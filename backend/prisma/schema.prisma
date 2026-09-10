@@ -1,0 +1,105 @@
+// Active phase-one schema. Full commerce target: reference/commerce.prisma.
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum CommerceProvider {
+  NATIVE
+  SHOPIFY
+}
+
+enum MembershipRole {
+  OWNER
+  ADMIN
+  DESIGNER
+  ORDER_MANAGER
+  STAFF
+}
+
+model User {
+  id          Int               @id @default(autoincrement())
+  name        String
+  email       String            @unique
+  // Nullable to preserve existing users; attach only after verified identity linking.
+  firebaseUid String?           @unique
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  memberships StoreMembership[]
+}
+
+model Store {
+  id                   String                  @id @default(uuid())
+  name                 String
+  slug                 String                  @unique
+  commerceProvider     CommerceProvider        @default(NATIVE)
+  currency             String                  @db.VarChar(3)
+  country              String                  @db.VarChar(2)
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  archivedAt           DateTime?
+  memberships          StoreMembership[]
+  settings             StoreSettings?
+  domains              StoreDomain[]
+  draft                StorefrontDraft?
+  publications         StorefrontPublication[] @relation("StorePublications")
+  // Composite FK ensures the live publication belongs to this store.
+  currentPublicationId String?
+  currentPublication   StorefrontPublication?  @relation("LivePublication", fields: [id, currentPublicationId], references: [storeId, id], onDelete: Restrict, onUpdate: NoAction)
+}
+
+model StoreMembership {
+  storeId   String
+  userId    Int
+  role      MembershipRole @default(STAFF)
+  createdAt DateTime       @default(now())
+  store     Store          @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@id([storeId, userId])
+  @@index([userId])
+}
+
+model StoreSettings {
+  storeId      String  @id
+  contactEmail String?
+  timezone     String  @default("UTC")
+  store        Store   @relation(fields: [storeId], references: [id], onDelete: Restrict)
+}
+
+model StoreDomain {
+  id         String    @id @default(uuid())
+  storeId    String
+  hostname   String    @unique
+  verifiedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  store      Store     @relation(fields: [storeId], references: [id], onDelete: Restrict)
+
+  @@index([storeId])
+}
+
+model StorefrontDraft {
+  storeId   String   @id
+  revision  Int      @default(0)
+  document  Json
+  updatedAt DateTime @updatedAt
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Restrict)
+}
+
+model StorefrontPublication {
+  id             String   @id @default(uuid())
+  storeId        String
+  sourceRevision Int
+  document       Json
+  publishedAt    DateTime @default(now())
+  store          Store    @relation("StorePublications", fields: [storeId], references: [id], onDelete: Restrict)
+  liveFor        Store[]  @relation("LivePublication")
+
+  @@unique([storeId, id])
+  @@index([storeId, publishedAt])
+}

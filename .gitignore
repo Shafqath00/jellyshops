@@ -1,0 +1,34 @@
+# Secrets and local configuration
+.env
+**/.env
+!.env.example
+
+# Dependencies and build output
+node_modules/
+**/node_modules/
+.next/
+dist/
+**/dist/
+coverage/
+**/coverage/
+
+# Local/runtime data
+.data/
+**/.data/
+uploads/
+**/uploads/
+**/.test-postgres-task2-visible/
+*.log
+*.tsbuildinfo
+
+# Test and local worktree output
+.worktrees/
+**/.worktrees/
+test-results/
+**/test-results/
+playwright-report/
+**/playwright-report/
+
+# Local generated/runtime artifacts
+backend/generated/
+backend/cloud-sql-proxy.exe

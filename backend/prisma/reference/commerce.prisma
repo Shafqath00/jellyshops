@@ -1,0 +1,666 @@
+// Full commerce reference only. See ../../docs/commerce-data-model.md.
+// Do not use this file to deploy the phase-one database.
+generator client {
+  provider = "prisma-client"
+  output   = "../../generated/commerce-reference"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum CommerceProvider {
+  NATIVE
+  SHOPIFY
+}
+
+enum IntegrationProvider {
+  SHOPIFY
+}
+
+enum MembershipRole {
+  OWNER
+  ADMIN
+  DESIGNER
+  ORDER_MANAGER
+  STAFF
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum CartStatus {
+  OPEN
+  CONVERTED
+  EXPIRED
+}
+
+enum CheckoutStatus {
+  OPEN
+  PROCESSING
+  COMPLETED
+  EXPIRED
+}
+
+enum OrderStatus {
+  OPEN
+  CANCELLED
+  CLOSED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  PARTIALLY_REFUNDED
+  REFUNDED
+  FAILED
+}
+
+enum FulfillmentStatus {
+  UNFULFILLED
+  PARTIALLY_FULFILLED
+  FULFILLED
+  RETURNED
+}
+
+enum RefundStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+enum WebhookStatus {
+  PENDING
+  PROCESSING
+  PROCESSED
+  FAILED
+}
+
+enum DiscountKind {
+  FIXED_AMOUNT
+  PERCENTAGE
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  INCOMPLETE
+}
+
+model User {
+  id          Int               @id @default(autoincrement())
+  name        String
+  email       String            @unique
+  // Nullable to preserve existing users; attach only after verified identity linking.
+  firebaseUid String?           @unique
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  memberships StoreMembership[]
+}
+
+model Store {
+  id                   String                  @id @default(uuid())
+  name                 String
+  slug                 String                  @unique
+  commerceProvider     CommerceProvider        @default(NATIVE)
+  currency             String                  @db.VarChar(3)
+  country              String                  @db.VarChar(2)
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  archivedAt           DateTime?
+  memberships          StoreMembership[]
+  settings             StoreSettings?
+  domains              StoreDomain[]
+  products             Product[]
+  collections          Collection[]
+  media                Media[]
+  draft                StorefrontDraft?
+  publications         StorefrontPublication[] @relation("StorePublications")
+  // Composite FK ensures the live publication belongs to this store.
+  currentPublicationId String?
+  currentPublication   StorefrontPublication?  @relation("LivePublication", fields: [id, currentPublicationId], references: [storeId, id], onDelete: Restrict, onUpdate: NoAction)
+  customers            Customer[]
+  carts                Cart[]
+  checkouts            Checkout[]
+  orders               Order[]
+  discounts            Discount[]
+  shippingProfiles     ShippingProfile[]
+  paymentAccount       PaymentAccount?
+  subscription         StoreSubscription?
+  integrations         StoreIntegration[]
+  webhookEvents        WebhookEvent[]
+  billingEvents        BillingEvent[]
+}
+
+model StoreMembership {
+  storeId   String
+  userId    Int
+  role      MembershipRole @default(STAFF)
+  createdAt DateTime       @default(now())
+  store     Store          @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@id([storeId, userId])
+  @@index([userId])
+}
+
+model StoreSettings {
+  storeId        String  @id
+  contactEmail   String?
+  timezone       String  @default("UTC")
+  logoMediaId    String?
+  // Versioned, validated settings; tax computation is supplied by a later service.
+  shippingOrigin Json?
+  taxSettings    Json?
+  store          Store   @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  logo           Media?  @relation(fields: [storeId, logoMediaId], references: [storeId, id], onDelete: Restrict)
+}
+
+model StoreDomain {
+  id         String    @id @default(uuid())
+  storeId    String
+  hostname   String    @unique
+  verifiedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  store      Store     @relation(fields: [storeId], references: [id], onDelete: Restrict)
+
+  @@index([storeId])
+}
+
+model Product {
+  id          String              @id @default(uuid())
+  storeId     String
+  title       String
+  description String              @default("")
+  status      ProductStatus       @default(DRAFT)
+  slug        String
+  vendor      String?
+  externalId  String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  store       Store               @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  variants    ProductVariant[]
+  collections CollectionProduct[]
+  images      ProductMedia[]
+
+  @@unique([storeId, id])
+  @@unique([storeId, slug])
+  @@unique([storeId, externalId])
+  @@index([storeId, status])
+}
+
+model ProductVariant {
+  id                  String          @id @default(uuid())
+  storeId             String
+  productId           String
+  title               String
+  sku                 String?
+  priceMinor          Int
+  compareAtPriceMinor Int?
+  weightGrams         Int?
+  options             Json
+  trackInventory      Boolean         @default(true)
+  externalId          String?
+  archivedAt          DateTime?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  product             Product         @relation(fields: [storeId, productId], references: [storeId, id], onDelete: Restrict)
+  inventory           InventoryLevel?
+  cartLines           CartLine[]
+
+  @@unique([storeId, id])
+  @@unique([storeId, sku])
+  @@unique([storeId, externalId])
+  @@index([storeId, productId])
+}
+
+model InventoryLevel {
+  storeId   String
+  variantId String
+  quantity  Int            @default(0)
+  reserved  Int            @default(0)
+  updatedAt DateTime       @updatedAt
+  variant   ProductVariant @relation(fields: [storeId, variantId], references: [storeId, id], onDelete: Restrict)
+
+  @@id([storeId, variantId])
+}
+
+model Collection {
+  id          String              @id @default(uuid())
+  storeId     String
+  title       String
+  slug        String
+  description String              @default("")
+  externalId  String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  store       Store               @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  products    CollectionProduct[]
+
+  @@unique([storeId, id])
+  @@unique([storeId, slug])
+  @@unique([storeId, externalId])
+}
+
+model CollectionProduct {
+  storeId      String
+  collectionId String
+  productId    String
+  position     Int        @default(0)
+  collection   Collection @relation(fields: [storeId, collectionId], references: [storeId, id], onDelete: Restrict)
+  product      Product    @relation(fields: [storeId, productId], references: [storeId, id], onDelete: Restrict)
+
+  @@id([storeId, collectionId, productId])
+  @@index([storeId, productId])
+}
+
+model Media {
+  id           String          @id @default(uuid())
+  storeId      String
+  storageKey   String          @unique
+  url          String
+  mimeType     String
+  byteSize     Int
+  width        Int
+  height       Int
+  originalName String
+  createdAt    DateTime        @default(now())
+  store        Store           @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  products     ProductMedia[]
+  storeLogos   StoreSettings[]
+
+  @@unique([storeId, id])
+}
+
+model ProductMedia {
+  storeId   String
+  productId String
+  mediaId   String
+  position  Int     @default(0)
+  altText   String?
+  product   Product @relation(fields: [storeId, productId], references: [storeId, id], onDelete: Restrict)
+  media     Media   @relation(fields: [storeId, mediaId], references: [storeId, id], onDelete: Restrict)
+
+  @@id([storeId, productId, mediaId])
+  @@index([storeId, mediaId])
+}
+
+model StorefrontDraft {
+  storeId   String   @id
+  revision  Int      @default(0)
+  document  Json
+  updatedAt DateTime @updatedAt
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Restrict)
+}
+
+model StorefrontPublication {
+  id             String   @id @default(uuid())
+  storeId        String
+  sourceRevision Int
+  document       Json
+  publishedAt    DateTime @default(now())
+  store          Store    @relation("StorePublications", fields: [storeId], references: [id], onDelete: Restrict)
+  liveFor        Store[]  @relation("LivePublication")
+
+  @@unique([storeId, id])
+  @@index([storeId, publishedAt])
+}
+
+model Customer {
+  id         String            @id @default(uuid())
+  storeId    String
+  email      String?
+  name       String?
+  externalId String?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  store      Store             @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  addresses  CustomerAddress[]
+  carts      Cart[]
+  orders     Order[]
+
+  @@unique([storeId, id])
+  @@unique([storeId, externalId])
+  @@index([storeId, email])
+}
+
+model CustomerAddress {
+  id         String   @id @default(uuid())
+  storeId    String
+  customerId String
+  address    Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  customer   Customer @relation(fields: [storeId, customerId], references: [storeId, id], onDelete: Restrict)
+
+  @@index([storeId, customerId])
+}
+
+model Cart {
+  id         String     @id @default(uuid())
+  storeId    String
+  customerId String?
+  tokenHash  String     @unique
+  currency   String     @db.VarChar(3)
+  status     CartStatus @default(OPEN)
+  revision   Int        @default(0)
+  expiresAt  DateTime
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  store      Store      @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  customer   Customer?  @relation(fields: [storeId, customerId], references: [storeId, id], onDelete: Restrict)
+  lines      CartLine[]
+  checkouts  Checkout[]
+
+  @@unique([storeId, id])
+  @@index([storeId, customerId])
+  @@index([status, expiresAt])
+}
+
+model CartLine {
+  id        String         @id @default(uuid())
+  storeId   String
+  cartId    String
+  variantId String
+  quantity  Int
+  cart      Cart           @relation(fields: [storeId, cartId], references: [storeId, id], onDelete: Restrict)
+  variant   ProductVariant @relation(fields: [storeId, variantId], references: [storeId, id], onDelete: Restrict)
+
+  @@unique([storeId, cartId, variantId])
+  @@index([storeId, variantId])
+}
+
+model Checkout {
+  id                 String         @id @default(uuid())
+  storeId            String
+  cartId             String
+  cartRevision       Int
+  idempotencyKey     String
+  status             CheckoutStatus @default(OPEN)
+  email              String
+  currency           String         @db.VarChar(3)
+  subtotalMinor      Int
+  discountTotalMinor Int            @default(0)
+  shippingTotalMinor Int            @default(0)
+  taxTotalMinor      Int            @default(0)
+  totalMinor         Int
+  // Server-produced line, discount, shipping and tax snapshots, never client prices.
+  lineSnapshots      Json
+  shippingAddress    Json?
+  billingAddress     Json?
+  expiresAt          DateTime
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  store              Store          @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  cart               Cart           @relation(fields: [storeId, cartId], references: [storeId, id], onDelete: Restrict)
+  order              Order?
+  payments           Payment[]
+
+  @@unique([storeId, id])
+  @@unique([storeId, idempotencyKey])
+  @@index([storeId, cartId])
+  @@index([status, expiresAt])
+}
+
+model Order {
+  id                 String            @id @default(uuid())
+  storeId            String
+  checkoutId         String?
+  customerId         String?
+  orderNumber        Int
+  externalId         String?
+  email              String
+  currency           String            @db.VarChar(3)
+  subtotalMinor      Int
+  discountTotalMinor Int               @default(0)
+  shippingTotalMinor Int               @default(0)
+  taxTotalMinor      Int               @default(0)
+  totalMinor         Int
+  status             OrderStatus       @default(OPEN)
+  paymentStatus      PaymentStatus     @default(PENDING)
+  fulfillmentStatus  FulfillmentStatus @default(UNFULFILLED)
+  shippingAddress    Json?
+  billingAddress     Json?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  store              Store             @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  checkout           Checkout?         @relation(fields: [storeId, checkoutId], references: [storeId, id], onDelete: Restrict)
+  customer           Customer?         @relation(fields: [storeId, customerId], references: [storeId, id], onDelete: Restrict)
+  lines              OrderLine[]
+  fulfillments       Fulfillment[]
+
+  @@unique([storeId, id])
+  @@unique([storeId, checkoutId])
+  @@unique([storeId, orderNumber])
+  @@unique([storeId, externalId])
+  @@index([storeId, createdAt])
+  @@index([storeId, customerId])
+}
+
+model OrderLine {
+  id                    String            @id @default(uuid())
+  storeId               String
+  orderId               String
+  // Historical identifiers deliberately have no live catalog FK.
+  productId             String?
+  variantId             String?
+  titleSnapshot         String
+  variantSnapshot       String
+  skuSnapshot           String?
+  priceSnapshotMinor    Int
+  quantity              Int
+  discountSnapshotMinor Int               @default(0)
+  taxSnapshotMinor      Int               @default(0)
+  order                 Order             @relation(fields: [storeId, orderId], references: [storeId, id], onDelete: Restrict)
+  fulfillmentLines      FulfillmentLine[]
+
+  @@unique([storeId, orderId, id])
+}
+
+model PaymentAccount {
+  storeId          String    @id
+  stripeAccountId  String    @unique
+  chargesEnabled   Boolean   @default(false)
+  payoutsEnabled   Boolean   @default(false)
+  detailsSubmitted Boolean   @default(false)
+  updatedAt        DateTime  @updatedAt
+  store            Store     @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  payments         Payment[]
+
+  @@unique([storeId, stripeAccountId])
+}
+
+model Payment {
+  id                    String         @id @default(uuid())
+  storeId               String
+  checkoutId            String
+  stripeAccountId       String
+  stripePaymentIntentId String?
+  idempotencyKey        String
+  amountMinor           Int
+  currency              String         @db.VarChar(3)
+  status                PaymentStatus  @default(PENDING)
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  checkout              Checkout       @relation(fields: [storeId, checkoutId], references: [storeId, id], onDelete: Restrict)
+  account               PaymentAccount @relation(fields: [storeId, stripeAccountId], references: [storeId, stripeAccountId], onDelete: Restrict)
+  refunds               Refund[]
+
+  @@unique([storeId, id])
+  @@unique([storeId, idempotencyKey])
+  @@unique([stripeAccountId, stripePaymentIntentId])
+  @@index([storeId, checkoutId])
+  @@index([storeId, stripeAccountId])
+}
+
+model Refund {
+  id             String       @id @default(uuid())
+  storeId        String
+  paymentId      String
+  idempotencyKey String
+  externalId     String?
+  amountMinor    Int
+  reason         String?
+  status         RefundStatus @default(PENDING)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  payment        Payment      @relation(fields: [storeId, paymentId], references: [storeId, id], onDelete: Restrict)
+
+  @@unique([storeId, idempotencyKey])
+  @@unique([storeId, externalId])
+  @@index([storeId, paymentId])
+}
+
+model Fulfillment {
+  id             String            @id @default(uuid())
+  storeId        String
+  orderId        String
+  carrier        String?
+  trackingNumber String?
+  shippedAt      DateTime?
+  deliveredAt    DateTime?
+  createdAt      DateTime          @default(now())
+  order          Order             @relation(fields: [storeId, orderId], references: [storeId, id], onDelete: Restrict)
+  lines          FulfillmentLine[]
+
+  @@unique([storeId, orderId, id])
+}
+
+model FulfillmentLine {
+  storeId       String
+  orderId       String
+  fulfillmentId String
+  orderLineId   String
+  quantity      Int
+  fulfillment   Fulfillment @relation(fields: [storeId, orderId, fulfillmentId], references: [storeId, orderId, id], onDelete: Restrict)
+  orderLine     OrderLine   @relation(fields: [storeId, orderId, orderLineId], references: [storeId, orderId, id], onDelete: Restrict)
+
+  @@id([storeId, fulfillmentId, orderLineId])
+  @@index([storeId, orderId, fulfillmentId])
+  @@index([storeId, orderId, orderLineId])
+}
+
+model Discount {
+  id                    String       @id @default(uuid())
+  storeId               String
+  code                  String
+  kind                  DiscountKind
+  amountMinor           Int?
+  percentageBasisPoints Int?
+  startsAt              DateTime     @default(now())
+  endsAt                DateTime?
+  usageLimit            Int?
+  active                Boolean      @default(true)
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  store                 Store        @relation(fields: [storeId], references: [id], onDelete: Restrict)
+
+  @@unique([storeId, code])
+}
+
+model ShippingProfile {
+  id        String         @id @default(uuid())
+  storeId   String
+  name      String
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  // MVP: store-wide profiles, selected by the shipping service.
+  store     Store          @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  rates     ShippingRate[]
+
+  @@unique([storeId, id])
+}
+
+model ShippingRate {
+  id                   String          @id @default(uuid())
+  storeId              String
+  profileId            String
+  name                 String
+  country              String          @db.VarChar(2)
+  amountMinor          Int
+  minimumSubtotalMinor Int?
+  maximumSubtotalMinor Int?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  profile              ShippingProfile @relation(fields: [storeId, profileId], references: [storeId, id], onDelete: Restrict)
+
+  @@index([storeId, profileId])
+}
+
+model StoreSubscription {
+  storeId              String             @id
+  stripeCustomerId     String             @unique
+  stripeSubscriptionId String?            @unique
+  stripePriceId        String
+  status               SubscriptionStatus @default(INCOMPLETE)
+  currentPeriodEnd     DateTime?
+  updatedAt            DateTime           @updatedAt
+  store                Store              @relation(fields: [storeId], references: [id], onDelete: Restrict)
+}
+
+model BillingEvent {
+  id            String        @id @default(uuid())
+  storeId       String
+  stripeEventId String        @unique
+  type          String
+  status        WebhookStatus @default(PENDING)
+  payload       Json
+  attempts      Int           @default(0)
+  lockedUntil   DateTime?
+  lastError     String?
+  receivedAt    DateTime      @default(now())
+  processedAt   DateTime?
+  store         Store         @relation(fields: [storeId], references: [id], onDelete: Restrict)
+
+  @@index([storeId, receivedAt])
+  @@index([status, lockedUntil])
+}
+
+model StoreIntegration {
+  id                    String              @id @default(uuid())
+  storeId               String
+  provider              IntegrationProvider
+  externalStoreId       String
+  shopDomain            String              @unique
+  // Envelope-encrypted ciphertext, never plaintext OAuth credentials.
+  credentialsCiphertext Bytes
+  credentialKeyId       String
+  syncCursor            String?
+  lastSyncedAt          DateTime?
+  disconnectedAt        DateTime?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  store                 Store               @relation(fields: [storeId], references: [id], onDelete: Restrict)
+
+  @@unique([storeId, provider])
+  @@unique([provider, externalStoreId])
+}
+
+model WebhookEvent {
+  id                String        @id @default(uuid())
+  storeId           String
+  // E.g. stripe-connect or shopify; platform billing uses BillingEvent.
+  provider          String
+  externalAccountId String
+  externalEventId   String
+  type              String
+  payload           Json
+  status            WebhookStatus @default(PENDING)
+  attempts          Int           @default(0)
+  lockedUntil       DateTime?
+  lastError         String?
+  occurredAt        DateTime?
+  receivedAt        DateTime      @default(now())
+  processedAt       DateTime?
+  store             Store         @relation(fields: [storeId], references: [id], onDelete: Restrict)
+
+  @@unique([provider, externalAccountId, externalEventId])
+  @@index([storeId, receivedAt])
+  @@index([status, lockedUntil])
+}
