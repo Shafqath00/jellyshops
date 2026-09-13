@@ -1,6 +1,6 @@
 import type { StoredMediaRecord } from "./types.js";
 
-export interface CreateMediaRecordInput extends Omit<StoredMediaRecord, "createdAt"> {}
+export type CreateMediaRecordInput = Omit<StoredMediaRecord, "createdAt">;
 
 export interface MediaRepository {
   create(input: CreateMediaRecordInput): Promise<StoredMediaRecord>;
