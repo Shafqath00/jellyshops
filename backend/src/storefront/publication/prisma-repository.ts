@@ -7,6 +7,16 @@ import type {
   CompiledPublicationRepository,
   PublishCompiledSnapshotInput,
 } from "./repository.js";
+import type { StorefrontDependencyGraph } from "../compiler/dependency-graph.js";
+
+function dependencyGraph(value: unknown): StorefrontDependencyGraph {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("Compiled publication dependency manifest is missing");
+  }
+  const edges = (value as { edges?: unknown }).edges;
+  if (!Array.isArray(edges)) throw new Error("Compiled publication dependency manifest is invalid");
+  return { edges: structuredClone(edges) as StorefrontDependencyGraph["edges"] };
+}
 
 function mapPublication(row: {
   id: string;
@@ -24,6 +34,10 @@ function mapPublication(row: {
     throw new Error("Publication is not a compiled V4 storefront publication");
   }
   const snapshot = runtimeStorefrontSnapshotV4Schema.parse(row.document);
+  const dependencies = dependencyGraph(row.dependencyManifest);
+  if (JSON.stringify(dependencies) !== JSON.stringify(snapshot.dependencies)) {
+    throw new Error("Compiled publication dependency manifest does not match runtime snapshot");
+  }
   return {
     id: row.id,
     storeId: row.storeId,
@@ -31,7 +45,7 @@ function mapPublication(row: {
     schemaVersion: row.schemaVersion,
     compilerVersion: row.compilerVersion,
     snapshot,
-    dependencies: snapshot.dependencies,
+    dependencies,
     themeArtifactId: row.themeArtifactId,
     idempotencyKey: row.idempotencyKey,
     publishedAt: row.publishedAt,
@@ -54,6 +68,9 @@ export class PrismaCompiledPublicationRepository implements CompiledPublicationR
     }
     if (input.snapshot.sourceGeneration !== input.expectedGeneration) {
       throw new Error("Compiled snapshot generation does not match expected generation");
+    }
+    if (JSON.stringify(input.dependencies) !== JSON.stringify(input.snapshot.dependencies)) {
+      throw new Error("Compilation dependency graph does not match runtime snapshot");
     }
 
     return this.client.$transaction(async (tx) => {
