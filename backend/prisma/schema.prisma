@@ -37,7 +37,7 @@ model User {
 model Store {
   id                   String                  @id @default(uuid())
   name                 String
-  slug                 String
+  slug                 String                  @unique
   commerceProvider     CommerceProvider        @default(NATIVE)
   currency             String                  @db.VarChar(3)
   country              String                  @db.VarChar(2)
@@ -53,8 +53,6 @@ model Store {
   // Composite FK ensures the live publication belongs to this store.
   currentPublicationId String?
   currentPublication   StorefrontPublication?  @relation("LivePublication", fields: [id, currentPublicationId], references: [storeId, id], onDelete: Restrict, onUpdate: NoAction)
-
-  @@unique([slug])
 }
 
 model StoreMembership {
