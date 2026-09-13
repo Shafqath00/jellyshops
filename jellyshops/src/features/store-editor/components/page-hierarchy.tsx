@@ -32,7 +32,6 @@ export function PageHierarchy({
   onPageSelect,
   selection,
   onSelect,
-  onCommand: _onCommand,
 }: {
   document: StorefrontDocument;
   activePageId: string;
