@@ -1,5 +1,6 @@
 import { Prisma, type PrismaClient } from "../../../generated/prisma/client.js";
 import { assertExpectedRevision, nextRevision, type WorkspaceTransaction } from "../concurrency.js";
+import { ResourceRevisionConflictError } from "../errors.js";
 import type {
   SaveThemeConfigurationInput,
   ThemeConfigurationRecord,
@@ -43,7 +44,7 @@ export class PrismaThemeRepository implements ThemeRepository {
     const current = await transaction.themeConfiguration.findUnique({ where: { storeId: input.storeId } });
     if (!current) {
       if (input.expectedRevision !== null) {
-        assertExpectedRevision(0, input.expectedRevision);
+        throw new Error("Theme configuration was not found");
       }
       return mapTheme(await transaction.themeConfiguration.create({
         data: {
@@ -56,9 +57,9 @@ export class PrismaThemeRepository implements ThemeRepository {
     }
 
     if (input.expectedRevision === null) {
-      assertExpectedRevision(current.revision, -1);
+      throw new ResourceRevisionConflictError(current.revision);
     }
-    assertExpectedRevision(current.revision, input.expectedRevision!);
+    assertExpectedRevision(current.revision, input.expectedRevision);
     return mapTheme(await transaction.themeConfiguration.update({
       where: { storeId: input.storeId },
       data: {
