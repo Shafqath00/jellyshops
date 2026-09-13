@@ -50,6 +50,7 @@ model Store {
   draft                StorefrontDraft?
   publications         StorefrontPublication[] @relation("StorePublications")
   auditEvents          AuditEvent[]
+  media                Media[]
   // Composite FK ensures the live publication belongs to this store.
   currentPublicationId String?
   currentPublication   StorefrontPublication?  @relation("LivePublication", fields: [id, currentPublicationId], references: [storeId, id], onDelete: Restrict, onUpdate: NoAction)
@@ -121,4 +122,25 @@ model AuditEvent {
 
   @@index([storeId, createdAt])
   @@index([actorUserId, createdAt])
+}
+
+model Media {
+  id           String   @id @default(uuid())
+  storeId      String
+  type         String
+  storageKey   String
+  url          String
+  mimeType     String
+  byteSize     Int
+  width        Int?
+  height       Int?
+  originalName String
+  altText      String?
+  referenced   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  store        Store    @relation(fields: [storeId], references: [id], onDelete: Restrict)
+
+  @@unique([storeId, id])
+  @@unique([storeId, storageKey])
+  @@index([storeId, createdAt])
 }
