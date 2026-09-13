@@ -85,7 +85,7 @@ export default function PagesAdminPage() {
         <section className="rounded-xl border border-[#e3e3e3] bg-white p-5">
           {page ? (
             <ResourceForm
-              key={page.id}
+              key={`${page.id}:${assignment?.revision ?? "new"}:${assignment?.templateId ?? "default"}`}
               resource={editable(page)}
               templates={templates.map(({ id, name }) => ({ id, name }))}
               assignedTemplateId={assignment?.templateId}
@@ -100,6 +100,10 @@ export default function PagesAdminPage() {
                   canonicalOverride: value.canonicalOverride,
                 });
                 setPages((current) => current.map((entry) => entry.id === saved.id ? saved : entry));
+              }}
+              onAssignTemplate={async ({ resourceId, templateId }) => {
+                const result = await api.assignTemplate(storeId, "page", resourceId, templateId, assignment?.revision ?? null);
+                setAssignment(result.assignment);
               }}
               onCustomizeTemplate={({ resourceId, templateId }) => {
                 window.location.assign(`/admin/online-store/editor?templateId=${encodeURIComponent(templateId)}&resourceType=page&resourceId=${encodeURIComponent(resourceId)}`);
