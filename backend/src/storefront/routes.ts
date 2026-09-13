@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { requireMerchant, requireStoreAccess } from "../auth/middleware.js";
+import { requireMerchant, requireStorePermission } from "../auth/middleware.js";
 import type { AuthProvider } from "../auth/types.js";
 import { ApiError } from "../http/errors.js";
 import type { StorefrontService } from "./service.js";
@@ -18,18 +18,22 @@ export function createStorefrontRouter(service: StorefrontService<unknown>, auth
 
   router.use(requireMerchant(authProvider));
 
-  router.get<{ storeId: string }>("/draft", requireStoreAccess("storefront:view"), async (request, response) => {
-    response.json(await service.getOrCreateDraft(String(request.params.storeId)));
+  router.get<{ storeId: string }>("/draft", requireStorePermission("storefront:view"), async (request, response) => {
+    response.json(await service.getOrCreateDraft(request.storeContext!.storeId));
   });
 
-  router.put<{ storeId: string }>("/draft", requireStoreAccess("storefront:edit"), async (request, response) => {
+  router.put<{ storeId: string }>("/draft", requireStorePermission("storefront:edit"), async (request, response) => {
     const { expectedRevision } = revisionSchema.parse(request.body);
-    response.json(await service.saveDraft(String(request.params.storeId), expectedRevision, request.body.document));
+    response.json(await service.saveDraft(
+      request.storeContext!.storeId,
+      expectedRevision,
+      request.body.document,
+    ));
   });
 
-  router.post<{ storeId: string }>("/publish", requireStoreAccess("storefront:publish"), async (request, response) => {
+  router.post<{ storeId: string }>("/publish", requireStorePermission("storefront:publish"), async (request, response) => {
     const { expectedRevision } = revisionSchema.parse(request.body);
-    response.status(201).json(await service.publish(String(request.params.storeId), expectedRevision));
+    response.status(201).json(await service.publish(request.storeContext!.storeId, expectedRevision));
   });
 
   return router;
