@@ -5,6 +5,7 @@ import {
   appendInlineSection,
   detachGlobalPlacement,
   replaceInlineWithGlobal,
+  updateInlineSection,
 } from "./template-layout";
 
 const section: SectionNode = {
@@ -43,5 +44,23 @@ it("replaces only the selected inline section when making it global", () => {
   expect(replaceInlineWithGlobal(layout, "hero-1", "global-1").sections).toEqual([
     { kind: "global", globalSectionId: "global-1" },
     { kind: "inline", section: expect.objectContaining({ id: "hero-2" }) },
+  ]);
+});
+
+it("updates only the selected inline section and preserves other placements", () => {
+  const layout = {
+    sections: [
+      { kind: "inline", section },
+      { kind: "global", globalSectionId: "global-1" },
+    ],
+  };
+  const updated = updateInlineSection(layout, "hero-1", (current) => ({
+    ...current,
+    settings: { ...current.settings, alignment: "center" },
+  }));
+
+  expect(updated.sections).toEqual([
+    { kind: "inline", section: expect.objectContaining({ settings: { alignment: "center" } }) },
+    { kind: "global", globalSectionId: "global-1" },
   ]);
 });
