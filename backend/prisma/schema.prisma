@@ -59,6 +59,8 @@ model Store {
   publications         StorefrontPublication[] @relation("StorePublications")
   auditEvents          AuditEvent[]
   media                Media[]
+  metafieldDefinitions MetafieldDefinition[]
+  metafieldValues      MetafieldValue[]
   // Composite FK ensures the live publication belongs to this store.
   currentPublicationId String?
   currentPublication   StorefrontPublication?  @relation("LivePublication", fields: [id, currentPublicationId], references: [storeId, id], onDelete: Restrict, onUpdate: NoAction)
@@ -253,4 +255,41 @@ model ProductMedia {
 
   @@id([storeId, productId, mediaId])
   @@index([storeId, mediaId])
+}
+
+model MetafieldDefinition {
+  id                String           @id @default(uuid())
+  storeId           String
+  ownerType         String
+  namespace         String
+  key               String
+  name              String
+  description       String?
+  type              String
+  validations       Json?
+  storefrontVisible Boolean          @default(false)
+  origin            String           @default("jelly")
+  archivedAt        DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  store             Store            @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  values            MetafieldValue[]
+
+  @@unique([storeId, id])
+  @@unique([storeId, ownerType, namespace, key])
+  @@index([storeId, ownerType, archivedAt])
+}
+
+model MetafieldValue {
+  id           String              @id @default(uuid())
+  storeId      String
+  definitionId String
+  ownerId      String
+  value        Json
+  updatedAt    DateTime            @updatedAt
+  store        Store               @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  definition   MetafieldDefinition @relation(fields: [storeId, definitionId], references: [storeId, id], onDelete: Restrict)
+
+  @@unique([storeId, definitionId, ownerId])
+  @@index([storeId, ownerId])
 }
