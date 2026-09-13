@@ -10,6 +10,7 @@ const template = {
   name: "Featured product",
   layout: {
     sections: [
+      { kind: "global", globalSectionId: "global-header" },
       {
         kind: "inline",
         section: {
@@ -21,24 +22,36 @@ const template = {
         },
       },
       { kind: "global", globalSectionId: "global-promo" },
+      { kind: "global", globalSectionId: "global-footer" },
     ],
   },
 };
 
+const globalSections = {
+  "global-header": { id: "global-header", name: "Main header", sectionType: "header" },
+  "global-promo": { id: "global-promo", name: "Summer promo", sectionType: "announcement-bar" },
+  "global-footer": { id: "global-footer", name: "Main footer", sectionType: "footer" },
+};
+
 describe("TemplateHierarchy", () => {
-  it("renders only placements from the active template", () => {
+  it("groups active template placements into Header, Template, and Footer", () => {
     render(
       <TemplateHierarchy
         template={template}
-        globalSections={{ "global-promo": { id: "global-promo", name: "Summer promo" } }}
+        globalSections={globalSections}
         selection={null}
         onSelect={vi.fn()}
       />,
     );
 
+    expect(screen.getByRole("heading", { name: "Header" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Template" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Footer" })).toBeVisible();
+    expect(screen.getByText("Main header")).toBeVisible();
     expect(screen.getByText("Hero")).toBeVisible();
     expect(screen.getByText("Summer promo")).toBeVisible();
-    expect(screen.getByText("Global")).toBeVisible();
+    expect(screen.getByText("Main footer")).toBeVisible();
+    expect(screen.getAllByText("Global")).toHaveLength(3);
   });
 
   it("selects a section from the active template without page-level mutation", async () => {
@@ -46,7 +59,7 @@ describe("TemplateHierarchy", () => {
     render(
       <TemplateHierarchy
         template={template}
-        globalSections={{ "global-promo": { id: "global-promo", name: "Summer promo" } }}
+        globalSections={globalSections}
         selection={null}
         onSelect={onSelect}
       />,
