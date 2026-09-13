@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 import { ApiError } from "../http/errors.js";
+import { hasStorePermission } from "./permissions.js";
 import type { AuthProvider, MerchantPrincipal, StorePermission } from "./types.js";
 
 declare global {
@@ -26,17 +27,14 @@ export function requireMerchant(provider: AuthProvider): RequestHandler {
   };
 }
 
-const writeRoles = new Set(["OWNER", "ADMIN", "DESIGNER"]);
-const readRoles = new Set(["OWNER", "ADMIN", "DESIGNER", "ORDER_MANAGER", "STAFF"]);
-
 export function requireStoreAccess(permission?: StorePermission): RequestHandler {
   return (request, _response, next) => {
     const storeId = String(request.params.storeId);
     const merchant = request.merchant;
-    const role = merchant?.storeRoles[storeId];
-    const allowedRoles = permission?.endsWith(":write") ? writeRoles : readRoles;
-    const allowed = merchant?.storeIds.includes(storeId)
-      && (permission === undefined || (role !== undefined && allowedRoles.has(role)));
+    const allowed = merchant !== undefined
+      && merchant.storeIds.includes(storeId)
+      && (permission === undefined || hasStorePermission(merchant, storeId, permission));
+
     if (!allowed) {
       next(new ApiError(403, "STORE_FORBIDDEN", "The merchant cannot access this store"));
       return;
