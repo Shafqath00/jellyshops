@@ -38,6 +38,18 @@ export function appendGlobalPlacement(layout: Record<string, unknown>, globalSec
   ]);
 }
 
+export function updateInlineSection(
+  layout: Record<string, unknown>,
+  sectionId: string,
+  update: (section: SectionNode) => SectionNode,
+): Record<string, unknown> {
+  const sections = readPlacements(layout).map((placement) => {
+    if (placement.kind !== "inline" || placement.section.id !== sectionId) return placement;
+    return { kind: "inline" as const, section: structuredClone(update(structuredClone(placement.section))) };
+  });
+  return withPlacements(layout, sections);
+}
+
 export function replaceInlineWithGlobal(
   layout: Record<string, unknown>,
   sectionId: string,
