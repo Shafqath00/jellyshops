@@ -18,6 +18,37 @@ describe("compiler input loader helpers", () => {
     expect(layout.sections[1]).toEqual({ kind: "global", globalSectionId: "announcement" });
   });
 
+  it("preserves enabled and responsive metadata for migrated sections and blocks", () => {
+    const layout = parseTemplateLayout({
+      sections: [{
+        kind: "inline",
+        section: {
+          id: "hero-1",
+          type: "hero",
+          enabled: false,
+          settings: { alignment: "center" },
+          responsive: { mobile: { alignment: "left" } },
+          blocks: [{
+            id: "heading-1",
+            type: "heading",
+            enabled: false,
+            settings: { text: "Hello" },
+            responsive: { mobile: { text: "Hi" } },
+          }],
+        },
+      }],
+    });
+
+    expect(layout.sections[0]).toMatchObject({
+      kind: "inline",
+      section: {
+        enabled: false,
+        responsive: { mobile: { alignment: "left" } },
+        blocks: [{ enabled: false, responsive: { mobile: { text: "Hi" } } }],
+      },
+    });
+  });
+
   it("rejects malformed template layout JSON before validation stages run", () => {
     expect(() => parseTemplateLayout({ sections: [{ kind: "global" }] })).toThrow(/layout/i);
   });
