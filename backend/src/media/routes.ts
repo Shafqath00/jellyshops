@@ -12,16 +12,16 @@ export function createMediaRouter(service: MediaService, authProvider: AuthProvi
   const uploadLimit = rateLimit({ windowMs: 60_000, limit: 30, standardHeaders: true, legacyHeaders: false });
 
   router.use(requireMerchant(authProvider));
-  router.post<{ storeId: string }>("/", requireStoreAccess("media:write"), uploadLimit, upload.single("file"), async (request, response) => {
+  router.post<{ storeId: string }>("/", requireStoreAccess("media:upload"), uploadLimit, upload.single("file"), async (request, response) => {
     if (!request.file) throw new ApiError(400, "MEDIA_REQUIRED", "Choose an image to upload");
     response.status(201).json(await service.upload(request.params.storeId, request.file));
   });
 
-  router.get<{ storeId: string }>("/", requireStoreAccess("media:read"), async (request, response) => {
+  router.get<{ storeId: string }>("/", requireStoreAccess("storefront:view"), async (request, response) => {
     response.json(await service.list(request.params.storeId));
   });
 
-  router.delete<{ storeId: string; mediaId: string }>("/:mediaId", requireStoreAccess("media:write"), async (request, response) => {
+  router.delete<{ storeId: string; mediaId: string }>("/:mediaId", requireStoreAccess("media:delete"), async (request, response) => {
     await service.remove(request.params.storeId, request.params.mediaId);
     response.sendStatus(204);
   });
