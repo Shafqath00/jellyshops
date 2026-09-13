@@ -79,4 +79,25 @@ describe("PrismaAuditRepository", () => {
       metadata: { generation: 11 },
     })).rejects.toBeTruthy();
   });
+
+  it("rejects raw update and delete attempts", async () => {
+    const { user, store } = await seedStore(integration);
+    const repository = new PrismaAuditRepository(integration.database.client);
+    const event = await repository.create({
+      storeId: store.id,
+      actorUserId: user.id,
+      action: "MEMBER_ROLE_CHANGED",
+      subjectType: "StoreMembership",
+      subjectId: `${store.id}:${user.id}`,
+    });
+
+    await expect(integration.database.client.auditEvent.update({
+      where: { id: event.id },
+      data: { action: "ALTERED" },
+    })).rejects.toBeTruthy();
+
+    await expect(integration.database.client.auditEvent.delete({
+      where: { id: event.id },
+    })).rejects.toBeTruthy();
+  });
 });
