@@ -40,6 +40,30 @@ describe("store editor API client", () => {
     );
   });
 
+  it("loads dynamic sources by template context and accepted value types", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse([]));
+    const api = createStoreEditorApi({ baseUrl: "http://localhost:3001", token: "jelly-demo-merchant", fetch: fetchMock });
+
+    await api.listDynamicSources("store-demo", "product", ["string", "image"]);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:3001/api/stores/store-demo/custom-data/dynamic-sources?context=product&accepts=string%2Cimage",
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: "Bearer jelly-demo-merchant" }) }),
+    );
+  });
+
+  it("loads saved section presets from the normalized workspace", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse([]));
+    const api = createStoreEditorApi({ baseUrl: "http://localhost:3001", token: "jelly-demo-merchant", fetch: fetchMock });
+
+    await api.listPresets("store-demo");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:3001/api/stores/store-demo/storefront/presets",
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: "Bearer jelly-demo-merchant" }) }),
+    );
+  });
+
   it("publishes by workspace generation with an idempotency key", async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse({
       ok: true,
