@@ -1,5 +1,7 @@
 import type {
   CompilationDiagnostic,
+  DynamicBinding,
+  DynamicValueType,
   RuntimeStorefrontSnapshotV4,
   StorefrontDocument,
 } from "@jelly/storefront-schema";
@@ -34,6 +36,25 @@ export interface GlobalSectionRecord {
   revision: number;
   name: string;
   section: Record<string, unknown>;
+}
+
+export interface SectionPresetRecord {
+  id: string;
+  storeId: string;
+  revision: number;
+  name: string;
+  section: Record<string, unknown>;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface DynamicSourceDescriptor {
+  id: string;
+  label: string;
+  valueType: DynamicValueType;
+  requiredContext?: StorefrontTemplateType | "any";
+  binding: DynamicBinding;
+  metaobjectDefinitionId?: string;
 }
 
 export interface MenuRecord {
