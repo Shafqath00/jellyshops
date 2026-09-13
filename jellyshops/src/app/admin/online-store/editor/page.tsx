@@ -4,18 +4,21 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import { ArrowLeft, Monitor, Smartphone, Tablet } from "lucide-react";
+import { getBlockDefinition, getSectionDefinition } from "@jelly/storefront-registry";
 import { RegistrySectionRenderer, type CommerceDataProvider } from "@jelly/storefront-renderer";
 import type { SectionNode } from "@jelly/storefront-schema";
 import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import { getDemoSession } from "@/features/store-editor/api/demo-session";
 import type {
   DemoCatalog,
+  DynamicSourceDescriptor,
   GlobalSectionRecord,
   SectionPresetRecord,
   StorefrontTemplateRecord,
   WorkspaceRecord,
 } from "@/features/store-editor/api/types";
 import { GlobalSectionPanel } from "@/features/store-editor/components/global-section-panel";
+import { SettingGroups } from "@/features/store-editor/components/inspector/setting-groups";
 import { SectionLibrary } from "@/features/store-editor/components/section-library";
 import { TemplateHierarchy } from "@/features/store-editor/components/template-hierarchy";
 import { TemplateResourceSelector, type PreviewResourceOption } from "@/features/store-editor/components/template-resource-selector";
@@ -26,6 +29,7 @@ import {
   appendInlineSection,
   detachGlobalPlacement,
   replaceInlineWithGlobal,
+  updateInlineSection,
 } from "@/features/store-editor/template-layout";
 
 const backendStoreId = "store-demo";
@@ -86,7 +90,7 @@ function templateSections(template: StorefrontTemplateRecord, globals: Map<strin
 }
 
 function selectedInlineSection(template: StorefrontTemplateRecord, selection: EditorSelection): SectionNode | null {
-  if (!selection || selection.kind !== "section") return null;
+  if (!selection || selection.kind === "theme" || !selection.sectionId) return null;
   const placements = template.layout.sections;
   if (!Array.isArray(placements)) return null;
   for (const placement of placements) {
@@ -118,6 +122,7 @@ export default function OnlineStoreEditorPage() {
   const [templates, setTemplates] = useState<StorefrontTemplateRecord[]>([]);
   const [globals, setGlobals] = useState<GlobalSectionRecord[]>([]);
   const [presets, setPresets] = useState<SectionPresetRecord[]>([]);
+  const [dynamicSources, setDynamicSources] = useState<DynamicSourceDescriptor[]>([]);
   const [catalog, setCatalog] = useState<DemoCatalog>({ products: [], collections: [] });
   const [activeTemplateId, setActiveTemplateId] = useState("");
   const [previewResourceId, setPreviewResourceId] = useState<string>();
@@ -151,6 +156,20 @@ export default function OnlineStoreEditorPage() {
   }, [api]);
 
   const activeTemplate = templates.find((template) => template.id === activeTemplateId);
+
+  useEffect(() => {
+    if (!api || !activeTemplate) {
+      setDynamicSources([]);
+      return;
+    }
+    let active = true;
+    setDynamicSources([]);
+    void api.listDynamicSources(backendStoreId, activeTemplate.type)
+      .then((sources) => { if (active) setDynamicSources(sources); })
+      .catch(() => { if (active) setDynamicSources([]); });
+    return () => { active = false; };
+  }, [api, activeTemplate]);
+
   const globalMap = useMemo(() => new Map(globals.map((global) => [global.id, global])), [globals]);
   const sections = useMemo(
     () => activeTemplate ? templateSections(activeTemplate, globalMap) : [],
@@ -177,6 +196,14 @@ export default function OnlineStoreEditorPage() {
     return section ? [{ id: global.id, name: global.name, section }] : [];
   }), [globals]);
   const localSection = activeTemplate ? selectedInlineSection(activeTemplate, selection) : null;
+  const selectedBlock = localSection && selection?.kind === "block"
+    ? localSection.blocks.find((block) => block.id === selection.blockId)
+    : undefined;
+  const sectionDefinition = localSection ? getSectionDefinition(localSection.type) : undefined;
+  const blockDefinition = selectedBlock ? getBlockDefinition(selectedBlock.type) : undefined;
+  const selectedControls = selectedBlock ? blockDefinition?.controls ?? [] : sectionDefinition?.controls ?? [];
+  const selectedSettings = selectedBlock?.settings ?? localSection?.settings ?? {};
+
   const commerce = useMemo<CommerceDataProvider>(() => ({
     async getProducts() {
       return catalog.products.map((product) => ({
@@ -250,6 +277,22 @@ export default function OnlineStoreEditorPage() {
     setSelection({ kind: "section", region: "template", sectionId: section.id });
   };
 
+  const updateSelectedSetting = async (key: string, value: unknown) => {
+    if (!activeTemplate || !localSection || !selection || selection.kind === "theme") return;
+    const layout = updateInlineSection(activeTemplate.layout, localSection.id, (current) => {
+      if (selection.kind === "block") {
+        return {
+          ...current,
+          blocks: current.blocks.map((block) => block.id === selection.blockId
+            ? { ...block, settings: { ...block.settings, [key]: value } }
+            : block),
+        };
+      }
+      return { ...current, settings: { ...current.settings, [key]: value } };
+    });
+    await persistLayout(layout);
+  };
+
   if (!api) {
     return <main className="grid min-h-[70vh] place-items-center p-8 text-center"><div><h1 className="text-xl font-semibold">Online Store editor is disabled</h1><p className="mt-2 text-sm text-[#6d7175]">Connect merchant authentication to use the editor.</p></div></main>;
   }
@@ -274,8 +317,8 @@ export default function OnlineStoreEditorPage() {
             ["desktop", "Desktop preview", Monitor],
             ["tablet", "Tablet preview", Tablet],
             ["mobile", "Mobile preview", Smartphone],
-          ] as const).map(([value, label, Icon]) => (
-            <button key={value} type="button" aria-label={label} aria-pressed={viewport === value} onClick={() => setViewport(value)} className={clsx("grid size-7 place-items-center rounded-md", viewport === value ? "bg-white shadow-sm" : "text-[#8c9196]")}><Icon size={15} /></button>
+          ] as const).map(([viewportValue, label, Icon]) => (
+            <button key={viewportValue} type="button" aria-label={label} aria-pressed={viewport === viewportValue} onClick={() => setViewport(viewportValue)} className={clsx("grid size-7 place-items-center rounded-md", viewport === viewportValue ? "bg-white shadow-sm" : "text-[#8c9196]")}><Icon size={15} /></button>
           ))}
         </div>
         <div className="text-right"><p className="text-[10px] text-[#8c9196]">Draft workspace</p><p className="text-[12px] font-semibold">Generation {workspace.generation}</p></div>
@@ -290,7 +333,7 @@ export default function OnlineStoreEditorPage() {
         onPreviewResourceChange={setPreviewResourceId}
       />
 
-      <div className="grid min-h-0 flex-1 grid-cols-[280px_minmax(0,1fr)_280px]">
+      <div className="grid min-h-0 flex-1 grid-cols-[280px_minmax(0,1fr)_320px]">
         <TemplateHierarchy
           template={activeTemplate}
           globalSections={globalLabels}
@@ -299,6 +342,7 @@ export default function OnlineStoreEditorPage() {
           onSelect={(next) => { setSelection(next); setActiveGlobalId(undefined); }}
           onGlobalSelect={(globalId) => { setActiveGlobalId(globalId); setSelection(null); }}
         />
+
         <main className="min-h-0 overflow-auto p-4" aria-label="Storefront preview">
           <div className={clsx(
             "mx-auto min-h-full overflow-hidden border border-[#dcdcdc] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-[max-width]",
@@ -324,11 +368,31 @@ export default function OnlineStoreEditorPage() {
             {sections.length === 0 && <div className="grid min-h-[360px] place-items-center p-8 text-center text-sm text-[#8c9196]">This template has no sections yet.</div>}
           </div>
         </main>
+
         <aside className="min-h-0 overflow-y-auto border-l border-[#e3e3e3] bg-white" aria-label="Section tools">
+          {localSection && selectedControls.length > 0 && (
+            <>
+              <div className="border-b border-[#eeeeee] px-4 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#8c9196]">Settings</p>
+                <p className="mt-1 truncate text-[12px] font-semibold text-[#303030]">{selectedBlock ? `${selectedBlock.type} block` : localSection.type}</p>
+              </div>
+              <div className="border-b border-[#eeeeee] px-4 py-4">
+                <SettingGroups
+                  controls={selectedControls}
+                  settings={selectedSettings}
+                  catalog={catalog}
+                  dynamicSources={dynamicSources}
+                  onChange={(key, nextValue) => { void updateSelectedSetting(key, nextValue); }}
+                />
+              </div>
+            </>
+          )}
+
           <div className="border-b border-[#eeeeee] px-4 py-3">
             <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#8c9196]">Section library</p>
           </div>
           <SectionLibrary presets={presetOptions} onInsertPreset={(section) => { void insertPreset(section); }} />
+
           <div className="border-y border-[#eeeeee] px-4 py-3">
             <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#8c9196]">Global sections</p>
           </div>
