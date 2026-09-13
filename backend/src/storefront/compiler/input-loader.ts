@@ -4,6 +4,7 @@ import { WorkspaceGenerationConflictError } from "../workspace/errors.js";
 import type {
   CompilerGlobalSectionInput,
   CompilerMetaobjectDefinitionInput,
+  CompilerResponsiveSettings,
   CompilerSectionNode,
   CompilerTemplateInput,
   StorefrontCompilationInput,
@@ -14,11 +15,19 @@ function object(value: unknown, label: string): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 
+function responsive(value: unknown): CompilerResponsiveSettings | undefined {
+  if (value === undefined) return undefined;
+  const record = object(value, "Responsive settings");
+  if (record.mobile === undefined) return {};
+  return { mobile: object(record.mobile, "Mobile responsive settings") };
+}
+
 function sectionNode(value: unknown): CompilerSectionNode {
   const record = object(value, "Section");
   if (typeof record.id !== "string" || !record.id) throw new Error("Section id is required");
   if (typeof record.type !== "string" || !record.type) throw new Error("Section type is required");
   const settings = object(record.settings ?? {}, "Section settings");
+  const sectionResponsive = responsive(record.responsive);
   const blocks = record.blocks === undefined
     ? undefined
     : Array.isArray(record.blocks)
@@ -26,10 +35,24 @@ function sectionNode(value: unknown): CompilerSectionNode {
           const item = object(block, "Block");
           if (typeof item.id !== "string" || !item.id) throw new Error("Block id is required");
           if (typeof item.type !== "string" || !item.type) throw new Error("Block type is required");
-          return { id: item.id, type: item.type, settings: object(item.settings ?? {}, "Block settings") };
+          const blockResponsive = responsive(item.responsive);
+          return {
+            id: item.id,
+            type: item.type,
+            ...(typeof item.enabled === "boolean" ? { enabled: item.enabled } : {}),
+            settings: object(item.settings ?? {}, "Block settings"),
+            ...(blockResponsive ? { responsive: blockResponsive } : {}),
+          };
         })
       : (() => { throw new Error("Section blocks must be an array"); })();
-  return { id: record.id, type: record.type, settings, ...(blocks ? { blocks } : {}) };
+  return {
+    id: record.id,
+    type: record.type,
+    ...(typeof record.enabled === "boolean" ? { enabled: record.enabled } : {}),
+    settings,
+    ...(sectionResponsive ? { responsive: sectionResponsive } : {}),
+    ...(blocks ? { blocks } : {}),
+  };
 }
 
 export function parseTemplateLayout(value: unknown): CompilerTemplateInput["layout"] {
@@ -56,11 +79,7 @@ function parseMetaobjectFields(value: unknown): CompilerMetaobjectDefinitionInpu
     const item = object(field, "Metaobject field");
     const type = dynamicValueTypeSchema.parse(item.type) as DynamicValueType;
     if (typeof item.handle !== "string" || !item.handle) throw new Error("Metaobject field handle is required");
-    return {
-      handle: item.handle,
-      type,
-      storefrontVisible: item.storefrontVisible === true,
-    };
+    return { handle: item.handle, type, storefrontVisible: item.storefrontVisible === true };
   });
 }
 
@@ -91,11 +110,7 @@ function assignmentType(value: string): "product" | "collection" | "page" | "blo
 export class PrismaCompilerInputLoader {
   constructor(private readonly client: PrismaClient) {}
 
-  async load(
-    storeId: string,
-    expectedGeneration: number,
-    registryManifestHash: string,
-  ): Promise<StorefrontCompilationInput> {
+  async load(storeId: string, expectedGeneration: number, registryManifestHash: string): Promise<StorefrontCompilationInput> {
     return this.client.$transaction(async (tx) => {
       const workspace = await tx.storefrontWorkspace.findUnique({ where: { storeId } });
       if (!workspace) throw new Error("Storefront workspace was not found");
@@ -131,17 +146,8 @@ export class PrismaCompilerInputLoader {
           name: template.name,
           layout: parseTemplateLayout(template.layout),
         })),
-        globalSections: globals.map((global) => ({
-          id: global.id,
-          name: global.name,
-          section: parseGlobalSection(global.section),
-        })),
-        menus: menus.map((menu) => ({
-          id: menu.id,
-          handle: menu.handle,
-          name: menu.name,
-          items: Array.isArray(menu.items) ? structuredClone(menu.items) : [],
-        })),
+        globalSections: globals.map((global) => ({ id: global.id, name: global.name, section: parseGlobalSection(global.section) })),
+        menus: menus.map((menu) => ({ id: menu.id, handle: menu.handle, name: menu.name, items: Array.isArray(menu.items) ? structuredClone(menu.items) : [] })),
         assignments: assignments.flatMap((assignment) => {
           const resourceType = assignmentType(assignment.resourceType);
           return resourceType ? [{ resourceType, resourceId: assignment.resourceId, templateId: assignment.templateId }] : [];
@@ -149,9 +155,7 @@ export class PrismaCompilerInputLoader {
         metafieldDefinitions: metafields.flatMap((definition) => {
           const parsedType = dynamicValueTypeSchema.safeParse(definition.type);
           if (!parsedType.success) return [];
-          const metaobjectId = parsedType.data === "metaobject_reference"
-            ? metaobjectDefinitionId(definition.validations)
-            : undefined;
+          const metaobjectId = parsedType.data === "metaobject_reference" ? metaobjectDefinitionId(definition.validations) : undefined;
           return [{
             id: definition.id,
             ownerType: definition.ownerType,
