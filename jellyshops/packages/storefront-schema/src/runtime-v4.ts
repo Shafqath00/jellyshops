@@ -101,7 +101,7 @@ export const runtimeStorefrontSnapshotV4Schema = z.object({
   templates: z.record(z.string().min(1), runtimeTemplateSchema),
   globalSections: z.record(z.string().min(1), runtimeGlobalSectionSchema),
   menus: z.record(z.string().min(1), runtimeMenuSchema),
-  templateDefaults: z.record(runtimeTemplateTypeSchema, z.string().min(1)).partial(),
+  templateDefaults: z.partialRecord(runtimeTemplateTypeSchema, z.string().min(1)),
   assignments: z.array(runtimeTemplateAssignmentSchema),
   dependencies: z.object({
     edges: z.array(dependencyEdgeSchema),
