@@ -4,17 +4,21 @@ import type {
   ContentDocument,
   ContentRepository,
   PageRecord,
-  SeoFields,
   UpdateArticleRecordInput,
   UpdateBlogRecordInput,
   UpdatePageRecordInput,
 } from "./repository.js";
 
-export interface CreatePageInput extends Partial<SeoFields> {
+export interface CreatePageInput {
   title: string;
   handle: string;
   content: ContentDocument;
   featuredMediaId?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  socialMediaId?: string;
+  noindex?: boolean;
+  canonicalOverride?: string;
 }
 
 export interface UpdatePageInput {
@@ -39,13 +43,18 @@ export interface UpdateBlogInput {
   handle?: string;
 }
 
-export interface CreateArticleInput extends Partial<SeoFields> {
+export interface CreateArticleInput {
   blogId: string;
   title: string;
   handle: string;
   excerpt?: string;
   content: ContentDocument;
   featuredMediaId?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  socialMediaId?: string;
+  noindex?: boolean;
+  canonicalOverride?: string;
 }
 
 export interface UpdateArticleInput {
@@ -82,7 +91,7 @@ function content(value: ContentDocument): ContentDocument {
   return structuredClone(value);
 }
 
-function optionalText(value: string | null | undefined): string | null | undefined {
+function normalizedNullableText(value: string | null | undefined): string | null | undefined {
   if (value === undefined || value === null) return value;
   const normalized = value.trim();
   return normalized || null;
@@ -99,13 +108,8 @@ export class ContentService {
     private readonly now: () => Date = () => new Date(),
   ) {}
 
-  getPage(storeId: string, id: string) {
-    return this.repository.getPage(storeId, id);
-  }
-
-  listPages(storeId: string) {
-    return this.repository.listPages(storeId);
-  }
+  getPage(storeId: string, id: string) { return this.repository.getPage(storeId, id); }
+  listPages(storeId: string) { return this.repository.listPages(storeId); }
 
   async createPage(storeId: string, input: CreatePageInput): Promise<PageRecord> {
     return this.repository.createPage({
@@ -113,14 +117,14 @@ export class ContentService {
       title: requiredText(input.title, "Page title"),
       handle: handle(input.handle),
       content: content(input.content),
-      ...(input.featuredMediaId ? { featuredMediaId: input.featuredMediaId.trim() } : {}),
+      featuredMediaId: normalizedNullableText(input.featuredMediaId) ?? null,
       status: "DRAFT",
       publishedAt: null,
-      ...(input.seoTitle ? { seoTitle: requiredText(input.seoTitle, "SEO title") } : {}),
-      ...(input.seoDescription ? { seoDescription: requiredText(input.seoDescription, "SEO description") } : {}),
-      ...(input.socialMediaId ? { socialMediaId: input.socialMediaId.trim() } : {}),
+      seoTitle: normalizedNullableText(input.seoTitle) ?? null,
+      seoDescription: normalizedNullableText(input.seoDescription) ?? null,
+      socialMediaId: normalizedNullableText(input.socialMediaId) ?? null,
       noindex: input.noindex ?? false,
-      ...(input.canonicalOverride ? { canonicalOverride: input.canonicalOverride.trim() } : {}),
+      canonicalOverride: normalizedNullableText(input.canonicalOverride) ?? null,
     });
   }
 
@@ -129,44 +133,29 @@ export class ContentService {
       ...(patch.title !== undefined ? { title: requiredText(patch.title, "Page title") } : {}),
       ...(patch.handle !== undefined ? { handle: handle(patch.handle) } : {}),
       ...(patch.content !== undefined ? { content: content(patch.content) } : {}),
-      ...(patch.featuredMediaId !== undefined ? { featuredMediaId: optionalText(patch.featuredMediaId) ?? undefined } : {}),
-      ...(patch.seoTitle !== undefined ? { seoTitle: optionalText(patch.seoTitle) ?? undefined } : {}),
-      ...(patch.seoDescription !== undefined ? { seoDescription: optionalText(patch.seoDescription) ?? undefined } : {}),
-      ...(patch.socialMediaId !== undefined ? { socialMediaId: optionalText(patch.socialMediaId) ?? undefined } : {}),
+      ...(patch.featuredMediaId !== undefined ? { featuredMediaId: normalizedNullableText(patch.featuredMediaId) ?? null } : {}),
+      ...(patch.seoTitle !== undefined ? { seoTitle: normalizedNullableText(patch.seoTitle) ?? null } : {}),
+      ...(patch.seoDescription !== undefined ? { seoDescription: normalizedNullableText(patch.seoDescription) ?? null } : {}),
+      ...(patch.socialMediaId !== undefined ? { socialMediaId: normalizedNullableText(patch.socialMediaId) ?? null } : {}),
       ...(patch.noindex !== undefined ? { noindex: patch.noindex } : {}),
-      ...(patch.canonicalOverride !== undefined ? { canonicalOverride: optionalText(patch.canonicalOverride) ?? undefined } : {}),
+      ...(patch.canonicalOverride !== undefined ? { canonicalOverride: normalizedNullableText(patch.canonicalOverride) ?? null } : {}),
     };
     return requireRecord(await this.repository.updatePage(storeId, id, normalized), "Page");
   }
 
   async publishPage(storeId: string, id: string): Promise<PageRecord> {
-    return requireRecord(await this.repository.updatePage(storeId, id, {
-      status: "PUBLISHED",
-      publishedAt: this.now(),
-    }), "Page");
+    return requireRecord(await this.repository.updatePage(storeId, id, { status: "PUBLISHED", publishedAt: this.now() }), "Page");
   }
 
   async unpublishPage(storeId: string, id: string): Promise<PageRecord> {
-    return requireRecord(await this.repository.updatePage(storeId, id, {
-      status: "DRAFT",
-      publishedAt: null,
-    }), "Page");
+    return requireRecord(await this.repository.updatePage(storeId, id, { status: "DRAFT", publishedAt: null }), "Page");
   }
 
-  getBlog(storeId: string, id: string) {
-    return this.repository.getBlog(storeId, id);
-  }
-
-  listBlogs(storeId: string) {
-    return this.repository.listBlogs(storeId);
-  }
+  getBlog(storeId: string, id: string) { return this.repository.getBlog(storeId, id); }
+  listBlogs(storeId: string) { return this.repository.listBlogs(storeId); }
 
   createBlog(storeId: string, input: CreateBlogInput): Promise<BlogRecord> {
-    return this.repository.createBlog({
-      storeId,
-      title: requiredText(input.title, "Blog title"),
-      handle: handle(input.handle),
-    });
+    return this.repository.createBlog({ storeId, title: requiredText(input.title, "Blog title"), handle: handle(input.handle) });
   }
 
   async updateBlog(storeId: string, id: string, patch: UpdateBlogInput): Promise<BlogRecord> {
@@ -177,19 +166,12 @@ export class ContentService {
     return requireRecord(await this.repository.updateBlog(storeId, id, normalized), "Blog");
   }
 
-  getArticle(storeId: string, id: string) {
-    return this.repository.getArticle(storeId, id);
-  }
-
-  listArticles(storeId: string, blogId?: string) {
-    return this.repository.listArticles(storeId, blogId);
-  }
+  getArticle(storeId: string, id: string) { return this.repository.getArticle(storeId, id); }
+  listArticles(storeId: string, blogId?: string) { return this.repository.listArticles(storeId, blogId); }
 
   async createArticle(storeId: string, input: CreateArticleInput): Promise<ArticleRecord> {
     const blogId = requiredText(input.blogId, "Blog id");
-    if (!await this.repository.getBlog(storeId, blogId)) {
-      throw new Error("Article blog was not found in this store");
-    }
+    if (!await this.repository.getBlog(storeId, blogId)) throw new Error("Article blog was not found in this store");
     return this.repository.createArticle({
       storeId,
       blogId,
@@ -197,14 +179,14 @@ export class ContentService {
       handle: handle(input.handle),
       excerpt: input.excerpt?.trim() ?? "",
       content: content(input.content),
-      ...(input.featuredMediaId ? { featuredMediaId: input.featuredMediaId.trim() } : {}),
+      featuredMediaId: normalizedNullableText(input.featuredMediaId) ?? null,
       status: "DRAFT",
       publishedAt: null,
-      ...(input.seoTitle ? { seoTitle: requiredText(input.seoTitle, "SEO title") } : {}),
-      ...(input.seoDescription ? { seoDescription: requiredText(input.seoDescription, "SEO description") } : {}),
-      ...(input.socialMediaId ? { socialMediaId: input.socialMediaId.trim() } : {}),
+      seoTitle: normalizedNullableText(input.seoTitle) ?? null,
+      seoDescription: normalizedNullableText(input.seoDescription) ?? null,
+      socialMediaId: normalizedNullableText(input.socialMediaId) ?? null,
       noindex: input.noindex ?? false,
-      ...(input.canonicalOverride ? { canonicalOverride: input.canonicalOverride.trim() } : {}),
+      canonicalOverride: normalizedNullableText(input.canonicalOverride) ?? null,
     });
   }
 
@@ -214,27 +196,21 @@ export class ContentService {
       ...(patch.handle !== undefined ? { handle: handle(patch.handle) } : {}),
       ...(patch.excerpt !== undefined ? { excerpt: patch.excerpt.trim() } : {}),
       ...(patch.content !== undefined ? { content: content(patch.content) } : {}),
-      ...(patch.featuredMediaId !== undefined ? { featuredMediaId: optionalText(patch.featuredMediaId) ?? undefined } : {}),
-      ...(patch.seoTitle !== undefined ? { seoTitle: optionalText(patch.seoTitle) ?? undefined } : {}),
-      ...(patch.seoDescription !== undefined ? { seoDescription: optionalText(patch.seoDescription) ?? undefined } : {}),
-      ...(patch.socialMediaId !== undefined ? { socialMediaId: optionalText(patch.socialMediaId) ?? undefined } : {}),
+      ...(patch.featuredMediaId !== undefined ? { featuredMediaId: normalizedNullableText(patch.featuredMediaId) ?? null } : {}),
+      ...(patch.seoTitle !== undefined ? { seoTitle: normalizedNullableText(patch.seoTitle) ?? null } : {}),
+      ...(patch.seoDescription !== undefined ? { seoDescription: normalizedNullableText(patch.seoDescription) ?? null } : {}),
+      ...(patch.socialMediaId !== undefined ? { socialMediaId: normalizedNullableText(patch.socialMediaId) ?? null } : {}),
       ...(patch.noindex !== undefined ? { noindex: patch.noindex } : {}),
-      ...(patch.canonicalOverride !== undefined ? { canonicalOverride: optionalText(patch.canonicalOverride) ?? undefined } : {}),
+      ...(patch.canonicalOverride !== undefined ? { canonicalOverride: normalizedNullableText(patch.canonicalOverride) ?? null } : {}),
     };
     return requireRecord(await this.repository.updateArticle(storeId, id, normalized), "Article");
   }
 
   async publishArticle(storeId: string, id: string): Promise<ArticleRecord> {
-    return requireRecord(await this.repository.updateArticle(storeId, id, {
-      status: "PUBLISHED",
-      publishedAt: this.now(),
-    }), "Article");
+    return requireRecord(await this.repository.updateArticle(storeId, id, { status: "PUBLISHED", publishedAt: this.now() }), "Article");
   }
 
   async unpublishArticle(storeId: string, id: string): Promise<ArticleRecord> {
-    return requireRecord(await this.repository.updateArticle(storeId, id, {
-      status: "DRAFT",
-      publishedAt: null,
-    }), "Article");
+    return requireRecord(await this.repository.updateArticle(storeId, id, { status: "DRAFT", publishedAt: null }), "Article");
   }
 }
