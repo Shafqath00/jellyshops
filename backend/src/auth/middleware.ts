@@ -1,12 +1,13 @@
 import type { RequestHandler } from "express";
 import { ApiError } from "../http/errors.js";
-import { hasStorePermission } from "./permissions.js";
+import { createStoreRequestContext, type StoreRequestContext } from "../tenants/store-context.js";
 import type { AuthProvider, MerchantPrincipal, StorePermission } from "./types.js";
 
 declare global {
   namespace Express {
     interface Request {
       merchant?: MerchantPrincipal;
+      storeContext?: StoreRequestContext;
     }
   }
 }
@@ -27,18 +28,23 @@ export function requireMerchant(provider: AuthProvider): RequestHandler {
   };
 }
 
-export function requireStoreAccess(permission?: StorePermission): RequestHandler {
+export function requireStorePermission(permission: StorePermission): RequestHandler {
   return (request, _response, next) => {
-    const storeId = String(request.params.storeId);
     const merchant = request.merchant;
-    const allowed = merchant !== undefined
-      && merchant.storeIds.includes(storeId)
-      && (permission === undefined || hasStorePermission(merchant, storeId, permission));
-
-    if (!allowed) {
+    if (!merchant) {
       next(new ApiError(403, "STORE_FORBIDDEN", "The merchant cannot access this store"));
       return;
     }
-    next();
+
+    try {
+      request.storeContext = createStoreRequestContext(
+        merchant,
+        String(request.params.storeId),
+        permission,
+      );
+      next();
+    } catch (error) {
+      next(error);
+    }
   };
 }
