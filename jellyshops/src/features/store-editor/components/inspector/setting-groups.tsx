@@ -21,6 +21,14 @@ const groups: Array<{
   { id: "advanced", label: "Advanced" },
 ];
 
+function displayValue(value: unknown): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  const setting = value as Record<string, unknown>;
+  if (setting.kind === "dynamic") return setting.fallback;
+  if (setting.kind === "static") return setting.value;
+  return value;
+}
+
 export function SettingGroups({
   controls,
   settings,
@@ -65,7 +73,7 @@ export function SettingGroups({
                 <div key={control.key} data-editor-control-key={control.key}>
                   <ControlRenderer
                     definition={control}
-                    value={settings[control.key]}
+                    value={displayValue(settings[control.key])}
                     catalog={catalog}
                     upload={upload}
                     onChange={(value) => onChange(control.key, value)}
