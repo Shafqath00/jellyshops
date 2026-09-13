@@ -18,19 +18,12 @@ export function createStorefrontRouter(service: StorefrontService<unknown>, auth
 
   router.use(requireMerchant(authProvider));
 
+  // Legacy V3 migration compatibility only. New editor writes use normalized workspace routes.
   router.get<{ storeId: string }>("/draft", requireStorePermission("storefront:view"), async (request, response) => {
     response.json(await service.getOrCreateDraft(request.storeContext!.storeId));
   });
 
-  router.put<{ storeId: string }>("/draft", requireStorePermission("storefront:edit"), async (request, response) => {
-    const { expectedRevision } = revisionSchema.parse(request.body);
-    response.json(await service.saveDraft(
-      request.storeContext!.storeId,
-      expectedRevision,
-      request.body.document,
-    ));
-  });
-
+  // Legacy V3 publishing remains temporarily available until the compiler-based publisher replaces it.
   router.post<{ storeId: string }>("/publish", requireStorePermission("storefront:publish"), async (request, response) => {
     const { expectedRevision } = revisionSchema.parse(request.body);
     response.status(201).json(await service.publish(request.storeContext!.storeId, expectedRevision));
