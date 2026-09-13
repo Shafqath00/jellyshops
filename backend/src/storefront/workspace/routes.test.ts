@@ -3,6 +3,7 @@ import request from "supertest";
 import { describe, expect, it, vi } from "vitest";
 import type { AuthProvider, MerchantPrincipal } from "../../auth/types.js";
 import { errorHandler } from "../../http/errors.js";
+import { ResourceRevisionConflictError, WorkspaceGenerationConflictError } from "./errors.js";
 import { createStorefrontWorkspaceRouter, type StorefrontWorkspaceApi } from "./routes.js";
 
 const principal: MerchantPrincipal = {
@@ -68,13 +69,39 @@ describe("normalized storefront workspace routes", () => {
       .send({ expectedRevision: 3, name: "Featured", storeId: "store-b" });
 
     expect(response.status).toBe(200);
-    expect(api.updateTemplate).toHaveBeenCalledWith(
-      "store-a",
-      "template-1",
-      3,
-      { name: "Featured" },
-    );
+    expect(api.updateTemplate).toHaveBeenCalledWith("store-a", "template-1", 3, { name: "Featured" });
     expect(response.body.generation).toBe(14);
+  });
+
+  it("returns 409 with current revision for a stale resource edit", async () => {
+    const { app, api } = setup();
+    vi.mocked(api.updateTemplate).mockRejectedValueOnce(new ResourceRevisionConflictError(8));
+
+    const response = await request(app)
+      .patch("/api/stores/store-a/storefront/templates/template-1")
+      .set("Authorization", "Bearer token")
+      .send({ expectedRevision: 3, name: "Featured" });
+
+    expect(response.status).toBe(409);
+    expect(response.body.error).toMatchObject({
+      code: "RESOURCE_REVISION_CONFLICT",
+      currentRevision: 8,
+    });
+  });
+
+  it("returns 409 with current generation for a stale workspace assertion", async () => {
+    const { app, api } = setup();
+    vi.mocked(api.getWorkspace).mockRejectedValueOnce(new WorkspaceGenerationConflictError(21));
+
+    const response = await request(app)
+      .get("/api/stores/store-a/storefront/workspace")
+      .set("Authorization", "Bearer token");
+
+    expect(response.status).toBe(409);
+    expect(response.body.error).toMatchObject({
+      code: "WORKSPACE_GENERATION_CONFLICT",
+      currentGeneration: 21,
+    });
   });
 
   it("creates nested menus using the authorized store context", async () => {
@@ -106,12 +133,12 @@ describe("normalized storefront workspace routes", () => {
   });
 
   it("uses storefront edit permission for mutations", async () => {
-    const designer: MerchantPrincipal = {
+    const staff: MerchantPrincipal = {
       userId: 8,
       storeIds: ["store-a"],
       storeRoles: { "store-a": "STAFF" },
     };
-    const provider: AuthProvider = { verify: async () => designer };
+    const provider: AuthProvider = { verify: async () => staff };
     const { api } = setup();
     const app = express();
     app.use((req, _res, next) => { req.id = "workspace-test"; next(); });
