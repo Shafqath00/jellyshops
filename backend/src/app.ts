@@ -6,6 +6,8 @@ import { DevelopmentAuthProvider } from "./auth/development-auth-provider.js";
 import type { AuthProvider } from "./auth/types.js";
 import { createCatalogAdminRouter, createCatalogRouter, createPublicCatalogRouter } from "./catalog/routes.js";
 import type { CatalogAdmin } from "./catalog/service.js";
+import { createContentRouter } from "./content/routes.js";
+import type { ContentService } from "./content/service.js";
 import { createCustomDataRouter } from "./custom-data/routes.js";
 import type { CustomDataService, MetaobjectService } from "./custom-data/service.js";
 import type { DynamicSourceRegistry } from "./dynamic-sources/registry.js";
@@ -41,6 +43,7 @@ export interface AppDependencies {
   mediaRepository: MediaRepository;
   mediaStorage: MediaStorage;
   catalogService: CatalogAdmin;
+  contentService: ContentService;
   customDataService: CustomDataService;
   metaobjectService: MetaobjectService;
   dynamicSourceRegistry: DynamicSourceRegistry;
@@ -72,6 +75,9 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
   if (dependencies.catalogService) {
     app.use("/api/stores/:storeId/catalog", createCatalogAdminRouter(dependencies.catalogService, authProvider));
     app.use("/api/public/stores/:storeId/catalog", createPublicCatalogRouter(dependencies.catalogService));
+  }
+  if (dependencies.contentService) {
+    app.use("/api/stores/:storeId/content", createContentRouter(dependencies.contentService, authProvider));
   }
   if (dependencies.customDataService && dependencies.metaobjectService && dependencies.dynamicSourceRegistry) {
     app.use(
