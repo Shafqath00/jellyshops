@@ -2,7 +2,11 @@ import {
   isDynamicValueTypeCompatible,
   type CompilationDiagnostic,
 } from "@jelly/storefront-schema";
-import { listDynamicBindings, listTemplateSections } from "./traversal.js";
+import {
+  listDynamicBindings,
+  listInvalidDynamicSettings,
+  listTemplateSections,
+} from "./traversal.js";
 import type {
   CompilerDynamicSourceResolver,
   CompilerRegistry,
@@ -17,6 +21,21 @@ export async function validateBindings(
   const diagnostics: CompilationDiagnostic[] = [];
   for (const template of input.templates) {
     for (const visit of listTemplateSections(input, template)) {
+      for (const invalid of listInvalidDynamicSettings(visit.section)) {
+        diagnostics.push({
+          severity: "error",
+          code: "DYNAMIC_SOURCE_INVALID",
+          message: invalid.message,
+          location: {
+            entityType: visit.source === "global" ? "global_section" : "template",
+            entityId: visit.source === "global" ? visit.globalSectionId : template.id,
+            sectionId: invalid.sectionId,
+            ...(invalid.blockId ? { blockId: invalid.blockId } : {}),
+            fieldKey: invalid.fieldKey,
+          },
+        });
+      }
+
       for (const occurrence of listDynamicBindings(visit.section)) {
         const expectedType = registry.dynamicSettingType(
           occurrence.sectionType,
