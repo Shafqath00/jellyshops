@@ -35,6 +35,7 @@ const migrationFiles = [
   "../../prisma/migrations/20260913210000_add_canonical_catalog/migration.sql",
   "../../prisma/migrations/20260913220000_add_metafields/migration.sql",
   "../../prisma/migrations/20260913230000_add_metaobjects/migration.sql",
+  "../../prisma/migrations/20260914000000_add_storefront_workspace/migration.sql",
 ] as const;
 
 export async function createIntegrationDatabase(): Promise<IntegrationDatabase> {
