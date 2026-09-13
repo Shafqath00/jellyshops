@@ -45,6 +45,14 @@ function contextResource(context: TemplateContext): DynamicResourceType | null {
     : null;
 }
 
+function bindingKey(binding: DynamicBinding): string {
+  switch (binding.kind) {
+    case "resource_field": return `resource:${binding.resource}:${binding.field}`;
+    case "metafield": return `metafield:${binding.resource}:${binding.namespace}.${binding.key}`;
+    case "metaobject_field": return `${bindingKey(binding.source)}.${binding.field}`;
+  }
+}
+
 export class DynamicSourceRegistry {
   constructor(
     private readonly customData: Pick<CustomDataRepository, "listMetafieldDefinitions">,
@@ -66,23 +74,43 @@ export class DynamicSourceRegistry {
       const definitions = await this.customData.listMetafieldDefinitions(storeId, ownerType);
       for (const definition of definitions) {
         if (!definition.storefrontVisible || definition.archivedAt) continue;
+        const binding: DynamicBinding = {
+          kind: "metafield",
+          resource: ownerType,
+          namespace: definition.namespace,
+          key: definition.key,
+        };
+        const id = bindingKey(binding);
+        const requiredContext = resourceContext(ownerType);
         const metaobjectDefinitionId = definition.type === "metaobject_reference"
           && typeof definition.validations?.metaobjectDefinitionId === "string"
           ? definition.validations.metaobjectDefinitionId
           : undefined;
+
         sources.push({
-          id: `metafield:${ownerType}:${definition.namespace}.${definition.key}`,
+          id,
           label: definition.name,
           valueType: definition.type,
-          requiredContext: resourceContext(ownerType),
-          binding: {
-            kind: "metafield",
-            resource: ownerType,
-            namespace: definition.namespace,
-            key: definition.key,
-          },
+          requiredContext,
+          binding,
           ...(metaobjectDefinitionId ? { metaobjectDefinitionId } : {}),
         });
+
+        if (metaobjectDefinitionId) {
+          const metaobject = await this.metaobjects.getMetaobjectDefinition(storeId, metaobjectDefinitionId);
+          if (metaobject && !metaobject.archivedAt && metaobject.storefrontVisible) {
+            for (const field of metaobject.fields) {
+              if (!field.storefrontVisible) continue;
+              sources.push({
+                id: `${id}.${field.handle}`,
+                label: `${definition.name} → ${field.name}`,
+                valueType: field.type,
+                requiredContext,
+                binding: { kind: "metaobject_field", source: binding, field: field.handle },
+              });
+            }
+          }
+        }
       }
     }
 
@@ -94,30 +122,9 @@ export class DynamicSourceRegistry {
     binding: DynamicBinding,
     context: TemplateContext,
   ): Promise<DynamicSourceDescriptor> {
-    if (binding.kind === "metaobject_field") {
-      const source = await this.describeBinding(storeId, binding.source, context);
-      if (source.valueType !== "metaobject_reference" || !source.metaobjectDefinitionId) {
-        throw new Error("Dynamic source does not reference a metaobject definition");
-      }
-      const definition = await this.metaobjects.getMetaobjectDefinition(storeId, source.metaobjectDefinitionId);
-      if (!definition || definition.archivedAt || !definition.storefrontVisible) {
-        throw new Error("Metaobject definition is not storefront visible");
-      }
-      const field = definition.fields.find(({ handle }) => handle === binding.field);
-      if (!field) throw new Error(`Unknown metaobject field: ${binding.field}`);
-      if (!field.storefrontVisible) throw new Error(`Metaobject field ${binding.field} is not storefront visible`);
-      return {
-        id: `${source.id}.${binding.field}`,
-        label: `${source.label} → ${field.name}`,
-        valueType: field.type,
-        requiredContext: source.requiredContext,
-        binding,
-      };
-    }
-
-    const candidates = await this.listDynamicSources(storeId, context);
-    const found = candidates.find(({ binding: candidate }) => JSON.stringify(candidate) === JSON.stringify(binding));
-    if (!found) throw new Error("Dynamic source is unavailable in this template context");
+    const key = bindingKey(binding);
+    const found = (await this.listDynamicSources(storeId, context)).find(({ id }) => id === key);
+    if (!found) throw new Error("Dynamic source is unavailable or not storefront visible in this template context");
     return found;
   }
 }
