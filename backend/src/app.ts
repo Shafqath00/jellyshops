@@ -6,6 +6,9 @@ import { DevelopmentAuthProvider } from "./auth/development-auth-provider.js";
 import type { AuthProvider } from "./auth/types.js";
 import { createCatalogAdminRouter, createCatalogRouter, createPublicCatalogRouter } from "./catalog/routes.js";
 import type { CatalogAdmin } from "./catalog/service.js";
+import { createCustomDataRouter } from "./custom-data/routes.js";
+import type { CustomDataService, MetaobjectService } from "./custom-data/service.js";
+import type { DynamicSourceRegistry } from "./dynamic-sources/registry.js";
 import { errorHandler, notFoundHandler } from "./http/errors.js";
 import { LocalJsonMediaRepository } from "./media/local-json-media-repository.js";
 import { LocalMediaStorage } from "./media/local-media-storage.js";
@@ -38,6 +41,9 @@ export interface AppDependencies {
   mediaRepository: MediaRepository;
   mediaStorage: MediaStorage;
   catalogService: CatalogAdmin;
+  customDataService: CustomDataService;
+  metaobjectService: MetaobjectService;
+  dynamicSourceRegistry: DynamicSourceRegistry;
 }
 
 export function createApp(dependencies: Partial<AppDependencies> = {}): Express {
@@ -45,11 +51,7 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
   const authProvider = dependencies.authProvider ?? new DevelopmentAuthProvider(config.demoStoreId);
   const storefrontRepository = dependencies.storefrontRepository ?? new LocalJsonStorefrontRepository(config.dataDirectory);
   const documentValidator = dependencies.documentValidator ?? storefrontDocumentValidator;
-  const storefrontService = new DefaultStorefrontService(
-    storefrontRepository,
-    documentValidator,
-    createDefaultStorefrontDocument,
-  );
+  const storefrontService = new DefaultStorefrontService(storefrontRepository, documentValidator, createDefaultStorefrontDocument);
   const mediaRepository = dependencies.mediaRepository ?? new LocalJsonMediaRepository(config.dataDirectory);
   const mediaStorage = dependencies.mediaStorage ?? new LocalMediaStorage(config.uploadDirectory);
   const mediaService = new MediaService(mediaRepository, mediaStorage);
@@ -64,36 +66,30 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
   app.use(cors({ origin: config.corsOrigins }));
   app.use(express.json({ limit: "2mb" }));
 
-  app.get("/health", (_request, response) => {
-    response.json({ ok: true });
-  });
+  app.get("/health", (_request, response) => response.json({ ok: true }));
 
   app.use("/api/demo/catalog", createCatalogRouter());
   if (dependencies.catalogService) {
+    app.use("/api/stores/:storeId/catalog", createCatalogAdminRouter(dependencies.catalogService, authProvider));
+    app.use("/api/public/stores/:storeId/catalog", createPublicCatalogRouter(dependencies.catalogService));
+  }
+  if (dependencies.customDataService && dependencies.metaobjectService && dependencies.dynamicSourceRegistry) {
     app.use(
-      "/api/stores/:storeId/catalog",
-      createCatalogAdminRouter(dependencies.catalogService, authProvider),
-    );
-    app.use(
-      "/api/public/stores/:storeId/catalog",
-      createPublicCatalogRouter(dependencies.catalogService),
+      "/api/stores/:storeId/custom-data",
+      createCustomDataRouter({
+        customData: dependencies.customDataService,
+        metaobjects: dependencies.metaobjectService,
+        registry: dependencies.dynamicSourceRegistry,
+      }, authProvider),
     );
   }
-  if (dependencies.tenantRepository) {
-    app.use("/api", createMerchantRouter(authProvider, dependencies.tenantRepository));
-  }
-  app.use(
-    "/api/stores/:storeId/storefront",
-    createStorefrontRouter(storefrontService, authProvider),
-  );
-  app.use(
-    "/api/stores/:storeId/media",
-    createMediaRouter(mediaService, authProvider, config.maxUploadBytes),
-  );
+  if (dependencies.tenantRepository) app.use("/api", createMerchantRouter(authProvider, dependencies.tenantRepository));
+
+  app.use("/api/stores/:storeId/storefront", createStorefrontRouter(storefrontService, authProvider));
+  app.use("/api/stores/:storeId/media", createMediaRouter(mediaService, authProvider, config.maxUploadBytes));
   app.use("/api/public/media", createPublicMediaRouter(mediaService));
 
   app.use(notFoundHandler);
   app.use(errorHandler);
-
   return app;
 }
