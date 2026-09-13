@@ -16,4 +16,28 @@ describe("editor reducer", () => {
     expect(state.history.past).toHaveLength(1);
     expect(state.saveStatus).toBe("dirty");
   });
+
+  it("updates only the saved resource revision while advancing workspace generation", () => {
+    const document = createDefaultStorefrontDocument("store-demo");
+    let state = createEditorState(document, 0);
+    state = editorReducer(state, {
+      type: "load-workspace",
+      generation: 21,
+      resourceRevisions: {
+        "template:product-featured": 3,
+        "menu:main": 7,
+      },
+    });
+
+    state = editorReducer(state, {
+      type: "resource-saved",
+      resourceKey: "template:product-featured",
+      revision: 4,
+      generation: 22,
+    });
+
+    expect(state.generation).toBe(22);
+    expect(state.resourceRevisions["template:product-featured"]).toBe(4);
+    expect(state.resourceRevisions["menu:main"]).toBe(7);
+  });
 });
