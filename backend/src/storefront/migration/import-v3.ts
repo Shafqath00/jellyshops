@@ -78,9 +78,8 @@ function templateLayout(
   };
 }
 
-export function buildV3ImportPlan(input: unknown): V3ImportPlan {
+export function buildV3ImportPlan(input: unknown, importedAt: Date = new Date()): V3ImportPlan {
   const document = storefrontDocumentSchema.parse(input);
-  const importedAt = new Date(0);
   const templates: V3ImportTemplate[] = document.pages.map((page) => ({
     id: templateId(page),
     type: templateType(page),
@@ -116,7 +115,7 @@ export function buildV3ImportPlan(input: unknown): V3ImportPlan {
       handle: page.slug,
       content: {},
       status: "PUBLISHED" as const,
-      publishedAt: importedAt,
+      publishedAt: new Date(importedAt),
     })),
     assignments: customPages.map((page) => ({
       resourceType: "page" as const,
@@ -146,10 +145,13 @@ export interface V3ImportResult {
 }
 
 export class PrismaV3StorefrontImporter {
-  constructor(private readonly client: PrismaClient) {}
+  constructor(
+    private readonly client: PrismaClient,
+    private readonly now: () => Date = () => new Date(),
+  ) {}
 
   async import(input: unknown): Promise<V3ImportResult> {
-    const plan = buildV3ImportPlan(input);
+    const plan = buildV3ImportPlan(input, this.now());
     return this.client.$transaction(async (tx) => {
       const store = await tx.store.findFirst({
         where: { id: plan.storeId, archivedAt: null },
