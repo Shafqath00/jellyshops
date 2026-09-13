@@ -32,6 +32,7 @@ export function createEditorState(document: StorefrontDocument, revision: number
     revision,
     generation: 0,
     resourceRevisions: {},
+    publishDiagnostics: [],
     saveStatus: "saved",
     validationIssues: [],
     activeUploads: 0,
@@ -80,6 +81,14 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       saveStatus: "saved",
     };
   }
+  if (action.type === "workspace-refreshed") {
+    return {
+      ...state,
+      generation: action.generation,
+      publishDiagnostics: [...action.diagnostics],
+    };
+  }
+  if (action.type === "set-publish-diagnostics") return { ...state, publishDiagnostics: [...action.diagnostics] };
   if (action.type === "set-active-page") {
     if (!state.history.present.pages.some((page) => page.id === action.pageId)) return state;
     return { ...state, activePageId: action.pageId, selection: null };
