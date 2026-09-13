@@ -6,9 +6,12 @@ import { DevelopmentAuthProvider } from "./auth/development-auth-provider.js";
 import type { AuthProvider } from "./auth/types.js";
 import { createCatalogRouter } from "./catalog/routes.js";
 import { errorHandler, notFoundHandler } from "./http/errors.js";
+import { LocalJsonMediaRepository } from "./media/local-json-media-repository.js";
 import { LocalMediaStorage } from "./media/local-media-storage.js";
+import type { MediaRepository } from "./media/repository.js";
 import { createMediaRouter, createPublicMediaRouter } from "./media/routes.js";
 import { MediaService } from "./media/service.js";
+import type { MediaStorage } from "./media/storage.js";
 import { LocalJsonStorefrontRepository } from "./storefront/local-json-repository.js";
 import { createDefaultStorefrontDocument, storefrontDocumentValidator } from "./storefront/document-validator.js";
 import { createStorefrontRouter } from "./storefront/routes.js";
@@ -31,6 +34,8 @@ export interface AppDependencies {
   storefrontRepository: StorefrontRepository<unknown>;
   documentValidator: DocumentValidator<unknown>;
   tenantRepository: TenantRepository;
+  mediaRepository: MediaRepository;
+  mediaStorage: MediaStorage;
 }
 
 export function createApp(dependencies: Partial<AppDependencies> = {}): Express {
@@ -43,7 +48,9 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
     documentValidator,
     createDefaultStorefrontDocument,
   );
-  const mediaService = new MediaService(new LocalMediaStorage(config.uploadDirectory, config.dataDirectory));
+  const mediaRepository = dependencies.mediaRepository ?? new LocalJsonMediaRepository(config.dataDirectory);
+  const mediaStorage = dependencies.mediaStorage ?? new LocalMediaStorage(config.uploadDirectory);
+  const mediaService = new MediaService(mediaRepository, mediaStorage);
   const app = express();
 
   app.disable("x-powered-by");
