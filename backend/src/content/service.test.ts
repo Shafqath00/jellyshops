@@ -3,7 +3,13 @@ import type {
   ArticleRecord,
   BlogRecord,
   ContentRepository,
+  CreateArticleRecordInput,
+  CreateBlogRecordInput,
+  CreatePageRecordInput,
   PageRecord,
+  UpdateArticleRecordInput,
+  UpdateBlogRecordInput,
+  UpdatePageRecordInput,
 } from "./repository.js";
 import { ContentService } from "./service.js";
 
@@ -12,7 +18,7 @@ class FakeContentRepository implements ContentRepository {
   blogs = new Map<string, BlogRecord>();
   articles = new Map<string, ArticleRecord>();
 
-  async createPage(input: Omit<PageRecord, "id" | "createdAt" | "updatedAt">) {
+  async createPage(input: CreatePageRecordInput) {
     const record: PageRecord = { id: `page-${this.pages.size + 1}`, createdAt: new Date(0), updatedAt: new Date(0), ...input };
     this.pages.set(record.id, record);
     return structuredClone(record);
@@ -22,17 +28,17 @@ class FakeContentRepository implements ContentRepository {
     return record?.storeId === storeId ? structuredClone(record) : null;
   }
   async listPages(storeId: string) {
-    return [...this.pages.values()].filter((page) => page.storeId === storeId).map(structuredClone);
+    return [...this.pages.values()].filter((page) => page.storeId === storeId).map((page) => structuredClone(page));
   }
-  async updatePage(storeId: string, id: string, patch: Partial<PageRecord>) {
+  async updatePage(storeId: string, id: string, patch: UpdatePageRecordInput) {
     const current = this.pages.get(id);
     if (!current || current.storeId !== storeId) return null;
-    const updated = { ...current, ...structuredClone(patch), id: current.id, storeId: current.storeId, updatedAt: new Date(1) };
+    const updated: PageRecord = { ...current, ...structuredClone(patch), id: current.id, storeId: current.storeId, updatedAt: new Date(1) };
     this.pages.set(id, updated);
     return structuredClone(updated);
   }
 
-  async createBlog(input: Omit<BlogRecord, "id" | "createdAt" | "updatedAt">) {
+  async createBlog(input: CreateBlogRecordInput) {
     const record: BlogRecord = { id: `blog-${this.blogs.size + 1}`, createdAt: new Date(0), updatedAt: new Date(0), ...input };
     this.blogs.set(record.id, record);
     return structuredClone(record);
@@ -42,17 +48,17 @@ class FakeContentRepository implements ContentRepository {
     return record?.storeId === storeId ? structuredClone(record) : null;
   }
   async listBlogs(storeId: string) {
-    return [...this.blogs.values()].filter((blog) => blog.storeId === storeId).map(structuredClone);
+    return [...this.blogs.values()].filter((blog) => blog.storeId === storeId).map((blog) => structuredClone(blog));
   }
-  async updateBlog(storeId: string, id: string, patch: Partial<BlogRecord>) {
+  async updateBlog(storeId: string, id: string, patch: UpdateBlogRecordInput) {
     const current = this.blogs.get(id);
     if (!current || current.storeId !== storeId) return null;
-    const updated = { ...current, ...structuredClone(patch), id: current.id, storeId: current.storeId, updatedAt: new Date(1) };
+    const updated: BlogRecord = { ...current, ...structuredClone(patch), id: current.id, storeId: current.storeId, updatedAt: new Date(1) };
     this.blogs.set(id, updated);
     return structuredClone(updated);
   }
 
-  async createArticle(input: Omit<ArticleRecord, "id" | "createdAt" | "updatedAt">) {
+  async createArticle(input: CreateArticleRecordInput) {
     const record: ArticleRecord = { id: `article-${this.articles.size + 1}`, createdAt: new Date(0), updatedAt: new Date(0), ...input };
     this.articles.set(record.id, record);
     return structuredClone(record);
@@ -64,12 +70,12 @@ class FakeContentRepository implements ContentRepository {
   async listArticles(storeId: string, blogId?: string) {
     return [...this.articles.values()]
       .filter((article) => article.storeId === storeId && (!blogId || article.blogId === blogId))
-      .map(structuredClone);
+      .map((article) => structuredClone(article));
   }
-  async updateArticle(storeId: string, id: string, patch: Partial<ArticleRecord>) {
+  async updateArticle(storeId: string, id: string, patch: UpdateArticleRecordInput) {
     const current = this.articles.get(id);
     if (!current || current.storeId !== storeId) return null;
-    const updated = { ...current, ...structuredClone(patch), id: current.id, storeId: current.storeId, updatedAt: new Date(1) };
+    const updated: ArticleRecord = { ...current, ...structuredClone(patch), id: current.id, storeId: current.storeId, blogId: current.blogId, updatedAt: new Date(1) };
     this.articles.set(id, updated);
     return structuredClone(updated);
   }
@@ -160,5 +166,26 @@ describe("ContentService", () => {
       socialMediaId: "media-1",
       canonicalOverride: "https://example.test/pages/faq",
     });
+  });
+
+  it("can explicitly clear nullable SEO and media fields", async () => {
+    const repository = new FakeContentRepository();
+    const service = new ContentService(repository);
+    const page = await service.createPage("store-a", {
+      title: "Story",
+      handle: "story",
+      content: {},
+      featuredMediaId: "media-1",
+      seoTitle: "Story title",
+      socialMediaId: "media-2",
+    });
+
+    const updated = await service.updatePage("store-a", page.id, {
+      featuredMediaId: null,
+      seoTitle: null,
+      socialMediaId: null,
+    });
+
+    expect(updated).toMatchObject({ featuredMediaId: null, seoTitle: null, socialMediaId: null });
   });
 });
