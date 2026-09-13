@@ -125,10 +125,23 @@ export default function OnlineStoreEditorPage() {
 
   const activeTemplate = templates.find((template) => template.id === activeTemplateId);
   const globalMap = useMemo(() => new Map(globals.map((global) => [global.id, global])), [globals]);
-  const sections = activeTemplate ? templateSections(activeTemplate, globalMap) : [];
-  const previewResources = resourceOptions(activeTemplate, catalog);
-  const globalLabels = Object.fromEntries(globals.map((global) => [global.id, { id: global.id, name: global.name }]));
-  const commerce: CommerceDataProvider = {
+  const sections = useMemo(
+    () => activeTemplate ? templateSections(activeTemplate, globalMap) : [],
+    [activeTemplate, globalMap],
+  );
+  const previewResources = useMemo(
+    () => resourceOptions(activeTemplate, catalog),
+    [activeTemplate, catalog],
+  );
+  const globalLabels = useMemo(() => Object.fromEntries(globals.map((global) => [
+    global.id,
+    {
+      id: global.id,
+      name: global.name,
+      sectionType: typeof global.section.type === "string" ? global.section.type : undefined,
+    },
+  ])), [globals]);
+  const commerce = useMemo<CommerceDataProvider>(() => ({
     async getProducts() {
       return catalog.products.map((product) => ({
         id: product.id,
@@ -138,7 +151,7 @@ export default function OnlineStoreEditorPage() {
         price: new Intl.NumberFormat("en-US", { style: "currency", currency: product.currency }).format(product.priceMinor / 100),
       }));
     },
-  };
+  }), [catalog]);
 
   useEffect(() => {
     if (previewResources.length === 0) {
@@ -148,7 +161,7 @@ export default function OnlineStoreEditorPage() {
     if (!previewResources.some((resource) => resource.id === previewResourceId)) {
       setPreviewResourceId(previewResources[0]?.id);
     }
-  }, [activeTemplateId, previewResourceId, previewResources]);
+  }, [previewResourceId, previewResources]);
 
   if (!api) {
     return <main className="grid min-h-[70vh] place-items-center p-8 text-center"><div><h1 className="text-xl font-semibold">Online Store editor is disabled</h1><p className="mt-2 text-sm text-[#6d7175]">Connect merchant authentication to use the editor.</p></div></main>;
