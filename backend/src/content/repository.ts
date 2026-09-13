@@ -2,11 +2,11 @@ export type ContentStatus = "DRAFT" | "PUBLISHED";
 export type ContentDocument = Record<string, unknown>;
 
 export interface SeoFields {
-  seoTitle?: string;
-  seoDescription?: string;
-  socialMediaId?: string;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  socialMediaId: string | null;
   noindex: boolean;
-  canonicalOverride?: string;
+  canonicalOverride: string | null;
 }
 
 export interface PageRecord extends SeoFields {
@@ -15,7 +15,7 @@ export interface PageRecord extends SeoFields {
   title: string;
   handle: string;
   content: ContentDocument;
-  featuredMediaId?: string;
+  featuredMediaId: string | null;
   status: ContentStatus;
   publishedAt: Date | null;
   createdAt: Date;
@@ -39,7 +39,7 @@ export interface ArticleRecord extends SeoFields {
   handle: string;
   excerpt: string;
   content: ContentDocument;
-  featuredMediaId?: string;
+  featuredMediaId: string | null;
   status: ContentStatus;
   publishedAt: Date | null;
   createdAt: Date;
