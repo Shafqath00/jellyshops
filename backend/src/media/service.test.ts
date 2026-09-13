@@ -22,6 +22,7 @@ function record(overrides: Partial<StoredMediaRecord> = {}): StoredMediaRecord {
     width: 1,
     height: 1,
     originalName: "hero.png",
+    altText: null,
     referenced: false,
     createdAt: new Date(0).toISOString(),
     ...overrides,
