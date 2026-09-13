@@ -22,10 +22,10 @@ function createProtectedApp(principal: MerchantPrincipal, permission?: StorePerm
 }
 
 describe("merchant authentication", () => {
-  const owner = {
-    merchantId: "merchant-demo",
+  const owner: MerchantPrincipal = {
+    userId: 1,
     storeIds: ["store-demo"],
-    storeRoles: { "store-demo": "OWNER" as const },
+    storeRoles: { "store-demo": "OWNER" },
   };
 
   it("accepts the configured demo token for its store", async () => {
@@ -59,16 +59,19 @@ describe("merchant authentication", () => {
   });
 
   it.each([
-    ["OWNER", "storefront:write", 204],
-    ["ADMIN", "media:write", 204],
-    ["DESIGNER", "storefront:write", 204],
-    ["STAFF", "storefront:read", 204],
-    ["ORDER_MANAGER", "media:read", 204],
-    ["STAFF", "storefront:write", 403],
-    ["ORDER_MANAGER", "media:write", 403],
+    ["OWNER", "storefront:publish", 204],
+    ["ADMIN", "storefront:publish", 204],
+    ["DESIGNER", "storefront:edit", 204],
+    ["DESIGNER", "storefront:publish", 403],
+    ["DEVELOPER", "developer:build", 204],
+    ["DEVELOPER", "developer:publish", 403],
+    ["STAFF", "content:view", 204],
+    ["STAFF", "storefront:edit", 403],
+    ["ORDER_MANAGER", "catalog:view", 204],
+    ["ORDER_MANAGER", "storefront:edit", 403],
   ] as const)("applies %s permissions for %s", async (role, permission, expectedStatus) => {
     const principal: MerchantPrincipal = {
-      merchantId: "merchant-role",
+      userId: 2,
       storeIds: ["store-demo"],
       storeRoles: { "store-demo": role },
     };
@@ -81,10 +84,10 @@ describe("merchant authentication", () => {
 
   it("denies permission when a membership has no role", async () => {
     const response = await request(createProtectedApp({
-      merchantId: "merchant-missing-role",
+      userId: 3,
       storeIds: ["store-demo"],
       storeRoles: {},
-    }, "storefront:read"))
+    }, "storefront:view"))
       .get("/api/stores/store-demo/private-check")
       .set("Authorization", "Bearer token");
 
