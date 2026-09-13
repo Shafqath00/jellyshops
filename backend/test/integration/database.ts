@@ -35,6 +35,13 @@ async function migrationSql(relativePath: string): Promise<string> {
   return readFile(new URL(relativePath, import.meta.url), "utf8");
 }
 
+const migrationFiles = [
+  "../../prisma/migrations/20260903164628_init/migration.sql",
+  "../../prisma/migrations/20260905090000_tenant_storefront/migration.sql",
+  "../../prisma/migrations/20260913160000_add_developer_membership_role/migration.sql",
+  "../../prisma/migrations/20260913170000_add_audit_events/migration.sql",
+] as const;
+
 export async function createIntegrationDatabase(): Promise<IntegrationDatabase> {
   const databaseUrl = requireTestDatabaseUrl();
   const schema = `jellyshops_test_${process.pid}_${randomUUID().replaceAll("-", "")}`;
@@ -50,12 +57,9 @@ export async function createIntegrationDatabase(): Promise<IntegrationDatabase> 
     const migrationConnection = await administration.connect();
     try {
       await migrationConnection.query(`SET search_path TO "${schema}"`);
-      await migrationConnection.query(
-        await migrationSql("../../prisma/migrations/20260903164628_init/migration.sql"),
-      );
-      await migrationConnection.query(
-        await migrationSql("../../prisma/migrations/20260905090000_tenant_storefront/migration.sql"),
-      );
+      for (const migrationFile of migrationFiles) {
+        await migrationConnection.query(await migrationSql(migrationFile));
+      }
     } finally {
       migrationConnection.release();
     }
