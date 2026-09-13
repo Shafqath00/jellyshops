@@ -12,12 +12,14 @@ import {
   NewsletterSection,
   SpacerDividerSection,
 } from "./sections/home-sections";
+import type { StorefrontRuntimeContext } from "./runtime-context";
 import type { CommerceDataProvider, RendererMode } from "./types";
 
 export interface SectionRenderProps {
   section: SectionNode;
   mode: RendererMode;
   commerce: CommerceDataProvider;
+  context: StorefrontRuntimeContext;
 }
 
 export type SectionRenderComponent = ComponentType<SectionRenderProps>;
