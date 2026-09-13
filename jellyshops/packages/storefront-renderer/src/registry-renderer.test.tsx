@@ -19,6 +19,25 @@ describe("registry-driven section rendering", () => {
     expect(screen.getByText("Rendered brand-story")).toBeInTheDocument();
   });
 
+  it("passes a constrained runtime context to registered sections", () => {
+    const registry = new SectionRenderRegistry();
+    registry.register("runtime-aware", ({ context }) => (
+      <span>{context.mode}:{context.region}:{String(context.commerce === commerce)}</span>
+    ));
+
+    render(
+      <RegistrySectionRenderer
+        section={section("runtime-aware")}
+        mode="preview"
+        region="template"
+        commerce={commerce}
+        registry={registry}
+      />,
+    );
+
+    expect(screen.getByText("preview:template:true")).toBeInTheDocument();
+  });
+
   it("keeps unsupported-section diagnostics in editor/preview but not published", () => {
     const registry = new SectionRenderRegistry();
     const { rerender } = render(
