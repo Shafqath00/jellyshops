@@ -57,14 +57,12 @@ describe("legacy storefront routes", () => {
     expect(unchanged.body.revision).toBe(0);
   });
 
-  it("temporarily keeps V3 publication available until compiler publishing replaces it", async () => {
+  it("rejects revision-based legacy publishing after compiled publishing becomes authoritative", async () => {
     const response = await authed(app)
       .post("/api/stores/store-demo/storefront/publish")
       .send({ expectedRevision: 0 });
 
-    expect(response.status).toBe(201);
-    const publicResponse = await request(app).get("/api/stores/store-demo/storefront/public");
-    expect(publicResponse.status).toBe(200);
-    expect(publicResponse.body.sourceRevision).toBe(0);
+    expect(response.status).toBe(404);
+    expect((await request(app).get("/api/stores/store-demo/storefront/public")).status).toBe(404);
   });
 });
