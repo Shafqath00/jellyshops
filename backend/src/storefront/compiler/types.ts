@@ -55,6 +55,7 @@ export interface CompilerMetafieldDefinitionInput {
   type: DynamicValueType;
   storefrontVisible: boolean;
   archived: boolean;
+  metaobjectDefinitionId?: string;
 }
 
 export interface CompilerMetaobjectDefinitionInput {
