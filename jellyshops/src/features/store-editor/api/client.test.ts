@@ -92,6 +92,14 @@ describe("store editor API client", () => {
     );
   });
 
+  it("returns publish diagnostics when strict compilation blocks publication", async () => {
+    const diagnostics = [{ severity: "error", code: "REFERENCE_MISSING", message: "Menu missing", location: { entityType: "menu", entityId: "main" } }];
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ ok: false, diagnostics }, 422));
+    const api = createStoreEditorApi({ baseUrl: "http://localhost:3001", token: "jelly-demo-merchant", fetch: fetchMock });
+
+    await expect(api.publish("store-demo", 22, "publish-bad")).resolves.toEqual({ ok: false, diagnostics });
+  });
+
   it("surfaces resource revision conflicts without discarding details", async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse({
       error: { code: "RESOURCE_REVISION_CONFLICT", message: "Stale template", currentRevision: 5, requestId: "request-1" },
