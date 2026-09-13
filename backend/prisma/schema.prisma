@@ -32,7 +32,6 @@ model User {
   id          Int               @id @default(autoincrement())
   name        String
   email       String            @unique
-  // Nullable to preserve existing users; attach only after verified identity linking.
   firebaseUid String?           @unique
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
@@ -41,29 +40,30 @@ model User {
 }
 
 model Store {
-  id                   String                  @id @default(uuid())
-  name                 String
-  slug                 String                  @unique
-  commerceProvider     CommerceProvider        @default(NATIVE)
-  currency             String                  @db.VarChar(3)
-  country              String                  @db.VarChar(2)
-  createdAt            DateTime                @default(now())
-  updatedAt            DateTime                @updatedAt
-  archivedAt           DateTime?
-  memberships          StoreMembership[]
-  settings             StoreSettings?
-  domains              StoreDomain[]
-  products             Product[]
-  collections          Collection[]
-  draft                StorefrontDraft?
-  publications         StorefrontPublication[] @relation("StorePublications")
-  auditEvents          AuditEvent[]
-  media                Media[]
-  metafieldDefinitions MetafieldDefinition[]
-  metafieldValues      MetafieldValue[]
-  // Composite FK ensures the live publication belongs to this store.
-  currentPublicationId String?
-  currentPublication   StorefrontPublication?  @relation("LivePublication", fields: [id, currentPublicationId], references: [storeId, id], onDelete: Restrict, onUpdate: NoAction)
+  id                    String                  @id @default(uuid())
+  name                  String
+  slug                  String                  @unique
+  commerceProvider      CommerceProvider        @default(NATIVE)
+  currency              String                  @db.VarChar(3)
+  country               String                  @db.VarChar(2)
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  archivedAt            DateTime?
+  memberships           StoreMembership[]
+  settings              StoreSettings?
+  domains               StoreDomain[]
+  products              Product[]
+  collections           Collection[]
+  draft                 StorefrontDraft?
+  publications          StorefrontPublication[] @relation("StorePublications")
+  auditEvents           AuditEvent[]
+  media                 Media[]
+  metafieldDefinitions  MetafieldDefinition[]
+  metafieldValues       MetafieldValue[]
+  metaobjectDefinitions MetaobjectDefinition[]
+  metaobjectEntries     MetaobjectEntry[]
+  currentPublicationId  String?
+  currentPublication    StorefrontPublication?  @relation("LivePublication", fields: [id, currentPublicationId], references: [storeId, id], onDelete: Restrict, onUpdate: NoAction)
 }
 
 model StoreMembership {
@@ -292,4 +292,40 @@ model MetafieldValue {
 
   @@unique([storeId, definitionId, ownerId])
   @@index([storeId, ownerId])
+}
+
+model MetaobjectDefinition {
+  id                String            @id @default(uuid())
+  storeId           String
+  handle            String
+  name              String
+  storefrontVisible Boolean           @default(false)
+  fields            Json
+  archivedAt        DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  store             Store             @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  entries           MetaobjectEntry[]
+
+  @@unique([storeId, id])
+  @@unique([storeId, handle])
+  @@index([storeId, archivedAt])
+}
+
+model MetaobjectEntry {
+  id           String               @id @default(uuid())
+  storeId      String
+  definitionId String
+  handle       String
+  displayName  String
+  values       Json
+  archivedAt   DateTime?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  store        Store                @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  definition   MetaobjectDefinition @relation(fields: [storeId, definitionId], references: [storeId, id], onDelete: Restrict)
+
+  @@unique([storeId, id])
+  @@unique([storeId, definitionId, handle])
+  @@index([storeId, definitionId, archivedAt])
 }
