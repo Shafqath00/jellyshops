@@ -64,6 +64,14 @@ describe("store editor API client", () => {
     );
   });
 
+  it("returns compiler diagnostics from an intentional 422 validation response", async () => {
+    const diagnostics = [{ severity: "error", code: "BINDING_INVALID", message: "Bad binding", location: { entityType: "template", entityId: "home-default" } }];
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ ok: false, diagnostics, dependencies: { edges: [] } }, 422));
+    const api = createStoreEditorApi({ baseUrl: "http://localhost:3001", token: "jelly-demo-merchant", fetch: fetchMock });
+
+    await expect(api.validate("store-demo", 22)).resolves.toEqual({ ok: false, diagnostics, dependencies: { edges: [] } });
+  });
+
   it("publishes by workspace generation with an idempotency key", async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse({
       ok: true,
