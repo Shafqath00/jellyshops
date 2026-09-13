@@ -9,3 +9,33 @@ export function moveSection(state: EditorState, page: PageType, sectionId: strin
   [sections[index], sections[target]] = [sections[target], sections[index]];
   return { ...state, document: { ...state.document, pages: { ...state.document.pages, [page]: { ...state.document.pages[page], sections } } } };
 }
+
+export interface WorkspaceEditorState {
+  generation: number;
+  resourceRevisions: Record<string, number>;
+}
+
+export function createWorkspaceEditorState(
+  generation: number,
+  resourceRevisions: Record<string, number> = {},
+): WorkspaceEditorState {
+  return { generation, resourceRevisions: { ...resourceRevisions } };
+}
+
+export function applyResourceSave(
+  state: WorkspaceEditorState,
+  resourceKey: string,
+  revision: number,
+  generation: number,
+): WorkspaceEditorState {
+  if (generation < state.generation) {
+    throw new Error("Workspace generation cannot move backwards");
+  }
+  return {
+    generation,
+    resourceRevisions: {
+      ...state.resourceRevisions,
+      [resourceKey]: revision,
+    },
+  };
+}
