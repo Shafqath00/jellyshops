@@ -1,4 +1,5 @@
-import type { PrismaClient } from "../generated/prisma/client.js";
+import { Prisma, type PrismaClient } from "../generated/prisma/client.js";
+import type { CatalogSyncWriter, ProviderProductInput, ProviderSyncResult } from "./provider-sync.js";
 import type { CatalogRepository } from "./repository.js";
 import type {
   CatalogCollection,
@@ -119,14 +120,11 @@ const productInclude = {
   },
 };
 
-export class PrismaCatalogRepository implements CatalogRepository {
+export class PrismaCatalogRepository implements CatalogRepository, CatalogSyncWriter {
   constructor(private readonly client: PrismaClient) {}
 
   async getProduct(storeId: string, id: string): Promise<CatalogProduct | null> {
-    const row = await this.client.product.findFirst({
-      where: { storeId, id },
-      include: productInclude,
-    });
+    const row = await this.client.product.findFirst({ where: { storeId, id }, include: productInclude });
     return row ? mapProduct(row) : null;
   }
 
@@ -136,12 +134,10 @@ export class PrismaCatalogRepository implements CatalogRepository {
         storeId,
         ...(input.status ? { status: input.status } : {}),
         ...(input.collectionId ? { collections: { some: { collectionId: input.collectionId } } } : {}),
-        ...(input.query ? {
-          OR: [
-            { title: { contains: input.query, mode: "insensitive" } },
-            { slug: { contains: input.query, mode: "insensitive" } },
-          ],
-        } : {}),
+        ...(input.query ? { OR: [
+          { title: { contains: input.query, mode: "insensitive" } },
+          { slug: { contains: input.query, mode: "insensitive" } },
+        ] } : {}),
         ...(input.cursor ? { id: { gt: input.cursor } } : {}),
       },
       include: productInclude,
@@ -150,10 +146,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
     });
     const hasNext = rows.length > input.limit;
     const page = rows.slice(0, input.limit);
-    return {
-      nodes: page.map(mapProduct),
-      nextCursor: hasNext ? page.at(-1)?.id ?? null : null,
-    };
+    return { nodes: page.map(mapProduct), nextCursor: hasNext ? page.at(-1)?.id ?? null : null };
   }
 
   async getVariant(storeId: string, id: string): Promise<CatalogVariant | null> {
@@ -184,12 +177,10 @@ export class PrismaCatalogRepository implements CatalogRepository {
     const rows = await this.client.collection.findMany({
       where: {
         storeId,
-        ...(input.query ? {
-          OR: [
-            { title: { contains: input.query, mode: "insensitive" } },
-            { slug: { contains: input.query, mode: "insensitive" } },
-          ],
-        } : {}),
+        ...(input.query ? { OR: [
+          { title: { contains: input.query, mode: "insensitive" } },
+          { slug: { contains: input.query, mode: "insensitive" } },
+        ] } : {}),
         ...(input.cursor ? { id: { gt: input.cursor } } : {}),
       },
       include: { products: { orderBy: { position: "asc" } } },
@@ -210,5 +201,82 @@ export class PrismaCatalogRepository implements CatalogRepository {
       })),
       nextCursor: hasNext ? page.at(-1)?.id ?? null : null,
     };
+  }
+
+  async upsertProviderProduct(storeId: string, input: ProviderProductInput): Promise<ProviderSyncResult> {
+    return this.client.$transaction(async (transaction) => {
+      const product = await transaction.product.upsert({
+        where: { storeId_externalId: { storeId, externalId: input.externalId } },
+        create: {
+          storeId,
+          externalId: input.externalId,
+          slug: input.handle,
+          title: input.title,
+          description: input.description,
+          vendor: input.vendor,
+          productType: input.productType,
+          tags: input.tags,
+          status: input.status,
+        },
+        update: {
+          slug: input.handle,
+          title: input.title,
+          description: input.description,
+          vendor: input.vendor,
+          productType: input.productType,
+          tags: input.tags,
+          status: input.status,
+        },
+        select: { id: true, externalId: true },
+      });
+
+      for (const variant of input.variants) {
+        const storedVariant = await transaction.productVariant.upsert({
+          where: { storeId_externalId: { storeId, externalId: variant.externalId } },
+          create: {
+            storeId,
+            productId: product.id,
+            externalId: variant.externalId,
+            title: variant.title,
+            sku: variant.sku,
+            priceMinor: variant.priceMinor,
+            compareAtPriceMinor: variant.compareAtPriceMinor,
+            options: variant.options as Prisma.InputJsonValue,
+            trackInventory: variant.trackInventory,
+          },
+          update: {
+            productId: product.id,
+            title: variant.title,
+            sku: variant.sku,
+            priceMinor: variant.priceMinor,
+            compareAtPriceMinor: variant.compareAtPriceMinor,
+            options: variant.options as Prisma.InputJsonValue,
+            trackInventory: variant.trackInventory,
+            archivedAt: null,
+          },
+          select: { id: true },
+        });
+
+        if (variant.trackInventory) {
+          await transaction.inventoryLevel.upsert({
+            where: { storeId_variantId: { storeId, variantId: storedVariant.id } },
+            create: {
+              storeId,
+              variantId: storedVariant.id,
+              quantity: variant.quantity ?? 0,
+              reserved: variant.reserved ?? 0,
+            },
+            update: {
+              quantity: variant.quantity ?? 0,
+              reserved: variant.reserved ?? 0,
+            },
+          });
+        } else {
+          await transaction.inventoryLevel.deleteMany({ where: { storeId, variantId: storedVariant.id } });
+        }
+      }
+
+      return { id: product.id, externalId: product.externalId! };
+    });
   }
 }
