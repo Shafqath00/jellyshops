@@ -106,6 +106,14 @@ export interface CompilerRegistry {
   dynamicSettingType(sectionType: string, fieldKey: string): DynamicValueType | null;
 }
 
+export interface CompilerDynamicSourceResolver {
+  describeBinding(
+    storeId: string,
+    binding: DynamicBinding,
+    templateType: TemplateType,
+  ): Promise<{ valueType: DynamicValueType }>;
+}
+
 export interface DynamicBindingOccurrence {
   sectionId: string;
   blockId?: string;
