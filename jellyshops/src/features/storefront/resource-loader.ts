@@ -36,6 +36,24 @@ export type ResolvedStorefrontRoute =
       reason: "resource" | "template";
     };
 
+function blockNode(input: unknown): SectionNode["blocks"][number] | null {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return null;
+  const record = input as Record<string, unknown>;
+  if (typeof record.id !== "string" || typeof record.type !== "string") return null;
+  const settings = record.settings;
+  return {
+    id: record.id,
+    type: record.type,
+    enabled: typeof record.enabled === "boolean" ? record.enabled : true,
+    settings: settings && typeof settings === "object" && !Array.isArray(settings)
+      ? structuredClone(settings as Record<string, unknown>)
+      : {},
+    ...(record.responsive && typeof record.responsive === "object" && !Array.isArray(record.responsive)
+      ? { responsive: structuredClone(record.responsive) as SectionNode["blocks"][number]["responsive"] }
+      : {}),
+  };
+}
+
 function sectionNode(input: Record<string, unknown>): SectionNode | null {
   if (typeof input.id !== "string" || typeof input.type !== "string") return null;
   const settings = input.settings;
@@ -48,7 +66,7 @@ function sectionNode(input: Record<string, unknown>): SectionNode | null {
       ? structuredClone(settings as Record<string, unknown>)
       : {},
     blocks: Array.isArray(blocks)
-      ? structuredClone(blocks) as SectionNode["blocks"]
+      ? blocks.map(blockNode).filter((block): block is NonNullable<ReturnType<typeof blockNode>> => block !== null)
       : [],
     ...(input.responsive && typeof input.responsive === "object" && !Array.isArray(input.responsive)
       ? { responsive: structuredClone(input.responsive) as SectionNode["responsive"] }
