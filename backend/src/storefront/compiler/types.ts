@@ -103,7 +103,7 @@ export interface RegistrySectionIssue {
 
 export interface CompilerRegistry {
   validateSection(section: CompilerSectionNode, templateType: TemplateType): RegistrySectionIssue[];
-  dynamicSettingType(sectionType: string, fieldKey: string): DynamicValueType | null;
+  dynamicSettingType(sectionType: string, fieldKey: string, blockType?: string): DynamicValueType | null;
 }
 
 export interface CompilerDynamicSourceResolver {
@@ -116,7 +116,9 @@ export interface CompilerDynamicSourceResolver {
 
 export interface DynamicBindingOccurrence {
   sectionId: string;
+  sectionType: string;
   blockId?: string;
+  blockType?: string;
   fieldKey: string;
   binding: DynamicBinding;
 }
