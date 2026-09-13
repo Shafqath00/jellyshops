@@ -18,6 +18,7 @@ import type { MediaRepository } from "./media/repository.js";
 import { createMediaRouter, createPublicMediaRouter } from "./media/routes.js";
 import { MediaService } from "./media/service.js";
 import type { MediaStorage } from "./media/storage.js";
+import { createStorefrontCompilerRouter, type StorefrontCompilerApi } from "./storefront/compiler/routes.js";
 import { LocalJsonStorefrontRepository } from "./storefront/local-json-repository.js";
 import { createDefaultStorefrontDocument, storefrontDocumentValidator } from "./storefront/document-validator.js";
 import { createStorefrontRouter } from "./storefront/routes.js";
@@ -49,6 +50,7 @@ export interface AppDependencies {
   metaobjectService: MetaobjectService;
   dynamicSourceRegistry: DynamicSourceRegistry;
   storefrontWorkspaceApi: StorefrontWorkspaceApi;
+  storefrontCompilerApi: StorefrontCompilerApi;
 }
 
 export function createApp(dependencies: Partial<AppDependencies> = {}): Express {
@@ -97,6 +99,12 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
     app.use(
       "/api/stores/:storeId/storefront",
       createStorefrontWorkspaceRouter(dependencies.storefrontWorkspaceApi, authProvider),
+    );
+  }
+  if (dependencies.storefrontCompilerApi) {
+    app.use(
+      "/api/stores/:storeId/storefront",
+      createStorefrontCompilerRouter(dependencies.storefrontCompilerApi, authProvider),
     );
   }
   app.use("/api/stores/:storeId/storefront", createStorefrontRouter(storefrontService, authProvider));
