@@ -3,6 +3,7 @@ import {
   defaultSectionRenderRegistry,
   type SectionRenderRegistry,
 } from "./render-registry";
+import { createStorefrontRuntimeContext } from "./runtime-context";
 import type { CommerceDataProvider, RendererMode, RendererSelection } from "./types";
 
 export function RegistrySectionRenderer({
@@ -25,8 +26,9 @@ export function RegistrySectionRenderer({
   if (!section.enabled) return null;
 
   const RenderComponent = registry.get(section.type);
+  const context = createStorefrontRuntimeContext({ mode, region, commerce });
   const content = RenderComponent
-    ? <RenderComponent section={section} mode={mode} commerce={commerce} />
+    ? <RenderComponent section={section} mode={mode} commerce={commerce} context={context} />
     : mode !== "published"
       ? <aside role="status">Unsupported section: {section.type}</aside>
       : null;
