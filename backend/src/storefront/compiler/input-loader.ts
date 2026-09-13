@@ -6,7 +6,6 @@ import type {
   CompilerMetaobjectDefinitionInput,
   CompilerSectionNode,
   CompilerTemplateInput,
-  CompilerTemplateInput as TemplateInput,
   StorefrontCompilationInput,
 } from "./types.js";
 
@@ -65,14 +64,20 @@ function parseMetaobjectFields(value: unknown): CompilerMetaobjectDefinitionInpu
   });
 }
 
+function metaobjectDefinitionId(validations: unknown): string | undefined {
+  if (!validations || typeof validations !== "object" || Array.isArray(validations)) return undefined;
+  const value = (validations as Record<string, unknown>).metaobjectDefinitionId;
+  return typeof value === "string" && value ? value : undefined;
+}
+
 export function assertCompilationGeneration(current: number, expected: number): void {
   if (current !== expected) throw new WorkspaceGenerationConflictError(current);
 }
 
-function templateType(value: string): TemplateInput["type"] {
+function templateType(value: string): CompilerTemplateInput["type"] {
   const normalized = value.toLowerCase();
   if (["home", "product", "collection", "page", "blog", "article", "search", "cart"].includes(normalized)) {
-    return normalized as TemplateInput["type"];
+    return normalized as CompilerTemplateInput["type"];
   }
   throw new Error(`Unsupported storefront template type: ${value}`);
 }
@@ -144,6 +149,9 @@ export class PrismaCompilerInputLoader {
         metafieldDefinitions: metafields.flatMap((definition) => {
           const parsedType = dynamicValueTypeSchema.safeParse(definition.type);
           if (!parsedType.success) return [];
+          const metaobjectId = parsedType.data === "metaobject_reference"
+            ? metaobjectDefinitionId(definition.validations)
+            : undefined;
           return [{
             id: definition.id,
             ownerType: definition.ownerType,
@@ -152,6 +160,7 @@ export class PrismaCompilerInputLoader {
             type: parsedType.data,
             storefrontVisible: definition.storefrontVisible,
             archived: definition.archivedAt !== null,
+            ...(metaobjectId ? { metaobjectDefinitionId: metaobjectId } : {}),
           }];
         }),
         metaobjectDefinitions: metaobjects.map((definition) => ({
