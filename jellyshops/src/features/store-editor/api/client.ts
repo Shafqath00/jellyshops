@@ -1,14 +1,16 @@
-import type { StorefrontDocument } from "@jelly/storefront-schema";
+import type { DynamicValueType, StorefrontDocument } from "@jelly/storefront-schema";
 import {
   StoreEditorApiError,
   type CompilationResult,
   type DemoCatalog,
   type DraftRecord,
+  type DynamicSourceDescriptor,
   type GlobalSectionRecord,
   type MediaRecord,
   type MenuRecord,
   type PublicationRecord,
   type PublishResult,
+  type SectionPresetRecord,
   type StorefrontTemplateRecord,
   type StorefrontTemplateType,
   type TemplateAssignmentRecord,
@@ -28,6 +30,9 @@ export interface StoreEditorApi {
   listGlobalSections(storeId: string): Promise<GlobalSectionRecord[]>;
   createGlobalSection(storeId: string, input: { name: string; section: Record<string, unknown> }): Promise<{ globalSection: GlobalSectionRecord; generation: number }>;
   updateGlobalSection(storeId: string, sectionId: string, expectedRevision: number, patch: { name?: string; section?: Record<string, unknown> }): Promise<{ globalSection: GlobalSectionRecord; generation: number }>;
+  listPresets(storeId: string): Promise<SectionPresetRecord[]>;
+  createPreset(storeId: string, input: { name: string; section: Record<string, unknown> }): Promise<{ preset: SectionPresetRecord; generation: number }>;
+  instantiatePreset(storeId: string, presetId: string): Promise<Record<string, unknown>>;
 
   listMenus(storeId: string): Promise<MenuRecord[]>;
   createMenu(storeId: string, input: { name: string; handle: string; items: unknown[] }): Promise<{ menu: MenuRecord; generation: number }>;
@@ -39,6 +44,7 @@ export interface StoreEditorApi {
   getAssignment(storeId: string, resourceType: TemplateAssignmentRecord["resourceType"], resourceId: string): Promise<TemplateAssignmentRecord | null>;
   assignTemplate(storeId: string, resourceType: TemplateAssignmentRecord["resourceType"], resourceId: string, templateId: string, expectedRevision: number | null): Promise<{ assignment: TemplateAssignmentRecord; generation: number }>;
 
+  listDynamicSources(storeId: string, context: StorefrontTemplateType, acceptedTypes?: DynamicValueType[]): Promise<DynamicSourceDescriptor[]>;
   validate(storeId: string, expectedGeneration: number): Promise<CompilationResult>;
   compilePreview(storeId: string, expectedGeneration: number): Promise<CompilationResult>;
   publish(storeId: string, expectedGeneration: number, idempotencyKey?: string): Promise<PublishResult>;
@@ -91,6 +97,7 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
   };
 
   const storefrontPath = (storeId: string, suffix: string) => `/api/stores/${encodeURIComponent(storeId)}/storefront${suffix}`;
+  const customDataPath = (storeId: string, suffix: string) => `/api/stores/${encodeURIComponent(storeId)}/custom-data${suffix}`;
 
   return {
     loadWorkspace: (storeId) => request(storefrontPath(storeId, "/workspace")),
@@ -103,6 +110,9 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
     listGlobalSections: (storeId) => request(storefrontPath(storeId, "/global-sections")),
     createGlobalSection: (storeId, input) => request(storefrontPath(storeId, "/global-sections"), { method: "POST", body: JSON.stringify(input) }),
     updateGlobalSection: (storeId, sectionId, expectedRevision, patch) => request(storefrontPath(storeId, `/global-sections/${encodeURIComponent(sectionId)}`), { method: "PATCH", body: JSON.stringify({ expectedRevision, ...patch }) }),
+    listPresets: (storeId) => request(storefrontPath(storeId, "/presets")),
+    createPreset: (storeId, input) => request(storefrontPath(storeId, "/presets"), { method: "POST", body: JSON.stringify(input) }),
+    instantiatePreset: (storeId, presetId) => request(storefrontPath(storeId, `/presets/${encodeURIComponent(presetId)}/instantiate`), { method: "POST" }),
 
     listMenus: (storeId) => request(storefrontPath(storeId, "/menus")),
     createMenu: (storeId, input) => request(storefrontPath(storeId, "/menus"), { method: "POST", body: JSON.stringify(input) }),
@@ -114,6 +124,11 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
     getAssignment: (storeId, resourceType, resourceId) => request(storefrontPath(storeId, `/assignments/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}`)),
     assignTemplate: (storeId, resourceType, resourceId, templateId, expectedRevision) => request(storefrontPath(storeId, `/assignments/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}`), { method: "PUT", body: JSON.stringify({ templateId, expectedRevision }) }),
 
+    listDynamicSources: (storeId, context, acceptedTypes) => {
+      const query = new URLSearchParams({ context });
+      if (acceptedTypes?.length) query.set("accepts", acceptedTypes.join(","));
+      return request(customDataPath(storeId, `/dynamic-sources?${query.toString()}`));
+    },
     validate: (storeId, expectedGeneration) => request(storefrontPath(storeId, "/validate"), { method: "POST", body: JSON.stringify({ expectedGeneration }) }),
     compilePreview: (storeId, expectedGeneration) => request(storefrontPath(storeId, "/preview/compile"), { method: "POST", body: JSON.stringify({ expectedGeneration }) }),
     publish: (storeId, expectedGeneration, idempotencyKey) => {
