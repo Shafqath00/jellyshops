@@ -6,7 +6,13 @@ import clsx from "clsx";
 import { ArrowLeft, Monitor, Smartphone, Tablet } from "lucide-react";
 import { getBlockDefinition, getSectionDefinition } from "@jelly/storefront-registry";
 import { RegistrySectionRenderer, type CommerceDataProvider } from "@jelly/storefront-renderer";
-import type { SectionNode } from "@jelly/storefront-schema";
+import type {
+  CompilationDiagnostic,
+  CompilationDiagnosticLocation,
+  RuntimeStorefrontSnapshotV4,
+  SectionNode,
+} from "@jelly/storefront-schema";
+import { expandRuntimeTemplate } from "@/features/storefront/resource-loader";
 import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import { getDemoSession } from "@/features/store-editor/api/demo-session";
 import type {
@@ -19,9 +25,12 @@ import type {
 } from "@/features/store-editor/api/types";
 import { GlobalSectionPanel } from "@/features/store-editor/components/global-section-panel";
 import { SettingGroups } from "@/features/store-editor/components/inspector/setting-groups";
+import { PublishControls } from "@/features/store-editor/components/publish-controls";
+import { PublishDiagnostics } from "@/features/store-editor/components/publish-diagnostics";
 import { SectionLibrary } from "@/features/store-editor/components/section-library";
 import { TemplateHierarchy } from "@/features/store-editor/components/template-hierarchy";
 import { TemplateResourceSelector, type PreviewResourceOption } from "@/features/store-editor/components/template-resource-selector";
+import { parseEditorNavigationTarget } from "@/features/store-editor/editor-navigation";
 import type { EditorSelection } from "@/features/store-editor/model/types";
 import type { EditorViewport } from "@/features/store-editor/state/types";
 import {
@@ -103,11 +112,21 @@ function selectedInlineSection(template: StorefrontTemplateRecord, selection: Ed
   return null;
 }
 
-function resourceOptions(template: StorefrontTemplateRecord | undefined, catalog: DemoCatalog): PreviewResourceOption[] {
+function resourceOptions(
+  template: StorefrontTemplateRecord | undefined,
+  catalog: DemoCatalog,
+  handoff: ReturnType<typeof parseEditorNavigationTarget>,
+): PreviewResourceOption[] {
   if (!template) return [];
-  if (template.type === "product") return catalog.products.map((product) => ({ id: product.id, label: product.name }));
-  if (template.type === "collection") return catalog.collections.map((collection) => ({ id: collection.id, label: collection.name }));
-  return [];
+  const options = template.type === "product"
+    ? catalog.products.map((product) => ({ id: product.id, label: product.name }))
+    : template.type === "collection"
+      ? catalog.collections.map((collection) => ({ id: collection.id, label: collection.name }))
+      : [];
+  if (handoff.resourceId && handoff.resourceType === template.type && !options.some((option) => option.id === handoff.resourceId)) {
+    options.push({ id: handoff.resourceId, label: `Selected ${handoff.resourceType}` });
+  }
+  return options;
 }
 
 export default function OnlineStoreEditorPage() {
@@ -117,6 +136,7 @@ export default function OnlineStoreEditorPage() {
     baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001",
     token,
   }) : null, [token]);
+  const [handoff] = useState(() => typeof window === "undefined" ? {} : parseEditorNavigationTarget(window.location.search));
 
   const [workspace, setWorkspace] = useState<WorkspaceRecord | null>(null);
   const [templates, setTemplates] = useState<StorefrontTemplateRecord[]>([]);
@@ -125,10 +145,12 @@ export default function OnlineStoreEditorPage() {
   const [dynamicSources, setDynamicSources] = useState<DynamicSourceDescriptor[]>([]);
   const [catalog, setCatalog] = useState<DemoCatalog>({ products: [], collections: [] });
   const [activeTemplateId, setActiveTemplateId] = useState("");
-  const [previewResourceId, setPreviewResourceId] = useState<string>();
+  const [previewResourceId, setPreviewResourceId] = useState<string | undefined>(handoff.resourceId);
   const [selection, setSelection] = useState<EditorSelection>(null);
   const [activeGlobalId, setActiveGlobalId] = useState<string>();
   const [viewport, setViewport] = useState<EditorViewport>("desktop");
+  const [diagnostics, setDiagnostics] = useState<CompilationDiagnostic[]>([]);
+  const [previewSnapshot, setPreviewSnapshot] = useState<RuntimeStorefrontSnapshotV4>();
   const [loadError, setLoadError] = useState<string>();
 
   useEffect(() => {
@@ -147,13 +169,17 @@ export default function OnlineStoreEditorPage() {
       setGlobals(nextGlobals);
       setPresets(nextPresets);
       setCatalog(nextCatalog);
-      setActiveTemplateId((current) => current || nextTemplates.find((template) => template.type === "home")?.id || nextTemplates[0]?.id || "");
+      setActiveTemplateId((current) => {
+        if (current) return current;
+        if (handoff.templateId && nextTemplates.some((template) => template.id === handoff.templateId)) return handoff.templateId;
+        return nextTemplates.find((template) => template.type === "home")?.id || nextTemplates[0]?.id || "";
+      });
     }).catch((error: unknown) => {
       if (!active) return;
       setLoadError(error instanceof Error ? error.message : "Unable to load the Online Store workspace");
     });
     return () => { active = false; };
-  }, [api]);
+  }, [api, handoff]);
 
   const activeTemplate = templates.find((template) => template.id === activeTemplateId);
 
@@ -168,7 +194,7 @@ export default function OnlineStoreEditorPage() {
       .then((sources) => { if (active) setDynamicSources(sources); })
       .catch(() => { if (active) setDynamicSources([]); });
     return () => { active = false; };
-  }, [api, activeTemplate]);
+  }, [api, activeTemplate?.type]);
 
   const globalMap = useMemo(() => new Map(globals.map((global) => [global.id, global])), [globals]);
   const sections = useMemo(
@@ -176,8 +202,8 @@ export default function OnlineStoreEditorPage() {
     [activeTemplate, globalMap],
   );
   const previewResources = useMemo(
-    () => resourceOptions(activeTemplate, catalog),
-    [activeTemplate, catalog],
+    () => resourceOptions(activeTemplate, catalog, handoff),
+    [activeTemplate, catalog, handoff],
   );
   const globalLabels = useMemo(() => Object.fromEntries(globals.map((global) => [
     global.id,
@@ -203,6 +229,8 @@ export default function OnlineStoreEditorPage() {
   const blockDefinition = selectedBlock ? getBlockDefinition(selectedBlock.type) : undefined;
   const selectedControls = selectedBlock ? blockDefinition?.controls ?? [] : sectionDefinition?.controls ?? [];
   const selectedSettings = selectedBlock?.settings ?? localSection?.settings ?? {};
+  const compiledTemplate = activeTemplate && previewSnapshot ? previewSnapshot.templates[activeTemplate.id] : undefined;
+  const renderedSections = compiledTemplate && previewSnapshot ? expandRuntimeTemplate(previewSnapshot, compiledTemplate) : sections;
 
   const commerce = useMemo<CommerceDataProvider>(() => ({
     async getProducts() {
@@ -236,6 +264,7 @@ export default function OnlineStoreEditorPage() {
     );
     setTemplates((current) => current.map((template) => template.id === result.template.id ? result.template : template));
     setWorkspace((current) => current ? { ...current, generation: result.generation } : current);
+    setPreviewSnapshot(undefined);
   };
 
   const insertPreset = async (section: SectionNode) => {
@@ -266,6 +295,7 @@ export default function OnlineStoreEditorPage() {
     );
     setTemplates((current) => current.map((template) => template.id === result.template.id ? result.template : template));
     setWorkspace((current) => current ? { ...current, generation: result.generation } : current);
+    setPreviewSnapshot(undefined);
     setSelection(null);
     setActiveGlobalId(created.globalSection.id);
   };
@@ -293,6 +323,24 @@ export default function OnlineStoreEditorPage() {
     await persistLayout(layout);
   };
 
+  const openDiagnostic = (location: CompilationDiagnosticLocation) => {
+    if (location.entityType === "template" && location.entityId && templates.some((template) => template.id === location.entityId)) {
+      setActiveTemplateId(location.entityId);
+      setActiveGlobalId(undefined);
+    }
+    if (location.entityType === "global_section" && location.entityId) {
+      setActiveGlobalId(location.entityId);
+      setSelection(null);
+      return;
+    }
+    if (location.sectionId) {
+      setActiveGlobalId(undefined);
+      setSelection(location.blockId
+        ? { kind: "block", region: "template", sectionId: location.sectionId, blockId: location.blockId, fieldKey: location.fieldKey }
+        : { kind: "section", region: "template", sectionId: location.sectionId });
+    }
+  };
+
   if (!api) {
     return <main className="grid min-h-[70vh] place-items-center p-8 text-center"><div><h1 className="text-xl font-semibold">Online Store editor is disabled</h1><p className="mt-2 text-sm text-[#6d7175]">Connect merchant authentication to use the editor.</p></div></main>;
   }
@@ -307,7 +355,7 @@ export default function OnlineStoreEditorPage() {
 
   return (
     <div className="fixed inset-0 z-[60] flex h-dvh flex-col overflow-hidden bg-[#f4f4f5] text-[#303030]">
-      <header className="flex h-14 shrink-0 items-center justify-between border-b border-[#e3e3e3] bg-white px-3">
+      <header className="flex min-h-14 shrink-0 items-center justify-between gap-3 border-b border-[#e3e3e3] bg-white px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
           <Link href="/admin" aria-label="Back to admin" className="grid size-8 place-items-center rounded-lg text-[#616161] hover:bg-[#f1f1f1]"><ArrowLeft size={17} /></Link>
           <div className="min-w-0"><p className="text-[10px] text-[#8c9196]">Online Store</p><h1 className="truncate text-[13px] font-semibold">Theme editor</h1></div>
@@ -321,7 +369,20 @@ export default function OnlineStoreEditorPage() {
             <button key={viewportValue} type="button" aria-label={label} aria-pressed={viewport === viewportValue} onClick={() => setViewport(viewportValue)} className={clsx("grid size-7 place-items-center rounded-md", viewport === viewportValue ? "bg-white shadow-sm" : "text-[#8c9196]")}><Icon size={15} /></button>
           ))}
         </div>
-        <div className="text-right"><p className="text-[10px] text-[#8c9196]">Draft workspace</p><p className="text-[12px] font-semibold">Generation {workspace.generation}</p></div>
+        <div className="flex items-center gap-3">
+          <div className="hidden text-right lg:block"><p className="text-[10px] text-[#8c9196]">Draft workspace</p><p className="text-[12px] font-semibold">Generation {workspace.generation}</p></div>
+          <PublishControls
+            generation={workspace.generation}
+            diagnostics={diagnostics}
+            validate={(generation) => api.validate(backendStoreId, generation)}
+            compilePreview={(generation) => api.compilePreview(backendStoreId, generation)}
+            publish={(generation, idempotencyKey) => api.publish(backendStoreId, generation, idempotencyKey)}
+            refreshWorkspace={() => api.loadWorkspace(backendStoreId)}
+            onDiagnostics={setDiagnostics}
+            onPreview={setPreviewSnapshot}
+            onGeneration={(generation) => setWorkspace((current) => current ? { ...current, generation } : current)}
+          />
+        </div>
       </header>
 
       <TemplateResourceSelector
@@ -329,7 +390,7 @@ export default function OnlineStoreEditorPage() {
         activeTemplateId={activeTemplate.id}
         previewResources={previewResources}
         previewResourceId={previewResourceId}
-        onTemplateChange={(templateId) => { setActiveTemplateId(templateId); setSelection(null); setActiveGlobalId(undefined); }}
+        onTemplateChange={(templateId) => { setActiveTemplateId(templateId); setSelection(null); setActiveGlobalId(undefined); setPreviewSnapshot(undefined); }}
         onPreviewResourceChange={setPreviewResourceId}
       />
 
@@ -344,32 +405,37 @@ export default function OnlineStoreEditorPage() {
         />
 
         <main className="min-h-0 overflow-auto p-4" aria-label="Storefront preview">
+          {previewSnapshot && <div className="mx-auto mb-2 max-w-[1440px] rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-[10px] font-medium text-emerald-800">Compiled preview · generation {previewSnapshot.sourceGeneration}</div>}
           <div className={clsx(
             "mx-auto min-h-full overflow-hidden border border-[#dcdcdc] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-[max-width]",
             viewport === "desktop" && "max-w-[1440px]",
             viewport === "tablet" && "max-w-[820px]",
             viewport === "mobile" && "max-w-[390px]",
           )} data-testid="preview-viewport" data-viewport={viewport}>
-            {sections.map((section) => (
+            {renderedSections.map((section) => (
               <RegistrySectionRenderer
                 key={section.id}
                 section={section}
-                mode="editor"
+                mode={previewSnapshot ? "preview" : "editor"}
                 commerce={commerce}
                 region="template"
-                selected={selection ?? undefined}
-                onSelect={(next) => {
+                selected={previewSnapshot ? undefined : selection ?? undefined}
+                onSelect={previewSnapshot ? undefined : (next) => {
                   setActiveGlobalId(undefined);
                   if (next.kind === "section" && next.sectionId) setSelection({ kind: "section", region: "template", sectionId: next.sectionId });
                   if (next.kind === "block" && next.sectionId && next.blockId) setSelection({ kind: "block", region: "template", sectionId: next.sectionId, blockId: next.blockId, fieldKey: next.fieldKey });
                 }}
               />
             ))}
-            {sections.length === 0 && <div className="grid min-h-[360px] place-items-center p-8 text-center text-sm text-[#8c9196]">This template has no sections yet.</div>}
+            {renderedSections.length === 0 && <div className="grid min-h-[360px] place-items-center p-8 text-center text-sm text-[#8c9196]">This template has no sections yet.</div>}
           </div>
         </main>
 
         <aside className="min-h-0 overflow-y-auto border-l border-[#e3e3e3] bg-white" aria-label="Section tools">
+          <div className="border-b border-[#eeeeee] p-3">
+            <PublishDiagnostics diagnostics={diagnostics} onOpen={openDiagnostic} />
+          </div>
+
           {localSection && selectedControls.length > 0 && (
             <>
               <div className="border-b border-[#eeeeee] px-4 py-3">
