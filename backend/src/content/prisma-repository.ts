@@ -46,9 +46,25 @@ function mapArticle(row: {
   return { ...row, content: contentDocument(row.content) };
 }
 
-function pageData(input: CreatePageRecordInput | UpdatePageRecordInput): Prisma.StorePageUncheckedCreateInput | Prisma.StorePageUncheckedUpdateInput {
+function pageCreateData(input: CreatePageRecordInput): Prisma.StorePageUncheckedCreateInput {
   return {
-    ...(input.storeId !== undefined ? { storeId: input.storeId } : {}),
+    storeId: input.storeId,
+    title: input.title,
+    handle: input.handle,
+    content: input.content as Prisma.InputJsonValue,
+    featuredMediaId: input.featuredMediaId,
+    status: input.status,
+    seoTitle: input.seoTitle,
+    seoDescription: input.seoDescription,
+    socialMediaId: input.socialMediaId,
+    noindex: input.noindex,
+    canonicalOverride: input.canonicalOverride,
+    publishedAt: input.publishedAt,
+  };
+}
+
+function pageUpdateData(input: UpdatePageRecordInput): Prisma.StorePageUncheckedUpdateInput {
+  return {
     ...(input.title !== undefined ? { title: input.title } : {}),
     ...(input.handle !== undefined ? { handle: input.handle } : {}),
     ...(input.content !== undefined ? { content: input.content as Prisma.InputJsonValue } : {}),
@@ -63,10 +79,27 @@ function pageData(input: CreatePageRecordInput | UpdatePageRecordInput): Prisma.
   };
 }
 
-function articleData(input: CreateArticleRecordInput | UpdateArticleRecordInput): Prisma.ArticleUncheckedCreateInput | Prisma.ArticleUncheckedUpdateInput {
+function articleCreateData(input: CreateArticleRecordInput): Prisma.ArticleUncheckedCreateInput {
   return {
-    ...(input.storeId !== undefined ? { storeId: input.storeId } : {}),
-    ...(input.blogId !== undefined ? { blogId: input.blogId } : {}),
+    storeId: input.storeId,
+    blogId: input.blogId,
+    title: input.title,
+    handle: input.handle,
+    excerpt: input.excerpt,
+    content: input.content as Prisma.InputJsonValue,
+    featuredMediaId: input.featuredMediaId,
+    status: input.status,
+    seoTitle: input.seoTitle,
+    seoDescription: input.seoDescription,
+    socialMediaId: input.socialMediaId,
+    noindex: input.noindex,
+    canonicalOverride: input.canonicalOverride,
+    publishedAt: input.publishedAt,
+  };
+}
+
+function articleUpdateData(input: UpdateArticleRecordInput): Prisma.ArticleUncheckedUpdateInput {
+  return {
     ...(input.title !== undefined ? { title: input.title } : {}),
     ...(input.handle !== undefined ? { handle: input.handle } : {}),
     ...(input.excerpt !== undefined ? { excerpt: input.excerpt } : {}),
@@ -86,7 +119,7 @@ export class PrismaContentRepository implements ContentRepository {
   constructor(private readonly client: PrismaClient) {}
 
   async createPage(input: CreatePageRecordInput): Promise<PageRecord> {
-    return mapPage(await this.client.storePage.create({ data: pageData(input) as Prisma.StorePageUncheckedCreateInput }));
+    return mapPage(await this.client.storePage.create({ data: pageCreateData(input) }));
   }
 
   async getPage(storeId: string, id: string): Promise<PageRecord | null> {
@@ -101,10 +134,7 @@ export class PrismaContentRepository implements ContentRepository {
   async updatePage(storeId: string, id: string, patch: UpdatePageRecordInput): Promise<PageRecord | null> {
     const existing = await this.client.storePage.findFirst({ where: { storeId, id }, select: { id: true } });
     if (!existing) return null;
-    return mapPage(await this.client.storePage.update({
-      where: { id: existing.id },
-      data: pageData(patch) as Prisma.StorePageUncheckedUpdateInput,
-    }));
+    return mapPage(await this.client.storePage.update({ where: { id: existing.id }, data: pageUpdateData(patch) }));
   }
 
   async createBlog(input: CreateBlogRecordInput): Promise<BlogRecord> {
@@ -127,7 +157,7 @@ export class PrismaContentRepository implements ContentRepository {
   }
 
   async createArticle(input: CreateArticleRecordInput): Promise<ArticleRecord> {
-    return mapArticle(await this.client.article.create({ data: articleData(input) as Prisma.ArticleUncheckedCreateInput }));
+    return mapArticle(await this.client.article.create({ data: articleCreateData(input) }));
   }
 
   async getArticle(storeId: string, id: string): Promise<ArticleRecord | null> {
@@ -145,9 +175,6 @@ export class PrismaContentRepository implements ContentRepository {
   async updateArticle(storeId: string, id: string, patch: UpdateArticleRecordInput): Promise<ArticleRecord | null> {
     const existing = await this.client.article.findFirst({ where: { storeId, id }, select: { id: true } });
     if (!existing) return null;
-    return mapArticle(await this.client.article.update({
-      where: { id: existing.id },
-      data: articleData(patch) as Prisma.ArticleUncheckedUpdateInput,
-    }));
+    return mapArticle(await this.client.article.update({ where: { id: existing.id }, data: articleUpdateData(patch) }));
   }
 }
