@@ -1,4 +1,4 @@
-import type { CatalogRepository } from "./repository.js";
+import type { CatalogRepository, CatalogWriter } from "./repository.js";
 import type {
   CatalogCollection,
   CatalogProduct,
@@ -6,8 +6,12 @@ import type {
   CatalogResourceRef,
   CatalogVariant,
   Connection,
+  CreateCollectionInput,
+  CreateProductInput,
   ListCollectionsInput,
   ListProductsInput,
+  UpdateCollectionInput,
+  UpdateProductInput,
 } from "./types.js";
 
 function assertLimit(limit: number): void {
@@ -26,8 +30,18 @@ export interface CatalogReader {
   resolveResource(storeId: string, ref: CatalogResourceRef): Promise<CatalogResource | null>;
 }
 
+export interface CatalogAdmin extends CatalogReader {
+  createProduct(storeId: string, input: CreateProductInput): Promise<CatalogProduct>;
+  updateProduct(storeId: string, productId: string, input: UpdateProductInput): Promise<CatalogProduct>;
+  createCollection(storeId: string, input: CreateCollectionInput): Promise<CatalogCollection>;
+  updateCollection(storeId: string, collectionId: string, input: UpdateCollectionInput): Promise<CatalogCollection>;
+}
+
 export class CatalogService implements CatalogReader {
-  constructor(private readonly repository: CatalogRepository) {}
+  constructor(
+    private readonly repository: CatalogRepository,
+    private readonly writer?: CatalogWriter,
+  ) {}
 
   getProduct(storeId: string, id: string): Promise<CatalogProduct | null> {
     return this.repository.getProduct(storeId, id);
@@ -59,6 +73,22 @@ export class CatalogService implements CatalogReader {
     return this.repository.listCollections(storeId, input);
   }
 
+  createProduct(storeId: string, input: CreateProductInput): Promise<CatalogProduct> {
+    return this.requireWriter().createProduct(storeId, input);
+  }
+
+  updateProduct(storeId: string, productId: string, input: UpdateProductInput): Promise<CatalogProduct> {
+    return this.requireWriter().updateProduct(storeId, productId, input);
+  }
+
+  createCollection(storeId: string, input: CreateCollectionInput): Promise<CatalogCollection> {
+    return this.requireWriter().createCollection(storeId, input);
+  }
+
+  updateCollection(storeId: string, collectionId: string, input: UpdateCollectionInput): Promise<CatalogCollection> {
+    return this.requireWriter().updateCollection(storeId, collectionId, input);
+  }
+
   async resolveResource(storeId: string, ref: CatalogResourceRef): Promise<CatalogResource | null> {
     switch (ref.type) {
       case "product":
@@ -68,5 +98,10 @@ export class CatalogService implements CatalogReader {
       case "collection":
         return this.getCollection(storeId, ref.id);
     }
+  }
+
+  private requireWriter(): CatalogWriter {
+    if (!this.writer) throw new Error("Catalog write operations are unavailable for this adapter");
+    return this.writer;
   }
 }
