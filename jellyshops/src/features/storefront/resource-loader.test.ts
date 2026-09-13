@@ -1,6 +1,7 @@
 import type { RuntimeStorefrontSnapshotV4 } from "@jelly/storefront-schema";
 import { describe, expect, it, vi } from "vitest";
 import {
+  expandRuntimeTemplate,
   resolvePublicResourceReference,
   resolveStorefrontRoute,
   type PublicResourceReader,
@@ -100,6 +101,27 @@ describe("resolveStorefrontRoute", () => {
     expect(result.status).toBe("ready");
     if (result.status !== "ready") throw new Error("expected route to resolve");
     expect(result.template.id).toBe("product-featured");
+  });
+
+  it("normalizes omitted enabled flags in compiled section data", () => {
+    const current = snapshot();
+    const template = current.templates["product-featured"];
+    template.layout = {
+      sections: [{
+        kind: "inline",
+        section: {
+          id: "copy",
+          type: "rich-text",
+          settings: {},
+          blocks: [{ id: "copy-text", type: "text", settings: { text: "Hello" } }],
+        },
+      }],
+    };
+
+    const sections = expandRuntimeTemplate(current, template);
+
+    expect(sections[0]?.enabled).toBe(true);
+    expect(sections[0]?.blocks[0]?.enabled).toBe(true);
   });
 
   it("returns a safe empty reference for an archived featured resource", async () => {
