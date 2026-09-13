@@ -40,9 +40,9 @@ const links = [
     icon: Palette,
   },
   {
-    href: "/admin/store-design",
-    label: "Store Design",
-    mobileLabel: "Design",
+    href: "/admin/online-store/editor",
+    label: "Online Store",
+    mobileLabel: "Store",
     icon: LayoutTemplate,
   },
   {
@@ -67,10 +67,7 @@ export function AdminNav() {
     <nav
       aria-label="Merchant navigation"
       className={clsx(
-        // Desktop
         "flex flex-col gap-0.5",
-
-        // Mobile
         "max-md:fixed",
         "max-md:inset-x-3",
         "max-md:bottom-3",
@@ -103,23 +100,16 @@ export function AdminNav() {
               aria-label={label}
               aria-current={active ? "page" : undefined}
               className={clsx(
-                // Desktop
                 "group flex min-h-9 items-center gap-2.5 rounded-lg px-2.5",
                 "text-[13px] font-medium",
                 "transition-colors duration-150",
                 "focus-visible:outline-none",
                 "focus-visible:ring-2",
                 "focus-visible:ring-jelly-guava/50",
-
-                // Default desktop state
                 !active &&
                   "text-[#4a4a4a] hover:bg-black/[0.05] hover:text-[#202223]",
-
-                // Active desktop state
                 active &&
                   "bg-black/[0.07] font-semibold text-[#202223]",
-
-                // Mobile layout
                 "max-md:min-h-[52px]",
                 "max-md:min-w-0",
                 "max-md:flex-col",
@@ -128,8 +118,6 @@ export function AdminNav() {
                 "max-md:rounded-xl",
                 "max-md:px-1",
                 "max-md:py-1.5",
-
-                // Mobile states
                 "max-md:bg-transparent",
                 active &&
                   "max-md:bg-[#f1f1f1]"
@@ -143,8 +131,6 @@ export function AdminNav() {
                   active
                     ? "text-[#303030]"
                     : "text-[#6d7175] group-hover:text-[#303030]",
-
-                  // Tiny Jelly identity on active mobile item
                   active &&
                     "max-md:text-jelly-guava-deep"
                 )}
