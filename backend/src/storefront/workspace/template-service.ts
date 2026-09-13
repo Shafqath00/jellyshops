@@ -1,5 +1,4 @@
 import type { WorkspaceTransaction } from "./concurrency.js";
-import type { WorkspaceMutationResult } from "./prisma-mutation-coordinator.js";
 import type {
   CloneTemplateRecordInput,
   StorefrontTemplateRecord,
@@ -9,11 +8,16 @@ import type {
   UpdateTemplateRecordInput,
 } from "./repositories/template-repository.js";
 
+export interface WorkspaceMutationRunResult<T> {
+  result: T;
+  generation: number;
+}
+
 export interface WorkspaceMutationRunner {
   run<T>(
     storeId: string,
     operation: (transaction: WorkspaceTransaction) => Promise<T>,
-  ): Promise<WorkspaceMutationResult<T>>;
+  ): Promise<WorkspaceMutationRunResult<T>>;
 }
 
 export interface CreateTemplateInput {
