@@ -6,7 +6,7 @@
 
 **Architecture:** Keep the current package boundaries and immutable-publication pattern, but replace the monolithic editable storefront document with normalized store-owned authoring resources. Compile those resources into a V4 immutable runtime snapshot; resolve live catalog/content/custom-data values at request time; render built-in sections natively and untrusted store code through a sandbox/capability bridge.
 
-**Tech Stack:** TypeScript, Node.js, Express 5, Prisma 7/PostgreSQL, Zod 4, Vitest, PGlite integration tests, Next.js/React, Playwright, dnd-kit, existing `@jelly/storefront-*` packages, plus esbuild for developer artifacts and Monaco for the browser editor when Milestone 8 begins.
+**Tech Stack:** TypeScript, Node.js, Express 5, Prisma 7/PostgreSQL, Zod 4, Vitest, PGlite integration tests, Next.js/React, Playwright, dnd-kit, existing `@jelly/storefront-*` packages, esbuild for developer artifacts, and Monaco for the browser editor when Milestone 8 begins.
 
 **Spec:** `docs/superpowers/specs/2026-09-13-jelly-shop-phase-1-online-store-platform-design.md`
 
@@ -23,7 +23,7 @@
 - Never execute store-uploaded TypeScript/React inside the privileged admin origin, Next.js server process, or Express backend process.
 - Preserve V3 storefronts until an explicit successful V4 publish; migration work must not silently switch the live publication.
 - The current storefront service's optimistic-concurrency and atomic live-publication pointer principles are retained, but generalized to resource revisions plus workspace generation.
-- Milestone 4 concurrency is a first-class component. `WorkspaceMutationCoordinator` and revision errors must have focused unit/integration tests before template/menu/global-section repositories depend on them.
+- Milestone 4 concurrency is a first-class component. `WorkspaceMutationCoordinator` and revision/generation errors must have focused unit/integration tests before template/menu/global-section repositories depend on them.
 - Do not redesign editor UI ahead of the catalog/custom-data/workspace/compiler contracts.
 - After every milestone, run `cd backend && npm test && npm run typecheck` for backend-affecting work and `cd jellyshops && npm test && npm run typecheck && npm run lint` for frontend/package-affecting work.
 
@@ -38,21 +38,21 @@ The plan deliberately introduces focused modules rather than growing `backend/sr
 ```text
 backend/src/
   auth/
-    permissions.ts                 role → capability mapping
-    middleware.ts                  authentication + capability enforcement
+    permissions.ts
+    middleware.ts
   tenants/
-    store-context.ts               tenant-safe request context
+    store-context.ts
   audit/
     types.ts
     repository.ts
     prisma-audit-repository.ts
     service.ts
   catalog/
-    types.ts                       canonical public/domain contracts
+    types.ts
     repository.ts
     prisma-catalog-repository.ts
     service.ts
-    provider-sync.ts               provider-neutral synchronization contract
+    provider-sync.ts
     routes.ts
   custom-data/
     repository.ts
@@ -64,22 +64,35 @@ backend/src/
     validator.ts
     resolver.ts
   media/
-    storage.ts                     storage interface
-    local-media-storage.ts         local adapter
+    storage.ts
+    local-media-storage.ts
+    repository.ts
     prisma-media-repository.ts
     service.ts
   storefront/
     workspace/
       types.ts
-      concurrency.ts               pure revision/generation rules
+      errors.ts
+      concurrency.ts
       prisma-mutation-coordinator.ts
       repositories/
         template-repository.ts
+        prisma-template-repository.ts
         global-section-repository.ts
+        prisma-global-section-repository.ts
+        preset-repository.ts
+        prisma-preset-repository.ts
         menu-repository.ts
+        prisma-menu-repository.ts
         theme-repository.ts
+        prisma-theme-repository.ts
         assignment-repository.ts
-      service.ts
+        prisma-assignment-repository.ts
+      template-service.ts
+      global-section-service.ts
+      menu-service.ts
+      theme-service.ts
+      assignment-service.ts
       routes.ts
     compiler/
       types.ts
@@ -91,9 +104,11 @@ backend/src/
       dependency-graph.ts
       snapshot.ts
       compiler.ts
+      routes.ts
     publication/
       service.ts
       repository.ts
+      prisma-repository.ts
     migration/
       import-v3.ts
     runtime/
@@ -106,6 +121,7 @@ backend/src/
     routes.ts
   developer/
     repository.ts
+    prisma-repository.ts
     build-service.ts
     import-policy.ts
     routes.ts
@@ -130,12 +146,14 @@ jellyshops/packages/
   storefront-registry/src/
     registry.ts
     types.ts
+    manifest.ts
   storefront-renderer/src/
     runtime-context.ts
     dynamic-values.ts
     section-renderer.tsx
     sandbox/
       protocol.ts
+      capabilities.ts
       sandbox-section.tsx
   storefront-themes/
   storefront-ui/
@@ -144,25 +162,34 @@ jellyshops/src/features/
   store-editor/
     api/client.ts
     api/types.ts
-    state/
-    components/
-      template-resource-selector.tsx
-      template-hierarchy.tsx
-      section-library.tsx
-      global-section-panel.tsx
-      dynamic-source-picker.tsx
-      publish-diagnostics.tsx
+    state/autosave-controller.ts
+    state/reducer.ts
+    state/types.ts
+    components/template-resource-selector.tsx
+    components/template-hierarchy.tsx
+    components/section-library.tsx
+    components/global-section-panel.tsx
+    components/dynamic-source-picker.tsx
+    components/publish-diagnostics.tsx
   storefront/
     public-storefront-api.ts
     storefront-page.tsx
     resource-loader.ts
   navigation/
+    api.ts
+    menu-editor.tsx
   content/
+    api.ts
+    resource-form.tsx
+    seo-fields.tsx
   developer-tools/
+    api.ts
+    code-editor.tsx
 
 jellyshops/src/app/admin/
   online-store/editor/page.tsx
   online-store/navigation/page.tsx
+  online-store/developer/page.tsx
   content/pages/page.tsx
   content/blogs/page.tsx
   content/metaobjects/page.tsx
@@ -181,14 +208,18 @@ jellyshops/src/app/admin/
 - Modify: `backend/src/auth/types.ts`
 - Modify: `backend/src/auth/middleware.ts`
 - Modify: `backend/src/auth/middleware.test.ts`
+- Modify: `backend/src/auth/firebase-auth-provider.ts`
+- Modify: `backend/src/auth/firebase-auth-provider.test.ts`
+- Modify: `backend/src/auth/development-auth-provider.ts`
 - Modify: `backend/src/tenants/types.ts`
 - Modify: `backend/prisma/schema.prisma`
-- Add migration under: `backend/prisma/migrations/`
+- Generate migration: `cd backend && npx prisma migrate dev --name add_developer_membership_role`
 
 **Interfaces:**
-- Produces: `StorePermission`, `ROLE_PERMISSIONS`, `hasStorePermission(principal, storeId, permission)`.
-- Produces role `DEVELOPER` while retaining existing roles.
-- Later admin/storefront routes consume `requireStorePermission(permission)`.
+- Produces `StorePermission`, `ROLE_PERMISSIONS`, `roleHasPermission(role, permission)`, and `hasStorePermission(principal, storeId, permission)`.
+- Adds role `DEVELOPER` while retaining existing roles.
+- Changes `MerchantPrincipal.merchantId: string` to `MerchantPrincipal.userId: number` so audit records can use the existing internal User ID.
+- Later routes consume `requireStorePermission(permission)`.
 
 - [ ] **Step 1: Write permission-matrix tests**
 
@@ -199,7 +230,7 @@ it("does not let DESIGNER publish or edit developer source", () => {
   expect(roleHasPermission("DESIGNER", "developer:edit")).toBe(false);
 });
 
-it("lets DEVELOPER build but not publish unless mapped explicitly", () => {
+it("lets DEVELOPER build but not publish", () => {
   expect(roleHasPermission("DEVELOPER", "developer:build")).toBe(true);
   expect(roleHasPermission("DEVELOPER", "developer:publish")).toBe(false);
 });
@@ -224,11 +255,11 @@ export const storePermissions = [
 export type StorePermission = typeof storePermissions[number];
 ```
 
-Use a fixed `Record<StoreRole, ReadonlySet<StorePermission>>`; remove `permission.endsWith(":write")` authorization logic from middleware.
+Use a fixed `Record<StoreRole, ReadonlySet<StorePermission>>`; remove `permission.endsWith(":write")` authorization logic.
 
-- [ ] **Step 4: Update auth principal/middleware tests**
+- [ ] **Step 4: Update principals/providers/middleware and rerun tests**
 
-Make `MerchantPrincipal` expose numeric `userId` plus `storeRoles`; update Firebase/development auth providers accordingly. Test denied store membership, denied permission, and allowed permission separately.
+Firebase auth returns `userId: account.id`; development auth returns its configured demo user ID. Test denied membership, denied permission, and allowed permission separately.
 
 Run: `cd backend && npm test -- src/auth/permissions.test.ts src/auth/middleware.test.ts src/auth/firebase-auth-provider.test.ts`
 Expected: PASS.
@@ -250,7 +281,8 @@ git commit -m "feat: add store capability authorization"
 - Create: `backend/src/tenants/store-context.ts`
 - Create: `backend/src/tenants/store-context.test.ts`
 - Modify: `backend/src/auth/middleware.ts`
-- Modify: `backend/src/app.ts`
+- Modify: `backend/src/storefront/routes.ts`
+- Modify: `backend/src/media/routes.ts`
 
 **Interfaces:**
 - Produces `StoreRequestContext { storeId: string; userId: number; role: StoreRole }`.
@@ -260,7 +292,7 @@ git commit -m "feat: add store capability authorization"
 - [ ] **Step 1: Write store-context tests**
 
 ```ts
-it("attaches only the requested authorized store", async () => {
+it("attaches only the requested authorized store", () => {
   const context = createStoreRequestContext(principal, "store-a", "catalog:edit");
   expect(context.storeId).toBe("store-a");
   expect(context.userId).toBe(7);
@@ -279,11 +311,11 @@ Expected: FAIL because the context helper does not exist.
 
 - [ ] **Step 3: Implement context creation and Express request typing**
 
-Add `request.storeContext?: StoreRequestContext`; middleware must derive store ID from route params, never from request body.
+Add `request.storeContext?: StoreRequestContext`; derive store ID only from route params.
 
-- [ ] **Step 4: Update one existing storefront/media route as proof of pattern**
+- [ ] **Step 4: Convert existing storefront/media routes as proof of pattern**
 
-Replace its direct `requireStoreAccess(...)` call with explicit capability middleware and use `request.storeContext!.storeId` in the handler. Do not convert all future routes in this task.
+Use `request.storeContext!.storeId` rather than reparsing body/store IDs.
 
 Run: `cd backend && npm test -- src/tenants/store-context.test.ts src/storefront/routes.test.ts src/media/routes.test.ts`
 Expected: PASS.
@@ -291,15 +323,15 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add backend/src/tenants backend/src/auth/middleware.ts backend/src/app.ts backend/src/storefront/routes.ts backend/src/media/routes.ts
+git add backend/src/tenants backend/src/auth/middleware.ts backend/src/storefront/routes.ts backend/src/media/routes.ts
 git commit -m "refactor: add tenant-safe store request context"
 ```
 
-## Task 3: Add store audit events
+## Task 3: Add append-only store audit events
 
 **Files:**
 - Modify: `backend/prisma/schema.prisma`
-- Add migration under: `backend/prisma/migrations/`
+- Generate migration: `cd backend && npx prisma migrate dev --name add_audit_events`
 - Create: `backend/src/audit/types.ts`
 - Create: `backend/src/audit/repository.ts`
 - Create: `backend/src/audit/prisma-audit-repository.ts`
@@ -308,13 +340,13 @@ git commit -m "refactor: add tenant-safe store request context"
 
 **Interfaces:**
 - Produces `AuditService.record(input)`.
-- `AuditEvent` fields: `id`, `storeId`, `actorUserId`, `action`, `subjectType`, `subjectId?`, `metadata Json?`, `createdAt`.
+- `AuditEvent`: `id`, `storeId`, `actorUserId`, `action`, `subjectType`, `subjectId?`, `metadata Json?`, `createdAt`.
 - Later publication/custom-data/developer tasks record high-risk events through this service.
 
 - [ ] **Step 1: Add a failing PGlite integration test**
 
 ```ts
-it("cannot record an audit event for a different store actor context", async () => {
+it("records a store-scoped publish audit event", async () => {
   const event = await repo.create({
     storeId,
     actorUserId: userId,
@@ -327,16 +359,16 @@ it("cannot record an audit event for a different store actor context", async () 
 });
 ```
 
-Include a FK/tenant test proving an unknown store is rejected.
+Also prove an unknown store/user FK is rejected.
 
 - [ ] **Step 2: Run integration test and verify failure**
 
 Run: `cd backend && npm run test:integration -- src/audit/prisma-audit-repository.integration.test.ts`
 Expected: FAIL because schema/repository are absent.
 
-- [ ] **Step 3: Add Prisma model and repository/service**
+- [ ] **Step 3: Add model/repository/service**
 
-Keep audit writes append-only; expose listing later only when a UI needs it. `metadata` must be JSON-safe and may not contain secrets/tokens.
+Keep audit writes append-only; reject metadata keys matching `token`, `secret`, `password`, or `authorization` in `AuditService`.
 
 - [ ] **Step 4: Generate client and rerun tests**
 
@@ -350,41 +382,43 @@ git add backend/prisma backend/src/audit
 git commit -m "feat: add store audit event foundation"
 ```
 
-## Task 4: Separate media metadata from storage implementation
+## Task 4: Separate media metadata from byte storage
 
 **Files:**
 - Create: `backend/src/media/storage.ts`
+- Create: `backend/src/media/repository.ts`
 - Modify: `backend/src/media/local-media-storage.ts`
 - Create: `backend/src/media/prisma-media-repository.ts`
-- Create: `backend/src/media/repository.ts`
+- Create: `backend/src/media/prisma-media-repository.integration.test.ts`
 - Modify: `backend/src/media/service.ts`
+- Create: `backend/src/media/service.test.ts`
 - Modify: `backend/src/media/types.ts`
 - Modify: `backend/src/media/routes.ts`
 - Modify: `backend/src/media/routes.test.ts`
 - Modify: `backend/prisma/schema.prisma`
-- Add migration under: `backend/prisma/migrations/`
+- Generate migration: `cd backend && npx prisma migrate dev --name add_media_metadata`
 
 **Interfaces:**
 - Produces `MediaStorage.put/open/remove` for bytes.
 - Produces `MediaRepository.create/get/list/delete` for metadata.
-- Merchant settings store `mediaId`, not raw filesystem path.
+- Merchant settings store `mediaId`, never filesystem/storage path.
 
-- [ ] **Step 1: Write service tests using fake storage + fake repository**
+- [ ] **Step 1: Write service tests using fake storage + repository**
 
-Test upload creates metadata, list is store-scoped, delete rejects referenced media, and storage deletion only happens after repository validation.
+Test upload creates metadata, list is store-scoped, delete rejects referenced media, and byte deletion runs only after repository validation.
 
 - [ ] **Step 2: Run focused tests and verify failure**
 
 Run: `cd backend && npm test -- src/media/service.test.ts src/media/routes.test.ts`
 Expected: FAIL until the new interfaces are wired.
 
-- [ ] **Step 3: Introduce `MediaStorage` and Prisma `Media` metadata**
+- [ ] **Step 3: Add `MediaStorage`, Prisma `Media`, and repository**
 
-Keep `LocalMediaStorage` as the development byte adapter. Add `Media` fields from the approved spec and a reference-safe deletion method.
+Keep `LocalMediaStorage` as the development byte adapter. Store stable metadata fields from the approved spec.
 
 - [ ] **Step 4: Wire app dependencies and pass tests**
 
-Run: `cd backend && npm run prisma:generate && npm test -- src/media && npm run typecheck`
+Run: `cd backend && npm run prisma:generate && npm test -- src/media && npm run test:integration -- src/media/prisma-media-repository.integration.test.ts && npm run typecheck`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
@@ -394,7 +428,7 @@ git add backend/src/media backend/src/app.ts backend/prisma
 git commit -m "refactor: separate media storage and metadata"
 ```
 
-**Milestone 1 gate:** backend tests/typecheck pass; explicit permissions are in use; one tenant context pattern is established; audit and media abstractions have database coverage.
+**Milestone 1 gate:** backend tests/typecheck pass; explicit permissions are used; tenant context is established; audit and media abstractions have database coverage.
 
 ---
 
@@ -405,27 +439,27 @@ git commit -m "refactor: separate media storage and metadata"
 **Files:**
 - Modify: `backend/prisma/schema.prisma`
 - Reference only: `backend/prisma/reference/commerce.prisma`
-- Add migration under: `backend/prisma/migrations/`
+- Generate migration: `cd backend && npx prisma migrate dev --name add_canonical_catalog`
 - Create: `backend/src/catalog/prisma-catalog-repository.integration.test.ts`
 
 **Interfaces:**
-- Adds production `Product`, `ProductVariant`, `InventoryLevel`, `Collection`, `CollectionProduct`, and `ProductMedia` records with compound store-scoped constraints.
-- Retains `CommerceProvider.NATIVE | SHOPIFY` and `externalId` fields.
+- Adds production `Product`, `ProductVariant`, `InventoryLevel`, `Collection`, `CollectionProduct`, and `ProductMedia` records with store-scoped constraints.
+- Retains `CommerceProvider.NATIVE | SHOPIFY` and provider `externalId` fields.
 
-- [ ] **Step 1: Write migration/repository integration fixtures first**
+- [ ] **Step 1: Write schema/repository integration fixtures first**
 
-Test two stores can use the same product slug while one store cannot duplicate it; cross-store product-media and collection-product references must fail.
+Prove two stores can use the same product slug while one store cannot duplicate it; cross-store product-media and collection-product references fail.
 
-- [ ] **Step 2: Run integration test and verify schema failure**
+- [ ] **Step 2: Run integration test and verify failure**
 
 Run: `cd backend && npm run test:integration -- src/catalog/prisma-catalog-repository.integration.test.ts`
 Expected: FAIL because active schema lacks catalog tables.
 
-- [ ] **Step 3: Port only storefront-required commerce models from the reference schema**
+- [ ] **Step 3: Port only storefront-required commerce models**
 
-Include store-scoped unique constraints and indexes. Do not port checkout/order/payment/discount models in this milestone.
+Do not port checkout/order/payment/discount models.
 
-- [ ] **Step 4: Generate client, verify migration, pass integration test**
+- [ ] **Step 4: Generate client, verify migration, pass test**
 
 Run: `cd backend && npm run prisma:generate && npm run test:migration && npm run test:integration -- src/catalog/prisma-catalog-repository.integration.test.ts`
 Expected: PASS.
@@ -449,14 +483,14 @@ git commit -m "feat: activate canonical catalog models"
 
 **Interfaces:**
 - Produces `CatalogReader` with `getProduct`, `listProducts`, `getVariant`, `getCollection`, `listCollections`, and `resolveResource`.
-- Produces stable Jelly resource IDs; provider IDs remain metadata.
+- Produces stable Jelly IDs; provider IDs remain metadata.
 - `DemoCatalogAdapter` implements the same reader only for dev/tests.
 
 - [ ] **Step 1: Write `CatalogReader` service tests**
 
-Test cursor/limit handling, inactive product filtering for public reads, stable IDs, variant price range, and collection membership ordering.
+Test cursor/limit handling, inactive-product filtering for public reads, stable IDs, variant price range, and collection ordering.
 
-- [ ] **Step 2: Run tests and verify failure**
+- [ ] **Step 2: Run and verify failure**
 
 Run: `cd backend && npm test -- src/catalog/service.test.ts`
 Expected: FAIL because canonical interfaces do not exist.
@@ -465,9 +499,7 @@ Expected: FAIL because canonical interfaces do not exist.
 
 Use explicit public/domain DTO mapping; never return raw Prisma rows from public methods.
 
-- [ ] **Step 4: Adapt demo provider to the same interface**
-
-Remove production dependencies on `DemoCatalog`; keep the deterministic demo products for tests/development.
+- [ ] **Step 4: Adapt demo provider and pass catalog tests**
 
 Run: `cd backend && npm test -- src/catalog && npm run typecheck`
 Expected: PASS.
@@ -496,13 +528,13 @@ git commit -m "feat: add canonical catalog service"
 - Public catalog endpoints expose sanitized active-resource DTOs only.
 - Product editor covers title, description, status, media, variants, price, basic inventory, and collection membership.
 
-- [ ] **Step 1: Read Next.js installed routing/data-fetching docs**
+- [ ] **Step 1: Read installed Next.js routing/data-fetching docs**
 
 Read the relevant files under `jellyshops/node_modules/next/dist/docs/` before touching `src/app/admin/...`.
 
-- [ ] **Step 2: Write route/client tests**
+- [ ] **Step 2: Write backend/client tests**
 
-Backend tests prove Store A cannot read/edit Store B products. Frontend client tests prove authorization header and route shape.
+Prove Store A cannot read/edit Store B products; prove frontend client sends authenticated store-scoped route.
 
 - [ ] **Step 3: Run focused tests and verify failure**
 
@@ -510,9 +542,9 @@ Run: `cd backend && npm test -- src/catalog/routes.test.ts`
 Run: `cd jellyshops && npm test -- src/features/catalog/api.test.ts`
 Expected: FAIL for missing endpoints/client.
 
-- [ ] **Step 4: Implement endpoints and minimal admin pages**
+- [ ] **Step 4: Implement endpoints and minimum admin pages**
 
-Keep UI deliberately functional; do not redesign the full admin shell. Use stable Jelly IDs in links and mutations.
+Use stable Jelly IDs in links/mutations; keep UI functional rather than redesigning the admin shell.
 
 - [ ] **Step 5: Run suites and commit**
 
@@ -526,7 +558,7 @@ git add backend/src/catalog backend/src/app.ts jellyshops/src/features/catalog j
 git commit -m "feat: add catalog admin and public APIs"
 ```
 
-## Task 8: Define provider synchronization boundary without coupling storefront code to Shopify
+## Task 8: Define provider synchronization boundary without leaking Shopify types
 
 **Files:**
 - Create: `backend/src/catalog/provider-sync.ts`
@@ -536,20 +568,20 @@ git commit -m "feat: add catalog admin and public APIs"
 
 **Interfaces:**
 - Produces `CatalogProviderSync` that upserts canonical Jelly records from provider payloads using `(storeId, externalId)`.
-- No storefront/editor code imports Shopify types.
+- No storefront/editor module imports provider-specific API types.
 
 - [ ] **Step 1: Write provider-neutral sync tests**
 
-Use a fake provider payload and assert the service maps it into canonical product/variant/media inputs while keeping provider-specific IDs in `externalId`.
+Use a fake provider payload and assert canonical product/variant/media inputs preserve provider IDs only in `externalId`.
 
-- [ ] **Step 2: Run test and verify failure**
+- [ ] **Step 2: Run and verify failure**
 
 Run: `cd backend && npm test -- src/catalog/provider-sync.test.ts`
 Expected: FAIL because the sync boundary is absent.
 
 - [ ] **Step 3: Implement interface and mapping contract**
 
-Do not implement live Shopify network integration here. The contract must be sufficient for a later webhook/sync adapter.
+Do not add live Shopify network integration here; this task defines the adapter contract and canonical upsert semantics.
 
 - [ ] **Step 4: Run catalog suite**
 
@@ -563,13 +595,13 @@ git add backend/src/catalog
 git commit -m "feat: define commerce provider sync boundary"
 ```
 
-**Milestone 2 gate:** production code reads catalog through `CatalogReader`; public/admin DTOs are tenant-safe; demo catalog is no longer the application contract.
+**Milestone 2 gate:** production reads go through `CatalogReader`; public/admin DTOs are tenant-safe; demo catalog is only a dev/test adapter.
 
 ---
 
 # Milestone 3 — Custom Data and Dynamic Source Type System
 
-## Task 9: Add shared custom-data and dynamic-binding schemas to `storefront-schema`
+## Task 9: Add shared custom-data and dynamic-binding schemas
 
 **Files:**
 - Create: `jellyshops/packages/storefront-schema/src/custom-data.ts`
@@ -579,20 +611,20 @@ git commit -m "feat: define commerce provider sync boundary"
 - Modify: `jellyshops/packages/storefront-schema/src/index.ts`
 
 **Interfaces:**
-- Produces `DynamicValueType`, `DynamicBinding`, `SettingValue<T>`, metafield/metaobject definition DTO schemas, and compatibility helpers.
+- Produces `DynamicValueType`, `DynamicBinding`, `SettingValue<T>`, custom-data schemas, and compatibility helpers.
 
 - [ ] **Step 1: Write schema tests**
 
-Test valid resource-field/metafield/metaobject bindings, reject arbitrary expression strings, reject unsupported list types, and prove `isDynamicTypeCompatible("image", "image")` while rejecting `image ← string`.
+Test valid resource/metafield/metaobject bindings, reject expression strings, reject unsupported list types, allow `image ← image`, reject `image ← string`.
 
 - [ ] **Step 2: Run root tests and verify failure**
 
 Run: `cd jellyshops && npm test -- packages/storefront-schema/src/custom-data.test.ts packages/storefront-schema/src/dynamic-sources.test.ts`
 Expected: FAIL because modules do not exist.
 
-- [ ] **Step 3: Implement Zod schemas + exported TS types**
+- [ ] **Step 3: Implement discriminated Zod unions + TS exports**
 
-Use explicit discriminated unions; do not permit unknown expression/evaluator fields.
+Do not permit unknown expression/evaluator fields.
 
 - [ ] **Step 4: Build schema package and rerun tests**
 
@@ -610,7 +642,7 @@ git commit -m "feat: add custom data and dynamic binding schemas"
 
 **Files:**
 - Modify: `backend/prisma/schema.prisma`
-- Add migration under: `backend/prisma/migrations/`
+- Generate migration: `cd backend && npx prisma migrate dev --name add_metafields`
 - Create: `backend/src/custom-data/repository.ts`
 - Create: `backend/src/custom-data/prisma-repository.ts`
 - Create: `backend/src/custom-data/service.ts`
@@ -620,11 +652,11 @@ git commit -m "feat: add custom data and dynamic binding schemas"
 **Interfaces:**
 - `namespace` + `key` immutable after create.
 - Values validate against definition type.
-- Definitions include `storefrontVisible`, `origin`, and archive state.
+- Definitions include `storefrontVisible`, `origin`, archive state.
 
 - [ ] **Step 1: Write service/integration tests**
 
-Test duplicate namespace/key rejection per `(storeId, ownerType)`, cross-store ownership rejection, type validation, immutable key behavior, and archive rather than destructive delete when usage exists.
+Test duplicate namespace/key rejection per `(storeId, ownerType)`, cross-store ownership rejection, type validation, immutable key behavior, and archive semantics.
 
 - [ ] **Step 2: Run tests and verify failure**
 
@@ -633,7 +665,7 @@ Expected: FAIL because models/services are absent.
 
 - [ ] **Step 3: Add Prisma models and service validation**
 
-Represent typed values as validated JSON behind the definition contract; keep owner identity explicit (`ownerType`, `ownerId`).
+Represent values as validated JSON behind the definition contract; retain explicit `ownerType`/`ownerId`.
 
 - [ ] **Step 4: Generate and pass tests**
 
@@ -651,7 +683,7 @@ git commit -m "feat: add typed metafields"
 
 **Files:**
 - Modify: `backend/prisma/schema.prisma`
-- Add migration under: `backend/prisma/migrations/`
+- Generate migration: `cd backend && npx prisma migrate dev --name add_metaobjects`
 - Extend: `backend/src/custom-data/repository.ts`
 - Extend: `backend/src/custom-data/prisma-repository.ts`
 - Extend: `backend/src/custom-data/service.ts`
@@ -660,11 +692,11 @@ git commit -m "feat: add typed metafields"
 **Interfaces:**
 - Definition field handles are stable; labels may change.
 - Entry values are validated JSON keyed by field handle.
-- Storefront visibility is enforced before values reach renderer/editor source picker.
+- Storefront visibility is enforced before renderer/editor source listing.
 
 - [ ] **Step 1: Write metaobject tests**
 
-Create `Brand{name:string, logo:image}`; verify invalid logo text is rejected, field-handle mutation is rejected, and a product metafield can reference a Brand entry by stable Jelly ID.
+Create `Brand{name:string, logo:image}`; reject invalid logo text, reject field-handle mutation, allow a product metafield to reference Brand by stable Jelly ID.
 
 - [ ] **Step 2: Run and verify failure**
 
@@ -673,7 +705,7 @@ Expected: FAIL.
 
 - [ ] **Step 3: Implement models/repository/service**
 
-Keep one JSON object for field definitions and one JSON object for entry values, validated through shared storefront-schema types.
+Keep definition fields and entry values as validated JSON documents.
 
 - [ ] **Step 4: Run custom-data suite/typecheck**
 
@@ -698,25 +730,25 @@ git commit -m "feat: add structured metaobjects"
 - Modify: `backend/src/app.ts`
 
 **Interfaces:**
-- Produces `listDynamicSources(context, controlType)` and `validateDynamicBinding(binding, expectedType, templateContext)`.
+- Produces `listDynamicSources(context, acceptedTypes)` and `validateDynamicBinding(binding, expectedType, templateContext)`.
 - Product-only sources are absent/invalid outside Product context.
 
 - [ ] **Step 1: Write validator tests**
 
-Test product title → text allowed; vendor → image rejected; product metafield only appears when storefront-visible; Product-specific global section binding rejected on Home context.
+Test product title → text allowed; vendor → image rejected; hidden product metafield omitted; Product-specific global-section binding rejected on Home context.
 
 - [ ] **Step 2: Run and verify failure**
 
 Run: `cd backend && npm test -- src/dynamic-sources/validator.test.ts`
 Expected: FAIL.
 
-- [ ] **Step 3: Implement registry using canonical catalog + custom-data definitions**
+- [ ] **Step 3: Implement registry from canonical catalog + custom-data definitions**
 
-Do not load live values in this registry; it describes source contracts/paths/types.
+Do not load live values; this registry describes source contracts/paths/types.
 
-- [ ] **Step 4: Add admin custom-data routes**
+- [ ] **Step 4: Add custom-data/source routes and test**
 
-Require `custom_data:edit`; list source descriptors via read permission appropriate to editor use.
+Require `custom_data:edit` for definition mutations and store read permission for source listing.
 
 Run: `cd backend && npm test -- src/dynamic-sources src/custom-data/routes.test.ts && npm run typecheck`
 Expected: PASS.
@@ -734,31 +766,32 @@ git commit -m "feat: add typed dynamic source registry"
 
 # Milestone 4 — Normalized Storefront Workspace
 
-## Task 13: Add normalized workspace/content persistence models
+## Task 13: Add normalized workspace and content persistence models
 
 **Files:**
 - Modify: `backend/prisma/schema.prisma`
-- Add migration under: `backend/prisma/migrations/`
+- Generate migration: `cd backend && npx prisma migrate dev --name add_storefront_workspace`
 - Create: `backend/src/storefront/workspace/types.ts`
 - Create: `backend/src/storefront/workspace/schema.integration.test.ts`
 
 **Interfaces:**
 - Adds `StorefrontWorkspace`, `StorefrontTemplate`, `GlobalSection`, `SectionPreset`, `NavigationMenu`, `ThemeConfiguration`, `StorefrontTemplateAssignment`.
-- Adds first-class `StorePage`, `Blog`, and `Article` content resources.
-- Every mutable storefront authoring record has integer `revision`; `StorefrontWorkspace` has integer `generation`.
+- Adds `StorePage`, `Blog`, `Article`, and `ContentStatus { DRAFT, PUBLISHED }`.
+- Mutable storefront authoring records have integer `revision`; workspace has integer `generation`.
+- `StorePage`/`Article` have `publishedAt DateTime?`; Phase 1 does not implement scheduled publishing.
 
 - [ ] **Step 1: Write schema integration tests before migration**
 
-Prove `(storeId, handle/type)` uniqueness, cross-store FK rejection, one workspace/theme configuration per store, and content resources can share handles across stores.
+Prove `(storeId, handle/type)` uniqueness, cross-store FK rejection, one workspace/theme configuration per store, and handles can repeat across stores.
 
 - [ ] **Step 2: Run and verify failure**
 
 Run: `cd backend && npm run test:integration -- src/storefront/workspace/schema.integration.test.ts`
 Expected: FAIL because models do not exist.
 
-- [ ] **Step 3: Add Prisma models and only required indexes/constraints**
+- [ ] **Step 3: Add models and only required indexes/constraints**
 
-Keep template/global/menu layouts as JSON. Do not normalize individual section/block setting fields into rows.
+Keep template/global/menu layouts as JSON; do not normalize individual block settings into rows.
 
 - [ ] **Step 4: Generate client and pass migration/integration tests**
 
@@ -785,8 +818,8 @@ git commit -m "feat: add normalized storefront workspace models"
 - Produces `ResourceRevisionConflictError(currentRevision)`.
 - Produces `WorkspaceGenerationConflictError(currentGeneration)`.
 - Produces `WorkspaceMutationCoordinator.run(storeId, operation)` that locks/creates the workspace row, executes one resource mutation inside the same transaction, and increments generation exactly once only after that mutation succeeds.
-- Resource repositories perform their own expected-revision check inside the coordinator transaction.
-- Publish later uses `assertWorkspaceGeneration(storeId, expectedGeneration, tx)` under store/workspace lock.
+- Resource repositories own expected-revision checks inside the coordinator transaction.
+- Publication later uses `assertWorkspaceGeneration(storeId, expectedGeneration, tx)` under lock.
 
 - [ ] **Step 1: Write pure revision/generation rule tests**
 
@@ -807,25 +840,25 @@ Required cases:
 
 1. successful mutation increments resource revision and workspace generation once;
 2. operation throws → resource mutation and generation bump both roll back;
-3. stale resource write returns conflict and generation does not change;
-4. editing Template A and Menu B from their correct independent revisions both succeeds even though generation changes between them;
-5. concurrent successful mutations produce monotonic unique generations rather than lost increments;
-6. `assertWorkspaceGeneration(olderGeneration)` returns current generation conflict.
+3. stale resource write conflicts and generation does not change;
+4. Template A and Menu B edits with their own correct revisions both succeed even though workspace generation changes between them;
+5. concurrent successful mutations produce monotonic unique generations with no lost increment;
+6. `assertWorkspaceGeneration(olderGeneration)` reports current generation.
 
-- [ ] **Step 3: Run focused unit/integration tests and verify failure**
+- [ ] **Step 3: Run focused tests and verify failure**
 
 Run: `cd backend && npm test -- src/storefront/workspace/concurrency.test.ts`
 Run: `cd backend && npm run test:integration -- src/storefront/workspace/prisma-mutation-coordinator.integration.test.ts`
 Expected: FAIL because concurrency component does not exist.
 
-- [ ] **Step 4: Implement coordinator and errors, then rerun tests**
+- [ ] **Step 4: Implement coordinator/errors and rerun tests**
 
-Use a short Prisma transaction and row lock for `StorefrontWorkspace`/Store as needed. The coordinator must never know template/menu business rules; its only purpose is atomic mutation + generation semantics.
+Use a short Prisma transaction and workspace/store row lock as required. The coordinator must know no template/menu business rules.
 
 Run: `cd backend && npm test -- src/storefront/workspace/concurrency.test.ts && npm run test:integration -- src/storefront/workspace/prisma-mutation-coordinator.integration.test.ts && npm run typecheck`
 Expected: PASS.
 
-- [ ] **Step 5: Commit concurrency independently before any resource repository**
+- [ ] **Step 5: Commit concurrency independently before resource repositories**
 
 ```bash
 git add backend/src/storefront/workspace/concurrency.ts backend/src/storefront/workspace/concurrency.test.ts backend/src/storefront/workspace/errors.ts backend/src/storefront/workspace/prisma-mutation-coordinator.ts backend/src/storefront/workspace/prisma-mutation-coordinator.integration.test.ts
@@ -843,21 +876,21 @@ git commit -m "feat: add storefront workspace concurrency coordinator"
 
 **Interfaces:**
 - `updateTemplate(storeId, templateId, expectedRevision, patch)` returns `{ template, generation }`.
-- Every update runs through `WorkspaceMutationCoordinator`.
-- Template types restricted to `home|product|collection|page|blog|article|search|cart`.
+- Every mutation runs through `WorkspaceMutationCoordinator`.
+- Template types: `home|product|collection|page|blog|article|search|cart`.
 
-- [ ] **Step 1: Write service + repository tests**
+- [ ] **Step 1: Write service/repository tests**
 
-Test create default handle, clone layout to create a new template, stale revision rejection, and generation returned after save.
+Test create default handle, clone layout, stale revision rejection, and returned new generation.
 
 - [ ] **Step 2: Run and verify failure**
 
 Run: `cd backend && npm test -- src/storefront/workspace/template-service.test.ts && npm run test:integration -- src/storefront/workspace/prisma-template-repository.integration.test.ts`
 Expected: FAIL.
 
-- [ ] **Step 3: Implement repository/service through coordinator**
+- [ ] **Step 3: Implement through coordinator**
 
-Do not duplicate generation-bump SQL in the template repository.
+Do not duplicate generation SQL in the template repository.
 
 - [ ] **Step 4: Run tests/typecheck**
 
@@ -874,20 +907,33 @@ git commit -m "feat: add versioned storefront templates"
 ## Task 16: Add global sections, presets, theme settings, menus, and assignments
 
 **Files:**
-- Create repository/service files under: `backend/src/storefront/workspace/repositories/`
+- Create: `backend/src/storefront/workspace/repositories/global-section-repository.ts`
+- Create: `backend/src/storefront/workspace/repositories/prisma-global-section-repository.ts`
+- Create: `backend/src/storefront/workspace/repositories/preset-repository.ts`
+- Create: `backend/src/storefront/workspace/repositories/prisma-preset-repository.ts`
+- Create: `backend/src/storefront/workspace/repositories/menu-repository.ts`
+- Create: `backend/src/storefront/workspace/repositories/prisma-menu-repository.ts`
+- Create: `backend/src/storefront/workspace/repositories/theme-repository.ts`
+- Create: `backend/src/storefront/workspace/repositories/prisma-theme-repository.ts`
+- Create: `backend/src/storefront/workspace/repositories/assignment-repository.ts`
+- Create: `backend/src/storefront/workspace/repositories/prisma-assignment-repository.ts`
+- Create: `backend/src/storefront/workspace/global-section-service.ts`
+- Create: `backend/src/storefront/workspace/menu-service.ts`
+- Create: `backend/src/storefront/workspace/theme-service.ts`
+- Create: `backend/src/storefront/workspace/assignment-service.ts`
 - Create: `backend/src/storefront/workspace/global-section-service.test.ts`
 - Create: `backend/src/storefront/workspace/menu-service.test.ts`
 - Create: `backend/src/storefront/workspace/assignment-service.test.ts`
 
 **Interfaces:**
-- Global section updates are versioned/generation-bumped.
-- Preset insert copies JSON; global placement stores stable global-section ID.
-- Menu items store stable Jelly resource IDs for internal targets.
-- Assignment service enforces resource belongs to same store and compatible template type.
+- Global-section updates are versioned/generation-bumped.
+- Preset insertion copies JSON; global placement stores stable global-section ID.
+- Menu internal targets store stable Jelly resource IDs.
+- Assignment service enforces same-store ownership and template-type compatibility.
 
 - [ ] **Step 1: Write focused behavior tests**
 
-Test preset copy divergence, global-section shared reference, nested menu ordering, stable resource IDs, invalid cross-store target, and Product assigned to Page template rejection.
+Test preset copy divergence, global shared reference, nested menu ordering, stable IDs, cross-store target rejection, and Product→Page-template rejection.
 
 - [ ] **Step 2: Run focused tests and verify failure**
 
@@ -896,7 +942,7 @@ Expected: FAIL.
 
 - [ ] **Step 3: Implement focused repositories/services**
 
-All workspace mutations use Task 14 coordinator. Keep assignment/menu validation out of concurrency module.
+All workspace mutations use Task 14 coordinator; assignment/menu validation stays outside concurrency code.
 
 - [ ] **Step 4: Run workspace suite**
 
@@ -923,12 +969,13 @@ git commit -m "feat: add reusable storefront workspace resources"
 
 **Interfaces:**
 - Page/article content save/publish is content lifecycle, not storefront layout publication.
-- Changing content fields does not bump workspace generation.
-- Changing template assignment goes through storefront assignment service and does bump generation.
+- Phase 1 status is only `DRAFT` or `PUBLISHED`; publishing sets `publishedAt = now()`, unpublishing returns to `DRAFT` and clears `publishedAt`.
+- Content-field changes do not bump workspace generation.
+- Template assignment goes through storefront assignment service and does bump generation.
 
 - [ ] **Step 1: Write lifecycle tests**
 
-Test page draft → published, article draft → scheduled/published timestamp behavior chosen by current schema, SEO fields, and prove content edit leaves workspace generation unchanged.
+Test Page DRAFT→PUBLISHED, Article DRAFT→PUBLISHED, unpublish clears `publishedAt`, SEO fields persist, and content edit leaves workspace generation unchanged.
 
 - [ ] **Step 2: Run and verify failure**
 
@@ -960,22 +1007,22 @@ git commit -m "feat: add page and blog content resources"
 - Modify: `backend/src/app.ts`
 
 **Interfaces:**
-- `GET /api/stores/:storeId/storefront/workspace`
+- `GET /api/stores/:storeId/storefront/workspace`.
 - CRUD routes for templates/global-sections/menus/theme-settings/assignments with `expectedRevision` where mutable.
-- Legacy `/draft` remains temporarily read-compatible for V3 migration only; new editor must not depend on it after Milestone 7.
+- Legacy `/draft` remains read-compatible for V3 migration only; new editor stops writing it in Milestone 7.
 
 - [ ] **Step 1: Write route contract tests**
 
-Test capability checks, conflict response includes current revision, successful mutation response includes new generation, and Store A cannot address Store B resources.
+Test capability checks, conflict response includes current revision, successful mutation includes new generation, Store A cannot address Store B resources.
 
 - [ ] **Step 2: Run and verify failure**
 
 Run: `cd backend && npm test -- src/storefront/workspace/routes.test.ts`
 Expected: FAIL.
 
-- [ ] **Step 3: Implement router and app wiring**
+- [ ] **Step 3: Implement router/app wiring**
 
-Map `ResourceRevisionConflictError` to HTTP 409 with `currentRevision`; workspace generation conflicts use separate code/currentGeneration.
+Map `ResourceRevisionConflictError` to HTTP 409 with `currentRevision`; map generation conflicts to separate code/currentGeneration.
 
 - [ ] **Step 4: Run storefront/workspace suites**
 
@@ -989,13 +1036,13 @@ git add backend/src/storefront backend/src/app.ts
 git commit -m "feat: expose normalized storefront workspace API"
 ```
 
-**Milestone 4 gate:** concurrency tests from Task 14 are green independently; every storefront workspace repository uses the coordinator; content-only edits do not bump generation; unrelated resource edits do not conflict through a single global revision.
+**Milestone 4 gate:** Task 14 concurrency tests are green independently; every workspace repository uses the coordinator; content-only edits do not bump generation; unrelated resource edits do not conflict through a single global revision.
 
 ---
 
 # Milestone 5 — Compiler V4 and Safe Publishing
 
-## Task 19: Define runtime V4 schema and structured compiler diagnostics
+## Task 19: Define runtime V4 schema and structured diagnostics
 
 **Files:**
 - Create: `jellyshops/packages/storefront-schema/src/runtime-v4.ts`
@@ -1006,18 +1053,18 @@ git commit -m "feat: expose normalized storefront workspace API"
 **Interfaces:**
 - Produces `RuntimeStorefrontSnapshotV4`.
 - Produces `CompilationDiagnostic { severity, code, message, location }`.
-- Snapshot stores binding instructions and artifact/registry identity, not live product/custom-data values.
+- Snapshot stores binding instructions/artifact identity, not live product/custom-data values.
 
 - [ ] **Step 1: Write runtime-schema tests**
 
-Assert snapshot accepts templates/global sections/menus/assignments/bindings and rejects embedded live inventory or unsupported schema version.
+Accept templates/global sections/menus/assignments/bindings; reject embedded live inventory and unsupported version.
 
 - [ ] **Step 2: Run and verify failure**
 
 Run: `cd jellyshops && npm test -- packages/storefront-schema/src/runtime-v4.test.ts`
 Expected: FAIL.
 
-- [ ] **Step 3: Implement schema and diagnostic types**
+- [ ] **Step 3: Implement schema/diagnostic types**
 
 Keep V2/V3 exports/migrations intact.
 
@@ -1038,20 +1085,25 @@ git commit -m "feat: define storefront runtime v4 schema"
 **Files:**
 - Create: `backend/src/storefront/compiler/types.ts`
 - Create: `backend/src/storefront/compiler/input-loader.ts`
+- Create: `backend/src/storefront/compiler/input-loader.test.ts`
 - Create: `backend/src/storefront/compiler/validate-registry.ts`
+- Create: `backend/src/storefront/compiler/validate-registry.test.ts`
 - Create: `backend/src/storefront/compiler/validate-references.ts`
+- Create: `backend/src/storefront/compiler/validate-references.test.ts`
 - Create: `backend/src/storefront/compiler/validate-bindings.ts`
+- Create: `backend/src/storefront/compiler/validate-bindings.test.ts`
 - Create: `backend/src/storefront/compiler/validate-context.ts`
-- Create tests beside each validator
-- Modify: `backend/package.json` to depend on/build `@jelly/storefront-registry` if required by compiler contracts
+- Create: `backend/src/storefront/compiler/validate-context.test.ts`
+- Modify: `backend/package.json`
+- Modify: `backend/package-lock.json`
 
 **Interfaces:**
 - `loadCompilationInput(storeId, generation)` returns one consistent authoring view.
-- Validators return diagnostics; expected merchant errors are not thrown as generic 500s.
+- Validators return diagnostics rather than throwing generic errors for merchant-correctable problems.
 
 - [ ] **Step 1: Write failing validator tests**
 
-Required cases: unknown section, deleted menu, missing global section, dynamic type mismatch, product-only binding on Home, invalid assignment.
+Cover unknown section, deleted menu, missing global section, binding type mismatch, product binding on Home, invalid assignment.
 
 - [ ] **Step 2: Run and verify failure**
 
@@ -1060,7 +1112,7 @@ Expected: FAIL.
 
 - [ ] **Step 3: Implement small validator modules**
 
-Keep each validator pure where practical. Do not create one large `compiler.ts` containing all rules.
+If backend needs registry contracts, add `@jelly/storefront-registry` as a local file dependency and extend backend build to build schema/registry first. Do not put all rules into one compiler function.
 
 - [ ] **Step 4: Run compiler tests/typecheck**
 
@@ -1086,20 +1138,20 @@ git commit -m "feat: add storefront compiler validation stages"
 
 **Interfaces:**
 - `compileStorefront(input): CompilationResult` returns `{ ok, snapshot?, dependencies, diagnostics }`.
-- Dependency edges include placement, binding, navigation, assignment, media, and extension reasons.
+- Dependency edges include placement, binding, navigation, assignment, media, extension.
 
 - [ ] **Step 1: Write graph/snapshot tests**
 
-Compile a Product template referencing a global banner, main menu, product metafield, and media; assert all edges exist and snapshot stores binding path rather than current value.
+Compile Product template referencing global banner, main menu, product metafield, media; assert all edges and binding path rather than current value.
 
 - [ ] **Step 2: Run and verify failure**
 
 Run: `cd backend && npm test -- src/storefront/compiler/dependency-graph.test.ts src/storefront/compiler/snapshot.test.ts src/storefront/compiler/compiler.test.ts`
 Expected: FAIL.
 
-- [ ] **Step 3: Implement graph builder, assembler, orchestration**
+- [ ] **Step 3: Implement graph, assembler, orchestration**
 
-Parse final output with `RuntimeStorefrontSnapshotV4` before returning success.
+Parse final output with `RuntimeStorefrontSnapshotV4` before success.
 
 - [ ] **Step 4: Run compiler suite**
 
@@ -1122,20 +1174,20 @@ git commit -m "feat: compile storefront dependency graph and runtime snapshot"
 
 **Interfaces:**
 - `POST /storefront/validate` performs full validation for expected generation.
-- `POST /storefront/preview/compile` may return snapshot plus blocking/nonblocking diagnostics for selected template/resource.
+- `POST /storefront/preview/compile` returns selected preview snapshot plus diagnostics without publishing.
 
 - [ ] **Step 1: Write route tests**
 
-Test warnings do not mark compile invalid; errors do; stale requested generation is reported; diagnostics include navigation location fields.
+Test warning vs error semantics, stale generation, and diagnostic location fields.
 
 - [ ] **Step 2: Run and verify failure**
 
 Run: `cd backend && npm test -- src/storefront/compiler/routes.test.ts`
 Expected: FAIL.
 
-- [ ] **Step 3: Implement routes with `storefront:view` permission**
+- [ ] **Step 3: Implement routes with `storefront:view`**
 
-Preview endpoint must not publish or mutate `currentPublicationId`.
+Preview endpoint must not mutate `currentPublicationId`.
 
 - [ ] **Step 4: Run route/compiler suites**
 
@@ -1158,16 +1210,16 @@ git commit -m "feat: add storefront validation and preview compilation"
 - Create: `backend/src/storefront/publication/service.test.ts`
 - Create: `backend/src/storefront/publication/prisma-repository.integration.test.ts`
 - Modify: `backend/prisma/schema.prisma`
-- Add migration under: `backend/prisma/migrations/`
+- Generate migration: `cd backend && npx prisma migrate dev --name compile_storefront_publications`
 - Modify: `backend/src/storefront/routes.ts`
 
 **Interfaces:**
-- Publication fields include `sourceGeneration`, `schemaVersion`, `compilerVersion`, `document`, `dependencyManifest`, optional `themeArtifactId`.
-- `publish(storeId, expectedGeneration, idempotencyKey, actorUserId)` compiles first, then performs short locked generation check + publication insert + pointer swap.
+- Publication fields: `sourceGeneration`, `schemaVersion`, `compilerVersion`, `document`, `dependencyManifest`, optional `themeArtifactId`, `idempotencyKey` unique per store.
+- `publish(storeId, expectedGeneration, idempotencyKey, actorUserId)` compiles first, then performs short locked generation check + insert + pointer swap.
 
 - [ ] **Step 1: Write publisher unit/integration tests**
 
-Required cases: compile error leaves pointer unchanged; generation changes after compile → `WORKSPACE_CHANGED`; successful publish creates immutable snapshot and switches pointer in one transaction; duplicate idempotency key returns same publication; audit event recorded.
+Cover compile error leaves pointer unchanged; generation changes after compile → `WORKSPACE_CHANGED`; success atomically switches; duplicate idempotency key returns same publication; audit event recorded.
 
 - [ ] **Step 2: Run and verify failure**
 
@@ -1176,7 +1228,7 @@ Expected: FAIL.
 
 - [ ] **Step 3: Implement compile-before-transaction publisher**
 
-Do not hold DB row locks while compiler executes. Recheck generation under lock immediately before publication creation.
+Do not hold DB locks while compiler executes. Recheck generation under lock immediately before insert/swap.
 
 - [ ] **Step 4: Run publication/storefront suites**
 
@@ -1196,16 +1248,16 @@ git commit -m "feat: publish compiled immutable storefront snapshots"
 - Create: `backend/src/storefront/migration/import-v3.ts`
 - Create: `backend/src/storefront/migration/import-v3.test.ts`
 - Create: `backend/scripts/migrate-storefront-v3-workspaces.mjs`
-- Extend: `jellyshops/packages/storefront-schema/src/migrations.ts`
-- Extend: `jellyshops/packages/storefront-schema/src/migrations.test.ts`
+- Modify: `jellyshops/packages/storefront-schema/src/migrations.ts`
+- Modify: `jellyshops/packages/storefront-schema/src/migrations.test.ts`
 
 **Interfaces:**
 - Import V3 draft/document into normalized resources without changing `currentPublicationId`.
-- Import creates initial workspace generation and can compile V4 preview diagnostics.
+- Import creates initial workspace generation and returns V4 preview diagnostics.
 
 - [ ] **Step 1: Write fixture-based migration tests**
 
-Cover Home, product/collection defaults, custom page, header/footer, theme settings, and media references. Assert existing current V3 publication ID remains unchanged after import.
+Cover Home, product/collection defaults, custom page, header/footer, theme settings, media references; assert current V3 publication ID unchanged after import.
 
 - [ ] **Step 2: Run and verify failure**
 
@@ -1214,7 +1266,7 @@ Expected: FAIL.
 
 - [ ] **Step 3: Implement importer + dry-run script**
 
-Script prints diagnostics/result counts and only writes normalized draft resources; publishing remains explicit through normal publish endpoint.
+Script writes normalized draft resources and prints counts/diagnostics only; publishing stays explicit.
 
 - [ ] **Step 4: Run migration/schema tests**
 
@@ -1225,11 +1277,11 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add backend/src/storefront/migration backend/scripts jellyshops/packages/storefront-schema/src/migrations*
+git add backend/src/storefront/migration backend/scripts jellyshops/packages/storefront-schema/src/migrations.ts jellyshops/packages/storefront-schema/src/migrations.test.ts
 git commit -m "feat: add safe storefront v3 workspace importer"
 ```
 
-**Milestone 5 gate:** full compile produces a validated V4 snapshot; failed or stale compile never changes live publication; V3 import is non-destructive.
+**Milestone 5 gate:** full compile produces validated V4 snapshot; failed/stale compile never changes live publication; V3 import is non-destructive.
 
 ---
 
@@ -1247,11 +1299,11 @@ git commit -m "feat: add safe storefront v3 workspace importer"
 **Interfaces:**
 - Resolve runtime binding values from current public catalog/content/custom data.
 - Cache publication snapshot by immutable publication ID, never mutable store ID alone.
-- Fallback order: dynamic value → binding fallback → control default → null.
+- Fallback: dynamic value → binding fallback → control default → null.
 
 - [ ] **Step 1: Write resolver/cache tests**
 
-Publish binding `product.title`, then change product title/metafield value and assert resolver returns new values without publication change. Test missing value fallback order and no storefront-visible access to private metafield.
+Publish `product.title` binding, change product title/metafield value, assert new live values without publication change; test fallback and hidden metafield denial.
 
 - [ ] **Step 2: Run and verify failure**
 
@@ -1260,7 +1312,7 @@ Expected: FAIL.
 
 - [ ] **Step 3: Implement resolver/runtime service**
 
-Use sanitized public resource DTOs. Do not give renderer repository/provider objects.
+Use sanitized public DTOs; renderer never receives repositories/provider clients.
 
 - [ ] **Step 4: Run runtime tests**
 
@@ -1285,21 +1337,21 @@ git commit -m "feat: resolve live storefront dynamic values"
 
 **Interfaces:**
 - Registry exposes render definition lookup.
-- `SectionRenderer` looks up the definition rather than branching on each section type.
-- Existing editor-selection data attributes remain supported.
+- `SectionRenderer` looks up definition rather than branching by section type.
+- Existing editor-selection metadata stays supported.
 
 - [ ] **Step 1: Write registry-renderer test**
 
-Register a test section definition and assert it renders without editing `section-renderer.tsx`; unknown section shows editor/preview warning and renders null in published mode.
+Register test section; assert rendering works without central renderer edits; unknown section warns in editor/preview and renders null published.
 
 - [ ] **Step 2: Run and verify failure**
 
 Run: `cd jellyshops && npm test -- packages/storefront-renderer/src/registry-renderer.test.tsx`
-Expected: FAIL while renderer remains hard-coded.
+Expected: FAIL while dispatch is hard-coded.
 
 - [ ] **Step 3: Implement generic registry dispatch**
 
-Migrate existing built-in components into registry render definitions while preserving their behavior.
+Migrate existing built-in components into registry render definitions without changing merchant defaults.
 
 - [ ] **Step 4: Run registry/renderer suites**
 
@@ -1324,16 +1376,16 @@ git commit -m "refactor: render storefront sections from registry"
 - Create: `jellyshops/src/features/storefront/resource-loader.test.ts`
 
 **Interfaces:**
-- Public page resolves current publication, route resource, assignment/default template, current live public data, then renderer context.
+- Resolve current publication, route resource, assignment/default template, current live public data, renderer context.
 - Missing ordinary merchant data degrades safely.
 
 - [ ] **Step 1: Read relevant installed Next.js docs**
 
-Read routing/server/data-fetching docs required for the concrete route files used by the storefront.
+Read routing/server/data-fetching docs required for the concrete storefront route files.
 
 - [ ] **Step 2: Write loader tests**
 
-Test product handle resolves stable product ID then assigned template; changed handle does not break ID-based menu/assignment; archived featured resource produces safe empty state.
+Test handle→stable ID→assigned template; handle rename does not break ID-based menu/assignment; archived featured resource yields safe empty state.
 
 - [ ] **Step 3: Run and verify failure**
 
@@ -1342,7 +1394,7 @@ Expected: FAIL until loader/runtime client is updated.
 
 - [ ] **Step 4: Implement loader/page integration**
 
-Keep public DTOs explicit; do not expose admin-shaped records.
+Keep public DTOs explicit; never expose admin-shaped records.
 
 - [ ] **Step 5: Run frontend suite and commit**
 
@@ -1355,7 +1407,7 @@ git add jellyshops/src/features/storefront jellyshops/packages/storefront-render
 git commit -m "feat: render public storefront from compiled publications"
 ```
 
-**Milestone 6 gate:** published layout is immutable, live data resolves independently, and the renderer has no central per-section `if/else` dispatch.
+**Milestone 6 gate:** published layout is immutable, live data resolves independently, renderer has no central per-section dispatch.
 
 ---
 
@@ -1367,28 +1419,32 @@ git commit -m "feat: render public storefront from compiled publications"
 - Modify: `jellyshops/src/features/store-editor/api/types.ts`
 - Modify: `jellyshops/src/features/store-editor/api/client.ts`
 - Modify: `jellyshops/src/features/store-editor/api/client.test.ts`
-- Modify: `jellyshops/src/features/store-editor/state/*`
+- Modify: `jellyshops/src/features/store-editor/state/types.ts`
+- Modify: `jellyshops/src/features/store-editor/state/reducer.ts`
+- Modify: `jellyshops/src/features/store-editor/state/reducer.test.ts`
+- Modify: `jellyshops/src/features/store-editor/state/autosave-controller.ts`
+- Modify: `jellyshops/src/features/store-editor/state/autosave-controller.test.ts`
 - Modify: `jellyshops/src/features/store-editor/editor-store.ts`
 - Modify: `jellyshops/src/features/store-editor/editor-store.test.ts`
 
 **Interfaces:**
-- Client methods: `loadWorkspace`, template/global/menu/theme resource CRUD, `validate`, `compilePreview`, `publish(expectedGeneration, idempotencyKey)`.
+- Client methods: `loadWorkspace`, resource CRUD, `validate`, `compilePreview`, `publish(expectedGeneration, idempotencyKey)`.
 - State tracks per-resource revisions plus workspace generation.
 
 - [ ] **Step 1: Write API/state tests**
 
-Test saving Template revision 3 sends only that template mutation, receives revision 4 + generation 22, and unrelated Menu state is not marked conflicted.
+Saving Template revision 3 sends only that resource, receives revision 4 + generation 22, unrelated Menu state is not conflicted.
 
 - [ ] **Step 2: Run and verify failure**
 
-Run: `cd jellyshops && npm test -- src/features/store-editor/api src/features/store-editor/editor-store.test.ts`
+Run: `cd jellyshops && npm test -- src/features/store-editor/api src/features/store-editor/editor-store.test.ts src/features/store-editor/state`
 Expected: FAIL.
 
 - [ ] **Step 3: Implement resource-oriented client/state adapter**
 
-Keep an adapter for legacy V3 store loading during migration; new editor writes only normalized APIs.
+Keep V3 read adapter during migration; new editor writes normalized APIs only.
 
-- [ ] **Step 4: Run focused frontend tests**
+- [ ] **Step 4: Run focused tests**
 
 Run: `cd jellyshops && npm test -- src/features/store-editor && npm run typecheck`
 Expected: PASS.
@@ -1400,11 +1456,11 @@ git add jellyshops/src/features/store-editor
 git commit -m "refactor: move editor state to storefront workspace resources"
 ```
 
-## Task 29: Add Online Store route, template selector, preview-resource selector, and template hierarchy
+## Task 29: Add Online Store route, template selector, preview-resource selector, hierarchy
 
 **Files:**
 - Create: `jellyshops/src/app/admin/online-store/editor/page.tsx`
-- Modify: `jellyshops/src/app/admin/store-design/page.tsx` to redirect
+- Modify: `jellyshops/src/app/admin/store-design/page.tsx`
 - Create: `jellyshops/src/features/store-editor/components/template-resource-selector.tsx`
 - Create: `jellyshops/src/features/store-editor/components/template-resource-selector.test.tsx`
 - Create: `jellyshops/src/features/store-editor/components/template-hierarchy.tsx`
@@ -1412,8 +1468,8 @@ git commit -m "refactor: move editor state to storefront workspace resources"
 - Refactor: `jellyshops/src/features/store-editor/components/page-hierarchy.tsx`
 
 **Interfaces:**
-- Layout selector and preview-resource selector are separate state concepts.
-- `page-hierarchy.tsx` stops owning custom-page creation and whole-document template replacement.
+- Layout selector and preview-resource selector are separate.
+- `page-hierarchy.tsx` stops owning page creation/whole-document replacement.
 
 - [ ] **Step 1: Read installed Next.js route docs**
 
@@ -1421,21 +1477,24 @@ Do this before creating `/admin/online-store/editor`.
 
 - [ ] **Step 2: Write component tests**
 
-Test selecting `product.featured` does not change preview product; changing preview product does not mutate template; hierarchy actions target active template.
+Selecting `product.featured` does not change preview product; changing preview product does not mutate template; hierarchy targets active template.
 
 - [ ] **Step 3: Run and verify failure**
 
 Run: `cd jellyshops && npm test -- src/features/store-editor/components/template-resource-selector.test.tsx src/features/store-editor/components/template-hierarchy.test.tsx`
 Expected: FAIL.
 
-- [ ] **Step 4: Implement route/components and compatibility redirect**
+- [ ] **Step 4: Implement route/components/compatibility redirect**
 
-Retain current toolbar/preview/inspector where their APIs still fit.
+Retain current toolbar/preview/inspector where APIs fit.
 
 - [ ] **Step 5: Run tests/typecheck/lint and commit**
 
 ```bash
-cd jellyshops && npm test -- src/features/store-editor && npm run typecheck && npm run lint
+cd jellyshops
+npm test -- src/features/store-editor
+npm run typecheck
+npm run lint
 git add src/app/admin/online-store src/app/admin/store-design src/features/store-editor
 git commit -m "feat: add template-based online store editor"
 ```
@@ -1444,29 +1503,31 @@ git commit -m "feat: add template-based online store editor"
 
 **Files:**
 - Create: `jellyshops/src/features/store-editor/components/section-library.tsx`
+- Create: `jellyshops/src/features/store-editor/components/section-library.test.tsx`
 - Create: `jellyshops/src/features/store-editor/components/global-section-panel.tsx`
+- Create: `jellyshops/src/features/store-editor/components/global-section-panel.test.tsx`
 - Create: `jellyshops/src/features/store-editor/components/dynamic-source-picker.tsx`
-- Create tests for each
+- Create: `jellyshops/src/features/store-editor/components/dynamic-source-picker.test.tsx`
 - Modify: `jellyshops/src/features/store-editor/components/inspector/inspector.tsx`
 - Modify: `jellyshops/src/features/store-editor/components/inspector/setting-groups.tsx`
 
 **Interfaces:**
 - Preset insert copies section.
-- Global section insert creates reference.
-- Dynamic-source button appears only for controls declaring compatible types.
+- Global insert creates reference.
+- Dynamic-source button appears only for compatible controls.
 
 - [ ] **Step 1: Write interaction tests**
 
-Test “Save as preset” copy semantics, “Make global” confirmation, “Detach” local copy, and incompatible dynamic source omitted from picker.
+Test preset copy semantics, Make Global confirmation, Detach local copy, incompatible source omitted.
 
 - [ ] **Step 2: Run and verify failure**
 
 Run: `cd jellyshops && npm test -- src/features/store-editor/components/section-library.test.tsx src/features/store-editor/components/global-section-panel.test.tsx src/features/store-editor/components/dynamic-source-picker.test.tsx`
 Expected: FAIL.
 
-- [ ] **Step 3: Implement components using registry metadata**
+- [ ] **Step 3: Implement via registry metadata**
 
-Do not hard-code metafield names or section-specific dynamic UI into inspector.
+Do not hard-code metafield names or section-specific source UI.
 
 - [ ] **Step 4: Run editor tests**
 
@@ -1484,37 +1545,48 @@ git commit -m "feat: add global sections and dynamic sources to editor"
 
 **Files:**
 - Create: `jellyshops/src/app/admin/online-store/navigation/page.tsx`
-- Create: `jellyshops/src/features/navigation/*`
+- Create: `jellyshops/src/features/navigation/api.ts`
+- Create: `jellyshops/src/features/navigation/api.test.ts`
+- Create: `jellyshops/src/features/navigation/menu-editor.tsx`
+- Create: `jellyshops/src/features/navigation/menu-editor.test.tsx`
 - Create: `jellyshops/src/app/admin/content/pages/page.tsx`
 - Create: `jellyshops/src/app/admin/content/blogs/page.tsx`
 - Create: `jellyshops/src/app/admin/content/metaobjects/page.tsx`
 - Create: `jellyshops/src/app/admin/settings/custom-data/page.tsx`
-- Create: `jellyshops/src/features/content/*`
+- Create: `jellyshops/src/features/content/api.ts`
+- Create: `jellyshops/src/features/content/api.test.ts`
+- Create: `jellyshops/src/features/content/resource-form.tsx`
+- Create: `jellyshops/src/features/content/resource-form.test.tsx`
+- Create: `jellyshops/src/features/content/seo-fields.tsx`
+- Create: `jellyshops/src/features/content/seo-fields.test.tsx`
 
 **Interfaces:**
 - Menu editor supports nested internal/external/anchor targets.
-- Resource forms expose SEO title, description, handle, social image, index visibility, advanced canonical override.
-- Content editor exposes template assignment separately from content values.
+- Resource forms expose SEO title, description, handle, social image, index visibility, canonical override.
+- Content editor exposes template assignment separately.
 
-- [ ] **Step 1: Read installed Next.js docs for each new route pattern**
+- [ ] **Step 1: Read installed Next.js docs for new route patterns**
 
-- [ ] **Step 2: Write navigation/content feature tests**
+- [ ] **Step 2: Write navigation/content tests**
 
-Test nested reorder serialization, internal target uses resource ID rather than URL, SEO form validation, and “Customize template” navigation preserves preview resource.
+Test nested reorder serialization, internal target uses resource ID, SEO validation, Customize Template preserves preview resource.
 
 - [ ] **Step 3: Run and verify failure**
 
 Run: `cd jellyshops && npm test -- src/features/navigation src/features/content`
 Expected: FAIL.
 
-- [ ] **Step 4: Implement pages/features against existing backend APIs**
+- [ ] **Step 4: Implement pages/features against backend APIs**
 
-Keep menu edits in workspace lifecycle; page/article content publish uses content lifecycle.
+Menu edits use workspace lifecycle; Page/Article content uses content lifecycle.
 
 - [ ] **Step 5: Run tests/typecheck/lint and commit**
 
 ```bash
-cd jellyshops && npm test -- src/features/navigation src/features/content && npm run typecheck && npm run lint
+cd jellyshops
+npm test -- src/features/navigation src/features/content
+npm run typecheck
+npm run lint
 git add src/app/admin/online-store/navigation src/app/admin/content src/app/admin/settings/custom-data src/features/navigation src/features/content
 git commit -m "feat: add navigation content and seo management"
 ```
@@ -1527,45 +1599,45 @@ git commit -m "feat: add navigation content and seo management"
 - Modify: `jellyshops/src/features/store-editor/components/editor-toolbar.tsx`
 - Modify: `jellyshops/src/features/store-editor/components/preview-canvas.tsx`
 - Modify: `jellyshops/src/features/store-editor/components/editor-shell.tsx`
-- Add Playwright coverage under existing e2e structure
+- Modify: `jellyshops/e2e/store-editor.spec.ts`
 
 **Interfaces:**
-- Diagnostics can navigate to template/section/block/field.
-- Publish sends current workspace generation + idempotency key.
-- `WORKSPACE_CHANGED` refreshes generation/diagnostics without silently overwriting edits.
+- Diagnostics navigate to template/section/block/field.
+- Publish sends workspace generation + idempotency key.
+- `WORKSPACE_CHANGED` refreshes generation/diagnostics without overwriting edits.
 
-- [ ] **Step 1: Write diagnostic/publish component tests**
+- [ ] **Step 1: Write diagnostic/publish tests**
 
-Test warning vs error display, “Open setting” selection, stale-generation conflict UI, and public publication remains unchanged after failed publish.
+Test warnings vs errors, Open Setting, stale-generation UI, public publication unchanged after failed publish.
 
 - [ ] **Step 2: Run and verify failure**
 
 Run: `cd jellyshops && npm test -- src/features/store-editor/components/publish-diagnostics.test.tsx`
 Expected: FAIL.
 
-- [ ] **Step 3: Implement tolerant preview + strict publish flow**
+- [ ] **Step 3: Implement tolerant preview + strict publish**
 
-Preview may show section-level error placeholder; Publish blocks on compiler errors.
+Preview may render section error placeholder; Publish blocks on errors.
 
-- [ ] **Step 4: Add/execute editor end-to-end scenario**
+- [ ] **Step 4: Extend editor Playwright scenario and execute**
 
 Run: `cd jellyshops && npm run test:e2e`
-Expected: editor can modify a template, preview it, see diagnostics, and publish successfully.
+Expected: template edit → preview → diagnostics → successful publish works.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add jellyshops/src/features/store-editor jellyshops/tests jellyshops/e2e 2>/dev/null || true
+git add jellyshops/src/features/store-editor jellyshops/e2e/store-editor.spec.ts
 git commit -m "feat: integrate compiler diagnostics into store editor"
 ```
 
-**Milestone 7 gate:** editor no longer saves a giant document; template/resource concepts are separate; diagnostics are navigable; existing toolbar/preview strengths remain.
+**Milestone 7 gate:** editor no longer saves giant document; template/resource concepts are separate; diagnostics are navigable; existing toolbar/preview strengths remain.
 
 ---
 
 # Milestone 8 — Theme SDK and Developer Artifacts
 
-## Task 33: Create `@jelly/storefront-sdk` with typed control/section/block builders
+## Task 33: Create `@jelly/storefront-sdk` typed builders
 
 **Files:**
 - Create: `jellyshops/packages/storefront-sdk/package.json`
@@ -1573,29 +1645,31 @@ git commit -m "feat: integrate compiler diagnostics into store editor"
 - Create: `jellyshops/packages/storefront-sdk/tsconfig.build.json`
 - Create: `jellyshops/packages/storefront-sdk/src/index.ts`
 - Create: `jellyshops/packages/storefront-sdk/src/controls.ts`
+- Create: `jellyshops/packages/storefront-sdk/src/controls.test.ts`
 - Create: `jellyshops/packages/storefront-sdk/src/section.ts`
+- Create: `jellyshops/packages/storefront-sdk/src/section.test.ts`
 - Create: `jellyshops/packages/storefront-sdk/src/block.ts`
 - Create: `jellyshops/packages/storefront-sdk/src/manifest.ts`
-- Create tests under the same package
+- Create: `jellyshops/packages/storefront-sdk/src/manifest.test.ts`
 
 **Interfaces:**
 - `defineSection`, `defineBlock`, control builders, API version, capability/manifest types.
-- Control builders produce editor metadata + runtime validation metadata from one definition.
+- Builders produce editor metadata + runtime validation metadata from one definition.
 
-- [ ] **Step 1: Write SDK type/runtime tests**
+- [ ] **Step 1: Write SDK tests**
 
-Define a test `brand-story` section; assert heading accepts string dynamic sources, image accepts image dynamic sources, and invalid defaults fail validation.
+Define `brand-story`; heading accepts string source, image accepts image source, invalid defaults fail validation.
 
 - [ ] **Step 2: Run and verify failure**
 
 Run: `cd jellyshops && npm test -- packages/storefront-sdk`
 Expected: FAIL because package does not exist.
 
-- [ ] **Step 3: Implement package with explicit `apiVersion: "2026-01"` contract**
+- [ ] **Step 3: Implement package with `apiVersion: "2026-01"`**
 
-SDK must import shared persisted types from storefront-schema, not editor internals.
+SDK imports shared persisted types from storefront-schema, never editor internals.
 
-- [ ] **Step 4: Build/test workspace**
+- [ ] **Step 4: Install/build/test workspace**
 
 Run: `cd jellyshops && npm install && npm test -- packages/storefront-sdk && npm run typecheck`
 Expected: PASS.
@@ -1607,33 +1681,34 @@ git add jellyshops/packages/storefront-sdk jellyshops/package-lock.json
 git commit -m "feat: add typed Jelly storefront sdk"
 ```
 
-## Task 34: Migrate built-in registry definitions onto SDK contracts and add manifest hashing
+## Task 34: Migrate built-in registry definitions onto SDK and add manifest hashing
 
 **Files:**
 - Modify: `jellyshops/packages/storefront-registry/src/types.ts`
 - Modify: `jellyshops/packages/storefront-registry/src/registry.ts`
-- Modify built-in section/block definition files
+- Modify: `jellyshops/packages/storefront-registry/src/blocks.ts`
+- Modify: `jellyshops/packages/storefront-registry/src/sections/layout.ts`
+- Modify: `jellyshops/packages/storefront-registry/src/sections/content.ts`
+- Modify: `jellyshops/packages/storefront-registry/src/sections/commerce.ts`
 - Create: `jellyshops/packages/storefront-registry/src/manifest.ts`
 - Create: `jellyshops/packages/storefront-registry/src/manifest.test.ts`
 
 **Interfaces:**
 - Registry accepts SDK definitions.
-- Produces deterministic `registryManifestHash` from section/block/API contract metadata.
+- Produces deterministic `registryManifestHash` from section/block/API metadata.
 
 - [ ] **Step 1: Write compatibility/hash tests**
 
-Same manifest → same hash; control/schema/capability change → different hash; existing built-ins still validate old fixtures.
+Same manifest → same hash; schema/control/capability change → different hash; existing built-ins still validate existing fixtures.
 
 - [ ] **Step 2: Run and verify failure**
 
 Run: `cd jellyshops && npm test -- packages/storefront-registry`
 Expected: FAIL before migration/hash implementation.
 
-- [ ] **Step 3: Migrate definitions incrementally**
+- [ ] **Step 3: Migrate definitions without merchant-visible default changes**
 
-Do not change merchant-visible defaults during contract migration unless a test captures the intentional change.
-
-- [ ] **Step 4: Run registry/renderer/schema suites**
+- [ ] **Step 4: Run registry/renderer/schema/SDK suites**
 
 Run: `cd jellyshops && npm test -- packages/storefront-registry packages/storefront-renderer packages/storefront-schema packages/storefront-sdk && npm run typecheck`
 Expected: PASS.
@@ -1645,37 +1720,40 @@ git add jellyshops/packages/storefront-registry jellyshops/packages/storefront-r
 git commit -m "refactor: drive registry from storefront sdk"
 ```
 
-## Task 35: Add developer source, immutable artifacts, and shared build service
+## Task 35: Add developer source, immutable artifacts, and build service
 
 **Files:**
 - Modify: `backend/prisma/schema.prisma`
-- Add migration under: `backend/prisma/migrations/`
+- Generate migration: `cd backend && npx prisma migrate dev --name add_theme_developer_artifacts`
 - Create: `backend/src/developer/repository.ts`
 - Create: `backend/src/developer/prisma-repository.ts`
 - Create: `backend/src/developer/build-service.ts`
 - Create: `backend/src/developer/build-service.test.ts`
-- Modify: `backend/package.json` to add pinned `esbuild`
-- Modify compiler/publication input to include artifact ID/hash/manifest
+- Modify: `backend/package.json`
+- Modify: `backend/package-lock.json`
+- Modify: `backend/src/storefront/compiler/input-loader.ts`
+- Modify: `backend/src/storefront/compiler/validate-registry.ts`
+- Modify: `backend/src/storefront/publication/service.ts`
 
 **Interfaces:**
 - `ThemeDeveloperSource` stores editable files.
-- `ThemeArtifact` is immutable with bundle location, manifest, SDK version, artifact hash.
-- Build does type/bundle/manifest work but never executes output in backend.
+- `ThemeArtifact` is immutable with bundle storage key, manifest, artifact hash, SDK version.
+- Build performs type/bundle/manifest work but never executes bundle in backend.
 
 - [ ] **Step 1: Write build-service tests**
 
-Test deterministic artifact hash for same source, invalid SDK API version rejection, syntax failure returns diagnostics, and artifact is not activated automatically.
+Same source → same artifact hash; invalid SDK version and syntax return diagnostics; artifact not activated automatically.
 
 - [ ] **Step 2: Run and verify failure**
 
 Run: `cd backend && npm test -- src/developer/build-service.test.ts`
 Expected: FAIL.
 
-- [ ] **Step 3: Implement build service and persistence**
+- [ ] **Step 3: Add pinned esbuild dependency and implement build/persistence**
 
-Use esbuild for bundling only. Build output is data/artifact bytes, never `import()`ed by Express.
+Use esbuild only to transform/bundle; backend never `import()`s merchant output.
 
-- [ ] **Step 4: Add compiler artifact identity validation and run tests**
+- [ ] **Step 4: Add compiler artifact validation and run tests**
 
 Run: `cd backend && npm run prisma:generate && npm test -- src/developer src/storefront/compiler src/storefront/publication && npm run typecheck`
 Expected: PASS.
@@ -1687,27 +1765,32 @@ git add backend/src/developer backend/prisma backend/package.json backend/packag
 git commit -m "feat: add immutable storefront developer artifacts"
 ```
 
-## Task 36: Add CLI contracts and browser code editor using the same build API
+## Task 36: Add CLI and browser editor using the same build API
 
 **Files:**
 - Create: `jellyshops/packages/storefront-cli/package.json`
 - Create: `jellyshops/packages/storefront-cli/src/index.ts`
 - Create: `jellyshops/packages/storefront-cli/src/client.ts`
-- Create tests
+- Create: `jellyshops/packages/storefront-cli/src/client.test.ts`
 - Create: `backend/src/developer/routes.ts`
 - Create: `backend/src/developer/routes.test.ts`
-- Create: `jellyshops/src/features/developer-tools/*`
+- Modify: `backend/src/app.ts`
+- Create: `jellyshops/src/features/developer-tools/api.ts`
+- Create: `jellyshops/src/features/developer-tools/api.test.ts`
+- Create: `jellyshops/src/features/developer-tools/code-editor.tsx`
+- Create: `jellyshops/src/features/developer-tools/code-editor.test.tsx`
 - Create: `jellyshops/src/app/admin/online-store/developer/page.tsx`
-- Modify: `jellyshops/package.json` to add pinned Monaco dependencies
+- Modify: `jellyshops/package.json`
+- Modify: `jellyshops/package-lock.json`
 
 **Interfaces:**
-- Backend source/build/activate-draft endpoints require developer capabilities.
-- CLI and browser editor both call the same routes/build service.
-- Neither path publishes directly; storefront publish remains separate.
+- Source/build/activate-draft endpoints require developer capabilities.
+- CLI/browser call the same routes/build service.
+- Neither path publishes production directly.
 
 - [ ] **Step 1: Write route/client tests**
 
-Test Designer denied, Developer can save/build, Developer without publish permission cannot publish, browser and CLI payload shapes are identical.
+Designer denied; Developer can save/build; Developer without `developer:publish` cannot approve code publication; CLI/browser payload shapes match.
 
 - [ ] **Step 2: Run and verify failure**
 
@@ -1715,9 +1798,9 @@ Run: `cd backend && npm test -- src/developer/routes.test.ts`
 Run: `cd jellyshops && npm test -- packages/storefront-cli src/features/developer-tools`
 Expected: FAIL.
 
-- [ ] **Step 3: Implement API, CLI commands, and Monaco editor shell**
+- [ ] **Step 3: Implement API, CLI, Monaco shell**
 
-Initial CLI commands: `validate`, `pull`, `push`, `build`. `push` updates draft source/artifact only.
+Initial CLI: `validate`, `pull`, `push`, `build`; `push` changes draft source/artifact only.
 
 - [ ] **Step 4: Run backend/frontend suites**
 
@@ -1732,7 +1815,7 @@ git add backend/src/developer backend/src/app.ts jellyshops/packages/storefront-
 git commit -m "feat: add shared cli and browser developer workflow"
 ```
 
-**Milestone 8 gate:** one SDK drives editor/compiler/renderer metadata; source and artifacts are separate; CLI/browser share build service; developer push never bypasses storefront publish.
+**Milestone 8 gate:** one SDK drives editor/compiler/renderer metadata; source/artifact are separate; CLI/browser share build service; developer push never bypasses publish.
 
 ---
 
@@ -1742,30 +1825,30 @@ git commit -m "feat: add shared cli and browser developer workflow"
 
 **Files:**
 - Create: `jellyshops/packages/storefront-renderer/src/sandbox/protocol.ts`
+- Create: `jellyshops/packages/storefront-renderer/src/sandbox/capabilities.ts`
 - Create: `jellyshops/packages/storefront-renderer/src/sandbox/sandbox-section.tsx`
 - Create: `jellyshops/packages/storefront-renderer/src/sandbox/sandbox-section.test.tsx`
-- Create a sandbox runtime route/page under the appropriate Next.js route after reading installed docs
-- Create: `jellyshops/packages/storefront-renderer/src/sandbox/capabilities.ts`
+- Create: `jellyshops/src/app/storefront-sandbox/[artifactId]/page.tsx`
 
 **Interfaces:**
 - Untrusted iframe uses `sandbox="allow-scripts"` without `allow-same-origin`.
-- Parent sends serialized public props/theme tokens and validates all messages.
-- Initial capability set: public navigation, search, and cart actions only.
+- Parent sends serialized public props/theme tokens and validates protocol messages.
+- Initial capabilities: navigation, search, cart actions only.
 
-- [ ] **Step 1: Write protocol/security tests**
+- [ ] **Step 1: Read installed Next.js docs for the sandbox route**
 
-Test unknown origin/channel/message rejected, ungranted capability rejected, no `allow-same-origin`, no direct parent DOM access assumption, and valid `cart.add` request is validated before dispatch.
+- [ ] **Step 2: Write protocol/security tests**
 
-- [ ] **Step 2: Run and verify failure**
+Reject unknown channel/message and ungranted capability; assert no `allow-same-origin`; valid `cart.add` request is validated before dispatch.
+
+- [ ] **Step 3: Run and verify failure**
 
 Run: `cd jellyshops && npm test -- packages/storefront-renderer/src/sandbox`
 Expected: FAIL.
 
-- [ ] **Step 3: Implement sandbox host/runtime**
+- [ ] **Step 4: Implement sandbox host/runtime and rerun**
 
-Pass semantic theme tokens as serialized data/CSS variables. Do not pass auth/admin tokens.
-
-- [ ] **Step 4: Run renderer tests/typecheck**
+Pass semantic tokens as serialized data/CSS variables; never pass auth/admin tokens.
 
 Run: `cd jellyshops && npm test -- packages/storefront-renderer && npm run typecheck`
 Expected: PASS.
@@ -1773,42 +1856,44 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add jellyshops/packages/storefront-renderer jellyshops/src/app
+git add jellyshops/packages/storefront-renderer jellyshops/src/app/storefront-sandbox
 git commit -m "feat: sandbox untrusted storefront extensions"
 ```
 
-## Task 38: Enforce developer import policy and checkout/account trust boundary
+## Task 38: Enforce import policy and checkout/account trust boundary
 
 **Files:**
 - Create: `backend/src/developer/import-policy.ts`
 - Create: `backend/src/developer/import-policy.test.ts`
-- Extend: `backend/src/developer/build-service.ts`
-- Create security tests under backend/frontend renderer test suites
-- Add checkout/account extension contract types to `jellyshops/packages/storefront-sdk/src/manifest.ts`
+- Create: `backend/src/developer/security.integration.test.ts`
+- Modify: `backend/src/developer/build-service.ts`
+- Modify: `jellyshops/packages/storefront-sdk/src/manifest.ts`
+- Create: `jellyshops/packages/storefront-sdk/src/checkout-account-surfaces.test.ts`
+- Create: `jellyshops/packages/storefront-renderer/src/sandbox/checkout-boundary.test.tsx`
 
 **Interfaces:**
-- Store-custom source may import React and approved Jelly packages only by default.
-- Reject Node built-ins, Prisma, Firebase Admin, filesystem, child processes, backend internals.
-- Checkout/account surfaces have a smaller approved capability/component contract and cannot load normal arbitrary theme bundle.
+- Store-custom source may import React and approved Jelly packages by default.
+- Reject Node built-ins, Prisma, Firebase Admin, filesystem, child processes, backend internals, undeclared arbitrary packages.
+- Checkout/account use smaller capability/component contracts and never load normal arbitrary theme bundle.
 
 - [ ] **Step 1: Write explicit deny/allow tests**
 
-Allow `react`, `@jelly/storefront-sdk`, `@jelly/storefront-ui`; reject `node:fs`, `node:child_process`, `@prisma/client`, `firebase-admin`, and undeclared arbitrary npm packages.
+Allow `react`, `@jelly/storefront-sdk`, `@jelly/storefront-ui`; reject `node:fs`, `node:child_process`, `@prisma/client`, `firebase-admin`, undeclared npm package.
 
 - [ ] **Step 2: Run and verify failure**
 
 Run: `cd backend && npm test -- src/developer/import-policy.test.ts`
 Expected: FAIL.
 
-- [ ] **Step 3: Implement AST/bundler-resolution import policy**
+- [ ] **Step 3: Implement bundler-resolution import policy**
 
-Reject before artifact activation; do not rely on lint warnings as security.
+Reject before artifact activation; linting alone is not security.
 
-- [ ] **Step 4: Add checkout/account contract tests**
+- [ ] **Step 4: Add checkout/account boundary tests and run suites**
 
 Prove storefront extension with `cart:write` cannot request payment/auth capability and normal theme artifact cannot be selected for checkout runtime.
 
-Run: `cd backend && npm test -- src/developer`
+Run: `cd backend && npm test -- src/developer && npm run test:integration -- src/developer/security.integration.test.ts`
 Run: `cd jellyshops && npm test -- packages/storefront-sdk packages/storefront-renderer`
 Expected: PASS.
 
@@ -1822,38 +1907,39 @@ git commit -m "security: enforce extension trust boundaries"
 ## Task 39: Execute migration, concurrency, performance, and critical-flow release gates
 
 **Files:**
-- Add/extend backend integration tests under `backend/src/**/*.integration.test.ts`
-- Add/extend Playwright tests under the repository's existing e2e test location
-- Extend: `backend/scripts/verify-phase-one-migration.mjs`
+- Create: `backend/src/storefront/phase-one.integration.test.ts`
+- Create: `backend/src/storefront/workspace/concurrency-stress.integration.test.ts`
+- Create: `backend/src/storefront/compiler/performance.test.ts`
+- Create: `jellyshops/e2e/phase-1-online-store.spec.ts`
+- Modify: `backend/scripts/verify-phase-one-migration.mjs`
 - Create: `docs/phase-1-online-store-release-checklist.md`
 
 **Interfaces:**
-- This task adds no new product contract; it proves the approved contracts work together.
+- No new product contract; proves approved contracts work together.
 
-- [ ] **Step 1: Add the eight spec-critical end-to-end flows**
+- [ ] **Step 1: Add eight spec-critical end-to-end flows**
 
 Required flows:
 
-1. create store → product → custom page → template edit → preview → publish → public render;
-2. assign shared Product template to multiple products and observe one layout update;
-3. global section placed in multiple templates updates all previews;
-4. metafield binding remains published while changing value updates public page without republish;
+1. store → product → page → template edit → preview → publish → public render;
+2. shared Product template assigned to multiple products;
+3. one global section updates multiple placements;
+4. metafield value change updates public page without storefront republish;
 5. nested menu survives target handle rename through resource ID;
-6. independent resource edits succeed while stale publish generation fails safely;
-7. custom developer artifact previews/publishes through sandbox and never executes in admin/backend;
-8. V3 store stays live during V4 import and switches only on explicit V4 publish.
+6. independent resource edits succeed while stale publish generation fails;
+7. custom artifact previews/publishes through sandbox and never executes in admin/backend;
+8. V3 remains live during V4 import and switches only on explicit V4 publish.
 
-- [ ] **Step 2: Add focused concurrency stress/integration coverage**
+- [ ] **Step 2: Add concurrency stress integration coverage**
 
-Run parallel template/menu/global-section mutations against one store; assert no lost generation increments, resource conflicts are local, and failed mutations do not bump generation.
+Parallel template/menu/global-section mutations against one store: no lost generation increments, resource conflicts local, failed mutations do not bump generation.
 
-- [ ] **Step 3: Add basic performance assertions**
+- [ ] **Step 3: Add deterministic performance regression test**
 
-Measure representative full compile and cached publication load with deterministic fixtures. Record thresholds in the release checklist based on CI baseline after measurement; the test should compare regression against that committed baseline rather than inventing a production SLA.
+In `performance.test.ts`, build one fixed fixture (100 templates, 20 global sections, 10 menus, 1,000 binding edges), run five warm-up compiles then 20 measured compiles, store median in test output, and fail only if the slowest measured compile exceeds 3× that run's median. For publication cache, perform one cold load then 100 cache hits and assert the repository loader is called exactly once. This catches pathological regressions without pretending to define a production latency SLA.
 
-- [ ] **Step 4: Run the complete verification matrix**
+- [ ] **Step 4: Run complete verification matrix**
 
-Run:
 ```bash
 cd backend
 npm run prisma:generate
@@ -1870,36 +1956,37 @@ npm run lint
 npm run build
 npm run test:e2e
 ```
+
 Expected: all commands PASS.
 
 - [ ] **Step 5: Commit release gates**
 
 ```bash
-git add backend jellyshops docs/phase-1-online-store-release-checklist.md
+git add backend/src/storefront backend/scripts/verify-phase-one-migration.mjs jellyshops/e2e/phase-1-online-store.spec.ts docs/phase-1-online-store-release-checklist.md
 git commit -m "test: harden phase 1 online store release gates"
 ```
 
-**Milestone 9 / Phase 1 gate:** every acceptance criterion in the approved spec has an automated test or explicit release-checklist verification; V3 migration is safe; concurrency invariants are proven; untrusted code remains outside privileged execution contexts.
+**Milestone 9 / Phase 1 gate:** every acceptance criterion in the approved spec has automated coverage or an explicit release-checklist verification; V3 migration is safe; concurrency invariants are proven; untrusted code remains outside privileged execution contexts.
 
 ---
 
 # Cross-Milestone Review Checkpoints
 
-After each milestone, stop implementation and review the diff against the approved spec before starting the next milestone. In particular:
+After each milestone, stop implementation and review the diff against the approved spec before starting the next milestone.
 
 - After Milestone 1, verify every new route can be expressed with explicit capabilities rather than role-name conditionals.
-- After Milestone 2, verify storefront/editor code is provider-neutral and `DemoCatalog` is only a test/dev adapter.
+- After Milestone 2, verify storefront/editor code is provider-neutral and `DemoCatalog` is only a dev/test adapter.
 - After Milestone 3, verify all binding/custom-data types come from one shared schema contract.
 - After Milestone 4, rerun Task 14 concurrency tests independently and verify no repository performs a manual generation bump outside `WorkspaceMutationCoordinator`.
 - After Milestone 5, verify no compiler output embeds current prices/inventory/metafield values and publish cannot switch a stale generation.
-- After Milestone 6, verify renderer has no store-provider/admin-data access and public caching keys on immutable publication identity.
-- After Milestone 7, verify editor does not persist a monolithic V4 document back to the backend.
+- After Milestone 6, verify renderer has no provider/admin-data access and public caching keys on immutable publication ID.
+- After Milestone 7, verify editor does not persist a monolithic V4 document back to backend.
 - After Milestone 8, verify source/artifact/build/publish are four separate states/actions.
-- After Milestone 9, run the full verification matrix from a clean checkout/migration database.
+- After Milestone 9, run full verification from a clean checkout and migration database.
 
 # Execution Notes
 
-- Execute milestones sequentially; tasks inside a milestone may only be parallelized when their listed Interfaces do not depend on each other.
-- For schema migrations, generate the migration through Prisma in the implementation worktree and inspect SQL before committing; do not hand-edit existing migration history.
-- Keep commits at the task boundaries above so a reviewer can reject/revert one behavior without discarding an entire milestone.
-- If implementation discovers a requirement that changes an approved architectural boundary (for example freezing live catalog values into a publication, executing custom code in the backend, or replacing resource revisions with one global revision), stop and return to design review rather than silently changing this plan.
+- Execute milestones sequentially; parallelize tasks only when their listed Interfaces do not depend on one another.
+- For Prisma migrations, generate migration SQL in the implementation worktree and inspect it before committing; never rewrite existing migration history.
+- Keep commits at task boundaries so one behavior can be reviewed/reverted independently.
+- If implementation discovers a requirement that changes an approved architectural boundary—freezing live catalog values into a publication, executing store code in backend/admin, or replacing resource revisions with one global revision—stop and return to design review rather than silently changing this plan.
