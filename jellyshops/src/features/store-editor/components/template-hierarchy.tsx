@@ -74,24 +74,35 @@ function placementRegion(
 
 function PlacementRow({
   placement,
-  index,
   globalSections,
   selection,
+  activeGlobalId,
   onSelect,
+  onGlobalSelect,
 }: {
   placement: TemplatePlacement;
-  index: number;
   globalSections: Record<string, GlobalLabel>;
   selection: EditorSelection;
+  activeGlobalId?: string;
   onSelect(selection: EditorSelection): void;
+  onGlobalSelect?(globalSectionId: string): void;
 }) {
   if (placement.kind === "global") {
     const global = globalSections[placement.globalSectionId];
+    const selected = activeGlobalId === placement.globalSectionId;
     return (
-      <div key={`global:${placement.globalSectionId}:${index}`} className="flex min-h-9 items-center gap-2 rounded-lg border border-[#e3e3e3] bg-[#fafafa] px-2.5 text-[12px] text-[#454f5b]">
+      <button
+        type="button"
+        aria-label={global?.name ?? "Missing global section"}
+        onClick={() => onGlobalSelect?.(placement.globalSectionId)}
+        className={clsx(
+          "flex min-h-9 w-full items-center gap-2 rounded-lg border px-2.5 text-left text-[12px]",
+          selected ? "border-[#b9b9b9] bg-[#eeeeee] text-[#202223]" : "border-[#e3e3e3] bg-[#fafafa] text-[#454f5b] hover:bg-white",
+        )}
+      >
         <span className="min-w-0 flex-1 truncate">{global?.name ?? "Missing global section"}</span>
         <span className="rounded bg-[#eeeeee] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.04em] text-[#616161]">Global</span>
-      </div>
+      </button>
     );
   }
 
@@ -99,7 +110,6 @@ function PlacementRow({
   const label = sectionLabels[placement.section.type] ?? placement.section.type;
   return (
     <button
-      key={placement.section.id}
       type="button"
       aria-label={label}
       onClick={() => onSelect({ kind: "section", region: "template", sectionId: placement.section.id })}
@@ -117,12 +127,16 @@ export function TemplateHierarchy({
   template,
   globalSections,
   selection,
+  activeGlobalId,
   onSelect,
+  onGlobalSelect,
 }: {
   template: Pick<StorefrontTemplateRecord, "id" | "name" | "layout">;
   globalSections: Record<string, GlobalLabel>;
   selection: EditorSelection;
+  activeGlobalId?: string;
   onSelect(selection: EditorSelection): void;
+  onGlobalSelect?(globalSectionId: string): void;
 }) {
   const templatePlacements = placements(template);
   const groups: Record<HierarchyRegion, TemplatePlacement[]> = {
@@ -150,10 +164,11 @@ export function TemplateHierarchy({
                 <PlacementRow
                   key={placement.kind === "global" ? `${placement.globalSectionId}:${index}` : placement.section.id}
                   placement={placement}
-                  index={index}
                   globalSections={globalSections}
                   selection={selection}
+                  activeGlobalId={activeGlobalId}
                   onSelect={onSelect}
+                  onGlobalSelect={onGlobalSelect}
                 />
               ))}
               {groups[region].length === 0 && (
