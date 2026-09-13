@@ -22,6 +22,12 @@ enum MembershipRole {
   STAFF
 }
 
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
 model User {
   id          Int               @id @default(autoincrement())
   name        String
@@ -47,6 +53,8 @@ model Store {
   memberships          StoreMembership[]
   settings             StoreSettings?
   domains              StoreDomain[]
+  products             Product[]
+  collections          Collection[]
   draft                StorefrontDraft?
   publications         StorefrontPublication[] @relation("StorePublications")
   auditEvents          AuditEvent[]
@@ -87,6 +95,94 @@ model StoreDomain {
   @@index([storeId])
 }
 
+model Product {
+  id          String              @id @default(uuid())
+  storeId     String
+  title       String
+  description String              @default("")
+  status      ProductStatus       @default(DRAFT)
+  slug        String
+  vendor      String?
+  productType String?
+  tags        String[]            @default([])
+  externalId  String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  store       Store               @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  variants    ProductVariant[]
+  collections CollectionProduct[]
+  media       ProductMedia[]
+
+  @@unique([storeId, id])
+  @@unique([storeId, slug])
+  @@unique([storeId, externalId])
+  @@index([storeId, status])
+}
+
+model ProductVariant {
+  id                  String          @id @default(uuid())
+  storeId             String
+  productId           String
+  title               String
+  sku                 String?
+  priceMinor          Int
+  compareAtPriceMinor Int?
+  weightGrams         Int?
+  options             Json
+  trackInventory      Boolean         @default(true)
+  externalId          String?
+  archivedAt          DateTime?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  product             Product         @relation(fields: [storeId, productId], references: [storeId, id], onDelete: Restrict)
+  inventory           InventoryLevel?
+
+  @@unique([storeId, id])
+  @@unique([storeId, sku])
+  @@unique([storeId, externalId])
+  @@index([storeId, productId])
+}
+
+model InventoryLevel {
+  storeId   String
+  variantId String
+  quantity  Int            @default(0)
+  reserved  Int            @default(0)
+  updatedAt DateTime       @updatedAt
+  variant   ProductVariant @relation(fields: [storeId, variantId], references: [storeId, id], onDelete: Restrict)
+
+  @@id([storeId, variantId])
+}
+
+model Collection {
+  id          String              @id @default(uuid())
+  storeId     String
+  title       String
+  slug        String
+  description String              @default("")
+  externalId  String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  store       Store               @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  products    CollectionProduct[]
+
+  @@unique([storeId, id])
+  @@unique([storeId, slug])
+  @@unique([storeId, externalId])
+}
+
+model CollectionProduct {
+  storeId      String
+  collectionId String
+  productId    String
+  position     Int        @default(0)
+  collection   Collection @relation(fields: [storeId, collectionId], references: [storeId, id], onDelete: Restrict)
+  product      Product    @relation(fields: [storeId, productId], references: [storeId, id], onDelete: Restrict)
+
+  @@id([storeId, collectionId, productId])
+  @@index([storeId, productId])
+}
+
 model StorefrontDraft {
   storeId   String   @id
   revision  Int      @default(0)
@@ -125,7 +221,7 @@ model AuditEvent {
 }
 
 model Media {
-  id           String   @id @default(uuid())
+  id           String         @id @default(uuid())
   storeId      String
   type         String
   storageKey   String
@@ -136,11 +232,25 @@ model Media {
   height       Int?
   originalName String
   altText      String?
-  referenced   Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  store        Store    @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  referenced   Boolean        @default(false)
+  createdAt    DateTime       @default(now())
+  store        Store          @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  products     ProductMedia[]
 
   @@unique([storeId, id])
   @@unique([storeId, storageKey])
   @@index([storeId, createdAt])
+}
+
+model ProductMedia {
+  storeId   String
+  productId String
+  mediaId   String
+  position  Int     @default(0)
+  altText   String?
+  product   Product @relation(fields: [storeId, productId], references: [storeId, id], onDelete: Restrict)
+  media     Media   @relation(fields: [storeId, mediaId], references: [storeId, id], onDelete: Restrict)
+
+  @@id([storeId, productId, mediaId])
+  @@index([storeId, mediaId])
 }
