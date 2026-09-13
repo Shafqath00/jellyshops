@@ -5,15 +5,25 @@ import type {
 } from "@jelly/storefront-schema";
 import type { TemplateType } from "../workspace/repositories/template-repository.js";
 
+export interface CompilerResponsiveSettings {
+  mobile?: Record<string, unknown>;
+}
+
+export interface CompilerBlockNode {
+  id: string;
+  type: string;
+  enabled?: boolean;
+  settings: Record<string, unknown>;
+  responsive?: CompilerResponsiveSettings;
+}
+
 export interface CompilerSectionNode {
   id: string;
   type: string;
+  enabled?: boolean;
   settings: Record<string, unknown>;
-  blocks?: Array<{
-    id: string;
-    type: string;
-    settings: Record<string, unknown>;
-  }>;
+  responsive?: CompilerResponsiveSettings;
+  blocks?: CompilerBlockNode[];
 }
 
 export type CompilerSectionPlacement =
