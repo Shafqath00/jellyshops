@@ -64,36 +64,41 @@ interface ClientOptions { baseUrl: string; token: string; fetch?: typeof fetch }
 export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }: ClientOptions): StoreEditorApi {
   const origin = baseUrl.replace(/\/$/, "");
   const url = (path: string) => `${origin}${path}`;
-  const request = async <T>(path: string, init: RequestInit = {}, authenticated = true): Promise<T> => {
-    const response = await fetcher(url(path), {
-      ...init,
-      headers: {
-        ...(init.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
-        ...(authenticated ? { Authorization: `Bearer ${token}` } : {}),
-        ...init.headers,
-      },
-    });
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({})) as {
-        error?: {
-          code?: string;
-          message?: string;
-          issues?: never[];
-          currentRevision?: number;
-          currentGeneration?: number;
-        };
+  const headers = (init: RequestInit, authenticated: boolean) => ({
+    ...(init.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+    ...(authenticated ? { Authorization: `Bearer ${token}` } : {}),
+    ...init.headers,
+  });
+  const apiError = async (response: Response): Promise<StoreEditorApiError> => {
+    const body = await response.json().catch(() => ({})) as {
+      error?: {
+        code?: string;
+        message?: string;
+        issues?: never[];
+        currentRevision?: number;
+        currentGeneration?: number;
       };
-      throw new StoreEditorApiError(
-        response.status,
-        body.error?.code ?? "REQUEST_FAILED",
-        body.error?.message ?? "Request failed",
-        body.error?.issues,
-        body.error?.currentRevision,
-        body.error?.currentGeneration,
-      );
-    }
+    };
+    return new StoreEditorApiError(
+      response.status,
+      body.error?.code ?? "REQUEST_FAILED",
+      body.error?.message ?? "Request failed",
+      body.error?.issues,
+      body.error?.currentRevision,
+      body.error?.currentGeneration,
+    );
+  };
+  const request = async <T>(path: string, init: RequestInit = {}, authenticated = true): Promise<T> => {
+    const response = await fetcher(url(path), { ...init, headers: headers(init, authenticated) });
+    if (!response.ok) throw await apiError(response);
     if (response.status === 204) return undefined as T;
     return await response.json() as T;
+  };
+  const compilerRequest = async (path: string, expectedGeneration: number): Promise<CompilationResult> => {
+    const init: RequestInit = { method: "POST", body: JSON.stringify({ expectedGeneration }) };
+    const response = await fetcher(url(path), { ...init, headers: headers(init, true) });
+    if (response.ok || response.status === 422) return await response.json() as CompilationResult;
+    throw await apiError(response);
   };
 
   const storefrontPath = (storeId: string, suffix: string) => `/api/stores/${encodeURIComponent(storeId)}/storefront${suffix}`;
@@ -129,8 +134,8 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
       if (acceptedTypes?.length) query.set("accepts", acceptedTypes.join(","));
       return request(customDataPath(storeId, `/dynamic-sources?${query.toString()}`));
     },
-    validate: (storeId, expectedGeneration) => request(storefrontPath(storeId, "/validate"), { method: "POST", body: JSON.stringify({ expectedGeneration }) }),
-    compilePreview: (storeId, expectedGeneration) => request(storefrontPath(storeId, "/preview/compile"), { method: "POST", body: JSON.stringify({ expectedGeneration }) }),
+    validate: (storeId, expectedGeneration) => compilerRequest(storefrontPath(storeId, "/validate"), expectedGeneration),
+    compilePreview: (storeId, expectedGeneration) => compilerRequest(storefrontPath(storeId, "/preview/compile"), expectedGeneration),
     publish: (storeId, expectedGeneration, idempotencyKey) => {
       if (!idempotencyKey) {
         throw new StoreEditorApiError(410, "LEGACY_PUBLISH_UNSUPPORTED", "Publishing now requires a workspace generation and idempotency key");
