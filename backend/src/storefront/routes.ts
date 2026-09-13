@@ -1,11 +1,8 @@
 import { Router } from "express";
-import { z } from "zod";
 import { requireMerchant, requireStorePermission } from "../auth/middleware.js";
 import type { AuthProvider } from "../auth/types.js";
 import { ApiError } from "../http/errors.js";
 import type { StorefrontService } from "./service.js";
-
-const revisionSchema = z.object({ expectedRevision: z.number().int().nonnegative().max(2_147_483_647) });
 
 export function createStorefrontRouter(service: StorefrontService<unknown>, authProvider: AuthProvider): Router {
   const router = Router({ mergeParams: true });
@@ -21,12 +18,6 @@ export function createStorefrontRouter(service: StorefrontService<unknown>, auth
   // Legacy V3 migration compatibility only. New editor writes use normalized workspace routes.
   router.get<{ storeId: string }>("/draft", requireStorePermission("storefront:view"), async (request, response) => {
     response.json(await service.getOrCreateDraft(request.storeContext!.storeId));
-  });
-
-  // Legacy V3 publishing remains temporarily available until the compiler-based publisher replaces it.
-  router.post<{ storeId: string }>("/publish", requireStorePermission("storefront:publish"), async (request, response) => {
-    const { expectedRevision } = revisionSchema.parse(request.body);
-    response.status(201).json(await service.publish(request.storeContext!.storeId, expectedRevision));
   });
 
   return router;
