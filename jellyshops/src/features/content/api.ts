@@ -31,6 +31,7 @@ export interface ArticleResource extends SeoResourceFields {
   handle: string;
   excerpt: string;
   content?: Record<string, unknown>;
+  featuredMediaId?: string | null;
   status?: "DRAFT" | "PUBLISHED";
   publishedAt?: string | null;
 }
@@ -57,6 +58,10 @@ export interface ContentApi {
   listBlogs(storeId: string): Promise<BlogResource[]>;
   createBlog(storeId: string, input: Omit<BlogResource, "id" | "storeId">): Promise<BlogResource>;
   listArticles(storeId: string, blogId?: string): Promise<ArticleResource[]>;
+  createArticle(storeId: string, input: Omit<ArticleResource, "id" | "status" | "publishedAt"> & { content: Record<string, unknown> }): Promise<ArticleResource>;
+  updateArticle(storeId: string, articleId: string, patch: Partial<Omit<ArticleResource, "id" | "blogId" | "status" | "publishedAt">>): Promise<ArticleResource>;
+  publishArticle(storeId: string, articleId: string): Promise<ArticleResource>;
+  unpublishArticle(storeId: string, articleId: string): Promise<ArticleResource>;
   listTemplates(storeId: string, type: ContentTemplate["type"]): Promise<ContentTemplate[]>;
   getAssignment(storeId: string, resourceType: TemplateAssignment["resourceType"], resourceId: string): Promise<TemplateAssignment | null>;
   assignTemplate(storeId: string, resourceType: TemplateAssignment["resourceType"], resourceId: string, templateId: string, expectedRevision: number | null): Promise<{ assignment: TemplateAssignment; generation: number }>;
@@ -96,6 +101,10 @@ export function createContentApi({
     listBlogs: (storeId) => request(content(storeId, "/blogs")),
     createBlog: (storeId, input) => request(content(storeId, "/blogs"), { method: "POST", body: JSON.stringify(input) }),
     listArticles: (storeId, blogId) => request(content(storeId, `/articles${blogId ? `?blogId=${encodeURIComponent(blogId)}` : ""}`)),
+    createArticle: (storeId, input) => request(content(storeId, "/articles"), { method: "POST", body: JSON.stringify(input) }),
+    updateArticle: (storeId, articleId, patch) => request(content(storeId, `/articles/${encodeURIComponent(articleId)}`), { method: "PATCH", body: JSON.stringify(patch) }),
+    publishArticle: (storeId, articleId) => request(content(storeId, `/articles/${encodeURIComponent(articleId)}/publish`), { method: "POST" }),
+    unpublishArticle: (storeId, articleId) => request(content(storeId, `/articles/${encodeURIComponent(articleId)}/unpublish`), { method: "POST" }),
     listTemplates: (storeId, type) => request(storefront(storeId, `/templates?type=${encodeURIComponent(type)}`)),
     getAssignment: (storeId, resourceType, resourceId) => request(storefront(storeId, `/assignments/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}`)),
     assignTemplate: (storeId, resourceType, resourceId, templateId, expectedRevision) => request(storefront(storeId, `/assignments/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}`), {
