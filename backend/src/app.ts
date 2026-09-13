@@ -4,7 +4,8 @@ import express, { type Express } from "express";
 import { loadConfig, type AppConfig } from "./config.js";
 import { DevelopmentAuthProvider } from "./auth/development-auth-provider.js";
 import type { AuthProvider } from "./auth/types.js";
-import { createCatalogRouter } from "./catalog/routes.js";
+import { createCatalogAdminRouter, createCatalogRouter, createPublicCatalogRouter } from "./catalog/routes.js";
+import type { CatalogAdmin } from "./catalog/service.js";
 import { errorHandler, notFoundHandler } from "./http/errors.js";
 import { LocalJsonMediaRepository } from "./media/local-json-media-repository.js";
 import { LocalMediaStorage } from "./media/local-media-storage.js";
@@ -36,6 +37,7 @@ export interface AppDependencies {
   tenantRepository: TenantRepository;
   mediaRepository: MediaRepository;
   mediaStorage: MediaStorage;
+  catalogService: CatalogAdmin;
 }
 
 export function createApp(dependencies: Partial<AppDependencies> = {}): Express {
@@ -67,6 +69,16 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
   });
 
   app.use("/api/demo/catalog", createCatalogRouter());
+  if (dependencies.catalogService) {
+    app.use(
+      "/api/stores/:storeId/catalog",
+      createCatalogAdminRouter(dependencies.catalogService, authProvider),
+    );
+    app.use(
+      "/api/public/stores/:storeId/catalog",
+      createPublicCatalogRouter(dependencies.catalogService),
+    );
+  }
   if (dependencies.tenantRepository) {
     app.use("/api", createMerchantRouter(authProvider, dependencies.tenantRepository));
   }
