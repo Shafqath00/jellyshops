@@ -1,4 +1,4 @@
-import type { WorkspaceTransaction } from "./concurrency.js";
+import type { WorkspaceMutationRunner } from "./mutation-runner.js";
 import type {
   CloneTemplateRecordInput,
   StorefrontTemplateRecord,
@@ -7,18 +7,6 @@ import type {
   TemplateType,
   UpdateTemplateRecordInput,
 } from "./repositories/template-repository.js";
-
-export interface WorkspaceMutationRunResult<T> {
-  result: T;
-  generation: number;
-}
-
-export interface WorkspaceMutationRunner {
-  run<T>(
-    storeId: string,
-    operation: (transaction: WorkspaceTransaction) => Promise<T>,
-  ): Promise<WorkspaceMutationRunResult<T>>;
-}
 
 export interface CreateTemplateInput {
   type: TemplateType;
