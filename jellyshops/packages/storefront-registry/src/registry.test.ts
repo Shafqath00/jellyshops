@@ -46,3 +46,20 @@ it("accepts declared mobile overrides and rejects undeclared ones", () => {
     expect.objectContaining({ code: "RESPONSIVE_FIELD_NOT_ALLOWED", field: "backgroundColor" })
   ]));
 });
+
+it("accepts a dynamic binding in a control that declares a compatible dynamic type", () => {
+  const hero = section("hero", [{
+    id: "heading-1",
+    type: "heading",
+    enabled: true,
+    settings: {
+      text: {
+        kind: "dynamic",
+        binding: { kind: "resource_field", resource: "product", field: "title" },
+        fallback: "Fallback heading",
+      },
+    },
+  }]);
+
+  expect(validateSectionAgainstRegistry(hero, "home")).toEqual([]);
+});
