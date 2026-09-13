@@ -18,16 +18,16 @@ export function createStorefrontRouter(service: StorefrontService<unknown>, auth
 
   router.use(requireMerchant(authProvider));
 
-  router.get<{ storeId: string }>("/draft", requireStoreAccess("storefront:read"), async (request, response) => {
+  router.get<{ storeId: string }>("/draft", requireStoreAccess("storefront:view"), async (request, response) => {
     response.json(await service.getOrCreateDraft(String(request.params.storeId)));
   });
 
-  router.put<{ storeId: string }>("/draft", requireStoreAccess("storefront:write"), async (request, response) => {
+  router.put<{ storeId: string }>("/draft", requireStoreAccess("storefront:edit"), async (request, response) => {
     const { expectedRevision } = revisionSchema.parse(request.body);
     response.json(await service.saveDraft(String(request.params.storeId), expectedRevision, request.body.document));
   });
 
-  router.post<{ storeId: string }>("/publish", requireStoreAccess("storefront:write"), async (request, response) => {
+  router.post<{ storeId: string }>("/publish", requireStoreAccess("storefront:publish"), async (request, response) => {
     const { expectedRevision } = revisionSchema.parse(request.body);
     response.status(201).json(await service.publish(String(request.params.storeId), expectedRevision));
   });
