@@ -9,6 +9,8 @@ export interface EditorState {
   selection: EditorSelection;
   viewport: EditorViewport;
   revision: number;
+  generation: number;
+  resourceRevisions: Record<string, number>;
   saveStatus: SaveStatus;
   validationIssues: ValidationIssue[];
   activeUploads: number;
@@ -20,6 +22,8 @@ export type EditorAction =
   | { type: "select"; selection: EditorSelection }
   | { type: "set-viewport"; viewport: EditorViewport }
   | { type: "load-document"; document: StorefrontDocument; revision: number }
+  | { type: "load-workspace"; generation: number; resourceRevisions: Record<string, number> }
+  | { type: "resource-saved"; resourceKey: string; revision: number; generation: number }
   | { type: "set-active-page"; pageId: string }
   | { type: "undo" }
   | { type: "redo" }
