@@ -19,3 +19,19 @@ FOREIGN KEY ("storeId") REFERENCES "Store"("id") ON DELETE RESTRICT ON UPDATE CA
 
 ALTER TABLE "AuditEvent" ADD CONSTRAINT "AuditEvent_actorUserId_fkey"
 FOREIGN KEY ("actorUserId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+CREATE FUNCTION jellyshops_reject_audit_event_mutation() RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION 'Audit events are append-only'
+    USING ERRCODE = '23514';
+END;
+$$;
+
+CREATE TRIGGER "AuditEvent_immutable_rows"
+BEFORE UPDATE OR DELETE ON "AuditEvent"
+FOR EACH ROW EXECUTE FUNCTION jellyshops_reject_audit_event_mutation();
+
+CREATE TRIGGER "AuditEvent_immutable_truncate"
+BEFORE TRUNCATE ON "AuditEvent"
+FOR EACH STATEMENT EXECUTE FUNCTION jellyshops_reject_audit_event_mutation();
