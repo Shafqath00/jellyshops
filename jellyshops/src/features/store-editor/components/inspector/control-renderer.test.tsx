@@ -34,4 +34,21 @@ describe("ControlRenderer", () => {
     await userEvent.setup().type(screen.getByLabelText("Text"), "!");
     expect(onChange).toHaveBeenLastCalledWith("Old!");
   });
+
+  it("shows a dynamic binding fallback in the static control", () => {
+    render(
+      <ControlRenderer
+        definition={definitions[0]}
+        value={{
+          kind: "dynamic",
+          binding: { kind: "resource_field", resource: "product", field: "title" },
+          fallback: "Fallback title",
+        }}
+        onChange={vi.fn()}
+        catalog={{ products: [], collections: [] }}
+      />,
+    );
+
+    expect(screen.getByLabelText("Text")).toHaveValue("Fallback title");
+  });
 });
