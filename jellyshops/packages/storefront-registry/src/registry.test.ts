@@ -55,7 +55,7 @@ it("accepts a dynamic binding in a control that declares a compatible dynamic ty
     settings: {
       text: {
         kind: "dynamic",
-        binding: { kind: "resource_field", resource: "product", field: "title" },
+        binding: { kind: "resource_field", resource: "store", field: "name" },
         fallback: "Fallback heading",
       },
     },
