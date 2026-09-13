@@ -41,20 +41,40 @@ function input(): StorefrontCompilationInput {
 }
 
 describe("validateBindings", () => {
-  it("reports type mismatch at the exact setting", async () => {
-    const registry: CompilerRegistry = {
-      validateSection: () => [],
-      dynamicSettingType: (_sectionType, fieldKey) => fieldKey === "image" ? "image" : null,
-    };
-    const sources: CompilerDynamicSourceResolver = {
-      describeBinding: async () => ({ valueType: "string" }),
-    };
+  const registry: CompilerRegistry = {
+    validateSection: () => [],
+    dynamicSettingType: (_sectionType, fieldKey) => fieldKey === "image" ? "image" : null,
+  };
+  const sources: CompilerDynamicSourceResolver = {
+    describeBinding: async () => ({ valueType: "string" }),
+  };
 
+  it("reports type mismatch at the exact setting", async () => {
     const diagnostics = await validateBindings(input(), registry, sources);
     expect(diagnostics).toEqual([
       expect.objectContaining({
         code: "DYNAMIC_SOURCE_TYPE_MISMATCH",
         location: expect.objectContaining({ entityId: "product-default", sectionId: "hero-1", fieldKey: "image" }),
+      }),
+    ]);
+  });
+
+  it("reports malformed dynamic binding syntax instead of skipping it", async () => {
+    const source = input();
+    source.templates[0].layout.sections = [{
+      kind: "inline",
+      section: {
+        id: "hero-1",
+        type: "hero",
+        settings: { image: { kind: "dynamic", binding: { kind: "resource_field", resource: "product" } } },
+      },
+    }];
+
+    const diagnostics = await validateBindings(source, registry, sources);
+    expect(diagnostics).toEqual([
+      expect.objectContaining({
+        code: "DYNAMIC_SOURCE_INVALID",
+        location: expect.objectContaining({ sectionId: "hero-1", fieldKey: "image" }),
       }),
     ]);
   });
