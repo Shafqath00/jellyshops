@@ -17,6 +17,7 @@ enum MembershipRole {
   OWNER
   ADMIN
   DESIGNER
+  DEVELOPER
   ORDER_MANAGER
   STAFF
 }
