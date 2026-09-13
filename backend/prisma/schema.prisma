@@ -333,11 +333,18 @@ model StorefrontPublication {
   id String @id @default(uuid())
   storeId String
   sourceRevision Int
+  sourceGeneration Int?
+  schemaVersion Int @default(3)
+  compilerVersion String?
   document Json
+  dependencyManifest Json?
+  themeArtifactId String?
+  idempotencyKey String?
   publishedAt DateTime @default(now())
   store Store @relation("StorePublications", fields: [storeId], references: [id], onDelete: Restrict)
   liveFor Store[] @relation("LivePublication")
   @@unique([storeId, id])
+  @@unique([storeId, idempotencyKey])
   @@index([storeId, publishedAt])
 }
 
