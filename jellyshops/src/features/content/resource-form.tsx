@@ -13,12 +13,14 @@ export function ResourceForm({
   templates,
   assignedTemplateId,
   onSave,
+  onAssignTemplate,
   onCustomizeTemplate,
 }: {
   resource: EditableContentResource;
   templates: Array<{ id: string; name: string }>;
   assignedTemplateId?: string;
   onSave(value: EditableContentResource): void | Promise<void>;
+  onAssignTemplate(input: { resourceId: string; templateId: string }): void | Promise<void>;
   onCustomizeTemplate(input: { resourceId: string; templateId: string }): void;
 }) {
   const [value, setValue] = useState(resource);
@@ -45,10 +47,19 @@ export function ResourceForm({
 
       <section className="rounded-xl border border-[#e3e3e3] bg-[#fafafa] p-4">
         <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#8c9196]">Template</p>
-        <div className="mt-2 flex gap-2">
-          <select aria-label="Template" value={templateId} onChange={(event) => setTemplateId(event.target.value)} className="h-9 min-w-0 flex-1 rounded-lg border border-[#d7d7d7] bg-white px-3 text-[12px]">
+        <div className="mt-2 flex flex-wrap gap-2">
+          <select aria-label="Template" value={templateId} onChange={(event) => setTemplateId(event.target.value)} className="h-9 min-w-[180px] flex-1 rounded-lg border border-[#d7d7d7] bg-white px-3 text-[12px]">
             {templates.map((template) => <option key={template.id} value={template.id}>{template.name}</option>)}
           </select>
+          <button
+            type="button"
+            aria-label="Assign template"
+            disabled={!templateId || templateId === assignedTemplateId}
+            onClick={() => templateId && void onAssignTemplate({ resourceId: resource.id, templateId })}
+            className="h-9 rounded-lg border border-[#c9cccf] bg-white px-3 text-[11px] font-semibold disabled:opacity-40"
+          >
+            Assign template
+          </button>
           <button
             type="button"
             aria-label="Customize template"
