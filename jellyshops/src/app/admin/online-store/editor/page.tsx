@@ -11,13 +11,22 @@ import { getDemoSession } from "@/features/store-editor/api/demo-session";
 import type {
   DemoCatalog,
   GlobalSectionRecord,
+  SectionPresetRecord,
   StorefrontTemplateRecord,
   WorkspaceRecord,
 } from "@/features/store-editor/api/types";
+import { GlobalSectionPanel } from "@/features/store-editor/components/global-section-panel";
+import { SectionLibrary } from "@/features/store-editor/components/section-library";
 import { TemplateHierarchy } from "@/features/store-editor/components/template-hierarchy";
 import { TemplateResourceSelector, type PreviewResourceOption } from "@/features/store-editor/components/template-resource-selector";
 import type { EditorSelection } from "@/features/store-editor/model/types";
 import type { EditorViewport } from "@/features/store-editor/state/types";
+import {
+  appendGlobalPlacement,
+  appendInlineSection,
+  detachGlobalPlacement,
+  replaceInlineWithGlobal,
+} from "@/features/store-editor/template-layout";
 
 const backendStoreId = "store-demo";
 
@@ -76,6 +85,20 @@ function templateSections(template: StorefrontTemplateRecord, globals: Map<strin
   });
 }
 
+function selectedInlineSection(template: StorefrontTemplateRecord, selection: EditorSelection): SectionNode | null {
+  if (!selection || selection.kind !== "section") return null;
+  const placements = template.layout.sections;
+  if (!Array.isArray(placements)) return null;
+  for (const placement of placements) {
+    if (!placement || typeof placement !== "object" || Array.isArray(placement)) continue;
+    const input = placement as Record<string, unknown>;
+    if (input.kind !== "inline") continue;
+    const section = normalizeSection(input.section);
+    if (section?.id === selection.sectionId) return section;
+  }
+  return null;
+}
+
 function resourceOptions(template: StorefrontTemplateRecord | undefined, catalog: DemoCatalog): PreviewResourceOption[] {
   if (!template) return [];
   if (template.type === "product") return catalog.products.map((product) => ({ id: product.id, label: product.name }));
@@ -94,10 +117,12 @@ export default function OnlineStoreEditorPage() {
   const [workspace, setWorkspace] = useState<WorkspaceRecord | null>(null);
   const [templates, setTemplates] = useState<StorefrontTemplateRecord[]>([]);
   const [globals, setGlobals] = useState<GlobalSectionRecord[]>([]);
+  const [presets, setPresets] = useState<SectionPresetRecord[]>([]);
   const [catalog, setCatalog] = useState<DemoCatalog>({ products: [], collections: [] });
   const [activeTemplateId, setActiveTemplateId] = useState("");
   const [previewResourceId, setPreviewResourceId] = useState<string>();
   const [selection, setSelection] = useState<EditorSelection>(null);
+  const [activeGlobalId, setActiveGlobalId] = useState<string>();
   const [viewport, setViewport] = useState<EditorViewport>("desktop");
   const [loadError, setLoadError] = useState<string>();
 
@@ -108,12 +133,14 @@ export default function OnlineStoreEditorPage() {
       api.loadWorkspace(backendStoreId),
       api.listTemplates(backendStoreId),
       api.listGlobalSections(backendStoreId),
+      api.listPresets(backendStoreId),
       api.listCatalog(),
-    ]).then(([nextWorkspace, nextTemplates, nextGlobals, nextCatalog]) => {
+    ]).then(([nextWorkspace, nextTemplates, nextGlobals, nextPresets, nextCatalog]) => {
       if (!active) return;
       setWorkspace(nextWorkspace);
       setTemplates(nextTemplates);
       setGlobals(nextGlobals);
+      setPresets(nextPresets);
       setCatalog(nextCatalog);
       setActiveTemplateId((current) => current || nextTemplates.find((template) => template.type === "home")?.id || nextTemplates[0]?.id || "");
     }).catch((error: unknown) => {
@@ -141,6 +168,15 @@ export default function OnlineStoreEditorPage() {
       sectionType: typeof global.section.type === "string" ? global.section.type : undefined,
     },
   ])), [globals]);
+  const presetOptions = useMemo(() => presets.flatMap((preset) => {
+    const section = normalizeSection(preset.section);
+    return section ? [{ id: preset.id, name: preset.name, section }] : [];
+  }), [presets]);
+  const globalOptions = useMemo(() => globals.flatMap((global) => {
+    const section = normalizeSection(global.section);
+    return section ? [{ id: global.id, name: global.name, section }] : [];
+  }), [globals]);
+  const localSection = activeTemplate ? selectedInlineSection(activeTemplate, selection) : null;
   const commerce = useMemo<CommerceDataProvider>(() => ({
     async getProducts() {
       return catalog.products.map((product) => ({
@@ -162,6 +198,57 @@ export default function OnlineStoreEditorPage() {
       setPreviewResourceId(previewResources[0]?.id);
     }
   }, [previewResourceId, previewResources]);
+
+  const persistLayout = async (layout: Record<string, unknown>) => {
+    if (!api || !activeTemplate) return;
+    const result = await api.updateTemplate(
+      backendStoreId,
+      activeTemplate.id,
+      activeTemplate.revision,
+      { layout },
+    );
+    setTemplates((current) => current.map((template) => template.id === result.template.id ? result.template : template));
+    setWorkspace((current) => current ? { ...current, generation: result.generation } : current);
+  };
+
+  const insertPreset = async (section: SectionNode) => {
+    if (!activeTemplate) return;
+    await persistLayout(appendInlineSection(activeTemplate.layout, section));
+  };
+
+  const insertGlobal = async (globalSectionId: string) => {
+    if (!activeTemplate) return;
+    await persistLayout(appendGlobalPlacement(activeTemplate.layout, globalSectionId));
+    setActiveGlobalId(globalSectionId);
+    setSelection(null);
+  };
+
+  const makeGlobal = async (section: SectionNode) => {
+    if (!api || !activeTemplate) return;
+    const created = await api.createGlobalSection(backendStoreId, {
+      name: `Global ${section.type}`,
+      section,
+    });
+    setGlobals((current) => [...current, created.globalSection]);
+    setWorkspace((current) => current ? { ...current, generation: created.generation } : current);
+    const result = await api.updateTemplate(
+      backendStoreId,
+      activeTemplate.id,
+      activeTemplate.revision,
+      { layout: replaceInlineWithGlobal(activeTemplate.layout, section.id, created.globalSection.id) },
+    );
+    setTemplates((current) => current.map((template) => template.id === result.template.id ? result.template : template));
+    setWorkspace((current) => current ? { ...current, generation: result.generation } : current);
+    setSelection(null);
+    setActiveGlobalId(created.globalSection.id);
+  };
+
+  const detachGlobal = async (section: SectionNode) => {
+    if (!activeTemplate || !activeGlobalId) return;
+    await persistLayout(detachGlobalPlacement(activeTemplate.layout, activeGlobalId, section));
+    setActiveGlobalId(undefined);
+    setSelection({ kind: "section", region: "template", sectionId: section.id });
+  };
 
   if (!api) {
     return <main className="grid min-h-[70vh] place-items-center p-8 text-center"><div><h1 className="text-xl font-semibold">Online Store editor is disabled</h1><p className="mt-2 text-sm text-[#6d7175]">Connect merchant authentication to use the editor.</p></div></main>;
@@ -199,12 +286,19 @@ export default function OnlineStoreEditorPage() {
         activeTemplateId={activeTemplate.id}
         previewResources={previewResources}
         previewResourceId={previewResourceId}
-        onTemplateChange={(templateId) => { setActiveTemplateId(templateId); setSelection(null); }}
+        onTemplateChange={(templateId) => { setActiveTemplateId(templateId); setSelection(null); setActiveGlobalId(undefined); }}
         onPreviewResourceChange={setPreviewResourceId}
       />
 
-      <div className="grid min-h-0 flex-1 grid-cols-[280px_minmax(0,1fr)]">
-        <TemplateHierarchy template={activeTemplate} globalSections={globalLabels} selection={selection} onSelect={setSelection} />
+      <div className="grid min-h-0 flex-1 grid-cols-[280px_minmax(0,1fr)_280px]">
+        <TemplateHierarchy
+          template={activeTemplate}
+          globalSections={globalLabels}
+          selection={selection}
+          activeGlobalId={activeGlobalId}
+          onSelect={(next) => { setSelection(next); setActiveGlobalId(undefined); }}
+          onGlobalSelect={(globalId) => { setActiveGlobalId(globalId); setSelection(null); }}
+        />
         <main className="min-h-0 overflow-auto p-4" aria-label="Storefront preview">
           <div className={clsx(
             "mx-auto min-h-full overflow-hidden border border-[#dcdcdc] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-[max-width]",
@@ -221,6 +315,7 @@ export default function OnlineStoreEditorPage() {
                 region="template"
                 selected={selection ?? undefined}
                 onSelect={(next) => {
+                  setActiveGlobalId(undefined);
                   if (next.kind === "section" && next.sectionId) setSelection({ kind: "section", region: "template", sectionId: next.sectionId });
                   if (next.kind === "block" && next.sectionId && next.blockId) setSelection({ kind: "block", region: "template", sectionId: next.sectionId, blockId: next.blockId, fieldKey: next.fieldKey });
                 }}
@@ -229,6 +324,23 @@ export default function OnlineStoreEditorPage() {
             {sections.length === 0 && <div className="grid min-h-[360px] place-items-center p-8 text-center text-sm text-[#8c9196]">This template has no sections yet.</div>}
           </div>
         </main>
+        <aside className="min-h-0 overflow-y-auto border-l border-[#e3e3e3] bg-white" aria-label="Section tools">
+          <div className="border-b border-[#eeeeee] px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#8c9196]">Section library</p>
+          </div>
+          <SectionLibrary presets={presetOptions} onInsertPreset={(section) => { void insertPreset(section); }} />
+          <div className="border-y border-[#eeeeee] px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#8c9196]">Global sections</p>
+          </div>
+          <GlobalSectionPanel
+            globalSections={globalOptions}
+            localSection={localSection ?? undefined}
+            attachedGlobalId={activeGlobalId}
+            onMakeGlobal={(section) => { void makeGlobal(section); }}
+            onInsertGlobal={(globalId) => { void insertGlobal(globalId); }}
+            onDetachGlobal={(section) => { void detachGlobal(section); }}
+          />
+        </aside>
       </div>
     </div>
   );
