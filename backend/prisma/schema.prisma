@@ -8,98 +8,459 @@ datasource db {
   provider = "postgresql"
 }
 
-enum CommerceProvider {
-  NATIVE
-  SHOPIFY
-}
-
-enum MembershipRole {
-  OWNER
-  ADMIN
-  DESIGNER
-  ORDER_MANAGER
-  STAFF
-}
+enum CommerceProvider { NATIVE SHOPIFY }
+enum MembershipRole { OWNER ADMIN DESIGNER DEVELOPER ORDER_MANAGER STAFF }
+enum ProductStatus { DRAFT ACTIVE ARCHIVED }
+enum ContentStatus { DRAFT PUBLISHED }
+enum StorefrontTemplateType { HOME PRODUCT COLLECTION PAGE BLOG ARTICLE SEARCH CART }
 
 model User {
-  id          Int               @id @default(autoincrement())
-  name        String
-  email       String            @unique
-  // Nullable to preserve existing users; attach only after verified identity linking.
-  firebaseUid String?           @unique
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  firebaseUid String? @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   memberships StoreMembership[]
+  auditEvents AuditEvent[]
 }
 
 model Store {
-  id                   String                  @id @default(uuid())
-  name                 String
-  slug                 String                  @unique
-  commerceProvider     CommerceProvider        @default(NATIVE)
-  currency             String                  @db.VarChar(3)
-  country              String                  @db.VarChar(2)
-  createdAt            DateTime                @default(now())
-  updatedAt            DateTime                @updatedAt
-  archivedAt           DateTime?
-  memberships          StoreMembership[]
-  settings             StoreSettings?
-  domains              StoreDomain[]
-  draft                StorefrontDraft?
-  publications         StorefrontPublication[] @relation("StorePublications")
-  // Composite FK ensures the live publication belongs to this store.
+  id String @id @default(uuid())
+  name String
+  slug String @unique
+  commerceProvider CommerceProvider @default(NATIVE)
+  currency String @db.VarChar(3)
+  country String @db.VarChar(2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  archivedAt DateTime?
+  memberships StoreMembership[]
+  settings StoreSettings?
+  domains StoreDomain[]
+  products Product[]
+  collections Collection[]
+  pages StorePage[]
+  blogs Blog[]
+  articles Article[]
+  workspace StorefrontWorkspace?
+  templates StorefrontTemplate[]
+  globalSections GlobalSection[]
+  sectionPresets SectionPreset[]
+  navigationMenus NavigationMenu[]
+  themeConfiguration ThemeConfiguration?
+  templateAssignments StorefrontTemplateAssignment[]
+  draft StorefrontDraft?
+  publications StorefrontPublication[] @relation("StorePublications")
+  auditEvents AuditEvent[]
+  media Media[]
+  metafieldDefinitions MetafieldDefinition[]
+  metafieldValues MetafieldValue[]
+  metaobjectDefinitions MetaobjectDefinition[]
+  metaobjectEntries MetaobjectEntry[]
   currentPublicationId String?
-  currentPublication   StorefrontPublication?  @relation("LivePublication", fields: [id, currentPublicationId], references: [storeId, id], onDelete: Restrict, onUpdate: NoAction)
+  currentPublication StorefrontPublication? @relation("LivePublication", fields: [id, currentPublicationId], references: [storeId, id], onDelete: Restrict, onUpdate: NoAction)
 }
 
 model StoreMembership {
-  storeId   String
-  userId    Int
-  role      MembershipRole @default(STAFF)
-  createdAt DateTime       @default(now())
-  store     Store          @relation(fields: [storeId], references: [id], onDelete: Restrict)
-  user      User           @relation(fields: [userId], references: [id], onDelete: Restrict)
-
+  storeId String
+  userId Int
+  role MembershipRole @default(STAFF)
+  createdAt DateTime @default(now())
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
   @@id([storeId, userId])
   @@index([userId])
 }
 
 model StoreSettings {
-  storeId      String  @id
+  storeId String @id
   contactEmail String?
-  timezone     String  @default("UTC")
-  store        Store   @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  timezone String @default("UTC")
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
 }
 
 model StoreDomain {
-  id         String    @id @default(uuid())
-  storeId    String
-  hostname   String    @unique
+  id String @id @default(uuid())
+  storeId String
+  hostname String @unique
   verifiedAt DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  store      Store     @relation(fields: [storeId], references: [id], onDelete: Restrict)
-
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
   @@index([storeId])
 }
 
-model StorefrontDraft {
-  storeId   String   @id
-  revision  Int      @default(0)
-  document  Json
+model Product {
+  id String @id @default(uuid())
+  storeId String
+  title String
+  description String @default("")
+  status ProductStatus @default(DRAFT)
+  slug String
+  vendor String?
+  productType String?
+  tags String[] @default([])
+  externalId String?
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  store     Store    @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  variants ProductVariant[]
+  collections CollectionProduct[]
+  media ProductMedia[]
+  @@unique([storeId, id])
+  @@unique([storeId, slug])
+  @@unique([storeId, externalId])
+  @@index([storeId, status])
+}
+
+model ProductVariant {
+  id String @id @default(uuid())
+  storeId String
+  productId String
+  title String
+  sku String?
+  priceMinor Int
+  compareAtPriceMinor Int?
+  weightGrams Int?
+  options Json
+  trackInventory Boolean @default(true)
+  externalId String?
+  archivedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product Product @relation(fields: [storeId, productId], references: [storeId, id], onDelete: Restrict)
+  inventory InventoryLevel?
+  @@unique([storeId, id])
+  @@unique([storeId, sku])
+  @@unique([storeId, externalId])
+  @@index([storeId, productId])
+}
+
+model InventoryLevel {
+  storeId String
+  variantId String
+  quantity Int @default(0)
+  reserved Int @default(0)
+  updatedAt DateTime @updatedAt
+  variant ProductVariant @relation(fields: [storeId, variantId], references: [storeId, id], onDelete: Restrict)
+  @@id([storeId, variantId])
+}
+
+model Collection {
+  id String @id @default(uuid())
+  storeId String
+  title String
+  slug String
+  description String @default("")
+  externalId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  products CollectionProduct[]
+  @@unique([storeId, id])
+  @@unique([storeId, slug])
+  @@unique([storeId, externalId])
+}
+
+model CollectionProduct {
+  storeId String
+  collectionId String
+  productId String
+  position Int @default(0)
+  collection Collection @relation(fields: [storeId, collectionId], references: [storeId, id], onDelete: Restrict)
+  product Product @relation(fields: [storeId, productId], references: [storeId, id], onDelete: Restrict)
+  @@id([storeId, collectionId, productId])
+  @@index([storeId, productId])
+}
+
+model StorefrontWorkspace {
+  storeId String @id
+  generation Int @default(0)
+  updatedAt DateTime @updatedAt
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+}
+
+model StorefrontTemplate {
+  id String @id @default(uuid())
+  storeId String
+  revision Int @default(0)
+  type StorefrontTemplateType
+  handle String
+  name String
+  layout Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  assignments StorefrontTemplateAssignment[]
+  @@unique([storeId, id])
+  @@unique([storeId, type, handle])
+  @@index([storeId, type])
+}
+
+model GlobalSection {
+  id String @id @default(uuid())
+  storeId String
+  revision Int @default(0)
+  name String
+  section Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  @@unique([storeId, id])
+  @@index([storeId, name])
+}
+
+model SectionPreset {
+  id String @id @default(uuid())
+  storeId String
+  revision Int @default(0)
+  name String
+  section Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  @@unique([storeId, id])
+  @@index([storeId, name])
+}
+
+model NavigationMenu {
+  id String @id @default(uuid())
+  storeId String
+  revision Int @default(0)
+  name String
+  handle String
+  items Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  @@unique([storeId, id])
+  @@unique([storeId, handle])
+}
+
+model ThemeConfiguration {
+  storeId String @id
+  revision Int @default(0)
+  themeId String
+  settings Json
+  draftArtifactId String?
+  updatedAt DateTime @updatedAt
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+}
+
+model StorefrontTemplateAssignment {
+  storeId String
+  resourceType String
+  resourceId String
+  revision Int @default(0)
+  templateId String
+  updatedAt DateTime @updatedAt
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  template StorefrontTemplate @relation(fields: [storeId, templateId], references: [storeId, id], onDelete: Restrict)
+  @@id([storeId, resourceType, resourceId])
+  @@index([storeId, templateId])
+}
+
+model StorePage {
+  id String @id @default(uuid())
+  storeId String
+  title String
+  handle String
+  content Json
+  featuredMediaId String?
+  status ContentStatus @default(DRAFT)
+  seoTitle String?
+  seoDescription String?
+  socialMediaId String?
+  noindex Boolean @default(false)
+  canonicalOverride String?
+  publishedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  @@unique([storeId, id])
+  @@unique([storeId, handle])
+  @@index([storeId, status])
+}
+
+model Blog {
+  id String @id @default(uuid())
+  storeId String
+  title String
+  handle String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  articles Article[]
+  @@unique([storeId, id])
+  @@unique([storeId, handle])
+}
+
+model Article {
+  id String @id @default(uuid())
+  storeId String
+  blogId String
+  title String
+  handle String
+  excerpt String @default("")
+  content Json
+  featuredMediaId String?
+  status ContentStatus @default(DRAFT)
+  seoTitle String?
+  seoDescription String?
+  socialMediaId String?
+  noindex Boolean @default(false)
+  canonicalOverride String?
+  publishedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  blog Blog @relation(fields: [storeId, blogId], references: [storeId, id], onDelete: Restrict)
+  @@unique([storeId, id])
+  @@unique([storeId, blogId, handle])
+  @@index([storeId, status])
+}
+
+model StorefrontDraft {
+  storeId String @id
+  revision Int @default(0)
+  document Json
+  updatedAt DateTime @updatedAt
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
 }
 
 model StorefrontPublication {
-  id             String   @id @default(uuid())
-  storeId        String
+  id String @id @default(uuid())
+  storeId String
   sourceRevision Int
-  document       Json
-  publishedAt    DateTime @default(now())
-  store          Store    @relation("StorePublications", fields: [storeId], references: [id], onDelete: Restrict)
-  liveFor        Store[]  @relation("LivePublication")
-
+  sourceGeneration Int?
+  schemaVersion Int @default(3)
+  compilerVersion String?
+  document Json
+  dependencyManifest Json?
+  themeArtifactId String?
+  idempotencyKey String?
+  publishedAt DateTime @default(now())
+  store Store @relation("StorePublications", fields: [storeId], references: [id], onDelete: Restrict)
+  liveFor Store[] @relation("LivePublication")
   @@unique([storeId, id])
+  @@unique([storeId, idempotencyKey])
   @@index([storeId, publishedAt])
+}
+
+model AuditEvent {
+  id String @id @default(uuid())
+  storeId String
+  actorUserId Int
+  action String
+  subjectType String
+  subjectId String?
+  metadata Json?
+  createdAt DateTime @default(now())
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  actor User @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
+  @@index([storeId, createdAt])
+  @@index([actorUserId, createdAt])
+}
+
+model Media {
+  id String @id @default(uuid())
+  storeId String
+  type String
+  storageKey String
+  url String
+  mimeType String
+  byteSize Int
+  width Int?
+  height Int?
+  originalName String
+  altText String?
+  referenced Boolean @default(false)
+  createdAt DateTime @default(now())
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  products ProductMedia[]
+  @@unique([storeId, id])
+  @@unique([storeId, storageKey])
+  @@index([storeId, createdAt])
+}
+
+model ProductMedia {
+  storeId String
+  productId String
+  mediaId String
+  position Int @default(0)
+  altText String?
+  product Product @relation(fields: [storeId, productId], references: [storeId, id], onDelete: Restrict)
+  media Media @relation(fields: [storeId, mediaId], references: [storeId, id], onDelete: Restrict)
+  @@id([storeId, productId, mediaId])
+  @@index([storeId, mediaId])
+}
+
+model MetafieldDefinition {
+  id String @id @default(uuid())
+  storeId String
+  ownerType String
+  namespace String
+  key String
+  name String
+  description String?
+  type String
+  validations Json?
+  storefrontVisible Boolean @default(false)
+  origin String @default("jelly")
+  archivedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  values MetafieldValue[]
+  @@unique([storeId, id])
+  @@unique([storeId, ownerType, namespace, key])
+  @@index([storeId, ownerType, archivedAt])
+}
+
+model MetafieldValue {
+  id String @id @default(uuid())
+  storeId String
+  definitionId String
+  ownerId String
+  value Json
+  updatedAt DateTime @updatedAt
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  definition MetafieldDefinition @relation(fields: [storeId, definitionId], references: [storeId, id], onDelete: Restrict)
+  @@unique([storeId, definitionId, ownerId])
+  @@index([storeId, ownerId])
+}
+
+model MetaobjectDefinition {
+  id String @id @default(uuid())
+  storeId String
+  handle String
+  name String
+  storefrontVisible Boolean @default(false)
+  fields Json
+  archivedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  entries MetaobjectEntry[]
+  @@unique([storeId, id])
+  @@unique([storeId, handle])
+  @@index([storeId, archivedAt])
+}
+
+model MetaobjectEntry {
+  id String @id @default(uuid())
+  storeId String
+  definitionId String
+  handle String
+  displayName String
+  values Json
+  archivedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  store Store @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  definition MetaobjectDefinition @relation(fields: [storeId, definitionId], references: [storeId, id], onDelete: Restrict)
+  @@unique([storeId, id])
+  @@unique([storeId, definitionId, handle])
+  @@index([storeId, definitionId, archivedAt])
 }

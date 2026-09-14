@@ -1,13 +1,20 @@
 import { z } from "zod";
+import type { DynamicValueType } from "@jelly/storefront-schema";
 import type { SectionDefinition } from "../types";
 
 const home = ["home"] as const;
 const empty = z.object({}).passthrough();
+const stringTypes = ["string", "text"] satisfies DynamicValueType[];
+const richTextTypes = ["rich_text", "string", "text"] satisfies DynamicValueType[];
+const imageTypes = ["image"] satisfies DynamicValueType[];
+const productTypes = ["product_reference"] satisfies DynamicValueType[];
+const collectionTypes = ["collection_reference"] satisfies DynamicValueType[];
+const urlTypes = ["url"] satisfies DynamicValueType[];
 const contentAlignment = [{ type: "segmented" as const, key: "contentAlignment", label: "Content alignment", group: "layout" as const, responsive: true, options: ["left", "center", "right"].map((value) => ({ label: value, value })) }];
 const comprehensiveControls = [
-  { type: "text" as const, key: "eyebrow", label: "Eyebrow", group: "content" as const, maxLength: 80 },
-  { type: "textarea" as const, key: "summary", label: "Summary", group: "content" as const, maxLength: 500 },
-  { type: "rich-text" as const, key: "body", label: "Body", group: "content" as const, maxLength: 4000 },
+  { type: "text" as const, key: "eyebrow", label: "Eyebrow", group: "content" as const, maxLength: 80, dynamicTypes: stringTypes },
+  { type: "textarea" as const, key: "summary", label: "Summary", group: "content" as const, maxLength: 500, dynamicTypes: stringTypes },
+  { type: "rich-text" as const, key: "body", label: "Body", group: "content" as const, maxLength: 4000, dynamicTypes: richTextTypes },
   { type: "number" as const, key: "columns", label: "Columns", group: "layout" as const, min: 1, max: 6, step: 1 },
   { type: "range" as const, key: "overlay", label: "Overlay", group: "style" as const, min: 0, max: 100, step: 5, unit: "%" },
   { type: "select" as const, key: "layout", label: "Layout", group: "layout" as const, options: [{ label: "Full", value: "full" }] },
@@ -16,10 +23,10 @@ const comprehensiveControls = [
   { type: "color" as const, key: "background", label: "Background", group: "style" as const, allowAlpha: true },
   { type: "font" as const, key: "headingFont", label: "Heading font", group: "style" as const, role: "heading" as const },
   { type: "spacing" as const, key: "paddingTop", label: "Top spacing", group: "layout" as const, min: 0, max: 160 },
-  { type: "link" as const, key: "link", label: "Link", group: "advanced" as const },
-  { type: "image" as const, key: "image", label: "Image", group: "content" as const },
-  { type: "product" as const, key: "productId", label: "Product", group: "content" as const },
-  { type: "collection" as const, key: "collectionId", label: "Collection", group: "content" as const },
+  { type: "link" as const, key: "link", label: "Link", group: "advanced" as const, dynamicTypes: urlTypes },
+  { type: "image" as const, key: "image", label: "Image", group: "content" as const, dynamicTypes: imageTypes },
+  { type: "product" as const, key: "productId", label: "Product", group: "content" as const, dynamicTypes: productTypes },
+  { type: "collection" as const, key: "collectionId", label: "Collection", group: "content" as const, dynamicTypes: collectionTypes },
 ];
 
 const heroBlocks = [

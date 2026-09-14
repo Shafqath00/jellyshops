@@ -1,4 +1,4 @@
-export type StoreRole = "OWNER" | "ADMIN" | "DESIGNER" | "ORDER_MANAGER" | "STAFF";
+export type StoreRole = "OWNER" | "ADMIN" | "DESIGNER" | "DEVELOPER" | "ORDER_MANAGER" | "STAFF";
 
 export interface VerifiedMerchantIdentity {
   uid: string;

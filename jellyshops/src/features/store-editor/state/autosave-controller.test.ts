@@ -33,6 +33,22 @@ describe("autosave controller", () => {
     expect(save).toHaveBeenCalledTimes(2);
   });
 
+  it("saves different workspace resources independently", async () => {
+    vi.useFakeTimers();
+    const saved: Array<string | undefined> = [];
+    const controller = createAutosaveController({
+      save: async (resourceKey) => { saved.push(resourceKey); },
+      onStatus: vi.fn(),
+      delayMs: 700,
+    });
+
+    controller.changed("template:product-featured");
+    controller.changed("menu:main");
+    await controller.flush();
+
+    expect(saved).toEqual(["template:product-featured", "menu:main"]);
+  });
+
   it("keeps an error retryable", async () => {
     vi.useFakeTimers();
     const statuses: string[] = [];

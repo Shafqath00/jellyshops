@@ -16,4 +16,49 @@ describe("editor reducer", () => {
     expect(state.history.past).toHaveLength(1);
     expect(state.saveStatus).toBe("dirty");
   });
+
+  it("updates only the saved resource revision while advancing workspace generation", () => {
+    const document = createDefaultStorefrontDocument("store-demo");
+    let state = createEditorState(document, 0);
+    state = editorReducer(state, {
+      type: "load-workspace",
+      generation: 21,
+      resourceRevisions: {
+        "template:product-featured": 3,
+        "menu:main": 7,
+      },
+    });
+
+    state = editorReducer(state, {
+      type: "resource-saved",
+      resourceKey: "template:product-featured",
+      revision: 4,
+      generation: 22,
+    });
+
+    expect(state.generation).toBe(22);
+    expect(state.resourceRevisions["template:product-featured"]).toBe(4);
+    expect(state.resourceRevisions["menu:main"]).toBe(7);
+  });
+
+  it("refreshes generation and diagnostics after WORKSPACE_CHANGED without overwriting local edits", () => {
+    const document = createDefaultStorefrontDocument("store-demo");
+    const hero = document.regions.template[0];
+    let state = createEditorState(document, 0);
+    state = editorReducer(state, { type: "command", command: { type: "update-section-setting", region: "template", sectionId: hero.id, key: "background", value: "#fff" } });
+    const editedDocument = state.history.present;
+    const history = state.history;
+
+    state = editorReducer(state, {
+      type: "workspace-refreshed",
+      generation: 23,
+      diagnostics: [{ severity: "error", code: "WORKSPACE_CHANGED", message: "Workspace changed", location: { entityType: "workspace" } }],
+    });
+
+    expect(state.generation).toBe(23);
+    expect(state.publishDiagnostics[0]?.code).toBe("WORKSPACE_CHANGED");
+    expect(state.history).toBe(history);
+    expect(state.history.present).toBe(editedDocument);
+    expect(state.saveStatus).toBe("dirty");
+  });
 });

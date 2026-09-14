@@ -1,4 +1,3 @@
-import { createDefaultStorefrontDocument } from "@jelly/storefront-schema";
 import { describe, expect, it, vi } from "vitest";
 import { createStoreEditorApi } from "./client";
 
@@ -7,32 +6,109 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 describe("store editor API client", () => {
-  it("sends the demo token and expected revision", async () => {
-    const document = createDefaultStorefrontDocument("store-demo");
-    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ storeId: "store-demo", revision: 4, document }));
+  it("saves only the edited template revision and receives the new workspace generation", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({
+      template: {
+        id: "product-featured",
+        storeId: "store-demo",
+        revision: 4,
+        type: "product",
+        handle: "featured",
+        name: "Featured product",
+        layout: { sections: [] },
+      },
+      generation: 22,
+    }));
     const api = createStoreEditorApi({ baseUrl: "http://localhost:3001", token: "jelly-demo-merchant", fetch: fetchMock });
 
-    await api.saveDraft("store-demo", 3, document);
+    const result = await api.updateTemplate("store-demo", "product-featured", 3, {
+      layout: { sections: [{ kind: "inline", section: { id: "hero-1" } }] },
+    });
 
+    expect(result.template.revision).toBe(4);
+    expect(result.generation).toBe(22);
     expect(fetchMock).toHaveBeenCalledWith(
-      "http://localhost:3001/api/stores/store-demo/storefront/draft",
+      "http://localhost:3001/api/stores/store-demo/storefront/templates/product-featured",
       expect.objectContaining({
-        method: "PUT",
+        method: "PATCH",
         headers: expect.objectContaining({ Authorization: "Bearer jelly-demo-merchant" }),
-        body: JSON.stringify({ expectedRevision: 3, document }),
+        body: JSON.stringify({
+          expectedRevision: 3,
+          layout: { sections: [{ kind: "inline", section: { id: "hero-1" } }] },
+        }),
       }),
     );
   });
 
-  it("surfaces revision conflicts without discarding details", async () => {
+  it("loads dynamic sources by template context and accepted value types", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse([]));
+    const api = createStoreEditorApi({ baseUrl: "http://localhost:3001", token: "jelly-demo-merchant", fetch: fetchMock });
+
+    await api.listDynamicSources("store-demo", "product", ["string", "image"]);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:3001/api/stores/store-demo/custom-data/dynamic-sources?context=product&accepts=string%2Cimage",
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: "Bearer jelly-demo-merchant" }) }),
+    );
+  });
+
+  it("loads saved section presets from the normalized workspace", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse([]));
+    const api = createStoreEditorApi({ baseUrl: "http://localhost:3001", token: "jelly-demo-merchant", fetch: fetchMock });
+
+    await api.listPresets("store-demo");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:3001/api/stores/store-demo/storefront/presets",
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: "Bearer jelly-demo-merchant" }) }),
+    );
+  });
+
+  it("returns compiler diagnostics from an intentional 422 validation response", async () => {
+    const diagnostics = [{ severity: "error", code: "BINDING_INVALID", message: "Bad binding", location: { entityType: "template", entityId: "home-default" } }];
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ ok: false, diagnostics, dependencies: { edges: [] } }, 422));
+    const api = createStoreEditorApi({ baseUrl: "http://localhost:3001", token: "jelly-demo-merchant", fetch: fetchMock });
+
+    await expect(api.validate("store-demo", 22)).resolves.toEqual({ ok: false, diagnostics, dependencies: { edges: [] } });
+  });
+
+  it("publishes by workspace generation with an idempotency key", async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse({
-      error: { code: "DRAFT_CONFLICT", message: "Stale draft", currentRevision: 5, requestId: "request-1" },
+      ok: true,
+      publication: { id: "publication-1", storeId: "store-demo", sourceGeneration: 22 },
+      diagnostics: [],
+      reused: false,
+    }, 201));
+    const api = createStoreEditorApi({ baseUrl: "http://localhost:3001", token: "jelly-demo-merchant", fetch: fetchMock });
+
+    await api.publish("store-demo", 22, "publish-abc");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:3001/api/stores/store-demo/storefront/publish",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ expectedGeneration: 22, idempotencyKey: "publish-abc" }),
+      }),
+    );
+  });
+
+  it("returns publish diagnostics when strict compilation blocks publication", async () => {
+    const diagnostics = [{ severity: "error", code: "REFERENCE_MISSING", message: "Menu missing", location: { entityType: "menu", entityId: "main" } }];
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ ok: false, diagnostics }, 422));
+    const api = createStoreEditorApi({ baseUrl: "http://localhost:3001", token: "jelly-demo-merchant", fetch: fetchMock });
+
+    await expect(api.publish("store-demo", 22, "publish-bad")).resolves.toEqual({ ok: false, diagnostics });
+  });
+
+  it("surfaces resource revision conflicts without discarding details", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({
+      error: { code: "RESOURCE_REVISION_CONFLICT", message: "Stale template", currentRevision: 5, requestId: "request-1" },
     }, 409));
     const api = createStoreEditorApi({ baseUrl: "http://localhost:3001", token: "jelly-demo-merchant", fetch: fetchMock });
 
-    await expect(api.saveDraft("store-demo", 4, createDefaultStorefrontDocument("store-demo"))).rejects.toMatchObject({
+    await expect(api.updateTemplate("store-demo", "product-featured", 4, { name: "Featured" })).rejects.toMatchObject({
       status: 409,
-      code: "DRAFT_CONFLICT",
+      code: "RESOURCE_REVISION_CONFLICT",
       currentRevision: 5,
     });
   });

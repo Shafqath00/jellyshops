@@ -1,4 +1,4 @@
-import type { StorefrontDocument } from "@jelly/storefront-schema";
+import type { CompilationDiagnostic, StorefrontDocument } from "@jelly/storefront-schema";
 import type { EditorCommand, EditorHistory, EditorSelection } from "../model/types";
 
 export type SaveStatus = "loading" | "saved" | "dirty" | "saving" | "error" | "conflict" | "publishing" | "published";
@@ -9,6 +9,9 @@ export interface EditorState {
   selection: EditorSelection;
   viewport: EditorViewport;
   revision: number;
+  generation: number;
+  resourceRevisions: Record<string, number>;
+  publishDiagnostics: CompilationDiagnostic[];
   saveStatus: SaveStatus;
   validationIssues: ValidationIssue[];
   activeUploads: number;
@@ -20,6 +23,10 @@ export type EditorAction =
   | { type: "select"; selection: EditorSelection }
   | { type: "set-viewport"; viewport: EditorViewport }
   | { type: "load-document"; document: StorefrontDocument; revision: number }
+  | { type: "load-workspace"; generation: number; resourceRevisions: Record<string, number> }
+  | { type: "resource-saved"; resourceKey: string; revision: number; generation: number }
+  | { type: "workspace-refreshed"; generation: number; diagnostics: CompilationDiagnostic[] }
+  | { type: "set-publish-diagnostics"; diagnostics: CompilationDiagnostic[] }
   | { type: "set-active-page"; pageId: string }
   | { type: "undo" }
   | { type: "redo" }

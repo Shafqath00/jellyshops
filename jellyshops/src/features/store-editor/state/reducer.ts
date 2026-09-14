@@ -25,7 +25,20 @@ function synchronizeHomeTemplate(
 
 export function createEditorState(document: StorefrontDocument, revision: number): EditorState {
   const synchronized = synchronizeHomeTemplate(document);
-  return { history: createHistory(synchronized), selection: null, viewport: "desktop", revision, saveStatus: "saved", validationIssues: [], activeUploads: 0, focusRequestId: 0, activePageId: synchronized.pages.find((page) => page.type === "home")?.id ?? synchronized.pages[0].id };
+  return {
+    history: createHistory(synchronized),
+    selection: null,
+    viewport: "desktop",
+    revision,
+    generation: 0,
+    resourceRevisions: {},
+    publishDiagnostics: [],
+    saveStatus: "saved",
+    validationIssues: [],
+    activeUploads: 0,
+    focusRequestId: 0,
+    activePageId: synchronized.pages.find((page) => page.type === "home")?.id ?? synchronized.pages[0].id,
+  };
 }
 
 export function editorReducer(state: EditorState, action: EditorAction): EditorState {
@@ -40,16 +53,42 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
   if (action.type === "load-document") {
     const document = synchronizeHomeTemplate(action.document);
     return {
-    ...state,
-    history: createHistory(document),
-    selection: reconcileSelection(document, state.selection),
-    revision: action.revision,
-    saveStatus: "saved",
-    activePageId: document.pages.some((page) => page.id === state.activePageId)
-      ? state.activePageId
-      : document.pages.find((page) => page.type === "home")?.id ?? document.pages[0].id,
+      ...state,
+      history: createHistory(document),
+      selection: reconcileSelection(document, state.selection),
+      revision: action.revision,
+      saveStatus: "saved",
+      activePageId: document.pages.some((page) => page.id === state.activePageId)
+        ? state.activePageId
+        : document.pages.find((page) => page.type === "home")?.id ?? document.pages[0].id,
     };
   }
+  if (action.type === "load-workspace") {
+    return {
+      ...state,
+      generation: action.generation,
+      resourceRevisions: { ...action.resourceRevisions },
+    };
+  }
+  if (action.type === "resource-saved") {
+    return {
+      ...state,
+      generation: action.generation,
+      resourceRevisions: {
+        ...state.resourceRevisions,
+        [action.resourceKey]: action.revision,
+      },
+      saveStatus: "saved",
+    };
+  }
+  if (action.type === "workspace-refreshed") {
+    return {
+      ...state,
+      generation: action.generation,
+      publishDiagnostics: [...action.diagnostics],
+    };
+  }
+  if (action.type === "set-publish-diagnostics") return { ...state, publishDiagnostics: [...action.diagnostics] };
   if (action.type === "set-active-page") {
     if (!state.history.present.pages.some((page) => page.id === action.pageId)) return state;
     return { ...state, activePageId: action.pageId, selection: null };

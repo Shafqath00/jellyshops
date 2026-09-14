@@ -22,6 +22,13 @@ export const notFoundHandler: RequestHandler = (_request, _response, next) => {
 };
 
 export const errorHandler: ErrorRequestHandler = (error, request, response, _next) => {
+  const currentRevision = typeof (error as { currentRevision?: unknown }).currentRevision === "number"
+    ? (error as { currentRevision: number }).currentRevision
+    : undefined;
+  const currentGeneration = typeof (error as { currentGeneration?: unknown }).currentGeneration === "number"
+    ? (error as { currentGeneration: number }).currentGeneration
+    : undefined;
+
   const apiError = error instanceof ApiError
     ? error
     : error instanceof z.ZodError
@@ -34,16 +41,19 @@ export const errorHandler: ErrorRequestHandler = (error, request, response, _nex
           message: issue.message,
         })),
       )
-      : new ApiError(500, "INTERNAL_ERROR", "An unexpected error occurred");
+      : currentRevision !== undefined
+        ? new ApiError(409, "RESOURCE_REVISION_CONFLICT", "The storefront resource changed since it was loaded")
+        : currentGeneration !== undefined
+          ? new ApiError(409, "WORKSPACE_GENERATION_CONFLICT", "The storefront workspace changed since it was loaded")
+          : new ApiError(500, "INTERNAL_ERROR", "An unexpected error occurred");
 
   response.status(apiError.status).json({
     error: {
       code: apiError.code,
       message: apiError.message,
       ...(apiError.issues ? { issues: apiError.issues } : {}),
-      ...(typeof (error as { currentRevision?: unknown }).currentRevision === "number"
-        ? { currentRevision: (error as { currentRevision: number }).currentRevision }
-        : {}),
+      ...(currentRevision !== undefined ? { currentRevision } : {}),
+      ...(currentGeneration !== undefined ? { currentGeneration } : {}),
       requestId: request.id,
     },
   });

@@ -4,7 +4,7 @@ import type { ControlDefinition } from "@jelly/storefront-registry";
 import { SettingGroups } from "./setting-groups";
 
 const controls: ControlDefinition[] = [
-  { type: "text", key: "heading", label: "Heading", group: "content", maxLength: 120 },
+  { type: "text", key: "heading", label: "Heading", group: "content", maxLength: 120, dynamicTypes: ["string"] },
   { type: "spacing", key: "padding", label: "Padding", group: "layout", min: 0, max: 120 },
   { type: "color", key: "background", label: "Background", group: "style", allowAlpha: true },
   { type: "link", key: "link", label: "Link", group: "advanced" },
@@ -19,5 +19,25 @@ describe("setting groups", () => {
     expect(screen.getByRole("heading", { name: "Style" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Advanced" })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Heading" })).toHaveValue("Fresh jelly");
+  });
+
+  it("shows a dynamic binding fallback in its static control", () => {
+    render(
+      <SettingGroups
+        controls={controls}
+        settings={{
+          heading: {
+            kind: "dynamic",
+            binding: { kind: "resource_field", resource: "product", field: "title" },
+            fallback: "Fallback title",
+          },
+        }}
+        catalog={{ products: [], collections: [] }}
+        dynamicSources={[]}
+        onChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("textbox", { name: "Heading" })).toHaveValue("Fallback title");
   });
 });

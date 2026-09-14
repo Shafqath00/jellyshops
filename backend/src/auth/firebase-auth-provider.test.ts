@@ -32,7 +32,7 @@ describe("FirebaseAuthProvider", () => {
     });
 
     await expect(provider.verify("client-id-token")).resolves.toEqual({
-      merchantId: "42",
+      userId: 42,
       storeIds: ["store-a", "store-b"],
       storeRoles: { "store-a": "ADMIN", "store-b": "STAFF" },
     });
@@ -126,7 +126,7 @@ describe("FirebaseAuthProvider", () => {
 
     await expect(provider.verify("token-one")).resolves.toMatchObject({ storeIds: ["removed-store"] });
     await expect(provider.verify("token-two")).resolves.toEqual({
-      merchantId: "9",
+      userId: 9,
       storeIds: [],
       storeRoles: {},
     });

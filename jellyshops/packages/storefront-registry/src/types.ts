@@ -1,10 +1,16 @@
-import type { BlockNode, PageType, SectionNode } from "@jelly/storefront-schema";
+import type { BlockNode, DynamicValueType, PageType, SectionNode } from "@jelly/storefront-schema";
 import type { ZodType } from "zod";
 
 export type ControlGroup = "content" | "layout" | "style" | "advanced";
 export type PresetCategory = "banners" | "products" | "content" | "marketing";
 export interface SectionPreset { id: string; label: string; category: PresetCategory; sectionType: string }
-interface ControlBase { key: string; label: string; group: ControlGroup; responsive?: boolean }
+interface ControlBase {
+  key: string;
+  label: string;
+  group: ControlGroup;
+  responsive?: boolean;
+  dynamicTypes?: DynamicValueType[];
+}
 export type ControlDefinition =
   | (ControlBase & { type: "text" | "textarea" | "rich-text"; maxLength: number })
   | (ControlBase & { type: "number" | "range"; min: number; max: number; step: number; unit?: string })

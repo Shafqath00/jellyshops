@@ -4,7 +4,10 @@ import type { AuthProvider, MerchantPrincipal } from "./types.js";
 export const DEMO_TOKEN = "jelly-demo-merchant";
 
 export class DevelopmentAuthProvider implements AuthProvider {
-  constructor(private readonly storeId: string) {}
+  constructor(
+    private readonly storeId: string,
+    private readonly userId = 0,
+  ) {}
 
   async verify(token: string): Promise<MerchantPrincipal> {
     if (token !== DEMO_TOKEN) {
@@ -12,7 +15,7 @@ export class DevelopmentAuthProvider implements AuthProvider {
     }
 
     return {
-      merchantId: "merchant-demo",
+      userId: this.userId,
       storeIds: [this.storeId],
       storeRoles: { [this.storeId]: "OWNER" },
     };

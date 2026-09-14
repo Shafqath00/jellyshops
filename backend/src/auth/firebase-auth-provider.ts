@@ -51,7 +51,7 @@ export class FirebaseAuthProvider implements AuthProvider {
     });
     const storeRoles = Object.fromEntries(account.stores.map((store) => [store.id, store.role]));
     return {
-      merchantId: String(account.id),
+      userId: account.id,
       storeIds: account.stores.map((store) => store.id),
       storeRoles,
     };

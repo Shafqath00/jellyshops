@@ -2,10 +2,10 @@ import express from "express";
 import request from "supertest";
 import { describe, expect, it, vi } from "vitest";
 import type { AuthProvider, MerchantPrincipal, StorePermission } from "./types.js";
-import { requireMerchant, requireStoreAccess } from "./middleware.js";
+import { requireMerchant, requireStorePermission } from "./middleware.js";
 import { errorHandler } from "../http/errors.js";
 
-function createProtectedApp(principal: MerchantPrincipal, permission?: StorePermission) {
+function createProtectedApp(principal: MerchantPrincipal, permission: StorePermission) {
   const app = express();
   app.use((request, _response, next) => {
     request.id = "request-test";
@@ -14,26 +14,27 @@ function createProtectedApp(principal: MerchantPrincipal, permission?: StorePerm
   app.get(
     "/api/stores/:storeId/private-check",
     requireMerchant({ verify: async () => principal } satisfies AuthProvider),
-    requireStoreAccess(permission),
-    (_request, response) => response.sendStatus(204),
+    requireStorePermission(permission),
+    (request, response) => response.status(200).json(request.storeContext),
   );
   app.use(errorHandler);
   return app;
 }
 
 describe("merchant authentication", () => {
-  const owner = {
-    merchantId: "merchant-demo",
+  const owner: MerchantPrincipal = {
+    userId: 1,
     storeIds: ["store-demo"],
-    storeRoles: { "store-demo": "OWNER" as const },
+    storeRoles: { "store-demo": "OWNER" },
   };
 
-  it("accepts the configured demo token for its store", async () => {
-    const response = await request(createProtectedApp(owner))
+  it("accepts an authorized store and attaches its request context", async () => {
+    const response = await request(createProtectedApp(owner, "storefront:view"))
       .get("/api/stores/store-demo/private-check")
       .set("Authorization", "Bearer jelly-demo-merchant");
 
-    expect(response.status).toBe(204);
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ storeId: "store-demo", userId: 1, role: "OWNER" });
   });
 
   it("rejects a missing bearer token without calling the provider", async () => {
@@ -50,7 +51,7 @@ describe("merchant authentication", () => {
   });
 
   it("rejects a valid merchant for another store", async () => {
-    const response = await request(createProtectedApp(owner))
+    const response = await request(createProtectedApp(owner, "storefront:view"))
       .get("/api/stores/store-other/private-check")
       .set("Authorization", "Bearer jelly-demo-merchant");
 
@@ -59,16 +60,19 @@ describe("merchant authentication", () => {
   });
 
   it.each([
-    ["OWNER", "storefront:write", 204],
-    ["ADMIN", "media:write", 204],
-    ["DESIGNER", "storefront:write", 204],
-    ["STAFF", "storefront:read", 204],
-    ["ORDER_MANAGER", "media:read", 204],
-    ["STAFF", "storefront:write", 403],
-    ["ORDER_MANAGER", "media:write", 403],
+    ["OWNER", "storefront:publish", 200],
+    ["ADMIN", "storefront:publish", 200],
+    ["DESIGNER", "storefront:edit", 200],
+    ["DESIGNER", "storefront:publish", 403],
+    ["DEVELOPER", "developer:build", 200],
+    ["DEVELOPER", "developer:publish", 403],
+    ["STAFF", "content:view", 200],
+    ["STAFF", "storefront:edit", 403],
+    ["ORDER_MANAGER", "catalog:view", 200],
+    ["ORDER_MANAGER", "storefront:edit", 403],
   ] as const)("applies %s permissions for %s", async (role, permission, expectedStatus) => {
     const principal: MerchantPrincipal = {
-      merchantId: "merchant-role",
+      userId: 2,
       storeIds: ["store-demo"],
       storeRoles: { "store-demo": role },
     };
@@ -81,10 +85,10 @@ describe("merchant authentication", () => {
 
   it("denies permission when a membership has no role", async () => {
     const response = await request(createProtectedApp({
-      merchantId: "merchant-missing-role",
+      userId: 3,
       storeIds: ["store-demo"],
       storeRoles: {},
-    }, "storefront:read"))
+    }, "storefront:view"))
       .get("/api/stores/store-demo/private-check")
       .set("Authorization", "Bearer token");
 
