@@ -1,5 +1,11 @@
 export type ProductStatus = "DRAFT" | "ACTIVE" | "ARCHIVED";
 
+/** A requested stock hold; availability is decided by conditional SQL writes. */
+export interface CatalogInventoryQuantity {
+  variantId: string;
+  quantity: number;
+}
+
 export interface CatalogMedia {
   id: string;
   url: string;
