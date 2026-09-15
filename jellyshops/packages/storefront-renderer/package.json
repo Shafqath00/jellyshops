@@ -1,0 +1,17 @@
+{
+  "name": "@jelly/storefront-renderer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@jelly/storefront-schema": "0.1.0",
+    "@jelly/storefront-themes": "0.1.0",
+    "@jelly/storefront-ui": "0.1.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}

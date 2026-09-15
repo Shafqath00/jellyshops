@@ -1,0 +1,13 @@
+{
+  "name": "@jelly/storefront-themes",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@jelly/storefront-registry": "0.1.0",
+    "@jelly/storefront-schema": "0.1.0"
+  }
+}
