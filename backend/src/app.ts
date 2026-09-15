@@ -33,6 +33,8 @@ import { createMerchantRouter } from "./tenants/routes.js";
 import type { TenantRepository } from "./tenants/repository.js";
 import { createStripeConnectRouter } from "./stripe/accounts/routes.js";
 import type { StripeAccountService } from "./stripe/accounts/service.js";
+import { createCommerceRouter } from "./commerce/routes.js";
+import type { CheckoutService } from "./commerce/service.js";
 import type { GlobalSettings, SectionNode, StorefrontDocument, ThemeId } from "@jelly/storefront-schema";
 
 declare global {
@@ -61,6 +63,7 @@ export interface AppDependencies {
   storefrontPublicationApi: StorefrontPublicationApi;
   publicStorefrontApi: PublicStorefrontApi;
   stripeAccountService?: StripeAccountService;
+  checkoutService?: CheckoutService;
 }
 
 export interface PublicStorefrontApi {
@@ -272,6 +275,12 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
     app.use(
       "/api/stores/:storeId/stripe-connect",
       createStripeConnectRouter(dependencies.stripeAccountService, authProvider),
+    );
+  }
+  if (dependencies.checkoutService) {
+    app.use(
+      "/api/public/stores/:storeId/checkout",
+      createCommerceRouter(dependencies.checkoutService),
     );
   }
 
