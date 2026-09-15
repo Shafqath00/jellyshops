@@ -1,17 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { createIntegrationDatabase, type IntegrationDatabase } from "./database.js";
-
-async function seedStore(database: IntegrationDatabase, id: string, slug: string) {
-  return database.database.client.store.create({
-    data: { id, name: id, slug, currency: "USD", country: "US" },
-  });
-}
+import { createPGliteDatabase, seedStore, type IntegrationDatabase } from "./pglite.js";
 
 describe("normalized storefront workspace schema", () => {
   let integration: IntegrationDatabase;
 
   beforeEach(async () => {
-    integration = await createIntegrationDatabase();
+    integration = await createPGliteDatabase();
     await seedStore(integration, "store-a", "store-a");
     await seedStore(integration, "store-b", "store-b");
   });
@@ -19,54 +13,42 @@ describe("normalized storefront workspace schema", () => {
   afterEach(async () => integration.close());
 
   it("allows only one workspace and theme configuration per store", async () => {
-    await integration.database.client.storefrontWorkspace.create({ data: { storeId: "store-a" } });
-    await expect(integration.database.client.storefrontWorkspace.create({ data: { storeId: "store-a" } }))
+    await integration.query(`INSERT INTO "StorefrontWorkspace" ("storeId", "updatedAt") VALUES ($1, CURRENT_TIMESTAMP)`, ["store-a"]);
+    await expect(integration.query(`INSERT INTO "StorefrontWorkspace" ("storeId", "updatedAt") VALUES ($1, CURRENT_TIMESTAMP)`, ["store-a"]))
       .rejects.toBeTruthy();
 
-    await integration.database.client.themeConfiguration.create({
-      data: { storeId: "store-a", themeId: "minimal", settings: {} },
-    });
-    await expect(integration.database.client.themeConfiguration.create({
-      data: { storeId: "store-a", themeId: "classic", settings: {} },
-    })).rejects.toBeTruthy();
+    await integration.query(`INSERT INTO "ThemeConfiguration" ("storeId", "themeId", "settings", "updatedAt") VALUES ($1, $2, $3::jsonb, CURRENT_TIMESTAMP)`, ["store-a", "minimal", "{}"]);
+    await expect(integration.query(`INSERT INTO "ThemeConfiguration" ("storeId", "themeId", "settings", "updatedAt") VALUES ($1, $2, $3::jsonb, CURRENT_TIMESTAMP)`, ["store-a", "classic", "{}"])).rejects.toBeTruthy();
   });
 
   it("scopes template handles by store and resource type", async () => {
     const template = { type: "PRODUCT" as const, handle: "default", name: "Default product", layout: { sections: [] } };
-    await integration.database.client.storefrontTemplate.create({ data: { storeId: "store-a", ...template } });
-    await integration.database.client.storefrontTemplate.create({ data: { storeId: "store-b", ...template } });
-    await integration.database.client.storefrontTemplate.create({
-      data: { storeId: "store-a", type: "PAGE", handle: "default", name: "Default page", layout: { sections: [] } },
-    });
-    await expect(integration.database.client.storefrontTemplate.create({ data: { storeId: "store-a", ...template } }))
+    await integration.query(`INSERT INTO "StorefrontTemplate" ("id", "storeId", "type", "handle", "name", "layout", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6::jsonb, CURRENT_TIMESTAMP)`, ["template-a-product", "store-a", template.type, template.handle, template.name, JSON.stringify(template.layout)]);
+    await integration.query(`INSERT INTO "StorefrontTemplate" ("id", "storeId", "type", "handle", "name", "layout", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6::jsonb, CURRENT_TIMESTAMP)`, ["template-b-product", "store-b", template.type, template.handle, template.name, JSON.stringify(template.layout)]);
+    await integration.query(`INSERT INTO "StorefrontTemplate" ("id", "storeId", "type", "handle", "name", "layout", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6::jsonb, CURRENT_TIMESTAMP)`, ["template-a-page", "store-a", "PAGE", "default", "Default page", JSON.stringify({ sections: [] })]);
+    await expect(integration.query(`INSERT INTO "StorefrontTemplate" ("id", "storeId", "type", "handle", "name", "layout", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6::jsonb, CURRENT_TIMESTAMP)`, ["template-a-duplicate", "store-a", template.type, template.handle, template.name, JSON.stringify(template.layout)]))
       .rejects.toBeTruthy();
   });
 
   it("rejects cross-store template assignments structurally", async () => {
-    const template = await integration.database.client.storefrontTemplate.create({
-      data: { storeId: "store-b", type: "PRODUCT", handle: "default", name: "Default", layout: { sections: [] } },
-    });
-    await expect(integration.database.client.storefrontTemplateAssignment.create({
-      data: { storeId: "store-a", resourceType: "product", resourceId: "product-a", templateId: template.id },
-    })).rejects.toBeTruthy();
+    await integration.query(`INSERT INTO "StorefrontTemplate" ("id", "storeId", "type", "handle", "name", "layout", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6::jsonb, CURRENT_TIMESTAMP)`, ["template-b", "store-b", "PRODUCT", "default", "Default", JSON.stringify({ sections: [] })]);
+    await expect(integration.query(`INSERT INTO "StorefrontTemplateAssignment" ("storeId", "resourceType", "resourceId", "templateId", "updatedAt") VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)`, ["store-a", "product", "product-a", "template-b"])).rejects.toBeTruthy();
   });
 
   it("allows the same page and blog handles in separate stores but not within one store", async () => {
-    await integration.database.client.storePage.create({ data: { storeId: "store-a", title: "About", handle: "about", content: {} } });
-    await integration.database.client.storePage.create({ data: { storeId: "store-b", title: "About", handle: "about", content: {} } });
-    await expect(integration.database.client.storePage.create({ data: { storeId: "store-a", title: "Again", handle: "about", content: {} } }))
+    await integration.query(`INSERT INTO "StorePage" ("id", "storeId", "title", "handle", "content", "updatedAt") VALUES ($1, $2, $3, $4, $5::jsonb, CURRENT_TIMESTAMP)`, ["page-a", "store-a", "About", "about", "{}"]);
+    await integration.query(`INSERT INTO "StorePage" ("id", "storeId", "title", "handle", "content", "updatedAt") VALUES ($1, $2, $3, $4, $5::jsonb, CURRENT_TIMESTAMP)`, ["page-b", "store-b", "About", "about", "{}"]);
+    await expect(integration.query(`INSERT INTO "StorePage" ("id", "storeId", "title", "handle", "content", "updatedAt") VALUES ($1, $2, $3, $4, $5::jsonb, CURRENT_TIMESTAMP)`, ["page-a-duplicate", "store-a", "Again", "about", "{}"]))
       .rejects.toBeTruthy();
 
-    await integration.database.client.blog.create({ data: { storeId: "store-a", title: "Journal", handle: "journal" } });
-    await integration.database.client.blog.create({ data: { storeId: "store-b", title: "Journal", handle: "journal" } });
+    await integration.query(`INSERT INTO "Blog" ("id", "storeId", "title", "handle", "updatedAt") VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)`, ["blog-a", "store-a", "Journal", "journal"]);
+    await integration.query(`INSERT INTO "Blog" ("id", "storeId", "title", "handle", "updatedAt") VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)`, ["blog-b", "store-b", "Journal", "journal"]);
   });
 
   it("starts workspace generation and resource revisions at zero", async () => {
-    const workspace = await integration.database.client.storefrontWorkspace.create({ data: { storeId: "store-a" } });
-    const template = await integration.database.client.storefrontTemplate.create({
-      data: { storeId: "store-a", type: "HOME", handle: "default", name: "Home", layout: { sections: [] } },
-    });
-    expect(workspace.generation).toBe(0);
-    expect(template.revision).toBe(0);
+    const workspace = await integration.query<{ generation: number }>(`INSERT INTO "StorefrontWorkspace" ("storeId", "updatedAt") VALUES ($1, CURRENT_TIMESTAMP) RETURNING "generation"`, ["store-a"]);
+    const template = await integration.query<{ revision: number }>(`INSERT INTO "StorefrontTemplate" ("id", "storeId", "type", "handle", "name", "layout", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6::jsonb, CURRENT_TIMESTAMP) RETURNING "revision"`, ["template-a", "store-a", "HOME", "default", "Home", JSON.stringify({ sections: [] })]);
+    expect(workspace.rows[0]?.generation).toBe(0);
+    expect(template.rows[0]?.revision).toBe(0);
   });
 });
