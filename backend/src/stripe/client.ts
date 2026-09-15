@@ -9,7 +9,8 @@ export interface ConnectedAccountRequest {
 
 export interface CreateAccountInput {
   storeId: string;
-  contactEmail: string;
+  /** Optional — only include when a trustworthy server-owned email is available. */
+  contactEmail?: string;
   displayName: string;
   country: string;
 }
@@ -96,7 +97,8 @@ export function createStripeGateway(
   return {
     createAccountV2(input, idempotencyKey) {
       return stripe.v2.core.accounts.create({
-        contact_email: input.contactEmail, display_name: input.displayName, identity: { country: input.country },
+        ...(input.contactEmail ? { contact_email: input.contactEmail } : {}),
+        display_name: input.displayName, identity: { country: input.country },
         dashboard: "full",
         defaults: { responsibilities: { fees_collector: "stripe", losses_collector: "stripe" } },
         configuration: { merchant: { capabilities: { card_payments: { requested: true } } } },

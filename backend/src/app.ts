@@ -31,6 +31,8 @@ import { createStorefrontWorkspaceRouter, type StorefrontWorkspaceApi } from "./
 import { updateSupabaseTemplate } from "./storefront/workspace/supabase-template-store.js";
 import { createMerchantRouter } from "./tenants/routes.js";
 import type { TenantRepository } from "./tenants/repository.js";
+import { createStripeConnectRouter } from "./stripe/accounts/routes.js";
+import type { StripeAccountService } from "./stripe/accounts/service.js";
 import type { GlobalSettings, SectionNode, StorefrontDocument, ThemeId } from "@jelly/storefront-schema";
 
 declare global {
@@ -58,6 +60,7 @@ export interface AppDependencies {
   storefrontCompilerApi: StorefrontCompilerApi;
   storefrontPublicationApi: StorefrontPublicationApi;
   publicStorefrontApi: PublicStorefrontApi;
+  stripeAccountService?: StripeAccountService;
 }
 
 export interface PublicStorefrontApi {
@@ -264,6 +267,13 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
     } catch (error) { next(error); }
   });
   if (dependencies.tenantRepository) app.use("/api", createMerchantRouter(authProvider, dependencies.tenantRepository));
+
+  if (dependencies.stripeAccountService) {
+    app.use(
+      "/api/stores/:storeId/stripe-connect",
+      createStripeConnectRouter(dependencies.stripeAccountService, authProvider),
+    );
+  }
 
   app.use(
     "/api/stores/:storeId/storefront",

@@ -44,6 +44,23 @@ describe("Stripe server gateway", () => {
     });
   });
 
+  it("creates account without contact_email when contactEmail is absent — preserves all v2 configuration", async () => {
+    // Task 3 compatibility: contactEmail is optional; no server-owned email source available in Task 3.
+    const { gateway, requests } = setup();
+    await gateway.createAccountV2({ storeId: "store-1", displayName: "Shop", country: "US" }, "persisted-account-key-no-email");
+    expect(requests[0].url).toContain("/v2/core/accounts");
+    const body = JSON.parse(requests[0].body);
+    expect(body).not.toHaveProperty("contact_email");
+    expect(body).toMatchObject({
+      display_name: "Shop", identity: { country: "US" },
+      dashboard: "full", defaults: { responsibilities: { fees_collector: "stripe", losses_collector: "stripe" } },
+      configuration: { merchant: { capabilities: { card_payments: { requested: true } } } },
+      metadata: { jelly_store_id: "store-1" },
+    });
+    expect(body).not.toHaveProperty("type");
+    expect(body).not.toHaveProperty("application_fee_amount");
+  });
+
   it("uses v2 account links and includes readiness and requirements when retrieving state", async () => {
     const { gateway, requests } = setup();
     await gateway.createAccountLink({ connectedAccountId: "acct_merchant",
