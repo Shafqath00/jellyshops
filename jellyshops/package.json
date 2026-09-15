@@ -12,6 +12,7 @@
     "build": "next build",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "pretest": "npm run build --workspace @jelly/storefront-schema",
     "test": "vitest run",
     "test:unit": "vitest run",
     "test:watch": "vitest",

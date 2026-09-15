@@ -11,6 +11,7 @@
     "build:storefront-schema": "npm --prefix ../jellyshops/packages/storefront-schema run build",
     "build": "npm run build:storefront-schema && tsc",
     "start": "node index.js",
+    "pretest": "npm run build:storefront-schema",
     "test": "vitest run",
     "test:start": "node scripts/verify-built-server.mjs",
     "test:watch": "vitest",
