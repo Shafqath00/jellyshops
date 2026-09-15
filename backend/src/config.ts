@@ -2,6 +2,42 @@ import path from "node:path";
 import "dotenv/config";
 import { z } from "zod";
 
+// Kept in step with the exact Stripe SDK pin. No preview or account-default version.
+export const STRIPE_API_VERSION = "2026-08-26.dahlia" as const;
+
+/** Backend-only credentials. Never serialize AppConfig into an API response. */
+export interface StripeServerConfig {
+  secretKey: string;
+  apiVersion: typeof STRIPE_API_VERSION;
+  cardPaymentMethodConfigurationId: string;
+  accountsV2WebhookSecret: string;
+  connectPaymentsWebhookSecret: string;
+  schedulerSecret: string;
+}
+
+function loadStripeConfig(environment: NodeJS.ProcessEnv, production: boolean): StripeServerConfig | undefined {
+  const names = ["STRIPE_SECRET_KEY", "STRIPE_ACCOUNTS_V2_VERSION", "STRIPE_CARD_PAYMENT_METHOD_CONFIGURATION_ID",
+    "STRIPE_ACCOUNTS_V2_WEBHOOK_SECRET", "STRIPE_CONNECT_PAYMENTS_WEBHOOK_SECRET", "SCHEDULER_SECRET"] as const;
+  if (!production && !names.some((name) => environment[name]?.trim())) return undefined;
+  for (const name of names) {
+    if (!environment[name]?.trim()) throw new Error(`${name} is required when Stripe is configured or in production`);
+  }
+  const secretKey = environment.STRIPE_SECRET_KEY!.trim();
+  if (!/^[sr]k_(test|live)_[A-Za-z0-9]+$/.test(secretKey)) throw new Error("STRIPE_SECRET_KEY must be a server API key");
+  if (environment.STRIPE_ACCOUNTS_V2_VERSION !== STRIPE_API_VERSION) {
+    throw new Error(`STRIPE_ACCOUNTS_V2_VERSION must match the supported SDK version (${STRIPE_API_VERSION})`);
+  }
+  const cardPaymentMethodConfigurationId = environment.STRIPE_CARD_PAYMENT_METHOD_CONFIGURATION_ID!.trim();
+  if (!/^pmc_[A-Za-z0-9]+$/.test(cardPaymentMethodConfigurationId)) {
+    throw new Error("STRIPE_CARD_PAYMENT_METHOD_CONFIGURATION_ID must identify a card-only payment method configuration");
+  }
+  const accountsV2WebhookSecret = environment.STRIPE_ACCOUNTS_V2_WEBHOOK_SECRET!.trim();
+  const connectPaymentsWebhookSecret = environment.STRIPE_CONNECT_PAYMENTS_WEBHOOK_SECRET!.trim();
+  if (accountsV2WebhookSecret === connectPaymentsWebhookSecret) throw new Error("Stripe webhook signing secrets must be distinct");
+  return { secretKey, apiVersion: STRIPE_API_VERSION, cardPaymentMethodConfigurationId,
+    accountsV2WebhookSecret, connectPaymentsWebhookSecret, schedulerSecret: environment.SCHEDULER_SECRET!.trim() };
+}
+
 const environmentSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().positive().default(3001),
@@ -27,6 +63,7 @@ export interface AppConfig {
   uploadDirectory: string;
   maxUploadBytes: number;
   demoStoreId: string;
+  stripe?: StripeServerConfig;
 }
 
 export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppConfig {
@@ -52,5 +89,6 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
     uploadDirectory: path.resolve(parsed.UPLOAD_DIRECTORY),
     maxUploadBytes: parsed.MAX_UPLOAD_BYTES,
     demoStoreId: parsed.DEMO_STORE_ID,
+    stripe: loadStripeConfig(environment, parsed.NODE_ENV === "production"),
   };
 }
