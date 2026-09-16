@@ -337,12 +337,12 @@ describe("CheckoutService", () => {
     });
   });
 
-  it("19. public order token has >=128 bits entropy", async () => {
+  it("19. public order token has 256 bits of URL-safe entropy", async () => {
     const { service, tx } = setup();
     vi.mocked(tx.query).mockResolvedValue({ rows: [{ id: "x" }] });
     const res = await service.begin(validCart);
     
-    expect(res.publicToken.length).toBeGreaterThanOrEqual(16); // 128 bits = 16 bytes = 32 hex chars usually
+    expect(res.publicToken).toMatch(/^[A-Za-z0-9_-]{43}$/);
   });
 
   it("20. invalid input returns 422", async () => {

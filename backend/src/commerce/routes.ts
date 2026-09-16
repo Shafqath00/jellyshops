@@ -55,6 +55,7 @@ export function createPublicOrderRouter(service: CheckoutService): express.Route
     try {
       const storeId = (request.params as Record<string, string>).storeId;
       const token = (request.params as Record<string, string>).publicToken;
+      await service.assertPublicOrderAccess(storeId, request.ip ?? "unknown");
       const result = await service.getPublicOrder(storeId, token);
       response.setHeader("Cache-Control", "no-store");
       response.json(result);

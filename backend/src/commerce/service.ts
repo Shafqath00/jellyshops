@@ -6,6 +6,7 @@ import type { CatalogReader } from "../catalog/service.js";
 import type { StripeAccountService } from "../stripe/accounts/service.js";
 import { ApiError } from "../http/errors.js";
 import { PaymentIntentService, type PaymentIntentGateway, type PreparedPayment } from "./payment-intents.js";
+import { PublicOrderRateLimiter } from "./rate-limit.js";
 
 const inputSchema = z.object({
   storeId: z.string().min(1),
@@ -34,7 +35,11 @@ function isAlreadySucceededCancellation(error: unknown): boolean {
 }
 
 export class CheckoutService {
-  constructor(private readonly deps: CheckoutServiceDeps) {}
+  private readonly publicOrderRateLimiter: PublicOrderRateLimiter;
+
+  constructor(private readonly deps: CheckoutServiceDeps) {
+    this.publicOrderRateLimiter = new PublicOrderRateLimiter(deps.repository);
+  }
 
   preparePayment(attemptId: string, storeId: string): Promise<PreparedPayment> {
     if (!this.deps.stripeGateway) throw new ApiError(503, "MERCHANT_PAYMENTS_UNAVAILABLE", "Payments are not configured.");
@@ -46,6 +51,10 @@ export class CheckoutService {
     const result = await this.deps.repository.getPublicOrder(storeId, publicToken);
     if (!result) throw new ApiError(404, "ORDER_NOT_FOUND", "Order not found.");
     return result;
+  }
+
+  assertPublicOrderAccess(storeId: string, ip: string): Promise<void> {
+    return this.publicOrderRateLimiter.assertAllowed(storeId, ip);
   }
 
   async begin(rawInput: BeginCheckoutInput): Promise<CheckoutAttemptResult> {
@@ -140,7 +149,7 @@ export class CheckoutService {
       }
 
       const orderId = `order-${randomUUID()}`;
-      const publicToken = randomBytes(16).toString("hex");
+      const publicToken = randomBytes(32).toString("base64url");
       await tx.query(
         `INSERT INTO "Order" (
           "id", "storeId", "number", "publicToken", "status", "customerSnapshot",
