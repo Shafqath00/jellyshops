@@ -39,6 +39,8 @@ import type { StripeGateway } from "./stripe/client.js";
 import type { SqlExecutor } from "./commerce/repository.js";
 import { createAccountsV2WebhookRouter } from "./stripe/webhooks/accounts-v2-route.js";
 import { createConnectPaymentsWebhookRouter } from "./stripe/webhooks/connect-payments-route.js";
+import { createSweeperRouter } from "./commerce/sweeper-routes.js";
+import type { ReservationSweeper } from "./commerce/sweeper.js";
 import type { GlobalSettings, SectionNode, StorefrontDocument, ThemeId } from "@jelly/storefront-schema";
 
 declare global {
@@ -70,6 +72,7 @@ export interface AppDependencies {
   checkoutService?: CheckoutService;
   stripeGateway?: StripeGateway;
   webhookSql?: SqlExecutor;
+  reservationSweeper?: ReservationSweeper;
 }
 
 export interface PublicStorefrontApi {
@@ -221,6 +224,9 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
   }
   if (dependencies.stripeGateway && dependencies.webhookSql) {
     app.use("/webhooks/stripe/connect-payments", createConnectPaymentsWebhookRouter(dependencies.stripeGateway, dependencies.webhookSql));
+  }
+  if (dependencies.reservationSweeper && config.stripe?.schedulerSecret) {
+    app.use("/internal/commerce/reservations/sweep", createSweeperRouter(dependencies.reservationSweeper, config.stripe.schedulerSecret));
   }
   app.use(express.json({ limit: "2mb" }));
 

@@ -54,6 +54,8 @@ export async function processConnectPaymentEvent(sql: SqlExecutor, event: { id: 
     if (event.type === "charge.refunded" && payment) {
       await sql.query(`UPDATE "Payment" SET "status" = 'REFUNDED' WHERE "id" = $1`, [payment.id]);
       await sql.query(`UPDATE "Order" SET "status" = 'REFUNDED', "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = $1 AND "status" IN ('PAID','PROCESSING','SHIPPED','DELIVERED')`, [payment.orderId]);
+      await sql.query(`UPDATE "InventoryLevel" il SET "quantity" = il."quantity" + ir."quantity" FROM "InventoryReservation" ir JOIN "OrderItem" oi ON oi."orderId" = $2 AND oi."storeId" = $3 AND oi."variantId" = ir."variantId" WHERE il."storeId" = $3 AND il."variantId" = ir."variantId" AND ir."status" = 'SOLD' AND ir."attemptId" IN (SELECT "id" FROM "CheckoutAttempt" WHERE "orderId" = $2 AND "storeId" = $3) AND NOT EXISTS (SELECT 1 FROM "Refund" r WHERE r."orderId" = $2 AND r."inventoryRestoredAt" IS NOT NULL)`, [payment.id, payment.orderId, payment.storeId]);
+      await sql.query(`UPDATE "Refund" SET "inventoryRestoredAt" = CURRENT_TIMESTAMP WHERE "orderId" = $1 AND "status" = 'SUCCEEDED' AND "inventoryRestoredAt" IS NULL`, [payment.orderId]);
     }
   }
 }
