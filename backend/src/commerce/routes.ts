@@ -19,6 +19,18 @@ const beginCheckoutSchema = z.object({
 export function createCommerceRouter(service: CheckoutService): express.Router {
   const router = express.Router({ mergeParams: true });
 
+  router.post("/payment-intent", async (request, response, next) => {
+    response.setHeader("Cache-Control", "no-store");
+    try {
+      const storeId = (request.params as Record<string, string>).storeId;
+      const parsed = z.object({ attemptId: z.string().trim().min(1) }).safeParse(request.body);
+      if (!parsed.success) throw new ApiError(422, "CHECKOUT_INPUT_INVALID", "A checkout attempt is required.");
+      response.json(await service.preparePayment(parsed.data.attemptId, storeId));
+    } catch (error) {
+      next(error);
+    }
+  });
+
   router.post("/attempts", async (request, response, next) => {
     try {
       const storeId = (request.params as Record<string, string>).storeId;

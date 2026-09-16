@@ -5,6 +5,7 @@ import type { CommerceRepository, CheckoutAttemptRow, OrderRow } from "./reposit
 import type { CatalogReader } from "../catalog/service.js";
 import type { StripeAccountService } from "../stripe/accounts/service.js";
 import { ApiError } from "../http/errors.js";
+import { PaymentIntentService, type PaymentIntentGateway, type PreparedPayment } from "./payment-intents.js";
 
 const inputSchema = z.object({
   storeId: z.string().min(1),
@@ -22,10 +23,16 @@ export interface CheckoutServiceDeps {
   repository: CommerceRepository;
   catalog: CatalogReader;
   stripeAccountService: StripeAccountService;
+  stripeGateway?: PaymentIntentGateway;
 }
 
 export class CheckoutService {
   constructor(private readonly deps: CheckoutServiceDeps) {}
+
+  preparePayment(attemptId: string, storeId: string): Promise<PreparedPayment> {
+    if (!this.deps.stripeGateway) throw new ApiError(503, "MERCHANT_PAYMENTS_UNAVAILABLE", "Payments are not configured.");
+    return new PaymentIntentService({ repository: this.deps.repository, stripeGateway: this.deps.stripeGateway }).preparePayment(attemptId, storeId);
+  }
 
   async begin(rawInput: BeginCheckoutInput): Promise<CheckoutAttemptResult> {
     const parsed = inputSchema.safeParse(rawInput);

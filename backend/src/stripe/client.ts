@@ -40,6 +40,7 @@ export interface StripeGateway {
   createAccountLink(input: CreateAccountLinkInput, idempotencyKey: string): Promise<Stripe.V2.Core.AccountLink>;
   retrieveAccountV2(connectedAccountId: string): Promise<Stripe.V2.Core.Account>;
   createDirectPaymentIntent(input: CreateDirectPaymentIntentInput, context: ConnectedAccountRequest): Promise<Stripe.PaymentIntent>;
+  retrievePaymentIntent(paymentIntentId: string, connectedAccountId: string): Promise<Stripe.PaymentIntent>;
   cancelPaymentIntent(paymentIntentId: string, context: ConnectedAccountRequest): Promise<Stripe.PaymentIntent>;
   createFullRefund(input: CreateFullRefundInput, context: ConnectedAccountRequest): Promise<Stripe.Refund>;
   constructEvent(destination: "accounts-v2", payload: Buffer, signature: string): Stripe.V2.Core.EventNotification;
@@ -125,6 +126,11 @@ export function createStripeGateway(
         metadata: { jelly_order_id: requireId(input.orderId, "Order ID"),
           jelly_checkout_attempt_id: requireId(input.checkoutAttemptId, "Checkout attempt ID") },
       }, options);
+    },
+    retrievePaymentIntent(paymentIntentId, connectedAccountId) {
+      return stripe.paymentIntents.retrieve(requireId(paymentIntentId, "PaymentIntent ID"), {}, {
+        stripeAccount: accountId(connectedAccountId),
+      });
     },
     cancelPaymentIntent(paymentIntentId, context) {
       return stripe.paymentIntents.cancel(requireId(paymentIntentId, "PaymentIntent ID"), {}, connectedOptions(context));

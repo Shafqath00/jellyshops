@@ -105,6 +105,17 @@ describe("Stripe server gateway", () => {
     });
   });
 
+  it("retrieves an existing intent only in the explicit merchant context", async () => {
+    const { gateway, requests } = setup();
+    await gateway.retrievePaymentIntent("pi_order", "acct_merchant");
+    expect(requests[0].url).toContain("/v1/payment_intents/pi_order");
+    expect(requests[0].headers.get("stripe-account")).toBe("acct_merchant");
+    expect(requests[0].headers.get("idempotency-key")).toBeNull();
+    expect(() => gateway.retrievePaymentIntent("pi_order", "")).toThrow();
+    expect(() => gateway.retrievePaymentIntent("", "acct_merchant")).toThrow();
+    expect(requests).toHaveLength(1);
+  });
+
   it("fails closed without connected-account context or a durable key", async () => {
     const { gateway, requests } = setup();
     for (const invalidContext of [{ ...context, connectedAccountId: "" }, { ...context, idempotencyKey: "" }]) {
