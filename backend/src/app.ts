@@ -216,6 +216,7 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
   const app = express();
 
   app.disable("x-powered-by");
+  app.set("trust proxy", config.trustProxy);
   app.use((request, response, next) => {
     request.id = randomUUID();
     response.setHeader("x-request-id", request.id);

@@ -17,6 +17,7 @@ async function createMediaApp() {
     port: 3001,
     nodeEnv: "test",
     corsOrigins: ["http://localhost:3000"],
+    trustProxy: false,
     authProvider: "development",
     repositoryProvider: "local-json",
     mediaProvider: "local-files",

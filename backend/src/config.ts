@@ -42,6 +42,7 @@ const environmentSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().positive().default(3001),
   CORS_ORIGINS: z.string().default("http://localhost:3000"),
+  TRUST_PROXY: z.enum(["true", "false"]).default("false"),
   AUTH_PROVIDER: z.enum(["development", "firebase"]).default("development"),
   MEDIA_PROVIDER: z.enum(["local-files", "gcs"]).default("local-files"),
   DATA_DIRECTORY: z.string().default(path.resolve(".data")),
@@ -57,6 +58,7 @@ export interface AppConfig {
   port: number;
   nodeEnv: "development" | "test" | "production";
   corsOrigins: string[];
+  trustProxy: boolean;
   authProvider: "development" | "firebase";
   mediaProvider: "local-files" | "gcs";
   dataDirectory: string;
@@ -83,6 +85,7 @@ export function loadConfig(environment: NodeJS.ProcessEnv = process.env): AppCon
     port: parsed.PORT,
     nodeEnv: parsed.NODE_ENV,
     corsOrigins: parsed.CORS_ORIGINS.split(",").map((origin) => origin.trim()).filter(Boolean),
+    trustProxy: parsed.TRUST_PROXY === "true",
     authProvider: parsed.AUTH_PROVIDER,
     mediaProvider: parsed.MEDIA_PROVIDER,
     dataDirectory: path.resolve(parsed.DATA_DIRECTORY),

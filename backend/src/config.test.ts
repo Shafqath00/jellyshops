@@ -22,6 +22,11 @@ describe("loadConfig", () => {
     expect(config).not.toHaveProperty("repositoryProvider");
   });
 
+  it("configures trusted proxy handling explicitly", () => {
+    expect(loadConfig({ NODE_ENV: "test" }).trustProxy).toBe(false);
+    expect(loadConfig({ NODE_ENV: "test", TRUST_PROXY: "true" }).trustProxy).toBe(true);
+  });
+
   it.each(Object.keys(stripeEnvironment))("requires %s in production", (name) => {
     expect(() => loadConfig({ ...productionEnvironment, [name]: undefined })).toThrow(name);
     expect(() => loadConfig({ ...productionEnvironment, [name]: "  " })).toThrow(name);

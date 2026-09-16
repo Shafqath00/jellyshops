@@ -1,10 +1,10 @@
 # Jelly Shop MVP
 
-A responsive, local-first commerce demo for small merchants. It includes a
+A responsive commerce storefront and merchant studio for small merchants. It includes a
 merchant studio, two themed storefronts, product and inventory management,
 guest cart and checkout, customer records, and an explicit order fulfilment
-lifecycle. Authentication, payments, images, and persistence use local mock
-adapters; no external credentials are required.
+lifecycle. Authentication, media, and demo catalog state have local development
+adapters. Customer payments use the server-side Stripe Connect API in configured environments.
 
 ## Run the Store Editor locally
 
@@ -48,14 +48,12 @@ If Chromium is not installed for Playwright, run:
 npx playwright install chromium
 ```
 
-## Mock architecture
+## Development architecture
 
 - Commerce state is seeded in `src/lib/seed.ts` and persisted under a single
   versioned local-storage key.
-- `src/lib/repository.ts` owns live pricing, stock validation, order-item
-  snapshots, customer creation, and order transition rules.
-- `src/lib/providers.ts` supplies mock authentication, payment, and asset
-  interfaces that can later be replaced by hosted services.
+- `src/lib/repository.ts` owns local catalog, storefront-design, customer, and cart demo state.
+- Checkout, payment, order, refund, and fulfilment authority lives in the backend API and Stripe webhooks.
 - Money is stored as integer minor units and formatted only at the UI boundary.
 
 The Store Editor currently uses the local Node/Express API and filesystem adapters.
