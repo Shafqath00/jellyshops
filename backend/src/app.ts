@@ -41,6 +41,8 @@ import { createAccountsV2WebhookRouter } from "./stripe/webhooks/accounts-v2-rou
 import { createConnectPaymentsWebhookRouter } from "./stripe/webhooks/connect-payments-route.js";
 import { createSweeperRouter } from "./commerce/sweeper-routes.js";
 import type { ReservationSweeper } from "./commerce/sweeper.js";
+import { createMerchantOrderRouter } from "./commerce/merchant-order-routes.js";
+import type { MerchantOrderService } from "./commerce/merchant-orders.js";
 import type { GlobalSettings, SectionNode, StorefrontDocument, ThemeId } from "@jelly/storefront-schema";
 
 declare global {
@@ -73,6 +75,7 @@ export interface AppDependencies {
   stripeGateway?: StripeGateway;
   webhookSql?: SqlExecutor;
   reservationSweeper?: ReservationSweeper;
+  merchantOrderService?: MerchantOrderService;
 }
 
 export interface PublicStorefrontApi {
@@ -227,6 +230,9 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
   }
   if (dependencies.reservationSweeper && config.stripe?.schedulerSecret) {
     app.use("/internal/commerce/reservations/sweep", createSweeperRouter(dependencies.reservationSweeper, config.stripe.schedulerSecret));
+  }
+  if (dependencies.merchantOrderService) {
+    app.use("/api/stores/:storeId/orders", createMerchantOrderRouter(dependencies.merchantOrderService, authProvider));
   }
   app.use(express.json({ limit: "2mb" }));
 
