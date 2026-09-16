@@ -1,8 +1,7 @@
 import { migrateStoreDesignDocument, type StoreDesignDocument } from "@jelly/storefront-schema";
 import { validateSectionAgainstRegistry } from "@jelly/storefront-registry";
-import type { Cart, Customer, CustomerInput, Order, OrderStatus, Product, ProductVariant, ShopState, Store, StoreDesignPublication, StoreDesignRecord } from "./domain";
-import { canTransitionOrder, slugify } from "./domain";
-import { mockPayments, type PaymentProvider } from "./providers";
+import type { Cart, Customer, Order, Product, ProductVariant, ShopState, Store, StoreDesignPublication, StoreDesignRecord } from "./domain";
+import { slugify } from "./domain";
 import { createSeedState } from "./seed";
 
 const STORAGE_KEY = "jelly-shop-state-v1";
@@ -11,11 +10,6 @@ export interface StorageLike {
   getItem(key: string): string | null;
   setItem(key: string, value: string): void;
   removeItem(key: string): void;
-}
-
-export interface CheckoutInput {
-  cartId: string;
-  customer: CustomerInput;
 }
 
 export interface SaveStoreDesignDraftInput { storeId: string; expectedRevision: number; document: StoreDesignDocument }
@@ -44,8 +38,6 @@ export interface ShopRepository {
   createCart(storeSlug: string): Cart;
   getCartForStore(storeSlug: string): Cart | undefined;
   updateCartItem(cartId: string, variantId: string, quantity: number): Cart;
-  checkout(input: CheckoutInput): Promise<Order>;
-  transitionOrder(orderId: string, next: OrderStatus): Order;
   reset(): void;
 }
 
@@ -86,7 +78,7 @@ function readState(storage: StorageLike): ShopState {
   }
 }
 
-export function createRepository(storage: StorageLike, payments: PaymentProvider = mockPayments): ShopRepository {
+export function createRepository(storage: StorageLike): ShopRepository {
   let state = readState(storage);
   const listeners = new Set<() => void>();
 
@@ -216,72 +208,6 @@ export function createRepository(storage: StorageLike, payments: PaymentProvider
       else cart.items.push({ variantId, quantity });
       commit();
       return cart;
-    },
-    async checkout({ cartId, customer: input }) {
-      const cart = state.carts.find((item) => item.id === cartId);
-      if (!cart || cart.items.length === 0) throw new Error("CART_EMPTY");
-      const store = state.stores.find((item) => item.id === cart.storeId);
-      if (!store?.published) throw new Error("STORE_UNAVAILABLE");
-
-      const items = cart.items.map((cartItem) => {
-        const product = state.products.find((entry) => entry.storeId === store.id && entry.variants.some((variant) => variant.id === cartItem.variantId));
-        const variant = product?.variants.find((entry) => entry.id === cartItem.variantId);
-        if (!product || !variant || product.archived || !product.published) throw new Error("PRODUCT_UNAVAILABLE");
-        if (variant.stock < cartItem.quantity) throw new Error("OUT_OF_STOCK");
-        return {
-          productId: product.id, variantId: variant.id, productName: product.name, variantName: variant.name,
-          sku: variant.sku, imageUrl: product.imageUrl, unitPriceMinor: variant.priceMinor, quantity: cartItem.quantity
-        };
-      });
-
-      const subtotalMinor = items.reduce((sum, item) => sum + item.unitPriceMinor * item.quantity, 0);
-      const totalMinor = subtotalMinor + store.shippingMinor;
-      const payment = await payments.confirm({ amount: totalMinor, currency: store.currency });
-      let customer = state.customers.find((entry) => entry.storeId === store.id && entry.email.toLowerCase() === input.email.toLowerCase());
-      if (customer) Object.assign(customer, input);
-      else {
-        customer = { ...input, id: `customer-${crypto.randomUUID()}`, storeId: store.id, createdAt: new Date().toISOString() };
-        state.customers.unshift(customer);
-      }
-
-      items.forEach((item) => {
-        const variant = findVariant(item.variantId)!;
-        variant.stock -= item.quantity;
-      });
-
-      const order: Order = {
-        id: `order-${crypto.randomUUID()}`,
-        number: `JS-${1041 + state.orders.length + 1}`,
-        storeId: store.id,
-        customerId: customer.id,
-        customerSnapshot: clone(input),
-        items,
-        subtotalMinor,
-        shippingMinor: store.shippingMinor,
-        totalMinor,
-        currency: store.currency,
-        status: "PENDING",
-        paymentStatus: payment.status,
-        paymentId: payment.id,
-        inventoryRestored: false,
-        createdAt: new Date().toISOString()
-      };
-      state.orders.unshift(order);
-      cart.items = [];
-      commit();
-      return order;
-    },
-    transitionOrder(orderId, next) {
-      const order = state.orders.find((entry) => entry.id === orderId);
-      if (!order) throw new Error("ORDER_NOT_FOUND");
-      if (!canTransitionOrder(order.status, next)) throw new Error("INVALID_ORDER_TRANSITION");
-      if (next === "CANCELLED" && !order.inventoryRestored) {
-        order.items.forEach((item) => { const variant = findVariant(item.variantId); if (variant) variant.stock += item.quantity; });
-        order.inventoryRestored = true;
-      }
-      order.status = next;
-      commit();
-      return order;
     },
     reset() {
       state = createSeedState();

@@ -30,5 +30,5 @@ it("creates a server checkout attempt and prepares card payment", async () => {
   await user.click(screen.getByRole("button", { name: /continue to card payment/i }));
 
   expect(await screen.findByText(/card payment form/i)).toBeVisible();
-  expect(screen.queryByRole("button", { name: /place mock order/i })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /place order/i })).not.toBeInTheDocument();
 });

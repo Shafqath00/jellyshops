@@ -1,11 +1,5 @@
-import type { Currency } from "./domain";
-
 export interface AuthProvider {
   getSession(): Promise<{ user: { id: string; name: string; email: string }; businessId: string; storeId: string }>;
-}
-
-export interface PaymentProvider {
-  confirm(input: { amount: number; currency: Currency }): Promise<{ id: string; status: "PAID" }>;
 }
 
 export interface AssetProvider {
@@ -19,13 +13,6 @@ export const mockAuth: AuthProvider = {
       businessId: "business-jelly",
       storeId: "store-sweet-bakes"
     };
-  }
-};
-
-export const mockPayments: PaymentProvider = {
-  async confirm({ amount, currency }) {
-    await Promise.resolve();
-    return { id: `mock_payment_${amount}_${currency}`, status: "PAID" };
   }
 };
 
