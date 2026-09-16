@@ -35,6 +35,9 @@ import { createStripeConnectRouter } from "./stripe/accounts/routes.js";
 import type { StripeAccountService } from "./stripe/accounts/service.js";
 import { createCommerceRouter, createPublicOrderRouter } from "./commerce/routes.js";
 import type { CheckoutService } from "./commerce/service.js";
+import type { StripeGateway } from "./stripe/client.js";
+import type { SqlExecutor } from "./commerce/repository.js";
+import { createAccountsV2WebhookRouter } from "./stripe/webhooks/accounts-v2-route.js";
 import type { GlobalSettings, SectionNode, StorefrontDocument, ThemeId } from "@jelly/storefront-schema";
 
 declare global {
@@ -64,6 +67,8 @@ export interface AppDependencies {
   publicStorefrontApi: PublicStorefrontApi;
   stripeAccountService?: StripeAccountService;
   checkoutService?: CheckoutService;
+  stripeGateway?: StripeGateway;
+  webhookSql?: SqlExecutor;
 }
 
 export interface PublicStorefrontApi {
@@ -210,6 +215,9 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
     next();
   });
   app.use(cors({ origin: config.corsOrigins }));
+  if (dependencies.stripeGateway && dependencies.stripeAccountService && dependencies.webhookSql) {
+    app.use("/webhooks/stripe/accounts-v2", createAccountsV2WebhookRouter(dependencies.stripeGateway, dependencies.stripeAccountService, dependencies.webhookSql));
+  }
   app.use(express.json({ limit: "2mb" }));
 
   app.get("/health", (_request, response) => response.json({ ok: true }));

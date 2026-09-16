@@ -142,6 +142,10 @@ export class StripeAccountService {
     });
   }
 
+  async markClosed(stripeAccountId: string): Promise<StripeConnectedAccountRow> {
+    return this.repo.markClosed(stripeAccountId);
+  }
+
   /** Returns current status DTO for a store (using the local read model). */
   async getStatus(storeId: string): Promise<StripeAccountStatusDto> {
     const row = await this.repo.findByStoreId(storeId);
