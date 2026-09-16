@@ -80,7 +80,7 @@ export function AdminNav() {
         "max-md:bottom-3",
         "max-md:z-50",
         "max-md:grid",
-        "max-md:grid-cols-7",
+        "max-md:grid-cols-8",
         "max-md:gap-0.5",
         "max-md:rounded-2xl",
         "max-md:border",

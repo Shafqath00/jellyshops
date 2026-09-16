@@ -11,6 +11,8 @@ export interface StripeAccountStatusDto {
   checkoutReady: boolean;
   requirements?: Record<string, unknown>;
   closed: boolean;
+  /** Full Dashboard merchants sign in to their own Stripe account. This is not an account-link URL. */
+  dashboardUrl?: string;
 }
 
 export interface EnsureAccountInput {

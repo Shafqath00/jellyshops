@@ -258,6 +258,15 @@ describe("StripeAccountService", () => {
       expect(status.checkoutReady).toBe(false);
       expect(status.closed).toBe(true);
     });
+
+    it("11b. gives a connected full-dashboard merchant a server-supplied dashboard URL", async () => {
+      const { service, sql } = setup();
+      vi.mocked(sql.query).mockResolvedValueOnce({ rows: [baseRow] });
+
+      const status = await service.getStatus("store-1");
+
+      expect(status.dashboardUrl).toBe("https://dashboard.stripe.com");
+    });
   });
 
   describe("getLivePaymentReadiness", () => {

@@ -59,6 +59,7 @@ const connectedStatus: StripeAccountStatusDto = {
   checkoutReady: true,
   requirements: {},
   closed: false,
+  dashboardUrl: "https://dashboard.stripe.com",
 };
 
 function makeService(): StripeAccountService {
@@ -109,6 +110,7 @@ describe("stripe connect routes", () => {
         .set("Authorization", "Bearer token");
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({ connected: true, checkoutReady: true });
+      expect(response.body.dashboardUrl).toBe("https://dashboard.stripe.com");
     });
 
     it("returns 200 with status for a merchant with payments:view (ADMIN)", async () => {

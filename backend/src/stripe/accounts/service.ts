@@ -51,6 +51,7 @@ function toStatusDto(row: StripeConnectedAccountRow): StripeAccountStatusDto {
     checkoutReady,
     requirements: row.requirements,
     closed,
+    dashboardUrl: "https://dashboard.stripe.com",
   };
 }
 
