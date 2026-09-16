@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Boxes,
+  CreditCard,
   Home,
   LayoutTemplate,
   PackageCheck,
@@ -23,6 +24,12 @@ const links = [
     href: "/admin/orders",
     label: "Orders",
     icon: PackageCheck,
+  },
+  {
+    href: "/admin/payments",
+    label: "Payments",
+    mobileLabel: "Pay",
+    icon: CreditCard,
   },
   {
     href: "/admin/products",
