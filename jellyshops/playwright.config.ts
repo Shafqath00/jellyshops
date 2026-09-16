@@ -9,6 +9,10 @@ export default defineConfig({
     command: "npm run dev",
     url: "http://127.0.0.1:3000",
     reuseExistingServer: false,
-    timeout: 120000
+    timeout: 120000,
+    env: {
+      NEXT_PUBLIC_STORE_EDITOR_API_URL: "http://127.0.0.1:3001",
+      NEXT_PUBLIC_DEMO_STOREFRONT_ID: "store-demo"
+    }
   }
 });

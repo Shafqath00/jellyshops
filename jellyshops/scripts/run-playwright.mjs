@@ -21,6 +21,7 @@ const backend = spawn(process.execPath, [backendCli, "src/server.ts"], {
     CORS_ORIGINS: "http://127.0.0.1:3000",
     DATA_DIRECTORY: join(temporaryRoot, "data"),
     UPLOAD_DIRECTORY: join(temporaryRoot, "uploads"),
+    JELLY_E2E: "1",
   },
   stdio: "inherit",
 });

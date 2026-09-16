@@ -90,6 +90,21 @@ describe("durable commerce", () => {
     expect((await database.query(`SELECT "status" FROM "Order" WHERE "id" = 'a'`)).rows).toEqual([{ status: "PENDING_PAYMENT" }]);
   });
 
+  it("serializes concurrent checkout critical sections for the same cart key", async () => {
+    const events: string[] = [];
+    const first = repository.withCheckoutLock("store-a", "cart-race", async () => {
+      events.push("first-enter");
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      events.push("first-exit");
+    });
+    const second = repository.withCheckoutLock("store-a", "cart-race", async () => {
+      events.push("second-enter");
+      events.push("second-exit");
+    });
+    await Promise.all([first, second]);
+    expect(events).toEqual(["first-enter", "first-exit", "second-enter", "second-exit"]);
+  });
+
   it("rejects an attempt belonging to another store and nonpositive quantities", async () => {
     await expect(repository.reserveVariants({ ...input("a"), storeId: "store-b" })).rejects.toThrow("Checkout attempt unavailable");
     await expect(repository.reserveVariants(input("a", "store-a-1", 0))).rejects.toThrow("positive integer");
