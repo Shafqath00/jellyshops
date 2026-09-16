@@ -38,6 +38,7 @@ import type { CheckoutService } from "./commerce/service.js";
 import type { StripeGateway } from "./stripe/client.js";
 import type { SqlExecutor } from "./commerce/repository.js";
 import { createAccountsV2WebhookRouter } from "./stripe/webhooks/accounts-v2-route.js";
+import { createConnectPaymentsWebhookRouter } from "./stripe/webhooks/connect-payments-route.js";
 import type { GlobalSettings, SectionNode, StorefrontDocument, ThemeId } from "@jelly/storefront-schema";
 
 declare global {
@@ -217,6 +218,9 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
   app.use(cors({ origin: config.corsOrigins }));
   if (dependencies.stripeGateway && dependencies.stripeAccountService && dependencies.webhookSql) {
     app.use("/webhooks/stripe/accounts-v2", createAccountsV2WebhookRouter(dependencies.stripeGateway, dependencies.stripeAccountService, dependencies.webhookSql));
+  }
+  if (dependencies.stripeGateway && dependencies.webhookSql) {
+    app.use("/webhooks/stripe/connect-payments", createConnectPaymentsWebhookRouter(dependencies.stripeGateway, dependencies.webhookSql));
   }
   app.use(express.json({ limit: "2mb" }));
 
