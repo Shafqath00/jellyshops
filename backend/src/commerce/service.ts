@@ -26,6 +26,13 @@ export interface CheckoutServiceDeps {
   stripeGateway?: PaymentIntentGateway;
 }
 
+function isAlreadySucceededCancellation(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const candidate = error as Error & { code?: string; raw?: unknown };
+  if (candidate.code === "payment_intent_unexpected_state") return true;
+  return /already succeeded|cannot be canceled|cannot be cancelled/i.test(candidate.message);
+}
+
 export class CheckoutService {
   constructor(private readonly deps: CheckoutServiceDeps) {}
 
@@ -91,8 +98,37 @@ export class CheckoutService {
             publicToken: orders[0]?.publicToken ?? "",
           };
         } else {
-          await tx.query(`UPDATE "CheckoutAttempt" SET "status" = 'CANCELLED' WHERE "id" = $1`, [existingAttempt.id]);
-          await tx.releaseAttempt(existingAttempt.id);
+          // Cancel the external intent before releasing the local hold. Both operations
+          // remain inside this checkout transaction so a replacement cannot briefly
+          // expose the old stock to a third shopper.
+          if (existingAttempt.paymentIntentId && this.deps.stripeGateway?.cancelPaymentIntent) {
+            const payment = (await tx.query<{ stripeAccountId: string }>(
+              `SELECT "stripeAccountId" FROM "Payment" WHERE "orderId" = $1 AND "storeId" = $2 FOR UPDATE`,
+              [existingAttempt.orderId, input.storeId],
+            )).rows[0];
+            if (!payment) throw new ApiError(409, "CHECKOUT_ATTEMPT_UNAVAILABLE", "This checkout attempt is no longer available.");
+            try {
+              await this.deps.stripeGateway.cancelPaymentIntent(existingAttempt.paymentIntentId, {
+                connectedAccountId: payment.stripeAccountId,
+                idempotencyKey: `${existingAttempt.stripeIdempotencyKey}-cancel`,
+              });
+            } catch (error) {
+              // Stripe rejects cancellation when a concurrent webhook already won.
+              // Keep the local state untouched; the webhook's PAID/SOLD transition wins.
+              if (!isAlreadySucceededCancellation(error)) throw error;
+            }
+          }
+
+          const cancelled = await tx.query(
+            `UPDATE "Order" SET "status" = 'CANCELLED', "updatedAt" = CURRENT_TIMESTAMP
+             WHERE "id" = $1 AND "storeId" = $2 AND "status" = 'PENDING_PAYMENT' RETURNING "id"`,
+            [existingAttempt.orderId, input.storeId],
+          );
+          if (cancelled.rows.length === 1) {
+            await tx.query(`UPDATE "CheckoutAttempt" SET "status" = 'CANCELLED' WHERE "id" = $1 AND "status" IN ('PAYMENT_INTENT_CREATING', 'READY')`, [existingAttempt.id]);
+            await tx.query(`UPDATE "Payment" SET "status" = 'CANCELLED' WHERE "orderId" = $1 AND "storeId" = $2 AND "status" = 'PENDING'`, [existingAttempt.orderId, input.storeId]);
+            await tx.releaseAttempt(existingAttempt.id);
+          }
         }
       }
 

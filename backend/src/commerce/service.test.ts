@@ -271,6 +271,70 @@ describe("CheckoutService", () => {
     it("18. old reservation released only during replacement transaction", async () => {
       // releaseAttempt called in same tx
     });
+
+    it("cancels a prepared Stripe intent before releasing the replaced attempt", async () => {
+      const { catalog, stripe, tx, repo } = setup();
+      const cancelPaymentIntent = vi.fn(async () => ({ id: "pi_old", status: "canceled" } as any));
+      const service = new CheckoutService({
+        repository: repo,
+        catalog,
+        stripeAccountService: stripe,
+        stripeGateway: { cancelPaymentIntent } as any,
+      });
+      const oldAttempt = {
+        id: "attempt-old", orderId: "order-old", storeId: "store-1", cartKey: "cart-123",
+        cartHash: "different-cart", stripeIdempotencyKey: "idem-old", paymentIntentId: "pi_old",
+        status: "READY", expiresAt: new Date(Date.now() + 60_000), createdAt: new Date(),
+      };
+      vi.mocked(tx.query).mockImplementation(async (sql: string) => {
+        if (sql.includes('SELECT * FROM "CheckoutAttempt"')) return { rows: [oldAttempt] };
+        if (sql.includes('SELECT "stripeAccountId" FROM "Payment"')) return { rows: [{ stripeAccountId: "acct_123" }] };
+        return { rows: [{ id: "new-record" }] };
+      });
+
+      await service.begin(validCart);
+
+      expect(cancelPaymentIntent).toHaveBeenCalledWith("pi_old", {
+        connectedAccountId: "acct_123", idempotencyKey: "idem-old-cancel",
+      });
+      expect(tx.releaseAttempt).toHaveBeenCalledWith("attempt-old");
+      const orderUpdate = vi.mocked(tx.query).mock.calls.find(([sql]) => (sql as string).includes('UPDATE "Order"'));
+      expect(orderUpdate?.[0]).toContain('"status" = \'CANCELLED\'');
+      expect(orderUpdate?.[0]).toContain('"status" = \'PENDING_PAYMENT\'');
+    });
+
+    it("does not release local inventory when Stripe already succeeded", async () => {
+      const { catalog, stripe, tx, repo } = setup();
+      const cancelPaymentIntent = vi.fn(async () => {
+        const error = new Error("PaymentIntent cannot be canceled because it has already succeeded") as Error & { code?: string };
+        error.code = "payment_intent_unexpected_state";
+        throw error;
+      });
+      const service = new CheckoutService({
+        repository: repo,
+        catalog,
+        stripeAccountService: stripe,
+        stripeGateway: { cancelPaymentIntent } as any,
+      });
+      const oldAttempt = {
+        id: "attempt-old", orderId: "order-old", storeId: "store-1", cartKey: "cart-123",
+        cartHash: "different-cart", stripeIdempotencyKey: "idem-old", paymentIntentId: "pi_old",
+        status: "READY", expiresAt: new Date(Date.now() + 60_000), createdAt: new Date(),
+      };
+      let orderUpdate = false;
+      vi.mocked(tx.query).mockImplementation(async (sql: string) => {
+        if (sql.includes('SELECT * FROM "CheckoutAttempt"')) return { rows: [oldAttempt] };
+        if (sql.includes('SELECT "stripeAccountId" FROM "Payment"')) return { rows: [{ stripeAccountId: "acct_123" }] };
+        if (sql.includes('UPDATE "Order"')) { orderUpdate = true; return { rows: [] }; }
+        return { rows: [{ id: "new-record" }] };
+      });
+
+      await service.begin(validCart);
+
+      expect(cancelPaymentIntent).toHaveBeenCalled();
+      expect(orderUpdate).toBe(true);
+      expect(tx.releaseAttempt).not.toHaveBeenCalled();
+    });
   });
 
   it("19. public order token has >=128 bits entropy", async () => {

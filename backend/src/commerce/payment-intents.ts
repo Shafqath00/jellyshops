@@ -3,7 +3,8 @@ import { ApiError } from "../http/errors.js";
 import type { StripeGateway } from "../stripe/client.js";
 import type { CheckoutAttemptRow, CommerceRepository, CommerceTransaction, OrderRow, PaymentRow } from "./repository.js";
 
-export type PaymentIntentGateway = Pick<StripeGateway, "createDirectPaymentIntent" | "retrievePaymentIntent">;
+export type PaymentIntentGateway = Pick<StripeGateway, "createDirectPaymentIntent" | "retrievePaymentIntent">
+  & Partial<Pick<StripeGateway, "cancelPaymentIntent">>;
 
 export interface PreparedPayment {
   orderId: string;
