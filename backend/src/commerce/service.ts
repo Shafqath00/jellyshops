@@ -41,6 +41,13 @@ export class CheckoutService {
     return new PaymentIntentService({ repository: this.deps.repository, stripeGateway: this.deps.stripeGateway }).preparePayment(attemptId, storeId);
   }
 
+  async getPublicOrder(storeId: string, publicToken: string) {
+    if (!storeId?.trim() || !publicToken?.trim()) throw new ApiError(404, "ORDER_NOT_FOUND", "Order not found.");
+    const result = await this.deps.repository.getPublicOrder(storeId, publicToken);
+    if (!result) throw new ApiError(404, "ORDER_NOT_FOUND", "Order not found.");
+    return result;
+  }
+
   async begin(rawInput: BeginCheckoutInput): Promise<CheckoutAttemptResult> {
     const parsed = inputSchema.safeParse(rawInput);
     if (!parsed.success) {

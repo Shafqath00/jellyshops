@@ -33,7 +33,7 @@ import { createMerchantRouter } from "./tenants/routes.js";
 import type { TenantRepository } from "./tenants/repository.js";
 import { createStripeConnectRouter } from "./stripe/accounts/routes.js";
 import type { StripeAccountService } from "./stripe/accounts/service.js";
-import { createCommerceRouter } from "./commerce/routes.js";
+import { createCommerceRouter, createPublicOrderRouter } from "./commerce/routes.js";
 import type { CheckoutService } from "./commerce/service.js";
 import type { GlobalSettings, SectionNode, StorefrontDocument, ThemeId } from "@jelly/storefront-schema";
 
@@ -281,6 +281,10 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
     app.use(
       "/api/public/stores/:storeId/checkout",
       createCommerceRouter(dependencies.checkoutService),
+    );
+    app.use(
+      "/api/public/stores/:storeId/orders",
+      createPublicOrderRouter(dependencies.checkoutService),
     );
   }
 

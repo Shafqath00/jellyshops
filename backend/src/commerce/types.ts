@@ -17,3 +17,9 @@ export interface CheckoutAttemptResult {
   orderId: string;
   publicToken: string;
 }
+
+export interface PublicOrderView {
+  order: Record<string, unknown>;
+  items: Record<string, unknown>[];
+  payment: Record<string, unknown> | null;
+}

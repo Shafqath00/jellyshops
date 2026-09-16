@@ -48,3 +48,17 @@ export function createCommerceRouter(service: CheckoutService): express.Router {
 
   return router;
 }
+
+export function createPublicOrderRouter(service: CheckoutService): express.Router {
+  const router = express.Router({ mergeParams: true });
+  router.get("/:publicToken", async (request, response, next) => {
+    try {
+      const storeId = (request.params as Record<string, string>).storeId;
+      const token = (request.params as Record<string, string>).publicToken;
+      const result = await service.getPublicOrder(storeId, token);
+      response.setHeader("Cache-Control", "no-store");
+      response.json(result);
+    } catch (error) { next(error); }
+  });
+  return router;
+}

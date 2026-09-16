@@ -261,4 +261,20 @@ export class CommerceRepository {
   convertAttemptToSold(attemptId: string): Promise<number> {
     return this.transaction((tx) => tx.convertAttemptToSold(attemptId));
   }
+
+  async getPublicOrder(storeId: string, publicToken: string): Promise<{ order: OrderRow; items: OrderItemRow[]; payment: PaymentRow | null } | null> {
+    return this.database.transaction(async (sql) => {
+      const order = (await sql.query<OrderRow>(
+        `SELECT * FROM "Order" WHERE "storeId" = $1 AND "publicToken" = $2`, [storeId, publicToken],
+      )).rows[0];
+      if (!order) return null;
+      const items = (await sql.query<OrderItemRow>(
+        `SELECT * FROM "OrderItem" WHERE "storeId" = $1 AND "orderId" = $2 ORDER BY "variantId"`, [storeId, order.id],
+      )).rows;
+      const payment = (await sql.query<PaymentRow>(
+        `SELECT * FROM "Payment" WHERE "storeId" = $1 AND "orderId" = $2`, [storeId, order.id],
+      )).rows[0] ?? null;
+      return { order, items, payment };
+    });
+  }
 }

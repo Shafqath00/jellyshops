@@ -1,7 +1,7 @@
 import express from "express";
 import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createCommerceRouter } from "./routes.js";
+import { createCommerceRouter, createPublicOrderRouter } from "./routes.js";
 import { CheckoutService } from "./service.js";
 import { errorHandler } from "../http/errors.js";
 import type { CommerceRepository, CommerceTransaction } from "./repository.js";
@@ -40,5 +40,16 @@ describe("commerce routes", () => {
       publicToken: "token-123",
     });
     expect(service.begin).toHaveBeenCalledWith(expect.objectContaining({ storeId: "store-1" }));
+  });
+
+  it("GET public order uses the public token and returns the server view", async () => {
+    const service = { getPublicOrder: vi.fn(async () => ({ order: { id: "order-1" }, items: [], payment: null })) } as unknown as CheckoutService;
+    const app = express();
+    app.use("/api/public/stores/:storeId/orders", createPublicOrderRouter(service));
+    app.use(errorHandler);
+    const response = await request(app).get("/api/public/stores/store-1/orders/public-token");
+    expect(response.status).toBe(200);
+    expect(response.body.order.id).toBe("order-1");
+    expect(service.getPublicOrder).toHaveBeenCalledWith("store-1", "public-token");
   });
 });
