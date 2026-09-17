@@ -112,3 +112,9 @@ export function createSeedState(): ShopState {
     }))
   };
 }
+
+/** Browser runtime state: store identity/layout remains local until the API loads; catalog is never demo-seeded. */
+export function createRuntimeState(): ShopState {
+  const state = createSeedState();
+  return { ...state, products: [], customers: [], orders: [] };
+}

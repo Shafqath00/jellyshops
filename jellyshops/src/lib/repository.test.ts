@@ -10,6 +10,12 @@ function memoryStorage(): StorageLike {
 }
 
 describe("shop repository", () => {
+  it("supports an empty runtime catalog before backend hydration", () => {
+    const repo = createRepository(memoryStorage(), { runtime: true });
+    expect(repo.listProducts("sweet-bakes")).toEqual([]);
+    expect(repo.getStoreBySlug("sweet-bakes")?.name).toBe("Sweet Bakes");
+  });
+
   it("persists product changes across repository instances", () => {
     const storage = memoryStorage();
     const first = createRepository(storage);

@@ -13,11 +13,11 @@ interface ShopContextValue {
 const ShopContext = createContext<ShopContextValue | null>(null);
 
 export function ShopProvider({ children }: { children: React.ReactNode }) {
-  const [repository, setRepository] = useState<ShopRepository>(() => createRepository(memoryStorage()));
+  const [repository, setRepository] = useState<ShopRepository>(() => createRepository(memoryStorage(), { runtime: true }));
   const state = useSyncExternalStore(repository.subscribe, repository.getState, repository.getState);
 
   useEffect(() => {
-    const persistedRepository = createRepository(window.localStorage);
+    const persistedRepository = createRepository(window.localStorage, { runtime: true });
     queueMicrotask(() => setRepository(persistedRepository));
   }, []);
 

@@ -2,7 +2,7 @@ import { migrateStoreDesignDocument, type StoreDesignDocument } from "@jelly/sto
 import { validateSectionAgainstRegistry } from "@jelly/storefront-registry";
 import type { Cart, Customer, Order, Product, ProductVariant, ShopState, Store, StoreDesignPublication, StoreDesignRecord } from "./domain";
 import { slugify } from "./domain";
-import { createSeedState } from "./seed";
+import { createRuntimeState, createSeedState } from "./seed";
 
 const STORAGE_KEY = "jelly-shop-state-v1";
 
@@ -79,8 +79,9 @@ function readState(storage: StorageLike): ShopState {
   }
 }
 
-export function createRepository(storage: StorageLike): ShopRepository {
+export function createRepository(storage: StorageLike, options: { runtime?: boolean } = {}): ShopRepository {
   let state = readState(storage);
+  if (options.runtime && !storage.getItem(STORAGE_KEY)) state = createRuntimeState();
   const listeners = new Set<() => void>();
 
   const commit = () => {
