@@ -16,7 +16,7 @@ import {
   type PublicStorefrontPublication,
 } from "@/features/storefront/public-storefront-api";
 import { expandRuntimeTemplate, type ResolvedStorefrontRoute } from "@/features/storefront/resource-loader";
-import { migrateStorefrontDocument, type StorefrontDocument } from "@jelly/storefront-schema";
+import { createStorefrontTemplate, migrateStorefrontDocument, type StorefrontDocument } from "@jelly/storefront-schema";
 
 function homeRoute(publication: Extract<PublicStorefrontPublication, { kind: "v4" }>): ResolvedStorefrontRoute {
   const templateId = publication.snapshot.templateDefaults.home;
@@ -30,6 +30,13 @@ function homeRoute(publication: Extract<PublicStorefrontPublication, { kind: "v4
   };
 }
 
+function isGenericStarter(publication: PublicStorefrontPublication): boolean {
+  if (publication.kind !== "v3") return false;
+  const first = publication.document.regions.template[0];
+  const text = first?.blocks.find((block) => block.type === "heading")?.settings.text;
+  return text === "Made to become part of your story.";
+}
+
 export default function StoreHomePage() {
   const { storeSlug } = useParams<{ storeSlug: string }>();
   const { repository } = useShop();
@@ -40,9 +47,14 @@ export default function StoreHomePage() {
   const editorStoreId = process.env.NEXT_PUBLIC_DEMO_STOREFRONT_ID
     ?? (storeSlug === "sweet-bakes" ? "store-demo" : storeId);
   const localPublication = store ? repository.getPublishedStoreDesign(store.id) : null;
+  const fallbackStoreId = store?.id ?? "store-demo";
   const fallbackDocument = useMemo<StorefrontDocument | null>(
-    () => localPublication ? migrateStorefrontDocument(localPublication.document, "store-demo") : null,
-    [localPublication],
+    () => localPublication ? migrateStorefrontDocument(localPublication.document, fallbackStoreId) : null,
+    [localPublication, fallbackStoreId],
+  );
+  const starterDocument = useMemo(
+    () => createStorefrontTemplate(storeSlug === "sweet-bakes" ? "bakes" : "essentials", fallbackStoreId),
+    [fallbackStoreId, storeSlug],
   );
   const [remotePublication, setRemotePublication] = useState<PublicStorefrontPublication | null>(null);
 
@@ -73,8 +85,12 @@ export default function StoreHomePage() {
     );
   }
 
-  if (remotePublication?.kind === "v3") {
+  if (remotePublication?.kind === "v3" && !isGenericStarter(remotePublication)) {
     return <PublishedStorefront document={remotePublication.document} storeSlug={store.slug} currency={store.currency} products={products} />;
+  }
+
+  if (remotePublication?.kind === "v3" && isGenericStarter(remotePublication)) {
+    return <PublishedStorefront document={starterDocument} storeSlug={store.slug} currency={store.currency} products={products} />;
   }
 
   if (fallbackDocument) {

@@ -10,7 +10,7 @@ export function StorefrontFrame({ storeSlug, children }: { storeSlug: string; ch
   const { repository } = useShop();
   const [cartOpen, setCartOpen] = useState(false);
   const store = repository.getStoreBySlug(storeSlug);
-  if (!store) return <main className="store-missing"><span>404</span><h1>This Jelly Shop isn’t here.</h1><p>Try one of our demo storefronts instead.</p><Link className="button button-primary" href="/sweet-bakes">Visit Sweet Bakes</Link></main>;
+  if (!store) return <main className="store-missing"><span>404</span><h1>This Jelly Shop isn’t here.</h1><p>Try one of our storefronts instead.</p><Link className="button button-primary" href="/sweet-bakes">Visit Sweet Bakes</Link></main>;
   const style = {
     "--store-bg": store.theme.background,
     "--store-surface": store.theme.surface,
