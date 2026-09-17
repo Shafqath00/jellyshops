@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { createSupabasePool } from "../src/database/client.js";
 
 type SeedProduct = { id: string; storeId: string; slug: string; title: string; description: string; productType: string; variantId: string; variantTitle: string; sku: string; priceMinor: number; quantity: number };
@@ -13,9 +14,17 @@ const products: SeedProduct[] = [
   { id: "product-ceramic-tray", storeId: "store-bloom-home", slug: "pebble-catchall", title: "Pebble Catchall", description: "A hand-glazed oval tray for rings, matches, or tiny daily treasures.", productType: "Objects", variantId: "ceramic-tray", variantTitle: "Moss glaze", sku: "BH-OBJ-PEB", priceMinor: 89900, quantity: 2 },
 ];
 
+const stores = [
+  { id: "store-demo", name: "Sweet Bakes", slug: "sweet-bakes" },
+  { id: "store-bloom-home", name: "Bloom Home", slug: "bloom-home" },
+];
+
 const pool = createSupabasePool();
 try {
   await pool.query("BEGIN");
+  for (const store of stores) {
+    await pool.query(`INSERT INTO "Store" ("id", "name", "slug", "currency", "country", "updatedAt") VALUES ($1,$2,$3,'INR','IN',NOW()) ON CONFLICT ("id") DO UPDATE SET "name"=EXCLUDED."name", "slug"=EXCLUDED."slug", "currency"=EXCLUDED."currency", "updatedAt"=NOW()`, [store.id, store.name, store.slug]);
+  }
   for (const product of products) {
     await pool.query(`INSERT INTO "Product" ("id", "storeId", "title", "description", "status", "slug", "productType", "tags", "updatedAt") VALUES ($1,$2,$3,$4,'ACTIVE',$5,$6,$7,NOW()) ON CONFLICT ("id") DO UPDATE SET "title"=EXCLUDED."title", "description"=EXCLUDED."description", "status"='ACTIVE', "slug"=EXCLUDED."slug", "productType"=EXCLUDED."productType", "updatedAt"=NOW()`, [product.id, product.storeId, product.title, product.description, product.slug, product.productType, [product.productType]]);
     await pool.query(`INSERT INTO "ProductVariant" ("id", "storeId", "productId", "title", "sku", "priceMinor", "options", "updatedAt") VALUES ($1,$2,$3,$4,$5,$6,'{}',NOW()) ON CONFLICT ("id") DO UPDATE SET "title"=EXCLUDED."title", "sku"=EXCLUDED."sku", "priceMinor"=EXCLUDED."priceMinor", "archivedAt"=NULL, "updatedAt"=NOW()`, [product.variantId, product.storeId, product.id, product.variantTitle, product.sku, product.priceMinor]);
