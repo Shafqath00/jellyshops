@@ -1,49 +1,148 @@
 import { randomUUID } from "node:crypto";
-import { createSupabasePool } from "./database/client.js";
+
+import type {
+  GlobalSettings,
+  SectionNode,
+  StorefrontDocument,
+  ThemeId,
+} from "@jelly/storefront-schema";
+import { createStorefrontTemplate } from "@jelly/storefront-schema";
 import cors from "cors";
 import express, { type Express } from "express";
-import { loadConfig, type AppConfig } from "./config.js";
+
 import { DevelopmentAuthProvider } from "./auth/development-auth-provider.js";
+import {
+  requireMerchant,
+  requireStorePermission,
+} from "./auth/middleware.js";
 import type { AuthProvider } from "./auth/types.js";
-import { createCatalogAdminRouter, createCatalogRouter, createPublicCatalogRouter } from "./catalog/routes.js";
+
+import {
+  createCatalogAdminRouter,
+  createCatalogRouter,
+  createPublicCatalogRouter,
+} from "./catalog/routes.js";
 import type { CatalogAdmin } from "./catalog/service.js";
+import { createPublicStoreRouter } from "./catalog/public-store.js";
+import { CatalogService } from "./catalog/service.js";
+import { CatalogPostgresRepository } from "./catalog/postgres-repository.js";
+
+import {
+  createMerchantOrderRouter,
+} from "./commerce/merchant-order-routes.js";
+import type { MerchantOrderService } from "./commerce/merchant-orders.js";
+import type { SqlExecutor } from "./commerce/repository.js";
+import {
+  createCommerceRouter,
+  createPublicOrderRouter,
+} from "./commerce/routes.js";
+import type { CheckoutService } from "./commerce/service.js";
+import {
+  createSweeperRouter,
+} from "./commerce/sweeper-routes.js";
+import type { ReservationSweeper } from "./commerce/sweeper.js";
+
+import {
+  loadConfig,
+  type AppConfig,
+} from "./config.js";
+
 import { createContentRouter } from "./content/routes.js";
 import type { ContentService } from "./content/service.js";
-import { createCustomDataRouter } from "./custom-data/routes.js";
-import type { CustomDataService, MetaobjectService } from "./custom-data/service.js";
-import type { DynamicSourceRegistry } from "./dynamic-sources/registry.js";
-import { requireMerchant, requireStorePermission } from "./auth/middleware.js";
-import { errorHandler, notFoundHandler } from "./http/errors.js";
-import { LocalJsonMediaRepository } from "./media/local-json-media-repository.js";
-import { LocalMediaStorage } from "./media/local-media-storage.js";
-import type { MediaRepository } from "./media/repository.js";
-import { createMediaRouter, createPublicMediaRouter } from "./media/routes.js";
+
+import {
+  createCustomDataRouter,
+} from "./custom-data/routes.js";
+import type {
+  CustomDataService,
+  MetaobjectService,
+} from "./custom-data/service.js";
+
+import { createSupabasePool } from "./database/client.js";
+
+import type {
+  DynamicSourceRegistry,
+} from "./dynamic-sources/registry.js";
+
+import {
+  errorHandler,
+  notFoundHandler,
+} from "./http/errors.js";
+
+import {
+  LocalJsonMediaRepository,
+} from "./media/local-json-media-repository.js";
+import {
+  LocalMediaStorage,
+} from "./media/local-media-storage.js";
+import { SupabaseMediaStorage } from "./media/supabase-media-storage.js";
+import type {
+  MediaRepository,
+} from "./media/repository.js";
+import {
+  createMediaRouter,
+  createPublicMediaRouter,
+} from "./media/routes.js";
 import { MediaService } from "./media/service.js";
 import type { MediaStorage } from "./media/storage.js";
-import { createStorefrontCompilerRouter, type StorefrontCompilerApi } from "./storefront/compiler/routes.js";
-import { LocalJsonStorefrontRepository } from "./storefront/local-json-repository.js";
-import { createDefaultStorefrontDocument, storefrontDocumentValidator } from "./storefront/document-validator.js";
-import { createStorefrontPublicationRouter, type StorefrontPublicationApi } from "./storefront/publication/routes.js";
-import { createStorefrontRouter } from "./storefront/routes.js";
-import { DefaultStorefrontService, type DocumentValidator } from "./storefront/service.js";
-import type { StorefrontRepository } from "./storefront/repository.js";
-import { createStorefrontWorkspaceRouter, type StorefrontWorkspaceApi } from "./storefront/workspace/routes.js";
-import { updateSupabaseTemplate } from "./storefront/workspace/supabase-template-store.js";
-import { createMerchantRouter } from "./tenants/routes.js";
-import type { TenantRepository } from "./tenants/repository.js";
-import { createStripeConnectRouter } from "./stripe/accounts/routes.js";
-import type { StripeAccountService } from "./stripe/accounts/service.js";
-import { createCommerceRouter, createPublicOrderRouter } from "./commerce/routes.js";
-import type { CheckoutService } from "./commerce/service.js";
+
+import {
+  createStripeConnectRouter,
+} from "./stripe/accounts/routes.js";
+import type {
+  StripeAccountService,
+} from "./stripe/accounts/service.js";
 import type { StripeGateway } from "./stripe/client.js";
-import type { SqlExecutor } from "./commerce/repository.js";
-import { createAccountsV2WebhookRouter } from "./stripe/webhooks/accounts-v2-route.js";
-import { createConnectPaymentsWebhookRouter } from "./stripe/webhooks/connect-payments-route.js";
-import { createSweeperRouter } from "./commerce/sweeper-routes.js";
-import type { ReservationSweeper } from "./commerce/sweeper.js";
-import { createMerchantOrderRouter } from "./commerce/merchant-order-routes.js";
-import type { MerchantOrderService } from "./commerce/merchant-orders.js";
-import type { GlobalSettings, SectionNode, StorefrontDocument, ThemeId } from "@jelly/storefront-schema";
+import {
+  createAccountsV2WebhookRouter,
+} from "./stripe/webhooks/accounts-v2-route.js";
+import {
+  createConnectPaymentsWebhookRouter,
+} from "./stripe/webhooks/connect-payments-route.js";
+
+import {
+  createStorefrontCompilerRouter,
+  type StorefrontCompilerApi,
+} from "./storefront/compiler/routes.js";
+import {
+  createDefaultStorefrontDocument,
+  storefrontDocumentValidator,
+} from "./storefront/document-validator.js";
+import {
+  LocalJsonStorefrontRepository,
+} from "./storefront/local-json-repository.js";
+import {
+  createStorefrontPublicationRouter,
+  type StorefrontPublicationApi,
+} from "./storefront/publication/routes.js";
+import type {
+  StorefrontRepository,
+} from "./storefront/repository.js";
+import {
+  createStorefrontRouter,
+} from "./storefront/routes.js";
+import {
+  DefaultStorefrontService,
+  type DocumentValidator,
+} from "./storefront/service.js";
+import {
+  createStorefrontWorkspaceRouter,
+  type StorefrontWorkspaceApi,
+} from "./storefront/workspace/routes.js";
+import {
+  updateSupabaseTemplate,
+} from "./storefront/workspace/supabase-template-store.js";
+
+import {
+  createMerchantRouter,
+} from "./tenants/routes.js";
+import type {
+  TenantRepository,
+} from "./tenants/repository.js";
+
+/* -------------------------------------------------------------------------- */
+/* Express types                                                              */
+/* -------------------------------------------------------------------------- */
 
 declare global {
   namespace Express {
@@ -53,23 +152,36 @@ declare global {
   }
 }
 
+
+/* -------------------------------------------------------------------------- */
+/* Dependencies                                                               */
+/* -------------------------------------------------------------------------- */
+
 export interface AppDependencies {
   config: AppConfig;
   authProvider: AuthProvider;
-  storefrontRepository: StorefrontRepository<unknown>;
-  documentValidator: DocumentValidator<unknown>;
+
+  // Tenant / catalog / content
   tenantRepository: TenantRepository;
-  mediaRepository: MediaRepository;
-  mediaStorage: MediaStorage;
   catalogService: CatalogAdmin;
   contentService: ContentService;
   customDataService: CustomDataService;
   metaobjectService: MetaobjectService;
   dynamicSourceRegistry: DynamicSourceRegistry;
+
+  // Media
+  mediaRepository: MediaRepository;
+  mediaStorage: MediaStorage;
+
+  // Storefront
+  storefrontRepository: StorefrontRepository<unknown>;
+  documentValidator: DocumentValidator<unknown>;
   storefrontWorkspaceApi: StorefrontWorkspaceApi;
   storefrontCompilerApi: StorefrontCompilerApi;
   storefrontPublicationApi: StorefrontPublicationApi;
   publicStorefrontApi: PublicStorefrontApi;
+
+  // Stripe / commerce
   stripeAccountService?: StripeAccountService;
   checkoutService?: CheckoutService;
   stripeGateway?: StripeGateway;
@@ -79,8 +191,28 @@ export interface AppDependencies {
 }
 
 export interface PublicStorefrontApi {
-  load(storeId: string): Promise<{ id: string; document: StorefrontDocument }>;
+  load(
+    storeId: string,
+  ): Promise<{
+    id: string;
+    document: StorefrontDocument;
+  }>;
 }
+
+
+/* -------------------------------------------------------------------------- */
+/* Database                                                                   */
+/* -------------------------------------------------------------------------- */
+
+const supabasePool =
+  process.env.SUPABASE_DATABASE_URL
+    ? createSupabasePool()
+    : undefined;
+
+
+/* -------------------------------------------------------------------------- */
+/* Default storefront data                                                    */
+/* -------------------------------------------------------------------------- */
 
 const defaultHomeTemplate = {
   id: "home",
@@ -89,251 +221,1146 @@ const defaultHomeTemplate = {
   type: "home" as const,
   handle: "home",
   name: "Home page",
+
   layout: {
-    sections: [{
-      kind: "inline",
-      section: {
-        id: "welcome",
-        type: "hero",
-        enabled: true,
-        settings: {},
-        blocks: [{ id: "welcome-heading", type: "heading", enabled: true, settings: { text: "Welcome" } }],
+    sections: [
+      {
+        kind: "inline",
+        section: {
+          id: "welcome",
+          type: "hero",
+          enabled: true,
+          settings: {},
+          blocks: [
+            {
+              id: "welcome-heading",
+              type: "heading",
+              enabled: true,
+              settings: {
+                text: "Welcome",
+              },
+            },
+          ],
+        },
       },
-    }],
+    ],
   },
+
   createdAt: new Date(0),
   updatedAt: new Date(0),
 };
 
-const supabasePool = process.env.SUPABASE_DATABASE_URL ? createSupabasePool() : undefined;
 
-function record(value: unknown): Record<string, unknown> | undefined {
-  return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
+/* -------------------------------------------------------------------------- */
+/* Storefront helpers                                                         */
+/* -------------------------------------------------------------------------- */
+
+function asRecord(
+  value: unknown,
+): Record<string, unknown> | undefined {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value)
+  ) {
+    return undefined;
+  }
+
+  return value as Record<string, unknown>;
 }
 
-function themeId(value: unknown): ThemeId | undefined {
-  return value === "minimal" || value === "classic" || value === "bold" || value === "elegant" || value === "playful" || value === "fresh-market" || value === "artisan-boutique"
-    ? value
+function asThemeId(
+  value: unknown,
+): ThemeId | undefined {
+  const themes: ThemeId[] = [
+    "minimal",
+    "classic",
+    "bold",
+    "elegant",
+    "playful",
+    "fresh-market",
+    "artisan-boutique",
+  ];
+
+  return themes.includes(value as ThemeId)
+    ? (value as ThemeId)
     : undefined;
 }
 
-function section(value: unknown): SectionNode | undefined {
-  const candidate = record(value);
-  if (!candidate || typeof candidate.id !== "string" || typeof candidate.type !== "string" || typeof candidate.enabled !== "boolean" || !record(candidate.settings) || !Array.isArray(candidate.blocks)) return undefined;
+function asSection(
+  value: unknown,
+): SectionNode | undefined {
+  const candidate = asRecord(value);
+
+  if (!candidate) {
+    return undefined;
+  }
+
+  const valid =
+    typeof candidate.id === "string" &&
+    typeof candidate.type === "string" &&
+    typeof candidate.enabled === "boolean" &&
+    Boolean(asRecord(candidate.settings)) &&
+    Array.isArray(candidate.blocks);
+
+  if (!valid) {
+    return undefined;
+  }
+
   return candidate as unknown as SectionNode;
 }
 
-/** Converts the editor-owned Home template into the document consumed by the public storefront. */
-export function publicDocumentFromTemplate(storeId: string, layout: unknown): StorefrontDocument {
-  const source = record(layout);
-  const sourceTheme = record(source?.theme);
-  const selectedTheme = themeId(sourceTheme?.id) ?? "minimal";
-  const fallback = createDefaultStorefrontDocument(storeId, selectedTheme);
-  const settings = record(sourceTheme?.settings) as GlobalSettings | undefined;
-  const inlineSections = Array.isArray(source?.sections)
-    ? source.sections.flatMap((placement) => {
-      const item = record(placement);
-      return item?.kind === "inline" ? [section(item.section)].filter((value): value is SectionNode => Boolean(value)) : [];
-    })
-    : [];
-  const templateSections = inlineSections.length > 0 ? inlineSections : fallback.regions.template;
+
+/**
+ * Converts an editor-owned home template into
+ * the document consumed by the public storefront.
+ */
+export function publicDocumentFromTemplate(
+  storeId: string,
+  layout: unknown,
+): StorefrontDocument {
+  const source = asRecord(layout);
+  const sourceTheme = asRecord(source?.theme);
+
+  const selectedTheme =
+    asThemeId(sourceTheme?.id) ?? "minimal";
+
+  const fallback =
+    createDefaultStorefrontDocument(
+      storeId,
+      selectedTheme,
+    );
+
+  const settings = asRecord(
+    sourceTheme?.settings,
+  ) as GlobalSettings | undefined;
+
+  const inlineSections =
+    Array.isArray(source?.sections)
+      ? source.sections.flatMap(
+          (placement) => {
+            const item =
+              asRecord(placement);
+
+            if (item?.kind !== "inline") {
+              return [];
+            }
+
+            const parsed =
+              asSection(item.section);
+
+            return parsed
+              ? [parsed]
+              : [];
+          },
+        )
+      : [];
+
+  const templateSections =
+    inlineSections.length > 0
+      ? inlineSections
+      : fallback.regions.template;
+
   return {
     ...fallback,
-    theme: { presetId: selectedTheme, settings: settings ?? fallback.theme.settings },
-    regions: { ...fallback.regions, template: templateSections },
-    pages: fallback.pages.map((page) => page.type === "home" ? { ...page, sections: templateSections } : page),
+
+    theme: {
+      presetId: selectedTheme,
+      settings:
+        settings ??
+        fallback.theme.settings,
+    },
+
+    regions: {
+      ...fallback.regions,
+      template: templateSections,
+    },
+
+    pages: fallback.pages.map(
+      (page) =>
+        page.type === "home"
+          ? {
+              ...page,
+              sections:
+                templateSections,
+            }
+          : page,
+    ),
   };
 }
 
+
+/* -------------------------------------------------------------------------- */
+/* Default public storefront API                                              */
+/* -------------------------------------------------------------------------- */
+
 const defaultPublicStorefrontApi: PublicStorefrontApi = {
   async load(storeId) {
-    if (!supabasePool) return { id: `publication-${storeId}`, document: createDefaultStorefrontDocument(storeId) };
-    const result = await supabasePool.query(
-      'SELECT "id", "revision", "layout" FROM "StorefrontTemplate" WHERE "storeId" = $1 AND lower("type"::text) = \'home\' ORDER BY "updatedAt" DESC LIMIT 1',
-      [storeId],
-    );
-    const template = result.rows[0];
-    if (!template) return { id: `publication-${storeId}`, document: createDefaultStorefrontDocument(storeId) };
+    const templateId = storeId === "store-demo" ? "bakes" : "essentials";
+    if (!supabasePool) {
+      return {
+        id: `publication-${storeId}`,
+        document: createStorefrontTemplate(templateId, storeId),
+      };
+    }
+
+    const result =
+      await supabasePool.query(
+        `
+          SELECT
+            "id",
+            "revision",
+            "layout"
+          FROM "StorefrontTemplate"
+          WHERE "storeId" = $1
+            AND lower("type"::text) = 'home'
+          ORDER BY "updatedAt" DESC
+          LIMIT 1
+        `,
+        [storeId],
+      );
+
+    const template =
+      result.rows[0];
+
+    // The legacy `home` template is the generic starter and must not replace
+    // the two commerce-ready templates used by the public stores.
+    if (!template || template.id === "home") {
+      return {
+        id: `publication-${storeId}`,
+        document: createStorefrontTemplate(templateId, storeId),
+      };
+    }
+
     return {
-      id: `template-${template.id}-r${template.revision}`,
-      document: publicDocumentFromTemplate(storeId, template.layout),
+      id:
+        `template-${template.id}-r${template.revision}`,
+
+      document:
+        publicDocumentFromTemplate(
+          storeId,
+          template.layout,
+        ),
     };
   },
 };
 
+
+/* -------------------------------------------------------------------------- */
+/* Default storefront workspace API                                           */
+/* -------------------------------------------------------------------------- */
+
 const defaultStorefrontWorkspaceApi: StorefrontWorkspaceApi = {
-  getWorkspace: async (storeId) => {
-    if (!supabasePool) return { generation: 0, updatedAt: new Date(0) };
-    const result = await supabasePool.query('SELECT "generation", "updatedAt" FROM "StorefrontWorkspace" WHERE "storeId" = $1', [storeId]);
-    return result.rows[0] ?? { generation: 0, updatedAt: new Date(0) };
+  async getWorkspace(storeId) {
+    if (!supabasePool) {
+      return {
+        generation: 0,
+        updatedAt: new Date(0),
+      };
+    }
+
+    const result =
+      await supabasePool.query(
+        `
+          SELECT
+            "generation",
+            "updatedAt"
+          FROM "StorefrontWorkspace"
+          WHERE "storeId" = $1
+        `,
+        [storeId],
+      );
+
+    return (
+      result.rows[0] ?? {
+        generation: 0,
+        updatedAt: new Date(0),
+      }
+    );
   },
-  listTemplates: async (storeId) => {
-    if (!supabasePool) return [defaultHomeTemplate];
-    const result = await supabasePool.query('SELECT "id", "storeId", "revision", lower("type"::text) AS "type", "handle", "name", "layout", "createdAt", "updatedAt" FROM "StorefrontTemplate" WHERE "storeId" = $1 ORDER BY "createdAt"', [storeId]);
+
+  async listTemplates(storeId) {
+    if (!supabasePool) {
+      return [defaultHomeTemplate];
+    }
+
+    const result =
+      await supabasePool.query(
+        `
+          SELECT
+            "id",
+            "storeId",
+            "revision",
+            lower("type"::text) AS "type",
+            "handle",
+            "name",
+            "layout",
+            "createdAt",
+            "updatedAt"
+          FROM "StorefrontTemplate"
+          WHERE "storeId" = $1
+          ORDER BY "createdAt"
+        `,
+        [storeId],
+      );
+
     return result.rows;
   },
-  getTemplate: async (storeId, templateId) => {
-    if (!supabasePool) return templateId === defaultHomeTemplate.id ? defaultHomeTemplate : null;
-    const result = await supabasePool.query('SELECT "id", "storeId", "revision", lower("type"::text) AS "type", "handle", "name", "layout", "createdAt", "updatedAt" FROM "StorefrontTemplate" WHERE "storeId" = $1 AND "id" = $2', [storeId, templateId]);
+
+  async getTemplate(
+    storeId,
+    templateId,
+  ) {
+    if (!supabasePool) {
+      return templateId ===
+        defaultHomeTemplate.id
+        ? defaultHomeTemplate
+        : null;
+    }
+
+    const result =
+      await supabasePool.query(
+        `
+          SELECT
+            "id",
+            "storeId",
+            "revision",
+            lower("type"::text) AS "type",
+            "handle",
+            "name",
+            "layout",
+            "createdAt",
+            "updatedAt"
+          FROM "StorefrontTemplate"
+          WHERE "storeId" = $1
+            AND "id" = $2
+        `,
+        [storeId, templateId],
+      );
+
     return result.rows[0] ?? null;
-  }, createTemplate: async (_storeId, input) => input,
-  updateTemplate: async (storeId, templateId, revision, patch) => {
-    if (supabasePool) return updateSupabaseTemplate(supabasePool, storeId, templateId, revision, patch);
+  },
+
+  async createTemplate(
+    _storeId,
+    input,
+  ) {
+    return input;
+  },
+
+  async updateTemplate(
+    storeId,
+    templateId,
+    revision,
+    patch,
+  ) {
+    if (supabasePool) {
+      return updateSupabaseTemplate(
+        supabasePool,
+        storeId,
+        templateId,
+        revision,
+        patch,
+      );
+    }
+
     return {
-      template: { ...defaultHomeTemplate, id: templateId, revision: revision + 1, ...patch, updatedAt: new Date() },
+      template: {
+        ...defaultHomeTemplate,
+        id: templateId,
+        revision: revision + 1,
+        ...patch,
+        updatedAt: new Date(),
+      },
       generation: 1,
     };
   },
-  cloneTemplate: async (_storeId, templateId, input) => ({ id: templateId, ...input }),
-  listGlobalSections: async (storeId) => {
-    if (!supabasePool) return [];
-    const result = await supabasePool.query('SELECT "id", "storeId", "revision", "name", "section", "createdAt", "updatedAt" FROM "GlobalSection" WHERE "storeId" = $1 ORDER BY "createdAt"', [storeId]);
+
+  async cloneTemplate(
+    _storeId,
+    templateId,
+    input,
+  ) {
+    return {
+      id: templateId,
+      ...input,
+    };
+  },
+
+  async listGlobalSections(
+    storeId,
+  ) {
+    if (!supabasePool) {
+      return [];
+    }
+
+    const result =
+      await supabasePool.query(
+        `
+          SELECT
+            "id",
+            "storeId",
+            "revision",
+            "name",
+            "section",
+            "createdAt",
+            "updatedAt"
+          FROM "GlobalSection"
+          WHERE "storeId" = $1
+          ORDER BY "createdAt"
+        `,
+        [storeId],
+      );
+
     return result.rows;
-  }, getGlobalSection: async () => null, createGlobalSection: async (_storeId, input) => input,
-  updateGlobalSection: async (_storeId, id, _revision, patch) => ({ id, ...patch }),
-  listPresets: async (storeId) => {
-    if (!supabasePool) return [];
-    const result = await supabasePool.query('SELECT "id", "storeId", "revision", "name", "section", "createdAt", "updatedAt" FROM "SectionPreset" WHERE "storeId" = $1 ORDER BY "createdAt"', [storeId]);
+  },
+
+  async getGlobalSection() {
+    return null;
+  },
+
+  async createGlobalSection(
+    _storeId,
+    input,
+  ) {
+    return input;
+  },
+
+  async updateGlobalSection(
+    _storeId,
+    id,
+    _revision,
+    patch,
+  ) {
+    return {
+      id,
+      ...patch,
+    };
+  },
+
+  async listPresets(storeId) {
+    if (!supabasePool) {
+      return [];
+    }
+
+    const result =
+      await supabasePool.query(
+        `
+          SELECT
+            "id",
+            "storeId",
+            "revision",
+            "name",
+            "section",
+            "createdAt",
+            "updatedAt"
+          FROM "SectionPreset"
+          WHERE "storeId" = $1
+          ORDER BY "createdAt"
+        `,
+        [storeId],
+      );
+
     return result.rows;
-  }, createPreset: async (_storeId, input) => input,
-  instantiatePreset: async () => ({}),
-  listMenus: async () => [], getMenu: async () => null, createMenu: async (_storeId, input) => input,
-  updateMenu: async (_storeId, id, _revision, patch) => ({ id, ...patch }),
-  getThemeConfiguration: async () => null, saveThemeConfiguration: async (_storeId, _revision, input) => input,
-  getAssignment: async () => null, assignTemplate: async (_storeId, input) => input,
+  },
+
+  async createPreset(
+    _storeId,
+    input,
+  ) {
+    return input;
+  },
+
+  async instantiatePreset() {
+    return {};
+  },
+
+  async listMenus() {
+    return [];
+  },
+
+  async getMenu() {
+    return null;
+  },
+
+  async createMenu(
+    _storeId,
+    input,
+  ) {
+    return input;
+  },
+
+  async updateMenu(
+    _storeId,
+    id,
+    _revision,
+    patch,
+  ) {
+    return {
+      id,
+      ...patch,
+    };
+  },
+
+  async getThemeConfiguration() {
+    return null;
+  },
+
+  async saveThemeConfiguration(
+    _storeId,
+    _revision,
+    input,
+  ) {
+    return input;
+  },
+
+  async getAssignment() {
+    return null;
+  },
+
+  async assignTemplate(
+    _storeId,
+    input,
+  ) {
+    return input;
+  },
 };
 
-export function createApp(dependencies: Partial<AppDependencies> = {}): Express {
-  const config = dependencies.config ?? loadConfig();
-  const authProvider = dependencies.authProvider ?? new DevelopmentAuthProvider(config.demoStoreId);
-  const storefrontRepository = dependencies.storefrontRepository ?? new LocalJsonStorefrontRepository(config.dataDirectory);
-  const documentValidator = dependencies.documentValidator ?? storefrontDocumentValidator;
-  const storefrontService = new DefaultStorefrontService(storefrontRepository, documentValidator, createDefaultStorefrontDocument);
-  const publicStorefrontApi = dependencies.publicStorefrontApi ?? defaultPublicStorefrontApi;
-  const mediaRepository = dependencies.mediaRepository ?? new LocalJsonMediaRepository(config.dataDirectory);
-  const mediaStorage = dependencies.mediaStorage ?? new LocalMediaStorage(config.uploadDirectory);
-  const mediaService = new MediaService(mediaRepository, mediaStorage);
-  const app = express();
 
+/* -------------------------------------------------------------------------- */
+/* Base middleware                                                            */
+/* -------------------------------------------------------------------------- */
+
+function configureMiddleware(
+  app: Express,
+  config: AppConfig,
+): void {
   app.disable("x-powered-by");
-  app.set("trust proxy", config.trustProxy);
-  app.use((request, response, next) => {
-    request.id = randomUUID();
-    response.setHeader("x-request-id", request.id);
-    next();
-  });
-  app.use(cors({ origin: config.corsOrigins }));
-  if (dependencies.stripeGateway && dependencies.stripeAccountService && dependencies.webhookSql) {
-    app.use("/webhooks/stripe/accounts-v2", createAccountsV2WebhookRouter(dependencies.stripeGateway, dependencies.stripeAccountService, dependencies.webhookSql));
-  }
-  if (dependencies.stripeGateway && dependencies.webhookSql) {
-    app.use("/webhooks/stripe/connect-payments", createConnectPaymentsWebhookRouter(dependencies.stripeGateway, dependencies.webhookSql));
-  }
-  if (dependencies.reservationSweeper && config.stripe?.schedulerSecret) {
-    app.use("/internal/commerce/reservations/sweep", createSweeperRouter(dependencies.reservationSweeper, config.stripe.schedulerSecret));
-  }
-  if (dependencies.merchantOrderService) {
-    app.use("/api/stores/:storeId/orders", createMerchantOrderRouter(dependencies.merchantOrderService, authProvider));
-  }
-  app.use(express.json({ limit: "2mb" }));
 
-  app.get("/health", (_request, response) => response.json({ ok: true }));
+  app.set(
+    "trust proxy",
+    config.trustProxy,
+  );
 
-  app.use("/api/demo/catalog", createCatalogRouter());
-  if (dependencies.catalogService) {
-    app.use("/api/stores/:storeId/catalog", createCatalogAdminRouter(dependencies.catalogService, authProvider));
-    app.use("/api/public/stores/:storeId/catalog", createPublicCatalogRouter(dependencies.catalogService));
-  }
-  if (dependencies.contentService) {
-    app.use("/api/stores/:storeId/content", createContentRouter(dependencies.contentService, authProvider));
-  }
-  if (dependencies.customDataService && dependencies.metaobjectService && dependencies.dynamicSourceRegistry) {
+  app.use(
+    (request, response, next) => {
+      request.id = randomUUID();
+
+      response.setHeader(
+        "x-request-id",
+        request.id,
+      );
+
+      next();
+    },
+  );
+
+  app.use(
+    cors({
+      origin: config.corsOrigins,
+    }),
+  );
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Stripe webhooks                                                            */
+/* -------------------------------------------------------------------------- */
+
+function mountStripeWebhooks(
+  app: Express,
+  deps: Partial<AppDependencies>,
+): void {
+  if (
+    deps.stripeGateway &&
+    deps.stripeAccountService &&
+    deps.webhookSql
+  ) {
     app.use(
-      "/api/stores/:storeId/custom-data",
-      createCustomDataRouter({
-        customData: dependencies.customDataService,
-        metaobjects: dependencies.metaobjectService,
-        registry: dependencies.dynamicSourceRegistry,
-      }, authProvider),
+      "/webhooks/stripe/accounts-v2",
+      createAccountsV2WebhookRouter(
+        deps.stripeGateway,
+        deps.stripeAccountService,
+        deps.webhookSql,
+      ),
     );
   }
+
+  if (
+    deps.stripeGateway &&
+    deps.webhookSql
+  ) {
+    app.use(
+      "/webhooks/stripe/connect-payments",
+      createConnectPaymentsWebhookRouter(
+        deps.stripeGateway,
+        deps.webhookSql,
+      ),
+    );
+  }
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Internal routes                                                            */
+/* -------------------------------------------------------------------------- */
+
+function mountInternalRoutes(
+  app: Express,
+  deps: Partial<AppDependencies>,
+  config: AppConfig,
+): void {
+  if (
+    deps.reservationSweeper &&
+    config.stripe?.schedulerSecret
+  ) {
+    app.use(
+      "/internal/commerce/reservations/sweep",
+      createSweeperRouter(
+        deps.reservationSweeper,
+        config.stripe.schedulerSecret,
+      ),
+    );
+  }
+
+  app.get(
+    "/health",
+    (_request, response) => {
+      response.json({
+        ok: true,
+      });
+    },
+  );
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Commerce routes                                                            */
+/* -------------------------------------------------------------------------- */
+
+function mountCommerceRoutes(
+  app: Express,
+  deps: Partial<AppDependencies>,
+  authProvider: AuthProvider,
+): void {
+  if (deps.stripeAccountService) {
+    app.use(
+      "/api/stores/:storeId/stripe-connect",
+      createStripeConnectRouter(
+        deps.stripeAccountService,
+        authProvider,
+      ),
+    );
+  }
+
+  if (deps.checkoutService) {
+    app.use(
+      "/api/public/stores/:storeId/checkout",
+      createCommerceRouter(
+        deps.checkoutService,
+      ),
+    );
+
+    app.use(
+      "/api/public/stores/:storeId/orders",
+      createPublicOrderRouter(
+        deps.checkoutService,
+      ),
+    );
+  }
+
+  if (deps.merchantOrderService) {
+    app.use(
+      "/api/stores/:storeId/orders",
+      createMerchantOrderRouter(
+        deps.merchantOrderService,
+        authProvider,
+      ),
+    );
+  }
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Tenant routes                                                              */
+/* -------------------------------------------------------------------------- */
+
+function mountTenantRoutes(
+  app: Express,
+  deps: Partial<AppDependencies>,
+  authProvider: AuthProvider,
+): void {
+  if (!deps.tenantRepository) {
+    return;
+  }
+
+  app.use(
+    "/api",
+    createMerchantRouter(
+      authProvider,
+      deps.tenantRepository,
+    ),
+  );
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Catalog routes                                                             */
+/* -------------------------------------------------------------------------- */
+
+function mountCatalogRoutes(
+  app: Express,
+  deps: Partial<AppDependencies>,
+  authProvider: AuthProvider,
+): void {
+  app.use(
+    "/api/demo/catalog",
+    createCatalogRouter(),
+  );
+
+  if (supabasePool) {
+    app.use(
+      "/api/public/stores/:storeId",
+      createPublicStoreRouter(supabasePool),
+    );
+  }
+
+  if (!deps.catalogService) {
+    return;
+  }
+
+  app.use(
+    "/api/stores/:storeId/catalog",
+    createCatalogAdminRouter(
+      deps.catalogService,
+      authProvider,
+    ),
+  );
+
+  app.use(
+    "/api/public/stores/:storeId/catalog",
+    createPublicCatalogRouter(
+      deps.catalogService,
+    ),
+  );
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Content / custom data                                                      */
+/* -------------------------------------------------------------------------- */
+
+function mountContentRoutes(
+  app: Express,
+  deps: Partial<AppDependencies>,
+  authProvider: AuthProvider,
+): void {
+  if (deps.contentService) {
+    app.use(
+      "/api/stores/:storeId/content",
+      createContentRouter(
+        deps.contentService,
+        authProvider,
+      ),
+    );
+  }
+
+  if (
+    deps.customDataService &&
+    deps.metaobjectService &&
+    deps.dynamicSourceRegistry
+  ) {
+    app.use(
+      "/api/stores/:storeId/custom-data",
+      createCustomDataRouter(
+        {
+          customData:
+            deps.customDataService,
+          metaobjects:
+            deps.metaobjectService,
+          registry:
+            deps.dynamicSourceRegistry,
+        },
+        authProvider,
+      ),
+    );
+  }
+
   app.get(
     "/api/stores/:storeId/custom-data/dynamic-sources",
     requireMerchant(authProvider),
-    requireStorePermission("storefront:view"),
-    (_request, response) => response.json([{ id: "resource:store:name", label: "Store name", valueType: "string", requiredContext: "any", binding: { kind: "resource_field", resource: "store", field: "name" } }]),
+    requireStorePermission(
+      "storefront:view",
+    ),
+    (_request, response) => {
+      response.json([
+        {
+          id: "resource:store:name",
+          label: "Store name",
+          valueType: "string",
+          requiredContext: "any",
+          binding: {
+            kind: "resource_field",
+            resource: "store",
+            field: "name",
+          },
+        },
+      ]);
+    },
   );
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Storefront                                                                 */
+/* -------------------------------------------------------------------------- */
+
+function mountStorefrontRoutes(
+  app: Express,
+  deps: Partial<AppDependencies>,
+  authProvider: AuthProvider,
+  storefrontService: DefaultStorefrontService<unknown>,
+  publicStorefrontApi: PublicStorefrontApi,
+): void {
   app.post(
     "/api/stores/:storeId/storefront/publish",
     requireMerchant(authProvider),
-    requireStorePermission("storefront:edit"),
-    async (request, response, next) => {
+    requireStorePermission(
+      "storefront:edit",
+    ),
+    async (
+      request,
+      response,
+      next,
+    ) => {
       try {
-        const storeId = request.storeContext!.storeId;
-        const generation = Number(request.body?.expectedGeneration ?? 0);
+        const storeId =
+          request.storeContext!.storeId;
+
+        const generation =
+          Number(
+            request.body
+              ?.expectedGeneration ??
+              0,
+          );
+
         if (supabasePool) {
           await supabasePool.query(
-            'UPDATE "StorefrontWorkspace" SET "generation" = GREATEST("generation", $1), "updatedAt" = NOW() WHERE "storeId" = $2',
-            [generation, storeId],
+            `
+              UPDATE "StorefrontWorkspace"
+              SET
+                "generation" =
+                  GREATEST(
+                    "generation",
+                    $1
+                  ),
+                "updatedAt" = NOW()
+              WHERE "storeId" = $2
+            `,
+            [
+              generation,
+              storeId,
+            ],
           );
         }
-        response.json({ ok: true, publication: { id: `publication-${storeId}-${generation}`, storeId, sourceGeneration: generation }, diagnostics: [] });
-      } catch (error) { next(error); }
+
+        response.json({
+          ok: true,
+
+          publication: {
+            id:
+              `publication-${storeId}-${generation}`,
+            storeId,
+            sourceGeneration:
+              generation,
+          },
+
+          diagnostics: [],
+        });
+      } catch (error) {
+        next(error);
+      }
     },
   );
-  for (const path of ["validate", "preview/compile"]) {
+
+  for (const path of [
+    "validate",
+    "preview/compile",
+  ]) {
     app.post(
       `/api/stores/:storeId/storefront/${path}`,
-      requireMerchant(authProvider),
-      requireStorePermission("storefront:view"),
-      (_request, response) => response.json({ ok: true, diagnostics: [], dependencies: {} }),
+      requireMerchant(
+        authProvider,
+      ),
+      requireStorePermission(
+        "storefront:view",
+      ),
+      (_request, response) => {
+        response.json({
+          ok: true,
+          diagnostics: [],
+          dependencies: {},
+        });
+      },
     );
   }
-  app.get("/api/stores/:storeId/storefront/public", async (request, response, next) => {
-    try {
-      response.json(await publicStorefrontApi.load(String(request.params.storeId)));
-    } catch (error) { next(error); }
-  });
-  if (dependencies.tenantRepository) app.use("/api", createMerchantRouter(authProvider, dependencies.tenantRepository));
 
-  if (dependencies.stripeAccountService) {
+  app.get(
+    "/api/stores/:storeId/storefront/public",
+    async (
+      request,
+      response,
+      next,
+    ) => {
+      try {
+        const storeId =
+          String(
+            request.params.storeId,
+          );
+
+        const result =
+          await publicStorefrontApi.load(
+            storeId,
+          );
+
+        response.json(result);
+      } catch (error) {
+        next(error);
+      }
+    },
+  );
+
+  app.use(
+    "/api/stores/:storeId/storefront",
+    createStorefrontWorkspaceRouter(
+      deps.storefrontWorkspaceApi ??
+        defaultStorefrontWorkspaceApi,
+      authProvider,
+    ),
+  );
+
+  if (
+    deps.storefrontCompilerApi
+  ) {
     app.use(
-      "/api/stores/:storeId/stripe-connect",
-      createStripeConnectRouter(dependencies.stripeAccountService, authProvider),
+      "/api/stores/:storeId/storefront",
+      createStorefrontCompilerRouter(
+        deps.storefrontCompilerApi,
+        authProvider,
+      ),
     );
   }
-  if (dependencies.checkoutService) {
+
+  if (
+    deps.storefrontPublicationApi
+  ) {
     app.use(
-      "/api/public/stores/:storeId/checkout",
-      createCommerceRouter(dependencies.checkoutService),
-    );
-    app.use(
-      "/api/public/stores/:storeId/orders",
-      createPublicOrderRouter(dependencies.checkoutService),
+      "/api/stores/:storeId/storefront",
+      createStorefrontPublicationRouter(
+        deps.storefrontPublicationApi,
+        authProvider,
+      ),
     );
   }
 
   app.use(
     "/api/stores/:storeId/storefront",
-    createStorefrontWorkspaceRouter(dependencies.storefrontWorkspaceApi ?? defaultStorefrontWorkspaceApi, authProvider),
+    createStorefrontRouter(
+      storefrontService,
+      authProvider,
+    ),
   );
-  if (dependencies.storefrontCompilerApi) {
-    app.use(
-      "/api/stores/:storeId/storefront",
-      createStorefrontCompilerRouter(dependencies.storefrontCompilerApi, authProvider),
-    );
-  }
-  if (dependencies.storefrontPublicationApi) {
-    app.use(
-      "/api/stores/:storeId/storefront",
-      createStorefrontPublicationRouter(dependencies.storefrontPublicationApi, authProvider),
-    );
-  }
-  app.use("/api/stores/:storeId/storefront", createStorefrontRouter(storefrontService, authProvider));
-  app.use("/api/stores/:storeId/media", createMediaRouter(mediaService, authProvider, config.maxUploadBytes));
-  app.use("/api/public/media", createPublicMediaRouter(mediaService));
+}
 
+
+/* -------------------------------------------------------------------------- */
+/* Media                                                                      */
+/* -------------------------------------------------------------------------- */
+
+function createDefaultMediaStorage(
+  config: AppConfig,
+): MediaStorage {
+  if (config.mediaProvider === "supabase") {
+    if (
+      !config.supabaseUrl ||
+      !config.supabaseSecretKey
+    ) {
+      throw new Error(
+        "Supabase media storage configuration is missing",
+      );
+    }
+
+    return new SupabaseMediaStorage(
+      config.supabaseUrl,
+      config.supabaseSecretKey,
+      config.supabaseMediaBucket,
+    );
+  }
+
+  // Preserve the existing behavior for local-files and gcs.
+  // A dedicated GCS MediaStorage implementation can replace this branch later.
+  return new LocalMediaStorage(
+    config.uploadDirectory,
+  );
+}
+
+function mountMediaRoutes(
+  app: Express,
+  mediaService: MediaService,
+  authProvider: AuthProvider,
+  config: AppConfig,
+): void {
+  app.use(
+    "/api/stores/:storeId/media",
+    createMediaRouter(
+      mediaService,
+      authProvider,
+      config.maxUploadBytes,
+    ),
+  );
+
+  app.use(
+    "/api/public/media",
+    createPublicMediaRouter(
+      mediaService,
+    ),
+  );
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* App                                                                        */
+/* -------------------------------------------------------------------------- */
+
+export function createApp(
+  dependencies: Partial<AppDependencies> = {},
+): Express {
+  const config =
+    dependencies.config ??
+    loadConfig();
+
+  const authProvider =
+    dependencies.authProvider ??
+    new DevelopmentAuthProvider(
+      config.demoStoreId,
+    );
+
+  const storefrontRepository =
+    dependencies.storefrontRepository ??
+    new LocalJsonStorefrontRepository(
+      config.dataDirectory,
+    );
+
+  const documentValidator =
+    dependencies.documentValidator ??
+    storefrontDocumentValidator;
+
+  const storefrontService =
+    new DefaultStorefrontService(
+      storefrontRepository,
+      documentValidator,
+      createDefaultStorefrontDocument,
+    );
+
+  const publicStorefrontApi =
+    dependencies.publicStorefrontApi ??
+    defaultPublicStorefrontApi;
+
+  const mediaRepository =
+    dependencies.mediaRepository ??
+    new LocalJsonMediaRepository(
+      config.dataDirectory,
+    );
+
+  const mediaStorage =
+    dependencies.mediaStorage ??
+    createDefaultMediaStorage(
+      config,
+    );
+
+  const mediaService =
+    new MediaService(
+      mediaRepository,
+      mediaStorage,
+    );
+
+  const app = express();
+
+  const catalogService =
+    dependencies.catalogService ??
+    (supabasePool ? new CatalogService(new CatalogPostgresRepository(supabasePool)) as CatalogAdmin : undefined);
+
+  /* Base middleware */
+  configureMiddleware(
+    app,
+    config,
+  );
+
+  /*
+   * Stripe webhook routes MUST be mounted
+   * before express.json(), because Stripe
+   * signature verification requires raw bytes.
+   */
+  mountStripeWebhooks(
+    app,
+    dependencies,
+  );
+
+  /* Normal JSON API parsing starts here. */
+  app.use(
+    express.json({
+      limit: "2mb",
+    }),
+  );
+
+  mountInternalRoutes(
+    app,
+    dependencies,
+    config,
+  );
+
+  mountTenantRoutes(
+    app,
+    dependencies,
+    authProvider,
+  );
+
+  mountCommerceRoutes(
+    app,
+    dependencies,
+    authProvider,
+  );
+
+  mountCatalogRoutes(
+    app,
+    { ...dependencies, catalogService },
+    authProvider,
+  );
+
+  mountContentRoutes(
+    app,
+    dependencies,
+    authProvider,
+  );
+
+  mountStorefrontRoutes(
+    app,
+    dependencies,
+    authProvider,
+    storefrontService,
+    publicStorefrontApi,
+  );
+
+  mountMediaRoutes(
+    app,
+    mediaService,
+    authProvider,
+    config,
+  );
+
+  /* Error handling must stay last. */
   app.use(notFoundHandler);
   app.use(errorHandler);
+
   return app;
 }

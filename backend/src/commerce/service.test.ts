@@ -199,7 +199,7 @@ describe("CheckoutService", () => {
       await service.begin(validCart);
       
       const insertAttempt = vi.mocked(tx.query).mock.calls.find(c => (c[0] as string).includes("INSERT INTO \"CheckoutAttempt\""));
-      expect(insertAttempt![1]).toContain("PAYMENT_INTENT_CREATING");
+      expect(insertAttempt![0]).toContain("PAYMENT_INTENT_CREATING");
     });
 
     it("12. persists Stripe idempotency key", async () => {
@@ -287,8 +287,8 @@ describe("CheckoutService", () => {
         status: "READY", expiresAt: new Date(Date.now() + 60_000), createdAt: new Date(),
       };
       vi.mocked(tx.query).mockImplementation(async (sql: string) => {
-        if (sql.includes('SELECT * FROM "CheckoutAttempt"')) return { rows: [oldAttempt] };
-        if (sql.includes('SELECT "stripeAccountId" FROM "Payment"')) return { rows: [{ stripeAccountId: "acct_123" }] };
+        if (sql.replace(/\s+/g, " ").includes('SELECT * FROM "CheckoutAttempt"')) return { rows: [oldAttempt] };
+        if (sql.replace(/\s+/g, " ").includes('SELECT "stripeAccountId" FROM "Payment"')) return { rows: [{ stripeAccountId: "acct_123" }] };
         return { rows: [{ id: "new-record" }] };
       });
 
@@ -323,8 +323,8 @@ describe("CheckoutService", () => {
       };
       let orderUpdate = false;
       vi.mocked(tx.query).mockImplementation(async (sql: string) => {
-        if (sql.includes('SELECT * FROM "CheckoutAttempt"')) return { rows: [oldAttempt] };
-        if (sql.includes('SELECT "stripeAccountId" FROM "Payment"')) return { rows: [{ stripeAccountId: "acct_123" }] };
+        if (sql.replace(/\s+/g, " ").includes('SELECT * FROM "CheckoutAttempt"')) return { rows: [oldAttempt] };
+        if (sql.replace(/\s+/g, " ").includes('SELECT "stripeAccountId" FROM "Payment"')) return { rows: [{ stripeAccountId: "acct_123" }] };
         if (sql.includes('UPDATE "Order"')) { orderUpdate = true; return { rows: [] }; }
         return { rows: [{ id: "new-record" }] };
       });

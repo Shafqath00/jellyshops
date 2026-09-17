@@ -1,16 +1,51 @@
-import express from "express";
 import crypto from "node:crypto";
+import express from "express";
+
+import { ApiError } from "../http/errors.js";
 import type { ReservationSweeper } from "./sweeper.js";
 
-export function createSweeperRouter(sweeper: ReservationSweeper, secret: string): express.Router {
+function secretsMatch(
+  supplied: string,
+  expected: string,
+): boolean {
+  return (
+    supplied.length === expected.length &&
+    crypto.timingSafeEqual(
+      Buffer.from(supplied),
+      Buffer.from(expected),
+    )
+  );
+}
+
+export function createSweeperRouter(
+  sweeper: ReservationSweeper,
+  secret: string,
+): express.Router {
   const router = express.Router();
-  router.post("/", async (request, response, next) => {
-    try {
-      const supplied = String(request.header("x-scheduler-secret") ?? "");
-      const valid = supplied.length === secret.length && crypto.timingSafeEqual(Buffer.from(supplied), Buffer.from(secret));
-      if (!valid) return response.status(401).json({ error: { code: "SCHEDULER_UNAUTHORIZED" } });
-      response.json({ released: await sweeper.sweep() });
-    } catch (error) { next(error); }
-  });
+
+  router.post(
+    "/",
+    async (request, response, next) => {
+      try {
+        const suppliedSecret =
+          request.header("x-scheduler-secret") ?? "";
+
+        if (!secretsMatch(suppliedSecret, secret)) {
+          throw new ApiError(
+            401,
+            "SCHEDULER_UNAUTHORIZED",
+            "Scheduler authorization failed.",
+          );
+        }
+
+        const released = await sweeper.sweep();
+
+        response.json({ released });
+      } catch (error) {
+        next(error);
+      }
+    },
+  );
+
   return router;
 }

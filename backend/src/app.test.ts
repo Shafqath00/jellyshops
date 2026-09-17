@@ -33,6 +33,14 @@ describe("service foundation", () => {
     expect(response.body).toEqual([expect.objectContaining({ id: "home", type: "home" })]);
   });
 
+  it("uses the real starter template instead of the generic storefront fallback", async () => {
+    const response = await request(createApp()).get("/api/stores/store-demo/storefront/public");
+
+    expect(response.status).toBe(200);
+    expect(response.body.document.regions.template[0].blocks[0].settings.text)
+      .toBe("Made for your sweetest moments");
+  });
+
   it("rejects development auth in production", () => {
     expect(() =>
       loadConfig({ NODE_ENV: "production", AUTH_PROVIDER: "development" }),

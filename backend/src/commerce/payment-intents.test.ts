@@ -40,10 +40,11 @@ describe("durable PaymentIntent preparation", () => {
     failAttachment = false; failRelease = false; failCommit = false;
     repository = new CommerceRepository({ transaction: (work) => database.transaction(async (tx) => {
       const result = await work({ query: async (sql, values) => {
-        if (failAttachment && sql.startsWith('UPDATE "Payment"') && sql.includes('"paymentIntentId"')) {
+        const normalizedSql = sql.trimStart();
+        if (failAttachment && normalizedSql.startsWith('UPDATE "Payment"') && normalizedSql.includes('"paymentIntentId"')) {
           failAttachment = false; throw new Error("local attachment failed");
         }
-        if (failRelease && sql.startsWith('UPDATE "InventoryLevel"')) throw new Error("release failed");
+        if (failRelease && normalizedSql.startsWith('UPDATE "InventoryLevel"')) throw new Error("release failed");
         return tx.query(sql, values);
       } });
       if (failCommit) { failCommit = false; throw new Error("commit failed"); }

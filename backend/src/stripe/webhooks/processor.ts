@@ -1,61 +1,701 @@
-import type { SqlExecutor } from "../../commerce/repository.js";
+import type {
+  PaymentRow,
+  SqlExecutor,
+} from "../../commerce/repository.js";
 
-type EventPayload = Record<string, any>;
+type EventPayload =
+  Record<string, unknown>;
 
-function objectOf(value: unknown): EventPayload { return value && typeof value === "object" ? value as EventPayload : {}; }
-function stripeObject(payload: EventPayload): EventPayload { return objectOf(payload.data?.object); }
+export interface ConnectPaymentEvent {
+  id: string;
+  type: string;
+  stripeAccountId: string | null;
+  payload: EventPayload;
+}
 
-export async function processConnectPaymentEvent(sql: SqlExecutor, event: { id: string; type: string; stripeAccountId: string | null; payload: EventPayload }): Promise<void> {
-  const accountId = event.stripeAccountId;
-  if (!accountId) return;
-  const object = stripeObject(event.payload);
-  const paymentIntentId = typeof object.payment_intent === "string" ? object.payment_intent : object.payment_intent?.id;
-  const intentId = typeof object.id === "string" && object.id.startsWith("pi_") ? object.id : paymentIntentId;
-  await sql.query(`UPDATE "StripeWebhookEvent" SET "processedAt" = CURRENT_TIMESTAMP WHERE "id" = $1 AND "processedAt" IS NULL`, [event.id]);
+const PAYMENT_INTENT_EVENTS = new Set([
+  "payment_intent.succeeded",
+  "payment_intent.payment_failed",
+  "payment_intent.canceled",
+]);
 
-  if (["payment_intent.succeeded", "payment_intent.payment_failed", "payment_intent.canceled"].includes(event.type) && intentId) {
-    const payments = await sql.query<any>(`SELECT * FROM "Payment" WHERE "stripeAccountId" = $1 AND "paymentIntentId" = $2 FOR UPDATE`, [accountId, intentId]);
-    const payment = payments.rows[0];
-    if (!payment) return;
-    if (event.type === "payment_intent.succeeded") {
-      await sql.query(`UPDATE "Payment" SET "status" = 'PAID' WHERE "id" = $1 AND "status" IN ('PENDING','PROCESSING')`, [payment.id]);
-      await sql.query(`UPDATE "Order" SET "status" = 'PAID', "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = $1 AND "storeId" = $2 AND "status" = 'PENDING_PAYMENT'`, [payment.orderId, payment.storeId]);
-      const attempt = await sql.query<any>(`SELECT "id" FROM "CheckoutAttempt" WHERE "orderId" = $1 AND "storeId" = $2`, [payment.orderId, payment.storeId]);
-      if (attempt.rows[0]) {
-        await sql.query(`UPDATE "CheckoutAttempt" SET "status" = 'SUCCEEDED' WHERE "id" = $1 AND "status" IN ('PAYMENT_INTENT_CREATING','READY','PROCESSING')`, [attempt.rows[0].id]);
-        await sql.query(`UPDATE "InventoryReservation" SET "status" = 'SOLD' WHERE "attemptId" = $1 AND "status" = 'HELD'`, [attempt.rows[0].id]);
-      }
-    } else if (event.type === "payment_intent.canceled") {
-      const cancelled = await sql.query(`UPDATE "Order" SET "status" = 'CANCELLED', "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = $1 AND "storeId" = $2 AND "status" = 'PENDING_PAYMENT' RETURNING "id"`, [payment.orderId, payment.storeId]);
-      await sql.query(`UPDATE "Payment" SET "status" = 'CANCELLED' WHERE "id" = $1 AND "status" = 'PENDING'`, [payment.id]);
-      const attempt = await sql.query<any>(`SELECT "id" FROM "CheckoutAttempt" WHERE "orderId" = $1 AND "storeId" = $2`, [payment.orderId, payment.storeId]);
-      if (cancelled.rows.length && attempt.rows[0]) {
-        await sql.query(`UPDATE "CheckoutAttempt" SET "status" = 'CANCELLED' WHERE "id" = $1 AND "status" <> 'SUCCEEDED'`, [attempt.rows[0].id]);
-        await sql.query(`UPDATE "InventoryReservation" SET "status" = 'RELEASED' WHERE "attemptId" = $1 AND "status" = 'HELD'`, [attempt.rows[0].id]);
-      }
-    } else {
-      await sql.query(`UPDATE "Payment" SET "status" = 'FAILED' WHERE "id" = $1 AND "status" = 'PENDING'`, [payment.id]);
-    }
+function asRecord(
+  value: unknown,
+): EventPayload {
+  return value &&
+    typeof value === "object" &&
+    !Array.isArray(value)
+    ? (value as EventPayload)
+    : {};
+}
+
+function stripeObject(
+  payload: EventPayload,
+): EventPayload {
+  const data = asRecord(payload.data);
+
+  return asRecord(data.object);
+}
+
+function expandableId(
+  value: unknown,
+): string | null {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  const object = asRecord(value);
+
+  return typeof object.id === "string"
+    ? object.id
+    : null;
+}
+
+function stringValue(
+  value: unknown,
+): string | null {
+  return typeof value === "string"
+    ? value
+    : null;
+}
+
+async function markProcessed(
+  sql: SqlExecutor,
+  eventId: string,
+): Promise<void> {
+  await sql.query(
+    `
+      UPDATE "StripeWebhookEvent"
+      SET "processedAt" = CURRENT_TIMESTAMP
+      WHERE "id" = $1
+        AND "processedAt" IS NULL
+    `,
+    [eventId],
+  );
+}
+
+async function findPaymentByIntent(
+  sql: SqlExecutor,
+  stripeAccountId: string,
+  paymentIntentId: string,
+): Promise<PaymentRow | null> {
+  const result =
+    await sql.query<PaymentRow>(
+      `
+        SELECT *
+        FROM "Payment"
+        WHERE "stripeAccountId" = $1
+          AND "paymentIntentId" = $2
+        FOR UPDATE
+      `,
+      [
+        stripeAccountId,
+        paymentIntentId,
+      ],
+    );
+
+  return result.rows[0] ?? null;
+}
+
+async function getCheckoutAttemptId(
+  sql: SqlExecutor,
+  payment: PaymentRow,
+): Promise<string | null> {
+  const result = await sql.query<{
+    id: string;
+  }>(
+    `
+      SELECT "id"
+      FROM "CheckoutAttempt"
+      WHERE "orderId" = $1
+        AND "storeId" = $2
+    `,
+    [
+      payment.orderId,
+      payment.storeId,
+    ],
+  );
+
+  return result.rows[0]?.id ?? null;
+}
+
+async function processPaymentSucceeded(
+  sql: SqlExecutor,
+  payment: PaymentRow,
+): Promise<void> {
+  await sql.query(
+    `
+      UPDATE "Payment"
+      SET "status" = 'PAID'
+      WHERE "id" = $1
+        AND "status" IN (
+          'PENDING',
+          'PROCESSING'
+        )
+    `,
+    [payment.id],
+  );
+
+  await sql.query(
+    `
+      UPDATE "Order"
+      SET
+        "status" = 'PAID',
+        "updatedAt" = CURRENT_TIMESTAMP
+      WHERE "id" = $1
+        AND "storeId" = $2
+        AND "status" = 'PENDING_PAYMENT'
+    `,
+    [
+      payment.orderId,
+      payment.storeId,
+    ],
+  );
+
+  const attemptId =
+    await getCheckoutAttemptId(
+      sql,
+      payment,
+    );
+
+  if (!attemptId) {
     return;
   }
 
-  if (event.type.startsWith("charge.dispute.") && object.id) {
-    const chargeId = typeof object.charge === "string" ? object.charge : object.charge?.id;
-    const payment = (await sql.query<any>(`SELECT "id", "storeId" FROM "Payment" WHERE "stripeAccountId" = $1 AND "chargeId" = $2`, [accountId, chargeId])).rows[0];
-    if (payment) await sql.query(`INSERT INTO "PaymentDispute" ("storeId", "paymentId", "stripeDisputeId", "status") VALUES ($1,$2,$3,$4) ON CONFLICT ("stripeDisputeId") DO UPDATE SET "status" = EXCLUDED."status"`, [payment.storeId, payment.id, object.id, object.status ?? "under_review"]);
+  await sql.query(
+    `
+      UPDATE "CheckoutAttempt"
+      SET "status" = 'SUCCEEDED'
+      WHERE "id" = $1
+        AND "status" IN (
+          'PAYMENT_INTENT_CREATING',
+          'READY',
+          'PROCESSING'
+        )
+    `,
+    [attemptId],
+  );
+
+  await sql.query(
+    `
+      UPDATE "InventoryReservation"
+      SET "status" = 'SOLD'
+      WHERE "attemptId" = $1
+        AND "status" = 'HELD'
+    `,
+    [attemptId],
+  );
+}
+
+async function processPaymentCancelled(
+  sql: SqlExecutor,
+  payment: PaymentRow,
+): Promise<void> {
+  const cancelled =
+    await sql.query(
+      `
+        UPDATE "Order"
+        SET
+          "status" = 'CANCELLED',
+          "updatedAt" = CURRENT_TIMESTAMP
+        WHERE "id" = $1
+          AND "storeId" = $2
+          AND "status" = 'PENDING_PAYMENT'
+        RETURNING "id"
+      `,
+      [
+        payment.orderId,
+        payment.storeId,
+      ],
+    );
+
+  await sql.query(
+    `
+      UPDATE "Payment"
+      SET "status" = 'CANCELLED'
+      WHERE "id" = $1
+        AND "status" = 'PENDING'
+    `,
+    [payment.id],
+  );
+
+  if (cancelled.rows.length !== 1) {
+    return;
   }
 
-  if (event.type.startsWith("refund.") || event.type === "charge.refunded") {
-    const refundId = event.type === "charge.refunded" ? null : object.id;
-    const pi = typeof object.payment_intent === "string" ? object.payment_intent : object.payment_intent?.id;
-    const charge = typeof object.id === "string" && object.id.startsWith("ch_") ? object.id : null;
-    const payment = (await sql.query<any>(`SELECT * FROM "Payment" WHERE "stripeAccountId" = $1 AND ("paymentIntentId" = $2 OR "chargeId" = $3)`, [accountId, pi, charge])).rows[0];
-    if (payment && refundId) await sql.query(`INSERT INTO "Refund" ("id", "storeId", "orderId", "paymentId", "stripeRefundId", "amountMinor", "status") VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT ("stripeRefundId") DO UPDATE SET "status" = EXCLUDED."status"`, [`refund-${refundId}`, payment.storeId, payment.orderId, payment.id, refundId, object.amount ?? payment.amountMinor, event.type === "refund.succeeded" ? "SUCCEEDED" : event.type === "refund.failed" ? "FAILED" : "PENDING"]);
-    if (event.type === "charge.refunded" && payment) {
-      await sql.query(`UPDATE "Payment" SET "status" = 'REFUNDED' WHERE "id" = $1`, [payment.id]);
-      await sql.query(`UPDATE "Order" SET "status" = 'REFUNDED', "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = $1 AND "status" IN ('PAID','PROCESSING','SHIPPED','DELIVERED')`, [payment.orderId]);
-      await sql.query(`UPDATE "InventoryLevel" il SET "quantity" = il."quantity" + ir."quantity" FROM "InventoryReservation" ir JOIN "OrderItem" oi ON oi."orderId" = $2 AND oi."storeId" = $3 AND oi."variantId" = ir."variantId" WHERE il."storeId" = $3 AND il."variantId" = ir."variantId" AND ir."status" = 'SOLD' AND ir."attemptId" IN (SELECT "id" FROM "CheckoutAttempt" WHERE "orderId" = $2 AND "storeId" = $3) AND NOT EXISTS (SELECT 1 FROM "Refund" r WHERE r."orderId" = $2 AND r."inventoryRestoredAt" IS NOT NULL)`, [payment.id, payment.orderId, payment.storeId]);
-      await sql.query(`UPDATE "Refund" SET "inventoryRestoredAt" = CURRENT_TIMESTAMP WHERE "orderId" = $1 AND "status" = 'SUCCEEDED' AND "inventoryRestoredAt" IS NULL`, [payment.orderId]);
-    }
+  const attemptId =
+    await getCheckoutAttemptId(
+      sql,
+      payment,
+    );
+
+  if (!attemptId) {
+    return;
   }
+
+  await sql.query(
+    `
+      UPDATE "CheckoutAttempt"
+      SET "status" = 'CANCELLED'
+      WHERE "id" = $1
+        AND "status" <> 'SUCCEEDED'
+    `,
+    [attemptId],
+  );
+
+  await sql.query(
+    `
+      UPDATE "InventoryReservation"
+      SET "status" = 'RELEASED'
+      WHERE "attemptId" = $1
+        AND "status" = 'HELD'
+    `,
+    [attemptId],
+  );
+}
+
+async function processPaymentFailed(
+  sql: SqlExecutor,
+  payment: PaymentRow,
+): Promise<void> {
+  await sql.query(
+    `
+      UPDATE "Payment"
+      SET "status" = 'FAILED'
+      WHERE "id" = $1
+        AND "status" = 'PENDING'
+    `,
+    [payment.id],
+  );
+}
+
+async function processPaymentIntentEvent(
+  sql: SqlExecutor,
+  event: ConnectPaymentEvent,
+  object: EventPayload,
+): Promise<boolean> {
+  if (
+    !PAYMENT_INTENT_EVENTS.has(
+      event.type,
+    )
+  ) {
+    return false;
+  }
+
+  const objectId =
+    stringValue(object.id);
+
+  const paymentIntentId =
+    objectId?.startsWith("pi_")
+      ? objectId
+      : expandableId(
+          object.payment_intent,
+        );
+
+  if (
+    !paymentIntentId ||
+    !event.stripeAccountId
+  ) {
+    return true;
+  }
+
+  const payment =
+    await findPaymentByIntent(
+      sql,
+      event.stripeAccountId,
+      paymentIntentId,
+    );
+
+  if (!payment) {
+    return true;
+  }
+
+  switch (event.type) {
+    case "payment_intent.succeeded":
+      await processPaymentSucceeded(
+        sql,
+        payment,
+      );
+      break;
+
+    case "payment_intent.canceled":
+      await processPaymentCancelled(
+        sql,
+        payment,
+      );
+      break;
+
+    case "payment_intent.payment_failed":
+      await processPaymentFailed(
+        sql,
+        payment,
+      );
+      break;
+  }
+
+  return true;
+}
+
+async function processDisputeEvent(
+  sql: SqlExecutor,
+  event: ConnectPaymentEvent,
+  object: EventPayload,
+): Promise<void> {
+  if (
+    !event.type.startsWith(
+      "charge.dispute.",
+    ) ||
+    !event.stripeAccountId
+  ) {
+    return;
+  }
+
+  const disputeId =
+    stringValue(object.id);
+
+  const chargeId =
+    expandableId(object.charge);
+
+  if (!disputeId || !chargeId) {
+    return;
+  }
+
+  const paymentResult =
+    await sql.query<{
+      id: string;
+      storeId: string;
+    }>(
+      `
+        SELECT
+          "id",
+          "storeId"
+        FROM "Payment"
+        WHERE "stripeAccountId" = $1
+          AND "chargeId" = $2
+      `,
+      [
+        event.stripeAccountId,
+        chargeId,
+      ],
+    );
+
+  const payment =
+    paymentResult.rows[0];
+
+  if (!payment) {
+    return;
+  }
+
+  const status =
+    stringValue(object.status) ??
+    "under_review";
+
+  await sql.query(
+    `
+      INSERT INTO "PaymentDispute" (
+        "storeId",
+        "paymentId",
+        "stripeDisputeId",
+        "status"
+      )
+      VALUES ($1, $2, $3, $4)
+
+      ON CONFLICT ("stripeDisputeId")
+      DO UPDATE
+      SET "status" = EXCLUDED."status"
+    `,
+    [
+      payment.storeId,
+      payment.id,
+      disputeId,
+      status,
+    ],
+  );
+}
+
+function refundStatus(
+  eventType: string,
+): "PENDING" | "SUCCEEDED" | "FAILED" {
+  if (
+    eventType ===
+    "refund.succeeded"
+  ) {
+    return "SUCCEEDED";
+  }
+
+  if (
+    eventType ===
+    "refund.failed"
+  ) {
+    return "FAILED";
+  }
+
+  return "PENDING";
+}
+
+async function findRefundPayment(
+  sql: SqlExecutor,
+  stripeAccountId: string,
+  paymentIntentId: string | null,
+  chargeId: string | null,
+): Promise<PaymentRow | null> {
+  const result =
+    await sql.query<PaymentRow>(
+      `
+        SELECT *
+        FROM "Payment"
+        WHERE "stripeAccountId" = $1
+          AND (
+            "paymentIntentId" = $2
+            OR "chargeId" = $3
+          )
+      `,
+      [
+        stripeAccountId,
+        paymentIntentId,
+        chargeId,
+      ],
+    );
+
+  return result.rows[0] ?? null;
+}
+
+async function upsertRefund(
+  sql: SqlExecutor,
+  event: ConnectPaymentEvent,
+  object: EventPayload,
+  payment: PaymentRow,
+  stripeRefundId: string,
+): Promise<void> {
+  const amount =
+    typeof object.amount === "number"
+      ? object.amount
+      : payment.amountMinor;
+
+  await sql.query(
+    `
+      INSERT INTO "Refund" (
+        "id",
+        "storeId",
+        "orderId",
+        "paymentId",
+        "stripeRefundId",
+        "amountMinor",
+        "status"
+      )
+      VALUES (
+        $1, $2, $3, $4,
+        $5, $6, $7
+      )
+
+      ON CONFLICT ("stripeRefundId")
+      DO UPDATE
+      SET "status" = EXCLUDED."status"
+    `,
+    [
+      `refund-${stripeRefundId}`,
+      payment.storeId,
+      payment.orderId,
+      payment.id,
+      stripeRefundId,
+      amount,
+      refundStatus(event.type),
+    ],
+  );
+}
+
+async function processChargeRefunded(
+  sql: SqlExecutor,
+  payment: PaymentRow,
+): Promise<void> {
+  await sql.query(
+    `
+      UPDATE "Payment"
+      SET "status" = 'REFUNDED'
+      WHERE "id" = $1
+    `,
+    [payment.id],
+  );
+
+  await sql.query(
+    `
+      UPDATE "Order"
+      SET
+        "status" = 'REFUNDED',
+        "updatedAt" = CURRENT_TIMESTAMP
+      WHERE "id" = $1
+        AND "status" IN (
+          'PAID',
+          'PROCESSING',
+          'SHIPPED',
+          'DELIVERED'
+        )
+    `,
+    [payment.orderId],
+  );
+
+  await sql.query(
+    `
+      UPDATE "InventoryLevel" il
+
+      SET
+        "quantity" =
+          il."quantity" + ir."quantity"
+
+      FROM "InventoryReservation" ir
+
+      JOIN "OrderItem" oi
+        ON oi."orderId" = $1
+        AND oi."storeId" = $2
+        AND oi."variantId" =
+          ir."variantId"
+
+      WHERE il."storeId" = $2
+        AND il."variantId" =
+          ir."variantId"
+
+        AND ir."status" = 'SOLD'
+
+        AND ir."attemptId" IN (
+          SELECT "id"
+          FROM "CheckoutAttempt"
+          WHERE "orderId" = $1
+            AND "storeId" = $2
+        )
+
+        AND NOT EXISTS (
+          SELECT 1
+          FROM "Refund" r
+          WHERE r."orderId" = $1
+            AND r."inventoryRestoredAt"
+              IS NOT NULL
+        )
+    `,
+    [
+      payment.orderId,
+      payment.storeId,
+    ],
+  );
+
+  await sql.query(
+    `
+      UPDATE "Refund"
+      SET
+        "inventoryRestoredAt" =
+          CURRENT_TIMESTAMP
+      WHERE "orderId" = $1
+        AND "status" = 'SUCCEEDED'
+        AND "inventoryRestoredAt"
+          IS NULL
+    `,
+    [payment.orderId],
+  );
+}
+
+async function processRefundEvent(
+  sql: SqlExecutor,
+  event: ConnectPaymentEvent,
+  object: EventPayload,
+): Promise<void> {
+  const isRefundEvent =
+    event.type.startsWith("refund.") ||
+    event.type ===
+      "charge.refunded";
+
+  if (
+    !isRefundEvent ||
+    !event.stripeAccountId
+  ) {
+    return;
+  }
+
+  const stripeRefundId =
+    event.type === "charge.refunded"
+      ? null
+      : stringValue(object.id);
+
+  const paymentIntentId =
+    expandableId(
+      object.payment_intent,
+    );
+
+  const objectId =
+    stringValue(object.id);
+
+  const chargeId =
+    objectId?.startsWith("ch_")
+      ? objectId
+      : null;
+
+  const payment =
+    await findRefundPayment(
+      sql,
+      event.stripeAccountId,
+      paymentIntentId,
+      chargeId,
+    );
+
+  if (!payment) {
+    return;
+  }
+
+  if (stripeRefundId) {
+    await upsertRefund(
+      sql,
+      event,
+      object,
+      payment,
+      stripeRefundId,
+    );
+  }
+
+  if (
+    event.type ===
+    "charge.refunded"
+  ) {
+    await processChargeRefunded(
+      sql,
+      payment,
+    );
+  }
+}
+
+export async function processConnectPaymentEvent(
+  sql: SqlExecutor,
+  event: ConnectPaymentEvent,
+): Promise<void> {
+  if (!event.stripeAccountId) {
+    return;
+  }
+
+  const object =
+    stripeObject(event.payload);
+
+  await markProcessed(
+    sql,
+    event.id,
+  );
+
+  const handledPaymentIntent =
+    await processPaymentIntentEvent(
+      sql,
+      event,
+      object,
+    );
+
+  if (handledPaymentIntent) {
+    return;
+  }
+
+  await processDisputeEvent(
+    sql,
+    event,
+    object,
+  );
+
+  await processRefundEvent(
+    sql,
+    event,
+    object,
+  );
 }
