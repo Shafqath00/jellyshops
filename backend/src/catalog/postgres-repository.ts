@@ -11,7 +11,8 @@ export class CatalogPostgresRepository implements CatalogAdminRepository {
 
   async listProducts(storeId: string, input: ListProductsInput): Promise<Connection<CatalogProduct>> {
     const values: unknown[] = [storeId];
-    const filters = [`p."storeId" = $1`, `p."status" = '${input.status ?? "ACTIVE"}'`];
+    const filters = [`p."storeId" = $1`];
+    if (input.status) filters.push(`p."status" = '${input.status}'`);
     if (input.query) { values.push(`%${input.query}%`); filters.push(`(p."title" ILIKE $${values.length} OR p."slug" ILIKE $${values.length})`); }
     if (input.cursor) { values.push(input.cursor); filters.push(`p."id" > $${values.length}`); }
     values.push(input.limit);
