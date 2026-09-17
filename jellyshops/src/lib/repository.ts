@@ -27,6 +27,7 @@ export interface ShopRepository {
   publishStoreDesign(storeId: string, expectedRevision: number): PublishStoreDesignResult;
   getPublishedStoreDesign(storeId: string): StoreDesignPublication | undefined;
   listProducts(storeSlug?: string): Product[];
+  replaceCatalog(storeId: string, products: Product[]): void;
   getProduct(id: string): Product | undefined;
   getProductBySlug(storeId: string, slug: string): Product | undefined;
   getVariant(id: string): ProductVariant | undefined;
@@ -151,6 +152,13 @@ export function createRepository(storage: StorageLike): ShopRepository {
       if (!storeSlug) return state.products;
       const store = storeForSlug(storeSlug);
       return store ? state.products.filter((product) => product.storeId === store.id) : [];
+    },
+    replaceCatalog(storeId, products) {
+      state.products = [
+        ...state.products.filter((product) => product.storeId !== storeId),
+        ...products.map((product) => clone(product)),
+      ];
+      commit();
     },
     getProduct: (id) => state.products.find((product) => product.id === id),
     getProductBySlug: (storeId, slug) => state.products.find((product) => product.storeId === storeId && product.slug === slug),

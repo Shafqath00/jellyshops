@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createMerchantCommerceApi } from "./client";
+import { createCommerceApi, createMerchantCommerceApi } from "./client";
 
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -7,6 +7,20 @@ function jsonResponse(body: unknown, status = 200) {
     headers: { "content-type": "application/json" },
   });
 }
+
+describe("public catalog API client", () => {
+  it("maps canonical backend products and variants", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({
+      nodes: [{ id: "p1", storeId: "store-demo", handle: "cake", title: "Cake", description: "Fresh", productType: "Cakes", tags: [], media: [{ id: "m1", url: "/cake.jpg", altText: "Cake", position: 0 }], variants: [{ id: "v1", title: "1 kg", sku: "CAKE-1", priceMinor: 1200, quantity: 4, available: true }], available: true }],
+      nextCursor: null,
+    }));
+    const api = createCommerceApi({ baseUrl: "http://localhost:3001", fetch: fetchMock });
+    await expect(api.getPublicCatalog("store-demo")).resolves.toEqual([
+      expect.objectContaining({ id: "p1", name: "Cake", variants: [expect.objectContaining({ id: "v1", name: "1 kg", priceMinor: 1200, stock: 4 })] }),
+    ]);
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:3001/api/public/stores/store-demo/catalog/products?limit=100", expect.anything());
+  });
+});
 
 describe("merchant commerce API client", () => {
   it("loads merchant orders with the merchant bearer token", async () => {
