@@ -7,13 +7,16 @@ import { useState } from "react";
 import { ArrowLeft, Check, ShoppingBag, Sparkles } from "lucide-react";
 import { useShop } from "@/contexts/shop-context";
 import { formatMoney } from "@/lib/domain";
+import { useStorefrontCatalogStatus } from "@/features/commerce/components/storefront-catalog-sync";
 
 export default function ProductPage() {
   const { storeSlug, productSlug } = useParams<{ storeSlug: string; productSlug: string }>();
   const { repository } = useShop();
+  const catalogStatus = useStorefrontCatalogStatus();
   const [added, setAdded] = useState(false);
   const store = repository.getStoreBySlug(storeSlug);
   const product = store ? repository.getProductBySlug(store.id, productSlug) : undefined;
+  if (catalogStatus === "loading") return <main className="flex min-h-[75vh] items-center justify-center px-6 text-center text-[var(--store-text)]"><p className="opacity-70">Loading product…</p></main>;
   if (!store || !product || product.archived || !product.published) return <main className="flex min-h-[75vh] flex-col items-center justify-center px-6 text-center text-[var(--store-text)]"><h1 className="font-[var(--store-display,Georgia)] text-[clamp(3.5rem,8vw,7.5rem)] leading-[.86] tracking-[-.07em]">Product not found</h1><Link className="mt-5 border-b text-sm font-bold" href={`/${storeSlug}/shop`}>Back to shop</Link></main>;
   const variant = product.variants[0];
   function addToCart() { const cart = repository.getCartForStore(storeSlug) ?? repository.createCart(storeSlug); const line = cart.items.find((item) => item.variantId === variant.id); repository.updateCartItem(cart.id, variant.id, Math.min((line?.quantity ?? 0) + 1, variant.stock)); setAdded(true); }
