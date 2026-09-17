@@ -867,6 +867,36 @@ function mountCommerceRoutes(
         deps.checkoutService,
       ),
     );
+  } else {
+    // Keep the public checkout contract visible even when the server has not
+    // been configured with Stripe/commerce dependencies. Returning an
+    // explicit 503 is substantially more useful than Express' generic 404:
+    // the route exists, but payment infrastructure is not available.
+    app.use(
+      "/api/public/stores/:storeId/checkout",
+      (_request, response) => {
+        response.status(503).json({
+          error: {
+            code: "CHECKOUT_NOT_CONFIGURED",
+            message:
+              "Checkout is not configured. Set the server Stripe and database environment variables.",
+          },
+        });
+      },
+    );
+
+    app.use(
+      "/api/public/stores/:storeId/orders",
+      (_request, response) => {
+        response.status(503).json({
+          error: {
+            code: "ORDERS_NOT_CONFIGURED",
+            message:
+              "Order lookup is not configured. Set the server Stripe and database environment variables.",
+          },
+        });
+      },
+    );
   }
 
   if (deps.merchantOrderService) {

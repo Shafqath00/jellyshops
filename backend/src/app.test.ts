@@ -41,6 +41,17 @@ describe("service foundation", () => {
       .toBe("Made for your sweetest moments");
   });
 
+  it("reports checkout configuration is unavailable instead of returning a misleading 404", async () => {
+    const response = await request(createApp())
+      .post("/api/public/stores/store-demo/checkout/attempts")
+      .send({});
+
+    expect(response.status).toBe(503);
+    expect(response.body.error).toEqual(expect.objectContaining({
+      code: "CHECKOUT_NOT_CONFIGURED",
+    }));
+  });
+
   it("rejects development auth in production", () => {
     expect(() =>
       loadConfig({ NODE_ENV: "production", AUTH_PROVIDER: "development" }),
