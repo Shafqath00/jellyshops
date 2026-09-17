@@ -15,11 +15,13 @@
     "test": "vitest run",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:start": "node scripts/verify-built-server.mjs",
+    "seed:starter-catalog": "tsx scripts/seed-starter-catalog.ts",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@jelly/storefront-schema": "file:../jellyshops/packages/storefront-schema",
+    "@supabase/supabase-js": "^2.116.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
