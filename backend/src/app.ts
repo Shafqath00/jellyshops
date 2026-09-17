@@ -423,9 +423,7 @@ const defaultPublicStorefrontApi: PublicStorefrontApi = {
     const template =
       result.rows[0];
 
-    // The legacy `home` template is the generic starter and must not replace
-    // the two commerce-ready templates used by the public stores.
-    if (!template || template.id === "home") {
+    if (!template) {
       return {
         id: `publication-${storeId}`,
         document: createStorefrontTemplate(templateId, storeId),
