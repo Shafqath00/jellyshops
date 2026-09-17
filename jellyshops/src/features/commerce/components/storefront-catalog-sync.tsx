@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useShop } from "@/contexts/shop-context";
 import { createCommerceApi } from "@/features/commerce/api/client";
 import { commerceStoreId } from "@/features/commerce/commerce-store-id";
 
 /** Loads the published catalog into the local cart repository. Cart state stays client-side; products do not. */
-export function StorefrontCatalogSync({ storeSlug }: { storeSlug: string }) {
+export function StorefrontCatalogSync({ storeSlug, children }: { storeSlug: string; children?: React.ReactNode }) {
   const { repository } = useShop();
-  const [failed, setFailed] = useState(false);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
 
   useEffect(() => {
     let cancelled = false;
@@ -20,14 +20,16 @@ export function StorefrontCatalogSync({ storeSlug }: { storeSlug: string }) {
         if (!localStore) return;
         repository.saveStore({ ...localStore, name: details.store.name, slug: details.store.slug, currency: details.store.currency.toUpperCase() as typeof localStore.currency });
         repository.replaceCatalog(localStore.id, products.map((product) => ({ ...product, storeId: localStore.id })));
-        setFailed(false);
+        setStatus("ready");
       }
     }).catch(() => {
-      if (!cancelled) setFailed(true);
+      if (!cancelled) setStatus("error");
     });
     return () => { cancelled = true; };
   }, [repository, storeSlug]);
 
-  if (!failed) return null;
-  return <p className="store-catalog-error" role="status">We couldn’t refresh the catalog. Please try again shortly.</p>;
+  return <CatalogStatusContext.Provider value={status}>{status === "error" ? <p className="store-catalog-error" role="status">We couldn’t refresh the catalog. Please try again shortly.</p> : null}{children}</CatalogStatusContext.Provider>;
 }
+
+const CatalogStatusContext = createContext<"loading" | "ready" | "error">("loading");
+export function useStorefrontCatalogStatus() { return useContext(CatalogStatusContext); }
