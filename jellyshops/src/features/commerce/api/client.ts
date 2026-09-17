@@ -40,6 +40,14 @@ export interface PublicCatalogResponse {
   nextCursor: string | null;
 }
 
+export interface PublicStoreDetails {
+  id: string;
+  name: string;
+  slug: string;
+  currency: string;
+  country: string;
+}
+
 export function catalogProductToStorefrontProduct(product: PublicCatalogProduct): Product {
   const image = [...product.media].sort((a, b) => a.position - b.position)[0];
   return {
@@ -79,6 +87,7 @@ export function createCommerceApi({ baseUrl, fetch: fetcher = fetch }: CommerceC
     return response.json() as Promise<T>;
   }
   return {
+    getPublicStore: (storeId: string) => request<{ store: PublicStoreDetails }>(`/api/public/stores/${encodeURIComponent(storeId)}`),
     getPublicCatalog: async (storeId: string) => {
       const response = await request<PublicCatalogResponse>(`/api/public/stores/${encodeURIComponent(storeId)}/catalog/products?limit=100`);
       return response.nodes.map(catalogProductToStorefrontProduct);

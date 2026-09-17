@@ -9,6 +9,12 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 describe("public catalog API client", () => {
+  it("loads public store details", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ store: { id: "store-demo", name: "Sweet Bakes", slug: "sweet-bakes", currency: "INR", country: "IN" } }));
+    const api = createCommerceApi({ baseUrl: "http://localhost:3001", fetch: fetchMock });
+    await expect(api.getPublicStore("store-demo")).resolves.toMatchObject({ store: { name: "Sweet Bakes", currency: "INR" } });
+  });
+
   it("maps canonical backend products and variants", async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse({
       nodes: [{ id: "p1", storeId: "store-demo", handle: "cake", title: "Cake", description: "Fresh", productType: "Cakes", tags: [], media: [{ id: "m1", url: "/cake.jpg", altText: "Cake", position: 0 }], variants: [{ id: "v1", title: "1 kg", sku: "CAKE-1", priceMinor: 1200, quantity: 4, available: true }], available: true }],

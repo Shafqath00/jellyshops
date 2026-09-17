@@ -13,10 +13,12 @@ export function StorefrontCatalogSync({ storeSlug }: { storeSlug: string }) {
   useEffect(() => {
     let cancelled = false;
     const api = createCommerceApi({ baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001" });
-    api.getPublicCatalog(commerceStoreId(storeSlug)).then((products) => {
+    const storeId = commerceStoreId(storeSlug);
+    Promise.all([api.getPublicStore(storeId), api.getPublicCatalog(storeId)]).then(([details, products]) => {
       if (!cancelled) {
         const localStore = repository.getStoreBySlug(storeSlug);
         if (!localStore) return;
+        repository.saveStore({ ...localStore, name: details.store.name, slug: details.store.slug, currency: details.store.currency.toUpperCase() as typeof localStore.currency });
         repository.replaceCatalog(localStore.id, products.map((product) => ({ ...product, storeId: localStore.id })));
         setFailed(false);
       }
