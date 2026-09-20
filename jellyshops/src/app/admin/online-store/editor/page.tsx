@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ComponentProps } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import { ArrowLeft, ChevronLeft, LayoutPanelTop, Monitor, Plus, Smartphone, Tablet, Trash2 } from "lucide-react";
@@ -57,6 +57,8 @@ import {
   setInlineSectionEnabled,
   updateInlineSection,
 } from "@/features/store-editor/template-layout";
+
+type RegistrySection = ComponentProps<typeof RegistrySectionRenderer>["section"];
 
 type HierarchyRegion = "header" | "template" | "footer";
 
@@ -588,7 +590,7 @@ export default function OnlineStoreEditorPage() {
             {renderedSections.map((section) => (
               <RegistrySectionRenderer
                 key={section.id}
-                section={section}
+                section={section as unknown as RegistrySection}
                 mode={previewSnapshot ? "preview" : "editor"}
                 commerce={commerce}
                 region="template"
