@@ -1,2 +1,2 @@
-import type { ThemeTokens } from "../types";
+import type { ThemeTokens } from "../types.js";
 export const minimalTokens: ThemeTokens = { colors: { primary: "#14213d", background: "#fffdf8", text: "#14213d", surface: "#ffffff", accent: "#ff6b8a" }, typography: { display: "Arial Rounded MT Bold", body: "Aptos" }, radii: { button: "14px", card: "20px" }, spacing: { section: "72px", container: "72rem" }, cardShadow: "0 16px 40px rgba(20, 33, 61, 0.12)" };

@@ -42,6 +42,7 @@ export async function loadPublicStorefrontPublication({
   try {
     const response = await fetcher(endpoint(baseUrl, storeId), {
       headers: { Accept: "application/json" },
+      cache: "no-store",
     });
     if (!response.ok) return null;
 

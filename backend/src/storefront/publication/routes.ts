@@ -9,7 +9,7 @@ export interface StorefrontPublicationApi {
     storeId: string,
     expectedGeneration: number,
     idempotencyKey: string,
-    actorUserId: number,
+    actorUserId: string,
   ): Promise<PublishStorefrontResult | {
     ok: true;
     publication: { id: string; storeId: string; sourceGeneration: number };

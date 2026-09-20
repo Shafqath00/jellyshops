@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { getDemoSession } from "@/features/store-editor/api/demo-session";
+import { useAuth } from "@/features/auth/auth-provider";
 
 interface MetafieldDefinition {
   id: string;
@@ -17,11 +17,12 @@ interface MetafieldDefinition {
   archivedAt: string | null;
 }
 
-const storeId = "store-demo";
 const ownerTypes = ["store", "product", "variant", "collection", "page", "blog", "article"] as const;
 
 export default function CustomDataSettingsPage() {
-  const token = getDemoSession()?.token;
+  const { session, activeStore } = useAuth();
+  const storeId = activeStore?.id ?? "";
+  const token = session?.access_token;
   const origin = process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
   const [ownerType, setOwnerType] = useState<(typeof ownerTypes)[number]>("product");
   const [definitions, setDefinitions] = useState<MetafieldDefinition[]>([]);

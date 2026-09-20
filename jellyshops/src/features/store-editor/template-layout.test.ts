@@ -5,8 +5,10 @@ import {
   appendGlobalPlacement,
   appendInlineSection,
   detachGlobalPlacement,
+  movePlacement,
   removeInlineSection,
   replaceInlineWithGlobal,
+  setInlineSectionEnabled,
   updateInlineSection,
 } from "./template-layout";
 
@@ -89,4 +91,12 @@ it("removes only the selected inline section", () => {
     { kind: "global", globalSectionId: "global-1" },
     { kind: "inline", section: expect.objectContaining({ id: "hero-2" }) },
   ]);
+});
+
+it("reorders placements and preserves hidden section configuration", () => {
+  const layout = { sections: [{ kind: "inline", section }, { kind: "inline", section: { ...section, id: "grid-1", enabled: false, settings: { heading: "Keep me" } } }] };
+  const moved = movePlacement(layout, "grid-1", "up");
+  expect((moved.sections as Array<{ kind: string; section: SectionNode }>)[0]?.section.id).toBe("grid-1");
+  const hidden = setInlineSectionEnabled(moved, "grid-1", false);
+  expect((hidden.sections as Array<{ kind: string; section: SectionNode }>)[0]?.section).toEqual(expect.objectContaining({ enabled: false, settings: { heading: "Keep me" } }));
 });

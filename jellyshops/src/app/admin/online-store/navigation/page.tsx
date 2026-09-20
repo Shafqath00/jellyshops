@@ -3,24 +3,24 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { getDemoSession } from "@/features/store-editor/api/demo-session";
+import { useAuth } from "@/features/auth/auth-provider";
 import { createNavigationApi, type NavigationMenu } from "@/features/navigation/api";
 import { MenuEditor } from "@/features/navigation/menu-editor";
 
-const storeId = "store-demo";
-
 export default function NavigationPage() {
-  const token = getDemoSession()?.token;
-  const api = useMemo(() => token ? createNavigationApi({
+  const { session, activeStore } = useAuth();
+  const storeId = activeStore?.id ?? "";
+  const token = session?.access_token;
+  const api = useMemo(() => (token && storeId) ? createNavigationApi({
     baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001",
     token,
-  }) : null, [token]);
+  }) : null, [token, storeId]);
   const [menus, setMenus] = useState<NavigationMenu[]>([]);
   const [activeMenuId, setActiveMenuId] = useState("");
   const [error, setError] = useState<string>();
 
   useEffect(() => {
-    if (!api) return;
+    if (!api || !storeId) return;
     let active = true;
     void api.listMenus(storeId).then((next) => {
       if (!active) return;
@@ -30,7 +30,7 @@ export default function NavigationPage() {
       if (active) setError(reason instanceof Error ? reason.message : "Unable to load navigation");
     });
     return () => { active = false; };
-  }, [api]);
+  }, [api, storeId]);
 
   const menu = menus.find((entry) => entry.id === activeMenuId);
 

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { STORE_DESIGN_SCHEMA_VERSION } from "./version.js";
 
-export const themeIdSchema = z.enum(["minimal", "classic", "bold", "elegant", "playful", "fresh-market", "artisan-boutique"]);
+export const themeIdSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 
 const settingsSchema = z.record(z.string(), z.unknown());
 const responsiveSettingsSchema = z.object({ mobile: settingsSchema.optional() }).strict();

@@ -96,11 +96,36 @@ const orders: Order[] = [
 ];
 
 export function createSeedState(): ShopState {
+  const categories = [
+    { id: "category-cakes", storeId: sweetBakes.id, name: "Cakes", slug: "cakes" },
+    { id: "category-candles", storeId: bloomHome.id, name: "Candles", slug: "candles" },
+    { id: "category-fashion", storeId: sweetBakes.id, name: "Fashion", slug: "fashion" },
+    { id: "category-clothing", storeId: sweetBakes.id, name: "Clothing", slug: "clothing", parentId: "category-fashion" },
+    { id: "category-tshirts", storeId: sweetBakes.id, name: "T-Shirts", slug: "t-shirts", parentId: "category-clothing" },
+    { id: "category-furniture", storeId: bloomHome.id, name: "Furniture", slug: "furniture" },
+    { id: "category-beds", storeId: bloomHome.id, name: "Beds", slug: "beds", parentId: "category-furniture" },
+    { id: "category-divan-beds", storeId: bloomHome.id, name: "Divan Beds", slug: "divan-beds", parentId: "category-beds" },
+  ];
+  const categoryOptionDefinitions = [
+    { id: "template-tshirt-size", storeId: sweetBakes.id, categoryId: "category-tshirts", name: "Size", optionKind: "variant" as const, displayType: "buttons" as const, required: true, position: 0 },
+    { id: "template-tshirt-colour", storeId: sweetBakes.id, categoryId: "category-tshirts", name: "Colour", optionKind: "variant" as const, displayType: "color" as const, required: true, position: 1 },
+    { id: "template-tshirt-material", storeId: sweetBakes.id, categoryId: "category-tshirts", name: "Material", optionKind: "configuration" as const, displayType: "dropdown" as const, required: false, position: 2 },
+    { id: "template-divan-fabric", storeId: bloomHome.id, categoryId: "category-divan-beds", name: "Fabric / Colour", optionKind: "variant" as const, displayType: "color" as const, required: true, position: 0 },
+    { id: "template-divan-size", storeId: bloomHome.id, categoryId: "category-divan-beds", name: "Size", optionKind: "variant" as const, displayType: "buttons" as const, required: true, position: 1 },
+    { id: "template-divan-storage", storeId: bloomHome.id, categoryId: "category-divan-beds", name: "Storage", optionKind: "configuration" as const, displayType: "buttons" as const, required: false, position: 2 },
+    { id: "template-divan-headboard", storeId: bloomHome.id, categoryId: "category-divan-beds", name: "Headboard", optionKind: "configuration" as const, displayType: "buttons" as const, required: false, position: 3 },
+    { id: "template-divan-base", storeId: bloomHome.id, categoryId: "category-divan-beds", name: "Base", optionKind: "configuration" as const, displayType: "buttons" as const, required: false, position: 4 },
+    { id: "template-divan-mattress", storeId: bloomHome.id, categoryId: "category-divan-beds", name: "Mattress", optionKind: "addon" as const, displayType: "buttons" as const, required: false, position: 5 },
+  ];
   return {
     version: 1,
     activeStoreId: sweetBakes.id,
     stores: structuredClone([sweetBakes, bloomHome]),
     products: structuredClone(products),
+    categories,
+    brands: [],
+    collections: [],
+    categoryOptionDefinitions,
     customers: [{ id: "customer-aisha", storeId: sweetBakes.id, name: "Aisha Rao", email: "aisha@example.com", phone: "+91 98765 43210", address: { line1: "18 Richmond Road", city: "Bengaluru", region: "Karnataka", postalCode: "560025", country: "India" }, createdAt: "2026-08-24T14:15:00.000Z" }],
     carts: [],
     orders: structuredClone(orders),

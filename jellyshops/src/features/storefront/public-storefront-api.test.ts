@@ -21,6 +21,7 @@ it("loads only the published snapshot from the public endpoint", async () => {
 
   expect(result.regions.template[0].blocks[0].settings.text).toBe("LIVE");
   expect(fetcher).toHaveBeenCalledWith("http://localhost:3001/api/stores/store-demo/storefront/public", expect.not.objectContaining({ headers: expect.objectContaining({ Authorization: expect.anything() }) }));
+  expect(fetcher).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ cache: "no-store" }));
 });
 
 it("parses a compiled V4 publication without treating it as a V3 document", async () => {

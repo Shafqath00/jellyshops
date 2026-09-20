@@ -18,6 +18,7 @@ export interface CatalogMedia {
 
 export interface CatalogVariant {
   id: string;
+  productId: string;
   externalId: string | null;
   title: string;
   sku: string | null;
@@ -49,6 +50,15 @@ export interface CatalogProduct {
     currency: string;
   } | null;
   available: boolean;
+  primaryCategoryId: string | null;
+  additionalCategoryIds: string[];
+  brandId: string | null;
+  collectionIds: string[];
+  options: unknown[];
+  inventoryOptionIds: string[];
+  categoryMetadata: unknown | null;
+  brandMetadata: unknown | null;
+  collectionMetadata: unknown[];
 }
 
 export interface CatalogCollection {
@@ -101,6 +111,15 @@ export interface CreateProductInput {
   tags?: string[];
   status?: ProductStatus;
   variants?: CatalogVariantInput[];
+  primaryCategoryId?: string | null;
+  additionalCategoryIds?: string[];
+  brandId?: string | null;
+  collectionIds?: string[];
+  options?: unknown[];
+  inventoryOptionIds?: string[];
+  categoryMetadata?: unknown | null;
+  brandMetadata?: unknown | null;
+  collectionMetadata?: unknown[];
 }
 
 export interface UpdateProductInput {
@@ -112,6 +131,15 @@ export interface UpdateProductInput {
   tags?: string[];
   status?: ProductStatus;
   variants?: CatalogVariantInput[];
+  primaryCategoryId?: string | null;
+  additionalCategoryIds?: string[];
+  brandId?: string | null;
+  collectionIds?: string[];
+  options?: unknown[];
+  inventoryOptionIds?: string[];
+  categoryMetadata?: unknown | null;
+  brandMetadata?: unknown | null;
+  collectionMetadata?: unknown[];
 }
 
 export interface CreateCollectionInput {

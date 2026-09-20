@@ -10,6 +10,7 @@ export function createStorefrontRouter(service: StorefrontService<unknown>, auth
   router.get<{ storeId: string }>("/public", async (request, response) => {
     const publication = await service.getPublic(String(request.params.storeId));
     if (!publication) throw new ApiError(404, "PUBLICATION_NOT_FOUND", "This store has not been published");
+    response.setHeader("Cache-Control", "no-store, max-age=0");
     response.json(publication);
   });
 

@@ -5,7 +5,7 @@ import type { StoreRole } from "./types.js";
 
 export interface StoreRequestContext {
   storeId: string;
-  userId: number;
+  userId: string;
   role: StoreRole;
 }
 

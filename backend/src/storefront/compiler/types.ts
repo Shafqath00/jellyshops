@@ -85,8 +85,11 @@ export interface StorefrontCompilationInput {
   generation: number;
   theme: {
     presetId: string;
+    id?: string;
+    version?: string;
     settings: Record<string, unknown>;
     artifactId: string | null;
+    fallbackReason?: "theme-unavailable" | "version-unavailable";
   };
   templates: CompilerTemplateInput[];
   globalSections: CompilerGlobalSectionInput[];

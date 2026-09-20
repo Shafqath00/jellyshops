@@ -46,6 +46,17 @@ function setup() {
 }
 
 describe("normalized storefront workspace routes", () => {
+  it("passes the optional template type filter to the API", async () => {
+    const { app, api } = setup();
+
+    const response = await request(app)
+      .get("/api/stores/store-a/storefront/templates?type=page")
+      .set("Authorization", "Bearer token");
+
+    expect(response.status).toBe(200);
+    expect(api.listTemplates).toHaveBeenCalledWith("store-a", "page");
+  });
+
   it("returns workspace generation only to an authorized store member", async () => {
     const { app, api } = setup();
     const allowed = await request(app)

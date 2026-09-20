@@ -3,11 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { getDemoSession } from "@/features/store-editor/api/demo-session";
+import { useAuth } from "@/features/auth/auth-provider";
 import { createContentApi, type ArticleResource, type BlogResource, type ContentTemplate, type TemplateAssignment } from "@/features/content/api";
 import { ResourceForm } from "@/features/content/resource-form";
 
-const storeId = "store-demo";
+
 
 function editable(article: ArticleResource) {
   return {
@@ -23,11 +23,13 @@ function editable(article: ArticleResource) {
 }
 
 export default function BlogsAdminPage() {
-  const token = getDemoSession()?.token;
-  const api = useMemo(() => token ? createContentApi({
+  const { session, activeStore } = useAuth();
+  const storeId = activeStore?.id ?? "";
+  const token = session?.access_token;
+  const api = useMemo(() => (token && storeId) ? createContentApi({
     baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001",
     token,
-  }) : null, [token]);
+  }) : null, [token, storeId]);
   const [blogs, setBlogs] = useState<BlogResource[]>([]);
   const [articles, setArticles] = useState<ArticleResource[]>([]);
   const [articleTemplates, setArticleTemplates] = useState<ContentTemplate[]>([]);

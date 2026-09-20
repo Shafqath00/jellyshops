@@ -12,7 +12,7 @@ import {
   type StorefrontDocument,
   type ThemeId,
 } from "@jelly/storefront-schema";
-import { resolveDesignTokens } from "@jelly/storefront-themes";
+import { resolveDesignTokens, resolveTheme } from "@jelly/storefront-themes";
 import type { Currency, Product } from "@/lib/domain";
 import { formatMoney } from "@/lib/domain";
 import type { ResolvedStorefrontRoute } from "./resource-loader";
@@ -33,14 +33,8 @@ function commerceProvider(storeSlug: string, currency: Currency, products: Produ
   };
 }
 
-function builtInThemeId(value: string): ThemeId {
-  return value === "classic" || value === "bold" || value === "elegant" || value === "playful"
-    ? value
-    : "minimal";
-}
-
 function runtimeThemeSettings(snapshot: RuntimeStorefrontSnapshotV4): GlobalSettings {
-  const themeId = builtInThemeId(snapshot.theme.presetId);
+  const themeId = resolveTheme(snapshot.theme.id ?? snapshot.theme.presetId, snapshot.theme.settings, snapshot.theme.version).id as ThemeId;
   const defaults = createDefaultStorefrontDocument(snapshot.storeId, themeId).theme.settings;
   const input = snapshot.theme.settings as Partial<GlobalSettings>;
   return {
@@ -64,13 +58,15 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
   products: Product[];
 }) {
   if (route.status !== "ready") return null;
-  const themeId = builtInThemeId(snapshot.theme.presetId);
+  const resolvedTheme = resolveTheme(snapshot.theme.id ?? snapshot.theme.presetId, snapshot.theme.settings, snapshot.theme.version);
+  const themeId = resolvedTheme.id as ThemeId;
   const style = resolveDesignTokens(themeId, runtimeThemeSettings(snapshot)) as CSSProperties;
   const commerce = commerceProvider(storeSlug, currency, products);
 
   return (
-    <div className="jelly-storefront" data-jelly-theme={snapshot.theme.presetId} style={style}>
-      <main>
+    <div className={`jelly-storefront jelly-theme-layout-${resolvedTheme.layout}`} data-jelly-theme={resolvedTheme.id} data-jelly-theme-version={resolvedTheme.version} style={style}>
+      {resolvedTheme.layout === "editorial" ? <div className="jelly-theme-masthead"><span>JellyShop collection</span><img src={`${resolvedTheme.assetPrefix}monogram.svg`} alt="" /></div> : null}
+      <main className={resolvedTheme.layout === "editorial" ? "jelly-theme-editorial-main" : undefined}>
         {route.sections.map((section) => (
           <RegistrySectionRenderer
             key={section.id}
@@ -78,6 +74,7 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
             mode="published"
             commerce={commerce}
             region="template"
+            themeId={resolvedTheme.id}
           />
         ))}
       </main>

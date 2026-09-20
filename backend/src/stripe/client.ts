@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 
-import type { AppConfig } from "../config.js";
+import type { AppConfig, StripeServerConfig } from "../config.js";
 
 /* -------------------------------------------------------------------------- */
 /* Public types                                                               */
@@ -243,13 +243,14 @@ export function createStripeGateway(
     );
   }
 
-  const settings = config.stripe;
-
-  if (!settings) {
+  if (!config.stripe) {
     throw new Error(
       "Stripe must be configured before creating the server gateway",
     );
   }
+
+  // Narrowed non-optional reference used inside closures below.
+  const settings: StripeServerConfig = config.stripe;
 
   const stripe = clientFactory(
     settings.secretKey,
@@ -461,8 +462,9 @@ export function createStripeGateway(
               input.currency,
             ),
 
-          payment_method_configuration:
-            settings.cardPaymentMethodConfigurationId,
+          ...(settings.cardPaymentMethodConfigurationId
+            ? { payment_method_configuration: settings.cardPaymentMethodConfigurationId }
+            : {}),
 
           metadata: {
             jelly_order_id:

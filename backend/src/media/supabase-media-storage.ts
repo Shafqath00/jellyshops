@@ -34,6 +34,14 @@ export class SupabaseMediaStorage
           persistSession: false,
           autoRefreshToken: false,
         },
+        realtime: {
+          // The backend never uses Supabase Realtime.
+          // Disabling it avoids the native WebSocket requirement
+          // on Node.js 20 and below.
+          timeout: 0,
+          params: {},
+          log_level: "disable",
+        },
       },
     );
   }

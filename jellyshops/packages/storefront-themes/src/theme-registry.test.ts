@@ -5,7 +5,7 @@ import { applyThemePreset, getThemeDefinition, listThemes, resolveDesignTokens }
 
 it("registers every Store Editor theme", () => {
   expect(listThemes().map((theme) => theme.id)).toEqual([
-    "minimal", "classic", "bold", "elegant", "playful", "fresh-market", "artisan-boutique",
+    "minimal", "classic", "bold", "elegant", "playful", "fresh-market", "artisan-boutique", "example-boutique",
   ]);
 });
 

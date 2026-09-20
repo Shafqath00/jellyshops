@@ -172,6 +172,8 @@ export interface OrderItemRow {
   imageSnapshot: string | null;
   unitPriceMinor: number;
   quantity: number;
+  configurationSnapshot?: Array<{ optionId: string; valueId: string; optionName: string; valueLabel: string; priceAdjustmentMinor: number }>;
+  configurationKey?: string;
 }
 
 export interface RefundRow {

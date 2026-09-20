@@ -8,6 +8,7 @@ import type { AssignableResourceType } from "./repositories/assignment-repositor
 import type { MenuItem } from "./repositories/menu-repository.js";
 
 export interface StorefrontWorkspaceApi {
+  listThemeCatalog(storeId: string): Promise<unknown[]>;
   getWorkspace(storeId: string): Promise<{ generation: number; updatedAt: Date } | null>;
 
   listTemplates(storeId: string, type?: TemplateType): Promise<unknown[]>;
@@ -30,7 +31,7 @@ export interface StorefrontWorkspaceApi {
   updateMenu(storeId: string, id: string, expectedRevision: number, patch: { name?: string; handle?: string; items?: MenuItem[] }): Promise<unknown>;
 
   getThemeConfiguration(storeId: string): Promise<unknown | null>;
-  saveThemeConfiguration(storeId: string, expectedRevision: number | null, input: { themeId: string; settings: Record<string, unknown>; draftArtifactId?: string | null }): Promise<unknown>;
+  saveThemeConfiguration(storeId: string, expectedRevision: number | null, input: { themeId: string; themeVersion?: string; settings: Record<string, unknown>; draftArtifactId?: string | null }): Promise<unknown>;
 
   getAssignment(storeId: string, resourceType: AssignableResourceType, resourceId: string): Promise<unknown | null>;
   assignTemplate(storeId: string, input: { resourceType: AssignableResourceType; resourceId: string; templateId: string; expectedRevision: number | null }): Promise<unknown>;
@@ -94,6 +95,7 @@ const menuUpdateSchema = z.object({
 const themeSaveSchema = z.object({
   expectedRevision: nullableExpectedRevisionSchema,
   themeId: z.string().min(1),
+  themeVersion: z.string().regex(/^\d+\.\d+\.\d+(?:[-+][\w.-]+)?$/).optional(),
   settings: jsonObjectSchema,
   draftArtifactId: z.string().min(1).nullable().optional(),
 }).strict();
@@ -124,6 +126,10 @@ export function createStorefrontWorkspaceRouter(api: StorefrontWorkspaceApi, aut
       const workspace = await api.getWorkspace(storeId(request));
       response.json(workspace ?? { generation: 0, updatedAt: null });
     } catch (error) { next(error); }
+  });
+
+  router.get("/themes", requireStorePermission("storefront:view"), async (request, response, next) => {
+    try { response.json(await api.listThemeCatalog(storeId(request))); } catch (error) { next(error); }
   });
 
   router.get("/templates", requireStorePermission("storefront:view"), async (request, response, next) => {

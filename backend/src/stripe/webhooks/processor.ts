@@ -123,67 +123,83 @@ async function processPaymentSucceeded(
   sql: SqlExecutor,
   payment: PaymentRow,
 ): Promise<void> {
+  // Webhooks are delivered at least once. A single statement makes settlement
+  // atomic and means a redelivery sees no HELD reservations to sell twice.
   await sql.query(
     `
-      UPDATE "Payment"
-      SET "status" = 'PAID'
-      WHERE "id" = $1
-        AND "status" IN (
-          'PENDING',
-          'PROCESSING'
-        )
+      WITH attempt AS (
+        SELECT "id"
+        FROM "CheckoutAttempt"
+        WHERE "orderId" = $1
+          AND "storeId" = $2
+        FOR UPDATE
+      ),
+      sold_reservations AS (
+        UPDATE "InventoryReservation" AS reservation
+        SET "status" = 'SOLD'
+        FROM attempt
+        WHERE reservation."attemptId" = attempt."id"
+          AND reservation."status" = 'HELD'
+        RETURNING
+          reservation."storeId",
+          reservation."variantId",
+          reservation."quantity"
+      ),
+      settled_inventory AS (
+        UPDATE "InventoryLevel" AS inventory
+        SET
+          "reserved" = inventory."reserved" - totals."quantity",
+          "quantity" = inventory."quantity" - totals."quantity",
+          "updatedAt" = CURRENT_TIMESTAMP
+        FROM (
+          SELECT
+            "storeId",
+            "variantId",
+            SUM("quantity")::integer AS "quantity"
+          FROM sold_reservations
+          GROUP BY "storeId", "variantId"
+        ) AS totals
+        WHERE inventory."storeId" = totals."storeId"
+          AND inventory."variantId" = totals."variantId"
+          AND inventory."reserved" >= totals."quantity"
+        RETURNING inventory."variantId"
+      ),
+      paid_payment AS (
+        UPDATE "Payment"
+        SET "status" = 'PAID'
+        WHERE "id" = $3
+          AND "status" IN ('PENDING', 'PROCESSING')
+        RETURNING "id"
+      ),
+      paid_order AS (
+        UPDATE "Order"
+        SET
+          "status" = 'PAID',
+          "updatedAt" = CURRENT_TIMESTAMP
+        WHERE "id" = $1
+          AND "storeId" = $2
+          AND "status" = 'PENDING_PAYMENT'
+        RETURNING "id"
+      ),
+      completed_attempt AS (
+        UPDATE "CheckoutAttempt"
+        SET "status" = 'SUCCEEDED'
+        WHERE "id" IN (SELECT "id" FROM attempt)
+          AND "status" IN (
+            'PAYMENT_INTENT_CREATING',
+            'READY',
+            'PROCESSING'
+          )
+        RETURNING "id"
+      )
+      SELECT
+        (SELECT COUNT(*) FROM sold_reservations) AS "soldReservations",
+        (SELECT COUNT(*) FROM settled_inventory) AS "settledInventory",
+        (SELECT COUNT(*) FROM paid_payment) AS "paidPayment",
+        (SELECT COUNT(*) FROM paid_order) AS "paidOrder",
+        (SELECT COUNT(*) FROM completed_attempt) AS "completedAttempt"
     `,
-    [payment.id],
-  );
-
-  await sql.query(
-    `
-      UPDATE "Order"
-      SET
-        "status" = 'PAID',
-        "updatedAt" = CURRENT_TIMESTAMP
-      WHERE "id" = $1
-        AND "storeId" = $2
-        AND "status" = 'PENDING_PAYMENT'
-    `,
-    [
-      payment.orderId,
-      payment.storeId,
-    ],
-  );
-
-  const attemptId =
-    await getCheckoutAttemptId(
-      sql,
-      payment,
-    );
-
-  if (!attemptId) {
-    return;
-  }
-
-  await sql.query(
-    `
-      UPDATE "CheckoutAttempt"
-      SET "status" = 'SUCCEEDED'
-      WHERE "id" = $1
-        AND "status" IN (
-          'PAYMENT_INTENT_CREATING',
-          'READY',
-          'PROCESSING'
-        )
-    `,
-    [attemptId],
-  );
-
-  await sql.query(
-    `
-      UPDATE "InventoryReservation"
-      SET "status" = 'SOLD'
-      WHERE "attemptId" = $1
-        AND "status" = 'HELD'
-    `,
-    [attemptId],
+    [payment.orderId, payment.storeId, payment.id],
   );
 }
 

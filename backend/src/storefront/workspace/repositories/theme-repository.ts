@@ -6,6 +6,7 @@ export interface ThemeConfigurationRecord {
   storeId: string;
   revision: number;
   themeId: string;
+  themeVersion: string;
   settings: ThemeSettings;
   draftArtifactId: string | null;
   updatedAt: Date;
@@ -15,6 +16,7 @@ export interface SaveThemeConfigurationInput {
   storeId: string;
   expectedRevision: number | null;
   themeId: string;
+  themeVersion?: string;
   settings: ThemeSettings;
   draftArtifactId?: string | null;
 }

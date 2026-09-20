@@ -1,0 +1,17 @@
+{
+  "functions": [
+    {
+      "source": "backend",
+      "codebase": "api",
+      "runtime": "nodejs22",
+      "predeploy": [
+        "npm --prefix backend run build"
+      ]
+    }
+  ],
+  "emulators": {
+    "functions": {
+      "port": 5001
+    }
+  }
+}

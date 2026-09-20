@@ -2,6 +2,7 @@ import type { DynamicValueType, StorefrontDocument } from "@jelly/storefront-sch
 import {
   StoreEditorApiError,
   type CompilationResult,
+  type CatalogAdminProduct,
   type DemoCatalog,
   type DraftRecord,
   type DynamicSourceDescriptor,
@@ -16,10 +17,12 @@ import {
   type TemplateAssignmentRecord,
   type TemplateMutationResult,
   type ThemeConfigurationRecord,
+  type ThemeCatalogEntry,
   type WorkspaceRecord,
 } from "./types";
 
 export interface StoreEditorApi {
+  listThemeCatalog(storeId: string): Promise<ThemeCatalogEntry[]>;
   loadWorkspace(storeId: string): Promise<WorkspaceRecord>;
   listTemplates(storeId: string, type?: StorefrontTemplateType): Promise<StorefrontTemplateRecord[]>;
   getTemplate(storeId: string, templateId: string): Promise<StorefrontTemplateRecord>;
@@ -39,7 +42,7 @@ export interface StoreEditorApi {
   updateMenu(storeId: string, menuId: string, expectedRevision: number, patch: { name?: string; handle?: string; items?: unknown[] }): Promise<{ menu: MenuRecord; generation: number }>;
 
   getThemeConfiguration(storeId: string): Promise<ThemeConfigurationRecord | null>;
-  saveThemeConfiguration(storeId: string, expectedRevision: number | null, input: { themeId: string; settings: Record<string, unknown>; draftArtifactId?: string | null }): Promise<{ theme: ThemeConfigurationRecord; generation: number }>;
+  saveThemeConfiguration(storeId: string, expectedRevision: number | null, input: { themeId: string; themeVersion?: string; settings: Record<string, unknown>; draftArtifactId?: string | null }): Promise<{ theme: ThemeConfigurationRecord; generation: number }>;
 
   getAssignment(storeId: string, resourceType: TemplateAssignmentRecord["resourceType"], resourceId: string): Promise<TemplateAssignmentRecord | null>;
   assignTemplate(storeId: string, resourceType: TemplateAssignmentRecord["resourceType"], resourceId: string, templateId: string, expectedRevision: number | null): Promise<{ assignment: TemplateAssignmentRecord; generation: number }>;
@@ -57,6 +60,9 @@ export interface StoreEditorApi {
   listCatalog(): Promise<DemoCatalog>;
   uploadMedia(storeId: string, file: File, onProgress?: (percent: number) => void): Promise<MediaRecord>;
   deleteMedia(storeId: string, mediaId: string): Promise<void>;
+  listProducts(storeId: string): Promise<{ nodes: CatalogAdminProduct[]; nextCursor: string | null }>;
+  createProduct(storeId: string, input: { handle: string; title: string; description?: string; productType?: string; status?: "DRAFT" | "ACTIVE"; primaryCategoryId?: string; additionalCategoryIds?: string[]; brandId?: string; collectionIds?: string[]; categoryMetadata?: unknown | null; brandMetadata?: unknown | null; collectionMetadata?: unknown[]; options?: unknown[]; inventoryOptionIds?: string[]; variants?: Array<{ title: string; sku?: string; priceMinor: number; quantity?: number; trackInventory?: boolean; options?: Record<string, string> }> }): Promise<CatalogAdminProduct>;
+  updateProduct(storeId: string, productId: string, input: { handle?: string; title?: string; description?: string; productType?: string; status?: "DRAFT" | "ACTIVE"; primaryCategoryId?: string | null; additionalCategoryIds?: string[]; brandId?: string | null; collectionIds?: string[]; categoryMetadata?: unknown | null; brandMetadata?: unknown | null; collectionMetadata?: unknown[]; options?: unknown[]; inventoryOptionIds?: string[]; variants?: Array<{ id?: string; title: string; sku?: string; priceMinor: number; quantity?: number; trackInventory?: boolean; options?: Record<string, string> }> }): Promise<CatalogAdminProduct>;
 }
 
 interface ClientOptions { baseUrl: string; token: string; fetch?: typeof fetch }
@@ -105,6 +111,7 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
   const customDataPath = (storeId: string, suffix: string) => `/api/stores/${encodeURIComponent(storeId)}/custom-data${suffix}`;
 
   return {
+    listThemeCatalog: (storeId) => request(storefrontPath(storeId, "/themes")),
     loadWorkspace: (storeId) => request(storefrontPath(storeId, "/workspace")),
     listTemplates: (storeId, type) => request(storefrontPath(storeId, `/templates${type ? `?type=${encodeURIComponent(type)}` : ""}`)),
     getTemplate: (storeId, templateId) => request(storefrontPath(storeId, `/templates/${encodeURIComponent(templateId)}`)),
@@ -163,5 +170,8 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
       return { ...result, url: result.url.startsWith("/") ? `${origin}${result.url}` : result.url };
     },
     deleteMedia: (storeId, mediaId) => request(`/api/stores/${encodeURIComponent(storeId)}/media/${encodeURIComponent(mediaId)}`, { method: "DELETE" }),
+    listProducts: (storeId) => request(`/api/stores/${encodeURIComponent(storeId)}/catalog/products?limit=100`),
+    createProduct: (storeId, input) => request<CatalogAdminProduct>(`/api/stores/${encodeURIComponent(storeId)}/catalog/products`, { method: "POST", body: JSON.stringify(input) }),
+    updateProduct: (storeId, productId, input) => request<CatalogAdminProduct>(`/api/stores/${encodeURIComponent(storeId)}/catalog/products/${encodeURIComponent(productId)}`, { method: "PATCH", body: JSON.stringify(input) }),
   };
 }

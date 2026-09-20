@@ -13,7 +13,7 @@ export const STRIPE_API_VERSION = "2026-08-26.dahlia" as const;
 export interface StripeServerConfig {
   secretKey: string;
   apiVersion: typeof STRIPE_API_VERSION;
-  cardPaymentMethodConfigurationId: string;
+  cardPaymentMethodConfigurationId?: string;
   accountsV2WebhookSecret: string;
   connectPaymentsWebhookSecret: string;
   schedulerSecret: string;
@@ -47,18 +47,12 @@ function loadStripeConfig(
   const names = [
     "STRIPE_SECRET_KEY",
     "STRIPE_ACCOUNTS_V2_VERSION",
-    "STRIPE_CARD_PAYMENT_METHOD_CONFIGURATION_ID",
     "STRIPE_ACCOUNTS_V2_WEBHOOK_SECRET",
     "STRIPE_CONNECT_PAYMENTS_WEBHOOK_SECRET",
     "SCHEDULER_SECRET",
   ] as const;
 
-  if (
-    !production &&
-    !names.some(
-      (name) => environment[name]?.trim(),
-    )
-  ) {
+  if (!names.some((name) => environment[name]?.trim())) {
     return undefined;
   }
 
@@ -93,12 +87,10 @@ function loadStripeConfig(
   }
 
   const cardPaymentMethodConfigurationId =
-    environment
-      .STRIPE_CARD_PAYMENT_METHOD_CONFIGURATION_ID!
-      .trim();
+    environment.STRIPE_CARD_PAYMENT_METHOD_CONFIGURATION_ID?.trim();
 
   if (
-    !/^pmc_[A-Za-z0-9]+$/.test(
+    cardPaymentMethodConfigurationId && !/^pmc_[A-Za-z0-9]+$/.test(
       cardPaymentMethodConfigurationId,
     )
   ) {
@@ -117,7 +109,12 @@ function loadStripeConfig(
       .STRIPE_CONNECT_PAYMENTS_WEBHOOK_SECRET!
       .trim();
 
+  // In production the two webhook endpoints must have independent signing
+  // secrets so a compromised endpoint cannot forge events for the other.
+  // In development/test, `stripe listen` issues a single whsec_ for all
+  // forwarded events, so sharing the secret is acceptable.
   if (
+    production &&
     accountsV2WebhookSecret ===
     connectPaymentsWebhookSecret
   ) {
@@ -164,6 +161,7 @@ const environmentSchema = z.object({
     .enum([
       "development",
       "firebase",
+      "supabase",
     ])
     .default("development"),
 
@@ -204,9 +202,9 @@ const environmentSchema = z.object({
   DEMO_STORE_ID: z
     .string()
     .min(1)
-    .default("store-demo"),
+    .default("store-sweet-bakes"),
 
-  FIREBASE_PROJECT_ID: z.preprocess(
+  JELLY_FIREBASE_PROJECT_ID: z.preprocess(
     emptyToUndefined,
     z.string().optional(),
   ),
@@ -248,6 +246,15 @@ const environmentSchema = z.object({
     emptyToUndefined,
     z.string().min(1).default("media"),
   ),
+
+  /**
+   * Supabase Anon (public) key — safe to use server-side for auth token verification.
+   * Required when AUTH_PROVIDER=supabase.
+   */
+  SUPABASE_ANON_KEY: z.preprocess(
+    emptyToUndefined,
+    z.string().min(1).optional(),
+  ),
 });
 
 export interface AppConfig {
@@ -264,7 +271,8 @@ export interface AppConfig {
 
   authProvider:
     | "development"
-    | "firebase";
+    | "firebase"
+    | "supabase";
 
   mediaProvider:
     | "local-files"
@@ -279,6 +287,14 @@ export interface AppConfig {
 
   demoStoreId: string;
 
+  /** Firebase project used by the Firebase Admin auth provider. */
+  firebaseProjectId?: string;
+
+  /** Google Cloud Storage configuration (used when MEDIA_PROVIDER=gcs). */
+  gcsBucket?: string;
+
+  gcsProjectId?: string;
+
   /**
    * Supabase Storage configuration.
    * These values are backend-only.
@@ -286,6 +302,8 @@ export interface AppConfig {
   supabaseUrl?: string;
 
   supabaseSecretKey?: string;
+
+  supabaseAnonKey?: string;
 
   supabaseMediaBucket: string;
 
@@ -312,10 +330,19 @@ export function loadConfig(
 
   if (
     parsed.AUTH_PROVIDER === "firebase" &&
-    !parsed.FIREBASE_PROJECT_ID
+    !parsed.JELLY_FIREBASE_PROJECT_ID
   ) {
     throw new Error(
-      "FIREBASE_PROJECT_ID is required when AUTH_PROVIDER=firebase",
+      "JELLY_FIREBASE_PROJECT_ID is required when AUTH_PROVIDER=firebase",
+    );
+  }
+
+  if (
+    parsed.AUTH_PROVIDER === "supabase" &&
+    (!parsed.SUPABASE_URL || !parsed.SUPABASE_ANON_KEY)
+  ) {
+    throw new Error(
+      "SUPABASE_URL and SUPABASE_ANON_KEY are required when AUTH_PROVIDER=supabase",
     );
   }
 
@@ -390,6 +417,15 @@ export function loadConfig(
     demoStoreId:
       parsed.DEMO_STORE_ID,
 
+    firebaseProjectId:
+      parsed.JELLY_FIREBASE_PROJECT_ID,
+
+    gcsBucket:
+      parsed.GCS_BUCKET,
+
+    gcsProjectId:
+      parsed.GCS_PROJECT_ID,
+
     /*
      * Supabase Storage
      */
@@ -398,6 +434,9 @@ export function loadConfig(
 
     supabaseSecretKey:
       parsed.SUPABASE_SECRET_KEY,
+
+    supabaseAnonKey:
+      parsed.SUPABASE_ANON_KEY,
 
     supabaseMediaBucket:
       parsed.SUPABASE_MEDIA_BUCKET,

@@ -31,12 +31,13 @@ const CHECKOUT_TTL_MS = 15 * 60 * 1000;
 const inputSchema = z.object({
   storeId: z.string().min(1),
   cartKey: z.string().min(1),
-  currency: z.string().length(3),
+  currency: z.string().length(3).transform((value) => value.toUpperCase()),
   items: z
     .array(
       z.object({
         variantId: z.string().min(1),
         quantity: z.number().int().positive(),
+        configurationSelections: z.array(z.object({ optionId: z.string().min(1), valueId: z.string().min(1), optionName: z.string().optional(), valueLabel: z.string().optional(), priceAdjustmentMinor: z.number().int().optional() })).optional(),
       }),
     )
     .min(1),
@@ -56,6 +57,8 @@ interface ValidatedLine {
   skuSnapshot: string | null;
   imageSnapshot: string | null;
   unitPriceMinor: number;
+  configurationSnapshot: Array<{ optionId: string; valueId: string; optionName: string; valueLabel: string; priceAdjustmentMinor: number }>;
+  configurationKey: string;
 }
 
 interface ValidatedCart {
@@ -338,13 +341,35 @@ export class CheckoutService {
           );
         }
 
+        const product = await this.deps.catalog.getProduct(storeId, variant.productId);
+        const productOptions = (product?.options ?? []) as Array<{ id: string; name: string; type?: string; required?: boolean; values?: Array<{ id: string; label: string; priceAdjustmentMinor?: number; priceAdjustment?: number }> }>;
+        const selections = item.configurationSelections ?? [];
+        const selectedOptionIds = new Set<string>();
+        const snapshot = selections.map((selection) => {
+          const option = productOptions.find((candidate) => candidate.id === selection.optionId);
+          const value = option?.values?.find((candidate) => candidate.id === selection.valueId);
+          if (!option || !value) throw new ApiError(422, "CHECKOUT_INPUT_INVALID", `Invalid product configuration: ${selection.optionId}`);
+          if (selectedOptionIds.has(option.id)) throw new ApiError(422, "CHECKOUT_INPUT_INVALID", `Duplicate product configuration: ${option.id}`);
+          selectedOptionIds.add(option.id);
+          if (option.type === "variant" && variant.options[option.id] !== value.id) throw new ApiError(422, "CHECKOUT_INPUT_INVALID", "Configuration does not match the selected variant.");
+          const priceAdjustmentMinor = Number.isFinite(value.priceAdjustmentMinor) ? Number(value.priceAdjustmentMinor) : Number.isFinite(value.priceAdjustment) ? Math.round(Number(value.priceAdjustment) * 100) : 0;
+          return { optionId: option.id, valueId: value.id, optionName: option.name, valueLabel: value.label, priceAdjustmentMinor };
+        });
+        for (const option of productOptions) {
+          if (option.required && !selectedOptionIds.has(option.id)) {
+            throw new ApiError(422, "CHECKOUT_INPUT_INVALID", `Missing required product configuration: ${option.id}`);
+          }
+        }
+        const unitPriceMinor = variant.priceMinor + snapshot.filter((selection) => productOptions.find((option) => option.id === selection.optionId)?.type !== "variant").reduce((total, selection) => total + selection.priceAdjustmentMinor, 0);
         return {
           variantId: variant.id,
           quantity: item.quantity,
           titleSnapshot: variant.title,
           skuSnapshot: variant.sku,
           imageSnapshot: null,
-          unitPriceMinor: variant.priceMinor,
+          unitPriceMinor,
+          configurationSnapshot: snapshot,
+          configurationKey: snapshot.map((selection) => `${selection.optionId}:${selection.valueId}`).sort().join("|"),
         };
       }),
     );
@@ -597,11 +622,13 @@ export class CheckoutService {
             "skuSnapshot",
             "imageSnapshot",
             "unitPriceMinor",
-            "quantity"
+            "quantity",
+            "configurationSnapshot"
+            ,"configurationKey"
           )
           VALUES (
             $1, $2, $3, $4,
-            $5, $6, $7, $8
+            $5, $6, $7, $8, $9, $10
           )
         `,
         [
@@ -613,6 +640,8 @@ export class CheckoutService {
           line.imageSnapshot,
           line.unitPriceMinor,
           line.quantity,
+          JSON.stringify(line.configurationSnapshot),
+          line.configurationKey,
         ],
       );
     }

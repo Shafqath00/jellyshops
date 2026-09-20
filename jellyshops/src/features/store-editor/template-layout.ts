@@ -50,6 +50,19 @@ export function updateInlineSection(
   return withPlacements(layout, sections);
 }
 
+export function movePlacement(layout: Record<string, unknown>, sectionId: string, direction: "up" | "down"): Record<string, unknown> {
+  const sections = readPlacements(layout);
+  const index = sections.findIndex((placement) => placement.kind === "inline" ? placement.section.id === sectionId : placement.globalSectionId === sectionId);
+  const target = direction === "up" ? index - 1 : index + 1;
+  if (index < 0 || target < 0 || target >= sections.length) return structuredClone(layout);
+  [sections[index], sections[target]] = [sections[target]!, sections[index]!];
+  return withPlacements(layout, sections);
+}
+
+export function setInlineSectionEnabled(layout: Record<string, unknown>, sectionId: string, enabled: boolean): Record<string, unknown> {
+  return updateInlineSection(layout, sectionId, (section) => ({ ...section, enabled }));
+}
+
 export function appendBlock(
   layout: Record<string, unknown>,
   sectionId: string,

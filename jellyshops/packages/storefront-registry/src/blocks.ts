@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { settingValueSchema, type DynamicValueType } from "@jelly/storefront-schema";
-import type { BlockDefinition } from "./types";
+import type { BlockDefinition } from "./types.js";
 
 const dynamicString = z.union([z.string(), settingValueSchema(z.string())]);
 const text = z.object({ text: dynamicString }).passthrough();

@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { ChevronDown, ChevronRight, LayoutPanelTop, MousePointerClick, Plus, Type } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronUp, Eye, EyeOff, LayoutPanelTop, MousePointerClick, Plus, Type } from "lucide-react";
 import type { EditorSelection } from "../model/types";
 import type { StorefrontTemplateRecord } from "../api/types";
 
@@ -25,6 +25,7 @@ type InlinePlacement = {
   section: {
     id: string;
     type: string;
+    enabled?: boolean;
     blocks: Array<{ id: string; type: string; settings?: Record<string, unknown> }>;
   };
 };
@@ -58,8 +59,9 @@ function placements(template: Pick<StorefrontTemplateRecord, "layout">): Templat
         return [{
           kind: "inline",
           section: {
-            id: section.id,
-            type: section.type,
+          id: section.id,
+          type: section.type,
+          enabled: section.enabled !== false,
             blocks: Array.isArray(section.blocks)
               ? section.blocks.flatMap((block): InlinePlacement["section"]["blocks"] => {
                 if (!block || typeof block !== "object" || Array.isArray(block)) return [];
@@ -97,6 +99,10 @@ function PlacementRow({
   onSelect,
   onGlobalSelect,
   onAddBlock,
+  onMove,
+  onToggle,
+  index,
+  count,
   region,
 }: {
   placement: TemplatePlacement;
@@ -106,6 +112,10 @@ function PlacementRow({
   onSelect(selection: EditorSelection): void;
   onGlobalSelect?(globalSectionId: string): void;
   onAddBlock?(sectionId: string): void;
+  onMove?(id: string, direction: "up" | "down"): void;
+  onToggle?(id: string, enabled: boolean): void;
+  index: number;
+  count: number;
   region: HierarchyRegion;
 }) {
   if (placement.kind === "global") {
@@ -145,6 +155,7 @@ function PlacementRow({
         <LayoutPanelTop size={15} className="text-[#777]" />
         <span className="truncate">{label}</span>
       </button>
+      {onMove ? <div className="-mt-8 mr-1 flex justify-end"><button type="button" aria-label={`Move ${label} up`} disabled={index === 0} onClick={() => onMove(placement.section.id, "up")} className="grid size-6 place-items-center rounded disabled:opacity-25"><ChevronUp size={13} /></button><button type="button" aria-label={`Move ${label} down`} disabled={index === count - 1} onClick={() => onMove(placement.section.id, "down")} className="grid size-6 place-items-center rounded disabled:opacity-25"><ChevronDown size={13} /></button>{onToggle ? <button type="button" aria-label={`${placement.section.enabled === false ? "Show" : "Hide"} ${label}`} onClick={() => onToggle(placement.section.id, placement.section.enabled === false)} className="grid size-6 place-items-center rounded"><span className="sr-only">{placement.section.enabled === false ? "Hidden" : "Visible"}</span>{placement.section.enabled === false ? <EyeOff size={13} /> : <Eye size={13} />}</button> : null}</div> : null}
       {expanded && (
         <div className="ml-5 mt-1 space-y-0.5 border-l border-[#e4e1e9] pl-2">
           {placement.section.blocks.map((block) => {
@@ -191,6 +202,8 @@ export function TemplateHierarchy({
   onGlobalSelect,
   onAddSection,
   onAddBlock,
+  onMove,
+  onToggle,
 }: {
   template: Pick<StorefrontTemplateRecord, "id" | "name" | "layout">;
   globalSections: Record<string, GlobalLabel>;
@@ -200,6 +213,8 @@ export function TemplateHierarchy({
   onGlobalSelect?(globalSectionId: string): void;
   onAddSection?(region: HierarchyRegion): void;
   onAddBlock?(sectionId: string): void;
+  onMove?(id: string, direction: "up" | "down"): void;
+  onToggle?(id: string, enabled: boolean): void;
 }) {
   const templatePlacements = placements(template);
   const groups: Record<HierarchyRegion, TemplatePlacement[]> = {
@@ -233,6 +248,10 @@ export function TemplateHierarchy({
                   onSelect={onSelect}
                   onGlobalSelect={onGlobalSelect}
                   onAddBlock={onAddBlock}
+                  onMove={onMove}
+                  onToggle={onToggle}
+                  index={index}
+                  count={groups[region].length}
                   region={region}
                 />
               ))}

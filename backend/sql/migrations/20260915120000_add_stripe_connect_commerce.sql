@@ -1,8 +1,9 @@
 -- Durable commerce. Composite foreign keys preserve the store boundary even
 -- when callers supply an otherwise valid identifier from a different store.
 CREATE TABLE "StripeConnectedAccount" (
-  "storeId" TEXT PRIMARY KEY REFERENCES "Store"("id") ON DELETE RESTRICT,
+  "storeId" TEXT NOT NULL REFERENCES "Store"("id") ON DELETE RESTRICT,
   "stripeAccountId" TEXT NOT NULL UNIQUE,
+  "isCurrent" BOOLEAN NOT NULL DEFAULT TRUE,
   -- Accounts v2: configuration.merchant.capabilities.card_payments.status
   "cardPaymentsStatus" TEXT NOT NULL DEFAULT 'unrequested',
   -- Accounts v2: configuration.merchant.capabilities.stripe_balance.payouts.status
@@ -11,6 +12,9 @@ CREATE TABLE "StripeConnectedAccount" (
   "closedAt" TIMESTAMPTZ,
   UNIQUE ("storeId", "stripeAccountId")
 );
+CREATE UNIQUE INDEX "StripeConnectedAccount_current_store_idx"
+  ON "StripeConnectedAccount" ("storeId")
+  WHERE "isCurrent" = TRUE;
 
 CREATE TABLE "Order" (
   "id" TEXT PRIMARY KEY,

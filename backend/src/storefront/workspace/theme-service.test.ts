@@ -52,4 +52,15 @@ describe("ThemeService", () => {
       expectedRevision: 3,
     }));
   });
+
+  it("rejects invalid values for manifest-declared settings before persisting", async () => {
+    const { service, repository } = setup();
+
+    await expect(service.saveThemeConfiguration("store-a", null, {
+      themeId: "minimal",
+      settings: { layout: { containerWidth: "not-a-width" } },
+    })).rejects.toMatchObject({ code: "THEME_SETTINGS_INVALID", status: 422 });
+
+    expect(repository.saveThemeConfiguration).not.toHaveBeenCalled();
+  });
 });

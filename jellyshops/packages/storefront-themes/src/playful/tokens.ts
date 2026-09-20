@@ -1,2 +1,2 @@
-import type { ThemeTokens } from "../types";
+import type { ThemeTokens } from "../types.js";
 export const playfulTokens: ThemeTokens = { colors: { primary: "#4b3f72", background: "#fff8e8", text: "#302943", surface: "#ffffff", accent: "#ff8fab" }, typography: { display: "Comic Sans MS", body: "Trebuchet MS" }, radii: { button: "999px", card: "28px" }, spacing: { section: "80px", container: "68rem" }, cardShadow: "0 10px 0 rgba(75, 63, 114, 0.16)" };

@@ -1,4 +1,5 @@
 import type {
+  CommerceDatabase,
   SqlExecutor,
   StripeConnectedAccountRow,
 } from "../../commerce/repository.js";
@@ -46,6 +47,7 @@ export interface UpdateAccountStateInput {
 const ACCOUNT_COLUMNS = `
   "storeId",
   "stripeAccountId",
+  "isCurrent",
   "cardPaymentsStatus",
   "payoutsStatus",
   "requirements",
@@ -96,7 +98,10 @@ function requireAccountRow(
  * All SQL values are passed through parameterized query placeholders.
  */
 export class StripeAccountRepository {
-  constructor(private readonly sql: SqlExecutor) {}
+  constructor(
+    private readonly sql: SqlExecutor,
+    private readonly database?: CommerceDatabase,
+  ) {}
 
   /**
    * Finds the Stripe connected account associated with a store.
@@ -111,6 +116,7 @@ export class StripeAccountRepository {
         SELECT ${ACCOUNT_COLUMNS}
         FROM "StripeConnectedAccount"
         WHERE "storeId" = $1
+          AND "isCurrent" = TRUE
       `,
       [storeId],
     );
@@ -154,11 +160,12 @@ export class StripeAccountRepository {
         INSERT INTO "StripeConnectedAccount" (
           "storeId",
           "stripeAccountId",
+          "isCurrent",
           "cardPaymentsStatus",
           "payoutsStatus",
           "requirements"
         )
-        VALUES ($1, $2, $3, $4, $5)
+        VALUES ($1, $2, TRUE, $3, $4, $5)
         RETURNING ${ACCOUNT_COLUMNS}
       `,
       [
@@ -182,7 +189,7 @@ export class StripeAccountRepository {
    * This is typically used after retrieving fresh account information from
    * Stripe or processing an account-related webhook.
    *
-   * Updating the account state also refreshes `updatedAt`.
+   * Updating the account state refreshes the mutable Stripe capability fields.
    *
    * @throws If no account exists with the supplied Stripe account ID.
    */
@@ -195,8 +202,7 @@ export class StripeAccountRepository {
         SET
           "cardPaymentsStatus" = $2,
           "payoutsStatus" = $3,
-          "requirements" = $4,
-          "updatedAt" = CURRENT_TIMESTAMP
+          "requirements" = $4
         WHERE "stripeAccountId" = $1
         RETURNING ${ACCOUNT_COLUMNS}
       `,
@@ -212,6 +218,60 @@ export class StripeAccountRepository {
       rows,
       `StripeConnectedAccount not found: ${input.stripeAccountId}`,
     );
+  }
+
+  /**
+   * Replaces an inaccessible account after the Stripe platform credentials
+   * have changed. Historical orders keep their stored Stripe account ID, while
+   * new checkout attempts use the newly connected account.
+   */
+  async replaceForStore(
+    input: InsertAccountInput,
+  ): Promise<StripeConnectedAccountRow> {
+    const replace = async (sql: SqlExecutor) => {
+      await sql.query(
+      `
+        UPDATE "StripeConnectedAccount"
+        SET "isCurrent" = FALSE
+        WHERE "storeId" = $1
+          AND "isCurrent" = TRUE
+      `,
+      [input.storeId],
+      );
+
+      const { rows } = await sql.query<StripeConnectedAccountRow>(
+      `
+        INSERT INTO "StripeConnectedAccount" (
+          "storeId",
+          "stripeAccountId",
+          "isCurrent",
+          "cardPaymentsStatus",
+          "payoutsStatus",
+          "requirements"
+        )
+        VALUES ($1, $2, TRUE, $3, $4, $5)
+        RETURNING ${ACCOUNT_COLUMNS}
+      `,
+      [
+        input.storeId,
+        input.stripeAccountId,
+        input.cardPaymentsStatus,
+        input.payoutsStatus,
+        input.requirements,
+      ],
+      );
+
+      return requireAccountRow(
+        rows,
+        `StripeConnectedAccount not found for store: ${input.storeId}`,
+      );
+    };
+
+    // Retiring and inserting must share a transaction or a failed insert can
+    // leave the store without a current connected account.
+    return this.database
+      ? this.database.transaction(replace)
+      : replace(this.sql);
   }
 
   /**
@@ -232,8 +292,7 @@ export class StripeAccountRepository {
       `
         UPDATE "StripeConnectedAccount"
         SET
-          "closedAt" = CURRENT_TIMESTAMP,
-          "updatedAt" = CURRENT_TIMESTAMP
+          "closedAt" = CURRENT_TIMESTAMP
         WHERE
           "stripeAccountId" = $1
           AND "closedAt" IS NULL

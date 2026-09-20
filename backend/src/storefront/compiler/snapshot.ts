@@ -4,12 +4,14 @@ import {
 } from "@jelly/storefront-schema";
 import type { StorefrontDependencyGraph } from "./dependency-graph.js";
 import type { StorefrontCompilationInput } from "./types.js";
+import { resolveTheme } from "@jelly/storefront-themes";
 
 export function assembleRuntimeSnapshot(
   input: StorefrontCompilationInput,
   dependencies: StorefrontDependencyGraph,
   compilerVersion: string,
 ): RuntimeStorefrontSnapshotV4 {
+  const resolvedTheme = resolveTheme(input.theme.id ?? input.theme.presetId, input.theme.settings, input.theme.version);
   const templates = Object.fromEntries(input.templates.map((template) => [
     template.id,
     {
@@ -40,9 +42,13 @@ export function assembleRuntimeSnapshot(
     compilerVersion,
     registryManifestHash: input.registryManifestHash,
     theme: {
-      presetId: input.theme.presetId,
-      settings: structuredClone(input.theme.settings),
+      // presetId is retained for V4 readers published before the resolver existed.
+      presetId: resolvedTheme.id,
+      id: resolvedTheme.id,
+      version: resolvedTheme.version,
+      settings: structuredClone(resolvedTheme.settings),
       artifactId: input.theme.artifactId,
+      ...(resolvedTheme.fallbackReason ? { fallbackReason: resolvedTheme.fallbackReason } : {}),
     },
     templates,
     globalSections,

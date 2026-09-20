@@ -45,7 +45,7 @@ export const errorHandler: ErrorRequestHandler = (error, request, response, _nex
         ? new ApiError(409, "RESOURCE_REVISION_CONFLICT", "The storefront resource changed since it was loaded")
         : currentGeneration !== undefined
           ? new ApiError(409, "WORKSPACE_GENERATION_CONFLICT", "The storefront workspace changed since it was loaded")
-          : new ApiError(500, "INTERNAL_ERROR", "An unexpected error occurred");
+          : (() => { console.error("API ERROR:", error); return new ApiError(500, "INTERNAL_ERROR", error instanceof Error ? error.message : "An unexpected error occurred"); })();
 
   response.status(apiError.status).json({
     error: {

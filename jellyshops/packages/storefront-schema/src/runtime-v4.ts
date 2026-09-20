@@ -95,8 +95,11 @@ export const runtimeStorefrontSnapshotV4Schema = z.object({
   registryManifestHash: z.string().min(1),
   theme: z.object({
     presetId: z.string().min(1),
+    id: z.string().min(1).optional(),
+    version: z.string().min(1).optional(),
     settings: jsonObjectSchema,
     artifactId: z.string().min(1).nullable(),
+    fallbackReason: z.enum(["theme-unavailable", "version-unavailable"]).optional(),
   }).strict(),
   templates: z.record(z.string().min(1), runtimeTemplateSchema),
   globalSections: z.record(z.string().min(1), runtimeGlobalSectionSchema),

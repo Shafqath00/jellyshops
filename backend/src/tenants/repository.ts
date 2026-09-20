@@ -7,6 +7,6 @@ import type {
 
 export interface TenantRepository {
   resolveMerchant(identity: VerifiedMerchantIdentity): Promise<MerchantAccount>;
-  listStores(userId: number): Promise<StoreSummary[]>;
-  createStore(userId: number, input: CreateStoreInput): Promise<StoreSummary>;
+  listStores(userId: string): Promise<StoreSummary[]>;
+  createStore(userId: string, input: CreateStoreInput): Promise<StoreSummary>;
 }

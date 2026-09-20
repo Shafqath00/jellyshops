@@ -1,6 +1,6 @@
 import type { SectionNode } from "@jelly/storefront-schema";
-import { listSectionDefinitions, validateSectionAgainstRegistry } from "./registry";
-import type { SectionPreset } from "./types";
+import { listSectionDefinitions, validateSectionAgainstRegistry } from "./registry.js";
+import type { SectionPreset } from "./types.js";
 
 export function listSectionPresets(): SectionPreset[] {
   return listSectionDefinitions().flatMap((definition) =>

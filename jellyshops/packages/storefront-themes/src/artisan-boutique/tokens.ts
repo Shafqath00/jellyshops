@@ -1,4 +1,4 @@
-import type { ThemeTokens } from "../types";
+import type { ThemeTokens } from "../types.js";
 
 export const artisanBoutiqueTokens: ThemeTokens = {
   colors: { primary: "#201a1d", background: "#f7f3ed", text: "#201a1d", surface: "#fffdf9", accent: "#7c2d4f" },

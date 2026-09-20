@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { DynamicValueType } from "@jelly/storefront-schema";
-import type { SectionDefinition } from "../types";
+import type { SectionDefinition } from "../types.js";
 
 const home = ["home"] as const;
 const empty = z.object({}).passthrough();

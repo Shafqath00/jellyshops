@@ -13,7 +13,7 @@ import type {
 
 export type PaymentIntentGateway = Pick<
   StripeGateway,
-  "createDirectPaymentIntent" | "retrievePaymentIntent"
+  "createDirectPaymentIntent" | "retrievePaymentIntent" | "cancelPaymentIntent"
 >;
 
 export interface PreparedPayment {

@@ -1,6 +1,7 @@
 export interface CheckoutLineInput {
   variantId: string;
   quantity: number;
+  configurationSelections?: Array<{ optionId: string; valueId: string; optionName?: string; valueLabel?: string; priceAdjustmentMinor?: number }>;
 }
 
 export interface BeginCheckoutInput {

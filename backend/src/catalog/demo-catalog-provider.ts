@@ -57,6 +57,7 @@ export function getDemoCatalog(): DemoCatalog {
 function canonicalProduct(storeId: string, product: DemoProduct): CatalogProduct {
   const variant: CatalogVariant = {
     id: `${product.id}-default`,
+    productId: product.id,
     externalId: null,
     title: "Default",
     sku: null,
@@ -91,6 +92,15 @@ function canonicalProduct(storeId: string, product: DemoProduct): CatalogProduct
     variants: [variant],
     priceRange: { minMinor: product.priceMinor, maxMinor: product.priceMinor, currency: product.currency },
     available: true,
+    primaryCategoryId: null,
+    additionalCategoryIds: [],
+    brandId: null,
+    collectionIds: [],
+    options: [],
+    inventoryOptionIds: [],
+    categoryMetadata: null,
+    brandMetadata: null,
+    collectionMetadata: [],
   };
 }
 

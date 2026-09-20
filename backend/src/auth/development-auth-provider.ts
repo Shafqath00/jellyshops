@@ -6,7 +6,7 @@ export const DEMO_TOKEN = "jelly-demo-merchant";
 export class DevelopmentAuthProvider implements AuthProvider {
   constructor(
     private readonly storeId: string,
-    private readonly userId = 0,
+    private readonly userId = "0",
   ) {}
 
   async verify(token: string): Promise<MerchantPrincipal> {

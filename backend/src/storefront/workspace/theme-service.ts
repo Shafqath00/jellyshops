@@ -1,4 +1,6 @@
 import type { WorkspaceMutationRunner } from "./mutation-runner.js";
+import { resolveTheme, validateThemeSettings } from "@jelly/storefront-themes";
+import { ApiError } from "../../http/errors.js";
 import type {
   ThemeConfigurationRecord,
   ThemeRepository,
@@ -36,15 +38,22 @@ export class ThemeService {
   async saveThemeConfiguration(
     storeId: string,
     expectedRevision: number | null,
-    input: { themeId: string; settings: ThemeSettings; draftArtifactId?: string | null },
+  input: { themeId: string; themeVersion?: string; settings: ThemeSettings; draftArtifactId?: string | null },
   ): Promise<ThemeMutationResult> {
+    const requestedId = normalizeThemeId(input.themeId);
+    const settings = normalizeSettings(input.settings);
+    const resolved = resolveTheme(requestedId, settings, input.themeVersion);
+    if (resolved.fallbackReason) throw new Error(`Theme '${requestedId}' is not available`);
+    const issues = validateThemeSettings(requestedId, settings);
+    if (issues.length) throw new ApiError(422, "THEME_SETTINGS_INVALID", "Theme settings are invalid", issues);
     const mutation = await this.coordinator.run(storeId, (transaction) => this.repository.saveThemeConfiguration(
       transaction,
       {
         storeId,
         expectedRevision,
-        themeId: normalizeThemeId(input.themeId),
-        settings: normalizeSettings(input.settings),
+        themeId: resolved.id,
+        themeVersion: resolved.version,
+        settings: resolved.settings,
         ...(input.draftArtifactId !== undefined ? { draftArtifactId: input.draftArtifactId } : {}),
       },
     ));

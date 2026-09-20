@@ -7,15 +7,22 @@ import type {
   ThemeId,
 } from "@jelly/storefront-schema";
 import { createStorefrontTemplate } from "@jelly/storefront-schema";
+import { listThemes, resolveTheme, validateThemeSettings } from "@jelly/storefront-themes";
 import cors from "cors";
 import express, { type Express } from "express";
 
 import { DevelopmentAuthProvider } from "./auth/development-auth-provider.js";
+import { FirebaseAuthProvider } from "./auth/firebase-auth-provider.js";
+import { createFirebaseTokenVerifier } from "./auth/firebase-token-verifier.js";
+import { SupabaseAuthProvider } from "./auth/supabase-auth-provider.js";
+import { createAdminRouter } from "./admin/routes.js";
+import { AdminSummaryService, CustomerService } from "./admin/service.js";
 import {
   requireMerchant,
   requireStorePermission,
 } from "./auth/middleware.js";
 import type { AuthProvider } from "./auth/types.js";
+import { PostgresTenantRepository } from "./tenants/postgres-repository.js";
 
 import {
   createCatalogAdminRouter,
@@ -23,24 +30,29 @@ import {
   createPublicCatalogRouter,
 } from "./catalog/routes.js";
 import type { CatalogAdmin } from "./catalog/service.js";
-import { createPublicStoreRouter } from "./catalog/public-store.js";
+import { createPublicStoreBySlugRouter, createPublicStoreRouter } from "./catalog/public-store.js";
 import { CatalogService } from "./catalog/service.js";
 import { CatalogPostgresRepository } from "./catalog/postgres-repository.js";
 
 import {
   createMerchantOrderRouter,
 } from "./commerce/merchant-order-routes.js";
-import type { MerchantOrderService } from "./commerce/merchant-orders.js";
-import type { SqlExecutor } from "./commerce/repository.js";
+import { MerchantOrderService } from "./commerce/merchant-orders.js";
+import {
+  CommerceRepository,
+  postgresCommerceDatabase,
+  type CommerceDatabase,
+  type SqlExecutor,
+} from "./commerce/repository.js";
 import {
   createCommerceRouter,
   createPublicOrderRouter,
 } from "./commerce/routes.js";
-import type { CheckoutService } from "./commerce/service.js";
+import { CheckoutService } from "./commerce/service.js";
 import {
   createSweeperRouter,
 } from "./commerce/sweeper-routes.js";
-import type { ReservationSweeper } from "./commerce/sweeper.js";
+import { ReservationSweeper } from "./commerce/sweeper.js";
 
 import {
   loadConfig,
@@ -68,6 +80,7 @@ import {
   errorHandler,
   notFoundHandler,
 } from "./http/errors.js";
+import { ApiError } from "./http/errors.js";
 
 import {
   LocalJsonMediaRepository,
@@ -89,10 +102,11 @@ import type { MediaStorage } from "./media/storage.js";
 import {
   createStripeConnectRouter,
 } from "./stripe/accounts/routes.js";
-import type {
-  StripeAccountService,
-} from "./stripe/accounts/service.js";
-import type { StripeGateway } from "./stripe/client.js";
+import { StripeAccountService } from "./stripe/accounts/service.js";
+import {
+  createStripeGateway,
+  type StripeGateway,
+} from "./stripe/client.js";
 import {
   createAccountsV2WebhookRouter,
 } from "./stripe/webhooks/accounts-v2-route.js";
@@ -216,7 +230,7 @@ const supabasePool =
 
 const defaultHomeTemplate = {
   id: "home",
-  storeId: "store-demo",
+  storeId: "store-sweet-bakes",
   revision: 1,
   type: "home" as const,
   handle: "home",
@@ -396,7 +410,7 @@ export function publicDocumentFromTemplate(
 
 const defaultPublicStorefrontApi: PublicStorefrontApi = {
   async load(storeId) {
-    const templateId = storeId === "store-demo" ? "bakes" : "essentials";
+    const templateId = "essentials";
     if (!supabasePool) {
       return {
         id: `publication-${storeId}`,
@@ -449,6 +463,12 @@ const defaultPublicStorefrontApi: PublicStorefrontApi = {
 /* -------------------------------------------------------------------------- */
 
 const defaultStorefrontWorkspaceApi: StorefrontWorkspaceApi = {
+  async listThemeCatalog() {
+    return listThemes().map((theme) => {
+      const manifest = theme.manifest as { id: string; name: string; version: string; description: string; enabled: boolean; layout: string; previewAsset?: string; assets?: { preview?: { path?: string } }; settingsSchema?: unknown[] };
+      return { id: manifest.id, name: manifest.name, version: manifest.version, description: manifest.description, previewAsset: manifest.assets?.preview?.path ?? manifest.previewAsset, available: manifest.enabled, layout: manifest.layout, settingsSchema: manifest.settingsSchema ?? [] };
+    });
+  },
   async getWorkspace(storeId) {
     if (!supabasePool) {
       return {
@@ -477,7 +497,7 @@ const defaultStorefrontWorkspaceApi: StorefrontWorkspaceApi = {
     );
   },
 
-  async listTemplates(storeId) {
+  async listTemplates(storeId, type) {
     if (!supabasePool) {
       return [defaultHomeTemplate];
     }
@@ -497,9 +517,10 @@ const defaultStorefrontWorkspaceApi: StorefrontWorkspaceApi = {
             "updatedAt"
           FROM "StorefrontTemplate"
           WHERE "storeId" = $1
+            AND ($2::text IS NULL OR lower("type"::text) = $2)
           ORDER BY "createdAt"
         `,
-        [storeId],
+        [storeId, type ?? null],
       );
 
     return result.rows;
@@ -540,10 +561,52 @@ const defaultStorefrontWorkspaceApi: StorefrontWorkspaceApi = {
   },
 
   async createTemplate(
-    _storeId,
+    storeId,
     input,
   ) {
-    return input;
+    if (!supabasePool) {
+      return {
+        template: {
+          id: `template-${crypto.randomUUID()}`,
+          storeId,
+          revision: 0,
+          type: input.type,
+          handle: input.handle ?? "default",
+          name: input.name,
+          layout: input.layout,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        generation: 1,
+      };
+    }
+
+    const client = await supabasePool.connect();
+    try {
+      await client.query("BEGIN");
+      const templateId = `template-${crypto.randomUUID()}`;
+      const inserted = await client.query(
+        `INSERT INTO "StorefrontTemplate" ("id", "storeId", "type", "handle", "name", "layout", "revision", "createdAt", "updatedAt")
+         VALUES ($1, $2, $3::"StorefrontTemplateType", $4, $5, $6::jsonb, 0, NOW(), NOW())
+         RETURNING "id", "storeId", "revision", lower("type"::text) AS "type", "handle", "name", "layout", "createdAt", "updatedAt"`,
+        [templateId, storeId, input.type.toUpperCase(), input.handle ?? "default", input.name, JSON.stringify(input.layout)],
+      );
+      const workspace = await client.query(
+        `INSERT INTO "StorefrontWorkspace" ("storeId", "generation", "updatedAt")
+         VALUES ($1, 1, NOW())
+         ON CONFLICT ("storeId") DO UPDATE
+         SET "generation" = "StorefrontWorkspace"."generation" + 1, "updatedAt" = NOW()
+         RETURNING "generation"`,
+        [storeId],
+      );
+      await client.query("COMMIT");
+      return { template: inserted.rows[0], generation: Number(workspace.rows[0]?.generation ?? 1) };
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
   },
 
   async updateTemplate(
@@ -700,16 +763,50 @@ const defaultStorefrontWorkspaceApi: StorefrontWorkspaceApi = {
     };
   },
 
-  async getThemeConfiguration() {
-    return null;
+  async getThemeConfiguration(storeId) {
+    if (!supabasePool) return null;
+    const result = await supabasePool.query(
+      `SELECT "storeId", "revision", "themeId", "themeVersion", "settings", "draftArtifactId", "updatedAt"
+       FROM "ThemeConfiguration" WHERE "storeId" = $1`,
+      [storeId],
+    );
+    return result.rows[0] ?? null;
   },
 
   async saveThemeConfiguration(
-    _storeId,
-    _revision,
+    storeId,
+    revision,
     input,
   ) {
-    return input;
+    const resolved = resolveTheme(input.themeId, input.settings, input.themeVersion);
+    if (resolved.fallbackReason) throw new ApiError(422, "THEME_UNAVAILABLE", `Theme '${input.themeId}' is unavailable`);
+    const issues = validateThemeSettings(resolved.id, input.settings);
+    if (issues.length) throw new ApiError(422, "THEME_SETTINGS_INVALID", "Theme settings are invalid", issues);
+    const savedInput = { ...input, themeId: resolved.id, themeVersion: resolved.version, settings: resolved.settings };
+    if (!supabasePool) {
+      return { theme: { storeId, revision: revision === null ? 0 : revision + 1, themeId: savedInput.themeId, themeVersion: savedInput.themeVersion, settings: savedInput.settings, draftArtifactId: savedInput.draftArtifactId ?? null, updatedAt: new Date() }, generation: 1 };
+    }
+    const client = await supabasePool.connect();
+    try {
+      await client.query("BEGIN");
+      const current = await client.query(`SELECT "revision" FROM "ThemeConfiguration" WHERE "storeId" = $1 FOR UPDATE`, [storeId]);
+      const currentRevision = current.rows[0] ? Number(current.rows[0].revision) : null;
+      if (currentRevision !== revision) throw new ApiError(409, "STOREFRONT_REVISION_CONFLICT", "Theme settings were changed by another editor");
+      const saved = await client.query(
+        `INSERT INTO "ThemeConfiguration" ("storeId", "revision", "themeId", "themeVersion", "settings", "draftArtifactId", "updatedAt")
+         VALUES ($1, 0, $2, $3, $4::jsonb, $5, NOW())
+         ON CONFLICT ("storeId") DO UPDATE SET "revision" = "ThemeConfiguration"."revision" + 1, "themeId" = EXCLUDED."themeId", "themeVersion" = EXCLUDED."themeVersion", "settings" = EXCLUDED."settings", "draftArtifactId" = EXCLUDED."draftArtifactId", "updatedAt" = NOW()
+         RETURNING "storeId", "revision", "themeId", "themeVersion", "settings", "draftArtifactId", "updatedAt"`,
+        [storeId, savedInput.themeId, savedInput.themeVersion, JSON.stringify(savedInput.settings), savedInput.draftArtifactId ?? null],
+      );
+      const workspace = await client.query(
+        `INSERT INTO "StorefrontWorkspace" ("storeId", "generation", "updatedAt") VALUES ($1, 1, NOW())
+         ON CONFLICT ("storeId") DO UPDATE SET "generation" = "StorefrontWorkspace"."generation" + 1, "updatedAt" = NOW() RETURNING "generation"`, [storeId],
+      );
+      await client.query("COMMIT");
+      return { theme: saved.rows[0], generation: Number(workspace.rows[0]?.generation ?? 1) };
+    } catch (error) { await client.query("ROLLBACK"); throw error; }
+    finally { client.release(); }
   },
 
   async getAssignment() {
@@ -908,6 +1005,15 @@ function mountCommerceRoutes(
   }
 }
 
+function mountAdminRoutes(
+  app: Express,
+  services: { summary: AdminSummaryService; customers: CustomerService } | undefined,
+  authProvider: AuthProvider,
+): void {
+  if (!services) return;
+  app.use("/api/stores/:storeId", createAdminRouter(services, authProvider));
+}
+
 
 /* -------------------------------------------------------------------------- */
 /* Tenant routes                                                              */
@@ -947,6 +1053,10 @@ function mountCatalogRoutes(
   );
 
   if (supabasePool) {
+    app.use(
+      "/api/public/storefronts/:slug",
+      createPublicStoreBySlugRouter(supabasePool),
+    );
     app.use(
       "/api/public/stores/:storeId",
       createPublicStoreRouter(supabasePool),
@@ -1267,11 +1377,36 @@ export function createApp(
     dependencies.config ??
     loadConfig();
 
+  function buildDefaultAuthProvider(): AuthProvider {
+    if (config.authProvider === "firebase") {
+      if (!config.firebaseProjectId || !supabasePool) {
+        throw new Error(
+          "AUTH_PROVIDER=firebase requires JELLY_FIREBASE_PROJECT_ID and SUPABASE_DATABASE_URL",
+        );
+      }
+      return new FirebaseAuthProvider(
+        createFirebaseTokenVerifier(config.firebaseProjectId),
+        new PostgresTenantRepository(supabasePool),
+      );
+    }
+    if (config.authProvider === "supabase") {
+      if (!config.supabaseUrl || !config.supabaseAnonKey || !supabasePool) {
+        throw new Error(
+          "AUTH_PROVIDER=supabase requires SUPABASE_URL, SUPABASE_ANON_KEY, and SUPABASE_DATABASE_URL",
+        );
+      }
+      return new SupabaseAuthProvider(
+        config.supabaseUrl,
+        config.supabaseAnonKey,
+        new PostgresTenantRepository(supabasePool),
+      );
+    }
+    return new DevelopmentAuthProvider(config.demoStoreId);
+  }
+
   const authProvider =
     dependencies.authProvider ??
-    new DevelopmentAuthProvider(
-      config.demoStoreId,
-    );
+    buildDefaultAuthProvider();
 
   const storefrontRepository =
     dependencies.storefrontRepository ??
@@ -1316,7 +1451,88 @@ export function createApp(
 
   const catalogService =
     dependencies.catalogService ??
-    (supabasePool ? new CatalogService(new CatalogPostgresRepository(supabasePool)) as CatalogAdmin : undefined);
+    (supabasePool
+      ? (() => {
+          const catalogRepository = new CatalogPostgresRepository(supabasePool);
+          return new CatalogService(catalogRepository, catalogRepository) as CatalogAdmin;
+        })()
+      : undefined);
+
+  const tenantRepository =
+    dependencies.tenantRepository ??
+    (supabasePool ? new PostgresTenantRepository(supabasePool) : undefined);
+
+  // Auto-build Stripe / commerce dependencies when Stripe is configured and
+  // a database pool is available. Tests and integration harnesses can still
+  // override any of these by passing them explicitly in `dependencies`.
+  const stripeGateway: StripeGateway | undefined =
+    dependencies.stripeGateway ??
+    (config.stripe ? createStripeGateway(config) : undefined);
+
+  const commerceDatabase: CommerceDatabase | undefined =
+    supabasePool
+      ? postgresCommerceDatabase(supabasePool)
+      : undefined;
+
+  const commerceRepository =
+    commerceDatabase
+      ? new CommerceRepository(commerceDatabase)
+      : undefined;
+
+  const webhookSql: SqlExecutor | undefined =
+    dependencies.webhookSql ??
+    supabasePool;
+
+  const stripeAccountService: StripeAccountService | undefined =
+    dependencies.stripeAccountService ??
+    (stripeGateway && webhookSql
+      ? new StripeAccountService({
+          gateway: stripeGateway,
+          sql: webhookSql,
+          database: commerceDatabase,
+        })
+      : undefined);
+
+  const checkoutService: CheckoutService | undefined =
+    dependencies.checkoutService ??
+    (commerceRepository && stripeGateway && stripeAccountService && catalogService
+      ? new CheckoutService({
+          repository: commerceRepository,
+          catalog: catalogService,
+          stripeAccountService,
+          stripeGateway,
+        })
+      : undefined);
+
+  const merchantOrderService: MerchantOrderService | undefined =
+    dependencies.merchantOrderService ??
+    (commerceRepository && stripeGateway
+      ? new MerchantOrderService(commerceRepository, stripeGateway)
+      : undefined);
+
+  const adminServices = commerceRepository
+    ? {
+        summary: new AdminSummaryService(commerceRepository),
+        customers: new CustomerService(commerceRepository),
+      }
+    : undefined;
+
+  const reservationSweeper: ReservationSweeper | undefined =
+    dependencies.reservationSweeper ??
+    (commerceRepository && stripeGateway
+      ? new ReservationSweeper(commerceRepository, stripeGateway)
+      : undefined);
+
+  const commerceDeps = {
+    ...dependencies,
+    stripeGateway,
+    webhookSql,
+    checkoutService,
+    stripeAccountService,
+    merchantOrderService,
+    reservationSweeper,
+    tenantRepository,
+  };
 
   /* Base middleware */
   configureMiddleware(
@@ -1331,7 +1547,7 @@ export function createApp(
    */
   mountStripeWebhooks(
     app,
-    dependencies,
+    commerceDeps,
   );
 
   /* Normal JSON API parsing starts here. */
@@ -1343,37 +1559,43 @@ export function createApp(
 
   mountInternalRoutes(
     app,
-    dependencies,
+    commerceDeps,
     config,
   );
 
   mountTenantRoutes(
     app,
-    dependencies,
+    commerceDeps,
     authProvider,
   );
 
   mountCommerceRoutes(
     app,
-    dependencies,
+    commerceDeps,
+    authProvider,
+  );
+
+  mountAdminRoutes(
+    app,
+    adminServices,
     authProvider,
   );
 
   mountCatalogRoutes(
     app,
-    { ...dependencies, catalogService },
+    { ...commerceDeps, catalogService },
     authProvider,
   );
 
   mountContentRoutes(
     app,
-    dependencies,
+    commerceDeps,
     authProvider,
   );
 
   mountStorefrontRoutes(
     app,
-    dependencies,
+    commerceDeps,
     authProvider,
     storefrontService,
     publicStorefrontApi,

@@ -1,4 +1,4 @@
-import type { ThemeTokens } from "../types";
+import type { ThemeTokens } from "../types.js";
 
 export const freshMarketTokens: ThemeTokens = {
   colors: { primary: "#166534", background: "#f6f4df", text: "#15362a", surface: "#ffffff", accent: "#f97316" },

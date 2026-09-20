@@ -49,6 +49,51 @@ export interface ProductVariant {
   sku: string;
   priceMinor: number;
   stock: number;
+  options?: Record<string, string>;
+}
+
+export type ProductOptionKind = "variant" | "configuration" | "addon";
+export type ProductOptionDisplay = "buttons" | "dropdown" | "color" | "image";
+
+export interface ProductOptionValue {
+  id: string;
+  label: string;
+  priceAdjustmentMinor: number;
+  color?: string;
+  image?: string;
+  isDefault?: boolean;
+  position: number;
+}
+
+export interface ProductOption {
+  id: string;
+  name: string;
+  type: ProductOptionKind;
+  display: ProductOptionDisplay;
+  required: boolean;
+  position: number;
+  values: ProductOptionValue[];
+}
+
+export interface Category {
+  id: string;
+  storeId: string;
+  name: string;
+  slug: string;
+  parentId?: string;
+}
+
+export interface Brand { id: string; storeId: string; name: string; slug?: string; logo?: string; }
+export interface Collection { id: string; storeId: string; name: string; slug: string; }
+export interface CategoryOptionDefinition {
+  id: string;
+  storeId: string;
+  categoryId: string;
+  name: string;
+  optionKind: ProductOptionKind;
+  displayType: ProductOptionDisplay;
+  required: boolean;
+  position: number;
 }
 
 export interface Product {
@@ -63,6 +108,13 @@ export interface Product {
   archived: boolean;
   featured: boolean;
   variants: ProductVariant[];
+  brandId?: string;
+  primaryCategoryId?: string;
+  additionalCategoryIds?: string[];
+  collectionIds?: string[];
+  options?: ProductOption[];
+  inventoryOptionIds?: string[];
+  compareAtPriceMinor?: number;
 }
 
 export interface CustomerAddress {
@@ -90,7 +142,11 @@ export interface Customer extends CustomerInput {
 export interface CartItem {
   variantId: string;
   quantity: number;
+  configurationSelections?: ConfiguredOptionSelection[];
+  unitPriceMinor?: number;
 }
+
+export interface ConfiguredOptionSelection { optionId: string; valueId: string; }
 
 export interface Cart {
   id: string;
@@ -108,7 +164,10 @@ export interface OrderItem {
   imageUrl: string;
   unitPriceMinor: number;
   quantity: number;
+  configurationSelections?: OrderConfigurationSelection[];
 }
+
+export interface OrderConfigurationSelection { optionId: string; valueId: string; optionName: string; valueLabel: string; priceAdjustmentMinor: number; }
 
 export interface Order {
   id: string;
@@ -133,6 +192,11 @@ export interface ShopState {
   activeStoreId: string;
   stores: Store[];
   products: Product[];
+  categories: Category[];
+  brands: Brand[];
+  collections: Collection[];
+  categoryOptionDefinitions: CategoryOptionDefinition[];
+  recentCategoryIdsByStore?: Record<string, string[]>;
   customers: Customer[];
   carts: Cart[];
   orders: Order[];
@@ -171,4 +235,50 @@ export function slugify(value: string): string {
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
+}
+
+export function majorToMinor(value: string | number): number {
+  const text = String(value).trim();
+  if (!/^-?\d+(?:\.\d{0,2})?$/.test(text)) return Number.NaN;
+  const sign = text.startsWith("-") ? -1 : 1;
+  const unsigned = text.replace(/^-/, "");
+  const [whole, fraction = ""] = unsigned.split(".");
+  return sign * (Number(whole) * 100 + Number(fraction.padEnd(2, "0")));
+}
+
+export function minorToMajor(minor: number): string {
+  if (!Number.isFinite(minor)) return "0.00";
+  return (minor / 100).toFixed(2);
+}
+
+export function getCategoryAncestors(categoryId: string, categories: Category[]): Category[] {
+  const byId = new Map(categories.map((category) => [category.id, category]));
+  const result: Category[] = [];
+  const visited = new Set<string>();
+  let current = byId.get(categoryId);
+  while (current && !visited.has(current.id)) {
+    visited.add(current.id);
+    result.unshift(current);
+    current = current.parentId ? byId.get(current.parentId) : undefined;
+  }
+  return result;
+}
+
+export function getCategoryBreadcrumb(categoryId: string, categories: Category[], separator = " › "): string {
+  return getCategoryAncestors(categoryId, categories).map((category) => category.name).join(separator);
+}
+
+export function getCategoryChildren(categoryId: string | undefined, categories: Category[]): Category[] {
+  return categories.filter((category) => (category.parentId ?? undefined) === categoryId);
+}
+
+export function getEffectiveCategoryOptionDefinitions(categoryId: string, categories: Category[], definitions: CategoryOptionDefinition[]): CategoryOptionDefinition[] {
+  const ancestry = getCategoryAncestors(categoryId, categories);
+  const byName = new Map<string, CategoryOptionDefinition>();
+  ancestry.forEach((category) => {
+    definitions.filter((definition) => definition.categoryId === category.id).forEach((definition) => {
+      byName.set(definition.name.trim().toLowerCase(), definition);
+    });
+  });
+  return [...byName.values()].sort((a, b) => a.position - b.position || a.name.localeCompare(b.name));
 }

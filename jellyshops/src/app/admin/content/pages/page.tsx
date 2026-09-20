@@ -3,11 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { getDemoSession } from "@/features/store-editor/api/demo-session";
+import { useAuth } from "@/features/auth/auth-provider";
 import { createContentApi, type ContentTemplate, type PageResource, type TemplateAssignment } from "@/features/content/api";
 import { ResourceForm } from "@/features/content/resource-form";
-
-const storeId = "store-demo";
 
 function editable(page: PageResource) {
   return {
@@ -23,11 +21,13 @@ function editable(page: PageResource) {
 }
 
 export default function PagesAdminPage() {
-  const token = getDemoSession()?.token;
-  const api = useMemo(() => token ? createContentApi({
+  const { session, activeStore } = useAuth();
+  const storeId = activeStore?.id ?? "";
+  const token = session?.access_token;
+  const api = useMemo(() => (token && storeId) ? createContentApi({
     baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001",
     token,
-  }) : null, [token]);
+  }) : null, [token, storeId]);
   const [pages, setPages] = useState<PageResource[]>([]);
   const [templates, setTemplates] = useState<ContentTemplate[]>([]);
   const [activePageId, setActivePageId] = useState("");
@@ -35,7 +35,7 @@ export default function PagesAdminPage() {
   const [error, setError] = useState<string>();
 
   useEffect(() => {
-    if (!api) return;
+    if (!api || !storeId) return;
     let active = true;
     void Promise.all([api.listPages(storeId), api.listTemplates(storeId, "page")])
       .then(([nextPages, nextTemplates]) => {

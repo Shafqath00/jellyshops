@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ShopProvider } from "@/contexts/shop-context";
+import { AuthProvider } from "@/features/auth/auth-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,9 +20,9 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <body>
-        <ShopProvider>
-          {children}
-        </ShopProvider>
+        <AuthProvider>
+          <ShopProvider>{children}</ShopProvider>
+        </AuthProvider>
       </body>
     </html>
   );

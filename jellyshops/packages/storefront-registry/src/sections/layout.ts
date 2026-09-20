@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { SectionDefinition } from "../types";
+import type { SectionDefinition } from "../types.js";
 
 const allPages = ["home", "product", "collection", "cart", "search", "not-found"] as const;
 const empty = z.object({}).passthrough();

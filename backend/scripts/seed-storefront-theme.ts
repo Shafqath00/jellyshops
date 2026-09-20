@@ -1,7 +1,8 @@
 import { createDefaultStorefrontDocument } from "@jelly/storefront-schema";
 import { createSupabasePool } from "../src/database/client.js";
 
-const storeId = process.env.DEMO_STORE_ID ?? "store-demo";
+const storeId = process.env.STOREFRONT_STORE_ID;
+if (!storeId) throw new Error("STOREFRONT_STORE_ID is required");
 const document = createDefaultStorefrontDocument(storeId);
 const layout = { sections: document.regions.template.map((section) => ({ kind: "inline", section })) };
 const pool = createSupabasePool();

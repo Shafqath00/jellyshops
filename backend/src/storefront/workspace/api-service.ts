@@ -20,6 +20,10 @@ export class DefaultStorefrontWorkspaceApi implements StorefrontWorkspaceApi {
     private readonly assignments: AssignmentService,
   ) {}
 
+  listThemeCatalog(_storeId: string) {
+    return Promise.resolve([]);
+  }
+
   getWorkspace(storeId: string) {
     return this.workspace.getWorkspace(storeId);
   }
@@ -113,7 +117,7 @@ export class DefaultStorefrontWorkspaceApi implements StorefrontWorkspaceApi {
   saveThemeConfiguration(
     storeId: string,
     expectedRevision: number | null,
-    input: { themeId: string; settings: ThemeSettings; draftArtifactId?: string | null },
+    input: { themeId: string; themeVersion?: string; settings: ThemeSettings; draftArtifactId?: string | null },
   ) {
     return this.theme.saveThemeConfiguration(storeId, expectedRevision, input);
   }

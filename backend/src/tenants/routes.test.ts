@@ -9,7 +9,7 @@ import { createMerchantRouter } from "./routes.js";
 function setup() {
   const auth: AuthProvider = {
     verify: vi.fn().mockResolvedValue({
-      userId: 42,
+      userId: "user-42",
       storeIds: [],
       storeRoles: {},
     }),
@@ -42,10 +42,10 @@ describe("merchant routes", () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
-      merchantId: 42,
+      merchantId: "user-42",
       stores: [{ id: "store-a", name: "A", slug: "a-store", currency: "USD", country: "US", role: "OWNER" }],
     });
-    expect(tenants.listStores).toHaveBeenCalledWith(42);
+    expect(tenants.listStores).toHaveBeenCalledWith("user-42");
   });
 
   it("lists stores through the same authenticated merchant", async () => {
@@ -55,7 +55,7 @@ describe("merchant routes", () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ stores: [] });
-    expect(tenants.listStores).toHaveBeenCalledWith(42);
+    expect(tenants.listStores).toHaveBeenCalledWith("user-42");
   });
 
   it("creates a native owner store from a strict validated request", async () => {
@@ -78,7 +78,7 @@ describe("merchant routes", () => {
 
     expect(response.status).toBe(201);
     expect(response.body.store).toMatchObject({ id: "store-new", role: "OWNER" });
-    expect(tenants.createStore).toHaveBeenCalledWith(42, {
+    expect(tenants.createStore).toHaveBeenCalledWith("user-42", {
       name: "Jelly Goods",
       slug: "jelly-goods",
       currency: "USD",
@@ -105,7 +105,7 @@ describe("merchant routes", () => {
 
   it("rejects an invalid principal identifier before tenant access", async () => {
     const { app, auth, tenants, authed } = setup();
-    vi.mocked(auth.verify).mockResolvedValue({ userId: 0, storeIds: [], storeRoles: {} });
+    vi.mocked(auth.verify).mockResolvedValue({ userId: "", storeIds: [], storeRoles: {} });
 
     const response = await request(app).get("/api/stores").set(authed());
 

@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowUpRight,
@@ -10,42 +9,34 @@ import {
   Plus,
   TriangleAlert,
 } from "lucide-react";
-import { useShop } from "@/contexts/shop-context";
-import { formatMoney } from "@/lib/domain";
+import { useCallback, useMemo } from "react";
+import { authApiOrigin, useAuth } from "@/features/auth/auth-provider";
+import { createAdminApi } from "@/features/admin/api";
+import { useAdminQuery } from "@/features/admin/use-admin-query";
 import { OrderStatusBadge } from "@/components/order-status";
+import type { OrderStatus } from "@/lib/domain";
+
+function getCustomerName(snapshot?: Record<string, unknown> | null) {
+  const name = snapshot?.name;
+  return typeof name === "string" && name.trim() ? name.trim() : "Customer";
+}
+
+function formatMoney(amountMinor: number, currency: string) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency,
+  }).format(amountMinor / 100);
+}
 
 export default function DashboardPage() {
-  const { state, repository } = useShop();
-
-  const store = state.stores.find(
-    (item) => item.id === state.activeStoreId
-  )!;
-
-  const products = state.products.filter(
-    (product) => product.storeId === store.id && !product.archived
-  );
-
-  const orders = repository.listOrders(store.id);
-
-  const needsAttention = orders.filter(
-    (order) => !["DELIVERED", "CANCELLED"].includes(order.status)
-  );
-
-  const revenue = orders
-    .filter(
-      (order) =>
-        order.paymentStatus === "PAID" &&
-        order.status !== "CANCELLED"
-    )
-    .reduce((sum, order) => sum + order.totalMinor, 0);
-
-  const lowStock = products.filter((product) =>
-    product.variants.some((variant) => variant.stock <= 3)
-  );
-
-  const publishedProducts = products.filter(
-    (product) => product.published
-  );
+  const { session, activeStore } = useAuth();
+  const api = useMemo(() => session ? createAdminApi({ baseUrl: authApiOrigin(), token: session.access_token }) : null, [session]);
+  const load = useCallback((_signal: AbortSignal) => api!.getSummary(activeStore!.id), [api, activeStore]);
+  const query = useAdminQuery(api && activeStore ? `summary:${activeStore.id}` : null, load);
+  if (query.loading) return <div className="admin-page"><div className="form-card">Loading dashboard…</div></div>;
+  if (query.error || !query.data || !activeStore) return <div className="admin-page"><div className="form-card" role="alert">{query.error?.message ?? "Dashboard unavailable"}<button className="button button-secondary" onClick={query.retry}>Retry</button></div></div>;
+  const store = activeStore;
+  const { actionableOrders: needsAttention, revenueMinor: revenue, orderCount, publishedProductCount, lowStock } = query.data;
 
   return (
     <div className="space-y-6">
@@ -147,8 +138,8 @@ export default function DashboardPage() {
               </p>
 
               <p className="mt-1 text-[11px] text-[#8c9196]">
-                Across {orders.length}{" "}
-                {orders.length === 1 ? "order" : "orders"}
+                Across {orderCount}{" "}
+                {orderCount === 1 ? "order" : "orders"}
               </p>
             </div>
 
@@ -188,7 +179,7 @@ export default function DashboardPage() {
               </p>
 
               <p className="mt-2 text-[24px] font-semibold tracking-[-0.025em] text-[#202223]">
-                {publishedProducts.length}
+                {publishedProductCount}
               </p>
 
               <p className="mt-1 text-[11px] text-[#8c9196]">
@@ -231,41 +222,42 @@ export default function DashboardPage() {
 
           {needsAttention.length > 0 ? (
             <div className="divide-y divide-[#eeeeee]">
-              {needsAttention.slice(0, 4).map((order) => (
-                <Link
-                  href={`/admin/orders/${order.id}`}
-                  key={order.id}
-                  className="group grid min-h-[68px] grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3 px-5 transition-colors hover:bg-[#fafafa] sm:grid-cols-[36px_minmax(0,1fr)_auto_auto]"
-                >
-                  <span className="grid size-9 place-items-center rounded-full bg-[#f1f1f1] text-[12px] font-semibold text-[#454f5b]">
-                    {order.customerSnapshot.name
-                      .slice(0, 1)
-                      .toUpperCase()}
-                  </span>
+              {needsAttention.slice(0, 4).map((order) => {
+                const customerName = getCustomerName(order.customerSnapshot);
 
-                  <div className="min-w-0">
-                    <p className="truncate text-[13px] font-semibold text-[#303030]">
-                      {order.customerSnapshot.name}
-                    </p>
+                return (
+                  <Link
+                    href={`/admin/orders/${order.id}`}
+                    key={order.id}
+                    className="group grid min-h-[68px] grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3 px-5 transition-colors hover:bg-[#fafafa] sm:grid-cols-[36px_minmax(0,1fr)_auto_auto]"
+                  >
+                    <span className="grid size-9 place-items-center rounded-full bg-[#f1f1f1] text-[12px] font-semibold text-[#454f5b]">
+                      {customerName.charAt(0).toUpperCase()}
+                    </span>
 
-                    <p className="mt-0.5 truncate text-[11px] text-[#8c9196]">
-                      {order.number} · {order.items.length}{" "}
-                      {order.items.length === 1 ? "item" : "items"}
-                    </p>
-                  </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-[13px] font-semibold text-[#303030]">
+                        {customerName}
+                      </p>
 
-                  <div className="hidden sm:block">
-                    <OrderStatusBadge status={order.status} />
-                  </div>
+                      <p className="mt-0.5 truncate text-[11px] text-[#8c9196]">
+                        {order.number}
+                      </p>
+                    </div>
 
-                  <strong className="text-right text-[12px] font-semibold text-[#303030]">
-                    {formatMoney(
-                      order.totalMinor,
-                      order.currency
-                    )}
-                  </strong>
-                </Link>
-              ))}
+                    <div className="hidden sm:block">
+                      <OrderStatusBadge status={order.status as OrderStatus} />
+                    </div>
+
+                    <strong className="text-right text-[12px] font-semibold text-[#303030]">
+                      {formatMoney(
+                        order.totalMinor,
+                        order.currency
+                      )}
+                    </strong>
+                  </Link>
+                );
+              })}
             </div>
           ) : (
             <div className="grid min-h-[220px] place-items-center px-6 py-10 text-center">
@@ -310,45 +302,32 @@ export default function DashboardPage() {
 
           {lowStock.length > 0 ? (
             <div className="divide-y divide-[#eeeeee]">
-              {lowStock.slice(0, 5).map((product) => {
-                const variant =
-                  product.variants.find(
-                    (item) => item.stock <= 3
-                  ) ?? product.variants[0];
+              {lowStock.slice(0, 5).map((item) => (
+                <Link
+                  href={`/admin/products/${item.productId}`}
+                  key={item.variantId}
+                  className="group flex min-h-[68px] items-center gap-3 px-5 transition-colors hover:bg-[#fafafa]"
+                >
+                  <span className="grid size-10 shrink-0 place-items-center rounded-lg border border-[#e3e3e3] bg-[#f7f7f7] text-[#6d7175]">
+                    <Boxes size={18} />
+                  </span>
 
-                return (
-                  <Link
-                    href={`/admin/products/${product.id}`}
-                    key={product.id}
-                    className="group flex min-h-[68px] items-center gap-3 px-5 transition-colors hover:bg-[#fafafa]"
-                  >
-                    <span className="relative size-10 shrink-0 overflow-hidden rounded-lg border border-[#e3e3e3] bg-[#f7f7f7]">
-                      <Image
-                        src={product.imageUrl}
-                        alt=""
-                        fill
-                        sizes="40px"
-                        className="object-cover"
-                      />
-                    </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] font-semibold text-[#303030]">
+                      {item.title}
+                    </p>
 
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[13px] font-semibold text-[#303030]">
-                        {product.name}
-                      </p>
+                    <p className="mt-0.5 truncate text-[11px] text-[#8c9196]">
+                      {item.sku ?? "No SKU"}
+                    </p>
+                  </div>
 
-                      <p className="mt-0.5 truncate text-[11px] text-[#8c9196]">
-                        {variant?.sku ?? "No SKU"}
-                      </p>
-                    </div>
-
-                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#fff4e5] px-2 py-1 text-[10px] font-semibold text-[#8a6116]">
-                      <TriangleAlert size={11} strokeWidth={2} />
-                      {variant?.stock ?? 0} left
-                    </span>
-                  </Link>
-                );
-              })}
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#fff4e5] px-2 py-1 text-[10px] font-semibold text-[#8a6116]">
+                    <TriangleAlert size={11} strokeWidth={2} />
+                    {item.quantity} left
+                  </span>
+                </Link>
+              ))}
             </div>
           ) : (
             <div className="grid min-h-[220px] place-items-center px-6 py-10 text-center">

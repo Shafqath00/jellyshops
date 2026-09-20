@@ -5,13 +5,15 @@
   "license": "ISC",
   "author": "",
   "type": "module",
-  "main": "dist/server.js",
+  "main": "dist/functions.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build:storefront-schema": "npm --prefix ../jellyshops/packages/storefront-schema run build",
-    "build": "npm run build:storefront-schema && tsc",
-    "start": "node index.js",
-    "pretest": "npm run build:storefront-schema",
+    "build:storefront-registry": "npm --prefix ../jellyshops/packages/storefront-registry run build",
+    "build:storefront-themes": "npm --prefix ../jellyshops/packages/storefront-themes run build",
+    "build": "npm run build:storefront-schema && npm run build:storefront-registry && npm run build:storefront-themes && tsc",
+    "start": "node dist/server.js",
+    "pretest": "npm run build:storefront-schema && npm run build:storefront-registry && npm run build:storefront-themes",
     "test": "vitest run",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:start": "node scripts/verify-built-server.mjs",
@@ -20,7 +22,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@jelly/storefront-schema": "file:../jellyshops/packages/storefront-schema",
+    "@jelly/storefront-schema": "file:./jelly-storefront-schema-0.1.0.tgz",
+    "@jelly/storefront-themes": "file:./jelly-storefront-themes-0.1.0.tgz",
     "@supabase/supabase-js": "^2.116.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -28,8 +31,10 @@
     "express-rate-limit": "^8.7.0",
     "file-type": "^22.0.2",
     "firebase-admin": "^14.3.0",
+    "firebase-functions": "^7.0.0",
     "multer": "^2.3.0",
     "pg": "^8.23.0",
+    "react": "^19.3.0",
     "sharp": "^0.35.4",
     "stripe": "22.6.2",
     "zod": "^4.5.4"
@@ -47,5 +52,10 @@
     "tsx": "^4.23.13",
     "typescript": "^7.0.2",
     "vitest": "^4.1.11"
+  },
+  "overrides": {
+    "@jelly/storefront-themes": "file:./jelly-storefront-themes-0.1.0.tgz",
+    "@jelly/storefront-schema": "file:./jelly-storefront-schema-0.1.0.tgz",
+    "@jelly/storefront-registry": "file:./jelly-storefront-registry-0.1.0.tgz"
   }
 }

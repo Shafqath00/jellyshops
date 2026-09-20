@@ -7,7 +7,10 @@ import type {
   OnboardingLinkDto,
   StripeAccountStatusDto,
 } from "./types.js";
-import type { StripeConnectedAccountRow } from "../../commerce/repository.js";
+import type {
+  CommerceDatabase,
+  StripeConnectedAccountRow,
+} from "../../commerce/repository.js";
 import type { SqlExecutor } from "../../commerce/repository.js";
 
 /** Stable idempotency key for account creation, scoped to this store's first creation attempt. */
@@ -59,16 +62,32 @@ function disconnectedDto(): StripeAccountStatusDto {
   return { connected: false, checkoutReady: false, closed: false };
 }
 
+function isInaccessibleAccountError(error: unknown): boolean {
+  const candidate = error as {
+    statusCode?: number;
+    code?: string;
+    type?: string;
+  };
+
+  return (
+    candidate.statusCode === 403 ||
+    candidate.statusCode === 404 ||
+    candidate.code === "account_not_found" ||
+    candidate.type === "StripePermissionError"
+  );
+}
+
 export interface StripeAccountServiceDeps {
   gateway: StripeGateway;
   sql: SqlExecutor;
+  database?: CommerceDatabase;
 }
 
 export class StripeAccountService {
   private readonly repo: StripeAccountRepository;
 
   constructor(private readonly deps: StripeAccountServiceDeps) {
-    this.repo = new StripeAccountRepository(deps.sql);
+    this.repo = new StripeAccountRepository(deps.sql, deps.database);
   }
 
   /** Ensures a connected account exists for the store; never creates duplicates. */
@@ -113,15 +132,48 @@ export class StripeAccountService {
       country: input.country,
     });
 
-    const idempotencyKey = `stripe-account-link-${input.storeId}-${Date.now()}`;
-    const link = await this.deps.gateway.createAccountLink(
-      {
-        connectedAccountId: account.stripeAccountId,
-        returnUrl: input.returnUrl,
-        refreshUrl: input.refreshUrl,
-      },
-      idempotencyKey,
-    );
+    let connectedAccountId = account.stripeAccountId;
+    let link: { url: string };
+
+    try {
+      link = await this.deps.gateway.createAccountLink(
+        {
+          connectedAccountId,
+          returnUrl: input.returnUrl,
+          refreshUrl: input.refreshUrl,
+        },
+        `stripe-account-link-${input.storeId}-${Date.now()}`,
+      );
+    } catch (error) {
+      if (!isInaccessibleAccountError(error)) throw error;
+
+      // The local row can outlive a Stripe platform credential change. Create
+      // a replacement under the currently configured platform and reattach it
+      // to this store instead of repeatedly onboarding the inaccessible ID.
+      const replacement = await this.deps.gateway.createAccountV2(
+        {
+          storeId: input.storeId,
+          displayName: input.displayName,
+          country: input.country,
+        },
+        `${accountCreationKey(input.storeId)}-replacement-${Date.now()}`,
+      );
+      const replacementState = mapAccountState(replacement);
+      const stored = await this.repo.replaceForStore({
+        storeId: input.storeId,
+        stripeAccountId: replacement.id,
+        ...replacementState,
+      });
+      connectedAccountId = stored.stripeAccountId;
+      link = await this.deps.gateway.createAccountLink(
+        {
+          connectedAccountId,
+          returnUrl: input.returnUrl,
+          refreshUrl: input.refreshUrl,
+        },
+        `stripe-account-link-${input.storeId}-${Date.now()}`,
+      );
+    }
 
     // Account Link return does NOT mean onboarding is complete.
     // Only capability state determines readiness.
@@ -147,11 +199,18 @@ export class StripeAccountService {
     return this.repo.markClosed(stripeAccountId);
   }
 
-  /** Returns current status DTO for a store (using the local read model). */
+  /** Returns current status DTO, refreshing the local read model from Stripe first. */
   async getStatus(storeId: string): Promise<StripeAccountStatusDto> {
     const row = await this.repo.findByStoreId(storeId);
     if (!row) return disconnectedDto();
-    return toStatusDto(row);
+    try {
+      return toStatusDto(await this.syncAccount(row.stripeAccountId));
+    } catch (error) {
+      if (isInaccessibleAccountError(error)) return disconnectedDto();
+
+      // Keep the last known state available if Stripe is temporarily unreachable.
+      return toStatusDto(row);
+    }
   }
 
   /** Retrieves the live Accounts v2 state, synchronizes local model, and returns
@@ -160,7 +219,12 @@ export class StripeAccountService {
     const row = await this.repo.findByStoreId(storeId);
     if (!row || row.closedAt !== null) return false;
 
-    const synced = await this.syncAccount(row.stripeAccountId);
-    return synced.cardPaymentsStatus === "active" && synced.closedAt === null;
+    try {
+      const synced = await this.syncAccount(row.stripeAccountId);
+      return synced.cardPaymentsStatus === "active" && synced.closedAt === null;
+    } catch (error) {
+      if (isInaccessibleAccountError(error)) return false;
+      throw error;
+    }
   }
 }

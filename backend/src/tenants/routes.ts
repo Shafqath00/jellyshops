@@ -12,8 +12,8 @@ const createStoreSchema = z.object({
   country: z.string().regex(/^[A-Z]{2}$/),
 }).strict();
 
-function merchantId(value: number | undefined): number {
-  if (typeof value !== "number" || !Number.isSafeInteger(value) || value <= 0) {
+function merchantId(value: string | undefined): string {
+  if (typeof value !== "string" || value.trim() === "") {
     throw new ApiError(500, "PRINCIPAL_INVALID", "The authenticated merchant identity is invalid");
   }
   return value;

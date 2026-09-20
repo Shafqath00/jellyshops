@@ -1,9 +1,9 @@
 import type { PageType, SectionNode } from "@jelly/storefront-schema";
-import { blockDefinitions } from "./blocks";
-import { commerceSections } from "./sections/commerce";
-import { contentSections } from "./sections/content";
-import { layoutSections } from "./sections/layout";
-import type { RegistryValidationIssue, SectionDefinition } from "./types";
+import { blockDefinitions } from "./blocks.js";
+import { commerceSections } from "./sections/commerce.js";
+import { contentSections } from "./sections/content.js";
+import { layoutSections } from "./sections/layout.js";
+import type { RegistryValidationIssue, SectionDefinition } from "./types.js";
 
 const sections: SectionDefinition[] = [...layoutSections, ...contentSections, ...commerceSections].map((definition) => ({
   ...definition,

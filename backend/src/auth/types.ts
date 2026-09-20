@@ -1,7 +1,7 @@
 import type { StoreRole } from "../tenants/types.js";
 
 export interface MerchantPrincipal {
-  userId: number;
+  userId: string;
   storeIds: string[];
   storeRoles: Record<string, StoreRole>;
 }

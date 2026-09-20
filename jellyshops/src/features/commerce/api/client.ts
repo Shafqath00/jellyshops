@@ -88,6 +88,7 @@ export function createCommerceApi({ baseUrl, fetch: fetcher = fetch }: CommerceC
   }
   return {
     getPublicStore: (storeId: string) => request<{ store: PublicStoreDetails }>(`/api/public/stores/${encodeURIComponent(storeId)}`),
+    getPublicStoreBySlug: (slug: string) => request<{ store: PublicStoreDetails }>(`/api/public/storefronts/${encodeURIComponent(slug)}`),
     getPublicCatalog: async (storeId: string) => {
       const response = await request<PublicCatalogResponse>(`/api/public/stores/${encodeURIComponent(storeId)}/catalog/products?limit=100`);
       return response.nodes.map(catalogProductToStorefrontProduct);

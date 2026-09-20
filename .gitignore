@@ -2,6 +2,7 @@
 .env
 **/.env
 !.env.example
+.firebaserc
 
 # Dependencies and build output
 node_modules/

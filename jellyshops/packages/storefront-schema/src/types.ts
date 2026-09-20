@@ -1,4 +1,5 @@
-export type ThemeId = "minimal" | "classic" | "bold" | "elegant" | "playful" | "fresh-market" | "artisan-boutique";
+/** Theme IDs are validated by the canonical manifest registry at runtime. */
+export type ThemeId = string;
 
 export type PageType = "home" | "product" | "collection" | "cart" | "search" | "not-found";
 

@@ -35,6 +35,15 @@ const createProductSchema = z.object({
   tags: z.array(z.string().trim().min(1)).optional(),
   status: productStatusSchema.optional(),
   variants: z.array(variantSchema.omit({ id: true })).optional(),
+  primaryCategoryId: z.string().min(1).nullable().optional(),
+  additionalCategoryIds: z.array(z.string().min(1)).optional(),
+  brandId: z.string().min(1).nullable().optional(),
+  collectionIds: z.array(z.string().min(1)).optional(),
+  options: z.array(z.unknown()).optional(),
+  inventoryOptionIds: z.array(z.string().min(1)).optional(),
+  categoryMetadata: z.unknown().nullable().optional(),
+  brandMetadata: z.unknown().nullable().optional(),
+  collectionMetadata: z.array(z.unknown()).optional(),
 });
 const updateProductSchema = createProductSchema.partial().extend({
   variants: z.array(variantSchema).optional(),

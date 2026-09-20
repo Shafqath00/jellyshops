@@ -8,7 +8,6 @@ function setup() {
   const config = loadConfig({ NODE_ENV: "test",
     STRIPE_SECRET_KEY: `rk_test_${randomBytes(24).toString("hex")}`,
     STRIPE_ACCOUNTS_V2_VERSION: "2026-08-26.dahlia",
-    STRIPE_CARD_PAYMENT_METHOD_CONFIGURATION_ID: "pmc_cards",
     STRIPE_ACCOUNTS_V2_WEBHOOK_SECRET: randomBytes(24).toString("hex"),
     STRIPE_CONNECT_PAYMENTS_WEBHOOK_SECRET: randomBytes(24).toString("hex"),
     SCHEDULER_SECRET: randomBytes(32).toString("hex"),
@@ -77,7 +76,7 @@ describe("Stripe server gateway", () => {
     expect(include).toEqual(expect.arrayContaining(["configuration.merchant", "requirements", "future_requirements"]));
   });
 
-  it("sends direct charges in merchant context with persisted idempotency, metadata, and card configuration", async () => {
+  it("sends direct charges in merchant context with persisted idempotency and metadata", async () => {
     const { gateway, requests } = setup();
     await gateway.createDirectPaymentIntent({ amount: 1299, currency: "usd", orderId: "order-1",
       checkoutAttemptId: "attempt-1" }, context);
@@ -85,7 +84,7 @@ describe("Stripe server gateway", () => {
     expect(requests[0].headers.get("stripe-account")).toBe("acct_merchant");
     expect(requests[0].headers.get("idempotency-key")).toBe("persisted-attempt-key");
     expect(Object.fromEntries(new URLSearchParams(requests[0].body))).toEqual({
-      amount: "1299", currency: "usd", payment_method_configuration: "pmc_cards",
+      amount: "1299", currency: "usd",
       "metadata[jelly_order_id]": "order-1", "metadata[jelly_checkout_attempt_id]": "attempt-1",
     });
   });

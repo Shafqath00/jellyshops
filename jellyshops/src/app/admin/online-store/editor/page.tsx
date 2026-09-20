@@ -20,20 +20,24 @@ import type {
   GlobalSettings,
   ThemeId,
 } from "@jelly/storefront-schema";
-import { resolveDesignTokens } from "@jelly/storefront-themes";
+import { resolveDesignTokens, resolveTheme } from "@jelly/storefront-themes";
 import { expandRuntimeTemplate } from "@/features/storefront/resource-loader";
 import { createStoreEditorApi } from "@/features/store-editor/api/client";
-import { getDemoSession } from "@/features/store-editor/api/demo-session";
+import { useAuth } from "@/features/auth/auth-provider";
 import type {
   DemoCatalog,
   DynamicSourceDescriptor,
   GlobalSectionRecord,
   SectionPresetRecord,
   StorefrontTemplateRecord,
+  ThemeCatalogEntry,
+  ThemeConfigurationRecord,
   WorkspaceRecord,
 } from "@/features/store-editor/api/types";
 import { GlobalSectionPanel } from "@/features/store-editor/components/global-section-panel";
+import { ThemedStorefrontShell } from "@/components/storefront-shell";
 import { SettingGroups } from "@/features/store-editor/components/inspector/setting-groups";
+import { ThemeSettingsPanel } from "@/features/store-editor/components/inspector/theme-settings-panel";
 import { PublishControls } from "@/features/store-editor/components/publish-controls";
 import { PublishDiagnostics } from "@/features/store-editor/components/publish-diagnostics";
 import { SectionLibrary } from "@/features/store-editor/components/section-library";
@@ -47,12 +51,13 @@ import {
   appendGlobalPlacement,
   appendInlineSection,
   detachGlobalPlacement,
+  movePlacement,
   removeInlineSection,
   replaceInlineWithGlobal,
+  setInlineSectionEnabled,
   updateInlineSection,
 } from "@/features/store-editor/template-layout";
 
-const backendStoreId = "store-demo";
 type HierarchyRegion = "header" | "template" | "footer";
 
 const sectionCategoryLabels = {
@@ -63,6 +68,19 @@ const sectionCategoryLabels = {
 
 function displayName(value: string): string {
   return value.split("-").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+}
+
+function setThemeSetting(settings: Record<string, unknown>, path: string, value: unknown): Record<string, unknown> {
+  const result = structuredClone(settings);
+  const keys = path.split(".");
+  let current = result;
+  keys.slice(0, -1).forEach((key) => {
+    const next = current[key];
+    current[key] = next && typeof next === "object" && !Array.isArray(next) ? structuredClone(next) : {};
+    current = current[key] as Record<string, unknown>;
+  });
+  current[keys[keys.length - 1]!] = value;
+  return result;
 }
 
 function normalizeBlock(value: unknown): SectionNode["blocks"][number] | null {
@@ -152,12 +170,13 @@ function resourceOptions(
 }
 
 export default function OnlineStoreEditorPage() {
-  const session = getDemoSession();
-  const token = session?.token;
-  const api = useMemo(() => token ? createStoreEditorApi({
+  const { session, activeStore } = useAuth();
+  const backendStoreId = activeStore?.id ?? "";
+  const token = session?.access_token;
+  const api = useMemo(() => (token && backendStoreId) ? createStoreEditorApi({
     baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001",
     token,
-  }) : null, [token]);
+  }) : null, [token, backendStoreId]);
   const [handoff] = useState(() => typeof window === "undefined" ? {} : parseEditorNavigationTarget(window.location.search));
 
   const [workspace, setWorkspace] = useState<WorkspaceRecord | null>(null);
@@ -166,6 +185,8 @@ export default function OnlineStoreEditorPage() {
   const [presets, setPresets] = useState<SectionPresetRecord[]>([]);
   const [dynamicSources, setDynamicSources] = useState<DynamicSourceDescriptor[]>([]);
   const [catalog, setCatalog] = useState<DemoCatalog>({ products: [], collections: [] });
+  const [themeCatalog, setThemeCatalog] = useState<ThemeCatalogEntry[]>([]);
+  const [themeConfiguration, setThemeConfiguration] = useState<ThemeConfigurationRecord | null>(null);
   const [activeTemplateId, setActiveTemplateId] = useState("");
   const [previewResourceId, setPreviewResourceId] = useState<string | undefined>(handoff.resourceId);
   const [selection, setSelection] = useState<EditorSelection>(null);
@@ -177,6 +198,8 @@ export default function OnlineStoreEditorPage() {
   const [libraryRegion, setLibraryRegion] = useState<HierarchyRegion>();
   const [blockPickerSectionId, setBlockPickerSectionId] = useState<string>();
   const [saveState, setSaveState] = useState<"saved" | "saving" | "error">("saved");
+  const [themeSaveState, setThemeSaveState] = useState<"saved" | "saving" | "error">("saved");
+  const [themeSaveError, setThemeSaveError] = useState<string>();
 
   useEffect(() => {
     if (!api) return;
@@ -187,13 +210,17 @@ export default function OnlineStoreEditorPage() {
       api.listGlobalSections(backendStoreId),
       api.listPresets(backendStoreId),
       api.listCatalog(),
-    ]).then(([nextWorkspace, nextTemplates, nextGlobals, nextPresets, nextCatalog]) => {
+      api.listThemeCatalog(backendStoreId),
+      api.getThemeConfiguration(backendStoreId),
+    ]).then(([nextWorkspace, nextTemplates, nextGlobals, nextPresets, nextCatalog, nextThemeCatalog, nextThemeConfiguration]) => {
       if (!active) return;
       setWorkspace(nextWorkspace);
       setTemplates(nextTemplates);
       setGlobals(nextGlobals);
       setPresets(nextPresets);
       setCatalog(nextCatalog);
+      setThemeCatalog(nextThemeCatalog);
+      setThemeConfiguration(nextThemeConfiguration);
       setActiveTemplateId((current) => {
         if (current) return current;
         if (handoff.templateId && nextTemplates.some((template) => template.id === handoff.templateId)) return handoff.templateId;
@@ -204,20 +231,17 @@ export default function OnlineStoreEditorPage() {
       setLoadError(error instanceof Error ? error.message : "Unable to load the Online Store workspace");
     });
     return () => { active = false; };
-  }, [api, handoff]);
+  }, [api, backendStoreId, handoff]);
 
   const activeTemplate = templates.find((template) => template.id === activeTemplateId);
   const previewThemeStyle = useMemo(() => {
-    const theme = activeTemplate?.layout.theme;
-    if (!theme || typeof theme !== "object" || Array.isArray(theme)) return undefined;
-    const input = theme as Record<string, unknown>;
-    if (input.id !== "fresh-market" && input.id !== "artisan-boutique") return undefined;
-    if (!input.settings || typeof input.settings !== "object" || Array.isArray(input.settings)) return undefined;
-    return resolveDesignTokens(input.id as ThemeId, input.settings as GlobalSettings);
-  }, [activeTemplate]);
+    const resolved = resolveTheme(themeConfiguration?.themeId, themeConfiguration?.settings ?? {}, themeConfiguration?.themeVersion);
+    return resolveDesignTokens(resolved.id as ThemeId, resolved.settings as unknown as GlobalSettings);
+  }, [themeConfiguration]);
 
   useEffect(() => {
     if (!api || !activeTemplate) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clear stale controls when the selected template disappears.
       setDynamicSources([]);
       return;
     }
@@ -227,7 +251,7 @@ export default function OnlineStoreEditorPage() {
       .then((sources) => { if (active) setDynamicSources(sources); })
       .catch(() => { if (active) setDynamicSources([]); });
     return () => { active = false; };
-  }, [api, activeTemplate?.type]);
+  }, [api, activeTemplate, backendStoreId]);
 
   const validGlobals = useMemo(
     () => globals.filter((global): global is GlobalSectionRecord => Boolean(global?.id)),
@@ -282,7 +306,8 @@ export default function OnlineStoreEditorPage() {
   }, [activeTemplate, libraryRegion]);
   const blockPickerSection = sections.find((section) => section.id === blockPickerSectionId);
   const blockPickerDefinition = blockPickerSection ? getSectionDefinition(blockPickerSection.type) : undefined;
-  const toolsOpen = Boolean(libraryRegion || blockPickerSectionId || localSection || activeGlobalId);
+  const selectedTheme = themeCatalog.find((theme) => theme.id === themeConfiguration?.themeId);
+  const toolsOpen = Boolean(libraryRegion || blockPickerSectionId || localSection || activeGlobalId || selection?.kind === "theme");
 
   const commerce = useMemo<CommerceDataProvider>(() => ({
     async getProducts() {
@@ -298,6 +323,7 @@ export default function OnlineStoreEditorPage() {
 
   useEffect(() => {
     if (previewResources.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset an invalid resource selection after template changes.
       setPreviewResourceId(undefined);
       return;
     }
@@ -322,6 +348,31 @@ export default function OnlineStoreEditorPage() {
       setSaveState("saved");
     } catch {
       setSaveState("error");
+    }
+  };
+
+  const persistThemeSetting = async (path: string, value: unknown) => {
+    if (!api || !themeConfiguration || themeSaveState === "saving") return;
+    const previous = themeConfiguration;
+    const settings = setThemeSetting(previous.settings, path, value);
+    setThemeConfiguration({ ...previous, settings });
+    setThemeSaveState("saving");
+    setThemeSaveError(undefined);
+    try {
+      const result = await api.saveThemeConfiguration(backendStoreId, previous.revision, {
+        themeId: previous.themeId,
+        themeVersion: previous.themeVersion,
+        settings,
+        draftArtifactId: previous.draftArtifactId ?? null,
+      });
+      setThemeConfiguration(result.theme);
+      setWorkspace((current) => current ? { ...current, generation: result.generation } : current);
+      setPreviewSnapshot(undefined);
+      setThemeSaveState("saved");
+    } catch (error) {
+      setThemeConfiguration(previous);
+      setThemeSaveState("error");
+      setThemeSaveError(error instanceof Error ? error.message : "Unable to save theme settings.");
     }
   };
 
@@ -357,6 +408,16 @@ export default function OnlineStoreEditorPage() {
     if (!activeTemplate || !localSection) return;
     await persistLayout(removeInlineSection(activeTemplate.layout, localSection.id));
     setSelection(null);
+  };
+
+  const moveSelectedPlacement = async (id: string, direction: "up" | "down") => {
+    if (!activeTemplate) return;
+    await persistLayout(movePlacement(activeTemplate.layout, id, direction));
+  };
+
+  const toggleSection = async (id: string, enabled: boolean) => {
+    if (!activeTemplate) return;
+    await persistLayout(setInlineSectionEnabled(activeTemplate.layout, id, enabled));
   };
 
   const insertGlobal = async (globalSectionId: string) => {
@@ -437,8 +498,24 @@ export default function OnlineStoreEditorPage() {
     return <main className="grid min-h-[70vh] place-items-center p-8 text-center"><div><h1 className="text-xl font-semibold">Could not load Online Store</h1><p className="mt-2 text-sm text-[#b42318]">{loadError}</p></div></main>;
   }
 
-  if (!workspace || !activeTemplate) {
+  if (!workspace) {
     return <main className="grid min-h-[70vh] place-items-center text-[13px] text-[#616161]" aria-live="polite">Loading Online Store editor…</main>;
+  }
+
+  if (templates.length === 0) {
+    return (
+      <main className="grid min-h-[70vh] place-items-center p-8 text-center">
+        <div>
+          <h1 className="text-xl font-semibold">No theme installed</h1>
+          <p className="mt-2 text-sm text-[#6d7175]">Please choose a template from the Online Store overview to get started.</p>
+          <Link href="/admin/online-store" className="mt-4 inline-block text-sm font-semibold text-[#315e24] hover:underline">Go to Online Store</Link>
+        </div>
+      </main>
+    );
+  }
+
+  if (!activeTemplate) {
+    return <main className="grid min-h-[70vh] place-items-center text-[13px] text-[#616161]" aria-live="polite">Loading template…</main>;
   }
 
   return (
@@ -484,6 +561,7 @@ export default function OnlineStoreEditorPage() {
 
       <div className="grid min-h-0 flex-1 grid-cols-[320px_minmax(0,1fr)]">
         <div className={clsx("col-start-1 row-start-1 min-h-0 border-r border-[#e3e3e3] bg-white", toolsOpen && "hidden")}>
+          <button type="button" onClick={() => { setSelection({ kind: "theme" }); setActiveGlobalId(undefined); }} className="m-2 flex min-h-9 w-[calc(100%-1rem)] items-center rounded-lg px-3 text-left text-[12px] font-semibold text-[#454f5b] hover:bg-[#f6f6f7]">Theme settings</button>
           <TemplateHierarchy
             template={activeTemplate}
             globalSections={globalLabels}
@@ -493,6 +571,8 @@ export default function OnlineStoreEditorPage() {
             onGlobalSelect={(globalId) => { setActiveGlobalId(globalId); setSelection(null); }}
             onAddSection={(region) => { setLibraryRegion(region); setBlockPickerSectionId(undefined); }}
             onAddBlock={(sectionId) => { setBlockPickerSectionId(sectionId); setLibraryRegion(undefined); }}
+            onMove={(id, direction) => { void moveSelectedPlacement(id, direction); }}
+            onToggle={(id, enabled) => { void toggleSection(id, enabled); }}
           />
         </div>
 
@@ -504,6 +584,7 @@ export default function OnlineStoreEditorPage() {
             viewport === "tablet" && "max-w-[820px]",
             viewport === "mobile" && "max-w-[390px]",
           )} data-testid="preview-viewport" data-viewport={viewport} style={previewThemeStyle}>
+            <ThemedStorefrontShell themeId={themeConfiguration?.themeId} settings={themeConfiguration?.settings ?? {}} store={{ name: activeStore?.name ?? "Your store", slug: activeStore?.slug ?? "store" }} navigation={[{ label: "Home", href: "#home" }, { label: "Shop", href: "#shop" }]} cartCount={0} cart={null} onCartOpen={() => undefined}>
             {renderedSections.map((section) => (
               <RegistrySectionRenderer
                 key={section.id}
@@ -511,6 +592,7 @@ export default function OnlineStoreEditorPage() {
                 mode={previewSnapshot ? "preview" : "editor"}
                 commerce={commerce}
                 region="template"
+                themeId={themeConfiguration?.themeId}
                 selected={previewSnapshot ? undefined : selection ?? undefined}
                 onSelect={previewSnapshot ? undefined : (next) => {
                   setActiveGlobalId(undefined);
@@ -520,10 +602,19 @@ export default function OnlineStoreEditorPage() {
               />
             ))}
             {renderedSections.length === 0 && <div className="grid min-h-[360px] place-items-center p-8 text-center text-sm text-[#8c9196]">This template has no sections yet.</div>}
+            </ThemedStorefrontShell>
           </div>
         </main>
 
         <aside className={clsx("col-start-1 row-start-1 min-h-0 overflow-y-auto border-r border-[#e3e3e3] bg-white", !toolsOpen && "hidden")} aria-label="Section tools">
+          {selection?.kind === "theme" && <ThemeSettingsPanel
+            schema={selectedTheme?.settingsSchema ?? []}
+            settings={themeConfiguration?.settings ?? {}}
+            saving={themeSaveState === "saving"}
+            error={themeSaveError}
+            upload={(file, onProgress) => api.uploadMedia(backendStoreId, file, onProgress)}
+            onChange={(path, value) => { void persistThemeSetting(path, value); }}
+          />}
           {diagnostics.length > 0 && <div className="border-b border-[#eeeeee] p-3">
             <PublishDiagnostics diagnostics={diagnostics} onOpen={openDiagnostic} />
           </div>}
@@ -602,12 +693,12 @@ export default function OnlineStoreEditorPage() {
             </>
           )}
 
-          {!localSection && !libraryRegion && !blockPickerSectionId && <div className="px-6 py-12 text-center"><LayoutPanelTop className="mx-auto text-[#b4a8c9]" size={28} /><p className="mt-3 text-[13px] font-semibold">Select a section to edit</p><p className="mt-1 text-[11px] leading-5 text-[#8c9196]">Choose a section or content block from the left panel, or add a new section.</p></div>}
+          {!localSection && selection?.kind !== "theme" && !libraryRegion && !blockPickerSectionId && <div className="px-6 py-12 text-center"><LayoutPanelTop className="mx-auto text-[#b4a8c9]" size={28} /><p className="mt-3 text-[13px] font-semibold">Select a section to edit</p><p className="mt-1 text-[11px] leading-5 text-[#8c9196]">Choose a section or content block from the left panel, or add a new section.</p></div>}
 
-          {!libraryRegion && !blockPickerSectionId && <div className="border-y border-[#eeeeee] px-4 py-3">
+          {selection?.kind !== "theme" && !libraryRegion && !blockPickerSectionId && <div className="border-y border-[#eeeeee] px-4 py-3">
             <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#8c9196]">Global sections</p>
           </div>}
-          {!libraryRegion && !blockPickerSectionId && <GlobalSectionPanel
+          {selection?.kind !== "theme" && !libraryRegion && !blockPickerSectionId && <GlobalSectionPanel
             globalSections={globalOptions}
             localSection={localSection ?? undefined}
             attachedGlobalId={activeGlobalId}

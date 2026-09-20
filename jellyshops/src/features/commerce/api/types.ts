@@ -1,7 +1,7 @@
 export interface CommerceAttemptInput {
   cartKey: string;
   currency: string;
-  items: Array<{ variantId: string; quantity: number }>;
+  items: Array<{ variantId: string; quantity: number; configurationSelections?: Array<{ optionId: string; valueId: string; optionName?: string; valueLabel?: string; priceAdjustmentMinor?: number }> }>;
   customerSnapshot: Record<string, unknown>;
   deliverySnapshot?: Record<string, unknown>;
 }
@@ -53,6 +53,7 @@ export interface MerchantOrderItem {
   skuSnapshot: string | null;
   imageSnapshot: string | null;
   unitPriceMinor: number;
+  configurationSnapshot?: Array<{ optionId: string; valueId: string; optionName: string; valueLabel: string; priceAdjustmentMinor: number }>;
   quantity: number;
 }
 

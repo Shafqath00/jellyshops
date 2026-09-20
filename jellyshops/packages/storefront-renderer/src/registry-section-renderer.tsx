@@ -5,6 +5,7 @@ import {
 } from "./render-registry";
 import { createStorefrontRuntimeContext } from "./runtime-context";
 import type { CommerceDataProvider, RendererMode, RendererSelection } from "./types";
+import { getThemeDefinition, DEFAULT_THEME_ID } from "@jelly/storefront-themes";
 
 export function RegistrySectionRenderer({
   section,
@@ -14,6 +15,7 @@ export function RegistrySectionRenderer({
   selected,
   onSelect,
   registry = defaultSectionRenderRegistry,
+  themeId,
 }: {
   section: SectionNode;
   mode: RendererMode;
@@ -22,10 +24,12 @@ export function RegistrySectionRenderer({
   selected?: RendererSelection | null;
   onSelect?: (selection: RendererSelection) => void;
   registry?: SectionRenderRegistry;
+  themeId?: string;
 }) {
   if (!section.enabled) return null;
 
-  const RenderComponent = registry.get(section.type);
+  const override = (id: string) => { try { return getThemeDefinition(id).sectionOverrides[section.type]; } catch { return undefined; } };
+  const RenderComponent = override(themeId ?? DEFAULT_THEME_ID) ?? override(DEFAULT_THEME_ID) ?? registry.get(section.type);
   const context = createStorefrontRuntimeContext({ mode, region, commerce });
   const content = RenderComponent
     ? <RenderComponent section={section} mode={mode} commerce={commerce} context={context} />

@@ -41,13 +41,9 @@ export default function StoreHomePage() {
   const { storeSlug } = useParams<{ storeSlug: string }>();
   const { repository } = useShop();
   const store = repository.getStoreBySlug(storeSlug);
-  const storeId = store?.id;
-  // The local commerce seed and the editor workspace deliberately use different IDs.
-  // A deployed shop should provide its database ID; the demo maps its public slug here.
-  const editorStoreId = process.env.NEXT_PUBLIC_DEMO_STOREFRONT_ID
-    ?? (storeSlug === "sweet-bakes" ? "store-demo" : storeId);
+  const editorStoreId = store?.id;
   const localPublication = store ? repository.getPublishedStoreDesign(store.id) : null;
-  const fallbackStoreId = store?.id ?? "store-demo";
+  const fallbackStoreId = store?.id ?? storeSlug;
   const fallbackDocument = useMemo<StorefrontDocument | null>(
     () => localPublication ? migrateStorefrontDocument(localPublication.document, fallbackStoreId) : null,
     [localPublication, fallbackStoreId],
