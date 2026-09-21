@@ -107,6 +107,15 @@ function reader(resource: PublicStorefrontResource | null): PublicResourceReader
 }
 
 describe("resolveStorefrontRoute", () => {
+  it("resolves Cart through its default template without a resource assignment", async () => {
+    const current = snapshot();
+    current.templates["cart-default"] = { id: "cart-default", type: "cart", handle: "default", layout: { sections: [] } };
+    current.templateDefaults.cart = "cart-default";
+
+    await expect(resolveStorefrontRoute(current, { type: "cart" }, reader(null)))
+      .resolves.toMatchObject({ status: "ready", context: { pageType: "cart", resource: null }, template: { id: "cart-default" } });
+  });
+
   it("resolves home through its default template with named global regions", async () => {
     const result = await resolveStorefrontRoute(snapshotWithGlobalLayout(), { type: "home" }, reader(null));
 

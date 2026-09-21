@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import type { MediaReference, SectionNode } from "@jelly/storefront-schema";
 import { StorefrontContainer } from "@jelly/storefront-ui";
+import type { StorefrontRuntimeContext } from "../runtime-context";
 
 function stringSetting(settings: Record<string, unknown>, key: string, fallback = ""): string {
   const value = settings[key];
@@ -79,9 +80,12 @@ export function JournalTeaserSection({ section }: { section: SectionNode }) {
   </StorefrontContainer></section>;
 }
 
-export function CartSummarySection({ section }: { section: SectionNode }) {
+export function CartSummarySection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
   const content = copy(section, "Your bag");
-  return <section className="jelly-section jelly-cart-summary"><StorefrontContainer><div className="jelly-cart-card"><div><h1>{content.heading}</h1><p>{content.body || "Your selected pieces will appear here when you add them to your bag."}</p></div><a className="jelly-button" href={content.href}>Continue shopping</a></div></StorefrontContainer></section>;
+  const lines = context?.page?.pageType === "cart" && Array.isArray(context.page.data?.lines) ? context.page.data.lines as Array<{ id: string; name: string; quantity: number; total: string; onDecrease?: () => void; onIncrease?: () => void }> : [];
+  const subtotal = context?.page?.pageType === "cart" && typeof context.page.data?.subtotal === "string" ? context.page.data.subtotal : undefined;
+  const checkoutHref = context?.page?.pageType === "cart" && typeof context.page.data?.checkoutHref === "string" ? context.page.data.checkoutHref : undefined;
+  return <section className="jelly-section jelly-cart-summary"><StorefrontContainer><div className="jelly-cart-card"><div><h1>{content.heading}</h1><p>{content.body || "Your selected pieces will appear here when you add them to your bag."}</p></div>{lines.length ? <div>{lines.map((line) => <div key={line.id}><span>{line.name}</span><button type="button" onClick={line.onDecrease}>−</button><span>{line.quantity}</span><button type="button" onClick={line.onIncrease}>+</button><strong>{line.total}</strong></div>)}<p>Subtotal: {subtotal}</p>{checkoutHref && <a className="jelly-button" href={checkoutHref}>Checkout</a>}</div> : <a className="jelly-button" href={content.href}>Continue shopping</a>}</div></StorefrontContainer></section>;
 }
 
 export function SearchResultsSection({ section }: { section: SectionNode }) {

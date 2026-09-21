@@ -75,6 +75,19 @@ describe("registry-driven section rendering", () => {
     expect(screen.getByText("No products are available in this collection yet.")).toBeInTheDocument();
   });
 
+  it("renders live Cart data and delegates quantity mutations to the runtime context", () => {
+    const onDecrease = vi.fn();
+    const onIncrease = vi.fn();
+    render(<RegistrySectionRenderer section={section("cart-summary")} mode="published" commerce={commerce} page={{ pageType: "cart", resource: null, data: { lines: [{ id: "line-1", name: "Lemon cake · Default", quantity: 2, total: "$20", onDecrease, onIncrease }], subtotal: "$20", checkoutHref: "/shop/checkout" } }} />);
+
+    expect(screen.getByText("Lemon cake · Default")).toBeInTheDocument();
+    expect(screen.getByText("Subtotal: $20")).toBeInTheDocument();
+    screen.getAllByRole("button")[0]?.click();
+    screen.getAllByRole("button")[1]?.click();
+    expect(onDecrease).toHaveBeenCalledOnce();
+    expect(onIncrease).toHaveBeenCalledOnce();
+  });
+
   it("keeps unsupported-section diagnostics in editor/preview but not published", () => {
     const registry = new SectionRenderRegistry();
     const { rerender } = render(

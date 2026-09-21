@@ -22,6 +22,7 @@ export interface PublicResourceReader {
 
 export type StorefrontRouteRequest =
   | { type: "home" }
+  | { type: "cart" }
   | { type: PublicResourceType; handle: string };
 
 export type ResolvedStorefrontRoute =
@@ -40,6 +41,7 @@ export type ResolvedStorefrontRoute =
 
 export type StorefrontPageContext =
   | { pageType: "home"; resource: null }
+  | { pageType: "cart"; resource: null; data?: Record<string, unknown> }
   | { pageType: PublicResourceType; resource: PublicStorefrontResource };
 
 export interface ResolvedStorefrontLayout {
@@ -165,6 +167,14 @@ export async function resolveStorefrontRoute(
     if (!template) return { status: "not-found", reason: "template" };
     const layout = expandRuntimeLayout(snapshot, template);
     return { status: "ready", context: { pageType: "home", resource: null }, resource: null, template, sections: layout.template, layout };
+  }
+
+  if (route.type === "cart") {
+    const templateId = snapshot.templateDefaults.cart;
+    const template = templateId ? snapshot.templates[templateId] : undefined;
+    if (!template || template.type !== "cart") return { status: "not-found", reason: "template" };
+    const layout = expandRuntimeLayout(snapshot, template);
+    return { status: "ready", context: { pageType: "cart", resource: null }, resource: null, template, sections: layout.template, layout };
   }
 
   const resource = await reader.findByHandle(route.type, route.handle);
