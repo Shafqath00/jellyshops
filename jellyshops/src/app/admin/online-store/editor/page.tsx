@@ -10,7 +10,7 @@ import {
   getSectionDefinition,
   listSectionDefinitions,
 } from "@jelly/storefront-registry";
-import { RegistrySectionRenderer, type CommerceDataProvider } from "@jelly/storefront-renderer";
+import { RegistrySectionRenderer, type CommerceDataProvider, type StorefrontPageContext } from "@jelly/storefront-renderer";
 import type {
   CompilationDiagnostic,
   CompilationDiagnosticLocation,
@@ -21,7 +21,7 @@ import type {
   ThemeId,
 } from "@jelly/storefront-schema";
 import { resolveDesignTokens, resolveTheme } from "@jelly/storefront-themes";
-import { expandRuntimeTemplate } from "@/features/storefront/resource-loader";
+import { expandRuntimeLayout } from "@/features/storefront/resource-loader";
 import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import { useAuth } from "@/features/auth/auth-provider";
 import type {
@@ -35,7 +35,6 @@ import type {
   WorkspaceRecord,
 } from "@/features/store-editor/api/types";
 import { GlobalSectionPanel } from "@/features/store-editor/components/global-section-panel";
-import { ThemedStorefrontShell } from "@/components/storefront-shell";
 import { SettingGroups } from "@/features/store-editor/components/inspector/setting-groups";
 import { ThemeSettingsPanel } from "@/features/store-editor/components/inspector/theme-settings-panel";
 import { PublishControls } from "@/features/store-editor/components/publish-controls";
@@ -293,7 +292,11 @@ export default function OnlineStoreEditorPage() {
   const selectedControls = selectedBlock ? blockDefinition?.controls ?? [] : sectionDefinition?.controls ?? [];
   const selectedSettings = selectedBlock?.settings ?? localSection?.settings ?? {};
   const compiledTemplate = activeTemplate && previewSnapshot ? previewSnapshot.templates[activeTemplate.id] : undefined;
-  const renderedSections = compiledTemplate && previewSnapshot ? expandRuntimeTemplate(previewSnapshot, compiledTemplate) : sections;
+  const previewLayout = compiledTemplate && previewSnapshot ? expandRuntimeLayout(previewSnapshot, compiledTemplate) : { announcement: [], header: [], template: sections, footer: [] };
+  const selectedPreviewProduct = activeTemplate?.type === "product" ? catalog.products.find((product) => product.id === previewResourceId) ?? catalog.products[0] : undefined;
+  const previewPageContext: StorefrontPageContext = selectedPreviewProduct
+    ? { pageType: "product", resource: { id: selectedPreviewProduct.id, handle: selectedPreviewProduct.slug, data: { title: selectedPreviewProduct.name, product: selectedPreviewProduct } } }
+    : { pageType: "home", resource: null };
   const builtInSections = useMemo(() => {
     if (!activeTemplate || !libraryRegion) return [];
     return listSectionDefinitions()
@@ -586,8 +589,7 @@ export default function OnlineStoreEditorPage() {
             viewport === "tablet" && "max-w-[820px]",
             viewport === "mobile" && "max-w-[390px]",
           )} data-testid="preview-viewport" data-viewport={viewport} style={previewThemeStyle}>
-            <ThemedStorefrontShell themeId={themeConfiguration?.themeId} settings={themeConfiguration?.settings ?? {}} store={{ name: activeStore?.name ?? "Your store", slug: activeStore?.slug ?? "store" }} navigation={[{ label: "Home", href: "#home" }, { label: "Shop", href: "#shop" }]} cartCount={0} cart={null} onCartOpen={() => undefined}>
-            {renderedSections.map((section) => (
+            {[...previewLayout.announcement, ...previewLayout.header, ...previewLayout.template, ...previewLayout.footer].map((section) => (
               <RegistrySectionRenderer
                 key={section.id}
                 section={section as unknown as RegistrySection}
@@ -595,6 +597,7 @@ export default function OnlineStoreEditorPage() {
                 commerce={commerce}
                 region="template"
                 themeId={themeConfiguration?.themeId}
+                page={previewPageContext}
                 selected={previewSnapshot ? undefined : selection ?? undefined}
                 onSelect={previewSnapshot ? undefined : (next) => {
                   setActiveGlobalId(undefined);
@@ -603,8 +606,7 @@ export default function OnlineStoreEditorPage() {
                 }}
               />
             ))}
-            {renderedSections.length === 0 && <div className="grid min-h-[360px] place-items-center p-8 text-center text-sm text-[#8c9196]">This template has no sections yet.</div>}
-            </ThemedStorefrontShell>
+            {previewLayout.template.length === 0 && <div className="grid min-h-[360px] place-items-center p-8 text-center text-sm text-[#8c9196]">This template has no sections yet.</div>}
           </div>
         </main>
 
