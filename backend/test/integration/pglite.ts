@@ -8,6 +8,8 @@ const schemaMigrations = [
   "20260913200000_add_media_metadata.sql",
   "20260913210000_add_canonical_catalog.sql",
   "20260914000000_add_storefront_workspace.sql",
+  "20260914010000_compile_storefront_publications.sql",
+  "20260922000000_v4_publication_activation.sql",
 ] as const;
 
 export type IntegrationDatabase = PGlite;
