@@ -4,6 +4,14 @@ The production Stripe Connect deployment and verification procedure is documente
 
 Run `npm run typecheck`, `npm run build`, and `npm test` before deployment. Apply SQL migrations in order and run the reservation sweeper every minute with `SCHEDULER_SECRET`.
 
+## V4 storefront publication lifecycle
+
+V4 storefront state has four strict boundaries. **Draft** is the mutable SQL workspace for a store. **Preview** compiles that persisted draft without saving or activating a publication. **Publish** compiles the requested draft generation, saves an immutable snapshot, and only then moves the store's active publication pointer. **Public** follows that pointer and serves only the active immutable snapshot; it never falls back to draft state.
+
+Publication rows and `Store.currentPublicationId` are SQL-backed. A restarted application rebuilds its process-local read cache from SQL and continues serving the same active publication while later draft generations remain private.
+
+Workspace and publication identity is `storeId` only. This milestone does not introduce installed-theme or multi-theme publication identity. Built-in resource-field dynamic bindings compile locally, but custom-data metafield and metaobject bindings still require an injected dynamic-source service; SQL-backed custom-data definition loading is not part of this milestone.
+
 ## Firebase Cloud Functions
 
 The compiled `api` export in `src/functions.ts` is the Firebase HTTP entrypoint (`dist/functions.js`). It wraps the existing Express application; local development still uses `src/server.ts` and `npm run dev`.
