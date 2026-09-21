@@ -118,6 +118,12 @@ import {
   createStorefrontCompilerRouter,
   type StorefrontCompilerApi,
 } from "./storefront/compiler/routes.js";
+import type {
+  CompilerDynamicSourceResolver,
+} from "./storefront/compiler/types.js";
+import {
+  createLocalV4CompilationService,
+} from "./storefront/local-v4-compilation.js";
 import {
   createDefaultStorefrontDocument,
   storefrontDocumentValidator,
@@ -129,12 +135,24 @@ import {
   createStorefrontPublicationRouter,
   type StorefrontPublicationApi,
 } from "./storefront/publication/routes.js";
+import {
+  CompiledStorefrontPublicationService,
+  type StorefrontCompilerPublisherApi,
+} from "./storefront/publication/service.js";
+import {
+  SqlCompiledPublicationRepository,
+} from "./storefront/publication/sql-repository.js";
 import type {
   StorefrontRepository,
 } from "./storefront/repository.js";
 import {
   createStorefrontRouter,
+  type PublicStorefrontApi,
 } from "./storefront/routes.js";
+import {
+  ImmutablePublicationCache,
+  StorefrontRuntimeService,
+} from "./storefront/runtime/service.js";
 import {
   DefaultStorefrontService,
   type DocumentValidator,
@@ -192,6 +210,8 @@ export interface AppDependencies {
   documentValidator: DocumentValidator<unknown>;
   storefrontWorkspaceApi: StorefrontWorkspaceApi;
   storefrontCompilerApi: StorefrontCompilerApi;
+  storefrontSql: SqlExecutor;
+  storefrontDynamicSourceResolver: CompilerDynamicSourceResolver;
   storefrontPublicationApi: StorefrontPublicationApi;
   publicStorefrontApi: PublicStorefrontApi;
 
@@ -203,16 +223,6 @@ export interface AppDependencies {
   reservationSweeper?: ReservationSweeper;
   merchantOrderService?: MerchantOrderService;
 }
-
-export interface PublicStorefrontApi {
-  load(
-    storeId: string,
-  ): Promise<{
-    id: string;
-    document: StorefrontDocument;
-  }>;
-}
-
 
 /* -------------------------------------------------------------------------- */
 /* Database                                                                   */
@@ -352,22 +362,22 @@ export function publicDocumentFromTemplate(
   const inlineSections =
     Array.isArray(source?.sections)
       ? source.sections.flatMap(
-          (placement) => {
-            const item =
-              asRecord(placement);
+        (placement) => {
+          const item =
+            asRecord(placement);
 
-            if (item?.kind !== "inline") {
-              return [];
-            }
+          if (item?.kind !== "inline") {
+            return [];
+          }
 
-            const parsed =
-              asSection(item.section);
+          const parsed =
+            asSection(item.section);
 
-            return parsed
-              ? [parsed]
-              : [];
-          },
-        )
+          return parsed
+            ? [parsed]
+            : [];
+        },
+      )
       : [];
 
   const templateSections =
@@ -394,68 +404,14 @@ export function publicDocumentFromTemplate(
       (page) =>
         page.type === "home"
           ? {
-              ...page,
-              sections:
-                templateSections,
-            }
+            ...page,
+            sections:
+              templateSections,
+          }
           : page,
     ),
   };
 }
-
-
-/* -------------------------------------------------------------------------- */
-/* Default public storefront API                                              */
-/* -------------------------------------------------------------------------- */
-
-const defaultPublicStorefrontApi: PublicStorefrontApi = {
-  async load(storeId) {
-    const templateId = "essentials";
-    if (!supabasePool) {
-      return {
-        id: `publication-${storeId}`,
-        document: createStorefrontTemplate(templateId, storeId),
-      };
-    }
-
-    const result =
-      await supabasePool.query(
-        `
-          SELECT
-            "id",
-            "revision",
-            "layout"
-          FROM "StorefrontTemplate"
-          WHERE "storeId" = $1
-            AND lower("type"::text) = 'home'
-          ORDER BY "updatedAt" DESC
-          LIMIT 1
-        `,
-        [storeId],
-      );
-
-    const template =
-      result.rows[0];
-
-    if (!template) {
-      return {
-        id: `publication-${storeId}`,
-        document: createStorefrontTemplate(templateId, storeId),
-      };
-    }
-
-    return {
-      id:
-        `template-${template.id}-r${template.revision}`,
-
-      document:
-        publicDocumentFromTemplate(
-          storeId,
-          template.layout,
-        ),
-    };
-  },
-};
 
 
 /* -------------------------------------------------------------------------- */
@@ -852,7 +808,12 @@ function configureMiddleware(
 
   app.use(
     cors({
-      origin: config.corsOrigins,
+      // `CORS_ORIGINS=*` is intentionally supported for local/testing
+      // deployments. The cors package reflects the request origin when
+      // `origin: true`, which also keeps Authorization preflights working.
+      origin: config.corsOrigins.includes("*")
+        ? true
+        : config.corsOrigins,
     }),
   );
 }
@@ -1160,126 +1121,29 @@ function mountStorefrontRoutes(
   storefrontService: DefaultStorefrontService<unknown>,
   publicStorefrontApi: PublicStorefrontApi,
 ): void {
-  app.post(
-    "/api/stores/:storeId/storefront/publish",
-    requireMerchant(authProvider),
-    requireStorePermission(
-      "storefront:edit",
+  // Public + legacy explicit routes first.
+  //
+  // This router no longer has router-wide auth, so routes it doesn't
+  // recognize safely fall through to the routers below.
+  app.use(
+    "/api/stores/:storeId/storefront",
+    createStorefrontRouter(
+      storefrontService,
+      publicStorefrontApi,
+      authProvider,
     ),
-    async (
-      request,
-      response,
-      next,
-    ) => {
-      try {
-        const storeId =
-          request.storeContext!.storeId;
-
-        const generation =
-          Number(
-            request.body
-              ?.expectedGeneration ??
-              0,
-          );
-
-        if (supabasePool) {
-          await supabasePool.query(
-            `
-              UPDATE "StorefrontWorkspace"
-              SET
-                "generation" =
-                  GREATEST(
-                    "generation",
-                    $1
-                  ),
-                "updatedAt" = NOW()
-              WHERE "storeId" = $2
-            `,
-            [
-              generation,
-              storeId,
-            ],
-          );
-        }
-
-        response.json({
-          ok: true,
-
-          publication: {
-            id:
-              `publication-${storeId}-${generation}`,
-            storeId,
-            sourceGeneration:
-              generation,
-          },
-
-          diagnostics: [],
-        });
-      } catch (error) {
-        next(error);
-      }
-    },
-  );
-
-  for (const path of [
-    "validate",
-    "preview/compile",
-  ]) {
-    app.post(
-      `/api/stores/:storeId/storefront/${path}`,
-      requireMerchant(
-        authProvider,
-      ),
-      requireStorePermission(
-        "storefront:view",
-      ),
-      (_request, response) => {
-        response.json({
-          ok: true,
-          diagnostics: [],
-          dependencies: {},
-        });
-      },
-    );
-  }
-
-  app.get(
-    "/api/stores/:storeId/storefront/public",
-    async (
-      request,
-      response,
-      next,
-    ) => {
-      try {
-        const storeId =
-          String(
-            request.params.storeId,
-          );
-
-        const result =
-          await publicStorefrontApi.load(
-            storeId,
-          );
-
-        response.json(result);
-      } catch (error) {
-        next(error);
-      }
-    },
   );
 
   app.use(
     "/api/stores/:storeId/storefront",
     createStorefrontWorkspaceRouter(
       deps.storefrontWorkspaceApi ??
-        defaultStorefrontWorkspaceApi,
+      defaultStorefrontWorkspaceApi,
       authProvider,
     ),
   );
 
-  if (
-    deps.storefrontCompilerApi
-  ) {
+  if (deps.storefrontCompilerApi) {
     app.use(
       "/api/stores/:storeId/storefront",
       createStorefrontCompilerRouter(
@@ -1287,11 +1151,39 @@ function mountStorefrontRoutes(
         authProvider,
       ),
     );
+  } else {
+    app.post(
+      "/api/stores/:storeId/storefront/validate",
+      requireMerchant(authProvider),
+      requireStorePermission("storefront:view"),
+      (_request, response) => {
+        response.status(503).json({
+          error: {
+            code: "STOREFRONT_COMPILER_NOT_CONFIGURED",
+            message:
+              "Storefront compiler is not configured.",
+          },
+        });
+      },
+    );
+
+    app.post(
+      "/api/stores/:storeId/storefront/preview/compile",
+      requireMerchant(authProvider),
+      requireStorePermission("storefront:view"),
+      (_request, response) => {
+        response.status(503).json({
+          error: {
+            code: "STOREFRONT_COMPILER_NOT_CONFIGURED",
+            message:
+              "Storefront compiler is not configured.",
+          },
+        });
+      },
+    );
   }
 
-  if (
-    deps.storefrontPublicationApi
-  ) {
+  if (deps.storefrontPublicationApi) {
     app.use(
       "/api/stores/:storeId/storefront",
       createStorefrontPublicationRouter(
@@ -1299,15 +1191,23 @@ function mountStorefrontRoutes(
         authProvider,
       ),
     );
+  } else {
+    app.post(
+      "/api/stores/:storeId/storefront/publish",
+      requireMerchant(authProvider),
+      requireStorePermission("storefront:publish"),
+      (_request, response) => {
+        response.status(503).json({
+          error: {
+            code:
+              "STOREFRONT_PUBLICATION_NOT_CONFIGURED",
+            message:
+              "Storefront publication service is not configured.",
+          },
+        });
+      },
+    );
   }
-
-  app.use(
-    "/api/stores/:storeId/storefront",
-    createStorefrontRouter(
-      storefrontService,
-      authProvider,
-    ),
-  );
 }
 
 
@@ -1425,10 +1325,6 @@ export function createApp(
       createDefaultStorefrontDocument,
     );
 
-  const publicStorefrontApi =
-    dependencies.publicStorefrontApi ??
-    defaultPublicStorefrontApi;
-
   const mediaRepository =
     dependencies.mediaRepository ??
     new LocalJsonMediaRepository(
@@ -1453,9 +1349,9 @@ export function createApp(
     dependencies.catalogService ??
     (supabasePool
       ? (() => {
-          const catalogRepository = new CatalogPostgresRepository(supabasePool);
-          return new CatalogService(catalogRepository, catalogRepository) as CatalogAdmin;
-        })()
+        const catalogRepository = new CatalogPostgresRepository(supabasePool);
+        return new CatalogService(catalogRepository, catalogRepository) as CatalogAdmin;
+      })()
       : undefined);
 
   const tenantRepository =
@@ -1483,25 +1379,84 @@ export function createApp(
     dependencies.webhookSql ??
     supabasePool;
 
+  const storefrontSql: SqlExecutor | undefined =
+    dependencies.storefrontSql ??
+    supabasePool;
+
+  const storefrontCompilerApi =
+    dependencies.storefrontCompilerApi ??
+    (storefrontSql
+      ? createLocalV4CompilationService(
+        storefrontSql,
+        dependencies.storefrontDynamicSourceResolver ??
+          dependencies.dynamicSourceRegistry,
+      )
+      : undefined);
+
+  let composedStorefrontPublicationApi: StorefrontPublicationApi | undefined;
+  let composedPublicStorefrontApi: PublicStorefrontApi | undefined;
+
+  if (
+    dependencies.storefrontSql &&
+    storefrontCompilerApi &&
+    (!dependencies.storefrontPublicationApi || !dependencies.publicStorefrontApi)
+  ) {
+    const publications = new SqlCompiledPublicationRepository(
+      dependencies.storefrontSql,
+    );
+
+    if (!dependencies.storefrontPublicationApi) {
+      composedStorefrontPublicationApi = new CompiledStorefrontPublicationService(
+        storefrontCompilerApi as StorefrontCompilerPublisherApi,
+        publications,
+      );
+    }
+
+    if (!dependencies.publicStorefrontApi) {
+      const runtime = new StorefrontRuntimeService(
+        publications,
+        new ImmutablePublicationCache(publications),
+      );
+      composedPublicStorefrontApi = {
+        async load(storeId) {
+          const current = await runtime.getPublishedPublication(storeId);
+          if (!current) return null;
+          return { id: current.id, document: current.snapshot };
+        },
+      };
+    }
+  }
+
+  const storefrontPublicationApi =
+    dependencies.storefrontPublicationApi ??
+    composedStorefrontPublicationApi;
+  const publicStorefrontApi: PublicStorefrontApi =
+    dependencies.publicStorefrontApi ??
+    composedPublicStorefrontApi ?? {
+      async load() {
+        return null;
+      },
+    };
+
   const stripeAccountService: StripeAccountService | undefined =
     dependencies.stripeAccountService ??
     (stripeGateway && webhookSql
       ? new StripeAccountService({
-          gateway: stripeGateway,
-          sql: webhookSql,
-          database: commerceDatabase,
-        })
+        gateway: stripeGateway,
+        sql: webhookSql,
+        database: commerceDatabase,
+      })
       : undefined);
 
   const checkoutService: CheckoutService | undefined =
     dependencies.checkoutService ??
     (commerceRepository && stripeGateway && stripeAccountService && catalogService
       ? new CheckoutService({
-          repository: commerceRepository,
-          catalog: catalogService,
-          stripeAccountService,
-          stripeGateway,
-        })
+        repository: commerceRepository,
+        catalog: catalogService,
+        stripeAccountService,
+        stripeGateway,
+      })
       : undefined);
 
   const merchantOrderService: MerchantOrderService | undefined =
@@ -1512,9 +1467,9 @@ export function createApp(
 
   const adminServices = commerceRepository
     ? {
-        summary: new AdminSummaryService(commerceRepository),
-        customers: new CustomerService(commerceRepository),
-      }
+      summary: new AdminSummaryService(commerceRepository),
+      customers: new CustomerService(commerceRepository),
+    }
     : undefined;
 
   const reservationSweeper: ReservationSweeper | undefined =
@@ -1525,6 +1480,9 @@ export function createApp(
 
   const commerceDeps = {
     ...dependencies,
+    storefrontCompilerApi,
+    storefrontPublicationApi,
+    publicStorefrontApi,
     stripeGateway,
     webhookSql,
     checkoutService,

@@ -1,25 +1,66 @@
 import { Router } from "express";
-import { requireMerchant, requireStorePermission } from "../auth/middleware.js";
+import type { RuntimeStorefrontSnapshotV4 } from "@jelly/storefront-schema";
+import {
+  requireMerchant,
+  requireStorePermission,
+} from "../auth/middleware.js";
 import type { AuthProvider } from "../auth/types.js";
 import { ApiError } from "../http/errors.js";
 import type { StorefrontService } from "./service.js";
 
-export function createStorefrontRouter(service: StorefrontService<unknown>, authProvider: AuthProvider): Router {
+export interface PublicStorefrontApi {
+  load(storeId: string): Promise<{
+    id: string;
+    document: RuntimeStorefrontSnapshotV4;
+  } | null>;
+}
+
+export function createStorefrontRouter(
+  service: StorefrontService<unknown>,
+  publicApi: PublicStorefrontApi,
+  authProvider: AuthProvider,
+): Router {
   const router = Router({ mergeParams: true });
 
-  router.get<{ storeId: string }>("/public", async (request, response) => {
-    const publication = await service.getPublic(String(request.params.storeId));
-    if (!publication) throw new ApiError(404, "PUBLICATION_NOT_FOUND", "This store has not been published");
-    response.setHeader("Cache-Control", "no-store, max-age=0");
-    response.json(publication);
-  });
+  // Public storefront — deliberately anonymous.
+  router.get<{ storeId: string }>(
+    "/public",
+    async (request, response) => {
+      const storeId = String(request.params.storeId);
 
-  router.use(requireMerchant(authProvider));
+      const publication = await publicApi.load(storeId);
 
-  // Legacy V3 migration compatibility only. New editor writes use normalized workspace routes.
-  router.get<{ storeId: string }>("/draft", requireStorePermission("storefront:view"), async (request, response) => {
-    response.json(await service.getOrCreateDraft(request.storeContext!.storeId));
-  });
+      if (!publication) {
+        throw new ApiError(
+          404,
+          "PUBLICATION_NOT_FOUND",
+          "This store has not been published",
+        );
+      }
+
+      response.setHeader(
+        "Cache-Control",
+        "no-store, max-age=0",
+      );
+
+      response.json(publication);
+    },
+  );
+
+  // Legacy V3 migration compatibility only.
+  // Authentication applies only to this endpoint.
+  router.get<{ storeId: string }>(
+    "/draft",
+    requireMerchant(authProvider),
+    requireStorePermission("storefront:view"),
+    async (request, response) => {
+      response.json(
+        await service.getOrCreateDraft(
+          request.storeContext!.storeId,
+        ),
+      );
+    },
+  );
 
   return router;
 }
