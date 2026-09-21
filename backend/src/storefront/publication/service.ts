@@ -30,10 +30,14 @@ export class CompiledStorefrontPublicationService {
     storeId: string,
     expectedGeneration: number,
     idempotencyKey: string,
-    actorUserId: number,
+    actorUserId: string,
   ): Promise<PublishStorefrontResult> {
     const existing = await this.repository.findByIdempotencyKey(storeId, idempotencyKey);
     if (existing) {
+      const currentPublicationId = await this.repository.getCurrentPublicationId(storeId);
+      if (currentPublicationId !== existing.id) {
+        await this.repository.activate(storeId, existing.id);
+      }
       return { ok: true, publication: existing, diagnostics: [], reused: true };
     }
 
@@ -42,7 +46,7 @@ export class CompiledStorefrontPublicationService {
       return { ok: false, diagnostics: compilation.diagnostics };
     }
 
-    const publication = await this.repository.publish({
+    const publication = await this.repository.save({
       storeId,
       expectedGeneration,
       idempotencyKey,
@@ -50,6 +54,7 @@ export class CompiledStorefrontPublicationService {
       snapshot: compilation.snapshot,
       dependencies: compilation.dependencies,
     });
+    await this.repository.activate(storeId, publication.id);
     return {
       ok: true,
       publication,

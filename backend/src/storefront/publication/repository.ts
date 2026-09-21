@@ -14,16 +14,20 @@ export interface CompiledPublicationRecord {
   publishedAt: Date;
 }
 
-export interface PublishCompiledSnapshotInput {
+export interface SaveCompiledSnapshotInput {
   storeId: string;
   expectedGeneration: number;
   idempotencyKey: string;
-  actorUserId: number;
+  actorUserId: string;
   snapshot: RuntimeStorefrontSnapshotV4;
   dependencies: StorefrontDependencyGraph;
 }
 
 export interface CompiledPublicationRepository {
   findByIdempotencyKey(storeId: string, idempotencyKey: string): Promise<CompiledPublicationRecord | null>;
-  publish(input: PublishCompiledSnapshotInput): Promise<CompiledPublicationRecord>;
+  save(input: SaveCompiledSnapshotInput): Promise<CompiledPublicationRecord>;
+  get(storeId: string, publicationId: string): Promise<CompiledPublicationRecord | null>;
+  getCurrentPublicationId(storeId: string): Promise<string | null>;
+  getCurrent(storeId: string): Promise<CompiledPublicationRecord | null>;
+  activate(storeId: string, publicationId: string): Promise<void>;
 }
