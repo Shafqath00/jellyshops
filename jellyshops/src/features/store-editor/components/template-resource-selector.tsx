@@ -19,6 +19,7 @@ export function TemplateResourceSelector({
   previewResourceId,
   onTemplateChange,
   onPreviewResourceChange,
+  onPageTypeChange,
 }: {
   templates: TemplateSelectorOption[];
   activeTemplateId: string;
@@ -26,14 +27,16 @@ export function TemplateResourceSelector({
   previewResourceId?: string;
   onTemplateChange(templateId: string): void;
   onPreviewResourceChange(resourceId: string): void;
+  onPageTypeChange?(pageType: StorefrontTemplateType): void;
 }) {
   const activeTemplate = templates.find((template) => template.id === activeTemplateId);
   const needsPreviewResource = activeTemplate ? activeTemplate.type !== "home" && activeTemplate.type !== "search" && activeTemplate.type !== "cart" : previewResources.length > 0;
   const pageType = activeTemplate?.type ? `${activeTemplate.type.charAt(0).toUpperCase()}${activeTemplate.type.slice(1)}` : "Home";
+  const pageTypes = [...new Set(templates.map((template) => template.type))];
 
   return (
     <div className="grid gap-3 border-b border-[#eeeeee] bg-white p-4 sm:grid-cols-3" aria-label="Template and preview resource">
-      <p className="grid gap-1.5 text-[11px] font-semibold text-[#616161]"><span>Page type</span><span className="text-[12px] text-[#303030]">Page type: {pageType}</span></p>
+      <label className="grid gap-1.5 text-[11px] font-semibold text-[#616161]"><span>Page type</span><select aria-label="Page type" value={activeTemplate?.type ?? "home"} onChange={(event) => onPageTypeChange?.(event.target.value as StorefrontTemplateType)} className="h-9 rounded-lg border border-[#c9cccf] bg-white px-2.5 text-[12px] text-[#303030] outline-none focus:border-[#616161]">{pageTypes.map((type) => <option key={type} value={type}>{type.charAt(0).toUpperCase()}{type.slice(1)}</option>)}</select><span className="sr-only">Page type: {pageType}</span></label>
       <label className="grid gap-1.5 text-[11px] font-semibold text-[#616161]">
         <span>Template</span>
         <select

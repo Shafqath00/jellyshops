@@ -69,4 +69,22 @@ describe("TemplateResourceSelector", () => {
     expect(screen.getByDisplayValue("Default Collection")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Summer Collection")).toBeInTheDocument();
   });
+
+  it("selects a page type without changing the current preview resource", async () => {
+    const onPageTypeChange = vi.fn();
+    const onPreviewResourceChange = vi.fn();
+    render(<TemplateResourceSelector
+      templates={[...templates, { id: "cart-default", type: "cart", handle: "default", name: "Default Cart" }]}
+      activeTemplateId="product-default"
+      previewResources={resources}
+      previewResourceId="product-1"
+      onTemplateChange={vi.fn()}
+      onPreviewResourceChange={onPreviewResourceChange}
+      onPageTypeChange={onPageTypeChange}
+    />);
+
+    await userEvent.selectOptions(screen.getByLabelText("Page type"), "cart");
+    expect(onPageTypeChange).toHaveBeenCalledWith("cart");
+    expect(onPreviewResourceChange).not.toHaveBeenCalled();
+  });
 });

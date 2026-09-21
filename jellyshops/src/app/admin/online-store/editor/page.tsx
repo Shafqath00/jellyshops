@@ -596,6 +596,14 @@ export default function OnlineStoreEditorPage() {
         previewResourceId={previewResourceId}
         onTemplateChange={(templateId) => { setActiveTemplateId(templateId); setSelection(null); setActiveGlobalId(undefined); setPreviewSnapshot(undefined); }}
         onPreviewResourceChange={setPreviewResourceId}
+        onPageTypeChange={(pageType) => {
+          const template = templates.find((entry) => entry.type === pageType);
+          if (!template) return;
+          setActiveTemplateId(template.id);
+          setSelection(null);
+          setActiveGlobalId(undefined);
+          setPreviewSnapshot(undefined);
+        }}
       />
 
       <div className="grid min-h-0 flex-1 grid-cols-[320px_minmax(0,1fr)]">
