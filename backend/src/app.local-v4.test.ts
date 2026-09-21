@@ -9,6 +9,7 @@ import {
   describe,
   expect,
   it,
+  vi,
 } from "vitest";
 
 import { createPGliteDatabase, seedStore, type IntegrationDatabase } from "../test/integration/pglite.js";
@@ -235,5 +236,44 @@ describe("local SQL-backed V4 compiler startup", () => {
     const response = await post(app, "validate", 4);
     expect(response.status).toBe(422);
     expect(response.body.diagnostics).toEqual([{ code: "INJECTED_COMPILER" }]);
+  });
+
+  it("composes publish and public APIs from the default configured SQL pool", async () => {
+    const originalDatabaseUrl = process.env.SUPABASE_DATABASE_URL;
+    process.env.SUPABASE_DATABASE_URL = "postgresql://configured-storefront";
+
+    vi.resetModules();
+    vi.doMock("./database/client.js", () => ({
+      createSupabasePool: () => ({
+        query: database.query.bind(database),
+        connect: vi.fn(),
+      }),
+    }));
+
+    try {
+      const { createApp: createConfiguredApp } = await import("./app.js");
+      const app = createConfiguredApp({ config: await config() });
+
+      const published = await post(app, "publish", 4, "default-pool-key");
+      expect(published.status).toBe(201);
+
+      const publicResponse = await getPublic(app);
+      expect(publicResponse.status).toBe(200);
+      expect(publicResponse.body).toMatchObject({
+        id: published.body.publication.id,
+        document: {
+          storeId: "store-a",
+          sourceGeneration: 4,
+        },
+      });
+    } finally {
+      vi.doUnmock("./database/client.js");
+      vi.resetModules();
+      if (originalDatabaseUrl === undefined) {
+        delete process.env.SUPABASE_DATABASE_URL;
+      } else {
+        process.env.SUPABASE_DATABASE_URL = originalDatabaseUrl;
+      }
+    }
   });
 });

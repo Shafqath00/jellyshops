@@ -66,6 +66,7 @@ async function createTestApp() {
   return createApp({
     config:
       createTestConfig(directory),
+    storefrontSql: null,
   });
 }
 

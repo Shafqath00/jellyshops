@@ -210,7 +210,7 @@ export interface AppDependencies {
   documentValidator: DocumentValidator<unknown>;
   storefrontWorkspaceApi: StorefrontWorkspaceApi;
   storefrontCompilerApi: StorefrontCompilerApi;
-  storefrontSql: SqlExecutor;
+  storefrontSql: SqlExecutor | null;
   storefrontDynamicSourceResolver: CompilerDynamicSourceResolver;
   storefrontPublicationApi: StorefrontPublicationApi;
   publicStorefrontApi: PublicStorefrontApi;
@@ -1379,9 +1379,15 @@ export function createApp(
     dependencies.webhookSql ??
     supabasePool;
 
+  const configuredStorefrontPool =
+    supabasePool && typeof supabasePool.connect === "function"
+      ? supabasePool
+      : undefined;
   const storefrontSql: SqlExecutor | undefined =
-    dependencies.storefrontSql ??
-    supabasePool;
+    dependencies.storefrontSql === null
+      ? undefined
+      : dependencies.storefrontSql ??
+        configuredStorefrontPool;
 
   const storefrontCompilerApi =
     dependencies.storefrontCompilerApi ??
@@ -1397,12 +1403,12 @@ export function createApp(
   let composedPublicStorefrontApi: PublicStorefrontApi | undefined;
 
   if (
-    dependencies.storefrontSql &&
+    storefrontSql &&
     storefrontCompilerApi &&
     (!dependencies.storefrontPublicationApi || !dependencies.publicStorefrontApi)
   ) {
     const publications = new SqlCompiledPublicationRepository(
-      dependencies.storefrontSql,
+      storefrontSql,
     );
 
     if (!dependencies.storefrontPublicationApi) {
