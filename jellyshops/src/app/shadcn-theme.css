@@ -1,82 +1,82 @@
 /* shadcn/ui semantic theme layer */
 :root {
-  --background: 0 0% 100%;
-  --foreground: 240 10% 3.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 240 10% 3.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 3.9%;
-  --primary: 240 5.9% 10%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 240 4.8% 95.9%;
-  --secondary-foreground: 240 5.9% 10%;
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
-  --accent: 240 4.8% 95.9%;
-  --accent-foreground: 240 5.9% 10%;
-  --destructive: 0 72.2% 50.6%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 240 5.9% 90%;
-  --input: 240 5.9% 90%;
-  --ring: 240 5.9% 10%;
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(240 10% 3.9%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(240 10% 3.9%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(240 10% 3.9%);
+  --primary: hsl(240 5.9% 10%);
+  --primary-foreground: hsl(0 0% 98%);
+  --secondary: hsl(240 4.8% 95.9%);
+  --secondary-foreground: hsl(240 5.9% 10%);
+  --muted: hsl(240 4.8% 95.9%);
+  --muted-foreground: hsl(240 3.8% 46.1%);
+  --accent: hsl(240 4.8% 95.9%);
+  --accent-foreground: hsl(240 5.9% 10%);
+  --destructive: hsl(0 72.2% 50.6%);
+  --destructive-foreground: hsl(0 0% 98%);
+  --border: hsl(240 5.9% 90%);
+  --input: hsl(240 5.9% 90%);
+  --ring: hsl(240 5.9% 10%);
   --radius: 0.625rem;
 
-  --ink: hsl(var(--foreground));
-  --ink-soft: hsl(var(--muted-foreground));
-  --paper: hsl(var(--background));
-  --paper-deep: hsl(var(--muted));
-  --line: hsl(var(--border));
-  --white: hsl(var(--card));
-  --guava: hsl(var(--primary));
-  --guava-deep: hsl(var(--primary));
-  --citrus: hsl(var(--muted));
-  --mint: hsl(var(--muted));
-  --blue: hsl(var(--ring));
+  --ink: var(--foreground);
+  --ink-soft: var(--muted-foreground);
+  --paper: var(--background);
+  --paper-deep: var(--muted);
+  --line: var(--border);
+  --white: var(--card);
+  --guava: var(--primary);
+  --guava-deep: var(--primary);
+  --citrus: var(--muted);
+  --mint: var(--muted);
+  --blue: var(--ring);
 }
 
-@theme {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 }
 
 body {
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
+  background: var(--background);
+  color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
 
 ::selection {
-  background: hsl(var(--foreground));
-  color: hsl(var(--background));
+  background: var(--foreground);
+  color: var(--background);
 }
 
 :focus-visible {
-  outline: 2px solid hsl(var(--ring));
+  outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
 
-/* Legacy surface normalization */
+/* Legacy surface normalization while pages move to local shadcn primitives. */
 .button,
 .auth-submit {
   min-height: 36px;
-  border: 1px solid hsl(var(--border));
+  border: 1px solid var(--border);
   border-radius: calc(var(--radius) - 2px);
   box-shadow: none;
   font-weight: 600;
@@ -86,13 +86,13 @@ body {
 .auth-submit:hover { transform: none; }
 .button-primary,
 .auth-submit {
-  color: hsl(var(--primary-foreground));
-  background: hsl(var(--primary));
-  border-color: hsl(var(--primary));
+  color: var(--primary-foreground);
+  background: var(--primary);
+  border-color: var(--primary);
 }
 .button-secondary {
-  color: hsl(var(--foreground));
-  background: hsl(var(--background));
+  color: var(--foreground);
+  background: var(--background);
 }
 .button-secondary:hover,
 .button-primary:hover,
@@ -104,15 +104,15 @@ body {
 .empty-state,
 .auth-panel,
 .cart-panel {
-  border: 1px solid hsl(var(--border));
+  border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: hsl(var(--card));
+  background: var(--card);
   box-shadow: 0 1px 2px rgba(0,0,0,.04);
 }
 
 .form-card-title span,
 .page-kicker {
-  color: hsl(var(--muted-foreground));
+  color: var(--muted-foreground);
   font-family: inherit;
   letter-spacing: .08em;
 }
@@ -123,24 +123,24 @@ body {
 .slug-input,
 .search-box,
 .theme-fields input[type="color"] {
-  border: 1px solid hsl(var(--input));
+  border: 1px solid var(--input);
   border-radius: calc(var(--radius) - 2px);
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
+  background: var(--background);
+  color: var(--foreground);
 }
 .field input:focus,
 .field textarea:focus,
 .field select:focus {
-  border-color: hsl(var(--ring));
-  outline: 1px solid hsl(var(--ring));
+  border-color: var(--ring);
+  outline: 1px solid var(--ring);
 }
 
 .data-head {
-  background: hsl(var(--muted));
-  color: hsl(var(--muted-foreground));
+  background: var(--muted);
+  color: var(--muted-foreground);
 }
-.data-row { border-color: hsl(var(--border)); }
-.data-row:hover { background: hsl(var(--muted) / .45); }
+.data-row { border-color: var(--border); }
+.data-row:hover { background: color-mix(in srgb, var(--muted) 45%, transparent); }
 
 .status-badge,
 .availability-live,
@@ -151,41 +151,41 @@ body {
 
 .empty-state {
   border-style: dashed;
-  background: hsl(var(--muted) / .3);
+  background: color-mix(in srgb, var(--muted) 30%, transparent);
 }
 .empty-state-icon {
-  border: 1px solid hsl(var(--border));
+  border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: hsl(var(--background));
+  background: var(--background);
   box-shadow: none;
 }
 
 .auth-page {
   background:
-    radial-gradient(circle at top left, hsl(var(--muted)) 0, transparent 28rem),
-    hsl(var(--background));
+    radial-gradient(circle at top left, var(--muted) 0, transparent 28rem),
+    var(--background);
 }
 .auth-brand span,
 .auth-orbit,
-.auth-orbit i { border-color: hsl(var(--border)); }
+.auth-orbit i { border-color: var(--border); }
 .auth-form input {
-  border: 1px solid hsl(var(--input));
+  border: 1px solid var(--input);
   border-radius: calc(var(--radius) - 2px);
-  background: hsl(var(--background));
+  background: var(--background);
 }
 
 .cart-overlay { background: rgb(0 0 0 / .35); }
-.cart-panel { background: hsl(var(--background)); }
+.cart-panel { background: var(--background); }
 .quantity-control,
 .icon-button,
 .cart-button {
-  border-color: hsl(var(--border));
+  border-color: var(--border);
   border-radius: calc(var(--radius) - 2px);
 }
 
 .store-header {
-  border-color: hsl(var(--border));
-  background: hsl(var(--background) / .92);
+  border-color: var(--border);
+  background: color-mix(in srgb, var(--background) 92%, transparent);
 }
 .store-logo { font-family: inherit; font-weight: 700; }
 .product-card-image {
@@ -194,16 +194,14 @@ body {
 }
 .product-card-copy h3 { font-family: inherit; }
 
-.launch-page {
-  background: hsl(var(--background));
-}
+.launch-page { background: var(--background); }
 .eyebrow,
 .demo-pill,
 .jelly-window,
 .preview-card,
 .wordmark-mark,
 .jelly-sticker {
-  border-color: hsl(var(--border));
+  border-color: var(--border);
   box-shadow: none;
 }
 .jelly-window { transform: none; border-radius: var(--radius); }
