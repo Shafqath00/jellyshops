@@ -15,7 +15,7 @@ import {
   loadPublicStorefrontPublication,
   type PublicStorefrontPublication,
 } from "@/features/storefront/public-storefront-api";
-import { expandRuntimeTemplate, type ResolvedStorefrontRoute } from "@/features/storefront/resource-loader";
+import { expandRuntimeLayout, type ResolvedStorefrontRoute } from "@/features/storefront/resource-loader";
 import { createStorefrontTemplate, migrateStorefrontDocument, type StorefrontDocument } from "@jelly/storefront-schema";
 
 function homeRoute(publication: Extract<PublicStorefrontPublication, { kind: "v4" }>): ResolvedStorefrontRoute {
@@ -24,9 +24,11 @@ function homeRoute(publication: Extract<PublicStorefrontPublication, { kind: "v4
   if (!template) return { status: "not-found", reason: "template" };
   return {
     status: "ready",
+    context: { pageType: "home", resource: null },
     resource: null,
     template,
-    sections: expandRuntimeTemplate(publication.snapshot, template),
+    layout: expandRuntimeLayout(publication.snapshot, template),
+    sections: expandRuntimeLayout(publication.snapshot, template).template,
   };
 }
 

@@ -53,6 +53,30 @@ function snapshot(): RuntimeStorefrontSnapshotV4 {
   };
 }
 
+function snapshotWithGlobalLayout(): RuntimeStorefrontSnapshotV4 {
+  const current = snapshot();
+  current.templates.home = {
+    id: "home",
+    type: "home",
+    handle: "default",
+    layout: {
+      sections: [
+        { kind: "global", globalSectionId: "announcement" },
+        { kind: "global", globalSectionId: "header" },
+        { kind: "inline", section: { id: "home-copy", type: "rich-text", enabled: true, settings: {}, blocks: [] } },
+        { kind: "global", globalSectionId: "footer" },
+      ],
+    },
+  };
+  current.globalSections = {
+    announcement: { id: "announcement", section: { id: "announcement", type: "announcement-bar", enabled: true, settings: {}, blocks: [] } },
+    header: { id: "header", section: { id: "header", type: "header", enabled: true, settings: {}, blocks: [] } },
+    footer: { id: "footer", section: { id: "footer", type: "footer", enabled: true, settings: {}, blocks: [] } },
+  };
+  current.templateDefaults = { home: "home", product: "product-default" };
+  return current;
+}
+
 function product(overrides: Partial<PublicStorefrontResource> = {}): PublicStorefrontResource {
   return {
     type: "product",
@@ -72,6 +96,18 @@ function reader(resource: PublicStorefrontResource | null): PublicResourceReader
 }
 
 describe("resolveStorefrontRoute", () => {
+  it("resolves home through its default template with named global regions", async () => {
+    const result = await resolveStorefrontRoute(snapshotWithGlobalLayout(), { type: "home" }, reader(null));
+
+    expect(result.status).toBe("ready");
+    if (result.status !== "ready") throw new Error("expected route to resolve");
+    expect(result.context).toEqual({ pageType: "home", resource: null });
+    expect(result.layout.announcement.map((section) => section.id)).toEqual(["announcement"]);
+    expect(result.layout.header.map((section) => section.id)).toEqual(["header"]);
+    expect(result.layout.template.map((section) => section.id)).toEqual(["home-copy"]);
+    expect(result.layout.footer.map((section) => section.id)).toEqual(["footer"]);
+  });
+
   it("resolves a handle to a stable resource id before choosing its assigned template", async () => {
     const resources = reader(product());
 

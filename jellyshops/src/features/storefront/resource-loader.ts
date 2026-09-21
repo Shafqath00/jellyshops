@@ -27,14 +27,27 @@ export type StorefrontRouteRequest =
 export type ResolvedStorefrontRoute =
   | {
       status: "ready";
+      context: StorefrontPageContext;
       resource: PublicStorefrontResource | null;
       template: RuntimeTemplateV4;
       sections: SectionNode[];
+      layout: ResolvedStorefrontLayout;
     }
   | {
       status: "not-found";
       reason: "resource" | "template";
     };
+
+export type StorefrontPageContext =
+  | { pageType: "home"; resource: null }
+  | { pageType: PublicResourceType; resource: PublicStorefrontResource };
+
+export interface ResolvedStorefrontLayout {
+  announcement: SectionNode[];
+  header: SectionNode[];
+  template: SectionNode[];
+  footer: SectionNode[];
+}
 
 function blockNode(input: unknown): SectionNode["blocks"][number] | null {
   if (!input || typeof input !== "object" || Array.isArray(input)) return null;
@@ -52,6 +65,7 @@ function blockNode(input: unknown): SectionNode["blocks"][number] | null {
       ? { responsive: structuredClone(record.responsive) as SectionNode["blocks"][number]["responsive"] }
       : {}),
   };
+
 }
 
 function sectionNode(input: Record<string, unknown>): SectionNode | null {
@@ -83,24 +97,38 @@ export function expandRuntimeTemplate(
   snapshot: RuntimeStorefrontSnapshotV4,
   template: RuntimeTemplateV4,
 ): SectionNode[] {
-  const layoutSections = template.layout.sections;
-  if (!Array.isArray(layoutSections)) return [];
+  return expandRuntimeLayout(snapshot, template).template;
+}
 
-  const sections: SectionNode[] = [];
+function regionFor(section: SectionNode): keyof ResolvedStorefrontLayout {
+  if (section.type === "announcement-bar") return "announcement";
+  if (section.type === "header") return "header";
+  if (section.type === "footer") return "footer";
+  return "template";
+}
+
+export function expandRuntimeLayout(
+  snapshot: RuntimeStorefrontSnapshotV4,
+  template: RuntimeTemplateV4,
+): ResolvedStorefrontLayout {
+  const layoutSections = template.layout.sections;
+  const layout: ResolvedStorefrontLayout = { announcement: [], header: [], template: [], footer: [] };
+  if (!Array.isArray(layoutSections)) return layout;
+
   for (const placement of layoutSections) {
     if (!placement || typeof placement !== "object" || Array.isArray(placement)) continue;
     const candidate = placement as Record<string, unknown>;
     if (candidate.kind === "inline" && candidate.section && typeof candidate.section === "object" && !Array.isArray(candidate.section)) {
       const section = sectionNode(candidate.section as Record<string, unknown>);
-      if (section) sections.push(section);
+      if (section) layout[regionFor(section)].push(section);
       continue;
     }
     if (candidate.kind === "global" && typeof candidate.globalSectionId === "string") {
       const section = globalSectionNode(snapshot.globalSections[candidate.globalSectionId]);
-      if (section) sections.push(section);
+      if (section) layout[regionFor(section)].push(section);
     }
   }
-  return sections;
+  return layout;
 }
 
 function assignedTemplateId(
@@ -130,7 +158,8 @@ export async function resolveStorefrontRoute(
     const templateId = snapshot.templateDefaults.home;
     const template = templateId ? snapshot.templates[templateId] : undefined;
     if (!template) return { status: "not-found", reason: "template" };
-    return { status: "ready", resource: null, template, sections: expandRuntimeTemplate(snapshot, template) };
+    const layout = expandRuntimeLayout(snapshot, template);
+    return { status: "ready", context: { pageType: "home", resource: null }, resource: null, template, sections: layout.template, layout };
   }
 
   const resource = await reader.findByHandle(route.type, route.handle);
@@ -140,5 +169,6 @@ export async function resolveStorefrontRoute(
   const template = templateId ? snapshot.templates[templateId] : undefined;
   if (!template || template.type !== route.type) return { status: "not-found", reason: "template" };
 
-  return { status: "ready", resource, template, sections: expandRuntimeTemplate(snapshot, template) };
+  const layout = expandRuntimeLayout(snapshot, template);
+  return { status: "ready", context: { pageType: route.type, resource }, resource, template, sections: layout.template, layout };
 }

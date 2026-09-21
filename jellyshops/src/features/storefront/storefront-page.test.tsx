@@ -33,8 +33,16 @@ it("renders a resolved compiled route without rebuilding a V3 document", () => {
   };
   const route: ResolvedStorefrontRoute = {
     status: "ready",
+    context: { pageType: "home", resource: null },
     resource: null,
     template: snapshot.templates.home,
+    layout: { announcement: [], header: [], template: [{
+      id: "copy",
+      type: "rich-text",
+      enabled: true,
+      settings: {},
+      blocks: [{ id: "copy-text", type: "text", enabled: true, settings: { text: "COMPILED LIVE" } }],
+    }], footer: [] },
     sections: [{
       id: "copy",
       type: "rich-text",
