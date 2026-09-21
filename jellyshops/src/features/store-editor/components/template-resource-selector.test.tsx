@@ -52,4 +52,21 @@ describe("TemplateResourceSelector", () => {
     expect(onPreviewResourceChange).toHaveBeenCalledWith("product-2");
     expect(onTemplateChange).not.toHaveBeenCalled();
   });
+
+  it("shows the page type separately from the template and preview resource", () => {
+    render(
+      <TemplateResourceSelector
+        templates={[{ id: "collection-default", type: "collection", handle: "default", name: "Default Collection" }]}
+        activeTemplateId="collection-default"
+        previewResources={[{ id: "summer", label: "Summer Collection" }]}
+        previewResourceId="summer"
+        onTemplateChange={vi.fn()}
+        onPreviewResourceChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("Page type: Collection")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Default Collection")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Summer Collection")).toBeInTheDocument();
+  });
 });

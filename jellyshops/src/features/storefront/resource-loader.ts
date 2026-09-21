@@ -135,9 +135,14 @@ function assignedTemplateId(
   snapshot: RuntimeStorefrontSnapshotV4,
   resource: PublicStorefrontResource,
 ): string | undefined {
-  return snapshot.assignments.find(
+  const assignedTemplateId = snapshot.assignments.find(
     (assignment) => assignment.resourceType === resource.type && assignment.resourceId === resource.id,
-  )?.templateId ?? snapshot.templateDefaults[resource.type];
+  )?.templateId;
+  const assignedTemplate = assignedTemplateId ? snapshot.templates[assignedTemplateId] : undefined;
+
+  return assignedTemplate?.type === resource.type
+    ? assignedTemplateId
+    : snapshot.templateDefaults[resource.type];
 }
 
 export async function resolvePublicResourceReference(

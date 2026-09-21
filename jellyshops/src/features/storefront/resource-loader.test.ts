@@ -88,6 +88,17 @@ function product(overrides: Partial<PublicStorefrontResource> = {}): PublicStore
   };
 }
 
+function collection(overrides: Partial<PublicStorefrontResource> = {}): PublicStorefrontResource {
+  return {
+    type: "collection",
+    id: "collection-1",
+    handle: "summer",
+    visible: true,
+    data: { collection: { id: "collection-1", name: "Summer" }, products: [] },
+    ...overrides,
+  };
+}
+
 function reader(resource: PublicStorefrontResource | null): PublicResourceReader {
   return {
     findByHandle: vi.fn(async () => resource),
@@ -137,6 +148,45 @@ describe("resolveStorefrontRoute", () => {
     expect(result.status).toBe("ready");
     if (result.status !== "ready") throw new Error("expected route to resolve");
     expect(result.template.id).toBe("product-featured");
+  });
+
+  it("resolves the default Collection template and lets an explicit assignment override it", async () => {
+    const current = snapshot();
+    current.templates["collection-default"] = { id: "collection-default", type: "collection", handle: "default", layout: { sections: [] } };
+    current.templates["collection-featured"] = { id: "collection-featured", type: "collection", handle: "featured", layout: { sections: [] } };
+    current.templateDefaults.collection = "collection-default";
+
+    await expect(resolveStorefrontRoute(current, { type: "collection", handle: "summer" }, reader(collection())))
+      .resolves.toMatchObject({ status: "ready", template: { id: "collection-default" } });
+
+    current.assignments.push({ resourceType: "collection", resourceId: "collection-1", templateId: "collection-featured" });
+    await expect(resolveStorefrontRoute(current, { type: "collection", handle: "summer" }, reader(collection())))
+      .resolves.toMatchObject({ status: "ready", template: { id: "collection-featured" } });
+  });
+
+  it("falls back to the resource-type default when an assigned template is missing or invalid", async () => {
+    const missingAssignment = snapshot();
+    missingAssignment.assignments = [{ resourceType: "product", resourceId: "product-1", templateId: "deleted-template" }];
+
+    const missingResult = await resolveStorefrontRoute(
+      missingAssignment,
+      { type: "product", handle: "classic-cake" },
+      reader(product()),
+    );
+
+    expect(missingResult).toMatchObject({ status: "ready", template: { id: "product-default" } });
+
+    const invalidAssignment = snapshot();
+    invalidAssignment.templates["collection-template"] = {
+      id: "collection-template", type: "collection", handle: "default", layout: { sections: [] },
+    };
+    invalidAssignment.assignments = [{ resourceType: "product", resourceId: "product-1", templateId: "collection-template" }];
+
+    await expect(resolveStorefrontRoute(
+      invalidAssignment,
+      { type: "product", handle: "classic-cake" },
+      reader(product()),
+    )).resolves.toMatchObject({ status: "ready", template: { id: "product-default" } });
   });
 
   it("normalizes omitted enabled flags in compiled section data", () => {

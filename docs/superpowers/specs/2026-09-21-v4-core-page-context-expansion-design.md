@@ -56,6 +56,10 @@ Sections receive this union through the existing runtime context. Their definiti
 
 ## Per-page adapters and templates
 
+### Current Collection catalog limitation
+
+The current catalog `Collection` model exposes its identity, store ownership, name, and slug only. It has no description, image, SEO metadata, or publication field. The V4 Collection adapter therefore exposes the live model unchanged and derives membership from visible live Products whose `collectionIds` include the Collection ID. When the catalog gains more Collection metadata, the page-context adapter can expose it without changing templates, snapshots, or section renderers.
+
 | Context | Adapter responsibility | Template selection |
 | --- | --- | --- |
 | Collection | resolve visible collection by handle; load its visible products | explicit collection assignment, then `templateDefaults.collection` |

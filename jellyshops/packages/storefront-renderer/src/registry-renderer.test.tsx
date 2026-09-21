@@ -51,6 +51,30 @@ describe("registry-driven section rendering", () => {
     expect(screen.getByRole("heading", { name: "Live cake" })).toBeInTheDocument();
   });
 
+  it("renders Collection title, supplied live products, and a safe empty state", () => {
+    const page = {
+      pageType: "collection" as const,
+      resource: {
+        id: "collection-1",
+        handle: "summer",
+        data: {
+          collection: { id: "collection-1", name: "Summer collection", slug: "summer" },
+          products: [{ id: "product-1", name: "Lemon cake", href: "/shop/products/lemon-cake", imageUrl: "", price: "$10" }],
+        },
+      },
+    };
+    const { rerender } = render(<>
+      <RegistrySectionRenderer section={section("collection-header")} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={section("collection-product-grid")} mode="published" commerce={commerce} page={page} />
+    </>);
+
+    expect(screen.getByRole("heading", { name: "Summer collection" })).toBeInTheDocument();
+    expect(screen.getByText("Lemon cake")).toBeInTheDocument();
+
+    rerender(<RegistrySectionRenderer section={section("collection-product-grid")} mode="published" commerce={commerce} page={{ ...page, resource: { ...page.resource, data: { ...page.resource.data, products: [] } } }} />);
+    expect(screen.getByText("No products are available in this collection yet.")).toBeInTheDocument();
+  });
+
   it("keeps unsupported-section diagnostics in editor/preview but not published", () => {
     const registry = new SectionRenderRegistry();
     const { rerender } = render(

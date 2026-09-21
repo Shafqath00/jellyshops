@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import type { SectionNode } from "@jelly/storefront-schema";
-import { StorefrontContainer } from "@jelly/storefront-ui";
+import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui";
 import { FooterSection } from "./sections/footer";
 import { HeaderSection } from "./sections/header";
 import { HeroSection } from "./sections/hero";
@@ -24,7 +24,7 @@ import {
   TrustStripSection,
 } from "./sections/theme-pack-sections";
 import type { StorefrontRuntimeContext } from "./runtime-context";
-import type { CommerceDataProvider, RendererMode } from "./types";
+import type { CommerceDataProvider, PublicProduct, RendererMode } from "./types";
 
 export interface SectionRenderProps {
   section: SectionNode;
@@ -57,6 +57,20 @@ export class SectionRenderRegistry {
   }
 }
 
+function collectionContext(context: StorefrontRuntimeContext): { name: string; products: PublicProduct[] } | null {
+  if (context.page?.pageType !== "collection") return null;
+  const collection = context.page.resource.data.collection;
+  const products = context.page.resource.data.products;
+  if (!collection || typeof collection !== "object" || Array.isArray(collection)) return null;
+  const name = (collection as Record<string, unknown>).name;
+  return {
+    name: typeof name === "string" ? name : "Collection",
+    products: Array.isArray(products) ? products.filter((product): product is PublicProduct => (
+      Boolean(product) && typeof product === "object" && typeof (product as PublicProduct).id === "string"
+    )) : [],
+  };
+}
+
 function builtInRegistry(): SectionRenderRegistry {
   const registry = new SectionRenderRegistry();
   registry.register("announcement-bar", ({ section }) => <AnnouncementBarSection section={section} />);
@@ -68,6 +82,18 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("product-information", ({ context }) => {
     const title = context.page?.pageType === "product" ? context.page.resource.data.title : undefined;
     return <section className="jelly-section jelly-product-information"><StorefrontContainer><h1>{typeof title === "string" ? title : "Product"}</h1></StorefrontContainer></section>;
+  });
+  registry.register("collection-header", ({ context }) => {
+    const collection = collectionContext(context);
+    return <section className="jelly-section jelly-collection-header"><StorefrontContainer><h1>{collection?.name ?? "Collection"}</h1></StorefrontContainer></section>;
+  });
+  registry.register("collection-product-grid", ({ context }) => {
+    const collection = collectionContext(context);
+    const products = collection?.products ?? [];
+    return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer>{products.length
+      ? <div className="jelly-product-grid-items">{products.map((product) => <StorefrontProductCard key={product.id} product={product} />)}</div>
+      : <p>No products are available in this collection yet.</p>
+    }</StorefrontContainer></section>;
   });
   registry.register("featured-collection", ({ commerce }) => <ProductGridSection commerce={commerce} />);
   registry.register("image-with-text", ({ section }) => <ImageWithTextSection section={section} />);

@@ -1,19 +1,30 @@
 import type { PublicProduct } from "@jelly/storefront-renderer";
-
-export interface PublicCollectionContextResource {
-  id: string;
-  handle: string;
-  title: string;
-  visible: boolean;
-}
+import type { Product } from "@/lib/domain";
+import type { Collection } from "@/lib/domain";
 
 export type StorefrontPageContext =
-  | { type: "collection"; collection: PublicCollectionContextResource; products: PublicProduct[] }
+  | { type: "collection"; collection: Collection; products: PublicProduct[] }
   | { type: "search"; query: string; results: Array<{ id: string }>; state: "empty" | "results" | "none" | "error" };
 
 export interface CollectionPageContextReader {
-  findCollection(handle: string): Promise<PublicCollectionContextResource | null>;
-  listProducts(collectionId: string): Promise<PublicProduct[]>;
+  findCollection(handle: string): Promise<Collection | null>;
+  listProducts(collectionId: string): Promise<Product[]>;
+}
+
+export function createCollectionPageContext(
+  collection: Collection,
+  catalogProducts: Product[],
+): Extract<StorefrontPageContext, { type: "collection" }> {
+  const products = catalogProducts
+    .filter((product) => product.published && !product.archived && product.collectionIds?.includes(collection.id))
+    .map((product): PublicProduct => ({
+      id: product.id,
+      name: product.name,
+      href: `/products/${product.slug}`,
+      imageUrl: product.imageUrl,
+      price: String(product.variants[0]?.priceMinor ?? 0),
+    }));
+  return { type: "collection", collection, products };
 }
 
 export async function loadCollectionPageContext(
@@ -21,8 +32,8 @@ export async function loadCollectionPageContext(
   handle: string,
 ): Promise<Extract<StorefrontPageContext, { type: "collection" }> | null> {
   const collection = await reader.findCollection(handle);
-  if (!collection?.visible) return null;
-  return { type: "collection", collection, products: await reader.listProducts(collection.id) };
+  if (!collection) return null;
+  return createCollectionPageContext(collection, await reader.listProducts(collection.id));
 }
 
 export interface SearchPageContextReader {

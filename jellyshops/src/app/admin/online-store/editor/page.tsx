@@ -22,6 +22,8 @@ import type {
 } from "@jelly/storefront-schema";
 import { resolveDesignTokens, resolveTheme } from "@jelly/storefront-themes";
 import { expandRuntimeLayout } from "@/features/storefront/resource-loader";
+import { createCollectionPageContext } from "@/features/storefront/page-context-loaders";
+import type { Collection, Product } from "@/lib/domain";
 import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import { useAuth } from "@/features/auth/auth-provider";
 import type {
@@ -170,6 +172,35 @@ function resourceOptions(
   return options;
 }
 
+function collectionPreviewPageContext(
+  catalog: DemoCatalog,
+  storeId: string,
+  previewResourceId: string | undefined,
+): StorefrontPageContext | null {
+  const selected = catalog.collections.find((collection) => collection.id === previewResourceId) ?? catalog.collections[0];
+  if (!selected) return null;
+  const collection: Collection = { id: selected.id, storeId, name: selected.name, slug: selected.slug };
+  const products: Product[] = catalog.products.map((product) => ({
+    id: product.id,
+    storeId,
+    name: product.name,
+    slug: product.slug,
+    description: "",
+    category: "",
+    imageUrl: product.imageUrl,
+    published: true,
+    archived: false,
+    featured: false,
+    variants: [{ id: `${product.id}-preview`, name: "Default", sku: "", priceMinor: product.priceMinor, stock: 1 }],
+    collectionIds: catalog.collections.filter((entry) => entry.productIds.includes(product.id)).map((entry) => entry.id),
+  }));
+  const context = createCollectionPageContext(collection, products);
+  return {
+    pageType: "collection",
+    resource: { id: context.collection.id, handle: context.collection.slug, data: { collection: context.collection, products: context.products } },
+  };
+}
+
 export default function OnlineStoreEditorPage() {
   const { session, activeStore } = useAuth();
   const backendStoreId = activeStore?.id ?? "";
@@ -294,9 +325,12 @@ export default function OnlineStoreEditorPage() {
   const compiledTemplate = activeTemplate && previewSnapshot ? previewSnapshot.templates[activeTemplate.id] : undefined;
   const previewLayout = compiledTemplate && previewSnapshot ? expandRuntimeLayout(previewSnapshot, compiledTemplate) : { announcement: [], header: [], template: sections, footer: [] };
   const selectedPreviewProduct = activeTemplate?.type === "product" ? catalog.products.find((product) => product.id === previewResourceId) ?? catalog.products[0] : undefined;
+  const selectedPreviewCollection = activeTemplate?.type === "collection"
+    ? collectionPreviewPageContext(catalog, backendStoreId, previewResourceId)
+    : null;
   const previewPageContext: StorefrontPageContext = selectedPreviewProduct
     ? { pageType: "product", resource: { id: selectedPreviewProduct.id, handle: selectedPreviewProduct.slug, data: { title: selectedPreviewProduct.name, product: selectedPreviewProduct } } }
-    : { pageType: "home", resource: null };
+    : selectedPreviewCollection ?? { pageType: "home", resource: null };
   const builtInSections = useMemo(() => {
     if (!activeTemplate || !libraryRegion) return [];
     return listSectionDefinitions()
