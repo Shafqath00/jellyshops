@@ -57,7 +57,7 @@ export interface StoreEditorApi {
   saveDraft(storeId: string, expectedRevision: number, document: StorefrontDocument): Promise<DraftRecord>;
   getPublic(storeId: string): Promise<PublicationRecord>;
 
-  listCatalog(): Promise<DemoCatalog>;
+  listCatalog(storeId: string): Promise<DemoCatalog>;
   uploadMedia(storeId: string, file: File, onProgress?: (percent: number) => void): Promise<MediaRecord>;
   deleteMedia(storeId: string, mediaId: string): Promise<void>;
   listProducts(storeId: string): Promise<{ nodes: CatalogAdminProduct[]; nextCursor: string | null }>;
@@ -161,7 +161,30 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
     saveDraft: (storeId, expectedRevision, document) => request(storefrontPath(storeId, "/draft"), { method: "PUT", body: JSON.stringify({ expectedRevision, document }) }),
     getPublic: (storeId) => request(storefrontPath(storeId, "/public"), {}, false),
 
-    listCatalog: () => request("/api/demo/catalog", {}, false),
+    listCatalog: async (storeId) => {
+      const catalogPath = `/api/stores/${encodeURIComponent(storeId)}/catalog`;
+      const [products, collections] = await Promise.all([
+        request<{ nodes: CatalogAdminProduct[] }>(`${catalogPath}/products?limit=100`),
+        request<{ nodes: Array<{ id: string; handle: string; title: string }> }>(`${catalogPath}/collections?limit=100`),
+      ]);
+      return {
+        products: products.nodes.map((product) => ({
+          id: product.id,
+          slug: product.handle,
+          name: product.title,
+          imageUrl: product.media[0]?.url ?? "",
+          priceMinor: product.variants[0]?.priceMinor ?? 0,
+          currency: "USD" as const,
+        })),
+        collections: collections.nodes.map((collection) => ({
+          id: collection.id,
+          slug: collection.handle,
+          name: collection.title,
+          imageUrl: "",
+          productIds: products.nodes.filter((product) => product.collectionIds?.includes(collection.id)).map((product) => product.id),
+        })),
+      };
+    },
     uploadMedia: async (storeId, file, onProgress) => {
       onProgress?.(0);
       const form = new FormData(); form.append("file", file);

@@ -241,7 +241,7 @@ export default function OnlineStoreEditorPage() {
       api.listTemplates(backendStoreId),
       api.listGlobalSections(backendStoreId),
       api.listPresets(backendStoreId),
-      api.listCatalog(),
+      api.listCatalog(backendStoreId),
       api.listThemeCatalog(backendStoreId),
       api.getThemeConfiguration(backendStoreId),
     ]).then(([nextWorkspace, nextTemplates, nextGlobals, nextPresets, nextCatalog, nextThemeCatalog, nextThemeConfiguration]) => {
