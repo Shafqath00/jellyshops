@@ -32,7 +32,7 @@ export function TemplateResourceSelector({
   const activeTemplate = templates.find((template) => template.id === activeTemplateId);
   const needsPreviewResource = activeTemplate ? activeTemplate.type !== "home" && activeTemplate.type !== "search" && activeTemplate.type !== "cart" : previewResources.length > 0;
   const pageType = activeTemplate?.type ? `${activeTemplate.type.charAt(0).toUpperCase()}${activeTemplate.type.slice(1)}` : "Home";
-  const pageTypes = [...new Set(templates.map((template) => template.type))];
+  const pageTypes: StorefrontTemplateType[] = ["home", "product", "collection", "cart", "search", "page", "blog", "article"];
 
   return (
     <div className="grid gap-3 border-b border-[#eeeeee] bg-white p-4 sm:grid-cols-3" aria-label="Template and preview resource">

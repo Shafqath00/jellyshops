@@ -69,6 +69,15 @@ const sectionCategoryLabels = {
   commerce: "Products",
 } as const;
 
+const defaultTemplateSections: Record<string, string[]> = {
+  home: ["hero"], product: ["product-information"], collection: ["collection-header", "collection-product-grid"],
+  cart: ["cart-summary"], search: ["search-results"], page: ["rich-text"], blog: ["journal-teaser"], article: ["rich-text"],
+};
+
+function defaultTemplateLayout(type: string): Record<string, unknown> {
+  return { sections: (defaultTemplateSections[type] ?? ["rich-text"]).map((sectionType) => ({ kind: "inline", section: { id: `${type}-${sectionType}`, type: sectionType, enabled: true, settings: {}, blocks: [] } })) };
+}
+
 function displayName(value: string): string {
   return value.split("-").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
 }
@@ -598,11 +607,20 @@ export default function OnlineStoreEditorPage() {
         onPreviewResourceChange={setPreviewResourceId}
         onPageTypeChange={(pageType) => {
           const template = templates.find((entry) => entry.type === pageType);
-          if (!template) return;
-          setActiveTemplateId(template.id);
-          setSelection(null);
-          setActiveGlobalId(undefined);
-          setPreviewSnapshot(undefined);
+          if (template) {
+            setActiveTemplateId(template.id);
+            setSelection(null);
+            setActiveGlobalId(undefined);
+            setPreviewSnapshot(undefined);
+            return;
+          }
+          if (!api) return;
+          void api.createTemplate(backendStoreId, { type: pageType, name: `Default ${pageType.charAt(0).toUpperCase()}${pageType.slice(1)}`, handle: "default", layout: defaultTemplateLayout(pageType) }).then((result) => {
+            setTemplates((current) => [...current, result.template]);
+            setActiveTemplateId(result.template.id);
+            setWorkspace((current) => current ? { ...current, generation: result.generation } : current);
+            setPreviewSnapshot(undefined);
+          });
         }}
       />
 
