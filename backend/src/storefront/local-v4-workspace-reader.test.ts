@@ -68,16 +68,56 @@ describe("LocalV4WorkspaceReader", () => {
 
   it("normalizes absent optional collections to empty compiler collections", async () => {
     const input = await new LocalV4WorkspaceReader(source({
+      getWorkspace: vi.fn(async () => null),
+      listTemplates: vi.fn(async () => undefined),
+      listGlobalSections: vi.fn(async () => undefined),
       listMenus: vi.fn(async () => undefined),
+      getThemeConfiguration: vi.fn(async () => null),
       listAssignments: vi.fn(async () => undefined),
+      listResourceIds: vi.fn(async () => undefined),
       listMetafieldDefinitions: vi.fn(async () => undefined),
       listMetaobjectDefinitions: vi.fn(async () => undefined),
-    })).load("store-a", 7, "registry-a");
+    })).load("store-a", 0, "registry-a");
 
+    expect(input.generation).toBe(0);
+    expect(input.templates).toEqual([]);
+    expect(input.globalSections).toEqual([]);
     expect(input.menus).toEqual([]);
     expect(input.assignments).toEqual([]);
     expect(input.metafieldDefinitions).toEqual([]);
     expect(input.metaobjectDefinitions).toEqual([]);
+    expect(input.theme).toEqual({ presetId: "minimal", settings: {}, artifactId: null });
+    expect(input.resourceIds).toEqual({
+      products: new Set(),
+      collections: new Set(),
+      pages: new Set(),
+      blogs: new Set(),
+      articles: new Set(),
+    });
+  });
+
+  it("normalizes persisted SQL enum values without changing document JSON", async () => {
+    const layout = {
+      sections: [{ kind: "global", globalSectionId: "missing" }],
+    };
+    const input = await new LocalV4WorkspaceReader(source({
+      listTemplates: vi.fn(async () => [{
+        id: "home-default",
+        storeId: "store-a",
+        revision: 0,
+        type: "HOME" as never,
+        handle: "default",
+        name: "Home",
+        layout,
+        createdAt: new Date(0),
+        updatedAt: new Date(0),
+      }]),
+    })).load("store-a", 7, "registry-a");
+
+    expect(input.templates[0]).toMatchObject({
+      type: "home",
+      layout,
+    });
   });
 
   it("preserves malformed persisted layouts for compiler validation", async () => {

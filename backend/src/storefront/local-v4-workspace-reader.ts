@@ -13,7 +13,11 @@ import { WorkspaceGenerationConflictError } from "./workspace/errors.js";
 import type { TemplateAssignmentRecord } from "./workspace/repositories/assignment-repository.js";
 import type { GlobalSectionRecord } from "./workspace/repositories/global-section-repository.js";
 import type { NavigationMenuRecord } from "./workspace/repositories/menu-repository.js";
-import type { StorefrontTemplateRecord } from "./workspace/repositories/template-repository.js";
+import {
+  templateTypes,
+  type StorefrontTemplateRecord,
+  type TemplateType,
+} from "./workspace/repositories/template-repository.js";
 import type { ThemeConfigurationRecord } from "./workspace/repositories/theme-repository.js";
 
 export interface CompilerResourceIds {
@@ -36,10 +40,17 @@ export interface LocalV4WorkspaceDataSource {
   listMetaobjectDefinitions(storeId: string): Promise<CompilerMetaobjectDefinitionInput[] | undefined>;
 }
 
+function templateType(value: string): TemplateType {
+  const normalized = value.toLowerCase();
+  return templateTypes.includes(normalized as TemplateType)
+    ? normalized as TemplateType
+    : value as TemplateType;
+}
+
 function template(record: StorefrontTemplateRecord): CompilerTemplateInput {
   return {
     id: record.id,
-    type: record.type,
+    type: templateType(record.type),
     handle: record.handle,
     name: record.name,
     layout: record.layout as CompilerTemplateInput["layout"],
