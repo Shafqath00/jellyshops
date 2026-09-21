@@ -38,6 +38,19 @@ describe("registry-driven section rendering", () => {
     expect(screen.getByText("preview:template:true")).toBeInTheDocument();
   });
 
+  it("passes live product page context to product sections", () => {
+    const registry = new SectionRenderRegistry();
+    registry.register("product-information", ({ context }) => <span>{context.page?.resource?.data.title as string}</span>);
+
+    render(<RegistrySectionRenderer section={section("product-information")} mode="published" commerce={commerce} registry={registry} page={{ pageType: "product", resource: { id: "product-1", handle: "cake", data: { title: "Live cake" } } }} />);
+    expect(screen.getByText("Live cake")).toBeInTheDocument();
+  });
+
+  it("renders product information from live page context", () => {
+    render(<RegistrySectionRenderer section={section("product-information")} mode="published" commerce={commerce} page={{ pageType: "product", resource: { id: "product-1", handle: "cake", data: { title: "Live cake" } } }} />);
+    expect(screen.getByRole("heading", { name: "Live cake" })).toBeInTheDocument();
+  });
+
   it("keeps unsupported-section diagnostics in editor/preview but not published", () => {
     const registry = new SectionRenderRegistry();
     const { rerender } = render(

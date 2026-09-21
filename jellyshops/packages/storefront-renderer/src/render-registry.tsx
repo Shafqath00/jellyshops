@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import type { SectionNode } from "@jelly/storefront-schema";
+import { StorefrontContainer } from "@jelly/storefront-ui";
 import { FooterSection } from "./sections/footer";
 import { HeaderSection } from "./sections/header";
 import { HeroSection } from "./sections/hero";
@@ -64,6 +65,10 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("hero", ({ section, mode }) => <HeroSection section={section} editor={mode === "editor"} />);
   registry.register("rich-text", ({ section, mode }) => <RichTextSection section={section} editor={mode === "editor"} />);
   registry.register("product-grid", ({ commerce }) => <ProductGridSection commerce={commerce} />);
+  registry.register("product-information", ({ context }) => {
+    const title = context.page?.pageType === "product" ? context.page.resource.data.title : undefined;
+    return <section className="jelly-section jelly-product-information"><StorefrontContainer><h1>{typeof title === "string" ? title : "Product"}</h1></StorefrontContainer></section>;
+  });
   registry.register("featured-collection", ({ commerce }) => <ProductGridSection commerce={commerce} />);
   registry.register("image-with-text", ({ section }) => <ImageWithTextSection section={section} />);
   registry.register("image-text", ({ section }) => <ImageWithTextSection section={section} />);

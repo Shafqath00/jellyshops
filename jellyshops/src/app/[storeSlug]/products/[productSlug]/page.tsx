@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useThemePresentation } from "@/components/storefront-shell";
 import { useShop } from "@/contexts/shop-context";
 import { formatMoney, type ConfiguredOptionSelection } from "@/lib/domain";
 import { getConfiguredPriceMinor, resolveProductVariant } from "@/lib/product-configuration";
 import { useStorefrontCatalogStatus } from "@/features/commerce/components/storefront-catalog-sync";
+import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
+import { loadPublicStorefrontPublication, type PublicStorefrontPublication } from "@/features/storefront/public-storefront-api";
+import { resolveStorefrontRoute, type PublicResourceReader } from "@/features/storefront/resource-loader";
 
 export default function ProductPage() {
   const { storeSlug, productSlug } = useParams<{ storeSlug: string; productSlug: string }>();
@@ -17,11 +20,32 @@ export default function ProductPage() {
   const catalogStatus = useStorefrontCatalogStatus();
   const [selections, setSelections] = useState<ConfiguredOptionSelection[]>([]);
   const [added, setAdded] = useState(false);
+  const [publication, setPublication] = useState<PublicStorefrontPublication | null>(null);
+  const [resolvedRoute, setResolvedRoute] = useState<Awaited<ReturnType<typeof resolveStorefrontRoute>> | null>(null);
   const store = repository.getStoreBySlug(storeSlug);
   const product = store ? repository.getProductBySlug(store.id, decodedProductSlug) : undefined;
+  const visibleProducts = repository.listProducts(storeSlug).filter((item) => item.published && !item.archived);
+  useEffect(() => {
+    if (!store) return;
+    let active = true;
+    void loadPublicStorefrontPublication({ baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001", storeId: store.id })
+      .then((next) => { if (active) setPublication(next); });
+    return () => { active = false; };
+  }, [store]);
+  useEffect(() => {
+    if (!store || !product || publication?.kind !== "v4") return;
+    const reader: PublicResourceReader = {
+      findByHandle: async (type, handle) => type === "product" && handle === product.slug ? { type: "product", id: product.id, handle: product.slug, visible: true, data: { title: product.name, description: product.description, product } } : null,
+      findById: async (type, id) => type === "product" && id === product.id ? { type: "product", id: product.id, handle: product.slug, visible: true, data: { title: product.name, description: product.description, product } } : null,
+    };
+    void resolveStorefrontRoute(publication.snapshot, { type: "product", handle: product.slug }, reader).then(setResolvedRoute);
+  }, [product, publication, store]);
   const options = [...(product?.options ?? [])].sort((a, b) => a.position - b.position);
   if (catalogStatus === "loading") return <main className="flex min-h-[75vh] items-center justify-center">Loading product…</main>;
   if (!store || !product || product.archived || !product.published) return <main className="flex min-h-[75vh] flex-col items-center justify-center"><h1>Product not found</h1><Link href={`/${storeSlug}/shop`}>Back to shop</Link></main>;
+  if (publication?.kind === "v4") {
+    if (resolvedRoute?.status === "ready") return <PublishedRuntimeStorefront snapshot={publication.snapshot} route={resolvedRoute} storeSlug={store.slug} currency={store.currency} products={visibleProducts} />;
+  }
   const selected = (optionId: string) => selections.find((item) => item.optionId === optionId)?.valueId;
   const choose = (optionId: string, valueId: string) => setSelections((items) => [...items.filter((item) => item.optionId !== optionId), { optionId, valueId }]);
   const requiredMissing = options.some((option) => option.required && !selected(option.id));
