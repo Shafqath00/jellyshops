@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ShopProvider } from "@/contexts/shop-context";
 import { AuthProvider } from "@/features/auth/auth-provider";
 import "./globals.css";
+import "./shadcn-theme.css";
 
 export const metadata: Metadata = {
   title: "Jelly Shop",
@@ -15,10 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      data-scroll-behavior="smooth"
-    >
+    <html lang="en" data-scroll-behavior="smooth">
       <body>
         <AuthProvider>
           <ShopProvider>{children}</ShopProvider>
