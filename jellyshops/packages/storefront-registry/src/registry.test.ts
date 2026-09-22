@@ -25,6 +25,13 @@ it("registers the complete ecommerce section catalog", () => {
   expect(validateSectionAgainstRegistry(section("not-found-message"), "not-found")).toEqual([]);
 });
 
+it("allows page content only on a custom Page template", () => {
+  expect(validateSectionAgainstRegistry(section("page-content"), "page" as never)).toEqual([]);
+  expect(validateSectionAgainstRegistry(section("page-content"), "home")).toEqual(expect.arrayContaining([
+    expect.objectContaining({ code: "SECTION_NOT_ALLOWED_ON_PAGE" }),
+  ]));
+});
+
 it("allows only Hero content blocks", () => {
   expect(getSectionDefinition("hero")?.allowedBlockTypes).toEqual(["heading", "text", "button"]);
 });

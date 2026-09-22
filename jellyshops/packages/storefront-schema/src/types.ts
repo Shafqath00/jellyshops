@@ -1,7 +1,7 @@
 /** Theme IDs are validated by the canonical manifest registry at runtime. */
 export type ThemeId = string;
 
-export type PageType = "home" | "product" | "collection" | "cart" | "search" | "not-found";
+export type PageType = "home" | "product" | "collection" | "cart" | "search" | "page" | "blog" | "article" | "not-found";
 
 export interface GlobalSettings {
   colors: { primary: string; background: string; text: string; surface: string; accent: string };

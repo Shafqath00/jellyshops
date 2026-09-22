@@ -95,6 +95,13 @@ describe("registry-driven section rendering", () => {
     expect(screen.getByRole("link", { name: /live shoe/i })).toHaveAttribute("href", "/store/products/shoe");
   });
 
+  it("renders custom Page title and safe text content from live resource context", () => {
+    render(<RegistrySectionRenderer section={section("page-content")} mode="published" commerce={commerce} page={{ pageType: "page", resource: { id: "about", handle: "about", data: { title: "About us", content: { text: "We make carefully chosen things.", html: "<script>unsafe</script>" } } } }} />);
+    expect(screen.getByRole("heading", { name: "About us" })).toBeInTheDocument();
+    expect(screen.getByText("We make carefully chosen things.")).toBeInTheDocument();
+    expect(screen.queryByText(/unsafe/i)).toBeNull();
+  });
+
   it("keeps unsupported-section diagnostics in editor/preview but not published", () => {
     const registry = new SectionRenderRegistry();
     const { rerender } = render(

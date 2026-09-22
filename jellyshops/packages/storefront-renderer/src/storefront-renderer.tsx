@@ -26,5 +26,6 @@ export function StorefrontRenderer({ document, page = "home", pageId, mode, comm
     return <div className="jelly-storefront" data-jelly-theme={document.theme.presetId} style={style}>{renderRegion("header")}<main>{activeSections.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode={mode} commerce={commerce} region="template" themeId={document.theme.presetId} selected={selected} onSelect={onSelect} />)}</main>{renderRegion("footer")}</div>;
   }
   const style = resolveDesignTokens(document.theme.id, document.globalSettings) as CSSProperties;
-  return <div className="jelly-storefront" data-jelly-theme={document.theme.id} style={style}><RegistrySectionRenderer section={document.header} mode={mode} commerce={commerce} /><main><PageRenderer page={document.pages[page]} mode={mode} commerce={commerce} onSectionError={onSectionError} /></main><RegistrySectionRenderer section={document.footer} mode={mode} commerce={commerce} /></div>;
+  const legacyPage = document.pages[page as keyof typeof document.pages] ?? document.pages.home;
+  return <div className="jelly-storefront" data-jelly-theme={document.theme.id} style={style}><RegistrySectionRenderer section={document.header} mode={mode} commerce={commerce} /><main><PageRenderer page={legacyPage} mode={mode} commerce={commerce} onSectionError={onSectionError} /></main><RegistrySectionRenderer section={document.footer} mode={mode} commerce={commerce} /></div>;
 }
