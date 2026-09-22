@@ -51,7 +51,7 @@ function packPages(id: ThemePackId, homeSections: SectionNode[]): StoreDesignDoc
   return {
     home: page("home", homeSections),
     product: page("product", [section("product-gallery"), section("product-information"), section("product-options"), section("product-purchase"), section("product-description"), section("related-products")]),
-    collection: page("collection", [section("collection-header"), section("collection-product-grid")]),
+    collection: page("collection", [section("collection-header"), section("collection-product-grid"), section("collection-description")]),
     cart: page("cart", [section("cart-summary"), section("trust-strip", {}, [block("text", { text: cartMessage })])]),
     search: page("search", [section("search-results")]),
     "not-found": page("not-found", [section("not-found-message", {}, [block("heading", { text: missingHeading }), block("text", { text: missingText }), block("button", { label: "Shop all", href: "/shop" })])]),

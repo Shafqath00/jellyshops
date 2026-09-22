@@ -38,6 +38,21 @@ it("registers Product merchandising sections only for Product templates", () => 
   }
 });
 
+it("registers configurable Collection sections only for Collection templates", () => {
+  const types = ["collection-header", "collection-product-grid", "collection-description"];
+  for (const type of types) {
+    const definition = getSectionDefinition(type);
+    expect(definition?.controls.length).toBeGreaterThan(0);
+    expect(validateSectionAgainstRegistry(section(type), "collection")).toEqual([]);
+    expect(validateSectionAgainstRegistry(section(type), "product")).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: "SECTION_NOT_ALLOWED_ON_PAGE" }),
+    ]));
+  }
+  expect(getSectionDefinition("collection-header")?.controls.map(({ key }) => key)).toEqual(["showTitle", "showDescription", "showImage"]);
+  expect(getSectionDefinition("collection-product-grid")?.defaultSettings).toMatchObject({ columns: 3, limit: 12 });
+  expect(getSectionDefinition("collection-description")?.defaultSettings).toMatchObject({ spacing: "standard" });
+});
+
 it("allows page content only on a custom Page template", () => {
   expect(validateSectionAgainstRegistry(section("page-content"), "page" as never)).toEqual([]);
   expect(validateSectionAgainstRegistry(section("page-content"), "home")).toEqual(expect.arrayContaining([
