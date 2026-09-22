@@ -17,15 +17,16 @@ export interface CollectionPageContextReader {
 export function createCollectionPageContext(
   collection: Collection,
   catalogProducts: Product[],
+  currency: Currency = "USD",
 ): Extract<StorefrontPageContext, { type: "collection" }> {
   const products = catalogProducts
-    .filter((product) => product.published && !product.archived && product.collectionIds?.includes(collection.id))
+    .filter((product) => product.storeId === collection.storeId && product.published && !product.archived && product.collectionIds?.includes(collection.id))
     .map((product): PublicProduct => ({
       id: product.id,
       name: product.name,
       href: `/products/${product.slug}`,
       imageUrl: product.imageUrl,
-      price: String(product.variants[0]?.priceMinor ?? 0),
+      price: product.variants[0] ? formatMoney(product.variants[0].priceMinor, currency) : "",
     }));
   return { type: "collection", collection, products };
 }
@@ -33,10 +34,11 @@ export function createCollectionPageContext(
 export async function loadCollectionPageContext(
   reader: CollectionPageContextReader,
   handle: string,
+  currency: Currency = "USD",
 ): Promise<Extract<StorefrontPageContext, { type: "collection" }> | null> {
   const collection = await reader.findCollection(handle);
   if (!collection) return null;
-  return createCollectionPageContext(collection, await reader.listProducts(collection.id));
+  return createCollectionPageContext(collection, await reader.listProducts(collection.id), currency);
 }
 
 export interface SearchPageContextReader {

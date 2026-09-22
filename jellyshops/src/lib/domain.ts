@@ -87,7 +87,7 @@ export interface Category {
 }
 
 export interface Brand { id: string; storeId: string; name: string; slug?: string; logo?: string; }
-export interface Collection { id: string; storeId: string; name: string; slug: string; }
+export interface Collection { id: string; storeId: string; name: string; slug: string; description?: string; imageUrl?: string; }
 export interface CategoryOptionDefinition {
   id: string;
   storeId: string;

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createEditorPreviewPageContext } from "./preview-context";
 import type { Product } from "@/lib/domain";
+import { createCollectionPageContext } from "@/features/storefront/page-context-loaders";
 
 const catalog = {
   products: [{ id: "product-1", slug: "classic-cake", name: "Classic Cake", imageUrl: "cake.jpg", priceMinor: 2500, currency: "USD" as const }],
@@ -89,5 +90,22 @@ describe("createEditorPreviewPageContext", () => {
     } } } });
     const presentation = context?.pageType === "collection" ? context.resource.data.collectionPresentation as { collection: { imageUrl?: string } } : null;
     expect(presentation?.collection.imageUrl).toBeUndefined();
+  });
+
+  it("matches public Collection presentation semantics for the same live catalog facts", () => {
+    const detail = { id: "collection-1", storeId: "store-a", handle: "cakes", title: "Real cakes", description: "Fresh every day", productIds: ["product-1"], products: [
+      { id: "product-1", storeId: "store-a", handle: "classic-cake", title: "Classic Cake", description: "", productType: "Cake", status: "ACTIVE" as const, media: [{ id: "image", url: "/real-cake.jpg", altText: null, position: 0 }], variants: [{ id: "variant-1", title: "Standard", sku: null, priceMinor: 2500, quantity: 3, available: true }], available: true },
+    ] };
+    const preview = createEditorPreviewPageContext({ type: "collection", resourceId: detail.id, storeId: "store-a", catalog, content, searchQuery: "", collectionDetail: detail });
+    const previewPresentation = preview?.pageType === "collection" ? preview.resource.data.collectionPresentation : null;
+    const publicContext = createCollectionPageContext(
+      { id: detail.id, storeId: detail.storeId, name: detail.title, slug: detail.handle, description: detail.description },
+      [{ id: "product-1", storeId: "store-a", name: "Classic Cake", slug: "classic-cake", description: "", category: "Cake", imageUrl: "/real-cake.jpg", published: true, archived: false, featured: false, collectionIds: ["collection-1"], variants: [{ id: "variant-1", name: "Standard", sku: "", priceMinor: 2500, stock: 3 }] }],
+      "USD",
+    );
+    expect(previewPresentation).toMatchObject({
+      collection: { id: publicContext.collection.id, title: publicContext.collection.name, description: publicContext.collection.description },
+      products: publicContext.products, totalProducts: publicContext.products.length,
+    });
   });
 });

@@ -36,7 +36,7 @@ export default function CollectionPage() {
     void loadCollectionPageContext({
       findCollection: async (handle) => repository.getCollections(store.id).find((collection) => collection.slug === handle) ?? null,
       listProducts: async () => repository.listProducts(store.slug),
-    }, decodedCollectionSlug).then((context) => {
+    }, decodedCollectionSlug, store.currency).then((context) => {
       if (active) setPageContext(context);
     });
     return () => { active = false; };
@@ -52,6 +52,11 @@ export default function CollectionPage() {
       data: {
         collection: pageContext.collection,
         products: pageContext.products.map((product) => ({ ...product, href: `/${store.slug}/products/${product.href.split("/").pop()}` })),
+        collectionPresentation: {
+          collection: { id: pageContext.collection.id, title: pageContext.collection.name, description: pageContext.collection.description ?? "", ...(pageContext.collection.imageUrl ? { imageUrl: pageContext.collection.imageUrl } : {}) },
+          products: pageContext.products.map((product) => ({ ...product, href: `/${store.slug}/products/${product.href.split("/").pop()}` })),
+          totalProducts: pageContext.products.length,
+        },
       },
     };
     const reader: PublicResourceReader = {

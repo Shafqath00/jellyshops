@@ -38,6 +38,14 @@ describe("catalog-backed Collection context", () => {
     expect(context?.collection).not.toHaveProperty("description");
   });
 
+  it("formats live Collection product prices for the storefront currency", async () => {
+    const context = await loadCollectionPageContext({
+      findCollection: async () => collection,
+      listProducts: async () => [product("member", { collectionIds: ["collection-1"], variants: [{ id: "variant", name: "Standard", sku: "S", priceMinor: 1200, stock: 2 }] })],
+    }, "summer", "USD");
+    expect(context?.products[0]?.price).toBe("$12.00");
+  });
+
   it("returns null for a collection that cannot be found in the current store", async () => {
     await expect(loadCollectionPageContext({ findCollection: async () => null, listProducts: async () => [] }, "other-store")).resolves.toBeNull();
   });
