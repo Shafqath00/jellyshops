@@ -8,7 +8,7 @@ import {
   createSectionFromDefinition,
   getBlockDefinition,
   getSectionDefinition,
-  listSectionDefinitions,
+  listSectionDefinitionsForPage,
 } from "@jelly/storefront-registry";
 import { RegistrySectionRenderer, type CommerceDataProvider, type StorefrontPageContext } from "@jelly/storefront-renderer";
 import type {
@@ -371,10 +371,7 @@ export default function OnlineStoreEditorPage() {
     : null;
   const builtInSections = useMemo(() => {
     if (!activeTemplate || !libraryRegion) return [];
-    return listSectionDefinitions()
-      .filter((definition) =>
-        definition.supportedPages.includes(activeTemplate.type)
-        && (definition.allowedRegions ?? ["template"]).includes(libraryRegion))
+    return listSectionDefinitionsForPage(activeTemplate.type, libraryRegion)
       .map((definition) => ({
         id: definition.type,
         name: displayName(definition.type),

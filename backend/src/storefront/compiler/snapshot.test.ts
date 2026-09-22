@@ -46,4 +46,26 @@ describe("assembleRuntimeSnapshot", () => {
     expect(JSON.stringify(snapshot)).toContain("resource_field");
     expect(snapshot).not.toHaveProperty("catalog");
   });
+
+  it("preserves section settings and template-owned order on a non-Home template", () => {
+    const source = input();
+    source.templates = [{
+      id: "article-default",
+      type: "article",
+      handle: "default",
+      name: "Article",
+      layout: { sections: [
+        { kind: "inline", section: { id: "story-first", type: "rich-text", settings: { alignment: "center", tone: "warm" }, blocks: [{ id: "copy-first", type: "text", settings: { text: "First" } }] } },
+        { kind: "inline", section: { id: "story-second", type: "rich-text", settings: { alignment: "left" }, blocks: [{ id: "copy-second", type: "text", settings: { text: "Second" } }] } },
+      ] },
+    }];
+    const snapshot = assembleRuntimeSnapshot(source, buildDependencyGraph(source), "2026-01");
+
+    expect(snapshot.templates["article-default"].layout.sections.map((placement) => placement.kind === "inline" ? placement.section.id : "global"))
+      .toEqual(["story-first", "story-second"]);
+    expect(snapshot.templates["article-default"].layout.sections[0]).toMatchObject({
+      kind: "inline",
+      section: { type: "rich-text", settings: { alignment: "center", tone: "warm" } },
+    });
+  });
 });

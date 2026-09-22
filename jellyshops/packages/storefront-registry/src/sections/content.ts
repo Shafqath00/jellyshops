@@ -3,6 +3,7 @@ import type { DynamicValueType } from "@jelly/storefront-schema";
 import type { SectionDefinition } from "../types.js";
 
 const home = ["home"] as const;
+const reusableContentPages = ["home", "product", "collection", "page", "blog", "article"] as const;
 const empty = z.object({}).passthrough();
 const stringTypes = ["string", "text"] satisfies DynamicValueType[];
 const richTextTypes = ["rich_text", "string", "text"] satisfies DynamicValueType[];
@@ -46,7 +47,7 @@ export const contentSections: SectionDefinition[] = [
   { type: "image-text", category: "content", supportedPages: [...home], settingsSchema: empty, controls: contentAlignment, allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: ["contentAlignment"] },
   { type: "image-with-text", category: "content", supportedPages: [...home], settingsSchema: empty, controls: contentAlignment, allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: ["contentAlignment"], presets: [{ id: "image-with-text", label: "Image with text", category: "content" }] },
   { type: "image-banner", category: "content", supportedPages: [...home], settingsSchema: empty, controls: contentAlignment, allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: ["contentAlignment"] },
-  { type: "rich-text", category: "content", supportedPages: [...home], settingsSchema: empty, controls: [], allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: [], presets: [{ id: "rich-text", label: "Rich text", category: "content" }] },
+  { type: "rich-text", category: "content", supportedPages: [...reusableContentPages], settingsSchema: empty, controls: [], allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: [], presets: [{ id: "rich-text", label: "Rich text", category: "content" }] },
   { type: "testimonials", category: "content", supportedPages: [...home], settingsSchema: empty, controls: [], allowedBlockTypes: ["testimonial"], defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
   { type: "faq", category: "content", supportedPages: [...home], settingsSchema: empty, controls: [], allowedBlockTypes: ["faq-item"], maxBlocks: 12, defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
   { type: "newsletter", category: "content", supportedPages: [...home], settingsSchema: empty, controls: [], allowedBlockTypes: ["heading", "text"], defaultSettings: {}, defaultBlocks: [], responsiveFields: [], presets: [{ id: "newsletter", label: "Newsletter", category: "marketing" }] },

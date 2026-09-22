@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 import type { SectionNode } from "@jelly/storefront-schema";
-import { getSectionDefinition, listSectionDefinitions, validateSectionAgainstRegistry } from "./index";
+import { getSectionDefinition, listSectionDefinitions, listSectionDefinitionsForPage, validateSectionAgainstRegistry } from "./index";
 
 function section(type: string, blocks: SectionNode["blocks"] = []): SectionNode {
   return { id: "section-1", type, enabled: true, settings: {}, blocks };
@@ -74,6 +74,28 @@ it("allows Article sections only on Article templates", () => {
   expect(validateSectionAgainstRegistry(section("article-content"), "blog")).toEqual(expect.arrayContaining([
     expect.objectContaining({ code: "SECTION_NOT_ALLOWED_ON_PAGE" }),
   ]));
+});
+
+it("makes rich text reusable on compatible content templates only", () => {
+  const richText = section("rich-text", [{ id: "story", type: "text", enabled: true, settings: { text: "Our story" } }]);
+  richText.settings = { alignment: "center" };
+
+  for (const pageType of ["home", "product", "collection", "page", "blog", "article"] as const) {
+    expect(validateSectionAgainstRegistry(richText, pageType)).toEqual([]);
+  }
+  for (const pageType of ["search", "cart", "not-found"] as const) {
+    expect(validateSectionAgainstRegistry(richText, pageType)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: "SECTION_NOT_ALLOWED_ON_PAGE" }),
+    ]));
+  }
+  expect(getSectionDefinition("rich-text")?.settingsSchema.parse(richText.settings)).toEqual({ alignment: "center" });
+});
+
+it("supplies Add Section options from page and region compatibility", () => {
+  expect(listSectionDefinitionsForPage("article").map(({ type }) => type)).toContain("rich-text");
+  expect(listSectionDefinitionsForPage("article").map(({ type }) => type)).not.toContain("article-list");
+  expect(listSectionDefinitionsForPage("article").map(({ type }) => type)).not.toContain("product-information");
+  expect(listSectionDefinitionsForPage("article", "header").map(({ type }) => type)).not.toContain("rich-text");
 });
 
 it("allows only Hero content blocks", () => {

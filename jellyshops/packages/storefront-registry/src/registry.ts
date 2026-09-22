@@ -3,7 +3,7 @@ import { blockDefinitions } from "./blocks.js";
 import { commerceSections } from "./sections/commerce.js";
 import { contentSections } from "./sections/content.js";
 import { layoutSections } from "./sections/layout.js";
-import type { RegistryValidationIssue, SectionDefinition } from "./types.js";
+import type { RegionName, RegistryValidationIssue, SectionDefinition } from "./types.js";
 
 const sections: SectionDefinition[] = [...layoutSections, ...contentSections, ...commerceSections].map((definition) => ({
   ...definition,
@@ -18,6 +18,9 @@ const sectionDefinitions = new Map(sections.map((definition) => [definition.type
 export function getSectionDefinition(type: string): SectionDefinition | undefined { return sectionDefinitions.get(type); }
 export function getBlockDefinition(type: string) { return blockDefinitions.get(type); }
 export function listSectionDefinitions(): SectionDefinition[] { return [...sections]; }
+export function listSectionDefinitionsForPage(pageType: PageType, region: RegionName = "template"): SectionDefinition[] {
+  return sections.filter((definition) => definition.supportedPages.includes(pageType) && (definition.allowedRegions ?? ["template"]).includes(region));
+}
 
 export function validateSectionAgainstRegistry(section: SectionNode, pageType: PageType): RegistryValidationIssue[] {
   const definition = getSectionDefinition(section.type);

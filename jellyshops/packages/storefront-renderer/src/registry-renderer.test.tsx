@@ -20,6 +20,29 @@ describe("registry-driven section rendering", () => {
     expect(screen.getByText("Rendered brand-story")).toBeInTheDocument();
   });
 
+  it("renders the same configured Rich text section in preview, editor, and published modes across compatible pages", () => {
+    const richText: SectionNode = {
+      id: "story",
+      type: "rich-text",
+      enabled: true,
+      settings: { alignment: "center" },
+      blocks: [{ id: "story-copy", type: "text", enabled: true, settings: { text: "Independent story content" } }],
+    };
+    const compatiblePages = ["home", "product", "collection", "page", "blog", "article"] as const;
+
+    for (const pageType of compatiblePages) {
+      const page = pageType === "home"
+        ? { pageType, resource: null }
+        : { pageType, resource: { id: `${pageType}-1`, handle: pageType, data: { unrelated: "Live resource data" } } };
+      for (const mode of ["preview", "editor", "published"] as const) {
+        const view = render(<RegistrySectionRenderer section={richText} mode={mode} commerce={commerce} page={page} />);
+        expect(view.getByText("Independent story content")).toBeInTheDocument();
+        expect(view.queryByText("Live resource data")).not.toBeInTheDocument();
+        view.unmount();
+      }
+    }
+  });
+
   it("passes a constrained runtime context to registered sections", () => {
     const registry = new SectionRenderRegistry();
     registry.register("runtime-aware", ({ context }) => (
