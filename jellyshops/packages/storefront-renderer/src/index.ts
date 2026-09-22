@@ -5,4 +5,4 @@ export { createStorefrontRuntimeContext } from "./runtime-context";
 export { isRenderableHomeSection, renderableHomeSectionTypes } from "./section-support";
 export type { SectionRenderComponent, SectionRenderProps } from "./render-registry";
 export type { RuntimeRegion, StorefrontRuntimeContext } from "./runtime-context";
-export type { AssetResolver, CommerceDataProvider, PublicProduct, StorefrontPageContext, StorefrontRendererProps } from "./types";
+export type { AssetResolver, CommerceDataProvider, ProductPresentationContext, PublicProduct, StorefrontPageContext, StorefrontRendererProps } from "./types";
