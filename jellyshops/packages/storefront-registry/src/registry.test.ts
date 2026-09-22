@@ -25,6 +25,19 @@ it("registers the complete ecommerce section catalog", () => {
   expect(validateSectionAgainstRegistry(section("not-found-message"), "not-found")).toEqual([]);
 });
 
+it("registers Product merchandising sections only for Product templates", () => {
+  const productSections = ["product-gallery", "product-information", "product-options", "product-purchase", "product-description", "related-products"];
+
+  expect(listSectionDefinitions().map((definition) => definition.type)).toEqual(expect.arrayContaining(productSections));
+  for (const type of productSections) {
+    expect(validateSectionAgainstRegistry(section(type), "product")).toEqual([]);
+    expect(validateSectionAgainstRegistry(section(type), "collection")).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: "SECTION_NOT_ALLOWED_ON_PAGE" }),
+    ]));
+    expect(getSectionDefinition(type)?.controls.length).toBeGreaterThan(0);
+  }
+});
+
 it("allows page content only on a custom Page template", () => {
   expect(validateSectionAgainstRegistry(section("page-content"), "page" as never)).toEqual([]);
   expect(validateSectionAgainstRegistry(section("page-content"), "home")).toEqual(expect.arrayContaining([

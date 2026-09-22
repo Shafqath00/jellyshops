@@ -50,7 +50,7 @@ function packPages(id: ThemePackId, homeSections: SectionNode[]): StoreDesignDoc
   const missingText = id === "fresh-market" ? "Try a fresh search or head back to the market." : "Return to the collection and discover something new.";
   return {
     home: page("home", homeSections),
-    product: page("product", [section("product-information"), section("product-description"), section("related-products")]),
+    product: page("product", [section("product-gallery"), section("product-information"), section("product-options"), section("product-purchase"), section("product-description"), section("related-products")]),
     collection: page("collection", [section("collection-header"), section("collection-product-grid")]),
     cart: page("cart", [section("cart-summary"), section("trust-strip", {}, [block("text", { text: cartMessage })])]),
     search: page("search", [section("search-results")]),
