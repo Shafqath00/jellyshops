@@ -1,5 +1,7 @@
 import type { ProductPresentationContext, PublicProduct, StorefrontPageContext } from "@jelly/storefront-renderer";
 import type { StorefrontTemplateType, ArticleResource, BlogResource, DemoCatalog, PageResource } from "./api/types";
+import type { ConfiguredOptionSelection, Product } from "@/lib/domain";
+import { createProductPresentationContext } from "@/features/storefront/product-presentation";
 
 export interface EditorPreviewContent {
   pages: PageResource[];
@@ -17,19 +19,21 @@ function publicProducts(catalog: DemoCatalog): PublicProduct[] {
   }));
 }
 
-function previewProductPresentation(product: DemoCatalog["products"][number]): ProductPresentationContext {
-  return {
-    product: { id: product.id, title: product.name, description: "", imageUrl: product.imageUrl, options: [] },
-    selection: [],
-    quantity: 1,
-    pricing: { price: new Intl.NumberFormat("en-US", { style: "currency", currency: product.currency }).format(product.priceMinor / 100) },
-    availability: { state: "unavailable", message: "Product options are unavailable in this preview", maxQuantity: 0 },
-    canAddToCart: false,
-    selectOption: () => undefined,
-    setQuantity: () => undefined,
-    addToCart: async () => ({ ok: false, message: "Product options are unavailable in this preview" }),
-    relatedProducts: [],
-  };
+export interface EditorProductPreviewRuntime {
+  selections: ConfiguredOptionSelection[];
+  quantity: number;
+  onSelectionsChange(selections: ConfiguredOptionSelection[]): void;
+  onQuantityChange(quantity: number): void;
+}
+
+function previewProductPresentation(product: Product, runtime: EditorProductPreviewRuntime, relatedProducts: PublicProduct[]): ProductPresentationContext {
+  return createProductPresentationContext({
+    product, currency: "USD", selections: runtime.selections, quantity: runtime.quantity,
+    onSelectionsChange: runtime.onSelectionsChange, onQuantityChange: runtime.onQuantityChange,
+    // Editor preview deliberately exercises the same delegated contract without mutating a shopper cart.
+    onAddToCart: async () => ({ ok: false, message: "Cart changes are disabled in editor preview" }),
+    relatedProducts,
+  });
 }
 
 function resource<T extends { id: string }>(items: T[], id: string | undefined): T | null {
@@ -62,6 +66,8 @@ export function createEditorPreviewPageContext({
   catalog,
   content,
   searchQuery,
+  productDetail,
+  productRuntime,
 }: {
   type: StorefrontTemplateType;
   resourceId?: string;
@@ -69,6 +75,8 @@ export function createEditorPreviewPageContext({
   catalog: DemoCatalog;
   content: EditorPreviewContent;
   searchQuery: string;
+  productDetail?: Product | null;
+  productRuntime?: EditorProductPreviewRuntime;
 }): StorefrontPageContext | null {
   if (type === "home") return { pageType: "home", resource: null };
   if (type === "cart") return { pageType: "cart", resource: null };
@@ -82,8 +90,8 @@ export function createEditorPreviewPageContext({
     };
   }
   if (type === "product") {
-    const product = resource(catalog.products, resourceId);
-    return product ? { pageType: "product", resource: { id: product.id, handle: product.slug, data: { title: product.name, product, productPresentation: previewProductPresentation(product) } } } : null;
+    if (!productDetail || !productRuntime || productDetail.id !== resourceId) return null;
+    return { pageType: "product", resource: { id: productDetail.id, handle: productDetail.slug, data: { title: productDetail.name, product: productDetail, productPresentation: previewProductPresentation(productDetail, productRuntime, publicProducts(catalog).filter((product) => product.id !== productDetail.id)) } } };
   }
   if (type === "collection") {
     const collection = resource(catalog.collections, resourceId);

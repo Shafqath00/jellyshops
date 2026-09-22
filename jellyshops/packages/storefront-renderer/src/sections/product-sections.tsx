@@ -11,8 +11,9 @@ function productContext(context: StorefrontRuntimeContext): ProductPresentationC
 
 export function ProductGallerySection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown> } }) {
   const product = productContext(context);
-  if (!product?.product.imageUrl) return null;
-  return <section className="jelly-section jelly-product-gallery"><StorefrontContainer><img src={product.product.imageUrl} alt={product.product.title} style={{ objectFit: section.settings.imageFit === "contain" ? "contain" : "cover" }} /></StorefrontContainer></section>;
+  const media = product?.product.media?.length ? product.product.media : product?.product.imageUrl ? [{ id: "primary", url: product.product.imageUrl, altText: product.product.title }] : [];
+  if (!product || media.length === 0) return null;
+  return <section className="jelly-section jelly-product-gallery"><StorefrontContainer>{media.map((item) => <img key={item.id} src={item.url} alt={item.altText ?? product.product.title} style={{ objectFit: section.settings.imageFit === "contain" ? "contain" : "cover" }} />)}</StorefrontContainer></section>;
 }
 
 export function ProductInformationSection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown> } }) {

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Product } from "@/lib/domain";
-import { createProductPresentationContext } from "./product-presentation";
+import { catalogProductToProduct, createProductPresentationContext } from "./product-presentation";
 
 const product: Product = {
   id: "cake", storeId: "store-a", name: "Celebration cake", slug: "celebration-cake", description: "Vanilla sponge", category: "Cakes", imageUrl: "/cake.jpg", published: true, archived: false, featured: false,
@@ -30,5 +30,19 @@ describe("createProductPresentationContext", () => {
     expect(onQuantityChange).toHaveBeenCalledWith(2);
     await expect(context.addToCart()).resolves.toEqual({ ok: true });
     expect(addToCart).toHaveBeenCalledWith({ variantId: "small", quantity: 2, selections: [{ optionId: "size", valueId: "small" }], priceMinor: 1200 });
+  });
+
+  it("preserves catalog detail media, options, compare-at price, and availability for the shared contract", () => {
+    const catalogProduct = catalogProductToProduct({
+      id: "cake", storeId: "store-a", handle: "celebration-cake", title: "Celebration cake", description: "Vanilla sponge", vendor: "Jelly Bakery", productType: "Cakes", status: "ACTIVE", available: true,
+      media: [{ id: "hero", url: "/hero.jpg", altText: "Cake", position: 0 }, { id: "side", url: "/side.jpg", altText: null, position: 1 }],
+      options: product.options, inventoryOptionIds: ["size"], variants: [{ id: "small", title: "Small", sku: "CAKE-S", priceMinor: 1200, compareAtPriceMinor: 1500, quantity: 2, available: true, options: { size: "small" } }],
+    });
+    const context = createProductPresentationContext({ product: catalogProduct, currency: "USD", selections: [{ optionId: "size", valueId: "small" }], quantity: 1, onSelectionsChange: vi.fn(), onQuantityChange: vi.fn(), onAddToCart: vi.fn() });
+
+    expect(context).toMatchObject({
+      product: { vendor: "Jelly Bakery", media: [{ id: "hero", url: "/hero.jpg" }, { id: "side", url: "/side.jpg" }] },
+      pricing: { compareAtPrice: "$15.00" }, availability: { state: "available", maxQuantity: 2 },
+    });
   });
 });

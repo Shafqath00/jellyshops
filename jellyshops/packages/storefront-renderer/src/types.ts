@@ -2,7 +2,7 @@ import type { GlobalSettings, PageType, StoreDesignDocument, StorefrontDocument 
 
 export interface PublicProduct { id: string; name: string; href: string; imageUrl: string; price: string }
 export interface ProductPresentationContext {
-  product: { id: string; title: string; description: string; imageUrl: string; sku?: string; vendor?: string; options: Array<{ id: string; name: string; required: boolean; values: Array<{ id: string; label: string; selected: boolean; available: boolean }> }> };
+  product: { id: string; title: string; description: string; imageUrl: string; media?: Array<{ id: string; url: string; altText?: string }>; sku?: string; vendor?: string; options: Array<{ id: string; name: string; required: boolean; values: Array<{ id: string; label: string; selected: boolean; available: boolean }> }> };
   selection: Array<{ optionId: string; valueId: string }>;
   quantity: number;
   pricing: { price: string; compareAtPrice?: string };

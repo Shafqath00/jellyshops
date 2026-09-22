@@ -47,6 +47,8 @@ import { TemplateHierarchy } from "@/features/store-editor/components/template-h
 import { TemplateResourceSelector } from "@/features/store-editor/components/template-resource-selector";
 import { parseEditorNavigationTarget } from "@/features/store-editor/editor-navigation";
 import { createEditorPreviewPageContext, editorPreviewResourceOptions } from "@/features/store-editor/preview-context";
+import { catalogProductToProduct } from "@/features/storefront/product-presentation";
+import type { ConfiguredOptionSelection, Product } from "@/lib/domain";
 import type { EditorSelection } from "@/features/store-editor/model/types";
 import type { EditorViewport } from "@/features/store-editor/state/types";
 import {
@@ -212,6 +214,9 @@ export default function OnlineStoreEditorPage() {
   const [activeTemplateId, setActiveTemplateId] = useState("");
   const [previewResourceId, setPreviewResourceId] = useState<string | undefined>(handoff.resourceId);
   const [previewQuery, setPreviewQuery] = useState("cake");
+  const [previewProduct, setPreviewProduct] = useState<Product | null>(null);
+  const [previewProductSelections, setPreviewProductSelections] = useState<ConfiguredOptionSelection[]>([]);
+  const [previewProductQuantity, setPreviewProductQuantity] = useState(1);
   const [selection, setSelection] = useState<EditorSelection>(null);
   const [activeGlobalId, setActiveGlobalId] = useState<string>();
   const [viewport, setViewport] = useState<EditorViewport>("desktop");
@@ -282,6 +287,23 @@ export default function OnlineStoreEditorPage() {
     return () => { active = false; };
   }, [api, activeTemplate, backendStoreId]);
 
+  useEffect(() => {
+    if (!api || activeTemplate?.type !== "product" || !previewResourceId) {
+      setPreviewProduct(null);
+      setPreviewProductSelections([]);
+      setPreviewProductQuantity(1);
+      return;
+    }
+    let active = true;
+    setPreviewProduct(null);
+    setPreviewProductSelections([]);
+    setPreviewProductQuantity(1);
+    void api.getProduct(backendStoreId, previewResourceId)
+      .then((detail) => { if (active && detail?.storeId === backendStoreId) setPreviewProduct(catalogProductToProduct(detail)); })
+      .catch(() => { if (active) setPreviewProduct(null); });
+    return () => { active = false; };
+  }, [api, activeTemplate?.type, backendStoreId, previewResourceId]);
+
   const validGlobals = useMemo(
     () => globals.filter((global): global is GlobalSectionRecord => Boolean(global?.id)),
     [globals],
@@ -330,7 +352,7 @@ export default function OnlineStoreEditorPage() {
     ? expandRuntimeLayout(previewSnapshot, compiledTemplate)
     : activeTemplate ? draftPreviewLayout(activeTemplate, globalMap) : { announcement: [], header: [], template: [], footer: [] };
   const previewPageContext: StorefrontPageContext | null = activeTemplate
-    ? createEditorPreviewPageContext({ type: activeTemplate.type, resourceId: previewResourceId, storeId: backendStoreId, catalog, content: { pages, blogs, articles }, searchQuery: previewQuery })
+    ? createEditorPreviewPageContext({ type: activeTemplate.type, resourceId: previewResourceId, storeId: backendStoreId, catalog, content: { pages, blogs, articles }, searchQuery: previewQuery, productDetail: previewProduct, productRuntime: { selections: previewProductSelections, quantity: previewProductQuantity, onSelectionsChange: setPreviewProductSelections, onQuantityChange: setPreviewProductQuantity } })
     : null;
   const builtInSections = useMemo(() => {
     if (!activeTemplate || !libraryRegion) return [];

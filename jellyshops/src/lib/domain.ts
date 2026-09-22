@@ -48,6 +48,7 @@ export interface ProductVariant {
   name: string;
   sku: string;
   priceMinor: number;
+  compareAtPriceMinor?: number;
   stock: number;
   options?: Record<string, string>;
 }
@@ -104,6 +105,8 @@ export interface Product {
   description: string;
   category: string;
   imageUrl: string;
+  media?: Array<{ id: string; url: string; altText?: string }>;
+  vendor?: string;
   published: boolean;
   archived: boolean;
   featured: boolean;
