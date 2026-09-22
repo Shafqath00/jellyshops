@@ -108,6 +108,40 @@ describe("registry-driven section rendering", () => {
     expect(screen.getByText("No products are available in this collection yet.")).toBeInTheDocument();
   });
 
+  it("renders Collection merchandising from live detail with section presentation settings", () => {
+    const page = { pageType: "collection" as const, resource: { id: "collection-a", handle: "cakes", data: {
+      collectionPresentation: { collection: { id: "collection-a", title: "Fresh cakes", description: "Baked today", imageUrl: "/cakes.jpg" }, products: [
+        { id: "one", name: "One", href: "/products/one", imageUrl: "", price: "$10.00" },
+        { id: "two", name: "Two", href: "/products/two", imageUrl: "", price: "$20.00" },
+      ], totalProducts: 2 },
+    } } };
+    render(<>
+      <RegistrySectionRenderer section={{ ...section("collection-header"), settings: { showTitle: true, showDescription: false, showImage: true } }} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={{ ...section("collection-product-grid"), settings: { columns: 2, limit: 1 } }} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={{ ...section("collection-description"), settings: { spacing: "compact" } }} mode="published" commerce={commerce} page={page} />
+    </>);
+
+    expect(screen.getByRole("heading", { name: "Fresh cakes" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Fresh cakes" })).toHaveAttribute("src", "/cakes.jpg");
+    expect(screen.getByText("Baked today")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /one/i })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /two/i })).toBeNull();
+    expect(screen.getByTestId("collection-product-grid-items")).toHaveAttribute("data-columns", "2");
+  });
+
+  it("renders configured empty copy without inventing missing Collection content", () => {
+    const page = { pageType: "collection" as const, resource: { id: "empty", handle: "empty", data: { collectionPresentation: { collection: { id: "empty", title: "Empty", description: "" }, products: [], totalProducts: 0 } } } };
+    render(<>
+      <RegistrySectionRenderer section={section("collection-header")} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={{ ...section("collection-product-grid"), settings: { emptyMessage: "Coming soon" } }} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={section("collection-description")} mode="published" commerce={commerce} page={page} />
+    </>);
+
+    expect(screen.getByText("Coming soon")).toBeInTheDocument();
+    expect(screen.queryByRole("img")).toBeNull();
+    expect(screen.queryByText("undefined")).toBeNull();
+  });
+
   it("renders live Cart data and delegates quantity mutations to the runtime context", () => {
     const onDecrease = vi.fn();
     const onIncrease = vi.fn();
