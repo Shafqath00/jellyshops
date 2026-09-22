@@ -1,4 +1,4 @@
-import type { PublicProduct, StorefrontPageContext } from "@jelly/storefront-renderer";
+import type { ProductPresentationContext, PublicProduct, StorefrontPageContext } from "@jelly/storefront-renderer";
 import type { StorefrontTemplateType, ArticleResource, BlogResource, DemoCatalog, PageResource } from "./api/types";
 
 export interface EditorPreviewContent {
@@ -15,6 +15,21 @@ function publicProducts(catalog: DemoCatalog): PublicProduct[] {
     imageUrl: product.imageUrl,
     price: new Intl.NumberFormat("en-US", { style: "currency", currency: product.currency }).format(product.priceMinor / 100),
   }));
+}
+
+function previewProductPresentation(product: DemoCatalog["products"][number]): ProductPresentationContext {
+  return {
+    product: { id: product.id, title: product.name, description: "", imageUrl: product.imageUrl, options: [] },
+    selection: [],
+    quantity: 1,
+    pricing: { price: new Intl.NumberFormat("en-US", { style: "currency", currency: product.currency }).format(product.priceMinor / 100) },
+    availability: { state: "unavailable", message: "Product options are unavailable in this preview", maxQuantity: 0 },
+    canAddToCart: false,
+    selectOption: () => undefined,
+    setQuantity: () => undefined,
+    addToCart: async () => ({ ok: false, message: "Product options are unavailable in this preview" }),
+    relatedProducts: [],
+  };
 }
 
 function resource<T extends { id: string }>(items: T[], id: string | undefined): T | null {
@@ -68,7 +83,7 @@ export function createEditorPreviewPageContext({
   }
   if (type === "product") {
     const product = resource(catalog.products, resourceId);
-    return product ? { pageType: "product", resource: { id: product.id, handle: product.slug, data: { title: product.name, product } } } : null;
+    return product ? { pageType: "product", resource: { id: product.id, handle: product.slug, data: { title: product.name, product, productPresentation: previewProductPresentation(product) } } } : null;
   }
   if (type === "collection") {
     const collection = resource(catalog.collections, resourceId);

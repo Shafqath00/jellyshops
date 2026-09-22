@@ -35,7 +35,7 @@ describe("createEditorPreviewPageContext", () => {
     expect(createEditorPreviewPageContext({ type: "home", storeId: "store-a", catalog, content, searchQuery: "cake" })).toEqual({ pageType: "home", resource: null });
     expect(createEditorPreviewPageContext({ type: "cart", storeId: "store-a", catalog, content, searchQuery: "cake" })).toEqual({ pageType: "cart", resource: null });
     expect(createEditorPreviewPageContext({ type: "product", resourceId: "product-1", storeId: "store-a", catalog, content, searchQuery: "cake" })).toMatchObject({
-      pageType: "product", resource: { id: "product-1", handle: "classic-cake", data: { title: "Classic Cake" } },
+      pageType: "product", resource: { id: "product-1", handle: "classic-cake", data: { title: "Classic Cake", productPresentation: { product: { title: "Classic Cake" }, quantity: 1 } } },
     });
     expect(createEditorPreviewPageContext({ type: "collection", resourceId: "collection-1", storeId: "store-a", catalog, content, searchQuery: "cake" })).toMatchObject({
       pageType: "collection", resource: { id: "collection-1", handle: "cakes", data: { collection: { storeId: "store-a", name: "Cakes" }, products: [expect.objectContaining({ id: "product-1" })] } },
