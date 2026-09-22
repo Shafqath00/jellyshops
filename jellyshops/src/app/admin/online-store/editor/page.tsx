@@ -22,18 +22,19 @@ import type {
 } from "@jelly/storefront-schema";
 import { resolveDesignTokens, resolveTheme } from "@jelly/storefront-themes";
 import { expandRuntimeLayout } from "@/features/storefront/resource-loader";
-import { createCollectionPageContext } from "@/features/storefront/page-context-loaders";
-import type { Collection, Product } from "@/lib/domain";
 import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import { useAuth } from "@/features/auth/auth-provider";
 import type {
   DemoCatalog,
+  ArticleResource,
+  BlogResource,
   DynamicSourceDescriptor,
   GlobalSectionRecord,
   SectionPresetRecord,
   StorefrontTemplateRecord,
   ThemeCatalogEntry,
   ThemeConfigurationRecord,
+  PageResource,
   WorkspaceRecord,
 } from "@/features/store-editor/api/types";
 import { GlobalSectionPanel } from "@/features/store-editor/components/global-section-panel";
@@ -43,8 +44,9 @@ import { PublishControls } from "@/features/store-editor/components/publish-cont
 import { PublishDiagnostics } from "@/features/store-editor/components/publish-diagnostics";
 import { SectionLibrary } from "@/features/store-editor/components/section-library";
 import { TemplateHierarchy } from "@/features/store-editor/components/template-hierarchy";
-import { TemplateResourceSelector, type PreviewResourceOption } from "@/features/store-editor/components/template-resource-selector";
+import { TemplateResourceSelector } from "@/features/store-editor/components/template-resource-selector";
 import { parseEditorNavigationTarget } from "@/features/store-editor/editor-navigation";
+import { createEditorPreviewPageContext, editorPreviewResourceOptions } from "@/features/store-editor/preview-context";
 import type { EditorSelection } from "@/features/store-editor/model/types";
 import type { EditorViewport } from "@/features/store-editor/state/types";
 import {
@@ -71,7 +73,7 @@ const sectionCategoryLabels = {
 
 const defaultTemplateSections: Record<string, string[]> = {
   home: ["hero"], product: ["product-information"], collection: ["collection-header", "collection-product-grid"],
-  cart: ["cart-summary"], search: ["search-results"], page: ["rich-text"], blog: ["journal-teaser"], article: ["rich-text"],
+  cart: ["cart-summary"], search: ["search-results"], page: ["page-content"], blog: ["blog-header", "article-list"], article: ["article-header", "article-content"],
 };
 
 function defaultTemplateLayout(type: string): Record<string, unknown> {
@@ -150,6 +152,28 @@ function templateSections(template: StorefrontTemplateRecord, globals: Map<strin
   });
 }
 
+function draftPreviewLayout(template: StorefrontTemplateRecord, globals: Map<string, GlobalSectionRecord>) {
+  const layout = { announcement: [] as SectionNode[], header: [] as SectionNode[], template: [] as SectionNode[], footer: [] as SectionNode[] };
+  const placements = template.layout.sections;
+  if (!Array.isArray(placements)) return layout;
+  for (const placement of placements) {
+    if (!placement || typeof placement !== "object" || Array.isArray(placement)) continue;
+    const input = placement as Record<string, unknown>;
+    const section = input.kind === "inline"
+      ? normalizeSection(input.section)
+      : input.kind === "global" && typeof input.globalSectionId === "string"
+        ? normalizeSection(globals.get(input.globalSectionId)?.section)
+        : null;
+    if (!section) continue;
+    const region = section.type === "announcement-bar" ? "announcement"
+      : section.type === "header" ? "header"
+        : section.type === "footer" ? "footer"
+          : "template";
+    layout[region].push(section);
+  }
+  return layout;
+}
+
 function selectedInlineSection(template: StorefrontTemplateRecord, selection: EditorSelection): SectionNode | null {
   if (!selection || selection.kind === "theme" || !selection.sectionId) return null;
   const placements = template.layout.sections;
@@ -162,52 +186,6 @@ function selectedInlineSection(template: StorefrontTemplateRecord, selection: Ed
     if (section?.id === selection.sectionId) return section;
   }
   return null;
-}
-
-function resourceOptions(
-  template: StorefrontTemplateRecord | undefined,
-  catalog: DemoCatalog,
-  handoff: ReturnType<typeof parseEditorNavigationTarget>,
-): PreviewResourceOption[] {
-  if (!template) return [];
-  const options = template.type === "product"
-    ? catalog.products.map((product) => ({ id: product.id, label: product.name }))
-    : template.type === "collection"
-      ? catalog.collections.map((collection) => ({ id: collection.id, label: collection.name }))
-      : [];
-  if (handoff.resourceId && handoff.resourceType === template.type && !options.some((option) => option.id === handoff.resourceId)) {
-    options.push({ id: handoff.resourceId, label: `Selected ${handoff.resourceType}` });
-  }
-  return options;
-}
-
-function collectionPreviewPageContext(
-  catalog: DemoCatalog,
-  storeId: string,
-  previewResourceId: string | undefined,
-): StorefrontPageContext | null {
-  const selected = catalog.collections.find((collection) => collection.id === previewResourceId) ?? catalog.collections[0];
-  if (!selected) return null;
-  const collection: Collection = { id: selected.id, storeId, name: selected.name, slug: selected.slug };
-  const products: Product[] = catalog.products.map((product) => ({
-    id: product.id,
-    storeId,
-    name: product.name,
-    slug: product.slug,
-    description: "",
-    category: "",
-    imageUrl: product.imageUrl,
-    published: true,
-    archived: false,
-    featured: false,
-    variants: [{ id: `${product.id}-preview`, name: "Default", sku: "", priceMinor: product.priceMinor, stock: 1 }],
-    collectionIds: catalog.collections.filter((entry) => entry.productIds.includes(product.id)).map((entry) => entry.id),
-  }));
-  const context = createCollectionPageContext(collection, products);
-  return {
-    pageType: "collection",
-    resource: { id: context.collection.id, handle: context.collection.slug, data: { collection: context.collection, products: context.products } },
-  };
 }
 
 export default function OnlineStoreEditorPage() {
@@ -226,10 +204,14 @@ export default function OnlineStoreEditorPage() {
   const [presets, setPresets] = useState<SectionPresetRecord[]>([]);
   const [dynamicSources, setDynamicSources] = useState<DynamicSourceDescriptor[]>([]);
   const [catalog, setCatalog] = useState<DemoCatalog>({ products: [], collections: [] });
+  const [pages, setPages] = useState<PageResource[]>([]);
+  const [blogs, setBlogs] = useState<BlogResource[]>([]);
+  const [articles, setArticles] = useState<ArticleResource[]>([]);
   const [themeCatalog, setThemeCatalog] = useState<ThemeCatalogEntry[]>([]);
   const [themeConfiguration, setThemeConfiguration] = useState<ThemeConfigurationRecord | null>(null);
   const [activeTemplateId, setActiveTemplateId] = useState("");
   const [previewResourceId, setPreviewResourceId] = useState<string | undefined>(handoff.resourceId);
+  const [previewQuery, setPreviewQuery] = useState("cake");
   const [selection, setSelection] = useState<EditorSelection>(null);
   const [activeGlobalId, setActiveGlobalId] = useState<string>();
   const [viewport, setViewport] = useState<EditorViewport>("desktop");
@@ -251,15 +233,21 @@ export default function OnlineStoreEditorPage() {
       api.listGlobalSections(backendStoreId),
       api.listPresets(backendStoreId),
       api.listCatalog(backendStoreId),
+      api.listPages(backendStoreId),
+      api.listBlogs(backendStoreId),
+      api.listArticles(backendStoreId),
       api.listThemeCatalog(backendStoreId),
       api.getThemeConfiguration(backendStoreId),
-    ]).then(([nextWorkspace, nextTemplates, nextGlobals, nextPresets, nextCatalog, nextThemeCatalog, nextThemeConfiguration]) => {
+    ]).then(([nextWorkspace, nextTemplates, nextGlobals, nextPresets, nextCatalog, nextPages, nextBlogs, nextArticles, nextThemeCatalog, nextThemeConfiguration]) => {
       if (!active) return;
       setWorkspace(nextWorkspace);
       setTemplates(nextTemplates);
       setGlobals(nextGlobals);
       setPresets(nextPresets);
       setCatalog(nextCatalog);
+      setPages(nextPages);
+      setBlogs(nextBlogs);
+      setArticles(nextArticles);
       setThemeCatalog(nextThemeCatalog);
       setThemeConfiguration(nextThemeConfiguration);
       setActiveTemplateId((current) => {
@@ -304,8 +292,14 @@ export default function OnlineStoreEditorPage() {
     [activeTemplate, globalMap],
   );
   const previewResources = useMemo(
-    () => resourceOptions(activeTemplate, catalog, handoff),
-    [activeTemplate, catalog, handoff],
+    () => {
+      const options = editorPreviewResourceOptions(activeTemplate?.type, catalog, { pages, blogs, articles });
+      if (handoff.resourceId && handoff.resourceType === activeTemplate?.type && !options.some((option) => option.id === handoff.resourceId)) {
+        options.push({ id: handoff.resourceId, label: `Selected ${handoff.resourceType}` });
+      }
+      return options;
+    },
+    [activeTemplate, articles, blogs, catalog, handoff, pages],
   );
   const globalLabels = useMemo(() => Object.fromEntries(validGlobals.map((global) => [
     global.id,
@@ -332,19 +326,17 @@ export default function OnlineStoreEditorPage() {
   const selectedControls = selectedBlock ? blockDefinition?.controls ?? [] : sectionDefinition?.controls ?? [];
   const selectedSettings = selectedBlock?.settings ?? localSection?.settings ?? {};
   const compiledTemplate = activeTemplate && previewSnapshot ? previewSnapshot.templates[activeTemplate.id] : undefined;
-  const previewLayout = compiledTemplate && previewSnapshot ? expandRuntimeLayout(previewSnapshot, compiledTemplate) : { announcement: [], header: [], template: sections, footer: [] };
-  const selectedPreviewProduct = activeTemplate?.type === "product" ? catalog.products.find((product) => product.id === previewResourceId) ?? catalog.products[0] : undefined;
-  const selectedPreviewCollection = activeTemplate?.type === "collection"
-    ? collectionPreviewPageContext(catalog, backendStoreId, previewResourceId)
+  const previewLayout = compiledTemplate && previewSnapshot
+    ? expandRuntimeLayout(previewSnapshot, compiledTemplate)
+    : activeTemplate ? draftPreviewLayout(activeTemplate, globalMap) : { announcement: [], header: [], template: [], footer: [] };
+  const previewPageContext: StorefrontPageContext | null = activeTemplate
+    ? createEditorPreviewPageContext({ type: activeTemplate.type, resourceId: previewResourceId, storeId: backendStoreId, catalog, content: { pages, blogs, articles }, searchQuery: previewQuery })
     : null;
-  const previewPageContext: StorefrontPageContext = selectedPreviewProduct
-    ? { pageType: "product", resource: { id: selectedPreviewProduct.id, handle: selectedPreviewProduct.slug, data: { title: selectedPreviewProduct.name, product: selectedPreviewProduct } } }
-    : selectedPreviewCollection ?? { pageType: "home", resource: null };
   const builtInSections = useMemo(() => {
     if (!activeTemplate || !libraryRegion) return [];
     return listSectionDefinitions()
       .filter((definition) =>
-        definition.supportedPages.includes(activeTemplate.type as "home" | "product" | "collection")
+        definition.supportedPages.includes(activeTemplate.type)
         && (definition.allowedRegions ?? ["template"]).includes(libraryRegion))
       .map((definition) => ({
         id: definition.type,
@@ -603,8 +595,10 @@ export default function OnlineStoreEditorPage() {
         activeTemplateId={activeTemplate.id}
         previewResources={previewResources}
         previewResourceId={previewResourceId}
+        previewQuery={previewQuery}
         onTemplateChange={(templateId) => { setActiveTemplateId(templateId); setSelection(null); setActiveGlobalId(undefined); setPreviewSnapshot(undefined); }}
         onPreviewResourceChange={setPreviewResourceId}
+        onPreviewQueryChange={setPreviewQuery}
         onPageTypeChange={(pageType) => {
           const template = templates.find((entry) => entry.type === pageType);
           if (template) {
@@ -657,7 +651,7 @@ export default function OnlineStoreEditorPage() {
                 commerce={commerce}
                 region="template"
                 themeId={themeConfiguration?.themeId}
-                page={previewPageContext}
+                page={previewPageContext ?? undefined}
                 selected={previewSnapshot ? undefined : selection ?? undefined}
                 onSelect={previewSnapshot ? undefined : (next) => {
                   setActiveGlobalId(undefined);

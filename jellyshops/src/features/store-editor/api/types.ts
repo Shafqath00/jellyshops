@@ -5,6 +5,7 @@ import type {
   RuntimeStorefrontSnapshotV4,
   StorefrontDocument,
 } from "@jelly/storefront-schema";
+import type { ArticleResource, BlogResource, PageResource } from "@/features/content/api";
 
 export type StorefrontTemplateType = "home" | "product" | "collection" | "page" | "blog" | "article" | "search" | "cart";
 
@@ -126,6 +127,7 @@ export interface CatalogAdminProduct { id: string; storeId: string; handle: stri
 export interface DemoProduct { id: string; slug: string; name: string; imageUrl: string; priceMinor: number; currency: "USD" }
 export interface DemoCollection { id: string; slug: string; name: string; imageUrl: string; productIds: string[] }
 export interface DemoCatalog { products: DemoProduct[]; collections: DemoCollection[] }
+export type { ArticleResource, BlogResource, PageResource };
 export interface ApiIssue { path: string; message: string }
 
 export class StoreEditorApiError extends Error {

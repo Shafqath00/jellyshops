@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
@@ -85,6 +86,32 @@ describe("TemplateResourceSelector", () => {
 
     await userEvent.selectOptions(screen.getByLabelText("Page type"), "cart");
     expect(onPageTypeChange).toHaveBeenCalledWith("cart");
+    expect(onPreviewResourceChange).not.toHaveBeenCalled();
+  });
+
+  it("changes the search preview query without changing the template or resource", async () => {
+    const onTemplateChange = vi.fn();
+    const onPreviewResourceChange = vi.fn();
+    const onPreviewQueryChange = vi.fn();
+    function SearchPreviewSelector() {
+      const [query, setQuery] = useState("cake");
+      return <TemplateResourceSelector
+        templates={[{ id: "search-default", type: "search", handle: "default", name: "Default search" }]}
+        activeTemplateId="search-default"
+        previewResources={[]}
+        previewQuery={query}
+        onTemplateChange={onTemplateChange}
+        onPreviewResourceChange={onPreviewResourceChange}
+        onPreviewQueryChange={(next) => { setQuery(next); onPreviewQueryChange(next); }}
+      />;
+    }
+    render(<SearchPreviewSelector />);
+
+    await userEvent.clear(screen.getByLabelText("Preview query"));
+    await userEvent.type(screen.getByLabelText("Preview query"), "birthday cake");
+
+    expect(onPreviewQueryChange).toHaveBeenLastCalledWith("birthday cake");
+    expect(onTemplateChange).not.toHaveBeenCalled();
     expect(onPreviewResourceChange).not.toHaveBeenCalled();
   });
 });

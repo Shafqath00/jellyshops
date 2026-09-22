@@ -3,6 +3,8 @@ import {
   StoreEditorApiError,
   type CompilationResult,
   type CatalogAdminProduct,
+  type ArticleResource,
+  type BlogResource,
   type DemoCatalog,
   type DraftRecord,
   type DynamicSourceDescriptor,
@@ -10,6 +12,7 @@ import {
   type MediaRecord,
   type MenuRecord,
   type PublicationRecord,
+  type PageResource,
   type PublishResult,
   type SectionPresetRecord,
   type StorefrontTemplateRecord,
@@ -58,6 +61,9 @@ export interface StoreEditorApi {
   getPublic(storeId: string): Promise<PublicationRecord>;
 
   listCatalog(storeId: string): Promise<DemoCatalog>;
+  listPages(storeId: string): Promise<PageResource[]>;
+  listBlogs(storeId: string): Promise<BlogResource[]>;
+  listArticles(storeId: string): Promise<ArticleResource[]>;
   uploadMedia(storeId: string, file: File, onProgress?: (percent: number) => void): Promise<MediaRecord>;
   deleteMedia(storeId: string, mediaId: string): Promise<void>;
   listProducts(storeId: string): Promise<{ nodes: CatalogAdminProduct[]; nextCursor: string | null }>;
@@ -109,6 +115,7 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
 
   const storefrontPath = (storeId: string, suffix: string) => `/api/stores/${encodeURIComponent(storeId)}/storefront${suffix}`;
   const customDataPath = (storeId: string, suffix: string) => `/api/stores/${encodeURIComponent(storeId)}/custom-data${suffix}`;
+  const contentPath = (storeId: string, suffix: string) => `/api/stores/${encodeURIComponent(storeId)}/content${suffix}`;
 
   return {
     listThemeCatalog: (storeId) => request(storefrontPath(storeId, "/themes")),
@@ -185,6 +192,9 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
         })),
       };
     },
+    listPages: (storeId) => request(contentPath(storeId, "/pages")),
+    listBlogs: (storeId) => request(contentPath(storeId, "/blogs")),
+    listArticles: (storeId) => request(contentPath(storeId, "/articles")),
     uploadMedia: async (storeId, file, onProgress) => {
       onProgress?.(0);
       const form = new FormData(); form.append("file", file);

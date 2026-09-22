@@ -64,6 +64,36 @@ describe("store editor API client", () => {
     );
   });
 
+  it("loads page, blog, and article preview resources from the current store", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(jsonResponse([]))
+      .mockResolvedValueOnce(jsonResponse([]))
+      .mockResolvedValueOnce(jsonResponse([]));
+    const api = createStoreEditorApi({ baseUrl: "http://localhost:3001", token: "jelly-demo-merchant", fetch: fetchMock });
+
+    await Promise.all([
+      api.listPages("store-demo"),
+      api.listBlogs("store-demo"),
+      api.listArticles("store-demo"),
+    ]);
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "http://localhost:3001/api/stores/store-demo/content/pages",
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: "Bearer jelly-demo-merchant" }) }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "http://localhost:3001/api/stores/store-demo/content/blogs",
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: "Bearer jelly-demo-merchant" }) }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      "http://localhost:3001/api/stores/store-demo/content/articles",
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: "Bearer jelly-demo-merchant" }) }),
+    );
+  });
+
   it("returns compiler diagnostics from an intentional 422 validation response", async () => {
     const diagnostics = [{ severity: "error", code: "BINDING_INVALID", message: "Bad binding", location: { entityType: "template", entityId: "home-default" } }];
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ ok: false, diagnostics, dependencies: { edges: [] } }, 422));

@@ -20,6 +20,8 @@ export function TemplateResourceSelector({
   onTemplateChange,
   onPreviewResourceChange,
   onPageTypeChange,
+  previewQuery,
+  onPreviewQueryChange,
 }: {
   templates: TemplateSelectorOption[];
   activeTemplateId: string;
@@ -28,6 +30,8 @@ export function TemplateResourceSelector({
   onTemplateChange(templateId: string): void;
   onPreviewResourceChange(resourceId: string): void;
   onPageTypeChange?(pageType: StorefrontTemplateType): void;
+  previewQuery?: string;
+  onPreviewQueryChange?(query: string): void;
 }) {
   const activeTemplate = templates.find((template) => template.id === activeTemplateId);
   const needsPreviewResource = activeTemplate ? activeTemplate.type !== "home" && activeTemplate.type !== "search" && activeTemplate.type !== "cart" : previewResources.length > 0;
@@ -70,6 +74,17 @@ export function TemplateResourceSelector({
           ))}
         </select>
       </label>
+
+      {activeTemplate?.type === "search" && <label className="grid gap-1.5 text-[11px] font-semibold text-[#616161]">
+        <span>Preview query</span>
+        <input
+          aria-label="Preview query"
+          value={previewQuery ?? ""}
+          onChange={(event) => onPreviewQueryChange?.(event.target.value)}
+          placeholder="Search products"
+          className="h-9 rounded-lg border border-[#c9cccf] bg-white px-2.5 text-[12px] text-[#303030] outline-none focus:border-[#616161]"
+        />
+      </label>}
     </div>
   );
 }
