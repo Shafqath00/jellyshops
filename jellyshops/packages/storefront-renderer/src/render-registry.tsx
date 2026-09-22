@@ -6,6 +6,7 @@ import { HeaderSection } from "./sections/header";
 import { HeroSection } from "./sections/hero";
 import { ProductGridSection } from "./sections/product-grid";
 import { RichTextSection } from "./sections/rich-text";
+import { ProductDescriptionSection, ProductGallerySection, ProductInformationSection, ProductOptionsSection, ProductPurchaseSection, RelatedProductsSection } from "./sections/product-sections";
 import { ArticleContentSection, ArticleHeaderSection, ArticleListSection, BlogHeaderSection, PageContentSection } from "./sections/content-pages";
 import {
   AnnouncementBarSection,
@@ -85,10 +86,12 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("article-header", ({ context }) => <ArticleHeaderSection context={context} />);
   registry.register("article-content", ({ context }) => <ArticleContentSection context={context} />);
   registry.register("product-grid", ({ commerce }) => <ProductGridSection commerce={commerce} />);
-  registry.register("product-information", ({ context }) => {
-    const title = context.page?.pageType === "product" ? context.page.resource.data.title : undefined;
-    return <section className="jelly-section jelly-product-information"><StorefrontContainer><h1>{typeof title === "string" ? title : "Product"}</h1></StorefrontContainer></section>;
-  });
+  registry.register("product-gallery", ({ context, section }) => <ProductGallerySection context={context} section={section} />);
+  registry.register("product-information", ({ context, section }) => <ProductInformationSection context={context} section={section} />);
+  registry.register("product-options", ({ context }) => <ProductOptionsSection context={context} />);
+  registry.register("product-purchase", ({ context, section }) => <ProductPurchaseSection context={context} section={section} />);
+  registry.register("product-description", ({ context }) => <ProductDescriptionSection context={context} />);
+  registry.register("related-products", ({ context, section }) => <RelatedProductsSection context={context} section={section} />);
   registry.register("collection-header", ({ context }) => {
     const collection = collectionContext(context);
     return <section className="jelly-section jelly-collection-header"><StorefrontContainer><h1>{collection?.name ?? "Collection"}</h1></StorefrontContainer></section>;

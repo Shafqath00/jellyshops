@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { SectionNode } from "@jelly/storefront-schema";
 import { SectionRenderRegistry } from "./render-registry";
@@ -49,6 +50,38 @@ describe("registry-driven section rendering", () => {
   it("renders product information from live page context", () => {
     render(<RegistrySectionRenderer section={section("product-information")} mode="published" commerce={commerce} page={{ pageType: "product", resource: { id: "product-1", handle: "cake", data: { title: "Live cake" } } }} />);
     expect(screen.getByRole("heading", { name: "Live cake" })).toBeInTheDocument();
+  });
+
+  it("renders Product merchandising sections from live context and delegates purchase", async () => {
+    const addToCart = vi.fn(async () => ({ ok: true }));
+    const selectOption = vi.fn();
+    const setQuantity = vi.fn();
+    const page = {
+      pageType: "product" as const,
+      resource: {
+        id: "cake", handle: "cake", data: {
+          productPresentation: {
+            product: { id: "cake", title: "Celebration cake", description: "Vanilla sponge", imageUrl: "/cake.jpg", sku: "CAKE-S", vendor: "Jelly", options: [{ id: "size", name: "Size", required: true, values: [{ id: "small", label: "Small", selected: true, available: true }] }] },
+            selection: [{ optionId: "size", valueId: "small" }], quantity: 1, pricing: { price: "$12.00", compareAtPrice: "$15.00" }, availability: { state: "available" as const, message: "2 available", maxQuantity: 2 }, canAddToCart: true,
+            selectOption, setQuantity, addToCart, relatedProducts: [{ id: "related", name: "Related cake", href: "/products/related", imageUrl: "", price: "$10.00" }],
+          },
+        },
+      },
+    };
+    render(<>
+      <RegistrySectionRenderer section={section("product-gallery")} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={section("product-information")} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={section("product-options")} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={section("product-purchase")} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={section("product-description")} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={section("related-products")} mode="published" commerce={commerce} page={page} />
+    </>);
+
+    expect(screen.getByRole("img", { name: "Celebration cake" })).toBeInTheDocument();
+    expect(screen.getByText("$15.00")).toBeInTheDocument();
+    expect(screen.getByText("Vanilla sponge")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Add to cart" }));
+    expect(addToCart).toHaveBeenCalledOnce();
   });
 
   it("renders Collection title, supplied live products, and a safe empty state", () => {
