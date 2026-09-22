@@ -1,0 +1,19 @@
+import { z } from "zod";
+
+const searchContextSchema = z.object({
+  type: z.literal("search"), query: z.string(), state: z.enum(["empty", "results", "none"]), resultCount: z.number().int().nonnegative(),
+  results: z.array(z.object({ id: z.string(), handle: z.string(), title: z.string(), description: z.string(), imageUrl: z.string().nullable(), priceMinor: z.number() })),
+});
+
+export type PublicSearchPageContext = z.infer<typeof searchContextSchema>;
+
+interface SearchOptions { baseUrl: string; storeId: string; query: string; fetch?: typeof fetch; }
+
+export async function loadPublicSearchPageContext({ baseUrl, storeId, query, fetch: fetcher = fetch }: SearchOptions): Promise<PublicSearchPageContext | null> {
+  try {
+    const response = await fetcher(`${baseUrl.replace(/\/$/, "")}/api/public/stores/${encodeURIComponent(storeId)}/storefront/context/search?q=${encodeURIComponent(query)}`, { headers: { Accept: "application/json" }, cache: "no-store" });
+    if (!response.ok) return null;
+    const parsed = searchContextSchema.safeParse(await response.json());
+    return parsed.success ? parsed.data : null;
+  } catch { return null; }
+}

@@ -125,6 +125,9 @@ import type {
 import {
   createLocalV4CompilationService,
 } from "./storefront/local-v4-compilation.js";
+import { createPublicStorefrontContextRouter } from "./storefront/context/routes.js";
+import { SqlPublicStorefrontContextRepository } from "./storefront/context/sql-repository.js";
+import { PublicStorefrontContextService } from "./storefront/context/service.js";
 import {
   createDefaultStorefrontDocument,
   storefrontDocumentValidator,
@@ -1396,6 +1399,14 @@ export function createApp(
       ? new ContentService(new SqlContentRepository(storefrontSql))
       : undefined);
 
+  const publicStorefrontContextService =
+    storefrontSql && catalogService
+      ? new PublicStorefrontContextService(
+        new SqlPublicStorefrontContextRepository(storefrontSql),
+        catalogService,
+      )
+      : undefined;
+
   const storefrontCompilerApi =
     dependencies.storefrontCompilerApi ??
     (storefrontSql
@@ -1558,6 +1569,13 @@ export function createApp(
     { ...commerceDeps, catalogService },
     authProvider,
   );
+
+  if (publicStorefrontContextService) {
+    app.use(
+      "/api/public/stores/:storeId/storefront/context",
+      createPublicStorefrontContextRouter(publicStorefrontContextService),
+    );
+  }
 
   mountContentRoutes(
     app,
