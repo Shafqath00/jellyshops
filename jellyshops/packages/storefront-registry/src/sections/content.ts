@@ -37,6 +37,8 @@ const heroBlocks = [
 
 export const contentSections: SectionDefinition[] = [
   { type: "page-content", category: "content", supportedPages: ["page"], settingsSchema: empty, controls: [], allowedBlockTypes: [], defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
+  { type: "blog-header", category: "content", supportedPages: ["blog"], settingsSchema: empty, controls: [], allowedBlockTypes: [], defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
+  { type: "article-list", category: "content", supportedPages: ["blog"], settingsSchema: empty, controls: [], allowedBlockTypes: [], defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
   { type: "hero", category: "content", supportedPages: [...home], settingsSchema: z.object({ contentAlignment: z.enum(["left", "center", "right"]).optional() }).passthrough(), controls: comprehensiveControls, allowedBlockTypes: ["heading", "text", "button"], defaultSettings: { contentAlignment: "left" }, defaultBlocks: heroBlocks, responsiveFields: ["contentAlignment"], presets: [{ id: "hero", label: "Hero", category: "banners" }] },
   { type: "category-grid", category: "content", supportedPages: [...home], settingsSchema: empty, controls: [], allowedBlockTypes: [], defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
   { type: "image-text", category: "content", supportedPages: [...home], settingsSchema: empty, controls: contentAlignment, allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: ["contentAlignment"] },

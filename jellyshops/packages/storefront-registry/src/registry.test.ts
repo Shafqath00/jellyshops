@@ -32,6 +32,14 @@ it("allows page content only on a custom Page template", () => {
   ]));
 });
 
+it("allows Blog sections only on Blog templates", () => {
+  expect(validateSectionAgainstRegistry(section("blog-header"), "blog")).toEqual([]);
+  expect(validateSectionAgainstRegistry(section("article-list"), "blog")).toEqual([]);
+  expect(validateSectionAgainstRegistry(section("article-list"), "page")).toEqual(expect.arrayContaining([
+    expect.objectContaining({ code: "SECTION_NOT_ALLOWED_ON_PAGE" }),
+  ]));
+});
+
 it("allows only Hero content blocks", () => {
   expect(getSectionDefinition("hero")?.allowedBlockTypes).toEqual(["heading", "text", "button"]);
 });
