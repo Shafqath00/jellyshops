@@ -1,7 +1,7 @@
 import type { QueryResultRow } from "pg";
 import { randomUUID } from "node:crypto";
 import type { SqlExecutor } from "../commerce/repository.js";
-import type { CatalogCollection, CatalogProduct, CatalogVariant, Connection, ListCollectionsInput, ListProductsInput, CreateProductInput, UpdateProductInput, CreateCollectionInput, UpdateCollectionInput } from "./types.js";
+import type { CatalogCollection, CatalogCollectionDetail, CatalogProduct, CatalogVariant, Connection, ListCollectionsInput, ListProductsInput, CreateProductInput, UpdateProductInput, CreateCollectionInput, UpdateCollectionInput } from "./types.js";
 import type { CatalogAdminRepository } from "./repository.js";
 
 type Row = QueryResultRow & Record<string, unknown>;
@@ -19,11 +19,15 @@ export class CatalogPostgresRepository implements CatalogAdminRepository {
     values.push(input.limit);
     const products = await this.database.query<Row>(`SELECT p.* FROM "Product" p WHERE ${filters.join(" AND ")} ORDER BY p."id" LIMIT $${values.length}`, values);
     if (!products.rows.length) return { nodes: [], nextCursor: null };
-    const ids = products.rows.map((row) => String(row.id));
+    return { nodes: await this.hydrateProducts(storeId, products.rows), nextCursor: products.rows.length === input.limit ? String(products.rows.at(-1)!.id) : null };
+  }
+
+  private async hydrateProducts(storeId: string, productRows: Row[]): Promise<CatalogProduct[]> {
+    if (!productRows.length) return [];
+    const ids = productRows.map((row) => String(row.id));
     const variants = await this.database.query<Row>(`SELECT v.*, i."quantity", i."reserved" FROM "ProductVariant" v LEFT JOIN "InventoryLevel" i ON i."storeId" = v."storeId" AND i."variantId" = v."id" WHERE v."storeId" = $1 AND v."productId" = ANY($2::text[]) AND v."archivedAt" IS NULL ORDER BY v."id"`, [storeId, ids]);
     const media = await this.database.query<Row>(`SELECT pm."productId", m.* FROM "ProductMedia" pm JOIN "Media" m ON m."storeId" = pm."storeId" AND m."id" = pm."mediaId" WHERE pm."storeId" = $1 AND pm."productId" = ANY($2::text[]) ORDER BY pm."position"`, [storeId, ids]);
-    const nodes = products.rows.map((row) => this.product(row, variants.rows.filter((v) => String(v.productId) === String(row.id)), media.rows.filter((m) => String(m.productId) === String(row.id))));
-    return { nodes, nextCursor: products.rows.length === input.limit ? String(products.rows.at(-1)!.id) : null };
+    return productRows.map((row) => this.product(row, variants.rows.filter((v) => String(v.productId) === String(row.id)), media.rows.filter((m) => String(m.productId) === String(row.id))));
   }
 
   async getProduct(storeId: string, id: string): Promise<CatalogProduct | null> { const result = await this.listProducts(storeId, { limit: 100, query: undefined }); return result.nodes.find((product) => product.id === id) ?? null; }
@@ -32,7 +36,14 @@ export class CatalogPostgresRepository implements CatalogAdminRepository {
     const row = result.rows[0]; if (!row || row.status !== "ACTIVE") return null; return this.variant(row);
   }
   async listCollections(storeId: string, _input: ListCollectionsInput): Promise<Connection<CatalogCollection>> { const result = await this.database.query<Row>(`SELECT c.* FROM "Collection" c WHERE c."storeId" = $1 ORDER BY c."id"`, [storeId]); return { nodes: result.rows.map((row) => ({ id: String(row.id), storeId, externalId: row.externalId ? String(row.externalId) : null, handle: String(row.slug), title: String(row.title), description: String(row.description ?? ""), productIds: [] })), nextCursor: null }; }
-  async getCollection(storeId: string, id: string): Promise<CatalogCollection | null> { const result = await this.listCollections(storeId, { limit: 100 }); return result.nodes.find((collection) => collection.id === id) ?? null; }
+  async getCollection(storeId: string, id: string): Promise<CatalogCollectionDetail | null> {
+    const collection = await this.database.query<Row>(`SELECT c.* FROM "Collection" c WHERE c."storeId" = $1 AND c."id" = $2`, [storeId, id]);
+    const row = collection.rows[0];
+    if (!row) return null;
+    const productRows = await this.database.query<Row>(`SELECT p.* FROM "Product" p WHERE p."storeId" = $1 AND p."collectionIds" @> ARRAY[$2]::text[] ORDER BY p."id"`, [storeId, id]);
+    const products = await this.hydrateProducts(storeId, productRows.rows);
+    return { id: String(row.id), storeId, externalId: row.externalId ? String(row.externalId) : null, handle: String(row.slug), title: String(row.title), description: String(row.description ?? ""), productIds: products.map((product) => product.id), products };
+  }
   async createProduct(storeId: string, input: CreateProductInput): Promise<CatalogProduct> {
     const productId = `product-${randomUUID()}`;
     await this.database.query(

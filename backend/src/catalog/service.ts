@@ -1,6 +1,7 @@
 import type { CatalogRepository, CatalogWriter } from "./repository.js";
 import type {
   CatalogCollection,
+  CatalogCollectionDetail,
   CatalogProduct,
   CatalogResource,
   CatalogResourceRef,
@@ -25,7 +26,7 @@ export interface CatalogReader {
   listProducts(storeId: string, input: ListProductsInput): Promise<Connection<CatalogProduct>>;
   listPublicProducts(storeId: string, input: Omit<ListProductsInput, "status">): Promise<Connection<CatalogProduct>>;
   getVariant(storeId: string, id: string): Promise<CatalogVariant | null>;
-  getCollection(storeId: string, id: string): Promise<CatalogCollection | null>;
+  getCollection(storeId: string, id: string): Promise<CatalogCollectionDetail | null>;
   listCollections(storeId: string, input: ListCollectionsInput): Promise<Connection<CatalogCollection>>;
   resolveResource(storeId: string, ref: CatalogResourceRef): Promise<CatalogResource | null>;
 }
@@ -64,7 +65,7 @@ export class CatalogService implements CatalogReader {
     return this.repository.getVariant(storeId, id);
   }
 
-  getCollection(storeId: string, id: string): Promise<CatalogCollection | null> {
+  getCollection(storeId: string, id: string): Promise<CatalogCollectionDetail | null> {
     return this.repository.getCollection(storeId, id);
   }
 

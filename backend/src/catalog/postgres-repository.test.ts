@@ -24,4 +24,16 @@ describe("PostgreSQL catalog repository", () => {
     expect(result.nodes[0].variants[0]).toMatchObject({ id: "v1", priceMinor: 1200, quantity: 4, reserved: 1, available: true });
     await expect(repository.listProducts("store-b", { limit: 50 })).resolves.toMatchObject({ nodes: [] });
   });
+
+  it("loads a collection and only its current-store product detail", async () => {
+    await database.query(`INSERT INTO "Collection" ("id", "storeId", "title", "slug", "updatedAt") VALUES ('ca', 'store-a', 'Cakes', 'cakes', CURRENT_TIMESTAMP), ('cb', 'store-b', 'Other cakes', 'other-cakes', CURRENT_TIMESTAMP)`);
+    await database.query(`UPDATE "Product" SET "collectionIds" = ARRAY['ca']::text[] WHERE "id" = 'p1' AND "storeId" = 'store-a'`);
+    await database.query(`INSERT INTO "Product" ("id", "storeId", "title", "status", "slug", "collectionIds", "updatedAt") VALUES ('pb', 'store-b', 'Private cake', 'ACTIVE', 'private-cake', ARRAY['ca']::text[], CURRENT_TIMESTAMP)`);
+
+    await expect(repository.getCollection("store-a", "ca")).resolves.toMatchObject({
+      id: "ca", storeId: "store-a", productIds: ["p1"],
+      products: [{ id: "p1", storeId: "store-a", variants: [{ id: "v1", priceMinor: 1200 }] }],
+    });
+    await expect(repository.getCollection("store-a", "cb")).resolves.toBeNull();
+  });
 });

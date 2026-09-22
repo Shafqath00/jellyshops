@@ -71,6 +71,11 @@ export interface CatalogCollection {
   productIds: string[];
 }
 
+/** Read-only detail projection; collection membership and products stay live catalog data. */
+export interface CatalogCollectionDetail extends CatalogCollection {
+  products: CatalogProduct[];
+}
+
 export interface Connection<T> {
   nodes: T[];
   nextCursor: string | null;

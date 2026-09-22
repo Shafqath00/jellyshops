@@ -21,6 +21,7 @@ function setup() {
     createProduct: vi.fn(async (_storeId: string, input: Record<string, unknown>) => ({ id: "product-1", ...input })),
     updateProduct: vi.fn(async (_storeId: string, productId: string, input: Record<string, unknown>) => ({ id: productId, ...input })),
     listCollections: vi.fn(async () => ({ nodes: [], nextCursor: null })),
+    getCollection: vi.fn(async (_storeId: string, id: string) => ({ id, storeId: "store-a", productIds: [], products: [] })),
     createCollection: vi.fn(async (_storeId: string, input: Record<string, unknown>) => ({ id: "collection-1", ...input })),
     updateCollection: vi.fn(async (_storeId: string, collectionId: string, input: Record<string, unknown>) => ({ id: collectionId, ...input })),
   };
@@ -54,6 +55,18 @@ describe("catalog routes", () => {
     expect(allowed.status).toBe(200);
     expect(denied.status).toBe(403);
     expect(service.listProducts).toHaveBeenCalledWith("store-a", expect.objectContaining({ limit: 50 }));
+  });
+
+  it("loads collection detail through the authorized store context", async () => {
+    const { app, service } = setup();
+    const allowed = await request(app).get("/api/stores/store-a/catalog/collections/ca").set("Authorization", "Bearer token");
+    const denied = await request(app).get("/api/stores/store-b/catalog/collections/ca").set("Authorization", "Bearer token");
+
+    expect(allowed.status).toBe(200);
+    expect(allowed.body).toMatchObject({ id: "ca", storeId: "store-a" });
+    expect(denied.status).toBe(403);
+    expect(service.getCollection).toHaveBeenCalledWith("store-a", "ca");
+    expect(service.getCollection).toHaveBeenCalledTimes(1);
   });
 
   it("creates products using the authorized store context", async () => {

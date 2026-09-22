@@ -11,6 +11,7 @@ const schemaMigrations = [
   "20260914010000_compile_storefront_publications.sql",
   "20260919130000_add_theme_configuration_version.sql",
   "20260919131000_fix_theme_version_constraint.sql",
+  "20260920110000_add_product_configuration_metadata.sql",
   "20260922000000_v4_publication_activation.sql",
 ] as const;
 

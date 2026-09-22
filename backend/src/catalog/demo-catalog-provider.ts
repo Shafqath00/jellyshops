@@ -152,9 +152,9 @@ export class DemoCatalogAdapter implements CatalogReader {
     return null;
   }
 
-  async getCollection(storeId: string, id: string): Promise<CatalogCollection | null> {
+  async getCollection(storeId: string, id: string) {
     const collection = collections.find((item) => item.id === id);
-    return collection ? canonicalCollection(storeId, collection) : null;
+    return collection ? { ...canonicalCollection(storeId, collection), products: products.filter((product) => collection.productIds.includes(product.id)).map((product) => canonicalProduct(storeId, product)) } : null;
   }
 
   async listCollections(storeId: string, input: ListCollectionsInput): Promise<Connection<CatalogCollection>> {

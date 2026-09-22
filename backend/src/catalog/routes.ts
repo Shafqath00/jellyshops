@@ -59,7 +59,7 @@ const updateCollectionSchema = createCollectionSchema.partial();
 type AdminCatalogService = Pick<
   CatalogAdmin,
   "listProducts" | "getProduct" | "createProduct" | "updateProduct" |
-  "listCollections" | "createCollection" | "updateCollection"
+  "listCollections" | "getCollection" | "createCollection" | "updateCollection"
 >;
 type PublicCatalogService = Pick<CatalogAdmin, "listPublicProducts" | "listCollections">;
 
@@ -95,6 +95,10 @@ export function createCatalogAdminRouter(service: AdminCatalogService, authProvi
   router.get("/collections", requireStorePermission("catalog:view"), async (request, response) => {
     const input = listSchema.parse(request.query);
     response.json(await service.listCollections(request.storeContext!.storeId, input));
+  });
+
+  router.get("/collections/:collectionId", requireStorePermission("catalog:view"), async (request, response) => {
+    response.json(await service.getCollection(request.storeContext!.storeId, String(request.params.collectionId)));
   });
 
   router.post("/collections", requireStorePermission("catalog:edit"), async (request, response) => {

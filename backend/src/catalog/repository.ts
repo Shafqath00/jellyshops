@@ -1,5 +1,6 @@
 import type {
   CatalogCollection,
+  CatalogCollectionDetail,
   CatalogProduct,
   CatalogVariant,
   Connection,
@@ -15,7 +16,7 @@ export interface CatalogRepository {
   getProduct(storeId: string, id: string): Promise<CatalogProduct | null>;
   listProducts(storeId: string, input: ListProductsInput): Promise<Connection<CatalogProduct>>;
   getVariant(storeId: string, id: string): Promise<CatalogVariant | null>;
-  getCollection(storeId: string, id: string): Promise<CatalogCollection | null>;
+  getCollection(storeId: string, id: string): Promise<CatalogCollectionDetail | null>;
   listCollections(storeId: string, input: ListCollectionsInput): Promise<Connection<CatalogCollection>>;
 }
 
