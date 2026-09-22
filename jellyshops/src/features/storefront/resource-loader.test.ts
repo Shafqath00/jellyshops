@@ -116,6 +116,19 @@ describe("resolveStorefrontRoute", () => {
       .resolves.toMatchObject({ status: "ready", context: { pageType: "cart", resource: null }, template: { id: "cart-default" } });
   });
 
+  it("resolves Search through its default template without reading a resource", async () => {
+    const current = snapshot();
+    current.templates["search-default"] = { id: "search-default", type: "search", handle: "default", layout: { sections: [] } };
+    current.templateDefaults.search = "search-default";
+    const resources = reader(null);
+
+    await expect(resolveStorefrontRoute(current, {
+      type: "search",
+      context: { type: "search", query: "shoes", state: "results", resultCount: 1, results: [{ id: "shoe", name: "Shoe", href: "/store/products/shoe", imageUrl: "shoe.jpg", price: "$12.00" }] },
+    }, resources)).resolves.toMatchObject({ status: "ready", context: { pageType: "search", data: { query: "shoes", resultCount: 1 } }, template: { id: "search-default" } });
+    expect(resources.findByHandle).not.toHaveBeenCalled();
+  });
+
   it("resolves home through its default template with named global regions", async () => {
     const result = await resolveStorefrontRoute(snapshotWithGlobalLayout(), { type: "home" }, reader(null));
 

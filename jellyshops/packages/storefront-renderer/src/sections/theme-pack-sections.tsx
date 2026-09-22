@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import type { MediaReference, SectionNode } from "@jelly/storefront-schema";
-import { StorefrontContainer } from "@jelly/storefront-ui";
+import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 
 function stringSetting(settings: Record<string, unknown>, key: string, fallback = ""): string {
@@ -88,9 +88,12 @@ export function CartSummarySection({ section, context }: { section: SectionNode;
   return <section className="jelly-section jelly-cart-summary"><StorefrontContainer><div className="jelly-cart-card"><div><h1>{content.heading}</h1><p>{content.body || "Your selected pieces will appear here when you add them to your bag."}</p></div>{lines.length ? <div>{lines.map((line) => <div key={line.id}><span>{line.name}</span><button type="button" onClick={line.onDecrease}>−</button><span>{line.quantity}</span><button type="button" onClick={line.onIncrease}>+</button><strong>{line.total}</strong></div>)}<p>Subtotal: {subtotal}</p>{checkoutHref && <a className="jelly-button" href={checkoutHref}>Checkout</a>}</div> : <a className="jelly-button" href={content.href}>Continue shopping</a>}</div></StorefrontContainer></section>;
 }
 
-export function SearchResultsSection({ section }: { section: SectionNode }) {
+export function SearchResultsSection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
+  const search = context.page?.pageType === "search" ? context.page.data : null;
   const content = copy(section, "Search the shop");
-  return <section className="jelly-section jelly-search-results"><StorefrontContainer><div className="jelly-search-shell"><h1>{content.heading}</h1><p>{content.body || "Find a product, collection, or story."}</p><form action="/shop"><label htmlFor="storefront-search">Search catalog</label><div><input id="storefront-search" name="q" placeholder="What are you looking for?" /><button type="submit">Search</button></div></form></div></StorefrontContainer></section>;
+  const query = search?.query ?? "";
+  const results = search?.results ?? [];
+  return <section className="jelly-section jelly-search-results"><StorefrontContainer><div className="jelly-search-shell"><h1>{content.heading}</h1><p>{content.body || "Find a product, collection, or story."}</p><form action={search?.searchHref ?? "/search"}><label htmlFor="storefront-search">Search catalog</label><div><input id="storefront-search" name="q" value={query} placeholder="What are you looking for?" readOnly /><button type="submit">Search</button></div></form>{search?.state === "empty" && <p>Enter a search term to find products.</p>}{search?.state === "none" && <p>No products found for “{query}”</p>}{search?.state === "results" && <div className="jelly-product-grid-items">{results.map((product) => <StorefrontProductCard key={product.id} product={product} />)}</div>}</div></StorefrontContainer></section>;
 }
 
 export function NotFoundMessageSection({ section }: { section: SectionNode }) {

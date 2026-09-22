@@ -88,6 +88,13 @@ describe("registry-driven section rendering", () => {
     expect(onIncrease).toHaveBeenCalledOnce();
   });
 
+  it("renders search results from live context rather than section settings", () => {
+    render(<RegistrySectionRenderer section={{ ...section("search-results"), settings: { heading: "Stale persisted heading" } }} mode="published" commerce={commerce} page={{ pageType: "search", resource: null, data: { query: "shoes", state: "results", resultCount: 1, searchHref: "/store/search", results: [{ id: "shoe", name: "Live Shoe", href: "/store/products/shoe", imageUrl: "shoe.jpg", price: "$12.00" }] } }} />);
+    expect(screen.getByDisplayValue("shoes")).toBeInTheDocument();
+    expect(screen.getByText("Live Shoe")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /live shoe/i })).toHaveAttribute("href", "/store/products/shoe");
+  });
+
   it("keeps unsupported-section diagnostics in editor/preview but not published", () => {
     const registry = new SectionRenderRegistry();
     const { rerender } = render(

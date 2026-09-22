@@ -106,7 +106,7 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("image-mosaic", ({ section }) => <ImageMosaicSection section={section} />);
   registry.register("journal-teaser", ({ section }) => <JournalTeaserSection section={section} />);
   registry.register("cart-summary", ({ section, context }) => <CartSummarySection section={section} context={context} />);
-  registry.register("search-results", ({ section }) => <SearchResultsSection section={section} />);
+  registry.register("search-results", ({ section, context }) => <SearchResultsSection section={section} context={context} />);
   registry.register("not-found-message", ({ section }) => <NotFoundMessageSection section={section} />);
   registry.register("spacer-divider", () => <SpacerDividerSection />);
   registry.register("spacer", () => <SpacerDividerSection />);

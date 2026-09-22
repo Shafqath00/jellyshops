@@ -4,6 +4,7 @@ export interface PublicProduct { id: string; name: string; href: string; imageUr
 export type StorefrontPageContext =
   | { pageType: "home"; resource: null }
   | { pageType: "cart"; resource: null; data?: Record<string, unknown> }
+  | { pageType: "search"; resource: null; data: { query: string; state: "empty" | "results" | "none"; resultCount: number; results: PublicProduct[]; searchHref?: string } }
   | { pageType: "product" | "collection" | "page" | "blog" | "article"; resource: { id: string; handle: string; data: Record<string, unknown> } };
 export interface CommerceDataProvider { getProducts(input?: { featured?: boolean; limit?: number }): Promise<PublicProduct[]> }
 export interface AssetResolver { resolve(assetId: string): Promise<string | null> }

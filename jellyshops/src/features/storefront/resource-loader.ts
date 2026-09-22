@@ -4,6 +4,7 @@ import type {
   RuntimeTemplateV4,
   SectionNode,
 } from "@jelly/storefront-schema";
+import type { PublicProduct } from "@jelly/storefront-renderer";
 
 export type PublicResourceType = "product" | "collection" | "page" | "blog" | "article";
 
@@ -23,7 +24,17 @@ export interface PublicResourceReader {
 export type StorefrontRouteRequest =
   | { type: "home" }
   | { type: "cart" }
+  | { type: "search"; context: SearchRouteContext }
   | { type: PublicResourceType; handle: string };
+
+export interface SearchRouteContext {
+  type: "search";
+  query: string;
+  state: "empty" | "results" | "none";
+  resultCount: number;
+  results: PublicProduct[];
+  searchHref?: string;
+}
 
 export type ResolvedStorefrontRoute =
   | {
@@ -42,6 +53,7 @@ export type ResolvedStorefrontRoute =
 export type StorefrontPageContext =
   | { pageType: "home"; resource: null }
   | { pageType: "cart"; resource: null; data?: Record<string, unknown> }
+  | { pageType: "search"; resource: null; data: SearchRouteContext }
   | { pageType: PublicResourceType; resource: PublicStorefrontResource };
 
 export interface ResolvedStorefrontLayout {
@@ -175,6 +187,14 @@ export async function resolveStorefrontRoute(
     if (!template || template.type !== "cart") return { status: "not-found", reason: "template" };
     const layout = expandRuntimeLayout(snapshot, template);
     return { status: "ready", context: { pageType: "cart", resource: null }, resource: null, template, sections: layout.template, layout };
+  }
+
+  if (route.type === "search") {
+    const templateId = snapshot.templateDefaults.search;
+    const template = templateId ? snapshot.templates[templateId] : undefined;
+    if (!template || template.type !== "search") return { status: "not-found", reason: "template" };
+    const layout = expandRuntimeLayout(snapshot, template);
+    return { status: "ready", context: { pageType: "search", resource: null, data: route.context }, resource: null, template, sections: layout.template, layout };
   }
 
   const resource = await reader.findByHandle(route.type, route.handle);
