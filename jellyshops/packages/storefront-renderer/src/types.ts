@@ -6,7 +6,7 @@ export interface ProductPresentationContext {
   selection: Array<{ optionId: string; valueId: string }>;
   quantity: number;
   pricing: { price: string; compareAtPrice?: string };
-  availability: { state: "available" | "out-of-stock" | "selection-required" | "unavailable"; message: string; maxQuantity: number };
+  availability: { state: "available" | "out-of-stock" | "selection-required" | "unavailable"; message: string; maxQuantity?: number };
   canAddToCart: boolean;
   selectOption(optionId: string, valueId: string): void;
   setQuantity(quantity: number): void;

@@ -35,7 +35,7 @@ export function ProductOptionsSection({ context }: { context: StorefrontRuntimeC
 export function ProductPurchaseSection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown> } }) {
   const product = productContext(context);
   if (!product) return null;
-  return <section className="jelly-section jelly-product-purchase"><StorefrontContainer>{section.settings.showQuantity !== false && <label>Quantity<input aria-label="Quantity" type="number" min={1} max={Math.max(1, product.availability.maxQuantity)} value={product.quantity} onChange={(event) => product.setQuantity(Number(event.target.value))} /></label>}<button type="button" disabled={!product.canAddToCart} onClick={() => { void product.addToCart(); }}>{typeof section.settings.label === "string" ? section.settings.label : "Add to cart"}</button></StorefrontContainer></section>;
+  return <section className="jelly-section jelly-product-purchase"><StorefrontContainer>{section.settings.showQuantity !== false && <label>Quantity<input aria-label="Quantity" type="number" min={1} {...(product.availability.maxQuantity === undefined ? {} : { max: Math.max(1, product.availability.maxQuantity) })} value={product.quantity} onChange={(event) => product.setQuantity(Number(event.target.value))} /></label>}<button type="button" disabled={!product.canAddToCart} onClick={() => { void product.addToCart(); }}>{typeof section.settings.label === "string" ? section.settings.label : "Add to cart"}</button></StorefrontContainer></section>;
 }
 
 export function ProductDescriptionSection({ context }: { context: StorefrontRuntimeContext }) {

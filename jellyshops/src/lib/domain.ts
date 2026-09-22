@@ -50,6 +50,8 @@ export interface ProductVariant {
   priceMinor: number;
   compareAtPriceMinor?: number;
   stock: number;
+  /** Explicit catalog availability covers untracked inventory, where quantity is unknown. */
+  available?: boolean;
   options?: Record<string, string>;
 }
 

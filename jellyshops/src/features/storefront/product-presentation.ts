@@ -21,7 +21,7 @@ export function catalogProductToProduct(product: CatalogAdminProduct): Product {
     variants: product.variants.map((variant) => ({
       id: variant.id, name: variant.title, sku: variant.sku ?? "", priceMinor: variant.priceMinor,
       ...(variant.compareAtPriceMinor == null ? {} : { compareAtPriceMinor: variant.compareAtPriceMinor }),
-      stock: variant.quantity ?? 0, options: variant.options as Record<string, string> | undefined,
+      stock: variant.quantity ?? 0, available: variant.available, options: variant.options as Record<string, string> | undefined,
     })),
     options, inventoryOptionIds: product.inventoryOptionIds ?? [], primaryCategoryId: product.primaryCategoryId ?? undefined,
     additionalCategoryIds: product.additionalCategoryIds ?? [], brandId: product.brandId ?? undefined, collectionIds: product.collectionIds ?? [],
@@ -43,12 +43,14 @@ export function createProductPresentationContext({ product, currency, selections
   const requiredMissing = options.some((option) => option.required && !selectedValue(option.id));
   const variant = resolveProductVariant(product, selections);
   const priceMinor = getConfiguredPriceMinor(variant, options, selections);
-  const maxQuantity = !requiredMissing && variant && variant.stock > 0 ? variant.stock : 0;
-  const clampedQuantity = Math.max(1, Math.min(quantity, Math.max(1, maxQuantity)));
+  const untrackedAvailable = variant?.available === true && variant.stock === 0;
+  const maxQuantity = !requiredMissing && variant && variant.stock > 0 ? variant.stock : untrackedAvailable ? undefined : 0;
+  const clampedQuantity = maxQuantity === undefined ? Math.max(1, quantity) : Math.max(1, Math.min(quantity, maxQuantity));
   const availability = requiredMissing ? { state: "selection-required" as const, message: "Choose the required options", maxQuantity: 0 }
     : !variant ? { state: "unavailable" as const, message: "This combination is unavailable", maxQuantity: 0 }
-      : variant.stock <= 0 ? { state: "out-of-stock" as const, message: "Out of stock", maxQuantity: 0 }
-        : { state: "available" as const, message: `${variant.stock} available`, maxQuantity: variant.stock };
+      : variant.stock <= 0 && !untrackedAvailable ? { state: "out-of-stock" as const, message: "Out of stock", maxQuantity: 0 }
+        : untrackedAvailable ? { state: "available" as const, message: "Available" }
+          : { state: "available" as const, message: `${variant.stock} available`, maxQuantity: variant.stock };
 
   return {
     product: { id: product.id, title: product.name, description: product.description, imageUrl: product.imageUrl, media: product.media ?? (product.imageUrl ? [{ id: `${product.id}-primary`, url: product.imageUrl }] : []), sku: variant?.sku || undefined, vendor: product.vendor, options: options.map((option) => ({ id: option.id, name: option.name, required: option.required, values: option.values.map((value) => ({ id: value.id, label: value.label, selected: selectedValue(option.id) === value.id, available: true })) })) },
@@ -58,7 +60,7 @@ export function createProductPresentationContext({ product, currency, selections
     availability,
     canAddToCart: availability.state === "available" && priceMinor !== undefined && Boolean(variant),
     selectOption: (optionId, valueId) => onSelectionsChange([...selections.filter((selection) => selection.optionId !== optionId), { optionId, valueId }]),
-    setQuantity: (nextQuantity) => onQuantityChange(Math.max(1, Math.min(nextQuantity, Math.max(1, maxQuantity)))),
+    setQuantity: (nextQuantity) => onQuantityChange(maxQuantity === undefined ? Math.max(1, nextQuantity) : Math.max(1, Math.min(nextQuantity, maxQuantity))),
     addToCart: () => variant && priceMinor !== undefined && availability.state === "available" ? onAddToCart({ variantId: variant.id, quantity: clampedQuantity, selections, priceMinor }) : Promise.resolve({ ok: false, message: availability.message }),
     relatedProducts,
   };
