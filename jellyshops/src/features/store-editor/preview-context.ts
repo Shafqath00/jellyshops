@@ -1,7 +1,19 @@
-import type { ProductPresentationContext, PublicProduct, StorefrontPageContext } from "@jelly/storefront-renderer";
-import type { StorefrontTemplateType, ArticleResource, BlogResource, DemoCatalog, PageResource } from "./api/types";
+import type { CollectionPresentationContext, ProductPresentationContext, PublicProduct, StorefrontPageContext } from "@jelly/storefront-renderer";
+import type { StorefrontTemplateType, ArticleResource, BlogResource, CatalogAdminCollectionDetail, DemoCatalog, PageResource } from "./api/types";
 import type { ConfiguredOptionSelection, Product } from "@/lib/domain";
 import { createProductPresentationContext } from "@/features/storefront/product-presentation";
+
+function collectionPresentation(detail: CatalogAdminCollectionDetail): CollectionPresentationContext {
+  const products = detail.products.filter((product) => product.storeId === detail.storeId).map((product): PublicProduct => {
+    const priceMinor = product.variants[0]?.priceMinor;
+    return {
+      id: product.id, name: product.title, href: `/products/${product.handle}`,
+      imageUrl: product.media[0]?.url ?? "",
+      price: priceMinor === undefined ? "" : new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(priceMinor / 100),
+    };
+  });
+  return { collection: { id: detail.id, title: detail.title, description: detail.description }, products, totalProducts: products.length };
+}
 
 export interface EditorPreviewContent {
   pages: PageResource[];
@@ -68,6 +80,7 @@ export function createEditorPreviewPageContext({
   searchQuery,
   productDetail,
   productRuntime,
+  collectionDetail,
 }: {
   type: StorefrontTemplateType;
   resourceId?: string;
@@ -77,6 +90,7 @@ export function createEditorPreviewPageContext({
   searchQuery: string;
   productDetail?: Product | null;
   productRuntime?: EditorProductPreviewRuntime;
+  collectionDetail?: CatalogAdminCollectionDetail | null;
 }): StorefrontPageContext | null {
   if (type === "home") return { pageType: "home", resource: null };
   if (type === "cart") return { pageType: "cart", resource: null };
@@ -94,18 +108,20 @@ export function createEditorPreviewPageContext({
     return { pageType: "product", resource: { id: productDetail.id, handle: productDetail.slug, data: { title: productDetail.name, product: productDetail, productPresentation: previewProductPresentation(productDetail, productRuntime, publicProducts(catalog).filter((product) => product.id !== productDetail.id)) } } };
   }
   if (type === "collection") {
-    const collection = resource(catalog.collections, resourceId);
-    return collection ? {
+    if (!collectionDetail || collectionDetail.id !== resourceId || collectionDetail.storeId !== storeId) return null;
+    const presentation = collectionPresentation(collectionDetail);
+    return {
       pageType: "collection",
       resource: {
-        id: collection.id,
-        handle: collection.slug,
+        id: collectionDetail.id,
+        handle: collectionDetail.handle,
         data: {
-          collection: { id: collection.id, storeId, name: collection.name, slug: collection.slug },
-          products: publicProducts(catalog).filter((product) => collection.productIds.includes(product.id)),
+          collectionPresentation: presentation,
+          collection: { id: collectionDetail.id, storeId, name: collectionDetail.title, slug: collectionDetail.handle },
+          products: presentation.products,
         },
       },
-    } : null;
+    };
   }
   if (type === "page") {
     const page = resource(content.pages, resourceId);

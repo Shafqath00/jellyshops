@@ -28,6 +28,7 @@ import type {
   DemoCatalog,
   ArticleResource,
   BlogResource,
+  CatalogAdminCollectionDetail,
   DynamicSourceDescriptor,
   GlobalSectionRecord,
   SectionPresetRecord,
@@ -74,7 +75,7 @@ const sectionCategoryLabels = {
 } as const;
 
 const defaultTemplateSections: Record<string, string[]> = {
-  home: ["hero"], product: ["product-information"], collection: ["collection-header", "collection-product-grid"],
+  home: ["hero"], product: ["product-information"], collection: ["collection-header", "collection-product-grid", "collection-description"],
   cart: ["cart-summary"], search: ["search-results"], page: ["page-content"], blog: ["blog-header", "article-list"], article: ["article-header", "article-content"],
 };
 
@@ -215,6 +216,7 @@ export default function OnlineStoreEditorPage() {
   const [previewResourceId, setPreviewResourceId] = useState<string | undefined>(handoff.resourceId);
   const [previewQuery, setPreviewQuery] = useState("cake");
   const [previewProduct, setPreviewProduct] = useState<Product | null>(null);
+  const [previewCollection, setPreviewCollection] = useState<CatalogAdminCollectionDetail | null>(null);
   const [previewProductSelections, setPreviewProductSelections] = useState<ConfiguredOptionSelection[]>([]);
   const [previewProductQuantity, setPreviewProductQuantity] = useState(1);
   const [selection, setSelection] = useState<EditorSelection>(null);
@@ -304,6 +306,19 @@ export default function OnlineStoreEditorPage() {
     return () => { active = false; };
   }, [api, activeTemplate?.type, backendStoreId, previewResourceId]);
 
+  useEffect(() => {
+    if (!api || activeTemplate?.type !== "collection" || !previewResourceId) {
+      setPreviewCollection(null);
+      return;
+    }
+    let active = true;
+    setPreviewCollection(null);
+    void api.getCollection(backendStoreId, previewResourceId)
+      .then((detail) => { if (active && detail?.storeId === backendStoreId) setPreviewCollection(detail); })
+      .catch(() => { if (active) setPreviewCollection(null); });
+    return () => { active = false; };
+  }, [api, activeTemplate?.type, backendStoreId, previewResourceId]);
+
   const validGlobals = useMemo(
     () => globals.filter((global): global is GlobalSectionRecord => Boolean(global?.id)),
     [globals],
@@ -352,7 +367,7 @@ export default function OnlineStoreEditorPage() {
     ? expandRuntimeLayout(previewSnapshot, compiledTemplate)
     : activeTemplate ? draftPreviewLayout(activeTemplate, globalMap) : { announcement: [], header: [], template: [], footer: [] };
   const previewPageContext: StorefrontPageContext | null = activeTemplate
-    ? createEditorPreviewPageContext({ type: activeTemplate.type, resourceId: previewResourceId, storeId: backendStoreId, catalog, content: { pages, blogs, articles }, searchQuery: previewQuery, productDetail: previewProduct, productRuntime: { selections: previewProductSelections, quantity: previewProductQuantity, onSelectionsChange: setPreviewProductSelections, onQuantityChange: setPreviewProductQuantity } })
+    ? createEditorPreviewPageContext({ type: activeTemplate.type, resourceId: previewResourceId, storeId: backendStoreId, catalog, content: { pages, blogs, articles }, searchQuery: previewQuery, productDetail: previewProduct, productRuntime: { selections: previewProductSelections, quantity: previewProductQuantity, onSelectionsChange: setPreviewProductSelections, onQuantityChange: setPreviewProductQuantity }, collectionDetail: previewCollection })
     : null;
   const builtInSections = useMemo(() => {
     if (!activeTemplate || !libraryRegion) return [];

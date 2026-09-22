@@ -106,6 +106,17 @@ describe("store editor API client", () => {
     );
   });
 
+  it("loads selected Collection detail from the authenticated current-store catalog", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ id: "collection-a", storeId: "store-a", products: [] }));
+    const api = createStoreEditorApi({ baseUrl: "http://localhost:3001", token: "jelly-demo-merchant", fetch: fetchMock });
+
+    await expect(api.getCollection("store-a", "collection-a")).resolves.toMatchObject({ id: "collection-a", storeId: "store-a" });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:3001/api/stores/store-a/catalog/collections/collection-a",
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: "Bearer jelly-demo-merchant" }) }),
+    );
+  });
+
   it("returns compiler diagnostics from an intentional 422 validation response", async () => {
     const diagnostics = [{ severity: "error", code: "BINDING_INVALID", message: "Bad binding", location: { entityType: "template", entityId: "home-default" } }];
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ ok: false, diagnostics, dependencies: { edges: [] } }, 422));

@@ -3,6 +3,7 @@ import {
   StoreEditorApiError,
   type CompilationResult,
   type CatalogAdminProduct,
+  type CatalogAdminCollectionDetail,
   type ArticleResource,
   type BlogResource,
   type DemoCatalog,
@@ -69,6 +70,7 @@ export interface StoreEditorApi {
   listProducts(storeId: string): Promise<{ nodes: CatalogAdminProduct[]; nextCursor: string | null }>;
   /** Full, store-scoped catalog record for runtime-only editor preview. */
   getProduct(storeId: string, productId: string): Promise<CatalogAdminProduct | null>;
+  getCollection(storeId: string, collectionId: string): Promise<CatalogAdminCollectionDetail | null>;
   createProduct(storeId: string, input: { handle: string; title: string; description?: string; productType?: string; status?: "DRAFT" | "ACTIVE"; primaryCategoryId?: string; additionalCategoryIds?: string[]; brandId?: string; collectionIds?: string[]; categoryMetadata?: unknown | null; brandMetadata?: unknown | null; collectionMetadata?: unknown[]; options?: unknown[]; inventoryOptionIds?: string[]; variants?: Array<{ title: string; sku?: string; priceMinor: number; quantity?: number; trackInventory?: boolean; options?: Record<string, string> }> }): Promise<CatalogAdminProduct>;
   updateProduct(storeId: string, productId: string, input: { handle?: string; title?: string; description?: string; productType?: string; status?: "DRAFT" | "ACTIVE"; primaryCategoryId?: string | null; additionalCategoryIds?: string[]; brandId?: string | null; collectionIds?: string[]; categoryMetadata?: unknown | null; brandMetadata?: unknown | null; collectionMetadata?: unknown[]; options?: unknown[]; inventoryOptionIds?: string[]; variants?: Array<{ id?: string; title: string; sku?: string; priceMinor: number; quantity?: number; trackInventory?: boolean; options?: Record<string, string> }> }): Promise<CatalogAdminProduct>;
 }
@@ -207,6 +209,7 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
     deleteMedia: (storeId, mediaId) => request(`/api/stores/${encodeURIComponent(storeId)}/media/${encodeURIComponent(mediaId)}`, { method: "DELETE" }),
     listProducts: (storeId) => request(`/api/stores/${encodeURIComponent(storeId)}/catalog/products?limit=100`),
     getProduct: (storeId, productId) => request(`/api/stores/${encodeURIComponent(storeId)}/catalog/products/${encodeURIComponent(productId)}`),
+    getCollection: (storeId, collectionId) => request(`/api/stores/${encodeURIComponent(storeId)}/catalog/collections/${encodeURIComponent(collectionId)}`),
     createProduct: (storeId, input) => request<CatalogAdminProduct>(`/api/stores/${encodeURIComponent(storeId)}/catalog/products`, { method: "POST", body: JSON.stringify(input) }),
     updateProduct: (storeId, productId, input) => request<CatalogAdminProduct>(`/api/stores/${encodeURIComponent(storeId)}/catalog/products/${encodeURIComponent(productId)}`, { method: "PATCH", body: JSON.stringify(input) }),
   };

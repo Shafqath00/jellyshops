@@ -46,9 +46,7 @@ describe("createEditorPreviewPageContext", () => {
     expect(createEditorPreviewPageContext({ type: "product", resourceId: "product-1", storeId: "store-a", catalog, content, searchQuery: "cake", productDetail, productRuntime })).toMatchObject({
       pageType: "product", resource: { id: "product-1", handle: "classic-cake", data: { title: "Classic Cake", productPresentation: { product: { title: "Classic Cake", media: [{ id: "cake-image" }] }, selection: [{ valueId: "small" }], quantity: 2, pricing: { compareAtPrice: "$30.00" }, availability: { state: "available" } } } },
     });
-    expect(createEditorPreviewPageContext({ type: "collection", resourceId: "collection-1", storeId: "store-a", catalog, content, searchQuery: "cake" })).toMatchObject({
-      pageType: "collection", resource: { id: "collection-1", handle: "cakes", data: { collection: { storeId: "store-a", name: "Cakes" }, products: [expect.objectContaining({ id: "product-1" })] } },
-    });
+    expect(createEditorPreviewPageContext({ type: "collection", resourceId: "collection-1", storeId: "store-a", catalog, content, searchQuery: "cake" })).toBeNull();
   });
 
   it("uses the shared live Product contract for option selection, unavailable variants, quantity, and safe preview purchase", async () => {
@@ -75,5 +73,21 @@ describe("createEditorPreviewPageContext", () => {
 
   it("returns no context for a resource template without a current-store selection", () => {
     expect(createEditorPreviewPageContext({ type: "article", resourceId: "missing", storeId: "store-a", catalog, content, searchQuery: "cake" })).toBeNull();
+  });
+
+  it("uses selected current-store Collection detail with live products and no fabricated image", () => {
+    const context = createEditorPreviewPageContext({
+      type: "collection", resourceId: "collection-1", storeId: "store-a", catalog, content, searchQuery: "cake",
+      collectionDetail: { id: "collection-1", storeId: "store-a", handle: "cakes", title: "Real cakes", description: "Fresh every day", productIds: ["product-1"], products: [
+        { id: "product-1", storeId: "store-a", handle: "classic-cake", title: "Classic Cake", description: "", productType: "Cake", status: "ACTIVE", media: [{ id: "image", url: "/real-cake.jpg", altText: null, position: 0 }], variants: [{ id: "variant-1", title: "Standard", sku: null, priceMinor: 2500, quantity: 3, available: true }], available: true },
+      ] },
+    });
+
+    expect(context).toMatchObject({ pageType: "collection", resource: { id: "collection-1", data: { collectionPresentation: {
+      collection: { id: "collection-1", title: "Real cakes", description: "Fresh every day" },
+      products: [{ id: "product-1", name: "Classic Cake", imageUrl: "/real-cake.jpg", price: "$25.00" }], totalProducts: 1,
+    } } } });
+    const presentation = context?.pageType === "collection" ? context.resource.data.collectionPresentation as { collection: { imageUrl?: string } } : null;
+    expect(presentation?.collection.imageUrl).toBeUndefined();
   });
 });
