@@ -44,3 +44,23 @@ export function ArticleListSection({ context }: { context: StorefrontRuntimeCont
   if (!blog) return null;
   return <section className="jelly-section jelly-article-list"><StorefrontContainer>{blog.articles.length ? <div>{blog.articles.map((article) => <article key={article.id}><h2><a href={`/${blog.storeSlug}/blogs/${blog.handle}/${article.handle}`}>{article.title}</a></h2>{article.excerpt && <p>{article.excerpt}</p>}</article>)}</div> : <p>No articles have been published yet.</p>}</StorefrontContainer></section>;
 }
+
+function articleData(context: StorefrontRuntimeContext): { title: string; excerpt: string; content: unknown } | null {
+  if (context.page?.pageType !== "article") return null;
+  const article = context.page.resource.data.article;
+  if (!article || typeof article !== "object" || Array.isArray(article)) return null;
+  const record = article as Record<string, unknown>;
+  if (typeof record.title !== "string") return null;
+  return { title: record.title, excerpt: typeof record.excerpt === "string" ? record.excerpt : "", content: record.content };
+}
+
+export function ArticleHeaderSection({ context }: { context: StorefrontRuntimeContext }) {
+  const article = articleData(context);
+  return article ? <section className="jelly-section jelly-article-header"><StorefrontContainer><h1>{article.title}</h1>{article.excerpt && <p>{article.excerpt}</p>}</StorefrontContainer></section> : null;
+}
+
+export function ArticleContentSection({ context }: { context: StorefrontRuntimeContext }) {
+  const article = articleData(context);
+  if (!article) return null;
+  return <section className="jelly-section jelly-article-content"><StorefrontContainer><article>{textFromContent(article.content).map((paragraph, index) => <p key={`${index}-${paragraph}`}>{paragraph}</p>)}</article></StorefrontContainer></section>;
+}

@@ -6,7 +6,7 @@ import { HeaderSection } from "./sections/header";
 import { HeroSection } from "./sections/hero";
 import { ProductGridSection } from "./sections/product-grid";
 import { RichTextSection } from "./sections/rich-text";
-import { ArticleListSection, BlogHeaderSection, PageContentSection } from "./sections/content-pages";
+import { ArticleContentSection, ArticleHeaderSection, ArticleListSection, BlogHeaderSection, PageContentSection } from "./sections/content-pages";
 import {
   AnnouncementBarSection,
   ImageWithTextSection,
@@ -82,6 +82,8 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("page-content", ({ context }) => <PageContentSection context={context} />);
   registry.register("blog-header", ({ context }) => <BlogHeaderSection context={context} />);
   registry.register("article-list", ({ context }) => <ArticleListSection context={context} />);
+  registry.register("article-header", ({ context }) => <ArticleHeaderSection context={context} />);
+  registry.register("article-content", ({ context }) => <ArticleContentSection context={context} />);
   registry.register("product-grid", ({ commerce }) => <ProductGridSection commerce={commerce} />);
   registry.register("product-information", ({ context }) => {
     const title = context.page?.pageType === "product" ? context.page.resource.data.title : undefined;

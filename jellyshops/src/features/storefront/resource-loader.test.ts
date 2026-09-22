@@ -186,6 +186,18 @@ describe("resolveStorefrontRoute", () => {
       .resolves.toMatchObject({ status: "ready", template: { id: "collection-featured" } });
   });
 
+  it("resolves the default Article template and lets an explicit assignment override it", async () => {
+    const current = snapshot();
+    current.templates["article-default"] = { id: "article-default", type: "article", handle: "default", layout: { sections: [] } };
+    current.templates["article-featured"] = { id: "article-featured", type: "article", handle: "featured", layout: { sections: [] } };
+    current.templateDefaults.article = "article-default";
+    const article: PublicStorefrontResource = { type: "article", id: "article-1", handle: "opening", visible: true, data: {} };
+
+    await expect(resolveStorefrontRoute(current, { type: "article", handle: "opening" }, reader(article))).resolves.toMatchObject({ status: "ready", template: { id: "article-default" } });
+    current.assignments.push({ resourceType: "article", resourceId: "article-1", templateId: "article-featured" });
+    await expect(resolveStorefrontRoute(current, { type: "article", handle: "opening" }, reader(article))).resolves.toMatchObject({ status: "ready", template: { id: "article-featured" } });
+  });
+
   it("falls back to the resource-type default when an assigned template is missing or invalid", async () => {
     const missingAssignment = snapshot();
     missingAssignment.assignments = [{ resourceType: "product", resourceId: "product-1", templateId: "deleted-template" }];

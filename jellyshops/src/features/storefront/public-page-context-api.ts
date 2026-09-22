@@ -13,14 +13,21 @@ const blogContextSchema = z.object({
   blog: z.object({ id: z.string(), handle: z.string(), title: z.string() }),
   articles: z.array(z.object({ id: z.string(), handle: z.string(), title: z.string(), excerpt: z.string(), publishedAt: z.string().nullable() })),
 });
+const articleContextSchema = z.object({
+  type: z.literal("article"),
+  blog: z.object({ id: z.string(), handle: z.string(), title: z.string() }),
+  article: z.object({ id: z.string(), handle: z.string(), title: z.string(), excerpt: z.string(), content: z.record(z.string(), z.unknown()), publishedAt: z.string().nullable() }),
+});
 
 export type PublicSearchPageContext = z.infer<typeof searchContextSchema>;
 export type PublicPageContext = z.infer<typeof pageContextSchema>;
 export type PublicBlogContext = z.infer<typeof blogContextSchema>;
+export type PublicArticleContext = z.infer<typeof articleContextSchema>;
 
 interface SearchOptions { baseUrl: string; storeId: string; query: string; fetch?: typeof fetch; }
 interface PageOptions { baseUrl: string; storeId: string; handle: string; fetch?: typeof fetch; }
 interface BlogOptions { baseUrl: string; storeId: string; handle: string; fetch?: typeof fetch; }
+interface ArticleOptions { baseUrl: string; storeId: string; blogHandle: string; articleHandle: string; fetch?: typeof fetch; }
 
 export async function loadPublicSearchPageContext({ baseUrl, storeId, query, fetch: fetcher = fetch }: SearchOptions): Promise<PublicSearchPageContext | null> {
   try {
@@ -45,6 +52,15 @@ export async function loadPublicBlogContext({ baseUrl, storeId, handle, fetch: f
     const response = await fetcher(`${baseUrl.replace(/\/$/, "")}/api/public/stores/${encodeURIComponent(storeId)}/storefront/context/blogs/${encodeURIComponent(handle)}`, { headers: { Accept: "application/json" }, cache: "no-store" });
     if (!response.ok) return null;
     const parsed = blogContextSchema.safeParse(await response.json());
+    return parsed.success ? parsed.data : null;
+  } catch { return null; }
+}
+
+export async function loadPublicArticleContext({ baseUrl, storeId, blogHandle, articleHandle, fetch: fetcher = fetch }: ArticleOptions): Promise<PublicArticleContext | null> {
+  try {
+    const response = await fetcher(`${baseUrl.replace(/\/$/, "")}/api/public/stores/${encodeURIComponent(storeId)}/storefront/context/blogs/${encodeURIComponent(blogHandle)}/articles/${encodeURIComponent(articleHandle)}`, { headers: { Accept: "application/json" }, cache: "no-store" });
+    if (!response.ok) return null;
+    const parsed = articleContextSchema.safeParse(await response.json());
     return parsed.success ? parsed.data : null;
   } catch { return null; }
 }

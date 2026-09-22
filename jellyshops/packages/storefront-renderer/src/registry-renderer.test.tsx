@@ -111,6 +111,15 @@ describe("registry-driven section rendering", () => {
     expect(screen.getByRole("link", { name: /opening day/i })).toHaveAttribute("href", "/store-a/blogs/news/opening-day");
   });
 
+  it("renders Article identity and safe live content without raw HTML", () => {
+    const page = { pageType: "article" as const, resource: { id: "article-a", handle: "opening", data: { blog: { id: "blog-a", handle: "news", title: "News" }, article: { id: "article-a", title: "Opening day", excerpt: "We opened", publishedAt: "2026-09-20T00:00:00.000Z", content: { text: "Welcome to our shop.", html: "<script>unsafe</script>" } } } } };
+    render(<><RegistrySectionRenderer section={section("article-header")} mode="published" commerce={commerce} page={page} /><RegistrySectionRenderer section={section("article-content")} mode="published" commerce={commerce} page={page} /></>);
+    expect(screen.getByRole("heading", { name: "Opening day" })).toBeInTheDocument();
+    expect(screen.getByText("We opened")).toBeInTheDocument();
+    expect(screen.getByText("Welcome to our shop.")).toBeInTheDocument();
+    expect(screen.queryByText(/unsafe/i)).toBeNull();
+  });
+
   it("keeps unsupported-section diagnostics in editor/preview but not published", () => {
     const registry = new SectionRenderRegistry();
     const { rerender } = render(
