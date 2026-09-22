@@ -11,7 +11,7 @@ import type {
   StripeMerchantStatus,
   StripeOnboardingLink,
 } from "./types";
-import type { Product } from "@/lib/domain";
+import type { Collection, Product } from "@/lib/domain";
 
 export interface PublicCatalogVariant {
   id: string;
@@ -37,6 +37,21 @@ export interface PublicCatalogProduct {
 
 export interface PublicCatalogResponse {
   nodes: PublicCatalogProduct[];
+  nextCursor: string | null;
+}
+
+export interface PublicCatalogCollection {
+  id: string;
+  storeId: string;
+  externalId: string | null;
+  handle: string;
+  title: string;
+  description: string;
+  productIds: string[];
+}
+
+export interface PublicCollectionsResponse {
+  nodes: PublicCatalogCollection[];
   nextCursor: string | null;
 }
 
@@ -92,6 +107,22 @@ export function createCommerceApi({ baseUrl, fetch: fetcher = fetch }: CommerceC
     getPublicCatalog: async (storeId: string) => {
       const response = await request<PublicCatalogResponse>(`/api/public/stores/${encodeURIComponent(storeId)}/catalog/products?limit=100`);
       return response.nodes.map(catalogProductToStorefrontProduct);
+    },
+    getPublicCollections: async (storeId: string): Promise<Collection[]> => {
+      const nodes: PublicCatalogCollection[] = [];
+      let cursor: string | null = null;
+      do {
+        const response: PublicCollectionsResponse = await request<PublicCollectionsResponse>(`/api/public/stores/${encodeURIComponent(storeId)}/catalog/collections?limit=100${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ""}`);
+        nodes.push(...response.nodes);
+        cursor = response.nextCursor;
+      } while (cursor);
+      return nodes.map((collection) => ({
+        id: collection.id,
+        storeId: collection.storeId,
+        name: collection.title,
+        slug: collection.handle,
+        ...(collection.description ? { description: collection.description } : {}),
+      }));
     },
     createAttempt: (storeId: string, input: CommerceAttemptInput) => request<CommerceAttemptResult>(`/api/public/stores/${encodeURIComponent(storeId)}/checkout/attempts`, { method: "POST", body: JSON.stringify(input) }),
     preparePayment: (storeId: string, attemptId: string) => request<PreparedPayment>(`/api/public/stores/${encodeURIComponent(storeId)}/checkout/payment-intent`, { method: "POST", body: JSON.stringify({ attemptId }) }),

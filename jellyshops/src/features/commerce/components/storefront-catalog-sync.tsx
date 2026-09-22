@@ -54,7 +54,10 @@ export function StorefrontCatalogSync({
         const api = createCommerceApi({ baseUrl: API_URL });
         const details = await api.getPublicStoreBySlug(storeSlug);
         const storeId = details.store.id;
-        const products = await api.getPublicCatalog(storeId);
+        const [products, collections] = await Promise.all([
+          api.getPublicCatalog(storeId),
+          api.getPublicCollections(storeId),
+        ]);
 
         if (cancelled) return;
 
@@ -93,6 +96,7 @@ export function StorefrontCatalogSync({
             storeId,
           }))
         );
+        repository.replaceCollections(storeId, collections);
 
         setStatus("ready");
       } catch {

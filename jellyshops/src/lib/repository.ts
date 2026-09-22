@@ -39,6 +39,7 @@ export interface ShopRepository {
   createBrand(input: Omit<Brand, "id" | "slug"> & { slug?: string }): Brand;
   getCollections(storeId: string): Collection[];
   createCollection(input: Omit<Collection, "id" | "slug"> & { slug?: string }): Collection;
+  replaceCollections(storeId: string, collections: Collection[]): void;
   getCategoryOptionDefinitions(categoryId: string): CategoryOptionDefinition[];
   createCategoryOptionDefinition(input: Omit<CategoryOptionDefinition, "id">): CategoryOptionDefinition;
   updateCategoryOptionDefinition(id: string, patch: Partial<Omit<CategoryOptionDefinition, "id" | "storeId" | "categoryId">>): CategoryOptionDefinition;
@@ -267,8 +268,22 @@ export function createRepository(storage: StorageLike, options: { runtime?: bool
       const slug = slugify(input.slug || name);
       if (!name) throw new Error("COLLECTION_NAME_REQUIRED");
       if ((state.collections ?? []).some((item) => item.storeId === input.storeId && (item.slug === slug || item.name.trim().toLowerCase() === name.toLowerCase()))) throw new Error("COLLECTION_DUPLICATE");
-      const collection: Collection = { id: `collection-${crypto.randomUUID()}`, storeId: input.storeId, name, slug };
+      const collection: Collection = { id: `collection-${crypto.randomUUID()}`, storeId: input.storeId, name, slug,
+        ...(input.description ? { description: input.description } : {}),
+        ...(input.imageUrl ? { imageUrl: input.imageUrl } : {}),
+      };
       state.collections.push(collection); commit(); return clone(collection);
+    },
+    replaceCollections(storeId, collections) {
+      const existing = new Map((state.collections ?? []).filter((item) => item.storeId === storeId).map((item) => [item.id, item]));
+      state.collections = [
+        ...(state.collections ?? []).filter((item) => item.storeId !== storeId),
+        ...collections.filter((item) => item.storeId === storeId).map((item) => {
+          const legacyImage = existing.get(item.id)?.imageUrl;
+          return { ...clone(item), ...(legacyImage && !item.imageUrl ? { imageUrl: legacyImage } : {}) };
+        }),
+      ];
+      commit();
     },
     getCategoryOptionDefinitions: (categoryId) => {
       const category = state.categories.find((item) => item.id === categoryId);

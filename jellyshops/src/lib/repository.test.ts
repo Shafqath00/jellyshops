@@ -47,6 +47,39 @@ describe("shop repository", () => {
     expect(other.parentId).toBe(first.id);
   });
 
+  it("persists optional Collection description and legacy image without adding absent metadata", () => {
+    const storage = memoryStorage();
+    const repo = createRepository(storage);
+    const described = repo.createCollection({ storeId: "store-sweet-bakes", name: "Seasonal", description: "Fresh this week", imageUrl: "/seasonal.jpg" });
+    const plain = repo.createCollection({ storeId: "store-sweet-bakes", name: "Everyday" });
+    const reloaded = createRepository(storage);
+
+    expect(reloaded.getCollections("store-sweet-bakes")).toContainEqual(expect.objectContaining({ id: described.id, description: "Fresh this week", imageUrl: "/seasonal.jpg" }));
+    expect(reloaded.getCollections("store-sweet-bakes").find((item) => item.id === plain.id)).not.toHaveProperty("description");
+    expect(reloaded.getCollections("store-sweet-bakes").find((item) => item.id === plain.id)).not.toHaveProperty("imageUrl");
+    expect(reloaded.getCollections("store-bloom-home").some((item) => item.id === described.id)).toBe(false);
+  });
+
+  it("replaces only one store's Catalog Collections and retains matching legacy images", () => {
+    const storage = memoryStorage();
+    const repo = createRepository(storage);
+    const local = repo.createCollection({ storeId: "store-sweet-bakes", name: "Old", imageUrl: "/legacy.jpg" });
+    const stale = repo.createCollection({ storeId: "store-sweet-bakes", name: "Stale", description: "No longer in Catalog", imageUrl: "/stale.jpg" });
+    const other = repo.createCollection({ storeId: "store-bloom-home", name: "Other", description: "Private to B" });
+
+    repo.replaceCollections("store-sweet-bakes", [
+      { id: local.id, storeId: "store-sweet-bakes", name: "Fresh", slug: "fresh", description: "From Catalog" },
+      { id: stale.id, storeId: "store-sweet-bakes", name: "Stale", slug: "stale" },
+      { id: "wrong-store", storeId: "store-bloom-home", name: "Wrong", slug: "wrong", description: "Do not leak" },
+    ]);
+
+    const reloaded = createRepository(storage);
+    expect(reloaded.getCollections("store-sweet-bakes")).toContainEqual({ id: local.id, storeId: "store-sweet-bakes", name: "Fresh", slug: "fresh", description: "From Catalog", imageUrl: "/legacy.jpg" });
+    expect(reloaded.getCollections("store-sweet-bakes").find((item) => item.id === stale.id)).toEqual({ id: stale.id, storeId: "store-sweet-bakes", name: "Stale", slug: "stale", imageUrl: "/stale.jpg" });
+    expect(reloaded.getCollections("store-sweet-bakes").some((item) => item.id === "wrong-store")).toBe(false);
+    expect(reloaded.getCollections("store-bloom-home")).toContainEqual(other);
+  });
+
   it("manages category option definitions", () => {
     const repo = createRepository(memoryStorage());
     const definition = repo.createCategoryOptionDefinition({ storeId: "store-sweet-bakes", categoryId: "category-cakes", name: "Size", optionKind: "variant", displayType: "buttons", required: false, position: 0 });

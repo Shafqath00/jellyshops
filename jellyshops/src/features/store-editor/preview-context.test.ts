@@ -108,4 +108,15 @@ describe("createEditorPreviewPageContext", () => {
       products: publicContext.products, totalProducts: publicContext.products.length,
     });
   });
+
+  it("keeps absent authoritative Collection metadata compatible in editor and public contexts", () => {
+    const detail = { id: "collection-1", storeId: "store-a", handle: "cakes", title: "Cakes", description: "", productIds: [], products: [] };
+    const preview = createEditorPreviewPageContext({ type: "collection", resourceId: detail.id, storeId: "store-a", catalog, content, searchQuery: "", collectionDetail: detail });
+    const editorCollection = preview?.pageType === "collection" ? (preview.resource.data.collectionPresentation as { collection: Record<string, unknown> }).collection : null;
+    const publicContext = createCollectionPageContext({ id: detail.id, storeId: detail.storeId, name: detail.title, slug: detail.handle }, [], "USD");
+
+    expect(publicContext.collection).not.toHaveProperty("description");
+    expect(publicContext.collection).not.toHaveProperty("imageUrl");
+    expect(editorCollection).toEqual({ id: publicContext.collection.id, title: publicContext.collection.name, description: "" });
+  });
 });

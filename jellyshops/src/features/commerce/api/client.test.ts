@@ -26,6 +26,30 @@ describe("public catalog API client", () => {
     ]);
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:3001/api/public/stores/store-demo/catalog/products?limit=100", expect.anything());
   });
+
+  it("maps authoritative Collection descriptions without inventing absent metadata", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ nodes: [
+      { id: "cakes", storeId: "store-a", externalId: null, handle: "cakes", title: "Cakes", description: "Baked today", productIds: [] },
+      { id: "plain", storeId: "store-a", externalId: null, handle: "plain", title: "Plain", description: "", productIds: [] },
+    ], nextCursor: null }));
+    const api = createCommerceApi({ baseUrl: "http://localhost:3001", fetch: fetchMock });
+
+    await expect(api.getPublicCollections("store-a")).resolves.toEqual([
+      { id: "cakes", storeId: "store-a", name: "Cakes", slug: "cakes", description: "Baked today" },
+      { id: "plain", storeId: "store-a", name: "Plain", slug: "plain" },
+    ]);
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:3001/api/public/stores/store-a/catalog/collections?limit=100", expect.anything());
+  });
+
+  it("loads later Collection pages so their descriptions remain public", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(jsonResponse({ nodes: [{ id: "first", storeId: "store-a", externalId: null, handle: "first", title: "First", description: "", productIds: [] }], nextCursor: "first" }))
+      .mockResolvedValueOnce(jsonResponse({ nodes: [{ id: "later", storeId: "store-a", externalId: null, handle: "later", title: "Later", description: "Next page", productIds: [] }], nextCursor: null }));
+    const api = createCommerceApi({ baseUrl: "http://localhost:3001", fetch: fetchMock });
+
+    await expect(api.getPublicCollections("store-a")).resolves.toContainEqual({ id: "later", storeId: "store-a", name: "Later", slug: "later", description: "Next page" });
+    expect(fetchMock).toHaveBeenLastCalledWith("http://localhost:3001/api/public/stores/store-a/catalog/collections?limit=100&cursor=first", expect.anything());
+  });
 });
 
 describe("merchant commerce API client", () => {
