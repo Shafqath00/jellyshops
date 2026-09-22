@@ -60,7 +60,8 @@ import {
 } from "./config.js";
 
 import { createContentRouter } from "./content/routes.js";
-import type { ContentService } from "./content/service.js";
+import { ContentService } from "./content/service.js";
+import { SqlContentRepository } from "./content/sql-repository.js";
 
 import {
   createCustomDataRouter,
@@ -1389,6 +1390,12 @@ export function createApp(
       : dependencies.storefrontSql ??
         configuredStorefrontPool;
 
+  const contentService =
+    dependencies.contentService ??
+    (storefrontSql
+      ? new ContentService(new SqlContentRepository(storefrontSql))
+      : undefined);
+
   const storefrontCompilerApi =
     dependencies.storefrontCompilerApi ??
     (storefrontSql
@@ -1496,6 +1503,7 @@ export function createApp(
     merchantOrderService,
     reservationSweeper,
     tenantRepository,
+    contentService,
   };
 
   /* Base middleware */

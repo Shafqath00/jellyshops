@@ -131,6 +131,23 @@ describe("local SQL-backed V4 compiler startup", () => {
     expect((await request(app).get("/api/stores/store-a/storefront/public")).status).toBe(404);
   });
 
+  it("composes the SQL content repository for local content routes", async () => {
+    const app = createApp({ config: await config(), storefrontSql: database });
+
+    const created = await request(app)
+      .post("/api/stores/store-a/content/pages")
+      .set("authorization", "Bearer jelly-demo-merchant")
+      .send({ title: "About", handle: "about", content: { text: "Local" } });
+
+    expect(created.status).toBe(201);
+    expect(created.body).toMatchObject({ storeId: "store-a", handle: "about", status: "DRAFT" });
+    const listed = await request(app)
+      .get("/api/stores/store-a/content/pages")
+      .set("authorization", "Bearer jelly-demo-merchant");
+    expect(listed.status).toBe(200);
+    expect(listed.body).toMatchObject([{ id: created.body.id, title: "About" }]);
+  });
+
   it("publishes the persisted draft and serves its active source generation", async () => {
     const app = createApp({ config: await config(), storefrontSql: database });
 
