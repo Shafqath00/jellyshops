@@ -85,6 +85,8 @@ Add a SQL-backed, read-only public storefront context service in the backend. It
 
 Its content reader is a focused `SqlPublicStorefrontContextRepository`; it does not replace or redesign the existing authenticated content service. The existing tables and indexes are sufficient, so this milestone adds no content-schema migration.
 
+The authenticated content service already defines Page, Blog, and Article CRUD contracts, but local SQL startup does not currently provide its repository. Add `SqlContentRepository implements ContentRepository` and compose `ContentService` once in `createApp` when the configured storefront SQL executor is available and no explicit content service was injected. The editor continues using the authenticated content routes; it does not use anonymous public endpoints to discover draft resources. Explicit dependency injection remains authoritative for tests and non-local deployments.
+
 The service exposes four operations:
 
 ```ts
