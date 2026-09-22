@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { loadCollectionPageContext, loadSearchPageContext } from "./page-context-loaders";
+import { createSearchPageContext, loadCollectionPageContext, loadSearchPageContext } from "./page-context-loaders";
 import type { Collection, Product } from "@/lib/domain";
 
 describe("V4 page-context loaders", () => {
@@ -15,6 +15,13 @@ describe("V4 page-context loaders", () => {
   it("normalizes an empty search query into a runtime-only empty state", async () => {
     const context = await loadSearchPageContext({ search: async () => [{ id: "product-1" }] }, "   ");
     expect(context).toEqual({ type: "search", query: "", results: [], state: "empty" });
+  });
+
+  it("adapts validated public Search results into renderer-only product cards", () => {
+    expect(createSearchPageContext({ type: "search", query: "shoes", state: "results", resultCount: 1, results: [{ id: "shoe", handle: "classic-shoe", title: "Classic shoe", description: "Light", imageUrl: "shoe.jpg", priceMinor: 1200 }] }, "store-a", "USD")).toEqual({
+      type: "search", query: "shoes", state: "results", resultCount: 1,
+      results: [{ id: "shoe", name: "Classic shoe", href: "/store-a/products/classic-shoe", imageUrl: "shoe.jpg", price: "$12.00" }],
+    });
   });
 });
 

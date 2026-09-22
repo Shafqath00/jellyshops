@@ -1,10 +1,13 @@
 import type { PublicProduct } from "@jelly/storefront-renderer";
 import type { Product } from "@/lib/domain";
 import type { Collection } from "@/lib/domain";
+import { formatMoney, type Currency } from "@/lib/domain";
+import type { PublicSearchPageContext } from "./public-page-context-api";
+import type { SearchRouteContext } from "./resource-loader";
 
 export type StorefrontPageContext =
   | { type: "collection"; collection: Collection; products: PublicProduct[] }
-  | { type: "search"; query: string; results: Array<{ id: string }>; state: "empty" | "results" | "none" | "error" };
+  | { type: "search"; query: string; resultCount?: number; results: Array<{ id: string }>; state: "empty" | "results" | "none" | "error" };
 
 export interface CollectionPageContextReader {
   findCollection(handle: string): Promise<Collection | null>;
@@ -52,4 +55,24 @@ export async function loadSearchPageContext(
   } catch {
     return { type: "search", query, results: [], state: "error" };
   }
+}
+
+export function createSearchPageContext(
+  context: PublicSearchPageContext,
+  storeSlug: string,
+  currency: Currency,
+): SearchRouteContext {
+  return {
+    type: "search",
+    query: context.query,
+    state: context.state,
+    resultCount: context.resultCount,
+    results: context.results.map((product): PublicProduct => ({
+      id: product.id,
+      name: product.title,
+      href: `/${storeSlug}/products/${product.handle}`,
+      imageUrl: product.imageUrl ?? "",
+      price: formatMoney(product.priceMinor, currency),
+    })),
+  };
 }
