@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
+import { signInAsE2eMerchant } from "./fixtures/merchant-auth";
 
 test("merchant edits a template, compiles preview, and publishes v4 storefront", async ({ page, context }) => {
+  await signInAsE2eMerchant(page);
   const heading = `A new jelly season ${Date.now()}`;
   const workspace = page.waitForResponse((response) => response.url().includes("/storefront/workspace") && response.request().method() === "GET");
   const templates = page.waitForResponse((response) => response.url().includes("/storefront/templates") && response.request().method() === "GET");
@@ -40,7 +42,7 @@ test("merchant edits a template, compiles preview, and publishes v4 storefront",
 });
 
 test("merchant can inspect the online store at mobile width", async ({ page }) => {
-  await page.goto("/admin/online-store/editor");
+  await signInAsE2eMerchant(page);
   await page.getByRole("button", { name: "Mobile preview" }).click();
   await expect(page.getByTestId("preview-viewport")).toHaveAttribute("data-viewport", "mobile");
 });

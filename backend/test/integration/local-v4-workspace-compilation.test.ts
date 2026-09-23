@@ -232,6 +232,26 @@ describe("persisted local V4 workspace compilation", () => {
     ]));
   });
 
+  it("reads a structured rich-text document from persisted draft workspace state", async () => {
+    const document = { type: "doc", content: [
+      { type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: "Our story", marks: [{ type: "bold" }] }] },
+      { type: "paragraph", content: [{ type: "text", text: "Read more", marks: [{ type: "link", attrs: { href: "/pages/about" } }] }] },
+    ] };
+    await database.query(
+      `UPDATE "StorefrontTemplate" SET "layout" = $1 WHERE "id" = 'home-a'`,
+      [{ sections: [{ kind: "inline", section: { id: "story-a", type: "rich-text", settings: { document }, blocks: [] } }] }],
+    );
+
+    const result = await compilationService(database).compile("store-a", 12);
+
+    expect(result.ok).toBe(true);
+    expect(result.snapshot?.templates["home-a"].layout.sections[0]).toMatchObject({
+      kind: "inline",
+      section: { settings: { document } },
+    });
+    expect(result.snapshot?.templates).not.toHaveProperty("home-b");
+  });
+
   it("rejects a generation changed during aggregate reads instead of returning a mixed workspace", async () => {
     const loadResources = createSqlCompilerResourceIdLoader(database);
     const result = compilationService(database, async (storeId) => {

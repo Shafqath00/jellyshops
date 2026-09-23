@@ -114,4 +114,16 @@ describe("TemplateResourceSelector", () => {
     expect(onTemplateChange).not.toHaveBeenCalled();
     expect(onPreviewResourceChange).not.toHaveBeenCalled();
   });
+
+  it("does not ask for a preview resource for the Not Found template", () => {
+    render(<TemplateResourceSelector
+      templates={[{ id: "not-found-default", type: "not-found", handle: "default", name: "Not Found" }]}
+      activeTemplateId="not-found-default"
+      previewResources={resources}
+      onTemplateChange={vi.fn()}
+      onPreviewResourceChange={vi.fn()}
+    />);
+
+    expect(screen.getByLabelText("Preview resource")).toBeDisabled();
+  });
 });

@@ -22,8 +22,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@jelly/storefront-registry": "file:./jelly-storefront-registry-0.1.0.tgz",
-    "@jelly/storefront-schema": "file:./jelly-storefront-schema-0.1.0.tgz",
+    "@jelly/storefront-registry": "file:./jelly-storefront-registry-v4-launch-ready-0.1.0.tgz",
+    "@jelly/storefront-schema": "file:./jelly-storefront-schema-v4-launch-ready-0.1.0.tgz",
     "@jelly/storefront-themes": "file:./jelly-storefront-themes-0.1.0.tgz",
     "@supabase/supabase-js": "^2.116.0",
     "cors": "^2.8.6",
@@ -56,7 +56,7 @@
   },
   "overrides": {
     "@jelly/storefront-themes": "file:./jelly-storefront-themes-0.1.0.tgz",
-    "@jelly/storefront-schema": "file:./jelly-storefront-schema-0.1.0.tgz",
-    "@jelly/storefront-registry": "file:./jelly-storefront-registry-0.1.0.tgz"
+    "@jelly/storefront-schema": "file:./jelly-storefront-schema-v4-launch-ready-0.1.0.tgz",
+    "@jelly/storefront-registry": "file:./jelly-storefront-registry-v4-launch-ready-0.1.0.tgz"
   }
 }

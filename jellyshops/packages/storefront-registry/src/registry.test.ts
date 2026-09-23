@@ -53,6 +53,31 @@ it("registers configurable Collection sections only for Collection templates", (
   expect(getSectionDefinition("collection-description")?.defaultSettings).toMatchObject({ spacing: "standard" });
 });
 
+it("registers a validated media control for the Home Image with text section", () => {
+  const definition = getSectionDefinition("image-with-text");
+  expect(definition?.controls.map(({ key }) => key)).toContain("image");
+  expect(definition?.settingsSchema.safeParse({ image: {
+    id: "media-1", url: "/api/public/media/store-a/media-1", alt: "Apples",
+    focalPoint: { x: 50, y: 50 }, fit: "cover",
+  } }).success).toBe(true);
+  expect(definition?.settingsSchema.safeParse({ image: { url: "javascript:alert(1)" } }).success).toBe(false);
+  expect(definition?.settingsSchema.safeParse({ image: { url: "//other.example/photo.jpg" } }).success).toBe(false);
+});
+
+it("makes the Home product grid configurable without requiring sample Catalog references", () => {
+  const definition = getSectionDefinition("product-grid");
+  expect(definition?.controls.map(({ key }) => key)).toEqual(["heading", "limit", "emptyMessage"]);
+  expect(definition?.settingsSchema.safeParse({ heading: "New arrivals", limit: 4, emptyMessage: "Coming soon" }).success).toBe(true);
+  expect(definition?.settingsSchema.safeParse({ limit: 25 }).success).toBe(false);
+  expect(validateSectionAgainstRegistry(section("product-grid"), "home")).toEqual([]);
+});
+
+it("exposes simple store identity and footer text controls in global chrome", () => {
+  expect(getSectionDefinition("header")?.controls.map(({ key }) => key)).toEqual(["storeName", "logo"]);
+  expect(getSectionDefinition("header")?.settingsSchema.safeParse({ storeName: "Little Market", logo: { id: "logo-1", url: "/api/public/media/store-a/logo-1", alt: "Logo" } }).success).toBe(true);
+  expect(getSectionDefinition("footer")?.controls.map(({ key }) => key)).toEqual(["text"]);
+});
+
 it("allows page content only on a custom Page template", () => {
   expect(validateSectionAgainstRegistry(section("page-content"), "page" as never)).toEqual([]);
   expect(validateSectionAgainstRegistry(section("page-content"), "home")).toEqual(expect.arrayContaining([

@@ -41,7 +41,7 @@ export interface LocalV4WorkspaceDataSource {
 }
 
 function templateType(value: string): TemplateType {
-  const normalized = value.toLowerCase();
+  const normalized = value.toLowerCase().replaceAll("_", "-");
   return templateTypes.includes(normalized as TemplateType)
     ? normalized as TemplateType
     : value as TemplateType;

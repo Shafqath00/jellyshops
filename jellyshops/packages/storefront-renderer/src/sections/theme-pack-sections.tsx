@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import type { MediaReference, SectionNode } from "@jelly/storefront-schema";
 import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui";
 import type { StorefrontRuntimeContext } from "../runtime-context";
+import { resolveStorefrontHref } from "../runtime-context";
 
 function stringSetting(settings: Record<string, unknown>, key: string, fallback = ""): string {
   const value = settings[key];
@@ -96,7 +97,8 @@ export function SearchResultsSection({ section, context }: { section: SectionNod
   return <section className="jelly-section jelly-search-results"><StorefrontContainer><div className="jelly-search-shell"><h1>{content.heading}</h1><p>{content.body || "Find a product, collection, or story."}</p><form action={search?.searchHref ?? "/search"}><label htmlFor="storefront-search">Search catalog</label><div><input id="storefront-search" name="q" value={query} placeholder="What are you looking for?" readOnly /><button type="submit">Search</button></div></form>{search?.state === "empty" && <p>Enter a search term to find products.</p>}{search?.state === "none" && <p>No products found for “{query}”</p>}{search?.state === "results" && <div className="jelly-product-grid-items">{results.map((product) => <StorefrontProductCard key={product.id} product={product} />)}</div>}</div></StorefrontContainer></section>;
 }
 
-export function NotFoundMessageSection({ section }: { section: SectionNode }) {
+export function NotFoundMessageSection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
   const content = copy(section, "We couldn't find that page");
-  return <section className="jelly-section jelly-not-found"><StorefrontContainer><div><p className="jelly-eyebrow">404</p><h1>{content.heading}</h1><p>{content.body || "The page may have moved, but there is plenty more to discover."}</p><a className="jelly-button" href={content.href}>{content.button || "Back to the shop"}</a></div></StorefrontContainer></section>;
+  const href = resolveStorefrontHref(content.href, context.storeSlug);
+  return <section className="jelly-section jelly-not-found"><StorefrontContainer><div><p className="jelly-eyebrow">404</p><h1>{content.heading}</h1><p>{content.body || "The page may have moved, but there is plenty more to discover."}</p>{href && <a className="jelly-button" href={href}>{content.button || "Back to the shop"}</a>}</div></StorefrontContainer></section>;
 }

@@ -30,6 +30,17 @@ describe("normalized storefront workspace schema", () => {
       .rejects.toBeTruthy();
   });
 
+  it("persists the V4 Not Found template type", async () => {
+    await integration.query(
+      `INSERT INTO "StorefrontTemplate" ("id", "storeId", "type", "handle", "name", "layout", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6::jsonb, CURRENT_TIMESTAMP)`,
+      ["template-a-not-found", "store-a", "NOT_FOUND", "default", "Not Found", JSON.stringify({ sections: [] })],
+    );
+
+    const persisted = await integration.query<{ type: string }>(`SELECT "type"::text AS "type" FROM "StorefrontTemplate" WHERE "id" = $1`, ["template-a-not-found"]);
+    expect(persisted.rows[0]?.type).toBe("NOT_FOUND");
+  });
+
   it("rejects cross-store template assignments structurally", async () => {
     await integration.query(`INSERT INTO "StorefrontTemplate" ("id", "storeId", "type", "handle", "name", "layout", "updatedAt") VALUES ($1, $2, $3, $4, $5, $6::jsonb, CURRENT_TIMESTAMP)`, ["template-b", "store-b", "PRODUCT", "default", "Default", JSON.stringify({ sections: [] })]);
     await expect(integration.query(`INSERT INTO "StorefrontTemplateAssignment" ("storeId", "resourceType", "resourceId", "templateId", "updatedAt") VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)`, ["store-a", "product", "product-a", "template-b"])).rejects.toBeTruthy();

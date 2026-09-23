@@ -18,7 +18,9 @@ function addMediaReferences(
     return;
   }
   const record = value as Record<string, unknown>;
-  if (record.type === "media" && typeof record.id === "string" && record.id) add(record.id);
+  const isMediaReference = record.type === "media"
+    || typeof record.id === "string" && typeof record.url === "string" && ("alt" in record || "focalPoint" in record);
+  if (isMediaReference && typeof record.id === "string" && record.id) add(record.id);
   Object.values(record).forEach((item) => addMediaReferences(item, add, seen));
 }
 

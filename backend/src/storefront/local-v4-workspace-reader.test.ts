@@ -120,6 +120,14 @@ describe("LocalV4WorkspaceReader", () => {
     });
   });
 
+  it("normalizes the SQL NOT_FOUND enum value to the public not-found page type", async () => {
+    const input = await new LocalV4WorkspaceReader(source({
+      listTemplates: vi.fn(async () => [{ id: "not-found-default", storeId: "store-a", revision: 0, type: "NOT_FOUND" as never, handle: "default", name: "Not Found", layout: { sections: [] }, createdAt: new Date(0), updatedAt: new Date(0) }]),
+    })).load("store-a", 7, "registry-a");
+
+    expect(input.templates[0]?.type).toBe("not-found");
+  });
+
   it("preserves malformed persisted layouts for compiler validation", async () => {
     const input = await new LocalV4WorkspaceReader(source({
       listTemplates: vi.fn(async () => [{ id: "home-default", storeId: "store-a", revision: 0, type: "home", handle: "default", name: "Home", layout: { sections: [{ kind: "global", globalSectionId: "missing" }] }, createdAt: new Date(0), updatedAt: new Date(0) }]),

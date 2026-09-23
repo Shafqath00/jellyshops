@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowRight, Sparkle } from "lucide-react";
 import { ProductCard } from "@/components/product-card";
+import { JellyHeroStrip } from "@/components/jelly/marquee";
 import { useShop } from "@/contexts/shop-context";
 import {
   PublishedRuntimeStorefront,
@@ -110,9 +111,22 @@ export default function StoreHomePage() {
           <span className="absolute bottom-7 left-7 grid size-[118px] place-items-center rounded-[52%_48%_56%_44%] border-2 border-[var(--store-text)] bg-[var(--store-accent-soft)] text-center font-[var(--store-display,Georgia)] text-base font-bold -rotate-6">Made today<br />Loved tonight</span>
         </div>
       </section>
-      <section className="overflow-hidden border-b border-[color-mix(in_srgb,var(--store-text)_20%,transparent)] bg-[var(--store-accent-soft)]">
-        <div className="flex min-h-[58px] min-w-max items-center justify-around gap-12 px-6 font-[var(--store-display,Georgia)] text-lg italic"><span>Hand-finished</span><i className="not-italic text-[var(--store-accent)]">✦</i><span>Freshly baked</span><i className="not-italic text-[var(--store-accent)]">✦</i><span>Local delivery</span><i className="not-italic text-[var(--store-accent)]">✦</i><span>Small joys</span></div>
-      </section>
+      <JellyHeroStrip
+          items={[
+            "Hand-finished",
+            "✦",
+            "Freshly baked",
+            "✦",
+            "Local delivery",
+            "✦",
+            "Small joys",
+            "✦",
+            "Made to order",
+            "✦",
+            "Ships with care",
+            "✦",
+          ]}
+        />
       <section className="px-[clamp(20px,6vw,90px)] py-[clamp(70px,9vw,130px)]">
         <div className="mb-9 flex items-end justify-between gap-5"><div><span className="text-[10px] font-extrabold uppercase tracking-[.12em] text-[var(--store-accent)]">Something lovely</span><h2 className="mt-2 font-[var(--store-display,Georgia)] text-[clamp(2.3rem,4vw,4rem)] tracking-[-.055em]">Shop the favourites</h2></div><Link className="flex items-center gap-2 border-b pb-1.5 text-xs font-bold" href={`/${store.slug}/shop`}>See everything <ArrowRight size={16} /></Link></div>
         <div className="grid grid-cols-2 gap-[clamp(15px,2.5vw,34px)] md:grid-cols-3">{featured.map((product) => <ProductCard key={product.id} product={product} storeSlug={store.slug} currency={store.currency} />)}</div>

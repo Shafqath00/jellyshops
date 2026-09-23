@@ -9,6 +9,7 @@ export const templateTypes = [
   "article",
   "search",
   "cart",
+  "not-found",
 ] as const;
 
 export type TemplateType = typeof templateTypes[number];

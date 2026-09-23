@@ -24,6 +24,7 @@ export interface PublicResourceReader {
 export type StorefrontRouteRequest =
   | { type: "home" }
   | { type: "cart" }
+  | { type: "not-found" }
   | { type: "search"; context: SearchRouteContext }
   | { type: PublicResourceType; handle: string };
 
@@ -53,6 +54,7 @@ export type ResolvedStorefrontRoute =
 export type StorefrontPageContext =
   | { pageType: "home"; resource: null }
   | { pageType: "cart"; resource: null; data?: Record<string, unknown> }
+  | { pageType: "not-found"; resource: null }
   | { pageType: "search"; resource: null; data: SearchRouteContext }
   | { pageType: PublicResourceType; resource: PublicStorefrontResource };
 
@@ -168,6 +170,14 @@ export async function resolvePublicResourceReference(
   return resource?.visible ? resource : null;
 }
 
+export function resolveStorefrontNotFound(snapshot: RuntimeStorefrontSnapshotV4): ResolvedStorefrontRoute {
+  const templateId = snapshot.templateDefaults["not-found"];
+  const template = templateId ? snapshot.templates[templateId] : undefined;
+  if (!template || template.type !== "not-found") return { status: "not-found", reason: "template" };
+  const layout = expandRuntimeLayout(snapshot, template);
+  return { status: "ready", context: { pageType: "not-found", resource: null }, resource: null, template, sections: layout.template, layout };
+}
+
 export async function resolveStorefrontRoute(
   snapshot: RuntimeStorefrontSnapshotV4,
   route: StorefrontRouteRequest,
@@ -195,6 +205,10 @@ export async function resolveStorefrontRoute(
     if (!template || template.type !== "search") return { status: "not-found", reason: "template" };
     const layout = expandRuntimeLayout(snapshot, template);
     return { status: "ready", context: { pageType: "search", resource: null, data: route.context }, resource: null, template, sections: layout.template, layout };
+  }
+
+  if (route.type === "not-found") {
+    return resolveStorefrontNotFound(snapshot);
   }
 
   const resource = await reader.findByHandle(route.type, route.handle);

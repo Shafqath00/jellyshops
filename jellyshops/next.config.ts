@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  distDir: process.env.JELLY_E2E_NEXT_DIST_DIR ?? ".next",
   transpilePackages: [
     "@jelly/storefront-schema",
     "@jelly/storefront-registry",

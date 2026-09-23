@@ -34,9 +34,9 @@ export function TemplateResourceSelector({
   onPreviewQueryChange?(query: string): void;
 }) {
   const activeTemplate = templates.find((template) => template.id === activeTemplateId);
-  const needsPreviewResource = activeTemplate ? activeTemplate.type !== "home" && activeTemplate.type !== "search" && activeTemplate.type !== "cart" : previewResources.length > 0;
+  const needsPreviewResource = activeTemplate ? activeTemplate.type !== "home" && activeTemplate.type !== "search" && activeTemplate.type !== "cart" && activeTemplate.type !== "not-found" : previewResources.length > 0;
   const pageType = activeTemplate?.type ? `${activeTemplate.type.charAt(0).toUpperCase()}${activeTemplate.type.slice(1)}` : "Home";
-  const pageTypes: StorefrontTemplateType[] = ["home", "product", "collection", "cart", "search", "page", "blog", "article"];
+  const pageTypes: StorefrontTemplateType[] = ["home", "product", "collection", "cart", "search", "page", "blog", "article", "not-found"];
 
   return (
     <div className="grid gap-3 border-b border-[#eeeeee] bg-white p-4 sm:grid-cols-3" aria-label="Template and preview resource">

@@ -66,8 +66,8 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
   return (
     <div className={`jelly-storefront jelly-theme-layout-${resolvedTheme.layout}`} data-jelly-theme={resolvedTheme.id} data-jelly-theme-version={resolvedTheme.version} style={style}>
       {resolvedTheme.layout === "editorial" ? <div className="jelly-theme-masthead"><span>JellyShop collection</span><img src={`${resolvedTheme.assetPrefix}monogram.svg`} alt="" /></div> : null}
-      {route.layout.announcement.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="header" themeId={resolvedTheme.id} page={route.context} />)}
-      {route.layout.header.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="header" themeId={resolvedTheme.id} page={route.context} />)}
+      {route.layout.announcement.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="header" themeId={resolvedTheme.id} page={route.context} menus={snapshot.menus} storeSlug={storeSlug} />)}
+      {route.layout.header.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="header" themeId={resolvedTheme.id} page={route.context} menus={snapshot.menus} storeSlug={storeSlug} />)}
       <main className={resolvedTheme.layout === "editorial" ? "jelly-theme-editorial-main" : undefined}>
         {route.layout.template.map((section) => (
           <RegistrySectionRenderer
@@ -78,10 +78,12 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
             region="template"
             themeId={resolvedTheme.id}
             page={route.context}
+            menus={snapshot.menus}
+            storeSlug={storeSlug}
           />
         ))}
       </main>
-      {route.layout.footer.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="footer" themeId={resolvedTheme.id} page={route.context} />)}
+      {route.layout.footer.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="footer" themeId={resolvedTheme.id} page={route.context} menus={snapshot.menus} storeSlug={storeSlug} />)}
     </div>
   );
 }

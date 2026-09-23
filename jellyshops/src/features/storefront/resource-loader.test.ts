@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   expandRuntimeTemplate,
   resolvePublicResourceReference,
+  resolveStorefrontNotFound,
   resolveStorefrontRoute,
   type PublicResourceReader,
   type PublicStorefrontResource,
@@ -258,5 +259,37 @@ describe("resolveStorefrontRoute", () => {
       { type: "product", handle: "classic-cake" },
       resources,
     )).resolves.toMatchObject({ status: "not-found", reason: "resource" });
+  });
+
+  it("resolves the compiled Not Found default through the same runtime layout", async () => {
+    const current = snapshot();
+    current.templates["not-found-default"] = {
+      id: "not-found-default",
+      type: "not-found",
+      handle: "default",
+      layout: { sections: [{ kind: "inline", section: { id: "not-found-copy", type: "not-found-message", settings: {}, blocks: [] } }] },
+    } as never;
+    current.templateDefaults["not-found"] = "not-found-default";
+
+    await expect(resolveStorefrontRoute(current, { type: "not-found" } as never, reader(null)))
+      .resolves.toMatchObject({ status: "ready", template: { id: "not-found-default", type: "not-found" }, context: { pageType: "not-found" } });
+  });
+
+  it("selects the compiled Not Found template for an unmatched storefront path", () => {
+    const current = snapshot();
+    current.templates["not-found-default"] = {
+      id: "not-found-default",
+      type: "not-found",
+      handle: "default",
+      layout: { sections: [{ kind: "inline", section: { id: "not-found-copy", type: "not-found-message", settings: {}, blocks: [] } }] },
+    };
+    current.templateDefaults["not-found"] = "not-found-default";
+
+    expect(resolveStorefrontNotFound(current)).toMatchObject({
+      status: "ready",
+      context: { pageType: "not-found", resource: null },
+      template: { id: "not-found-default" },
+      sections: [{ id: "not-found-copy" }],
+    });
   });
 });

@@ -62,16 +62,16 @@ export class SectionRenderRegistry {
 function builtInRegistry(): SectionRenderRegistry {
   const registry = new SectionRenderRegistry();
   registry.register("announcement-bar", ({ section }) => <AnnouncementBarSection section={section} />);
-  registry.register("header", ({ section }) => <HeaderSection section={section} />);
-  registry.register("footer", ({ section }) => <FooterSection section={section} />);
-  registry.register("hero", ({ section, mode }) => <HeroSection section={section} editor={mode === "editor"} />);
-  registry.register("rich-text", ({ section, mode }) => <RichTextSection section={section} editor={mode === "editor"} />);
+  registry.register("header", ({ section, context }) => <HeaderSection section={section} context={context} />);
+  registry.register("footer", ({ section, context }) => <FooterSection section={section} context={context} />);
+  registry.register("hero", ({ section, mode, context }) => <HeroSection section={section} editor={mode === "editor"} context={context} />);
+  registry.register("rich-text", ({ section }) => <RichTextSection section={section} />);
   registry.register("page-content", ({ context }) => <PageContentSection context={context} />);
   registry.register("blog-header", ({ context }) => <BlogHeaderSection context={context} />);
   registry.register("article-list", ({ context }) => <ArticleListSection context={context} />);
   registry.register("article-header", ({ context }) => <ArticleHeaderSection context={context} />);
   registry.register("article-content", ({ context }) => <ArticleContentSection context={context} />);
-  registry.register("product-grid", ({ commerce }) => <ProductGridSection commerce={commerce} />);
+  registry.register("product-grid", ({ commerce, section }) => <ProductGridSection commerce={commerce} section={section} />);
   registry.register("product-gallery", ({ context, section }) => <ProductGallerySection context={context} section={section} />);
   registry.register("product-information", ({ context, section }) => <ProductInformationSection context={context} section={section} />);
   registry.register("product-options", ({ context }) => <ProductOptionsSection context={context} />);
@@ -81,9 +81,9 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("collection-header", ({ context, section }) => <CollectionHeaderSection context={context} section={section} />);
   registry.register("collection-product-grid", ({ context, section }) => <CollectionProductGridSection context={context} section={section} />);
   registry.register("collection-description", ({ context, section }) => <CollectionDescriptionSection context={context} section={section} />);
-  registry.register("featured-collection", ({ commerce }) => <ProductGridSection commerce={commerce} />);
-  registry.register("image-with-text", ({ section }) => <ImageWithTextSection section={section} />);
-  registry.register("image-text", ({ section }) => <ImageWithTextSection section={section} />);
+  registry.register("featured-collection", ({ commerce, section }) => <ProductGridSection commerce={commerce} section={section} />);
+  registry.register("image-with-text", ({ section, context }) => <ImageWithTextSection section={section} context={context} />);
+  registry.register("image-text", ({ section, context }) => <ImageWithTextSection section={section} context={context} />);
   registry.register("multicolumn", ({ section }) => <MulticolumnSection section={section} />);
   registry.register("newsletter", ({ section }) => <NewsletterSection section={section} />);
   registry.register("category-grid", ({ section }) => <CategoryGridSection section={section} />);
@@ -93,7 +93,7 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("journal-teaser", ({ section }) => <JournalTeaserSection section={section} />);
   registry.register("cart-summary", ({ section, context }) => <CartSummarySection section={section} context={context} />);
   registry.register("search-results", ({ section, context }) => <SearchResultsSection section={section} context={context} />);
-  registry.register("not-found-message", ({ section }) => <NotFoundMessageSection section={section} />);
+  registry.register("not-found-message", ({ section, context }) => <NotFoundMessageSection section={section} context={context} />);
   registry.register("spacer-divider", () => <SpacerDividerSection />);
   registry.register("spacer", () => <SpacerDividerSection />);
   registry.register("divider", () => <SpacerDividerSection />);

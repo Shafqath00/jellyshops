@@ -24,6 +24,8 @@ const productRuntime = { selections: [{ optionId: "size", valueId: "small" }], q
 
 describe("createEditorPreviewPageContext", () => {
   it("builds page, blog, and article contexts from current-store content", () => {
+    expect(createEditorPreviewPageContext({ type: "not-found", storeId: "store-a", catalog, content, searchQuery: "cake" }))
+      .toEqual({ pageType: "not-found", resource: null });
     expect(createEditorPreviewPageContext({ type: "page", resourceId: "page-1", storeId: "store-a", catalog, content, searchQuery: "cake" })).toMatchObject({
       pageType: "page", resource: { id: "page-1", handle: "our-story", data: { title: "Our story" } },
     });

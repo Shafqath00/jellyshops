@@ -98,6 +98,7 @@ import {
   createPublicMediaRouter,
 } from "./media/routes.js";
 import { MediaService } from "./media/service.js";
+import { createStorefrontMediaReferenceReader } from "./media/storefront-reference-reader.js";
 import type { MediaStorage } from "./media/storage.js";
 
 import {
@@ -125,6 +126,8 @@ import type {
 import {
   createLocalV4CompilationService,
 } from "./storefront/local-v4-compilation.js";
+import { StorefrontStarterInstallationService } from "./storefront/starter/installation-service.js";
+import { createStorefrontStarterRouter, type StorefrontStarterApi } from "./storefront/starter/routes.js";
 import { createPublicStorefrontContextRouter } from "./storefront/context/routes.js";
 import { SqlPublicStorefrontContextRepository } from "./storefront/context/sql-repository.js";
 import { PublicStorefrontContextService } from "./storefront/context/service.js";
@@ -218,6 +221,7 @@ export interface AppDependencies {
   storefrontDynamicSourceResolver: CompilerDynamicSourceResolver;
   storefrontPublicationApi: StorefrontPublicationApi;
   publicStorefrontApi: PublicStorefrontApi;
+  storefrontStarterApi?: StorefrontStarterApi;
 
   // Stripe / commerce
   stripeAccountService?: StripeAccountService;
@@ -1124,6 +1128,7 @@ function mountStorefrontRoutes(
   authProvider: AuthProvider,
   storefrontService: DefaultStorefrontService<unknown>,
   publicStorefrontApi: PublicStorefrontApi,
+  storefrontStarterApi?: StorefrontStarterApi,
 ): void {
   // Public + legacy explicit routes first.
   //
@@ -1137,6 +1142,13 @@ function mountStorefrontRoutes(
       authProvider,
     ),
   );
+
+  if (storefrontStarterApi) {
+    app.use(
+      "/api/stores/:storeId/storefront/starters",
+      createStorefrontStarterRouter(storefrontStarterApi, authProvider),
+    );
+  }
 
   app.use(
     "/api/stores/:storeId/storefront",
@@ -1341,12 +1353,6 @@ export function createApp(
       config,
     );
 
-  const mediaService =
-    new MediaService(
-      mediaRepository,
-      mediaStorage,
-    );
-
   const app = express();
 
   const catalogService =
@@ -1391,7 +1397,13 @@ export function createApp(
     dependencies.storefrontSql === null
       ? undefined
       : dependencies.storefrontSql ??
-        configuredStorefrontPool;
+      configuredStorefrontPool;
+
+  const mediaService = new MediaService(
+    mediaRepository,
+    mediaStorage,
+    storefrontSql ? createStorefrontMediaReferenceReader(storefrontSql) : undefined,
+  );
 
   const contentService =
     dependencies.contentService ??
@@ -1416,6 +1428,9 @@ export function createApp(
           dependencies.dynamicSourceRegistry,
       )
       : undefined);
+
+  const storefrontStarterApi = dependencies.storefrontStarterApi ??
+    (storefrontSql && commerceDatabase ? new StorefrontStarterInstallationService(commerceDatabase) : undefined);
 
   let composedStorefrontPublicationApi: StorefrontPublicationApi | undefined;
   let composedPublicStorefrontApi: PublicStorefrontApi | undefined;
@@ -1589,6 +1604,7 @@ export function createApp(
     authProvider,
     storefrontService,
     publicStorefrontApi,
+    storefrontStarterApi,
   );
 
   mountMediaRoutes(

@@ -19,81 +19,65 @@ function validSnapshot() {
         type: "product",
         handle: "default",
         layout: {
-          sections: [
-            {
-              kind: "inline",
-              section: {
-                id: "title-1",
-                type: "product-title",
-                settings: {
-                  heading: {
-                    kind: "dynamic",
-                    binding: { kind: "resource_field", resource: "product", field: "title" },
-                  },
-                },
-              },
+          sections: [{
+            kind: "inline",
+            section: {
+              id: "title-1",
+              type: "product-title",
+              settings: { heading: { kind: "dynamic", binding: { kind: "resource_field", resource: "product", field: "title" } } },
             },
-          ],
+          }],
         },
       },
     },
     globalSections: {},
-    menus: {
-      main: {
-        id: "main",
-        handle: "main",
-        items: [
-          {
-            id: "shop",
-            label: "Shop",
-            target: { kind: "collection", resourceId: "collection-1" },
-            children: [],
-          },
-        ],
-      },
-    },
+    menus: { main: { id: "main", handle: "main", items: [{ id: "shop", label: "Shop", target: { kind: "collection", resourceId: "collection-1" }, children: [] }] } },
     templateDefaults: { product: "product-default" },
-    assignments: [
-      { resourceType: "product", resourceId: "product-1", templateId: "product-default" },
-    ],
-    dependencies: {
-      edges: [
-        {
-          from: { type: "template", id: "product-default" },
-          to: { type: "metafield_definition", id: "details.material" },
-          reason: "binding",
-        },
-      ],
-    },
+    assignments: [{ resourceType: "product", resourceId: "product-1", templateId: "product-default" }],
+    dependencies: { edges: [{ from: { type: "template", id: "product-default" }, to: { type: "metafield_definition", id: "details.material" }, reason: "binding" }] },
   };
 }
 
 describe("runtime storefront snapshot v4", () => {
   it("accepts immutable presentation configuration and binding instructions", () => {
-    const result = runtimeStorefrontSnapshotV4Schema.safeParse(validSnapshot());
-    expect(result.success).toBe(true);
+    expect(runtimeStorefrontSnapshotV4Schema.safeParse(validSnapshot()).success).toBe(true);
   });
 
   it("rejects unsupported runtime schema versions", () => {
-    const result = runtimeStorefrontSnapshotV4Schema.safeParse({ ...validSnapshot(), schemaVersion: 3 });
-    expect(result.success).toBe(false);
+    expect(runtimeStorefrontSnapshotV4Schema.safeParse({ ...validSnapshot(), schemaVersion: 3 }).success).toBe(false);
   });
 
   it("rejects embedded live commerce values", () => {
-    const snapshot = {
-      ...validSnapshot(),
-      catalog: {
-        products: [{ id: "product-1", priceMinor: 1200, inventory: 4 }],
-      },
-    };
+    const snapshot = { ...validSnapshot(), catalog: { products: [{ id: "product-1", priceMinor: 1200, inventory: 4 }] } };
     expect(runtimeStorefrontSnapshotV4Schema.safeParse(snapshot).success).toBe(false);
   });
 
   it("rejects assignments that point at unsupported resource types", () => {
     const snapshot = validSnapshot();
-    snapshot.assignments = [
-      { resourceType: "order" as "product", resourceId: "order-1", templateId: "product-default" },
-    ];
+    snapshot.assignments = [{ resourceType: "order" as "product", resourceId: "order-1", templateId: "product-default" }];
     expect(runtimeStorefrontSnapshotV4Schema.safeParse(snapshot).success).toBe(false);
+  });
+});
+
+describe("V4 runtime snapshot template coverage", () => {
+  it("accepts Not Found as a template and a default template type", () => {
+    const result = runtimeStorefrontSnapshotV4Schema.safeParse({
+      schemaVersion: 4,
+      storeId: "store-a",
+      sourceGeneration: 3,
+      compilerVersion: "test",
+      registryManifestHash: "hash",
+      theme: { presetId: "fresh-market", settings: {}, artifactId: null },
+      templates: {
+        "not-found-default": { id: "not-found-default", type: "not-found", handle: "default", layout: { sections: [] } },
+      },
+      globalSections: {},
+      menus: {},
+      templateDefaults: { "not-found": "not-found-default" },
+      assignments: [],
+      dependencies: { edges: [] },
+    });
+
+    expect(result.success).toBe(true);
   });
 });

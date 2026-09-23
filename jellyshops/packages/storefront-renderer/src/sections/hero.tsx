@@ -1,13 +1,15 @@
 import type { CSSProperties } from "react";
 import type { MediaReference, SectionNode } from "@jelly/storefront-schema";
 import { StorefrontContainer } from "@jelly/storefront-ui";
+import type { StorefrontRuntimeContext } from "../runtime-context";
+import { resolveStorefrontHref } from "../runtime-context";
 
 function setting(block: SectionNode["blocks"][number], key: string): string | undefined {
   const value = block.settings[key];
   return typeof value === "string" ? value : undefined;
 }
 
-export function HeroSection({ section, editor = false }: { section: SectionNode; editor?: boolean }) {
+export function HeroSection({ section, editor = false, context }: { section: SectionNode; editor?: boolean; context: StorefrontRuntimeContext }) {
   const settings = section.settings;
   const image = settings.image && typeof settings.image === "object" ? settings.image as MediaReference : undefined;
   const focalPoint = image && image.focalPoint && Number.isFinite(image.focalPoint.x) && Number.isFinite(image.focalPoint.y)
@@ -29,7 +31,10 @@ export function HeroSection({ section, editor = false }: { section: SectionNode;
     if (!text) return null;
     const editorProps = editor ? { "data-editor-block-id": block.id, "data-editor-field-key": block.type === "button" ? "label" : "text" } : {};
     if (block.type === "heading") return <h1 key={block.id} {...editorProps}>{text}</h1>;
-    if (block.type === "button") return <a className="jelly-button" href={setting(block, "href") ?? "#"} key={block.id} {...editorProps}>{text}</a>;
+    if (block.type === "button") {
+      const href = resolveStorefrontHref(setting(block, "href") ?? "#", context.storeSlug);
+      return href ? <a className="jelly-button" href={href} key={block.id} {...editorProps}>{text}</a> : <span key={block.id} {...editorProps}>{text}</span>;
+    }
     return <p key={block.id} {...editorProps}>{text}</p>;
     })}
     {typeof settings.summary === "string" && settings.summary && <p className="jelly-hero-summary">{settings.summary}</p>}

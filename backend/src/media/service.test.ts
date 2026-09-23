@@ -96,6 +96,20 @@ describe("MediaService", () => {
     expect(storage.remove).not.toHaveBeenCalled();
   });
 
+  it("rejects media referenced by the persisted storefront even if its cached flag is false", async () => {
+    const { repository, storage } = setup([record()]);
+    const referenceReader = vi.fn(async () => true);
+    const service = new MediaService(repository, storage, referenceReader);
+
+    await expect(service.remove("store-a", "media-1")).rejects.toMatchObject<ApiError>({
+      status: 409,
+      code: "MEDIA_IN_USE",
+    });
+    expect(referenceReader).toHaveBeenCalledWith("store-a", "media-1");
+    expect(repository.delete).not.toHaveBeenCalled();
+    expect(storage.remove).not.toHaveBeenCalled();
+  });
+
   it("deletes metadata then bytes after validation", async () => {
     const { service, repository, storage } = setup([record()]);
 

@@ -15,6 +15,7 @@ export class MediaService {
   constructor(
     private readonly repository: MediaRepository,
     private readonly storage: MediaStorage,
+    private readonly storefrontReferenceReader?: (storeId: string, mediaId: string) => Promise<boolean>,
   ) {}
 
   async upload(storeId: string, file: Express.Multer.File): Promise<MediaRecord> {
@@ -64,7 +65,7 @@ export class MediaService {
   async remove(storeId: string, mediaId: string): Promise<void> {
     const record = await this.repository.get(storeId, mediaId);
     if (!record) throw new ApiError(404, "MEDIA_NOT_FOUND", "The requested image was not found");
-    if (record.referenced) {
+    if (record.referenced || await this.storefrontReferenceReader?.(storeId, mediaId)) {
       throw new ApiError(409, "MEDIA_IN_USE", "The image is used by a storefront document");
     }
 

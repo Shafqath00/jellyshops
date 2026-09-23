@@ -68,4 +68,25 @@ describe("assembleRuntimeSnapshot", () => {
       section: { type: "rich-text", settings: { alignment: "center", tone: "warm" } },
     });
   });
+
+  it("compiles a Not Found default into the strict V4 runtime snapshot", () => {
+    const source = input();
+    source.templates = [{
+      id: "not-found-default",
+      type: "not-found",
+      handle: "default",
+      name: "Not Found",
+      layout: { sections: [{ kind: "inline", section: {
+        id: "not-found-message",
+        type: "not-found-message",
+        settings: {},
+        blocks: [{ id: "not-found-heading", type: "heading", settings: { text: "Page not found" } }],
+      } }] },
+    }];
+
+    const snapshot = assembleRuntimeSnapshot(source, buildDependencyGraph(source), "2026-01");
+
+    expect(snapshot.templateDefaults["not-found"]).toBe("not-found-default");
+    expect(snapshot.templates["not-found-default"]?.type).toBe("not-found");
+  });
 });

@@ -7,12 +7,14 @@ import type {
 } from "@jelly/storefront-schema";
 import type { ArticleResource, BlogResource, PageResource } from "@/features/content/api";
 
-export type StorefrontTemplateType = "home" | "product" | "collection" | "page" | "blog" | "article" | "search" | "cart";
+export type StorefrontTemplateType = "home" | "product" | "collection" | "page" | "blog" | "article" | "search" | "cart" | "not-found";
 
 export interface WorkspaceRecord {
   generation: number;
   updatedAt: string | null;
 }
+
+export interface StarterInstallationResult { storeId: string; starterPackId: "fresh-market" | "artisan-boutique"; starterPackVersion: string; generation: number; installed: boolean }
 
 export interface StorefrontTemplateRecord {
   id: string;

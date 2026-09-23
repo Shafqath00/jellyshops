@@ -18,6 +18,7 @@ import {
   type SectionPresetRecord,
   type StorefrontTemplateRecord,
   type StorefrontTemplateType,
+  type StarterInstallationResult,
   type TemplateAssignmentRecord,
   type TemplateMutationResult,
   type ThemeConfigurationRecord,
@@ -26,6 +27,7 @@ import {
 } from "./types";
 
 export interface StoreEditorApi {
+  installStarterPack(storeId: string, starterPackId: "fresh-market" | "artisan-boutique"): Promise<StarterInstallationResult>;
   listThemeCatalog(storeId: string): Promise<ThemeCatalogEntry[]>;
   loadWorkspace(storeId: string): Promise<WorkspaceRecord>;
   listTemplates(storeId: string, type?: StorefrontTemplateType): Promise<StorefrontTemplateRecord[]>;
@@ -122,6 +124,7 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
   const contentPath = (storeId: string, suffix: string) => `/api/stores/${encodeURIComponent(storeId)}/content${suffix}`;
 
   return {
+    installStarterPack: (storeId, starterPackId) => request(storefrontPath(storeId, `/starters/${encodeURIComponent(starterPackId)}/install`), { method: "POST" }),
     listThemeCatalog: (storeId) => request(storefrontPath(storeId, "/themes")),
     loadWorkspace: (storeId) => request(storefrontPath(storeId, "/workspace")),
     listTemplates: (storeId, type) => request(storefrontPath(storeId, `/templates${type ? `?type=${encodeURIComponent(type)}` : ""}`)),

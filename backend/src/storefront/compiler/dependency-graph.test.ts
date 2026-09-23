@@ -77,4 +77,22 @@ describe("buildDependencyGraph", () => {
       expect.objectContaining({ from: { type: "theme", id: "active" }, to: { type: "extension", id: "artifact-1" }, reason: "extension" }),
     ]));
   });
+
+  it("records dependencies for the MediaReference shape emitted by the local upload control", () => {
+    const compilation = input();
+    const template = compilation.templates[0]!;
+    const placement = template.layout.sections.find((entry) => entry.kind === "inline");
+    if (!placement || placement.kind !== "inline") throw new Error("Expected an inline section");
+    placement.section.settings.image = {
+      id: "uploaded-image-1",
+      url: "/api/public/media/store-a/uploaded-image-1",
+      alt: "Market vegetables",
+      focalPoint: { x: 50, y: 45 },
+      fit: "cover",
+    };
+
+    expect(buildDependencyGraph(compilation).edges).toEqual(expect.arrayContaining([
+      expect.objectContaining({ to: { type: "media", id: "uploaded-image-1" }, reason: "media" }),
+    ]));
+  });
 });

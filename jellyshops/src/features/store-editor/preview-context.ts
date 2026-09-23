@@ -94,6 +94,7 @@ export function createEditorPreviewPageContext({
 }): StorefrontPageContext | null {
   if (type === "home") return { pageType: "home", resource: null };
   if (type === "cart") return { pageType: "cart", resource: null };
+  if (type === "not-found") return { pageType: "not-found", resource: null };
   if (type === "search") {
     const query = searchQuery.trim();
     const results = publicProducts(catalog).filter((product) => product.name.toLocaleLowerCase().includes(query.toLocaleLowerCase()));

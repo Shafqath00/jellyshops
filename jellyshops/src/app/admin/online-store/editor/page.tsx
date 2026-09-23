@@ -33,6 +33,7 @@ import type {
   CatalogAdminCollectionDetail,
   DynamicSourceDescriptor,
   GlobalSectionRecord,
+  MenuRecord,
   SectionPresetRecord,
   StorefrontTemplateRecord,
   ThemeCatalogEntry,
@@ -79,7 +80,7 @@ const sectionCategoryLabels = {
 
 const defaultTemplateSections: Record<string, string[]> = {
   home: ["hero"], product: ["product-information"], collection: ["collection-header", "collection-product-grid", "collection-description"],
-  cart: ["cart-summary"], search: ["search-results"], page: ["page-content"], blog: ["blog-header", "article-list"], article: ["article-header", "article-content"],
+  cart: ["cart-summary"], search: ["search-results"], page: ["page-content"], blog: ["blog-header", "article-list"], article: ["article-header", "article-content"], "not-found": ["not-found-message"],
 };
 
 function defaultTemplateLayout(type: string): Record<string, unknown> {
@@ -207,6 +208,7 @@ export default function OnlineStoreEditorPage() {
   const [workspace, setWorkspace] = useState<WorkspaceRecord | null>(null);
   const [templates, setTemplates] = useState<StorefrontTemplateRecord[]>([]);
   const [globals, setGlobals] = useState<GlobalSectionRecord[]>([]);
+  const [menuRecords, setMenuRecords] = useState<MenuRecord[]>([]);
   const [presets, setPresets] = useState<SectionPresetRecord[]>([]);
   const [dynamicSources, setDynamicSources] = useState<DynamicSourceDescriptor[]>([]);
   const [catalog, setCatalog] = useState<DemoCatalog>({ products: [], collections: [] });
@@ -241,6 +243,7 @@ export default function OnlineStoreEditorPage() {
       api.loadWorkspace(backendStoreId),
       api.listTemplates(backendStoreId),
       api.listGlobalSections(backendStoreId),
+      api.listMenus(backendStoreId),
       api.listPresets(backendStoreId),
       api.listCatalog(backendStoreId),
       api.listPages(backendStoreId),
@@ -248,11 +251,12 @@ export default function OnlineStoreEditorPage() {
       api.listArticles(backendStoreId),
       api.listThemeCatalog(backendStoreId),
       api.getThemeConfiguration(backendStoreId),
-    ]).then(([nextWorkspace, nextTemplates, nextGlobals, nextPresets, nextCatalog, nextPages, nextBlogs, nextArticles, nextThemeCatalog, nextThemeConfiguration]) => {
+    ]).then(([nextWorkspace, nextTemplates, nextGlobals, nextMenus, nextPresets, nextCatalog, nextPages, nextBlogs, nextArticles, nextThemeCatalog, nextThemeConfiguration]) => {
       if (!active) return;
       setWorkspace(nextWorkspace);
       setTemplates(nextTemplates);
       setGlobals(nextGlobals);
+      setMenuRecords(nextMenus ?? []);
       setPresets(nextPresets);
       setCatalog(nextCatalog);
       setPages(nextPages);
@@ -410,7 +414,7 @@ export default function OnlineStoreEditorPage() {
   }, [previewResourceId, previewResources]);
 
   const persistLayout = async (layout: Record<string, unknown>) => {
-    if (!api || !activeTemplate) return;
+    if (!api || !activeTemplate) return false;
     setSaveState("saving");
     try {
       const result = await api.updateTemplate(
@@ -608,7 +612,7 @@ export default function OnlineStoreEditorPage() {
 
   return (
     <div className="fixed inset-0 z-[60] flex h-dvh flex-col overflow-hidden bg-[#f4f4f5] text-[#303030]">
-      <header className="flex min-h-14 shrink-0 items-center justify-between gap-3 border-b border-[#e3e3e3] bg-white px-3 py-2">
+      <header className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[#e3e3e3] bg-white px-3 py-2 sm:gap-3">
         <div className="flex min-w-0 items-center gap-2">
           <Link href="/admin" aria-label="Back to admin" className="grid size-8 place-items-center rounded-lg text-[#616161] hover:bg-[#f1f1f1]"><ArrowLeft size={17} /></Link>
           <div className="min-w-0"><p className="text-[10px] text-[#8c9196]">Online Store</p><h1 className="truncate text-[13px] font-semibold">Theme editor</h1></div>
@@ -622,7 +626,7 @@ export default function OnlineStoreEditorPage() {
             <button key={viewportValue} type="button" aria-label={label} aria-pressed={viewport === viewportValue} onClick={() => setViewport(viewportValue)} className={clsx("grid size-7 place-items-center rounded-md", viewport === viewportValue ? "bg-white shadow-sm" : "text-[#8c9196]")}><Icon size={15} /></button>
           ))}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex w-full items-center justify-end gap-3 sm:w-auto">
           <div className="hidden text-right lg:block"><p className="text-[10px] text-[#8c9196]">{saveState === "saving" ? "Saving changes…" : saveState === "error" ? "Save failed" : "All changes saved"}</p><p className="text-[12px] font-semibold">Generation {workspace.generation}</p></div>
           <PublishControls
             generation={workspace.generation}
@@ -666,8 +670,8 @@ export default function OnlineStoreEditorPage() {
         }}
       />
 
-      <div className="grid min-h-0 flex-1 grid-cols-[320px_minmax(0,1fr)]">
-        <div className={clsx("col-start-1 row-start-1 min-h-0 border-r border-[#e3e3e3] bg-white", toolsOpen && "hidden")}>
+      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,40%)_minmax(0,1fr)] sm:grid-cols-[320px_minmax(0,1fr)] sm:grid-rows-1">
+        <div className={clsx("col-start-1 row-start-1 min-h-0 overflow-y-auto border-b border-[#e3e3e3] bg-white sm:border-b-0 sm:border-r", toolsOpen && "hidden")}>
           <button type="button" onClick={() => { setSelection({ kind: "theme" }); setActiveGlobalId(undefined); }} className="m-2 flex min-h-9 w-[calc(100%-1rem)] items-center rounded-lg px-3 text-left text-[12px] font-semibold text-[#454f5b] hover:bg-[#f6f6f7]">Theme settings</button>
           <TemplateHierarchy
             template={activeTemplate}
@@ -683,7 +687,7 @@ export default function OnlineStoreEditorPage() {
           />
         </div>
 
-        <main className="col-start-2 row-start-1 min-h-0 overflow-auto p-4" aria-label="Storefront preview">
+        <main className="col-start-1 row-start-2 min-h-0 min-w-0 overflow-auto p-2 sm:col-start-2 sm:row-start-1 sm:p-4" aria-label="Storefront preview">
           {previewSnapshot && <div className="mx-auto mb-2 max-w-[1440px] rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-[10px] font-medium text-emerald-800">Compiled preview · generation {previewSnapshot.sourceGeneration}</div>}
           <div className={clsx(
             "mx-auto min-h-full overflow-hidden border border-[#dcdcdc] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-[max-width]",
@@ -700,6 +704,8 @@ export default function OnlineStoreEditorPage() {
                 region="template"
                 themeId={themeConfiguration?.themeId}
                 page={previewPageContext ?? undefined}
+                menus={previewSnapshot?.menus ?? Object.fromEntries(menuRecords.map((menu) => [menu.handle, { id: menu.id, handle: menu.handle, items: menu.items }])) as Record<string, RuntimeMenuV4>}
+                storeSlug={activeStore?.slug}
                 selected={previewSnapshot ? undefined : selection ?? undefined}
                 onSelect={previewSnapshot ? undefined : (next) => {
                   setActiveGlobalId(undefined);
@@ -712,7 +718,7 @@ export default function OnlineStoreEditorPage() {
           </div>
         </main>
 
-        <aside className={clsx("col-start-1 row-start-1 min-h-0 overflow-y-auto border-r border-[#e3e3e3] bg-white", !toolsOpen && "hidden")} aria-label="Section tools">
+        <aside className={clsx("col-start-1 row-start-1 min-h-0 overflow-y-auto border-b border-[#e3e3e3] bg-white sm:border-b-0 sm:border-r", !toolsOpen && "hidden")} aria-label="Section tools">
           {selection?.kind === "theme" && <ThemeSettingsPanel
             schema={selectedTheme?.settingsSchema ?? []}
             settings={themeConfiguration?.settings ?? {}}

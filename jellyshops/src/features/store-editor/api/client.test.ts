@@ -6,6 +6,17 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 describe("store editor API client", () => {
+  it("installs a V4 starter into the current store through the workspace endpoint", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ storeId: "store-a", starterPackId: "fresh-market", starterPackVersion: "1.0.0", generation: 1, installed: true }, 201));
+    const api = createStoreEditorApi({ baseUrl: "http://localhost:3001", token: "merchant-token", fetch: fetchMock });
+
+    await expect(api.installStarterPack("store-a", "fresh-market")).resolves.toMatchObject({ generation: 1, installed: true });
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:3001/api/stores/store-a/storefront/starters/fresh-market/install", expect.objectContaining({
+      method: "POST",
+      headers: expect.objectContaining({ Authorization: "Bearer merchant-token" }),
+    }));
+  });
+
   it("saves only the edited template revision and receives the new workspace generation", async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse({
       template: {

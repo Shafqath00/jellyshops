@@ -9,7 +9,7 @@ import { PublishedRuntimeStorefront, PublishedStorefront } from "@/features/stor
 import { useThemePresentation } from "@/components/storefront-shell";
 import { loadPublicStorefrontPublication, type PublicStorefrontPublication } from "@/features/storefront/public-storefront-api";
 import { loadPublicPageContext, type PublicPageContext } from "@/features/storefront/public-page-context-api";
-import { resolveStorefrontRoute, type ResolvedStorefrontRoute } from "@/features/storefront/resource-loader";
+import { resolveStorefrontNotFound, resolveStorefrontRoute, type ResolvedStorefrontRoute } from "@/features/storefront/resource-loader";
 import { isReservedStorefrontPath } from "@/features/storefront/reserved-paths";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
@@ -39,13 +39,18 @@ export default function CustomStorePage() {
       if (!active) return;
       setPublication(nextPublication);
       setContext(nextContext);
+      if (nextPublication?.kind === "v4" && !nextContext) setRoute(resolveStorefrontNotFound(nextPublication.snapshot));
     });
     return () => { active = false; };
   }, [store, pageSlug]);
 
   useEffect(() => {
-    if (!publication || publication.kind !== "v4" || !context) {
+    if (!publication || publication.kind !== "v4") {
       setRoute(null);
+      return;
+    }
+    if (!context) {
+      setRoute(resolveStorefrontNotFound(publication.snapshot));
       return;
     }
     const resource = { type: "page" as const, id: context.page.id, handle: context.page.handle, visible: true, data: context.page };

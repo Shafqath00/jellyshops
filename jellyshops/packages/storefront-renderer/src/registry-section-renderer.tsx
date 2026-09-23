@@ -1,4 +1,4 @@
-import type { SectionNode } from "@jelly/storefront-schema";
+import type { RuntimeMenuV4, SectionNode } from "@jelly/storefront-schema";
 import {
   defaultSectionRenderRegistry,
   type SectionRenderRegistry,
@@ -17,6 +17,8 @@ export function RegistrySectionRenderer({
   registry = defaultSectionRenderRegistry,
   themeId,
   page,
+  menus,
+  storeSlug,
 }: {
   section: SectionNode;
   mode: RendererMode;
@@ -27,12 +29,14 @@ export function RegistrySectionRenderer({
   registry?: SectionRenderRegistry;
   themeId?: string;
   page?: StorefrontPageContext;
+  menus?: Record<string, RuntimeMenuV4>;
+  storeSlug?: string;
 }) {
   if (!section.enabled) return null;
 
   const override = (id: string) => { try { return getThemeDefinition(id).sectionOverrides[section.type]; } catch { return undefined; } };
   const RenderComponent = override(themeId ?? DEFAULT_THEME_ID) ?? override(DEFAULT_THEME_ID) ?? registry.get(section.type);
-  const context = createStorefrontRuntimeContext({ mode, region, commerce, page });
+  const context = createStorefrontRuntimeContext({ mode, region, commerce, page, menus, storeSlug });
   const content = RenderComponent
     ? <RenderComponent section={section} mode={mode} commerce={commerce} context={context} />
     : mode !== "published"

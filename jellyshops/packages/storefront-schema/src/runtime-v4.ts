@@ -12,6 +12,7 @@ const runtimeTemplateTypeSchema = z.enum([
   "article",
   "search",
   "cart",
+  "not-found",
 ]);
 const assignableResourceTypeSchema = z.enum(["product", "collection", "page", "blog", "article"]);
 

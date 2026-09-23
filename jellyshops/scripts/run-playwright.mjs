@@ -6,7 +6,9 @@ import { fileURLToPath } from "node:url";
 
 const env = { ...process.env };
 delete env.NO_COLOR;
-env.NEXT_PUBLIC_STORE_EDITOR_API_URL = "http://127.0.0.1:3001";
+const frontendPort = env.JELLY_E2E_FRONTEND_PORT ?? "3000";
+const backendPort = env.JELLY_E2E_BACKEND_PORT ?? "3001";
+env.NEXT_PUBLIC_STORE_EDITOR_API_URL = `http://127.0.0.1:${backendPort}`;
 const backendDirectory = [resolve(process.cwd(), "../backend"), resolve(process.cwd(), "../../../backend")]
   .find((candidate) => existsSync(join(candidate, "package.json")));
 if (!backendDirectory) throw new Error("Could not locate the sibling backend project");
@@ -17,8 +19,8 @@ const backend = spawn(process.execPath, [backendCli, "src/server.ts"], {
   env: {
     ...env,
     NODE_ENV: "test",
-    PORT: "3001",
-    CORS_ORIGINS: "http://127.0.0.1:3000",
+    PORT: backendPort,
+    CORS_ORIGINS: `http://127.0.0.1:${frontendPort}`,
     DATA_DIRECTORY: join(temporaryRoot, "data"),
     UPLOAD_DIRECTORY: join(temporaryRoot, "uploads"),
     JELLY_E2E: "1",
@@ -36,12 +38,12 @@ const waitForBackend = async () => {
   const deadline = Date.now() + 30_000;
   while (Date.now() < deadline) {
     try {
-      const response = await fetch("http://127.0.0.1:3001/health");
+      const response = await fetch(`http://127.0.0.1:${backendPort}/health`);
       if (response.ok) return;
     } catch {}
     await new Promise((resolve) => setTimeout(resolve, 200));
   }
-  throw new Error("Store Editor API did not become ready on port 3001");
+  throw new Error(`Store Editor API did not become ready on port ${backendPort}`);
 };
 
 const cli = fileURLToPath(new URL("../node_modules/@playwright/test/cli.js", import.meta.url));
