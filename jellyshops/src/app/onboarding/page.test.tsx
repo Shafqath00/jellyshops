@@ -44,7 +44,23 @@ beforeEach(() => {
 
 it("creates a store and refreshes merchant context before opening the starter chooser", async () => {
   const events: string[] = [];
-  const refreshMerchant = setAuth({ refreshMerchant: vi.fn(async () => { events.push("refresh-merchant"); }) });
+  let releaseRefresh: () => void = () => {};
+  const refreshGate = new Promise<void>((resolve) => { releaseRefresh = resolve; });
+  let rerenderWithCreatedStore: () => void = () => {};
+  const authState = {
+    configured: true,
+    loading: false,
+    session,
+    stores: [] as ReturnType<typeof store>[],
+    refreshMerchant: vi.fn(async () => {
+      events.push("refresh-merchant");
+      authState.stores = [store()];
+      rerenderWithCreatedStore();
+      await refreshGate;
+    }),
+  };
+  useAuth.mockReturnValue(authState);
+  const refreshMerchant = authState.refreshMerchant;
   vi.mocked(fetch).mockImplementation(async (_input, init) => {
     events.push("create-store");
     expect(init?.headers).toEqual({ "Content-Type": "application/json", Authorization: "Bearer merchant-token" });
@@ -52,12 +68,17 @@ it("creates a store and refreshes merchant context before opening the starter ch
     return new Response("{}", { status: 201 });
   });
   const user = userEvent.setup();
-  render(<OnboardingPage />);
+  const view = render(<OnboardingPage />);
+  rerenderWithCreatedStore = () => view.rerender(<OnboardingPage />);
 
   await user.type(screen.getByLabelText("Store name"), "Maya's pottery");
   await user.click(screen.getByRole("button", { name: /create my shop/i }));
 
+  await waitFor(() => expect(events).toEqual(["create-store", "refresh-merchant"]));
+  expect(router.replace).not.toHaveBeenCalled();
+  releaseRefresh();
   await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/admin/online-store"));
+  expect(router.replace).toHaveBeenCalledTimes(1);
   expect(events).toEqual(["create-store", "refresh-merchant"]);
   expect(refreshMerchant).toHaveBeenCalledTimes(1);
 });
