@@ -2,6 +2,7 @@ export { STORE_DESIGN_SCHEMA_VERSION } from "./version.js";
 export { createDefaultStoreDesign } from "./defaults.js";
 export { migrateStoreDesignDocument } from "./migrations.js";
 export { storeDesignDocumentSchema, themeIdSchema } from "./schema.js";
+export { isRichTextDocument, normalizeRichTextDocument, resolveRichTextDocument, safeRichTextHref } from "./rich-text.js";
 export {
   STOREFRONT_SCHEMA_VERSION,
   createDefaultStorefrontDocument,
@@ -58,3 +59,4 @@ export type {
   RuntimeTemplateV4,
 } from "./runtime-v4.js";
 export type { BlockNode, GlobalSettings, PageDocument, PageType, SectionNode, StoreDesignDocument, ThemeId } from "./types.js";
+export type { RichTextBlock, RichTextDocument, RichTextInline, RichTextMark } from "./rich-text.js";

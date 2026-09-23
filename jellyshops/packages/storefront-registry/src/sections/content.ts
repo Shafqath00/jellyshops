@@ -1,10 +1,22 @@
 import { z } from "zod";
-import type { DynamicValueType } from "@jelly/storefront-schema";
+import { isRichTextDocument, safeRichTextHref, type DynamicValueType, type RichTextDocument } from "@jelly/storefront-schema";
 import type { SectionDefinition } from "../types.js";
 
 const home = ["home"] as const;
 const reusableContentPages = ["home", "product", "collection", "page", "blog", "article"] as const;
 const empty = z.object({}).passthrough();
+const richTextSettings = z.object({ document: z.custom<RichTextDocument>(isRichTextDocument).optional() }).passthrough();
+const imageReference = z.object({
+  id: z.string().optional(),
+  url: z.string().refine((value) => safeRichTextHref(value) !== null && !value.startsWith("#"), "Image URL must use a safe relative, HTTP, or HTTPS URL"),
+  alt: z.string().optional(),
+  focalPoint: z.object({ x: z.number().min(0).max(100), y: z.number().min(0).max(100) }).optional(),
+  fit: z.enum(["cover", "contain"]).optional(),
+}).passthrough();
+const imageWithTextSettings = z.object({
+  image: imageReference.optional(),
+  contentAlignment: z.enum(["left", "center", "right"]).optional(),
+}).passthrough();
 const stringTypes = ["string", "text"] satisfies DynamicValueType[];
 const richTextTypes = ["rich_text", "string", "text"] satisfies DynamicValueType[];
 const imageTypes = ["image"] satisfies DynamicValueType[];
@@ -47,7 +59,7 @@ export const contentSections: SectionDefinition[] = [
   { type: "image-text", category: "content", supportedPages: [...home], settingsSchema: empty, controls: contentAlignment, allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: ["contentAlignment"] },
   { type: "image-with-text", category: "content", supportedPages: [...home], settingsSchema: empty, controls: contentAlignment, allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: ["contentAlignment"], presets: [{ id: "image-with-text", label: "Image with text", category: "content" }] },
   { type: "image-banner", category: "content", supportedPages: [...home], settingsSchema: empty, controls: contentAlignment, allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: ["contentAlignment"] },
-  { type: "rich-text", category: "content", supportedPages: [...reusableContentPages], settingsSchema: empty, controls: [], allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: [], presets: [{ id: "rich-text", label: "Rich text", category: "content" }] },
+  { type: "rich-text", category: "content", supportedPages: [...reusableContentPages], settingsSchema: richTextSettings, controls: [], allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: [], presets: [{ id: "rich-text", label: "Rich text", category: "content" }] },
   { type: "testimonials", category: "content", supportedPages: [...home], settingsSchema: empty, controls: [], allowedBlockTypes: ["testimonial"], defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
   { type: "faq", category: "content", supportedPages: [...home], settingsSchema: empty, controls: [], allowedBlockTypes: ["faq-item"], maxBlocks: 12, defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
   { type: "newsletter", category: "content", supportedPages: [...home], settingsSchema: empty, controls: [], allowedBlockTypes: ["heading", "text"], defaultSettings: {}, defaultBlocks: [], responsiveFields: [], presets: [{ id: "newsletter", label: "Newsletter", category: "marketing" }] },

@@ -43,6 +43,43 @@ describe("registry-driven section rendering", () => {
     }
   });
 
+  it("renders the same structured document in preview and published modes", () => {
+    const structured: SectionNode = { id: "story", type: "rich-text", enabled: true, blocks: [], settings: { document: {
+      type: "doc", content: [
+        { type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: "Our story", marks: [{ type: "bold" }] }] },
+        { type: "paragraph", content: [{ type: "text", text: "Learn more", marks: [{ type: "link", attrs: { href: "/pages/about" } }] }, { type: "hardBreak" }, { type: "text", text: "Today", marks: [{ type: "italic" }] }] },
+        { type: "bulletList", content: [{ type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: "Carefully made" }] }] }] },
+        { type: "blockquote", content: [{ type: "paragraph", content: [{ type: "text", text: "For every day" }] }] },
+      ],
+    } } };
+    for (const mode of ["preview", "published"] as const) {
+      const view = render(<RegistrySectionRenderer section={structured} mode={mode} commerce={commerce} page={{ pageType: "article", resource: { id: "article-1", handle: "story", data: {} } }} />);
+      expect(view.getByRole("heading", { level: 2, name: "Our story" }).querySelector("strong")).not.toBeNull();
+      expect(view.getByRole("link", { name: "Learn more" })).toHaveAttribute("href", "/pages/about");
+      expect(view.getByText("Today").closest("em")).not.toBeNull();
+      expect(view.getByRole("listitem")).toHaveTextContent("Carefully made");
+      expect(view.getByText("For every day").closest("blockquote")).not.toBeNull();
+      view.unmount();
+    }
+  });
+
+  it("escapes text and ignores unsupported nodes and unsafe links in public output", () => {
+    const untrusted: SectionNode = { id: "story", type: "rich-text", enabled: true, blocks: [], settings: { document: {
+      type: "doc", content: [
+        { type: "script", attrs: { src: "https://example.com/evil.js" } },
+        { type: "paragraph", content: [
+          { type: "text", text: "<script>alert(1)</script>" },
+          { type: "text", text: "Click", marks: [{ type: "link", attrs: { href: "javascript:alert(1)" } }] },
+        ] },
+      ],
+    } } };
+    const view = render(<RegistrySectionRenderer section={untrusted} mode="published" commerce={commerce} />);
+    expect(view.getByText("<script>alert(1)</script>")).toBeInTheDocument();
+    expect(view.container.querySelector("script")).toBeNull();
+    expect(view.queryByRole("link", { name: "Click" })).toBeNull();
+    expect(view.getByText("Click")).toBeInTheDocument();
+  });
+
   it("passes a constrained runtime context to registered sections", () => {
     const registry = new SectionRenderRegistry();
     registry.register("runtime-aware", ({ context }) => (

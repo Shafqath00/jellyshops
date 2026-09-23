@@ -91,6 +91,24 @@ it("makes rich text reusable on compatible content templates only", () => {
   expect(getSectionDefinition("rich-text")?.settingsSchema.parse(richText.settings)).toEqual({ alignment: "center" });
 });
 
+it("accepts structured rich text and rejects unsupported document content", () => {
+  const richText = section("rich-text");
+  richText.settings.document = { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Safe" }] }] };
+  expect(validateSectionAgainstRegistry(richText, "article")).toEqual([]);
+
+  richText.settings.document = { type: "doc", content: [{ type: "script", attrs: { src: "https://example.com/x.js" } }] };
+  expect(validateSectionAgainstRegistry(richText, "article")).toEqual(expect.arrayContaining([
+    expect.objectContaining({ code: "SETTINGS_INVALID" }),
+  ]));
+
+  richText.settings.document = { type: "doc", content: [{ type: "paragraph", content: [
+    { type: "text", text: "Click", marks: [{ type: "link", attrs: { href: "javascript:alert(1)" } }] },
+  ] }] };
+  expect(validateSectionAgainstRegistry(richText, "article")).toEqual(expect.arrayContaining([
+    expect.objectContaining({ code: "SETTINGS_INVALID" }),
+  ]));
+});
+
 it("supplies Add Section options from page and region compatibility", () => {
   expect(listSectionDefinitionsForPage("article").map(({ type }) => type)).toContain("rich-text");
   expect(listSectionDefinitionsForPage("article").map(({ type }) => type)).not.toContain("article-list");

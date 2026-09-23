@@ -15,9 +15,11 @@ import type {
   CompilationDiagnostic,
   CompilationDiagnosticLocation,
   RuntimeStorefrontSnapshotV4,
+  RuntimeMenuV4,
   BlockNode,
   SectionNode,
   GlobalSettings,
+  RichTextDocument,
   ThemeId,
 } from "@jelly/storefront-schema";
 import { resolveDesignTokens, resolveTheme } from "@jelly/storefront-themes";
@@ -40,6 +42,7 @@ import type {
 } from "@/features/store-editor/api/types";
 import { GlobalSectionPanel } from "@/features/store-editor/components/global-section-panel";
 import { SettingGroups } from "@/features/store-editor/components/inspector/setting-groups";
+import { RichTextDocumentEditor } from "@/features/store-editor/components/inspector/rich-text-document-editor";
 import { ThemeSettingsPanel } from "@/features/store-editor/components/inspector/theme-settings-panel";
 import { PublishControls } from "@/features/store-editor/components/publish-controls";
 import { PublishDiagnostics } from "@/features/store-editor/components/publish-diagnostics";
@@ -420,8 +423,10 @@ export default function OnlineStoreEditorPage() {
       setWorkspace((current) => current ? { ...current, generation: result.generation } : current);
       setPreviewSnapshot(undefined);
       setSaveState("saved");
+      return true;
     } catch {
       setSaveState("error");
+      return false;
     }
   };
 
@@ -544,6 +549,15 @@ export default function OnlineStoreEditorPage() {
       return { ...current, settings: { ...current.settings, [key]: value } };
     });
     await persistLayout(layout);
+  };
+
+  const saveRichTextDocument = async (document: RichTextDocument) => {
+    if (!activeTemplate || !localSection || localSection.type !== "rich-text") throw new Error("Select a rich text section first.");
+    const layout = updateInlineSection(activeTemplate.layout, localSection.id, (current) => ({
+      ...current,
+      settings: { ...current.settings, document },
+    }));
+    if (!await persistLayout(layout)) throw new Error("Rich text could not be saved. Please try again.");
   };
 
   const openDiagnostic = (location: CompilationDiagnosticLocation) => {
@@ -757,12 +771,16 @@ export default function OnlineStoreEditorPage() {
                     <ChevronLeft size={16} />
                   </button>
                   <LayoutPanelTop size={16} className="text-[#6f5b92]" />
-                  <div className="min-w-0"><p className="text-[10px] text-[#8c9196]">{selectedBlock ? displayName(localSection.type) : "Section settings"}</p><p className="truncate text-[13px] font-semibold">{displayName(selectedBlock?.type ?? localSection.type)}</p></div>
+                  <div className="min-w-0"><p className="text-[10px] text-[#8c9196]">{selectedBlock && localSection.type !== "rich-text" ? displayName(localSection.type) : "Section settings"}</p><p className="truncate text-[13px] font-semibold">{displayName(localSection.type === "rich-text" ? localSection.type : selectedBlock?.type ?? localSection.type)}</p></div>
                 </div>
                 {!selectedBlock && <button type="button" aria-label="Remove section" onClick={() => { void removeSelectedSection(); }} className="grid size-8 place-items-center rounded-lg text-[#9b3a32] hover:bg-[#fff1f0]"><Trash2 size={15} /></button>}
               </div>
               <div className="border-b border-[#eeeeee] px-4 py-4">
-                {selectedControls.length > 0 ? <SettingGroups
+                {localSection.type === "rich-text" ? <RichTextDocumentEditor
+                    key={`${activeTemplate?.id}:${localSection.id}`}
+                    section={localSection}
+                    onSave={saveRichTextDocument}
+                  /> : selectedControls.length > 0 ? <SettingGroups
                     controls={selectedControls}
                     settings={selectedSettings}
                     catalog={catalog}
@@ -771,7 +789,7 @@ export default function OnlineStoreEditorPage() {
                     onChange={(key, nextValue) => { void updateSelectedSetting(key, nextValue); }}
                   /> : <p className="py-8 text-center text-[12px] text-[#8c9196]">This item has no additional settings.</p>}
               </div>
-              {!selectedBlock && sectionDefinition && sectionDefinition.allowedBlockTypes.length > 0 && (
+              {!selectedBlock && localSection.type !== "rich-text" && sectionDefinition && sectionDefinition.allowedBlockTypes.length > 0 && (
                 <div className="border-b border-[#eeeeee] p-3">
                   <button
                     type="button"
