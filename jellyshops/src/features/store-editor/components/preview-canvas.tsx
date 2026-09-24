@@ -32,8 +32,8 @@ export function PreviewCanvas({
           data-testid="preview-viewport"
           data-viewport={viewport}
           className={clsx(
-            "relative min-h-full overflow-hidden bg-white",
-            "border border-[#dcdcdc]",
+            "relative min-h-full overflow-hidden bg-[var(--white)]",
+            "border border-[var(--line)]",
             "shadow-[0_2px_8px_rgba(0,0,0,0.06)]",
             "transition-[max-width,width] duration-200 ease-out",
 

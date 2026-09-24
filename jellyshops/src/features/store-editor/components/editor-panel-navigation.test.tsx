@@ -9,6 +9,7 @@ describe("EditorPanelNavigation", () => {
     const onChange = vi.fn();
     const { rerender } = render(<EditorPanelNavigation value="sections" onChange={onChange} />);
 
+    expect(screen.getByRole("navigation", { name: "Editor panels" })).toHaveClass("bg-[var(--white)]", "border-[var(--line)]");
     expect(screen.getByRole("button", { name: "Sections" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: "Preview" })).toHaveAttribute("aria-pressed", "false");
     expect(screen.getByRole("button", { name: "Settings" })).toHaveAttribute("aria-pressed", "false");

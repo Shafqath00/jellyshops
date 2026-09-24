@@ -45,6 +45,7 @@ describe("TemplateHierarchy", () => {
     );
 
     expect(screen.getByRole("heading", { name: "Header" })).toBeVisible();
+    expect(screen.getByRole("complementary", { name: "Template hierarchy" })).toHaveClass("bg-[var(--white)]");
     expect(screen.getByRole("heading", { name: "Template" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Footer" })).toBeVisible();
     expect(screen.getByText("Main header")).toBeVisible();

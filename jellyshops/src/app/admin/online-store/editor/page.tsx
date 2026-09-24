@@ -584,15 +584,15 @@ export default function OnlineStoreEditorPage() {
   };
 
   if (!api) {
-    return <main className="grid min-h-[70vh] place-items-center p-8 text-center"><div><h1 className="text-xl font-semibold">Online Store editor is disabled</h1><p className="mt-2 text-sm text-[#6d7175]">Connect merchant authentication to use the editor.</p></div></main>;
+    return <main className="grid min-h-[70vh] place-items-center p-8 text-center text-[var(--ink)]"><div><h1 className="text-xl font-semibold">Online Store editor is disabled</h1><p className="mt-2 text-sm text-[var(--ink-soft)]">Connect merchant authentication to use the editor.</p></div></main>;
   }
 
   if (loadError) {
-    return <main className="grid min-h-[70vh] place-items-center p-8 text-center"><div><h1 className="text-xl font-semibold">Could not load Online Store</h1><p className="mt-2 text-sm text-[#b42318]">{loadError}</p></div></main>;
+    return <main className="grid min-h-[70vh] place-items-center p-8 text-center text-[var(--ink)]"><div><h1 className="text-xl font-semibold">Could not load Online Store</h1><p className="mt-2 text-sm text-[var(--destructive)]">{loadError}</p></div></main>;
   }
 
   if (!workspace) {
-    return <main className="grid min-h-[70vh] place-items-center text-[13px] text-[#616161]" aria-live="polite">Loading Online Store editor…</main>;
+    return <main className="grid min-h-[70vh] place-items-center text-[13px] text-[var(--ink-soft)]" aria-live="polite">Loading Online Store editor…</main>;
   }
 
   if (templates.length === 0) {
@@ -600,15 +600,15 @@ export default function OnlineStoreEditorPage() {
       <main className="grid min-h-[70vh] place-items-center p-8 text-center">
         <div>
           <h1 className="text-xl font-semibold">No theme installed</h1>
-          <p className="mt-2 text-sm text-[#6d7175]">Please choose a template from the Online Store overview to get started.</p>
-          <Link href="/admin/online-store" className="mt-4 inline-block text-sm font-semibold text-[#315e24] hover:underline">Go to Online Store</Link>
+          <p className="mt-2 text-sm text-[var(--ink-soft)]">Please choose a template from the Online Store overview to get started.</p>
+          <Link href="/admin/online-store" className="mt-4 inline-block text-sm font-semibold text-[var(--ink)] hover:underline">Go to Online Store</Link>
         </div>
       </main>
     );
   }
 
   if (!activeTemplate) {
-    return <main className="grid min-h-[70vh] place-items-center text-[13px] text-[#616161]" aria-live="polite">Loading template…</main>;
+    return <main className="grid min-h-[70vh] place-items-center text-[13px] text-[var(--ink-soft)]" aria-live="polite">Loading template…</main>;
   }
 
   const renderPreviewSections = (items: SectionNode[]) => items.map((section) => (
@@ -632,23 +632,23 @@ export default function OnlineStoreEditorPage() {
   ));
 
   return (
-    <div className="fixed inset-0 z-[60] flex h-dvh flex-col overflow-hidden bg-[#f4f4f5] text-[#303030]">
-      <header className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[#e3e3e3] bg-white px-3 py-2 sm:gap-3">
+    <div data-testid="theme-editor-shell" className="fixed inset-0 z-[60] flex h-dvh flex-col overflow-hidden bg-[var(--paper-deep)] text-[var(--ink)]">
+      <header className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--line)] bg-[var(--white)] px-3 py-2 sm:gap-3">
         <div className="flex min-w-0 items-center gap-2">
-          <Link href="/admin" aria-label="Back to admin" className="grid size-8 place-items-center rounded-lg text-[#616161] hover:bg-[#f1f1f1]"><ArrowLeft size={17} /></Link>
-          <div className="min-w-0"><p className="text-[10px] text-[#8c9196]">Online Store</p><h1 className="truncate text-[13px] font-semibold">Theme editor</h1></div>
+          <Link href="/admin" aria-label="Back to admin" className="grid size-8 place-items-center rounded-lg text-[var(--ink-soft)] hover:bg-[var(--paper)]"><ArrowLeft size={17} /></Link>
+          <div className="min-w-0"><p className="text-[10px] text-[var(--ink-soft)]">Online Store</p><h1 className="truncate text-[13px] font-semibold">Theme editor</h1></div>
         </div>
-        <div className="flex items-center rounded-lg bg-[#f1f1f1] p-1" aria-label="Preview device">
+        <div className="flex items-center rounded-lg bg-[var(--paper-deep)] p-1" aria-label="Preview device">
           {([
             ["desktop", "Desktop preview", Monitor],
             ["tablet", "Tablet preview", Tablet],
             ["mobile", "Mobile preview", Smartphone],
           ] as const).map(([viewportValue, label, Icon]) => (
-          <button key={viewportValue} type="button" aria-label={label} title={`${label.replace(" preview", "")} · ${viewportValue === "desktop" ? 1440 : viewportValue === "tablet" ? 820 : 390}px`} aria-pressed={viewport === viewportValue} onClick={() => setViewport(viewportValue)} className={clsx("grid size-7 place-items-center rounded-md", viewport === viewportValue ? "bg-white shadow-sm" : "text-[#8c9196]")}><Icon size={15} /></button>
+          <button key={viewportValue} type="button" aria-label={label} title={`${label.replace(" preview", "")} · ${viewportValue === "desktop" ? 1440 : viewportValue === "tablet" ? 820 : 390}px`} aria-pressed={viewport === viewportValue} onClick={() => setViewport(viewportValue)} className={clsx("grid size-7 place-items-center rounded-md", viewport === viewportValue ? "bg-[var(--white)] text-[var(--ink)] shadow-sm" : "text-[var(--ink-soft)]")}><Icon size={15} /></button>
           ))}
         </div>
         <div className="flex w-full items-center justify-end gap-3 sm:w-auto">
-          <div className="hidden text-right lg:block"><p className="text-[10px] text-[#8c9196]">{saveState === "saving" ? "Saving changes…" : saveState === "error" ? "Save failed" : "All changes saved"}</p><p className="text-[12px] font-semibold">Generation {workspace.generation}</p></div>
+          <div className="hidden text-right lg:block"><p className="text-[10px] text-[var(--ink-soft)]">{saveState === "saving" ? "Saving changes…" : saveState === "error" ? "Save failed" : "All changes saved"}</p><p className="text-[12px] font-semibold">Generation {workspace.generation}</p></div>
           <PublishControls
             generation={workspace.generation}
             diagnostics={diagnostics}
@@ -696,8 +696,8 @@ export default function OnlineStoreEditorPage() {
       <EditorPanelNavigation value={mobilePanel} onChange={setMobilePanel} />
 
       <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-1 lg:grid-cols-[280px_minmax(0,1fr)_320px]">
-        <div className={clsx("flex min-h-0 flex-col border-b border-[#e3e3e3] bg-white lg:col-start-1 lg:row-start-1 lg:border-b-0 lg:border-r", mobilePanel !== "sections" && "hidden lg:flex")}>
-          <button type="button" onClick={() => { setSelection({ kind: "theme" }); setActiveGlobalId(undefined); setMobilePanel("settings"); }} className="m-2 flex min-h-9 shrink-0 items-center rounded-lg px-3 text-left text-[12px] font-semibold text-[#454f5b] hover:bg-[#f6f6f7]">Theme settings</button>
+          <div className={clsx("flex min-h-0 flex-col border-b border-[var(--line)] bg-[var(--white)] lg:col-start-1 lg:row-start-1 lg:border-b-0 lg:border-r", mobilePanel !== "sections" && "hidden lg:flex")}>
+          <button type="button" onClick={() => { setSelection({ kind: "theme" }); setActiveGlobalId(undefined); setMobilePanel("settings"); }} className="m-2 flex min-h-9 shrink-0 items-center rounded-lg px-3 text-left text-[12px] font-semibold text-[var(--ink)] hover:bg-[var(--paper)]">Theme settings</button>
           <TemplateHierarchy
             template={activeTemplate}
             globalSections={globalLabels}
@@ -715,7 +715,7 @@ export default function OnlineStoreEditorPage() {
         <main className={clsx("min-h-0 min-w-0 overflow-auto p-2 lg:col-start-2 lg:row-start-1 lg:p-4", mobilePanel !== "preview" && "hidden lg:block")} aria-label="Storefront preview">
           {previewSnapshot && <div className="mx-auto mb-2 max-w-[1440px] rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-[10px] font-medium text-emerald-800">Compiled preview · generation {previewSnapshot.sourceGeneration}</div>}
           <div className={clsx(
-            "mx-auto min-h-full overflow-hidden border border-[#dcdcdc] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-[max-width]",
+            "mx-auto min-h-full overflow-hidden border border-[var(--line)] bg-[var(--white)] shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-[max-width]",
             viewport === "desktop" && "max-w-[1440px]",
             viewport === "tablet" && "max-w-[820px]",
             viewport === "mobile" && "max-w-[390px]",
@@ -723,13 +723,13 @@ export default function OnlineStoreEditorPage() {
             {renderPreviewSections([...previewLayout.announcement, ...previewLayout.header])}
             <div data-storefront-template>
               {renderPreviewSections(previewLayout.template)}
-              {previewLayout.template.length === 0 && <div className="grid min-h-[360px] place-items-center p-8 text-center text-sm text-[#8c9196]">This template has no sections yet.</div>}
+              {previewLayout.template.length === 0 && <div className="grid min-h-[360px] place-items-center p-8 text-center text-sm text-[var(--ink-soft)]">This template has no sections yet.</div>}
             </div>
             {renderPreviewSections(previewLayout.footer)}
           </div>
         </main>
 
-        <aside className={clsx("min-h-0 overflow-y-auto border-b border-[#e3e3e3] bg-white lg:col-start-3 lg:row-start-1 lg:border-b-0 lg:border-l", mobilePanel !== "settings" && "hidden lg:block")} aria-label="Section tools">
+        <aside className={clsx("min-h-0 overflow-y-auto border-b border-[var(--line)] bg-[var(--white)] lg:col-start-3 lg:row-start-1 lg:border-b-0 lg:border-l", mobilePanel !== "settings" && "hidden lg:block")} aria-label="Section tools">
           {selection?.kind === "theme" && <ThemeSettingsPanel
             schema={selectedTheme?.settingsSchema ?? []}
             settings={themeConfiguration?.settings ?? {}}
@@ -738,15 +738,15 @@ export default function OnlineStoreEditorPage() {
             upload={(file, onProgress) => api.uploadMedia(backendStoreId, file, onProgress)}
             onChange={(path, value) => { void persistThemeSetting(path, value); }}
           />}
-          {diagnostics.length > 0 && <div className="border-b border-[#eeeeee] p-3">
+          {diagnostics.length > 0 && <div className="border-b border-[var(--line)] p-3">
             <PublishDiagnostics diagnostics={diagnostics} onOpen={openDiagnostic} />
           </div>}
 
           {libraryRegion && (
             <>
-              <div className="flex h-14 items-center gap-2 border-b border-[#eeeeee] px-3">
-                <button type="button" aria-label="Back to sections" onClick={() => { setLibraryRegion(undefined); setMobilePanel("sections"); }} className="grid size-8 place-items-center rounded-lg text-[#616161] hover:bg-[#f1f1f1]"><ChevronLeft size={16} /></button>
-                <div><p className="text-[10px] text-[#8c9196]">{displayName(libraryRegion)}</p><h2 className="text-[13px] font-semibold">Add section</h2></div>
+              <div className="flex h-14 items-center gap-2 border-b border-[var(--line)] px-3">
+                <button type="button" aria-label="Back to sections" onClick={() => { setLibraryRegion(undefined); setMobilePanel("sections"); }} className="grid size-8 place-items-center rounded-lg text-[var(--ink-soft)] hover:bg-[var(--paper)]"><ChevronLeft size={16} /></button>
+                <div><p className="text-[10px] text-[var(--ink-soft)]">{displayName(libraryRegion)}</p><h2 className="text-[13px] font-semibold">Add section</h2></div>
               </div>
               <SectionLibrary
                 presets={presetOptions}
@@ -759,40 +759,40 @@ export default function OnlineStoreEditorPage() {
 
           {blockPickerSection && blockPickerDefinition && !libraryRegion && (
             <>
-              <div className="flex h-14 items-center gap-2 border-b border-[#eeeeee] px-3">
-                <button type="button" aria-label="Back to section settings" onClick={() => { setBlockPickerSectionId(undefined); setMobilePanel("settings"); }} className="grid size-8 place-items-center rounded-lg text-[#616161] hover:bg-[#f1f1f1]"><ChevronLeft size={16} /></button>
-                <div><p className="text-[10px] text-[#8c9196]">{displayName(blockPickerSection.type)}</p><h2 className="text-[13px] font-semibold">Add content block</h2></div>
+              <div className="flex h-14 items-center gap-2 border-b border-[var(--line)] px-3">
+                <button type="button" aria-label="Back to section settings" onClick={() => { setBlockPickerSectionId(undefined); setMobilePanel("settings"); }} className="grid size-8 place-items-center rounded-lg text-[var(--ink-soft)] hover:bg-[var(--paper)]"><ChevronLeft size={16} /></button>
+                <div><p className="text-[10px] text-[var(--ink-soft)]">{displayName(blockPickerSection.type)}</p><h2 className="text-[13px] font-semibold">Add content block</h2></div>
               </div>
               <div className="space-y-1 p-3">
                 {blockPickerDefinition.allowedBlockTypes.map((blockType) => (
-                  <button key={blockType} type="button" onClick={() => { void addBlock(blockType); }} className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-[13px] font-medium hover:bg-[#f2eff7]">
-                    <span className="grid size-8 place-items-center rounded-lg border border-[#e3e3e3] text-[#6f5b92]"><Plus size={15} /></span>
+                  <button key={blockType} type="button" onClick={() => { void addBlock(blockType); }} className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-[13px] font-medium hover:bg-[var(--paper)]">
+                    <span className="grid size-8 place-items-center rounded-lg border border-[var(--line)] text-[var(--ink)]"><Plus size={15} /></span>
                     {displayName(blockType)}
                   </button>
                 ))}
-                {blockPickerDefinition.allowedBlockTypes.length === 0 && <p className="py-8 text-center text-[12px] text-[#8c9196]">This section does not support content blocks.</p>}
+                {blockPickerDefinition.allowedBlockTypes.length === 0 && <p className="py-8 text-center text-[12px] text-[var(--ink-soft)]">This section does not support content blocks.</p>}
               </div>
             </>
           )}
 
           {localSection && !libraryRegion && !blockPickerSectionId && (
             <>
-              <div className="flex min-h-14 items-center justify-between gap-3 border-b border-[#eeeeee] px-3 py-2">
+              <div className="flex min-h-14 items-center justify-between gap-3 border-b border-[var(--line)] px-3 py-2">
                 <div className="flex min-w-0 items-center gap-2">
                   <button
                     type="button"
                     aria-label={selectedBlock ? "Back to section settings" : "Back to sections"}
                     onClick={() => { setSelection(selectedBlock ? { kind: "section", region: selection && selection.kind !== "theme" ? selection.region : "template", sectionId: localSection.id } : null); if (!selectedBlock) setMobilePanel("sections"); }}
-                    className="grid size-8 shrink-0 place-items-center rounded-lg text-[#616161] hover:bg-[#f1f1f1]"
+                    className="grid size-8 shrink-0 place-items-center rounded-lg text-[var(--ink-soft)] hover:bg-[var(--paper)]"
                   >
                     <ChevronLeft size={16} />
                   </button>
-                  <LayoutPanelTop size={16} className="text-[#6f5b92]" />
-                  <div className="min-w-0"><p className="text-[10px] text-[#8c9196]">{selectedBlock && localSection.type !== "rich-text" ? displayName(localSection.type) : "Section settings"}</p><p className="truncate text-[13px] font-semibold">{displayName(localSection.type === "rich-text" ? localSection.type : selectedBlock?.type ?? localSection.type)}</p></div>
+                  <LayoutPanelTop size={16} className="text-[var(--ink-soft)]" />
+                  <div className="min-w-0"><p className="text-[10px] text-[var(--ink-soft)]">{selectedBlock && localSection.type !== "rich-text" ? displayName(localSection.type) : "Section settings"}</p><p className="truncate text-[13px] font-semibold">{displayName(localSection.type === "rich-text" ? localSection.type : selectedBlock?.type ?? localSection.type)}</p></div>
                 </div>
-                {!selectedBlock && <button type="button" aria-label="Remove section" onClick={() => { void removeSelectedSection(); }} className="grid size-8 place-items-center rounded-lg text-[#9b3a32] hover:bg-[#fff1f0]"><Trash2 size={15} /></button>}
+                {!selectedBlock && <button type="button" aria-label="Remove section" onClick={() => { void removeSelectedSection(); }} className="grid size-8 place-items-center rounded-lg text-[var(--destructive)] hover:bg-[var(--paper-deep)]"><Trash2 size={15} /></button>}
               </div>
-              <div className="border-b border-[#eeeeee] px-4 py-4">
+              <div className="border-b border-[var(--line)] px-4 py-4">
                 {localSection.type === "rich-text" ? <RichTextDocumentEditor
                     key={`${activeTemplate?.id}:${localSection.id}`}
                     section={localSection}
@@ -804,14 +804,14 @@ export default function OnlineStoreEditorPage() {
                     upload={(file, onProgress) => api.uploadMedia(backendStoreId, file, onProgress)}
                     dynamicSources={dynamicSources}
                     onChange={(key, nextValue) => { void updateSelectedSetting(key, nextValue); }}
-                  /> : <p className="py-8 text-center text-[12px] text-[#8c9196]">This item has no additional settings.</p>}
+                  /> : <p className="py-8 text-center text-[12px] text-[var(--ink-soft)]">This item has no additional settings.</p>}
               </div>
               {!selectedBlock && localSection.type !== "rich-text" && sectionDefinition && sectionDefinition.allowedBlockTypes.length > 0 && (
-                <div className="border-b border-[#eeeeee] p-3">
+                <div className="border-b border-[var(--line)] p-3">
                   <button
                     type="button"
                     onClick={() => setBlockPickerSectionId(localSection.id)}
-                    className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-[#d8d1e3] bg-[#f7f4fb] px-3 text-[12px] font-semibold text-[#624d86] hover:bg-[#eee8f7]"
+                    className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-[var(--line)] bg-[var(--paper)] px-3 text-[12px] font-semibold text-[var(--ink)] hover:bg-[var(--paper-deep)]"
                   >
                     <Plus size={15} /> Add content block
                   </button>
@@ -820,10 +820,10 @@ export default function OnlineStoreEditorPage() {
             </>
           )}
 
-          {!localSection && selection?.kind !== "theme" && !libraryRegion && !blockPickerSectionId && <div className="px-6 py-12 text-center"><LayoutPanelTop className="mx-auto text-[#b4a8c9]" size={28} /><p className="mt-3 text-[13px] font-semibold">Select a section to edit</p><p className="mt-1 text-[11px] leading-5 text-[#8c9196]">Choose a section or content block from the left panel, or add a new section.</p></div>}
+          {!localSection && selection?.kind !== "theme" && !libraryRegion && !blockPickerSectionId && <div className="px-6 py-12 text-center"><LayoutPanelTop className="mx-auto text-[var(--ink-soft)]" size={28} /><p className="mt-3 text-[13px] font-semibold">Select a section to edit</p><p className="mt-1 text-[11px] leading-5 text-[var(--ink-soft)]">Choose a section or content block from the left panel, or add a new section.</p></div>}
 
-          {selection?.kind !== "theme" && !libraryRegion && !blockPickerSectionId && <div className="border-y border-[#eeeeee] px-4 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#8c9196]">Global sections</p>
+          {selection?.kind !== "theme" && !libraryRegion && !blockPickerSectionId && <div className="border-y border-[var(--line)] px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[var(--ink-soft)]">Global sections</p>
           </div>}
           {selection?.kind !== "theme" && !libraryRegion && !blockPickerSectionId && <GlobalSectionPanel
             globalSections={globalOptions}

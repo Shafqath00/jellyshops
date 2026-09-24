@@ -81,10 +81,11 @@ for (const [label, storeName] of [
     await page.getByLabel("Switch store").selectOption({ label: storeName });
     await ensurePrimaryNavigation(page);
     await page.getByRole("link", { name: "Online Store" }).click();
-    const publicHref = await page.getByRole("link", { name: "View store", exact: true }).getAttribute("href");
+    const publicHref = await page.getByRole("main").getByRole("link", { name: "View store", exact: true }).getAttribute("href");
     expect(publicHref).toBeTruthy();
     await page.getByRole("link", { name: "Open theme editor" }).click();
     await expect(page.getByRole("heading", { name: "Theme editor" })).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByTestId("theme-editor-shell")).toHaveClass(/bg-\[var\(--paper-deep\)\]/);
     await expect(page.getByTestId("section-hero")).toBeVisible();
     await expect(page.getByTestId("section-product-grid")).toBeVisible();
     const publicPage = await page.context().newPage();

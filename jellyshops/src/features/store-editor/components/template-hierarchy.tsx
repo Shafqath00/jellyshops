@@ -128,11 +128,11 @@ function PlacementRow({
         onClick={() => onGlobalSelect?.(placement.globalSectionId)}
         className={clsx(
           "flex min-h-9 w-full items-center gap-2 rounded-lg border px-2.5 text-left text-[12px]",
-          selected ? "border-[#b9b9b9] bg-[#eeeeee] text-[#202223]" : "border-[#e3e3e3] bg-[#fafafa] text-[#454f5b] hover:bg-white",
+          selected ? "border-[var(--line)] bg-[var(--paper-deep)] text-[var(--ink)]" : "border-[var(--line)] bg-[var(--paper)] text-[var(--ink-soft)] hover:bg-[var(--white)]",
         )}
       >
         <span className="min-w-0 flex-1 truncate">{global?.name ?? "Missing global section"}</span>
-        <span className="rounded bg-[#eeeeee] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.04em] text-[#616161]">Global</span>
+        <span className="rounded bg-[var(--paper-deep)] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.04em] text-[var(--ink-soft)]">Global</span>
       </button>
     );
   }
@@ -148,16 +148,16 @@ function PlacementRow({
         onClick={() => onSelect({ kind: "section", region, sectionId: placement.section.id })}
         className={clsx(
           "flex min-h-10 w-full items-center gap-2 rounded-xl px-2.5 text-left text-[12px] font-medium",
-          selected ? "bg-[#eeeaf5] text-[#372b4b]" : "text-[#454f5b] hover:bg-[#f6f6f7]",
+          selected ? "bg-[var(--paper-deep)] text-[var(--ink)]" : "text-[var(--ink-soft)] hover:bg-[var(--paper)]",
         )}
       >
         {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-        <LayoutPanelTop size={15} className="text-[#777]" />
+        <LayoutPanelTop size={15} className="text-[var(--ink-soft)]" />
         <span className="truncate">{label}</span>
       </button>
       {onMove ? <div className="-mt-8 mr-1 flex justify-end"><button type="button" aria-label={`Move ${label} up`} disabled={index === 0} onClick={() => onMove(placement.section.id, "up")} className="grid size-6 place-items-center rounded disabled:opacity-25"><ChevronUp size={13} /></button><button type="button" aria-label={`Move ${label} down`} disabled={index === count - 1} onClick={() => onMove(placement.section.id, "down")} className="grid size-6 place-items-center rounded disabled:opacity-25"><ChevronDown size={13} /></button>{onToggle ? <button type="button" aria-label={`${placement.section.enabled === false ? "Show" : "Hide"} ${label}`} onClick={() => onToggle(placement.section.id, placement.section.enabled === false)} className="grid size-6 place-items-center rounded"><span className="sr-only">{placement.section.enabled === false ? "Hidden" : "Visible"}</span>{placement.section.enabled === false ? <EyeOff size={13} /> : <Eye size={13} />}</button> : null}</div> : null}
       {expanded && (
-        <div className="ml-5 mt-1 space-y-0.5 border-l border-[#e4e1e9] pl-2">
+        <div className="ml-5 mt-1 space-y-0.5 border-l border-[var(--line)] pl-2">
           {placement.section.blocks.map((block) => {
             const blockSelected = selection?.kind === "block" && selection.blockId === block.id;
             const blockLabel = sectionLabels[block.type] ?? block.type.charAt(0).toUpperCase() + block.type.slice(1);
@@ -169,7 +169,7 @@ function PlacementRow({
                 onClick={() => onSelect({ kind: "block", region, sectionId: placement.section.id, blockId: block.id })}
                 className={clsx(
                   "flex min-h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-[12px]",
-                  blockSelected ? "bg-[#7b61a8] text-white" : "text-[#616161] hover:bg-[#f6f6f7]",
+                  blockSelected ? "bg-[var(--ink)] text-[var(--white)]" : "text-[var(--ink-soft)] hover:bg-[var(--paper)]",
                 )}
               >
                 {block.type === "button" ? <MousePointerClick size={14} /> : <Type size={14} />}
@@ -182,7 +182,7 @@ function PlacementRow({
               type="button"
               aria-label={`Add block to ${label}`}
               onClick={() => onAddBlock(placement.section.id)}
-              className="flex min-h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-[12px] font-medium text-[#6f5b92] hover:bg-[#f2eff7]"
+              className="flex min-h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-[12px] font-medium text-[var(--ink)] hover:bg-[var(--paper-deep)]"
             >
               <Plus size={15} /> Add block
             </button>
@@ -225,16 +225,16 @@ export function TemplateHierarchy({
   templatePlacements.forEach((placement) => groups[placementRegion(placement, globalSections)].push(placement));
 
   return (
-    <aside className="flex h-full min-h-0 flex-col bg-white" aria-label="Template hierarchy">
-      <div className="h-14 shrink-0 border-b border-[#eeeeee] px-4 py-2.5">
-        <p className="text-[10px] font-medium text-[#8c9196]">Template</p>
-        <h1 className="mt-0.5 truncate text-[13px] font-semibold text-[#303030]">{template.name}</h1>
+    <aside className="flex min-h-0 flex-1 flex-col bg-[var(--white)]" aria-label="Template hierarchy">
+      <div className="h-14 shrink-0 border-b border-[var(--line)] px-4 py-2.5">
+        <p className="text-[10px] font-medium text-[var(--ink-soft)]">Template</p>
+        <h1 className="mt-0.5 truncate text-[13px] font-semibold text-[var(--ink)]">{template.name}</h1>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto p-2">
         {(["header", "template", "footer"] as const).map((region) => (
           <section key={region} className="mb-3 last:mb-0">
-            <h2 className="px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#8c9196]">
+            <h2 className="px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.06em] text-[var(--ink-soft)]">
               {region === "template" ? "Template" : region === "header" ? "Header" : "Footer"}
             </h2>
             <div className="space-y-1">
@@ -256,14 +256,14 @@ export function TemplateHierarchy({
                 />
               ))}
               {groups[region].length === 0 && (
-                <p className="px-2 py-2 text-[11px] text-[#b1b1b1]">No {region} sections.</p>
+                <p className="px-2 py-2 text-[11px] text-[var(--ink-soft)]">No {region} sections.</p>
               )}
               {onAddSection && (
                 <button
                   type="button"
                   aria-label={`Add section to ${region === "template" ? "Template" : region === "header" ? "Header" : "Footer"}`}
                   onClick={() => onAddSection(region)}
-                  className="mt-1 flex min-h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-[12px] font-medium text-[#6f5b92] hover:bg-[#f2eff7]"
+                  className="mt-1 flex min-h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-[12px] font-medium text-[var(--ink)] hover:bg-[var(--paper-deep)]"
                 >
                   <Plus size={15} /> Add section
                 </button>
