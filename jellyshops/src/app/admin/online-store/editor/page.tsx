@@ -611,6 +611,26 @@ export default function OnlineStoreEditorPage() {
     return <main className="grid min-h-[70vh] place-items-center text-[13px] text-[#616161]" aria-live="polite">Loading template…</main>;
   }
 
+  const renderPreviewSections = (items: SectionNode[]) => items.map((section) => (
+    <RegistrySectionRenderer
+      key={section.id}
+      section={section as unknown as RegistrySection}
+      mode={previewSnapshot ? "preview" : "editor"}
+      commerce={commerce}
+      region="template"
+      themeId={themeConfiguration?.themeId}
+      page={previewPageContext ?? undefined}
+      menus={previewSnapshot?.menus ?? Object.fromEntries(menuRecords.map((menu) => [menu.handle, { id: menu.id, handle: menu.handle, items: menu.items }])) as Record<string, RuntimeMenuV4>}
+      storeSlug={activeStore?.slug}
+      selected={previewSnapshot ? undefined : selection ?? undefined}
+      onSelect={previewSnapshot ? undefined : (next) => {
+        setActiveGlobalId(undefined);
+        if (next.kind === "section" && next.sectionId) setSelection({ kind: "section", region: "template", sectionId: next.sectionId });
+        if (next.kind === "block" && next.sectionId && next.blockId) setSelection({ kind: "block", region: "template", sectionId: next.sectionId, blockId: next.blockId, fieldKey: next.fieldKey });
+      }}
+    />
+  ));
+
   return (
     <div className="fixed inset-0 z-[60] flex h-dvh flex-col overflow-hidden bg-[#f4f4f5] text-[#303030]">
       <header className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[#e3e3e3] bg-white px-3 py-2 sm:gap-3">
@@ -700,26 +720,12 @@ export default function OnlineStoreEditorPage() {
             viewport === "tablet" && "max-w-[820px]",
             viewport === "mobile" && "max-w-[390px]",
           )} data-testid="preview-viewport" data-jelly-theme={themeConfiguration?.themeId ?? "minimal"} data-viewport={viewport} data-preview-width={viewport === "desktop" ? 1440 : viewport === "tablet" ? 820 : 390} style={previewThemeStyle}>
-            {[...previewLayout.announcement, ...previewLayout.header, ...previewLayout.template, ...previewLayout.footer].map((section) => (
-              <RegistrySectionRenderer
-                key={section.id}
-                section={section as unknown as RegistrySection}
-                mode={previewSnapshot ? "preview" : "editor"}
-                commerce={commerce}
-                region="template"
-                themeId={themeConfiguration?.themeId}
-                page={previewPageContext ?? undefined}
-                menus={previewSnapshot?.menus ?? Object.fromEntries(menuRecords.map((menu) => [menu.handle, { id: menu.id, handle: menu.handle, items: menu.items }])) as Record<string, RuntimeMenuV4>}
-                storeSlug={activeStore?.slug}
-                selected={previewSnapshot ? undefined : selection ?? undefined}
-                onSelect={previewSnapshot ? undefined : (next) => {
-                  setActiveGlobalId(undefined);
-                  if (next.kind === "section" && next.sectionId) setSelection({ kind: "section", region: "template", sectionId: next.sectionId });
-                  if (next.kind === "block" && next.sectionId && next.blockId) setSelection({ kind: "block", region: "template", sectionId: next.sectionId, blockId: next.blockId, fieldKey: next.fieldKey });
-                }}
-              />
-            ))}
-            {previewLayout.template.length === 0 && <div className="grid min-h-[360px] place-items-center p-8 text-center text-sm text-[#8c9196]">This template has no sections yet.</div>}
+            {renderPreviewSections([...previewLayout.announcement, ...previewLayout.header])}
+            <div data-storefront-template>
+              {renderPreviewSections(previewLayout.template)}
+              {previewLayout.template.length === 0 && <div className="grid min-h-[360px] place-items-center p-8 text-center text-sm text-[#8c9196]">This template has no sections yet.</div>}
+            </div>
+            {renderPreviewSections(previewLayout.footer)}
           </div>
         </main>
 

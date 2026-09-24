@@ -148,6 +148,11 @@ for (const [label, storeName] of [
           await expect(preview.getByRole("heading", { name: draftHeadline })).toBeVisible();
           await expect(preview.getByTestId("section-product-grid")).toBeVisible();
           expect(await preview.getByTestId("section-hero").locator("img").evaluate((image) => image.getBoundingClientRect().width)).toBeLessThanOrEqual(await preview.evaluate((element) => element.clientWidth));
+          const heroMediaRatio = await preview.getByTestId("section-hero").locator(".jelly-hero-media").evaluate((media) => {
+            const { width: mediaWidth, height: mediaHeight } = media.getBoundingClientRect();
+            return mediaWidth / mediaHeight;
+          });
+          if (label === "Fresh Market") expect(heroMediaRatio).toBeGreaterThanOrEqual(width <= 700 ? 1.3 : 1.5);
         }
         if (pageType === "product") {
           const resources = page.getByLabel("Preview resource", { exact: true });
@@ -157,6 +162,19 @@ for (const [label, storeName] of [
           await expect(preview.getByTestId("section-product-purchase").getByRole("button", { name: "Add to cart" })).toBeVisible();
           await expect(preview.getByRole("spinbutton", { name: "Quantity" })).toBeVisible();
           await expect(preview.getByTestId("section-product-information")).toContainText(/available|stock/i);
+          if (label === "Fresh Market") {
+            const gallery = await preview.getByTestId("section-product-gallery").boundingBox();
+            const information = await preview.getByTestId("section-product-information").boundingBox();
+            expect(gallery).not.toBeNull();
+            expect(information).not.toBeNull();
+            if (!gallery || !information) throw new Error("Product gallery and information must render in the preview");
+            if (width >= 700) {
+              expect(information.x).toBeGreaterThan(gallery.x);
+              expect(Math.abs(information.y - gallery.y)).toBeLessThanOrEqual(8);
+            } else {
+              expect(information.y).toBeGreaterThanOrEqual(gallery.y + gallery.height - 1);
+            }
+          }
         }
         if (pageType === "collection" || pageType === "page" || pageType === "blog" || pageType === "article") {
           const resourceSelector = page.getByLabel("Preview resource", { exact: true });

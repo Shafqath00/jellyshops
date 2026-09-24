@@ -432,6 +432,27 @@ button, a { -webkit-tap-highlight-color: transparent; }
 [data-jelly-theme="fresh-market"] :is(.jelly-cart-card h1, .jelly-search-shell h1, .jelly-not-found h1) { font-size: clamp(2.25rem, 4.5vw, 4rem); line-height: 1.04; letter-spacing: -.035em; overflow-wrap: anywhere; text-wrap: balance; }
 [data-jelly-theme="fresh-market"] :is(.jelly-page-content article, .jelly-article-content article) { max-width: 680px; }
 [data-jelly-theme="fresh-market"] .jelly-article-published-at { display: block; margin: 10px 0 12px; color: var(--jelly-color-muted); font-size: .875rem; }
+[data-jelly-theme="fresh-market"] .jelly-hero-media { min-height: 0; aspect-ratio: 16 / 10; }
+[data-jelly-theme="fresh-market"] [data-storefront-template]:has(> [data-testid="section-product-gallery"]) { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr); column-gap: clamp(24px, 4vw, 56px); align-items: start; }
+[data-jelly-theme="fresh-market"] [data-storefront-template]:has(> [data-testid="section-product-gallery"]) > [data-testid="section-product-gallery"] { grid-column: 1; grid-row: 1 / span 4; }
+[data-jelly-theme="fresh-market"] [data-storefront-template]:has(> [data-testid="section-product-gallery"]) > [data-testid="section-product-information"] { grid-column: 2; grid-row: 1; }
+[data-jelly-theme="fresh-market"] [data-storefront-template]:has(> [data-testid="section-product-gallery"]) > [data-testid="section-product-options"] { grid-column: 2; grid-row: 2; }
+[data-jelly-theme="fresh-market"] [data-storefront-template]:has(> [data-testid="section-product-gallery"]) > [data-testid="section-product-purchase"] { grid-column: 2; grid-row: 3; }
+[data-jelly-theme="fresh-market"] [data-storefront-template]:has(> [data-testid="section-product-gallery"]) > [data-testid="section-product-description"] { grid-column: 2; grid-row: 4; }
+[data-jelly-theme="fresh-market"] [data-storefront-template]:has(> [data-testid="section-product-gallery"]) > [data-testid="section-related-products"] { grid-column: 1 / -1; grid-row: 5; }
+[data-jelly-theme="fresh-market"] [data-testid="section-product-gallery"] .jelly-section { padding-block: 48px 24px; }
+[data-jelly-theme="fresh-market"] [data-testid="section-product-gallery"] .jelly-container { grid-template-columns: minmax(0, 1fr); }
+[data-jelly-theme="fresh-market"] [data-testid="section-product-information"] .jelly-section { padding-block: 48px 12px; }
+[data-jelly-theme="fresh-market"] :is([data-testid="section-product-options"], [data-testid="section-product-purchase"], [data-testid="section-product-description"]) .jelly-section { padding-block: 12px; }
+[data-jelly-theme="fresh-market"] [data-testid="section-related-products"] .jelly-section { padding-top: 40px; }
+@media (max-width: 700px) {
+  [data-jelly-theme="fresh-market"] .jelly-hero-media { aspect-ratio: 4 / 3; }
+  [data-jelly-theme="fresh-market"] [data-storefront-template]:has(> [data-testid="section-product-gallery"]) { grid-template-columns: minmax(0, 1fr); column-gap: 0; }
+  [data-jelly-theme="fresh-market"] [data-storefront-template]:has(> [data-testid="section-product-gallery"]) > [data-testid^="section-product-"] { grid-column: 1; grid-row: auto; }
+  [data-jelly-theme="fresh-market"] [data-storefront-template]:has(> [data-testid="section-product-gallery"]) > [data-testid="section-related-products"] { grid-column: 1; grid-row: auto; }
+  [data-jelly-theme="fresh-market"] [data-testid="section-product-gallery"] .jelly-section { padding-block: 36px 16px; }
+  [data-jelly-theme="fresh-market"] [data-testid="section-product-information"] .jelly-section { padding-block: 12px; }
+}
 .jelly-image-text-layout { display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; gap: clamp(24px, 5vw, 64px); }
 .jelly-image-text.has-image .jelly-image-text-layout { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .jelly-image-text-media { min-height: 320px; overflow: hidden; border-radius: var(--jelly-radius-card); background: var(--jelly-color-surface); }
