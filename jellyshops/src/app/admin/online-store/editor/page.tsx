@@ -47,6 +47,7 @@ import { RichTextDocumentEditor } from "@/features/store-editor/components/inspe
 import { ThemeSettingsPanel } from "@/features/store-editor/components/inspector/theme-settings-panel";
 import { PublishControls } from "@/features/store-editor/components/publish-controls";
 import { PublishDiagnostics } from "@/features/store-editor/components/publish-diagnostics";
+import { EditorPanelNavigation, type EditorPanel } from "@/features/store-editor/components/editor-panel-navigation";
 import { SectionLibrary } from "@/features/store-editor/components/section-library";
 import { TemplateHierarchy } from "@/features/store-editor/components/template-hierarchy";
 import { TemplateResourceSelector } from "@/features/store-editor/components/template-resource-selector";
@@ -227,6 +228,7 @@ export default function OnlineStoreEditorPage() {
   const [selection, setSelection] = useState<EditorSelection>(null);
   const [activeGlobalId, setActiveGlobalId] = useState<string>();
   const [viewport, setViewport] = useState<EditorViewport>("desktop");
+  const [mobilePanel, setMobilePanel] = useState<EditorPanel>("sections");
   const [diagnostics, setDiagnostics] = useState<CompilationDiagnostic[]>([]);
   const [previewSnapshot, setPreviewSnapshot] = useState<RuntimeStorefrontSnapshotV4>();
   const [loadError, setLoadError] = useState<string>();
@@ -388,7 +390,6 @@ export default function OnlineStoreEditorPage() {
   const blockPickerSection = sections.find((section) => section.id === blockPickerSectionId);
   const blockPickerDefinition = blockPickerSection ? getSectionDefinition(blockPickerSection.type) : undefined;
   const selectedTheme = themeCatalog.find((theme) => theme.id === themeConfiguration?.themeId);
-  const toolsOpen = Boolean(libraryRegion || blockPickerSectionId || localSection || activeGlobalId || selection?.kind === "theme");
 
   const commerce = useMemo<CommerceDataProvider>(() => ({
     async getProducts() {
@@ -623,7 +624,7 @@ export default function OnlineStoreEditorPage() {
             ["tablet", "Tablet preview", Tablet],
             ["mobile", "Mobile preview", Smartphone],
           ] as const).map(([viewportValue, label, Icon]) => (
-            <button key={viewportValue} type="button" aria-label={label} aria-pressed={viewport === viewportValue} onClick={() => setViewport(viewportValue)} className={clsx("grid size-7 place-items-center rounded-md", viewport === viewportValue ? "bg-white shadow-sm" : "text-[#8c9196]")}><Icon size={15} /></button>
+          <button key={viewportValue} type="button" aria-label={label} title={`${label.replace(" preview", "")} · ${viewportValue === "desktop" ? 1440 : viewportValue === "tablet" ? 820 : 390}px`} aria-pressed={viewport === viewportValue} onClick={() => setViewport(viewportValue)} className={clsx("grid size-7 place-items-center rounded-md", viewport === viewportValue ? "bg-white shadow-sm" : "text-[#8c9196]")}><Icon size={15} /></button>
           ))}
         </div>
         <div className="flex w-full items-center justify-end gap-3 sm:w-auto">
@@ -648,7 +649,7 @@ export default function OnlineStoreEditorPage() {
         previewResources={previewResources}
         previewResourceId={previewResourceId}
         previewQuery={previewQuery}
-        onTemplateChange={(templateId) => { setActiveTemplateId(templateId); setSelection(null); setActiveGlobalId(undefined); setPreviewSnapshot(undefined); }}
+        onTemplateChange={(templateId) => { setActiveTemplateId(templateId); setSelection(null); setActiveGlobalId(undefined); setPreviewSnapshot(undefined); setMobilePanel("sections"); }}
         onPreviewResourceChange={setPreviewResourceId}
         onPreviewQueryChange={setPreviewQuery}
         onPageTypeChange={(pageType) => {
@@ -658,6 +659,7 @@ export default function OnlineStoreEditorPage() {
             setSelection(null);
             setActiveGlobalId(undefined);
             setPreviewSnapshot(undefined);
+            setMobilePanel("sections");
             return;
           }
           if (!api) return;
@@ -666,35 +668,38 @@ export default function OnlineStoreEditorPage() {
             setActiveTemplateId(result.template.id);
             setWorkspace((current) => current ? { ...current, generation: result.generation } : current);
             setPreviewSnapshot(undefined);
+            setMobilePanel("sections");
           });
         }}
       />
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,40%)_minmax(0,1fr)] sm:grid-cols-[320px_minmax(0,1fr)] sm:grid-rows-1">
-        <div className={clsx("col-start-1 row-start-1 min-h-0 overflow-y-auto border-b border-[#e3e3e3] bg-white sm:border-b-0 sm:border-r", toolsOpen && "hidden")}>
-          <button type="button" onClick={() => { setSelection({ kind: "theme" }); setActiveGlobalId(undefined); }} className="m-2 flex min-h-9 w-[calc(100%-1rem)] items-center rounded-lg px-3 text-left text-[12px] font-semibold text-[#454f5b] hover:bg-[#f6f6f7]">Theme settings</button>
+      <EditorPanelNavigation value={mobilePanel} onChange={setMobilePanel} />
+
+      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-1 lg:grid-cols-[280px_minmax(0,1fr)_320px]">
+        <div className={clsx("flex min-h-0 flex-col border-b border-[#e3e3e3] bg-white lg:col-start-1 lg:row-start-1 lg:border-b-0 lg:border-r", mobilePanel !== "sections" && "hidden lg:flex")}>
+          <button type="button" onClick={() => { setSelection({ kind: "theme" }); setActiveGlobalId(undefined); setMobilePanel("settings"); }} className="m-2 flex min-h-9 shrink-0 items-center rounded-lg px-3 text-left text-[12px] font-semibold text-[#454f5b] hover:bg-[#f6f6f7]">Theme settings</button>
           <TemplateHierarchy
             template={activeTemplate}
             globalSections={globalLabels}
             selection={selection}
             activeGlobalId={activeGlobalId}
-            onSelect={(next) => { setSelection(next); setActiveGlobalId(undefined); }}
-            onGlobalSelect={(globalId) => { setActiveGlobalId(globalId); setSelection(null); }}
-            onAddSection={(region) => { setLibraryRegion(region); setBlockPickerSectionId(undefined); }}
-            onAddBlock={(sectionId) => { setBlockPickerSectionId(sectionId); setLibraryRegion(undefined); }}
+            onSelect={(next) => { setSelection(next); setActiveGlobalId(undefined); setMobilePanel("settings"); }}
+            onGlobalSelect={(globalId) => { setActiveGlobalId(globalId); setSelection(null); setMobilePanel("settings"); }}
+            onAddSection={(region) => { setLibraryRegion(region); setBlockPickerSectionId(undefined); setMobilePanel("settings"); }}
+            onAddBlock={(sectionId) => { setBlockPickerSectionId(sectionId); setLibraryRegion(undefined); setMobilePanel("settings"); }}
             onMove={(id, direction) => { void moveSelectedPlacement(id, direction); }}
             onToggle={(id, enabled) => { void toggleSection(id, enabled); }}
           />
         </div>
 
-        <main className="col-start-1 row-start-2 min-h-0 min-w-0 overflow-auto p-2 sm:col-start-2 sm:row-start-1 sm:p-4" aria-label="Storefront preview">
+        <main className={clsx("min-h-0 min-w-0 overflow-auto p-2 lg:col-start-2 lg:row-start-1 lg:p-4", mobilePanel !== "preview" && "hidden lg:block")} aria-label="Storefront preview">
           {previewSnapshot && <div className="mx-auto mb-2 max-w-[1440px] rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-[10px] font-medium text-emerald-800">Compiled preview · generation {previewSnapshot.sourceGeneration}</div>}
           <div className={clsx(
             "mx-auto min-h-full overflow-hidden border border-[#dcdcdc] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-[max-width]",
             viewport === "desktop" && "max-w-[1440px]",
             viewport === "tablet" && "max-w-[820px]",
             viewport === "mobile" && "max-w-[390px]",
-          )} data-testid="preview-viewport" data-viewport={viewport} style={previewThemeStyle}>
+          )} data-testid="preview-viewport" data-jelly-theme={themeConfiguration?.themeId ?? "minimal"} data-viewport={viewport} data-preview-width={viewport === "desktop" ? 1440 : viewport === "tablet" ? 820 : 390} style={previewThemeStyle}>
             {[...previewLayout.announcement, ...previewLayout.header, ...previewLayout.template, ...previewLayout.footer].map((section) => (
               <RegistrySectionRenderer
                 key={section.id}
@@ -718,7 +723,7 @@ export default function OnlineStoreEditorPage() {
           </div>
         </main>
 
-        <aside className={clsx("col-start-1 row-start-1 min-h-0 overflow-y-auto border-b border-[#e3e3e3] bg-white sm:border-b-0 sm:border-r", !toolsOpen && "hidden")} aria-label="Section tools">
+        <aside className={clsx("min-h-0 overflow-y-auto border-b border-[#e3e3e3] bg-white lg:col-start-3 lg:row-start-1 lg:border-b-0 lg:border-l", mobilePanel !== "settings" && "hidden lg:block")} aria-label="Section tools">
           {selection?.kind === "theme" && <ThemeSettingsPanel
             schema={selectedTheme?.settingsSchema ?? []}
             settings={themeConfiguration?.settings ?? {}}
@@ -734,7 +739,7 @@ export default function OnlineStoreEditorPage() {
           {libraryRegion && (
             <>
               <div className="flex h-14 items-center gap-2 border-b border-[#eeeeee] px-3">
-                <button type="button" aria-label="Back to sections" onClick={() => setLibraryRegion(undefined)} className="grid size-8 place-items-center rounded-lg text-[#616161] hover:bg-[#f1f1f1]"><ChevronLeft size={16} /></button>
+                <button type="button" aria-label="Back to sections" onClick={() => { setLibraryRegion(undefined); setMobilePanel("sections"); }} className="grid size-8 place-items-center rounded-lg text-[#616161] hover:bg-[#f1f1f1]"><ChevronLeft size={16} /></button>
                 <div><p className="text-[10px] text-[#8c9196]">{displayName(libraryRegion)}</p><h2 className="text-[13px] font-semibold">Add section</h2></div>
               </div>
               <SectionLibrary
@@ -749,7 +754,7 @@ export default function OnlineStoreEditorPage() {
           {blockPickerSection && blockPickerDefinition && !libraryRegion && (
             <>
               <div className="flex h-14 items-center gap-2 border-b border-[#eeeeee] px-3">
-                <button type="button" aria-label="Back to section settings" onClick={() => setBlockPickerSectionId(undefined)} className="grid size-8 place-items-center rounded-lg text-[#616161] hover:bg-[#f1f1f1]"><ChevronLeft size={16} /></button>
+                <button type="button" aria-label="Back to section settings" onClick={() => { setBlockPickerSectionId(undefined); setMobilePanel("settings"); }} className="grid size-8 place-items-center rounded-lg text-[#616161] hover:bg-[#f1f1f1]"><ChevronLeft size={16} /></button>
                 <div><p className="text-[10px] text-[#8c9196]">{displayName(blockPickerSection.type)}</p><h2 className="text-[13px] font-semibold">Add content block</h2></div>
               </div>
               <div className="space-y-1 p-3">
@@ -771,7 +776,7 @@ export default function OnlineStoreEditorPage() {
                   <button
                     type="button"
                     aria-label={selectedBlock ? "Back to section settings" : "Back to sections"}
-                    onClick={() => setSelection(selectedBlock ? { kind: "section", region: selection && selection.kind !== "theme" ? selection.region : "template", sectionId: localSection.id } : null)}
+                    onClick={() => { setSelection(selectedBlock ? { kind: "section", region: selection && selection.kind !== "theme" ? selection.region : "template", sectionId: localSection.id } : null); if (!selectedBlock) setMobilePanel("sections"); }}
                     className="grid size-8 shrink-0 place-items-center rounded-lg text-[#616161] hover:bg-[#f1f1f1]"
                   >
                     <ChevronLeft size={16} />

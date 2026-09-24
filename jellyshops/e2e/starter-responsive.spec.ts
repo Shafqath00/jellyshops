@@ -130,6 +130,10 @@ for (const [label, storeName] of [
         await expect(storefrontNavigation).toBeVisible();
         await expect(storefrontNavigation.getByRole("link", { name: "Home", exact: true })).toBeVisible();
         await expect(storefrontNavigation.getByRole("link", { name: "Search", exact: true })).toBeVisible();
+        if (label === "Fresh Market") {
+          const headingFontSize = await preview.getByTestId("section-hero").getByRole("heading").evaluate((heading) => Number.parseFloat(getComputedStyle(heading).fontSize));
+          expect(headingFontSize).toBeLessThanOrEqual(width <= 390 ? 40 : 72);
+        }
         expect(await storefrontNavigation.evaluate((element) => element.getBoundingClientRect().right)).toBeLessThanOrEqual(
           await preview.locator(".jelly-header").evaluate((element) => element.getBoundingClientRect().right) + 1,
         );
