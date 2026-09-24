@@ -45,18 +45,29 @@ export function ArticleListSection({ context }: { context: StorefrontRuntimeCont
   return <section className="jelly-section jelly-article-list"><StorefrontContainer>{blog.articles.length ? <div>{blog.articles.map((article) => <article key={article.id}><h2><a href={`/${blog.storeSlug}/blogs/${blog.handle}/${article.handle}`}>{article.title}</a></h2>{article.excerpt && <p>{article.excerpt}</p>}</article>)}</div> : <p>No articles have been published yet.</p>}</StorefrontContainer></section>;
 }
 
-function articleData(context: StorefrontRuntimeContext): { title: string; excerpt: string; content: unknown } | null {
+function articleData(context: StorefrontRuntimeContext): { title: string; excerpt: string; content: unknown; publishedAt?: string } | null {
   if (context.page?.pageType !== "article") return null;
   const article = context.page.resource.data.article;
   if (!article || typeof article !== "object" || Array.isArray(article)) return null;
   const record = article as Record<string, unknown>;
   if (typeof record.title !== "string") return null;
-  return { title: record.title, excerpt: typeof record.excerpt === "string" ? record.excerpt : "", content: record.content };
+  return {
+    title: record.title,
+    excerpt: typeof record.excerpt === "string" ? record.excerpt : "",
+    content: record.content,
+    ...(typeof record.publishedAt === "string" && Number.isFinite(Date.parse(record.publishedAt))
+      ? { publishedAt: record.publishedAt }
+      : {}),
+  };
 }
 
 export function ArticleHeaderSection({ context }: { context: StorefrontRuntimeContext }) {
   const article = articleData(context);
-  return article ? <section className="jelly-section jelly-article-header"><StorefrontContainer><h1>{article.title}</h1>{article.excerpt && <p>{article.excerpt}</p>}</StorefrontContainer></section> : null;
+  const publishedDate = article?.publishedAt ? new Date(article.publishedAt) : undefined;
+  const publicationLabel = publishedDate
+    ? new Intl.DateTimeFormat("en", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" }).format(publishedDate)
+    : undefined;
+  return article ? <section className="jelly-section jelly-article-header"><StorefrontContainer><h1>{article.title}</h1>{publicationLabel && article.publishedAt && <time className="jelly-article-published-at" dateTime={article.publishedAt}>Published {publicationLabel}</time>}{article.excerpt && <p>{article.excerpt}</p>}</StorefrontContainer></section> : null;
 }
 
 export function ArticleContentSection({ context }: { context: StorefrontRuntimeContext }) {
