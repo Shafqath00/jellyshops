@@ -199,6 +199,7 @@ for (const [label, storeName] of [
         if (pageType === "search") {
           await expect(preview.getByTestId("section-search-results")).toBeVisible();
           await expect(preview.getByLabel("Search catalog")).toBeVisible();
+          await expect(preview.getByRole("searchbox", { name: "Search catalog" })).toBeEditable();
         }
         if (pageType === "page") await expect(preview.getByTestId("section-page-content")).toBeAttached();
         if (pageType === "blog") await expect(preview.getByTestId("section-article-list")).toBeAttached();

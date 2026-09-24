@@ -316,7 +316,19 @@ describe("registry-driven section rendering", () => {
     render(<RegistrySectionRenderer section={{ ...section("search-results"), settings: { heading: "Stale persisted heading" } }} mode="published" commerce={commerce} page={{ pageType: "search", resource: null, data: { query: "shoes", state: "results", resultCount: 1, searchHref: "/store/search", results: [{ id: "shoe", name: "Live Shoe", href: "/store/products/shoe", imageUrl: "shoe.jpg", price: "$12.00" }] } }} />);
     expect(screen.getByDisplayValue("shoes")).toBeInTheDocument();
     expect(screen.getByText("Live Shoe")).toBeInTheDocument();
+    expect(screen.getByText("$12.00")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /live shoe/i })).toHaveAttribute("href", "/store/products/shoe");
+  });
+
+  it("lets shoppers edit and submit the search query through the storefront route", async () => {
+    const user = userEvent.setup();
+    render(<RegistrySectionRenderer section={section("search-results")} mode="published" commerce={commerce} page={{ pageType: "search", resource: null, data: { query: "shoes", state: "empty", resultCount: 0, searchHref: "/store/search", results: [] } }} />);
+
+    const input = screen.getByRole("searchbox", { name: "Search catalog" });
+    expect(input.closest("form")).toHaveAttribute("action", "/store/search");
+    await user.clear(input);
+    await user.type(input, "apples");
+    expect(input).toHaveValue("apples");
   });
 
   it("renders custom Page title and safe text content from live resource context", () => {
