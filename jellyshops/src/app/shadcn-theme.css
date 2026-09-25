@@ -174,19 +174,16 @@ body {
   background: var(--background);
 }
 
+/* ── Cart overlay & panel ──────────────────────────────────────────── */
 .cart-overlay { background: rgb(0 0 0 / .35); }
 .cart-panel { background: var(--background); }
 .quantity-control,
-.icon-button,
-.cart-button {
+.icon-button {
   border-color: var(--border);
   border-radius: calc(var(--radius) - 2px);
 }
 
-.store-header {
-  border-color: var(--border);
-  background: color-mix(in srgb, var(--background) 92%, transparent);
-}
+/* Legacy StoreHeader retains its selector-based logo styles until that unused component is migrated. */
 .store-logo { font-family: inherit; font-weight: 700; }
 .product-card-image {
   border-radius: var(--radius);

@@ -2,13 +2,15 @@
 /* eslint-disable @next/next/no-img-element -- merchant-selected local media is a presentation asset. */
 
 import Link from "next/link";
+import clsx from "clsx";
 import { createContext, useContext } from "react";
 import { ShoppingBag, X } from "lucide-react";
 import { resolveThemeShell, type StorefrontCartProps, type StorefrontFooterProps, type StorefrontHeaderProps, type StorefrontLayoutProps, type StorefrontNavigationItem, type StorefrontShellStore } from "@jelly/storefront-themes";
 import { SharedCartPage, SharedCheckoutPage, SharedCollectionPage, SharedContentPage, SharedOrderPage, SharedProductPage, SharedSearchPage } from "./storefront-pages";
+import { CartBadge } from "@/components/jelly/cart";
 
 export function SharedStorefrontLayout({ children, header, footer, cart }: StorefrontLayoutProps) {
-  return <div className="storefront">{header}{children}{footer}{cart}</div>;
+  return <div className="min-h-dvh bg-[var(--store-bg)] text-[var(--store-text)] [font-family:var(--theme-font-body)]">{header}{children}{footer}{cart}</div>;
 }
 export function SharedStorefrontHeader({ store, navigation, cartCount, settings, onCartOpen }: StorefrontHeaderProps) {
   const header = settings.header && typeof settings.header === "object" ? settings.header as Record<string, unknown> : {};
@@ -18,16 +20,37 @@ export function SharedStorefrontHeader({ store, navigation, cartCount, settings,
   const branding = settings.branding && typeof settings.branding === "object" ? settings.branding as Record<string, unknown> : {};
   const logoUrl = typeof branding.logoUrl === "string" && branding.logoUrl ? branding.logoUrl : store.logoUrl;
   const visibleNavigation = navigation.filter((item) => showSearch || !item.href.endsWith("/search"));
-  return <header className={`store-header store-header-${variant}`}><Link href={`/${store.slug}`} className="store-logo">{logoUrl ? <img src={logoUrl} alt={store.name} className="max-h-8 w-auto object-contain" /> : store.name}</Link><nav aria-label="Store navigation">{visibleNavigation.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}</nav>{showCart ? <button type="button" className="cart-button" onClick={onCartOpen} aria-label={`Open cart with ${cartCount} items`}><ShoppingBag size={19} /><span>Bag</span>{cartCount > 0 ? <b>{cartCount}</b> : null}</button> : null}</header>;
+  return <header className={clsx(
+    "sticky top-0 z-20 grid h-[74px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b border-[var(--theme-border)] bg-[color-mix(in_srgb,var(--store-bg)_92%,transparent)] px-[clamp(20px,5vw,72px)] backdrop-blur-[16px] max-[720px]:grid-cols-[minmax(0,1fr)_auto] max-[720px]:px-4",
+    variant === "compact" && "h-[58px] [&_nav]:gap-[14px] [&_nav]:text-[11px]",
+  )}>
+    <Link href={`/${store.slug}`} className={clsx(
+      "col-start-1 min-w-0 truncate justify-self-start text-[22px] font-bold tracking-[-0.04em] [font-family:var(--store-display,Georgia,serif)]",
+      variant === "logo-centered" && "col-start-2 justify-self-center max-[720px]:col-start-1 max-[720px]:justify-self-start",
+    )}>
+      {logoUrl ? <img src={logoUrl} alt={store.name} className="max-h-8 w-auto object-contain" /> : store.name}
+    </Link>
+    <nav aria-label="Store navigation" className={clsx(
+      "col-start-2 row-start-1 flex min-w-0 items-center justify-center gap-6 text-[13px] font-bold max-[720px]:hidden",
+      variant === "logo-centered" && "col-start-1 justify-self-start",
+    )}>{visibleNavigation.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}</nav>
+    {showCart ? <button type="button" className="col-start-3 flex min-h-10 items-center justify-self-end gap-[7px] rounded-full border border-[var(--theme-border)] bg-transparent px-3 text-inherit transition-colors hover:bg-[color-mix(in_srgb,var(--store-surface)_75%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--store-accent)] max-[720px]:col-start-2" onClick={onCartOpen} aria-label={`Open cart with ${cartCount} items`}><ShoppingBag size={19} /><span className="max-[720px]:hidden">Bag</span><CartBadge count={cartCount} /></button> : null}
+  </header>;
 }
 export function SharedStorefrontFooter({ store, settings }: StorefrontFooterProps) {
   const footer = settings.footer && typeof settings.footer === "object" ? settings.footer as Record<string, unknown> : {};
   const variant = typeof footer.variant === "string" ? footer.variant : "simple";
-  return <footer className={`store-footer store-footer-${variant}`}><div><b>{store.name}</b>{footer.showDescription !== false ? <p>{store.tagline}</p> : null}</div><div><span>Shipping & returns</span><span>Care guide</span><span>Instagram</span></div><Link href="/admin">Made with Jelly Shop ↗</Link></footer>;
+  return <footer className={clsx(
+    "grid min-h-[230px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-[50px] bg-[var(--store-text)] px-[clamp(20px,6vw,90px)] py-[54px] text-[var(--store-bg)] max-[800px]:grid-cols-1",
+    "[&>div:first-child_b]:text-[25px] [&>div:first-child_b]:[font-family:var(--store-display,Georgia,serif)] [&>div:first-child_p]:mt-[7px] [&>div:first-child_p]:text-[11px] [&>div:first-child_p]:opacity-60",
+    "[&>div:nth-child(2)]:grid [&>div:nth-child(2)]:gap-[9px] [&>div:nth-child(2)]:text-[11px] [&>a]:justify-self-end [&>a]:text-[10px] [&>a]:opacity-65 max-[800px]:[&>a]:justify-self-start",
+    variant === "simple" && "[&>div:nth-child(2)]:hidden",
+    variant === "newsletter" && "grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]",
+  )}><div><b>{store.name}</b>{footer.showDescription !== false ? <p>{store.tagline}</p> : null}</div><div><span>Shipping &amp; returns</span><span>Care guide</span><span>Instagram</span></div><Link href="/admin">Made with Jelly Shop ↗</Link></footer>;
 }
 export function SharedCartPresentation({ open, onClose, children }: StorefrontCartProps) {
   if (!open) return null;
-  return <div className="fixed inset-0 z-[100] flex justify-end bg-jelly-ink/30 backdrop-blur-sm" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><aside className="fixed right-0 top-0 flex min-h-full w-full max-w-[470px] flex-col bg-jelly-paper p-7 shadow-[-24px_0_70px_rgba(20,33,61,.18)]" role="dialog" aria-modal="true" aria-labelledby="cart-title"><button type="button" className="absolute right-7 top-7 grid size-[42px] place-items-center rounded-full border border-jelly-line bg-white" onClick={onClose} aria-label="Close cart"><X /></button>{children}</aside></div>;
+  return <div className="fixed inset-0 z-[100] flex justify-end bg-[color-mix(in_srgb,var(--store-text)_28%,transparent)] backdrop-blur-sm animate-jelly-fade-in" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><aside className="fixed right-0 top-0 flex min-h-full w-full max-w-[470px] flex-col bg-[var(--store-surface)] p-7 text-[var(--store-text)] shadow-[-24px_0_70px_rgba(20,33,61,.16)] animate-jelly-slide-in-right" role="dialog" aria-modal="true" aria-labelledby="cart-title"><button type="button" className="absolute right-7 top-7 grid size-[42px] place-items-center rounded-full border border-[var(--theme-border)] bg-[var(--store-surface)] transition-colors hover:bg-[color-mix(in_srgb,var(--store-bg)_88%,var(--store-surface))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--store-accent)]" onClick={onClose} aria-label="Close cart"><X size={18} /></button>{children}</aside></div>;
 }
 
 export function ThemedStorefrontShell({ themeId, settings, store, navigation, cartCount, cart, children, onCartOpen }: {
