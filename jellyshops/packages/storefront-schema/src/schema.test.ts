@@ -16,9 +16,9 @@ it("validates Fresh Market with every public ecommerce page", () => {
   }
 });
 
-it("rejects an unsupported theme", () => {
+it("rejects a malformed theme identifier; availability is checked by the manifest registry", () => {
   const document = createDefaultStoreDesign() as { theme: { id: string } };
-  document.theme.id = "neon";
+  document.theme.id = "Neon!";
 
   expect(storeDesignDocumentSchema.safeParse(document).success).toBe(false);
 });

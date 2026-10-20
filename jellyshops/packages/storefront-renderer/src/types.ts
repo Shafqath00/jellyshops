@@ -1,13 +1,15 @@
 import type { GlobalSettings, PageType, StoreDesignDocument, StorefrontDocument } from "@jelly/storefront-schema";
+import type { ReactNode } from "react";
 
 export interface PublicProduct { id: string; name: string; href: string; imageUrl: string; price: string }
 export interface CollectionPresentationContext {
+  interactiveGrid?: ReactNode;
   collection: { id: string; title: string; description: string; imageUrl?: string };
   products: PublicProduct[];
   totalProducts: number;
 }
 export interface ProductPresentationContext {
-  product: { id: string; title: string; description: string; imageUrl: string; media?: Array<{ id: string; url: string; altText?: string }>; sku?: string; vendor?: string; options: Array<{ id: string; name: string; required: boolean; values: Array<{ id: string; label: string; selected: boolean; available: boolean }> }> };
+  product: { id: string; title: string; description: string; imageUrl: string; specifications?: Record<string, string>; shippingCopy?: string; media?: Array<{ id: string; url: string; altText?: string }>; sku?: string; vendor?: string; options: Array<{ id: string; name: string; required: boolean; values: Array<{ id: string; label: string; selected: boolean; available: boolean }> }> };
   selection: Array<{ optionId: string; valueId: string }>;
   quantity: number;
   pricing: { price: string; compareAtPrice?: string };
@@ -16,6 +18,8 @@ export interface ProductPresentationContext {
   selectOption(optionId: string, valueId: string): void;
   setQuantity(quantity: number): void;
   addToCart(): Promise<{ ok: boolean; message?: string }>;
+  buyNow?(): Promise<{ ok: boolean; message?: string }>;
+  wishlistControl?: ReactNode;
   relatedProducts: PublicProduct[];
 }
 export type StorefrontPageContext =
@@ -24,7 +28,7 @@ export type StorefrontPageContext =
   | { pageType: "not-found"; resource: null }
   | { pageType: "search"; resource: null; data: { query: string; state: "empty" | "results" | "none"; resultCount: number; results: PublicProduct[]; searchHref?: string } }
   | { pageType: "product" | "collection" | "page" | "blog" | "article"; resource: { id: string; handle: string; data: Record<string, unknown> } };
-export interface CommerceDataProvider { getProducts(input?: { featured?: boolean; limit?: number }): Promise<PublicProduct[]> }
+export interface CommerceDataProvider { initialProducts?: PublicProduct[]; getProducts(input?: { featured?: boolean; limit?: number; sort?: string; collectionId?: string }): Promise<PublicProduct[]>; subscribeNewsletter?: (email: string, source: string) => Promise<void> }
 export interface AssetResolver { resolve(assetId: string): Promise<string | null> }
 export type RendererMode = "preview" | "editor" | "published";
 export interface RendererSelection { kind: "theme" | "section" | "block"; region?: "header" | "template" | "footer"; sectionId?: string; blockId?: string; fieldKey?: string }

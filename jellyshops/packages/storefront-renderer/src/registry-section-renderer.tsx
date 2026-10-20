@@ -1,11 +1,19 @@
 import type { RuntimeMenuV4, SectionNode } from "@jelly/storefront-schema";
+import { createElement } from "react";
 import {
   defaultSectionRenderRegistry,
+  type SectionRenderComponent,
   type SectionRenderRegistry,
 } from "./render-registry";
 import { createStorefrontRuntimeContext } from "./runtime-context";
 import type { CommerceDataProvider, RendererMode, RendererSelection, StorefrontPageContext } from "./types";
 import { getThemeDefinition, DEFAULT_THEME_ID } from "@jelly/storefront-themes";
+
+function sectionComponent(themeId: string, type: string, registry: SectionRenderRegistry) {
+  const override = (id: string) => { try { return getThemeDefinition(id).sectionOverrides[type]; } catch { return undefined; } };
+  // Theme overrides consume the same runtime props with a looser commerce type.
+  return (override(themeId) ?? override(DEFAULT_THEME_ID) ?? registry.get(type)) as SectionRenderComponent | undefined;
+}
 
 export function RegistrySectionRenderer({
   section,
@@ -34,11 +42,10 @@ export function RegistrySectionRenderer({
 }) {
   if (!section.enabled) return null;
 
-  const override = (id: string) => { try { return getThemeDefinition(id).sectionOverrides[section.type]; } catch { return undefined; } };
-  const RenderComponent = override(themeId ?? DEFAULT_THEME_ID) ?? override(DEFAULT_THEME_ID) ?? registry.get(section.type);
+  const RenderComponent = sectionComponent(themeId ?? DEFAULT_THEME_ID, section.type, registry);
   const context = createStorefrontRuntimeContext({ mode, region, commerce, page, menus, storeSlug });
   const content = RenderComponent
-    ? <RenderComponent section={section} mode={mode} commerce={commerce} context={context} />
+    ? createElement(RenderComponent, { section, mode, commerce, context })
     : mode !== "published"
       ? <aside role="status">Unsupported section: {section.type}</aside>
       : null;

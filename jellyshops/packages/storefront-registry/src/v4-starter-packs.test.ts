@@ -7,12 +7,17 @@ describe("V4 starter packs", () => {
   it("provides versioned Fresh Market and Artisan Boutique definitions with every default page", () => {
     const packs = listV4StarterPacks();
 
-    expect(packs.map(({ id }) => id)).toEqual(["fresh-market", "artisan-boutique"]);
-    for (const pack of packs) {
+    expect(packs.map(({ id }) => id)).toEqual(["jelly-signature", "fresh-market", "artisan-boutique"]);
+    for (const pack of packs.filter(({ id }) => id !== "jelly-signature")) {
       expect(pack.version).toMatch(/^\d+\.\d+\.\d+$/);
       expect(pack.templates.map(({ type }) => type).sort()).toEqual([...requiredPageTypes].sort());
       expect(pack.templates.every(({ handle }) => handle === "default")).toBe(true);
     }
+    const signature = getV4StarterPack("jelly-signature");
+    expect(signature.templates).toHaveLength(19);
+    expect(signature.templates.map(({ type }) => type)).toEqual(expect.arrayContaining([
+      ...requiredPageTypes, "checkout", "wishlist", "customer-login", "customer-register", "customer-recovery", "customer-account", "customer-orders", "customer-order", "customer-addresses", "order-success",
+    ]));
   });
 
   it("uses unique stable pack-local keys and does not embed fake merchant resource IDs", () => {

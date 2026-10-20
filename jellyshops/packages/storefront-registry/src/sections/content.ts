@@ -3,7 +3,7 @@ import { isRichTextDocument, safeRichTextHref, type DynamicValueType, type RichT
 import type { SectionDefinition } from "../types.js";
 
 const home = ["home"] as const;
-const reusableContentPages = ["home", "product", "collection", "page", "blog", "article"] as const;
+const reusableContentPages = ["home", "product", "collection", "page", "blog", "article", "checkout", "wishlist", "customer-login", "customer-register", "customer-recovery", "customer-account", "customer-orders", "customer-order", "customer-addresses", "order-success"] as const;
 const empty = z.object({}).passthrough();
 const richTextSettings = z.object({ document: z.custom<RichTextDocument>(isRichTextDocument).optional() }).passthrough();
 const imageReference = z.object({

@@ -34,7 +34,7 @@ describe("registry-driven section rendering", () => {
         <RegistrySectionRenderer section={header} mode={mode} commerce={commerce} menus={menus} storeSlug="shop-a" />
         <RegistrySectionRenderer section={footer} mode={mode} commerce={commerce} menus={menus} storeSlug="shop-a" />
       </>);
-      expect(view.getAllByRole("link", { name: "Home" })).toHaveLength(2);
+      expect(view.getAllByRole("link", { name: "Home" })).toHaveLength(3);
       expect(view.getAllByRole("link", { name: "Home" })[0]).toHaveAttribute("href", "/shop-a");
       expect(view.getAllByRole("link", { name: "Search" })[0]).toHaveAttribute("href", "/shop-a/search");
       expect(view.queryByRole("link", { name: "Bad link" })).toBeNull();
@@ -45,13 +45,18 @@ describe("registry-driven section rendering", () => {
   });
 
   it("keeps starter CTA and Not Found links inside the selected storefront", () => {
-    const hero: SectionNode = { id: "hero", type: "hero", enabled: true, settings: {}, blocks: [{ id: "buy", type: "button", enabled: true, settings: { label: "Shop", href: "/" } }] };
+    const hero: SectionNode = { id: "hero", type: "hero", enabled: true, settings: { image: { url: "/market.jpg", alt: "Fresh produce at the market" } }, blocks: [
+      { id: "headline", type: "heading", enabled: true, settings: { text: "Good food, gathered well." } },
+      { id: "buy", type: "button", enabled: true, settings: { label: "Shop", href: "/" } },
+    ] };
     const notFound: SectionNode = { id: "not-found", type: "not-found-message", enabled: true, settings: {}, blocks: [{ id: "back", type: "button", enabled: true, settings: { label: "Back", href: "/" } }] };
     render(<>
       <RegistrySectionRenderer section={hero} mode="published" commerce={commerce} storeSlug="store-a" />
       <RegistrySectionRenderer section={notFound} mode="published" commerce={commerce} storeSlug="store-a" page={{ pageType: "not-found", resource: null }} />
     </>);
     expect(screen.getByRole("link", { name: "Shop" })).toHaveAttribute("href", "/store-a");
+    expect(screen.getByRole("heading", { name: "Good food, gathered well." })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Fresh produce at the market" })).toHaveAttribute("src", "/market.jpg");
     expect(screen.getByRole("link", { name: "Back" })).toHaveAttribute("href", "/store-a");
   });
 
@@ -174,6 +179,9 @@ describe("registry-driven section rendering", () => {
 
     expect(screen.getByRole("img", { name: "Celebration cake" })).toBeInTheDocument();
     expect(screen.getByText("$15.00")).toBeInTheDocument();
+    expect(screen.getByText("2 available")).toBeInTheDocument();
+    expect(screen.getByRole("spinbutton", { name: "Quantity" })).toHaveValue(1);
+    expect(screen.getByRole("button", { name: "Small" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText("Vanilla sponge")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Add to cart" }));
     expect(addToCart).toHaveBeenCalledOnce();
@@ -306,6 +314,7 @@ describe("registry-driven section rendering", () => {
 
     expect(screen.getByText("Lemon cake · Default")).toBeInTheDocument();
     expect(screen.getByText("Subtotal: $20")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Checkout" })).toHaveAttribute("href", "/shop/checkout");
     screen.getAllByRole("button")[0]?.click();
     screen.getAllByRole("button")[1]?.click();
     expect(onDecrease).toHaveBeenCalledOnce();

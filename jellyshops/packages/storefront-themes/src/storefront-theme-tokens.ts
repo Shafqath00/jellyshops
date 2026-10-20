@@ -15,7 +15,7 @@ const font = (value: unknown, fallback: string) => typeof value === "string" && 
 
 /** Resolves one canonical token layer for every storefront route. */
 export function resolveStorefrontThemeTokens(themeId: ThemeId | string, settings: Record<string, unknown> = {}, legacy: LegacyStoreThemeValues = {}): Record<string, string> {
-  const modern = settings as Record<string, any>;
+  const modern = settings as Record<string, unknown> & { colors?: Record<string, unknown>; typography?: Record<string, unknown>; layout?: Record<string, unknown>; buttons?: Record<string, unknown>; header?: Record<string, unknown>; footer?: Record<string, unknown>; productCards?: Record<string, unknown> };
   const merged = {
     ...modern,
     colors: {
@@ -31,6 +31,14 @@ export function resolveStorefrontThemeTokens(themeId: ThemeId | string, settings
     },
   } as unknown as GlobalSettings;
   const base = resolveDesignTokens(themeId, merged);
+  const bounded = (value: unknown, fallback: number, min: number, max: number) => typeof value === "number" && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
+  if (typeof modern.layout?.contentWidth === "number") base["--jelly-container-width"] = `${bounded(modern.layout.contentWidth, 1280, 960, 1600)}px`;
+  if (typeof modern.layout?.sectionGap === "number") base["--jelly-spacing-section"] = `${bounded(modern.layout.sectionGap, 80, 24, 160)}px`;
+  base["--jelly-color-secondary"] = color(modern.colors?.secondary, base["--jelly-color-secondary"]);
+  base["--jelly-heading-weight"] = String(bounded(modern.typography?.headingWeight, 400, 300, 800));
+  base["--jelly-body-weight"] = String(bounded(modern.typography?.bodyWeight, 400, 300, 700));
+  base["--jelly-body-size"] = `${bounded(modern.typography?.bodySize, 16, 14, 22)}px`;
+  base["--jelly-heading-size"] = `${bounded(modern.typography?.headingSize, 56, 28, 88)}px`;
   const background = color(base["--jelly-color-background"], "#ffffff");
   const surface = color(base["--jelly-color-surface"], background);
   const text = color(base["--jelly-color-text"], "#1a1a1a");

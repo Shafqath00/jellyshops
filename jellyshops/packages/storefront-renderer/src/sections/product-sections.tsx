@@ -1,4 +1,5 @@
 import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui";
+import { useState } from "react";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import type { ProductPresentationContext } from "../types";
 
@@ -23,7 +24,7 @@ export function ProductInformationSection({ context, section }: { context: Store
     return typeof title === "string" ? <section className="jelly-section jelly-product-information"><StorefrontContainer><h1>{title}</h1></StorefrontContainer></section> : null;
   }
   const show = (key: string) => section.settings[key] !== false;
-  return <section className="jelly-section jelly-product-information"><StorefrontContainer><h1>{product.product.title}</h1>{show("showVendor") && product.product.vendor && <p>{product.product.vendor}</p>}<p><strong>{product.pricing.price}</strong>{show("showCompareAtPrice") && product.pricing.compareAtPrice && <s>{product.pricing.compareAtPrice}</s>}</p>{show("showSku") && product.product.sku && <p>SKU: {product.product.sku}</p>}{show("showAvailability") && <p>{product.availability.message}</p>}</StorefrontContainer></section>;
+  return <section className="jelly-section jelly-product-information"><StorefrontContainer><h1>{product.product.title}</h1>{show("showVendor") && product.product.vendor && <p>{product.product.vendor}</p>}<p><strong>{product.pricing.price}</strong>{show("showCompareAtPrice") && product.pricing.compareAtPrice && <s>{product.pricing.compareAtPrice}</s>}</p>{show("showSku") && product.product.sku && <p>SKU: {product.product.sku}</p>}{show("showAvailability") && <p>{product.availability.message}</p>}{product.product.shippingCopy && <p>{product.product.shippingCopy}</p>}{Object.keys(product.product.specifications ?? {}).length > 0 && <details><summary>Product details</summary><dl>{Object.entries(product.product.specifications ?? {}).map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></details>}</StorefrontContainer></section>;
 }
 
 export function ProductOptionsSection({ context }: { context: StorefrontRuntimeContext }) {
@@ -33,9 +34,17 @@ export function ProductOptionsSection({ context }: { context: StorefrontRuntimeC
 }
 
 export function ProductPurchaseSection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown> } }) {
+  const [busy, setBusy] = useState(false); const [message, setMessage] = useState<string>(); const [error, setError] = useState<string>();
   const product = productContext(context);
   if (!product) return null;
-  return <section className="jelly-section jelly-product-purchase"><StorefrontContainer>{section.settings.showQuantity !== false && <label>Quantity<input aria-label="Quantity" type="number" min={1} {...(product.availability.maxQuantity === undefined ? {} : { max: Math.max(1, product.availability.maxQuantity) })} value={product.quantity} onChange={(event) => product.setQuantity(Number(event.target.value))} /></label>}<button type="button" disabled={!product.canAddToCart} onClick={() => { void product.addToCart(); }}>{typeof section.settings.label === "string" ? section.settings.label : "Add to cart"}</button></StorefrontContainer></section>;
+  async function purchase(now = false) {
+    if (!product || busy || context.mode !== "published") return;
+    setBusy(true); setMessage(undefined); setError(undefined);
+    try { const result = await (now ? product.buyNow?.() : product.addToCart()); if (!result?.ok) throw new Error(result?.message ?? "Unable to add this product."); if (!now) setMessage("Added to your bag."); }
+    catch (caught) { setError(caught instanceof Error ? caught.message : "Unable to add this product."); }
+    finally { setBusy(false); }
+  }
+  return <section className="jelly-section jelly-product-purchase"><StorefrontContainer>{section.settings.showQuantity !== false && <label>Quantity<input aria-label="Quantity" type="number" min={1} {...(product.availability.maxQuantity === undefined ? {} : { max: Math.max(1, product.availability.maxQuantity) })} value={product.quantity} onChange={(event) => product.setQuantity(Number(event.target.value))} /></label>}<button type="button" disabled={!product.canAddToCart || busy || context.mode !== "published"} onClick={() => { void purchase(); }}>{busy ? "Please wait…" : typeof section.settings.label === "string" ? section.settings.label : "Add to cart"}</button>{product.buyNow && <button type="button" disabled={!product.canAddToCart || busy || context.mode !== "published"} onClick={() => void purchase(true)}>Buy now</button>}{product.wishlistControl}{message && <p role="status">{message}</p>}{error && <p role="alert">{error}</p>}</StorefrontContainer></section>;
 }
 
 export function ProductDescriptionSection({ context }: { context: StorefrontRuntimeContext }) {

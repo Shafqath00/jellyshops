@@ -36,12 +36,12 @@ function SectionIntro({ section, fallback }: { section: SectionNode; fallback: s
   </div>;
 }
 
-export function CategoryGridSection({ section }: { section: SectionNode }) {
+export function CategoryGridSection({ section, context }: { section: SectionNode; context?: StorefrontRuntimeContext }) {
   const labels = section.blocks.filter((block) => block.enabled).map((block) => stringSetting(block.settings, "text")).filter(Boolean);
   const categories = labels.length ? labels : ["Fresh produce", "Pantry essentials", "Good-for-you snacks", "Seasonal favourites"];
   return <section className="jelly-section jelly-category-grid"><StorefrontContainer>
     <SectionIntro section={section} fallback="Shop by category" />
-    <div className="jelly-category-grid-items">{categories.slice(0, 4).map((label, index) => <a href="/shop" className="jelly-category-card" key={label}>
+    <div className="jelly-category-grid-items">{categories.slice(0, 4).map((label, index) => <a href={context?.storeSlug ? `/${context.storeSlug}/shop` : "#shop"} className="jelly-category-card" key={label}>
       <span>{String(index + 1).padStart(2, "0")}</span><strong>{label}</strong><small>Explore collection</small>
     </a>)}</div>
   </StorefrontContainer></section>;
@@ -74,10 +74,9 @@ export function ImageMosaicSection({ section }: { section: SectionNode }) {
   </div></StorefrontContainer></section>;
 }
 
-export function JournalTeaserSection({ section }: { section: SectionNode }) {
-  const content = copy(section, "From the journal");
+export function JournalTeaserSection({ section, context }: { section: SectionNode; context?: StorefrontRuntimeContext }) {
   return <section className="jelly-section jelly-journal"><StorefrontContainer><SectionIntro section={section} fallback="From the journal" />
-    <div className="jelly-journal-grid">{["The ritual of everyday objects", "A guide to thoughtful gifting", "Notes from our makers"].map((title, index) => <article key={title}><span>Journal · 0{index + 1}</span><h3>{title}</h3><a href="/shop">Read story →</a></article>)}</div>
+    <div className="jelly-journal-grid">{["The ritual of everyday objects", "A guide to thoughtful gifting", "Notes from our makers"].map((title, index) => <article key={title}><span>Journal · 0{index + 1}</span><h3>{title}</h3><a href={context?.storeSlug ? `/${context.storeSlug}/shop` : "#shop"}>Read story →</a></article>)}</div>
   </StorefrontContainer></section>;
 }
 

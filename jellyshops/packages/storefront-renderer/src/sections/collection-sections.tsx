@@ -29,6 +29,7 @@ export function CollectionHeaderSection({ context, section }: { context: Storefr
 export function CollectionProductGridSection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown> } }) {
   const presentation = collectionContext(context);
   if (!presentation) return null;
+  if (presentation.interactiveGrid) return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer>{presentation.interactiveGrid}</StorefrontContainer></section>;
   const columns = typeof section.settings.columns === "number" && Number.isInteger(section.settings.columns) ? Math.max(2, Math.min(4, section.settings.columns)) : 3;
   const limit = typeof section.settings.limit === "number" && Number.isInteger(section.settings.limit) ? Math.max(1, Math.min(24, section.settings.limit)) : 12;
   const emptyMessage = typeof section.settings.emptyMessage === "string" ? section.settings.emptyMessage : "No products are available in this collection yet.";

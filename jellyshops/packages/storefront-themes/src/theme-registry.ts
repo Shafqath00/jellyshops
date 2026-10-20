@@ -13,11 +13,19 @@ import exampleBoutiqueManifest from "./themes/example-boutique/theme.json" with 
 import { BoutiqueHero, type ThemeSectionProps } from "./themes/example-boutique/hero.js";
 import { boutiqueShellComponents } from "./themes/example-boutique/shell.js";
 import type { ComponentType } from "react";
+import { signatureManifest, signatureTokens } from "./jelly-signature/definition.js";
 
-function definition(id: ThemeId, label: string, tokens: ThemeTokens, manifest: unknown = { id, name: label, version: "1.0.0", description: label, assetPrefix: `/themes/${id}/`, layout: "standard", enabled: true, settingsDefaults: {}, assets: { stylesheets: [], scripts: [], fonts: [], icons: [], assets: [] } }, sectionOverrides: Record<string, ComponentType<ThemeSectionProps>> = {}, components?: ThemeShellComponents): ThemeDefinition {
-  return { id, label, tokens, manifest, sectionOverrides, components, sectionVariants: Object.fromEntries(listSectionDefinitions().map((section) => [section.type, `${id}-${section.type}`])) };
+function definition(id: ThemeId, label: string, tokens: ThemeTokens, manifest?: unknown, sectionOverrides: Record<string, ComponentType<ThemeSectionProps>> = {}, components?: ThemeShellComponents): ThemeDefinition {
+  const presetManifest = {
+    id, name: label, version: "1.0.0", description: label, assetPrefix: `/themes/${id}/`, layout: "standard", enabled: true,
+    settingsDefaults: { ...defaultManifest.settingsDefaults, colors: tokens.colors, typography: { ...defaultManifest.settingsDefaults.typography, headingFont: tokens.typography.display, bodyFont: tokens.typography.body } },
+    settingsSchema: defaultManifest.settingsSchema,
+    assets: { stylesheets: [], scripts: [], fonts: [], icons: [], assets: [] },
+  };
+  return { id, label, tokens, manifest: manifest ?? presetManifest, sectionOverrides, components, sectionVariants: Object.fromEntries(listSectionDefinitions().map((section) => [section.type, `${id}-${section.type}`])) };
 }
 const themes = [
+  definition("jelly-signature", "Jelly Signature", signatureTokens, signatureManifest),
   definition("minimal", "Default", minimalTokens, defaultManifest),
   definition("classic", "Classic", classicTokens),
   definition("bold", "Bold", boldTokens),

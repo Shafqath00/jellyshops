@@ -5,7 +5,7 @@ import type { V4StarterPack } from "./v4-starter-packs.js";
 const pageTypes: PageType[] = ["home", "product", "collection", "cart", "search", "page", "blog", "article", "not-found"];
 const globalKeys = ["announcement", "header", "footer"] as const;
 const resourceTypes = ["product", "collection", "page", "blog", "article"] as const;
-const supportedThemes = new Set(["fresh-market", "artisan-boutique"]);
+const supportedThemes = new Set(["fresh-market", "artisan-boutique", "jelly-signature"]);
 const themeVersionPattern = /^\d+\.\d+\.\d+(?:[-+][\w.-]+)?$/;
 
 export interface V4StarterPackIssue {
@@ -115,7 +115,7 @@ export function validateV4StarterPack(value: unknown): V4StarterPackIssue[] {
   for (const [index, template] of templates.entries()) {
     const path = `templates[${index}]`;
     addKey(template?.key, `${path}.key`);
-    if (!pageTypes.includes(template?.type) || template.handle !== "default") {
+    if (![...pageTypes, "checkout", "wishlist", "customer-login", "customer-register", "customer-recovery", "customer-account", "customer-orders", "customer-order", "customer-addresses", "order-success"].includes(template?.type) || template.handle !== "default") {
       issues.push({ code: "INVALID_TEMPLATE", path, message: "Starter templates require a supported page type and the default handle" });
       continue;
     }

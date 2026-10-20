@@ -1,6 +1,6 @@
 import type { PageType, SectionNode } from "@jelly/storefront-schema";
 
-export type V4StarterPackId = "fresh-market" | "artisan-boutique";
+export type V4StarterPackId = "fresh-market" | "artisan-boutique" | "jelly-signature";
 export type V4StarterTemplateType = Exclude<PageType, never>;
 
 export interface StarterMenuItem {
@@ -67,25 +67,23 @@ function global(globalSectionId: string) {
 
 function makePack(id: V4StarterPackId): V4StarterPack {
   const fresh = id === "fresh-market";
-  const label = fresh ? "Fresh Market" : "Artisan Boutique";
-  const palette = fresh
-    ? { primary: "#166534", background: "#f6f4df", text: "#15362a", surface: "#ffffff", accent: "#f97316" }
-    : { primary: "#201a1d", background: "#f7f3ed", text: "#201a1d", surface: "#fffdf9", accent: "#7c2d4f" };
-  const announcementText = fresh ? "Good things are in season." : "Thoughtful finds, made to last.";
-  const heroHeading = fresh ? "Good food, gathered well." : "Made to become part of your story.";
-  const heroSummary = fresh
+  const signature = id === "jelly-signature";
+  const label = signature ? "Jelly Signature" : fresh ? "Fresh Market" : "Artisan Boutique";
+  const announcementText = signature ? "A little something lovely, delivered with care." : fresh ? "Good things are in season." : "Thoughtful finds, made to last.";
+  const heroHeading = signature ? "Find your everyday favourites." : fresh ? "Good food, gathered well." : "Made to become part of your story.";
+  const heroSummary = signature ? "Explore the latest from our store." : fresh
     ? "Bright flavors and everyday favorites, chosen with care."
     : "Considered pieces, refined materials, and a little more meaning in every day.";
-  const heroImage = fresh
+  const heroImage = signature ? "/themes/jelly-signature/hero.svg" : fresh
     ? "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1800&q=85"
     : "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1800&q=85";
   const hero = section(`${id}-home-hero`, {
     type: "hero",
     settings: {
-      eyebrow: fresh ? "Seasonal picks" : "The new collection",
+      eyebrow: signature ? "A collection picked for you" : fresh ? "Seasonal picks" : "The new collection",
       summary: heroSummary,
       contentAlignment: fresh ? "left" : "center",
-      image: { url: heroImage, alt: fresh ? "Fresh produce at a market" : "Artisan boutique collection" },
+      image: { url: heroImage, alt: signature ? "An illustrated arrangement of everyday products" : fresh ? "Fresh produce at a market" : "Artisan boutique collection" },
       overlay: fresh ? 8 : 12,
     },
     blocks: [
@@ -107,7 +105,7 @@ function makePack(id: V4StarterPackId): V4StarterPack {
     },
     blocks: [
       block(`${id}-home-story-heading`, "heading", { text: fresh ? "From nearby growers to your table." : "The beauty is in the making." }),
-      block(`${id}-home-story-copy`, "text", { text: fresh ? "Simple ingredients, carefully chosen." : "A considered collection for slow, lasting rituals." }),
+      block(`${id}-home-story-copy`, "text", { text: signature ? "Thoughtful pieces for everyday moments." : fresh ? "Simple ingredients, carefully chosen." : "A considered collection for slow, lasting rituals." }),
       block(`${id}-home-story-button`, "button", { label: fresh ? "Our approach" : "Our story", href: "/" }),
     ],
   });
@@ -151,6 +149,19 @@ function makePack(id: V4StarterPackId): V4StarterPack {
       ],
     })), global(`${id}-global-footer`)] } },
   ];
+  if (signature) {
+    imageWithText.enabled = false;
+    const home = templates.find((item) => item.type === "home")!;
+    home.layout.sections = inline(hero,
+      section(id + "-categories", { type: "category-grid", settings: {}, blocks: [] }),
+      section(id + "-featured", { type: "product-grid", settings: { limit: 8, heading: "The collection" }, blocks: [] }),
+      imageWithText,
+      section(id + "-arrivals", { type: "product-grid", settings: { limit: 4, heading: "Just arrived", sort: "newest" }, blocks: [] }),
+      section(id + "-bestsellers", { type: "product-grid", settings: { limit: 4, heading: "Customer favourites", sort: "best-selling", hideWhenEmpty: true }, blocks: [] }),
+      section(id + "-newsletter", { type: "newsletter", settings: {}, blocks: [block(id + "-newsletter-title", "heading", { text: "A little news, now and then." }), block(id + "-newsletter-copy", "text", { text: "Sign up for updates from our store." })] })
+    );
+    for (const type of ["checkout", "wishlist", "customer-login", "customer-register", "customer-recovery", "customer-account", "customer-orders", "customer-order", "customer-addresses", "order-success"] as const) templates.push({ key: id + "-template-" + type, type, handle: "default", name: type.replaceAll("-", " "), layout: { sections: [] } });
+  }
   for (const template of templates) {
     const inlineSections = template.layout.sections.filter((placement) => placement.kind === "inline");
     template.layout.sections = [
@@ -165,10 +176,10 @@ function makePack(id: V4StarterPackId): V4StarterPack {
     id,
     version: "1.0.0",
     name: label,
-    description: fresh
+    description: signature ? "A complete cream, navy, and pink storefront for independent brands." : fresh
       ? "A bright, produce-first storefront for food, grocery, and everyday essentials."
       : "A quiet, editorial storefront for considered goods and handcrafted pieces.",
-    previewAsset: fresh
+    previewAsset: signature ? "/themes/jelly-signature/preview.svg" : fresh
       ? "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=85"
       : "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=85",
     theme: { themeId: id, settings: {} },
@@ -192,6 +203,7 @@ function makePack(id: V4StarterPackId): V4StarterPack {
 }
 
 const starterPacks: Record<V4StarterPackId, V4StarterPack> = {
+  "jelly-signature": makePack("jelly-signature"),
   "fresh-market": makePack("fresh-market"),
   "artisan-boutique": makePack("artisan-boutique"),
 };

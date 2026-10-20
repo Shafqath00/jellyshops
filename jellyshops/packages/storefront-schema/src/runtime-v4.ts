@@ -1,19 +1,10 @@
 import { z } from "zod";
+import { storefrontPageTypes } from "./types.js";
 
 export const RUNTIME_STOREFRONT_SCHEMA_VERSION = 4 as const;
 
 const jsonObjectSchema = z.record(z.string(), z.unknown());
-const runtimeTemplateTypeSchema = z.enum([
-  "home",
-  "product",
-  "collection",
-  "page",
-  "blog",
-  "article",
-  "search",
-  "cart",
-  "not-found",
-]);
+const runtimeTemplateTypeSchema = z.enum(storefrontPageTypes);
 const assignableResourceTypeSchema = z.enum(["product", "collection", "page", "blog", "article"]);
 
 const runtimeTemplateSchema = z.object({

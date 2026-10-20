@@ -2,7 +2,7 @@ import { z } from "zod";
 import { safeRichTextHref } from "@jelly/storefront-schema";
 import type { SectionDefinition } from "../types.js";
 
-const allPages = ["home", "product", "collection", "cart", "search", "page", "blog", "article", "not-found"] as const;
+const allPages = ["home", "product", "collection", "cart", "search", "page", "blog", "article", "not-found", "checkout", "wishlist", "customer-login", "customer-register", "customer-recovery", "customer-account", "customer-orders", "customer-order", "customer-addresses", "order-success"] as const;
 const empty = z.object({}).passthrough();
 const safeImage = z.object({ id: z.string().optional(), url: z.string().refine((value) => safeRichTextHref(value) !== null && !value.startsWith("#")), alt: z.string().optional(), focalPoint: z.object({ x: z.number().min(0).max(100), y: z.number().min(0).max(100) }).optional(), fit: z.enum(["cover", "contain"]).optional() }).passthrough();
 const headerSettings = z.object({ storeName: z.string().max(120).optional(), logo: safeImage.optional() }).passthrough();

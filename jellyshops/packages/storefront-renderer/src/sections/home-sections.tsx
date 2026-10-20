@@ -1,5 +1,7 @@
 import { safeRichTextHref, type MediaReference, type SectionNode } from "@jelly/storefront-schema";
 import { StorefrontContainer } from "@jelly/storefront-ui";
+import { useState } from "react";
+import type { RendererMode } from "../types";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
 
@@ -56,8 +58,14 @@ export function ImageWithTextSection({ section, context }: { section: SectionNod
 export function MulticolumnSection({ section }: { section: SectionNode }) {
   return <section className="jelly-section jelly-multicolumn"><StorefrontContainer><h2>{text(section, "Why shop with us")}</h2></StorefrontContainer></section>;
 }
-export function NewsletterSection({ section }: { section: SectionNode }) {
-  return <section className="jelly-section jelly-newsletter"><StorefrontContainer><h2>{text(section, "Join our newsletter")}</h2><form onSubmit={(event) => event.preventDefault()}><label>Email<input type="email" /></label><button type="submit">Subscribe</button></form></StorefrontContainer></section>;
+export function NewsletterSection({ section, subscribe, mode = "preview" }: { section: SectionNode; subscribe?: (email: string, source: string) => Promise<void>; mode?: RendererMode }) {
+  const [status, setStatus] = useState<"idle" | "pending" | "success">("idle"); const [error, setError] = useState<string>();
+  return <section className="jelly-section jelly-newsletter"><StorefrontContainer><h2>{text(section, "Join our newsletter")}</h2><form onSubmit={(event) => {
+    event.preventDefault(); if (mode !== "published" || !subscribe || status === "pending") return;
+    const data = new FormData(event.currentTarget); if (data.get("consent") !== "yes") { setError("Consent is required to subscribe."); return; }
+    setStatus("pending"); setError(undefined);
+    void subscribe(String(data.get("email")), section.id).then(() => setStatus("success")).catch((caught: unknown) => { setStatus("idle"); setError(caught instanceof Error ? caught.message : "Unable to subscribe. Please retry."); });
+  }}><label>Email<input type="email" name="email" autoComplete="email" required maxLength={254} /></label><label><input type="checkbox" name="consent" value="yes" required />I agree to receive updates from this store.</label><button type="submit" disabled={mode !== "published" || !subscribe || status === "pending"}>{status === "pending" ? "Subscribing…" : "Subscribe"}</button>{mode !== "published" && <p>Subscriptions are disabled in preview.</p>}{status === "success" && <p role="status">You’re subscribed.</p>}{error && <p role="alert">{error}</p>}</form></StorefrontContainer></section>;
 }
 export function SpacerDividerSection() {
   return <div className="jelly-spacer-divider" aria-hidden="true"><hr /></div>;

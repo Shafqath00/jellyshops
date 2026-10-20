@@ -1,7 +1,8 @@
 /** Theme IDs are validated by the canonical manifest registry at runtime. */
 export type ThemeId = string;
 
-export type PageType = "home" | "product" | "collection" | "cart" | "search" | "page" | "blog" | "article" | "not-found";
+export const storefrontPageTypes = ["home", "product", "collection", "cart", "search", "page", "blog", "article", "not-found", "checkout", "wishlist", "customer-login", "customer-register", "customer-recovery", "customer-account", "customer-orders", "customer-order", "customer-addresses", "order-success"] as const;
+export type PageType = typeof storefrontPageTypes[number];
 
 export interface GlobalSettings {
   colors: { primary: string; background: string; text: string; surface: string; accent: string };

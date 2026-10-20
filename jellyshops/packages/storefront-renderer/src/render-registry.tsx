@@ -85,7 +85,7 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("image-with-text", ({ section, context }) => <ImageWithTextSection section={section} context={context} />);
   registry.register("image-text", ({ section, context }) => <ImageWithTextSection section={section} context={context} />);
   registry.register("multicolumn", ({ section }) => <MulticolumnSection section={section} />);
-  registry.register("newsletter", ({ section }) => <NewsletterSection section={section} />);
+  registry.register("newsletter", ({ section, commerce, mode }) => <NewsletterSection section={section} subscribe={commerce.subscribeNewsletter} mode={mode} />);
   registry.register("category-grid", ({ section }) => <CategoryGridSection section={section} />);
   registry.register("testimonials", ({ section }) => <TestimonialsSection section={section} />);
   registry.register("trust-strip", ({ section }) => <TrustStripSection section={section} />);

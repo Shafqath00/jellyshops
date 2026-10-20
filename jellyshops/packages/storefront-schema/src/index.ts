@@ -58,5 +58,6 @@ export type {
   RuntimeTemplateAssignmentV4,
   RuntimeTemplateV4,
 } from "./runtime-v4.js";
+export { storefrontPageTypes } from "./types.js";
 export type { BlockNode, GlobalSettings, PageDocument, PageType, SectionNode, StoreDesignDocument, ThemeId } from "./types.js";
 export type { RichTextBlock, RichTextDocument, RichTextInline, RichTextMark } from "./rich-text.js";

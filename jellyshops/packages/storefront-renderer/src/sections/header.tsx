@@ -35,5 +35,12 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
       {logoUrl && !logoUrl.startsWith("#") ? <img src={logoUrl} alt={image?.alt ?? ""} /> : <span>{name}</span>}
     </a>
     <MenuLinks section={section} context={context} label="Primary navigation" />
+    {context.storeSlug && <nav className="jelly-header-tools" aria-label="Shopping tools">
+      {section.settings.showSearch !== false && <a href={`/${context.storeSlug}/search`}>Search</a>}
+      {section.settings.showAccount !== false && <a href={`/${context.storeSlug}/account`}>Account</a>}
+      {section.settings.showWishlist !== false && <a href={`/${context.storeSlug}/wishlist`}>Wishlist</a>}
+      {section.settings.showCart !== false && <a href={`/${context.storeSlug}/cart`}>Bag</a>}
+    </nav>}
+    <details className="jelly-mobile-navigation"><summary>Menu</summary><MenuLinks section={section} context={context} label="Mobile navigation" />{context.storeSlug && <nav aria-label="Account and saved items"><ul><li><a href={`/${context.storeSlug}/account`}>Account</a></li><li><a href={`/${context.storeSlug}/wishlist`}>Wishlist</a></li><li><a href={`/${context.storeSlug}/cart`}>Shopping bag</a></li></ul></nav>}</details>
   </header>;
 }

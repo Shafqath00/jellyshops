@@ -2,10 +2,20 @@ import { expect, it } from "vitest";
 import { createDefaultStoreDesign } from "@jelly/storefront-schema";
 import { listSectionDefinitions } from "@jelly/storefront-registry";
 import { applyThemePreset, getThemeDefinition, listThemes, resolveDesignTokens } from "./index";
+import { validateThemeManifest, resolveTheme } from "./theme-resolver";
+
+it.each(["fresh-market", "artisan-boutique", "classic"])("exposes working color and font controls for %s", (id) => {
+  const manifest = validateThemeManifest(getThemeDefinition(id).manifest);
+  expect(manifest.settingsSchema).toEqual(expect.arrayContaining([
+    expect.objectContaining({ id: "colors.accent", type: "color" }),
+    expect.objectContaining({ id: "typography.headingFont", type: "font" }),
+  ]));
+  expect(resolveTheme(id).settings).toMatchObject({ colors: getThemeDefinition(id).tokens.colors });
+});
 
 it("registers every Store Editor theme", () => {
   expect(listThemes().map((theme) => theme.id)).toEqual([
-    "minimal", "classic", "bold", "elegant", "playful", "fresh-market", "artisan-boutique", "example-boutique",
+    "jelly-signature", "minimal", "classic", "bold", "elegant", "playful", "fresh-market", "artisan-boutique", "example-boutique",
   ]);
 });
 
