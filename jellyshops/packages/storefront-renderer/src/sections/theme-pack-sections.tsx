@@ -38,7 +38,7 @@ function SectionIntro({ section, fallback }: { section: SectionNode; fallback: s
 
 export function CategoryGridSection({ section, context }: { section: SectionNode; context?: StorefrontRuntimeContext }) {
   const labels = section.blocks.filter((block) => block.enabled).map((block) => stringSetting(block.settings, "text")).filter(Boolean);
-  const categories = labels.length ? labels : ["Fresh produce", "Pantry essentials", "Good-for-you snacks", "Seasonal favourites"];
+  const categories = labels.length ? labels : ["New arrivals", "Best sellers", "For the home", "Gifts"];
   return <section className="jelly-section jelly-category-grid"><StorefrontContainer>
     <SectionIntro section={section} fallback="Shop by category" />
     <div className="jelly-category-grid-items">{categories.slice(0, 4).map((label, index) => <a href={context?.storeSlug ? `/${context.storeSlug}/shop` : "#shop"} className="jelly-category-card" key={label}>

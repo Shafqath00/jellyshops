@@ -60,10 +60,11 @@
 [data-jelly-theme="jelly-signature"] .jelly-header-tools { justify-content: flex-end; gap: 16px; }
 .jelly-mobile-navigation { display: none; }
 [data-jelly-theme="jelly-signature"] .jelly-hero { padding-block: 48px 64px; }
-[data-jelly-theme="jelly-signature"] .jelly-hero > .jelly-container { border-radius: 24px; overflow: hidden; background: var(--theme-accent); display: grid; grid-template-columns: 1.1fr 1fr; min-height: 480px; }
+[data-jelly-theme="jelly-signature"] .jelly-hero > .jelly-container { border-radius: var(--jelly-radius-card, 4px); overflow: hidden; background: var(--theme-accent); display: grid; grid-template-columns: 1.1fr 1fr; min-height: 480px; }
 [data-jelly-theme="jelly-signature"] .jelly-hero-content { padding: clamp(32px,5vw,72px); display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 24px; }
 [data-jelly-theme="jelly-signature"] .jelly-hero h1 { font-family: var(--theme-font-heading); font-size: clamp(36px,5vw,var(--jelly-heading-size,64px)); font-weight: var(--jelly-heading-weight,400); line-height: 1.08; letter-spacing: -.04em; }
-[data-jelly-theme="jelly-signature"] .jelly-hero-media { min-height: 320px; }
+[data-jelly-theme="jelly-signature"] .jelly-product-grid h2 { margin: 0 0 32px; font-family: var(--theme-font-heading); font-size: clamp(1.75rem, 3vw, 2.5rem); font-weight: var(--jelly-heading-weight, 400); letter-spacing: -.02em; line-height: 1.15; }
+[data-jelly-theme="jelly-signature"] .jelly-hero-media { min-height: 320px; align-self: stretch; border-radius: 0; }
 [data-jelly-theme="jelly-signature"] .jelly-hero-media img { width: 100%; height: 100%; object-fit: cover; }
 [data-jelly-theme="jelly-signature"] .jelly-button, [data-jelly-theme="jelly-signature"] .jelly-product-purchase button { background: var(--jelly-color-primary); color: white; padding: 16px 24px; min-height: 48px; border-radius: var(--jelly-radius-button); }
 [data-jelly-theme="jelly-signature"] .jelly-product-purchase .jelly-container { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 16px; }

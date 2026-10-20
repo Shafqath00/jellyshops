@@ -81,8 +81,7 @@ function makePack(id: V4StarterPackId): V4StarterPack {
     type: "hero",
     settings: {
       eyebrow: signature ? "A collection picked for you" : fresh ? "Seasonal picks" : "The new collection",
-      summary: heroSummary,
-      contentAlignment: fresh ? "left" : "center",
+      contentAlignment: fresh || signature ? "left" : "center",
       image: { url: heroImage, alt: signature ? "An illustrated arrangement of everyday products" : fresh ? "Fresh produce at a market" : "Artisan boutique collection" },
       overlay: fresh ? 8 : 12,
     },
