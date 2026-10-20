@@ -1,4 +1,5 @@
 import type { WorkspaceMutationRunner } from "./mutation-runner.js";
+import { cloneLocalIds } from "./clone-local-ids.js";
 import type {
   GlobalSectionRecord,
   GlobalSectionRepository,
@@ -97,7 +98,7 @@ export class GlobalSectionService {
   async instantiatePreset(storeId: string, presetId: string): Promise<SectionDocument> {
     const preset = await this.presets.getPreset(storeId, presetId);
     if (!preset) throw new Error("Section preset was not found");
-    return cloneSection(preset.section);
+    return cloneLocalIds(preset.section, true);
   }
 
   createGlobalPlacement(globalSectionId: string): GlobalPlacement {

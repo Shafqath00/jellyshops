@@ -53,7 +53,7 @@ describe("catalog routes", () => {
       .set("Authorization", "Bearer token");
 
     expect(allowed.status).toBe(200);
-    expect(denied.status).toBe(403);
+    expect(denied.status).toBe(404);
     expect(service.listProducts).toHaveBeenCalledWith("store-a", expect.objectContaining({ limit: 50 }));
   });
 
@@ -64,7 +64,7 @@ describe("catalog routes", () => {
 
     expect(allowed.status).toBe(200);
     expect(allowed.body).toMatchObject({ id: "ca", storeId: "store-a" });
-    expect(denied.status).toBe(403);
+    expect(denied.status).toBe(404);
     expect(service.getCollection).toHaveBeenCalledWith("store-a", "ca");
     expect(service.getCollection).toHaveBeenCalledTimes(1);
   });

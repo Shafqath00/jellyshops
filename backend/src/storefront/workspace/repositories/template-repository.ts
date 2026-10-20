@@ -10,6 +10,7 @@ export const templateTypes = [
   "search",
   "cart",
   "not-found",
+  "checkout", "wishlist", "customer-login", "customer-register", "customer-recovery", "customer-account", "customer-orders", "customer-order", "customer-addresses", "order-success",
 ] as const;
 
 export type TemplateType = typeof templateTypes[number];

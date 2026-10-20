@@ -26,7 +26,7 @@ describe("merchant order routes", () => {
       .set("Authorization", "Bearer merchant-token")
       .send({});
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(404);
     expect(service.refund).not.toHaveBeenCalled();
   });
 });

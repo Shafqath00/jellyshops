@@ -12,9 +12,15 @@ const listSchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(50),
 });
 const productListSchema = listSchema.extend({
+  categoryId: z.string().min(1).max(160).optional(),
+  minPriceMinor: z.coerce.number().int().nonnegative().max(2147483647).optional(),
+  maxPriceMinor: z.coerce.number().int().nonnegative().max(2147483647).optional(),
+  available: z.enum(["true", "false"]).transform((value) => value === "true").optional(),
+  sort: z.enum(["id", "newest", "price-asc", "price-desc", "title-asc", "best-selling"]).optional(),
+  variantOptions: z.preprocess((raw) => { if (typeof raw !== "string") return raw; try { return JSON.parse(raw); } catch { return null; } }, z.record(z.string().min(1).max(160), z.string().min(1).max(160)).refine((value) => Object.keys(value).length <= 20)).optional(),
   collectionId: z.string().min(1).optional(),
   status: productStatusSchema.optional(),
-});
+}).refine((value) => value.minPriceMinor === undefined || value.maxPriceMinor === undefined || value.minPriceMinor <= value.maxPriceMinor, { message: "Minimum price must not exceed maximum price", path: ["minPriceMinor"] });
 const variantSchema = z.object({
   id: z.string().min(1).optional(),
   title: z.string().trim().min(1),
@@ -27,9 +33,11 @@ const variantSchema = z.object({
   reserved: z.number().int().nonnegative().nullable().optional(),
 });
 const createProductSchema = z.object({
+  imageUrl: z.string().url().optional(),
   handle: z.string().trim().min(1),
   title: z.string().trim().min(1),
   description: z.string().optional(),
+  specifications: z.record(z.string().trim().min(1).max(80), z.string().trim().min(1).max(500)).refine((value) => Object.keys(value).length <= 50).optional(),
   vendor: z.string().trim().min(1).nullable().optional(),
   productType: z.string().trim().min(1).nullable().optional(),
   tags: z.array(z.string().trim().min(1)).optional(),

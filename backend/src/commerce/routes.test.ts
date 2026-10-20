@@ -11,6 +11,7 @@ import type { StripeAccountService } from "../stripe/accounts/service.js";
 
 function setup() {
   const service = {
+    assertCheckoutAccess: vi.fn(async () => undefined),
     begin: vi.fn(async () => ({ attemptId: "attempt-1", orderId: "order-1", publicToken: "token-123" })),
   } as unknown as CheckoutService;
 
@@ -23,6 +24,22 @@ function setup() {
 }
 
 describe("commerce routes", () => {
+  it("preserves option IDs while dropping client-supplied price adjustments", async () => {
+    const { app, service } = setup();
+    const response = await request(app).post("/api/public/stores/store-1/checkout/attempts").send({
+      cartKey: "cart", currency: "USD", customerSnapshot: {},
+      items: [{ variantId: "v1", quantity: 1, configurationSelections: [{ optionId: "size", valueId: "large", priceAdjustmentMinor: -9999 }] }],
+    });
+    expect(response.status).toBe(201);
+    expect(service.begin).toHaveBeenCalledWith(expect.objectContaining({ items: [{ variantId: "v1", quantity: 1, configurationSelections: [{ optionId: "size", valueId: "large" }] }] }));
+  });
+
+  it.each([0, 1000])("rejects an out-of-bounds quantity %s", async (quantity) => {
+    const { app, service } = setup();
+    const response = await request(app).post("/api/public/stores/store-1/checkout/attempts").send({ cartKey: "cart", currency: "USD", customerSnapshot: {}, items: [{ variantId: "v1", quantity }] });
+    expect(response.status).toBe(422);
+    expect(service.begin).not.toHaveBeenCalled();
+  });
   it("POST /attempts calls CheckoutService.begin", async () => {
     const { app, service } = setup();
     const response = await request(app)

@@ -68,7 +68,7 @@ describe("normalized storefront workspace routes", () => {
 
     expect(allowed.status).toBe(200);
     expect(allowed.body.generation).toBe(12);
-    expect(denied.status).toBe(403);
+    expect(denied.status).toBe(404);
     expect(api.getWorkspace).toHaveBeenCalledWith("store-a");
   });
 

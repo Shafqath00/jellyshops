@@ -1,0 +1,11 @@
+// dotenv must never fill unit-test configuration from a developer's live .env.
+// Tests that exercise SQL supply an explicit embedded/test database or a mock.
+for (const name of [
+  "SUPABASE_DATABASE_URL", "SUPABASE_RUNTIME_DATABASE_URL", "SUPABASE_URL",
+  "SUPABASE_SECRET_KEY", "SUPABASE_ANON_KEY", "STRIPE_SECRET_KEY",
+  "STRIPE_ACCOUNTS_V2_VERSION", "STRIPE_ACCOUNTS_V2_WEBHOOK_SECRET",
+  "STRIPE_CONNECT_PAYMENTS_WEBHOOK_SECRET", "STRIPE_CARD_PAYMENT_METHOD_CONFIGURATION_ID",
+  "SCHEDULER_SECRET",
+]) process.env[name] = "";
+process.env.AUTH_PROVIDER = "development";
+process.env.MEDIA_PROVIDER = "local-files";

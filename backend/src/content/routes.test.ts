@@ -50,7 +50,7 @@ describe("content routes", () => {
       .set("Authorization", "Bearer token");
 
     expect(allowed.status).toBe(200);
-    expect(denied.status).toBe(403);
+    expect(denied.status).toBe(404);
     expect(service.listPages).toHaveBeenCalledWith("store-a");
   });
 

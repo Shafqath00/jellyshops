@@ -13,6 +13,17 @@ function setup(rows: unknown[][]) {
 }
 
 describe("AdminSummaryService", () => {
+  it("reports persisted setup and verified payment readiness", async () => {
+    const { repository } = setup([[{ revenueMinor: 0, orderCount: 0 }], [{ publishedProductCount: 2 }], [], [], [{ timezone: "Europe/London", details: true, publication: true, shipping: true }]]);
+    const paymentReady = vi.fn(async () => true);
+    await expect(new AdminSummaryService(repository, paymentReady).getSummary("store-a")).resolves.toMatchObject({ timezone: "Europe/London", setup: { details: true, products: true, publication: true, shipping: true, payments: true } });
+    expect(paymentReady).toHaveBeenCalledWith("store-a");
+  });
+
+  it("leaves payment setup incomplete when Stripe cannot be reached", async () => {
+    const { repository } = setup([[], [], [], [], []]);
+    await expect(new AdminSummaryService(repository, async () => { throw new Error("unavailable"); }).getSummary("store-a")).resolves.toMatchObject({ setup: { payments: false } });
+  });
   it("returns zero revenue and empty queues for a store without orders", async () => {
     const { repository } = setup([[{ revenueMinor: 0, orderCount: 0 }], [{ publishedProductCount: 0 }], [], []]);
 
@@ -22,13 +33,15 @@ describe("AdminSummaryService", () => {
       publishedProductCount: 0,
       actionableOrders: [],
       lowStock: [],
+      timezone: "UTC",
+      setup: { details: false, products: false, publication: false, shipping: false, payments: false },
     });
   });
 
   it("uses the requested store id for every dashboard projection", async () => {
     const { query, repository } = setup([[{ revenueMinor: 0, orderCount: 0 }], [{ publishedProductCount: 0 }], [], []]);
     await new AdminSummaryService(repository).getSummary("store-a");
-    expect(query.mock.calls).toHaveLength(4);
+    expect(query.mock.calls).toHaveLength(5);
     expect(query.mock.calls.every(([, values]) => values?.includes("store-a"))).toBe(true);
   });
 });

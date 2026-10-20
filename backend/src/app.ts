@@ -1,4 +1,7 @@
 import { randomUUID } from "node:crypto";
+import { CustomerService as StoreCustomerService } from "./customers/service.js";
+import { createCustomerRouter, createEngagementRouter, createMerchantEngagementRouter, customerIdentity, supabaseCustomerVerifier } from "./customers/routes.js";
+import { PublicOrderRateLimiter } from "./commerce/rate-limit.js";
 
 import type {
   GlobalSettings,
@@ -23,6 +26,9 @@ import {
 } from "./auth/middleware.js";
 import type { AuthProvider } from "./auth/types.js";
 import { PostgresTenantRepository } from "./tenants/postgres-repository.js";
+import { SqlMediaRepository } from "./media/sql-media-repository.js";
+import { createSqlWorkspaceApi } from "./storefront/workspace/sql-repositories.js";
+import { createStoreSettingsRouter, StoreSettingsRepository } from "./tenants/settings.js";
 
 import {
   createCatalogAdminRouter,
@@ -66,14 +72,15 @@ import { SqlContentRepository } from "./content/sql-repository.js";
 import {
   createCustomDataRouter,
 } from "./custom-data/routes.js";
-import type {
+import {
   CustomDataService,
   MetaobjectService,
 } from "./custom-data/service.js";
+import { SqlCustomDataRepository } from "./custom-data/sql-repository.js";
 
 import { createSupabasePool } from "./database/client.js";
 
-import type {
+import {
   DynamicSourceRegistry,
 } from "./dynamic-sources/registry.js";
 
@@ -131,6 +138,7 @@ import { createStorefrontStarterRouter, type StorefrontStarterApi } from "./stor
 import { createPublicStorefrontContextRouter } from "./storefront/context/routes.js";
 import { SqlPublicStorefrontContextRepository } from "./storefront/context/sql-repository.js";
 import { PublicStorefrontContextService } from "./storefront/context/service.js";
+import { toStorefrontTemplateEnumValue } from "./storefront/workspace/template-type-enum.js";
 import {
   createDefaultStorefrontDocument,
   storefrontDocumentValidator,
@@ -171,6 +179,7 @@ import {
 import {
   updateSupabaseTemplate,
 } from "./storefront/workspace/supabase-template-store.js";
+import { writeSqlGlobalSection } from "./storefront/workspace/sql-global-section-store.js";
 
 import {
   createMerchantRouter,
@@ -226,6 +235,7 @@ export interface AppDependencies {
   // Stripe / commerce
   stripeAccountService?: StripeAccountService;
   checkoutService?: CheckoutService;
+  resolveCheckoutCustomer?: (request: express.Request) => Promise<string | undefined>;
   stripeGateway?: StripeGateway;
   webhookSql?: SqlExecutor;
   reservationSweeper?: ReservationSweeper;
@@ -237,7 +247,7 @@ export interface AppDependencies {
 /* -------------------------------------------------------------------------- */
 
 const supabasePool =
-  process.env.SUPABASE_DATABASE_URL
+  (process.env.SUPABASE_RUNTIME_DATABASE_URL || process.env.SUPABASE_DATABASE_URL)
     ? createSupabasePool()
     : undefined;
 
@@ -473,7 +483,7 @@ const defaultStorefrontWorkspaceApi: StorefrontWorkspaceApi = {
             "id",
             "storeId",
             "revision",
-            lower("type"::text) AS "type",
+            replace(lower("type"::text), '_', '-') AS "type",
             "handle",
             "name",
             "layout",
@@ -481,7 +491,7 @@ const defaultStorefrontWorkspaceApi: StorefrontWorkspaceApi = {
             "updatedAt"
           FROM "StorefrontTemplate"
           WHERE "storeId" = $1
-            AND ($2::text IS NULL OR lower("type"::text) = $2)
+            AND ($2::text IS NULL OR replace(lower("type"::text), '_', '-') = $2)
           ORDER BY "createdAt"
         `,
         [storeId, type ?? null],
@@ -508,7 +518,7 @@ const defaultStorefrontWorkspaceApi: StorefrontWorkspaceApi = {
             "id",
             "storeId",
             "revision",
-            lower("type"::text) AS "type",
+            replace(lower("type"::text), '_', '-') AS "type",
             "handle",
             "name",
             "layout",
@@ -552,8 +562,8 @@ const defaultStorefrontWorkspaceApi: StorefrontWorkspaceApi = {
       const inserted = await client.query(
         `INSERT INTO "StorefrontTemplate" ("id", "storeId", "type", "handle", "name", "layout", "revision", "createdAt", "updatedAt")
          VALUES ($1, $2, $3::"StorefrontTemplateType", $4, $5, $6::jsonb, 0, NOW(), NOW())
-         RETURNING "id", "storeId", "revision", lower("type"::text) AS "type", "handle", "name", "layout", "createdAt", "updatedAt"`,
-        [templateId, storeId, input.type.toUpperCase(), input.handle ?? "default", input.name, JSON.stringify(input.layout)],
+         RETURNING "id", "storeId", "revision", replace(lower("type"::text), '_', '-') AS "type", "handle", "name", "layout", "createdAt", "updatedAt"`,
+        [templateId, storeId, toStorefrontTemplateEnumValue(input.type), input.handle ?? "default", input.name, JSON.stringify(input.layout)],
       );
       const workspace = await client.query(
         `INSERT INTO "StorefrontWorkspace" ("storeId", "generation", "updatedAt")
@@ -645,18 +655,20 @@ const defaultStorefrontWorkspaceApi: StorefrontWorkspaceApi = {
   },
 
   async createGlobalSection(
-    _storeId,
+    storeId,
     input,
   ) {
+    if (supabasePool) return writeSqlGlobalSection(supabasePool, storeId, null, null, input);
     return input;
   },
 
   async updateGlobalSection(
-    _storeId,
+    storeId,
     id,
-    _revision,
+    revision,
     patch,
   ) {
+    if (supabasePool) return writeSqlGlobalSection(supabasePool, storeId, id, revision, patch);
     return {
       id,
       ...patch,
@@ -922,6 +934,7 @@ function mountCommerceRoutes(
       "/api/public/stores/:storeId/checkout",
       createCommerceRouter(
         deps.checkoutService,
+        deps.resolveCheckoutCustomer,
       ),
     );
 
@@ -1343,9 +1356,9 @@ export function createApp(
 
   const mediaRepository =
     dependencies.mediaRepository ??
-    new LocalJsonMediaRepository(
+    (supabasePool ? new SqlMediaRepository(supabasePool) : new LocalJsonMediaRepository(
       config.dataDirectory,
-    );
+    ));
 
   const mediaStorage =
     dependencies.mediaStorage ??
@@ -1359,7 +1372,7 @@ export function createApp(
     dependencies.catalogService ??
     (supabasePool
       ? (() => {
-        const catalogRepository = new CatalogPostgresRepository(supabasePool);
+        const catalogRepository = new CatalogPostgresRepository(supabasePool, postgresCommerceDatabase(supabasePool));
         return new CatalogService(catalogRepository, catalogRepository) as CatalogAdmin;
       })()
       : undefined);
@@ -1419,13 +1432,16 @@ export function createApp(
       )
       : undefined;
 
+  const customDataRepository = storefrontSql ? new SqlCustomDataRepository(storefrontSql) : undefined;
+  const dynamicSourceRegistry = dependencies.dynamicSourceRegistry ?? (customDataRepository ? new DynamicSourceRegistry(customDataRepository, customDataRepository) : undefined);
+
   const storefrontCompilerApi =
     dependencies.storefrontCompilerApi ??
     (storefrontSql
       ? createLocalV4CompilationService(
         storefrontSql,
         dependencies.storefrontDynamicSourceResolver ??
-          dependencies.dynamicSourceRegistry,
+          dynamicSourceRegistry,
       )
       : undefined);
 
@@ -1495,6 +1511,10 @@ export function createApp(
         catalog: catalogService,
         stripeAccountService,
         stripeGateway,
+        checkoutPolicy: new StoreSettingsRepository(commerceDatabase!),
+        enabledCountries: config.stripe?.secretKey.includes("_live_")
+          ? (process.env.LIVE_CHECKOUT_COUNTRIES ?? "").split(",").map((country) => country.trim()).filter(Boolean)
+          : ["IN", "GB", "US"],
       })
       : undefined);
 
@@ -1506,7 +1526,14 @@ export function createApp(
 
   const adminServices = commerceRepository
     ? {
-      summary: new AdminSummaryService(commerceRepository),
+      summary: new AdminSummaryService(commerceRepository, async (storeId) => {
+        if (!stripeAccountService || !commerceDatabase) return false;
+        const policy = await new StoreSettingsRepository(commerceDatabase).getCheckoutPolicy(storeId);
+        const enabledCountries = config.stripe?.secretKey.includes("_live_")
+          ? (process.env.LIVE_CHECKOUT_COUNTRIES ?? "").split(",").map((country) => country.trim())
+          : ["IN", "GB", "US"];
+        return enabledCountries.includes(policy.country) && stripeAccountService.getLivePaymentReadiness(storeId);
+      }),
       customers: new CustomerService(commerceRepository),
     }
     : undefined;
@@ -1517,8 +1544,18 @@ export function createApp(
       ? new ReservationSweeper(commerceRepository, stripeGateway)
       : undefined);
 
+  const customerService = commerceDatabase ? new StoreCustomerService(commerceDatabase, process.env.CUSTOMER_LINK_SECRET) : undefined;
+  const verifyCustomer = config.supabaseUrl && config.supabaseAnonKey ? supabaseCustomerVerifier(config.supabaseUrl, config.supabaseAnonKey) : undefined;
   const commerceDeps = {
     ...dependencies,
+    resolveCheckoutCustomer: customerService && verifyCustomer ? async (request: express.Request) => {
+      if (!request.header("authorization")) return undefined;
+      return (await customerService.profile(String(request.params.storeId), await customerIdentity(request, verifyCustomer))).id;
+    } : undefined,
+    customDataService: dependencies.customDataService ?? (customDataRepository ? new CustomDataService(customDataRepository) : undefined),
+    metaobjectService: dependencies.metaobjectService ?? (customDataRepository ? new MetaobjectService(customDataRepository) : undefined),
+    dynamicSourceRegistry,
+    storefrontWorkspaceApi: dependencies.storefrontWorkspaceApi ?? (commerceDatabase ? createSqlWorkspaceApi(commerceDatabase) : undefined),
     storefrontCompilerApi,
     storefrontPublicationApi,
     publicStorefrontApi,
@@ -1554,6 +1591,16 @@ export function createApp(
       limit: "2mb",
     }),
   );
+
+  if (commerceDatabase) {
+    app.use("/api/stores/:storeId/settings", createStoreSettingsRouter(authProvider, new StoreSettingsRepository(commerceDatabase)));
+  }
+  if (customerService && commerceRepository) {
+    const limiter = new PublicOrderRateLimiter(commerceRepository, { namespace: "store-engagement", limit: 10, code: "ENGAGEMENT_RATE_LIMITED" });
+    if (verifyCustomer) app.use("/api/public/stores/:storeId/customer", createCustomerRouter(customerService, verifyCustomer));
+    app.use("/api/public/stores/:storeId/engagement", createEngagementRouter(customerService, (storeId, ip) => limiter.assertAllowed(storeId, ip)));
+    app.use("/api/stores/:storeId/engagement", createMerchantEngagementRouter(customerService, authProvider));
+  }
 
   mountInternalRoutes(
     app,

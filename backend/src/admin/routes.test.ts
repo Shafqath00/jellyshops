@@ -14,7 +14,7 @@ describe("admin routes", () => {
     const app = express();
     app.use("/api/stores/:storeId", createAdminRouter({ summary, customers }, auth));
     app.use(errorHandler);
-    await request(app).get("/api/stores/store-b/admin-summary").set("Authorization", "Bearer token").expect(403);
+    await request(app).get("/api/stores/store-b/admin-summary").set("Authorization", "Bearer token").expect(404);
     expect(summary.getSummary).not.toHaveBeenCalled();
   });
 });

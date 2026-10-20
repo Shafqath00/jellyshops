@@ -38,6 +38,7 @@ export interface CatalogProduct {
   handle: string;
   title: string;
   description: string;
+  specifications: Record<string, string>;
   vendor: string | null;
   productType: string | null;
   tags: string[];
@@ -82,6 +83,12 @@ export interface Connection<T> {
 }
 
 export interface ListProductsInput {
+  categoryId?: string;
+  minPriceMinor?: number;
+  maxPriceMinor?: number;
+  available?: boolean;
+  variantOptions?: Record<string, string>;
+  sort?: "id" | "newest" | "price-asc" | "price-desc" | "title-asc" | "best-selling";
   query?: string;
   collectionId?: string;
   status?: ProductStatus;
@@ -108,9 +115,11 @@ export interface CatalogVariantInput {
 }
 
 export interface CreateProductInput {
+  imageUrl?: string;
   handle: string;
   title: string;
   description?: string;
+  specifications?: Record<string, string>;
   vendor?: string | null;
   productType?: string | null;
   tags?: string[];
@@ -128,9 +137,11 @@ export interface CreateProductInput {
 }
 
 export interface UpdateProductInput {
+  imageUrl?: string;
   handle?: string;
   title?: string;
   description?: string;
+  specifications?: Record<string, string>;
   vendor?: string | null;
   productType?: string | null;
   tags?: string[];

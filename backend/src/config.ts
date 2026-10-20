@@ -89,6 +89,10 @@ function loadStripeConfig(
   const cardPaymentMethodConfigurationId =
     environment.STRIPE_CARD_PAYMENT_METHOD_CONFIGURATION_ID?.trim();
 
+  if (production && !cardPaymentMethodConfigurationId) {
+    throw new Error("STRIPE_CARD_PAYMENT_METHOD_CONFIGURATION_ID is required when Stripe is configured in production");
+  }
+
   if (
     cardPaymentMethodConfigurationId && !/^pmc_[A-Za-z0-9]+$/.test(
       cardPaymentMethodConfigurationId,
@@ -316,6 +320,10 @@ export function loadConfig(
   const parsed =
     environmentSchema.parse(environment);
 
+  if (parsed.NODE_ENV === "production" && parsed.CORS_ORIGINS.split(",").some((origin) => origin.trim() === "*")) {
+    throw new Error("CORS_ORIGINS must list explicit origins in production");
+  }
+
   /*
    * Authentication validation
    */
@@ -335,6 +343,11 @@ export function loadConfig(
     throw new Error(
       "JELLY_FIREBASE_PROJECT_ID is required when AUTH_PROVIDER=firebase",
     );
+  }
+
+  if (parsed.NODE_ENV === "production") {
+    if (!environment.CORS_ORIGINS?.trim()) throw new Error("CORS_ORIGINS is required in production");
+    if (!environment.SUPABASE_RUNTIME_DATABASE_URL?.trim()) throw new Error("SUPABASE_RUNTIME_DATABASE_URL is required in production; keep migration credentials separate");
   }
 
   if (

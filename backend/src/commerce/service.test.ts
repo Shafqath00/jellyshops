@@ -34,6 +34,7 @@ function makeStripeAccountService(): StripeAccountService {
 
 function makeTransaction(): CommerceTransaction {
   return {
+    nextOrderNumber: vi.fn(async () => "JS-000001"),
     query: vi.fn(async () => ({ rows: [] })),
     reserveVariants: vi.fn(async () => [{ attemptId: "attempt-1", storeId: "store-1", variantId: "v1", quantity: 2, status: "HELD", expiresAt: new Date() }]),
     releaseAttempt: vi.fn(),
@@ -56,8 +57,9 @@ function setup() {
   const stripe = makeStripeAccountService();
   const tx = makeTransaction();
   const repo = makeCommerceRepository(tx);
-  const service = new CheckoutService({ repository: repo, catalog, stripeAccountService: stripe });
-  return { service, catalog, stripe, tx, repo };
+  const checkoutPolicy = { getCheckoutPolicy: vi.fn(async () => ({ currency: "USD", country: "US", shippingMinor: 0 })) };
+  const service = new CheckoutService({ repository: repo, catalog, stripeAccountService: stripe, checkoutPolicy });
+  return { service, catalog, stripe, tx, repo, checkoutPolicy };
 }
 
 const validCart: BeginCheckoutInput = {
@@ -68,7 +70,7 @@ const validCart: BeginCheckoutInput = {
     { variantId: "v2", quantity: 1 },
     { variantId: "v1", quantity: 2 },
   ],
-  customerSnapshot: { email: "test@example.com" },
+  customerSnapshot: { email: "test@example.com", address: { country: "US" } },
 };
 
 // ---------------------------------------------------------------------------
@@ -76,6 +78,22 @@ const validCart: BeginCheckoutInput = {
 // ---------------------------------------------------------------------------
 
 describe("CheckoutService", () => {
+  it("uses persisted shipping and transaction-safe order numbering", async () => {
+    const { service, tx, checkoutPolicy } = setup();
+    checkoutPolicy.getCheckoutPolicy.mockResolvedValue({ currency: "USD", country: "US", shippingMinor: 475 });
+    await service.begin(validCart);
+    const order = vi.mocked(tx.query).mock.calls.find(([sql]) => sql.includes('INSERT INTO "Order"'));
+    expect(order?.[1]?.[2]).toBe("JS-000001");
+    expect(order?.[1]?.[7]).toBe(475);
+    expect(order?.[1]?.[8]).toBe(4975);
+  });
+
+  it("rejects a foreign delivery country before Stripe or reservations", async () => {
+    const { service, stripe, tx } = setup();
+    await expect(service.begin({ ...validCart, deliverySnapshot: { country: "GB" } })).rejects.toMatchObject({ code: "CHECKOUT_DELIVERY_COUNTRY_INVALID" });
+    expect(stripe.getLivePaymentReadiness).not.toHaveBeenCalled();
+    expect(tx.reserveVariants).not.toHaveBeenCalled();
+  });
   describe("deterministic cart hash", () => {
     it("1. canonical hash independent of line order", async () => {
       const { service, tx } = setup();
@@ -138,17 +156,15 @@ describe("CheckoutService", () => {
       // I'll skip literal shipping mock since shipping isn't fully spec'd out but it MUST be in hash.
     });
 
-    it("5. changed currency changes hash", async () => {
+    it("5. rejects a currency that differs from the store", async () => {
       const { service, tx } = setup();
       vi.mocked(tx.query).mockResolvedValue({ rows: [{ id: "x" }] });
       await service.begin(validCart);
       const hash1 = vi.mocked(tx.query).mock.calls.find(c => (c[0] as string).includes("INSERT INTO \"CheckoutAttempt\""))![1]![4];
       
       vi.mocked(tx.query).mockClear();
-      await service.begin({ ...validCart, currency: "eur" });
-      const hash2 = vi.mocked(tx.query).mock.calls.find(c => (c[0] as string).includes("INSERT INTO \"CheckoutAttempt\""))![1]![4];
-      
-      expect(hash1).not.toBe(hash2);
+      await expect(service.begin({ ...validCart, currency: "eur" })).rejects.toMatchObject({ code: "CHECKOUT_CURRENCY_MISMATCH" });
+      expect(tx.reserveVariants).toHaveBeenCalledTimes(1);
     });
 
     it("6. browser price/total not trusted", async () => {
@@ -279,6 +295,7 @@ describe("CheckoutService", () => {
         repository: repo,
         catalog,
         stripeAccountService: stripe,
+        checkoutPolicy: { getCheckoutPolicy: async () => ({ currency: "USD", country: "US", shippingMinor: 0 }) },
         stripeGateway: { cancelPaymentIntent } as any,
       });
       const oldAttempt = {
@@ -314,6 +331,7 @@ describe("CheckoutService", () => {
         repository: repo,
         catalog,
         stripeAccountService: stripe,
+        checkoutPolicy: { getCheckoutPolicy: async () => ({ currency: "USD", country: "US", shippingMinor: 0 }) },
         stripeGateway: { cancelPaymentIntent } as any,
       });
       const oldAttempt = {

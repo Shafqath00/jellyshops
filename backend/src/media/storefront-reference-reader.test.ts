@@ -11,12 +11,13 @@ describe("storefront media reference reader", () => {
       }
       if (statement.includes('"GlobalSection"')) return { rows: [] };
       if (statement.includes('"StorefrontPublication"')) return { rows: [] };
+      if (/"(ProductMedia|StorePage|Article|SectionPreset)"/.test(statement)) return { rows: [] };
       throw new Error(`Unexpected SQL: ${statement}`);
     });
     const reader = createStorefrontMediaReferenceReader({ query } as unknown as SqlExecutor);
 
     await expect(reader("store-a", "media-a")).resolves.toBe(true);
     await expect(reader("store-b", "media-a")).resolves.toBe(false);
-    expect(query).toHaveBeenCalledTimes(6);
+    expect(query).toHaveBeenCalledTimes(14);
   });
 });

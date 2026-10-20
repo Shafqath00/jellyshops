@@ -95,12 +95,12 @@ describe("stripe connect routes", () => {
       expect(response.status).toBe(401);
     });
 
-    it("returns 403 when merchant has no access to the store", async () => {
+    it("returns 404 when merchant has no access to the store", async () => {
       const { app } = setup(otherStorePrincipal);
       const response = await request(app)
         .get("/api/stores/store-1/stripe-connect/status")
         .set("Authorization", "Bearer token");
-      expect(response.status).toBe(403);
+      expect(response.status).toBe(404);
     });
 
     it("returns 200 with status for a merchant with payments:view (OWNER)", async () => {
@@ -162,13 +162,13 @@ describe("stripe connect routes", () => {
       expect(response.status).toBe(401);
     });
 
-    it("returns 403 when merchant has no access to the store", async () => {
+    it("returns 404 when merchant has no access to the store", async () => {
       const { app } = setup(otherStorePrincipal);
       const response = await request(app)
         .post("/api/stores/store-1/stripe-connect/onboarding-link")
         .set("Authorization", "Bearer token")
         .send(validBody);
-      expect(response.status).toBe(403);
+      expect(response.status).toBe(404);
     });
 
     it("returns 403 for ORDER_MANAGER (lacks payments:manage)", async () => {

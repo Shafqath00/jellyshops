@@ -177,6 +177,7 @@ describe("durable PaymentIntent preparation", () => {
 
   it("serves preparation through CheckoutService and the scoped public route", async () => {
     const checkout = new CheckoutService({ repository, catalog: {} as CatalogReader,
+      checkoutPolicy: { getCheckoutPolicy: async () => ({ currency: "USD", country: "US", shippingMinor: 0 }) },
       stripeAccountService: {} as StripeAccountService,
       stripeGateway: { createDirectPaymentIntent: create, retrievePaymentIntent: retrieve } });
     const app = express();

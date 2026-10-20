@@ -4,13 +4,14 @@ import { requireMerchant } from "../auth/middleware.js";
 import type { AuthProvider } from "../auth/types.js";
 import { ApiError } from "../http/errors.js";
 import type { TenantRepository } from "./repository.js";
+import { MARKET_CURRENCIES } from "./settings.js";
 
 const createStoreSchema = z.object({
   name: z.string().trim().min(1).max(120),
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).min(3).max(63),
   currency: z.string().regex(/^[A-Z]{3}$/),
   country: z.string().regex(/^[A-Z]{2}$/),
-}).strict();
+}).strict().refine((input) => MARKET_CURRENCIES[input.country] === input.currency, { message: "Choose India/INR, United Kingdom/GBP, or United States/USD.", path: ["currency"] });
 
 function merchantId(value: string | undefined): string {
   if (typeof value !== "string" || value.trim() === "") {

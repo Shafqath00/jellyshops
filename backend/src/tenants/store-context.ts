@@ -15,7 +15,10 @@ export function createStoreRequestContext(
   permission: StorePermission,
 ): StoreRequestContext {
   const role = principal.storeRoles[storeId];
-  if (!role || !hasStorePermission(principal, storeId, permission)) {
+  if (!role) {
+    throw new ApiError(404, "STORE_NOT_FOUND", "Store not found");
+  }
+  if (!hasStorePermission(principal, storeId, permission)) {
     throw new ApiError(403, "STORE_FORBIDDEN", "The merchant cannot access this store");
   }
 

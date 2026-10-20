@@ -5,6 +5,8 @@ export interface CheckoutLineInput {
 }
 
 export interface BeginCheckoutInput {
+  /** Server-verified identity only; public HTTP input never accepts this field. */
+  customerId?: string;
   storeId: string;
   cartKey: string;
   currency: string;

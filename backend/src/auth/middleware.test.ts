@@ -55,8 +55,8 @@ describe("merchant authentication", () => {
       .get("/api/stores/store-other/private-check")
       .set("Authorization", "Bearer jelly-demo-merchant");
 
-    expect(response.status).toBe(403);
-    expect(response.body.error.code).toBe("STORE_FORBIDDEN");
+    expect(response.status).toBe(404);
+    expect(response.body.error.code).toBe("STORE_NOT_FOUND");
   });
 
   it.each([
@@ -92,6 +92,6 @@ describe("merchant authentication", () => {
       .get("/api/stores/store-demo/private-check")
       .set("Authorization", "Bearer token");
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(404);
   });
 });

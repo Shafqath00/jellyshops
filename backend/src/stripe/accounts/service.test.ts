@@ -365,6 +365,8 @@ describe("StripeAccountService", () => {
       const { service, gateway, sql } = setup();
       vi.mocked(sql.query)
         .mockResolvedValueOnce({ rows: [baseRow] })   // getStatus → findByStoreId
+        .mockResolvedValueOnce({ rows: [baseRow] })   // getStatus → syncAccount lookup
+        .mockResolvedValueOnce({ rows: [baseRow] })   // getStatus → syncAccount update
         .mockResolvedValueOnce({ rows: [baseRow] })   // getLivePaymentReadiness → findByStoreId
         .mockResolvedValueOnce({ rows: [baseRow] })   // syncAccount → findByStripeAccountId
         .mockResolvedValueOnce({ rows: [{ ...baseRow, cardPaymentsStatus: "active" }] }); // syncAccount → updateState

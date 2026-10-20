@@ -3,6 +3,8 @@ import { validateSectionAgainstRegistry } from "@jelly/storefront-registry";
 import type { PageType, SectionNode } from "@jelly/storefront-schema";
 import type { CompilerDynamicSourceResolver, CompilerRegistry, StorefrontCompilationInput } from "./types.js";
 import { compileStorefront } from "./compiler.js";
+import { createPGliteDatabase, seedStore } from "../../../test/integration/pglite.js";
+import { SqlCompiledPublicationRepository } from "../publication/sql-repository.js";
 
 const compatiblePages = ["home", "product", "collection", "page", "blog", "article"] as const;
 const sources: CompilerDynamicSourceResolver = { describeBinding: async () => ({ valueType: "string" }) };
@@ -51,5 +53,43 @@ describe("reusable Rich text compiler compatibility", () => {
       kind: "inline",
       section: { type: "rich-text", settings: { alignment: "center" } },
     });
+  });
+
+  it("keeps structured formatting through compilation and local publication storage", async () => {
+    const source = input("article");
+    const document = { type: "doc", content: [
+      { type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: "Our story", marks: [{ type: "bold" }] }] },
+      { type: "paragraph", content: [{ type: "text", text: "Read more", marks: [{ type: "link", attrs: { href: "/pages/about" } }] }] },
+    ] };
+    const placement = source.templates[0].layout.sections[0];
+    if (placement.kind !== "inline") throw new Error("Expected inline rich-text section");
+    placement.section.settings.document = document;
+    const result = await compileStorefront(source, registry, sources, "2026-01");
+    expect(result.ok).toBe(true);
+    expect(result.snapshot?.templates["article-default"].layout.sections[0]).toMatchObject({ kind: "inline", section: { settings: { document } } });
+
+    const database = await createPGliteDatabase();
+    try {
+      await seedStore(database, "store-a", "store-a");
+      const publications = new SqlCompiledPublicationRepository(database);
+      const saved = await publications.save({ storeId: "store-a", expectedGeneration: 1, idempotencyKey: "rich-text", actorUserId: "user-a", snapshot: result.snapshot!, dependencies: result.dependencies });
+      await publications.activate("store-a", saved.id);
+      expect((await publications.getCurrent("store-a"))?.snapshot.templates["article-default"].layout.sections[0])
+        .toMatchObject({ kind: "inline", section: { settings: { document } } });
+    } finally {
+      await database.close();
+    }
+  });
+
+  it("returns compiler diagnostics for unsupported nodes and unsafe links", async () => {
+    const source = input("article");
+    const placement = source.templates[0].layout.sections[0];
+    if (placement.kind !== "inline") throw new Error("Expected inline rich-text section");
+    placement.section.settings.document = { type: "doc", content: [{ type: "paragraph", content: [
+      { type: "text", text: "Click", marks: [{ type: "link", attrs: { href: "javascript:alert(1)" } }] },
+    ] }] };
+    const result = await compileStorefront(source, registry, sources, "2026-01");
+    expect(result.ok).toBe(false);
+    expect(result.diagnostics).toEqual(expect.arrayContaining([expect.objectContaining({ code: "SETTINGS_INVALID", location: expect.objectContaining({ sectionId: "story-1" }) })]));
   });
 });

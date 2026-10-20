@@ -2,6 +2,8 @@ import { Router } from "express";
 import type { SqlExecutor } from "../commerce/repository.js";
 
 export interface PublicStoreDetails {
+  shippingMinor: number;
+  shippingCopy: string;
   id: string;
   name: string;
   slug: string;
@@ -13,7 +15,7 @@ export function createPublicStoreRouter(database: SqlExecutor): Router {
   const router = Router({ mergeParams: true });
   router.get<{ storeId: string }>("/", async (request, response) => {
     const result = await database.query<PublicStoreDetails>(
-      `SELECT "id", "name", "slug", "currency", "country" FROM "Store" WHERE "id" = $1 AND "archivedAt" IS NULL`,
+      `SELECT s."id", s."name", s."slug", s."currency", s."country", COALESCE(ss."shippingMinor", 0) AS "shippingMinor", COALESCE(ss."shippingCopy",'') AS "shippingCopy" FROM "Store" s LEFT JOIN "StoreSettings" ss ON ss."storeId" = s."id" WHERE s."id" = $1 AND s."archivedAt" IS NULL`,
       [String(request.params.storeId)],
     );
     const store = result.rows[0];
@@ -27,7 +29,7 @@ export function createPublicStoreBySlugRouter(database: SqlExecutor): Router {
   const router = Router({ mergeParams: true });
   router.get<{ slug: string }>("/", async (request, response) => {
     const result = await database.query<PublicStoreDetails>(
-      `SELECT "id", "name", "slug", "currency", "country" FROM "Store" WHERE "slug" = $1 AND "archivedAt" IS NULL`,
+      `SELECT s."id", s."name", s."slug", s."currency", s."country", COALESCE(ss."shippingMinor", 0) AS "shippingMinor", COALESCE(ss."shippingCopy",'') AS "shippingCopy" FROM "Store" s LEFT JOIN "StoreSettings" ss ON ss."storeId" = s."id" WHERE s."slug" = $1 AND s."archivedAt" IS NULL`,
       [String(request.params.slug)],
     );
     const store = result.rows[0];

@@ -9,6 +9,7 @@ import type { StorefrontWorkspaceApi } from "./routes.js";
 import type { TemplateService } from "./template-service.js";
 import type { ThemeService } from "./theme-service.js";
 import type { StorefrontWorkspaceReader } from "./workspace-reader.js";
+import { listThemes } from "@jelly/storefront-themes";
 
 export class DefaultStorefrontWorkspaceApi implements StorefrontWorkspaceApi {
   constructor(
@@ -21,7 +22,10 @@ export class DefaultStorefrontWorkspaceApi implements StorefrontWorkspaceApi {
   ) {}
 
   listThemeCatalog(_storeId: string) {
-    return Promise.resolve([]);
+    return Promise.resolve(listThemes().map(({ manifest: value }) => {
+      const manifest = value as { id: string; name: string; version: string; enabled: boolean; settingsSchema?: unknown[] };
+      return { ...manifest, available: manifest.enabled, settingsSchema: manifest.settingsSchema ?? [] };
+    }));
   }
 
   getWorkspace(storeId: string) {

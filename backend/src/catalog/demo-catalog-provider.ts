@@ -76,6 +76,7 @@ function canonicalProduct(storeId: string, product: DemoProduct): CatalogProduct
     handle: product.slug,
     title: product.name,
     description: "",
+    specifications: {},
     vendor: null,
     productType: null,
     tags: [],

@@ -7,6 +7,8 @@ const RATE_LIMIT_WINDOW_MS = 60_000;
 const DEFAULT_LOOKUP_LIMIT = 5;
 
 interface PublicOrderRateLimitOptions {
+  namespace?: string;
+  code?: string;
   limit?: number;
   now?: () => Date;
 }
@@ -28,6 +30,8 @@ function hashIpAddress(ip: string): string {
 export class PublicOrderRateLimiter {
   private readonly limit: number;
   private readonly now: () => Date;
+  private readonly namespace: string;
+  private readonly code: string;
 
   constructor(
     private readonly repository: CommerceRepository,
@@ -35,6 +39,8 @@ export class PublicOrderRateLimiter {
   ) {
     this.limit = options.limit ?? DEFAULT_LOOKUP_LIMIT;
     this.now = options.now ?? (() => new Date());
+    this.namespace = options.namespace ?? "";
+    this.code = options.code ?? "PUBLIC_ORDER_RATE_LIMITED";
   }
 
   async assertAllowed(
@@ -42,7 +48,7 @@ export class PublicOrderRateLimiter {
     ip: string,
   ): Promise<void> {
     const windowStartedAt = getWindowStart(this.now());
-    const ipHash = hashIpAddress(ip);
+    const ipHash = hashIpAddress(this.namespace ? JSON.stringify([this.namespace, ip]) : ip);
 
     const result = await this.repository.transaction(
       (tx) =>
@@ -84,8 +90,8 @@ export class PublicOrderRateLimiter {
     if (!allowed) {
       throw new ApiError(
         429,
-        "PUBLIC_ORDER_RATE_LIMITED",
-        "Too many order lookup attempts. Try again shortly.",
+        this.code,
+        "Too many requests. Try again shortly.",
       );
     }
   }

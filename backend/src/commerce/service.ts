@@ -8,6 +8,7 @@ import { z } from "zod";
 import type { CatalogReader } from "../catalog/service.js";
 import { ApiError } from "../http/errors.js";
 import type { StripeAccountService } from "../stripe/accounts/service.js";
+import type { CheckoutPolicy } from "../tenants/settings.js";
 
 import {
   PaymentIntentService,
@@ -36,11 +37,11 @@ const inputSchema = z.object({
     .array(
       z.object({
         variantId: z.string().min(1),
-        quantity: z.number().int().positive(),
-        configurationSelections: z.array(z.object({ optionId: z.string().min(1), valueId: z.string().min(1), optionName: z.string().optional(), valueLabel: z.string().optional(), priceAdjustmentMinor: z.number().int().optional() })).optional(),
+        quantity: z.number().int().min(1).max(999),
+        configurationSelections: z.array(z.object({ optionId: z.string().min(1), valueId: z.string().min(1) })).max(20).optional(),
       }),
     )
-    .min(1),
+    .min(1).max(50),
   customerSnapshot: z.record(
     z.string(),
     z.unknown(),
@@ -74,6 +75,8 @@ export interface CheckoutServiceDeps {
   catalog: CatalogReader;
   stripeAccountService: StripeAccountService;
   stripeGateway?: PaymentIntentGateway;
+  checkoutPolicy: { getCheckoutPolicy(storeId: string): Promise<CheckoutPolicy> };
+  enabledCountries?: readonly string[];
 }
 
 function checkoutUnavailable() {
@@ -115,7 +118,7 @@ function createCartHash(
   const items = lines
     .map(
       (line) =>
-        `${line.variantId}:${line.quantity}:${line.unitPriceMinor}`,
+        JSON.stringify([line.variantId, line.quantity, line.unitPriceMinor, line.configurationKey]),
     )
     .sort();
 
@@ -209,10 +212,25 @@ export class CheckoutService {
     );
   }
 
+  async assertCheckoutAccess(storeId: string, ip: string, key: string, preparation = false): Promise<void> {
+    const store = await this.deps.repository.transaction((tx) => tx.query(`SELECT "id" FROM "Store" WHERE "id" = $1 AND "archivedAt" IS NULL`, [storeId]));
+    if (!store.rows.length) throw new ApiError(404, "STORE_NOT_FOUND", "Store not found.");
+    const namespace = preparation ? "checkout-payment" : "checkout-attempt";
+    await new PublicOrderRateLimiter(this.deps.repository, { namespace, limit: preparation ? 60 : 20, code: "CHECKOUT_RATE_LIMITED" }).assertAllowed(storeId, ip);
+    await new PublicOrderRateLimiter(this.deps.repository, { namespace: `${namespace}:cart`, limit: preparation ? 30 : 5, code: "CHECKOUT_RATE_LIMITED" }).assertAllowed(storeId, key);
+  }
+
   async begin(
     rawInput: BeginCheckoutInput,
+    customerId?: string,
   ): Promise<CheckoutAttemptResult> {
-    const input = this.parseInput(rawInput);
+    const input = { ...this.parseInput(rawInput), customerId };
+
+    const policy = await this.deps.checkoutPolicy.getCheckoutPolicy(input.storeId);
+    if (input.currency !== policy.currency) throw new ApiError(422, "CHECKOUT_CURRENCY_MISMATCH", "Use the store's currency to check out.");
+    const countries = [input.deliverySnapshot?.country, (input.deliverySnapshot?.address as Record<string, unknown> | undefined)?.country, (input.customerSnapshot.address as Record<string, unknown> | undefined)?.country].filter((value) => value !== undefined);
+    if (!countries.length || countries.some((country) => String(country).toUpperCase() !== policy.country)) throw new ApiError(422, "CHECKOUT_DELIVERY_COUNTRY_INVALID", "A delivery address within the store's country is required.");
+    if (this.deps.enabledCountries && !this.deps.enabledCountries.includes(policy.country)) throw new ApiError(409, "MARKET_PAYMENTS_UNAVAILABLE", "Payments are not yet available for this store's country.");
 
     const stripeAccountId =
       await this.getStripeAccountId(
@@ -223,7 +241,11 @@ export class CheckoutService {
       input.storeId,
       input.currency,
       input.items,
+      policy.shippingMinor,
     );
+
+    // Buyer/delivery changes must not reuse an attempt holding an older snapshot.
+    cart.cartHash = createHash("sha256").update(JSON.stringify([cart.cartHash, input.customerSnapshot, input.deliverySnapshot ?? null, customerId ?? null])).digest("hex");
 
     return this.deps.repository.withCheckoutLock(
       input.storeId,
@@ -316,6 +338,7 @@ export class CheckoutService {
     storeId: string,
     currency: string,
     items: BeginCheckoutInput["items"],
+    shippingMinor: number,
   ): Promise<ValidatedCart> {
     const lines = await Promise.all(
       items.map(async (item) => {
@@ -361,6 +384,7 @@ export class CheckoutService {
           }
         }
         const unitPriceMinor = variant.priceMinor + snapshot.filter((selection) => productOptions.find((option) => option.id === selection.optionId)?.type !== "variant").reduce((total, selection) => total + selection.priceAdjustmentMinor, 0);
+        if (!Number.isSafeInteger(unitPriceMinor) || unitPriceMinor < 0) throw new ApiError(422, "CHECKOUT_PRICE_INVALID", "This product's price requires review.");
         return {
           variantId: variant.id,
           quantity: item.quantity,
@@ -382,9 +406,9 @@ export class CheckoutService {
       0,
     );
 
-    const shippingMinor = 0;
     const totalMinor =
       subtotalMinor + shippingMinor;
+    if (!Number.isSafeInteger(totalMinor) || totalMinor < 0) throw new ApiError(422, "CHECKOUT_PRICE_INVALID", "The checkout total is invalid.");
 
     return {
       lines,
@@ -568,7 +592,7 @@ export class CheckoutService {
 
   private async createCheckout(
     tx: CommerceTransaction,
-    input: z.infer<typeof inputSchema>,
+    input: z.infer<typeof inputSchema> & { customerId?: string },
     cart: ValidatedCart,
     stripeAccountId: string,
   ): Promise<CheckoutAttemptResult> {
@@ -600,7 +624,7 @@ export class CheckoutService {
       [
         orderId,
         input.storeId,
-        orderId.slice(0, 8).toUpperCase(),
+        await tx.nextOrderNumber(input.storeId),
         publicToken,
         "PENDING_PAYMENT",
         input.customerSnapshot,
@@ -610,6 +634,8 @@ export class CheckoutService {
         input.currency,
       ],
     );
+
+    if (input.customerId) await tx.query('UPDATE "Order" SET "customerId" = $3 WHERE "storeId" = $1 AND "id" = $2', [input.storeId, orderId, input.customerId]);
 
     for (const line of cart.lines) {
       await tx.query(

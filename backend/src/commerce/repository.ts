@@ -285,6 +285,12 @@ export class CommerceTransaction
     private readonly sql: SqlExecutor,
   ) {}
 
+  async nextOrderNumber(storeId: string): Promise<string> {
+    const result = await this.query<{ value: string }>(`INSERT INTO "StoreOrderCounter" ("storeId", "value") VALUES ($1, 1) ON CONFLICT ("storeId") DO UPDATE SET "value" = "StoreOrderCounter"."value" + 1 RETURNING "value"::text`, [storeId]);
+    if (!result.rows[0]) throw new Error("Could not allocate an order number");
+    return `JS-${result.rows[0].value.padStart(6, "0")}`;
+  }
+
   query<Row extends QueryResultRow = Record<string, unknown>>(
     statement: string,
     values?: unknown[],

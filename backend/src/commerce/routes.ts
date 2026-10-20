@@ -6,13 +6,16 @@ import type { CheckoutService } from "./service.js";
 
 const checkoutLineSchema = z.object({
   variantId: z.string().min(1),
-  quantity: z.number().int().positive(),
+  quantity: z.number().int().min(1).max(999),
+  configurationSelections: z.array(z.object({
+    optionId: z.string().min(1), valueId: z.string().min(1),
+  })).max(20).optional(),
 });
 
 const beginCheckoutSchema = z.object({
-  cartKey: z.string().min(1),
+  cartKey: z.string().min(1).max(128),
   currency: z.string().length(3),
-  items: z.array(checkoutLineSchema).min(1),
+  items: z.array(checkoutLineSchema).min(1).max(50),
   customerSnapshot: z.record(z.string(), z.unknown()),
   deliverySnapshot: z.record(z.string(), z.unknown()).optional(),
 });
@@ -31,6 +34,7 @@ function getPublicToken(request: express.Request): string {
 
 export function createCommerceRouter(
   service: CheckoutService,
+  resolveCustomer?: (request: express.Request) => Promise<string | undefined>,
 ): express.Router {
   const router = express.Router({ mergeParams: true });
 
@@ -49,10 +53,13 @@ export function createCommerceRouter(
           );
         }
 
-        const result = await service.begin({
+        await service.assertCheckoutAccess(storeId, request.ip ?? "unknown", parsed.data.cartKey);
+        const customerId = await resolveCustomer?.(request);
+        const input = {
           storeId,
           ...parsed.data,
-        });
+        };
+        const result = customerId ? await service.begin(input, customerId) : await service.begin(input);
 
         response
           .status(201)
@@ -80,6 +87,7 @@ export function createCommerceRouter(
           );
         }
 
+        await service.assertCheckoutAccess(storeId, request.ip ?? "unknown", parsed.data.attemptId, true);
         const result = await service.preparePayment(
           parsed.data.attemptId,
           storeId,

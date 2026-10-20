@@ -18,6 +18,15 @@ function repositoryWithCounters() {
 }
 
 describe("PublicOrderRateLimiter", () => {
+  it("keeps checkout retries separate from new-attempt and order-lookup budgets", async () => {
+    const { repository } = repositoryWithCounters();
+    const attempts = new PublicOrderRateLimiter(repository, { namespace: "checkout-attempt", limit: 1 });
+    const retries = new PublicOrderRateLimiter(repository, { namespace: "checkout-payment", limit: 2 });
+    await attempts.assertAllowed("store-1", "ip");
+    await expect(attempts.assertAllowed("store-1", "ip")).rejects.toMatchObject({ status: 429 });
+    await expect(retries.assertAllowed("store-1", "ip")).resolves.toBeUndefined();
+    await expect(retries.assertAllowed("store-1", "ip")).resolves.toBeUndefined();
+  });
   it("rejects the sixth public lookup for one store and IP during a one-minute window", async () => {
     const { repository } = repositoryWithCounters();
     const limiter = new PublicOrderRateLimiter(repository, { limit: 5, now: () => new Date("2026-09-16T12:00:30.000Z") });

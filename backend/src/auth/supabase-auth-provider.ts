@@ -1,4 +1,4 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
 import { ApiError } from "../http/errors.js";
 import type { TenantRepository } from "../tenants/repository.js";
 import type { AuthProvider, MerchantPrincipal } from "./types.js";
@@ -26,16 +26,25 @@ export class SupabaseAuthProvider implements AuthProvider {
   }
 
   async verify(token: string): Promise<MerchantPrincipal> {
+    let user: User;
     try {
-      const { data: { user }, error } = await this.supabase.auth.getUser(token);
+      const response = await this.supabase.auth.getUser(token);
 
-      if (error || !user) {
+      if (response.error || !response.data.user) {
         throw new ApiError(401, "AUTH_INVALID", "Invalid or expired token");
       }
+      user = response.data.user;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      console.error("Supabase auth request failed:", error);
+      throw new ApiError(503, "AUTH_PROVIDER_UNAVAILABLE", "The authentication provider is temporarily unavailable");
+    }
 
-      // 1. We know the user's Supabase UUID.
-      // 2. We use our TenantRepository (or our PostgreSQL database layer) to resolve
-      //    their merchant identity and find what stores they own.
+    // 1. We know the user's Supabase UUID.
+    // 2. Resolve their merchant identity and stores in the application database.
+    try {
       const account = await this.tenants.resolveMerchant({
         uid: user.id,
         email: user.email ?? "",
@@ -51,11 +60,8 @@ export class SupabaseAuthProvider implements AuthProvider {
         storeRoles,
       };
     } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      console.error("Supabase verification failed:", error);
-      throw new ApiError(401, "AUTH_INVALID", "Could not verify authentication token");
+      console.error("Supabase merchant lookup failed:", error);
+      throw new ApiError(503, "MERCHANT_DATA_UNAVAILABLE", "Merchant data is temporarily unavailable");
     }
   }
 }

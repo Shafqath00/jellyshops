@@ -30,7 +30,7 @@ describe("storefront starter install route", () => {
     const unknown = await request(app).post("/api/stores/store-a/storefront/starters/unknown/install").set("Authorization", "Bearer token");
     const forbidden = await request(app).post("/api/stores/store-b/storefront/starters/fresh-market/install").set("Authorization", "Bearer token");
     expect(unknown.status).toBe(400);
-    expect(forbidden.status).toBe(403);
+    expect(forbidden.status).toBe(404);
     expect(api.install).not.toHaveBeenCalled();
   });
 });

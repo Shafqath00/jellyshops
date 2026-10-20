@@ -11,11 +11,18 @@ const stripeEnvironment = {
   SCHEDULER_SECRET: randomBytes(32).toString("hex"),
 };
 const productionEnvironment = {
-  NODE_ENV: "production", AUTH_PROVIDER: "firebase", FIREBASE_PROJECT_ID: "test-project",
+  NODE_ENV: "production",
+  AUTH_PROVIDER: "firebase",
+  JELLY_FIREBASE_PROJECT_ID: "test-project",
+  CORS_ORIGINS: "https://shop.example.test",
+  SUPABASE_RUNTIME_DATABASE_URL: "postgresql://jelly_backend_login@example.test/postgres",
   ...stripeEnvironment,
 };
 
 describe("loadConfig", () => {
+  it("rejects wildcard CORS in production", () => {
+    expect(() => loadConfig({ ...productionEnvironment, CORS_ORIGINS: "*" })).toThrow("CORS_ORIGINS");
+  });
   it("does not expose a selectable SQL repository provider", () => {
     const config = loadConfig({ NODE_ENV: "test" });
 

@@ -1,4 +1,5 @@
 import pg from "pg";
+import { randomUUID } from "node:crypto";
 import type {
   CreateStoreInput,
   MerchantAccount,
@@ -56,8 +57,11 @@ export class PostgresTenantRepository implements TenantRepository {
     userId: string,
     input: CreateStoreInput,
   ): Promise<StoreSummary> {
+    const client = await this.pool.connect();
+    try {
+    await client.query("BEGIN");
     // Look up internal integer id
-    const userResult = await this.pool.query<{ id: number }>(
+    const userResult = await client.query<{ id: number }>(
       `SELECT "id" FROM "User" WHERE "firebaseUid" = $1 LIMIT 1`,
       [userId],
     );
@@ -66,20 +70,23 @@ export class PostgresTenantRepository implements TenantRepository {
       throw new Error("User not found");
     }
 
-    const storeId = `store-${input.slug}-${Date.now()}`;
+    const storeId = `store-${randomUUID()}`;
 
-    await this.pool.query(
+    await client.query(
       `INSERT INTO "Store" ("id", "name", "slug", "currency", "country", "owner_user_id", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
       [storeId, input.name, input.slug, input.currency, input.country, userId],
     );
 
-    await this.pool.query(
+    await client.query(
       `INSERT INTO "StoreMembership" ("storeId", "userId", "role", "createdAt")
        VALUES ($1, $2, 'OWNER', NOW())`,
       [storeId, internalId],
     );
 
+    await client.query(`INSERT INTO "StoreSettings" ("storeId") VALUES ($1)`, [storeId]);
+    await client.query(`INSERT INTO "StorefrontWorkspace" ("storeId", "generation", "updatedAt") VALUES ($1, 0, NOW())`, [storeId]);
+    await client.query("COMMIT");
     return {
       id: storeId,
       name: input.name,
@@ -88,6 +95,10 @@ export class PostgresTenantRepository implements TenantRepository {
       country: input.country,
       role: "OWNER",
     };
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally { client.release(); }
   }
 
   private async _listOwnedStores(

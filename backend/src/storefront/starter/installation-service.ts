@@ -69,8 +69,8 @@ export class StorefrontStarterInstallationService {
     private readonly id: () => string = randomUUID,
   ) {}
 
-  async install(storeId: string, starterPackId: string): Promise<StarterInstallationResult> {
-    if (starterPackId !== "fresh-market" && starterPackId !== "artisan-boutique") {
+  async install(storeId: string, starterPackId: string, options?: { replaceDraft: boolean; expectedGeneration: number }): Promise<StarterInstallationResult> {
+    if (starterPackId !== "fresh-market" && starterPackId !== "artisan-boutique" && starterPackId !== "jelly-signature") {
       throw new RangeError("Unknown V4 starter pack");
     }
     const pack = getV4StarterPack(starterPackId);
@@ -90,12 +90,25 @@ export class StorefrontStarterInstallationService {
         [storeId],
       );
       const current = workspace.rows[0];
-      if (current?.starterPackId === pack.id && current.starterPackVersion === pack.version) {
+      if (options && Number(current?.generation ?? 0) !== options.expectedGeneration) throw new StarterInstallationConflictError("The draft changed. Reload before replacing it.");
+      if (pack.id === "jelly-signature") {
+        const collisions = await sql.query<{ handle: string }>('SELECT "handle" FROM "StorePage" WHERE "storeId"=$1 AND "handle"=ANY($2::text[])', [storeId, ["account", "wishlist", "checkout", "order", "search", "cart", "collections", "products", "shop", "contact", "newsletter"]]);
+        if (collisions.rows.length) throw new StarterInstallationConflictError(`Rename conflicting content paths before installing: ${collisions.rows.map((row) => row.handle).join(", ")}.`);
+      }
+      if (!options?.replaceDraft && current?.starterPackId === pack.id && current.starterPackVersion === pack.version) {
         return { storeId, starterPackId: pack.id, starterPackVersion: pack.version, generation: Number(current.generation), installed: false };
       }
-      if (current?.starterPackId || await hasExistingWorkspaceState(sql, storeId)) throw new StarterInstallationConflictError();
+      const hasState = current?.starterPackId || await hasExistingWorkspaceState(sql, storeId);
+      if (hasState && !options?.replaceDraft) throw new StarterInstallationConflictError();
 
       const installationId = this.id();
+      if (hasState) {
+        // Retain old templates and shared sections so saved drafts remain inspectable.
+        // Publications contain immutable snapshots and are never modified here.
+        await sql.query('DELETE FROM "StorefrontTemplateAssignment" WHERE "storeId"=$1', [storeId]);
+        await sql.query(`UPDATE "StorefrontTemplate" SET "handle"='previous-' || substr(md5("id" || $2),1,24), "revision"="revision"+1 WHERE "storeId"=$1 AND "handle"='default'`, [storeId, installationId]);
+        await sql.query(`UPDATE "NavigationMenu" SET "handle"='previous-' || substr(md5("id" || $2),1,24), "revision"="revision"+1 WHERE "storeId"=$1`, [storeId, installationId]);
+      }
       const installedGlobalIds = new Map<string, string>();
       for (const global of pack.globalSections) installedGlobalIds.set(global.section.id, `${installationId}:${global.section.id}`);
       const installedTemplateIds = new Map(pack.templates.map((template) => [template.key, `${installationId}:${template.key}`]));
@@ -124,9 +137,17 @@ export class StorefrontStarterInstallationService {
       }
 
       await sql.query(
-        `INSERT INTO "ThemeConfiguration" ("storeId", "revision", "themeId", "themeVersion", "settings", "draftArtifactId", "updatedAt") VALUES ($1, 0, $2, $3, $4::jsonb, NULL, $5)`,
+        `INSERT INTO "ThemeConfiguration" ("storeId", "revision", "themeId", "themeVersion", "settings", "draftArtifactId", "updatedAt") VALUES ($1, 0, $2, $3, $4::jsonb, NULL, $5)
+         ON CONFLICT ("storeId") DO UPDATE SET "revision"="ThemeConfiguration"."revision"+1,"themeId"=EXCLUDED."themeId","themeVersion"=EXCLUDED."themeVersion","settings"=EXCLUDED."settings","draftArtifactId"=NULL,"updatedAt"=EXCLUDED."updatedAt"`,
         [storeId, pack.theme.themeId, pack.version, JSON.stringify(pack.theme.settings), now],
       );
+      if (pack.id === "jelly-signature") {
+        for (const page of [{ handle: "about", title: "About" }, { handle: "faq", title: "Frequently asked questions" }, { handle: "shipping", title: "Shipping information" }, { handle: "returns", title: "Returns information" }, { handle: "privacy", title: "Privacy policy" }, { handle: "terms", title: "Terms of service" }]) {
+          await sql.query(`INSERT INTO "StorePage" ("id","storeId","title","handle","content","featuredMediaId","status","publishedAt","seoTitle","seoDescription","socialMediaId","noindex","canonicalOverride","createdAt","updatedAt")
+            SELECT $1,$2,$3,$4,$5::jsonb,NULL,'DRAFT',NULL,NULL,NULL,NULL,TRUE,NULL,$6,$6
+            WHERE NOT EXISTS (SELECT 1 FROM "StorePage" WHERE "storeId"=$2 AND "handle"=$4)`, [`${installationId}:page:${page.handle}`, storeId, page.title, page.handle, JSON.stringify({ type: "doc", content: [{ type: "paragraph" }] }), now]);
+        }
+      }
       const updatedWorkspace = await sql.query<{ generation: number }>(
         `UPDATE "StorefrontWorkspace" SET "generation" = "generation" + 1, "starterPackId" = $2, "starterPackVersion" = $3, "updatedAt" = $4 WHERE "storeId" = $1 RETURNING "generation"`,
         [storeId, pack.id, pack.version, now],

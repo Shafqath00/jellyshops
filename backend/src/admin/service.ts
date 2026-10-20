@@ -22,6 +22,8 @@ export interface AdminLowStockItem {
 }
 
 export interface AdminSummary {
+  timezone: string;
+  setup: { details: boolean; products: boolean; publication: boolean; shipping: boolean; payments: boolean };
   revenueMinor: number;
   orderCount: number;
   publishedProductCount: number;
@@ -43,9 +45,10 @@ export interface MerchantCustomerDetail extends MerchantCustomer {
 }
 
 export class AdminSummaryService {
-  constructor(private readonly repository: CommerceRepository) {}
+  constructor(private readonly repository: CommerceRepository, private readonly paymentReady?: (storeId: string) => Promise<boolean>) {}
 
   async getSummary(storeId: string): Promise<AdminSummary> {
+    const payments = await this.paymentReady?.(storeId).catch(() => false) ?? false;
     return this.repository.transaction(async (tx) => {
       const totals = await tx.query<{ revenueMinor: number; orderCount: number }>(`
         SELECT COALESCE(SUM(o."totalMinor") FILTER (WHERE p."status" = 'PAID' AND o."status" <> 'CANCELLED'), 0)::int AS "revenueMinor",
@@ -66,7 +69,16 @@ export class AdminSummaryService {
         JOIN "Product" p ON p."storeId" = v."storeId" AND p."id" = v."productId"
         WHERE i."storeId" = $1 AND i."quantity" <= 3 AND p."status" = 'ACTIVE' AND v."archivedAt" IS NULL
         ORDER BY i."quantity", p."title", v."title" LIMIT 5`, [storeId]);
-      return { revenueMinor: totals.rows[0]?.revenueMinor ?? 0, orderCount: totals.rows[0]?.orderCount ?? 0, publishedProductCount: products.rows[0]?.publishedProductCount ?? 0, actionableOrders: actionableOrders.rows, lowStock: lowStock.rows };
+      const configuration = await tx.query<{ timezone: string; details: boolean; publication: boolean; shipping: boolean }>(`
+        SELECT COALESCE(ss."timezone", 'UTC') AS "timezone",
+          (length(trim(s."name")) > 0 AND length(trim(s."slug")) > 0) AS "details",
+          (s."currentPublicationId" IS NOT NULL) AS "publication",
+          (ss."storeId" IS NOT NULL AND ss."shippingMinor" >= 0) AS "shipping"
+        FROM "Store" s LEFT JOIN "StoreSettings" ss ON ss."storeId" = s."id"
+        WHERE s."id" = $1`, [storeId]);
+      const settings = configuration.rows[0];
+      const publishedProductCount = products.rows[0]?.publishedProductCount ?? 0;
+      return { timezone: settings?.timezone ?? "UTC", setup: { details: settings?.details ?? false, products: publishedProductCount > 0, publication: settings?.publication ?? false, shipping: settings?.shipping ?? false, payments }, revenueMinor: totals.rows[0]?.revenueMinor ?? 0, orderCount: totals.rows[0]?.orderCount ?? 0, publishedProductCount, actionableOrders: actionableOrders.rows, lowStock: lowStock.rows };
     });
   }
 }
