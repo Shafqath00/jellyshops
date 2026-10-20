@@ -1,0 +1,32 @@
+name: Core MVP checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            jellyshops/package-lock.json
+            backend/package-lock.json
+      - run: npm ci
+        working-directory: jellyshops
+      - run: node scripts/prepare-shared-packages.mjs --check
+      - run: npm ci
+        working-directory: backend
+      - run: npm run typecheck && npm test -- --maxWorkers=2 && npm run build
+        working-directory: backend
+      - run: npm run typecheck && npm run lint && npm test -- --maxWorkers=2
+        working-directory: jellyshops
+      - run: npm run build
+        working-directory: jellyshops
+        env:
+          NODE_ENV: production

@@ -1,6 +1,7 @@
 # Secrets and local configuration
 .env
 **/.env
+**/.env.onboarding.local
 !.env.example
 .firebaserc
 
@@ -20,6 +21,12 @@ uploads/
 **/uploads/
 **/.test-postgres-task2-visible/
 *.log
+**/.cache/
+*-mvp-tests*.json
+*-mvp-final-tests.json
+frontend-mvp-lint.json
+catalog-payment-tests.json
+**/.env.staging.local
 *.tsbuildinfo
 
 # Test and local worktree output
@@ -33,3 +40,4 @@ playwright-report/
 # Local generated/runtime artifacts
 backend/generated/
 backend/cloud-sql-proxy.exe
+backend/.tmp-vitest/
