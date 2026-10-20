@@ -4,6 +4,22 @@ import type { SectionNode } from "@jelly/storefront-schema";
 import type { CommerceDatabase, SqlExecutor } from "../../commerce/repository.js";
 import { ApiError } from "../../http/errors.js";
 
+const heading = (text: string) => ({ type: "heading", attrs: { level: 2 }, content: [{ type: "text", text }] });
+const paragraph = (text: string) => ({ type: "paragraph", content: [{ type: "text", text }] });
+const STARTER_PAGE_COPY: Record<string, Array<[string, string]>> = {
+  about: [["Our story", "Tell customers who you are, what you make or sell, and why you started."], ["What we care about", "Share the values behind your products, such as quality, materials or service."]],
+  faq: [["How long does delivery take?", "Add your usual dispatch and delivery times here."], ["Can I return an item?", "Explain your return window and how to start a return."], ["How can I contact you?", "Point customers to your contact page or support email."]],
+  shipping: [["Where we ship", "List the regions you deliver to."], ["Delivery times and costs", "Explain dispatch times, delivery estimates and shipping charges."]],
+  returns: [["Returns", "Explain how long customers have to return an item and what condition it must be in."], ["Refunds", "Explain when and how refunds are issued."]],
+  privacy: [["What we collect", "Describe the personal information you collect and why."], ["How we use it", "Describe how data is used, stored and shared, and how customers can contact you about it."]],
+  terms: [["Using this store", "Describe the terms that apply when customers place orders."], ["Orders and payment", "Describe pricing, payment, cancellations and liability."]],
+};
+/** Editable starter copy for the draft information pages. Merchants must review and complete it before publishing; it is not legal advice. */
+function starterPageContent(handle: string) {
+  const sections = STARTER_PAGE_COPY[handle] ?? [];
+  return { type: "doc", content: sections.length ? sections.flatMap(([title, body]) => [heading(title), paragraph(body)]) : [{ type: "paragraph" }] };
+}
+
 export class StarterInstallationConflictError extends ApiError {
   constructor(message = "A starter can only be installed into an empty storefront workspace.") {
     super(409, "STARTER_INSTALL_CONFLICT", message);
@@ -145,7 +161,7 @@ export class StorefrontStarterInstallationService {
         for (const page of [{ handle: "about", title: "About" }, { handle: "faq", title: "Frequently asked questions" }, { handle: "shipping", title: "Shipping information" }, { handle: "returns", title: "Returns information" }, { handle: "privacy", title: "Privacy policy" }, { handle: "terms", title: "Terms of service" }]) {
           await sql.query(`INSERT INTO "StorePage" ("id","storeId","title","handle","content","featuredMediaId","status","publishedAt","seoTitle","seoDescription","socialMediaId","noindex","canonicalOverride","createdAt","updatedAt")
             SELECT $1,$2,$3,$4,$5::jsonb,NULL,'DRAFT',NULL,NULL,NULL,NULL,TRUE,NULL,$6,$6
-            WHERE NOT EXISTS (SELECT 1 FROM "StorePage" WHERE "storeId"=$2 AND "handle"=$4)`, [`${installationId}:page:${page.handle}`, storeId, page.title, page.handle, JSON.stringify({ type: "doc", content: [{ type: "paragraph" }] }), now]);
+            WHERE NOT EXISTS (SELECT 1 FROM "StorePage" WHERE "storeId"=$2 AND "handle"=$4)`, [`${installationId}:page:${page.handle}`, storeId, page.title, page.handle, JSON.stringify(starterPageContent(page.handle)), now]);
         }
       }
       const updatedWorkspace = await sql.query<{ generation: number }>(

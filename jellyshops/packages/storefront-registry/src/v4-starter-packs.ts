@@ -68,7 +68,7 @@ function global(globalSectionId: string) {
 function makePack(id: V4StarterPackId): V4StarterPack {
   const fresh = id === "fresh-market";
   const signature = id === "jelly-signature";
-  const label = signature ? "Jelly Signature" : fresh ? "Fresh Market" : "Artisan Boutique";
+  const label = signature ? "Jelly Minimal" : fresh ? "Fresh Market" : "Artisan Boutique";
   const announcementText = signature ? "A little something lovely, delivered with care." : fresh ? "Good things are in season." : "Thoughtful finds, made to last.";
   const heroHeading = signature ? "Find your everyday favourites." : fresh ? "Good food, gathered well." : "Made to become part of your story.";
   const heroSummary = signature ? "Explore the latest from our store." : fresh

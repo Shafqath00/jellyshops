@@ -25,7 +25,7 @@ function definition(id: ThemeId, label: string, tokens: ThemeTokens, manifest?: 
   return { id, label, tokens, manifest: manifest ?? presetManifest, sectionOverrides, components, sectionVariants: Object.fromEntries(listSectionDefinitions().map((section) => [section.type, `${id}-${section.type}`])) };
 }
 const themes = [
-  definition("jelly-signature", "Jelly Signature", signatureTokens, signatureManifest),
+  definition("jelly-signature", "Jelly Minimal", signatureTokens, signatureManifest),
   definition("minimal", "Default", minimalTokens, defaultManifest),
   definition("classic", "Classic", classicTokens),
   definition("bold", "Bold", boldTokens),
