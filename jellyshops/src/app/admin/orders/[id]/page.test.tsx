@@ -3,9 +3,11 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { OrderDetailView } from "./page";
 
-vi.mock("@/features/commerce/merchant-session", () => ({
-  getMerchantSession: () => ({ storeId: "store-demo", token: "jelly-demo-merchant" }),
-}));
+vi.mock("@/features/auth/auth-provider", () => {
+  const activeStore = { id: "store-demo", currency: "INR", country: "IN" };
+  const session = { access_token: "jelly-demo-merchant" };
+  return { useAuth: () => ({ activeStore, session }) };
+});
 
 function jsonResponse(body: unknown) {
   return new Response(JSON.stringify(body), { headers: { "content-type": "application/json" } });
@@ -30,13 +32,13 @@ describe("OrderDetailView", () => {
     render(<OrderDetailView orderId="order-1" />);
 
     expect(await screen.findByText("JS-1001")).toBeVisible();
-    expect(screen.getByText(/payment dispute: needs response/i)).toBeVisible();
+    expect(screen.getByLabelText("Payment disputes")).toHaveTextContent(/payment dispute:\s*needs response/i);
     await user.click(screen.getByRole("button", { name: /confirm order/i }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenLastCalledWith(
       "http://localhost:3001/api/stores/store-demo/orders/order-1/fulfilment",
       expect.objectContaining({ method: "POST", body: JSON.stringify({ status: "CONFIRMED" }) }),
     ));
-    expect(await screen.findByText("confirmed")).toBeVisible();
+    expect((await screen.findAllByText(/^confirmed$/i)).length).toBeGreaterThan(0);
   });
 });

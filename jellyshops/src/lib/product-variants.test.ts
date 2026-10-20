@@ -4,6 +4,10 @@ const value = (id: string, label: string) => ({ id, label, priceAdjustmentMinor:
 const option = (id: string, values: ReturnType<typeof value>[]) => ({ id, name: id, type: "variant" as const, display: "buttons" as const, required: true, position: 0, values });
 
 describe("product variant reconciliation", () => {
+  it("applies edited base price and stock while preserving the standard variant ID", () => {
+    const result = reconcileProductVariants({ options: [], inventoryOptionIds: [], variants: [{ id: "standard", name: "Standard", priceMinor: 100, stock: 2, sku: "OLD", options: {} }], basePriceMinor: 250, defaultStock: 5, standardSku: "NEW", updateStandard: true });
+    expect(result.variants[0]).toMatchObject({ id: "standard", priceMinor: 250, stock: 5, sku: "NEW" });
+  });
   it("keeps a standard variant for simple products", () => {
     expect(reconcileProductVariants({ options: [], inventoryOptionIds: [], variants: [], basePriceMinor: 49900 }).variants[0].name).toBe("Standard");
   });

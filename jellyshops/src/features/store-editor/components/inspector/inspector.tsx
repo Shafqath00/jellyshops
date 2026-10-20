@@ -70,15 +70,13 @@ export function Inspector({
   const requestedFieldKey = selection.kind === "block" ? selection.fieldKey : undefined;
   const focusRequestId = selection.kind === "block" ? selection.focusRequestId : undefined;
 
-  if (!section) return null;
-
-  const sectionDefinition = getSectionDefinition(section.type);
+  const sectionDefinition = section ? getSectionDefinition(section.type) : undefined;
   const selectedBlock = selection.kind === "block"
-    ? section.blocks.find(({ id }) => id === selection.blockId)
+    ? section?.blocks.find(({ id }) => id === selection.blockId)
     : undefined;
   const blockDefinition = selectedBlock ? getBlockDefinition(selectedBlock.type) : undefined;
   const controls = selectedBlock ? blockDefinition?.controls ?? [] : sectionDefinition?.controls ?? [];
-  const settings = selectedBlock?.settings ?? section.settings;
+  const settings = selectedBlock?.settings ?? section?.settings ?? {};
 
   useEffect(() => {
     if (!selectedBlock || !requestedFieldKey) return;
@@ -90,6 +88,8 @@ export function Inspector({
       )
       ?.focus();
   }, [selectedBlock, requestedFieldKey, focusRequestId]);
+
+  if (!section) return null;
 
   const update = (key: string, value: unknown) => {
     if (selectedBlock) {

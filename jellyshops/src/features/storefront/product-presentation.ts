@@ -14,7 +14,7 @@ export function catalogProductToProduct(product: CatalogAdminProduct): Product {
   );
   return {
     id: product.id, storeId: product.storeId, name: product.title, slug: product.handle,
-    description: product.description, category: product.productType ?? "", imageUrl: product.media[0]?.url ?? "",
+    description: product.description, specifications: product.specifications ?? {}, category: product.productType ?? "", imageUrl: product.media[0]?.url ?? "",
     published: product.status === "ACTIVE", archived: product.status === "ARCHIVED", featured: false,
     media: product.media.map((media) => ({ id: media.id, url: media.url, ...(media.altText ? { altText: media.altText } : {}) })),
     ...(product.vendor ? { vendor: product.vendor } : {}),
@@ -28,9 +28,10 @@ export function catalogProductToProduct(product: CatalogAdminProduct): Product {
   };
 }
 
-export function createProductPresentationContext({ product, currency, selections, quantity, onSelectionsChange, onQuantityChange, onAddToCart, relatedProducts = [] }: {
+export function createProductPresentationContext({ product, currency, shippingCopy, selections, quantity, onSelectionsChange, onQuantityChange, onAddToCart, relatedProducts = [] }: {
   product: Product;
   currency: Currency;
+  shippingCopy?: string;
   selections: ConfiguredOptionSelection[];
   quantity: number;
   onSelectionsChange(selections: ConfiguredOptionSelection[]): void;
@@ -53,7 +54,7 @@ export function createProductPresentationContext({ product, currency, selections
           : { state: "available" as const, message: `${variant.stock} available`, maxQuantity: variant.stock };
 
   return {
-    product: { id: product.id, title: product.name, description: product.description, imageUrl: product.imageUrl, media: product.media ?? (product.imageUrl ? [{ id: `${product.id}-primary`, url: product.imageUrl }] : []), sku: variant?.sku || undefined, vendor: product.vendor, options: options.map((option) => ({ id: option.id, name: option.name, required: option.required, values: option.values.map((value) => ({ id: value.id, label: value.label, selected: selectedValue(option.id) === value.id, available: true })) })) },
+    product: { id: product.id, title: product.name, description: product.description, imageUrl: product.imageUrl, specifications: product.specifications ?? {}, shippingCopy, media: product.media ?? (product.imageUrl ? [{ id: `${product.id}-primary`, url: product.imageUrl }] : []), sku: variant?.sku || undefined, vendor: product.vendor, options: options.map((option) => ({ id: option.id, name: option.name, required: option.required, values: option.values.map((value) => ({ id: value.id, label: value.label, selected: selectedValue(option.id) === value.id, available: true })) })) },
     selection: selections,
     quantity: clampedQuantity,
     pricing: { price: formatMoney(priceMinor ?? 0, currency), ...(variant?.compareAtPriceMinor ?? product.compareAtPriceMinor ? { compareAtPrice: formatMoney(variant?.compareAtPriceMinor ?? product.compareAtPriceMinor ?? 0, currency) } : {}) },

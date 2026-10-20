@@ -1,6 +1,95 @@
 @import "tailwindcss";
 
+/* Route-owned customer controls inherit each published theme's shared tokens. */
+.signature-page { width: min(calc(100% - 32px), var(--jelly-container-width, 1280px)); margin-inline: auto; padding-block: clamp(32px, 6vw, var(--jelly-spacing-section, 80px)); color: var(--theme-text, #172440); font-family: var(--theme-font-body, Arial, sans-serif); font-size: var(--jelly-body-size, 16px); font-weight: var(--jelly-body-weight, 400); }
+.signature-page-heading { margin-bottom: 32px; max-width: 720px; }
+.signature-page-heading h1 { font-family: var(--theme-font-heading, Georgia, serif); font-size: clamp(32px, 5vw, var(--jelly-heading-size, 56px)); font-weight: var(--jelly-heading-weight, 400); line-height: 1.12; letter-spacing: -.035em; margin-block: 8px 16px; }
+.signature-page-heading p:not(.signature-eyebrow) { color: var(--theme-muted-text, #5b6170); line-height: 1.7; }
+.signature-eyebrow { text-transform: uppercase; letter-spacing: .16em; font-size: 11px; font-weight: 700; }
+.signature-panel { border: 1px solid var(--theme-border, #e4e0db); background: var(--theme-surface, white); border-radius: var(--jelly-radius-card, 16px); padding: clamp(24px, 4vw, 40px); }
+.signature-panel h2 { font-family: var(--theme-font-heading, Georgia, serif); font-size: 24px; margin-bottom: 16px; }
+.signature-panel p { line-height: 1.7; margin-bottom: 16px; }
+.signature-panel form { display: grid; gap: 16px; max-width: 560px; }
+.signature-panel label { display: grid; gap: 8px; font-size: 14px; font-weight: 600; }
+.signature-panel input, .signature-panel select, .signature-panel textarea { width: 100%; min-height: 48px; padding: 12px 16px; border: 1px solid var(--theme-border, #d8d8de); background: var(--theme-background, #fcf9f2); color: inherit; border-radius: var(--jelly-radius-input, 8px); font: inherit; }
+.signature-panel textarea { min-height: 160px; resize: vertical; }
+.signature-page :focus-visible { outline: 2px solid var(--jelly-color-primary, #172440); outline-offset: 4px; }
+.signature-primary, .signature-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 12px 24px; border-radius: var(--jelly-radius-button, 8px); font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; }
+.signature-primary { background: var(--jelly-color-primary, #172440); color: var(--theme-surface, white); border: 1px solid var(--jelly-color-primary, #172440); }
+.signature-secondary { color: var(--theme-text, #172440); border: 1px solid var(--theme-border, #d8d8de); background: var(--theme-surface, white); }
+.signature-page button:disabled { opacity: .55; cursor: wait; }
+.signature-auth { max-width: 560px; }
+.signature-auth nav, .signature-account-nav, .signature-actions { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+.signature-auth nav { margin-top: 24px; font-size: 13px; }
+.signature-account-nav { border-bottom: 1px solid var(--theme-border, #ddd); padding-block: 0 24px; margin-bottom: 32px; }
+.signature-account-nav a { padding-block: 8px; }
+.signature-account-nav button { margin-left: auto; }
+.signature-account-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px; }
+.signature-address, .signature-order { border-bottom: 1px solid var(--theme-border, #ddd); padding-block: 24px; overflow-wrap: anywhere; }
+.signature-order { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; }
+.signature-order ul { width: 100%; }
+.signature-order li { display: flex; justify-content: space-between; gap: 16px; padding-block: 8px; }
+.signature-notice { padding: 16px 24px; margin-bottom: 24px; border: 1px solid var(--theme-border, #ddd); border-radius: 8px; overflow-wrap: anywhere; }
+.signature-wishlist { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,240px),1fr)); gap: 24px; }
+.signature-wishlist article { padding: 24px; border: 1px solid var(--theme-border, #ddd); border-radius: 12px; }
+@media (max-width: 767px) { .signature-account-grid { grid-template-columns: minmax(0,1fr); } .signature-account-nav { gap: 8px 16px; } .signature-page { width: calc(100% - 32px); } }
+.signature-catalog { display: grid; gap: 32px; }
+.signature-filters { display: grid; grid-template-columns: minmax(180px,2fr) repeat(4,minmax(120px,1fr)) auto; gap: 12px; align-items: end; padding: 20px; border: 1px solid var(--theme-border,#e4e0db); border-radius: 16px; background: var(--theme-surface,#fff); }
+.signature-filters label { display: grid; gap: 7px; min-width: 0; font-size: 12px; font-weight: 600; }
+.signature-filters input:not([type=checkbox]), .signature-filters select, .signature-quick-view select { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--theme-border,#d8d8de); border-radius: 8px; background: var(--theme-background,#fcf9f2); color: inherit; font: inherit; }
+.signature-filters .signature-check { display: flex; align-items: center; gap: 8px; min-height: 44px; white-space: nowrap; }
+.signature-product-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 32px 20px; }
+.signature-product-grid article { min-width: 0; }
+.signature-product-grid article > a { color: inherit; text-decoration: none; }
+.signature-card-image { overflow: hidden; aspect-ratio: 4/5; border-radius: 12px; background: var(--theme-accent-soft,#f4b9ca); }
+.signature-card-image img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
+.signature-product-grid article:hover .signature-card-image img { transform: scale(1.025); }
+.signature-product-grid h2 { margin-top: 14px; font: 20px/1.25 var(--theme-font-heading,Georgia,serif); }
+.signature-product-grid article > p { margin: 8px 0 12px; font-size: 14px; }
+.signature-quick-view { display: grid; gap: 16px; }
+.signature-quick-view > img { width: min(100%,420px); max-height: 360px; justify-self: center; object-fit: contain; border-radius: 10px; background: var(--theme-accent-soft,#f4b9ca); }
+.signature-quick-view label { display: grid; gap: 8px; }
+.signature-catalog :focus-visible { outline: 2px solid var(--jelly-color-primary,#172440); outline-offset: 3px; }
+@media (max-width: 1100px) { .signature-filters { grid-template-columns: repeat(3,minmax(0,1fr)); } .signature-product-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } }
+@media (max-width: 680px) { .signature-filters { grid-template-columns: repeat(2,minmax(0,1fr)); padding: 14px; } .signature-filters label:first-child { grid-column: 1/-1; } .signature-product-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px 12px; } .signature-product-grid h2 { font-size: 17px; } }
+[data-jelly-theme="jelly-signature"] .jelly-container { width: min(calc(100% - 48px), var(--jelly-container-width, 1280px)); margin-inline: auto; }
+[data-jelly-theme="jelly-signature"] .jelly-header { display: grid; position: relative; grid-template-columns: minmax(120px,1fr) auto minmax(240px,1fr); gap: 24px; align-items: center; min-height: 88px; padding: 16px max(24px,calc((100vw - var(--jelly-container-width,1280px))/2)); background: var(--theme-background); border-bottom: 1px solid var(--theme-border); }
+[data-jelly-theme="jelly-signature"] .jelly-header-brand { font: 28px var(--theme-font-heading); letter-spacing: -.035em; }
+[data-jelly-theme="jelly-signature"] .jelly-header-brand img { max-height: 48px; max-width: 200px; width: auto; object-fit: contain; }
+[data-jelly-theme="jelly-signature"] .jelly-header ul, [data-jelly-theme="jelly-signature"] .jelly-header-tools { display: flex; gap: 24px; align-items: center; font-size: 13px; }
+[data-jelly-theme="jelly-signature"] .jelly-header-tools { justify-content: flex-end; gap: 16px; }
+.jelly-mobile-navigation { display: none; }
+[data-jelly-theme="jelly-signature"] .jelly-hero { padding-block: 48px 64px; }
+[data-jelly-theme="jelly-signature"] .jelly-hero > .jelly-container { border-radius: 24px; overflow: hidden; background: var(--theme-accent); display: grid; grid-template-columns: 1.1fr 1fr; min-height: 480px; }
+[data-jelly-theme="jelly-signature"] .jelly-hero-content { padding: clamp(32px,5vw,72px); display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 24px; }
+[data-jelly-theme="jelly-signature"] .jelly-hero h1 { font-family: var(--theme-font-heading); font-size: clamp(36px,5vw,var(--jelly-heading-size,64px)); font-weight: var(--jelly-heading-weight,400); line-height: 1.08; letter-spacing: -.04em; }
+[data-jelly-theme="jelly-signature"] .jelly-hero-media { min-height: 320px; }
+[data-jelly-theme="jelly-signature"] .jelly-hero-media img { width: 100%; height: 100%; object-fit: cover; }
+[data-jelly-theme="jelly-signature"] .jelly-button, [data-jelly-theme="jelly-signature"] .jelly-product-purchase button { background: var(--jelly-color-primary); color: white; padding: 16px 24px; min-height: 48px; border-radius: var(--jelly-radius-button); }
+[data-jelly-theme="jelly-signature"] .jelly-product-purchase .jelly-container { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 16px; }
+[data-jelly-theme="jelly-signature"] .jelly-newsletter { margin-block: var(--jelly-spacing-section,80px); padding-block: 64px; background: var(--theme-accent-soft); }
+[data-jelly-theme="jelly-signature"] .jelly-newsletter form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px; margin-top: 24px; max-width: 720px; }
+[data-jelly-theme="jelly-signature"] .jelly-newsletter label { display: grid; gap: 8px; }
+[data-jelly-theme="jelly-signature"] .jelly-newsletter input[type="email"] { min-height: 48px; border: 1px solid var(--theme-border); border-radius: 8px; padding: 12px 16px; background: var(--theme-surface); }
+[data-jelly-theme="jelly-signature"] .jelly-newsletter label:has(input[type="checkbox"]) { display: flex; align-items: center; gap: 8px; order: 2; width: 100%; font-size: 13px; }
+[data-jelly-theme="jelly-signature"] .jelly-newsletter button { background: var(--jelly-color-primary); color: white; min-height: 48px; padding: 12px 24px; border-radius: 8px; }
+[data-jelly-theme="jelly-signature"] .jelly-footer { background: var(--jelly-color-primary); color: var(--theme-background); padding: 48px max(24px,calc((100vw - var(--jelly-container-width,1280px))/2)); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 32px; }
+@media (max-width: 767px) {
+  [data-jelly-theme="jelly-signature"] .jelly-header { grid-template-columns: minmax(0,1fr) auto auto; padding: 16px; gap: 8px; min-height: 72px; }
+  [data-jelly-theme="jelly-signature"] .jelly-header > nav:not(.jelly-header-tools) { display: none; }
+  [data-jelly-theme="jelly-signature"] .jelly-header-tools a:not(:last-child) { display: none; }
+  [data-jelly-theme="jelly-signature"] .jelly-mobile-navigation { display: block; }
+  [data-jelly-theme="jelly-signature"] .jelly-mobile-navigation summary { min-height: 44px; padding: 12px; cursor: pointer; }
+  [data-jelly-theme="jelly-signature"] .jelly-mobile-navigation nav { position: absolute; z-index: 30; top: 100%; right: 0; left: 0; background: var(--theme-surface); padding: 24px; border-block: 1px solid var(--theme-border); box-shadow: 0 16px 24px #17244012; }
+  [data-jelly-theme="jelly-signature"] .jelly-mobile-navigation ul { flex-direction: column; align-items: stretch; }
+  [data-jelly-theme="jelly-signature"] .jelly-mobile-navigation a { min-height: 44px; display: flex; align-items: center; }
+  [data-jelly-theme="jelly-signature"] .jelly-container { width: calc(100% - 32px); }
+  [data-jelly-theme="jelly-signature"] .jelly-hero > .jelly-container { grid-template-columns: minmax(0,1fr); }
+  [data-jelly-theme="jelly-signature"] .jelly-hero-media { min-height: 240px; }
+}
+
 @theme {
+  /* ── Jellyshop brand palette ─────────────────────────────────────── */
   --color-jelly-ink: #14213d;
   --color-jelly-ink-soft: #45516a;
   --color-jelly-paper: #fffdf8;
@@ -11,17 +100,97 @@
   --color-jelly-mint: #a8e6cf;
   --color-jelly-blue: #8ec5ff;
   --color-jelly-line: #dcd8ce;
+  --color-jelly-success: #27b36a;
+  --color-jelly-warning: #f59e0b;
+  --color-jelly-destructive: #e03e5a;
+
+  /* ── Radius ──────────────────────────────────────────────────────── */
   --radius-jelly-sm: 12px;
   --radius-jelly-md: 20px;
   --radius-jelly-lg: 32px;
+
+  /* ── Shadows ─────────────────────────────────────────────────────── */
   --shadow-jelly-card: 0 24px 70px rgba(20, 33, 61, 0.13);
   --shadow-jelly-guava: 5px 5px 0 #ff6b8a;
   --shadow-jelly-citrus: 5px 5px 0 #ffd85a;
+  --shadow-jelly-ink: 5px 5px 0 #14213d;
+
+  /* ── Typography ──────────────────────────────────────────────────── */
   --font-jelly-sans: "Aptos", "Segoe UI", Arial, sans-serif;
   --font-jelly-display: "Arial Rounded MT Bold", "Trebuchet MS", sans-serif;
   --font-jelly-mono: "Cascadia Mono", monospace;
+
+  /* ── Motion: easing curves ───────────────────────────────────────── */
+  --ease-jelly-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-jelly-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --ease-jelly-accelerate: cubic-bezier(0.4, 0, 1, 1);
+  --ease-jelly-spring: cubic-bezier(0.34, 1.28, 0.64, 1);
+
+  /* ── Motion: duration scale ──────────────────────────────────────── */
+  --duration-jelly-instant: 80ms;
+  --duration-jelly-fast: 140ms;
+  --duration-jelly-standard: 200ms;
+  --duration-jelly-medium: 300ms;
+  --duration-jelly-slow: 420ms;
+  --duration-jelly-drawer: 320ms;
+
+  /* ── Motion: named animation utilities (animate-jelly-*) ────────── */
+  --animate-jelly-fade-in: jelly-fade-in var(--duration-jelly-standard) var(--ease-jelly-decelerate) both;
+  --animate-jelly-fade-out: jelly-fade-out var(--duration-jelly-fast) var(--ease-jelly-accelerate) both;
+  --animate-jelly-slide-up: jelly-slide-up var(--duration-jelly-standard) var(--ease-jelly-decelerate) both;
+  --animate-jelly-slide-in-right: jelly-slide-in-right var(--duration-jelly-drawer) var(--ease-jelly-decelerate) both;
+  --animate-jelly-slide-out-right: jelly-slide-out-right var(--duration-jelly-drawer) var(--ease-jelly-accelerate) both;
+  --animate-jelly-slide-in-left: jelly-slide-in-left var(--duration-jelly-drawer) var(--ease-jelly-decelerate) both;
+  --animate-jelly-badge-bump: jelly-badge-bump var(--duration-jelly-fast) var(--ease-jelly-spring);
+  --animate-jelly-shimmer: jelly-shimmer 1.6s var(--ease-jelly-standard) infinite;
+  --animate-jelly-marquee: jelly-marquee 32s linear infinite;
+  --animate-jelly-ping-soft: jelly-ping-soft 2s var(--ease-jelly-standard) infinite;
+
+  /* ── Keyframes ───────────────────────────────────────────────────── */
+  @keyframes jelly-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes jelly-fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+  @keyframes jelly-slide-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes jelly-slide-in-right {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+  @keyframes jelly-slide-out-right {
+    from { transform: translateX(0); }
+    to { transform: translateX(100%); }
+  }
+  @keyframes jelly-slide-in-left {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+  @keyframes jelly-badge-bump {
+    0%, 100% { transform: scale(1); }
+    40% { transform: scale(1.32); }
+  }
+  @keyframes jelly-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  @keyframes jelly-marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes jelly-ping-soft {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.12); }
+  }
 }
 
+/* ── Semantic token layer ────────────────────────────────────────────── */
+/* Raw brand aliases (used by legacy globals.css CSS classes) */
 :root {
   --ink: #14213d;
   --ink-soft: #45516a;
@@ -38,6 +207,59 @@
   --radius-sm: 12px;
   --radius-md: 20px;
   --radius-lg: 32px;
+
+  /* shadcn/ui semantic tokens — mapped to Jellyshop brand palette */
+  --background: #fffdf8;        /* jelly-paper */
+  --foreground: #14213d;        /* jelly-ink */
+  --card: #ffffff;
+  --card-foreground: #14213d;
+  --popover: #ffffff;
+  --popover-foreground: #14213d;
+  --primary: #14213d;           /* jelly-ink */
+  --primary-foreground: #fffdf8;
+  --secondary: #f7f4ed;         /* jelly-paper-deep */
+  --secondary-foreground: #14213d;
+  --muted: #f7f4ed;
+  --muted-foreground: #45516a;  /* jelly-ink-soft */
+  --accent: #ffd85a;            /* jelly-citrus */
+  --accent-foreground: #14213d;
+  --destructive: #e03e5a;
+  --destructive-foreground: #ffffff;
+  --success: #27b36a;
+  --success-foreground: #ffffff;
+  --border: #dcd8ce;            /* jelly-line */
+  --input: #dcd8ce;
+  --ring: #8ec5ff;              /* jelly-blue */
+  --radius: 12px;
+}
+
+/* ── Bridge semantic tokens → Tailwind v4 utilities ────────────────── */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 8px);
+  --radius-xl: calc(var(--radius) + 20px);
 }
 
 * { box-sizing: border-box; }
@@ -105,7 +327,24 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .jelly-sticker { right: -8px; bottom: -48px; }
   .launch-footer { gap: 20px; align-items: flex-start; flex-direction: column; }
 }
-@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
+/* ── Central reduced-motion strategy ────────────────────────────────── */
+/* All Jellyshop motion (CSS transitions + animations) is disabled here.
+   JS-driven state does not need a useReducedMotion hook for purely CSS effects. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  /* Pause the marquee track specifically */
+  .jelly-marquee > div {
+    animation-play-state: paused !important;
+  }
+}
 
 /* Shared application surfaces */
 .status-badge { display: inline-flex; align-items: center; width: fit-content; padding: 6px 10px; border: 1px solid currentColor; border-radius: 999px 999px 999px 7px; font-size: 11px; font-weight: 850; letter-spacing: .04em; }

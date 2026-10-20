@@ -33,22 +33,24 @@ const CatalogStatusContext =
 
 interface StorefrontCatalogSyncProps {
   storeSlug: string;
+  initialReady?: boolean;
   children?: React.ReactNode;
 }
 
 export function StorefrontCatalogSync({
   storeSlug,
+  initialReady = false,
   children,
 }: StorefrontCatalogSyncProps) {
   const { repository } = useShop();
   const [status, setStatus] =
-    useState<CatalogStatus>("loading");
+    useState<CatalogStatus>(initialReady ? "ready" : "loading");
 
   useEffect(() => {
     let cancelled = false;
 
     async function syncCatalog() {
-      setStatus("loading");
+      if (!initialReady) setStatus("loading");
 
       try {
         const api = createCommerceApi({ baseUrl: API_URL });
@@ -76,7 +78,8 @@ export function StorefrontCatalogSync({
               details.store.currency.toUpperCase() as Store["currency"],
             published: true,
             bannerUrl: FALLBACK_BANNER,
-            shippingMinor: 0,
+            shippingMinor: details.store.shippingMinor ?? 0,
+            shippingCopy: details.store.shippingCopy ?? "",
             theme: DEFAULT_THEME,
           } satisfies Store);
 
@@ -85,6 +88,9 @@ export function StorefrontCatalogSync({
           id: storeId,
           name: details.store.name,
           slug: details.store.slug,
+          country: details.store.country,
+          shippingMinor: details.store.shippingMinor ?? 0,
+          shippingCopy: details.store.shippingCopy ?? "",
           currency:
             details.store.currency.toUpperCase() as Store["currency"],
         });
@@ -111,7 +117,7 @@ export function StorefrontCatalogSync({
     return () => {
       cancelled = true;
     };
-  }, [repository, storeSlug]);
+  }, [repository, storeSlug, initialReady]);
 
   return (
     <CatalogStatusContext.Provider value={status}>

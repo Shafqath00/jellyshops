@@ -87,9 +87,11 @@ export function EditorShell({
   const revisionRef = useRef(revision);
   const onSaveRef = useRef(onSave);
 
-  documentRef.current = state.history.present;
-  revisionRef.current = state.revision;
-  onSaveRef.current = onSave;
+  useEffect(() => {
+    documentRef.current = state.history.present;
+    revisionRef.current = state.revision;
+    onSaveRef.current = onSave;
+  }, [state.history.present, state.revision, onSave]);
 
   useEffect(() => {
     dispatch({

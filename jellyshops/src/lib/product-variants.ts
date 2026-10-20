@@ -24,11 +24,11 @@ function combinations(options: ProductOption[], index = 0, selections: Record<st
   return options[index].values.flatMap((value) => combinations(options, index + 1, { ...selections, [options[index].id]: value.id }));
 }
 
-export function reconcileProductVariants({ options, inventoryOptionIds, variants, basePriceMinor, defaultStock = 0 }: { options: ProductOption[]; inventoryOptionIds: string[]; variants: ProductVariant[]; basePriceMinor: number; defaultStock?: number }): { variants: ProductVariant[]; error?: string } {
+export function reconcileProductVariants({ options, inventoryOptionIds, variants, basePriceMinor, defaultStock = 0, standardSku, updateStandard = false }: { options: ProductOption[]; inventoryOptionIds: string[]; variants: ProductVariant[]; basePriceMinor: number; defaultStock?: number; standardSku?: string; updateStandard?: boolean }): { variants: ProductVariant[]; error?: string } {
   const inventoryOptions = getInventoryOptions(options, inventoryOptionIds);
   if (inventoryOptions.length === 0) {
     const standard = variants.find((variant) => Object.keys(variant.options ?? {}).length === 0) ?? variants[0];
-    return { variants: [{ id: standard?.id ?? "", name: "Standard", sku: standard?.sku ?? "", priceMinor: standard?.priceMinor ?? basePriceMinor, stock: standard?.stock ?? defaultStock, options: {} }] };
+    return { variants: [{ id: standard?.id ?? "", name: "Standard", sku: updateStandard ? standardSku ?? standard?.sku ?? "" : standard?.sku ?? "", priceMinor: updateStandard ? basePriceMinor : standard?.priceMinor ?? basePriceMinor, stock: updateStandard ? defaultStock : standard?.stock ?? defaultStock, options: {} }] };
   }
   const count = getVariantCombinationCount(inventoryOptions);
   if (count > MAX_INVENTORY_VARIANTS) return { variants, error: `This setup would create ${count} inventory variants. Reduce the number of inventory options or values.` };

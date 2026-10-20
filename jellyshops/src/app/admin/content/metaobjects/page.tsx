@@ -51,7 +51,6 @@ export default function MetaobjectsPage() {
 
   useEffect(() => {
     if (!headers || !activeId) {
-      setEntries([]);
       return;
     }
     let active = true;

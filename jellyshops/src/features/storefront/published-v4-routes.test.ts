@@ -44,6 +44,11 @@ function publishedSnapshot(): RuntimeStorefrontSnapshotV4 {
         handle: "default",
         layout: { sections: [] },
       },
+      "published-search": { id: "published-search", type: "search", handle: "default", layout: { sections: [] } },
+      "published-page": { id: "published-page", type: "page", handle: "default", layout: { sections: [] } },
+      "published-blog": { id: "published-blog", type: "blog", handle: "default", layout: { sections: [] } },
+      "published-article": { id: "published-article", type: "article", handle: "default", layout: { sections: [] } },
+      "published-not-found": { id: "published-not-found", type: "not-found", handle: "default", layout: { sections: [] } },
     },
     globalSections: {},
     menus: {},
@@ -52,6 +57,11 @@ function publishedSnapshot(): RuntimeStorefrontSnapshotV4 {
       product: "published-product",
       collection: "published-collection",
       cart: "published-cart",
+      search: "published-search",
+      page: "published-page",
+      blog: "published-blog",
+      article: "published-article",
+      "not-found": "published-not-found",
     },
     assignments: [],
     dependencies: { edges: [] },
@@ -74,6 +84,9 @@ function resourceReader(): PublicResourceReader {
       visible: true,
       data: { title: "Collection A", products: [] },
     },
+    { type: "page", id: "page-a", handle: "page-a", visible: true, data: { title: "Page A" } },
+    { type: "blog", id: "blog-a", handle: "blog-a", visible: true, data: { title: "Blog A" } },
+    { type: "article", id: "article-a", handle: "article-a", visible: true, data: { title: "Article A" } },
   ];
   return {
     async findByHandle(type, handle) {
@@ -91,6 +104,11 @@ describe("published V4 runtime routes", () => {
     [{ type: "product", handle: "product-a" }, "published-product"],
     [{ type: "collection", handle: "collection-a" }, "published-collection"],
     [{ type: "cart" }, "published-cart"],
+    [{ type: "search", context: { type: "search", query: "cake", state: "empty", resultCount: 0, results: [] } }, "published-search"],
+    [{ type: "page", handle: "page-a" }, "published-page"],
+    [{ type: "blog", handle: "blog-a" }, "published-blog"],
+    [{ type: "article", handle: "article-a" }, "published-article"],
+    [{ type: "not-found" }, "published-not-found"],
   ] as const)("resolves %s through template %s", async (route, templateId) => {
     const result = await resolveStorefrontRoute(
       publishedSnapshot(),

@@ -2,9 +2,11 @@ import { render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import OrdersPage from "./page";
 
-vi.mock("@/features/commerce/merchant-session", () => ({
-  getMerchantSession: () => ({ storeId: "store-demo", token: "jelly-demo-merchant" }),
-}));
+vi.mock("@/features/auth/auth-provider", () => {
+  const activeStore = { id: "store-demo", currency: "INR", country: "IN" };
+  const session = { access_token: "jelly-demo-merchant" };
+  return { useAuth: () => ({ activeStore, session }) };
+});
 
 afterEach(() => vi.unstubAllGlobals());
 

@@ -7,6 +7,7 @@ import {
   CreditCard,
   Home,
   LayoutTemplate,
+  MessageSquare,
   PackageCheck,
   Palette,
   Settings,
@@ -20,6 +21,7 @@ const links = [
   { href: "/admin/payments", label: "Payments", mobileLabel: "Pay", icon: CreditCard },
   { href: "/admin/products", label: "Products", icon: Boxes },
   { href: "/admin/customers", label: "Customers", icon: UsersRound },
+  { href: "/admin/engagement", label: "Messages", mobileLabel: "Inbox", icon: MessageSquare },
   { href: "/admin/store", label: "Store", icon: Palette },
   { href: "/admin/online-store", label: "Online Store", mobileLabel: "Online", icon: LayoutTemplate },
   { href: "/admin/settings", label: "Settings", icon: Settings },
@@ -39,7 +41,7 @@ export function AdminNav() {
       className={cn(
         "flex flex-col gap-1",
         "max-md:fixed max-md:inset-x-3 max-md:bottom-3 max-md:z-50",
-        "max-md:grid max-md:grid-cols-8 max-md:rounded-xl max-md:border max-md:bg-background/95 max-md:p-1.5 max-md:shadow-lg max-md:backdrop-blur",
+        "max-md:grid max-md:grid-cols-9 max-md:rounded-xl max-md:border max-md:bg-background/95 max-md:p-1.5 max-md:shadow-lg max-md:backdrop-blur",
       )}
     >
       {links.map(({ href, label, mobileLabel, icon: Icon }) => {

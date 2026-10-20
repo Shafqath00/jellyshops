@@ -27,7 +27,7 @@ import {
 } from "./types";
 
 export interface StoreEditorApi {
-  installStarterPack(storeId: string, starterPackId: "fresh-market" | "artisan-boutique"): Promise<StarterInstallationResult>;
+  installStarterPack(storeId: string, starterPackId: "fresh-market" | "artisan-boutique" | "jelly-signature", options?: { replaceDraft: true; expectedGeneration: number }): Promise<StarterInstallationResult>;
   listThemeCatalog(storeId: string): Promise<ThemeCatalogEntry[]>;
   loadWorkspace(storeId: string): Promise<WorkspaceRecord>;
   listTemplates(storeId: string, type?: StorefrontTemplateType): Promise<StorefrontTemplateRecord[]>;
@@ -73,8 +73,8 @@ export interface StoreEditorApi {
   /** Full, store-scoped catalog record for runtime-only editor preview. */
   getProduct(storeId: string, productId: string): Promise<CatalogAdminProduct | null>;
   getCollection(storeId: string, collectionId: string): Promise<CatalogAdminCollectionDetail | null>;
-  createProduct(storeId: string, input: { handle: string; title: string; description?: string; productType?: string; status?: "DRAFT" | "ACTIVE"; primaryCategoryId?: string; additionalCategoryIds?: string[]; brandId?: string; collectionIds?: string[]; categoryMetadata?: unknown | null; brandMetadata?: unknown | null; collectionMetadata?: unknown[]; options?: unknown[]; inventoryOptionIds?: string[]; variants?: Array<{ title: string; sku?: string; priceMinor: number; quantity?: number; trackInventory?: boolean; options?: Record<string, string> }> }): Promise<CatalogAdminProduct>;
-  updateProduct(storeId: string, productId: string, input: { handle?: string; title?: string; description?: string; productType?: string; status?: "DRAFT" | "ACTIVE"; primaryCategoryId?: string | null; additionalCategoryIds?: string[]; brandId?: string | null; collectionIds?: string[]; categoryMetadata?: unknown | null; brandMetadata?: unknown | null; collectionMetadata?: unknown[]; options?: unknown[]; inventoryOptionIds?: string[]; variants?: Array<{ id?: string; title: string; sku?: string; priceMinor: number; quantity?: number; trackInventory?: boolean; options?: Record<string, string> }> }): Promise<CatalogAdminProduct>;
+  createProduct(storeId: string, input: { imageUrl?: string; handle: string; title: string; description?: string; productType?: string; status?: "DRAFT" | "ACTIVE" | "ARCHIVED"; primaryCategoryId?: string; additionalCategoryIds?: string[]; brandId?: string; collectionIds?: string[]; categoryMetadata?: unknown | null; brandMetadata?: unknown | null; collectionMetadata?: unknown[]; options?: unknown[]; inventoryOptionIds?: string[]; variants?: Array<{ title: string; sku?: string; priceMinor: number; quantity?: number; trackInventory?: boolean; options?: Record<string, string> }> }): Promise<CatalogAdminProduct>;
+  updateProduct(storeId: string, productId: string, input: { imageUrl?: string; handle?: string; title?: string; description?: string; productType?: string; status?: "DRAFT" | "ACTIVE" | "ARCHIVED"; primaryCategoryId?: string | null; additionalCategoryIds?: string[]; brandId?: string | null; collectionIds?: string[]; categoryMetadata?: unknown | null; brandMetadata?: unknown | null; collectionMetadata?: unknown[]; options?: unknown[]; inventoryOptionIds?: string[]; variants?: Array<{ id?: string; title: string; sku?: string; priceMinor: number; quantity?: number; trackInventory?: boolean; options?: Record<string, string> }> }): Promise<CatalogAdminProduct>;
 }
 
 interface ClientOptions { baseUrl: string; token: string; fetch?: typeof fetch }
@@ -124,7 +124,7 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
   const contentPath = (storeId: string, suffix: string) => `/api/stores/${encodeURIComponent(storeId)}/content${suffix}`;
 
   return {
-    installStarterPack: (storeId, starterPackId) => request(storefrontPath(storeId, `/starters/${encodeURIComponent(starterPackId)}/install`), { method: "POST" }),
+    installStarterPack: (storeId, starterPackId, options) => request(storefrontPath(storeId, `/starters/${encodeURIComponent(starterPackId)}/install`), { method: "POST", ...(options ? { body: JSON.stringify(options) } : {}) }),
     listThemeCatalog: (storeId) => request(storefrontPath(storeId, "/themes")),
     loadWorkspace: (storeId) => request(storefrontPath(storeId, "/workspace")),
     listTemplates: (storeId, type) => request(storefrontPath(storeId, `/templates${type ? `?type=${encodeURIComponent(type)}` : ""}`)),

@@ -7,14 +7,14 @@ import type {
 } from "@jelly/storefront-schema";
 import type { ArticleResource, BlogResource, PageResource } from "@/features/content/api";
 
-export type StorefrontTemplateType = "home" | "product" | "collection" | "page" | "blog" | "article" | "search" | "cart" | "not-found";
+export type StorefrontTemplateType = import("@jelly/storefront-schema").PageType;
 
 export interface WorkspaceRecord {
   generation: number;
   updatedAt: string | null;
 }
 
-export interface StarterInstallationResult { storeId: string; starterPackId: "fresh-market" | "artisan-boutique"; starterPackVersion: string; generation: number; installed: boolean }
+export interface StarterInstallationResult { storeId: string; starterPackId: "fresh-market" | "artisan-boutique" | "jelly-signature"; starterPackVersion: string; generation: number; installed: boolean }
 
 export interface StorefrontTemplateRecord {
   id: string;
@@ -125,7 +125,7 @@ export interface PublicationRecord { id: string; storeId: string; sourceRevision
 
 export interface MediaRecord { id: string; storeId: string; url: string; mimeType: string; byteSize: number; width: number; height: number; originalName: string; referenced: boolean; createdAt: string }
 export interface CatalogAdminVariant { id: string; title: string; sku: string | null; priceMinor: number; compareAtPriceMinor?: number | null; options?: Record<string, unknown>; trackInventory?: boolean; quantity: number | null; reserved?: number | null; available: boolean }
-export interface CatalogAdminProduct { id: string; storeId: string; handle: string; title: string; description: string; vendor?: string | null; productType: string | null; status: "DRAFT" | "ACTIVE" | "ARCHIVED"; media: Array<{ id: string; url: string; altText: string | null; position: number }>; variants: CatalogAdminVariant[]; available: boolean; primaryCategoryId?: string | null; additionalCategoryIds?: string[]; brandId?: string | null; collectionIds?: string[]; categoryMetadata?: unknown | null; brandMetadata?: unknown | null; collectionMetadata?: unknown[]; options?: unknown[]; inventoryOptionIds?: string[] }
+export interface CatalogAdminProduct { id: string; storeId: string; handle: string; title: string; description: string; specifications?: Record<string, string>; vendor?: string | null; productType: string | null; status: "DRAFT" | "ACTIVE" | "ARCHIVED"; media: Array<{ id: string; url: string; altText: string | null; position: number }>; variants: CatalogAdminVariant[]; available: boolean; primaryCategoryId?: string | null; additionalCategoryIds?: string[]; brandId?: string | null; collectionIds?: string[]; categoryMetadata?: unknown | null; brandMetadata?: unknown | null; collectionMetadata?: unknown[]; options?: unknown[]; inventoryOptionIds?: string[] }
 export interface CatalogAdminCollectionDetail { id: string; storeId: string; handle: string; title: string; description: string; productIds: string[]; products: CatalogAdminProduct[] }
 export interface DemoProduct { id: string; slug: string; name: string; imageUrl: string; priceMinor: number; currency: "USD" }
 export interface DemoCollection { id: string; slug: string; name: string; imageUrl: string; productIds: string[] }

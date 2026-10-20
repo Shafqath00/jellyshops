@@ -42,6 +42,8 @@ type GlobalLabel = {
   id: string;
   name: string;
   sectionType?: string;
+  sectionId?: string;
+  blocks?: Array<{ id: string; type: string }>;
 };
 
 function placements(template: Pick<StorefrontTemplateRecord, "layout">): TemplatePlacement[] {
@@ -122,6 +124,7 @@ function PlacementRow({
     const global = globalSections[placement.globalSectionId];
     const selected = activeGlobalId === placement.globalSectionId;
     return (
+      <div>
       <button
         type="button"
         aria-label={global?.name ?? "Missing global section"}
@@ -134,6 +137,14 @@ function PlacementRow({
         <span className="min-w-0 flex-1 truncate">{global?.name ?? "Missing global section"}</span>
         <span className="rounded bg-[var(--paper-deep)] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.04em] text-[var(--ink-soft)]">Global</span>
       </button>
+      {selected && global?.blocks && global.blocks.length > 0 && <div className="ml-5 mt-1 space-y-0.5 border-l border-[var(--line)] pl-2">{global.blocks.map((block) => {
+        const blockLabel = sectionLabels[block.type] ?? block.type.charAt(0).toUpperCase() + block.type.slice(1);
+        const blockSelected = selection?.kind === "block" && selection.blockId === block.id;
+        return <button key={block.id} type="button" aria-label={`${blockLabel} block`} onClick={() => onSelect({ kind: "block", region, sectionId: global.sectionId ?? placement.globalSectionId, blockId: block.id })} className={clsx("flex min-h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-[12px]", blockSelected ? "bg-[var(--ink)] text-[var(--white)]" : "text-[var(--ink-soft)] hover:bg-[var(--paper)]")}>
+          {block.type === "button" ? <MousePointerClick size={14} /> : <Type size={14} />}<span className="truncate">{blockLabel}</span>
+        </button>;
+      })}</div>}
+      </div>
     );
   }
 

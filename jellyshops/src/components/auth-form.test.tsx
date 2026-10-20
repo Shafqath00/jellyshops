@@ -36,7 +36,7 @@ it("keeps signup without a session on the email-confirmation path", async () => 
   expect(supabase.auth.signUp).toHaveBeenCalledWith({
     email: "maya@example.com",
     password: "secure-password",
-    options: { data: { name: "Maya Potter" } },
+    options: { data: { name: "Maya Potter" }, emailRedirectTo: "http://localhost:3000/auth/callback?next=%2Fonboarding" },
   });
   expect(router.replace).not.toHaveBeenCalled();
   expect(fetch).not.toHaveBeenCalled();

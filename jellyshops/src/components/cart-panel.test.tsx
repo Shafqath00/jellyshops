@@ -10,5 +10,5 @@ it("renders an accessible cart dialog", () => {
 
 it("uses a Tailwind fixed overlay for the cart", () => {
   render(<ShopProvider><CartPanel storeSlug="sweet-bakes" open onClose={() => undefined} /></ShopProvider>);
-  expect(screen.getByRole("dialog", { name: /your cart/i })).toHaveClass("fixed", "right-0", "top-0");
+  expect(screen.getByRole("dialog", { name: /your cart/i })).toHaveClass("fixed", "right-0", "inset-y-0");
 });

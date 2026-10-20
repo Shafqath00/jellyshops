@@ -81,23 +81,24 @@ for (const [label, storeName] of [
     await page.getByLabel("Switch store").selectOption({ label: storeName });
     await ensurePrimaryNavigation(page);
     await page.getByRole("link", { name: "Online Store" }).click();
+    const preview = page.frameLocator('iframe[title="Storefront preview"]').locator("body");
     const publicHref = await page.getByRole("main").getByRole("link", { name: "View store", exact: true }).getAttribute("href");
     expect(publicHref).toBeTruthy();
     await page.getByRole("link", { name: "Open theme editor" }).click();
     await expect(page.getByRole("heading", { name: "Theme editor" })).toBeVisible({ timeout: 30_000 });
     await expect(page.getByTestId("theme-editor-shell")).toHaveClass(/bg-\[var\(--paper-deep\)\]/);
-    await expect(page.getByTestId("section-hero")).toBeVisible();
-    await expect(page.getByTestId("section-product-grid")).toBeVisible();
+    await expect(preview.getByTestId("section-hero")).toBeVisible();
+    await expect(preview.getByTestId("section-product-grid")).toBeVisible();
     const publicPage = await page.context().newPage();
     await publicPage.goto(publicHref!);
     await expect(publicPage.locator("body")).toBeVisible();
     const publicStateBeforeDraftPreview = (await publicPage.locator("body").innerText()).trim();
     expect(publicStateBeforeDraftPreview.length).toBeGreaterThan(0);
     const draftHeadline = `Draft ${label} update ${Date.now()}`;
-    await page.getByTestId("section-hero").click();
+    await preview.getByTestId("section-hero").click();
     await page.getByRole("button", { name: "Heading block" }).click();
     await page.getByLabel("Heading", { exact: true }).fill(draftHeadline);
-    await expect(page.getByTestId("section-hero")).toContainText(draftHeadline);
+    await expect(preview.getByTestId("section-hero")).toContainText(draftHeadline);
     await page.getByRole("button", { name: "Back to section settings" }).click();
     const uploaded = page.waitForResponse((response) => response.url().endsWith("/media") && response.request().method() === "POST");
     await page.getByLabel("Image", { exact: true }).setInputFiles({
@@ -109,7 +110,7 @@ for (const [label, storeName] of [
     expect(uploadedResponse.status()).toBe(201);
     const media = await uploadedResponse.json() as { url: string };
     const imageUrl = new URL(media.url, uploadedResponse.url()).href;
-    await expect(page.getByTestId("section-hero").locator("img")).toHaveAttribute("src", imageUrl);
+    await expect(preview.getByTestId("section-hero").locator("img")).toHaveAttribute("src", imageUrl);
     let productName = "";
 
     for (const [width, device] of [[1440, "desktop"], [820, "tablet"], [390, "mobile"], [320, "mobile"]] as const) {
@@ -118,10 +119,10 @@ for (const [label, storeName] of [
       if (width < 1024) {
         await page.getByRole("navigation", { name: "Editor panels" }).getByRole("button", { name: "Preview" }).click();
       }
-      const preview = page.getByTestId("preview-viewport");
-      await expect(preview).toHaveAttribute("data-viewport", device);
+      const previewShell = page.getByTestId("preview-viewport");
+      await expect(previewShell).toHaveAttribute("data-viewport", device);
         await expect(preview).toBeVisible();
-        expect(await preview.evaluate((element) => element.getBoundingClientRect().width)).toBeGreaterThan(Math.min(width, 320) - 48);
+        expect(await previewShell.evaluate((element) => element.getBoundingClientRect().width)).toBeGreaterThan(Math.min(width, 320) - 48);
         expect(await preview.evaluate((element) => element.scrollWidth - element.clientWidth)).toBeLessThanOrEqual(1);
         expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width + 1);
         await expect(page.locator("header").getByRole("button", { name: "Preview", exact: true })).toBeVisible();

@@ -1,9 +1,30 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ComponentProps } from "react";
+import { useEffect, useMemo, useRef, useState, type ComponentProps, type SetStateAction, type CSSProperties } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import clsx from "clsx";
-import { ArrowLeft, ChevronLeft, LayoutPanelTop, Monitor, Plus, Smartphone, Tablet, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronLeft,
+  Layers3,
+  LayoutPanelTop,
+  Monitor,
+  MousePointer2,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Plus,
+  Settings2,
+  Smartphone,
+  Tablet,
+  Trash2,
+  CheckCircle2,
+  Loader2,
+  RefreshCw,
+  Sparkles,
+} from "lucide-react";
+import { createRevisionedSaveQueue } from "@/features/store-editor/state/revisioned-save-queue";
+import { createSessionHistory } from "@/features/store-editor/state/session-history";
 import {
   createSectionFromDefinition,
   getBlockDefinition,
@@ -50,6 +71,7 @@ import { PublishDiagnostics } from "@/features/store-editor/components/publish-d
 import { EditorPanelNavigation, type EditorPanel } from "@/features/store-editor/components/editor-panel-navigation";
 import { SectionLibrary } from "@/features/store-editor/components/section-library";
 import { TemplateHierarchy } from "@/features/store-editor/components/template-hierarchy";
+import { StorefrontPreviewFrame } from "@/features/store-editor/components/storefront-preview-frame";
 import { TemplateResourceSelector } from "@/features/store-editor/components/template-resource-selector";
 import { parseEditorNavigationTarget } from "@/features/store-editor/editor-navigation";
 import { createEditorPreviewPageContext, editorPreviewResourceOptions } from "@/features/store-editor/preview-context";
@@ -197,6 +219,12 @@ function selectedInlineSection(template: StorefrontTemplateRecord, selection: Ed
 }
 
 export default function OnlineStoreEditorPage() {
+  const { activeStore } = useAuth();
+  return <StoreEditorWorkspace key={activeStore?.id ?? "loading"} />;
+}
+
+function StoreEditorWorkspace() {
+  const router = useRouter();
   const { session, activeStore } = useAuth();
   const backendStoreId = activeStore?.id ?? "";
   const token = session?.access_token;
@@ -207,8 +235,18 @@ export default function OnlineStoreEditorPage() {
   const [handoff] = useState(() => typeof window === "undefined" ? {} : parseEditorNavigationTarget(window.location.search));
 
   const [workspace, setWorkspace] = useState<WorkspaceRecord | null>(null);
-  const [templates, setTemplates] = useState<StorefrontTemplateRecord[]>([]);
-  const [globals, setGlobals] = useState<GlobalSectionRecord[]>([]);
+  const [templates, setTemplateState] = useState<StorefrontTemplateRecord[]>([]);
+  const [globals, setGlobalState] = useState<GlobalSectionRecord[]>([]);
+  const templateDrafts = useRef<StorefrontTemplateRecord[]>([]);
+  const globalDrafts = useRef<GlobalSectionRecord[]>([]);
+  const setTemplates = (next: SetStateAction<StorefrontTemplateRecord[]>) => {
+    templateDrafts.current = typeof next === "function" ? next(templateDrafts.current) : next;
+    setTemplateState(templateDrafts.current);
+  };
+  const setGlobals = (next: SetStateAction<GlobalSectionRecord[]>) => {
+    globalDrafts.current = typeof next === "function" ? next(globalDrafts.current) : next;
+    setGlobalState(globalDrafts.current);
+  };
   const [menuRecords, setMenuRecords] = useState<MenuRecord[]>([]);
   const [presets, setPresets] = useState<SectionPresetRecord[]>([]);
   const [dynamicSources, setDynamicSources] = useState<DynamicSourceDescriptor[]>([]);
@@ -217,7 +255,12 @@ export default function OnlineStoreEditorPage() {
   const [blogs, setBlogs] = useState<BlogResource[]>([]);
   const [articles, setArticles] = useState<ArticleResource[]>([]);
   const [themeCatalog, setThemeCatalog] = useState<ThemeCatalogEntry[]>([]);
-  const [themeConfiguration, setThemeConfiguration] = useState<ThemeConfigurationRecord | null>(null);
+  const [themeConfiguration, setThemeState] = useState<ThemeConfigurationRecord | null>(null);
+  const themeDraft = useRef<ThemeConfigurationRecord | null>(null);
+  const setThemeConfiguration = (next: ThemeConfigurationRecord | null) => {
+    themeDraft.current = next;
+    setThemeState(next);
+  };
   const [activeTemplateId, setActiveTemplateId] = useState("");
   const [previewResourceId, setPreviewResourceId] = useState<string | undefined>(handoff.resourceId);
   const [previewQuery, setPreviewQuery] = useState("cake");
@@ -229,14 +272,60 @@ export default function OnlineStoreEditorPage() {
   const [activeGlobalId, setActiveGlobalId] = useState<string>();
   const [viewport, setViewport] = useState<EditorViewport>("desktop");
   const [mobilePanel, setMobilePanel] = useState<EditorPanel>("sections");
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
+  const [previewInspectorEnabled, setPreviewInspectorEnabled] = useState(true);
   const [diagnostics, setDiagnostics] = useState<CompilationDiagnostic[]>([]);
   const [previewSnapshot, setPreviewSnapshot] = useState<RuntimeStorefrontSnapshotV4>();
   const [loadError, setLoadError] = useState<string>();
   const [libraryRegion, setLibraryRegion] = useState<HierarchyRegion>();
   const [blockPickerSectionId, setBlockPickerSectionId] = useState<string>();
   const [saveState, setSaveState] = useState<"saved" | "saving" | "error">("saved");
-  const [themeSaveState, setThemeSaveState] = useState<"saved" | "saving" | "error">("saved");
-  const [themeSaveError, setThemeSaveError] = useState<string>();
+  const [saveError, setSaveError] = useState<string>();
+  const [isConverting, setIsConverting] = useState(false);
+  const convertingRef = useRef(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const [history] = useState(() => createSessionHistory<{ kind: "template" | "global" | "theme"; id: string; before: Record<string, unknown>; after: Record<string, unknown> }>());
+  const [, refreshHistory] = useState(0);
+  const historyScope = `${backendStoreId}:${activeTemplateId}`;
+  const recordHistory = (change: { kind: "template" | "global" | "theme"; id: string; before: Record<string, unknown>; after: Record<string, unknown> }) => {
+    if (JSON.stringify(change.before) === JSON.stringify(change.after)) return;
+    history.push(historyScope, change); refreshHistory((value) => value + 1);
+  };
+  const saveQueue = useRef<ReturnType<typeof createRevisionedSaveQueue> | null>(null);
+  useEffect(() => {
+    const queue = createRevisionedSaveQueue({
+      onStatus: setSaveState,
+      onError: (error) => setSaveError(error instanceof Error ? error.message : "Your changes could not be saved. Try again."),
+    });
+    saveQueue.current = queue;
+    return () => { queue.dispose(); saveQueue.current?.dispose(); saveQueue.current = null; };
+  }, [backendStoreId]);
+
+  useEffect(() => {
+    if (saveState === "saved") return;
+    const protectDraft = (event: BeforeUnloadEvent) => { event.preventDefault(); };
+    window.addEventListener("beforeunload", protectDraft);
+    return () => window.removeEventListener("beforeunload", protectDraft);
+  }, [saveState]);
+
+  useEffect(() => {
+    if (saveState === "saved") return;
+    const protectNavigation = (event: MouseEvent) => {
+      if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      const link = (event.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!link || link.target === "_blank" || link.hasAttribute("download") || link.origin !== window.location.origin) return;
+      event.preventDefault(); event.stopImmediatePropagation();
+      void saveQueue.current?.flush().then((ok) => { if (ok) router.push(`${link.pathname}${link.search}${link.hash}`); });
+    };
+    const protectStore = (event: Event) => {
+      event.preventDefault();
+      const commit = (event as CustomEvent<{ commit: () => void }>).detail.commit;
+      void saveQueue.current?.flush().then((ok) => { if (ok) commit(); });
+    };
+    document.addEventListener("click", protectNavigation, true);
+    window.addEventListener("jelly:before-store-change", protectStore);
+    return () => { document.removeEventListener("click", protectNavigation, true); window.removeEventListener("jelly:before-store-change", protectStore); };
+  }, [router, saveState]);
 
   useEffect(() => {
     if (!api) return;
@@ -276,7 +365,7 @@ export default function OnlineStoreEditorPage() {
       setLoadError(error instanceof Error ? error.message : "Unable to load the Online Store workspace");
     });
     return () => { active = false; };
-  }, [api, backendStoreId, handoff]);
+  }, [api, backendStoreId, handoff, loadAttempt]);
 
   const activeTemplate = templates.find((template) => template.id === activeTemplateId);
   const previewThemeStyle = useMemo(() => {
@@ -300,6 +389,7 @@ export default function OnlineStoreEditorPage() {
 
   useEffect(() => {
     if (!api || activeTemplate?.type !== "product" || !previewResourceId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clear detail data when switching away from product preview.
       setPreviewProduct(null);
       setPreviewProductSelections([]);
       setPreviewProductQuantity(1);
@@ -317,6 +407,7 @@ export default function OnlineStoreEditorPage() {
 
   useEffect(() => {
     if (!api || activeTemplate?.type !== "collection" || !previewResourceId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clear detail data when switching away from collection preview.
       setPreviewCollection(null);
       return;
     }
@@ -353,6 +444,8 @@ export default function OnlineStoreEditorPage() {
       id: global.id,
       name: global.name,
       sectionType: typeof global.section.type === "string" ? global.section.type : undefined,
+      sectionId: typeof global.section.id === "string" ? global.section.id : undefined,
+      blocks: Array.isArray(global.section.blocks) ? global.section.blocks.flatMap((block) => block && typeof block === "object" && typeof block.id === "string" && typeof block.type === "string" ? [{ id: block.id, type: block.type }] : []) : [],
     },
   ])), [validGlobals]);
   const presetOptions = useMemo(() => presets.flatMap((preset) => {
@@ -363,7 +456,8 @@ export default function OnlineStoreEditorPage() {
     const section = normalizeSection(global.section);
     return section ? [{ id: global.id, name: global.name, section }] : [];
   }), [validGlobals]);
-  const localSection = activeTemplate ? selectedInlineSection(activeTemplate, selection) : null;
+  const selectedGlobal = activeGlobalId ? globalMap.get(activeGlobalId) : undefined;
+  const localSection = selectedGlobal ? normalizeSection(selectedGlobal.section) : activeTemplate ? selectedInlineSection(activeTemplate, selection) : null;
   const selectedBlock = localSection && selection?.kind === "block"
     ? localSection.blocks.find((block) => block.id === selection.blockId)
     : undefined;
@@ -414,55 +508,81 @@ export default function OnlineStoreEditorPage() {
     }
   }, [previewResourceId, previewResources]);
 
-  const persistLayout = async (layout: Record<string, unknown>) => {
+  const persistLayout = async (layout: Record<string, unknown>, record = true) => {
+    if (convertingRef.current) return false;
     if (!api || !activeTemplate) return false;
-    setSaveState("saving");
-    try {
-      const result = await api.updateTemplate(
-        backendStoreId,
-        activeTemplate.id,
-        activeTemplate.revision,
-        { layout },
-      );
-      setTemplates((current) => current.map((template) => template.id === result.template.id ? result.template : template));
-      setWorkspace((current) => current ? { ...current, generation: result.generation } : current);
-      setPreviewSnapshot(undefined);
-      setSaveState("saved");
-      return true;
-    } catch {
-      setSaveState("error");
-      return false;
-    }
+    const previous = templateDrafts.current.find((template) => template.id === activeTemplate.id) ?? activeTemplate;
+    if (record) recordHistory({ kind: "template", id: previous.id, before: previous.layout, after: layout });
+    const draft = { ...previous, layout };
+    setTemplates((current) => current.map((template) => template.id === draft.id ? draft : template));
+    setPreviewSnapshot(undefined);
+    setDiagnostics([]);
+    return saveQueue.current?.save(`template:${draft.id}`, draft, {
+      async persist(value) {
+        const result = await api.updateTemplate(backendStoreId, value.id, value.revision, { layout: value.layout });
+        setWorkspace((current) => current ? { ...current, generation: Math.max(current.generation, result.generation) } : current);
+        return result.template;
+      },
+      onSaved(saved, pending) {
+        setTemplates((current) => current.map((template) => template.id === saved.id ? pending ? { ...template, revision: saved.revision } : saved : template));
+      },
+    }) ?? false;
   };
 
-  const persistThemeSetting = async (path: string, value: unknown) => {
-    if (!api || !themeConfiguration || themeSaveState === "saving") return;
-    const previous = themeConfiguration;
-    const settings = setThemeSetting(previous.settings, path, value);
-    setThemeConfiguration({ ...previous, settings });
-    setThemeSaveState("saving");
-    setThemeSaveError(undefined);
-    try {
-      const result = await api.saveThemeConfiguration(backendStoreId, previous.revision, {
-        themeId: previous.themeId,
-        themeVersion: previous.themeVersion,
-        settings,
-        draftArtifactId: previous.draftArtifactId ?? null,
-      });
-      setThemeConfiguration(result.theme);
-      setWorkspace((current) => current ? { ...current, generation: result.generation } : current);
-      setPreviewSnapshot(undefined);
-      setThemeSaveState("saved");
-    } catch (error) {
-      setThemeConfiguration(previous);
-      setThemeSaveState("error");
-      setThemeSaveError(error instanceof Error ? error.message : "Unable to save theme settings.");
-    }
+  const persistThemeSetting = async (path: string, value: unknown, record = true) => {
+    if (convertingRef.current) return;
+    if (!api || !themeDraft.current) return;
+    const previous = themeDraft.current;
+    const settings = path ? setThemeSetting(previous.settings, path, value) : value as Record<string, unknown>;
+    if (record) recordHistory({ kind: "theme", id: "theme", before: previous.settings, after: settings });
+    const draft = { ...previous, settings };
+    setThemeConfiguration(draft);
+    setPreviewSnapshot(undefined);
+    setDiagnostics([]);
+    await saveQueue.current?.save("theme", draft, {
+      async persist(value) {
+        const result = await api.saveThemeConfiguration(backendStoreId, value.revision, { themeId: value.themeId, themeVersion: value.themeVersion, settings: value.settings, draftArtifactId: value.draftArtifactId ?? null });
+        setWorkspace((current) => current ? { ...current, generation: Math.max(current.generation, result.generation) } : current);
+        return result.theme;
+      },
+      onSaved(saved, pending) { setThemeConfiguration(pending && themeDraft.current ? { ...themeDraft.current, revision: saved.revision } : saved); },
+    });
+  };
+
+  const persistGlobalSection = async (section: SectionNode, record = true, targetId = selectedGlobal?.id) => {
+    if (convertingRef.current) return false;
+    if (!api || !targetId) return false;
+    const previous = globalDrafts.current.find((global) => global.id === targetId);
+    if (!previous) return false;
+    const nextSection = section as unknown as Record<string, unknown>;
+    if (record) recordHistory({ kind: "global", id: previous.id, before: previous.section, after: nextSection });
+    const draft = { ...previous, section: nextSection };
+    setGlobals((current) => current.map((global) => global.id === draft.id ? draft : global));
+    setPreviewSnapshot(undefined);
+    setDiagnostics([]);
+    return saveQueue.current?.save(`global:${draft.id}`, draft, {
+      async persist(value) {
+        const result = await api.updateGlobalSection(backendStoreId, value.id, value.revision, { section: value.section });
+        setWorkspace((current) => current ? { ...current, generation: Math.max(current.generation, result.generation) } : current);
+        return result.globalSection;
+      },
+      onSaved(saved, pending) { setGlobals((current) => current.map((global) => global.id === saved.id ? pending ? { ...global, revision: saved.revision } : saved : global)); },
+    }) ?? false;
+  };
+
+  const playHistory = async (direction: "undo" | "redo") => {
+    const change = direction === "undo" ? history.undo(historyScope) : history.redo(historyScope);
+    if (!change) return;
+    refreshHistory((value) => value + 1);
+    const value = direction === "undo" ? change.before : change.after;
+    if (change.kind === "template") await persistLayout(value, false);
+    else if (change.kind === "global") await persistGlobalSection(value as unknown as SectionNode, false, change.id);
+    else await persistThemeSetting("", value, false);
   };
 
   const insertPreset = async (section: SectionNode) => {
     if (!activeTemplate) return;
-    await persistLayout(appendInlineSection(activeTemplate.layout, section));
+    if (!await persistLayout(appendInlineSection(activeTemplate.layout, section))) return;
   };
 
   const insertBuiltIn = async (sectionType: string) => {
@@ -483,14 +603,14 @@ export default function OnlineStoreEditorPage() {
       enabled: true,
       settings: structuredClone(definition.defaultSettings),
     };
-    await persistLayout(appendBlock(activeTemplate.layout, blockPickerSection.id, block));
+    if (!await persistLayout(appendBlock(activeTemplate.layout, blockPickerSection.id, block))) return;
     setSelection({ kind: "block", region: "template", sectionId: blockPickerSection.id, blockId: block.id });
     setBlockPickerSectionId(undefined);
   };
 
   const removeSelectedSection = async () => {
     if (!activeTemplate || !localSection) return;
-    await persistLayout(removeInlineSection(activeTemplate.layout, localSection.id));
+    if (!await persistLayout(removeInlineSection(activeTemplate.layout, localSection.id))) return;
     setSelection(null);
   };
 
@@ -506,13 +626,19 @@ export default function OnlineStoreEditorPage() {
 
   const insertGlobal = async (globalSectionId: string) => {
     if (!activeTemplate) return;
-    await persistLayout(appendGlobalPlacement(activeTemplate.layout, globalSectionId));
+    if (!await persistLayout(appendGlobalPlacement(activeTemplate.layout, globalSectionId))) return;
     setActiveGlobalId(globalSectionId);
     setSelection(null);
   };
 
   const makeGlobal = async (section: SectionNode) => {
     if (!api || !activeTemplate) return;
+    if (convertingRef.current) return;
+    convertingRef.current = true;
+    setIsConverting(true);
+    try {
+    if (!await saveQueue.current?.flush()) return;
+    setSaveState("saving");
     const created = await api.createGlobalSection(backendStoreId, {
       name: `Global ${section.type}`,
       section: structuredClone(section) as unknown as Record<string, unknown>,
@@ -523,25 +649,41 @@ export default function OnlineStoreEditorPage() {
     const result = await api.updateTemplate(
       backendStoreId,
       activeTemplate.id,
-      activeTemplate.revision,
-      { layout: replaceInlineWithGlobal(activeTemplate.layout, section.id, created.globalSection.id) },
+      templateDrafts.current.find((template) => template.id === activeTemplate.id)?.revision ?? activeTemplate.revision,
+      { layout: replaceInlineWithGlobal(templateDrafts.current.find((template) => template.id === activeTemplate.id)?.layout ?? activeTemplate.layout, section.id, created.globalSection.id) },
     );
     setTemplates((current) => current.map((template) => template.id === result.template.id ? result.template : template));
     setWorkspace((current) => current ? { ...current, generation: result.generation } : current);
     setPreviewSnapshot(undefined);
     setSelection(null);
     setActiveGlobalId(created.globalSection.id);
+    setSaveState("saved");
+    } catch (error) {
+      setSaveState("error");
+      setSaveError(error instanceof Error ? error.message : "Could not create a shared section. Try again.");
+    } finally {
+      convertingRef.current = false;
+      setIsConverting(false);
+    }
   };
 
   const detachGlobal = async (section: SectionNode) => {
     if (!activeTemplate || !activeGlobalId) return;
-    await persistLayout(detachGlobalPlacement(activeTemplate.layout, activeGlobalId, section));
+    if (!await persistLayout(detachGlobalPlacement(activeTemplate.layout, activeGlobalId, section))) return;
     setActiveGlobalId(undefined);
     setSelection({ kind: "section", region: "template", sectionId: section.id });
   };
 
   const updateSelectedSetting = async (key: string, value: unknown) => {
-    if (!activeTemplate || !localSection || !selection || selection.kind === "theme") return;
+    if (convertingRef.current) return;
+    if (!activeTemplate || !localSection || selection?.kind === "theme") return;
+    if (selectedGlobal) {
+      await persistGlobalSection(selection?.kind === "block"
+        ? { ...localSection, blocks: localSection.blocks.map((block) => block.id === selection.blockId ? { ...block, settings: { ...block.settings, [key]: value } } : block) }
+        : { ...localSection, settings: { ...localSection.settings, [key]: value } });
+      return;
+    }
+    if (!selection) return;
     const layout = updateInlineSection(activeTemplate.layout, localSection.id, (current) => {
       if (selection.kind === "block") {
         return {
@@ -557,7 +699,12 @@ export default function OnlineStoreEditorPage() {
   };
 
   const saveRichTextDocument = async (document: RichTextDocument) => {
+    if (convertingRef.current) throw new Error("Wait for the shared section update to finish.");
     if (!activeTemplate || !localSection || localSection.type !== "rich-text") throw new Error("Select a rich text section first.");
+    if (selectedGlobal) {
+      if (!await persistGlobalSection({ ...localSection, settings: { ...localSection.settings, document } })) throw new Error("Your shared text could not be saved. Try again.");
+      return;
+    }
     const layout = updateInlineSection(activeTemplate.layout, localSection.id, (current) => ({
       ...current,
       settings: { ...current.settings, document },
@@ -588,7 +735,7 @@ export default function OnlineStoreEditorPage() {
   }
 
   if (loadError) {
-    return <main className="grid min-h-[70vh] place-items-center p-8 text-center text-[var(--ink)]"><div><h1 className="text-xl font-semibold">Could not load Online Store</h1><p className="mt-2 text-sm text-[var(--destructive)]">{loadError}</p></div></main>;
+    return <main className="grid min-h-[70vh] place-items-center p-8 text-center text-[var(--ink)]"><div><h1 className="text-xl font-semibold">Could not load Online Store</h1><p role="alert" className="mt-2 text-sm text-[var(--destructive)]">{loadError}</p><button type="button" onClick={() => { setLoadError(undefined); setLoadAttempt((value) => value + 1); }} className="mt-5 rounded-xl border border-[var(--line)] px-5 py-3 text-sm font-semibold">Try again</button></div></main>;
   }
 
   if (!workspace) {
@@ -615,41 +762,340 @@ export default function OnlineStoreEditorPage() {
     <RegistrySectionRenderer
       key={section.id}
       section={section as unknown as RegistrySection}
-      mode={previewSnapshot ? "preview" : "editor"}
+      mode={previewInspectorEnabled ? "editor" : "preview"}
       commerce={commerce}
       region="template"
       themeId={themeConfiguration?.themeId}
       page={previewPageContext ?? undefined}
       menus={previewSnapshot?.menus ?? Object.fromEntries(menuRecords.map((menu) => [menu.handle, { id: menu.id, handle: menu.handle, items: menu.items }])) as Record<string, RuntimeMenuV4>}
       storeSlug={activeStore?.slug}
-      selected={previewSnapshot ? undefined : selection ?? undefined}
-      onSelect={previewSnapshot ? undefined : (next) => {
+      selected={previewSnapshot || !previewInspectorEnabled ? undefined : selection ?? undefined}
+      onSelect={!previewInspectorEnabled ? undefined : (next) => {
+        setPreviewSnapshot(undefined);
+        const global = validGlobals.find((item) => item.section.id === next.sectionId);
+        if (global) {
+          setActiveGlobalId(global.id);
+          setSelection(next.kind === "block" && next.blockId ? { kind: "block", region: "template", sectionId: next.sectionId!, blockId: next.blockId } : null);
+          setMobilePanel("settings");
+          return;
+        }
         setActiveGlobalId(undefined);
-        if (next.kind === "section" && next.sectionId) setSelection({ kind: "section", region: "template", sectionId: next.sectionId });
-        if (next.kind === "block" && next.sectionId && next.blockId) setSelection({ kind: "block", region: "template", sectionId: next.sectionId, blockId: next.blockId, fieldKey: next.fieldKey });
+        if (next.kind === "section" && next.sectionId) {
+          setSelection({ kind: "section", region: "template", sectionId: next.sectionId });
+          setMobilePanel("settings");
+        }
+        if (next.kind === "block" && next.sectionId && next.blockId) {
+          setSelection({ kind: "block", region: "template", sectionId: next.sectionId, blockId: next.blockId, fieldKey: next.fieldKey });
+          setMobilePanel("settings");
+        }
       }}
     />
   ));
 
-  return (
-    <div data-testid="theme-editor-shell" className="fixed inset-0 z-[60] flex h-dvh flex-col overflow-hidden bg-[var(--paper-deep)] text-[var(--ink)]">
-      <header className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--line)] bg-[var(--white)] px-3 py-2 sm:gap-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <Link href="/admin" aria-label="Back to admin" className="grid size-8 place-items-center rounded-lg text-[var(--ink-soft)] hover:bg-[var(--paper)]"><ArrowLeft size={17} /></Link>
-          <div className="min-w-0"><p className="text-[10px] text-[var(--ink-soft)]">Online Store</p><h1 className="truncate text-[13px] font-semibold">Theme editor</h1></div>
+  const renderInspectorPanel = () => (
+    <>
+      {selection?.kind === "theme" && (
+        <ThemeSettingsPanel
+          schema={selectedTheme?.settingsSchema ?? []}
+          settings={themeConfiguration?.settings ?? {}}
+          saving={false}
+          upload={(file, onProgress) => api.uploadMedia(backendStoreId, file, onProgress)}
+          onChange={(path, value) => { void persistThemeSetting(path, value); }}
+        />
+      )}
+
+      {diagnostics.length > 0 && (
+        <div className="border-b border-[var(--line)] p-3">
+          <PublishDiagnostics diagnostics={diagnostics} onOpen={openDiagnostic} />
         </div>
-        <div className="flex items-center rounded-lg bg-[var(--paper-deep)] p-1" aria-label="Preview device">
+      )}
+
+      {libraryRegion && (
+        <>
+          <div className="flex h-14 items-center gap-2 border-b border-[var(--line)] px-3">
+            <button
+              type="button"
+              aria-label="Back to sections"
+              onClick={() => { setLibraryRegion(undefined); setMobilePanel("sections"); }}
+              className="grid size-8 place-items-center rounded-lg text-[var(--ink-soft)] hover:bg-[var(--paper)]"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <div>
+              <p className="text-[10px] text-[var(--ink-soft)]">{displayName(libraryRegion)}</p>
+              <h2 className="text-[13px] font-semibold">Add section</h2>
+            </div>
+          </div>
+          <SectionLibrary
+            presets={presetOptions}
+            builtIns={builtInSections}
+            onInsertPreset={(section) => { void insertPreset(section); setLibraryRegion(undefined); }}
+            onInsertBuiltIn={(sectionType) => { void insertBuiltIn(sectionType); }}
+          />
+        </>
+      )}
+
+      {blockPickerSection && blockPickerDefinition && !libraryRegion && (
+        <>
+          <div className="flex h-14 items-center gap-2 border-b border-[var(--line)] px-3">
+            <button
+              type="button"
+              aria-label="Back to section settings"
+              onClick={() => { setBlockPickerSectionId(undefined); setMobilePanel("settings"); }}
+              className="grid size-8 place-items-center rounded-lg text-[var(--ink-soft)] hover:bg-[var(--paper)]"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <div>
+              <p className="text-[10px] text-[var(--ink-soft)]">{displayName(blockPickerSection.type)}</p>
+              <h2 className="text-[13px] font-semibold">Add content block</h2>
+            </div>
+          </div>
+          <div className="space-y-1 p-3">
+            {blockPickerDefinition.allowedBlockTypes.map((blockType) => (
+              <button
+                key={blockType}
+                type="button"
+                onClick={() => { void addBlock(blockType); }}
+                className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-[13px] font-medium hover:bg-[var(--paper)]"
+              >
+                <span className="grid size-8 place-items-center rounded-lg border border-[var(--line)] text-[var(--ink)]">
+                  <Plus size={15} />
+                </span>
+                {displayName(blockType)}
+              </button>
+            ))}
+            {blockPickerDefinition.allowedBlockTypes.length === 0 && (
+              <p className="py-8 text-center text-[12px] text-[var(--ink-soft)]">This section does not support content blocks.</p>
+            )}
+          </div>
+        </>
+      )}
+
+      {localSection && !libraryRegion && !blockPickerSectionId && (
+        <>
+          <div className="flex min-h-14 items-center justify-between gap-3 border-b border-[var(--line)] px-3 py-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <button
+                type="button"
+                aria-label={selectedBlock ? "Back to section settings" : "Back to sections"}
+                onClick={() => {
+                  setSelection(selectedBlock
+                    ? { kind: "section", region: selection && selection.kind !== "theme" ? selection.region : "template", sectionId: localSection.id }
+                    : null);
+                  if (!selectedBlock) setMobilePanel("sections");
+                }}
+                className="grid size-8 shrink-0 place-items-center rounded-lg text-[var(--ink-soft)] hover:bg-[var(--paper)]"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <LayoutPanelTop size={16} className="text-[var(--ink-soft)]" />
+              <div className="min-w-0">
+                <p className="text-[10px] text-[var(--ink-soft)]">
+                  {selectedBlock && localSection.type !== "rich-text" ? displayName(localSection.type) : "Section settings"}
+                </p>
+                <p className="truncate text-[13px] font-semibold">
+                  {displayName(localSection.type === "rich-text" ? localSection.type : selectedBlock?.type ?? localSection.type)}
+                </p>
+              </div>
+            </div>
+            {!selectedBlock && !selectedGlobal && (
+              <button
+                type="button"
+                aria-label="Remove section"
+                onClick={() => { void removeSelectedSection(); }}
+                className="grid size-8 place-items-center rounded-lg text-[var(--destructive)] hover:bg-[var(--paper-deep)]"
+              >
+                <Trash2 size={15} />
+              </button>
+            )}
+          </div>
+
+          <div className="border-b border-[var(--line)] px-4 py-4">
+            {localSection.type === "rich-text" ? (
+              <RichTextDocumentEditor
+                key={`${activeTemplate.id}:${localSection.id}`}
+                section={localSection}
+                onSave={saveRichTextDocument}
+              />
+            ) : selectedControls.length > 0 ? (
+              <SettingGroups
+                controls={selectedControls}
+                settings={selectedSettings}
+                catalog={catalog}
+                upload={(file, onProgress) => api.uploadMedia(backendStoreId, file, onProgress)}
+                dynamicSources={dynamicSources}
+                onChange={(key, nextValue) => { void updateSelectedSetting(key, nextValue); }}
+              />
+            ) : (
+              <p className="py-8 text-center text-[12px] text-[var(--ink-soft)]">This item has no additional settings.</p>
+            )}
+          </div>
+
+          {!selectedBlock && !selectedGlobal && localSection.type !== "rich-text" && sectionDefinition && sectionDefinition.allowedBlockTypes.length > 0 && (
+            <div className="border-b border-[var(--line)] p-3">
+              <button
+                type="button"
+                onClick={() => setBlockPickerSectionId(localSection.id)}
+                className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-[var(--line)] bg-[var(--paper)] px-3 text-[12px] font-semibold text-[var(--ink)] hover:bg-[var(--paper-deep)]"
+              >
+                <Plus size={15} /> Add content block
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      {!localSection && selection?.kind !== "theme" && !libraryRegion && !blockPickerSectionId && (
+        <div className="px-6 py-12 text-center">
+          <LayoutPanelTop className="mx-auto text-[var(--ink-soft)]" size={28} />
+          <p className="mt-3 text-[13px] font-semibold">Select a section to edit</p>
+          <p className="mt-1 text-[11px] leading-5 text-[var(--ink-soft)]">Choose a section or content block from the page structure, or add a new section.</p>
+        </div>
+      )}
+
+      {selection?.kind !== "theme" && !libraryRegion && !blockPickerSectionId && (
+        <>
+          <div className="border-y border-[var(--line)] px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[var(--ink-soft)]">Global sections</p>
+          </div>
+          <GlobalSectionPanel
+            globalSections={globalOptions}
+            localSection={selectedGlobal ? undefined : localSection ?? undefined}
+            attachedGlobalId={activeGlobalId}
+            onMakeGlobal={(section) => { void makeGlobal(section); }}
+            onInsertGlobal={(globalId) => { void insertGlobal(globalId); }}
+            onDetachGlobal={(section) => { void detachGlobal(section); }}
+          />
+        </>
+      )}
+    </>
+  );
+
+  return (
+    <div
+      data-testid="theme-editor-shell"
+      style={{ "--paper": "#fffaf6", "--paper-deep": "#f5efeb", "--ink": "#241f20", "--ink-soft": "#74686c", "--line": "#e8e0db", "--white": "#ffffff" } as CSSProperties}
+      className="fixed inset-0 z-[60] flex h-dvh flex-col overflow-hidden bg-[var(--paper-deep)] text-[var(--ink)]"
+    >
+      <header className="grid shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-[var(--line)] bg-[var(--white)] px-3 py-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:px-5">
+        <div className="flex min-w-0 items-center gap-1">
+          <Link
+            href="/admin/online-store"
+            aria-label="Back to templates"
+            onClick={(event) => { event.preventDefault(); void saveQueue.current?.flush().then((saved) => { if (saved) router.push("/admin/online-store"); }); }}
+            className="grid size-9 shrink-0 place-items-center rounded-lg text-[var(--ink-soft)] hover:bg-[var(--paper)]"
+          >
+            <ArrowLeft size={17} />
+          </Link>
+
+          <button
+            type="button"
+            aria-label={desktopSidebarOpen ? "Hide editor sidebar" : "Show editor sidebar"}
+            aria-pressed={desktopSidebarOpen}
+            onClick={() => setDesktopSidebarOpen((open) => !open)}
+            className="hidden size-9 place-items-center rounded-lg text-[var(--ink-soft)] hover:bg-[var(--paper)] lg:grid"
+          >
+            {desktopSidebarOpen ? <PanelLeftClose size={17} /> : <PanelLeftOpen size={17} />}
+          </button>
+
+          <div className="hidden items-center gap-1 lg:flex">
+            <button
+              type="button"
+              aria-label="Sections"
+              title="Sections"
+              onClick={() => {
+                setDesktopSidebarOpen(true);
+                setSelection(null);
+                setLibraryRegion(undefined);
+                setBlockPickerSectionId(undefined);
+                setMobilePanel("sections");
+              }}
+              className={clsx(
+                "grid size-9 place-items-center rounded-lg",
+                selection?.kind !== "theme" ? "bg-[var(--paper)] text-[var(--ink)]" : "text-[var(--ink-soft)] hover:bg-[var(--paper)]",
+              )}
+            >
+              <Layers3 size={17} />
+            </button>
+            <button
+              type="button"
+              aria-label="Theme settings"
+              title="Theme settings"
+              onClick={() => {
+                setDesktopSidebarOpen(true);
+                setSelection({ kind: "theme" });
+                setActiveGlobalId(undefined);
+                setLibraryRegion(undefined);
+                setBlockPickerSectionId(undefined);
+                setMobilePanel("settings");
+              }}
+              className={clsx(
+                "grid size-9 place-items-center rounded-lg",
+                selection?.kind === "theme" ? "bg-[var(--paper)] text-[var(--ink)]" : "text-[var(--ink-soft)] hover:bg-[var(--paper)]",
+              )}
+            >
+              <Settings2 size={17} />
+            </button>
+          </div>
+
+          <div className="ml-1 min-w-0">
+            <p className="hidden text-[11px] text-[var(--ink-soft)] sm:block">{activeStore?.name} / Store editor</p>
+            <h1 className="truncate text-sm font-semibold">Theme editor</h1>
+          </div>
+        </div>
+
+        <div className="order-last col-span-2 mx-auto flex items-center gap-1 rounded-xl bg-[var(--paper-deep)] p-1 sm:order-none sm:col-span-1">
+          <button
+            type="button"
+            aria-label="Toggle preview inspector"
+            title="Preview inspector"
+            aria-pressed={previewInspectorEnabled}
+            onClick={() => setPreviewInspectorEnabled((enabled) => !enabled)}
+            className={clsx(
+              "grid size-8 place-items-center rounded-lg",
+              previewInspectorEnabled ? "bg-[var(--white)] text-[var(--ink)] shadow-sm" : "text-[var(--ink-soft)]",
+            )}
+          >
+            <MousePointer2 size={15} />
+          </button>
+          <span className="mx-0.5 h-4 w-px bg-[var(--line)]" aria-hidden="true" />
           {([
             ["desktop", "Desktop preview", Monitor],
             ["tablet", "Tablet preview", Tablet],
             ["mobile", "Mobile preview", Smartphone],
           ] as const).map(([viewportValue, label, Icon]) => (
-          <button key={viewportValue} type="button" aria-label={label} title={`${label.replace(" preview", "")} · ${viewportValue === "desktop" ? 1440 : viewportValue === "tablet" ? 820 : 390}px`} aria-pressed={viewport === viewportValue} onClick={() => setViewport(viewportValue)} className={clsx("grid size-7 place-items-center rounded-md", viewport === viewportValue ? "bg-[var(--white)] text-[var(--ink)] shadow-sm" : "text-[var(--ink-soft)]")}><Icon size={15} /></button>
+            <button
+              key={viewportValue}
+              type="button"
+              aria-label={label}
+              title={`${label.replace(" preview", "")} · ${viewportValue === "desktop" ? 1440 : viewportValue === "tablet" ? 820 : 390}px`}
+              aria-pressed={viewport === viewportValue}
+              onClick={() => setViewport(viewportValue)}
+              className={clsx(
+                "grid size-8 place-items-center rounded-lg",
+                viewport === viewportValue ? "bg-[var(--white)] text-[var(--ink)] shadow-sm" : "text-[var(--ink-soft)] hover:text-[var(--ink)]",
+              )}
+            >
+              <Icon size={15} />
+            </button>
           ))}
         </div>
-        <div className="flex w-full items-center justify-end gap-3 sm:w-auto">
-          <div className="hidden text-right lg:block"><p className="text-[10px] text-[var(--ink-soft)]">{saveState === "saving" ? "Saving changes…" : saveState === "error" ? "Save failed" : "All changes saved"}</p><p className="text-[12px] font-semibold">Generation {workspace.generation}</p></div>
+
+        <div className="flex min-w-0 items-center justify-end gap-2">
+          <button type="button" aria-label="Undo last editor change" disabled={!history.canUndo(historyScope) || isConverting} onClick={() => { void playHistory("undo"); }} className="rounded-lg border border-[var(--line)] px-3 py-2 text-xs disabled:opacity-40">Undo</button>
+          <button type="button" aria-label="Redo editor change" disabled={!history.canRedo(historyScope) || isConverting} onClick={() => { void playHistory("redo"); }} className="rounded-lg border border-[var(--line)] px-3 py-2 text-xs disabled:opacity-40">Redo</button>
+          <div className="hidden text-right xl:block" role="status">
+            <p className={clsx(
+              "text-[10px]",
+              saveState === "error" ? "text-[var(--destructive)]" : "text-[var(--ink-soft)]",
+            )}>
+              {saveState === "saving" ? "Saving changes…" : saveState === "error" ? "Changes not saved" : "All changes saved"}
+            </p>
+            <p className="text-[11px] font-medium text-[var(--ink-soft)]">Private until published</p>
+          </div>
           <PublishControls
+            saveState={saveState}
             generation={workspace.generation}
             diagnostics={diagnostics}
             validate={(generation) => api.validate(backendStoreId, generation)}
@@ -663,176 +1109,195 @@ export default function OnlineStoreEditorPage() {
         </div>
       </header>
 
-      <TemplateResourceSelector
-        templates={templates.map(({ id, type, handle, name }) => ({ id, type, handle, name }))}
-        activeTemplateId={activeTemplate.id}
-        previewResources={previewResources}
-        previewResourceId={previewResourceId}
-        previewQuery={previewQuery}
-        onTemplateChange={(templateId) => { setActiveTemplateId(templateId); setSelection(null); setActiveGlobalId(undefined); setPreviewSnapshot(undefined); setMobilePanel("sections"); }}
-        onPreviewResourceChange={setPreviewResourceId}
-        onPreviewQueryChange={setPreviewQuery}
-        onPageTypeChange={(pageType) => {
-          const template = templates.find((entry) => entry.type === pageType);
-          if (template) {
-            setActiveTemplateId(template.id);
-            setSelection(null);
-            setActiveGlobalId(undefined);
-            setPreviewSnapshot(undefined);
-            setMobilePanel("sections");
-            return;
-          }
-          if (!api) return;
-          void api.createTemplate(backendStoreId, { type: pageType, name: `Default ${pageType.charAt(0).toUpperCase()}${pageType.slice(1)}`, handle: "default", layout: defaultTemplateLayout(pageType) }).then((result) => {
-            setTemplates((current) => [...current, result.template]);
-            setActiveTemplateId(result.template.id);
-            setWorkspace((current) => current ? { ...current, generation: result.generation } : current);
-            setPreviewSnapshot(undefined);
-            setMobilePanel("sections");
-          });
-        }}
-      />
+      {saveState === "error" && <div role="alert" className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-red-200 bg-red-50 px-5 py-3 text-xs leading-5 text-red-800"><p><strong>Your changes are still here.</strong> {saveError ?? "They could not be saved."}</p><button type="button" onClick={() => { setSaveError(undefined); void saveQueue.current?.retry(); }} className="inline-flex min-h-9 items-center gap-2 rounded-lg border border-red-200 bg-white px-3 font-semibold"><RefreshCw size={13} />Retry saving</button><button type="button" onClick={() => { const data = new Blob([JSON.stringify({ templates: templateDrafts.current, globals: globalDrafts.current, theme: themeDraft.current }, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(data); const link = document.createElement("a"); link.href = url; link.download = "jelly-shop-local-changes.json"; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); }} className="rounded-lg border border-red-200 bg-white px-3 py-2 font-semibold">Download local changes</button><button type="button" onClick={() => { if (!window.confirm("Discard unsaved changes and reload the latest saved workspace? Download your local changes first if you want to keep a copy.")) return; saveQueue.current?.dispose(); saveQueue.current = createRevisionedSaveQueue({ onStatus: setSaveState, onError: (error) => setSaveError(error instanceof Error ? error.message : "Your changes could not be saved.") }); history.clear(); refreshHistory((value) => value + 1); setSaveState("saved"); setSaveError(undefined); setLoadAttempt((value) => value + 1); }} className="rounded-lg border border-red-200 bg-white px-3 py-2 font-semibold">Discard local changes and reload</button></div>}
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[var(--line)] bg-[#fff5f6] px-4 py-2 text-[11px] text-[var(--ink-soft)] sm:px-5"><span className="flex items-center gap-2"><Sparkles size={13} className="text-[#9b5266]" />{previewSnapshot ? "Compiled preview. Select a section or change a setting to continue editing." : "Select a section in your preview to make it your own."}</span><span className="flex shrink-0 items-center gap-1.5 xl:hidden">{saveState === "saving" ? <Loader2 size={12} className="animate-spin motion-reduce:animate-none" /> : <CheckCircle2 size={12} />}{saveState === "saving" ? "Saving…" : saveState === "error" ? "Not saved" : "Saved"}</span></div>
+
+      <div className="shrink-0 border-b border-[var(--line)] bg-[var(--white)]">
+        <div className="mx-auto max-w-[1200px]">
+          <TemplateResourceSelector
+            templates={templates.map(({ id, type, handle, name }) => ({ id, type, handle, name }))}
+            activeTemplateId={activeTemplate.id}
+            previewResources={previewResources}
+            previewResourceId={previewResourceId}
+            previewQuery={previewQuery}
+            onTemplateChange={(templateId) => {
+              setActiveTemplateId(templateId);
+              setSelection(null);
+              setActiveGlobalId(undefined);
+              setPreviewSnapshot(undefined);
+              setMobilePanel("sections");
+            }}
+            onPreviewResourceChange={setPreviewResourceId}
+            onPreviewQueryChange={setPreviewQuery}
+            onPageTypeChange={(pageType) => {
+              const template = templates.find((entry) => entry.type === pageType);
+              if (template) {
+                setActiveTemplateId(template.id);
+                setSelection(null);
+                setActiveGlobalId(undefined);
+                setPreviewSnapshot(undefined);
+                setMobilePanel("sections");
+                return;
+              }
+              if (!api) return;
+              void (async () => {
+              if (!await saveQueue.current?.flush()) return;
+              setSaveState("saving");
+              await api.createTemplate(backendStoreId, {
+                type: pageType,
+                name: `Default ${pageType.charAt(0).toUpperCase()}${pageType.slice(1)}`,
+                handle: "default",
+                layout: defaultTemplateLayout(pageType),
+              }).then((result) => {
+                setTemplates((current) => [...current, result.template]);
+                setActiveTemplateId(result.template.id);
+                setWorkspace((current) => current ? { ...current, generation: result.generation } : current);
+                setPreviewSnapshot(undefined);
+                setMobilePanel("sections");
+                setSaveState("saved");
+              }).catch((error: unknown) => {
+                setSaveError(error instanceof Error ? error.message : "Could not create this page. Try again.");
+                setSaveState("error");
+              });
+              })();
+            }}
+          />
+        </div>
+      </div>
 
       <EditorPanelNavigation value={mobilePanel} onChange={setMobilePanel} />
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-1 lg:grid-cols-[280px_minmax(0,1fr)_320px]">
-          <div className={clsx("flex min-h-0 flex-col border-b border-[var(--line)] bg-[var(--white)] lg:col-start-1 lg:row-start-1 lg:border-b-0 lg:border-r", mobilePanel !== "sections" && "hidden lg:flex")}>
-          <button type="button" onClick={() => { setSelection({ kind: "theme" }); setActiveGlobalId(undefined); setMobilePanel("settings"); }} className="m-2 flex min-h-9 shrink-0 items-center rounded-lg px-3 text-left text-[12px] font-semibold text-[var(--ink)] hover:bg-[var(--paper)]">Theme settings</button>
-          <TemplateHierarchy
-            template={activeTemplate}
-            globalSections={globalLabels}
-            selection={selection}
-            activeGlobalId={activeGlobalId}
-            onSelect={(next) => { setSelection(next); setActiveGlobalId(undefined); setMobilePanel("settings"); }}
-            onGlobalSelect={(globalId) => { setActiveGlobalId(globalId); setSelection(null); setMobilePanel("settings"); }}
-            onAddSection={(region) => { setLibraryRegion(region); setBlockPickerSectionId(undefined); setMobilePanel("settings"); }}
-            onAddBlock={(sectionId) => { setBlockPickerSectionId(sectionId); setLibraryRegion(undefined); setMobilePanel("settings"); }}
-            onMove={(id, direction) => { void moveSelectedPlacement(id, direction); }}
-            onToggle={(id, enabled) => { void toggleSection(id, enabled); }}
-          />
-        </div>
-
-        <main className={clsx("min-h-0 min-w-0 overflow-auto p-2 lg:col-start-2 lg:row-start-1 lg:p-4", mobilePanel !== "preview" && "hidden lg:block")} aria-label="Storefront preview">
-          {previewSnapshot && <div className="mx-auto mb-2 max-w-[1440px] rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-[10px] font-medium text-emerald-800">Compiled preview · generation {previewSnapshot.sourceGeneration}</div>}
-          <div className={clsx(
-            "mx-auto min-h-full overflow-hidden border border-[var(--line)] bg-[var(--white)] shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-[max-width]",
-            viewport === "desktop" && "max-w-[1440px]",
-            viewport === "tablet" && "max-w-[820px]",
-            viewport === "mobile" && "max-w-[390px]",
-          )} data-testid="preview-viewport" data-jelly-theme={themeConfiguration?.themeId ?? "minimal"} data-viewport={viewport} data-preview-width={viewport === "desktop" ? 1440 : viewport === "tablet" ? 820 : 390} style={previewThemeStyle}>
-            {renderPreviewSections([...previewLayout.announcement, ...previewLayout.header])}
-            <div data-storefront-template>
-              {renderPreviewSections(previewLayout.template)}
-              {previewLayout.template.length === 0 && <div className="grid min-h-[360px] place-items-center p-8 text-center text-sm text-[var(--ink-soft)]">This template has no sections yet.</div>}
+      <div
+        className={clsx(
+          "grid min-h-0 flex-1 grid-cols-1 grid-rows-1",
+          desktopSidebarOpen
+              ? "lg:grid-cols-[260px_minmax(0,1fr)_300px] lg:grid-rows-1 min-[1600px]:grid-cols-[290px_minmax(0,1fr)_340px]"
+            : "lg:grid-cols-[minmax(0,1fr)] lg:grid-rows-1",
+        )}
+        inert={isConverting}
+        aria-busy={isConverting}
+      >
+        <section
+          className={clsx(
+            "min-h-0 overflow-hidden border-b border-[var(--line)] bg-[var(--white)]",
+            mobilePanel !== "sections" && "hidden lg:block",
+            desktopSidebarOpen
+              ? "lg:col-start-1 lg:row-start-1 lg:border-r lg:border-b-0"
+              : "lg:hidden",
+          )}
+          aria-label="Page structure"
+        >
+          <div className="flex h-full min-h-0 flex-col">
+            <div className="flex h-11 shrink-0 items-center justify-between border-b border-[var(--line)] px-3">
+              <div className="flex items-center gap-2">
+                <Layers3 size={15} className="text-[var(--ink-soft)]" />
+                <h2 className="text-[13px] font-semibold">Page structure</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelection({ kind: "theme" });
+                  setActiveGlobalId(undefined);
+                  setLibraryRegion(undefined);
+                  setBlockPickerSectionId(undefined);
+                  setMobilePanel("settings");
+                }}
+                className="rounded-md px-2 py-1 text-[11px] font-medium text-[var(--ink-soft)] hover:bg-[var(--paper)] hover:text-[var(--ink)] min-[1600px]:hidden"
+              >
+                Theme settings
+              </button>
             </div>
-            {renderPreviewSections(previewLayout.footer)}
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <TemplateHierarchy
+                template={activeTemplate}
+                globalSections={globalLabels}
+                selection={selection}
+                activeGlobalId={activeGlobalId}
+                onSelect={(next) => {
+                  setSelection(next);
+                  const owningGlobal = next && next.kind !== "theme" ? validGlobals.find((global) => global.section.id === next.sectionId) : undefined;
+                  setActiveGlobalId(owningGlobal?.id);
+                  setMobilePanel("settings");
+                }}
+                onGlobalSelect={(globalId) => {
+                  setActiveGlobalId(globalId);
+                  setSelection(null);
+                  setMobilePanel("settings");
+                }}
+                onAddSection={(region) => {
+                  setLibraryRegion(region);
+                  setBlockPickerSectionId(undefined);
+                  setMobilePanel("settings");
+                }}
+                onAddBlock={(sectionId) => {
+                  setBlockPickerSectionId(sectionId);
+                  setLibraryRegion(undefined);
+                  setMobilePanel("settings");
+                }}
+                onMove={(id, direction) => { void moveSelectedPlacement(id, direction); }}
+                onToggle={(id, enabled) => { void toggleSection(id, enabled); }}
+              />
+            </div>
+          </div>
+        </section>
+
+        <main
+          className={clsx(
+            "min-h-0 min-w-0 overflow-auto bg-[var(--paper-deep)] p-2 sm:p-3 lg:p-5",
+            mobilePanel !== "preview" && "hidden lg:block",
+            desktopSidebarOpen
+              ? "lg:col-start-2 lg:row-start-1"
+              : "lg:col-start-1 lg:row-start-1",
+          )}
+          aria-label="Storefront preview"
+        >
+          {previewSnapshot && (
+            <div className="mx-auto mb-3 max-w-[1440px] rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-[10px] font-medium text-emerald-800">
+              Compiled preview · generation {previewSnapshot.sourceGeneration}
+            </div>
+          )}
+
+          <div className="mx-auto flex min-h-full w-full items-start justify-center">
+            <div
+              className={clsx(
+                "min-h-full w-full overflow-hidden rounded-sm border border-[var(--line)] bg-[var(--white)] shadow-[0_8px_28px_rgba(0,0,0,0.08)] transition-[max-width] duration-200",
+                viewport === "desktop" && "max-w-[1440px]",
+                viewport === "tablet" && "max-w-[820px]",
+                viewport === "mobile" && "max-w-[390px]",
+              )}
+              data-testid="preview-viewport"
+              data-jelly-theme={themeConfiguration?.themeId ?? "minimal"}
+              data-viewport={viewport}
+              data-preview-width={viewport === "desktop" ? 1440 : viewport === "tablet" ? 820 : 390}
+              style={previewThemeStyle}
+            >
+              <StorefrontPreviewFrame title="Storefront preview" themeId={themeConfiguration?.themeId ?? "minimal"} style={previewThemeStyle} className="h-[calc(100dvh-230px)] min-h-[420px] w-full border-0 bg-white">
+                {renderPreviewSections([...previewLayout.announcement, ...previewLayout.header])}
+                <div data-storefront-template>
+                  {renderPreviewSections(previewLayout.template)}
+                  {previewLayout.template.length === 0 && (
+                    <div className="grid min-h-[360px] place-items-center p-8 text-center text-sm text-[var(--ink-soft)]">
+                      This template has no sections yet.
+                    </div>
+                  )}
+                </div>
+                {renderPreviewSections(previewLayout.footer)}
+              </StorefrontPreviewFrame>
+            </div>
           </div>
         </main>
 
-        <aside className={clsx("min-h-0 overflow-y-auto border-b border-[var(--line)] bg-[var(--white)] lg:col-start-3 lg:row-start-1 lg:border-b-0 lg:border-l", mobilePanel !== "settings" && "hidden lg:block")} aria-label="Section tools">
-          {selection?.kind === "theme" && <ThemeSettingsPanel
-            schema={selectedTheme?.settingsSchema ?? []}
-            settings={themeConfiguration?.settings ?? {}}
-            saving={themeSaveState === "saving"}
-            error={themeSaveError}
-            upload={(file, onProgress) => api.uploadMedia(backendStoreId, file, onProgress)}
-            onChange={(path, value) => { void persistThemeSetting(path, value); }}
-          />}
-          {diagnostics.length > 0 && <div className="border-b border-[var(--line)] p-3">
-            <PublishDiagnostics diagnostics={diagnostics} onOpen={openDiagnostic} />
-          </div>}
-
-          {libraryRegion && (
-            <>
-              <div className="flex h-14 items-center gap-2 border-b border-[var(--line)] px-3">
-                <button type="button" aria-label="Back to sections" onClick={() => { setLibraryRegion(undefined); setMobilePanel("sections"); }} className="grid size-8 place-items-center rounded-lg text-[var(--ink-soft)] hover:bg-[var(--paper)]"><ChevronLeft size={16} /></button>
-                <div><p className="text-[10px] text-[var(--ink-soft)]">{displayName(libraryRegion)}</p><h2 className="text-[13px] font-semibold">Add section</h2></div>
-              </div>
-              <SectionLibrary
-                presets={presetOptions}
-                builtIns={builtInSections}
-                onInsertPreset={(section) => { void insertPreset(section); setLibraryRegion(undefined); }}
-                onInsertBuiltIn={(sectionType) => { void insertBuiltIn(sectionType); }}
-              />
-            </>
+        <aside
+          className={clsx(
+            "min-h-0 overflow-y-auto bg-[var(--white)]",
+            mobilePanel !== "settings" && "hidden lg:block",
+            desktopSidebarOpen
+              ? "lg:col-start-3 lg:row-start-1 lg:border-l lg:border-[var(--line)]"
+              : "lg:hidden",
           )}
-
-          {blockPickerSection && blockPickerDefinition && !libraryRegion && (
-            <>
-              <div className="flex h-14 items-center gap-2 border-b border-[var(--line)] px-3">
-                <button type="button" aria-label="Back to section settings" onClick={() => { setBlockPickerSectionId(undefined); setMobilePanel("settings"); }} className="grid size-8 place-items-center rounded-lg text-[var(--ink-soft)] hover:bg-[var(--paper)]"><ChevronLeft size={16} /></button>
-                <div><p className="text-[10px] text-[var(--ink-soft)]">{displayName(blockPickerSection.type)}</p><h2 className="text-[13px] font-semibold">Add content block</h2></div>
-              </div>
-              <div className="space-y-1 p-3">
-                {blockPickerDefinition.allowedBlockTypes.map((blockType) => (
-                  <button key={blockType} type="button" onClick={() => { void addBlock(blockType); }} className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-[13px] font-medium hover:bg-[var(--paper)]">
-                    <span className="grid size-8 place-items-center rounded-lg border border-[var(--line)] text-[var(--ink)]"><Plus size={15} /></span>
-                    {displayName(blockType)}
-                  </button>
-                ))}
-                {blockPickerDefinition.allowedBlockTypes.length === 0 && <p className="py-8 text-center text-[12px] text-[var(--ink-soft)]">This section does not support content blocks.</p>}
-              </div>
-            </>
-          )}
-
-          {localSection && !libraryRegion && !blockPickerSectionId && (
-            <>
-              <div className="flex min-h-14 items-center justify-between gap-3 border-b border-[var(--line)] px-3 py-2">
-                <div className="flex min-w-0 items-center gap-2">
-                  <button
-                    type="button"
-                    aria-label={selectedBlock ? "Back to section settings" : "Back to sections"}
-                    onClick={() => { setSelection(selectedBlock ? { kind: "section", region: selection && selection.kind !== "theme" ? selection.region : "template", sectionId: localSection.id } : null); if (!selectedBlock) setMobilePanel("sections"); }}
-                    className="grid size-8 shrink-0 place-items-center rounded-lg text-[var(--ink-soft)] hover:bg-[var(--paper)]"
-                  >
-                    <ChevronLeft size={16} />
-                  </button>
-                  <LayoutPanelTop size={16} className="text-[var(--ink-soft)]" />
-                  <div className="min-w-0"><p className="text-[10px] text-[var(--ink-soft)]">{selectedBlock && localSection.type !== "rich-text" ? displayName(localSection.type) : "Section settings"}</p><p className="truncate text-[13px] font-semibold">{displayName(localSection.type === "rich-text" ? localSection.type : selectedBlock?.type ?? localSection.type)}</p></div>
-                </div>
-                {!selectedBlock && <button type="button" aria-label="Remove section" onClick={() => { void removeSelectedSection(); }} className="grid size-8 place-items-center rounded-lg text-[var(--destructive)] hover:bg-[var(--paper-deep)]"><Trash2 size={15} /></button>}
-              </div>
-              <div className="border-b border-[var(--line)] px-4 py-4">
-                {localSection.type === "rich-text" ? <RichTextDocumentEditor
-                    key={`${activeTemplate?.id}:${localSection.id}`}
-                    section={localSection}
-                    onSave={saveRichTextDocument}
-                  /> : selectedControls.length > 0 ? <SettingGroups
-                    controls={selectedControls}
-                    settings={selectedSettings}
-                    catalog={catalog}
-                    upload={(file, onProgress) => api.uploadMedia(backendStoreId, file, onProgress)}
-                    dynamicSources={dynamicSources}
-                    onChange={(key, nextValue) => { void updateSelectedSetting(key, nextValue); }}
-                  /> : <p className="py-8 text-center text-[12px] text-[var(--ink-soft)]">This item has no additional settings.</p>}
-              </div>
-              {!selectedBlock && localSection.type !== "rich-text" && sectionDefinition && sectionDefinition.allowedBlockTypes.length > 0 && (
-                <div className="border-b border-[var(--line)] p-3">
-                  <button
-                    type="button"
-                    onClick={() => setBlockPickerSectionId(localSection.id)}
-                    className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-[var(--line)] bg-[var(--paper)] px-3 text-[12px] font-semibold text-[var(--ink)] hover:bg-[var(--paper-deep)]"
-                  >
-                    <Plus size={15} /> Add content block
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-
-          {!localSection && selection?.kind !== "theme" && !libraryRegion && !blockPickerSectionId && <div className="px-6 py-12 text-center"><LayoutPanelTop className="mx-auto text-[var(--ink-soft)]" size={28} /><p className="mt-3 text-[13px] font-semibold">Select a section to edit</p><p className="mt-1 text-[11px] leading-5 text-[var(--ink-soft)]">Choose a section or content block from the left panel, or add a new section.</p></div>}
-
-          {selection?.kind !== "theme" && !libraryRegion && !blockPickerSectionId && <div className="border-y border-[var(--line)] px-4 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[var(--ink-soft)]">Global sections</p>
-          </div>}
-          {selection?.kind !== "theme" && !libraryRegion && !blockPickerSectionId && <GlobalSectionPanel
-            globalSections={globalOptions}
-            localSection={localSection ?? undefined}
-            attachedGlobalId={activeGlobalId}
-            onMakeGlobal={(section) => { void makeGlobal(section); }}
-            onInsertGlobal={(globalId) => { void insertGlobal(globalId); }}
-            onDetachGlobal={(section) => { void detachGlobal(section); }}
-          />}
+          aria-label="Section settings"
+        >
+          {renderInspectorPanel()}
         </aside>
       </div>
     </div>

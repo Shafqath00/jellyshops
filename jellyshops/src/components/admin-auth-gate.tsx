@@ -11,7 +11,7 @@ export function AdminAuthGate({
 }: {
   children: React.ReactNode;
 }) {
-  const { configured, loading, merchantLoading, session, stores } = useAuth();
+  const { configured, loading, merchantLoading, merchantStatus, merchantError, refreshMerchant, session, stores } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -24,6 +24,7 @@ export function AdminAuthGate({
       configured &&
       session &&
       !merchantLoading &&
+      merchantStatus === "ready" &&
       stores.length === 0
     ) {
       router.replace("/onboarding");
@@ -32,6 +33,7 @@ export function AdminAuthGate({
     configured,
     loading,
     merchantLoading,
+    merchantStatus,
     pathname,
     router,
     session,
@@ -72,6 +74,10 @@ export function AdminAuthGate({
         </section>
       </main>
     );
+  }
+
+  if (session && merchantStatus === "error") {
+    return <main className="auth-page"><section className="auth-panel auth-message"><p role="alert">{merchantError ?? "Could not load your stores."}</p><button className="button button-primary" onClick={() => { void refreshMerchant().catch(() => {}); }}>Retry loading stores</button></section></main>;
   }
 
   if (loading || merchantLoading || !session || stores.length === 0) {

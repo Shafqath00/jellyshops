@@ -163,7 +163,7 @@ describe("editor shell", () => {
 
     await waitFor(() => expect(onPublish).toHaveBeenCalledWith(expect.objectContaining({ storeId: "store-demo" }), 8));
     expect(onSave.mock.invocationCallOrder[0]).toBeLessThan(onPublish.mock.invocationCallOrder[0]);
-    expect(onSave.mock.calls[0][0].regions.template[0].blocks[0].settings.text).toBe("Ready to publish");
+    expect(onSave.mock.calls.at(-1)?.[0].regions.template[0].blocks[0].settings.text).toBe("Ready to publish");
   });
 
   it("prevents overlapping save and publish operations", async () => {

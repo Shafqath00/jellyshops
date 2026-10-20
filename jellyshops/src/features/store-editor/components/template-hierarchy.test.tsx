@@ -29,7 +29,7 @@ const template = {
 
 const globalSections = {
   "global-header": { id: "global-header", name: "Main header", sectionType: "header" },
-  "global-promo": { id: "global-promo", name: "Summer promo", sectionType: "announcement-bar" },
+  "global-promo": { id: "global-promo", name: "Summer promo", sectionType: "announcement-bar", sectionId: "announcement-1", blocks: [{ id: "announcement-copy", type: "text" }] },
   "global-footer": { id: "global-footer", name: "Main footer", sectionType: "footer" },
 };
 
@@ -101,5 +101,12 @@ describe("TemplateHierarchy", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Add section to Template" }));
     expect(onAddSection).toHaveBeenCalledWith("template");
+  });
+
+  it("exposes blocks inside shared sections for direct editing", async () => {
+    const onSelect = vi.fn();
+    render(<TemplateHierarchy template={template} globalSections={globalSections} selection={null} activeGlobalId="global-promo" onSelect={onSelect} />);
+    await userEvent.click(screen.getByRole("button", { name: "Text block" }));
+    expect(onSelect).toHaveBeenCalledWith({ kind: "block", region: "template", sectionId: "announcement-1", blockId: "announcement-copy" });
   });
 });

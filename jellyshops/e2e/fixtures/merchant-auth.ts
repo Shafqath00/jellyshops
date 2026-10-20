@@ -8,6 +8,17 @@ export async function signInAsE2eMerchant(page: Page, destination = "/admin/onli
     throw new Error("Authenticated editor E2E requires JELLY_E2E_EMAIL and JELLY_E2E_PASSWORD for a dedicated test merchant.");
   }
 
+  await signInWithMerchantCredentials(page, email, password, destination);
+}
+
+export async function signInAsOnboardingE2eMerchant(page: Page, destination = "/onboarding"): Promise<void> {
+  const email = process.env.JELLY_ONBOARDING_E2E_EMAIL;
+  const password = process.env.JELLY_ONBOARDING_E2E_PASSWORD;
+  if (!email || !password) throw new Error("Storeless onboarding E2E requires the dedicated local onboarding credentials.");
+  await signInWithMerchantCredentials(page, email, password, destination);
+}
+
+async function signInWithMerchantCredentials(page: Page, email: string, password: string, destination: string): Promise<void> {
   await page.goto(`/login?next=${encodeURIComponent(destination)}`);
   await expect(page.getByLabel("Email")).toBeVisible();
   await page.getByLabel("Email").fill(email);
@@ -16,6 +27,11 @@ export async function signInAsE2eMerchant(page: Page, destination = "/admin/onli
   if (destination === "/admin/online-store/editor") {
     await expect(page.getByRole("heading", { name: "Theme editor" })).toBeVisible();
   } else {
-    await expect(page).toHaveURL(new RegExp(`${destination.replaceAll("/", "\\/")}$`));
+    try {
+      await page.waitForURL(new RegExp(`${destination.replaceAll("/", "\\/")}$`), { timeout: 15_000 });
+    } catch {
+      const message = (await page.getByRole("alert").allTextContents()).join(" ").trim();
+      throw new Error(message ? `Merchant sign-in did not complete: ${message}` : `Merchant sign-in did not navigate to ${destination}.`);
+    }
   }
 }

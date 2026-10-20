@@ -35,7 +35,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       ? await supabase.auth.signUp({
           email,
           password,
-          options: { data: { name: String(data.get("name") ?? "") } },
+          options: { data: { name: String(data.get("name") ?? "") }, emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/onboarding")}` },
         })
       : await supabase.auth.signInWithPassword({ email, password });
 

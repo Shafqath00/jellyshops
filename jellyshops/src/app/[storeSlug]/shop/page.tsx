@@ -1,4 +1,6 @@
 "use client";
+import { CatalogBrowser } from "@/features/storefront/catalog-browser";
+
 
 import { useParams, useSearchParams } from "next/navigation";
 import { useThemePresentation } from "@/components/storefront-shell";
@@ -10,7 +12,7 @@ export default function ShopPage() {
   const { storeSlug } = useParams<{ storeSlug: string }>();
   const search = useSearchParams();
   const { repository } = useShop();
-  const { shell, settings } = useThemePresentation();
+  const { shell, settings, themeId } = useThemePresentation();
   const catalogStatus = useStorefrontCatalogStatus();
   const store = repository.getStoreBySlug(storeSlug);
   if (!store) return null;
@@ -21,5 +23,6 @@ export default function ShopPage() {
   const visible = selected ? products.filter((product) => product.category === selected) : products;
   const CollectionPage = shell.CollectionPage;
   const productViews = visible.map((product) => { const variant = product.variants[0]; return { id: product.id, name: product.name, slug: product.slug, category: product.category, imageUrl: product.imageUrl, price: formatMoney(variant?.priceMinor ?? 0, store.currency), soldOut: !variant || variant.stock <= 0, lowStock: Boolean(variant && variant.stock > 0 && variant.stock <= 3), href: `/${store.slug}/products/${product.slug}` }; });
+  if (settings && themeId === "jelly-signature") return <main className="signature-page"><header className="signature-page-heading"><h1>Explore the collection</h1></header><CatalogBrowser storeSlug={store.slug} /></main>;
   return <CollectionPage store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} settings={settings} products={productViews} categories={categories} selectedCategory={selected ?? undefined} allHref={`/${store.slug}/shop`} categoryHref={(category) => `/${store.slug}/shop?category=${encodeURIComponent(category)}`} />;
 }

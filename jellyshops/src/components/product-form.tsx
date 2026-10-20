@@ -10,12 +10,21 @@ import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import { ProductCategoryPicker } from "@/components/product-category-picker";
 import { CategoryRecommendations } from "@/components/category-recommendations";
 import { reconcileProductVariants } from "@/lib/product-variants";
+import { catalogProductToStorefrontProduct } from "@/features/commerce/api/client";
 
 const API_URL = process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1486427944299-d1955d23e34d?auto=format&fit=crop&w=1200&q=85";
 const inputClass = "mt-2 h-11 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[12px] font-semibold text-[#342d2f] outline-none focus:border-[#d39aaa] focus:ring-4 focus:ring-[#ff8da4]/10";
 const labelClass = "text-[10px] font-black uppercase tracking-[0.08em] text-[#7f7476]";
 const cardClass = "rounded-[24px] border border-black/[0.06] bg-white p-5 shadow-[0_14px_44px_rgba(83,61,66,0.05)] sm:p-6";
+function parseSpecifications(value: string): Record<string, string> {
+  return Object.fromEntries(value.split("\n").flatMap((line) => {
+    const separator = line.indexOf(":");
+    if (separator < 1) return [];
+    const key = line.slice(0, separator).trim(); const content = line.slice(separator + 1).trim();
+    return key && content ? [[key, content]] : [];
+  }));
+}
 const newOption = (position: number): ProductOption => ({ id: `option-${crypto.randomUUID()}`, name: "", type: "configuration", display: "buttons", required: false, position, values: [] });
 const newValue = (position: number): ProductOptionValue => ({ id: `value-${crypto.randomUUID()}`, label: "", priceAdjustmentMinor: 0, position });
 
@@ -23,18 +32,21 @@ export function ProductForm({ product }: { product?: Product }) {
   const { repository, state } = useShop();
   const { session, activeStore } = useAuth();
   const storeId = activeStore?.id ?? state.activeStoreId;
-  const api = useMemo(() => session?.access_token ? createStoreEditorApi({ baseUrl: API_URL, token: session.access_token }) : null, [session?.access_token]);
+  const token = session?.access_token;
+  const api = useMemo(() => token ? createStoreEditorApi({ baseUrl: API_URL, token }) : null, [token]);
   const variant = product?.variants?.[0];
   const categories = repository.getCategories(storeId);
   const brands = repository.getBrands(storeId);
   const collections = repository.getCollections(storeId);
   const [name, setName] = useState(product?.name ?? "");
   const [description, setDescription] = useState(product?.description ?? "");
+  const [specificationsText, setSpecificationsText] = useState(Object.entries(product?.specifications ?? {}).map(([key, value]) => `${key}: ${value}`).join("\n"));
   const [categoryId, setCategoryId] = useState(product?.primaryCategoryId ?? "");
   const [additionalCategoryIds, setAdditionalCategoryIds] = useState(product?.additionalCategoryIds ?? []);
   const [brandId, setBrandId] = useState(product?.brandId ?? "");
   const [collectionIds, setCollectionIds] = useState(product?.collectionIds ?? []);
   const [price, setPrice] = useState(minorToMajor(variant?.priceMinor ?? 0));
+  const [compareAtPrice, setCompareAtPrice] = useState(minorToMajor(variant?.compareAtPriceMinor ?? 0));
   const [stock, setStock] = useState(String(variant?.stock ?? 0));
   const [sku, setSku] = useState(variant?.sku ?? "");
   const [imageUrl, setImageUrl] = useState(product?.imageUrl ?? FALLBACK_IMAGE);
@@ -43,6 +55,7 @@ export function ProductForm({ product }: { product?: Product }) {
   const [showOptions, setShowOptions] = useState((product?.options?.length ?? 0) > 0);
   const [saved, setSaved] = useState(false), [saving, setSaving] = useState(false), [error, setError] = useState("");
   const [createOpen, setCreateOpen] = useState(false), [createName, setCreateName] = useState(""), [createParentId, setCreateParentId] = useState<string | undefined>(), [createError, setCreateError] = useState("");
+  const [persistedProduct, setPersistedProduct] = useState(product);
 
   const updateOption = (id: string, patch: Partial<ProductOption>) => setOptions((items) => items.map((item) => item.id === id ? { ...item, ...patch } : item));
   const updateValue = (optionId: string, valueId: string, patch: Partial<ProductOptionValue>) => setOptions((items) => items.map((item) => item.id === optionId ? { ...item, values: item.values.map((value) => value.id === valueId ? { ...value, ...patch } : value) } : item));
@@ -58,17 +71,29 @@ export function ProductForm({ product }: { product?: Product }) {
     if (!name.trim()) return setError("Add a product name before saving.");
     if (!Number.isFinite(priceMinor) || priceMinor < 0) return setError("Base price must be zero or greater.");
     if (!Number.isInteger(stockValue) || stockValue < 0) return setError("Stock cannot be negative.");
+    const compareAtMinor = compareAtPrice.trim() ? majorToMinor(compareAtPrice) : 0;
+    if (!Number.isFinite(compareAtMinor) || compareAtMinor < 0) return setError("Compare-at price must be zero or greater.");
+    const specifications = parseSpecifications(specificationsText);
     const cleanOptions = options.map((option) => ({ ...option, name: option.name.trim(), values: option.values.map((value) => ({ ...value, label: value.label.trim() })) }));
     if (cleanOptions.some((option) => !option.name || option.values.some((value) => !value.label))) return setError("Every option needs a name and non-empty values.");
     const selectedCategory = categories.find((category) => category.id === categoryId);
-    const id = product?.id ?? `product-${crypto.randomUUID()}`;
+    const id = persistedProduct?.id ?? `product-${crypto.randomUUID()}`;
     const inventoryOptionIds = cleanOptions.filter((option) => option.type === "variant").map((option) => option.id);
-    const reconciled = reconcileProductVariants({ options: cleanOptions, inventoryOptionIds, variants: product?.variants ?? [{ id: variant?.id ?? `${id}-variant-1`, name: "Standard", sku, priceMinor, stock: stockValue, options: {} }], basePriceMinor: priceMinor, defaultStock: stockValue });
+    const reconciled = reconcileProductVariants({ options: cleanOptions, inventoryOptionIds, variants: persistedProduct?.variants ?? [{ id: variant?.id ?? `${id}-variant-1`, name: "Standard", sku, priceMinor, stock: stockValue, options: {} }], basePriceMinor: priceMinor, defaultStock: stockValue, updateStandard: true, standardSku: sku });
     if (reconciled.error) return setError(reconciled.error);
     const slug = product?.slug ? slugify(product.slug) : slugify(name.trim());
-    const local: Product = { id, storeId, name: name.trim(), slug, description: description.trim(), category: selectedCategory?.name ?? "Other", imageUrl, published, archived: false, featured: product?.featured ?? false, primaryCategoryId: categoryId || undefined, additionalCategoryIds: additionalCategoryIds.filter((item) => item !== categoryId), brandId: brandId || undefined, collectionIds, options: cleanOptions, inventoryOptionIds, variants: reconciled.variants };
+    const local: Product = { id, storeId, name: name.trim(), slug, description: description.trim(), specifications, category: selectedCategory?.name ?? "Other", imageUrl, published, archived: false, featured: product?.featured ?? false, primaryCategoryId: categoryId || undefined, additionalCategoryIds: additionalCategoryIds.filter((item) => item !== categoryId), brandId: brandId || undefined, collectionIds, options: cleanOptions, inventoryOptionIds, variants: reconciled.variants };
     setSaving(true);
-    try { repository.saveProduct(local); if (api && activeStore) { const payload = { handle: local.slug, title: local.name, description: local.description, productType: local.category, status: published ? "ACTIVE" as const : "DRAFT" as const, primaryCategoryId: local.primaryCategoryId, additionalCategoryIds: local.additionalCategoryIds, brandId: local.brandId, collectionIds: local.collectionIds, categoryMetadata: selectedCategory ?? null, brandMetadata: brands.find((item) => item.id === brandId) ?? null, collectionMetadata: collectionIds.map((id) => collections.find((item) => item.id === id)).filter(Boolean), options: local.options, inventoryOptionIds: local.inventoryOptionIds, variants: local.variants.map((item) => ({ ...(item.id ? { id: item.id } : {}), title: item.name, sku: item.sku || undefined, priceMinor: item.priceMinor, quantity: item.stock, trackInventory: true, options: item.options })) }; product?.id ? await api.updateProduct(activeStore.id, product.id, payload) : await api.createProduct(activeStore.id, payload); } setSaved(true); } catch (caught) { setError(caught instanceof Error ? caught.message : "Unable to save this product."); } finally { setSaving(false); }
+    try {
+      if (!api || !activeStore) throw new Error("Select your authenticated store before saving.");
+      const payload = { imageUrl: local.imageUrl, handle: local.slug, title: local.name, description: local.description, specifications: local.specifications, productType: local.category, status: published ? "ACTIVE" as const : "DRAFT" as const, primaryCategoryId: local.primaryCategoryId, additionalCategoryIds: local.additionalCategoryIds, brandId: local.brandId, collectionIds: local.collectionIds, categoryMetadata: selectedCategory ?? null, brandMetadata: brands.find((item) => item.id === brandId) ?? null, collectionMetadata: collectionIds.map((collectionId) => collections.find((item) => item.id === collectionId)).filter(Boolean), options: local.options, inventoryOptionIds: local.inventoryOptionIds, variants: local.variants.map((item) => ({ ...(persistedProduct?.variants.some((existing) => existing.id === item.id) ? { id: item.id } : {}), title: item.name, sku: item.sku || undefined, priceMinor: item.priceMinor, compareAtPriceMinor: !cleanOptions.length && item.id === reconciled.variants[0]?.id && compareAtMinor > 0 ? compareAtMinor : item.compareAtPriceMinor ?? null, quantity: item.stock, trackInventory: true, options: item.options })) };
+      const result = persistedProduct?.id ? await api.updateProduct(activeStore.id, persistedProduct.id, payload) : await api.createProduct(activeStore.id, payload);
+      const canonical = catalogProductToStorefrontProduct(result);
+      repository.saveProduct(canonical);
+      setPersistedProduct(canonical);
+      setSaved(true);
+    } catch (caught) { setError(caught instanceof Error ? caught.message : "Unable to save this product."); }
+    finally { setSaving(false); }
   }
 
   return (
@@ -138,6 +163,11 @@ export function ProductForm({ product }: { product?: Product }) {
                   placeholder="Describe materials, features, fit, care information, or anything customers should know."
                   className="mt-2 w-full resize-y rounded-[16px] border border-black/[0.08] bg-[#fffdfc] px-3.5 py-3 text-[12px] font-medium leading-6 text-[#352e30] outline-none transition placeholder:text-[#b8adaf] hover:border-black/[0.13] focus:border-[#cf8fa0] focus:bg-white focus:ring-4 focus:ring-[#e8a9b8]/10"
                 />
+              </label>
+              <label className="block">
+                <span className={labelClass}>Product specifications</span>
+                <textarea value={specificationsText} onChange={(event) => setSpecificationsText(event.target.value)} rows={4} maxLength={12000} placeholder={"Material: Cotton\nCare: Machine wash cold"} className="mt-2 w-full resize-y rounded-[16px] border border-black/[0.08] bg-[#fffdfc] px-3.5 py-3 text-[12px] font-medium leading-6 text-[#352e30] outline-none focus:border-[#cf8fa0] focus:ring-4 focus:ring-[#e8a9b8]/10" />
+                <small className="mt-1 block text-[10px] text-[#93878a]">Use one label and value per line, separated by a colon.</small>
               </label>
             </div>
           </section>
@@ -215,7 +245,7 @@ export function ProductForm({ product }: { product?: Product }) {
             </div>
 
             <div className="p-5 sm:p-6">
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <label>
                   <span className={labelClass}>Base price</span>
                   <div className="relative">
@@ -228,9 +258,14 @@ export function ProductForm({ product }: { product?: Product }) {
                       className={`${inputClass} pl-8`}
                     />
                     <span className="pointer-events-none absolute left-3 top-[21px] text-[11px] font-black text-[#988c8f]">
-                      ₹
+                      {new Intl.NumberFormat("en", { style: "currency", currency: activeStore?.currency ?? "INR", maximumFractionDigits: 0 }).formatToParts(0).find((part) => part.type === "currency")?.value ?? "¤"}
                     </span>
                   </div>
+                </label>
+
+                <label>
+                  <span className={labelClass}>Compare-at price</span>
+                  <input type="number" min="0" step="0.01" value={compareAtPrice} onChange={(event) => setCompareAtPrice(event.target.value)} className={inputClass} placeholder="Optional" />
                 </label>
 
                 <label>

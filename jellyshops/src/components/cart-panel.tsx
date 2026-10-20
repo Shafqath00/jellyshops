@@ -8,37 +8,154 @@ import { useShop } from "@/contexts/shop-context";
 import { formatMoney } from "@/lib/domain";
 import type { ComponentType } from "react";
 import type { StorefrontCartProps } from "@jelly/storefront-themes";
+import { CartDrawer, CartItem, CartSummary, EmptyCart } from "@/components/jelly/cart";
 
-export function CartPanel({ storeSlug, open, onClose, Presentation }: { storeSlug: string; open: boolean; onClose: () => void; Presentation?: ComponentType<StorefrontCartProps> }) {
+/* ──────────────────────────────────────────────────────────────────────
+ * CartPanel — connects Jellyshop commerce state to CartDrawer presentation
+ *
+ * Commerce logic: unchanged (uses useShop / repository)
+ * Presentation:   CartDrawer + CartItem + CartSummary + EmptyCart
+ * ──────────────────────────────────────────────────────────────────── */
+
+export function CartPanel({
+  storeSlug,
+  open,
+  onClose,
+  Presentation,
+}: {
+  storeSlug: string;
+  open: boolean;
+  onClose: () => void;
+  Presentation?: ComponentType<StorefrontCartProps>;
+}) {
   const { repository, state } = useShop();
   const store = repository.getStoreBySlug(storeSlug);
   const cart = repository.getCartForStore(storeSlug);
   const lines = cart?.items.map((item) => {
-    const product = state.products.find((entry) => entry.variants.some((variant) => variant.id === item.variantId));
+    const product = state.products.find((entry) =>
+      entry.variants.some((variant) => variant.id === item.variantId),
+    );
     const variant = product?.variants.find((entry) => entry.id === item.variantId);
     return product && variant ? { item, product, variant } : null;
   }).filter(Boolean) ?? [];
   const staleItems = (cart?.items.length ?? 0) - lines.length;
-  const subtotal = lines.reduce((sum, line) => sum + (line!.item.unitPriceMinor ?? line!.variant.priceMinor) * line!.item.quantity, 0);
+  const subtotal = lines.reduce(
+    (sum, line) =>
+      sum + (line!.item.unitPriceMinor ?? line!.variant.priceMinor) * line!.item.quantity,
+    0,
+  );
 
+  // Keyboard close — handled inside CartDrawer; keep this for Presentation themes
   useEffect(() => {
-    if (!open) return;
+    if (!open || Presentation) return;
     const close = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
     window.addEventListener("keydown", close);
     return () => window.removeEventListener("keydown", close);
-  }, [open, onClose]);
+  }, [open, onClose, Presentation]);
 
   if (!store) return null;
-  const content = <>
-        <div className="flex items-start justify-between"><div><span className="text-[10px] font-extrabold uppercase tracking-[.11em] text-jelly-ink-soft">Your selection</span><h2 id="cart-title" className="mt-1 text-[30px] tracking-[-.045em]">Your cart</h2></div></div>
-        {staleItems > 0 ? <p className="cart-stale" role="status">{staleItems} item{staleItems === 1 ? "" : "s"} in your bag is no longer available.</p> : null}
-        {lines.length === 0 ? <div className="cart-empty"><ShoppingBag size={28} /><h3>Your bag is waiting</h3><p>Pick something lovely from the shop.</p><button type="button" className="button button-secondary" onClick={onClose}>Keep browsing</button></div> : (
-          <>
-            <div className="cart-lines">{lines.map((line) => line && <div className="cart-line" key={`${line.variant.id}-${JSON.stringify(line.item.configurationSelections ?? [])}`}><div className="cart-thumb"><Image src={line.product.imageUrl} alt="" fill sizes="90px" /></div><div className="cart-line-copy"><b>{line.product.name}</b><span>{line.variant.name}</span>{line.item.configurationSelections?.map((selection) => { const option = line.product.options?.find((item) => item.id === selection.optionId); const value = option?.values.find((item) => item.id === selection.valueId); return option && value ? <small key={selection.optionId}>{option.name}: {value.label}</small> : null; })}<div className="quantity-control"><button type="button" aria-label={`Remove one ${line.product.name}`} onClick={() => repository.updateCartItem(cart!.id, line.variant.id, line.item.quantity - 1, line.item.configurationSelections, line.item.unitPriceMinor)}><Minus size={14} /></button><span>{line.item.quantity}</span><button type="button" aria-label={`Add one ${line.product.name}`} disabled={line.item.quantity >= line.variant.stock} onClick={() => repository.updateCartItem(cart!.id, line.variant.id, line.item.quantity + 1, line.item.configurationSelections, line.item.unitPriceMinor)}><Plus size={14} /></button></div></div><strong>{formatMoney((line.item.unitPriceMinor ?? line.variant.priceMinor) * line.item.quantity, store.currency)}</strong></div>)}</div>
-            <div className="cart-summary"><div><span>Subtotal</span><b>{formatMoney(subtotal, store.currency)}</b></div><p>Shipping is calculated at checkout.</p><Link href={`/${store.slug}/checkout`} className="button button-primary" onClick={onClose}>Checkout</Link></div>
-          </>
-        )}
-  </>;
-  if (!Presentation) return open ? <div className="fixed inset-0 z-[100] flex justify-end bg-jelly-ink/30 backdrop-blur-sm" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><aside className="fixed right-0 top-0 flex min-h-full w-full max-w-[470px] flex-col bg-jelly-paper p-7 shadow-[-24px_0_70px_rgba(20,33,61,.18)]" role="dialog" aria-modal="true" aria-labelledby="cart-title"><button type="button" className="absolute right-7 top-7 grid size-[42px] place-items-center rounded-full border border-jelly-line bg-white" onClick={onClose} aria-label="Close cart"><X /></button>{content}</aside></div> : null;
-  return <Presentation open={open} itemCount={cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0} settings={{}} onClose={onClose}>{content}</Presentation>;
+
+  /* ── Cart content shared between default + Presentation themes ─── */
+  const content = (
+    <>
+      {/* Header */}
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <span className="text-[10px] font-extrabold uppercase tracking-[.11em] text-muted-foreground">
+            Your selection
+          </span>
+          <h2
+            aria-hidden="true"
+            className="mt-1 text-[28px] font-bold leading-none tracking-[-0.045em]"
+          >
+            Your cart
+          </h2>
+        </div>
+      </div>
+
+      {staleItems > 0 && (
+        <p className="mb-4 rounded-lg bg-destructive/10 px-3 py-2 text-[12px] text-destructive" role="status">
+          {staleItems} item{staleItems === 1 ? "" : "s"} in your bag is no longer available.
+        </p>
+      )}
+
+      {lines.length === 0 ? (
+        <EmptyCart onClose={onClose} />
+      ) : (
+        <>
+          {/* Items */}
+          <div className="flex flex-col gap-5">
+            {lines.map(
+              (line) =>
+                line && (
+                  <CartItem
+                    key={`${line.variant.id}-${JSON.stringify(line.item.configurationSelections ?? [])}`}
+                    imageUrl={line.product.imageUrl}
+                    name={line.product.name}
+                    variantName={line.variant.name}
+                    options={line.item.configurationSelections?.map((selection) => {
+                      const option = line.product.options?.find((o) => o.id === selection.optionId);
+                      const value = option?.values.find((v) => v.id === selection.valueId);
+                      return option && value ? `${option.name}: ${value.label}` : "";
+                    }).filter(Boolean)}
+                    quantity={line.item.quantity}
+                    lineTotal={formatMoney(
+                      (line.item.unitPriceMinor ?? line.variant.priceMinor) * line.item.quantity,
+                      store.currency,
+                    )}
+                    canIncrease={line.item.quantity < line.variant.stock}
+                    onDecrease={() =>
+                      repository.updateCartItem(
+                        cart!.id,
+                        line.variant.id,
+                        line.item.quantity - 1,
+                        line.item.configurationSelections,
+                        line.item.unitPriceMinor,
+                      )
+                    }
+                    onIncrease={() =>
+                      repository.updateCartItem(
+                        cart!.id,
+                        line.variant.id,
+                        line.item.quantity + 1,
+                        line.item.configurationSelections,
+                        line.item.unitPriceMinor,
+                      )
+                    }
+                  />
+                ),
+            )}
+          </div>
+
+          {/* Summary */}
+          <CartSummary
+            subtotal={formatMoney(subtotal, store.currency)}
+            checkoutHref={`/${store.slug}/checkout`}
+            onClose={onClose}
+          />
+        </>
+      )}
+    </>
+  );
+
+  /* ── Theme-provided CartPanel (boutique, editorial, etc.) ───────── */
+  if (Presentation) {
+    return (
+      <Presentation
+        open={open}
+        itemCount={cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0}
+        settings={{}}
+        onClose={onClose}
+      >
+        {content}
+      </Presentation>
+    );
+  }
+
+  /* ── Default Jellyshop CartDrawer ──────────────────────────────── */
+  return (
+    <CartDrawer open={open} onClose={onClose}>
+      {content}
+    </CartDrawer>
+  );
 }

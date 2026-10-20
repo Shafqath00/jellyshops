@@ -12,6 +12,22 @@ const errorDiagnostic: CompilationDiagnostic = {
   location: { entityType: "template", entityId: "home-default" },
 };
 
+it("blocks compilation and publication while draft changes are not saved", () => {
+  render(<PublishControls generation={7} diagnostics={[]} saveState="saving" validate={vi.fn()} compilePreview={vi.fn()} publish={vi.fn()} refreshWorkspace={vi.fn()} onDiagnostics={vi.fn()} onPreview={vi.fn()} onGeneration={vi.fn()} />);
+  expect(screen.getByRole("button", { name: "Publish" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Preview" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Validate" })).toBeDisabled();
+});
+
+it("shows preview request failures and allows another attempt", async () => {
+  const compilePreview = vi.fn().mockRejectedValueOnce(new Error("Preview service unavailable")).mockResolvedValue({ ok: true, diagnostics: [], dependencies: {} });
+  render(<PublishControls generation={7} diagnostics={[]} validate={vi.fn()} compilePreview={compilePreview} publish={vi.fn()} refreshWorkspace={vi.fn()} onDiagnostics={vi.fn()} onPreview={vi.fn()} onGeneration={vi.fn()} />);
+  await userEvent.click(screen.getByRole("button", { name: "Preview" }));
+  expect(screen.getByRole("alert")).toHaveTextContent("Preview service unavailable");
+  await userEvent.click(screen.getByRole("button", { name: "Preview" }));
+  expect(screen.getByRole("status")).toHaveTextContent(/Preview/);
+});
+
 it("blocks publish while compiler errors are present", () => {
   render(
     <PublishControls

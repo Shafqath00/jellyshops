@@ -11,15 +11,17 @@ import type {
   StripeMerchantStatus,
   StripeOnboardingLink,
 } from "./types";
-import type { Collection, Product } from "@/lib/domain";
+import type { Collection, Product, ProductOption } from "@/lib/domain";
 
 export interface PublicCatalogVariant {
   id: string;
   title: string;
   sku: string | null;
   priceMinor: number;
+  compareAtPriceMinor?: number | null;
   quantity: number | null;
   available: boolean;
+  options?: Record<string, unknown>;
 }
 
 export interface PublicCatalogProduct {
@@ -28,8 +30,16 @@ export interface PublicCatalogProduct {
   handle: string;
   title: string;
   description: string;
+  specifications?: Record<string, string>;
   productType: string | null;
-  tags: string[];
+  tags?: string[];
+  status?: "DRAFT" | "ACTIVE" | "ARCHIVED";
+  primaryCategoryId?: string | null;
+  additionalCategoryIds?: string[];
+  brandId?: string | null;
+  collectionIds?: string[];
+  options?: unknown[];
+  inventoryOptionIds?: string[];
   media: Array<{ id: string; url: string; altText: string | null; position: number }>;
   variants: PublicCatalogVariant[];
   available: boolean;
@@ -56,6 +66,8 @@ export interface PublicCollectionsResponse {
 }
 
 export interface PublicStoreDetails {
+  shippingMinor?: number;
+  shippingCopy?: string;
   id: string;
   name: string;
   slug: string;
@@ -71,29 +83,40 @@ export function catalogProductToStorefrontProduct(product: PublicCatalogProduct)
     name: product.title,
     slug: product.handle,
     description: product.description,
-    category: product.productType ?? product.tags[0] ?? "Collection",
+    specifications: product.specifications ?? {},
+    category: product.productType ?? product.tags?.[0] ?? "Collection",
     imageUrl: image?.url ?? "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1200&q=85",
-    published: true,
-    archived: false,
+    published: product.status === undefined || product.status === "ACTIVE",
+    archived: product.status === "ARCHIVED",
+    primaryCategoryId: product.primaryCategoryId ?? undefined,
+    additionalCategoryIds: product.additionalCategoryIds ?? [],
+    brandId: product.brandId ?? undefined,
+    collectionIds: product.collectionIds ?? [],
+    options: (product.options ?? []) as ProductOption[],
+    inventoryOptionIds: product.inventoryOptionIds ?? [],
+    media: product.media.map((entry) => ({ id: entry.id, url: entry.url, altText: entry.altText ?? undefined })),
     featured: false,
     variants: product.variants.map((variant) => ({
       id: variant.id,
       name: variant.title,
       sku: variant.sku ?? "",
       priceMinor: variant.priceMinor,
+      compareAtPriceMinor: variant.compareAtPriceMinor ?? undefined,
       stock: variant.quantity ?? (variant.available ? Number.MAX_SAFE_INTEGER : 0),
+      available: variant.available,
+      options: variant.options as Record<string, string> | undefined,
     })),
   };
 }
 
-interface CommerceClientOptions { baseUrl: string; fetch?: typeof fetch }
+interface CommerceClientOptions { baseUrl: string; fetch?: typeof fetch; token?: string }
 
-export function createCommerceApi({ baseUrl, fetch: fetcher = fetch }: CommerceClientOptions) {
+export function createCommerceApi({ baseUrl, token, fetch: fetcher = fetch }: CommerceClientOptions) {
   const origin = baseUrl.replace(/\/$/, "");
   async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     const response = await fetcher(`${origin}${path}`, {
       ...init,
-      headers: { "Content-Type": "application/json", ...init.headers },
+      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}), ...init.headers },
     });
     if (!response.ok) {
       const body = await response.json().catch(() => ({})) as { error?: { message?: string } };

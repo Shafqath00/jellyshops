@@ -1,3 +1,4 @@
+import { storefrontPageTypes } from "@jelly/storefront-schema";
 import type { StorefrontTemplateType } from "../api/types";
 
 export interface TemplateSelectorOption {
@@ -34,9 +35,10 @@ export function TemplateResourceSelector({
   onPreviewQueryChange?(query: string): void;
 }) {
   const activeTemplate = templates.find((template) => template.id === activeTemplateId);
-  const needsPreviewResource = activeTemplate ? activeTemplate.type !== "home" && activeTemplate.type !== "search" && activeTemplate.type !== "cart" && activeTemplate.type !== "not-found" : previewResources.length > 0;
+  const resourceFreeTypes: StorefrontTemplateType[] = ["home", "search", "cart", "not-found", "checkout", "wishlist", "customer-login", "customer-register", "customer-recovery", "customer-account", "customer-orders", "customer-order", "customer-addresses", "order-success"];
+  const needsPreviewResource = activeTemplate ? !resourceFreeTypes.includes(activeTemplate.type) : previewResources.length > 0;
   const pageType = activeTemplate?.type ? `${activeTemplate.type.charAt(0).toUpperCase()}${activeTemplate.type.slice(1)}` : "Home";
-  const pageTypes: StorefrontTemplateType[] = ["home", "product", "collection", "cart", "search", "page", "blog", "article", "not-found"];
+  const pageTypes: readonly StorefrontTemplateType[] = storefrontPageTypes;
 
   return (
     <div className="grid gap-3 border-b border-[#eeeeee] bg-white p-4 sm:grid-cols-3" aria-label="Template and preview resource">

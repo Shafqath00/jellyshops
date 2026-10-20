@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const updateCartItem = vi.fn();
-vi.mock("next/navigation", () => ({ useParams: () => ({ storeSlug: "store-a", productSlug: "cake" }) }));
+vi.mock("next/navigation", () => ({ useParams: () => ({ storeSlug: "store-a", productSlug: "cake" }), useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("@/components/storefront-shell", () => ({ useThemePresentation: () => ({ shell: { ProductPage: () => <p>Legacy product</p> }, settings: {} }) }));
 vi.mock("@/features/commerce/components/storefront-catalog-sync", () => ({ useStorefrontCatalogStatus: () => "ready" }));
 vi.mock("@/features/storefront/public-storefront-api", () => ({ loadPublicStorefrontPublication: async () => ({ kind: "v4", snapshot: { templateDefaults: { product: "product-default" }, templates: { "product-default": { id: "product-default", type: "product", layout: { sections: [] } } }, globalSections: {}, assignments: [], theme: { presetId: "minimal", settings: {} } } }) }));
@@ -15,7 +15,7 @@ vi.mock("@/contexts/shop-context", () => ({ useShop: () => ({ repository: {
   listProducts: () => [], getCartForStore: () => ({ id: "cart-a", items: [] }), createCart: () => ({ id: "cart-a", items: [] }), updateCartItem,
 } }) }));
 
-import ProductPage from "./page";
+import ProductPage from "./product-client";
 
 describe("V4 Product route", () => {
   beforeEach(() => updateCartItem.mockReset());

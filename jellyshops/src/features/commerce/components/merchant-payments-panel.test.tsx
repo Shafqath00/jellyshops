@@ -3,9 +3,11 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MerchantPaymentsPanel } from "./merchant-payments-panel";
 
-vi.mock("../merchant-session", () => ({
-  getMerchantSession: () => ({ storeId: "store-demo", token: "jelly-demo-merchant" }),
-}));
+vi.mock("@/features/auth/auth-provider", () => {
+  const activeStore = { id: "store-demo", currency: "INR", country: "IN" };
+  const session = { access_token: "jelly-demo-merchant" };
+  return { useAuth: () => ({ activeStore, session }) };
+});
 
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -27,8 +29,8 @@ describe("MerchantPaymentsPanel", () => {
 
     render(<MerchantPaymentsPanel redirect={redirect} />);
 
-    expect(await screen.findByText(/card payments are inactive/i)).toBeVisible();
-    await user.click(screen.getByRole("button", { name: /continue stripe onboarding/i }));
+    expect(await screen.findByText(/card payments are not active yet/i)).toBeVisible();
+    await user.click(screen.getByRole("button", { name: /continue onboarding/i }));
 
     await waitFor(() => expect(redirect).toHaveBeenCalledWith("https://connect.stripe.test/onboarding"));
   });
@@ -62,7 +64,7 @@ describe("MerchantPaymentsPanel", () => {
 
     render(<MerchantPaymentsPanel />);
 
-    expect(await screen.findByText("business_profile.url")).toBeVisible();
-    expect(screen.getByText("external_account")).toBeVisible();
+    expect(await screen.findByText("business profile · url")).toBeVisible();
+    expect(screen.getByText("external account")).toBeVisible();
   });
 });

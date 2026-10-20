@@ -10,10 +10,10 @@ import type {
 import { ImageControl } from "../controls/image-control";
 
 const inputClass =
-  "h-9 w-full rounded-lg border border-[#d7d7d7] bg-white px-3 text-[12px] font-medium text-[#303030] outline-none transition placeholder:text-[#a3a3a3] hover:border-[#bdbdbd] focus:border-[#8c8c8c] focus:ring-2 focus:ring-black/[0.06]";
+  "h-10 w-full rounded-xl border border-[var(--line)] bg-white px-3 text-[13px] font-medium text-[var(--ink)] outline-none transition placeholder:text-[#a3a3a3] hover:border-[#c2a9b1] focus:border-[#b8778a] focus:ring-2 focus:ring-[#ff8da4]/15";
 
 const labelClass =
-  "mb-1.5 block text-[11px] font-medium text-[#454f5b]";
+  "mb-2 block text-xs font-medium text-[var(--ink-soft)]";
 
 function SelectControl({
   label,

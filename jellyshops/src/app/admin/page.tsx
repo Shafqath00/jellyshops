@@ -37,6 +37,17 @@ export default function DashboardPage() {
   if (query.error || !query.data || !activeStore) return <div className="admin-page"><div className="form-card" role="alert">{query.error?.message ?? "Dashboard unavailable"}<button className="button button-secondary" onClick={query.retry}>Retry</button></div></div>;
   const store = activeStore;
   const { actionableOrders: needsAttention, revenueMinor: revenue, orderCount, publishedProductCount, lowStock } = query.data;
+  const setup = query.data.setup;
+  const setupItems = [
+    { label: "Store details", complete: setup?.details },
+    { label: "Products", complete: setup?.products },
+    { label: "Publication", complete: setup?.publication },
+    { label: "Shipping", complete: setup?.shipping },
+    { label: "Payments", complete: setup?.payments },
+  ];
+  const completed = setupItems.filter((item) => item.complete).length;
+  const ready = completed === setupItems.length;
+  const today = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: query.data.timezone ?? "UTC" }).format(new Date());
 
   return (
     <div className="space-y-6">
@@ -44,11 +55,11 @@ export default function DashboardPage() {
       <header className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <p className="mb-1 text-[12px] font-medium text-[#6d7175]">
-            Sunday, 30 August
+            {today}
           </p>
 
           <h1 className="text-[24px] font-semibold tracking-[-0.025em] text-[#202223] sm:text-[28px]">
-            Good evening, Maya.
+            Welcome back to {store.name}.
           </h1>
 
           <p className="mt-1.5 max-w-xl text-[13px] leading-5 text-[#6d7175]">
@@ -85,39 +96,38 @@ export default function DashboardPage() {
           <div className="flex min-w-0 items-start gap-3.5">
             <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-[#eaf7f0]">
               <span className="text-[13px] font-bold text-[#29845a]">
-                3/3
+                {completed}/{setupItems.length}
               </span>
             </div>
 
             <div>
               <div className="mb-1 flex flex-wrap items-center gap-2">
                 <h2 className="text-[14px] font-semibold text-[#303030]">
-                  Your storefront is ready
+                  {ready ? "Your storefront is ready" : "Complete your store setup"}
                 </h2>
 
                 <span className="rounded-full bg-[#eaf7f0] px-2 py-0.5 text-[10px] font-semibold text-[#237a50]">
-                  Ready
+                  {ready ? "Ready" : "In progress"}
                 </span>
               </div>
 
               <p className="text-[12px] leading-5 text-[#6d7175]">
-                Products published, checkout enabled, and shipping
-                configured.
+                {ready ? "Catalog, publication, shipping, and payment readiness verified." : "Review each step before accepting customer payments."}
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-x-5 gap-y-2 border-t border-[#eeeeee] pt-4 lg:border-0 lg:pt-0">
-            {["Store details", "Products", "Shipping"].map((item) => (
+            {setupItems.map((item) => (
               <div
-                key={item}
+                key={item.label}
                 className="flex items-center gap-1.5 text-[11px] font-medium text-[#454f5b]"
               >
                 <span className="grid size-4 place-items-center rounded-full bg-[#eaf7f0] text-[9px] font-bold text-[#29845a]">
-                  ✓
+                  {item.complete ? "✓" : "○"}
                 </span>
 
-                {item}
+                {item.label}
               </div>
             ))}
           </div>
@@ -130,7 +140,7 @@ export default function DashboardPage() {
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <p className="text-[12px] font-medium text-[#6d7175]">
-                Total mock sales
+                Total sales
               </p>
 
               <p className="mt-2 text-[24px] font-semibold tracking-[-0.025em] text-[#202223]">

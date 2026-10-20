@@ -1,4 +1,5 @@
 "use client";
+import { useInitialStorefrontPublication } from "@/features/storefront/storefront-bootstrap";
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -14,7 +15,8 @@ export default function CartPage() {
   const { repository, state } = useShop();
   const { shell, settings } = useThemePresentation();
   const store = repository.getStoreBySlug(storeSlug);
-  const [publication, setPublication] = useState<PublicStorefrontPublication | null>(null);
+  const initialPublication = useInitialStorefrontPublication();
+  const [publication, setPublication] = useState<PublicStorefrontPublication | null>(initialPublication);
   const [resolvedRoute, setResolvedRoute] = useState<Awaited<ReturnType<typeof resolveStorefrontRoute>> | null>(null);
   useEffect(() => {
     if (!store) return;

@@ -1,4 +1,6 @@
 export interface AdminSummary {
+  timezone?: string;
+  setup?: { details: boolean; products: boolean; publication: boolean; shipping: boolean; payments: boolean };
   revenueMinor: number;
   orderCount: number;
   publishedProductCount: number;

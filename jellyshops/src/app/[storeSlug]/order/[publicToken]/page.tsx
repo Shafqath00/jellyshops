@@ -10,7 +10,7 @@ import { useThemePresentation } from "@/components/storefront-shell";
 
 function PublicOrderContent() {
   const { storeSlug, publicToken } = useParams<{ storeSlug: string; publicToken: string }>();
-  const [result, setResult] = useState<{ order: Record<string, any>; items: Record<string, any>[]; payment: Record<string, any> | null } | null>(null);
+  const [result, setResult] = useState<{ order: Record<string, unknown>; items: Record<string, unknown>[]; payment: Record<string, unknown> | null } | null>(null);
   const [missing, setMissing] = useState(false);
   const api = useMemo(() => createCommerceApi({ baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001" }), []);
   useEffect(() => { api.getPublicStoreBySlug(storeSlug).then(({ store }) => api.getPublicOrder(store.id, publicToken)).then(setResult).catch(() => setMissing(true)); }, [api, publicToken, storeSlug]);

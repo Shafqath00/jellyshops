@@ -11,7 +11,7 @@ test("merchant edits a template, compiles preview, and publishes v4 storefront",
   expect((await templates).ok()).toBeTruthy();
   await expect(page.getByRole("heading", { name: "Theme editor" })).toBeVisible();
 
-  const headingBlock = page.locator("[data-editor-block-id][data-editor-field-key='text']").first();
+  const headingBlock = page.frameLocator('iframe[title="Storefront preview"]').locator("[data-editor-block-id][data-editor-field-key='text']").first();
   await expect(headingBlock).toBeVisible();
   await headingBlock.click();
 

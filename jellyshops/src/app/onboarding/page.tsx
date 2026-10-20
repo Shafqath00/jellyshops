@@ -12,6 +12,7 @@ export default function OnboardingPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
+  const [country, setCountry] = useState("IN");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [storeCreatedHere, setStoreCreatedHere] = useState(false);
@@ -44,7 +45,7 @@ export default function OnboardingPage() {
       const response = await fetch(`${authApiOrigin()}/api/stores`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
-        body: JSON.stringify({ name, slug, currency: "INR", country: "IN" }),
+        body: JSON.stringify({ name, slug, currency: ({ IN: "INR", GB: "GBP", US: "USD" } as Record<string, string>)[country], country }),
       });
       if (!response.ok) {
         const body = await response.json().catch(() => null) as { error?: { message?: string } } | null;
@@ -119,7 +120,8 @@ export default function OnboardingPage() {
                 />
               </div>
             </label>
-            <p className="auth-helper"><Check size={15} /> You can change your shop details later.</p>
+            <label><span>Store country and currency</span><select value={country} onChange={(event) => setCountry(event.target.value)}><option value="IN">India · INR</option><option value="GB">United Kingdom · GBP</option><option value="US">United States · USD</option></select></label>
+            <p className="auth-helper"><Check size={15} /> Country and currency stay fixed. Payments open when your market and Stripe account are eligible.</p>
             {error && <p className="auth-error" role="alert">{error}</p>}
             <button className="auth-submit" disabled={pending} type="submit">
               {pending ? "Creating your shop…" : "Create my shop"}

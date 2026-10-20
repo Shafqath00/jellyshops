@@ -127,7 +127,7 @@ export default function HomePage() {
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/admin"
-                className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#241f20] px-5 text-[13px] font-bold text-white shadow-[0_12px_30px_rgba(36,31,32,0.18)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#3a3234]"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-jelly-ink px-5 text-[13px] font-bold text-jelly-paper shadow-jelly-guava transition duration-[var(--duration-jelly-standard)] hover:-translate-y-0.5 hover:opacity-90"
               >
                 Open merchant studio
                 <ArrowUpRight size={15} />

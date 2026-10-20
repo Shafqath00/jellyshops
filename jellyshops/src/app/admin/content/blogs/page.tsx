@@ -54,8 +54,6 @@ export default function BlogsAdminPage() {
 
   useEffect(() => {
     if (!api || !activeBlogId) {
-      setArticles([]);
-      setActiveArticleId("");
       return;
     }
     let active = true;
@@ -69,7 +67,6 @@ export default function BlogsAdminPage() {
 
   useEffect(() => {
     if (!api || !activeArticleId) {
-      setAssignment(null);
       return;
     }
     let active = true;

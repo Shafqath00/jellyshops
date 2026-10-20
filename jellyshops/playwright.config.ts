@@ -1,4 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
+import nextEnv from "@next/env";
+
+nextEnv.loadEnvConfig(process.cwd());
 
 const frontendPort = process.env.JELLY_E2E_FRONTEND_PORT ?? "3000";
 const backendPort = process.env.JELLY_E2E_BACKEND_PORT ?? "3001";

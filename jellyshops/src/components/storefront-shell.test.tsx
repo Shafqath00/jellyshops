@@ -49,19 +49,21 @@ describe("shared storefront shell", () => {
   it("keeps the cart dialog theme-token driven and dismissible", async () => {
     const user = userEvent.setup();
     const onClose = vi.fn();
-    const { container, rerender } = render(<SharedCartPresentation open itemCount={1} settings={{}} onClose={onClose}>
+    const { rerender } = render(<SharedCartPresentation open itemCount={1} settings={{}} onClose={onClose}>
       <h2 id="cart-title">Your bag</h2>
     </SharedCartPresentation>);
 
     expect(screen.getByRole("dialog", { name: "Your bag" }).className).toContain("--store-surface");
-    expect(screen.getByRole("button", { name: "Close cart" })).toHaveClass("focus-visible:outline", "focus-visible:outline-2");
+    expect(screen.getByRole("button", { name: "Close" })).toHaveClass("focus-visible:ring-2", "focus-visible:ring-ring");
     fireEvent.mouseDown(screen.getByRole("dialog"));
     expect(onClose).not.toHaveBeenCalled();
-    await user.click(screen.getByRole("button", { name: "Close cart" }));
+    await user.click(screen.getByRole("button", { name: "Close" }));
     expect(onClose).toHaveBeenCalledOnce();
 
     onClose.mockClear();
-    fireEvent.mouseDown(container.firstChild as Element);
+    const overlay = document.body.querySelector<HTMLElement>("[data-state='open'].fixed.inset-0");
+    expect(overlay).not.toBeNull();
+    await user.click(overlay!);
     expect(onClose).toHaveBeenCalledOnce();
 
     rerender(<SharedCartPresentation open={false} itemCount={0} settings={{}} onClose={onClose}><h2 id="cart-title">Your bag</h2></SharedCartPresentation>);

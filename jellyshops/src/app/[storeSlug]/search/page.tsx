@@ -1,4 +1,7 @@
 "use client";
+import { CatalogBrowser } from "@/features/storefront/catalog-browser";
+
+import { useInitialStorefrontPublication } from "@/features/storefront/storefront-bootstrap";
 
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
@@ -19,7 +22,8 @@ export default function SearchPage() {
   const { repository, state } = useShop();
   const { shell, settings } = useThemePresentation();
   const store = repository.getStoreBySlug(storeSlug);
-  const [publication, setPublication] = useState<PublicStorefrontPublication | null>(null);
+  const initialPublication = useInitialStorefrontPublication();
+  const [publication, setPublication] = useState<PublicStorefrontPublication | null>(initialPublication);
   const [context, setContext] = useState<PublicSearchPageContext | null>(null);
   const [route, setRoute] = useState<ResolvedStorefrontRoute | null>(null);
 
@@ -39,7 +43,6 @@ export default function SearchPage() {
 
   useEffect(() => {
     if (!store || publication?.kind !== "v4" || !context) {
-      setRoute(null);
       return;
     }
     let active = true;
@@ -52,6 +55,7 @@ export default function SearchPage() {
   }, [store, publication, context]);
 
   if (!store) return null;
+  if (store && publication?.kind === "v4" && (publication.snapshot.theme.id ?? publication.snapshot.theme.presetId) === "jelly-signature") return <main className="signature-page"><header className="signature-page-heading"><h1>Find your next favourite</h1></header><CatalogBrowser key={query} storeSlug={store.slug} initialQuery={query} /></main>;
   if (publication?.kind === "v4") {
     if (route?.status === "ready") {
       return <PublishedRuntimeStorefront snapshot={publication.snapshot} route={route} storeSlug={store.slug} currency={store.currency} products={state.products.filter((product) => product.published && !product.archived)} />;

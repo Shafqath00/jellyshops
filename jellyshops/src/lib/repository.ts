@@ -351,9 +351,9 @@ export function createRepository(storage: StorageLike, options: { runtime?: bool
       if (!findVariant(variantId)) throw new Error("VARIANT_NOT_FOUND");
       const lineKey = createCartConfigurationKey(variantId, configurationSelections);
       const existing = cart.items.find((item) => createCartConfigurationKey(item.variantId, item.configurationSelections) === lineKey);
-      if (quantity <= 0) cart.items = cart.items.filter((item) => item.variantId !== variantId);
+      if (quantity <= 0) cart.items = cart.items.filter((item) => createCartConfigurationKey(item.variantId, item.configurationSelections) !== lineKey);
       else if (existing) existing.quantity = quantity;
-      else cart.items.push({ variantId, quantity, configurationSelections, unitPriceMinor });
+      else cart.items.push({ variantId, quantity, ...(configurationSelections.length ? { configurationSelections } : {}), ...(unitPriceMinor !== undefined ? { unitPriceMinor } : {}) });
       commit();
       return cart;
     },

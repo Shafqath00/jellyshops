@@ -1,3 +1,5 @@
+"use client";
+import { useStorefrontChrome } from "./chrome-context";
 import type { CSSProperties } from "react";
 import {
   RegistrySectionRenderer,
@@ -12,14 +14,31 @@ import {
   type StorefrontDocument,
   type ThemeId,
 } from "@jelly/storefront-schema";
-import { resolveDesignTokens, resolveTheme } from "@jelly/storefront-themes";
+import { resolveDesignTokens, resolveStorefrontThemeTokens, resolveTheme } from "@jelly/storefront-themes";
 import type { Currency, Product } from "@/lib/domain";
 import { formatMoney } from "@/lib/domain";
 import type { ResolvedStorefrontRoute } from "./resource-loader";
+import { catalogProductToStorefrontProduct, type PublicCatalogResponse } from "@/features/commerce/api/client";
 
-function commerceProvider(storeSlug: string, currency: Currency, products: Product[]): CommerceDataProvider {
+function commerceProvider(storeSlug: string, currency: Currency, products: Product[], storeId?: string): CommerceDataProvider {
+  const initialProducts = products.filter((product) => product.published && !product.archived).map((product) => ({ id: product.id, name: product.name, href: `/${storeSlug}/products/${product.slug}`, imageUrl: product.imageUrl, price: formatMoney(product.variants[0]?.priceMinor ?? 0, currency) }));
   return {
-    async getProducts() {
+    initialProducts,
+    subscribeNewsletter: storeId ? async (email, source) => {
+      const origin = process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
+      const response = await fetch(`${origin}/api/public/stores/${encodeURIComponent(storeId)}/engagement/newsletter`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, source, consent: true }) });
+      if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error?.message ?? "Unable to subscribe. Please retry."); }
+    } : undefined,
+    async getProducts(input) {
+      if (storeId && (input?.sort || input?.collectionId)) {
+        const params = new URLSearchParams({ limit: String(input.limit ?? 6) });
+        if (input.sort) params.set("sort", input.sort);
+        if (input.collectionId) params.set("collectionId", input.collectionId);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001"}/api/public/stores/${encodeURIComponent(storeId)}/catalog/products?${params}`, { cache: "no-store" });
+        if (!response.ok) throw new Error("Products are temporarily unavailable.");
+        const data = await response.json() as PublicCatalogResponse;
+        return data.nodes.map(catalogProductToStorefrontProduct).map((product) => ({ id: product.id, name: product.name, href: `/${storeSlug}/products/${product.slug}`, imageUrl: product.imageUrl, price: formatMoney(product.variants[0]?.priceMinor ?? 0, currency) }));
+      }
       return products
         .filter((product) => product.published && !product.archived)
         .map((product) => ({
@@ -57,17 +76,18 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
   currency: Currency;
   products: Product[];
 }) {
+  const chromeHandled = useStorefrontChrome();
   if (route.status !== "ready") return null;
   const resolvedTheme = resolveTheme(snapshot.theme.id ?? snapshot.theme.presetId, snapshot.theme.settings, snapshot.theme.version);
   const themeId = resolvedTheme.id as ThemeId;
-  const style = resolveDesignTokens(themeId, runtimeThemeSettings(snapshot)) as CSSProperties;
-  const commerce = commerceProvider(storeSlug, currency, products);
+  const style = resolveStorefrontThemeTokens(themeId, resolvedTheme.settings) as CSSProperties;
+  const commerce = commerceProvider(storeSlug, currency, products, snapshot.storeId);
 
   return (
     <div className={`jelly-storefront jelly-theme-layout-${resolvedTheme.layout}`} data-jelly-theme={resolvedTheme.id} data-jelly-theme-version={resolvedTheme.version} style={style}>
       {resolvedTheme.layout === "editorial" ? <div className="jelly-theme-masthead"><span>JellyShop collection</span><img src={`${resolvedTheme.assetPrefix}monogram.svg`} alt="" /></div> : null}
-      {route.layout.announcement.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="header" themeId={resolvedTheme.id} page={route.context} menus={snapshot.menus} storeSlug={storeSlug} />)}
-      {route.layout.header.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="header" themeId={resolvedTheme.id} page={route.context} menus={snapshot.menus} storeSlug={storeSlug} />)}
+      {!chromeHandled && route.layout.announcement.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="header" themeId={resolvedTheme.id} page={route.context} menus={snapshot.menus} storeSlug={storeSlug} />)}
+      {!chromeHandled && route.layout.header.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="header" themeId={resolvedTheme.id} page={route.context} menus={snapshot.menus} storeSlug={storeSlug} />)}
       <main className={resolvedTheme.layout === "editorial" ? "jelly-theme-editorial-main" : undefined}>
         {route.layout.template.map((section) => (
           <RegistrySectionRenderer
@@ -83,7 +103,7 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
           />
         ))}
       </main>
-      {route.layout.footer.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="footer" themeId={resolvedTheme.id} page={route.context} menus={snapshot.menus} storeSlug={storeSlug} />)}
+      {!chromeHandled && route.layout.footer.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="footer" themeId={resolvedTheme.id} page={route.context} menus={snapshot.menus} storeSlug={storeSlug} />)}
     </div>
   );
 }

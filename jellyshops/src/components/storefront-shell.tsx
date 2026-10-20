@@ -4,10 +4,11 @@
 import Link from "next/link";
 import clsx from "clsx";
 import { createContext, useContext } from "react";
-import { ShoppingBag, X } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { resolveThemeShell, type StorefrontCartProps, type StorefrontFooterProps, type StorefrontHeaderProps, type StorefrontLayoutProps, type StorefrontNavigationItem, type StorefrontShellStore } from "@jelly/storefront-themes";
 import { SharedCartPage, SharedCheckoutPage, SharedCollectionPage, SharedContentPage, SharedOrderPage, SharedProductPage, SharedSearchPage } from "./storefront-pages";
 import { CartBadge } from "@/components/jelly/cart";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export function SharedStorefrontLayout({ children, header, footer, cart }: StorefrontLayoutProps) {
   return <div className="min-h-dvh bg-[var(--store-bg)] text-[var(--store-text)] [font-family:var(--theme-font-body)]">{header}{children}{footer}{cart}</div>;
@@ -50,10 +51,12 @@ export function SharedStorefrontFooter({ store, settings }: StorefrontFooterProp
 }
 export function SharedCartPresentation({ open, onClose, children }: StorefrontCartProps) {
   if (!open) return null;
-  return <div className="fixed inset-0 z-[100] flex justify-end bg-[color-mix(in_srgb,var(--store-text)_28%,transparent)] backdrop-blur-sm animate-jelly-fade-in" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><aside className="fixed right-0 top-0 flex min-h-full w-full max-w-[470px] flex-col bg-[var(--store-surface)] p-7 text-[var(--store-text)] shadow-[-24px_0_70px_rgba(20,33,61,.16)] animate-jelly-slide-in-right" role="dialog" aria-modal="true" aria-labelledby="cart-title"><button type="button" className="absolute right-7 top-7 grid size-[42px] place-items-center rounded-full border border-[var(--theme-border)] bg-[var(--store-surface)] transition-colors hover:bg-[color-mix(in_srgb,var(--store-bg)_88%,var(--store-surface))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--store-accent)]" onClick={onClose} aria-label="Close cart"><X size={18} /></button>{children}</aside></div>;
+  return <Dialog open={open} onOpenChange={(next) => { if (!next) onClose(); }}><DialogContent aria-labelledby="cart-title" className="left-auto right-0 top-0 h-dvh max-w-[470px] translate-x-0 translate-y-0 overflow-auto rounded-none bg-[var(--store-surface)] p-7 text-[var(--store-text)] shadow-[-24px_0_70px_rgba(20,33,61,.16)]">{children}</DialogContent></Dialog>;
 }
 
-export function ThemedStorefrontShell({ themeId, settings, store, navigation, cartCount, cart, children, onCartOpen }: {
+export function ThemedStorefrontShell({ themeId, settings, store, navigation, cartCount, cart, children, onCartOpen, headerContent, footerContent }: {
+  headerContent?: React.ReactNode;
+  footerContent?: React.ReactNode;
   themeId?: string;
   settings: Record<string, unknown>;
   store: StorefrontShellStore;
@@ -67,7 +70,7 @@ export function ThemedStorefrontShell({ themeId, settings, store, navigation, ca
   const Header = shell.Header;
   const Footer = shell.Footer;
   const Layout = shell.Layout;
-  return <ThemePresentationContext.Provider value={{ themeId, settings, shell }}><Layout store={store} settings={settings} header={<Header store={store} navigation={navigation} cartCount={cartCount} settings={settings} onCartOpen={onCartOpen} />} footer={<Footer store={store} settings={settings} />} cart={cart}>{children}</Layout></ThemePresentationContext.Provider>;
+  return <ThemePresentationContext.Provider value={{ themeId, settings, shell }}><Layout store={store} settings={settings} header={headerContent ?? <Header store={store} navigation={navigation} cartCount={cartCount} settings={settings} onCartOpen={onCartOpen} />} footer={footerContent ?? <Footer store={store} settings={settings} />} cart={cart}>{children}</Layout></ThemePresentationContext.Provider>;
 }
 
 const ThemePresentationContext = createContext<{ themeId?: string; settings: Record<string, unknown>; shell: ReturnType<typeof resolveThemeShell> } | null>(null);

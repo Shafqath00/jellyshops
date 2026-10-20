@@ -1,4 +1,4 @@
-export type Currency = "INR" | "USD";
+export type Currency = "INR" | "GBP" | "USD";
 export type OrderStatus = "PENDING" | "CONFIRMED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
 export type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "REFUNDED";
 
@@ -12,6 +12,7 @@ export interface StoreTheme {
 }
 
 export interface Store {
+  country?: string;
   id: string;
   businessId: string;
   name: string;
@@ -23,6 +24,7 @@ export interface Store {
   logoUrl?: string;
   bannerUrl: string;
   shippingMinor: number;
+  shippingCopy?: string;
   theme: StoreTheme;
 }
 
@@ -105,6 +107,7 @@ export interface Product {
   name: string;
   slug: string;
   description: string;
+  specifications?: Record<string, string>;
   category: string;
   imageUrl: string;
   media?: Array<{ id: string; url: string; altText?: string }>;

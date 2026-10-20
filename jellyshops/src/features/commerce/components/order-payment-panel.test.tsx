@@ -45,13 +45,13 @@ describe("OrderPaymentPanel", () => {
     render(<OrderPaymentPanel payment={payment} refunds={[{ id: "refund-1", status: "FAILED", amountMinor: 129900, stripeRefundId: "re_123" }]} disputes={[]} fulfilmentStatus="CONFIRMED" requestFullRefund={vi.fn()} />);
 
     expect(screen.getByText(/refund failed/i)).toBeVisible();
-    expect(screen.getByText("Fulfilment: confirmed")).toBeVisible();
+    expect(screen.getByText(/^confirmed$/i)).toBeVisible();
   });
 
   it("shows a dispute without changing the fulfilment state shown to the merchant", () => {
     render(<OrderPaymentPanel payment={payment} refunds={[]} disputes={[{ stripeDisputeId: "dp_123", status: "needs_response" }]} fulfilmentStatus="SHIPPED" requestFullRefund={vi.fn()} />);
 
-    expect(screen.getByText("Fulfilment: shipped")).toBeVisible();
-    expect(screen.getByText(/payment dispute: needs response/i)).toBeVisible();
+    expect(screen.getByText(/^shipped$/i)).toBeVisible();
+    expect(screen.getByLabelText("Payment disputes")).toHaveTextContent(/payment dispute:\s*needs response/i);
   });
 });

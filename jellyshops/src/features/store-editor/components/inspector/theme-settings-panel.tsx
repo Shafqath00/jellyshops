@@ -33,7 +33,7 @@ export function ThemeSettingsPanel({ schema, settings, saving, error, upload, on
 }
 
 function ThemeSettingControl({ field, value, disabled, upload, onChange }: { field: ThemeSettingDefinition; value: unknown; disabled: boolean; upload?: (file: File, onProgress?: (percent: number) => void) => Promise<MediaRecord>; onChange(value: unknown): void }) {
-  const inputClass = "mt-1.5 w-full rounded-lg border border-[var(--line)] bg-[var(--white)] px-3 py-2 text-[12px] text-[var(--ink)] outline-none disabled:bg-[var(--paper-deep)]";
+  const inputClass = "mt-1.5 min-h-10 w-full rounded-xl border border-[var(--line)] bg-[var(--white)] px-3 py-2 text-[13px] text-[var(--ink)] outline-none focus:border-[#b8778a] focus:ring-2 focus:ring-[#ff8da4]/15 disabled:bg-[var(--paper-deep)]";
   const stringValue = typeof value === "string" ? value : "";
   const choices = field.options ?? [];
   const label = <><span className="text-[12px] font-medium text-[var(--ink)]">{field.label}</span>{field.description ? <span className="mt-1 block text-[11px] text-[var(--ink-soft)]">{field.description}</span> : null}</>;

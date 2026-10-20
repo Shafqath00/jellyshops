@@ -50,7 +50,6 @@ export default function PagesAdminPage() {
 
   useEffect(() => {
     if (!api || !activePageId) {
-      setAssignment(null);
       return;
     }
     let active = true;
