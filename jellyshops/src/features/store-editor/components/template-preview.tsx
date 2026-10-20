@@ -15,6 +15,15 @@ const sampleCommerce: CommerceDataProvider = { async getProducts() { return []; 
 export function TemplateThumbnail({ id, name, image }: { id: string; name: string; image?: string }) {
   const fresh = id === "fresh-market";
   const [failed, setFailed] = useState(false);
+  if (id === "jelly-signature") return <div aria-label={`${name} design preview`} className="overflow-hidden rounded-xl border border-black/10 bg-[#faf9f7] shadow-[0_8px_24px_-8px_rgba(17,17,17,0.12)]">
+    <div className="bg-[#111] px-4 py-1.5 text-center text-[8px] font-semibold tracking-wider text-white">A little something lovely, delivered with care.</div>
+    <div className="flex items-center justify-between gap-2 px-5 py-3"><span className="font-serif text-[13px] tracking-tight text-[#111]">{name}</span><div className="flex gap-3 text-[8px] text-[#6b665f]"><span>Shop</span><span>Our story</span><span>Bag (0)</span></div></div>
+    <div className="grid min-h-[175px] grid-cols-[0.9fr_1fr] bg-[#e7e2d9] sm:min-h-[200px]">
+      <div className="flex flex-col justify-center px-5 py-6"><span className="mb-2 text-[7px] font-semibold uppercase tracking-[0.15em] text-[#6b665f]">A collection picked for you</span><p className="font-serif text-[clamp(20px,2.4vw,32px)] leading-[1.05] tracking-tight text-[#111]">Find your everyday favourites.</p><span className="mt-4 w-fit rounded-sm bg-[#111] px-3 py-1.5 text-[8px] font-semibold text-white">Explore the collection ↗</span></div>
+      <div className="relative min-h-full overflow-hidden bg-[#cbc6bd]"><div className="absolute bottom-0 left-1/2 h-3/4 w-2/5 -translate-x-1/2 rounded-t-full bg-[#111]" /></div>
+    </div>
+    <div className="flex items-center justify-between px-5 py-4"><span className="font-serif text-xs text-[#111]">The collection</span><div className="flex gap-1.5">{["#111", "#6b665f", "#e7e2d9"].map((color) => <span key={color} className="size-2 rounded-full border border-black/10" style={{ background: color }} />)}</div></div>
+  </div>;
   return <div aria-label={`${name} design preview`} className="overflow-hidden rounded-xl border border-black/10 bg-white shadow-[0_8px_24px_-8px_rgba(50,35,30,0.12)]">
     <div className={`px-4 py-1.5 text-center text-[8px] font-semibold tracking-wider ${fresh ? "bg-[#315e24] text-white" : "bg-[#48362e] text-[#fff8ee]"}`}>{fresh ? "A little goodness, every day." : "Thoughtfully made. Uniquely yours."}</div>
     <div className="flex items-center justify-between gap-2 px-5 py-3"><span className={`text-[13px] font-bold tracking-tight ${fresh ? "text-[#315e24]" : "font-serif text-[#48362e]"}`}>{name}</span><div className="flex gap-3 text-[8px] text-[#7c726b]"><span>Shop</span><span>Our story</span><span>Bag (0)</span></div></div>
