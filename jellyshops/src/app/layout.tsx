@@ -3,6 +3,7 @@ import { ShopProvider } from "@/contexts/shop-context";
 import { AuthProvider } from "@/features/auth/auth-provider";
 import { storefrontFontVariables } from "./fonts";
 import "./globals.css";
+import "./themes/storefront-base.css";
 import "./themes/jelly-minimal.css";
 import "./shadcn-theme.css";
 

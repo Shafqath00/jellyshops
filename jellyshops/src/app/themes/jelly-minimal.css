@@ -769,6 +769,12 @@
   [data-jelly-theme="jelly-signature"] .signature-panel { padding: var(--jm-3); }
 }
 
+/* 10.6 Touch targets: every standalone link and control is at least 24px tall (WCAG 2.2 target size) */
+[data-jelly-theme="jelly-signature"] :is(.jelly-header nav, .jelly-footer, .jelly-mobile-navigation-panel) a { display: inline-flex; align-items: center; min-height: 24px; }
+[data-jelly-theme="jelly-signature"] .jelly-header-brand { min-height: 44px; }
+[data-jelly-theme="jelly-signature"] .jelly-button.jelly-button--link { min-height: 32px; padding-block: 4px; }
+[data-jelly-theme="jelly-signature"] :where(input[type="checkbox"], input[type="radio"]) { width: 20px; height: 20px; }
+
 /* 11 ── Motion ────────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   [data-jelly-theme="jelly-signature"] *,

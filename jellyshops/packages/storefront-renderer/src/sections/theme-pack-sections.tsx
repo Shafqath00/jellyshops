@@ -161,6 +161,7 @@ export function SearchResultsSection({ section, context }: { section: SectionNod
     {search?.state === "empty" && <p className="jelly-search-status">Enter a word or two to find products.</p>}
     {search?.state === "none" && <p className="jelly-search-status">No products match “{query}”. Check the spelling or try a broader word.</p>}
     {search?.state === "results" && <p className="jelly-search-status">{search.resultCount === 1 ? "1 result" : `${search.resultCount} results`} for “{query}”</p>}
+    {search?.state === "results" && <h2 className="jelly-visually-hidden">Search results</h2>}
     {search?.state === "results" && <div className="jelly-product-grid-items">{results.map((product) => <StorefrontProductCard key={product.id} product={product} />)}</div>}
   </div></StorefrontContainer></section>;
 }

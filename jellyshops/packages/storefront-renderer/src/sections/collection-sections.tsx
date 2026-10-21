@@ -41,11 +41,11 @@ export function CollectionHeaderSection({ context, section }: { context: Storefr
 export function CollectionProductGridSection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown> } }) {
   const presentation = collectionContext(context);
   if (!presentation) return null;
-  if (presentation.interactiveGrid) return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer>{presentation.interactiveGrid}</StorefrontContainer></section>;
+  if (presentation.interactiveGrid) return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer><h2 className="jelly-visually-hidden">Products</h2>{presentation.interactiveGrid}</StorefrontContainer></section>;
   const columns = typeof section.settings.columns === "number" && Number.isInteger(section.settings.columns) ? Math.max(2, Math.min(4, section.settings.columns)) : 3;
   const limit = typeof section.settings.limit === "number" && Number.isInteger(section.settings.limit) ? Math.max(1, Math.min(24, section.settings.limit)) : 12;
   const emptyMessage = typeof section.settings.emptyMessage === "string" ? section.settings.emptyMessage : "No products are available in this collection yet.";
-  return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer>{presentation.products.length
+  return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer><h2 className="jelly-visually-hidden">Products</h2>{presentation.products.length
     ? <div className="jelly-product-grid-items" data-testid="collection-product-grid-items" data-columns={columns} style={{ "--jelly-columns": columns } as CSSProperties}>{presentation.products.slice(0, limit).map((product) => <StorefrontProductCard key={product.id} product={product} />)}</div>
     : <p className="jelly-empty-state">{emptyMessage}</p>
   }</StorefrontContainer></section>;
