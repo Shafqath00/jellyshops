@@ -1,6 +1,6 @@
 # Jelly Shops — project memory for Claude
 
-Multi-tenant e-commerce platform ("Shopify-simple" for small merchants): merchant admin, a visual theme editor, public storefronts, Stripe Connect payments. Read this before working in the repo. Deeper docs: `docs/backend-architecture.md`, `docs/theme-architecture.md`, `docs/jelly-minimal-launch-checklist.md`, `docs/reports/`, `jellyshops/AGENTS.md`.
+Multi-tenant e-commerce platform ("Shopify-simple" for small merchants): merchant admin, a visual theme editor, public storefronts, Stripe Connect payments. Read this before working in the repo. Deeper docs: start at `docs/README.md` (generated file maps/function/endpoint/schema references via `node scripts/generate-docs.mjs` and `node scripts/generate-db-docs.mjs`), `docs/backend-architecture.md`, `docs/theme-architecture.md`, `docs/jelly-minimal-launch-checklist.md`, `docs/reports/`, `jellyshops/AGENTS.md`.
 
 ## Layout
 
@@ -76,7 +76,8 @@ Test status at last run: frontend 439 passing, backend 385 passing, both builds 
 - **A PR into `main` is impossible**: `local/task3` and `origin/main` have unrelated histories (different root commits). The user chose to leave the branch pushed without a PR.
 - Manual staging + Stripe sandbox journey (`docs/jelly-minimal-launch-checklist.md`) not run; the user must provide a working staging login.
 - Production database isolation (RLS) was applied to staging only (Supabase project `ayvpxqwleurhkfyujzlu`); production is not contained.
-- Not built yet: digital products and file delivery, custom domains/SSL, subdomain generation, Indian payment gateways (Stripe is wired directly; a provider interface is still needed), persisted taxonomy (categories/brands), transactional email, Vercel deploy (token invalid).
+- Not built yet: custom domains/SSL, subdomain generation (a `StoreDomain` table exists, unused by code), Indian payment gateways (Stripe is wired directly; a provider interface is still needed), persisted taxonomy (categories/brands), analytics, Vercel deploy (token invalid).
+- Built 2026-10-22 (commit 018fb66, migrations applied to staging, gated per store, off by default): order management, order emails (outbox + SMTP), digital product delivery. Docs: `docs/features/`.
 - Known small issues: product form stays "Unsaved product" after saving (can duplicate), variant price-adjustment fields show ₹ on a £ store, variant products show "No SKU", one slow product-list request after a variant save (cleared by restarting the backend).
 - Another developer has uncommitted admin-UI edits in the working tree (admin pages, `app-shell.tsx`, `admin-theme-toggle.tsx`, `shadcn-theme.css`, parts of `globals.css`). Do not commit or revert them; commit only your own files with explicit `git add` paths. Their `admin-theme-toggle.tsx` currently has one lint error.
 
