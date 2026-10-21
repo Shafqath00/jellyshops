@@ -16,7 +16,7 @@ import { TemplatePreview, type PreviewTemplate } from "./template-preview";
 const THEME_ID = "jelly-signature";
 const widths = { desktop: 1280, tablet: 768, mobile: 390 } as const;
 type Device = keyof typeof widths;
-const views = [["guide", "Style guide"], ["home", "Home"], ["collection", "Collection"], ["product", "Product"]] as const;
+const views = [["guide", "Style guide"], ["home", "Home"], ["collection", "Collection"], ["product", "Product"], ["cart", "Cart"], ["search", "Search"], ["page", "Page"], ["not-found", "404"]] as const;
 type View = (typeof views)[number][0];
 
 const commerce: CommerceDataProvider = { async getProducts() { return []; } };

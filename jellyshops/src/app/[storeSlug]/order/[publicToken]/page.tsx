@@ -14,11 +14,23 @@ function PublicOrderContent() {
   const [missing, setMissing] = useState(false);
   const api = useMemo(() => createCommerceApi({ baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001" }), []);
   useEffect(() => { api.getPublicStoreBySlug(storeSlug).then(({ store }) => api.getPublicOrder(store.id, publicToken)).then(setResult).catch(() => setMissing(true)); }, [api, publicToken, storeSlug]);
-  if (missing) return <main className="flex min-h-[75vh] flex-col items-center justify-center gap-4 px-6 text-center"><PackageCheck /><h1 className="font-[var(--store-display,Georgia)] text-5xl">Order not found</h1><Link className="border-b text-sm font-bold" href={`/${storeSlug}`}>Back to store</Link></main>;
-  if (!result) return <main className="flex min-h-[75vh] items-center justify-center px-6 text-center">Loading your order…</main>;
+  if (missing) return <main className="jelly-checkout-empty"><PackageCheck size={32} aria-hidden="true" /><h1>Order not found</h1><p>Check the link in your confirmation email, or contact the shop if you need help.</p><Link className="jelly-button" href={`/${storeSlug}`}>Back to the shop</Link></main>;
+  if (!result) return <main className="jelly-checkout-empty" aria-busy="true"><p role="status">Loading your order…</p></main>;
   const order = result.order;
   const pendingPayment = order.status === "PENDING_PAYMENT";
-  return <main className="flex min-h-[75vh] flex-col items-center justify-center px-6 py-20 text-center text-[var(--store-text)]"><span className="mb-6 grid size-[60px] place-items-center rounded-full border-2 border-[var(--store-text)] bg-[var(--store-accent-soft)] shadow-[6px_6px_0_var(--store-text)]"><Check /></span><p className="text-[10px] font-extrabold uppercase tracking-[.12em] text-[var(--store-accent)]">{String(order.number ?? "Order")}</p><h1 className="my-3 font-[var(--store-display,Georgia)] text-[clamp(3.5rem,8vw,7.5rem)] leading-[.86] tracking-[-.07em]">{pendingPayment ? "Payment pending." : "Order received."}</h1><p className="max-w-[530px] leading-relaxed opacity-70">{pendingPayment ? "Your order is waiting for payment confirmation." : "Your order is being prepared by the shop."}</p><div className="my-[26px] w-full max-w-[550px] rounded-[18px] border border-[color-mix(in_srgb,var(--store-text)_20%,transparent)] bg-[var(--store-surface)] px-[22px] text-left"><div className="flex min-h-[62px] items-center justify-between border-b border-[color-mix(in_srgb,var(--store-text)_14%,transparent)] text-xs"><span className="opacity-60">Order status</span><b>{String(order.status)}</b></div><div className="flex min-h-[62px] items-center justify-between text-xs"><span className="opacity-60">Total</span><b>{(Number(order.totalMinor) / 100).toFixed(2)} {String(order.currency)}</b></div></div><Link className="inline-flex min-h-[50px] items-center justify-center rounded-[999px_999px_999px_14px] border-[1.5px] border-[var(--store-text)] bg-[var(--store-text)] px-5 text-[13px] font-extrabold text-[var(--store-bg)]" href={`/${storeSlug}/shop`}>Back to shop</Link></main>;
+  const currency = String(order.currency ?? "GBP").toUpperCase();
+  const money = (minor: unknown) => new Intl.NumberFormat("en", { style: "currency", currency }).format(Number(minor ?? 0) / 100);
+  const status = String(order.status ?? "").replaceAll("_", " ").toLowerCase();
+  const items = result.items.filter((item) => typeof item.titleSnapshot === "string");
+  return <main className="jelly-order-confirmation">
+    <span className="jelly-order-confirmation-icon" aria-hidden="true">{pendingPayment ? <PackageCheck /> : <Check />}</span>
+    <p className="jelly-eyebrow">{String(order.number ?? "Your order")}</p>
+    <h1>{pendingPayment ? "Payment pending" : "Thank you for your order"}</h1>
+    <p>{pendingPayment ? "We are waiting for your payment to be confirmed. This page updates once it is." : "Your order has been received and the shop is getting it ready."}</p>
+    {items.length > 0 && <ul className="jelly-order-items">{items.map((item, index) => <li key={`${String(item.variantId ?? "item")}-${index}`}><span>{String(item.titleSnapshot)}<small> × {Number(item.quantity ?? 1)}</small></span>{item.unitPriceMinor !== undefined && <b>{money(Number(item.unitPriceMinor) * Number(item.quantity ?? 1))}</b>}</li>)}</ul>}
+    <dl className="jelly-order-confirmation-summary"><div><dt>Status</dt><dd>{status.charAt(0).toUpperCase() + status.slice(1)}</dd></div><div><dt>Total</dt><dd>{money(order.totalMinor)}</dd></div></dl>
+    <div className="jelly-section-actions"><Link className="jelly-button" href={`/${storeSlug}/shop`}>Continue shopping</Link></div>
+  </main>;
 }
 
 export default function PublicOrderPage() {

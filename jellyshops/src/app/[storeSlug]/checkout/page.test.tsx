@@ -26,7 +26,7 @@ it("creates a server checkout attempt and prepares card payment", async () => {
   await user.type(screen.getByLabelText(/address line/i), "22 Palm Avenue");
   await user.type(screen.getByLabelText(/^city$/i), "Bengaluru");
   await user.type(screen.getByLabelText(/state/i), "Karnataka");
-  await user.type(screen.getByLabelText(/postal code/i), "560001");
+  await user.type(screen.getByLabelText(/pin code|postcode|zip code/i), "560001");
   await user.click(screen.getByRole("button", { name: /continue to card payment/i }));
 
   expect(await screen.findByText(/card payment form/i)).toBeVisible();

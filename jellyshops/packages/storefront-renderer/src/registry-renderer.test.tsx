@@ -313,7 +313,7 @@ describe("registry-driven section rendering", () => {
     render(<RegistrySectionRenderer section={section("cart-summary")} mode="published" commerce={commerce} page={{ pageType: "cart", resource: null, data: { lines: [{ id: "line-1", name: "Lemon cake · Default", quantity: 2, total: "$20", onDecrease, onIncrease }], subtotal: "$20", checkoutHref: "/shop/checkout" } }} />);
 
     expect(screen.getByText("Lemon cake · Default")).toBeInTheDocument();
-    expect(screen.getByText("Subtotal: $20")).toBeInTheDocument();
+    expect(screen.getByRole("complementary", { name: "Order summary" })).toHaveTextContent("Subtotal$20");
     expect(screen.getByRole("link", { name: "Checkout" })).toHaveAttribute("href", "/shop/checkout");
     screen.getAllByRole("button")[0]?.click();
     screen.getAllByRole("button")[1]?.click();
@@ -333,7 +333,7 @@ describe("registry-driven section rendering", () => {
     const user = userEvent.setup();
     render(<RegistrySectionRenderer section={section("search-results")} mode="published" commerce={commerce} page={{ pageType: "search", resource: null, data: { query: "shoes", state: "empty", resultCount: 0, searchHref: "/store/search", results: [] } }} />);
 
-    const input = screen.getByRole("searchbox", { name: "Search catalog" });
+    const input = screen.getByRole("searchbox", { name: "Search products" });
     expect(input.closest("form")).toHaveAttribute("action", "/store/search");
     await user.clear(input);
     await user.type(input, "apples");

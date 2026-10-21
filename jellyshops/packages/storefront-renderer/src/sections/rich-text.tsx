@@ -18,7 +18,7 @@ function renderInline(content: RichTextInline[]): ReactNode[] {
   });
 }
 
-function renderBlocks(blocks: RichTextBlock[]): ReactNode[] {
+export function renderBlocks(blocks: RichTextBlock[]): ReactNode[] {
   return blocks.map((block, index) => {
     if (block.type === "paragraph") return <p key={index}>{renderInline(block.content)}</p>;
     if (block.type === "heading") {

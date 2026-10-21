@@ -1,5 +1,17 @@
+import { isRichTextDocument } from "@jelly/storefront-schema";
+import type { ReactNode } from "react";
 import { StorefrontContainer } from "@jelly/storefront-ui";
+import { renderBlocks } from "./rich-text";
 import type { StorefrontRuntimeContext } from "../runtime-context";
+
+/** Saved page/article content: rich text documents keep headings and lists; older plain text becomes paragraphs. */
+function renderContent(value: unknown): ReactNode[] {
+  if (isRichTextDocument(value)) {
+    const blocks = value.content.filter((block) => !(block.type === "paragraph" && block.content.length === 0));
+    return renderBlocks(blocks);
+  }
+  return textFromContent(value).map((paragraph, index) => <p key={`${index}-${paragraph}`}>{paragraph}</p>);
+}
 
 function textFromContent(value: unknown): string[] {
   if (!value || typeof value !== "object" || Array.isArray(value)) return [];
@@ -13,8 +25,8 @@ export function PageContentSection({ context }: { context: StorefrontRuntimeCont
   if (context.page?.pageType !== "page") return null;
   const data = context.page.resource.data;
   const title = typeof data.title === "string" ? data.title : "Page";
-  const content = textFromContent(data.content);
-  return <section className="jelly-section jelly-page-content"><StorefrontContainer><article><h1>{title}</h1>{content.map((paragraph, index) => <p key={`${index}-${paragraph}`}>{paragraph}</p>)}</article></StorefrontContainer></section>;
+  const content = renderContent(data.content);
+  return <section className="jelly-section jelly-page-content"><StorefrontContainer><article className="jelly-prose"><h1>{title}</h1>{content}</article></StorefrontContainer></section>;
 }
 
 function blogData(context: StorefrontRuntimeContext): { storeSlug: string; title: string; handle: string; articles: Array<{ id: string; title: string; handle: string; excerpt: string }> } | null {
@@ -73,5 +85,5 @@ export function ArticleHeaderSection({ context }: { context: StorefrontRuntimeCo
 export function ArticleContentSection({ context }: { context: StorefrontRuntimeContext }) {
   const article = articleData(context);
   if (!article) return null;
-  return <section className="jelly-section jelly-article-content"><StorefrontContainer><article>{textFromContent(article.content).map((paragraph, index) => <p key={`${index}-${paragraph}`}>{paragraph}</p>)}</article></StorefrontContainer></section>;
+  return <section className="jelly-section jelly-article-content"><StorefrontContainer><article className="jelly-prose">{renderContent(article.content)}</article></StorefrontContainer></section>;
 }

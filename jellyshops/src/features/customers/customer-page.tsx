@@ -13,6 +13,22 @@ interface CustomerOrder { id: string; number: string; status: string; totalMinor
 interface Profile { name: string; email: string; revision: number }
 interface WishlistItem { productId: string; title: string; slug: string; status: string }
 const titles: Partial<Record<PageType, string>> = { "customer-login": "Welcome back", "customer-register": "Create your account", "customer-recovery": "Reset your password", "customer-account": "Your account", "customer-orders": "Your orders", "customer-order": "Order details", "customer-addresses": "Your addresses", wishlist: "Your wishlist" };
+const subtitles: Partial<Record<PageType, string>> = {
+  "customer-login": "Sign in to see your orders, addresses and saved favourites.",
+  "customer-register": "Save your details for faster checkout and keep track of your orders.",
+  "customer-recovery": "Enter your email and we will send you a link to choose a new password.",
+  "customer-account": "Your details, orders and favourites in one place.",
+  "customer-orders": "Every order you have placed with this account.",
+  "customer-order": "Items, totals and delivery details for this order.",
+  "customer-addresses": "Save delivery addresses for faster checkout.",
+  wishlist: "The pieces you have saved for later.",
+};
+const accountTabs: Array<{ kind: PageType; label: string; path: string }> = [
+  { kind: "customer-account", label: "Overview", path: "" },
+  { kind: "customer-orders", label: "Orders", path: "/orders" },
+  { kind: "customer-addresses", label: "Addresses", path: "/addresses" },
+  { kind: "wishlist", label: "Wishlist", path: "" },
+];
 const addressFields = ["label", "name", "line1", "line2", "city", "region", "postalCode", "phone"] as const;
 const labels = { label: "Label", name: "Full name", line1: "Address line 1", line2: "Address line 2", city: "City", region: "State or region", postalCode: "Postal code", phone: "Phone" };
 export function CustomerPage({ kind }: { kind: PageType }) {
@@ -70,7 +86,7 @@ export function CustomerPage({ kind }: { kind: PageType }) {
   }
   const money = (minor: number, currency: string = store.currency) => new Intl.NumberFormat("en", { style: "currency", currency }).format(minor / 100);
   return <ProtectedStorefrontPage type={kind} storeSlug={store.slug}>
-    <header className="signature-page-heading"><p className="signature-eyebrow">{store.name}</p><h1>{titles[kind] ?? "Your account"}</h1><p>A space for your favourites, orders, and everyday details.</p></header>
+    <header className={`signature-page-heading${authPage ? " signature-page-heading--auth" : ""}`}><p className="signature-eyebrow">{store.name}</p><h1>{titles[kind] ?? "Your account"}</h1><p>{subtitles[kind] ?? subtitles["customer-account"]}</p></header>
     {message && <p className="signature-notice" role="status">{message}</p>}{(error || authError) && <p className="signature-notice" role="alert">{error ?? authError}</p>}
     {authLoading ? <p role="status">Loading your account…</p> : authPage ? <section className="signature-panel signature-auth">
       {session && kind !== "customer-recovery" ? <><p>{verified ? `Signed in as ${session.user.email}.` : "Check your email and verify your account before continuing."}</p><Link className="signature-primary" href={accountHref}>Continue to your account</Link><button className="signature-secondary" onClick={() => void act(async () => { const response = await customerAuth?.auth.signOut(); if (response?.error) throw response.error; })}>Sign out</button></> : <form onSubmit={(event) => void authenticate(event)}>
@@ -78,9 +94,9 @@ export function CustomerPage({ kind }: { kind: PageType }) {
         {!(kind === "customer-recovery" && !session) && <label>Password<input type="password" name="password" minLength={8} required autoComplete={kind === "customer-login" ? "current-password" : "new-password"} /></label>}
         <button className="signature-primary" disabled={busy}>{busy ? "Please wait…" : kind === "customer-login" ? "Sign in" : kind === "customer-register" ? "Create account" : session ? "Save new password" : "Send recovery email"}</button>
       </form>}
-      <nav aria-label="Customer access"><Link href={`${accountHref}/login`}>Sign in</Link><Link href={`${accountHref}/register`}>Create account</Link><Link href={`${accountHref}/recover`}>Forgot password?</Link></nav>
+      <nav aria-label="Customer access">{kind !== "customer-login" && <Link href={`${accountHref}/login`}>Already have an account? Sign in</Link>}{kind !== "customer-register" && <Link href={`${accountHref}/register`}>New here? Create an account</Link>}{kind !== "customer-recovery" && <Link href={`${accountHref}/recover`}>Forgot your password?</Link>}</nav>
     </section> : <>
-      <nav className="signature-account-nav" aria-label="Your account"><Link href={accountHref}>Overview</Link><Link href={`${accountHref}/orders`}>Orders</Link><Link href={`${accountHref}/addresses`}>Addresses</Link><Link href={`/${store.slug}/wishlist`}>Wishlist</Link>{session && <button disabled={busy} onClick={() => void act(async () => { const response = await customerAuth?.auth.signOut(); if (response?.error) throw response.error; })}>Sign out</button>}</nav>
+      <nav className="signature-account-nav" aria-label="Your account">{accountTabs.map((tab) => <Link key={tab.kind} href={tab.kind === "wishlist" ? `/${store.slug}/wishlist` : `${accountHref}${tab.path}`} aria-current={tab.kind === kind || (tab.kind === "customer-orders" && kind === "customer-order") ? "page" : undefined}>{tab.label}</Link>)}{session && <button disabled={busy} onClick={() => void act(async () => { const response = await customerAuth?.auth.signOut(); if (response?.error) throw response.error; })}>Sign out</button>}</nav>
       {kind !== "wishlist" && (!session || !verified) ? <section className="signature-panel"><h2>{session ? "Verify your email" : "Make yourself at home"}</h2><p>{session ? "Use the verification link in your email to access your account." : "Sign in to see your orders and saved addresses."}</p><Link className="signature-primary" href={`${accountHref}/login`}>Sign in</Link></section> : !current ? <p role="status">Loading…</p> : current.error ? <div role="alert"><p>{current.error}</p><button onClick={() => setRefresh((value) => value + 1)}>Retry</button></div> : <>
         {kind === "customer-account" && current.profile && <section className="signature-panel"><h2>Good to see you{current.profile.name ? `, ${current.profile.name}` : ""}.</h2><p>{current.profile.email}</p><form key={`${current.profile.revision}:${scope}`} onSubmit={(event) => { event.preventDefault(); const name = String(new FormData(event.currentTarget).get("name") ?? ""); void act(async () => { await customerRequest(store.id, "/profile", session, "PATCH", { name, revision: current.profile!.revision }); setRefresh((value) => value + 1); setMessage("Your details have been saved."); }); }}><label>Your name<input name="name" required maxLength={120} defaultValue={current.profile.name} autoComplete="name" /></label><button className="signature-primary" disabled={busy}>Save details</button></form></section>}
         {(kind === "customer-orders" || kind === "customer-order") && <section className="signature-panel">{!current.orders.length ? <p>You haven’t placed any orders with this account yet.</p> : current.orders.map((order) => <article className="signature-order" key={order.id}><div><Link href={`${accountHref}/orders/${encodeURIComponent(order.id)}`}><h2>{order.number}</h2></Link><p>{new Date(order.createdAt).toLocaleDateString()} · {order.status.replaceAll("_", " ").toLowerCase()}</p></div><strong>{money(order.totalMinor, order.currency)}</strong>{order.items && <ul>{order.items.map((item) => <li key={item.variantId}>{item.titleSnapshot} × {item.quantity}<span>{money(item.lineTotalMinor, order.currency)}</span></li>)}</ul>}</article>)}</section>}

@@ -9,7 +9,7 @@ import type { RuntimeMenuV4, SectionNode } from "@jelly/storefront-schema";
  * Renders a Jelly Minimal starter template (home, product or collection) with
  * sample catalogue data, exactly as the published storefront composes it.
  */
-export type PreviewTemplate = "home" | "product" | "collection";
+export type PreviewTemplate = "home" | "product" | "collection" | "cart" | "search" | "page" | "not-found";
 
 const THEME_ID = "jelly-signature";
 const image = (photo: string) => `https://images.unsplash.com/${photo}?auto=format&fit=crop&w=900&q=80`;
@@ -75,10 +75,46 @@ const collectionContext: StorefrontPageContext = {
   } } },
 } as StorefrontPageContext;
 
+function useCartContext(): StorefrontPageContext {
+  const [quantities, setQuantities] = useState<Record<string, number>>({ p1: 1, p3: 2 });
+  const lines = sampleProducts.filter((product) => quantities[product.id]).map((product) => {
+    const unit = Number(product.price.replace(/[^0-9.]/g, ""));
+    const quantity = quantities[product.id];
+    const update = (next: number) => setQuantities((current) => { const copy = { ...current }; if (next <= 0) delete copy[product.id]; else copy[product.id] = next; return copy; });
+    return { id: product.id, name: product.name, productName: product.name, variantName: product.id === "p3" ? "Medium" : "Standard", imageUrl: product.imageUrl, quantity, unitPrice: product.price, total: `£${(unit * quantity).toFixed(2)}`, canIncrease: quantity < 5, onDecrease: () => update(quantity - 1), onIncrease: () => update(quantity + 1), onRemove: () => update(0), minor: unit * quantity * 100 };
+  });
+  const subtotal = lines.reduce((sum, line) => sum + line.minor, 0) / 100;
+  return { pageType: "cart", resource: null, data: { lines, subtotal: `£${subtotal.toFixed(2)}`, shippingNote: "Free delivery on orders over £50. Taxes included.", checkoutHref: "#checkout", shopHref: "#shop" } };
+}
+
+const searchContext: StorefrontPageContext = { pageType: "search", resource: null, data: { query: "linen", state: "results", resultCount: 2, results: [sampleProducts[0], sampleProducts[6]], searchHref: "#search" } };
+const infoPageContext: StorefrontPageContext = {
+  pageType: "page",
+  resource: { id: "about", handle: "about", data: { title: "About us", content: { type: "doc", content: [
+    { type: "paragraph", content: [{ type: "text", text: "We started in a small studio with a simple idea: everyday things should be made well and last for years." }] },
+    { type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: "What we care about" }] },
+    { type: "paragraph", content: [{ type: "text", text: "Natural materials, honest prices and careful packaging. We work with a handful of makers we know by name." }] },
+    { type: "bulletList", content: [
+      { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: "Small batches, made to order where we can" }] }] },
+      { type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: "Plastic-free packaging" }] }] },
+    ] },
+  ] } } },
+} as unknown as StorefrontPageContext;
+
 export function TemplatePreview({ template }: { template: PreviewTemplate }) {
   const pack = getV4StarterPack("jelly-signature");
   const productPage = useProductContext();
-  const page: StorefrontPageContext = template === "product" ? productPage : template === "collection" ? collectionContext : { pageType: "home", resource: null };
+  const cartPage = useCartContext();
+  const pages: Record<PreviewTemplate, StorefrontPageContext> = {
+    home: { pageType: "home", resource: null },
+    product: productPage,
+    collection: collectionContext,
+    cart: cartPage,
+    search: searchContext,
+    page: infoPageContext,
+    "not-found": { pageType: "not-found", resource: null },
+  };
+  const page = pages[template];
   const layout = pack.templates.find((item) => item.type === template)?.layout.sections ?? [];
   type Entry = { region: "header" | "template" | "footer"; section: SectionNode };
   const resolved: Entry[] = layout.flatMap((placement): Entry[] => {
