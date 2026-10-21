@@ -14,7 +14,9 @@ function text(section: SectionNode, fallback: string): string {
 }
 
 export function AnnouncementBarSection({ section }: { section: SectionNode }) {
-  return <aside className="jelly-announcement">{text(section, "Welcome to our store")}</aside>;
+  const message = text(section, "Welcome to our store");
+  const href = typeof section.settings.link === "string" && section.settings.link ? safeRichTextHref(section.settings.link) : null;
+  return <aside className="jelly-announcement">{href ? <a href={href}>{message}</a> : message}</aside>;
 }
 export function ImageWithTextSection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
   const candidate = section.settings.image;

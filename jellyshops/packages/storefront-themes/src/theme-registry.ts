@@ -14,6 +14,7 @@ import { BoutiqueHero, type ThemeSectionProps } from "./themes/example-boutique/
 import { boutiqueShellComponents } from "./themes/example-boutique/shell.js";
 import type { ComponentType } from "react";
 import { signatureManifest, signatureTokens } from "./jelly-signature/definition.js";
+import { fontStack } from "./fonts.js";
 
 function definition(id: ThemeId, label: string, tokens: ThemeTokens, manifest?: unknown, sectionOverrides: Record<string, ComponentType<ThemeSectionProps>> = {}, components?: ThemeShellComponents): ThemeDefinition {
   const presetManifest = {
@@ -82,8 +83,8 @@ export function resolveDesignTokens(themeId: ThemeId, globalSettings: GlobalSett
     "--jelly-color-secondary": tokens.colors.accent,
     "--jelly-color-muted": `color-mix(in srgb, ${textColor} 62%, transparent)`,
     "--jelly-color-border": `color-mix(in srgb, ${textColor} 18%, transparent)`,
-    "--jelly-font-display": ty?.headingFont || tokens.typography.display,
-    "--jelly-font-body": ty?.bodyFont || tokens.typography.body,
+    "--jelly-font-display": fontStack(ty?.headingFont || tokens.typography.display, "Georgia"),
+    "--jelly-font-body": fontStack(ty?.bodyFont || tokens.typography.body, "Arial"),
     "--jelly-radius-button": (bt?.radius ? buttonRadii[bt.radius] : undefined) || tokens.radii.button,
     "--jelly-radius-card": tokens.radii.card,
     "--jelly-radius-input": tokens.radii.button,

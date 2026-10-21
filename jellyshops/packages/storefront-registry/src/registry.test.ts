@@ -72,10 +72,11 @@ it("makes the Home product grid configurable without requiring sample Catalog re
   expect(validateSectionAgainstRegistry(section("product-grid"), "home")).toEqual([]);
 });
 
-it("exposes simple store identity and footer text controls in global chrome", () => {
-  expect(getSectionDefinition("header")?.controls.map(({ key }) => key)).toEqual(["storeName", "logo"]);
+it("exposes store identity, layout and footer content controls in global chrome", () => {
+  expect(getSectionDefinition("header")?.controls.map(({ key }) => key)).toEqual(["storeName", "logo", "logoWidth", "logoPosition", "sticky", "showSearch", "showAccount", "showWishlist", "showCart"]);
   expect(getSectionDefinition("header")?.settingsSchema.safeParse({ storeName: "Little Market", logo: { id: "logo-1", url: "/api/public/media/store-a/logo-1", alt: "Logo" } }).success).toBe(true);
-  expect(getSectionDefinition("footer")?.controls.map(({ key }) => key)).toEqual(["text"]);
+  expect(getSectionDefinition("footer")?.controls.map(({ key }) => key)).toEqual(["storeName", "text", "contactEmail", "copyright"]);
+  expect(getSectionDefinition("announcement-bar")?.controls.map(({ key }) => key)).toEqual(["text", "link"]);
 });
 
 it("allows page content only on a custom Page template", () => {

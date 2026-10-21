@@ -7,7 +7,7 @@ import { resolveStorefrontThemeTokens } from "./storefront-theme-tokens";
 it("registers Jelly Minimal (id jelly-signature) with editable branded tokens and a 1280px container", () => {
   expect(getThemeDefinition("jelly-signature").tokens.spacing.container).toBe("80rem");
   const theme = resolveTheme("jelly-signature");
-  expect(theme.settings).toMatchObject({ colors: { primary: "#111111", background: "#faf9f7", accent: "#e7e2d9" }, layout: { contentWidth: 1280 } });
+  expect(theme.settings).toMatchObject({ colors: { primary: "#1c1b19", background: "#faf9f7", accent: "#ece7de" }, layout: { contentWidth: 1280 } });
   expect(validateThemeManifest(getThemeDefinition("jelly-signature").manifest).settingsSchema.map((item) => item.id)).toEqual(expect.arrayContaining(["colors.secondary", "branding.faviconUrl", "typography.headingWeight", "layout.contentWidth"]));
 });
 

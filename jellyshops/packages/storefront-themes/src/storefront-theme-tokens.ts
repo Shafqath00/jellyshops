@@ -11,7 +11,6 @@ export interface LegacyStoreThemeValues {
 }
 
 const color = (value: unknown, fallback: string) => typeof value === "string" && /^(#[\da-f]{3,8}|(?:rgb|hsl)a?\([^\n]+\)|[a-z]+)$/i.test(value.trim()) ? value.trim() : fallback;
-const font = (value: unknown, fallback: string) => typeof value === "string" && /^[\w ,.'-]{1,120}$/.test(value.trim()) ? value.trim() : fallback;
 
 /** Resolves one canonical token layer for every storefront route. */
 export function resolveStorefrontThemeTokens(themeId: ThemeId | string, settings: Record<string, unknown> = {}, legacy: LegacyStoreThemeValues = {}): Record<string, string> {
@@ -44,8 +43,13 @@ export function resolveStorefrontThemeTokens(themeId: ThemeId | string, settings
   const text = color(base["--jelly-color-text"], "#1a1a1a");
   const accent = color(base["--jelly-color-accent"], "#315e24");
   const accentSoft = color(modern.colors?.accentSoft ?? legacy.accentSoft, `color-mix(in srgb, ${accent} 18%, ${background})`);
-  const heading = font(base["--jelly-font-display"], "Georgia");
-  const body = font(base["--jelly-font-body"], "Arial");
+  const card = (modern as { productCard?: Record<string, unknown> }).productCard ?? {};
+  base["--jelly-card-ratio"] = card.imageRatio === "square" ? "1 / 1" : card.imageRatio === "landscape" ? "4 / 3" : "4 / 5";
+  base["--jelly-card-align"] = card.alignment === "center" ? "center" : "start";
+  base["--jelly-card-border"] = card.style === "bordered" ? "1px solid var(--theme-border)" : "0";
+  base["--jelly-card-padding"] = card.style === "bordered" ? "12px" : "0";
+  const heading = base["--jelly-font-display"];
+  const body = base["--jelly-font-body"];
   const semantic = {
     "--theme-background": background, "--theme-surface": surface, "--theme-text": text,
     "--theme-muted-text": base["--jelly-color-muted"] || `color-mix(in srgb, ${text} 62%, transparent)`,

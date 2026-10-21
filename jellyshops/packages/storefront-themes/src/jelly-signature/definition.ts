@@ -1,36 +1,65 @@
 import base from "../themes/default/theme.json" with { type: "json" };
+import { FONT_OPTIONS } from "../fonts.js";
 import type { ThemeTokens } from "../types.js";
 
+/**
+ * Jelly Minimal — the flagship storefront theme. The internal id stays
+ * `jelly-signature` so stores created before the rename keep working.
+ *
+ * Design system: warm white canvas, charcoal ink, sand highlights,
+ * Fraunces headings over an Inter body, an 8px spacing scale and a
+ * 1280px content width. Every value below is a merchant-editable default.
+ */
 export const signatureTokens: ThemeTokens = {
-  colors: { primary: "#111111", background: "#faf9f7", text: "#1a1a1a", surface: "#ffffff", accent: "#e7e2d9" },
-  typography: { display: "Georgia", body: "Inter" },
+  colors: { primary: "#1c1b19", background: "#faf9f7", text: "#1c1b19", surface: "#ffffff", accent: "#ece7de" },
+  typography: { display: "Fraunces", body: "Inter" },
   radii: { button: "2px", card: "4px" },
-  spacing: { section: "80px", container: "80rem" },
-  cardShadow: "0 1px 2px rgba(17, 17, 17, 0.06)",
+  spacing: { section: "96px", container: "80rem" },
+  cardShadow: "0 1px 2px rgba(28, 27, 25, 0.06)",
 };
 
-const fonts = ["Arial", "Georgia", "Inter"].map((value) => ({ value, label: value }));
+const fonts = FONT_OPTIONS.map((option) => ({ ...option }));
+const color = (id: string, label: string, value: string) => ({ id: `colors.${id}`, type: "color", label, group: "Colors", default: value });
+const range = (id: string, label: string, group: string, value: number, min: number, max: number, step: number) => ({ id, type: "range", label, group, default: value, min, max, step });
+const select = (id: string, label: string, group: string, value: string, options: Array<[string, string]>) => ({ id, type: "select", label, group, default: value, options: options.map(([optionValue, optionLabel]) => ({ value: optionValue, label: optionLabel })) });
+
 export const signatureManifest = {
-  ...base, id: "jelly-signature", name: "Jelly Minimal", version: "1.0.0",
+  ...base,
+  id: "jelly-signature",
+  name: "Jelly Minimal",
+  version: "2.0.0",
   description: "A modern, minimal storefront in warm white and charcoal.",
-  assetPrefix: "/themes/jelly-signature/", previewAsset: "/themes/jelly-signature/preview.svg",
+  assetPrefix: "/themes/jelly-signature/",
+  previewAsset: "/themes/jelly-signature/preview.svg",
   assets: { stylesheets: [], scripts: [], fonts: [], icons: [], assets: [], preview: { path: "/themes/jelly-signature/preview.svg", alt: "Jelly Minimal storefront preview" } },
   settingsDefaults: {
     ...base.settingsDefaults,
     colors: { ...signatureTokens.colors, secondary: "#6b665f" },
-    typography: { headingFont: "Georgia", bodyFont: "Inter", headingScale: "standard", scale: "default", headingWeight: 400, bodyWeight: 400, bodySize: 16, headingSize: 56 },
-    layout: { containerWidth: "wide", sectionSpacing: "standard", density: "comfortable", contentWidth: 1280, sectionGap: 80 },
+    typography: { headingFont: "Fraunces", bodyFont: "Inter", headingScale: "standard", scale: "default", headingWeight: 400, bodyWeight: 400, bodySize: 16, headingSize: 56 },
+    buttons: { style: "solid", radius: "square" },
+    layout: { containerWidth: "wide", sectionSpacing: "standard", density: "comfortable", contentWidth: 1280, sectionGap: 96 },
+    productCard: { imageRatio: "portrait", style: "minimal", alignment: "left", showBrand: false },
     branding: { logoUrl: "", bannerUrl: "", faviconUrl: "" },
-    header: { ...base.settingsDefaults.header, showAccount: true, showWishlist: true },
   },
   settingsSchema: [
-    ...base.settingsSchema,
-    ...["background", "text", "surface", "secondary"].map((name) => ({ id: `colors.${name}`, type: "color", label: `${name[0].toUpperCase()}${name.slice(1)} color`, group: "Colors", default: name === "secondary" ? "#6b665f" : signatureTokens.colors[name as keyof typeof signatureTokens.colors] })),
-    { id: "branding.faviconUrl", type: "image", label: "Favicon", group: "Branding", default: "" },
-    ...[{ name: "headingWeight", label: "Heading weight", value: 400, min: 300, max: 800, step: 100 }, { name: "bodyWeight", label: "Body weight", value: 400, min: 300, max: 700, step: 100 }, { name: "bodySize", label: "Body size", value: 16, min: 14, max: 22, step: 1 }, { name: "headingSize", label: "Heading size", value: 56, min: 28, max: 88, step: 2 }].map((item) => ({ id: `typography.${item.name}`, type: "range", label: item.label, group: "Typography", default: item.value, min: item.min, max: item.max, step: item.step })),
-    { id: "layout.contentWidth", type: "range", label: "Content width", group: "Layout", default: 1280, min: 960, max: 1600, step: 32 },
-    { id: "layout.sectionGap", type: "range", label: "Section spacing", group: "Layout", default: 80, min: 24, max: 160, step: 8 },
-    { id: "header.showAccount", type: "checkbox", label: "Show customer account", group: "Header", default: true },
-    { id: "header.showWishlist", type: "checkbox", label: "Show wishlist", group: "Header", default: true },
-  ].map((setting) => setting.type === "font" ? { ...setting, options: fonts } : setting),
+    color("background", "Page background", "#faf9f7"),
+    color("surface", "Cards and panels", "#ffffff"),
+    color("text", "Text", "#1c1b19"),
+    color("secondary", "Soft text", "#6b665f"),
+    color("primary", "Buttons", "#1c1b19"),
+    color("accent", "Highlight backgrounds", "#ece7de"),
+    { id: "typography.headingFont", type: "font", label: "Heading font", group: "Typography", default: "Fraunces", options: fonts },
+    { id: "typography.bodyFont", type: "font", label: "Body font", group: "Typography", default: "Inter", options: fonts },
+    range("typography.headingSize", "Heading size", "Typography", 56, 32, 88, 4),
+    range("typography.bodySize", "Text size", "Typography", 16, 14, 20, 1),
+    range("typography.headingWeight", "Heading weight", "Typography", 400, 300, 700, 100),
+    select("buttons.radius", "Button corners", "Buttons", "square", [["square", "Square"], ["soft", "Slightly rounded"], ["rounded", "Rounded"], ["pill", "Pill"]]),
+    range("layout.contentWidth", "Page width", "Layout", 1280, 960, 1600, 32),
+    range("layout.sectionGap", "Space between sections", "Layout", 96, 32, 160, 8),
+    select("productCard.imageRatio", "Product image shape", "Product cards", "portrait", [["portrait", "Portrait"], ["square", "Square"], ["landscape", "Landscape"]]),
+    select("productCard.style", "Product card style", "Product cards", "minimal", [["minimal", "Minimal"], ["bordered", "Bordered"]]),
+    { id: "productCard.alignment", type: "alignment", label: "Product text alignment", group: "Product cards", default: "left", options: [{ value: "left", label: "Left" }, { value: "center", label: "Center" }] },
+    { id: "branding.logoUrl", type: "image", label: "Store logo", group: "Branding", default: "" },
+    { id: "branding.faviconUrl", type: "image", label: "Browser tab icon", group: "Branding", default: "" },
+  ],
 };

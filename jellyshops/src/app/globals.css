@@ -52,44 +52,8 @@
 .signature-catalog :focus-visible { outline: 2px solid var(--jelly-color-primary,#111111); outline-offset: 3px; }
 @media (max-width: 1100px) { .signature-filters { grid-template-columns: repeat(3,minmax(0,1fr)); } .signature-product-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } }
 @media (max-width: 680px) { .signature-filters { grid-template-columns: repeat(2,minmax(0,1fr)); padding: 14px; } .signature-filters label:first-child { grid-column: 1/-1; } .signature-product-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px 12px; } .signature-product-grid h2 { font-size: 17px; } }
-[data-jelly-theme="jelly-signature"] .jelly-container { width: min(calc(100% - 48px), var(--jelly-container-width, 1280px)); margin-inline: auto; }
-[data-jelly-theme="jelly-signature"] .jelly-header { display: grid; position: relative; grid-template-columns: minmax(120px,1fr) auto minmax(240px,1fr); gap: 24px; align-items: center; min-height: 88px; padding: 16px max(24px,calc((100vw - var(--jelly-container-width,1280px))/2)); background: var(--theme-background); color: var(--theme-text); border-bottom: 1px solid var(--theme-border); }
-[data-jelly-theme="jelly-signature"] .jelly-eyebrow, [data-jelly-theme="jelly-signature"] .jelly-category-card span { color: color-mix(in srgb, var(--theme-text) 68%, transparent); }
-[data-jelly-theme="jelly-signature"] .jelly-announcement { padding: 8px 24px; background: var(--jelly-color-primary); color: var(--theme-background); font-size: 12px; letter-spacing: .04em; text-align: center; }
-[data-jelly-theme="jelly-signature"] .jelly-header-brand { font: 28px var(--theme-font-heading); letter-spacing: -.035em; }
-[data-jelly-theme="jelly-signature"] .jelly-header-brand img { max-height: 48px; max-width: 200px; width: auto; object-fit: contain; }
-[data-jelly-theme="jelly-signature"] .jelly-header ul, [data-jelly-theme="jelly-signature"] .jelly-header-tools { display: flex; gap: 24px; align-items: center; font-size: 13px; }
-[data-jelly-theme="jelly-signature"] .jelly-header-tools { justify-content: flex-end; gap: 16px; }
+/* Jelly Minimal theme styles live in ./themes/jelly-minimal.css. */
 .jelly-mobile-navigation { display: none; }
-[data-jelly-theme="jelly-signature"] .jelly-hero { padding-block: 48px 64px; }
-[data-jelly-theme="jelly-signature"] .jelly-hero > .jelly-container { border-radius: var(--jelly-radius-card, 4px); overflow: hidden; background: var(--theme-accent); display: grid; grid-template-columns: 1.1fr 1fr; min-height: 480px; }
-[data-jelly-theme="jelly-signature"] .jelly-hero-content { padding: clamp(32px,5vw,72px); display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 24px; }
-[data-jelly-theme="jelly-signature"] .jelly-hero h1 { font-family: var(--theme-font-heading); font-size: clamp(36px,5vw,var(--jelly-heading-size,64px)); font-weight: var(--jelly-heading-weight,400); line-height: 1.08; letter-spacing: -.04em; }
-[data-jelly-theme="jelly-signature"] .jelly-product-grid h2 { margin: 0 0 32px; font-family: var(--theme-font-heading); font-size: clamp(1.75rem, 3vw, 2.5rem); font-weight: var(--jelly-heading-weight, 400); letter-spacing: -.02em; line-height: 1.15; }
-[data-jelly-theme="jelly-signature"] .jelly-hero-media { min-height: 320px; align-self: stretch; border-radius: 0; }
-[data-jelly-theme="jelly-signature"] .jelly-hero-media img { width: 100%; height: 100%; object-fit: cover; }
-[data-jelly-theme="jelly-signature"] .jelly-button, [data-jelly-theme="jelly-signature"] .jelly-product-purchase button { background: var(--jelly-color-primary); color: white; padding: 16px 24px; min-height: 48px; border-radius: var(--jelly-radius-button); }
-[data-jelly-theme="jelly-signature"] .jelly-product-purchase .jelly-container { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 16px; }
-[data-jelly-theme="jelly-signature"] .jelly-newsletter { margin-block: var(--jelly-spacing-section,80px); padding-block: 64px; background: var(--theme-accent-soft); }
-[data-jelly-theme="jelly-signature"] .jelly-newsletter form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px; margin-top: 24px; max-width: 720px; }
-[data-jelly-theme="jelly-signature"] .jelly-newsletter label { display: grid; gap: 8px; }
-[data-jelly-theme="jelly-signature"] .jelly-newsletter input[type="email"] { min-height: 48px; border: 1px solid var(--theme-border); border-radius: 8px; padding: 12px 16px; background: var(--theme-surface); }
-[data-jelly-theme="jelly-signature"] .jelly-newsletter label:has(input[type="checkbox"]) { display: flex; align-items: center; gap: 8px; order: 2; width: 100%; font-size: 13px; }
-[data-jelly-theme="jelly-signature"] .jelly-newsletter button { background: var(--jelly-color-primary); color: white; min-height: 48px; padding: 12px 24px; border-radius: 8px; }
-[data-jelly-theme="jelly-signature"] .jelly-footer { background: var(--jelly-color-primary); color: var(--theme-background); padding: 48px max(24px,calc((100vw - var(--jelly-container-width,1280px))/2)); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 32px; }
-@media (max-width: 767px) {
-  [data-jelly-theme="jelly-signature"] .jelly-header { grid-template-columns: minmax(0,1fr) auto auto; padding: 16px; gap: 8px; min-height: 72px; }
-  [data-jelly-theme="jelly-signature"] .jelly-header > nav:not(.jelly-header-tools) { display: none; }
-  [data-jelly-theme="jelly-signature"] .jelly-header-tools a:not(:last-child) { display: none; }
-  [data-jelly-theme="jelly-signature"] .jelly-mobile-navigation { display: block; }
-  [data-jelly-theme="jelly-signature"] .jelly-mobile-navigation summary { min-height: 44px; padding: 12px; cursor: pointer; }
-  [data-jelly-theme="jelly-signature"] .jelly-mobile-navigation nav { position: absolute; z-index: 30; top: 100%; right: 0; left: 0; background: var(--theme-surface); padding: 24px; border-block: 1px solid var(--theme-border); box-shadow: 0 16px 24px #11111112; }
-  [data-jelly-theme="jelly-signature"] .jelly-mobile-navigation ul { flex-direction: column; align-items: stretch; }
-  [data-jelly-theme="jelly-signature"] .jelly-mobile-navigation a { min-height: 44px; display: flex; align-items: center; }
-  [data-jelly-theme="jelly-signature"] .jelly-container { width: calc(100% - 32px); }
-  [data-jelly-theme="jelly-signature"] .jelly-hero > .jelly-container { grid-template-columns: minmax(0,1fr); }
-  [data-jelly-theme="jelly-signature"] .jelly-hero-media { min-height: 240px; }
-}
 
 @theme {
   /* ── Jellyshop brand palette ─────────────────────────────────────── */

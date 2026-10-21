@@ -28,6 +28,8 @@ export function StorefrontPreviewFrame({
       doc.head.append(viewport);
     }
     if (!doc.body) doc.documentElement.append(doc.createElement("body"));
+    // Font variables live on the parent <html>; mirror them so preview text uses the same self-hosted fonts.
+    doc.documentElement.className = document.documentElement.className;
     const syncStyles = () => {
       doc.head.querySelectorAll("[data-parent-style]").forEach((node) => node.remove());
       document.head.querySelectorAll('link[rel="stylesheet"], style').forEach((source, index) => {

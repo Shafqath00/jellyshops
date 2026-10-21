@@ -25,22 +25,55 @@ export function MenuLinks({ section, context, label = "Store navigation" }: { se
   })}</ul></nav>;
 }
 
+type ToolIcon = "search" | "account" | "wishlist" | "bag" | "menu";
+const iconPaths: Record<ToolIcon, string> = {
+  search: "M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Zm10 2-4.35-4.35",
+  account: "M20 21a8 8 0 0 0-16 0M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z",
+  wishlist: "M19.5 12.6 12 20l-7.5-7.4A4.8 4.8 0 0 1 12 6.1a4.8 4.8 0 0 1 7.5 6.5Z",
+  bag: "M6 7h12l1 14H5L6 7Zm3 0a3 3 0 0 1 6 0",
+  menu: "M4 7h16M4 12h16M4 17h16",
+};
+
+export function StorefrontIcon({ name }: { name: ToolIcon }) {
+  return <svg className="jelly-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d={iconPaths[name]} /></svg>;
+}
+
+function imageSetting(value: unknown): { url: string; alt?: string } | undefined {
+  return value && typeof value === "object" && "url" in value && typeof value.url === "string" ? value as { url: string; alt?: string } : undefined;
+}
+
 export function HeaderSection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
-  const candidate = section.settings.logo;
-  const image = candidate && typeof candidate === "object" && "url" in candidate && typeof candidate.url === "string" ? candidate as { url: string; alt?: string } : undefined;
+  const settings = section.settings;
+  const image = imageSetting(settings.logo);
   const logoUrl = image ? safeRichTextHref(image.url) : null;
-  const name = typeof section.settings.storeName === "string" && section.settings.storeName.trim() ? section.settings.storeName : "Storefront";
-  return <header className="jelly-header" data-section-id={section.id}>
-    <a className="jelly-header-brand" href={context.storeSlug ? `/${encodeURIComponent(context.storeSlug)}` : "/"}>
-      {logoUrl && !logoUrl.startsWith("#") ? <img src={logoUrl} alt={image?.alt ?? ""} /> : <span>{name}</span>}
+  const name = typeof settings.storeName === "string" && settings.storeName.trim() ? settings.storeName : "Storefront";
+  const logoWidth = typeof settings.logoWidth === "number" ? Math.min(240, Math.max(64, settings.logoWidth)) : undefined;
+  const root = context.storeSlug ? `/${encodeURIComponent(context.storeSlug)}` : "";
+  const tools = context.storeSlug ? ([
+    ["search", "Search", `${root}/search`, settings.showSearch],
+    ["account", "Account", `${root}/account`, settings.showAccount],
+    ["wishlist", "Wishlist", `${root}/wishlist`, settings.showWishlist],
+    ["bag", "Bag", `${root}/cart`, settings.showCart],
+  ] as const).filter(([, , , visible]) => visible !== false) : [];
+  return <header
+    className="jelly-header"
+    data-section-id={section.id}
+    data-logo-position={settings.logoPosition === "center" ? "center" : "left"}
+    data-sticky={settings.sticky === true ? "true" : undefined}
+  >
+    <details className="jelly-mobile-navigation">
+      <summary aria-label="Open menu"><StorefrontIcon name="menu" /><span className="jelly-visually-hidden">Menu</span></summary>
+      <div className="jelly-mobile-navigation-panel">
+        <MenuLinks section={section} context={context} label="Mobile navigation" />
+        {tools.length > 0 && <nav aria-label="Account and saved items"><ul>{tools.filter(([icon]) => icon !== "search").map(([icon, label, href]) => <li key={icon}><a href={href}>{icon === "bag" ? "Shopping bag" : label}</a></li>)}</ul></nav>}
+      </div>
+    </details>
+    <a className="jelly-header-brand" href={root || "/"} style={logoWidth ? { width: logoWidth } : undefined}>
+      {logoUrl && !logoUrl.startsWith("#") ? <img src={logoUrl} alt={image?.alt || name} /> : <span>{name}</span>}
     </a>
     <MenuLinks section={section} context={context} label="Primary navigation" />
-    {context.storeSlug && <nav className="jelly-header-tools" aria-label="Shopping tools">
-      {section.settings.showSearch !== false && <a href={`/${context.storeSlug}/search`}>Search</a>}
-      {section.settings.showAccount !== false && <a href={`/${context.storeSlug}/account`}>Account</a>}
-      {section.settings.showWishlist !== false && <a href={`/${context.storeSlug}/wishlist`}>Wishlist</a>}
-      {section.settings.showCart !== false && <a href={`/${context.storeSlug}/cart`}>Bag</a>}
+    {tools.length > 0 && <nav className="jelly-header-tools" aria-label="Shopping tools">
+      {tools.map(([icon, label, href]) => <a key={icon} href={href} data-tool={icon} aria-label={label}><StorefrontIcon name={icon} /><span className="jelly-header-tool-label">{label}</span></a>)}
     </nav>}
-    <details className="jelly-mobile-navigation"><summary>Menu</summary><MenuLinks section={section} context={context} label="Mobile navigation" />{context.storeSlug && <nav aria-label="Account and saved items"><ul><li><a href={`/${context.storeSlug}/account`}>Account</a></li><li><a href={`/${context.storeSlug}/wishlist`}>Wishlist</a></li><li><a href={`/${context.storeSlug}/cart`}>Shopping bag</a></li></ul></nav>}</details>
   </header>;
 }
