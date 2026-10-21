@@ -14,9 +14,9 @@ import { catalogProductToStorefrontProduct } from "@/features/commerce/api/clien
 
 const API_URL = process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1486427944299-d1955d23e34d?auto=format&fit=crop&w=1200&q=85";
-const inputClass = "mt-2 h-11 w-full rounded-xl border border-black/[0.09] bg-white px-3.5 text-[12px] font-semibold text-[#342d2f] outline-none focus:border-[#d39aaa] focus:ring-4 focus:ring-[#ff8da4]/10";
-const labelClass = "text-[10px] font-black uppercase tracking-[0.08em] text-[#7f7476]";
-const cardClass = "rounded-[24px] border border-black/[0.06] bg-white p-5 shadow-[0_14px_44px_rgba(83,61,66,0.05)] sm:p-6";
+const inputClass = "mt-2 h-11 w-full rounded-xl border border-black/[0.09] bg-card px-3.5 text-[12px] font-semibold text-foreground outline-none focus:border-tint-border focus:ring-4 focus:ring-ring/40";
+const labelClass = "text-[10px] font-black uppercase tracking-[0.08em] text-muted-foreground";
+const cardClass = "rounded-[24px] border border-black/[0.06] bg-card p-5 shadow-[0_14px_44px_rgba(83,61,66,0.05)] sm:p-6";
 function parseSpecifications(value: string): Record<string, string> {
   return Object.fromEntries(value.split("\n").flatMap((line) => {
     const separator = line.indexOf(":");
@@ -105,7 +105,7 @@ export function ProductForm({ product }: { product?: Product }) {
       {saved && (
         <div
           role="status"
-          className="flex items-center gap-2.5 rounded-[18px] border border-[#dce8b8] bg-[#f7faed] px-4 py-3 text-[11px] font-black text-[#65712f]"
+          className="flex items-center gap-2.5 rounded-[18px] border border-border bg-muted/50 px-4 py-3 text-[11px] font-black text-success"
         >
           <CheckCircle2 size={16} />
           Product saved successfully
@@ -115,7 +115,7 @@ export function ProductForm({ product }: { product?: Product }) {
       {error && (
         <div
           role="alert"
-          className="rounded-[18px] border border-[#efced5] bg-[#fff5f7] px-4 py-3 text-[11px] font-bold text-[#9a5365]"
+          className="rounded-[18px] border border-tint-border bg-muted/50 px-4 py-3 text-[11px] font-bold text-tint-foreground"
         >
           {error}
         </div>
@@ -128,10 +128,10 @@ export function ProductForm({ product }: { product?: Product }) {
           {/* PRODUCT INFORMATION */}
           <section className={cardClass}>
             <div className="border-b border-black/[0.055] px-5 py-4 sm:px-6">
-              <h2 className="text-[15px] font-black tracking-[-0.02em] text-[#30292b]">
+              <h2 className="text-[15px] font-black tracking-[-0.02em] text-foreground">
                 Product information
               </h2>
-              <p className="mt-1 text-[11px] leading-5 text-[#93878a]">
+              <p className="mt-1 text-[11px] leading-5 text-muted-foreground">
                 Give your product a clear name and description.
               </p>
             </div>
@@ -151,7 +151,7 @@ export function ProductForm({ product }: { product?: Product }) {
               <label className="block">
                 <div className="flex items-center justify-between">
                   <span className={labelClass}>Description</span>
-                  <span className="text-[9px] font-semibold text-[#aaa0a2]">
+                  <span className="text-[9px] font-semibold text-muted-foreground">
                     Customer facing
                   </span>
                 </div>
@@ -161,13 +161,13 @@ export function ProductForm({ product }: { product?: Product }) {
                   onChange={(e) => setDescription(e.target.value)}
                   rows={6}
                   placeholder="Describe materials, features, fit, care information, or anything customers should know."
-                  className="mt-2 w-full resize-y rounded-[16px] border border-black/[0.08] bg-[#fffdfc] px-3.5 py-3 text-[12px] font-medium leading-6 text-[#352e30] outline-none transition placeholder:text-[#b8adaf] hover:border-black/[0.13] focus:border-[#cf8fa0] focus:bg-white focus:ring-4 focus:ring-[#e8a9b8]/10"
+                  className="mt-2 w-full resize-y rounded-[16px] border border-black/[0.08] bg-muted/50 px-3.5 py-3 text-[12px] font-medium leading-6 text-foreground outline-none transition placeholder:text-muted-foreground hover:border-black/[0.13] focus:border-tint-border focus:bg-white focus:ring-4 focus:ring-ring/40"
                 />
               </label>
               <label className="block">
                 <span className={labelClass}>Product specifications</span>
-                <textarea value={specificationsText} onChange={(event) => setSpecificationsText(event.target.value)} rows={4} maxLength={12000} placeholder={"Material: Cotton\nCare: Machine wash cold"} className="mt-2 w-full resize-y rounded-[16px] border border-black/[0.08] bg-[#fffdfc] px-3.5 py-3 text-[12px] font-medium leading-6 text-[#352e30] outline-none focus:border-[#cf8fa0] focus:ring-4 focus:ring-[#e8a9b8]/10" />
-                <small className="mt-1 block text-[10px] text-[#93878a]">Use one label and value per line, separated by a colon.</small>
+                <textarea value={specificationsText} onChange={(event) => setSpecificationsText(event.target.value)} rows={4} maxLength={12000} placeholder={"Material: Cotton\nCare: Machine wash cold"} className="mt-2 w-full resize-y rounded-[16px] border border-black/[0.08] bg-muted/50 px-3.5 py-3 text-[12px] font-medium leading-6 text-foreground outline-none focus:border-tint-border focus:ring-4 focus:ring-ring/40" />
+                <small className="mt-1 block text-[10px] text-muted-foreground">Use one label and value per line, separated by a colon.</small>
               </label>
             </div>
           </section>
@@ -176,10 +176,10 @@ export function ProductForm({ product }: { product?: Product }) {
           <section className={cardClass}>
             <div className="flex items-center justify-between border-b border-black/[0.055] px-5 py-4 sm:px-6">
               <div>
-                <h2 className="text-[15px] font-black tracking-[-0.02em] text-[#30292b]">
+                <h2 className="text-[15px] font-black tracking-[-0.02em] text-foreground">
                   Media
                 </h2>
-                <p className="mt-1 text-[11px] text-[#93878a]">
+                <p className="mt-1 text-[11px] text-muted-foreground">
                   Add a clear product image for your storefront.
                 </p>
               </div>
@@ -187,7 +187,7 @@ export function ProductForm({ product }: { product?: Product }) {
 
             <div className="p-5 sm:p-6">
               <div className="grid gap-5 sm:grid-cols-[180px_minmax(0,1fr)]">
-                <div className="group relative aspect-[4/5] overflow-hidden rounded-[22px] border border-black/[0.06] bg-[#f5f0ee]">
+                <div className="group relative aspect-[4/5] overflow-hidden rounded-[22px] border border-black/[0.06] bg-muted">
                   {imageUrl ? (
                     <Image
                       src={imageUrl}
@@ -197,12 +197,12 @@ export function ProductForm({ product }: { product?: Product }) {
                       className="object-cover transition duration-300 group-hover:scale-[1.02]"
                     />
                   ) : (
-                    <div className="grid h-full place-items-center text-[#b1a6a8]">
+                    <div className="grid h-full place-items-center text-muted-foreground">
                       <ImageIcon size={24} />
                     </div>
                   )}
 
-                  <div className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-1 text-[8px] font-black uppercase tracking-[0.1em] text-[#64595c] shadow-sm backdrop-blur">
+                  <div className="absolute left-2 top-2 rounded-full bg-card/90 px-2 py-1 text-[8px] font-black uppercase tracking-[0.1em] text-muted-foreground shadow-sm backdrop-blur">
                     Primary
                   </div>
                 </div>
@@ -219,11 +219,11 @@ export function ProductForm({ product }: { product?: Product }) {
                     />
                   </label>
 
-                  <div className="mt-4 rounded-[16px] border border-dashed border-[#dfcbd0] bg-[#fff9fa] px-4 py-4">
-                    <p className="text-[11px] font-black text-[#554a4d]">
+                  <div className="mt-4 rounded-[16px] border border-dashed border-border bg-muted/50 px-4 py-4">
+                    <p className="text-[11px] font-black text-muted-foreground">
                       Product media
                     </p>
-                    <p className="mt-1 text-[10px] leading-5 text-[#96898c]">
+                    <p className="mt-1 text-[10px] leading-5 text-muted-foreground">
                       Multiple product and variant images can be added here when
                       your media model is enabled.
                     </p>
@@ -236,10 +236,10 @@ export function ProductForm({ product }: { product?: Product }) {
           {/* PRICING */}
           <section className={cardClass}>
             <div className="border-b border-black/[0.055] px-5 py-4 sm:px-6">
-              <h2 className="text-[15px] font-black tracking-[-0.02em] text-[#30292b]">
+              <h2 className="text-[15px] font-black tracking-[-0.02em] text-foreground">
                 Pricing & inventory
               </h2>
-              <p className="mt-1 text-[11px] text-[#93878a]">
+              <p className="mt-1 text-[11px] text-muted-foreground">
                 Set the base selling price and inventory information.
               </p>
             </div>
@@ -257,7 +257,7 @@ export function ProductForm({ product }: { product?: Product }) {
                       onChange={(e) => setPrice(e.target.value)}
                       className={`${inputClass} pl-8`}
                     />
-                    <span className="pointer-events-none absolute left-3 top-[21px] text-[11px] font-black text-[#988c8f]">
+                    <span className="pointer-events-none absolute left-3 top-[21px] text-[11px] font-black text-muted-foreground">
                       {new Intl.NumberFormat("en", { style: "currency", currency: activeStore?.currency ?? "INR", maximumFractionDigits: 0 }).formatToParts(0).find((part) => part.type === "currency")?.value ?? "¤"}
                     </span>
                   </div>
@@ -297,11 +297,11 @@ export function ProductForm({ product }: { product?: Product }) {
           <section className={cardClass}>
             <div className="flex flex-col gap-3 border-b border-black/[0.055] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
               <div>
-                <h2 className="text-[15px] font-black tracking-[-0.02em] text-[#30292b]">
+                <h2 className="text-[15px] font-black tracking-[-0.02em] text-foreground">
                   Product options
                 </h2>
 
-                <p className="mt-1 text-[11px] leading-5 text-[#93878a]">
+                <p className="mt-1 text-[11px] leading-5 text-muted-foreground">
                   Add sizes, colours, configurations, or add-ons.
                 </p>
               </div>
@@ -315,7 +315,7 @@ export function ProductForm({ product }: { product?: Product }) {
                     newOption(items.length),
                   ]);
                 }}
-                className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full border border-[#eed8de] bg-[#fff6f8] px-3.5 text-[10px] font-black text-[#9b5968] transition hover:border-[#dfb9c3] hover:bg-[#ffedf1]"
+                className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full border border-border bg-muted/50 px-3.5 text-[10px] font-black text-tint-foreground transition hover:border-tint-border hover:bg-muted"
               >
                 <Plus size={13} />
                 Add option
@@ -333,17 +333,17 @@ export function ProductForm({ product }: { product?: Product }) {
                       newOption(items.length),
                     ]);
                   }}
-                  className="group flex w-full flex-col items-center justify-center rounded-[20px] border border-dashed border-[#dfcbd0] bg-[#fffafa] px-5 py-10 text-center transition hover:border-[#d3a6b1] hover:bg-[#fff6f8]"
+                  className="group flex w-full flex-col items-center justify-center rounded-[20px] border border-dashed border-border bg-muted/50 px-5 py-10 text-center transition hover:border-tint-border hover:bg-muted/50"
                 >
-                  <span className="grid size-10 place-items-center rounded-full bg-[#fff0f3] text-[#a45e70] transition group-hover:scale-105">
+                  <span className="grid size-10 place-items-center rounded-full bg-muted text-tint-foreground transition group-hover:scale-105">
                     <Plus size={17} />
                   </span>
 
-                  <span className="mt-3 text-[12px] font-black text-[#443a3d]">
+                  <span className="mt-3 text-[12px] font-black text-foreground">
                     Add product options
                   </span>
 
-                  <span className="mt-1 max-w-sm text-[10px] leading-5 text-[#978b8e]">
+                  <span className="mt-1 max-w-sm text-[10px] leading-5 text-muted-foreground">
                     Use options for size, colour, storage, material, add-ons, and
                     other customer choices.
                   </span>
@@ -354,21 +354,21 @@ export function ProductForm({ product }: { product?: Product }) {
                 {options.map((option, optionIndex) => (
                   <div
                     key={option.id}
-                    className="overflow-hidden rounded-[20px] border border-black/[0.065] bg-[#fffdfc]"
+                    className="overflow-hidden rounded-[20px] border border-black/[0.065] bg-muted/50"
                   >
-                    <div className="flex items-center justify-between border-b border-black/[0.055] bg-[#fcf9f8] px-4 py-3.5">
+                    <div className="flex items-center justify-between border-b border-black/[0.055] bg-muted/50 px-4 py-3.5">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="grid size-6 place-items-center rounded-full bg-[#f3e9eb] text-[9px] font-black text-[#9b5968]">
+                          <span className="grid size-6 place-items-center rounded-full bg-muted text-[9px] font-black text-tint-foreground">
                             {optionIndex + 1}
                           </span>
 
-                          <p className="text-[12px] font-black text-[#3a3234]">
+                          <p className="text-[12px] font-black text-foreground">
                             {option.name || "New option"}
                           </p>
                         </div>
 
-                        <p className="ml-8 mt-0.5 text-[9px] font-semibold capitalize text-[#998d90]">
+                        <p className="ml-8 mt-0.5 text-[9px] font-semibold capitalize text-muted-foreground">
                           {option.type === "variant"
                             ? "Inventory variant"
                             : option.type}
@@ -383,7 +383,7 @@ export function ProductForm({ product }: { product?: Product }) {
                             items.filter((item) => item.id !== option.id),
                           )
                         }
-                        className="grid size-8 place-items-center rounded-full text-[#a35467] transition hover:bg-[#fff0f3]"
+                        className="grid size-8 place-items-center rounded-full text-tint-foreground transition hover:bg-muted"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -446,7 +446,7 @@ export function ProductForm({ product }: { product?: Product }) {
                         </label>
                       </div>
 
-                      <label className="mt-4 inline-flex items-center gap-2 text-[10px] font-black text-[#756a6d]">
+                      <label className="mt-4 inline-flex items-center gap-2 text-[10px] font-black text-muted-foreground">
                         <input
                           type="checkbox"
                           checked={option.required}
@@ -463,7 +463,7 @@ export function ProductForm({ product }: { product?: Product }) {
                       <div className="mt-5">
                         <div className="mb-2 flex items-center justify-between">
                           <span className={labelClass}>Values</span>
-                          <span className="text-[9px] font-semibold text-[#aaa0a2]">
+                          <span className="text-[9px] font-semibold text-muted-foreground">
                             {option.values.length} values
                           </span>
                         </div>
@@ -472,9 +472,9 @@ export function ProductForm({ product }: { product?: Product }) {
                           {option.values.map((value, valueIndex) => (
                             <div
                               key={value.id}
-                              className="grid items-end gap-2 rounded-[14px] border border-black/[0.055] bg-white p-3 sm:grid-cols-[32px_minmax(0,1fr)_145px_34px]"
+                              className="grid items-end gap-2 rounded-[14px] border border-black/[0.055] bg-card p-3 sm:grid-cols-[32px_minmax(0,1fr)_145px_34px]"
                             >
-                              <div className="hidden size-8 items-center justify-center rounded-[10px] bg-[#f5f0ee] text-[9px] font-black text-[#8f8386] sm:flex">
+                              <div className="hidden size-8 items-center justify-center rounded-[10px] bg-muted text-[9px] font-black text-muted-foreground sm:flex">
                                 {valueIndex + 1}
                               </div>
 
@@ -509,7 +509,7 @@ export function ProductForm({ product }: { product?: Product }) {
                                     }
                                     className={`${inputClass} pl-7`}
                                   />
-                                  <span className="pointer-events-none absolute left-2.5 top-[21px] text-[10px] font-black text-[#9d9294]">
+                                  <span className="pointer-events-none absolute left-2.5 top-[21px] text-[10px] font-black text-muted-foreground">
                                     ₹
                                   </span>
                                 </div>
@@ -525,7 +525,7 @@ export function ProductForm({ product }: { product?: Product }) {
                                     ),
                                   })
                                 }
-                                className="mb-1 grid size-8 place-items-center rounded-full text-[#aa6071] transition hover:bg-[#fff0f3]"
+                                className="mb-1 grid size-8 place-items-center rounded-full text-tint-foreground transition hover:bg-muted"
                               >
                                 <Trash2 size={14} />
                               </button>
@@ -543,7 +543,7 @@ export function ProductForm({ product }: { product?: Product }) {
                               ],
                             })
                           }
-                          className="mt-3 inline-flex items-center gap-1.5 rounded-full px-1 py-1 text-[10px] font-black text-[#9b5968]"
+                          className="mt-3 inline-flex items-center gap-1.5 rounded-full px-1 py-1 text-[10px] font-black text-tint-foreground"
                         >
                           <Plus size={12} />
                           Add value
@@ -563,24 +563,24 @@ export function ProductForm({ product }: { product?: Product }) {
           {/* STATUS */}
           <section className={cardClass}>
             <div className="border-b border-black/[0.055] px-5 py-4">
-              <h2 className="text-[14px] font-black text-[#30292b]">
+              <h2 className="text-[14px] font-black text-foreground">
                 Status
               </h2>
             </div>
 
             <div className="p-5">
-              <label className="flex cursor-pointer items-center justify-between rounded-[16px] border border-black/[0.06] bg-[#fcfaf9] px-4 py-3.5">
+              <label className="flex cursor-pointer items-center justify-between rounded-[16px] border border-black/[0.06] bg-muted/50 px-4 py-3.5">
                 <div>
-                  <p className="text-[11px] font-black text-[#403739]">
+                  <p className="text-[11px] font-black text-foreground">
                     Publish in storefront
                   </p>
-                  <p className="mt-0.5 text-[9px] leading-4 text-[#95898c]">
+                  <p className="mt-0.5 text-[9px] leading-4 text-muted-foreground">
                     Customers can see this product.
                   </p>
                 </div>
 
                 <span
-                  className={`relative h-6 w-11 rounded-full transition ${published ? "bg-[#30292b]" : "bg-[#ded6d4]"
+                  className={`relative h-6 w-11 rounded-full transition ${published ? "bg-primary" : "bg-muted"
                     }`}
                 >
                   <input
@@ -591,15 +591,15 @@ export function ProductForm({ product }: { product?: Product }) {
                   />
 
                   <span
-                    className={`absolute top-1 size-4 rounded-full bg-white shadow-sm transition ${published ? "left-6" : "left-1"
+                    className={`absolute top-1 size-4 rounded-full bg-card shadow-sm transition ${published ? "left-6" : "left-1"
                       }`}
                   />
                 </span>
               </label>
 
-              <div className="mt-3 flex items-center gap-2 px-1 text-[9px] font-black uppercase tracking-[0.1em] text-[#93878a]">
+              <div className="mt-3 flex items-center gap-2 px-1 text-[9px] font-black uppercase tracking-[0.1em] text-muted-foreground">
                 <span
-                  className={`size-2 rounded-full ${published ? "bg-[#b8cb65]" : "bg-[#cfc6c4]"
+                  className={`size-2 rounded-full ${published ? "bg-success/15" : "bg-secondary"
                     }`}
                 />
                 {published ? "Active" : "Draft"}
@@ -610,11 +610,11 @@ export function ProductForm({ product }: { product?: Product }) {
           {/* ORGANIZATION */}
           <section className={cardClass}>
             <div className="border-b border-black/[0.055] px-5 py-4">
-              <h2 className="text-[14px] font-black text-[#30292b]">
+              <h2 className="text-[14px] font-black text-foreground">
                 Organization
               </h2>
 
-              <p className="mt-1 text-[10px] leading-4 text-[#93878a]">
+              <p className="mt-1 text-[10px] leading-4 text-muted-foreground">
                 Control where this product belongs.
               </p>
             </div>
@@ -661,7 +661,7 @@ export function ProductForm({ product }: { product?: Product }) {
                       return (
                         <span
                           key={id}
-                          className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-black/[0.055] bg-[#f7f2f0] px-2.5 py-1.5 text-[9px] font-black text-[#756a6d]"
+                          className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-black/[0.055] bg-muted px-2.5 py-1.5 text-[9px] font-black text-muted-foreground"
                         >
                           <span className="truncate">
                             {getCategoryBreadcrumb(id, categories)}
@@ -723,8 +723,8 @@ export function ProductForm({ product }: { product?: Product }) {
                           )
                         }
                         className={`rounded-full border px-3 py-1.5 text-[9px] font-black transition ${active
-                            ? "border-[#30292b] bg-[#30292b] text-white"
-                            : "border-black/[0.055] bg-[#f7f3f1] text-[#776c6e] hover:bg-[#fff0f3]"
+                            ? "border-tint-border bg-primary text-primary-foreground"
+                            : "border-black/[0.055] bg-muted/50 text-muted-foreground hover:bg-muted"
                           }`}
                       >
                         {collection.name}
@@ -744,15 +744,15 @@ export function ProductForm({ product }: { product?: Product }) {
           role="dialog"
           aria-modal="true"
           aria-label="Create category"
-          className="fixed inset-0 z-50 grid place-items-center bg-[#2e2729]/35 p-4 backdrop-blur-[2px]"
+          className="fixed inset-0 z-50 grid place-items-center bg-primary/35 p-4 backdrop-blur-[2px]"
         >
-          <div className="w-full max-w-md overflow-hidden rounded-[28px] border border-white/50 bg-white shadow-[0_30px_90px_rgba(56,39,44,0.22)]">
+          <div className="w-full max-w-md overflow-hidden rounded-[28px] border border-white/50 bg-card shadow-[0_30px_90px_rgba(56,39,44,0.22)]">
             <div className="border-b border-black/[0.055] px-6 py-5">
-              <p className="text-[9px] font-black uppercase tracking-[0.14em] text-[#a05b6c]">
+              <p className="text-[9px] font-black uppercase tracking-[0.14em] text-tint-foreground">
                 Organization
               </p>
 
-              <h2 className="mt-1 text-[19px] font-black tracking-[-0.025em] text-[#30292b]">
+              <h2 className="mt-1 text-[19px] font-black tracking-[-0.025em] text-foreground">
                 Create category
               </h2>
             </div>
@@ -773,7 +773,7 @@ export function ProductForm({ product }: { product?: Product }) {
               <div className="mt-5">
                 <p className={labelClass}>Parent category</p>
 
-                <div className="mt-2 rounded-[14px] border border-[#f0dde2] bg-[#fff8fa] px-3.5 py-3 text-[11px] font-bold leading-5 text-[#5f5557]">
+                <div className="mt-2 rounded-[14px] border border-border bg-muted/50 px-3.5 py-3 text-[11px] font-bold leading-5 text-muted-foreground">
                   {createParentId
                     ? getCategoryBreadcrumb(createParentId, categories)
                     : "Root category"}
@@ -783,7 +783,7 @@ export function ProductForm({ product }: { product?: Product }) {
               {createError && (
                 <p
                   role="alert"
-                  className="mt-4 rounded-[14px] bg-[#fff1f4] px-3 py-2.5 text-[10px] font-bold text-[#a35467]"
+                  className="mt-4 rounded-[14px] bg-muted/50 px-3 py-2.5 text-[10px] font-bold text-tint-foreground"
                 >
                   {createError}
                 </p>
@@ -793,7 +793,7 @@ export function ProductForm({ product }: { product?: Product }) {
                 <button
                   type="button"
                   onClick={() => setCreateOpen(false)}
-                  className="h-9 rounded-full px-4 text-[10px] font-black text-[#756b6d] transition hover:bg-[#f7f3f1]"
+                  className="h-9 rounded-full px-4 text-[10px] font-black text-muted-foreground transition hover:bg-muted/50"
                 >
                   Cancel
                 </button>
@@ -801,7 +801,7 @@ export function ProductForm({ product }: { product?: Product }) {
                 <button
                   type="button"
                   onClick={createCategory}
-                  className="h-9 rounded-full bg-[#30292b] px-5 text-[10px] font-black text-white shadow-[0_5px_16px_rgba(48,41,43,0.16)] transition hover:bg-[#1f1a1c]"
+                  className="h-9 rounded-full bg-primary px-5 text-[10px] font-black text-primary-foreground shadow-[0_5px_16px_rgba(48,41,43,0.16)] transition hover:bg-primary"
                 >
                   Create category
                 </button>
@@ -813,15 +813,15 @@ export function ProductForm({ product }: { product?: Product }) {
 
       {/* SAVE BAR */}
       <div className="sticky bottom-4 z-20">
-        <div className="ml-auto flex w-fit items-center gap-3 rounded-full border border-black/[0.07] bg-white/95 p-1.5 pl-4 shadow-[0_14px_40px_rgba(58,40,45,0.14)] backdrop-blur">
-          <span className="hidden text-[9px] font-bold text-[#94888b] sm:block">
+        <div className="ml-auto flex w-fit items-center gap-3 rounded-full border border-black/[0.07] bg-card/95 p-1.5 pl-4 shadow-[0_14px_40px_rgba(58,40,45,0.14)] backdrop-blur">
+          <span className="hidden text-[9px] font-bold text-muted-foreground sm:block">
             {published ? "Ready for storefront" : "Saving as draft"}
           </span>
 
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex h-10 min-w-36 items-center justify-center gap-2 rounded-full bg-[#292426] px-5 text-[10px] font-black text-white shadow-[0_5px_18px_rgba(41,36,38,0.16)] transition hover:-translate-y-px hover:bg-[#1d191a] disabled:pointer-events-none disabled:opacity-50"
+            className="inline-flex h-10 min-w-36 items-center justify-center gap-2 rounded-full bg-primary px-5 text-[10px] font-black text-primary-foreground shadow-[0_5px_18px_rgba(41,36,38,0.16)] transition hover:-translate-y-px hover:bg-primary disabled:pointer-events-none disabled:opacity-50"
           >
             {saving && <Loader2 size={14} className="animate-spin" />}
             {saving ? "Saving…" : product ? "Save changes" : "Save product"}

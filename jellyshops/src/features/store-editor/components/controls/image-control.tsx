@@ -110,7 +110,7 @@ export function ImageControl({
   return (
     <div className="space-y-4">
       <div>
-        <span className="mb-1.5 block text-[11px] font-medium text-[#454f5b]">
+        <span className="mb-1.5 block text-[11px] font-medium text-muted-foreground">
           {label}
         </span>
 
@@ -138,33 +138,33 @@ export function ImageControl({
         {!value ? (
           <label
             htmlFor={inputId}
-            className={`group flex min-h-[140px] w-full flex-col items-center justify-center rounded-xl border border-dashed border-[#c9c9c9] bg-[#fafafa] px-5 text-center transition ${
+            className={`group flex min-h-[140px] w-full flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/50 px-5 text-center transition ${
               uploading
                 ? "cursor-wait opacity-70"
-                : "cursor-pointer hover:border-[#a3a3a3] hover:bg-[#f7f7f7]"
+                : "cursor-pointer hover:border-border hover:bg-muted/50"
             }`}
           >
-            <span className="grid size-9 place-items-center rounded-lg bg-white text-[#6d7175] shadow-[0_0_0_1px_rgba(0,0,0,0.07)]">
+            <span className="grid size-9 place-items-center rounded-lg bg-card text-muted-foreground shadow-[0_0_0_1px_rgba(0,0,0,0.07)]">
               <Upload
                 size={16}
                 strokeWidth={1.8}
               />
             </span>
 
-            <span className="mt-3 text-[12px] font-semibold text-[#303030]">
+            <span className="mt-3 text-[12px] font-semibold text-foreground">
               {uploading
                 ? "Uploading image…"
                 : "Upload image"}
             </span>
 
-            <span className="mt-1 text-[10px] leading-4 text-[#8c9196]">
+            <span className="mt-1 text-[10px] leading-4 text-muted-foreground">
               PNG, JPEG, WebP, GIF
               or AVIF
             </span>
           </label>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-[#dedede] bg-[#f6f6f7]">
-            <div className="relative aspect-[4/3] overflow-hidden bg-[#eeeeee]">
+          <div className="overflow-hidden rounded-xl border border-border bg-muted/50">
+            <div className="relative aspect-[4/3] overflow-hidden bg-muted">
               {/* Local uploads can use object/API URLs that Next Image cannot optimize. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -176,10 +176,10 @@ export function ImageControl({
               <div className="absolute inset-x-0 bottom-0 flex items-center justify-end gap-1.5 bg-gradient-to-t from-black/35 to-transparent p-2.5 pt-8">
                 <label
                   htmlFor={inputId}
-                  className={`inline-flex h-8 items-center gap-1.5 rounded-lg bg-white px-2.5 text-[11px] font-semibold text-[#303030] shadow-sm transition ${
+                  className={`inline-flex h-8 items-center gap-1.5 rounded-lg bg-card px-2.5 text-[11px] font-semibold text-foreground shadow-sm transition ${
                     uploading
                       ? "cursor-wait opacity-60"
-                      : "cursor-pointer hover:bg-[#f6f6f7]"
+                      : "cursor-pointer hover:bg-muted/50"
                   }`}
                 >
                   <ImagePlus
@@ -198,7 +198,7 @@ export function ImageControl({
                       undefined
                     )
                   }
-                  className="grid size-8 place-items-center rounded-lg bg-white text-[#616161] shadow-sm transition hover:bg-[#fff1f0] hover:text-[#b42318] disabled:opacity-50"
+                  className="grid size-8 place-items-center rounded-lg bg-card text-muted-foreground shadow-sm transition hover:bg-muted/50 hover:text-destructive disabled:opacity-50"
                 >
                   <Trash2
                     size={13}
@@ -214,11 +214,11 @@ export function ImageControl({
           "uploading" && (
           <div className="mt-2">
             <div className="mb-1.5 flex items-center justify-between gap-3">
-              <span className="text-[10px] font-medium text-[#6d7175]">
+              <span className="text-[10px] font-medium text-muted-foreground">
                 Uploading…
               </span>
 
-              <span className="text-[10px] font-semibold tabular-nums text-[#6d7175]">
+              <span className="text-[10px] font-semibold tabular-nums text-muted-foreground">
                 {Math.round(
                   state.percent
                 )}
@@ -234,10 +234,10 @@ export function ImageControl({
               aria-valuenow={
                 state.percent
               }
-              className="h-1 overflow-hidden rounded-full bg-[#e3e3e3]"
+              className="h-1 overflow-hidden rounded-full bg-muted"
             >
               <div
-                className="h-full rounded-full bg-[#303030] transition-[width]"
+                className="h-full rounded-full bg-primary transition-[width]"
                 style={{
                   width: `${Math.min(
                     100,
@@ -257,9 +257,9 @@ export function ImageControl({
           "error" && (
           <div
             role="alert"
-            className="mt-2 flex items-center justify-between gap-3 rounded-lg bg-[#fff4f2] px-3 py-2.5"
+            className="mt-2 flex items-center justify-between gap-3 rounded-lg bg-muted/50 px-3 py-2.5"
           >
-            <span className="min-w-0 text-[11px] leading-4 text-[#b42318]">
+            <span className="min-w-0 text-[11px] leading-4 text-destructive">
               {state.message}
             </span>
 
@@ -270,7 +270,7 @@ export function ImageControl({
                   state.file
                 )
               }
-              className="inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold text-[#b42318] hover:underline"
+              className="inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold text-destructive hover:underline"
             >
               <RefreshCcw
                 size={11}
@@ -287,7 +287,7 @@ export function ImageControl({
           <div>
             <label
               htmlFor={`${inputId}-alt`}
-              className="mb-1.5 block text-[11px] font-medium text-[#454f5b]"
+              className="mb-1.5 block text-[11px] font-medium text-muted-foreground"
             >
               Alternative text
             </label>
@@ -311,10 +311,10 @@ export function ImageControl({
                       .value,
                 })
               }
-              className="h-9 w-full rounded-lg border border-[#d7d7d7] bg-white px-3 text-[12px] font-medium text-[#303030] outline-none transition placeholder:text-[#a3a3a3] hover:border-[#bdbdbd] focus:border-[#8c8c8c] focus:ring-2 focus:ring-black/[0.06] disabled:bg-[#f6f6f7] disabled:text-[#8c9196]"
+              className="h-9 w-full rounded-lg border border-border bg-card px-3 text-[12px] font-medium text-foreground outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-border focus:ring-2 focus:ring-black/[0.06] disabled:bg-muted/50 disabled:text-muted-foreground"
             />
 
-            <p className="mt-1.5 text-[10px] leading-4 text-[#8c9196]">
+            <p className="mt-1.5 text-[10px] leading-4 text-muted-foreground">
               Describe the image for
               customers using screen
               readers.
@@ -324,11 +324,11 @@ export function ImageControl({
           {/* Decorative */}
           <label className="flex min-h-8 cursor-pointer items-center justify-between gap-4">
             <div>
-              <span className="block text-[12px] font-medium text-[#454f5b]">
+              <span className="block text-[12px] font-medium text-muted-foreground">
                 Decorative image
               </span>
 
-              <span className="mt-0.5 block text-[10px] text-[#8c9196]">
+              <span className="mt-0.5 block text-[10px] text-muted-foreground">
                 Ignore this image for
                 screen readers
               </span>
@@ -356,15 +356,15 @@ export function ImageControl({
                 className="peer sr-only"
               />
 
-              <span className="block h-5 w-9 rounded-full bg-[#d7d7d7] transition peer-checked:bg-[#303030] peer-focus-visible:ring-2 peer-focus-visible:ring-black/20 peer-focus-visible:ring-offset-2" />
+              <span className="block h-5 w-9 rounded-full bg-muted transition peer-checked:bg-primary peer-focus-visible:ring-2 peer-focus-visible:ring-black/20 peer-focus-visible:ring-offset-2" />
 
-              <span className="absolute left-0.5 top-0.5 size-4 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-4" />
+              <span className="absolute left-0.5 top-0.5 size-4 rounded-full bg-card shadow-sm transition-transform peer-checked:translate-x-4" />
             </span>
           </label>
 
           {/* Focal point */}
-          <section className="border-t border-[#eeeeee] pt-4">
-            <h3 className="mb-4 text-[10px] font-semibold uppercase tracking-[0.07em] text-[#8c9196]">
+          <section className="border-t border-border pt-4">
+            <h3 className="mb-4 text-[10px] font-semibold uppercase tracking-[0.07em] text-muted-foreground">
               Focal point
             </h3>
 
@@ -404,15 +404,15 @@ export function ImageControl({
           </section>
 
           {/* Image fit */}
-          <section className="border-t border-[#eeeeee] pt-4">
-            <span className="mb-2 block text-[11px] font-medium text-[#454f5b]">
+          <section className="border-t border-border pt-4">
+            <span className="mb-2 block text-[11px] font-medium text-muted-foreground">
               Image fit
             </span>
 
             <div
               role="group"
               aria-label="Image fit"
-              className="flex rounded-lg bg-[#f1f1f1] p-1"
+              className="flex rounded-lg bg-muted p-1"
             >
               {(
                 [
@@ -439,8 +439,8 @@ export function ImageControl({
                     }
                     className={`min-h-7 flex-1 rounded-md px-3 text-[11px] font-medium capitalize transition ${
                       active
-                        ? "bg-white text-[#202223] shadow-[0_1px_2px_rgba(0,0,0,0.08)]"
-                        : "text-[#6d7175] hover:text-[#303030]"
+                        ? "bg-card text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.08)]"
+                        : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     {fit}
@@ -451,13 +451,13 @@ export function ImageControl({
           </section>
 
           {/* Destructive action */}
-          <div className="border-t border-[#eeeeee] pt-4">
+          <div className="border-t border-border pt-4">
             <button
               type="button"
               onClick={() =>
                 onChange(undefined)
               }
-              className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2 text-[11px] font-medium text-[#b42318] transition hover:bg-[#fff1f0]"
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2 text-[11px] font-medium text-destructive transition hover:bg-muted/50"
             >
               <Trash2
                 size={13}
@@ -484,11 +484,11 @@ function FocalPointControl({
   return (
     <label className="block">
       <span className="mb-2 flex items-center justify-between gap-4">
-        <span className="text-[11px] font-medium text-[#454f5b]">
+        <span className="text-[11px] font-medium text-muted-foreground">
           {label}
         </span>
 
-        <span className="rounded-md bg-[#f1f1f1] px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-[#616161]">
+        <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-muted-foreground">
           {value}
         </span>
       </span>
@@ -506,7 +506,7 @@ function FocalPointControl({
             )
           )
         }
-        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-[#dedede] accent-[#303030]"
+        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-muted accent-primary"
       />
     </label>
   );

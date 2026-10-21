@@ -66,22 +66,22 @@ export default function PagesAdminPage() {
   return (
     <main className="mx-auto max-w-6xl p-6 md:p-8">
       <div className="mb-6 flex items-center gap-3">
-        <Link href="/admin" aria-label="Back to admin" className="grid size-9 place-items-center rounded-lg border border-[#d7d7d7] bg-white"><ArrowLeft size={16} /></Link>
-        <div><p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#8c9196]">Content</p><h1 className="text-2xl font-semibold tracking-[-0.03em]">Pages</h1></div>
+        <Link href="/admin" aria-label="Back to admin" className="grid size-9 place-items-center rounded-lg border border-border bg-card"><ArrowLeft size={16} /></Link>
+        <div><p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Content</p><h1 className="text-2xl font-semibold tracking-[-0.03em]">Pages</h1></div>
       </div>
       {error && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
       <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-        <aside className="rounded-xl border border-[#e3e3e3] bg-white p-2">
+        <aside className="rounded-xl border border-border bg-card p-2">
           {pages.map((entry) => (
-            <button key={entry.id} type="button" onClick={() => setActivePageId(entry.id)} className={`flex min-h-10 w-full items-center rounded-lg px-3 text-left text-[12px] font-medium ${entry.id === activePageId ? "bg-[#eeeeee] text-[#202223]" : "text-[#616161] hover:bg-[#f6f6f7]"}`}>
+            <button key={entry.id} type="button" onClick={() => setActivePageId(entry.id)} className={`flex min-h-10 w-full items-center rounded-lg px-3 text-left text-[12px] font-medium ${entry.id === activePageId ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted/50"}`}>
               <span className="truncate">{entry.title}</span>
-              <span className="ml-auto text-[9px] uppercase text-[#8c9196]">{entry.status ?? "DRAFT"}</span>
+              <span className="ml-auto text-[9px] uppercase text-muted-foreground">{entry.status ?? "DRAFT"}</span>
             </button>
           ))}
-          {pages.length === 0 && <p className="p-4 text-center text-[12px] text-[#8c9196]">No pages yet.</p>}
+          {pages.length === 0 && <p className="p-4 text-center text-[12px] text-muted-foreground">No pages yet.</p>}
         </aside>
 
-        <section className="rounded-xl border border-[#e3e3e3] bg-white p-5">
+        <section className="rounded-xl border border-border bg-card p-5">
           {page ? (
             <ResourceForm
               key={`${page.id}:${assignment?.revision ?? "new"}:${assignment?.templateId ?? "default"}`}
@@ -108,7 +108,7 @@ export default function PagesAdminPage() {
                 window.location.assign(`/admin/online-store/editor?templateId=${encodeURIComponent(templateId)}&resourceType=page&resourceId=${encodeURIComponent(resourceId)}`);
               }}
             />
-          ) : <p className="p-8 text-center text-sm text-[#8c9196]">Choose a page to edit.</p>}
+          ) : <p className="p-8 text-center text-sm text-muted-foreground">Choose a page to edit.</p>}
         </section>
       </div>
     </main>

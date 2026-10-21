@@ -171,3 +171,63 @@ body {
 .jelly-sticker {
   font-family: inherit;
 }
+
+/* ── Admin dark mode ───────────────────────────────────────────────── */
+/* Applied to <html> by the admin shell only, so storefronts never go dark. */
+:root {
+  --warn-bg: #fff4e5;
+  --warn-fg: #8a6116;
+  --tint-bg: #fff0f3;
+  --tint-fg: #914f60;
+  --tint-bd: #edcbd2;
+}
+
+:root.admin-dark {
+  color-scheme: dark;
+  --background: #0b0b0e;
+  --foreground: #ececf1;
+  --card: #131318;
+  --card-foreground: #ececf1;
+  --popover: #16161c;
+  --popover-foreground: #ececf1;
+  --primary: #ececf1;
+  --primary-foreground: #0b0b0e;
+  --secondary: #1b1b22;
+  --secondary-foreground: #ececf1;
+  --muted: #1b1b22;
+  --muted-foreground: #9a9aab;
+  --accent: #ffd85a;
+  --accent-foreground: #14213d;
+  --destructive: #f0647c;
+  --success: #3ecf86;
+  --border: #26262f;
+  --input: #2f2f3a;
+  --ring: #8ec5ff;
+  --warn-bg: rgba(245, 166, 35, 0.14);
+  --warn-fg: #f5b84a;
+  --tint-bg: rgba(255, 107, 138, 0.12);
+  --tint-fg: #f2a0b2;
+  --tint-bd: rgba(255, 107, 138, 0.28);
+}
+
+/* Stat cards: soft hairline highlight, a quiet lift on hover. */
+.stat-card {
+  position: relative;
+  transition: transform var(--duration-jelly-fast, 150ms) ease, border-color var(--duration-jelly-fast, 150ms) ease;
+}
+.stat-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--foreground) 14%, transparent), transparent);
+  pointer-events: none;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--foreground) 22%, var(--border));
+}
+@media (prefers-reduced-motion: reduce) {
+  .stat-card:hover { transform: none; }
+}

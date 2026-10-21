@@ -62,25 +62,25 @@ export function MenuEditor({
   const entries = rows(menu.items);
 
   return (
-    <section aria-label="Menu editor" className="rounded-xl border border-[#e3e3e3] bg-white">
-      <header className="flex items-center justify-between border-b border-[#eeeeee] px-4 py-3">
+    <section aria-label="Menu editor" className="rounded-xl border border-border bg-card">
+      <header className="flex items-center justify-between border-b border-border px-4 py-3">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#8c9196]">Navigation</p>
-          <h2 className="mt-1 text-sm font-semibold text-[#303030]">{menu.name}</h2>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Navigation</p>
+          <h2 className="mt-1 text-sm font-semibold text-foreground">{menu.name}</h2>
         </div>
-        <button type="button" onClick={onSave} className="h-8 rounded-md bg-[#303030] px-3 text-[11px] font-semibold text-white">Save menu</button>
+        <button type="button" onClick={onSave} className="h-8 rounded-md bg-primary px-3 text-[11px] font-semibold text-primary-foreground">Save menu</button>
       </header>
-      <div className="divide-y divide-[#eeeeee]">
+      <div className="divide-y divide-border">
         {entries.map(({ item, depth, parentId, index }) => (
           <div key={item.id} className="flex min-h-11 items-center gap-2 px-3" style={{ paddingLeft: 12 + depth * 20 }}>
-            <span className="min-w-0 flex-1 truncate text-[12px] font-medium text-[#454f5b]">{item.label}</span>
-            <span className="text-[10px] text-[#8c9196]">{item.target.kind}</span>
+            <span className="min-w-0 flex-1 truncate text-[12px] font-medium text-muted-foreground">{item.label}</span>
+            <span className="text-[10px] text-muted-foreground">{item.target.kind}</span>
             <button
               type="button"
               aria-label={`Move ${item.label} up`}
               disabled={index === 0}
               onClick={() => onChange(reorderMenuItem(menu.items, item.id, { parentId, index: index - 1 }))}
-              className="h-7 rounded border border-[#d7d7d7] px-2 text-[10px] disabled:opacity-30"
+              className="h-7 rounded border border-border px-2 text-[10px] disabled:opacity-30"
             >
               Up
             </button>
@@ -88,13 +88,13 @@ export function MenuEditor({
               type="button"
               aria-label={`Move ${item.label} down`}
               onClick={() => onChange(reorderMenuItem(menu.items, item.id, { parentId, index: index + 1 }))}
-              className="h-7 rounded border border-[#d7d7d7] px-2 text-[10px]"
+              className="h-7 rounded border border-border px-2 text-[10px]"
             >
               Down
             </button>
           </div>
         ))}
-        {entries.length === 0 && <p className="p-6 text-center text-[12px] text-[#8c9196]">No menu items yet.</p>}
+        {entries.length === 0 && <p className="p-6 text-center text-[12px] text-muted-foreground">No menu items yet.</p>}
       </div>
     </section>
   );

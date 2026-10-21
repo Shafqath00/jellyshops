@@ -75,7 +75,7 @@ export default function CustomerDetailPage() {
   if (query.loading) {
     return (
       <div className="grid min-h-64 place-items-center">
-        <div className="flex items-center gap-2.5 text-[12px] font-bold text-[#766a6d]">
+        <div className="flex items-center gap-2.5 text-[12px] font-bold text-muted-foreground">
           <Loader2 size={16} className="animate-spin" />
           Loading customer…
         </div>
@@ -85,22 +85,22 @@ export default function CustomerDetailPage() {
 
   if (query.error || !query.data) {
     return (
-      <div className="mx-auto max-w-3xl rounded-[24px] border border-black/[0.06] bg-white p-8 text-center shadow-[0_14px_44px_rgba(83,61,66,0.05)]">
-        <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-[#fff0f3] text-[#a35467]">
+      <div className="mx-auto max-w-3xl rounded-[24px] border border-black/[0.06] bg-card p-8 text-center shadow-[0_14px_44px_rgba(83,61,66,0.05)]">
+        <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-muted text-tint-foreground">
           <UserRound size={19} />
         </span>
 
-        <h1 className="mt-4 text-[20px] font-black tracking-[-0.03em] text-[#30292b]">
+        <h1 className="mt-4 text-[20px] font-black tracking-[-0.03em] text-foreground">
           Customer not found
         </h1>
 
-        <p className="mt-2 text-[12px] leading-5 text-[#817477]">
+        <p className="mt-2 text-[12px] leading-5 text-muted-foreground">
           This customer may no longer be available for this store.
         </p>
 
         <Link
           href="/admin/customers"
-          className="mt-5 inline-flex h-10 items-center rounded-full bg-[#241f20] px-4 text-[11px] font-black text-white"
+          className="mt-5 inline-flex h-10 items-center rounded-full bg-primary px-4 text-[11px] font-black text-primary-foreground"
         >
           Back to customers
         </Link>
@@ -124,28 +124,28 @@ export default function CustomerDetailPage() {
     <div className="mx-auto max-w-5xl space-y-6">
       <Link
         href="/admin/customers"
-        className="inline-flex items-center gap-1.5 text-[11px] font-black text-[#756a6d] transition hover:text-[#2d2628]"
+        className="inline-flex items-center gap-1.5 text-[11px] font-black text-muted-foreground transition hover:text-foreground"
       >
         <ArrowLeft size={14} />
         Customers
       </Link>
 
-      <section className="rounded-[26px] border border-black/[0.06] bg-white p-5 shadow-[0_14px_44px_rgba(83,61,66,0.055)] sm:p-6">
+      <section className="rounded-[26px] border border-black/[0.06] bg-card p-5 shadow-[0_14px_44px_rgba(83,61,66,0.055)] sm:p-6">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-          <span className="grid size-16 shrink-0 place-items-center rounded-[22px] bg-[#f8ecef] text-[18px] font-black text-[#8f5261] ring-1 ring-black/[0.04]">
+          <span className="grid size-16 shrink-0 place-items-center rounded-[22px] bg-muted text-[18px] font-black text-tint-foreground ring-1 ring-black/[0.04]">
             {initials(customer.name)}
           </span>
 
           <div className="min-w-0 flex-1">
-            <p className="text-[9px] font-black uppercase tracking-[0.12em] text-[#9b5968]">
+            <p className="text-[9px] font-black uppercase tracking-[0.12em] text-tint-foreground">
               Customer profile
             </p>
 
-            <h1 className="mt-1.5 truncate text-[28px] font-black tracking-[-0.045em] text-[#292426] sm:text-[32px]">
+            <h1 className="mt-1.5 truncate text-[28px] font-black tracking-[-0.045em] text-foreground sm:text-[32px]">
               {customer.name}
             </h1>
 
-            <div className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-[#807477]">
+            <div className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground">
               <Mail size={13} strokeWidth={1.8} />
               <span className="truncate">
                 {customer.email ?? "Email unavailable"}
@@ -154,20 +154,20 @@ export default function CustomerDetailPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:min-w-64">
-            <div className="rounded-2xl bg-[#fffaf7] p-3.5 ring-1 ring-black/[0.05]">
-              <p className="text-[9px] font-black uppercase tracking-[0.09em] text-[#9b8e91]">
+            <div className="rounded-2xl bg-muted/50 p-3.5 ring-1 ring-black/[0.05]">
+              <p className="text-[9px] font-black uppercase tracking-[0.09em] text-muted-foreground">
                 Orders
               </p>
-              <p className="mt-1.5 text-[18px] font-black text-[#332b2d]">
+              <p className="mt-1.5 text-[18px] font-black text-foreground">
                 {orders.length}
               </p>
             </div>
 
-            <div className="rounded-2xl bg-[#fffaf7] p-3.5 ring-1 ring-black/[0.05]">
-              <p className="text-[9px] font-black uppercase tracking-[0.09em] text-[#9b8e91]">
+            <div className="rounded-2xl bg-muted/50 p-3.5 ring-1 ring-black/[0.05]">
+              <p className="text-[9px] font-black uppercase tracking-[0.09em] text-muted-foreground">
                 Spend
               </p>
-              <p className="mt-1.5 truncate text-[14px] font-black text-[#332b2d]">
+              <p className="mt-1.5 truncate text-[14px] font-black text-foreground">
                 {formatMoney(
                   lifetimeValue,
                   defaultCurrency as Currency
@@ -178,20 +178,20 @@ export default function CustomerDetailPage() {
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-[24px] border border-black/[0.06] bg-white shadow-[0_14px_44px_rgba(83,61,66,0.05)]">
-        <div className="flex items-center justify-between gap-4 border-b border-black/[0.06] bg-[#fffdfb] px-5 py-4">
+      <section className="overflow-hidden rounded-[24px] border border-black/[0.06] bg-card shadow-[0_14px_44px_rgba(83,61,66,0.05)]">
+        <div className="flex items-center justify-between gap-4 border-b border-black/[0.06] bg-muted/50 px-5 py-4">
           <div>
-            <p className="text-[9px] font-black uppercase tracking-[0.11em] text-[#9b5968]">
+            <p className="text-[9px] font-black uppercase tracking-[0.11em] text-tint-foreground">
               Order history
             </p>
 
-            <h2 className="mt-1 text-[15px] font-black tracking-[-0.02em] text-[#322a2c]">
+            <h2 className="mt-1 text-[15px] font-black tracking-[-0.02em] text-foreground">
               {orders.length}{" "}
               {orders.length === 1 ? "order" : "orders"}
             </h2>
           </div>
 
-          <span className="grid size-9 place-items-center rounded-xl bg-[#fff0f3] text-[#a35467]">
+          <span className="grid size-9 place-items-center rounded-xl bg-muted text-tint-foreground">
             <ShoppingBag size={15} strokeWidth={1.8} />
           </span>
         </div>
@@ -201,12 +201,12 @@ export default function CustomerDetailPage() {
             <div>
               <ShoppingBag
                 size={20}
-                className="mx-auto text-[#aaa0a2]"
+                className="mx-auto text-muted-foreground"
               />
-              <p className="mt-3 text-[12px] font-black text-[#3b3335]">
+              <p className="mt-3 text-[12px] font-black text-foreground">
                 No orders yet
               </p>
-              <p className="mt-1 text-[10px] text-[#8a7f81]">
+              <p className="mt-1 text-[10px] text-muted-foreground">
                 Orders from this customer will appear here.
               </p>
             </div>
@@ -217,13 +217,13 @@ export default function CustomerDetailPage() {
               <Link
                 key={order.id}
                 href={`/admin/orders/${order.id}`}
-                className="grid gap-3 px-5 py-4 transition hover:bg-[#fffaf7] sm:grid-cols-[1fr_auto_auto] sm:items-center"
+                className="grid gap-3 px-5 py-4 transition hover:bg-muted/50 sm:grid-cols-[1fr_auto_auto] sm:items-center"
               >
                 <div>
-                  <p className="text-[12px] font-black text-[#332b2d]">
+                  <p className="text-[12px] font-black text-foreground">
                     {order.number}
                   </p>
-                  <p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.08em] text-[#9b8e91]">
+                  <p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                     Order
                   </p>
                 </div>
@@ -234,7 +234,7 @@ export default function CustomerDetailPage() {
                   />
                 </div>
 
-                <p className="text-[12px] font-black text-[#332b2d] sm:min-w-24 sm:text-right">
+                <p className="text-[12px] font-black text-foreground sm:min-w-24 sm:text-right">
                   {formatMoney(
                     order.totalMinor,
                     order.currency as Currency

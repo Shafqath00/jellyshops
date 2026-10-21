@@ -223,6 +223,9 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-tint: var(--tint-bg);
+  --color-tint-foreground: var(--tint-fg);
+  --color-tint-border: var(--tint-bd);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: var(--radius);
   --radius-lg: calc(var(--radius) + 8px);

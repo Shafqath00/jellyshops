@@ -61,18 +61,18 @@ function StatusTile({
   const active = value === "active";
 
   return (
-    <div className="rounded-2xl border border-black/[0.06] bg-[#fffaf7] p-4">
-      <p className="text-[9px] font-black uppercase tracking-[0.1em] text-[#9b8e91]">
+    <div className="rounded-2xl border border-black/[0.06] bg-muted/50 p-4">
+      <p className="text-[9px] font-black uppercase tracking-[0.1em] text-muted-foreground">
         {title}
       </p>
 
       <div className="mt-2 flex items-center gap-2">
         <span
           className={`size-2 rounded-full ${
-            active ? "bg-[#7b8b3f]" : "bg-[#d09a3c]"
+            active ? "bg-success/15" : "bg-[var(--warn-bg)]"
           }`}
         />
-        <p className="text-[13px] font-black text-[#332b2d]">
+        <p className="text-[13px] font-black text-foreground">
           {label(value)}
         </p>
       </div>
@@ -168,7 +168,7 @@ export function MerchantPaymentsPanel({
   if (loading) {
     return (
       <div className="flex min-h-40 items-center justify-center">
-        <div className="flex items-center gap-2.5 text-[12px] font-bold text-[#766a6d]">
+        <div className="flex items-center gap-2.5 text-[12px] font-bold text-muted-foreground">
           <Loader2 size={16} className="animate-spin" />
           Loading payment status…
         </div>
@@ -179,10 +179,10 @@ export function MerchantPaymentsPanel({
   if (!api) {
     return (
       <div className="p-2">
-        <h2 className="text-[15px] font-black text-[#322a2c]">
+        <h2 className="text-[15px] font-black text-foreground">
           Payments unavailable
         </h2>
-        <p className="mt-2 text-[12px] leading-5 text-[#817477]">
+        <p className="mt-2 text-[12px] leading-5 text-muted-foreground">
           Sign in as a merchant to manage Stripe payments.
         </p>
       </div>
@@ -193,7 +193,7 @@ export function MerchantPaymentsPanel({
     return (
       <div
         role="alert"
-        className="rounded-2xl border border-[#edcbd2] bg-[#fff5f7] p-4 text-[12px] font-semibold text-[#914f60]"
+        className="rounded-2xl border border-tint-border bg-muted/50 p-4 text-[12px] font-semibold text-tint-foreground"
       >
         {error}
       </div>
@@ -203,15 +203,15 @@ export function MerchantPaymentsPanel({
   if (!status?.connected) {
     return (
       <div className="p-2">
-        <span className="grid size-11 place-items-center rounded-2xl bg-[#fff0f3] text-[#a35467]">
+        <span className="grid size-11 place-items-center rounded-2xl bg-muted text-tint-foreground">
           <ExternalLink size={18} strokeWidth={1.8} />
         </span>
 
-        <h2 className="mt-4 text-[17px] font-black tracking-[-0.025em] text-[#322a2c]">
+        <h2 className="mt-4 text-[17px] font-black tracking-[-0.025em] text-foreground">
           Connect Stripe
         </h2>
 
-        <p className="mt-2 max-w-md text-[12px] leading-5 text-[#817477]">
+        <p className="mt-2 max-w-md text-[12px] leading-5 text-muted-foreground">
           Complete Stripe onboarding before customers can make payments and
           payouts can begin.
         </p>
@@ -220,7 +220,7 @@ export function MerchantPaymentsPanel({
           type="button"
           onClick={openStripeOnboarding}
           disabled={opening}
-          className="mt-5 inline-flex h-10 items-center gap-2 rounded-full bg-[#241f20] px-4 text-[11px] font-black text-white transition hover:-translate-y-0.5 hover:bg-[#3a3234] disabled:pointer-events-none disabled:opacity-60"
+          className="mt-5 inline-flex h-10 items-center gap-2 rounded-full bg-primary px-4 text-[11px] font-black text-primary-foreground transition hover:-translate-y-0.5 hover:bg-primary disabled:pointer-events-none disabled:opacity-60"
         >
           {opening ? (
             <Loader2 size={14} className="animate-spin" />
@@ -235,20 +235,20 @@ export function MerchantPaymentsPanel({
 
   if (status.closed) {
     return (
-      <div className="rounded-2xl border border-[#edcbd2] bg-[#fff5f7] p-5">
+      <div className="rounded-2xl border border-tint-border bg-muted/50 p-5">
         <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-[#a35467]">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-card text-tint-foreground">
             <AlertCircle size={18} />
           </span>
 
           <div>
-            <p className="text-[9px] font-black uppercase tracking-[0.1em] text-[#a35c6d]">
+            <p className="text-[9px] font-black uppercase tracking-[0.1em] text-tint-foreground">
               Stripe account
             </p>
-            <h2 className="mt-1 text-[15px] font-black text-[#322a2c]">
+            <h2 className="mt-1 text-[15px] font-black text-foreground">
               Payments unavailable
             </h2>
-            <p className="mt-2 text-[12px] leading-5 text-[#914f60]">
+            <p className="mt-2 text-[12px] leading-5 text-tint-foreground">
               This Stripe account is closed.
             </p>
           </div>
@@ -265,19 +265,19 @@ export function MerchantPaymentsPanel({
       {error && (
         <div
           role="alert"
-          className="rounded-2xl border border-[#edcbd2] bg-[#fff5f7] p-4 text-[12px] font-semibold text-[#914f60]"
+          className="rounded-2xl border border-tint-border bg-muted/50 p-4 text-[12px] font-semibold text-tint-foreground"
         >
           {error}
         </div>
       )}
 
-      <section className="rounded-[18px] border border-black/[0.06] bg-white p-1">
+      <section className="rounded-[18px] border border-black/[0.06] bg-card p-1">
         <div className="flex items-start justify-between gap-4 p-4">
           <div>
-            <p className="text-[9px] font-black uppercase tracking-[0.1em] text-[#a35c6d]">
+            <p className="text-[9px] font-black uppercase tracking-[0.1em] text-tint-foreground">
               Stripe account
             </p>
-            <h2 className="mt-1 text-[16px] font-black tracking-[-0.025em] text-[#322a2c]">
+            <h2 className="mt-1 text-[16px] font-black tracking-[-0.025em] text-foreground">
               Payment readiness
             </h2>
           </div>
@@ -285,8 +285,8 @@ export function MerchantPaymentsPanel({
           <span
             className={`grid size-10 shrink-0 place-items-center rounded-xl ${
               status.checkoutReady
-                ? "bg-[#edf3cf] text-[#586629]"
-                : "bg-[#fff1d2] text-[#8a6419]"
+                ? "bg-[var(--warn-bg)] text-success"
+                : "bg-[var(--warn-bg)] text-[var(--warn-fg)]"
             }`}
           >
             {status.checkoutReady ? (
@@ -307,7 +307,7 @@ export function MerchantPaymentsPanel({
 
         {requirements.length > 0 && (
           <div className="border-t border-black/[0.06] px-4 py-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.08em] text-[#8f8184]">
+            <p className="text-[10px] font-black uppercase tracking-[0.08em] text-muted-foreground">
               Still required
             </p>
 
@@ -315,9 +315,9 @@ export function MerchantPaymentsPanel({
               {requirements.map((requirement) => (
                 <li
                   key={requirement}
-                  className="flex items-start gap-2 text-[11px] leading-5 text-[#716568]"
+                  className="flex items-start gap-2 text-[11px] leading-5 text-muted-foreground"
                 >
-                  <span className="mt-2 size-1.5 shrink-0 rounded-full bg-[#d09a3c]" />
+                  <span className="mt-2 size-1.5 shrink-0 rounded-full bg-[var(--warn-bg)]" />
                   <span>{requirementLabel(requirement)}</span>
                 </li>
               ))}
@@ -327,7 +327,7 @@ export function MerchantPaymentsPanel({
 
         <div className="border-t border-black/[0.06] px-4 py-4">
           {cardsActive ? (
-            <div className="flex items-start gap-2.5 text-[11px] leading-5 text-[#63702f]">
+            <div className="flex items-start gap-2.5 text-[11px] leading-5 text-success">
               <CheckCircle2 size={15} className="mt-0.5 shrink-0" />
               <p>
                 Customers can pay. Stripe manages payment processing and
@@ -336,7 +336,7 @@ export function MerchantPaymentsPanel({
             </div>
           ) : (
             <div>
-              <p className="text-[11px] leading-5 text-[#766a6d]">
+              <p className="text-[11px] leading-5 text-muted-foreground">
                 Card payments are not active yet. Finish the remaining Stripe
                 requirements to start accepting payments.
               </p>
@@ -345,7 +345,7 @@ export function MerchantPaymentsPanel({
                 type="button"
                 onClick={openStripeOnboarding}
                 disabled={opening}
-                className="mt-3 inline-flex h-9 items-center gap-2 rounded-full bg-[#241f20] px-3.5 text-[10px] font-black text-white transition hover:bg-[#3a3234] disabled:pointer-events-none disabled:opacity-60"
+                className="mt-3 inline-flex h-9 items-center gap-2 rounded-full bg-primary px-3.5 text-[10px] font-black text-primary-foreground transition hover:bg-primary disabled:pointer-events-none disabled:opacity-60"
               >
                 {opening ? (
                   <Loader2 size={13} className="animate-spin" />
@@ -359,12 +359,12 @@ export function MerchantPaymentsPanel({
         </div>
       </section>
 
-      <section className="rounded-[18px] border border-black/[0.06] bg-[#fffaf7] p-5">
-        <h2 className="text-[14px] font-black text-[#322a2c]">
+      <section className="rounded-[18px] border border-black/[0.06] bg-muted/50 p-5">
+        <h2 className="text-[14px] font-black text-foreground">
           Stripe Dashboard
         </h2>
 
-        <p className="mt-2 max-w-xl text-[11px] leading-5 text-[#817477]">
+        <p className="mt-2 max-w-xl text-[11px] leading-5 text-muted-foreground">
           Manage verification, payouts, disputes, and Stripe reporting from
           the connected account dashboard.
         </p>
@@ -374,7 +374,7 @@ export function MerchantPaymentsPanel({
             href={status.dashboardUrl}
             target="_blank"
             rel="noreferrer"
-            className="mt-4 inline-flex h-9 items-center gap-2 rounded-full border border-black/[0.08] bg-white px-3.5 text-[10px] font-black text-[#43393b] transition hover:bg-[#fff3f6]"
+            className="mt-4 inline-flex h-9 items-center gap-2 rounded-full border border-black/[0.08] bg-card px-3.5 text-[10px] font-black text-foreground transition hover:bg-muted/50"
           >
             Open Stripe Dashboard
             <ExternalLink size={13} />

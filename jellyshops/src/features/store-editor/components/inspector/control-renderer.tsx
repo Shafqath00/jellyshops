@@ -10,7 +10,7 @@ import type {
 import { ImageControl } from "../controls/image-control";
 
 const inputClass =
-  "h-10 w-full rounded-xl border border-[var(--line)] bg-white px-3 text-[13px] font-medium text-[var(--ink)] outline-none transition placeholder:text-[#a3a3a3] hover:border-[#c2a9b1] focus:border-[#b8778a] focus:ring-2 focus:ring-[#ff8da4]/15";
+  "h-10 w-full rounded-xl border border-[var(--line)] bg-card px-3 text-[13px] font-medium text-[var(--ink)] outline-none transition placeholder:text-muted-foreground hover:border-tint-border focus:border-tint-border focus:ring-2 focus:ring-ring/40";
 
 const labelClass =
   "mb-2 block text-xs font-medium text-[var(--ink-soft)]";
@@ -65,7 +65,7 @@ function SelectControl({
         <ChevronDown
           size={14}
           strokeWidth={1.8}
-          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#8c9196]"
+          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
         />
       </div>
     </label>
@@ -83,7 +83,7 @@ function ToggleControl({
 }) {
   return (
     <label className="flex min-h-8 cursor-pointer items-center justify-between gap-4">
-      <span className="text-[12px] font-medium text-[#454f5b]">
+      <span className="text-[12px] font-medium text-muted-foreground">
         {label}
       </span>
 
@@ -98,14 +98,14 @@ function ToggleControl({
           className="peer sr-only"
         />
 
-        <span className="block h-5 w-9 rounded-full bg-[#d7d7d7] transition peer-checked:bg-[#303030] peer-focus-visible:ring-2 peer-focus-visible:ring-black/20 peer-focus-visible:ring-offset-2" />
+        <span className="block h-5 w-9 rounded-full bg-muted transition peer-checked:bg-primary peer-focus-visible:ring-2 peer-focus-visible:ring-black/20 peer-focus-visible:ring-offset-2" />
 
-        <span className="absolute left-0.5 top-0.5 grid size-4 place-items-center rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-4">
+        <span className="absolute left-0.5 top-0.5 grid size-4 place-items-center rounded-full bg-card shadow-sm transition-transform peer-checked:translate-x-4">
           {checked && (
             <Check
               size={9}
               strokeWidth={3}
-              className="text-[#303030]"
+              className="text-foreground"
             />
           )}
         </span>
@@ -137,7 +137,7 @@ function ColorControl({
         {label}
       </label>
 
-      <div className="flex h-9 items-center gap-2 rounded-lg border border-[#d7d7d7] bg-white px-2 transition hover:border-[#bdbdbd] focus-within:border-[#8c8c8c] focus-within:ring-2 focus-within:ring-black/[0.06]">
+      <div className="flex h-9 items-center gap-2 rounded-lg border border-border bg-card px-2 transition hover:border-border focus-within:border-border focus-within:ring-2 focus-within:ring-black/[0.06]">
         <label className="relative size-5 shrink-0 cursor-pointer overflow-hidden rounded-md border border-black/10">
           <input
             type="color"
@@ -158,7 +158,7 @@ function ColorControl({
             onChange(event.target.value)
           }
           placeholder="#FFFFFF"
-          className="min-w-0 flex-1 bg-transparent text-[12px] font-medium uppercase text-[#303030] outline-none placeholder:text-[#a3a3a3]"
+          className="min-w-0 flex-1 bg-transparent text-[12px] font-medium uppercase text-foreground outline-none placeholder:text-muted-foreground"
         />
       </div>
     </div>
@@ -188,7 +188,7 @@ function SegmentedControl({
       <div
         role="group"
         aria-label={label}
-        className="flex flex-wrap gap-1 rounded-lg bg-[#f1f1f1] p-1"
+        className="flex flex-wrap gap-1 rounded-lg bg-muted p-1"
       >
         {options.map((option) => {
           const active =
@@ -204,8 +204,8 @@ function SegmentedControl({
               }
               className={`min-h-7 flex-1 rounded-md px-2.5 text-[11px] font-medium transition ${
                 active
-                  ? "bg-white text-[#202223] shadow-[0_1px_2px_rgba(0,0,0,0.08)]"
-                  : "text-[#6d7175] hover:text-[#303030]"
+                  ? "bg-card text-foreground shadow-[0_1px_2px_rgba(0,0,0,0.08)]"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {option.label}
@@ -235,11 +235,11 @@ function RangeControl({
   return (
     <label className="block">
       <span className="mb-2 flex items-center justify-between gap-3">
-        <span className="text-[11px] font-medium text-[#454f5b]">
+        <span className="text-[11px] font-medium text-muted-foreground">
           {label}
         </span>
 
-        <span className="min-w-[30px] rounded-md bg-[#f1f1f1] px-1.5 py-0.5 text-center text-[10px] font-semibold tabular-nums text-[#616161]">
+        <span className="min-w-[30px] rounded-md bg-muted px-1.5 py-0.5 text-center text-[10px] font-semibold tabular-nums text-muted-foreground">
           {value}
         </span>
       </span>
@@ -256,7 +256,7 @@ function RangeControl({
             Number(event.target.value)
           )
         }
-        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-[#dedede] accent-[#303030]"
+        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-muted accent-primary"
       />
     </label>
   );
@@ -346,7 +346,7 @@ export function ControlRenderer({
               event.target.value
             )
           }
-          className="w-full resize-y rounded-lg border border-[#d7d7d7] bg-white px-3 py-2.5 text-[12px] font-medium leading-5 text-[#303030] outline-none transition placeholder:text-[#a3a3a3] hover:border-[#bdbdbd] focus:border-[#8c8c8c] focus:ring-2 focus:ring-black/[0.06]"
+          className="w-full resize-y rounded-lg border border-border bg-card px-3 py-2.5 text-[12px] font-medium leading-5 text-foreground outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-border focus:ring-2 focus:ring-black/[0.06]"
         />
       </label>
     );

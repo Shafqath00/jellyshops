@@ -18,6 +18,7 @@ import {
 import { useAuth } from "@/features/auth/auth-provider";
 import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import type { CatalogAdminProduct } from "@/features/store-editor/api/types";
+import { SkeletonRows } from "@/components/ui/skeleton";
 
 const API_URL =
   process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
@@ -38,11 +39,11 @@ function productStatus(status: string) {
   return status === "ACTIVE"
     ? {
         label: "Live",
-        className: "bg-[#edf5e8] text-[#4f6a43]",
+        className: "bg-muted text-success",
       }
     : {
         label: "Draft",
-        className: "bg-[#f3f0ed] text-[#756b68]",
+        className: "bg-muted text-muted-foreground",
       };
 }
 
@@ -135,81 +136,76 @@ export default function ProductsPage() {
     <div className="space-y-6">
       <header className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-[#9b5968]">
+          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-tint-foreground">
             Catalog
           </p>
 
-          <h1 className="mt-2 text-[30px] font-black tracking-[-0.045em] text-[#292426] sm:text-[34px]">
+          <h1 className="mt-2 text-[30px] font-black tracking-[-0.045em] text-foreground sm:text-[34px]">
             Products
           </h1>
 
-          <p className="mt-2 max-w-xl text-[13px] leading-6 text-[#756b6d]">
+          <p className="mt-2 max-w-xl text-[13px] leading-6 text-muted-foreground">
             Manage what customers see, buy, and discover in your shop.
           </p>
         </div>
 
         <Link
           href="/admin/products/new"
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-[#241f20] px-4 text-[11px] font-black text-white shadow-[0_10px_24px_rgba(36,31,32,0.14)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#3a3234]"
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-primary px-4 text-[11px] font-black text-primary-foreground shadow-[0_10px_24px_rgba(36,31,32,0.14)] transition duration-200 hover:-translate-y-0.5 hover:bg-primary"
         >
           <Plus size={15} strokeWidth={2.2} />
           Add product
         </Link>
       </header>
 
-      <section className="overflow-hidden rounded-[24px] border border-black/[0.06] bg-white shadow-[0_14px_44px_rgba(83,61,66,0.055)]">
-        <div className="flex flex-col gap-3 border-b border-black/[0.06] bg-[#fffdfb] p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+      <section className="overflow-hidden rounded-[24px] border border-black/[0.06] bg-card shadow-[0_14px_44px_rgba(83,61,66,0.055)]">
+        <div className="flex flex-col gap-3 border-b border-black/[0.06] bg-muted/50 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <label className="relative block w-full sm:max-w-sm">
             <Search
               size={15}
               strokeWidth={1.9}
-              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9b8f92]"
+              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
             />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               aria-label="Search products"
               placeholder="Search products, type or SKU"
-              className="h-10 w-full rounded-full border border-black/[0.08] bg-white pl-10 pr-4 text-[12px] font-semibold text-[#342d2f] outline-none transition placeholder:text-[#aaa0a2] focus:border-[#d39aaa] focus:ring-4 focus:ring-[#ff8da4]/10"
+              className="h-10 w-full rounded-full border border-black/[0.08] bg-card pl-10 pr-4 text-[12px] font-semibold text-foreground outline-none transition placeholder:text-muted-foreground focus:border-tint-border focus:ring-4 focus:ring-ring/40"
             />
           </label>
 
-          <div className="flex items-center gap-2 text-[10px] font-bold text-[#8a7f81]">
+          <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground">
             <Box size={13} strokeWidth={1.8} />
             {products.length} {products.length === 1 ? "product" : "products"}
           </div>
         </div>
 
         {loading ? (
-          <div className="grid min-h-64 place-items-center px-6">
-            <div className="flex items-center gap-2.5 text-[12px] font-bold text-[#766a6d]">
-              <Loader2 size={16} className="animate-spin" />
-              Loading products…
-            </div>
-          </div>
+          <SkeletonRows label="Loading products…" />
         ) : error ? (
-          <div className="m-5 rounded-2xl border border-[#edcbd2] bg-[#fff5f7] p-4 text-[12px] font-semibold text-[#914f60]">
+          <div className="m-5 rounded-2xl border border-tint-border bg-muted/50 p-4 text-[12px] font-semibold text-tint-foreground">
             {error}
           </div>
         ) : products.length === 0 ? (
           <div className="grid min-h-72 place-items-center px-6 py-12 text-center">
             <div>
-              <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-[#fff0f3] text-[#a35467]">
+              <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-muted text-tint-foreground">
                 <PackageOpen size={22} strokeWidth={1.8} />
               </span>
 
-              <h2 className="mt-4 text-[16px] font-black tracking-[-0.02em] text-[#322a2c]">
+              <h2 className="mt-4 text-[16px] font-black tracking-[-0.02em] text-foreground">
                 Your catalog is ready for its first product
               </h2>
 
-              <p className="mx-auto mt-2 max-w-sm text-[12px] leading-5 text-[#817477]">
+              <p className="mx-auto mt-2 max-w-sm text-[12px] leading-5 text-muted-foreground">
                 Add a product with a clear image, price, and stock level. You
                 can publish it whenever you are ready.
               </p>
 
               <Link
                 href="/admin/products/new"
-                className="mt-5 inline-flex h-10 items-center gap-2 rounded-full bg-[#241f20] px-4 text-[11px] font-black text-white transition hover:bg-[#3a3234]"
+                className="mt-5 inline-flex h-10 items-center gap-2 rounded-full bg-primary px-4 text-[11px] font-black text-primary-foreground transition hover:bg-primary"
               >
                 <Plus size={14} />
                 Add first product
@@ -219,18 +215,18 @@ export default function ProductsPage() {
         ) : filteredProducts.length === 0 ? (
           <div className="grid min-h-60 place-items-center px-6 text-center">
             <div>
-              <Search className="mx-auto text-[#aa9ea0]" size={22} />
-              <p className="mt-3 text-[13px] font-black text-[#3b3335]">
+              <Search className="mx-auto text-muted-foreground" size={22} />
+              <p className="mt-3 text-[13px] font-black text-foreground">
                 No products match “{query}”
               </p>
-              <p className="mt-1 text-[11px] text-[#8a7f81]">
+              <p className="mt-1 text-[11px] text-muted-foreground">
                 Try a product name, category, or SKU.
               </p>
             </div>
           </div>
         ) : (
           <>
-            <div className="hidden grid-cols-[minmax(0,1.8fr)_0.7fr_0.8fr_0.8fr] gap-4 border-b border-black/[0.06] bg-[#fffaf7] px-5 py-3 text-[9px] font-black uppercase tracking-[0.11em] text-[#9a8e90] md:grid">
+            <div className="hidden grid-cols-[minmax(0,1.8fr)_0.7fr_0.8fr_0.8fr] gap-4 border-b border-black/[0.06] bg-muted/50 px-5 py-3 text-[9px] font-black uppercase tracking-[0.11em] text-muted-foreground md:grid">
               <span>Product</span>
               <span>Status</span>
               <span>Inventory</span>
@@ -248,10 +244,10 @@ export default function ProductsPage() {
                   <Link
                     href={`/admin/products/${product.id}`}
                     key={product.id}
-                    className="group grid gap-4 px-4 py-4 transition duration-200 hover:bg-[#fffaf7] sm:px-5 md:grid-cols-[minmax(0,1.8fr)_0.7fr_0.8fr_0.8fr] md:items-center"
+                    className="group grid gap-4 px-4 py-4 transition duration-200 hover:bg-muted/50 sm:px-5 md:grid-cols-[minmax(0,1.8fr)_0.7fr_0.8fr_0.8fr] md:items-center"
                   >
                     <div className="flex min-w-0 items-center gap-3.5">
-                      <span className="relative size-14 shrink-0 overflow-hidden rounded-2xl bg-[#f3efed] ring-1 ring-black/[0.06]">
+                      <span className="relative size-14 shrink-0 overflow-hidden rounded-2xl bg-muted ring-1 ring-black/[0.06]">
                         <Image
                           src={image}
                           alt={product.title}
@@ -262,11 +258,11 @@ export default function ProductsPage() {
                       </span>
 
                       <div className="min-w-0">
-                        <p className="truncate text-[13px] font-black tracking-[-0.015em] text-[#332b2d]">
+                        <p className="truncate text-[13px] font-black tracking-[-0.015em] text-foreground">
                           {product.title}
                         </p>
 
-                        <p className="mt-1 truncate text-[10px] font-medium text-[#95898c]">
+                        <p className="mt-1 truncate text-[10px] font-medium text-muted-foreground">
                           {product.productType ?? "Product"} ·{" "}
                           {variant?.sku ?? "No SKU"}
                         </p>
@@ -285,21 +281,21 @@ export default function ProductsPage() {
                       <p
                         className={`text-[11px] font-bold ${
                           stock <= 3
-                            ? "text-[#a36c24]"
-                            : "text-[#665d5f]"
+                            ? "text-muted-foreground"
+                            : "text-muted-foreground"
                         }`}
                       >
                         {stock} in stock
                       </p>
 
                       {stock <= 3 && (
-                        <p className="mt-0.5 text-[9px] font-semibold text-[#b58b4a]">
+                        <p className="mt-0.5 text-[9px] font-semibold text-[var(--warn-fg)]">
                           Low inventory
                         </p>
                       )}
                     </div>
 
-                    <p className="text-[12px] font-black text-[#332b2d] md:text-right">
+                    <p className="text-[12px] font-black text-foreground md:text-right">
                       {formatMoney(variant?.priceMinor ?? 0, currency)}
                     </p>
                   </Link>

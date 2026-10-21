@@ -91,15 +91,15 @@ function getAddress(snapshot: Record<string, unknown>) {
 function getStatusStyle(status: string) {
   switch (status) {
     case "DELIVERED":
-      return "bg-[#edf3cf] text-[#586629]";
+      return "bg-[var(--warn-bg)] text-success";
     case "SHIPPED":
-      return "bg-[#e9edff] text-[#5866a1]";
+      return "bg-muted text-muted-foreground";
     case "CANCELLED":
-      return "bg-[#f8e5e9] text-[#945264]";
+      return "bg-muted text-tint-foreground";
     case "PROCESSING":
-      return "bg-[#eaf3f0] text-[#4e756b]";
+      return "bg-muted text-success";
     default:
-      return "bg-[#fff1d2] text-[#8a6419]";
+      return "bg-[var(--warn-bg)] text-[var(--warn-fg)]";
   }
 }
 
@@ -239,7 +239,7 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
     <div className="space-y-6">
       <Link
         href="/admin/orders"
-        className="inline-flex items-center gap-1.5 text-[11px] font-black text-[#766a6d] transition hover:text-[#2d2628]"
+        className="inline-flex items-center gap-1.5 text-[11px] font-black text-muted-foreground transition hover:text-foreground"
       >
         <ArrowLeft size={14} />
         Orders
@@ -247,13 +247,13 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
 
       <header className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.12em] text-[#a35c6d]">
+          <p className="text-[10px] font-black uppercase tracking-[0.12em] text-tint-foreground">
             {order.number}
           </p>
-          <h1 className="mt-2 text-[30px] font-black tracking-[-0.045em] text-[#2d2628] sm:text-[34px]">
+          <h1 className="mt-2 text-[30px] font-black tracking-[-0.045em] text-foreground sm:text-[34px]">
             Order details
           </h1>
-          <p className="mt-2 text-[12px] text-[#817477]">
+          <p className="mt-2 text-[12px] text-muted-foreground">
             Placed {formatDate(order.createdAt)}
           </p>
         </div>
@@ -270,7 +270,7 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
               type="button"
               onClick={advanceFulfilment}
               disabled={transitioning}
-              className="inline-flex h-10 items-center gap-2 rounded-full bg-[#2d2628] px-4 text-[11px] font-black text-white shadow-[0_8px_24px_rgba(45,38,40,0.16)] transition hover:-translate-y-0.5 hover:bg-[#43383b] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-10 items-center gap-2 rounded-full bg-primary px-4 text-[11px] font-black text-primary-foreground shadow-[0_8px_24px_rgba(45,38,40,0.16)] transition hover:-translate-y-0.5 hover:bg-primary disabled:cursor-not-allowed disabled:opacity-60"
             >
               {transitioning ? (
                 <Loader2 size={15} className="animate-spin" />
@@ -286,14 +286,14 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
       {error ? (
         <div
           role="alert"
-          className="rounded-[18px] border border-[#edcbd2] bg-[#fff5f7] px-4 py-3 text-[11px] font-semibold text-[#914f60]"
+          className="rounded-[18px] border border-tint-border bg-muted/50 px-4 py-3 text-[11px] font-semibold text-tint-foreground"
         >
           {error}
         </div>
       ) : null}
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
-        <section className="overflow-hidden rounded-[22px] border border-black/[0.06] bg-white shadow-[0_12px_40px_rgba(83,61,66,0.05)]">
+        <section className="overflow-hidden rounded-[22px] border border-black/[0.06] bg-card shadow-[0_12px_40px_rgba(83,61,66,0.05)]">
           <SectionHeader eyebrow="Items" title="What they ordered" />
 
           <div className="divide-y divide-black/[0.06]">
@@ -303,22 +303,22 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
                 className="grid grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-3 px-5 py-4"
               >
                 <span
-                  className="grid size-11 place-items-center rounded-xl bg-[#fff1f4] text-[#aa6070]"
+                  className="grid size-11 place-items-center rounded-xl bg-muted/50 text-tint-foreground"
                   aria-hidden="true"
                 >
                   <PackageCheck size={17} strokeWidth={1.8} />
                 </span>
 
                 <div className="min-w-0">
-                  <p className="truncate text-[12px] font-black text-[#3b3234]">
+                  <p className="truncate text-[12px] font-black text-foreground">
                     {item.titleSnapshot}
                   </p>
-                  <p className="mt-1 text-[10px] text-[#9b8e91]">
+                  <p className="mt-1 text-[10px] text-muted-foreground">
                     {item.skuSnapshot ?? "No SKU"} · Qty {item.quantity}
                   </p>
                 </div>
 
-                <p className="text-[12px] font-black text-[#332b2d]">
+                <p className="text-[12px] font-black text-foreground">
                   {formatMoney(
                     item.unitPriceMinor * item.quantity,
                     order.currency
@@ -328,7 +328,7 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
             ))}
           </div>
 
-          <div className="border-t border-black/[0.06] bg-[#fffaf7] px-5 py-4">
+          <div className="border-t border-black/[0.06] bg-muted/50 px-5 py-4">
             <TotalRow
               label="Subtotal"
               value={formatMoney(order.subtotalMinor, order.currency)}
@@ -338,8 +338,8 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
               value={formatMoney(order.shippingMinor, order.currency)}
             />
             <div className="mt-3 flex items-center justify-between border-t border-black/[0.06] pt-3">
-              <span className="text-[12px] font-black text-[#3c3335]">Total</span>
-              <strong className="text-[16px] font-black tracking-[-0.03em] text-[#2d2628]">
+              <span className="text-[12px] font-black text-foreground">Total</span>
+              <strong className="text-[16px] font-black tracking-[-0.03em] text-foreground">
                 {formatMoney(order.totalMinor, order.currency)}
               </strong>
             </div>
@@ -393,8 +393,8 @@ export function OrderDetailView({ orderId }: { orderId: string }) {
 
 function StatePanel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="grid min-h-48 place-items-center rounded-[22px] border border-black/[0.06] bg-white">
-      <div className="flex items-center gap-2.5 text-[12px] font-bold text-[#766a6d]">
+    <div className="grid min-h-48 place-items-center rounded-[22px] border border-black/[0.06] bg-card">
+      <div className="flex items-center gap-2.5 text-[12px] font-bold text-muted-foreground">
         {children}
       </div>
     </div>
@@ -414,16 +414,16 @@ function MessageState({
     <div
       className={`rounded-[22px] border p-6 ${
         error
-          ? "border-[#edcbd2] bg-[#fff5f7]"
-          : "border-black/[0.06] bg-white"
+          ? "border-tint-border bg-muted/50"
+          : "border-black/[0.06] bg-card"
       }`}
     >
-      <h1 className="text-[18px] font-black tracking-[-0.03em] text-[#322a2c]">
+      <h1 className="text-[18px] font-black tracking-[-0.03em] text-foreground">
         {title}
       </h1>
       <p
         className={`mt-2 text-[12px] leading-5 ${
-          error ? "text-[#914f60]" : "text-[#817477]"
+          error ? "text-tint-foreground" : "text-muted-foreground"
         }`}
       >
         {body}
@@ -435,10 +435,10 @@ function MessageState({
 function SectionHeader({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
     <div className="border-b border-black/[0.06] px-5 py-4">
-      <p className="text-[9px] font-black uppercase tracking-[0.1em] text-[#a35c6d]">
+      <p className="text-[9px] font-black uppercase tracking-[0.1em] text-tint-foreground">
         {eyebrow}
       </p>
-      <h2 className="mt-1 text-[15px] font-black tracking-[-0.025em] text-[#332b2d]">
+      <h2 className="mt-1 text-[15px] font-black tracking-[-0.025em] text-foreground">
         {title}
       </h2>
     </div>
@@ -448,8 +448,8 @@ function SectionHeader({ eyebrow, title }: { eyebrow: string; title: string }) {
 function TotalRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between py-1 text-[11px]">
-      <span className="text-[#817477]">{label}</span>
-      <strong className="font-bold text-[#4a4043]">{value}</strong>
+      <span className="text-muted-foreground">{label}</span>
+      <strong className="font-bold text-foreground">{value}</strong>
     </div>
   );
 }
@@ -464,14 +464,14 @@ function InfoCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-[22px] border border-black/[0.06] bg-white p-5 shadow-[0_12px_40px_rgba(83,61,66,0.05)]">
-      <p className="text-[9px] font-black uppercase tracking-[0.1em] text-[#a35c6d]">
+    <section className="rounded-[22px] border border-black/[0.06] bg-card p-5 shadow-[0_12px_40px_rgba(83,61,66,0.05)]">
+      <p className="text-[9px] font-black uppercase tracking-[0.1em] text-tint-foreground">
         {eyebrow}
       </p>
-      <h2 className="mt-1.5 text-[14px] font-black tracking-[-0.02em] text-[#332b2d]">
+      <h2 className="mt-1.5 text-[14px] font-black tracking-[-0.02em] text-foreground">
         {title}
       </h2>
-      <div className="mt-3 space-y-1 text-[11px] leading-5 text-[#817477]">
+      <div className="mt-3 space-y-1 text-[11px] leading-5 text-muted-foreground">
         {children}
       </div>
     </section>

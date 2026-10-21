@@ -45,14 +45,14 @@ function refundMessage(refund: MerchantRefund) {
 
 function refundStyle(status: MerchantRefund["status"]) {
   if (status === "SUCCEEDED") {
-    return "border-[#dfe9b7] bg-[#f5f8e7] text-[#59672c]";
+    return "border-border bg-muted/50 text-success";
   }
 
   if (status === "FAILED" || status === "REQUIRES_ACTION") {
-    return "border-[#edcbd2] bg-[#fff5f7] text-[#914f60]";
+    return "border-tint-border bg-muted/50 text-tint-foreground";
   }
 
-  return "border-[#eadbb8] bg-[#fff9e8] text-[#806222]";
+  return "border-border bg-muted/50 text-[var(--warn-fg)]";
 }
 
 export function OrderPaymentPanel({
@@ -99,28 +99,28 @@ export function OrderPaymentPanel({
   return (
     <section
       aria-label="Payment and refund"
-      className="rounded-[22px] border border-black/[0.06] bg-white p-5 shadow-[0_12px_40px_rgba(83,61,66,0.05)]"
+      className="rounded-[22px] border border-black/[0.06] bg-card p-5 shadow-[0_12px_40px_rgba(83,61,66,0.05)]"
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-[9px] font-black uppercase tracking-[0.1em] text-[#a35c6d]">
+          <p className="text-[9px] font-black uppercase tracking-[0.1em] text-tint-foreground">
             Payment
           </p>
-          <h2 className="mt-1 text-[15px] font-black tracking-[-0.02em] text-[#322a2c]">
+          <h2 className="mt-1 text-[15px] font-black tracking-[-0.02em] text-foreground">
             Payment & refunds
           </h2>
         </div>
 
-        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#fff0f3] text-[#a35467]">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-muted text-tint-foreground">
           <CreditCard size={17} strokeWidth={1.8} />
         </span>
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-[#fffaf7] px-3.5 py-3">
-        <span className="text-[10px] font-bold text-[#8f8184]">
+      <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-muted/50 px-3.5 py-3">
+        <span className="text-[10px] font-bold text-muted-foreground">
           Fulfilment
         </span>
-        <span className="text-[10px] font-black text-[#43393b]">
+        <span className="text-[10px] font-black text-foreground">
           {label(fulfilmentStatus)}
         </span>
       </div>
@@ -129,29 +129,29 @@ export function OrderPaymentPanel({
         <div className="mt-3 rounded-2xl border border-black/[0.06] p-4">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[9px] font-black uppercase tracking-[0.09em] text-[#9b8e91]">
+              <p className="text-[9px] font-black uppercase tracking-[0.09em] text-muted-foreground">
                 Card payment
               </p>
-              <p className="mt-1 text-[13px] font-black text-[#332b2d]">
+              <p className="mt-1 text-[13px] font-black text-foreground">
                 {label(payment.status)}
               </p>
             </div>
 
             {payment.status === "PAID" ? (
-              <CheckCircle2 size={17} className="text-[#667535]" />
+              <CheckCircle2 size={17} className="text-success" />
             ) : (
-              <AlertCircle size={17} className="text-[#a97825]" />
+              <AlertCircle size={17} className="text-[var(--warn-fg)]" />
             )}
           </div>
 
           {payment.paymentIntentId && (
-            <p className="mt-3 break-all text-[9px] leading-4 text-[#a09597]">
+            <p className="mt-3 break-all text-[9px] leading-4 text-muted-foreground">
               {payment.paymentIntentId}
             </p>
           )}
         </div>
       ) : (
-        <p className="mt-4 text-[11px] leading-5 text-[#817477]">
+        <p className="mt-4 text-[11px] leading-5 text-muted-foreground">
           No payment is attached to this order yet.
         </p>
       )}
@@ -179,7 +179,7 @@ export function OrderPaymentPanel({
           {disputes.map((dispute) => (
             <div
               key={dispute.stripeDisputeId}
-              className="flex items-start gap-2 rounded-xl border border-[#edcbd2] bg-[#fff5f7] px-3.5 py-3 text-[10px] font-semibold leading-5 text-[#914f60]"
+              className="flex items-start gap-2 rounded-xl border border-tint-border bg-muted/50 px-3.5 py-3 text-[10px] font-semibold leading-5 text-tint-foreground"
             >
               <ShieldAlert size={15} className="mt-0.5 shrink-0" />
               <span>
@@ -193,7 +193,7 @@ export function OrderPaymentPanel({
 
       {error && (
         <p
-          className="mt-4 rounded-xl bg-[#fff5f7] px-3 py-2.5 text-[10px] font-semibold text-[#914f60]"
+          className="mt-4 rounded-xl bg-muted/50 px-3 py-2.5 text-[10px] font-semibold text-tint-foreground"
           role="alert"
         >
           {error}
@@ -204,7 +204,7 @@ export function OrderPaymentPanel({
         <button
           type="button"
           onClick={() => setConfirming(true)}
-          className="mt-4 inline-flex h-9 items-center gap-2 rounded-full border border-black/[0.08] bg-white px-3.5 text-[10px] font-black text-[#55494c] transition hover:bg-[#fff3f6]"
+          className="mt-4 inline-flex h-9 items-center gap-2 rounded-full border border-black/[0.08] bg-card px-3.5 text-[10px] font-black text-foreground transition hover:bg-muted/50"
         >
           <RotateCcw size={13} />
           Issue full refund
@@ -213,16 +213,16 @@ export function OrderPaymentPanel({
 
       {confirming && (
         <div
-          className="mt-4 rounded-2xl border border-[#f0b8c5] bg-[#fff3f6] p-4"
+          className="mt-4 rounded-2xl border border-tint-border bg-muted/50 p-4"
           role="dialog"
           aria-modal="true"
           aria-label="Confirm full refund"
         >
-          <h3 className="text-[13px] font-black text-[#332b2d]">
+          <h3 className="text-[13px] font-black text-foreground">
             Confirm full refund
           </h3>
 
-          <p className="mt-1.5 text-[10px] leading-5 text-[#817477]">
+          <p className="mt-1.5 text-[10px] leading-5 text-muted-foreground">
             This sends a full refund request through Stripe. Partial refunds
             are not available from this action.
           </p>
@@ -232,7 +232,7 @@ export function OrderPaymentPanel({
               type="button"
               onClick={confirmRefund}
               disabled={submitting}
-              className="inline-flex h-9 items-center gap-2 rounded-full bg-[#241f20] px-3.5 text-[10px] font-black text-white transition hover:bg-[#3a3234] disabled:pointer-events-none disabled:opacity-60"
+              className="inline-flex h-9 items-center gap-2 rounded-full bg-primary px-3.5 text-[10px] font-black text-primary-foreground transition hover:bg-primary disabled:pointer-events-none disabled:opacity-60"
             >
               {submitting && (
                 <Loader2 size={13} className="animate-spin" />
@@ -244,7 +244,7 @@ export function OrderPaymentPanel({
               type="button"
               onClick={() => setConfirming(false)}
               disabled={submitting}
-              className="inline-flex h-9 items-center rounded-full border border-black/[0.08] bg-white px-3.5 text-[10px] font-black text-[#55494c] disabled:opacity-60"
+              className="inline-flex h-9 items-center rounded-full border border-black/[0.08] bg-card px-3.5 text-[10px] font-black text-foreground disabled:opacity-60"
             >
               Keep order
             </button>

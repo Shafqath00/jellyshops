@@ -43,15 +43,15 @@ export function PageHierarchy({
   const activePage = document.pages.find((page) => page.id === activePageId) ?? document.pages[0];
 
   return (
-    <aside className="flex h-full min-h-0 flex-col bg-white" aria-label="Legacy page hierarchy">
-      <div className="h-14 shrink-0 border-b border-[#eeeeee] px-4 py-2.5">
-        <p className="text-[10px] font-medium text-[#8c9196]">Legacy page preview</p>
-        <h1 className="mt-0.5 truncate text-[13px] font-semibold text-[#303030]">{activePage?.title ?? "Home page"}</h1>
+    <aside className="flex h-full min-h-0 flex-col bg-card" aria-label="Legacy page hierarchy">
+      <div className="h-14 shrink-0 border-b border-border px-4 py-2.5">
+        <p className="text-[10px] font-medium text-muted-foreground">Legacy page preview</p>
+        <h1 className="mt-0.5 truncate text-[13px] font-semibold text-foreground">{activePage?.title ?? "Home page"}</h1>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto p-2">
         <section className="mb-4">
-          <h2 className="px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#8c9196]">Pages</h2>
+          <h2 className="px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Pages</h2>
           <div className="space-y-0.5">
             {document.pages.map((page) => (
               <button
@@ -62,18 +62,18 @@ export function PageHierarchy({
                 onClick={() => onPageSelect(page.id)}
                 className={clsx(
                   "flex h-8 w-full items-center rounded-md px-2 text-left text-[12px] font-medium",
-                  page.id === activePageId ? "bg-[#eeeeee] text-[#202223]" : "text-[#616161] hover:bg-[#f6f6f7]",
+                  page.id === activePageId ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted/50",
                 )}
               >
                 <span className="truncate">{page.title}</span>
-                {page.system && <span className="ml-auto text-[10px] text-[#8c9196]">System</span>}
+                {page.system && <span className="ml-auto text-[10px] text-muted-foreground">System</span>}
               </button>
             ))}
           </div>
         </section>
 
         <section>
-          <h2 className="px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#8c9196]">Sections</h2>
+          <h2 className="px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Sections</h2>
           <div className="space-y-0.5">
             {(activePage?.sections ?? []).map((section) => {
               const selected = selection?.kind === "section" && selection.sectionId === section.id;
@@ -86,7 +86,7 @@ export function PageHierarchy({
                   onClick={() => onSelect({ kind: "section", region: "template", sectionId: section.id })}
                   className={clsx(
                     "flex h-8 w-full items-center rounded-md px-2 text-left text-[12px] font-medium",
-                    selected ? "bg-[#eeeeee] text-[#202223]" : "text-[#616161] hover:bg-[#f6f6f7]",
+                    selected ? "bg-muted text-foreground" : "text-muted-foreground hover:bg-muted/50",
                   )}
                 >
                   <span className="truncate">{label}</span>

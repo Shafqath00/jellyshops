@@ -99,8 +99,8 @@ export function PublishControls({
   return (
     <div className="flex flex-wrap items-center justify-end gap-2" aria-busy={busy !== null}>
       {status && <span role={failed ? "alert" : "status"} className={`order-last w-full text-right text-xs ${failed ? "text-red-700" : "text-[var(--ink-soft)]"}`}>{status}</span>}
-      <button type="button" aria-label="Validate" title="Check your changes" disabled={disabled} onClick={() => { void runValidate(); }} className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-[var(--line)] bg-white px-3 text-xs font-semibold disabled:opacity-40"><Check size={14} /><span className="hidden sm:inline">Check</span></button>
-      <button type="button" aria-label="Preview" disabled={disabled} onClick={() => { void runPreview(); }} className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-[var(--line)] bg-white px-3 text-xs font-semibold disabled:opacity-40"><Eye size={14} /><span className="hidden sm:inline">Preview</span></button>
+      <button type="button" aria-label="Validate" title="Check your changes" disabled={disabled} onClick={() => { void runValidate(); }} className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-[var(--line)] bg-card px-3 text-xs font-semibold disabled:opacity-40"><Check size={14} /><span className="hidden sm:inline">Check</span></button>
+      <button type="button" aria-label="Preview" disabled={disabled} onClick={() => { void runPreview(); }} className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-[var(--line)] bg-card px-3 text-xs font-semibold disabled:opacity-40"><Eye size={14} /><span className="hidden sm:inline">Preview</span></button>
       <button type="button" aria-label="Publish" disabled={disabled || hasBlockingDiagnostics(diagnostics)} onClick={() => { void runPublish(); }} className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-[var(--ink)] px-3 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40">{busy === "publish" ? <Loader2 size={14} className="animate-spin motion-reduce:animate-none" /> : <Upload size={14} />}Publish</button>
     </div>
   );

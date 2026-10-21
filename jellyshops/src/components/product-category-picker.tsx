@@ -26,10 +26,10 @@ type ProductCategoryPickerProps = {
 };
 
 const inputClass =
-  "h-10 w-full rounded-xl border border-black/[0.07] bg-[#fffdfc] " +
-  "text-[11px] font-semibold text-[#3d3537] outline-none transition " +
-  "placeholder:text-[#b1a6a8] focus:border-[#d09aaa] " +
-  "focus:ring-4 focus:ring-[#e8a9b8]/10";
+  "h-10 w-full rounded-xl border border-black/[0.07] bg-muted/50 " +
+  "text-[11px] font-semibold text-foreground outline-none transition " +
+  "placeholder:text-muted-foreground focus:border-tint-border " +
+  "focus:ring-4 focus:ring-ring/40";
 
 export function ProductCategoryPicker({
   categories,
@@ -94,7 +94,7 @@ export function ProductCategoryPicker({
   return (
     <div className="relative">
       <label className="block">
-        <span className="text-[9px] font-black uppercase tracking-[0.12em] text-[#887c7f]">
+        <span className="text-[9px] font-black uppercase tracking-[0.12em] text-muted-foreground">
           {label}
         </span>
 
@@ -107,15 +107,15 @@ export function ProductCategoryPicker({
             "mt-2 flex min-h-11 w-full items-center justify-between gap-3",
             "rounded-[14px] border px-3.5 text-left transition",
             open
-              ? "border-[#d6a8b4] bg-white ring-4 ring-[#e8a9b8]/10"
-              : "border-black/[0.07] bg-[#fffdfc] hover:border-black/[0.12]",
+              ? "border-tint-border bg-card ring-4 ring-ring/40"
+              : "border-black/[0.07] bg-muted/50 hover:border-black/[0.12]",
           ].join(" ")}
         >
           <span
             className={
               selected
-                ? "min-w-0 truncate text-[11px] font-bold text-[#403739]"
-                : "min-w-0 truncate text-[11px] font-semibold text-[#aaa0a2]"
+                ? "min-w-0 truncate text-[11px] font-bold text-foreground"
+                : "min-w-0 truncate text-[11px] font-semibold text-muted-foreground"
             }
           >
             {selected
@@ -125,7 +125,7 @@ export function ProductCategoryPicker({
 
           <ChevronDown
             size={14}
-            className={`shrink-0 text-[#9b5968] transition ${
+            className={`shrink-0 text-tint-foreground transition ${
               open ? "rotate-180" : ""
             }`}
           />
@@ -139,7 +139,7 @@ export function ProductCategoryPicker({
           className={[
             "absolute left-0 z-40 mt-2 w-full overflow-hidden",
             "min-w-[min(380px,calc(100vw-2rem))]",
-            "rounded-[20px] border border-black/[0.07] bg-white",
+            "rounded-[20px] border border-black/[0.07] bg-card",
             "shadow-[0_22px_60px_rgba(70,49,55,0.16)]",
           ].join(" ")}
         >
@@ -148,7 +148,7 @@ export function ProductCategoryPicker({
             <div className="relative">
               <Search
                 size={14}
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#a3989b]"
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
               />
 
               <input
@@ -165,7 +165,7 @@ export function ProductCategoryPicker({
                   type="button"
                   onClick={() => setQuery("")}
                   aria-label="Clear search"
-                  className="absolute right-2 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-full text-[#9c707b] transition hover:bg-[#fff0f3]"
+                  className="absolute right-2 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-full text-tint-foreground transition hover:bg-muted"
                 >
                   <X size={13} />
                 </button>
@@ -177,7 +177,7 @@ export function ProductCategoryPicker({
             {/* Recent */}
             {!query && !browseId && recent.length > 0 && (
               <div className="mb-2">
-                <p className="px-2 pb-1.5 pt-1 text-[8px] font-black uppercase tracking-[0.14em] text-[#a05d6d]">
+                <p className="px-2 pb-1.5 pt-1 text-[8px] font-black uppercase tracking-[0.14em] text-tint-foreground">
                   Recently used
                 </p>
 
@@ -203,19 +203,19 @@ export function ProductCategoryPicker({
                     type="button"
                     onClick={goBack}
                     aria-label="Go back"
-                    className="grid size-7 shrink-0 place-items-center rounded-full bg-[#fff3f5] text-[#9b5968] transition hover:bg-[#ffe9ee]"
+                    className="grid size-7 shrink-0 place-items-center rounded-full bg-muted/50 text-tint-foreground transition hover:bg-tint"
                   >
                     <ChevronLeft size={13} />
                   </button>
                 )}
 
                 <div className="min-w-0">
-                  <p className="text-[8px] font-black uppercase tracking-[0.13em] text-[#96898c]">
+                  <p className="text-[8px] font-black uppercase tracking-[0.13em] text-muted-foreground">
                     {browseId ? "Browsing" : "Categories"}
                   </p>
 
                   {browseCategory && (
-                    <p className="truncate text-[10px] font-bold text-[#4c4345]">
+                    <p className="truncate text-[10px] font-bold text-foreground">
                       {getCategoryBreadcrumb(
                         browseCategory.id,
                         categories,
@@ -235,19 +235,19 @@ export function ProductCategoryPicker({
                 return (
                   <div
                     key={category.id}
-                    className="group flex items-center rounded-[12px] transition hover:bg-[#fff7f8]"
+                    className="group flex items-center rounded-[12px] transition hover:bg-muted/50"
                   >
                     <button
                       type="button"
                       onClick={() => select(category.id)}
                       className="min-w-0 flex-1 px-3 py-2.5 text-left"
                     >
-                      <span className="block truncate text-[11px] font-bold text-[#493f42]">
+                      <span className="block truncate text-[11px] font-bold text-foreground">
                         {category.name}
                       </span>
 
                       {query && (
-                        <span className="mt-0.5 block truncate text-[9px] font-medium text-[#9d9194]">
+                        <span className="mt-0.5 block truncate text-[9px] font-medium text-muted-foreground">
                           {getCategoryBreadcrumb(
                             category.id,
                             categories,
@@ -261,7 +261,7 @@ export function ProductCategoryPicker({
                         type="button"
                         onClick={() => setBrowseId(category.id)}
                         aria-label={`Browse ${category.name}`}
-                        className="mr-1 grid size-8 shrink-0 place-items-center rounded-full text-[#a15e6f] transition hover:bg-white"
+                        className="mr-1 grid size-8 shrink-0 place-items-center rounded-full text-tint-foreground transition hover:bg-white"
                       >
                         <ChevronRight size={13} />
                       </button>
@@ -272,10 +272,10 @@ export function ProductCategoryPicker({
 
               {rows.length === 0 && (
                 <div className="px-3 py-8 text-center">
-                  <p className="text-[11px] font-bold text-[#756a6d]">
+                  <p className="text-[11px] font-bold text-muted-foreground">
                     No categories found
                   </p>
-                  <p className="mt-1 text-[9px] text-[#aaa0a2]">
+                  <p className="mt-1 text-[9px] text-muted-foreground">
                     Try another search or create a new category.
                   </p>
                 </div>
@@ -285,16 +285,16 @@ export function ProductCategoryPicker({
 
           {/* Footer */}
           {onCreateCategory && (
-            <div className="border-t border-black/[0.055] bg-[#fcfaf9] p-2">
+            <div className="border-t border-black/[0.055] bg-muted/50 p-2">
               <button
                 type="button"
                 onClick={() => {
                   onCreateCategory(browseId);
                   close();
                 }}
-                className="flex w-full items-center gap-2 rounded-[12px] px-3 py-2.5 text-left text-[10px] font-black text-[#9b5968] transition hover:bg-[#fff0f3]"
+                className="flex w-full items-center gap-2 rounded-[12px] px-3 py-2.5 text-left text-[10px] font-black text-tint-foreground transition hover:bg-muted"
               >
-                <span className="grid size-6 place-items-center rounded-full bg-[#fff0f3]">
+                <span className="grid size-6 place-items-center rounded-full bg-muted">
                   <Plus size={12} />
                 </span>
 
@@ -328,14 +328,14 @@ function CategoryRow({
     <button
       type="button"
       onClick={() => onSelect(category.id)}
-      className="block w-full rounded-[12px] px-3 py-2.5 text-left transition hover:bg-[#fff7f8]"
+      className="block w-full rounded-[12px] px-3 py-2.5 text-left transition hover:bg-muted/50"
     >
-      <span className="block truncate text-[10px] font-black text-[#4a4043]">
+      <span className="block truncate text-[10px] font-black text-foreground">
         {category.name}
       </span>
 
       {showBreadcrumb && (
-        <span className="mt-0.5 block truncate text-[9px] font-medium text-[#9b8f92]">
+        <span className="mt-0.5 block truncate text-[9px] font-medium text-muted-foreground">
           {getCategoryBreadcrumb(category.id, categories)}
         </span>
       )}

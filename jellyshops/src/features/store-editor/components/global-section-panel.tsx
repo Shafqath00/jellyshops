@@ -28,14 +28,14 @@ export function GlobalSectionPanel({
   if (attached) {
     return (
       <section aria-label="Global section" className="p-3">
-        <div className="rounded-lg border border-[#e3e3e3] bg-[#fafafa] p-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#8c9196]">Synced global section</p>
-          <p className="mt-1 text-[12px] font-semibold text-[#303030]">{attached.name}</p>
+        <div className="rounded-lg border border-border bg-muted/50 p-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Synced global section</p>
+          <p className="mt-1 text-[12px] font-semibold text-foreground">{attached.name}</p>
           <button
             type="button"
             aria-label={`Detach ${attached.name}`}
             onClick={() => onDetachGlobal(structuredClone(attached.section))}
-            className="mt-3 h-8 rounded-md border border-[#c9cccf] bg-white px-3 text-[11px] font-semibold text-[#303030] hover:bg-[#f6f6f7]"
+            className="mt-3 h-8 rounded-md border border-border bg-card px-3 text-[11px] font-semibold text-foreground hover:bg-muted/50"
           >
             Detach
           </button>
@@ -54,7 +54,7 @@ export function GlobalSectionPanel({
             if (!window.confirm("Convert this section into a synced global section? Changes will affect every placement.")) return;
             onMakeGlobal(structuredClone(localSection));
           }}
-          className="h-8 rounded-md bg-[#303030] px-3 text-[11px] font-semibold text-white"
+          className="h-8 rounded-md bg-primary px-3 text-[11px] font-semibold text-primary-foreground"
         >
           Make global
         </button>
@@ -67,7 +67,7 @@ export function GlobalSectionPanel({
             type="button"
             aria-label={`Insert ${global.name}`}
             onClick={() => onInsertGlobal(global.id)}
-            className="flex min-h-9 w-full items-center rounded-lg px-2.5 text-left text-[12px] font-medium text-[#454f5b] hover:bg-[#f6f6f7]"
+            className="flex min-h-9 w-full items-center rounded-lg px-2.5 text-left text-[12px] font-medium text-muted-foreground hover:bg-muted/50"
           >
             <span className="truncate">{global.name}</span>
           </button>

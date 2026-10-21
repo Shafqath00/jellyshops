@@ -38,7 +38,7 @@ function SelectField({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-[11px] font-medium text-[#454f5b]">
+      <span className="mb-1.5 block text-[11px] font-medium text-muted-foreground">
         {label}
       </span>
 
@@ -51,7 +51,7 @@ function SelectField({
               event.target.value
             )
           }
-          className="h-9 w-full appearance-none rounded-lg border border-[#d7d7d7] bg-white px-3 pr-9 text-[12px] font-medium text-[#303030] outline-none transition hover:border-[#bdbdbd] focus:border-[#8c8c8c] focus:ring-2 focus:ring-black/[0.06]"
+          className="h-9 w-full appearance-none rounded-lg border border-border bg-card px-3 pr-9 text-[12px] font-medium text-foreground outline-none transition hover:border-border focus:border-border focus:ring-2 focus:ring-black/[0.06]"
         >
           {options.map(
             (option) => (
@@ -72,7 +72,7 @@ function SelectField({
         <ChevronDown
           size={14}
           strokeWidth={1.8}
-          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#8c9196]"
+          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
         />
       </div>
     </label>
@@ -87,8 +87,8 @@ function SettingsGroup({
   children: React.ReactNode;
 }) {
   return (
-    <section className="border-b border-[#eeeeee] px-4 py-5 last:border-b-0">
-      <h2 className="mb-4 text-[10px] font-semibold uppercase tracking-[0.07em] text-[#8c9196]">
+    <section className="border-b border-border px-4 py-5 last:border-b-0">
+      <h2 className="mb-4 text-[10px] font-semibold uppercase tracking-[0.07em] text-muted-foreground">
         {title}
       </h2>
 
@@ -112,7 +112,7 @@ function ToggleField({
 }) {
   return (
     <label className="flex min-h-8 cursor-pointer items-center justify-between gap-4">
-      <span className="text-[12px] font-medium text-[#454f5b]">
+      <span className="text-[12px] font-medium text-muted-foreground">
         {label}
       </span>
 
@@ -128,14 +128,14 @@ function ToggleField({
           className="peer sr-only"
         />
 
-        <span className="block h-5 w-9 rounded-full bg-[#d7d7d7] transition peer-checked:bg-[#303030] peer-focus-visible:ring-2 peer-focus-visible:ring-black/20 peer-focus-visible:ring-offset-2" />
+        <span className="block h-5 w-9 rounded-full bg-muted transition peer-checked:bg-primary peer-focus-visible:ring-2 peer-focus-visible:ring-black/20 peer-focus-visible:ring-offset-2" />
 
-        <span className="absolute left-0.5 top-0.5 grid size-4 place-items-center rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-4">
+        <span className="absolute left-0.5 top-0.5 grid size-4 place-items-center rounded-full bg-card shadow-sm transition-transform peer-checked:translate-x-4">
           {checked && (
             <Check
               size={9}
               strokeWidth={3}
-              className="text-[#303030]"
+              className="text-foreground"
             />
           )}
         </span>
@@ -180,18 +180,18 @@ export function ThemeInspector({
 
   return (
     <aside
-      className="flex h-full min-h-0 flex-col bg-white"
+      className="flex h-full min-h-0 flex-col bg-card"
       aria-label="Theme settings panel"
     >
       {/* Header */}
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-[#eeeeee] px-3">
+      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-3">
         <button
           type="button"
           aria-label="Back to page hierarchy"
           onClick={() =>
             onSelect(null)
           }
-          className="grid size-8 shrink-0 place-items-center rounded-lg text-[#6d7175] transition hover:bg-[#f1f1f1] hover:text-[#202223]"
+          className="grid size-8 shrink-0 place-items-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
         >
           <ArrowLeft
             size={16}
@@ -200,11 +200,11 @@ export function ThemeInspector({
         </button>
 
         <div className="min-w-0">
-          <p className="text-[10px] font-medium text-[#8c9196]">
+          <p className="text-[10px] font-medium text-muted-foreground">
             Global
           </p>
 
-          <h1 className="mt-0.5 truncate text-[13px] font-semibold text-[#303030]">
+          <h1 className="mt-0.5 truncate text-[13px] font-semibold text-foreground">
             Theme settings
           </h1>
         </div>
@@ -258,12 +258,12 @@ export function ThemeInspector({
                 >
                   <label
                     htmlFor={id}
-                    className="block text-[11px] font-medium text-[#454f5b]"
+                    className="block text-[11px] font-medium text-muted-foreground"
                   >
                     {label}
                   </label>
 
-                  <div className="flex h-9 items-center gap-2 rounded-lg border border-[#d7d7d7] bg-white px-2 transition focus-within:border-[#8c8c8c] focus-within:ring-2 focus-within:ring-black/[0.06]"
+                  <div className="flex h-9 items-center gap-2 rounded-lg border border-border bg-card px-2 transition focus-within:border-border focus-within:ring-2 focus-within:ring-black/[0.06]"
                   >
                     <label className="relative size-5 shrink-0 cursor-pointer overflow-hidden rounded-md border border-black/10">
                       <input
@@ -299,7 +299,7 @@ export function ThemeInspector({
                             .value
                         )
                       }
-                      className="min-w-0 flex-1 bg-transparent text-[12px] font-medium uppercase text-[#303030] outline-none"
+                      className="min-w-0 flex-1 bg-transparent text-[12px] font-medium uppercase text-foreground outline-none"
                     />
                   </div>
                 </div>
@@ -509,7 +509,7 @@ export function ThemeInspector({
             }
           />
 
-          <div className="border-t border-[#eeeeee] pt-3">
+          <div className="border-t border-border pt-3">
             <ToggleField
               label="Show vendor"
               checked={

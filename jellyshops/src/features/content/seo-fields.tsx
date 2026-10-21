@@ -37,32 +37,32 @@ export function SeoFields({
 
   return (
     <fieldset className="space-y-4">
-      <legend className="text-sm font-semibold text-[#303030]">Search engine listing</legend>
-      <label className="block text-[12px] font-medium text-[#454f5b]">
+      <legend className="text-sm font-semibold text-foreground">Search engine listing</legend>
+      <label className="block text-[12px] font-medium text-muted-foreground">
         Handle
-        <input aria-label="Handle" value={value.handle} onChange={(event) => onChange({ ...value, handle: event.target.value })} className="mt-1 h-9 w-full rounded-lg border border-[#d7d7d7] px-3" />
-        {issues.handle && <span className="mt-1 block text-[11px] text-[#b42318]">{issues.handle}</span>}
+        <input aria-label="Handle" value={value.handle} onChange={(event) => onChange({ ...value, handle: event.target.value })} className="mt-1 h-9 w-full rounded-lg border border-border px-3" />
+        {issues.handle && <span className="mt-1 block text-[11px] text-destructive">{issues.handle}</span>}
       </label>
-      <label className="block text-[12px] font-medium text-[#454f5b]">
+      <label className="block text-[12px] font-medium text-muted-foreground">
         SEO title
-        <input aria-label="SEO title" value={field("seoTitle")} onChange={(event) => onChange({ ...value, seoTitle: event.target.value || null })} className="mt-1 h-9 w-full rounded-lg border border-[#d7d7d7] px-3" />
-        {issues.seoTitle && <span className="mt-1 block text-[11px] text-[#b42318]">{issues.seoTitle}</span>}
+        <input aria-label="SEO title" value={field("seoTitle")} onChange={(event) => onChange({ ...value, seoTitle: event.target.value || null })} className="mt-1 h-9 w-full rounded-lg border border-border px-3" />
+        {issues.seoTitle && <span className="mt-1 block text-[11px] text-destructive">{issues.seoTitle}</span>}
       </label>
-      <label className="block text-[12px] font-medium text-[#454f5b]">
+      <label className="block text-[12px] font-medium text-muted-foreground">
         SEO description
-        <textarea aria-label="SEO description" value={field("seoDescription")} onChange={(event) => onChange({ ...value, seoDescription: event.target.value || null })} className="mt-1 min-h-24 w-full rounded-lg border border-[#d7d7d7] px-3 py-2" />
-        {issues.seoDescription && <span className="mt-1 block text-[11px] text-[#b42318]">{issues.seoDescription}</span>}
+        <textarea aria-label="SEO description" value={field("seoDescription")} onChange={(event) => onChange({ ...value, seoDescription: event.target.value || null })} className="mt-1 min-h-24 w-full rounded-lg border border-border px-3 py-2" />
+        {issues.seoDescription && <span className="mt-1 block text-[11px] text-destructive">{issues.seoDescription}</span>}
       </label>
-      <label className="block text-[12px] font-medium text-[#454f5b]">
+      <label className="block text-[12px] font-medium text-muted-foreground">
         Social image media ID
-        <input aria-label="Social image media ID" value={field("socialMediaId")} onChange={(event) => onChange({ ...value, socialMediaId: event.target.value || null })} className="mt-1 h-9 w-full rounded-lg border border-[#d7d7d7] px-3" />
+        <input aria-label="Social image media ID" value={field("socialMediaId")} onChange={(event) => onChange({ ...value, socialMediaId: event.target.value || null })} className="mt-1 h-9 w-full rounded-lg border border-border px-3" />
       </label>
-      <label className="block text-[12px] font-medium text-[#454f5b]">
+      <label className="block text-[12px] font-medium text-muted-foreground">
         Canonical override
-        <input aria-label="Canonical override" value={field("canonicalOverride")} onChange={(event) => onChange({ ...value, canonicalOverride: event.target.value || null })} className="mt-1 h-9 w-full rounded-lg border border-[#d7d7d7] px-3" />
-        {issues.canonicalOverride && <span className="mt-1 block text-[11px] text-[#b42318]">{issues.canonicalOverride}</span>}
+        <input aria-label="Canonical override" value={field("canonicalOverride")} onChange={(event) => onChange({ ...value, canonicalOverride: event.target.value || null })} className="mt-1 h-9 w-full rounded-lg border border-border px-3" />
+        {issues.canonicalOverride && <span className="mt-1 block text-[11px] text-destructive">{issues.canonicalOverride}</span>}
       </label>
-      <label className="flex items-center gap-2 text-[12px] font-medium text-[#454f5b]">
+      <label className="flex items-center gap-2 text-[12px] font-medium text-muted-foreground">
         <input aria-label="Hide from search engines" type="checkbox" checked={value.noindex} onChange={(event) => onChange({ ...value, noindex: event.target.checked })} />
         Hide from search engines
       </label>

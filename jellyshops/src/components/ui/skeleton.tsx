@@ -50,3 +50,28 @@ export function SkeletonText({ lines = 3, className }: { lines?: number; classNa
     </div>
   );
 }
+
+/* Table-shaped loading placeholder; the label stays available to screen readers. */
+export function SkeletonRows({
+  rows = 5,
+  label,
+  className,
+}: {
+  rows?: number;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <div role="status" className={cn("space-y-3 p-5", className)}>
+      <span className="sr-only">{label}</span>
+      {Array.from({ length: rows }).map((_, i) => (
+        <div key={i} className="flex items-center gap-4">
+          <Skeleton className="size-9 shrink-0 rounded-lg" />
+          <Skeleton className="h-3.5 w-1/4 rounded-full" />
+          <Skeleton className="h-3.5 flex-1 rounded-full" />
+          <Skeleton className="hidden h-3.5 w-16 rounded-full sm:block" />
+        </div>
+      ))}
+    </div>
+  );
+}

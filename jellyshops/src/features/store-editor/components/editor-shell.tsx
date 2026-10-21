@@ -309,11 +309,11 @@ export function EditorShell({
   ) : (
     <div className="flex h-full items-center justify-center px-8 text-center">
       <div className="max-w-[220px]">
-        <p className="text-[13px] font-semibold text-[#303030]">
+        <p className="text-[13px] font-semibold text-foreground">
           Nothing selected
         </p>
 
-        <p className="mt-1.5 text-[12px] leading-5 text-[#8c9196]">
+        <p className="mt-1.5 text-[12px] leading-5 text-muted-foreground">
           Select a section or block in the preview to edit
           its settings.
         </p>
@@ -322,7 +322,7 @@ export function EditorShell({
   );
 
   return (
-    <div className="fixed inset-0 z-[60] flex h-dvh flex-col overflow-hidden bg-[#f4f4f5] text-[#303030]">
+    <div className="fixed inset-0 z-[60] flex h-dvh flex-col overflow-hidden bg-muted/50 text-foreground">
       <EditorToolbar
         viewport={state.viewport}
         status={state.saveStatus}
@@ -350,7 +350,7 @@ export function EditorShell({
       />
 
       {/* Mobile editor navigation */}
-      <div className="flex h-11 shrink-0 items-center justify-center gap-1 border-b border-[#e3e3e3] bg-white px-3 lg:hidden">
+      <div className="flex h-11 shrink-0 items-center justify-center gap-1 border-b border-border bg-card px-3 lg:hidden">
         <button
           type="button"
           onClick={() =>
@@ -359,8 +359,8 @@ export function EditorShell({
           className={clsx(
             "h-8 rounded-lg px-3 text-[12px] font-medium transition",
             mobilePanel === "sections"
-              ? "bg-[#eeeeee] text-[#202223]"
-              : "text-[#6d7175] hover:bg-[#f6f6f7]"
+              ? "bg-muted text-foreground"
+              : "text-muted-foreground hover:bg-muted/50"
           )}
         >
           Sections
@@ -374,8 +374,8 @@ export function EditorShell({
           className={clsx(
             "h-8 rounded-lg px-3 text-[12px] font-medium transition",
             mobilePanel === null
-              ? "bg-[#eeeeee] text-[#202223]"
-              : "text-[#6d7175] hover:bg-[#f6f6f7]"
+              ? "bg-muted text-foreground"
+              : "text-muted-foreground hover:bg-muted/50"
           )}
         >
           Preview
@@ -389,8 +389,8 @@ export function EditorShell({
           className={clsx(
             "h-8 rounded-lg px-3 text-[12px] font-medium transition",
             mobilePanel === "settings"
-              ? "bg-[#eeeeee] text-[#202223]"
-              : "text-[#6d7175] hover:bg-[#f6f6f7]"
+              ? "bg-muted text-foreground"
+              : "text-muted-foreground hover:bg-muted/50"
           )}
         >
           Settings
@@ -413,7 +413,7 @@ export function EditorShell({
         {/* Sections */}
         <div
           className={clsx(
-            "min-h-0 overflow-y-auto border-r border-[#e3e3e3] bg-white",
+            "min-h-0 overflow-y-auto border-r border-border bg-card",
             "[&_.theme-editor-sidebar]:h-full",
             "[&_.theme-editor-sidebar]:w-full",
             "[&_.theme-editor-sidebar]:border-0",
@@ -442,7 +442,7 @@ export function EditorShell({
         </div>
 
         {/* Preview */}
-        <main className="min-h-0 min-w-0 overflow-hidden bg-[#ededee]">
+        <main className="min-h-0 min-w-0 overflow-hidden bg-muted">
           <div className="h-full min-h-0 p-3 sm:p-4 lg:p-6">
             <div className="mx-auto h-full min-h-0 w-full overflow-hidden">
               <PreviewCanvas
@@ -459,7 +459,7 @@ export function EditorShell({
         {/* Settings */}
         <div
           className={clsx(
-            "min-h-0 overflow-y-auto border-l border-[#e3e3e3] bg-white",
+            "min-h-0 overflow-y-auto border-l border-border bg-card",
             "[&_.theme-editor-sidebar]:h-full",
             "[&_.theme-editor-sidebar]:w-full",
             "[&_.theme-editor-sidebar]:border-0",

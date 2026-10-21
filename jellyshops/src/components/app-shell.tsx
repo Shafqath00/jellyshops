@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   ChevronDown,
   ExternalLink,
@@ -11,12 +12,14 @@ import { useAuth } from "@/features/auth/auth-provider";
 import { AdminNav } from "./admin-nav";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { AdminThemeToggle } from "@/components/admin-theme-toggle";
 
 export function AppShell({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
   const { activeStore: store, stores, setActiveStoreId } = useAuth();
 
   if (!store) return null;
@@ -109,13 +112,16 @@ export function AppShell({
             </div>
           </div>
 
-          <Link
-            href={`/${store.slug}`}
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            View store
-            <ExternalLink />
-          </Link>
+          <div className="flex items-center gap-2">
+            <AdminThemeToggle />
+            <Link
+              href={`/${store.slug}`}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              View store
+              <ExternalLink />
+            </Link>
+          </div>
         </header>
 
         <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b bg-background/95 px-4 backdrop-blur md:hidden">
@@ -144,7 +150,9 @@ export function AppShell({
 
         <main className="min-w-0">
           <div className="mx-auto w-full max-w-[1600px] px-4 pb-24 pt-6 sm:px-6 md:px-8 md:pb-12 lg:px-10">
-            {children}
+            <div key={pathname} className="animate-jelly-fade-in">
+              {children}
+            </div>
           </div>
         </main>
       </div>

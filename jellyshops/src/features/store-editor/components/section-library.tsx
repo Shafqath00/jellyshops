@@ -37,11 +37,11 @@ export function SectionLibrary({
   const categories = useMemo(() => [...new Set(filtered.map((item) => item.category))], [filtered]);
 
   return (
-    <section aria-label="Section library" className="min-h-0 bg-white">
+    <section aria-label="Section library" className="min-h-0 bg-card">
       {builtIns.length > 0 && (
-        <div className="sticky top-0 z-10 border-b border-[#e7e7e7] bg-white p-3">
-          <label className="flex h-10 items-center gap-2 rounded-xl border border-[#c9cccf] px-3 shadow-sm focus-within:border-[#7b61a8] focus-within:ring-2 focus-within:ring-[#7b61a8]/15">
-            <Search size={16} className="text-[#777]" />
+        <div className="sticky top-0 z-10 border-b border-border bg-card p-3">
+          <label className="flex h-10 items-center gap-2 rounded-xl border border-border px-3 shadow-sm focus-within:border-border focus-within:ring-2 focus-within:ring-ring/40">
+            <Search size={16} className="text-muted-foreground" />
             <span className="sr-only">Search sections</span>
             <input
               type="search"
@@ -49,7 +49,7 @@ export function SectionLibrary({
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search sections"
-              className="min-w-0 flex-1 border-0 bg-transparent text-[13px] outline-none placeholder:text-[#9a9a9a]"
+              className="min-w-0 flex-1 border-0 bg-transparent text-[13px] outline-none placeholder:text-muted-foreground"
             />
           </label>
         </div>
@@ -58,7 +58,7 @@ export function SectionLibrary({
       <div className="space-y-5 p-3">
         {categories.map((category) => (
           <div key={category}>
-            <h3 className="mb-2 text-[11px] font-semibold text-[#616161]">{category}</h3>
+            <h3 className="mb-2 text-[11px] font-semibold text-muted-foreground">{category}</h3>
             <div className="space-y-1">
               {filtered.filter((item) => item.category === category).map((item) => (
                 <button
@@ -66,9 +66,9 @@ export function SectionLibrary({
                   type="button"
                   aria-label={`Add ${item.name}`}
                   onClick={() => onInsertBuiltIn?.(item.id)}
-                  className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-[13px] font-medium text-[#303030] transition hover:bg-[#f2eff7] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#7b61a8]"
+                  className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-[13px] font-medium text-foreground transition hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring"
                 >
-                  <span className="grid size-8 shrink-0 place-items-center rounded-lg border border-[#e3e3e3] bg-[#fafafa] text-[#6f5b92]"><LayoutPanelTop size={16} /></span>
+                  <span className="grid size-8 shrink-0 place-items-center rounded-lg border border-border bg-muted/50 text-muted-foreground"><LayoutPanelTop size={16} /></span>
                   <span className="truncate">{item.name}</span>
                 </button>
               ))}
@@ -77,19 +77,19 @@ export function SectionLibrary({
         ))}
 
         {builtIns.length > 0 && filtered.length === 0 && (
-          <p className="py-8 text-center text-[12px] text-[#8c9196]">No sections match “{query}”.</p>
+          <p className="py-8 text-center text-[12px] text-muted-foreground">No sections match “{query}”.</p>
         )}
 
         {presets.length > 0 && (
-          <div className="border-t border-[#eeeeee] pt-4">
-            <h3 className="mb-2 text-[11px] font-semibold text-[#616161]">Saved sections</h3>
+          <div className="border-t border-border pt-4">
+            <h3 className="mb-2 text-[11px] font-semibold text-muted-foreground">Saved sections</h3>
             {presets.map((preset) => (
               <button
                 key={preset.id}
                 type="button"
                 aria-label={`Insert ${preset.name}`}
                 onClick={() => onInsertPreset(structuredClone(preset.section))}
-                className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-[12px] font-medium text-[#454f5b] hover:bg-[#f6f6f7]"
+                className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-[12px] font-medium text-muted-foreground hover:bg-muted/50"
               >
                 <span className="truncate">{preset.name}</span>
               </button>
@@ -98,7 +98,7 @@ export function SectionLibrary({
         )}
 
         {builtIns.length === 0 && presets.length === 0 && (
-          <p className="px-1 py-4 text-[12px] text-[#8c9196]">No sections are available for this template.</p>
+          <p className="px-1 py-4 text-[12px] text-muted-foreground">No sections are available for this template.</p>
         )}
       </div>
     </section>

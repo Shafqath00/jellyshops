@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
 import {
   ArrowUpRight,
   Boxes,
@@ -26,6 +27,40 @@ function formatMoney(amountMinor: number, currency: string) {
     style: "currency",
     currency,
   }).format(amountMinor / 100);
+}
+
+function StatCard({
+  label,
+  value,
+  hint,
+  icon: Icon,
+  index,
+}: {
+  label: string;
+  value: string;
+  hint: string;
+  icon: LucideIcon;
+  index: number;
+}) {
+  return (
+    <article
+      className="stat-card animate-jelly-slide-up rounded-xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
+      style={{ animationDelay: `${index * 60}ms` }}
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-[12px] font-medium text-muted-foreground">{label}</p>
+          <p className="mt-2 text-[24px] font-semibold tabular-nums tracking-[-0.025em] text-foreground">
+            {value}
+          </p>
+          <p className="mt-1 text-[11px] text-muted-foreground">{hint}</p>
+        </div>
+        <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground">
+          <Icon size={18} strokeWidth={1.7} />
+        </span>
+      </div>
+    </article>
+  );
 }
 
 export default function DashboardPage() {
@@ -54,17 +89,17 @@ export default function DashboardPage() {
       {/* Page header */}
       <header className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
-          <p className="mb-1 text-[12px] font-medium text-[#6d7175]">
+          <p className="mb-1 text-[12px] font-medium text-muted-foreground">
             {today}
           </p>
 
-          <h1 className="text-[24px] font-semibold tracking-[-0.025em] text-[#202223] sm:text-[28px]">
+          <h1 className="text-[24px] font-semibold tracking-[-0.025em] text-foreground sm:text-[28px]">
             Welcome back to {store.name}.
           </h1>
 
-          <p className="mt-1.5 max-w-xl text-[13px] leading-5 text-[#6d7175]">
+          <p className="mt-1.5 max-w-xl text-[13px] leading-5 text-muted-foreground">
             Here&apos;s what&apos;s happening with{" "}
-            <span className="font-medium text-[#454f5b]">
+            <span className="font-medium text-muted-foreground">
               {store.name}
             </span>{" "}
             today.
@@ -74,7 +109,7 @@ export default function DashboardPage() {
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           <Link
             href={`/${store.slug}`}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-[#c9cccf] bg-white px-3.5 text-[13px] font-semibold text-[#303030] shadow-[0_1px_0_rgba(0,0,0,0.04)] transition hover:bg-[#f6f6f7]"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-input bg-card px-3.5 text-[13px] font-semibold text-foreground shadow-[0_1px_0_rgba(0,0,0,0.04)] transition hover:bg-muted"
           >
             View store
             <ArrowUpRight size={14} strokeWidth={1.8} />
@@ -82,7 +117,7 @@ export default function DashboardPage() {
 
           <Link
             href="/admin/products/new"
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-[#303030] px-3.5 text-[13px] font-semibold text-white shadow-[0_1px_0_rgba(0,0,0,0.15)] transition hover:bg-[#1f1f1f]"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground shadow-[0_1px_0_rgba(0,0,0,0.15)] transition hover:bg-primary/90"
           >
             <Plus size={15} strokeWidth={2} />
             Add product
@@ -91,39 +126,39 @@ export default function DashboardPage() {
       </header>
 
       {/* Store setup */}
-      <section className="rounded-xl border border-[#dfe3e8] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+      <section className="rounded-xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
         <div className="flex flex-col gap-5 p-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex min-w-0 items-start gap-3.5">
-            <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-[#eaf7f0]">
-              <span className="text-[13px] font-bold text-[#29845a]">
+            <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-success/15">
+              <span className="text-[13px] font-bold text-success">
                 {completed}/{setupItems.length}
               </span>
             </div>
 
             <div>
               <div className="mb-1 flex flex-wrap items-center gap-2">
-                <h2 className="text-[14px] font-semibold text-[#303030]">
+                <h2 className="text-[14px] font-semibold text-foreground">
                   {ready ? "Your storefront is ready" : "Complete your store setup"}
                 </h2>
 
-                <span className="rounded-full bg-[#eaf7f0] px-2 py-0.5 text-[10px] font-semibold text-[#237a50]">
+                <span className="rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-semibold text-success">
                   {ready ? "Ready" : "In progress"}
                 </span>
               </div>
 
-              <p className="text-[12px] leading-5 text-[#6d7175]">
+              <p className="text-[12px] leading-5 text-muted-foreground">
                 {ready ? "Catalog, publication, shipping, and payment readiness verified." : "Review each step before accepting customer payments."}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-x-5 gap-y-2 border-t border-[#eeeeee] pt-4 lg:border-0 lg:pt-0">
+          <div className="flex flex-wrap gap-x-5 gap-y-2 border-t border-border pt-4 lg:border-0 lg:pt-0">
             {setupItems.map((item) => (
               <div
                 key={item.label}
-                className="flex items-center gap-1.5 text-[11px] font-medium text-[#454f5b]"
+                className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground"
               >
-                <span className="grid size-4 place-items-center rounded-full bg-[#eaf7f0] text-[9px] font-bold text-[#29845a]">
+                <span className="grid size-4 place-items-center rounded-full bg-success/15 text-[9px] font-bold text-success">
                   {item.complete ? "✓" : "○"}
                 </span>
 
@@ -136,94 +171,47 @@ export default function DashboardPage() {
 
       {/* Metrics */}
       <section className="grid gap-3 md:grid-cols-3">
-        <article className="rounded-xl border border-[#e3e3e3] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-[12px] font-medium text-[#6d7175]">
-                Total sales
-              </p>
-
-              <p className="mt-2 text-[24px] font-semibold tracking-[-0.025em] text-[#202223]">
-                {formatMoney(revenue, store.currency)}
-              </p>
-
-              <p className="mt-1 text-[11px] text-[#8c9196]">
-                Across {orderCount}{" "}
-                {orderCount === 1 ? "order" : "orders"}
-              </p>
-            </div>
-
-            <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#f1f1f1] text-[#5c5f62]">
-              <CircleDollarSign size={18} strokeWidth={1.7} />
-            </span>
-          </div>
-        </article>
-
-        <article className="rounded-xl border border-[#e3e3e3] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-[12px] font-medium text-[#6d7175]">
-                Needs attention
-              </p>
-
-              <p className="mt-2 text-[24px] font-semibold tracking-[-0.025em] text-[#202223]">
-                {needsAttention.length}
-              </p>
-
-              <p className="mt-1 text-[11px] text-[#8c9196]">
-                Orders to move forward
-              </p>
-            </div>
-
-            <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#f1f1f1] text-[#5c5f62]">
-              <PackageCheck size={18} strokeWidth={1.7} />
-            </span>
-          </div>
-        </article>
-
-        <article className="rounded-xl border border-[#e3e3e3] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-[12px] font-medium text-[#6d7175]">
-                Live products
-              </p>
-
-              <p className="mt-2 text-[24px] font-semibold tracking-[-0.025em] text-[#202223]">
-                {publishedProductCount}
-              </p>
-
-              <p className="mt-1 text-[11px] text-[#8c9196]">
-                {lowStock.length}{" "}
-                {lowStock.length === 1 ? "product" : "products"} running
-                low
-              </p>
-            </div>
-
-            <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#f1f1f1] text-[#5c5f62]">
-              <Boxes size={18} strokeWidth={1.7} />
-            </span>
-          </div>
-        </article>
+        <StatCard
+          index={0}
+          label="Total sales"
+          value={formatMoney(revenue, store.currency)}
+          hint={`Across ${orderCount} ${orderCount === 1 ? "order" : "orders"}`}
+          icon={CircleDollarSign}
+        />
+        <StatCard
+          index={1}
+          label="Needs attention"
+          value={String(needsAttention.length)}
+          hint="Orders to move forward"
+          icon={PackageCheck}
+        />
+        <StatCard
+          index={2}
+          label="Live products"
+          value={String(publishedProductCount)}
+          hint={`${lowStock.length} ${lowStock.length === 1 ? "product" : "products"} running low`}
+          icon={Boxes}
+        />
       </section>
 
       {/* Dashboard lists */}
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(340px,0.75fr)]">
         {/* Orders */}
-        <section className="overflow-hidden rounded-xl border border-[#e3e3e3] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          <div className="flex min-h-[64px] items-center justify-between gap-4 border-b border-[#eeeeee] px-5">
+        <section className="overflow-hidden rounded-xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+          <div className="flex min-h-[64px] items-center justify-between gap-4 border-b border-border px-5">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8c9196]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                 Order queue
               </p>
 
-              <h2 className="mt-0.5 text-[15px] font-semibold text-[#303030]">
+              <h2 className="mt-0.5 text-[15px] font-semibold text-foreground">
                 What&apos;s moving
               </h2>
             </div>
 
             <Link
               href="/admin/orders"
-              className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#454f5b] hover:text-[#202223]"
+              className="inline-flex items-center gap-1 text-[12px] font-semibold text-muted-foreground hover:text-foreground"
             >
               View all
               <ArrowUpRight size={13} />
@@ -231,7 +219,7 @@ export default function DashboardPage() {
           </div>
 
           {needsAttention.length > 0 ? (
-            <div className="divide-y divide-[#eeeeee]">
+            <div className="divide-y divide-border">
               {needsAttention.slice(0, 4).map((order) => {
                 const customerName = getCustomerName(order.customerSnapshot);
 
@@ -239,18 +227,18 @@ export default function DashboardPage() {
                   <Link
                     href={`/admin/orders/${order.id}`}
                     key={order.id}
-                    className="group grid min-h-[68px] grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3 px-5 transition-colors hover:bg-[#fafafa] sm:grid-cols-[36px_minmax(0,1fr)_auto_auto]"
+                    className="group grid min-h-[68px] grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3 px-5 transition-colors hover:bg-muted/50 sm:grid-cols-[36px_minmax(0,1fr)_auto_auto]"
                   >
-                    <span className="grid size-9 place-items-center rounded-full bg-[#f1f1f1] text-[12px] font-semibold text-[#454f5b]">
+                    <span className="grid size-9 place-items-center rounded-full bg-muted text-[12px] font-semibold text-muted-foreground">
                       {customerName.charAt(0).toUpperCase()}
                     </span>
 
                     <div className="min-w-0">
-                      <p className="truncate text-[13px] font-semibold text-[#303030]">
+                      <p className="truncate text-[13px] font-semibold text-foreground">
                         {customerName}
                       </p>
 
-                      <p className="mt-0.5 truncate text-[11px] text-[#8c9196]">
+                      <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
                         {order.number}
                       </p>
                     </div>
@@ -259,7 +247,7 @@ export default function DashboardPage() {
                       <OrderStatusBadge status={order.status as OrderStatus} />
                     </div>
 
-                    <strong className="text-right text-[12px] font-semibold text-[#303030]">
+                    <strong className="text-right text-[12px] font-semibold text-foreground">
                       {formatMoney(
                         order.totalMinor,
                         order.currency
@@ -272,15 +260,15 @@ export default function DashboardPage() {
           ) : (
             <div className="grid min-h-[220px] place-items-center px-6 py-10 text-center">
               <div>
-                <span className="mx-auto grid size-10 place-items-center rounded-full bg-[#f1f1f1] text-[#6d7175]">
+                <span className="mx-auto grid size-10 place-items-center rounded-full bg-muted text-muted-foreground">
                   <PackageCheck size={18} />
                 </span>
 
-                <p className="mt-3 text-[13px] font-semibold text-[#303030]">
+                <p className="mt-3 text-[13px] font-semibold text-foreground">
                   No orders need attention
                 </p>
 
-                <p className="mt-1 text-[11px] text-[#8c9196]">
+                <p className="mt-1 text-[11px] text-muted-foreground">
                   New orders that need action will appear here.
                 </p>
               </div>
@@ -289,21 +277,21 @@ export default function DashboardPage() {
         </section>
 
         {/* Inventory */}
-        <section className="overflow-hidden rounded-xl border border-[#e3e3e3] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          <div className="flex min-h-[64px] items-center justify-between gap-4 border-b border-[#eeeeee] px-5">
+        <section className="overflow-hidden rounded-xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+          <div className="flex min-h-[64px] items-center justify-between gap-4 border-b border-border px-5">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8c9196]">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                 Inventory
               </p>
 
-              <h2 className="mt-0.5 text-[15px] font-semibold text-[#303030]">
+              <h2 className="mt-0.5 text-[15px] font-semibold text-foreground">
                 Running low
               </h2>
             </div>
 
             <Link
               href="/admin/products"
-              className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#454f5b] hover:text-[#202223]"
+              className="inline-flex items-center gap-1 text-[12px] font-semibold text-muted-foreground hover:text-foreground"
             >
               Catalog
               <ArrowUpRight size={13} />
@@ -311,28 +299,28 @@ export default function DashboardPage() {
           </div>
 
           {lowStock.length > 0 ? (
-            <div className="divide-y divide-[#eeeeee]">
+            <div className="divide-y divide-border">
               {lowStock.slice(0, 5).map((item) => (
                 <Link
                   href={`/admin/products/${item.productId}`}
                   key={item.variantId}
-                  className="group flex min-h-[68px] items-center gap-3 px-5 transition-colors hover:bg-[#fafafa]"
+                  className="group flex min-h-[68px] items-center gap-3 px-5 transition-colors hover:bg-muted/50"
                 >
-                  <span className="grid size-10 shrink-0 place-items-center rounded-lg border border-[#e3e3e3] bg-[#f7f7f7] text-[#6d7175]">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-lg border border-border bg-muted text-muted-foreground">
                     <Boxes size={18} />
                   </span>
 
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[13px] font-semibold text-[#303030]">
+                    <p className="truncate text-[13px] font-semibold text-foreground">
                       {item.title}
                     </p>
 
-                    <p className="mt-0.5 truncate text-[11px] text-[#8c9196]">
+                    <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
                       {item.sku ?? "No SKU"}
                     </p>
                   </div>
 
-                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#fff4e5] px-2 py-1 text-[10px] font-semibold text-[#8a6116]">
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--warn-bg)] px-2 py-1 text-[10px] font-semibold text-[var(--warn-fg)]">
                     <TriangleAlert size={11} strokeWidth={2} />
                     {item.quantity} left
                   </span>
@@ -342,15 +330,15 @@ export default function DashboardPage() {
           ) : (
             <div className="grid min-h-[220px] place-items-center px-6 py-10 text-center">
               <div>
-                <span className="mx-auto grid size-10 place-items-center rounded-full bg-[#f1f1f1] text-[#6d7175]">
+                <span className="mx-auto grid size-10 place-items-center rounded-full bg-muted text-muted-foreground">
                   <Boxes size={18} />
                 </span>
 
-                <p className="mt-3 text-[13px] font-semibold text-[#303030]">
+                <p className="mt-3 text-[13px] font-semibold text-foreground">
                   Inventory looks healthy
                 </p>
 
-                <p className="mt-1 text-[11px] text-[#8c9196]">
+                <p className="mt-1 text-[11px] text-muted-foreground">
                   Products with low stock will appear here.
                 </p>
               </div>

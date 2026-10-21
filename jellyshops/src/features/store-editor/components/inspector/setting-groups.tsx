@@ -56,13 +56,13 @@ export function SettingGroups({
         return (
           <section
             key={id}
-            className={id === "advanced" ? "border-t border-[#eeeeee] pt-5" : ""}
+            className={id === "advanced" ? "border-t border-border pt-5" : ""}
           >
             <h2
               className={
                 id === "advanced"
-                  ? "mb-3 text-[10px] font-semibold uppercase tracking-[0.07em] text-[#a3a3a3]"
-                  : "mb-3 text-[10px] font-semibold uppercase tracking-[0.07em] text-[#8c9196]"
+                  ? "mb-3 text-[10px] font-semibold uppercase tracking-[0.07em] text-muted-foreground"
+                  : "mb-3 text-[10px] font-semibold uppercase tracking-[0.07em] text-muted-foreground"
               }
             >
               {label}

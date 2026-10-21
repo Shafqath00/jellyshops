@@ -39,13 +39,13 @@ export default function NavigationPage() {
   return (
     <main className="mx-auto max-w-5xl p-6 md:p-8">
       <div className="mb-6 flex items-center gap-3">
-        <Link href="/admin/online-store/editor" aria-label="Back to Online Store" className="grid size-9 place-items-center rounded-lg border border-[#d7d7d7] bg-white"><ArrowLeft size={16} /></Link>
-        <div><p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#8c9196]">Online Store</p><h1 className="text-2xl font-semibold tracking-[-0.03em]">Navigation</h1></div>
+        <Link href="/admin/online-store/editor" aria-label="Back to Online Store" className="grid size-9 place-items-center rounded-lg border border-border bg-card"><ArrowLeft size={16} /></Link>
+        <div><p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Online Store</p><h1 className="text-2xl font-semibold tracking-[-0.03em]">Navigation</h1></div>
       </div>
       {error && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
       <div className="mb-4 flex gap-2 overflow-x-auto">
         {menus.map((entry) => (
-          <button key={entry.id} type="button" onClick={() => setActiveMenuId(entry.id)} className={`h-9 rounded-lg border px-3 text-[12px] font-semibold ${entry.id === activeMenuId ? "border-[#303030] bg-[#303030] text-white" : "border-[#d7d7d7] bg-white"}`}>{entry.name}</button>
+          <button key={entry.id} type="button" onClick={() => setActiveMenuId(entry.id)} className={`h-9 rounded-lg border px-3 text-[12px] font-semibold ${entry.id === activeMenuId ? "border-border bg-primary text-primary-foreground" : "border-border bg-card"}`}>{entry.name}</button>
         ))}
       </div>
       {menu ? (
@@ -58,7 +58,7 @@ export default function NavigationPage() {
             }).catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Unable to save menu"));
           }}
         />
-      ) : <p className="rounded-xl border border-dashed border-[#d7d7d7] p-8 text-center text-sm text-[#8c9196]">No navigation menus yet.</p>}
+      ) : <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">No navigation menus yet.</p>}
     </main>
   );
 }
