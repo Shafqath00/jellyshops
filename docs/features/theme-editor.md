@@ -7,7 +7,7 @@ Entry: `jellyshops/src/app/admin/online-store/editor/page.tsx` (about 1,300 line
 | Path (under `jellyshops/src/features/store-editor`) | Role |
 | --- | --- |
 | `api/client.ts`, `api/types.ts` | Typed calls to `/api/stores/:storeId/storefront/*` (workspace, templates, global sections, menus, theme settings, assignments, validate, preview compile, publish). |
-| `model/` | Editor document model: `commands.ts` (add/move/remove/update sections and blocks), `history.ts` (undo/redo), `selection.ts`, `types.ts` (`page-commands.test.ts` exists but there is no `page-commands.ts`; the test file is an orphan). |
+| `model/` | Editor document model: `commands.ts` (add/move/remove/update sections and blocks), `history.ts` (undo/redo), `selection.ts`, `types.ts` (`page-commands.test.ts` tests page-level cases of `commands.ts`; there is no `page-commands.ts`). |
 | `state/reducer.ts` | Editor state transitions. |
 | `state/autosave-controller.ts` | `createAutosaveController({ save, onStatus, delayMs = 700 })`: debounced saves per dirty resource; statuses `dirty`/`saving`/`saved`/`error`; `flush`, `retry`, `dispose`. |
 | `components/` | `editor-toolbar`, `preview-canvas`, `storefront-preview-frame`, `section-library`, `page-hierarchy`, `template-hierarchy`, `template-resource-selector`, `global-section-panel`, `publish-controls`, `publish-diagnostics`, `editor-panel-navigation`, `dynamic-source-picker`. |
