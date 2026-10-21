@@ -1,245 +1,68 @@
 "use client";
-
 import Link from "next/link";
-import { ClipboardList } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { Search, Package, ArrowRight } from "lucide-react";
 import { useAuth } from "@/features/auth/auth-provider";
 import { createMerchantCommerceApi } from "@/features/commerce/api/client";
-import type { MerchantOrderListItem } from "@/features/commerce/api/types";
-import { SkeletonRows } from "@/components/ui/skeleton";
-
-const API_URL =
-  process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
-
-function formatMoney(amountMinor: number, currency: string) {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency,
-  }).format(amountMinor / 100);
-}
-
-function formatDate(value: string) {
-  return new Date(value).toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function formatStatus(value?: string | null) {
-  if (!value) return "Not started";
-
-  return value
-    .replaceAll("_", " ")
-    .toLowerCase()
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
-function getCustomerName(snapshot: Record<string, unknown>) {
-  const name = snapshot.name;
-
-  return typeof name === "string" && name.trim()
-    ? name
-    : "Customer unavailable";
-}
-
-function getStatusStyle(status: string) {
-  switch (status) {
-    case "DELIVERED":
-      return "bg-[var(--warn-bg)] text-success";
-    case "SHIPPED":
-      return "bg-muted text-muted-foreground";
-    case "CANCELLED":
-      return "bg-muted text-tint-foreground";
-    case "PROCESSING":
-      return "bg-muted text-success";
-    default:
-      return "bg-[var(--warn-bg)] text-[var(--warn-fg)]";
-  }
-}
-
+import type { OrderListQuery, OrderListResult, MerchantOrderStatus } from "@/features/commerce/api/types";
+import { OrderBadge, orderLabel, orderMoney, orderStatuses, orderInputClass, orderButtonClass, orderPanelClass } from "@/features/commerce/components/order-ui";
+const initialQuery: OrderListQuery = { sort: "date", direction: "desc", page: 1, pageSize: 25 };
 export default function OrdersPage() {
-  const { session, activeStore } = useAuth();
-  const storeId = activeStore?.id;
-  const token = session?.access_token;
-
-  const api = useMemo(() => {
-    if (!storeId || !token) return null;
-
-    return createMerchantCommerceApi({
-      baseUrl: API_URL,
-      token,
-    });
-  }, [storeId, token]);
-
-  const [orders, setOrders] = useState<MerchantOrderListItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadOrders() {
-      if (!api || !storeId) {
+    const { session, activeStore } = useAuth();
+    const storeId = activeStore?.id;
+    const api = useMemo(() => session?.access_token ? createMerchantCommerceApi({ baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001", token: session.access_token }) : null, [session?.access_token]);
+    const [query, setQuery] = useState<OrderListQuery>(initialQuery);
+    const [hydrated, setHydrated] = useState(false);
+    const [search, setSearch] = useState("");
+    const [result, setResult] = useState<OrderListResult | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [refresh, setRefresh] = useState(0);
+    const [updating, setUpdating] = useState<string | null>(null);
+    useEffect(() => { const params = new URLSearchParams(window.location.search); const next = { ...initialQuery, ...Object.fromEntries(params), page: Math.max(1, Number(params.get("page")) || 1), pageSize: 25 }; setQuery(next); setSearch(next.query ?? ""); setHydrated(true); }, []);
+    useEffect(() => { if (!hydrated)
+        return; const timer = setTimeout(() => setQuery(current => current.query === search ? current : { ...current, query: search, page: 1 }), 300); return () => clearTimeout(timer); }, [search, hydrated]);
+    useEffect(() => { if (!hydrated)
+        return; const params = new URLSearchParams(); for (const [key, value] of Object.entries(query))
+        if (value !== undefined && value !== "")
+            params.set(key, String(value)); window.history.replaceState(null, "", `${window.location.pathname}?${params}`); }, [query, hydrated]);
+    useEffect(() => { let active = true; if (!hydrated)
+        return; if (!api || !storeId) {
         setLoading(false);
         return;
-      }
-
-      setLoading(true);
-      setError("");
-
-      try {
-        const result = await api.listOrders(storeId);
-        if (!cancelled) setOrders(result);
-      } catch (caught) {
-        if (!cancelled) {
-          setError(
-            caught instanceof Error ? caught.message : "Unable to load orders"
-          );
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+    } setLoading(true); api.queryOrders(storeId, query).then(data => { if (active) {
+        setResult({ ...data, total: data.total ?? data.orders.length, page: data.page ?? 1, pageSize: data.pageSize ?? 25, summary: data.summary ?? {} });
+        setError("");
+    } }).catch(caught => { if (active)
+        setError(caught instanceof Error ? caught.message : "Unable to load orders"); }).finally(() => { if (active)
+        setLoading(false); }); return () => { active = false; }; }, [api, storeId, query, refresh, hydrated]);
+    useEffect(() => { const focus = () => setRefresh(value => value + 1); window.addEventListener("focus", focus); const timer = result?.orders.some(order => order.status === "PENDING_PAYMENT" || order.paymentStatus === "PROCESSING") ? setInterval(focus, 5000) : null; return () => { window.removeEventListener("focus", focus); if (timer)
+        clearInterval(timer); }; }, [result]);
+    const update = (key: string, value: string) => setQuery(current => ({ ...current, [key]: value, page: 1 }));
+    const summary = result?.summary ?? {};
+    async function advance(orderId: string, status: MerchantOrderStatus) { if (!api || !storeId)
+        return; setUpdating(orderId); setError(""); try {
+        await api.transitionFulfilment(storeId, orderId, status);
+        setRefresh(value => value + 1);
     }
-
-    loadOrders();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [api, storeId]);
-
-  return (
-    <div className="space-y-6">
-      <header>
-        <p className="text-[10px] font-black uppercase tracking-[0.12em] text-tint-foreground">
-          Fulfilment
-        </p>
-        <h1 className="mt-2 text-[30px] font-black tracking-[-0.045em] text-foreground sm:text-[34px]">
-          Orders
-        </h1>
-        <p className="mt-2 max-w-xl text-[13px] leading-6 text-muted-foreground">
-          Track customer orders and keep fulfilment moving.
-        </p>
-      </header>
-
-      {loading ? (
-        <Panel className="p-0">
-          <SkeletonRows label="Loading orders…" />
-        </Panel>
-      ) : !api ? (
-        <Panel>
-          <h2 className="text-[15px] font-black text-foreground">
-            Orders unavailable
-          </h2>
-          <p className="mt-2 text-[12px] text-muted-foreground">
-            Sign in as a merchant to manage orders.
-          </p>
-        </Panel>
-      ) : error ? (
-        <div
-          role="alert"
-          className="rounded-[22px] border border-tint-border bg-muted/50 p-5 text-[12px] font-semibold text-tint-foreground"
-        >
-          {error}
-        </div>
-      ) : orders.length === 0 ? (
-        <EmptyOrders />
-      ) : (
-        <OrdersTable orders={orders} />
-      )}
-    </div>
-  );
-}
-
-function Panel({
-  children,
-  className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <section
-      className={`rounded-[22px] border border-black/[0.06] bg-card p-6 shadow-[0_12px_40px_rgba(83,61,66,0.05)] ${className}`}
-    >
-      {children}
-    </section>
-  );
-}
-
-function EmptyOrders() {
-  return (
-    <section className="grid min-h-64 place-items-center rounded-[22px] border border-dashed border-black/[0.10] bg-card/70 px-6 py-10 text-center">
-      <div>
-        <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-muted text-tint-foreground">
-          <ClipboardList size={20} strokeWidth={1.8} />
-        </span>
-        <h2 className="mt-4 text-[15px] font-black text-foreground">
-          No orders yet
-        </h2>
-        <p className="mx-auto mt-2 max-w-xs text-[12px] leading-5 text-muted-foreground">
-          New paid orders will appear here after customers check out.
-        </p>
-      </div>
-    </section>
-  );
-}
-
-function OrdersTable({ orders }: { orders: MerchantOrderListItem[] }) {
-  return (
-    <section className="overflow-hidden rounded-[22px] border border-black/[0.06] bg-card shadow-[0_12px_40px_rgba(83,61,66,0.05)]">
-      <div className="hidden grid-cols-[0.8fr_1.5fr_0.9fr_0.9fr_0.8fr] gap-4 border-b border-black/[0.06] bg-muted/50 px-5 py-3 text-[9px] font-black uppercase tracking-[0.1em] text-muted-foreground md:grid">
-        <span>Order</span>
-        <span>Customer</span>
-        <span>Status</span>
-        <span>Total</span>
-        <span>Date</span>
-      </div>
-
-      <div className="divide-y divide-black/[0.06]">
-        {orders.map((order) => (
-          <Link
-            key={order.id}
-            href={`/admin/orders/${order.id}`}
-            className="group grid gap-4 px-5 py-4 transition hover:bg-muted/50 md:grid-cols-[0.8fr_1.5fr_0.9fr_0.9fr_0.8fr] md:items-center"
-          >
-            <div>
-              <p className="text-[9px] font-black uppercase tracking-[0.1em] text-muted-foreground md:hidden">
-                Order
-              </p>
-              <p className="mt-1 text-[13px] font-black text-foreground md:mt-0">
-                {order.number}
-              </p>
-            </div>
-
-            <div className="min-w-0">
-              <p className="truncate text-[12px] font-bold text-foreground">
-                {getCustomerName(order.customerSnapshot)}
-              </p>
-              <p className="mt-1 text-[10px] text-muted-foreground">
-                Payment: {formatStatus(order.paymentStatus)}
-              </p>
-            </div>
-
-            <div>
-              <span
-                className={`inline-flex rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.06em] ${getStatusStyle(order.status)}`}
-              >
-                {formatStatus(order.status)}
-              </span>
-            </div>
-
-            <p className="text-[12px] font-black text-foreground">
-              {formatMoney(order.totalMinor, order.currency)}
-            </p>
-
-            <p className="text-[11px] font-semibold text-muted-foreground">
-              {formatDate(order.createdAt)}
-            </p>
-          </Link>
-        ))}
-      </div>
-    </section>
-  );
+    catch (caught) {
+        setError(caught instanceof Error ? caught.message : "Unable to update order");
+    }
+    finally {
+        setUpdating(null);
+    } }
+    return <div className="space-y-5"><header className="flex items-end justify-between"><div><p className="text-xs font-semibold text-muted-foreground">Merchant workspace</p><h1 className="mt-1 text-3xl font-bold tracking-tight">Orders</h1></div><button className={orderButtonClass} onClick={() => setRefresh(value => value + 1)}>Refresh</button></header>
+    {result?.featureEnabled === false && <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950"><div><strong>Order workspace is in preview</strong><p className="mt-1">{["OWNER", "ADMIN"].includes(activeStore?.role ?? "") ? "Enable it for this store to manage shipments, financial edits and customer communication." : "An owner or administrator can enable order management for this store."}</p></div>{["OWNER", "ADMIN"].includes(activeStore?.role ?? "") && <button className={orderButtonClass} disabled={loading} onClick={async () => { if (!api || !storeId)
+        return; setLoading(true); try {
+        await api.setOrderWorkspaceEnabled(storeId, true);
+        setRefresh(value => value + 1);
+    }
+    catch (caught) {
+        setError(caught instanceof Error ? caught.message : "Unable to enable workspace");
+        setLoading(false);
+    } }}>Enable order workspace</button>}</div>}<section aria-label="Order summary" className={`${orderPanelClass} grid grid-cols-3 divide-x divide-border overflow-hidden lg:grid-cols-9`}>{["TOTAL", ...orderStatuses].map(status => <button key={status} className="min-w-0 px-3 py-4 text-left hover:bg-muted" onClick={() => update("status", status === "TOTAL" ? "" : status)}><span className="block min-h-8 text-[10px] leading-4 text-muted-foreground">{status === "PAID" ? "Awaiting confirmation" : status === "TOTAL" ? "Total orders" : orderLabel(status)}</span><strong className="text-xl tabular-nums">{summary[status] ?? summary[status.toLowerCase()] ?? (status === "TOTAL" ? result?.total : undefined) ?? "—"}</strong></button>)}</section>
+    <section className={`${orderPanelClass} overflow-hidden`}><div className="flex flex-wrap gap-3 border-b border-border p-3"><label className="relative min-w-48 flex-1"><span className="sr-only">Search orders</span><Search className="absolute left-3 top-2.5 text-muted-foreground" size={17}/><input className={`${orderInputClass} pl-9`} value={search} onChange={event => setSearch(event.target.value)} placeholder="Search order, customer or product"/></label><label><span className="sr-only">Order status</span><select className={orderInputClass} value={query.status ?? ""} onChange={event => update("status", event.target.value)}><option value="">All orders</option>{orderStatuses.map(status => <option key={status}>{status}</option>)}</select></label><label><span className="sr-only">Payment status</span><select className={orderInputClass} value={query.paymentStatus ?? ""} onChange={event => update("paymentStatus", event.target.value)}><option value="">All payments</option>{["PENDING", "PROCESSING", "PAID", "FAILED", "REFUNDED"].map(status => <option key={status}>{status}</option>)}</select></label><label><span className="sr-only">Sort orders</span><select className={orderInputClass} value={query.sort} onChange={event => update("sort", event.target.value)}><option value="date">Date</option><option value="amount">Amount</option><option value="status">Status</option></select></label><button className={orderButtonClass} onClick={() => update("direction", query.direction === "asc" ? "desc" : "asc")}>{query.direction === "asc" ? "Ascending ↑" : "Descending ↓"}</button></div>
+    {error && <div role="alert" className="m-4 rounded-lg border border-red-200 p-4 text-sm text-red-800">{error} <button className="underline" onClick={() => setRefresh(value => value + 1)}>Try again</button></div>}
+    {!api && !loading ? <p className="p-8 text-center text-sm">Sign in as a merchant to manage orders.</p> : loading && !result ? <p className="p-12 text-center text-sm" role="status">Loading orders…</p> : !result?.orders.length ? <div className="p-14 text-center"><Package className="mx-auto text-muted-foreground"/><h2 className="mt-3 font-semibold">{search || query.status || query.paymentStatus ? "No matching orders" : "No orders yet"}</h2><p className="mt-2 text-sm text-muted-foreground">{search || query.status || query.paymentStatus ? "Try another search or clear your filters." : "Orders appear here when customers check out."}</p></div> : <div aria-busy={loading}><div className="hidden grid-cols-[1fr_1.2fr_1.5fr_1fr_1fr_1fr_auto] gap-3 bg-muted/50 px-4 py-3 text-xs text-muted-foreground lg:grid"><span>Order / date</span><span>Customer</span><span>Items</span><span>Payment</span><span>Fulfilment</span><span>Total</span><span /></div>{result.orders.map(order => <div key={order.id} className="grid items-center gap-3 border-t border-border px-4 py-4 text-sm hover:bg-muted/50 lg:grid-cols-[1fr_1.2fr_1.5fr_1fr_1fr_1fr_auto]"><div><Link className="font-semibold underline-offset-4 hover:underline" href={`/admin/orders/${order.id}`}>{order.number}</Link><p className="mt-1 text-xs text-muted-foreground">{new Date(order.createdAt).toLocaleString("en", { dateStyle: "medium", timeStyle: "short", ...(result.timeZone ? { timeZone: result.timeZone } : {}) })}</p></div><div><span>{String(order.customerSnapshot.name ?? "Customer unavailable")}</span><p className="truncate text-xs text-muted-foreground">{String(order.customerSnapshot.email ?? "")}</p></div><div className="flex items-center gap-2">{order.items?.[0]?.imageSnapshot && <img src={order.items[0].imageSnapshot} alt="" className="size-9 rounded border border-border object-cover"/>}<span className="truncate text-xs">{order.items?.map(item => `${item.titleSnapshot} × ${item.quantity}`).join(", ") || `${order.itemCount ?? "—"} items`}</span></div><div><span className="mr-2 text-xs text-muted-foreground lg:hidden">Payment</span><OrderBadge value={order.paymentStatus}/></div><div><span className="mr-2 text-xs text-muted-foreground lg:hidden">Fulfilment</span><OrderBadge value={order.fulfilmentStatus ?? order.status}/></div><strong className="tabular-nums">{orderMoney(order.totalMinor, order.currency)}</strong>{result.featureEnabled && ["OWNER", "ADMIN", "ORDER_MANAGER"].includes(activeStore?.role ?? "") && ["PAID", "CONFIRMED"].includes(order.status) ? <button className={orderButtonClass} disabled={updating === order.id} onClick={event => { event.preventDefault(); event.stopPropagation(); void advance(order.id, order.status === "PAID" ? "CONFIRMED" : "PROCESSING"); }}>{updating === order.id ? "Updating�" : order.status === "PAID" ? "Confirm" : "Process"}</button> : <Link className={orderButtonClass} href={`/admin/orders/${order.id}`} aria-label={`View ${order.number}`}><ArrowRight size={15}/></Link>}</div>)}</div>}
+    {result && result.total > 0 && <footer className="flex items-center justify-between border-t border-border px-4 py-3 text-xs"><span>{result.total} orders · Page {query.page} of {Math.max(1, Math.ceil(result.total / result.pageSize))}</span><div className="flex gap-2"><button className={orderButtonClass} disabled={Number(query.page) <= 1 || loading} onClick={() => setQuery(current => ({ ...current, page: Number(current.page) - 1 }))}>Previous</button><button className={orderButtonClass} disabled={Number(query.page) * result.pageSize >= result.total || loading} onClick={() => setQuery(current => ({ ...current, page: Number(current.page) + 1 }))}>Next</button></div></footer>}</section></div>;
 }

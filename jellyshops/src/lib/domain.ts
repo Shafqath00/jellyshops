@@ -102,6 +102,7 @@ export interface CategoryOptionDefinition {
 }
 
 export interface Product {
+  fulfillmentType?: "PHYSICAL" | "DIGITAL";
   id: string;
   storeId: string;
   name: string;

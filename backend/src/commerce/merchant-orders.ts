@@ -3,9 +3,11 @@ import type { StripeGateway } from "../stripe/client.js";
 
 import { FulfilmentService } from "./fulfilment.js";
 import type { CommerceRepository } from "./repository.js";
+import { OrderManagementService } from "./order-management.js";
 import { RefundService } from "./refunds.js";
 
 export class MerchantOrderService {
+  readonly management: OrderManagementService;
   private readonly fulfilment: FulfilmentService;
   private readonly refunds: RefundService;
 
@@ -13,9 +15,12 @@ export class MerchantOrderService {
     private readonly repository: CommerceRepository,
     stripe: StripeGateway,
   ) {
+    this.management = new OrderManagementService(repository, stripe);
     this.fulfilment = new FulfilmentService(repository);
     this.refunds = new RefundService(repository, stripe);
   }
+
+  search(storeId: string, query: import("./order-management.js").OrderQuery) { return this.management.search(storeId, query); }
 
   async list(storeId: string) {
     return this.repository.transaction(async (tx) => {
@@ -40,8 +45,8 @@ export class MerchantOrderService {
     });
   }
 
-  async get(storeId: string, orderId: string) {
-    return this.repository.transaction(async (tx) => {
+  async get(storeId: string, orderId: string): Promise<Record<string, any>> {
+    const detail = await this.repository.transaction(async (tx) => {
       const orderResult = await tx.query(
         `
           SELECT *
@@ -113,6 +118,7 @@ export class MerchantOrderService {
       }
 
       return {
+        ...await this.management.details(storeId, orderId, tx),
         order,
         items: itemsResult.rows,
         payment,
@@ -120,6 +126,7 @@ export class MerchantOrderService {
         disputes,
       };
     });
+    return detail;
   }
 
   transition(
@@ -134,10 +141,12 @@ export class MerchantOrderService {
     );
   }
 
-  refund(storeId: string, orderId: string) {
-    return this.refunds.fullRefund(
-      storeId,
-      orderId,
-    );
+  async refund(storeId: string, orderId: string) {
+    const order = await this.repository.transaction(async tx =>
+      (await tx.query(`SELECT revision FROM "Order" WHERE "storeId"=$1 AND id=$2`, [storeId, orderId])).rows[0]);
+    if (!order) throw new ApiError(404, "ORDER_NOT_FOUND", "Order not found.");
+    return this.management.refund(storeId, orderId, { revision: Number(order.revision), idempotencyKey: `legacy-full-${orderId}` });
   }
 }
+
+

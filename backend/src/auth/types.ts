@@ -26,8 +26,11 @@ export type StorePermission =
   | "settings:manage"
   | "payments:view"
   | "payments:manage"
+  | "orders:view"
+  | "orders:manage"
   | "orders:refund";
 
 export interface AuthProvider {
   verify(token: string): Promise<MerchantPrincipal>;
 }
+

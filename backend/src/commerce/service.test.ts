@@ -78,6 +78,15 @@ const validCart: BeginCheckoutInput = {
 // ---------------------------------------------------------------------------
 
 describe("CheckoutService", () => {
+  it("captures product identity and image instead of only the variant label", async () => {
+    const { service, catalog, tx } = setup();
+    vi.mocked(catalog.getProduct).mockResolvedValue({ title: "Celebration cake", media: [{ url: "https://example.test/cake.jpg" }], options: [] } as any);
+    await service.begin(validCart);
+    const item = vi.mocked(tx.query).mock.calls.find(([sql]) => sql.includes('INSERT INTO "OrderItem"'));
+    expect(item?.[1]?.[3]).toBe("Celebration cake — Valid Variant");
+    expect(item?.[1]?.[5]).toBe("https://example.test/cake.jpg");
+  });
+
   it("uses persisted shipping and transaction-safe order numbering", async () => {
     const { service, tx, checkoutPolicy } = setup();
     checkoutPolicy.getCheckoutPolicy.mockResolvedValue({ currency: "USD", country: "US", shippingMinor: 475 });

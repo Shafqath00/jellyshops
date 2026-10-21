@@ -30,6 +30,16 @@ export type MerchantPaymentStatus = "PENDING" | "PROCESSING" | "PAID" | "FAILED"
 export type RefundStatus = "PENDING" | "REQUIRES_ACTION" | "SUCCEEDED" | "FAILED" | "CANCELLED";
 
 export interface MerchantOrder {
+  revision?: number;
+  taxMinor?: number | null;
+  discountMinor?: number | null;
+  balanceDueMinor?: number;
+  deliverySnapshot?: Record<string, unknown>;
+  billingAddress?: Record<string, unknown> | null;
+  customerNote?: string | null;
+  isTest?: boolean;
+  paymentStatus?: string | null;
+  fulfilmentStatus?: string;
   id: string;
   number: string;
   storeId: string;
@@ -45,9 +55,19 @@ export interface MerchantOrder {
 
 export interface MerchantOrderListItem extends MerchantOrder {
   paymentStatus: MerchantPaymentStatus | null;
+  items?: MerchantOrderItem[];
+  itemCount?: number;
 }
 
 export interface MerchantOrderItem {
+  id?: string;
+  configurationKey?: string;
+  productTitleSnapshot?: string;
+  variantTitleSnapshot?: string;
+  fulfilmentType?: "PHYSICAL" | "DIGITAL";
+  fulfillmentType?: "PHYSICAL" | "DIGITAL";
+  fulfilledQuantity?: number;
+  discountMinor?: number | null;
   variantId: string;
   titleSnapshot: string;
   skuSnapshot: string | null;
@@ -79,9 +99,28 @@ export interface MerchantPaymentDispute {
 }
 
 export interface MerchantOrderDetail {
+  timeZone?: string;
   order: MerchantOrder;
   items: MerchantOrderItem[];
   payment: MerchantPayment | null;
   refunds: MerchantRefund[];
   disputes: MerchantPaymentDispute[];
+  events?: OrderActivity[];
+  notes?: OrderNote[];
+  fulfilments?: OrderFulfilment[];
+  returns?: OrderReturn[];
+  revisions?: Array<{ id: string; status: string; revision?: number; number?: number; amountMinor?: number; deltaMinor?: number; settlementMinor?: number; balancePaymentUrl?: string }>;
+  notifications?: Array<{ id: string; type: string; status: string; createdAt?: string; error?: string; lastError?: string }>;
+  transactions?: Array<{ id: string; kind: string; status: string; amountMinor: number; paymentIntentId?: string }>;
+  operations?: Array<{ id: string; kind: string; status: string; attempts: number; lastError?: string }>;
+  capabilities?: Record<string, boolean>;
 }
+
+export interface OrderActivity { id: string; type: string; createdAt: string; message?: string; payload?: Record<string, unknown> }
+export interface OrderNote { id: string; body: string; createdAt: string; authorName?: string }
+export interface OrderFulfilment { id: string; status: string; trackingNumber?: string | null; trackingUrl?: string | null; carrier?: string | null; items?: Array<{ orderItemId?: string; variantId?: string; quantity: number }> }
+export interface OrderReturn { id: string; status: string; reason?: string; items?: Array<{ orderItemId?: string; variantId?: string; quantity: number }> }
+export interface OrderListQuery { query?: string; status?: string; paymentStatus?: string; sort?: string; direction?: string; page?: number; pageSize?: number }
+export interface OrderListResult { orders: MerchantOrderListItem[]; total: number; page: number; pageSize: number; summary: Record<string, number>; featureEnabled?: boolean; timeZone?: string }
+export interface OrderEditInput { revision: number; items: Array<{ variantId: string; configurationKey?: string; quantity: number }>; shippingMinor?: number }
+export interface OrderEditPreview { beforeTotalMinor?: number; afterTotalMinor?: number; totalMinor?: number; deltaMinor?: number; settlementMinor?: number; differenceMinor?: number; balancePaymentUrl?: string; message?: string; [key: string]: unknown }

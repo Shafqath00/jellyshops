@@ -57,6 +57,9 @@ interface ValidatedLine {
   titleSnapshot: string;
   skuSnapshot: string | null;
   imageSnapshot: string | null;
+  productTitleSnapshot: string | null;
+  variantTitleSnapshot: string;
+  fulfillmentType: "PHYSICAL" | "DIGITAL";
   unitPriceMinor: number;
   configurationSnapshot: Array<{ optionId: string; valueId: string; optionName: string; valueLabel: string; priceAdjustmentMinor: number }>;
   configurationKey: string;
@@ -77,6 +80,8 @@ export interface CheckoutServiceDeps {
   stripeGateway?: PaymentIntentGateway;
   checkoutPolicy: { getCheckoutPolicy(storeId: string): Promise<CheckoutPolicy> };
   enabledCountries?: readonly string[];
+  enhancedSnapshots?: boolean;
+  isTest?: boolean;
 }
 
 function checkoutUnavailable() {
@@ -199,7 +204,19 @@ export class CheckoutService {
       );
     }
 
-    return order;
+    // Explicit public projection: never serialize staff metadata or Stripe IDs.
+    const source = order.order;
+    return {
+      order: {
+        number: source.number, status: source.status, currency: source.currency,
+        subtotalMinor: source.subtotalMinor, shippingMinor: source.shippingMinor,
+        totalMinor: source.totalMinor, createdAt: source.createdAt,
+        ...("balanceDueMinor" in source ? { balanceDueMinor: source.balanceDueMinor } : {}),
+      },
+      items: order.items.map(({ titleSnapshot, imageSnapshot, unitPriceMinor, quantity, configurationSnapshot }) =>
+        ({ titleSnapshot, imageSnapshot, unitPriceMinor, quantity, configurationSnapshot })),
+      payment: order.payment ? { status: order.payment.status } : null,
+    };
   }
 
   assertPublicOrderAccess(
@@ -229,13 +246,8 @@ export class CheckoutService {
     const policy = await this.deps.checkoutPolicy.getCheckoutPolicy(input.storeId);
     if (input.currency !== policy.currency) throw new ApiError(422, "CHECKOUT_CURRENCY_MISMATCH", "Use the store's currency to check out.");
     const countries = [input.deliverySnapshot?.country, (input.deliverySnapshot?.address as Record<string, unknown> | undefined)?.country, (input.customerSnapshot.address as Record<string, unknown> | undefined)?.country].filter((value) => value !== undefined);
-    if (!countries.length || countries.some((country) => String(country).toUpperCase() !== policy.country)) throw new ApiError(422, "CHECKOUT_DELIVERY_COUNTRY_INVALID", "A delivery address within the store's country is required.");
+    if (countries.some((country) => String(country).toUpperCase() !== policy.country)) throw new ApiError(422, "CHECKOUT_DELIVERY_COUNTRY_INVALID", "An address within the store's country is required.");
     if (this.deps.enabledCountries && !this.deps.enabledCountries.includes(policy.country)) throw new ApiError(409, "MARKET_PAYMENTS_UNAVAILABLE", "Payments are not yet available for this store's country.");
-
-    const stripeAccountId =
-      await this.getStripeAccountId(
-        input.storeId,
-      );
 
     const cart = await this.validateCart(
       input.storeId,
@@ -243,6 +255,8 @@ export class CheckoutService {
       input.items,
       policy.shippingMinor,
     );
+    if (cart.lines.some((line) => line.fulfillmentType !== "DIGITAL") && !countries.length) throw new ApiError(422, "CHECKOUT_DELIVERY_COUNTRY_INVALID", "A delivery address within the store's country is required.");
+    const stripeAccountId = await this.getStripeAccountId(input.storeId);
 
     // Buyer/delivery changes must not reuse an attempt holding an older snapshot.
     cart.cartHash = createHash("sha256").update(JSON.stringify([cart.cartHash, input.customerSnapshot, input.deliverySnapshot ?? null, customerId ?? null])).digest("hex");
@@ -365,6 +379,11 @@ export class CheckoutService {
         }
 
         const product = await this.deps.catalog.getProduct(storeId, variant.productId);
+        const fulfillmentType = (product as { fulfillmentType?: string } | null)?.fulfillmentType === "DIGITAL" ? "DIGITAL" as const : "PHYSICAL" as const;
+        if (fulfillmentType === "DIGITAL" && this.deps.enhancedSnapshots) {
+          const assets = await this.deps.repository.transaction((tx) => tx.query('SELECT "id" FROM "DigitalAsset" WHERE "storeId"=$1 AND "productId"=$2 AND "archivedAt" IS NULL LIMIT 1', [storeId, variant.productId]));
+          if (!assets.rows.length) throw new ApiError(409, "DIGITAL_FILE_UNAVAILABLE", "This digital product is not ready for purchase.");
+        }
         const productOptions = (product?.options ?? []) as Array<{ id: string; name: string; type?: string; required?: boolean; values?: Array<{ id: string; label: string; priceAdjustmentMinor?: number; priceAdjustment?: number }> }>;
         const selections = item.configurationSelections ?? [];
         const selectedOptionIds = new Set<string>();
@@ -388,9 +407,12 @@ export class CheckoutService {
         return {
           variantId: variant.id,
           quantity: item.quantity,
-          titleSnapshot: variant.title,
+          titleSnapshot: product?.title && product.title !== variant.title ? `${product.title} — ${variant.title}` : variant.title,
           skuSnapshot: variant.sku,
-          imageSnapshot: null,
+          imageSnapshot: product?.media?.[0]?.url ?? null,
+          productTitleSnapshot: product?.title ?? null,
+          variantTitleSnapshot: variant.title,
+          fulfillmentType,
           unitPriceMinor,
           configurationSnapshot: snapshot,
           configurationKey: snapshot.map((selection) => `${selection.optionId}:${selection.valueId}`).sort().join("|"),
@@ -406,8 +428,8 @@ export class CheckoutService {
       0,
     );
 
-    const totalMinor =
-      subtotalMinor + shippingMinor;
+    if (lines.every((line) => line.fulfillmentType === "DIGITAL")) shippingMinor = 0;
+    const totalMinor = subtotalMinor + shippingMinor;
     if (!Number.isSafeInteger(totalMinor) || totalMinor < 0) throw new ApiError(422, "CHECKOUT_PRICE_INVALID", "The checkout total is invalid.");
 
     return {
@@ -636,6 +658,9 @@ export class CheckoutService {
     );
 
     if (input.customerId) await tx.query('UPDATE "Order" SET "customerId" = $3 WHERE "storeId" = $1 AND "id" = $2', [input.storeId, orderId, input.customerId]);
+    if (this.deps.enhancedSnapshots) {
+      await tx.query('UPDATE "Order" SET "deliverySnapshot"=$3::jsonb,"billingAddress"=$4::jsonb,"customerNote"=$5,"isTest"=$6 WHERE "storeId"=$1 AND "id"=$2', [input.storeId, orderId, input.deliverySnapshot ? JSON.stringify(input.deliverySnapshot) : null, input.customerSnapshot.billingAddress ? JSON.stringify(input.customerSnapshot.billingAddress) : null, typeof input.customerSnapshot.note === "string" ? input.customerSnapshot.note.slice(0,10000) : null, this.deps.isTest ?? false]);
+    }
 
     for (const line of cart.lines) {
       await tx.query(
@@ -670,6 +695,7 @@ export class CheckoutService {
           line.configurationKey,
         ],
       );
+      if (this.deps.enhancedSnapshots) await tx.query('UPDATE "OrderItem" SET "productTitleSnapshot"=$4,"variantTitleSnapshot"=$5,"fulfillmentType"=$6 WHERE "storeId"=$1 AND "orderId"=$2 AND "variantId"=$3 AND "configurationKey"=$7', [input.storeId, orderId, line.variantId, line.productTitleSnapshot, line.variantTitleSnapshot, line.fulfillmentType, line.configurationKey]);
     }
 
     const paymentId =
@@ -745,10 +771,11 @@ export class CheckoutService {
     );
 
     try {
-      await tx.reserveVariants({
+      const physicalItems = input.items.filter((item) => cart.lines.some((line) => line.variantId === item.variantId && line.fulfillmentType !== "DIGITAL"));
+      if (physicalItems.length) await tx.reserveVariants({
         storeId: input.storeId,
         attemptId,
-        items: input.items,
+        items: physicalItems,
       });
     } catch (error) {
       if (
@@ -767,6 +794,7 @@ export class CheckoutService {
       throw error;
     }
 
+    if (this.deps.enhancedSnapshots) await tx.query(`INSERT INTO "OrderRevision" (id,"storeId","orderId",number,status,snapshot,"idempotencyKey","requestHash","appliedAt") SELECT 'original-'||o.id,o."storeId",o.id,1,'APPLIED',jsonb_build_object('order',to_jsonb(o),'items',COALESCE((SELECT jsonb_agg(to_jsonb(i)) FROM "OrderItem" i WHERE i."storeId"=o."storeId" AND i."orderId"=o.id),'[]'::jsonb)),'original','original',o."createdAt" FROM "Order" o WHERE o."storeId"=$1 AND o.id=$2 ON CONFLICT DO NOTHING`, [input.storeId, orderId]);
     return {
       attemptId,
       orderId,

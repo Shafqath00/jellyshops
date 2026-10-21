@@ -104,6 +104,12 @@ describe("Stripe server gateway", () => {
     });
   });
 
+  it("sends an explicit minor-unit amount for an order-adjustment refund", async () => {
+    const { gateway, requests } = setup();
+    await gateway.createFullRefund({ paymentIntentId: "pi_order", orderId: "order-1", refundId: "refund-adjustment", amountMinor: 250 }, context);
+    expect(new URLSearchParams(requests[0].body).get("amount")).toBe("250");
+  });
+
   it("retrieves an existing intent only in the explicit merchant context", async () => {
     const { gateway, requests } = setup();
     await gateway.retrievePaymentIntent("pi_order", "acct_merchant");

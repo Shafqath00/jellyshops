@@ -44,6 +44,7 @@ export interface CreateFullRefundInput {
   paymentIntentId: string;
   orderId: string;
   refundId: string;
+  amountMinor?: number;
 }
 
 
@@ -528,6 +529,7 @@ export function createStripeGateway(
     ) {
       return stripe.refunds.create(
         {
+          ...(input.amountMinor !== undefined ? { amount: requireAmount(input.amountMinor) } : {}),
           payment_intent:
             requireValue(
               input.paymentIntentId,

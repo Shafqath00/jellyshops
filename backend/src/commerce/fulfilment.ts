@@ -1,5 +1,7 @@
 import { ApiError } from "../http/errors.js";
 import type { CommerceRepository } from "./repository.js";
+import { appendOrderEvent } from "./order-management.js";
+import { randomUUID } from "node:crypto";
 
 const fulfilmentTransitions: Record<string, string> = {
   PAID: "CONFIRMED",
@@ -17,6 +19,8 @@ const fulfilmentStartedStatuses = new Set([
 interface OrderRow {
   id: string;
   status: string;
+  balanceDueMinor?: number;
+  fulfilmentStatus?: string;
 }
 
 interface PaymentRow {
@@ -30,7 +34,7 @@ export class FulfilmentService {
     return this.repository.transaction(async (tx) => {
       const orderResult = await tx.query<OrderRow>(
         `
-          SELECT "id", "status"
+          SELECT *
           FROM "Order"
           WHERE "storeId" = $1
             AND "id" = $2
@@ -60,9 +64,7 @@ export class FulfilmentService {
         );
       }
 
-      // PAID itself is already the authoritative payment-success state.
-      // Later fulfilment transitions additionally verify the Payment row.
-      if (nextStatus !== "CONFIRMED") {
+      {
         const paymentResult = await tx.query<PaymentRow>(
           `
             SELECT "status"
@@ -75,7 +77,8 @@ export class FulfilmentService {
 
         const payment = paymentResult.rows[0];
 
-        if (payment?.status !== "PAID") {
+        const pending = await tx.query(`SELECT id FROM "OrderRevision" WHERE "storeId"=$1 AND "orderId"=$2 AND status='PENDING'`, [storeId, orderId]);
+        if (payment?.status !== "PAID" || (order.balanceDueMinor ?? 0) > 0 || pending.rows.length > 0) {
           throw new ApiError(
             409,
             "ORDER_NOT_PAID",
@@ -87,11 +90,29 @@ export class FulfilmentService {
       const fulfilmentStarted =
         fulfilmentStartedStatuses.has(nextStatus);
 
+      if (nextStatus === "PROCESSING" || nextStatus === "SHIPPED") {
+        const physical = await tx.query(`SELECT "variantId", "configurationKey", quantity FROM "OrderItem" WHERE "storeId"=$1 AND "orderId"=$2 AND "fulfillmentType"='PHYSICAL'`, [storeId, orderId]);
+        if (!physical.rows.length) {
+          throw new ApiError(409, "DIGITAL_FULFILMENT_AUTOMATIC", "Digital items are delivered automatically after payment.");
+        }
+        if (nextStatus === "SHIPPED") {
+          await tx.query(`INSERT INTO "OrderFulfilment" (id,"storeId","orderId",items) VALUES ($1,$2,$3,$4)`, [`shipment-${randomUUID()}`, storeId, orderId, JSON.stringify(physical.rows)]);
+        }
+      }
+      if (nextStatus === "DELIVERED") {
+        if (order.fulfilmentStatus !== "FULFILLED") {
+          throw new ApiError(409, "ORDER_PARTIALLY_FULFILLED", "Ship every physical item before marking the whole order delivered.");
+        }
+        await tx.query(`UPDATE "OrderFulfilment" SET status='DELIVERED',"deliveredAt"=COALESCE("deliveredAt",now()) WHERE "storeId"=$1 AND "orderId"=$2`, [storeId, orderId]);
+      }
+
       const updateResult = await tx.query<OrderRow>(
         `
           UPDATE "Order"
           SET
             "status" = $3,
+            "revision" = "revision" + 1,
+            "fulfilmentStatus" = CASE WHEN $3='SHIPPED' THEN 'FULFILLED' WHEN $3='DELIVERED' THEN 'DELIVERED' ELSE "fulfilmentStatus" END,
             "fulfilmentStartedAt" = CASE
               WHEN $4
                 THEN COALESCE("fulfilmentStartedAt", CURRENT_TIMESTAMP)
@@ -111,6 +132,8 @@ export class FulfilmentService {
           order.status,
         ],
       );
+
+      await appendOrderEvent(tx, storeId, orderId, "STATUS_CHANGED", { previousStatus: order.status, status: nextStatus });
 
       // Another concurrent transition may have won.
       return updateResult.rows[0] ?? order;

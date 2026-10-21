@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Archive, ArrowLeft } from "lucide-react";
 import { ProductForm } from "@/components/product-form";
+import { DigitalProductSettings } from "@/components/digital-product-settings";
 import { useShop } from "@/contexts/shop-context";
 import { useEffect, useMemo, useState } from "react";
 import { authApiOrigin, useAuth } from "@/features/auth/auth-provider";
@@ -105,6 +106,7 @@ export function ProductEditView({
       </header>
 
       <ProductForm key={scope} product={product} />
+      <DigitalProductSettings key={`delivery:${scope}`} productId={product.id} />
     </div>
   );
 }

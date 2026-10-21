@@ -32,6 +32,7 @@ export interface CatalogVariant {
 }
 
 export interface CatalogProduct {
+  fulfillmentType?: "PHYSICAL" | "DIGITAL";
   id: string;
   storeId: string;
   externalId: string | null;

@@ -6,6 +6,7 @@
  * handler for every request, so this module must never call `listen()`.
  */
 import { onRequest } from "firebase-functions/v2/https";
+import { onSchedule } from "firebase-functions/v2/scheduler";
 
 import { createApp } from "./app.js";
 import { loadConfig } from "./config.js";
@@ -23,6 +24,7 @@ const config = loadConfig({
     : "production",
 });
 
+const application = createApp({ config });
 export const api = onRequest(
   {
     region: process.env.FUNCTIONS_REGION ?? "us-central1",
@@ -30,5 +32,12 @@ export const api = onRequest(
     memory: "1GiB",
     maxInstances: 5,
   },
-  createApp({ config }),
+  application,
 );
+
+export const orderWorkers = onSchedule({ schedule: "every 1 minutes", region: process.env.FUNCTIONS_REGION ?? "us-central1", timeoutSeconds: 300, memory: "1GiB", maxInstances: 1 }, async () => {
+  if (application.locals.runOrderWorkers) {
+    const result = await application.locals.runOrderWorkers();
+    console.info("Order workers completed", result);
+  }
+});

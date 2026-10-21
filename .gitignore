@@ -41,3 +41,6 @@ playwright-report/
 backend/generated/
 backend/cloud-sql-proxy.exe
 backend/.tmp-vitest/
+**/.test-tmp/
+**/node-compile-cache/
+**/.next-order-management/

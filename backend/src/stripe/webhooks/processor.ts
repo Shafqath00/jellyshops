@@ -13,6 +13,12 @@ export interface ConnectPaymentEvent {
   payload: EventPayload;
 }
 
+export interface PaymentSettlementHooks {
+  settlePaymentIntent(id: string, status: string, sql: SqlExecutor, stripeAccountId: string, object?: EventPayload): Promise<boolean>;
+  settleRefund(id: string, status: string, sql: SqlExecutor, stripeAccountId: string, object?: EventPayload): Promise<boolean>;
+  settleChargeRefund?(paymentIntentId: string, sql: SqlExecutor, stripeAccountId: string): Promise<boolean>;
+}
+
 const PAYMENT_INTENT_EVENTS = new Set([
   "payment_intent.succeeded",
   "payment_intent.payment_failed",
@@ -168,7 +174,7 @@ async function processPaymentSucceeded(
         UPDATE "Payment"
         SET "status" = 'PAID'
         WHERE "id" = $3
-          AND "status" IN ('PENDING', 'PROCESSING')
+          AND "status" IN ('PENDING', 'PROCESSING', 'FAILED')
         RETURNING "id"
       ),
       paid_order AS (
@@ -230,7 +236,7 @@ async function processPaymentCancelled(
       UPDATE "Payment"
       SET "status" = 'CANCELLED'
       WHERE "id" = $1
-        AND "status" = 'PENDING'
+        AND "status" IN ('PENDING', 'PROCESSING', 'FAILED')
     `,
     [payment.id],
   );
@@ -261,10 +267,22 @@ async function processPaymentCancelled(
 
   await sql.query(
     `
-      UPDATE "InventoryReservation"
-      SET "status" = 'RELEASED'
-      WHERE "attemptId" = $1
-        AND "status" = 'HELD'
+      WITH released AS (
+        UPDATE "InventoryReservation"
+        SET "status" = 'RELEASED'
+        WHERE "attemptId" = $1
+          AND "status" = 'HELD'
+        RETURNING "storeId", "variantId", "quantity"
+      ), totals AS (
+        SELECT "storeId", "variantId", SUM("quantity")::integer AS quantity
+        FROM released GROUP BY "storeId", "variantId"
+      )
+      UPDATE "InventoryLevel" inventory
+      SET reserved = inventory.reserved - totals.quantity,
+          "updatedAt" = CURRENT_TIMESTAMP
+      FROM totals
+      WHERE inventory."storeId" = totals."storeId"
+        AND inventory."variantId" = totals."variantId"
     `,
     [attemptId],
   );
@@ -431,17 +449,18 @@ async function processDisputeEvent(
 
 function refundStatus(
   eventType: string,
+  objectStatus?: unknown,
 ): "PENDING" | "SUCCEEDED" | "FAILED" {
   if (
     eventType ===
-    "refund.succeeded"
+    "refund.succeeded" || objectStatus === "succeeded"
   ) {
     return "SUCCEEDED";
   }
 
   if (
     eventType ===
-    "refund.failed"
+    "refund.failed" || objectStatus === "failed" || objectStatus === "canceled"
   ) {
     return "FAILED";
   }
@@ -515,7 +534,7 @@ async function upsertRefund(
       payment.id,
       stripeRefundId,
       amount,
-      refundStatus(event.type),
+      refundStatus(event.type, object.status),
     ],
   );
 }
@@ -542,6 +561,7 @@ async function processChargeRefunded(
       WHERE "id" = $1
         AND "status" IN (
           'PAID',
+          'CONFIRMED',
           'PROCESSING',
           'SHIPPED',
           'DELIVERED'
@@ -571,6 +591,12 @@ async function processChargeRefunded(
           ir."variantId"
 
         AND ir."status" = 'SOLD'
+        AND EXISTS (
+          SELECT 1 FROM "Order" original_order
+          WHERE original_order."id" = $1
+            AND original_order."storeId" = $2
+            AND original_order."fulfilmentStartedAt" IS NULL
+        )
 
         AND ir."attemptId" IN (
           SELECT "id"
@@ -666,8 +692,10 @@ async function processRefundEvent(
   }
 
   if (
-    event.type ===
-    "charge.refunded"
+    event.type === "charge.refunded" &&
+    (object.refunded === true ||
+      (typeof object.amount === "number" && object.amount > 0 &&
+        typeof object.amount_refunded === "number" && object.amount_refunded >= object.amount))
   ) {
     await processChargeRefunded(
       sql,
@@ -679,18 +707,34 @@ async function processRefundEvent(
 export async function processConnectPaymentEvent(
   sql: SqlExecutor,
   event: ConnectPaymentEvent,
+  hooks?: PaymentSettlementHooks,
 ): Promise<void> {
   if (!event.stripeAccountId) {
+    await markProcessed(sql, event.id);
     return;
   }
 
   const object =
     stripeObject(event.payload);
 
-  await markProcessed(
-    sql,
-    event.id,
-  );
+  if (event.type === "charge.refunded" && hooks?.settleChargeRefund) {
+    const intent = expandableId(object.payment_intent);
+    if (intent && await hooks.settleChargeRefund(intent, sql, event.stripeAccountId)) {
+      await markProcessed(sql, event.id);
+      return;
+    }
+  }
+
+  const remoteId = stringValue(object.id);
+  if (hooks && remoteId) {
+    const paymentStatus = event.type === "payment_intent.succeeded" ? "succeeded" : event.type === "payment_intent.canceled" ? "canceled" : null;
+    const handled = paymentStatus
+      ? await hooks.settlePaymentIntent(remoteId, paymentStatus, sql, event.stripeAccountId, object)
+      : event.type.startsWith("refund.")
+        ? await hooks.settleRefund(remoteId, String(object.status ?? (event.type === "refund.failed" ? "failed" : "pending")), sql, event.stripeAccountId, object)
+        : false;
+    if (handled) { await markProcessed(sql, event.id); return; }
+  }
 
   const handledPaymentIntent =
     await processPaymentIntentEvent(
@@ -700,6 +744,7 @@ export async function processConnectPaymentEvent(
     );
 
   if (handledPaymentIntent) {
+    await markProcessed(sql, event.id);
     return;
   }
 
@@ -714,4 +759,5 @@ export async function processConnectPaymentEvent(
     event,
     object,
   );
+  await markProcessed(sql, event.id);
 }

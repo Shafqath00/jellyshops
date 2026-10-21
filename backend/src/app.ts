@@ -1,4 +1,6 @@
 import { randomUUID } from "node:crypto";
+import { createOrderRuntime, createOrderWorkerRouter, type OrderRuntime } from "./commerce/order-runtime.js";
+import { createNotificationRouter, createOrderNotificationRouter, createDigitalProductRouter, createPublicDigitalRouter } from "./commerce/notification-routes.js";
 import { CustomerService as StoreCustomerService } from "./customers/service.js";
 import { createCustomerRouter, createEngagementRouter, createMerchantEngagementRouter, customerIdentity, supabaseCustomerVerifier } from "./customers/routes.js";
 import { PublicOrderRateLimiter } from "./commerce/rate-limit.js";
@@ -240,6 +242,8 @@ export interface AppDependencies {
   webhookSql?: SqlExecutor;
   reservationSweeper?: ReservationSweeper;
   merchantOrderService?: MerchantOrderService;
+  commerceDatabase?: CommerceDatabase;
+  orderRuntime?: OrderRuntime;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -871,6 +875,7 @@ function mountStripeWebhooks(
       createConnectPaymentsWebhookRouter(
         deps.stripeGateway,
         deps.webhookSql,
+        { database: deps.commerceDatabase, hooks: deps.orderRuntime?.hooks },
       ),
     );
   }
@@ -1389,9 +1394,9 @@ export function createApp(
     (config.stripe ? createStripeGateway(config) : undefined);
 
   const commerceDatabase: CommerceDatabase | undefined =
-    supabasePool
+    dependencies.commerceDatabase ?? (supabasePool
       ? postgresCommerceDatabase(supabasePool)
-      : undefined;
+      : undefined);
 
   const commerceRepository =
     commerceDatabase
@@ -1511,6 +1516,8 @@ export function createApp(
         catalog: catalogService,
         stripeAccountService,
         stripeGateway,
+        enhancedSnapshots: true,
+        isTest: !config.stripe?.secretKey.includes("_live_"),
         checkoutPolicy: new StoreSettingsRepository(commerceDatabase!),
         enabledCountries: config.stripe?.secretKey.includes("_live_")
           ? (process.env.LIVE_CHECKOUT_COUNTRIES ?? "").split(",").map((country) => country.trim()).filter(Boolean)
@@ -1523,6 +1530,10 @@ export function createApp(
     (commerceRepository && stripeGateway
       ? new MerchantOrderService(commerceRepository, stripeGateway)
       : undefined);
+
+  const orderRuntime = dependencies.orderRuntime ?? (commerceDatabase && merchantOrderService
+    ? createOrderRuntime(commerceDatabase, merchantOrderService, config) : undefined);
+  if (orderRuntime) app.locals.runOrderWorkers = orderRuntime.runWorkers;
 
   const adminServices = commerceRepository
     ? {
@@ -1564,6 +1575,8 @@ export function createApp(
     checkoutService,
     stripeAccountService,
     merchantOrderService,
+    commerceDatabase,
+    orderRuntime,
     reservationSweeper,
     tenantRepository,
     contentService,
@@ -1591,6 +1604,25 @@ export function createApp(
       limit: "2mb",
     }),
   );
+
+  if (orderRuntime) {
+    if (orderRuntime.notifications) {
+      app.use("/api/stores/:storeId/order-notifications", createNotificationRouter(orderRuntime.notifications, authProvider));
+      app.use("/api/stores/:storeId/orders", createOrderNotificationRouter(orderRuntime.notifications, authProvider));
+    }
+    if (orderRuntime.digital) {
+      app.use("/api/stores/:storeId/digital-products", createDigitalProductRouter(orderRuntime.digital, authProvider));
+      app.use("/api/public/stores/:storeId/digital", createPublicDigitalRouter(orderRuntime.digital));
+    }
+    if (config.stripe?.schedulerSecret) app.use("/internal/commerce/orders/work", createOrderWorkerRouter(orderRuntime.runWorkers, config.stripe.schedulerSecret));
+    if (merchantOrderService && checkoutService) app.get("/api/public/stores/:storeId/orders/:publicToken/balance", async (req, res, next) => {
+      try {
+        res.setHeader("Cache-Control", "no-store");
+        await checkoutService.assertPublicOrderAccess(String(req.params.storeId), req.ip || "unknown");
+        res.json(await merchantOrderService.management.getPublicBalance(String(req.params.storeId), String(req.params.publicToken)));
+      } catch (error) { next(error); }
+    });
+  }
 
   if (commerceDatabase) {
     app.use("/api/stores/:storeId/settings", createStoreSettingsRouter(authProvider, new StoreSettingsRepository(commerceDatabase)));
