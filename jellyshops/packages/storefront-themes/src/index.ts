@@ -1,4 +1,4 @@
-export { applyThemePreset, getThemeDefinition, listThemes, resolveDesignTokens } from "./theme-registry.js";
+export { applyThemePreset, COMPLETE_STOREFRONT_THEME_IDS, getThemeDefinition, isCompleteStorefrontTheme, listThemes, resolveDesignTokens } from "./theme-registry.js";
 export { DEFAULT_THEME_ID, getThemeAsset, resolveTheme, resolveThemePreview, validateThemeManifest, validateThemeSettings } from "./theme-resolver.js";
 export { resolveThemeShell, resolveThemeShellComponent } from "./theme-shell-resolver.js";
 export { resolveStorefrontThemeTokens } from "./storefront-theme-tokens.js";

@@ -1,11 +1,11 @@
 import type { PageType, SectionNode } from "@jelly/storefront-schema";
 import { getBlockDefinition, getSectionDefinition, validateSectionAgainstRegistry } from "./registry.js";
-import type { V4StarterPack } from "./v4-starter-packs.js";
+import { V4_STARTER_PACK_IDS, type V4StarterPack } from "./v4-starter-packs.js";
 
 const pageTypes: PageType[] = ["home", "product", "collection", "cart", "search", "page", "blog", "article", "not-found"];
 const globalKeys = ["announcement", "header", "footer"] as const;
 const resourceTypes = ["product", "collection", "page", "blog", "article"] as const;
-const supportedThemes = new Set(["fresh-market", "artisan-boutique", "jelly-signature"]);
+const supportedThemes = new Set<string>(V4_STARTER_PACK_IDS);
 const themeVersionPattern = /^\d+\.\d+\.\d+(?:[-+][\w.-]+)?$/;
 
 export interface V4StarterPackIssue {

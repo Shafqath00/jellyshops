@@ -14,6 +14,7 @@ import { BoutiqueHero, type ThemeSectionProps } from "./themes/example-boutique/
 import { boutiqueShellComponents } from "./themes/example-boutique/shell.js";
 import type { ComponentType } from "react";
 import { signatureManifest, signatureTokens } from "./jelly-signature/definition.js";
+import { avenueManifest, avenueTokens } from "./jelly-avenue/definition.js";
 import { fontStack } from "./fonts.js";
 
 function definition(id: ThemeId, label: string, tokens: ThemeTokens, manifest?: unknown, sectionOverrides: Record<string, ComponentType<ThemeSectionProps>> = {}, components?: ThemeShellComponents): ThemeDefinition {
@@ -27,6 +28,7 @@ function definition(id: ThemeId, label: string, tokens: ThemeTokens, manifest?: 
 }
 const themes = [
   definition("jelly-signature", "Jelly Minimal", signatureTokens, signatureManifest),
+  definition("jelly-avenue", "Jelly Avenue", avenueTokens, avenueManifest),
   definition("minimal", "Default", minimalTokens, defaultManifest),
   definition("classic", "Classic", classicTokens),
   definition("bold", "Bold", boldTokens),
@@ -38,6 +40,16 @@ const themes = [
 ];
 
 export function listThemes(): ThemeDefinition[] { return [...themes]; }
+
+/**
+ * Themes that ship a complete storefront: their own header, footer, catalogue
+ * browser and styled cart, checkout, account and content pages. Routes use
+ * this instead of checking for one theme id.
+ */
+export const COMPLETE_STOREFRONT_THEME_IDS = ["jelly-signature", "jelly-avenue"] as const;
+export function isCompleteStorefrontTheme(id: string | null | undefined): boolean {
+  return typeof id === "string" && (COMPLETE_STOREFRONT_THEME_IDS as readonly string[]).includes(id);
+}
 export function getThemeDefinition(id: ThemeId | string): ThemeDefinition {
   const theme = themes.find((candidate) => candidate.id === id);
   if (!theme) throw new Error(`Unknown JellyShop theme: ${id}`);

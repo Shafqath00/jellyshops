@@ -48,6 +48,7 @@ export function resolveStorefrontThemeTokens(themeId: ThemeId | string, settings
   base["--jelly-card-align"] = card.alignment === "center" ? "center" : "start";
   base["--jelly-card-border"] = card.style === "bordered" ? "1px solid var(--theme-border)" : "0";
   base["--jelly-card-padding"] = card.style === "bordered" ? "12px" : "0";
+  if (typeof card.gridSpacing === "string") base["--jelly-grid-gap"] = card.gridSpacing === "none" ? "0px" : card.gridSpacing === "large" ? "32px" : "12px";
   const heading = base["--jelly-font-display"];
   const body = base["--jelly-font-body"];
   const semantic = {

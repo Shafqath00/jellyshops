@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { getV4StarterPack, listV4StarterPacks } from "./v4-starter-packs";
+import { COMPLETE_STARTER_PACK_IDS, getV4StarterPack, isV4StarterPackId, listV4StarterPacks } from "./v4-starter-packs";
+import { validateV4StarterPack } from "./v4-starter-packs-validation";
 
 const requiredPageTypes = ["home", "product", "collection", "cart", "search", "page", "blog", "article", "not-found"];
 
@@ -7,8 +8,8 @@ describe("V4 starter packs", () => {
   it("provides versioned Fresh Market and Artisan Boutique definitions with every default page", () => {
     const packs = listV4StarterPacks();
 
-    expect(packs.map(({ id }) => id)).toEqual(["jelly-signature", "fresh-market", "artisan-boutique"]);
-    for (const pack of packs.filter(({ id }) => id !== "jelly-signature")) {
+    expect(packs.map(({ id }) => id)).toEqual(["jelly-avenue", "jelly-signature", "fresh-market", "artisan-boutique"]);
+    for (const pack of packs.filter(({ id }) => !COMPLETE_STARTER_PACK_IDS.includes(id))) {
       expect(pack.version).toMatch(/^\d+\.\d+\.\d+$/);
       expect(pack.templates.map(({ type }) => type).sort()).toEqual([...requiredPageTypes].sort());
       expect(pack.templates.every(({ handle }) => handle === "default")).toBe(true);
@@ -18,6 +19,24 @@ describe("V4 starter packs", () => {
     expect(signature.templates.map(({ type }) => type)).toEqual(expect.arrayContaining([
       ...requiredPageTypes, "checkout", "wishlist", "customer-login", "customer-register", "customer-recovery", "customer-account", "customer-orders", "customer-order", "customer-addresses", "order-success",
     ]));
+  });
+
+  it("installs Jelly Avenue with every page type, an editorial home page and its own copy", () => {
+    const avenue = getV4StarterPack("jelly-avenue");
+    expect(isV4StarterPackId("jelly-avenue")).toBe(true);
+    expect(isV4StarterPackId("metropolitan")).toBe(false);
+    expect(COMPLETE_STARTER_PACK_IDS).toContain("jelly-avenue");
+    expect(validateV4StarterPack(avenue)).toEqual([]);
+    expect(avenue.theme.themeId).toBe("jelly-avenue");
+    expect(avenue.templates).toHaveLength(getV4StarterPack("jelly-signature").templates.length);
+    expect(avenue.summary).toMatch(/editorial/i);
+    expect(avenue.tags.length).toBeGreaterThan(0);
+    const home = avenue.templates.find(({ type }) => type === "home")!;
+    const homeTypes = home.layout.sections.flatMap((placement) => placement.kind === "inline" ? [placement.section.type] : []);
+    expect(homeTypes).toEqual(["hero", "product-grid", "category-grid", "product-grid", "image-banner", "image-with-text", "multicolumn", "newsletter"]);
+    const header = avenue.globalSections.find(({ key }) => key === "header")!;
+    expect(header.section.settings).toMatchObject({ logoPosition: "center", sticky: true });
+    expect(JSON.stringify(avenue)).not.toMatch(/metropolitan/i);
   });
 
   it("uses unique stable pack-local keys and does not embed fake merchant resource IDs", () => {

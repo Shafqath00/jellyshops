@@ -15,7 +15,7 @@ it.each(["fresh-market", "artisan-boutique", "classic"])("exposes working color 
 
 it("registers every Store Editor theme", () => {
   expect(listThemes().map((theme) => theme.id)).toEqual([
-    "jelly-signature", "minimal", "classic", "bold", "elegant", "playful", "fresh-market", "artisan-boutique", "example-boutique",
+    "jelly-signature", "jelly-avenue", "minimal", "classic", "bold", "elegant", "playful", "fresh-market", "artisan-boutique", "example-boutique",
   ]);
 });
 

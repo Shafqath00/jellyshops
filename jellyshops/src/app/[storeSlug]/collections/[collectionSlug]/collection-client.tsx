@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { CatalogBrowser } from "@/features/storefront/catalog-browser";
+import { isCompleteStorefrontTheme } from "@jelly/storefront-themes";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useShop } from "@/contexts/shop-context";
@@ -57,7 +58,7 @@ export default function CollectionPage() {
         collection: pageContext.collection,
         products: pageContext.products.map((product) => ({ ...product, href: `/${store.slug}/products/${product.href.split("/").pop()}` })),
         collectionPresentation: {
-          ...(publication.snapshot.theme?.id === "jelly-signature" || publication.snapshot.theme?.presetId === "jelly-signature" ? { interactiveGrid: <CatalogBrowser storeSlug={store.slug} collectionId={pageContext.collection.id} /> } : {}),
+          ...(isCompleteStorefrontTheme(publication.snapshot.theme?.id ?? publication.snapshot.theme?.presetId) ? { interactiveGrid: <CatalogBrowser storeSlug={store.slug} collectionId={pageContext.collection.id} /> } : {}),
           collection: { id: pageContext.collection.id, title: pageContext.collection.name, description: pageContext.collection.description ?? "", ...(pageContext.collection.imageUrl ? { imageUrl: pageContext.collection.imageUrl } : {}) },
           products: pageContext.products.map((product) => ({ ...product, href: `/${store.slug}/products/${product.href.split("/").pop()}` })),
           totalProducts: pageContext.products.length,

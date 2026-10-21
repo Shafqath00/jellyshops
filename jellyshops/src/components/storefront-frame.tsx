@@ -6,7 +6,7 @@ import { CartPanel } from "./cart-panel";
 import { SharedCartPresentation, ThemedStorefrontShell } from "./storefront-shell";
 import { useShop } from "@/contexts/shop-context";
 import { loadPublicStorefrontPublication } from "@/features/storefront/public-storefront-api";
-import { resolveStorefrontThemeTokens, resolveTheme, resolveThemeShellComponent } from "@jelly/storefront-themes";
+import { isCompleteStorefrontTheme, resolveStorefrontThemeTokens, resolveTheme, resolveThemeShellComponent } from "@jelly/storefront-themes";
 import { useInitialStorefrontPublication } from "@/features/storefront/storefront-bootstrap";
 import { StorefrontChromeContext } from "@/features/storefront/chrome-context";
 import { RegistrySectionRenderer, withStoreIdentity } from "@jelly/storefront-renderer";
@@ -37,7 +37,7 @@ export function StorefrontFrame({ storeSlug, children }: { storeSlug: string; ch
   const cartCount = cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
   const style = resolveStorefrontThemeTokens(resolvedTheme.id, resolvedTheme.settings, store.theme) as CSSProperties;
   const CartPresentation = resolveThemeShellComponent(resolvedTheme.id, "CartPanel", SharedCartPresentation);
-  const signature = resolvedTheme.id === "jelly-signature" && initialPublication?.kind === "v4";
+  const signature = isCompleteStorefrontTheme(resolvedTheme.id) && initialPublication?.kind === "v4";
   const snapshot = initialPublication?.kind === "v4" ? initialPublication.snapshot : null;
   const branding = resolvedTheme.settings.branding as { logoUrl?: string } | undefined;
   const headerSettings = resolvedTheme.settings.header as Record<string, unknown> | undefined;

@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { getV4StarterPack, validateV4StarterPack, type StarterMenuItem, type V4StarterPack, type V4StarterPackId } from "@jelly/storefront-registry";
+import { COMPLETE_STARTER_PACK_IDS, getV4StarterPack, isV4StarterPackId, validateV4StarterPack, type StarterMenuItem, type V4StarterPack, type V4StarterPackId } from "@jelly/storefront-registry";
 import type { SectionNode } from "@jelly/storefront-schema";
 import type { CommerceDatabase, SqlExecutor } from "../../commerce/repository.js";
 import { ApiError } from "../../http/errors.js";
@@ -86,7 +86,7 @@ export class StorefrontStarterInstallationService {
   ) {}
 
   async install(storeId: string, starterPackId: string, options?: { replaceDraft: boolean; expectedGeneration: number }): Promise<StarterInstallationResult> {
-    if (starterPackId !== "fresh-market" && starterPackId !== "artisan-boutique" && starterPackId !== "jelly-signature") {
+    if (!isV4StarterPackId(starterPackId)) {
       throw new RangeError("Unknown V4 starter pack");
     }
     const pack = getV4StarterPack(starterPackId);
@@ -107,7 +107,7 @@ export class StorefrontStarterInstallationService {
       );
       const current = workspace.rows[0];
       if (options && Number(current?.generation ?? 0) !== options.expectedGeneration) throw new StarterInstallationConflictError("The draft changed. Reload before replacing it.");
-      if (pack.id === "jelly-signature") {
+      if (COMPLETE_STARTER_PACK_IDS.includes(pack.id)) {
         const collisions = await sql.query<{ handle: string }>('SELECT "handle" FROM "StorePage" WHERE "storeId"=$1 AND "handle"=ANY($2::text[])', [storeId, ["account", "wishlist", "checkout", "order", "search", "cart", "collections", "products", "shop", "contact", "newsletter"]]);
         if (collisions.rows.length) throw new StarterInstallationConflictError(`Rename conflicting content paths before installing: ${collisions.rows.map((row) => row.handle).join(", ")}.`);
       }
@@ -157,7 +157,7 @@ export class StorefrontStarterInstallationService {
          ON CONFLICT ("storeId") DO UPDATE SET "revision"="ThemeConfiguration"."revision"+1,"themeId"=EXCLUDED."themeId","themeVersion"=EXCLUDED."themeVersion","settings"=EXCLUDED."settings","draftArtifactId"=NULL,"updatedAt"=EXCLUDED."updatedAt"`,
         [storeId, pack.theme.themeId, pack.version, JSON.stringify(pack.theme.settings), now],
       );
-      if (pack.id === "jelly-signature") {
+      if (COMPLETE_STARTER_PACK_IDS.includes(pack.id)) {
         for (const page of [{ handle: "about", title: "About" }, { handle: "faq", title: "Frequently asked questions" }, { handle: "shipping", title: "Shipping information" }, { handle: "returns", title: "Returns information" }, { handle: "privacy", title: "Privacy policy" }, { handle: "terms", title: "Terms of service" }]) {
           await sql.query(`INSERT INTO "StorePage" ("id","storeId","title","handle","content","featuredMediaId","status","publishedAt","seoTitle","seoDescription","socialMediaId","noindex","canonicalOverride","createdAt","updatedAt")
             SELECT $1,$2,$3,$4,$5::jsonb,NULL,'DRAFT',NULL,NULL,NULL,NULL,TRUE,NULL,$6,$6

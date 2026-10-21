@@ -1,4 +1,5 @@
 import type { DynamicValueType, StorefrontDocument } from "@jelly/storefront-schema";
+import type { V4StarterPackId } from "@jelly/storefront-registry";
 import {
   StoreEditorApiError,
   type CompilationResult,
@@ -27,7 +28,7 @@ import {
 } from "./types";
 
 export interface StoreEditorApi {
-  installStarterPack(storeId: string, starterPackId: "fresh-market" | "artisan-boutique" | "jelly-signature", options?: { replaceDraft: true; expectedGeneration: number }): Promise<StarterInstallationResult>;
+  installStarterPack(storeId: string, starterPackId: V4StarterPackId, options?: { replaceDraft: true; expectedGeneration: number }): Promise<StarterInstallationResult>;
   listThemeCatalog(storeId: string): Promise<ThemeCatalogEntry[]>;
   loadWorkspace(storeId: string): Promise<WorkspaceRecord>;
   listTemplates(storeId: string, type?: StorefrontTemplateType): Promise<StorefrontTemplateRecord[]>;

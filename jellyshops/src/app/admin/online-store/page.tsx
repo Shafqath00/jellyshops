@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowUpRight, Check, CheckCircle2, Eye, LayoutTemplate, Loader2, Palette, Pencil, RefreshCw, Sparkles } from "lucide-react";
-import { listV4StarterPacks } from "@jelly/storefront-registry";
+import { listV4StarterPacks, type V4StarterPackId } from "@jelly/storefront-registry";
 import { useAuth } from "@/features/auth/auth-provider";
 import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import type { ThemeCatalogEntry, ThemeConfigurationRecord } from "@/features/store-editor/api/types";
@@ -69,7 +69,7 @@ function StoreDesignLibrary() {
     finally { operation.current = false; if (mounted.current) setSaving(undefined); }
   }
 
-  async function installStarter(starterId: "fresh-market" | "artisan-boutique" | "jelly-signature") {
+  async function installStarter(starterId: V4StarterPackId) {
     if (!api || !storeId || operation.current) return;
     if (hasWorkspace && !window.confirm("Replace your current draft template and page assignments? Existing templates are retained in the library. Your published store, products, orders, and customer records stay unchanged.")) return;
     operation.current = true;
@@ -127,8 +127,8 @@ function StoreDesignLibrary() {
                 </button>
                 <div className="p-5 sm:p-6">
                   <div className="flex items-start justify-between gap-3"><h3 className="text-xl font-bold tracking-tight">{starter.name}</h3>{selected && <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-tint-foreground"><Check size={12} />Selected</span>}</div>
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{starter.id === "jelly-signature" ? "A modern, minimal storefront in warm white and charcoal, with a complete shopping and customer experience." : starter.id === "fresh-market" ? "Fresh, friendly, and full of life. A natural home for everyday essentials and local favorites." : "Thoughtful details, beautiful products. A considered canvas for independent brands and makers."}</p>
-                  <div className="mt-4 flex flex-wrap gap-2">{(starter.id === "fresh-market" ? ["Food & essentials", "Fresh & natural"] : starter.id === "jelly-signature" ? ["Fashion & lifestyle", "Clean & minimal"] : ["Fashion & lifestyle", "Warm & editorial"]).map((label) => <span key={label} className="rounded-md bg-muted/50 px-2 py-1 text-[11px] font-medium text-muted-foreground">{label}</span>)}</div>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{starter.summary}</p>
+                  <div className="mt-4 flex flex-wrap gap-2">{starter.tags.map((label) => <span key={label} className="rounded-md bg-muted/50 px-2 py-1 text-[11px] font-medium text-muted-foreground">{label}</span>)}</div>
                   <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-border pt-5">
                     {!hasWorkspace ? <button type="button" disabled={!api || Boolean(saving)} onClick={() => void installStarter(starter.id)} className={primary}>{saving === `starter:${starter.id}` ? <><Loader2 size={15} className="animate-spin motion-reduce:animate-none" />Preparing your store…</> : <>Use template<ArrowRight size={15} /></>}</button> : selected ? <Link href={editorHref} className={primary}><Pencil size={14} />Customize template</Link> : <button type="button" className={primary} disabled={Boolean(saving)} onClick={() => void installStarter(starter.id)}>Use this template<ArrowRight size={15} /></button>}
                     <button type="button" onClick={() => setPreviewId(starter.id)} className={secondary}><Eye size={15} />Preview</button>

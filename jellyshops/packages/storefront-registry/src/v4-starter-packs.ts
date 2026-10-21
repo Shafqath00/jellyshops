@@ -1,6 +1,12 @@
 import type { PageType, SectionNode } from "@jelly/storefront-schema";
 
-export type V4StarterPackId = "fresh-market" | "artisan-boutique" | "jelly-signature";
+export type V4StarterPackId = "fresh-market" | "artisan-boutique" | "jelly-signature" | "jelly-avenue";
+export const V4_STARTER_PACK_IDS: readonly V4StarterPackId[] = ["jelly-avenue", "jelly-signature", "fresh-market", "artisan-boutique"];
+/** Starter packs that install every page type plus draft information pages (About, FAQ, policies). */
+export const COMPLETE_STARTER_PACK_IDS: readonly V4StarterPackId[] = ["jelly-signature", "jelly-avenue"];
+export function isV4StarterPackId(value: unknown): value is V4StarterPackId {
+  return typeof value === "string" && (V4_STARTER_PACK_IDS as readonly string[]).includes(value);
+}
 export type V4StarterTemplateType = Exclude<PageType, never>;
 
 export interface StarterMenuItem {
@@ -15,6 +21,9 @@ export interface V4StarterPack {
   version: string;
   name: string;
   description: string;
+  /** One-sentence pitch and category tags shown on the template card. */
+  summary: string;
+  tags: string[];
   previewAsset: string;
   theme: { themeId: string; settings: Record<string, unknown> };
   globalSections: Array<{
@@ -65,11 +74,81 @@ function global(globalSectionId: string) {
   return { kind: "global" as const, globalSectionId };
 }
 
+const photo = (id: string, width = 1800) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=80`;
+
+/** Jelly Avenue home page: full-bleed campaign imagery between edge-to-edge product grids. */
+function avenueHome(id: V4StarterPackId): SectionNode[] {
+  const card = (key: string, label: string, image: string, alt: string) => block(`${id}-collection-${key}`, "collection-card", { label, link: "/shop", image: { url: photo(image, 1400), alt } });
+  return [
+    section(`${id}-home-hero`, {
+      type: "hero",
+      settings: {
+        eyebrow: "The new season",
+        layout: "overlay",
+        height: "large",
+        colorScheme: "dark",
+        contentAlignment: "center",
+        overlay: 28,
+        image: { url: photo("photo-1485968579580-b6d095142e6e", 2400), alt: "A woman in a tailored check coat on a city street" },
+      },
+      blocks: [
+        block(`${id}-home-hero-heading`, "heading", { text: "Dressed for the city." }),
+        block(`${id}-home-hero-copy`, "text", { text: "Considered tailoring and everyday essentials, made to move with you." }),
+        block(`${id}-home-hero-button`, "button", { label: "Shop the collection", href: "/shop" }),
+      ],
+    }),
+    section(`${id}-featured`, { type: "product-grid", settings: { heading: "New this season", text: "The latest arrivals: structured cuts and soft layers for the modern everyday.", limit: 8, columns: 4, sort: "newest", contentAlignment: "center", viewAllLabel: "View all", viewAllLink: "/shop" }, blocks: [] }),
+    section(`${id}-collections`, {
+      type: "category-grid",
+      settings: { heading: "", columns: 2, imageRatio: "portrait" },
+      blocks: [
+        card("him", "For him", "photo-1617137968427-85924c800a22", "A man in a navy suit walking past a glass building"),
+        card("her", "For her", "photo-1539109136881-3be0616acf4b", "A woman in a pale blue coat in a city square"),
+      ],
+    }),
+    section(`${id}-bestsellers`, { type: "product-grid", settings: { heading: "Quiet favourites", text: "Our best-loved staples, chosen for the way they wear.", limit: 4, columns: 4, sort: "best-selling", contentAlignment: "center", hideWhenEmpty: true }, blocks: [] }),
+    section(`${id}-campaign`, {
+      type: "image-banner",
+      settings: { height: "large", overlay: 30, contentAlignment: "center", image: { url: photo("photo-1445205170230-053b83016050", 2400), alt: "Wool coats in warm neutral tones hanging on a rail" } },
+      blocks: [
+        block(`${id}-campaign-heading`, "heading", { text: "The new tailoring" }),
+        block(`${id}-campaign-copy`, "text", { text: "Refined materials and considered cuts, made to move between the everyday and the extraordinary." }),
+        block(`${id}-campaign-button`, "button", { label: "View the collection", href: "/shop" }),
+      ],
+    }),
+    section(`${id}-home-story`, {
+      type: "image-with-text",
+      settings: { eyebrow: "Our approach", imagePosition: "right", colorScheme: "page", image: { url: photo("photo-1441984904996-e0b6ba687e04", 1400), alt: "A bright studio shop with clothing on wooden rails" } },
+      blocks: [
+        block(`${id}-home-story-heading`, "heading", { text: "Designed to outlast the season." }),
+        block(`${id}-home-story-copy`, "text", { text: "Tell customers what you make and why it matters: the materials you choose, the people who make it and the care that goes into every piece." }),
+        block(`${id}-home-story-button`, "button", { label: "Read our story", href: "/pages/about" }),
+      ],
+    }),
+    section(`${id}-promises`, {
+      type: "multicolumn",
+      settings: { heading: "", columns: 3, contentAlignment: "center", colorScheme: "soft" },
+      blocks: [
+        block(`${id}-promise-delivery`, "column", { heading: "Free delivery", text: "Complimentary delivery on every order, tracked to your door." }),
+        block(`${id}-promise-returns`, "column", { heading: "30-day returns", text: "Not quite right? Send it back within 30 days." }),
+        block(`${id}-promise-checkout`, "column", { heading: "Secure checkout", text: "Pay safely with the methods you already use." }),
+      ],
+    }),
+    section(`${id}-newsletter`, {
+      type: "newsletter",
+      settings: { buttonLabel: "Subscribe", contentAlignment: "center", colorScheme: "page" },
+      blocks: [block(`${id}-newsletter-title`, "heading", { text: "Join the list" }), block(`${id}-newsletter-copy`, "text", { text: "Be the first to hear about new arrivals, restocks and private sales." })],
+    }),
+  ];
+}
+
 function makePack(id: V4StarterPackId): V4StarterPack {
   const fresh = id === "fresh-market";
-  const signature = id === "jelly-signature";
-  const label = signature ? "Jelly Minimal" : fresh ? "Fresh Market" : "Artisan Boutique";
-  const announcementText = signature ? "A little something lovely, delivered with care." : fresh ? "Good things are in season." : "Thoughtful finds, made to last.";
+  const avenue = id === "jelly-avenue";
+  // Jelly Avenue shares Jelly Minimal's complete page set; only its home page and copy differ.
+  const signature = id === "jelly-signature" || avenue;
+  const label = avenue ? "Jelly Avenue" : signature ? "Jelly Minimal" : fresh ? "Fresh Market" : "Artisan Boutique";
+  const announcementText = avenue ? "Free delivery and 30-day returns on every order." : signature ? "A little something lovely, delivered with care." : fresh ? "Good things are in season." : "Thoughtful finds, made to last.";
   const heroHeading = signature ? "Find your everyday favourites." : fresh ? "Good food, gathered well." : "Made to become part of your story.";
   const heroSummary = signature ? "Explore the latest from our store." : fresh
     ? "Bright flavors and everyday favorites, chosen with care."
@@ -151,7 +230,7 @@ function makePack(id: V4StarterPackId): V4StarterPack {
   if (signature) {
     const home = templates.find((item) => item.type === "home")!;
     const card = (key: string, label: string, image: string, alt: string) => block(`${id}-collection-${key}`, "collection-card", { label, link: "/shop", image: { url: image, alt } });
-    home.layout.sections = inline(
+    home.layout.sections = avenue ? inline(...avenueHome(id)) : inline(
       section(`${id}-home-hero`, {
         type: "hero",
         settings: {
@@ -208,10 +287,10 @@ function makePack(id: V4StarterPackId): V4StarterPack {
     const product = templates.find((item) => item.type === "product")!;
     for (const placement of product.layout.sections) {
       if (placement.kind !== "inline") continue;
-      if (placement.section.type === "product-gallery") placement.section.settings = { imageFit: "cover", layout: "stacked" };
+      if (placement.section.type === "product-gallery") placement.section.settings = { imageFit: "cover", layout: avenue ? "grid" : "stacked" };
       if (placement.section.type === "product-options") placement.section.settings = { style: "buttons" };
       if (placement.section.type === "product-description") placement.section.settings = { spacing: "standard", heading: "Description" };
-      if (placement.section.type === "related-products") placement.section.settings = { limit: 4, heading: "You may also like" };
+      if (placement.section.type === "related-products") placement.section.settings = { limit: 4, heading: avenue ? "Complete the look" : "You may also like" };
     }
     for (const type of ["checkout", "wishlist", "customer-login", "customer-register", "customer-recovery", "customer-account", "customer-orders", "customer-order", "customer-addresses", "order-success"] as const) templates.push({ key: id + "-template-" + type, type, handle: "default", name: type.replaceAll("-", " "), layout: { sections: [] } });
   }
@@ -229,17 +308,19 @@ function makePack(id: V4StarterPackId): V4StarterPack {
     id,
     version: "1.0.0",
     name: label,
-    description: signature ? "A modern, minimal storefront in warm white and charcoal for independent brands." : fresh
+    description: avenue ? "An editorial, image-led storefront with full-bleed banners and product-first grids." : signature ? "A modern, minimal storefront in warm white and charcoal for independent brands." : fresh
       ? "A bright, produce-first storefront for food, grocery, and everyday essentials."
       : "A quiet, editorial storefront for considered goods and handcrafted pieces.",
-    previewAsset: signature ? "/themes/jelly-signature/preview.svg" : fresh
+    summary: avenue ? "Editorial and image-led, with full-screen banners, edge-to-edge product grids and a complete shopping and customer experience." : signature ? "A modern, minimal storefront in warm white and charcoal, with a complete shopping and customer experience." : fresh ? "Fresh, friendly, and full of life. A natural home for everyday essentials and local favorites." : "Thoughtful details, beautiful products. A considered canvas for independent brands and makers.",
+    tags: avenue ? ["Fashion & apparel", "Editorial & bold"] : signature ? ["Fashion & lifestyle", "Clean & minimal"] : fresh ? ["Food & essentials", "Fresh & natural"] : ["Fashion & lifestyle", "Warm & editorial"],
+    previewAsset: avenue ? "/themes/jelly-avenue/preview.svg" : signature ? "/themes/jelly-signature/preview.svg" : fresh
       ? "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=85"
       : "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=85",
     theme: { themeId: id, settings: {} },
     globalSections: [
       { key: "announcement", name: "Announcement", section: section(`${id}-global-announcement-section`, { type: "announcement-bar", settings: {}, blocks: [block(`${id}-global-announcement-copy`, "text", { text: announcementText })] }) },
-      { key: "header", name: "Header", section: section(`${id}-global-header-section`, { type: "header", settings: {}, blocks: [block(`${id}-global-header-menu`, "menu", { handle: "main" })] }) },
-      { key: "footer", name: "Footer", section: section(`${id}-global-footer-section`, { type: "footer", settings: signature ? { text: "Thoughtful everyday goods, chosen with care and delivered to your door." } : {}, blocks: [block(`${id}-global-footer-menu`, "menu", { handle: "main" })] }) },
+      { key: "header", name: "Header", section: section(`${id}-global-header-section`, { type: "header", settings: avenue ? { logoPosition: "center", sticky: true } : {}, blocks: [block(`${id}-global-header-menu`, "menu", { handle: "main" })] }) },
+      { key: "footer", name: "Footer", section: section(`${id}-global-footer-section`, { type: "footer", settings: avenue ? { text: "Modern wardrobe essentials, made to be worn on repeat. Designed in the studio, delivered to your door." } : signature ? { text: "Thoughtful everyday goods, chosen with care and delivered to your door." } : {}, blocks: [block(`${id}-global-footer-menu`, "menu", { handle: "main" })] }) },
     ],
     menus: [{
       key: "main",
@@ -256,6 +337,7 @@ function makePack(id: V4StarterPackId): V4StarterPack {
 }
 
 const starterPacks: Record<V4StarterPackId, V4StarterPack> = {
+  "jelly-avenue": makePack("jelly-avenue"),
   "jelly-signature": makePack("jelly-signature"),
   "fresh-market": makePack("fresh-market"),
   "artisan-boutique": makePack("artisan-boutique"),

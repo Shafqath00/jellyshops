@@ -3,7 +3,7 @@ export { createPresetSection, createSectionFromDefinition, listSectionPresets } 
 export { createThemePackDocument, getThemePack, listThemePacks } from "./theme-packs.js";
 export type { BlockDefinition, ControlDefinition, ControlGroup, RegionName, RegistryValidationIssue, RegistryValidationIssueCode, SectionDefinition } from "./types.js";
 export type { ThemePack, ThemePackId } from "./theme-packs.js";
-export { getV4StarterPack, listV4StarterPacks } from "./v4-starter-packs.js";
+export { COMPLETE_STARTER_PACK_IDS, getV4StarterPack, isV4StarterPackId, listV4StarterPacks, V4_STARTER_PACK_IDS } from "./v4-starter-packs.js";
 export type { StarterMenuItem, V4StarterPack, V4StarterPackId, V4StarterTemplateType } from "./v4-starter-packs.js";
 export { validateV4StarterPack } from "./v4-starter-packs-validation.js";
 export type { V4StarterPackIssue } from "./v4-starter-packs-validation.js";

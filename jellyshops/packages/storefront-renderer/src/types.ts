@@ -1,7 +1,7 @@
 import type { GlobalSettings, PageType, StoreDesignDocument, StorefrontDocument } from "@jelly/storefront-schema";
 import type { ReactNode } from "react";
 
-export interface PublicProduct { id: string; name: string; href: string; imageUrl: string; price: string }
+export interface PublicProduct { id: string; name: string; href: string; imageUrl: string; price: string; compareAtPrice?: string; badge?: string }
 export interface CollectionPresentationContext {
   interactiveGrid?: ReactNode;
   collection: { id: string; title: string; description: string; imageUrl?: string };

@@ -21,7 +21,11 @@ Section renderer ─ shared markup        packages/storefront-renderer/src/secti
 1. **Tokens and settings** (`definition.ts`). `ThemeTokens` holds the defaults. `settingsSchema` lists the global settings shown under Theme settings in the editor: colours, fonts, sizes, button corners, page width, section spacing and product cards. Keep the labels plain ("Buttons", "Page width") and the list short.
 2. **Stylesheet** (`jellyshops/src/app/themes/<theme>.css`). Every rule is scoped to `[data-jelly-theme="<theme-id>"]`. Read values only from the resolved tokens (`--theme-*`, `--jelly-*`), never hard-coded colours, so merchant settings apply everywhere. Jelly Minimal defines its derived scale as `--jm-*` (colours, an 8px spacing scale, a type scale) at the top of its file.
 3. **Starter pack.** The templates, sections and copy a new store starts with. Every page type a theme supports needs a template.
-4. **Style guide.** Jelly Minimal's is at `/theme-preview/jelly-minimal`. It renders the real header, footer, buttons, form fields and product cards at desktop, tablet and mobile widths. Review a theme there before you build pages.
+4. **Style guide.** Every complete theme has one at `/theme-preview/<theme>` (`/theme-preview/jelly-minimal`, `/theme-preview/jelly-avenue`). It renders the real header, footer, buttons, form fields and product cards, plus every starter template with sample data, at desktop, tablet and mobile widths. The page is shared (`src/features/theme-preview/`); a theme only adds a sample-data entry in `configs.ts`.
+
+## Complete storefront themes
+
+Jelly Minimal (`jelly-signature`) and Jelly Avenue (`jelly-avenue`) are *complete* themes: they install every page type (checkout, account, wishlist, order pages) plus draft information pages, render their own header and footer around every route, and use the catalogue browser with filters and sorting. Code asks `isCompleteStorefrontTheme(id)` (`@jelly/storefront-themes`) and `COMPLETE_STARTER_PACK_IDS` (`@jelly/storefront-registry`) instead of checking for one theme id. Add a new complete theme to both lists.
 
 ## Rules
 
@@ -32,7 +36,8 @@ Section renderer ─ shared markup        packages/storefront-renderer/src/secti
 
 ## Adding a new theme
 
-1. Copy `jelly-signature/definition.ts` to a new folder, choose a new id, and register it in `theme-registry.ts`.
-2. Create `jellyshops/src/app/themes/<id>.css` scoped to the new id, and import it in `jellyshops/src/app/layout.tsx`.
-3. Add a starter pack for the id in `v4-starter-packs.ts`.
-4. Add a style-guide route like `/theme-preview/jelly-minimal`, then check every page type at 390, 768 and 1280 px.
+1. Copy `jelly-avenue/definition.ts` (or `jelly-signature/`) to a new folder, choose a new id, and register it in `theme-registry.ts` and `COMPLETE_STOREFRONT_THEME_IDS`.
+2. Create `jellyshops/src/app/themes/<id>.css` scoped to the new id, and import it in `jellyshops/src/app/layout.tsx`. Start from the closest existing theme's file: it is organised in the same numbered sections (tokens, base, buttons, forms, header, footer, cards, sections, pages, motion), so only the tokens and the look of each section change.
+3. Add the id to `V4StarterPackId`, `V4_STARTER_PACK_IDS` and `COMPLETE_STARTER_PACK_IDS` in `v4-starter-packs.ts`, give it a home page builder (see `avenueHome`), a summary and tags for the template gallery, and a thumbnail in `template-preview.tsx`.
+4. Add a `ThemePreviewConfig` in `src/features/theme-preview/configs.ts` and a two-line route at `src/app/theme-preview/<slug>/page.tsx`, then check every page type at 390, 768 and 1280 px.
+5. Repack the shared packages for the backend (see Rules).

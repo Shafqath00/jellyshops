@@ -1,3 +1,4 @@
+import type { V4StarterPackId } from "@jelly/storefront-registry";
 import type {
   CompilationDiagnostic,
   DynamicBinding,
@@ -14,7 +15,7 @@ export interface WorkspaceRecord {
   updatedAt: string | null;
 }
 
-export interface StarterInstallationResult { storeId: string; starterPackId: "fresh-market" | "artisan-boutique" | "jelly-signature"; starterPackVersion: string; generation: number; installed: boolean }
+export interface StarterInstallationResult { storeId: string; starterPackId: V4StarterPackId; starterPackVersion: string; generation: number; installed: boolean }
 
 export interface StorefrontTemplateRecord {
   id: string;

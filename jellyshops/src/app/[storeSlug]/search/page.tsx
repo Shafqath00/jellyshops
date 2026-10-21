@@ -1,5 +1,6 @@
 "use client";
 import { CatalogBrowser } from "@/features/storefront/catalog-browser";
+import { isCompleteStorefrontTheme } from "@jelly/storefront-themes";
 
 import { useInitialStorefrontPublication } from "@/features/storefront/storefront-bootstrap";
 
@@ -55,7 +56,7 @@ export default function SearchPage() {
   }, [store, publication, context]);
 
   if (!store) return null;
-  if (store && publication?.kind === "v4" && (publication.snapshot.theme.id ?? publication.snapshot.theme.presetId) === "jelly-signature") return <main className="signature-page"><header className="signature-page-heading"><h1>Find your next favourite</h1></header><CatalogBrowser key={query} storeSlug={store.slug} initialQuery={query} /></main>;
+  if (store && publication?.kind === "v4" && isCompleteStorefrontTheme(publication.snapshot.theme.id ?? publication.snapshot.theme.presetId)) return <main className="signature-page"><header className="signature-page-heading"><h1>Find your next favourite</h1></header><CatalogBrowser key={query} storeSlug={store.slug} initialQuery={query} /></main>;
   if (publication?.kind === "v4") {
     if (route?.status === "ready") {
       return <PublishedRuntimeStorefront snapshot={publication.snapshot} route={route} storeSlug={store.slug} currency={store.currency} products={state.products.filter((product) => product.published && !product.archived)} />;

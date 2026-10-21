@@ -5,6 +5,7 @@ import { storefrontFontVariables } from "./fonts";
 import "./globals.css";
 import "./themes/storefront-base.css";
 import "./themes/jelly-minimal.css";
+import "./themes/jelly-avenue.css";
 import "./shadcn-theme.css";
 
 export const metadata: Metadata = {

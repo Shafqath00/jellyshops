@@ -1,4 +1,5 @@
 import { Router, type Request } from "express";
+import { isV4StarterPackId } from "@jelly/storefront-registry";
 import { z } from "zod";
 import { requireMerchant, requireStorePermission } from "../../auth/middleware.js";
 import type { AuthProvider } from "../../auth/types.js";
@@ -15,7 +16,7 @@ export function createStorefrontStarterRouter(api: StorefrontStarterApi, authPro
   router.post("/:starterId/install", requireStorePermission("storefront:edit"), async (request: Request, response, next) => {
     try {
       const starterId = String(request.params.starterId);
-      if (starterId !== "fresh-market" && starterId !== "artisan-boutique" && starterId !== "jelly-signature") {
+      if (!isV4StarterPackId(starterId)) {
         throw new ApiError(400, "STARTER_UNKNOWN", "The selected starter pack does not exist");
       }
       const parsed = z.object({ replaceDraft: z.literal(true), expectedGeneration: z.number().int().nonnegative() }).strict().safeParse(request.body);

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-labelledby="title">
+  <title id="title">Jelly Avenue storefront preview</title>
+  <rect width="1200" height="900" fill="#ffffff"/>
+  <rect width="1200" height="520" fill="#2b2f33"/>
+  <rect y="0" width="1200" height="520" fill="url(#shade)"/>
+  <defs>
+    <linearGradient id="shade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6f7378" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#2b2f33" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <path d="M520 520V300c0-60 36-104 80-104s80 44 80 104v220z" fill="#ffffff" fill-opacity=".14"/>
+  <g fill="#ffffff" font-family="Inter, Arial, sans-serif">
+    <text x="600" y="58" text-anchor="middle" font-size="26" font-weight="500" letter-spacing="-0.5">Jelly Avenue</text>
+    <rect x="40" y="44" width="24" height="2"/><rect x="40" y="52" width="24" height="2"/>
+    <text x="1160" y="58" text-anchor="end" font-size="16">Bag</text>
+    <text x="600" y="404" text-anchor="middle" font-size="13" letter-spacing="2.5" fill-opacity=".8">THE NEW SEASON</text>
+    <text x="600" y="452" text-anchor="middle" font-size="48" font-weight="500" letter-spacing="-1.5">Dressed for the city.</text>
+  </g>
+  <g>
+    <rect x="0" y="520" width="300" height="300" fill="#ececea"/>
+    <rect x="300" y="520" width="300" height="300" fill="#f2f2f0"/>
+    <rect x="600" y="520" width="300" height="300" fill="#e7e7e4"/>
+    <rect x="900" y="520" width="300" height="300" fill="#efefec"/>
+    <g fill="#2b2f33" fill-opacity=".14">
+      <path d="M110 790V640c0-30 18-52 40-52s40 22 40 52v150z"/>
+      <path d="M410 790V640c0-30 18-52 40-52s40 22 40 52v150z"/>
+      <path d="M710 790V640c0-30 18-52 40-52s40 22 40 52v150z"/>
+      <path d="M1010 790V640c0-30 18-52 40-52s40 22 40 52v150z"/>
+    </g>
+  </g>
+  <g fill="#2b2f33" font-family="Inter, Arial, sans-serif" font-size="14">
+    <text x="16" y="850">Tailored overcoat</text><text x="316" y="850">Relaxed trouser</text><text x="616" y="850">Cable knit</text><text x="916" y="850">Wool blazer</text>
+    <text x="16" y="872" fill-opacity=".6">£240.00</text><text x="316" y="872" fill-opacity=".6">£95.00</text><text x="616" y="872" fill-opacity=".6">£120.00</text><text x="916" y="872" fill-opacity=".6">£210.00</text>
+  </g>
+</svg>

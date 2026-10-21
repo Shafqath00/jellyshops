@@ -15,6 +15,15 @@ const sampleCommerce: CommerceDataProvider = { async getProducts() { return []; 
 export function TemplateThumbnail({ id, name, image }: { id: string; name: string; image?: string }) {
   const fresh = id === "fresh-market";
   const [failed, setFailed] = useState(false);
+  if (id === "jelly-avenue") return <div aria-label={`${name} design preview`} className="overflow-hidden rounded-xl border border-black/10 bg-white shadow-[0_8px_24px_-8px_rgba(17,17,17,0.12)]">
+    <div className="relative min-h-[205px] overflow-hidden bg-[#2b2f33] sm:min-h-[230px]">
+      {!failed && <Image src="https://images.unsplash.com/photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=900&q=70" alt="" fill sizes="(max-width: 768px) 90vw, 40vw" className="object-cover opacity-80" onError={() => setFailed(true)} />}
+      <div className="relative flex items-center justify-between px-5 py-3 text-white"><span className="text-[10px]">☰</span><span className="text-[13px] font-medium tracking-tight">{name}</span><span className="text-[8px]">Bag</span></div>
+      <div className="absolute inset-x-0 bottom-0 flex flex-col items-center px-5 pb-6 text-center text-white"><span className="mb-1.5 text-[7px] font-medium uppercase tracking-[0.15em] text-white/80">The new season</span><p className="text-[clamp(18px,2.2vw,28px)] font-medium leading-[1.05] tracking-[-0.03em]">Dressed for the city.</p><span className="mt-3 bg-white px-3 py-1.5 text-[8px] font-medium text-[#2b2f33]">Shop the collection</span></div>
+    </div>
+    <div className="grid grid-cols-4">{["#e9e9e6", "#f2f2f0", "#e4e4e0", "#efefec"].map((color) => <div key={color} className="aspect-[4/5]" style={{ background: color }}><div className="mx-auto mt-[22%] h-1/2 w-1/2 rounded-t-[40%] bg-[#2b2f33]/15" /></div>)}</div>
+    <div className="flex items-center justify-between px-5 py-3"><span className="text-xs font-medium tracking-tight text-[#2b2f33]">New this season</span><div className="flex gap-1.5">{["#2b2f33", "#6f7378", "#f2f2f0"].map((color) => <span key={color} className="size-2 rounded-full border border-black/10" style={{ background: color }} />)}</div></div>
+  </div>;
   if (id === "jelly-signature") return <div aria-label={`${name} design preview`} className="overflow-hidden rounded-xl border border-black/10 bg-[#faf9f7] shadow-[0_8px_24px_-8px_rgba(17,17,17,0.12)]">
     <div className="bg-[#111] px-4 py-1.5 text-center text-[8px] font-semibold tracking-wider text-white">A little something lovely, delivered with care.</div>
     <div className="flex items-center justify-between gap-2 px-5 py-3"><span className="font-serif text-[13px] tracking-tight text-[#111]">{name}</span><div className="flex gap-3 text-[8px] text-[#6b665f]"><span>Shop</span><span>Our story</span><span>Bag (0)</span></div></div>
