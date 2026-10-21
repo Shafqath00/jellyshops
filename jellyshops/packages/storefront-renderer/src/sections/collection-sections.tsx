@@ -1,6 +1,8 @@
+import type { CSSProperties } from "react";
 import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import type { CollectionPresentationContext, PublicProduct } from "../types";
+import { choice } from "./shared";
 
 function collectionContext(context: StorefrontRuntimeContext): CollectionPresentationContext | null {
   if (context.page?.pageType !== "collection") return null;
@@ -19,11 +21,21 @@ export function CollectionHeaderSection({ context, section }: { context: Storefr
   const presentation = collectionContext(context);
   if (!presentation) return null;
   const { collection } = presentation;
-  return <section className="jelly-section jelly-collection-header"><StorefrontContainer>
-    {section.settings.showImage !== false && collection.imageUrl && <img src={collection.imageUrl} alt={collection.title} />}
-    {section.settings.showTitle !== false && <h1>{collection.title}</h1>}
-    {section.settings.showDescription === true && collection.description && <p>{collection.description}</p>}
-  </StorefrontContainer></section>;
+  const showImage = section.settings.showImage !== false && Boolean(collection.imageUrl);
+  const layout = showImage ? choice(section.settings, "layout", ["simple", "banner"] as const, "simple") : "simple";
+  return <section className="jelly-section jelly-collection-header" data-layout={layout} data-align={choice(section.settings, "contentAlignment", ["left", "center"] as const, "left")}>
+    {/* eslint-disable-next-line @next/next/no-img-element */}
+    {showImage && layout === "banner" && <img className="jelly-collection-header-media" src={collection.imageUrl} alt="" />}
+    <StorefrontContainer>
+      <div className="jelly-collection-header-copy">
+        {section.settings.showTitle !== false && <h1>{collection.title}</h1>}
+        {section.settings.showDescription === true && collection.description && <p>{collection.description}</p>}
+        <p className="jelly-collection-count">{presentation.totalProducts === 1 ? "1 product" : `${presentation.totalProducts} products`}</p>
+      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {showImage && layout === "simple" && <img className="jelly-collection-header-image" src={collection.imageUrl} alt={collection.title} />}
+    </StorefrontContainer>
+  </section>;
 }
 
 export function CollectionProductGridSection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown> } }) {
@@ -34,8 +46,8 @@ export function CollectionProductGridSection({ context, section }: { context: St
   const limit = typeof section.settings.limit === "number" && Number.isInteger(section.settings.limit) ? Math.max(1, Math.min(24, section.settings.limit)) : 12;
   const emptyMessage = typeof section.settings.emptyMessage === "string" ? section.settings.emptyMessage : "No products are available in this collection yet.";
   return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer>{presentation.products.length
-    ? <div className="jelly-product-grid-items" data-testid="collection-product-grid-items" data-columns={columns} style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>{presentation.products.slice(0, limit).map((product) => <StorefrontProductCard key={product.id} product={product} />)}</div>
-    : <p>{emptyMessage}</p>
+    ? <div className="jelly-product-grid-items" data-testid="collection-product-grid-items" data-columns={columns} style={{ "--jelly-columns": columns } as CSSProperties}>{presentation.products.slice(0, limit).map((product) => <StorefrontProductCard key={product.id} product={product} />)}</div>
+    : <p className="jelly-empty-state">{emptyMessage}</p>
   }</StorefrontContainer></section>;
 }
 

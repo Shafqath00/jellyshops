@@ -48,7 +48,7 @@ it("registers configurable Collection sections only for Collection templates", (
       expect.objectContaining({ code: "SECTION_NOT_ALLOWED_ON_PAGE" }),
     ]));
   }
-  expect(getSectionDefinition("collection-header")?.controls.map(({ key }) => key)).toEqual(["showTitle", "showDescription", "showImage"]);
+  expect(getSectionDefinition("collection-header")?.controls.map(({ key }) => key)).toEqual(["layout", "contentAlignment", "showTitle", "showDescription", "showImage"]);
   expect(getSectionDefinition("collection-product-grid")?.defaultSettings).toMatchObject({ columns: 3, limit: 12 });
   expect(getSectionDefinition("collection-description")?.defaultSettings).toMatchObject({ spacing: "standard" });
 });
@@ -66,7 +66,7 @@ it("registers a validated media control for the Home Image with text section", (
 
 it("makes the Home product grid configurable without requiring sample Catalog references", () => {
   const definition = getSectionDefinition("product-grid");
-  expect(definition?.controls.map(({ key }) => key)).toEqual(["heading", "limit", "emptyMessage"]);
+  expect(definition?.controls.map(({ key }) => key)).toEqual(["heading", "text", "collectionId", "sort", "limit", "columns", "viewAllLabel", "viewAllLink", "hideWhenEmpty", "colorScheme", "emptyMessage"]);
   expect(definition?.settingsSchema.safeParse({ heading: "New arrivals", limit: 4, emptyMessage: "Coming soon" }).success).toBe(true);
   expect(definition?.settingsSchema.safeParse({ limit: 25 }).success).toBe(false);
   expect(validateSectionAgainstRegistry(section("product-grid"), "home")).toEqual([]);

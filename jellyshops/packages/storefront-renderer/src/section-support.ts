@@ -9,6 +9,8 @@ export const renderableHomeSectionTypes: ReadonlySet<string> = new Set([
   "image-with-text",
   "image-text",
   "multicolumn",
+  "image-banner",
+  "faq",
   "newsletter",
   "category-grid",
   "testimonials",

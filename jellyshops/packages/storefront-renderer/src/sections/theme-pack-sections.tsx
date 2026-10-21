@@ -3,6 +3,8 @@ import type { MediaReference, SectionNode } from "@jelly/storefront-schema";
 import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
+import type { RendererMode } from "../types";
+import { choice, imageValue, numberValue, sectionData, visibleBlocks } from "./shared";
 
 function stringSetting(settings: Record<string, unknown>, key: string, fallback = ""): string {
   const value = settings[key];
@@ -37,30 +39,48 @@ function SectionIntro({ section, fallback }: { section: SectionNode; fallback: s
 }
 
 export function CategoryGridSection({ section, context }: { section: SectionNode; context?: StorefrontRuntimeContext }) {
-  const labels = section.blocks.filter((block) => block.enabled).map((block) => stringSetting(block.settings, "text")).filter(Boolean);
-  const categories = labels.length ? labels : ["New arrivals", "Best sellers", "For the home", "Gifts"];
-  return <section className="jelly-section jelly-category-grid"><StorefrontContainer>
-    <SectionIntro section={section} fallback="Shop by category" />
-    <div className="jelly-category-grid-items">{categories.slice(0, 4).map((label, index) => <a href={context?.storeSlug ? `/${context.storeSlug}/shop` : "#shop"} className="jelly-category-card" key={label}>
-      <span>{String(index + 1).padStart(2, "0")}</span><strong>{label}</strong><small>Explore collection</small>
+  const shopHref = context?.storeSlug ? `/${context.storeSlug}/shop` : "#shop";
+  const cards = visibleBlocks(section, "collection-card").flatMap((block) => {
+    const label = stringSetting(block.settings, "label");
+    return label ? [{ id: block.id, label, image: imageValue(block.settings), href: resolveStorefrontHref(block.settings.link, context?.storeSlug) ?? shopHref }] : [];
+  });
+  // Until the merchant adds collection cards, show neutral placeholders that link to the shop.
+  const items = cards.length ? cards : ["New arrivals", "Best sellers", "For the home", "Gifts"].map((label) => ({ id: label, label, image: undefined, href: shopHref }));
+  const columns = numberValue(section.settings, "columns", 4, 2, 4);
+  return <section className="jelly-section jelly-category-grid" {...sectionData(section, { "data-image-ratio": choice(section.settings, "imageRatio", ["portrait", "square"] as const, "portrait") })}><StorefrontContainer>
+    <SectionIntro section={section} fallback="Shop by collection" />
+    <div className="jelly-category-grid-items" style={{ "--jelly-columns": columns } as CSSProperties}>{items.map((item) => <a href={item.href} className="jelly-category-card" key={item.id}>
+      <span className="jelly-category-card-media">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        {item.image ? <img src={item.image.url} alt="" loading="lazy" /> : null}
+      </span>
+      <strong>{item.label}</strong>
     </a>)}</div>
   </StorefrontContainer></section>;
 }
 
-export function TestimonialsSection({ section }: { section: SectionNode }) {
-  const reviews = section.blocks.filter((block) => block.enabled).map((block) => stringSetting(block.settings, "text")).filter(Boolean);
-  const content = copy(section, "Loved by regulars");
-  const messages = reviews.length ? reviews : ["Beautifully made, thoughtfully packed, and a joy to receive.", "The small details feel so personal. I come back every season.", "A genuinely lovely shopping experience from start to finish."];
-  return <section className="jelly-section jelly-testimonials"><StorefrontContainer><SectionIntro section={section} fallback="Loved by regulars" />
-    <div className="jelly-testimonial-grid">{messages.slice(0, 3).map((message, index) => <blockquote key={message}><p>“{message}”</p><cite>{["Maya R.", "Jordan L.", "Casey T."][index]}</cite></blockquote>)}</div>
-    {content.button && <a className="jelly-text-link" href={content.href}>{content.button} →</a>}
+export function TestimonialsSection({ section, mode = "published" }: { section: SectionNode; mode?: RendererMode }) {
+  const reviews = visibleBlocks(section, "testimonial").flatMap((block) => {
+    const quote = stringSetting(block.settings, "quote");
+    return quote ? [{ id: block.id, quote, author: stringSetting(block.settings, "author") }] : [];
+  });
+  // Never invent reviews: with no testimonials the section only shows an editing hint outside the live store.
+  if (!reviews.length && mode === "published") return null;
+  return <section className="jelly-section jelly-testimonials" {...sectionData(section)}><StorefrontContainer>
+    <SectionIntro section={section} fallback="What customers say" />
+    {reviews.length
+      ? <div className="jelly-testimonial-grid">{reviews.map((review) => <blockquote key={review.id}><p>{review.quote}</p>{review.author && <cite>{review.author}</cite>}</blockquote>)}</div>
+      : <p className="jelly-editor-hint">Add a testimonial block with a real customer quote. This section stays hidden on your live store until you do.</p>}
   </StorefrontContainer></section>;
 }
 
 export function TrustStripSection({ section }: { section: SectionNode }) {
-  const promises = section.blocks.filter((block) => block.enabled).map((block) => stringSetting(block.settings, "text")).filter(Boolean);
-  const items = promises.length ? promises : ["Thoughtfully sourced", "Secure checkout", "Made with care"];
-  return <section className="jelly-trust-strip"><StorefrontContainer><div>{items.slice(0, 4).map((item, index) => <p key={item}><span aria-hidden="true">{["✦", "◌", "✚", "↗"][index]}</span>{item}</p>)}</div></StorefrontContainer></section>;
+  const promises = visibleBlocks(section).map((block) => stringSetting(block.settings, "text")).filter(Boolean);
+  const items = promises.length ? promises : ["Secure checkout", "Carefully packed", "Friendly support"];
+  return <section className="jelly-trust-strip" {...sectionData(section)}><StorefrontContainer><ul>{items.slice(0, 4).map((item) => <li key={item}>
+    <svg className="jelly-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+    {item}
+  </li>)}</ul></StorefrontContainer></section>;
 }
 
 export function ImageMosaicSection({ section }: { section: SectionNode }) {

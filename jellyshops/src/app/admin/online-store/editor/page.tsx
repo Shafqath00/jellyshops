@@ -39,11 +39,10 @@ import type {
   RuntimeMenuV4,
   BlockNode,
   SectionNode,
-  GlobalSettings,
   RichTextDocument,
   ThemeId,
 } from "@jelly/storefront-schema";
-import { resolveDesignTokens, resolveTheme } from "@jelly/storefront-themes";
+import { resolveStorefrontThemeTokens, resolveTheme } from "@jelly/storefront-themes";
 import { expandRuntimeLayout } from "@/features/storefront/resource-loader";
 import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import { useAuth } from "@/features/auth/auth-provider";
@@ -370,7 +369,8 @@ function StoreEditorWorkspace() {
   const activeTemplate = templates.find((template) => template.id === activeTemplateId);
   const previewThemeStyle = useMemo(() => {
     const resolved = resolveTheme(themeConfiguration?.themeId, themeConfiguration?.settings ?? {}, themeConfiguration?.themeVersion);
-    return resolveDesignTokens(resolved.id as ThemeId, resolved.settings as unknown as GlobalSettings);
+    // Same token layer as the published storefront, so the preview matches the live store.
+    return resolveStorefrontThemeTokens(resolved.id as ThemeId, resolved.settings);
   }, [themeConfiguration]);
 
   useEffect(() => {

@@ -52,7 +52,7 @@ describe("V4 starter packs", () => {
     ]));
 
     expect(composition).toEqual({
-      home: ["global:header", "global:announcement", "hero", "product-grid", "image-with-text", "global:footer"],
+      home: ["global:announcement", "global:header", "hero", "product-grid", "image-with-text", "global:footer"],
       product: ["global:header", "product-gallery", "product-information", "product-options", "product-purchase", "product-description", "related-products", "global:footer"],
       collection: ["global:header", "collection-header", "collection-product-grid", "collection-description", "global:footer"],
       cart: ["global:header", "cart-summary", "global:footer"],

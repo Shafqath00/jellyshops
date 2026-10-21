@@ -6,6 +6,7 @@ import type { RuntimeMenuV4, SectionNode } from "@jelly/storefront-schema";
 import { resolveStorefrontThemeTokens, resolveTheme } from "@jelly/storefront-themes";
 import { StorefrontProductCard } from "@jelly/storefront-ui";
 import { StorefrontPreviewFrame } from "@/features/store-editor/components/storefront-preview-frame";
+import { TemplatePreview, type PreviewTemplate } from "./template-preview";
 
 /**
  * Jelly Minimal style guide: the theme's tokens, type, controls and shared
@@ -15,6 +16,8 @@ import { StorefrontPreviewFrame } from "@/features/store-editor/components/store
 const THEME_ID = "jelly-signature";
 const widths = { desktop: 1280, tablet: 768, mobile: 390 } as const;
 type Device = keyof typeof widths;
+const views = [["guide", "Style guide"], ["home", "Home"], ["collection", "Collection"], ["product", "Product"]] as const;
+type View = (typeof views)[number][0];
 
 const commerce: CommerceDataProvider = { async getProducts() { return []; } };
 const menus: Record<string, RuntimeMenuV4> = {
@@ -124,20 +127,24 @@ function Guide() {
 
 export default function JellyMinimalStyleGuidePage() {
   const [device, setDevice] = useState<Device>("desktop");
+  const [view, setView] = useState<View>("guide");
   // The preview iframe must mount on the client so its load handler is attached before the frame loads.
   const ready = useSyncExternalStore(subscribeNoop, () => true, () => false);
   const theme = resolveTheme(THEME_ID);
   const style = resolveStorefrontThemeTokens(theme.id, theme.settings) as CSSProperties;
   return <main style={{ minHeight: "100vh", background: "#eeece8", padding: 16, display: "grid", gap: 16, gridTemplateRows: "auto 1fr" }}>
     <header style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
-      <strong style={{ fontSize: 14 }}>Jelly Minimal · style guide</strong>
+      <strong style={{ fontSize: 14 }}>Jelly Minimal · theme preview</strong>
+      <div role="group" aria-label="Page" style={{ display: "flex", gap: 4, padding: 4, background: "white", borderRadius: 8 }}>
+        {views.map(([key, label]) => <button key={key} type="button" aria-pressed={view === key} onClick={() => setView(key)} style={{ padding: "6px 12px", borderRadius: 6, fontSize: 13, background: view === key ? "#1c1b19" : "transparent", color: view === key ? "white" : "#1c1b19" }}>{label}</button>)}
+      </div>
       <div role="group" aria-label="Preview width" style={{ display: "flex", gap: 4, padding: 4, background: "white", borderRadius: 8 }}>
         {(Object.keys(widths) as Device[]).map((key) => <button key={key} type="button" aria-pressed={device === key} onClick={() => setDevice(key)} style={{ padding: "6px 12px", borderRadius: 6, fontSize: 13, background: device === key ? "#1c1b19" : "transparent", color: device === key ? "white" : "#1c1b19" }}>{key[0].toUpperCase() + key.slice(1)} · {widths[key]}px</button>)}
       </div>
     </header>
     <div style={{ width: widths[device], maxWidth: "100%", margin: "0 auto", minHeight: "80vh", background: "white", boxShadow: "0 1px 3px rgba(0,0,0,.08)" }}>
       {ready && <StorefrontPreviewFrame title="Jelly Minimal style guide" themeId={THEME_ID} style={style} className="block h-[80vh] w-full border-0">
-        <Guide />
+        {view === "guide" ? <Guide /> : <TemplatePreview key={view} template={view as PreviewTemplate} />}
       </StorefrontPreviewFrame>}
     </div>
   </main>;

@@ -10,6 +10,8 @@ import { CollectionDescriptionSection, CollectionHeaderSection, CollectionProduc
 import { ArticleContentSection, ArticleHeaderSection, ArticleListSection, BlogHeaderSection, PageContentSection } from "./sections/content-pages";
 import {
   AnnouncementBarSection,
+  FaqSection,
+  ImageBannerSection,
   ImageWithTextSection,
   MulticolumnSection,
   NewsletterSection,
@@ -71,23 +73,25 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("article-list", ({ context }) => <ArticleListSection context={context} />);
   registry.register("article-header", ({ context }) => <ArticleHeaderSection context={context} />);
   registry.register("article-content", ({ context }) => <ArticleContentSection context={context} />);
-  registry.register("product-grid", ({ commerce, section }) => <ProductGridSection commerce={commerce} section={section} />);
+  registry.register("product-grid", ({ commerce, section, context }) => <ProductGridSection commerce={commerce} section={section} storeSlug={context.storeSlug} />);
   registry.register("product-gallery", ({ context, section }) => <ProductGallerySection context={context} section={section} />);
   registry.register("product-information", ({ context, section }) => <ProductInformationSection context={context} section={section} />);
-  registry.register("product-options", ({ context }) => <ProductOptionsSection context={context} />);
+  registry.register("product-options", ({ context, section }) => <ProductOptionsSection context={context} section={section} />);
   registry.register("product-purchase", ({ context, section }) => <ProductPurchaseSection context={context} section={section} />);
-  registry.register("product-description", ({ context }) => <ProductDescriptionSection context={context} />);
+  registry.register("product-description", ({ context, section }) => <ProductDescriptionSection context={context} section={section} />);
   registry.register("related-products", ({ context, section }) => <RelatedProductsSection context={context} section={section} />);
   registry.register("collection-header", ({ context, section }) => <CollectionHeaderSection context={context} section={section} />);
   registry.register("collection-product-grid", ({ context, section }) => <CollectionProductGridSection context={context} section={section} />);
   registry.register("collection-description", ({ context, section }) => <CollectionDescriptionSection context={context} section={section} />);
-  registry.register("featured-collection", ({ commerce, section }) => <ProductGridSection commerce={commerce} section={section} />);
+  registry.register("featured-collection", ({ commerce, section, context }) => <ProductGridSection commerce={commerce} section={section} storeSlug={context.storeSlug} />);
   registry.register("image-with-text", ({ section, context }) => <ImageWithTextSection section={section} context={context} />);
   registry.register("image-text", ({ section, context }) => <ImageWithTextSection section={section} context={context} />);
-  registry.register("multicolumn", ({ section }) => <MulticolumnSection section={section} />);
+  registry.register("multicolumn", ({ section, context }) => <MulticolumnSection section={section} context={context} />);
+  registry.register("image-banner", ({ section, context }) => <ImageBannerSection section={section} context={context} />);
+  registry.register("faq", ({ section }) => <FaqSection section={section} />);
   registry.register("newsletter", ({ section, commerce, mode }) => <NewsletterSection section={section} subscribe={commerce.subscribeNewsletter} mode={mode} />);
-  registry.register("category-grid", ({ section }) => <CategoryGridSection section={section} />);
-  registry.register("testimonials", ({ section }) => <TestimonialsSection section={section} />);
+  registry.register("category-grid", ({ section, context }) => <CategoryGridSection section={section} context={context} />);
+  registry.register("testimonials", ({ section, mode }) => <TestimonialsSection section={section} mode={mode} />);
   registry.register("trust-strip", ({ section }) => <TrustStripSection section={section} />);
   registry.register("image-mosaic", ({ section }) => <ImageMosaicSection section={section} />);
   registry.register("journal-teaser", ({ section }) => <JournalTeaserSection section={section} />);

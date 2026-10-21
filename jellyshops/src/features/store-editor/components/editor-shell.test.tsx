@@ -67,7 +67,7 @@ describe("editor shell", () => {
 
     await user.click(screen.getByRole("button", { name: "Hero section" }));
     expect(screen.getByRole("heading", { name: "Hero settings" })).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: "Eyebrow" })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Small text above heading" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Heading block" }));
     const heading = screen.getByRole("textbox", { name: "Heading" });
@@ -124,8 +124,8 @@ describe("editor shell", () => {
     render(<EditorShell initialDocument={documentWithRichText()} revision={2} commerce={commerce} onSave={onSave} onPublish={vi.fn()} />);
 
     await user.click(screen.getByRole("button", { name: "Hero section" }));
-    await user.clear(screen.getByRole("textbox", { name: "Eyebrow" }));
-    await user.type(screen.getByRole("textbox", { name: "Eyebrow" }), "New");
+    await user.clear(screen.getByRole("textbox", { name: "Small text above heading" }));
+    await user.type(screen.getByRole("textbox", { name: "Small text above heading" }), "New");
     expect(onSave).not.toHaveBeenCalled();
 
     await waitFor(() => expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ storeId: "store-demo" }), 2), { timeout: 1200 });
@@ -140,8 +140,8 @@ describe("editor shell", () => {
     render(<EditorShell initialDocument={documentWithRichText()} revision={2} commerce={commerce} onSave={onSave} onPublish={vi.fn()} onReload={onReload} />);
 
     await user.click(screen.getByRole("button", { name: "Hero section" }));
-    await user.clear(screen.getByRole("textbox", { name: "Eyebrow" }));
-    await user.type(screen.getByRole("textbox", { name: "Eyebrow" }), "New");
+    await user.clear(screen.getByRole("textbox", { name: "Small text above heading" }));
+    await user.type(screen.getByRole("textbox", { name: "Small text above heading" }), "New");
 
     await waitFor(() => expect(screen.getByText("Conflict detected")).toBeInTheDocument(), { timeout: 1200 });
     expect(onSave).toHaveBeenCalledTimes(1);

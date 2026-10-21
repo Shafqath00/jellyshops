@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui";
 import type { CommerceDataProvider, PublicProduct } from "../types";
+import { resolveStorefrontHref } from "../runtime-context";
+import { sectionData } from "./shared";
 
-export function ProductGridSection({ commerce, section }: { commerce: CommerceDataProvider; section: import("@jelly/storefront-schema").SectionNode }) {
+export function ProductGridSection({ commerce, section, storeSlug }: { commerce: CommerceDataProvider; section: import("@jelly/storefront-schema").SectionNode; storeSlug?: string }) {
   const [result, setResult] = useState<{ source: CommerceDataProvider; limit: number; scope: string; products: PublicProduct[]; error?: boolean }>();
   const [retry, setRetry] = useState(0);
   const sort = typeof section.settings.sort === "string" ? section.settings.sort : undefined;
@@ -33,9 +35,16 @@ export function ProductGridSection({ commerce, section }: { commerce: CommerceDa
     return () => { active = false; };
   }, [commerce, limit, scope, sort, collectionId]);
   if (loaded && !products.length && !current?.error && section.settings.hideWhenEmpty === true) return null;
-  return <section className="jelly-section jelly-product-grid"><StorefrontContainer>
-    {heading && <h2>{heading}</h2>}
-    {current?.error ? <p role="alert">Products are temporarily unavailable. <button type="button" onClick={() => setRetry((value) => value + 1)}>Retry</button></p> : loaded && products.length === 0 && <p>{emptyMessage}</p>}
-    <div className="jelly-product-grid-items">{products.map((product) => <StorefrontProductCard key={product.id} product={product} />)}</div>
+  const intro = typeof section.settings.text === "string" ? section.settings.text : "";
+  const viewAllLabel = typeof section.settings.viewAllLabel === "string" ? section.settings.viewAllLabel.trim() : "";
+  const viewAllHref = viewAllLabel ? resolveStorefrontHref(section.settings.viewAllLink || "/shop", storeSlug) : null;
+  const columns = typeof section.settings.columns === "number" && Number.isInteger(section.settings.columns) ? Math.max(2, Math.min(4, section.settings.columns)) : 4;
+  return <section className="jelly-section jelly-product-grid" {...sectionData(section)}><StorefrontContainer>
+    {(heading || viewAllHref) && <div className="jelly-section-header">
+      <div>{heading && <h2>{heading}</h2>}{intro && <p>{intro}</p>}</div>
+      {viewAllHref && <a className="jelly-button jelly-button--link" href={viewAllHref}>{viewAllLabel}</a>}
+    </div>}
+    {current?.error ? <p role="alert">Products are temporarily unavailable. <button type="button" onClick={() => setRetry((value) => value + 1)}>Retry</button></p> : loaded && products.length === 0 && <p className="jelly-empty-state">{emptyMessage}</p>}
+    <div className="jelly-product-grid-items" style={{ "--jelly-columns": columns } as CSSProperties}>{products.map((product) => <StorefrontProductCard key={product.id} product={product} />)}</div>
   </StorefrontContainer></section>;
 }

@@ -5,8 +5,8 @@ import Image from "next/image";
 import { ArrowRight, Check, Monitor, Smartphone } from "lucide-react";
 import { RegistrySectionRenderer, type CommerceDataProvider } from "@jelly/storefront-renderer";
 import type { V4StarterPack } from "@jelly/storefront-registry";
-import type { GlobalSettings, ThemeId } from "@jelly/storefront-schema";
-import { resolveDesignTokens } from "@jelly/storefront-themes";
+import type { ThemeId } from "@jelly/storefront-schema";
+import { resolveStorefrontThemeTokens, resolveTheme } from "@jelly/storefront-themes";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { StorefrontPreviewFrame } from "./storefront-preview-frame";
 
@@ -50,7 +50,8 @@ export function TemplatePreviewDialog({ starter, hasWorkspace, busy, error, onCl
     const section = placement.kind === "inline" ? placement.section : starter.globalSections.find((global) => global.section.id === placement.globalSectionId)?.section;
     return section ? [section] : [];
   }) ?? [];
-  const style = resolveDesignTokens(starter.theme.themeId as ThemeId, starter.theme.settings as unknown as GlobalSettings) as CSSProperties;
+  const theme = resolveTheme(starter.theme.themeId, starter.theme.settings);
+  const style = resolveStorefrontThemeTokens(theme.id as ThemeId, theme.settings) as CSSProperties;
   return <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
     <DialogContent className="flex h-[90dvh] w-[calc(100%_-_24px)] max-w-6xl! flex-col gap-0 overflow-hidden rounded-2xl border-[#e9ddd8] bg-[#fffaf6] p-0! text-[#241f20] sm:w-[calc(100%_-_48px)]">
       <header className="shrink-0 border-b border-[#e9ddd8] bg-white px-5 py-4 pr-16 sm:px-6"><DialogTitle className="text-xl text-[#241f20]">{starter.name}</DialogTitle><DialogDescription className="mt-1 text-xs leading-5 text-[#74686c]">Sample home page · Your products and content are added in the editor.</DialogDescription></header>
