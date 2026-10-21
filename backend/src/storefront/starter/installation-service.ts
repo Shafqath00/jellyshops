@@ -26,7 +26,7 @@ export class StarterInstallationConflictError extends ApiError {
   }
 }
 
-export class StorefrontNotFoundError extends ApiError {
+class StorefrontNotFoundError extends ApiError {
   constructor() { super(404, "STOREFRONT_NOT_FOUND", "Storefront was not found"); }
 }
 

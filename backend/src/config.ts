@@ -4,7 +4,7 @@ import { z } from "zod";
 
 // Kept in step with the exact Stripe SDK pin.
 // No preview or account-default version.
-export const STRIPE_API_VERSION = "2026-08-26.dahlia" as const;
+const STRIPE_API_VERSION = "2026-08-26.dahlia" as const;
 
 /**
  * Backend-only credentials.

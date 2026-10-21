@@ -22,7 +22,7 @@ const resourceTables = { product: "Product", collection: "Collection", page: "St
 const jsonColumns = new Set(["layout", "section", "items", "settings"]);
 function sql(transaction: unknown): SqlExecutor { return transaction as SqlExecutor; }
 
-export class SqlWorkspaceRepositories implements TemplateRepository, GlobalSectionRepository, PresetRepository, MenuRepository, ThemeRepository, AssignmentRepository, WorkspaceMutationRunner {
+class SqlWorkspaceRepositories implements TemplateRepository, GlobalSectionRepository, PresetRepository, MenuRepository, ThemeRepository, AssignmentRepository, WorkspaceMutationRunner {
   constructor(private readonly db: CommerceDatabase) {}
   async run<T>(storeId: string, operation: (transaction: unknown) => Promise<T>) {
     return this.db.transaction(async (tx) => {

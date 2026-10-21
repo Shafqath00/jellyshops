@@ -32,7 +32,7 @@ export class CaptureNotificationTransport implements NotificationTransport {
   readonly messages: NotificationMessage[] = [];
   async send(message: NotificationMessage) { this.messages.push(message); return { messageId: `capture:${message.id}` }; }
 }
-export async function recordNotificationEvent(sql: SqlExecutor, storeId: string, orderId: string, type: string, details: object) {
+async function recordNotificationEvent(sql: SqlExecutor, storeId: string, orderId: string, type: string, details: object) {
   await sql.query(`INSERT INTO "OrderEvent"("id","storeId","orderId","type","details") VALUES($1,$2,$3,$4,$5::jsonb)`, [randomUUID(), storeId, orderId, type, JSON.stringify(details)]);
 }
 export function createNotificationService(database: CommerceDatabase, transport: NotificationTransport, options: { publicBaseUrl: string; apiBaseUrl?: string; tokenSecret: string }) {

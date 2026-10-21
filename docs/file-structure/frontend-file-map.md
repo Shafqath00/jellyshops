@@ -263,9 +263,9 @@ Single storefront renderer for preview and live.
 
 ### `jellyshops/packages/storefront-renderer/src/sections/header.tsx`
 
-- **Purpose:** React component(s): MenuLinks, MenuList, StorefrontIcon, HeaderSection (inferred from file name; no header comment)
+- **Purpose:** React component(s): MenuList, HeaderSection (inferred from file name; no header comment)
 - **Size:** 112 lines
-- **Exports:** `MenuLinks`, `MenuList`, `StorefrontIcon`, `HeaderSection`
+- **Exports:** `MenuList`, `HeaderSection`
 - **Imports (project):** `jellyshops/packages/storefront-renderer/src/runtime-context.ts`, `jellyshops/packages/storefront-schema/src/index.ts`
 - **Imports (packages):** `react`
 - **Used by:** `jellyshops/packages/storefront-renderer/src/render-registry.tsx`, `jellyshops/packages/storefront-renderer/src/sections/footer.tsx`
@@ -1589,9 +1589,9 @@ shadcn-style UI primitives.
 
 ### `jellyshops/src/components/ui/skeleton.tsx`
 
-- **Purpose:** React component(s): Skeleton, SkeletonProductCard, SkeletonText, SkeletonRows (inferred from file name; no header comment)
+- **Purpose:** React component(s): SkeletonProductCard, SkeletonText, SkeletonRows (inferred from file name; no header comment)
 - **Size:** 78 lines
-- **Exports:** `Skeleton`, `SkeletonProductCard`, `SkeletonText`, `SkeletonRows`
+- **Exports:** `SkeletonProductCard`, `SkeletonText`, `SkeletonRows`
 - **Imports (project):** `jellyshops/src/lib/utils.ts`
 - **Imports (packages):** `react`
 - **Used by:** `jellyshops/src/app/admin/customers/page.tsx`, `jellyshops/src/app/admin/products/page.tsx`
@@ -1640,19 +1640,18 @@ Merchant authentication (Supabase session, merchant/store loading).
 ### `jellyshops/src/features/auth/auth-provider.tsx`
 
 - **Purpose:** React component(s): supabase, AuthProvider, useAuth, authApiOrigin (inferred from file name; no header comment)
-- **Size:** 98 lines
-- **Exports:** `MerchantStore` (type), `supabase`, `AuthProvider`, `useAuth`, `authApiOrigin`
+- **Size:** 96 lines
+- **Exports:** `supabase`, `AuthProvider`, `useAuth`, `authApiOrigin`
 - **Imports (project):** `jellyshops/src/features/auth/merchant-api.ts`
 - **Imports (packages):** `@supabase/supabase-js`, `react`
-- **Used by:** `jellyshops/src/app/admin/content/blogs/page.tsx`, `jellyshops/src/app/admin/content/metaobjects/page.tsx`, `jellyshops/src/app/admin/content/pages/page.tsx`, `jellyshops/src/app/admin/customers/[id]/page.tsx`, `jellyshops/src/app/admin/customers/page.tsx`, `jellyshops/src/app/admin/engagement/page.tsx`, `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/app/admin/online-store/navigation/page.tsx`, `jellyshops/src/app/admin/online-store/page.tsx`, `jellyshops/src/app/admin/orders/[id]/page.tsx`, `jellyshops/src/app/admin/orders/page.tsx`, `jellyshops/src/app/admin/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/app/admin/products/page.tsx`, `jellyshops/src/app/admin/settings/custom-data/page.tsx`, `jellyshops/src/app/admin/settings/notifications/page.tsx`, `jellyshops/src/app/admin/settings/page.tsx`, `jellyshops/src/app/layout.tsx`, `jellyshops/src/app/onboarding/page.tsx`, `jellyshops/src/components/admin-auth-gate.tsx`, `jellyshops/src/components/app-shell.tsx`, `jellyshops/src/components/auth-form.tsx`, `jellyshops/src/components/digital-product-settings.tsx`, `jellyshops/src/components/product-form.tsx`, `jellyshops/src/features/auth/merchant-api.ts`, `jellyshops/src/features/auth/merchant-auth-callback.tsx`, `jellyshops/src/features/commerce/components/merchant-payments-panel.tsx`
+- **Used by:** `jellyshops/src/app/admin/content/blogs/page.tsx`, `jellyshops/src/app/admin/content/metaobjects/page.tsx`, `jellyshops/src/app/admin/content/pages/page.tsx`, `jellyshops/src/app/admin/customers/[id]/page.tsx`, `jellyshops/src/app/admin/customers/page.tsx`, `jellyshops/src/app/admin/engagement/page.tsx`, `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/app/admin/online-store/navigation/page.tsx`, `jellyshops/src/app/admin/online-store/page.tsx`, `jellyshops/src/app/admin/orders/[id]/page.tsx`, `jellyshops/src/app/admin/orders/page.tsx`, `jellyshops/src/app/admin/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/app/admin/products/page.tsx`, `jellyshops/src/app/admin/settings/custom-data/page.tsx`, `jellyshops/src/app/admin/settings/notifications/page.tsx`, `jellyshops/src/app/admin/settings/page.tsx`, `jellyshops/src/app/layout.tsx`, `jellyshops/src/app/onboarding/page.tsx`, `jellyshops/src/components/admin-auth-gate.tsx`, `jellyshops/src/components/app-shell.tsx`, `jellyshops/src/components/auth-form.tsx`, `jellyshops/src/components/digital-product-settings.tsx`, `jellyshops/src/components/product-form.tsx`, `jellyshops/src/features/auth/merchant-auth-callback.tsx`, `jellyshops/src/features/commerce/components/merchant-payments-panel.tsx`
 
 - `merchant-api.test.ts` — test (29 lines)
 ### `jellyshops/src/features/auth/merchant-api.ts`
 
 - **Purpose:** API client / request helpers: loadMerchant (inferred from file name; no header comment)
-- **Size:** 31 lines
-- **Exports:** `loadMerchant`
-- **Imports (project):** `jellyshops/src/features/auth/auth-provider.tsx`
+- **Size:** 33 lines
+- **Exports:** `MerchantStore` (type), `loadMerchant`
 - **Used by:** `jellyshops/src/features/auth/auth-provider.tsx`
 - **Tests:** `merchant-api.test.ts`
 
@@ -2427,9 +2426,9 @@ Domain types/helpers, legacy local repository, product variant helpers, utilitie
 - `product-variants.test.ts` — test (30 lines)
 ### `jellyshops/src/lib/product-variants.ts`
 
-- **Purpose:** Exports MAX_INVENTORY_VARIANTS, getInventoryOptions, getVariantCombinationCount, createVariantCombinationKey (inferred from file name; no header comment)
+- **Purpose:** Exports getInventoryOptions, createVariantCombinationKey, reconcileProductVariants (inferred from file name; no header comment)
 - **Size:** 41 lines
-- **Exports:** `MAX_INVENTORY_VARIANTS`, `getInventoryOptions`, `getVariantCombinationCount`, `createVariantCombinationKey`, `getVariantDisplayName`, `reconcileProductVariants`
+- **Exports:** `getInventoryOptions`, `createVariantCombinationKey`, `reconcileProductVariants`
 - **Imports (project):** `jellyshops/src/lib/domain.ts`
 - **Used by:** `jellyshops/src/components/product-form.tsx`, `jellyshops/src/lib/product-configuration.ts`
 - **Tests:** `product-variants.test.ts`

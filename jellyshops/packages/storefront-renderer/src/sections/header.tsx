@@ -15,7 +15,7 @@ function menuHref(item: RuntimeMenuItem, storeSlug?: string): string | null {
   return `${root}/${target.kind === "product" ? "products" : target.kind === "collection" ? "collections" : target.kind === "page" ? "pages" : "blogs"}/${encodeURIComponent(target.resourceId)}`;
 }
 
-export function MenuLinks({ section, context, label = "Store navigation" }: { section: SectionNode; context: StorefrontRuntimeContext; label?: string }) {
+function MenuLinks({ section, context, label = "Store navigation" }: { section: SectionNode; context: StorefrontRuntimeContext; label?: string }) {
   const block = section.blocks.find((entry) => entry.enabled && entry.type === "menu");
   const handle = typeof block?.settings.handle === "string" ? block.settings.handle : "main";
   return (context.menus?.[handle]?.items.length ?? 0) > 0 ? <nav aria-label={label}><MenuList handle={handle} context={context} /></nav> : null;
@@ -40,7 +40,7 @@ const iconPaths: Record<ToolIcon, string> = {
   menu: "M4 7h16M4 12h16M4 17h16",
 };
 
-export function StorefrontIcon({ name }: { name: ToolIcon }) {
+function StorefrontIcon({ name }: { name: ToolIcon }) {
   return <svg className="jelly-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d={iconPaths[name]} /></svg>;
 }
 

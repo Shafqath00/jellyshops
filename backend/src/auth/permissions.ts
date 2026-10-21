@@ -1,7 +1,7 @@
 import type { StoreRole } from "../tenants/types.js";
 import type { StorePermission } from "./types.js";
 
-export const ROLE_PERMISSIONS: Record<StoreRole, ReadonlySet<StorePermission>> = {
+const ROLE_PERMISSIONS: Record<StoreRole, ReadonlySet<StorePermission>> = {
   OWNER: new Set<StorePermission>([
     "storefront:view", "storefront:edit", "storefront:publish",
     "content:view", "content:edit",

@@ -53,9 +53,9 @@ Platform-admin routes and bootstrap.
 - `config.test.ts` — test (78 lines)
 ### `backend/src/config.ts`
 
-- **Purpose:** Exports STRIPE_API_VERSION, loadConfig (inferred from file name; no header comment)
+- **Purpose:** Exports loadConfig (inferred from file name; no header comment)
 - **Size:** 467 lines
-- **Exports:** `STRIPE_API_VERSION`, `StripeServerConfig` (type), `AppConfig` (type), `loadConfig`
+- **Exports:** `StripeServerConfig` (type), `AppConfig` (type), `loadConfig`
 - **Imports (packages):** `dotenv`, `node:path`, `zod`
 - **Used by:** `backend/src/app.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/functions.ts`, `backend/src/server.ts`, `backend/src/stripe/client.ts`
 - **Tests:** `app.local-v4.test.ts`, `app.public-storefront.test.ts`, `app.test.ts`, `order-workspace.test.ts`, `config.test.ts`, `routes.test.ts`, `routes.test.ts`, `client.test.ts`
@@ -142,9 +142,9 @@ Authentication providers (Supabase/Firebase), session middleware, roles and stor
 - `permissions.test.ts` — test (40 lines)
 ### `backend/src/auth/permissions.ts`
 
-- **Purpose:** Exports ROLE_PERMISSIONS, roleHasPermission, hasStorePermission (inferred from file name; no header comment)
+- **Purpose:** Exports roleHasPermission, hasStorePermission (inferred from file name; no header comment)
 - **Size:** 61 lines
-- **Exports:** `ROLE_PERMISSIONS`, `roleHasPermission`, `hasStorePermission`
+- **Exports:** `roleHasPermission`, `hasStorePermission`
 - **Imports (project):** `backend/src/auth/types.ts`, `backend/src/tenants/types.ts`
 - **Used by:** `backend/src/commerce/merchant-order-routes.ts`, `backend/src/tenants/store-context.ts`
 - **Tests:** `permissions.test.ts`
@@ -331,7 +331,7 @@ Checkout, orders, payment intents, inventory, fulfilment, order management, noti
 
 - **Purpose:** Exports notificationTypes, digitalToken, hashDigitalToken, notificationRetry (inferred from file name; no header comment)
 - **Size:** 113 lines
-- **Exports:** `notificationTypes`, `NotificationType` (type), `digitalToken`, `hashDigitalToken`, `notificationRetry`, `NotificationContent` (type), `renderOrderNotification`, `NotificationMessage` (type), `NotificationTransport` (type), `UncertainDeliveryError`, `CaptureNotificationTransport`, `recordNotificationEvent`, `createNotificationService`, `NotificationService` (type)
+- **Exports:** `notificationTypes`, `NotificationType` (type), `digitalToken`, `hashDigitalToken`, `notificationRetry`, `NotificationContent` (type), `renderOrderNotification`, `NotificationMessage` (type), `NotificationTransport` (type), `UncertainDeliveryError`, `CaptureNotificationTransport`, `createNotificationService`, `NotificationService` (type)
 - **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/http/errors.ts`
 - **Imports (packages):** `node:crypto`
 - **Database tables referenced:** `DigitalAsset`, `DigitalEntitlement`, `Order`, `OrderEvent`, `OrderFulfilment`, `OrderItem`, `OrderNotification`, `Store`, `StoreNotificationBranding`
@@ -547,9 +547,9 @@ Merchant-defined custom data definitions and values.
 - `service.test.ts` — test (115 lines)
 ### `backend/src/custom-data/service.ts`
 
-- **Purpose:** Application service (business rules): isValidCustomDataValue, CustomDataService, MetaobjectService (inferred from file name; no header comment)
+- **Purpose:** Application service (business rules): CustomDataService, MetaobjectService (inferred from file name; no header comment)
 - **Size:** 250 lines
-- **Exports:** `isValidCustomDataValue`, `CustomDataService`, `MetaobjectService`
+- **Exports:** `CustomDataService`, `MetaobjectService`
 - **Imports (project):** `backend/src/custom-data/repository.ts`
 - **Imports (packages):** `@jelly/storefront-schema`
 - **Used by:** `backend/src/app.ts`, `backend/src/custom-data/routes.ts`
@@ -1097,9 +1097,9 @@ Installs starter packs into a store's draft.
 
 ### `backend/src/storefront/starter/installation-service.ts`
 
-- **Purpose:** Application service (business rules): StarterInstallationConflictError, StorefrontNotFoundError, StorefrontStarterInstallationService (inferred from file name; no header comment)
+- **Purpose:** Application service (business rules): StarterInstallationConflictError, StorefrontStarterInstallationService (inferred from file name; no header comment)
 - **Size:** 175 lines
-- **Exports:** `StarterInstallationConflictError`, `StorefrontNotFoundError`, `StarterInstallationResult` (type), `StorefrontStarterInstallationService`
+- **Exports:** `StarterInstallationConflictError`, `StarterInstallationResult` (type), `StorefrontStarterInstallationService`
 - **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/http/errors.ts`
 - **Imports (packages):** `@jelly/storefront-registry`, `@jelly/storefront-schema`, `node:crypto`
 - **Database tables referenced:** `GlobalSection`, `NavigationMenu`, `Store`, `StorePage`, `StorefrontTemplate`, `StorefrontTemplateAssignment`, `StorefrontWorkspace`, `ThemeConfiguration`
@@ -1224,9 +1224,9 @@ Mutable draft workspace: templates, global sections, menus, theme settings, assi
 - `sql-repositories.test.ts` — test (30 lines)
 ### `backend/src/storefront/workspace/sql-repositories.ts`
 
-- **Purpose:** Data access layer: SqlWorkspaceRepositories, createSqlWorkspaceApi (inferred from file name; no header comment)
+- **Purpose:** Data access layer: createSqlWorkspaceApi (inferred from file name; no header comment)
 - **Size:** 88 lines
-- **Exports:** `SqlWorkspaceRepositories`, `createSqlWorkspaceApi`
+- **Exports:** `createSqlWorkspaceApi`
 - **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/storefront/workspace/api-service.ts`, `backend/src/storefront/workspace/assignment-service.ts`, `backend/src/storefront/workspace/clone-local-ids.ts`, `backend/src/storefront/workspace/errors.ts`, `backend/src/storefront/workspace/global-section-service.ts`, `backend/src/storefront/workspace/menu-service.ts`, `backend/src/storefront/workspace/mutation-runner.ts`, `backend/src/storefront/workspace/repositories/assignment-repository.ts`, `backend/src/storefront/workspace/repositories/global-section-repository.ts`, `backend/src/storefront/workspace/repositories/menu-repository.ts`, `backend/src/storefront/workspace/repositories/preset-repository.ts`, `backend/src/storefront/workspace/repositories/template-repository.ts`, `backend/src/storefront/workspace/repositories/theme-repository.ts`, `backend/src/storefront/workspace/template-service.ts`, `backend/src/storefront/workspace/template-type-enum.ts`, `backend/src/storefront/workspace/theme-service.ts`
 - **Imports (packages):** `node:crypto`, `pg`
 - **Database tables referenced:** `StorefrontTemplate`, `StorefrontTemplateAssignment`, `StorefrontWorkspace`, `ThemeConfiguration`

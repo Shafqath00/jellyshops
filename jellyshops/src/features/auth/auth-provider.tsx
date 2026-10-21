@@ -2,11 +2,9 @@
 
 import { createClient, type Session } from "@supabase/supabase-js";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { loadMerchant } from "./merchant-api";
+import { loadMerchant, type MerchantStore } from "./merchant-api";
 
-export interface MerchantStore {
-  id: string; name: string; slug: string; currency: string; country: string; role: string;
-}
+export type { MerchantStore };
 interface AuthContextValue {
   configured: boolean; loading: boolean; merchantLoading: boolean;
   merchantStatus: "loading" | "ready" | "error"; merchantError: string | null;

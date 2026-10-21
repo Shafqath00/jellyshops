@@ -198,7 +198,6 @@ Called from: `backend/src/commerce/digital.ts`, `backend/src/commerce/notificati
 | `renderOrderNotification` | function | `(type: NotificationType, data: NotificationContent)` |  |
 | `UncertainDeliveryError` | class |  |  |
 | `CaptureNotificationTransport` | class | `send(message: NotificationMessage)` |  |
-| `recordNotificationEvent` | function (async) | `(sql: SqlExecutor, storeId: string, orderId: string, type: string, details: object)` |  |
 | `createNotificationService` | function | `(database: CommerceDatabase, transport: NotificationTransport, options: { publicBaseUrl: string; apiBaseUrl?: string; tokenSecret: string })` |  |
 
 ## `backend/src/commerce/order-management-invoice.ts`
@@ -341,7 +340,6 @@ Called from: `backend/src/app.ts`, `backend/src/custom-data/routes.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
-| `isValidCustomDataValue` | function | `(type: DynamicValueType, value: unknown): boolean` |  |
 | `CustomDataService` | class | `createMetafieldDefinition(storeId: string, input: Omit<CreateMetafieldDefinitionInput, "storeId">): Promise<MetafieldDefinitionRecord>`<br>`listMetafieldDefinitions(storeId: string, ownerType: CustomDataOwnerType)`<br>`updateMetafieldDefinition(storeId: string, id: string, patch: UpdateMetafieldDefinitionInput): Promise<MetafieldDefinitionRecord>`<br>`archiveMetafieldDefinition(storeId: string, id: string): Promise<MetafieldDefinitionRecord>`<br>`setMetafieldValue(storeId: string, definitionId: string, ownerId: string, value: unknown): Promise<MetafieldValueRecord>`<br>`getMetafieldValue(storeId: string, definitionId: string, ownerId: string)` |  |
 | `MetaobjectService` | class | `createDefinition(storeId: string, input: Omit<CreateMetaobjectDefinitionInput, "storeId">): Promise<MetaobjectDefinitionRecord>`<br>`listDefinitions(storeId: string)`<br>`updateDefinition(storeId: string, id: string, patch: UpdateMetaobjectDefinitionInput): Promise<MetaobjectDefinitionRecord>`<br>`createEntry(storeId: string, definitionId: string, input: Omit<CreateMetaobjectEntryInput, "storeId" \| "definitionId">): Promise<MetaobjectEntryRecord>`<br>`updateEntry(storeId: string, id: string, patch: UpdateMetaobjectEntryInput): Promise<MetaobjectEntryRecord>`<br>`listEntries(storeId: string, definitionId: string)` |  |
 
@@ -684,7 +682,6 @@ Called from: `backend/src/app.ts`, `backend/src/storefront/starter/routes.ts`
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
 | `StarterInstallationConflictError` | class |  |  |
-| `StorefrontNotFoundError` | class |  |  |
 | `StorefrontStarterInstallationService` | class | `install(storeId: string, starterPackId: string, options?: { replaceDraft: boolean; expectedGeneration: number }): Promise<StarterInstallationResult>` |  |
 
 ## `backend/src/storefront/starter/routes.ts`
@@ -775,7 +772,6 @@ Called from: `backend/src/app.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
-| `SqlWorkspaceRepositories` | class | `run(storeId: string, operation: (transaction: unknown) => Promise<T>)`<br>`getWorkspace(storeId: string)`<br>`getTemplate(storeId: string, id: string)`<br>`listTemplates(storeId: string, type?: StorefrontTemplateRecord["type"])`<br>`createTemplate(tx: unknown, input: Parameters<TemplateRepository["createTemplate"]>[1])`<br>`updateTemplate(tx: unknown, storeId: string, id: string, revision: number, patch: Parameters<TemplateRepository["updateTemplate"]>[4])`<br>`cloneTemplate(tx: unknown, storeId: string, id: string, input: Parameters<TemplateRepository["cloneTemplate"]>[3])`<br>`getGlobalSection(storeId: string, id: string)`<br>`listGlobalSections(storeId: string)`<br>`createGlobalSection(tx: unknown, input: Parameters<GlobalSectionRepository["createGlobalSection"]>[1])`<br>`updateGlobalSection(tx: unknown, storeId: string, id: string, revision: number, patch: Parameters<GlobalSectionRepository["updateGlobalSection"]>[4])`<br>`getPreset(storeId: string, id: string)`<br>`listPresets(storeId: string)`<br>`createPreset(tx: unknown, input: Parameters<PresetRepository["createPreset"]>[1])`<br>`getMenu(storeId: string, id: string)`<br>`listMenus(storeId: string)`<br>`createMenu(tx: unknown, input: Parameters<MenuRepository["createMenu"]>[1])`<br>`updateMenu(tx: unknown, storeId: string, id: string, revision: number, patch: Parameters<MenuRepository["updateMenu"]>[4])`<br>`resourceExists(tx: unknown, storeId: string, type: keyof typeof resourceTables, id: string)`<br>`getAssignment(storeId: string, type: TemplateAssignmentRecord["resourceType"], id: string)`<br>`getTemplateType(tx: unknown, storeId: string, id: string)`<br>`upsertAssignment(tx: unknown, input: Parameters<AssignmentRepository["upsertAssignment"]>[1])`<br>`getThemeConfiguration(storeId: string)`<br>`saveThemeConfiguration(tx: unknown, input: Parameters<ThemeRepository["saveThemeConfiguration"]>[1])` |  |
 | `createSqlWorkspaceApi` | function | `(db: CommerceDatabase)` |  |
 
 ## `backend/src/storefront/workspace/supabase-template-store.ts`

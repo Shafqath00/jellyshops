@@ -149,9 +149,7 @@ Called from: `jellyshops/packages/storefront-renderer/src/render-registry.tsx`, 
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
-| `MenuLinks` | function | `({ section, context, label = "Store navigation" }: { section: SectionNode; context: StorefrontRuntimeContext; label?: string })` |  |
 | `MenuList` | function | `({ handle, context }: { handle: string; context: StorefrontRuntimeContext })` | The top-level links of one navigation menu as a plain list. |
-| `StorefrontIcon` | function | `({ name }: { name: ToolIcon })` |  |
 | `HeaderSection` | function | `({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext })` |  |
 
 ## `jellyshops/packages/storefront-renderer/src/sections/hero.tsx`
@@ -1043,7 +1041,6 @@ Called from: `jellyshops/src/app/admin/customers/page.tsx`, `jellyshops/src/app/
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
-| `Skeleton` | function | `({ className, ...props }: React.HTMLAttributes<HTMLDivElement>)` | ────────────────────────────────────────────────────────────────────── Skeleton — loading placeholder with shimmer animation Uses Jellyshop motion tokens from globals.css @theme ──────────────────────────────────────────────────────────────────── |
 | `SkeletonProductCard` | function | `({ className }: { className?: string })` | Convenience skeleton shapes used across Jellyshop |
 | `SkeletonText` | function | `({ lines = 3, className }: { lines?: number; className?: string })` |  |
 | `SkeletonRows` | function | `({ rows = 5, label, className, }: { rows?: number; label: string; className?: string; })` | Table-shaped loading placeholder; the label stays available to screen readers. |
@@ -1076,7 +1073,7 @@ Called from: `jellyshops/src/app/admin/customers/[id]/page.tsx`, `jellyshops/src
 
 ## `jellyshops/src/features/auth/auth-provider.tsx`
 
-Called from: `jellyshops/src/app/admin/content/blogs/page.tsx`, `jellyshops/src/app/admin/content/metaobjects/page.tsx`, `jellyshops/src/app/admin/content/pages/page.tsx`, `jellyshops/src/app/admin/customers/[id]/page.tsx`, `jellyshops/src/app/admin/customers/page.tsx`, `jellyshops/src/app/admin/engagement/page.tsx`, `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/app/admin/online-store/navigation/page.tsx`, `jellyshops/src/app/admin/online-store/page.tsx`, `jellyshops/src/app/admin/orders/[id]/page.tsx`, `jellyshops/src/app/admin/orders/page.tsx`, `jellyshops/src/app/admin/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/app/admin/products/page.tsx`, `jellyshops/src/app/admin/settings/custom-data/page.tsx`, `jellyshops/src/app/admin/settings/notifications/page.tsx`, `jellyshops/src/app/admin/settings/page.tsx`, `jellyshops/src/app/layout.tsx`, `jellyshops/src/app/onboarding/page.tsx`, `jellyshops/src/components/admin-auth-gate.tsx`, `jellyshops/src/components/app-shell.tsx`, `jellyshops/src/components/auth-form.tsx`, `jellyshops/src/components/digital-product-settings.tsx`, `jellyshops/src/components/product-form.tsx`, `jellyshops/src/features/auth/merchant-api.ts`, `jellyshops/src/features/auth/merchant-auth-callback.tsx`, `jellyshops/src/features/commerce/components/merchant-payments-panel.tsx`
+Called from: `jellyshops/src/app/admin/content/blogs/page.tsx`, `jellyshops/src/app/admin/content/metaobjects/page.tsx`, `jellyshops/src/app/admin/content/pages/page.tsx`, `jellyshops/src/app/admin/customers/[id]/page.tsx`, `jellyshops/src/app/admin/customers/page.tsx`, `jellyshops/src/app/admin/engagement/page.tsx`, `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/app/admin/online-store/navigation/page.tsx`, `jellyshops/src/app/admin/online-store/page.tsx`, `jellyshops/src/app/admin/orders/[id]/page.tsx`, `jellyshops/src/app/admin/orders/page.tsx`, `jellyshops/src/app/admin/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/app/admin/products/page.tsx`, `jellyshops/src/app/admin/settings/custom-data/page.tsx`, `jellyshops/src/app/admin/settings/notifications/page.tsx`, `jellyshops/src/app/admin/settings/page.tsx`, `jellyshops/src/app/layout.tsx`, `jellyshops/src/app/onboarding/page.tsx`, `jellyshops/src/components/admin-auth-gate.tsx`, `jellyshops/src/components/app-shell.tsx`, `jellyshops/src/components/auth-form.tsx`, `jellyshops/src/components/digital-product-settings.tsx`, `jellyshops/src/components/product-form.tsx`, `jellyshops/src/features/auth/merchant-auth-callback.tsx`, `jellyshops/src/features/commerce/components/merchant-payments-panel.tsx`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -1723,9 +1720,7 @@ Called from: `jellyshops/src/components/product-form.tsx`, `jellyshops/src/lib/p
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
 | `getInventoryOptions` | function | `(options: ProductOption[], inventoryOptionIds: string[]): ProductOption[]` |  |
-| `getVariantCombinationCount` | function | `(options: ProductOption[]): number` |  |
 | `createVariantCombinationKey` | function | `(selections: Record<string, string>): string` |  |
-| `getVariantDisplayName` | function | `(selections: Record<string, string>, options: ProductOption[]): string` |  |
 | `reconcileProductVariants` | function | `({ options, inventoryOptionIds, variants, basePriceMinor, defaultStock = 0, standardSku, updateStandard = false }: { options: ProductOption[]; inventoryOptionIds: string[]; variants: ProductVariant[]; basePriceMinor: number; defaultStock?: number; standardSku?: string; updateStandard?: boolean }): { variants: ProductVariant[]; error?: string }` |  |
 
 ## `jellyshops/src/lib/repository.ts`

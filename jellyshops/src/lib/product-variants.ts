@@ -1,13 +1,13 @@
 import type { ProductOption, ProductVariant } from "./domain";
 
-export const MAX_INVENTORY_VARIANTS = 100;
+const MAX_INVENTORY_VARIANTS = 100;
 
 export function getInventoryOptions(options: ProductOption[], inventoryOptionIds: string[]): ProductOption[] {
   const ids = new Set(inventoryOptionIds);
   return options.filter((option) => option.type === "variant" && ids.has(option.id) && option.values.length > 0);
 }
 
-export function getVariantCombinationCount(options: ProductOption[]): number {
+function getVariantCombinationCount(options: ProductOption[]): number {
   return options.reduce((count, option) => count * option.values.length, 1);
 }
 
@@ -15,7 +15,7 @@ export function createVariantCombinationKey(selections: Record<string, string>):
   return Object.entries(selections).sort(([a], [b]) => a.localeCompare(b)).map(([optionId, valueId]) => `${optionId}:${valueId}`).join("|");
 }
 
-export function getVariantDisplayName(selections: Record<string, string>, options: ProductOption[]): string {
+function getVariantDisplayName(selections: Record<string, string>, options: ProductOption[]): string {
   return options.map((option) => option.values.find((value) => value.id === selections[option.id])?.label).filter((label): label is string => Boolean(label)).join(" / ") || "Standard";
 }
 

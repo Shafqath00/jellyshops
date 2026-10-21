@@ -52,7 +52,7 @@ function validateScalar(type: string, value: unknown): boolean {
   }
 }
 
-export function isValidCustomDataValue(type: DynamicValueType, value: unknown): boolean {
+function isValidCustomDataValue(type: DynamicValueType, value: unknown): boolean {
   if (type.startsWith("list:")) {
     if (!Array.isArray(value)) return false;
     const scalar = type.slice(5);

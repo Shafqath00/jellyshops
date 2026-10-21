@@ -15,23 +15,17 @@ Static findings only: nothing has been deleted. Each item needs a human check be
 - backend/src/app.ts → `publicDocumentFromTemplate` (not referenced anywhere else)
 - backend/src/auth/development-auth-provider.ts → `DEMO_TOKEN` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/auth/firebase-token-verifier.ts → `FirebaseAdminTokenVerifier` (used inside its own file; the `export` keyword may be unnecessary)
-- backend/src/auth/permissions.ts → `ROLE_PERMISSIONS` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/auth/permissions.ts → `roleHasPermission` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/catalog/demo-catalog-provider.ts → `DemoCatalogAdapter` (not referenced anywhere else)
 - backend/src/catalog/provider-sync.ts → `CatalogProviderSync` (not referenced anywhere else)
 - backend/src/commerce/notifications.ts → `digitalToken` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/commerce/notifications.ts → `notificationRetry` (used inside its own file; the `export` keyword may be unnecessary)
-- backend/src/commerce/notifications.ts → `recordNotificationEvent` (used inside its own file; the `export` keyword may be unnecessary)
-- backend/src/config.ts → `STRIPE_API_VERSION` (used inside its own file; the `export` keyword may be unnecessary)
-- backend/src/custom-data/service.ts → `isValidCustomDataValue` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/dynamic-sources/resolver.ts → `DynamicValueResolver` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/dynamic-sources/resolver.ts → `resolveSettingValue` (not referenced anywhere else)
 - backend/src/storefront/publication/sql-repository.ts → `PublicationActivationError` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/storefront/starter/installation-service.ts → `StarterInstallationConflictError` (used inside its own file; the `export` keyword may be unnecessary)
-- backend/src/storefront/starter/installation-service.ts → `StorefrontNotFoundError` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/storefront/workspace/concurrency.ts → `assertExpectedRevision` (not referenced anywhere else)
 - backend/src/storefront/workspace/concurrency.ts → `nextRevision` (not referenced anywhere else)
-- backend/src/storefront/workspace/sql-repositories.ts → `SqlWorkspaceRepositories` (used inside its own file; the `export` keyword may be unnecessary)
 
 ## Backend: files over 500 lines
 
@@ -54,14 +48,11 @@ Static findings only: nothing has been deleted. Each item needs a human check be
 
 ## Frontend: exported values/functions never referenced by another non-test file
 
-- jellyshops/packages/storefront-renderer/src/sections/header.tsx → `MenuLinks` (used inside its own file; the `export` keyword may be unnecessary)
-- jellyshops/packages/storefront-renderer/src/sections/header.tsx → `StorefrontIcon` (used inside its own file; the `export` keyword may be unnecessary)
 - jellyshops/packages/storefront-schema/src/schema.ts → `sectionNodeSchema` (used inside its own file; the `export` keyword may be unnecessary)
 - jellyshops/src/components/storefront-shell.tsx → `SharedStorefrontLayout` (used inside its own file; the `export` keyword may be unnecessary)
 - jellyshops/src/components/storefront-shell.tsx → `SharedStorefrontHeader` (used inside its own file; the `export` keyword may be unnecessary)
 - jellyshops/src/components/storefront-shell.tsx → `SharedStorefrontFooter` (used inside its own file; the `export` keyword may be unnecessary)
 - jellyshops/src/components/ui/card.tsx → `CardFooter` (not referenced anywhere else)
-- jellyshops/src/components/ui/skeleton.tsx → `Skeleton` (used inside its own file; the `export` keyword may be unnecessary)
 - jellyshops/src/components/ui/skeleton.tsx → `SkeletonProductCard` (not referenced anywhere else)
 - jellyshops/src/components/ui/skeleton.tsx → `SkeletonText` (not referenced anywhere else)
 - jellyshops/src/features/admin/api.ts → `AdminApiError` (used inside its own file; the `export` keyword may be unnecessary)
@@ -86,9 +77,6 @@ Static findings only: nothing has been deleted. Each item needs a human check be
 - jellyshops/src/lib/domain.ts → `canTransitionOrder` (not referenced anywhere else)
 - jellyshops/src/lib/domain.ts → `nextOrderStatus` (not referenced anywhere else)
 - jellyshops/src/lib/domain.ts → `getCategoryAncestors` (used inside its own file; the `export` keyword may be unnecessary)
-- jellyshops/src/lib/product-variants.ts → `MAX_INVENTORY_VARIANTS` (used inside its own file; the `export` keyword may be unnecessary)
-- jellyshops/src/lib/product-variants.ts → `getVariantCombinationCount` (used inside its own file; the `export` keyword may be unnecessary)
-- jellyshops/src/lib/product-variants.ts → `getVariantDisplayName` (used inside its own file; the `export` keyword may be unnecessary)
 
 ## Frontend: files over 500 lines
 
@@ -104,7 +92,7 @@ None found.
 
 ## Frontend: circular imports
 
-- `jellyshops/src/features/auth/merchant-api.ts` ↔ `jellyshops/src/features/auth/auth-provider.tsx`
+None found.
 
 ## Backend: same function/component name exported from more than one file
 

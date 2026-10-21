@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
  * Uses Jellyshop motion tokens from globals.css @theme
  * ──────────────────────────────────────────────────────────────────── */
 
-export function Skeleton({
+function Skeleton({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) {

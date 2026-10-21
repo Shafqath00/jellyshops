@@ -1,4 +1,6 @@
-import type { MerchantStore } from "./auth-provider";
+export interface MerchantStore {
+  id: string; name: string; slug: string; currency: string; country: string; role: string;
+}
 
 const fallbackMessage = "Could not load your stores. Check your connection and retry.";
 
