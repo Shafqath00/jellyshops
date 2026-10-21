@@ -4,7 +4,7 @@ import { useState, type CSSProperties } from "react";
 import type { RendererMode } from "../types";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
-import { choice, imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
+import { choice, headingHidden, imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
 
 function text(section: SectionNode, fallback: string): string {
   const setting = section.settings.heading ?? section.settings.text;
@@ -101,7 +101,7 @@ export function MulticolumnSection({ section, context }: { section: SectionNode;
   const count = numberValue(section.settings, "columns", 3, 2, 4);
   return <section className="jelly-section jelly-multicolumn" {...sectionData(section, { "data-align": choice(section.settings, "contentAlignment", ["left", "center", "right"] as const, "left") })}>
     <StorefrontContainer>
-      <div className="jelly-section-intro"><h2>{content.heading}</h2>{content.body && <p>{content.body}</p>}</div>
+      {!headingHidden(section) && <div className="jelly-section-intro"><h2>{content.heading}</h2>{content.body && <p>{content.body}</p>}</div>}
       {columns.length > 0 && <div className="jelly-multicolumn-grid" style={{ "--jelly-columns": count } as CSSProperties}>
         {columns.map((column) => <article key={column.id}><h3>{column.heading}</h3>{column.text && <p>{column.text}</p>}</article>)}
       </div>}
@@ -129,19 +129,24 @@ export function FaqSection({ section }: { section: SectionNode }) {
   </section>;
 }
 
-export function NewsletterSection({ section, subscribe, mode = "preview" }: { section: SectionNode; subscribe?: (email: string, source: string) => Promise<void>; mode?: RendererMode }) {
+/** Email sign-up with consent, shared by the newsletter section and the footer. `source` records where the customer subscribed. */
+export function NewsletterForm({ source, buttonLabel, subscribe, mode = "preview" }: { source: string; buttonLabel: string; subscribe?: (email: string, source: string) => Promise<void>; mode?: RendererMode }) {
   const [status, setStatus] = useState<"idle" | "pending" | "success">("idle"); const [error, setError] = useState<string>();
+  return <form onSubmit={(event) => {
+    event.preventDefault(); if (mode !== "published" || !subscribe || status === "pending") return;
+    const data = new FormData(event.currentTarget); if (data.get("consent") !== "yes") { setError("Consent is required to subscribe."); return; }
+    setStatus("pending"); setError(undefined);
+    void subscribe(String(data.get("email")), source).then(() => setStatus("success")).catch((caught: unknown) => { setStatus("idle"); setError(caught instanceof Error ? caught.message : "Unable to subscribe. Please retry."); });
+  }}><label>Email<input type="email" name="email" autoComplete="email" required maxLength={254} placeholder="you@example.com" /></label><label><input type="checkbox" name="consent" value="yes" required />I agree to receive updates from this store.</label><button type="submit" disabled={mode !== "published" || !subscribe || status === "pending"}>{status === "pending" ? "Subscribing…" : buttonLabel}</button>{mode !== "published" && <p className="jelly-newsletter-note">Subscriptions are disabled in preview.</p>}{status === "success" && <p role="status">You’re subscribed.</p>}{error && <p role="alert">{error}</p>}</form>;
+}
+
+export function NewsletterSection({ section, subscribe, mode = "preview" }: { section: SectionNode; subscribe?: (email: string, source: string) => Promise<void>; mode?: RendererMode }) {
   const content = blockCopy(section, "Join our newsletter");
   const buttonLabel = stringValue(section.settings, "buttonLabel", "Subscribe");
   return <section className="jelly-section jelly-newsletter" {...sectionData(section, { "data-align": choice(section.settings, "contentAlignment", ["left", "center", "right"] as const, "left") })}><StorefrontContainer>
     <h2>{content.heading}</h2>
     {content.body && <p className="jelly-newsletter-text">{content.body}</p>}
-    <form onSubmit={(event) => {
-      event.preventDefault(); if (mode !== "published" || !subscribe || status === "pending") return;
-      const data = new FormData(event.currentTarget); if (data.get("consent") !== "yes") { setError("Consent is required to subscribe."); return; }
-      setStatus("pending"); setError(undefined);
-      void subscribe(String(data.get("email")), section.id).then(() => setStatus("success")).catch((caught: unknown) => { setStatus("idle"); setError(caught instanceof Error ? caught.message : "Unable to subscribe. Please retry."); });
-    }}><label>Email<input type="email" name="email" autoComplete="email" required maxLength={254} placeholder="you@example.com" /></label><label><input type="checkbox" name="consent" value="yes" required />I agree to receive updates from this store.</label><button type="submit" disabled={mode !== "published" || !subscribe || status === "pending"}>{status === "pending" ? "Subscribing…" : buttonLabel}</button>{mode !== "published" && <p className="jelly-newsletter-note">Subscriptions are disabled in preview.</p>}{status === "success" && <p role="status">You’re subscribed.</p>}{error && <p role="alert">{error}</p>}</form>
+    <NewsletterForm source={section.id} buttonLabel={buttonLabel} subscribe={subscribe} mode={mode} />
   </StorefrontContainer></section>;
 }
 

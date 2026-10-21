@@ -25,6 +25,11 @@ export function imageValue(settings: Settings | undefined, key = "image"): (Medi
   return url && !url.startsWith("#") ? { ...(candidate as MediaReference), url } : undefined;
 }
 
+/** A section heading saved as empty text (with no heading block) means "no heading", not "use the default". */
+export function headingHidden(section: SectionNode): boolean {
+  return section.settings.heading === "" && !visibleBlocks(section, "heading").length;
+}
+
 export function visibleBlocks(section: SectionNode, type?: string) {
   return section.blocks.filter((block) => block.enabled && (!type || block.type === type));
 }

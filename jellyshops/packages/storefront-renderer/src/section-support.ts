@@ -3,6 +3,7 @@ export const renderableHomeSectionTypes: ReadonlySet<string> = new Set([
   "header",
   "footer",
   "hero",
+  "slideshow",
   "rich-text",
   "product-grid",
   "featured-collection",

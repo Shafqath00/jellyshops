@@ -73,6 +73,24 @@ const heroSettings = z.object({
   overlay: z.number().min(0).max(100).optional(),
 }).passthrough();
 
+const slideshowSettings = z.object({
+  height: z.enum(["medium", "large"]).optional(),
+  contentAlignment: alignmentSchema,
+  overlay: z.number().min(0).max(100).optional(),
+  autoplay: z.boolean().optional(),
+  interval: z.number().int().min(3).max(12).optional(),
+}).passthrough();
+const slideshowControls = [
+  heightControl,
+  leftOrCenter,
+  darknessControl("Image darkness"),
+  { type: "checkbox" as const, key: "autoplay", label: "Change slides automatically", group: "layout" as const },
+  { type: "range" as const, key: "interval", label: "Seconds per slide", group: "layout" as const, min: 3, max: 12, step: 1, unit: "s" },
+];
+const slideshowBlocks = [
+  { id: "preset-slide-1", type: "slide", enabled: true, settings: { heading: "A new season", text: "Introduce your latest collection.", buttonLabel: "Shop now", buttonLink: "/shop" } },
+  { id: "preset-slide-2", type: "slide", enabled: true, settings: { heading: "Made to last", text: "Tell customers what makes your products special.", buttonLabel: "Our story", buttonLink: "/about" } },
+];
 const heroBlocks = [
   { id: "preset-heading", type: "heading", enabled: true, settings: { text: "Welcome" } },
   { id: "preset-text", type: "text", enabled: true, settings: { text: "Discover our collection." } },
@@ -86,6 +104,7 @@ export const contentSections: SectionDefinition[] = [
   { type: "article-header", category: "content", supportedPages: ["article"], settingsSchema: empty, controls: [], allowedBlockTypes: [], defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
   { type: "article-content", category: "content", supportedPages: ["article"], settingsSchema: empty, controls: [], allowedBlockTypes: [], defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
   { type: "hero", category: "content", supportedPages: [...home], settingsSchema: heroSettings, controls: heroControls, allowedBlockTypes: ["heading", "text", "button"], maxBlocks: 4, defaultSettings: { contentAlignment: "left" }, defaultBlocks: heroBlocks, responsiveFields: ["contentAlignment"], presets: [{ id: "hero", label: "Hero", category: "banners" }] },
+  { type: "slideshow", category: "content", supportedPages: [...home], settingsSchema: slideshowSettings, controls: slideshowControls, allowedBlockTypes: ["slide"], minBlocks: 1, maxBlocks: 6, defaultSettings: { height: "large", contentAlignment: "center", overlay: 30, autoplay: true, interval: 6 }, defaultBlocks: slideshowBlocks, responsiveFields: [], presets: [{ id: "slideshow", label: "Slideshow", category: "banners" }] },
   { type: "category-grid", category: "content", supportedPages: [...home], settingsSchema: z.object({ heading: z.string().max(120).optional(), text: z.string().max(400).optional(), columns: z.number().int().min(2).max(4).optional(), imageRatio: z.enum(["portrait", "square"]).optional(), colorScheme: schemeSchema }).passthrough(), controls: [sectionHeading, sectionText, columnsControl(4), { type: "segmented", key: "imageRatio", label: "Image shape", group: "style", options: [{ label: "Portrait", value: "portrait" }, { label: "Square", value: "square" }] }, colorScheme], allowedBlockTypes: ["collection-card"], maxBlocks: 8, defaultSettings: { heading: "Shop by collection", columns: 4 }, defaultBlocks: [], responsiveFields: [], presets: [{ id: "category-grid", label: "Collection list", category: "products" }] },
   { type: "image-text", category: "content", supportedPages: [...home], settingsSchema: empty, controls: contentAlignment, allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: ["contentAlignment"] },
   { type: "image-with-text", category: "content", supportedPages: [...home], settingsSchema: imageWithTextSettings, controls: [eyebrowControl, imageControl, { type: "segmented", key: "imagePosition", label: "Image position", group: "layout", options: [{ label: "Left", value: "left" }, { label: "Right", value: "right" }] }, colorScheme], allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: ["contentAlignment"], presets: [{ id: "image-with-text", label: "Image with text", category: "content" }] },

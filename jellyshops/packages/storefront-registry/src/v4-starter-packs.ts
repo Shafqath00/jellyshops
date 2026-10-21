@@ -76,28 +76,26 @@ function global(globalSectionId: string) {
 
 const photo = (id: string, width = 1800) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=80`;
 
-/** Jelly Avenue home page: full-bleed campaign imagery between edge-to-edge product grids. */
+/** Jelly Avenue home page: a full-screen slideshow, then campaign imagery between edge-to-edge product grids. */
 function avenueHome(id: V4StarterPackId): SectionNode[] {
   const card = (key: string, label: string, image: string, alt: string) => block(`${id}-collection-${key}`, "collection-card", { label, link: "/shop", image: { url: photo(image, 1400), alt } });
+  const slide = (key: string, image: string, alt: string, settings: Record<string, unknown>) => block(`${id}-slide-${key}`, "slide", { image: { url: photo(image, 2400), alt }, ...settings });
   return [
-    section(`${id}-home-hero`, {
-      type: "hero",
-      settings: {
-        eyebrow: "The new season",
-        layout: "overlay",
-        height: "large",
-        colorScheme: "dark",
-        contentAlignment: "center",
-        overlay: 28,
-        image: { url: photo("photo-1485968579580-b6d095142e6e", 2400), alt: "A woman in a tailored check coat on a city street" },
-      },
+    section(`${id}-home-slideshow`, {
+      type: "slideshow",
+      settings: { height: "large", contentAlignment: "center", overlay: 28, autoplay: true, interval: 6 },
       blocks: [
-        block(`${id}-home-hero-heading`, "heading", { text: "Dressed for the city." }),
-        block(`${id}-home-hero-copy`, "text", { text: "Considered tailoring and everyday essentials, made to move with you." }),
-        block(`${id}-home-hero-button`, "button", { label: "Shop the collection", href: "/shop" }),
+        slide("city", "photo-1485968579580-b6d095142e6e", "A woman in a tailored check coat on a city street", { eyebrow: "The new season", heading: "Dressed for the city", text: "Considered tailoring and everyday essentials, made to move with you.", buttonLabel: "Shop the collection", buttonLink: "/shop" }),
+        slide("her", "photo-1539109136881-3be0616acf4b", "A woman in a pale blue coat in a city square", { eyebrow: "For her", heading: "Quiet confidence", text: "Soft layers and clean lines for every day of the week.", buttonLabel: "Shop women", buttonLink: "/shop" }),
+        slide("him", "photo-1617137968427-85924c800a22", "A man in a navy suit walking past a glass building", { eyebrow: "For him", heading: "Sharp, never stiff", text: "Tailoring cut for movement, made to be worn on repeat.", buttonLabel: "Shop men", buttonLink: "/shop" }),
       ],
     }),
-    section(`${id}-featured`, { type: "product-grid", settings: { heading: "New this season", text: "The latest arrivals: structured cuts and soft layers for the modern everyday.", limit: 8, columns: 4, sort: "newest", contentAlignment: "center", viewAllLabel: "View all", viewAllLink: "/shop" }, blocks: [] }),
+    section(`${id}-featured`, {
+      type: "product-grid",
+      settings: { heading: "New this season", text: "The latest arrivals: structured cuts and soft layers for the modern everyday.", limit: 8, columns: 4, sort: "newest", contentAlignment: "center", viewAllLabel: "View all", viewAllLink: "/shop" },
+      // Merchants can point each tab at a collection (for example Women and Men) in the editor.
+      blocks: [block(`${id}-featured-tab-new`, "product-tab", { label: "New in", sort: "newest" }), block(`${id}-featured-tab-best`, "product-tab", { label: "Best sellers", sort: "best-selling" })],
+    }),
     section(`${id}-collections`, {
       type: "category-grid",
       settings: { heading: "", columns: 2, imageRatio: "portrait" },
@@ -122,7 +120,7 @@ function avenueHome(id: V4StarterPackId): SectionNode[] {
       blocks: [
         block(`${id}-home-story-heading`, "heading", { text: "Designed to outlast the season." }),
         block(`${id}-home-story-copy`, "text", { text: "Tell customers what you make and why it matters: the materials you choose, the people who make it and the care that goes into every piece." }),
-        block(`${id}-home-story-button`, "button", { label: "Read our story", href: "/pages/about" }),
+        block(`${id}-home-story-button`, "button", { label: "Read our story", href: "/about" }),
       ],
     }),
     section(`${id}-promises`, {
@@ -134,12 +132,38 @@ function avenueHome(id: V4StarterPackId): SectionNode[] {
         block(`${id}-promise-checkout`, "column", { heading: "Secure checkout", text: "Pay safely with the methods you already use." }),
       ],
     }),
-    section(`${id}-newsletter`, {
-      type: "newsletter",
-      settings: { buttonLabel: "Subscribe", contentAlignment: "center", colorScheme: "page" },
-      blocks: [block(`${id}-newsletter-title`, "heading", { text: "Join the list" }), block(`${id}-newsletter-copy`, "text", { text: "Be the first to hear about new arrivals, restocks and private sales." })],
-    }),
   ];
+}
+
+/** Jelly Avenue footer: newsletter sign-up and Shop, Help and About link columns the merchant can edit as blocks. */
+function avenueFooter(id: V4StarterPackId): SectionNode {
+  const link = (key: string, label: string, href: string) => block(`${id}-footer-link-${key}`, "link", { label, link: href });
+  return section(`${id}-global-footer-section`, {
+    type: "footer",
+    settings: {
+      text: "Modern wardrobe essentials, made to be worn on repeat. Designed in the studio, delivered to your door.",
+      showNewsletter: true,
+      newsletterHeading: "Join the list",
+      newsletterText: "Be the first to hear about new arrivals, restocks and private sales.",
+    },
+    blocks: [
+      block(`${id}-footer-shop`, "link-heading", { text: "Shop" }),
+      link("all", "Shop all", "/shop"),
+      link("search", "Search", "/search"),
+      link("account", "My account", "/account"),
+      link("wishlist", "Wishlist", "/wishlist"),
+      block(`${id}-footer-help`, "link-heading", { text: "Help" }),
+      link("shipping", "Shipping", "/shipping"),
+      link("returns", "Returns", "/returns"),
+      link("faq", "FAQ", "/faq"),
+      link("contact", "Contact us", "/contact"),
+      block(`${id}-footer-about`, "link-heading", { text: "About" }),
+      link("story", "Our story", "/about"),
+      link("privacy", "Privacy policy", "/privacy"),
+      link("terms", "Terms of service", "/terms"),
+      block(`${id}-footer-instagram`, "social-link", { label: "Instagram", href: "https://instagram.com" }),
+    ],
+  });
 }
 
 function makePack(id: V4StarterPackId): V4StarterPack {
@@ -245,7 +269,7 @@ function makePack(id: V4StarterPackId): V4StarterPack {
           block(`${id}-home-hero-heading`, "heading", { text: "Everyday pieces, thoughtfully made." }),
           block(`${id}-home-hero-copy`, "text", { text: "Considered essentials for the home and wardrobe, chosen to be used and loved for years." }),
           block(`${id}-home-hero-button`, "button", { label: "Shop the collection", href: "/shop" }),
-          block(`${id}-home-hero-secondary`, "button", { label: "Our story", href: "/pages/about" }),
+          block(`${id}-home-hero-secondary`, "button", { label: "Our story", href: "/about" }),
         ],
       }),
       section(`${id}-collections`, {
@@ -265,7 +289,7 @@ function makePack(id: V4StarterPackId): V4StarterPack {
         blocks: [
           block(`${id}-home-story-heading`, "heading", { text: "Made to be lived with." }),
           block(`${id}-home-story-copy`, "text", { text: "Tell customers who you are, what you make and why it matters. A few honest sentences go a long way." }),
-          block(`${id}-home-story-button`, "button", { label: "Read our story", href: "/pages/about" }),
+          block(`${id}-home-story-button`, "button", { label: "Read our story", href: "/about" }),
         ],
       }),
       section(`${id}-promises`, {
@@ -319,8 +343,8 @@ function makePack(id: V4StarterPackId): V4StarterPack {
     theme: { themeId: id, settings: {} },
     globalSections: [
       { key: "announcement", name: "Announcement", section: section(`${id}-global-announcement-section`, { type: "announcement-bar", settings: {}, blocks: [block(`${id}-global-announcement-copy`, "text", { text: announcementText })] }) },
-      { key: "header", name: "Header", section: section(`${id}-global-header-section`, { type: "header", settings: avenue ? { logoPosition: "center", sticky: true } : {}, blocks: [block(`${id}-global-header-menu`, "menu", { handle: "main" })] }) },
-      { key: "footer", name: "Footer", section: section(`${id}-global-footer-section`, { type: "footer", settings: avenue ? { text: "Modern wardrobe essentials, made to be worn on repeat. Designed in the studio, delivered to your door." } : signature ? { text: "Thoughtful everyday goods, chosen with care and delivered to your door." } : {}, blocks: [block(`${id}-global-footer-menu`, "menu", { handle: "main" })] }) },
+      { key: "header", name: "Header", section: section(`${id}-global-header-section`, { type: "header", settings: avenue ? { logoPosition: "center", sticky: true, transparent: true } : {}, blocks: [block(`${id}-global-header-menu`, "menu", { handle: "main" })] }) },
+      { key: "footer", name: "Footer", section: avenue ? avenueFooter(id) : section(`${id}-global-footer-section`, { type: "footer", settings: signature ? { text: "Thoughtful everyday goods, chosen with care and delivered to your door." } : {}, blocks: [block(`${id}-global-footer-menu`, "menu", { handle: "main" })] }) },
     ],
     menus: [{
       key: "main",

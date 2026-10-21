@@ -286,6 +286,7 @@
 [data-jelly-theme="jelly-signature"] .jelly-footer ul a { text-decoration: none; }
 [data-jelly-theme="jelly-signature"] .jelly-footer ul a:hover { text-decoration: underline; }
 [data-jelly-theme="jelly-signature"] .jelly-footer-contact { display: grid; align-content: start; gap: var(--jm-3); }
+[data-jelly-theme="jelly-signature"] .jelly-footer-column h2 { margin-bottom: 4px; color: var(--jm-muted); font: 500 var(--jm-text-xs) / 1.4 var(--jm-font-body); letter-spacing: .08em; text-transform: uppercase; }
 [data-jelly-theme="jelly-signature"] .jelly-footer-contact li span { display: block; color: var(--jm-muted); font-size: var(--jm-text-xs); letter-spacing: .08em; text-transform: uppercase; }
 [data-jelly-theme="jelly-signature"] .jelly-footer-credit {
   margin-top: var(--jm-8);

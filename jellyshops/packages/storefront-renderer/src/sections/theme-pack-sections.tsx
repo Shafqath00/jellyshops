@@ -4,7 +4,7 @@ import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
 import type { RendererMode } from "../types";
-import { choice, imageValue, numberValue, sectionData, visibleBlocks } from "./shared";
+import { choice, headingHidden, imageValue, numberValue, sectionData, visibleBlocks } from "./shared";
 
 function stringSetting(settings: Record<string, unknown>, key: string, fallback = ""): string {
   const value = settings[key];
@@ -48,7 +48,7 @@ export function CategoryGridSection({ section, context }: { section: SectionNode
   const items = cards.length ? cards : ["New arrivals", "Best sellers", "For the home", "Gifts"].map((label) => ({ id: label, label, image: undefined, href: shopHref }));
   const columns = numberValue(section.settings, "columns", 4, 2, 4);
   return <section className="jelly-section jelly-category-grid" {...sectionData(section, { "data-image-ratio": choice(section.settings, "imageRatio", ["portrait", "square"] as const, "portrait") })}><StorefrontContainer>
-    <SectionIntro section={section} fallback="Shop by collection" />
+    {!headingHidden(section) && <SectionIntro section={section} fallback="Shop by collection" />}
     <div className="jelly-category-grid-items" style={{ "--jelly-columns": columns } as CSSProperties}>{items.map((item) => <a href={item.href} className="jelly-category-card" key={item.id}>
       <span className="jelly-category-card-media">
         {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { safeRichTextHref, type RuntimeMenuV4, type SectionNode } from "@jelly/storefront-schema";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 
@@ -17,12 +18,17 @@ function menuHref(item: RuntimeMenuItem, storeSlug?: string): string | null {
 export function MenuLinks({ section, context, label = "Store navigation" }: { section: SectionNode; context: StorefrontRuntimeContext; label?: string }) {
   const block = section.blocks.find((entry) => entry.enabled && entry.type === "menu");
   const handle = typeof block?.settings.handle === "string" ? block.settings.handle : "main";
+  return (context.menus?.[handle]?.items.length ?? 0) > 0 ? <nav aria-label={label}><MenuList handle={handle} context={context} /></nav> : null;
+}
+
+/** The top-level links of one navigation menu as a plain list. */
+export function MenuList({ handle, context }: { handle: string; context: StorefrontRuntimeContext }) {
   const items = context.menus?.[handle]?.items ?? [];
   if (items.length === 0) return null;
-  return <nav aria-label={label}><ul>{items.map((item) => {
+  return <ul>{items.map((item) => {
     const href = menuHref(item, context.storeSlug);
     return href ? <li key={item.id}><a href={href}>{item.label}</a></li> : null;
-  })}</ul></nav>;
+  })}</ul>;
 }
 
 type ToolIcon = "search" | "account" | "wishlist" | "bag" | "menu";
@@ -42,7 +48,22 @@ function imageSetting(value: unknown): { url: string; alt?: string } | undefined
   return value && typeof value === "object" && "url" in value && typeof value.url === "string" ? value as { url: string; alt?: string } : undefined;
 }
 
+/** True once the page holding `ref` has scrolled; a transparent header turns solid then. */
+function useScrolled(ref: RefObject<HTMLElement | null>, enabled: boolean): boolean {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const view = ref.current?.ownerDocument.defaultView;
+    if (!enabled || !view) return;
+    const update = () => setScrolled(view.scrollY > 8);
+    update();
+    view.addEventListener("scroll", update, { passive: true });
+    return () => view.removeEventListener("scroll", update);
+  }, [ref, enabled]);
+  return scrolled;
+}
+
 export function HeaderSection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
+  const headerRef = useRef<HTMLElement>(null);
   const settings = section.settings;
   const image = imageSetting(settings.logo);
   const logoUrl = image ? safeRichTextHref(image.url) : null;
@@ -55,11 +76,19 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
     ["wishlist", "Wishlist", `${root}/wishlist`, settings.showWishlist],
     ["bag", "Bag", `${root}/cart`, settings.showCart],
   ] as const).filter(([, , , visible]) => visible !== false) : [];
+  const transparent = settings.transparent === true;
+  const overlayImage = transparent ? imageSetting(settings.overlayLogo) : undefined;
+  const overlayLogoUrl = overlayImage ? safeRichTextHref(overlayImage.url) : null;
+  const scrolled = useScrolled(headerRef, transparent);
   return <header
+    ref={headerRef}
     className="jelly-header"
     data-section-id={section.id}
     data-logo-position={settings.logoPosition === "center" ? "center" : "left"}
     data-sticky={settings.sticky === true ? "true" : undefined}
+    data-transparent={transparent ? "true" : undefined}
+    data-scrolled={transparent && scrolled ? "true" : undefined}
+    data-overlay-logo={overlayLogoUrl && !overlayLogoUrl.startsWith("#") ? "true" : undefined}
   >
     <details className="jelly-mobile-navigation">
       <summary aria-label="Open menu"><StorefrontIcon name="menu" /><span className="jelly-visually-hidden">Menu</span></summary>
@@ -70,6 +99,9 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
     </details>
     <a className="jelly-header-brand" href={root || "/"} style={logoWidth ? { width: logoWidth } : undefined}>
       {logoUrl && !logoUrl.startsWith("#") ? <img src={logoUrl} alt={image?.alt || name} /> : <span>{name}</span>}
+      {/* Merchant media URLs may be served by the local API and are not Next Image assets. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {overlayLogoUrl && !overlayLogoUrl.startsWith("#") && <img className="jelly-header-overlay-logo" src={overlayLogoUrl} alt="" aria-hidden="true" />}
     </a>
     <MenuLinks section={section} context={context} label="Primary navigation" />
     {tools.length > 0 && <nav className="jelly-header-tools" aria-label="Shopping tools">

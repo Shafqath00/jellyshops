@@ -66,16 +66,16 @@ it("registers a validated media control for the Home Image with text section", (
 
 it("makes the Home product grid configurable without requiring sample Catalog references", () => {
   const definition = getSectionDefinition("product-grid");
-  expect(definition?.controls.map(({ key }) => key)).toEqual(["heading", "text", "collectionId", "sort", "limit", "columns", "viewAllLabel", "viewAllLink", "hideWhenEmpty", "colorScheme", "emptyMessage"]);
+  expect(definition?.controls.map(({ key }) => key)).toEqual(["heading", "text", "contentAlignment", "collectionId", "sort", "limit", "columns", "viewAllLabel", "viewAllLink", "hideWhenEmpty", "colorScheme", "emptyMessage"]);
   expect(definition?.settingsSchema.safeParse({ heading: "New arrivals", limit: 4, emptyMessage: "Coming soon" }).success).toBe(true);
   expect(definition?.settingsSchema.safeParse({ limit: 25 }).success).toBe(false);
   expect(validateSectionAgainstRegistry(section("product-grid"), "home")).toEqual([]);
 });
 
 it("exposes store identity, layout and footer content controls in global chrome", () => {
-  expect(getSectionDefinition("header")?.controls.map(({ key }) => key)).toEqual(["storeName", "logo", "logoWidth", "logoPosition", "sticky", "showSearch", "showAccount", "showWishlist", "showCart"]);
+  expect(getSectionDefinition("header")?.controls.map(({ key }) => key)).toEqual(["storeName", "logo", "logoWidth", "logoPosition", "sticky", "transparent", "overlayLogo", "showSearch", "showAccount", "showWishlist", "showCart"]);
   expect(getSectionDefinition("header")?.settingsSchema.safeParse({ storeName: "Little Market", logo: { id: "logo-1", url: "/api/public/media/store-a/logo-1", alt: "Logo" } }).success).toBe(true);
-  expect(getSectionDefinition("footer")?.controls.map(({ key }) => key)).toEqual(["storeName", "text", "contactEmail", "copyright"]);
+  expect(getSectionDefinition("footer")?.controls.map(({ key }) => key)).toEqual(["storeName", "text", "contactEmail", "copyright", "showNewsletter", "newsletterHeading", "newsletterText"]);
   expect(getSectionDefinition("announcement-bar")?.controls.map(({ key }) => key)).toEqual(["text", "link"]);
 });
 

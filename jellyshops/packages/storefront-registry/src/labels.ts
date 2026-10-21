@@ -6,6 +6,7 @@ const sectionLabels: Record<string, string> = {
   header: "Header",
   footer: "Footer",
   hero: "Hero banner",
+  slideshow: "Slideshow",
   "image-banner": "Image banner",
   "image-with-text": "Image with text",
   "image-text": "Image with text",
@@ -56,6 +57,10 @@ const blockLabels: Record<string, string> = {
   "social-link": "Social link",
   "collection-card": "Collection",
   column: "Column",
+  slide: "Slide",
+  "product-tab": "Product tab",
+  "link-heading": "Link column heading",
+  link: "Link",
 };
 
 const pageTypeLabels: Record<PageType, string> = {

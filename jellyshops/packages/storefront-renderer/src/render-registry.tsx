@@ -3,6 +3,7 @@ import type { SectionNode } from "@jelly/storefront-schema";
 import { FooterSection } from "./sections/footer";
 import { HeaderSection } from "./sections/header";
 import { HeroSection } from "./sections/hero";
+import { SlideshowSection } from "./sections/slideshow";
 import { ProductGridSection } from "./sections/product-grid";
 import { RichTextSection } from "./sections/rich-text";
 import { ProductDescriptionSection, ProductGallerySection, ProductInformationSection, ProductOptionsSection, ProductPurchaseSection, RelatedProductsSection } from "./sections/product-sections";
@@ -65,8 +66,9 @@ function builtInRegistry(): SectionRenderRegistry {
   const registry = new SectionRenderRegistry();
   registry.register("announcement-bar", ({ section }) => <AnnouncementBarSection section={section} />);
   registry.register("header", ({ section, context }) => <HeaderSection section={section} context={context} />);
-  registry.register("footer", ({ section, context }) => <FooterSection section={section} context={context} />);
+  registry.register("footer", ({ section, context, commerce, mode }) => <FooterSection section={section} context={context} subscribe={commerce.subscribeNewsletter} mode={mode} />);
   registry.register("hero", ({ section, mode, context }) => <HeroSection section={section} editor={mode === "editor"} context={context} />);
+  registry.register("slideshow", ({ section, mode, context }) => <SlideshowSection section={section} context={context} editor={mode === "editor"} />);
   registry.register("rich-text", ({ section }) => <RichTextSection section={section} />);
   registry.register("page-content", ({ context }) => <PageContentSection context={context} />);
   registry.register("blog-header", ({ context }) => <BlogHeaderSection context={context} />);

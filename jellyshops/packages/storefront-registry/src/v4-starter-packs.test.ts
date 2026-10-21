@@ -33,9 +33,14 @@ describe("V4 starter packs", () => {
     expect(avenue.tags.length).toBeGreaterThan(0);
     const home = avenue.templates.find(({ type }) => type === "home")!;
     const homeTypes = home.layout.sections.flatMap((placement) => placement.kind === "inline" ? [placement.section.type] : []);
-    expect(homeTypes).toEqual(["hero", "product-grid", "category-grid", "product-grid", "image-banner", "image-with-text", "multicolumn", "newsletter"]);
+    expect(homeTypes).toEqual(["slideshow", "product-grid", "category-grid", "product-grid", "image-banner", "image-with-text", "multicolumn"]);
     const header = avenue.globalSections.find(({ key }) => key === "header")!;
-    expect(header.section.settings).toMatchObject({ logoPosition: "center", sticky: true });
+    expect(header.section.settings).toMatchObject({ logoPosition: "center", sticky: true, transparent: true });
+    const footer = avenue.globalSections.find(({ key }) => key === "footer")!;
+    expect(footer.section.settings).toMatchObject({ showNewsletter: true });
+    expect(footer.section.blocks.filter(({ type }) => type === "link-heading").map(({ settings }) => settings.text)).toEqual(["Shop", "Help", "About"]);
+    // Information pages are served at /<store>/<handle>, never /pages/<handle>.
+    expect(JSON.stringify(avenue)).not.toContain("/pages/");
     expect(JSON.stringify(avenue)).not.toMatch(/metropolitan/i);
   });
 
