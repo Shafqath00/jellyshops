@@ -4,7 +4,7 @@
 
 Tests are listed but only summarised (they have no exports). “Used by” lists non-test importers; “Tests” lists test files importing the file.
 
-247 source files, 113 test files.
+237 source files, 112 test files.
 
 ## `jellyshops/packages/storefront-registry/src/`
 
@@ -1426,15 +1426,6 @@ Shared and legacy UI: admin shell/nav, product form, cart, storefront shell.
 - **Imports (packages):** `react`
 - **Used by:** `jellyshops/src/app/admin/products/[id]/page.tsx`
 
-### `jellyshops/src/components/empty-state.tsx`
-
-- **Purpose:** React component(s): EmptyState (inferred from file name; no header comment)
-- **Size:** 33 lines
-- **Exports:** `EmptyState`
-- **Imports (project):** `jellyshops/src/components/ui/button.tsx`
-- **Imports (packages):** `lucide-react`, `next`
-- **Used by:** nothing (entry point or unused)
-
 - `order-status.test.tsx` — test (8 lines)
 ### `jellyshops/src/components/order-status.tsx`
 
@@ -1444,15 +1435,6 @@ Shared and legacy UI: admin shell/nav, product form, cart, storefront shell.
 - **Imports (project):** `jellyshops/src/lib/domain.ts`
 - **Used by:** `jellyshops/src/app/admin/customers/[id]/page.tsx`, `jellyshops/src/app/admin/page.tsx`
 - **Tests:** `order-status.test.tsx`
-
-### `jellyshops/src/components/product-card.tsx`
-
-- **Purpose:** React component(s): ProductCard (inferred from file name; no header comment)
-- **Size:** 87 lines
-- **Exports:** `ProductCard`
-- **Imports (project):** `jellyshops/src/components/jelly/product.tsx`, `jellyshops/src/lib/domain.ts`
-- **Imports (packages):** `lucide-react`, `next`
-- **Used by:** nothing (entry point or unused)
 
 ### `jellyshops/src/components/product-category-picker.tsx`
 
@@ -1471,15 +1453,6 @@ Shared and legacy UI: admin shell/nav, product form, cart, storefront shell.
 - **Imports (project):** `jellyshops/src/components/category-recommendations.tsx`, `jellyshops/src/components/product-category-picker.tsx`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/auth/auth-provider.tsx`, `jellyshops/src/features/commerce/api/client.ts`, `jellyshops/src/features/store-editor/api/client.ts`, `jellyshops/src/lib/domain.ts`, `jellyshops/src/lib/product-variants.ts`
 - **Imports (packages):** `lucide-react`, `next`, `react`
 - **Used by:** `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/app/admin/products/new/page.tsx`
-
-### `jellyshops/src/components/store-header.tsx`
-
-- **Purpose:** React component(s): StoreHeader (inferred from file name; no header comment)
-- **Size:** 86 lines
-- **Exports:** `StoreHeader`
-- **Imports (project):** `jellyshops/src/components/jelly/cart.tsx`, `jellyshops/src/contexts/shop-context.tsx`
-- **Imports (packages):** `lucide-react`, `next`
-- **Used by:** nothing (entry point or unused)
 
 ### `jellyshops/src/components/storefront-frame.tsx`
 
@@ -1521,7 +1494,7 @@ Storefront primitives used by theme markup.
 - **Exports:** `CartDrawer`, `CartItem`, `CartSummary`, `EmptyCart`, `CartBadge`
 - **Imports (project):** `jellyshops/src/components/ui/sheet.tsx`, `jellyshops/src/lib/utils.ts`
 - **Imports (packages):** `lucide-react`, `next`, `react`
-- **Used by:** `jellyshops/src/components/cart-panel.tsx`, `jellyshops/src/components/jelly/index.ts`, `jellyshops/src/components/store-header.tsx`, `jellyshops/src/components/storefront-shell.tsx`
+- **Used by:** `jellyshops/src/components/cart-panel.tsx`, `jellyshops/src/components/jelly/index.ts`, `jellyshops/src/components/storefront-shell.tsx`
 
 ### `jellyshops/src/components/jelly/index.ts`
 
@@ -1555,20 +1528,11 @@ Storefront primitives used by theme markup.
 - **Exports:** `AddToCartButton`, `ProductBadge`, `ProductPrice`
 - **Imports (project):** `jellyshops/src/lib/utils.ts`
 - **Imports (packages):** `lucide-react`, `react`
-- **Used by:** `jellyshops/src/components/jelly/index.ts`, `jellyshops/src/components/product-card.tsx`, `jellyshops/src/components/storefront-pages.tsx`
+- **Used by:** `jellyshops/src/components/jelly/index.ts`, `jellyshops/src/components/storefront-pages.tsx`
 
 ## `jellyshops/src/components/ui/`
 
 shadcn-style UI primitives.
-
-### `jellyshops/src/components/ui/badge.tsx`
-
-- **Purpose:** React component(s): Badge (inferred from file name; no header comment)
-- **Size:** 29 lines
-- **Exports:** `BadgeVariant` (type), `Badge`
-- **Imports (project):** `jellyshops/src/lib/utils.ts`
-- **Imports (packages):** `react`
-- **Used by:** nothing (entry point or unused)
 
 ### `jellyshops/src/components/ui/button.tsx`
 
@@ -1577,7 +1541,7 @@ shadcn-style UI primitives.
 - **Exports:** `ButtonVariant` (type), `ButtonSize` (type), `buttonVariants`, `ButtonProps` (type), `Button`
 - **Imports (project):** `jellyshops/src/lib/utils.ts`
 - **Imports (packages):** `react`
-- **Used by:** `jellyshops/src/components/admin-theme-toggle.tsx`, `jellyshops/src/components/app-shell.tsx`, `jellyshops/src/components/auth-form.tsx`, `jellyshops/src/components/empty-state.tsx`
+- **Used by:** `jellyshops/src/components/admin-theme-toggle.tsx`, `jellyshops/src/components/app-shell.tsx`, `jellyshops/src/components/auth-form.tsx`
 
 ### `jellyshops/src/components/ui/card.tsx`
 
@@ -1614,14 +1578,6 @@ shadcn-style UI primitives.
 - **Imports (packages):** `react`
 - **Used by:** `jellyshops/src/components/auth-form.tsx`
 
-### `jellyshops/src/components/ui/separator.tsx`
-
-- **Purpose:** React component(s): Separator (inferred from file name; no header comment)
-- **Size:** 22 lines
-- **Exports:** `Separator`
-- **Imports (project):** `jellyshops/src/lib/utils.ts`
-- **Used by:** nothing (entry point or unused)
-
 ### `jellyshops/src/components/ui/sheet.tsx`
 
 - **Purpose:** React component(s):  (inferred from file name; no header comment)
@@ -1640,14 +1596,6 @@ shadcn-style UI primitives.
 - **Imports (packages):** `react`
 - **Used by:** `jellyshops/src/app/admin/customers/page.tsx`, `jellyshops/src/app/admin/products/page.tsx`
 
-### `jellyshops/src/components/ui/tooltip.tsx`
-
-- **Purpose:** Module without exports (side-effect, config or entry point).
-- **Size:** 34 lines
-- **Imports (project):** `jellyshops/src/lib/utils.ts`
-- **Imports (packages):** `@radix-ui/react-tooltip`, `react`
-- **Used by:** nothing (entry point or unused)
-
 ## `jellyshops/src/contexts/`
 
 React contexts (legacy shop state).
@@ -1659,7 +1607,7 @@ React contexts (legacy shop state).
 - **Exports:** `ShopProvider`, `useShop`
 - **Imports (project):** `jellyshops/src/lib/domain.ts`, `jellyshops/src/lib/repository.ts`
 - **Imports (packages):** `react`
-- **Used by:** `jellyshops/src/app/[storeSlug]/[...unmatched]/page.tsx`, `jellyshops/src/app/[storeSlug]/cart/page.tsx`, `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `jellyshops/src/app/[storeSlug]/collections/[collectionSlug]/collection-client.tsx`, `jellyshops/src/app/[storeSlug]/order/[publicToken]/page.tsx`, `jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/app/[storeSlug]/shop/page.tsx`, `jellyshops/src/app/admin/onboarding/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/app/admin/store/page.tsx`, `jellyshops/src/app/layout.tsx`, `jellyshops/src/components/cart-panel.tsx`, `jellyshops/src/components/product-form.tsx`, `jellyshops/src/components/store-header.tsx`, `jellyshops/src/components/storefront-frame.tsx`, `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/customers/customer-page.tsx`, `jellyshops/src/features/customers/customer-provider.tsx`, `jellyshops/src/features/storefront/catalog-browser.tsx`, `jellyshops/src/features/storefront/storefront-bootstrap.tsx`
+- **Used by:** `jellyshops/src/app/[storeSlug]/[...unmatched]/page.tsx`, `jellyshops/src/app/[storeSlug]/cart/page.tsx`, `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `jellyshops/src/app/[storeSlug]/collections/[collectionSlug]/collection-client.tsx`, `jellyshops/src/app/[storeSlug]/order/[publicToken]/page.tsx`, `jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/app/[storeSlug]/shop/page.tsx`, `jellyshops/src/app/admin/onboarding/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/app/admin/store/page.tsx`, `jellyshops/src/app/layout.tsx`, `jellyshops/src/components/cart-panel.tsx`, `jellyshops/src/components/product-form.tsx`, `jellyshops/src/components/storefront-frame.tsx`, `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/customers/customer-page.tsx`, `jellyshops/src/features/customers/customer-provider.tsx`, `jellyshops/src/features/storefront/catalog-browser.tsx`, `jellyshops/src/features/storefront/storefront-bootstrap.tsx`
 - **Tests:** `page.test.tsx`, `page.test.tsx`, `cart-panel.test.tsx`
 
 ## `jellyshops/src/features/admin/`
@@ -1735,24 +1683,6 @@ Merchant authentication (Supabase session, merchant/store loading).
 - **Size:** 127 lines
 - **Exports:** `CommerceAttemptInput` (type), `CommerceAttemptResult` (type), `PreparedPayment` (type), `PublicOrderResult` (type), `StripeMerchantStatus` (type), `StripeOnboardingLink` (type), `MerchantOrderStatus` (type), `MerchantPaymentStatus` (type), `RefundStatus` (type), `MerchantOrder` (type), `MerchantOrderListItem` (type), `MerchantOrderItem` (type), `MerchantPayment` (type), `MerchantRefund` (type), `MerchantPaymentDispute` (type), `MerchantOrderDetail` (type), `OrderActivity` (type), `OrderNote` (type), `OrderFulfilment` (type), `OrderReturn` (type), `OrderListQuery` (type), `OrderListResult` (type), `OrderEditInput` (type), `OrderEditPreview` (type)
 - **Used by:** `jellyshops/src/app/admin/orders/[id]/page.tsx`, `jellyshops/src/app/admin/orders/page.tsx`, `jellyshops/src/features/commerce/api/client.ts`, `jellyshops/src/features/commerce/components/merchant-payments-panel.tsx`, `jellyshops/src/features/commerce/components/order-payment-panel.tsx`
-
-## `jellyshops/src/features/commerce/`
-
-Order/payment API client and merchant/shopper commerce components.
-
-### `jellyshops/src/features/commerce/commerce-store-id.ts`
-
-- **Purpose:** Exports commerceStoreId (inferred from file name; no header comment)
-- **Size:** 7 lines
-- **Exports:** `commerceStoreId`
-- **Used by:** nothing (entry point or unused)
-
-### `jellyshops/src/features/commerce/merchant-session.ts`
-
-- **Purpose:** Exports getMerchantSession (inferred from file name; no header comment)
-- **Size:** 7 lines
-- **Exports:** `MerchantSession` (type), `getMerchantSession`
-- **Used by:** nothing (entry point or unused)
 
 ## `jellyshops/src/features/commerce/components/`
 
@@ -1937,13 +1867,6 @@ Menu API and editor.
 - **Imports (project):** `jellyshops/packages/storefront-registry/src/index.ts`, `jellyshops/packages/storefront-schema/src/index.ts`, `jellyshops/src/features/store-editor/api/types.ts`
 - **Used by:** `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/app/admin/online-store/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/app/admin/products/page.tsx`, `jellyshops/src/components/product-form.tsx`
 - **Tests:** `client.test.ts`
-
-### `jellyshops/src/features/store-editor/api/demo-session.ts`
-
-- **Purpose:** Exports getDemoSession (inferred from file name; no header comment)
-- **Size:** 6 lines
-- **Exports:** `DemoSession` (type), `getDemoSession`
-- **Used by:** nothing (entry point or unused)
 
 ### `jellyshops/src/features/store-editor/api/types.ts`
 
@@ -2488,7 +2411,7 @@ Domain types/helpers, legacy local repository, product variant helpers, utilitie
 - **Size:** 294 lines
 - **Exports:** `Currency` (type), `OrderStatus` (type), `PaymentStatus` (type), `StoreTheme` (type), `Store` (type), `StoreDesignPublication` (type), `StoreDesignRecord` (type), `ProductVariant` (type), `ProductOptionKind` (type), `ProductOptionDisplay` (type), `ProductOptionValue` (type), `ProductOption` (type), `Category` (type), `Brand` (type), `Collection` (type), `CategoryOptionDefinition` (type), `Product` (type), `CustomerAddress` (type), `CustomerInput` (type), `Customer` (type), `CartItem` (type), `ConfiguredOptionSelection` (type), `Cart` (type), `OrderItem` (type), `OrderConfigurationSelection` (type), `Order` (type), `ShopState` (type), `canTransitionOrder`, `nextOrderStatus`, `formatMoney`, `slugify`, `majorToMinor`, `minorToMajor`, `getCategoryAncestors`, `getCategoryBreadcrumb`, `getCategoryChildren`, `getEffectiveCategoryOptionDefinitions`
 - **Imports (project):** `jellyshops/packages/storefront-schema/src/index.ts`
-- **Used by:** `jellyshops/src/app/[storeSlug]/cart/page.tsx`, `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/app/[storeSlug]/shop/page.tsx`, `jellyshops/src/app/admin/customers/[id]/page.tsx`, `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/app/admin/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/components/cart-panel.tsx`, `jellyshops/src/components/category-recommendations.tsx`, `jellyshops/src/components/order-status.tsx`, `jellyshops/src/components/product-card.tsx`, `jellyshops/src/components/product-category-picker.tsx`, `jellyshops/src/components/product-form.tsx`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/commerce/api/client.ts`, `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/store-editor/preview-context.ts`, `jellyshops/src/features/storefront/catalog-browser.tsx`, `jellyshops/src/features/storefront/page-context-loaders.ts`, `jellyshops/src/features/storefront/product-presentation.ts`, `jellyshops/src/features/storefront/server-storefront.ts`, `jellyshops/src/features/storefront/storefront-page.tsx`, `jellyshops/src/lib/product-configuration.ts`, `jellyshops/src/lib/product-variants.ts`, `jellyshops/src/lib/repository.ts`, `jellyshops/src/lib/seed.ts`
+- **Used by:** `jellyshops/src/app/[storeSlug]/cart/page.tsx`, `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/app/[storeSlug]/shop/page.tsx`, `jellyshops/src/app/admin/customers/[id]/page.tsx`, `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/app/admin/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/components/cart-panel.tsx`, `jellyshops/src/components/category-recommendations.tsx`, `jellyshops/src/components/order-status.tsx`, `jellyshops/src/components/product-category-picker.tsx`, `jellyshops/src/components/product-form.tsx`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/commerce/api/client.ts`, `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/store-editor/preview-context.ts`, `jellyshops/src/features/storefront/catalog-browser.tsx`, `jellyshops/src/features/storefront/page-context-loaders.ts`, `jellyshops/src/features/storefront/product-presentation.ts`, `jellyshops/src/features/storefront/server-storefront.ts`, `jellyshops/src/features/storefront/storefront-page.tsx`, `jellyshops/src/lib/product-configuration.ts`, `jellyshops/src/lib/product-variants.ts`, `jellyshops/src/lib/repository.ts`, `jellyshops/src/lib/seed.ts`
 - **Tests:** `preview-context.test.ts`, `page-context-loaders.test.ts`, `product-presentation.test.ts`, `domain.test.ts`
 
 - `product-configuration.test.ts` — test (19 lines)
@@ -2510,15 +2433,6 @@ Domain types/helpers, legacy local repository, product variant helpers, utilitie
 - **Imports (project):** `jellyshops/src/lib/domain.ts`
 - **Used by:** `jellyshops/src/components/product-form.tsx`, `jellyshops/src/lib/product-configuration.ts`
 - **Tests:** `product-variants.test.ts`
-
-- `providers.test.ts` — test (15 lines)
-### `jellyshops/src/lib/providers.ts`
-
-- **Purpose:** Exports mockAuth, mockAssets (inferred from file name; no header comment)
-- **Size:** 26 lines
-- **Exports:** `AuthProvider` (type), `AssetProvider` (type), `mockAuth`, `mockAssets`
-- **Used by:** nothing (entry point or unused)
-- **Tests:** `providers.test.ts`
 
 - `repository.test.ts` — test (126 lines)
 ### `jellyshops/src/lib/repository.ts`
@@ -2546,7 +2460,7 @@ Domain types/helpers, legacy local repository, product variant helpers, utilitie
 - **Size:** 6 lines
 - **Exports:** `cn`
 - **Imports (packages):** `clsx`
-- **Used by:** `jellyshops/src/components/admin-nav.tsx`, `jellyshops/src/components/app-shell.tsx`, `jellyshops/src/components/jelly/cart.tsx`, `jellyshops/src/components/jelly/layout.tsx`, `jellyshops/src/components/jelly/marquee.tsx`, `jellyshops/src/components/jelly/product.tsx`, `jellyshops/src/components/ui/badge.tsx`, `jellyshops/src/components/ui/button.tsx`, `jellyshops/src/components/ui/card.tsx`, `jellyshops/src/components/ui/dialog.tsx`, `jellyshops/src/components/ui/input.tsx`, `jellyshops/src/components/ui/label.tsx`, `jellyshops/src/components/ui/separator.tsx`, `jellyshops/src/components/ui/sheet.tsx`, `jellyshops/src/components/ui/skeleton.tsx`, `jellyshops/src/components/ui/tooltip.tsx`
+- **Used by:** `jellyshops/src/components/admin-nav.tsx`, `jellyshops/src/components/app-shell.tsx`, `jellyshops/src/components/jelly/cart.tsx`, `jellyshops/src/components/jelly/layout.tsx`, `jellyshops/src/components/jelly/marquee.tsx`, `jellyshops/src/components/jelly/product.tsx`, `jellyshops/src/components/ui/button.tsx`, `jellyshops/src/components/ui/card.tsx`, `jellyshops/src/components/ui/dialog.tsx`, `jellyshops/src/components/ui/input.tsx`, `jellyshops/src/components/ui/label.tsx`, `jellyshops/src/components/ui/sheet.tsx`, `jellyshops/src/components/ui/skeleton.tsx`
 
 ## `jellyshops/src/test/`
 

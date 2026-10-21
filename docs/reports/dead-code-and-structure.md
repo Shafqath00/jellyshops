@@ -6,15 +6,13 @@ Static findings only: nothing has been deleted. Each item needs a human check be
 
 ## Backend: source files not imported by any other non-test source file
 
-- `backend/src/audit/service.ts` (only imported by tests)
+- `backend/src/audit/repository.ts`
 - `backend/src/catalog/provider-sync.ts` (only imported by tests)
 - `backend/src/dynamic-sources/resolver.ts` (only imported by tests)
-- `backend/src/dynamic-sources/validator.ts` (only imported by tests)
 
 ## Backend: exported values/functions never referenced by another non-test file
 
 - backend/src/app.ts → `publicDocumentFromTemplate` (not referenced anywhere else)
-- backend/src/audit/service.ts → `AuditService` (not referenced anywhere else)
 - backend/src/auth/development-auth-provider.ts → `DEMO_TOKEN` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/auth/firebase-token-verifier.ts → `FirebaseAdminTokenVerifier` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/auth/permissions.ts → `ROLE_PERMISSIONS` (used inside its own file; the `export` keyword may be unnecessary)
@@ -28,7 +26,6 @@ Static findings only: nothing has been deleted. Each item needs a human check be
 - backend/src/custom-data/service.ts → `isValidCustomDataValue` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/dynamic-sources/resolver.ts → `DynamicValueResolver` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/dynamic-sources/resolver.ts → `resolveSettingValue` (not referenced anywhere else)
-- backend/src/dynamic-sources/validator.ts → `validateDynamicBinding` (not referenced anywhere else)
 - backend/src/storefront/publication/sql-repository.ts → `PublicationActivationError` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/storefront/starter/installation-service.ts → `StarterInstallationConflictError` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/storefront/starter/installation-service.ts → `StorefrontNotFoundError` (used inside its own file; the `export` keyword may be unnecessary)
@@ -48,45 +45,28 @@ Static findings only: nothing has been deleted. Each item needs a human check be
 ## Frontend: source files not imported by any other non-test source file
 
 - `jellyshops/packages/storefront-renderer/src/section-renderer.tsx`
-- `jellyshops/src/components/empty-state.tsx`
-- `jellyshops/src/components/product-card.tsx`
-- `jellyshops/src/components/store-header.tsx`
-- `jellyshops/src/components/ui/badge.tsx`
-- `jellyshops/src/components/ui/separator.tsx`
-- `jellyshops/src/components/ui/tooltip.tsx`
-- `jellyshops/src/features/commerce/commerce-store-id.ts`
 - `jellyshops/src/features/commerce/components/order-payment-panel.tsx` (only imported by tests)
-- `jellyshops/src/features/commerce/merchant-session.ts`
-- `jellyshops/src/features/store-editor/api/demo-session.ts`
 - `jellyshops/src/features/store-editor/components/drag-reorder.ts` (only imported by tests)
 - `jellyshops/src/features/store-editor/components/editor-shell.tsx` (only imported by tests)
 - `jellyshops/src/features/store-editor/editor-store.ts` (only imported by tests)
 - `jellyshops/src/features/store-editor/theme-pack-workspace.ts` (only imported by tests)
 - `jellyshops/src/features/storefront/reserved-paths.ts` (only imported by tests)
-- `jellyshops/src/lib/providers.ts` (only imported by tests)
 
 ## Frontend: exported values/functions never referenced by another non-test file
 
 - jellyshops/packages/storefront-renderer/src/sections/header.tsx → `MenuLinks` (used inside its own file; the `export` keyword may be unnecessary)
 - jellyshops/packages/storefront-renderer/src/sections/header.tsx → `StorefrontIcon` (used inside its own file; the `export` keyword may be unnecessary)
 - jellyshops/packages/storefront-schema/src/schema.ts → `sectionNodeSchema` (used inside its own file; the `export` keyword may be unnecessary)
-- jellyshops/src/components/empty-state.tsx → `EmptyState` (not referenced anywhere else)
-- jellyshops/src/components/product-card.tsx → `ProductCard` (used inside its own file; the `export` keyword may be unnecessary)
-- jellyshops/src/components/store-header.tsx → `StoreHeader` (used inside its own file; the `export` keyword may be unnecessary)
 - jellyshops/src/components/storefront-shell.tsx → `SharedStorefrontLayout` (used inside its own file; the `export` keyword may be unnecessary)
 - jellyshops/src/components/storefront-shell.tsx → `SharedStorefrontHeader` (used inside its own file; the `export` keyword may be unnecessary)
 - jellyshops/src/components/storefront-shell.tsx → `SharedStorefrontFooter` (used inside its own file; the `export` keyword may be unnecessary)
 - jellyshops/src/components/ui/card.tsx → `CardFooter` (not referenced anywhere else)
-- jellyshops/src/components/ui/separator.tsx → `Separator` (not referenced anywhere else)
 - jellyshops/src/components/ui/skeleton.tsx → `Skeleton` (used inside its own file; the `export` keyword may be unnecessary)
 - jellyshops/src/components/ui/skeleton.tsx → `SkeletonProductCard` (not referenced anywhere else)
 - jellyshops/src/components/ui/skeleton.tsx → `SkeletonText` (not referenced anywhere else)
 - jellyshops/src/features/admin/api.ts → `AdminApiError` (used inside its own file; the `export` keyword may be unnecessary)
-- jellyshops/src/features/commerce/commerce-store-id.ts → `commerceStoreId` (not referenced anywhere else)
 - jellyshops/src/features/commerce/components/order-payment-panel.tsx → `OrderPaymentPanel` (not referenced anywhere else)
-- jellyshops/src/features/commerce/merchant-session.ts → `getMerchantSession` (not referenced anywhere else)
 - jellyshops/src/features/navigation/menu-editor.tsx → `reorderMenuItem` (used inside its own file; the `export` keyword may be unnecessary)
-- jellyshops/src/features/store-editor/api/demo-session.ts → `getDemoSession` (not referenced anywhere else)
 - jellyshops/src/features/store-editor/components/drag-reorder.ts → `dragReorderCommand` (not referenced anywhere else)
 - jellyshops/src/features/store-editor/components/editor-shell.tsx → `EditorShell` (not referenced anywhere else)
 - jellyshops/src/features/store-editor/editor-store.ts → `setTheme` (not referenced anywhere else)
@@ -109,8 +89,6 @@ Static findings only: nothing has been deleted. Each item needs a human check be
 - jellyshops/src/lib/product-variants.ts → `MAX_INVENTORY_VARIANTS` (used inside its own file; the `export` keyword may be unnecessary)
 - jellyshops/src/lib/product-variants.ts → `getVariantCombinationCount` (used inside its own file; the `export` keyword may be unnecessary)
 - jellyshops/src/lib/product-variants.ts → `getVariantDisplayName` (used inside its own file; the `export` keyword may be unnecessary)
-- jellyshops/src/lib/providers.ts → `mockAuth` (not referenced anywhere else)
-- jellyshops/src/lib/providers.ts → `mockAssets` (not referenced anywhere else)
 
 ## Frontend: files over 500 lines
 

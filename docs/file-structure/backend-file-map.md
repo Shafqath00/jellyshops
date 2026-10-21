@@ -4,7 +4,7 @@
 
 Tests are listed but only summarised (they have no exports). “Used by” lists non-test importers; “Tests” lists test files importing the file.
 
-138 source files, 96 test files.
+136 source files, 94 test files.
 
 ## `backend/src/admin/`
 
@@ -87,25 +87,14 @@ Audit-event recording.
 - **Size:** 6 lines
 - **Exports:** `AuditRepository` (type)
 - **Imports (project):** `backend/src/audit/types.ts`
-- **Used by:** `backend/src/audit/service.ts`
-- **Tests:** `service.test.ts`
-
-- `service.test.ts` — test (40 lines)
-### `backend/src/audit/service.ts`
-
-- **Purpose:** Application service (business rules): AuditService (inferred from file name; no header comment)
-- **Size:** 29 lines
-- **Exports:** `AuditService`
-- **Imports (project):** `backend/src/audit/repository.ts`, `backend/src/audit/types.ts`
 - **Used by:** nothing (entry point or unused)
-- **Tests:** `service.test.ts`
 
 ### `backend/src/audit/types.ts`
 
 - **Purpose:** Type definitions (inferred from file name; no header comment)
 - **Size:** 16 lines
 - **Exports:** `AuditMetadata` (type), `CreateAuditEventInput` (type), `AuditEventRecord` (type)
-- **Used by:** `backend/src/audit/repository.ts`, `backend/src/audit/service.ts`
+- **Used by:** `backend/src/audit/repository.ts`
 
 ## `backend/src/auth/`
 
@@ -541,7 +530,7 @@ Merchant-defined custom data definitions and values.
 - **Exports:** `MetafieldDefinitionRecord` (type), `CreateMetafieldDefinitionInput` (type), `UpdateMetafieldDefinitionInput` (type), `MetafieldValueRecord` (type), `CustomDataRepository` (type), `MetaobjectDefinitionRecord` (type), `CreateMetaobjectDefinitionInput` (type), `UpdateMetaobjectDefinitionInput` (type), `MetaobjectEntryRecord` (type), `CreateMetaobjectEntryInput` (type), `UpdateMetaobjectEntryInput` (type), `MetaobjectRepository` (type)
 - **Imports (packages):** `@jelly/storefront-schema`
 - **Used by:** `backend/src/custom-data/service.ts`, `backend/src/custom-data/sql-repository.ts`, `backend/src/dynamic-sources/registry.ts`, `backend/src/dynamic-sources/resolver.ts`
-- **Tests:** `metaobjects.test.ts`, `service.test.ts`, `resolver.test.ts`, `validator.test.ts`
+- **Tests:** `metaobjects.test.ts`, `service.test.ts`, `resolver.test.ts`
 
 - `routes.test.ts` — test (92 lines)
 ### `backend/src/custom-data/routes.ts`
@@ -633,8 +622,8 @@ Data sources for dynamic storefront content.
 - **Exports:** `TemplateContext` (type), `DynamicSourceDescriptor` (type), `DynamicSourceRegistry`
 - **Imports (project):** `backend/src/custom-data/repository.ts`
 - **Imports (packages):** `@jelly/storefront-schema`
-- **Used by:** `backend/src/app.ts`, `backend/src/custom-data/routes.ts`, `backend/src/dynamic-sources/validator.ts`
-- **Tests:** `sql-repository.test.ts`, `validator.test.ts`
+- **Used by:** `backend/src/app.ts`, `backend/src/custom-data/routes.ts`
+- **Tests:** `sql-repository.test.ts`
 
 - `resolver.test.ts` — test (96 lines)
 ### `backend/src/dynamic-sources/resolver.ts`
@@ -646,17 +635,6 @@ Data sources for dynamic storefront content.
 - **Imports (packages):** `@jelly/storefront-schema`
 - **Used by:** nothing (entry point or unused)
 - **Tests:** `sql-repository.test.ts`, `resolver.test.ts`
-
-- `validator.test.ts` — test (80 lines)
-### `backend/src/dynamic-sources/validator.ts`
-
-- **Purpose:** Exports validateDynamicBinding (inferred from file name; no header comment)
-- **Size:** 25 lines
-- **Exports:** `validateDynamicBinding`
-- **Imports (project):** `backend/src/dynamic-sources/registry.ts`
-- **Imports (packages):** `@jelly/storefront-schema`
-- **Used by:** nothing (entry point or unused)
-- **Tests:** `validator.test.ts`
 
 ## `backend/src/http/`
 

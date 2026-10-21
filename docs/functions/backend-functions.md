@@ -30,14 +30,6 @@ Called from: `backend/src/functions.ts`, `backend/src/server.ts`
 | `publicDocumentFromTemplate` | function | `(storeId: string, layout: unknown): StorefrontDocument` | Converts an editor-owned home template into the document consumed by the public storefront. |
 | `createApp` | function | `(dependencies: Partial<AppDependencies> = {}): Express` | -------------------------------------------------------------------------- |
 
-## `backend/src/audit/service.ts`
-
-Called from: —
-
-| Name | Kind | Signature | Description |
-| --- | --- | --- | --- |
-| `AuditService` | class | `record(input: CreateAuditEventInput): Promise<AuditEventRecord>` |  |
-
 ## `backend/src/auth/development-auth-provider.ts`
 
 Called from: `backend/src/app.ts`
@@ -391,7 +383,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/dynamic-sources/registry.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/custom-data/routes.ts`, `backend/src/dynamic-sources/validator.ts`
+Called from: `backend/src/app.ts`, `backend/src/custom-data/routes.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -405,14 +397,6 @@ Called from: —
 | --- | --- | --- | --- |
 | `DynamicValueResolver` | class | `resolve(storeId: string, binding: DynamicBinding, context: RuntimeValueContext): Promise<unknown>` |  |
 | `resolveSettingValue` | function (async) | `(resolver: DynamicValueResolver, storeId: string, setting: SettingValue<T>, context: RuntimeValueContext, defaultValue?: T): Promise<T \| null>` |  |
-
-## `backend/src/dynamic-sources/validator.ts`
-
-Called from: —
-
-| Name | Kind | Signature | Description |
-| --- | --- | --- | --- |
-| `validateDynamicBinding` | function (async) | `(registry: DynamicSourceRegistry, storeId: string, binding: DynamicBinding, expectedType: DynamicValueType, context: TemplateContext): Promise<DynamicSourceDescriptor>` |  |
 
 ## `backend/src/http/errors.ts`
 
