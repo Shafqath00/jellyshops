@@ -113,6 +113,8 @@ function normalizeMetadata(state: ShopState): ShopState {
 
 function addMissingStoreDesigns(state: ShopState): ShopState {
   const existing = Array.isArray(state.storeDesigns) ? state.storeDesigns : [];
+  // Stores synced from the API have no seed design; fall back to the first seed design instead of throwing and discarding the whole saved state (carts included).
+  const seedDesigns = createSeedState().storeDesigns;
   state = normalizeMetadata({
     ...state,
     categories: Array.isArray(state.categories) ? state.categories : [],
@@ -122,7 +124,7 @@ function addMissingStoreDesigns(state: ShopState): ShopState {
     recentCategoryIdsByStore: state.recentCategoryIdsByStore ?? {},
     storeDesigns: state.stores.map((store) => existing.find((record) => record.storeId === store.id) ?? {
       storeId: store.id,
-      draftDocument: migrateStoreDesignDocument(createSeedState().storeDesigns.find((record) => record.storeId === store.id)!.draftDocument),
+      draftDocument: migrateStoreDesignDocument((seedDesigns.find((record) => record.storeId === store.id) ?? seedDesigns[0]).draftDocument),
       draftRevision: 1,
       publications: []
     })

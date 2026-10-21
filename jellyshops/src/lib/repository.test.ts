@@ -112,4 +112,14 @@ describe("shop repository", () => {
     repo.recordRecentCategory("store-sweet-bakes", ids[0]);
     expect(repo.getRecentCategoryIds("store-sweet-bakes")[0]).toBe(ids[0]);
   });
+
+  it("keeps saved carts when a synced store has no seed design", () => {
+    const storage = memoryStorage();
+    const first = createRepository(storage);
+    const store = { ...first.getState().stores[0], id: "store-synced", slug: "synced-shop", name: "Synced Shop" };
+    first.saveStore(store);
+    const cart = first.createCart("synced-shop");
+    const reloaded = createRepository(storage);
+    expect(reloaded.getCartForStore("synced-shop")?.id).toBe(cart.id);
+  });
 });

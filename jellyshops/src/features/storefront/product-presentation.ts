@@ -41,7 +41,8 @@ export function createProductPresentationContext({ product, currency, shippingCo
 }): ProductPresentationContext {
   const options = [...(product.options ?? [])].sort((left, right) => left.position - right.position);
   const selectedValue = (optionId: string) => selections.find((selection) => selection.optionId === optionId)?.valueId;
-  const requiredMissing = options.some((option) => option.required && !selectedValue(option.id));
+  const inventoryChoiceMissing = (product.inventoryOptionIds ?? []).some((optionId) => !selectedValue(optionId));
+  const requiredMissing = inventoryChoiceMissing || options.some((option) => option.required && !selectedValue(option.id));
   const variant = resolveProductVariant(product, selections);
   const priceMinor = getConfiguredPriceMinor(variant, options, selections);
   const untrackedAvailable = variant?.available === true && variant.stock === 0;
@@ -57,7 +58,7 @@ export function createProductPresentationContext({ product, currency, shippingCo
     product: { id: product.id, title: product.name, description: product.description, imageUrl: product.imageUrl, specifications: product.specifications ?? {}, shippingCopy, media: product.media ?? (product.imageUrl ? [{ id: `${product.id}-primary`, url: product.imageUrl }] : []), sku: variant?.sku || undefined, vendor: product.vendor, options: options.map((option) => ({ id: option.id, name: option.name, required: option.required, values: option.values.map((value) => ({ id: value.id, label: value.label, selected: selectedValue(option.id) === value.id, available: true })) })) },
     selection: selections,
     quantity: clampedQuantity,
-    pricing: { price: formatMoney(priceMinor ?? 0, currency), ...(variant?.compareAtPriceMinor ?? product.compareAtPriceMinor ? { compareAtPrice: formatMoney(variant?.compareAtPriceMinor ?? product.compareAtPriceMinor ?? 0, currency) } : {}) },
+    pricing: { price: formatMoney(priceMinor ?? (inventoryChoiceMissing && product.variants.length ? Math.min(...product.variants.map((candidate) => candidate.priceMinor)) : 0), currency), ...(variant?.compareAtPriceMinor ?? product.compareAtPriceMinor ? { compareAtPrice: formatMoney(variant?.compareAtPriceMinor ?? product.compareAtPriceMinor ?? 0, currency) } : {}) },
     availability,
     canAddToCart: availability.state === "available" && priceMinor !== undefined && Boolean(variant),
     selectOption: (optionId, valueId) => onSelectionsChange([...selections.filter((selection) => selection.optionId !== optionId), { optionId, valueId }]),
