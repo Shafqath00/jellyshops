@@ -6,3 +6,5 @@ export { isRenderableHomeSection, renderableHomeSectionTypes } from "./section-s
 export type { SectionRenderComponent, SectionRenderProps } from "./render-registry";
 export type { RuntimeRegion, StorefrontRuntimeContext } from "./runtime-context";
 export type { AssetResolver, CollectionPresentationContext, CommerceDataProvider, ProductPresentationContext, PublicProduct, StorefrontPageContext, StorefrontRendererProps } from "./types";
+export { withStoreIdentity } from "./store-identity";
+export type { StoreIdentity } from "./store-identity";

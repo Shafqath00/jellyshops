@@ -46,10 +46,10 @@ describe("TemplateHierarchy", () => {
 
     expect(screen.getByRole("heading", { name: "Header" })).toBeVisible();
     expect(screen.getByRole("complementary", { name: "Template hierarchy" })).toHaveClass("bg-[var(--white)]");
-    expect(screen.getByRole("heading", { name: "Template" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Page sections" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Footer" })).toBeVisible();
     expect(screen.getByText("Main header")).toBeVisible();
-    expect(screen.getByText("Hero")).toBeVisible();
+    expect(screen.getByText("Hero banner")).toBeVisible();
     expect(screen.getByText("Summer promo")).toBeVisible();
     expect(screen.getByText("Main footer")).toBeVisible();
     expect(screen.getAllByText("Global")).toHaveLength(3);
@@ -66,7 +66,7 @@ describe("TemplateHierarchy", () => {
       />,
     );
 
-    await userEvent.click(screen.getByRole("button", { name: "Hero" }));
+    await userEvent.click(screen.getByRole("button", { name: "Hero banner" }));
 
     expect(onSelect).toHaveBeenCalledWith({ kind: "section", region: "template", sectionId: "hero-1" });
   });
@@ -93,20 +93,20 @@ describe("TemplateHierarchy", () => {
       />,
     );
 
-    await userEvent.click(screen.getByRole("button", { name: "Heading block" }));
+    await userEvent.click(screen.getByRole("button", { name: /^Heading/ }));
     expect(onSelect).toHaveBeenCalledWith({ kind: "block", region: "template", sectionId: "hero-1", blockId: "heading-1" });
 
-    await userEvent.click(screen.getByRole("button", { name: "Add block to Hero" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add block to Hero banner" }));
     expect(onAddBlock).toHaveBeenCalledWith("hero-1");
 
-    await userEvent.click(screen.getByRole("button", { name: "Add section to Template" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add section to Page sections" }));
     expect(onAddSection).toHaveBeenCalledWith("template");
   });
 
   it("exposes blocks inside shared sections for direct editing", async () => {
     const onSelect = vi.fn();
     render(<TemplateHierarchy template={template} globalSections={globalSections} selection={null} activeGlobalId="global-promo" onSelect={onSelect} />);
-    await userEvent.click(screen.getByRole("button", { name: "Text block" }));
+    await userEvent.click(screen.getByRole("button", { name: /^Text/ }));
     expect(onSelect).toHaveBeenCalledWith({ kind: "block", region: "template", sectionId: "announcement-1", blockId: "announcement-copy" });
   });
 });

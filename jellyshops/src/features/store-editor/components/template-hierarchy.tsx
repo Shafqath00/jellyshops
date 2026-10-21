@@ -2,23 +2,14 @@ import clsx from "clsx";
 import { ChevronDown, ChevronRight, ChevronUp, Eye, EyeOff, LayoutPanelTop, MousePointerClick, Plus, Type } from "lucide-react";
 import type { EditorSelection } from "../model/types";
 import type { StorefrontTemplateRecord } from "../api/types";
+import { blockLabel as blockTypeLabel, sectionLabel } from "@jelly/storefront-registry";
 
-const sectionLabels: Record<string, string> = {
-  "announcement-bar": "Announcement bar",
-  header: "Header",
-  hero: "Hero",
-  "product-grid": "Product grid",
-  "featured-collection": "Featured collection",
-  "rich-text": "Rich text",
-  "image-with-text": "Image with text",
-  "image-text": "Image with text",
-  multicolumn: "Multicolumn",
-  newsletter: "Newsletter",
-  "spacer-divider": "Spacer / divider",
-  spacer: "Spacer / divider",
-  divider: "Spacer / divider",
-  footer: "Footer",
-};
+/** Block name plus a short preview of its text, so merchants can tell blocks apart. */
+function describeBlock(block: { type: string; settings?: Record<string, unknown> }): string {
+  const label = blockTypeLabel(block.type);
+  const text = [block.settings?.text, block.settings?.label, block.settings?.heading, block.settings?.question, block.settings?.quote].find((value): value is string => typeof value === "string" && value.trim().length > 0);
+  return text ? `${label}: ${text.trim().slice(0, 40)}${text.trim().length > 40 ? "…" : ""}` : label;
+}
 
 type InlinePlacement = {
   kind: "inline";
@@ -138,9 +129,9 @@ function PlacementRow({
         <span className="rounded bg-[var(--paper-deep)] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.04em] text-[var(--ink-soft)]">Global</span>
       </button>
       {selected && global?.blocks && global.blocks.length > 0 && <div className="ml-5 mt-1 space-y-0.5 border-l border-[var(--line)] pl-2">{global.blocks.map((block) => {
-        const blockLabel = sectionLabels[block.type] ?? block.type.charAt(0).toUpperCase() + block.type.slice(1);
+        const blockLabel = describeBlock(block);
         const blockSelected = selection?.kind === "block" && selection.blockId === block.id;
-        return <button key={block.id} type="button" aria-label={`${blockLabel} block`} onClick={() => onSelect({ kind: "block", region, sectionId: global.sectionId ?? placement.globalSectionId, blockId: block.id })} className={clsx("flex min-h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-[12px]", blockSelected ? "bg-[var(--ink)] text-[var(--white)]" : "text-[var(--ink-soft)] hover:bg-[var(--paper)]")}>
+        return <button key={block.id} type="button" aria-label={blockLabel} onClick={() => onSelect({ kind: "block", region, sectionId: global.sectionId ?? placement.globalSectionId, blockId: block.id })} className={clsx("flex min-h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-[12px]", blockSelected ? "bg-[var(--ink)] text-[var(--white)]" : "text-[var(--ink-soft)] hover:bg-[var(--paper)]")}>
           {block.type === "button" ? <MousePointerClick size={14} /> : <Type size={14} />}<span className="truncate">{blockLabel}</span>
         </button>;
       })}</div>}
@@ -150,7 +141,7 @@ function PlacementRow({
 
   const selected = selection?.kind !== "theme" && selection?.sectionId === placement.section.id;
   const expanded = selected;
-  const label = sectionLabels[placement.section.type] ?? placement.section.type;
+  const label = sectionLabel(placement.section.type);
   return (
     <div>
       <button
@@ -171,12 +162,12 @@ function PlacementRow({
         <div className="ml-5 mt-1 space-y-0.5 border-l border-[var(--line)] pl-2">
           {placement.section.blocks.map((block) => {
             const blockSelected = selection?.kind === "block" && selection.blockId === block.id;
-            const blockLabel = sectionLabels[block.type] ?? block.type.charAt(0).toUpperCase() + block.type.slice(1);
+            const blockLabel = describeBlock(block);
             return (
               <button
                 key={block.id}
                 type="button"
-                aria-label={`${blockLabel} block`}
+                aria-label={blockLabel}
                 onClick={() => onSelect({ kind: "block", region, sectionId: placement.section.id, blockId: block.id })}
                 className={clsx(
                   "flex min-h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-[12px]",
@@ -238,7 +229,7 @@ export function TemplateHierarchy({
   return (
     <aside className="flex min-h-0 flex-1 flex-col bg-[var(--white)]" aria-label="Template hierarchy">
       <div className="h-14 shrink-0 border-b border-[var(--line)] px-4 py-2.5">
-        <p className="text-[10px] font-medium text-[var(--ink-soft)]">Template</p>
+        <p className="text-[10px] font-medium text-[var(--ink-soft)]">Layout</p>
         <h1 className="mt-0.5 truncate text-[13px] font-semibold text-[var(--ink)]">{template.name}</h1>
       </div>
 
@@ -246,7 +237,7 @@ export function TemplateHierarchy({
         {(["header", "template", "footer"] as const).map((region) => (
           <section key={region} className="mb-3 last:mb-0">
             <h2 className="px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.06em] text-[var(--ink-soft)]">
-              {region === "template" ? "Template" : region === "header" ? "Header" : "Footer"}
+              {region === "template" ? "Page sections" : region === "header" ? "Header" : "Footer"}
             </h2>
             <div className="space-y-1">
               {groups[region].map((placement, index) => (
@@ -272,7 +263,7 @@ export function TemplateHierarchy({
               {onAddSection && (
                 <button
                   type="button"
-                  aria-label={`Add section to ${region === "template" ? "Template" : region === "header" ? "Header" : "Footer"}`}
+                  aria-label={`Add section to ${region === "template" ? "Page sections" : region === "header" ? "Header" : "Footer"}`}
                   onClick={() => onAddSection(region)}
                   className="mt-1 flex min-h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-[12px] font-medium text-[var(--ink)] hover:bg-[var(--paper-deep)]"
                 >

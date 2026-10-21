@@ -28,7 +28,7 @@ describe("TemplateResourceSelector", () => {
       />,
     );
 
-    await userEvent.selectOptions(screen.getByLabelText("Template"), "product-featured");
+    await userEvent.selectOptions(screen.getByLabelText("Layout"), "product-featured");
 
     expect(onTemplateChange).toHaveBeenCalledWith("product-featured");
     expect(onPreviewResourceChange).not.toHaveBeenCalled();
@@ -48,7 +48,7 @@ describe("TemplateResourceSelector", () => {
       />,
     );
 
-    await userEvent.selectOptions(screen.getByLabelText("Preview resource"), "product-2");
+    await userEvent.selectOptions(screen.getByLabelText("Preview with"), "product-2");
 
     expect(onPreviewResourceChange).toHaveBeenCalledWith("product-2");
     expect(onTemplateChange).not.toHaveBeenCalled();
@@ -66,7 +66,7 @@ describe("TemplateResourceSelector", () => {
       />,
     );
 
-    expect(screen.getByText("Page type: Collection")).toBeInTheDocument();
+    expect(screen.getByText("Page: Collection pages")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Default Collection")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Summer Collection")).toBeInTheDocument();
   });
@@ -84,7 +84,7 @@ describe("TemplateResourceSelector", () => {
       onPageTypeChange={onPageTypeChange}
     />);
 
-    await userEvent.selectOptions(screen.getByLabelText("Page type"), "cart");
+    await userEvent.selectOptions(screen.getByLabelText("Page"), "cart");
     expect(onPageTypeChange).toHaveBeenCalledWith("cart");
     expect(onPreviewResourceChange).not.toHaveBeenCalled();
   });
@@ -107,8 +107,8 @@ describe("TemplateResourceSelector", () => {
     }
     render(<SearchPreviewSelector />);
 
-    await userEvent.clear(screen.getByLabelText("Preview query"));
-    await userEvent.type(screen.getByLabelText("Preview query"), "birthday cake");
+    await userEvent.clear(screen.getByLabelText("Preview search for"));
+    await userEvent.type(screen.getByLabelText("Preview search for"), "birthday cake");
 
     expect(onPreviewQueryChange).toHaveBeenLastCalledWith("birthday cake");
     expect(onTemplateChange).not.toHaveBeenCalled();
@@ -124,6 +124,6 @@ describe("TemplateResourceSelector", () => {
       onPreviewResourceChange={vi.fn()}
     />);
 
-    expect(screen.getByLabelText("Preview resource")).toBeDisabled();
+    expect(screen.getByLabelText("Preview with")).toBeDisabled();
   });
 });

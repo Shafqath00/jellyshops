@@ -17,7 +17,7 @@ const groups: Array<{
 }> = [
   { id: "content", label: "Content" },
   { id: "layout", label: "Layout" },
-  { id: "style", label: "Style" },
+  { id: "style", label: "Appearance" },
   { id: "advanced", label: "Advanced" },
 ];
 

@@ -16,7 +16,7 @@ describe("setting groups", () => {
 
     expect(screen.getByRole("heading", { name: "Content" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Layout" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Style" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Appearance" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Advanced" })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Heading" })).toHaveValue("Fresh jelly");
   });

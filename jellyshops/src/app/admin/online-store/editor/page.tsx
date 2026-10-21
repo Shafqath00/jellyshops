@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ComponentProps, type SetStateAction, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ComponentProps, type SetStateAction, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
@@ -25,13 +26,8 @@ import {
 } from "lucide-react";
 import { createRevisionedSaveQueue } from "@/features/store-editor/state/revisioned-save-queue";
 import { createSessionHistory } from "@/features/store-editor/state/session-history";
-import {
-  createSectionFromDefinition,
-  getBlockDefinition,
-  getSectionDefinition,
-  listSectionDefinitionsForPage,
-} from "@jelly/storefront-registry";
-import { RegistrySectionRenderer, type CommerceDataProvider, type StorefrontPageContext } from "@jelly/storefront-renderer";
+import { blockLabel, createSectionFromDefinition, getBlockDefinition, getSectionDefinition, listSectionDefinitionsForPage, sectionLabel } from "@jelly/storefront-registry";
+import { RegistrySectionRenderer, withStoreIdentity, type CommerceDataProvider, type StorefrontPageContext } from "@jelly/storefront-renderer";
 import type {
   CompilationDiagnostic,
   CompilationDiagnosticLocation,
@@ -109,8 +105,11 @@ function defaultTemplateLayout(type: string): Record<string, unknown> {
   return { sections: (defaultTemplateSections[type] ?? ["rich-text"]).map((sectionType) => ({ kind: "inline", section: { id: `${type}-${sectionType}`, type: sectionType, enabled: true, settings: {}, blocks: [] } })) };
 }
 
+const regionLabels: Record<string, string> = { header: "Header", template: "Page sections", footer: "Footer" };
+
+/** Merchant-facing name for a region or section type. */
 function displayName(value: string): string {
-  return value.split("-").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+  return regionLabels[value] ?? sectionLabel(value);
 }
 
 function setThemeSetting(settings: Record<string, unknown>, path: string, value: unknown): Record<string, unknown> {
@@ -222,7 +221,10 @@ export default function OnlineStoreEditorPage() {
   return <StoreEditorWorkspace key={activeStore?.id ?? "loading"} />;
 }
 
+function subscribeNoop() { return () => {}; }
+
 function StoreEditorWorkspace() {
+  const mountedOnClient = useSyncExternalStore(subscribeNoop, () => true, () => false);
   const router = useRouter();
   const { session, activeStore } = useAuth();
   const backendStoreId = activeStore?.id ?? "";
@@ -758,10 +760,12 @@ function StoreEditorWorkspace() {
     return <main className="grid min-h-[70vh] place-items-center text-[13px] text-[var(--ink-soft)]" aria-live="polite">Loading template…</main>;
   }
 
+  const previewBranding = (themeConfiguration?.settings as { branding?: { logoUrl?: string }; header?: Record<string, unknown> } | undefined);
+  const previewIdentity = { name: activeStore?.name ?? "Your store", logoUrl: previewBranding?.branding?.logoUrl || undefined, headerSettings: previewBranding?.header };
   const renderPreviewSections = (items: SectionNode[]) => items.map((section) => (
     <RegistrySectionRenderer
       key={section.id}
-      section={section as unknown as RegistrySection}
+      section={withStoreIdentity(section as unknown as RegistrySection, previewIdentity)}
       mode={previewInspectorEnabled ? "editor" : "preview"}
       commerce={commerce}
       region="template"
@@ -862,7 +866,7 @@ function StoreEditorWorkspace() {
                 <span className="grid size-8 place-items-center rounded-lg border border-[var(--line)] text-[var(--ink)]">
                   <Plus size={15} />
                 </span>
-                {displayName(blockType)}
+                {blockLabel(blockType)}
               </button>
             ))}
             {blockPickerDefinition.allowedBlockTypes.length === 0 && (
@@ -895,7 +899,7 @@ function StoreEditorWorkspace() {
                   {selectedBlock && localSection.type !== "rich-text" ? displayName(localSection.type) : "Section settings"}
                 </p>
                 <p className="truncate text-[13px] font-semibold">
-                  {displayName(localSection.type === "rich-text" ? localSection.type : selectedBlock?.type ?? localSection.type)}
+                  {localSection.type === "rich-text" || !selectedBlock ? displayName(localSection.type) : blockLabel(selectedBlock.type)}
                 </p>
               </div>
             </div>
@@ -972,7 +976,7 @@ function StoreEditorWorkspace() {
     </>
   );
 
-  return (
+  const shell = (
     <div
       data-testid="theme-editor-shell"
       style={{ "--paper": "#fffaf6", "--paper-deep": "#f5efeb", "--ink": "#241f20", "--ink-soft": "#74686c", "--line": "#e8e0db", "--white": "#ffffff" } as CSSProperties}
@@ -1302,4 +1306,7 @@ function StoreEditorWorkspace() {
       </div>
     </div>
   );
+  // The admin shell animates each page's opacity, which creates a stacking context that would trap this
+  // full-screen editor under the admin header. Render it on <body> once mounted on the client.
+  return mountedOnClient ? createPortal(shell, document.body) : shell;
 }

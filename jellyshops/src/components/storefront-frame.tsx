@@ -9,7 +9,7 @@ import { loadPublicStorefrontPublication } from "@/features/storefront/public-st
 import { resolveStorefrontThemeTokens, resolveTheme, resolveThemeShellComponent } from "@jelly/storefront-themes";
 import { useInitialStorefrontPublication } from "@/features/storefront/storefront-bootstrap";
 import { StorefrontChromeContext } from "@/features/storefront/chrome-context";
-import { RegistrySectionRenderer } from "@jelly/storefront-renderer";
+import { RegistrySectionRenderer, withStoreIdentity } from "@jelly/storefront-renderer";
 import type { SectionNode } from "@jelly/storefront-schema";
 
 export function StorefrontFrame({ storeSlug, children }: { storeSlug: string; children: React.ReactNode }) {
@@ -42,7 +42,7 @@ export function StorefrontFrame({ storeSlug, children }: { storeSlug: string; ch
   const branding = resolvedTheme.settings.branding as { logoUrl?: string } | undefined;
   const headerSettings = resolvedTheme.settings.header as Record<string, unknown> | undefined;
   const globals = snapshot ? Object.values(snapshot.globalSections).map((item) => item.section as unknown as SectionNode) : [];
-  const renderGlobal = (section: SectionNode) => <RegistrySectionRenderer key={section.id} section={section.type === "header" ? { ...section, settings: { ...headerSettings, ...section.settings, storeName: section.settings.storeName || store.name, ...(branding?.logoUrl ? { logo: { url: branding.logoUrl, alt: store.name } } : {}) } } : section} mode="published" commerce={{ getProducts: async () => [] }} region={section.type === "footer" ? "footer" : "header"} themeId={resolvedTheme.id} menus={snapshot?.menus} storeSlug={store.slug} />;
+  const renderGlobal = (section: SectionNode) => <RegistrySectionRenderer key={section.id} section={withStoreIdentity(section, { name: store.name, logoUrl: branding?.logoUrl || undefined, headerSettings })} mode="published" commerce={{ getProducts: async () => [] }} region={section.type === "footer" ? "footer" : "header"} themeId={resolvedTheme.id} menus={snapshot?.menus} storeSlug={store.slug} />;
   const headerContent = signature ? <>{globals.filter((item) => item.type === "announcement-bar").map(renderGlobal)}{globals.filter((item) => item.type === "header").map(renderGlobal)}</> : undefined;
   const footerContent = signature ? <>{globals.filter((item) => item.type === "footer").map(renderGlobal)}</> : undefined;
   return <StorefrontChromeContext.Provider value={Boolean(signature)}><div data-jelly-theme={resolvedTheme.id} style={style}><ThemedStorefrontShell headerContent={headerContent} footerContent={footerContent} themeId={resolvedTheme.id} settings={resolvedTheme.settings} store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} navigation={[{ label: "Home", href: `/${store.slug}` }, { label: "Shop all", href: `/${store.slug}/shop` }, { label: "Search", href: `/${store.slug}/search` }, { label: "Cart", href: `/${store.slug}/cart` }, { label: "Account", href: `/${store.slug}/account` }, { label: "Wishlist", href: `/${store.slug}/wishlist` }]} cartCount={cartCount} onCartOpen={() => setCartOpen(true)} cart={<CartPanel storeSlug={storeSlug} open={cartOpen} onClose={() => setCartOpen(false)} Presentation={CartPresentation} />}>{children}<span hidden>{state.version}</span></ThemedStorefrontShell></div></StorefrontChromeContext.Provider>;

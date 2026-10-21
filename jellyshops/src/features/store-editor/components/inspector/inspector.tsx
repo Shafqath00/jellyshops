@@ -22,27 +22,11 @@ import type {
   EditorCommand,
   EditorSelection,
 } from "../../model/types";
+import { blockLabel, sectionLabel } from "@jelly/storefront-registry";
 import { SettingGroups } from "./setting-groups";
 
-const sectionLabels: Record<string, string> = {
-  "announcement-bar": "Announcement bar",
-  header: "Header",
-  hero: "Hero",
-  "product-grid": "Product grid",
-  "featured-collection": "Featured collection",
-  "rich-text": "Rich text",
-  "image-with-text": "Image with text",
-  multicolumn: "Multicolumn",
-  newsletter: "Newsletter",
-  "spacer-divider": "Spacer / divider",
-  footer: "Footer",
-};
-
 function title(value: string): string {
-  return sectionLabels[value] ?? value
-    .split("-")
-    .map((word) => word[0]?.toUpperCase() + word.slice(1))
-    .join(" ");
+  return sectionLabel(value);
 }
 
 export function Inspector({
@@ -182,7 +166,7 @@ export function Inspector({
                   })}
                   className="flex min-h-9 w-full items-center justify-between gap-3 rounded-lg px-2.5 text-left text-[12px] font-medium text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
                 >
-                  <span className="truncate">{title(block.type)} block</span>
+                  <span className="truncate">{blockLabel(block.type)} block</span>
                   <ChevronRight size={14} className="shrink-0 text-muted-foreground" />
                 </button>
               ))}

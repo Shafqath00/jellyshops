@@ -25,7 +25,7 @@ describe("editor shell", () => {
     expect(screen.getByTestId("section-hero")).toHaveAttribute("data-editor-selected", "true");
 
     await user.click(screen.getByTestId("section-rich-text"));
-    expect(screen.getByRole("heading", { name: "Rich text settings" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Text settings" })).toBeInTheDocument();
   });
 
   it("keeps the section tree visible while the selected section inspector is open", async () => {
@@ -36,7 +36,7 @@ describe("editor shell", () => {
 
     expect(screen.getByRole("heading", { name: "Home page" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Rich text section" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Hero settings" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Hero banner settings" })).toBeInTheDocument();
     expect(screen.getByLabelText("Storefront preview")).toBeInTheDocument();
   });
 
@@ -66,7 +66,7 @@ describe("editor shell", () => {
     render(<EditorShell initialDocument={documentWithRichText()} revision={0} commerce={commerce} onSave={vi.fn()} onPublish={vi.fn()} />);
 
     await user.click(screen.getByRole("button", { name: "Hero section" }));
-    expect(screen.getByRole("heading", { name: "Hero settings" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Hero banner settings" })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Small text above heading" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Heading block" }));
