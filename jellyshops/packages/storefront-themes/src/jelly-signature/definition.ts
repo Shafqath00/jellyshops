@@ -27,7 +27,8 @@ export const signatureManifest = {
   ...base,
   id: "jelly-signature",
   name: "Jelly Minimal",
-  version: "2.0.0",
+  // Published stores pin this version; bumping it makes them fall back to the default theme.
+  version: "1.0.0",
   description: "A modern, minimal storefront in warm white and charcoal.",
   assetPrefix: "/themes/jelly-signature/",
   previewAsset: "/themes/jelly-signature/preview.svg",

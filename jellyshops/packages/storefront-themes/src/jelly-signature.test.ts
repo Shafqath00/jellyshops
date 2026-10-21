@@ -15,3 +15,7 @@ it("applies numeric typography, secondary colors and width controls to actual CS
   const tokens = resolveStorefrontThemeTokens("jelly-signature", { colors: { secondary: "#123456" }, typography: { headingWeight: 700, bodySize: 18 }, layout: { contentWidth: 1152, sectionGap: 64 } });
   expect(tokens).toMatchObject({ "--jelly-container-width": "1152px", "--jelly-spacing-section": "64px", "--jelly-color-secondary": "#123456", "--jelly-heading-weight": "700", "--jelly-body-size": "18px" });
 });
+
+it("keeps the version that existing publications pin so they do not fall back to the default theme", () => {
+  expect(resolveTheme("jelly-signature", {}, "1.0.0").id).toBe("jelly-signature");
+});
