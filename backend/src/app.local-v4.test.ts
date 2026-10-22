@@ -269,6 +269,11 @@ describe("local SQL-backed V4 compiler startup", () => {
 
     try {
       const { createApp: createConfiguredApp } = await import("./app.js");
+      const disabledApp = createConfiguredApp({ config: await config(), storefrontSql: null });
+      const disabled = await post(disabledApp, "validate", 4);
+      expect(disabled.status).toBe(503);
+      expect(disabled.body.error.code).toBe("STOREFRONT_COMPILER_NOT_CONFIGURED");
+
       const app = createConfiguredApp({ config: await config() });
 
       const published = await post(app, "publish", 4, "default-pool-key");
