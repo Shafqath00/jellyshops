@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ComponentProps, type SetStateAction, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type SetStateAction, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { createRevisionedSaveQueue } from "@/features/store-editor/state/revisioned-save-queue";
 import { createSessionHistory } from "@/features/store-editor/state/session-history";
-import { blockLabel, createSectionFromDefinition, getBlockDefinition, getSectionDefinition, listSectionDefinitionsForPage, sectionLabel } from "@jelly/storefront-registry";
+import { blockLabel, createSectionFromDefinition, getBlockDefinition, getSectionDefinition, listSectionDefinitionsForPage } from "@jelly/storefront-registry";
 import { RegistrySectionRenderer, withStoreIdentity, type CommerceDataProvider, type StorefrontPageContext } from "@jelly/storefront-renderer";
 import type {
   CompilationDiagnostic,
@@ -68,6 +68,7 @@ import { SectionLibrary } from "@/features/store-editor/components/section-libra
 import { TemplateHierarchy } from "@/features/store-editor/components/template-hierarchy";
 import { StorefrontPreviewFrame } from "@/features/store-editor/components/storefront-preview-frame";
 import { TemplateResourceSelector } from "@/features/store-editor/components/template-resource-selector";
+import { type RegistrySection, type HierarchyRegion, sectionCategoryLabels, defaultTemplateLayout, displayName, setThemeSetting, normalizeSection, templateSections, draftPreviewLayout, selectedInlineSection } from "@/features/store-editor/editor-page-helpers";
 import { parseEditorNavigationTarget } from "@/features/store-editor/editor-navigation";
 import { createEditorPreviewPageContext, editorPreviewResourceOptions } from "@/features/store-editor/preview-context";
 import { catalogProductToProduct } from "@/features/storefront/product-presentation";
@@ -85,136 +86,6 @@ import {
   setInlineSectionEnabled,
   updateInlineSection,
 } from "@/features/store-editor/template-layout";
-
-type RegistrySection = ComponentProps<typeof RegistrySectionRenderer>["section"];
-
-type HierarchyRegion = "header" | "template" | "footer";
-
-const sectionCategoryLabels = {
-  layout: "Layout",
-  content: "Content",
-  commerce: "Products",
-} as const;
-
-const defaultTemplateSections: Record<string, string[]> = {
-  home: ["hero"], product: ["product-information"], collection: ["collection-header", "collection-product-grid", "collection-description"],
-  cart: ["cart-summary"], search: ["search-results"], page: ["page-content"], blog: ["blog-header", "article-list"], article: ["article-header", "article-content"], "not-found": ["not-found-message"],
-};
-
-function defaultTemplateLayout(type: string): Record<string, unknown> {
-  return { sections: (defaultTemplateSections[type] ?? ["rich-text"]).map((sectionType) => ({ kind: "inline", section: { id: `${type}-${sectionType}`, type: sectionType, enabled: true, settings: {}, blocks: [] } })) };
-}
-
-const regionLabels: Record<string, string> = { header: "Header", template: "Page sections", footer: "Footer" };
-
-/** Merchant-facing name for a region or section type. */
-function displayName(value: string): string {
-  return regionLabels[value] ?? sectionLabel(value);
-}
-
-function setThemeSetting(settings: Record<string, unknown>, path: string, value: unknown): Record<string, unknown> {
-  const result = structuredClone(settings);
-  const keys = path.split(".");
-  let current = result;
-  keys.slice(0, -1).forEach((key) => {
-    const next = current[key];
-    current[key] = next && typeof next === "object" && !Array.isArray(next) ? structuredClone(next) : {};
-    current = current[key] as Record<string, unknown>;
-  });
-  current[keys[keys.length - 1]!] = value;
-  return result;
-}
-
-function normalizeBlock(value: unknown): SectionNode["blocks"][number] | null {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const input = value as Record<string, unknown>;
-  if (typeof input.id !== "string" || typeof input.type !== "string") return null;
-  return {
-    id: input.id,
-    type: input.type,
-    enabled: typeof input.enabled === "boolean" ? input.enabled : true,
-    settings: input.settings && typeof input.settings === "object" && !Array.isArray(input.settings)
-      ? structuredClone(input.settings as Record<string, unknown>)
-      : {},
-    ...(input.responsive && typeof input.responsive === "object" && !Array.isArray(input.responsive)
-      ? { responsive: structuredClone(input.responsive) as SectionNode["blocks"][number]["responsive"] }
-      : {}),
-  };
-}
-
-function normalizeSection(value: unknown): SectionNode | null {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const input = value as Record<string, unknown>;
-  if (typeof input.id !== "string" || typeof input.type !== "string") return null;
-  return {
-    id: input.id,
-    type: input.type,
-    enabled: typeof input.enabled === "boolean" ? input.enabled : true,
-    settings: input.settings && typeof input.settings === "object" && !Array.isArray(input.settings)
-      ? structuredClone(input.settings as Record<string, unknown>)
-      : {},
-    blocks: Array.isArray(input.blocks)
-      ? input.blocks.map(normalizeBlock).filter((block): block is NonNullable<ReturnType<typeof normalizeBlock>> => block !== null)
-      : [],
-    ...(input.responsive && typeof input.responsive === "object" && !Array.isArray(input.responsive)
-      ? { responsive: structuredClone(input.responsive) as SectionNode["responsive"] }
-      : {}),
-  };
-}
-
-function templateSections(template: StorefrontTemplateRecord, globals: Map<string, GlobalSectionRecord>): SectionNode[] {
-  const placements = template.layout.sections;
-  if (!Array.isArray(placements)) return [];
-  return placements.flatMap((placement): SectionNode[] => {
-    if (!placement || typeof placement !== "object" || Array.isArray(placement)) return [];
-    const input = placement as Record<string, unknown>;
-    if (input.kind === "inline") {
-      const section = normalizeSection(input.section);
-      return section ? [section] : [];
-    }
-    if (input.kind === "global" && typeof input.globalSectionId === "string") {
-      const section = normalizeSection(globals.get(input.globalSectionId)?.section);
-      return section ? [section] : [];
-    }
-    return [];
-  });
-}
-
-function draftPreviewLayout(template: StorefrontTemplateRecord, globals: Map<string, GlobalSectionRecord>) {
-  const layout = { announcement: [] as SectionNode[], header: [] as SectionNode[], template: [] as SectionNode[], footer: [] as SectionNode[] };
-  const placements = template.layout.sections;
-  if (!Array.isArray(placements)) return layout;
-  for (const placement of placements) {
-    if (!placement || typeof placement !== "object" || Array.isArray(placement)) continue;
-    const input = placement as Record<string, unknown>;
-    const section = input.kind === "inline"
-      ? normalizeSection(input.section)
-      : input.kind === "global" && typeof input.globalSectionId === "string"
-        ? normalizeSection(globals.get(input.globalSectionId)?.section)
-        : null;
-    if (!section) continue;
-    const region = section.type === "announcement-bar" ? "announcement"
-      : section.type === "header" ? "header"
-        : section.type === "footer" ? "footer"
-          : "template";
-    layout[region].push(section);
-  }
-  return layout;
-}
-
-function selectedInlineSection(template: StorefrontTemplateRecord, selection: EditorSelection): SectionNode | null {
-  if (!selection || selection.kind === "theme" || !selection.sectionId) return null;
-  const placements = template.layout.sections;
-  if (!Array.isArray(placements)) return null;
-  for (const placement of placements) {
-    if (!placement || typeof placement !== "object" || Array.isArray(placement)) continue;
-    const input = placement as Record<string, unknown>;
-    if (input.kind !== "inline") continue;
-    const section = normalizeSection(input.section);
-    if (section?.id === selection.sectionId) return section;
-  }
-  return null;
-}
 
 export default function OnlineStoreEditorPage() {
   const { activeStore } = useAuth();
