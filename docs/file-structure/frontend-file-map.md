@@ -1122,7 +1122,7 @@ Merchant admin pages.
 ### `jellyshops/src/app/admin/orders/[id]/page.tsx`
 
 - **Purpose:** Next.js page for route "/admin/orders/[id]" (inferred from file name; no header comment)
-- **Size:** 161 lines
+- **Size:** 813 lines
 - **Exports:** `OrderDetailView`, `OrderDetailPage (default)`
 - **Imports (project):** `jellyshops/src/features/auth/auth-provider.tsx`, `jellyshops/src/features/commerce/api/client.ts`, `jellyshops/src/features/commerce/api/types.ts`, `jellyshops/src/features/commerce/components/order-ui.tsx`
 - **Imports (packages):** `lucide-react`, `next`, `react`
@@ -1135,7 +1135,7 @@ Merchant admin pages.
 ### `jellyshops/src/app/admin/orders/page.tsx`
 
 - **Purpose:** Next.js page for route "/admin/orders" (inferred from file name; no header comment)
-- **Size:** 69 lines
+- **Size:** 707 lines
 - **Exports:** `OrdersPage (default)`
 - **Imports (project):** `jellyshops/src/features/auth/auth-provider.tsx`, `jellyshops/src/features/commerce/api/client.ts`, `jellyshops/src/features/commerce/api/types.ts`, `jellyshops/src/features/commerce/components/order-ui.tsx`
 - **Imports (packages):** `lucide-react`, `next`, `react`

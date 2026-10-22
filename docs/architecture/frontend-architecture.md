@@ -15,7 +15,7 @@ Full file list with imports/importers: [frontend-file-map](../file-structure/fro
 | `app/theme-preview/*` | Store-less theme review pages (`jelly-minimal`, `jelly-avenue`). |
 | `app/themes/*.css` | Per-theme CSS scoped by `[data-jelly-theme="…"]`. |
 | `features/` | Feature code: `auth`, `admin` (admin API + query hook), `commerce` (order/payment API client and panels), `content`, `customers` (storefront customer accounts, wishlist), `navigation` (menu editor), `store-editor` (visual editor), `storefront` (loading published storefront documents and page contexts), `theme-preview`. |
-| `components/` | Shared and legacy components: admin shell and nav, product form, cart panel, storefront shell, `ui/` (shadcn-style primitives), `jelly/` (storefront primitives). |
+| `components/` | App-wide pieces only: admin shell and nav, theme toggle, `ui/` (shadcn-style primitives), `jelly/` (storefront primitives). |
 | `contexts/shop-context.tsx` | `ShopProvider`: client state for the legacy shop repository (cart, local seed data). |
 | `lib/` | `domain.ts` (types and domain helpers), `repository.ts` (legacy localStorage repository, key `jelly-shop-state-v1`), product variant/configuration helpers, `utils.ts` (`cn`). |
 | `jellyshops/packages/*` | Shared workspace packages (see [shared-modules](../file-structure/shared-modules.md)). |

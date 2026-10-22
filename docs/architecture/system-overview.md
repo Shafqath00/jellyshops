@@ -26,7 +26,7 @@ Next.js app (jellyshops/)  ─────────────────�
    admin pages, editor, storefront pages (server + client components) │
    │  fetch(NEXT_PUBLIC_STORE_EDITOR_API_URL / STOREFRONT_API_URL)     │
    ▼                                                                   │
-Express API (backend/src/app.ts)                                       │
+Express API (backend/src/app.ts + app/)                                   │
    ├─ merchant routes   /api/stores/:storeId/...   Bearer JWT + permission check
    ├─ public routes     /api/public/stores/:storeId/...   no merchant auth
    ├─ webhooks          /webhooks/stripe/...              Stripe signature

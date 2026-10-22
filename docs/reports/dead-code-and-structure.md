@@ -81,6 +81,8 @@ Static findings only: nothing has been deleted. Each item needs a human check be
 
 - `jellyshops/src/app/admin/online-store/editor/page.tsx` — 1313 lines
 - `jellyshops/src/features/commerce/components/product-form.tsx` — 834 lines
+- `jellyshops/src/app/admin/orders/[id]/page.tsx` — 813 lines
+- `jellyshops/src/app/admin/orders/page.tsx` — 707 lines
 - `jellyshops/src/features/store-editor/components/inspector/control-renderer.tsx` — 587 lines
 - `jellyshops/src/features/store-editor/components/inspector/theme-inspector.tsx` — 554 lines
 - `jellyshops/src/features/store-editor/components/controls/image-control.tsx` — 513 lines

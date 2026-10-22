@@ -694,8 +694,8 @@ Called from: —
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
-| `OrderDetailView` | function | `({ orderId }: { orderId: string; })` |  |
-| `OrderDetailPage (default)` | function | `()` |  |
+| `OrderDetailView` | function | `({ orderId }: { orderId: string; })` | Keep the order view export for use from other routes/components. |
+| `OrderDetailPage (default)` | function | `()` | App Router page entry point |
 
 ## `jellyshops/src/app/admin/orders/page.tsx`
 
@@ -703,7 +703,7 @@ Called from: —
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
-| `OrdersPage (default)` | function | `()` |  |
+| `OrdersPage (default)` | function | `()` | ----------------------------------------------------------------------------- |
 
 ## `jellyshops/src/app/admin/page.tsx`
 

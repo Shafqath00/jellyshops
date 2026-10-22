@@ -1,6 +1,6 @@
 # Cart and checkout
 
-Code: `backend/src/commerce/{routes,service,payment-intents,repository,rate-limit,sweeper}.ts`, `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `components/cart-panel.tsx`, `features/commerce/components/payment-element-checkout.tsx`. Tables: `CheckoutAttempt`, `InventoryReservation`, `Order`, `OrderItem`, `Payment`, `StoreOrderCounter` ([schema](../architecture/database-schema.md)).
+Code: `backend/src/commerce/{routes,service,payment-intents,repository,rate-limit,sweeper}.ts`, `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `features/storefront/components/cart-panel.tsx`, `features/commerce/components/payment-element-checkout.tsx`. Tables: `CheckoutAttempt`, `InventoryReservation`, `Order`, `OrderItem`, `Payment`, `StoreOrderCounter` ([schema](../architecture/database-schema.md)).
 
 ## Flow
 

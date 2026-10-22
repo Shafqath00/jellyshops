@@ -10,7 +10,11 @@ Full file list: [backend-file-map](../file-structure/backend-file-map.md). Funct
 | --- | --- |
 | `src/server.ts` | Local process entry (`PORT`, default 3001). Builds config, DB pools, workers. |
 | `src/functions.ts` | Firebase Functions entry (`api` function; see [deployment](../development/deployment.md)). |
-| `src/app.ts` | `createApp(deps)`: Express composition root. Wires services, mounts routers, error handler. Dependencies are injectable for tests. |
+| `src/app.ts` | `createApp(deps)`: short Express entry (about 50 lines). Resolves dependencies, configures middleware, mounts the route groups, adds the error handlers last. |
+| `src/app/dependencies.ts` | `resolveAppDependencies`: builds config, pools, services and repositories; every dependency is injectable for tests. |
+| `src/app/middleware.ts`, `types.ts`, `database.ts` | CORS/proxy/security middleware, `AppDependencies` and context types, database helper. |
+| `src/app/routes/*.ts` | Route mounting by group: `commerce` (checkout, public orders, Stripe webhooks, order runtime), `merchant` (tenants, admin, catalog, content, customers, store settings), `storefront` (workspace, compile, publish, public context), `media`, `internal` (scheduler routes). |
+| `src/app/default-storefront-workspace.ts` | Default storefront workspace/template construction used when a store has none. |
 | `src/config.ts` | Environment parsing into `AppConfig`. |
 
 ## Module layout (`backend/src`)
@@ -54,4 +58,4 @@ Schema, registry and themes come from `@jelly/storefront-*` tarballs; rebuild th
 
 ## Known structural issues
 
-`app.ts` is ~1,700 lines because it composes every module; several commerce/stripe files exceed 500 lines. See [dead-code-and-structure](../reports/dead-code-and-structure.md).
+`app.ts` was split into `src/app/` (commit 59b6f90); several commerce/stripe files still exceed 500 lines. See [dead-code-and-structure](../reports/dead-code-and-structure.md).

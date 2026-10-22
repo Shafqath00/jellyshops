@@ -28,6 +28,6 @@ Delivery guarantees: a rejected recipient or pre-DATA failure is retried; a lost
 | Download | `GET /api/public/stores/:storeId/digital/:entitlementId` with a token; the backend rechecks entitlement state and streams bytes (never a public or signed URL). Attempts are logged in `DigitalDownloadAttempt` |
 | Tokens | HMAC per entitlement with `DIGITAL_TOKEN_SECRET` (at least 32 chars, stable across instances); only SHA-256 hashes are stored; tokens are never in merchant list responses |
 | Revocation | order cancelled or refunded, full refund, or a refund event naming the variants |
-| Frontend | `components/digital-product-settings.tsx`, rendered on `app/admin/products/[id]` |
+| Frontend | `features/commerce/components/digital-product-settings.tsx`, rendered on `app/admin/products/[id]` |
 
 Checkout must only accept a digital product that has an active file; this is enforced at checkout time rather than in the database.
