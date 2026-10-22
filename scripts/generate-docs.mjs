@@ -159,6 +159,8 @@ function tablesIn(text) {
 
 const dirPurpose = {
   "backend/src/admin": "Platform-admin routes and bootstrap.",
+  "backend/src/app": "Application dependency composition, shared defaults and middleware setup.",
+  "backend/src/app/routes": "Ordered application route mounting for domain routers and direct endpoints.",
   "backend/src/audit": "Audit-event recording.",
   "backend/src/auth": "Authentication providers (Supabase/Firebase), session middleware, roles and store permissions.",
   "backend/src/catalog": "Products, variants, collections: types, validation, Postgres/memory repositories, merchant routes.",
@@ -186,19 +188,19 @@ const dirPurpose = {
   "jellyshops/src/app": "Next.js App Router: root layout, home, fonts, global CSS.",
   "jellyshops/src/app/admin": "Merchant admin pages.",
   "jellyshops/src/app/[storeSlug]": "Public storefront routes for one store.",
-  "jellyshops/src/components": "Shared and legacy UI: admin shell/nav, product form, cart, storefront shell.",
+  "jellyshops/src/components": "Shared UI primitives and the deferred admin shell.",
   "jellyshops/src/components/ui": "shadcn-style UI primitives.",
   "jellyshops/src/components/jelly": "Storefront primitives used by theme markup.",
   "jellyshops/src/contexts": "React contexts (legacy shop state).",
   "jellyshops/src/lib": "Domain types/helpers, legacy local repository, product variant helpers, utilities.",
-  "jellyshops/src/features/auth": "Merchant authentication (Supabase session, merchant/store loading).",
-  "jellyshops/src/features/admin": "Authenticated admin fetch helper and query hook.",
+  "jellyshops/src/features/auth": "Merchant authentication (Supabase session, merchant/store loading) and auth components.",
+  "jellyshops/src/features/admin": "Authenticated admin fetch helper, query hook and merchant shell components.",
   "jellyshops/src/features/commerce": "Order/payment API client and merchant/shopper commerce components.",
   "jellyshops/src/features/content": "Pages/blogs/metaobjects API and form components.",
   "jellyshops/src/features/customers": "Storefront customer session, wishlist, contact and newsletter UI.",
   "jellyshops/src/features/navigation": "Menu API and editor.",
   "jellyshops/src/features/store-editor": "Visual theme editor: model, state, API client, preview and inspector components.",
-  "jellyshops/src/features/storefront": "Loading published storefront documents and page contexts; storefront page rendering.",
+  "jellyshops/src/features/storefront": "Loading published storefront documents and page contexts; storefront page rendering and shell/cart components.",
   "jellyshops/src/features/theme-preview": "Store-less theme preview pages and sample data.",
   "jellyshops/packages/storefront-schema/src": "Zod schemas and types for storefront documents and snapshots.",
   "jellyshops/packages/storefront-registry/src": "Section/block registry, editor controls, starter packs, labels.",
@@ -286,6 +288,11 @@ function functionRef(group, { files, info, importers }, title) {
   return out;
 }
 
+function isAppRouteSource(file) {
+  const relative = rel(file);
+  return relative === "backend/src/app.ts" || /^backend\/src\/app\/routes\/[^/]+\.ts$/.test(relative);
+}
+
 function endpoints({ files, info }) {
   const factories = new Map();
   for (const f of files) {
@@ -311,7 +318,7 @@ function endpoints({ files, info }) {
         rows.push({ verb: r.verb, full, middleware: [...(target.fnGuards.get(m.factory) ?? []).map((g) => `router.use(${g})`), ...r.middleware], file: rel(target.file), line: r.line, mount: `${rel(rec.file)}:${m.line}` });
       }
     }
-    if (rec.file.endsWith(path.join("src", "app.ts"))) {
+    if (isAppRouteSource(rec.file)) {
       for (const r of rec.routes) {
         const key = `${r.verb} ${r.path} app`;
         if (seen.has(key)) continue;
@@ -321,8 +328,8 @@ function endpoints({ files, info }) {
     }
   }
   rows.sort((a, b) => a.full.localeCompare(b.full) || a.verb.localeCompare(b.verb));
-  const unmounted = [...info.values()].map((r) => ({ ...r, routes: r.routes.filter((x) => !mountedKeys.has(`${rel(r.file)}:${x.line}`) && !rel(r.file).endsWith("src/app.ts")) })).filter((r) => r.routes.length && !/.test./.test(r.file));
-  let out = header("API endpoints", "Routes are resolved statically: each `router.<verb>(path)` is joined to the prefix of the `app.use(prefix, createXRouter(...))` call that mounts it. Many mounts in `app.ts` are conditional on configuration (database, Stripe, auth provider); an endpoint exists only when its dependencies are configured. Authentication column shows the guard expressions found on the route; routers that apply a guard with `router.use` are noted in `docs/api/authentication.md`.");
+  const unmounted = [...info.values()].map((r) => ({ ...r, routes: r.routes.filter((x) => !mountedKeys.has(`${rel(r.file)}:${x.line}`) && !isAppRouteSource(r.file)) })).filter((r) => r.routes.length && !/.test./.test(r.file));
+  let out = header("API endpoints", "Routes are resolved statically: each `router.<verb>(path)` is joined to the prefix of the `app.use(prefix, createXRouter(...))` call that mounts it. Many mounts in the application composition modules are conditional on configuration (database, Stripe, auth provider); an endpoint exists only when its dependencies are configured. Authentication column shows the guard expressions found on the route; routers that apply a guard with `router.use` are noted in `docs/api/authentication.md`.");
   out += `${rows.length} endpoints.\n\n| Method | Path | Guards on route | Handler file | Mounted at |\n| --- | --- | --- | --- | --- |\n`;
   for (const r of rows) out += `| ${r.verb} | \`${r.full}\` | ${r.middleware.length ? r.middleware.map((m) => `\`${cell(m)}\``).join("<br>") : "—"} | \`${r.file}:${r.line}\` | \`${r.mount}\` |\n`;
   if (unmounted.length) {

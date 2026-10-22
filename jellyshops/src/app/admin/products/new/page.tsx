@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { ProductForm } from "@/components/product-form";
+import { ProductForm } from "@/features/commerce/components/product-form";
 
 export default function NewProductPage() {
   return (

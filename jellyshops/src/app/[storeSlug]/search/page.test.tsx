@@ -6,7 +6,7 @@ const loadContext = vi.fn();
 
 vi.mock("next/navigation", () => ({ useParams: () => ({ storeSlug: "store-a" }), useSearchParams: () => new URLSearchParams("q=shoes") }));
 vi.mock("@/contexts/shop-context", () => ({ useShop: () => ({ repository: { getStoreBySlug: () => ({ id: "store-a", slug: "store-a", name: "Store A", currency: "USD" }), listProducts: () => [] }, state: { products: [] } }) }));
-vi.mock("@/components/storefront-shell", () => ({ useThemePresentation: () => ({ shell: { SearchPage: () => <div>legacy search</div> }, settings: {} }) }));
+vi.mock("@/features/storefront/components/storefront-shell", () => ({ useThemePresentation: () => ({ shell: { SearchPage: () => <div>legacy search</div> }, settings: {} }) }));
 vi.mock("@/features/storefront/public-storefront-api", () => ({ loadPublicStorefrontPublication: (...args: unknown[]) => loadPublication(...args) }));
 vi.mock("@/features/storefront/public-page-context-api", () => ({ loadPublicSearchPageContext: (...args: unknown[]) => loadContext(...args) }));
 vi.mock("@/features/storefront/storefront-page", () => ({ PublishedRuntimeStorefront: ({ route }: { route: { template: { id: string } } }) => <div data-testid="v4-search">{route.template.id}</div> }));

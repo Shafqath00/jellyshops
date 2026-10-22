@@ -3,7 +3,7 @@ import { useInitialStorefrontPublication } from "@/features/storefront/storefron
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useThemePresentation } from "@/components/storefront-shell";
+import { useThemePresentation } from "@/features/storefront/components/storefront-shell";
 import { useShop } from "@/contexts/shop-context";
 import { formatMoney } from "@/lib/domain";
 import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";

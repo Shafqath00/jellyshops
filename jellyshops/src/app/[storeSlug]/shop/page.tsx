@@ -4,7 +4,7 @@ import { isCompleteStorefrontTheme } from "@jelly/storefront-themes";
 
 
 import { useParams, useSearchParams } from "next/navigation";
-import { useThemePresentation } from "@/components/storefront-shell";
+import { useThemePresentation } from "@/features/storefront/components/storefront-shell";
 import { formatMoney } from "@/lib/domain";
 import { useShop } from "@/contexts/shop-context";
 import { useStorefrontCatalogStatus } from "@/features/commerce/components/storefront-catalog-sync";

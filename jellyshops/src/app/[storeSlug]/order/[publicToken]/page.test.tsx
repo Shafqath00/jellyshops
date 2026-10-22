@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import PublicOrderPage from "./page";
 vi.mock("next/navigation", () => ({ useParams: () => ({ storeSlug: "berry", publicToken: "secret" }) }));
 vi.mock("@/contexts/shop-context", () => ({ useShop: () => ({ repository: { getStoreBySlug: () => ({ name: "Berry", slug: "berry" }) } }) }));
-vi.mock("@/components/storefront-shell", () => ({ useThemePresentation: () => ({ shell: { OrderPage: ({ children }: {
+vi.mock("@/features/storefront/components/storefront-shell", () => ({ useThemePresentation: () => ({ shell: { OrderPage: ({ children }: {
                 children: React.ReactNode;
             }) => children }, settings: {} }) }));
 afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers(); });

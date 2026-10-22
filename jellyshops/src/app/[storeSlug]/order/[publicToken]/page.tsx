@@ -6,7 +6,7 @@ import { Check, PackageCheck } from "lucide-react";
 import { createCommerceApi } from "@/features/commerce/api/client";
 import { useMemo } from "react";
 import { useShop } from "@/contexts/shop-context";
-import { useThemePresentation } from "@/components/storefront-shell";
+import { useThemePresentation } from "@/features/storefront/components/storefront-shell";
 
 function PublicOrderContent() {
   const { storeSlug, publicToken } = useParams<{ storeSlug: string; publicToken: string }>();

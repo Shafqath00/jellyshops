@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const updateCartItem = vi.fn();
 vi.mock("next/navigation", () => ({ useParams: () => ({ storeSlug: "store-a", productSlug: "cake" }), useRouter: () => ({ push: vi.fn() }) }));
-vi.mock("@/components/storefront-shell", () => ({ useThemePresentation: () => ({ shell: { ProductPage: () => <p>Legacy product</p> }, settings: {} }) }));
+vi.mock("@/features/storefront/components/storefront-shell", () => ({ useThemePresentation: () => ({ shell: { ProductPage: () => <p>Legacy product</p> }, settings: {} }) }));
 vi.mock("@/features/commerce/components/storefront-catalog-sync", () => ({ useStorefrontCatalogStatus: () => "ready" }));
 vi.mock("@/features/storefront/public-storefront-api", () => ({ loadPublicStorefrontPublication: async () => ({ kind: "v4", snapshot: { templateDefaults: { product: "product-default" }, templates: { "product-default": { id: "product-default", type: "product", layout: { sections: [] } } }, globalSections: {}, assignments: [], theme: { presetId: "minimal", settings: {} } } }) }));
 vi.mock("@/features/storefront/resource-loader", () => ({ resolveStorefrontRoute: async (_snapshot: unknown, _route: unknown, reader: { findByHandle: (type: string, handle: string) => Promise<unknown> }) => ({ status: "ready", layout: { announcement: [], header: [], template: [], footer: [] }, context: { pageType: "product", resource: await reader.findByHandle("product", "cake") } }) }));

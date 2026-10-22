@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { WishlistButton } from "@/features/customers/wishlist-button";
-import { useThemePresentation } from "@/components/storefront-shell";
+import { useThemePresentation } from "@/features/storefront/components/storefront-shell";
 import { useShop } from "@/contexts/shop-context";
 import { formatMoney, type ConfiguredOptionSelection } from "@/lib/domain";
 import { getConfiguredPriceMinor, resolveProductVariant } from "@/lib/product-configuration";

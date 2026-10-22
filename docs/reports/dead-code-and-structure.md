@@ -12,7 +12,6 @@ Static findings only: nothing has been deleted. Each item needs a human check be
 
 ## Backend: exported values/functions never referenced by another non-test file
 
-- backend/src/app.ts → `publicDocumentFromTemplate` (not referenced anywhere else)
 - backend/src/auth/development-auth-provider.ts → `DEMO_TOKEN` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/auth/firebase-token-verifier.ts → `FirebaseAdminTokenVerifier` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/auth/permissions.ts → `roleHasPermission` (used inside its own file; the `export` keyword may be unnecessary)
@@ -29,12 +28,12 @@ Static findings only: nothing has been deleted. Each item needs a human check be
 
 ## Backend: files over 500 lines
 
-- `backend/src/app.ts` — 1702 lines
 - `backend/src/commerce/service.ts` — 805 lines
 - `backend/src/stripe/webhooks/processor.ts` — 764 lines
 - `backend/src/commerce/repository.ts` — 711 lines
 - `backend/src/commerce/order-management.ts` — 594 lines
 - `backend/src/stripe/client.ts` — 563 lines
+- `backend/src/app/default-storefront-workspace.ts` — 536 lines
 
 ## Frontend: source files not imported by any other non-test source file
 
@@ -49,9 +48,6 @@ Static findings only: nothing has been deleted. Each item needs a human check be
 ## Frontend: exported values/functions never referenced by another non-test file
 
 - jellyshops/packages/storefront-schema/src/schema.ts → `sectionNodeSchema` (used inside its own file; the `export` keyword may be unnecessary)
-- jellyshops/src/components/storefront-shell.tsx → `SharedStorefrontLayout` (used inside its own file; the `export` keyword may be unnecessary)
-- jellyshops/src/components/storefront-shell.tsx → `SharedStorefrontHeader` (used inside its own file; the `export` keyword may be unnecessary)
-- jellyshops/src/components/storefront-shell.tsx → `SharedStorefrontFooter` (used inside its own file; the `export` keyword may be unnecessary)
 - jellyshops/src/components/ui/card.tsx → `CardFooter` (not referenced anywhere else)
 - jellyshops/src/components/ui/skeleton.tsx → `SkeletonProductCard` (not referenced anywhere else)
 - jellyshops/src/components/ui/skeleton.tsx → `SkeletonText` (not referenced anywhere else)
@@ -65,6 +61,9 @@ Static findings only: nothing has been deleted. Each item needs a human check be
 - jellyshops/src/features/store-editor/editor-store.ts → `createWorkspaceEditorState` (not referenced anywhere else)
 - jellyshops/src/features/store-editor/editor-store.ts → `applyResourceSave` (not referenced anywhere else)
 - jellyshops/src/features/store-editor/theme-pack-workspace.ts → `createThemePackLayout` (not referenced anywhere else)
+- jellyshops/src/features/storefront/components/storefront-shell.tsx → `SharedStorefrontLayout` (used inside its own file; the `export` keyword may be unnecessary)
+- jellyshops/src/features/storefront/components/storefront-shell.tsx → `SharedStorefrontHeader` (used inside its own file; the `export` keyword may be unnecessary)
+- jellyshops/src/features/storefront/components/storefront-shell.tsx → `SharedStorefrontFooter` (used inside its own file; the `export` keyword may be unnecessary)
 - jellyshops/src/features/storefront/page-context-loaders.ts → `loadSearchPageContext` (not referenced anywhere else)
 - jellyshops/src/features/storefront/public-page-context-api.ts → `loadPublicPageContext` (not referenced anywhere else)
 - jellyshops/src/features/storefront/public-page-context-api.ts → `loadPublicBlogContext` (not referenced anywhere else)
@@ -81,7 +80,7 @@ Static findings only: nothing has been deleted. Each item needs a human check be
 ## Frontend: files over 500 lines
 
 - `jellyshops/src/app/admin/online-store/editor/page.tsx` — 1313 lines
-- `jellyshops/src/components/product-form.tsx` — 834 lines
+- `jellyshops/src/features/commerce/components/product-form.tsx` — 834 lines
 - `jellyshops/src/features/store-editor/components/inspector/control-renderer.tsx` — 587 lines
 - `jellyshops/src/features/store-editor/components/inspector/theme-inspector.tsx` — 554 lines
 - `jellyshops/src/features/store-editor/components/controls/image-control.tsx` — 513 lines

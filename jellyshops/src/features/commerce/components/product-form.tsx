@@ -7,8 +7,8 @@ import { getCategoryBreadcrumb, majorToMinor, minorToMajor, slugify, type Catego
 import { useShop } from "@/contexts/shop-context";
 import { useAuth } from "@/features/auth/auth-provider";
 import { createStoreEditorApi } from "@/features/store-editor/api/client";
-import { ProductCategoryPicker } from "@/components/product-category-picker";
-import { CategoryRecommendations } from "@/components/category-recommendations";
+import { ProductCategoryPicker } from "@/features/commerce/components/product-category-picker";
+import { CategoryRecommendations } from "@/features/commerce/components/category-recommendations";
 import { reconcileProductVariants } from "@/lib/product-variants";
 import { catalogProductToStorefrontProduct } from "@/features/commerce/api/client";
 

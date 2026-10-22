@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-22
 
-**Status:** Written spec approved in conversation; implementation plan awaiting review
+**Status:** Implemented; validation and review complete
 
 ## Goal
 

@@ -6,7 +6,7 @@ Signatures are taken from the TypeScript source; descriptions come from the JSDo
 
 ## `backend/src/admin/routes.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/routes/merchant.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -14,7 +14,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/admin/service.ts`
 
-Called from: `backend/src/admin/routes.ts`, `backend/src/app.ts`
+Called from: `backend/src/admin/routes.ts`, `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -27,12 +27,83 @@ Called from: `backend/src/functions.ts`, `backend/src/server.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
-| `publicDocumentFromTemplate` | function | `(storeId: string, layout: unknown): StorefrontDocument` | Converts an editor-owned home template into the document consumed by the public storefront. |
-| `createApp` | function | `(dependencies: Partial<AppDependencies> = {}): Express` | -------------------------------------------------------------------------- |
+| `createApp` | function | `(dependencies: Partial<AppDependencies> = {}): Express` |  |
+
+## `backend/src/app/default-storefront-workspace.ts`
+
+Called from: `backend/src/app.ts`, `backend/src/app/routes/storefront.ts`
+
+| Name | Kind | Signature | Description |
+| --- | --- | --- | --- |
+| `publicDocumentFromTemplate` | function | `(storeId: string, layout: unknown): StorefrontDocument` |  |
+
+## `backend/src/app/dependencies.ts`
+
+Called from: `backend/src/app.ts`
+
+| Name | Kind | Signature | Description |
+| --- | --- | --- | --- |
+| `resolveAppDependencies` | function | `(dependencies: Partial<AppDependencies> = {}): AppContext` |  |
+
+## `backend/src/app/middleware.ts`
+
+Called from: `backend/src/app.ts`
+
+| Name | Kind | Signature | Description |
+| --- | --- | --- | --- |
+| `configureMiddleware` | function | `(app: Express, config: AppConfig): void` |  |
+
+## `backend/src/app/routes/commerce.ts`
+
+Called from: `backend/src/app.ts`
+
+| Name | Kind | Signature | Description |
+| --- | --- | --- | --- |
+| `mountStripeWebhooks` | function | `(app: Express, context: AppContext): void` |  |
+| `mountOrderRuntimeRoutes` | function | `(app: Express, context: AppContext): void` |  |
+| `mountCommerceRoutes` | function | `(app: Express, context: AppContext): void` |  |
+
+## `backend/src/app/routes/internal.ts`
+
+Called from: `backend/src/app.ts`
+
+| Name | Kind | Signature | Description |
+| --- | --- | --- | --- |
+| `mountInternalRoutes` | function | `(app: Express, context: AppContext): void` |  |
+
+## `backend/src/app/routes/media.ts`
+
+Called from: `backend/src/app.ts`
+
+| Name | Kind | Signature | Description |
+| --- | --- | --- | --- |
+| `mountMediaRoutes` | function | `(app: Express, context: AppContext): void` |  |
+
+## `backend/src/app/routes/merchant.ts`
+
+Called from: `backend/src/app.ts`
+
+| Name | Kind | Signature | Description |
+| --- | --- | --- | --- |
+| `mountStoreSettingsRoutes` | function | `(app: Express, context: AppContext): void` |  |
+| `mountCustomerRoutes` | function | `(app: Express, context: AppContext): void` |  |
+| `mountTenantRoutes` | function | `(app: Express, context: AppContext): void` |  |
+| `mountAdminRoutes` | function | `(app: Express, context: AppContext): void` |  |
+| `mountCatalogRoutes` | function | `(app: Express, context: AppContext): void` |  |
+| `mountContentRoutes` | function | `(app: Express, context: AppContext): void` |  |
+
+## `backend/src/app/routes/storefront.ts`
+
+Called from: `backend/src/app.ts`
+
+| Name | Kind | Signature | Description |
+| --- | --- | --- | --- |
+| `mountPublicStorefrontContextRoutes` | function | `(app: Express, context: AppContext): void` |  |
+| `mountStorefrontRoutes` | function | `(app: Express, context: AppContext): void` |  |
 
 ## `backend/src/auth/development-auth-provider.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -40,7 +111,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/auth/firebase-auth-provider.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -48,7 +119,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/auth/firebase-token-verifier.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/auth/firebase-auth-provider.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/auth/firebase-auth-provider.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -57,7 +128,7 @@ Called from: `backend/src/app.ts`, `backend/src/auth/firebase-auth-provider.ts`
 
 ## `backend/src/auth/middleware.ts`
 
-Called from: `backend/src/admin/routes.ts`, `backend/src/app.ts`, `backend/src/catalog/routes.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/notification-routes.ts`, `backend/src/content/routes.ts`, `backend/src/custom-data/routes.ts`, `backend/src/customers/routes.ts`, `backend/src/media/routes.ts`, `backend/src/storefront/compiler/routes.ts`, `backend/src/storefront/publication/routes.ts`, `backend/src/storefront/routes.ts`, `backend/src/storefront/starter/routes.ts`, `backend/src/storefront/workspace/routes.ts`, `backend/src/stripe/accounts/routes.ts`, `backend/src/tenants/routes.ts`, `backend/src/tenants/settings.ts`
+Called from: `backend/src/admin/routes.ts`, `backend/src/app/routes/merchant.ts`, `backend/src/app/routes/storefront.ts`, `backend/src/catalog/routes.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/notification-routes.ts`, `backend/src/content/routes.ts`, `backend/src/custom-data/routes.ts`, `backend/src/customers/routes.ts`, `backend/src/media/routes.ts`, `backend/src/storefront/compiler/routes.ts`, `backend/src/storefront/publication/routes.ts`, `backend/src/storefront/routes.ts`, `backend/src/storefront/starter/routes.ts`, `backend/src/storefront/workspace/routes.ts`, `backend/src/stripe/accounts/routes.ts`, `backend/src/tenants/routes.ts`, `backend/src/tenants/settings.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -75,7 +146,7 @@ Called from: `backend/src/commerce/merchant-order-routes.ts`, `backend/src/tenan
 
 ## `backend/src/auth/supabase-auth-provider.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -92,7 +163,7 @@ Called from: `backend/src/catalog/routes.ts`
 
 ## `backend/src/catalog/postgres-repository.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -108,7 +179,7 @@ Called from: —
 
 ## `backend/src/catalog/public-store.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/routes/merchant.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -117,7 +188,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/catalog/routes.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/routes/merchant.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -127,7 +198,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/catalog/service.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/catalog/demo-catalog-provider.ts`, `backend/src/catalog/routes.ts`, `backend/src/commerce/service.ts`, `backend/src/storefront/context/service.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/catalog/demo-catalog-provider.ts`, `backend/src/catalog/routes.ts`, `backend/src/commerce/service.ts`, `backend/src/storefront/context/service.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -153,7 +224,7 @@ Called from: `backend/src/commerce/merchant-orders.ts`
 
 ## `backend/src/commerce/merchant-order-routes.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/routes/commerce.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -161,7 +232,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/commerce/merchant-orders.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/order-runtime.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/order-runtime.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -169,7 +240,7 @@ Called from: `backend/src/app.ts`, `backend/src/commerce/merchant-order-routes.t
 
 ## `backend/src/commerce/notification-routes.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/routes/commerce.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -220,7 +291,7 @@ Called from: `backend/src/commerce/fulfilment.ts`, `backend/src/commerce/merchan
 
 ## `backend/src/commerce/order-runtime.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/routes/commerce.ts`, `backend/src/app/types.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -237,7 +308,7 @@ Called from: `backend/src/commerce/service.ts`
 
 ## `backend/src/commerce/rate-limit.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/commerce/service.ts`
+Called from: `backend/src/app/routes/merchant.ts`, `backend/src/commerce/service.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -253,7 +324,7 @@ Called from: `backend/src/commerce/merchant-orders.ts`
 
 ## `backend/src/commerce/repository.ts`
 
-Called from: `backend/src/admin/service.ts`, `backend/src/app.ts`, `backend/src/catalog/postgres-repository.ts`, `backend/src/catalog/public-store.ts`, `backend/src/commerce/digital.ts`, `backend/src/commerce/fulfilment.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/notifications.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/service.ts`, `backend/src/commerce/sweeper.ts`, `backend/src/content/sql-repository.ts`, `backend/src/custom-data/sql-repository.ts`, `backend/src/customers/service.ts`, `backend/src/media/sql-media-repository.ts`, `backend/src/media/storefront-reference-reader.ts`, `backend/src/storefront/context/sql-repository.ts`, `backend/src/storefront/local-v4-compilation.ts`, `backend/src/storefront/publication/sql-repository.ts`, `backend/src/storefront/sql-v4-workspace-data-source.ts`, `backend/src/storefront/starter/installation-service.ts`, `backend/src/storefront/workspace/sql-repositories.ts`, `backend/src/stripe/accounts/repository.ts`, `backend/src/stripe/accounts/service.ts`, `backend/src/stripe/accounts/types.ts`, `backend/src/stripe/webhooks/accounts-v2-route.ts`, `backend/src/stripe/webhooks/connect-payments-route.ts`, `backend/src/stripe/webhooks/processor.ts`, `backend/src/stripe/webhooks/receipt-repository.ts`, `backend/src/tenants/settings.ts`
+Called from: `backend/src/admin/service.ts`, `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/catalog/postgres-repository.ts`, `backend/src/catalog/public-store.ts`, `backend/src/commerce/digital.ts`, `backend/src/commerce/fulfilment.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/notifications.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/service.ts`, `backend/src/commerce/sweeper.ts`, `backend/src/content/sql-repository.ts`, `backend/src/custom-data/sql-repository.ts`, `backend/src/customers/service.ts`, `backend/src/media/sql-media-repository.ts`, `backend/src/media/storefront-reference-reader.ts`, `backend/src/storefront/context/sql-repository.ts`, `backend/src/storefront/local-v4-compilation.ts`, `backend/src/storefront/publication/sql-repository.ts`, `backend/src/storefront/sql-v4-workspace-data-source.ts`, `backend/src/storefront/starter/installation-service.ts`, `backend/src/storefront/workspace/sql-repositories.ts`, `backend/src/stripe/accounts/repository.ts`, `backend/src/stripe/accounts/service.ts`, `backend/src/stripe/accounts/types.ts`, `backend/src/stripe/webhooks/accounts-v2-route.ts`, `backend/src/stripe/webhooks/connect-payments-route.ts`, `backend/src/stripe/webhooks/processor.ts`, `backend/src/stripe/webhooks/receipt-repository.ts`, `backend/src/tenants/settings.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -263,7 +334,7 @@ Called from: `backend/src/admin/service.ts`, `backend/src/app.ts`, `backend/src/
 
 ## `backend/src/commerce/routes.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/routes/commerce.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -272,7 +343,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/commerce/service.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/commerce/routes.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/commerce/routes.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -280,7 +351,7 @@ Called from: `backend/src/app.ts`, `backend/src/commerce/routes.ts`
 
 ## `backend/src/commerce/sweeper-routes.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/routes/internal.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -288,7 +359,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/commerce/sweeper.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/commerce/sweeper-routes.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/commerce/sweeper-routes.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -296,7 +367,7 @@ Called from: `backend/src/app.ts`, `backend/src/commerce/sweeper-routes.ts`
 
 ## `backend/src/config.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/functions.ts`, `backend/src/server.ts`, `backend/src/stripe/client.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/middleware.ts`, `backend/src/app/types.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/functions.ts`, `backend/src/server.ts`, `backend/src/stripe/client.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -304,7 +375,7 @@ Called from: `backend/src/app.ts`, `backend/src/commerce/order-runtime.ts`, `bac
 
 ## `backend/src/content/routes.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/routes/merchant.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -312,7 +383,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/content/service.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/content/routes.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/content/routes.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -320,7 +391,7 @@ Called from: `backend/src/app.ts`, `backend/src/content/routes.ts`
 
 ## `backend/src/content/sql-repository.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -328,7 +399,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/custom-data/routes.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/routes/merchant.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -336,7 +407,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/custom-data/service.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/custom-data/routes.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/custom-data/routes.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -345,7 +416,7 @@ Called from: `backend/src/app.ts`, `backend/src/custom-data/routes.ts`
 
 ## `backend/src/custom-data/sql-repository.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -353,7 +424,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/customers/routes.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/routes/merchant.ts`, `backend/src/app/types.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -365,7 +436,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/customers/service.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/customers/routes.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/customers/routes.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -373,7 +444,7 @@ Called from: `backend/src/app.ts`, `backend/src/customers/routes.ts`
 
 ## `backend/src/database/client.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/database.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -381,7 +452,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/dynamic-sources/registry.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/custom-data/routes.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/custom-data/routes.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -398,7 +469,7 @@ Called from: —
 
 ## `backend/src/http/errors.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/auth/development-auth-provider.ts`, `backend/src/auth/firebase-auth-provider.ts`, `backend/src/auth/middleware.ts`, `backend/src/auth/supabase-auth-provider.ts`, `backend/src/catalog/postgres-repository.ts`, `backend/src/commerce/digital.ts`, `backend/src/commerce/fulfilment.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/notification-routes.ts`, `backend/src/commerce/notifications.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/routes.ts`, `backend/src/commerce/service.ts`, `backend/src/commerce/sweeper-routes.ts`, `backend/src/content/routes.ts`, `backend/src/customers/routes.ts`, `backend/src/customers/service.ts`, `backend/src/media/routes.ts`, `backend/src/media/service.ts`, `backend/src/media/validation.ts`, `backend/src/storefront/context/routes.ts`, `backend/src/storefront/repository.ts`, `backend/src/storefront/routes.ts`, `backend/src/storefront/service.ts`, `backend/src/storefront/starter/installation-service.ts`, `backend/src/storefront/starter/routes.ts`, `backend/src/storefront/workspace/routes.ts`, `backend/src/storefront/workspace/sql-global-section-store.ts`, `backend/src/storefront/workspace/theme-service.ts`, `backend/src/tenants/routes.ts`, `backend/src/tenants/settings.ts`, `backend/src/tenants/store-context.ts`
+Called from: `backend/src/app.ts`, `backend/src/app/default-storefront-workspace.ts`, `backend/src/auth/development-auth-provider.ts`, `backend/src/auth/firebase-auth-provider.ts`, `backend/src/auth/middleware.ts`, `backend/src/auth/supabase-auth-provider.ts`, `backend/src/catalog/postgres-repository.ts`, `backend/src/commerce/digital.ts`, `backend/src/commerce/fulfilment.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/notification-routes.ts`, `backend/src/commerce/notifications.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/routes.ts`, `backend/src/commerce/service.ts`, `backend/src/commerce/sweeper-routes.ts`, `backend/src/content/routes.ts`, `backend/src/customers/routes.ts`, `backend/src/customers/service.ts`, `backend/src/media/routes.ts`, `backend/src/media/service.ts`, `backend/src/media/validation.ts`, `backend/src/storefront/context/routes.ts`, `backend/src/storefront/repository.ts`, `backend/src/storefront/routes.ts`, `backend/src/storefront/service.ts`, `backend/src/storefront/starter/installation-service.ts`, `backend/src/storefront/starter/routes.ts`, `backend/src/storefront/workspace/routes.ts`, `backend/src/storefront/workspace/sql-global-section-store.ts`, `backend/src/storefront/workspace/theme-service.ts`, `backend/src/tenants/routes.ts`, `backend/src/tenants/settings.ts`, `backend/src/tenants/store-context.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -408,7 +479,7 @@ Called from: `backend/src/app.ts`, `backend/src/auth/development-auth-provider.t
 
 ## `backend/src/media/local-json-media-repository.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -416,7 +487,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/media/local-media-storage.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -424,7 +495,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/media/routes.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/routes/media.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -433,7 +504,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/media/service.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/media/routes.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/media/routes.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -441,7 +512,7 @@ Called from: `backend/src/app.ts`, `backend/src/media/routes.ts`
 
 ## `backend/src/media/sql-media-repository.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -449,7 +520,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/media/storefront-reference-reader.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -457,7 +528,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/media/supabase-media-storage.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -489,7 +560,7 @@ Called from: `backend/src/storefront/compiler/compiler.ts`, `backend/src/storefr
 
 ## `backend/src/storefront/compiler/routes.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/routes/storefront.ts`, `backend/src/app/types.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -555,7 +626,7 @@ Called from: `backend/src/storefront/compiler/compiler.ts`
 
 ## `backend/src/storefront/context/routes.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/routes/storefront.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -563,7 +634,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/storefront/context/service.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/storefront/context/routes.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/storefront/context/routes.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -571,7 +642,7 @@ Called from: `backend/src/app.ts`, `backend/src/storefront/context/routes.ts`
 
 ## `backend/src/storefront/context/sql-repository.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -579,7 +650,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/storefront/local-json-repository.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -587,7 +658,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/storefront/local-v4-compilation.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -603,7 +674,7 @@ Called from: `backend/src/storefront/local-v4-compilation.ts`, `backend/src/stor
 
 ## `backend/src/storefront/publication/routes.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/routes/storefront.ts`, `backend/src/app/types.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -611,7 +682,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/storefront/publication/service.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/storefront/publication/routes.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/storefront/publication/routes.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -619,7 +690,7 @@ Called from: `backend/src/app.ts`, `backend/src/storefront/publication/routes.ts
 
 ## `backend/src/storefront/publication/sql-repository.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -628,7 +699,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/storefront/repository.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/storefront/local-json-repository.ts`, `backend/src/storefront/service.ts`
+Called from: `backend/src/app/types.ts`, `backend/src/storefront/local-json-repository.ts`, `backend/src/storefront/service.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -636,7 +707,7 @@ Called from: `backend/src/app.ts`, `backend/src/storefront/local-json-repository
 
 ## `backend/src/storefront/routes.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/routes/storefront.ts`, `backend/src/app/types.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -652,7 +723,7 @@ Called from: `backend/src/storefront/publication/sql-repository.ts`, `backend/sr
 
 ## `backend/src/storefront/runtime/service.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/storefront/publication/sql-repository.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/storefront/publication/sql-repository.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -660,7 +731,7 @@ Called from: `backend/src/app.ts`, `backend/src/storefront/publication/sql-repos
 
 ## `backend/src/storefront/service.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/storefront/routes.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/storefront/routes.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -677,7 +748,7 @@ Called from: `backend/src/storefront/local-v4-compilation.ts`
 
 ## `backend/src/storefront/starter/installation-service.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/storefront/starter/routes.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/storefront/starter/routes.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -686,7 +757,7 @@ Called from: `backend/src/app.ts`, `backend/src/storefront/starter/routes.ts`
 
 ## `backend/src/storefront/starter/routes.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/routes/storefront.ts`, `backend/src/app/types.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -752,7 +823,7 @@ Called from: `backend/src/storefront/workspace/api-service.ts`, `backend/src/sto
 
 ## `backend/src/storefront/workspace/routes.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/storefront/workspace/api-service.ts`
+Called from: `backend/src/app/default-storefront-workspace.ts`, `backend/src/app/routes/storefront.ts`, `backend/src/app/types.ts`, `backend/src/storefront/workspace/api-service.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -760,7 +831,7 @@ Called from: `backend/src/app.ts`, `backend/src/storefront/workspace/api-service
 
 ## `backend/src/storefront/workspace/sql-global-section-store.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/default-storefront-workspace.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -768,7 +839,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/storefront/workspace/sql-repositories.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -776,7 +847,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/storefront/workspace/supabase-template-store.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/storefront/workspace/sql-global-section-store.ts`
+Called from: `backend/src/app/default-storefront-workspace.ts`, `backend/src/storefront/workspace/sql-global-section-store.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -792,7 +863,7 @@ Called from: `backend/src/storefront/workspace/api-service.ts`, `backend/src/sto
 
 ## `backend/src/storefront/workspace/template-type-enum.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/storefront/workspace/sql-repositories.ts`
+Called from: `backend/src/app/default-storefront-workspace.ts`, `backend/src/storefront/workspace/sql-repositories.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -817,7 +888,7 @@ Called from: `backend/src/stripe/accounts/service.ts`
 
 ## `backend/src/stripe/accounts/routes.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/routes/commerce.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -825,7 +896,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/stripe/accounts/service.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/commerce/service.ts`, `backend/src/stripe/accounts/routes.ts`, `backend/src/stripe/webhooks/accounts-v2-route.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/commerce/service.ts`, `backend/src/stripe/accounts/routes.ts`, `backend/src/stripe/webhooks/accounts-v2-route.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -833,7 +904,7 @@ Called from: `backend/src/app.ts`, `backend/src/commerce/service.ts`, `backend/s
 
 ## `backend/src/stripe/client.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/sweeper.ts`, `backend/src/stripe/accounts/service.ts`, `backend/src/stripe/webhooks/accounts-v2-route.ts`, `backend/src/stripe/webhooks/connect-payments-route.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/sweeper.ts`, `backend/src/stripe/accounts/service.ts`, `backend/src/stripe/webhooks/accounts-v2-route.ts`, `backend/src/stripe/webhooks/connect-payments-route.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -841,7 +912,7 @@ Called from: `backend/src/app.ts`, `backend/src/commerce/merchant-orders.ts`, `b
 
 ## `backend/src/stripe/webhooks/accounts-v2-route.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/routes/commerce.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -849,7 +920,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/stripe/webhooks/connect-payments-route.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/routes/commerce.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -873,7 +944,7 @@ Called from: `backend/src/stripe/webhooks/accounts-v2-route.ts`, `backend/src/st
 
 ## `backend/src/tenants/postgres-repository.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/dependencies.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -881,7 +952,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/tenants/routes.ts`
 
-Called from: `backend/src/app.ts`
+Called from: `backend/src/app/routes/merchant.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -889,7 +960,7 @@ Called from: `backend/src/app.ts`
 
 ## `backend/src/tenants/settings.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/commerce/service.ts`, `backend/src/tenants/routes.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/routes/merchant.ts`, `backend/src/commerce/service.ts`, `backend/src/tenants/routes.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |

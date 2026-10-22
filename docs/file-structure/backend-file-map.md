@@ -4,7 +4,7 @@
 
 Tests are listed but only summarised (they have no exports). “Used by” lists non-test importers; “Tests” lists test files importing the file.
 
-136 source files, 94 test files.
+146 source files, 95 test files.
 
 ## `backend/src/admin/`
 
@@ -19,7 +19,7 @@ Platform-admin routes and bootstrap.
 - **Imports (project):** `backend/src/admin/service.ts`, `backend/src/auth/middleware.ts`, `backend/src/auth/types.ts`
 - **Imports (packages):** `express`
 - **Routes:** `GET /admin-summary`, `GET /customers`, `GET /customers/:customerId`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/routes/merchant.ts`
 - **Tests:** `routes.test.ts`
 
 - `service.test.ts` — test (65 lines)
@@ -30,25 +30,24 @@ Platform-admin routes and bootstrap.
 - **Exports:** `AdminOrder` (type), `AdminLowStockItem` (type), `AdminSummary` (type), `MerchantCustomer` (type), `MerchantCustomerDetail` (type), `AdminSummaryService`, `CustomerService`
 - **Imports (project):** `backend/src/commerce/repository.ts`
 - **Database tables referenced:** `InventoryLevel`, `Order`, `Payment`, `Product`, `ProductVariant`, `Store`, `StoreSettings`
-- **Used by:** `backend/src/admin/routes.ts`, `backend/src/app.ts`
+- **Used by:** `backend/src/admin/routes.ts`, `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`
 - **Tests:** `service.test.ts`
 
 ## `backend/src/`
 
-- `app.local-v4.test.ts` — test (297 lines)
+- `app.composition.test.ts` — test (92 lines)
+- `app.local-v4.test.ts` — test (302 lines)
 - `app.public-storefront.test.ts` — test (169 lines)
 - `app.test.ts` — test (201 lines)
 ### `backend/src/app.ts`
 
-- **Purpose:** Exports publicDocumentFromTemplate, createApp (inferred from file name; no header comment)
-- **Size:** 1702 lines
-- **Exports:** `AppDependencies` (type), `publicDocumentFromTemplate`, `createApp`
-- **Imports (project):** `backend/src/admin/routes.ts`, `backend/src/admin/service.ts`, `backend/src/auth/development-auth-provider.ts`, `backend/src/auth/firebase-auth-provider.ts`, `backend/src/auth/firebase-token-verifier.ts`, `backend/src/auth/middleware.ts`, `backend/src/auth/supabase-auth-provider.ts`, `backend/src/auth/types.ts`, `backend/src/catalog/postgres-repository.ts`, `backend/src/catalog/public-store.ts`, `backend/src/catalog/routes.ts`, `backend/src/catalog/service.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/notification-routes.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/repository.ts`, `backend/src/commerce/routes.ts`, `backend/src/commerce/service.ts`, `backend/src/commerce/sweeper-routes.ts`, `backend/src/commerce/sweeper.ts`, `backend/src/config.ts`, `backend/src/content/routes.ts`, `backend/src/content/service.ts`, `backend/src/content/sql-repository.ts`, `backend/src/custom-data/routes.ts`, `backend/src/custom-data/service.ts`, `backend/src/custom-data/sql-repository.ts`, `backend/src/customers/routes.ts`, `backend/src/customers/service.ts`, `backend/src/database/client.ts`, `backend/src/dynamic-sources/registry.ts`, `backend/src/http/errors.ts`, `backend/src/media/local-json-media-repository.ts`, `backend/src/media/local-media-storage.ts`, `backend/src/media/repository.ts`, `backend/src/media/routes.ts`, `backend/src/media/service.ts`, `backend/src/media/sql-media-repository.ts`, `backend/src/media/storage.ts`, `backend/src/media/storefront-reference-reader.ts`, `backend/src/media/supabase-media-storage.ts`, `backend/src/storefront/compiler/routes.ts`, `backend/src/storefront/compiler/types.ts`, `backend/src/storefront/context/routes.ts`, `backend/src/storefront/context/service.ts`, `backend/src/storefront/context/sql-repository.ts`, `backend/src/storefront/document-validator.ts`, `backend/src/storefront/local-json-repository.ts`, `backend/src/storefront/local-v4-compilation.ts`, `backend/src/storefront/publication/routes.ts`, `backend/src/storefront/publication/service.ts`, `backend/src/storefront/publication/sql-repository.ts`, `backend/src/storefront/repository.ts`, `backend/src/storefront/routes.ts`, `backend/src/storefront/runtime/service.ts`, `backend/src/storefront/service.ts`, `backend/src/storefront/starter/installation-service.ts`, `backend/src/storefront/starter/routes.ts`, `backend/src/storefront/workspace/routes.ts`, `backend/src/storefront/workspace/sql-global-section-store.ts`, `backend/src/storefront/workspace/sql-repositories.ts`, `backend/src/storefront/workspace/supabase-template-store.ts`, `backend/src/storefront/workspace/template-type-enum.ts`, `backend/src/stripe/accounts/routes.ts`, `backend/src/stripe/accounts/service.ts`, `backend/src/stripe/client.ts`, `backend/src/stripe/webhooks/accounts-v2-route.ts`, `backend/src/stripe/webhooks/connect-payments-route.ts`, `backend/src/tenants/postgres-repository.ts`, `backend/src/tenants/repository.ts`, `backend/src/tenants/routes.ts`, `backend/src/tenants/settings.ts`
-- **Imports (packages):** `@jelly/storefront-schema`, `@jelly/storefront-themes`, `cors`, `express`, `node:crypto`
-- **Routes:** `GET /health`, `GET /api/stores/:storeId/custom-data/dynamic-sources`, `POST /api/stores/:storeId/storefront/validate`, `POST /api/stores/:storeId/storefront/preview/compile`, `POST /api/stores/:storeId/storefront/publish`, `GET /api/public/stores/:storeId/orders/:publicToken/balance`
-- **Database tables referenced:** `GlobalSection`, `SectionPreset`, `StorefrontTemplate`, `StorefrontWorkspace`, `ThemeConfiguration`
+- **Purpose:** Exports createApp (inferred from file name; no header comment)
+- **Size:** 52 lines
+- **Exports:** `createApp`
+- **Imports (project):** `backend/src/app/default-storefront-workspace.ts`, `backend/src/app/dependencies.ts`, `backend/src/app/middleware.ts`, `backend/src/app/routes/commerce.ts`, `backend/src/app/routes/internal.ts`, `backend/src/app/routes/media.ts`, `backend/src/app/routes/merchant.ts`, `backend/src/app/routes/storefront.ts`, `backend/src/app/types.ts`, `backend/src/http/errors.ts`
+- **Imports (packages):** `express`
 - **Used by:** `backend/src/functions.ts`, `backend/src/server.ts`
-- **Tests:** `app.local-v4.test.ts`, `app.test.ts`, `routes.test.ts`, `routes.test.ts`, `routes.test.ts`
+- **Tests:** `app.composition.test.ts`, `app.local-v4.test.ts`, `app.test.ts`, `routes.test.ts`, `routes.test.ts`, `routes.test.ts`
 
 - `config.test.ts` — test (78 lines)
 ### `backend/src/config.ts`
@@ -57,8 +56,8 @@ Platform-admin routes and bootstrap.
 - **Size:** 467 lines
 - **Exports:** `StripeServerConfig` (type), `AppConfig` (type), `loadConfig`
 - **Imports (packages):** `dotenv`, `node:path`, `zod`
-- **Used by:** `backend/src/app.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/functions.ts`, `backend/src/server.ts`, `backend/src/stripe/client.ts`
-- **Tests:** `app.local-v4.test.ts`, `app.public-storefront.test.ts`, `app.test.ts`, `order-workspace.test.ts`, `config.test.ts`, `routes.test.ts`, `routes.test.ts`, `client.test.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/middleware.ts`, `backend/src/app/types.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/functions.ts`, `backend/src/server.ts`, `backend/src/stripe/client.ts`
+- **Tests:** `app.composition.test.ts`, `app.local-v4.test.ts`, `app.public-storefront.test.ts`, `app.test.ts`, `order-workspace.test.ts`, `config.test.ts`, `routes.test.ts`, `routes.test.ts`, `client.test.ts`
 
 - `functions.test.ts` — test (42 lines)
 ### `backend/src/functions.ts`
@@ -76,6 +75,108 @@ Platform-admin routes and bootstrap.
 - **Size:** 26 lines
 - **Imports (project):** `backend/src/app.ts`, `backend/src/config.ts`
 - **Used by:** nothing (entry point or unused)
+
+## `backend/src/app/`
+
+Application dependency composition, shared defaults and middleware setup.
+
+### `backend/src/app/database.ts`
+
+- **Purpose:** Exports supabasePool (inferred from file name; no header comment)
+- **Size:** 7 lines
+- **Exports:** `supabasePool`
+- **Imports (project):** `backend/src/database/client.ts`
+- **Used by:** `backend/src/app/default-storefront-workspace.ts`, `backend/src/app/dependencies.ts`, `backend/src/app/routes/merchant.ts`
+
+### `backend/src/app/default-storefront-workspace.ts`
+
+- **Purpose:** Exports publicDocumentFromTemplate, defaultStorefrontWorkspaceApi (inferred from file name; no header comment)
+- **Size:** 536 lines
+- **Exports:** `publicDocumentFromTemplate`, `defaultStorefrontWorkspaceApi`
+- **Imports (project):** `backend/src/app/database.ts`, `backend/src/http/errors.ts`, `backend/src/storefront/document-validator.ts`, `backend/src/storefront/workspace/routes.ts`, `backend/src/storefront/workspace/sql-global-section-store.ts`, `backend/src/storefront/workspace/supabase-template-store.ts`, `backend/src/storefront/workspace/template-type-enum.ts`
+- **Imports (packages):** `@jelly/storefront-schema`, `@jelly/storefront-themes`
+- **Database tables referenced:** `GlobalSection`, `SectionPreset`, `StorefrontTemplate`, `StorefrontWorkspace`, `ThemeConfiguration`
+- **Used by:** `backend/src/app.ts`, `backend/src/app/routes/storefront.ts`
+
+### `backend/src/app/dependencies.ts`
+
+- **Purpose:** Exports resolveAppDependencies (inferred from file name; no header comment)
+- **Size:** 356 lines
+- **Exports:** `resolveAppDependencies`
+- **Imports (project):** `backend/src/admin/service.ts`, `backend/src/app/database.ts`, `backend/src/app/types.ts`, `backend/src/auth/development-auth-provider.ts`, `backend/src/auth/firebase-auth-provider.ts`, `backend/src/auth/firebase-token-verifier.ts`, `backend/src/auth/supabase-auth-provider.ts`, `backend/src/auth/types.ts`, `backend/src/catalog/postgres-repository.ts`, `backend/src/catalog/service.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/repository.ts`, `backend/src/commerce/service.ts`, `backend/src/commerce/sweeper.ts`, `backend/src/config.ts`, `backend/src/content/service.ts`, `backend/src/content/sql-repository.ts`, `backend/src/custom-data/service.ts`, `backend/src/custom-data/sql-repository.ts`, `backend/src/customers/routes.ts`, `backend/src/customers/service.ts`, `backend/src/dynamic-sources/registry.ts`, `backend/src/media/local-json-media-repository.ts`, `backend/src/media/local-media-storage.ts`, `backend/src/media/service.ts`, `backend/src/media/sql-media-repository.ts`, `backend/src/media/storage.ts`, `backend/src/media/storefront-reference-reader.ts`, `backend/src/media/supabase-media-storage.ts`, `backend/src/storefront/context/service.ts`, `backend/src/storefront/context/sql-repository.ts`, `backend/src/storefront/document-validator.ts`, `backend/src/storefront/local-json-repository.ts`, `backend/src/storefront/local-v4-compilation.ts`, `backend/src/storefront/publication/routes.ts`, `backend/src/storefront/publication/service.ts`, `backend/src/storefront/publication/sql-repository.ts`, `backend/src/storefront/routes.ts`, `backend/src/storefront/runtime/service.ts`, `backend/src/storefront/service.ts`, `backend/src/storefront/starter/installation-service.ts`, `backend/src/storefront/workspace/sql-repositories.ts`, `backend/src/stripe/accounts/service.ts`, `backend/src/stripe/client.ts`, `backend/src/tenants/postgres-repository.ts`, `backend/src/tenants/settings.ts`
+- **Imports (packages):** `express`
+- **Used by:** `backend/src/app.ts`
+
+### `backend/src/app/middleware.ts`
+
+- **Purpose:** Exports configureMiddleware (inferred from file name; no header comment)
+- **Size:** 49 lines
+- **Exports:** `configureMiddleware`
+- **Imports (project):** `backend/src/config.ts`
+- **Imports (packages):** `cors`, `express`, `node:crypto`
+- **Used by:** `backend/src/app.ts`
+
+### `backend/src/app/types.ts`
+
+- **Purpose:** Type definitions (inferred from file name; no header comment)
+- **Size:** 86 lines
+- **Exports:** `AppDependencies` (type), `AppContext` (type)
+- **Imports (project):** `backend/src/admin/service.ts`, `backend/src/auth/types.ts`, `backend/src/catalog/service.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/repository.ts`, `backend/src/commerce/service.ts`, `backend/src/commerce/sweeper.ts`, `backend/src/config.ts`, `backend/src/content/service.ts`, `backend/src/custom-data/service.ts`, `backend/src/customers/routes.ts`, `backend/src/customers/service.ts`, `backend/src/dynamic-sources/registry.ts`, `backend/src/media/repository.ts`, `backend/src/media/service.ts`, `backend/src/media/storage.ts`, `backend/src/storefront/compiler/routes.ts`, `backend/src/storefront/compiler/types.ts`, `backend/src/storefront/context/service.ts`, `backend/src/storefront/publication/routes.ts`, `backend/src/storefront/repository.ts`, `backend/src/storefront/routes.ts`, `backend/src/storefront/service.ts`, `backend/src/storefront/starter/routes.ts`, `backend/src/storefront/workspace/routes.ts`, `backend/src/stripe/accounts/service.ts`, `backend/src/stripe/client.ts`, `backend/src/tenants/repository.ts`
+- **Imports (packages):** `express`
+- **Used by:** `backend/src/app.ts`, `backend/src/app/dependencies.ts`, `backend/src/app/routes/commerce.ts`, `backend/src/app/routes/internal.ts`, `backend/src/app/routes/media.ts`, `backend/src/app/routes/merchant.ts`, `backend/src/app/routes/storefront.ts`
+
+## `backend/src/app/routes/`
+
+Ordered application route mounting for domain routers and direct endpoints.
+
+### `backend/src/app/routes/commerce.ts`
+
+- **Purpose:** Exports mountStripeWebhooks, mountOrderRuntimeRoutes, mountCommerceRoutes (inferred from file name; no header comment)
+- **Size:** 142 lines
+- **Exports:** `mountStripeWebhooks`, `mountOrderRuntimeRoutes`, `mountCommerceRoutes`
+- **Imports (project):** `backend/src/app/types.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/notification-routes.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/routes.ts`, `backend/src/stripe/accounts/routes.ts`, `backend/src/stripe/webhooks/accounts-v2-route.ts`, `backend/src/stripe/webhooks/connect-payments-route.ts`
+- **Imports (packages):** `express`
+- **Routes:** `GET /api/public/stores/:storeId/orders/:publicToken/balance`
+- **Used by:** `backend/src/app.ts`
+
+### `backend/src/app/routes/internal.ts`
+
+- **Purpose:** Exports mountInternalRoutes (inferred from file name; no header comment)
+- **Size:** 30 lines
+- **Exports:** `mountInternalRoutes`
+- **Imports (project):** `backend/src/app/types.ts`, `backend/src/commerce/sweeper-routes.ts`
+- **Imports (packages):** `express`
+- **Routes:** `GET /health`
+- **Used by:** `backend/src/app.ts`
+
+### `backend/src/app/routes/media.ts`
+
+- **Purpose:** Exports mountMediaRoutes (inferred from file name; no header comment)
+- **Size:** 24 lines
+- **Exports:** `mountMediaRoutes`
+- **Imports (project):** `backend/src/app/types.ts`, `backend/src/media/routes.ts`
+- **Imports (packages):** `express`
+- **Used by:** `backend/src/app.ts`
+
+### `backend/src/app/routes/merchant.ts`
+
+- **Purpose:** Exports mountStoreSettingsRoutes, mountCustomerRoutes, mountTenantRoutes, mountAdminRoutes (inferred from file name; no header comment)
+- **Size:** 153 lines
+- **Exports:** `mountStoreSettingsRoutes`, `mountCustomerRoutes`, `mountTenantRoutes`, `mountAdminRoutes`, `mountCatalogRoutes`, `mountContentRoutes`
+- **Imports (project):** `backend/src/admin/routes.ts`, `backend/src/app/database.ts`, `backend/src/app/types.ts`, `backend/src/auth/middleware.ts`, `backend/src/catalog/public-store.ts`, `backend/src/catalog/routes.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/content/routes.ts`, `backend/src/custom-data/routes.ts`, `backend/src/customers/routes.ts`, `backend/src/tenants/routes.ts`, `backend/src/tenants/settings.ts`
+- **Imports (packages):** `express`
+- **Routes:** `GET /api/stores/:storeId/custom-data/dynamic-sources`
+- **Used by:** `backend/src/app.ts`
+
+### `backend/src/app/routes/storefront.ts`
+
+- **Purpose:** Exports mountPublicStorefrontContextRoutes, mountStorefrontRoutes (inferred from file name; no header comment)
+- **Size:** 120 lines
+- **Exports:** `mountPublicStorefrontContextRoutes`, `mountStorefrontRoutes`
+- **Imports (project):** `backend/src/app/default-storefront-workspace.ts`, `backend/src/app/types.ts`, `backend/src/auth/middleware.ts`, `backend/src/storefront/compiler/routes.ts`, `backend/src/storefront/context/routes.ts`, `backend/src/storefront/publication/routes.ts`, `backend/src/storefront/routes.ts`, `backend/src/storefront/starter/routes.ts`, `backend/src/storefront/workspace/routes.ts`
+- **Imports (packages):** `express`
+- **Routes:** `POST /api/stores/:storeId/storefront/validate`, `POST /api/stores/:storeId/storefront/preview/compile`, `POST /api/stores/:storeId/storefront/publish`
+- **Used by:** `backend/src/app.ts`
 
 ## `backend/src/audit/`
 
@@ -106,7 +207,7 @@ Authentication providers (Supabase/Firebase), session middleware, roles and stor
 - **Size:** 24 lines
 - **Exports:** `DEMO_TOKEN`, `DevelopmentAuthProvider`
 - **Imports (project):** `backend/src/auth/types.ts`, `backend/src/http/errors.ts`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`
 
 - `firebase-auth-provider.test.ts` — test (136 lines)
 ### `backend/src/auth/firebase-auth-provider.ts`
@@ -115,7 +216,7 @@ Authentication providers (Supabase/Firebase), session middleware, roles and stor
 - **Size:** 60 lines
 - **Exports:** `FirebaseAuthProvider`
 - **Imports (project):** `backend/src/auth/firebase-token-verifier.ts`, `backend/src/auth/types.ts`, `backend/src/http/errors.ts`, `backend/src/tenants/repository.ts`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`
 - **Tests:** `firebase-auth-provider.test.ts`
 
 - `firebase-token-verifier.test.ts` — test (23 lines)
@@ -125,7 +226,7 @@ Authentication providers (Supabase/Firebase), session middleware, roles and stor
 - **Size:** 37 lines
 - **Exports:** `FirebaseTokenVerifier` (type), `FirebaseAdminTokenVerifier`, `createFirebaseTokenVerifier`
 - **Imports (packages):** `firebase-admin`
-- **Used by:** `backend/src/app.ts`, `backend/src/auth/firebase-auth-provider.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/auth/firebase-auth-provider.ts`
 - **Tests:** `firebase-auth-provider.test.ts`, `firebase-token-verifier.test.ts`
 
 - `middleware.test.ts` — test (98 lines)
@@ -136,7 +237,7 @@ Authentication providers (Supabase/Firebase), session middleware, roles and stor
 - **Exports:** `requireMerchant`, `requireStorePermission`
 - **Imports (project):** `backend/src/auth/types.ts`, `backend/src/http/errors.ts`, `backend/src/tenants/store-context.ts`
 - **Imports (packages):** `express`
-- **Used by:** `backend/src/admin/routes.ts`, `backend/src/app.ts`, `backend/src/catalog/routes.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/notification-routes.ts`, `backend/src/content/routes.ts`, `backend/src/custom-data/routes.ts`, `backend/src/customers/routes.ts`, `backend/src/media/routes.ts`, `backend/src/storefront/compiler/routes.ts`, `backend/src/storefront/publication/routes.ts`, `backend/src/storefront/routes.ts`, `backend/src/storefront/starter/routes.ts`, `backend/src/storefront/workspace/routes.ts`, `backend/src/stripe/accounts/routes.ts`, `backend/src/tenants/routes.ts`, `backend/src/tenants/settings.ts`
+- **Used by:** `backend/src/admin/routes.ts`, `backend/src/app/routes/merchant.ts`, `backend/src/app/routes/storefront.ts`, `backend/src/catalog/routes.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/notification-routes.ts`, `backend/src/content/routes.ts`, `backend/src/custom-data/routes.ts`, `backend/src/customers/routes.ts`, `backend/src/media/routes.ts`, `backend/src/storefront/compiler/routes.ts`, `backend/src/storefront/publication/routes.ts`, `backend/src/storefront/routes.ts`, `backend/src/storefront/starter/routes.ts`, `backend/src/storefront/workspace/routes.ts`, `backend/src/stripe/accounts/routes.ts`, `backend/src/tenants/routes.ts`, `backend/src/tenants/settings.ts`
 - **Tests:** `middleware.test.ts`
 
 - `permissions.test.ts` — test (40 lines)
@@ -157,7 +258,7 @@ Authentication providers (Supabase/Firebase), session middleware, roles and stor
 - **Exports:** `SupabaseAuthProvider`
 - **Imports (project):** `backend/src/auth/types.ts`, `backend/src/http/errors.ts`, `backend/src/tenants/repository.ts`
 - **Imports (packages):** `@supabase/supabase-js`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`
 - **Tests:** `supabase-auth-provider.test.ts`
 
 ### `backend/src/auth/types.ts`
@@ -166,7 +267,7 @@ Authentication providers (Supabase/Firebase), session middleware, roles and stor
 - **Size:** 37 lines
 - **Exports:** `MerchantPrincipal` (type), `StorePermission` (type), `AuthProvider` (type)
 - **Imports (project):** `backend/src/tenants/types.ts`
-- **Used by:** `backend/src/admin/routes.ts`, `backend/src/app.ts`, `backend/src/auth/development-auth-provider.ts`, `backend/src/auth/firebase-auth-provider.ts`, `backend/src/auth/middleware.ts`, `backend/src/auth/permissions.ts`, `backend/src/auth/supabase-auth-provider.ts`, `backend/src/catalog/routes.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/notification-routes.ts`, `backend/src/content/routes.ts`, `backend/src/custom-data/routes.ts`, `backend/src/customers/routes.ts`, `backend/src/media/routes.ts`, `backend/src/storefront/compiler/routes.ts`, `backend/src/storefront/publication/routes.ts`, `backend/src/storefront/routes.ts`, `backend/src/storefront/starter/routes.ts`, `backend/src/storefront/workspace/routes.ts`, `backend/src/stripe/accounts/routes.ts`, `backend/src/tenants/routes.ts`, `backend/src/tenants/settings.ts`, `backend/src/tenants/store-context.ts`
+- **Used by:** `backend/src/admin/routes.ts`, `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/auth/development-auth-provider.ts`, `backend/src/auth/firebase-auth-provider.ts`, `backend/src/auth/middleware.ts`, `backend/src/auth/permissions.ts`, `backend/src/auth/supabase-auth-provider.ts`, `backend/src/catalog/routes.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/notification-routes.ts`, `backend/src/content/routes.ts`, `backend/src/custom-data/routes.ts`, `backend/src/customers/routes.ts`, `backend/src/media/routes.ts`, `backend/src/storefront/compiler/routes.ts`, `backend/src/storefront/publication/routes.ts`, `backend/src/storefront/routes.ts`, `backend/src/storefront/starter/routes.ts`, `backend/src/storefront/workspace/routes.ts`, `backend/src/stripe/accounts/routes.ts`, `backend/src/tenants/routes.ts`, `backend/src/tenants/settings.ts`, `backend/src/tenants/store-context.ts`
 - **Tests:** `routes.test.ts`, `middleware.test.ts`, `routes.test.ts`, `merchant-order-routes.test.ts`, `routes.test.ts`, `routes.test.ts`, `routes.test.ts`, `routes.test.ts`, `routes.test.ts`, `routes.test.ts`, `routes.test.ts`, `routes.test.ts`, `store-context.test.ts`
 
 ## `backend/src/catalog/`
@@ -192,7 +293,7 @@ Products, variants, collections: types, validation, Postgres/memory repositories
 - **Imports (project):** `backend/src/catalog/repository.ts`, `backend/src/catalog/types.ts`, `backend/src/commerce/repository.ts`, `backend/src/http/errors.ts`
 - **Imports (packages):** `node:crypto`, `pg`
 - **Database tables referenced:** `Collection`, `InventoryLevel`, `Media`, `Order`, `OrderItem`, `Payment`, `Product`, `ProductMedia`, `ProductVariant`, `Store`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`
 - **Tests:** `postgres-repository.test.ts`
 
 - `provider-sync.test.ts` — test (72 lines)
@@ -215,7 +316,7 @@ Products, variants, collections: types, validation, Postgres/memory repositories
 - **Imports (packages):** `express`
 - **Routes:** `GET /`, `GET /`
 - **Database tables referenced:** `Store`, `StoreSettings`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/routes/merchant.ts`
 - **Tests:** `public-store.test.ts`
 
 ### `backend/src/catalog/repository.ts`
@@ -236,7 +337,7 @@ Products, variants, collections: types, validation, Postgres/memory repositories
 - **Imports (project):** `backend/src/auth/middleware.ts`, `backend/src/auth/types.ts`, `backend/src/catalog/demo-catalog-provider.ts`, `backend/src/catalog/service.ts`
 - **Imports (packages):** `express`, `zod`
 - **Routes:** `GET /`, `GET /products`, `GET /products/:productId`, `POST /products`, `PATCH /products/:productId`, `GET /collections`, `GET /collections/:collectionId`, `POST /collections`, `PATCH /collections/:collectionId`, `GET /products`, `GET /collections`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/routes/merchant.ts`
 - **Tests:** `routes.test.ts`
 
 - `service.test.ts` — test (106 lines)
@@ -246,7 +347,7 @@ Products, variants, collections: types, validation, Postgres/memory repositories
 - **Size:** 109 lines
 - **Exports:** `CatalogReader` (type), `CatalogAdmin` (type), `CatalogService`
 - **Imports (project):** `backend/src/catalog/repository.ts`, `backend/src/catalog/types.ts`
-- **Used by:** `backend/src/app.ts`, `backend/src/catalog/demo-catalog-provider.ts`, `backend/src/catalog/routes.ts`, `backend/src/commerce/service.ts`, `backend/src/storefront/context/service.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/catalog/demo-catalog-provider.ts`, `backend/src/catalog/routes.ts`, `backend/src/commerce/service.ts`, `backend/src/storefront/context/service.ts`
 - **Tests:** `service.test.ts`, `order-workspace.test.ts`, `payment-intents.test.ts`, `routes.test.ts`, `service.test.ts`, `service.test.ts`
 
 ### `backend/src/catalog/types.ts`
@@ -293,7 +394,7 @@ Checkout, orders, payment intents, inventory, fulfilment, order management, noti
 - **Imports (project):** `backend/src/auth/middleware.ts`, `backend/src/auth/permissions.ts`, `backend/src/auth/types.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/order-management-invoice.ts`, `backend/src/http/errors.ts`
 - **Imports (packages):** `express`, `zod`
 - **Routes:** `GET /settings`, `PATCH /settings`, `GET /`, `GET /:orderId`, `POST /:orderId/notes`, `PATCH /:orderId/contact`, `PATCH /:orderId/tracking`, `POST /:orderId/fulfilment`, `POST /:orderId/fulfilments`, `POST /:orderId/fulfilments/:fulfilmentId/deliver`, `POST /:orderId/returns`, `POST /:orderId/returns/:returnId/receive`, `POST /:orderId/edits/preview`, `POST /:orderId/edits`, `POST /:orderId/refunds`, `POST /:orderId/cancel`, `GET /:orderId/invoice`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/routes/commerce.ts`
 - **Tests:** `merchant-order-routes.test.ts`
 
 ### `backend/src/commerce/merchant-orders.ts`
@@ -303,7 +404,7 @@ Checkout, orders, payment intents, inventory, fulfilment, order management, noti
 - **Exports:** `MerchantOrderService`
 - **Imports (project):** `backend/src/commerce/fulfilment.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/repository.ts`, `backend/src/http/errors.ts`, `backend/src/stripe/client.ts`
 - **Database tables referenced:** `Order`, `OrderItem`, `Payment`, `PaymentDispute`, `Refund`
-- **Used by:** `backend/src/app.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/order-runtime.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/order-runtime.ts`
 - **Tests:** `merchant-order-routes.test.ts`, `order-workspace.test.ts`
 
 ### `backend/src/commerce/notification-routes.ts`
@@ -314,7 +415,7 @@ Checkout, orders, payment intents, inventory, fulfilment, order management, noti
 - **Imports (project):** `backend/src/auth/middleware.ts`, `backend/src/auth/types.ts`, `backend/src/commerce/digital.ts`, `backend/src/commerce/notifications.ts`, `backend/src/http/errors.ts`
 - **Imports (packages):** `express`, `multer`, `zod`
 - **Routes:** `GET /`, `GET /branding`, `PUT /branding`, `POST /preview`, `POST /:orderId/notifications/resend`, `GET /:productId`, `PUT /:productId`, `POST /:productId/assets`, `DELETE /:productId/assets/:assetId`, `GET /:entitlementId`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/routes/commerce.ts`
 
 ### `backend/src/commerce/notification-transport.ts`
 
@@ -367,8 +468,8 @@ Checkout, orders, payment intents, inventory, fulfilment, order management, noti
 - **Imports (packages):** `@supabase/supabase-js`, `express`, `node:crypto`, `node:path`
 - **Routes:** `POST /`
 - **Database tables referenced:** `OrderNotification`, `OrderRevision`, `OrderTransaction`, `Payment`, `StripeWebhookEvent`
-- **Used by:** `backend/src/app.ts`
-- **Tests:** `order-workspace.test.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/routes/commerce.ts`, `backend/src/app/types.ts`
+- **Tests:** `app.composition.test.ts`, `order-workspace.test.ts`
 
 - `order-workspace.test.ts` — test (79 lines)
 - `payment-intents.test.ts` — test (198 lines)
@@ -392,7 +493,7 @@ Checkout, orders, payment intents, inventory, fulfilment, order management, noti
 - **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/http/errors.ts`
 - **Imports (packages):** `node:crypto`
 - **Database tables referenced:** `PublicOrderAccessRateLimit`
-- **Used by:** `backend/src/app.ts`, `backend/src/commerce/service.ts`
+- **Used by:** `backend/src/app/routes/merchant.ts`, `backend/src/commerce/service.ts`
 - **Tests:** `rate-limit.test.ts`
 
 - `refunds.test.ts` — test (11 lines)
@@ -416,8 +517,8 @@ Checkout, orders, payment intents, inventory, fulfilment, order management, noti
 - **Imports (project):** `backend/src/catalog/types.ts`
 - **Imports (packages):** `pg`
 - **Database tables referenced:** `CheckoutAttempt`, `InventoryLevel`, `InventoryReservation`, `Order`, `OrderItem`, `Payment`, `StoreOrderCounter`
-- **Used by:** `backend/src/admin/service.ts`, `backend/src/app.ts`, `backend/src/catalog/postgres-repository.ts`, `backend/src/catalog/public-store.ts`, `backend/src/commerce/digital.ts`, `backend/src/commerce/fulfilment.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/notifications.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/service.ts`, `backend/src/commerce/sweeper.ts`, `backend/src/content/sql-repository.ts`, `backend/src/custom-data/sql-repository.ts`, `backend/src/customers/service.ts`, `backend/src/media/sql-media-repository.ts`, `backend/src/media/storefront-reference-reader.ts`, `backend/src/storefront/context/sql-repository.ts`, `backend/src/storefront/local-v4-compilation.ts`, `backend/src/storefront/publication/sql-repository.ts`, `backend/src/storefront/sql-v4-workspace-data-source.ts`, `backend/src/storefront/starter/installation-service.ts`, `backend/src/storefront/workspace/sql-repositories.ts`, `backend/src/stripe/accounts/repository.ts`, `backend/src/stripe/accounts/service.ts`, `backend/src/stripe/accounts/types.ts`, `backend/src/stripe/webhooks/accounts-v2-route.ts`, `backend/src/stripe/webhooks/connect-payments-route.ts`, `backend/src/stripe/webhooks/processor.ts`, `backend/src/stripe/webhooks/receipt-repository.ts`, `backend/src/tenants/settings.ts`
-- **Tests:** `service.test.ts`, `notifications-digital-db.test.ts`, `order-management.test.ts`, `order-workspace.test.ts`, `payment-intents.test.ts`, `rate-limit.test.ts`, `repository.test.ts`, `routes.test.ts`, `service.test.ts`, `storefront-reference-reader.test.ts`, `service.test.ts`
+- **Used by:** `backend/src/admin/service.ts`, `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/catalog/postgres-repository.ts`, `backend/src/catalog/public-store.ts`, `backend/src/commerce/digital.ts`, `backend/src/commerce/fulfilment.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/notifications.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/service.ts`, `backend/src/commerce/sweeper.ts`, `backend/src/content/sql-repository.ts`, `backend/src/custom-data/sql-repository.ts`, `backend/src/customers/service.ts`, `backend/src/media/sql-media-repository.ts`, `backend/src/media/storefront-reference-reader.ts`, `backend/src/storefront/context/sql-repository.ts`, `backend/src/storefront/local-v4-compilation.ts`, `backend/src/storefront/publication/sql-repository.ts`, `backend/src/storefront/sql-v4-workspace-data-source.ts`, `backend/src/storefront/starter/installation-service.ts`, `backend/src/storefront/workspace/sql-repositories.ts`, `backend/src/stripe/accounts/repository.ts`, `backend/src/stripe/accounts/service.ts`, `backend/src/stripe/accounts/types.ts`, `backend/src/stripe/webhooks/accounts-v2-route.ts`, `backend/src/stripe/webhooks/connect-payments-route.ts`, `backend/src/stripe/webhooks/processor.ts`, `backend/src/stripe/webhooks/receipt-repository.ts`, `backend/src/tenants/settings.ts`
+- **Tests:** `service.test.ts`, `app.composition.test.ts`, `notifications-digital-db.test.ts`, `order-management.test.ts`, `order-workspace.test.ts`, `payment-intents.test.ts`, `rate-limit.test.ts`, `repository.test.ts`, `routes.test.ts`, `service.test.ts`, `storefront-reference-reader.test.ts`, `service.test.ts`
 
 - `routes.test.ts` — test (109 lines)
 ### `backend/src/commerce/routes.ts`
@@ -428,7 +529,7 @@ Checkout, orders, payment intents, inventory, fulfilment, order management, noti
 - **Imports (project):** `backend/src/commerce/service.ts`, `backend/src/http/errors.ts`
 - **Imports (packages):** `express`, `zod`
 - **Routes:** `POST /attempts`, `POST /payment-intent`, `GET /:publicToken`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/routes/commerce.ts`
 - **Tests:** `payment-intents.test.ts`, `routes.test.ts`
 
 - `service.test.ts` — test (392 lines)
@@ -440,7 +541,7 @@ Checkout, orders, payment intents, inventory, fulfilment, order management, noti
 - **Imports (project):** `backend/src/catalog/service.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/repository.ts`, `backend/src/commerce/types.ts`, `backend/src/http/errors.ts`, `backend/src/stripe/accounts/service.ts`, `backend/src/tenants/settings.ts`
 - **Imports (packages):** `node:crypto`, `zod`
 - **Database tables referenced:** `CheckoutAttempt`, `DigitalAsset`, `Order`, `OrderItem`, `OrderRevision`, `Payment`, `Store`
-- **Used by:** `backend/src/app.ts`, `backend/src/commerce/routes.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/commerce/routes.ts`
 - **Tests:** `order-workspace.test.ts`, `payment-intents.test.ts`, `routes.test.ts`, `service.test.ts`
 
 ### `backend/src/commerce/sweeper-routes.ts`
@@ -451,7 +552,7 @@ Checkout, orders, payment intents, inventory, fulfilment, order management, noti
 - **Imports (project):** `backend/src/commerce/sweeper.ts`, `backend/src/http/errors.ts`
 - **Imports (packages):** `express`, `node:crypto`
 - **Routes:** `POST /`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/routes/internal.ts`
 
 - `sweeper.test.ts` — test (13 lines)
 ### `backend/src/commerce/sweeper.ts`
@@ -461,7 +562,7 @@ Checkout, orders, payment intents, inventory, fulfilment, order management, noti
 - **Exports:** `ReservationSweeper`
 - **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/stripe/client.ts`
 - **Database tables referenced:** `CheckoutAttempt`, `Order`, `Payment`
-- **Used by:** `backend/src/app.ts`, `backend/src/commerce/sweeper-routes.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/commerce/sweeper-routes.ts`
 - **Tests:** `sweeper.test.ts`
 
 ### `backend/src/commerce/types.ts`
@@ -493,7 +594,7 @@ Information pages and navigation menus.
 - **Imports (project):** `backend/src/auth/middleware.ts`, `backend/src/auth/types.ts`, `backend/src/content/service.ts`, `backend/src/http/errors.ts`
 - **Imports (packages):** `express`, `zod`
 - **Routes:** `GET /pages`, `GET /pages/:pageId`, `POST /pages`, `PATCH /pages/:pageId`, `POST /pages/:pageId/publish`, `POST /pages/:pageId/unpublish`, `GET /blogs`, `GET /blogs/:blogId`, `POST /blogs`, `PATCH /blogs/:blogId`, `GET /articles`, `GET /articles/:articleId`, `POST /articles`, `PATCH /articles/:articleId`, `POST /articles/:articleId/publish`, `POST /articles/:articleId/unpublish`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/routes/merchant.ts`
 - **Tests:** `routes.test.ts`
 
 - `service.test.ts` — test (192 lines)
@@ -503,7 +604,7 @@ Information pages and navigation menus.
 - **Size:** 217 lines
 - **Exports:** `CreatePageInput` (type), `UpdatePageInput` (type), `CreateBlogInput` (type), `UpdateBlogInput` (type), `CreateArticleInput` (type), `UpdateArticleInput` (type), `ContentService`
 - **Imports (project):** `backend/src/content/repository.ts`
-- **Used by:** `backend/src/app.ts`, `backend/src/content/routes.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/content/routes.ts`
 - **Tests:** `service.test.ts`
 
 - `sql-repository.test.ts` — test (126 lines)
@@ -515,7 +616,7 @@ Information pages and navigation menus.
 - **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/content/repository.ts`
 - **Imports (packages):** `node:crypto`, `pg`
 - **Database tables referenced:** `Article`, `Blog`, `StorePage`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`
 - **Tests:** `sql-repository.test.ts`
 
 ## `backend/src/custom-data/`
@@ -541,7 +642,7 @@ Merchant-defined custom data definitions and values.
 - **Imports (project):** `backend/src/auth/middleware.ts`, `backend/src/auth/types.ts`, `backend/src/custom-data/service.ts`, `backend/src/dynamic-sources/registry.ts`
 - **Imports (packages):** `@jelly/storefront-schema`, `express`, `zod`
 - **Routes:** `GET /dynamic-sources`, `GET /metafields`, `POST /metafields`, `PATCH /metafields/:definitionId`, `PUT /metafields/:definitionId/owners/:ownerId`, `GET /metaobjects`, `POST /metaobjects`, `PATCH /metaobjects/:definitionId`, `GET /metaobjects/:definitionId/entries`, `POST /metaobjects/:definitionId/entries`, `PATCH /metaobject-entries/:entryId`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/routes/merchant.ts`
 - **Tests:** `routes.test.ts`
 
 - `service.test.ts` — test (115 lines)
@@ -552,7 +653,7 @@ Merchant-defined custom data definitions and values.
 - **Exports:** `CustomDataService`, `MetaobjectService`
 - **Imports (project):** `backend/src/custom-data/repository.ts`
 - **Imports (packages):** `@jelly/storefront-schema`
-- **Used by:** `backend/src/app.ts`, `backend/src/custom-data/routes.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/custom-data/routes.ts`
 - **Tests:** `metaobjects.test.ts`, `service.test.ts`, `sql-repository.test.ts`
 
 - `sql-repository.test.ts` — test (25 lines)
@@ -564,7 +665,7 @@ Merchant-defined custom data definitions and values.
 - **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/custom-data/repository.ts`
 - **Imports (packages):** `node:crypto`, `pg`
 - **Database tables referenced:** `MetafieldDefinition`, `MetafieldValue`, `MetaobjectDefinition`, `MetaobjectEntry`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`
 - **Tests:** `sql-repository.test.ts`
 
 ## `backend/src/customers/`
@@ -580,7 +681,7 @@ Customer accounts, addresses and engagement.
 - **Imports (project):** `backend/src/auth/middleware.ts`, `backend/src/auth/types.ts`, `backend/src/customers/service.ts`, `backend/src/http/errors.ts`
 - **Imports (packages):** `@supabase/supabase-js`, `express`, `zod`
 - **Routes:** `GET /profile`, `PATCH /profile`, `GET /addresses`, `POST /addresses`, `PATCH /addresses/:addressId`, `DELETE /addresses/:addressId`, `GET /orders`, `GET /orders/:orderId`, `GET /wishlist`, `POST /wishlist/merge`, `DELETE /wishlist/:productId`, `POST /newsletter`, `POST /newsletter/unsubscribe`, `POST /contact`, `GET /subscribers.csv`, `GET /enquiries`, `PATCH /enquiries/:enquiryId`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/routes/merchant.ts`, `backend/src/app/types.ts`
 - **Tests:** `routes.test.ts`
 
 - `service.test.ts` — test (66 lines)
@@ -592,7 +693,7 @@ Customer accounts, addresses and engagement.
 - **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/http/errors.ts`
 - **Imports (packages):** `node:crypto`, `zod`
 - **Database tables referenced:** `ContactEnquiry`, `CustomerAddress`, `CustomerWishlist`, `NewsletterSubscriber`, `Order`, `OrderItem`, `Product`, `Store`, `StoreCustomer`
-- **Used by:** `backend/src/app.ts`, `backend/src/customers/routes.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/customers/routes.ts`
 - **Tests:** `routes.test.ts`, `service.test.ts`
 
 ## `backend/src/database/`
@@ -606,7 +707,7 @@ Postgres pool and transaction helpers.
 - **Size:** 28 lines
 - **Exports:** `createSupabasePool`
 - **Imports (packages):** `node:fs`, `pg`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/database.ts`
 - **Tests:** `client.test.ts`
 
 - `isolation.test.ts` — test (29 lines)
@@ -622,7 +723,7 @@ Data sources for dynamic storefront content.
 - **Exports:** `TemplateContext` (type), `DynamicSourceDescriptor` (type), `DynamicSourceRegistry`
 - **Imports (project):** `backend/src/custom-data/repository.ts`
 - **Imports (packages):** `@jelly/storefront-schema`
-- **Used by:** `backend/src/app.ts`, `backend/src/custom-data/routes.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/custom-data/routes.ts`
 - **Tests:** `sql-repository.test.ts`
 
 - `resolver.test.ts` — test (96 lines)
@@ -646,7 +747,7 @@ HTTP helpers (errors, validation).
 - **Size:** 61 lines
 - **Exports:** `ApiIssue` (type), `ApiError`, `notFoundHandler`, `errorHandler`
 - **Imports (packages):** `express`, `zod`
-- **Used by:** `backend/src/app.ts`, `backend/src/auth/development-auth-provider.ts`, `backend/src/auth/firebase-auth-provider.ts`, `backend/src/auth/middleware.ts`, `backend/src/auth/supabase-auth-provider.ts`, `backend/src/catalog/postgres-repository.ts`, `backend/src/commerce/digital.ts`, `backend/src/commerce/fulfilment.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/notification-routes.ts`, `backend/src/commerce/notifications.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/routes.ts`, `backend/src/commerce/service.ts`, `backend/src/commerce/sweeper-routes.ts`, `backend/src/content/routes.ts`, `backend/src/customers/routes.ts`, `backend/src/customers/service.ts`, `backend/src/media/routes.ts`, `backend/src/media/service.ts`, `backend/src/media/validation.ts`, `backend/src/storefront/context/routes.ts`, `backend/src/storefront/repository.ts`, `backend/src/storefront/routes.ts`, `backend/src/storefront/service.ts`, `backend/src/storefront/starter/installation-service.ts`, `backend/src/storefront/starter/routes.ts`, `backend/src/storefront/workspace/routes.ts`, `backend/src/storefront/workspace/sql-global-section-store.ts`, `backend/src/storefront/workspace/theme-service.ts`, `backend/src/tenants/routes.ts`, `backend/src/tenants/settings.ts`, `backend/src/tenants/store-context.ts`
+- **Used by:** `backend/src/app.ts`, `backend/src/app/default-storefront-workspace.ts`, `backend/src/auth/development-auth-provider.ts`, `backend/src/auth/firebase-auth-provider.ts`, `backend/src/auth/middleware.ts`, `backend/src/auth/supabase-auth-provider.ts`, `backend/src/catalog/postgres-repository.ts`, `backend/src/commerce/digital.ts`, `backend/src/commerce/fulfilment.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/notification-routes.ts`, `backend/src/commerce/notifications.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/routes.ts`, `backend/src/commerce/service.ts`, `backend/src/commerce/sweeper-routes.ts`, `backend/src/content/routes.ts`, `backend/src/customers/routes.ts`, `backend/src/customers/service.ts`, `backend/src/media/routes.ts`, `backend/src/media/service.ts`, `backend/src/media/validation.ts`, `backend/src/storefront/context/routes.ts`, `backend/src/storefront/repository.ts`, `backend/src/storefront/routes.ts`, `backend/src/storefront/service.ts`, `backend/src/storefront/starter/installation-service.ts`, `backend/src/storefront/starter/routes.ts`, `backend/src/storefront/workspace/routes.ts`, `backend/src/storefront/workspace/sql-global-section-store.ts`, `backend/src/storefront/workspace/theme-service.ts`, `backend/src/tenants/routes.ts`, `backend/src/tenants/settings.ts`, `backend/src/tenants/store-context.ts`
 - **Tests:** `routes.test.ts`, `firebase-auth-provider.test.ts`, `middleware.test.ts`, `routes.test.ts`, `merchant-order-routes.test.ts`, `payment-intents.test.ts`, `routes.test.ts`, `routes.test.ts`, `routes.test.ts`, `routes.test.ts`, `service.test.ts`, `routes.test.ts`, `routes.test.ts`, `routes.test.ts`, `service.test.ts`, `routes.test.ts`, `routes.test.ts`, `routes.test.ts`, `routes.test.ts`, `store-context.test.ts`
 
 ## `backend/src/media/`
@@ -660,7 +761,7 @@ Media upload, storage providers and asset records.
 - **Exports:** `LocalJsonMediaRepository`
 - **Imports (project):** `backend/src/media/repository.ts`, `backend/src/media/types.ts`
 - **Imports (packages):** `node:fs`, `node:path`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`
 
 ### `backend/src/media/local-media-storage.ts`
 
@@ -669,7 +770,7 @@ Media upload, storage providers and asset records.
 - **Exports:** `LocalMediaStorage`
 - **Imports (project):** `backend/src/media/storage.ts`
 - **Imports (packages):** `node:fs`, `node:path`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`
 
 ### `backend/src/media/repository.ts`
 
@@ -677,7 +778,7 @@ Media upload, storage providers and asset records.
 - **Size:** 11 lines
 - **Exports:** `CreateMediaRecordInput` (type), `MediaRepository` (type)
 - **Imports (project):** `backend/src/media/types.ts`
-- **Used by:** `backend/src/app.ts`, `backend/src/media/local-json-media-repository.ts`, `backend/src/media/service.ts`, `backend/src/media/sql-media-repository.ts`
+- **Used by:** `backend/src/app/types.ts`, `backend/src/media/local-json-media-repository.ts`, `backend/src/media/service.ts`, `backend/src/media/sql-media-repository.ts`
 - **Tests:** `service.test.ts`
 
 - `routes.test.ts` — test (91 lines)
@@ -689,7 +790,7 @@ Media upload, storage providers and asset records.
 - **Imports (project):** `backend/src/auth/middleware.ts`, `backend/src/auth/types.ts`, `backend/src/http/errors.ts`, `backend/src/media/service.ts`
 - **Imports (packages):** `express`, `express-rate-limit`, `multer`
 - **Routes:** `POST /`, `GET /`, `DELETE /:mediaId`, `GET /:storeId/:mediaId`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/routes/media.ts`
 
 - `service.test.ts` — test (122 lines)
 ### `backend/src/media/service.ts`
@@ -699,7 +800,7 @@ Media upload, storage providers and asset records.
 - **Exports:** `MediaService`
 - **Imports (project):** `backend/src/http/errors.ts`, `backend/src/media/repository.ts`, `backend/src/media/storage.ts`, `backend/src/media/types.ts`, `backend/src/media/validation.ts`
 - **Imports (packages):** `node:crypto`, `node:path`
-- **Used by:** `backend/src/app.ts`, `backend/src/media/routes.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/media/routes.ts`
 - **Tests:** `service.test.ts`
 
 - `sql-media-repository.test.ts` — test (20 lines)
@@ -710,7 +811,7 @@ Media upload, storage providers and asset records.
 - **Exports:** `SqlMediaRepository`
 - **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/media/repository.ts`, `backend/src/media/types.ts`
 - **Database tables referenced:** `Media`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`
 - **Tests:** `sql-media-repository.test.ts`
 
 ### `backend/src/media/storage.ts`
@@ -718,7 +819,7 @@ Media upload, storage providers and asset records.
 - **Purpose:** Exports  (inferred from file name; no header comment)
 - **Size:** 13 lines
 - **Exports:** `PutMediaInput` (type), `MediaStorage` (type)
-- **Used by:** `backend/src/app.ts`, `backend/src/media/local-media-storage.ts`, `backend/src/media/service.ts`, `backend/src/media/supabase-media-storage.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/media/local-media-storage.ts`, `backend/src/media/service.ts`, `backend/src/media/supabase-media-storage.ts`
 - **Tests:** `service.test.ts`
 
 - `storefront-reference-reader.test.ts` — test (24 lines)
@@ -729,7 +830,7 @@ Media upload, storage providers and asset records.
 - **Exports:** `createStorefrontMediaReferenceReader`
 - **Imports (project):** `backend/src/commerce/repository.ts`
 - **Database tables referenced:** `Article`, `GlobalSection`, `ProductMedia`, `SectionPreset`, `StorePage`, `StorefrontPublication`, `StorefrontTemplate`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`
 - **Tests:** `storefront-reference-reader.test.ts`
 
 - `supabase-media-storage.test.ts` — test (127 lines)
@@ -740,7 +841,7 @@ Media upload, storage providers and asset records.
 - **Exports:** `SupabaseMediaStorage`
 - **Imports (project):** `backend/src/media/storage.ts`
 - **Imports (packages):** `@supabase/supabase-js`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`
 - **Tests:** `supabase-media-storage.test.ts`
 
 ### `backend/src/media/types.ts`
@@ -796,7 +897,7 @@ Compiles a draft workspace into a validated runtime snapshot (registry, binding,
 - **Imports (project):** `backend/src/auth/middleware.ts`, `backend/src/auth/types.ts`
 - **Imports (packages):** `express`, `zod`
 - **Routes:** `POST /validate`, `POST /preview/compile`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/routes/storefront.ts`, `backend/src/app/types.ts`
 - **Tests:** `routes.test.ts`
 
 ### `backend/src/storefront/compiler/service.ts`
@@ -835,7 +936,7 @@ Compiles a draft workspace into a validated runtime snapshot (registry, binding,
 - **Exports:** `CompilerResponsiveSettings` (type), `CompilerBlockNode` (type), `CompilerSectionNode` (type), `CompilerSectionPlacement` (type), `CompilerTemplateInput` (type), `CompilerGlobalSectionInput` (type), `CompilerMenuInput` (type), `CompilerAssignmentInput` (type), `CompilerMetafieldDefinitionInput` (type), `CompilerMetaobjectDefinitionInput` (type), `StorefrontCompilationInput` (type), `RegistrySectionIssue` (type), `CompilerRegistry` (type), `CompilerDynamicSourceResolver` (type), `DynamicBindingOccurrence` (type), `ValidationResult` (type)
 - **Imports (project):** `backend/src/storefront/workspace/repositories/template-repository.ts`
 - **Imports (packages):** `@jelly/storefront-schema`
-- **Used by:** `backend/src/app.ts`, `backend/src/storefront/compiler/compiler.ts`, `backend/src/storefront/compiler/dependency-graph.ts`, `backend/src/storefront/compiler/service.ts`, `backend/src/storefront/compiler/snapshot.ts`, `backend/src/storefront/compiler/traversal.ts`, `backend/src/storefront/compiler/validate-bindings.ts`, `backend/src/storefront/compiler/validate-context.ts`, `backend/src/storefront/compiler/validate-references.ts`, `backend/src/storefront/compiler/validate-registry.ts`, `backend/src/storefront/local-v4-compilation.ts`, `backend/src/storefront/local-v4-workspace-reader.ts`
+- **Used by:** `backend/src/app/types.ts`, `backend/src/storefront/compiler/compiler.ts`, `backend/src/storefront/compiler/dependency-graph.ts`, `backend/src/storefront/compiler/service.ts`, `backend/src/storefront/compiler/snapshot.ts`, `backend/src/storefront/compiler/traversal.ts`, `backend/src/storefront/compiler/validate-bindings.ts`, `backend/src/storefront/compiler/validate-context.ts`, `backend/src/storefront/compiler/validate-references.ts`, `backend/src/storefront/compiler/validate-registry.ts`, `backend/src/storefront/local-v4-compilation.ts`, `backend/src/storefront/local-v4-workspace-reader.ts`
 - **Tests:** `compiler.test.ts`, `dependency-graph.test.ts`, `reusable-section-compatibility.test.ts`, `snapshot.test.ts`, `validate-bindings.test.ts`, `validate-context.test.ts`, `validate-references.test.ts`, `validate-registry.test.ts`, `local-v4-workspace-reader.test.ts`
 
 - `validate-bindings.test.ts` — test (82 lines)
@@ -895,7 +996,7 @@ Public page-context routes (page, blog, article, search data for the storefront)
 - **Imports (project):** `backend/src/http/errors.ts`, `backend/src/storefront/context/service.ts`
 - **Imports (packages):** `express`
 - **Routes:** `GET /search`, `GET /pages/:pageHandle`, `GET /blogs/:blogHandle`, `GET /blogs/:blogHandle/articles/:articleHandle`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/routes/storefront.ts`
 - **Tests:** `routes.test.ts`
 
 - `service.test.ts` — test (30 lines)
@@ -905,7 +1006,7 @@ Public page-context routes (page, blog, article, search data for the storefront)
 - **Size:** 58 lines
 - **Exports:** `PublicStorefrontContextService`
 - **Imports (project):** `backend/src/catalog/service.ts`, `backend/src/storefront/context/types.ts`
-- **Used by:** `backend/src/app.ts`, `backend/src/storefront/context/routes.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/storefront/context/routes.ts`
 - **Tests:** `service.test.ts`
 
 - `sql-repository.test.ts` — test (26 lines)
@@ -917,7 +1018,7 @@ Public page-context routes (page, blog, article, search data for the storefront)
 - **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/storefront/context/types.ts`
 - **Imports (packages):** `pg`
 - **Database tables referenced:** `Article`, `Blog`, `StorePage`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`
 - **Tests:** `sql-repository.test.ts`
 
 ### `backend/src/storefront/context/types.ts`
@@ -939,7 +1040,7 @@ Theme documents: draft workspace, compiler, publication, runtime snapshots, star
 - **Size:** 30 lines
 - **Exports:** `storefrontDocumentValidator`
 - **Imports (packages):** `@jelly/storefront-schema`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/default-storefront-workspace.ts`, `backend/src/app/dependencies.ts`
 - **Tests:** `document-validator.test.ts`
 
 - `local-json-repository.test.ts` — test (29 lines)
@@ -950,7 +1051,7 @@ Theme documents: draft workspace, compiler, publication, runtime snapshots, star
 - **Exports:** `LocalJsonStorefrontRepository`
 - **Imports (project):** `backend/src/storefront/repository.ts`, `backend/src/storefront/types.ts`
 - **Imports (packages):** `node:crypto`, `node:fs`, `node:path`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`
 - **Tests:** `local-json-repository.test.ts`
 
 ### `backend/src/storefront/local-v4-compilation.ts`
@@ -960,7 +1061,7 @@ Theme documents: draft workspace, compiler, publication, runtime snapshots, star
 - **Exports:** `createLocalV4CompilationService`
 - **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/storefront/compiler/service.ts`, `backend/src/storefront/compiler/types.ts`, `backend/src/storefront/local-v4-workspace-reader.ts`, `backend/src/storefront/sql-v4-workspace-data-source.ts`
 - **Imports (packages):** `@jelly/storefront-registry`, `@jelly/storefront-schema`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`
 
 - `local-v4-workspace-reader.test.ts` — test (150 lines)
 ### `backend/src/storefront/local-v4-workspace-reader.ts`
@@ -978,7 +1079,7 @@ Theme documents: draft workspace, compiler, publication, runtime snapshots, star
 - **Size:** 16 lines
 - **Exports:** `DraftConflictError`, `StorefrontRepository` (type)
 - **Imports (project):** `backend/src/http/errors.ts`, `backend/src/storefront/types.ts`
-- **Used by:** `backend/src/app.ts`, `backend/src/storefront/local-json-repository.ts`, `backend/src/storefront/service.ts`
+- **Used by:** `backend/src/app/types.ts`, `backend/src/storefront/local-json-repository.ts`, `backend/src/storefront/service.ts`
 - **Tests:** `routes.test.ts`, `service.test.ts`
 
 - `routes.test.ts` — test (330 lines)
@@ -990,7 +1091,7 @@ Theme documents: draft workspace, compiler, publication, runtime snapshots, star
 - **Imports (project):** `backend/src/auth/middleware.ts`, `backend/src/auth/types.ts`, `backend/src/http/errors.ts`, `backend/src/storefront/service.ts`
 - **Imports (packages):** `@jelly/storefront-schema`, `express`
 - **Routes:** `GET /public`, `GET /draft`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/routes/storefront.ts`, `backend/src/app/types.ts`
 
 - `service.test.ts` — test (38 lines)
 ### `backend/src/storefront/service.ts`
@@ -999,7 +1100,7 @@ Theme documents: draft workspace, compiler, publication, runtime snapshots, star
 - **Size:** 51 lines
 - **Exports:** `DocumentValidator` (type), `StorefrontService` (type), `DefaultStorefrontService`
 - **Imports (project):** `backend/src/http/errors.ts`, `backend/src/storefront/repository.ts`, `backend/src/storefront/types.ts`
-- **Used by:** `backend/src/app.ts`, `backend/src/storefront/routes.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/storefront/routes.ts`
 - **Tests:** `service.test.ts`
 
 - `sql-v4-workspace-data-source.test.ts` — test (195 lines)
@@ -1043,7 +1144,7 @@ Immutable publications and the active-publication pointer.
 - **Imports (project):** `backend/src/auth/middleware.ts`, `backend/src/auth/types.ts`, `backend/src/storefront/publication/service.ts`
 - **Imports (packages):** `express`, `zod`
 - **Routes:** `POST /publish`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/routes/storefront.ts`, `backend/src/app/types.ts`
 - **Tests:** `routes.test.ts`
 
 - `service.test.ts` — test (208 lines)
@@ -1053,7 +1154,7 @@ Immutable publications and the active-publication pointer.
 - **Size:** 66 lines
 - **Exports:** `StorefrontCompilerPublisherApi` (type), `PublishStorefrontResult` (type), `CompiledStorefrontPublicationService`
 - **Imports (project):** `backend/src/storefront/compiler/compiler.ts`, `backend/src/storefront/publication/repository.ts`
-- **Used by:** `backend/src/app.ts`, `backend/src/storefront/publication/routes.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/storefront/publication/routes.ts`
 - **Tests:** `service.test.ts`
 
 - `sql-repository.test.ts` — test (168 lines)
@@ -1065,7 +1166,7 @@ Immutable publications and the active-publication pointer.
 - **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/storefront/compiler/dependency-graph.ts`, `backend/src/storefront/publication/repository.ts`, `backend/src/storefront/runtime/cache.ts`, `backend/src/storefront/runtime/service.ts`
 - **Imports (packages):** `@jelly/storefront-schema`, `node:crypto`, `pg`
 - **Database tables referenced:** `Store`, `StorefrontPublication`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`
 - **Tests:** `reusable-section-compatibility.test.ts`, `sql-repository.test.ts`
 
 ## `backend/src/storefront/runtime/`
@@ -1088,7 +1189,7 @@ Serves the published snapshot (with a process-local cache).
 - **Exports:** `CurrentPublicationPointer` (type), `PublishedPublication` (type), `StorefrontRuntimeService`
 - **Imports (project):** `backend/src/storefront/runtime/cache.ts`
 - **Imports (packages):** `@jelly/storefront-schema`
-- **Used by:** `backend/src/app.ts`, `backend/src/storefront/publication/sql-repository.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/storefront/publication/sql-repository.ts`
 - **Tests:** `service.test.ts`
 
 ## `backend/src/storefront/starter/`
@@ -1103,7 +1204,7 @@ Installs starter packs into a store's draft.
 - **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/http/errors.ts`
 - **Imports (packages):** `@jelly/storefront-registry`, `@jelly/storefront-schema`, `node:crypto`
 - **Database tables referenced:** `GlobalSection`, `NavigationMenu`, `Store`, `StorePage`, `StorefrontTemplate`, `StorefrontTemplateAssignment`, `StorefrontWorkspace`, `ThemeConfiguration`
-- **Used by:** `backend/src/app.ts`, `backend/src/storefront/starter/routes.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/storefront/starter/routes.ts`
 - **Tests:** `service.test.ts`
 
 - `routes.test.ts` — test (37 lines)
@@ -1115,7 +1216,7 @@ Installs starter packs into a store's draft.
 - **Imports (project):** `backend/src/auth/middleware.ts`, `backend/src/auth/types.ts`, `backend/src/http/errors.ts`, `backend/src/storefront/starter/installation-service.ts`
 - **Imports (packages):** `@jelly/storefront-registry`, `express`, `zod`
 - **Routes:** `POST /:starterId/install`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/routes/storefront.ts`, `backend/src/app/types.ts`
 - **Tests:** `routes.test.ts`
 
 ## `backend/src/storefront/workspace/`
@@ -1206,7 +1307,7 @@ Mutable draft workspace: templates, global sections, menus, theme settings, assi
 - **Imports (project):** `backend/src/auth/middleware.ts`, `backend/src/auth/types.ts`, `backend/src/http/errors.ts`, `backend/src/storefront/workspace/repositories/assignment-repository.ts`, `backend/src/storefront/workspace/repositories/menu-repository.ts`, `backend/src/storefront/workspace/repositories/template-repository.ts`
 - **Imports (packages):** `express`, `zod`
 - **Routes:** `GET /workspace`, `GET /themes`, `GET /templates`, `GET /templates/:templateId`, `POST /templates`, `PATCH /templates/:templateId`, `POST /templates/:templateId/clone`, `GET /global-sections`, `GET /global-sections/:sectionId`, `POST /global-sections`, `PATCH /global-sections/:sectionId`, `GET /presets`, `POST /presets`, `POST /presets/:presetId/instantiate`, `GET /menus`, `GET /menus/:menuId`, `POST /menus`, `PATCH /menus/:menuId`, `GET /theme-settings`, `PUT /theme-settings`, `GET /assignments/:resourceType/:resourceId`, `PUT /assignments/:resourceType/:resourceId`
-- **Used by:** `backend/src/app.ts`, `backend/src/storefront/workspace/api-service.ts`
+- **Used by:** `backend/src/app/default-storefront-workspace.ts`, `backend/src/app/routes/storefront.ts`, `backend/src/app/types.ts`, `backend/src/storefront/workspace/api-service.ts`
 - **Tests:** `routes.test.ts`
 
 - `sql-global-section-store.test.ts` — test (25 lines)
@@ -1218,7 +1319,7 @@ Mutable draft workspace: templates, global sections, menus, theme settings, assi
 - **Imports (project):** `backend/src/http/errors.ts`, `backend/src/storefront/workspace/errors.ts`, `backend/src/storefront/workspace/supabase-template-store.ts`
 - **Imports (packages):** `node:crypto`
 - **Database tables referenced:** `GlobalSection`, `StorefrontWorkspace`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/default-storefront-workspace.ts`
 - **Tests:** `sql-global-section-store.test.ts`
 
 - `sql-repositories.test.ts` — test (30 lines)
@@ -1230,7 +1331,7 @@ Mutable draft workspace: templates, global sections, menus, theme settings, assi
 - **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/storefront/workspace/api-service.ts`, `backend/src/storefront/workspace/assignment-service.ts`, `backend/src/storefront/workspace/clone-local-ids.ts`, `backend/src/storefront/workspace/errors.ts`, `backend/src/storefront/workspace/global-section-service.ts`, `backend/src/storefront/workspace/menu-service.ts`, `backend/src/storefront/workspace/mutation-runner.ts`, `backend/src/storefront/workspace/repositories/assignment-repository.ts`, `backend/src/storefront/workspace/repositories/global-section-repository.ts`, `backend/src/storefront/workspace/repositories/menu-repository.ts`, `backend/src/storefront/workspace/repositories/preset-repository.ts`, `backend/src/storefront/workspace/repositories/template-repository.ts`, `backend/src/storefront/workspace/repositories/theme-repository.ts`, `backend/src/storefront/workspace/template-service.ts`, `backend/src/storefront/workspace/template-type-enum.ts`, `backend/src/storefront/workspace/theme-service.ts`
 - **Imports (packages):** `node:crypto`, `pg`
 - **Database tables referenced:** `StorefrontTemplate`, `StorefrontTemplateAssignment`, `StorefrontWorkspace`, `ThemeConfiguration`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`
 - **Tests:** `sql-repositories.test.ts`
 
 - `supabase-template-store.test.ts` — test (32 lines)
@@ -1241,7 +1342,7 @@ Mutable draft workspace: templates, global sections, menus, theme settings, assi
 - **Exports:** `SqlPool` (type), `updateSupabaseTemplate`
 - **Imports (project):** `backend/src/storefront/workspace/errors.ts`
 - **Database tables referenced:** `StorefrontTemplate`, `StorefrontWorkspace`
-- **Used by:** `backend/src/app.ts`, `backend/src/storefront/workspace/sql-global-section-store.ts`
+- **Used by:** `backend/src/app/default-storefront-workspace.ts`, `backend/src/storefront/workspace/sql-global-section-store.ts`
 - **Tests:** `supabase-template-store.test.ts`
 
 - `template-service.test.ts` — test (172 lines)
@@ -1261,7 +1362,7 @@ Mutable draft workspace: templates, global sections, menus, theme settings, assi
 - **Size:** 13 lines
 - **Exports:** `toStorefrontTemplateEnumValue`, `fromStorefrontTemplateEnumValue`
 - **Imports (project):** `backend/src/storefront/workspace/repositories/template-repository.ts`
-- **Used by:** `backend/src/app.ts`, `backend/src/storefront/workspace/sql-repositories.ts`
+- **Used by:** `backend/src/app/default-storefront-workspace.ts`, `backend/src/storefront/workspace/sql-repositories.ts`
 - **Tests:** `template-type-enum.test.ts`
 
 - `theme-service.test.ts` — test (67 lines)
@@ -1362,7 +1463,7 @@ Stripe Connect connected-account lifecycle (create, onboarding link, status sync
 - **Imports (project):** `backend/src/auth/middleware.ts`, `backend/src/auth/types.ts`, `backend/src/stripe/accounts/service.ts`
 - **Imports (packages):** `express`, `zod`
 - **Routes:** `GET /status`, `POST /onboarding-link`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/routes/commerce.ts`
 - **Tests:** `routes.test.ts`
 
 - `service.test.ts` — test (384 lines)
@@ -1373,8 +1474,8 @@ Stripe Connect connected-account lifecycle (create, onboarding link, status sync
 - **Exports:** `StripeAccountServiceDeps` (type), `StripeAccountService`
 - **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/stripe/accounts/repository.ts`, `backend/src/stripe/accounts/types.ts`, `backend/src/stripe/client.ts`
 - **Imports (packages):** `stripe`
-- **Used by:** `backend/src/app.ts`, `backend/src/commerce/service.ts`, `backend/src/stripe/accounts/routes.ts`, `backend/src/stripe/webhooks/accounts-v2-route.ts`
-- **Tests:** `order-workspace.test.ts`, `payment-intents.test.ts`, `routes.test.ts`, `service.test.ts`, `routes.test.ts`, `service.test.ts`, `accounts-v2-route.test.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/commerce/service.ts`, `backend/src/stripe/accounts/routes.ts`, `backend/src/stripe/webhooks/accounts-v2-route.ts`
+- **Tests:** `app.composition.test.ts`, `order-workspace.test.ts`, `payment-intents.test.ts`, `routes.test.ts`, `service.test.ts`, `routes.test.ts`, `service.test.ts`, `accounts-v2-route.test.ts`
 
 ### `backend/src/stripe/accounts/types.ts`
 
@@ -1397,8 +1498,8 @@ Stripe Connect accounts, payment client and webhook processing.
 - **Exports:** `ConnectedAccountRequest` (type), `CreateAccountInput` (type), `CreateAccountLinkInput` (type), `CreateDirectPaymentIntentInput` (type), `CreateFullRefundInput` (type), `StripeGateway` (type), `createStripeGateway`
 - **Imports (project):** `backend/src/config.ts`
 - **Imports (packages):** `stripe`
-- **Used by:** `backend/src/app.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/sweeper.ts`, `backend/src/stripe/accounts/service.ts`, `backend/src/stripe/webhooks/accounts-v2-route.ts`, `backend/src/stripe/webhooks/connect-payments-route.ts`
-- **Tests:** `order-workspace.test.ts`, `payment-intents.test.ts`, `service.test.ts`, `client.test.ts`, `accounts-v2-route.test.ts`, `connect-payments-route.test.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/sweeper.ts`, `backend/src/stripe/accounts/service.ts`, `backend/src/stripe/webhooks/accounts-v2-route.ts`, `backend/src/stripe/webhooks/connect-payments-route.ts`
+- **Tests:** `app.composition.test.ts`, `order-workspace.test.ts`, `payment-intents.test.ts`, `service.test.ts`, `client.test.ts`, `accounts-v2-route.test.ts`, `connect-payments-route.test.ts`
 
 ## `backend/src/stripe/webhooks/`
 
@@ -1413,7 +1514,7 @@ Stripe webhook routes (signature check) and the event processor.
 - **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/stripe/accounts/service.ts`, `backend/src/stripe/client.ts`, `backend/src/stripe/webhooks/receipt-repository.ts`
 - **Imports (packages):** `express`, `stripe`
 - **Routes:** `POST /`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/routes/commerce.ts`
 - **Tests:** `accounts-v2-route.test.ts`
 
 - `connect-payments-route.test.ts` — test (30 lines)
@@ -1426,7 +1527,7 @@ Stripe webhook routes (signature check) and the event processor.
 - **Imports (packages):** `express`
 - **Routes:** `POST /`
 - **Database tables referenced:** `StripeWebhookEvent`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/routes/commerce.ts`
 - **Tests:** `connect-payments-route.test.ts`
 
 - `processor.test.ts` — test (79 lines)
@@ -1462,7 +1563,7 @@ Stores (tenants), memberships and onboarding.
 - **Imports (project):** `backend/src/tenants/repository.ts`, `backend/src/tenants/types.ts`
 - **Imports (packages):** `node:crypto`, `pg`
 - **Database tables referenced:** `Store`, `StoreMembership`, `StoreSettings`, `StorefrontWorkspace`, `User`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/dependencies.ts`
 - **Tests:** `postgres-repository.test.ts`
 
 ### `backend/src/tenants/repository.ts`
@@ -1471,7 +1572,7 @@ Stores (tenants), memberships and onboarding.
 - **Size:** 13 lines
 - **Exports:** `TenantRepository` (type)
 - **Imports (project):** `backend/src/tenants/types.ts`
-- **Used by:** `backend/src/app.ts`, `backend/src/auth/firebase-auth-provider.ts`, `backend/src/auth/supabase-auth-provider.ts`, `backend/src/tenants/postgres-repository.ts`, `backend/src/tenants/routes.ts`
+- **Used by:** `backend/src/app/types.ts`, `backend/src/auth/firebase-auth-provider.ts`, `backend/src/auth/supabase-auth-provider.ts`, `backend/src/tenants/postgres-repository.ts`, `backend/src/tenants/routes.ts`
 - **Tests:** `firebase-auth-provider.test.ts`, `supabase-auth-provider.test.ts`, `routes.test.ts`
 
 - `routes.test.ts` — test (117 lines)
@@ -1483,7 +1584,7 @@ Stores (tenants), memberships and onboarding.
 - **Imports (project):** `backend/src/auth/middleware.ts`, `backend/src/auth/types.ts`, `backend/src/http/errors.ts`, `backend/src/tenants/repository.ts`, `backend/src/tenants/settings.ts`
 - **Imports (packages):** `express`, `zod`
 - **Routes:** `GET /me`, `GET /stores`, `POST /stores`
-- **Used by:** `backend/src/app.ts`
+- **Used by:** `backend/src/app/routes/merchant.ts`
 - **Tests:** `routes.test.ts`
 
 - `settings.test.ts` — test (29 lines)
@@ -1496,7 +1597,7 @@ Stores (tenants), memberships and onboarding.
 - **Imports (packages):** `express`, `zod`
 - **Routes:** `GET /`, `PATCH /`
 - **Database tables referenced:** `Order`, `Store`, `StoreSettings`, `StorefrontPublication`
-- **Used by:** `backend/src/app.ts`, `backend/src/commerce/service.ts`, `backend/src/tenants/routes.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/routes/merchant.ts`, `backend/src/commerce/service.ts`, `backend/src/tenants/routes.ts`
 - **Tests:** `settings.test.ts`
 
 - `store-context.test.ts` — test (36 lines)

@@ -6,7 +6,7 @@ import { useInitialStorefrontPublication } from "@/features/storefront/storefron
 
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
-import { useThemePresentation } from "@/components/storefront-shell";
+import { useThemePresentation } from "@/features/storefront/components/storefront-shell";
 import { useShop } from "@/contexts/shop-context";
 import { formatMoney } from "@/lib/domain";
 import { loadPublicSearchPageContext, type PublicSearchPageContext } from "@/features/storefront/public-page-context-api";

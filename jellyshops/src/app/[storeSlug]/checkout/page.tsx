@@ -10,7 +10,7 @@ import { formatMoney, type Order } from "@/lib/domain";
 import { createCommerceApi } from "@/features/commerce/api/client";
 import { PaymentElementCheckout } from "@/features/commerce/components/payment-element-checkout";
 import { useCustomer } from "@/features/customers/customer-provider";
-import { useThemePresentation } from "@/components/storefront-shell";
+import { useThemePresentation } from "@/features/storefront/components/storefront-shell";
 
 export function CheckoutView({ storeSlug }: { storeSlug: string }) {
   const { session: customerSession } = useCustomer();

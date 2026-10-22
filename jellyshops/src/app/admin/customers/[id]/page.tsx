@@ -20,7 +20,7 @@ import {
 } from "@/features/auth/auth-provider";
 import { createAdminApi } from "@/features/admin/api";
 import { useAdminQuery } from "@/features/admin/use-admin-query";
-import { OrderStatusBadge } from "@/components/order-status";
+import { OrderStatusBadge } from "@/features/commerce/components/order-status";
 import { formatMoney } from "@/lib/domain";
 import type { Currency } from "@/lib/domain";
 

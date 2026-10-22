@@ -1,4 +1,4 @@
-import { StorefrontFrame } from "@/components/storefront-frame";
+import { StorefrontFrame } from "@/features/storefront/components/storefront-frame";
 import { StorefrontCatalogSync } from "@/features/commerce/components/storefront-catalog-sync";
 import { notFound } from "next/navigation";
 import { getServerStorefront } from "@/features/storefront/server-storefront";

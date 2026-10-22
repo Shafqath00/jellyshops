@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Archive, ArrowLeft } from "lucide-react";
-import { ProductForm } from "@/components/product-form";
-import { DigitalProductSettings } from "@/components/digital-product-settings";
+import { ProductForm } from "@/features/commerce/components/product-form";
+import { DigitalProductSettings } from "@/features/commerce/components/digital-product-settings";
 import { useShop } from "@/contexts/shop-context";
 import { useEffect, useMemo, useState } from "react";
 import { authApiOrigin, useAuth } from "@/features/auth/auth-provider";

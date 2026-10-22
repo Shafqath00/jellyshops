@@ -135,7 +135,7 @@ Single storefront renderer for preview and live.
 - **Purpose:** Package/barrel entry point re-exporting its folder (inferred from file name; no header comment)
 - **Size:** 11 lines
 - **Imports (project):** `jellyshops/packages/storefront-renderer/src/registry-section-renderer.tsx`, `jellyshops/packages/storefront-renderer/src/render-registry.tsx`, `jellyshops/packages/storefront-renderer/src/runtime-context.ts`, `jellyshops/packages/storefront-renderer/src/section-support.ts`, `jellyshops/packages/storefront-renderer/src/store-identity.ts`, `jellyshops/packages/storefront-renderer/src/storefront-renderer.tsx`, `jellyshops/packages/storefront-renderer/src/types.ts`
-- **Used by:** `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/components/storefront-frame.tsx`, `jellyshops/src/features/customers/protected-storefront-page.tsx`, `jellyshops/src/features/store-editor/components/editor-shell.tsx`, `jellyshops/src/features/store-editor/components/preview-canvas.tsx`, `jellyshops/src/features/store-editor/components/template-preview.tsx`, `jellyshops/src/features/store-editor/preview-context.ts`, `jellyshops/src/features/storefront/page-context-loaders.ts`, `jellyshops/src/features/storefront/product-presentation.ts`, `jellyshops/src/features/storefront/resource-loader.ts`, `jellyshops/src/features/storefront/storefront-page.tsx`, `jellyshops/src/features/theme-preview/configs.ts`, `jellyshops/src/features/theme-preview/template-preview.tsx`, `jellyshops/src/features/theme-preview/theme-preview-page.tsx`
+- **Used by:** `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/features/customers/protected-storefront-page.tsx`, `jellyshops/src/features/store-editor/components/editor-shell.tsx`, `jellyshops/src/features/store-editor/components/preview-canvas.tsx`, `jellyshops/src/features/store-editor/components/template-preview.tsx`, `jellyshops/src/features/store-editor/preview-context.ts`, `jellyshops/src/features/storefront/components/storefront-frame.tsx`, `jellyshops/src/features/storefront/page-context-loaders.ts`, `jellyshops/src/features/storefront/product-presentation.ts`, `jellyshops/src/features/storefront/resource-loader.ts`, `jellyshops/src/features/storefront/storefront-page.tsx`, `jellyshops/src/features/theme-preview/configs.ts`, `jellyshops/src/features/theme-preview/template-preview.tsx`, `jellyshops/src/features/theme-preview/theme-preview-page.tsx`
 - **Tests:** `storefront-renderer-v2.test.tsx`, `storefront-renderer.test.tsx`
 
 - `newsletter.test.tsx` — test (14 lines)
@@ -396,7 +396,7 @@ Zod schemas and types for storefront documents and snapshots.
 - **Purpose:** Package/barrel entry point re-exporting its folder (inferred from file name; no header comment)
 - **Size:** 64 lines
 - **Imports (project):** `jellyshops/packages/storefront-schema/src/custom-data.ts`, `jellyshops/packages/storefront-schema/src/defaults.ts`, `jellyshops/packages/storefront-schema/src/diagnostics.ts`, `jellyshops/packages/storefront-schema/src/dynamic-sources.ts`, `jellyshops/packages/storefront-schema/src/migrations.ts`, `jellyshops/packages/storefront-schema/src/rich-text.ts`, `jellyshops/packages/storefront-schema/src/runtime-v4.ts`, `jellyshops/packages/storefront-schema/src/schema.ts`, `jellyshops/packages/storefront-schema/src/storefront-v2.ts`, `jellyshops/packages/storefront-schema/src/types.ts`, `jellyshops/packages/storefront-schema/src/version.ts`
-- **Used by:** `jellyshops/packages/storefront-registry/src/blocks.ts`, `jellyshops/packages/storefront-registry/src/labels.ts`, `jellyshops/packages/storefront-registry/src/presets.ts`, `jellyshops/packages/storefront-registry/src/registry.ts`, `jellyshops/packages/storefront-registry/src/sections/content.ts`, `jellyshops/packages/storefront-registry/src/sections/layout.ts`, `jellyshops/packages/storefront-registry/src/theme-packs.ts`, `jellyshops/packages/storefront-registry/src/types.ts`, `jellyshops/packages/storefront-registry/src/v4-starter-packs-validation.ts`, `jellyshops/packages/storefront-registry/src/v4-starter-packs.ts`, `jellyshops/packages/storefront-renderer/src/page-renderer.tsx`, `jellyshops/packages/storefront-renderer/src/registry-section-renderer.tsx`, `jellyshops/packages/storefront-renderer/src/render-registry.tsx`, `jellyshops/packages/storefront-renderer/src/runtime-context.ts`, `jellyshops/packages/storefront-renderer/src/sections/content-pages.tsx`, `jellyshops/packages/storefront-renderer/src/sections/footer.tsx`, `jellyshops/packages/storefront-renderer/src/sections/header.tsx`, `jellyshops/packages/storefront-renderer/src/sections/hero.tsx`, `jellyshops/packages/storefront-renderer/src/sections/home-sections.tsx`, `jellyshops/packages/storefront-renderer/src/sections/rich-text.tsx`, `jellyshops/packages/storefront-renderer/src/sections/shared.ts`, `jellyshops/packages/storefront-renderer/src/sections/slideshow.tsx`, `jellyshops/packages/storefront-renderer/src/sections/theme-pack-sections.tsx`, `jellyshops/packages/storefront-renderer/src/store-identity.ts`, `jellyshops/packages/storefront-renderer/src/storefront-renderer.tsx`, `jellyshops/packages/storefront-renderer/src/types.ts`, `jellyshops/packages/storefront-themes/src/storefront-theme-tokens.ts`, `jellyshops/packages/storefront-themes/src/theme-registry.ts`, `jellyshops/packages/storefront-themes/src/themes/example-boutique/hero.tsx`, `jellyshops/packages/storefront-themes/src/types.ts`, `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/components/storefront-frame.tsx`, `jellyshops/src/features/customers/customer-page.tsx`, `jellyshops/src/features/customers/protected-storefront-page.tsx`, `jellyshops/src/features/store-editor/api/client.ts`, `jellyshops/src/features/store-editor/api/types.ts`, `jellyshops/src/features/store-editor/components/controls/image-control.tsx`, `jellyshops/src/features/store-editor/components/dynamic-source-picker.tsx`, `jellyshops/src/features/store-editor/components/editor-shell.tsx`, `jellyshops/src/features/store-editor/components/global-section-panel.tsx`, `jellyshops/src/features/store-editor/components/inspector/control-renderer.tsx`, `jellyshops/src/features/store-editor/components/inspector/inspector.tsx`, `jellyshops/src/features/store-editor/components/inspector/rich-text-document-editor.tsx`, `jellyshops/src/features/store-editor/components/inspector/theme-inspector.tsx`, `jellyshops/src/features/store-editor/components/page-hierarchy.tsx`, `jellyshops/src/features/store-editor/components/preview-canvas.tsx`, `jellyshops/src/features/store-editor/components/publish-controls.tsx`, `jellyshops/src/features/store-editor/components/publish-diagnostics.tsx`, `jellyshops/src/features/store-editor/components/section-library.tsx`, `jellyshops/src/features/store-editor/components/template-preview.tsx`, `jellyshops/src/features/store-editor/components/template-resource-selector.tsx`, `jellyshops/src/features/store-editor/editor-store.ts`, `jellyshops/src/features/store-editor/model/commands.ts`, `jellyshops/src/features/store-editor/model/history.ts`, `jellyshops/src/features/store-editor/model/selection.ts`, `jellyshops/src/features/store-editor/model/types.ts`, `jellyshops/src/features/store-editor/state/reducer.ts`, `jellyshops/src/features/store-editor/state/types.ts`, `jellyshops/src/features/store-editor/template-layout.ts`, `jellyshops/src/features/storefront/public-storefront-api.ts`, `jellyshops/src/features/storefront/resource-loader.ts`, `jellyshops/src/features/storefront/server-storefront.ts`, `jellyshops/src/features/storefront/storefront-page.tsx`, `jellyshops/src/features/theme-preview/template-preview.tsx`, `jellyshops/src/features/theme-preview/theme-preview-page.tsx`, `jellyshops/src/lib/domain.ts`, `jellyshops/src/lib/repository.ts`, `jellyshops/src/lib/seed.ts`
+- **Used by:** `jellyshops/packages/storefront-registry/src/blocks.ts`, `jellyshops/packages/storefront-registry/src/labels.ts`, `jellyshops/packages/storefront-registry/src/presets.ts`, `jellyshops/packages/storefront-registry/src/registry.ts`, `jellyshops/packages/storefront-registry/src/sections/content.ts`, `jellyshops/packages/storefront-registry/src/sections/layout.ts`, `jellyshops/packages/storefront-registry/src/theme-packs.ts`, `jellyshops/packages/storefront-registry/src/types.ts`, `jellyshops/packages/storefront-registry/src/v4-starter-packs-validation.ts`, `jellyshops/packages/storefront-registry/src/v4-starter-packs.ts`, `jellyshops/packages/storefront-renderer/src/page-renderer.tsx`, `jellyshops/packages/storefront-renderer/src/registry-section-renderer.tsx`, `jellyshops/packages/storefront-renderer/src/render-registry.tsx`, `jellyshops/packages/storefront-renderer/src/runtime-context.ts`, `jellyshops/packages/storefront-renderer/src/sections/content-pages.tsx`, `jellyshops/packages/storefront-renderer/src/sections/footer.tsx`, `jellyshops/packages/storefront-renderer/src/sections/header.tsx`, `jellyshops/packages/storefront-renderer/src/sections/hero.tsx`, `jellyshops/packages/storefront-renderer/src/sections/home-sections.tsx`, `jellyshops/packages/storefront-renderer/src/sections/rich-text.tsx`, `jellyshops/packages/storefront-renderer/src/sections/shared.ts`, `jellyshops/packages/storefront-renderer/src/sections/slideshow.tsx`, `jellyshops/packages/storefront-renderer/src/sections/theme-pack-sections.tsx`, `jellyshops/packages/storefront-renderer/src/store-identity.ts`, `jellyshops/packages/storefront-renderer/src/storefront-renderer.tsx`, `jellyshops/packages/storefront-renderer/src/types.ts`, `jellyshops/packages/storefront-themes/src/storefront-theme-tokens.ts`, `jellyshops/packages/storefront-themes/src/theme-registry.ts`, `jellyshops/packages/storefront-themes/src/themes/example-boutique/hero.tsx`, `jellyshops/packages/storefront-themes/src/types.ts`, `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/features/customers/customer-page.tsx`, `jellyshops/src/features/customers/protected-storefront-page.tsx`, `jellyshops/src/features/store-editor/api/client.ts`, `jellyshops/src/features/store-editor/api/types.ts`, `jellyshops/src/features/store-editor/components/controls/image-control.tsx`, `jellyshops/src/features/store-editor/components/dynamic-source-picker.tsx`, `jellyshops/src/features/store-editor/components/editor-shell.tsx`, `jellyshops/src/features/store-editor/components/global-section-panel.tsx`, `jellyshops/src/features/store-editor/components/inspector/control-renderer.tsx`, `jellyshops/src/features/store-editor/components/inspector/inspector.tsx`, `jellyshops/src/features/store-editor/components/inspector/rich-text-document-editor.tsx`, `jellyshops/src/features/store-editor/components/inspector/theme-inspector.tsx`, `jellyshops/src/features/store-editor/components/page-hierarchy.tsx`, `jellyshops/src/features/store-editor/components/preview-canvas.tsx`, `jellyshops/src/features/store-editor/components/publish-controls.tsx`, `jellyshops/src/features/store-editor/components/publish-diagnostics.tsx`, `jellyshops/src/features/store-editor/components/section-library.tsx`, `jellyshops/src/features/store-editor/components/template-preview.tsx`, `jellyshops/src/features/store-editor/components/template-resource-selector.tsx`, `jellyshops/src/features/store-editor/editor-store.ts`, `jellyshops/src/features/store-editor/model/commands.ts`, `jellyshops/src/features/store-editor/model/history.ts`, `jellyshops/src/features/store-editor/model/selection.ts`, `jellyshops/src/features/store-editor/model/types.ts`, `jellyshops/src/features/store-editor/state/reducer.ts`, `jellyshops/src/features/store-editor/state/types.ts`, `jellyshops/src/features/store-editor/template-layout.ts`, `jellyshops/src/features/storefront/components/storefront-frame.tsx`, `jellyshops/src/features/storefront/public-storefront-api.ts`, `jellyshops/src/features/storefront/resource-loader.ts`, `jellyshops/src/features/storefront/server-storefront.ts`, `jellyshops/src/features/storefront/storefront-page.tsx`, `jellyshops/src/features/theme-preview/template-preview.tsx`, `jellyshops/src/features/theme-preview/theme-preview-page.tsx`, `jellyshops/src/lib/domain.ts`, `jellyshops/src/lib/repository.ts`, `jellyshops/src/lib/seed.ts`
 - **Tests:** `editor-shell.test.tsx`, `rich-text-document-editor.test.tsx`, `preview-canvas.test.tsx`, `publish-controls.test.tsx`, `publish-diagnostics.test.tsx`, `editor-store.test.ts`, `commands.test.ts`, `history.test.ts`, `page-commands.test.ts`, `reducer.test.ts`, `template-layout.test.ts`, `public-storefront-api.test.ts`, `published-v4-routes.test.ts`, `resource-loader.test.ts`, `storefront-page.test.tsx`, `store-design.test.ts`, `index.test.ts`, `registry.test.ts`, `home-page-sections.test.tsx`, `registry-renderer.test.tsx`, `storefront-renderer-v2.test.tsx`, `storefront-renderer-v3.test.tsx`, `storefront-renderer.test.tsx`, `theme-registry.test.ts`
 
 - `migrations.test.ts` — test (20 lines)
@@ -524,7 +524,7 @@ Theme definitions, token resolvers, fonts.
 - **Purpose:** Package/barrel entry point re-exporting its folder (inferred from file name; no header comment)
 - **Size:** 9 lines
 - **Imports (project):** `jellyshops/packages/storefront-themes/src/fonts.ts`, `jellyshops/packages/storefront-themes/src/storefront-theme-tokens.ts`, `jellyshops/packages/storefront-themes/src/theme-registry.ts`, `jellyshops/packages/storefront-themes/src/theme-resolver.ts`, `jellyshops/packages/storefront-themes/src/theme-shell-resolver.ts`, `jellyshops/packages/storefront-themes/src/types.ts`
-- **Used by:** `jellyshops/packages/storefront-renderer/src/registry-section-renderer.tsx`, `jellyshops/packages/storefront-renderer/src/storefront-renderer.tsx`, `jellyshops/src/app/[storeSlug]/collections/[collectionSlug]/collection-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/app/[storeSlug]/shop/page.tsx`, `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/components/cart-panel.tsx`, `jellyshops/src/components/storefront-frame.tsx`, `jellyshops/src/components/storefront-pages.tsx`, `jellyshops/src/components/storefront-shell.tsx`, `jellyshops/src/features/store-editor/components/inspector/theme-inspector.tsx`, `jellyshops/src/features/store-editor/components/template-preview.tsx`, `jellyshops/src/features/storefront/storefront-page.tsx`, `jellyshops/src/features/theme-preview/theme-preview-page.tsx`
+- **Used by:** `jellyshops/packages/storefront-renderer/src/registry-section-renderer.tsx`, `jellyshops/packages/storefront-renderer/src/storefront-renderer.tsx`, `jellyshops/src/app/[storeSlug]/collections/[collectionSlug]/collection-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/app/[storeSlug]/shop/page.tsx`, `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/features/store-editor/components/inspector/theme-inspector.tsx`, `jellyshops/src/features/store-editor/components/template-preview.tsx`, `jellyshops/src/features/storefront/components/cart-panel.tsx`, `jellyshops/src/features/storefront/components/storefront-frame.tsx`, `jellyshops/src/features/storefront/components/storefront-pages.tsx`, `jellyshops/src/features/storefront/components/storefront-shell.tsx`, `jellyshops/src/features/storefront/storefront-page.tsx`, `jellyshops/src/features/theme-preview/theme-preview-page.tsx`
 - **Tests:** `theme-registry.test.ts`
 
 - `jelly-avenue.test.ts` — test (29 lines)
@@ -816,7 +816,7 @@ Small shared storefront components.
 - **Purpose:** Next.js page for route "/[storeSlug]/cart" (inferred from file name; no header comment)
 - **Size:** 53 lines
 - **Exports:** `CartPage (default)`
-- **Imports (project):** `jellyshops/src/components/storefront-shell.tsx`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/storefront/public-storefront-api.ts`, `jellyshops/src/features/storefront/resource-loader.ts`, `jellyshops/src/features/storefront/storefront-bootstrap.tsx`, `jellyshops/src/features/storefront/storefront-page.tsx`, `jellyshops/src/lib/domain.ts`
+- **Imports (project):** `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/storefront/components/storefront-shell.tsx`, `jellyshops/src/features/storefront/public-storefront-api.ts`, `jellyshops/src/features/storefront/resource-loader.ts`, `jellyshops/src/features/storefront/storefront-bootstrap.tsx`, `jellyshops/src/features/storefront/storefront-page.tsx`, `jellyshops/src/lib/domain.ts`
 - **Imports (packages):** `next`, `react`
 - **Used by:** nothing (entry point or unused)
 
@@ -828,7 +828,7 @@ Small shared storefront components.
 - **Purpose:** Next.js page for route "/[storeSlug]/checkout" (inferred from file name; no header comment)
 - **Size:** 60 lines
 - **Exports:** `CheckoutView`, `CheckoutPage (default)`
-- **Imports (project):** `jellyshops/src/components/storefront-shell.tsx`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/commerce/api/client.ts`, `jellyshops/src/features/commerce/components/payment-element-checkout.tsx`, `jellyshops/src/features/customers/customer-provider.tsx`, `jellyshops/src/lib/domain.ts`
+- **Imports (project):** `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/commerce/api/client.ts`, `jellyshops/src/features/commerce/components/payment-element-checkout.tsx`, `jellyshops/src/features/customers/customer-provider.tsx`, `jellyshops/src/features/storefront/components/storefront-shell.tsx`, `jellyshops/src/lib/domain.ts`
 - **Imports (packages):** `lucide-react`, `next`, `react`
 - **Used by:** nothing (entry point or unused)
 - **Tests:** `page.test.tsx`
@@ -875,7 +875,7 @@ Public storefront routes for one store.
 - **Purpose:** Next.js layout for route "/[storeSlug]" (inferred from file name; no header comment)
 - **Size:** 20 lines
 - **Exports:** `generateMetadata`, `StoreLayout (default)`
-- **Imports (project):** `jellyshops/src/components/storefront-frame.tsx`, `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/storefront/server-storefront.ts`, `jellyshops/src/features/storefront/storefront-bootstrap.tsx`
+- **Imports (project):** `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/storefront/components/storefront-frame.tsx`, `jellyshops/src/features/storefront/server-storefront.ts`, `jellyshops/src/features/storefront/storefront-bootstrap.tsx`
 - **Imports (packages):** `next`
 - **Used by:** nothing (entry point or unused)
 
@@ -920,7 +920,7 @@ Public storefront routes for one store.
 - **Purpose:** Next.js page for route "/[storeSlug]/order/[publicToken]" (inferred from file name; no header comment)
 - **Size:** 71 lines
 - **Exports:** `PublicOrderPage (default)`
-- **Imports (project):** `jellyshops/src/components/storefront-shell.tsx`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/commerce/api/client.ts`
+- **Imports (project):** `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/commerce/api/client.ts`, `jellyshops/src/features/storefront/components/storefront-shell.tsx`
 - **Imports (packages):** `lucide-react`, `next`, `react`
 - **Used by:** nothing (entry point or unused)
 - **Tests:** `page.test.tsx`
@@ -942,7 +942,7 @@ Public storefront routes for one store.
 - **Purpose:** React component(s): ProductPage (default) (inferred from file name; no header comment)
 - **Size:** 92 lines
 - **Exports:** `ProductPage (default)`
-- **Imports (project):** `jellyshops/src/components/storefront-shell.tsx`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/customers/wishlist-button.tsx`, `jellyshops/src/features/storefront/product-presentation.ts`, `jellyshops/src/features/storefront/public-storefront-api.ts`, `jellyshops/src/features/storefront/resource-loader.ts`, `jellyshops/src/features/storefront/storefront-bootstrap.tsx`, `jellyshops/src/features/storefront/storefront-page.tsx`, `jellyshops/src/lib/domain.ts`, `jellyshops/src/lib/product-configuration.ts`
+- **Imports (project):** `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/customers/wishlist-button.tsx`, `jellyshops/src/features/storefront/components/storefront-shell.tsx`, `jellyshops/src/features/storefront/product-presentation.ts`, `jellyshops/src/features/storefront/public-storefront-api.ts`, `jellyshops/src/features/storefront/resource-loader.ts`, `jellyshops/src/features/storefront/storefront-bootstrap.tsx`, `jellyshops/src/features/storefront/storefront-page.tsx`, `jellyshops/src/lib/domain.ts`, `jellyshops/src/lib/product-configuration.ts`
 - **Imports (packages):** `next`, `react`
 - **Used by:** `jellyshops/src/app/[storeSlug]/products/[productSlug]/page.tsx`
 - **Tests:** `page.test.tsx`
@@ -955,7 +955,7 @@ Public storefront routes for one store.
 - **Purpose:** Next.js page for route "/[storeSlug]/search" (inferred from file name; no header comment)
 - **Size:** 75 lines
 - **Exports:** `SearchPage (default)`
-- **Imports (project):** `jellyshops/packages/storefront-themes/src/index.ts`, `jellyshops/src/components/storefront-shell.tsx`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/storefront/catalog-browser.tsx`, `jellyshops/src/features/storefront/page-context-loaders.ts`, `jellyshops/src/features/storefront/public-page-context-api.ts`, `jellyshops/src/features/storefront/public-storefront-api.ts`, `jellyshops/src/features/storefront/resource-loader.ts`, `jellyshops/src/features/storefront/storefront-bootstrap.tsx`, `jellyshops/src/features/storefront/storefront-page.tsx`, `jellyshops/src/lib/domain.ts`
+- **Imports (project):** `jellyshops/packages/storefront-themes/src/index.ts`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/storefront/catalog-browser.tsx`, `jellyshops/src/features/storefront/components/storefront-shell.tsx`, `jellyshops/src/features/storefront/page-context-loaders.ts`, `jellyshops/src/features/storefront/public-page-context-api.ts`, `jellyshops/src/features/storefront/public-storefront-api.ts`, `jellyshops/src/features/storefront/resource-loader.ts`, `jellyshops/src/features/storefront/storefront-bootstrap.tsx`, `jellyshops/src/features/storefront/storefront-page.tsx`, `jellyshops/src/lib/domain.ts`
 - **Imports (packages):** `next`, `react`
 - **Used by:** nothing (entry point or unused)
 - **Tests:** `page.test.tsx`
@@ -967,7 +967,7 @@ Public storefront routes for one store.
 - **Purpose:** Next.js page for route "/[storeSlug]/shop" (inferred from file name; no header comment)
 - **Size:** 30 lines
 - **Exports:** `ShopPage (default)`
-- **Imports (project):** `jellyshops/packages/storefront-themes/src/index.ts`, `jellyshops/src/components/storefront-shell.tsx`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/storefront/catalog-browser.tsx`, `jellyshops/src/lib/domain.ts`
+- **Imports (project):** `jellyshops/packages/storefront-themes/src/index.ts`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/storefront/catalog-browser.tsx`, `jellyshops/src/features/storefront/components/storefront-shell.tsx`, `jellyshops/src/lib/domain.ts`
 - **Imports (packages):** `next`
 - **Used by:** nothing (entry point or unused)
 
@@ -1022,7 +1022,7 @@ Public storefront routes for one store.
 - **Purpose:** Next.js page for route "/admin/customers/[id]" (inferred from file name; no header comment)
 - **Size:** 251 lines
 - **Exports:** `CustomerDetailPage (default)`
-- **Imports (project):** `jellyshops/src/components/order-status.tsx`, `jellyshops/src/features/admin/api.ts`, `jellyshops/src/features/admin/use-admin-query.ts`, `jellyshops/src/features/auth/auth-provider.tsx`, `jellyshops/src/lib/domain.ts`
+- **Imports (project):** `jellyshops/src/features/admin/api.ts`, `jellyshops/src/features/admin/use-admin-query.ts`, `jellyshops/src/features/auth/auth-provider.tsx`, `jellyshops/src/features/commerce/components/order-status.tsx`, `jellyshops/src/lib/domain.ts`
 - **Imports (packages):** `lucide-react`, `next`, `react`
 - **Used by:** nothing (entry point or unused)
 
@@ -1057,7 +1057,7 @@ Merchant admin pages.
 - **Purpose:** Next.js layout for route "/admin" (inferred from file name; no header comment)
 - **Size:** 15 lines
 - **Exports:** `AdminLayout (default)`
-- **Imports (project):** `jellyshops/src/components/admin-auth-gate.tsx`, `jellyshops/src/components/app-shell.tsx`
+- **Imports (project):** `jellyshops/src/components/app-shell.tsx`, `jellyshops/src/features/auth/components/admin-auth-gate.tsx`
 - **Used by:** nothing (entry point or unused)
 
 ### `jellyshops/src/app/admin/page.tsx`
@@ -1065,7 +1065,7 @@ Merchant admin pages.
 - **Purpose:** Next.js page for route "/admin" (inferred from file name; no header comment)
 - **Size:** 352 lines
 - **Exports:** `DashboardPage (default)`
-- **Imports (project):** `jellyshops/src/components/order-status.tsx`, `jellyshops/src/features/admin/api.ts`, `jellyshops/src/features/admin/use-admin-query.ts`, `jellyshops/src/features/auth/auth-provider.tsx`, `jellyshops/src/lib/domain.ts`
+- **Imports (project):** `jellyshops/src/features/admin/api.ts`, `jellyshops/src/features/admin/use-admin-query.ts`, `jellyshops/src/features/auth/auth-provider.tsx`, `jellyshops/src/features/commerce/components/order-status.tsx`, `jellyshops/src/lib/domain.ts`
 - **Imports (packages):** `lucide-react`, `next`, `react`
 - **Used by:** nothing (entry point or unused)
 
@@ -1162,7 +1162,7 @@ Merchant admin pages.
 - **Purpose:** Next.js page for route "/admin/products/[id]" (inferred from file name; no header comment)
 - **Size:** 119 lines
 - **Exports:** `ProductEditView`, `ProductEditPage (default)`
-- **Imports (project):** `jellyshops/src/components/digital-product-settings.tsx`, `jellyshops/src/components/product-form.tsx`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/auth/auth-provider.tsx`, `jellyshops/src/features/commerce/api/client.ts`, `jellyshops/src/features/store-editor/api/client.ts`, `jellyshops/src/lib/domain.ts`
+- **Imports (project):** `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/auth/auth-provider.tsx`, `jellyshops/src/features/commerce/api/client.ts`, `jellyshops/src/features/commerce/components/digital-product-settings.tsx`, `jellyshops/src/features/commerce/components/product-form.tsx`, `jellyshops/src/features/store-editor/api/client.ts`, `jellyshops/src/lib/domain.ts`
 - **Imports (packages):** `lucide-react`, `next`, `react`
 - **Used by:** nothing (entry point or unused)
 
@@ -1174,7 +1174,7 @@ Merchant admin pages.
 - **Purpose:** Next.js page for route "/admin/products/new" (inferred from file name; no header comment)
 - **Size:** 52 lines
 - **Exports:** `NewProductPage (default)`
-- **Imports (project):** `jellyshops/src/components/product-form.tsx`
+- **Imports (project):** `jellyshops/src/features/commerce/components/product-form.tsx`
 - **Imports (packages):** `lucide-react`, `next`
 - **Used by:** nothing (entry point or unused)
 - **Tests:** `page.test.tsx`
@@ -1295,7 +1295,7 @@ Next.js App Router: root layout, home, fonts, global CSS.
 - **Purpose:** Next.js page for route "/login" (inferred from file name; no header comment)
 - **Size:** 4 lines
 - **Exports:** `LoginPage (default)`
-- **Imports (project):** `jellyshops/src/components/auth-form.tsx`
+- **Imports (project):** `jellyshops/src/features/auth/components/auth-form.tsx`
 - **Imports (packages):** `react`
 - **Used by:** nothing (entry point or unused)
 
@@ -1319,7 +1319,7 @@ Next.js App Router: root layout, home, fonts, global CSS.
 - **Purpose:** Next.js page for route "/signup" (inferred from file name; no header comment)
 - **Size:** 4 lines
 - **Exports:** `SignupPage (default)`
-- **Imports (project):** `jellyshops/src/components/auth-form.tsx`
+- **Imports (project):** `jellyshops/src/features/auth/components/auth-form.tsx`
 - **Imports (packages):** `react`
 - **Used by:** nothing (entry point or unused)
 
@@ -1345,18 +1345,7 @@ Next.js App Router: root layout, home, fonts, global CSS.
 
 ## `jellyshops/src/components/`
 
-Shared and legacy UI: admin shell/nav, product form, cart, storefront shell.
-
-- `admin-auth-gate.test.tsx` — test (22 lines)
-### `jellyshops/src/components/admin-auth-gate.tsx`
-
-- **Purpose:** React component(s): AdminAuthGate (inferred from file name; no header comment)
-- **Size:** 115 lines
-- **Exports:** `AdminAuthGate`
-- **Imports (project):** `jellyshops/src/features/auth/auth-provider.tsx`
-- **Imports (packages):** `lucide-react`, `next`, `react`
-- **Used by:** `jellyshops/src/app/admin/layout.tsx`
-- **Tests:** `admin-auth-gate.test.tsx`
+Shared UI primitives and the deferred admin shell.
 
 ### `jellyshops/src/components/admin-nav.tsx`
 
@@ -1386,103 +1375,6 @@ Shared and legacy UI: admin shell/nav, product form, cart, storefront shell.
 - **Imports (packages):** `lucide-react`, `next`, `react`
 - **Used by:** `jellyshops/src/app/admin/layout.tsx`
 
-- `auth-form.test.tsx` — test (44 lines)
-### `jellyshops/src/components/auth-form.tsx`
-
-- **Purpose:** React component(s): AuthForm (inferred from file name; no header comment)
-- **Size:** 160 lines
-- **Exports:** `AuthForm`
-- **Imports (project):** `jellyshops/src/components/ui/button.tsx`, `jellyshops/src/components/ui/card.tsx`, `jellyshops/src/components/ui/input.tsx`, `jellyshops/src/components/ui/label.tsx`, `jellyshops/src/features/auth/auth-provider.tsx`
-- **Imports (packages):** `lucide-react`, `next`, `react`
-- **Used by:** `jellyshops/src/app/login/page.tsx`, `jellyshops/src/app/signup/page.tsx`
-- **Tests:** `auth-form.test.tsx`
-
-- `cart-panel.test.tsx` — test (15 lines)
-### `jellyshops/src/components/cart-panel.tsx`
-
-- **Purpose:** React component(s): CartPanel (inferred from file name; no header comment)
-- **Size:** 162 lines
-- **Exports:** `CartPanel`
-- **Imports (project):** `jellyshops/packages/storefront-themes/src/index.ts`, `jellyshops/src/components/jelly/cart.tsx`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/lib/domain.ts`
-- **Imports (packages):** `lucide-react`, `next`, `react`
-- **Used by:** `jellyshops/src/components/storefront-frame.tsx`
-- **Tests:** `cart-panel.test.tsx`
-
-### `jellyshops/src/components/category-recommendations.tsx`
-
-- **Purpose:** React component(s): CategoryRecommendations (inferred from file name; no header comment)
-- **Size:** 168 lines
-- **Exports:** `CategoryRecommendations`
-- **Imports (project):** `jellyshops/src/lib/domain.ts`
-- **Imports (packages):** `lucide-react`, `react`
-- **Used by:** `jellyshops/src/components/product-form.tsx`
-
-### `jellyshops/src/components/digital-product-settings.tsx`
-
-- **Purpose:** React component(s): DigitalProductSettings (inferred from file name; no header comment)
-- **Size:** 36 lines
-- **Exports:** `DigitalProductSettings`
-- **Imports (project):** `jellyshops/src/features/auth/auth-provider.tsx`
-- **Imports (packages):** `react`
-- **Used by:** `jellyshops/src/app/admin/products/[id]/page.tsx`
-
-- `order-status.test.tsx` — test (8 lines)
-### `jellyshops/src/components/order-status.tsx`
-
-- **Purpose:** React component(s): OrderStatusBadge (inferred from file name; no header comment)
-- **Size:** 15 lines
-- **Exports:** `OrderStatusBadge`
-- **Imports (project):** `jellyshops/src/lib/domain.ts`
-- **Used by:** `jellyshops/src/app/admin/customers/[id]/page.tsx`, `jellyshops/src/app/admin/page.tsx`
-- **Tests:** `order-status.test.tsx`
-
-### `jellyshops/src/components/product-category-picker.tsx`
-
-- **Purpose:** React component(s): ProductCategoryPicker (inferred from file name; no header comment)
-- **Size:** 344 lines
-- **Exports:** `ProductCategoryPicker`
-- **Imports (project):** `jellyshops/src/lib/domain.ts`
-- **Imports (packages):** `lucide-react`, `react`
-- **Used by:** `jellyshops/src/components/product-form.tsx`
-
-### `jellyshops/src/components/product-form.tsx`
-
-- **Purpose:** React component(s): ProductForm (inferred from file name; no header comment)
-- **Size:** 834 lines
-- **Exports:** `ProductForm`
-- **Imports (project):** `jellyshops/src/components/category-recommendations.tsx`, `jellyshops/src/components/product-category-picker.tsx`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/auth/auth-provider.tsx`, `jellyshops/src/features/commerce/api/client.ts`, `jellyshops/src/features/store-editor/api/client.ts`, `jellyshops/src/lib/domain.ts`, `jellyshops/src/lib/product-variants.ts`
-- **Imports (packages):** `lucide-react`, `next`, `react`
-- **Used by:** `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/app/admin/products/new/page.tsx`
-
-### `jellyshops/src/components/storefront-frame.tsx`
-
-- **Purpose:** React component(s): StorefrontFrame (inferred from file name; no header comment)
-- **Size:** 50 lines
-- **Exports:** `StorefrontFrame`
-- **Imports (project):** `jellyshops/packages/storefront-renderer/src/index.ts`, `jellyshops/packages/storefront-schema/src/index.ts`, `jellyshops/packages/storefront-themes/src/index.ts`, `jellyshops/src/components/cart-panel.tsx`, `jellyshops/src/components/storefront-shell.tsx`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/storefront/chrome-context.tsx`, `jellyshops/src/features/storefront/public-storefront-api.ts`, `jellyshops/src/features/storefront/storefront-bootstrap.tsx`
-- **Imports (packages):** `next`, `react`
-- **Used by:** `jellyshops/src/app/[storeSlug]/layout.tsx`
-
-### `jellyshops/src/components/storefront-pages.tsx`
-
-- **Purpose:** React component(s): SharedCollectionPage, SharedProductPage, SharedSearchPage, SharedCartPage (inferred from file name; no header comment)
-- **Size:** 32 lines
-- **Exports:** `SharedCollectionPage`, `SharedProductPage`, `SharedSearchPage`, `SharedCartPage`, `SharedCheckoutPage`, `SharedOrderPage`, `SharedContentPage`
-- **Imports (project):** `jellyshops/packages/storefront-themes/src/index.ts`, `jellyshops/src/components/jelly/product.tsx`
-- **Imports (packages):** `lucide-react`, `next`
-- **Used by:** `jellyshops/src/components/storefront-shell.tsx`
-
-- `storefront-shell.test.tsx` — test (73 lines)
-### `jellyshops/src/components/storefront-shell.tsx`
-
-- **Purpose:** React component(s): SharedStorefrontLayout, SharedStorefrontHeader, SharedStorefrontFooter, SharedCartPresentation (inferred from file name; no header comment)
-- **Size:** 82 lines
-- **Exports:** `SharedStorefrontLayout`, `SharedStorefrontHeader`, `SharedStorefrontFooter`, `SharedCartPresentation`, `ThemedStorefrontShell`, `useThemePresentation`
-- **Imports (project):** `jellyshops/packages/storefront-themes/src/index.ts`, `jellyshops/src/components/jelly/cart.tsx`, `jellyshops/src/components/storefront-pages.tsx`, `jellyshops/src/components/ui/dialog.tsx`
-- **Imports (packages):** `clsx`, `lucide-react`, `next`, `react`
-- **Used by:** `jellyshops/src/app/[storeSlug]/cart/page.tsx`, `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `jellyshops/src/app/[storeSlug]/order/[publicToken]/page.tsx`, `jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/app/[storeSlug]/shop/page.tsx`, `jellyshops/src/components/storefront-frame.tsx`
-- **Tests:** `storefront-shell.test.tsx`
-
 ## `jellyshops/src/components/jelly/`
 
 Storefront primitives used by theme markup.
@@ -1494,7 +1386,7 @@ Storefront primitives used by theme markup.
 - **Exports:** `CartDrawer`, `CartItem`, `CartSummary`, `EmptyCart`, `CartBadge`
 - **Imports (project):** `jellyshops/src/components/ui/sheet.tsx`, `jellyshops/src/lib/utils.ts`
 - **Imports (packages):** `lucide-react`, `next`, `react`
-- **Used by:** `jellyshops/src/components/cart-panel.tsx`, `jellyshops/src/components/jelly/index.ts`, `jellyshops/src/components/storefront-shell.tsx`
+- **Used by:** `jellyshops/src/components/jelly/index.ts`, `jellyshops/src/features/storefront/components/cart-panel.tsx`, `jellyshops/src/features/storefront/components/storefront-shell.tsx`
 
 ### `jellyshops/src/components/jelly/index.ts`
 
@@ -1528,7 +1420,7 @@ Storefront primitives used by theme markup.
 - **Exports:** `AddToCartButton`, `ProductBadge`, `ProductPrice`
 - **Imports (project):** `jellyshops/src/lib/utils.ts`
 - **Imports (packages):** `lucide-react`, `react`
-- **Used by:** `jellyshops/src/components/jelly/index.ts`, `jellyshops/src/components/storefront-pages.tsx`
+- **Used by:** `jellyshops/src/components/jelly/index.ts`, `jellyshops/src/features/storefront/components/storefront-pages.tsx`
 
 ## `jellyshops/src/components/ui/`
 
@@ -1541,7 +1433,7 @@ shadcn-style UI primitives.
 - **Exports:** `ButtonVariant` (type), `ButtonSize` (type), `buttonVariants`, `ButtonProps` (type), `Button`
 - **Imports (project):** `jellyshops/src/lib/utils.ts`
 - **Imports (packages):** `react`
-- **Used by:** `jellyshops/src/components/admin-theme-toggle.tsx`, `jellyshops/src/components/app-shell.tsx`, `jellyshops/src/components/auth-form.tsx`
+- **Used by:** `jellyshops/src/components/admin-theme-toggle.tsx`, `jellyshops/src/components/app-shell.tsx`, `jellyshops/src/features/auth/components/auth-form.tsx`
 
 ### `jellyshops/src/components/ui/card.tsx`
 
@@ -1550,7 +1442,7 @@ shadcn-style UI primitives.
 - **Exports:** `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`
 - **Imports (project):** `jellyshops/src/lib/utils.ts`
 - **Imports (packages):** `react`
-- **Used by:** `jellyshops/src/components/auth-form.tsx`
+- **Used by:** `jellyshops/src/features/auth/components/auth-form.tsx`
 
 ### `jellyshops/src/components/ui/dialog.tsx`
 
@@ -1558,7 +1450,7 @@ shadcn-style UI primitives.
 - **Size:** 121 lines
 - **Imports (project):** `jellyshops/src/lib/utils.ts`
 - **Imports (packages):** `@radix-ui/react-dialog`, `lucide-react`, `react`
-- **Used by:** `jellyshops/src/components/storefront-shell.tsx`, `jellyshops/src/features/store-editor/components/template-preview.tsx`, `jellyshops/src/features/storefront/catalog-browser.tsx`
+- **Used by:** `jellyshops/src/features/store-editor/components/template-preview.tsx`, `jellyshops/src/features/storefront/catalog-browser.tsx`, `jellyshops/src/features/storefront/components/storefront-shell.tsx`
 
 ### `jellyshops/src/components/ui/input.tsx`
 
@@ -1567,7 +1459,7 @@ shadcn-style UI primitives.
 - **Exports:** `Input`
 - **Imports (project):** `jellyshops/src/lib/utils.ts`
 - **Imports (packages):** `react`
-- **Used by:** `jellyshops/src/components/auth-form.tsx`
+- **Used by:** `jellyshops/src/features/auth/components/auth-form.tsx`
 
 ### `jellyshops/src/components/ui/label.tsx`
 
@@ -1576,7 +1468,7 @@ shadcn-style UI primitives.
 - **Exports:** `Label`
 - **Imports (project):** `jellyshops/src/lib/utils.ts`
 - **Imports (packages):** `react`
-- **Used by:** `jellyshops/src/components/auth-form.tsx`
+- **Used by:** `jellyshops/src/features/auth/components/auth-form.tsx`
 
 ### `jellyshops/src/components/ui/sheet.tsx`
 
@@ -1607,12 +1499,12 @@ React contexts (legacy shop state).
 - **Exports:** `ShopProvider`, `useShop`
 - **Imports (project):** `jellyshops/src/lib/domain.ts`, `jellyshops/src/lib/repository.ts`
 - **Imports (packages):** `react`
-- **Used by:** `jellyshops/src/app/[storeSlug]/[...unmatched]/page.tsx`, `jellyshops/src/app/[storeSlug]/cart/page.tsx`, `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `jellyshops/src/app/[storeSlug]/collections/[collectionSlug]/collection-client.tsx`, `jellyshops/src/app/[storeSlug]/order/[publicToken]/page.tsx`, `jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/app/[storeSlug]/shop/page.tsx`, `jellyshops/src/app/admin/onboarding/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/app/admin/store/page.tsx`, `jellyshops/src/app/layout.tsx`, `jellyshops/src/components/cart-panel.tsx`, `jellyshops/src/components/product-form.tsx`, `jellyshops/src/components/storefront-frame.tsx`, `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/customers/customer-page.tsx`, `jellyshops/src/features/customers/customer-provider.tsx`, `jellyshops/src/features/storefront/catalog-browser.tsx`, `jellyshops/src/features/storefront/storefront-bootstrap.tsx`
+- **Used by:** `jellyshops/src/app/[storeSlug]/[...unmatched]/page.tsx`, `jellyshops/src/app/[storeSlug]/cart/page.tsx`, `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `jellyshops/src/app/[storeSlug]/collections/[collectionSlug]/collection-client.tsx`, `jellyshops/src/app/[storeSlug]/order/[publicToken]/page.tsx`, `jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/app/[storeSlug]/shop/page.tsx`, `jellyshops/src/app/admin/onboarding/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/app/admin/store/page.tsx`, `jellyshops/src/app/layout.tsx`, `jellyshops/src/features/commerce/components/product-form.tsx`, `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/customers/customer-page.tsx`, `jellyshops/src/features/customers/customer-provider.tsx`, `jellyshops/src/features/storefront/catalog-browser.tsx`, `jellyshops/src/features/storefront/components/cart-panel.tsx`, `jellyshops/src/features/storefront/components/storefront-frame.tsx`, `jellyshops/src/features/storefront/storefront-bootstrap.tsx`
 - **Tests:** `page.test.tsx`, `page.test.tsx`, `cart-panel.test.tsx`
 
 ## `jellyshops/src/features/admin/`
 
-Authenticated admin fetch helper and query hook.
+Authenticated admin fetch helper, query hook and merchant shell components.
 
 - `api.test.ts` — test (11 lines)
 ### `jellyshops/src/features/admin/api.ts`
@@ -1635,7 +1527,7 @@ Authenticated admin fetch helper and query hook.
 
 ## `jellyshops/src/features/auth/`
 
-Merchant authentication (Supabase session, merchant/store loading).
+Merchant authentication (Supabase session, merchant/store loading) and auth components.
 
 ### `jellyshops/src/features/auth/auth-provider.tsx`
 
@@ -1644,7 +1536,7 @@ Merchant authentication (Supabase session, merchant/store loading).
 - **Exports:** `supabase`, `AuthProvider`, `useAuth`, `authApiOrigin`
 - **Imports (project):** `jellyshops/src/features/auth/merchant-api.ts`
 - **Imports (packages):** `@supabase/supabase-js`, `react`
-- **Used by:** `jellyshops/src/app/admin/content/blogs/page.tsx`, `jellyshops/src/app/admin/content/metaobjects/page.tsx`, `jellyshops/src/app/admin/content/pages/page.tsx`, `jellyshops/src/app/admin/customers/[id]/page.tsx`, `jellyshops/src/app/admin/customers/page.tsx`, `jellyshops/src/app/admin/engagement/page.tsx`, `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/app/admin/online-store/navigation/page.tsx`, `jellyshops/src/app/admin/online-store/page.tsx`, `jellyshops/src/app/admin/orders/[id]/page.tsx`, `jellyshops/src/app/admin/orders/page.tsx`, `jellyshops/src/app/admin/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/app/admin/products/page.tsx`, `jellyshops/src/app/admin/settings/custom-data/page.tsx`, `jellyshops/src/app/admin/settings/notifications/page.tsx`, `jellyshops/src/app/admin/settings/page.tsx`, `jellyshops/src/app/layout.tsx`, `jellyshops/src/app/onboarding/page.tsx`, `jellyshops/src/components/admin-auth-gate.tsx`, `jellyshops/src/components/app-shell.tsx`, `jellyshops/src/components/auth-form.tsx`, `jellyshops/src/components/digital-product-settings.tsx`, `jellyshops/src/components/product-form.tsx`, `jellyshops/src/features/auth/merchant-auth-callback.tsx`, `jellyshops/src/features/commerce/components/merchant-payments-panel.tsx`
+- **Used by:** `jellyshops/src/app/admin/content/blogs/page.tsx`, `jellyshops/src/app/admin/content/metaobjects/page.tsx`, `jellyshops/src/app/admin/content/pages/page.tsx`, `jellyshops/src/app/admin/customers/[id]/page.tsx`, `jellyshops/src/app/admin/customers/page.tsx`, `jellyshops/src/app/admin/engagement/page.tsx`, `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/app/admin/online-store/navigation/page.tsx`, `jellyshops/src/app/admin/online-store/page.tsx`, `jellyshops/src/app/admin/orders/[id]/page.tsx`, `jellyshops/src/app/admin/orders/page.tsx`, `jellyshops/src/app/admin/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/app/admin/products/page.tsx`, `jellyshops/src/app/admin/settings/custom-data/page.tsx`, `jellyshops/src/app/admin/settings/notifications/page.tsx`, `jellyshops/src/app/admin/settings/page.tsx`, `jellyshops/src/app/layout.tsx`, `jellyshops/src/app/onboarding/page.tsx`, `jellyshops/src/components/app-shell.tsx`, `jellyshops/src/features/auth/components/admin-auth-gate.tsx`, `jellyshops/src/features/auth/components/auth-form.tsx`, `jellyshops/src/features/auth/merchant-auth-callback.tsx`, `jellyshops/src/features/commerce/components/digital-product-settings.tsx`, `jellyshops/src/features/commerce/components/merchant-payments-panel.tsx`, `jellyshops/src/features/commerce/components/product-form.tsx`
 
 - `merchant-api.test.ts` — test (29 lines)
 ### `jellyshops/src/features/auth/merchant-api.ts`
@@ -1664,6 +1556,30 @@ Merchant authentication (Supabase session, merchant/store loading).
 - **Imports (packages):** `next`, `react`
 - **Used by:** `jellyshops/src/app/auth/callback/page.tsx`
 
+## `jellyshops/src/features/auth/components/`
+
+- `admin-auth-gate.test.tsx` — test (22 lines)
+### `jellyshops/src/features/auth/components/admin-auth-gate.tsx`
+
+- **Purpose:** React component(s): AdminAuthGate (inferred from file name; no header comment)
+- **Size:** 115 lines
+- **Exports:** `AdminAuthGate`
+- **Imports (project):** `jellyshops/src/features/auth/auth-provider.tsx`
+- **Imports (packages):** `lucide-react`, `next`, `react`
+- **Used by:** `jellyshops/src/app/admin/layout.tsx`
+- **Tests:** `admin-auth-gate.test.tsx`
+
+- `auth-form.test.tsx` — test (44 lines)
+### `jellyshops/src/features/auth/components/auth-form.tsx`
+
+- **Purpose:** React component(s): AuthForm (inferred from file name; no header comment)
+- **Size:** 160 lines
+- **Exports:** `AuthForm`
+- **Imports (project):** `jellyshops/src/components/ui/button.tsx`, `jellyshops/src/components/ui/card.tsx`, `jellyshops/src/components/ui/input.tsx`, `jellyshops/src/components/ui/label.tsx`, `jellyshops/src/features/auth/auth-provider.tsx`
+- **Imports (packages):** `lucide-react`, `next`, `react`
+- **Used by:** `jellyshops/src/app/login/page.tsx`, `jellyshops/src/app/signup/page.tsx`
+- **Tests:** `auth-form.test.tsx`
+
 ## `jellyshops/src/features/commerce/api/`
 
 - `client.test.ts` — test (93 lines)
@@ -1673,7 +1589,7 @@ Merchant authentication (Supabase session, merchant/store loading).
 - **Size:** 225 lines
 - **Exports:** `PublicCatalogVariant` (type), `PublicCatalogProduct` (type), `PublicCatalogResponse` (type), `PublicCatalogCollection` (type), `PublicCollectionsResponse` (type), `PublicStoreDetails` (type), `catalogProductToStorefrontProduct`, `createCommerceApi`, `CommerceApi` (type), `createMerchantCommerceApi`, `MerchantCommerceApi` (type)
 - **Imports (project):** `jellyshops/src/features/commerce/api/types.ts`, `jellyshops/src/lib/domain.ts`
-- **Used by:** `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `jellyshops/src/app/[storeSlug]/order/[publicToken]/balance/page.tsx`, `jellyshops/src/app/[storeSlug]/order/[publicToken]/page.tsx`, `jellyshops/src/app/admin/orders/[id]/page.tsx`, `jellyshops/src/app/admin/orders/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/components/product-form.tsx`, `jellyshops/src/features/commerce/components/merchant-payments-panel.tsx`, `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/storefront/catalog-browser.tsx`, `jellyshops/src/features/storefront/server-storefront.ts`, `jellyshops/src/features/storefront/storefront-page.tsx`
+- **Used by:** `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `jellyshops/src/app/[storeSlug]/order/[publicToken]/balance/page.tsx`, `jellyshops/src/app/[storeSlug]/order/[publicToken]/page.tsx`, `jellyshops/src/app/admin/orders/[id]/page.tsx`, `jellyshops/src/app/admin/orders/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/features/commerce/components/merchant-payments-panel.tsx`, `jellyshops/src/features/commerce/components/product-form.tsx`, `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/storefront/catalog-browser.tsx`, `jellyshops/src/features/storefront/server-storefront.ts`, `jellyshops/src/features/storefront/storefront-page.tsx`
 - **Tests:** `client.test.ts`
 
 ### `jellyshops/src/features/commerce/api/types.ts`
@@ -1684,6 +1600,24 @@ Merchant authentication (Supabase session, merchant/store loading).
 - **Used by:** `jellyshops/src/app/admin/orders/[id]/page.tsx`, `jellyshops/src/app/admin/orders/page.tsx`, `jellyshops/src/features/commerce/api/client.ts`, `jellyshops/src/features/commerce/components/merchant-payments-panel.tsx`, `jellyshops/src/features/commerce/components/order-payment-panel.tsx`
 
 ## `jellyshops/src/features/commerce/components/`
+
+### `jellyshops/src/features/commerce/components/category-recommendations.tsx`
+
+- **Purpose:** React component(s): CategoryRecommendations (inferred from file name; no header comment)
+- **Size:** 168 lines
+- **Exports:** `CategoryRecommendations`
+- **Imports (project):** `jellyshops/src/lib/domain.ts`
+- **Imports (packages):** `lucide-react`, `react`
+- **Used by:** `jellyshops/src/features/commerce/components/product-form.tsx`
+
+### `jellyshops/src/features/commerce/components/digital-product-settings.tsx`
+
+- **Purpose:** React component(s): DigitalProductSettings (inferred from file name; no header comment)
+- **Size:** 36 lines
+- **Exports:** `DigitalProductSettings`
+- **Imports (project):** `jellyshops/src/features/auth/auth-provider.tsx`
+- **Imports (packages):** `react`
+- **Used by:** `jellyshops/src/app/admin/products/[id]/page.tsx`
 
 - `merchant-payments-panel.test.tsx` — test (71 lines)
 ### `jellyshops/src/features/commerce/components/merchant-payments-panel.tsx`
@@ -1707,6 +1641,16 @@ Merchant authentication (Supabase session, merchant/store loading).
 - **Used by:** nothing (entry point or unused)
 - **Tests:** `order-payment-panel.test.tsx`
 
+- `order-status.test.tsx` — test (8 lines)
+### `jellyshops/src/features/commerce/components/order-status.tsx`
+
+- **Purpose:** React component(s): OrderStatusBadge (inferred from file name; no header comment)
+- **Size:** 15 lines
+- **Exports:** `OrderStatusBadge`
+- **Imports (project):** `jellyshops/src/lib/domain.ts`
+- **Used by:** `jellyshops/src/app/admin/customers/[id]/page.tsx`, `jellyshops/src/app/admin/page.tsx`
+- **Tests:** `order-status.test.tsx`
+
 ### `jellyshops/src/features/commerce/components/order-ui.tsx`
 
 - **Purpose:** React component(s): orderStatuses, orderLabel, orderMoney, OrderBadge (inferred from file name; no header comment)
@@ -1721,6 +1665,24 @@ Merchant authentication (Supabase session, merchant/store loading).
 - **Exports:** `PaymentElementCheckout`
 - **Imports (packages):** `@stripe/react-stripe-js`, `@stripe/stripe-js`, `lucide-react`, `react`
 - **Used by:** `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `jellyshops/src/app/[storeSlug]/order/[publicToken]/balance/page.tsx`
+
+### `jellyshops/src/features/commerce/components/product-category-picker.tsx`
+
+- **Purpose:** React component(s): ProductCategoryPicker (inferred from file name; no header comment)
+- **Size:** 344 lines
+- **Exports:** `ProductCategoryPicker`
+- **Imports (project):** `jellyshops/src/lib/domain.ts`
+- **Imports (packages):** `lucide-react`, `react`
+- **Used by:** `jellyshops/src/features/commerce/components/product-form.tsx`
+
+### `jellyshops/src/features/commerce/components/product-form.tsx`
+
+- **Purpose:** React component(s): ProductForm (inferred from file name; no header comment)
+- **Size:** 834 lines
+- **Exports:** `ProductForm`
+- **Imports (project):** `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/auth/auth-provider.tsx`, `jellyshops/src/features/commerce/api/client.ts`, `jellyshops/src/features/commerce/components/category-recommendations.tsx`, `jellyshops/src/features/commerce/components/product-category-picker.tsx`, `jellyshops/src/features/store-editor/api/client.ts`, `jellyshops/src/lib/domain.ts`, `jellyshops/src/lib/product-variants.ts`
+- **Imports (packages):** `lucide-react`, `next`, `react`
+- **Used by:** `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/app/admin/products/new/page.tsx`
 
 - `storefront-catalog-sync.test.tsx` — test (45 lines)
 ### `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`
@@ -1864,7 +1826,7 @@ Menu API and editor.
 - **Size:** 221 lines
 - **Exports:** `StoreEditorApi` (type), `createStoreEditorApi`
 - **Imports (project):** `jellyshops/packages/storefront-registry/src/index.ts`, `jellyshops/packages/storefront-schema/src/index.ts`, `jellyshops/src/features/store-editor/api/types.ts`
-- **Used by:** `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/app/admin/online-store/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/app/admin/products/page.tsx`, `jellyshops/src/components/product-form.tsx`
+- **Used by:** `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/app/admin/online-store/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/app/admin/products/page.tsx`, `jellyshops/src/features/commerce/components/product-form.tsx`
 - **Tests:** `client.test.ts`
 
 ### `jellyshops/src/features/store-editor/api/types.ts`
@@ -2249,7 +2211,7 @@ Visual theme editor: model, state, API client, preview and inspector components.
 
 ## `jellyshops/src/features/storefront/`
 
-Loading published storefront documents and page contexts; storefront page rendering.
+Loading published storefront documents and page contexts; storefront page rendering and shell/cart components.
 
 ### `jellyshops/src/features/storefront/catalog-browser.tsx`
 
@@ -2266,7 +2228,7 @@ Loading published storefront documents and page contexts; storefront page render
 - **Size:** 5 lines
 - **Exports:** `StorefrontChromeContext`, `useStorefrontChrome`
 - **Imports (packages):** `react`
-- **Used by:** `jellyshops/src/components/storefront-frame.tsx`, `jellyshops/src/features/storefront/storefront-page.tsx`
+- **Used by:** `jellyshops/src/features/storefront/components/storefront-frame.tsx`, `jellyshops/src/features/storefront/storefront-page.tsx`
 
 - `page-context-loaders.test.ts` — test (53 lines)
 ### `jellyshops/src/features/storefront/page-context-loaders.ts`
@@ -2305,7 +2267,7 @@ Loading published storefront documents and page contexts; storefront page render
 - **Size:** 73 lines
 - **Exports:** `PublicStorefrontPublication` (type), `loadPublicStorefrontPublication`, `loadPublicStorefrontDocument`
 - **Imports (project):** `jellyshops/packages/storefront-schema/src/index.ts`
-- **Used by:** `jellyshops/src/app/[storeSlug]/[...unmatched]/page.tsx`, `jellyshops/src/app/[storeSlug]/cart/page.tsx`, `jellyshops/src/app/[storeSlug]/collections/[collectionSlug]/collection-client.tsx`, `jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/components/storefront-frame.tsx`, `jellyshops/src/features/storefront/server-storefront.ts`, `jellyshops/src/features/storefront/storefront-bootstrap.tsx`
+- **Used by:** `jellyshops/src/app/[storeSlug]/[...unmatched]/page.tsx`, `jellyshops/src/app/[storeSlug]/cart/page.tsx`, `jellyshops/src/app/[storeSlug]/collections/[collectionSlug]/collection-client.tsx`, `jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/features/storefront/components/storefront-frame.tsx`, `jellyshops/src/features/storefront/server-storefront.ts`, `jellyshops/src/features/storefront/storefront-bootstrap.tsx`
 - **Tests:** `page.test.tsx`, `public-storefront-api.test.ts`
 
 - `published-v4-routes.test.ts` — test (124 lines)
@@ -2356,7 +2318,7 @@ Loading published storefront documents and page contexts; storefront page render
 - **Exports:** `StorefrontBootstrap`, `useInitialStorefrontPublication`
 - **Imports (project):** `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/customers/customer-provider.tsx`, `jellyshops/src/features/storefront/public-storefront-api.ts`, `jellyshops/src/features/storefront/server-storefront.ts`
 - **Imports (packages):** `react`
-- **Used by:** `jellyshops/src/app/[storeSlug]/cart/page.tsx`, `jellyshops/src/app/[storeSlug]/collections/[collectionSlug]/collection-client.tsx`, `jellyshops/src/app/[storeSlug]/layout.tsx`, `jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/components/storefront-frame.tsx`, `jellyshops/src/features/customers/protected-storefront-page.tsx`
+- **Used by:** `jellyshops/src/app/[storeSlug]/cart/page.tsx`, `jellyshops/src/app/[storeSlug]/collections/[collectionSlug]/collection-client.tsx`, `jellyshops/src/app/[storeSlug]/layout.tsx`, `jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/features/customers/protected-storefront-page.tsx`, `jellyshops/src/features/storefront/components/storefront-frame.tsx`
 
 - `storefront-page.test.tsx` — test (88 lines)
 ### `jellyshops/src/features/storefront/storefront-page.tsx`
@@ -2368,6 +2330,48 @@ Loading published storefront documents and page contexts; storefront page render
 - **Imports (packages):** `react`
 - **Used by:** `jellyshops/src/app/[storeSlug]/[...unmatched]/page.tsx`, `jellyshops/src/app/[storeSlug]/cart/page.tsx`, `jellyshops/src/app/[storeSlug]/collections/[collectionSlug]/collection-client.tsx`, `jellyshops/src/app/[storeSlug]/page.tsx`, `jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/features/storefront/server-content-page.tsx`
 - **Tests:** `storefront-page.test.tsx`
+
+## `jellyshops/src/features/storefront/components/`
+
+- `cart-panel.test.tsx` — test (15 lines)
+### `jellyshops/src/features/storefront/components/cart-panel.tsx`
+
+- **Purpose:** React component(s): CartPanel (inferred from file name; no header comment)
+- **Size:** 162 lines
+- **Exports:** `CartPanel`
+- **Imports (project):** `jellyshops/packages/storefront-themes/src/index.ts`, `jellyshops/src/components/jelly/cart.tsx`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/lib/domain.ts`
+- **Imports (packages):** `lucide-react`, `next`, `react`
+- **Used by:** `jellyshops/src/features/storefront/components/storefront-frame.tsx`
+- **Tests:** `cart-panel.test.tsx`
+
+### `jellyshops/src/features/storefront/components/storefront-frame.tsx`
+
+- **Purpose:** React component(s): StorefrontFrame (inferred from file name; no header comment)
+- **Size:** 50 lines
+- **Exports:** `StorefrontFrame`
+- **Imports (project):** `jellyshops/packages/storefront-renderer/src/index.ts`, `jellyshops/packages/storefront-schema/src/index.ts`, `jellyshops/packages/storefront-themes/src/index.ts`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/storefront/chrome-context.tsx`, `jellyshops/src/features/storefront/components/cart-panel.tsx`, `jellyshops/src/features/storefront/components/storefront-shell.tsx`, `jellyshops/src/features/storefront/public-storefront-api.ts`, `jellyshops/src/features/storefront/storefront-bootstrap.tsx`
+- **Imports (packages):** `next`, `react`
+- **Used by:** `jellyshops/src/app/[storeSlug]/layout.tsx`
+
+### `jellyshops/src/features/storefront/components/storefront-pages.tsx`
+
+- **Purpose:** React component(s): SharedCollectionPage, SharedProductPage, SharedSearchPage, SharedCartPage (inferred from file name; no header comment)
+- **Size:** 32 lines
+- **Exports:** `SharedCollectionPage`, `SharedProductPage`, `SharedSearchPage`, `SharedCartPage`, `SharedCheckoutPage`, `SharedOrderPage`, `SharedContentPage`
+- **Imports (project):** `jellyshops/packages/storefront-themes/src/index.ts`, `jellyshops/src/components/jelly/product.tsx`
+- **Imports (packages):** `lucide-react`, `next`
+- **Used by:** `jellyshops/src/features/storefront/components/storefront-shell.tsx`
+
+- `storefront-shell.test.tsx` — test (73 lines)
+### `jellyshops/src/features/storefront/components/storefront-shell.tsx`
+
+- **Purpose:** React component(s): SharedStorefrontLayout, SharedStorefrontHeader, SharedStorefrontFooter, SharedCartPresentation (inferred from file name; no header comment)
+- **Size:** 82 lines
+- **Exports:** `SharedStorefrontLayout`, `SharedStorefrontHeader`, `SharedStorefrontFooter`, `SharedCartPresentation`, `ThemedStorefrontShell`, `useThemePresentation`
+- **Imports (project):** `jellyshops/packages/storefront-themes/src/index.ts`, `jellyshops/src/components/jelly/cart.tsx`, `jellyshops/src/components/ui/dialog.tsx`, `jellyshops/src/features/storefront/components/storefront-pages.tsx`
+- **Imports (packages):** `clsx`, `lucide-react`, `next`, `react`
+- **Used by:** `jellyshops/src/app/[storeSlug]/cart/page.tsx`, `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `jellyshops/src/app/[storeSlug]/order/[publicToken]/page.tsx`, `jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/app/[storeSlug]/shop/page.tsx`, `jellyshops/src/features/storefront/components/storefront-frame.tsx`
+- **Tests:** `storefront-shell.test.tsx`
 
 ## `jellyshops/src/features/theme-preview/`
 
@@ -2410,7 +2414,7 @@ Domain types/helpers, legacy local repository, product variant helpers, utilitie
 - **Size:** 294 lines
 - **Exports:** `Currency` (type), `OrderStatus` (type), `PaymentStatus` (type), `StoreTheme` (type), `Store` (type), `StoreDesignPublication` (type), `StoreDesignRecord` (type), `ProductVariant` (type), `ProductOptionKind` (type), `ProductOptionDisplay` (type), `ProductOptionValue` (type), `ProductOption` (type), `Category` (type), `Brand` (type), `Collection` (type), `CategoryOptionDefinition` (type), `Product` (type), `CustomerAddress` (type), `CustomerInput` (type), `Customer` (type), `CartItem` (type), `ConfiguredOptionSelection` (type), `Cart` (type), `OrderItem` (type), `OrderConfigurationSelection` (type), `Order` (type), `ShopState` (type), `canTransitionOrder`, `nextOrderStatus`, `formatMoney`, `slugify`, `majorToMinor`, `minorToMajor`, `getCategoryAncestors`, `getCategoryBreadcrumb`, `getCategoryChildren`, `getEffectiveCategoryOptionDefinitions`
 - **Imports (project):** `jellyshops/packages/storefront-schema/src/index.ts`
-- **Used by:** `jellyshops/src/app/[storeSlug]/cart/page.tsx`, `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/app/[storeSlug]/shop/page.tsx`, `jellyshops/src/app/admin/customers/[id]/page.tsx`, `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/app/admin/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/components/cart-panel.tsx`, `jellyshops/src/components/category-recommendations.tsx`, `jellyshops/src/components/order-status.tsx`, `jellyshops/src/components/product-category-picker.tsx`, `jellyshops/src/components/product-form.tsx`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/commerce/api/client.ts`, `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/store-editor/preview-context.ts`, `jellyshops/src/features/storefront/catalog-browser.tsx`, `jellyshops/src/features/storefront/page-context-loaders.ts`, `jellyshops/src/features/storefront/product-presentation.ts`, `jellyshops/src/features/storefront/server-storefront.ts`, `jellyshops/src/features/storefront/storefront-page.tsx`, `jellyshops/src/lib/product-configuration.ts`, `jellyshops/src/lib/product-variants.ts`, `jellyshops/src/lib/repository.ts`, `jellyshops/src/lib/seed.ts`
+- **Used by:** `jellyshops/src/app/[storeSlug]/cart/page.tsx`, `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/app/[storeSlug]/shop/page.tsx`, `jellyshops/src/app/admin/customers/[id]/page.tsx`, `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/app/admin/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/commerce/api/client.ts`, `jellyshops/src/features/commerce/components/category-recommendations.tsx`, `jellyshops/src/features/commerce/components/order-status.tsx`, `jellyshops/src/features/commerce/components/product-category-picker.tsx`, `jellyshops/src/features/commerce/components/product-form.tsx`, `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/store-editor/preview-context.ts`, `jellyshops/src/features/storefront/catalog-browser.tsx`, `jellyshops/src/features/storefront/components/cart-panel.tsx`, `jellyshops/src/features/storefront/page-context-loaders.ts`, `jellyshops/src/features/storefront/product-presentation.ts`, `jellyshops/src/features/storefront/server-storefront.ts`, `jellyshops/src/features/storefront/storefront-page.tsx`, `jellyshops/src/lib/product-configuration.ts`, `jellyshops/src/lib/product-variants.ts`, `jellyshops/src/lib/repository.ts`, `jellyshops/src/lib/seed.ts`
 - **Tests:** `preview-context.test.ts`, `page-context-loaders.test.ts`, `product-presentation.test.ts`, `domain.test.ts`
 
 - `product-configuration.test.ts` — test (19 lines)
@@ -2430,7 +2434,7 @@ Domain types/helpers, legacy local repository, product variant helpers, utilitie
 - **Size:** 41 lines
 - **Exports:** `getInventoryOptions`, `createVariantCombinationKey`, `reconcileProductVariants`
 - **Imports (project):** `jellyshops/src/lib/domain.ts`
-- **Used by:** `jellyshops/src/components/product-form.tsx`, `jellyshops/src/lib/product-configuration.ts`
+- **Used by:** `jellyshops/src/features/commerce/components/product-form.tsx`, `jellyshops/src/lib/product-configuration.ts`
 - **Tests:** `product-variants.test.ts`
 
 - `repository.test.ts` — test (126 lines)

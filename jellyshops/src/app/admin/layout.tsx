@@ -1,5 +1,5 @@
 import { AppShell } from "@/components/app-shell";
-import { AdminAuthGate } from "@/components/admin-auth-gate";
+import { AdminAuthGate } from "@/features/auth/components/admin-auth-gate";
 
 export default function AdminLayout({
   children,

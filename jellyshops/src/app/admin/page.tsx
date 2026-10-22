@@ -14,7 +14,7 @@ import { useCallback, useMemo } from "react";
 import { authApiOrigin, useAuth } from "@/features/auth/auth-provider";
 import { createAdminApi } from "@/features/admin/api";
 import { useAdminQuery } from "@/features/admin/use-admin-query";
-import { OrderStatusBadge } from "@/components/order-status";
+import { OrderStatusBadge } from "@/features/commerce/components/order-status";
 import type { OrderStatus } from "@/lib/domain";
 
 function getCustomerName(snapshot?: Record<string, unknown> | null) {
