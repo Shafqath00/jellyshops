@@ -17,6 +17,7 @@ Static findings only: nothing has been deleted. Each item needs a human check be
 - backend/src/auth/permissions.ts → `roleHasPermission` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/catalog/demo-catalog-provider.ts → `DemoCatalogAdapter` (not referenced anywhere else)
 - backend/src/catalog/provider-sync.ts → `CatalogProviderSync` (not referenced anywhere else)
+- backend/src/commerce/checkout-attempts.ts → `cancelStripeIntent` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/commerce/notifications.ts → `digitalToken` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/commerce/notifications.ts → `notificationRetry` (used inside its own file; the `export` keyword may be unnecessary)
 - backend/src/dynamic-sources/resolver.ts → `DynamicValueResolver` (used inside its own file; the `export` keyword may be unnecessary)
@@ -28,8 +29,6 @@ Static findings only: nothing has been deleted. Each item needs a human check be
 
 ## Backend: files over 500 lines
 
-- `backend/src/commerce/service.ts` — 805 lines
-- `backend/src/stripe/webhooks/processor.ts` — 764 lines
 - `backend/src/commerce/repository.ts` — 711 lines
 - `backend/src/commerce/order-management.ts` — 594 lines
 - `backend/src/stripe/client.ts` — 563 lines
@@ -56,6 +55,9 @@ Static findings only: nothing has been deleted. Each item needs a human check be
 - jellyshops/src/features/navigation/menu-editor.tsx → `reorderMenuItem` (used inside its own file; the `export` keyword may be unnecessary)
 - jellyshops/src/features/store-editor/components/drag-reorder.ts → `dragReorderCommand` (not referenced anywhere else)
 - jellyshops/src/features/store-editor/components/editor-shell.tsx → `EditorShell` (not referenced anywhere else)
+- jellyshops/src/features/store-editor/editor-page-helpers.ts → `defaultTemplateSections` (used inside its own file; the `export` keyword may be unnecessary)
+- jellyshops/src/features/store-editor/editor-page-helpers.ts → `regionLabels` (used inside its own file; the `export` keyword may be unnecessary)
+- jellyshops/src/features/store-editor/editor-page-helpers.ts → `normalizeBlock` (used inside its own file; the `export` keyword may be unnecessary)
 - jellyshops/src/features/store-editor/editor-store.ts → `setTheme` (not referenced anywhere else)
 - jellyshops/src/features/store-editor/editor-store.ts → `moveSection` (not referenced anywhere else)
 - jellyshops/src/features/store-editor/editor-store.ts → `createWorkspaceEditorState` (not referenced anywhere else)
@@ -79,8 +81,7 @@ Static findings only: nothing has been deleted. Each item needs a human check be
 
 ## Frontend: files over 500 lines
 
-- `jellyshops/src/app/admin/online-store/editor/page.tsx` — 1313 lines
-- `jellyshops/src/features/commerce/components/product-form.tsx` — 834 lines
+- `jellyshops/src/app/admin/online-store/editor/page.tsx` — 1184 lines
 - `jellyshops/src/app/admin/orders/[id]/page.tsx` — 813 lines
 - `jellyshops/src/app/admin/orders/page.tsx` — 707 lines
 - `jellyshops/src/features/store-editor/components/inspector/control-renderer.tsx` — 587 lines

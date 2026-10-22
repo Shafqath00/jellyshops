@@ -198,11 +198,30 @@ Called from: `backend/src/app/routes/merchant.ts`
 
 ## `backend/src/catalog/service.ts`
 
-Called from: `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/catalog/demo-catalog-provider.ts`, `backend/src/catalog/routes.ts`, `backend/src/commerce/service.ts`, `backend/src/storefront/context/service.ts`
+Called from: `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/catalog/demo-catalog-provider.ts`, `backend/src/catalog/routes.ts`, `backend/src/commerce/checkout-cart.ts`, `backend/src/commerce/service.ts`, `backend/src/storefront/context/service.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
 | `CatalogService` | class | `getProduct(storeId: string, id: string): Promise<CatalogProduct \| null>`<br>`listProducts(storeId: string, input: ListProductsInput): Promise<Connection<CatalogProduct>>`<br>`listPublicProducts(storeId: string, input: Omit<ListProductsInput, "status">): Promise<Connection<CatalogProduct>>`<br>`getVariant(storeId: string, id: string): Promise<CatalogVariant \| null>`<br>`getCollection(storeId: string, id: string): Promise<CatalogCollectionDetail \| null>`<br>`listCollections(storeId: string, input: ListCollectionsInput): Promise<Connection<CatalogCollection>>`<br>`createProduct(storeId: string, input: CreateProductInput): Promise<CatalogProduct>`<br>`updateProduct(storeId: string, productId: string, input: UpdateProductInput): Promise<CatalogProduct>`<br>`createCollection(storeId: string, input: CreateCollectionInput): Promise<CatalogCollection>`<br>`updateCollection(storeId: string, collectionId: string, input: UpdateCollectionInput): Promise<CatalogCollection>`<br>`resolveResource(storeId: string, ref: CatalogResourceRef): Promise<CatalogResource \| null>` |  |
+
+## `backend/src/commerce/checkout-attempts.ts`
+
+Called from: `backend/src/commerce/service.ts`
+
+| Name | Kind | Signature | Description |
+| --- | --- | --- | --- |
+| `findExistingAttempt` | function (async) | `(tx: CommerceTransaction, storeId: string, cartKey: string)` |  |
+| `tryReuseAttempt` | function (async) | `(tx: CommerceTransaction, attempt: CheckoutAttemptRow, cartHash: string): Promise<CheckoutAttemptResult \| null>` |  |
+| `cancelExistingAttempt` | function (async) | `(deps: AttemptDeps, tx: CommerceTransaction, attempt: CheckoutAttemptRow, storeId: string): Promise<void>` |  |
+| `cancelStripeIntent` | function (async) | `(deps: AttemptDeps, tx: CommerceTransaction, attempt: CheckoutAttemptRow, storeId: string): Promise<void>` |  |
+
+## `backend/src/commerce/checkout-cart.ts`
+
+Called from: `backend/src/commerce/service.ts`
+
+| Name | Kind | Signature | Description |
+| --- | --- | --- | --- |
+| `validateCart` | function (async) | `(deps: CartValidationDeps, storeId: string, currency: string, items: BeginCheckoutInput["items"], shippingMinor: number): Promise<ValidatedCart>` | Re-prices every line from the catalog and returns the server-authoritative cart. |
 
 ## `backend/src/commerce/digital.ts`
 
@@ -300,7 +319,7 @@ Called from: `backend/src/app/dependencies.ts`, `backend/src/app/routes/commerce
 
 ## `backend/src/commerce/payment-intents.ts`
 
-Called from: `backend/src/commerce/service.ts`
+Called from: `backend/src/commerce/checkout-attempts.ts`, `backend/src/commerce/service.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -324,7 +343,7 @@ Called from: `backend/src/commerce/merchant-orders.ts`
 
 ## `backend/src/commerce/repository.ts`
 
-Called from: `backend/src/admin/service.ts`, `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/catalog/postgres-repository.ts`, `backend/src/catalog/public-store.ts`, `backend/src/commerce/digital.ts`, `backend/src/commerce/fulfilment.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/notifications.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/service.ts`, `backend/src/commerce/sweeper.ts`, `backend/src/content/sql-repository.ts`, `backend/src/custom-data/sql-repository.ts`, `backend/src/customers/service.ts`, `backend/src/media/sql-media-repository.ts`, `backend/src/media/storefront-reference-reader.ts`, `backend/src/storefront/context/sql-repository.ts`, `backend/src/storefront/local-v4-compilation.ts`, `backend/src/storefront/publication/sql-repository.ts`, `backend/src/storefront/sql-v4-workspace-data-source.ts`, `backend/src/storefront/starter/installation-service.ts`, `backend/src/storefront/workspace/sql-repositories.ts`, `backend/src/stripe/accounts/repository.ts`, `backend/src/stripe/accounts/service.ts`, `backend/src/stripe/accounts/types.ts`, `backend/src/stripe/webhooks/accounts-v2-route.ts`, `backend/src/stripe/webhooks/connect-payments-route.ts`, `backend/src/stripe/webhooks/processor.ts`, `backend/src/stripe/webhooks/receipt-repository.ts`, `backend/src/tenants/settings.ts`
+Called from: `backend/src/admin/service.ts`, `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/catalog/postgres-repository.ts`, `backend/src/catalog/public-store.ts`, `backend/src/commerce/checkout-attempts.ts`, `backend/src/commerce/checkout-cart.ts`, `backend/src/commerce/digital.ts`, `backend/src/commerce/fulfilment.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/notifications.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/service.ts`, `backend/src/commerce/sweeper.ts`, `backend/src/content/sql-repository.ts`, `backend/src/custom-data/sql-repository.ts`, `backend/src/customers/service.ts`, `backend/src/media/sql-media-repository.ts`, `backend/src/media/storefront-reference-reader.ts`, `backend/src/storefront/context/sql-repository.ts`, `backend/src/storefront/local-v4-compilation.ts`, `backend/src/storefront/publication/sql-repository.ts`, `backend/src/storefront/sql-v4-workspace-data-source.ts`, `backend/src/storefront/starter/installation-service.ts`, `backend/src/storefront/workspace/sql-repositories.ts`, `backend/src/stripe/accounts/repository.ts`, `backend/src/stripe/accounts/service.ts`, `backend/src/stripe/accounts/types.ts`, `backend/src/stripe/webhooks/accounts-v2-route.ts`, `backend/src/stripe/webhooks/connect-payments-route.ts`, `backend/src/stripe/webhooks/dispute-events.ts`, `backend/src/stripe/webhooks/event-helpers.ts`, `backend/src/stripe/webhooks/event-types.ts`, `backend/src/stripe/webhooks/payment-intent-events.ts`, `backend/src/stripe/webhooks/processor.ts`, `backend/src/stripe/webhooks/receipt-repository.ts`, `backend/src/stripe/webhooks/refund-events.ts`, `backend/src/tenants/settings.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -469,7 +488,7 @@ Called from: —
 
 ## `backend/src/http/errors.ts`
 
-Called from: `backend/src/app.ts`, `backend/src/app/default-storefront-workspace.ts`, `backend/src/auth/development-auth-provider.ts`, `backend/src/auth/firebase-auth-provider.ts`, `backend/src/auth/middleware.ts`, `backend/src/auth/supabase-auth-provider.ts`, `backend/src/catalog/postgres-repository.ts`, `backend/src/commerce/digital.ts`, `backend/src/commerce/fulfilment.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/notification-routes.ts`, `backend/src/commerce/notifications.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/routes.ts`, `backend/src/commerce/service.ts`, `backend/src/commerce/sweeper-routes.ts`, `backend/src/content/routes.ts`, `backend/src/customers/routes.ts`, `backend/src/customers/service.ts`, `backend/src/media/routes.ts`, `backend/src/media/service.ts`, `backend/src/media/validation.ts`, `backend/src/storefront/context/routes.ts`, `backend/src/storefront/repository.ts`, `backend/src/storefront/routes.ts`, `backend/src/storefront/service.ts`, `backend/src/storefront/starter/installation-service.ts`, `backend/src/storefront/starter/routes.ts`, `backend/src/storefront/workspace/routes.ts`, `backend/src/storefront/workspace/sql-global-section-store.ts`, `backend/src/storefront/workspace/theme-service.ts`, `backend/src/tenants/routes.ts`, `backend/src/tenants/settings.ts`, `backend/src/tenants/store-context.ts`
+Called from: `backend/src/app.ts`, `backend/src/app/default-storefront-workspace.ts`, `backend/src/auth/development-auth-provider.ts`, `backend/src/auth/firebase-auth-provider.ts`, `backend/src/auth/middleware.ts`, `backend/src/auth/supabase-auth-provider.ts`, `backend/src/catalog/postgres-repository.ts`, `backend/src/commerce/checkout-attempts.ts`, `backend/src/commerce/checkout-cart.ts`, `backend/src/commerce/digital.ts`, `backend/src/commerce/fulfilment.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/notification-routes.ts`, `backend/src/commerce/notifications.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/routes.ts`, `backend/src/commerce/service.ts`, `backend/src/commerce/sweeper-routes.ts`, `backend/src/content/routes.ts`, `backend/src/customers/routes.ts`, `backend/src/customers/service.ts`, `backend/src/media/routes.ts`, `backend/src/media/service.ts`, `backend/src/media/validation.ts`, `backend/src/storefront/context/routes.ts`, `backend/src/storefront/repository.ts`, `backend/src/storefront/routes.ts`, `backend/src/storefront/service.ts`, `backend/src/storefront/starter/installation-service.ts`, `backend/src/storefront/starter/routes.ts`, `backend/src/storefront/workspace/routes.ts`, `backend/src/storefront/workspace/sql-global-section-store.ts`, `backend/src/storefront/workspace/theme-service.ts`, `backend/src/tenants/routes.ts`, `backend/src/tenants/settings.ts`, `backend/src/tenants/store-context.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -926,6 +945,36 @@ Called from: `backend/src/app/routes/commerce.ts`
 | --- | --- | --- | --- |
 | `createConnectPaymentsWebhookRouter` | function | `(gateway: StripeGateway, sql: SqlExecutor, options: { database?: CommerceDatabase; hooks?: PaymentSettlementHooks } = {}): express.Router` |  |
 
+## `backend/src/stripe/webhooks/dispute-events.ts`
+
+Called from: `backend/src/stripe/webhooks/processor.ts`
+
+| Name | Kind | Signature | Description |
+| --- | --- | --- | --- |
+| `processDisputeEvent` | function (async) | `(sql: SqlExecutor, event: ConnectPaymentEvent, object: EventPayload): Promise<void>` |  |
+
+## `backend/src/stripe/webhooks/event-helpers.ts`
+
+Called from: `backend/src/stripe/webhooks/dispute-events.ts`, `backend/src/stripe/webhooks/payment-intent-events.ts`, `backend/src/stripe/webhooks/processor.ts`, `backend/src/stripe/webhooks/refund-events.ts`
+
+| Name | Kind | Signature | Description |
+| --- | --- | --- | --- |
+| `asRecord` | function | `(value: unknown): EventPayload` |  |
+| `stripeObject` | function | `(payload: EventPayload): EventPayload` |  |
+| `expandableId` | function | `(value: unknown): string \| null` |  |
+| `stringValue` | function | `(value: unknown): string \| null` |  |
+| `markProcessed` | function (async) | `(sql: SqlExecutor, eventId: string): Promise<void>` |  |
+| `findPaymentByIntent` | function (async) | `(sql: SqlExecutor, stripeAccountId: string, paymentIntentId: string): Promise<PaymentRow \| null>` |  |
+| `getCheckoutAttemptId` | function (async) | `(sql: SqlExecutor, payment: PaymentRow): Promise<string \| null>` |  |
+
+## `backend/src/stripe/webhooks/payment-intent-events.ts`
+
+Called from: `backend/src/stripe/webhooks/processor.ts`
+
+| Name | Kind | Signature | Description |
+| --- | --- | --- | --- |
+| `processPaymentIntentEvent` | function (async) | `(sql: SqlExecutor, event: ConnectPaymentEvent, object: EventPayload): Promise<boolean>` |  |
+
 ## `backend/src/stripe/webhooks/processor.ts`
 
 Called from: `backend/src/commerce/order-runtime.ts`, `backend/src/stripe/webhooks/connect-payments-route.ts`
@@ -941,6 +990,14 @@ Called from: `backend/src/stripe/webhooks/accounts-v2-route.ts`, `backend/src/st
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
 | `WebhookReceiptRepository` | class | `record(input: RecordWebhookInput): Promise<WebhookReceiptResult>` |  |
+
+## `backend/src/stripe/webhooks/refund-events.ts`
+
+Called from: `backend/src/stripe/webhooks/processor.ts`
+
+| Name | Kind | Signature | Description |
+| --- | --- | --- | --- |
+| `processRefundEvent` | function (async) | `(sql: SqlExecutor, event: ConnectPaymentEvent, object: EventPayload): Promise<void>` |  |
 
 ## `backend/src/tenants/postgres-repository.ts`
 

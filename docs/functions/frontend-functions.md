@@ -948,7 +948,7 @@ Called from: `jellyshops/src/app/admin/customers/page.tsx`, `jellyshops/src/app/
 
 ## `jellyshops/src/contexts/shop-context.tsx`
 
-Called from: `jellyshops/src/app/[storeSlug]/[...unmatched]/page.tsx`, `jellyshops/src/app/[storeSlug]/cart/page.tsx`, `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `jellyshops/src/app/[storeSlug]/collections/[collectionSlug]/collection-client.tsx`, `jellyshops/src/app/[storeSlug]/order/[publicToken]/page.tsx`, `jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/app/[storeSlug]/shop/page.tsx`, `jellyshops/src/app/admin/onboarding/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/app/admin/store/page.tsx`, `jellyshops/src/app/layout.tsx`, `jellyshops/src/features/commerce/components/product-form.tsx`, `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/customers/customer-page.tsx`, `jellyshops/src/features/customers/customer-provider.tsx`, `jellyshops/src/features/storefront/catalog-browser.tsx`, `jellyshops/src/features/storefront/components/cart-panel.tsx`, `jellyshops/src/features/storefront/components/storefront-frame.tsx`, `jellyshops/src/features/storefront/storefront-bootstrap.tsx`
+Called from: `jellyshops/src/app/[storeSlug]/[...unmatched]/page.tsx`, `jellyshops/src/app/[storeSlug]/cart/page.tsx`, `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `jellyshops/src/app/[storeSlug]/collections/[collectionSlug]/collection-client.tsx`, `jellyshops/src/app/[storeSlug]/order/[publicToken]/page.tsx`, `jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/app/[storeSlug]/shop/page.tsx`, `jellyshops/src/app/admin/onboarding/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/app/admin/store/page.tsx`, `jellyshops/src/app/layout.tsx`, `jellyshops/src/features/commerce/components/create-category-dialog.tsx`, `jellyshops/src/features/commerce/components/product-form.tsx`, `jellyshops/src/features/commerce/components/product-organization-panel.tsx`, `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/customers/customer-page.tsx`, `jellyshops/src/features/customers/customer-provider.tsx`, `jellyshops/src/features/storefront/catalog-browser.tsx`, `jellyshops/src/features/storefront/components/cart-panel.tsx`, `jellyshops/src/features/storefront/components/storefront-frame.tsx`, `jellyshops/src/features/storefront/storefront-bootstrap.tsx`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -1026,11 +1026,19 @@ Called from: `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `jellyshops/src
 
 ## `jellyshops/src/features/commerce/components/category-recommendations.tsx`
 
-Called from: `jellyshops/src/features/commerce/components/product-form.tsx`
+Called from: `jellyshops/src/features/commerce/components/product-organization-panel.tsx`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
 | `CategoryRecommendations` | function | `({ categoryId, categories, definitions, existingOptions, onAdd, }: CategoryRecommendationsProps)` |  |
+
+## `jellyshops/src/features/commerce/components/create-category-dialog.tsx`
+
+Called from: `jellyshops/src/features/commerce/components/product-form.tsx`
+
+| Name | Kind | Signature | Description |
+| --- | --- | --- | --- |
+| `CreateCategoryDialog` | function | `({ createName, setCreateName, createParentId, createError, categories, onCancel, onCreate }: { createName: string; setCreateName: (value: string) => void; createParentId: string \| undefined; createError: string; categories: Categories; onCancel: () => void; onCreate: () => void; })` |  |
 
 ## `jellyshops/src/features/commerce/components/digital-product-settings.tsx`
 
@@ -1084,7 +1092,7 @@ Called from: `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `jellyshops/src
 
 ## `jellyshops/src/features/commerce/components/product-category-picker.tsx`
 
-Called from: `jellyshops/src/features/commerce/components/product-form.tsx`
+Called from: `jellyshops/src/features/commerce/components/product-organization-panel.tsx`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -1097,6 +1105,22 @@ Called from: `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
 | `ProductForm` | function | `({ product }: { product?: Product })` |  |
+
+## `jellyshops/src/features/commerce/components/product-options-editor.tsx`
+
+Called from: `jellyshops/src/features/commerce/components/product-form.tsx`
+
+| Name | Kind | Signature | Description |
+| --- | --- | --- | --- |
+| `ProductOptionsEditor` | function | `({ options, showOptions, setOptions, setShowOptions, updateOption, updateValue }: { options: ProductOption[]; showOptions: boolean; setOptions: Dispatch<SetStateAction<ProductOption[]>>; setShowOptions: Dispatch<SetStateAction<boolean>>; updateOption: (id: string, patch: Partial<ProductOption>) => void; updateValue: (optionId: string, valueId: string, patch: Partial<ProductOptionValue>) => void; })` |  |
+
+## `jellyshops/src/features/commerce/components/product-organization-panel.tsx`
+
+Called from: `jellyshops/src/features/commerce/components/product-form.tsx`
+
+| Name | Kind | Signature | Description |
+| --- | --- | --- | --- |
+| `ProductOrganizationPanel` | function | `({ repository, state, storeId, categories, brands, collections, categoryId, additionalCategoryIds, brandId, collectionIds, options, selectPrimary, openCreate, addAdditional, addRecommended, setAdditionalCategoryIds, setBrandId, setCollectionIds }: { repository: Repository; state: Shop["state"]; storeId: string; categories: ReturnType<Repository["getCategories"]>; brands: ReturnType<Repository["getBrands"]>; collections: ReturnType<Repository["getCollections"]>; categoryId: string; additionalCategoryIds: string[]; brandId: string; collectionIds: string[]; options: ProductOption[]; selectPrimary: (id: string) => void; openCreate: (parentId?: string) => void; addAdditional: (id: string) => void; addRecommended: (definitions: CategoryOptionDefinition[]) => void; setAdditionalCategoryIds: Dispatch<SetStateAction<string[]>>; setBrandId: (value: string) => void; setCollectionIds: Dispatch<SetStateAction<string[]>>; })` |  |
 
 ## `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`
 
@@ -1220,7 +1244,7 @@ Called from: `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshop
 
 ## `jellyshops/src/features/store-editor/api/types.ts`
 
-Called from: `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/app/admin/online-store/page.tsx`, `jellyshops/src/app/admin/products/page.tsx`, `jellyshops/src/features/store-editor/api/client.ts`, `jellyshops/src/features/store-editor/components/controls/image-control.tsx`, `jellyshops/src/features/store-editor/components/editor-shell.tsx`, `jellyshops/src/features/store-editor/components/inspector/control-renderer.tsx`, `jellyshops/src/features/store-editor/components/inspector/inspector.tsx`, `jellyshops/src/features/store-editor/components/inspector/setting-groups.tsx`, `jellyshops/src/features/store-editor/components/inspector/theme-settings-panel.tsx`, `jellyshops/src/features/store-editor/components/publish-controls.tsx`, `jellyshops/src/features/store-editor/components/template-hierarchy.tsx`, `jellyshops/src/features/store-editor/components/template-resource-selector.tsx`, `jellyshops/src/features/store-editor/editor-navigation.ts`, `jellyshops/src/features/store-editor/preview-context.ts`, `jellyshops/src/features/storefront/product-presentation.ts`
+Called from: `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/app/admin/online-store/page.tsx`, `jellyshops/src/app/admin/products/page.tsx`, `jellyshops/src/features/store-editor/api/client.ts`, `jellyshops/src/features/store-editor/components/controls/image-control.tsx`, `jellyshops/src/features/store-editor/components/editor-shell.tsx`, `jellyshops/src/features/store-editor/components/inspector/control-renderer.tsx`, `jellyshops/src/features/store-editor/components/inspector/inspector.tsx`, `jellyshops/src/features/store-editor/components/inspector/setting-groups.tsx`, `jellyshops/src/features/store-editor/components/inspector/theme-settings-panel.tsx`, `jellyshops/src/features/store-editor/components/publish-controls.tsx`, `jellyshops/src/features/store-editor/components/template-hierarchy.tsx`, `jellyshops/src/features/store-editor/components/template-resource-selector.tsx`, `jellyshops/src/features/store-editor/editor-navigation.ts`, `jellyshops/src/features/store-editor/editor-page-helpers.ts`, `jellyshops/src/features/store-editor/preview-context.ts`, `jellyshops/src/features/storefront/product-presentation.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
@@ -1411,6 +1435,21 @@ Called from: `jellyshops/src/app/admin/online-store/editor/page.tsx`
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |
 | `parseEditorNavigationTarget` | function | `(search: string): EditorNavigationTarget` |  |
+
+## `jellyshops/src/features/store-editor/editor-page-helpers.ts`
+
+Called from: `jellyshops/src/app/admin/online-store/editor/page.tsx`
+
+| Name | Kind | Signature | Description |
+| --- | --- | --- | --- |
+| `defaultTemplateLayout` | function | `(type: string): Record<string, unknown>` |  |
+| `displayName` | function | `(value: string): string` | Merchant-facing name for a region or section type. |
+| `setThemeSetting` | function | `(settings: Record<string, unknown>, path: string, value: unknown): Record<string, unknown>` |  |
+| `normalizeBlock` | function | `(value: unknown): SectionNode["blocks"][number] \| null` |  |
+| `normalizeSection` | function | `(value: unknown): SectionNode \| null` |  |
+| `templateSections` | function | `(template: StorefrontTemplateRecord, globals: Map<string, GlobalSectionRecord>): SectionNode[]` |  |
+| `draftPreviewLayout` | function | `(template: StorefrontTemplateRecord, globals: Map<string, GlobalSectionRecord>)` |  |
+| `selectedInlineSection` | function | `(template: StorefrontTemplateRecord, selection: EditorSelection): SectionNode \| null` |  |
 
 ## `jellyshops/src/features/store-editor/editor-store.ts`
 
@@ -1688,7 +1727,7 @@ Called from: `jellyshops/src/app/theme-preview/jelly-avenue/page.tsx`, `jellysho
 
 ## `jellyshops/src/lib/domain.ts`
 
-Called from: `jellyshops/src/app/[storeSlug]/cart/page.tsx`, `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/app/[storeSlug]/shop/page.tsx`, `jellyshops/src/app/admin/customers/[id]/page.tsx`, `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/app/admin/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/commerce/api/client.ts`, `jellyshops/src/features/commerce/components/category-recommendations.tsx`, `jellyshops/src/features/commerce/components/order-status.tsx`, `jellyshops/src/features/commerce/components/product-category-picker.tsx`, `jellyshops/src/features/commerce/components/product-form.tsx`, `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/store-editor/preview-context.ts`, `jellyshops/src/features/storefront/catalog-browser.tsx`, `jellyshops/src/features/storefront/components/cart-panel.tsx`, `jellyshops/src/features/storefront/page-context-loaders.ts`, `jellyshops/src/features/storefront/product-presentation.ts`, `jellyshops/src/features/storefront/server-storefront.ts`, `jellyshops/src/features/storefront/storefront-page.tsx`, `jellyshops/src/lib/product-configuration.ts`, `jellyshops/src/lib/product-variants.ts`, `jellyshops/src/lib/repository.ts`, `jellyshops/src/lib/seed.ts`
+Called from: `jellyshops/src/app/[storeSlug]/cart/page.tsx`, `jellyshops/src/app/[storeSlug]/checkout/page.tsx`, `jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx`, `jellyshops/src/app/[storeSlug]/search/page.tsx`, `jellyshops/src/app/[storeSlug]/shop/page.tsx`, `jellyshops/src/app/admin/customers/[id]/page.tsx`, `jellyshops/src/app/admin/online-store/editor/page.tsx`, `jellyshops/src/app/admin/page.tsx`, `jellyshops/src/app/admin/products/[id]/page.tsx`, `jellyshops/src/contexts/shop-context.tsx`, `jellyshops/src/features/commerce/api/client.ts`, `jellyshops/src/features/commerce/components/category-recommendations.tsx`, `jellyshops/src/features/commerce/components/create-category-dialog.tsx`, `jellyshops/src/features/commerce/components/order-status.tsx`, `jellyshops/src/features/commerce/components/product-category-picker.tsx`, `jellyshops/src/features/commerce/components/product-form.tsx`, `jellyshops/src/features/commerce/components/product-options-editor.tsx`, `jellyshops/src/features/commerce/components/product-organization-panel.tsx`, `jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx`, `jellyshops/src/features/store-editor/preview-context.ts`, `jellyshops/src/features/storefront/catalog-browser.tsx`, `jellyshops/src/features/storefront/components/cart-panel.tsx`, `jellyshops/src/features/storefront/page-context-loaders.ts`, `jellyshops/src/features/storefront/product-presentation.ts`, `jellyshops/src/features/storefront/server-storefront.ts`, `jellyshops/src/features/storefront/storefront-page.tsx`, `jellyshops/src/lib/product-configuration.ts`, `jellyshops/src/lib/product-variants.ts`, `jellyshops/src/lib/repository.ts`, `jellyshops/src/lib/seed.ts`
 
 | Name | Kind | Signature | Description |
 | --- | --- | --- | --- |

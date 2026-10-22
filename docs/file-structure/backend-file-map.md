@@ -4,7 +4,7 @@
 
 Tests are listed but only summarised (they have no exports). “Used by” lists non-test importers; “Tests” lists test files importing the file.
 
-146 source files, 95 test files.
+153 source files, 95 test files.
 
 ## `backend/src/admin/`
 
@@ -347,7 +347,7 @@ Products, variants, collections: types, validation, Postgres/memory repositories
 - **Size:** 109 lines
 - **Exports:** `CatalogReader` (type), `CatalogAdmin` (type), `CatalogService`
 - **Imports (project):** `backend/src/catalog/repository.ts`, `backend/src/catalog/types.ts`
-- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/catalog/demo-catalog-provider.ts`, `backend/src/catalog/routes.ts`, `backend/src/commerce/service.ts`, `backend/src/storefront/context/service.ts`
+- **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/catalog/demo-catalog-provider.ts`, `backend/src/catalog/routes.ts`, `backend/src/commerce/checkout-cart.ts`, `backend/src/commerce/service.ts`, `backend/src/storefront/context/service.ts`
 - **Tests:** `service.test.ts`, `order-workspace.test.ts`, `payment-intents.test.ts`, `routes.test.ts`, `service.test.ts`, `service.test.ts`
 
 ### `backend/src/catalog/types.ts`
@@ -361,6 +361,25 @@ Products, variants, collections: types, validation, Postgres/memory repositories
 ## `backend/src/commerce/`
 
 Checkout, orders, payment intents, inventory, fulfilment, order management, notifications, digital delivery.
+
+### `backend/src/commerce/checkout-attempts.ts`
+
+- **Purpose:** Exports findExistingAttempt, tryReuseAttempt, cancelExistingAttempt, cancelStripeIntent (inferred from file name; no header comment)
+- **Size:** 214 lines
+- **Exports:** `AttemptDeps` (type), `findExistingAttempt`, `tryReuseAttempt`, `cancelExistingAttempt`, `cancelStripeIntent`
+- **Imports (project):** `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/repository.ts`, `backend/src/commerce/types.ts`, `backend/src/http/errors.ts`
+- **Database tables referenced:** `CheckoutAttempt`, `Order`, `Payment`
+- **Used by:** `backend/src/commerce/service.ts`
+
+### `backend/src/commerce/checkout-cart.ts`
+
+- **Purpose:** Exports checkoutInputSchema, validateCart (inferred from file name; no header comment)
+- **Size:** 181 lines
+- **Exports:** `checkoutInputSchema`, `ValidatedLine` (type), `ValidatedCart` (type), `CartValidationDeps` (type), `validateCart`
+- **Imports (project):** `backend/src/catalog/service.ts`, `backend/src/commerce/repository.ts`, `backend/src/commerce/types.ts`, `backend/src/http/errors.ts`
+- **Imports (packages):** `node:crypto`, `zod`
+- **Database tables referenced:** `DigitalAsset`
+- **Used by:** `backend/src/commerce/service.ts`
 
 ### `backend/src/commerce/digital.ts`
 
@@ -481,7 +500,7 @@ Checkout, orders, payment intents, inventory, fulfilment, order management, noti
 - **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/http/errors.ts`, `backend/src/stripe/client.ts`
 - **Imports (packages):** `stripe`
 - **Database tables referenced:** `CheckoutAttempt`, `Order`, `Payment`
-- **Used by:** `backend/src/commerce/service.ts`
+- **Used by:** `backend/src/commerce/checkout-attempts.ts`, `backend/src/commerce/service.ts`
 - **Tests:** `payment-intents.test.ts`
 
 - `rate-limit.test.ts` — test (69 lines)
@@ -517,7 +536,7 @@ Checkout, orders, payment intents, inventory, fulfilment, order management, noti
 - **Imports (project):** `backend/src/catalog/types.ts`
 - **Imports (packages):** `pg`
 - **Database tables referenced:** `CheckoutAttempt`, `InventoryLevel`, `InventoryReservation`, `Order`, `OrderItem`, `Payment`, `StoreOrderCounter`
-- **Used by:** `backend/src/admin/service.ts`, `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/catalog/postgres-repository.ts`, `backend/src/catalog/public-store.ts`, `backend/src/commerce/digital.ts`, `backend/src/commerce/fulfilment.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/notifications.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/service.ts`, `backend/src/commerce/sweeper.ts`, `backend/src/content/sql-repository.ts`, `backend/src/custom-data/sql-repository.ts`, `backend/src/customers/service.ts`, `backend/src/media/sql-media-repository.ts`, `backend/src/media/storefront-reference-reader.ts`, `backend/src/storefront/context/sql-repository.ts`, `backend/src/storefront/local-v4-compilation.ts`, `backend/src/storefront/publication/sql-repository.ts`, `backend/src/storefront/sql-v4-workspace-data-source.ts`, `backend/src/storefront/starter/installation-service.ts`, `backend/src/storefront/workspace/sql-repositories.ts`, `backend/src/stripe/accounts/repository.ts`, `backend/src/stripe/accounts/service.ts`, `backend/src/stripe/accounts/types.ts`, `backend/src/stripe/webhooks/accounts-v2-route.ts`, `backend/src/stripe/webhooks/connect-payments-route.ts`, `backend/src/stripe/webhooks/processor.ts`, `backend/src/stripe/webhooks/receipt-repository.ts`, `backend/src/tenants/settings.ts`
+- **Used by:** `backend/src/admin/service.ts`, `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/catalog/postgres-repository.ts`, `backend/src/catalog/public-store.ts`, `backend/src/commerce/checkout-attempts.ts`, `backend/src/commerce/checkout-cart.ts`, `backend/src/commerce/digital.ts`, `backend/src/commerce/fulfilment.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/notifications.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/service.ts`, `backend/src/commerce/sweeper.ts`, `backend/src/content/sql-repository.ts`, `backend/src/custom-data/sql-repository.ts`, `backend/src/customers/service.ts`, `backend/src/media/sql-media-repository.ts`, `backend/src/media/storefront-reference-reader.ts`, `backend/src/storefront/context/sql-repository.ts`, `backend/src/storefront/local-v4-compilation.ts`, `backend/src/storefront/publication/sql-repository.ts`, `backend/src/storefront/sql-v4-workspace-data-source.ts`, `backend/src/storefront/starter/installation-service.ts`, `backend/src/storefront/workspace/sql-repositories.ts`, `backend/src/stripe/accounts/repository.ts`, `backend/src/stripe/accounts/service.ts`, `backend/src/stripe/accounts/types.ts`, `backend/src/stripe/webhooks/accounts-v2-route.ts`, `backend/src/stripe/webhooks/connect-payments-route.ts`, `backend/src/stripe/webhooks/dispute-events.ts`, `backend/src/stripe/webhooks/event-helpers.ts`, `backend/src/stripe/webhooks/event-types.ts`, `backend/src/stripe/webhooks/payment-intent-events.ts`, `backend/src/stripe/webhooks/processor.ts`, `backend/src/stripe/webhooks/receipt-repository.ts`, `backend/src/stripe/webhooks/refund-events.ts`, `backend/src/tenants/settings.ts`
 - **Tests:** `service.test.ts`, `app.composition.test.ts`, `notifications-digital-db.test.ts`, `order-management.test.ts`, `order-workspace.test.ts`, `payment-intents.test.ts`, `rate-limit.test.ts`, `repository.test.ts`, `routes.test.ts`, `service.test.ts`, `storefront-reference-reader.test.ts`, `service.test.ts`
 
 - `routes.test.ts` — test (109 lines)
@@ -536,11 +555,11 @@ Checkout, orders, payment intents, inventory, fulfilment, order management, noti
 ### `backend/src/commerce/service.ts`
 
 - **Purpose:** Application service (business rules): CheckoutService (inferred from file name; no header comment)
-- **Size:** 805 lines
+- **Size:** 456 lines
 - **Exports:** `CheckoutServiceDeps` (type), `CheckoutService`
-- **Imports (project):** `backend/src/catalog/service.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/repository.ts`, `backend/src/commerce/types.ts`, `backend/src/http/errors.ts`, `backend/src/stripe/accounts/service.ts`, `backend/src/tenants/settings.ts`
+- **Imports (project):** `backend/src/catalog/service.ts`, `backend/src/commerce/checkout-attempts.ts`, `backend/src/commerce/checkout-cart.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/repository.ts`, `backend/src/commerce/types.ts`, `backend/src/http/errors.ts`, `backend/src/stripe/accounts/service.ts`, `backend/src/tenants/settings.ts`
 - **Imports (packages):** `node:crypto`, `zod`
-- **Database tables referenced:** `CheckoutAttempt`, `DigitalAsset`, `Order`, `OrderItem`, `OrderRevision`, `Payment`, `Store`
+- **Database tables referenced:** `CheckoutAttempt`, `Order`, `OrderItem`, `OrderRevision`, `Payment`, `Store`
 - **Used by:** `backend/src/app/dependencies.ts`, `backend/src/app/types.ts`, `backend/src/commerce/routes.ts`
 - **Tests:** `order-workspace.test.ts`, `payment-intents.test.ts`, `routes.test.ts`, `service.test.ts`
 
@@ -570,7 +589,7 @@ Checkout, orders, payment intents, inventory, fulfilment, order management, noti
 - **Purpose:** Type definitions (inferred from file name; no header comment)
 - **Size:** 29 lines
 - **Exports:** `CheckoutLineInput` (type), `BeginCheckoutInput` (type), `CheckoutAttemptResult` (type), `PublicOrderView` (type)
-- **Used by:** `backend/src/commerce/service.ts`
+- **Used by:** `backend/src/commerce/checkout-attempts.ts`, `backend/src/commerce/checkout-cart.ts`, `backend/src/commerce/service.ts`
 - **Tests:** `service.test.ts`
 
 ## `backend/src/content/`
@@ -747,7 +766,7 @@ HTTP helpers (errors, validation).
 - **Size:** 61 lines
 - **Exports:** `ApiIssue` (type), `ApiError`, `notFoundHandler`, `errorHandler`
 - **Imports (packages):** `express`, `zod`
-- **Used by:** `backend/src/app.ts`, `backend/src/app/default-storefront-workspace.ts`, `backend/src/auth/development-auth-provider.ts`, `backend/src/auth/firebase-auth-provider.ts`, `backend/src/auth/middleware.ts`, `backend/src/auth/supabase-auth-provider.ts`, `backend/src/catalog/postgres-repository.ts`, `backend/src/commerce/digital.ts`, `backend/src/commerce/fulfilment.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/notification-routes.ts`, `backend/src/commerce/notifications.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/routes.ts`, `backend/src/commerce/service.ts`, `backend/src/commerce/sweeper-routes.ts`, `backend/src/content/routes.ts`, `backend/src/customers/routes.ts`, `backend/src/customers/service.ts`, `backend/src/media/routes.ts`, `backend/src/media/service.ts`, `backend/src/media/validation.ts`, `backend/src/storefront/context/routes.ts`, `backend/src/storefront/repository.ts`, `backend/src/storefront/routes.ts`, `backend/src/storefront/service.ts`, `backend/src/storefront/starter/installation-service.ts`, `backend/src/storefront/starter/routes.ts`, `backend/src/storefront/workspace/routes.ts`, `backend/src/storefront/workspace/sql-global-section-store.ts`, `backend/src/storefront/workspace/theme-service.ts`, `backend/src/tenants/routes.ts`, `backend/src/tenants/settings.ts`, `backend/src/tenants/store-context.ts`
+- **Used by:** `backend/src/app.ts`, `backend/src/app/default-storefront-workspace.ts`, `backend/src/auth/development-auth-provider.ts`, `backend/src/auth/firebase-auth-provider.ts`, `backend/src/auth/middleware.ts`, `backend/src/auth/supabase-auth-provider.ts`, `backend/src/catalog/postgres-repository.ts`, `backend/src/commerce/checkout-attempts.ts`, `backend/src/commerce/checkout-cart.ts`, `backend/src/commerce/digital.ts`, `backend/src/commerce/fulfilment.ts`, `backend/src/commerce/merchant-order-routes.ts`, `backend/src/commerce/merchant-orders.ts`, `backend/src/commerce/notification-routes.ts`, `backend/src/commerce/notifications.ts`, `backend/src/commerce/order-management.ts`, `backend/src/commerce/order-runtime.ts`, `backend/src/commerce/payment-intents.ts`, `backend/src/commerce/rate-limit.ts`, `backend/src/commerce/refunds.ts`, `backend/src/commerce/routes.ts`, `backend/src/commerce/service.ts`, `backend/src/commerce/sweeper-routes.ts`, `backend/src/content/routes.ts`, `backend/src/customers/routes.ts`, `backend/src/customers/service.ts`, `backend/src/media/routes.ts`, `backend/src/media/service.ts`, `backend/src/media/validation.ts`, `backend/src/storefront/context/routes.ts`, `backend/src/storefront/repository.ts`, `backend/src/storefront/routes.ts`, `backend/src/storefront/service.ts`, `backend/src/storefront/starter/installation-service.ts`, `backend/src/storefront/starter/routes.ts`, `backend/src/storefront/workspace/routes.ts`, `backend/src/storefront/workspace/sql-global-section-store.ts`, `backend/src/storefront/workspace/theme-service.ts`, `backend/src/tenants/routes.ts`, `backend/src/tenants/settings.ts`, `backend/src/tenants/store-context.ts`
 - **Tests:** `routes.test.ts`, `firebase-auth-provider.test.ts`, `middleware.test.ts`, `routes.test.ts`, `merchant-order-routes.test.ts`, `payment-intents.test.ts`, `routes.test.ts`, `routes.test.ts`, `routes.test.ts`, `routes.test.ts`, `service.test.ts`, `routes.test.ts`, `routes.test.ts`, `routes.test.ts`, `service.test.ts`, `routes.test.ts`, `routes.test.ts`, `routes.test.ts`, `routes.test.ts`, `store-context.test.ts`
 
 ## `backend/src/media/`
@@ -1530,14 +1549,48 @@ Stripe webhook routes (signature check) and the event processor.
 - **Used by:** `backend/src/app/routes/commerce.ts`
 - **Tests:** `connect-payments-route.test.ts`
 
+### `backend/src/stripe/webhooks/dispute-events.ts`
+
+- **Purpose:** Exports processDisputeEvent (inferred from file name; no header comment)
+- **Size:** 82 lines
+- **Exports:** `processDisputeEvent`
+- **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/stripe/webhooks/event-helpers.ts`, `backend/src/stripe/webhooks/event-types.ts`
+- **Database tables referenced:** `Payment`, `PaymentDispute`
+- **Used by:** `backend/src/stripe/webhooks/processor.ts`
+
+### `backend/src/stripe/webhooks/event-helpers.ts`
+
+- **Purpose:** Exports asRecord, stripeObject, expandableId, stringValue (inferred from file name; no header comment)
+- **Size:** 104 lines
+- **Exports:** `asRecord`, `stripeObject`, `expandableId`, `stringValue`, `markProcessed`, `findPaymentByIntent`, `getCheckoutAttemptId`
+- **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/stripe/webhooks/event-types.ts`
+- **Database tables referenced:** `CheckoutAttempt`, `Payment`, `StripeWebhookEvent`
+- **Used by:** `backend/src/stripe/webhooks/dispute-events.ts`, `backend/src/stripe/webhooks/payment-intent-events.ts`, `backend/src/stripe/webhooks/processor.ts`, `backend/src/stripe/webhooks/refund-events.ts`
+
+### `backend/src/stripe/webhooks/event-types.ts`
+
+- **Purpose:** Type definitions (inferred from file name; no header comment)
+- **Size:** 18 lines
+- **Exports:** `EventPayload` (type), `ConnectPaymentEvent` (type), `PaymentSettlementHooks` (type)
+- **Imports (project):** `backend/src/commerce/repository.ts`
+- **Used by:** `backend/src/stripe/webhooks/dispute-events.ts`, `backend/src/stripe/webhooks/event-helpers.ts`, `backend/src/stripe/webhooks/payment-intent-events.ts`, `backend/src/stripe/webhooks/processor.ts`, `backend/src/stripe/webhooks/refund-events.ts`
+
+### `backend/src/stripe/webhooks/payment-intent-events.ts`
+
+- **Purpose:** Exports processPaymentIntentEvent (inferred from file name; no header comment)
+- **Size:** 256 lines
+- **Exports:** `processPaymentIntentEvent`
+- **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/stripe/webhooks/event-helpers.ts`, `backend/src/stripe/webhooks/event-types.ts`
+- **Database tables referenced:** `CheckoutAttempt`, `InventoryLevel`, `InventoryReservation`, `Order`, `Payment`
+- **Used by:** `backend/src/stripe/webhooks/processor.ts`
+
 - `processor.test.ts` — test (79 lines)
 ### `backend/src/stripe/webhooks/processor.ts`
 
 - **Purpose:** Exports processConnectPaymentEvent (inferred from file name; no header comment)
-- **Size:** 764 lines
-- **Exports:** `ConnectPaymentEvent` (type), `PaymentSettlementHooks` (type), `processConnectPaymentEvent`
-- **Imports (project):** `backend/src/commerce/repository.ts`
-- **Database tables referenced:** `CheckoutAttempt`, `InventoryLevel`, `InventoryReservation`, `Order`, `OrderItem`, `Payment`, `PaymentDispute`, `Refund`, `StripeWebhookEvent`
+- **Size:** 68 lines
+- **Exports:** `processConnectPaymentEvent`
+- **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/stripe/webhooks/dispute-events.ts`, `backend/src/stripe/webhooks/event-helpers.ts`, `backend/src/stripe/webhooks/event-types.ts`, `backend/src/stripe/webhooks/payment-intent-events.ts`, `backend/src/stripe/webhooks/refund-events.ts`
 - **Used by:** `backend/src/commerce/order-runtime.ts`, `backend/src/stripe/webhooks/connect-payments-route.ts`
 - **Tests:** `order-workspace.test.ts`, `processor.test.ts`
 
@@ -1549,6 +1602,15 @@ Stripe webhook routes (signature check) and the event processor.
 - **Imports (project):** `backend/src/commerce/repository.ts`
 - **Database tables referenced:** `StripeWebhookEvent`
 - **Used by:** `backend/src/stripe/webhooks/accounts-v2-route.ts`, `backend/src/stripe/webhooks/connect-payments-route.ts`
+
+### `backend/src/stripe/webhooks/refund-events.ts`
+
+- **Purpose:** Exports processRefundEvent (inferred from file name; no header comment)
+- **Size:** 262 lines
+- **Exports:** `processRefundEvent`
+- **Imports (project):** `backend/src/commerce/repository.ts`, `backend/src/stripe/webhooks/event-helpers.ts`, `backend/src/stripe/webhooks/event-types.ts`
+- **Database tables referenced:** `CheckoutAttempt`, `InventoryLevel`, `InventoryReservation`, `Order`, `OrderItem`, `Payment`, `Refund`
+- **Used by:** `backend/src/stripe/webhooks/processor.ts`
 
 ## `backend/src/tenants/`
 
