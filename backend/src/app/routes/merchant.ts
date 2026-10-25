@@ -8,6 +8,9 @@ import { createContentRouter } from "../../content/routes.js";
 import { createCustomDataRouter } from "../../custom-data/routes.js";
 import { createCustomerRouter, createEngagementRouter, createMerchantEngagementRouter } from "../../customers/routes.js";
 import { createMerchantRouter } from "../../tenants/routes.js";
+import { createTaxonomyRouter } from "../../taxonomy/routes.js";
+import { SqlTaxonomyRepository } from "../../taxonomy/sql-repository.js";
+import { TaxonomyService } from "../../taxonomy/service.js";
 import { createStoreSettingsRouter, StoreSettingsRepository } from "../../tenants/settings.js";
 import { supabasePool } from "../database.js";
 import type { AppContext } from "../types.js";
@@ -84,6 +87,11 @@ export function mountCatalogRoutes(app: Express, context: AppContext): void {
       authProvider,
     ),
   );
+
+  const { commerceDatabase } = context.routeDependencies;
+  if (commerceDatabase) {
+    app.use("/api/stores/:storeId/taxonomy", createTaxonomyRouter(new TaxonomyService(new SqlTaxonomyRepository(commerceDatabase)), authProvider));
+  }
 
   app.use(
     "/api/public/stores/:storeId/catalog",
