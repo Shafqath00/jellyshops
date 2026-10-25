@@ -55,17 +55,19 @@ export function ProductOptionsSection({ context, section }: { context: Storefron
   const style = section?.settings.style === "select" ? "select" : "buttons";
   return <section className="jelly-section jelly-product-options" data-style={style}><StorefrontContainer>
     {product.product.options.map((option) => {
-      const selected = option.values.find((value) => value.selected);
-      if (style === "select") return <label key={option.id} className="jelly-product-option-select">
-        <span>{option.name}</span>
+      const chosen = option.values.filter((value) => value.selected);
+      const selected = chosen[0];
+      // A dropdown can only hold one value, so choices that take several always render as buttons.
+      if (style === "select" && !option.multiple) return <label key={option.id} className="jelly-product-option-select">
+        <span>{option.name}{option.missing && <span className="jelly-product-option-required"> (required)</span>}</span>
         <select value={selected?.id ?? ""} onChange={(event) => product.selectOption(option.id, event.target.value)}>
           {!selected && <option value="" disabled>Choose {option.name.toLowerCase()}</option>}
           {option.values.map((value) => <option key={value.id} value={value.id} disabled={!value.available}>{value.label}{value.available ? "" : " — sold out"}</option>)}
         </select>
       </label>;
-      return <fieldset key={option.id}>
-        <legend>{option.name}{selected && <span>: {selected.label}</span>}</legend>
-        <div className="jelly-product-option-values">{option.values.map((value) => <button key={value.id} type="button" aria-pressed={value.selected} disabled={!value.available} onClick={() => product.selectOption(option.id, value.id)}>{value.label}</button>)}</div>
+      return <fieldset key={option.id} aria-invalid={option.missing || undefined} data-missing={option.missing || undefined}>
+        <legend>{option.name}{chosen.length > 0 && <span>: {chosen.map((value) => value.label).join(", ")}</span>}{!option.required && chosen.length === 0 && <span> (optional)</span>}{option.missing && <span className="jelly-product-option-required" role="note"> (required)</span>}</legend>
+        <div className="jelly-product-option-values">{option.values.map((value) => <button key={value.id} type="button" aria-pressed={value.selected} disabled={!value.available} onClick={() => product.selectOption(option.id, value.id)}>{value.label}{value.priceAdjustment && <span className="jelly-product-option-price"> +{value.priceAdjustment}</span>}</button>)}</div>
       </fieldset>;
     })}
   </StorefrontContainer></section>;

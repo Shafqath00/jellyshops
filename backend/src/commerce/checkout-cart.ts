@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { validateProductSelections, type ProductOptionLike } from "@jelly/storefront-schema";
 import { z } from "zod";
 
 import type { CatalogReader } from "../catalog/service.js";
@@ -118,24 +119,18 @@ export async function validateCart(
         const assets = await deps.repository.transaction((tx) => tx.query('SELECT "id" FROM "DigitalAsset" WHERE "storeId"=$1 AND "productId"=$2 AND "archivedAt" IS NULL LIMIT 1', [storeId, variant.productId]));
         if (!assets.rows.length) throw new ApiError(409, "DIGITAL_FILE_UNAVAILABLE", "This digital product is not ready for purchase.");
       }
-      const productOptions = (product?.options ?? []) as Array<{ id: string; name: string; type?: string; required?: boolean; values?: Array<{ id: string; label: string; priceAdjustmentMinor?: number; priceAdjustment?: number }> }>;
+      const productOptions = (product?.options ?? []) as Array<{ id: string; name: string; type?: string; required?: boolean; multiple?: boolean; values?: Array<{ id: string; label: string; priceAdjustmentMinor?: number; priceAdjustment?: number }> }>;
       const selections = item.configurationSelections ?? [];
-      const selectedOptionIds = new Set<string>();
+      // One shared rule set with the storefront and builder: required, hidden-by-condition, single vs several, min and max.
+      const [firstProblem] = validateProductSelections(productOptions.map((option) => ({ ...option, type: option.type === "variant" || option.type === "addon" ? option.type : "configuration", required: Boolean(option.required), values: option.values ?? [] })) as ProductOptionLike[], selections);
+      if (firstProblem) throw new ApiError(422, "CHECKOUT_INPUT_INVALID", firstProblem.message);
       const snapshot = selections.map((selection) => {
-        const option = productOptions.find((candidate) => candidate.id === selection.optionId);
-        const value = option?.values?.find((candidate) => candidate.id === selection.valueId);
-        if (!option || !value) throw new ApiError(422, "CHECKOUT_INPUT_INVALID", `Invalid product configuration: ${selection.optionId}`);
-        if (selectedOptionIds.has(option.id)) throw new ApiError(422, "CHECKOUT_INPUT_INVALID", `Duplicate product configuration: ${option.id}`);
-        selectedOptionIds.add(option.id);
+        const option = productOptions.find((candidate) => candidate.id === selection.optionId)!;
+        const value = option.values?.find((candidate) => candidate.id === selection.valueId)!;
         if (option.type === "variant" && variant.options[option.id] !== value.id) throw new ApiError(422, "CHECKOUT_INPUT_INVALID", "Configuration does not match the selected variant.");
         const priceAdjustmentMinor = Number.isFinite(value.priceAdjustmentMinor) ? Number(value.priceAdjustmentMinor) : Number.isFinite(value.priceAdjustment) ? Math.round(Number(value.priceAdjustment) * 100) : 0;
         return { optionId: option.id, valueId: value.id, optionName: option.name, valueLabel: value.label, priceAdjustmentMinor };
       });
-      for (const option of productOptions) {
-        if (option.required && !selectedOptionIds.has(option.id)) {
-          throw new ApiError(422, "CHECKOUT_INPUT_INVALID", `Missing required product configuration: ${option.id}`);
-        }
-      }
       const unitPriceMinor = variant.priceMinor + snapshot.filter((selection) => productOptions.find((option) => option.id === selection.optionId)?.type !== "variant").reduce((total, selection) => total + selection.priceAdjustmentMinor, 0);
       if (!Number.isSafeInteger(unitPriceMinor) || unitPriceMinor < 0) throw new ApiError(422, "CHECKOUT_PRICE_INVALID", "This product's price requires review.");
       return {

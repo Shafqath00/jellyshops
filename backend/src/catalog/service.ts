@@ -1,3 +1,4 @@
+import { assertValidProductConfiguration } from "./product-configuration.js";
 import type { CatalogRepository, CatalogWriter } from "./repository.js";
 import type {
   CatalogCollection,
@@ -74,11 +75,17 @@ export class CatalogService implements CatalogReader {
     return this.repository.listCollections(storeId, input);
   }
 
-  createProduct(storeId: string, input: CreateProductInput): Promise<CatalogProduct> {
+  async createProduct(storeId: string, input: CreateProductInput): Promise<CatalogProduct> {
+    assertValidProductConfiguration(input);
     return this.requireWriter().createProduct(storeId, input);
   }
 
-  updateProduct(storeId: string, productId: string, input: UpdateProductInput): Promise<CatalogProduct> {
+  async updateProduct(storeId: string, productId: string, input: UpdateProductInput): Promise<CatalogProduct> {
+    // An update may leave the choices untouched; validate what it sends against what is stored.
+    if (input.options !== undefined || input.inventoryOptionIds !== undefined || input.variants !== undefined) {
+      const existing = await this.repository.getProduct(storeId, productId);
+      assertValidProductConfiguration(input, existing ?? undefined);
+    }
     return this.requireWriter().updateProduct(storeId, productId, input);
   }
 

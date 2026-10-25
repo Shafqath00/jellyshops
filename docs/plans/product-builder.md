@@ -1,6 +1,16 @@
 # Product Builder — design plan
 
-Status: proposal, nothing implemented. Date: 2026-10-25.
+Status: phases 1-6 built (phase 6 in part: see below). Date: 2026-10-25.
+
+**Built**
+1. Shared rules (conditions, selection and draft validation), now in `@jelly/storefront-schema` (`product-options.ts`) so the API, storefront and builder share one rule set.
+2. Persisted categories and templates (`/api/stores/:storeId/taxonomy`, migration `20261023000000_category_taxonomy.sql`, applied to staging).
+3. Builder shell at `/admin/products/builder`: basics, category, price and stock.
+4. Choices and combinations sections, bulk edit, editing at `/admin/products/builder/[id]`.
+5. Interactive buyer preview.
+6. Server enforcement on product writes (3 stock-tracked choices, 100 combinations, duplicates, conditions, variant/choice match), checkout validation with pick-several and conditional choices, and storefront pick-several, conditions and required hints.
+
+**Not built yet:** text-input customisations, per-combination photos, an explicit "don't sell this combination" flag (needs a migration), and the condition editor in the builder.
 
 ## 0. What already exists (we extend, we do not restart)
 

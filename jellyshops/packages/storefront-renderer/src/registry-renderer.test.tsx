@@ -400,4 +400,30 @@ describe("registry-driven section rendering", () => {
     wrapper.click();
     expect(onSelect).toHaveBeenCalledWith({ kind: "section", region: "template", sectionId: "brand-story-1" });
   });
+
+  it("renders choices that take several values as toggle buttons, even in dropdown style, and flags missing required ones", async () => {
+    const selectOption = vi.fn();
+    const page = {
+      pageType: "product" as const,
+      resource: { id: "bed", handle: "bed", data: { productPresentation: {
+        product: { id: "bed", title: "Bed", description: "", imageUrl: "", options: [
+          { id: "size", name: "Size", required: true, missing: true, values: [{ id: "s", label: "Single", selected: false, available: true }] },
+          { id: "extras", name: "Extras", required: false, multiple: true, values: [{ id: "head", label: "Headboard", selected: true, available: true, priceAdjustment: "$50.00" }, { id: "rug", label: "Rug", selected: true, available: true }, { id: "lamp", label: "Lamp", selected: false, available: true }] },
+        ] },
+        selection: [], quantity: 1, pricing: { price: "$100.00" }, availability: { state: "selection-required" as const, message: "Choose the required options", maxQuantity: 0 }, canAddToCart: false,
+        selectOption, setQuantity: vi.fn(), addToCart: vi.fn(), relatedProducts: [],
+      } } },
+    };
+    const dropdown: SectionNode = { ...section("product-options"), settings: { style: "select" } };
+    render(<RegistrySectionRenderer section={dropdown} mode="published" commerce={commerce} page={page} />);
+    expect(screen.getByRole("combobox")).toBeInTheDocument();
+    expect(screen.getAllByRole("combobox")).toHaveLength(1);
+    expect(screen.getByText(/(required)/)).toBeInTheDocument();
+    expect(screen.getByText(": Headboard, Rug")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Headboard/ })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: /Headboard/ })).toHaveTextContent("+$50.00");
+    expect(screen.getByRole("button", { name: "Lamp" })).toHaveAttribute("aria-pressed", "false");
+    await userEvent.click(screen.getByRole("button", { name: "Lamp" }));
+    expect(selectOption).toHaveBeenCalledWith("extras", "lamp");
+  });
 });

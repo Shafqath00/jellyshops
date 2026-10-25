@@ -9,6 +9,7 @@ import { useThemePresentation } from "@/features/storefront/components/storefron
 import { useShop } from "@/contexts/shop-context";
 import { formatMoney, type ConfiguredOptionSelection } from "@/lib/domain";
 import { getConfiguredPriceMinor, resolveProductVariant } from "@/lib/product-configuration";
+import { getVisibleOptions, toggleSelection, validateProductSelections } from "@/lib/product-builder";
 import { createProductPresentationContext } from "@/features/storefront/product-presentation";
 import { useStorefrontCatalogStatus } from "@/features/commerce/components/storefront-catalog-sync";
 import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
@@ -31,10 +32,11 @@ export default function ProductPage() {
   const store = repository.getStoreBySlug(storeSlug);
   const product = store ? repository.getProductBySlug(store.id, decodedProductSlug) : undefined;
   const visibleProducts = repository.listProducts(storeSlug).filter((item) => item.published && !item.archived);
-  const options = [...(product?.options ?? [])].sort((a, b) => a.position - b.position);
-  const selected = (optionId: string) => selections.find((item) => item.optionId === optionId)?.valueId;
-  const choose = (optionId: string, valueId: string) => setSelections((items) => [...items.filter((item) => item.optionId !== optionId), { optionId, valueId }]);
-  const requiredMissing = options.some((option) => option.required && !selected(option.id));
+  const allOptions = [...(product?.options ?? [])].sort((a, b) => a.position - b.position);
+  const options = getVisibleOptions(allOptions, selections);
+  const isSelected = (optionId: string, valueId: string) => selections.some((item) => item.optionId === optionId && item.valueId === valueId);
+  const choose = (optionId: string, valueId: string) => { const option = allOptions.find((candidate) => candidate.id === optionId); if (option) setSelections((items) => toggleSelection(option, items, valueId)); };
+  const requiredMissing = validateProductSelections(allOptions, selections).some((problem) => problem.code === "required" || problem.code === "too_few");
   const variant = product ? resolveProductVariant(product, selections) : undefined;
   const finalPrice = getConfiguredPriceMinor(variant, options, selections) ?? 0;
   const addCurrentToCart = async ({ variantId, nextQuantity, nextSelections, priceMinor }: { variantId: string; nextQuantity: number; nextSelections: ConfiguredOptionSelection[]; priceMinor: number }) => {
@@ -86,6 +88,6 @@ export default function ProductPage() {
   }
   const addToCart = () => { if (variant) void addCurrentToCart({ variantId: variant.id, nextQuantity: 1, nextSelections: selections, priceMinor: finalPrice }); };
   const ProductTemplate = shell.ProductPage;
-  const productOptions = options.map((option) => ({ id: option.id, name: option.name, required: option.required, values: option.values.map((value) => ({ id: value.id, label: value.label, priceAdjustment: value.priceAdjustmentMinor ? formatMoney(value.priceAdjustmentMinor, store.currency) : undefined, selected: selected(option.id) === value.id })) }));
+  const productOptions = options.map((option) => ({ id: option.id, name: option.name, required: option.required, values: option.values.map((value) => ({ id: value.id, label: value.label, priceAdjustment: value.priceAdjustmentMinor ? formatMoney(value.priceAdjustmentMinor, store.currency) : undefined, selected: isSelected(option.id, value.id) })) }));
   return <ProductTemplate store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} settings={settings} product={{ name: product.name, category: product.category, description: product.description, imageUrl: product.imageUrl, specifications: product.specifications }} price={formatMoney(finalPrice, store.currency)} compareAtPrice={variant?.compareAtPriceMinor && variant.compareAtPriceMinor > finalPrice ? formatMoney(variant.compareAtPriceMinor, store.currency) : undefined} shippingCopy={store.shippingCopy} availableText={variant ? (variant.stock > 0 ? `${variant.stock} available` : "Out of stock") : requiredMissing ? "Choose the required options" : "This combination is unavailable"} options={productOptions} backHref={`/${store.slug}/shop`} variantAvailable={Boolean(variant && variant.stock > 0)} requiredMissing={requiredMissing} added={added} onSelectOption={choose} onAddToCart={addToCart} />;
 }

@@ -9,7 +9,7 @@ export interface CollectionPresentationContext {
   totalProducts: number;
 }
 export interface ProductPresentationContext {
-  product: { id: string; title: string; description: string; imageUrl: string; specifications?: Record<string, string>; shippingCopy?: string; media?: Array<{ id: string; url: string; altText?: string }>; sku?: string; vendor?: string; options: Array<{ id: string; name: string; required: boolean; values: Array<{ id: string; label: string; selected: boolean; available: boolean }> }> };
+  product: { id: string; title: string; description: string; imageUrl: string; specifications?: Record<string, string>; shippingCopy?: string; media?: Array<{ id: string; url: string; altText?: string }>; sku?: string; vendor?: string; options: Array<{ id: string; name: string; required: boolean; multiple?: boolean; missing?: boolean; values: Array<{ id: string; label: string; selected: boolean; available: boolean; priceAdjustment?: string }> }> };
   selection: Array<{ optionId: string; valueId: string }>;
   quantity: number;
   pricing: { price: string; compareAtPrice?: string };

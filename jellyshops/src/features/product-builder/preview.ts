@@ -1,5 +1,5 @@
 import { majorToMinor, type ConfiguredOptionSelection, type Product, type ProductOption, type ProductVariant } from "@/lib/domain";
-import { getVisibleOptions, validateProductSelections, type SelectionProblem } from "@/lib/product-builder";
+import { getVisibleOptions, toggleSelection, validateProductSelections, type SelectionProblem } from "@/lib/product-builder";
 import { getConfiguredPriceMinor, resolveProductVariant } from "@/lib/product-configuration";
 import { effectiveVariants, inventoryOptionIdsOf, isUnlimitedStock, type ProductDraft } from "./draft";
 
@@ -35,19 +35,7 @@ export function pruneSelections(options: ProductOption[], selections: Configured
   return selections.filter((selection) => options.find((option) => option.id === selection.optionId)?.values.some((value) => value.id === selection.valueId));
 }
 
-/** Clicking a value: replaces it for single-pick choices (optional ones can be un-picked), toggles for multi-pick up to the maximum. */
-export function toggleSelection(option: ProductOption, selections: ConfiguredOptionSelection[], valueId: string): ConfiguredOptionSelection[] {
-  const others = selections.filter((selection) => selection.optionId !== option.id);
-  const mine = selections.filter((selection) => selection.optionId === option.id);
-  const picked = mine.some((selection) => selection.valueId === valueId);
-  if (option.type !== "variant" && option.multiple) {
-    if (picked) return selections.filter((selection) => !(selection.optionId === option.id && selection.valueId === valueId));
-    if (option.maxSelect !== undefined && mine.length >= option.maxSelect) return selections;
-    return [...selections, { optionId: option.id, valueId }];
-  }
-  if (picked) return option.required ? selections : others;
-  return [...others, { optionId: option.id, valueId }];
-}
+export { toggleSelection };
 
 export type ValueStatus = "available" | "sold-out" | "unavailable";
 

@@ -61,3 +61,28 @@ export type {
 export { storefrontPageTypes } from "./types.js";
 export type { BlockNode, GlobalSettings, PageDocument, PageType, SectionNode, StoreDesignDocument, ThemeId } from "./types.js";
 export type { RichTextBlock, RichTextDocument, RichTextInline, RichTextMark } from "./rich-text.js";
+export {
+  MAX_VARIANTS,
+  MAX_VARIANT_AXES,
+  dropHiddenSelections,
+  findConditionProblems,
+  getVisibleOptions,
+  selectionKey,
+  toggleSelection,
+  validateProductDraft,
+  validateProductOptions,
+  validateProductSelections,
+  validateVariantCombinations,
+} from "./product-options.js";
+export type {
+  ConditionProblem,
+  DraftIssue,
+  DraftVariantLike,
+  OptionIssue,
+  OptionSelection,
+  ProductDraftInput,
+  ProductOptionConditionLike,
+  ProductOptionLike,
+  ProductOptionValueLike,
+  SelectionProblem,
+} from "./product-options.js";

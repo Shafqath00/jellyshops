@@ -45,4 +45,52 @@ describe("createProductPresentationContext", () => {
       pricing: { compareAtPrice: "$15.00" }, availability: { state: "available", maxQuantity: 2 },
     });
   });
+
+  describe("choices beyond size", () => {
+    const value = (id: string, label: string, priceAdjustmentMinor = 0) => ({ id, label, priceAdjustmentMinor, position: 0 });
+    const bed: Product = {
+      ...product, id: "bed", name: "Bed",
+      variants: [{ id: "single", name: "Single", sku: "B1", priceMinor: 10000, stock: 3, options: { size: "single" } }, { id: "king", name: "King", sku: "B2", priceMinor: 20000, stock: 3, options: { size: "king" } }],
+      options: [
+        { id: "size", name: "Size", type: "variant", display: "buttons", required: true, position: 0, values: [value("single", "Single"), value("king", "King")] },
+        { id: "extras", name: "Extras", type: "addon", display: "buttons", required: false, multiple: true, maxSelect: 2, position: 1, values: [value("head", "Headboard", 5000), value("rug", "Rug", 1000), value("lamp", "Lamp", 500)] },
+        { id: "long", name: "Extra long", type: "configuration", display: "buttons", required: true, position: 2, visibleWhen: { optionId: "size", valueIds: ["king"] }, values: [value("yes", "Yes", 100)] },
+      ],
+    };
+    const build = (selections: Array<{ optionId: string; valueId: string }>, onSelectionsChange = vi.fn()) => createProductPresentationContext({ product: bed, currency: "USD", selections, quantity: 1, onSelectionsChange, onQuantityChange: vi.fn(), onAddToCart: vi.fn() });
+
+    it("adds up every picked extra and lists price changes on the values", () => {
+      const context = build([{ optionId: "size", valueId: "single" }, { optionId: "extras", valueId: "head" }, { optionId: "extras", valueId: "rug" }]);
+      expect(context.pricing.price).toBe("$160.00");
+      const extras = context.product.options.find((option) => option.id === "extras")!;
+      expect(extras).toMatchObject({ multiple: true });
+      expect(extras.values.map((v) => [v.label, v.selected, v.priceAdjustment])).toEqual([["Headboard", true, "$50.00"], ["Rug", true, "$10.00"], ["Lamp", false, "$5.00"]]);
+      expect(context.product.options.find((option) => option.id === "size")).not.toHaveProperty("multiple");
+    });
+
+    it("toggles extras on and off, respects the maximum, and replaces single-pick choices", () => {
+      const onChange = vi.fn();
+      build([{ optionId: "extras", valueId: "head" }], onChange).selectOption("extras", "rug");
+      expect(onChange).toHaveBeenLastCalledWith([{ optionId: "extras", valueId: "head" }, { optionId: "extras", valueId: "rug" }]);
+      build([{ optionId: "extras", valueId: "head" }], onChange).selectOption("extras", "head");
+      expect(onChange).toHaveBeenLastCalledWith([]);
+      const full = [{ optionId: "extras", valueId: "head" }, { optionId: "extras", valueId: "rug" }];
+      build(full, onChange).selectOption("extras", "lamp");
+      expect(onChange).toHaveBeenLastCalledWith(full);
+      build([{ optionId: "size", valueId: "single" }], onChange).selectOption("size", "king");
+      expect(onChange).toHaveBeenLastCalledWith([{ optionId: "size", valueId: "king" }]);
+    });
+
+    it("only shows and requires a conditional choice once its condition is met", () => {
+      const single = build([{ optionId: "size", valueId: "single" }]);
+      expect(single.product.options.map((option) => option.id)).toEqual(["size", "extras"]);
+      expect(single.canAddToCart).toBe(true);
+      const king = build([{ optionId: "size", valueId: "king" }]);
+      expect(king.product.options.map((option) => option.id)).toEqual(["size", "extras", "long"]);
+      expect(king.product.options.find((option) => option.id === "long")).toMatchObject({ missing: true });
+      expect(king.canAddToCart).toBe(false);
+      expect(king.availability.state).toBe("selection-required");
+      expect(build([{ optionId: "size", valueId: "king" }, { optionId: "long", valueId: "yes" }]).canAddToCart).toBe(true);
+    });
+  });
 });
