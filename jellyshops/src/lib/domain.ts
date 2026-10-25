@@ -78,7 +78,15 @@ export interface ProductOption {
   required: boolean;
   position: number;
   values: ProductOptionValue[];
+  /** Customer may pick several values (add-ons, extras). Never true for variant axes. */
+  multiple?: boolean;
+  minSelect?: number;
+  maxSelect?: number;
+  /** Show this choice only when another choice has one of the listed values. */
+  visibleWhen?: ProductOptionCondition;
 }
+
+export interface ProductOptionCondition { optionId: string; valueIds: string[]; }
 
 export interface Category {
   id: string;
