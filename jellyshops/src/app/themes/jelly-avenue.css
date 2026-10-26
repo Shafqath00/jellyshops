@@ -172,6 +172,20 @@
 [data-jelly-theme="jelly-avenue"] :where(input, textarea)::placeholder { color: color-mix(in srgb, var(--av-text) 45%, transparent); }
 [data-jelly-theme="jelly-avenue"] :where(input[type="checkbox"], input[type="radio"]) { width: 18px; height: 18px; accent-color: var(--av-ink); }
 [data-jelly-theme="jelly-avenue"] :where(label) { font-size: var(--av-text-sm); font-weight: 500; }
+/* Routes that ship their own field styles (checkout, account, catalogue filters) outrank the zero-specificity rules above, so restate the look for them. */
+[data-jelly-theme="jelly-avenue"] :is(.field, .checkout-form, .signature-panel, .signature-filters) :is(input:not([type="checkbox"], [type="radio"]), select, textarea) {
+  min-height: 46px;
+  padding: 11px 14px;
+  border: 1px solid var(--av-border-strong);
+  border-radius: var(--jelly-radius-input, var(--av-radius-button));
+  background: var(--av-bg);
+  color: var(--av-text);
+  font: inherit;
+  font-size: var(--av-text-base);
+  box-shadow: none;
+}
+[data-jelly-theme="jelly-avenue"] :is(.field, .checkout-form, .signature-panel, .signature-filters) :is(input:not([type="checkbox"], [type="radio"]), select, textarea):focus-visible { border-color: var(--av-ink); box-shadow: 0 0 0 1px var(--av-ink); outline: none; }
+[data-jelly-theme="jelly-avenue"] :is(.field, .checkout-form, .signature-panel) textarea { min-height: 120px; }
 
 /* 5 ── Announcement bar ───────────────────────────────────────────────── */
 [data-jelly-theme="jelly-avenue"] .jelly-announcement {
@@ -351,6 +365,8 @@
 }
 @media (max-width: 599px) {
   [data-jelly-theme="jelly-avenue"] .jelly-footer-links { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* Newsletter sign-ups stack: field, then a full-width button. */
+  [data-jelly-theme="jelly-avenue"] .jelly-newsletter form > button { flex: 1 1 100%; }
 }
 
 /* 8 ── Product cards and grids ────────────────────────────────────────── */
