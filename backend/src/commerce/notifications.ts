@@ -2,9 +2,11 @@ import { createHash, createHmac, randomUUID } from "node:crypto";
 import type { CommerceDatabase, SqlExecutor } from "./repository.js";
 import { ApiError } from "../http/errors.js";
 
-export const notificationTypes = ["PLACED", "PAYMENT_CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUND_PROCESSED", "DIGITAL_READY"] as const;
+export const notificationTypes = ["PLACED", "PAYMENT_CONFIRMED", "PROCESSING", "PACKED", "SHIPPED", "OUT_FOR_DELIVERY", "DELIVERED", "SHIPMENT_DELAYED", "DELIVERY_FAILED", "CANCELLED", "REFUND_PROCESSED", "DIGITAL_READY"] as const;
+/** Notifications that name a shipment, so they carry its carrier and tracking details. */
+const shipmentNotificationTypes: ReadonlySet<string> = new Set(["SHIPPED", "OUT_FOR_DELIVERY", "DELIVERED", "SHIPMENT_DELAYED", "DELIVERY_FAILED"]);
 export type NotificationType = typeof notificationTypes[number];
-const titles: Record<NotificationType, string> = { PLACED: "Order placed", PAYMENT_CONFIRMED: "Payment confirmed", PROCESSING: "Your order is being prepared", SHIPPED: "Your order has shipped", DELIVERED: "Your order was delivered", CANCELLED: "Order cancelled", REFUND_PROCESSED: "Refund processed", DIGITAL_READY: "Your downloads are ready" };
+const titles: Record<NotificationType, string> = { PLACED: "Order placed", PAYMENT_CONFIRMED: "Payment confirmed", PROCESSING: "Your order is being prepared", PACKED: "Your order is packed", SHIPPED: "Your order has shipped", OUT_FOR_DELIVERY: "Your order is out for delivery", DELIVERED: "Your order was delivered", SHIPMENT_DELAYED: "Your shipment is delayed", DELIVERY_FAILED: "A delivery attempt failed", CANCELLED: "Order cancelled", REFUND_PROCESSED: "Refund processed", DIGITAL_READY: "Your downloads are ready" };
 const escape = (value: unknown) => String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 export function digitalToken(id: string, secret: string): string {
   if (secret.length < 32) throw new Error("DIGITAL_TOKEN_SECRET must contain at least 32 characters");
@@ -78,7 +80,7 @@ export function createNotificationService(database: CommerceDatabase, transport:
               await sql.query(`UPDATE "DigitalEntitlement" SET "tokenHash"=$2 WHERE "id"=$1`, [grant.id, hashDigitalToken(token)]);
               downloads.push({ filename: String(grant.filename), url: `${apiBaseUrl}/api/public/stores/${encodeURIComponent(String(job.storeId))}/digital/${grant.id}?token=${token}` });
             }
-            const tracking = job.type === "SHIPPED" || job.type === "DELIVERED" ? (await sql.query(`SELECT carrier,"trackingNumber" AS number,"trackingUrl" AS url FROM "OrderFulfilment" WHERE "storeId"=$1 AND "orderId"=$2 ORDER BY "createdAt"`, [job.storeId, job.orderId])).rows.map((r) => ({ carrier: String(r.carrier ?? ""), number: String(r.number ?? ""), url: typeof r.url === "string" && /^https?:\/\//.test(r.url) ? r.url : undefined })) : [];
+            const tracking = shipmentNotificationTypes.has(String(job.type)) ? (await sql.query(`SELECT carrier,"trackingNumber" AS number,"trackingUrl" AS url FROM "OrderFulfilment" WHERE "storeId"=$1 AND "orderId"=$2 ORDER BY "createdAt"`, [job.storeId, job.orderId])).rows.map((r) => ({ carrier: String(r.carrier ?? ""), number: String(r.number ?? ""), url: typeof r.url === "string" && /^https?:\/\//.test(r.url) ? r.url : undefined })) : [];
             const itemRows = Array.isArray(order.items) ? order.items as Record<string, unknown>[] : (await sql.query(`SELECT * FROM "OrderItem" WHERE "storeId"=$1 AND "orderId"=$2 ORDER BY "variantId"`, [job.storeId, job.orderId])).rows;
             const items = itemRows.map((r) => ({ title: String(r.titleSnapshot), quantity: Number(r.quantity), unitPriceMinor: Number(r.unitPriceMinor) }));
             return { order, downloads, tracking, items };

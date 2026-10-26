@@ -63,3 +63,4 @@
 :where(.jelly-order-timeline li) { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent); font-size: 14px; }
 :where(.jelly-order-timeline time) { opacity: .75; }
 @media (max-width: 599px) { :where(.jelly-order-progress) { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 18px; } :where(.jelly-order-progress-step)::before { display: none; } }
+:where(.jelly-shipment-exception) { margin: 0; padding: 10px 12px; border-radius: var(--jelly-radius-card, 4px); background: color-mix(in srgb, #b45309 12%, transparent); font-size: 14px; }

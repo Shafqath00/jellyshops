@@ -17,6 +17,8 @@ export interface PublicShipment {
   items: Array<{ title: string; quantity: number }>;
   shippedAt: string;
   deliveredAt: string | null;
+  /** A problem still open on this parcel, shown to the shopper with a next step. */
+  exception: "DELAYED" | "DELIVERY_FAILED" | null;
 }
 
 export interface PublicTimelineEntry { label: string; at: string }

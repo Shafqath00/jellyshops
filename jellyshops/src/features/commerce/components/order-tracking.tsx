@@ -24,6 +24,11 @@ export function OrderProgress({ steps }: { steps: PublicProgressStep[] }) {
   </ol>;
 }
 
+const EXCEPTION_COPY: Record<NonNullable<PublicShipment["exception"]>, string> = {
+  DELAYED: "This parcel has been delayed. Use the courier link for the latest information, or contact the shop if you need help.",
+  DELIVERY_FAILED: "A delivery attempt was unsuccessful. Use the courier link to see the next steps, or contact the shop to arrange another delivery.",
+};
+
 export function ShipmentList({ shipments }: { shipments: PublicShipment[] }) {
   if (shipments.length === 0) return null;
   return <section className="jelly-order-shipments" aria-labelledby="order-shipments-heading">
@@ -34,8 +39,9 @@ export function ShipmentList({ shipments }: { shipments: PublicShipment[] }) {
       return <article key={shipment.id} className="jelly-shipment" data-status={shipment.status}>
         <header>
           <strong>{shipments.length > 1 ? `Shipment ${index + 1}` : "Shipment"}</strong>
-          <span className="jelly-shipment-status">{delivered ? `Delivered ${delivered}` : shipped ? `Shipped ${shipped}` : "Shipped"}</span>
+          <span className="jelly-shipment-status">{delivered ? `Delivered ${delivered}` : shipment.status === "OUT_FOR_DELIVERY" ? "Out for delivery" : shipped ? `Shipped ${shipped}` : "Shipped"}</span>
         </header>
+        {shipment.exception && <p className="jelly-shipment-exception" role="status">{EXCEPTION_COPY[shipment.exception]}</p>}
         {shipment.carrier && <p className="jelly-shipment-carrier">Carrier: {shipment.carrier}</p>}
         {shipment.trackingNumber && <p className="jelly-shipment-number">Tracking number: <span>{shipment.trackingNumber}</span></p>}
         {shipment.trackingUrl && <p><a className="jelly-button jelly-button--link" href={shipment.trackingUrl} target="_blank" rel="noopener noreferrer">Track on {shipment.carrier ?? "the courier's website"} (opens in a new tab)</a></p>}

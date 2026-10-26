@@ -14,6 +14,7 @@ export interface PublicShipmentRow {
   items: unknown;
   createdAt: string | Date;
   deliveredAt: string | Date | null;
+  exception?: string | null;
 }
 
 export interface PublicOrderEventRow {
@@ -31,6 +32,8 @@ export interface PublicShipment {
   items: Array<{ title: string; quantity: number }>;
   shippedAt: string;
   deliveredAt: string | null;
+  /** A problem the shopper should know about, or null. */
+  exception: "DELAYED" | "DELIVERY_FAILED" | null;
 }
 
 export interface PublicTimelineEntry {
@@ -63,6 +66,14 @@ const TIMELINE_STATUS_LABELS: Record<string, string> = {
 /** Event types that become public timeline entries. Anything not listed here stays internal. */
 const PUBLIC_EVENT_LABELS: Record<string, string> = {
   ORDER_CANCELLED: "Order cancelled",
+  ORDER_PACKED: "Packed",
+  SHIPMENT_OUT_FOR_DELIVERY: "Out for delivery",
+};
+
+/** Problems a shopper is told about in the timeline. Clearing a problem is not shown. */
+const EXCEPTION_LABELS: Record<string, string> = {
+  DELAYED: "Delayed",
+  DELIVERY_FAILED: "Delivery attempt failed",
 };
 
 function itemTitles(items: unknown, lines: Array<{ variantId?: unknown; titleSnapshot?: unknown }> = []): Array<{ title: string; quantity: number }> {
@@ -76,6 +87,12 @@ function itemTitles(items: unknown, lines: Array<{ variantId?: unknown; titleSna
     const title = typeof line?.titleSnapshot === "string" && line.titleSnapshot.trim() ? line.titleSnapshot : "Item";
     return [{ title, quantity: count }];
   });
+}
+
+/** A problem still open on a parcel that has not been delivered. */
+function openException(row: PublicShipmentRow): PublicShipment["exception"] {
+  if (row.deliveredAt !== null) return null;
+  return row.exception === "DELAYED" || row.exception === "DELIVERY_FAILED" ? row.exception : null;
 }
 
 /** Shipments as the shopper sees them. Internal fields and staff detail are dropped. */
@@ -93,6 +110,7 @@ export function buildPublicShipments(
       items: itemTitles(row.items, lines),
       shippedAt: toIso(row.createdAt) ?? new Date(0).toISOString(),
       deliveredAt: toIso(row.deliveredAt),
+      exception: openException(row),
     }))
     .sort((a, b) => a.shippedAt.localeCompare(b.shippedAt));
 }
@@ -109,6 +127,10 @@ export function buildPublicTimeline(
     if (event.type === "STATUS_CHANGED") {
       const status = (event.details as { status?: unknown } | null)?.status;
       const label = typeof status === "string" ? TIMELINE_STATUS_LABELS[status] : undefined;
+      if (label) entries.push({ label, at });
+    } else if (event.type === "SHIPMENT_EXCEPTION_SET") {
+      const exception = (event.details as { exception?: unknown } | null)?.exception;
+      const label = typeof exception === "string" ? EXCEPTION_LABELS[exception] : undefined;
       if (label) entries.push({ label, at });
     } else if (PUBLIC_EVENT_LABELS[event.type]) {
       entries.push({ label: PUBLIC_EVENT_LABELS[event.type], at });

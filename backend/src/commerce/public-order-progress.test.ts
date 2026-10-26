@@ -35,6 +35,7 @@ describe("public shipments", () => {
       items: [{ title: "Belted wool coat", quantity: 1 }],
       shippedAt: "2026-10-21T09:00:00.000Z",
       deliveredAt: null,
+      exception: null,
     });
     expect(JSON.stringify(result)).not.toContain("staff only");
   });

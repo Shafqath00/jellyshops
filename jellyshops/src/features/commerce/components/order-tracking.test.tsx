@@ -36,6 +36,7 @@ describe("ShipmentList", () => {
     items: [{ title: "Belted wool coat", quantity: 1 }],
     shippedAt: "2026-10-21T09:00:00.000Z",
     deliveredAt: null,
+    exception: null,
   };
 
   it("shows the carrier, tracking number, items and a courier link that opens safely in a new tab", () => {
@@ -55,6 +56,16 @@ describe("ShipmentList", () => {
     expect(screen.getByText("Shipment 2")).toBeInTheDocument();
     expect(screen.getByText(/Delivered Oct 23, 2026/)).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Track on/ })).toHaveTextContent("Royal Mail");
+  });
+
+  it("tells the shopper what to do about a delay or a failed delivery", () => {
+    render(<ShipmentList shipments={[{ ...shipment, exception: "DELIVERY_FAILED" }]} />);
+    expect(screen.getByRole("status")).toHaveTextContent("A delivery attempt was unsuccessful");
+  });
+
+  it("shows out for delivery in the header once the parcel is on the van", () => {
+    render(<ShipmentList shipments={[{ ...shipment, status: "OUT_FOR_DELIVERY" }]} />);
+    expect(screen.getByText("Out for delivery")).toBeInTheDocument();
   });
 
   it("renders nothing without shipments", () => {

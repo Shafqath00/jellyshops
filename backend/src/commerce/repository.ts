@@ -706,7 +706,7 @@ export class CommerceRepository {
             `
               SELECT id, status, carrier,
                 "trackingNumber", "trackingUrl",
-                items, "createdAt", "deliveredAt"
+                items, "createdAt", "deliveredAt", exception
               FROM "OrderFulfilment"
               WHERE "storeId" = $1
                 AND "orderId" = $2
@@ -727,7 +727,7 @@ export class CommerceRepository {
               ORDER BY "createdAt", id
               LIMIT 200
             `,
-            [storeId, order.id, ["STATUS_CHANGED", "ORDER_CANCELLED"]],
+            [storeId, order.id, ["STATUS_CHANGED", "ORDER_CANCELLED", "ORDER_PACKED", "SHIPMENT_OUT_FOR_DELIVERY", "SHIPMENT_EXCEPTION_SET"]],
           );
 
         return {
