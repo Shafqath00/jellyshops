@@ -1,6 +1,7 @@
 import { pageTypeLabel } from "@jelly/storefront-registry";
 import { storefrontPageTypes } from "@jelly/storefront-schema";
 import type { StorefrontTemplateType } from "../api/types";
+import { isRetainedTemplate } from "../template-selection";
 
 export interface TemplateSelectorOption {
   id: string;
@@ -54,7 +55,7 @@ export function TemplateResourceSelector({
         >
           {templates.map((template) => (
             <option key={template.id} value={template.id}>
-              {template.name}
+              {template.name}{isRetainedTemplate(template) ? " (previous template)" : ""}
             </option>
           ))}
         </select>

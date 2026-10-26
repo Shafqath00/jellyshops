@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mkdtemp } from "node:fs/promises";
+import { mkdtemp, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import request from "supertest";
@@ -141,6 +141,35 @@ describe("V4 starter installation persistence", () => {
     const compiledTemplateIds = Object.keys(isolatedCompilation.snapshot!.templates);
     expect(compiledTemplateIds).toEqual(expect.arrayContaining(ids.rows.filter((row) => row.storeId === "store-a").map((row) => row.id)));
     expect(compiledTemplateIds.filter((id) => ids.rows.some((row) => row.storeId === "store-b" && row.id === id))).toEqual([]);
+    await database.close();
+  });
+
+  it("replaces a draft with another template, keeping the old templates under previous handles and exactly one active template per page", async () => {
+    const database = await createPGliteDatabase();
+    // The complete themes ship checkout, wishlist and account pages. Their page types come from this migration, which the shared test schema skips; only its enum statements are needed here.
+    const customerServices = await readFile(new URL("../../sql/migrations/20261020163817_jelly_signature_customer_services.sql", import.meta.url), "utf8");
+    await database.exec(customerServices.split(/\r?\n/).filter((line) => line.startsWith('ALTER TYPE "StorefrontTemplateType"')).join("\n"));
+    await seedStore(database, "store-a", "store-a");
+    let installSequence = 0;
+    const installer = new StorefrontStarterInstallationService(transactionDatabase(database), () => `install-${++installSequence}`);
+    const first = await installer.install("store-a", "jelly-signature");
+    const replaced = await installer.install("store-a", "jelly-avenue", { replaceDraft: true, expectedGeneration: first.generation });
+    expect(replaced).toMatchObject({ starterPackId: "jelly-avenue", installed: true, generation: first.generation + 1 });
+
+    const homes = await database.query<{ id: string; handle: string; layout: { sections: Array<{ kind: string; section?: { type: string } }> } }>(
+      `SELECT "id", "handle", "layout" FROM "StorefrontTemplate" WHERE "storeId" = 'store-a' AND lower("type"::text) = 'home' ORDER BY "createdAt", "id"`,
+    );
+    const sectionTypes = (home: (typeof homes.rows)[number]) => home.layout.sections.flatMap((placement) => placement.kind === "inline" && placement.section ? [placement.section.type] : []);
+    expect(homes.rows).toHaveLength(2);
+    // The editor opens the one handled "default"; it must be the new template, not the oldest row.
+    const active = homes.rows.filter((home) => home.handle === "default");
+    expect(active).toHaveLength(1);
+    expect(sectionTypes(active[0])).toContain("slideshow");
+    const retained = homes.rows.filter((home) => home.handle !== "default");
+    expect(retained).toHaveLength(1);
+    expect(retained[0].handle).toMatch(/^previous-/);
+    expect(sectionTypes(retained[0])).not.toContain("slideshow");
+    await expect(database.query(`SELECT "themeId" FROM "ThemeConfiguration" WHERE "storeId" = 'store-a'`)).resolves.toMatchObject({ rows: [{ themeId: "jelly-avenue" }] });
     await database.close();
   });
 

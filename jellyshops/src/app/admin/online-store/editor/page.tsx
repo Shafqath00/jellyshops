@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { createRevisionedSaveQueue } from "@/features/store-editor/state/revisioned-save-queue";
 import { createSessionHistory } from "@/features/store-editor/state/session-history";
+import { pickInitialTemplate, pickTemplateForType } from "@/features/store-editor/template-selection";
 import { blockLabel, createSectionFromDefinition, getBlockDefinition, getSectionDefinition, listSectionDefinitionsForPage } from "@jelly/storefront-registry";
 import { RegistrySectionRenderer, withStoreIdentity, type CommerceDataProvider, type StorefrontPageContext } from "@jelly/storefront-renderer";
 import type {
@@ -230,7 +231,7 @@ function StoreEditorWorkspace() {
       setActiveTemplateId((current) => {
         if (current) return current;
         if (handoff.templateId && nextTemplates.some((template) => template.id === handoff.templateId)) return handoff.templateId;
-        return nextTemplates.find((template) => template.type === "home")?.id || nextTemplates[0]?.id || "";
+        return pickInitialTemplate(nextTemplates)?.id || "";
       });
     }).catch((error: unknown) => {
       if (!active) return;
@@ -1005,7 +1006,7 @@ function StoreEditorWorkspace() {
             onPreviewResourceChange={setPreviewResourceId}
             onPreviewQueryChange={setPreviewQuery}
             onPageTypeChange={(pageType) => {
-              const template = templates.find((entry) => entry.type === pageType);
+              const template = pickTemplateForType(templates, pageType);
               if (template) {
                 setActiveTemplateId(template.id);
                 setSelection(null);
