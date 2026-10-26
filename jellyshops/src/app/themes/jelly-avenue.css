@@ -20,7 +20,7 @@
   --av-bg: var(--theme-background, #ffffff);
   --av-surface: var(--theme-surface, #f2f2f0);
   --av-text: var(--theme-text, #2b2f33);
-  --av-muted: var(--jelly-color-secondary, #6f7378);
+  --av-muted: var(--jelly-color-secondary, #666b70);
   --av-ink: var(--jelly-color-primary, #2b2f33);
   --av-ink-contrast: var(--theme-background, #ffffff);
   --av-accent: var(--theme-accent, #f2f2f0);

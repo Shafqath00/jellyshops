@@ -29,6 +29,10 @@ Jelly Minimal (`jelly-signature`) and Jelly Avenue (`jelly-avenue`) are *complet
 
 Sections a theme can offer beyond the core set live in their own registry/renderer files so they do not collide with the core product sections: `slideshow`, product-grid tabs (`product-tab` blocks), footer link columns (`link-heading` / `link` blocks) and the product page's `product-tabs` (`info-tab` blocks) and `product-stock-counter` (`jellyshops/packages/storefront-registry/src/sections/product-extras.ts`, `.../storefront-renderer/src/sections/product-extras.tsx`). The collection page's filter toolbar is `src/features/storefront/catalog-browser.tsx`; themes show or hide its parts (Filters toggle, product count, size toggle) with CSS.
 
+## Launch checklists
+
+Each complete theme has a checklist that lists the automated checks, the accessibility checks and the manual staging journey: [Jelly Minimal](jelly-minimal-launch-checklist.md), [Jelly Avenue](jelly-avenue-launch-checklist.md). Copy one when you add a theme.
+
 ## Rules
 
 - **Change shared markup, not per-theme copies.** If a theme needs a new element or option (for example a centred logo), add the setting to the section's registry schema and controls, render it in the shared section, and style it in each theme's CSS. A theme only overrides a section component (`sectionOverrides`) when the markup has to differ.

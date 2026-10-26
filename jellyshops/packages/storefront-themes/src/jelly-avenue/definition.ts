@@ -33,7 +33,7 @@ export const avenueManifest = {
   assets: { stylesheets: [], scripts: [], fonts: [], icons: [], assets: [], preview: { path: "/themes/jelly-avenue/preview.svg", alt: "Jelly Avenue storefront preview" } },
   settingsDefaults: {
     ...base.settingsDefaults,
-    colors: { ...avenueTokens.colors, secondary: "#6f7378" },
+    colors: { ...avenueTokens.colors, secondary: "#666b70" },
     typography: { headingFont: "Inter", bodyFont: "Inter", headingScale: "standard", scale: "default", headingWeight: 500, bodyWeight: 400, bodySize: 15, headingSize: 56 },
     buttons: { style: "solid", radius: "square" },
     layout: { containerWidth: "wide", sectionSpacing: "standard", density: "comfortable", contentWidth: 1440, sectionGap: 96 },
@@ -44,7 +44,7 @@ export const avenueManifest = {
     color("background", "Page background", "#ffffff"),
     color("surface", "Product image background", "#f2f2f0"),
     color("text", "Text", "#2b2f33"),
-    color("secondary", "Soft text", "#6f7378"),
+    color("secondary", "Soft text", "#666b70"),
     color("primary", "Buttons", "#2b2f33"),
     color("accent", "Panels and highlights", "#f2f2f0"),
     { id: "typography.headingFont", type: "font", label: "Heading font", group: "Typography", default: "Inter", options: fonts },

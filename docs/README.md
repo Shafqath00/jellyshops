@@ -35,4 +35,4 @@ If a narrative document disagrees with a generated one, the generated one is rig
 - `development/` — [local-setup](development/local-setup.md), [environment-variables](development/environment-variables.md), [testing](development/testing.md), [deployment](development/deployment.md).
 - `reports/` — [dead-code-and-structure](reports/dead-code-and-structure.md) (generated), plus older audits and test reports.
 
-Older documents kept in place: [backend-architecture.md](backend-architecture.md) (detailed backend guide), [theme-architecture.md](theme-architecture.md), [jelly-minimal-launch-checklist.md](jelly-minimal-launch-checklist.md), [order-management-progress.md](order-management-progress.md), `../backend/docs/order-notifications-digital.md`.
+Older documents kept in place: [backend-architecture.md](backend-architecture.md) (detailed backend guide), [theme-architecture.md](theme-architecture.md), [jelly-minimal-launch-checklist.md](jelly-minimal-launch-checklist.md), [jelly-avenue-launch-checklist.md](jelly-avenue-launch-checklist.md), [order-management-progress.md](order-management-progress.md), `../backend/docs/order-notifications-digital.md`.
