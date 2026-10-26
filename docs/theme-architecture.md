@@ -27,6 +27,8 @@ Section renderer ─ shared markup        packages/storefront-renderer/src/secti
 
 Jelly Minimal (`jelly-signature`) and Jelly Avenue (`jelly-avenue`) are *complete* themes: they install every page type (checkout, account, wishlist, order pages) plus draft information pages, render their own header and footer around every route, and use the catalogue browser with filters and sorting. Code asks `isCompleteStorefrontTheme(id)` (`@jelly/storefront-themes`) and `COMPLETE_STARTER_PACK_IDS` (`@jelly/storefront-registry`) instead of checking for one theme id. Add a new complete theme to both lists.
 
+Sections a theme can offer beyond the core set live in their own registry/renderer files so they do not collide with the core product sections: `slideshow`, product-grid tabs (`product-tab` blocks), footer link columns (`link-heading` / `link` blocks) and the product page's `product-tabs` (`info-tab` blocks) and `product-stock-counter` (`jellyshops/packages/storefront-registry/src/sections/product-extras.ts`, `.../storefront-renderer/src/sections/product-extras.tsx`). The collection page's filter toolbar is `src/features/storefront/catalog-browser.tsx`; themes show or hide its parts (Filters toggle, product count, size toggle) with CSS.
+
 ## Rules
 
 - **Change shared markup, not per-theme copies.** If a theme needs a new element or option (for example a centred logo), add the setting to the section's registry schema and controls, render it in the shared section, and style it in each theme's CSS. A theme only overrides a section component (`sectionOverrides`) when the markup has to differ.

@@ -21,6 +21,8 @@ export function CatalogBrowser({ storeSlug, collectionId, initialQuery = "", ini
   const { repository, state } = useShop(); const store = repository.getStoreBySlug(storeSlug);
   const [filters, setFilters] = useState({ query: initialQuery, sort: "id", available: false, categoryId: "", minPriceMinor: "", maxPriceMinor: "" });
   const [attempt, setAttempt] = useState(0); const [more, setMore] = useState<string>(); const [quick, setQuick] = useState<Product>();
+  // Themes decide whether these show: the extra filters can fold away, and products can be shown larger or smaller.
+  const [filtersOpen, setFiltersOpen] = useState(false); const [density, setDensity] = useState<"standard" | "large">("standard");
   const scope = JSON.stringify([store?.id, collectionId, filters, attempt]);
   const [result, setResult] = useState<{ scope: string; products: Product[]; nextCursor: string | null; error?: string }>();
   const all = initialProducts ?? repository.listProducts(storeSlug);
@@ -55,15 +57,25 @@ export function CatalogBrowser({ storeSlug, collectionId, initialQuery = "", ini
     catch (error) { setResult((value) => value?.scope === scope ? { ...value, error: error instanceof Error ? error.message : "Unable to load more products." } : value); }
     finally { setMore((value) => value === scope ? undefined : value); }
   }
-  return <div className="signature-catalog"><form className="signature-filters" aria-label="Filter products" onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); setFilters({ query: String(data.get("query") ?? ""), sort: String(data.get("sort") ?? "id"), available: data.get("available") === "yes", categoryId: String(data.get("categoryId") ?? ""), minPriceMinor: String(data.get("min") ?? ""), maxPriceMinor: String(data.get("max") ?? "") }); }}>
-    <label>Search<input name="query" type="search" defaultValue={initialQuery} placeholder="Find something you love" maxLength={120} /></label>
-    <label>Sort<select name="sort" defaultValue="id"><option value="id">Featured</option><option value="newest">New arrivals</option><option value="best-selling">Best sellers</option><option value="price-asc">Price: low to high</option><option value="price-desc">Price: high to low</option><option value="title-asc">Name: A to Z</option></select></label>
+  const countLabel = !current && !defaultFilters ? "Loading…" : products.length === 0 ? "No products" : `${products.length}${nextCursor ? "+" : ""} ${products.length === 1 && !nextCursor ? "product" : "products"}`;
+  const densityIcon = (columns: number) => <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true" focusable="false">{columns === 2 ? <><rect x="2" y="2" width="6" height="14" /><rect x="10" y="2" width="6" height="14" /></> : <><rect x="1.5" y="2" width="3" height="14" /><rect x="6" y="2" width="3" height="14" /><rect x="10.5" y="2" width="3" height="14" /><rect x="15" y="2" width="1.5" height="14" /></>}</svg>;
+  return <div className="signature-catalog"><form className="signature-filters" aria-label="Filter products" data-filters-open={filtersOpen ? "true" : undefined} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); setFilters({ query: String(data.get("query") ?? ""), sort: String(data.get("sort") ?? "id"), available: data.get("available") === "yes", categoryId: String(data.get("categoryId") ?? ""), minPriceMinor: String(data.get("min") ?? ""), maxPriceMinor: String(data.get("max") ?? "") }); }}>
+    <div className="signature-toolbar">
+    <button type="button" className="signature-filter-toggle" aria-expanded={filtersOpen} onClick={() => setFiltersOpen((open) => !open)}>Filters</button>
+    <p className="signature-result-count" role="status">{countLabel}</p>
+    <div className="signature-view-toggle" role="group" aria-label="Product size">
+      <button type="button" aria-pressed={density === "large"} aria-label="Show larger images" onClick={() => setDensity("large")}>{densityIcon(2)}</button>
+      <button type="button" aria-pressed={density === "standard"} aria-label="Show more products" onClick={() => setDensity("standard")}>{densityIcon(4)}</button>
+    </div>
+  </div>
+  <label className="signature-search">Search<input name="query" type="search" defaultValue={initialQuery} placeholder="Find something you love" maxLength={120} /></label>
+    <label className="signature-sort">Sort<select name="sort" defaultValue="id" onChange={(event) => event.currentTarget.form?.requestSubmit()}><option value="id">Featured</option><option value="newest">New arrivals</option><option value="best-selling">Best sellers</option><option value="price-asc">Price: low to high</option><option value="price-desc">Price: high to low</option><option value="title-asc">Name: A to Z</option></select></label>
     {categories.length > 0 && <label>Category<select name="categoryId"><option value="">All categories</option>{categories.map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>}
-    <label>Min price ({store.currency})<input type="number" min="0" step="0.01" name="min" /></label><label>Max price ({store.currency})<input type="number" min="0" step="0.01" name="max" /></label><label className="signature-check"><input name="available" type="checkbox" value="yes" />In stock only</label><button className="signature-primary">Apply filters</button>
+    <label>Min price ({store.currency})<input type="number" min="0" step="0.01" name="min" /></label><label>Max price ({store.currency})<input type="number" min="0" step="0.01" name="max" /></label><label className="signature-check"><input name="available" type="checkbox" value="yes" />In stock only</label><button className="signature-primary signature-apply">Apply filters</button>
   </form>
     {current?.error && <div role="alert"><p>{current.error}</p><button className="signature-secondary" onClick={() => setAttempt((value) => value + 1)}>Retry</button></div>}
     {!current && !defaultFilters ? <p role="status">Loading products…</p> : !products.length && !current?.error ? <p>No products match these filters.</p> : null}
-    <div className="signature-product-grid">{products.map((product) => <article key={product.id}><Link href={`/${storeSlug}/products/${product.slug}`}><div className="signature-card-image"><img src={product.imageUrl} alt={product.name} width={480} height={600} loading="lazy" /></div><h2>{product.name}</h2></Link><p>{formatMoney(product.variants[0]?.priceMinor ?? 0, store.currency)}</p><button className="signature-secondary" onClick={() => setQuick(product)}>Quick view</button></article>)}</div>
+    <div className="signature-product-grid" data-density={density}>{products.map((product) => <article key={product.id} className="signature-card"><Link href={`/${storeSlug}/products/${product.slug}`}><div className="signature-card-image"><img src={product.imageUrl} alt={product.name} width={480} height={600} loading="lazy" /></div><h2>{product.name}</h2></Link><p className="signature-card-price">{formatMoney(product.variants[0]?.priceMinor ?? 0, store.currency)}</p><button className="signature-secondary signature-quick-view-button" onClick={() => setQuick(product)}>Quick view</button></article>)}</div>
     {nextCursor && <button className="signature-secondary" disabled={more === scope || !current} onClick={() => void loadMore()}>{more === scope ? "Loading…" : "Load more"}</button>}
     {quick && <QuickView key={quick.id} product={quick} storeSlug={storeSlug} onClose={() => setQuick(undefined)} />}<span hidden>{state.version}</span>
   </div>;

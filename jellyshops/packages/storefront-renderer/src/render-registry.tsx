@@ -4,6 +4,7 @@ import { FooterSection } from "./sections/footer";
 import { HeaderSection } from "./sections/header";
 import { HeroSection } from "./sections/hero";
 import { SlideshowSection } from "./sections/slideshow";
+import { ProductStockCounterSection, ProductTabsSection } from "./sections/product-extras";
 import { ProductGridSection } from "./sections/product-grid";
 import { RichTextSection } from "./sections/rich-text";
 import { ProductDescriptionSection, ProductGallerySection, ProductInformationSection, ProductOptionsSection, ProductPurchaseSection, RelatedProductsSection } from "./sections/product-sections";
@@ -81,6 +82,8 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("product-options", ({ context, section }) => <ProductOptionsSection context={context} section={section} />);
   registry.register("product-purchase", ({ context, section }) => <ProductPurchaseSection context={context} section={section} />);
   registry.register("product-description", ({ context, section }) => <ProductDescriptionSection context={context} section={section} />);
+  registry.register("product-tabs", ({ section }) => <ProductTabsSection section={section} />);
+  registry.register("product-stock-counter", ({ section, context }) => <ProductStockCounterSection section={section} context={context} />);
   registry.register("related-products", ({ context, section }) => <RelatedProductsSection context={context} section={section} />);
   registry.register("collection-header", ({ context, section }) => <CollectionHeaderSection context={context} section={section} />);
   registry.register("collection-product-grid", ({ context, section }) => <CollectionProductGridSection context={context} section={section} />);

@@ -3,9 +3,10 @@ import { blockDefinitions } from "./blocks.js";
 import { commerceSections } from "./sections/commerce.js";
 import { contentSections } from "./sections/content.js";
 import { layoutSections } from "./sections/layout.js";
+import { productExtraSections } from "./sections/product-extras.js";
 import type { RegionName, RegistryValidationIssue, SectionDefinition } from "./types.js";
 
-const sections: SectionDefinition[] = [...layoutSections, ...contentSections, ...commerceSections].map((definition) => ({
+const sections: SectionDefinition[] = [...layoutSections, ...contentSections, ...commerceSections, ...productExtraSections].map((definition) => ({
   ...definition,
   allowedRegions: definition.type === "header" || definition.type === "announcement-bar"
     ? ["header"]

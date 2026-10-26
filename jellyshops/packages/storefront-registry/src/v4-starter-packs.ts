@@ -316,6 +316,25 @@ function makePack(id: V4StarterPackId): V4StarterPack {
       if (placement.section.type === "product-description") placement.section.settings = { spacing: "standard", heading: "Description" };
       if (placement.section.type === "related-products") placement.section.settings = { limit: 4, heading: avenue ? "Complete the look" : "You may also like" };
     }
+    if (avenue) {
+      const placements = product.layout.sections;
+      const after = (type: string) => placements.findIndex((placement) => placement.kind === "inline" && placement.section.type === type) + 1;
+      // Stock count under the buy buttons; information tabs and trust badges under the description.
+      placements.splice(after("product-description"), 0, ...inline(
+        section(`${id}-product-tabs`, { type: "product-tabs", settings: { firstOpen: false }, blocks: [
+          block(`${id}-tab-care`, "info-tab", { title: "Materials & care", text: "Describe what the piece is made from and how to look after it. For example: 100% organic cotton. Machine wash cold and dry flat to keep its shape." }),
+          block(`${id}-tab-shipping`, "info-tab", { title: "Shipping & returns", text: "Free delivery on every order, dispatched within 2 working days.\n\nNot quite right? Return it within 30 days for a full refund." }),
+        ] }),
+        section(`${id}-product-trust`, { type: "trust-strip", settings: { colorScheme: "page" }, blocks: [block(`${id}-trust-delivery`, "text", { text: "Free delivery" }), block(`${id}-trust-returns`, "text", { text: "30-day returns" }), block(`${id}-trust-checkout`, "text", { text: "Secure checkout" })] }),
+      ));
+      placements.splice(after("product-purchase"), 0, ...inline(section(`${id}-product-stock`, { type: "product-stock-counter", settings: { lowStockThreshold: 5, showWhenPlentiful: true }, blocks: [] })));
+      const collection = templates.find((item) => item.type === "collection")!;
+      for (const placement of collection.layout.sections) {
+        if (placement.kind !== "inline") continue;
+        if (placement.section.type === "collection-header") placement.section.settings = { showTitle: true, showDescription: true, showImage: true, layout: "banner", contentAlignment: "center" };
+        if (placement.section.type === "collection-product-grid") placement.section.settings = { columns: 4, limit: 12, emptyMessage: "No products are available in this collection yet." };
+      }
+    }
     for (const type of ["checkout", "wishlist", "customer-login", "customer-register", "customer-recovery", "customer-account", "customer-orders", "customer-order", "customer-addresses", "order-success"] as const) templates.push({ key: id + "-template-" + type, type, handle: "default", name: type.replaceAll("-", " "), layout: { sections: [] } });
   }
   for (const template of templates) {

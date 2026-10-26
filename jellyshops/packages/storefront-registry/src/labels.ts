@@ -31,6 +31,8 @@ const sectionLabels: Record<string, string> = {
   "product-options": "Product options",
   "product-purchase": "Add to cart buttons",
   "product-description": "Product description",
+  "product-tabs": "Product information tabs",
+  "product-stock-counter": "Stock counter",
   "related-products": "Related products",
   "collection-header": "Collection banner",
   "collection-product-grid": "Collection products",
@@ -59,6 +61,7 @@ const blockLabels: Record<string, string> = {
   column: "Column",
   slide: "Slide",
   "product-tab": "Product tab",
+  "info-tab": "Information tab",
   "link-heading": "Link column heading",
   link: "Link",
 };

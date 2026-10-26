@@ -41,6 +41,11 @@ describe("V4 starter packs", () => {
     expect(footer.section.blocks.filter(({ type }) => type === "link-heading").map(({ settings }) => settings.text)).toEqual(["Shop", "Help", "About"]);
     // Information pages are served at /<store>/<handle>, never /pages/<handle>.
     expect(JSON.stringify(avenue)).not.toContain("/pages/");
+    const types = (pageType: string) => avenue.templates.find(({ type }) => type === pageType)!.layout.sections.flatMap((placement) => placement.kind === "inline" ? [placement.section.type] : []);
+    expect(types("product")).toEqual(["product-gallery", "product-information", "product-options", "product-purchase", "product-stock-counter", "product-description", "product-tabs", "trust-strip", "related-products"]);
+    expect(types("collection")).toEqual(["collection-header", "collection-product-grid", "collection-description"]);
+    const collectionHeader = avenue.templates.find(({ type }) => type === "collection")!.layout.sections.flatMap((placement) => placement.kind === "inline" && placement.section.type === "collection-header" ? [placement.section] : [])[0];
+    expect(collectionHeader.settings).toMatchObject({ layout: "banner", contentAlignment: "center" });
     expect(JSON.stringify(avenue)).not.toMatch(/metropolitan/i);
   });
 
