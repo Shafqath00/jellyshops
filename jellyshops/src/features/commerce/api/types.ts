@@ -8,7 +8,34 @@ export interface CommerceAttemptInput {
 
 export interface CommerceAttemptResult { attemptId: string; orderId: string; publicToken: string }
 export interface PreparedPayment { orderId: string; publicToken: string; clientSecret: string; connectedAccountId: string }
-export interface PublicOrderResult { order: Record<string, unknown>; items: Record<string, unknown>[]; payment: Record<string, unknown> | null }
+export interface PublicShipment {
+  id: string;
+  status: string;
+  carrier: string | null;
+  trackingNumber: string | null;
+  trackingUrl: string | null;
+  items: Array<{ title: string; quantity: number }>;
+  shippedAt: string;
+  deliveredAt: string | null;
+}
+
+export interface PublicTimelineEntry { label: string; at: string }
+
+export interface PublicProgressStep {
+  key: "PLACED" | "PROCESSING" | "SHIPPED" | "DELIVERED";
+  label: string;
+  state: "done" | "current" | "upcoming";
+  at: string | null;
+}
+
+export interface PublicOrderResult {
+  order: Record<string, unknown>;
+  items: Record<string, unknown>[];
+  payment: Record<string, unknown> | null;
+  shipments?: PublicShipment[];
+  timeline?: PublicTimelineEntry[];
+  progress?: PublicProgressStep[];
+}
 
 export interface StripeMerchantStatus {
   connected: boolean;

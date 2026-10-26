@@ -40,3 +40,26 @@
 :where(.jelly-footer-newsletter) { display: grid; gap: 12px; margin-bottom: 48px; }
 :where(.jelly-footer-newsletter h2) { margin: 0; }
 @media (prefers-reduced-motion: reduce) { :where(.jelly-slide) { transition: none; } }
+
+/* Order tracking (shopper order page). Neutral defaults; each theme restyles through its own tokens. */
+:where(.jelly-order-progress) { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+:where(.jelly-order-progress-step) { position: relative; display: grid; gap: 6px; padding-top: 18px; color: color-mix(in srgb, currentColor 55%, transparent); font-size: 14px; }
+:where(.jelly-order-progress-step)::before { content: ""; position: absolute; top: 5px; left: 0; right: 0; height: 2px; background: color-mix(in srgb, currentColor 18%, transparent); }
+:where(.jelly-order-progress-step[data-state="done"], .jelly-order-progress-step[data-state="current"]) { color: inherit; }
+:where(.jelly-order-progress-step[data-state="done"])::before, :where(.jelly-order-progress-step[data-state="current"])::before { background: currentColor; }
+:where(.jelly-order-progress-marker) { position: absolute; top: 0; left: 0; width: 12px; height: 12px; border-radius: 50%; background: color-mix(in srgb, currentColor 18%, transparent); }
+:where(.jelly-order-progress-step[data-state="done"] .jelly-order-progress-marker, .jelly-order-progress-step[data-state="current"] .jelly-order-progress-marker) { background: currentColor; }
+:where(.jelly-order-progress-date) { font-size: 12px; opacity: .75; }
+:where(.jelly-order-progress, .jelly-order-shipments, .jelly-order-timeline) { width: 100%; text-align: left; }
+:where(.jelly-order-shipments, .jelly-order-timeline) { display: grid; gap: 12px; margin-top: 32px; }
+:where(.jelly-order-shipments h2, .jelly-order-timeline h2) { margin: 0; font-size: 18px; }
+:where(.jelly-shipment) { display: grid; gap: 8px; padding: 16px; border: 1px solid color-mix(in srgb, currentColor 14%, transparent); border-radius: var(--jelly-radius-card, 4px); }
+:where(.jelly-shipment header) { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+:where(.jelly-shipment p, .jelly-shipment-items) { margin: 0; font-size: 14px; }
+:where(.jelly-shipment-items) { display: grid; gap: 4px; padding: 0; list-style: none; }
+:where(.jelly-shipment-items small) { opacity: .75; }
+:where(.jelly-shipment-number span) { font-variant-numeric: tabular-nums; font-weight: 600; }
+:where(.jelly-order-timeline ol) { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+:where(.jelly-order-timeline li) { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent); font-size: 14px; }
+:where(.jelly-order-timeline time) { opacity: .75; }
+@media (max-width: 599px) { :where(.jelly-order-progress) { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 18px; } :where(.jelly-order-progress-step)::before { display: none; } }

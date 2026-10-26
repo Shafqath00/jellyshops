@@ -4,13 +4,15 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Check, PackageCheck } from "lucide-react";
 import { createCommerceApi } from "@/features/commerce/api/client";
+import type { PublicOrderResult } from "@/features/commerce/api/types";
+import { OrderProgress, OrderTimeline, ShipmentList } from "@/features/commerce/components/order-tracking";
 import { useMemo } from "react";
 import { useShop } from "@/contexts/shop-context";
 import { useThemePresentation } from "@/features/storefront/components/storefront-shell";
 
 function PublicOrderContent() {
   const { storeSlug, publicToken } = useParams<{ storeSlug: string; publicToken: string }>();
-  const [result, setResult] = useState<{ order: Record<string, unknown>; items: Record<string, unknown>[]; payment: Record<string, unknown> | null } | null>(null);
+  const [result, setResult] = useState<PublicOrderResult | null>(null);
   const [missing, setMissing] = useState(false);
   const api = useMemo(() => createCommerceApi({ baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001" }), []);
   const [refreshError, setRefreshError] = useState(false);
@@ -54,6 +56,9 @@ function PublicOrderContent() {
     <p>{pendingPayment ? "We are waiting for your payment to be confirmed. This page updates once it is." : order.status === "CANCELLED" ? "This order has been cancelled. Contact the shop if you need help with its payment status." : order.status === "REFUNDED" ? "Your refund has been confirmed. Contact the shop if you need help." : "Your order has been received and the shop is getting it ready."}</p>
     {items.length > 0 && <ul className="jelly-order-items">{items.map((item, index) => <li key={`${String(item.variantId ?? "item")}-${index}`}><span>{String(item.titleSnapshot)}<small> × {Number(item.quantity ?? 1)}</small></span>{item.unitPriceMinor !== undefined && <b>{money(Number(item.unitPriceMinor) * Number(item.quantity ?? 1))}</b>}</li>)}</ul>}
     <dl className="jelly-order-confirmation-summary"><div><dt>Status</dt><dd>{status.charAt(0).toUpperCase() + status.slice(1)}</dd></div><div><dt>Total</dt><dd>{money(order.totalMinor)}</dd></div></dl>
+    <OrderProgress steps={result.progress ?? []} />
+    <ShipmentList shipments={result.shipments ?? []} />
+    <OrderTimeline entries={result.timeline ?? []} />
     {Number(order.balanceDueMinor ?? 0) > 0 && <div className="jelly-section-actions"><Link className="jelly-button" href={`/${storeSlug}/order/${publicToken}/balance`}>Pay balance {money(order.balanceDueMinor)}</Link></div>}
     <div className="jelly-section-actions"><Link className="jelly-button" href={`/${storeSlug}/shop`}>Continue shopping</Link></div>
   </main>;

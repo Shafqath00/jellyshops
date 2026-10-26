@@ -36,6 +36,7 @@ import type {
   BeginCheckoutInput,
   CheckoutAttemptResult,
 } from "./types.js";
+import { buildPublicProgress, buildPublicShipments, buildPublicTimeline } from "./public-order-progress.js";
 
 const CHECKOUT_TTL_MS = 15 * 60 * 1000;
 
@@ -118,6 +119,8 @@ export class CheckoutService {
 
     // Explicit public projection: never serialize staff metadata or Stripe IDs.
     const source = order.order;
+    const shipments = buildPublicShipments(order.shipments, order.items);
+    const timeline = buildPublicTimeline(source.createdAt, order.events);
     return {
       order: {
         number: source.number, status: source.status, currency: source.currency,
@@ -128,6 +131,9 @@ export class CheckoutService {
       items: order.items.map(({ titleSnapshot, imageSnapshot, unitPriceMinor, quantity, configurationSnapshot }) =>
         ({ titleSnapshot, imageSnapshot, unitPriceMinor, quantity, configurationSnapshot })),
       payment: order.payment ? { status: order.payment.status } : null,
+      shipments,
+      timeline,
+      progress: buildPublicProgress({ status: source.status, timeline, shipments }),
     };
   }
 

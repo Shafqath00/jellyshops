@@ -71,6 +71,32 @@ describe("integrated order workspace", () => {
     expect(publicOrder.payment).toEqual({ status: "PAID" });
     expect(JSON.stringify(publicOrder)).not.toContain("pi_a");
   });
+  it("shows the shopper shipments, timeline and progress, and never staff notes or internal events", async () => {
+    const order = await createOrder();
+    const item = (await db.query<{ variantId: string }>(`SELECT "variantId" FROM "OrderItem" WHERE "orderId" = $1 LIMIT 1`, [order.orderId])).rows[0];
+    await db.query(`UPDATE "Order" SET status = 'SHIPPED', "fulfilmentStatus" = 'FULFILLED' WHERE id = $1`, [order.orderId]);
+    await db.query(
+      `INSERT INTO "OrderFulfilment" (id, "storeId", "orderId", items, status, "trackingNumber", carrier, "trackingUrl")
+       VALUES ('shipment-public', 's', $1, $2::jsonb, 'SHIPPED', 'RM-TEST-1', 'Royal Mail', 'https://track.example.com/RM-TEST-1')`,
+      [order.orderId, JSON.stringify([{ variantId: item.variantId, quantity: 1 }])],
+    );
+    await db.query(`INSERT INTO "OrderNote" (id,"storeId","orderId",body) VALUES ('internal-note','s',$1,'refund risk, do not discuss')`, [order.orderId]);
+    await db.query(`INSERT INTO "OrderEvent" (id,"storeId","orderId",type,details) VALUES ('internal-event','s',$1,'NOTE_ADDED','{"body":"refund risk"}')`, [order.orderId]);
+
+    const publicOrder = await checkout.getPublicOrder("s", order.publicToken);
+    expect(publicOrder.shipments).toEqual([expect.objectContaining({
+      id: "shipment-public",
+      status: "SHIPPED",
+      carrier: "Royal Mail",
+      trackingNumber: "RM-TEST-1",
+      trackingUrl: "https://track.example.com/RM-TEST-1",
+      items: [expect.objectContaining({ quantity: 1 })],
+    })]);
+    expect(publicOrder.progress.map((step: { state: string }) => step.state)).toEqual(["done", "done", "current", "upcoming"]);
+    expect(JSON.stringify(publicOrder)).not.toContain("refund risk");
+    expect(JSON.stringify(publicOrder)).not.toContain("internal-note");
+    expect(JSON.stringify(publicOrder)).not.toContain("NOTE_ADDED");
+  });
   it("rejects digital checkout when the product no longer has an active file", async () => {
     await db.exec(`UPDATE "DigitalAsset" SET "archivedAt"=now()`);
     await expect(createOrder()).rejects.toMatchObject({ code: "DIGITAL_FILE_UNAVAILABLE" });

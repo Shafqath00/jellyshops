@@ -1,6 +1,7 @@
 import type { QueryResultRow } from "pg";
 
 import type { CatalogInventoryQuantity } from "../catalog/types.js";
+import type { PublicOrderEventRow, PublicShipmentRow } from "./public-order-progress.js";
 
 /* -------------------------------------------------------------------------- */
 /* Database                                                                   */
@@ -589,6 +590,8 @@ export interface PublicOrder {
   order: OrderRow;
   items: OrderItemRow[];
   payment: PaymentRow | null;
+  shipments: PublicShipmentRow[];
+  events: PublicOrderEventRow[];
 }
 
 export class CommerceRepository {
@@ -698,11 +701,42 @@ export class CommerceRepository {
             [storeId, order.id],
           );
 
+        const shipmentResult =
+          await sql.query<PublicShipmentRow>(
+            `
+              SELECT id, status, carrier,
+                "trackingNumber", "trackingUrl",
+                items, "createdAt", "deliveredAt"
+              FROM "OrderFulfilment"
+              WHERE "storeId" = $1
+                AND "orderId" = $2
+              ORDER BY "createdAt", id
+            `,
+            [storeId, order.id],
+          );
+
+        // Only the event types the shopper may see; the projection filters again.
+        const eventResult =
+          await sql.query<PublicOrderEventRow>(
+            `
+              SELECT type, details, "createdAt"
+              FROM "OrderEvent"
+              WHERE "storeId" = $1
+                AND "orderId" = $2
+                AND type = ANY($3::text[])
+              ORDER BY "createdAt", id
+              LIMIT 200
+            `,
+            [storeId, order.id, ["STATUS_CHANGED", "ORDER_CANCELLED"]],
+          );
+
         return {
           order,
           items: itemsResult.rows,
           payment:
             paymentResult.rows[0] ?? null,
+          shipments: shipmentResult.rows,
+          events: eventResult.rows,
         };
       },
     );
