@@ -21,9 +21,9 @@ export interface ShipmentActionsProps {
   orderStatus: string;
   revision: number;
   shipments: ShipmentActionsShipment[];
-  onPacked(revision: number): Promise<void>;
-  onOutForDelivery(shipmentId: string, revision: number): Promise<void>;
-  onException(shipmentId: string, exception: "DELAYED" | "DELIVERY_FAILED" | null, revision: number): Promise<void>;
+  onPacked(revision: number): Promise<unknown>;
+  onOutForDelivery(shipmentId: string, revision: number): Promise<unknown>;
+  onException(shipmentId: string, exception: "DELAYED" | "DELIVERY_FAILED" | null, revision: number): Promise<unknown>;
 }
 
 const EXCEPTION_LABEL: Record<"DELAYED" | "DELIVERY_FAILED", string> = { DELAYED: "Delayed", DELIVERY_FAILED: "Delivery attempt failed" };
@@ -33,7 +33,7 @@ export function ShipmentActions({ orderStatus, revision, shipments, onPacked, on
   const [error, setError] = useState<string>();
   const canPack = orderStatus === "PROCESSING";
 
-  async function run(key: string, work: () => Promise<void>) {
+  async function run(key: string, work: () => Promise<unknown>) {
     setBusy(key);
     setError(undefined);
     try {

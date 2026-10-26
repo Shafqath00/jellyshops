@@ -147,7 +147,7 @@ export interface MerchantOrderDetail {
 
 export interface OrderActivity { id: string; type: string; createdAt: string; message?: string; payload?: Record<string, unknown> }
 export interface OrderNote { id: string; body: string; createdAt: string; authorName?: string }
-export interface OrderFulfilment { id: string; status: string; trackingNumber?: string | null; trackingUrl?: string | null; carrier?: string | null; items?: Array<{ orderItemId?: string; variantId?: string; quantity: number }> }
+export interface OrderFulfilment { id: string; status: string; exception?: string | null; deliveredAt?: string | null; trackingNumber?: string | null; trackingUrl?: string | null; carrier?: string | null; items?: Array<{ orderItemId?: string; variantId?: string; quantity: number }> }
 export interface OrderReturn { id: string; status: string; reason?: string; items?: Array<{ orderItemId?: string; variantId?: string; quantity: number }> }
 export interface OrderListQuery { query?: string; status?: string; paymentStatus?: string; sort?: string; direction?: string; page?: number; pageSize?: number }
 export interface OrderListResult { orders: MerchantOrderListItem[]; total: number; page: number; pageSize: number; summary: Record<string, number>; featureEnabled?: boolean; timeZone?: string }
