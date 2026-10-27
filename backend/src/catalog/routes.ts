@@ -21,12 +21,21 @@ const productListSchema = listSchema.extend({
   collectionId: z.string().min(1).optional(),
   status: productStatusSchema.optional(),
 }).refine((value) => value.minPriceMinor === undefined || value.maxPriceMinor === undefined || value.minPriceMinor <= value.maxPriceMinor, { message: "Minimum price must not exceed maximum price", path: ["minPriceMinor"] });
+const UNIT_DIMENSION: Record<string, string> = { mg: "mass", g: "mass", kg: "mass", ml: "volume", cl: "volume", l: "volume", mm: "length", cm: "length", m: "length", m2: "area", item: "count" };
+const unitPricingSchema = z.object({
+  totalAmount: z.number().positive().max(1_000_000),
+  totalUnit: z.string().refine((unit) => unit in UNIT_DIMENSION, "Unknown unit"),
+  baseAmount: z.number().positive().max(1_000_000),
+  baseUnit: z.string().refine((unit) => unit in UNIT_DIMENSION, "Unknown unit"),
+}).refine((value) => UNIT_DIMENSION[value.totalUnit] === UNIT_DIMENSION[value.baseUnit], { message: "Measurement and price-per units must measure the same thing", path: ["baseUnit"] });
 const variantSchema = z.object({
   id: z.string().min(1).optional(),
   title: z.string().trim().min(1),
   sku: z.string().trim().min(1).nullable().optional(),
   priceMinor: z.number().int().nonnegative(),
   compareAtPriceMinor: z.number().int().nonnegative().nullable().optional(),
+  costMinor: z.number().int().nonnegative().nullable().optional(),
+  unitPricing: unitPricingSchema.nullable().optional(),
   options: z.record(z.string(), z.unknown()).optional(),
   trackInventory: z.boolean().optional(),
   quantity: z.number().int().nonnegative().nullable().optional(),

@@ -61,7 +61,7 @@ describe("draft", () => {
   it("builds a one-variant payload in minor units", () => {
     const payload = draftToPayload({ ...valid, compareAtPrice: "599.50", sku: " MUG-1 ", categoryId: "tees", published: false }, "T-Shirts");
     expect(payload).toMatchObject({ handle: "mug", title: "Mug", productType: "T-Shirts", status: "DRAFT", primaryCategoryId: "tees", options: [], inventoryOptionIds: [] });
-    expect(payload.variants).toEqual([{ title: "Standard", sku: "MUG-1", priceMinor: 49900, compareAtPriceMinor: 59950, quantity: 3, trackInventory: true, options: {} }]);
+    expect(payload.variants).toEqual([{ title: "Standard", sku: "MUG-1", priceMinor: 49900, compareAtPriceMinor: 59950, costMinor: null, unitPricing: null, quantity: 3, trackInventory: true, options: {} }]);
   });
   it("omits optional fields and defaults stock to zero", () => {
     const payload = draftToPayload({ ...valid, stock: "" }, undefined);

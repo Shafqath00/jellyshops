@@ -59,7 +59,9 @@ export class CatalogService implements CatalogReader {
     input: Omit<ListProductsInput, "status">,
   ): Promise<Connection<CatalogProduct>> {
     assertLimit(input.limit);
-    return this.repository.listProducts(storeId, { ...input, status: "ACTIVE" });
+    const page = await this.repository.listProducts(storeId, { ...input, status: "ACTIVE" });
+    // Internal cost is merchant-only data.
+    return { ...page, nodes: page.nodes.map((product) => ({ ...product, variants: product.variants.map(({ costMinor: _cost, ...variant }) => variant) })) };
   }
 
   getVariant(storeId: string, id: string): Promise<CatalogVariant | null> {

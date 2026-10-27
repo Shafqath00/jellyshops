@@ -51,6 +51,9 @@ export interface ProductVariant {
   sku: string;
   priceMinor: number;
   compareAtPriceMinor?: number;
+  /** Merchant-only cost per item (never sent to shoppers). */
+  costMinor?: number;
+  unitPricing?: { totalAmount: number; totalUnit: string; baseAmount: number; baseUnit: string };
   stock: number;
   /** Explicit catalog availability covers untracked inventory, where quantity is unknown. */
   available?: boolean;

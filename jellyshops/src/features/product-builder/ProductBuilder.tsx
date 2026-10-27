@@ -19,7 +19,7 @@ import { VariantsSection } from "./sections/VariantsSection";
 import { buildCategoryPaths, createTaxonomyClient, getCategoryTemplates, type Taxonomy } from "./taxonomy";
 
 const API_URL = process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
-const FIELD_IDS: Record<keyof DraftErrors, string> = { title: "pb-title", description: "pb-description", imageUrl: "pb-title", categoryId: "pb-category-search", price: "pb-price", compareAtPrice: "pb-compare", sku: "pb-sku", stock: "pb-stock", published: "pb-published" };
+const FIELD_IDS: Record<keyof DraftErrors, string> = { title: "pb-title", description: "pb-description", imageUrl: "pb-title", categoryId: "pb-category-search", price: "pb-price", compareAtPrice: "pb-compare", cost: "pb-cost", unitPricing: "pb-unit-total", sku: "pb-sku", stock: "pb-stock", published: "pb-published" };
 const NOTHING_SAVED: PersistedState = { variantIds: [], imageUrl: "" };
 
 /**

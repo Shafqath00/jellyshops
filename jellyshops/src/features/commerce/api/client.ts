@@ -20,6 +20,8 @@ export interface PublicCatalogVariant {
   sku: string | null;
   priceMinor: number;
   compareAtPriceMinor?: number | null;
+  costMinor?: number | null;
+  unitPricing?: { totalAmount: number; totalUnit: string; baseAmount: number; baseUnit: string } | null;
   quantity: number | null;
   available: boolean;
   options?: Record<string, unknown>;
@@ -105,6 +107,8 @@ export function catalogProductToStorefrontProduct(product: PublicCatalogProduct)
       sku: variant.sku ?? "",
       priceMinor: variant.priceMinor,
       compareAtPriceMinor: variant.compareAtPriceMinor ?? undefined,
+      costMinor: variant.costMinor ?? undefined,
+      unitPricing: variant.unitPricing ?? undefined,
       stock: product.fulfillmentType === "DIGITAL" ? Number.MAX_SAFE_INTEGER : variant.quantity ?? (variant.available ? Number.MAX_SAFE_INTEGER : 0),
       available: product.fulfillmentType === "DIGITAL" || variant.available,
       options: variant.options as Record<string, string> | undefined,

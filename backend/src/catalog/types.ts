@@ -16,6 +16,9 @@ export interface CatalogMedia {
   position: number;
 }
 
+/** "Total 500 g, show the price per 100 g". Both units must measure the same thing. */
+export interface UnitPricing { totalAmount: number; totalUnit: string; baseAmount: number; baseUnit: string }
+
 export interface CatalogVariant {
   id: string;
   productId: string;
@@ -24,6 +27,9 @@ export interface CatalogVariant {
   sku: string | null;
   priceMinor: number;
   compareAtPriceMinor: number | null;
+  /** Internal cost per item; never exposed on the public storefront. */
+  costMinor?: number | null;
+  unitPricing?: UnitPricing | null;
   options: Record<string, unknown>;
   trackInventory: boolean;
   quantity: number | null;
@@ -109,6 +115,8 @@ export interface CatalogVariantInput {
   sku?: string | null;
   priceMinor: number;
   compareAtPriceMinor?: number | null;
+  costMinor?: number | null;
+  unitPricing?: UnitPricing | null;
   options?: Record<string, unknown>;
   trackInventory?: boolean;
   quantity?: number | null;

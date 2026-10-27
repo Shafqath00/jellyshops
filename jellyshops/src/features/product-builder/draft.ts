@@ -1,6 +1,7 @@
 import { majorToMinor, minorToMajor, slugify, type Product, type ProductOption, type ProductVariant } from "@/lib/domain";
 import { reconcileProductVariants } from "@/lib/product-variants";
 import { validateProductDraft, type DraftIssue } from "@/lib/product-builder";
+import { emptyUnitPricing, parseUnitPricing, type UnitPricingDraft } from "./pricing";
 
 /** What the seller has typed so far. Text fields stay strings so partial input is never lost. */
 export interface ProductDraft {
@@ -10,6 +11,10 @@ export interface ProductDraft {
   categoryId: string;
   price: string;
   compareAtPrice: string;
+  /** What the seller pays per item. Internal only; drives profit and margin. */
+  cost: string;
+  /** Optional "price per 100 g" display; blank while untouched. */
+  unitPricing: UnitPricingDraft;
   sku: string;
   stock: string;
   published: boolean;
@@ -19,7 +24,7 @@ export interface ProductDraft {
   variants: ProductVariant[];
 }
 
-export const emptyDraft: ProductDraft = { title: "", description: "", imageUrl: "", categoryId: "", price: "", compareAtPrice: "", sku: "", stock: "", published: true, options: [], variants: [] };
+export const emptyDraft: ProductDraft = { title: "", description: "", imageUrl: "", categoryId: "", price: "", compareAtPrice: "", cost: "", unitPricing: emptyUnitPricing, sku: "", stock: "", published: true, options: [], variants: [] };
 
 /** What already exists on the server, so saves update the same rows instead of duplicating them. */
 export interface PersistedState {
@@ -29,7 +34,7 @@ export interface PersistedState {
   imageUrl: string;
 }
 
-export type DraftField = "title" | "description" | "imageUrl" | "categoryId" | "price" | "compareAtPrice" | "sku" | "stock" | "published";
+export type DraftField = "title" | "description" | "imageUrl" | "categoryId" | "price" | "compareAtPrice" | "cost" | "unitPricing" | "sku" | "stock" | "published";
 export type DraftErrors = Partial<Record<DraftField, string>>;
 
 /** Untracked inventory is represented as a huge number by the catalog mapper; never send that back as a quantity. */
@@ -51,6 +56,12 @@ export function validateSimpleDraft(draft: ProductDraft): DraftErrors {
   if (!draft.price.trim()) errors.price = "Enter a price.";
   else if (!Number.isFinite(price) || price < 0) errors.price = "Enter a valid price, like 499 or 499.50.";
   if (!hasVariantAxes(draft)) {
+    if (draft.cost.trim()) {
+      const cost = majorToMinor(draft.cost);
+      if (!Number.isFinite(cost) || cost < 0) errors.cost = "Enter a valid cost, like 250 or 250.50.";
+    }
+    const unit = parseUnitPricing(draft.unitPricing);
+    if (unit.error) errors.unitPricing = unit.error;
     if (compareAt !== undefined) {
       if (!Number.isFinite(compareAt) || compareAt < 0) errors.compareAtPrice = "Enter a valid price, like 599.";
       else if (Number.isFinite(price) && compareAt <= price) errors.compareAtPrice = "The original price should be higher than the price.";
@@ -121,6 +132,8 @@ export function draftToPayload(draft: ProductDraft, categoryName: string | undef
         sku: draft.sku.trim() || undefined,
         priceMinor: majorToMinor(draft.price),
         compareAtPriceMinor: compareAt > 0 ? compareAt : null,
+        costMinor: draft.cost.trim() ? majorToMinor(draft.cost) : null,
+        unitPricing: parseUnitPricing(draft.unitPricing).value,
         // Blank stock on an existing product means "leave it as it is" (it may be untracked).
         ...(draft.stock.trim() === "" && persisted.standardVariantId ? {} : { quantity: Number(draft.stock || 0), trackInventory: true }),
         options: {} as Record<string, string>,
@@ -153,6 +166,8 @@ export function productToDraft(product: Product): { draft: ProductDraft; persist
     categoryId: product.primaryCategoryId ?? "",
     price: minorToMajor(first?.priceMinor ?? 0),
     compareAtPrice: !axes && first?.compareAtPriceMinor ? minorToMajor(first.compareAtPriceMinor) : "",
+    cost: !axes && first?.costMinor != null ? minorToMajor(first.costMinor) : "",
+    unitPricing: !axes && first?.unitPricing ? { totalAmount: String(first.unitPricing.totalAmount), totalUnit: first.unitPricing.totalUnit, baseAmount: String(first.unitPricing.baseAmount), baseUnit: first.unitPricing.baseUnit } : emptyUnitPricing,
     sku: !axes ? first?.sku ?? "" : "",
     stock: !axes && first && Number.isFinite(first.stock) && first.stock < Number.MAX_SAFE_INTEGER ? String(first.stock) : "",
     published: product.published,
