@@ -510,7 +510,7 @@
 [data-jelly-theme="jelly-signature"] :is(main, [data-storefront-template]):has(> [data-testid="section-product-gallery"]) > * { grid-column: 1 / -1; min-width: 0; }
 [data-jelly-theme="jelly-signature"] :is(main, [data-storefront-template]):has(> [data-testid="section-product-gallery"]) { grid-template-rows: repeat(8, auto) minmax(0, 1fr); }
 [data-jelly-theme="jelly-signature"] :is(main, [data-storefront-template]):has(> [data-testid="section-product-gallery"]) > [data-testid="section-product-gallery"] { grid-column: 1; grid-row: 1 / span 9; }
-[data-jelly-theme="jelly-signature"] :is(main, [data-storefront-template]):has(> [data-testid="section-product-gallery"]) > :is([data-testid="section-product-information"], [data-testid="section-product-options"], [data-testid="section-product-purchase"], [data-testid="section-product-description"], [data-testid="section-trust-strip"], [data-testid="section-product-stock-counter"], [data-testid="section-product-tabs"]) { grid-column: 2; }
+[data-jelly-theme="jelly-signature"] :is(main, [data-storefront-template]):has(> [data-testid="section-product-gallery"]) > :is([data-testid="section-product-information"], [data-testid="section-product-options"], [data-testid="section-product-purchase"], [data-testid="section-product-description"], [data-testid="section-trust-strip"], [data-testid="section-product-stock-counter"], [data-testid="section-product-tabs"], [data-testid="section-product-specifications"]) { grid-column: 2; }
 [data-jelly-theme="jelly-signature"] :is(main, [data-storefront-template]):has(> [data-testid="section-product-gallery"]) :is(.jelly-product-gallery, .jelly-product-information, .jelly-product-options, .jelly-product-purchase, .jelly-product-description) { padding-block: 0 var(--jm-3); }
 [data-jelly-theme="jelly-signature"] :is(main, [data-storefront-template]):has(> [data-testid="section-product-gallery"]) :is(.jelly-product-gallery, .jelly-product-information, .jelly-product-options, .jelly-product-purchase, .jelly-product-description, .jelly-related-products) > .jelly-container { width: 100%; }
 [data-jelly-theme="jelly-signature"] :is(main, [data-storefront-template]):has(> [data-testid="section-product-gallery"]) .jelly-trust-strip { margin-bottom: var(--jm-3); }
@@ -791,3 +791,22 @@
   [data-jelly-theme="jelly-signature"] *::before,
   [data-jelly-theme="jelly-signature"] *::after { transition-duration: 1ms !important; animation-duration: 1ms !important; }
 }
+
+/* Specifications and store visit (showroom sections) */
+[data-jelly-theme="jelly-signature"] .jelly-specifications h2 { margin: 0 0 var(--jm-2); font-family: var(--jm-font-heading); font-size: var(--jm-h4); font-weight: var(--jm-heading-weight); }
+[data-jelly-theme="jelly-signature"] .jelly-specifications-list > div { border-bottom-color: var(--jm-border); font-size: var(--jm-text-sm); }
+[data-jelly-theme="jelly-signature"] .jelly-specifications-list > div:first-child { border-top: 1px solid var(--jm-border); }
+[data-jelly-theme="jelly-signature"] .jelly-specifications-list dt { color: var(--jm-muted); }
+[data-jelly-theme="jelly-signature"] .jelly-specifications details { border-block: 1px solid var(--jm-border); }
+[data-jelly-theme="jelly-signature"] .jelly-specifications details > summary { padding-block: var(--jm-2); font-weight: 500; }
+[data-jelly-theme="jelly-signature"] .jelly-specifications details .jelly-specifications-list > div:first-child { border-top: 0; }
+[data-jelly-theme="jelly-signature"] .jelly-specifications details .jelly-specifications-list > div:last-child { border-bottom: 0; }
+[data-jelly-theme="jelly-signature"] .jelly-store-visit h2 { margin: 0; font-family: var(--jm-font-heading); font-size: var(--jm-h2, var(--jm-h1)); font-weight: var(--jm-heading-weight); }
+[data-jelly-theme="jelly-signature"] .jelly-store-visit-text { max-width: 52ch; margin: 0; color: var(--jm-muted); }
+[data-jelly-theme="jelly-signature"] .jelly-store-visit-address { font-size: var(--jm-text-lg); }
+[data-jelly-theme="jelly-signature"] .jelly-store-visit-hours h3 { margin: 0 0 var(--jm-1); font-size: var(--jm-text-xs); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--jm-muted); }
+[data-jelly-theme="jelly-signature"] .jelly-store-visit-hours dl { font-size: var(--jm-text-sm); }
+[data-jelly-theme="jelly-signature"] .jelly-store-visit-actions { margin-top: var(--jm-1); }
+[data-jelly-theme="jelly-signature"] .jelly-store-visit-media img { border-radius: var(--jm-radius-card); }
+[data-jelly-theme="jelly-signature"] [data-color-scheme="dark"] .jelly-store-visit-text,
+[data-jelly-theme="jelly-signature"] [data-color-scheme="dark"] .jelly-store-visit-hours h3 { color: inherit; opacity: .8; }

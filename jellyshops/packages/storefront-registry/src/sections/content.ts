@@ -114,7 +114,31 @@ export const contentSections: SectionDefinition[] = [
   { type: "faq", category: "content", supportedPages: [...home], settingsSchema: z.object({ heading: z.string().max(120).optional(), text: z.string().max(400).optional(), colorScheme: schemeSchema }).passthrough(), controls: [sectionHeading, sectionText, colorScheme], allowedBlockTypes: ["faq-item"], maxBlocks: 12, defaultSettings: { heading: "Frequently asked questions" }, defaultBlocks: [], responsiveFields: [], presets: [{ id: "faq", label: "FAQ", category: "content" }] },
   { type: "newsletter", category: "content", supportedPages: [...home], settingsSchema: z.object({ buttonLabel: z.string().max(40).optional(), contentAlignment: alignmentSchema, colorScheme: schemeSchema }).passthrough(), controls: [{ type: "text", key: "buttonLabel", label: "Button label", group: "content", maxLength: 40 }, leftOrCenter, colorScheme], allowedBlockTypes: ["heading", "text"], defaultSettings: {}, defaultBlocks: [], responsiveFields: [], presets: [{ id: "newsletter", label: "Newsletter", category: "marketing" }] },
   { type: "multicolumn", category: "content", supportedPages: [...home], settingsSchema: z.object({ heading: z.string().max(120).optional(), columns: z.number().int().min(2).max(4).optional(), contentAlignment: alignmentSchema, colorScheme: schemeSchema }).passthrough(), controls: [sectionHeading, columnsControl(4), leftOrCenter, colorScheme], allowedBlockTypes: ["column", "heading", "text", "button"], maxBlocks: 8, defaultSettings: { heading: "Why shop with us", columns: 3 }, defaultBlocks: [], responsiveFields: [], presets: [{ id: "multicolumn", label: "Feature columns", category: "content" }] },
-  { type: "contact-store-info", category: "content", supportedPages: [...home], settingsSchema: empty, controls: [], allowedBlockTypes: ["contact-item"], defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
+  {
+    // Showroom or shop visit: address, opening hours and one-tap contact buttons. Plain text only; bindings are not resolved on the live store yet.
+    type: "contact-store-info", category: "content", supportedPages: ["home", "page"],
+    settingsSchema: z.object({
+      heading: z.string().max(120).optional(), text: z.string().max(400).optional(), image: imageReference.optional(),
+      address: z.string().max(300).optional(), hours: z.string().max(400).optional(), phone: z.string().max(40).optional(),
+      whatsapp: z.string().max(40).optional(), email: z.string().max(120).optional(), mapLink: z.string().max(500).optional(),
+      colorScheme: schemeSchema,
+    }).passthrough(),
+    controls: [
+      { type: "text", key: "heading", label: "Heading", group: "content", maxLength: 120 },
+      { type: "textarea", key: "text", label: "Text", group: "content", maxLength: 400 },
+      { type: "textarea", key: "address", label: "Address", group: "content", maxLength: 300 },
+      { type: "textarea", key: "hours", label: "Opening hours (one line per day, e.g. Mon–Fri: 10am–7pm)", group: "content", maxLength: 400 },
+      { type: "text", key: "phone", label: "Phone number", group: "content", maxLength: 40 },
+      { type: "text", key: "whatsapp", label: "WhatsApp number, with country code", group: "content", maxLength: 40 },
+      { type: "text", key: "email", label: "Email address", group: "content", maxLength: 120 },
+      { type: "text", key: "mapLink", label: "Map link (leave empty to search the address on Google Maps)", group: "content", maxLength: 500 },
+      { type: "image", key: "image", label: "Photo of your shop (optional)", group: "content" },
+      colorScheme,
+    ],
+    allowedBlockTypes: ["contact-item"], maxBlocks: 6,
+    defaultSettings: { heading: "Visit our showroom", text: "Come and try our products in person. Our team is happy to help.", address: "", hours: "Mon–Sat: 10am–7pm\nSun: 11am–5pm", colorScheme: "soft" },
+    defaultBlocks: [], responsiveFields: [],
+  },
   { type: "logo-list", category: "content", supportedPages: [...home], settingsSchema: empty, controls: [], allowedBlockTypes: ["logo"], defaultSettings: {}, defaultBlocks: [], responsiveFields: [] }
   ,{ type: "journal-teaser", category: "content", supportedPages: [...home], settingsSchema: empty, controls: comprehensiveControls, allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: ["contentAlignment"] }
   ,{ type: "trust-strip", category: "content", supportedPages: [...home, "product", "cart"], settingsSchema: z.object({ colorScheme: schemeSchema }).passthrough(), controls: [colorScheme], allowedBlockTypes: ["heading", "text"], defaultSettings: { contentAlignment: "center" }, defaultBlocks: [], responsiveFields: ["contentAlignment"] }

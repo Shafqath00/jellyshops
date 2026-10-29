@@ -673,7 +673,7 @@
 [data-jelly-theme="jelly-avenue"] :is(main, [data-storefront-template]):has(> [data-testid="section-product-gallery"]) > * { grid-column: 1 / -1; min-width: 0; }
 [data-jelly-theme="jelly-avenue"] :is(main, [data-storefront-template]):has(> [data-testid="section-product-gallery"]) { grid-template-rows: repeat(8, auto) minmax(0, 1fr); }
 [data-jelly-theme="jelly-avenue"] :is(main, [data-storefront-template]):has(> [data-testid="section-product-gallery"]) > [data-testid="section-product-gallery"] { grid-column: 1; grid-row: 1 / span 9; }
-[data-jelly-theme="jelly-avenue"] :is(main, [data-storefront-template]):has(> [data-testid="section-product-gallery"]) > :is([data-testid="section-product-information"], [data-testid="section-product-options"], [data-testid="section-product-purchase"], [data-testid="section-product-description"], [data-testid="section-trust-strip"], [data-testid="section-product-stock-counter"], [data-testid="section-product-tabs"]) { grid-column: 2; max-width: 480px; }
+[data-jelly-theme="jelly-avenue"] :is(main, [data-storefront-template]):has(> [data-testid="section-product-gallery"]) > :is([data-testid="section-product-information"], [data-testid="section-product-options"], [data-testid="section-product-purchase"], [data-testid="section-product-description"], [data-testid="section-trust-strip"], [data-testid="section-product-stock-counter"], [data-testid="section-product-tabs"], [data-testid="section-product-specifications"]) { grid-column: 2; max-width: 480px; }
 [data-jelly-theme="jelly-avenue"] :is(main, [data-storefront-template]):has(> [data-testid="section-product-gallery"]) > [data-testid="section-product-information"] { padding-top: clamp(32px, 4vw, 64px); }
 [data-jelly-theme="jelly-avenue"] :is(main, [data-storefront-template]):has(> [data-testid="section-product-gallery"]) > [data-testid="section-related-products"] { margin-right: calc(-1 * var(--av-gutter)); }
 [data-jelly-theme="jelly-avenue"] :is(main, [data-storefront-template]):has(> [data-testid="section-product-gallery"]) :is(.jelly-product-gallery, .jelly-product-information, .jelly-product-options, .jelly-product-purchase, .jelly-product-description) { padding-block: 0 var(--av-3); }
@@ -1056,3 +1056,22 @@
   [data-jelly-theme="jelly-avenue"] *::before,
   [data-jelly-theme="jelly-avenue"] *::after { transition-duration: 1ms !important; animation-duration: 1ms !important; }
 }
+
+/* Specifications and store visit (showroom sections) */
+[data-jelly-theme="jelly-avenue"] .jelly-specifications h2 { margin: 0 0 var(--av-2); font-family: var(--av-font-heading); font-size: var(--av-h4); font-weight: var(--av-heading-weight); }
+[data-jelly-theme="jelly-avenue"] .jelly-specifications-list > div { border-bottom-color: var(--av-border); font-size: var(--av-text-sm); }
+[data-jelly-theme="jelly-avenue"] .jelly-specifications-list > div:first-child { border-top: 1px solid var(--av-border); }
+[data-jelly-theme="jelly-avenue"] .jelly-specifications-list dt { color: var(--av-muted); }
+[data-jelly-theme="jelly-avenue"] .jelly-specifications details { border-block: 1px solid var(--av-border); }
+[data-jelly-theme="jelly-avenue"] .jelly-specifications details > summary { padding-block: var(--av-2); font-weight: 500; }
+[data-jelly-theme="jelly-avenue"] .jelly-specifications details .jelly-specifications-list > div:first-child { border-top: 0; }
+[data-jelly-theme="jelly-avenue"] .jelly-specifications details .jelly-specifications-list > div:last-child { border-bottom: 0; }
+[data-jelly-theme="jelly-avenue"] .jelly-store-visit h2 { margin: 0; font-family: var(--av-font-heading); font-size: var(--av-h2, var(--av-h1)); font-weight: var(--av-heading-weight); }
+[data-jelly-theme="jelly-avenue"] .jelly-store-visit-text { max-width: 52ch; margin: 0; color: var(--av-muted); }
+[data-jelly-theme="jelly-avenue"] .jelly-store-visit-address { font-size: var(--av-text-lg); }
+[data-jelly-theme="jelly-avenue"] .jelly-store-visit-hours h3 { margin: 0 0 var(--av-1); font-size: var(--av-text-xs); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--av-muted); }
+[data-jelly-theme="jelly-avenue"] .jelly-store-visit-hours dl { font-size: var(--av-text-sm); }
+[data-jelly-theme="jelly-avenue"] .jelly-store-visit-actions { margin-top: var(--av-1); }
+[data-jelly-theme="jelly-avenue"] .jelly-store-visit-media img { border-radius: var(--av-radius-card); }
+[data-jelly-theme="jelly-avenue"] [data-color-scheme="dark"] .jelly-store-visit-text,
+[data-jelly-theme="jelly-avenue"] [data-color-scheme="dark"] .jelly-store-visit-hours h3 { color: inherit; opacity: .8; }

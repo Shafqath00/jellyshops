@@ -1,7 +1,7 @@
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import type { SectionNode } from "@jelly/storefront-schema";
 import type { StorefrontRuntimeContext } from "../runtime-context";
-import { numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
+import { choice, headingHidden, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
 
 type Availability = { state?: string; message?: string; maxQuantity?: number };
 
@@ -10,6 +10,40 @@ function productAvailability(context: StorefrontRuntimeContext): Availability | 
   if (context.page?.pageType !== "product") return undefined;
   const presentation = context.page.resource.data.productPresentation as { availability?: Availability } | undefined;
   return presentation?.availability;
+}
+
+/** The specifications entered on the product being shown, in the order the merchant typed them. */
+function productSpecifications(context: StorefrontRuntimeContext): Array<[string, string]> {
+  if (context.page?.pageType !== "product") return [];
+  const presentation = context.page.resource.data.productPresentation as { product?: { specifications?: unknown } } | undefined;
+  const value = presentation?.product?.specifications;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return [];
+  return Object.entries(value as Record<string, unknown>).flatMap(([label, text]) => typeof text === "string" && label.trim() && text.trim() ? [[label.trim(), text.trim()] as [string, string]] : []);
+}
+
+/**
+ * A product's specifications (size, firmness, materials…) as a table, followed by
+ * fixed rows the merchant adds for every product on this template (warranty,
+ * trial period). A product row wins over a fixed row with the same name.
+ */
+export function ProductSpecificationsSection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
+  const own = section.settings.showProductSpecifications === false ? [] : productSpecifications(context);
+  const taken = new Set(own.map(([label]) => label.toLowerCase()));
+  const fixed = visibleBlocks(section, "spec-row").flatMap((block) => {
+    const label = stringValue(block.settings, "label").trim();
+    const value = stringValue(block.settings, "value").trim();
+    return label && value && !taken.has(label.toLowerCase()) ? [[label, value] as [string, string]] : [];
+  });
+  const rows = [...own, ...fixed];
+  if (!rows.length) return null;
+  const heading = stringValue(section.settings, "heading", "Specifications");
+  const table = <dl className="jelly-specifications-list">{rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>;
+  const layout = choice(section.settings, "layout", ["table", "expandable"] as const, "table");
+  return <section className="jelly-section jelly-specifications" {...sectionData(section, { "data-layout": layout })}><StorefrontContainer>
+    {layout === "expandable"
+      ? <details><summary>{heading}</summary>{table}</details>
+      : <>{!headingHidden(section) && <h2>{heading}</h2>}{table}</>}
+  </StorefrontContainer></section>;
 }
 
 /**

@@ -85,7 +85,7 @@ Every row has a `revision`; saves send the revision they started from, and the s
 | Section groups (header/footer groups) | Shared ("global") sections | Have it, simpler |
 | Section presets | `SectionPreset` table + insert from library | Have it |
 | Global theme settings (`settings_schema.json`) | `settingsSchema` per theme, Theme settings panel | Have it, curated and shorter (good) |
-| Dynamic sources / metafields | Dynamic bindings + custom data | Have it in engine; few section settings accept bindings |
+| Dynamic sources / metafields | Bindings can be chosen in the editor and pass the Publish check, but are **never resolved** when a page is shown (correction, see section 8) | **Yes**: needed before custom fields are useful on the store |
 | App blocks / theme app extensions | Not built | No, not needed now |
 | Nested blocks, unlimited block types per section | One level of blocks, fixed per section | No, keep it simple |
 | Per-device setting overrides | Fields exist, not wired | Optional; CSS-only is acceptable |
@@ -122,7 +122,7 @@ Every row has a `revision`; saves send the revision they started from, and the s
 | Validate + publish with diagnostics that jump to the problem | Working | `publish-controls.tsx`, `publish-diagnostics` |
 | Assign a template to a page or blog article | Working | `admin/content/pages/page.tsx:104`, `admin/content/blogs/page.tsx:158` |
 | Live store honours assignments and defaults | Working | `resource-loader.ts:150-162` |
-| Custom fields bound into sections | Working in engine; limited by which controls accept bindings | `dynamic-sources.ts`, `validate-bindings.ts` |
+| Custom fields bound into sections | **Broken** (corrected 2026-10-29): validated at publish, but `DynamicValueResolver` in `backend/src/dynamic-sources/resolver.ts` is never called and the renderer only reads plain strings, so a bound setting shows blank to shoppers | `validate-bindings.ts`; no runtime caller |
 
 ---
 
@@ -139,8 +139,8 @@ Every row has a `revision`; saves send the revision they started from, and the s
 | Save a section as a preset from the editor | **Partial** | API exists; not exposed as a clear action |
 | Per-device (mobile) settings | **Partial** | Fields declared, never read |
 | Product reviews with real ratings | **Missing** | Only static testimonials |
-| Product specifications table | **Partial** | Possible via custom fields, but no section shows a list of spec rows, and `info-tab` text does not accept bindings |
-| Colour/fabric swatches | **Missing** | Deferred in Avenue phase 3 |
+| Product specifications table | Built in phase C | Per-product specifications already exist on products (the "Product details" area); the new Specifications section shows them as a table plus fixed rows |
+| Colour/fabric swatches | **Missing** | The product builder shows a swatch picker, but the choice and colours are never sent to the API and there is no database column, so they are lost on save; the storefront draws plain buttons |
 | Slide-out cart | **Missing** | Header bag links to cart page |
 | Schedule publish, version history/rollback UI | **Missing** | Publications are kept, so rollback is technically possible later |
 
@@ -193,6 +193,8 @@ Ordered by impact.
 | 7 | `saveThemeConfiguration` defaults `themeVersion` to `"1.0.0"` when the client omits it | `sql-repositories.ts:81` | Same pinning risk as #4 for any future theme with another version |
 | 8 | Legacy v1/v3 document formats still in code | schema package | Maintenance cost, not a bug |
 | 9 | Not run: manual staging journey (editor → publish → live) | launch checklists | End-to-end on real data is unverified |
+| 10 | **Custom-field bindings are never resolved for shoppers** (found in phase C). The editor offers "connect to custom field" on many settings and Publish accepts it, but the value renders blank | `backend/src/dynamic-sources/resolver.ts` unused; renderer `stringValue()` | Merchants can build pages that look empty live |
+| 11 | `contact-store-info` and `logo-list` are in the section library but had no renderer ("Unsupported section" in the editor, nothing live). `contact-store-info` fixed in phase C | `render-registry.tsx` | Confusing dead options |
 
 ---
 
@@ -207,14 +209,14 @@ Registered sections today (`packages/storefront-registry/src/sections/`): announ
 | Categories and collections | Ready | category-grid, collection pages with filters and sort |
 | Bedroom furniture collections | Ready | same, using collections |
 | Product highlights | Ready | multicolumn, image-with-text, product-tabs |
-| Product specifications (dimensions, firmness, materials) | **Partial** | Custom fields exist; need a "Specifications" section/block that lists label/value rows from custom fields or typed rows |
+| Product specifications (dimensions, firmness, materials) | Ready (phase C) | Specifications section: product's own specs + fixed rows (warranty, trial) |
 | Size and variant selection (Single / Double / King) | Ready | product-options (buttons or select), shared option rules |
 | Fabric/colour swatches | **Missing** | Deferred swatches |
 | Testimonials | Ready | testimonials (static quotes) |
 | Product reviews with stars | **Missing** | Needs a reviews data model; out of scope for the first template |
 | Offers and promo banners | Ready | image-banner, announcement-bar, compare-at price on product |
 | Delivery and warranty info | Ready | trust-strip, product-tabs ("Delivery", "Warranty", "Trial"), faq |
-| Store information, showroom address, opening hours, contact | Ready, basic | contact-store-info; no map embed, no "book a showroom visit" form |
+| Store information, showroom address, opening hours, contact | Ready (phase C) | "Store visit and contact": address with directions, opening hours, call / WhatsApp / email buttons, photo. Before phase C this section had **no renderer** and showed "Unsupported section". No booking form |
 | Responsive product displays | Ready | theme CSS at 390/768/1280 (Minimal and Avenue specs pass) |
 | Different layouts for beds vs mattresses vs accessories | **Partial** | Engine supports it; needs create-alternate-template and product/collection assignment UI |
 | Fully editable without code | Ready for everything above except the gaps | |
@@ -240,11 +242,11 @@ Each phase is small, testable on its own, and ends with a commit, in line with h
 3. Rename "Online store / Templates" to "Store designs"; plain names for shared sections ("Shared header", "Use on every page"); show "Saved, not live yet" next to Publish.
 4. Optional: "Keep a copy of my current design" before switching store designs, with restore.
 
-**Phase C: Showroom-ready sections**
+**Phase C: Showroom-ready sections** — done 2026-10-29: Specifications section and store visit section (items 1 and 3). `logo-list` still has no renderer.
 1. Specifications section (label/value rows; each row can be typed or bound to a custom field), allowed on product pages.
-2. Let `info-tab` text accept custom-field bindings (per-product delivery/warranty text).
+2. ~~Let `info-tab` text accept custom-field bindings~~ — dropped: bindings are not resolved anywhere yet. Moved to a new phase C2 "resolve custom-field bindings on the live store".
 3. Showroom visit block in contact-store-info (address, hours, map link, call/WhatsApp button).
-4. Colour/fabric swatches in product-options (the deferred work).
+4. Colour/fabric swatches — deferred: needs an API field and migration for option display and colours, plus changes in product files another developer is editing.
 
 **Phase D: Bed Showroom theme**
 Follow `docs/theme-architecture.md` "Adding a new theme": new theme id, CSS, starter pack with home, collection, product (default + "mattress" alternate), information pages, style guide entry, Playwright spec and launch checklist.

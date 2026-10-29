@@ -64,3 +64,21 @@
 :where(.jelly-order-timeline time) { opacity: .75; }
 @media (max-width: 599px) { :where(.jelly-order-progress) { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 18px; } :where(.jelly-order-progress-step)::before { display: none; } }
 :where(.jelly-shipment-exception) { margin: 0; padding: 10px 12px; border-radius: var(--jelly-radius-card, 4px); background: color-mix(in srgb, #b45309 12%, transparent); font-size: 14px; }
+
+/* Specifications table and store visit: layout only; each theme sets colours and type. */
+:where(.jelly-specifications-list) { display: grid; margin: 0; }
+:where(.jelly-specifications-list > div) { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 16px; padding-block: 10px; border-bottom: 1px solid color-mix(in srgb, currentColor 14%, transparent); }
+:where(.jelly-specifications-list dd) { margin: 0; }
+:where(.jelly-specifications details > summary) { cursor: pointer; }
+:where(.jelly-store-visit .jelly-container) { display: grid; gap: 32px; align-items: center; }
+@media (min-width: 900px) { :where(.jelly-store-visit[data-has-image="true"] .jelly-container) { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+:where(.jelly-store-visit-body) { display: grid; gap: 16px; justify-items: start; }
+:where(.jelly-store-visit-address) { display: grid; font-style: normal; }
+:where(.jelly-store-visit-hours dl) { display: grid; gap: 4px; margin: 0; }
+:where(.jelly-store-visit-hours dl > div) { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+:where(.jelly-store-visit-hours dt) { min-width: 120px; }
+:where(.jelly-store-visit-hours dd) { margin: 0; }
+:where(.jelly-store-visit-details) { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+:where(.jelly-store-visit-details span) { margin-inline-end: 8px; opacity: .7; }
+:where(.jelly-store-visit-actions) { display: flex; flex-wrap: wrap; gap: 12px; }
+:where(.jelly-store-visit-media img) { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }

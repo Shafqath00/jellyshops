@@ -15,6 +15,12 @@ const stockCounterSettings = z.object({
   showWhenPlentiful: z.boolean().optional(),
 }).passthrough();
 
+const specificationsSettings = z.object({
+  heading: z.string().max(120).optional(),
+  showProductSpecifications: z.boolean().optional(),
+  layout: z.enum(["table", "expandable"]).optional(),
+}).passthrough();
+
 const infoTabBlocks = [
   { id: "preset-tab-care", type: "info-tab", enabled: true, settings: { title: "Materials & care", text: "Describe what the product is made from and how to look after it." } },
   { id: "preset-tab-shipping", type: "info-tab", enabled: true, settings: { title: "Shipping & returns", text: "Explain delivery times, costs and your returns policy." } },
@@ -31,6 +37,23 @@ export const productExtraSections: SectionDefinition[] = [
     maxBlocks: 8,
     defaultSettings: { firstOpen: false },
     defaultBlocks: infoTabBlocks,
+    responsiveFields: [],
+  },
+  {
+    // Each product's own specifications (entered on the product form) as a table, plus fixed rows that apply to every product using the template.
+    type: "product-specifications",
+    category: "commerce",
+    supportedPages: [...productOnly],
+    settingsSchema: specificationsSettings,
+    controls: [
+      { type: "text", key: "heading", label: "Heading", group: "content", maxLength: 120 },
+      { type: "checkbox", key: "showProductSpecifications", label: "Show the specifications entered on each product", group: "content" },
+      { type: "segmented", key: "layout", label: "Show as", group: "layout", options: [{ label: "Table", value: "table" }, { label: "Expandable panel", value: "expandable" }] },
+    ],
+    allowedBlockTypes: ["spec-row"],
+    maxBlocks: 12,
+    defaultSettings: { heading: "Specifications", showProductSpecifications: true, layout: "table" },
+    defaultBlocks: [],
     responsiveFields: [],
   },
   {
