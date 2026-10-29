@@ -792,6 +792,32 @@
   [data-jelly-theme="jelly-signature"] *::after { transition-duration: 1ms !important; animation-duration: 1ms !important; }
 }
 
+/* Pressed feedback: responds on pointer-down, before the tap is released */
+[data-jelly-theme="jelly-signature"] :is(.jelly-button, .signature-primary, .signature-secondary, .jelly-product-purchase button, .jelly-newsletter button, .jelly-search-shell button, .jelly-quantity-stepper button):not(:disabled):active {
+  transform: scale(.98);
+  transition-duration: 80ms;
+}
+
+/* Sticky header: a translucent material over the page, solid when the visitor asks for less transparency */
+[data-jelly-theme="jelly-signature"] .jelly-header[data-sticky="true"] {
+  background: color-mix(in srgb, var(--jm-bg) 85%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
+}
+@media (prefers-reduced-transparency: reduce) {
+  [data-jelly-theme="jelly-signature"] .jelly-header[data-sticky="true"] { background: var(--jm-bg); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+
+/* Higher contrast: stronger borders and body-colour secondary text */
+@media (prefers-contrast: more) {
+  [data-jelly-theme="jelly-signature"] {
+    --jm-border: color-mix(in srgb, var(--jm-text) 45%, transparent);
+    --jm-border-strong: color-mix(in srgb, var(--jm-text) 70%, transparent);
+    --jm-muted: var(--jm-text);
+  }
+  [data-jelly-theme="jelly-signature"] .jelly-header[data-sticky="true"] { background: var(--jm-bg); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+
 /* Specifications and store visit (showroom sections) */
 [data-jelly-theme="jelly-signature"] .jelly-specifications h2 { margin: 0 0 var(--jm-2); font-family: var(--jm-font-heading); font-size: var(--jm-h4); font-weight: var(--jm-heading-weight); }
 [data-jelly-theme="jelly-signature"] .jelly-specifications-list > div { border-bottom-color: var(--jm-border); font-size: var(--jm-text-sm); }

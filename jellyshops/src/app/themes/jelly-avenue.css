@@ -1055,6 +1055,37 @@
   [data-jelly-theme="jelly-avenue"] *,
   [data-jelly-theme="jelly-avenue"] *::before,
   [data-jelly-theme="jelly-avenue"] *::after { transition-duration: 1ms !important; animation-duration: 1ms !important; }
+  /* No slow zoom on slides; slides still cross-fade, quickly */
+  [data-jelly-theme="jelly-avenue"] .jelly-slide-media,
+  [data-jelly-theme="jelly-avenue"] .jelly-slide[data-active="true"] .jelly-slide-media { transform: none; }
+  [data-jelly-theme="jelly-avenue"] .jelly-slide { transition: opacity 200ms linear, visibility 0s linear 200ms !important; }
+  [data-jelly-theme="jelly-avenue"] .jelly-slide[data-active="true"] { transition: opacity 200ms linear !important; }
+}
+
+/* Pressed feedback: responds on pointer-down, before the tap is released */
+[data-jelly-theme="jelly-avenue"] :is(.jelly-button, .signature-primary, .signature-secondary, .jelly-product-purchase button, .jelly-newsletter button, .jelly-search-shell button, .jelly-quantity-stepper button):not(:disabled):active {
+  transform: scale(.98);
+  transition-duration: 80ms;
+}
+
+/* Sticky header: a translucent material over the page, solid when the visitor asks for less transparency */
+[data-jelly-theme="jelly-avenue"] .jelly-header[data-sticky="true"] {
+  background: color-mix(in srgb, var(--av-bg) 85%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
+}
+@media (prefers-reduced-transparency: reduce) {
+  [data-jelly-theme="jelly-avenue"] .jelly-header[data-sticky="true"] { background: var(--av-bg); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+
+/* Higher contrast: stronger borders and body-colour secondary text */
+@media (prefers-contrast: more) {
+  [data-jelly-theme="jelly-avenue"] {
+    --av-border: color-mix(in srgb, var(--av-text) 45%, transparent);
+    --av-border-strong: color-mix(in srgb, var(--av-text) 70%, transparent);
+    --av-muted: var(--av-text);
+  }
+  [data-jelly-theme="jelly-avenue"] .jelly-header[data-sticky="true"] { background: var(--av-bg); -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
 
 /* Specifications and store visit (showroom sections) */
