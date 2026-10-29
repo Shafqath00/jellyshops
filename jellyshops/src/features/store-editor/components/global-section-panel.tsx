@@ -27,17 +27,17 @@ export function GlobalSectionPanel({
 
   if (attached) {
     return (
-      <section aria-label="Global section" className="p-3">
+      <section aria-label="Shared section" className="p-3">
         <div className="rounded-lg border border-border bg-muted/50 p-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Synced global section</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Shared section · edits show on every page that uses it</p>
           <p className="mt-1 text-[12px] font-semibold text-foreground">{attached.name}</p>
           <button
             type="button"
-            aria-label={`Detach ${attached.name}`}
+            aria-label={`Stop sharing ${attached.name}`}
             onClick={() => onDetachGlobal(structuredClone(attached.section))}
             className="mt-3 h-8 rounded-md border border-border bg-card px-3 text-[11px] font-semibold text-foreground hover:bg-muted/50"
           >
-            Detach
+            Make a separate copy
           </button>
         </div>
       </section>
@@ -45,18 +45,18 @@ export function GlobalSectionPanel({
   }
 
   return (
-    <section aria-label="Global sections" className="space-y-3 p-3">
+    <section aria-label="Shared sections" className="space-y-3 p-3">
       {localSection && (
         <button
           type="button"
-          aria-label="Make global"
+          aria-label="Share this section"
           onClick={() => {
-            if (!window.confirm("Convert this section into a synced global section? Changes will affect every placement.")) return;
+            if (!window.confirm("Share this section? You can then add it to other pages, and any edit to it shows everywhere it is used.")) return;
             onMakeGlobal(structuredClone(localSection));
           }}
           className="h-8 rounded-md bg-primary px-3 text-[11px] font-semibold text-primary-foreground"
         >
-          Make global
+          Share this section
         </button>
       )}
 

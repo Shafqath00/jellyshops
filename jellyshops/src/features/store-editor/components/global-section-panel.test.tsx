@@ -38,7 +38,7 @@ it("confirms before converting a local section into a synced global section", as
     />,
   );
 
-  await userEvent.click(screen.getByRole("button", { name: "Make global" }));
+  await userEvent.click(screen.getByRole("button", { name: "Share this section" }));
 
   expect(window.confirm).toHaveBeenCalled();
   expect(onMakeGlobal).toHaveBeenCalledTimes(1);
@@ -72,7 +72,7 @@ it("inserts a shared global reference and detaches to a local copy", async () =>
     />,
   );
 
-  await userEvent.click(screen.getByRole("button", { name: "Detach Announcement" }));
+  await userEvent.click(screen.getByRole("button", { name: "Stop sharing Announcement" }));
   const detached = onDetachGlobal.mock.calls[0][0];
   expect(detached).toEqual(globalSection.section);
   expect(detached).not.toBe(globalSection.section);
