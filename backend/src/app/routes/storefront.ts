@@ -8,9 +8,43 @@ import { createStorefrontStarterRouter } from "../../storefront/starter/routes.j
 import { createStorefrontWorkspaceRouter } from "../../storefront/workspace/routes.js";
 import { defaultStorefrontWorkspaceApi } from "../default-storefront-workspace.js";
 import type { AppContext } from "../types.js";
+import { SqlCustomDataRepository } from "../../custom-data/sql-repository.js";
+import { StorefrontBindingValueService } from "../../dynamic-sources/binding-values.js";
+import { createEditorBindingValuesRouter, createPublicBindingValuesRouter } from "../../dynamic-sources/binding-values-routes.js";
+import { DynamicValueResolver } from "../../dynamic-sources/resolver.js";
+
+const bindingValueServices = new WeakMap<AppContext, StorefrontBindingValueService | null>();
+
+/** Custom-field values for storefront sections; needs the SQL database, so it is off in the local JSON mode. */
+function bindingValueService(context: AppContext): StorefrontBindingValueService | undefined {
+  if (!bindingValueServices.has(context)) {
+    const { storefrontSql: sql, contentService: content, mediaRepository: media } = context.routeDependencies;
+    const catalog = context.catalogService;
+    const repository = sql ? new SqlCustomDataRepository(sql) : undefined;
+    bindingValueServices.set(context, sql && repository && catalog && content && media
+      ? new StorefrontBindingValueService(new DynamicValueResolver(repository, repository), {
+        product: (storeId, id) => catalog.getProduct(storeId, id),
+        collection: (storeId, id) => catalog.getCollection(storeId, id),
+        page: (storeId, id) => content.getPage(storeId, id),
+        blog: (storeId, id) => content.getBlog(storeId, id),
+        article: (storeId, id) => content.getArticle(storeId, id),
+        storeName: async (storeId) => (await sql.query<{ name: string }>(`SELECT "name" FROM "Store" WHERE "id" = $1`, [storeId])).rows[0]?.name ?? null,
+        media: async (storeId, id) => {
+          const record = await media.get(storeId, id);
+          return record ? { url: record.url, ...(record.altText ? { alt: record.altText } : {}) } : null;
+        },
+      })
+      : null);
+  }
+  return bindingValueServices.get(context) ?? undefined;
+}
 
 export function mountPublicStorefrontContextRoutes(app: Express, context: AppContext): void {
   const { publicStorefrontContextService } = context;
+  const bindingValues = bindingValueService(context);
+  if (bindingValues) {
+    app.use("/api/public/stores/:storeId/storefront/binding-values", createPublicBindingValuesRouter(bindingValues));
+  }
   if (publicStorefrontContextService) {
     app.use(
       "/api/public/stores/:storeId/storefront/context",
@@ -34,6 +68,11 @@ export function mountStorefrontRoutes(app: Express, context: AppContext): void {
       authProvider,
     ),
   );
+
+  const bindingValues = bindingValueService(context);
+  if (bindingValues) {
+    app.use("/api/stores/:storeId/storefront", createEditorBindingValuesRouter(bindingValues, authProvider));
+  }
 
   if (storefrontStarterApi) {
     app.use(

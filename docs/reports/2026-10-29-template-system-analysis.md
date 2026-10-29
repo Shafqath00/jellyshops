@@ -244,7 +244,7 @@ Each phase is small, testable on its own, and ends with a commit, in line with h
 
 **Phase C: Showroom-ready sections** — done 2026-10-29: Specifications section and store visit section (items 1 and 3). `logo-list` still has no renderer.
 1. Specifications section (label/value rows; each row can be typed or bound to a custom field), allowed on product pages.
-2. ~~Let `info-tab` text accept custom-field bindings~~ — dropped: bindings are not resolved anywhere yet. Moved to a new phase C2 "resolve custom-field bindings on the live store".
+2. ~~Let `info-tab` text accept custom-field bindings~~ — dropped: bindings are not resolved anywhere yet. Moved to a new phase C2 "resolve custom-field bindings on the live store" — done 2026-10-29: values are looked up when a page is shown (`POST /api/public/stores/:storeId/storefront/binding-values`, published items and storefront-visible fields only) and in the editor preview (signed-in route, drafts allowed); unresolved settings show their fallback. Header/footer on non-home pages still show fallbacks only (they are drawn by `storefront-frame.tsx`).
 3. Showroom visit block in contact-store-info (address, hours, map link, call/WhatsApp button).
 4. Colour/fabric swatches — deferred: needs an API field and migration for option display and colours, plus changes in product files another developer is editing.
 

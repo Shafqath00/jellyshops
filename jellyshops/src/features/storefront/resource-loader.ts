@@ -5,6 +5,8 @@ import type {
   SectionNode,
 } from "@jelly/storefront-schema";
 import type { PublicProduct } from "@jelly/storefront-renderer";
+import { loadPublicBindingValues, type BindingValueLoader } from "./binding-values-api";
+import { applyBindingValues, collectLayoutBindings } from "./dynamic-settings";
 
 export type PublicResourceType = "product" | "collection" | "page" | "blog" | "article";
 
@@ -123,7 +125,37 @@ function regionFor(section: SectionNode): keyof ResolvedStorefrontLayout {
   return "template";
 }
 
+/**
+ * The template's sections, ready to render. Settings connected to custom fields
+ * show their fallback here; `resolveStorefrontRoute` fills in the real values.
+ */
 export function expandRuntimeLayout(
+  snapshot: RuntimeStorefrontSnapshotV4,
+  template: RuntimeTemplateV4,
+): ResolvedStorefrontLayout {
+  return applyBindingValues(expandRawRuntimeLayout(snapshot, template), new Map());
+}
+
+/** Like `expandRuntimeLayout`, with custom-field values looked up for the resource being shown. A failed lookup falls back quietly. */
+export async function expandRuntimeLayoutWithValues(
+  snapshot: RuntimeStorefrontSnapshotV4,
+  template: RuntimeTemplateV4,
+  resource: PublicStorefrontResource | null,
+  loadValues: BindingValueLoader = loadPublicBindingValues,
+): Promise<ResolvedStorefrontLayout> {
+  const raw = expandRawRuntimeLayout(snapshot, template);
+  const bindings = collectLayoutBindings(raw);
+  if (!bindings.length) return applyBindingValues(raw, new Map());
+  try {
+    const values = await loadValues({ storeId: snapshot.storeId, bindings, ...(resource ? { resource: { type: resource.type, id: resource.id } } : {}) });
+    return applyBindingValues(raw, values);
+  } catch {
+    return applyBindingValues(raw, new Map());
+  }
+}
+
+/** The template's sections exactly as saved, with custom-field connections still in place (for the editor preview, which looks values up itself). */
+export function expandRawRuntimeLayout(
   snapshot: RuntimeStorefrontSnapshotV4,
   template: RuntimeTemplateV4,
 ): ResolvedStorefrontLayout {
@@ -182,12 +214,13 @@ export async function resolveStorefrontRoute(
   snapshot: RuntimeStorefrontSnapshotV4,
   route: StorefrontRouteRequest,
   reader: PublicResourceReader,
+  loadValues: BindingValueLoader = loadPublicBindingValues,
 ): Promise<ResolvedStorefrontRoute> {
   if (route.type === "home") {
     const templateId = snapshot.templateDefaults.home;
     const template = templateId ? snapshot.templates[templateId] : undefined;
     if (!template) return { status: "not-found", reason: "template" };
-    const layout = expandRuntimeLayout(snapshot, template);
+    const layout = await expandRuntimeLayoutWithValues(snapshot, template, null, loadValues);
     return { status: "ready", context: { pageType: "home", resource: null }, resource: null, template, sections: layout.template, layout };
   }
 
@@ -195,7 +228,7 @@ export async function resolveStorefrontRoute(
     const templateId = snapshot.templateDefaults.cart;
     const template = templateId ? snapshot.templates[templateId] : undefined;
     if (!template || template.type !== "cart") return { status: "not-found", reason: "template" };
-    const layout = expandRuntimeLayout(snapshot, template);
+    const layout = await expandRuntimeLayoutWithValues(snapshot, template, null, loadValues);
     return { status: "ready", context: { pageType: "cart", resource: null }, resource: null, template, sections: layout.template, layout };
   }
 
@@ -203,7 +236,7 @@ export async function resolveStorefrontRoute(
     const templateId = snapshot.templateDefaults.search;
     const template = templateId ? snapshot.templates[templateId] : undefined;
     if (!template || template.type !== "search") return { status: "not-found", reason: "template" };
-    const layout = expandRuntimeLayout(snapshot, template);
+    const layout = await expandRuntimeLayoutWithValues(snapshot, template, null, loadValues);
     return { status: "ready", context: { pageType: "search", resource: null, data: route.context }, resource: null, template, sections: layout.template, layout };
   }
 
@@ -218,6 +251,6 @@ export async function resolveStorefrontRoute(
   const template = templateId ? snapshot.templates[templateId] : undefined;
   if (!template || template.type !== route.type) return { status: "not-found", reason: "template" };
 
-  const layout = expandRuntimeLayout(snapshot, template);
+  const layout = await expandRuntimeLayoutWithValues(snapshot, template, resource, loadValues);
   return { status: "ready", context: { pageType: route.type, resource }, resource, template, sections: layout.template, layout };
 }
