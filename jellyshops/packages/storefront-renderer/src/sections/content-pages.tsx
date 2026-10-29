@@ -7,7 +7,10 @@ import type { StorefrontRuntimeContext } from "../runtime-context";
 /** Saved page/article content: rich text documents keep headings and lists; older plain text becomes paragraphs. */
 function renderContent(value: unknown): ReactNode[] {
   if (isRichTextDocument(value)) {
-    const blocks = value.content.filter((block) => !(block.type === "paragraph" && block.content.length === 0));
+    // The document check accepts paragraphs and headings saved without a `content` list (an empty line in the page editor), so treat a missing list as empty.
+    const blocks = value.content
+      .filter((block) => !(block.type === "paragraph" && !block.content?.length))
+      .map((block) => block.type === "heading" && !block.content ? { ...block, content: [] } : block);
     return renderBlocks(blocks);
   }
   return textFromContent(value).map((paragraph, index) => <p key={`${index}-${paragraph}`}>{paragraph}</p>);
