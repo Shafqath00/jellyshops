@@ -12,6 +12,7 @@ import { TemplateService } from "./template-service.js";
 
 class MemoryTemplateRepository implements TemplateRepository {
   private readonly templates = new Map<string, StorefrontTemplateRecord>();
+  readonly assignmentCounts = new Map<string, number>();
 
   async getTemplate(storeId: string, templateId: string): Promise<StorefrontTemplateRecord | null> {
     const template = this.templates.get(templateId);
@@ -75,6 +76,23 @@ class MemoryTemplateRepository implements TemplateRepository {
       handle: input.handle,
       layout: structuredClone(source.layout),
     });
+  }
+
+  async countAssignments(_transaction: WorkspaceTransaction, _storeId: string, templateId: string): Promise<number> {
+    return this.assignmentCounts.get(templateId) ?? 0;
+  }
+
+  async deleteTemplate(
+    _transaction: WorkspaceTransaction,
+    storeId: string,
+    templateId: string,
+    expectedRevision: number,
+  ): Promise<StorefrontTemplateRecord | null> {
+    const current = this.templates.get(templateId);
+    if (!current || current.storeId !== storeId) return null;
+    assertExpectedRevision(current.revision, expectedRevision);
+    this.templates.delete(templateId);
+    return structuredClone(current);
   }
 }
 
@@ -151,7 +169,7 @@ describe("TemplateService", () => {
     const source = await service.createTemplate("store-a", {
       type: "product",
       name: "Default product",
-      layout: { sections: [{ id: "hero", settings: { heading: "Hello" } }] },
+      layout: { sections: [{ kind: "inline", section: { id: "hero", type: "hero", enabled: true, settings: { heading: "Hello" }, blocks: [] } }] },
     });
 
     const cloned = await service.cloneTemplate("store-a", source.template.id, {
@@ -167,5 +185,66 @@ describe("TemplateService", () => {
     });
     expect(cloned.template.id).not.toBe(source.template.id);
     expect(cloned.generation).toBe(2);
+  });
+
+  it("explains invalid names, handles and layouts with 400 errors", async () => {
+    const { service, generation } = setup();
+
+    await expect(service.createTemplate("store-a", { type: "product", name: "  ", layout: { sections: [] } }))
+      .rejects.toMatchObject({ status: 400, code: "TEMPLATE_NAME_REQUIRED" });
+    await expect(service.createTemplate("store-a", { type: "product", name: "Mattress", handle: "Mattress page!", layout: { sections: [] } }))
+      .rejects.toMatchObject({ status: 400, code: "TEMPLATE_HANDLE_INVALID" });
+    await expect(service.createTemplate("store-a", { type: "product", name: "Mattress", handle: "previous-mattress", layout: { sections: [] } }))
+      .rejects.toMatchObject({ status: 400, code: "TEMPLATE_HANDLE_RESERVED" });
+    await expect(service.createTemplate("store-a", { type: "product", name: "Mattress", handle: "mattress", layout: {} }))
+      .rejects.toMatchObject({ status: 400, code: "TEMPLATE_LAYOUT_INVALID", issues: [{ path: "layout.sections" }] });
+    await expect(service.createTemplate("store-a", {
+      type: "product",
+      name: "Mattress",
+      handle: "mattress",
+      layout: { sections: [
+        { kind: "inline", section: { id: "a", type: "hero", blocks: [] } },
+        { kind: "inline", section: { id: "a", type: "rich-text" } },
+        { kind: "global" },
+        { id: "loose" },
+      ] },
+    })).rejects.toMatchObject({
+      issues: [
+        { path: "layout.sections.1.section.id", message: "Section ids must be unique in a template" },
+        { path: "layout.sections.2", message: "Shared section placement needs a section id" },
+        { path: "layout.sections.3", message: "Each placement must be an inline section or a shared section" },
+      ],
+    });
+    expect(generation()).toBe(0);
+  });
+
+  it("returns 404 when updating a template that does not exist", async () => {
+    const { service } = setup();
+
+    await expect(service.updateTemplate("store-a", "missing", 0, { name: "Anything" }))
+      .rejects.toMatchObject({ status: 404, code: "STOREFRONT_RESOURCE_NOT_FOUND" });
+  });
+
+  it("deletes an unused alternate template", async () => {
+    const { service, repository } = setup();
+    const created = await service.createTemplate("store-a", { type: "product", name: "Mattress", handle: "mattress", layout: { sections: [] } });
+
+    const result = await service.deleteTemplate("store-a", created.template.id, 0);
+
+    expect(result).toEqual({ templateId: created.template.id, generation: 2 });
+    expect(await repository.getTemplate("store-a", created.template.id)).toBeNull();
+  });
+
+  it("keeps default templates and templates still assigned to something", async () => {
+    const { service, repository, generation } = setup();
+    const main = await service.createTemplate("store-a", { type: "product", name: "Product", layout: { sections: [] } });
+    const alternate = await service.createTemplate("store-a", { type: "product", name: "Mattress", handle: "mattress", layout: { sections: [] } });
+    repository.assignmentCounts.set(alternate.template.id, 3);
+
+    await expect(service.deleteTemplate("store-a", main.template.id, 0)).rejects.toMatchObject({ status: 409, code: "TEMPLATE_IS_DEFAULT" });
+    await expect(service.deleteTemplate("store-a", alternate.template.id, 0))
+      .rejects.toMatchObject({ status: 409, code: "TEMPLATE_IN_USE", message: "This template is used by 3 items. Switch them to another template first." });
+    await expect(service.deleteTemplate("store-a", "missing", 0)).rejects.toMatchObject({ status: 404 });
+    expect(generation()).toBe(2);
   });
 });

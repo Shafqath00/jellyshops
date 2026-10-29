@@ -14,6 +14,7 @@ import type { TemplateAssignmentRecord } from "./workspace/repositories/assignme
 import type { GlobalSectionRecord } from "./workspace/repositories/global-section-repository.js";
 import type { NavigationMenuRecord } from "./workspace/repositories/menu-repository.js";
 import {
+  isRetiredTemplateHandle,
   templateTypes,
   type StorefrontTemplateRecord,
   type TemplateType,
@@ -90,6 +91,15 @@ function theme(configuration: ThemeConfigurationRecord | null): StorefrontCompil
   };
 }
 
+/**
+ * Templates set aside by a store-design switch stay in the draft library, but only the
+ * ones still assigned to something are compiled, so an old layout can't block publishing.
+ */
+function liveTemplates(templates: StorefrontTemplateRecord[], assignments: TemplateAssignmentRecord[]): StorefrontTemplateRecord[] {
+  const assigned = new Set(assignments.map(({ templateId }) => templateId));
+  return templates.filter((record) => !isRetiredTemplateHandle(record.handle) || assigned.has(record.id));
+}
+
 export class LocalV4WorkspaceReader implements CompilationInputLoader {
   constructor(private readonly source: LocalV4WorkspaceDataSource) {}
 
@@ -116,7 +126,7 @@ export class LocalV4WorkspaceReader implements CompilationInputLoader {
       storeId,
       generation: initial.generation,
       theme: theme(themeConfiguration),
-      templates: (templates ?? []).map(template),
+      templates: liveTemplates(templates ?? [], assignments ?? []).map(template),
       globalSections: (globalSections ?? []).map(globalSection),
       menus: (menus ?? []).map(menu),
       assignments: (assignments ?? []).map(assignment),

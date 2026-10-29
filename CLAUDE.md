@@ -76,6 +76,8 @@ Test status at last run: frontend 439 passing, backend 385 passing, both builds 
 
 **Product builder (started 2026-10-25, plan in `docs/plans/product-builder.md`):** single-page builder at `/admin/products/builder` (+ `/[id]`), features in `jellyshops/src/features/product-builder/`, shared option rules in `packages/storefront-schema/src/product-options.ts` (backend uses the packed copy), taxonomy API in `backend/src/taxonomy/`. The classic form at `/admin/products/new` is untouched. Phases 1-6 done except text inputs, variant photos and the condition editor.
 
+**Template system (analysis 2026-10-29, `docs/reports/2026-10-29-template-system-analysis.md`):** agreed roadmap A reliability fixes, B template management UI (create/rename/delete alternate templates, template picker on product/collection forms, rename "Templates" page to "Store designs"), C showroom sections (specifications, showroom visit, swatches), D Bed Showroom theme. Phase A done (backend): template/assignment mistakes return 400/404/409 with plain messages (`ApiError` thrown from the services; `http/errors.ts` has the other developer's edit, so it was left alone), `DELETE /templates/:id` (refuses `default` and assigned templates) and `DELETE /assignments/:type/:id`, layout shape checked on save, Publish skips `previous-*` templates nobody uses (`isRetiredTemplateHandle`), starter install pins the theme's own version.
+
 **Not done / open:**
 - **A PR into `main` is impossible**: `local/task3` and `origin/main` have unrelated histories (different root commits). The user chose to leave the branch pushed without a PR.
 - Manual staging + Stripe sandbox journey (`docs/jelly-minimal-launch-checklist.md`) not run; the user must provide a working staging login.

@@ -60,6 +60,10 @@ export class DefaultStorefrontWorkspaceApi implements StorefrontWorkspaceApi {
     return this.templates.cloneTemplate(storeId, sourceTemplateId, input);
   }
 
+  deleteTemplate(storeId: string, templateId: string, expectedRevision: number) {
+    return this.templates.deleteTemplate(storeId, templateId, expectedRevision);
+  }
+
   listGlobalSections(storeId: string) {
     return this.globals.listGlobalSections(storeId);
   }
@@ -140,5 +144,12 @@ export class DefaultStorefrontWorkspaceApi implements StorefrontWorkspaceApi {
     },
   ) {
     return this.assignments.assignTemplate(storeId, input);
+  }
+
+  removeAssignment(
+    storeId: string,
+    input: { resourceType: AssignableResourceType; resourceId: string; expectedRevision: number },
+  ) {
+    return this.assignments.removeAssignment(storeId, input);
   }
 }

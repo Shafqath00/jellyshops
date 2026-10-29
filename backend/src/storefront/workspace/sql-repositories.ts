@@ -7,6 +7,7 @@ import { GlobalSectionService } from "./global-section-service.js";
 import { MenuService } from "./menu-service.js";
 import { TemplateService } from "./template-service.js";
 import { ThemeService } from "./theme-service.js";
+import { ApiError } from "../../http/errors.js";
 import { ResourceRevisionConflictError } from "./errors.js";
 import { cloneLocalIds } from "./clone-local-ids.js";
 import { fromStorefrontTemplateEnumValue as decodeType, toStorefrontTemplateEnumValue as encodeType } from "./template-type-enum.js";
@@ -21,6 +22,17 @@ import type { WorkspaceMutationRunner } from "./mutation-runner.js";
 const resourceTables = { product: "Product", collection: "Collection", page: "StorePage", blog: "Blog", article: "Article" } as const;
 const jsonColumns = new Set(["layout", "section", "items", "settings"]);
 function sql(transaction: unknown): SqlExecutor { return transaction as SqlExecutor; }
+/** Turns the per-page-type unique handle index into a message a merchant can act on. */
+async function uniqueTemplateHandle<T>(write: Promise<T>): Promise<T> {
+  try { return await write; }
+  catch (error) {
+    const details = error as { code?: unknown; constraint?: unknown; message?: unknown };
+    if (details.code === "23505" && `${details.constraint ?? details.message ?? ""}`.includes("StorefrontTemplate_storeId_type_handle_key")) {
+      throw new ApiError(409, "TEMPLATE_HANDLE_TAKEN", "Another template for this page type already uses that name. Choose a different one.");
+    }
+    throw error;
+  }
+}
 
 class SqlWorkspaceRepositories implements TemplateRepository, GlobalSectionRepository, PresetRepository, MenuRepository, ThemeRepository, AssignmentRepository, WorkspaceMutationRunner {
   constructor(private readonly db: CommerceDatabase) {}
@@ -52,8 +64,16 @@ class SqlWorkspaceRepositories implements TemplateRepository, GlobalSectionRepos
   getWorkspace(storeId: string) { return this.db.transaction(async (tx) => (await tx.query<{ generation: number; updatedAt: Date }>(`SELECT "generation", "updatedAt" FROM "StorefrontWorkspace" WHERE "storeId" = $1`, [storeId])).rows[0] ?? null); }
   async getTemplate(storeId: string, id: string) { const row = (await this.read<StorefrontTemplateRecord>("StorefrontTemplate", storeId, id))[0]; return row ? this.template(row) : null; }
   async listTemplates(storeId: string, type?: StorefrontTemplateRecord["type"]) { return (await this.read<StorefrontTemplateRecord>("StorefrontTemplate", storeId)).map((row) => this.template(row)).filter((row) => !type || row.type === type); }
-  async createTemplate(tx: unknown, input: Parameters<TemplateRepository["createTemplate"]>[1]) { return this.template(await this.insert<StorefrontTemplateRecord>(tx, "StorefrontTemplate", { ...input, type: encodeType(input.type) })); }
-  async updateTemplate(tx: unknown, storeId: string, id: string, revision: number, patch: Parameters<TemplateRepository["updateTemplate"]>[4]) { const row = await this.update<StorefrontTemplateRecord>(tx, "StorefrontTemplate", storeId, id, revision, { ...patch }); return row ? this.template(row) : null; }
+  async createTemplate(tx: unknown, input: Parameters<TemplateRepository["createTemplate"]>[1]) { return this.template(await uniqueTemplateHandle(this.insert<StorefrontTemplateRecord>(tx, "StorefrontTemplate", { ...input, type: encodeType(input.type) }))); }
+  async updateTemplate(tx: unknown, storeId: string, id: string, revision: number, patch: Parameters<TemplateRepository["updateTemplate"]>[4]) { const row = await uniqueTemplateHandle(this.update<StorefrontTemplateRecord>(tx, "StorefrontTemplate", storeId, id, revision, { ...patch })); return row ? this.template(row) : null; }
+  async countAssignments(tx: unknown, storeId: string, id: string) { return Number((await sql(tx).query<{ count: string | number }>(`SELECT COUNT(*) AS "count" FROM "StorefrontTemplateAssignment" WHERE "storeId" = $1 AND "templateId" = $2`, [storeId, id])).rows[0]?.count ?? 0); }
+  async deleteTemplate(tx: unknown, storeId: string, id: string, revision: number) {
+    const current = (await sql(tx).query<StorefrontTemplateRecord>(`SELECT * FROM "StorefrontTemplate" WHERE "storeId" = $1 AND "id" = $2 FOR UPDATE`, [storeId, id])).rows[0];
+    if (!current) return null;
+    if (current.revision !== revision) throw new ResourceRevisionConflictError(current.revision);
+    await sql(tx).query(`DELETE FROM "StorefrontTemplate" WHERE "storeId" = $1 AND "id" = $2`, [storeId, id]);
+    return this.template(current);
+  }
   async cloneTemplate(tx: unknown, storeId: string, id: string, input: Parameters<TemplateRepository["cloneTemplate"]>[3]) { const source = (await sql(tx).query<StorefrontTemplateRecord>(`SELECT * FROM "StorefrontTemplate" WHERE "storeId" = $1 AND "id" = $2`, [storeId, id])).rows[0]; return source ? this.createTemplate(tx, { storeId, ...input, type: decodeType(source.type), layout: cloneLocalIds(source.layout) }) : null; }
   async getGlobalSection(storeId: string, id: string) { return (await this.read<GlobalSectionRecord>("GlobalSection", storeId, id))[0] ?? null; }
   listGlobalSections(storeId: string) { return this.read<GlobalSectionRecord>("GlobalSection", storeId); }
@@ -73,6 +93,13 @@ class SqlWorkspaceRepositories implements TemplateRepository, GlobalSectionRepos
     const current = (await sql(tx).query<TemplateAssignmentRecord>(`SELECT * FROM "StorefrontTemplateAssignment" WHERE "storeId" = $1 AND "resourceType" = $2 AND "resourceId" = $3 FOR UPDATE`, [input.storeId, input.resourceType, input.resourceId])).rows[0];
     if ((current?.revision ?? null) !== input.expectedRevision) throw new ResourceRevisionConflictError(current?.revision ?? 0);
     return (await sql(tx).query<TemplateAssignmentRecord>(`INSERT INTO "StorefrontTemplateAssignment" ("storeId", "resourceType", "resourceId", "templateId", "revision", "updatedAt") VALUES ($1,$2,$3,$4,0,NOW()) ON CONFLICT ("storeId", "resourceType", "resourceId") DO UPDATE SET "templateId" = EXCLUDED."templateId", "revision" = "StorefrontTemplateAssignment"."revision" + 1, "updatedAt" = NOW() RETURNING *`, [input.storeId, input.resourceType, input.resourceId, input.templateId])).rows[0];
+  }
+  async deleteAssignment(tx: unknown, input: Parameters<AssignmentRepository["deleteAssignment"]>[1]) {
+    const current = (await sql(tx).query<TemplateAssignmentRecord>(`SELECT * FROM "StorefrontTemplateAssignment" WHERE "storeId" = $1 AND "resourceType" = $2 AND "resourceId" = $3 FOR UPDATE`, [input.storeId, input.resourceType, input.resourceId])).rows[0];
+    if (!current) return false;
+    if (current.revision !== input.expectedRevision) throw new ResourceRevisionConflictError(current.revision);
+    await sql(tx).query(`DELETE FROM "StorefrontTemplateAssignment" WHERE "storeId" = $1 AND "resourceType" = $2 AND "resourceId" = $3`, [input.storeId, input.resourceType, input.resourceId]);
+    return true;
   }
   getThemeConfiguration(storeId: string) { return this.db.transaction(async (tx) => (await tx.query<ThemeConfigurationRecord>(`SELECT * FROM "ThemeConfiguration" WHERE "storeId" = $1`, [storeId])).rows[0] ?? null); }
   async saveThemeConfiguration(tx: unknown, input: Parameters<ThemeRepository["saveThemeConfiguration"]>[1]) {

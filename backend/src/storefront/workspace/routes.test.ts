@@ -21,6 +21,7 @@ function setup() {
     createTemplate: vi.fn(async () => ({ template: { id: "template-1", revision: 0 }, generation: 13 })),
     updateTemplate: vi.fn(async () => ({ template: { id: "template-1", revision: 4 }, generation: 14 })),
     cloneTemplate: vi.fn(async () => ({ template: { id: "template-2", revision: 0 }, generation: 14 })),
+    deleteTemplate: vi.fn(async () => ({ templateId: "template-2", generation: 15 })),
     listGlobalSections: vi.fn(async () => []),
     getGlobalSection: vi.fn(async () => null),
     createGlobalSection: vi.fn(async () => ({ globalSection: { id: "global-1", revision: 0 }, generation: 13 })),
@@ -36,6 +37,7 @@ function setup() {
     saveThemeConfiguration: vi.fn(async () => ({ theme: { storeId: "store-a", revision: 1 }, generation: 13 })),
     getAssignment: vi.fn(async () => null),
     assignTemplate: vi.fn(async () => ({ assignment: { resourceType: "page", resourceId: "page-1", revision: 0 }, generation: 13 })),
+    removeAssignment: vi.fn(async () => ({ generation: 16 })),
   };
   const app = express();
   app.use((req, _res, next) => { req.id = "workspace-test"; next(); });
@@ -164,5 +166,51 @@ describe("normalized storefront workspace routes", () => {
 
     expect(response.status).toBe(403);
     expect(api.createTemplate).not.toHaveBeenCalled();
+  });
+
+  it("deletes a template with its expected revision", async () => {
+    const { app, api } = setup();
+    const response = await request(app)
+      .delete("/api/stores/store-a/storefront/templates/template-2")
+      .set("Authorization", "Bearer token")
+      .send({ expectedRevision: 3 });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ templateId: "template-2", generation: 15 });
+    expect(api.deleteTemplate).toHaveBeenCalledWith("store-a", "template-2", 3);
+  });
+
+  it("requires an expected revision to delete a template", async () => {
+    const { app, api } = setup();
+    const response = await request(app)
+      .delete("/api/stores/store-a/storefront/templates/template-2")
+      .set("Authorization", "Bearer token");
+
+    expect(response.status).toBe(400);
+    expect(api.deleteTemplate).not.toHaveBeenCalled();
+  });
+
+  it("removes an assignment so the resource falls back to its default template", async () => {
+    const { app, api } = setup();
+    const response = await request(app)
+      .delete("/api/stores/store-a/storefront/assignments/product/bed-1")
+      .set("Authorization", "Bearer token")
+      .send({ expectedRevision: 2 });
+
+    expect(response.status).toBe(200);
+    expect(api.removeAssignment).toHaveBeenCalledWith("store-a", { resourceType: "product", resourceId: "bed-1", expectedRevision: 2 });
+  });
+
+  it("passes plain-language service errors through with their status", async () => {
+    const { app, api } = setup();
+    const { ApiError } = await import("../../http/errors.js");
+    vi.mocked(api.deleteTemplate).mockRejectedValueOnce(new ApiError(409, "TEMPLATE_IN_USE", "This template is used by 1 item. Switch them to another template first."));
+    const response = await request(app)
+      .delete("/api/stores/store-a/storefront/templates/template-2")
+      .set("Authorization", "Bearer token")
+      .send({ expectedRevision: 0 });
+
+    expect(response.status).toBe(409);
+    expect(response.body.error).toMatchObject({ code: "TEMPLATE_IN_USE", message: "This template is used by 1 item. Switch them to another template first." });
   });
 });

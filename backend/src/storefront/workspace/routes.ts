@@ -16,6 +16,7 @@ export interface StorefrontWorkspaceApi {
   createTemplate(storeId: string, input: { type: TemplateType; name: string; handle?: string; layout: Record<string, unknown> }): Promise<unknown>;
   updateTemplate(storeId: string, templateId: string, expectedRevision: number, patch: { name?: string; handle?: string; layout?: Record<string, unknown> }): Promise<unknown>;
   cloneTemplate(storeId: string, sourceTemplateId: string, input: { name: string; handle: string }): Promise<unknown>;
+  deleteTemplate(storeId: string, templateId: string, expectedRevision: number): Promise<unknown>;
 
   listGlobalSections(storeId: string): Promise<unknown[]>;
   getGlobalSection(storeId: string, id: string): Promise<unknown | null>;
@@ -35,6 +36,7 @@ export interface StorefrontWorkspaceApi {
 
   getAssignment(storeId: string, resourceType: AssignableResourceType, resourceId: string): Promise<unknown | null>;
   assignTemplate(storeId: string, input: { resourceType: AssignableResourceType; resourceId: string; templateId: string; expectedRevision: number | null }): Promise<unknown>;
+  removeAssignment(storeId: string, input: { resourceType: AssignableResourceType; resourceId: string; expectedRevision: number }): Promise<unknown>;
 }
 
 const MAX_REVISION = 2_147_483_647;
@@ -57,6 +59,7 @@ const templateUpdateSchema = z.object({
   layout: jsonObjectSchema.optional(),
 }).strip();
 const templateCloneSchema = z.object({ name: z.string().min(1), handle: z.string().min(1) }).strict();
+const revisionOnlySchema = z.object({ expectedRevision: expectedRevisionSchema }).strict();
 
 const globalCreateSchema = z.object({ name: z.string().min(1), section: jsonObjectSchema }).strict();
 const globalUpdateSchema = z.object({
@@ -157,6 +160,13 @@ export function createStorefrontWorkspaceRouter(api: StorefrontWorkspaceApi, aut
     catch (error) { next(error); }
   });
 
+  router.delete("/templates/:templateId", requireStorePermission("storefront:edit"), async (request, response, next) => {
+    try {
+      const { expectedRevision } = revisionOnlySchema.parse(request.body ?? {});
+      response.json(await api.deleteTemplate(storeId(request), String(request.params.templateId), expectedRevision));
+    } catch (error) { next(error); }
+  });
+
   router.get("/global-sections", requireStorePermission("storefront:view"), async (request, response, next) => {
     try { response.json(await api.listGlobalSections(storeId(request))); } catch (error) { next(error); }
   });
@@ -230,6 +240,18 @@ export function createStorefrontWorkspaceRouter(api: StorefrontWorkspaceApi, aut
         resourceId: String(request.params.resourceId),
         templateId: input.templateId,
         expectedRevision: input.expectedRevision,
+      }));
+    } catch (error) { next(error); }
+  });
+
+  router.delete("/assignments/:resourceType/:resourceId", requireStorePermission("storefront:edit"), async (request, response, next) => {
+    try {
+      const resourceType = assignableResourceTypeSchema.parse(request.params.resourceType);
+      const { expectedRevision } = revisionOnlySchema.parse(request.body ?? {});
+      response.json(await api.removeAssignment(storeId(request), {
+        resourceType,
+        resourceId: String(request.params.resourceId),
+        expectedRevision,
       }));
     } catch (error) { next(error); }
   });

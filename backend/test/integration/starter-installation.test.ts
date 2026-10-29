@@ -1,3 +1,4 @@
+import { resolveTheme } from "@jelly/storefront-themes";
 import { describe, expect, it } from "vitest";
 import { mkdtemp, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -125,6 +126,8 @@ describe("V4 starter installation persistence", () => {
     );
     expect(counts.rows[0]).toEqual({ templates: 9, globals: 3, menus: 1, themes: 1, assignments: 0 });
     await expect(database.query(`SELECT "starterPackId", "starterPackVersion", "generation" FROM "StorefrontWorkspace" WHERE "storeId" = 'store-a'`)).resolves.toMatchObject({ rows: [{ starterPackId: "fresh-market", starterPackVersion: "1.0.0", generation: 1 }] });
+    // The theme version is pinned from the theme itself, never from the starter pack's version.
+    await expect(database.query(`SELECT "themeId", "themeVersion" FROM "ThemeConfiguration" WHERE "storeId" = 'store-a'`)).resolves.toMatchObject({ rows: [{ themeId: "fresh-market", themeVersion: resolveTheme("fresh-market").version }] });
 
     const retry = await installer.install("store-a", "fresh-market");
     expect(retry).toMatchObject({ generation: 1, installed: false });

@@ -522,8 +522,16 @@ export const defaultStorefrontWorkspaceApi: StorefrontWorkspaceApi = {
     finally { client.release(); }
   },
 
+  async deleteTemplate() {
+    throw new ApiError(501, "NOT_SUPPORTED", "Deleting templates needs the storefront database.");
+  },
+
   async getAssignment() {
     return null;
+  },
+
+  async removeAssignment() {
+    throw new ApiError(501, "NOT_SUPPORTED", "Removing template assignments needs the storefront database.");
   },
 
   async assignTemplate(

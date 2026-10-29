@@ -3,6 +3,8 @@ import { COMPLETE_STARTER_PACK_IDS, getV4StarterPack, isV4StarterPackId, validat
 import type { SectionNode } from "@jelly/storefront-schema";
 import type { CommerceDatabase, SqlExecutor } from "../../commerce/repository.js";
 import { ApiError } from "../../http/errors.js";
+import { resolveTheme } from "@jelly/storefront-themes";
+import { RETIRED_TEMPLATE_HANDLE_PREFIX } from "../workspace/repositories/template-repository.js";
 
 const heading = (text: string) => ({ type: "heading", attrs: { level: 2 }, content: [{ type: "text", text }] });
 const paragraph = (text: string) => ({ type: "paragraph", content: [{ type: "text", text }] });
@@ -122,7 +124,7 @@ export class StorefrontStarterInstallationService {
         // Retain old templates and shared sections so saved drafts remain inspectable.
         // Publications contain immutable snapshots and are never modified here.
         await sql.query('DELETE FROM "StorefrontTemplateAssignment" WHERE "storeId"=$1', [storeId]);
-        await sql.query(`UPDATE "StorefrontTemplate" SET "handle"='previous-' || substr(md5("id" || $2),1,24), "revision"="revision"+1 WHERE "storeId"=$1 AND "handle"='default'`, [storeId, installationId]);
+        await sql.query(`UPDATE "StorefrontTemplate" SET "handle"=$3 || substr(md5("id" || $2),1,24), "revision"="revision"+1 WHERE "storeId"=$1 AND "handle"='default'`, [storeId, installationId, RETIRED_TEMPLATE_HANDLE_PREFIX]);
         await sql.query(`UPDATE "NavigationMenu" SET "handle"='previous-' || substr(md5("id" || $2),1,24), "revision"="revision"+1 WHERE "storeId"=$1`, [storeId, installationId]);
       }
       const installedGlobalIds = new Map<string, string>();
@@ -155,7 +157,8 @@ export class StorefrontStarterInstallationService {
       await sql.query(
         `INSERT INTO "ThemeConfiguration" ("storeId", "revision", "themeId", "themeVersion", "settings", "draftArtifactId", "updatedAt") VALUES ($1, 0, $2, $3, $4::jsonb, NULL, $5)
          ON CONFLICT ("storeId") DO UPDATE SET "revision"="ThemeConfiguration"."revision"+1,"themeId"=EXCLUDED."themeId","themeVersion"=EXCLUDED."themeVersion","settings"=EXCLUDED."settings","draftArtifactId"=NULL,"updatedAt"=EXCLUDED."updatedAt"`,
-        [storeId, pack.theme.themeId, pack.version, JSON.stringify(pack.theme.settings), now],
+        // Published stores pin the theme's own version; the starter pack's version is tracked on the workspace.
+        [storeId, pack.theme.themeId, resolveTheme(pack.theme.themeId, pack.theme.settings).version, JSON.stringify(pack.theme.settings), now],
       );
       if (COMPLETE_STARTER_PACK_IDS.includes(pack.id)) {
         for (const page of [{ handle: "about", title: "About" }, { handle: "faq", title: "Frequently asked questions" }, { handle: "shipping", title: "Shipping information" }, { handle: "returns", title: "Returns information" }, { handle: "privacy", title: "Privacy policy" }, { handle: "terms", title: "Terms of service" }]) {

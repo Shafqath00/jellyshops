@@ -146,4 +146,18 @@ describe("LocalV4WorkspaceReader", () => {
     await expect(new LocalV4WorkspaceReader(source({ getWorkspace })).load("store-a", 7, "registry-a"))
       .rejects.toEqual(new WorkspaceGenerationConflictError(8));
   });
+
+  it("leaves out templates retired by a store-design switch unless something still uses them", async () => {
+    const retired = (id: string) => ({ id, storeId: "store-a", revision: 1, type: "product" as const, handle: `previous-${id}`, name: "Old product", layout: { sections: [{ kind: "inline", section: { id: `${id}-gone`, type: "removed-section", settings: {} } }] }, createdAt: new Date(0), updatedAt: new Date(0) });
+    const input = await new LocalV4WorkspaceReader(source({
+      listTemplates: vi.fn(async () => [
+        { id: "home-default", storeId: "store-a", revision: 0, type: "home" as const, handle: "default", name: "Home", layout: { sections: [] }, createdAt: new Date(0), updatedAt: new Date(0) },
+        retired("old-unused"),
+        retired("old-assigned"),
+      ]),
+      listAssignments: vi.fn(async () => [{ storeId: "store-a", resourceType: "product" as const, resourceId: "product-a", revision: 0, templateId: "old-assigned", updatedAt: new Date(0) }]),
+    })).load("store-a", 7, "registry-a");
+
+    expect(input.templates.map(({ id }) => id)).toEqual(["home-default", "old-assigned"]);
+  });
 });

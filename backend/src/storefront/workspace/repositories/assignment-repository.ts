@@ -41,4 +41,9 @@ export interface AssignmentRepository {
     transaction: WorkspaceTransaction,
     input: UpsertAssignmentInput,
   ): Promise<TemplateAssignmentRecord>;
+  /** Returns false when there was no assignment to remove. */
+  deleteAssignment(
+    transaction: WorkspaceTransaction,
+    input: Omit<UpsertAssignmentInput, "templateId" | "expectedRevision"> & { expectedRevision: number },
+  ): Promise<boolean>;
 }

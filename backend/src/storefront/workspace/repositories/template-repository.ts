@@ -16,6 +16,13 @@ export const templateTypes = [
 export type TemplateType = typeof templateTypes[number];
 export type TemplateLayout = Record<string, unknown>;
 
+/** Handle given to templates set aside when a merchant installs another store design. */
+export const RETIRED_TEMPLATE_HANDLE_PREFIX = "previous-";
+
+export function isRetiredTemplateHandle(handle: string): boolean {
+  return handle.startsWith(RETIRED_TEMPLATE_HANDLE_PREFIX);
+}
+
 export interface StorefrontTemplateRecord {
   id: string;
   storeId: string;
@@ -66,5 +73,16 @@ export interface TemplateRepository {
     storeId: string,
     sourceTemplateId: string,
     input: CloneTemplateRecordInput,
+  ): Promise<StorefrontTemplateRecord | null>;
+  countAssignments(
+    transaction: WorkspaceTransaction,
+    storeId: string,
+    templateId: string,
+  ): Promise<number>;
+  deleteTemplate(
+    transaction: WorkspaceTransaction,
+    storeId: string,
+    templateId: string,
+    expectedRevision: number,
   ): Promise<StorefrontTemplateRecord | null>;
 }
