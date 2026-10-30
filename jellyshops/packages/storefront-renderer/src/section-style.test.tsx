@@ -6,7 +6,7 @@ import { sectionStyleProps } from "./section-style";
 it("turns style settings into section variables", () => {
   const props = sectionStyleProps({ styleColors: true, styleBackground: "#112233", styleText: "#fafafa", styleHeadingFont: "Fraunces", styleHeadingSize: "large", styleHeadingWeight: "700", styleBodySize: "small", styleAlign: "center", styleSpacing: "none" });
   expect(props["data-section-style"]).toBe("colors heading-font heading-size heading-weight body-size align spacing");
-  expect(props.style).toMatchObject({ "--section-bg": "#112233", "--section-text": "#fafafa", "--section-heading-scale": "1.2", "--section-heading-weight": "700", "--section-body-size": "14px", "--section-body-scale": "0.9", "--section-align": "center", "--section-space": "0px" });
+  expect(props.style).toMatchObject({ "--section-bg": "#112233", "--section-text": "#fafafa", "--section-heading-scale": "1.2", "--section-heading-weight": "700", "--section-body-size": "14px", "--section-body-scale": "0.9", "--section-align": "center", "--section-justify": "center", "--section-space": "0px" });
   expect(String((props.style as Record<string, string>)["--section-heading-font"])).toContain("--font-fraunces");
 });
 

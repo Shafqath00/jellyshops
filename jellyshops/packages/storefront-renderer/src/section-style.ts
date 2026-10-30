@@ -39,7 +39,7 @@ export function sectionStyleProps(settings: Record<string, unknown> | undefined)
   if (weights.has(text("styleHeadingWeight"))) { vars["--section-heading-weight"] = text("styleHeadingWeight"); used.push("heading-weight"); }
   if (fonts.has(text("styleBodyFont"))) { vars["--section-body-font"] = fontStack(text("styleBodyFont"), "Arial"); used.push("body-font"); }
   if (bodySize[text("styleBodySize")]) { vars["--section-body-size"] = bodySize[text("styleBodySize")]; vars["--section-body-scale"] = bodyScale[text("styleBodySize")]; used.push("body-size"); }
-  if (alignments.has(text("styleAlign"))) { vars["--section-align"] = text("styleAlign"); used.push("align"); }
+  if (alignments.has(text("styleAlign"))) { vars["--section-align"] = text("styleAlign"); vars["--section-justify"] = { left: "start", center: "center", right: "end" }[text("styleAlign")] as string; used.push("align"); }
   if (spacing[text("styleSpacing")]) { vars["--section-space"] = spacing[text("styleSpacing")]; used.push("spacing"); }
 
   return used.length ? { "data-section-style": used.join(" "), style: vars as CSSProperties } : {};

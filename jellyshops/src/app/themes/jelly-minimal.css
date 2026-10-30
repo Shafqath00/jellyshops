@@ -871,6 +871,9 @@
 [data-jelly-theme="jelly-signature"] [data-section-style~="spacing"] { --jm-section: var(--section-space); }
 [data-jelly-theme="jelly-signature"] [data-section-style~="align"] :is(.jelly-section-intro, .jelly-section-intro > *) { justify-items: var(--section-align); justify-self: var(--section-align); }
 
+[data-jelly-theme="jelly-signature"] [data-section-style~="align"] :is(.jelly-section-actions, .jelly-eyebrow) { justify-content: var(--section-justify); justify-self: var(--section-justify); }
+[data-jelly-theme="jelly-signature"] [data-section-style~="align"] :is([class*="-content"], .jelly-section-intro) { justify-items: var(--section-justify); }
+
 /* 13 ── Formatted section text (rich text settings such as intros, answers, footer text) ── */
 /* Short formatted text inside a section reads like the paragraph it replaces, not like a long article. */
 [data-jelly-theme="jelly-signature"] .jelly-setting-text > :first-child { margin-top: 0; }
