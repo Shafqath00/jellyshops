@@ -6,6 +6,7 @@ import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
 import { choice, headingHidden, imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
 import { formattedSetting, SettingText } from "./setting-text";
+import { blockStyleProps } from "../block-style";
 
 function text(section: SectionNode, fallback: string): string {
   const setting = section.settings.heading ?? section.settings.text;
@@ -25,9 +26,11 @@ function blockCopy(section: SectionNode, fallbackHeading: string) {
     heading: stringValue(heading?.settings, "text", stringValue(section.settings, "heading", fallbackHeading)),
     body: stringValue(body?.settings, "text", stringValue(section.settings, "body", stringValue(section.settings, "text"))),
     bodyDocument: stringValue(body?.settings, "text") ? formattedSetting(body?.settings, "text") : stringValue(section.settings, "body") ? null : formattedSetting(section.settings, "text"),
+    headingProps: blockStyleProps(heading?.settings),
+    bodyProps: blockStyleProps(body?.settings),
     buttons: buttons.flatMap((block) => {
       const label = stringValue(block.settings, "label");
-      return label ? [{ id: block.id, label, href: block.settings.href }] : [];
+      return label ? [{ id: block.id, label, href: block.settings.href, props: blockStyleProps(block.settings) }] : [];
     }),
   };
 }
@@ -38,7 +41,7 @@ function Actions({ buttons, storeSlug }: { buttons: ReturnType<typeof blockCopy>
     return href ? [{ ...button, href }] : [];
   });
   if (!links.length) return null;
-  return <div className="jelly-section-actions">{links.map((button, index) => <a key={button.id} className={index === 0 ? "jelly-button" : "jelly-button jelly-button--secondary"} href={button.href}>{button.label}</a>)}</div>;
+  return <div className="jelly-section-actions">{links.map((button, index) => <a key={button.id} className={index === 0 ? "jelly-button" : "jelly-button jelly-button--secondary"} href={button.href} {...button.props}>{button.label}</a>)}</div>;
 }
 
 export function AnnouncementBarSection({ section }: { section: SectionNode }) {
@@ -63,8 +66,8 @@ export function ImageWithTextSection({ section, context }: { section: SectionNod
         </div>}
         <div className="jelly-image-text-content">
           {eyebrow && <p className="jelly-eyebrow">{eyebrow}</p>}
-          <h2>{content.heading}</h2>
-          <SettingText text={content.body} document={content.bodyDocument} />
+          <h2 {...content.headingProps}>{content.heading}</h2>
+          <SettingText text={content.body} document={content.bodyDocument} {...content.bodyProps} />
           <Actions buttons={content.buttons} storeSlug={context.storeSlug} />
         </div>
       </div>
@@ -87,8 +90,8 @@ export function ImageBannerSection({ section, context }: { section: SectionNode;
       {overlay > 0 && <span className="jelly-image-banner-overlay" aria-hidden="true" style={{ background: `rgba(0, 0, 0, ${overlay})` }} />}
     </>}
     <StorefrontContainer className="jelly-image-banner-content">
-      {content.heading && <h2>{content.heading}</h2>}
-      <SettingText text={content.body} document={content.bodyDocument} />
+      {content.heading && <h2 {...content.headingProps}>{content.heading}</h2>}
+      <SettingText text={content.body} document={content.bodyDocument} {...content.bodyProps} />
       <Actions buttons={content.buttons} storeSlug={context.storeSlug} />
     </StorefrontContainer>
   </section>;
@@ -103,7 +106,7 @@ export function MulticolumnSection({ section, context }: { section: SectionNode;
   const count = numberValue(section.settings, "columns", 3, 2, 4);
   return <section className="jelly-section jelly-multicolumn" {...sectionData(section, { "data-align": choice(section.settings, "contentAlignment", ["left", "center", "right"] as const, "left") })}>
     <StorefrontContainer>
-      {!headingHidden(section) && <div className="jelly-section-intro"><h2>{content.heading}</h2><SettingText text={content.body} document={content.bodyDocument} /></div>}
+      {!headingHidden(section) && <div className="jelly-section-intro"><h2 {...content.headingProps}>{content.heading}</h2><SettingText text={content.body} document={content.bodyDocument} {...content.bodyProps} /></div>}
       {columns.length > 0 && <div className="jelly-multicolumn-grid" style={{ "--jelly-columns": count } as CSSProperties}>
         {columns.map((column) => <article key={column.id}><h3>{column.heading}</h3><SettingText text={column.text} document={column.document} /></article>)}
       </div>}
@@ -146,8 +149,8 @@ export function NewsletterSection({ section, subscribe, mode = "preview" }: { se
   const content = blockCopy(section, "Join our newsletter");
   const buttonLabel = stringValue(section.settings, "buttonLabel", "Subscribe");
   return <section className="jelly-section jelly-newsletter" {...sectionData(section, { "data-align": choice(section.settings, "contentAlignment", ["left", "center", "right"] as const, "left") })}><StorefrontContainer>
-    <h2>{content.heading}</h2>
-    <SettingText className="jelly-newsletter-text" text={content.body} document={content.bodyDocument} />
+    <h2 {...content.headingProps}>{content.heading}</h2>
+    <SettingText {...content.bodyProps} className="jelly-newsletter-text" text={content.body} document={content.bodyDocument} />
     <NewsletterForm source={section.id} buttonLabel={buttonLabel} subscribe={subscribe} mode={mode} />
   </StorefrontContainer></section>;
 }

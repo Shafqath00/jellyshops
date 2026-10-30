@@ -93,5 +93,13 @@
 :where([data-section-style~="body-font"]) { font-family: var(--section-body-font); }
 :where([data-section-style~="body-size"]) { font-size: var(--section-body-size); }
 :where([data-section-style~="align"]) { text-align: var(--section-align); }
+:where([data-section-style~="pad-top"]) > :where(*) { padding-top: var(--section-pad-top); }
+:where([data-section-style~="pad-bottom"]) > :where(*) { padding-bottom: var(--section-pad-bottom); }
+:where([data-type-preset="h1"]) { font-size: 2.5rem; }
+:where([data-type-preset="h2"]) { font-size: 2rem; }
+:where([data-type-preset="h3"]) { font-size: 1.5rem; }
+:where([data-type-preset="h4"]) { font-size: 1.25rem; }
+:where([data-type-preset="body"]) { font-size: 1rem; }
+:where([data-type-preset="small"]) { font-size: 0.875rem; }
 :where(.jelly-setting-text) > :where(:first-child) { margin-top: 0; }
 :where(.jelly-setting-text) > :where(:last-child) { margin-bottom: 0; }

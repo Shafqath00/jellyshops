@@ -1,6 +1,7 @@
 import { resolveRichTextDocument, safeRichTextHref, type RichTextBlock, type RichTextInline, type SectionNode } from "@jelly/storefront-schema";
-import type { ReactNode } from "react";
+import { cloneElement, isValidElement, type ReactNode } from "react";
 import { StorefrontContainer } from "@jelly/storefront-ui";
+import { blockStyleProps } from "../block-style";
 
 function renderInline(content: RichTextInline[]): ReactNode[] {
   return content.map((node, index) => {
@@ -35,5 +36,13 @@ export function renderBlocks(blocks: RichTextBlock[]): ReactNode[] {
 
 export function RichTextSection({ section }: { section: SectionNode }) {
   const document = resolveRichTextDocument(section);
-  return <section className="jelly-section jelly-rich-text"><StorefrontContainer>{renderBlocks(document.content)}</StorefrontContainer></section>;
+  // Without a saved document, each paragraph comes from one text block (in order), so it takes that block's style settings.
+  const sourceBlocks = Object.prototype.hasOwnProperty.call(section.settings, "document")
+    ? []
+    : section.blocks.filter((block) => block.enabled && typeof block.settings.text === "string");
+  const rendered = renderBlocks(document.content).map((node, index) => {
+    const props = sourceBlocks.length === document.content.length ? blockStyleProps(sourceBlocks[index].settings) : {};
+    return Object.keys(props).length && isValidElement(node) ? cloneElement(node, props) : node;
+  });
+  return <section className="jelly-section jelly-rich-text"><StorefrontContainer>{rendered}</StorefrontContainer></section>;
 }

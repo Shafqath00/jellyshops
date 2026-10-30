@@ -31,3 +31,11 @@ it("puts the style on the section wrapper in the editor and the live store", () 
     unmount();
   }
 });
+
+it("uses exact top and bottom padding and full width when chosen", () => {
+  const props = sectionStyleProps({ stylePaddingTop: 24, stylePaddingBottom: 0, styleWidth: "full" });
+  expect(props["data-section-style"]).toBe("pad-top pad-bottom full-width");
+  expect(props.style).toMatchObject({ "--section-pad-top": "24px", "--section-pad-bottom": "0px" });
+  expect(sectionStyleProps({ stylePaddingTop: 900 }).style).toMatchObject({ "--section-pad-top": "200px" });
+  expect(sectionStyleProps({ stylePaddingTop: "10px", styleWidth: "page" })).toEqual({});
+});

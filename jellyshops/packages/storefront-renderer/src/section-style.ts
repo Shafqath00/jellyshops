@@ -41,6 +41,13 @@ export function sectionStyleProps(settings: Record<string, unknown> | undefined)
   if (bodySize[text("styleBodySize")]) { vars["--section-body-size"] = bodySize[text("styleBodySize")]; vars["--section-body-scale"] = bodyScale[text("styleBodySize")]; used.push("body-size"); }
   if (alignments.has(text("styleAlign"))) { vars["--section-align"] = text("styleAlign"); vars["--section-justify"] = { left: "start", center: "center", right: "end" }[text("styleAlign")] as string; used.push("align"); }
   if (spacing[text("styleSpacing")]) { vars["--section-space"] = spacing[text("styleSpacing")]; used.push("spacing"); }
+  // Exact padding (px) wins over the named spacing for its side.
+  const pad = (key: string) => typeof settings[key] === "number" && Number.isFinite(settings[key]) ? Math.min(200, Math.max(0, Math.round(settings[key] as number))) : undefined;
+  const top = pad("stylePaddingTop");
+  const bottom = pad("stylePaddingBottom");
+  if (top !== undefined) { vars["--section-pad-top"] = `${top}px`; used.push("pad-top"); }
+  if (bottom !== undefined) { vars["--section-pad-bottom"] = `${bottom}px`; used.push("pad-bottom"); }
+  if (settings.styleWidth === "full") used.push("full-width");
 
   return used.length ? { "data-section-style": used.join(" "), style: vars as CSSProperties } : {};
 }

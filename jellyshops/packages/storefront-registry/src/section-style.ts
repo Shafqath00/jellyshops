@@ -15,6 +15,7 @@ export const SECTION_HEADING_WEIGHTS = ["300", "400", "500", "600", "700"] as co
 export const SECTION_BODY_SIZES = ["small", "regular", "large"] as const;
 export const SECTION_ALIGNMENTS = ["left", "center", "right"] as const;
 export const SECTION_SPACINGS = ["none", "small", "large"] as const;
+export const SECTION_WIDTHS = ["page", "full"] as const;
 
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 /** Empty string means "use the theme's choice"; the editor's select lists it as "Theme default". */
@@ -31,6 +32,9 @@ export const sectionStyleSchema = z.object({
   styleBodySize: optional(SECTION_BODY_SIZES),
   styleAlign: optional(SECTION_ALIGNMENTS),
   styleSpacing: optional(SECTION_SPACINGS),
+  styleWidth: optional(SECTION_WIDTHS),
+  stylePaddingTop: z.number().int().min(0).max(200).optional(),
+  stylePaddingBottom: z.number().int().min(0).max(200).optional(),
 }).passthrough();
 
 export type SectionStyleSettings = z.infer<typeof sectionStyleSchema>;
@@ -39,16 +43,19 @@ const themeDefault = { label: "Theme default", value: "" };
 const fonts = [themeDefault, ...SECTION_FONT_CHOICES.map((font) => ({ label: font, value: font }))];
 
 export const SECTION_STYLE_CONTROLS: ControlDefinition[] = [
-  { type: "checkbox", key: "styleColors", label: "Use my own colours", description: "Turn on to choose this section's background and text colours.", group: "style" },
-  { type: "color", key: "styleBackground", label: "Background colour", group: "style", allowAlpha: false },
-  { type: "color", key: "styleText", label: "Text colour", group: "style", allowAlpha: false },
-  { type: "select", key: "styleHeadingFont", label: "Heading font", group: "style", options: fonts },
-  { type: "select", key: "styleHeadingSize", label: "Heading size", group: "style", options: [themeDefault, { label: "Small", value: "small" }, { label: "Medium", value: "medium" }, { label: "Large", value: "large" }, { label: "Extra large", value: "x-large" }] },
-  { type: "select", key: "styleHeadingWeight", label: "Heading weight", group: "style", options: [themeDefault, { label: "Light", value: "300" }, { label: "Regular", value: "400" }, { label: "Medium", value: "500" }, { label: "Semibold", value: "600" }, { label: "Bold", value: "700" }] },
-  { type: "select", key: "styleBodyFont", label: "Text font", group: "style", options: fonts },
-  { type: "select", key: "styleBodySize", label: "Text size", group: "style", options: [themeDefault, { label: "Small", value: "small" }, { label: "Regular", value: "regular" }, { label: "Large", value: "large" }] },
-  { type: "select", key: "styleAlign", label: "Text alignment", group: "style", options: [themeDefault, { label: "Left", value: "left" }, { label: "Centre", value: "center" }, { label: "Right", value: "right" }] },
-  { type: "select", key: "styleSpacing", label: "Space above and below", group: "style", options: [themeDefault, { label: "None", value: "none" }, { label: "Small", value: "small" }, { label: "Large", value: "large" }] },
+  { type: "checkbox", key: "styleColors", label: "Use my own colours", description: "Turn on to choose this section's background and text colours.", group: "style", heading: "Appearance" },
+  { type: "color", key: "styleBackground", label: "Background colour", group: "style", heading: "Appearance", allowAlpha: false, showWhen: { key: "styleColors", equals: true } },
+  { type: "color", key: "styleText", label: "Text colour", group: "style", heading: "Appearance", allowAlpha: false, showWhen: { key: "styleColors", equals: true } },
+  { type: "select", key: "styleHeadingFont", label: "Heading font", group: "style", heading: "Typography", options: fonts },
+  { type: "select", key: "styleHeadingSize", label: "Heading size", group: "style", heading: "Typography", options: [themeDefault, { label: "Small", value: "small" }, { label: "Medium", value: "medium" }, { label: "Large", value: "large" }, { label: "Extra large", value: "x-large" }] },
+  { type: "select", key: "styleHeadingWeight", label: "Heading weight", group: "style", heading: "Typography", options: [themeDefault, { label: "Light", value: "300" }, { label: "Regular", value: "400" }, { label: "Medium", value: "500" }, { label: "Semibold", value: "600" }, { label: "Bold", value: "700" }] },
+  { type: "select", key: "styleBodyFont", label: "Text font", group: "style", heading: "Typography", options: fonts },
+  { type: "select", key: "styleBodySize", label: "Text size", group: "style", heading: "Typography", options: [themeDefault, { label: "Small", value: "small" }, { label: "Regular", value: "regular" }, { label: "Large", value: "large" }] },
+  { type: "select", key: "styleAlign", label: "Text alignment", group: "layout", heading: "Layout", options: [themeDefault, { label: "Left", value: "left" }, { label: "Centre", value: "center" }, { label: "Right", value: "right" }] },
+  { type: "segmented", key: "styleWidth", label: "Width", group: "layout", heading: "Layout", options: [{ label: "Page", value: "page" }, { label: "Full", value: "full" }] },
+  { type: "select", key: "styleSpacing", label: "Space above and below", group: "style", heading: "Padding", description: "Or set exact sizes below.", options: [themeDefault, { label: "None", value: "none" }, { label: "Small", value: "small" }, { label: "Large", value: "large" }] },
+  { type: "range", key: "stylePaddingTop", label: "Top", group: "style", heading: "Padding", min: 0, max: 200, step: 4, unit: "px" },
+  { type: "range", key: "stylePaddingBottom", label: "Bottom", group: "style", heading: "Padding", min: 0, max: 200, step: 4, unit: "px" },
 ];
 
 const styleKeys = new Set(SECTION_STYLE_CONTROLS.map((control) => control.key));

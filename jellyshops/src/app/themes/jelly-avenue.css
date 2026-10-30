@@ -1152,3 +1152,17 @@
 [data-jelly-theme="jelly-avenue"] .jelly-setting-text :is(p, ul, ol) { margin: 0 0 0.75em; color: inherit; line-height: inherit; }
 [data-jelly-theme="jelly-avenue"] .jelly-setting-text :is(h2, h3) { margin: 1em 0 0.4em; font-size: var(--av-h4); }
 [data-jelly-theme="jelly-avenue"] .jelly-setting-text :is(ul, ol) { padding-left: 1.25em; }
+
+/* 14 ── Block style and exact section padding (editor "Layout", "Typography", "Padding" settings) ── */
+/* Blocks carry their colours, borders and padding inline; only the text styles need the theme's tokens.
+   A chosen text style is the merchant's explicit choice, so it beats the section's own heading rules. */
+[data-jelly-theme="jelly-avenue"] [data-type-preset^="h"] { font-family: var(--av-font-heading) !important; font-weight: var(--av-heading-weight) !important; line-height: 1.1 !important; letter-spacing: -0.01em !important; }
+[data-jelly-theme="jelly-avenue"] [data-type-preset="h1"] { font-size: var(--av-h1) !important; }
+[data-jelly-theme="jelly-avenue"] [data-type-preset="h2"] { font-size: var(--av-h2) !important; }
+[data-jelly-theme="jelly-avenue"] [data-type-preset="h3"] { font-size: var(--av-h3) !important; }
+[data-jelly-theme="jelly-avenue"] [data-type-preset="h4"] { font-size: var(--av-h4) !important; }
+[data-jelly-theme="jelly-avenue"] [data-type-preset="body"] { font-family: var(--av-font-body) !important; font-size: var(--av-text-base) !important; font-weight: 400 !important; line-height: 1.6 !important; letter-spacing: 0 !important; text-transform: none !important; }
+[data-jelly-theme="jelly-avenue"] [data-type-preset="small"] { font-family: var(--av-font-body) !important; font-size: var(--av-text-sm) !important; font-weight: 400 !important; line-height: 1.5 !important; letter-spacing: 0 !important; text-transform: none !important; }
+[data-jelly-theme="jelly-avenue"] [data-section-style~="pad-top"] > * { padding-top: var(--section-pad-top); margin-top: 0; }
+[data-jelly-theme="jelly-avenue"] [data-section-style~="pad-bottom"] > * { padding-bottom: var(--section-pad-bottom); margin-bottom: 0; }
+[data-jelly-theme="jelly-avenue"] [data-section-style~="full-width"] .jelly-container { width: calc(100% - 2 * var(--av-gutter)); max-width: none; }

@@ -7,6 +7,10 @@ export interface SectionPreset { id: string; label: string; category: PresetCate
 interface ControlBase {
   key: string;
   label: string;
+  /** Sub-heading the editor shows above this control (e.g. "Padding"), like Shopify's setting groups. */
+  heading?: string;
+  /** Shows the control only while another setting has this value. */
+  showWhen?: { key: string; equals: unknown };
   group: ControlGroup;
   responsive?: boolean;
   dynamicTypes?: DynamicValueType[];

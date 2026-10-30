@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { settingValueSchema, type DynamicValueType } from "@jelly/storefront-schema";
+import { withBlockStyle } from "./block-style.js";
 import type { BlockDefinition } from "./types.js";
 
 const dynamicString = z.union([z.string(), settingValueSchema(z.string())]);
@@ -32,4 +33,5 @@ const blocks: BlockDefinition[] = [
   { type: "social-link", settingsSchema: z.object({ label: z.string(), href: z.union([z.string(), settingValueSchema(z.string())]) }).passthrough(), controls: [{ type: "link", key: "href", label: "Link", group: "content", dynamicTypes: urlTypes }], defaultSettings: { label: "Instagram", href: "https://example.com" } }
 ];
 
-export const blockDefinitions = new Map(blocks.map((definition) => [definition.type, definition]));
+// Heading, text and button blocks get the shared style settings (layout, typography, colours, borders, padding).
+export const blockDefinitions = new Map(blocks.map(withBlockStyle).map((definition) => [definition.type, definition]));

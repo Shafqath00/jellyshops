@@ -3,6 +3,7 @@ import type { SectionNode } from "@jelly/storefront-schema";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
+import { blockStyleProps } from "../block-style";
 import { choice, imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
 
 function setting(block: SectionNode["blocks"][number], key: string): string | undefined {
@@ -42,12 +43,12 @@ export function HeroSection({ section, editor = false, context }: { section: Sec
         {blocks.filter((block) => block.type !== "button").map((block) => {
           const text = setting(block, "text");
           if (!text) return null;
-          return block.type === "heading" ? <h1 key={block.id} {...editorProps(block)}>{text}</h1> : <p key={block.id} {...editorProps(block)}>{text}</p>;
+          return block.type === "heading" ? <h1 key={block.id} {...blockStyleProps(block.settings)} {...editorProps(block)}>{text}</h1> : <p key={block.id} {...blockStyleProps(block.settings)} {...editorProps(block)}>{text}</p>;
         })}
         {summary && <p className="jelly-hero-summary">{summary}</p>}
         {typeof settings.body === "string" && settings.body && <div className="jelly-hero-body">{settings.body}</div>}
         {buttons.length > 0 && <div className="jelly-hero-actions">{buttons.map(({ block, label, href }, index) => href
-          ? <a className={index === 0 ? "jelly-button" : "jelly-button jelly-button--secondary"} href={href} key={block.id} {...editorProps(block)}>{label}</a>
+          ? <a className={index === 0 ? "jelly-button" : "jelly-button jelly-button--secondary"} href={href} key={block.id} {...blockStyleProps(block.settings)} {...editorProps(block)}>{label}</a>
           : <span key={block.id} {...editorProps(block)}>{label}</span>)}</div>}
       </div>
       {image && layout !== "text" && <div className="jelly-hero-media">

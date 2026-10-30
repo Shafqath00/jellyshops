@@ -5,6 +5,7 @@ import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
 import type { RendererMode } from "../types";
 import { choice, headingHidden, imageValue, numberValue, sectionData, visibleBlocks } from "./shared";
+import { blockStyleProps } from "../block-style";
 
 function stringSetting(settings: Record<string, unknown>, key: string, fallback = ""): string {
   const value = settings[key];
@@ -26,15 +27,18 @@ function copy(section: SectionNode, fallbackHeading: string) {
     body: stringSetting(body?.settings ?? section.settings, "text", stringSetting(section.settings, "text")),
     button: stringSetting(button?.settings ?? section.settings, "label"),
     href: stringSetting(button?.settings ?? section.settings, "href", "/shop"),
+    headingProps: blockStyleProps(heading?.settings),
+    bodyProps: blockStyleProps(body?.settings),
+    buttonProps: blockStyleProps(button?.settings),
   };
 }
 
 function SectionIntro({ section, fallback }: { section: SectionNode; fallback: string }) {
   const content = copy(section, fallback);
   return <div className="jelly-section-intro">
-    <h2>{content.heading}</h2>
-    {content.body && <p>{content.body}</p>}
-    {content.button && <a className="jelly-button" href={content.href}>{content.button}</a>}
+    <h2 {...content.headingProps}>{content.heading}</h2>
+    {content.body && <p {...content.bodyProps}>{content.body}</p>}
+    {content.button && <a className="jelly-button" href={content.href} {...content.buttonProps}>{content.button}</a>}
   </div>;
 }
 
@@ -88,7 +92,7 @@ export function ImageMosaicSection({ section }: { section: SectionNode }) {
   const content = copy(section, "A closer look");
   const imageStyle: CSSProperties | undefined = image ? { backgroundImage: `url(${image.url})` } : undefined;
   return <section className="jelly-section jelly-image-mosaic"><StorefrontContainer><div className="jelly-image-mosaic-grid">
-    <div className="jelly-mosaic-panel jelly-mosaic-copy"><h2>{content.heading}</h2>{content.body && <p>{content.body}</p>}{content.button && <a className="jelly-button" href={content.href}>{content.button}</a>}</div>
+    <div className="jelly-mosaic-panel jelly-mosaic-copy"><h2 {...content.headingProps}>{content.heading}</h2>{content.body && <p {...content.bodyProps}>{content.body}</p>}{content.button && <a className="jelly-button" href={content.href} {...content.buttonProps}>{content.button}</a>}</div>
     <div className="jelly-mosaic-panel jelly-mosaic-image" style={imageStyle}>{!image && <span>Our process, in detail</span>}</div>
     <div className="jelly-mosaic-panel jelly-mosaic-note"><span>Made for slow moments</span></div>
   </div></StorefrontContainer></section>;
@@ -112,12 +116,12 @@ export function CartSummarySection({ section, context }: { section: SectionNode;
   const shippingNote = typeof data.shippingNote === "string" ? data.shippingNote : "Shipping is calculated at checkout.";
   const count = lines.reduce((sum, line) => sum + line.quantity, 0);
   if (!lines.length) return <section className="jelly-section jelly-cart-summary" data-empty="true"><StorefrontContainer><div className="jelly-cart-empty">
-    <h1>{content.heading}</h1>
-    <p>{content.body || "Your bag is empty. Find something you love and it will appear here."}</p>
+    <h1 {...content.headingProps}>{content.heading}</h1>
+    <p {...content.bodyProps}>{content.body || "Your bag is empty. Find something you love and it will appear here."}</p>
     <a className="jelly-button" href={shopHref}>Continue shopping</a>
   </div></StorefrontContainer></section>;
   return <section className="jelly-section jelly-cart-summary"><StorefrontContainer>
-    <header className="jelly-cart-header"><h1>{content.heading}</h1><p>{count === 1 ? "1 item" : `${count} items`}</p></header>
+    <header className="jelly-cart-header"><h1 {...content.headingProps}>{content.heading}</h1><p>{count === 1 ? "1 item" : `${count} items`}</p></header>
     <div className="jelly-cart-layout">
       <ul className="jelly-cart-lines">{lines.map((line) => <li key={line.id} className="jelly-cart-line">
         <span className="jelly-cart-line-media">{/* eslint-disable-next-line @next/next/no-img-element */}{line.imageUrl ? <img src={line.imageUrl} alt="" loading="lazy" /> : null}</span>
@@ -155,8 +159,8 @@ export function SearchResultsSection({ section, context }: { section: SectionNod
   const results = search?.results ?? [];
   const action = search?.searchHref ?? (context.storeSlug ? `/${context.storeSlug}/search` : "/search");
   return <section className="jelly-section jelly-search-results"><StorefrontContainer><div className="jelly-search-shell">
-    <h1>{content.heading}</h1>
-    {content.body && <p>{content.body}</p>}
+    <h1 {...content.headingProps}>{content.heading}</h1>
+    {content.body && <p {...content.bodyProps}>{content.body}</p>}
     <form action={action} role="search"><label htmlFor="storefront-search">Search products</label><div><input id="storefront-search" type="search" name="q" defaultValue={query} placeholder="What are you looking for?" /><button type="submit">Search</button></div></form>
     {search?.state === "empty" && <p className="jelly-search-status">Enter a word or two to find products.</p>}
     {search?.state === "none" && <p className="jelly-search-status">No products match “{query}”. Check the spelling or try a broader word.</p>}
@@ -169,5 +173,5 @@ export function SearchResultsSection({ section, context }: { section: SectionNod
 export function NotFoundMessageSection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
   const content = copy(section, "We couldn't find that page");
   const href = resolveStorefrontHref(content.href, context.storeSlug);
-  return <section className="jelly-section jelly-not-found"><StorefrontContainer><div><p className="jelly-eyebrow">404</p><h1>{content.heading}</h1><p>{content.body || "The page may have moved, but there is plenty more to discover."}</p>{href && <a className="jelly-button" href={href}>{content.button || "Back to the shop"}</a>}</div></StorefrontContainer></section>;
+  return <section className="jelly-section jelly-not-found"><StorefrontContainer><div><p className="jelly-eyebrow">404</p><h1 {...content.headingProps}>{content.heading}</h1><p {...content.bodyProps}>{content.body || "The page may have moved, but there is plenty more to discover."}</p>{href && <a className="jelly-button" href={href}>{content.button || "Back to the shop"}</a>}</div></StorefrontContainer></section>;
 }
