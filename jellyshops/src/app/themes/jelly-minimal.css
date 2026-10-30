@@ -901,3 +901,9 @@
 /* A section using a colour scheme gets the scheme's button colours. */
 [data-jelly-theme="jelly-signature"] [data-section-style~="scheme"],
 [data-jelly-theme="jelly-signature"] [data-section-style~="scheme"] [data-color-scheme] { --jm-ink: var(--section-button); --jm-ink-contrast: var(--section-button-text); }
+
+/* 16 ── Custom content section, image and video blocks ──────────────────── */
+[data-jelly-theme="jelly-signature"] .jelly-custom-content h2 { font-family: var(--jm-font-heading); font-size: var(--jm-h2); font-weight: var(--jm-heading-weight); line-height: 1.1; }
+[data-jelly-theme="jelly-signature"] .jelly-custom-content-inner > :is(p, .jelly-setting-text) { max-width: 60ch; color: var(--jm-muted); }
+[data-jelly-theme="jelly-signature"] :is(.jelly-image-block, .jelly-video-block) { border-radius: var(--jm-radius-card); }
+[data-jelly-theme="jelly-signature"] .jelly-image-block { background: var(--jm-surface); }

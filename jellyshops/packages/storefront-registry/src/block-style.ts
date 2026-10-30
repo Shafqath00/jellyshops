@@ -11,7 +11,10 @@ import type { BlockDefinition, ControlDefinition } from "./types.js";
 
 export const BLOCK_TYPE_PRESETS = ["h1", "h2", "h3", "h4", "body", "small"] as const;
 export const BLOCK_MAX_WIDTHS = ["narrow", "normal", "wide", "none"] as const;
-export const STYLED_BLOCK_TYPES = ["heading", "text", "button"] as const;
+export const STYLED_BLOCK_TYPES = ["heading", "text", "button", "image", "video"] as const;
+/** Buttons and media have no text style, text colour or background of their own (buttons have their own colours). */
+const TEXT_ONLY_KEYS = new Set(["blockTypePreset", "blockTextColor", "blockBackground", "blockBackgroundColor"]);
+const TEXT_BLOCK_TYPES = new Set(["heading", "text"]);
 
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 const empty = z.literal("");
@@ -64,13 +67,13 @@ export function isBlockStyleKey(key: string): boolean {
   return styleKeys.has(key);
 }
 
-/** Adds the shared style controls to heading, text and button blocks; other blocks are returned unchanged. */
+/** Adds the shared style controls to heading, text, button, image and video blocks; other blocks are returned unchanged. */
 export function withBlockStyle(definition: BlockDefinition): BlockDefinition {
   if (!styledTypes.has(definition.type)) return definition;
   const own = new Set(definition.controls.map((control) => control.key));
   return {
     ...definition,
-    controls: [...definition.controls, ...BLOCK_STYLE_CONTROLS.filter((control) => !own.has(control.key))],
+    controls: [...definition.controls, ...BLOCK_STYLE_CONTROLS.filter((control) => !own.has(control.key) && (TEXT_BLOCK_TYPES.has(definition.type) || !TEXT_ONLY_KEYS.has(control.key)))],
     settingsSchema: z.intersection(definition.settingsSchema, blockStyleSchema),
   };
 }

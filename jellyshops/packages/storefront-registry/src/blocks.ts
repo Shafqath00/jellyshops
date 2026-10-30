@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { settingValueSchema, type DynamicValueType } from "@jelly/storefront-schema";
 import { withBlockStyle } from "./block-style.js";
-import type { BlockDefinition } from "./types.js";
+import type { BlockDefinition, ControlDefinition } from "./types.js";
 
 const dynamicString = z.union([z.string(), settingValueSchema(z.string())]);
 const text = z.object({ text: dynamicString }).passthrough();
@@ -9,6 +9,30 @@ const stringTypes = ["string", "text"] satisfies DynamicValueType[];
 const urlTypes = ["url"] satisfies DynamicValueType[];
 
 const imageReference = z.object({ url: z.string(), alt: z.string().optional() }).passthrough();
+
+/** Shapes for image and video blocks. */
+export const MEDIA_RATIOS = ["square", "portrait", "landscape", "wide"] as const;
+const ratioOptions = [{ label: "Square", value: "square" }, { label: "Portrait (4:5)", value: "portrait" }, { label: "Landscape (4:3)", value: "landscape" }, { label: "Wide (16:9)", value: "wide" }];
+const hexColor = z.union([z.string().regex(/^#[0-9a-fA-F]{6}$/), z.literal("")]).optional();
+const choice = <T extends readonly [string, ...string[]]>(values: T) => z.union([z.enum(values), z.literal("")]).optional();
+const buttonOptionsSchema = {
+  buttonStyle: choice(["primary", "secondary", "link"] as const),
+  buttonSize: choice(["small", "medium", "large"] as const),
+  buttonHover: choice(["darken", "lift", "underline", "none"] as const),
+  buttonColor: hexColor,
+  buttonTextColor: hexColor,
+  openInNewTab: z.boolean().optional(),
+};
+const themeDefault = { label: "Theme default", value: "" };
+/** Button options, grouped like Shopify's button block. Empty follows the theme's button settings. */
+const buttonOptionControls: ControlDefinition[] = [
+  { type: "checkbox", key: "openInNewTab", label: "Open link in a new tab", group: "content" },
+  { type: "select", key: "buttonStyle", label: "Style", description: "Theme default: the first button is filled, the others are outlined.", group: "style", heading: "Button", options: [themeDefault, { label: "Filled", value: "primary" }, { label: "Outlined", value: "secondary" }, { label: "Text link", value: "link" }] },
+  { type: "select", key: "buttonSize", label: "Size", group: "style", heading: "Button", options: [themeDefault, { label: "Small", value: "small" }, { label: "Medium", value: "medium" }, { label: "Large", value: "large" }] },
+  { type: "select", key: "buttonHover", label: "Hover effect", group: "style", heading: "Button", options: [themeDefault, { label: "Darken", value: "darken" }, { label: "Lift with shadow", value: "lift" }, { label: "Underline", value: "underline" }, { label: "None", value: "none" }] },
+  { type: "color", key: "buttonColor", label: "Button colour", group: "style", heading: "Appearance", allowAlpha: false },
+  { type: "color", key: "buttonTextColor", label: "Button text colour", group: "style", heading: "Appearance", allowAlpha: false },
+];
 
 const linkSchema = z.union([z.string(), settingValueSchema(z.string())]).optional();
 
@@ -22,7 +46,9 @@ const blocks: BlockDefinition[] = [
   { type: "column", settingsSchema: z.object({ heading: z.string().max(80), text: z.string().max(400).optional() }).passthrough(), controls: [{ type: "text", key: "heading", label: "Title", group: "content", maxLength: 80 }, { type: "rich-text", key: "text", label: "Text", group: "content", maxLength: 400 }], defaultSettings: { heading: "Free delivery", text: "Tell customers why they will love shopping with you." } },
   { type: "heading", settingsSchema: text, controls: [{ type: "text", key: "text", label: "Heading", group: "content", maxLength: 120, dynamicTypes: stringTypes }], defaultSettings: { text: "Heading" } },
   { type: "text", settingsSchema: text, controls: [{ type: "rich-text", key: "text", label: "Text", group: "content", maxLength: 1000, dynamicTypes: stringTypes }], defaultSettings: { text: "Add your text here." } },
-  { type: "button", settingsSchema: z.object({ label: dynamicString, href: z.union([z.string(), settingValueSchema(z.string())]).optional() }).passthrough(), controls: [{ type: "text", key: "label", label: "Button text", group: "content", maxLength: 40, dynamicTypes: stringTypes }, { type: "link", key: "href", label: "Link", group: "content", dynamicTypes: urlTypes }], defaultSettings: { label: "Shop now", href: "/shop" } },
+  { type: "button", settingsSchema: z.object({ label: dynamicString, href: z.union([z.string(), settingValueSchema(z.string())]).optional(), ...buttonOptionsSchema }).passthrough(), controls: [{ type: "text", key: "label", label: "Button text", group: "content", maxLength: 40, dynamicTypes: stringTypes }, { type: "link", key: "href", label: "Link", group: "content", dynamicTypes: urlTypes }, ...buttonOptionControls], defaultSettings: { label: "Shop now", href: "/shop" } },
+  { type: "image", settingsSchema: z.object({ image: imageReference.optional(), link: linkSchema, aspectRatio: z.union([z.enum(MEDIA_RATIOS), z.literal("")]).optional(), overlay: z.number().int().min(0).max(80).optional() }).passthrough(), controls: [{ type: "image", key: "image", label: "Image", group: "content" }, { type: "link", key: "link", label: "Link", description: "Optional. Where the image goes when tapped.", group: "content", dynamicTypes: urlTypes }, { type: "select", key: "aspectRatio", label: "Shape", group: "layout", heading: "Layout", options: [{ label: "Original", value: "" }, ...ratioOptions] }, { type: "range", key: "overlay", label: "Darken image", group: "style", heading: "Appearance", min: 0, max: 80, step: 5, unit: "%" }], defaultSettings: {} },
+  { type: "video", settingsSchema: z.object({ url: z.string().max(500).optional(), poster: imageReference.optional(), aspectRatio: z.union([z.enum(MEDIA_RATIOS), z.literal("")]).optional(), autoplay: z.boolean().optional(), controls: z.boolean().optional() }).passthrough(), controls: [{ type: "text", key: "url", label: "Video link", description: "A YouTube or Vimeo link, or a link to an .mp4 file.", group: "content", maxLength: 500 }, { type: "image", key: "poster", label: "Cover image", description: "Shown before an .mp4 video plays.", group: "content" }, { type: "select", key: "aspectRatio", label: "Shape", group: "layout", heading: "Layout", options: [{ label: "Wide (16:9)", value: "" }, ...ratioOptions.filter(({ value }) => value !== "wide")] }, { type: "checkbox", key: "autoplay", label: "Play automatically (muted, on repeat)", group: "content" }, { type: "checkbox", key: "controls", label: "Show play controls", group: "content" }], defaultSettings: { controls: true } },
   { type: "testimonial", settingsSchema: z.object({ quote: dynamicString, author: z.string() }).passthrough(), controls: [{ type: "textarea", key: "quote", label: "Quote", group: "content", maxLength: 500, dynamicTypes: stringTypes }, { type: "text", key: "author", label: "Customer name", group: "content", maxLength: 80 }], defaultSettings: { quote: "A customer story.", author: "Customer" } },
   { type: "faq-item", settingsSchema: z.object({ question: dynamicString, answer: z.string() }).passthrough(), controls: [{ type: "text", key: "question", label: "Question", group: "content", maxLength: 160, dynamicTypes: stringTypes }, { type: "rich-text", key: "answer", label: "Answer", group: "content", maxLength: 1000 }], defaultSettings: { question: "Question", answer: "Answer" } },
   { type: "logo", settingsSchema: z.object({ assetId: z.string().optional(), label: dynamicString.optional() }).passthrough(), controls: [{ type: "text", key: "label", label: "Label", group: "content", maxLength: 80, dynamicTypes: stringTypes }], defaultSettings: {} },

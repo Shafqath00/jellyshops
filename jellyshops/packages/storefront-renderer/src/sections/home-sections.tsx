@@ -7,6 +7,7 @@ import { resolveStorefrontHref } from "../runtime-context";
 import { choice, headingHidden, imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
 import { formattedSetting, SettingText } from "./setting-text";
 import { blockStyleProps } from "../block-style";
+import { buttonProps } from "./block-content";
 
 function text(section: SectionNode, fallback: string): string {
   const setting = section.settings.heading ?? section.settings.text;
@@ -30,7 +31,7 @@ function blockCopy(section: SectionNode, fallbackHeading: string) {
     bodyProps: blockStyleProps(body?.settings),
     buttons: buttons.flatMap((block) => {
       const label = stringValue(block.settings, "label");
-      return label ? [{ id: block.id, label, href: block.settings.href, props: blockStyleProps(block.settings) }] : [];
+      return label ? [{ id: block.id, label, href: block.settings.href, settings: block.settings }] : [];
     }),
   };
 }
@@ -41,7 +42,7 @@ function Actions({ buttons, storeSlug }: { buttons: ReturnType<typeof blockCopy>
     return href ? [{ ...button, href }] : [];
   });
   if (!links.length) return null;
-  return <div className="jelly-section-actions">{links.map((button, index) => <a key={button.id} className={index === 0 ? "jelly-button" : "jelly-button jelly-button--secondary"} href={button.href} {...button.props}>{button.label}</a>)}</div>;
+  return <div className="jelly-section-actions">{links.map((button, index) => <a key={button.id} href={button.href} {...buttonProps(button.settings, index)}>{button.label}</a>)}</div>;
 }
 
 export function AnnouncementBarSection({ section }: { section: SectionNode }) {

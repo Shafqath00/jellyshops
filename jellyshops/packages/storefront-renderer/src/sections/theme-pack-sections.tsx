@@ -6,6 +6,7 @@ import { resolveStorefrontHref } from "../runtime-context";
 import type { RendererMode } from "../types";
 import { choice, headingHidden, imageValue, numberValue, sectionData, visibleBlocks } from "./shared";
 import { blockStyleProps } from "../block-style";
+import { buttonProps } from "./block-content";
 
 function stringSetting(settings: Record<string, unknown>, key: string, fallback = ""): string {
   const value = settings[key];
@@ -29,7 +30,7 @@ function copy(section: SectionNode, fallbackHeading: string) {
     href: stringSetting(button?.settings ?? section.settings, "href", "/shop"),
     headingProps: blockStyleProps(heading?.settings),
     bodyProps: blockStyleProps(body?.settings),
-    buttonProps: blockStyleProps(button?.settings),
+    buttonProps: buttonProps(button?.settings ?? {}),
   };
 }
 
@@ -38,7 +39,7 @@ function SectionIntro({ section, fallback }: { section: SectionNode; fallback: s
   return <div className="jelly-section-intro">
     <h2 {...content.headingProps}>{content.heading}</h2>
     {content.body && <p {...content.bodyProps}>{content.body}</p>}
-    {content.button && <a className="jelly-button" href={content.href} {...content.buttonProps}>{content.button}</a>}
+    {content.button && <a href={content.href} {...content.buttonProps}>{content.button}</a>}
   </div>;
 }
 
@@ -92,7 +93,7 @@ export function ImageMosaicSection({ section }: { section: SectionNode }) {
   const content = copy(section, "A closer look");
   const imageStyle: CSSProperties | undefined = image ? { backgroundImage: `url(${image.url})` } : undefined;
   return <section className="jelly-section jelly-image-mosaic"><StorefrontContainer><div className="jelly-image-mosaic-grid">
-    <div className="jelly-mosaic-panel jelly-mosaic-copy"><h2 {...content.headingProps}>{content.heading}</h2>{content.body && <p {...content.bodyProps}>{content.body}</p>}{content.button && <a className="jelly-button" href={content.href} {...content.buttonProps}>{content.button}</a>}</div>
+    <div className="jelly-mosaic-panel jelly-mosaic-copy"><h2 {...content.headingProps}>{content.heading}</h2>{content.body && <p {...content.bodyProps}>{content.body}</p>}{content.button && <a href={content.href} {...content.buttonProps}>{content.button}</a>}</div>
     <div className="jelly-mosaic-panel jelly-mosaic-image" style={imageStyle}>{!image && <span>Our process, in detail</span>}</div>
     <div className="jelly-mosaic-panel jelly-mosaic-note"><span>Made for slow moments</span></div>
   </div></StorefrontContainer></section>;

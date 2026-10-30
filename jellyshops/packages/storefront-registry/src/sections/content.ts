@@ -109,6 +109,25 @@ export const contentSections: SectionDefinition[] = [
   { type: "image-text", category: "content", supportedPages: [...home], settingsSchema: empty, controls: contentAlignment, allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: ["contentAlignment"] },
   { type: "image-with-text", category: "content", supportedPages: [...home], settingsSchema: imageWithTextSettings, controls: [eyebrowControl, imageControl, { type: "segmented", key: "imagePosition", label: "Image position", group: "layout", options: [{ label: "Left", value: "left" }, { label: "Right", value: "right" }] }, colorScheme], allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: ["contentAlignment"], presets: [{ id: "image-with-text", label: "Image with text", category: "content" }] },
   { type: "image-banner", category: "content", supportedPages: [...home], settingsSchema: z.object({ image: imageReference.optional(), height: z.enum(["medium", "large"]).optional(), overlay: z.number().min(0).max(100).optional(), contentAlignment: alignmentSchema }).passthrough(), controls: [imageControl, heightControl, leftOrCenter, darknessControl("Image darkness")], allowedBlockTypes: ["heading", "text", "button"], maxBlocks: 4, defaultSettings: { height: "medium", overlay: 30, contentAlignment: "center" }, defaultBlocks: heroBlocks, responsiveFields: [], presets: [{ id: "image-banner", label: "Image banner", category: "banners" }] },
+  {
+    // Shopify-style free section: any mix of heading, text, button, image and video blocks, in order.
+    type: "custom-content", category: "content", supportedPages: [...reusableContentPages],
+    settingsSchema: z.object({ direction: z.enum(["vertical", "horizontal"]).optional(), contentAlignment: alignmentSchema, gap: z.number().int().min(0).max(80).optional(), contentWidth: z.enum(["narrow", "normal", "wide", "full"]).optional() }).passthrough(),
+    controls: [
+      { type: "segmented", key: "direction", label: "Direction", group: "layout", options: [{ label: "Vertical", value: "vertical" }, { label: "Horizontal", value: "horizontal" }] },
+      { type: "segmented", key: "contentAlignment", label: "Alignment", group: "layout", options: [{ label: "Left", value: "left" }, { label: "Centre", value: "center" }, { label: "Right", value: "right" }] },
+      { type: "range", key: "gap", label: "Gap", group: "layout", min: 0, max: 80, step: 4, unit: "px" },
+      { type: "select", key: "contentWidth", label: "Content width", group: "layout", options: [{ label: "Narrow", value: "narrow" }, { label: "Normal", value: "normal" }, { label: "Wide", value: "wide" }, { label: "Full page", value: "full" }] },
+    ],
+    allowedBlockTypes: ["heading", "text", "button", "image", "video"], maxBlocks: 12,
+    defaultSettings: { direction: "vertical", contentAlignment: "center", gap: 16, contentWidth: "normal" },
+    defaultBlocks: [
+      { id: "custom-heading", type: "heading", enabled: true, settings: { text: "Tell your story" } },
+      { id: "custom-text", type: "text", enabled: true, settings: { text: "Share what makes your shop special." } },
+      { id: "custom-button", type: "button", enabled: true, settings: { label: "Shop now", href: "/shop" } },
+    ],
+    responsiveFields: [], presets: [{ id: "custom-content", label: "Custom content", category: "content" }],
+  },
   { type: "rich-text", category: "content", supportedPages: [...reusableContentPages], settingsSchema: richTextSettings, controls: [], allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: [], presets: [{ id: "rich-text", label: "Rich text", category: "content" }] },
   { type: "testimonials", category: "content", supportedPages: [...home], settingsSchema: z.object({ heading: z.string().max(120).optional(), colorScheme: schemeSchema }).passthrough(), controls: [sectionHeading, colorScheme], allowedBlockTypes: ["testimonial"], maxBlocks: 6, defaultSettings: { heading: "What customers say" }, defaultBlocks: [], responsiveFields: [], presets: [{ id: "testimonials", label: "Testimonials", category: "content" }] },
   { type: "faq", category: "content", supportedPages: [...home], settingsSchema: z.object({ heading: z.string().max(120).optional(), text: z.string().max(400).optional(), colorScheme: schemeSchema }).passthrough(), controls: [sectionHeading, sectionText, colorScheme], allowedBlockTypes: ["faq-item"], maxBlocks: 12, defaultSettings: { heading: "Frequently asked questions" }, defaultBlocks: [], responsiveFields: [], presets: [{ id: "faq", label: "FAQ", category: "content" }] },

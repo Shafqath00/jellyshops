@@ -7,6 +7,7 @@ import { SlideshowSection } from "./sections/slideshow";
 import { ProductStockCounterSection, ProductTabsSection } from "./sections/product-extras";
 import { ProductGridSection } from "./sections/product-grid";
 import { RichTextSection } from "./sections/rich-text";
+import { CustomContentSection } from "./sections/custom-content";
 import { ProductDescriptionSection, ProductGallerySection, ProductInformationSection, ProductOptionsSection, ProductPurchaseSection, RelatedProductsSection } from "./sections/product-sections";
 import { CollectionDescriptionSection, CollectionHeaderSection, CollectionProductGridSection } from "./sections/collection-sections";
 import { ArticleContentSection, ArticleHeaderSection, ArticleListSection, BlogHeaderSection, PageContentSection } from "./sections/content-pages";
@@ -71,6 +72,7 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("hero", ({ section, mode, context }) => <HeroSection section={section} editor={mode === "editor"} context={context} />);
   registry.register("slideshow", ({ section, mode, context }) => <SlideshowSection section={section} context={context} editor={mode === "editor"} />);
   registry.register("rich-text", ({ section }) => <RichTextSection section={section} />);
+  registry.register("custom-content", ({ section, context, mode }) => <CustomContentSection section={section} context={context} editor={mode === "editor"} />);
   registry.register("page-content", ({ context }) => <PageContentSection context={context} />);
   registry.register("blog-header", ({ context }) => <BlogHeaderSection context={context} />);
   registry.register("article-list", ({ context }) => <ArticleListSection context={context} />);
