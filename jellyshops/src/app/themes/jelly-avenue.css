@@ -32,12 +32,12 @@
   --av-font-body: var(--theme-font-body, Arial, sans-serif);
   --av-heading-weight: var(--jelly-heading-weight, 500);
   --av-text-xs: 11px;
-  --av-text-sm: 13px;
+  --av-text-sm: var(--jelly-type-small-size, 13px);
   --av-text-base: var(--jelly-body-size, 15px);
   --av-text-lg: 17px;
-  --av-h4: 18px;
-  --av-h3: clamp(20px, 2vw, 24px);
-  --av-h2: clamp(26px, 3vw, 40px);
+  --av-h4: var(--jelly-type-h4-size, 18px);
+  --av-h3: var(--jelly-type-h3-size, clamp(20px, 2vw, 24px));
+  --av-h2: var(--jelly-type-h2-size, clamp(26px, 3vw, 40px));
   --av-h1: clamp(34px, 4.8vw, var(--jelly-heading-size, 56px));
   --av-display: clamp(40px, 6.2vw, calc(var(--jelly-heading-size, 56px) * 1.4));
   --av-tracking: -0.035em;
@@ -113,9 +113,9 @@
   align-items: center;
   justify-content: center;
   gap: var(--av-1);
-  min-height: 46px;
-  padding: 0 28px;
-  border: 1px solid var(--av-ink);
+  min-height: var(--jelly-button-height, 46px);
+  padding: 0 var(--jelly-button-padding, 28px);
+  border: var(--jelly-button-border-width, 1px) solid var(--av-ink);
   border-radius: var(--av-radius-button);
   background: var(--av-ink);
   color: var(--av-ink-contrast);
@@ -126,12 +126,12 @@
   transition: background-color var(--av-fast) var(--av-ease), color var(--av-fast) var(--av-ease), border-color var(--av-fast) var(--av-ease);
 }
 [data-jelly-theme="jelly-avenue"] :is(.jelly-button, .signature-primary, .jelly-product-purchase button, .jelly-newsletter button, .jelly-search-shell button):hover {
-  background: color-mix(in srgb, var(--av-ink) 82%, var(--av-bg));
+  background: color-mix(in srgb, var(--av-ink) var(--jelly-button-hover-mix, 82%), var(--av-bg));
 }
 [data-jelly-theme="jelly-avenue"] :is(.jelly-button.jelly-button--secondary, .signature-secondary) {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--av-1);
-  min-height: 46px; padding: 0 28px;
-  border: 1px solid var(--av-ink);
+  min-height: var(--jelly-button-height, 46px); padding: 0 var(--jelly-button-padding, 28px);
+  border: var(--jelly-button-border-width, 1px) solid var(--av-ink);
   border-radius: var(--av-radius-button);
   background: transparent;
   color: var(--av-ink);
@@ -1126,14 +1126,14 @@
 [data-jelly-theme="jelly-avenue"] [data-section-style~="heading-weight"] { --av-heading-weight: var(--section-heading-weight); }
 [data-jelly-theme="jelly-avenue"] [data-section-style~="heading-size"] {
   --av-h1: calc(clamp(34px, 4.8vw, var(--jelly-heading-size, 56px)) * var(--section-heading-scale));
-  --av-h2: calc(clamp(26px, 3vw, 40px) * var(--section-heading-scale));
-  --av-h3: calc(clamp(20px, 2vw, 24px) * var(--section-heading-scale));
+  --av-h2: calc(var(--jelly-type-h2-size, clamp(26px, 3vw, 40px)) * var(--section-heading-scale));
+  --av-h3: calc(var(--jelly-type-h3-size, clamp(20px, 2vw, 24px)) * var(--section-heading-scale));
   --av-display: calc(clamp(40px, 6.2vw, calc(var(--jelly-heading-size, 56px) * 1.4)) * var(--section-heading-scale));
 }
 [data-jelly-theme="jelly-avenue"] [data-section-style~="body-font"] { --av-font-body: var(--section-body-font); --jelly-font-body: var(--section-body-font); font-family: var(--section-body-font); }
 [data-jelly-theme="jelly-avenue"] [data-section-style~="body-size"] {
   --av-text-xs: calc(11px * var(--section-body-scale));
-  --av-text-sm: calc(13px * var(--section-body-scale));
+  --av-text-sm: calc(var(--jelly-type-small-size, 13px) * var(--section-body-scale));
   --av-text-base: calc(var(--jelly-body-size, 15px) * var(--section-body-scale));
   --av-text-lg: calc(17px * var(--section-body-scale));
 }
@@ -1156,13 +1156,19 @@
 /* 14 ── Block style and exact section padding (editor "Layout", "Typography", "Padding" settings) ── */
 /* Blocks carry their colours, borders and padding inline; only the text styles need the theme's tokens.
    A chosen text style is the merchant's explicit choice, so it beats the section's own heading rules. */
-[data-jelly-theme="jelly-avenue"] [data-type-preset^="h"] { font-family: var(--av-font-heading) !important; font-weight: var(--av-heading-weight) !important; line-height: 1.1 !important; letter-spacing: -0.01em !important; }
-[data-jelly-theme="jelly-avenue"] [data-type-preset="h1"] { font-size: var(--av-h1) !important; }
-[data-jelly-theme="jelly-avenue"] [data-type-preset="h2"] { font-size: var(--av-h2) !important; }
-[data-jelly-theme="jelly-avenue"] [data-type-preset="h3"] { font-size: var(--av-h3) !important; }
-[data-jelly-theme="jelly-avenue"] [data-type-preset="h4"] { font-size: var(--av-h4) !important; }
-[data-jelly-theme="jelly-avenue"] [data-type-preset="body"] { font-family: var(--av-font-body) !important; font-size: var(--av-text-base) !important; font-weight: 400 !important; line-height: 1.6 !important; letter-spacing: 0 !important; text-transform: none !important; }
-[data-jelly-theme="jelly-avenue"] [data-type-preset="small"] { font-family: var(--av-font-body) !important; font-size: var(--av-text-sm) !important; font-weight: 400 !important; line-height: 1.5 !important; letter-spacing: 0 !important; text-transform: none !important; }
+[data-jelly-theme="jelly-avenue"] [data-type-preset="h1"] { font-family: var(--jelly-type-h1-font, var(--av-font-heading)) !important; font-size: var(--av-h1) !important; font-weight: var(--av-heading-weight) !important; line-height: var(--jelly-type-h1-line, 1.1) !important; letter-spacing: var(--jelly-type-h1-tracking, -0.01em) !important; text-transform: var(--jelly-type-h1-case, none) !important; }
+[data-jelly-theme="jelly-avenue"] [data-type-preset="h2"] { font-family: var(--jelly-type-h2-font, var(--av-font-heading)) !important; font-size: var(--av-h2) !important; font-weight: var(--av-heading-weight) !important; line-height: var(--jelly-type-h2-line, 1.1) !important; letter-spacing: var(--jelly-type-h2-tracking, -0.01em) !important; text-transform: var(--jelly-type-h2-case, none) !important; }
+[data-jelly-theme="jelly-avenue"] [data-type-preset="h3"] { font-family: var(--jelly-type-h3-font, var(--av-font-heading)) !important; font-size: var(--av-h3) !important; font-weight: var(--av-heading-weight) !important; line-height: var(--jelly-type-h3-line, 1.1) !important; letter-spacing: var(--jelly-type-h3-tracking, -0.01em) !important; text-transform: var(--jelly-type-h3-case, none) !important; }
+[data-jelly-theme="jelly-avenue"] [data-type-preset="h4"] { font-family: var(--jelly-type-h4-font, var(--av-font-heading)) !important; font-size: var(--av-h4) !important; font-weight: var(--av-heading-weight) !important; line-height: var(--jelly-type-h4-line, 1.1) !important; letter-spacing: var(--jelly-type-h4-tracking, -0.01em) !important; text-transform: var(--jelly-type-h4-case, none) !important; }
+[data-jelly-theme="jelly-avenue"] [data-type-preset="body"] { font-family: var(--jelly-type-body-font, var(--av-font-body)) !important; font-size: var(--av-text-base) !important; font-weight: 400 !important; line-height: var(--jelly-type-body-line, 1.6) !important; letter-spacing: var(--jelly-type-body-tracking, 0) !important; text-transform: var(--jelly-type-body-case, none) !important; }
+[data-jelly-theme="jelly-avenue"] [data-type-preset="small"] { font-family: var(--jelly-type-small-font, var(--av-font-body)) !important; font-size: var(--av-text-sm) !important; font-weight: 400 !important; line-height: var(--jelly-type-small-line, 1.5) !important; letter-spacing: var(--jelly-type-small-tracking, 0) !important; text-transform: var(--jelly-type-small-case, none) !important; }
 [data-jelly-theme="jelly-avenue"] [data-section-style~="pad-top"] > * { padding-top: var(--section-pad-top); margin-top: 0; }
 [data-jelly-theme="jelly-avenue"] [data-section-style~="pad-bottom"] > * { padding-bottom: var(--section-pad-bottom); margin-bottom: 0; }
 [data-jelly-theme="jelly-avenue"] [data-section-style~="full-width"] .jelly-container { width: calc(100% - 2 * var(--av-gutter)); max-width: none; }
+
+/* 15 ── Theme settings: buttons and colour schemes ───────────────────────── */
+[data-jelly-theme="jelly-avenue"] :is(.jelly-button, .signature-primary, .signature-secondary, .jelly-product-purchase button, .jelly-newsletter button, .jelly-search-shell button):not(.jelly-button--link) { text-transform: var(--jelly-button-case, none); transition: background-color var(--av-fast) var(--av-ease), color var(--av-fast) var(--av-ease), border-color var(--av-fast) var(--av-ease), transform var(--av-fast) var(--av-ease), box-shadow var(--av-fast) var(--av-ease); }
+[data-jelly-theme="jelly-avenue"] :is(.jelly-button, .signature-primary, .signature-secondary, .jelly-product-purchase button, .jelly-newsletter button, .jelly-search-shell button):not(.jelly-button--link, :disabled):hover { transform: var(--jelly-button-hover-transform, none); box-shadow: var(--jelly-button-hover-shadow, none); text-decoration: var(--jelly-button-hover-decoration, none); text-underline-offset: 4px; }
+/* A section using a colour scheme gets the scheme's button colours. */
+[data-jelly-theme="jelly-avenue"] [data-section-style~="scheme"],
+[data-jelly-theme="jelly-avenue"] [data-section-style~="scheme"] [data-color-scheme] { --av-ink: var(--section-button); --av-ink-contrast: var(--section-button-text); }

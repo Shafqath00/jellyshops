@@ -1,5 +1,6 @@
 import type { GlobalSettings, ThemeId } from "@jelly/storefront-schema";
-import { resolveDesignTokens } from "./theme-registry.js";
+import { getThemeDefinition, resolveDesignTokens } from "./theme-registry.js";
+import { resolveThemeStyleTokens, themeStyleDefaultsFrom } from "./theme-style-settings.js";
 
 export interface LegacyStoreThemeValues {
   accent?: string;
@@ -58,5 +59,9 @@ export function resolveStorefrontThemeTokens(themeId: ThemeId | string, settings
     "--theme-border": base["--jelly-color-border"] || `color-mix(in srgb, ${text} 18%, transparent)`,
     "--theme-font-heading": heading, "--theme-font-body": body,
   };
-  return { ...base, ...semantic, "--store-bg": background, "--store-surface": surface, "--store-text": text, "--store-accent": accent, "--store-accent-soft": accentSoft, "--store-display": heading };
+  // Text styles, colour schemes and button extras (themes that declare them).
+  let styleDefaults: ReturnType<typeof themeStyleDefaultsFrom>;
+  try { styleDefaults = themeStyleDefaultsFrom((getThemeDefinition(themeId as ThemeId).manifest as { settingsDefaults?: Record<string, unknown> }).settingsDefaults); } catch { styleDefaults = undefined; }
+  const style = resolveThemeStyleTokens(modern, styleDefaults);
+  return { ...base, ...semantic, ...style, "--store-bg": background, "--store-surface": surface, "--store-text": text, "--store-accent": accent, "--store-accent-soft": accentSoft, "--store-display": heading };
 }

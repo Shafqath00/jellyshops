@@ -39,3 +39,11 @@ it("uses exact top and bottom padding and full width when chosen", () => {
   expect(sectionStyleProps({ stylePaddingTop: 900 }).style).toMatchObject({ "--section-pad-top": "200px" });
   expect(sectionStyleProps({ stylePaddingTop: "10px", styleWidth: "page" })).toEqual({});
 });
+
+it("uses a colour scheme from theme settings unless the section has its own colours", () => {
+  const props = sectionStyleProps({ styleScheme: "scheme3" });
+  expect(props["data-section-style"]).toBe("colors scheme");
+  expect(props.style).toMatchObject({ "--section-bg": "var(--jelly-scheme-3-bg)", "--section-button": "var(--jelly-scheme-3-button)" });
+  expect(sectionStyleProps({ styleScheme: "scheme3", styleColors: true, styleBackground: "#112233" }).style).toMatchObject({ "--section-bg": "#112233", "--section-button-text": "var(--jelly-scheme-3-button-text)" });
+  expect(sectionStyleProps({ styleScheme: "scheme9" })).toEqual({});
+});

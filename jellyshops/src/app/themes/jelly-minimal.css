@@ -30,12 +30,12 @@
   --jm-font-body: var(--theme-font-body, Arial, sans-serif);
   --jm-heading-weight: var(--jelly-heading-weight, 400);
   --jm-text-xs: 12px;
-  --jm-text-sm: 14px;
+  --jm-text-sm: var(--jelly-type-small-size, 14px);
   --jm-text-base: var(--jelly-body-size, 16px);
   --jm-text-lg: 18px;
-  --jm-h4: 20px;
-  --jm-h3: clamp(22px, 2.2vw, 28px);
-  --jm-h2: clamp(28px, 3.6vw, 44px);
+  --jm-h4: var(--jelly-type-h4-size, 20px);
+  --jm-h3: var(--jelly-type-h3-size, clamp(22px, 2.2vw, 28px));
+  --jm-h2: var(--jelly-type-h2-size, clamp(28px, 3.6vw, 44px));
   --jm-h1: clamp(36px, 5.2vw, var(--jelly-heading-size, 56px));
 
   /* 8px spacing scale */
@@ -106,9 +106,9 @@
   align-items: center;
   justify-content: center;
   gap: var(--jm-1);
-  min-height: 48px;
-  padding: 0 28px;
-  border: 1px solid var(--jm-ink);
+  min-height: var(--jelly-button-height, 48px);
+  padding: 0 var(--jelly-button-padding, 28px);
+  border: var(--jelly-button-border-width, 1px) solid var(--jm-ink);
   border-radius: var(--jm-radius-button);
   background: var(--jm-ink);
   color: var(--jm-ink-contrast);
@@ -119,12 +119,12 @@
   transition: background-color var(--jm-fast) var(--jm-ease), color var(--jm-fast) var(--jm-ease), border-color var(--jm-fast) var(--jm-ease);
 }
 [data-jelly-theme="jelly-signature"] :is(.jelly-button, .signature-primary, .jelly-product-purchase button, .jelly-newsletter button, .jelly-search-shell button):hover {
-  background: color-mix(in srgb, var(--jm-ink) 84%, var(--jm-bg));
+  background: color-mix(in srgb, var(--jm-ink) var(--jelly-button-hover-mix, 84%), var(--jm-bg));
 }
 [data-jelly-theme="jelly-signature"] :is(.jelly-button.jelly-button--secondary, .signature-secondary) {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--jm-1);
-  min-height: 48px; padding: 0 28px;
-  border: 1px solid var(--jm-ink);
+  min-height: var(--jelly-button-height, 48px); padding: 0 var(--jelly-button-padding, 28px);
+  border: var(--jelly-button-border-width, 1px) solid var(--jm-ink);
   border-radius: var(--jm-radius-button);
   background: transparent;
   color: var(--jm-ink);
@@ -856,13 +856,13 @@
 [data-jelly-theme="jelly-signature"] [data-section-style~="heading-weight"] { --jm-heading-weight: var(--section-heading-weight); }
 [data-jelly-theme="jelly-signature"] [data-section-style~="heading-size"] {
   --jm-h1: calc(clamp(36px, 5.2vw, var(--jelly-heading-size, 56px)) * var(--section-heading-scale));
-  --jm-h2: calc(clamp(28px, 3.6vw, 44px) * var(--section-heading-scale));
-  --jm-h3: calc(clamp(22px, 2.2vw, 28px) * var(--section-heading-scale));
+  --jm-h2: calc(var(--jelly-type-h2-size, clamp(28px, 3.6vw, 44px)) * var(--section-heading-scale));
+  --jm-h3: calc(var(--jelly-type-h3-size, clamp(22px, 2.2vw, 28px)) * var(--section-heading-scale));
 }
 [data-jelly-theme="jelly-signature"] [data-section-style~="body-font"] { --jm-font-body: var(--section-body-font); --jelly-font-body: var(--section-body-font); font-family: var(--section-body-font); }
 [data-jelly-theme="jelly-signature"] [data-section-style~="body-size"] {
   --jm-text-xs: calc(12px * var(--section-body-scale));
-  --jm-text-sm: calc(14px * var(--section-body-scale));
+  --jm-text-sm: calc(var(--jelly-type-small-size, 14px) * var(--section-body-scale));
   --jm-text-base: calc(var(--jelly-body-size, 16px) * var(--section-body-scale));
   --jm-text-lg: calc(18px * var(--section-body-scale));
 }
@@ -885,13 +885,19 @@
 /* 14 ── Block style and exact section padding (editor "Layout", "Typography", "Padding" settings) ── */
 /* Blocks carry their colours, borders and padding inline; only the text styles need the theme's tokens.
    A chosen text style is the merchant's explicit choice, so it beats the section's own heading rules. */
-[data-jelly-theme="jelly-signature"] [data-type-preset^="h"] { font-family: var(--jm-font-heading) !important; font-weight: var(--jm-heading-weight) !important; line-height: 1.1 !important; letter-spacing: -0.01em !important; }
-[data-jelly-theme="jelly-signature"] [data-type-preset="h1"] { font-size: var(--jm-h1) !important; }
-[data-jelly-theme="jelly-signature"] [data-type-preset="h2"] { font-size: var(--jm-h2) !important; }
-[data-jelly-theme="jelly-signature"] [data-type-preset="h3"] { font-size: var(--jm-h3) !important; }
-[data-jelly-theme="jelly-signature"] [data-type-preset="h4"] { font-size: var(--jm-h4) !important; }
-[data-jelly-theme="jelly-signature"] [data-type-preset="body"] { font-family: var(--jm-font-body) !important; font-size: var(--jm-text-base) !important; font-weight: 400 !important; line-height: 1.6 !important; letter-spacing: 0 !important; text-transform: none !important; }
-[data-jelly-theme="jelly-signature"] [data-type-preset="small"] { font-family: var(--jm-font-body) !important; font-size: var(--jm-text-sm) !important; font-weight: 400 !important; line-height: 1.5 !important; letter-spacing: 0 !important; text-transform: none !important; }
+[data-jelly-theme="jelly-signature"] [data-type-preset="h1"] { font-family: var(--jelly-type-h1-font, var(--jm-font-heading)) !important; font-size: var(--jm-h1) !important; font-weight: var(--jm-heading-weight) !important; line-height: var(--jelly-type-h1-line, 1.1) !important; letter-spacing: var(--jelly-type-h1-tracking, -0.01em) !important; text-transform: var(--jelly-type-h1-case, none) !important; }
+[data-jelly-theme="jelly-signature"] [data-type-preset="h2"] { font-family: var(--jelly-type-h2-font, var(--jm-font-heading)) !important; font-size: var(--jm-h2) !important; font-weight: var(--jm-heading-weight) !important; line-height: var(--jelly-type-h2-line, 1.1) !important; letter-spacing: var(--jelly-type-h2-tracking, -0.01em) !important; text-transform: var(--jelly-type-h2-case, none) !important; }
+[data-jelly-theme="jelly-signature"] [data-type-preset="h3"] { font-family: var(--jelly-type-h3-font, var(--jm-font-heading)) !important; font-size: var(--jm-h3) !important; font-weight: var(--jm-heading-weight) !important; line-height: var(--jelly-type-h3-line, 1.1) !important; letter-spacing: var(--jelly-type-h3-tracking, -0.01em) !important; text-transform: var(--jelly-type-h3-case, none) !important; }
+[data-jelly-theme="jelly-signature"] [data-type-preset="h4"] { font-family: var(--jelly-type-h4-font, var(--jm-font-heading)) !important; font-size: var(--jm-h4) !important; font-weight: var(--jm-heading-weight) !important; line-height: var(--jelly-type-h4-line, 1.1) !important; letter-spacing: var(--jelly-type-h4-tracking, -0.01em) !important; text-transform: var(--jelly-type-h4-case, none) !important; }
+[data-jelly-theme="jelly-signature"] [data-type-preset="body"] { font-family: var(--jelly-type-body-font, var(--jm-font-body)) !important; font-size: var(--jm-text-base) !important; font-weight: 400 !important; line-height: var(--jelly-type-body-line, 1.6) !important; letter-spacing: var(--jelly-type-body-tracking, 0) !important; text-transform: var(--jelly-type-body-case, none) !important; }
+[data-jelly-theme="jelly-signature"] [data-type-preset="small"] { font-family: var(--jelly-type-small-font, var(--jm-font-body)) !important; font-size: var(--jm-text-sm) !important; font-weight: 400 !important; line-height: var(--jelly-type-small-line, 1.5) !important; letter-spacing: var(--jelly-type-small-tracking, 0) !important; text-transform: var(--jelly-type-small-case, none) !important; }
 [data-jelly-theme="jelly-signature"] [data-section-style~="pad-top"] > * { padding-top: var(--section-pad-top); margin-top: 0; }
 [data-jelly-theme="jelly-signature"] [data-section-style~="pad-bottom"] > * { padding-bottom: var(--section-pad-bottom); margin-bottom: 0; }
 [data-jelly-theme="jelly-signature"] [data-section-style~="full-width"] .jelly-container { width: calc(100% - 2 * var(--jm-gutter)); max-width: none; }
+
+/* 15 ── Theme settings: buttons and colour schemes ───────────────────────── */
+[data-jelly-theme="jelly-signature"] :is(.jelly-button, .signature-primary, .signature-secondary, .jelly-product-purchase button, .jelly-newsletter button, .jelly-search-shell button):not(.jelly-button--link) { text-transform: var(--jelly-button-case, none); transition: background-color var(--jm-fast) var(--jm-ease), color var(--jm-fast) var(--jm-ease), border-color var(--jm-fast) var(--jm-ease), transform var(--jm-fast) var(--jm-ease), box-shadow var(--jm-fast) var(--jm-ease); }
+[data-jelly-theme="jelly-signature"] :is(.jelly-button, .signature-primary, .signature-secondary, .jelly-product-purchase button, .jelly-newsletter button, .jelly-search-shell button):not(.jelly-button--link, :disabled):hover { transform: var(--jelly-button-hover-transform, none); box-shadow: var(--jelly-button-hover-shadow, none); text-decoration: var(--jelly-button-hover-decoration, none); text-underline-offset: 4px; }
+/* A section using a colour scheme gets the scheme's button colours. */
+[data-jelly-theme="jelly-signature"] [data-section-style~="scheme"],
+[data-jelly-theme="jelly-signature"] [data-section-style~="scheme"] [data-color-scheme] { --jm-ink: var(--section-button); --jm-ink-contrast: var(--section-button-text); }

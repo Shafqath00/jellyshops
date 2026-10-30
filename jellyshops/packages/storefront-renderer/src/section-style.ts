@@ -28,11 +28,20 @@ export function sectionStyleProps(settings: Record<string, unknown> | undefined)
   const used: string[] = [];
   const text = (key: string) => typeof settings[key] === "string" ? settings[key] as string : "";
 
+  // A colour scheme from theme settings; "Use my own colours" below replaces it.
+  const scheme = ({ scheme1: 1, scheme2: 2, scheme3: 3, scheme4: 4 } as Record<string, number | undefined>)[text("styleScheme")];
+  if (scheme) {
+    vars["--section-bg"] = `var(--jelly-scheme-${scheme}-bg)`;
+    vars["--section-text"] = `var(--jelly-scheme-${scheme}-text)`;
+    vars["--section-button"] = `var(--jelly-scheme-${scheme}-button)`;
+    vars["--section-button-text"] = `var(--jelly-scheme-${scheme}-button-text)`;
+    used.push("colors", "scheme");
+  }
   // A colour left empty keeps the theme's, so ticking "Use my own colours" never blanks the section.
   if (settings.styleColors === true && (hex.test(text("styleBackground")) || hex.test(text("styleText")))) {
     vars["--section-bg"] = hex.test(text("styleBackground")) ? text("styleBackground") : "var(--theme-background, #ffffff)";
     vars["--section-text"] = hex.test(text("styleText")) ? text("styleText") : "var(--theme-text, #1c1b19)";
-    used.push("colors");
+    if (!used.includes("colors")) used.push("colors");
   }
   if (fonts.has(text("styleHeadingFont"))) { vars["--section-heading-font"] = fontStack(text("styleHeadingFont"), "Arial"); used.push("heading-font"); }
   if (headingScale[text("styleHeadingSize")]) { vars["--section-heading-scale"] = headingScale[text("styleHeadingSize")]; used.push("heading-size"); }

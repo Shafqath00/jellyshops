@@ -16,12 +16,15 @@ export const SECTION_BODY_SIZES = ["small", "regular", "large"] as const;
 export const SECTION_ALIGNMENTS = ["left", "center", "right"] as const;
 export const SECTION_SPACINGS = ["none", "small", "large"] as const;
 export const SECTION_WIDTHS = ["page", "full"] as const;
+/** The four colour schemes set in theme settings (Theme settings › Colour scheme 1-4). */
+export const SECTION_SCHEMES = ["scheme1", "scheme2", "scheme3", "scheme4"] as const;
 
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 /** Empty string means "use the theme's choice"; the editor's select lists it as "Theme default". */
 const optional = <T extends readonly [string, ...string[]]>(values: T) => z.union([z.enum(values), z.literal("")]).optional();
 
 export const sectionStyleSchema = z.object({
+  styleScheme: optional(SECTION_SCHEMES),
   styleColors: z.boolean().optional(),
   styleBackground: hexColor.optional(),
   styleText: hexColor.optional(),
@@ -43,7 +46,8 @@ const themeDefault = { label: "Theme default", value: "" };
 const fonts = [themeDefault, ...SECTION_FONT_CHOICES.map((font) => ({ label: font, value: font }))];
 
 export const SECTION_STYLE_CONTROLS: ControlDefinition[] = [
-  { type: "checkbox", key: "styleColors", label: "Use my own colours", description: "Turn on to choose this section's background and text colours.", group: "style", heading: "Appearance" },
+  { type: "select", key: "styleScheme", label: "Colour scheme", description: "Edit the schemes in theme settings.", group: "style", heading: "Appearance", options: [themeDefault, { label: "Scheme 1", value: "scheme1" }, { label: "Scheme 2", value: "scheme2" }, { label: "Scheme 3", value: "scheme3" }, { label: "Scheme 4", value: "scheme4" }] },
+  { type: "checkbox", key: "styleColors", label: "Use my own colours", description: "Turn on to choose this section's background and text colours. They replace the colour scheme.", group: "style", heading: "Appearance" },
   { type: "color", key: "styleBackground", label: "Background colour", group: "style", heading: "Appearance", allowAlpha: false, showWhen: { key: "styleColors", equals: true } },
   { type: "color", key: "styleText", label: "Text colour", group: "style", heading: "Appearance", allowAlpha: false, showWhen: { key: "styleColors", equals: true } },
   { type: "select", key: "styleHeadingFont", label: "Heading font", group: "style", heading: "Typography", options: fonts },
