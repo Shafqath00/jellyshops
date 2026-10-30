@@ -58,6 +58,10 @@ export function normalizeBlock(value: unknown): SectionNode["blocks"][number] | 
     ...(input.responsive && typeof input.responsive === "object" && !Array.isArray(input.responsive)
       ? { responsive: structuredClone(input.responsive) as SectionNode["blocks"][number]["responsive"] }
       : {}),
+    // Blocks inside a group.
+    ...(Array.isArray(input.blocks)
+      ? { blocks: input.blocks.map(normalizeBlock).filter((block): block is NonNullable<ReturnType<typeof normalizeBlock>> => block !== null) }
+      : {}),
   };
 }
 

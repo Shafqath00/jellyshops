@@ -55,6 +55,7 @@ const blockLabels: Record<string, string> = {
   button: "Button",
   image: "Image",
   video: "Video",
+  group: "Group",
   testimonial: "Testimonial",
   "faq-item": "Question",
   logo: "Logo",

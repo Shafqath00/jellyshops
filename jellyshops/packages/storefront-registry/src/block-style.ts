@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { BlockDefinition, ControlDefinition } from "./types.js";
 
 /**
- * Style settings the heading, text and button blocks share, laid out like
+ * Style settings the heading, text, button, media and group blocks share, laid out like
  * Shopify's block panel: Layout, Typography, Appearance, Borders, Padding.
  * Each one is optional: when it is empty the block follows its section and theme.
  * The renderer turns them into inline styles on the block, in the editor preview
@@ -11,10 +11,11 @@ import type { BlockDefinition, ControlDefinition } from "./types.js";
 
 export const BLOCK_TYPE_PRESETS = ["h1", "h2", "h3", "h4", "body", "small"] as const;
 export const BLOCK_MAX_WIDTHS = ["narrow", "normal", "wide", "none"] as const;
-export const STYLED_BLOCK_TYPES = ["heading", "text", "button", "image", "video"] as const;
+export const STYLED_BLOCK_TYPES = ["heading", "text", "button", "image", "video", "group"] as const;
 /** Buttons and media have no text style, text colour or background of their own (buttons have their own colours). */
 const TEXT_ONLY_KEYS = new Set(["blockTypePreset", "blockTextColor", "blockBackground", "blockBackgroundColor"]);
-const TEXT_BLOCK_TYPES = new Set(["heading", "text"]);
+/** A group passes its text style and colours on to the blocks inside it. */
+const TEXT_BLOCK_TYPES = new Set(["heading", "text", "group"]);
 
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 const empty = z.literal("");
@@ -67,7 +68,7 @@ export function isBlockStyleKey(key: string): boolean {
   return styleKeys.has(key);
 }
 
-/** Adds the shared style controls to heading, text, button, image and video blocks; other blocks are returned unchanged. */
+/** Adds the shared style controls to heading, text, button, image, video and group blocks; other blocks are returned unchanged. */
 export function withBlockStyle(definition: BlockDefinition): BlockDefinition {
   if (!styledTypes.has(definition.type)) return definition;
   const own = new Set(definition.controls.map((control) => control.key));

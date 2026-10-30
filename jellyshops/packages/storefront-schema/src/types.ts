@@ -22,6 +22,8 @@ export interface BlockNode {
   enabled: boolean;
   settings: Record<string, unknown>;
   responsive?: ResponsiveSettings;
+  /** Child blocks, for blocks that hold others (e.g. a group). */
+  blocks?: BlockNode[];
 }
 
 export interface SectionNode {

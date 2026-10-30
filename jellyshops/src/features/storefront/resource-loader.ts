@@ -82,6 +82,10 @@ function blockNode(input: unknown): SectionNode["blocks"][number] | null {
     ...(record.responsive && typeof record.responsive === "object" && !Array.isArray(record.responsive)
       ? { responsive: structuredClone(record.responsive) as SectionNode["blocks"][number]["responsive"] }
       : {}),
+    // Blocks inside a group.
+    ...(Array.isArray(record.blocks)
+      ? { blocks: record.blocks.map(blockNode).filter((block): block is NonNullable<ReturnType<typeof blockNode>> => block !== null) }
+      : {}),
   };
 
 }

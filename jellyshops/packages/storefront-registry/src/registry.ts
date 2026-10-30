@@ -1,4 +1,4 @@
-import { isRichTextDocument, type PageType, type SectionNode } from "@jelly/storefront-schema";
+import { isRichTextDocument, MAX_BLOCK_DEPTH, type BlockNode, type PageType, type SectionNode } from "@jelly/storefront-schema";
 import { z } from "zod";
 import { blockDefinitions } from "./blocks.js";
 import { commerceSections } from "./sections/commerce.js";
@@ -48,13 +48,28 @@ export function validateSectionAgainstRegistry(section: SectionNode, pageType: P
   if ((definition.maxBlocks !== undefined && section.blocks.length > definition.maxBlocks) || (definition.minBlocks !== undefined && section.blocks.length < definition.minBlocks)) {
     issues.push({ code: "BLOCK_LIMIT_EXCEEDED", sectionId: section.id, message: "Section block limit exceeded" });
   }
-  for (const block of section.blocks) {
-    if (!definition.allowedBlockTypes.includes(block.type)) {
-      issues.push({ code: "BLOCK_NOT_ALLOWED", sectionId: section.id, blockId: block.id, message: `${block.type} is not allowed in ${section.type}` });
+  issues.push(...validateBlocks(section.blocks, definition.allowedBlockTypes, section.type, section.id, 1));
+  return issues;
+}
+
+/** Checks blocks and, for groups, the blocks inside them (one level deep). */
+function validateBlocks(blocks: BlockNode[], allowed: string[], owner: string, sectionId: string, depth: number): RegistryValidationIssue[] {
+  const issues: RegistryValidationIssue[] = [];
+  for (const block of blocks) {
+    if (!allowed.includes(block.type)) {
+      issues.push({ code: "BLOCK_NOT_ALLOWED", sectionId, blockId: block.id, message: `${block.type} is not allowed in ${owner}` });
       continue;
     }
     const blockDefinition = getBlockDefinition(block.type);
-    if (!blockDefinition || !blockDefinition.settingsSchema.safeParse(block.settings).success || !formattedCopiesValid(block.settings)) issues.push({ code: "SETTINGS_INVALID", sectionId: section.id, blockId: block.id, message: "Block settings are invalid" });
+    if (!blockDefinition || !blockDefinition.settingsSchema.safeParse(block.settings).success || !formattedCopiesValid(block.settings)) issues.push({ code: "SETTINGS_INVALID", sectionId, blockId: block.id, message: "Block settings are invalid" });
+    const children = block.blocks ?? [];
+    if (children.length === 0) continue;
+    if (!blockDefinition?.allowedBlockTypes || depth >= MAX_BLOCK_DEPTH) {
+      issues.push({ code: "BLOCK_NOT_ALLOWED", sectionId, blockId: block.id, message: `${block.type} cannot hold other blocks` });
+      continue;
+    }
+    if (blockDefinition.maxBlocks !== undefined && children.length > blockDefinition.maxBlocks) issues.push({ code: "BLOCK_LIMIT_EXCEEDED", sectionId, blockId: block.id, message: "Block limit exceeded" });
+    issues.push(...validateBlocks(children, blockDefinition.allowedBlockTypes, block.type, sectionId, depth + 1));
   }
   return issues;
 }

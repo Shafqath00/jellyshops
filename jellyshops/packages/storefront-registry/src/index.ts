@@ -12,3 +12,4 @@ export { isSectionStyleKey, SECTION_ALIGNMENTS, SECTION_BODY_SIZES, SECTION_FONT
 export type { SectionStyleSettings } from "./section-style.js";
 export { BLOCK_MAX_WIDTHS, BLOCK_STYLE_CONTROLS, BLOCK_TYPE_PRESETS, blockStyleSchema, isBlockStyleKey, STYLED_BLOCK_TYPES } from "./block-style.js";
 export type { BlockStyleSettings } from "./block-style.js";
+export { GROUP_CHILD_TYPES } from "./blocks.js";

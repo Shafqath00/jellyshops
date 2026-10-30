@@ -1,5 +1,5 @@
-import type { DynamicBinding, RichTextDocument, SectionNode } from "@jelly/storefront-schema";
-import { isRichTextDocument } from "@jelly/storefront-schema";
+import type { BlockNode, DynamicBinding, RichTextDocument, SectionNode } from "@jelly/storefront-schema";
+import { flattenBlocks, isRichTextDocument } from "@jelly/storefront-schema";
 import { getBlockDefinition, getSectionDefinition } from "@jelly/storefront-registry";
 
 /**
@@ -38,7 +38,7 @@ export function bindingKey(binding: DynamicBinding): string {
 }
 
 function nodes(layout: { [K in string]?: SectionNode[] }): Array<{ settings: Record<string, unknown> }> {
-  return Object.values(layout).flatMap((sections) => (sections ?? []).flatMap((section) => [section, ...section.blocks]));
+  return Object.values(layout).flatMap((sections) => (sections ?? []).flatMap((section) => [section, ...flattenBlocks(section.blocks)]));
 }
 
 /** Every distinct binding the layout's sections and blocks use. */
@@ -130,6 +130,14 @@ function controlTypes(controls: Array<{ key: string; type: string }> | undefined
   return new Map((controls ?? []).map((control) => [control.key, control.type]));
 }
 
+function applyBlockValues(blocks: BlockNode[], values: BindingValues): BlockNode[] {
+  return blocks.map((block) => ({
+    ...block,
+    settings: applySettings(block.settings, controlTypes(getBlockDefinition(block.type)?.controls), values),
+    ...(block.blocks ? { blocks: applyBlockValues(block.blocks, values) } : {}),
+  }));
+}
+
 /** A copy of the layout with every bound setting replaced by its value (or fallback); the input is not changed. */
 export function applyBindingValues<K extends string>(layout: Regions<K>, values: BindingValues): Regions<K> {
   const result = {} as Regions<K>;
@@ -137,10 +145,7 @@ export function applyBindingValues<K extends string>(layout: Regions<K>, values:
     result[region] = layout[region].map((section) => ({
       ...section,
       settings: applySettings(section.settings, controlTypes(getSectionDefinition(section.type)?.controls), values),
-      blocks: section.blocks.map((block) => ({
-        ...block,
-        settings: applySettings(block.settings, controlTypes(getBlockDefinition(block.type)?.controls), values),
-      })),
+      blocks: applyBlockValues(section.blocks, values),
     }));
   }
   return result;

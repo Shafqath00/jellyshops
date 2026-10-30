@@ -36,6 +36,34 @@ const buttonOptionControls: ControlDefinition[] = [
 
 const linkSchema = z.union([z.string(), settingValueSchema(z.string())]).optional();
 
+/** Blocks a group may hold. Groups do not hold groups (one level of nesting). */
+export const GROUP_CHILD_TYPES = ["heading", "text", "button", "image", "video"];
+/** A group lays its blocks out in a row or a column, like Shopify's group block. */
+const groupBlock: BlockDefinition = {
+  type: "group",
+  settingsSchema: z.object({
+    groupDirection: choice(["vertical", "horizontal"] as const),
+    groupAlign: choice(["start", "center", "end", "between"] as const),
+    groupVerticalAlign: choice(["start", "center", "end"] as const),
+    groupGap: z.number().int().min(0).max(80).optional(),
+    groupWrap: z.boolean().optional(),
+  }).passthrough(),
+  controls: [
+    { type: "segmented", key: "groupDirection", label: "Direction", group: "layout", heading: "Layout", options: [{ label: "Vertical", value: "vertical" }, { label: "Horizontal", value: "horizontal" }] },
+    { type: "select", key: "groupAlign", label: "Alignment", group: "layout", heading: "Layout", options: [{ label: "Follow section", value: "" }, { label: "Start", value: "start" }, { label: "Centre", value: "center" }, { label: "End", value: "end" }, { label: "Spread out", value: "between" }] },
+    { type: "segmented", key: "groupVerticalAlign", label: "Line up", group: "layout", heading: "Layout", showWhen: { key: "groupDirection", equals: "horizontal" }, options: [{ label: "Top", value: "start" }, { label: "Middle", value: "center" }, { label: "Bottom", value: "end" }] },
+    { type: "range", key: "groupGap", label: "Gap", group: "layout", heading: "Layout", min: 0, max: 80, step: 1, unit: "px" },
+    { type: "checkbox", key: "groupWrap", label: "Stack on small screens", group: "layout", heading: "Layout", showWhen: { key: "groupDirection", equals: "horizontal" } },
+  ],
+  defaultSettings: { groupDirection: "horizontal", groupGap: 12, groupWrap: true },
+  allowedBlockTypes: GROUP_CHILD_TYPES,
+  maxBlocks: 8,
+  defaultBlocks: [
+    { id: "group-button-1", type: "button", enabled: true, settings: { label: "Shop now", href: "/shop" } },
+    { id: "group-button-2", type: "button", enabled: true, settings: { label: "Learn more", href: "/pages/about" } },
+  ],
+};
+
 const blocks: BlockDefinition[] = [
   { type: "slide", settingsSchema: z.object({ image: imageReference.optional(), eyebrow: z.string().max(80).optional(), heading: dynamicString.optional(), text: dynamicString.optional(), buttonLabel: z.string().max(40).optional(), buttonLink: linkSchema }).passthrough(), controls: [{ type: "image", key: "image", label: "Image", group: "content" }, { type: "text", key: "eyebrow", label: "Small text above heading", group: "content", maxLength: 80 }, { type: "text", key: "heading", label: "Heading", group: "content", maxLength: 120, dynamicTypes: stringTypes }, { type: "textarea", key: "text", label: "Text", group: "content", maxLength: 400, dynamicTypes: stringTypes }, { type: "text", key: "buttonLabel", label: "Button text", group: "content", maxLength: 40 }, { type: "link", key: "buttonLink", label: "Button link", group: "content", dynamicTypes: urlTypes }], defaultSettings: { heading: "A new season", text: "Introduce your latest collection.", buttonLabel: "Shop now", buttonLink: "/shop" } },
   { type: "product-tab", settingsSchema: z.object({ label: z.string().max(40), sort: z.string().max(40).optional(), collectionId: z.unknown().optional() }).passthrough(), controls: [{ type: "text", key: "label", label: "Tab name", group: "content", maxLength: 40 }, { type: "collection", key: "collectionId", label: "Show products from", group: "content", dynamicTypes: ["collection_reference"] }, { type: "select", key: "sort", label: "Order", group: "content", options: [{ label: "Featured", value: "" }, { label: "Newest first", value: "newest" }, { label: "Best selling", value: "best-selling" }, { label: "Price: low to high", value: "price-asc" }] }], defaultSettings: { label: "New in", sort: "newest" } },
@@ -56,6 +84,7 @@ const blocks: BlockDefinition[] = [
   // Fixed rows for the Specifications section, e.g. "Warranty: 10 years". Values are typed, not bound, because bindings are not resolved on the live store yet.
   { type: "spec-row", settingsSchema: z.object({ label: z.string().max(60), value: z.string().max(240) }).passthrough(), controls: [{ type: "text", key: "label", label: "Name, e.g. Warranty", group: "content", maxLength: 60 }, { type: "text", key: "value", label: "Value, e.g. 10 years", group: "content", maxLength: 240 }], defaultSettings: { label: "Warranty", value: "10 years" } },
   { type: "contact-item", settingsSchema: z.object({ label: z.string(), value: dynamicString }).passthrough(), controls: [{ type: "text", key: "label", label: "Label", group: "content", maxLength: 40 }, { type: "text", key: "value", label: "Value", group: "content", maxLength: 160, dynamicTypes: stringTypes }], defaultSettings: { label: "Email", value: "hello@example.com" } },
+  groupBlock,
   { type: "social-link", settingsSchema: z.object({ label: z.string(), href: z.union([z.string(), settingValueSchema(z.string())]) }).passthrough(), controls: [{ type: "link", key: "href", label: "Link", group: "content", dynamicTypes: urlTypes }], defaultSettings: { label: "Instagram", href: "https://example.com" } }
 ];
 

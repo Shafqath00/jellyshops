@@ -119,7 +119,7 @@ export const contentSections: SectionDefinition[] = [
       { type: "range", key: "gap", label: "Gap", group: "layout", min: 0, max: 80, step: 4, unit: "px" },
       { type: "select", key: "contentWidth", label: "Content width", group: "layout", options: [{ label: "Narrow", value: "narrow" }, { label: "Normal", value: "normal" }, { label: "Wide", value: "wide" }, { label: "Full page", value: "full" }] },
     ],
-    allowedBlockTypes: ["heading", "text", "button", "image", "video"], maxBlocks: 12,
+    allowedBlockTypes: ["heading", "text", "button", "image", "video", "group"], maxBlocks: 12,
     defaultSettings: { direction: "vertical", contentAlignment: "center", gap: 16, contentWidth: "normal" },
     defaultBlocks: [
       { id: "custom-heading", type: "heading", enabled: true, settings: { text: "Tell your story" } },

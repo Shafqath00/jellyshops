@@ -15,6 +15,8 @@ export interface CompilerBlockNode {
   enabled?: boolean;
   settings: Record<string, unknown>;
   responsive?: CompilerResponsiveSettings;
+  /** Blocks inside a group block. */
+  blocks?: CompilerBlockNode[];
 }
 
 export interface CompilerSectionNode {

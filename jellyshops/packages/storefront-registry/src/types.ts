@@ -25,7 +25,16 @@ export type ControlDefinition =
   | (ControlBase & { type: "spacing"; min: number; max: number })
   | (ControlBase & { type: "link" | "image" | "product" | "collection" });
 export type RegionName = "header" | "template" | "footer";
-export interface BlockDefinition { type: string; settingsSchema: ZodType; controls: ControlDefinition[]; defaultSettings: Record<string, unknown> }
+export interface BlockDefinition {
+  type: string;
+  settingsSchema: ZodType;
+  controls: ControlDefinition[];
+  defaultSettings: Record<string, unknown>;
+  /** Blocks that may sit inside this one (a group). Blocks without it hold no children. */
+  allowedBlockTypes?: string[];
+  maxBlocks?: number;
+  defaultBlocks?: BlockNode[];
+}
 export interface SectionDefinition {
   type: string;
   category: "layout" | "content" | "commerce";

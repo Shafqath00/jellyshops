@@ -59,6 +59,8 @@ export type {
   RuntimeTemplateV4,
 } from "./runtime-v4.js";
 export { storefrontPageTypes } from "./types.js";
+export { MAX_BLOCK_DEPTH, childBlocks, copyBlockWithNewIds, findBlock, flattenBlocks, updateBlock, updateBlockList } from "./block-tree.js";
+export type { BlockLocation } from "./block-tree.js";
 export type { BlockNode, GlobalSettings, PageDocument, PageType, SectionNode, StoreDesignDocument, ThemeId } from "./types.js";
 export type { RichTextBlock, RichTextDocument, RichTextInline, RichTextMark } from "./rich-text.js";
 export {

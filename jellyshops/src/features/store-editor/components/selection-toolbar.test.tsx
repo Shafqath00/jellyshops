@@ -15,7 +15,7 @@ function previewFrame() {
   return doc;
 }
 
-const actions = { "move-up": false, "move-down": true, duplicate: true, toggle: true, remove: true };
+const actions = { "move-up": false, "move-down": true, duplicate: true, toggle: true, remove: true, "group-in": false, "group-out": false };
 
 it("shows the actions next to the selected block inside the preview and outlines it", async () => {
   const doc = previewFrame();
@@ -23,6 +23,8 @@ it("shows the actions next to the selected block inside the preview and outlines
   render(<SelectionToolbar target={{ sectionId: "s1", blockId: "b1" }} label="Heading" hidden={false} actions={actions} onAction={onAction} />);
   const toolbar = await waitFor(() => within(doc.body).getByRole("toolbar", { name: "Heading actions" }));
   expect(within(toolbar).getByRole("button", { name: "Move up" })).toBeDisabled();
+  // Group buttons only show when the block can go into or out of a group.
+  expect(within(toolbar).queryByRole("button", { name: "Move out of group" })).not.toBeInTheDocument();
   await userEvent.setup({ document: doc }).click(within(toolbar).getByRole("button", { name: "Duplicate" }));
   expect(onAction).toHaveBeenCalledWith("duplicate");
   await waitFor(() => expect(doc.querySelector("h2")).toHaveAttribute("data-editor-current"));
@@ -35,4 +37,14 @@ it("offers Show for a hidden item that is not on the page", async () => {
   const toolbar = await waitFor(() => within(doc.body).getByRole("toolbar", { name: "Text actions" }));
   expect(within(toolbar).getByText("Text (hidden)")).toBeInTheDocument();
   expect(within(toolbar).getByRole("button", { name: "Show" })).toBeInTheDocument();
+});
+
+it("offers moving a block out of its group when it can", async () => {
+  const doc = previewFrame();
+  const onAction = vi.fn();
+  render(<SelectionToolbar target={{ sectionId: "s1", blockId: "b1" }} label="Button" hidden={false} actions={{ ...actions, "group-out": true }} onAction={onAction} />);
+  const toolbar = await waitFor(() => within(doc.body).getByRole("toolbar", { name: "Button actions" }));
+  await userEvent.setup({ document: doc }).click(within(toolbar).getByRole("button", { name: "Move out of group" }));
+  expect(onAction).toHaveBeenCalledWith("group-out");
+  expect(within(toolbar).queryByRole("button", { name: "Move into group above" })).not.toBeInTheDocument();
 });

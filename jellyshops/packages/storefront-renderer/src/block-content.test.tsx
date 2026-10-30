@@ -63,3 +63,40 @@ it("lets the editor select heading, text and button blocks in content sections, 
   render(<RegistrySectionRenderer section={section} mode="published" commerce={{ getProducts: async () => [] }} />);
   expect(screen.getByRole("heading", { name: "Made here" })).not.toHaveAttribute("data-editor-block-id");
 });
+
+it("lays out a group's blocks in a row and lets the editor select blocks inside it", () => {
+  const section: SectionNode = {
+    id: "c2", type: "custom-content", enabled: true, settings: {},
+    blocks: [
+      { id: "h", type: "heading", enabled: true, settings: { text: "Visit us" } },
+      { id: "g", type: "group", enabled: true, settings: { groupDirection: "horizontal", groupAlign: "between", groupGap: 24, blockBackground: true, blockBackgroundColor: "#eeeeee" }, blocks: [
+        { id: "b1", type: "button", enabled: true, settings: { label: "Book a visit", href: "/contact" } },
+        { id: "b2", type: "button", enabled: true, settings: { label: "Call us", href: "/call" } },
+        { id: "off", type: "text", enabled: false, settings: { text: "Hidden text" } },
+      ] },
+      { id: "empty", type: "group", enabled: true, settings: {}, blocks: [] },
+      { id: "fill", type: "group", enabled: true, settings: { blockWidth: "fill" }, blocks: [{ id: "f1", type: "heading", enabled: true, settings: { text: "Full width" } }] },
+    ],
+  };
+  const { unmount } = render(<RegistrySectionRenderer section={section} mode="published" commerce={{ getProducts: async () => [] }} storeSlug="demo" />);
+  const group = screen.getByRole("link", { name: "Book a visit" }).parentElement!;
+  expect(group).toHaveClass("jelly-block-group");
+  expect(group).toHaveAttribute("data-direction", "horizontal");
+  expect(group).toHaveAttribute("data-align", "between");
+  expect(group.style.getPropertyValue("--group-gap")).toBe("24px");
+  expect(group.style.background).toBe("rgb(238, 238, 238)");
+  // Each group numbers its own buttons: the first is filled, the next outlined.
+  expect(screen.getByRole("link", { name: "Book a visit" })).toHaveClass("jelly-button");
+  expect(screen.getByRole("link", { name: "Call us" })).toHaveClass("jelly-button--secondary");
+  expect(screen.queryByText("Hidden text")).not.toBeInTheDocument();
+  expect(screen.queryByText("Add blocks to this group")).not.toBeInTheDocument();
+  expect(group).not.toHaveAttribute("data-editor-block-id");
+  // Width "Fill" stretches a group but keeps it a flex layout.
+  expect(screen.getByRole("heading", { name: "Full width" }).parentElement!.style.display).toBe("");
+  expect(screen.getByRole("heading", { name: "Full width" }).parentElement!.style.width).toBe("100%");
+  unmount();
+  render(<RegistrySectionRenderer section={section} mode="editor" commerce={{ getProducts: async () => [] }} storeSlug="demo" />);
+  expect(screen.getByRole("link", { name: "Call us" })).toHaveAttribute("data-editor-block-id", "b2");
+  expect(screen.getByRole("link", { name: "Call us" }).parentElement).toHaveAttribute("data-editor-block-id", "g");
+  expect(screen.getByText("Add blocks to this group").parentElement).toHaveAttribute("data-editor-block-id", "empty");
+});

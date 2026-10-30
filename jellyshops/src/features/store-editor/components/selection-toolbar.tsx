@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, ListIndentDecrease, ListIndentIncrease, Trash2 } from "lucide-react";
 import type { SelectionAction, SelectionTarget } from "../selection-actions";
 
 /**
  * Shopify-style floating toolbar for the selected section or block, drawn inside
  * the preview frame next to the selected element: move up/down, duplicate,
- * hide/show and delete. When the element is not on the page (hidden), the toolbar
+ * hide/show and delete, plus moving a block into or out of a group when it can. When the element is not on the page (hidden), the toolbar
  * sits at the top of the preview so the item can be shown again.
  */
 
@@ -44,9 +44,11 @@ function usePreviewDocument(frameTitle: string): Document | null {
 /** Outlines the selected element even in sections that cannot mark their own selected block. */
 const currentStyle = ".theme-preview-viewport [data-editor-current] { outline: 2px solid var(--primary, #2563eb) !important; outline-offset: -2px; }";
 
-const actionButtons: Array<{ action: SelectionAction; label: (hidden: boolean) => string; icon: (hidden: boolean) => typeof ArrowUp }> = [
+const actionButtons: Array<{ action: SelectionAction; label: (hidden: boolean) => string; icon: (hidden: boolean) => typeof ArrowUp; onlyWhenAvailable?: boolean }> = [
   { action: "move-up", label: () => "Move up", icon: () => ArrowUp },
   { action: "move-down", label: () => "Move down", icon: () => ArrowDown },
+  { action: "group-in", label: () => "Move into group above", icon: () => ListIndentIncrease, onlyWhenAvailable: true },
+  { action: "group-out", label: () => "Move out of group", icon: () => ListIndentDecrease, onlyWhenAvailable: true },
   { action: "duplicate", label: () => "Duplicate", icon: () => Copy },
   { action: "toggle", label: (hidden) => hidden ? "Show" : "Hide", icon: (hidden) => hidden ? Eye : EyeOff },
   { action: "remove", label: () => "Delete", icon: () => Trash2 },
@@ -111,7 +113,7 @@ export function SelectionToolbar({
     >
       <style>{currentStyle}</style>
       <span className="max-w-[160px] truncate px-1.5 text-[11px] font-semibold">{hidden ? `${label} (hidden)` : label}</span>
-      {actionButtons.map(({ action, label: name, icon }) => {
+      {actionButtons.filter(({ action, onlyWhenAvailable }) => !onlyWhenAvailable || actions[action]).map(({ action, label: name, icon }) => {
         const Icon = icon(hidden);
         const text = name(hidden);
         return (

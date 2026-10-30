@@ -95,4 +95,20 @@ describe("buildDependencyGraph", () => {
       expect.objectContaining({ to: { type: "media", id: "uploaded-image-1" }, reason: "media" }),
     ]));
   });
+
+  it("records media used by blocks inside a group", () => {
+    const compilation = input();
+    const placement = compilation.templates[0]!.layout.sections.find((entry) => entry.kind === "inline");
+    if (!placement || placement.kind !== "inline") throw new Error("Expected an inline section");
+    placement.section.blocks = [{
+      id: "group-1",
+      type: "group",
+      settings: {},
+      blocks: [{ id: "image-1", type: "image", settings: { image: { type: "media", id: "media-in-group" } } }],
+    }];
+
+    expect(buildDependencyGraph(compilation).edges).toEqual(expect.arrayContaining([
+      expect.objectContaining({ to: { type: "media", id: "media-in-group" }, reason: "media" }),
+    ]));
+  });
 });

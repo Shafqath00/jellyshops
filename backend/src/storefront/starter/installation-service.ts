@@ -44,9 +44,12 @@ function toDatabaseType(type: string): string {
   return type.replaceAll("-", "_").toUpperCase();
 }
 
+function rekeyBlocks(blocks: SectionNode["blocks"], prefix: string): SectionNode["blocks"] {
+  return blocks.map((block) => ({ ...block, id: `${prefix}:${block.id}`, ...(block.blocks ? { blocks: rekeyBlocks(block.blocks, prefix) } : {}) }));
+}
+
 function rekeySection(section: SectionNode, prefix: string): SectionNode {
-  const blocks = section.blocks.map((block) => ({ ...block, id: `${prefix}:${block.id}` }));
-  return { ...section, id: `${prefix}:${String(section.id)}`, blocks };
+  return { ...section, id: `${prefix}:${String(section.id)}`, blocks: rekeyBlocks(section.blocks, prefix) };
 }
 
 function rekeyMenuItems(items: StarterMenuItem[], prefix: string): StarterMenuItem[] {

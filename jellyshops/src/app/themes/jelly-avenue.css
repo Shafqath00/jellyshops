@@ -1175,6 +1175,6 @@
 
 /* 16 ── Custom content section, image and video blocks ──────────────────── */
 [data-jelly-theme="jelly-avenue"] .jelly-custom-content h2 { font-family: var(--av-font-heading); font-size: var(--av-h2); font-weight: var(--av-heading-weight); line-height: 1.1; }
-[data-jelly-theme="jelly-avenue"] .jelly-custom-content-inner > :is(p, .jelly-setting-text) { max-width: 60ch; color: var(--av-muted); }
+[data-jelly-theme="jelly-avenue"] :is(.jelly-custom-content-inner, .jelly-custom-content .jelly-block-group) > :is(p, .jelly-setting-text) { max-width: 60ch; color: var(--av-muted); }
 [data-jelly-theme="jelly-avenue"] :is(.jelly-image-block, .jelly-video-block) { border-radius: var(--av-radius-card); }
 [data-jelly-theme="jelly-avenue"] .jelly-image-block { background: var(--av-surface); }

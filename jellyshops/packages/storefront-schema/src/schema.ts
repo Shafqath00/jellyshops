@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { BlockNode } from "./types.js";
 import { STORE_DESIGN_SCHEMA_VERSION } from "./version.js";
 
 export const themeIdSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
@@ -6,13 +7,14 @@ export const themeIdSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 const settingsSchema = z.record(z.string(), z.unknown());
 const responsiveSettingsSchema = z.object({ mobile: settingsSchema.optional() }).strict();
 
-const blockNodeSchema = z.object({
+const blockNodeSchema: z.ZodType<BlockNode> = z.lazy(() => z.object({
   id: z.string().min(1),
   type: z.string().min(1),
   enabled: z.boolean(),
   settings: settingsSchema,
-  responsive: responsiveSettingsSchema.optional()
-});
+  responsive: responsiveSettingsSchema.optional(),
+  blocks: z.array(blockNodeSchema).optional()
+}));
 
 export const sectionNodeSchema = z.object({
   id: z.string().min(1),
