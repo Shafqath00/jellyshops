@@ -5,6 +5,7 @@ import type { RendererMode } from "../types";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
 import { choice, headingHidden, imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
+import { formattedSetting, SettingText } from "./setting-text";
 
 function text(section: SectionNode, fallback: string): string {
   const setting = section.settings.heading ?? section.settings.text;
@@ -23,6 +24,7 @@ function blockCopy(section: SectionNode, fallbackHeading: string) {
   return {
     heading: stringValue(heading?.settings, "text", stringValue(section.settings, "heading", fallbackHeading)),
     body: stringValue(body?.settings, "text", stringValue(section.settings, "body", stringValue(section.settings, "text"))),
+    bodyDocument: stringValue(body?.settings, "text") ? formattedSetting(body?.settings, "text") : stringValue(section.settings, "body") ? null : formattedSetting(section.settings, "text"),
     buttons: buttons.flatMap((block) => {
       const label = stringValue(block.settings, "label");
       return label ? [{ id: block.id, label, href: block.settings.href }] : [];
@@ -62,7 +64,7 @@ export function ImageWithTextSection({ section, context }: { section: SectionNod
         <div className="jelly-image-text-content">
           {eyebrow && <p className="jelly-eyebrow">{eyebrow}</p>}
           <h2>{content.heading}</h2>
-          {content.body && <p>{content.body}</p>}
+          <SettingText text={content.body} document={content.bodyDocument} />
           <Actions buttons={content.buttons} storeSlug={context.storeSlug} />
         </div>
       </div>
@@ -86,7 +88,7 @@ export function ImageBannerSection({ section, context }: { section: SectionNode;
     </>}
     <StorefrontContainer className="jelly-image-banner-content">
       {content.heading && <h2>{content.heading}</h2>}
-      {content.body && <p>{content.body}</p>}
+      <SettingText text={content.body} document={content.bodyDocument} />
       <Actions buttons={content.buttons} storeSlug={context.storeSlug} />
     </StorefrontContainer>
   </section>;
@@ -95,15 +97,15 @@ export function ImageBannerSection({ section, context }: { section: SectionNode;
 export function MulticolumnSection({ section, context }: { section: SectionNode; context?: StorefrontRuntimeContext }) {
   const columns = visibleBlocks(section, "column").flatMap((block) => {
     const heading = stringValue(block.settings, "heading");
-    return heading ? [{ id: block.id, heading, text: stringValue(block.settings, "text") }] : [];
+    return heading ? [{ id: block.id, heading, text: stringValue(block.settings, "text"), document: formattedSetting(block.settings, "text") }] : [];
   });
   const content = blockCopy(section, "Why shop with us");
   const count = numberValue(section.settings, "columns", 3, 2, 4);
   return <section className="jelly-section jelly-multicolumn" {...sectionData(section, { "data-align": choice(section.settings, "contentAlignment", ["left", "center", "right"] as const, "left") })}>
     <StorefrontContainer>
-      {!headingHidden(section) && <div className="jelly-section-intro"><h2>{content.heading}</h2>{content.body && <p>{content.body}</p>}</div>}
+      {!headingHidden(section) && <div className="jelly-section-intro"><h2>{content.heading}</h2><SettingText text={content.body} document={content.bodyDocument} /></div>}
       {columns.length > 0 && <div className="jelly-multicolumn-grid" style={{ "--jelly-columns": count } as CSSProperties}>
-        {columns.map((column) => <article key={column.id}><h3>{column.heading}</h3>{column.text && <p>{column.text}</p>}</article>)}
+        {columns.map((column) => <article key={column.id}><h3>{column.heading}</h3><SettingText text={column.text} document={column.document} /></article>)}
       </div>}
       <Actions buttons={content.buttons} storeSlug={context?.storeSlug} />
     </StorefrontContainer>
@@ -113,16 +115,16 @@ export function MulticolumnSection({ section, context }: { section: SectionNode;
 export function FaqSection({ section }: { section: SectionNode }) {
   const items = visibleBlocks(section, "faq-item").flatMap((block) => {
     const question = stringValue(block.settings, "question");
-    return question ? [{ id: block.id, question, answer: stringValue(block.settings, "answer") }] : [];
+    return question ? [{ id: block.id, question, answer: stringValue(block.settings, "answer"), document: formattedSetting(block.settings, "answer") }] : [];
   });
   const heading = stringValue(section.settings, "heading", "Frequently asked questions");
   const intro = stringValue(section.settings, "text");
   return <section className="jelly-section jelly-faq" {...sectionData(section)}>
     <StorefrontContainer>
       <div className="jelly-faq-layout">
-        <div className="jelly-section-intro"><h2>{heading}</h2>{intro && <p>{intro}</p>}</div>
+        <div className="jelly-section-intro"><h2>{heading}</h2><SettingText text={intro} document={formattedSetting(section.settings, "text")} /></div>
         <div className="jelly-faq-list">
-          {items.map((item) => <details key={item.id}><summary>{item.question}</summary>{item.answer && <p>{item.answer}</p>}</details>)}
+          {items.map((item) => <details key={item.id}><summary>{item.question}</summary><SettingText text={item.answer} document={item.document} /></details>)}
         </div>
       </div>
     </StorefrontContainer>
@@ -145,7 +147,7 @@ export function NewsletterSection({ section, subscribe, mode = "preview" }: { se
   const buttonLabel = stringValue(section.settings, "buttonLabel", "Subscribe");
   return <section className="jelly-section jelly-newsletter" {...sectionData(section, { "data-align": choice(section.settings, "contentAlignment", ["left", "center", "right"] as const, "left") })}><StorefrontContainer>
     <h2>{content.heading}</h2>
-    {content.body && <p className="jelly-newsletter-text">{content.body}</p>}
+    <SettingText className="jelly-newsletter-text" text={content.body} document={content.bodyDocument} />
     <NewsletterForm source={section.id} buttonLabel={buttonLabel} subscribe={subscribe} mode={mode} />
   </StorefrontContainer></section>;
 }

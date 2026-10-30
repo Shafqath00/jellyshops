@@ -2,6 +2,7 @@ import { StorefrontContainer } from "@jelly/storefront-ui";
 import type { SectionNode } from "@jelly/storefront-schema";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { choice, headingHidden, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
+import { formattedSetting, SettingText } from "./setting-text";
 
 type Availability = { state?: string; message?: string; maxQuantity?: number };
 
@@ -54,14 +55,14 @@ export function ProductSpecificationsSection({ section, context }: { section: Se
 export function ProductTabsSection({ section }: { section: SectionNode }) {
   const tabs = visibleBlocks(section, "info-tab").flatMap((block) => {
     const title = stringValue(block.settings, "title");
-    return title ? [{ id: block.id, title, paragraphs: stringValue(block.settings, "text").split(/\n{2,}/).map((part) => part.trim()).filter(Boolean) }] : [];
+    return title ? [{ id: block.id, title, paragraphs: stringValue(block.settings, "text").split(/\n{2,}/).map((part) => part.trim()).filter(Boolean), document: formattedSetting(block.settings, "text") }] : [];
   });
   if (!tabs.length) return null;
   const firstOpen = section.settings.firstOpen === true;
   return <section className="jelly-section jelly-product-tabs-section" {...sectionData(section)}><StorefrontContainer>
     {tabs.map((tab, index) => <details key={tab.id} open={firstOpen && index === 0 ? true : undefined}>
       <summary>{tab.title}</summary>
-      <div>{tab.paragraphs.map((paragraph, position) => <p key={position}>{paragraph}</p>)}</div>
+      {tab.document ? <SettingText text="" document={tab.document} /> : <div>{tab.paragraphs.map((paragraph, position) => <p key={position}>{paragraph}</p>)}</div>}
     </details>)}
   </StorefrontContainer></section>;
 }

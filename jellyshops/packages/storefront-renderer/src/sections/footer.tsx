@@ -4,6 +4,7 @@ import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
 import { MenuList } from "./header";
 import { NewsletterForm } from "./home-sections";
+import { formattedSetting, SettingText } from "./setting-text";
 
 function stringSetting(value: unknown): string {
   return typeof value === "string" ? value : "";
@@ -63,13 +64,13 @@ export function FooterSection({ section, context, subscribe, mode = "preview" }:
   return <footer className="jelly-footer" data-section-id={section.id} data-newsletter={showNewsletter ? "true" : undefined}>
     {showNewsletter && <div className="jelly-footer-newsletter jelly-newsletter">
       <h2>{newsletterHeading}</h2>
-      {newsletterText && <p className="jelly-newsletter-text">{newsletterText}</p>}
+      <SettingText className="jelly-newsletter-text" text={newsletterText} document={formattedSetting(section.settings, "newsletterText")} />
       <NewsletterForm source={`${section.id}:footer`} buttonLabel="Subscribe" subscribe={subscribe} mode={mode} />
     </div>}
     <div className="jelly-footer-inner">
       <div className="jelly-footer-brand">
         {storeName && <strong>{storeName}</strong>}
-        {text && <p>{text}</p>}
+        <SettingText text={text} document={formattedSetting(section.settings, "text")} />
         {contactEmail && <a href={`mailto:${encodeURIComponent(contactEmail)}`}>{contactEmail}</a>}
       </div>
       {columns.length > 0 && <nav className="jelly-footer-links" aria-label="Footer navigation">{columns.map((column) => <div className="jelly-footer-column" key={column.id}>

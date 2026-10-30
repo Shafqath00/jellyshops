@@ -3,6 +3,7 @@ import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui
 import type { CommerceDataProvider, PublicProduct } from "../types";
 import { resolveStorefrontHref } from "../runtime-context";
 import { sectionData, stringValue, visibleBlocks } from "./shared";
+import { formattedSetting, SettingText } from "./setting-text";
 
 export function ProductGridSection({ commerce, section, storeSlug }: { commerce: CommerceDataProvider; section: import("@jelly/storefront-schema").SectionNode; storeSlug?: string }) {
   const [result, setResult] = useState<{ source: CommerceDataProvider; limit: number; scope: string; products: PublicProduct[]; error?: boolean }>();
@@ -58,7 +59,7 @@ export function ProductGridSection({ commerce, section, storeSlug }: { commerce:
   };
   return <section className="jelly-section jelly-product-grid" {...sectionData(section, { "data-align": align })}><StorefrontContainer>
     {(heading || viewAllHref || tabs.length > 1) && <div className="jelly-section-header">
-      <div>{heading && <h2>{heading}</h2>}{intro && <p>{intro}</p>}</div>
+      <div>{heading && <h2>{heading}</h2>}<SettingText text={intro} document={formattedSetting(section.settings, "text")} /></div>
       {tabs.length > 1 && <div className="jelly-product-tabs" role="tablist" aria-label={heading || "Product lists"}>{tabs.map((tab, index) => <button
         key={tab.id}
         type="button"

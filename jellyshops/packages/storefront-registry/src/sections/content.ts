@@ -47,7 +47,7 @@ const comprehensiveControls = [
 // Plain-language controls shared by the merchandising sections below.
 const colorScheme = { type: "segmented" as const, key: "colorScheme", label: "Background", group: "style" as const, options: [{ label: "Page", value: "page" }, { label: "Soft", value: "soft" }, { label: "Dark", value: "dark" }] };
 const sectionHeading = { type: "text" as const, key: "heading", label: "Heading", group: "content" as const, maxLength: 120, dynamicTypes: stringTypes };
-const sectionText = { type: "textarea" as const, key: "text", label: "Text", group: "content" as const, maxLength: 400, dynamicTypes: stringTypes };
+const sectionText = { type: "rich-text" as const, key: "text", label: "Text", group: "content" as const, maxLength: 400, dynamicTypes: stringTypes };
 const imageControl = { type: "image" as const, key: "image", label: "Image", group: "content" as const, dynamicTypes: imageTypes };
 const eyebrowControl = { type: "text" as const, key: "eyebrow", label: "Small text above heading", group: "content" as const, maxLength: 80, dynamicTypes: stringTypes };
 const leftOrCenter = { type: "segmented" as const, key: "contentAlignment", label: "Text alignment", group: "layout" as const, options: [{ label: "Left", value: "left" }, { label: "Center", value: "center" }] };
@@ -125,7 +125,7 @@ export const contentSections: SectionDefinition[] = [
     }).passthrough(),
     controls: [
       { type: "text", key: "heading", label: "Heading", group: "content", maxLength: 120 },
-      { type: "textarea", key: "text", label: "Text", group: "content", maxLength: 400 },
+      { type: "rich-text", key: "text", label: "Text", group: "content", maxLength: 400 },
       { type: "textarea", key: "address", label: "Address", group: "content", maxLength: 300 },
       { type: "textarea", key: "hours", label: "Opening hours (one line per day, e.g. Mon–Fri: 10am–7pm)", group: "content", maxLength: 400 },
       { type: "text", key: "phone", label: "Phone number", group: "content", maxLength: 40 },

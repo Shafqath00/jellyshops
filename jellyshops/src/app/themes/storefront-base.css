@@ -93,3 +93,5 @@
 :where([data-section-style~="body-font"]) { font-family: var(--section-body-font); }
 :where([data-section-style~="body-size"]) { font-size: var(--section-body-size); }
 :where([data-section-style~="align"]) { text-align: var(--section-align); }
+:where(.jelly-setting-text) > :where(:first-child) { margin-top: 0; }
+:where(.jelly-setting-text) > :where(:last-child) { margin-bottom: 0; }

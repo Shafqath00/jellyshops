@@ -1141,3 +1141,11 @@
 [data-jelly-theme="jelly-avenue"] [data-section-style~="align"] :is(h1, h2, h3, h4, p, [class*="-intro"], [class*="-header"], [class*="-content"]) { text-align: var(--section-align); }
 [data-jelly-theme="jelly-avenue"] [data-section-style~="spacing"] { --av-section: var(--section-space); }
 [data-jelly-theme="jelly-avenue"] [data-section-style~="align"] :is(.jelly-section-intro, .jelly-section-intro > *) { justify-items: var(--section-align); justify-self: var(--section-align); }
+
+/* 13 ── Formatted section text (rich text settings such as intros, answers, footer text) ── */
+/* Short formatted text inside a section reads like the paragraph it replaces, not like a long article. */
+[data-jelly-theme="jelly-avenue"] .jelly-setting-text > :first-child { margin-top: 0; }
+[data-jelly-theme="jelly-avenue"] .jelly-setting-text > :last-child { margin-bottom: 0; }
+[data-jelly-theme="jelly-avenue"] .jelly-setting-text :is(p, ul, ol) { margin: 0 0 0.75em; color: inherit; line-height: inherit; }
+[data-jelly-theme="jelly-avenue"] .jelly-setting-text :is(h2, h3) { margin: 1em 0 0.4em; font-size: var(--av-h4); }
+[data-jelly-theme="jelly-avenue"] .jelly-setting-text :is(ul, ol) { padding-left: 1.25em; }

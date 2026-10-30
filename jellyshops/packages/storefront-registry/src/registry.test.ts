@@ -205,3 +205,12 @@ it("gives every section the shared style settings and checks their values", () =
   expect(schema.safeParse({ styleHeadingFont: "Comic Sans" }).success).toBe(false);
   expect(schema.safeParse({ styleHeadingWeight: "950" }).success).toBe(false);
 });
+
+it("edits descriptions as rich text and checks the formatted copy", () => {
+  expect(getSectionDefinition("footer")?.controls.find(({ key }) => key === "text")?.type).toBe("rich-text");
+  expect(getSectionDefinition("faq")?.controls.find(({ key }) => key === "text")?.type).toBe("rich-text");
+  const faq = { id: "faq", type: "faq", enabled: true, settings: { heading: "Questions" }, blocks: [{ id: "q1", type: "faq-item", enabled: true, settings: { question: "Returns?", answer: "Yes.", answerDoc: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Yes." }] }] } } }] } as SectionNode;
+  expect(validateSectionAgainstRegistry(faq, "home")).toEqual([]);
+  const broken = { ...faq, blocks: [{ ...faq.blocks[0], settings: { ...faq.blocks[0].settings, answerDoc: "<script>" } }] } as SectionNode;
+  expect(validateSectionAgainstRegistry(broken, "home")).toEqual([expect.objectContaining({ code: "SETTINGS_INVALID", blockId: "q1" })]);
+});

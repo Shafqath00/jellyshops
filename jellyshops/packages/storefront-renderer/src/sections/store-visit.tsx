@@ -1,6 +1,7 @@
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import { safeRichTextHref, type SectionNode } from "@jelly/storefront-schema";
 import { headingHidden, imageValue, sectionData, stringValue, visibleBlocks } from "./shared";
+import { formattedSetting, SettingText } from "./setting-text";
 
 /** Digits only, keeping a leading "+" for tel: links. */
 function dialable(value: string, keepPlus: boolean): string {
@@ -57,7 +58,7 @@ export function StoreVisitSection({ section }: { section: SectionNode }) {
   return <section className="jelly-section jelly-store-visit" {...sectionData(section, { "data-has-image": image ? "true" : undefined })}><StorefrontContainer>
     <div className="jelly-store-visit-body">
       {!headingHidden(section) && <h2>{heading}</h2>}
-      {text && <p className="jelly-store-visit-text">{text}</p>}
+      <SettingText className="jelly-store-visit-text" text={text} document={formattedSetting(settings, "text")} />
       {address && <address className="jelly-store-visit-address">{address.split("\n").map((line, index) => <span key={index}>{line}</span>)}</address>}
       {hours.length > 0 && <div className="jelly-store-visit-hours">
         <h3>Opening hours</h3>

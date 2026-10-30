@@ -43,12 +43,12 @@ const headerControls: SectionDefinition["controls"] = [
 ];
 const footerControls: SectionDefinition["controls"] = [
   { type: "text", key: "storeName", label: "Store name", group: "content", maxLength: 120 },
-  { type: "textarea", key: "text", label: "About your store", group: "content", maxLength: 240 },
+  { type: "rich-text", key: "text", label: "About your store", group: "content", maxLength: 240 },
   { type: "text", key: "contactEmail", label: "Contact email", group: "content", maxLength: 160 },
   { type: "text", key: "copyright", label: "Copyright text", group: "content", maxLength: 160 },
   { type: "checkbox", key: "showNewsletter", label: "Show newsletter sign-up", group: "content" },
   { type: "text", key: "newsletterHeading", label: "Newsletter heading", group: "content", maxLength: 120 },
-  { type: "textarea", key: "newsletterText", label: "Newsletter text", group: "content", maxLength: 240 },
+  { type: "rich-text", key: "newsletterText", label: "Newsletter text", group: "content", maxLength: 240 },
 ];
 
 export const layoutSections: SectionDefinition[] = [

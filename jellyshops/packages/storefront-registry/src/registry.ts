@@ -1,4 +1,4 @@
-import type { PageType, SectionNode } from "@jelly/storefront-schema";
+import { isRichTextDocument, type PageType, type SectionNode } from "@jelly/storefront-schema";
 import { z } from "zod";
 import { blockDefinitions } from "./blocks.js";
 import { commerceSections } from "./sections/commerce.js";
@@ -28,13 +28,18 @@ export function listSectionDefinitionsForPage(pageType: PageType, region: Region
   return sections.filter((definition) => definition.supportedPages.includes(pageType) && (definition.allowedRegions ?? ["template"]).includes(region));
 }
 
+/** Rich text settings keep a formatted copy under `<key>Doc` next to the plain text; it must be a real document. */
+function formattedCopiesValid(settings: Record<string, unknown>): boolean {
+  return Object.entries(settings).every(([key, value]) => !key.endsWith("Doc") || value === undefined || value === null || isRichTextDocument(value));
+}
+
 export function validateSectionAgainstRegistry(section: SectionNode, pageType: PageType): RegistryValidationIssue[] {
   const definition = getSectionDefinition(section.type);
   if (!definition) return [{ code: "SECTION_NOT_REGISTERED", sectionId: section.id, message: `Section ${section.type} is not registered` }];
 
   const issues: RegistryValidationIssue[] = [];
   if (!definition.supportedPages.includes(pageType)) issues.push({ code: "SECTION_NOT_ALLOWED_ON_PAGE", sectionId: section.id, message: `${section.type} is not allowed on ${pageType}` });
-  if (!definition.settingsSchema.safeParse(section.settings).success) issues.push({ code: "SETTINGS_INVALID", sectionId: section.id, message: "Section settings are invalid" });
+  if (!definition.settingsSchema.safeParse(section.settings).success || !formattedCopiesValid(section.settings)) issues.push({ code: "SETTINGS_INVALID", sectionId: section.id, message: "Section settings are invalid" });
   if (section.responsive?.mobile) {
     for (const field of Object.keys(section.responsive.mobile)) {
       if (!definition.responsiveFields.includes(field)) issues.push({ code: "RESPONSIVE_FIELD_NOT_ALLOWED", sectionId: section.id, field, message: `${field} cannot be overridden on mobile` });
@@ -49,7 +54,7 @@ export function validateSectionAgainstRegistry(section: SectionNode, pageType: P
       continue;
     }
     const blockDefinition = getBlockDefinition(block.type);
-    if (!blockDefinition || !blockDefinition.settingsSchema.safeParse(block.settings).success) issues.push({ code: "SETTINGS_INVALID", sectionId: section.id, blockId: block.id, message: "Block settings are invalid" });
+    if (!blockDefinition || !blockDefinition.settingsSchema.safeParse(block.settings).success || !formattedCopiesValid(block.settings)) issues.push({ code: "SETTINGS_INVALID", sectionId: section.id, blockId: block.id, message: "Block settings are invalid" });
   }
   return issues;
 }
