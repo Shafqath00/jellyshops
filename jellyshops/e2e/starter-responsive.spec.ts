@@ -223,7 +223,7 @@ for (const [label, storeName] of [
     const compilation = page.waitForResponse((response) => response.url().endsWith("/storefront/preview/compile") && response.request().method() === "POST");
     await page.locator("header").getByRole("button", { name: "Preview", exact: true }).click();
     expect((await compilation).status()).toBe(200);
-    await expect(page.getByText(/Compiled preview · generation/)).toBeVisible();
+    await expect(page.getByText(/how your store will look when you publish/)).toBeVisible();
     await publicPage.reload();
     await expect.poll(() => publicPage.locator("body").innerText()).toBe(publicStateBeforeDraftPreview);
     const publication = page.waitForResponse((response) => response.url().endsWith("/storefront/publish") && response.request().method() === "POST");
