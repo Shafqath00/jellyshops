@@ -7,7 +7,7 @@ import { resolveStorefrontHref } from "../runtime-context";
 import { choice, headingHidden, imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
 import { formattedSetting, SettingText } from "./setting-text";
 import { blockStyleProps } from "../block-style";
-import { buttonProps } from "./block-content";
+import { blockEditorData, buttonProps } from "./block-content";
 
 function text(section: SectionNode, fallback: string): string {
   const setting = section.settings.heading ?? section.settings.text;
@@ -18,7 +18,8 @@ function text(section: SectionNode, fallback: string): string {
 }
 
 /** Heading, text and button content from a section's heading/text/button blocks, falling back to section settings. */
-function blockCopy(section: SectionNode, fallbackHeading: string) {
+/** `editor` adds the data the editor preview needs to select a block when it is clicked. */
+function blockCopy(section: SectionNode, fallbackHeading: string, editor = false) {
   const blocks = visibleBlocks(section);
   const heading = blocks.find((block) => block.type === "heading");
   const body = blocks.find((block) => block.type === "text");
@@ -27,11 +28,11 @@ function blockCopy(section: SectionNode, fallbackHeading: string) {
     heading: stringValue(heading?.settings, "text", stringValue(section.settings, "heading", fallbackHeading)),
     body: stringValue(body?.settings, "text", stringValue(section.settings, "body", stringValue(section.settings, "text"))),
     bodyDocument: stringValue(body?.settings, "text") ? formattedSetting(body?.settings, "text") : stringValue(section.settings, "body") ? null : formattedSetting(section.settings, "text"),
-    headingProps: blockStyleProps(heading?.settings),
-    bodyProps: blockStyleProps(body?.settings),
+    headingProps: { ...blockStyleProps(heading?.settings), ...(heading ? blockEditorData(heading, editor, "Heading", undefined, "text") : {}) },
+    bodyProps: { ...blockStyleProps(body?.settings), ...(body ? blockEditorData(body, editor, "Text", undefined, "text") : {}) },
     buttons: buttons.flatMap((block) => {
       const label = stringValue(block.settings, "label");
-      return label ? [{ id: block.id, label, href: block.settings.href, settings: block.settings }] : [];
+      return label ? [{ id: block.id, label, href: block.settings.href, settings: block.settings, editorData: blockEditorData(block, editor, "Button", undefined, "label") }] : [];
     }),
   };
 }
@@ -42,7 +43,7 @@ function Actions({ buttons, storeSlug }: { buttons: ReturnType<typeof blockCopy>
     return href ? [{ ...button, href }] : [];
   });
   if (!links.length) return null;
-  return <div className="jelly-section-actions">{links.map((button, index) => <a key={button.id} href={button.href} {...buttonProps(button.settings, index)}>{button.label}</a>)}</div>;
+  return <div className="jelly-section-actions">{links.map((button, index) => <a key={button.id} href={button.href} {...buttonProps(button.settings, index)} {...button.editorData}>{button.label}</a>)}</div>;
 }
 
 export function AnnouncementBarSection({ section }: { section: SectionNode }) {
@@ -53,7 +54,7 @@ export function AnnouncementBarSection({ section }: { section: SectionNode }) {
 
 export function ImageWithTextSection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
   const image = imageValue(section.settings);
-  const content = blockCopy(section, "Image with text");
+  const content = blockCopy(section, "Image with text", context.mode === "editor");
   const alignment = choice(section.settings, "contentAlignment", ["left", "center", "right"] as const, "left");
   const imagePosition = choice(section.settings, "imagePosition", ["left", "right"] as const, "left");
   const eyebrow = stringValue(section.settings, "eyebrow");
@@ -78,7 +79,7 @@ export function ImageWithTextSection({ section, context }: { section: SectionNod
 
 export function ImageBannerSection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
   const image = imageValue(section.settings);
-  const content = blockCopy(section, "");
+  const content = blockCopy(section, "", context.mode === "editor");
   const overlay = numberValue(section.settings, "overlay", 30, 0, 100) / 100;
   return <section className="jelly-image-banner" {...sectionData(section, {
     "data-height": choice(section.settings, "height", ["medium", "large"] as const, "medium"),
@@ -103,7 +104,7 @@ export function MulticolumnSection({ section, context }: { section: SectionNode;
     const heading = stringValue(block.settings, "heading");
     return heading ? [{ id: block.id, heading, text: stringValue(block.settings, "text"), document: formattedSetting(block.settings, "text") }] : [];
   });
-  const content = blockCopy(section, "Why shop with us");
+  const content = blockCopy(section, "Why shop with us", context?.mode === "editor");
   const count = numberValue(section.settings, "columns", 3, 2, 4);
   return <section className="jelly-section jelly-multicolumn" {...sectionData(section, { "data-align": choice(section.settings, "contentAlignment", ["left", "center", "right"] as const, "left") })}>
     <StorefrontContainer>
@@ -147,7 +148,7 @@ export function NewsletterForm({ source, buttonLabel, subscribe, mode = "preview
 }
 
 export function NewsletterSection({ section, subscribe, mode = "preview" }: { section: SectionNode; subscribe?: (email: string, source: string) => Promise<void>; mode?: RendererMode }) {
-  const content = blockCopy(section, "Join our newsletter");
+  const content = blockCopy(section, "Join our newsletter", mode === "editor");
   const buttonLabel = stringValue(section.settings, "buttonLabel", "Subscribe");
   return <section className="jelly-section jelly-newsletter" {...sectionData(section, { "data-align": choice(section.settings, "contentAlignment", ["left", "center", "right"] as const, "left") })}><StorefrontContainer>
     <h2 {...content.headingProps}>{content.heading}</h2>

@@ -45,3 +45,21 @@ it("shows custom content blocks in order, in the editor and the live store", () 
   expect(screen.getByText("Add a video link")).toHaveAttribute("data-editor-block-id", "empty");
   expect(screen.getByRole("img", { name: "The studio" }).closest("a")).toBeNull();
 });
+
+it("lets the editor select heading, text and button blocks in content sections, but not on the live store", () => {
+  const section: SectionNode = {
+    id: "it", type: "image-with-text", enabled: true, settings: {},
+    blocks: [
+      { id: "h", type: "heading", enabled: true, settings: { text: "Made here" } },
+      { id: "t", type: "text", enabled: true, settings: { text: "By hand." } },
+      { id: "b", type: "button", enabled: true, settings: { label: "Read more", href: "/about" } },
+    ],
+  };
+  const { unmount } = render(<RegistrySectionRenderer section={section} mode="editor" commerce={{ getProducts: async () => [] }} />);
+  expect(screen.getByRole("heading", { name: "Made here" })).toHaveAttribute("data-editor-block-id", "h");
+  expect(screen.getByText("By hand.")).toHaveAttribute("data-editor-block-id", "t");
+  expect(screen.getByRole("link", { name: "Read more" })).toHaveAttribute("data-editor-block-id", "b");
+  unmount();
+  render(<RegistrySectionRenderer section={section} mode="published" commerce={{ getProducts: async () => [] }} />);
+  expect(screen.getByRole("heading", { name: "Made here" })).not.toHaveAttribute("data-editor-block-id");
+});

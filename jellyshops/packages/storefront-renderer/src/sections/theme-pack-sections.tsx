@@ -6,7 +6,7 @@ import { resolveStorefrontHref } from "../runtime-context";
 import type { RendererMode } from "../types";
 import { choice, headingHidden, imageValue, numberValue, sectionData, visibleBlocks } from "./shared";
 import { blockStyleProps } from "../block-style";
-import { buttonProps } from "./block-content";
+import { blockEditorData, buttonProps } from "./block-content";
 
 function stringSetting(settings: Record<string, unknown>, key: string, fallback = ""): string {
   const value = settings[key];
@@ -18,7 +18,8 @@ function imageSetting(settings: Record<string, unknown>): MediaReference | undef
   return image && typeof image === "object" && "url" in image ? image as MediaReference : undefined;
 }
 
-function copy(section: SectionNode, fallbackHeading: string) {
+/** `editor` adds the data the editor preview needs to select a block when it is clicked. */
+function copy(section: SectionNode, fallbackHeading: string, editor = false) {
   const visible = section.blocks.filter((block) => block.enabled);
   const heading = visible.find((block) => block.type === "heading");
   const body = visible.find((block) => block.type === "text");
@@ -28,14 +29,14 @@ function copy(section: SectionNode, fallbackHeading: string) {
     body: stringSetting(body?.settings ?? section.settings, "text", stringSetting(section.settings, "text")),
     button: stringSetting(button?.settings ?? section.settings, "label"),
     href: stringSetting(button?.settings ?? section.settings, "href", "/shop"),
-    headingProps: blockStyleProps(heading?.settings),
-    bodyProps: blockStyleProps(body?.settings),
-    buttonProps: buttonProps(button?.settings ?? {}),
+    headingProps: { ...blockStyleProps(heading?.settings), ...(heading ? blockEditorData(heading, editor, "Heading", undefined, "text") : {}) },
+    bodyProps: { ...blockStyleProps(body?.settings), ...(body ? blockEditorData(body, editor, "Text", undefined, "text") : {}) },
+    buttonProps: { ...buttonProps(button?.settings ?? {}), ...(button ? blockEditorData(button, editor, "Button", undefined, "label") : {}) },
   };
 }
 
-function SectionIntro({ section, fallback }: { section: SectionNode; fallback: string }) {
-  const content = copy(section, fallback);
+function SectionIntro({ section, fallback, editor = false }: { section: SectionNode; fallback: string; editor?: boolean }) {
+  const content = copy(section, fallback, editor);
   return <div className="jelly-section-intro">
     <h2 {...content.headingProps}>{content.heading}</h2>
     {content.body && <p {...content.bodyProps}>{content.body}</p>}
@@ -53,7 +54,7 @@ export function CategoryGridSection({ section, context }: { section: SectionNode
   const items = cards.length ? cards : ["New arrivals", "Best sellers", "For the home", "Gifts"].map((label) => ({ id: label, label, image: undefined, href: shopHref }));
   const columns = numberValue(section.settings, "columns", 4, 2, 4);
   return <section className="jelly-section jelly-category-grid" {...sectionData(section, { "data-image-ratio": choice(section.settings, "imageRatio", ["portrait", "square"] as const, "portrait") })}><StorefrontContainer>
-    {!headingHidden(section) && <SectionIntro section={section} fallback="Shop by collection" />}
+    {!headingHidden(section) && <SectionIntro section={section} fallback="Shop by collection" editor={context?.mode === "editor"} />}
     <div className="jelly-category-grid-items" style={{ "--jelly-columns": columns } as CSSProperties}>{items.map((item) => <a href={item.href} className="jelly-category-card" key={item.id}>
       <span className="jelly-category-card-media">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -72,7 +73,7 @@ export function TestimonialsSection({ section, mode = "published" }: { section: 
   // Never invent reviews: with no testimonials the section only shows an editing hint outside the live store.
   if (!reviews.length && mode === "published") return null;
   return <section className="jelly-section jelly-testimonials" {...sectionData(section)}><StorefrontContainer>
-    <SectionIntro section={section} fallback="What customers say" />
+    <SectionIntro section={section} fallback="What customers say" editor={mode === "editor"} />
     {reviews.length
       ? <div className="jelly-testimonial-grid">{reviews.map((review) => <blockquote key={review.id}><p>{review.quote}</p>{review.author && <cite>{review.author}</cite>}</blockquote>)}</div>
       : <p className="jelly-editor-hint">Add a testimonial block with a real customer quote. This section stays hidden on your live store until you do.</p>}
@@ -108,7 +109,7 @@ export function JournalTeaserSection({ section, context }: { section: SectionNod
 interface CartLineView { id: string; name: string; productName?: string; variantName?: string; imageUrl?: string; options?: string[]; quantity: number; unitPrice?: string; total: string; canIncrease?: boolean; onDecrease?: () => void; onIncrease?: () => void; onRemove?: () => void }
 
 export function CartSummarySection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
-  const content = copy(section, "Your bag");
+  const content = copy(section, "Your bag", context.mode === "editor");
   const data = context?.page?.pageType === "cart" ? context.page.data ?? {} : {};
   const lines = Array.isArray(data.lines) ? data.lines as CartLineView[] : [];
   const subtotal = typeof data.subtotal === "string" ? data.subtotal : undefined;
@@ -155,7 +156,7 @@ export function CartSummarySection({ section, context }: { section: SectionNode;
 
 export function SearchResultsSection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
   const search = context.page?.pageType === "search" ? context.page.data : null;
-  const content = copy(section, "Search");
+  const content = copy(section, "Search", context.mode === "editor");
   const query = search?.query ?? "";
   const results = search?.results ?? [];
   const action = search?.searchHref ?? (context.storeSlug ? `/${context.storeSlug}/search` : "/search");
@@ -172,7 +173,7 @@ export function SearchResultsSection({ section, context }: { section: SectionNod
 }
 
 export function NotFoundMessageSection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
-  const content = copy(section, "We couldn't find that page");
+  const content = copy(section, "We couldn't find that page", context.mode === "editor");
   const href = resolveStorefrontHref(content.href, context.storeSlug);
   return <section className="jelly-section jelly-not-found"><StorefrontContainer><div><p className="jelly-eyebrow">404</p><h1 {...content.headingProps}>{content.heading}</h1><p {...content.bodyProps}>{content.body || "The page may have moved, but there is plenty more to discover."}</p>{href && <a className="jelly-button" href={href}>{content.button || "Back to the shop"}</a>}</div></StorefrontContainer></section>;
 }
