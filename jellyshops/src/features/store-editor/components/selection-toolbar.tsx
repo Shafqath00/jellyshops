@@ -86,8 +86,9 @@ export function SelectionToolbar({
         if (element && !element.hasAttribute("data-editor-current")) element.setAttribute("data-editor-current", "");
         const scrollTop = view?.scrollY ?? 0;
         const width = doc.documentElement.clientWidth;
-        if (!element) { set({ top: scrollTop + 8, left: width / 2, docked: true }); return; }
-        const rect = element.getBoundingClientRect();
+        const rect = element?.getBoundingClientRect();
+        // Missing (hidden) or not drawn at this width ("Show on" desktop or phones only): dock at the top.
+        if (!element || !rect || (rect.width === 0 && rect.height === 0)) { set({ top: scrollTop + 8, left: width / 2, docked: true }); return; }
         // Above the element's top-right corner, or just inside it when there is no room above.
         const top = rect.top >= 44 ? rect.top + scrollTop - 40 : Math.max(rect.top, 0) + scrollTop + 6;
         set({ top, left: Math.min(Math.max(rect.right - 6, 220), width - 6), docked: false });
@@ -112,7 +113,7 @@ export function SelectionToolbar({
       className="flex items-center gap-0.5 rounded-lg border border-black/10 bg-white p-1 font-sans text-[#1c1b19] shadow-[0_4px_16px_rgba(0,0,0,0.16)]"
     >
       <style>{currentStyle}</style>
-      <span className="max-w-[160px] truncate px-1.5 text-[11px] font-semibold">{hidden ? `${label} (hidden)` : label}</span>
+      <span className="max-w-[220px] truncate px-1.5 text-[11px] font-semibold">{hidden ? `${label} (hidden)` : position.docked ? `${label} (not shown at this width)` : label}</span>
       {actionButtons.filter(({ action, onlyWhenAvailable }) => !onlyWhenAvailable || actions[action]).map(({ action, label: name, icon }) => {
         const Icon = icon(hidden);
         const text = name(hidden);

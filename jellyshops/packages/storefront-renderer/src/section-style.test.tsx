@@ -47,3 +47,15 @@ it("uses a colour scheme from theme settings unless the section has its own colo
   expect(sectionStyleProps({ styleScheme: "scheme3", styleColors: true, styleBackground: "#112233" }).style).toMatchObject({ "--section-bg": "#112233", "--section-button-text": "var(--jelly-scheme-3-button-text)" });
   expect(sectionStyleProps({ styleScheme: "scheme9" })).toEqual({});
 });
+
+it("adds phone values and Show on, and ignores unknown phone values", () => {
+  const props = sectionStyleProps({ stylePaddingTop: 80, styleShowOn: "desktop" }, { stylePaddingTop: 24, stylePaddingBottom: 300, styleAlign: "center", styleHeadingSize: "small" });
+  expect(props["data-section-style"]).toBe("pad-top");
+  expect(props["data-section-mobile"]).toBe("heading-size align pad-top pad-bottom");
+  expect(props["data-show-on"]).toBe("desktop");
+  expect(props.style).toMatchObject({ "--section-pad-top": "80px", "--section-pad-top-m": "24px", "--section-pad-bottom-m": "200px", "--section-align-m": "center", "--section-justify-m": "center", "--section-heading-scale-m": "0.8" });
+  // A section with only phone values still gets them, with no desktop list.
+  expect(sectionStyleProps({}, { styleAlign: "right" })).toEqual({ "data-section-mobile": "align", style: { "--section-align-m": "right", "--section-justify-m": "end" } });
+  expect(sectionStyleProps({}, { styleAlign: "justify;}", stylePaddingTop: "12px" })).toEqual({});
+  expect(sectionStyleProps({ styleShowOn: "watch" })).toEqual({});
+});

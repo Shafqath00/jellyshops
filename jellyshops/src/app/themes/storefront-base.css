@@ -155,3 +155,26 @@
 :where([data-button-hover="lift"]) { --jelly-button-hover-mix: 100%; --jelly-button-hover-transform: translateY(-2px); --jelly-button-hover-shadow: 0 6px 16px rgb(0 0 0 / 0.16); --jelly-button-hover-decoration: none; }
 :where([data-button-hover="underline"]) { --jelly-button-hover-mix: 100%; --jelly-button-hover-transform: none; --jelly-button-hover-shadow: none; --jelly-button-hover-decoration: underline; }
 :where([data-button-hover="none"]) { --jelly-button-hover-mix: 100%; --jelly-button-hover-transform: none; --jelly-button-hover-shadow: none; --jelly-button-hover-decoration: none; }
+
+/* Phone values and "Show on" (editor "Mobile" view). Phones are screens up to 767px wide, like the themes' own breakpoint.
+   Phone values beat the inline desktop values, so these rules use !important. */
+@media (min-width: 768px) {
+  [data-show-on="mobile"] { display: none !important; }
+}
+@media (max-width: 767px) {
+  [data-show-on="desktop"] { display: none !important; }
+  :where([data-section-mobile~="align"]) { text-align: var(--section-align-m); }
+  :where([data-section-mobile~="pad-top"]) > :where(*) { padding-top: var(--section-pad-top-m); }
+  :where([data-section-mobile~="pad-bottom"]) > :where(*) { padding-bottom: var(--section-pad-bottom-m); }
+  [data-block-mobile~="pad-top"] { padding-top: var(--block-pad-top-m) !important; }
+  [data-block-mobile~="pad-bottom"] { padding-bottom: var(--block-pad-bottom-m) !important; }
+  [data-block-mobile~="pad-left"] { padding-left: var(--block-pad-left-m) !important; }
+  [data-block-mobile~="pad-right"] { padding-right: var(--block-pad-right-m) !important; }
+  .jelly-block-group[style*="--group-gap-m"] { gap: var(--group-gap-m); }
+  .jelly-block-group[data-direction-mobile="vertical"] { flex-direction: column; flex-wrap: nowrap; }
+  .jelly-block-group[data-direction-mobile="horizontal"] { flex-direction: row; flex-wrap: nowrap; }
+  .jelly-block-group[data-direction-mobile="horizontal"] > * { flex-basis: auto; }
+  .jelly-custom-content[style*="--custom-gap-m"] .jelly-custom-content-inner { gap: var(--custom-gap-m); }
+  .jelly-custom-content[data-direction-mobile="vertical"] .jelly-custom-content-inner { flex-direction: column; }
+  .jelly-custom-content[data-direction-mobile="horizontal"] .jelly-custom-content-inner { flex-direction: row; flex-wrap: wrap; }
+}

@@ -13,6 +13,8 @@ interface ControlBase {
   showWhen?: { key: string; equals: unknown };
   group: ControlGroup;
   responsive?: boolean;
+  /** Has a separate phone value (saved under `responsive.mobile`) that the store shows on screens up to 767px wide. */
+  mobile?: boolean;
   dynamicTypes?: DynamicValueType[];
 }
 export type ControlDefinition =

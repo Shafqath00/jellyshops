@@ -26,3 +26,13 @@ it("checks the blocks inside a group", () => {
   expect(codes([group([{ ...button("a"), settings: { label: "Go", buttonSize: "huge" } }])])).toEqual(["SETTINGS_INVALID:a"]);
   expect(codes([group([], { groupDirection: "diagonal" })])).toEqual(["SETTINGS_INVALID:g"]);
 });
+
+it("accepts phone values only for phone settings, and checks them", () => {
+  const issues = (node: SectionNode) => validateSectionAgainstRegistry(node, "home").map(({ code, blockId, field }) => `${code}:${blockId ?? ""}:${field ?? ""}`);
+  const phoneSection = (mobile: Record<string, unknown>, blocks: BlockNode[] = []): SectionNode => ({ ...section(blocks), responsive: { mobile } });
+  expect(issues(phoneSection({ stylePaddingTop: 16, styleAlign: "center", gap: 8 }, [{ ...button("a"), responsive: { mobile: { blockPaddingTop: 4 } } }, { id: "h", type: "heading", enabled: true, settings: { text: "Hi" }, responsive: { mobile: { blockTypePreset: "h4" } } }]))).toEqual([]);
+  expect(issues(phoneSection({ styleHeadingFont: "Inter" }))).toEqual(["RESPONSIVE_FIELD_NOT_ALLOWED::styleHeadingFont"]);
+  expect(issues(phoneSection({ stylePaddingTop: 999 }))).toEqual(["SETTINGS_INVALID::"]);
+  expect(issues(section([{ ...button("a"), responsive: { mobile: { label: "Phone label" } } }]))).toEqual(["RESPONSIVE_FIELD_NOT_ALLOWED:a:label"]);
+  expect(issues(section([{ ...group([]), responsive: { mobile: { groupDirection: "sideways" } } }]))).toEqual(["SETTINGS_INVALID:g:"]);
+});

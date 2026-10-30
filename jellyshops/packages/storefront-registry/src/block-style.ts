@@ -36,18 +36,20 @@ export const blockStyleSchema = z.object({
   blockPaddingBottom: px(100).optional(),
   blockPaddingLeft: px(100).optional(),
   blockPaddingRight: px(100).optional(),
+  blockShowOn: z.union([z.enum(["desktop", "mobile"]), empty]).optional(),
 }).passthrough();
 
 export type BlockStyleSettings = z.infer<typeof blockStyleSchema>;
 
 const themeDefault = { label: "Theme default", value: "" };
 const padding = (side: "Top" | "Bottom" | "Left" | "Right"): ControlDefinition =>
-  ({ type: "range", key: `blockPadding${side}`, label: side, group: "style", heading: "Padding", min: 0, max: 100, step: 1, unit: "px" });
+  ({ type: "range", key: `blockPadding${side}`, mobile: true, label: side, group: "style", heading: "Padding", min: 0, max: 100, step: 1, unit: "px" });
 
 export const BLOCK_STYLE_CONTROLS: ControlDefinition[] = [
   { type: "segmented", key: "blockWidth", label: "Width", group: "layout", heading: "Layout", options: [{ label: "Fit", value: "fit" }, { label: "Fill", value: "fill" }] },
+  { type: "select", key: "blockShowOn", label: "Show on", group: "layout", heading: "Layout", options: [{ label: "All screens", value: "" }, { label: "Desktop and tablet only", value: "desktop" }, { label: "Phones only", value: "mobile" }] },
   { type: "select", key: "blockMaxWidth", label: "Max width", group: "layout", heading: "Layout", options: [themeDefault, { label: "Narrow", value: "narrow" }, { label: "Normal", value: "normal" }, { label: "Wide", value: "wide" }, { label: "None", value: "none" }] },
-  { type: "select", key: "blockTypePreset", label: "Text style", group: "style", heading: "Typography", description: "Uses the sizes and fonts from your theme settings.", options: [themeDefault, { label: "Heading 1", value: "h1" }, { label: "Heading 2", value: "h2" }, { label: "Heading 3", value: "h3" }, { label: "Heading 4", value: "h4" }, { label: "Body", value: "body" }, { label: "Small", value: "small" }] },
+  { type: "select", key: "blockTypePreset", mobile: true, label: "Text style", group: "style", heading: "Typography", description: "Uses the sizes and fonts from your theme settings.", options: [themeDefault, { label: "Heading 1", value: "h1" }, { label: "Heading 2", value: "h2" }, { label: "Heading 3", value: "h3" }, { label: "Heading 4", value: "h4" }, { label: "Body", value: "body" }, { label: "Small", value: "small" }] },
   { type: "color", key: "blockTextColor", label: "Text colour", group: "style", heading: "Appearance", allowAlpha: false },
   { type: "checkbox", key: "blockBackground", label: "Background", group: "style", heading: "Appearance" },
   { type: "color", key: "blockBackgroundColor", label: "Background colour", group: "style", heading: "Appearance", allowAlpha: false, showWhen: { key: "blockBackground", equals: true } },

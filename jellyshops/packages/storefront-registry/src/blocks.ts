@@ -49,10 +49,10 @@ const groupBlock: BlockDefinition = {
     groupWrap: z.boolean().optional(),
   }).passthrough(),
   controls: [
-    { type: "segmented", key: "groupDirection", label: "Direction", group: "layout", heading: "Layout", options: [{ label: "Vertical", value: "vertical" }, { label: "Horizontal", value: "horizontal" }] },
+    { type: "segmented", key: "groupDirection", mobile: true, label: "Direction", group: "layout", heading: "Layout", options: [{ label: "Vertical", value: "vertical" }, { label: "Horizontal", value: "horizontal" }] },
     { type: "select", key: "groupAlign", label: "Alignment", group: "layout", heading: "Layout", options: [{ label: "Follow section", value: "" }, { label: "Start", value: "start" }, { label: "Centre", value: "center" }, { label: "End", value: "end" }, { label: "Spread out", value: "between" }] },
     { type: "segmented", key: "groupVerticalAlign", label: "Line up", group: "layout", heading: "Layout", showWhen: { key: "groupDirection", equals: "horizontal" }, options: [{ label: "Top", value: "start" }, { label: "Middle", value: "center" }, { label: "Bottom", value: "end" }] },
-    { type: "range", key: "groupGap", label: "Gap", group: "layout", heading: "Layout", min: 0, max: 80, step: 1, unit: "px" },
+    { type: "range", key: "groupGap", mobile: true, label: "Gap", group: "layout", heading: "Layout", min: 0, max: 80, step: 1, unit: "px" },
     { type: "checkbox", key: "groupWrap", label: "Stack on small screens", group: "layout", heading: "Layout", showWhen: { key: "groupDirection", equals: "horizontal" } },
   ],
   defaultSettings: { groupDirection: "horizontal", groupGap: 12, groupWrap: true },

@@ -38,3 +38,32 @@ it("styles heading, text and button blocks in the editor and the live store", ()
     unmount();
   }
 });
+
+it("adds a block's phone padding, phone text style and Show on", () => {
+  const props = blockStyleProps({ blockPaddingTop: 32, blockTypePreset: "h2", blockShowOn: "mobile" }, { blockPaddingTop: 8, blockPaddingLeft: 4, blockTypePreset: "h4" });
+  expect(props).toMatchObject({ "data-type-preset": "h2", "data-type-preset-mobile": "h4", "data-block-mobile": "pad-top pad-left", "data-show-on": "mobile" });
+  expect(props.style).toMatchObject({ paddingTop: "32px", "--block-pad-top-m": "8px", "--block-pad-left-m": "4px" });
+  expect(blockStyleProps({}, { blockTypePreset: "huge", blockPaddingTop: -5 })).toEqual({ "data-block-mobile": "pad-top", style: { "--block-pad-top-m": "0px" } });
+});
+
+it("renders phone values for custom content, groups and their blocks", () => {
+  const section: SectionNode = {
+    id: "c", type: "custom-content", enabled: true, settings: { direction: "horizontal", gap: 40 }, responsive: { mobile: { direction: "vertical", gap: 8 } },
+    blocks: [
+      { id: "g", type: "group", enabled: true, settings: { groupDirection: "horizontal" }, responsive: { mobile: { groupDirection: "vertical", groupGap: 4 } }, blocks: [
+        { id: "b", type: "button", enabled: true, settings: { label: "Shop", href: "/shop" }, responsive: { mobile: { blockPaddingLeft: 12 } } },
+        { id: "t", type: "heading", enabled: true, settings: { text: "Desktop only", blockShowOn: "desktop" } },
+      ] },
+    ],
+  };
+  render(<RegistrySectionRenderer section={section} mode="published" commerce={{ getProducts: async () => [] }} storeSlug="demo" />);
+  const wrapper = screen.getByTestId("section-custom-content");
+  expect(wrapper.querySelector(".jelly-custom-content")).toHaveAttribute("data-direction-mobile", "vertical");
+  expect((wrapper.querySelector(".jelly-custom-content") as HTMLElement).style.getPropertyValue("--custom-gap-m")).toBe("8px");
+  const group = wrapper.querySelector(".jelly-block-group") as HTMLElement;
+  expect(group).toHaveAttribute("data-direction-mobile", "vertical");
+  expect(group.style.getPropertyValue("--group-gap-m")).toBe("4px");
+  expect(screen.getByRole("link", { name: "Shop" })).toHaveAttribute("data-block-mobile", "pad-left");
+  expect(screen.getByRole("link", { name: "Shop" }).style.getPropertyValue("--block-pad-left-m")).toBe("12px");
+  expect(screen.getByRole("heading", { name: "Desktop only" })).toHaveAttribute("data-show-on", "desktop");
+});

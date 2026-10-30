@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import type { BlockNode } from "@jelly/storefront-schema";
 import { resolveStorefrontHref } from "../runtime-context";
-import { blockStyleProps } from "../block-style";
+import { blockStyle, blockStyleProps } from "../block-style";
 import { imageValue, stringValue } from "./shared";
 
 /**
@@ -21,11 +21,11 @@ function color(settings: Settings, key: string): string | undefined {
 }
 
 /** Class, link target and inline colours for a button block. `index` decides the theme default (first filled, others outlined). */
-export function buttonProps(settings: Settings, index = 0) {
+export function buttonProps(settings: Settings, index = 0, mobile?: Settings) {
   const style = settings.buttonStyle === "primary" || settings.buttonStyle === "secondary" || settings.buttonStyle === "link"
     ? settings.buttonStyle
     : index === 0 ? "primary" : "secondary";
-  const own = blockStyleProps(settings);
+  const own = blockStyleProps(settings, mobile);
   const inline: CSSProperties = { ...own.style };
   const background = color(settings, "buttonColor");
   const text = color(settings, "buttonTextColor");
@@ -38,6 +38,8 @@ export function buttonProps(settings: Settings, index = 0) {
     ...(["small", "medium", "large"].includes(settings.buttonSize as string) ? { "data-button-size": settings.buttonSize as string } : {}),
     ...(["darken", "lift", "underline", "none"].includes(settings.buttonHover as string) ? { "data-button-hover": settings.buttonHover as string } : {}),
     ...(own["data-block-style"] !== undefined || background || text ? { "data-block-style": "" } : {}),
+    ...(own["data-block-mobile"] ? { "data-block-mobile": own["data-block-mobile"] } : {}),
+    ...(own["data-show-on"] ? { "data-show-on": own["data-show-on"] } : {}),
     ...(Object.keys(inline).length ? { style: inline } : {}),
   };
 }
@@ -57,7 +59,7 @@ export function ImageBlock({ block, storeSlug, editor = false, extra = {} }: { b
   const image = imageValue(block.settings);
   const ratio = typeof block.settings.aspectRatio === "string" ? ratios[block.settings.aspectRatio] : undefined;
   const overlay = typeof block.settings.overlay === "number" ? Math.min(80, Math.max(0, block.settings.overlay)) : 0;
-  const own = blockStyleProps(block.settings);
+  const own = blockStyle(block);
   if (!image) return editor ? <div className="jelly-image-block is-empty" {...own} {...extra} style={{ ...own.style, aspectRatio: ratio ?? "4 / 3" }}>Choose an image</div> : null;
   const href = resolveStorefrontHref(block.settings.link, storeSlug);
   const picture = <>
@@ -97,7 +99,7 @@ export function VideoBlock({ block, editor = false, extra = {} }: { block: Block
   const controls = block.settings.controls !== false;
   const source = videoSource(block.settings.url, autoplay, controls);
   const ratio = (typeof block.settings.aspectRatio === "string" && ratios[block.settings.aspectRatio]) || ratios.wide;
-  const own = blockStyleProps(block.settings);
+  const own = blockStyle(block);
   const props = { className: "jelly-video-block", ...own, ...extra, style: { ...own.style, aspectRatio: ratio } };
   if (!source) return editor ? <div {...props} data-empty="true">{stringValue(block.settings, "url") ? "This video link can't be shown. Use a YouTube, Vimeo or .mp4 link." : "Add a video link"}</div> : null;
   if (source.kind === "embed") return <div {...props}><iframe src={source.src} title="Video" loading="lazy" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen /></div>;

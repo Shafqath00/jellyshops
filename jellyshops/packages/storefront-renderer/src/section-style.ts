@@ -5,7 +5,9 @@ import { fontStack } from "@jelly/storefront-themes";
  * Turns a section's shared style settings into CSS variables on its wrapper.
  * `data-section-style` lists which settings are in use, so theme CSS only
  * overrides its own tokens for those (see the themes' "Section style" rules).
- * Unknown values are ignored, so nothing a merchant saves can inject CSS.
+ * Phone values (`responsive.mobile`) become `-m` variables listed in
+ * `data-section-mobile`; the themes apply them below 768px. "Show on" becomes
+ * `data-show-on`. Unknown values are ignored, so nothing a merchant saves can inject CSS.
  */
 const headingScale: Record<string, string> = { small: "0.8", medium: "1", large: "1.2", "x-large": "1.45" };
 const bodySize: Record<string, string> = { small: "14px", regular: "16px", large: "18px" };
@@ -19,10 +21,29 @@ const hex = /^#[0-9a-fA-F]{6}$/;
 
 export interface SectionStyleProps {
   "data-section-style"?: string;
+  "data-section-mobile"?: string;
+  "data-show-on"?: string;
   style?: CSSProperties;
 }
 
-export function sectionStyleProps(settings: Record<string, unknown> | undefined): SectionStyleProps {
+const justify: Record<string, string> = { left: "start", center: "center", right: "end" };
+const padding = (value: unknown) => typeof value === "number" && Number.isFinite(value) ? Math.min(200, Math.max(0, Math.round(value))) : undefined;
+
+/** Phone values for heading size, alignment and padding. */
+function mobileVars(mobile: Record<string, unknown> | undefined, vars: Record<string, string>): string[] {
+  if (!mobile) return [];
+  const used: string[] = [];
+  const text = (key: string) => typeof mobile[key] === "string" ? mobile[key] as string : "";
+  if (headingScale[text("styleHeadingSize")]) { vars["--section-heading-scale-m"] = headingScale[text("styleHeadingSize")]; used.push("heading-size"); }
+  if (alignments.has(text("styleAlign"))) { vars["--section-align-m"] = text("styleAlign"); vars["--section-justify-m"] = justify[text("styleAlign")]; used.push("align"); }
+  const top = padding(mobile.stylePaddingTop);
+  const bottom = padding(mobile.stylePaddingBottom);
+  if (top !== undefined) { vars["--section-pad-top-m"] = `${top}px`; used.push("pad-top"); }
+  if (bottom !== undefined) { vars["--section-pad-bottom-m"] = `${bottom}px`; used.push("pad-bottom"); }
+  return used;
+}
+
+export function sectionStyleProps(settings: Record<string, unknown> | undefined, mobile?: Record<string, unknown>): SectionStyleProps {
   if (!settings) return {};
   const vars: Record<string, string> = {};
   const used: string[] = [];
@@ -48,15 +69,22 @@ export function sectionStyleProps(settings: Record<string, unknown> | undefined)
   if (weights.has(text("styleHeadingWeight"))) { vars["--section-heading-weight"] = text("styleHeadingWeight"); used.push("heading-weight"); }
   if (fonts.has(text("styleBodyFont"))) { vars["--section-body-font"] = fontStack(text("styleBodyFont"), "Arial"); used.push("body-font"); }
   if (bodySize[text("styleBodySize")]) { vars["--section-body-size"] = bodySize[text("styleBodySize")]; vars["--section-body-scale"] = bodyScale[text("styleBodySize")]; used.push("body-size"); }
-  if (alignments.has(text("styleAlign"))) { vars["--section-align"] = text("styleAlign"); vars["--section-justify"] = { left: "start", center: "center", right: "end" }[text("styleAlign")] as string; used.push("align"); }
+  if (alignments.has(text("styleAlign"))) { vars["--section-align"] = text("styleAlign"); vars["--section-justify"] = justify[text("styleAlign")]; used.push("align"); }
   if (spacing[text("styleSpacing")]) { vars["--section-space"] = spacing[text("styleSpacing")]; used.push("spacing"); }
   // Exact padding (px) wins over the named spacing for its side.
-  const pad = (key: string) => typeof settings[key] === "number" && Number.isFinite(settings[key]) ? Math.min(200, Math.max(0, Math.round(settings[key] as number))) : undefined;
-  const top = pad("stylePaddingTop");
-  const bottom = pad("stylePaddingBottom");
+  const top = padding(settings.stylePaddingTop);
+  const bottom = padding(settings.stylePaddingBottom);
   if (top !== undefined) { vars["--section-pad-top"] = `${top}px`; used.push("pad-top"); }
   if (bottom !== undefined) { vars["--section-pad-bottom"] = `${bottom}px`; used.push("pad-bottom"); }
   if (settings.styleWidth === "full") used.push("full-width");
 
-  return used.length ? { "data-section-style": used.join(" "), style: vars as CSSProperties } : {};
+  const phone = mobileVars(mobile, vars);
+  const showOn = settings.styleShowOn === "desktop" || settings.styleShowOn === "mobile" ? settings.styleShowOn : undefined;
+
+  return {
+    ...(used.length ? { "data-section-style": used.join(" ") } : {}),
+    ...(phone.length ? { "data-section-mobile": phone.join(" ") } : {}),
+    ...(showOn ? { "data-show-on": showOn } : {}),
+    ...(Object.keys(vars).length ? { style: vars as CSSProperties } : {}),
+  };
 }

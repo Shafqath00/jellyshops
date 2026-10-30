@@ -114,9 +114,9 @@ export const contentSections: SectionDefinition[] = [
     type: "custom-content", category: "content", supportedPages: [...reusableContentPages],
     settingsSchema: z.object({ direction: z.enum(["vertical", "horizontal"]).optional(), contentAlignment: alignmentSchema, gap: z.number().int().min(0).max(80).optional(), contentWidth: z.enum(["narrow", "normal", "wide", "full"]).optional() }).passthrough(),
     controls: [
-      { type: "segmented", key: "direction", label: "Direction", group: "layout", options: [{ label: "Vertical", value: "vertical" }, { label: "Horizontal", value: "horizontal" }] },
+      { type: "segmented", key: "direction", mobile: true, label: "Direction", group: "layout", options: [{ label: "Vertical", value: "vertical" }, { label: "Horizontal", value: "horizontal" }] },
       { type: "segmented", key: "contentAlignment", label: "Alignment", group: "layout", options: [{ label: "Left", value: "left" }, { label: "Centre", value: "center" }, { label: "Right", value: "right" }] },
-      { type: "range", key: "gap", label: "Gap", group: "layout", min: 0, max: 80, step: 4, unit: "px" },
+      { type: "range", key: "gap", mobile: true, label: "Gap", group: "layout", min: 0, max: 80, step: 4, unit: "px" },
       { type: "select", key: "contentWidth", label: "Content width", group: "layout", options: [{ label: "Narrow", value: "narrow" }, { label: "Normal", value: "normal" }, { label: "Wide", value: "wide" }, { label: "Full page", value: "full" }] },
     ],
     allowedBlockTypes: ["heading", "text", "button", "image", "video", "group"], maxBlocks: 12,

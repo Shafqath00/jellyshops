@@ -6,7 +6,7 @@ import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
 import { choice, headingHidden, imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
 import { formattedSetting, SettingText } from "./setting-text";
-import { blockStyleProps } from "../block-style";
+import { blockStyle } from "../block-style";
 import { blockEditorData, buttonProps } from "./block-content";
 
 function text(section: SectionNode, fallback: string): string {
@@ -28,11 +28,11 @@ function blockCopy(section: SectionNode, fallbackHeading: string, editor = false
     heading: stringValue(heading?.settings, "text", stringValue(section.settings, "heading", fallbackHeading)),
     body: stringValue(body?.settings, "text", stringValue(section.settings, "body", stringValue(section.settings, "text"))),
     bodyDocument: stringValue(body?.settings, "text") ? formattedSetting(body?.settings, "text") : stringValue(section.settings, "body") ? null : formattedSetting(section.settings, "text"),
-    headingProps: { ...blockStyleProps(heading?.settings), ...(heading ? blockEditorData(heading, editor, "Heading", undefined, "text") : {}) },
-    bodyProps: { ...blockStyleProps(body?.settings), ...(body ? blockEditorData(body, editor, "Text", undefined, "text") : {}) },
+    headingProps: { ...blockStyle(heading), ...(heading ? blockEditorData(heading, editor, "Heading", undefined, "text") : {}) },
+    bodyProps: { ...blockStyle(body), ...(body ? blockEditorData(body, editor, "Text", undefined, "text") : {}) },
     buttons: buttons.flatMap((block) => {
       const label = stringValue(block.settings, "label");
-      return label ? [{ id: block.id, label, href: block.settings.href, settings: block.settings, editorData: blockEditorData(block, editor, "Button", undefined, "label") }] : [];
+      return label ? [{ id: block.id, label, href: block.settings.href, settings: block.settings, mobile: block.responsive?.mobile, editorData: blockEditorData(block, editor, "Button", undefined, "label") }] : [];
     }),
   };
 }
@@ -43,7 +43,7 @@ function Actions({ buttons, storeSlug }: { buttons: ReturnType<typeof blockCopy>
     return href ? [{ ...button, href }] : [];
   });
   if (!links.length) return null;
-  return <div className="jelly-section-actions">{links.map((button, index) => <a key={button.id} href={button.href} {...buttonProps(button.settings, index)} {...button.editorData}>{button.label}</a>)}</div>;
+  return <div className="jelly-section-actions">{links.map((button, index) => <a key={button.id} href={button.href} {...buttonProps(button.settings, index, button.mobile)} {...button.editorData}>{button.label}</a>)}</div>;
 }
 
 export function AnnouncementBarSection({ section }: { section: SectionNode }) {

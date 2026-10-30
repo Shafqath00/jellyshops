@@ -5,7 +5,7 @@ import { blockLabel } from "@jelly/storefront-registry";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
-import { blockStyleProps } from "../block-style";
+import { blockStyle } from "../block-style";
 import { blockEditorData, buttonProps, ImageBlock, VideoBlock } from "./block-content";
 import { formattedSetting, SettingText } from "./setting-text";
 import { choice, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
@@ -22,16 +22,16 @@ function renderBlocks(blocks: BlockNode[], options: BlockContext): ReactNode[] {
     const label = blockLabel(block.type);
     if (block.type === "heading") {
       const text = stringValue(block.settings, "text");
-      return text ? <h2 key={block.id} {...blockStyleProps(block.settings)} {...blockEditorData(block, editor, label, selectedBlockId, "text")}>{text}</h2> : null;
+      return text ? <h2 key={block.id} {...blockStyle(block)} {...blockEditorData(block, editor, label, selectedBlockId, "text")}>{text}</h2> : null;
     }
     if (block.type === "text") {
-      return <SettingText key={block.id} text={stringValue(block.settings, "text")} document={formattedSetting(block.settings, "text")} {...blockStyleProps(block.settings)} {...blockEditorData(block, editor, label, selectedBlockId, "text")} />;
+      return <SettingText key={block.id} text={stringValue(block.settings, "text")} document={formattedSetting(block.settings, "text")} {...blockStyle(block)} {...blockEditorData(block, editor, label, selectedBlockId, "text")} />;
     }
     if (block.type === "button") {
       const text = stringValue(block.settings, "label");
       const href = resolveStorefrontHref(block.settings.href, context.storeSlug);
       if (!text) return null;
-      const props = buttonProps(block.settings, buttonIndex++);
+      const props = buttonProps(block.settings, buttonIndex++, block.responsive?.mobile);
       return href ? <a key={block.id} href={href} {...props} {...blockEditorData(block, editor, label, selectedBlockId, "label")}>{text}</a> : <span key={block.id} {...props} {...blockEditorData(block, editor, label, selectedBlockId, "label")}>{text}</span>;
     }
     if (block.type === "image") return <ImageBlock key={block.id} block={block} storeSlug={context.storeSlug} editor={editor} extra={blockEditorData(block, editor, label, selectedBlockId)} />;
@@ -47,7 +47,10 @@ function GroupBlock({ block, options }: { block: BlockNode; options: BlockContex
   const direction = choice(settings, "groupDirection", ["vertical", "horizontal"] as const, "horizontal");
   const align = choice(settings, "groupAlign", ["", "start", "center", "end", "between"] as const, "");
   const verticalAlign = choice(settings, "groupVerticalAlign", ["start", "center", "end"] as const, "center");
-  const own = blockStyleProps(settings);
+  const own = blockStyle(block);
+  const mobile = block.responsive?.mobile;
+  const mobileDirection = choice(mobile, "groupDirection", ["", "vertical", "horizontal"] as const, "");
+  const mobileGap = typeof mobile?.groupGap === "number" ? numberValue(mobile, "groupGap", 12, 0, 80) : undefined;
   const children = renderBlocks(childBlocks(block), options).filter(Boolean);
   if (children.length === 0 && !options.editor) return null;
   return <div
@@ -55,11 +58,12 @@ function GroupBlock({ block, options }: { block: BlockNode; options: BlockContex
     data-direction={direction}
     {...(align ? { "data-align": align } : {})}
     data-vertical-align={verticalAlign}
+    {...(mobileDirection ? { "data-direction-mobile": mobileDirection } : {})}
     {...(settings.groupWrap === false ? {} : { "data-wrap": "" })}
     {...own}
     {...blockEditorData(block, options.editor, blockLabel(block.type), options.selectedBlockId)}
     // Width "Fill" sets display: block on other blocks; a group stays a flex row or column.
-    style={{ ...own.style, display: undefined, "--group-gap": `${numberValue(settings, "groupGap", 12, 0, 80)}px` } as CSSProperties}
+    style={{ ...own.style, display: undefined, "--group-gap": `${numberValue(settings, "groupGap", 12, 0, 80)}px`, ...(mobileGap !== undefined ? { "--group-gap-m": `${mobileGap}px` } : {}) } as CSSProperties}
   >
     {children.length > 0 ? children : <span className="jelly-block-group-empty">Add blocks to this group</span>}
   </div>;
@@ -70,9 +74,15 @@ export function CustomContentSection({ section, context, editor = false, selecte
   const direction = choice(section.settings, "direction", ["vertical", "horizontal"] as const, "vertical");
   const alignment = choice(section.settings, "contentAlignment", ["left", "center", "right"] as const, "center");
   const width = choice(section.settings, "contentWidth", ["narrow", "normal", "wide", "full"] as const, "normal");
-  const style = { "--custom-gap": `${numberValue(section.settings, "gap", 16, 0, 80)}px`, "--custom-width": widths[width] } as CSSProperties;
+  const mobile = section.responsive?.mobile;
+  const mobileDirection = choice(mobile, "direction", ["", "vertical", "horizontal"] as const, "");
+  const style = {
+    "--custom-gap": `${numberValue(section.settings, "gap", 16, 0, 80)}px`,
+    ...(typeof mobile?.gap === "number" ? { "--custom-gap-m": `${numberValue(mobile, "gap", 16, 0, 80)}px` } : {}),
+    "--custom-width": widths[width],
+  } as CSSProperties;
   const items = renderBlocks(visibleBlocks(section), { context, editor, selectedBlockId });
-  return <section className="jelly-section jelly-custom-content" {...sectionData(section, { "data-direction": direction, "data-align": alignment })} style={style}>
+  return <section className="jelly-section jelly-custom-content" {...sectionData(section, { "data-direction": direction, "data-align": alignment, ...(mobileDirection ? { "data-direction-mobile": mobileDirection } : {}) })} style={style}>
     <StorefrontContainer><div className="jelly-custom-content-inner">{items}</div></StorefrontContainer>
   </section>;
 }

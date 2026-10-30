@@ -16,6 +16,8 @@ export const SECTION_BODY_SIZES = ["small", "regular", "large"] as const;
 export const SECTION_ALIGNMENTS = ["left", "center", "right"] as const;
 export const SECTION_SPACINGS = ["none", "small", "large"] as const;
 export const SECTION_WIDTHS = ["page", "full"] as const;
+/** Where a section or block shows: every screen (empty), desktop and tablet only, or phones only. */
+export const SHOW_ON_CHOICES = ["desktop", "mobile"] as const;
 /** The four colour schemes set in theme settings (Theme settings › Colour scheme 1-4). */
 export const SECTION_SCHEMES = ["scheme1", "scheme2", "scheme3", "scheme4"] as const;
 
@@ -38,6 +40,7 @@ export const sectionStyleSchema = z.object({
   styleWidth: optional(SECTION_WIDTHS),
   stylePaddingTop: z.number().int().min(0).max(200).optional(),
   stylePaddingBottom: z.number().int().min(0).max(200).optional(),
+  styleShowOn: optional(SHOW_ON_CHOICES),
 }).passthrough();
 
 export type SectionStyleSettings = z.infer<typeof sectionStyleSchema>;
@@ -51,15 +54,16 @@ export const SECTION_STYLE_CONTROLS: ControlDefinition[] = [
   { type: "color", key: "styleBackground", label: "Background colour", group: "style", heading: "Appearance", allowAlpha: false, showWhen: { key: "styleColors", equals: true } },
   { type: "color", key: "styleText", label: "Text colour", group: "style", heading: "Appearance", allowAlpha: false, showWhen: { key: "styleColors", equals: true } },
   { type: "select", key: "styleHeadingFont", label: "Heading font", group: "style", heading: "Typography", options: fonts },
-  { type: "select", key: "styleHeadingSize", label: "Heading size", group: "style", heading: "Typography", options: [themeDefault, { label: "Small", value: "small" }, { label: "Medium", value: "medium" }, { label: "Large", value: "large" }, { label: "Extra large", value: "x-large" }] },
+  { type: "select", key: "styleHeadingSize", mobile: true, label: "Heading size", group: "style", heading: "Typography", options: [themeDefault, { label: "Small", value: "small" }, { label: "Medium", value: "medium" }, { label: "Large", value: "large" }, { label: "Extra large", value: "x-large" }] },
   { type: "select", key: "styleHeadingWeight", label: "Heading weight", group: "style", heading: "Typography", options: [themeDefault, { label: "Light", value: "300" }, { label: "Regular", value: "400" }, { label: "Medium", value: "500" }, { label: "Semibold", value: "600" }, { label: "Bold", value: "700" }] },
   { type: "select", key: "styleBodyFont", label: "Text font", group: "style", heading: "Typography", options: fonts },
   { type: "select", key: "styleBodySize", label: "Text size", group: "style", heading: "Typography", options: [themeDefault, { label: "Small", value: "small" }, { label: "Regular", value: "regular" }, { label: "Large", value: "large" }] },
-  { type: "select", key: "styleAlign", label: "Text alignment", group: "layout", heading: "Layout", options: [themeDefault, { label: "Left", value: "left" }, { label: "Centre", value: "center" }, { label: "Right", value: "right" }] },
+  { type: "select", key: "styleAlign", mobile: true, label: "Text alignment", group: "layout", heading: "Layout", options: [themeDefault, { label: "Left", value: "left" }, { label: "Centre", value: "center" }, { label: "Right", value: "right" }] },
+  { type: "select", key: "styleShowOn", label: "Show on", group: "layout", heading: "Layout", options: [{ label: "All screens", value: "" }, { label: "Desktop and tablet only", value: "desktop" }, { label: "Phones only", value: "mobile" }] },
   { type: "segmented", key: "styleWidth", label: "Width", group: "layout", heading: "Layout", options: [{ label: "Page", value: "page" }, { label: "Full", value: "full" }] },
   { type: "select", key: "styleSpacing", label: "Space above and below", group: "style", heading: "Padding", description: "Or set exact sizes below.", options: [themeDefault, { label: "None", value: "none" }, { label: "Small", value: "small" }, { label: "Large", value: "large" }] },
-  { type: "range", key: "stylePaddingTop", label: "Top", group: "style", heading: "Padding", min: 0, max: 200, step: 4, unit: "px" },
-  { type: "range", key: "stylePaddingBottom", label: "Bottom", group: "style", heading: "Padding", min: 0, max: 200, step: 4, unit: "px" },
+  { type: "range", key: "stylePaddingTop", mobile: true, label: "Top", group: "style", heading: "Padding", min: 0, max: 200, step: 4, unit: "px" },
+  { type: "range", key: "stylePaddingBottom", mobile: true, label: "Bottom", group: "style", heading: "Padding", min: 0, max: 200, step: 4, unit: "px" },
 ];
 
 const styleKeys = new Set(SECTION_STYLE_CONTROLS.map((control) => control.key));

@@ -1,7 +1,7 @@
 import { resolveRichTextDocument, safeRichTextHref, type RichTextBlock, type RichTextInline, type SectionNode } from "@jelly/storefront-schema";
 import { cloneElement, isValidElement, type ReactNode } from "react";
 import { StorefrontContainer } from "@jelly/storefront-ui";
-import { blockStyleProps } from "../block-style";
+import { blockStyle } from "../block-style";
 
 function renderInline(content: RichTextInline[]): ReactNode[] {
   return content.map((node, index) => {
@@ -41,7 +41,7 @@ export function RichTextSection({ section }: { section: SectionNode }) {
     ? []
     : section.blocks.filter((block) => block.enabled && typeof block.settings.text === "string");
   const rendered = renderBlocks(document.content).map((node, index) => {
-    const props = sourceBlocks.length === document.content.length ? blockStyleProps(sourceBlocks[index].settings) : {};
+    const props = sourceBlocks.length === document.content.length ? blockStyle(sourceBlocks[index]) : {};
     return Object.keys(props).length && isValidElement(node) ? cloneElement(node, props) : node;
   });
   return <section className="jelly-section jelly-rich-text"><StorefrontContainer>{rendered}</StorefrontContainer></section>;

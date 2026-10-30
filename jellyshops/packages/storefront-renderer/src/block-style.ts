@@ -3,7 +3,10 @@ import type { CSSProperties } from "react";
 /**
  * Turns a heading, text or button block's style settings (see the registry's
  * block-style.ts) into inline styles, plus `data-type-preset` for the theme's
- * text styles. Unknown values are ignored, so nothing a merchant saves can inject CSS.
+ * text styles. Phone values (`responsive.mobile`) for padding and text style
+ * become `--block-pad-*-m` variables listed in `data-block-mobile` and
+ * `data-type-preset-mobile`, applied below 768px; "Show on" becomes `data-show-on`.
+ * Unknown values are ignored, so nothing a merchant saves can inject CSS.
  */
 const hex = /^#[0-9a-fA-F]{6}$/;
 const presets = new Set(["h1", "h2", "h3", "h4", "body", "small"]);
@@ -12,6 +15,9 @@ const maxWidths: Record<string, string> = { narrow: "28rem", normal: "42rem", wi
 export interface BlockStyleProps {
   "data-block-style"?: string;
   "data-type-preset"?: string;
+  "data-type-preset-mobile"?: string;
+  "data-block-mobile"?: string;
+  "data-show-on"?: string;
   style?: CSSProperties;
 }
 
@@ -19,7 +25,7 @@ function px(value: unknown, max: number): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? Math.min(max, Math.max(0, Math.round(value))) : undefined;
 }
 
-export function blockStyleProps(settings: Record<string, unknown> | undefined): BlockStyleProps {
+export function blockStyleProps(settings: Record<string, unknown> | undefined, mobile?: Record<string, unknown>): BlockStyleProps {
   if (!settings) return {};
   const style: CSSProperties = {};
   const color = (key: string) => typeof settings[key] === "string" && hex.test(settings[key] as string) ? settings[key] as string : undefined;
@@ -42,9 +48,26 @@ export function blockStyleProps(settings: Record<string, unknown> | undefined): 
 
   const preset = typeof settings.blockTypePreset === "string" && presets.has(settings.blockTypePreset) ? settings.blockTypePreset : undefined;
   const styled = Object.keys(style).length > 0;
-  if (!styled && !preset) return {};
+  const phone: string[] = [];
+  const vars: Record<string, string> = {};
+  for (const side of ["Top", "Bottom", "Left", "Right"] as const) {
+    const value = px(mobile?.[`blockPadding${side}`], 100);
+    if (value !== undefined) { vars[`--block-pad-${side.toLowerCase()}-m`] = `${value}px`; phone.push(`pad-${side.toLowerCase()}`); }
+  }
+  const mobilePreset = typeof mobile?.blockTypePreset === "string" && presets.has(mobile.blockTypePreset) ? mobile.blockTypePreset : undefined;
+  const showOn = settings.blockShowOn === "desktop" || settings.blockShowOn === "mobile" ? settings.blockShowOn : undefined;
+  const allStyle = { ...style, ...vars } as CSSProperties;
   return {
-    ...(styled ? { "data-block-style": "", style } : {}),
+    ...(styled ? { "data-block-style": "" } : {}),
+    ...(styled || phone.length ? { style: allStyle } : {}),
     ...(preset ? { "data-type-preset": preset } : {}),
+    ...(mobilePreset ? { "data-type-preset-mobile": mobilePreset } : {}),
+    ...(phone.length ? { "data-block-mobile": phone.join(" ") } : {}),
+    ...(showOn ? { "data-show-on": showOn } : {}),
   };
+}
+
+/** Style props for a block, with its phone values. */
+export function blockStyle(block: { settings: Record<string, unknown>; responsive?: { mobile?: Record<string, unknown> } } | undefined): BlockStyleProps {
+  return block ? blockStyleProps(block.settings, block.responsive?.mobile) : {};
 }

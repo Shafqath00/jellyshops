@@ -5,7 +5,7 @@ import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
 import type { RendererMode } from "../types";
 import { choice, headingHidden, imageValue, numberValue, sectionData, visibleBlocks } from "./shared";
-import { blockStyleProps } from "../block-style";
+import { blockStyle } from "../block-style";
 import { blockEditorData, buttonProps } from "./block-content";
 
 function stringSetting(settings: Record<string, unknown>, key: string, fallback = ""): string {
@@ -29,9 +29,9 @@ function copy(section: SectionNode, fallbackHeading: string, editor = false) {
     body: stringSetting(body?.settings ?? section.settings, "text", stringSetting(section.settings, "text")),
     button: stringSetting(button?.settings ?? section.settings, "label"),
     href: stringSetting(button?.settings ?? section.settings, "href", "/shop"),
-    headingProps: { ...blockStyleProps(heading?.settings), ...(heading ? blockEditorData(heading, editor, "Heading", undefined, "text") : {}) },
-    bodyProps: { ...blockStyleProps(body?.settings), ...(body ? blockEditorData(body, editor, "Text", undefined, "text") : {}) },
-    buttonProps: { ...buttonProps(button?.settings ?? {}), ...(button ? blockEditorData(button, editor, "Button", undefined, "label") : {}) },
+    headingProps: { ...blockStyle(heading), ...(heading ? blockEditorData(heading, editor, "Heading", undefined, "text") : {}) },
+    bodyProps: { ...blockStyle(body), ...(body ? blockEditorData(body, editor, "Text", undefined, "text") : {}) },
+    buttonProps: { ...buttonProps(button?.settings ?? {}, 0, button?.responsive?.mobile), ...(button ? blockEditorData(button, editor, "Button", undefined, "label") : {}) },
   };
 }
 
