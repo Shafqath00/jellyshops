@@ -1,13 +1,18 @@
 import type { PageType, SectionNode } from "@jelly/storefront-schema";
+import { z } from "zod";
 import { blockDefinitions } from "./blocks.js";
 import { commerceSections } from "./sections/commerce.js";
 import { contentSections } from "./sections/content.js";
 import { layoutSections } from "./sections/layout.js";
 import { productExtraSections } from "./sections/product-extras.js";
+import { sectionStyleSchema, withSectionStyleControls } from "./section-style.js";
 import type { RegionName, RegistryValidationIssue, SectionDefinition } from "./types.js";
 
 const sections: SectionDefinition[] = [...layoutSections, ...contentSections, ...commerceSections, ...productExtraSections].map((definition) => ({
   ...definition,
+  // Every section gets the shared style settings (colours, fonts, sizes, alignment, spacing).
+  controls: withSectionStyleControls(definition.controls),
+  settingsSchema: z.intersection(definition.settingsSchema, sectionStyleSchema),
   allowedRegions: definition.type === "header" || definition.type === "announcement-bar"
     ? ["header"]
     : definition.type === "footer"

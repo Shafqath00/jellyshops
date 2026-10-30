@@ -82,3 +82,14 @@
 :where(.jelly-store-visit-details span) { margin-inline-end: 8px; opacity: .7; }
 :where(.jelly-store-visit-actions) { display: flex; flex-wrap: wrap; gap: 12px; }
 :where(.jelly-store-visit-media img) { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+
+/*
+ * Section style fallback for themes without their own "Section style" rules.
+ * Zero specificity; the complete themes replace their tokens instead.
+ */
+:where([data-section-style~="colors"]) { background: var(--section-bg); color: var(--section-text); }
+:where([data-section-style~="heading-font"]) :where(h1, h2, h3, h4) { font-family: var(--section-heading-font); }
+:where([data-section-style~="heading-weight"]) :where(h1, h2, h3, h4) { font-weight: var(--section-heading-weight); }
+:where([data-section-style~="body-font"]) { font-family: var(--section-body-font); }
+:where([data-section-style~="body-size"]) { font-size: var(--section-body-size); }
+:where([data-section-style~="align"]) { text-align: var(--section-align); }

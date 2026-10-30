@@ -836,3 +836,37 @@
 [data-jelly-theme="jelly-signature"] .jelly-store-visit-media img { border-radius: var(--jm-radius-card); }
 [data-jelly-theme="jelly-signature"] [data-color-scheme="dark"] .jelly-store-visit-text,
 [data-jelly-theme="jelly-signature"] [data-color-scheme="dark"] .jelly-store-visit-hours h3 { color: inherit; opacity: .8; }
+
+/* 12 ── Section style (shared "Appearance" settings on every section) ───── */
+/* The renderer puts --section-* variables on the section wrapper and lists the
+   settings in use in data-section-style; only those tokens are replaced. */
+[data-jelly-theme="jelly-signature"] [data-section-style~="colors"],
+[data-jelly-theme="jelly-signature"] [data-section-style~="colors"] [data-color-scheme] {
+  --jm-bg: var(--section-bg);
+  --jm-surface: color-mix(in srgb, var(--section-text) 6%, var(--section-bg));
+  --jm-accent: color-mix(in srgb, var(--section-text) 8%, var(--section-bg));
+  --jm-text: var(--section-text);
+  --jm-muted: color-mix(in srgb, var(--section-text) 72%, var(--section-bg));
+  --jm-border: color-mix(in srgb, var(--section-text) 14%, transparent);
+  --jm-border-strong: color-mix(in srgb, var(--section-text) 30%, transparent);
+  background: var(--section-bg);
+  color: var(--section-text);
+}
+[data-jelly-theme="jelly-signature"] [data-section-style~="heading-font"] { --jm-font-heading: var(--section-heading-font); --jelly-font-display: var(--section-heading-font); --jelly-font-heading: var(--section-heading-font); }
+[data-jelly-theme="jelly-signature"] [data-section-style~="heading-weight"] { --jm-heading-weight: var(--section-heading-weight); }
+[data-jelly-theme="jelly-signature"] [data-section-style~="heading-size"] {
+  --jm-h1: calc(clamp(36px, 5.2vw, var(--jelly-heading-size, 56px)) * var(--section-heading-scale));
+  --jm-h2: calc(clamp(28px, 3.6vw, 44px) * var(--section-heading-scale));
+  --jm-h3: calc(clamp(22px, 2.2vw, 28px) * var(--section-heading-scale));
+}
+[data-jelly-theme="jelly-signature"] [data-section-style~="body-font"] { --jm-font-body: var(--section-body-font); --jelly-font-body: var(--section-body-font); font-family: var(--section-body-font); }
+[data-jelly-theme="jelly-signature"] [data-section-style~="body-size"] {
+  --jm-text-xs: calc(12px * var(--section-body-scale));
+  --jm-text-sm: calc(14px * var(--section-body-scale));
+  --jm-text-base: calc(var(--jelly-body-size, 16px) * var(--section-body-scale));
+  --jm-text-lg: calc(18px * var(--section-body-scale));
+}
+[data-jelly-theme="jelly-signature"] [data-section-style~="align"],
+[data-jelly-theme="jelly-signature"] [data-section-style~="align"] :is(h1, h2, h3, h4, p, [class*="-intro"], [class*="-header"], [class*="-content"]) { text-align: var(--section-align); }
+[data-jelly-theme="jelly-signature"] [data-section-style~="spacing"] { --jm-section: var(--section-space); }
+[data-jelly-theme="jelly-signature"] [data-section-style~="align"] :is(.jelly-section-intro, .jelly-section-intro > *) { justify-items: var(--section-align); justify-self: var(--section-align); }

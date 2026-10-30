@@ -1,6 +1,10 @@
 import { expect, it } from "vitest";
 import type { SectionNode } from "@jelly/storefront-schema";
 import { getSectionDefinition, listSectionDefinitions, listSectionDefinitionsForPage, validateSectionAgainstRegistry } from "./index";
+import { isSectionStyleKey } from "./section-style";
+
+/** A section's own settings, leaving out the style settings every section shares. */
+const ownKeys = (type: string) => getSectionDefinition(type)?.controls.map(({ key }) => key).filter((key) => !isSectionStyleKey(key));
 
 function section(type: string, blocks: SectionNode["blocks"] = []): SectionNode {
   return { id: "section-1", type, enabled: true, settings: {}, blocks };
@@ -48,7 +52,7 @@ it("registers configurable Collection sections only for Collection templates", (
       expect.objectContaining({ code: "SECTION_NOT_ALLOWED_ON_PAGE" }),
     ]));
   }
-  expect(getSectionDefinition("collection-header")?.controls.map(({ key }) => key)).toEqual(["layout", "contentAlignment", "showTitle", "showDescription", "showImage"]);
+  expect(ownKeys("collection-header")).toEqual(["layout", "contentAlignment", "showTitle", "showDescription", "showImage"]);
   expect(getSectionDefinition("collection-product-grid")?.defaultSettings).toMatchObject({ columns: 3, limit: 12 });
   expect(getSectionDefinition("collection-description")?.defaultSettings).toMatchObject({ spacing: "standard" });
 });
@@ -66,17 +70,17 @@ it("registers a validated media control for the Home Image with text section", (
 
 it("makes the Home product grid configurable without requiring sample Catalog references", () => {
   const definition = getSectionDefinition("product-grid");
-  expect(definition?.controls.map(({ key }) => key)).toEqual(["heading", "text", "contentAlignment", "collectionId", "sort", "limit", "columns", "viewAllLabel", "viewAllLink", "hideWhenEmpty", "colorScheme", "emptyMessage"]);
+  expect(ownKeys("product-grid")).toEqual(["heading", "text", "contentAlignment", "collectionId", "sort", "limit", "columns", "viewAllLabel", "viewAllLink", "hideWhenEmpty", "colorScheme", "emptyMessage"]);
   expect(definition?.settingsSchema.safeParse({ heading: "New arrivals", limit: 4, emptyMessage: "Coming soon" }).success).toBe(true);
   expect(definition?.settingsSchema.safeParse({ limit: 25 }).success).toBe(false);
   expect(validateSectionAgainstRegistry(section("product-grid"), "home")).toEqual([]);
 });
 
 it("exposes store identity, layout and footer content controls in global chrome", () => {
-  expect(getSectionDefinition("header")?.controls.map(({ key }) => key)).toEqual(["storeName", "logo", "logoWidth", "logoPosition", "sticky", "transparent", "overlayLogo", "showSearch", "showAccount", "showWishlist", "showCart"]);
+  expect(ownKeys("header")).toEqual(["storeName", "logo", "logoWidth", "logoPosition", "sticky", "transparent", "overlayLogo", "showSearch", "showAccount", "showWishlist", "showCart"]);
   expect(getSectionDefinition("header")?.settingsSchema.safeParse({ storeName: "Little Market", logo: { id: "logo-1", url: "/api/public/media/store-a/logo-1", alt: "Logo" } }).success).toBe(true);
-  expect(getSectionDefinition("footer")?.controls.map(({ key }) => key)).toEqual(["storeName", "text", "contactEmail", "copyright", "showNewsletter", "newsletterHeading", "newsletterText"]);
-  expect(getSectionDefinition("announcement-bar")?.controls.map(({ key }) => key)).toEqual(["text", "link"]);
+  expect(ownKeys("footer")).toEqual(["storeName", "text", "contactEmail", "copyright", "showNewsletter", "newsletterHeading", "newsletterText"]);
+  expect(ownKeys("announcement-bar")).toEqual(["text", "link"]);
 });
 
 it("allows page content only on a custom Page template", () => {
@@ -189,4 +193,15 @@ it("accepts a dynamic binding in a control that declares a compatible dynamic ty
   }]);
 
   expect(validateSectionAgainstRegistry(hero, "home")).toEqual([]);
+});
+
+it("gives every section the shared style settings and checks their values", () => {
+  for (const definition of listSectionDefinitions()) {
+    expect(definition.controls.filter(({ key }) => isSectionStyleKey(key))).toHaveLength(10);
+  }
+  const schema = getSectionDefinition("rich-text")!.settingsSchema;
+  expect(schema.safeParse({ styleColors: true, styleBackground: "#112233", styleText: "#fefefe", styleHeadingFont: "Fraunces", styleHeadingSize: "large", styleHeadingWeight: "700", styleAlign: "center", styleSpacing: "" }).success).toBe(true);
+  expect(schema.safeParse({ styleBackground: "red; background: url(x)" }).success).toBe(false);
+  expect(schema.safeParse({ styleHeadingFont: "Comic Sans" }).success).toBe(false);
+  expect(schema.safeParse({ styleHeadingWeight: "950" }).success).toBe(false);
 });

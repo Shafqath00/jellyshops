@@ -8,3 +8,5 @@ export type { StarterMenuItem, V4StarterPack, V4StarterPackId, V4StarterTemplate
 export { validateV4StarterPack } from "./v4-starter-packs-validation.js";
 export type { V4StarterPackIssue } from "./v4-starter-packs-validation.js";
 export { blockLabel, pageTypeLabel, sectionLabel } from "./labels.js";
+export { isSectionStyleKey, SECTION_ALIGNMENTS, SECTION_BODY_SIZES, SECTION_FONT_CHOICES, SECTION_HEADING_SIZES, SECTION_HEADING_WEIGHTS, SECTION_SPACINGS, SECTION_STYLE_CONTROLS, sectionStyleSchema, withSectionStyleControls } from "./section-style.js";
+export type { SectionStyleSettings } from "./section-style.js";
