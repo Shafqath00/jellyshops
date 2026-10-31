@@ -5,7 +5,7 @@ import { STORE_DESIGN_SCHEMA_VERSION } from "./version.js";
 export const themeIdSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 
 const settingsSchema = z.record(z.string(), z.unknown());
-const responsiveSettingsSchema = z.object({ mobile: settingsSchema.optional() }).strict();
+const responsiveSettingsSchema = z.object({ mobile: settingsSchema.optional(), tablet: settingsSchema.optional() }).strict();
 
 const blockNodeSchema: z.ZodType<BlockNode> = z.lazy(() => z.object({
   id: z.string().min(1),

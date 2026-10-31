@@ -65,3 +65,11 @@ it("adds shadow and opacity directly on the section wrapper", () => {
   expect(sectionStyleProps({ styleShadow: "none", styleOpacity: 100 })).toEqual({});
   expect(sectionStyleProps({ styleShadow: "glow;}", styleOpacity: "50%" })).toEqual({});
 });
+
+it("adds tablet values with their own variables and list", () => {
+  const props = sectionStyleProps({ stylePaddingTop: 80 }, { stylePaddingTop: 24 }, { stylePaddingTop: 48, styleAlign: "right", styleHeadingSize: "large" });
+  expect(props["data-section-mobile"]).toBe("pad-top");
+  expect(props["data-section-tablet"]).toBe("heading-size align pad-top");
+  expect(props.style).toMatchObject({ "--section-pad-top-m": "24px", "--section-pad-top-t": "48px", "--section-align-t": "right", "--section-justify-t": "end", "--section-heading-scale-t": "1.2" });
+  expect(sectionStyleProps({}, undefined, { styleAlign: "justify;}" })).toEqual({});
+});

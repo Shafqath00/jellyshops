@@ -40,12 +40,14 @@ export function validateSectionAgainstRegistry(section: SectionNode, pageType: P
   const issues: RegistryValidationIssue[] = [];
   if (!definition.supportedPages.includes(pageType)) issues.push({ code: "SECTION_NOT_ALLOWED_ON_PAGE", sectionId: section.id, message: `${section.type} is not allowed on ${pageType}` });
   if (!definition.settingsSchema.safeParse(section.settings).success || !formattedCopiesValid(section.settings)) issues.push({ code: "SETTINGS_INVALID", sectionId: section.id, message: "Section settings are invalid" });
-  if (section.responsive?.mobile) {
+  for (const device of ["mobile", "tablet"] as const) {
+    const values = section.responsive?.[device];
+    if (!values) continue;
     const allowed = new Set([...definition.responsiveFields, ...mobileSettingKeys(definition.controls)]);
-    for (const field of Object.keys(section.responsive.mobile)) {
-      if (!allowed.has(field)) issues.push({ code: "RESPONSIVE_FIELD_NOT_ALLOWED", sectionId: section.id, field, message: `${field} cannot be overridden on mobile` });
+    for (const field of Object.keys(values)) {
+      if (!allowed.has(field)) issues.push({ code: "RESPONSIVE_FIELD_NOT_ALLOWED", sectionId: section.id, field, message: `${field} cannot be overridden on ${device}` });
     }
-    if (!definition.settingsSchema.safeParse({ ...section.settings, ...section.responsive.mobile }).success) issues.push({ code: "SETTINGS_INVALID", sectionId: section.id, message: "Section phone settings are invalid" });
+    if (!definition.settingsSchema.safeParse({ ...section.settings, ...values }).success) issues.push({ code: "SETTINGS_INVALID", sectionId: section.id, message: `Section ${device === "mobile" ? "phone" : "tablet"} settings are invalid` });
   }
   if ((definition.maxBlocks !== undefined && section.blocks.length > definition.maxBlocks) || (definition.minBlocks !== undefined && section.blocks.length < definition.minBlocks)) {
     issues.push({ code: "BLOCK_LIMIT_EXCEEDED", sectionId: section.id, message: "Section block limit exceeded" });
@@ -69,13 +71,14 @@ function validateBlocks(blocks: BlockNode[], allowed: string[], owner: string, s
     }
     const blockDefinition = getBlockDefinition(block.type);
     if (!blockDefinition || !blockDefinition.settingsSchema.safeParse(block.settings).success || !formattedCopiesValid(block.settings)) issues.push({ code: "SETTINGS_INVALID", sectionId, blockId: block.id, message: "Block settings are invalid" });
-    const mobile = block.responsive?.mobile;
-    if (mobile && blockDefinition) {
-      const allowedMobile = new Set(mobileSettingKeys(blockDefinition.controls));
-      for (const field of Object.keys(mobile)) {
-        if (!allowedMobile.has(field)) issues.push({ code: "RESPONSIVE_FIELD_NOT_ALLOWED", sectionId, blockId: block.id, field, message: `${field} cannot be overridden on mobile` });
+    for (const device of ["mobile", "tablet"] as const) {
+      const values = block.responsive?.[device];
+      if (!values || !blockDefinition) continue;
+      const allowedKeys = new Set(mobileSettingKeys(blockDefinition.controls));
+      for (const field of Object.keys(values)) {
+        if (!allowedKeys.has(field)) issues.push({ code: "RESPONSIVE_FIELD_NOT_ALLOWED", sectionId, blockId: block.id, field, message: `${field} cannot be overridden on ${device}` });
       }
-      if (!blockDefinition.settingsSchema.safeParse({ ...block.settings, ...mobile }).success) issues.push({ code: "SETTINGS_INVALID", sectionId, blockId: block.id, message: "Block phone settings are invalid" });
+      if (!blockDefinition.settingsSchema.safeParse({ ...block.settings, ...values }).success) issues.push({ code: "SETTINGS_INVALID", sectionId, blockId: block.id, message: `Block ${device === "mobile" ? "phone" : "tablet"} settings are invalid` });
     }
     const children = block.blocks ?? [];
     if (children.length === 0) continue;

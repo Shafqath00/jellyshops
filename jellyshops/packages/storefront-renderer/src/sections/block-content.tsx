@@ -21,11 +21,11 @@ function color(settings: Settings, key: string): string | undefined {
 }
 
 /** Class, link target and inline colours for a button block. `index` decides the theme default (first filled, others outlined). */
-export function buttonProps(settings: Settings, index = 0, mobile?: Settings) {
+export function buttonProps(settings: Settings, index = 0, mobile?: Settings, tablet?: Settings) {
   const style = settings.buttonStyle === "primary" || settings.buttonStyle === "secondary" || settings.buttonStyle === "link"
     ? settings.buttonStyle
     : index === 0 ? "primary" : "secondary";
-  const own = blockStyleProps(settings, mobile);
+  const own = blockStyleProps(settings, mobile, tablet);
   const inline: CSSProperties = { ...own.style };
   const background = color(settings, "buttonColor");
   const text = color(settings, "buttonTextColor");

@@ -7,13 +7,14 @@ export interface SectionPreset { id: string; label: string; category: PresetCate
 interface ControlBase {
   key: string;
   label: string;
+  description?: string;
   /** Sub-heading the editor shows above this control (e.g. "Padding"), like Shopify's setting groups. */
   heading?: string;
   /** Shows the control only while another setting has this value. */
   showWhen?: { key: string; equals: unknown };
   group: ControlGroup;
   responsive?: boolean;
-  /** Has a separate phone value (saved under `responsive.mobile`) that the store shows on screens up to 767px wide. */
+  /** Has a separate phone value (saved under `responsive.mobile`, screens up to 767px) and tablet value (`responsive.tablet`, 768-1023px). */
   mobile?: boolean;
   dynamicTypes?: DynamicValueType[];
 }

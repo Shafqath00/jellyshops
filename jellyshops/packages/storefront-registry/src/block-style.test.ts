@@ -49,3 +49,10 @@ it("accepts the shadow, opacity, gradient, height and margin settings and reject
   expect(validateSectionAgainstRegistry(section({ blockOpacity: 5 }), "home")[0]?.code).toBe("SETTINGS_INVALID");
   expect(validateSectionAgainstRegistry(section({ blockShadow: "glow" }), "home")[0]?.code).toBe("SETTINGS_INVALID");
 });
+
+it("accepts tablet values for the same settings as phone values and rejects others", () => {
+  const withTablet = (tablet: Record<string, unknown>): SectionNode => ({ ...section({}), blocks: [{ ...section({}).blocks[0], responsive: { tablet } }] });
+  expect(validateSectionAgainstRegistry(withTablet({ blockPaddingTop: 12, blockTypePreset: "h3" }), "home")).toEqual([]);
+  expect(validateSectionAgainstRegistry(withTablet({ blockRadius: 4 }), "home")[0]?.code).toBe("RESPONSIVE_FIELD_NOT_ALLOWED");
+  expect(validateSectionAgainstRegistry(withTablet({ blockPaddingTop: 500 }), "home")[0]?.code).toBe("SETTINGS_INVALID");
+});

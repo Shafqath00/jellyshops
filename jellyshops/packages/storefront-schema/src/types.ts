@@ -14,6 +14,8 @@ export interface GlobalSettings {
 
 export interface ResponsiveSettings {
   mobile?: Record<string, unknown>;
+  /** Screens from 768px to 1023px wide; empty values follow the desktop value. */
+  tablet?: Record<string, unknown>;
 }
 
 export interface BlockNode {

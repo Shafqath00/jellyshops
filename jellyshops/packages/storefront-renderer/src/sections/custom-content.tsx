@@ -31,7 +31,7 @@ function renderBlocks(blocks: BlockNode[], options: BlockContext): ReactNode[] {
       const text = stringValue(block.settings, "label");
       const href = resolveStorefrontHref(block.settings.href, context.storeSlug);
       if (!text) return null;
-      const props = buttonProps(block.settings, buttonIndex++, block.responsive?.mobile);
+      const props = buttonProps(block.settings, buttonIndex++, block.responsive?.mobile, block.responsive?.tablet);
       return href ? <a key={block.id} href={href} {...props} {...blockEditorData(block, editor, label, selectedBlockId, "label")}>{text}</a> : <span key={block.id} {...props} {...blockEditorData(block, editor, label, selectedBlockId, "label")}>{text}</span>;
     }
     if (block.type === "image") return <ImageBlock key={block.id} block={block} storeSlug={context.storeSlug} editor={editor} extra={blockEditorData(block, editor, label, selectedBlockId)} />;
@@ -51,6 +51,9 @@ function GroupBlock({ block, options }: { block: BlockNode; options: BlockContex
   const mobile = block.responsive?.mobile;
   const mobileDirection = choice(mobile, "groupDirection", ["", "vertical", "horizontal"] as const, "");
   const mobileGap = typeof mobile?.groupGap === "number" ? numberValue(mobile, "groupGap", 12, 0, 80) : undefined;
+  const tablet = block.responsive?.tablet;
+  const tabletDirection = choice(tablet, "groupDirection", ["", "vertical", "horizontal"] as const, "");
+  const tabletGap = typeof tablet?.groupGap === "number" ? numberValue(tablet, "groupGap", 12, 0, 80) : undefined;
   const children = renderBlocks(childBlocks(block), options).filter(Boolean);
   if (children.length === 0 && !options.editor) return null;
   return <div
@@ -59,11 +62,12 @@ function GroupBlock({ block, options }: { block: BlockNode; options: BlockContex
     {...(align ? { "data-align": align } : {})}
     data-vertical-align={verticalAlign}
     {...(mobileDirection ? { "data-direction-mobile": mobileDirection } : {})}
+    {...(tabletDirection ? { "data-direction-tablet": tabletDirection } : {})}
     {...(settings.groupWrap === false ? {} : { "data-wrap": "" })}
     {...own}
     {...blockEditorData(block, options.editor, blockLabel(block.type), options.selectedBlockId)}
     // Width "Fill" sets display: block on other blocks; a group stays a flex row or column.
-    style={{ ...own.style, display: undefined, "--group-gap": `${numberValue(settings, "groupGap", 12, 0, 80)}px`, ...(mobileGap !== undefined ? { "--group-gap-m": `${mobileGap}px` } : {}) } as CSSProperties}
+    style={{ ...own.style, display: undefined, "--group-gap": `${numberValue(settings, "groupGap", 12, 0, 80)}px`, ...(mobileGap !== undefined ? { "--group-gap-m": `${mobileGap}px` } : {}), ...(tabletGap !== undefined ? { "--group-gap-t": `${tabletGap}px` } : {}) } as CSSProperties}
   >
     {children.length > 0 ? children : <span className="jelly-block-group-empty">Add blocks to this group</span>}
   </div>;
@@ -76,13 +80,16 @@ export function CustomContentSection({ section, context, editor = false, selecte
   const width = choice(section.settings, "contentWidth", ["narrow", "normal", "wide", "full"] as const, "normal");
   const mobile = section.responsive?.mobile;
   const mobileDirection = choice(mobile, "direction", ["", "vertical", "horizontal"] as const, "");
+  const tablet = section.responsive?.tablet;
+  const tabletDirection = choice(tablet, "direction", ["", "vertical", "horizontal"] as const, "");
   const style = {
     "--custom-gap": `${numberValue(section.settings, "gap", 16, 0, 80)}px`,
     ...(typeof mobile?.gap === "number" ? { "--custom-gap-m": `${numberValue(mobile, "gap", 16, 0, 80)}px` } : {}),
+    ...(typeof tablet?.gap === "number" ? { "--custom-gap-t": `${numberValue(tablet, "gap", 16, 0, 80)}px` } : {}),
     "--custom-width": widths[width],
   } as CSSProperties;
   const items = renderBlocks(visibleBlocks(section), { context, editor, selectedBlockId });
-  return <section className="jelly-section jelly-custom-content" {...sectionData(section, { "data-direction": direction, "data-align": alignment, ...(mobileDirection ? { "data-direction-mobile": mobileDirection } : {}) })} style={style}>
+  return <section className="jelly-section jelly-custom-content" {...sectionData(section, { "data-direction": direction, "data-align": alignment, ...(mobileDirection ? { "data-direction-mobile": mobileDirection } : {}), ...(tabletDirection ? { "data-direction-tablet": tabletDirection } : {}) })} style={style}>
     <StorefrontContainer><div className="jelly-custom-content-inner">{items}</div></StorefrontContainer>
   </section>;
 }

@@ -75,3 +75,12 @@ it("adds gradient, shadow, opacity, minimum height and margins", () => {
   expect(blockStyleProps({ blockOpacity: 100, blockShadow: "none", blockGradientColor: "red;}" })).toEqual({});
   expect(blockStyleProps({ blockBackground: true, blockBackgroundColor: "#112233", blockGradientColor: "red;}" }).style).toMatchObject({ background: "#112233" });
 });
+
+it("adds tablet values next to phone values", () => {
+  const props = blockStyleProps({ blockPaddingTop: 40 }, { blockPaddingTop: 8 }, { blockPaddingTop: 24, blockPaddingLeft: 500, blockTypePreset: "h3" });
+  expect(props["data-block-mobile"]).toBe("pad-top");
+  expect(props["data-block-tablet"]).toBe("pad-top pad-left");
+  expect(props["data-type-preset-tablet"]).toBe("h3");
+  expect(props.style).toMatchObject({ "--block-pad-top-m": "8px", "--block-pad-top-t": "24px", "--block-pad-left-t": "100px" });
+  expect(blockStyleProps({}, undefined, { blockTypePreset: "h9", blockPaddingTop: "4px" })).toEqual({});
+});

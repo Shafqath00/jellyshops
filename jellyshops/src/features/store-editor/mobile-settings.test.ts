@@ -30,3 +30,14 @@ it("saves phone settings as phone values on Mobile and removes them when cleared
   // Other node fields (id, blocks) are kept.
   expect(applySettingsPatch({ id: "b", ...node }, { pad: 4 }, controls, true)).toMatchObject({ id: "b", responsive: { mobile: { pad: 4 } } });
 });
+
+it("keeps tablet values apart from phone values", () => {
+  const both = { settings: { pad: 64, align: "center", title: "Hi" }, responsive: { mobile: { pad: 16 } } };
+  const tablet = applySettingsPatch(both, { pad: 40 }, controls, "tablet");
+  expect(tablet).toEqual({ settings: both.settings, responsive: { mobile: { pad: 16 }, tablet: { pad: 40 } } });
+  expect(settingsForView(tablet, controls, "tablet")).toMatchObject({ pad: 40 });
+  expect(settingsForView(tablet, controls, "mobile")).toMatchObject({ pad: 16 });
+  expect(controlsForView(controls, "tablet", both.settings)[0]).toMatchObject({ label: "Top (tablet)", description: "Tablets only. Desktop: 64px." });
+  // Clearing the tablet value leaves the phone value alone.
+  expect(applySettingsPatch(tablet, { pad: undefined }, controls, "tablet")).toEqual(both);
+});

@@ -1,15 +1,20 @@
 import type { ControlDefinition } from "@jelly/storefront-registry";
 
 /**
- * Phone values in the editor, like Shopify's mobile view: while the preview is on
- * Mobile, settings with a phone value (controls marked `mobile`) show and save
- * `responsive.mobile[key]` instead of the desktop value. Clearing a phone value
+ * Phone and tablet values in the editor, like Shopify's mobile view: while the preview is on
+ * Mobile (or Tablet), settings with a separate value (controls marked `mobile`) show and save
+ * `responsive.mobile[key]` (`responsive.tablet[key]`) instead of the desktop value. Clearing it
  * ("Same as desktop", or the reset button) removes it, so the desktop value applies again.
+ * The functions take the device, or a boolean where `true` means phone.
  */
+
+export type EditingDevice = "desktop" | "tablet" | "mobile";
+const deviceOf = (view: boolean | EditingDevice): EditingDevice => view === true ? "mobile" : view === false ? "desktop" : view;
+const deviceName = { mobile: "phone", tablet: "tablet" } as const;
 
 export interface SettingsNode {
   settings: Record<string, unknown>;
-  responsive?: { mobile?: Record<string, unknown> };
+  responsive?: { mobile?: Record<string, unknown>; tablet?: Record<string, unknown> };
 }
 
 const sameAsDesktop = { label: "Same as desktop", value: "" };
@@ -29,11 +34,13 @@ function describe(control: ControlDefinition, value: unknown): string {
 }
 
 /** Controls as the panel shows them: on Mobile, phone settings are labelled and can go back to the desktop value. */
-export function controlsForView(controls: ControlDefinition[], mobile: boolean, settings: Record<string, unknown> = {}): ControlDefinition[] {
-  if (!mobile) return controls;
+export function controlsForView(controls: ControlDefinition[], view: boolean | EditingDevice, settings: Record<string, unknown> = {}): ControlDefinition[] {
+  const device = deviceOf(view);
+  if (device === "desktop") return controls;
+  const name = deviceName[device];
   return controls.map((control): ControlDefinition => {
     if (!control.mobile) return control;
-    const phone: ControlDefinition = { ...control, label: `${control.label} (phone)`, description: `Phones only. Desktop: ${describe(control, settings[control.key])}.` };
+    const phone: ControlDefinition = { ...control, label: `${control.label} (${name})`, description: `${name === "phone" ? "Phones" : "Tablets"} only. Desktop: ${describe(control, settings[control.key])}.` };
     if (phone.type === "select" || phone.type === "segmented") {
       phone.options = [sameAsDesktop, ...phone.options.filter((option) => option.value !== "")];
     }
@@ -42,9 +49,10 @@ export function controlsForView(controls: ControlDefinition[], mobile: boolean, 
 }
 
 /** Values the panel shows: on Mobile, phone settings show their phone value (empty when they follow desktop). */
-export function settingsForView(node: SettingsNode, controls: ControlDefinition[], mobile: boolean): Record<string, unknown> {
-  if (!mobile) return node.settings;
-  const phone = node.responsive?.mobile ?? {};
+export function settingsForView(node: SettingsNode, controls: ControlDefinition[], view: boolean | EditingDevice): Record<string, unknown> {
+  const device = deviceOf(view);
+  if (device === "desktop") return node.settings;
+  const phone = node.responsive?.[device] ?? {};
   const result = { ...node.settings };
   for (const key of mobileKeys(controls)) {
     if (key in phone) result[key] = phone[key];
@@ -54,10 +62,11 @@ export function settingsForView(node: SettingsNode, controls: ControlDefinition[
 }
 
 /** Applies a settings change: on Mobile, phone settings go to `responsive.mobile`; everything else changes the desktop value. */
-export function applySettingsPatch<T extends SettingsNode>(node: T, patch: Record<string, unknown>, controls: ControlDefinition[], mobile: boolean): T {
-  const phoneKeys = mobile ? mobileKeys(controls) : new Set<string>();
+export function applySettingsPatch<T extends SettingsNode>(node: T, patch: Record<string, unknown>, controls: ControlDefinition[], view: boolean | EditingDevice): T {
+  const device = deviceOf(view);
+  const phoneKeys = device !== "desktop" ? mobileKeys(controls) : new Set<string>();
   const settings = { ...node.settings };
-  const phone = { ...(node.responsive?.mobile ?? {}) };
+  const phone = { ...(device !== "desktop" ? node.responsive?.[device] ?? {} : {}) };
   for (const [key, value] of Object.entries(patch)) {
     if (!phoneKeys.has(key)) settings[key] = value;
     else if (value === undefined || value === null || value === "") delete phone[key];
@@ -65,7 +74,7 @@ export function applySettingsPatch<T extends SettingsNode>(node: T, patch: Recor
   }
   const { responsive, ...rest } = node;
   const otherResponsive = { ...(responsive ?? {}) };
-  delete otherResponsive.mobile;
-  const nextResponsive = Object.keys(phone).length ? { ...otherResponsive, mobile: phone } : otherResponsive;
+  if (device !== "desktop") delete otherResponsive[device];
+  const nextResponsive = device !== "desktop" && Object.keys(phone).length ? { ...otherResponsive, [device]: phone } : otherResponsive;
   return { ...rest, settings, ...(Object.keys(nextResponsive).length ? { responsive: nextResponsive } : {}) } as T;
 }

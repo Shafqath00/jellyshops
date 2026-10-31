@@ -27,6 +27,7 @@ const hex = /^#[0-9a-fA-F]{6}$/;
 export interface SectionStyleProps {
   "data-section-style"?: string;
   "data-section-mobile"?: string;
+  "data-section-tablet"?: string;
   "data-show-on"?: string;
   style?: CSSProperties;
 }
@@ -34,21 +35,21 @@ export interface SectionStyleProps {
 const justify: Record<string, string> = { left: "start", center: "center", right: "end" };
 const padding = (value: unknown) => typeof value === "number" && Number.isFinite(value) ? Math.min(200, Math.max(0, Math.round(value))) : undefined;
 
-/** Phone values for heading size, alignment and padding. */
-function mobileVars(mobile: Record<string, unknown> | undefined, vars: Record<string, string>): string[] {
+/** Phone (`m`) or tablet (`t`) values for heading size, alignment and padding. */
+function responsiveVars(mobile: Record<string, unknown> | undefined, vars: Record<string, string>, suffix: "m" | "t"): string[] {
   if (!mobile) return [];
   const used: string[] = [];
   const text = (key: string) => typeof mobile[key] === "string" ? mobile[key] as string : "";
-  if (headingScale[text("styleHeadingSize")]) { vars["--section-heading-scale-m"] = headingScale[text("styleHeadingSize")]; used.push("heading-size"); }
-  if (alignments.has(text("styleAlign"))) { vars["--section-align-m"] = text("styleAlign"); vars["--section-justify-m"] = justify[text("styleAlign")]; used.push("align"); }
+  if (headingScale[text("styleHeadingSize")]) { vars[`--section-heading-scale-${suffix}`] = headingScale[text("styleHeadingSize")]; used.push("heading-size"); }
+  if (alignments.has(text("styleAlign"))) { vars[`--section-align-${suffix}`] = text("styleAlign"); vars[`--section-justify-${suffix}`] = justify[text("styleAlign")]; used.push("align"); }
   const top = padding(mobile.stylePaddingTop);
   const bottom = padding(mobile.stylePaddingBottom);
-  if (top !== undefined) { vars["--section-pad-top-m"] = `${top}px`; used.push("pad-top"); }
-  if (bottom !== undefined) { vars["--section-pad-bottom-m"] = `${bottom}px`; used.push("pad-bottom"); }
+  if (top !== undefined) { vars[`--section-pad-top-${suffix}`] = `${top}px`; used.push("pad-top"); }
+  if (bottom !== undefined) { vars[`--section-pad-bottom-${suffix}`] = `${bottom}px`; used.push("pad-bottom"); }
   return used;
 }
 
-export function sectionStyleProps(settings: Record<string, unknown> | undefined, mobile?: Record<string, unknown>): SectionStyleProps {
+export function sectionStyleProps(settings: Record<string, unknown> | undefined, mobile?: Record<string, unknown>, tablet?: Record<string, unknown>): SectionStyleProps {
   if (!settings) return {};
   const vars: Record<string, string> = {};
   const used: string[] = [];
@@ -91,12 +92,14 @@ export function sectionStyleProps(settings: Record<string, unknown> | undefined,
     if (opacity < 100) direct.opacity = opacity / 100;
   }
 
-  const phone = mobileVars(mobile, vars);
+  const phone = responsiveVars(mobile, vars, "m");
+  const tabletUsed = responsiveVars(tablet, vars, "t");
   const showOn = settings.styleShowOn === "desktop" || settings.styleShowOn === "mobile" ? settings.styleShowOn : undefined;
 
   return {
     ...(used.length ? { "data-section-style": used.join(" ") } : {}),
     ...(phone.length ? { "data-section-mobile": phone.join(" ") } : {}),
+    ...(tabletUsed.length ? { "data-section-tablet": tabletUsed.join(" ") } : {}),
     ...(showOn ? { "data-show-on": showOn } : {}),
     ...(Object.keys(vars).length || Object.keys(direct).length ? { style: { ...vars, ...direct } as CSSProperties } : {}),
   };

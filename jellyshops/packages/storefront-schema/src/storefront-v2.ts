@@ -36,7 +36,7 @@ export interface StorefrontDocument {
 }
 
 const settingsSchema = z.record(z.string(), z.unknown());
-const responsiveSchema = z.object({ mobile: settingsSchema.optional() }).strict();
+const responsiveSchema = z.object({ mobile: settingsSchema.optional(), tablet: settingsSchema.optional() }).strict();
 const blockSchema: z.ZodType<BlockNode> = z.lazy(() => z.object({ id: z.string().min(1), type: z.string().min(1), enabled: z.boolean(), settings: settingsSchema, responsive: responsiveSchema.optional(), blocks: z.array(blockSchema).optional() }));
 const sectionSchema = z.object({ id: z.string().min(1), type: z.string().min(1), enabled: z.boolean(), settings: settingsSchema, responsive: responsiveSchema.optional(), blocks: z.array(blockSchema) });
 const globalSettingsSchema = storeDesignDocumentSchema.shape.globalSettings;

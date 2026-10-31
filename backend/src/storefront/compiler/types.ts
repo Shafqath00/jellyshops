@@ -7,6 +7,7 @@ import type { TemplateType } from "../workspace/repositories/template-repository
 
 export interface CompilerResponsiveSettings {
   mobile?: Record<string, unknown>;
+  tablet?: Record<string, unknown>;
 }
 
 export interface CompilerBlockNode {
