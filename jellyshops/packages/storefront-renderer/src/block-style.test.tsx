@@ -67,3 +67,11 @@ it("renders phone values for custom content, groups and their blocks", () => {
   expect(screen.getByRole("link", { name: "Shop" }).style.getPropertyValue("--block-pad-left-m")).toBe("12px");
   expect(screen.getByRole("heading", { name: "Desktop only" })).toHaveAttribute("data-show-on", "desktop");
 });
+
+it("adds gradient, shadow, opacity, minimum height and margins", () => {
+  const props = blockStyleProps({ blockBackground: true, blockBackgroundColor: "#112233", blockGradientColor: "#ffffff", blockGradientAngle: 90, blockShadow: "medium", blockOpacity: 60, blockMinHeight: 240, blockMarginTop: 12, blockMarginBottom: 500 });
+  expect(props.style).toMatchObject({ background: "linear-gradient(90deg, #112233, #ffffff)", boxShadow: "0 6px 20px rgba(0, 0, 0, 0.14)", opacity: 0.6, minHeight: "240px", marginTop: "12px", marginBottom: "100px" });
+  // Full opacity, no shadow and a bad gradient colour change nothing.
+  expect(blockStyleProps({ blockOpacity: 100, blockShadow: "none", blockGradientColor: "red;}" })).toEqual({});
+  expect(blockStyleProps({ blockBackground: true, blockBackgroundColor: "#112233", blockGradientColor: "red;}" }).style).toMatchObject({ background: "#112233" });
+});

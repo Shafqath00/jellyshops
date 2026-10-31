@@ -59,3 +59,9 @@ it("adds phone values and Show on, and ignores unknown phone values", () => {
   expect(sectionStyleProps({}, { styleAlign: "justify;}", stylePaddingTop: "12px" })).toEqual({});
   expect(sectionStyleProps({ styleShowOn: "watch" })).toEqual({});
 });
+
+it("adds shadow and opacity directly on the section wrapper", () => {
+  expect(sectionStyleProps({ styleShadow: "soft", styleOpacity: 70 })).toEqual({ style: { boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)", opacity: 0.7 } });
+  expect(sectionStyleProps({ styleShadow: "none", styleOpacity: 100 })).toEqual({});
+  expect(sectionStyleProps({ styleShadow: "glow;}", styleOpacity: "50%" })).toEqual({});
+});

@@ -43,3 +43,9 @@ it("adds a Custom content section that accepts any mix of content blocks", () =>
   expect(validateSectionAgainstRegistry(custom, "home")).toEqual([]);
   expect(validateSectionAgainstRegistry({ ...custom, blocks: [{ ...custom.blocks[2], settings: { label: "Go", buttonStyle: "glow" } }] }, "page")[0]?.code).toBe("SETTINGS_INVALID");
 });
+
+it("accepts the shadow, opacity, gradient, height and margin settings and rejects out-of-range ones", () => {
+  expect(validateSectionAgainstRegistry(section({ blockShadow: "soft", blockOpacity: 80, blockGradientColor: "#aabbcc", blockGradientAngle: 45, blockMinHeight: 300, blockMarginTop: 10 }), "home")).toEqual([]);
+  expect(validateSectionAgainstRegistry(section({ blockOpacity: 5 }), "home")[0]?.code).toBe("SETTINGS_INVALID");
+  expect(validateSectionAgainstRegistry(section({ blockShadow: "glow" }), "home")[0]?.code).toBe("SETTINGS_INVALID");
+});

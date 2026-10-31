@@ -17,6 +17,11 @@ const weights = new Set(["300", "400", "500", "600", "700"]);
 const alignments = new Set(["left", "center", "right"]);
 const spacing: Record<string, string> = { none: "0px", small: "clamp(24px, 4vw, 40px)", large: "clamp(80px, 11vw, 144px)" };
 const fonts = new Set(["Fraunces", "Inter", "Georgia", "Arial"]);
+const shadows: Record<string, string> = {
+  soft: "0 2px 8px rgba(0, 0, 0, 0.08)",
+  medium: "0 6px 20px rgba(0, 0, 0, 0.14)",
+  strong: "0 14px 40px rgba(0, 0, 0, 0.24)",
+};
 const hex = /^#[0-9a-fA-F]{6}$/;
 
 export interface SectionStyleProps {
@@ -78,6 +83,14 @@ export function sectionStyleProps(settings: Record<string, unknown> | undefined,
   if (bottom !== undefined) { vars["--section-pad-bottom"] = `${bottom}px`; used.push("pad-bottom"); }
   if (settings.styleWidth === "full") used.push("full-width");
 
+  // Opacity and shadow go straight on the wrapper; they need no theme rules.
+  const direct: CSSProperties = {};
+  if (shadows[text("styleShadow")]) direct.boxShadow = shadows[text("styleShadow")];
+  if (typeof settings.styleOpacity === "number" && Number.isFinite(settings.styleOpacity)) {
+    const opacity = Math.min(100, Math.max(10, Math.round(settings.styleOpacity)));
+    if (opacity < 100) direct.opacity = opacity / 100;
+  }
+
   const phone = mobileVars(mobile, vars);
   const showOn = settings.styleShowOn === "desktop" || settings.styleShowOn === "mobile" ? settings.styleShowOn : undefined;
 
@@ -85,6 +98,6 @@ export function sectionStyleProps(settings: Record<string, unknown> | undefined,
     ...(used.length ? { "data-section-style": used.join(" ") } : {}),
     ...(phone.length ? { "data-section-mobile": phone.join(" ") } : {}),
     ...(showOn ? { "data-show-on": showOn } : {}),
-    ...(Object.keys(vars).length ? { style: vars as CSSProperties } : {}),
+    ...(Object.keys(vars).length || Object.keys(direct).length ? { style: { ...vars, ...direct } as CSSProperties } : {}),
   };
 }

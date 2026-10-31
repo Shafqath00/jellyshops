@@ -41,6 +41,8 @@ export const sectionStyleSchema = z.object({
   stylePaddingTop: z.number().int().min(0).max(200).optional(),
   stylePaddingBottom: z.number().int().min(0).max(200).optional(),
   styleShowOn: optional(SHOW_ON_CHOICES),
+  styleShadow: optional(["none", "soft", "medium", "strong"] as const),
+  styleOpacity: z.number().int().min(10).max(100).optional(),
 }).passthrough();
 
 export type SectionStyleSettings = z.infer<typeof sectionStyleSchema>;
@@ -61,6 +63,8 @@ export const SECTION_STYLE_CONTROLS: ControlDefinition[] = [
   { type: "select", key: "styleAlign", mobile: true, label: "Text alignment", group: "layout", heading: "Layout", options: [themeDefault, { label: "Left", value: "left" }, { label: "Centre", value: "center" }, { label: "Right", value: "right" }] },
   { type: "select", key: "styleShowOn", label: "Show on", group: "layout", heading: "Layout", options: [{ label: "All screens", value: "" }, { label: "Desktop and tablet only", value: "desktop" }, { label: "Phones only", value: "mobile" }] },
   { type: "segmented", key: "styleWidth", label: "Width", group: "layout", heading: "Layout", options: [{ label: "Page", value: "page" }, { label: "Full", value: "full" }] },
+  { type: "select", key: "styleShadow", label: "Shadow", group: "style", heading: "Appearance", options: [{ label: "None", value: "none" }, { label: "Soft", value: "soft" }, { label: "Medium", value: "medium" }, { label: "Strong", value: "strong" }] },
+  { type: "range", key: "styleOpacity", label: "Opacity", group: "style", heading: "Appearance", min: 10, max: 100, step: 5, unit: "%" },
   { type: "select", key: "styleSpacing", label: "Space above and below", group: "style", heading: "Padding", description: "Or set exact sizes below.", options: [themeDefault, { label: "None", value: "none" }, { label: "Small", value: "small" }, { label: "Large", value: "large" }] },
   { type: "range", key: "stylePaddingTop", mobile: true, label: "Top", group: "style", heading: "Padding", min: 0, max: 200, step: 4, unit: "px" },
   { type: "range", key: "stylePaddingBottom", mobile: true, label: "Bottom", group: "style", heading: "Padding", min: 0, max: 200, step: 4, unit: "px" },

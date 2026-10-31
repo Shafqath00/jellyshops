@@ -10,6 +10,11 @@ import type { CSSProperties } from "react";
  */
 const hex = /^#[0-9a-fA-F]{6}$/;
 const presets = new Set(["h1", "h2", "h3", "h4", "body", "small"]);
+const shadows: Record<string, string> = {
+  soft: "0 2px 8px rgba(0, 0, 0, 0.08)",
+  medium: "0 6px 20px rgba(0, 0, 0, 0.14)",
+  strong: "0 14px 40px rgba(0, 0, 0, 0.24)",
+};
 const maxWidths: Record<string, string> = { narrow: "28rem", normal: "42rem", wide: "60rem", none: "none" };
 
 export interface BlockStyleProps {
@@ -34,7 +39,21 @@ export function blockStyleProps(settings: Record<string, unknown> | undefined, m
   else if (settings.blockWidth === "fit") Object.assign(style, { width: "fit-content" });
   if (typeof settings.blockMaxWidth === "string" && maxWidths[settings.blockMaxWidth]) style.maxWidth = maxWidths[settings.blockMaxWidth];
   if (color("blockTextColor")) style.color = color("blockTextColor");
-  if (settings.blockBackground === true) style.background = color("blockBackgroundColor") ?? "var(--theme-surface, #f4f2ee)";
+  if (settings.blockBackground === true) {
+    const base = color("blockBackgroundColor") ?? "var(--theme-surface, #f4f2ee)";
+    const to = color("blockGradientColor");
+    const angle = typeof settings.blockGradientAngle === "number" && Number.isFinite(settings.blockGradientAngle) ? Math.min(360, Math.max(0, Math.round(settings.blockGradientAngle))) : 135;
+    style.background = to ? `linear-gradient(${angle}deg, ${base}, ${to})` : base;
+  }
+  if (typeof settings.blockShadow === "string" && shadows[settings.blockShadow]) style.boxShadow = shadows[settings.blockShadow];
+  const opacity = typeof settings.blockOpacity === "number" && Number.isFinite(settings.blockOpacity) ? Math.min(100, Math.max(10, Math.round(settings.blockOpacity))) : undefined;
+  if (opacity !== undefined && opacity < 100) style.opacity = opacity / 100;
+  const minHeight = px(settings.blockMinHeight, 800);
+  if (minHeight) Object.assign(style, { minHeight: `${minHeight}px`, boxSizing: "border-box" });
+  for (const side of ["Top", "Bottom"] as const) {
+    const value = px(settings[`blockMargin${side}`], 100);
+    if (value !== undefined) style[`margin${side}`] = `${value}px`;
+  }
   if (settings.blockBorder === "solid") style.border = `${px(settings.blockBorderWidth, 8) || 1}px solid ${color("blockBorderColor") ?? "currentColor"}`;
   else if (settings.blockBorder === "none") style.border = "none";
   const radius = px(settings.blockRadius, 100);

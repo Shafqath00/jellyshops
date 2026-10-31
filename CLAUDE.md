@@ -93,6 +93,8 @@ Phase 8 done 2026-10-31 (collection descriptions skipped by choice): "Restore yo
 
 **Publish history (2026-10-31):** backend `GET /storefront/publications` (newest first, marks the live one) and `POST /storefront/publications/:id/restore` (makes an earlier version live again; the draft is untouched; 404 for another store or unknown id), in `storefront/publication/`. Editor: `components/publish-history.tsx` ("Version history" in More actions). **Uncommitted hookups in the other developer's files:** `api/client.ts` (`listPublications`, `restorePublication`), `publish-controls.tsx` (`historyMenu` slot), editor `page.tsx`. Listing checked on staging; restoring not tried on staging. Signed-in QA of the editor was done 2026-10-31 (sections, blocks, groups, phone values, Show on, restore session, publish + live match).
 
+**More style controls (2026-10-31):** blocks (heading/text/button/image/video/group) gain gradient (background colour to a second colour + angle), opacity, shadow (none/soft/medium/strong), minimum height and space above/below; sections gain shadow and opacity (on the wrapper). Inline styles from `block-style.ts` / `section-style.ts` in the renderer, so no theme CSS. Not done: section gradients and heights, tablet values. Backend tarballs repacked (not committed). Checked in the signed-in editor (section + block shadow).
+
 **Not done / open:**
 - **A PR into `main` is impossible**: `local/task3` and `origin/main` have unrelated histories (different root commits). The user chose to leave the branch pushed without a PR.
 - Manual staging + Stripe sandbox journey (`docs/jelly-minimal-launch-checklist.md`) not run; the user must provide a working staging login.
