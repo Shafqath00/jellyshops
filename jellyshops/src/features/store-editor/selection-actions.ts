@@ -153,3 +153,53 @@ export function applySelectionAction(
   items[index] = { ...items[index], section: { ...section, blocks } };
   return { layout: withSections(layout, items), select };
 }
+
+/** The ids of the items the target sits among: the template's own sections, or the blocks in its section or group. */
+export function siblingIdsFor(layout: Record<string, unknown>, target: SelectionTarget): string[] {
+  const found = findTarget(layout, target);
+  if (!found) return [];
+  if (found.location) return found.location.siblings.map((item) => item.id);
+  return placements(layout).flatMap((item) => item?.kind === "inline" && (item.section as SectionNode | undefined)?.id ? [(item.section as SectionNode).id] : []);
+}
+
+/**
+ * Drag and drop on the preview: moves the target to just before the sibling `beforeId`
+ * (or to the end of its list when null). Sections stay among the template's own sections
+ * and blocks stay in the list they are in. Returns null when nothing would change.
+ */
+export function moveBefore(
+  layout: Record<string, unknown>,
+  target: SelectionTarget,
+  beforeId: string | null,
+): { layout: Record<string, unknown>; select: SelectionTarget } | null {
+  if (beforeId === target.blockId || (!target.blockId && beforeId === target.sectionId)) return null;
+  const items = placements(layout);
+  const index = inlineIndex(items, target.sectionId);
+  if (index < 0) return null;
+  if (!target.blockId) {
+    const before = items.map((item) => (item?.section as SectionNode | undefined)?.id);
+    const [moved] = items.splice(index, 1);
+    const to = beforeId === null ? items.length : inlineIndex(items, beforeId);
+    if (to < 0) return null;
+    items.splice(to, 0, moved);
+    if (items.every((item, position) => (item?.section as SectionNode | undefined)?.id === before[position])) return null;
+    return { layout: withSections(layout, items), select: target };
+  }
+  const section = items[index].section as SectionNode;
+  const location = findBlock(section.blocks, target.blockId);
+  if (!location) return null;
+  const order = location.siblings.map((item) => item.id);
+  let valid = true;
+  const blocks = updateBlockList(section.blocks, location.parent?.id, (list) => {
+    const from = list.findIndex((item) => item.id === target.blockId);
+    const [moved] = list.splice(from, 1);
+    const to = beforeId === null ? list.length : list.findIndex((item) => item.id === beforeId);
+    if (to < 0) { valid = false; list.splice(from, 0, moved); return list; }
+    list.splice(to, 0, moved);
+    return list;
+  });
+  const after = (location.parent ? findBlock(blocks, location.parent.id)?.block.blocks ?? [] : blocks).map((item) => item.id);
+  if (!valid || after.every((id, position) => id === order[position])) return null;
+  items[index] = { ...items[index], section: { ...section, blocks } };
+  return { layout: withSections(layout, items), select: target };
+}

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, ListIndentDecrease, ListIndentIncrease, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, GripVertical, ListIndentDecrease, ListIndentIncrease, Trash2 } from "lucide-react";
+import { dropPosition } from "../drag-position";
 import type { SelectionAction, SelectionTarget } from "../selection-actions";
 
 /**
@@ -61,6 +62,8 @@ export function SelectionToolbar({
   hidden,
   actions,
   onAction,
+  siblingIds,
+  onMove,
 }: {
   frameTitle?: string;
   target: SelectionTarget | null;
@@ -68,9 +71,58 @@ export function SelectionToolbar({
   hidden: boolean;
   actions: Record<SelectionAction, boolean>;
   onAction(action: SelectionAction): void;
+  /** Ids of the items the selection sits among, in page order; with `onMove` they make the grip draggable. */
+  siblingIds?: string[];
+  /** Drop before the sibling with this id, or at the end of the list when null. */
+  onMove?(beforeId: string | null): void;
 }) {
   const doc = usePreviewDocument(frameTitle);
   const [position, setPosition] = useState<{ top: number; left: number; docked: boolean } | null>(null);
+  const [dropLine, setDropLine] = useState<number | null>(null);
+
+  // Drag the grip over the preview: a line shows where the item would land, and letting go moves it there.
+  const startDrag = (event: React.PointerEvent<HTMLButtonElement>) => {
+    if (!doc || !target || !onMove || !siblingIds || siblingIds.length < 2 || event.button > 0) return;
+    event.preventDefault();
+    const view = doc.defaultView;
+    if (!view) return;
+    const grip = event.currentTarget;
+    grip.setPointerCapture(event.pointerId);
+    const draggedId = target.blockId ?? target.sectionId;
+    let pointerY = event.clientY;
+    let latest: ReturnType<typeof dropPosition> = null;
+    let frame = 0;
+    const measure = () => siblingIds.flatMap((id) => {
+      const element = findElement(doc, target.blockId ? { sectionId: target.sectionId, blockId: id } : { sectionId: id });
+      const rect = element?.getBoundingClientRect();
+      return rect && (rect.width > 0 || rect.height > 0) ? [{ id, top: rect.top + view.scrollY, bottom: rect.bottom + view.scrollY }] : [];
+    });
+    const tick = () => {
+      if (pointerY < 60) view.scrollBy(0, -14);
+      else if (pointerY > view.innerHeight - 60) view.scrollBy(0, 14);
+      latest = dropPosition(measure(), draggedId, pointerY + view.scrollY);
+      setDropLine(latest ? latest.lineY : null);
+      frame = requestAnimationFrame(tick);
+    };
+    const move = (moveEvent: PointerEvent) => { pointerY = moveEvent.clientY; };
+    const finish = (commit: boolean) => {
+      cancelAnimationFrame(frame);
+      grip.removeEventListener("pointermove", move);
+      grip.removeEventListener("pointerup", up);
+      grip.removeEventListener("pointercancel", cancel);
+      doc.removeEventListener("keydown", key);
+      setDropLine(null);
+      if (commit && latest) onMove(latest.beforeId);
+    };
+    const up = () => finish(true);
+    const cancel = () => finish(false);
+    const key = (keyEvent: KeyboardEvent) => { if (keyEvent.key === "Escape") finish(false); };
+    grip.addEventListener("pointermove", move);
+    grip.addEventListener("pointerup", up);
+    grip.addEventListener("pointercancel", cancel);
+    doc.addEventListener("keydown", key);
+    frame = requestAnimationFrame(tick);
+  };
 
   useEffect(() => {
     if (!doc || !target) return;
@@ -107,6 +159,8 @@ export function SelectionToolbar({
 
   if (!doc || !target || !position) return null;
   return createPortal(
+    <>
+    {dropLine !== null && <div aria-hidden="true" data-editor-drop-line="" style={{ position: "absolute", left: 0, right: 0, top: dropLine - 2, height: 4, borderRadius: 2, background: "var(--primary, #2563eb)", pointerEvents: "none", zIndex: 2147482999 }} />}
     <div
       role="toolbar"
       aria-label={`${label} actions`}
@@ -116,6 +170,11 @@ export function SelectionToolbar({
       className="flex items-center gap-0.5 rounded-lg border border-black/10 bg-white p-1 font-sans text-[#1c1b19] shadow-[0_4px_16px_rgba(0,0,0,0.16)]"
     >
       <style>{currentStyle}</style>
+      {onMove && siblingIds && siblingIds.length > 1 && !hidden && !position.docked && (
+        <button type="button" aria-label="Drag to move" title="Drag to move" onPointerDown={startDrag} style={{ touchAction: "none", cursor: "grab" }} className="grid size-7 place-items-center rounded-md hover:bg-black/[0.06]">
+          <GripVertical size={14} strokeWidth={1.9} />
+        </button>
+      )}
       <span className="max-w-[220px] truncate px-1.5 text-[11px] font-semibold">{hidden ? `${label} (hidden)` : position.docked ? `${label} (not shown at this width)` : label}</span>
       {actionButtons.filter(({ action, onlyWhenAvailable }) => !onlyWhenAvailable || actions[action]).map(({ action, label: name, icon }) => {
         const Icon = icon(hidden);
@@ -134,7 +193,8 @@ export function SelectionToolbar({
           </button>
         );
       })}
-    </div>,
+    </div>
+    </>,
     doc.body,
   );
 }

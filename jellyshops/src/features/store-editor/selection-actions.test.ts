@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { applySelectionAction, availableActions } from "./selection-actions";
+import { applySelectionAction, availableActions, moveBefore, siblingIdsFor } from "./selection-actions";
 
 const block = (id: string) => ({ id, type: "button", enabled: true, settings: { label: id } });
 const layout = () => ({
@@ -80,4 +80,27 @@ it("moves a block into the group above it and back out", () => {
   let next = 0;
   const copy = applySelectionAction(grouped(), { sectionId: "a", blockId: "g" }, "duplicate", () => `n${++next}`);
   expect(ids_of(copy)).toBe("b1 g[g1,g2] n1[n2,n3] b2");
+});
+
+it("drags sections and blocks to a new place among their siblings", () => {
+  const three = () => ({ type: "home", sections: [
+    { kind: "global", globalSectionId: "header" },
+    ...["a", "c", "d"].map((id) => ({ kind: "inline", section: { id, type: "custom-content", enabled: true, settings: {}, blocks: [block(`${id}1`), block(`${id}2`), block(`${id}3`)] } })),
+  ] });
+  const order = (result: { layout: Record<string, unknown> } | null) => (result!.layout.sections as Array<{ section?: { id: string } }>).map((item) => item.section?.id ?? "global");
+  expect(siblingIdsFor(three(), { sectionId: "a" })).toEqual(["a", "c", "d"]);
+  expect(order(moveBefore(three(), { sectionId: "d" }, "a"))).toEqual(["global", "d", "a", "c"]);
+  expect(order(moveBefore(three(), { sectionId: "a" }, null))).toEqual(["global", "c", "d", "a"]);
+  expect(order(moveBefore(three(), { sectionId: "a" }, "d"))).toEqual(["global", "c", "a", "d"]);
+  // Dropping where it already is, onto itself, or before something that is not a sibling does nothing.
+  expect(moveBefore(three(), { sectionId: "a" }, "c")).toBeNull();
+  expect(moveBefore(three(), { sectionId: "a" }, "a")).toBeNull();
+  expect(moveBefore(three(), { sectionId: "a" }, "nope")).toBeNull();
+
+  expect(siblingIdsFor(three(), { sectionId: "a", blockId: "a2" })).toEqual(["a1", "a2", "a3"]);
+  const moved = moveBefore(three(), { sectionId: "c", blockId: "c3" }, "c1");
+  expect(inline(moved, 2).section.blocks.map(({ id }) => id)).toEqual(["c3", "c1", "c2"]);
+  expect(inline(moveBefore(three(), { sectionId: "c", blockId: "c1" }, null), 2).section.blocks.map(({ id }) => id)).toEqual(["c2", "c3", "c1"]);
+  expect(moveBefore(three(), { sectionId: "c", blockId: "c1" }, "a1")).toBeNull();
+  expect(moveBefore(three(), { sectionId: "c", blockId: "c1" }, "c2")).toBeNull();
 });
