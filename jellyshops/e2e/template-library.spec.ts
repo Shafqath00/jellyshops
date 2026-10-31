@@ -23,12 +23,12 @@ test("merchant previews templates, edits a draft, and uses the editor on mobile"
   const headingBlock = page.frameLocator('iframe[title="Storefront preview"]').locator("[data-editor-block-id][data-editor-field-key='text']").first();
   await headingBlock.click();
   const input = page.getByRole("textbox", { name: "Heading", exact: true });
-  const original = await input.inputValue();
+  const original = ((await input.textContent()) ?? "").trim();
   const edited = `A shop with a little soul ${Date.now()}`;
   try {
     await input.fill(edited);
     await expect(page.getByRole("button", { name: "Publish", exact: true })).toBeDisabled();
-    await expect(input).toHaveValue(edited);
+    await expect(input).toHaveText(edited);
     await expect(page.getByText("All changes saved", { exact: true })).toBeVisible();
     await page.reload();
     await expect(page.getByText(edited, { exact: true })).toBeVisible();

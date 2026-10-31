@@ -16,7 +16,7 @@ test("merchant edits a template, compiles preview, and publishes v4 storefront",
   await headingBlock.click();
 
   const templateSave = page.waitForResponse((response) => response.url().includes("/storefront/templates/") && response.request().method() === "PATCH");
-  await page.getByLabel("Heading").fill(heading);
+  await page.getByLabel("Heading", { exact: true }).fill(heading);
   expect((await templateSave).ok()).toBeTruthy();
 
   const validation = page.waitForResponse((response) => response.url().endsWith("/storefront/validate") && response.request().method() === "POST");
