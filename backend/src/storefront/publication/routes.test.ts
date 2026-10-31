@@ -20,6 +20,8 @@ function setup() {
       diagnostics: [],
       reused: false,
     })),
+    history: vi.fn(async () => [{ id: "pub-1", sourceGeneration: 8, publishedAt: new Date("2026-10-31T10:00:00.000Z"), isCurrent: true }]),
+    restore: vi.fn(async (_storeId: string, publicationId: string) => ({ id: publicationId, sourceGeneration: 7, alreadyCurrent: false })),
   };
   const app = express();
   app.use((req, _res, next) => { req.id = "publish-test"; next(); });
@@ -74,6 +76,32 @@ describe("compiled storefront publish route", () => {
 
     expect(response.status).toBe(422);
     expect(response.body).toMatchObject({ ok: false, diagnostics: [{ code: "MISSING_GLOBAL_SECTION" }] });
+  });
+
+  it("lists published versions for the authorized store", async () => {
+    const { app, api } = setup();
+    const response = await request(app).get("/api/stores/store-a/storefront/publications").set("Authorization", "Bearer token");
+
+    expect(response.status).toBe(200);
+    expect(api.history).toHaveBeenCalledWith("store-a", 20);
+    expect(response.body.publications[0]).toMatchObject({ id: "pub-1", isCurrent: true });
+  });
+
+  it("restores an earlier published version", async () => {
+    const { app, api } = setup();
+    const response = await request(app).post("/api/stores/store-a/storefront/publications/pub-0/restore").set("Authorization", "Bearer token");
+
+    expect(response.status).toBe(200);
+    expect(api.restore).toHaveBeenCalledWith("store-a", "pub-0");
+    expect(response.body).toMatchObject({ ok: true, publication: { id: "pub-0" } });
+  });
+
+  it("says history is unavailable when the API does not support it", async () => {
+    const { app, api } = setup();
+    delete api.history;
+    const response = await request(app).get("/api/stores/store-a/storefront/publications").set("Authorization", "Bearer token");
+
+    expect(response.status).toBe(503);
   });
 
   it("requires storefront publish permission", async () => {

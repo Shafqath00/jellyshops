@@ -14,6 +14,13 @@ export interface CompiledPublicationRecord {
   publishedAt: Date;
 }
 
+export interface PublicationHistoryEntry {
+  id: string;
+  sourceGeneration: number;
+  publishedAt: Date;
+  isCurrent: boolean;
+}
+
 export interface SaveCompiledSnapshotInput {
   storeId: string;
   expectedGeneration: number;
@@ -30,4 +37,6 @@ export interface CompiledPublicationRepository {
   getCurrentPublicationId(storeId: string): Promise<string | null>;
   getCurrent(storeId: string): Promise<CompiledPublicationRecord | null>;
   activate(storeId: string, publicationId: string): Promise<void>;
+  /** Newest first, without the stored documents. */
+  list(storeId: string, limit: number): Promise<PublicationHistoryEntry[]>;
 }

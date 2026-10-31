@@ -96,6 +96,19 @@ class MemoryPublicationRepository implements CompiledPublicationRepository {
     if (!await this.get(storeId, publicationId)) throw new Error("publication missing");
     this.currentPublicationId = publicationId;
   }
+
+  async list(storeId: string, limit: number) {
+    return [...this.publications.values()]
+      .filter((publication) => publication.storeId === storeId)
+      .reverse()
+      .slice(0, limit)
+      .map((publication) => ({
+        id: publication.id,
+        sourceGeneration: publication.sourceGeneration,
+        publishedAt: publication.publishedAt,
+        isCurrent: publication.id === this.currentPublicationId,
+      }));
+  }
 }
 
 describe("CompiledStorefrontPublicationService", () => {
@@ -203,5 +216,42 @@ describe("CompiledStorefrontPublicationService", () => {
     expect(compiler.compile).not.toHaveBeenCalled();
     expect(save).not.toHaveBeenCalled();
     expect(activate).not.toHaveBeenCalled();
+  });
+
+  describe("history and restore", () => {
+    function setup() {
+      const compiler = { compile: vi.fn(async () => successfulCompilation()) };
+      const repository = new MemoryPublicationRepository();
+      repository.publications.set("pub-a", record("pub-a", "a", 1));
+      repository.publications.set("pub-b", record("pub-b", "b", 2));
+      repository.currentPublicationId = "pub-b";
+      return { repository, service: new CompiledStorefrontPublicationService(compiler, repository) };
+    }
+
+    it("lists versions newest first and marks the live one", async () => {
+      const { service } = setup();
+      const history = await service.history("store-a");
+      expect(history.map((entry) => [entry.id, entry.isCurrent])).toEqual([["pub-b", true], ["pub-a", false]]);
+    });
+
+    it("makes an earlier version live again", async () => {
+      const { service, repository } = setup();
+      await expect(service.restore("store-a", "pub-a")).resolves.toMatchObject({ id: "pub-a", alreadyCurrent: false });
+      expect(repository.currentPublicationId).toBe("pub-a");
+    });
+
+    it("does nothing when the version is already live", async () => {
+      const { service, repository } = setup();
+      const activate = vi.spyOn(repository, "activate");
+      await expect(service.restore("store-a", "pub-b")).resolves.toMatchObject({ alreadyCurrent: true });
+      expect(activate).not.toHaveBeenCalled();
+    });
+
+    it("refuses a version that belongs to another store or does not exist", async () => {
+      const { service, repository } = setup();
+      await expect(service.restore("store-b", "pub-a")).rejects.toMatchObject({ status: 404 });
+      await expect(service.restore("store-a", "nope")).rejects.toMatchObject({ status: 404 });
+      expect(repository.currentPublicationId).toBe("pub-b");
+    });
   });
 });

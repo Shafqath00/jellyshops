@@ -11,6 +11,7 @@ import type { StorefrontDependencyGraph } from "../compiler/dependency-graph.js"
 import type {
   CompiledPublicationRecord,
   CompiledPublicationRepository,
+  PublicationHistoryEntry,
   SaveCompiledSnapshotInput,
 } from "./repository.js";
 
@@ -188,6 +189,25 @@ export class SqlCompiledPublicationRepository implements
     if (result.rows.length === 0) {
       throw new PublicationActivationError(storeId, publicationId);
     }
+  }
+
+  async list(storeId: string, limit: number): Promise<PublicationHistoryEntry[]> {
+    const result = await this.sql.query<{ id: unknown; sourceGeneration: unknown; publishedAt: string | Date; isCurrent: unknown } & QueryResultRow>(
+      `SELECT publication."id", publication."sourceGeneration", publication."publishedAt",
+              (publication."id" = store."currentPublicationId") AS "isCurrent"
+       FROM "StorefrontPublication" AS publication
+       JOIN "Store" AS store ON store."id" = publication."storeId"
+       WHERE publication."storeId" = $1
+       ORDER BY publication."publishedAt" DESC, publication."id" DESC
+       LIMIT $2`,
+      [storeId, limit],
+    );
+    return result.rows.map((row) => ({
+      id: String(row.id),
+      sourceGeneration: Number(row.sourceGeneration),
+      publishedAt: new Date(row.publishedAt),
+      isCurrent: row.isCurrent === true,
+    }));
   }
 
   async loadPublication(publicationId: string): Promise<RuntimeStorefrontSnapshotV4 | null> {

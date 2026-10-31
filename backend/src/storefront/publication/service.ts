@@ -2,7 +2,9 @@ import type { CompilationResult } from "../compiler/compiler.js";
 import type {
   CompiledPublicationRecord,
   CompiledPublicationRepository,
+  PublicationHistoryEntry,
 } from "./repository.js";
+import { ApiError } from "../../http/errors.js";
 
 export interface StorefrontCompilerPublisherApi {
   compile(storeId: string, expectedGeneration: number): Promise<CompilationResult>;
@@ -61,5 +63,18 @@ export class CompiledStorefrontPublicationService {
       diagnostics: compilation.diagnostics,
       reused: false,
     };
+  }
+
+  async history(storeId: string, limit = 20): Promise<PublicationHistoryEntry[]> {
+    return this.repository.list(storeId, limit);
+  }
+
+  /** Makes an earlier published version the live one again. The draft is not touched. */
+  async restore(storeId: string, publicationId: string): Promise<{ id: string; sourceGeneration: number; alreadyCurrent: boolean }> {
+    const publication = await this.repository.get(storeId, publicationId);
+    if (!publication) throw new ApiError(404, "PUBLICATION_NOT_FOUND", "That published version was not found.");
+    const current = await this.repository.getCurrentPublicationId(storeId);
+    if (current !== publication.id) await this.repository.activate(storeId, publication.id);
+    return { id: publication.id, sourceGeneration: publication.sourceGeneration, alreadyCurrent: current === publication.id };
   }
 }
