@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { inlineSetting } from "./setting-text";
 import type { SectionNode } from "@jelly/storefront-schema";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import type { StorefrontRuntimeContext } from "../runtime-context";
@@ -44,7 +45,7 @@ export function HeroSection({ section, editor = false, context }: { section: Sec
         {blocks.filter((block) => block.type !== "button").map((block) => {
           const text = setting(block, "text");
           if (!text) return null;
-          return block.type === "heading" ? <h1 key={block.id} {...blockStyle(block)} {...editorProps(block)}>{text}</h1> : <p key={block.id} {...blockStyle(block)} {...editorProps(block)}>{text}</p>;
+          return block.type === "heading" ? <h1 key={block.id} {...blockStyle(block)} {...editorProps(block)}>{inlineSetting(block.settings, "text", text)}</h1> : <p key={block.id} {...blockStyle(block)} {...editorProps(block)}>{text}</p>;
         })}
         {summary && <p className="jelly-hero-summary">{summary}</p>}
         {typeof settings.body === "string" && settings.body && <div className="jelly-hero-body">{settings.body}</div>}

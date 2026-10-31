@@ -5,7 +5,7 @@ import type { RendererMode } from "../types";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
 import { choice, headingHidden, imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
-import { formattedSetting, SettingText } from "./setting-text";
+import { formattedSetting, inlineSetting, SettingText } from "./setting-text";
 import { blockStyle } from "../block-style";
 import { blockEditorData, buttonProps } from "./block-content";
 
@@ -26,6 +26,8 @@ function blockCopy(section: SectionNode, fallbackHeading: string, editor = false
   const buttons = blocks.filter((block) => block.type === "button");
   return {
     heading: stringValue(heading?.settings, "text", stringValue(section.settings, "heading", fallbackHeading)),
+    /** The heading with its formatting (bold, italic, links, colour, size) when the heading block has it. */
+    headingContent: inlineSetting(heading?.settings, "text", stringValue(heading?.settings, "text", stringValue(section.settings, "heading", fallbackHeading))),
     body: stringValue(body?.settings, "text", stringValue(section.settings, "body", stringValue(section.settings, "text"))),
     bodyDocument: stringValue(body?.settings, "text") ? formattedSetting(body?.settings, "text") : stringValue(section.settings, "body") ? null : formattedSetting(section.settings, "text"),
     headingProps: { ...blockStyle(heading), ...(heading ? blockEditorData(heading, editor, "Heading", undefined, "text") : {}) },
@@ -68,7 +70,7 @@ export function ImageWithTextSection({ section, context }: { section: SectionNod
         </div>}
         <div className="jelly-image-text-content">
           {eyebrow && <p className="jelly-eyebrow">{eyebrow}</p>}
-          <h2 {...content.headingProps}>{content.heading}</h2>
+          <h2 {...content.headingProps}>{content.headingContent}</h2>
           <SettingText text={content.body} document={content.bodyDocument} {...content.bodyProps} />
           <Actions buttons={content.buttons} storeSlug={context.storeSlug} />
         </div>
@@ -92,7 +94,7 @@ export function ImageBannerSection({ section, context }: { section: SectionNode;
       {overlay > 0 && <span className="jelly-image-banner-overlay" aria-hidden="true" style={{ background: `rgba(0, 0, 0, ${overlay})` }} />}
     </>}
     <StorefrontContainer className="jelly-image-banner-content">
-      {content.heading && <h2 {...content.headingProps}>{content.heading}</h2>}
+      {content.heading && <h2 {...content.headingProps}>{content.headingContent}</h2>}
       <SettingText text={content.body} document={content.bodyDocument} {...content.bodyProps} />
       <Actions buttons={content.buttons} storeSlug={context.storeSlug} />
     </StorefrontContainer>
@@ -108,7 +110,7 @@ export function MulticolumnSection({ section, context }: { section: SectionNode;
   const count = numberValue(section.settings, "columns", 3, 2, 4);
   return <section className="jelly-section jelly-multicolumn" {...sectionData(section, { "data-align": choice(section.settings, "contentAlignment", ["left", "center", "right"] as const, "left") })}>
     <StorefrontContainer>
-      {!headingHidden(section) && <div className="jelly-section-intro"><h2 {...content.headingProps}>{content.heading}</h2><SettingText text={content.body} document={content.bodyDocument} {...content.bodyProps} /></div>}
+      {!headingHidden(section) && <div className="jelly-section-intro"><h2 {...content.headingProps}>{content.headingContent}</h2><SettingText text={content.body} document={content.bodyDocument} {...content.bodyProps} /></div>}
       {columns.length > 0 && <div className="jelly-multicolumn-grid" style={{ "--jelly-columns": count } as CSSProperties}>
         {columns.map((column) => <article key={column.id}><h3>{column.heading}</h3><SettingText text={column.text} document={column.document} /></article>)}
       </div>}
@@ -151,7 +153,7 @@ export function NewsletterSection({ section, subscribe, mode = "preview" }: { se
   const content = blockCopy(section, "Join our newsletter", mode === "editor");
   const buttonLabel = stringValue(section.settings, "buttonLabel", "Subscribe");
   return <section className="jelly-section jelly-newsletter" {...sectionData(section, { "data-align": choice(section.settings, "contentAlignment", ["left", "center", "right"] as const, "left") })}><StorefrontContainer>
-    <h2 {...content.headingProps}>{content.heading}</h2>
+    <h2 {...content.headingProps}>{content.headingContent}</h2>
     <SettingText {...content.bodyProps} className="jelly-newsletter-text" text={content.body} document={content.bodyDocument} />
     <NewsletterForm source={section.id} buttonLabel={buttonLabel} subscribe={subscribe} mode={mode} />
   </StorefrontContainer></section>;

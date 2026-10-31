@@ -1,6 +1,7 @@
 import type { SectionNode } from "./types.js";
+import { normalizeTextStyleMark, type RichTextStyleMark } from "./rich-text-style.js";
 
-export type RichTextMark = { type: "bold" } | { type: "italic" } | { type: "link"; attrs: { href: string } };
+export type RichTextMark = { type: "bold" } | { type: "italic" } | { type: "link"; attrs: { href: string } } | RichTextStyleMark;
 export type RichTextInline = { type: "text"; text: string; marks?: RichTextMark[] } | { type: "hardBreak" };
 export type RichTextBlock =
   | { type: "paragraph"; content: RichTextInline[] }
@@ -35,6 +36,7 @@ function normalizeMark(value: unknown): RichTextMark | null {
   const mark = record(value);
   if (!mark) return null;
   if (mark.type === "bold" || mark.type === "italic") return { type: mark.type };
+  if (mark.type === "textStyle") return normalizeTextStyleMark(mark.attrs);
   if (mark.type === "link") {
     const href = safeRichTextHref(record(mark.attrs)?.href);
     return href ? { type: "link", attrs: { href } } : null;

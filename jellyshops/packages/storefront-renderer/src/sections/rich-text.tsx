@@ -1,15 +1,16 @@
-import { resolveRichTextDocument, safeRichTextHref, type RichTextBlock, type RichTextInline, type SectionNode } from "@jelly/storefront-schema";
+import { resolveRichTextDocument, richTextStyleCss, safeRichTextHref, type RichTextBlock, type RichTextInline, type SectionNode } from "@jelly/storefront-schema";
 import { cloneElement, isValidElement, type ReactNode } from "react";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import { blockStyle } from "../block-style";
 
-function renderInline(content: RichTextInline[]): ReactNode[] {
+export function renderInline(content: RichTextInline[]): ReactNode[] {
   return content.map((node, index) => {
     if (node.type === "hardBreak") return <br key={index} />;
     let value: ReactNode = node.text;
     for (const mark of node.marks ?? []) {
       if (mark.type === "bold") value = <strong>{value}</strong>;
       else if (mark.type === "italic") value = <em>{value}</em>;
+      else if (mark.type === "textStyle") value = <span style={richTextStyleCss(mark.attrs)}>{value}</span>;
       else {
         const href = safeRichTextHref(mark.attrs.href);
         if (href) value = <a href={href} rel="noopener noreferrer">{value}</a>;

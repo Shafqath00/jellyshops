@@ -18,7 +18,7 @@ interface ControlBase {
   dynamicTypes?: DynamicValueType[];
 }
 export type ControlDefinition =
-  | (ControlBase & { type: "text" | "textarea" | "rich-text"; maxLength: number })
+  | (ControlBase & { type: "text" | "textarea" | "rich-text"; maxLength: number; /** One line of formatted text (headings): no paragraphs or lists. */ inline?: boolean })
   | (ControlBase & { type: "number" | "range"; min: number; max: number; step: number; unit?: string })
   | (ControlBase & { type: "select" | "segmented"; options: Array<{ label: string; value: string }> })
   | (ControlBase & { type: "checkbox" })

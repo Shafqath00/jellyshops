@@ -73,7 +73,8 @@ describe("editor shell", () => {
     const heading = screen.getByRole("textbox", { name: "Heading" });
     await user.clear(heading);
     await user.type(heading, "Fresh arrivals");
-    expect(screen.getByText("Fresh arrivals")).toBeInTheDocument();
+    // The heading field is a formatted text box, so check the preview's heading.
+    expect(screen.getByRole("heading", { name: "Fresh arrivals" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Back to page hierarchy" }));
     expect(screen.getByRole("heading", { name: "Home page" })).toBeInTheDocument();

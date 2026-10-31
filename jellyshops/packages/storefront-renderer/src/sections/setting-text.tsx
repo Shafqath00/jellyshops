@@ -1,6 +1,6 @@
 import { normalizeRichTextDocument, type RichTextBlock, type RichTextDocument } from "@jelly/storefront-schema";
-import type { HTMLAttributes, ReactNode } from "react";
-import { renderBlocks } from "./rich-text";
+import { Fragment, type HTMLAttributes, type ReactNode } from "react";
+import { renderBlocks, renderInline } from "./rich-text";
 
 /**
  * Text settings edited with the rich text editor keep two values: the plain text
@@ -36,4 +36,16 @@ const squash = (value: string) => value.replace(/^\s*(?:-|\d+\.)\s+/gm, "").repl
 export function SettingText({ text, document, ...props }: { text: string; document: RichTextDocument | null } & HTMLAttributes<HTMLElement>): ReactNode {
   if (document) return <div {...props} className={["jelly-rich-text jelly-setting-text", props.className].filter(Boolean).join(" ")}>{renderBlocks(document.content)}</div>;
   return text ? <p {...props}>{text}</p> : null;
+}
+
+/**
+ * A one-line text setting (a heading) with its bold, italic, underline, links,
+ * colour and size, or the plain `fallback` when it has no matching formatted copy.
+ * Goes inside the heading element; lines are joined with line breaks.
+ */
+export function inlineSetting(settings: Record<string, unknown> | undefined, key: string, fallback: string): ReactNode {
+  const document = formattedSetting(settings, key);
+  const lines = (document?.content ?? []).flatMap((block) => block.type === "paragraph" || block.type === "heading" ? [block.content] : []);
+  if (!lines.length) return fallback;
+  return lines.map((line, index) => <Fragment key={index}>{index > 0 && <br />}{renderInline(line)}</Fragment>);
 }

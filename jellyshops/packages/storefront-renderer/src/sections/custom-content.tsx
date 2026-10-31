@@ -7,7 +7,7 @@ import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
 import { blockStyle } from "../block-style";
 import { blockEditorData, buttonProps, ImageBlock, VideoBlock } from "./block-content";
-import { formattedSetting, SettingText } from "./setting-text";
+import { formattedSetting, inlineSetting, SettingText } from "./setting-text";
 import { choice, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
 
 const widths: Record<string, string> = { narrow: "36rem", normal: "48rem", wide: "72rem", full: "none" };
@@ -22,7 +22,7 @@ function renderBlocks(blocks: BlockNode[], options: BlockContext): ReactNode[] {
     const label = blockLabel(block.type);
     if (block.type === "heading") {
       const text = stringValue(block.settings, "text");
-      return text ? <h2 key={block.id} {...blockStyle(block)} {...blockEditorData(block, editor, label, selectedBlockId, "text")}>{text}</h2> : null;
+      return text ? <h2 key={block.id} {...blockStyle(block)} {...blockEditorData(block, editor, label, selectedBlockId, "text")}>{inlineSetting(block.settings, "text", text)}</h2> : null;
     }
     if (block.type === "text") {
       return <SettingText key={block.id} text={stringValue(block.settings, "text")} document={formattedSetting(block.settings, "text")} {...blockStyle(block)} {...blockEditorData(block, editor, label, selectedBlockId, "text")} />;
