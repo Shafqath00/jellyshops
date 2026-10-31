@@ -9,6 +9,8 @@ const originalBoundingRect = Object.getOwnPropertyDescriptor(Range.prototype, "g
 beforeAll(() => {
   Object.defineProperty(Range.prototype, "getClientRects", { configurable: true, value: () => [new DOMRect(0, 0, 1, 1)] });
   Object.defineProperty(Range.prototype, "getBoundingClientRect", { configurable: true, value: () => new DOMRect(0, 0, 1, 1) });
+  // ProseMirror also asks which element is under the pointer on mouse down.
+  if (!document.elementFromPoint) Object.defineProperty(document, "elementFromPoint", { configurable: true, value: () => null });
 });
 afterAll(() => {
   if (originalClientRects) Object.defineProperty(Range.prototype, "getClientRects", originalClientRects); else Reflect.deleteProperty(Range.prototype, "getClientRects");
