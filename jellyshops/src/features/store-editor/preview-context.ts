@@ -12,7 +12,8 @@ function collectionPresentation(detail: CatalogAdminCollectionDetail): Collectio
       price: priceMinor === undefined ? "" : new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(priceMinor / 100),
     };
   });
-  return { collection: { id: detail.id, title: detail.title, description: detail.description }, products, totalProducts: products.length };
+  const descriptionDoc = (detail as { descriptionDoc?: CollectionPresentationContext["collection"]["descriptionDoc"] }).descriptionDoc;
+  return { collection: { id: detail.id, title: detail.title, description: detail.description, ...(descriptionDoc ? { descriptionDoc } : {}) }, products, totalProducts: products.length };
 }
 
 export interface EditorPreviewContent {

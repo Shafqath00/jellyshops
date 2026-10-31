@@ -3,6 +3,15 @@ import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import type { CollectionPresentationContext, PublicProduct } from "../types";
 import { choice } from "./shared";
+import { normalizeRichTextDocument } from "@jelly/storefront-schema";
+import { renderBlocks } from "./rich-text";
+
+/** The merchant's formatted description when there is one, otherwise the plain text. */
+function CollectionDescriptionText({ collection }: { collection: CollectionPresentationContext["collection"] }) {
+  const document = collection.descriptionDoc ? normalizeRichTextDocument(collection.descriptionDoc) : null;
+  if (document?.content.length) return <div className="jelly-rich-description">{renderBlocks(document.content)}</div>;
+  return collection.description ? <p>{collection.description}</p> : null;
+}
 
 function collectionContext(context: StorefrontRuntimeContext): CollectionPresentationContext | null {
   if (context.page?.pageType !== "collection") return null;
@@ -29,7 +38,7 @@ export function CollectionHeaderSection({ context, section }: { context: Storefr
     <StorefrontContainer>
       <div className="jelly-collection-header-copy">
         {section.settings.showTitle !== false && <h1>{collection.title}</h1>}
-        {section.settings.showDescription === true && collection.description && <p>{collection.description}</p>}
+        {section.settings.showDescription === true && <CollectionDescriptionText collection={collection} />}
         <p className="jelly-collection-count">{presentation.totalProducts === 1 ? "1 product" : `${presentation.totalProducts} products`}</p>
       </div>
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -52,8 +61,8 @@ export function CollectionProductGridSection({ context, section }: { context: St
 }
 
 export function CollectionDescriptionSection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown> } }) {
-  const description = collectionContext(context)?.collection.description;
-  if (!description) return null;
+  const collection = collectionContext(context)?.collection;
+  if (!collection || (!collection.description && !collection.descriptionDoc)) return null;
   const spacing = ["compact", "standard", "spacious"].includes(String(section.settings.spacing)) ? String(section.settings.spacing) : "standard";
-  return <section className="jelly-section jelly-collection-description" data-spacing={spacing}><StorefrontContainer><p>{description}</p></StorefrontContainer></section>;
+  return <section className="jelly-section jelly-collection-description" data-spacing={spacing}><StorefrontContainer><CollectionDescriptionText collection={collection} /></StorefrontContainer></section>;
 }
