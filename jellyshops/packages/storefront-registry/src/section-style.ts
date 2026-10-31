@@ -43,6 +43,9 @@ export const sectionStyleSchema = z.object({
   styleShowOn: optional(SHOW_ON_CHOICES),
   styleShadow: optional(["none", "soft", "medium", "strong"] as const),
   styleOpacity: z.number().int().min(10).max(100).optional(),
+  styleGradientColor: z.union([hexColor, z.literal("")]).optional(),
+  styleGradientAngle: z.number().int().min(0).max(360).optional(),
+  styleMinHeight: z.number().int().min(0).max(1000).optional(),
 }).passthrough();
 
 export type SectionStyleSettings = z.infer<typeof sectionStyleSchema>;
@@ -62,7 +65,10 @@ export const SECTION_STYLE_CONTROLS: ControlDefinition[] = [
   { type: "select", key: "styleBodySize", label: "Text size", group: "style", heading: "Typography", options: [themeDefault, { label: "Small", value: "small" }, { label: "Regular", value: "regular" }, { label: "Large", value: "large" }] },
   { type: "select", key: "styleAlign", mobile: true, label: "Text alignment", group: "layout", heading: "Layout", options: [themeDefault, { label: "Left", value: "left" }, { label: "Centre", value: "center" }, { label: "Right", value: "right" }] },
   { type: "select", key: "styleShowOn", label: "Show on", group: "layout", heading: "Layout", options: [{ label: "All screens", value: "" }, { label: "Desktop and tablet only", value: "desktop" }, { label: "Phones only", value: "mobile" }] },
+  { type: "range", key: "styleMinHeight", label: "Minimum height", group: "layout", heading: "Layout", min: 0, max: 1000, step: 20, unit: "px" },
   { type: "segmented", key: "styleWidth", label: "Width", group: "layout", heading: "Layout", options: [{ label: "Page", value: "page" }, { label: "Full", value: "full" }] },
+  { type: "color", key: "styleGradientColor", label: "Gradient to colour", description: "Fades the section's background into this colour. Leave empty for a flat background.", group: "style", heading: "Appearance", allowAlpha: false },
+  { type: "range", key: "styleGradientAngle", label: "Gradient angle", group: "style", heading: "Appearance", min: 0, max: 360, step: 15, unit: "°" },
   { type: "select", key: "styleShadow", label: "Shadow", group: "style", heading: "Appearance", options: [{ label: "None", value: "none" }, { label: "Soft", value: "soft" }, { label: "Medium", value: "medium" }, { label: "Strong", value: "strong" }] },
   { type: "range", key: "styleOpacity", label: "Opacity", group: "style", heading: "Appearance", min: 10, max: 100, step: 5, unit: "%" },
   { type: "select", key: "styleSpacing", label: "Space above and below", group: "style", heading: "Padding", description: "Or set exact sizes below.", options: [themeDefault, { label: "None", value: "none" }, { label: "Small", value: "small" }, { label: "Large", value: "large" }] },

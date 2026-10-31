@@ -73,3 +73,11 @@ it("adds tablet values with their own variables and list", () => {
   expect(props.style).toMatchObject({ "--section-pad-top-m": "24px", "--section-pad-top-t": "48px", "--section-align-t": "right", "--section-justify-t": "end", "--section-heading-scale-t": "1.2" });
   expect(sectionStyleProps({}, undefined, { styleAlign: "justify;}" })).toEqual({});
 });
+
+it("adds a gradient from the section background and a minimum height", () => {
+  const props = sectionStyleProps({ styleGradientColor: "#112233", styleGradientAngle: 90, styleMinHeight: 400 });
+  expect(props["data-section-style"]).toBe("gradient min-height");
+  expect(props.style).toMatchObject({ "--section-gradient": "linear-gradient(90deg, var(--section-bg, var(--theme-background, #ffffff)), #112233)", "--section-min-height": "400px" });
+  expect(sectionStyleProps({ styleGradientColor: "red;}", styleMinHeight: 0 })).toEqual({});
+  expect(sectionStyleProps({ styleGradientColor: "#112233" }).style).toMatchObject({ "--section-gradient": expect.stringContaining("180deg") });
+});

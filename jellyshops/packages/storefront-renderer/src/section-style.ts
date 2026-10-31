@@ -83,6 +83,14 @@ export function sectionStyleProps(settings: Record<string, unknown> | undefined,
   if (top !== undefined) { vars["--section-pad-top"] = `${top}px`; used.push("pad-top"); }
   if (bottom !== undefined) { vars["--section-pad-bottom"] = `${bottom}px`; used.push("pad-bottom"); }
   if (settings.styleWidth === "full") used.push("full-width");
+  // A gradient starts at the section's own background (scheme, own colour or theme) and fades to the chosen colour.
+  if (hex.test(text("styleGradientColor"))) {
+    const angle = typeof settings.styleGradientAngle === "number" && Number.isFinite(settings.styleGradientAngle) ? Math.min(360, Math.max(0, Math.round(settings.styleGradientAngle))) : 180;
+    vars["--section-gradient"] = `linear-gradient(${angle}deg, var(--section-bg, var(--theme-background, #ffffff)), ${text("styleGradientColor")})`;
+    used.push("gradient");
+  }
+  const minHeight = typeof settings.styleMinHeight === "number" && Number.isFinite(settings.styleMinHeight) ? Math.min(1000, Math.max(0, Math.round(settings.styleMinHeight))) : 0;
+  if (minHeight > 0) { vars["--section-min-height"] = `${minHeight}px`; used.push("min-height"); }
 
   // Opacity and shadow go straight on the wrapper; they need no theme rules.
   const direct: CSSProperties = {};

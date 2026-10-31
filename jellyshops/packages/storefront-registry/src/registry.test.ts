@@ -197,7 +197,7 @@ it("accepts a dynamic binding in a control that declares a compatible dynamic ty
 
 it("gives every section the shared style settings and checks their values", () => {
   for (const definition of listSectionDefinitions()) {
-    expect(definition.controls.filter(({ key }) => isSectionStyleKey(key))).toHaveLength(17);
+    expect(definition.controls.filter(({ key }) => isSectionStyleKey(key))).toHaveLength(20);
   }
   const schema = getSectionDefinition("rich-text")!.settingsSchema;
   expect(schema.safeParse({ styleColors: true, styleBackground: "#112233", styleText: "#fefefe", styleHeadingFont: "Fraunces", styleHeadingSize: "large", styleHeadingWeight: "700", styleAlign: "center", styleSpacing: "" }).success).toBe(true);

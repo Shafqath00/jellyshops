@@ -88,6 +88,8 @@
  * Zero specificity; the complete themes replace their tokens instead.
  */
 :where([data-section-style~="colors"]) { background: var(--section-bg); color: var(--section-text); }
+[data-section-style~="gradient"] > * { background-image: var(--section-gradient) !important; }
+[data-section-style~="min-height"] > * { min-height: var(--section-min-height); }
 :where([data-section-style~="heading-font"]) :where(h1, h2, h3, h4) { font-family: var(--section-heading-font); }
 :where([data-section-style~="heading-weight"]) :where(h1, h2, h3, h4) { font-weight: var(--section-heading-weight); }
 :where([data-section-style~="body-font"]) { font-family: var(--section-body-font); }
