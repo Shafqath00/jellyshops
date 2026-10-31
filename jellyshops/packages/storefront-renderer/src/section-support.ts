@@ -17,6 +17,7 @@ export const renderableHomeSectionTypes: ReadonlySet<string> = new Set([
   "category-grid",
   "testimonials",
   "trust-strip",
+  "logo-list",
   "image-mosaic",
   "journal-teaser",
   "cart-summary",

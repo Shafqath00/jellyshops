@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { safeRichTextHref, type RuntimeMenuV4, type SectionNode } from "@jelly/storefront-schema";
 import type { StorefrontRuntimeContext } from "../runtime-context";
+import { MenuTree, type MenuVariant } from "./menu-tree";
 
 type RuntimeMenuItem = RuntimeMenuV4["items"][number];
 
@@ -15,20 +16,16 @@ function menuHref(item: RuntimeMenuItem, storeSlug?: string): string | null {
   return `${root}/${target.kind === "product" ? "products" : target.kind === "collection" ? "collections" : target.kind === "page" ? "pages" : "blogs"}/${encodeURIComponent(target.resourceId)}`;
 }
 
-function MenuLinks({ section, context, label = "Store navigation" }: { section: SectionNode; context: StorefrontRuntimeContext; label?: string }) {
+function MenuLinks({ section, context, label = "Store navigation", variant }: { section: SectionNode; context: StorefrontRuntimeContext; label?: string; variant: MenuVariant }) {
   const block = section.blocks.find((entry) => entry.enabled && entry.type === "menu");
   const handle = typeof block?.settings.handle === "string" ? block.settings.handle : "main";
-  return (context.menus?.[handle]?.items.length ?? 0) > 0 ? <nav aria-label={label}><MenuList handle={handle} context={context} /></nav> : null;
+  return (context.menus?.[handle]?.items.length ?? 0) > 0 ? <nav aria-label={label}><MenuList handle={handle} context={context} variant={variant} /></nav> : null;
 }
 
-/** The top-level links of one navigation menu as a plain list. */
-export function MenuList({ handle, context }: { handle: string; context: StorefrontRuntimeContext }) {
+/** One navigation menu: top-level links (`flat`), or with its dropdowns (`bar`) or fold-out groups (`panel`). */
+export function MenuList({ handle, context, variant = "flat" }: { handle: string; context: StorefrontRuntimeContext; variant?: MenuVariant }) {
   const items = context.menus?.[handle]?.items ?? [];
-  if (items.length === 0) return null;
-  return <ul>{items.map((item) => {
-    const href = menuHref(item, context.storeSlug);
-    return href ? <li key={item.id}><a href={href}>{item.label}</a></li> : null;
-  })}</ul>;
+  return <MenuTree items={items} variant={variant} hrefFor={(item) => menuHref(item, context.storeSlug)} />;
 }
 
 type ToolIcon = "search" | "account" | "wishlist" | "bag" | "menu";
@@ -93,7 +90,7 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
     <details className="jelly-mobile-navigation">
       <summary aria-label="Open menu"><StorefrontIcon name="menu" /><span className="jelly-visually-hidden">Menu</span></summary>
       <div className="jelly-mobile-navigation-panel">
-        <MenuLinks section={section} context={context} label="Mobile navigation" />
+        <MenuLinks section={section} context={context} label="Mobile navigation" variant="panel" />
         {tools.length > 0 && <nav aria-label="Account and saved items"><ul>{tools.filter(([icon]) => icon !== "search").map(([icon, label, href]) => <li key={icon}><a href={href}>{icon === "bag" ? "Shopping bag" : label}</a></li>)}</ul></nav>}
       </div>
     </details>
@@ -103,7 +100,7 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {overlayLogoUrl && !overlayLogoUrl.startsWith("#") && <img className="jelly-header-overlay-logo" src={overlayLogoUrl} alt="" aria-hidden="true" />}
     </a>
-    <MenuLinks section={section} context={context} label="Primary navigation" />
+    <MenuLinks section={section} context={context} label="Primary navigation" variant="bar" />
     {tools.length > 0 && <nav className="jelly-header-tools" aria-label="Shopping tools">
       {tools.map(([icon, label, href]) => <a key={icon} href={href} data-tool={icon} aria-label={label}><StorefrontIcon name={icon} /><span className="jelly-header-tool-label">{label}</span></a>)}
     </nav>}

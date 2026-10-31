@@ -16,7 +16,14 @@ export type PreviewTemplate = "home" | "product" | "collection" | "cart" | "sear
 const menus: Record<string, RuntimeMenuV4> = {
   main: { id: "preview-main", handle: "main", items: [
     { id: "home", label: "Home", target: { kind: "home" }, children: [] },
-    { id: "shop", label: "Shop all", target: { kind: "search" }, children: [] },
+    // Sub-links so the preview shows the header dropdown and the phone menu's fold-out group.
+    { id: "shop", label: "Shop all", target: { kind: "search" }, children: [
+      { id: "new", label: "New arrivals", target: { kind: "search" }, children: [] },
+      { id: "best", label: "Best sellers", target: { kind: "search" }, children: [] },
+      { id: "gifts", label: "Gifts", target: { kind: "search" }, children: [
+        { id: "gifts-small", label: "Under £50", target: { kind: "search" }, children: [] },
+      ] },
+    ] },
     { id: "about", label: "About", target: { kind: "home" }, children: [] },
   ] },
 };

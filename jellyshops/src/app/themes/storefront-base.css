@@ -198,3 +198,62 @@
   .jelly-custom-content[data-direction-tablet="vertical"] .jelly-custom-content-inner { flex-direction: column; }
   .jelly-custom-content[data-direction-tablet="horizontal"] .jelly-custom-content-inner { flex-direction: row; flex-wrap: wrap; }
 }
+
+/*
+ * Header menus with sub-links (sections/menu-tree.tsx). Desktop: a dropdown under the
+ * top-level link, opened by hover or by its arrow button. Phone menu: fold-out groups.
+ * Selectors are specific enough to beat each theme's `.jelly-header ul` flex rule.
+ */
+.jelly-header .jelly-menu-item { position: relative; display: inline-flex; align-items: center; gap: 2px; }
+.jelly-header .jelly-menu-toggle {
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+  min-width: 24px; min-height: 24px; padding: 0; border: 0; border-radius: 4px;
+  background: none; color: inherit; font: inherit; cursor: pointer;
+}
+.jelly-header .jelly-menu-toggle:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.jelly-header .jelly-menu-chevron { flex: none; transition: transform 150ms ease; }
+.jelly-header .jelly-menu-item[data-open="true"] > .jelly-menu-toggle .jelly-menu-chevron,
+.jelly-header .jelly-menu-disclosure[open] > summary .jelly-menu-chevron { transform: rotate(180deg); }
+.jelly-header .jelly-menu-item > ul.jelly-submenu {
+  position: absolute; top: 100%; left: -16px; z-index: 40;
+  display: none; flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 0;
+  min-width: 220px; max-width: 320px; padding: 12px 16px;
+  border: 1px solid color-mix(in srgb, var(--theme-text, #1a1a1a) 12%, transparent);
+  border-radius: 6px;
+  background: var(--theme-background, #ffffff); color: var(--theme-text, #1a1a1a);
+  box-shadow: 0 16px 32px -16px color-mix(in srgb, var(--theme-text, #1a1a1a) 35%, transparent);
+}
+.jelly-header .jelly-menu-item[data-open="true"] > ul.jelly-submenu { display: flex; }
+@media (hover: hover) {
+  .jelly-header .jelly-menu-item:hover:not([data-hover-off="true"]) > ul.jelly-submenu { display: flex; }
+}
+.jelly-header ul.jelly-submenu > li > :is(a, .jelly-menu-label) { display: block; padding: 6px 0; }
+.jelly-header ul.jelly-submenu .jelly-menu-label { font-weight: 600; }
+.jelly-header ul.jelly-submenu ul.jelly-submenu-group { flex-direction: column; align-items: stretch; gap: 0; margin: 0 0 6px; padding-left: 12px; }
+.jelly-header ul.jelly-submenu-group a { display: block; padding: 4px 0; opacity: 0.85; }
+.jelly-header .jelly-mobile-navigation .jelly-mobile-navigation-panel .jelly-menu-disclosure > summary {
+  display: flex; align-items: center; justify-content: space-between;
+  width: auto; height: auto; min-height: 48px; margin: 0; border-radius: 0;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  list-style: none; cursor: pointer;
+}
+.jelly-header .jelly-menu-disclosure > summary::-webkit-details-marker { display: none; }
+/* Phone menu rows fill the width; without this the header's centred flex lists shrink them to the text. */
+.jelly-header .jelly-mobile-navigation .jelly-mobile-navigation-panel ul { align-items: stretch; }
+.jelly-header .jelly-mobile-navigation .jelly-mobile-navigation-panel li > a { display: flex; min-height: 48px; }
+.jelly-header .jelly-mobile-navigation .jelly-menu-disclosure > :not(summary) { margin-left: 16px; }
+
+/* Logo list (sections/logo-list.tsx). Zero specificity so a theme can restyle it. */
+:where(.jelly-logo-list) { padding-block: 48px; }
+:where(.jelly-logo-list-heading) { margin: 0 0 24px; text-align: center; font-size: 0.875rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.75; }
+:where(.jelly-logo-list-items) { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 24px 48px; margin: 0; padding: 0; list-style: none; }
+:where(.jelly-logo-list-items) :where(a) { display: inline-flex; color: inherit; text-decoration: none; }
+:where(.jelly-logo-list-items) :where(img) { display: block; width: auto; max-width: 200px; height: var(--logo-height, 48px); object-fit: contain; }
+:where(.jelly-logo-list-name) { display: inline-flex; align-items: center; min-height: var(--logo-height, 48px); font-size: 1.125rem; font-weight: 600; opacity: 0.8; }
+:where(.jelly-logo-list[data-grayscale="true"]) :where(img) { filter: grayscale(1); opacity: 0.7; transition: filter 150ms ease, opacity 150ms ease; }
+:where(.jelly-logo-list[data-grayscale="true"]) :where(li:hover img, a:focus-visible img) { filter: none; opacity: 1; }
+@media (max-width: 767px) {
+  :where(.jelly-logo-list) { padding-block: 32px; }
+  :where(.jelly-logo-list-items) { gap: 16px 32px; }
+  :where(.jelly-logo-list-items) :where(img) { max-width: 140px; height: min(var(--logo-height, 48px), 40px); }
+}

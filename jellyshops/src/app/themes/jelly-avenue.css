@@ -277,6 +277,7 @@
   border-bottom: 1px solid var(--av-border);
   font-size: var(--av-text-lg); font-weight: 500; letter-spacing: -0.02em; text-decoration: none;
 }
+[data-jelly-theme="jelly-avenue"] .jelly-mobile-navigation-panel .jelly-menu-disclosure > summary { border-bottom-color: var(--av-border); font-size: var(--av-text-lg); font-weight: 500; letter-spacing: -0.02em; }
 @media (max-width: 899px) {
   [data-jelly-theme="jelly-avenue"] { --av-header-height: 56px; }
   [data-jelly-theme="jelly-avenue"] .jelly-header,

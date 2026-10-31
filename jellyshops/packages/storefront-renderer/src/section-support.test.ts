@@ -12,6 +12,7 @@ describe("editor preset renderer support", () => {
     "category-grid",
     "testimonials",
     "trust-strip",
+    "logo-list",
     "image-mosaic",
     "journal-teaser",
     "cart-summary",

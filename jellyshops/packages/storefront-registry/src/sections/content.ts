@@ -158,7 +158,20 @@ export const contentSections: SectionDefinition[] = [
     defaultSettings: { heading: "Visit our showroom", text: "Come and try our products in person. Our team is happy to help.", address: "", hours: "Mon–Sat: 10am–7pm\nSun: 11am–5pm", colorScheme: "soft" },
     defaultBlocks: [], responsiveFields: [],
   },
-  { type: "logo-list", category: "content", supportedPages: [...home], settingsSchema: empty, controls: [], allowedBlockTypes: ["logo"], defaultSettings: {}, defaultBlocks: [], responsiveFields: [] }
+  {
+    // Brand, press or partner logos in a row. Logos without an image show their name as text.
+    type: "logo-list", category: "content", supportedPages: [...home, "page"],
+    settingsSchema: z.object({ heading: z.string().max(120).optional(), logoHeight: z.number().int().min(24).max(120).optional(), grayscale: z.boolean().optional(), colorScheme: schemeSchema }).passthrough(),
+    controls: [
+      sectionHeading,
+      { type: "range", key: "logoHeight", label: "Logo height", group: "layout", min: 24, max: 120, step: 4, unit: "px" },
+      { type: "checkbox", key: "grayscale", label: "Show logos in grey (colour when pointed at)", group: "style" },
+      colorScheme,
+    ],
+    allowedBlockTypes: ["logo"], maxBlocks: 12,
+    defaultSettings: { heading: "As featured in", logoHeight: 48 },
+    defaultBlocks: [], responsiveFields: [], presets: [{ id: "logo-list", label: "Logo list", category: "content" }],
+  }
   ,{ type: "journal-teaser", category: "content", supportedPages: [...home], settingsSchema: empty, controls: comprehensiveControls, allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: ["contentAlignment"] }
   ,{ type: "trust-strip", category: "content", supportedPages: [...home, "product", "cart"], settingsSchema: z.object({ colorScheme: schemeSchema }).passthrough(), controls: [colorScheme], allowedBlockTypes: ["heading", "text"], defaultSettings: { contentAlignment: "center" }, defaultBlocks: [], responsiveFields: ["contentAlignment"] }
   ,{ type: "image-mosaic", category: "content", supportedPages: [...home], settingsSchema: empty, controls: comprehensiveControls, allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: ["contentAlignment"] }

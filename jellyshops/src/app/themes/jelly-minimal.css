@@ -254,6 +254,7 @@
   border-bottom: 1px solid var(--jm-border);
   font-size: var(--jm-text-base); text-decoration: none;
 }
+[data-jelly-theme="jelly-signature"] .jelly-mobile-navigation-panel .jelly-menu-disclosure > summary { font-size: var(--jm-text-base); border-bottom-color: var(--jm-border); }
 @media (max-width: 899px) {
   [data-jelly-theme="jelly-signature"] .jelly-header,
   [data-jelly-theme="jelly-signature"] .jelly-header[data-logo-position="center"] { grid-template-columns: 44px minmax(0, 1fr) auto; gap: var(--jm-1); min-height: 64px; padding-block: var(--jm-1); }

@@ -8,6 +8,7 @@ import { ProductStockCounterSection, ProductTabsSection } from "./sections/produ
 import { ProductGridSection } from "./sections/product-grid";
 import { RichTextSection } from "./sections/rich-text";
 import { CustomContentSection } from "./sections/custom-content";
+import { LogoListSection } from "./sections/logo-list";
 import { ProductDescriptionSection, ProductGallerySection, ProductInformationSection, ProductOptionsSection, ProductPurchaseSection, RelatedProductsSection } from "./sections/product-sections";
 import { CollectionDescriptionSection, CollectionHeaderSection, CollectionProductGridSection } from "./sections/collection-sections";
 import { ArticleContentSection, ArticleHeaderSection, ArticleListSection, BlogHeaderSection, PageContentSection } from "./sections/content-pages";
@@ -98,6 +99,7 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("faq", ({ section }) => <FaqSection section={section} />);
   registry.register("newsletter", ({ section, commerce, mode }) => <NewsletterSection section={section} subscribe={commerce.subscribeNewsletter} mode={mode} />);
   registry.register("category-grid", ({ section, context }) => <CategoryGridSection section={section} context={context} />);
+  registry.register("logo-list", ({ section, context, mode }) => <LogoListSection section={section} context={context} mode={mode} />);
   registry.register("testimonials", ({ section, mode }) => <TestimonialsSection section={section} mode={mode} />);
   registry.register("trust-strip", ({ section }) => <TrustStripSection section={section} />);
   registry.register("image-mosaic", ({ section }) => <ImageMosaicSection section={section} />);
