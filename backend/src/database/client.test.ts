@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-const { Pool } = vi.hoisted(() => ({ Pool: vi.fn(function (input) { return input; }) }));
+import { EventEmitter } from "node:events";
+const { Pool } = vi.hoisted(() => ({ Pool: vi.fn(function (input) { return Object.assign(new (require("node:events").EventEmitter)(), { config: input }); }) }));
 vi.mock("pg", () => ({ default: { Pool } }));
 import { createSupabasePool } from "./client.js";
 describe("database transport security", () => {
@@ -34,5 +35,13 @@ describe("database transport security", () => {
       else process.env.SUPABASE_DATABASE_CA = previousInline;
       rmSync(directory, { recursive: true, force: true });
     }
+  });
+
+  it("survives an idle connection being dropped instead of crashing the server", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const pool = createSupabasePool("postgresql://user:password@db.example.test/postgres") as unknown as EventEmitter;
+    expect(() => pool.emit("error", Object.assign(new Error("read ECONNRESET"), { code: "ECONNRESET" }))).not.toThrow();
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("ECONNRESET"));
+    warn.mockRestore();
   });
 });

@@ -14,14 +14,21 @@ export function createSupabasePool(connectionString = process.env.SUPABASE_RUNTI
   const ca = caFile
     ? readFileSync(caFile, "utf8")
     : process.env.SUPABASE_DATABASE_CA?.replaceAll("\\n", "\n");
-  return new Pool({
+  const pool = new Pool({
     connectionString: url.toString(),
     max,
     connectionTimeoutMillis: 10000,
     idleTimeoutMillis: 30000,
+    keepAlive: true,
     ssl: {
       rejectUnauthorized: true,
       ...(ca ? { ca } : {}),
     },
   });
+  // An idle connection the database or network drops (ECONNRESET) emits "error" on the pool. Without a
+  // listener Node treats it as uncaught and the whole server exits; the pool already discards that client.
+  pool.on("error", (error: Error & { code?: string }) => {
+    console.warn(`Database connection dropped while idle (${error.code ?? error.message}); it will be replaced.`);
+  });
+  return pool;
 }
