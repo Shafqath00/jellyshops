@@ -24,7 +24,7 @@ const sectionLabels: Record<string, string> = {
   "logo-list": "Logo list",
   "journal-teaser": "Blog posts",
   "image-mosaic": "Image mosaic",
-  "spacer-divider": "Spacer",
+  "spacer-divider": "Spacer (exact height)",
   spacer: "Spacer",
   divider: "Divider",
   "product-gallery": "Product images",

@@ -99,7 +99,10 @@ export function SelectionToolbar({
     content.observe(doc.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "style", "data-editor-selected", "data-editor-block-selected"] });
     view?.addEventListener("scroll", place, { passive: true });
     view?.addEventListener("resize", place);
-    return () => { cancelAnimationFrame(frame); content.disconnect(); doc.querySelectorAll("[data-editor-current]").forEach((item) => item.removeAttribute("data-editor-current")); view?.removeEventListener("scroll", place); view?.removeEventListener("resize", place); };
+    // The preview is hidden (zero size) while the editor shows another tab on small screens; measure again when it comes back.
+    const size = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(place);
+    size?.observe(doc.documentElement);
+    return () => { cancelAnimationFrame(frame); content.disconnect(); size?.disconnect(); doc.querySelectorAll("[data-editor-current]").forEach((item) => item.removeAttribute("data-editor-current")); view?.removeEventListener("scroll", place); view?.removeEventListener("resize", place); };
   }, [doc, target]);
 
   if (!doc || !target || !position) return null;
