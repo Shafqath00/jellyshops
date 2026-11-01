@@ -49,7 +49,7 @@ export const avenueManifest = {
     buttons: { style: "solid", radius: "square", ...styleSettings.buttonDefaults },
     ...styleSettings.defaults,
     layout: { containerWidth: "wide", sectionSpacing: "standard", density: "comfortable", contentWidth: 1440, sectionGap: 96 },
-    productCard: { imageRatio: "portrait", style: "minimal", alignment: "left", showBrand: false, gridSpacing: "none" },
+    productCard: { imageRatio: "portrait", style: "minimal", alignment: "left", showBrand: false, ...styleSettings.cardDefaults, gridSpacing: "none" },
     branding: { logoUrl: "", bannerUrl: "", faviconUrl: "" },
   },
   settingsSchema: [
@@ -72,6 +72,9 @@ export const avenueManifest = {
     select("productCard.gridSpacing", "Space between products", "Product cards", "none", [["none", "None (edge to edge)"], ["small", "Small"], ["large", "Large"]]),
     select("productCard.style", "Product card style", "Product cards", "minimal", [["minimal", "Minimal"], ["bordered", "Bordered"]]),
     { id: "productCard.alignment", type: "alignment", label: "Product text alignment", group: "Product cards", default: "left", options: [{ value: "left", label: "Left" }, { value: "center", label: "Center" }] },
+    ...styleSettings.cardSchema,
+    ...styleSettings.badgeSchema,
+    ...styleSettings.fieldSchema,
     { id: "branding.logoUrl", type: "image", label: "Store logo", group: "Branding", default: "" },
     { id: "branding.faviconUrl", type: "image", label: "Browser tab icon", group: "Branding", default: "" },
   ],

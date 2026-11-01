@@ -6,8 +6,8 @@ import type { BlockNode } from "./types.js";
  * helpers work at any depth. None of them change their input.
  */
 
-/** How deep blocks may nest: a section's blocks are level 1, a group's children level 2. */
-export const MAX_BLOCK_DEPTH = 2;
+/** How deep blocks may nest: a section's blocks are level 1, a group's children level 2, a group-in-a-group's children level 3. */
+export const MAX_BLOCK_DEPTH = 3;
 
 export interface BlockLocation {
   block: BlockNode;
@@ -16,7 +16,7 @@ export interface BlockLocation {
   /** The list the block sits in (the section's blocks or the parent's). */
   siblings: BlockNode[];
   index: number;
-  /** 1 for a section's own blocks, 2 for a group's children. */
+  /** 1 for a section's own blocks, 2 for a group's children, 3 inside a group in a group. */
   depth: number;
 }
 
@@ -31,6 +31,11 @@ export function findBlock(blocks: BlockNode[], id: string, parent: BlockNode | n
     if (nested) return nested;
   }
   return null;
+}
+
+/** Levels of blocks in this block: 1 for a block holding none, 2 for a group of plain blocks, and so on. */
+export function blockTreeHeight(block: BlockNode): number {
+  return 1 + Math.max(0, ...childBlocks(block).map(blockTreeHeight));
 }
 
 /** Every block, children after their parent. */

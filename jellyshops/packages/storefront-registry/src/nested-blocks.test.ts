@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 import type { BlockNode, SectionNode } from "@jelly/storefront-schema";
-import { getBlockDefinition, validateSectionAgainstRegistry } from "./registry.js";
+import { allowedChildBlockTypes, getBlockDefinition, validateSectionAgainstRegistry } from "./registry.js";
 
 const button = (id: string): BlockNode => ({ id, type: "button", enabled: true, settings: { label: id, href: "/shop" } });
 const group = (children: BlockNode[], settings: Record<string, unknown> = {}): BlockNode => ({ id: "g", type: "group", enabled: true, settings, blocks: children });
@@ -8,7 +8,7 @@ const section = (blocks: BlockNode[]): SectionNode => ({ id: "s", type: "custom-
 
 it("defines a group block that holds content blocks and has the shared style settings", () => {
   const definition = getBlockDefinition("group")!;
-  expect(definition.allowedBlockTypes).toEqual(["heading", "text", "button", "image", "video"]);
+  expect(definition.allowedBlockTypes).toEqual(["heading", "text", "button", "image", "video", "group"]);
   expect(definition.maxBlocks).toBe(8);
   expect(definition.controls.map(({ key }) => key)).toEqual(expect.arrayContaining(["groupDirection", "groupGap", "blockBackgroundColor", "blockPaddingTop"]));
 });
@@ -19,8 +19,9 @@ it("accepts a group of blocks in custom content", () => {
 
 it("checks the blocks inside a group", () => {
   const codes = (blocks: BlockNode[]) => validateSectionAgainstRegistry(section(blocks), "home").map(({ code, blockId }) => `${code}:${blockId}`);
-  // Groups hold no groups, and other blocks hold nothing.
-  expect(codes([group([{ ...group([]), id: "inner" }])])).toEqual(["BLOCK_NOT_ALLOWED:inner"]);
+  // A group may hold a group of plain blocks (three levels), not a third group; other blocks hold nothing.
+  expect(codes([group([{ ...group([button("a")]), id: "inner" }])])).toEqual([]);
+  expect(codes([group([{ ...group([{ ...group([]), id: "third" }]), id: "inner" }])])).toEqual(["BLOCK_NOT_ALLOWED:third"]);
   expect(codes([{ ...button("a"), blocks: [button("b")] }])).toEqual(["BLOCK_NOT_ALLOWED:a"]);
   expect(codes([group(Array.from({ length: 9 }, (_, index) => button(`b${index}`)))])).toEqual(["BLOCK_LIMIT_EXCEEDED:g"]);
   expect(codes([group([{ ...button("a"), settings: { label: "Go", buttonSize: "huge" } }])])).toEqual(["SETTINGS_INVALID:a"]);
@@ -35,4 +36,11 @@ it("accepts phone values only for phone settings, and checks them", () => {
   expect(issues(phoneSection({ stylePaddingTop: 999 }))).toEqual(["SETTINGS_INVALID::"]);
   expect(issues(section([{ ...button("a"), responsive: { mobile: { label: "Phone label" } } }]))).toEqual(["RESPONSIVE_FIELD_NOT_ALLOWED:a:label"]);
   expect(issues(section([{ ...group([]), responsive: { mobile: { groupDirection: "sideways" } } }]))).toEqual(["SETTINGS_INVALID:g:"]);
+});
+
+it("offers groups inside a group only where they can still hold blocks", () => {
+  expect(allowedChildBlockTypes("group", 1)).toContain("group");
+  expect(allowedChildBlockTypes("group", 2)).toEqual(["heading", "text", "button", "image", "video"]);
+  expect(allowedChildBlockTypes("group", 3)).toEqual([]);
+  expect(allowedChildBlockTypes("button", 1)).toEqual([]);
 });

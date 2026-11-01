@@ -30,7 +30,11 @@ it("creates a group with its starter buttons under fresh ids and adds blocks to 
 });
 
 it("offers child blocks only for groups, and says when a group is full", () => {
-  expect(childBlockOptions(section(), "g")).toEqual({ types: ["heading", "text", "button", "image", "video"], full: false });
+  expect(childBlockOptions(section(), "g")).toEqual({ types: ["heading", "text", "button", "image", "video", "group"], full: false });
+  // A group inside a group holds plain blocks only.
+  const nested = section();
+  nested.blocks[1].blocks = [{ id: "inner", type: "group", enabled: true, settings: {}, blocks: [] }];
+  expect(childBlockOptions(nested, "inner").types).toEqual(["heading", "text", "button", "image", "video"]);
   expect(childBlockOptions(section(), "h").types).toEqual([]);
   const full = section();
   full.blocks[1].blocks = Array.from({ length: 8 }, (_, index) => ({ id: `b${index}`, type: "button", enabled: true, settings: {} }));

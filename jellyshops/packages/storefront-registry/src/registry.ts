@@ -23,6 +23,17 @@ const sectionDefinitions = new Map(sections.map((definition) => [definition.type
 
 export function getSectionDefinition(type: string): SectionDefinition | undefined { return sectionDefinitions.get(type); }
 export function getBlockDefinition(type: string) { return blockDefinitions.get(type); }
+
+/**
+ * The block types a block at `depth` (1 = placed in the section) may hold.
+ * Blocks that hold blocks themselves (groups) are left out at the last level,
+ * where they could hold nothing.
+ */
+export function allowedChildBlockTypes(blockType: string, depth: number): string[] {
+  const allowed = blockDefinitions.get(blockType)?.allowedBlockTypes;
+  if (!allowed || depth >= MAX_BLOCK_DEPTH) return [];
+  return depth + 1 >= MAX_BLOCK_DEPTH ? allowed.filter((type) => !blockDefinitions.get(type)?.allowedBlockTypes) : allowed;
+}
 export function listSectionDefinitions(): SectionDefinition[] { return [...sections]; }
 export function listSectionDefinitionsForPage(pageType: PageType, region: RegionName = "template"): SectionDefinition[] {
   return sections.filter((definition) => definition.supportedPages.includes(pageType) && (definition.allowedRegions ?? ["template"]).includes(region));
@@ -91,7 +102,7 @@ function validateBlocks(blocks: BlockNode[], allowed: string[], owner: string, s
       continue;
     }
     if (blockDefinition.maxBlocks !== undefined && children.length > blockDefinition.maxBlocks) issues.push({ code: "BLOCK_LIMIT_EXCEEDED", sectionId, blockId: block.id, message: "Block limit exceeded" });
-    issues.push(...validateBlocks(children, blockDefinition.allowedBlockTypes, block.type, sectionId, depth + 1));
+    issues.push(...validateBlocks(children, allowedChildBlockTypes(block.type, depth), block.type, sectionId, depth + 1));
   }
   return issues;
 }

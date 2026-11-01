@@ -82,6 +82,25 @@ it("moves a block into the group above it and back out", () => {
   expect(ids_of(copy)).toBe("b1 g[g1,g2] n1[n2,n3] b2");
 });
 
+it("moves a group into the group above (three levels) and a block back out one level", () => {
+  const nested = () => ({
+    sections: [{ kind: "inline", section: { id: "a", type: "custom-content", enabled: true, settings: {}, blocks: [
+      { id: "g", type: "group", enabled: true, settings: {}, blocks: [block("g1"), { id: "inner", type: "group", enabled: true, settings: {}, blocks: [block("i1"), block("i2")] }] },
+      { id: "h", type: "group", enabled: true, settings: {}, blocks: [block("h1")] },
+      { id: "deep", type: "group", enabled: true, settings: {}, blocks: [{ id: "deep-inner", type: "group", enabled: true, settings: {}, blocks: [block("d1")] }] },
+    ] } }],
+  });
+  const tree = (result: { layout: Record<string, unknown> } | null) => {
+    const show = (items: Array<{ id: string; blocks?: unknown[] }>): string => items.map(({ id, blocks }) => blocks ? `${id}[${show(blocks as Array<{ id: string }>)}]` : id).join(" ");
+    return show(inline(result, 0).section.blocks as Array<{ id: string }>);
+  };
+  // A group of plain blocks fits inside the group above; a group holding a group would make four levels.
+  expect(tree(applySelectionAction(nested(), { sectionId: "a", blockId: "h" }, "group-in"))).toBe("g[g1 inner[i1 i2] h[h1]] deep[deep-inner[d1]]");
+  expect(availableActions(nested(), { sectionId: "a", blockId: "deep" })["group-in"]).toBe(false);
+  // Out of the inner group: straight after it, still inside the outer group.
+  expect(tree(applySelectionAction(nested(), { sectionId: "a", blockId: "i1" }, "group-out"))).toBe("g[g1 inner[i2] i1] h[h1] deep[deep-inner[d1]]");
+});
+
 it("drags sections and blocks to a new place among their siblings", () => {
   const three = () => ({ type: "home", sections: [
     { kind: "global", globalSectionId: "header" },

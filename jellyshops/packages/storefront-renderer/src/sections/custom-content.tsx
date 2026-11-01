@@ -41,7 +41,7 @@ function renderBlocks(blocks: BlockNode[], options: BlockContext): ReactNode[] {
   });
 }
 
-/** A row or column of blocks. Groups hold no groups, so this goes one level deep. */
+/** A row or column of blocks; a group may hold one more group (three levels in all). */
 function GroupBlock({ block, options }: { block: BlockNode; options: BlockContext }) {
   const settings = block.settings;
   const direction = choice(settings, "groupDirection", ["vertical", "horizontal"] as const, "horizontal");
@@ -71,6 +71,13 @@ function GroupBlock({ block, options }: { block: BlockNode; options: BlockContex
   >
     {children.length > 0 ? children : <span className="jelly-block-group-empty">Add blocks to this group</span>}
   </div>;
+}
+
+/** Group blocks placed in another section (image with text, image banner), drawn after that section's own heading, text and buttons. */
+export function SectionGroups({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
+  const groups = visibleBlocks(section, "group");
+  if (groups.length === 0) return null;
+  return <div className="jelly-section-groups">{renderBlocks(groups, { context, editor: context.mode === "editor" })}</div>;
 }
 
 /** "Custom content": heading, text, button, image, video and group blocks shown in the order the merchant set. */

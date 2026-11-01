@@ -953,3 +953,27 @@
   [data-jelly-theme="jelly-signature"] [data-section-tablet~="pad-top"] > * { padding-top: var(--section-pad-top-t); margin-top: 0; }
   [data-jelly-theme="jelly-signature"] [data-section-tablet~="pad-bottom"] > * { padding-bottom: var(--section-pad-bottom-t); margin-bottom: 0; }
 }
+
+/* 19 ── Theme settings: form fields, product cards and badges (tokens only exist when the merchant changes a setting) ── */
+[data-jelly-theme="jelly-signature"] :where(input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"]), select) { min-height: var(--jelly-field-height, 48px); }
+[data-jelly-theme="jelly-signature"] :where(input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"]), select, textarea) {
+  border-width: var(--jelly-field-border-width, 1px);
+  border-radius: var(--jelly-field-radius, var(--jelly-radius-input, var(--jm-radius-button)));
+}
+[data-jelly-theme="jelly-signature"] .jelly-product-card > a {
+  border-radius: var(--jelly-card-radius, var(--jm-radius-card));
+  background: var(--jelly-card-bg, transparent);
+  box-shadow: var(--jelly-card-shadow, none);
+  transition: transform var(--jm-slow) var(--jm-ease), box-shadow var(--jm-slow) var(--jm-ease);
+}
+[data-jelly-theme="jelly-signature"] .jelly-product-card > a:hover { transform: var(--jelly-card-hover-lift, none); }
+[data-jelly-theme="jelly-signature"] .jelly-product-card-media { border-radius: var(--jelly-card-radius, var(--jm-radius-card)); }
+[data-jelly-theme="jelly-signature"] .jelly-product-card > a:hover .jelly-product-card-media img { transform: var(--jelly-card-hover-image, scale(1.03)); }
+[data-jelly-theme="jelly-signature"] .jelly-product-card-badge {
+  left: var(--jelly-badge-left, 12px);
+  right: var(--jelly-badge-right, auto);
+  border-radius: var(--jelly-badge-radius, 0);
+  background: var(--jelly-badge-bg, var(--jm-bg));
+  color: var(--jelly-badge-text, var(--jm-text));
+}
+@media (prefers-reduced-motion: reduce) { [data-jelly-theme="jelly-signature"] .jelly-product-card > a:hover { transform: none; } }

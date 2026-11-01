@@ -1226,3 +1226,27 @@
   [data-jelly-theme="jelly-avenue"] [data-section-tablet~="pad-top"] > * { padding-top: var(--section-pad-top-t); margin-top: 0; }
   [data-jelly-theme="jelly-avenue"] [data-section-tablet~="pad-bottom"] > * { padding-bottom: var(--section-pad-bottom-t); margin-bottom: 0; }
 }
+
+/* 19 ── Theme settings: form fields, product cards and badges (tokens only exist when the merchant changes a setting) ── */
+[data-jelly-theme="jelly-avenue"] :where(input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"]), select) { min-height: var(--jelly-field-height, 46px); }
+[data-jelly-theme="jelly-avenue"] :where(input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"]), select, textarea) {
+  border-width: var(--jelly-field-border-width, 1px);
+  border-radius: var(--jelly-field-radius, var(--jelly-radius-input, var(--av-radius-button)));
+}
+[data-jelly-theme="jelly-avenue"] .jelly-product-card > a {
+  border-radius: var(--jelly-card-radius, var(--av-radius-card));
+  background: var(--jelly-card-bg, transparent);
+  box-shadow: var(--jelly-card-shadow, none);
+  transition: transform var(--av-slow) var(--av-ease), box-shadow var(--av-slow) var(--av-ease);
+}
+[data-jelly-theme="jelly-avenue"] .jelly-product-card > a:hover { transform: var(--jelly-card-hover-lift, none); }
+[data-jelly-theme="jelly-avenue"] .jelly-product-card-media { border-radius: var(--jelly-card-radius, var(--av-radius-card)); }
+[data-jelly-theme="jelly-avenue"] .jelly-product-card > a:hover .jelly-product-card-media img { transform: var(--jelly-card-hover-image, scale(1.04)); }
+[data-jelly-theme="jelly-avenue"] .jelly-product-card-badge {
+  left: var(--jelly-badge-left, auto);
+  right: var(--jelly-badge-right, 12px);
+  border-radius: var(--jelly-badge-radius, 0);
+  background: var(--jelly-badge-bg, var(--av-ink));
+  color: var(--jelly-badge-text, var(--av-ink-contrast));
+}
+@media (prefers-reduced-motion: reduce) { [data-jelly-theme="jelly-avenue"] .jelly-product-card > a:hover { transform: none; } }

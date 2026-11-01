@@ -51,7 +51,7 @@ export const signatureManifest = {
     buttons: { style: "solid", radius: "square", ...styleSettings.buttonDefaults },
     ...styleSettings.defaults,
     layout: { containerWidth: "wide", sectionSpacing: "standard", density: "comfortable", contentWidth: 1280, sectionGap: 96 },
-    productCard: { imageRatio: "portrait", style: "minimal", alignment: "left", showBrand: false },
+    productCard: { imageRatio: "portrait", style: "minimal", alignment: "left", showBrand: false, ...styleSettings.cardDefaults },
     branding: { logoUrl: "", bannerUrl: "", faviconUrl: "" },
   },
   settingsSchema: [
@@ -73,6 +73,9 @@ export const signatureManifest = {
     select("productCard.imageRatio", "Product image shape", "Product cards", "portrait", [["portrait", "Portrait"], ["square", "Square"], ["landscape", "Landscape"]]),
     select("productCard.style", "Product card style", "Product cards", "minimal", [["minimal", "Minimal"], ["bordered", "Bordered"]]),
     { id: "productCard.alignment", type: "alignment", label: "Product text alignment", group: "Product cards", default: "left", options: [{ value: "left", label: "Left" }, { value: "center", label: "Center" }] },
+    ...styleSettings.cardSchema,
+    ...styleSettings.badgeSchema,
+    ...styleSettings.fieldSchema,
     { id: "branding.logoUrl", type: "image", label: "Store logo", group: "Branding", default: "" },
     { id: "branding.faviconUrl", type: "image", label: "Browser tab icon", group: "Branding", default: "" },
   ],

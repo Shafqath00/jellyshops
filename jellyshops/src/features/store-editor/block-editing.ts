@@ -1,6 +1,6 @@
 import type { BlockLocation, BlockNode, SectionNode } from "@jelly/storefront-schema";
 import { childBlocks, copyBlockWithNewIds, findBlock, MAX_BLOCK_DEPTH, updateBlock, updateBlockList } from "@jelly/storefront-schema";
-import { getBlockDefinition } from "@jelly/storefront-registry";
+import { allowedChildBlockTypes, getBlockDefinition } from "@jelly/storefront-registry";
 
 /**
  * Editor helpers for blocks at any depth (a section's blocks and the blocks
@@ -35,5 +35,5 @@ export function childBlockOptions(section: SectionNode, blockId: string): { type
   const definition = location ? getBlockDefinition(location.block.type) : undefined;
   if (!location || !definition?.allowedBlockTypes || location.depth >= MAX_BLOCK_DEPTH) return { types: [], full: false };
   const count = childBlocks(location.block).length;
-  return { types: definition.allowedBlockTypes, full: definition.maxBlocks !== undefined && count >= definition.maxBlocks };
+  return { types: allowedChildBlockTypes(location.block.type, location.depth), full: definition.maxBlocks !== undefined && count >= definition.maxBlocks };
 }

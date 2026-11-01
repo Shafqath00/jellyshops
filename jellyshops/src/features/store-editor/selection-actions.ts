@@ -1,6 +1,6 @@
 import type { BlockLocation, BlockNode, SectionNode } from "@jelly/storefront-schema";
-import { childBlocks, copyBlockWithNewIds, findBlock, updateBlock, updateBlockList } from "@jelly/storefront-schema";
-import { getBlockDefinition, getSectionDefinition } from "@jelly/storefront-registry";
+import { blockTreeHeight, childBlocks, copyBlockWithNewIds, findBlock, MAX_BLOCK_DEPTH, updateBlock, updateBlockList } from "@jelly/storefront-schema";
+import { allowedChildBlockTypes, getBlockDefinition, getSectionDefinition } from "@jelly/storefront-registry";
 
 /**
  * Shopify-style actions on the selected section or block of a template layout:
@@ -43,13 +43,13 @@ function hasRoom(rules: { max?: number }, count: number): boolean {
   return rules.max === undefined || count < rules.max;
 }
 
-/** The group just above a top-level block, when the block may go inside it. */
+/** The group just above a top-level block, when the block (and any blocks inside it) fits there. */
 function groupAbove(location: BlockLocation): BlockNode | null {
   if (location.parent || location.index === 0) return null;
   const above = location.siblings[location.index - 1];
   const definition = getBlockDefinition(above.type);
-  if (!definition?.allowedBlockTypes?.includes(location.block.type)) return null;
-  return hasRoom({ max: definition.maxBlocks }, childBlocks(above).length) ? above : null;
+  if (!allowedChildBlockTypes(above.type, 1).includes(location.block.type) || 1 + blockTreeHeight(location.block) > MAX_BLOCK_DEPTH) return null;
+  return hasRoom({ max: definition?.maxBlocks }, childBlocks(above).length) ? above : null;
 }
 
 /** The section (in the template, not a shared one) and block the target points at. */
@@ -73,7 +73,9 @@ export function availableActions(layout: Record<string, unknown>, target: Select
   }
   const rules = listRules(section, location.parent);
   const count = location.siblings.length;
-  const sectionRules = listRules(section, null);
+  // "Move out of group" puts the block in the list holding its group: the section's, or an outer group's.
+  const outer = location.parent ? findBlock(section.blocks, location.parent.id)?.parent ?? null : null;
+  const outerRules = listRules(section, outer);
   return {
     "move-up": location.index > 0,
     "move-down": location.index < count - 1,
@@ -81,7 +83,7 @@ export function availableActions(layout: Record<string, unknown>, target: Select
     toggle: true,
     remove: rules.min === undefined || count > rules.min,
     "group-in": groupAbove(location) !== null,
-    "group-out": location.parent !== null && sectionRules.allowed.includes(location.block.type) && hasRoom(sectionRules, section.blocks.length),
+    "group-out": location.parent !== null && outerRules.allowed.includes(location.block.type) && hasRoom(outerRules, outer ? childBlocks(outer).length : section.blocks.length),
   };
 }
 
@@ -145,10 +147,10 @@ export function applySelectionAction(
     blocks = blocks.filter((item) => item.id !== block.id);
     blocks = updateBlock(blocks, group.id, (current) => ({ ...current, blocks: [...childBlocks(current), block] }));
   } else {
-    // Out of the group: placed straight after it in the section.
+    // Out of the group: placed straight after it, in the list that holds the group.
+    const outerId = findBlock(blocks, parentId!)?.parent?.id;
     blocks = updateBlockList(blocks, parentId, (list) => list.filter((item) => item.id !== block.id));
-    const groupIndex = blocks.findIndex((item) => item.id === parentId);
-    blocks = [...blocks.slice(0, groupIndex + 1), block, ...blocks.slice(groupIndex + 1)];
+    blocks = updateBlockList(blocks, outerId, (list) => { list.splice(list.findIndex((item) => item.id === parentId) + 1, 0, block); return list; });
   }
   items[index] = { ...items[index], section: { ...section, blocks } };
   return { layout: withSections(layout, items), select };

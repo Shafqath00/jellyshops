@@ -140,6 +140,10 @@
 :where(.jelly-block-group-empty) { padding: 12px 16px; border: 1px dashed color-mix(in srgb, currentColor 30%, transparent); font-size: 13px; opacity: 0.7; }
 /* Groups fill the content width like Shopify's, unless the merchant sets Width: Fit (an inline width wins over stretch). */
 :where(.jelly-custom-content[data-direction="vertical"] .jelly-custom-content-inner > .jelly-block-group) { align-self: stretch; }
+:where(.jelly-block-group > .jelly-block-group) { align-self: stretch; }
+/* Groups placed in image with text and image banner sections sit under the section's own buttons. */
+:where(.jelly-section-groups) { display: grid; gap: 16px; margin-top: 24px; }
+:where(.jelly-image-banner[data-align="center"] .jelly-section-groups .jelly-block-group[data-direction="horizontal"]) { justify-content: center; }
 @media (max-width: 640px) {
   :where(.jelly-block-group[data-direction="horizontal"][data-wrap]) { flex-wrap: wrap; }
   :where(.jelly-block-group[data-direction="horizontal"][data-wrap] > :is(.jelly-image-block, .jelly-video-block, .jelly-setting-text, p)) { flex-basis: 100%; }
@@ -283,3 +287,5 @@
 /* Article text width; beats each theme's 720px default for the article body. */
 .jelly-section.jelly-article-content[data-width="narrow"] article.jelly-prose { max-width: 600px; }
 .jelly-section.jelly-article-content[data-width="wide"] article.jelly-prose { max-width: 960px; }
+/* Automatic "Sale" badge on product cards: shown only when the theme's Sale badge setting is on. */
+.jelly-product-card-badge[data-badge="sale"] { display: var(--jelly-badge-sale-display, none); }

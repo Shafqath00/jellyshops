@@ -25,7 +25,7 @@ export const SECTION_WIDTHS = ["page", "full"] as const;
  */
 export const SHOW_ON_CHOICES = ["desktop-only", "desktop", "touch", "mobile"] as const;
 /** The four colour schemes set in theme settings (Theme settings › Colour scheme 1-4). */
-export const SECTION_SCHEMES = ["scheme1", "scheme2", "scheme3", "scheme4"] as const;
+export const SECTION_SCHEMES = ["scheme1", "scheme2", "scheme3", "scheme4", "scheme5", "scheme6", "scheme7", "scheme8"] as const;
 
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 /** Empty string means "use the theme's choice"; the editor's select lists it as "Theme default". */
@@ -65,7 +65,7 @@ const themeDefault = { label: "Theme default", value: "" };
 const fonts = [themeDefault, ...SECTION_FONT_CHOICES.map((font) => ({ label: font, value: font }))];
 
 export const SECTION_STYLE_CONTROLS: ControlDefinition[] = [
-  { type: "select", key: "styleScheme", label: "Colour scheme", description: "Edit the schemes in theme settings.", group: "style", heading: "Appearance", options: [themeDefault, { label: "Scheme 1", value: "scheme1" }, { label: "Scheme 2", value: "scheme2" }, { label: "Scheme 3", value: "scheme3" }, { label: "Scheme 4", value: "scheme4" }] },
+  { type: "select", key: "styleScheme", label: "Colour scheme", description: "Edit the schemes in theme settings.", group: "style", heading: "Appearance", options: [themeDefault, ...SECTION_SCHEMES.map((value, index) => ({ label: `Scheme ${index + 1}`, value }))] },
   { type: "checkbox", key: "styleColors", label: "Use my own colours", description: "Turn on to choose this section's background and text colours. They replace the colour scheme.", group: "style", heading: "Appearance" },
   { type: "color", key: "styleBackground", label: "Background colour", group: "style", heading: "Appearance", allowAlpha: false, showWhen: { key: "styleColors", equals: true } },
   { type: "color", key: "styleText", label: "Text colour", group: "style", heading: "Appearance", allowAlpha: false, showWhen: { key: "styleColors", equals: true } },

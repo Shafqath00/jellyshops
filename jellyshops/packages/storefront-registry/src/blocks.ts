@@ -37,7 +37,8 @@ const buttonOptionControls: ControlDefinition[] = [
 const linkSchema = z.union([z.string(), settingValueSchema(z.string())]).optional();
 
 /** Blocks a group may hold. Groups do not hold groups (one level of nesting). */
-export const GROUP_CHILD_TYPES = ["heading", "text", "button", "image", "video"];
+/** A group may hold another group; `allowedChildBlockTypes` drops "group" where a group could hold nothing. */
+export const GROUP_CHILD_TYPES = ["heading", "text", "button", "image", "video", "group"];
 /** A group lays its blocks out in a row or a column, like Shopify's group block. */
 const groupBlock: BlockDefinition = {
   type: "group",

@@ -6,6 +6,8 @@ export function StorefrontProductCard({ product }: { product: StorefrontProductC
       <div className="jelly-product-card-media">
         {product.imageUrl ? <img src={product.imageUrl} alt={product.name} loading="lazy" decoding="async" /> : <span className="jelly-product-card-placeholder" aria-hidden="true" />}
         {product.badge && <span className="jelly-product-card-badge">{product.badge}</span>}
+        {/* Hidden unless the theme's "Sale badge" setting is on. */}
+        {!product.badge && product.compareAtPrice && <span className="jelly-product-card-badge" data-badge="sale">Sale</span>}
       </div>
       <div className="jelly-product-card-body">
         <h3>{product.name}</h3>

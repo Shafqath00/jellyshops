@@ -8,6 +8,7 @@ import { choice, headingHidden, imageValue, numberValue, sectionData, stringValu
 import { formattedSetting, inlineSetting, SettingText } from "./setting-text";
 import { blockStyle } from "../block-style";
 import { blockEditorData, buttonProps } from "./block-content";
+import { SectionGroups } from "./custom-content";
 
 function text(section: SectionNode, fallback: string): string {
   const setting = section.settings.heading ?? section.settings.text;
@@ -73,6 +74,7 @@ export function ImageWithTextSection({ section, context }: { section: SectionNod
           <h2 {...content.headingProps}>{content.headingContent}</h2>
           <SettingText text={content.body} document={content.bodyDocument} {...content.bodyProps} />
           <Actions buttons={content.buttons} storeSlug={context.storeSlug} />
+          <SectionGroups section={section} context={context} />
         </div>
       </div>
     </StorefrontContainer>
@@ -97,6 +99,7 @@ export function ImageBannerSection({ section, context }: { section: SectionNode;
       {content.heading && <h2 {...content.headingProps}>{content.headingContent}</h2>}
       <SettingText text={content.body} document={content.bodyDocument} {...content.bodyProps} />
       <Actions buttons={content.buttons} storeSlug={context.storeSlug} />
+      <SectionGroups section={section} context={context} />
     </StorefrontContainer>
   </section>;
 }

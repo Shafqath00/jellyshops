@@ -1,27 +1,33 @@
 /**
  * Shopify-style global style settings shared by the complete themes:
  * text styles (Heading 1-4, Body, Small), four colour schemes sections can
- * pick, and extra button settings. `themeStyleSettings()` returns the
- * manifest defaults and schema entries; `resolveThemeStyleTokens()` turns the
- * saved values into `--jelly-type-*`, `--jelly-scheme-*` and `--jelly-button-*`
- * variables. A token is only written when the merchant's value differs from the
+ * pick, extra button settings, form fields, product card extras and badges.
+ * `themeStyleSettings()` returns the manifest defaults and schema entries;
+ * `resolveThemeStyleTokens()` turns the saved values into `--jelly-type-*`,
+ * `--jelly-scheme-*`, `--jelly-button-*`, `--jelly-field-*`, `--jelly-card-*`
+ * and `--jelly-badge-*` variables. A token is only written when the merchant's value differs from the
  * theme's default, so untouched stores keep the theme's own responsive sizes.
  */
 
 export const TEXT_STYLE_LEVELS = ["h1", "h2", "h3", "h4", "body", "small"] as const;
 export type TextStyleLevel = typeof TEXT_STYLE_LEVELS[number];
-export const COLOR_SCHEME_IDS = ["scheme1", "scheme2", "scheme3", "scheme4"] as const;
+/** Up to eight schemes; `colorSchemes.count` (4-8) says how many the merchant uses. */
+export const COLOR_SCHEME_IDS = ["scheme1", "scheme2", "scheme3", "scheme4", "scheme5", "scheme6", "scheme7", "scheme8"] as const;
 export type ColorSchemeId = typeof COLOR_SCHEME_IDS[number];
+export const MIN_COLOR_SCHEMES = 4;
+type BaseSchemeId = "scheme1" | "scheme2" | "scheme3" | "scheme4";
+/** Schemes 5-8 start as copies of a theme scheme the merchant can then change. */
+const extraSchemeSources: Record<Exclude<ColorSchemeId, BaseSchemeId>, BaseSchemeId> = { scheme5: "scheme2", scheme6: "scheme4", scheme7: "scheme3", scheme8: "scheme1" };
 
 export interface ColorSchemeValues { background: string; text: string; button: string; buttonText: string }
 export interface ThemeStyleDefaults {
   /** Largest (desktop) size in px of Heading 2-4 and Small text. Heading 1 and Body use typography.headingSize/bodySize. */
   sizes: { h2: number; h3: number; h4: number; small: number };
-  schemes: Record<ColorSchemeId, ColorSchemeValues>;
+  schemes: Record<BaseSchemeId, ColorSchemeValues> & Partial<Record<ColorSchemeId, ColorSchemeValues>>;
 }
 
 const levelLabels: Record<TextStyleLevel, string> = { h1: "Heading 1", h2: "Heading 2", h3: "Heading 3", h4: "Heading 4", body: "Body", small: "Small" };
-const schemeLabels: Record<ColorSchemeId, string> = { scheme1: "Scheme 1", scheme2: "Scheme 2", scheme3: "Scheme 3", scheme4: "Scheme 4" };
+const schemeNumber = (id: ColorSchemeId) => COLOR_SCHEME_IDS.indexOf(id) + 1;
 /** Smallest size as a share of the largest, and the screen width (px) at which the largest is reached. */
 const responsive: Record<"h2" | "h3", { min: number; full: number }> = { h2: { min: 0.64, full: 1220 }, h3: { min: 0.8, full: 1270 } };
 const theme = "theme";
@@ -65,28 +71,58 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
       select(`textStyles.${level}.textCase`, "Case", group, theme, cases),
     ];
   });
-  const colorSchemeSchema = COLOR_SCHEME_IDS.flatMap((id) => {
-    const group = `Colour ${schemeLabels[id].toLowerCase()}`;
-    const values = defaults.schemes[id];
-    return [
-      color(`colorSchemes.${id}.background`, "Background", group, values.background),
-      color(`colorSchemes.${id}.text`, "Text", group, values.text),
-      color(`colorSchemes.${id}.button`, "Button", group, values.button),
-      color(`colorSchemes.${id}.buttonText`, "Button text", group, values.buttonText),
-    ];
-  });
+  const schemes = Object.fromEntries(COLOR_SCHEME_IDS.map((id) => [id, { ...(defaults.schemes[id] ?? defaults.schemes[extraSchemeSources[id as keyof typeof extraSchemeSources]]) }])) as Record<ColorSchemeId, ColorSchemeValues>;
+  const colorSchemeSchema = [
+    select("colorSchemes.count", "Number of colour schemes", "Colour schemes", String(MIN_COLOR_SCHEMES), COLOR_SCHEME_IDS.slice(MIN_COLOR_SCHEMES - 1).map((_id, index) => [String(MIN_COLOR_SCHEMES + index), String(MIN_COLOR_SCHEMES + index)] as [string, string]), "Sections using a scheme you remove keep its colours until you pick another."),
+    ...COLOR_SCHEME_IDS.flatMap((id) => {
+      const group = `Colour scheme ${schemeNumber(id)}`;
+      const values = schemes[id];
+      return [
+        { id: `colorSchemes.${id}.name`, type: "text", label: "Name", group, default: "", description: "Shown when a section picks its colour scheme." },
+        color(`colorSchemes.${id}.background`, "Background", group, values.background),
+        color(`colorSchemes.${id}.text`, "Text", group, values.text),
+        color(`colorSchemes.${id}.button`, "Button", group, values.button),
+        color(`colorSchemes.${id}.buttonText`, "Button text", group, values.buttonText),
+      ];
+    })];
   const buttonSchema = [
     select("buttons.size", "Button size", "Buttons", theme, [[theme, "Theme default"], ["small", "Small"], ["medium", "Medium"], ["large", "Large"]]),
     select("buttons.textCase", "Button text case", "Buttons", theme, cases),
     select("buttons.borderWidth", "Border thickness", "Buttons", theme, [[theme, "Theme default"], ["none", "None"], ["thin", "Thin"], ["thick", "Thick"]]),
     select("buttons.hover", "Hover effect", "Buttons", theme, [[theme, "Theme default"], ["darken", "Darken"], ["lift", "Lift with shadow"], ["underline", "Underline"], ["none", "None"]]),
   ];
+  const fieldSchema = [
+    select("fields.radius", "Field corners", "Form fields", theme, [[theme, "Theme default"], ["square", "Square"], ["soft", "Slightly rounded"], ["rounded", "Rounded"], ["pill", "Pill"]]),
+    select("fields.borderWidth", "Border thickness", "Form fields", theme, [[theme, "Theme default"], ["thin", "Thin"], ["thick", "Thick"]]),
+    select("fields.height", "Field height", "Form fields", theme, [[theme, "Theme default"], ["small", "Small"], ["medium", "Medium"], ["large", "Large"]]),
+  ];
+  const cardSchema = [
+    select("productCard.radius", "Card corners", "Product cards", theme, [[theme, "Theme default"], ["square", "Square"], ["soft", "Slightly rounded"], ["rounded", "Rounded"]]),
+    select("productCard.shadow", "Card shadow", "Product cards", theme, [[theme, "Theme default"], ["none", "None"], ["soft", "Soft"], ["medium", "Medium"]], "A shadow also gives the card a background and inner space."),
+    select("productCard.hover", "Hover effect", "Product cards", theme, [[theme, "Theme default"], ["zoom", "Zoom the photo"], ["lift", "Lift the card"], ["none", "None"]]),
+  ];
+  const badgeSchema = [
+    select("badges.sale", "Sale badge", "Badges", "hide", [["hide", "Don't show"], ["show", "Show on discounted products"]]),
+    select("badges.position", "Position", "Badges", theme, [[theme, "Theme default"], ["top-left", "Top left"], ["top-right", "Top right"]]),
+    select("badges.shape", "Shape", "Badges", theme, [[theme, "Theme default"], ["square", "Square"], ["rounded", "Rounded"], ["pill", "Pill"]]),
+    color("badges.background", "Background", "Badges", ""),
+    color("badges.text", "Text", "Badges", ""),
+  ];
   return {
-    defaults: { textStyles, colorSchemes: structuredClone(defaults.schemes) },
+    defaults: {
+      textStyles,
+      colorSchemes: { count: String(MIN_COLOR_SCHEMES), ...Object.fromEntries(COLOR_SCHEME_IDS.map((id) => [id, { name: "", ...schemes[id] }])) },
+      fields: { radius: theme, borderWidth: theme, height: theme },
+      badges: { sale: "hide", position: theme, shape: theme, background: "", text: "" },
+    },
     buttonDefaults: { size: theme, textCase: theme, borderWidth: theme, hover: theme },
+    cardDefaults: { radius: theme, shadow: theme, hover: theme },
     textStyleSchema,
     colorSchemeSchema,
     buttonSchema,
+    fieldSchema,
+    cardSchema,
+    badgeSchema,
   };
 }
 
@@ -106,6 +142,19 @@ export function themeStyleDefaultsFrom(settingsDefaults: Record<string, unknown>
   if (!Object.keys(styles).length || !Object.keys(schemes).length) return undefined;
   const size = (level: string) => Number(record(styles[level]).size);
   return { sizes: { h2: size("h2"), h3: size("h3"), h4: size("h4"), small: size("small") }, schemes: schemes as unknown as ThemeStyleDefaults["schemes"] };
+}
+
+/** How many colour schemes the merchant uses (4-8). */
+export function colorSchemeCount(settings: Record<string, unknown> | undefined): number {
+  const count = Number(record(settings?.colorSchemes).count);
+  return Number.isInteger(count) ? Math.min(COLOR_SCHEME_IDS.length, Math.max(MIN_COLOR_SCHEMES, count)) : MIN_COLOR_SCHEMES;
+}
+
+/** "Scheme 2: Dark" when the merchant named it, otherwise "Scheme 2". */
+export function colorSchemeLabel(settings: Record<string, unknown> | undefined, id: ColorSchemeId): string {
+  const name = record(record(settings?.colorSchemes)[id]).name;
+  const label = `Scheme ${schemeNumber(id)}`;
+  return typeof name === "string" && name.trim() ? `${label}: ${name.trim().slice(0, 40)}` : label;
 }
 
 export function resolveThemeStyleTokens(settings: Record<string, unknown>, defaults: ThemeStyleDefaults | undefined): Record<string, string> {
@@ -146,5 +195,31 @@ export function resolveThemeStyleTokens(settings: Record<string, unknown>, defau
   else if (buttons.hover === "underline") Object.assign(tokens, { "--jelly-button-hover-decoration": "underline", "--jelly-button-hover-mix": "100%" });
   else if (buttons.hover === "none") tokens["--jelly-button-hover-mix"] = "100%";
   else if (buttons.hover === "darken") tokens["--jelly-button-hover-mix"] = "72%";
+
+  const fields = record(settings.fields);
+  const fieldRadii: Record<string, string> = { square: "0px", soft: "4px", rounded: "10px", pill: "999px" };
+  if (typeof fields.radius === "string" && fieldRadii[fields.radius]) tokens["--jelly-field-radius"] = fieldRadii[fields.radius];
+  if (fields.borderWidth === "thin" || fields.borderWidth === "thick") tokens["--jelly-field-border-width"] = borders[fields.borderWidth];
+  const fieldHeights: Record<string, string> = { small: "40px", medium: "48px", large: "56px" };
+  if (typeof fields.height === "string" && fieldHeights[fields.height]) tokens["--jelly-field-height"] = fieldHeights[fields.height];
+
+  const card = record(settings.productCard);
+  const cardRadii: Record<string, string> = { square: "0px", soft: "6px", rounded: "16px" };
+  if (typeof card.radius === "string" && cardRadii[card.radius]) tokens["--jelly-card-radius"] = cardRadii[card.radius];
+  const shadows: Record<string, string> = { soft: "0 1px 4px rgb(0 0 0 / 0.08)", medium: "0 8px 24px rgb(0 0 0 / 0.12)" };
+  if (typeof card.shadow === "string" && shadows[card.shadow]) Object.assign(tokens, { "--jelly-card-shadow": shadows[card.shadow], "--jelly-card-bg": "var(--theme-surface)", "--jelly-card-padding": "12px" });
+  else if (card.shadow === "none") tokens["--jelly-card-shadow"] = "none";
+  if (card.hover === "zoom") tokens["--jelly-card-hover-image"] = "scale(1.06)";
+  else if (card.hover === "lift") Object.assign(tokens, { "--jelly-card-hover-image": "none", "--jelly-card-hover-lift": "translateY(-4px)" });
+  else if (card.hover === "none") tokens["--jelly-card-hover-image"] = "none";
+
+  const badges = record(settings.badges);
+  if (badges.sale === "show") tokens["--jelly-badge-sale-display"] = "inline-block";
+  if (badges.position === "top-left") Object.assign(tokens, { "--jelly-badge-left": "12px", "--jelly-badge-right": "auto" });
+  else if (badges.position === "top-right") Object.assign(tokens, { "--jelly-badge-left": "auto", "--jelly-badge-right": "12px" });
+  const badgeRadii: Record<string, string> = { square: "0px", rounded: "4px", pill: "999px" };
+  if (typeof badges.shape === "string" && badgeRadii[badges.shape]) tokens["--jelly-badge-radius"] = badgeRadii[badges.shape];
+  if (typeof badges.background === "string" && hex.test(badges.background)) tokens["--jelly-badge-bg"] = badges.background;
+  if (typeof badges.text === "string" && hex.test(badges.text)) tokens["--jelly-badge-text"] = badges.text;
   return tokens;
 }

@@ -38,3 +38,22 @@ it("accepts the new settings and rejects values outside their choices", () => {
   expect(validateThemeSettings("jelly-signature", { textStyles: { h3: { size: 500 } } })[0]?.path).toBe("textStyles.h3.size");
   expect(validateThemeSettings("jelly-avenue", { buttons: { hover: "spin" } })[0]?.path).toBe("buttons.hover");
 });
+
+it("adds field, product card and badge tokens only for changed settings", () => {
+  for (const id of ["jelly-signature", "jelly-avenue"]) {
+    const untouched = tokensFor(id);
+    expect(Object.keys(untouched).filter((key) => /^--jelly-(field|badge)-|^--jelly-card-(radius|shadow|hover|bg)/.test(key))).toEqual([]);
+    const tokens = tokensFor(id, {
+      fields: { radius: "pill", borderWidth: "thick", height: "large" },
+      productCard: { radius: "rounded", shadow: "soft", hover: "lift" },
+      badges: { sale: "show", position: "top-left", shape: "pill", background: "#c0392b", text: "javascript:alert(1)" },
+    });
+    expect(tokens).toMatchObject({
+      "--jelly-field-radius": "999px", "--jelly-field-border-width": "2px", "--jelly-field-height": "56px",
+      "--jelly-card-radius": "16px", "--jelly-card-padding": "12px", "--jelly-card-bg": "var(--theme-surface)", "--jelly-card-hover-lift": "translateY(-4px)", "--jelly-card-hover-image": "none",
+      "--jelly-badge-sale-display": "inline-block", "--jelly-badge-left": "12px", "--jelly-badge-right": "auto", "--jelly-badge-radius": "999px", "--jelly-badge-bg": "#c0392b",
+    });
+    expect(tokens["--jelly-badge-text"]).toBeUndefined();
+    expect(validateThemeSettings(id, { fields: { height: "huge" }, badges: { sale: "yes" } }).map((issue) => issue.path)).toEqual(["badges.sale", "fields.height"]);
+  }
+});
