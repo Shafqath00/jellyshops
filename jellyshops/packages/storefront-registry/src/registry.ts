@@ -1,4 +1,4 @@
-import { isRichTextDocument, MAX_BLOCK_DEPTH, type BlockNode, type PageType, type SectionNode } from "@jelly/storefront-schema";
+import { customCssProblem, isRichTextDocument, MAX_BLOCK_DEPTH, type BlockNode, type PageType, type SectionNode } from "@jelly/storefront-schema";
 import { z } from "zod";
 import { blockDefinitions } from "./blocks.js";
 import { commerceSections } from "./sections/commerce.js";
@@ -39,7 +39,11 @@ export function validateSectionAgainstRegistry(section: SectionNode, pageType: P
 
   const issues: RegistryValidationIssue[] = [];
   if (!definition.supportedPages.includes(pageType)) issues.push({ code: "SECTION_NOT_ALLOWED_ON_PAGE", sectionId: section.id, message: `${section.type} is not allowed on ${pageType}` });
-  if (!definition.settingsSchema.safeParse(section.settings).success || !formattedCopiesValid(section.settings)) issues.push({ code: "SETTINGS_INVALID", sectionId: section.id, message: "Section settings are invalid" });
+  if (!definition.settingsSchema.safeParse(section.settings).success || !formattedCopiesValid(section.settings)) {
+    // Custom CSS is the one setting merchants type freely, so say what is wrong with it.
+    const cssProblem = typeof section.settings.customCss === "string" ? customCssProblem(section.settings.customCss) : null;
+    issues.push({ code: "SETTINGS_INVALID", sectionId: section.id, message: cssProblem ? `Custom CSS: ${cssProblem}` : "Section settings are invalid" });
+  }
   for (const device of ["mobile", "tablet"] as const) {
     const values = section.responsive?.[device];
     if (!values) continue;

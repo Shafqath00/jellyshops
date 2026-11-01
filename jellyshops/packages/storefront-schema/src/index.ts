@@ -90,3 +90,4 @@ export type {
   ProductOptionValueLike,
   SelectionProblem,
 } from "./product-options.js";
+export { MAX_SECTION_CSS_LENGTH, customCssProblem, scopeCustomCss } from "./custom-css.js";

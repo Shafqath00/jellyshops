@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { showOnChoice } from "./section-style";
 
 /**
  * Turns a heading, text or button block's style settings (see the registry's
@@ -80,7 +81,7 @@ export function blockStyleProps(settings: Record<string, unknown> | undefined, m
   }
   const mobilePreset = typeof mobile?.blockTypePreset === "string" && presets.has(mobile.blockTypePreset) ? mobile.blockTypePreset : undefined;
   const tabletPreset = typeof tablet?.blockTypePreset === "string" && presets.has(tablet.blockTypePreset) ? tablet.blockTypePreset : undefined;
-  const showOn = settings.blockShowOn === "desktop" || settings.blockShowOn === "mobile" ? settings.blockShowOn : undefined;
+  const showOn = showOnChoice(settings.blockShowOn);
   const allStyle = { ...style, ...vars } as CSSProperties;
   return {
     ...(styled ? { "data-block-style": "" } : {}),

@@ -17,6 +17,11 @@ const weights = new Set(["300", "400", "500", "600", "700"]);
 const alignments = new Set(["left", "center", "right"]);
 const spacing: Record<string, string> = { none: "0px", small: "clamp(24px, 4vw, 40px)", large: "clamp(80px, 11vw, 144px)" };
 const fonts = new Set<string>(FONT_OPTIONS.map((option) => option.value));
+const showOnChoices = new Set(["desktop-only", "desktop", "touch", "mobile"]);
+/** A saved "Show on" choice, or undefined for every screen (or an unknown value). */
+export function showOnChoice(value: unknown): string | undefined {
+  return typeof value === "string" && showOnChoices.has(value) ? value : undefined;
+}
 const shadows: Record<string, string> = {
   soft: "0 2px 8px rgba(0, 0, 0, 0.08)",
   medium: "0 6px 20px rgba(0, 0, 0, 0.14)",
@@ -102,7 +107,7 @@ export function sectionStyleProps(settings: Record<string, unknown> | undefined,
 
   const phone = responsiveVars(mobile, vars, "m");
   const tabletUsed = responsiveVars(tablet, vars, "t");
-  const showOn = settings.styleShowOn === "desktop" || settings.styleShowOn === "mobile" ? settings.styleShowOn : undefined;
+  const showOn = showOnChoice(settings.styleShowOn);
 
   return {
     ...(used.length ? { "data-section-style": used.join(" ") } : {}),

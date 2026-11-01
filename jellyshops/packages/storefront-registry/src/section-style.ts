@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { customCssProblem, MAX_SECTION_CSS_LENGTH } from "@jelly/storefront-schema";
 import type { ControlDefinition } from "./types.js";
 
 /**
@@ -18,8 +19,11 @@ export const SECTION_BODY_SIZES = ["small", "regular", "large"] as const;
 export const SECTION_ALIGNMENTS = ["left", "center", "right"] as const;
 export const SECTION_SPACINGS = ["none", "small", "large"] as const;
 export const SECTION_WIDTHS = ["page", "full"] as const;
-/** Where a section or block shows: every screen (empty), desktop and tablet only, or phones only. */
-export const SHOW_ON_CHOICES = ["desktop", "mobile"] as const;
+/**
+ * Where a section or block shows: every screen (empty), desktop only (1024px and up), desktop and tablet
+ * (768px and up), tablet and phones (below 1024px) or phones only (below 768px).
+ */
+export const SHOW_ON_CHOICES = ["desktop-only", "desktop", "touch", "mobile"] as const;
 /** The four colour schemes set in theme settings (Theme settings › Colour scheme 1-4). */
 export const SECTION_SCHEMES = ["scheme1", "scheme2", "scheme3", "scheme4"] as const;
 
@@ -48,6 +52,11 @@ export const sectionStyleSchema = z.object({
   styleGradientColor: z.union([hexColor, z.literal("")]).optional(),
   styleGradientAngle: z.number().int().min(0).max(360).optional(),
   styleMinHeight: z.number().int().min(0).max(1000).optional(),
+  // Limited to this section by the renderer (`scopeCustomCss`); unsafe CSS is refused here so it never gets saved.
+  customCss: z.string().max(MAX_SECTION_CSS_LENGTH).superRefine((css, context) => {
+    const problem = customCssProblem(css);
+    if (problem) context.addIssue({ code: "custom", message: problem });
+  }).optional(),
 }).passthrough();
 
 export type SectionStyleSettings = z.infer<typeof sectionStyleSchema>;
@@ -66,7 +75,7 @@ export const SECTION_STYLE_CONTROLS: ControlDefinition[] = [
   { type: "select", key: "styleBodyFont", label: "Text font", group: "style", heading: "Typography", options: fonts },
   { type: "select", key: "styleBodySize", label: "Text size", group: "style", heading: "Typography", options: [themeDefault, { label: "Small", value: "small" }, { label: "Regular", value: "regular" }, { label: "Large", value: "large" }] },
   { type: "select", key: "styleAlign", mobile: true, label: "Text alignment", group: "layout", heading: "Layout", options: [themeDefault, { label: "Left", value: "left" }, { label: "Centre", value: "center" }, { label: "Right", value: "right" }] },
-  { type: "select", key: "styleShowOn", label: "Show on", group: "layout", heading: "Layout", options: [{ label: "All screens", value: "" }, { label: "Desktop and tablet only", value: "desktop" }, { label: "Phones only", value: "mobile" }] },
+  { type: "select", key: "styleShowOn", label: "Show on", group: "layout", heading: "Layout", options: [{ label: "All screens", value: "" }, { label: "Desktop only", value: "desktop-only" }, { label: "Desktop and tablet", value: "desktop" }, { label: "Tablet and phones", value: "touch" }, { label: "Phones only", value: "mobile" }] },
   { type: "range", key: "styleMinHeight", label: "Minimum height", group: "layout", heading: "Layout", min: 0, max: 1000, step: 20, unit: "px" },
   { type: "segmented", key: "styleWidth", label: "Width", group: "layout", heading: "Layout", options: [{ label: "Page", value: "page" }, { label: "Full", value: "full" }] },
   { type: "color", key: "styleGradientColor", label: "Gradient to colour", description: "Fades the section's background into this colour. Leave empty for a flat background.", group: "style", heading: "Appearance", allowAlpha: false },
@@ -76,6 +85,7 @@ export const SECTION_STYLE_CONTROLS: ControlDefinition[] = [
   { type: "select", key: "styleSpacing", label: "Space above and below", group: "style", heading: "Padding", description: "Or set exact sizes below.", options: [themeDefault, { label: "None", value: "none" }, { label: "Small", value: "small" }, { label: "Large", value: "large" }] },
   { type: "range", key: "stylePaddingTop", mobile: true, label: "Top", group: "style", heading: "Padding", min: 0, max: 200, step: 4, unit: "px" },
   { type: "range", key: "stylePaddingBottom", mobile: true, label: "Bottom", group: "style", heading: "Padding", min: 0, max: 200, step: 4, unit: "px" },
+  { type: "textarea", key: "customCss", label: "Custom CSS", description: "Only changes this section. Example: h2 { letter-spacing: 0.1em; } Use & for the section itself.", group: "advanced", maxLength: MAX_SECTION_CSS_LENGTH },
 ];
 
 const styleKeys = new Set(SECTION_STYLE_CONTROLS.map((control) => control.key));

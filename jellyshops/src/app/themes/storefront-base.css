@@ -163,6 +163,13 @@
 @media (min-width: 768px) {
   [data-show-on="mobile"] { display: none !important; }
 }
+/* "Desktop only" hides below 1024px; "Tablet and phones" hides from 1024px. */
+@media (max-width: 1023px) {
+  [data-show-on="desktop-only"] { display: none !important; }
+}
+@media (min-width: 1024px) {
+  [data-show-on="touch"] { display: none !important; }
+}
 @media (max-width: 767px) {
   [data-show-on="desktop"] { display: none !important; }
   :where([data-section-mobile~="align"]) { text-align: var(--section-align-m); }

@@ -6,6 +6,7 @@ import {
   type SectionRenderRegistry,
 } from "./render-registry";
 import { createStorefrontRuntimeContext } from "./runtime-context";
+import { SectionCustomCss, sectionCssProps } from "./section-custom-css";
 import type { CommerceDataProvider, RendererMode, RendererSelection, StorefrontPageContext } from "./types";
 import { getThemeDefinition, DEFAULT_THEME_ID } from "@jelly/storefront-themes";
 
@@ -55,6 +56,7 @@ export function RegistrySectionRenderer({
   const isSelected = selected?.kind === "section" && selected.sectionId === section.id;
   return <div
     data-testid={`section-${section.type}`}
+    {...sectionCssProps(section)}
     {...(editor ? { "data-editor-section-id": section.id, "data-editor-selected": String(isSelected) } : {})}
     onClick={editor ? (event) => {
       event.preventDefault();
@@ -66,5 +68,5 @@ export function RegistrySectionRenderer({
         ? { kind: "block", region, sectionId: section.id, blockId, fieldKey: block?.dataset.editorFieldKey }
         : { kind: "section", region, sectionId: section.id });
     } : undefined}
-  >{content}</div>;
+  ><SectionCustomCss section={section} />{content}</div>;
 }
