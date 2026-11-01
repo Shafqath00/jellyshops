@@ -22,10 +22,9 @@ The API runs on port 3001 and the frontend on port 3000. Open these routes:
 - Sweet Bakes: [http://localhost:3000/sweet-bakes](http://localhost:3000/sweet-bakes)
 - Bloom Home: [http://localhost:3000/bloom-home](http://localhost:3000/bloom-home)
 
-Development uses the built-in demo merchant automatically. Store Editor changes remain
-private until **Publish** is selected. Drafts, publications, and uploaded media are stored
-under `../backend/.data` and `../backend/uploads`. Stop the API, remove those two directories,
-and restart it to reset only the Store Editor API data.
+Authentication, persistence and media depend on the configured providers. See
+`../backend/README.md` and the backend environment example for setup. Store Editor
+changes remain private until **Publish** is selected.
 
 Use **Reset demo data** in the merchant sidebar or Settings page to restore all
 seed products, inventory, customers, orders, and storefront settings.
@@ -56,7 +55,35 @@ npx playwright install chromium
 - Checkout, payment, order, refund, and fulfilment authority lives in the backend API and Stripe webhooks.
 - Money is stored as integer minor units and formatted only at the UI boundary.
 
-The Store Editor currently uses the local Node/Express API and filesystem adapters.
-Firebase Authentication, PostgreSQL/Prisma, and Google Cloud Storage are deliberately
-not connected yet; their replacement boundaries and environment keys are documented in
-`../backend/README.md`.
+The local API supports multiple authentication and persistence configurations.
+The frontend uses Supabase Auth in configured environments; customer payments use
+the backend's Stripe integration. See `../backend/README.md` for provider setup.
+
+## Code map and contribution guidance
+
+`src/app` contains Next.js routes, layouts and global/theme styles. Business
+features live under `src/features`, shared UI under `src/components/ui`, the
+admin shell and navigation under `src/components/layout`, the shop
+provider under `src/contexts`, and cross-feature domain types and helpers under
+`src/lib`. Unit tests normally live beside the code they exercise; browser tests
+and fixtures are under `e2e`.
+
+The five npm workspace packages under `packages` contain storefront schemas,
+registry definitions, themes, the renderer and shared storefront UI. The editor
+preview and published storefront use the same renderer. Some packages are also
+consumed by the backend, so preserve package exports, theme IDs and versions
+when refactoring. Keep route entry points in `src/app`, feature code with its
+feature, and genuinely reusable primitives in `src/components/ui`. Preserve the
+server/client boundary and CSS import order when moving code.
+
+CI uses Node.js 22. Copy `.env.example` to `.env.local` and configure values
+for your environment. The `dev`, `test` and `build` scripts build the schema,
+registry and themes workspaces first. Playwright starts local frontend and backend
+services with temporary data; it needs backend dependencies, free ports and a
+supported browser. On Windows the Playwright configuration uses Chrome. The
+separate onboarding browser gate requires additional test configuration; see
+`scripts/run-onboarding-e2e.mjs` and the backend documentation.
+
+For further guidance see `../docs/README.md`, `../docs/development/testing.md`,
+and `../docs/theme-architecture.md`. Historical test results are snapshots, not
+proof that the current checkout passes.

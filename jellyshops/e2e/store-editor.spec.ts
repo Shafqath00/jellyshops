@@ -9,7 +9,7 @@ test("merchant edits a template, compiles preview, and publishes v4 storefront",
   await page.goto("/admin/online-store/editor");
   expect((await workspace).ok()).toBeTruthy();
   expect((await templates).ok()).toBeTruthy();
-  await expect(page.getByRole("heading", { name: "Theme editor" })).toBeVisible();
+  await expect(page.getByTestId("theme-editor-shell")).toBeVisible();
 
   const headingBlock = page.frameLocator('iframe[title="Storefront preview"]').locator("[data-editor-block-id][data-editor-field-key='text']").first();
   await expect(headingBlock).toBeVisible();
@@ -18,24 +18,29 @@ test("merchant edits a template, compiles preview, and publishes v4 storefront",
   const templateSave = page.waitForResponse((response) => response.url().includes("/storefront/templates/") && response.request().method() === "PATCH");
   await page.getByLabel("Heading", { exact: true }).fill(heading);
   expect((await templateSave).ok()).toBeTruthy();
+  await page.getByRole("button", { name: "Save draft" }).click();
+  await page.reload();
+  await expect(page.frameLocator('iframe[title="Storefront preview"]').getByText(heading).first()).toBeVisible();
 
+  await page.getByLabel("More actions").click();
   const validation = page.waitForResponse((response) => response.url().endsWith("/storefront/validate") && response.request().method() === "POST");
-  await page.getByRole("button", { name: "Validate" }).click();
+  await page.getByRole("button", { name: "Check changes" }).click();
   expect([200, 422]).toContain((await validation).status());
 
   const preview = page.waitForResponse((response) => response.url().endsWith("/storefront/preview/compile") && response.request().method() === "POST");
-  await page.getByRole("button", { name: "Preview" }).click();
+  await page.getByRole("button", { name: "Compiled preview" }).click();
   expect([200, 422]).toContain((await preview).status());
-  await expect(page.getByText(/Compiled preview · generation/)).toBeVisible();
+  await expect(page.getByText(/how your store will look when you publish/)).toBeVisible();
 
   const publicPage = await context.newPage();
   await publicPage.goto("/sweet-bakes");
   await expect(publicPage.getByText(heading)).not.toBeVisible();
 
   const publication = page.waitForResponse((response) => response.url().endsWith("/storefront/publish") && response.request().method() === "POST");
+  await page.getByLabel("Publishing options").click();
   await page.getByRole("button", { name: "Publish" }).click();
   expect([200, 201]).toContain((await publication).status());
-  await expect(page.getByRole("status")).toContainText("Published");
+  await expect(page.getByRole("status").filter({ hasText: "Published" })).toBeVisible();
 
   await publicPage.reload();
   await expect(publicPage.getByText(heading)).toBeVisible();

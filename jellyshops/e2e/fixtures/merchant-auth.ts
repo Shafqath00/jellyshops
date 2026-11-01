@@ -25,7 +25,7 @@ async function signInWithMerchantCredentials(page: Page, email: string, password
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
   if (destination === "/admin/online-store/editor") {
-    await expect(page.getByRole("heading", { name: "Theme editor" })).toBeVisible();
+    await expect(page.getByTestId("theme-editor-shell")).toBeVisible();
   } else {
     try {
       await page.waitForURL(new RegExp(`${destination.replaceAll("/", "\\/")}$`), { timeout: 15_000 });

@@ -1,0 +1,4327 @@
+{
+  "capturedAt": "2026-10-29T18:14:22.779Z",
+  "baselineHead": "283635ef1347993666b061885a905dc774ca276e",
+  "note": "Working-tree source inventory, not a claim every file was read or tested individually. Secrets and env files excluded. Original user changes preserved.",
+  "counts": {
+    "files": 863,
+    "frontendPages": 56,
+    "backendMigrationFiles": 41
+  },
+  "files": [
+    {
+      "path": ".github/workflows/core-mvp.yml",
+      "bytes": 943,
+      "sha256": "eb7ce8aba83bce504615232ae1d6cd353dac0aec8c3695a62cac03a2c87eceaa"
+    },
+    {
+      "path": "backend/sql/migrations/20260903164628_init.sql",
+      "bytes": 304,
+      "sha256": "0c9ad546f7977f001a9e9b48c3bfbc6100d831db6916e5e655efe98b33de4fca"
+    },
+    {
+      "path": "backend/sql/migrations/20260905090000_tenant_storefront.sql",
+      "bytes": 5760,
+      "sha256": "173d7934aae688efacf7dc650402421cfd5792fe5add3c79be6ab376c5e810f4"
+    },
+    {
+      "path": "backend/sql/migrations/20260913160000_add_developer_membership_role.sql",
+      "bytes": 51,
+      "sha256": "1faeee6d1c6af88f4e9258caff7d561982d5e3cb8d7afe50bf00681785050bc5"
+    },
+    {
+      "path": "backend/sql/migrations/20260913170000_add_audit_events.sql",
+      "bytes": 1349,
+      "sha256": "8a7b15e8f7b86f75477f0072afd5623032641a78386a0e6674264d1bbb58a38e"
+    },
+    {
+      "path": "backend/sql/migrations/20260913200000_add_media_metadata.sql",
+      "bytes": 1184,
+      "sha256": "743496c4193617a1a73e104318113b41e233ec039e20b80d0042eeb8f7806bd7"
+    },
+    {
+      "path": "backend/sql/migrations/20260913210000_add_canonical_catalog.sql",
+      "bytes": 5749,
+      "sha256": "4d4af42003d99c15283679d0868026b07bc9c8ab1d8a4efc44dfa863eff00d1e"
+    },
+    {
+      "path": "backend/sql/migrations/20260913220000_add_metafields.sql",
+      "bytes": 2462,
+      "sha256": "b99fd67d599027bababb8c27cf1c26fdbd7844601f82db09aaaaf51ea6886ea5"
+    },
+    {
+      "path": "backend/sql/migrations/20260913230000_add_metaobjects.sql",
+      "bytes": 2499,
+      "sha256": "1ee1b96ecb4afb9acbf84e794ea476328017a77f8493048a1e2051dc50e54d5c"
+    },
+    {
+      "path": "backend/sql/migrations/20260914000000_add_storefront_workspace.sql",
+      "bytes": 9128,
+      "sha256": "ca2f7140260039c54d744df5e18c0311ea69b1b673ac729de764f17b6f266633"
+    },
+    {
+      "path": "backend/sql/migrations/20260914010000_compile_storefront_publications.sql",
+      "bytes": 683,
+      "sha256": "2de59c9f1d0747343b5f227f4da6b9759de5327aac6da1ea560b07bca3a69a75"
+    },
+    {
+      "path": "backend/sql/migrations/20260915120000_add_stripe_connect_commerce.sql",
+      "bytes": 7616,
+      "sha256": "ce3eed2472171d9542b8525747207cfafd8a4a37aaecc8ab66105355dc52a7f3"
+    },
+    {
+      "path": "backend/sql/migrations/20260916100000_add_refund_idempotency_key.sql",
+      "bytes": 336,
+      "sha256": "9672d308ebec744dde7fa4072b568ee38b089602d30345f7de8ece7ff3e56963"
+    },
+    {
+      "path": "backend/sql/migrations/20260918000000_add_store_owner.sql",
+      "bytes": 637,
+      "sha256": "95c836070660f923915d9ebba3ae06b7aadab2dc1435edf8914bc3a08cb478d5"
+    },
+    {
+      "path": "backend/sql/migrations/20260919120000_allow_stripe_account_reconnect.sql",
+      "bytes": 352,
+      "sha256": "873e6ec6babe968fe674aa9f8d44565e695ff5f8679059022a9635c0d43cb022"
+    },
+    {
+      "path": "backend/sql/migrations/20260919130000_add_theme_configuration_version.sql",
+      "bytes": 275,
+      "sha256": "5634cf546914ef982a8bcce4a0e171251dafe57af5a10bba1056898ff898e00f"
+    },
+    {
+      "path": "backend/sql/migrations/20260919131000_fix_theme_version_constraint.sql",
+      "bytes": 269,
+      "sha256": "58aea0c4eb0d9bc73be1ee1e590bb75393877cfc20b35b3e8881a819fcf2e6c4"
+    },
+    {
+      "path": "backend/sql/migrations/20260920100000_add_order_item_configuration_snapshot.sql",
+      "bytes": 366,
+      "sha256": "fd60f51a5607579ca21258fa0874331d63856132cbbada07971e4d8573a434a7"
+    },
+    {
+      "path": "backend/sql/migrations/20260920100000_repair_theme_configuration_version.sql",
+      "bytes": 517,
+      "sha256": "3790becd3b5a8495ba2e786ec2bbfc4329324e1ada27891064491ab2a0978971"
+    },
+    {
+      "path": "backend/sql/migrations/20260920110000_add_product_configuration_metadata.sql",
+      "bytes": 643,
+      "sha256": "663bb076d9bec02abb7f3947e55ed168f14816a98a5777c80db3c7c9433edead"
+    },
+    {
+      "path": "backend/sql/migrations/20260922000000_v4_publication_activation.sql",
+      "bytes": 242,
+      "sha256": "ec3874b83303b4bb1af61737868ec9571a7fd9a1510b67ac7508846e8548a7a7"
+    },
+    {
+      "path": "backend/sql/migrations/20260923090000_add_not_found_template.sql",
+      "bytes": 73,
+      "sha256": "cc44a6f4ffda118a9420c2bcf592e6a00261553f82fd8550b3abece5c89f8747"
+    },
+    {
+      "path": "backend/sql/migrations/20260923100000_add_starter_pack_provenance.sql",
+      "bytes": 137,
+      "sha256": "ef78b8fdea2bf33e77118ddb421acfb839afb1b5f572c2bff8fef2aa28932908"
+    },
+    {
+      "path": "backend/sql/migrations/20261020140329_store_settings_checkout.sql",
+      "bytes": 778,
+      "sha256": "9b7b303e9207c9d08196787ffa79f5f017963a696bd0fc9990baa9db16997500"
+    },
+    {
+      "path": "backend/sql/migrations/20261020143750_backend_runtime_role.sql",
+      "bytes": 1636,
+      "sha256": "068886c230d2633b0d9515f586c756a0de73fd2dcd23c82f3fccc5bbfd432170"
+    },
+    {
+      "path": "backend/sql/migrations/20261020163817_jelly_signature_customer_services.sql",
+      "bytes": 4856,
+      "sha256": "d3665da29e8f12d906816b0f6b861997522cd84f97fe6e49ed26828512d429ed"
+    },
+    {
+      "path": "backend/sql/migrations/20261020180000_commerce_foreign_key_indexes_and_account_id.sql",
+      "bytes": 1375,
+      "sha256": "22c7dbbac54e57bb8ce3cd199a07ac86488e93d4c0a3520a849417ec1af77588"
+    },
+    {
+      "path": "backend/sql/migrations/20261022000000_order_management.sql",
+      "bytes": 9682,
+      "sha256": "1cdfc464404e0e64154f0e3eed7f332372c3948f40723ab2a2115d3d713d9206"
+    },
+    {
+      "path": "backend/sql/migrations/20261022010000_notifications_digital.sql",
+      "bytes": 12522,
+      "sha256": "24f482e1fdc9d940e76869ca692ea0d4ee245180370e0ce5f5e701425791eff2"
+    },
+    {
+      "path": "backend/sql/migrations/20261023000000_category_taxonomy.sql",
+      "bytes": 4543,
+      "sha256": "c2ddb727d31a67cd5eef1b9d2329b4e536f8412111eaf1470b80913d22aedbef"
+    },
+    {
+      "path": "backend/sql/migrations/20261025000000_product_media_assignments.sql",
+      "bytes": 183,
+      "sha256": "ea5b9c4d353f6ad32e86dcccba34c356b73084dfaa27d64240e8d359e62cb2d8"
+    },
+    {
+      "path": "backend/sql/migrations/20261025010000_media_content_hash.sql",
+      "bytes": 175,
+      "sha256": "02aeff08f23f30d972742f7ef5bd31c2da707cac514833dce78e04b917d25aef"
+    },
+    {
+      "path": "backend/sql/migrations/20261027000000_shipment_exceptions.sql",
+      "bytes": 1828,
+      "sha256": "3ed2b6b7dd09bfe46af11b4e2f9109face5289056b1d3aafd030e0781d242f9b"
+    },
+    {
+      "path": "backend/sql/migrations/20261027131838_order_notification_templates.sql",
+      "bytes": 162,
+      "sha256": "43802a136499de91f32e352e7b429654d2aa335494169fa2f10b12e83a4514fd"
+    },
+    {
+      "path": "backend/sql/migrations/20261028000000_variant_cost_unit_pricing.sql",
+      "bytes": 346,
+      "sha256": "a5ca030001c8a7865103cbc0b95eac666ca624eaef2cae1ab55df57d2fb5c7f9"
+    },
+    {
+      "path": "backend/sql/migrations/20261028010000_product_description_document.sql",
+      "bytes": 434,
+      "sha256": "0db1feafa65603ef0131fc77a3634da0c8da00e26415494ea1dd1c7e81abef85"
+    },
+    {
+      "path": "backend/sql/migrations/20261028020000_inventory_barcode_low_stock_history.sql",
+      "bytes": 3995,
+      "sha256": "3be673454362aa870c565e4b263f2cab1a3ad91f9848c5f768982bc204bc59ab"
+    },
+    {
+      "path": "backend/sql/migrations/20261028030000_inventory_adjustment_backend_read_only.sql",
+      "bytes": 528,
+      "sha256": "a575addd22ddebd3e604cbdf3622dd997773031d00b92185875c0fc295cb9d7d"
+    },
+    {
+      "path": "backend/sql/migrations/20261028040000_variant_shipping_details.sql",
+      "bytes": 1403,
+      "sha256": "f5e1ac6f54b831c94e35f409b59599a9d60139245b4dd75787349c9d7dd932b0"
+    },
+    {
+      "path": "backend/sql/migrations/20261028041000_order_item_shipping_snapshot.sql",
+      "bytes": 1505,
+      "sha256": "7716e0c429b8e76e7c8361ec4bc23ea9a93d43673aa1882e494eb91a5e201783"
+    },
+    {
+      "path": "backend/sql/migrations/20261028050000_variant_sellable_and_photo.sql",
+      "bytes": 752,
+      "sha256": "2d907bd355bd257cdc824ec95a5409593ce4ec4d8cb04e0f9437e28dfa9ee3f8"
+    },
+    {
+      "path": "backend/sql/migrations/20261029000000_product_seo_fields.sql",
+      "bytes": 544,
+      "sha256": "f2b2edf039ecaa92a56b5211c96bb5c0cdebc41f32dc76aa12c0a5647b1977a4"
+    },
+    {
+      "path": "backend/sql/security/isolate-server-owned-data.sql",
+      "bytes": 1954,
+      "sha256": "ed693c2f373223f77908ea757e8715107dcf0f39d828070ba11db83b42d57824"
+    },
+    {
+      "path": "backend/src/admin/low-stock-summary.test.ts",
+      "bytes": 2429,
+      "sha256": "9e758a6d1afb4280c4151ec6e2f903d80200300772048dd6186d7d4e6f520f08"
+    },
+    {
+      "path": "backend/src/admin/routes.test.ts",
+      "bytes": 953,
+      "sha256": "2a7c3c8d1e18804b5b9a9ffbba8eabbefeded4fb49cff5cb347a60477bd89cbe"
+    },
+    {
+      "path": "backend/src/admin/routes.ts",
+      "bytes": 1521,
+      "sha256": "6d1fb72f0102ed3baff6535cd44fbbd3606d78f3aa232563ace587dbbee98cd8"
+    },
+    {
+      "path": "backend/src/admin/service.test.ts",
+      "bytes": 3380,
+      "sha256": "b3200e7d0a543b0d1c8354aaf903d97a9b6229bab9ac316c2afde0fc9693ae32"
+    },
+    {
+      "path": "backend/src/admin/service.ts",
+      "bytes": 6590,
+      "sha256": "6eeebf342632d76bc2f914da3b297ae6e5c6354974f155f8211a0908107220c0"
+    },
+    {
+      "path": "backend/src/app.composition.test.ts",
+      "bytes": 3633,
+      "sha256": "bad2fd64421f61c4ed938ab1cb90bac67f7eb334ec1a6e869784c4872fe905c0"
+    },
+    {
+      "path": "backend/src/app.local-v4.test.ts",
+      "bytes": 10323,
+      "sha256": "792a795972bd2791bd1116d7df300e53b4e2b6da1e52902bcf43531096a21f1c"
+    },
+    {
+      "path": "backend/src/app.public-storefront.test.ts",
+      "bytes": 3363,
+      "sha256": "d00322dec6d663736e303593d49840a3976ac7f02af58f15c12b2deec4542437"
+    },
+    {
+      "path": "backend/src/app.test.ts",
+      "bytes": 4470,
+      "sha256": "5320172fa7875256401217804f6801423ecaa47f2f1adedd1d31fad90e7ba2da"
+    },
+    {
+      "path": "backend/src/app.ts",
+      "bytes": 2015,
+      "sha256": "3e00a48001c47cfa75149abbb81bfa2e33adab172f01ce191fad56812eca7bed"
+    },
+    {
+      "path": "backend/src/app/database.ts",
+      "bytes": 216,
+      "sha256": "d0a21c44e2e4bb4ad134567518519a5d0d792345bbb47d860de6c497e3549bf1"
+    },
+    {
+      "path": "backend/src/app/default-storefront-workspace.ts",
+      "bytes": 14090,
+      "sha256": "20481dbca4c331ed477705e8236f75519ecd9b3390e9280717828bbbae47afdf"
+    },
+    {
+      "path": "backend/src/app/dependencies.ts",
+      "bytes": 14653,
+      "sha256": "1a3eef124f2196fa11810967c4d0b2551c9318cec6b4afe525b3cb9166f69bba"
+    },
+    {
+      "path": "backend/src/app/middleware.ts",
+      "bytes": 959,
+      "sha256": "4c995efb9ca6a75177aeb366c5bcdb5083eaa7454c23d380e1133fa74ba93525"
+    },
+    {
+      "path": "backend/src/app/routes/commerce.ts",
+      "bytes": 5162,
+      "sha256": "3a0fea7da4990c735b57b393bb7695daf33ee0cbbbf2e61611df659ee0df02e1"
+    },
+    {
+      "path": "backend/src/app/routes/internal.ts",
+      "bytes": 674,
+      "sha256": "9cbff8ba011c378b714fb7554586ba078bb720c7ca34e6c3575a9a46b7c524aa"
+    },
+    {
+      "path": "backend/src/app/routes/media.ts",
+      "bytes": 556,
+      "sha256": "8efc666521cef4e1e80b5458723773c074f93384899a07495c9cd9ece98b03a9"
+    },
+    {
+      "path": "backend/src/app/routes/merchant.ts",
+      "bytes": 5215,
+      "sha256": "d5b024de6cae805395c433f68630c16432b4f162952c9803770a794d33a97e94"
+    },
+    {
+      "path": "backend/src/app/routes/storefront.ts",
+      "bytes": 6585,
+      "sha256": "8137b22b39c8e2963ba5ed85f14b841319992973d8ed3067730e93ad7e662352"
+    },
+    {
+      "path": "backend/src/app/types.ts",
+      "bytes": 4294,
+      "sha256": "e5141be220f48e755916a49a1f1a90f7b915b3a5f6bc76cbb2b665ee7098b46e"
+    },
+    {
+      "path": "backend/src/audit/repository.ts",
+      "bytes": 180,
+      "sha256": "bf227fa4c3c099cc555f71cc30a405362d63efb14456a56d84bad2626382a5a0"
+    },
+    {
+      "path": "backend/src/audit/types.ts",
+      "bytes": 332,
+      "sha256": "41c45d82298bfc59c9a972eef496e57cad4402660aaa60e480e7bfd7be522e47"
+    },
+    {
+      "path": "backend/src/auth/development-auth-provider.ts",
+      "bytes": 634,
+      "sha256": "46fb8919108d76e168599dc6d3301bccaffc28cb3f43446435d4370f90eda428"
+    },
+    {
+      "path": "backend/src/auth/firebase-auth-provider.test.ts",
+      "bytes": 4731,
+      "sha256": "cb221e883ff5a843d91e4e3ad9510bd007ddd2056ff3375a426d99d6987bfd5d"
+    },
+    {
+      "path": "backend/src/auth/firebase-auth-provider.ts",
+      "bytes": 1860,
+      "sha256": "584b83a584d18dc9ed799957f75bf6705978a5c4cfd2e0b459d246a50c2fa2ee"
+    },
+    {
+      "path": "backend/src/auth/firebase-token-verifier.test.ts",
+      "bytes": 781,
+      "sha256": "18f496a50d32261c3f5b0659f6e02aff9e51ccefd0279c10068a7caea669d384"
+    },
+    {
+      "path": "backend/src/auth/firebase-token-verifier.ts",
+      "bytes": 1190,
+      "sha256": "82f983a6a4d62ee7b3ef5ed063fe1ef8ffa8c7f89257ac6dee11530070473c02"
+    },
+    {
+      "path": "backend/src/auth/middleware.test.ts",
+      "bytes": 3525,
+      "sha256": "1039dd4b94baabb6f159ae2ce1263d7b2a1f176a49bec1b69fd3c07409aa84aa"
+    },
+    {
+      "path": "backend/src/auth/middleware.ts",
+      "bytes": 1448,
+      "sha256": "7324d15aaed67a8e774a8aab8a54c36844637f8233f8866271a5b7e682013cab"
+    },
+    {
+      "path": "backend/src/auth/permissions.test.ts",
+      "bytes": 2033,
+      "sha256": "1750887eec9b81b7273361d03423a618d7fc6da789eee7e52b01bf67187e99cb"
+    },
+    {
+      "path": "backend/src/auth/permissions.ts",
+      "bytes": 2143,
+      "sha256": "8c4eb511b25f79f07978930489bb9bd3b2e92d49f9d7f01ead5178269e01ca74"
+    },
+    {
+      "path": "backend/src/auth/supabase-auth-provider.test.ts",
+      "bytes": 1653,
+      "sha256": "70a03aecbc35d1ccedbb58d59f27ca07abb8aaecacb706b5974833d07e36506d"
+    },
+    {
+      "path": "backend/src/auth/supabase-auth-provider.ts",
+      "bytes": 2260,
+      "sha256": "3816b491b60a6f4d1418a5a09b90038836f25214e37ff19e769b6cc68243fe61"
+    },
+    {
+      "path": "backend/src/auth/types.ts",
+      "bytes": 755,
+      "sha256": "7b4bcdf051543d383f2b4f7ae3930bbfe0a6a68c2543414053f9b0c996177ae5"
+    },
+    {
+      "path": "backend/src/catalog/demo-catalog-provider.test.ts",
+      "bytes": 392,
+      "sha256": "a802f659c552abf2870d7034588c8d589da418558503e23a4b9567913654dca6"
+    },
+    {
+      "path": "backend/src/catalog/demo-catalog-provider.ts",
+      "bytes": 6498,
+      "sha256": "b65e7d667f9f483b7d16b03d0376f39b8e7e90c5ff9b0e7b89a6dc93ed504cd3"
+    },
+    {
+      "path": "backend/src/catalog/inventory-history-routes.test.ts",
+      "bytes": 6976,
+      "sha256": "05aa6cc995a1dabde0d4ec2c0f7a2cb460c9e26c8589543967be0b1e172a10ce"
+    },
+    {
+      "path": "backend/src/catalog/inventory-history.test.ts",
+      "bytes": 10861,
+      "sha256": "351c3facae006c181c3091c95ce27ec8a1f11ff23b256991a63d2df618f66a6a"
+    },
+    {
+      "path": "backend/src/catalog/inventory.test.ts",
+      "bytes": 2158,
+      "sha256": "928ffda18019caf2f3a6912a466cf1fdd4b6ee57ec85424417edad856333ff01"
+    },
+    {
+      "path": "backend/src/catalog/inventory.ts",
+      "bytes": 6376,
+      "sha256": "baeb7faeac505fe7455e6f10b62a3accd8f5836a3bf579a08f443bf72a648359"
+    },
+    {
+      "path": "backend/src/catalog/postgres-repository.test.ts",
+      "bytes": 11470,
+      "sha256": "9d13eb1e59419336717f593c639e9dcf8fdf4a8ffeb594912d614f837fd3c8bd"
+    },
+    {
+      "path": "backend/src/catalog/postgres-repository.ts",
+      "bytes": 32675,
+      "sha256": "1cb03c52bf86ccb4b2d279470dc66e19abd27c74848a5f6deda857650da6cefc"
+    },
+    {
+      "path": "backend/src/catalog/product-configuration.test.ts",
+      "bytes": 7076,
+      "sha256": "c53d954279a7f2721b7fd32350c3a58f7bb7fd384f1d286c947305d74680d70b"
+    },
+    {
+      "path": "backend/src/catalog/product-configuration.ts",
+      "bytes": 2686,
+      "sha256": "7e278d0aa324689ef0531e75d1745d39e41887a466be53f27d9c8d8fa505ec5b"
+    },
+    {
+      "path": "backend/src/catalog/product-description.test.ts",
+      "bytes": 5658,
+      "sha256": "55e59b8e5248662430f0ad422465c10e3a72bc3f4ef7c2d376bfbe5024051c9a"
+    },
+    {
+      "path": "backend/src/catalog/product-description.ts",
+      "bytes": 1719,
+      "sha256": "75f61b0d1433a7f763cb7e74e65fb7ab3c64dcc5ed85ca3fc6d036f9e3c1ef2c"
+    },
+    {
+      "path": "backend/src/catalog/product-image-snapshot.test.ts",
+      "bytes": 1226,
+      "sha256": "f187419c534ab0f0729acb01bdfe4d37f008e7ea87aeddb2c5fd448c8cc2cd36"
+    },
+    {
+      "path": "backend/src/catalog/product-image-snapshot.ts",
+      "bytes": 1470,
+      "sha256": "5064da1332b31510935b0ab0cd11325dcefabfedd517b7b4930f68c02ab692e4"
+    },
+    {
+      "path": "backend/src/catalog/product-media-feature.ts",
+      "bytes": 222,
+      "sha256": "a3e6fd1c345d131de7ce8d44308184bb8742758f7674018156679ad2690cf172"
+    },
+    {
+      "path": "backend/src/catalog/product-media.test.ts",
+      "bytes": 580,
+      "sha256": "2438643c76ccd7aed2ac75554f55be6f21610de61a2a23bf78a4ba5d82e7c875"
+    },
+    {
+      "path": "backend/src/catalog/product-media.ts",
+      "bytes": 1092,
+      "sha256": "48a73a944b3e81eb5d0d9420eb48d5ce92f34e85af26aa0c93182e599d6fb4a9"
+    },
+    {
+      "path": "backend/src/catalog/product-seo.test.ts",
+      "bytes": 8991,
+      "sha256": "9c61ada115c6356a85ae11bba455de34723b7c02dba6d68f968f7342055a5f86"
+    },
+    {
+      "path": "backend/src/catalog/provider-sync.test.ts",
+      "bytes": 2501,
+      "sha256": "5a9439310fa1d4f31d7c03b79ad72bf3807196d1a8b56c1fe3cb9d0562980978"
+    },
+    {
+      "path": "backend/src/catalog/provider-sync.ts",
+      "bytes": 1882,
+      "sha256": "439aa1fb80e28183a326427649b995834990b6d48c94f84c5f0f0f9330bfc8a1"
+    },
+    {
+      "path": "backend/src/catalog/public-store.test.ts",
+      "bytes": 1511,
+      "sha256": "88b41b067a587fb3f05dcb9b7c7a8b2dcc769264f61884f020b1beaf47be81c8"
+    },
+    {
+      "path": "backend/src/catalog/public-store.ts",
+      "bytes": 1859,
+      "sha256": "3dc8bc1b965713a97e74fb77515572dca096b5b3a492daf152521e1c4a73b9a7"
+    },
+    {
+      "path": "backend/src/catalog/repository.ts",
+      "bytes": 1744,
+      "sha256": "63adfdc4750e87ff2ebdc92de54391611c75a3b4e4d7aba06b99847a02049401"
+    },
+    {
+      "path": "backend/src/catalog/routes.test.ts",
+      "bytes": 6254,
+      "sha256": "92b9eb6d3d04c0e27b2b34692fd5055d6ebbae5227a9151f3d21f6c8bbdad14e"
+    },
+    {
+      "path": "backend/src/catalog/routes.ts",
+      "bytes": 11432,
+      "sha256": "4c782e07f9a71ff5f7dab96b51b4dd785deb9bf6e66efa3215cb4ade46451e6a"
+    },
+    {
+      "path": "backend/src/catalog/service.test.ts",
+      "bytes": 3347,
+      "sha256": "bd38cc7b814581e2882ce2e83f08b30c62cb3a064edce0a6c3a3c0cd112419ce"
+    },
+    {
+      "path": "backend/src/catalog/service.ts",
+      "bytes": 7240,
+      "sha256": "e1dd7bc50bc392a327a282ca24f8161db990efb74f80696bb1421274e32885ea"
+    },
+    {
+      "path": "backend/src/catalog/types.ts",
+      "bytes": 9326,
+      "sha256": "243e0be1c04ba682d9fa34151f26b95bac04c8da43eb81a5d2d7ab61e617d540"
+    },
+    {
+      "path": "backend/src/catalog/variant-cost-unit-pricing.test.ts",
+      "bytes": 2592,
+      "sha256": "3b9a49d1bac7144fab505ab974c9a1b87587e76e08495a6ab2db9c836bbae1fc"
+    },
+    {
+      "path": "backend/src/catalog/variant-sellable-photo.test.ts",
+      "bytes": 9429,
+      "sha256": "ac365baee19e2dde13074677954b806816b908d85928028d5aa94c04f8d8eb9f"
+    },
+    {
+      "path": "backend/src/catalog/variant-shipping.test.ts",
+      "bytes": 6927,
+      "sha256": "53d28479443b3d7d9ef0f70a7156e6d7cd6b47fc452c63a9d2f53de59c41b6fa"
+    },
+    {
+      "path": "backend/src/commerce/checkout-attempts.ts",
+      "bytes": 4107,
+      "sha256": "ec7c4abd8a1989c34892c39bfed751bb4eed492b947408539a2501f95719bb46"
+    },
+    {
+      "path": "backend/src/commerce/checkout-cart.ts",
+      "bytes": 7264,
+      "sha256": "f05120325b7f5c0264cccc273443f3da237919745cd4c98f1580cd9bd51e7778"
+    },
+    {
+      "path": "backend/src/commerce/checkout-selections.test.ts",
+      "bytes": 6272,
+      "sha256": "f0917ac3f110a6f09c26a5c65e1731bae865fb2da57e2ba69f4e5c3ee9fc7bc1"
+    },
+    {
+      "path": "backend/src/commerce/checkout-variant-rules.test.ts",
+      "bytes": 2314,
+      "sha256": "382c0959c91a53db9749f4931ce91f3b013a7aa9ce23473bac3b573a13f2c7dd"
+    },
+    {
+      "path": "backend/src/commerce/digital.ts",
+      "bytes": 7415,
+      "sha256": "459041f9bf4ffbc75bc4d7ab73183d71f11e658a6c641c453d68e5db590bf96c"
+    },
+    {
+      "path": "backend/src/commerce/fulfilment.test.ts",
+      "bytes": 1216,
+      "sha256": "71376beff5fff6e75833d635a19f6e307d07d20a3c5331129073ac7e32086973"
+    },
+    {
+      "path": "backend/src/commerce/fulfilment.ts",
+      "bytes": 4584,
+      "sha256": "73b4894e4a16f0caaebe7638ed5b88e360d45bc035232d57e3cb620ef865309b"
+    },
+    {
+      "path": "backend/src/commerce/local-notification-worker.test.ts",
+      "bytes": 2121,
+      "sha256": "e7628de2ee7c65c1a3edd735e031b269ac73028e273507e9f12b09265ce0b8a5"
+    },
+    {
+      "path": "backend/src/commerce/local-notification-worker.ts",
+      "bytes": 2191,
+      "sha256": "004fcd81b832cdcf16c433adc0420701900f5667b971202cb9bd0d0d645d3438"
+    },
+    {
+      "path": "backend/src/commerce/merchant-order-routes.test.ts",
+      "bytes": 1253,
+      "sha256": "2e6771926da8e4669a4cdc02d4717df2b0838a4c31476043f00b214bec6211c5"
+    },
+    {
+      "path": "backend/src/commerce/merchant-order-routes.ts",
+      "bytes": 8924,
+      "sha256": "d5f93d8ede486e2c2a78fa19c1c1bee3ef5a633031cb1dc8b32d99dccb01068b"
+    },
+    {
+      "path": "backend/src/commerce/merchant-orders.ts",
+      "bytes": 3974,
+      "sha256": "7aac304762544feaa23778c5f7aac8587ec8df38dec6ae18e4f41ed4aca2e5ae"
+    },
+    {
+      "path": "backend/src/commerce/notification-routes.ts",
+      "bytes": 6304,
+      "sha256": "1bbfd8b3a0bd53595a8da0df2c8e1c82f7a747530f1d79262ba2fa59032b87e3"
+    },
+    {
+      "path": "backend/src/commerce/notification-transport.ts",
+      "bytes": 1761,
+      "sha256": "3a3bc15b4de98af2c34ad5fcdd6de7d00ac00aa269b8c26c520b5e73931be552"
+    },
+    {
+      "path": "backend/src/commerce/notification-worker-route.test.ts",
+      "bytes": 1636,
+      "sha256": "56505eac0b0ed8191a8a394b2442cf12c0be24c5850d61e419f8004110967493"
+    },
+    {
+      "path": "backend/src/commerce/notifications-digital-db.test.ts",
+      "bytes": 10542,
+      "sha256": "4cd164eaaf29106caa990322d1da9da070df62a7074e598052501f0190b1336b"
+    },
+    {
+      "path": "backend/src/commerce/notifications-digital.test.ts",
+      "bytes": 5762,
+      "sha256": "7913212a899f2fc8f4e5eb5dd9c180bce93a455a38c2509153ae43cbf6ccadb1"
+    },
+    {
+      "path": "backend/src/commerce/notifications.ts",
+      "bytes": 23262,
+      "sha256": "32dff5c1a1419c27861a8ee9fbf41a2371cda12fb594736ebe891cc18a46502f"
+    },
+    {
+      "path": "backend/src/commerce/order-management-invoice.ts",
+      "bytes": 3848,
+      "sha256": "46342c890764d1ad694b4dd9a16757beb6f54d094569bded612d4708b0b03d6f"
+    },
+    {
+      "path": "backend/src/commerce/order-management.test.ts",
+      "bytes": 16790,
+      "sha256": "8e61c1e6f3e848e0a0081450e3d6741b3cdfba897f3f171b284d3cbadae8ec65"
+    },
+    {
+      "path": "backend/src/commerce/order-management.ts",
+      "bytes": 61915,
+      "sha256": "d0b5fbe10ff50b6e0209fbcb43bb4125e17e4eb32039d1f6990b1d95e29a4e26"
+    },
+    {
+      "path": "backend/src/commerce/order-runtime.ts",
+      "bytes": 6782,
+      "sha256": "ab9d2affb640eef691754da6113ed4577690562ed6ac9e38707ab04799896717"
+    },
+    {
+      "path": "backend/src/commerce/order-workspace.test.ts",
+      "bytes": 8431,
+      "sha256": "ac9c418d8b7728e060b57254f753ef0f5fdfce91c4212d16a5d8e14b8f1e5840"
+    },
+    {
+      "path": "backend/src/commerce/payment-intents.test.ts",
+      "bytes": 13758,
+      "sha256": "c87ee19393c709d23cdfc3e36f231c355decefa6c4319d15f2669139a9e105f9"
+    },
+    {
+      "path": "backend/src/commerce/payment-intents.ts",
+      "bytes": 9758,
+      "sha256": "2c23c402a52f31efcd4de64ca4a441a96f330300b13d208692c38528aa175d81"
+    },
+    {
+      "path": "backend/src/commerce/public-order-progress.test.ts",
+      "bytes": 5447,
+      "sha256": "7e253a8b85548a6810bb2d338e6f90c4913b0704b70997103c7578b034ad0736"
+    },
+    {
+      "path": "backend/src/commerce/public-order-progress.ts",
+      "bytes": 7261,
+      "sha256": "3e973ebcfd60fbb8f187373120cfc825c2d526abadd4eb177dbd1eabee15856b"
+    },
+    {
+      "path": "backend/src/commerce/rate-limit.test.ts",
+      "bytes": 3982,
+      "sha256": "d57e9f1e5d9f6dfb4a9a9089767d3381cbeb6dde5daa1e6916a4d30accca2b71"
+    },
+    {
+      "path": "backend/src/commerce/rate-limit.ts",
+      "bytes": 2417,
+      "sha256": "f060e1a43a560ba74d3d148b24508a818954a674897c664d1fad0d37d25b6b5c"
+    },
+    {
+      "path": "backend/src/commerce/refunds.test.ts",
+      "bytes": 937,
+      "sha256": "bb8094e9a49a67edc5e1462219c4bd575ea22aae19ec217c3d9b6481e5d9579b"
+    },
+    {
+      "path": "backend/src/commerce/refunds.ts",
+      "bytes": 3282,
+      "sha256": "59c3cfbc63cb9729635ced001d0734406d0d4c2e9fe7acb1215e2056d023de35"
+    },
+    {
+      "path": "backend/src/commerce/repository.test.ts",
+      "bytes": 2223,
+      "sha256": "bb16ebbc9da1e4042ba0b8bb9b86cefd7c972d654d44c2ed269d245cc7d93ba2"
+    },
+    {
+      "path": "backend/src/commerce/repository.ts",
+      "bytes": 17041,
+      "sha256": "d3aee8b577dc70d205b259838e2470c775a9ea8ca53c84456d2296c3b68fd123"
+    },
+    {
+      "path": "backend/src/commerce/routes.test.ts",
+      "bytes": 5066,
+      "sha256": "1b3c7756b2966fccf8051e5cdaa867afc0c251ec3a1f578d5967f90335cd54da"
+    },
+    {
+      "path": "backend/src/commerce/routes.ts",
+      "bytes": 3607,
+      "sha256": "fd141224fc40674e300990ca89aaf4b06c062c483e3360a38c067e301934f7d4"
+    },
+    {
+      "path": "backend/src/commerce/service.test.ts",
+      "bytes": 18489,
+      "sha256": "8c58a9ce817202385ea062f06489396cc0796ccd255f0a0f6b2c90baf905498b"
+    },
+    {
+      "path": "backend/src/commerce/service.ts",
+      "bytes": 13854,
+      "sha256": "c3cfd23b8a46dc60b92c5e6b288eba555b568a4db07fe6e45556354c9cdf24e7"
+    },
+    {
+      "path": "backend/src/commerce/shipment-actions.test.ts",
+      "bytes": 8603,
+      "sha256": "8c5aa2b1ff28777ace51d845d94568e04f775dda021ffa7e3b794798a37f7f15"
+    },
+    {
+      "path": "backend/src/commerce/sweeper-routes.ts",
+      "bytes": 1083,
+      "sha256": "67574e90cbc7ea651f0f3d192650e10f996f28594bc2f242ffb4675e63cf4ba0"
+    },
+    {
+      "path": "backend/src/commerce/sweeper.test.ts",
+      "bytes": 877,
+      "sha256": "1fbde8b74554a6047fa4e9afe203301c7770a752c6d307d567d8302b3fff3596"
+    },
+    {
+      "path": "backend/src/commerce/sweeper.ts",
+      "bytes": 3647,
+      "sha256": "1a82b8bc3ed5b70a04cd787b5a3ced676ae1bec07307ed6c3f6b14021fb0285c"
+    },
+    {
+      "path": "backend/src/commerce/types.ts",
+      "bytes": 812,
+      "sha256": "b25ed531792ee07cca6cb75c1c2f6ec8bd5655abe36b6aaecdebe0d282744453"
+    },
+    {
+      "path": "backend/src/config.test.ts",
+      "bytes": 3685,
+      "sha256": "4027bb1b0d7892f2c7459ec26b284503aa9fbc8d263ce92d24383edeaf359b16"
+    },
+    {
+      "path": "backend/src/config.ts",
+      "bytes": 9793,
+      "sha256": "ed9806fcc73f47d23ed4072344b750563c322d19fe3a898cc6420ef5575d7b3f"
+    },
+    {
+      "path": "backend/src/content/repository.ts",
+      "bytes": 2575,
+      "sha256": "39fecfc73f372547bc70ead051e23b810e6ae2b3179b7be399b0b432d2a91a16"
+    },
+    {
+      "path": "backend/src/content/routes.test.ts",
+      "bytes": 4368,
+      "sha256": "c9693100fde7d9517dcb260583605769b4ffc5642f81ffcc11271737a23b3535"
+    },
+    {
+      "path": "backend/src/content/routes.ts",
+      "bytes": 8145,
+      "sha256": "d765f7e462d984958731634cf6f62669eb7bc2f179c9ccaaf5cd617ce0315579"
+    },
+    {
+      "path": "backend/src/content/service.test.ts",
+      "bytes": 7599,
+      "sha256": "b826f5c69d3411389b78272eb62c5c466838896b33c471b9fa29f6495d6ec848"
+    },
+    {
+      "path": "backend/src/content/service.ts",
+      "bytes": 8957,
+      "sha256": "fb271adcf2ddeda8332f4939b3c2d9711da8373129b811f09b01a9b89fb3ba90"
+    },
+    {
+      "path": "backend/src/content/sql-repository.test.ts",
+      "bytes": 4844,
+      "sha256": "5477a03b42f18406cac326a71b97ea925cdcbc7d01c5fcf6684adb2a3e92ab49"
+    },
+    {
+      "path": "backend/src/content/sql-repository.ts",
+      "bytes": 8564,
+      "sha256": "0b81a13dd2971c6e95d2e10a7b068c18bf4a0523cac09aa59971062ad3b74cb4"
+    },
+    {
+      "path": "backend/src/custom-data/metaobjects.test.ts",
+      "bytes": 4604,
+      "sha256": "e3a177973460aceecdc8a8395ad738f4f1d9f0bc658008579b0c2b19418ea79c"
+    },
+    {
+      "path": "backend/src/custom-data/owner-values-routes.test.ts",
+      "bytes": 5398,
+      "sha256": "2c6be02b3c2cbd28a91a02ac8a5e98d99a9fb4303db85a5f53087e47980c0b0f"
+    },
+    {
+      "path": "backend/src/custom-data/owner-values.test.ts",
+      "bytes": 11353,
+      "sha256": "398145435fe7bbbe2a67a25feccfb95e8da9982e5d7ebffd353da318269f7d7f"
+    },
+    {
+      "path": "backend/src/custom-data/owner-values.ts",
+      "bytes": 3448,
+      "sha256": "0309754b4201733336cfaae5d6df6cfb0a78c206f8aaf8b90c5fe59628443d66"
+    },
+    {
+      "path": "backend/src/custom-data/repository.ts",
+      "bytes": 3833,
+      "sha256": "e56be48b9dc3fdf68a0f2b9626af283512b9593e7d60d037ec34accd53864d64"
+    },
+    {
+      "path": "backend/src/custom-data/routes.test.ts",
+      "bytes": 3581,
+      "sha256": "75d83743524293c2238d8a7f39fb32265b3cdcaf79b1bb21531c055bc2e7106a"
+    },
+    {
+      "path": "backend/src/custom-data/routes.ts",
+      "bytes": 7342,
+      "sha256": "b4a13ba70fa901f3d16ea0f65c3f15bcac6c25ee92378b03b5c89134f47c7417"
+    },
+    {
+      "path": "backend/src/custom-data/service.test.ts",
+      "bytes": 4489,
+      "sha256": "00471af6b2c07096f2fa8b413df32b332b5a6b3ed49ef72e4e46e65214ea3a76"
+    },
+    {
+      "path": "backend/src/custom-data/service.ts",
+      "bytes": 10318,
+      "sha256": "5f7137e6bbb2bd969965500acf4bd2879962f54ebdec362dd197492e16ee4722"
+    },
+    {
+      "path": "backend/src/custom-data/sql-repository.test.ts",
+      "bytes": 2208,
+      "sha256": "e221a17a994d037485ab982b711225fca7cae9195c21f0a832e65fc2e885406a"
+    },
+    {
+      "path": "backend/src/custom-data/sql-repository.ts",
+      "bytes": 7714,
+      "sha256": "e549e9c665ca182ff6e77a90b78a3fa9446d6594aebb078ad446e27d5faa50ab"
+    },
+    {
+      "path": "backend/src/custom-data/value-rules.test.ts",
+      "bytes": 6663,
+      "sha256": "718433791764d05ca3f93baf8ef3fe14ebc665d9d75afd21e1f9bce026dec6ea"
+    },
+    {
+      "path": "backend/src/custom-data/value-rules.ts",
+      "bytes": 8825,
+      "sha256": "371ef27a9bde2602c16a67ae095421a19b549ae4af51ada12508ac2929763a76"
+    },
+    {
+      "path": "backend/src/customers/routes.test.ts",
+      "bytes": 1681,
+      "sha256": "8d8255ef4858dd3bc32eebee5806401f58288fd64d621a6f4d18a7a14a2c3e05"
+    },
+    {
+      "path": "backend/src/customers/routes.ts",
+      "bytes": 6239,
+      "sha256": "c460561357f77ff0d9db77b3d2b9840e0d6dcf56ad6027faaa3259c1896629c3"
+    },
+    {
+      "path": "backend/src/customers/service.test.ts",
+      "bytes": 5144,
+      "sha256": "4eac464513c3a45cf1395d47fc08c709169578426bb3d02dbd98c9108af91e50"
+    },
+    {
+      "path": "backend/src/customers/service.ts",
+      "bytes": 13329,
+      "sha256": "514a63d690d84e95335ad5c33c44dbbb2070a100598a9a94c70ac50d48c31a54"
+    },
+    {
+      "path": "backend/src/database/client.test.ts",
+      "bytes": 1980,
+      "sha256": "d5d07912e4d732e90cd58cc963955f240ec0bd867ccec3f9ed134f3523ed49b1"
+    },
+    {
+      "path": "backend/src/database/client.ts",
+      "bytes": 1112,
+      "sha256": "161190d69deab938f8a9d7afb6a8a9e4f1bc7880039001e08f6f484964edd3d4"
+    },
+    {
+      "path": "backend/src/database/isolation.test.ts",
+      "bytes": 1922,
+      "sha256": "1758a9157239c440f6f133d639b4c1aa4c6fbe7f57677c82cbb7eae9d22d335a"
+    },
+    {
+      "path": "backend/src/database/migration-chain.test.ts",
+      "bytes": 810,
+      "sha256": "1a9cf7febc6a16dc873282346624afe79f1f8feea837de5eb1bbf95b071fe100"
+    },
+    {
+      "path": "backend/src/dynamic-sources/binding-values-routes.ts",
+      "bytes": 1991,
+      "sha256": "833bf13f1395d6114f6e366533a4e632149a2487f9753f3303073a61fccb25f9"
+    },
+    {
+      "path": "backend/src/dynamic-sources/binding-values.test.ts",
+      "bytes": 8981,
+      "sha256": "73331d3c33ab5d227841e743cf3269c44d54de752d7f7471854f87dd1a406073"
+    },
+    {
+      "path": "backend/src/dynamic-sources/binding-values.ts",
+      "bytes": 5372,
+      "sha256": "2b049132d413eec65396dc75636a85726277eb3a87ef103d31892387ba22991c"
+    },
+    {
+      "path": "backend/src/dynamic-sources/registry.ts",
+      "bytes": 7003,
+      "sha256": "e85507410b2f97da2220167df317772c5f10bf42b8af10d10f749f748809a803"
+    },
+    {
+      "path": "backend/src/dynamic-sources/resolver.test.ts",
+      "bytes": 5103,
+      "sha256": "6bca57f71049e2683a5ca948f1a843a6487d31c336158f458f2671e1d7107191"
+    },
+    {
+      "path": "backend/src/dynamic-sources/resolver.ts",
+      "bytes": 7192,
+      "sha256": "a9449cc920b61f180939df2c85da257019744207060becd8bec38213c3588ee7"
+    },
+    {
+      "path": "backend/src/functions.test.ts",
+      "bytes": 1592,
+      "sha256": "d36a9f10a703dad2afe3567cb2cfe474ae422ef93b979e99e0995e09d56f98b9"
+    },
+    {
+      "path": "backend/src/functions.ts",
+      "bytes": 2366,
+      "sha256": "5c6dce9057e98ecaf9ac3b4eb24a1e85662c05cd30dc80d02b07bea88d144571"
+    },
+    {
+      "path": "backend/src/http/errors.ts",
+      "bytes": 2446,
+      "sha256": "ef809d87636d55bc991d930aa3c8627cc810f7d3d8452ca50b98bb423f3a4902"
+    },
+    {
+      "path": "backend/src/media/local-json-media-repository.ts",
+      "bytes": 3348,
+      "sha256": "6f4677d1aed7d53c7fd7eb546f026e27caabedde48f2bf136100f8e617b5b98d"
+    },
+    {
+      "path": "backend/src/media/local-media-storage.ts",
+      "bytes": 1148,
+      "sha256": "a0541cc2589e499eaefb937367942e2db8b35ae81db61a241f591ed4459e475c"
+    },
+    {
+      "path": "backend/src/media/processing.test.ts",
+      "bytes": 5930,
+      "sha256": "b4e805029961e1be34ad400cce63714475709fd2a59dca3d12303a71afc38ea8"
+    },
+    {
+      "path": "backend/src/media/repository.ts",
+      "bytes": 534,
+      "sha256": "a8ee67796c1d62195a3c4d34aa03f8721b55fb6044abdf87719f4242587b6eee"
+    },
+    {
+      "path": "backend/src/media/routes.test.ts",
+      "bytes": 4396,
+      "sha256": "5424a704242e8986548c8722fbabcee9d4c29a931328230a4f8e26a5562a321b"
+    },
+    {
+      "path": "backend/src/media/routes.ts",
+      "bytes": 2687,
+      "sha256": "e1d79c4b93b4570ddcbee4a1a647be739bb4d00835f49217008cb372ef615a5c"
+    },
+    {
+      "path": "backend/src/media/service.test.ts",
+      "bytes": 4400,
+      "sha256": "6ba38a3679a9c8eeee9a7f8e7d4c29ca0cc4964d130f1aef7f507250a5f8280a"
+    },
+    {
+      "path": "backend/src/media/service.ts",
+      "bytes": 6155,
+      "sha256": "6a70b115544b936eb640bd548b0a5ae8228e0eb4f23a056de562e8aa2067306e"
+    },
+    {
+      "path": "backend/src/media/sql-media-repository.test.ts",
+      "bytes": 2521,
+      "sha256": "9e339e6c223fabc4496c1af59d61906f4fc4704233a27d10139f304ab73f5988"
+    },
+    {
+      "path": "backend/src/media/sql-media-repository.ts",
+      "bytes": 2255,
+      "sha256": "e8bc1f6d859f2083008ffcb0506f281a2ef2b36e1a0050c3c0801449c5e0ac67"
+    },
+    {
+      "path": "backend/src/media/storage.ts",
+      "bytes": 313,
+      "sha256": "4ce0c3db141990d31c9035910466f7e5bd2656713b4e782f5cf0274d2ee78ce6"
+    },
+    {
+      "path": "backend/src/media/storefront-reference-reader.test.ts",
+      "bytes": 1322,
+      "sha256": "04e2fcba26165d28593eb171bbf2ac8c20e34946bac9db85ba2f5b330887befa"
+    },
+    {
+      "path": "backend/src/media/storefront-reference-reader.ts",
+      "bytes": 2142,
+      "sha256": "c2ca40b37053409159c3732bfbc1bfa7b1fed2794d7f1ffcd2628a9b86911b1f"
+    },
+    {
+      "path": "backend/src/media/supabase-media-storage.test.ts",
+      "bytes": 2770,
+      "sha256": "049ec07793c86f26d7893409d7e7fd6597d9d71787a110fc6624170897baafbc"
+    },
+    {
+      "path": "backend/src/media/supabase-media-storage.ts",
+      "bytes": 2269,
+      "sha256": "94f6d64ced26d05dc114b64693b536cc6518584ef1efe9319a5198dc2a832b36"
+    },
+    {
+      "path": "backend/src/media/types.ts",
+      "bytes": 552,
+      "sha256": "c7a8261ecac7323ffd5fbbf62386d4a766fa7128ef4a0b7b9fb4f61c377f334e"
+    },
+    {
+      "path": "backend/src/media/validation.ts",
+      "bytes": 1146,
+      "sha256": "ed0cad958ba11178d350b5fda09b45b4dee66e0878f50f5fefea9b5819b1bcb0"
+    },
+    {
+      "path": "backend/src/server.ts",
+      "bytes": 817,
+      "sha256": "13b455bd87abefac2517f9cd13c35778ac9909e826473f4cce6e72c89186e7b7"
+    },
+    {
+      "path": "backend/src/storefront/compiler/compiler.test.ts",
+      "bytes": 2017,
+      "sha256": "1b849d64473c3b6b971ddfb822d73493707c4ebe6141ccf0fb211bc44818f95e"
+    },
+    {
+      "path": "backend/src/storefront/compiler/compiler.ts",
+      "bytes": 2512,
+      "sha256": "1465a8a4a76d52739a3a9fa55fdc0dda2d0308e02cc6fc791518fe934eb996cc"
+    },
+    {
+      "path": "backend/src/storefront/compiler/dependency-graph.test.ts",
+      "bytes": 4510,
+      "sha256": "cd6060f832e41cce42948fc593425232370f1f924558d5a0e54ad11a8266db3c"
+    },
+    {
+      "path": "backend/src/storefront/compiler/dependency-graph.ts",
+      "bytes": 5169,
+      "sha256": "d24ede197da99af58a28240e682e1100f91c6e29867844574909697dfce1511c"
+    },
+    {
+      "path": "backend/src/storefront/compiler/reusable-section-compatibility.test.ts",
+      "bytes": 4917,
+      "sha256": "9fa5fc849d152883b5e8e2963468cc0c2040a64719025449057bb3458668bad5"
+    },
+    {
+      "path": "backend/src/storefront/compiler/routes.test.ts",
+      "bytes": 3480,
+      "sha256": "b660b86cbecc2dffd5b4181e38a92c52e84a2aba11714f9895700fe8addf6919"
+    },
+    {
+      "path": "backend/src/storefront/compiler/routes.ts",
+      "bytes": 1929,
+      "sha256": "808a334ed8b92a92acc7db68058fce2abe548178410a0c2d214e674abc8b3455"
+    },
+    {
+      "path": "backend/src/storefront/compiler/service.ts",
+      "bytes": 995,
+      "sha256": "6d138dbd6408b484b619c647b5ea0a381258337ff703056d40de75e820b496a3"
+    },
+    {
+      "path": "backend/src/storefront/compiler/snapshot.test.ts",
+      "bytes": 3881,
+      "sha256": "56d02db9ff2fa23f84acb64da63ea2a8937973418d15e893cd102c3e31f0a364"
+    },
+    {
+      "path": "backend/src/storefront/compiler/snapshot.ts",
+      "bytes": 2296,
+      "sha256": "b79270777d70350df43538caa1063570738b524d5c8bc9bcdc4bb24193af0cd1"
+    },
+    {
+      "path": "backend/src/storefront/compiler/traversal.ts",
+      "bytes": 3497,
+      "sha256": "56605a8020f033193032ce31129422cabc198bd1542e10fbc3d406fe98a72a6b"
+    },
+    {
+      "path": "backend/src/storefront/compiler/types.ts",
+      "bytes": 3444,
+      "sha256": "22d34e2ec9eba6c4fee4d98bf3a898389111f44b34ac3aed3023895389efc641"
+    },
+    {
+      "path": "backend/src/storefront/compiler/validate-bindings.test.ts",
+      "bytes": 2607,
+      "sha256": "31b95933de3a0d1d5025f6385617537abd1aa0999f26c3fa75c370cbbe0e5205"
+    },
+    {
+      "path": "backend/src/storefront/compiler/validate-bindings.ts",
+      "bytes": 3055,
+      "sha256": "08b4efdea74cafec83e6ecf09b0ca099c626e9c210f751ffb21756e601388bc2"
+    },
+    {
+      "path": "backend/src/storefront/compiler/validate-context.test.ts",
+      "bytes": 1572,
+      "sha256": "f34ac0c36f1705494336bee1056813b41c21909c743b9a93b53bf60752082a2e"
+    },
+    {
+      "path": "backend/src/storefront/compiler/validate-context.ts",
+      "bytes": 1696,
+      "sha256": "78c5163c4478b914e5eaa1a524eb7b362074707b2350729c5fee700119833fda"
+    },
+    {
+      "path": "backend/src/storefront/compiler/validate-references.test.ts",
+      "bytes": 1609,
+      "sha256": "0e1ab6e65e4f7e0b3b50ad97d0f20904a8fd68ab0b1c5536c5f2e85227cbdba6"
+    },
+    {
+      "path": "backend/src/storefront/compiler/validate-references.ts",
+      "bytes": 3527,
+      "sha256": "bda3b0b55aeaaf43b0603154ff1caf3631363173cc560c24b85f0f91a04bb88c"
+    },
+    {
+      "path": "backend/src/storefront/compiler/validate-registry.test.ts",
+      "bytes": 1573,
+      "sha256": "7610129b05c10e8510aec62c2cbd0646449d6224a328b814989b28013d430232"
+    },
+    {
+      "path": "backend/src/storefront/compiler/validate-registry.ts",
+      "bytes": 1153,
+      "sha256": "8c10aa86b816e7435324b032ac8542cf9b5c9c5347757159222fbc8138ccbb0d"
+    },
+    {
+      "path": "backend/src/storefront/context/routes.test.ts",
+      "bytes": 1363,
+      "sha256": "af0596b19fa196602b832b20e670cfa1742861c12734c04d14c4089312f2f03b"
+    },
+    {
+      "path": "backend/src/storefront/context/routes.ts",
+      "bytes": 1722,
+      "sha256": "13fd79c3e9c58773dbffe8026058cf9a14ac930ea8e1fd85d4a9f6384336d1d0"
+    },
+    {
+      "path": "backend/src/storefront/context/service.test.ts",
+      "bytes": 1849,
+      "sha256": "dbda4c73892a88c1549ce6c39db0ed188d6e3b6be70c44b6e54cfb812c400704"
+    },
+    {
+      "path": "backend/src/storefront/context/service.ts",
+      "bytes": 2293,
+      "sha256": "bf954775c1e6fcdbe46f42fd769451d3e03ddb2989ea6e90994875f6550b2869"
+    },
+    {
+      "path": "backend/src/storefront/context/sql-repository.test.ts",
+      "bytes": 2802,
+      "sha256": "427dec95ea42a80e423d3e5d97a720fe733c51ac4e37849118b902d6885cc731"
+    },
+    {
+      "path": "backend/src/storefront/context/sql-repository.ts",
+      "bytes": 3264,
+      "sha256": "ed5a870303787dd1000753394bac33c24dbd88347756bf7bd1649a1fce7d7a2b"
+    },
+    {
+      "path": "backend/src/storefront/context/types.ts",
+      "bytes": 1594,
+      "sha256": "e921138692c7fe0347269ab0ef3982e968473b4f1653b69fcefbb9ef09bfad68"
+    },
+    {
+      "path": "backend/src/storefront/document-validator.test.ts",
+      "bytes": 1205,
+      "sha256": "459a078fc6c717221fea8482f847a02ae5bb13c1f2bc311e53ef9220d21d7da3"
+    },
+    {
+      "path": "backend/src/storefront/document-validator.ts",
+      "bytes": 813,
+      "sha256": "2197d0cf4c7e5fb02adeed4ea69ac8e9a83b6619405d707700818b1f16126d35"
+    },
+    {
+      "path": "backend/src/storefront/local-json-repository.test.ts",
+      "bytes": 1036,
+      "sha256": "0c198c93de2c138d188888c614837f301e9ff44bc84e646c3da7eadd4dca51a6"
+    },
+    {
+      "path": "backend/src/storefront/local-json-repository.ts",
+      "bytes": 4122,
+      "sha256": "762ce7fe68f8660f4e6724131688cb91bb1f31bb35cffa406b31283d3a081b23"
+    },
+    {
+      "path": "backend/src/storefront/local-v4-compilation.ts",
+      "bytes": 3160,
+      "sha256": "82865587802cc567851892822263acad497de97cc4dd628d947cb311fbe9bb10"
+    },
+    {
+      "path": "backend/src/storefront/local-v4-workspace-reader.test.ts",
+      "bytes": 8677,
+      "sha256": "36c45efbb3d9abed3d25164abec8769cd3ffd8bed8ce845a7cfb9831acdfdc0a"
+    },
+    {
+      "path": "backend/src/storefront/local-v4-workspace-reader.ts",
+      "bytes": 6215,
+      "sha256": "d6552edb518272ef12105ec390153d004a390d7febe0e99cfba021df3bc50fbf"
+    },
+    {
+      "path": "backend/src/storefront/publication/repository.ts",
+      "bytes": 1252,
+      "sha256": "a7c1d7c1cf34eac7ab5c4961fe4bfa7a3ac8c20c4e96041ce958e6ddf3157bd4"
+    },
+    {
+      "path": "backend/src/storefront/publication/routes.test.ts",
+      "bytes": 3775,
+      "sha256": "c47ddf59acdbb675678ebbdc6e19f4419097f26ad2aa0691f45d4aeac28277eb"
+    },
+    {
+      "path": "backend/src/storefront/publication/routes.ts",
+      "bytes": 1712,
+      "sha256": "62646f628df3c505a7e53f03319bc8da1c68e2696ea44a44d5a505c6b745d2e9"
+    },
+    {
+      "path": "backend/src/storefront/publication/service.test.ts",
+      "bytes": 8134,
+      "sha256": "82b773273191233152aa2af5733bac72001321278bcf2d93001a032ca22be5e0"
+    },
+    {
+      "path": "backend/src/storefront/publication/service.ts",
+      "bytes": 1973,
+      "sha256": "5d6086d9e91094bfe8b963376d630242b9f17576181f6e0f9fad334b25f31221"
+    },
+    {
+      "path": "backend/src/storefront/publication/sql-repository.test.ts",
+      "bytes": 6240,
+      "sha256": "714841715e607547f4f84389315116beec6020dd8d485ecab8c3fb1461da3ec1"
+    },
+    {
+      "path": "backend/src/storefront/publication/sql-repository.ts",
+      "bytes": 6644,
+      "sha256": "b7b6b880955140d71bbdfeec0a4af32f72cbabf6f2973fffddfa85cf3600b71a"
+    },
+    {
+      "path": "backend/src/storefront/repository.ts",
+      "bytes": 716,
+      "sha256": "6d91d1c00f102615bf19bf7ccd785deced9434d37de2686b28254d905ff77d28"
+    },
+    {
+      "path": "backend/src/storefront/routes.test.ts",
+      "bytes": 6429,
+      "sha256": "08a0e3a8558ae88c5054152f97d5162060674b69fe75e25b2fb59a24c3fcd7b3"
+    },
+    {
+      "path": "backend/src/storefront/routes.ts",
+      "bytes": 1681,
+      "sha256": "3987ce8914e972acaed513601bf846301b3c7ac887491ede9a154f59dc4f8140"
+    },
+    {
+      "path": "backend/src/storefront/runtime/cache.ts",
+      "bytes": 1028,
+      "sha256": "d8a21a168b51c4b63a78ae87678a39262285f5f69f63bc577f47bc7f7a88c17a"
+    },
+    {
+      "path": "backend/src/storefront/runtime/service.test.ts",
+      "bytes": 3275,
+      "sha256": "c0c927131a6e91c2990a02ce90385c9557ac1d35afeb02e18b0d93730b2e9380"
+    },
+    {
+      "path": "backend/src/storefront/runtime/service.ts",
+      "bytes": 1131,
+      "sha256": "3e15b8074aaa3ad5b6dc4248e0627eac9758ab254be7484c2ea16919d0979f0d"
+    },
+    {
+      "path": "backend/src/storefront/service.test.ts",
+      "bytes": 1511,
+      "sha256": "70df0785428127736bd7bbc9530f21b22497306d96773c871f4e7da18e024e79"
+    },
+    {
+      "path": "backend/src/storefront/service.ts",
+      "bytes": 1999,
+      "sha256": "ced46287b136f99f3aec75f3ed59247e502cf69611d32270dad1cf4a40126b92"
+    },
+    {
+      "path": "backend/src/storefront/sql-v4-workspace-data-source.test.ts",
+      "bytes": 6991,
+      "sha256": "d35f9bf7d171bdb0a27fb0141a10b653b1707608a1781660fe187af34ee45778"
+    },
+    {
+      "path": "backend/src/storefront/sql-v4-workspace-data-source.ts",
+      "bytes": 3434,
+      "sha256": "3fb5d555dca186f1ef55d7d4d8887bb94d3a8d10dc64d05952fa2c83d3ac49d5"
+    },
+    {
+      "path": "backend/src/storefront/starter/installation-service.ts",
+      "bytes": 11886,
+      "sha256": "2c45b37c1e60b4458811d1c14629361b2d591832323ee5faf800e4e9ae54d9e3"
+    },
+    {
+      "path": "backend/src/storefront/starter/routes.test.ts",
+      "bytes": 1966,
+      "sha256": "b2fbac9ad9e52ceb15ba464857a1e8a33fada9dc3e8f0db0da7c319baf4b9117"
+    },
+    {
+      "path": "backend/src/storefront/starter/routes.ts",
+      "bytes": 1741,
+      "sha256": "0259e71230830cfaff84b885afb2e6338952775b37a790b685b25f503c7630a8"
+    },
+    {
+      "path": "backend/src/storefront/types.ts",
+      "bytes": 502,
+      "sha256": "dcec0ac0bbd75a8a9bd27e36e0b062a00f2a7d4485af1637315a8c8923a60234"
+    },
+    {
+      "path": "backend/src/storefront/workspace/api-service.ts",
+      "bytes": 5242,
+      "sha256": "84bd3e7ca59c8f4b30af16e7f77028a1d0ccbe9bf370795d293ebf3055f6f543"
+    },
+    {
+      "path": "backend/src/storefront/workspace/assignment-service.test.ts",
+      "bytes": 4235,
+      "sha256": "eef6c5d42cc3547911d0762e6da7bfc20b2671dc41a64125225e68c3a2d2b9e5"
+    },
+    {
+      "path": "backend/src/storefront/workspace/assignment-service.ts",
+      "bytes": 3443,
+      "sha256": "3f2bbabc987779df2dcc46c3811f3b16282f69d090f6c1df3494a2abd31705d7"
+    },
+    {
+      "path": "backend/src/storefront/workspace/clone-local-ids.test.ts",
+      "bytes": 812,
+      "sha256": "311b1d07474cd41cb5339aee4fd711c740dcb638d8ddcf066af5fea8593570ae"
+    },
+    {
+      "path": "backend/src/storefront/workspace/clone-local-ids.ts",
+      "bytes": 972,
+      "sha256": "1459dd9557817546ec4010bec6d0d119c8e2d383884d32a54c8f048bde8dff9b"
+    },
+    {
+      "path": "backend/src/storefront/workspace/concurrency.test.ts",
+      "bytes": 950,
+      "sha256": "d89677d67bb9f978cdcd5145d37f81fe0a6813e6ba8cec5b0ba4ebef1c39b5e1"
+    },
+    {
+      "path": "backend/src/storefront/workspace/concurrency.ts",
+      "bytes": 662,
+      "sha256": "43a4b72ad24390ae1be6f636bb12a42bba7d8f9e74451552a6e412587189a165"
+    },
+    {
+      "path": "backend/src/storefront/workspace/errors.ts",
+      "bytes": 629,
+      "sha256": "64b8730d4846cddd6ee4bbf8fb2e32e8640db705e498e6b1e0d2fa5dba352055"
+    },
+    {
+      "path": "backend/src/storefront/workspace/global-section-service.test.ts",
+      "bytes": 3174,
+      "sha256": "fd29a6c3c4ed5eb39507a43e6f196bbb5fc802cd1a9d5e073a910181c19f0bbc"
+    },
+    {
+      "path": "backend/src/storefront/workspace/global-section-service.ts",
+      "bytes": 3874,
+      "sha256": "879e4c6127dcd996734a5b5e7912e30c141220f211aa7b3f0c57ac61ad16287a"
+    },
+    {
+      "path": "backend/src/storefront/workspace/menu-service.test.ts",
+      "bytes": 3022,
+      "sha256": "65b7d3ba299d5cdccc33f88ceaa0fa65d4347d49f2e60c28f37791e5c0753d6c"
+    },
+    {
+      "path": "backend/src/storefront/workspace/menu-service.ts",
+      "bytes": 5103,
+      "sha256": "6198a4390617313cd2ac3d7e85acab082881661cf2088e99084afbfc9fbba1da"
+    },
+    {
+      "path": "backend/src/storefront/workspace/mutation-runner.ts",
+      "bytes": 337,
+      "sha256": "c0b49ed7276d56bdc38ddaab8abb734061b62c14828ee218172a58b86b3d2ee5"
+    },
+    {
+      "path": "backend/src/storefront/workspace/repositories/assignment-repository.ts",
+      "bytes": 1473,
+      "sha256": "6afcb26593d69775eb1ad60e60dca8940b5d08db584c3abd73954b357d6acf5d"
+    },
+    {
+      "path": "backend/src/storefront/workspace/repositories/global-section-repository.ts",
+      "bytes": 1031,
+      "sha256": "aa4ab2c90cfea1d691c3d91b6bfd218966c70f428bba93bf19fa2216d9898e69"
+    },
+    {
+      "path": "backend/src/storefront/workspace/repositories/menu-repository.ts",
+      "bytes": 1481,
+      "sha256": "82beb94a780cbf9b6f5b715ced7cb8a028d13936802e8d13431cfb776db3d75c"
+    },
+    {
+      "path": "backend/src/storefront/workspace/repositories/preset-repository.ts",
+      "bytes": 703,
+      "sha256": "750155cce4c9cefcae3ed27a544288f06a7bd47443e757f8b6657a93ddf0dbfe"
+    },
+    {
+      "path": "backend/src/storefront/workspace/repositories/template-repository.ts",
+      "bytes": 2426,
+      "sha256": "a4e5dd68cd5a089594da4c97da9650a645860086f6c37dbe33b330fef6fb70a7"
+    },
+    {
+      "path": "backend/src/storefront/workspace/repositories/theme-repository.ts",
+      "bytes": 803,
+      "sha256": "9d4077903deb8780036dd109270fc50f8ee911baae4951586544baa34e0e86ac"
+    },
+    {
+      "path": "backend/src/storefront/workspace/routes.test.ts",
+      "bytes": 9623,
+      "sha256": "d913ad2d921bfac56b1db742ce5d4c3e6c8f42a0faf0354e9ba710e1b5631074"
+    },
+    {
+      "path": "backend/src/storefront/workspace/routes.ts",
+      "bytes": 14753,
+      "sha256": "583ac0e9bbedd3bfc450a4a078bfc9531e5889595fdd37f9d6e7031f323ec7f3"
+    },
+    {
+      "path": "backend/src/storefront/workspace/sql-global-section-store.test.ts",
+      "bytes": 1967,
+      "sha256": "64bccea90c5cf68a2926e6b799f6c3557b866dfcd5aff14cf85cceafd7fab933"
+    },
+    {
+      "path": "backend/src/storefront/workspace/sql-global-section-store.ts",
+      "bytes": 2240,
+      "sha256": "a3ead06ba58ed546def819178c2cc2883f487813cec77b10d50e37c169acff12"
+    },
+    {
+      "path": "backend/src/storefront/workspace/sql-repositories.test.ts",
+      "bytes": 4671,
+      "sha256": "3a5fd880ed8b00cd1c5093679f8cb42a9a29928f00908b35c551c9642e7fafb5"
+    },
+    {
+      "path": "backend/src/storefront/workspace/sql-repositories.ts",
+      "bytes": 13897,
+      "sha256": "25afe079460bdbd3780aa6ee1bc452a574a18b0f727e566d840d972b55a11395"
+    },
+    {
+      "path": "backend/src/storefront/workspace/supabase-template-store.test.ts",
+      "bytes": 1533,
+      "sha256": "c1caf5c3bde819e6ecf513a58b44c97c27a9281018d076f91fcfeb17985a12fa"
+    },
+    {
+      "path": "backend/src/storefront/workspace/supabase-template-store.ts",
+      "bytes": 2200,
+      "sha256": "e13ffe5c754a544d35f170fb95469092ada9b5cea78ae394937da8224148ef55"
+    },
+    {
+      "path": "backend/src/storefront/workspace/template-service.test.ts",
+      "bytes": 9945,
+      "sha256": "d76fd8f2186c43a5cdf0f191372f903051a0a8b646d01a5715b496f6d5dad264"
+    },
+    {
+      "path": "backend/src/storefront/workspace/template-service.ts",
+      "bytes": 7531,
+      "sha256": "4eef8254642132f5dda411c5c814b77ebcefa191af5ce88a99f5553dccee11b6"
+    },
+    {
+      "path": "backend/src/storefront/workspace/template-type-enum.test.ts",
+      "bytes": 760,
+      "sha256": "32ba1a990988dac9a5ed4e74855e4eb226d56b98a6996860f7eccfa86aae80c8"
+    },
+    {
+      "path": "backend/src/storefront/workspace/template-type-enum.ts",
+      "bytes": 628,
+      "sha256": "42c61f35dd66be1705a6911a9a3442802f9b50fc9d3ad62812322e8c5ae8de00"
+    },
+    {
+      "path": "backend/src/storefront/workspace/theme-service.test.ts",
+      "bytes": 2389,
+      "sha256": "21ac47c1164083d57797c8ef5b10bf68b7e241d68ff37729ad7a5b28c16350a5"
+    },
+    {
+      "path": "backend/src/storefront/workspace/theme-service.ts",
+      "bytes": 2289,
+      "sha256": "11f58d71b78fdd53f2b59776fb830aac23539a9e8ed69f897054422e653af395"
+    },
+    {
+      "path": "backend/src/storefront/workspace/workspace-reader.ts",
+      "bytes": 137,
+      "sha256": "81b47b4b76a0e1947a5b1eacbbe0880ffe44f82dd9b32f4a95ccdec85bc8f188"
+    },
+    {
+      "path": "backend/src/stripe/accounts/repository.ts",
+      "bytes": 8798,
+      "sha256": "e869ac7a9c4be297f6660b0d8711ab2e26bba83b1054b2e5bd847e732ccc5aad"
+    },
+    {
+      "path": "backend/src/stripe/accounts/routes.test.ts",
+      "bytes": 8758,
+      "sha256": "6a3d51c6a2811f87164ee9b4d1100d6efb541c6d51caf11bde527662c4776485"
+    },
+    {
+      "path": "backend/src/stripe/accounts/routes.ts",
+      "bytes": 5625,
+      "sha256": "e66a5adfb66cb804749300e18f9e3274ff1b837c01afc7c57bbfd013e0012101"
+    },
+    {
+      "path": "backend/src/stripe/accounts/service.test.ts",
+      "bytes": 15410,
+      "sha256": "c5708f7f2442a62a45d60e2ff1354e2b838b9e7b87aa2b397b906612c9f2dec2"
+    },
+    {
+      "path": "backend/src/stripe/accounts/service.ts",
+      "bytes": 8172,
+      "sha256": "60feb160847fc94c178cb40e6f3117b8b97d9cb8d27b7d71b5b65f731fb7555a"
+    },
+    {
+      "path": "backend/src/stripe/accounts/types.ts",
+      "bytes": 1051,
+      "sha256": "2f696c3af21bbaa121f849178e162a89af12eaed25de6beff1d0298a27839324"
+    },
+    {
+      "path": "backend/src/stripe/client.test.ts",
+      "bytes": 9709,
+      "sha256": "ba123f07c9334bd94025c576f06a457b2c1b1be944b01b5d43807c3eb5f93a9b"
+    },
+    {
+      "path": "backend/src/stripe/client.ts",
+      "bytes": 12389,
+      "sha256": "c1424e5cfb7c20aba37ee0bc6d197f2b8b59ef6a6ac23cf184bd698b1a13626d"
+    },
+    {
+      "path": "backend/src/stripe/webhooks/accounts-v2-route.test.ts",
+      "bytes": 1722,
+      "sha256": "fa2ebd6b5ba839b5f67da94a89d95773db819565a749464050c61bcb547d9a75"
+    },
+    {
+      "path": "backend/src/stripe/webhooks/accounts-v2-route.ts",
+      "bytes": 3604,
+      "sha256": "c3de90338be2ab95ce7ccae7cbb5e74c92234e063bd658028034529c05632914"
+    },
+    {
+      "path": "backend/src/stripe/webhooks/connect-payments-route.test.ts",
+      "bytes": 3473,
+      "sha256": "6335eb965b69ec9cbef8ec4c295c0de29809dad160570c572f2f983c18f0af4c"
+    },
+    {
+      "path": "backend/src/stripe/webhooks/connect-payments-route.ts",
+      "bytes": 3337,
+      "sha256": "aebc09c0d3b7a6fe379f6636471274304ffb3bc3062bae074ad2e027361a6ec6"
+    },
+    {
+      "path": "backend/src/stripe/webhooks/dispute-events.ts",
+      "bytes": 1470,
+      "sha256": "26d77a0cbae6aa3693170abbe436c150d3f31bc123ef55b662b917591aa63b51"
+    },
+    {
+      "path": "backend/src/stripe/webhooks/event-helpers.ts",
+      "bytes": 1955,
+      "sha256": "eb904d874e63bf2ab95faf6abe95a1972280faa0d091721b84496e4f4fb60378"
+    },
+    {
+      "path": "backend/src/stripe/webhooks/event-types.ts",
+      "bytes": 668,
+      "sha256": "4877a91d0ffc1e0c702c63d78aeee6f943c79c57fab77664250bea025dbc794c"
+    },
+    {
+      "path": "backend/src/stripe/webhooks/payment-intent-events.ts",
+      "bytes": 6142,
+      "sha256": "0cb9be3cb9270299bc2364a3ef93c892d54a53ea514c5147a3640fef3a073339"
+    },
+    {
+      "path": "backend/src/stripe/webhooks/processor.test.ts",
+      "bytes": 5859,
+      "sha256": "1ee11c9bfe03c7e4dbb413c52ebba49e76b10c408318024a37d0c41dddcb2a93"
+    },
+    {
+      "path": "backend/src/stripe/webhooks/processor.ts",
+      "bytes": 2109,
+      "sha256": "d08633ab595f33305f04a05c072a96a47c9052c82ce877bac824245fc8546943"
+    },
+    {
+      "path": "backend/src/stripe/webhooks/receipt-repository.ts",
+      "bytes": 2236,
+      "sha256": "cdb3fc48d6a0fdf4e40395c59a3602a32ee00f0affeb8b0cec1b24a71f37a817"
+    },
+    {
+      "path": "backend/src/stripe/webhooks/refund-events.ts",
+      "bytes": 5153,
+      "sha256": "718b67c0a1e9e844cd735e40d4559895894d4d7c690d24ab6ea881e1f651b135"
+    },
+    {
+      "path": "backend/src/taxonomy/repository.ts",
+      "bytes": 1981,
+      "sha256": "d1dcf067c003223e73fcc475abad50c48a8af729ecde032d98415c9af2e45f70"
+    },
+    {
+      "path": "backend/src/taxonomy/routes.test.ts",
+      "bytes": 3980,
+      "sha256": "d1d812ce2fc4df97e1cccc11cfc4cddb9f1e810d9962e56ebbe54e279a5e5387"
+    },
+    {
+      "path": "backend/src/taxonomy/routes.ts",
+      "bytes": 3618,
+      "sha256": "182ddb962b30a629c36ce62dedb0e351fa14861e7b70868ed2a98dddb81f2853"
+    },
+    {
+      "path": "backend/src/taxonomy/seed.ts",
+      "bytes": 4468,
+      "sha256": "4f2f12e5c173089df67b4d92a92d0eb532d5d02d896a74bb40ab1e2155f4c81e"
+    },
+    {
+      "path": "backend/src/taxonomy/service.test.ts",
+      "bytes": 9378,
+      "sha256": "8efe841fee366893910c7aefa6ee48271bbac00c136147823eccbeb276a5a463"
+    },
+    {
+      "path": "backend/src/taxonomy/service.ts",
+      "bytes": 8544,
+      "sha256": "72beb4afb03c21bbdc71e44a5ae932b823becfb2e874d98f36adb3b0b901a7ed"
+    },
+    {
+      "path": "backend/src/taxonomy/sql-repository.ts",
+      "bytes": 7795,
+      "sha256": "99af8f46a961ed845f36e3366d532de4b7b78982b3c81c0fa2814ebea0ed0cec"
+    },
+    {
+      "path": "backend/src/tenants/postgres-repository.test.ts",
+      "bytes": 1867,
+      "sha256": "2f686a6183f82977ecadd1dbee5e2fa81f51d475437e19b5a731b14a9d9a7a36"
+    },
+    {
+      "path": "backend/src/tenants/postgres-repository.ts",
+      "bytes": 3995,
+      "sha256": "bcbd0bf7f29c5e6b0c1f0f951db413035ab6821d1c9ca30ba5a09dde797d2dc8"
+    },
+    {
+      "path": "backend/src/tenants/repository.ts",
+      "bytes": 372,
+      "sha256": "a715e26df7d5892f36a457c9f668f8e4540933632db6b62b20b903709583ccfd"
+    },
+    {
+      "path": "backend/src/tenants/routes.test.ts",
+      "bytes": 3918,
+      "sha256": "c6e54a5887a47ed8fb8d503eb57e1db02380f72aadf3b472c5f7c71635fb00b6"
+    },
+    {
+      "path": "backend/src/tenants/routes.ts",
+      "bytes": 1828,
+      "sha256": "91f26041e7f92ebc987f80697b6b111643d0b45047310937441ac263f52bc457"
+    },
+    {
+      "path": "backend/src/tenants/settings.test.ts",
+      "bytes": 2114,
+      "sha256": "2be94870f654684b200c2e442b611ec1a91c7330743d341cd8cafead84b5b361"
+    },
+    {
+      "path": "backend/src/tenants/settings.ts",
+      "bytes": 5355,
+      "sha256": "59b630d8357e40ac2d7e0c6fb487d430d63619c6f34e2991f37ddd46adf39a35"
+    },
+    {
+      "path": "backend/src/tenants/store-context.test.ts",
+      "bytes": 1194,
+      "sha256": "47f564bbc67cd07c4431c6250d68a05d8a134f0c9b00a7b1f1a0665683186735"
+    },
+    {
+      "path": "backend/src/tenants/store-context.ts",
+      "bytes": 835,
+      "sha256": "0e90a1af2ad1ce8b220fe67aa99b0af4df99e99c326a2677d73d646f9f0a0077"
+    },
+    {
+      "path": "backend/src/tenants/types.ts",
+      "bytes": 520,
+      "sha256": "95d38f3c537f1bdd2d35fe451c33bf073198a4fc9df547f696443f5bfa69da95"
+    },
+    {
+      "path": "backend/supabase/migrations/20261020140219_isolate_server_owned_data.sql",
+      "bytes": 1954,
+      "sha256": "ed693c2f373223f77908ea757e8715107dcf0f39d828070ba11db83b42d57824"
+    },
+    {
+      "path": "backend/supabase/migrations/20261020140329_store_settings_checkout.sql",
+      "bytes": 778,
+      "sha256": "9b7b303e9207c9d08196787ffa79f5f017963a696bd0fc9990baa9db16997500"
+    },
+    {
+      "path": "backend/supabase/migrations/20261020143750_backend_runtime_role.sql",
+      "bytes": 1636,
+      "sha256": "068886c230d2633b0d9515f586c756a0de73fd2dcd23c82f3fccc5bbfd432170"
+    },
+    {
+      "path": "backend/supabase/migrations/20261020163817_jelly_signature_customer_services.sql",
+      "bytes": 4856,
+      "sha256": "d3665da29e8f12d906816b0f6b861997522cd84f97fe6e49ed26828512d429ed"
+    },
+    {
+      "path": "backend/supabase/migrations/20261020180000_commerce_foreign_key_indexes_and_account_id.sql",
+      "bytes": 1375,
+      "sha256": "22c7dbbac54e57bb8ce3cd199a07ac86488e93d4c0a3520a849417ec1af77588"
+    },
+    {
+      "path": "backend/supabase/migrations/20261023000000_category_taxonomy.sql",
+      "bytes": 4543,
+      "sha256": "c2ddb727d31a67cd5eef1b9d2329b4e536f8412111eaf1470b80913d22aedbef"
+    },
+    {
+      "path": "backend/supabase/migrations/20261025000000_product_media_assignments.sql",
+      "bytes": 183,
+      "sha256": "ea5b9c4d353f6ad32e86dcccba34c356b73084dfaa27d64240e8d359e62cb2d8"
+    },
+    {
+      "path": "backend/supabase/migrations/20261025010000_media_content_hash.sql",
+      "bytes": 175,
+      "sha256": "02aeff08f23f30d972742f7ef5bd31c2da707cac514833dce78e04b917d25aef"
+    },
+    {
+      "path": "backend/supabase/migrations/20261027000000_shipment_exceptions.sql",
+      "bytes": 1828,
+      "sha256": "3ed2b6b7dd09bfe46af11b4e2f9109face5289056b1d3aafd030e0781d242f9b"
+    },
+    {
+      "path": "backend/supabase/migrations/20261027131838_order_notification_templates.sql",
+      "bytes": 162,
+      "sha256": "43802a136499de91f32e352e7b429654d2aa335494169fa2f10b12e83a4514fd"
+    },
+    {
+      "path": "backend/supabase/migrations/20261028000000_variant_cost_unit_pricing.sql",
+      "bytes": 346,
+      "sha256": "a5ca030001c8a7865103cbc0b95eac666ca624eaef2cae1ab55df57d2fb5c7f9"
+    },
+    {
+      "path": "backend/supabase/migrations/20261028010000_product_description_document.sql",
+      "bytes": 434,
+      "sha256": "0db1feafa65603ef0131fc77a3634da0c8da00e26415494ea1dd1c7e81abef85"
+    },
+    {
+      "path": "backend/supabase/migrations/20261028020000_inventory_barcode_low_stock_history.sql",
+      "bytes": 3995,
+      "sha256": "3be673454362aa870c565e4b263f2cab1a3ad91f9848c5f768982bc204bc59ab"
+    },
+    {
+      "path": "backend/supabase/migrations/20261028030000_inventory_adjustment_backend_read_only.sql",
+      "bytes": 528,
+      "sha256": "a575addd22ddebd3e604cbdf3622dd997773031d00b92185875c0fc295cb9d7d"
+    },
+    {
+      "path": "backend/supabase/migrations/20261028040000_variant_shipping_details.sql",
+      "bytes": 1403,
+      "sha256": "f5e1ac6f54b831c94e35f409b59599a9d60139245b4dd75787349c9d7dd932b0"
+    },
+    {
+      "path": "backend/supabase/migrations/20261028041000_order_item_shipping_snapshot.sql",
+      "bytes": 1505,
+      "sha256": "7716e0c429b8e76e7c8361ec4bc23ea9a93d43673aa1882e494eb91a5e201783"
+    },
+    {
+      "path": "backend/supabase/migrations/20261028050000_variant_sellable_and_photo.sql",
+      "bytes": 752,
+      "sha256": "2d907bd355bd257cdc824ec95a5409593ce4ec4d8cb04e0f9437e28dfa9ee3f8"
+    },
+    {
+      "path": "backend/supabase/migrations/20261029000000_product_seo_fields.sql",
+      "bytes": 544,
+      "sha256": "f2b2edf039ecaa92a56b5211c96bb5c0cdebc41f32dc76aa12c0a5647b1977a4"
+    },
+    {
+      "path": "backend/test/integration/binding-values.test.ts",
+      "bytes": 5356,
+      "sha256": "9417054b767445992fb64d1f11abf153b949c31d903913c0b0fb1329610f2a02"
+    },
+    {
+      "path": "backend/test/integration/catalog-schema.test.ts",
+      "bytes": 2909,
+      "sha256": "949fe46813f92b575b89b3fecc5f05df617f14a418098cdf8909805073901cc8"
+    },
+    {
+      "path": "backend/test/integration/local-v4-publication-pipeline.test.ts",
+      "bytes": 14661,
+      "sha256": "24dca6ac0643e90eef896675fd3c8b426ba9a18b20e0e0720ca34eca9557033b"
+    },
+    {
+      "path": "backend/test/integration/local-v4-workspace-compilation.test.ts",
+      "bytes": 9113,
+      "sha256": "cd175daf397c499f965a7d887bacef97e5d4d31c1b44393ecf61c67cba41cadc"
+    },
+    {
+      "path": "backend/test/integration/onboarding-e2e-reset.test.ts",
+      "bytes": 8209,
+      "sha256": "21321e0d6de48f6cc91c0fddf25b05bc2122ae73fafc0cc6520e490d17daeddf"
+    },
+    {
+      "path": "backend/test/integration/pglite.ts",
+      "bytes": 1816,
+      "sha256": "0f243842e655da1d487e57dc3b9e058f187015a851c266be83d908808421f2e9"
+    },
+    {
+      "path": "backend/test/integration/publication-schema.test.ts",
+      "bytes": 1764,
+      "sha256": "9d20f7a61fa3216218c853026132a980c0ee59550b11b658ff730cd7f2ccf88d"
+    },
+    {
+      "path": "backend/test/integration/starter-installation.test.ts",
+      "bytes": 31714,
+      "sha256": "f06818d594533491f06cbbb63f3c632e813e85af53277b15547e08a61be61af5"
+    },
+    {
+      "path": "backend/test/integration/storefront-workspace-schema.test.ts",
+      "bytes": 5916,
+      "sha256": "ded09080528cad263b361728cb7bc105005525117e4c3d06f954be1e801ee757"
+    },
+    {
+      "path": "backend/test/integration/stripe-connect-commerce.test.ts",
+      "bytes": 10675,
+      "sha256": "fb3f2634ef6e1d04a1f8579f0853653f646fb5b3e9cae0a8a2d9a83d43364ea3"
+    },
+    {
+      "path": "backend/test/unit-environment.ts",
+      "bytes": 867,
+      "sha256": "5342b8b0947fbf712ba161ed3c75cec2681ac48adf31269626872314f2db94a9"
+    },
+    {
+      "path": "jellyshops/e2e/first-order.spec.ts",
+      "bytes": 1041,
+      "sha256": "0d547bf5abec5ad93100df686cbc3a12c8351505236dbb9583969fef8d0226c3"
+    },
+    {
+      "path": "jellyshops/e2e/fixtures/merchant-auth.ts",
+      "bytes": 1947,
+      "sha256": "1f75307e64b1dd3f50ad82e4327122d101d5955346eea42930db1bb9f0aa00a8"
+    },
+    {
+      "path": "jellyshops/e2e/jelly-avenue-theme.spec.ts",
+      "bytes": 3888,
+      "sha256": "0ffc2c551e8cd4c7190966adb8cd3945813fce6710e5dc618e8ad017136ec388"
+    },
+    {
+      "path": "jellyshops/e2e/jelly-minimal-theme.spec.ts",
+      "bytes": 3174,
+      "sha256": "2b67dfcc3c0d549d8b616cbf96313d5e076b1ed3c41331c19985107c066f8efb"
+    },
+    {
+      "path": "jellyshops/e2e/onboarding.spec.ts",
+      "bytes": 2427,
+      "sha256": "fb956734c8ff1cbafd74f4e1914451394ae9cdf7d3a81a568e256c5ba927522a"
+    },
+    {
+      "path": "jellyshops/e2e/starter-responsive.spec.ts",
+      "bytes": 14596,
+      "sha256": "cde5391bf123d0762b06fe81db1a9fe6947452fb208cbd6cf1f795605f147e3c"
+    },
+    {
+      "path": "jellyshops/e2e/store-editor.spec.ts",
+      "bytes": 3154,
+      "sha256": "df4d15967466ed48269acbf6c4e6ccf885db4ac75066fc1ec3e55035d960d8c7"
+    },
+    {
+      "path": "jellyshops/e2e/stripe-connect-commerce.spec.ts",
+      "bytes": 2094,
+      "sha256": "76bd08f4fa5e540c7ab3ca1ec7eb93d9bbeacb591a54a840f7fabe76ee3ff5f5"
+    },
+    {
+      "path": "jellyshops/e2e/template-library.spec.ts",
+      "bytes": 3306,
+      "sha256": "c07e453e97f4f1061b15eeca51d04093b14acdff06dad091a166d2da5275168a"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/package.json",
+      "bytes": 417,
+      "sha256": "c93d9ed099c517145c7d1483e79f9859bcebfe9e0b657bf92dfd81542cb5dcf9"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/blocks.ts",
+      "bytes": 7752,
+      "sha256": "6372caba5fafcf2c5a574356e92f74fa3d73416ed2aae36143e6053337d76948"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/controls.test.ts",
+      "bytes": 1173,
+      "sha256": "1cf742f01f05f2c5e89fe1a12190f7c777d02197004fd9bf6f7dcc8d35738a3f"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/index.ts",
+      "bytes": 1068,
+      "sha256": "8d944b2eb84a9d5f5be15d6c546611753825152e8c1c973c0f29dfcfac3e013d"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/jelly-signature.test.ts",
+      "bytes": 938,
+      "sha256": "88a19c1c8b1bfbb630797606dd363f25c23b363bdd7a5f480e831a955d1f3136"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/labels.ts",
+      "bytes": 3474,
+      "sha256": "b370486dad0ec6437ac882675abb521f5e6e0d5dddf91a08390ada4dab41e601"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/presets.test.ts",
+      "bytes": 1625,
+      "sha256": "23f588161fff67f20aa6cf4423db482ff0b2c214826a85140f17b1145f371b90"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/presets.ts",
+      "bytes": 1645,
+      "sha256": "ded6e0286fa376ab8c9e38f97efebd1ed9ac6202d3dd2192d5fc519a1c2c1bf3"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/registry.test.ts",
+      "bytes": 10603,
+      "sha256": "4aa818ac732f3bea00dad02639bfcc641a05c7e70b8931681f5a8d4ba0fb8b4c"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/registry.ts",
+      "bytes": 3389,
+      "sha256": "9ec307b47746ab701f332390bd88bd0c5fe7eb8b5cc4e05c30738af1965d0eb3"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/sections/commerce.ts",
+      "bytes": 11464,
+      "sha256": "155c0d216c7f48e0638ff4b24af97b4b070cd763d96ed46235c9fa2acbdb11a0"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/sections/content.ts",
+      "bytes": 17518,
+      "sha256": "5067d2df0b429c197fdcb6c3e68efa65a7b4e99daf4cf00304ad0ae932ea8bb0"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/sections/layout.ts",
+      "bytes": 5843,
+      "sha256": "c114f332205b0eb3de6c860ed69f152459cc6c9dcdf6651ade8fd52a83fdd814"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/sections/product-extras.ts",
+      "bytes": 3225,
+      "sha256": "50554e38dc46405321513a2e26ad6244da251be7fe1446871f0395ce09371267"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/theme-packs.test.ts",
+      "bytes": 819,
+      "sha256": "73d9dbe792f93727fcd24dd439339d3771c6a6c1c3d6ce2992b46110c3fd1f18"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/theme-packs.ts",
+      "bytes": 7666,
+      "sha256": "cd9341e6543efb5f2438e12c6536fb3c021debb8be39f81f91cbc7f8345ae0ad"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/types.ts",
+      "bytes": 2233,
+      "sha256": "da93a49cca82aa319be07db5ab8237198104573d76b8728012521e746b76ce59"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/v4-starter-packs-validation.test.ts",
+      "bytes": 4882,
+      "sha256": "f53a43ee6fc072d3f233c80478bf24cab721f5bfc89904bbafcf0bddb1f95083"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/v4-starter-packs-validation.ts",
+      "bytes": 13006,
+      "sha256": "eb24b3c7b1ecd47fa9533fc241048ea55fcc7b645efec8e20641341a3d46d25b"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/v4-starter-packs.test.ts",
+      "bytes": 8464,
+      "sha256": "b9ba4844679f6991ecb87a6ac7e81f9b243f27de97183665e2b8d3a2fdc9fd14"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/src/v4-starter-packs.ts",
+      "bytes": 27405,
+      "sha256": "c5f2212b6fe3e0a0bf6e235a09551100a4b90e2f59d82ab9be2f9738e1c83250"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/tsconfig.build.json",
+      "bytes": 405,
+      "sha256": "e6b4aca844a7cdb6efe0081e5b2709b2468b24299a59b81ddb47f82a728d78e1"
+    },
+    {
+      "path": "jellyshops/packages/storefront-registry/tsconfig.json",
+      "bytes": 85,
+      "sha256": "bbccb8bab9670cda697161c5a3307ddcb6b6abc302be224058bdeb4ffcb21519"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/package.json",
+      "bytes": 345,
+      "sha256": "170934d8b9b7e8e6a7c5f91337083c20500a3e9fd948245ce2ba970bef643112"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/content-pages.test.tsx",
+      "bytes": 1516,
+      "sha256": "71ff8f07996406fd30977f06c8b6f9960f6459666f291855fccde4f41955d727"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/home-page-sections.test.tsx",
+      "bytes": 7218,
+      "sha256": "3f488ce15fadc838af0c3ee27d2a0a570c9d322135abe8c051d14feb983be722"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/index.ts",
+      "bytes": 908,
+      "sha256": "4baff755e6ec65db5654ca81a7926877accdd70684ec0be21f34045f2d1c6122"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/newsletter.test.tsx",
+      "bytes": 992,
+      "sha256": "db6aed56bed62c0edbe1c17daab201ffdb6313fd5b281d2cf89adba42cb3fe05"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/page-renderer.tsx",
+      "bytes": 814,
+      "sha256": "6a8cd903544f04d08d8903370e353b1c9ce8198f98d4f6823af513e992c9410e"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/product-extras.test.tsx",
+      "bytes": 4224,
+      "sha256": "c46820619db8a2c6dd9aae4f54e8ed8c5d41538fc98a4c34dd676dde9c60f39a"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/product-gallery-viewer.test.tsx",
+      "bytes": 1335,
+      "sha256": "8f79ddae64b26451201de4c3c018f50cf6db81b79851f6896e182abb6fdca0c4"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/product-gallery-viewer.tsx",
+      "bytes": 2579,
+      "sha256": "4fcfae1d065d9fee17187f321f27fc595989b1e3aa141ac82bf76c033eb1f379"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/registry-renderer.test.tsx",
+      "bytes": 29391,
+      "sha256": "db3a39dbc72d27ec80696b55a8a2467fe0134a0cfb721b78a0a4d65e7d682721"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/registry-section-renderer.tsx",
+      "bytes": 3087,
+      "sha256": "2a2d0adede58fbc4913ee95e7e7dff856495b89efb35c390379f774faa820dd0"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/render-error-boundary.tsx",
+      "bytes": 490,
+      "sha256": "8e2b0de62d50d0a20035e38374264c7b9d8058248445861434e2cebd21108af6"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/render-registry.tsx",
+      "bytes": 7911,
+      "sha256": "74ac43fba3ca4038ea33bc8c16b1587007b53abc4cee2e31e51dc9b2a0d31657"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/runtime-context.ts",
+      "bytes": 1015,
+      "sha256": "6928aeb01ec1de10843ccd46e21dd27f75cd1f26c44f1b6ba74dda87695572a9"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/section-renderer.tsx",
+      "bytes": 90,
+      "sha256": "50bd4a24a38a4b607226f9c520613099ca269e60b9945f56ae6ca53be64616d0"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/section-support.test.ts",
+      "bytes": 808,
+      "sha256": "e6bf0d81f562efdbac2c564d334ba19586475a15b3d8764104e440e40ed41c54"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/section-support.ts",
+      "bytes": 616,
+      "sha256": "a10e79511749ea575ebcdd4899ade94d71b8b064a163529b6630ea30b2dc1891"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/sections/collection-sections.tsx",
+      "bytes": 4921,
+      "sha256": "4f1b770553aed749a0bbe6dddb9096a31260f6c392f45628ec483a656151eea5"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/sections/content-pages.tsx",
+      "bytes": 5837,
+      "sha256": "e227952133f0de457a6ab45cc9284915f6a17181195aad4aae4862c5ebaf0d09"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/sections/footer.tsx",
+      "bytes": 5242,
+      "sha256": "75f94d6e87e4bca5d58aa6a24e8ec96a3648f39bdcfdbc5464d5a7d288e48ace"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/sections/header.tsx",
+      "bytes": 6752,
+      "sha256": "c80014cd1f063aa4b3dcaf8e63ffc50e7d41d4c5fba08d8e03cba3cf094d2168"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/sections/hero.tsx",
+      "bytes": 4319,
+      "sha256": "ddc2f4d9a5b04501969ae450266e29f1843589cb47bbf5a6b98645a1b31db2f0"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/sections/home-sections.tsx",
+      "bytes": 10346,
+      "sha256": "a4c3c444c7a83ed9f33636f8eb4cde82cde25f2227f215873f41b4036eb7fafa"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/sections/product-extras.tsx",
+      "bytes": 5286,
+      "sha256": "6f2f1853560c8d4f14c3c67b86553dcd12be989e80a3bd1743a0e781edb227a6"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/sections/product-grid.tsx",
+      "bytes": 5729,
+      "sha256": "e7bd16b0af3f00ec85fd557d150d9103ced44372a08ab657aaec25848737dbea"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/sections/product-sections.tsx",
+      "bytes": 11101,
+      "sha256": "67b03ab7301f3eb83c612bbc01f78bde2fe2ba6001d8f3fa0f79f77e495bd674"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/sections/rich-description.test.tsx",
+      "bytes": 3697,
+      "sha256": "2b157caa6a11629931e56d6817ba8707beca56bf78cd1ba0135b56c9334638b2"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/sections/rich-text.tsx",
+      "bytes": 3016,
+      "sha256": "0183a93c0500ddeec67228bbe6150c1e67cb0d7632d32f3b5f6b76b777d30eea"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/sections/shared.ts",
+      "bytes": 2597,
+      "sha256": "0da83864a0ce50b6000ff9dfab4f16e934e3bc1858ac65265bfb66d5f5d9bdaa"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/sections/slideshow.tsx",
+      "bytes": 5627,
+      "sha256": "bfdf36093848835a42d563da44f5f0b0d8ebe3a79075f8952037a486fd79f191"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/sections/store-visit.tsx",
+      "bytes": 4680,
+      "sha256": "009150c201ca1a517535862a4d5a4d076e13b42795e5d765d43beeaf4bf9f3b0"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/sections/theme-pack-sections.tsx",
+      "bytes": 13028,
+      "sha256": "1cb5f8eda7ae027c6fdbf24b1d69696c7b2c2657c61b1b5df07c6af3b4efd87d"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/showroom-sections.test.tsx",
+      "bytes": 6250,
+      "sha256": "64030508b28d4d92547d6311e5b88115ba51b282c45c2fd59fd65fb1f3751115"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/store-identity.ts",
+      "bytes": 1146,
+      "sha256": "ca3e7899af917691abb3207bf798048ebb09ab1fb722d2dcaadafb9e93263655"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/storefront-renderer-v2.test.tsx",
+      "bytes": 2163,
+      "sha256": "d9532106e633e1be567f38818ee8e154b43b9106647c36444899cb9c9479ae4a"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/storefront-renderer-v3.test.tsx",
+      "bytes": 1140,
+      "sha256": "bfa947f7b18aa4ad024fba7c5ae3ed64b879e003173891cc1e5647d26eb1ccb0"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/storefront-renderer.test.tsx",
+      "bytes": 3856,
+      "sha256": "9faa9537e31e28dc48747af1089b229a31e9ef41f918003a32ba8df4cfe4b2ab"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/storefront-renderer.tsx",
+      "bytes": 2331,
+      "sha256": "f703e123b049419ba3db40afb73961661f37ca273b9ce0fe13227fc57f16baa9"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/src/types.ts",
+      "bytes": 3220,
+      "sha256": "a8ce670c14885b2aff2435528a32f23b8134aed5c2bf759c1c48e542e40a6960"
+    },
+    {
+      "path": "jellyshops/packages/storefront-renderer/tsconfig.json",
+      "bytes": 85,
+      "sha256": "bbccb8bab9670cda697161c5a3307ddcb6b6abc302be224058bdeb4ffcb21519"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/package.json",
+      "bytes": 429,
+      "sha256": "9487b210b239ba4bc8da7211ec8a7758d49249543da5feded2cc4dbfb8763431"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/custom-data.test.ts",
+      "bytes": 2219,
+      "sha256": "e5b7d878bfdf5df7debe19381fb81ac8758ab3611c527ae698a224f49a3c611a"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/custom-data.ts",
+      "bytes": 2928,
+      "sha256": "9be0ce0ee012194e753763b42f0e5d40d0a00afeae8c15a770274916b2ada0b8"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/defaults.ts",
+      "bytes": 2038,
+      "sha256": "c945d13b0e9b922472b0f3cf7596c8835e7f023f42ccfcc2fbb6744649f84ae4"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/diagnostics.test.ts",
+      "bytes": 1189,
+      "sha256": "6919068a4c48ddde5876ed3d37473b1e790705a0631c39cf15be8b10a91ee685"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/diagnostics.ts",
+      "bytes": 1041,
+      "sha256": "56b4c2b2fccb438cae38223e27707f6a2e7aa864a1674c6305bf6d65c3195306"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/dynamic-sources.test.ts",
+      "bytes": 2329,
+      "sha256": "9469fa2d13ee02b42268c33f4cbc2c024e5045e106029e9785543a4ae1ada90b"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/dynamic-sources.ts",
+      "bytes": 1921,
+      "sha256": "52343388caa3ac8b3b0b5c909c46dafe398c72bca0cc7fb36f9f402c7e688bd6"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/index.test.ts",
+      "bytes": 204,
+      "sha256": "eaa7debc411bd7f6026c6bc5da2e79a86458a7f882eb2943f643de898d8a79ba"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/index.ts",
+      "bytes": 3256,
+      "sha256": "f53ab342637f17bde63c442e4dd9238feb94b0b4c8f626333556a01eb633b721"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/migrations.test.ts",
+      "bytes": 727,
+      "sha256": "fcdf8fd94dc558e2a1c6f5eac1d5ac2d0aed91c81eb739c9b6125bce45790090"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/migrations.ts",
+      "bytes": 1440,
+      "sha256": "a83ee388ea1d1175f566d9e51933c7353b9d19bef72833a0965ef7f27e4729c9"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/product-media.test.ts",
+      "bytes": 4446,
+      "sha256": "6f7ba4a0bda1699ccfd899f6a9e68acd85a64a70b4aaa7d5eab8a6c7271fae4c"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/product-media.ts",
+      "bytes": 6948,
+      "sha256": "b41549aa7950a38a26b3b717c1ee32af6797a4dcffdcf81b484e0bada300cb13"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/product-options.ts",
+      "bytes": 16381,
+      "sha256": "11614da081aa61756c98bc43cc4f2a1730c14e997c19445c8ff050c10f903593"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/rich-text.test.ts",
+      "bytes": 8575,
+      "sha256": "87f3abd273326e74f0a88563d4bddbfbd570f21acfc48728e635c780141ac8e8"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/rich-text.ts",
+      "bytes": 11422,
+      "sha256": "ef87ad5fa7f4faaebeb64d9a9232efb03c96115ce1efeaa6b7a529c05ef70cd1"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/runtime-v4.test.ts",
+      "bytes": 3239,
+      "sha256": "1ae54de4af6da2bb96d740728b48768964a9d196cd7b61b9715a3a2e6a4b3ecf"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/runtime-v4.ts",
+      "bytes": 4121,
+      "sha256": "4aa6fa2175b9d6530f36b7d855d38a251e8a623c69736251eb04bdaa644ead13"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/schema.test.ts",
+      "bytes": 1819,
+      "sha256": "7526f7ae170066e3171fb81d0b17e62911ed62d28a081aa7b77a178cd58d6aa3"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/schema.ts",
+      "bytes": 2845,
+      "sha256": "7423c78c728a8f62e9c514c4c2ca9459f08efd628cd0f62b123caeeeac19e904"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/storefront-v2.test.ts",
+      "bytes": 1944,
+      "sha256": "899b8c9b203fb8d78f53e96f3e194ed32e6cbb63f44ea592e05d3ad63115c185"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/storefront-v2.ts",
+      "bytes": 9443,
+      "sha256": "9055593ea57afe75c194001e4541747f9d5ec7946423d88dd374f03918770f3b"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/storefront-v3.test.ts",
+      "bytes": 1618,
+      "sha256": "891ac372e9c8aaffed616299046bda5853aafbedddf6ef1ad490400bdc8ccd20"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/types.ts",
+      "bytes": 1929,
+      "sha256": "fdf56a7d7da2bd5a741cda8cd18e7124af319856b715606880f0d920c2963dbd"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/src/version.ts",
+      "bytes": 55,
+      "sha256": "678f74f6098868eab1b14d68c3d48e08c2c66f8c4955f8a052c7d0a9c43c6e77"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/tsconfig.build.json",
+      "bytes": 405,
+      "sha256": "e6b4aca844a7cdb6efe0081e5b2709b2468b24299a59b81ddb47f82a728d78e1"
+    },
+    {
+      "path": "jellyshops/packages/storefront-schema/tsconfig.json",
+      "bytes": 85,
+      "sha256": "bbccb8bab9670cda697161c5a3307ddcb6b6abc302be224058bdeb4ffcb21519"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/package.json",
+      "bytes": 436,
+      "sha256": "990eeb382a58daf25e8e2624e1720b655495e9bb76bc411b3b260ab18d270dd7"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/artisan-boutique/tokens.ts",
+      "bytes": 416,
+      "sha256": "5fe61ab1a0f24d78148b872cbadb8d2fad16e2c02476a8443c1233a4d4184474"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/bold/tokens.ts",
+      "bytes": 374,
+      "sha256": "080fbe884ad36ae8ededfeca554396dcf5bd3ac8cf0a701626758fd79464eb4c"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/classic/tokens.ts",
+      "bytes": 393,
+      "sha256": "004a30cb0e6c83a5e6704f71b0e4b9d142dae1cf497e44fa15330e66e1eb506a"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/elegant/tokens.ts",
+      "bytes": 416,
+      "sha256": "ce856e16242af1c8bcc72e7251ad8a494f07580c2ebee106797535997cc4676c"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/fonts.ts",
+      "bytes": 1096,
+      "sha256": "7538cc677a5e25b9bef93e9e7ad7c9d948535188c895dd324e6c2c84131e8353"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/fresh-market/tokens.ts",
+      "bytes": 416,
+      "sha256": "991760cbd34d7f8a213530f32e65bc74233dcac03a1063cd4f024e4fec5a217e"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/index.ts",
+      "bytes": 1364,
+      "sha256": "6ccc7e2b7901ce8b4a0def28a146cf1723aacaee81de74dc992970da028be88f"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/jelly-avenue.test.ts",
+      "bytes": 1969,
+      "sha256": "a0b5f348b288188c4125b46134c2ee4b4531740a160e69eb999276fff1590693"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/jelly-avenue/definition.ts",
+      "bytes": 4710,
+      "sha256": "4e174831306d2e0783e3a89333e18c3ffae9b0aeebd49c8101416180198bf2d3"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/jelly-signature.test.ts",
+      "bytes": 1634,
+      "sha256": "8593ba7509f87685fa1652e8689d99afb7ddd575a0da4a68c9b497f32106daec"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/jelly-signature/definition.ts",
+      "bytes": 4627,
+      "sha256": "c9ff506781eda108395305586872a433c6abc2ef1473364dcc7f466885e74116"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/minimal/tokens.ts",
+      "bytes": 411,
+      "sha256": "5492640ae8417b27ed40eefdd79bbbccc1bd70b865e2d48d0a01b03de9648b89"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/playful/tokens.ts",
+      "bytes": 409,
+      "sha256": "772ced0c2cf51ef83d661e015ff7a0834bf4846caae4b67a9b1c75d205ae2baf"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/storefront-theme-tokens.test.ts",
+      "bytes": 2148,
+      "sha256": "6851c216728c15e11c14adc5c9dcabb665a8ded5a6cdce207b7c62821db3ed76"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/storefront-theme-tokens.ts",
+      "bytes": 4259,
+      "sha256": "f6683f87719eff5b29761978b8288af894d5239f72bce88b95c6ffe1dd2e93ff"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/theme-registry.test.ts",
+      "bytes": 4224,
+      "sha256": "02c4b2254797dc059486816083de50b23b3b30252f98d8c70f4420c0fc82ff5e"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/theme-registry.ts",
+      "bytes": 6704,
+      "sha256": "7feb5f81bdac1a7d1e08347fb3c8488bcd83793ec744101b6f712364612f2b71"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/theme-resolver.test.ts",
+      "bytes": 2426,
+      "sha256": "bc1bded1c5b8b596684527d41bc22e6e1926a59e4dfbae8a36fd3296b6b96039"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/theme-resolver.ts",
+      "bytes": 8185,
+      "sha256": "3a7351ebae9d91d981e99cccf6b2616a78d921fdb98e5a178e3164db2a3d326a"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/theme-shell-resolver.test.tsx",
+      "bytes": 4109,
+      "sha256": "a1c20a38c412de0e8f31a620e5b894e0825d820fde596c680084f902f490c352"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/theme-shell-resolver.ts",
+      "bytes": 2511,
+      "sha256": "f1800c3c0ef14645c4d50df42baff3f1189724e1ef7d824148965523c4179a15"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/themes/default/theme.json",
+      "bytes": 5232,
+      "sha256": "59689418495519e9f2e861eb077f7bd6c0f60bd3f59f4b0e748e602419bd4364"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/themes/example-boutique/hero.tsx",
+      "bytes": 897,
+      "sha256": "c4423232f3f59d3149fc05694bfe252c385aeb4dd452a845b557d8ad0665feb2"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/themes/example-boutique/shell.tsx",
+      "bytes": 7955,
+      "sha256": "5c76426cf80386987db27a3c023755a52e1d09583ee619b22ac30719f9fe846b"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/themes/example-boutique/theme.json",
+      "bytes": 6958,
+      "sha256": "21a792731e64cef3406e9093e05b012ff91d0c9acb9fe3e9abe49f39be033e1a"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/src/types.ts",
+      "bytes": 5045,
+      "sha256": "f4a87e4eda8ca9dfb05e3bf465ea2ff520816ab62225c8586e979c4a8d156f7a"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/tsconfig.build.json",
+      "bytes": 442,
+      "sha256": "789d0913e4487cae9377a2e0f5957471cb145241e36e8e524771b22ee2e906cd"
+    },
+    {
+      "path": "jellyshops/packages/storefront-themes/tsconfig.json",
+      "bytes": 85,
+      "sha256": "bbccb8bab9670cda697161c5a3307ddcb6b6abc302be224058bdeb4ffcb21519"
+    },
+    {
+      "path": "jellyshops/packages/storefront-ui/package.json",
+      "bytes": 196,
+      "sha256": "f6d78546ad3c43dc4dfe0c677391e89a84504f58c096c7e6a54fb76af6513bd6"
+    },
+    {
+      "path": "jellyshops/packages/storefront-ui/src/button.tsx",
+      "bytes": 262,
+      "sha256": "37235a78515ab9a20c88485a7d2477d81005bfe32c9d1492c488742183667c71"
+    },
+    {
+      "path": "jellyshops/packages/storefront-ui/src/container.tsx",
+      "bytes": 247,
+      "sha256": "03deb3fa0e33c940ebc12709c395504651578ae47025b33db514bccaa527ba0e"
+    },
+    {
+      "path": "jellyshops/packages/storefront-ui/src/index.ts",
+      "bytes": 217,
+      "sha256": "5495213d854c783eecd1b182634c1086b4608e2703fd3a87f0be0124a006c5fe"
+    },
+    {
+      "path": "jellyshops/packages/storefront-ui/src/product-card.tsx",
+      "bytes": 993,
+      "sha256": "7ac7d2b8f4a1926e3041e53514db6dc4492cf22ed1a75424d0ed9b2618d61c6c"
+    },
+    {
+      "path": "jellyshops/packages/storefront-ui/tsconfig.json",
+      "bytes": 85,
+      "sha256": "bbccb8bab9670cda697161c5a3307ddcb6b6abc302be224058bdeb4ffcb21519"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/[...unmatched]/page.test.tsx",
+      "bytes": 2061,
+      "sha256": "69fc38c190dc6bc531a27f48f93c7a0f271462254bea136f166f9938ad3eb992"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/[...unmatched]/page.tsx",
+      "bytes": 2085,
+      "sha256": "c43d5bfff982efd6cf717a17c8281e2da927a0578bbcfa14da7275ff395be914"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/[pageSlug]/page.tsx",
+      "bytes": 318,
+      "sha256": "88e1a3ef310dc957a1a305f6ca96b934abde9f6d9c69a52917997f499674fe88"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/account/addresses/page.tsx",
+      "bytes": 310,
+      "sha256": "8c153971395d30451f9f129b67447173125e88a20f0a2656775a46d34baacbc5"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/account/login/page.tsx",
+      "bytes": 302,
+      "sha256": "744547fbe6a29a9529cfe67fd5b00e2fc4e6e053f4b1184bdb449ed9151c0226"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/account/orders/[orderId]/page.tsx",
+      "bytes": 302,
+      "sha256": "c663f9185830a4f6c81c9eba53f41d5ae4dbf101b1c4a5981e0f3fcd06a39196"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/account/orders/page.tsx",
+      "bytes": 304,
+      "sha256": "03ea507f2c123f8101b9d53a5f7a54d302871e4d2893aad8b53af698830f90fd"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/account/page.tsx",
+      "bytes": 306,
+      "sha256": "c20f0970b776f0642d98ee753defd19dfde796be7611eb781baa05ab92c39be5"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/account/recover/page.tsx",
+      "bytes": 308,
+      "sha256": "971df214fce55694967f31f67388067eecda3f2c6e9f2f676f6c77562d3101fd"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/account/register/page.tsx",
+      "bytes": 308,
+      "sha256": "3c6e3b6644ce8f25f2de40d9f7e8b175757bc25adfe484dc166aa420101c6e37"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/blogs/[blogSlug]/[articleSlug]/page.test.tsx",
+      "bytes": 1757,
+      "sha256": "0f89275918b97a2ee375ff506da680fc657a15ad8fd7e61cb3b16ce38a040c01"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/blogs/[blogSlug]/[articleSlug]/page.tsx",
+      "bytes": 373,
+      "sha256": "f378e448b7e28e649ac83f928d6c5c3c8672663696b9705ffbd9de1a019ba240"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/blogs/[blogSlug]/page.test.tsx",
+      "bytes": 1643,
+      "sha256": "a2cc3e6e830829daddb50cbbf68714a3614e9d146dc0b31c51556e4909538919"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/blogs/[blogSlug]/page.tsx",
+      "bytes": 318,
+      "sha256": "b51c4b577a988bc3b8346a73524fa061fb073b8d24ca6429c552a87b22142a7f"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/cart/page.tsx",
+      "bytes": 5021,
+      "sha256": "186bdb50c0774ca562cedb6b955bf8a1b52befd4ec74226eaf8c7f6af83f8e78"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/checkout/page.test.tsx",
+      "bytes": 4248,
+      "sha256": "9aa45931fb3fa9c58c5425561d0a40f11d74425b23aba8478b1a068cf0ebb93e"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/checkout/page.tsx",
+      "bytes": 35,
+      "sha256": "514289915cc049190ea22619fe4b9859e0a903a8c3ea008fc7bef114856562b2"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/checkout/view.tsx",
+      "bytes": 9017,
+      "sha256": "86d896b530d128707c1a11c5283264f6c487c587968362715d94c6501ac13f96"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/collections/[collectionSlug]/collection-client.tsx",
+      "bytes": 5426,
+      "sha256": "c5110da8f6b8f199b8387b3e346bbd8cc0d25b44504b27b03218b0021d90410a"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/collections/[collectionSlug]/page.test.tsx",
+      "bytes": 3262,
+      "sha256": "8ab0c285be910008a2fbea1f17b3e4978a68e3a7dde07a5740f1c3290e2fafc7"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/collections/[collectionSlug]/page.tsx",
+      "bytes": 1208,
+      "sha256": "0011ee9520d33188d3b88867fded310f543f86eb053db10132ec2d6e86acc7af"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/contact/page.tsx",
+      "bytes": 1000,
+      "sha256": "887aa660fca62c38f41aa2a0bb023b7b942751155e83f654900830378371b586"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/layout.tsx",
+      "bytes": 1474,
+      "sha256": "02142a908d88e2b80009927d148600a0351017f62755aad63385ae1cdf8ffbf3"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/newsletter/unsubscribe/page.tsx",
+      "bytes": 890,
+      "sha256": "9c1c5e1922db54d6041fdb9f54d8efd352f90740a14d424034c147b4a10052ab"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/order/[publicToken]/balance/page.test.tsx",
+      "bytes": 2272,
+      "sha256": "c0e132cec1ffb16753417ccfe7dad280984359b783a9cce5321f55c8e1e8177a"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/order/[publicToken]/balance/page.tsx",
+      "bytes": 3947,
+      "sha256": "bfbe6e943d1daf4a14a068636c8543d348faddbafb046d0b70184531f7c6d922"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/order/[publicToken]/page.test.tsx",
+      "bytes": 4051,
+      "sha256": "b7d4260a152f40a770ee50dead397a3145465e1d8b8ddb28f5fa34c67b124716"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/order/[publicToken]/page.tsx",
+      "bytes": 6507,
+      "sha256": "5ae7290458d25bd253b3978e73ec7b752a5e14453547edf2930f4438091b2daa"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/page.tsx",
+      "bytes": 1379,
+      "sha256": "a8938b0ca51f3b0f57036f7262492b69cf9c8dc6160ac79e58df02081fcd616c"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/products/[productSlug]/metadata.test.ts",
+      "bytes": 2406,
+      "sha256": "8a3c77cf64a4e5f823c2ad3255af7f9f2512c6231528c85bab9af4450fac4f21"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/products/[productSlug]/page.test.tsx",
+      "bytes": 3197,
+      "sha256": "3ed47fa0679a058755d55aaabe15385da0e2891f76e438a5f92bdcc11cea3d76"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/products/[productSlug]/page.tsx",
+      "bytes": 1932,
+      "sha256": "7cbe6fd54001a9924453c77c7f1796334fcb1f84ea0ca6ea27013214be371dd0"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/products/[productSlug]/product-client.tsx",
+      "bytes": 8898,
+      "sha256": "1e3e33cedb1cef4822baf5d8d9978f5962a05937d93a7321ad362517d50b86db"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/search/page.test.tsx",
+      "bytes": 2301,
+      "sha256": "b88f2eebfb2b57fe181d22c4483eb7a3bc89a35790f11fa327fa2e99a0596b42"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/search/page.tsx",
+      "bytes": 4434,
+      "sha256": "8077cac3cca0edee4c0757915c4c47d77b92d4487c715bbe9f57ae4020b9522f"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/shop/page.tsx",
+      "bytes": 2455,
+      "sha256": "e4a9426468c2f464706e7626a8f08246f5dac991829bf07aadca3adbf34a1cb0"
+    },
+    {
+      "path": "jellyshops/src/app/[storeSlug]/wishlist/page.tsx",
+      "bytes": 290,
+      "sha256": "58f346cda96620ab432f06f7c1d780893777fdd20c00230d552d8fdc85470c0d"
+    },
+    {
+      "path": "jellyshops/src/app/admin/admin.css",
+      "bytes": 11458,
+      "sha256": "7a374c13e33b67bcf6e05c9d05c13989a15e6d0cf6fb92e30585a1f64ac39c3e"
+    },
+    {
+      "path": "jellyshops/src/app/admin/content/blogs/page.tsx",
+      "bytes": 9306,
+      "sha256": "1c5137fd2b4fbd300b6fc392b034e8cb047356f7000dba1055a967189979aaca"
+    },
+    {
+      "path": "jellyshops/src/app/admin/content/metaobjects/page.tsx",
+      "bytes": 4956,
+      "sha256": "fc05236a166d74d00de7337bb8ebf96c036e9ca6cb714fd6c7e580795323af9f"
+    },
+    {
+      "path": "jellyshops/src/app/admin/content/pages/page.tsx",
+      "bytes": 5599,
+      "sha256": "d35d80c8d6fa67eded03904e9607af8fa8326ca5a2b0ee54d34c79481dd2df02"
+    },
+    {
+      "path": "jellyshops/src/app/admin/customers/[id]/page.tsx",
+      "bytes": 8403,
+      "sha256": "528f44b40a93bbc20b58aeab9f820f0a705b08b185a5273059facb6189dd9858"
+    },
+    {
+      "path": "jellyshops/src/app/admin/customers/page.tsx",
+      "bytes": 7929,
+      "sha256": "fa577c35906c8e6dedfaaf9195d65ee31e3a80b1561a76ac9a85df6c9cff02de"
+    },
+    {
+      "path": "jellyshops/src/app/admin/engagement/page.tsx",
+      "bytes": 6006,
+      "sha256": "e4888ffd2536a63e303ff3797f6e6ffd1ce1f1c2de93414d5098b31ffa0e230b"
+    },
+    {
+      "path": "jellyshops/src/app/admin/layout.tsx",
+      "bytes": 343,
+      "sha256": "f50f17771c66ab34ebbb092d2d48c78743a2c70565ac3f2d97eed6ccb1b986a6"
+    },
+    {
+      "path": "jellyshops/src/app/admin/onboarding/page.tsx",
+      "bytes": 1793,
+      "sha256": "6c2266ab6f30ddfa6c15ce38f5e457e959b2ad3aab2b59b46b536c9f005cf6d8"
+    },
+    {
+      "path": "jellyshops/src/app/admin/online-store/editor/page.tsx",
+      "bytes": 63279,
+      "sha256": "f15cfe001bf1566c786643ff9e785fa8526141c4e9b7fa2f2173af358a7554e6"
+    },
+    {
+      "path": "jellyshops/src/app/admin/online-store/navigation/page.tsx",
+      "bytes": 3282,
+      "sha256": "cac3bc80004b0a14ae4c89f042896364d242188c5dcf761c76a4dfc07aa90762"
+    },
+    {
+      "path": "jellyshops/src/app/admin/online-store/page.test.tsx",
+      "bytes": 8177,
+      "sha256": "10adfda8785391211e0046628e89214411eea06130cedabe1774885528954828"
+    },
+    {
+      "path": "jellyshops/src/app/admin/online-store/page.tsx",
+      "bytes": 15705,
+      "sha256": "e44099dbffc37bafdecc2ef0dc69669145d58a67735538338e728d0d618a8c28"
+    },
+    {
+      "path": "jellyshops/src/app/admin/online-store/template-library.test.tsx",
+      "bytes": 4595,
+      "sha256": "ea8389bd84feaf4fc0780decf99d0074ebe0b3a1ac74393f9d605ef6c54836c0"
+    },
+    {
+      "path": "jellyshops/src/app/admin/orders/[id]/page.test.tsx",
+      "bytes": 10549,
+      "sha256": "9cc1f2de814b4a2d0f22c5d754109ce451e043f2f6c2ccd3e82bb0bbff4a260f"
+    },
+    {
+      "path": "jellyshops/src/app/admin/orders/[id]/page.tsx",
+      "bytes": 35,
+      "sha256": "514289915cc049190ea22619fe4b9859e0a903a8c3ea008fc7bef114856562b2"
+    },
+    {
+      "path": "jellyshops/src/app/admin/orders/[id]/view.tsx",
+      "bytes": 41076,
+      "sha256": "68a82463f74996a5ae0d3f5445d0a73036812a51596ad291b91fec913a2bc8cd"
+    },
+    {
+      "path": "jellyshops/src/app/admin/orders/page.test.tsx",
+      "bytes": 3647,
+      "sha256": "c7f09bfff7f46354b384883b278ff79b55e07131ed4f8ffb3be530d366049912"
+    },
+    {
+      "path": "jellyshops/src/app/admin/orders/page.tsx",
+      "bytes": 20761,
+      "sha256": "42fb5c64a78c95188f857e67f429fb3e1f40b47216c56b6a329142ef435e6e8f"
+    },
+    {
+      "path": "jellyshops/src/app/admin/page.tsx",
+      "bytes": 14669,
+      "sha256": "b326a2d14febd4c7af23a5092b8cc4c937afcfb722892128fef928d4a2e030e1"
+    },
+    {
+      "path": "jellyshops/src/app/admin/payments/page.test.tsx",
+      "bytes": 1033,
+      "sha256": "5b22be0b86e3f3a7e76aaa07297f2626c2380fcd3db3c3e022cc9fb6643578c5"
+    },
+    {
+      "path": "jellyshops/src/app/admin/payments/page.tsx",
+      "bytes": 474,
+      "sha256": "7a9914536d3ffdba6bd3c871dd52df02972d71b0aa91d39817d96282b92c6a81"
+    },
+    {
+      "path": "jellyshops/src/app/admin/products/[id]/page.tsx",
+      "bytes": 399,
+      "sha256": "2f29ac801f5d4296ece71f4ccb3a5cd33467533a79c46c9dce0527812670b908"
+    },
+    {
+      "path": "jellyshops/src/app/admin/products/builder/[id]/page.tsx",
+      "bytes": 44,
+      "sha256": "5e06e95d44726924cbd8c9f534cb1fc1f814d7ddbeb4c2b23f4a980384a4eee7"
+    },
+    {
+      "path": "jellyshops/src/app/admin/products/builder/page.tsx",
+      "bytes": 125,
+      "sha256": "1d18b9fdca2c46cd9c8d55c789339b3ea6ef06b9b1733a1b400ba9e0e18cb638"
+    },
+    {
+      "path": "jellyshops/src/app/admin/products/collections/page.tsx",
+      "bytes": 6105,
+      "sha256": "41565dc3e9998d0da9852e261717ad51be483dd9502e99797bcfeddf95e4b152"
+    },
+    {
+      "path": "jellyshops/src/app/admin/products/new/page.test.tsx",
+      "bytes": 1198,
+      "sha256": "c8d038b4f5f0b2698332bdb0f7bbdeb1432dce663068a8391365de06276e9a1d"
+    },
+    {
+      "path": "jellyshops/src/app/admin/products/new/page.tsx",
+      "bytes": 125,
+      "sha256": "1d18b9fdca2c46cd9c8d55c789339b3ea6ef06b9b1733a1b400ba9e0e18cb638"
+    },
+    {
+      "path": "jellyshops/src/app/admin/products/page.tsx",
+      "bytes": 5247,
+      "sha256": "6b827615afbd1d0eed75a4a71243bb9f8428f56070140925ac061a93b608127d"
+    },
+    {
+      "path": "jellyshops/src/app/admin/products/stock/page.tsx",
+      "bytes": 6382,
+      "sha256": "bf162913636cef27a992f793aa7d400134a68a7ae27b9fbac9615a84989a0d0d"
+    },
+    {
+      "path": "jellyshops/src/app/admin/products/stock/stock-page.test.tsx",
+      "bytes": 4009,
+      "sha256": "57ed1faa77f0b662062a2eba9cf2190a120ed5ee7cd656cfa8646cefe4f60f68"
+    },
+    {
+      "path": "jellyshops/src/app/admin/settings/custom-data/page.tsx",
+      "bytes": 4328,
+      "sha256": "4613e4e7b00f97a74a3187da0d08ab48139551c79626f609864a53e5e71a804e"
+    },
+    {
+      "path": "jellyshops/src/app/admin/settings/notifications/page.test.tsx",
+      "bytes": 2168,
+      "sha256": "da556065220b92eaabe80de853052a5b8079b2cce4d5359651426d8800ef200d"
+    },
+    {
+      "path": "jellyshops/src/app/admin/settings/notifications/page.tsx",
+      "bytes": 6864,
+      "sha256": "a4d0fbe0520f85b036dbd6f56524c777e8e4330d4ab3917b86f06b647c91a5cf"
+    },
+    {
+      "path": "jellyshops/src/app/admin/settings/page.tsx",
+      "bytes": 5439,
+      "sha256": "4a6f286a71f4798f7cb575e6c496df3f88afc7dfc4a97d2c6fbcdc981fe631fe"
+    },
+    {
+      "path": "jellyshops/src/app/admin/store-design/page.test.tsx",
+      "bytes": 921,
+      "sha256": "f2fd0f51fabf3e03d221f4ac6f01ac917d10022bc83fd92523b4aa685e606270"
+    },
+    {
+      "path": "jellyshops/src/app/admin/store-design/page.tsx",
+      "bytes": 138,
+      "sha256": "04865ea06b68b23c2f6d6270ae32215e7ea8f4387f0acd4feb9b25cec3aa4dac"
+    },
+    {
+      "path": "jellyshops/src/app/admin/store/page.tsx",
+      "bytes": 2997,
+      "sha256": "0a4e8a45d32392f1846a95e320a5c2d80e3704c8ba123f5e4c6ef18789d76fbb"
+    },
+    {
+      "path": "jellyshops/src/app/auth/callback/page.tsx",
+      "bytes": 481,
+      "sha256": "a1d4d54851f3c35377dbba1e4c8bbb57ce1f1e510fd4bf547f3e206ef627c7a8"
+    },
+    {
+      "path": "jellyshops/src/app/fonts.ts",
+      "bytes": 461,
+      "sha256": "2a5a923528a97f7ea5470db6545e8e2e29cc2e8693e5b8f498b583aa5abce1b6"
+    },
+    {
+      "path": "jellyshops/src/app/globals.css",
+      "bytes": 100905,
+      "sha256": "2fc04d3ce6fe2e2bf1c08af47b2d676e72559b4703fccc6fb502c1d1e7ad5e47"
+    },
+    {
+      "path": "jellyshops/src/app/layout.tsx",
+      "bytes": 933,
+      "sha256": "73108c02b60deeeac4686494c83675971cdf2ba0fe8ea6f3c60a9d63bb77f93c"
+    },
+    {
+      "path": "jellyshops/src/app/login/page.tsx",
+      "bytes": 236,
+      "sha256": "de58c9d41d24c58ead16d7b64809a22a908be8763cbe71dde6e424b1aa10e013"
+    },
+    {
+      "path": "jellyshops/src/app/onboarding/page.test.tsx",
+      "bytes": 5071,
+      "sha256": "03dcbb0a4344ad6e99bca74c5cf530d76d46301ebe2f41f4de5de607eeeacbf0"
+    },
+    {
+      "path": "jellyshops/src/app/onboarding/page.tsx",
+      "bytes": 5420,
+      "sha256": "830408327d3320357dd59b0ee6780c05f10987b8ac1408815cb2d5a2c377eab8"
+    },
+    {
+      "path": "jellyshops/src/app/page.test.tsx",
+      "bytes": 511,
+      "sha256": "1892fba57643d44ae2cc47a6a9091a78682f2dc0142d79d4df2f2b566db3a7d9"
+    },
+    {
+      "path": "jellyshops/src/app/page.tsx",
+      "bytes": 17703,
+      "sha256": "bef5d612c4b4dc7d51b38517f25471ae67a98b9a070bb55a987fb9c01025a1f6"
+    },
+    {
+      "path": "jellyshops/src/app/shadcn-theme.css",
+      "bytes": 8071,
+      "sha256": "7c706f1e80f4ecd27b6066b3ac69efac311a5b36aeba1530bde80e7b92fa8007"
+    },
+    {
+      "path": "jellyshops/src/app/signup/page.tsx",
+      "bytes": 238,
+      "sha256": "0774c7919bff621549a7fd8355f85ea52ee28808910b2a7653e08c4a74379c44"
+    },
+    {
+      "path": "jellyshops/src/app/theme-preview/jelly-avenue/page.tsx",
+      "bytes": 322,
+      "sha256": "f7fc27fec57abc78fbdee95a0c2f9f319bbf1e53c1ad076c66a549f1b6bf1138"
+    },
+    {
+      "path": "jellyshops/src/app/theme-preview/jelly-minimal/page.tsx",
+      "bytes": 326,
+      "sha256": "dcc975182dc70865fb0c3e38522c18578cf281eb7eef2867800b1198c4d5a4c6"
+    },
+    {
+      "path": "jellyshops/src/app/themes/jelly-avenue.css",
+      "bytes": 99130,
+      "sha256": "a9c2abeb8dca1c344442de7867aebc71bd7200203440c5855672fcf8ece8ab4e"
+    },
+    {
+      "path": "jellyshops/src/app/themes/jelly-minimal.css",
+      "bytes": 75573,
+      "sha256": "a9e49361dbf53275beb51c620f2579acfd2acda7da2f58ac47fd36b8e47837a5"
+    },
+    {
+      "path": "jellyshops/src/app/themes/storefront-base.css",
+      "bytes": 7891,
+      "sha256": "fb8640663746cc2b3cdcf0e1cae058e3360d26e623df8bc2b722800aad273084"
+    },
+    {
+      "path": "jellyshops/src/app/themes/theme-css.test.ts",
+      "bytes": 2088,
+      "sha256": "1d46f62a491a2f3efed2e463118e75c8e43a5a2b998bff90d85f8f5bacebe952"
+    },
+    {
+      "path": "jellyshops/src/components/admin-ui.tsx",
+      "bytes": 1546,
+      "sha256": "63fc82367473655bff67db2ca6f72671611665dda9c4e7202f5fb9703a7285d8"
+    },
+    {
+      "path": "jellyshops/src/components/jelly/cart.tsx",
+      "bytes": 7774,
+      "sha256": "6f69c7c37ef1d454d01fee331608c66c47e6b7fa289de76ee44978b3509a9de5"
+    },
+    {
+      "path": "jellyshops/src/components/jelly/index.ts",
+      "bytes": 465,
+      "sha256": "1ac8e889ae113028979d1abf17fa6dbe32f53fd7676d50e481c33f4b4d3b37a3"
+    },
+    {
+      "path": "jellyshops/src/components/jelly/layout.tsx",
+      "bytes": 3668,
+      "sha256": "c398677900ec6d45e3d7ba1799e27cd4ed32ff9c31c94ea9935873a7cde656cf"
+    },
+    {
+      "path": "jellyshops/src/components/jelly/marquee.tsx",
+      "bytes": 3663,
+      "sha256": "e531e6655ced3e162d818640be93f8d847648759a54eb40b1dd93d978737643f"
+    },
+    {
+      "path": "jellyshops/src/components/jelly/product.tsx",
+      "bytes": 6150,
+      "sha256": "6b7d54eac659bbfe13f9758e593c74834cccc84f92c9c5609b9d64e74da10881"
+    },
+    {
+      "path": "jellyshops/src/components/layout/admin-nav.test.tsx",
+      "bytes": 865,
+      "sha256": "10441acca1d4e4b7c0360bf9fce24b21acb45cfdc3b29ce4ae816ec9ad88ecba"
+    },
+    {
+      "path": "jellyshops/src/components/layout/admin-nav.tsx",
+      "bytes": 3547,
+      "sha256": "ba7bae2e6ae02d105e0e3e5afee7ef6cdacc9215c6bc72367fd61775c49cf58f"
+    },
+    {
+      "path": "jellyshops/src/components/layout/admin-theme-toggle.test.tsx",
+      "bytes": 796,
+      "sha256": "a927a795f1f685000516a0bb3e672311187e41bbd0c13a1e4f102ecf894795d4"
+    },
+    {
+      "path": "jellyshops/src/components/layout/admin-theme-toggle.tsx",
+      "bytes": 1414,
+      "sha256": "2650d82d463ef969e6a1b9f01dcf77137674fa7c04f9239af4dbc1f4f682a5c0"
+    },
+    {
+      "path": "jellyshops/src/components/layout/app-shell.tsx",
+      "bytes": 3241,
+      "sha256": "0ca9e855a199e2f2e50a281d214a8bc80da4d7fdbe114d13cbcc644ce05190ac"
+    },
+    {
+      "path": "jellyshops/src/components/ui/button.tsx",
+      "bytes": 2097,
+      "sha256": "6ee4b2beb304724a098b5348b3f2c7e1e969de0d8db1635bcf5dc0d87fd922ec"
+    },
+    {
+      "path": "jellyshops/src/components/ui/card.tsx",
+      "bytes": 1348,
+      "sha256": "8faa5123a5cddb640e98cec89ef6630f7e11f54f6c39500232b5a862d732fe21"
+    },
+    {
+      "path": "jellyshops/src/components/ui/dialog.tsx",
+      "bytes": 3545,
+      "sha256": "dc33ad1254fee93e5fa743f896c6928a614566d7e8cb9a3aa9b94601ddd59986"
+    },
+    {
+      "path": "jellyshops/src/components/ui/input.tsx",
+      "bytes": 635,
+      "sha256": "db27d007593879b0ac9d112464ecac9c05bd78329a0b592da317afb1605a5aa7"
+    },
+    {
+      "path": "jellyshops/src/components/ui/label.tsx",
+      "bytes": 415,
+      "sha256": "33ebcb23391f11100130b020b73d1687e1f6e96691fc99507208c685282dd37e"
+    },
+    {
+      "path": "jellyshops/src/components/ui/sheet.tsx",
+      "bytes": 4147,
+      "sha256": "5a627a248018d200c7822891a6ad61352bbc188aa5e8836b8c86af58d2222aba"
+    },
+    {
+      "path": "jellyshops/src/components/ui/skeleton.tsx",
+      "bytes": 2654,
+      "sha256": "055fe8245c643af32e4a9fbfe54415319231324820dd43598872bc85767dd337"
+    },
+    {
+      "path": "jellyshops/src/contexts/shop-context.tsx",
+      "bytes": 2003,
+      "sha256": "9ebbb95be6a9d63cc25a75611861927f0666897f00488e0b0bb1e7e1d54be65a"
+    },
+    {
+      "path": "jellyshops/src/features/admin/api/admin-api.test.ts",
+      "bytes": 725,
+      "sha256": "4f40016db4716936812aa6f712a7d6e9642b6b2e908b894630906c7e7040b493"
+    },
+    {
+      "path": "jellyshops/src/features/admin/api/admin-api.ts",
+      "bytes": 1947,
+      "sha256": "5f4554a0557639ec4185a954794fd0538b11e645e1eb253cfbd29d2d33b6c751"
+    },
+    {
+      "path": "jellyshops/src/features/admin/api/catalog-api.ts",
+      "bytes": 2047,
+      "sha256": "5f17cf181049ff18b420d59cd2744f346000d6b5e62d55d9318f1c7bbe7e89ef"
+    },
+    {
+      "path": "jellyshops/src/features/admin/catalog-pages.test.tsx",
+      "bytes": 5283,
+      "sha256": "35242407a06b1df8688311686fb6da2e6fcf5b7ba80778ce2dd690e0dbce5958"
+    },
+    {
+      "path": "jellyshops/src/features/admin/components/stock-history.test.tsx",
+      "bytes": 3143,
+      "sha256": "250742e5b8e14b95e0cc7e42ba7e5cc226e645403d56af40f73fec226dbefb48"
+    },
+    {
+      "path": "jellyshops/src/features/admin/components/stock-history.tsx",
+      "bytes": 4440,
+      "sha256": "8868e00e2da0a72c689af83103225600052c1a6760b093cc85421afb66752ed2"
+    },
+    {
+      "path": "jellyshops/src/features/admin/hooks/use-admin-query.test.tsx",
+      "bytes": 601,
+      "sha256": "c3c270f3fcfb9f6fe47bc32480ff43e2d03a279c8b06bc71aabaffac04a594cb"
+    },
+    {
+      "path": "jellyshops/src/features/admin/hooks/use-admin-query.ts",
+      "bytes": 1131,
+      "sha256": "41e83a7ef9224416bd899d9dad783e4192f44f2c03c6c9966de9fc8c43707f41"
+    },
+    {
+      "path": "jellyshops/src/features/auth/api/merchant-api.test.ts",
+      "bytes": 1361,
+      "sha256": "891b68bdf250d5757abc56c740b78c44570d7af951460bc5a822bf3bc4f89f79"
+    },
+    {
+      "path": "jellyshops/src/features/auth/api/merchant-api.ts",
+      "bytes": 1145,
+      "sha256": "eac0aa4c536bd42d07ca19f6b0147f51b75efab544d87f456692b61b29aa2047"
+    },
+    {
+      "path": "jellyshops/src/features/auth/components/admin-auth-gate.test.tsx",
+      "bytes": 1558,
+      "sha256": "eb963d1e5d4a12253dbee64a732a676fc8560fb6f3a0304be1b1916a0f81dbad"
+    },
+    {
+      "path": "jellyshops/src/features/auth/components/admin-auth-gate.tsx",
+      "bytes": 4248,
+      "sha256": "af3d11e5a797d3075d6384de1d7d527bbba1ce1294020f90d655ddddeb60b5c5"
+    },
+    {
+      "path": "jellyshops/src/features/auth/components/auth-form.test.tsx",
+      "bytes": 1700,
+      "sha256": "a32e3f65977cbdb2b93bb3baaae24db059ae0fac396970ca11fb211c8064c446"
+    },
+    {
+      "path": "jellyshops/src/features/auth/components/auth-form.tsx",
+      "bytes": 5527,
+      "sha256": "dcbae34527562f5d3879306b978e72201ad3f3d2a9a1ea5ef2c2051c128698e6"
+    },
+    {
+      "path": "jellyshops/src/features/auth/lib/session-token.test.ts",
+      "bytes": 1305,
+      "sha256": "37fa0460bce4764a4f8617189107bb25725228fd9a82ba5ef7c8703c26b85fac"
+    },
+    {
+      "path": "jellyshops/src/features/auth/lib/session-token.ts",
+      "bytes": 972,
+      "sha256": "0156d96bf541131a46ad162a8b91371ce4fb7530e4c3dd6fdbcac9d4c6cd6ae4"
+    },
+    {
+      "path": "jellyshops/src/features/auth/merchant-auth-callback.tsx",
+      "bytes": 1476,
+      "sha256": "b3a4f2db423ef70b604c13ac133994c8d655772cf01ae9e6aafc1bf3fba370c6"
+    },
+    {
+      "path": "jellyshops/src/features/auth/providers/auth-provider.tsx",
+      "bytes": 5460,
+      "sha256": "f1b67f097a5ed567601502a9229594ee485d5f9c9e1b659b2a889abc90a7cc75"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/api/client.test.ts",
+      "bytes": 7649,
+      "sha256": "25d3a2b886fdd321f1a6ceb857cfb483702934afb39f59f473b278c5641ef57c"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/api/client.ts",
+      "bytes": 15187,
+      "sha256": "06020d2a84c07e5e79843336ad420697dbce5a7d090b07de44f63c6d3ba2a054"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/api/types.ts",
+      "bytes": 6658,
+      "sha256": "0fb12fc1d117102ac614b3117d3a900236e5d6f97ef51c12510ddc18cdf4af96"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/category-recommendations.tsx",
+      "bytes": 5008,
+      "sha256": "5d3b38740cabbb4bd0586105f620f4f9e1ade2d525ee9c5deb6d18c92f9d8849"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/create-category-dialog.tsx",
+      "bytes": 3199,
+      "sha256": "b8258ca4d30cadbd30ef518cb2083b33ad38bbaf3ac7de50073c980eb5a3db4f"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/digital-product-settings.tsx",
+      "bytes": 5184,
+      "sha256": "cf012d8788830b4f0cc069eb29abb725f1499fd7ecdca623d92f359fc6713d56"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/merchant-payments-panel.test.tsx",
+      "bytes": 3148,
+      "sha256": "f78ff53e658f6a5356f0e6e63bf4b8ed43f5b1f52baa35ae6ae9121885e2f35f"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/merchant-payments-panel.tsx",
+      "bytes": 11425,
+      "sha256": "aa4eb41d492f3c69d88613774cd3a4f108ad623b2d6cfea9721003e15421457b"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/order-payment-panel.test.tsx",
+      "bytes": 2691,
+      "sha256": "f463d3745d8bf2a164bde74bc66bec48a568348a7cc6775314fc487de924ebfa"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/order-payment-panel.tsx",
+      "bytes": 8081,
+      "sha256": "8437fd240ed087dc080dcf2463f74ed72c5426e0b42397fbf4df124b046a4841"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/order-status.test.tsx",
+      "bytes": 261,
+      "sha256": "d9308093f30fe95e324094e8c7c1e3eaecdfa15d926c3733954bfbdb555f6d90"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/order-status.tsx",
+      "bytes": 421,
+      "sha256": "d3b5b1b791ac9b66286c9238f0eaf74253afc749e660c9bb8f2713e6cfbe51aa"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/order-tracking.test.tsx",
+      "bytes": 4112,
+      "sha256": "09aaf114cbb437650e04957edacdeee349a6df45612cacf2c8d26f63855832c5"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/order-tracking.tsx",
+      "bytes": 3998,
+      "sha256": "1953ee0dda8b2abf895f83519eb6876b586d5034d28633a378f6f558c68b0b37"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/order-ui.tsx",
+      "bytes": 1400,
+      "sha256": "942c4711b2a67b02a61a667ab1ed1cde4cc539c6aa074678401158cbf0c9c39f"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/parcel-weight.tsx",
+      "bytes": 958,
+      "sha256": "b09fdf98716128e8bc599ce07fb96588762e0a28b6ad7413d24957a532e317c6"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/payment-element-checkout.tsx",
+      "bytes": 5107,
+      "sha256": "e7d047d2ad66dfae2d20db791f41ecfa5d050accf1caff18a73c476b37893ace"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/product-category-picker.tsx",
+      "bytes": 10887,
+      "sha256": "400193f0a28730b4c047fb2499c3a4b4103d1d7ba9e2826c30b9612f3103224d"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/product-form-styles.ts",
+      "bytes": 443,
+      "sha256": "25a02e29327c4faea29884b64f41fdd9a75a07fd79b19118e63cc25ffc8e1103"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/product-form.tsx",
+      "bytes": 22904,
+      "sha256": "91015ab8ca71108897ba63b3b1772cb2db4ff00a71abecfa83abb4babe337403"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/product-options-editor.tsx",
+      "bytes": 12861,
+      "sha256": "870d04e31f86f479d076d5a659d685750af5d4c4d4208c2a760b2d6c5cae101a"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/product-organization-panel.tsx",
+      "bytes": 6346,
+      "sha256": "7c35cfc81e31583f0250b146658ffd0a2086ab7663a2fde283d7f912d500e044"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/shipment-actions.test.tsx",
+      "bytes": 3442,
+      "sha256": "55fca85e3754bdab2d9d46b8d6e75e9296c237c2bc8d846056c538caf8e4f828"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/shipment-actions.tsx",
+      "bytes": 4498,
+      "sha256": "27e592102f1cf7e22534e2a3eb9bc2ab346bf501718587edada97b9bbab3e077"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/storefront-catalog-sync.test.tsx",
+      "bytes": 2927,
+      "sha256": "5f5cf6eb0985edf175a3418387601a057a97ecdd272c862257142498ca2d3fe5"
+    },
+    {
+      "path": "jellyshops/src/features/commerce/components/storefront-catalog-sync.tsx",
+      "bytes": 3970,
+      "sha256": "214d7e679a5e08525e3b6513e33ff12bbb179e6c3bfff32cf1809799e783efe2"
+    },
+    {
+      "path": "jellyshops/src/features/content/api/client.test.ts",
+      "bytes": 1599,
+      "sha256": "0314e327d4f58e6a3f1031f9b0cb130951a0613c3f158f41fdc82b47f6c51e39"
+    },
+    {
+      "path": "jellyshops/src/features/content/api/client.ts",
+      "bytes": 5843,
+      "sha256": "aac743722ac9e6b5cc14b1868a286e6ff10f4ad64ed5021f13d372a9df2d7118"
+    },
+    {
+      "path": "jellyshops/src/features/content/components/resource-form.test.tsx",
+      "bytes": 1798,
+      "sha256": "8f5348db2240757167503b91c259f3a80ef92c01a6ea83819cef4041ec8c2cd7"
+    },
+    {
+      "path": "jellyshops/src/features/content/components/resource-form.tsx",
+      "bytes": 3360,
+      "sha256": "d99d532d0e242eefa6d4f75172799a5eb1170638d015949db205e95a9c0e1cc3"
+    },
+    {
+      "path": "jellyshops/src/features/content/components/seo-fields.test.tsx",
+      "bytes": 884,
+      "sha256": "b926f2f7630791df13ed06adee47813b65e761554ad35f759d76c4a9ff883901"
+    },
+    {
+      "path": "jellyshops/src/features/content/components/seo-fields.tsx",
+      "bytes": 4070,
+      "sha256": "0987adcf9940ed858a2dc951f39297e870d5dc1aa77cf57fca87cebdca4be80c"
+    },
+    {
+      "path": "jellyshops/src/features/customers/components/contact-form.tsx",
+      "bytes": 1915,
+      "sha256": "6e70b731dcd1dc401c9ca01a8e49388c1a74f92ac19b592e3b751cd35b4b3b96"
+    },
+    {
+      "path": "jellyshops/src/features/customers/components/customer-page.tsx",
+      "bytes": 15994,
+      "sha256": "f0777be7adf98075f3bf0ef0e740a79a508ce68cf01ef5f4d409ba5efd7df11f"
+    },
+    {
+      "path": "jellyshops/src/features/customers/components/newsletter-unsubscribe.tsx",
+      "bytes": 1217,
+      "sha256": "c01e49238339dfb755f5c0881eb9a75ebd0953a9298c5d221abe1b93eea3ed84"
+    },
+    {
+      "path": "jellyshops/src/features/customers/components/protected-storefront-page.tsx",
+      "bytes": 1253,
+      "sha256": "a521832d3938e748c921e2e86cde68f91ba4b716a26b3af01de9497d57b969b8"
+    },
+    {
+      "path": "jellyshops/src/features/customers/components/wishlist-button.tsx",
+      "bytes": 1930,
+      "sha256": "7aa88fd55dde9993275e08fb631eafa2d59907361464e7046192c0f89f8a8169"
+    },
+    {
+      "path": "jellyshops/src/features/customers/lib/wishlist.test.ts",
+      "bytes": 546,
+      "sha256": "e8c0d6046d13e7055e26231b5114c758a46aa3640ddb2d459bdc6f26c3ddc6f0"
+    },
+    {
+      "path": "jellyshops/src/features/customers/lib/wishlist.ts",
+      "bytes": 665,
+      "sha256": "6a5114332e3eab739b5415eab15f4e5f8c709e8ada1e7529a9731788a3f90f3a"
+    },
+    {
+      "path": "jellyshops/src/features/customers/providers/customer-provider.tsx",
+      "bytes": 4384,
+      "sha256": "d394f2cc895e4da37949515aee0e4f1dcd17ee3b0850408e48c33875bcfa2225"
+    },
+    {
+      "path": "jellyshops/src/features/navigation/api/client.test.ts",
+      "bytes": 1238,
+      "sha256": "17937fad3271ab356665a5705118029dc5bf78fef404494fcd1cce72d0577efb"
+    },
+    {
+      "path": "jellyshops/src/features/navigation/api/client.ts",
+      "bytes": 2112,
+      "sha256": "23380a20fd5bba56a867079d9c6a23970645579f0bdee18f32898542499cbbbd"
+    },
+    {
+      "path": "jellyshops/src/features/navigation/components/menu-editor.test.tsx",
+      "bytes": 791,
+      "sha256": "212914a45ef2c3ed000b6b6fd2c05f0159d4295998712e3dcd1d17cc7732291f"
+    },
+    {
+      "path": "jellyshops/src/features/navigation/components/menu-editor.tsx",
+      "bytes": 3848,
+      "sha256": "83c389c599e31837639307aa5755d7b51e14baeb819c7bcaa01f8f476d414fc8"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/bulk.ts",
+      "bytes": 2796,
+      "sha256": "d4bacb61a518ccc92d4baab43b7e28022558a0205930d5138aa13676ee058099"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/buyer-preview.tsx",
+      "bytes": 10130,
+      "sha256": "42558fbfa920907cab86bae796a8932e53eef92b8eb9089f90efd12915721658"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/choices-and-variants.test.tsx",
+      "bytes": 26150,
+      "sha256": "47b3b43142b462ff9d915352c3423e81c46e074901a0266e012bda88119a8c64"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/choices.ts",
+      "bytes": 4556,
+      "sha256": "106ab13d8e4205043a30beb3d6ab65e0dce76d8c5b2fe64accb7ca1806d4d970"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/draft.ts",
+      "bytes": 18217,
+      "sha256": "1a8ad9538183531ba24c9da6dcf314982df368bea1370d1a2af76d83afecadfa"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/gallery-draft.test.ts",
+      "bytes": 1326,
+      "sha256": "5c814927f7465a0c84a5bf16a2ea864372c43885c8dd4b3a94cb089d71b77b25"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/metafields/api.ts",
+      "bytes": 3360,
+      "sha256": "2942ef42e27d3256e11a332e94440a1d756c2fa93a91cee126558c3bdc7bd0b9"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/metafields/lookups.ts",
+      "bytes": 2118,
+      "sha256": "b1521e610de1588ae98698206f1648f4a454b68c529c486d99ae3aa01f4fc4c2"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/metafields/metafield-fields.tsx",
+      "bytes": 2092,
+      "sha256": "724cb6905fd1c593960f03be8113122c066bc1cb727c957466929f4ce06ab146"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/metafields/metafield-input.test.tsx",
+      "bytes": 10909,
+      "sha256": "da19c9d3b54f7b5999533f4b3e21a474136a3205fb976a65f4c68f48464db8d8"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/metafields/metafield-input.tsx",
+      "bytes": 12863,
+      "sha256": "af02ad808bfa892f22ff73b6a8e057e0a05753a961e03526e16ef547ccb6db86"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/metafields/new-definition-form.test.tsx",
+      "bytes": 6827,
+      "sha256": "f8b8ae936536926d6a196f80c8aa6e69132284ef854ad88873efc73413c3c20f"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/metafields/new-definition-form.tsx",
+      "bytes": 9254,
+      "sha256": "e1832957a93093e0a63c7b83dd21866b6e7bc20a6d5fcac82818a80e972027b0"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/metafields/use-product-metafields.test.tsx",
+      "bytes": 10041,
+      "sha256": "479f86eb1f3edaa345fc167c1d8081ead18a926c5d557f213798fd1b2a07d6fd"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/metafields/use-product-metafields.ts",
+      "bytes": 8449,
+      "sha256": "2b4ab25f029b5e97cc10f76d361ac4abaeb9f6f3ae0b67550a5a3a0952a84f56"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/metafields/values.test.ts",
+      "bytes": 5053,
+      "sha256": "29a737dfca4541b67d6f879c536d3741cf4ceafbb71f9a51904c74e3cc8b66f4"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/metafields/values.ts",
+      "bytes": 7852,
+      "sha256": "aa8dff7d900d023e82cfe34b166d3ae60c0cbb6fe3f7dc869ba1c5cd33974a25"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/metafields/variant-custom-fields.test.tsx",
+      "bytes": 4266,
+      "sha256": "da18cc4c5860cb6af433efb2c7e98f8ea8917eea1e8963addd74962f19aba229"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/organization.test.ts",
+      "bytes": 1857,
+      "sha256": "620ea9e85a8bd4f5d2affc17175477518308f20b897b2785cf5781995474a857"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/photos-section.test.tsx",
+      "bytes": 4231,
+      "sha256": "94fac463abd68495642a5b53360a9422fb4a85707bf50d8c724b608c9fef871f"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/preview.test.tsx",
+      "bytes": 11731,
+      "sha256": "1928d2440c300321cb5c22d0518f918385a4977a490f3f90539a58fd630068d7"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/preview.ts",
+      "bytes": 6593,
+      "sha256": "cdf37332f70a2387e6c3e48befbf17e7a26eb824cd4ea2197a8833a3648200cc"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/pricing.test.ts",
+      "bytes": 2146,
+      "sha256": "7b790c4f7676690b65b40c8c9c80cafbfed4d2ced1cb682f2f3b1ca151231b6c"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/pricing.ts",
+      "bytes": 3877,
+      "sha256": "e4ef52826a3e5517290c28dac9881635ee4c46dbe7e2cc6ef50751f32cd8a481"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/product-builder-edit.tsx",
+      "bytes": 1948,
+      "sha256": "8309043ccca2a6d4c6b49136cce33ddcbf18c5a6e0e2c98d59eec196f2191bd9"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/product-builder-metafields.test.tsx",
+      "bytes": 10438,
+      "sha256": "478bed92bf59be9cbd0deb57111b2a6ebb88c84cd29894abfdca6c0389e6f15a"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/product-builder-page.tsx",
+      "bytes": 124,
+      "sha256": "555a6f96a7af1d82032a41adb5314220ba97a639b9c8860006464c5088fb4bf4"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/product-builder.test.tsx",
+      "bytes": 12406,
+      "sha256": "b6c7ee8cc51001c9c6e20e07e88532f4b079e7bfc9f337476e4496d288bee2e1"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/product-builder.tsx",
+      "bytes": 18162,
+      "sha256": "176904d33b7422a137f14af3a34192a674d5d92c6f73c97347bbe874ee4bf358"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/basics-section.tsx",
+      "bytes": 3820,
+      "sha256": "bab6303bc1abac6be3ba9fbdf17a4db77d6c0dc197cf794f7f1e65e1343efaa2"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/category-section.tsx",
+      "bytes": 5749,
+      "sha256": "3bdc18b6b2f2a44b37efd1b167dac138c2f195cafdf18f3e7c3b5562573204f1"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/choice-card.tsx",
+      "bytes": 8797,
+      "sha256": "3ce9cc88dc00795c0353149ec1aba3cd1c66a8781b020ec478ef586896f5c8e7"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/choices-section.tsx",
+      "bytes": 4866,
+      "sha256": "5905ae51b4593d670c4b1fc277596a9874713b98e439c6fadea2b7cb99b74463"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/description-editor.test.tsx",
+      "bytes": 6208,
+      "sha256": "9a6e3e5f8a490924f1f8ebecad5ca16b902dc8b04e0d53e213d04f6c8caf301c"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/description-editor.tsx",
+      "bytes": 12744,
+      "sha256": "b4bd5608dc2be1419a93be040351b279aba3c1e8e40cab9725e76bc8037f1c2e"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/metafields-section.tsx",
+      "bytes": 2209,
+      "sha256": "f15089338935832d0a7da709822260bef7f4a1fcc42dd824f3cac4e12dc929d7"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/optional-fields.test.tsx",
+      "bytes": 1966,
+      "sha256": "55b57ff6a0f948dd1d54d8eba8314be6686c7e4186135c438d861b5435c5bac6"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/organization-section.tsx",
+      "bytes": 4359,
+      "sha256": "9d4a46617aeddd37f2daf9cd3c0c39c9791cf7e3d7eeaf20b9597b58a8453377"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/photos-section.tsx",
+      "bytes": 18988,
+      "sha256": "dde340320390f411728fb6f2dce3b9f9951266104d7a9d65ff92e5dcd5cac6e8"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/pricing-section.test.tsx",
+      "bytes": 6682,
+      "sha256": "dbdacb3fceae49263621d3314fa081db6f984accda958d8c563bc4430add97d8"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/pricing-section.tsx",
+      "bytes": 10181,
+      "sha256": "e95ac94595729b5672d58d45ed0b290a12936ff2de8a9621ac807a2222da69d1"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/section-parts.tsx",
+      "bytes": 991,
+      "sha256": "153176f7d93814446a537072035d69468868222cd0a407d7c3d3abdb8714f713"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/seo-section.test.tsx",
+      "bytes": 7272,
+      "sha256": "61be208d6f38fbc3ff94cd7ebcf3dbf4b65d1ac2273183f74f05be377c860510"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/seo-section.tsx",
+      "bytes": 6110,
+      "sha256": "f50cf4c8e5291fc5b13230c7faf6fcf4b855afa9cddc94734f55bb12227c06de"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/shipping-section.test.tsx",
+      "bytes": 6019,
+      "sha256": "6728e250d188ee650c3c53d17ca08e48e7f7ec1f3f6fe6f65ed38c1633ff7393"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/shipping-section.tsx",
+      "bytes": 5318,
+      "sha256": "3d4405efa6207f306363cc34f76572f8a9198f1261c4540f10309f43cfce3c0f"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/variant-details.test.tsx",
+      "bytes": 12723,
+      "sha256": "125d486c9bc2a55ed07f8b1a6feea2b24f28f597d31dbb5d449975b339db78b5"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/variant-details.tsx",
+      "bytes": 9542,
+      "sha256": "722748f125132a2abd9185f2d4dc337a437f0dfbc94c991d98b6bd96251376a5"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/sections/variants-section.tsx",
+      "bytes": 14067,
+      "sha256": "4d68c64eb8453449d08f6e723d6aa140840e3e1bcb58d8a751594c19baa0f73a"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/shipping.test.ts",
+      "bytes": 6797,
+      "sha256": "4df99d89021b716f38830ae6f7adc59354e0c7d100287af7cda18e83b18fa0f0"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/shipping.ts",
+      "bytes": 8883,
+      "sha256": "f9b7270430b80ffbc407c0162a4ed6542d9607e8c35c4ad1d454d4be6c09d523"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/stock.test.ts",
+      "bytes": 852,
+      "sha256": "b02f1616e60504c810a64e883a8a094b1e02d1b10780a4ac20768d82328ff8b5"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/stock.ts",
+      "bytes": 1319,
+      "sha256": "5f69f000a135b17b6d3cd6ebb5380740293896de3e0b592d7716760b3cfa89f8"
+    },
+    {
+      "path": "jellyshops/src/features/product-builder/taxonomy.ts",
+      "bytes": 4238,
+      "sha256": "63f860de1e1f18b04a13f22fbbc1a6d4a81852e1f8153a9a247248a5ca4aa92e"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/api/client.test.ts",
+      "bytes": 12663,
+      "sha256": "e7f25481de60ae9c211443aa41b0c3d92409f33946da273056079b2b40a6a6f2"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/api/client.ts",
+      "bytes": 20276,
+      "sha256": "4935e516fc4d9a17d5dc59de1a7099bc9afe83c85f7bce1d34a94b3bb0132900"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/api/types.ts",
+      "bytes": 5901,
+      "sha256": "15fea3a266f448941116681bbfb3391c609c19c6479a339f2ef6f225d9f54806"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/controls/image-control.test.tsx",
+      "bytes": 1020,
+      "sha256": "5d73f3a640239504c2bd4fc254fca26baecc0994476967facb54b634e39d99d3"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/controls/image-control.tsx",
+      "bytes": 14459,
+      "sha256": "f7cbd96fefe61fda86ddb8ea1f5e136cfa264cba2946b2363bef1e44f459c3e0"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/drag-reorder.test.ts",
+      "bytes": 1146,
+      "sha256": "eee50fea3f02fc8a638b0f603df2a5ea15c14137cae3e28c863e408a644b9369"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/drag-reorder.ts",
+      "bytes": 929,
+      "sha256": "4504fe07f464fb95c1267be56405eaaca045b92f1c48761c21dbdb91db203d9c"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/dynamic-source-picker.test.tsx",
+      "bytes": 1477,
+      "sha256": "fcc3d86cb0e801cd94ec3d26569e3cad489a4fbd0b771ecf1b24044cc6724ccb"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/dynamic-source-picker.tsx",
+      "bytes": 1341,
+      "sha256": "187b97aded957a59932d179ca3e0db217e531a5b1592ef273ebf789085cd25e7"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/editor-page-picker.test.tsx",
+      "bytes": 1849,
+      "sha256": "5120e2bdba2320de1df6f9de7e11c8826214cd8842a26d58b06dc8d36ad2944e"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/editor-page-picker.tsx",
+      "bytes": 5972,
+      "sha256": "d77a276242bd211ddac0f61d697e465315cca756220bd6d2dfe4c5132d253dcf"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/editor-panel-navigation.test.tsx",
+      "bytes": 884,
+      "sha256": "3255edf67d07102b8b2a95b5645b81f13f19716797c048895f75a4eab9e5bcef"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/editor-panel-navigation.tsx",
+      "bytes": 950,
+      "sha256": "4aa4da62d68b09671f0d135380539f49ababc904074d9ba01cb7c658e95dc35f"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/editor-shell.test.tsx",
+      "bytes": 9949,
+      "sha256": "6adf797ec8dcc9eb09fae3f0cef0f72e698b099c7debccbabea5db3112ee97d5"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/editor-shell.tsx",
+      "bytes": 11764,
+      "sha256": "da225ca2b8e641206d2aaf782d776eddd9a86da6705f9be1bae48d3c32e034cc"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/editor-toolbar.tsx",
+      "bytes": 7728,
+      "sha256": "95d7431640b3d35487f3d6dd7772929faf68cf50446ae17cd2ab74d3ae93407d"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/global-section-panel.test.tsx",
+      "bytes": 2312,
+      "sha256": "4283053f82df08f931dadf8c4670810721a656877af761b4106cc0016e483e21"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/global-section-panel.tsx",
+      "bytes": 2659,
+      "sha256": "14f18f559934ed2d1d4fbc26e500a1becd24ab8fd9801596fc97be529ff77e94"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/inspector/control-renderer.test.tsx",
+      "bytes": 2714,
+      "sha256": "0a10dace9458f9b01108369fb733bd7436cf1d759bda6db7882b476d92b239a4"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/inspector/control-renderer.tsx",
+      "bytes": 12759,
+      "sha256": "80f8b8b6ef87c0fda88bd05a84bcebfac222e1ff3dd70ac6244e5cf0ed2240c4"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/inspector/inspector.tsx",
+      "bytes": 6291,
+      "sha256": "61e2dd6ff41f83f5c1271c81526f36fe143a8e19c573c777d6e8bdbdca088ab9"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/inspector/rich-text-document-editor.test.tsx",
+      "bytes": 4446,
+      "sha256": "1019f622fc09cfaf9bbf3ee41b43a80eb575985c30dd7325c5eb7d087fdd76e2"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/inspector/rich-text-document-editor.tsx",
+      "bytes": 5776,
+      "sha256": "45d2c3619a9177a9140f4d2932b540e4edbbba9bba68f97c695af689f5ed372d"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/inspector/setting-groups.test.tsx",
+      "bytes": 2256,
+      "sha256": "8bc09d58155abb2a8f7faa27d61dc39b98eeae292b7d1efc39df50bb6acb7c99"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/inspector/setting-groups.tsx",
+      "bytes": 3301,
+      "sha256": "355a86d42b886fa00cd747c506df0a3a39ec16eebb1104c8039a2c54a89274b8"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/inspector/theme-inspector.tsx",
+      "bytes": 13807,
+      "sha256": "caa06deb76ea82123f60a49c09d0795106ae1c370474931f188111529e4ce868"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/inspector/theme-settings-panel.test.tsx",
+      "bytes": 1355,
+      "sha256": "2a9cca948a7b037460f38efbf20cb6ceda7b7d2a786666844e15a1143eddda3a"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/inspector/theme-settings-panel.tsx",
+      "bytes": 5995,
+      "sha256": "85d43a3494339f7a6e92eca1c6375e08ee61e61e83c8dc825db72eaa8ecb4383"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/page-hierarchy.tsx",
+      "bytes": 3985,
+      "sha256": "beeaf6e6881ad12545b70150cc472799d6e314ef3b63a482e4faa05c5f23a3bc"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/preview-canvas.test.tsx",
+      "bytes": 872,
+      "sha256": "255f3415162a1599b2abe9b1d0a0175baa9a655817eee4be1c2927687154229b"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/preview-canvas.tsx",
+      "bytes": 2516,
+      "sha256": "0b129e67d1d7cf4200a3b175fcb66a9b783bce2bfc67b3bca3d0b5fdacaa2825"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/publish-controls.test.tsx",
+      "bytes": 6464,
+      "sha256": "1b373a3c3554fade1aa87b0f77451fbf2c28e907c545b47e44a4ed56e740b1ee"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/publish-controls.tsx",
+      "bytes": 9489,
+      "sha256": "b6861f55bd872390ff79bf0217a1b7b1a86bf8dd4bc2f1470446ac36f8f81c2d"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/publish-diagnostics.test.tsx",
+      "bytes": 1439,
+      "sha256": "9cff7ea9d462e70ad516e39eecc6dc07d91a4c1116db49193abe29406a26b7d2"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/publish-diagnostics.tsx",
+      "bytes": 2400,
+      "sha256": "a0e76574eaea4a6a2eeefb8eeb2ed7a6144c3223a6be4e219e9f213d0381b784"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/section-library.test.tsx",
+      "bytes": 1823,
+      "sha256": "57b59217612e790172a968009e5161da69e9bf04ec15a2e3b9eaf78d5a0f9508"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/section-library.tsx",
+      "bytes": 4224,
+      "sha256": "34e3a8db30184f4cea0df394f10fad277f6d7eea2fa73d9b12c6156c47348421"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/storefront-preview-frame.test.tsx",
+      "bytes": 1088,
+      "sha256": "db7529897881a704987d3c2e76c773e9b3f55e7629c99ae656ad43c720abf480"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/storefront-preview-frame.tsx",
+      "bytes": 2230,
+      "sha256": "6646aadb46c38cfb93a92da609c3ff7b0c16e1590ce3a9d43044c154fb7bea70"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/template-actions.test.tsx",
+      "bytes": 6361,
+      "sha256": "26c44cb22e72355a50afe5ecb4767663ce3612059e8f49d82a7e0bf8365bbce3"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/template-actions.tsx",
+      "bytes": 10584,
+      "sha256": "416729b86f9a0e434717f8dd70f982a6e5eb5519c92086b9d4795fcf040b6299"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/template-hierarchy.test.tsx",
+      "bytes": 6639,
+      "sha256": "74701d28b0e7db4328942cb0538cc12cd5fed91b5005a291d9fed44a4a3d1155"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/template-hierarchy.tsx",
+      "bytes": 14340,
+      "sha256": "7a70d91d3c265eadc3aaf3c9acc5be12362cd7c23a265a42eb92e5492682ef99"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/template-picker.test.tsx",
+      "bytes": 3426,
+      "sha256": "3cc9bbcf7f84e4eac2279c8b38a3af8f6662922ed1036738dd6c88109fb732c9"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/template-picker.tsx",
+      "bytes": 5534,
+      "sha256": "c151c88484e81dc921dfed7eb153c81c98106571a220709205ee46ec4c4f1ab4"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/template-preview.test.tsx",
+      "bytes": 905,
+      "sha256": "c3d9e135a89920a52caf215e87e40669064f9fa98e7c451e6f50f2023ce2b6e1"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/template-preview.tsx",
+      "bytes": 10452,
+      "sha256": "f0f2dfd6c963c95fbd659f043b6bd5eae1a76acc7e29f726da2a6c7f1e1ddc74"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/template-resource-selector.test.tsx",
+      "bytes": 5213,
+      "sha256": "d482166e8a8d623f72f26ec22e040f8b3563ebe2bfe10f498ad25756c0baf599"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/template-resource-selector.tsx",
+      "bytes": 4454,
+      "sha256": "c091964ea43803f87e2eb1dd8dec6156177730b8598c48b98472e42ddcefb808"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/components/workspace-toolbar.tsx",
+      "bytes": 3166,
+      "sha256": "9344ee19da6803ad8658587e216f10cd06b49baa4c61b3de2ec31c5f0f44cbd5"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/editor-navigation.test.ts",
+      "bytes": 683,
+      "sha256": "e1098a770a8c1940dd07c0d7f65f3e906a5afb7a27b449da1d7d6ffdb151061f"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/editor-navigation.ts",
+      "bytes": 959,
+      "sha256": "daba43acdcd61315d49f6dc4cdcc8874d0fdcc14e9f00ad167db63230f7447c9"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/editor-page-helpers.ts",
+      "bytes": 6518,
+      "sha256": "80de80841b17e8b1990aa424170a62113df1d44dba1c65bc369b85ce058ad346"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/editor-store.test.ts",
+      "bytes": 1355,
+      "sha256": "8771655aa048ae7a240e766a22d7771a542047a375bc7975ef5b9807bbc23a2d"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/editor-store.ts",
+      "bytes": 1971,
+      "sha256": "cc11f670ff42e37f8e31c7299374299b371b5def1c0c5ed37823cdca155df1b8"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/model/commands.test.ts",
+      "bytes": 2528,
+      "sha256": "2621193742a5d71e05590302b6bca71ea9d19cfa3712b3ea97fd7fd09ac7ae26"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/model/commands.ts",
+      "bytes": 7057,
+      "sha256": "20bff4ef874e89c77cea939fb90ffa9ae269c56cd2a1d3e2cb0c0c4862120787"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/model/history.test.ts",
+      "bytes": 1175,
+      "sha256": "80355b5f507f50e7de0b992d8eea7907f206594d86fe269b218fcf6472b2d14a"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/model/history.ts",
+      "bytes": 988,
+      "sha256": "20b433730c08140037d6f93d60747add827e5f5d616802bda1eaa19faae41a5b"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/model/page-commands.test.ts",
+      "bytes": 1582,
+      "sha256": "be46464990e55ce5b74d532249d71119a318f75171fa89b99218d08321d5243e"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/model/selection.ts",
+      "bytes": 637,
+      "sha256": "36d777dc3a122762a1a3d3c145445654e2bb429a0e8aa6c5acf2c31a7708f547"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/model/types.ts",
+      "bytes": 2353,
+      "sha256": "eab56cf8f260ebc2eeddc3c1095d80105f232abfc380e50b9f4e59040609df68"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/preview-context.test.ts",
+      "bytes": 11213,
+      "sha256": "4964b1b4b72fb610fffcc87896543b2788afeabc985051e2179fbff67978e54d"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/preview-context.ts",
+      "bytes": 6622,
+      "sha256": "429aae260749820ed0bc5014ed6f2ace905f2c2368b5aad2f68a3330c9240bf9"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/state/autosave-controller.test.ts",
+      "bytes": 2254,
+      "sha256": "46d66beead6030fd2175bc5b8a2d924be7b263492a9346f1699bf66d017bf89f"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/state/autosave-controller.ts",
+      "bytes": 2181,
+      "sha256": "3ee1eabe757747fc0b7681a6394f15d066ee3478c67f360951780d18112bd5cb"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/state/reducer.test.ts",
+      "bytes": 2776,
+      "sha256": "7bbd0679950ddf803e59dfade71ebcc880947599e1f0a32bf65ab1f8eb0d735c"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/state/reducer.ts",
+      "bytes": 4268,
+      "sha256": "800af7e935f01105fd2ebe6cc155f8f1c3f3cb5bb2fbc2bc54aeac1044d0f840"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/state/revisioned-save-queue.test.ts",
+      "bytes": 2463,
+      "sha256": "815923d5da603347b3d7cdfb94fc8f026eb4265fe905caaa5f042529c54e6425"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/state/revisioned-save-queue.ts",
+      "bytes": 2848,
+      "sha256": "42f0a2a9c8f42f4d4862bf9ba29a12bd5034c0443699dc3d330d97c13178e675"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/state/session-history.test.ts",
+      "bytes": 842,
+      "sha256": "b5f7a2ada2900a42e2858e3c80ec05c4060882d7a64ab0fe95f8101c9a9cabea"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/state/session-history.ts",
+      "bytes": 867,
+      "sha256": "cd6068fbbb542862dbf6d3638b7b6987a43d53adfedb5337279145be696d1ab7"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/state/types.ts",
+      "bytes": 1729,
+      "sha256": "f85b01c3fd9a7bd85c4ae3fc4a80da6f676c1bfb5cbd2c785360d451188632bc"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/template-layout.test.ts",
+      "bytes": 4952,
+      "sha256": "d4a2fa304d12e6d80292f9e233a2a87e6f329ed9740a560c737ce5c770622677"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/template-layout.ts",
+      "bytes": 5049,
+      "sha256": "d0927fd992cd182bca156d199e13a93661ee716b619bdcdab829f3218a17fe38"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/template-names.test.ts",
+      "bytes": 2530,
+      "sha256": "606edef04ce5eb25b7864abc7407a9b7509ada538e5c596a19d44a92a0b36958"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/template-names.ts",
+      "bytes": 2860,
+      "sha256": "445e037c20b349063061f3f795cea252c03f99d8ee207b1a72e015aaaae7f1c0"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/template-selection.test.ts",
+      "bytes": 2229,
+      "sha256": "d6b5af99e2995f9a5640b4eea90fb4d45d6536714bf46b0fbe718aeb29cf82e0"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/template-selection.ts",
+      "bytes": 1480,
+      "sha256": "1595f577eaa5abf0211385dd54e13294232287c3742251658cccc43828157b50"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/theme-pack-workspace.test.ts",
+      "bytes": 597,
+      "sha256": "f656cd2abbf1204393aa00dd8797a139b0517096e087895b85bf58029c9cf101"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/theme-pack-workspace.ts",
+      "bytes": 848,
+      "sha256": "1d6705ccd148121873492c14107db796778cead28244762403be7dcb7ad4e5dc"
+    },
+    {
+      "path": "jellyshops/src/features/store-editor/use-preview-binding-values.ts",
+      "bytes": 2134,
+      "sha256": "61cf3261ebbe8bedeaa0f923a3e6e4747eac791416703cb2c1b92b169872222a"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/binding-values-api.ts",
+      "bytes": 2566,
+      "sha256": "84755aea8a7d76f2da1f6baaaa4f4e5845975481c518b16139bc312aaf6289c8"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/catalog-browser.tsx",
+      "bytes": 11431,
+      "sha256": "17e95909fc82535231143891b7360e3a7669afdd710f7ac5036f89fbf897d26c"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/chrome-context.tsx",
+      "bytes": 204,
+      "sha256": "fce6f8bf749dd5e7f598753fab506853445bcb8b94f9ec9aac645bc2646db897"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/components/cart-panel.test.tsx",
+      "bytes": 748,
+      "sha256": "c2253a9154a458ac6455298174e27d90989e1aeda00dbca09fb2c6f094925b72"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/components/cart-panel.tsx",
+      "bytes": 6263,
+      "sha256": "c821ac7f9812d57c79e88be5e56b87937ffc2f588e7f163791d73cfc61a4496a"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/components/storefront-frame.test.tsx",
+      "bytes": 3535,
+      "sha256": "890a5347753a2515e8eb98f7c80f2bce830cd56179f14ead9ab405872329201f"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/components/storefront-frame.tsx",
+      "bytes": 7290,
+      "sha256": "765a69ac2ca5f69d8e49bcf92a12fb5ed09f1f62b11e1d106f2a58939f67bb21"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/components/storefront-pages.tsx",
+      "bytes": 9453,
+      "sha256": "a3cd11b6e2ab2c105b4e95f1c4ae095ff28c6fcfd3363bcfffa24960d244589a"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/components/storefront-shell.test.tsx",
+      "bytes": 3659,
+      "sha256": "32e7eb475431b2d29d21eca288c500f36701e0a0d89883817f36f767b5888fc6"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/components/storefront-shell.tsx",
+      "bytes": 7214,
+      "sha256": "1b56404dbaf874f0d146b612383413fbb4fb328a599c87f12bae7f669f85e7be"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/dynamic-settings.test.ts",
+      "bytes": 7675,
+      "sha256": "23dec53788630b3b1c7a61aacafa4171aa02c39d8f9aee0d7f92db5778955093"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/dynamic-settings.ts",
+      "bytes": 6380,
+      "sha256": "eb2165395fbe7f4f0a1bb233e59c02547f3821468d096cb5dda9e4b5f2fc0ef0"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/page-context-loaders.test.ts",
+      "bytes": 3628,
+      "sha256": "68346263ca5c03d8a6f6f5bb13b77f41f7cc5ec0248dd3408ee2cb27020f6b94"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/page-context-loaders.ts",
+      "bytes": 3050,
+      "sha256": "fff3756b6c565df0bceb57f927b036a14773a5cf6dda6e42ce401c07ae7275a4"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/product-presentation.test.ts",
+      "bytes": 8552,
+      "sha256": "507cf103fcfcdcb33915bf4bd77d41673048c10689f6172c1ea5048e7407b9c3"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/product-presentation.ts",
+      "bytes": 7534,
+      "sha256": "9e63b28f33ab0cca1d7f993f22f9337eaea8af8b3e1bc341497bf13297529f6a"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/public-page-context-api.test.ts",
+      "bytes": 3087,
+      "sha256": "a250fcb431d041f72dbc483e389da773c78d5cfd36d018a267dc5616e197e10e"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/public-page-context-api.ts",
+      "bytes": 4340,
+      "sha256": "58d63be72d23d2b582fa730048e503673a550ede754f371c6b7ae3a46b106553"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/public-storefront-api.test.ts",
+      "bytes": 3148,
+      "sha256": "3fe685b87b497976d3852e91fe20b01e0bc9cb92912382a2b00cb688692406f7"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/public-storefront-api.ts",
+      "bytes": 2188,
+      "sha256": "07ddb22f2c3c4fa73ee00ab2655e0a97f9233298a73d23d5cf063e1abc5418de"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/published-v4-routes.test.ts",
+      "bytes": 4430,
+      "sha256": "a382f0cd88483a0e03799d1796ccf869521fc1d506b31d77bc8ed49d1357a5c3"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/reserved-paths.test.ts",
+      "bytes": 387,
+      "sha256": "6b69a329a3d002b3bea3bab3479d5becb829aa6fe361a7da620f7b4712d2d796"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/reserved-paths.ts",
+      "bytes": 203,
+      "sha256": "edd33714ac9bf3e0a82f44385f2d5f3de1730c17398fbe49decdfccd13291d61"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/resource-loader.test.ts",
+      "bytes": 12518,
+      "sha256": "7a2c478deb8d4a3e35decdfcf4ee6b369addd34410dfb1dad16ff77848f5e177"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/resource-loader.ts",
+      "bytes": 10775,
+      "sha256": "2bf9f7a398be740da3ee714df35d760f16592b47f46843cbb5e369475941d2d1"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/section-limits.test.ts",
+      "bytes": 2255,
+      "sha256": "567326c5a29a777702c790df8539b1adb759682d07b54eb3d9af285e73edf099"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/server-content-page.tsx",
+      "bytes": 1897,
+      "sha256": "c64fe1023f0275c3db71be859254499e7ebe76fff2c0b5f716a7cee68a6b7bfe"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/server-storefront.test.ts",
+      "bytes": 652,
+      "sha256": "129b9d032060eb2cc834d614c2fe73f14fc50c2eed907f91b3ba0f8c45c218e4"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/server-storefront.ts",
+      "bytes": 4828,
+      "sha256": "b16df99781fd7ba5526239208efe96e3b0cac1094c917e7203f95f7e739734ee"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/storefront-bootstrap.tsx",
+      "bytes": 870,
+      "sha256": "35c8b65a28c822a07cb1b8295b56a14f18339a6e787d38e216c35b218b18903a"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/storefront-page.test.tsx",
+      "bytes": 4162,
+      "sha256": "b689b247f4f20add10183b2aca81d3a3cff04e6a618fa2103b2551b2e713069b"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/storefront-page.tsx",
+      "bytes": 6831,
+      "sha256": "4f17f7275b37946e9a4268d8b94e1c57b5ad564d1147dd1e39921c9604c2545e"
+    },
+    {
+      "path": "jellyshops/src/features/storefront/variant-sellable.test.ts",
+      "bytes": 2765,
+      "sha256": "a1933b6e22562e53eac261e42e6d35d603feddeac6c88e525a7f1477d7d0af50"
+    },
+    {
+      "path": "jellyshops/src/features/theme-preview/configs.ts",
+      "bytes": 7882,
+      "sha256": "9105c04abf87c7d62876761694bb42b0364108e96ac7c92b793523e4d8af5aab"
+    },
+    {
+      "path": "jellyshops/src/features/theme-preview/template-preview.tsx",
+      "bytes": 7197,
+      "sha256": "4cedf23bd8050e465002fea17ba9ae25002ccd07bcf3442dea7c0ac32b7693aa"
+    },
+    {
+      "path": "jellyshops/src/features/theme-preview/theme-preview-page.tsx",
+      "bytes": 10515,
+      "sha256": "15b7c0a5b61b0c8d72330468ff62c04a7acba9673901fbeb02ea21284fbb06b6"
+    },
+    {
+      "path": "jellyshops/src/lib/domain.test.ts",
+      "bytes": 3339,
+      "sha256": "330450e1453231134ce1f274a053caf067b59df9e41cd8b1ee4883f797fac331"
+    },
+    {
+      "path": "jellyshops/src/lib/domain.ts",
+      "bytes": 9563,
+      "sha256": "7543cc29ed8535fab672edd1f69c89111cd6e86da5880282a6db62e6c3420643"
+    },
+    {
+      "path": "jellyshops/src/lib/media-urls.test.ts",
+      "bytes": 1224,
+      "sha256": "9a1c82fd319b8f355f2d0ce6be3a698a28f913ce919e457c2071281cafa57322"
+    },
+    {
+      "path": "jellyshops/src/lib/media-urls.ts",
+      "bytes": 1131,
+      "sha256": "7fceffa887b625f72745da0abc91cc0daa1132d45e8e3ba6e24b14b8f1d9775e"
+    },
+    {
+      "path": "jellyshops/src/lib/product-builder/index.ts",
+      "bytes": 511,
+      "sha256": "7e2fb919e60da1b7fb153954a15b07e9db157f4cc4fb0abc5455ff7fc03bf5bc"
+    },
+    {
+      "path": "jellyshops/src/lib/product-builder/product-builder.test.ts",
+      "bytes": 10150,
+      "sha256": "2c730ece038db7d35248a6e99f0943b2bcb8d85e8b3e4aac400b0c81a93d696e"
+    },
+    {
+      "path": "jellyshops/src/lib/product-configuration.test.ts",
+      "bytes": 1293,
+      "sha256": "daa9dcf2f7612e29f12f096d92277115c246ff33344b96211d48b93604554255"
+    },
+    {
+      "path": "jellyshops/src/lib/product-configuration.ts",
+      "bytes": 1572,
+      "sha256": "7cc48c0e54176b9476b57ac189b2e7182e07d64a7d4ac0e441f19092070310e8"
+    },
+    {
+      "path": "jellyshops/src/lib/product-media.test.ts",
+      "bytes": 1046,
+      "sha256": "ced4987ab7ba106b6cfddaba4c0200c373ccf3f62ab483eab7c908c0db8edfd4"
+    },
+    {
+      "path": "jellyshops/src/lib/product-media.ts",
+      "bytes": 1776,
+      "sha256": "b2d81fcb350fa582f1b880611290b88581b1a276d82e019641fce6bc8a92d582"
+    },
+    {
+      "path": "jellyshops/src/lib/product-variants.test.ts",
+      "bytes": 2201,
+      "sha256": "5b5f94d9e61a29a9d7bd12bfbe0e60e54ed968c2a9953bc9805bf9dcfc550505"
+    },
+    {
+      "path": "jellyshops/src/lib/product-variants.ts",
+      "bytes": 3111,
+      "sha256": "8287d566524e16c4b3f04fcd722b1c4969f5eb8a3fa7fbef00a5934dc1ab4ec6"
+    },
+    {
+      "path": "jellyshops/src/lib/repository.test.ts",
+      "bytes": 7708,
+      "sha256": "c89c73a15323927f9b16e65103cf8bf2cfa5a449acc6ebdd7e035e6d4c9670ed"
+    },
+    {
+      "path": "jellyshops/src/lib/repository.ts",
+      "bytes": 20478,
+      "sha256": "32a089fa8b95190950e6dbbea65b9bc36b9890185d59d250f0c07a08d3020f78"
+    },
+    {
+      "path": "jellyshops/src/lib/seed.ts",
+      "bytes": 10721,
+      "sha256": "0f0ca5571e6dc4cea2aea73add302a2392dcc78188ee2838c2f3f51aae6f47fa"
+    },
+    {
+      "path": "jellyshops/src/lib/seo.test.ts",
+      "bytes": 3272,
+      "sha256": "706d63c736c5272fb1fc53d02b8182361965df362df65f22d66b40553df5b827"
+    },
+    {
+      "path": "jellyshops/src/lib/seo.ts",
+      "bytes": 2808,
+      "sha256": "0ef3a1f3250b0fcf9ffa956fad720b6559e1821552ab30d9f3581e0982cd607f"
+    },
+    {
+      "path": "jellyshops/src/lib/store-design.test.ts",
+      "bytes": 4813,
+      "sha256": "77276551e2b0515f44b6057caa4454b529f260a03263281843bd0bda898f3232"
+    },
+    {
+      "path": "jellyshops/src/lib/utils.ts",
+      "bytes": 118,
+      "sha256": "14fb2f175bc4163670d3c29d81916c358e18b6b20a793e9b851428cf9aa9fb2c"
+    },
+    {
+      "path": "jellyshops/src/lib/variant-photo.test.ts",
+      "bytes": 2731,
+      "sha256": "b58c36ef9172d2625a1cc0937f673dab9cd3a7f0cbd397e167a8b5c4f74b94d3"
+    },
+    {
+      "path": "jellyshops/src/test/setup.ts",
+      "bytes": 43,
+      "sha256": "9b328c4843431fa76d8de00008fc159e95f99a840211085ff3b8f25e53d14409"
+    }
+  ]
+}

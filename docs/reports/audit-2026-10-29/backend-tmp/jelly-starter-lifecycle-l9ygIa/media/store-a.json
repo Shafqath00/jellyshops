@@ -1,0 +1,18 @@
+[
+  {
+    "id": "921c31db-f706-4695-b291-0264856597f0",
+    "storeId": "store-a",
+    "type": "image",
+    "storageKey": "store-a\\921c31db-f706-4695-b291-0264856597f0.png",
+    "contentHash": "431ced6916a2a21a156e38701afe55bbd7f88969fbbfc56d7fe099d47f265460",
+    "url": "/api/public/media/store-a/921c31db-f706-4695-b291-0264856597f0",
+    "mimeType": "image/png",
+    "byteSize": 91,
+    "width": 1,
+    "height": 1,
+    "originalName": "merchant-market-hero.png",
+    "altText": null,
+    "referenced": false,
+    "createdAt": "2026-10-29T18:12:21.361Z"
+  }
+]

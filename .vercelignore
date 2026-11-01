@@ -1,0 +1,32 @@
+# The Vercel project builds jellyshops/ from the repository root.
+# Upload frontend source only; Firebase owns the backend deployment.
+/*
+!jellyshops
+
+# Dependencies and generated/local files are recreated by the cloud build.
+/jellyshops/**/node_modules
+/jellyshops/.next*
+/jellyshops/**/.vercel
+/jellyshops/**/dist
+/jellyshops/**/coverage
+/jellyshops/**/.cache
+/jellyshops/**/.data
+/jellyshops/**/.worktrees
+/jellyshops/**/test-results
+/jellyshops/**/playwright-report
+/jellyshops/**/*.log
+/jellyshops/**/*.tsbuildinfo
+
+# Configuration values are supplied by the Vercel project environment.
+/jellyshops/**/.env*
+
+# Local test/runtime caches and design-review screenshots.
+/jellyshops/**/node-compile-cache
+/jellyshops/**/.test-tmp
+/jellyshops/**/.test-temp
+/jellyshops/**/.tmp*
+/jellyshops/**/.agents
+/jellyshops/**/.codex
+/jellyshops/e2e
+/jellyshops/docs
+/jellyshops/editor-design-comparison.png

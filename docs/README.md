@@ -2,20 +2,21 @@
 
 Jelly Shops is a multi-tenant e-commerce platform for small merchants: a merchant admin, a visual theme editor, public storefronts and Stripe Connect payments.
 
-This index describes the repository **as it is today**. Narrative documents were written from the code; reference documents (file maps, function reference, endpoints, database schema, dead-code report) are **generated** from the source and must not be edited by hand:
+Start with the [architecture and restructuring audit](architecture/codebase-audit.md) for the current working-tree assessment, documentation limitations, and proposed migration. Other documents and generated references are snapshots and may lag behind the source; verify details before relying on them. Generated references should not be edited by hand:
 
 ```bash
 node scripts/generate-docs.mjs      # file maps, function reference, endpoints, dead-code report
 node scripts/generate-db-docs.mjs   # database schema (reads the database in backend/.env, read-only)
 ```
 
-If a narrative document disagrees with a generated one, the generated one is right: fix the narrative.
+Neither generated output nor narrative is automatically authoritative: check the source, configuration, migrations, and actual deployment. The database generator requires special care described in the audit; do not run it against a live environment without verifying its connection and TLS settings.
 
 ## Start here
 
 | I want to... | Read |
 | --- | --- |
 | Understand the whole system | [architecture/system-overview.md](architecture/system-overview.md) |
+| Review the current architecture, findings and proposed migration | [architecture/codebase-audit.md](architecture/codebase-audit.md) |
 | Run it locally | [development/local-setup.md](development/local-setup.md) |
 | Know which environment variables exist | [development/environment-variables.md](development/environment-variables.md) |
 | Find a file or see who imports it | [file-structure/frontend-file-map.md](file-structure/frontend-file-map.md), [file-structure/backend-file-map.md](file-structure/backend-file-map.md) |
