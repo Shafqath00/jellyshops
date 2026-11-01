@@ -1,3 +1,5 @@
+import { productImageSnapshot } from "../catalog/product-image-snapshot.js";
+import { isProductMediaEnabledForStore } from "../catalog/product-media-feature.js";
 import { createHash, randomUUID } from 'node:crypto';
 import { ApiError } from '../http/errors.js';
 import type { StripeGateway } from '../stripe/client.js';
@@ -216,6 +218,8 @@ export class OrderManagementService {
                 const v = (await tx.query<Row>(`SELECT v.*,p.title AS "productTitle",p.options AS "productOptions",to_jsonb(p)->>'fulfillmentType' AS "fulfillmentType",(SELECT m.url FROM "ProductMedia" pm JOIN "Media" m ON m."storeId"=pm."storeId" AND m.id=pm."mediaId" WHERE pm."storeId"=p."storeId" AND pm."productId"=p.id ORDER BY pm.position LIMIT 1) AS "imageSnapshot" FROM "ProductVariant" v JOIN "Product" p ON p.id=v."productId" AND p."storeId"=v."storeId" WHERE v."storeId"=$1 AND v.id=$2 AND p.status='ACTIVE'`, [storeId, inputItem.variantId])).rows[0];
                 if (!v)
                     fail('VARIANT_NOT_FOUND', 'Product variant not found.', 404);
+                if (v.sellable === false)
+                    fail('VARIANT_UNAVAILABLE', 'This combination is no longer sold.', 409);
                 const selectedKeys = (inputItem.configurationKey ?? '').split('|').filter(Boolean);
                 const configurationSnapshot: Row[] = [];
                 const options: Row[] = Array.isArray(v.productOptions) ? v.productOptions : [];
@@ -236,7 +240,12 @@ export class OrderManagementService {
                     const hasAsset = (await tx.query<Row>(`SELECT id FROM "DigitalAsset" WHERE "storeId"=$1 AND "productId"=$2 AND "archivedAt" IS NULL LIMIT 1`, [storeId, v.productId])).rows.length;
                     if (!hasAsset) fail('DIGITAL_FILE_UNAVAILABLE', 'This digital product has no active private file.');
                 }
-                item = { ...inputItem, configurationKey: selectedKeys.sort().join('|'), configurationSnapshot, titleSnapshot: v.productTitle + ' — ' + v.title, productTitleSnapshot: v.productTitle, variantTitleSnapshot: v.title, skuSnapshot: v.sku ?? null, imageSnapshot: v.imageSnapshot ?? null, unitPriceMinor, fulfillmentType: v.fulfillmentType ?? 'PHYSICAL', taxMinor: 0, discountMinor: 0 };
+                let imageSnapshot = v.imageSnapshot ?? null;
+                if (isProductMediaEnabledForStore(storeId)) {
+                    const media = (await tx.query<Row>(`SELECT m.*, pm."position", pm."altText", pm."appliesTo" FROM "ProductMedia" pm JOIN "Media" m ON m."storeId"=pm."storeId" AND m.id=pm."mediaId" WHERE pm."storeId"=$1 AND pm."productId"=$2 ORDER BY pm."position"`, [storeId, v.productId])).rows;
+                    imageSnapshot = productImageSnapshot(storeId, media as any, options, configurationSnapshot as any, v.options ?? {}, v.mediaId ?? null);
+                }
+                item = { ...inputItem, configurationKey: selectedKeys.sort().join('|'), configurationSnapshot, titleSnapshot: v.productTitle + ' — ' + v.title, productTitleSnapshot: v.productTitle, variantTitleSnapshot: v.title, skuSnapshot: v.sku ?? null, imageSnapshot, unitPriceMinor, fulfillmentType: v.fulfillmentType ?? 'PHYSICAL', taxMinor: 0, discountMinor: 0 };
             }
             subtotalMinor += item.unitPriceMinor * item.quantity;
             taxMinor += item.taxMinor ?? 0;
@@ -349,7 +358,7 @@ export class OrderManagementService {
             await tx.query(`UPDATE "InventoryLevel" SET quantity=quantity-$3,"updatedAt"=now() WHERE "storeId"=$1 AND "variantId"=$2`, [storeId, delta.variantId, delta.quantity]);
         await tx.query(`DELETE FROM "OrderItem" WHERE "storeId"=$1 AND "orderId"=$2`, [storeId, orderId]);
         for (const item of snapshot.items)
-            await tx.query(`INSERT INTO "OrderItem" ("storeId","orderId","variantId","configurationKey","configurationSnapshot","titleSnapshot","productTitleSnapshot","variantTitleSnapshot","skuSnapshot","imageSnapshot","unitPriceMinor",quantity,"fulfillmentType","taxMinor","discountMinor") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`, [storeId, orderId, item.variantId, item.configurationKey ?? '', JSON.stringify(item.configurationSnapshot ?? []), item.titleSnapshot, item.productTitleSnapshot ?? null, item.variantTitleSnapshot ?? null, item.skuSnapshot ?? null, item.imageSnapshot ?? null, item.unitPriceMinor, item.quantity, item.fulfillmentType ?? 'PHYSICAL', item.taxMinor ?? null, item.discountMinor ?? null]);
+            await tx.query(`INSERT INTO "OrderItem" ("storeId","orderId","variantId","configurationKey","configurationSnapshot","titleSnapshot","productTitleSnapshot","variantTitleSnapshot","skuSnapshot","imageSnapshot","unitPriceMinor",quantity,"fulfillmentType","taxMinor","discountMinor","shippingSnapshot") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16::jsonb)`, [storeId, orderId, item.variantId, item.configurationKey ?? '', JSON.stringify(item.configurationSnapshot ?? []), item.titleSnapshot, item.productTitleSnapshot ?? null, item.variantTitleSnapshot ?? null, item.skuSnapshot ?? null, item.imageSnapshot ?? null, item.unitPriceMinor, item.quantity, item.fulfillmentType ?? 'PHYSICAL', item.taxMinor ?? null, item.discountMinor ?? null, item.shippingSnapshot ? JSON.stringify(item.shippingSnapshot) : null]);
         await tx.query(`UPDATE "Order" SET "subtotalMinor"=$3,"shippingMinor"=$4,"taxMinor"=$5,"discountMinor"=$6,"totalMinor"=$7,"balanceDueMinor"=0,revision=revision+1,"updatedAt"=now() WHERE "storeId"=$1 AND id=$2`, [storeId, orderId, snapshot.subtotalMinor, snapshot.shippingMinor, snapshot.taxMinor, snapshot.discountMinor, snapshot.totalMinor]);
         await tx.query(`UPDATE "OrderRevision" SET status='APPLIED',"appliedAt"=now() WHERE id=$1`, [revision.id]);
         await appendOrderEvent(tx, storeId, orderId, 'EDIT_APPLIED', { revisionId: revision.id });

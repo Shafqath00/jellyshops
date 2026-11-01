@@ -17,7 +17,7 @@ describe('shipment progress and exceptions', () => {
 
   beforeEach(async () => {
     db = await createPGliteDatabase();
-    for (const file of ['20260915120000_add_stripe_connect_commerce.sql', '20260916100000_add_refund_idempotency_key.sql', '20260920100000_add_order_item_configuration_snapshot.sql', '20261020143750_backend_runtime_role.sql', '20261022000000_order_management.sql', '20261022010000_notifications_digital.sql', '20261027000000_shipment_exceptions.sql'])
+    for (const file of ['20260915120000_add_stripe_connect_commerce.sql', '20260916100000_add_refund_idempotency_key.sql', '20260920100000_add_order_item_configuration_snapshot.sql', '20261020143750_backend_runtime_role.sql', '20261022000000_order_management.sql', '20261028041000_order_item_shipping_snapshot.sql', '20261022010000_notifications_digital.sql', '20261027000000_shipment_exceptions.sql'])
       await migrate(file);
     await seedStore(db, 's', 's');
     await db.exec(`INSERT INTO "StoreOrderManagementSettings" VALUES ('s', TRUE);

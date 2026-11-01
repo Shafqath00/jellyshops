@@ -8,8 +8,12 @@ function record(row: MediaRow): StoredMediaRecord {
 }
 export class SqlMediaRepository implements MediaRepository {
   constructor(private readonly sql: SqlExecutor) {}
+  async findByHash(storeId: string, contentHash: string): Promise<StoredMediaRecord | null> {
+    const result = await this.sql.query<MediaRow>(`SELECT * FROM "Media" WHERE "storeId" = $1 AND "contentHash" = $2`, [storeId, contentHash]);
+    return result.rows[0] ? record(result.rows[0]) : null;
+  }
   async create(input: CreateMediaRecordInput): Promise<StoredMediaRecord> {
-    const result = await this.sql.query<MediaRow>(`INSERT INTO "Media" ("id", "storeId", "type", "storageKey", "url", "mimeType", "byteSize", "width", "height", "originalName", "altText", "referenced") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`, [input.id, input.storeId, input.type, input.storageKey, input.url, input.mimeType, input.byteSize, input.width, input.height, input.originalName, input.altText, input.referenced]);
+    const result = await this.sql.query<MediaRow>(`INSERT INTO "Media" ("id", "storeId", "type", "storageKey", "url", "mimeType", "byteSize", "width", "height", "originalName", "altText", "referenced", "contentHash") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`, [input.id, input.storeId, input.type, input.storageKey, input.url, input.mimeType, input.byteSize, input.width, input.height, input.originalName, input.altText, input.referenced, input.contentHash ?? null]);
     return record(result.rows[0]);
   }
   async get(storeId: string, id: string): Promise<StoredMediaRecord | null> {

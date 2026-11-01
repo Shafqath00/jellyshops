@@ -51,6 +51,7 @@ export class SupabaseMediaStorage
     mediaId,
     extension,
     contents,
+    mimeType,
   }: PutMediaInput): Promise<string> {
     const storageKey =
       `${storeId}/${mediaId}.${extension}`;
@@ -63,6 +64,7 @@ export class SupabaseMediaStorage
           contents,
           {
             upsert: false,
+            ...(mimeType ? { contentType: mimeType } : {}),
           },
         );
 

@@ -13,12 +13,26 @@ describe("transactional notifications and private digital access", () => {
   await db.exec(`CREATE ROLE jelly_backend NOBYPASSRLS; CREATE ROLE anon NOBYPASSRLS`);
   await db.exec(`CREATE TABLE "OrderRevision"("id" TEXT PRIMARY KEY,"storeId" TEXT,"orderId" TEXT,"status" TEXT)`);
   await db.exec(await readFile(new URL("../../sql/migrations/20261022010000_notifications_digital.sql", import.meta.url), "utf8"));
+  await db.exec(await readFile(new URL("../../sql/migrations/20261027131838_order_notification_templates.sql", import.meta.url), "utf8"));
   await seedStore(db, "s", "shop");
   await db.exec(`INSERT INTO "StoreOrderManagementSettings" VALUES('s',TRUE)`);
   await db.exec(`INSERT INTO "Product"("id","storeId","title","description","status","slug","updatedAt","fulfillmentType") VALUES('p','s','Guide','','ACTIVE','guide',CURRENT_TIMESTAMP,'DIGITAL'); INSERT INTO "ProductVariant"("id","storeId","productId","title","priceMinor","updatedAt","options") VALUES('v','s','p','PDF',100,CURRENT_TIMESTAMP,'{}'); INSERT INTO "StripeConnectedAccount"("storeId","stripeAccountId") VALUES('s','acct'); INSERT INTO "Order"("id","storeId","number","publicToken","customerSnapshot","subtotalMinor","shippingMinor","totalMinor","currency") VALUES('o','s','001','public','{"name":"Buyer","email":"buyer@example.test"}',100,0,100,'USD'); INSERT INTO "OrderItem"("storeId","orderId","variantId","titleSnapshot","unitPriceMinor","quantity","fulfillmentType") VALUES('s','o','v','Guide',100,1,'DIGITAL'); INSERT INTO "DigitalAsset"("id","storeId","productId","storageKey","filename","mimeType","sizeBytes","maxDownloads") VALUES('asset','s','p','private/key','guide.pdf','application/pdf',3,1); INSERT INTO "Payment"("id","storeId","orderId","stripeAccountId","amountMinor","currency") VALUES('pay','s','o','acct',100,'USD')`);
   transactions = { transaction: (work) => db.transaction((tx) => work({ query: async (sql, values) => tx.query(sql, values) as never })) };
  });
  afterEach(async () => { await db.close(); });
+ it("stores wording per shop and applies it to queued order confirmations", async () => {
+  const capture = new CaptureNotificationTransport();
+  const service = createNotificationService(transactions, capture, { publicBaseUrl: "https://example.test", tokenSecret: "x".repeat(32) });
+  const template = { subject: "Your order arrived", heading: "Thank you!", message: "We will prepare it soon.", closing: "See you again." };
+  await service.saveTemplate("s", "PLACED", template);
+  expect(await service.template("s", "PLACED")).toEqual(template);
+  expect((await service.template("s", "PAYMENT_CONFIRMED")).subject).toBe("Payment confirmed");
+  expect((await service.template("other", "PLACED")).heading).toBe("Thank you for your order");
+  await service.runWorker();
+  expect(capture.messages[0]!.subject).toContain("Your order arrived");
+  expect(capture.messages[0]!.html).toContain("We will prepare it soon.");
+  expect(capture.messages[0]!.html).toContain("Guide");
+ });
  it("grants once after verified payment and enforces tenant, token and download limit", async () => {
   expect((await db.query(`SELECT * FROM "DigitalEntitlement"`)).rows).toHaveLength(0);
   await db.exec(`UPDATE "Payment" SET "status"='PAID'; UPDATE "Payment" SET "status"='PAID'`);

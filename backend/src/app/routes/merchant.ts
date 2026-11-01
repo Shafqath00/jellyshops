@@ -129,6 +129,8 @@ export function mountContentRoutes(app: Express, context: AppContext): void {
             deps.metaobjectService,
           registry:
             deps.dynamicSourceRegistry,
+          ownerValues:
+            deps.ownerMetafieldService,
         },
         authProvider,
       ),

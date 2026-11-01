@@ -1,11 +1,12 @@
 import { randomUUID } from "node:crypto";
 import type { QueryResultRow } from "pg";
 import type { SqlExecutor } from "../commerce/repository.js";
+import type { OwnerValue, OwnerValuesStore } from "./owner-values.js";
 import type { CustomDataRepository, MetaobjectRepository, MetafieldDefinitionRecord, MetafieldValueRecord, MetaobjectDefinitionRecord, MetaobjectEntryRecord } from "./repository.js";
 
 const jsonFields = new Set(["validations", "fields", "values", "value"]);
 const ownerTables = { product: "Product", variant: "ProductVariant", collection: "Collection", page: "StorePage", blog: "Blog", article: "Article" } as const;
-export class SqlCustomDataRepository implements CustomDataRepository, MetaobjectRepository {
+export class SqlCustomDataRepository implements CustomDataRepository, MetaobjectRepository, OwnerValuesStore {
   constructor(private readonly sql: SqlExecutor) {}
   private async insert<T extends QueryResultRow>(table: string, input: Record<string, unknown>): Promise<T> {
     const values = { id: randomUUID(), ...input }; const fields = Object.keys(values);
@@ -22,6 +23,20 @@ export class SqlCustomDataRepository implements CustomDataRepository, Metaobject
   updateMetafieldDefinition(storeId: string, id: string, patch: Parameters<CustomDataRepository["updateMetafieldDefinition"]>[2]) { return this.update<MetafieldDefinitionRecord>("MetafieldDefinition", storeId, id, { ...patch }); }
   async setMetafieldValue(input: Parameters<CustomDataRepository["setMetafieldValue"]>[0]) { return (await this.sql.query<MetafieldValueRecord>(`INSERT INTO "MetafieldValue" ("id", "storeId", "definitionId", "ownerId", "value", "updatedAt") VALUES ($1,$2,$3,$4,$5::jsonb,NOW()) ON CONFLICT ("storeId", "definitionId", "ownerId") DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = NOW() RETURNING *`, [randomUUID(), input.storeId, input.definitionId, input.ownerId, JSON.stringify(input.value)])).rows[0]; }
   async getMetafieldValue(storeId: string, definitionId: string, ownerId: string) { return (await this.sql.query<MetafieldValueRecord>(`SELECT * FROM "MetafieldValue" WHERE "storeId" = $1 AND "definitionId" = $2 AND "ownerId" = $3`, [storeId, definitionId, ownerId])).rows[0] ?? null; }
+  async listDefinitionsByIds(storeId: string, ownerType: MetafieldDefinitionRecord["ownerType"], ids: string[]) {
+    return (await this.sql.query<MetafieldDefinitionRecord>(`SELECT * FROM "MetafieldDefinition" WHERE "storeId" = $1 AND "ownerType" = $2 AND "archivedAt" IS NULL AND "id" = ANY($3::text[])`, [storeId, ownerType, ids])).rows;
+  }
+  async listOwnerValues(storeId: string, ownerType: MetafieldDefinitionRecord["ownerType"], ownerIds: string[]): Promise<OwnerValue[]> {
+    return (await this.sql.query<OwnerValue>(`SELECT v."ownerId", v."definitionId", v."value" FROM "MetafieldValue" v JOIN "MetafieldDefinition" d ON d."storeId" = v."storeId" AND d."id" = v."definitionId" WHERE v."storeId" = $1 AND d."ownerType" = $2 AND d."archivedAt" IS NULL AND v."ownerId" = ANY($3::text[]) ORDER BY v."ownerId", d."namespace", d."key"`, [storeId, ownerType, ownerIds])).rows;
+  }
+  /** One statement, so the removals and the writes of a save happen together or not at all. */
+  async replaceOwnerValues(storeId: string, ownerId: string, upserts: Array<{ definitionId: string; value: unknown }>, deletes: string[]): Promise<void> {
+    await this.sql.query(`WITH removed AS (DELETE FROM "MetafieldValue" WHERE "storeId" = $1 AND "ownerId" = $2 AND "definitionId" = ANY($3::text[]) RETURNING 1)
+      INSERT INTO "MetafieldValue" ("id", "storeId", "definitionId", "ownerId", "value", "updatedAt")
+      SELECT t.id, $1::text, t.definition_id, $2::text, t.value::jsonb, NOW() FROM unnest($4::text[], $5::text[], $6::text[]) AS t(id, definition_id, value)
+      ON CONFLICT ("storeId", "definitionId", "ownerId") DO UPDATE SET "value" = EXCLUDED."value", "updatedAt" = NOW()`,
+      [storeId, ownerId, deletes, upserts.map(() => randomUUID()), upserts.map((entry) => entry.definitionId), upserts.map((entry) => JSON.stringify(entry.value))]);
+  }
   async ownerExists(storeId: string, type: Parameters<CustomDataRepository["ownerExists"]>[1], id: string) {
     const table = type === "store" ? "Store" : ownerTables[type];
     return (await this.sql.query(`SELECT "id" FROM "${table}" WHERE ${type === "store" ? '"id" = $1 AND "id" = $2 AND "archivedAt" IS NULL' : '"storeId" = $1 AND "id" = $2'}`, [storeId, id])).rows.length === 1;

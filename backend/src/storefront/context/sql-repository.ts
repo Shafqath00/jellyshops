@@ -19,6 +19,15 @@ const article = (row: Row): PublicArticleRecord => ({ ...summary(row), content: 
 export class SqlPublicStorefrontContextRepository implements PublicStorefrontContextRepository {
   constructor(private readonly sql: SqlExecutor) {}
 
+  async listNavigationResources(storeId: string): Promise<Array<{ kind: "page" | "blog" | "article"; id: string; handle: string; blogHandle: string | null }>> {
+    const result = await this.sql.query<Row>(`
+      SELECT 'page' AS kind, "id", "handle", NULL::text AS "blogHandle" FROM "StorePage" WHERE "storeId" = $1 AND "status" = 'PUBLISHED'
+      UNION ALL SELECT 'blog', "id", "handle", NULL::text FROM "Blog" WHERE "storeId" = $1
+      UNION ALL SELECT 'article', a."id", a."handle", b."handle" FROM "Article" a JOIN "Blog" b ON b."id" = a."blogId" AND b."storeId" = a."storeId" WHERE a."storeId" = $1 AND a."status" = 'PUBLISHED'
+    `, [storeId]);
+    return result.rows.map(row => ({ kind: row.kind as "page" | "blog" | "article", id: String(row.id), handle: String(row.handle), blogHandle: row.blogHandle == null ? null : String(row.blogHandle) }));
+  }
+
   async findPublishedPageByHandle(storeId: string, handle: string): Promise<PublicPageRecord | null> {
     const result = await this.sql.query<Row>(`SELECT "id", "handle", "title", "content", "publishedAt" FROM "StorePage" WHERE "storeId" = $1 AND "handle" = $2 AND "status" = 'PUBLISHED'`, [storeId, handle]);
     return result.rows[0] ? page(result.rows[0]) : null;

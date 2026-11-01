@@ -8,6 +8,7 @@ import { createStorefrontStarterRouter } from "../../storefront/starter/routes.j
 import { createStorefrontWorkspaceRouter } from "../../storefront/workspace/routes.js";
 import { defaultStorefrontWorkspaceApi } from "../default-storefront-workspace.js";
 import type { AppContext } from "../types.js";
+import type { SqlExecutor } from "../../commerce/repository.js";
 import { SqlCustomDataRepository } from "../../custom-data/sql-repository.js";
 import { StorefrontBindingValueService } from "../../dynamic-sources/binding-values.js";
 import { createEditorBindingValuesRouter, createPublicBindingValuesRouter } from "../../dynamic-sources/binding-values-routes.js";
@@ -16,13 +17,21 @@ import { createPublicMetaobjectRouter, PublicMetaobjectService } from "../../cus
 
 const bindingValueServices = new WeakMap<AppContext, StorefrontBindingValueService | null>();
 
-/** Custom-field values for storefront sections; needs the SQL database, so it is off in the local JSON mode. */
-function bindingValueService(context: AppContext): StorefrontBindingValueService | undefined {
+/**
+ * Custom-field values for storefront sections. Built from the database handle the app
+ * resolved at startup (`routeDependencies.commerceDatabase`), so it is off in the local
+ * JSON mode, which has no database.
+ */
+export function bindingValueService(context: AppContext): StorefrontBindingValueService | undefined {
   if (!bindingValueServices.has(context)) {
-    const { storefrontSql: sql, contentService: content, mediaRepository: media } = context.routeDependencies;
+    const { commerceDatabase: database, contentService: content } = context.routeDependencies;
     const catalog = context.catalogService;
+    // One query per statement; the lookups are independent reads.
+    const sql: SqlExecutor | undefined = database
+      ? { query: (text, values) => database.transaction((transaction) => transaction.query(text, values)) } as SqlExecutor
+      : undefined;
     const repository = sql ? new SqlCustomDataRepository(sql) : undefined;
-    bindingValueServices.set(context, sql && repository && catalog && content && media
+    bindingValueServices.set(context, sql && repository && catalog && content
       ? new StorefrontBindingValueService(new DynamicValueResolver(repository, repository), {
         product: (storeId, id) => catalog.getProduct(storeId, id),
         collection: (storeId, id) => catalog.getCollection(storeId, id),
@@ -31,8 +40,8 @@ function bindingValueService(context: AppContext): StorefrontBindingValueService
         article: (storeId, id) => content.getArticle(storeId, id),
         storeName: async (storeId) => (await sql.query<{ name: string }>(`SELECT "name" FROM "Store" WHERE "id" = $1`, [storeId])).rows[0]?.name ?? null,
         media: async (storeId, id) => {
-          const record = await media.get(storeId, id);
-          return record ? { url: record.url, ...(record.altText ? { alt: record.altText } : {}) } : null;
+          const row = (await sql.query<{ altText: string | null }>(`SELECT "altText" FROM "Media" WHERE "storeId" = $1 AND "id" = $2`, [storeId, id])).rows[0];
+          return row ? { url: `/api/public/media/${storeId}/${id}`, ...(row.altText ? { alt: row.altText } : {}) } : null;
         },
       })
       : null);

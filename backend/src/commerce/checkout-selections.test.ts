@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { CatalogReader } from "../catalog/service.js";
 import { validateCart } from "./checkout-cart.js";
 import type { CommerceRepository } from "./repository.js";
@@ -27,6 +27,16 @@ const run = (variantId: string, configurationSelections: Array<{ optionId: strin
   validateCart(deps(), "store", "INR", [{ variantId, quantity: 2, configurationSelections }], 0);
 
 describe("checkout product selections", () => {
+  it("snapshots the selected photo for a checkout line", async () => {
+    vi.stubEnv("PRODUCT_MEDIA_STORE_IDS", "store");
+    try {
+      const dependencies = deps();
+      dependencies.catalog.getProduct = async () => ({ id: "p1", title: "Bed", options, media: [{ id: "shared", url: "shared.jpg" }, { id: "firm", url: "firm.jpg", appliesTo: { firmness: ["firm"] } }] } as never);
+      const cart = await validateCart(dependencies, "store", "INR", [{ variantId: "small", quantity: 1, configurationSelections: [sel("size", "s"), sel("firmness", "firm")] }], 0);
+      expect(cart.lines[0].imageSnapshot).toBe("firm.jpg");
+    } finally { vi.unstubAllEnvs(); }
+  });
+
   it("prices the variant plus every selected extra, including several from one multi-pick choice", async () => {
     const cart = await run("small", [sel("size", "s"), sel("firmness", "firm"), sel("extras", "head"), sel("extras", "tables")]);
     expect(cart.lines[0].unitPriceMinor).toBe(10000 + 2000 + 5000 + 3000);

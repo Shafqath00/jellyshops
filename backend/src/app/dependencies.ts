@@ -18,6 +18,7 @@ import { ContentService } from "../content/service.js";
 import { SqlContentRepository } from "../content/sql-repository.js";
 import { CustomDataService, MetaobjectService } from "../custom-data/service.js";
 import { SqlCustomDataRepository } from "../custom-data/sql-repository.js";
+import { OwnerMetafieldService } from "../custom-data/owner-values.js";
 import { customerIdentity, supabaseCustomerVerifier } from "../customers/routes.js";
 import { CustomerService as StoreCustomerService } from "../customers/service.js";
 import { DynamicSourceRegistry } from "../dynamic-sources/registry.js";
@@ -333,6 +334,7 @@ export function resolveAppDependencies(dependencies: Partial<AppDependencies> = 
       return (await customerService.profile(String(request.params.storeId), await customerIdentity(request, verifyCustomer))).id;
     } : undefined,
     customDataService: dependencies.customDataService ?? (customDataRepository ? new CustomDataService(customDataRepository) : undefined),
+    ownerMetafieldService: dependencies.ownerMetafieldService ?? (customDataRepository ? new OwnerMetafieldService(customDataRepository) : undefined),
     metaobjectService: dependencies.metaobjectService ?? (customDataRepository ? new MetaobjectService(customDataRepository) : undefined),
     dynamicSourceRegistry,
     storefrontWorkspaceApi: dependencies.storefrontWorkspaceApi ?? (commerceDatabase ? createSqlWorkspaceApi(commerceDatabase) : undefined),

@@ -8,15 +8,24 @@ import { notificationTypes, renderOrderNotification, type NotificationService } 
 import { ApiError } from "../http/errors.js";
 const brandSchema = z.object({ brandName: z.string().max(100).optional(), replyTo: z.email().optional(), accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/), logoUrl: z.url().refine((v) => v.startsWith("https://")).optional() });
 const typeSchema = z.object({ type: z.enum(notificationTypes) });
+const templateSchema = z.object({ subject: z.string().trim().min(1).max(120).refine(value => !/[\r\n]/.test(value)), heading: z.string().trim().min(1).max(120), message: z.string().trim().min(1).max(2000), closing: z.string().trim().max(1000) }).strict();
 const asyncRoute = (handler: (req: express.Request, res: express.Response) => Promise<unknown>): express.RequestHandler => (req, res, next) => { void handler(req, res).catch(next); };
 export function createNotificationRouter(service: NotificationService, auth: AuthProvider) {
   const router = express.Router({ mergeParams: true }); router.use(requireMerchant(auth));
   router.get("/", requireStorePermission("orders:view"), asyncRoute(async (req, res) => res.json({ notifications: await service.list(req.storeContext!.storeId, typeof req.query.orderId === "string" ? req.query.orderId : undefined) })));
   router.get("/branding", requireStorePermission("settings:manage"), asyncRoute(async (req, res) => res.json(await service.branding(req.storeContext!.storeId))));
   router.put("/branding", requireStorePermission("settings:manage"), asyncRoute(async (req, res) => res.json(await service.saveBranding(req.storeContext!.storeId, brandSchema.parse(req.body)))));
+  router.get("/templates/:type", requireStorePermission("settings:manage"), asyncRoute(async (req, res) => {
+    const type = z.enum(notificationTypes).parse(req.params.type);
+    res.json(await service.template(req.storeContext!.storeId, type));
+  }));
+  router.put("/templates/:type", requireStorePermission("settings:manage"), asyncRoute(async (req, res) => {
+    const type = z.enum(notificationTypes).parse(req.params.type);
+    res.json(await service.saveTemplate(req.storeContext!.storeId, type, templateSchema.parse(req.body)));
+  }));
   router.post("/preview", requireStorePermission("settings:manage"), asyncRoute(async (req, res) => {
-    const { type } = typeSchema.parse(req.body); const branding = await service.branding(req.storeContext!.storeId);
-    res.json(renderOrderNotification(type, { brandName: String(branding.brandName ?? "Jelly Shop"), accentColor: String(branding.accentColor ?? "#192642"), number: "PREVIEW-001", totalMinor: 1200, currency: "USD", orderUrl: "https://example.invalid/order", customerName: "Customer" }));
+    const { type, template } = typeSchema.extend({ template: templateSchema.optional() }).parse(req.body); const branding = await service.branding(req.storeContext!.storeId);
+    res.json(renderOrderNotification(type, { brandName: String(branding.brandName ?? "Jelly Shop"), accentColor: String(branding.accentColor ?? "#14213d"), logoUrl: typeof branding.logoUrl === "string" ? branding.logoUrl : undefined, contactEmail: typeof branding.replyTo === "string" ? branding.replyTo : undefined, number: "PREVIEW-001", totalMinor: 2500, currency: "USD", orderUrl: "https://example.invalid/order", customerName: "Customer", items: [{ title: "Example item", quantity: 2, unitPriceMinor: 1250 }] }, template ?? await service.template(req.storeContext!.storeId, type)));
   })); return router;
 }
 export function createOrderNotificationRouter(service: NotificationService, auth: AuthProvider) {

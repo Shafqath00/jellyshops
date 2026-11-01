@@ -19,6 +19,10 @@ export class PublicStorefrontContextService {
     private readonly catalog: Pick<CatalogReader, "listPublicProducts">,
   ) {}
 
+  async navigation(storeId: string) {
+    return { resources: await this.repository.listNavigationResources?.(storeId) ?? [] };
+  }
+
   async search(storeId: string, value: string): Promise<SearchPageContext> {
     const query = value.trim();
     if (!query) return { type: "search", query: "", state: "empty", resultCount: 0, results: [] };

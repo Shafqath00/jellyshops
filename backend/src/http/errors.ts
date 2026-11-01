@@ -45,7 +45,7 @@ export const errorHandler: ErrorRequestHandler = (error, request, response, _nex
         ? new ApiError(409, "RESOURCE_REVISION_CONFLICT", "The storefront resource changed since it was loaded")
         : currentGeneration !== undefined
           ? new ApiError(409, "WORKSPACE_GENERATION_CONFLICT", "The storefront workspace changed since it was loaded")
-          : (() => { console.error(JSON.stringify({ event: "api_error", requestId: request.id, name: error instanceof Error ? error.name : "UnknownError", code: typeof error?.code === "string" ? error.code : undefined })); return new ApiError(500, "INTERNAL_ERROR", "An unexpected error occurred"); })();
+          : (() => { console.error(JSON.stringify({ event: "api_error", requestId: request.id, name: error instanceof Error ? error.name : "UnknownError", code: typeof error?.code === "string" ? error.code : undefined, ...(process.env.FUNCTIONS_EMULATOR === "true" && error instanceof Error ? { message: error.message } : {}) })); return new ApiError(500, "INTERNAL_ERROR", "An unexpected error occurred"); })();
 
   response.status(apiError.status).json({
     error: {

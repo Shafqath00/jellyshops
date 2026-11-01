@@ -64,15 +64,22 @@ export function createOrderRuntime(database: CommerceDatabase, orders: MerchantO
 }
 export type OrderRuntime = ReturnType<typeof createOrderRuntime>;
 
-export function createOrderWorkerRouter(run: () => Promise<unknown>, secret: string) {
+export function createOrderWorkerRouter(run: () => Promise<unknown>, secret: string, readStatus?: () => Promise<unknown>) {
   const router = express.Router();
-  router.post("/", async (req, res, next) => {
+  router.use((req, res, next) => {
     try {
       const actual = Buffer.from(req.header("x-scheduler-secret") || "");
       const expected = Buffer.from(secret);
       if (!expected.length || actual.length !== expected.length || !timingSafeEqual(actual, expected)) throw new ApiError(401, "SCHEDULER_UNAUTHORIZED", "Scheduler authorization failed.");
-      res.json(await run());
+      res.setHeader("Cache-Control", "no-store");
+      next();
     } catch (error) { next(error); }
+  });
+  if (readStatus) router.get("/", async (_req, res, next) => {
+    try { res.json(await readStatus()); } catch (error) { next(error); }
+  });
+  router.post("/", async (_req, res, next) => {
+    try { res.json(await run()); } catch (error) { next(error); }
   });
   return router;
 }

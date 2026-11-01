@@ -1,3 +1,5 @@
+import { ApiError } from "../http/errors.js";
+import { definitionRulesProblem, valueProblem } from "./value-rules.js";
 import {
   dynamicValueTypeSchema,
   metafieldDefinitionSchema,
@@ -69,7 +71,10 @@ export class CustomDataService {
     input: Omit<CreateMetafieldDefinitionInput, "storeId">,
   ): Promise<MetafieldDefinitionRecord> {
     const parsed = metafieldDefinitionSchema.parse(input);
-    return this.repository.createMetafieldDefinition({
+    const rulesProblem = definitionRulesProblem(parsed.type, parsed.validations);
+    if (rulesProblem) throw new ApiError(422, "METAFIELD_RULES_INVALID", rulesProblem);
+    try {
+    return await this.repository.createMetafieldDefinition({
       storeId,
       ownerType: parsed.ownerType,
       namespace: parsed.namespace,
@@ -81,6 +86,10 @@ export class CustomDataService {
       storefrontVisible: parsed.storefrontVisible,
       origin: parsed.origin,
     });
+    } catch (error) {
+      if ((error as { code?: string }).code === "23505") throw new ApiError(409, "METAFIELD_EXISTS", "A custom field with this namespace and key already exists for these items.");
+      throw error;
+    }
   }
 
   listMetafieldDefinitions(storeId: string, ownerType: CustomDataOwnerType) {
@@ -95,6 +104,12 @@ export class CustomDataService {
     const record = patch as UpdateMetafieldDefinitionInput & Record<string, unknown>;
     for (const immutable of ["namespace", "key", "ownerType", "type"]) {
       if (immutable in record) throw new Error(`Metafield ${immutable} is immutable`);
+    }
+    if (patch.validations !== undefined) {
+      const current = await this.repository.getMetafieldDefinition(storeId, id);
+      if (!current) throw new Error("Metafield definition was not found");
+      const rulesProblem = definitionRulesProblem(current.type, patch.validations);
+      if (rulesProblem) throw new ApiError(422, "METAFIELD_RULES_INVALID", rulesProblem);
     }
     const updated = await this.repository.updateMetafieldDefinition(storeId, id, patch);
     if (!updated) throw new Error("Metafield definition was not found");
@@ -117,6 +132,8 @@ export class CustomDataService {
     if (!isValidCustomDataValue(definition.type, value)) {
       throw new Error(`Metafield value must match ${definition.type}`);
     }
+    const problem = valueProblem(definition.type, value, definition.validations);
+    if (problem) throw new ApiError(422, "METAFIELD_INVALID", `${definition.name}: ${problem}`, [{ path: definitionId, message: problem }]);
     if (!await this.repository.ownerExists(storeId, definition.ownerType, ownerId)) {
       throw new Error("Metafield owner does not belong to this store");
     }

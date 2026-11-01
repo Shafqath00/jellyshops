@@ -1,5 +1,5 @@
 import { Router } from "express";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import multer from "multer";
 import { requireMerchant, requireStorePermission } from "../auth/middleware.js";
 import type { AuthProvider } from "../auth/types.js";
@@ -9,7 +9,15 @@ import type { MediaService } from "./service.js";
 export function createMediaRouter(service: MediaService, authProvider: AuthProvider, maxUploadBytes: number): Router {
   const router = Router({ mergeParams: true });
   const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: maxUploadBytes, files: 1 } });
-  const uploadLimit = rateLimit({ windowMs: 60_000, limit: 30, standardHeaders: true, legacyHeaders: false });
+  // The Firebase emulator on Windows can leave request.ip undefined; fall back
+  // to a shared bucket instead of failing the request.
+  const uploadLimit = rateLimit({
+    windowMs: 60_000,
+    limit: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (request) => (request.ip ? ipKeyGenerator(request.ip) : "unknown"),
+  });
 
   router.use(requireMerchant(authProvider));
   router.post<{ storeId: string }>("/", requireStorePermission("media:upload"), uploadLimit, upload.single("file"), async (request, response) => {
@@ -18,7 +26,7 @@ export function createMediaRouter(service: MediaService, authProvider: AuthProvi
   });
 
   router.get<{ storeId: string }>("/", requireStorePermission("storefront:view"), async (request, response) => {
-    response.json(await service.list(request.storeContext!.storeId));
+    response.json(await service.list(request.storeContext!.storeId, request.query.unused === "older30d"));
   });
 
   router.delete<{ storeId: string; mediaId: string }>("/:mediaId", requireStorePermission("media:delete"), async (request, response) => {
@@ -32,8 +40,12 @@ export function createMediaRouter(service: MediaService, authProvider: AuthProvi
 export function createPublicMediaRouter(service: MediaService): Router {
   const router = Router();
   router.get<{ storeId: string; mediaId: string }>("/:storeId/:mediaId", async (request, response) => {
-    const media = await service.open(request.params.storeId, request.params.mediaId);
-    response.type(media.record.mimeType).send(media.contents);
+    const requestedWidth = request.query.w;
+    if (requestedWidth !== undefined && (typeof requestedWidth !== "string" || !/^(320|640|1280)$/.test(requestedWidth))) {
+      throw new ApiError(400, "MEDIA_WIDTH_INVALID", "Choose a supported image width: 320, 640, or 1280");
+    }
+    const media = await service.open(request.params.storeId, request.params.mediaId, requestedWidth === undefined ? undefined : Number(requestedWidth));
+    response.set("Cache-Control", "public, max-age=31536000, immutable").set("ETag", media.etag).type(media.mimeType).send(media.contents);
   });
   return router;
 }

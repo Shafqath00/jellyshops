@@ -8,6 +8,9 @@
   "main": "dist/functions.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
+    "workers:notifications": "tsx scripts/run-notification-worker.ts",
+    "workers:notifications:check": "tsx scripts/run-notification-worker.ts --check",
+    "workers:notifications:once": "tsx scripts/run-notification-worker.ts --once",
     "build:storefront-schema": "npm --prefix ../jellyshops/packages/storefront-schema run build",
     "build:storefront-registry": "npm --prefix ../jellyshops/packages/storefront-registry run build",
     "build:storefront-themes": "npm --prefix ../jellyshops/packages/storefront-themes run build",

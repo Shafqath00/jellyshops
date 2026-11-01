@@ -51,8 +51,12 @@ export function mountOrderRuntimeRoutes(app: Express, context: AppContext): void
   const { orderRuntime, merchantOrderService, checkoutService } = context.routeDependencies;
   if (orderRuntime) {
     if (orderRuntime.notifications) {
+      const notifications = orderRuntime.notifications;
       app.use("/api/stores/:storeId/order-notifications", createNotificationRouter(orderRuntime.notifications, authProvider));
       app.use("/api/stores/:storeId/orders", createOrderNotificationRouter(orderRuntime.notifications, authProvider));
+      if (config.stripe?.schedulerSecret) app.use("/internal/commerce/notifications/work", createOrderWorkerRouter(
+        () => notifications.runWorker(1), config.stripe.schedulerSecret, () => notifications.queueStatus(),
+      ));
     }
     if (orderRuntime.digital) {
       app.use("/api/stores/:storeId/digital-products", createDigitalProductRouter(orderRuntime.digital, authProvider));

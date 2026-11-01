@@ -47,6 +47,7 @@ export interface BlogPageContext { type: "blog"; blog: PublicBlogRecord; article
 export interface ArticlePageContext { type: "article"; blog: PublicBlogRecord; article: PublicArticleRecord; }
 
 export interface PublicStorefrontContextRepository {
+  listNavigationResources?(storeId: string): Promise<Array<{ kind: "page" | "blog" | "article"; id: string; handle: string; blogHandle: string | null }>>;
   findPublishedPageByHandle(storeId: string, handle: string): Promise<PublicPageRecord | null>;
   findBlogByHandle(storeId: string, handle: string): Promise<PublicBlogRecord | null>;
   listPublishedArticles(storeId: string, blogId: string): Promise<PublicArticleSummary[]>;

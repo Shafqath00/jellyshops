@@ -2,7 +2,7 @@ import { Router } from "express";
 import { ApiError } from "../../http/errors.js";
 import type { PublicStorefrontContextService } from "./service.js";
 
-type PublicContextApi = Pick<PublicStorefrontContextService, "search" | "page" | "blog" | "article">;
+type PublicContextApi = Pick<PublicStorefrontContextService, "search" | "page" | "blog" | "article"> & Partial<Pick<PublicStorefrontContextService, "navigation">>;
 
 function missing(): never {
   throw new ApiError(404, "STOREFRONT_CONTEXT_NOT_FOUND", "Storefront context was not found");
@@ -10,6 +10,9 @@ function missing(): never {
 
 export function createPublicStorefrontContextRouter(service: PublicContextApi): Router {
   const router = Router({ mergeParams: true });
+  router.get<{ storeId: string }>("/navigation", async (request, response, next) => {
+    try { response.json(await service.navigation?.(String(request.params.storeId)) ?? { resources: [] }); } catch (error) { next(error); }
+  });
   router.get<{ storeId: string }>("/search", async (request, response, next) => {
     try { response.json(await service.search(String(request.params.storeId), typeof request.query.q === "string" ? request.query.q : "")); } catch (error) { next(error); }
   });

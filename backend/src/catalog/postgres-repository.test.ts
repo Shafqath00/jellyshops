@@ -12,6 +12,7 @@ describe("PostgreSQL catalog repository", () => {
     await database.exec(await readFile(new URL("../../sql/migrations/20260915120000_add_stripe_connect_commerce.sql", import.meta.url), "utf8"));
     await database.exec(await readFile(new URL("../../sql/migrations/20261020140329_store_settings_checkout.sql", import.meta.url), "utf8"));
     await database.exec(await readFile(new URL("../../sql/migrations/20261020163817_jelly_signature_customer_services.sql", import.meta.url), "utf8"));
+    await database.exec(await readFile(new URL("../../sql/migrations/20261101000000_collection_description_document.sql", import.meta.url), "utf8"));
     repository = new CatalogPostgresRepository(database);
     await seedStore(database, "store-a", "store-a");
     await seedStore(database, "store-b", "store-b");
@@ -21,6 +22,52 @@ describe("PostgreSQL catalog repository", () => {
   });
 
   afterEach(async () => { await database.close(); });
+
+  const options = [{ id: "colour", name: "Colour", type: "configuration", required: false, values: [{ id: "black", label: "Black" }, { id: "white", label: "White" }] }];
+  const seedMedia = async (storeId: string, id: string) => database.query(`INSERT INTO "Media" ("id","storeId","type","storageKey","url","mimeType","byteSize","originalName","altText") VALUES ($1,$2,'image',$1,$3,'image/jpeg',1,$1,'Library alt')`, [id, storeId, `https://example.com/${id}.jpg`]);
+
+  it("rolls back product and gallery edits together when media ownership fails", async () => {
+    await seedMedia("store-a", "shared");
+    await seedMedia("store-b", "foreign");
+    await repository.updateProduct("store-a", "p1", { media: [{ mediaId: "shared" }] });
+    const transactional = new CatalogPostgresRepository(database, { transaction: work => database.transaction(tx => work({ query: (sql, values) => tx.query(sql, values) })) });
+    await expect(transactional.updateProduct("store-a", "p1", { title: "Should roll back", media: [{ mediaId: "foreign" }] })).rejects.toMatchObject({ code: "MEDIA_INVALID" });
+    expect(await repository.getProduct("store-a", "p1")).toMatchObject({ title: "Cake", media: [{ id: "shared" }] });
+  });
+
+  it("replaces and hydrates ordered gallery assignments without changing the library", async () => {
+    await seedMedia("store-a", "black"); await seedMedia("store-a", "shared");
+    const saved = await repository.updateProduct("store-a", "p1", { options, media: [{ mediaId: "black", altText: "Black front", appliesTo: { colour: ["black"] } }, { mediaId: "shared", altText: "Shared shot" }] });
+    expect(saved.media.map(media => [media.id, media.position, media.altText, media.appliesTo])).toEqual([["black", 0, "Black front", { colour: ["black"] }], ["shared", 1, "Shared shot", {}]]);
+    expect((await repository.updateProduct("store-a", "p1", { title: "Renamed" })).media).toEqual(saved.media);
+    expect((await repository.updateProduct("store-a", "p1", { media: [] })).media).toEqual([]);
+    expect((await database.query(`SELECT "id" FROM "Media" WHERE "storeId"='store-a'`)).rows).toHaveLength(2);
+  });
+
+  it("rejects foreign media, repeats, bad assignments, and galleries over the cap", async () => {
+    await seedMedia("store-b", "foreign");
+    await expect(repository.updateProduct("store-a", "p1", { media: [{ mediaId: "foreign" }] })).rejects.toMatchObject({ code: "MEDIA_INVALID" });
+    await expect(repository.updateProduct("store-a", "p1", { media: [{ mediaId: "a" }, { mediaId: "a" }] })).rejects.toMatchObject({ code: "MEDIA_DUPLICATE" });
+    await expect(repository.updateProduct("store-a", "p1", { options, media: [{ mediaId: "a", appliesTo: { colour: ["missing"] } }] })).rejects.toMatchObject({ code: "MEDIA_ASSIGNMENT_INVALID" });
+    await expect(repository.updateProduct("store-a", "p1", { media: Array.from({ length: 31 }, (_, n) => ({ mediaId: String(n) })) })).rejects.toMatchObject({ code: "MEDIA_LIMIT_EXCEEDED" });
+  });
+
+  it("unlinks photos when their last assigned value is removed", async () => {
+    await seedMedia("store-a", "black"); await seedMedia("store-a", "shared");
+    await repository.updateProduct("store-a", "p1", { options, media: [{ mediaId: "black", appliesTo: { colour: ["black"] } }, { mediaId: "shared" }] });
+    const saved = await repository.updateProduct("store-a", "p1", { options: [{ ...options[0], values: [{ id: "white", label: "White" }] }] });
+    expect(saved.media.map(media => media.id)).toEqual(["shared"]);
+    expect((await database.query(`SELECT "id" FROM "Media" WHERE "id"='black'`)).rows).toHaveLength(1);
+  });
+
+  it("keeps gallery tags and alt text when legacy clients save or move the cover", async () => {
+    await seedMedia("store-a", "black"); await seedMedia("store-a", "shared");
+    const original = await repository.updateProduct("store-a", "p1", { options, media: [{ mediaId: "black", altText: "Tagged", appliesTo: { colour: ["black"] } }, { mediaId: "shared", altText: "Shared" }] });
+    expect((await repository.updateProduct("store-a", "p1", { imageUrl: original.media[0].url })).media).toEqual(original.media);
+    const moved = await repository.updateProduct("store-a", "p1", { imageUrl: original.media[1].url });
+    expect(moved.media.map(media => media.id)).toEqual(["shared", "black"]);
+    expect(moved.media[1]).toMatchObject({ altText: "Tagged", appliesTo: { colour: ["black"] } });
+  });
 
   it("filters live catalog values and paginates deterministic price sorting", async () => {
     await repository.createProduct("store-a", { title: "Small cake", handle: "small", status: "ACTIVE", primaryCategoryId: "cake", variants: [{ title: "Small", priceMinor: 500, quantity: 2, options: { size: "small" } }] });

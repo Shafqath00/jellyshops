@@ -1,6 +1,6 @@
 import { PGlite } from '@electric-sql/pglite';
 import { readFile } from 'node:fs/promises';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createPGliteDatabase, seedStore } from '../../test/integration/pglite.js';
 import { CommerceRepository } from './repository.js';
 import { OrderManagementService } from './order-management.js';
@@ -10,7 +10,7 @@ describe('order management transactions', () => {
     let service: OrderManagementService;
     beforeEach(async () => {
         db = await createPGliteDatabase();
-        for (const file of ['20260915120000_add_stripe_connect_commerce.sql', '20260916100000_add_refund_idempotency_key.sql', '20260920100000_add_order_item_configuration_snapshot.sql', '20261020143750_backend_runtime_role.sql', '20261022000000_order_management.sql'])
+        for (const file of ['20260915120000_add_stripe_connect_commerce.sql', '20260916100000_add_refund_idempotency_key.sql', '20260920100000_add_order_item_configuration_snapshot.sql', '20261020143750_backend_runtime_role.sql', '20261022000000_order_management.sql', '20261028041000_order_item_shipping_snapshot.sql'])
             await db.exec(await readFile(new URL('../../sql/migrations/' + file, import.meta.url), 'utf8'));
         await seedStore(db, 's', 's');
         await seedStore(db, 'other', 'other');
@@ -23,7 +23,7 @@ describe('order management transactions', () => {
  INSERT INTO "Payment" (id,"storeId","orderId","stripeAccountId","paymentIntentId",status,"amountMinor",currency) VALUES ('pay','s','o','acct_a','pi_a','PAID',200,'USD');`);
         service = new OrderManagementService(new CommerceRepository({ transaction: work => db.transaction(tx => work({ query: (sql, values) => tx.query(sql, values) })) }), { createFullRefund: async () => ({ id: 're_a', status: 'pending' }), cancelPaymentIntent: async () => ({ status: 'canceled' }), createDirectPaymentIntent: async () => ({ id: 'pi_balance', client_secret: 'secret' }) } as any);
     });
-    afterEach(async () => { await db?.close(); });
+    afterEach(async () => { vi.unstubAllEnvs(); await db?.close(); });
     it('requires verified payment even when the legacy status says paid', async () => {
         await db.exec(`UPDATE "Payment" SET status='PENDING'`);
         const repository = new CommerceRepository({ transaction: work => db.transaction(tx => work({ query: (sql, values) => tx.query(sql, values) })) });
@@ -43,6 +43,21 @@ describe('order management transactions', () => {
         expect((await db.query(`SELECT quantity FROM "OrderItem"`)).rows[0]).toEqual({quantity:3});
         await db.exec('CREATE ROLE browser_user NOLOGIN');
         await expect(db.transaction(async tx=>{await tx.exec('SET LOCAL ROLE browser_user');await tx.query('SELECT * FROM "OrderRevision"');})).rejects.toThrow(/permission denied/);
+    });
+    it('keeps the shipping details each line was ordered with when the order is edited', async () => {
+        await db.exec(`UPDATE "ProductVariant" SET "weightGrams"=500,"hsCode"='610910' WHERE id='v'; UPDATE "OrderItem" SET "shippingSnapshot"='{"weightGrams":250}'::jsonb;`);
+        await service.edit('s', 'o', { revision: 1, idempotencyKey: 'edit-shipping', items: [{ variantId: 'v', quantity: 3 }] });
+        await service.runOperations();
+        await service.settlePaymentIntent('pi_balance', 'succeeded');
+        expect((await db.query(`SELECT quantity,"shippingSnapshot" FROM "OrderItem"`)).rows[0]).toEqual({ quantity: 3, shippingSnapshot: { weightGrams: 250 } });
+    });
+    it('will not add a combination the merchant has stopped selling, but keeps ones already on the order', async () => {
+        await db.exec(`INSERT INTO "ProductVariant" (id,"storeId","productId",title,"priceMinor",options,"updatedAt",sellable) VALUES ('v2','s','p','Large',150,'{}',now(),false);
+ INSERT INTO "InventoryLevel" ("storeId","variantId",quantity,"updatedAt") VALUES ('s','v2',10,now());`);
+        await expect(service.edit('s', 'o', { revision: 1, idempotencyKey: 'add-disabled', items: [{ variantId: 'v', quantity: 2 }, { variantId: 'v2', quantity: 1 }] })).rejects.toMatchObject({ code: 'VARIANT_UNAVAILABLE' });
+        await db.exec(`UPDATE "ProductVariant" SET sellable=false WHERE id='v'`);
+        const kept = await service.edit('s', 'o', { revision: 1, idempotencyKey: 'keep-disabled', items: [{ variantId: 'v', quantity: 1 }] });
+        expect(kept.id).toBeTruthy();
     });
     it('searches snapshots and isolates tenants', async () => { const result = await service.search('s', { query: 'Alice' }); expect(result.total).toBe(1); expect(result.summary.PAID).toBe(1); expect((await service.search('other', {})).total).toBe(0); });
     it('holds stock once and applies only verified settlement', async () => {
@@ -95,6 +110,16 @@ describe('order management transactions', () => {
         await service.refund('s','o',{revision:2,idempotencyKey:'full'});
         const refunds=(await db.query<any>(`SELECT "paymentIntentId","amountMinor" FROM "OrderTransaction" WHERE kind='REFUND' ORDER BY "amountMinor"`)).rows;
         expect(refunds).toEqual([{paymentIntentId:'pi_balance',amountMinor:100},{paymentIntentId:'pi_a',amountMinor:200}]);
+    });
+    it('snapshots the configured photo for new lines and preserves purchased images', async () => {
+        vi.stubEnv('PRODUCT_MEDIA_STORE_IDS', 's');
+        await db.query(`UPDATE "Product" SET options=$1 WHERE id='p'`, [JSON.stringify([{ id:'wrap', name:'Wrapping', type:'configuration', required:true, values:[{id:'gift',label:'Gift wrap'}] }])]);
+        await db.exec(`UPDATE "OrderItem" SET "imageSnapshot"='purchased.jpg';
+          INSERT INTO "Media" (id,"storeId",type,"storageKey",url,"mimeType","byteSize","originalName") VALUES ('shared','s','image','shared','shared.jpg','image/jpeg',1,'shared'),('gift','s','image','gift','gift.jpg','image/jpeg',1,'gift');
+          INSERT INTO "ProductMedia" ("storeId","productId","mediaId",position,"appliesTo") VALUES ('s','p','shared',0,'{}'),('s','p','gift',1,'{"wrap":["gift"]}');`);
+        const preview = await service.preview('s','o',{revision:1,items:[{variantId:'v',quantity:2},{variantId:'v',configurationKey:'wrap:gift',quantity:1}]});
+        expect(preview.items.find((item: any) => item.configurationKey === 'wrap:gift').imageSnapshot).toBe('gift.jpg');
+        expect(preview.items.find((item: any) => !item.configurationKey).imageSnapshot).toBe('purchased.jpg');
     });
     it('prices a new configured line from current catalog values while preserving original prices',async()=>{
         await db.query(`UPDATE "Product" SET options=$1 WHERE id='p'`,[JSON.stringify([{id:'wrap',name:'Wrapping',required:true,values:[{id:'gift',label:'Gift wrap',priceAdjustmentMinor:20}]}])]);

@@ -16,6 +16,17 @@ Workspace and publication identity is `storeId` only. This milestone does not in
 
 ## Firebase Cloud Functions
 
+### Local order email worker
+
+The Functions emulator does not run the deployed Cloud Scheduler timer. While the local API is running, use a second terminal in `backend/`:
+
+```powershell
+npm run workers:notifications:check
+npm run workers:notifications
+```
+
+The check command only reads queue counts. The worker command submits queued customer emails through the configured SMTP provider, including Resend SMTP. The runner loads `backend/.env`, uses `ORDER_PUBLIC_API_URL` (including the Firebase function prefix) and `SCHEDULER_SECRET`, and accepts only loopback API destinations. It processes one email at a time, waits ten seconds between requests, and stops with Ctrl+C. Use `npm run workers:notifications:once` to process at most one queued email. It does not run refund or other order-operation jobs. Do not run it alongside another local email runner.
+
 The compiled `api` export in `src/functions.ts` is the Firebase HTTP entrypoint (`dist/functions.js`). It wraps the existing Express application; local development still uses `src/server.ts` and `npm run dev`.
 
 1. Install the Firebase CLI and authenticate with `firebase login`.

@@ -15,6 +15,9 @@ describe("SqlPublicStorefrontContextRepository", () => {
 
   it("returns only same-store published content and ordered blog summaries", async () => {
     const repository = new SqlPublicStorefrontContextRepository(database);
+    const links = await repository.listNavigationResources("store-a");
+    expect(links).toEqual(expect.arrayContaining([{ kind: "page", id: "page-a", handle: "about", blogHandle: null }, { kind: "article", id: "article-a", handle: "launch", blogHandle: "news" }]));
+    expect(links.some(item => ["page-b", "article-b", "article-draft"].includes(item.id))).toBe(false);
     await expect(repository.findPublishedPageByHandle("store-a", "about")).resolves.toMatchObject({ id: "page-a", title: "About A" });
     await expect(repository.findPublishedPageByHandle("store-b", "about")).resolves.toMatchObject({ id: "page-b", title: "About B" });
     await expect(repository.findPublishedPageByHandle("store-a", "draft-page")).resolves.toBeNull();

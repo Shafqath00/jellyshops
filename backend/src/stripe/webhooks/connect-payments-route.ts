@@ -37,7 +37,8 @@ export function createConnectPaymentsWebhookRouter(
         const event =
           gateway.constructEvent(
             "connect-payments",
-            request.body as Buffer,
+            // Firebase parses JSON before Express; its rawBody retains the signed bytes.
+            (request as typeof request & { rawBody?: Buffer }).rawBody ?? request.body as Buffer,
             signature,
           );
 

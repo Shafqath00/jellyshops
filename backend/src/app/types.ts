@@ -10,6 +10,7 @@ import type { ReservationSweeper } from "../commerce/sweeper.js";
 import type { AppConfig } from "../config.js";
 import type { ContentService } from "../content/service.js";
 import type { CustomDataService, MetaobjectService } from "../custom-data/service.js";
+import type { OwnerMetafieldService } from "../custom-data/owner-values.js";
 import type { supabaseCustomerVerifier } from "../customers/routes.js";
 import type { CustomerService as StoreCustomerService } from "../customers/service.js";
 import type { DynamicSourceRegistry } from "../dynamic-sources/registry.js";
@@ -38,6 +39,7 @@ export interface AppDependencies {
   catalogService: CatalogAdmin;
   contentService: ContentService;
   customDataService: CustomDataService;
+  ownerMetafieldService?: OwnerMetafieldService;
   metaobjectService: MetaobjectService;
   dynamicSourceRegistry: DynamicSourceRegistry;
 

@@ -1,9 +1,11 @@
 # Secrets and local configuration
 .env
 **/.env
+**/.env.*
 **/.env.onboarding.local
 !.env.example
 .firebaserc
+.vercel/
 
 # Dependencies and build output
 node_modules/
@@ -44,3 +46,8 @@ backend/.tmp-vitest/
 **/.test-tmp/
 **/node-compile-cache/
 **/.next-order-management/
+
+# Local caches and test output
+backend/.test-temp/
+backend/supabase/.temp/
+/jellyshops/tsx-*/

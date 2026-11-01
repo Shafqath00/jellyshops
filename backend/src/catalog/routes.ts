@@ -1,3 +1,4 @@
+import { assertMediaInput } from "./product-media.js";
 import { Router } from "express";
 import { z } from "zod";
 import { requireMerchant, requireStorePermission } from "../auth/middleware.js";
@@ -36,16 +37,38 @@ const variantSchema = z.object({
   compareAtPriceMinor: z.number().int().nonnegative().nullable().optional(),
   costMinor: z.number().int().nonnegative().nullable().optional(),
   unitPricing: unitPricingSchema.nullable().optional(),
+  barcode: z.string().trim().min(1).max(64).nullable().optional(),
+  lowStockThreshold: z.number().int().nonnegative().max(1_000_000).nullable().optional(),
+  weightGrams: z.number().int().min(0).max(100_000_000).nullable().optional(),
+  lengthMm: z.number().int().min(0).max(10_000_000).nullable().optional(),
+  widthMm: z.number().int().min(0).max(10_000_000).nullable().optional(),
+  heightMm: z.number().int().min(0).max(10_000_000).nullable().optional(),
+  countryOfOrigin: z.string().regex(/^[A-Z]{2}$/, "Use a two-letter country code").nullable().optional(),
+  hsCode: z.string().regex(/^\d{6,10}$/, "An HS code has 6 to 10 digits").nullable().optional(),
+  sellable: z.boolean().optional(),
+  mediaId: z.string().min(1).max(200).nullable().optional(),
   options: z.record(z.string(), z.unknown()).optional(),
   trackInventory: z.boolean().optional(),
   quantity: z.number().int().nonnegative().nullable().optional(),
   reserved: z.number().int().nonnegative().nullable().optional(),
 });
+const mediaItemsSchema = z.array(z.object({
+  mediaId: z.string().min(1),
+  altText: z.string().max(2000).nullable().optional(),
+  appliesTo: z.record(z.string().min(1), z.array(z.string().min(1)).min(1)).optional(),
+})).max(30);
+/** The last part of a product's web address: no spaces and nothing that would change what the address means. */
+const productHandleSchema = z.string().trim().min(1).max(255).regex(/^[^\s/?#%]+$/, "A URL handle cannot contain spaces or / ? # %");
 const createProductSchema = z.object({
+  media: mediaItemsSchema.optional(),
   imageUrl: z.string().url().optional(),
-  handle: z.string().trim().min(1),
+  handle: productHandleSchema,
   title: z.string().trim().min(1),
   description: z.string().optional(),
+  descriptionDoc: z.unknown().nullable().optional(),
+  seoTitle: z.string().trim().min(1).max(255).nullable().optional(),
+  seoDescription: z.string().trim().min(1).max(500).nullable().optional(),
+  fulfillmentType: z.enum(["PHYSICAL", "DIGITAL"]).optional(),
   specifications: z.record(z.string().trim().min(1).max(80), z.string().trim().min(1).max(500)).refine((value) => Object.keys(value).length <= 50).optional(),
   vendor: z.string().trim().min(1).nullable().optional(),
   productType: z.string().trim().min(1).nullable().optional(),
@@ -69,6 +92,7 @@ const createCollectionSchema = z.object({
   handle: z.string().trim().min(1),
   title: z.string().trim().min(1),
   description: z.string().optional(),
+  descriptionDoc: z.unknown().nullable().optional(),
   productIds: z.array(z.string().min(1)).optional(),
 });
 const updateCollectionSchema = createCollectionSchema.partial();
@@ -77,7 +101,7 @@ type AdminCatalogService = Pick<
   CatalogAdmin,
   "listProducts" | "getProduct" | "createProduct" | "updateProduct" |
   "listCollections" | "getCollection" | "createCollection" | "updateCollection"
->;
+> & Partial<Pick<CatalogAdmin, "listInventory" | "updateInventory" | "listInventoryHistory">>;
 type PublicCatalogService = Pick<CatalogAdmin, "listPublicProducts" | "listCollections">;
 
 export function createCatalogRouter(): Router {
@@ -90,6 +114,22 @@ export function createCatalogAdminRouter(service: AdminCatalogService, authProvi
   const router = Router({ mergeParams: true });
   router.use(requireMerchant(authProvider));
 
+  router.get("/inventory", requireStorePermission("catalog:view"), async (request, response) => {
+    const input = listSchema.extend({ query: z.string().max(200).optional() }).parse(request.query);
+    if (!service.listInventory) { response.status(503).json({ error: { message: "Stock management is unavailable." } }); return; }
+    response.json(await service.listInventory(request.storeContext!.storeId,input));
+  });
+  router.patch("/inventory/:variantId", requireStorePermission("catalog:edit"), async (request, response) => {
+    const input=z.object({ quantity:z.number().int().nonnegative().max(2147483647),expectedRevision:z.string().min(1).max(200),note:z.string().trim().max(500).optional() }).strict().parse(request.body);
+    if (!service.updateInventory) { response.status(503).json({ error: { message: "Stock management is unavailable." } }); return; }
+    response.json(await service.updateInventory(request.storeContext!.storeId,String(request.params.variantId),{ ...input, actor: request.merchant?.userId }));
+  });
+  router.get("/inventory/:variantId/history", requireStorePermission("catalog:view"), async (request, response) => {
+    const input = listSchema.parse(request.query);
+    if (!service.listInventoryHistory) { response.status(503).json({ error: { message: "Stock management is unavailable." } }); return; }
+    response.json(await service.listInventoryHistory(request.storeContext!.storeId, String(request.params.variantId), { limit: input.limit, cursor: input.cursor }));
+  });
+
   router.get("/products", requireStorePermission("catalog:view"), async (request, response) => {
     const input = productListSchema.parse(request.query);
     response.json(await service.listProducts(request.storeContext!.storeId, input));
@@ -101,12 +141,19 @@ export function createCatalogAdminRouter(service: AdminCatalogService, authProvi
 
   router.post("/products", requireStorePermission("catalog:edit"), async (request, response) => {
     const input = createProductSchema.parse(request.body);
+    assertMediaInput(input);
     response.status(201).json(await service.createProduct(request.storeContext!.storeId, input));
   });
 
   router.patch("/products/:productId", requireStorePermission("catalog:edit"), async (request, response) => {
     const input = updateProductSchema.parse(request.body);
+    assertMediaInput(input);
     response.json(await service.updateProduct(request.storeContext!.storeId, String(request.params.productId), input));
+  });
+
+  router.put("/products/:productId/media", requireStorePermission("catalog:edit"), async (request, response) => {
+    const { items } = z.object({ items: mediaItemsSchema }).strict().parse(request.body);
+    response.json(await service.updateProduct(request.storeContext!.storeId, String(request.params.productId), { media: items }));
   });
 
   router.get("/collections", requireStorePermission("catalog:view"), async (request, response) => {

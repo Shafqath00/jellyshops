@@ -15,7 +15,14 @@ const schemaMigrations = [
   "20260922000000_v4_publication_activation.sql",
   "20260923090000_add_not_found_template.sql",
   "20260923100000_add_starter_pack_provenance.sql",
+  "20261025000000_product_media_assignments.sql",
+  "20261025010000_media_content_hash.sql",
   "20261028000000_variant_cost_unit_pricing.sql",
+  "20261028010000_product_description_document.sql",
+  "20261028020000_inventory_barcode_low_stock_history.sql",
+  "20261028040000_variant_shipping_details.sql",
+  "20261028050000_variant_sellable_and_photo.sql",
+  "20261029000000_product_seo_fields.sql",
 ] as const;
 
 export type IntegrationDatabase = PGlite;

@@ -67,8 +67,9 @@ export class AdminSummaryService {
         SELECT p."id" AS "productId", v."id" AS "variantId", p."title", v."sku", i."quantity"
         FROM "InventoryLevel" i JOIN "ProductVariant" v ON v."storeId" = i."storeId" AND v."id" = i."variantId"
         JOIN "Product" p ON p."storeId" = v."storeId" AND p."id" = v."productId"
-        WHERE i."storeId" = $1 AND i."quantity" <= 3 AND p."status" = 'ACTIVE' AND v."archivedAt" IS NULL
-        ORDER BY i."quantity", p."title", v."title" LIMIT 5`, [storeId]);
+        WHERE i."storeId" = $1 AND v."trackInventory" = true AND i."quantity" - i."reserved" <= COALESCE(v."lowStockThreshold", 3)
+          AND p."status" = 'ACTIVE' AND v."archivedAt" IS NULL
+        ORDER BY i."quantity" - i."reserved", p."title", v."title" LIMIT 5`, [storeId]);
       const configuration = await tx.query<{ timezone: string; details: boolean; publication: boolean; shipping: boolean }>(`
         SELECT COALESCE(ss."timezone", 'UTC') AS "timezone",
           (length(trim(s."name")) > 0 AND length(trim(s."slug")) > 0) AS "details",

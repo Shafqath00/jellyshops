@@ -7,6 +7,7 @@ import { createPublicStorefrontContextRouter } from "./routes.js";
 describe("public storefront context routes", () => {
   it("uses the path store identity and returns contexts or 404", async () => {
     const service = {
+      navigation: vi.fn(async () => ({ resources: [{ kind: "page" as const, id: "p", handle: "about", blogHandle: null }] })),
       search: vi.fn(async () => ({ type: "search", query: "shoes", state: "none", resultCount: 0, results: [] })),
       page: vi.fn(async () => null), blog: vi.fn(async () => null), article: vi.fn(async () => null),
     };
@@ -17,6 +18,10 @@ describe("public storefront context routes", () => {
     const search = await request(app).get("/api/public/stores/store-a/storefront/context/search?q=shoes");
     expect(search.status).toBe(200);
     expect(service.search).toHaveBeenCalledWith("store-a", "shoes");
+    const navigation = await request(app).get("/api/public/stores/store-a/storefront/context/navigation");
+    expect(navigation.status).toBe(200);
+    expect(navigation.body.resources[0].handle).toBe("about");
+    expect(service.navigation).toHaveBeenCalledWith("store-a");
     expect((await request(app).get("/api/public/stores/store-a/storefront/context/pages/about")).status).toBe(404);
     expect((await request(app).get("/api/public/stores/store-a/storefront/context/blogs/news")).status).toBe(404);
     expect((await request(app).get("/api/public/stores/store-a/storefront/context/blogs/news/articles/launch")).status).toBe(404);

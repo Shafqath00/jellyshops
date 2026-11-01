@@ -1,3 +1,4 @@
+import { productImageSnapshot } from "../catalog/product-image-snapshot.js";
 import { createHash } from "node:crypto";
 import { validateProductSelections, type ProductOptionLike } from "@jelly/storefront-schema";
 import { z } from "zod";
@@ -105,6 +106,10 @@ export async function validateCart(
         );
       }
 
+      if (variant.sellable === false) {
+        throw new ApiError(409, "VARIANT_UNAVAILABLE", `This combination is no longer sold: ${item.variantId}`);
+      }
+
       if (!variant.available) {
         throw new ApiError(
           409,
@@ -138,7 +143,7 @@ export async function validateCart(
         quantity: item.quantity,
         titleSnapshot: product?.title && product.title !== variant.title ? `${product.title} — ${variant.title}` : variant.title,
         skuSnapshot: variant.sku,
-        imageSnapshot: product?.media?.[0]?.url ?? null,
+        imageSnapshot: productImageSnapshot(storeId, product?.media ?? [], product?.options ?? [], selections, variant.options, variant.mediaId ?? null),
         productTitleSnapshot: product?.title ?? null,
         variantTitleSnapshot: variant.title,
         fulfillmentType,
