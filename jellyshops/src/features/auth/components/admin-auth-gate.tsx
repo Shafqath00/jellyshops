@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { AlertCircle, LoaderCircle, Sparkles } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { useAuth } from "@/features/auth/auth-provider";
+import { useAuth } from "@/features/auth/providers/auth-provider";
 
 export function AdminAuthGate({
   children,

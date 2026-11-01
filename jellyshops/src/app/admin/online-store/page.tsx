@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowUpRight, Check, CheckCircle2, Eye, LayoutTemplate, Loader2, Palette, Pencil, RefreshCw, Sparkles } from "lucide-react";
 import { listV4StarterPacks, type V4StarterPackId } from "@jelly/storefront-registry";
-import { useAuth } from "@/features/auth/auth-provider";
+import { useAuth } from "@/features/auth/providers/auth-provider";
 import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import type { ThemeCatalogEntry, ThemeConfigurationRecord } from "@/features/store-editor/api/types";
 import { TemplateThumbnail, TemplatePreviewDialog } from "@/features/store-editor/components/template-preview";
@@ -49,7 +49,7 @@ function StoreDesignLibrary() {
         if (!alive) return;
         setThemes(catalog); setConfiguration(selected); setError(undefined);
         setHasWorkspace(Boolean(selected || templates.length || globals.length || menus.length));
-      }).catch((reason: unknown) => { if (alive) setError(reason instanceof Error ? reason.message : "Could not load your templates. Try again."); })
+      }).catch((reason: unknown) => { if (alive) setError(reason instanceof Error ? reason.message : "Could not load your store designs. Try again."); })
       .finally(() => { if (alive) setLoading(false); });
     return () => { alive = false; };
   }, [api, storeId, retry]);
@@ -71,7 +71,7 @@ function StoreDesignLibrary() {
 
   async function installStarter(starterId: V4StarterPackId) {
     if (!api || !storeId || operation.current) return;
-    if (hasWorkspace && !window.confirm("Replace your current draft template and page assignments? Existing templates are retained in the library. Your published store, products, orders, and customer records stay unchanged.")) return;
+    if (hasWorkspace && !window.confirm("Switch your draft to this store design? Your page layouts are replaced, and products, collections and pages go back to the main layout for their type. Your live store, products, orders and customers stay the same until you publish.")) return;
     operation.current = true;
     setSaving(`starter:${starterId}`); setError(undefined); setNotice(undefined);
     try {
@@ -80,7 +80,7 @@ function StoreDesignLibrary() {
         await api.installStarterPack(storeId, starterId, { replaceDraft: true, expectedGeneration: workspace.generation });
       } else await api.installStarterPack(storeId, starterId);
       if (mounted.current) router.push(editorHref);
-    } catch (reason) { if (mounted.current) setError(reason instanceof Error ? reason.message : "Could not prepare your template. Try again."); }
+    } catch (reason) { if (mounted.current) setError(reason instanceof Error ? reason.message : "Could not prepare this store design. Try again."); }
     finally { operation.current = false; if (mounted.current) setSaving(undefined); }
   }
 
@@ -94,18 +94,18 @@ function StoreDesignLibrary() {
       <div className="mx-auto max-w-[1180px] space-y-9">
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="mb-3 flex items-center gap-2 text-xs font-semibold text-tint-foreground"><span className="grid size-6 place-items-center rounded-lg bg-tint"><LayoutTemplate size={13} /></span>Online store / Templates</p>
+            <p className="mb-3 flex items-center gap-2 text-xs font-semibold text-tint-foreground"><span className="grid size-6 place-items-center rounded-lg bg-tint"><LayoutTemplate size={13} /></span>Online store / Store designs</p>
             <h1 className="text-3xl font-bold tracking-[-0.045em] sm:text-4xl">A little more you.</h1>
             <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">Find your starting point. Add your products, make it your own, and bring your shop to life.</p>
           </div>
           {activeStore && <Link href={`/${activeStore.slug}`} className={secondary}>View store<ArrowUpRight size={15} /></Link>}
         </header>
-        {error && <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"><span>{error}</span><button type="button" onClick={() => { setLoading(true); setError(undefined); setRetry((value) => value + 1); }} className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-red-200 bg-card px-3 font-semibold"><RefreshCw size={14} />Try again</button></div>}
-        {notice && <p role="status" className="flex items-start gap-2 rounded-2xl border border-green-200 bg-green-50 p-4 text-sm leading-6 text-green-800"><CheckCircle2 className="mt-1 shrink-0" size={16} />{notice}</p>}
-        {loading ? <div aria-label="Loading templates" aria-busy="true" className="grid gap-5 md:grid-cols-2">{[0, 1].map((key) => <div key={key} className="h-80 animate-pulse rounded-3xl border border-border bg-card motion-reduce:animate-none"><div className="m-4 h-44 rounded-2xl bg-muted" /><div className="mx-6 mt-6 h-4 w-1/3 rounded bg-muted" /><div className="mx-6 mt-3 h-3 w-2/3 rounded bg-muted" /></div>)}<span className="sr-only">Loading your storefront designs…</span></div> : error && themes.length === 0 ? null : <>
+        {error && <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"><span>{error}</span><button type="button" onClick={() => { setLoading(true); setError(undefined); setRetry((value) => value + 1); }} className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-red-200 bg-card px-3 font-semibold"><RefreshCw size={14} />Try again</button></div>}
+        {notice && <p role="status" className="flex items-start gap-2 rounded-xl border border-green-200 bg-green-50 p-4 text-sm leading-6 text-green-800"><CheckCircle2 className="mt-1 shrink-0" size={16} />{notice}</p>}
+        {loading ? <div aria-label="Loading store designs" aria-busy="true" className="grid gap-5 md:grid-cols-2">{[0, 1].map((key) => <div key={key} className="h-80 animate-pulse rounded-3xl border border-border bg-card motion-reduce:animate-none"><div className="m-4 h-44 rounded-xl bg-muted" /><div className="mx-6 mt-6 h-4 w-1/3 rounded bg-muted" /><div className="mx-6 mt-3 h-3 w-2/3 rounded bg-muted" /></div>)}<span className="sr-only">Loading your storefront designs…</span></div> : error && themes.length === 0 ? null : <>
           {hasWorkspace && <section aria-labelledby="current-design" className="grid overflow-hidden rounded-3xl border border-border bg-card lg:grid-cols-2">
             <div className="flex flex-col justify-center p-6 sm:p-8">
-              <p className="mb-4 flex items-center gap-2 text-xs font-semibold text-muted-foreground"><span className="size-2 rounded-full bg-secondary" />Your private design</p>
+              <p className="mb-4 flex items-center gap-2 text-xs font-semibold text-muted-foreground"><span className="size-2 rounded-lg bg-secondary" />Your private design</p>
               <h2 id="current-design" className="text-2xl font-bold tracking-tight">{selectedTheme?.name ?? "Your storefront"}</h2>
               <p className="mt-3 max-w-sm text-sm leading-6 text-muted-foreground">Your shop is taking shape. Pick up where you left off and make every detail feel like your brand.</p>
               <Link href={editorHref} className={`${primary} mt-6 w-fit`}><Pencil size={15} />Continue editing<ArrowRight size={15} /></Link>
@@ -115,22 +115,22 @@ function StoreDesignLibrary() {
           </section>}
           <section aria-labelledby="template-gallery">
             <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-              <div><p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-tint-foreground">Made for your next chapter</p><h2 id="template-gallery" className="text-2xl font-bold tracking-tight">{hasWorkspace ? "Explore storefront templates" : "Choose your starting point"}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{hasWorkspace ? "Browse for inspiration. Edit your current storefront, or change its appearance below." : "Complete, ready-to-edit layouts. Your photos, your words, your products."}</p></div>
-              <span className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground">{starters.length} templates · Included with your store</span>
+              <div><p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-tint-foreground">Made for your next chapter</p><h2 id="template-gallery" className="text-2xl font-bold tracking-tight">{hasWorkspace ? "Explore store designs" : "Choose your starting point"}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{hasWorkspace ? "Browse for inspiration. Edit your current storefront, or change its appearance below." : "Complete, ready-to-edit layouts. Your photos, your words, your products."}</p></div>
+              <span className="rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground">{starters.length} store designs · Included with your store</span>
             </div>
             <div className="grid gap-6 md:grid-cols-2">{starters.map((starter) => {
               const selected = configuration?.themeId === starter.id;
-              return <article key={starter.id} aria-label={starter.name} className={`group overflow-hidden rounded-3xl border bg-card transition-shadow hover:shadow-[0_12px_40px_-18px_rgba(83,61,66,0.18)] ${selected ? "border-tint-border" : "border-border"}`}>
+              return <article key={starter.id} aria-label={starter.name} className={`group overflow-hidden rounded-3xl border bg-card transition-shadow hover:shadow-sm ${selected ? "border-tint-border" : "border-border"}`}>
                 <button type="button" aria-label={`Preview ${starter.name}`} onClick={() => setPreviewId(starter.id)} className={`relative block w-full p-5 text-left sm:p-6 ${starter.id === "fresh-market" ? "bg-muted" : "bg-muted"}`}>
                   <TemplateThumbnail id={starter.id} name={starter.name} image={starter.previewAsset} />
-                  <span className="absolute bottom-8 right-8 inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-card/95 px-3 py-2 text-xs font-semibold shadow-sm transition group-hover:-translate-y-0.5 motion-reduce:transform-none"><Eye size={13} />Explore template</span>
+                  <span className="absolute bottom-8 right-8 inline-flex items-center gap-1.5 rounded-lg border border-white/70 bg-card/95 px-3 py-2 text-xs font-semibold shadow-sm transition group-hover:-translate-y-0.5 motion-reduce:transform-none"><Eye size={13} />Explore design</span>
                 </button>
                 <div className="p-5 sm:p-6">
-                  <div className="flex items-start justify-between gap-3"><h3 className="text-xl font-bold tracking-tight">{starter.name}</h3>{selected && <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-tint-foreground"><Check size={12} />Selected</span>}</div>
+                  <div className="flex items-start justify-between gap-3"><h3 className="text-xl font-bold tracking-tight">{starter.name}</h3>{selected && <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2.5 py-1 text-xs font-semibold text-tint-foreground"><Check size={12} />Selected</span>}</div>
                   <p className="mt-2 text-sm leading-6 text-muted-foreground">{starter.summary}</p>
-                  <div className="mt-4 flex flex-wrap gap-2">{starter.tags.map((label) => <span key={label} className="rounded-md bg-muted/50 px-2 py-1 text-[11px] font-medium text-muted-foreground">{label}</span>)}</div>
+                  <div className="mt-4 flex flex-wrap gap-2">{starter.tags.map((label) => <span key={label} className="rounded-md bg-muted/50 px-2 py-1 text-[13px] font-medium text-muted-foreground">{label}</span>)}</div>
                   <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-border pt-5">
-                    {!hasWorkspace ? <button type="button" disabled={!api || Boolean(saving)} onClick={() => void installStarter(starter.id)} className={primary}>{saving === `starter:${starter.id}` ? <><Loader2 size={15} className="animate-spin motion-reduce:animate-none" />Preparing your store…</> : <>Use template<ArrowRight size={15} /></>}</button> : selected ? <Link href={editorHref} className={primary}><Pencil size={14} />Customize template</Link> : <button type="button" className={primary} disabled={Boolean(saving)} onClick={() => void installStarter(starter.id)}>Use this template<ArrowRight size={15} /></button>}
+                    {!hasWorkspace ? <button type="button" disabled={!api || Boolean(saving)} onClick={() => void installStarter(starter.id)} className={primary}>{saving === `starter:${starter.id}` ? <><Loader2 size={15} className="animate-spin motion-reduce:animate-none" />Preparing your store…</> : <>Start with this design<ArrowRight size={15} /></>}</button> : selected ? <Link href={editorHref} className={primary}><Pencil size={14} />Customize design</Link> : <button type="button" className={primary} disabled={Boolean(saving)} onClick={() => void installStarter(starter.id)}>Switch to this design<ArrowRight size={15} /></button>}
                     <button type="button" onClick={() => setPreviewId(starter.id)} className={secondary}><Eye size={15} />Preview</button>
                   </div>
                 </div>
@@ -142,10 +142,10 @@ function StoreDesignLibrary() {
             {unavailable && <p role="alert" className="mb-5 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Your selected theme “{configuration.themeId}” is unavailable. Choose an available theme to continue.</p>}
             {themes.length ? <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{themes.map((theme) => {
               const selected = theme.id === configuration?.themeId;
-              return <div key={theme.id} className={`flex items-center justify-between gap-3 rounded-2xl border p-4 ${selected ? "border-tint-border bg-muted/50" : "border-border"}`}><div className="min-w-0"><p className="truncate text-sm font-semibold">{theme.name}</p><p className="mt-1 text-xs text-muted-foreground">{selected ? "Selected theme" : theme.available ? "Ready to customize" : "Unavailable"}</p></div><button type="button" aria-label={selected ? `Customize ${theme.name}` : `Use ${theme.name}`} disabled={!theme.available || Boolean(saving)} onClick={() => selected ? router.push(editorHref) : void selectTheme(theme)} className={`grid size-10 shrink-0 place-items-center rounded-xl border transition disabled:opacity-40 ${selected ? "border-tint-border bg-card text-tint-foreground" : "border-border hover:bg-muted"}`}>{saving === theme.id ? <Loader2 size={16} className="animate-spin motion-reduce:animate-none" /> : selected ? <Pencil size={16} /> : <ArrowRight size={16} />}</button></div>;
+              return <div key={theme.id} className={`flex items-center justify-between gap-3 rounded-xl border p-4 ${selected ? "border-tint-border bg-muted/50" : "border-border"}`}><div className="min-w-0"><p className="truncate text-sm font-semibold">{theme.name}</p><p className="mt-1 text-xs text-muted-foreground">{selected ? "Selected theme" : theme.available ? "Ready to customize" : "Unavailable"}</p></div><button type="button" aria-label={selected ? `Customize ${theme.name}` : `Use ${theme.name}`} disabled={!theme.available || Boolean(saving)} onClick={() => selected ? router.push(editorHref) : void selectTheme(theme)} className={`grid size-10 shrink-0 place-items-center rounded-xl border transition disabled:opacity-40 ${selected ? "border-tint-border bg-card text-tint-foreground" : "border-border hover:bg-muted"}`}>{saving === theme.id ? <Loader2 size={16} className="animate-spin motion-reduce:animate-none" /> : selected ? <Pencil size={16} /> : <ArrowRight size={16} />}</button></div>;
             })}</div> : <p className="text-sm text-muted-foreground">No additional themes are available.</p>}
           </section>}
-          <aside className="flex items-start gap-3 rounded-2xl bg-muted px-5 py-4"><Sparkles size={18} className="mt-0.5 shrink-0 text-tint-foreground" /><p className="text-sm leading-6 text-muted-foreground"><strong className="font-semibold text-foreground">Start with a template. Make it yours.</strong> Customize colors, images, text, and sections in the editor. Preview on different screens before you publish.</p></aside>
+          <aside className="flex items-start gap-3 rounded-xl bg-muted px-5 py-4"><Sparkles size={18} className="mt-0.5 shrink-0 text-tint-foreground" /><p className="text-sm leading-6 text-muted-foreground"><strong className="font-semibold text-foreground">Start with a store design. Make it yours.</strong> Customize colors, images, text, and sections in the editor. Preview on different screens before you publish.</p></aside>
         </>}
       </div>
       {preview && <TemplatePreviewDialog starter={preview} hasWorkspace={hasWorkspace} busy={Boolean(saving)} error={error} onClose={() => setPreviewId(undefined)} onUse={() => void installStarter(preview.id)} onEdit={() => router.push(editorHref)} />}

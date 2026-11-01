@@ -3,7 +3,7 @@ import { createClient, type Session } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { useShop } from "@/contexts/shop-context";
-import { mergeWishlistIds, readGuestWishlist, writeGuestWishlist } from "./wishlist";
+import { mergeWishlistIds, readGuestWishlist, writeGuestWishlist } from "../lib/wishlist";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

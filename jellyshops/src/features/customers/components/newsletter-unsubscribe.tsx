@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { customerApiOrigin } from "./customer-provider";
+import { customerApiOrigin } from "../providers/customer-provider";
 
 export function NewsletterUnsubscribe({ storeId, token }: { storeId: string; token: string }) {
   const [state, setState] = useState<"loading" | "done" | "error">("loading");

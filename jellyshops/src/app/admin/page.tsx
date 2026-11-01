@@ -11,9 +11,9 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { useCallback, useMemo } from "react";
-import { authApiOrigin, useAuth } from "@/features/auth/auth-provider";
-import { createAdminApi } from "@/features/admin/api";
-import { useAdminQuery } from "@/features/admin/use-admin-query";
+import { authApiOrigin, useAuth } from "@/features/auth/providers/auth-provider";
+import { createAdminApi } from "@/features/admin/api/admin-api";
+import { useAdminQuery } from "@/features/admin/hooks/use-admin-query";
 import { OrderStatusBadge } from "@/features/commerce/components/order-status";
 import type { OrderStatus } from "@/lib/domain";
 
@@ -44,7 +44,7 @@ function StatCard({
 }) {
   return (
     <article
-      className="stat-card animate-jelly-slide-up rounded-xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
+      className="stat-card animate-jelly-slide-up rounded-xl border border-border bg-card p-5 shadow-sm"
       style={{ animationDelay: `${index * 60}ms` }}
     >
       <div className="flex items-start justify-between gap-4">
@@ -53,7 +53,7 @@ function StatCard({
           <p className="mt-2 text-[24px] font-semibold tabular-nums tracking-[-0.025em] text-foreground">
             {value}
           </p>
-          <p className="mt-1 text-[11px] text-muted-foreground">{hint}</p>
+          <p className="mt-1 text-[13px] text-muted-foreground">{hint}</p>
         </div>
         <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground">
           <Icon size={18} strokeWidth={1.7} />
@@ -74,11 +74,11 @@ export default function DashboardPage() {
   const { actionableOrders: needsAttention, revenueMinor: revenue, orderCount, publishedProductCount, lowStock } = query.data;
   const setup = query.data.setup;
   const setupItems = [
-    { label: "Store details", complete: setup?.details },
-    { label: "Products", complete: setup?.products },
-    { label: "Publication", complete: setup?.publication },
-    { label: "Shipping", complete: setup?.shipping },
-    { label: "Payments", complete: setup?.payments },
+    { label: "Store details", href: "/admin/settings", complete: setup?.details },
+    { label: "Products", href: "/admin/products", complete: setup?.products },
+    { label: "Publication", href: "/admin/online-store", complete: setup?.publication },
+    { label: "Shipping", href: "/admin/settings", complete: setup?.shipping },
+    { label: "Payments", href: "/admin/payments", complete: setup?.payments },
   ];
   const completed = setupItems.filter((item) => item.complete).length;
   const ready = completed === setupItems.length;
@@ -94,7 +94,7 @@ export default function DashboardPage() {
           </p>
 
           <h1 className="text-[24px] font-semibold tracking-[-0.025em] text-foreground sm:text-[28px]">
-            Welcome back to {store.name}.
+            Home
           </h1>
 
           <p className="mt-1.5 max-w-xl text-[13px] leading-5 text-muted-foreground">
@@ -109,7 +109,7 @@ export default function DashboardPage() {
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           <Link
             href={`/${store.slug}`}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-input bg-card px-3.5 text-[13px] font-semibold text-foreground shadow-[0_1px_0_rgba(0,0,0,0.04)] transition hover:bg-muted"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-input bg-card px-3.5 text-[13px] font-semibold text-foreground shadow-sm transition hover:bg-muted"
           >
             View store
             <ArrowUpRight size={14} strokeWidth={1.8} />
@@ -117,7 +117,7 @@ export default function DashboardPage() {
 
           <Link
             href="/admin/products/new"
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground shadow-[0_1px_0_rgba(0,0,0,0.15)] transition hover:bg-primary/90"
+            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-primary px-3.5 text-[13px] font-semibold text-primary-foreground shadow-sm transition hover:bg-primary/90"
           >
             <Plus size={15} strokeWidth={2} />
             Add product
@@ -126,7 +126,7 @@ export default function DashboardPage() {
       </header>
 
       {/* Store setup */}
-      <section className="rounded-xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+      <section className="rounded-xl border border-border bg-card shadow-sm">
         <div className="flex flex-col gap-5 p-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex min-w-0 items-start gap-3.5">
             <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-success/15">
@@ -141,7 +141,7 @@ export default function DashboardPage() {
                   {ready ? "Your storefront is ready" : "Complete your store setup"}
                 </h2>
 
-                <span className="rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-semibold text-success">
+                <span className="rounded-lg bg-success/15 px-2 py-0.5 text-[12px] font-semibold text-success">
                   {ready ? "Ready" : "In progress"}
                 </span>
               </div>
@@ -154,16 +154,18 @@ export default function DashboardPage() {
 
           <div className="flex flex-wrap gap-x-5 gap-y-2 border-t border-border pt-4 lg:border-0 lg:pt-0">
             {setupItems.map((item) => (
-              <div
+              <Link
+                href={item.href}
+                aria-label={`${item.label}: ${item.complete ? "Complete" : "Needs setup"}`}
                 key={item.label}
-                className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground"
+                className="flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground"
               >
-                <span className="grid size-4 place-items-center rounded-full bg-success/15 text-[9px] font-bold text-success">
+                <span className="grid size-4 place-items-center rounded-lg bg-success/15 text-[9px] font-bold text-success">
                   {item.complete ? "✓" : "○"}
                 </span>
 
                 {item.label}
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -197,15 +199,15 @@ export default function DashboardPage() {
       {/* Dashboard lists */}
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(340px,0.75fr)]">
         {/* Orders */}
-        <section className="overflow-hidden rounded-xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+        <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
           <div className="flex min-h-[64px] items-center justify-between gap-4 border-b border-border px-5">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                 Order queue
               </p>
 
               <h2 className="mt-0.5 text-[15px] font-semibold text-foreground">
-                What&apos;s moving
+                Orders needing attention
               </h2>
             </div>
 
@@ -229,7 +231,7 @@ export default function DashboardPage() {
                     key={order.id}
                     className="group grid min-h-[68px] grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3 px-5 transition-colors hover:bg-muted/50 sm:grid-cols-[36px_minmax(0,1fr)_auto_auto]"
                   >
-                    <span className="grid size-9 place-items-center rounded-full bg-muted text-[12px] font-semibold text-muted-foreground">
+                    <span className="grid size-9 place-items-center rounded-lg bg-muted text-[12px] font-semibold text-muted-foreground">
                       {customerName.charAt(0).toUpperCase()}
                     </span>
 
@@ -238,7 +240,7 @@ export default function DashboardPage() {
                         {customerName}
                       </p>
 
-                      <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                      <p className="mt-0.5 truncate text-[13px] text-muted-foreground">
                         {order.number}
                       </p>
                     </div>
@@ -260,7 +262,7 @@ export default function DashboardPage() {
           ) : (
             <div className="grid min-h-[220px] place-items-center px-6 py-10 text-center">
               <div>
-                <span className="mx-auto grid size-10 place-items-center rounded-full bg-muted text-muted-foreground">
+                <span className="mx-auto grid size-10 place-items-center rounded-lg bg-muted text-muted-foreground">
                   <PackageCheck size={18} />
                 </span>
 
@@ -268,7 +270,7 @@ export default function DashboardPage() {
                   No orders need attention
                 </p>
 
-                <p className="mt-1 text-[11px] text-muted-foreground">
+                <p className="mt-1 text-[13px] text-muted-foreground">
                   New orders that need action will appear here.
                 </p>
               </div>
@@ -277,10 +279,10 @@ export default function DashboardPage() {
         </section>
 
         {/* Inventory */}
-        <section className="overflow-hidden rounded-xl border border-border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+        <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
           <div className="flex min-h-[64px] items-center justify-between gap-4 border-b border-border px-5">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                 Inventory
               </p>
 
@@ -315,12 +317,12 @@ export default function DashboardPage() {
                       {item.title}
                     </p>
 
-                    <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                    <p className="mt-0.5 truncate text-[13px] text-muted-foreground">
                       {item.sku ?? "No SKU"}
                     </p>
                   </div>
 
-                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[var(--warn-bg)] px-2 py-1 text-[10px] font-semibold text-[var(--warn-fg)]">
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-[var(--warn-bg)] px-2 py-1 text-[12px] font-semibold text-[var(--warn-fg)]">
                     <TriangleAlert size={11} strokeWidth={2} />
                     {item.quantity} left
                   </span>
@@ -330,7 +332,7 @@ export default function DashboardPage() {
           ) : (
             <div className="grid min-h-[220px] place-items-center px-6 py-10 text-center">
               <div>
-                <span className="mx-auto grid size-10 place-items-center rounded-full bg-muted text-muted-foreground">
+                <span className="mx-auto grid size-10 place-items-center rounded-lg bg-muted text-muted-foreground">
                   <Boxes size={18} />
                 </span>
 
@@ -338,7 +340,7 @@ export default function DashboardPage() {
                   Inventory looks healthy
                 </p>
 
-                <p className="mt-1 text-[11px] text-muted-foreground">
+                <p className="mt-1 text-[13px] text-muted-foreground">
                   Products with low stock will appear here.
                 </p>
               </div>

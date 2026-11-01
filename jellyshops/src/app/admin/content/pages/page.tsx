@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { useAuth } from "@/features/auth/auth-provider";
-import { createContentApi, type ContentTemplate, type PageResource, type TemplateAssignment } from "@/features/content/api";
-import { ResourceForm } from "@/features/content/resource-form";
+import { useAuth } from "@/features/auth/providers/auth-provider";
+import { createContentApi, type ContentTemplate, type PageResource, type TemplateAssignment } from "@/features/content/api/client";
+import { ResourceForm } from "@/features/content/components/resource-form";
 
 function editable(page: PageResource) {
   return {
@@ -67,7 +67,7 @@ export default function PagesAdminPage() {
     <main className="mx-auto max-w-6xl p-6 md:p-8">
       <div className="mb-6 flex items-center gap-3">
         <Link href="/admin" aria-label="Back to admin" className="grid size-9 place-items-center rounded-lg border border-border bg-card"><ArrowLeft size={16} /></Link>
-        <div><p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Content</p><h1 className="text-2xl font-semibold tracking-[-0.03em]">Pages</h1></div>
+        <div><h1 className="text-2xl font-semibold tracking-[-0.03em]">Pages</h1></div>
       </div>
       {error && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
       <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">

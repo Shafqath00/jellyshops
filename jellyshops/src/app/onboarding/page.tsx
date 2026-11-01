@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check } from "lucide-react";
-import { authApiOrigin, useAuth } from "@/features/auth/auth-provider";
+import { authApiOrigin, useAuth } from "@/features/auth/providers/auth-provider";
 
 function slugify(value: string) { return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
 

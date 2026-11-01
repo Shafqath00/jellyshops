@@ -182,8 +182,39 @@ body {
   --tint-bd: #edcbd2;
 }
 
+/* ── Admin UI: neutral, Shopify-inspired palette with tighter radii ─── */
+/* The admin shell sets `admin-ui` on <html>; storefronts keep brand tokens. */
+:root.admin-ui {
+  --ui-r-sm: 4px;
+  --ui-r-md: 6px;
+  --ui-r-lg: 8px;
+  --ui-r-xl: 12px;
+  --frame: #1a1a1a;
+  --background: #f4f4f5;
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --primary: #1a1a1a;
+  --primary-foreground: #ffffff;
+  --secondary: #ececee;
+  --secondary-foreground: #1a1a1a;
+  --muted: #efeff1;
+  --muted-foreground: #616166;
+  --accent: #ececee;
+  --accent-foreground: #1a1a1a;
+  --border: #e1e1e5;
+  --input: #c9c9ce;
+  --ring: #3b82f6;
+  --success: #1f8a52;
+  --tint-bg: #f7f2f2;
+  --tint-fg: #6b4545;
+  --tint-bd: #e7dada;
+}
+
 :root.admin-dark {
   color-scheme: dark;
+  --frame: #000000;
   --background: #0b0b0e;
   --foreground: #ececf1;
   --card: #131318;

@@ -8,7 +8,7 @@ const { push, auth } = vi.hoisted(() => ({
   auth: { session: { access_token: "merchant-token" }, activeStore: { id: "store-1", name: "Little Things", slug: "little-things" } },
 }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
-vi.mock("@/features/auth/auth-provider", () => ({ useAuth: () => auth }));
+vi.mock("@/features/auth/providers/auth-provider", () => ({ useAuth: () => auth }));
 
 const themes = [{ id: "fresh-market", name: "Fresh Market", version: "1.0.0", description: "Fresh and welcoming", available: true }, { id: "classic", name: "Classic", version: "1.0.0", description: "Timeless essentials", available: true }];
 const requests: Array<{ url: string; method: string; body?: Record<string, unknown> }> = [];
@@ -44,7 +44,7 @@ it("previews a template without installing it, then installs the chosen template
   const dialog = screen.getByRole("dialog");
   expect(within(dialog).getByRole("heading", { name: "Fresh Market" })).toBeVisible();
   expect(requests.filter((request) => request.method !== "GET")).toHaveLength(0);
-  await userEvent.click(within(dialog).getByRole("button", { name: "Use template" }));
+  await userEvent.click(within(dialog).getByRole("button", { name: "Start with this design" }));
   expect(requests.find((request) => request.url.endsWith("/starters/fresh-market/install"))?.method).toBe("POST");
   expect(push).toHaveBeenCalledWith("/admin/online-store/editor");
 });
@@ -53,7 +53,7 @@ it("offers continued editing rather than installation for an existing workspace"
   existing = true;
   render(<OnlineStorePage />);
   expect(await screen.findByRole("link", { name: /Continue editing/i })).toHaveAttribute("href", "/admin/online-store/editor");
-  expect(screen.queryByRole("button", { name: /^Use template/ })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /^Start with this design/ })).not.toBeInTheDocument();
   expect(requests.some((request) => request.url.endsWith("/install"))).toBe(false);
 });
 

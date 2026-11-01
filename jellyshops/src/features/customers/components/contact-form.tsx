@@ -1,6 +1,6 @@
 "use client";
 import { useState, type FormEvent } from "react";
-import { customerApiOrigin } from "./customer-provider";
+import { customerApiOrigin } from "../providers/customer-provider";
 
 export function ContactForm({ storeId }: { storeId: string }) {
   const [status, setStatus] = useState<"idle" | "pending" | "sent">("idle");

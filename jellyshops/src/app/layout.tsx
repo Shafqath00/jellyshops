@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ShopProvider } from "@/contexts/shop-context";
-import { AuthProvider } from "@/features/auth/auth-provider";
+import { AuthProvider } from "@/features/auth/providers/auth-provider";
 import { storefrontFontVariables } from "./fonts";
 import "./globals.css";
 import "./themes/storefront-base.css";

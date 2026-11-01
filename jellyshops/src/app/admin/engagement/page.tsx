@@ -1,8 +1,8 @@
 "use client";
-import Link from "next/link";
+import { AdminPageHeader, AdminEmptyState, AdminNotice } from "@/components/admin-ui";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, Download } from "lucide-react";
-import { useAuth } from "@/features/auth/auth-provider";
+import { Download } from "lucide-react";
+import { useAuth } from "@/features/auth/providers/auth-provider";
 
 interface Enquiry { id: string; name: string; email: string; message: string; status: "NEW" | "READ" | "CLOSED"; revision: number; createdAt: string }
 const apiOrigin = (process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001").replace(/\/$/, "");
@@ -10,6 +10,8 @@ export default function EngagementPage() {
   const { activeStore, session } = useAuth();
   const [items, setItems] = useState<Enquiry[]>([]);
   const [error, setError] = useState<string>();
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [busy, setBusy] = useState(false);
   const storeId = activeStore?.id ?? ""; const token = session?.access_token;
   const load = useCallback(async () => {
@@ -47,8 +49,14 @@ export default function EngagementPage() {
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Unable to download subscribers."); }
     finally { setBusy(false); }
   }
-  return <main className="mx-auto max-w-6xl p-6 md:p-8"><header className="mb-6 flex items-center justify-between gap-4"><div className="flex items-center gap-3"><Link href="/admin" aria-label="Back to dashboard" className="grid size-9 place-items-center rounded-lg border bg-card"><ArrowLeft size={16} /></Link><div><p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Customers</p><h1 className="text-2xl font-semibold">Messages &amp; subscribers</h1></div></div><button className="button button-secondary" type="button" onClick={() => void exportSubscribers()} disabled={busy}><Download size={16} /> Export subscribers</button></header>
-    {error && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}<button className="ml-3 underline" onClick={() => { setError(undefined); void load().then(setItems).catch((caught: unknown) => setError(caught instanceof Error ? caught.message : "Unable to load messages.")); }}>Retry</button></p>}
-    <section className="grid gap-3">{items.map((item) => <article key={item.id} className="rounded-xl border border-border bg-card p-5"><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs text-muted-foreground">{new Date(item.createdAt).toLocaleString()} · {item.status.toLowerCase()}</p><h2 className="mt-1 font-semibold">{item.name}</h2><a className="text-sm underline" href={`mailto:${encodeURIComponent(item.email)}`}>{item.email}</a></div><label className="text-sm">Status <select aria-label={`Status for ${item.name}`} value={item.status} disabled={busy} className="ml-2 rounded-md border p-2" onChange={(event) => void update(item, event.target.value as Enquiry["status"])}><option value="NEW">New</option><option value="READ">Read</option><option value="CLOSED">Closed</option></select></label></div><p className="mt-4 whitespace-pre-wrap text-sm leading-6">{item.message}</p></article>)}{!items.length && !error && <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">No contact enquiries yet. Messages submitted through your storefront will appear here.</p>}</section>
+  const visible = items.filter((item) => (!statusFilter || item.status === statusFilter) && `${item.name} ${item.email} ${item.message}`.toLowerCase().includes(search.toLowerCase()));
+  return <main>
+    <AdminPageHeader title="Messages & subscribers" actions={<button className="admin-button" type="button" onClick={() => void exportSubscribers()} disabled={busy}><Download size={16} /> Export subscribers</button>} />
+    {error && <AdminNotice error>{error}<button className="ml-3 underline" onClick={() => { setError(undefined); void load().then(setItems).catch((caught: unknown) => setError(caught instanceof Error ? caught.message : "Unable to load messages.")); }}>Retry</button></AdminNotice>}
+    <section className="admin-card !p-0">
+      <div className="admin-toolbar"><input className="admin-search" aria-label="Search messages" placeholder="Search name, email or message" value={search} onChange={(event) => setSearch(event.target.value)} /><select aria-label="Filter message status" className="admin-button" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="">All messages</option><option value="NEW">New</option><option value="READ">Read</option><option value="CLOSED">Closed</option></select></div>
+      {visible.map((item) => <details key={item.id} className="border-b border-border last:border-0"><summary className="cursor-pointer px-4 py-3"><span className="font-medium">{item.name}</span><span className="ml-3 text-muted-foreground">{item.status.toLowerCase()} · {new Date(item.createdAt).toLocaleDateString()}</span><span className="mt-1 block truncate text-muted-foreground">{item.message}</span></summary><div className="border-t border-border px-4 py-3"><a className="underline" href={`mailto:${encodeURIComponent(item.email)}`}>{item.email}</a><p className="my-4 whitespace-pre-wrap leading-6">{item.message}</p><label className="admin-field max-w-48">Status<select aria-label={`Status for ${item.name}`} value={item.status} disabled={busy} onChange={(event) => void update(item, event.target.value as Enquiry["status"])}><option value="NEW">New</option><option value="READ">Read</option><option value="CLOSED">Closed</option></select></label></div></details>)}
+      {!visible.length && !error && <AdminEmptyState title={items.length ? "No matching messages" : "No messages yet"}>Messages sent through your storefront appear here.</AdminEmptyState>}
+    </section>
   </main>;
 }

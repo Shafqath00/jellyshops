@@ -8,7 +8,7 @@ const { useAuth, router, authApiOrigin } = vi.hoisted(() => ({
   authApiOrigin: vi.fn(() => "http://api.test"),
 }));
 
-vi.mock("@/features/auth/auth-provider", () => ({ useAuth, authApiOrigin }));
+vi.mock("@/features/auth/providers/auth-provider", () => ({ useAuth, authApiOrigin }));
 vi.mock("next/navigation", () => ({ useRouter: () => router }));
 
 import OnboardingPage from "./page";

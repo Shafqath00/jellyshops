@@ -8,7 +8,7 @@ const { supabase, useAuth, router } = vi.hoisted(() => ({
   router: { replace: vi.fn() },
 }));
 
-vi.mock("@/features/auth/auth-provider", () => ({ supabase, useAuth }));
+vi.mock("@/features/auth/providers/auth-provider", () => ({ supabase, useAuth }));
 vi.mock("next/navigation", () => ({
   useRouter: () => router,
   useSearchParams: () => new URLSearchParams(),

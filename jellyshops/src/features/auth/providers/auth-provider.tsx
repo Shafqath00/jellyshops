@@ -2,7 +2,8 @@
 
 import { createClient, type Session } from "@supabase/supabase-js";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { loadMerchant, type MerchantStore } from "./merchant-api";
+import { loadMerchant, type MerchantStore } from "../api/merchant-api";
+import { createSessionTokenReader } from "../lib/session-token";
 
 export type { MerchantStore };
 interface AuthContextValue {
@@ -11,6 +12,7 @@ interface AuthContextValue {
   session: Session | null; stores: MerchantStore[]; activeStore: MerchantStore | null;
   setActiveStoreId: (storeId: string) => void;
   refreshMerchant: () => Promise<void>; signOut: () => Promise<void>;
+  getAccessToken: (refresh?: boolean) => Promise<string>;
 }
 const AuthContext = createContext<AuthContextValue | null>(null);
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -27,6 +29,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(Boolean(supabase));
   const [refreshing, setRefreshing] = useState(false);
   const generation = useRef(0);
+  const getAccessToken = useMemo(() => supabase && session?.user.id
+    ? createSessionTokenReader(supabase.auth, session.user.id)
+    : async () => { throw new Error("Sign in again to continue."); }, [session?.user.id]);
 
   useEffect(() => {
     if (!supabase) return;
@@ -72,7 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const current = session && merchant?.userId === session.user.id ? merchant : null;
     const stores = current?.stores ?? [];
     return {
-      configured: Boolean(supabase), loading, session, stores,
+      configured: Boolean(supabase), loading, session, stores, getAccessToken,
       merchantLoading: Boolean(session) && (refreshing || !current),
       merchantStatus: refreshing ? "loading" : current?.status ?? "loading",
       merchantError: current?.error ?? null,
@@ -84,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }, refreshMerchant,
       signOut: async () => { await supabase?.auth.signOut(); },
     };
-  }, [activeStoreId, loading, merchant, refreshMerchant, refreshing, session]);
+  }, [activeStoreId, getAccessToken, loading, merchant, refreshMerchant, refreshing, session]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 export function useAuth(): AuthContextValue {

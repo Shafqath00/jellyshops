@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const STORAGE_KEY = "jelly-admin-theme";
+const subscribe = () => () => {};
+const serverSnapshot = () => false;
 
 function readStored(): boolean {
   try {
@@ -16,11 +18,9 @@ function readStored(): boolean {
 
 /* Toggles `admin-dark` on <html> while the admin shell is mounted. */
 export function AdminThemeToggle() {
-  const [dark, setDark] = useState(false);
-
-  useEffect(() => {
-    setDark(readStored());
-  }, []);
+  const storedDark = useSyncExternalStore(subscribe, readStored, serverSnapshot);
+  const [selectedDark, setDark] = useState<boolean | null>(null);
+  const dark = selectedDark ?? storedDark;
 
   useEffect(() => {
     const root = document.documentElement;

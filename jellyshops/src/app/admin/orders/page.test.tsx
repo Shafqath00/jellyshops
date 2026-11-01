@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import OrdersPage from "./page";
-vi.mock("@/features/auth/auth-provider", () => { const activeStore = { id: "store-demo", role: "OWNER", currency: "INR", country: "IN" }; const session = { access_token: "jelly-demo-merchant" }; return { useAuth: () => ({ activeStore, session }) }; });
+vi.mock("@/features/auth/providers/auth-provider", () => { const activeStore = { id: "store-demo", role: "OWNER", currency: "INR", country: "IN" }; const session = { access_token: "jelly-demo-merchant" }; return { useAuth: () => ({ activeStore, session }) }; });
 const order = { id: "order-1", number: "JS-1001", storeId: "store-demo", status: "PAID", customerSnapshot: { name: "Asha Rao" }, totalMinor: 129900, currency: "INR", createdAt: "2026-09-16T12:00:00.000Z", subtotalMinor: 119900, shippingMinor: 10000, fulfilmentStartedAt: null, paymentStatus: "PAID" };
 afterEach(() => { vi.unstubAllGlobals(); window.history.replaceState(null, "", "/"); });
 describe("OrdersPage", () => {

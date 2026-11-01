@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 const { useAuth, replace, retry } = vi.hoisted(() => ({ useAuth: vi.fn(), replace: vi.fn(), retry: vi.fn(async () => {}) }));
-vi.mock("@/features/auth/auth-provider", () => ({ useAuth }));
+vi.mock("@/features/auth/providers/auth-provider", () => ({ useAuth }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace }), usePathname: () => "/admin" }));
 import { AdminAuthGate } from "./admin-auth-gate";
 beforeEach(() => { vi.clearAllMocks(); });

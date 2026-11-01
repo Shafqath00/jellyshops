@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
-import { AdminNav } from "@/components/admin-nav";
+import { AdminNav } from "@/components/layout/admin-nav";
 
 const { redirect } = vi.hoisted(() => ({
   redirect: vi.fn(() => { throw new Error("NEXT_REDIRECT"); }),
@@ -25,5 +25,6 @@ it("redirects the legacy store design route to the Online Store editor", () => {
 it("links merchant navigation to Online Store", () => {
   render(<AdminNav />);
 
-  expect(screen.getByRole("link", { name: "Online Store" })).toHaveAttribute("href", "/admin/online-store");
+  fireEvent.click(screen.getByText("Online Store"));
+  expect(screen.getByRole("link", { name: "Themes" })).toHaveAttribute("href", "/admin/online-store");
 });

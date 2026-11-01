@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
-import { customerRequest, useCustomer } from "./customer-provider";
-import { readGuestWishlist, writeGuestWishlist } from "./wishlist";
+import { customerRequest, useCustomer } from "../providers/customer-provider";
+import { readGuestWishlist, writeGuestWishlist } from "../lib/wishlist";
 
 export function WishlistButton({ storeId, productId }: { storeId: string; productId: string }) {
   const { session } = useCustomer();

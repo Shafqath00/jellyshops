@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { useAuth } from "@/features/auth/auth-provider";
+import { useAuth } from "@/features/auth/providers/auth-provider";
 
 interface MetaobjectDefinition {
   id: string;
@@ -71,7 +71,7 @@ export default function MetaobjectsPage() {
     <main className="mx-auto max-w-6xl p-6 md:p-8">
       <div className="mb-6 flex items-center gap-3">
         <Link href="/admin" aria-label="Back to admin" className="grid size-9 place-items-center rounded-lg border border-border bg-card"><ArrowLeft size={16} /></Link>
-        <div><p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Content</p><h1 className="text-2xl font-semibold tracking-[-0.03em]">Metaobjects</h1></div>
+        <div><h1 className="text-2xl font-semibold tracking-[-0.03em]">Custom content</h1></div>
       </div>
       {error && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
       <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
@@ -85,9 +85,9 @@ export default function MetaobjectsPage() {
         <section className="rounded-xl border border-border bg-card">
           {definition ? (
             <>
-              <header className="border-b border-border px-5 py-4"><h2 className="text-base font-semibold">{definition.name}</h2><p className="mt-1 text-[11px] text-muted-foreground">{definition.storefrontVisible ? "Available to storefront bindings" : "Admin only"} · {definition.fields.length} fields</p></header>
+              <header className="border-b border-border px-5 py-4"><h2 className="text-base font-semibold">{definition.name}</h2><p className="mt-1 text-[13px] text-muted-foreground">{definition.storefrontVisible ? "Available to storefront bindings" : "Admin only"} · {definition.fields.length} fields</p></header>
               <div className="divide-y divide-border">
-                {entries.map((entry) => <div key={entry.id} className="px-5 py-3"><p className="text-[12px] font-medium">{entry.displayName}</p><p className="text-[10px] text-muted-foreground">{entry.handle}</p></div>)}
+                {entries.map((entry) => <div key={entry.id} className="px-5 py-3"><p className="text-[12px] font-medium">{entry.displayName}</p><p className="text-[12px] text-muted-foreground">{entry.handle}</p></div>)}
                 {entries.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">No entries yet.</p>}
               </div>
             </>

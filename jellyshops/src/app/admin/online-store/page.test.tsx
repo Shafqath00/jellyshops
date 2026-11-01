@@ -11,7 +11,7 @@ const { api, useAuth, router } = vi.hoisted(() => ({
   router: { push: vi.fn() },
 }));
 
-vi.mock("@/features/auth/auth-provider", () => ({ useAuth }));
+vi.mock("@/features/auth/providers/auth-provider", () => ({ useAuth }));
 vi.mock("@/features/store-editor/api/client", () => ({ createStoreEditorApi: () => api }));
 vi.mock("next/navigation", () => ({ useRouter: () => router }));
 
@@ -38,7 +38,7 @@ it("installs the chosen starter before opening the editor without saving a theme
   const user = userEvent.setup();
   render(<OnlineStorePage />);
   await screen.findByRole("button", { name: "Preview Fresh Market" });
-  await user.click(within(screen.getByRole("article", { name: "Fresh Market" })).getByRole("button", { name: "Use template" }));
+  await user.click(within(screen.getByRole("article", { name: "Fresh Market" })).getByRole("button", { name: "Start with this design" }));
   await waitFor(() => expect(api.installStarterPack).toHaveBeenCalledWith("store-a", "fresh-market"));
   expect(router.push).toHaveBeenCalledWith("/admin/online-store/editor");
   expect(api.saveThemeConfiguration).not.toHaveBeenCalled();
@@ -50,7 +50,7 @@ it("shows a recoverable starter installation conflict and remains on the chooser
   api.installStarterPack.mockRejectedValueOnce(new StoreEditorApiError(409, "STARTER_INSTALL_CONFLICT", "This store already has a custom workspace."));
   render(<OnlineStorePage />);
   await screen.findByRole("button", { name: "Preview Fresh Market" });
-  const button = screen.getAllByRole("button", { name: "Use template" })[0];
+  const button = screen.getAllByRole("button", { name: "Start with this design" })[0];
   await user.click(button);
   expect(await screen.findByRole("alert")).toHaveTextContent("already has a custom workspace");
   expect(button).toBeEnabled();

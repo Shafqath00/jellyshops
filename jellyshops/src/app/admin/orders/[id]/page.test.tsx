@@ -1,14 +1,83 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { OrderDetailView } from "./page";
-vi.mock("@/features/auth/auth-provider", () => { const activeStore = { id: "store-demo", currency: "INR", country: "IN" }; const session = { access_token: "merchant" }; return { useAuth: () => ({ activeStore, session }) }; });
+import { OrderDetailView } from "./view";
+vi.mock("@/features/auth/providers/auth-provider", () => { const activeStore = { id: "store-demo", currency: "INR", country: "IN" }; const session = { access_token: "merchant" }; return { useAuth: () => ({ activeStore, session }) }; });
 const order = { id: "order-1", number: "JS-1001", storeId: "store-demo", status: "PAID", revision: 3, customerSnapshot: { name: "Asha", email: "asha@example.com" }, totalMinor: 1200, currency: "INR", createdAt: "2026-09-16T12:00:00Z", subtotalMinor: 1200, shippingMinor: 0, fulfilmentStartedAt: null };
 const detail = { order, items: [{ variantId: "v1", titleSnapshot: "Berry cake", skuSnapshot: "CAKE-1", imageSnapshot: null, unitPriceMinor: 1200, quantity: 1 }], payment: { id: "p1", status: "PAID", amountMinor: 1200, currency: "INR", paymentIntentId: "pi_123", chargeId: null }, refunds: [], disputes: [], capabilities: { manage: true, edit: true, refund: true } };
 const json = (value: unknown) => new Response(JSON.stringify(value));
-beforeEach(() => { HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); }; });
+beforeEach(() => { HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); }; HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); }; });
 afterEach(() => vi.unstubAllGlobals());
 describe("OrderDetailView", () => {
+    it("explains why tracking is unavailable before a shipment exists", async () => {
+        vi.stubGlobal("fetch", vi.fn(async () => json(detail)));
+        render(<OrderDetailView orderId="order-1" />);
+        expect(await screen.findByRole("button", { name: "Update tracking" })).toBeDisabled();
+        expect(screen.getByText(/Create a shipment before adding tracking/)).toBeVisible();
+    });
+
+    it("shows what each line was ordered with and the weight of the parcel", async () => {
+        const line = { variantId: "v1", titleSnapshot: "Tee", skuSnapshot: "TEE", imageSnapshot: null, unitPriceMinor: 1200 };
+        vi.stubGlobal("fetch", vi.fn(async () => json({ ...detail, items: [
+            { ...line, quantity: 2, shippingSnapshot: { weightGrams: 250, lengthMm: 300, widthMm: 200, heightMm: 50, countryOfOrigin: "IN", hsCode: "610910" } },
+            { ...line, variantId: "v2", titleSnapshot: "Mug", quantity: 1, shippingSnapshot: null },
+            { ...line, variantId: "v3", titleSnapshot: "Guide", quantity: 1, fulfillmentType: "DIGITAL", shippingSnapshot: null },
+        ] })));
+        render(<OrderDetailView orderId="order-1" />);
+        expect(await screen.findByText("250 g · 30 × 20 × 5 cm · Made in India · HS 6109.10")).toBeVisible();
+        expect(screen.getByText(/Parcel weight:/)).toHaveTextContent("500 g");
+        expect(screen.getByText(/1 item has no recorded weight, so this is a minimum/)).toBeVisible();
+    });
+    it("does not invent a parcel weight for older orders", async () => {
+        vi.stubGlobal("fetch", vi.fn(async () => json(detail)));
+        render(<OrderDetailView orderId="order-1" />);
+        expect(await screen.findByText(/Parcel weight:/)).toHaveTextContent("Not recorded");
+    });
+    it("allows tracking updates for an existing shipment", async () => {
+        vi.stubGlobal("fetch", vi.fn(async () => json({ ...detail, fulfilments: [{ id: "shipment-1", status: "SHIPPED" }] })));
+        render(<OrderDetailView orderId="order-1" />);
+        expect(await screen.findByRole("button", { name: "Update tracking" })).toBeEnabled();
+        expect(screen.queryByText(/Create a shipment before adding tracking/)).toBeNull();
+    });
+    it("offers only notification types recorded for the order and selects an available type", async () => {
+        const user = userEvent.setup();
+        const mock = vi.fn(async () => json({ ...detail, notifications: [
+            { id: "processing-2", type: "PROCESSING", status: "QUEUED" },
+            { id: "processing-1", type: "PROCESSING", status: "ACCEPTED" },
+        ] }));
+        vi.stubGlobal("fetch", mock);
+        render(<OrderDetailView orderId="order-1" />);
+        await user.click(await screen.findByRole("button", { name: "Resend email" }));
+        expect(screen.getByLabelText("Email type")).toHaveValue("PROCESSING");
+        expect(screen.getAllByRole("option")).toHaveLength(1);
+        expect(screen.queryByRole("option", { name: "Payment Confirmed" })).toBeNull();
+        await user.click(screen.getByRole("button", { name: /^Confirm$/ }));
+        await waitFor(() => expect(mock).toHaveBeenCalledWith(expect.stringContaining("/notifications/resend"), expect.objectContaining({ body: JSON.stringify({ type: "PROCESSING" }) })));
+    });
+
+    it("explains missing notification history and prevents an invalid resend", async () => {
+        const user = userEvent.setup();
+        vi.stubGlobal("fetch", vi.fn(async () => json(detail)));
+        render(<OrderDetailView orderId="order-1" />);
+        await user.click(await screen.findByRole("button", { name: "Resend email" }));
+        expect(screen.getByText(/No previous emails are recorded for this order/)).toBeVisible();
+        expect(screen.queryByRole("combobox", { name: "Email type" })).toBeNull();
+        expect(screen.getByRole("button", { name: /^Confirm$/ })).toBeDisabled();
+    });
+
+    it("clears a refresh error after a later successful order load", async () => {
+        const mock = vi.fn().mockResolvedValueOnce(json(detail))
+            .mockResolvedValueOnce(new Response(JSON.stringify({ error: { message: "Invalid or expired token" } }), { status: 401 }))
+            .mockResolvedValue(json(detail));
+        vi.stubGlobal("fetch", mock);
+        render(<OrderDetailView orderId="order-1" />);
+        await screen.findByText("JS-1001");
+        window.dispatchEvent(new Event("focus"));
+        expect(await screen.findByRole("alert")).toHaveTextContent("Invalid or expired token");
+        window.dispatchEvent(new Event("focus"));
+        await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+    });
+
     it("sends a fulfilment transition and reloads authoritative detail", async () => {
         const user = userEvent.setup();
         let confirmed = false;

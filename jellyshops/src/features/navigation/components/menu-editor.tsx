@@ -1,6 +1,9 @@
 "use client";
 
-import type { MenuItem, NavigationMenu } from "./api";
+import type { MenuItem, NavigationMenu } from "../api/client";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { MenuLinkForm, type CollectionChoice } from "./menu-link-form";
 
 export interface MenuDestination {
   parentId: string | null;
@@ -54,12 +57,19 @@ export function MenuEditor({
   menu,
   onChange,
   onSave,
+  collections = [],
+  saving = false,
+  dirty = true,
 }: {
   menu: NavigationMenu;
   onChange(items: MenuItem[]): void;
   onSave(): void;
+  collections?: CollectionChoice[];
+  saving?: boolean;
+  dirty?: boolean;
 }) {
   const entries = rows(menu.items);
+  const [editing, setEditing] = useState<MenuItem | "new" | null>(null);
 
   return (
     <section aria-label="Menu editor" className="rounded-xl border border-border bg-card">
@@ -68,13 +78,15 @@ export function MenuEditor({
           <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Navigation</p>
           <h2 className="mt-1 text-sm font-semibold text-foreground">{menu.name}</h2>
         </div>
-        <button type="button" onClick={onSave} className="h-8 rounded-md bg-primary px-3 text-[11px] font-semibold text-primary-foreground">Save menu</button>
+        <div className="flex items-center gap-3"><span className="text-xs text-muted-foreground" role="status">{saving ? "Saving…" : dirty ? "Unsaved changes" : "Saved"}</span><Button type="button" disabled={saving || !dirty || editing !== null} onClick={onSave}>Save menu</Button></div>
       </header>
+      <fieldset disabled={saving} className="min-w-0">
       <div className="divide-y divide-border">
         {entries.map(({ item, depth, parentId, index }) => (
           <div key={item.id} className="flex min-h-11 items-center gap-2 px-3" style={{ paddingLeft: 12 + depth * 20 }}>
             <span className="min-w-0 flex-1 truncate text-[12px] font-medium text-muted-foreground">{item.label}</span>
             <span className="text-[10px] text-muted-foreground">{item.target.kind}</span>
+            {depth === 0 && <><Button type="button" variant="ghost" size="sm" aria-label={`Edit ${item.label}`} onClick={() => setEditing(item)}>Edit</Button><Button type="button" variant="ghost" size="sm" aria-label={`Remove ${item.label}`} onClick={() => { onChange(menu.items.flatMap(entry => entry.id === item.id ? entry.children : [entry])); setEditing(null); }}>Remove</Button></>}
             <button
               type="button"
               aria-label={`Move ${item.label} up`}
@@ -87,6 +99,7 @@ export function MenuEditor({
             <button
               type="button"
               aria-label={`Move ${item.label} down`}
+              disabled={index === (parentId ? findItem(menu.items, parentId)?.children.length ?? 0 : menu.items.length) - 1}
               onClick={() => onChange(reorderMenuItem(menu.items, item.id, { parentId, index: index + 1 }))}
               className="h-7 rounded border border-border px-2 text-[10px]"
             >
@@ -96,6 +109,8 @@ export function MenuEditor({
         ))}
         {entries.length === 0 && <p className="p-6 text-center text-[12px] text-muted-foreground">No menu items yet.</p>}
       </div>
+      <div className="p-4">{editing ? <MenuLinkForm key={editing === "new" ? "new" : editing.id} item={editing === "new" ? undefined : editing} collections={collections} onCancel={() => setEditing(null)} onApply={item => { onChange(editing === "new" ? [...menu.items, item] : menu.items.map(entry => entry.id === item.id ? item : entry)); setEditing(null); }} /> : <Button type="button" variant="outline" onClick={() => setEditing("new")}>Add link</Button>}</div>
+      </fieldset>
     </section>
   );
 }

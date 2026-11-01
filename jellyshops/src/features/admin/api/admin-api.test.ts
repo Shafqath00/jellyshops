@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createAdminApi } from "./api";
+import { createAdminApi } from "./admin-api";
 
 describe("createAdminApi", () => {
   it("sends the bearer token when loading a store summary", async () => {

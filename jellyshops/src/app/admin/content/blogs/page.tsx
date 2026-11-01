@@ -3,9 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { useAuth } from "@/features/auth/auth-provider";
-import { createContentApi, type ArticleResource, type BlogResource, type ContentTemplate, type TemplateAssignment } from "@/features/content/api";
-import { ResourceForm } from "@/features/content/resource-form";
+import { useAuth } from "@/features/auth/providers/auth-provider";
+import { createContentApi, type ArticleResource, type BlogResource, type ContentTemplate, type TemplateAssignment } from "@/features/content/api/client";
+import { ResourceForm } from "@/features/content/components/resource-form";
 
 
 
@@ -84,7 +84,7 @@ export default function BlogsAdminPage() {
     <main className="mx-auto max-w-7xl p-6 md:p-8">
       <div className="mb-6 flex items-center gap-3">
         <Link href="/admin" aria-label="Back to admin" className="grid size-9 place-items-center rounded-lg border border-border bg-card"><ArrowLeft size={16} /></Link>
-        <div><p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Content</p><h1 className="text-2xl font-semibold tracking-[-0.03em]">Blogs & articles</h1></div>
+        <div><h1 className="text-2xl font-semibold tracking-[-0.03em]">Blog posts</h1></div>
       </div>
       {error && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
       <div className="grid gap-6 xl:grid-cols-[260px_280px_minmax(0,1fr)]">
@@ -107,7 +107,7 @@ export default function BlogsAdminPage() {
             <h2 className="text-sm font-semibold">Create blog</h2>
             <input aria-label="Blog title" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Blog title" className="mt-3 h-9 w-full rounded-lg border border-border px-3 text-[12px]" />
             <input aria-label="Blog handle" value={handle} onChange={(event) => setHandle(event.target.value)} placeholder="blog-handle" className="mt-2 h-9 w-full rounded-lg border border-border px-3 text-[12px]" />
-            <button type="submit" className="mt-3 h-8 rounded-md bg-primary px-3 text-[11px] font-semibold text-primary-foreground">Create</button>
+            <button type="submit" className="mt-3 h-8 rounded-md bg-primary px-3 text-[13px] font-semibold text-primary-foreground">Create</button>
           </form>
         </aside>
 
@@ -115,7 +115,7 @@ export default function BlogsAdminPage() {
           <header className="border-b border-border px-4 py-3"><h2 className="text-sm font-semibold">Articles</h2></header>
           <div className="divide-y divide-border">
             {articles.map((entry) => (
-              <button key={entry.id} type="button" onClick={() => setActiveArticleId(entry.id)} className={`flex min-h-12 w-full items-center gap-3 px-4 text-left ${entry.id === activeArticleId ? "bg-muted/50" : "hover:bg-muted/50"}`}><span className="min-w-0 flex-1 truncate text-[12px] font-medium">{entry.title}</span><span className="text-[10px] uppercase text-muted-foreground">{entry.status ?? "DRAFT"}</span></button>
+              <button key={entry.id} type="button" onClick={() => setActiveArticleId(entry.id)} className={`flex min-h-12 w-full items-center gap-3 px-4 text-left ${entry.id === activeArticleId ? "bg-muted/50" : "hover:bg-muted/50"}`}><span className="min-w-0 flex-1 truncate text-[12px] font-medium">{entry.title}</span><span className="text-[12px] uppercase text-muted-foreground">{entry.status ?? "DRAFT"}</span></button>
             ))}
             {articles.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">No articles in this blog yet.</p>}
           </div>
@@ -125,14 +125,14 @@ export default function BlogsAdminPage() {
           {article ? (
             <>
               <div className="mb-5 flex items-center justify-between gap-3 border-b border-border pb-4">
-                <div><p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Article lifecycle</p><p className="mt-1 text-[12px] font-medium">{article.status ?? "DRAFT"}</p></div>
+                <div><p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Article lifecycle</p><p className="mt-1 text-[12px] font-medium">{article.status ?? "DRAFT"}</p></div>
                 <button
                   type="button"
                   onClick={() => {
                     const action = article.status === "PUBLISHED" ? api.unpublishArticle(storeId, article.id) : api.publishArticle(storeId, article.id);
                     void action.then((saved) => setArticles((current) => current.map((entry) => entry.id === saved.id ? saved : entry)));
                   }}
-                  className="h-8 rounded-md border border-border bg-card px-3 text-[11px] font-semibold"
+                  className="h-8 rounded-md border border-border bg-card px-3 text-[13px] font-semibold"
                 >
                   {article.status === "PUBLISHED" ? "Unpublish" : "Publish"}
                 </button>

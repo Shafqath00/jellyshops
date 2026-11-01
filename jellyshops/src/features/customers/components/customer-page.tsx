@@ -4,8 +4,8 @@ import { useParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { useShop } from "@/contexts/shop-context";
 import type { PageType } from "@jelly/storefront-schema";
-import { customerAuth, customerRequest, useCustomer } from "./customer-provider";
-import { mergeWishlistIds, readGuestWishlist, writeGuestWishlist } from "./wishlist";
+import { customerAuth, customerRequest, useCustomer } from "../providers/customer-provider";
+import { mergeWishlistIds, readGuestWishlist, writeGuestWishlist } from "../lib/wishlist";
 import { ProtectedStorefrontPage } from "./protected-storefront-page";
 
 interface Address { id: string; revision: number; label: string; name: string; line1: string; line2: string; city: string; region: string; postalCode: string; country: string; phone: string }

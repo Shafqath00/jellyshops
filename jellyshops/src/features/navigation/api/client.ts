@@ -32,6 +32,10 @@ export interface NavigationApi {
   updateMenu(storeId: string, menuId: string, expectedRevision: number, patch: { name?: string; handle?: string; items?: MenuItem[] }): Promise<NavigationMutationResult>;
 }
 
+export class NavigationApiError extends Error {
+  constructor(message: string, public readonly status: number) { super(message); }
+}
+
 export function createNavigationApi({
   baseUrl,
   token,
@@ -51,7 +55,10 @@ export function createNavigationApi({
         ...init.headers,
       },
     });
-    if (!response.ok) throw new Error(`Navigation request failed (${response.status})`);
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      throw new NavigationApiError(body.error?.message ?? `Navigation request failed (${response.status})`, response.status);
+    }
     return await response.json() as T;
   };
   const base = (storeId: string) => `/api/stores/${encodeURIComponent(storeId)}/storefront/menus`;

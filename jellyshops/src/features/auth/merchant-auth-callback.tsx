@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "./auth-provider";
+import { supabase } from "./providers/auth-provider";
 
 export function MerchantAuthCallback({ code, nextPath }: { code: string; nextPath: string }) {
   const router = useRouter(); const [error, setError] = useState("");

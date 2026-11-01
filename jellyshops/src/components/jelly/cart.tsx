@@ -60,7 +60,7 @@ export function CartItem({
     <div className="grid grid-cols-[78px_1fr_auto] items-start gap-3.5">
       {/* Thumbnail */}
       <div className="relative aspect-square w-[78px] overflow-hidden rounded-[18px] bg-muted">
-        <Image src={imageUrl} alt="" fill sizes="90px" className="object-cover" />
+        {imageUrl && <Image src={imageUrl} alt="" fill sizes="90px" className="object-cover" />}
       </div>
 
       {/* Details */}
