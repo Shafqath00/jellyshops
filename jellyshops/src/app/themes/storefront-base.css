@@ -257,3 +257,22 @@
   :where(.jelly-logo-list-items) { gap: 16px 32px; }
   :where(.jelly-logo-list-items) :where(img) { max-width: 140px; height: min(var(--logo-height, 48px), 40px); }
 }
+
+/* Blog and article section settings (sections/content-pages.tsx). Zero specificity so themes can restyle them. */
+:where(.jelly-blog-header[data-align="center"], .jelly-article-header[data-align="center"]) { text-align: center; }
+:where(.jelly-blog-header-text) { max-width: 60ch; margin-top: 12px; }
+:where(.jelly-blog-header[data-align="center"]) :where(.jelly-blog-header-text) { margin-inline: auto; }
+:where(.jelly-article-list-items) { display: grid; gap: 32px; }
+:where(.jelly-article-list[data-layout="grid"]) :where(.jelly-article-list-items) { grid-template-columns: repeat(var(--article-columns, 3), minmax(0, 1fr)); }
+:where(.jelly-article-list[data-columns="2"]) { --article-columns: 2; }
+:where(.jelly-article-list-items) :where(article) { display: grid; align-content: start; gap: 8px; }
+:where(.jelly-article-list-items) :where(h2) { margin: 0; }
+:where(.jelly-article-list-items) :where(p) { margin: 0; }
+:where(.jelly-article-list) :where(.jelly-article-published-at) { font-size: 0.875rem; opacity: 0.75; }
+:where(.jelly-article-read-more) { width: fit-content; font-weight: 600; }
+@media (max-width: 767px) {
+  :where(.jelly-article-list[data-layout="grid"]) :where(.jelly-article-list-items) { grid-template-columns: minmax(0, 1fr); }
+}
+/* Article text width; beats each theme's 720px default for the article body. */
+.jelly-section.jelly-article-content[data-width="narrow"] article.jelly-prose { max-width: 600px; }
+.jelly-section.jelly-article-content[data-width="wide"] article.jelly-prose { max-width: 960px; }

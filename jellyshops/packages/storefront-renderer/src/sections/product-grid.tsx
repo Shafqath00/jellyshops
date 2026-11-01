@@ -4,8 +4,9 @@ import type { CommerceDataProvider, PublicProduct } from "../types";
 import { resolveStorefrontHref } from "../runtime-context";
 import { sectionData, stringValue, visibleBlocks } from "./shared";
 import { formattedSetting, SettingText } from "./setting-text";
+import { blockEditorData } from "./block-content";
 
-export function ProductGridSection({ commerce, section, storeSlug }: { commerce: CommerceDataProvider; section: import("@jelly/storefront-schema").SectionNode; storeSlug?: string }) {
+export function ProductGridSection({ commerce, section, storeSlug, editor = false }: { commerce: CommerceDataProvider; section: import("@jelly/storefront-schema").SectionNode; storeSlug?: string; editor?: boolean }) {
   const [result, setResult] = useState<{ source: CommerceDataProvider; limit: number; scope: string; products: PublicProduct[]; error?: boolean }>();
   const [retry, setRetry] = useState(0);
   const [tabId, setTabId] = useState<string>();
@@ -13,7 +14,7 @@ export function ProductGridSection({ commerce, section, storeSlug }: { commerce:
   // Optional "product-tab" blocks switch the grid between lists (for example New in / Best sellers).
   const tabs = visibleBlocks(section, "product-tab").flatMap((block) => {
     const label = stringValue(block.settings, "label");
-    return label ? [{ id: block.id, label, sort: stringValue(block.settings, "sort") || undefined, collectionId: typeof block.settings.collectionId === "string" ? block.settings.collectionId : undefined }] : [];
+    return label ? [{ id: block.id, block, label, sort: stringValue(block.settings, "sort") || undefined, collectionId: typeof block.settings.collectionId === "string" ? block.settings.collectionId : undefined }] : [];
   });
   const activeTab = tabs.find((tab) => tab.id === tabId) ?? tabs[0];
   const sort = activeTab ? activeTab.sort : typeof section.settings.sort === "string" ? section.settings.sort : undefined;
@@ -66,6 +67,7 @@ export function ProductGridSection({ commerce, section, storeSlug }: { commerce:
         role="tab"
         id={`${panelId}-${tab.id}`}
         data-tab-id={tab.id}
+        {...blockEditorData(tab.block, editor, "Product tab")}
         aria-selected={tab.id === activeTab?.id}
         aria-controls={panelId}
         tabIndex={tab.id === activeTab?.id ? 0 : -1}

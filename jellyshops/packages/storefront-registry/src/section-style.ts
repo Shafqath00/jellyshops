@@ -9,7 +9,9 @@ import type { ControlDefinition } from "./types.js";
  */
 
 /** Same names as the theme's font list, so the renderer can turn them into font stacks. */
-export const SECTION_FONT_CHOICES = ["Fraunces", "Inter", "Georgia", "Arial"] as const;
+export const SECTION_FONT_CHOICES = [
+  "Fraunces", "Inter", "Playfair Display", "Cormorant Garamond", "Lora", "EB Garamond", "Libre Baskerville", "DM Serif Display", "Crimson Pro", "Manrope", "DM Sans", "Work Sans", "Montserrat", "Outfit", "Plus Jakarta Sans", "Nunito Sans", "Raleway", "Space Grotesk", "Josefin Sans", "Figtree", "Jost", "Poppins", "Hind", "Oswald", "Bebas Neue", "Syne", "Georgia", "Arial",
+] as const;
 export const SECTION_HEADING_SIZES = ["small", "medium", "large", "x-large"] as const;
 export const SECTION_HEADING_WEIGHTS = ["300", "400", "500", "600", "700"] as const;
 export const SECTION_BODY_SIZES = ["small", "regular", "large"] as const;

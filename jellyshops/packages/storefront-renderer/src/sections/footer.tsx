@@ -1,16 +1,17 @@
-import { safeRichTextHref, type SectionNode } from "@jelly/storefront-schema";
+import { safeRichTextHref, type BlockNode, type SectionNode } from "@jelly/storefront-schema";
 import type { RendererMode } from "../types";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
 import { MenuList } from "./header";
 import { NewsletterForm } from "./home-sections";
 import { formattedSetting, SettingText } from "./setting-text";
+import { blockEditorData } from "./block-content";
 
 function stringSetting(value: unknown): string {
   return typeof value === "string" ? value : "";
 }
 
-type FooterColumn = { id: string; heading: string } & ({ kind: "menu"; handle: string } | { kind: "links"; links: Array<{ id: string; label: string; href: string }> });
+type FooterColumn = { id: string; heading: string; block: BlockNode } & ({ kind: "menu"; handle: string } | { kind: "links"; links: Array<{ id: string; label: string; href: string; block: BlockNode }> });
 
 /**
  * Footer link columns, in block order: each menu block is a column (its
@@ -23,19 +24,19 @@ function footerColumns(section: SectionNode, context: StorefrontRuntimeContext):
     if (!block.enabled) continue;
     if (block.type === "menu") {
       const handle = stringSetting(block.settings.handle) || "main";
-      columns.push({ id: block.id, heading: stringSetting(block.settings.label).trim(), kind: "menu", handle });
+      columns.push({ id: block.id, heading: stringSetting(block.settings.label).trim(), kind: "menu", handle, block });
     } else if (block.type === "link-heading") {
-      columns.push({ id: block.id, heading: stringSetting(block.settings.text).trim(), kind: "links", links: [] });
+      columns.push({ id: block.id, heading: stringSetting(block.settings.text).trim(), kind: "links", links: [], block });
     } else if (block.type === "link") {
       const label = stringSetting(block.settings.label).trim();
       const href = resolveStorefrontHref(block.settings.link, context.storeSlug);
       if (!label || !href) continue;
       let column = columns.at(-1);
       if (!column || column.kind !== "links") {
-        column = { id: block.id, heading: "", kind: "links", links: [] };
+        column = { id: block.id, heading: "", kind: "links", links: [], block };
         columns.push(column);
       }
-      column.links.push({ id: block.id, label, href });
+      column.links.push({ id: block.id, label, href, block });
     }
   }
   return columns.filter((column) => column.kind === "menu" ? (context.menus?.[column.handle]?.items.length ?? 0) > 0 : column.links.length > 0);
@@ -51,15 +52,17 @@ export function FooterSection({ section, context, subscribe, mode = "preview" }:
   const newsletterText = stringSetting(section.settings.newsletterText).trim();
   const blocks = section.blocks.filter((block) => block.enabled);
   const columns = footerColumns(section, context);
+  // In the editor each link, column heading, contact detail and social link selects its own block.
+  const editor = mode === "editor";
   const socials = blocks.filter((block) => block.type === "social-link").flatMap((block) => {
     const label = stringSetting(block.settings.label);
     const href = safeRichTextHref(stringSetting(block.settings.href));
-    return label && href ? [{ id: block.id, label, href }] : [];
+    return label && href ? [{ id: block.id, label, href, block }] : [];
   });
   const contacts = blocks.filter((block) => block.type === "contact-item").flatMap((block) => {
     const label = stringSetting(block.settings.label);
     const value = stringSetting(block.settings.value);
-    return value ? [{ id: block.id, label, value }] : [];
+    return value ? [{ id: block.id, label, value, block }] : [];
   });
   return <footer className="jelly-footer" data-section-id={section.id} data-newsletter={showNewsletter ? "true" : undefined}>
     {showNewsletter && <div className="jelly-footer-newsletter jelly-newsletter">
@@ -74,12 +77,12 @@ export function FooterSection({ section, context, subscribe, mode = "preview" }:
         {contactEmail && <a href={`mailto:${encodeURIComponent(contactEmail)}`}>{contactEmail}</a>}
       </div>
       {columns.length > 0 && <nav className="jelly-footer-links" aria-label="Footer navigation">{columns.map((column) => <div className="jelly-footer-column" key={column.id}>
-        {column.heading && <h2>{column.heading}</h2>}
-        {column.kind === "menu" ? <MenuList handle={column.handle} context={context} /> : <ul>{column.links.map((link) => <li key={link.id}><a href={link.href}>{link.label}</a></li>)}</ul>}
+        {column.heading && <h2 {...blockEditorData(column.block, editor, column.kind === "menu" ? "Menu" : "Column heading")}>{column.heading}</h2>}
+        {column.kind === "menu" ? <MenuList handle={column.handle} context={context} /> : <ul>{column.links.map((link) => <li key={link.id} {...blockEditorData(link.block, editor, "Link")}><a href={link.href}>{link.label}</a></li>)}</ul>}
       </div>)}</nav>}
       {(contacts.length > 0 || socials.length > 0) && <div className="jelly-footer-contact">
-        {contacts.length > 0 && <ul>{contacts.map((item) => <li key={item.id}>{item.label && <span>{item.label}</span>}{item.value}</li>)}</ul>}
-        {socials.length > 0 && <ul className="jelly-footer-social" aria-label="Social media">{socials.map((item) => <li key={item.id}><a href={item.href} rel="noopener noreferrer" target="_blank">{item.label}</a></li>)}</ul>}
+        {contacts.length > 0 && <ul>{contacts.map((item) => <li key={item.id} {...blockEditorData(item.block, editor, "Contact detail")}>{item.label && <span>{item.label}</span>}{item.value}</li>)}</ul>}
+        {socials.length > 0 && <ul className="jelly-footer-social" aria-label="Social media">{socials.map((item) => <li key={item.id} {...blockEditorData(item.block, editor, "Social link")}><a href={item.href} rel="noopener noreferrer" target="_blank">{item.label}</a></li>)}</ul>}
       </div>}
     </div>
     <p className="jelly-footer-credit">{copyright}</p>

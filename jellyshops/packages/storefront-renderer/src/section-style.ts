@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { fontStack } from "@jelly/storefront-themes";
+import { FONT_OPTIONS, fontStack } from "@jelly/storefront-themes";
 
 /**
  * Turns a section's shared style settings into CSS variables on its wrapper.
@@ -16,7 +16,7 @@ const bodyScale: Record<string, string> = { small: "0.9", regular: "1", large: "
 const weights = new Set(["300", "400", "500", "600", "700"]);
 const alignments = new Set(["left", "center", "right"]);
 const spacing: Record<string, string> = { none: "0px", small: "clamp(24px, 4vw, 40px)", large: "clamp(80px, 11vw, 144px)" };
-const fonts = new Set(["Fraunces", "Inter", "Georgia", "Arial"]);
+const fonts = new Set<string>(FONT_OPTIONS.map((option) => option.value));
 const shadows: Record<string, string> = {
   soft: "0 2px 8px rgba(0, 0, 0, 0.08)",
   medium: "0 6px 20px rgba(0, 0, 0, 0.14)",

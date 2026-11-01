@@ -2,6 +2,7 @@ import { StorefrontContainer } from "@jelly/storefront-ui";
 import { safeRichTextHref, type SectionNode } from "@jelly/storefront-schema";
 import { headingHidden, imageValue, sectionData, stringValue, visibleBlocks } from "./shared";
 import { formattedSetting, SettingText } from "./setting-text";
+import { blockEditorData } from "./block-content";
 
 /** Digits only, keeping a leading "+" for tel: links. */
 function dialable(value: string, keepPlus: boolean): string {
@@ -32,7 +33,7 @@ function openingHours(text: string): Array<{ day: string; time?: string }> {
  * hours, and buttons to call, message on WhatsApp or email. Every part is
  * optional and hidden when empty.
  */
-export function StoreVisitSection({ section }: { section: SectionNode }) {
+export function StoreVisitSection({ section, editor = false }: { section: SectionNode; editor?: boolean }) {
   const settings = section.settings;
   const heading = stringValue(settings, "heading", "Visit us");
   const text = stringValue(settings, "text");
@@ -45,7 +46,7 @@ export function StoreVisitSection({ section }: { section: SectionNode }) {
   const image = imageValue(settings);
   const details = visibleBlocks(section, "contact-item").flatMap((block) => {
     const value = stringValue(block.settings, "value");
-    return value ? [{ id: block.id, label: stringValue(block.settings, "label"), value }] : [];
+    return value ? [{ id: block.id, block, label: stringValue(block.settings, "label"), value }] : [];
   });
   const actions = [
     directions && address ? { key: "directions", href: directions, label: "Get directions", external: true } : undefined,
@@ -64,7 +65,7 @@ export function StoreVisitSection({ section }: { section: SectionNode }) {
         <h3>Opening hours</h3>
         <dl>{hours.map((row, index) => <div key={index}><dt>{row.day}</dt>{row.time && <dd>{row.time}</dd>}</div>)}</dl>
       </div>}
-      {details.length > 0 && <ul className="jelly-store-visit-details">{details.map((item) => <li key={item.id}>{item.label && <span>{item.label}</span>}{item.value}</li>)}</ul>}
+      {details.length > 0 && <ul className="jelly-store-visit-details">{details.map((item) => <li key={item.id} {...blockEditorData(item.block, editor, "Contact detail")}>{item.label && <span>{item.label}</span>}{item.value}</li>)}</ul>}
       {actions.length > 0 && <div className="jelly-store-visit-actions">
         {actions.map((action, index) => <a key={action.key} href={action.href} className={index === 0 ? "jelly-button" : "jelly-button jelly-button--secondary"} {...(action.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>{action.label}</a>)}
       </div>}

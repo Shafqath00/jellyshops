@@ -24,7 +24,8 @@ describe("storefront theme tokens", () => {
       "--jelly-color-text": "#26372c",
       "--jelly-color-surface": "#ffffff",
       "--jelly-color-accent": "#a84e08",
-      "--jelly-font-display": "\"Nunito Sans\", Georgia, \"Times New Roman\", serif",
+      // Nunito Sans is one of the self-hosted fonts, so it comes from the app rather than the shopper's computer.
+      "--jelly-font-display": "var(--font-nunito-sans), \"Helvetica Neue\", Arial, sans-serif",
       "--jelly-font-body": "\"Aptos\", Arial, \"Helvetica Neue\", sans-serif",
       "--jelly-radius-button": "12px",
       "--jelly-radius-card": "10px",

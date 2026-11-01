@@ -119,10 +119,10 @@ export function MulticolumnSection({ section, context }: { section: SectionNode;
   </section>;
 }
 
-export function FaqSection({ section }: { section: SectionNode }) {
+export function FaqSection({ section, editor = false }: { section: SectionNode; editor?: boolean }) {
   const items = visibleBlocks(section, "faq-item").flatMap((block) => {
     const question = stringValue(block.settings, "question");
-    return question ? [{ id: block.id, question, answer: stringValue(block.settings, "answer"), document: formattedSetting(block.settings, "answer") }] : [];
+    return question ? [{ id: block.id, block, question, answer: stringValue(block.settings, "answer"), document: formattedSetting(block.settings, "answer") }] : [];
   });
   const heading = stringValue(section.settings, "heading", "Frequently asked questions");
   const intro = stringValue(section.settings, "text");
@@ -131,7 +131,7 @@ export function FaqSection({ section }: { section: SectionNode }) {
       <div className="jelly-faq-layout">
         <div className="jelly-section-intro"><h2>{heading}</h2><SettingText text={intro} document={formattedSetting(section.settings, "text")} /></div>
         <div className="jelly-faq-list">
-          {items.map((item) => <details key={item.id}><summary>{item.question}</summary><SettingText text={item.answer} document={item.document} /></details>)}
+          {items.map((item) => <details key={item.id} {...blockEditorData(item.block, editor, "Question")}><summary>{item.question}</summary><SettingText text={item.answer} document={item.document} /></details>)}
         </div>
       </div>
     </StorefrontContainer>

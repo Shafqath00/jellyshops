@@ -3,6 +3,7 @@ import type { SectionNode } from "@jelly/storefront-schema";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { choice, headingHidden, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
 import { formattedSetting, SettingText } from "./setting-text";
+import { blockEditorData } from "./block-content";
 
 type Availability = { state?: string; message?: string; maxQuantity?: number };
 
@@ -33,12 +34,13 @@ export function ProductSpecificationsSection({ section, context }: { section: Se
   const fixed = visibleBlocks(section, "spec-row").flatMap((block) => {
     const label = stringValue(block.settings, "label").trim();
     const value = stringValue(block.settings, "value").trim();
-    return label && value && !taken.has(label.toLowerCase()) ? [[label, value] as [string, string]] : [];
+    return label && value && !taken.has(label.toLowerCase()) ? [{ label, value, block }] : [];
   });
-  const rows = [...own, ...fixed];
+  const rows = [...own.map(([label, value]) => ({ label, value, block: undefined })), ...fixed];
+  const editor = context.mode === "editor";
   if (!rows.length) return null;
   const heading = stringValue(section.settings, "heading", "Specifications");
-  const table = <dl className="jelly-specifications-list">{rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>;
+  const table = <dl className="jelly-specifications-list">{rows.map(({ label, value, block }) => <div key={label} {...(block ? blockEditorData(block, editor, "Specification") : {})}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>;
   const layout = choice(section.settings, "layout", ["table", "expandable"] as const, "table");
   return <section className="jelly-section jelly-specifications" {...sectionData(section, { "data-layout": layout })}><StorefrontContainer>
     {layout === "expandable"
@@ -52,15 +54,15 @@ export function ProductSpecificationsSection({ section, context }: { section: Se
  * an accordion. Uses native <details> so it works without JavaScript and is
  * keyboard and screen-reader accessible by default.
  */
-export function ProductTabsSection({ section }: { section: SectionNode }) {
+export function ProductTabsSection({ section, editor = false }: { section: SectionNode; editor?: boolean }) {
   const tabs = visibleBlocks(section, "info-tab").flatMap((block) => {
     const title = stringValue(block.settings, "title");
-    return title ? [{ id: block.id, title, paragraphs: stringValue(block.settings, "text").split(/\n{2,}/).map((part) => part.trim()).filter(Boolean), document: formattedSetting(block.settings, "text") }] : [];
+    return title ? [{ id: block.id, block, title, paragraphs: stringValue(block.settings, "text").split(/\n{2,}/).map((part) => part.trim()).filter(Boolean), document: formattedSetting(block.settings, "text") }] : [];
   });
   if (!tabs.length) return null;
   const firstOpen = section.settings.firstOpen === true;
   return <section className="jelly-section jelly-product-tabs-section" {...sectionData(section)}><StorefrontContainer>
-    {tabs.map((tab, index) => <details key={tab.id} open={firstOpen && index === 0 ? true : undefined}>
+    {tabs.map((tab, index) => <details key={tab.id} open={firstOpen && index === 0 ? true : undefined} {...blockEditorData(tab.block, editor, "Tab")}>
       <summary>{tab.title}</summary>
       {tab.document ? <SettingText text="" document={tab.document} /> : <div>{tab.paragraphs.map((paragraph, position) => <p key={position}>{paragraph}</p>)}</div>}
     </details>)}

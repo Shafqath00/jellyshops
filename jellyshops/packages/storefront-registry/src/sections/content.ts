@@ -99,10 +99,45 @@ const heroBlocks = [
 
 export const contentSections: SectionDefinition[] = [
   { type: "page-content", category: "content", supportedPages: ["page"], settingsSchema: empty, controls: [], allowedBlockTypes: [], defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
-  { type: "blog-header", category: "content", supportedPages: ["blog"], settingsSchema: empty, controls: [], allowedBlockTypes: [], defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
-  { type: "article-list", category: "content", supportedPages: ["blog"], settingsSchema: empty, controls: [], allowedBlockTypes: [], defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
-  { type: "article-header", category: "content", supportedPages: ["article"], settingsSchema: empty, controls: [], allowedBlockTypes: [], defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
-  { type: "article-content", category: "content", supportedPages: ["article"], settingsSchema: empty, controls: [], allowedBlockTypes: [], defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
+  {
+    type: "blog-header", category: "content", supportedPages: ["blog"],
+    settingsSchema: z.object({ text: z.string().max(400).optional(), contentAlignment: alignmentSchema }).passthrough(),
+    controls: [{ ...sectionText, label: "Text under the blog title" }, leftOrCenter],
+    allowedBlockTypes: [], defaultSettings: {}, defaultBlocks: [], responsiveFields: [],
+  },
+  {
+    type: "article-list", category: "content", supportedPages: ["blog"],
+    settingsSchema: z.object({
+      layout: z.enum(["list", "grid"]).optional(), columns: z.number().int().min(2).max(3).optional(),
+      showExcerpt: z.boolean().optional(), showDate: z.boolean().optional(),
+      readMoreLabel: z.string().max(40).optional(), emptyMessage: z.string().max(200).optional(),
+    }).passthrough(),
+    controls: [
+      { type: "segmented", key: "layout", label: "Layout", group: "layout", options: [{ label: "List", value: "list" }, { label: "Grid", value: "grid" }] },
+      { ...columnsControl(3), showWhen: { key: "layout", equals: "grid" } },
+      { type: "checkbox", key: "showExcerpt", label: "Show each article's summary", group: "content" },
+      { type: "checkbox", key: "showDate", label: "Show the publish date", group: "content" },
+      { type: "text", key: "readMoreLabel", label: "Read more link", description: "Leave empty to hide it.", group: "content", maxLength: 40 },
+      { type: "text", key: "emptyMessage", label: "Message when there are no articles", group: "content", maxLength: 200 },
+    ],
+    allowedBlockTypes: [], defaultSettings: { layout: "list", columns: 3, showExcerpt: true, showDate: true }, defaultBlocks: [], responsiveFields: [],
+  },
+  {
+    type: "article-header", category: "content", supportedPages: ["article"],
+    settingsSchema: z.object({ showDate: z.boolean().optional(), showExcerpt: z.boolean().optional(), contentAlignment: alignmentSchema }).passthrough(),
+    controls: [
+      { type: "checkbox", key: "showDate", label: "Show the publish date", group: "content" },
+      { type: "checkbox", key: "showExcerpt", label: "Show the summary under the title", group: "content" },
+      leftOrCenter,
+    ],
+    allowedBlockTypes: [], defaultSettings: { showDate: true, showExcerpt: true }, defaultBlocks: [], responsiveFields: [],
+  },
+  {
+    type: "article-content", category: "content", supportedPages: ["article"],
+    settingsSchema: z.object({ textWidth: z.enum(["narrow", "medium", "wide"]).optional() }).passthrough(),
+    controls: [{ type: "segmented", key: "textWidth", label: "Text width", group: "layout", options: [{ label: "Narrow", value: "narrow" }, { label: "Medium", value: "medium" }, { label: "Wide", value: "wide" }] }],
+    allowedBlockTypes: [], defaultSettings: {}, defaultBlocks: [], responsiveFields: [],
+  },
   { type: "hero", category: "content", supportedPages: [...home], settingsSchema: heroSettings, controls: heroControls, allowedBlockTypes: ["heading", "text", "button"], maxBlocks: 4, defaultSettings: { contentAlignment: "left" }, defaultBlocks: heroBlocks, responsiveFields: ["contentAlignment"], presets: [{ id: "hero", label: "Hero", category: "banners" }] },
   { type: "slideshow", category: "content", supportedPages: [...home], settingsSchema: slideshowSettings, controls: slideshowControls, allowedBlockTypes: ["slide"], minBlocks: 1, maxBlocks: 6, defaultSettings: { height: "large", contentAlignment: "center", overlay: 30, autoplay: true, interval: 6 }, defaultBlocks: slideshowBlocks, responsiveFields: [], presets: [{ id: "slideshow", label: "Slideshow", category: "banners" }] },
   { type: "category-grid", category: "content", supportedPages: [...home], settingsSchema: z.object({ heading: z.string().max(120).optional(), text: z.string().max(400).optional(), columns: z.number().int().min(2).max(4).optional(), imageRatio: z.enum(["portrait", "square"]).optional(), colorScheme: schemeSchema }).passthrough(), controls: [sectionHeading, sectionText, columnsControl(4), { type: "segmented", key: "imageRatio", label: "Image shape", group: "style", options: [{ label: "Portrait", value: "portrait" }, { label: "Square", value: "square" }] }, colorScheme], allowedBlockTypes: ["collection-card"], maxBlocks: 8, defaultSettings: { heading: "Shop by collection", columns: 4 }, defaultBlocks: [], responsiveFields: [], presets: [{ id: "category-grid", label: "Collection list", category: "products" }] },

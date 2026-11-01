@@ -1,8 +1,10 @@
-import { isRichTextDocument } from "@jelly/storefront-schema";
+import { isRichTextDocument, type SectionNode } from "@jelly/storefront-schema";
 import type { ReactNode } from "react";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import { renderBlocks } from "./rich-text";
 import type { StorefrontRuntimeContext } from "../runtime-context";
+import { choice, numberValue, sectionData, stringValue } from "./shared";
+import { formattedSetting, SettingText } from "./setting-text";
 
 /** Saved page/article content: rich text documents keep headings and lists; older plain text becomes paragraphs. */
 function renderContent(value: unknown): ReactNode[] {
@@ -32,7 +34,7 @@ export function PageContentSection({ context }: { context: StorefrontRuntimeCont
   return <section className="jelly-section jelly-page-content"><StorefrontContainer><article className="jelly-prose"><h1>{title}</h1>{content}</article></StorefrontContainer></section>;
 }
 
-function blogData(context: StorefrontRuntimeContext): { storeSlug: string; title: string; handle: string; articles: Array<{ id: string; title: string; handle: string; excerpt: string }> } | null {
+function blogData(context: StorefrontRuntimeContext): { storeSlug: string; title: string; handle: string; articles: Array<{ id: string; title: string; handle: string; excerpt: string; publishedAt?: string }> } | null {
   if (context.page?.pageType !== "blog") return null;
   const data = context.page.resource.data;
   const blog = data.blog;
@@ -43,21 +45,57 @@ function blogData(context: StorefrontRuntimeContext): { storeSlug: string; title
     if (!entry || typeof entry !== "object" || Array.isArray(entry)) return [];
     const article = entry as Record<string, unknown>;
     return typeof article.id === "string" && typeof article.title === "string" && typeof article.handle === "string"
-      ? [{ id: article.id, title: article.title, handle: article.handle, excerpt: typeof article.excerpt === "string" ? article.excerpt : "" }]
+      ? [{ id: article.id, title: article.title, handle: article.handle, excerpt: typeof article.excerpt === "string" ? article.excerpt : "", ...(validDate(article.publishedAt) ? { publishedAt: article.publishedAt } : {}) }]
       : [];
   }) : [];
   return { storeSlug: typeof data.storeSlug === "string" ? data.storeSlug : "", title: record.title, handle: record.handle, articles };
 }
 
-export function BlogHeaderSection({ context }: { context: StorefrontRuntimeContext }) {
-  const blog = blogData(context);
-  return blog ? <section className="jelly-section jelly-blog-header"><StorefrontContainer><h1>{blog.title}</h1></StorefrontContainer></section> : null;
+function validDate(value: unknown): value is string {
+  return typeof value === "string" && Number.isFinite(Date.parse(value));
 }
 
-export function ArticleListSection({ context }: { context: StorefrontRuntimeContext }) {
+/** "March 12, 2026"; dates are stored in UTC so the label never shifts by a day. */
+function dateLabel(value: string): string {
+  return new Intl.DateTimeFormat("en", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" }).format(new Date(value));
+}
+
+const alignment = (section: SectionNode) => choice(section.settings, "contentAlignment", ["left", "center"] as const, "left");
+
+export function BlogHeaderSection({ context, section }: { context: StorefrontRuntimeContext; section?: SectionNode }) {
   const blog = blogData(context);
   if (!blog) return null;
-  return <section className="jelly-section jelly-article-list"><StorefrontContainer>{blog.articles.length ? <div>{blog.articles.map((article) => <article key={article.id}><h2><a href={`/${blog.storeSlug}/blogs/${blog.handle}/${article.handle}`}>{article.title}</a></h2>{article.excerpt && <p>{article.excerpt}</p>}</article>)}</div> : <p>No articles have been published yet.</p>}</StorefrontContainer></section>;
+  return <section className="jelly-section jelly-blog-header" {...(section ? sectionData(section, { "data-align": alignment(section) }) : {})}><StorefrontContainer>
+    <h1>{blog.title}</h1>
+    {section && <SettingText className="jelly-blog-header-text" text={stringValue(section.settings, "text")} document={formattedSetting(section.settings, "text")} />}
+  </StorefrontContainer></section>;
+}
+
+/**
+ * The blog's articles as a list or a grid. Sections saved before these
+ * settings existed keep their look: summaries on, dates and "Read more" off.
+ */
+export function ArticleListSection({ context, section }: { context: StorefrontRuntimeContext; section?: SectionNode }) {
+  const blog = blogData(context);
+  if (!blog) return null;
+  const settings = section?.settings;
+  const layout = choice(settings, "layout", ["list", "grid"] as const, "list");
+  const showExcerpt = settings?.showExcerpt !== false;
+  const showDate = settings?.showDate === true;
+  const readMore = stringValue(settings, "readMoreLabel").trim();
+  const empty = stringValue(settings, "emptyMessage").trim() || "No articles have been published yet.";
+  const columns = layout === "grid" ? String(numberValue(settings, "columns", 3, 2, 3)) : undefined;
+  return <section className="jelly-section jelly-article-list" {...(section ? sectionData(section, { "data-layout": layout, "data-columns": columns }) : {})}><StorefrontContainer>
+    {blog.articles.length ? <div className="jelly-article-list-items">{blog.articles.map((article) => {
+      const href = `/${blog.storeSlug}/blogs/${blog.handle}/${article.handle}`;
+      return <article key={article.id}>
+        {showDate && article.publishedAt && <time className="jelly-article-published-at" dateTime={article.publishedAt}>{dateLabel(article.publishedAt)}</time>}
+        <h2><a href={href}>{article.title}</a></h2>
+        {showExcerpt && article.excerpt && <p>{article.excerpt}</p>}
+        {readMore && <a className="jelly-article-read-more" href={href} aria-label={`${readMore}: ${article.title}`}>{readMore}</a>}
+      </article>;
+    })}</div> : <p>{empty}</p>}
+  </StorefrontContainer></section>;
 }
 
 function articleData(context: StorefrontRuntimeContext): { title: string; excerpt: string; content: unknown; publishedAt?: string } | null {
@@ -70,23 +108,25 @@ function articleData(context: StorefrontRuntimeContext): { title: string; excerp
     title: record.title,
     excerpt: typeof record.excerpt === "string" ? record.excerpt : "",
     content: record.content,
-    ...(typeof record.publishedAt === "string" && Number.isFinite(Date.parse(record.publishedAt))
-      ? { publishedAt: record.publishedAt }
-      : {}),
+    ...(validDate(record.publishedAt) ? { publishedAt: record.publishedAt } : {}),
   };
 }
 
-export function ArticleHeaderSection({ context }: { context: StorefrontRuntimeContext }) {
-  const article = articleData(context);
-  const publishedDate = article?.publishedAt ? new Date(article.publishedAt) : undefined;
-  const publicationLabel = publishedDate
-    ? new Intl.DateTimeFormat("en", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" }).format(publishedDate)
-    : undefined;
-  return article ? <section className="jelly-section jelly-article-header"><StorefrontContainer><h1>{article.title}</h1>{publicationLabel && article.publishedAt && <time className="jelly-article-published-at" dateTime={article.publishedAt}>Published {publicationLabel}</time>}{article.excerpt && <p>{article.excerpt}</p>}</StorefrontContainer></section> : null;
-}
-
-export function ArticleContentSection({ context }: { context: StorefrontRuntimeContext }) {
+export function ArticleHeaderSection({ context, section }: { context: StorefrontRuntimeContext; section?: SectionNode }) {
   const article = articleData(context);
   if (!article) return null;
-  return <section className="jelly-section jelly-article-content"><StorefrontContainer><article className="jelly-prose">{renderContent(article.content)}</article></StorefrontContainer></section>;
+  const showDate = section?.settings.showDate !== false;
+  const showExcerpt = section?.settings.showExcerpt !== false;
+  return <section className="jelly-section jelly-article-header" {...(section ? sectionData(section, { "data-align": alignment(section) }) : {})}><StorefrontContainer>
+    <h1>{article.title}</h1>
+    {showDate && article.publishedAt && <time className="jelly-article-published-at" dateTime={article.publishedAt}>Published {dateLabel(article.publishedAt)}</time>}
+    {showExcerpt && article.excerpt && <p>{article.excerpt}</p>}
+  </StorefrontContainer></section>;
+}
+
+export function ArticleContentSection({ context, section }: { context: StorefrontRuntimeContext; section?: SectionNode }) {
+  const article = articleData(context);
+  if (!article) return null;
+  const width = choice(section?.settings, "textWidth", ["narrow", "medium", "wide"] as const, "medium");
+  return <section className="jelly-section jelly-article-content" {...(section ? sectionData(section, { "data-width": width === "medium" ? undefined : width }) : {})}><StorefrontContainer><article className="jelly-prose">{renderContent(article.content)}</article></StorefrontContainer></section>;
 }
