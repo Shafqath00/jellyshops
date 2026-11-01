@@ -5,27 +5,30 @@ import { MenuTree, type MenuVariant } from "./menu-tree";
 
 type RuntimeMenuItem = RuntimeMenuV4["items"][number];
 
-function menuHref(item: RuntimeMenuItem, storeSlug?: string): string | null {
+function menuHref(item: RuntimeMenuItem, context: StorefrontRuntimeContext): string | null {
+  const { storeSlug } = context;
   const target = item.target;
   if (target.kind === "external") return safeRichTextHref(target.url);
-  if (target.kind === "anchor") return safeRichTextHref(`#${target.anchor}`);
+  if (target.kind === "anchor") return safeRichTextHref(target.anchor.startsWith("#") ? target.anchor : `#${target.anchor}`);
+  if (target.kind === "collection") return safeRichTextHref(context.collectionLinks?.[target.resourceId]);
   if (!storeSlug) return target.kind === "home" ? "/" : target.kind === "search" ? "/search" : null;
   const root = `/${encodeURIComponent(storeSlug)}`;
   if (target.kind === "home") return root;
   if (target.kind === "search") return `${root}/search`;
-  return `${root}/${target.kind === "product" ? "products" : target.kind === "collection" ? "collections" : target.kind === "page" ? "pages" : "blogs"}/${encodeURIComponent(target.resourceId)}`;
+  return safeRichTextHref(context.resourceLinks?.[`${target.kind}:${target.resourceId}`]);
 }
 
 function MenuLinks({ section, context, label = "Store navigation", variant }: { section: SectionNode; context: StorefrontRuntimeContext; label?: string; variant: MenuVariant }) {
   const block = section.blocks.find((entry) => entry.enabled && entry.type === "menu");
   const handle = typeof block?.settings.handle === "string" ? block.settings.handle : "main";
-  return (context.menus?.[handle]?.items.length ?? 0) > 0 ? <nav aria-label={label}><MenuList handle={handle} context={context} variant={variant} /></nav> : null;
+  const menu = Object.values(context.menus ?? {}).find(item => item.handle === handle);
+  return (menu?.items.length ?? 0) > 0 ? <nav aria-label={label}><MenuList handle={handle} context={context} variant={variant} /></nav> : null;
 }
 
 /** One navigation menu: top-level links (`flat`), or with its dropdowns (`bar`) or fold-out groups (`panel`). */
 export function MenuList({ handle, context, variant = "flat" }: { handle: string; context: StorefrontRuntimeContext; variant?: MenuVariant }) {
-  const items = context.menus?.[handle]?.items ?? [];
-  return <MenuTree items={items} variant={variant} hrefFor={(item) => menuHref(item, context.storeSlug)} />;
+  const items = Object.values(context.menus ?? {}).find(item => item.handle === handle)?.items ?? [];
+  return <MenuTree items={items} variant={variant} hrefFor={(item) => menuHref(item, context)} />;
 }
 
 type ToolIcon = "search" | "account" | "wishlist" | "bag" | "menu";

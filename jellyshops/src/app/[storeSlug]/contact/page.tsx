@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ContactForm } from "@/features/customers/contact-form";
+import { ContactForm } from "@/features/customers/components/contact-form";
 import { ServerContentPage } from "@/features/storefront/server-content-page";
 import { getServerStorefront } from "@/features/storefront/server-storefront";
 

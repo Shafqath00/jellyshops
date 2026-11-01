@@ -1,12 +1,15 @@
 "use client";
 import Link from "next/link";
+import { resolveMediaUrls } from "@/lib/media-urls";
 import { useEffect, useMemo, useState } from "react";
 import { useShop } from "@/contexts/shop-context";
 import type { Product } from "@/lib/domain";
 import { formatMoney } from "@/lib/domain";
 import { catalogProductToStorefrontProduct, type PublicCatalogResponse } from "@/features/commerce/api/client";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { WishlistButton } from "@/features/customers/wishlist-button";
+import { WishlistButton } from "@/features/customers/components/wishlist-button";
+
+const mediaOrigin = process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
 
 function QuickView({ product, storeSlug, onClose }: { product: Product; storeSlug: string; onClose(): void }) {
   const { repository } = useShop(); const store = repository.getStoreBySlug(storeSlug)!;
@@ -42,7 +45,7 @@ export function CatalogBrowser({ storeSlug, collectionId, initialQuery = "", ini
   useEffect(() => {
     if (!store) return;
     const controller = new AbortController(); let active = true;
-    void fetch(`${base}?${query}`, { signal: controller.signal, cache: "no-store" }).then(async (response) => { if (!response.ok) throw new Error("Unable to load products. Please retry."); const data = await response.json() as PublicCatalogResponse; if (active) setResult({ scope, products: data.nodes.map(catalogProductToStorefrontProduct), nextCursor: data.nextCursor }); }).catch((error: unknown) => { if (active) setResult({ scope, products: [], nextCursor: null, error: error instanceof Error ? error.message : "Unable to load products." }); });
+    void fetch(`${base}?${query}`, { signal: controller.signal, cache: "no-store" }).then(async (response) => { if (!response.ok) throw new Error("Unable to load products. Please retry."); const data = resolveMediaUrls(await response.json() as PublicCatalogResponse, mediaOrigin); if (active) setResult({ scope, products: data.nodes.map(catalogProductToStorefrontProduct), nextCursor: data.nextCursor }); }).catch((error: unknown) => { if (active) setResult({ scope, products: [], nextCursor: null, error: error instanceof Error ? error.message : "Unable to load products." }); });
     return () => { active = false; controller.abort(); };
   }, [store, base, query, scope]);
   if (!store) return null;
@@ -53,7 +56,7 @@ export function CatalogBrowser({ storeSlug, collectionId, initialQuery = "", ini
   async function loadMore() {
     if (!nextCursor || more === scope) return;
     setMore(scope);
-    try { const response = await fetch(`${base}?${query}&cursor=${encodeURIComponent(nextCursor)}`, { cache: "no-store" }); if (!response.ok) throw new Error("Unable to load more products."); const data = await response.json() as PublicCatalogResponse; setResult((value) => value?.scope === scope ? { scope, products: [...new Map([...value.products, ...data.nodes.map(catalogProductToStorefrontProduct)].map((p) => [p.id, p])).values()], nextCursor: data.nextCursor } : value); }
+    try { const response = await fetch(`${base}?${query}&cursor=${encodeURIComponent(nextCursor)}`, { cache: "no-store" }); if (!response.ok) throw new Error("Unable to load more products."); const data = resolveMediaUrls(await response.json() as PublicCatalogResponse, mediaOrigin); setResult((value) => value?.scope === scope ? { scope, products: [...new Map([...value.products, ...data.nodes.map(catalogProductToStorefrontProduct)].map((p) => [p.id, p])).values()], nextCursor: data.nextCursor } : value); }
     catch (error) { setResult((value) => value?.scope === scope ? { ...value, error: error instanceof Error ? error.message : "Unable to load more products." } : value); }
     finally { setMore((value) => value === scope ? undefined : value); }
   }

@@ -59,7 +59,7 @@ export default function CollectionPage() {
         products: pageContext.products.map((product) => ({ ...product, href: `/${store.slug}/products/${product.href.split("/").pop()}` })),
         collectionPresentation: {
           ...(isCompleteStorefrontTheme(publication.snapshot.theme?.id ?? publication.snapshot.theme?.presetId) ? { interactiveGrid: <CatalogBrowser storeSlug={store.slug} collectionId={pageContext.collection.id} /> } : {}),
-          collection: { id: pageContext.collection.id, title: pageContext.collection.name, description: pageContext.collection.description ?? "", ...(pageContext.collection.imageUrl ? { imageUrl: pageContext.collection.imageUrl } : {}) },
+          collection: { id: pageContext.collection.id, title: pageContext.collection.name, description: pageContext.collection.description ?? "", ...(pageContext.collection.descriptionDoc ? { descriptionDoc: pageContext.collection.descriptionDoc } : {}), ...(pageContext.collection.imageUrl ? { imageUrl: pageContext.collection.imageUrl } : {}) },
           products: pageContext.products.map((product) => ({ ...product, href: `/${store.slug}/products/${product.href.split("/").pop()}` })),
           totalProducts: pageContext.products.length,
         },
@@ -72,7 +72,7 @@ export default function CollectionPage() {
     void resolveStorefrontRoute(publication.snapshot, { type: "collection", handle: resource.handle }, reader).then(setResolvedRoute);
   }, [pageContext, publication, store]);
 
-  if (catalogStatus === "loading" || pageContext === undefined) return <main className="flex min-h-[75vh] items-center justify-center">Loading collection…</main>;
+  if (catalogStatus === "loading" || pageContext === undefined || (pageContext && publication?.kind === "v4" && !resolvedRoute)) return <main className="flex min-h-[75vh] items-center justify-center" role="status">Loading collection…</main>;
   if (!store || !pageContext) return <main className="flex min-h-[75vh] flex-col items-center justify-center"><h1>Collection not found</h1><Link href={`/${storeSlug}/shop`}>Back to shop</Link></main>;
 
   if (publication?.kind === "v4" && resolvedRoute?.status === "ready") {

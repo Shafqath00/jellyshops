@@ -4,7 +4,8 @@ import { FooterSection } from "./sections/footer";
 import { HeaderSection } from "./sections/header";
 import { HeroSection } from "./sections/hero";
 import { SlideshowSection } from "./sections/slideshow";
-import { ProductStockCounterSection, ProductTabsSection } from "./sections/product-extras";
+import { ProductSpecificationsSection, ProductStockCounterSection, ProductTabsSection } from "./sections/product-extras";
+import { StoreVisitSection } from "./sections/store-visit";
 import { ProductGridSection } from "./sections/product-grid";
 import { RichTextSection } from "./sections/rich-text";
 import { CustomContentSection } from "./sections/custom-content";
@@ -40,6 +41,7 @@ export interface SectionRenderProps {
   mode: RendererMode;
   commerce: CommerceDataProvider;
   context: StorefrontRuntimeContext;
+  selectedBlockId?: string;
 }
 
 export type SectionRenderComponent = ComponentType<SectionRenderProps>;
@@ -71,12 +73,12 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("announcement-bar", ({ section }) => <AnnouncementBarSection section={section} />);
   registry.register("header", ({ section, context }) => <HeaderSection section={section} context={context} />);
   registry.register("footer", ({ section, context, commerce, mode }) => <FooterSection section={section} context={context} subscribe={commerce.subscribeNewsletter} mode={mode} />);
-  registry.register("hero", ({ section, mode, context }) => <HeroSection section={section} editor={mode === "editor"} context={context} />);
-  registry.register("slideshow", ({ section, mode, context }) => <SlideshowSection section={section} context={context} editor={mode === "editor"} />);
+  registry.register("hero", ({ section, mode, context, selectedBlockId }) => <HeroSection section={section} editor={mode === "editor"} context={context} selectedBlockId={selectedBlockId} />);
+  registry.register("slideshow", ({ section, mode, context, selectedBlockId }) => <SlideshowSection section={section} context={context} editor={mode === "editor"} selectedBlockId={selectedBlockId} />);
   registry.register("rich-text", ({ section }) => <RichTextSection section={section} />);
   // The Apps section is a Custom content section that only takes app blocks.
-  registry.register("apps", ({ section, context, mode }) => <CustomContentSection section={section} context={context} editor={mode === "editor"} />);
-  registry.register("custom-content", ({ section, context, mode }) => <CustomContentSection section={section} context={context} editor={mode === "editor"} />);
+  registry.register("apps", ({ section, context, mode, selectedBlockId }) => <CustomContentSection section={section} context={context} editor={mode === "editor"} selectedBlockId={selectedBlockId} />);
+  registry.register("custom-content", ({ section, context, mode, selectedBlockId }) => <CustomContentSection section={section} context={context} editor={mode === "editor"} selectedBlockId={selectedBlockId} />);
   registry.register("page-content", ({ context }) => <PageContentSection context={context} />);
   registry.register("blog-header", ({ context, section }) => <BlogHeaderSection context={context} section={section} />);
   registry.register("article-list", ({ context, section }) => <ArticleListSection context={context} section={section} />);
@@ -90,6 +92,8 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("product-description", ({ context, section }) => <ProductDescriptionSection context={context} section={section} />);
   registry.register("product-tabs", ({ section, mode }) => <ProductTabsSection section={section} editor={mode === "editor"} />);
   registry.register("product-stock-counter", ({ section, context }) => <ProductStockCounterSection section={section} context={context} />);
+  registry.register("product-specifications", ({ section, context }) => <ProductSpecificationsSection section={section} context={context} />);
+  registry.register("contact-store-info", ({ section, mode }) => <StoreVisitSection section={section} editor={mode === "editor"} />);
   registry.register("related-products", ({ context, section }) => <RelatedProductsSection context={context} section={section} />);
   registry.register("collection-header", ({ context, section }) => <CollectionHeaderSection context={context} section={section} />);
   registry.register("collection-product-grid", ({ context, section }) => <CollectionProductGridSection context={context} section={section} />);
@@ -103,7 +107,7 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("newsletter", ({ section, commerce, mode }) => <NewsletterSection section={section} subscribe={commerce.subscribeNewsletter} mode={mode} />);
   registry.register("category-grid", ({ section, context }) => <CategoryGridSection section={section} context={context} />);
   registry.register("metaobject-list", ({ section, context, mode }) => <MetaobjectListSection section={section} context={context} mode={mode} />);
-  registry.register("logo-list", ({ section, context, mode }) => <LogoListSection section={section} context={context} mode={mode} />);
+  registry.register("logo-list", ({ section, context, mode, selectedBlockId }) => <LogoListSection section={section} context={context} mode={mode} selectedBlockId={selectedBlockId} />);
   registry.register("testimonials", ({ section, mode }) => <TestimonialsSection section={section} mode={mode} />);
   registry.register("trust-strip", ({ section }) => <TrustStripSection section={section} />);
   registry.register("image-mosaic", ({ section }) => <ImageMosaicSection section={section} />);

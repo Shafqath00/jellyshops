@@ -3,6 +3,9 @@ import { useState } from "react";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import type { ProductPresentationContext } from "../types";
 import { choice } from "./shared";
+import { ProductGalleryViewer } from "../product-gallery-viewer";
+import { normalizeRichTextDocument, productMediaSrcSet } from "@jelly/storefront-schema";
+import { renderBlocks } from "./rich-text";
 
 function productContext(context: StorefrontRuntimeContext): ProductPresentationContext | null {
   const candidate = context.page?.pageType === "product" ? context.page.resource.data.productPresentation : undefined;
@@ -14,13 +17,14 @@ function productContext(context: StorefrontRuntimeContext): ProductPresentationC
 export function ProductGallerySection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown> } }) {
   const product = productContext(context);
   const media = product?.product.media?.length ? product.product.media : product?.product.imageUrl ? [{ id: "primary", url: product.product.imageUrl, altText: product.product.title }] : [];
-  if (!product || media.length === 0) return null;
+  if (!product) return null;
   const fit = section.settings.imageFit === "contain" ? "contain" : "cover";
+  if (product.product.galleryEnabled && section.settings.layout !== "stacked" && section.settings.layout !== "grid") return <section className="jelly-section jelly-product-gallery" data-layout="thumbnails"><StorefrontContainer><ProductGalleryViewer media={media} title={product.product.title} fit={fit} /></StorefrontContainer></section>;
   return <section className="jelly-section jelly-product-gallery" data-layout={choice(section.settings, "layout", ["stacked", "grid"] as const, "stacked")} data-count={media.length}>
     <StorefrontContainer>
       {media.map((item, index) => <figure key={item.id} className="jelly-product-gallery-item">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={item.url} alt={item.altText ?? product.product.title} style={{ objectFit: fit }} loading={index === 0 ? "eager" : "lazy"} />
+        <img src={item.url} srcSet={productMediaSrcSet(item)} sizes="(min-width: 1024px) 50vw, 100vw" width={"width" in item ? item.width ?? undefined : undefined} height={"height" in item ? item.height ?? undefined : undefined} alt={item.altText ?? product.product.title} style={{ objectFit: fit }} loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} />
       </figure>)}
     </StorefrontContainer>
   </section>;
@@ -33,7 +37,7 @@ export function ProductInformationSection({ context, section }: { context: Store
     return typeof title === "string" ? <section className="jelly-section jelly-product-information"><StorefrontContainer><h1>{title}</h1></StorefrontContainer></section> : null;
   }
   const show = (key: string) => section.settings[key] !== false;
-  const specifications = Object.entries(product.product.specifications ?? {});
+  const specifications = show("showSpecifications") ? Object.entries(product.product.specifications ?? {}) : [];
   const state = product.availability.state;
   return <section className="jelly-section jelly-product-information"><StorefrontContainer>
     {show("showVendor") && product.product.vendor && <p className="jelly-eyebrow">{product.product.vendor}</p>}
@@ -108,11 +112,14 @@ export function ProductPurchaseSection({ context, section }: { context: Storefro
 
 export function ProductDescriptionSection({ context, section }: { context: StorefrontRuntimeContext; section?: { settings: Record<string, unknown> } }) {
   const product = productContext(context);
-  if (!product?.product.description) return null;
+  const descriptionDoc = product?.product.descriptionDoc ? normalizeRichTextDocument(product.product.descriptionDoc) : null;
+  if (!product || (!product.product.description && !descriptionDoc?.content.length)) return null;
   const heading = typeof section?.settings.heading === "string" ? section.settings.heading.trim() : "";
   return <section className="jelly-section jelly-product-description"><StorefrontContainer>
     {heading && <h2>{heading}</h2>}
-    {product.product.description.split(/\n{2,}/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+    {descriptionDoc?.content.length
+      ? <div className="jelly-rich-description">{renderBlocks(descriptionDoc.content)}</div>
+      : product.product.description.split(/\n{2,}/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
   </StorefrontContainer></section>;
 }
 

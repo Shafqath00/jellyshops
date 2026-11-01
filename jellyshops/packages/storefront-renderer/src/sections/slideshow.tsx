@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { SectionNode } from "@jelly/storefront-schema";
+import { blockLabel } from "@jelly/storefront-registry";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
-import { choice, imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
+import { choice, editorBlockData, imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
 
 /**
  * Full-width image slideshow. Slides change automatically when the merchant
@@ -10,7 +11,7 @@ import { choice, imageValue, numberValue, sectionData, stringValue, visibleBlock
  * the visitor prefers reduced motion, and in the editor. Every slide stays in
  * the DOM so headings remain available to search engines and screen readers.
  */
-export function SlideshowSection({ section, context, editor = false }: { section: SectionNode; context: StorefrontRuntimeContext; editor?: boolean }) {
+export function SlideshowSection({ section, context, editor = false, selectedBlockId }: { section: SectionNode; context: StorefrontRuntimeContext; editor?: boolean; selectedBlockId?: string }) {
   const slides = visibleBlocks(section, "slide").map((block) => ({
     id: block.id,
     image: imageValue(block.settings),
@@ -36,7 +37,9 @@ export function SlideshowSection({ section, context, editor = false }: { section
   }, [autoplay, paused, interval, count, current]);
   if (!count) return editor ? <section className="jelly-section jelly-slideshow" {...sectionData(section)}><p className="jelly-editor-hint">Add a slide to start your slideshow.</p></section> : null;
   const go = (index: number) => setActive((index + count) % count);
-  const editorProps = (id: string, field: string) => editor ? { "data-editor-block-id": id, "data-editor-field-key": field } : {};
+  const editorProps = (id: string, field?: string) => editor
+    ? editorBlockData(id, blockLabel("slide"), field ? undefined : selectedBlockId, field)
+    : {};
   return <section
     ref={rootRef}
     className="jelly-slideshow"
@@ -61,6 +64,7 @@ export function SlideshowSection({ section, context, editor = false }: { section
         aria-hidden={index === current ? undefined : true}
         data-active={index === current ? "true" : undefined}
         inert={index === current ? undefined : true}
+        {...editorProps(slide.id)}
       >
         {slide.image && <>
           {/* eslint-disable-next-line @next/next/no-img-element */}

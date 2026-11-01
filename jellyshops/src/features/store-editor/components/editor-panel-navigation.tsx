@@ -1,30 +1,8 @@
 import clsx from "clsx";
-
 export type EditorPanel = "sections" | "preview" | "settings";
-
-const panels: Array<{ id: EditorPanel; label: string }> = [
-  { id: "sections", label: "Sections" },
-  { id: "preview", label: "Preview" },
-  { id: "settings", label: "Settings" },
-];
-
-export function EditorPanelNavigation({ value, onChange }: { value: EditorPanel; onChange(panel: EditorPanel): void }) {
-  return (
-    <nav aria-label="Editor panels" className="grid grid-cols-3 gap-1 border-b border-[var(--line)] bg-[var(--white)] p-2 lg:hidden">
-      {panels.map(({ id, label }) => (
-        <button
-          key={id}
-          type="button"
-          aria-pressed={value === id}
-          onClick={() => onChange(id)}
-          className={clsx(
-            "min-h-10 rounded-lg px-2 text-[12px] font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ink)]",
-            value === id ? "bg-[var(--paper-deep)] text-[var(--ink)]" : "text-[var(--ink-soft)] hover:bg-[var(--paper)]",
-          )}
-        >
-          {label}
-        </button>
-      ))}
-    </nav>
-  );
+export function EditorPanelNavigation({ value, onChange, editPanel = "sections" }: { value: EditorPanel; onChange(panel: EditorPanel): void; editPanel?: "sections" | "settings" }) {
+  return <nav aria-label="Editor panels" className="grid grid-cols-2 gap-1 border-b border-[var(--line)] bg-[var(--white)] p-1 lg:hidden">
+    <button type="button" aria-pressed={value !== "preview"} onClick={() => { if (value === "preview") onChange(editPanel); }} className={clsx("min-h-9 rounded-lg text-xs font-semibold", value !== "preview" ? "bg-muted text-foreground" : "text-muted-foreground")}>Edit</button>
+    <button type="button" aria-pressed={value === "preview"} onClick={() => onChange("preview")} className={clsx("min-h-9 rounded-lg text-xs font-semibold", value === "preview" ? "bg-muted text-foreground" : "text-muted-foreground")}>Preview</button>
+  </nav>;
 }

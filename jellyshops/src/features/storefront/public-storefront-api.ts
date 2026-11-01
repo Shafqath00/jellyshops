@@ -4,6 +4,7 @@ import {
   type RuntimeStorefrontSnapshotV4,
   type StorefrontDocument,
 } from "@jelly/storefront-schema";
+import { resolveMediaUrls } from "@/lib/media-urls";
 
 interface LoadOptions {
   baseUrl: string;
@@ -46,7 +47,7 @@ export async function loadPublicStorefrontPublication({
     });
     if (!response.ok) return null;
 
-    const body = await response.json() as { id?: unknown; document?: unknown };
+    const body = resolveMediaUrls(await response.json() as { id?: unknown; document?: unknown }, baseUrl);
     if (typeof body.id !== "string") return null;
 
     const v4 = runtimeStorefrontSnapshotV4Schema.safeParse(body.document);

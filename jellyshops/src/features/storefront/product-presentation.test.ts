@@ -10,6 +10,17 @@ const product: Product = {
 };
 
 describe("createProductPresentationContext", () => {
+  it("resolves tagged gallery metadata without selecting purchase values", () => {
+    vi.stubEnv("NEXT_PUBLIC_PRODUCT_MEDIA_STORE_IDS", "store-a");
+    const tagged = { ...product, media: [{ id: "cover", url: "/cover.jpg" }, { id: "large-photo", url: "/large.jpg", width: 1200, height: 800, appliesTo: { size: ["large"] } }, { id: "small-photo", url: "/small.jpg", appliesTo: { size: ["small"] } }] };
+    const props = { product: tagged, currency: "USD" as const, quantity: 1, onSelectionsChange: vi.fn(), onQuantityChange: vi.fn(), onAddToCart: vi.fn() };
+    expect(createProductPresentationContext({ ...props, selections: [] }).product.media?.map((item) => item.id)).toEqual(["cover", "large-photo", "small-photo"]);
+    const selected = createProductPresentationContext({ ...props, selections: [{ optionId: "size", valueId: "large" }] });
+    expect(selected.product.imageUrl).toBe("/large.jpg");
+    expect(selected.product.media?.[0]).toMatchObject({ width: 1200, height: 800 });
+    expect(props.onSelectionsChange).not.toHaveBeenCalled();
+    vi.unstubAllEnvs();
+  });
   it("requires a live required option before purchase", async () => {
     const addToCart = vi.fn();
     const context = createProductPresentationContext({ product, currency: "USD", selections: [], quantity: 1, onSelectionsChange: vi.fn(), onQuantityChange: vi.fn(), onAddToCart: addToCart });

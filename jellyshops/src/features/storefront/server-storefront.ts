@@ -3,6 +3,7 @@ import { migrateStorefrontDocument, runtimeStorefrontSnapshotV4Schema } from "@j
 import { catalogProductToStorefrontProduct, type PublicCatalogResponse, type PublicStoreDetails } from "@/features/commerce/api/client";
 import type { Collection, Product, Store } from "@/lib/domain";
 import type { PublicStorefrontPublication } from "./public-storefront-api";
+import { resolveMediaUrls } from "@/lib/media-urls";
 
 export interface StorefrontBootstrapData { store: Store; products: Product[]; collections: Collection[]; publication: PublicStorefrontPublication }
 const origin = (process.env.STOREFRONT_API_URL ?? process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001").replace(/\/$/, "");
@@ -11,7 +12,7 @@ export async function loadServerStorefront(slug: string, fetcher: typeof fetch =
     const response = await fetcher(`${origin}${path}`, { cache: "no-store", headers: { Accept: "application/json" } });
     if (response.status === 404) return null;
     if (!response.ok) throw new Error("The storefront service is temporarily unavailable.");
-    return response.json() as Promise<T>;
+    return resolveMediaUrls(await response.json() as T, origin);
   }
   const details = await read<{ store: PublicStoreDetails }>(`/api/public/storefronts/${encodeURIComponent(slug)}`);
   if (!details) return null;
@@ -39,17 +40,17 @@ export async function loadServerStorefront(slug: string, fetcher: typeof fetch =
     if (product.imageUrl.startsWith("/")) product.imageUrl = `${origin}${product.imageUrl}`;
     for (const media of product.media ?? []) if (media.url.startsWith("/")) media.url = `${origin}${media.url}`;
   }
-  const collections: Array<{ id: string; title: string; handle: string; description: string }> = [];
+  const collections: Array<{ id: string; title: string; handle: string; description: string; descriptionDoc?: Collection["descriptionDoc"] }> = [];
   const collectionCursors = new Set<string>(); let collectionCursor: string | null = null;
   do {
-    const page: { nodes: Array<{ id: string; title: string; handle: string; description: string }>; nextCursor: string | null } | null = await read(`/api/public/stores/${encodeURIComponent(id)}/catalog/collections?limit=100${collectionCursor ? `&cursor=${encodeURIComponent(collectionCursor)}` : ""}`);
+    const page: { nodes: Array<{ id: string; title: string; handle: string; description: string; descriptionDoc?: Collection["descriptionDoc"] }>; nextCursor: string | null } | null = await read(`/api/public/stores/${encodeURIComponent(id)}/catalog/collections?limit=100${collectionCursor ? `&cursor=${encodeURIComponent(collectionCursor)}` : ""}`);
     if (!page) throw new Error("The storefront collections are unavailable.");
     collections.push(...page.nodes); collectionCursor = page.nextCursor;
     if (collectionCursor && collectionCursors.has(collectionCursor)) throw new Error("The storefront collections returned an invalid cursor.");
     if (collectionCursor) collectionCursors.add(collectionCursor);
   } while (collectionCursor);
   const store: Store = { id, businessId: id, name: details.store.name, slug: details.store.slug, country: details.store.country, tagline: details.store.name, description: `Welcome to ${details.store.name}.`, currency: details.store.currency as Store["currency"], published: true, bannerUrl: products[0]?.imageUrl ?? "", shippingMinor: details.store.shippingMinor ?? 0, shippingCopy: details.store.shippingCopy ?? "", theme: { accent: "#172a1b", accentSoft: "#e8f3d6", background: "#fffdf8", surface: "#ffffff", text: "#172a1b", displayFont: "serif" } };
-  return { store, products, collections: collections.map((collection) => ({ id: collection.id, storeId: id, name: collection.title, slug: collection.handle, description: collection.description })), publication };
+  return { store, products, collections: collections.map((collection) => ({ id: collection.id, storeId: id, name: collection.title, slug: collection.handle, description: collection.description, ...(collection.descriptionDoc ? { descriptionDoc: collection.descriptionDoc } : {}) })), publication };
 }
 // Request-scoped deduplication only. Published HTML/data never fall back to drafts.
 export const getServerStorefront = cache((slug: string) => loadServerStorefront(slug));

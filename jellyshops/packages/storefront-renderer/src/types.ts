@@ -1,15 +1,15 @@
-import type { GlobalSettings, PageType, StoreDesignDocument, StorefrontDocument } from "@jelly/storefront-schema";
+import type { GlobalSettings, PageType, ProductMediaLike, RichTextDocument, StoreDesignDocument, StorefrontDocument } from "@jelly/storefront-schema";
 import type { ReactNode } from "react";
 
 export interface PublicProduct { id: string; name: string; href: string; imageUrl: string; price: string; compareAtPrice?: string; badge?: string }
 export interface CollectionPresentationContext {
   interactiveGrid?: ReactNode;
-  collection: { id: string; title: string; description: string; imageUrl?: string };
+  collection: { id: string; title: string; description: string; descriptionDoc?: RichTextDocument | null; imageUrl?: string };
   products: PublicProduct[];
   totalProducts: number;
 }
 export interface ProductPresentationContext {
-  product: { id: string; title: string; description: string; imageUrl: string; specifications?: Record<string, string>; shippingCopy?: string; media?: Array<{ id: string; url: string; altText?: string }>; sku?: string; vendor?: string; options: Array<{ id: string; name: string; required: boolean; multiple?: boolean; missing?: boolean; values: Array<{ id: string; label: string; selected: boolean; available: boolean; priceAdjustment?: string }> }> };
+  product: { id: string; title: string; description: string; descriptionDoc?: RichTextDocument | null; imageUrl: string; galleryEnabled?: boolean; specifications?: Record<string, string>; shippingCopy?: string; media?: ProductMediaLike[]; sku?: string; vendor?: string; options: Array<{ id: string; name: string; required: boolean; multiple?: boolean; missing?: boolean; values: Array<{ id: string; label: string; selected: boolean; available: boolean; priceAdjustment?: string; previewImageUrl?: string }> }> };
   selection: Array<{ optionId: string; valueId: string }>;
   quantity: number;
   pricing: { price: string; compareAtPrice?: string };

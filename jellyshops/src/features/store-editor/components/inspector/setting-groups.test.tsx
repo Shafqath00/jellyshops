@@ -41,3 +41,23 @@ describe("setting groups", () => {
     expect(screen.getByRole("textbox", { name: "Heading" })).toHaveValue("Fallback title");
   });
 });
+
+it("keeps advanced controls collapsed until requested", async () => {
+  render(<SettingGroups controls={controls} settings={{}} catalog={{ products: [], collections: [] }} onChange={vi.fn()} />);
+  expect(screen.getByText("Advanced").closest("details")).not.toHaveAttribute("open");
+});
+
+it("splits controls under their sub-headings and hides controls until they apply", () => {
+  const styled: ControlDefinition[] = [
+    { type: "segmented", key: "blockBorder", label: "Style", group: "style", heading: "Borders", options: [{ label: "None", value: "none" }, { label: "Solid", value: "solid" }] },
+    { type: "color", key: "blockBorderColor", label: "Border colour", group: "style", heading: "Borders", allowAlpha: false, showWhen: { key: "blockBorder", equals: "solid" } },
+    { type: "range", key: "blockPaddingTop", label: "Top", group: "style", heading: "Padding", min: 0, max: 100, step: 1, unit: "px" },
+  ];
+  const { rerender } = render(<SettingGroups controls={styled} settings={{}} catalog={{ products: [], collections: [] }} onChange={vi.fn()} />);
+  expect(screen.getByRole("heading", { name: "Borders" })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "Padding" })).toBeInTheDocument();
+  expect(screen.queryByRole("heading", { name: "Appearance" })).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Border colour")).not.toBeInTheDocument();
+  rerender(<SettingGroups controls={styled} settings={{ blockBorder: "solid" }} catalog={{ products: [], collections: [] }} onChange={vi.fn()} />);
+  expect(screen.getByLabelText("Border colour")).toBeInTheDocument();
+});

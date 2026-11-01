@@ -42,3 +42,13 @@ export function sectionData(section: SectionNode, extra: Record<string, string |
     ...extra,
   };
 }
+
+/** Editor-only affordances for a rendered content block. */
+export function editorBlockData(id: string, label: string, selectedBlockId?: string, fieldKey?: string) {
+  return {
+    "data-editor-block-id": id,
+    "data-editor-block-label": label,
+    "data-editor-block-selected": String(selectedBlockId === id),
+    ...(fieldKey ? { "data-editor-field-key": fieldKey } : {}),
+  };
+}

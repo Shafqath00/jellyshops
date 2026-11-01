@@ -31,7 +31,7 @@ it("parses a compiled V4 publication without treating it as a V3 document", asyn
     sourceGeneration: 12,
     compilerVersion: "2026-09",
     registryManifestHash: "registry-hash",
-    theme: { presetId: "minimal", settings: {}, artifactId: null },
+    theme: { presetId: "minimal", settings: { branding: { logoUrl: "/api/public/media/store-demo/logo" } }, artifactId: null },
     templates: {},
     globalSections: {},
     menus: {},
@@ -54,7 +54,7 @@ it("parses a compiled V4 publication without treating it as a V3 document", asyn
   })).resolves.toMatchObject({
     kind: "v4",
     publicationId: "publication-v4",
-    snapshot: { schemaVersion: 4, sourceGeneration: 12 },
+    snapshot: { schemaVersion: 4, sourceGeneration: 12, theme: { settings: { branding: { logoUrl: "http://localhost:3001/api/public/media/store-demo/logo" } } } },
   });
 });
 

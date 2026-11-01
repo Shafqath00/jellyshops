@@ -1,6 +1,7 @@
 "use client";
 
 import type { MediaRecord, ThemeSettingDefinition } from "../../api/types";
+import { themeSchemaForPanel } from "../../color-schemes";
 
 function read(settings: Record<string, unknown>, path: string): unknown {
   return path.split(".").reduce<unknown>((value, key) => value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>)[key] : undefined, settings);
@@ -26,7 +27,7 @@ export function ThemeSettingsPanel({ schema, settings, saving, error, upload, on
     <aside aria-label="Theme settings" className="min-h-0 bg-[var(--white)]">
       <header className="border-b border-[var(--line)] px-4 py-3"><p className="text-[10px] font-medium text-[var(--ink-soft)]">Global</p><h2 className="mt-0.5 text-[13px] font-semibold text-[var(--ink)]">Theme settings</h2></header>
       {error ? <p role="alert" className="m-3 rounded-lg bg-red-50 p-2 text-[11px] text-red-700">{error}</p> : null}
-      {Object.entries(grouped(schema)).map(([group, fields]) => <section key={group} className="border-b border-[var(--line)] p-4"><h3 className="mb-3 text-[10px] font-semibold uppercase tracking-[0.06em] text-[var(--ink-soft)]">{group}</h3><div className="space-y-4">{fields.map((field) => <ThemeSettingControl key={field.id} field={field} value={read(settings, field.id) ?? field.default} disabled={saving} upload={upload} onChange={(value) => onChange(field.id, value)} />)}</div></section>)}
+      {Object.entries(grouped(themeSchemaForPanel(schema, settings))).map(([group, fields]) => <details key={group} className="border-b border-[var(--line)]"><summary className="cursor-pointer px-4 py-3 text-[13px] font-medium">{group}</summary><div className="space-y-4 px-4 pb-4">{fields.map((field) => <ThemeSettingControl key={field.id} field={field} value={read(settings, field.id) ?? field.default} disabled={saving} upload={upload} onChange={(value) => onChange(field.id, value)} />)}</div></details>)}
       {!schema.length ? <p className="p-6 text-center text-[12px] text-[var(--ink-soft)]">This theme does not declare editable global settings.</p> : null}
     </aside>
   );

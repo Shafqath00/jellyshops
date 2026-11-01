@@ -6,6 +6,7 @@ import {
   appendInlineSection,
   detachGlobalPlacement,
   movePlacement,
+  reorderPlacement,
   removeInlineSection,
   replaceInlineWithGlobal,
   setInlineSectionEnabled,
@@ -99,4 +100,18 @@ it("reorders placements and preserves hidden section configuration", () => {
   expect((moved.sections as Array<{ kind: string; section: SectionNode }>)[0]?.section.id).toBe("grid-1");
   const hidden = setInlineSectionEnabled(moved, "grid-1", false);
   expect((hidden.sections as Array<{ kind: string; section: SectionNode }>)[0]?.section).toEqual(expect.objectContaining({ enabled: false, settings: { heading: "Keep me" } }));
+});
+
+it("reorders a specific placement while preserving repeated shared references and extra fields", () => {
+  const layout = { sections: [{ kind: "global", globalSectionId: "shared", custom: 1 }, { kind: "inline", section }, { kind: "global", globalSectionId: "shared", custom: 2 }], extra: true };
+  const reordered = reorderPlacement(layout, 2, 0);
+  expect(reordered.sections).toEqual([layout.sections[2], layout.sections[0], layout.sections[1]]);
+  expect(reordered.extra).toBe(true);
+});
+
+
+it("preserves placement metadata when editing another section", () => {
+  const layout = { sections: [{ kind: "inline", section, extra: "keep" }, { kind: "global", globalSectionId: "shared", note: "keep" }] };
+  const updated = updateInlineSection(layout, "hero-1", (current) => ({ ...current, enabled: false }));
+  expect(updated.sections).toEqual([{ kind: "inline", section: { ...section, enabled: false }, extra: "keep" }, layout.sections[1]]);
 });

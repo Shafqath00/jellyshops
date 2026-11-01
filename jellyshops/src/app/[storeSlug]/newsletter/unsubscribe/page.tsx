@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { NewsletterUnsubscribe } from "@/features/customers/newsletter-unsubscribe";
+import { NewsletterUnsubscribe } from "@/features/customers/components/newsletter-unsubscribe";
 import { getServerStorefront } from "@/features/storefront/server-storefront";
 
 export const metadata: Metadata = { title: "Newsletter preferences", robots: { index: false, follow: false } };

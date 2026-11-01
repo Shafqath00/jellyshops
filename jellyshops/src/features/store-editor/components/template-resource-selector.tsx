@@ -43,7 +43,7 @@ export function TemplateResourceSelector({
   const pageTypes: readonly StorefrontTemplateType[] = storefrontPageTypes;
 
   return (
-    <div className="grid gap-3 border-b border-border bg-card p-4 sm:grid-cols-3" aria-label="Page to edit">
+    <div className="grid gap-2 bg-card p-2 sm:grid-cols-3" aria-label="Page to edit">
       <label className="grid gap-1.5 text-[11px] font-semibold text-muted-foreground"><span>Page</span><select aria-label="Page" value={activeTemplate?.type ?? "home"} onChange={(event) => onPageTypeChange?.(event.target.value as StorefrontTemplateType)} className="h-9 rounded-lg border border-border bg-card px-2.5 text-[12px] text-foreground outline-none focus:border-border">{pageTypes.map((type) => <option key={type} value={type}>{pageTypeLabel(type)}</option>)}</select><span className="sr-only">Page: {pageType}</span></label>
       <label className="grid gap-1.5 text-[11px] font-semibold text-muted-foreground">
         <span>Layout</span>

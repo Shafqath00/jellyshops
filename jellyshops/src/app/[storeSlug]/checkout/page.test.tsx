@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 import { ShopProvider } from "@/contexts/shop-context";
 import { createRepository } from "@/lib/repository";
-import { CheckoutView } from "./page";
+import { CheckoutView } from "./view";
 
 vi.mock("@/features/commerce/components/payment-element-checkout", () => ({
   PaymentElementCheckout: () => <div>Card payment form</div>,

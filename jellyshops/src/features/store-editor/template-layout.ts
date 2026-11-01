@@ -11,10 +11,10 @@ function readPlacements(layout: Record<string, unknown>): TemplatePlacement[] {
     if (!item || typeof item !== "object" || Array.isArray(item)) return [];
     const candidate = item as Record<string, unknown>;
     if (candidate.kind === "global" && typeof candidate.globalSectionId === "string") {
-      return [{ kind: "global", globalSectionId: candidate.globalSectionId }];
+      return [{ ...structuredClone(candidate), kind: "global", globalSectionId: candidate.globalSectionId }];
     }
     if (candidate.kind === "inline" && candidate.section && typeof candidate.section === "object" && !Array.isArray(candidate.section)) {
-      return [{ kind: "inline", section: structuredClone(candidate.section) as SectionNode }];
+      return [{ ...structuredClone(candidate), kind: "inline", section: structuredClone(candidate.section) as SectionNode }];
     }
     return [];
   });
@@ -45,7 +45,7 @@ export function updateInlineSection(
 ): Record<string, unknown> {
   const sections = readPlacements(layout).map((placement) => {
     if (placement.kind !== "inline" || placement.section.id !== sectionId) return placement;
-    return { kind: "inline" as const, section: structuredClone(update(structuredClone(placement.section))) };
+    return { ...placement, section: structuredClone(update(structuredClone(placement.section))) };
   });
   return withPlacements(layout, sections);
 }
@@ -112,4 +112,13 @@ export function detachGlobalPlacement(
     return placement;
   });
   return withPlacements(layout, sections);
+}
+
+/** Move a placement by its array position, preserving its complete stored representation. */
+export function reorderPlacement(layout: Record<string, unknown>, from: number, to: number): Record<string, unknown> {
+  const result = structuredClone(layout);
+  if (!Array.isArray(result.sections) || from < 0 || to < 0 || from >= result.sections.length || to >= result.sections.length || from === to) return result;
+  const [placement] = result.sections.splice(from, 1);
+  result.sections.splice(to, 0, placement);
+  return result;
 }

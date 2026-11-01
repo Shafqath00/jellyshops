@@ -14,6 +14,8 @@ describe("ThemeSettingsPanel", () => {
     render(<ThemeSettingsPanel schema={schema} settings={{ colors: { accent: "#a75b38" }, layout: { containerWidth: "standard" } }} saving={false} onChange={onChange} />);
 
     expect(screen.getByRole("complementary", { name: "Theme settings" })).toHaveClass("bg-[var(--white)]");
+    await userEvent.click(screen.getByText("Layout"));
+    await userEvent.click(screen.getByText("Colors"));
     await userEvent.selectOptions(screen.getByLabelText("Page width"), "wide");
     expect(screen.getByLabelText("Accent color picker")).toHaveValue("#a75b38");
     expect(onChange).toHaveBeenCalledWith("layout.containerWidth", "wide");

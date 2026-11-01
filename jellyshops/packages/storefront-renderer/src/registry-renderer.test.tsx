@@ -401,6 +401,36 @@ describe("registry-driven section rendering", () => {
     expect(onSelect).toHaveBeenCalledWith({ kind: "section", region: "template", sectionId: "brand-story-1" });
   });
 
+  it("highlights and selects the exact hero block in the preview", () => {
+    const hero: SectionNode = {
+      id: "hero-1",
+      type: "hero",
+      enabled: true,
+      settings: {},
+      blocks: [{ id: "hero-heading", type: "heading", enabled: true, settings: { text: "Made for everyday" } }],
+    };
+    const onSelect = vi.fn();
+    render(
+      <RegistrySectionRenderer
+        section={hero}
+        mode="editor"
+        commerce={commerce}
+        region="template"
+        selected={{ kind: "block", region: "template", sectionId: hero.id, blockId: "hero-heading" }}
+        onSelect={onSelect}
+      />,
+    );
+
+    const wrapper = screen.getByTestId("section-hero");
+    const heading = screen.getByRole("heading", { name: "Made for everyday" });
+    expect(wrapper).toHaveAttribute("data-editor-selected", "false");
+    expect(heading).toHaveAttribute("data-editor-block-id", "hero-heading");
+    expect(heading).toHaveAttribute("data-editor-block-label", "Heading");
+    expect(heading).toHaveAttribute("data-editor-block-selected", "true");
+    heading.click();
+    expect(onSelect).toHaveBeenCalledWith({ kind: "block", region: "template", sectionId: hero.id, blockId: "hero-heading", fieldKey: "text" });
+  });
+
   it("renders choices that take several values as toggle buttons, even in dropdown style, and flags missing required ones", async () => {
     const selectOption = vi.fn();
     const page = {

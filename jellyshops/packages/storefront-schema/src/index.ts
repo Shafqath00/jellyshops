@@ -2,7 +2,7 @@ export { STORE_DESIGN_SCHEMA_VERSION } from "./version.js";
 export { createDefaultStoreDesign } from "./defaults.js";
 export { migrateStoreDesignDocument } from "./migrations.js";
 export { storeDesignDocumentSchema, themeIdSchema } from "./schema.js";
-export { isRichTextDocument, normalizeRichTextDocument, resolveRichTextDocument, safeRichTextHref } from "./rich-text.js";
+export { isRichTextDocument, normalizeRichTextDocument, plainTextToRichTextDocument, resolveRichTextDocument, richTextToPlainText, safeRichTextHref } from "./rich-text.js";
 export {
   STOREFRONT_SCHEMA_VERSION,
   createDefaultStorefrontDocument,
@@ -64,7 +64,7 @@ export type { RichTextSize, RichTextStyleAttrs, RichTextStyleMark } from "./rich
 export { MAX_BLOCK_DEPTH, blockTreeHeight, childBlocks, copyBlockWithNewIds, findBlock, flattenBlocks, updateBlock, updateBlockList } from "./block-tree.js";
 export type { BlockLocation } from "./block-tree.js";
 export type { BlockNode, GlobalSettings, PageDocument, PageType, SectionNode, StoreDesignDocument, ThemeId } from "./types.js";
-export type { RichTextBlock, RichTextDocument, RichTextInline, RichTextMark } from "./rich-text.js";
+export type { RichTextAlign, RichTextBlock, RichTextDocument, RichTextInline, RichTextMark, RichTextTableCell, RichTextTableRow } from "./rich-text.js";
 export {
   MAX_VARIANTS,
   MAX_VARIANT_AXES,
@@ -90,6 +90,8 @@ export type {
   ProductOptionValueLike,
   SelectionProblem,
 } from "./product-options.js";
+export { MAX_PRODUCT_PHOTOS, isProductMediaEnabled, resolveProductGallery, validateMediaAssignments, pruneMediaAssignments, suggestAssignmentsFromFilenames, productMediaUrl, productMediaSrcSet } from "./product-media.js";
+export type { MediaAssignments, ProductMediaLike, ProductMediaInput, MediaAssignmentIssue } from "./product-media.js";
 export { MAX_SECTION_CSS_LENGTH, customCssProblem, scopeCustomCss } from "./custom-css.js";
 export { LANGUAGE_CODE, MAX_TRANSLATION_LENGTH, readTranslations, translateSection, translateSettings, translationsProblem, withTranslation } from "./translations.js";
 export type { Translations } from "./translations.js";

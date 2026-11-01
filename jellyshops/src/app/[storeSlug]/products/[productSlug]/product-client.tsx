@@ -2,9 +2,10 @@
 import { useInitialStorefrontPublication } from "@/features/storefront/storefront-bootstrap";
 
 import Link from "next/link";
+import { ProductGalleryViewer } from "@jelly/storefront-renderer";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { WishlistButton } from "@/features/customers/wishlist-button";
+import { WishlistButton } from "@/features/customers/components/wishlist-button";
 import { useThemePresentation } from "@/features/storefront/components/storefront-shell";
 import { useShop } from "@/contexts/shop-context";
 import { formatMoney, type ConfiguredOptionSelection } from "@/lib/domain";
@@ -89,5 +90,5 @@ export default function ProductPage() {
   const addToCart = () => { if (variant) void addCurrentToCart({ variantId: variant.id, nextQuantity: 1, nextSelections: selections, priceMinor: finalPrice }); };
   const ProductTemplate = shell.ProductPage;
   const productOptions = options.map((option) => ({ id: option.id, name: option.name, required: option.required, values: option.values.map((value) => ({ id: value.id, label: value.label, priceAdjustment: value.priceAdjustmentMinor ? formatMoney(value.priceAdjustmentMinor, store.currency) : undefined, selected: isSelected(option.id, value.id) })) }));
-  return <ProductTemplate store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} settings={settings} product={{ name: product.name, category: product.category, description: product.description, imageUrl: product.imageUrl, specifications: product.specifications }} price={formatMoney(finalPrice, store.currency)} compareAtPrice={variant?.compareAtPriceMinor && variant.compareAtPriceMinor > finalPrice ? formatMoney(variant.compareAtPriceMinor, store.currency) : undefined} shippingCopy={store.shippingCopy} availableText={variant ? (variant.stock > 0 ? `${variant.stock} available` : "Out of stock") : requiredMissing ? "Choose the required options" : "This combination is unavailable"} options={productOptions} backHref={`/${store.slug}/shop`} variantAvailable={Boolean(variant && variant.stock > 0)} requiredMissing={requiredMissing} added={added} onSelectOption={choose} onAddToCart={addToCart} />;
+  return <ProductTemplate store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} settings={settings} product={{ name: product.name, category: product.category, description: product.description, imageUrl: productPresentation?.product.imageUrl ?? product.imageUrl, gallery: productPresentation?.product.galleryEnabled ? <ProductGalleryViewer media={productPresentation.product.media ?? []} title={product.name} /> : undefined, specifications: product.specifications }} price={formatMoney(finalPrice, store.currency)} compareAtPrice={variant?.compareAtPriceMinor && variant.compareAtPriceMinor > finalPrice ? formatMoney(variant.compareAtPriceMinor, store.currency) : undefined} shippingCopy={store.shippingCopy} availableText={variant && variant.sellable !== false ? (variant.stock > 0 ? `${variant.stock} available` : "Out of stock") : requiredMissing ? "Choose the required options" : "This combination is unavailable"} options={productOptions} backHref={`/${store.slug}/shop`} variantAvailable={Boolean(variant && variant.sellable !== false && variant.stock > 0)} requiredMissing={requiredMissing} added={added} onSelectOption={choose} onAddToCart={addToCart} />;
 }

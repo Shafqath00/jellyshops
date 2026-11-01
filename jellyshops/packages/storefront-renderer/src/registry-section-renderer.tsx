@@ -1,5 +1,6 @@
 import { translateSection, type RuntimeMenuV4, type SectionNode } from "@jelly/storefront-schema";
 import { createElement } from "react";
+import { sectionLabel } from "@jelly/storefront-registry";
 import {
   defaultSectionRenderRegistry,
   type SectionRenderComponent,
@@ -7,6 +8,7 @@ import {
 } from "./render-registry";
 import { createStorefrontRuntimeContext } from "./runtime-context";
 import { SectionCustomCss, sectionCssProps } from "./section-custom-css";
+import { sectionStyleProps } from "./section-style";
 import type { CommerceDataProvider, RendererMode, RendererSelection, StorefrontPageContext } from "./types";
 import { getThemeDefinition, DEFAULT_THEME_ID } from "@jelly/storefront-themes";
 
@@ -28,6 +30,8 @@ export function RegistrySectionRenderer({
   page,
   menus,
   storeSlug,
+  collectionLinks,
+  resourceLinks,
   language,
 }: {
   section: SectionNode;
@@ -41,6 +45,8 @@ export function RegistrySectionRenderer({
   page?: StorefrontPageContext;
   menus?: Record<string, RuntimeMenuV4>;
   storeSlug?: string;
+  collectionLinks?: Record<string, string>;
+  resourceLinks?: Record<string, string>;
   /** Shows the section's text in this language when it has a translation (null/undefined = main language). */
   language?: string | null;
 }) {
@@ -48,9 +54,17 @@ export function RegistrySectionRenderer({
   const section = translateSection(sourceSection, language);
 
   const RenderComponent = sectionComponent(themeId ?? DEFAULT_THEME_ID, section.type, registry);
-  const context = createStorefrontRuntimeContext({ mode, region, commerce, page, menus, storeSlug });
+  const context = createStorefrontRuntimeContext({ mode, region, commerce, page, menus, storeSlug, collectionLinks, resourceLinks });
   const content = RenderComponent
-    ? createElement(RenderComponent, { section, mode, commerce, context })
+    ? createElement(RenderComponent, {
+      section,
+      mode,
+      commerce,
+      context,
+      ...(mode === "editor" && selected?.kind === "block" && selected.sectionId === section.id
+        ? { selectedBlockId: selected.blockId }
+        : {}),
+    })
     : mode !== "published"
       ? <aside role="status">Unsupported section: {section.type}</aside>
       : null;
@@ -61,7 +75,8 @@ export function RegistrySectionRenderer({
   return <div
     data-testid={`section-${section.type}`}
     {...sectionCssProps(section)}
-    {...(editor ? { "data-editor-section-id": section.id, "data-editor-selected": String(isSelected) } : {})}
+    {...sectionStyleProps(section.settings, section.responsive?.mobile, section.responsive?.tablet)}
+    {...(editor ? { "data-editor-section-id": section.id, "data-editor-label": sectionLabel(section.type), "data-editor-selected": String(isSelected) } : {})}
     onClick={editor ? (event) => {
       event.preventDefault();
       event.stopPropagation();

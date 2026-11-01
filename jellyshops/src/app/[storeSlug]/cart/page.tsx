@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useThemePresentation } from "@/features/storefront/components/storefront-shell";
 import { useShop } from "@/contexts/shop-context";
 import { formatMoney } from "@/lib/domain";
+import { cartProductImage } from "@/lib/product-media";
 import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
 import { loadPublicStorefrontPublication, type PublicStorefrontPublication } from "@/features/storefront/public-storefront-api";
 import { resolveStorefrontRoute } from "@/features/storefront/resource-loader";
@@ -40,7 +41,7 @@ export default function CartPage() {
       return option && value ? [`${option.name}: ${value.label}`] : [];
     });
     const unitPrice = item.unitPriceMinor ?? variant.priceMinor;
-    return { id: `${variant.id}-${JSON.stringify(item.configurationSelections ?? [])}`, productName: product.name, variantName: variant.name, imageUrl: product.imageUrl, quantity: item.quantity, unitPrice: formatMoney(unitPrice, store.currency), lineTotal: formatMoney(unitPrice * item.quantity, store.currency), lineTotalMinor: unitPrice * item.quantity, canIncrease: item.quantity < variant.stock, options, onUpdate: (quantity: number) => repository.updateCartItem(cart!.id, variant.id, quantity, item.configurationSelections, item.unitPriceMinor) };
+    return { id: `${variant.id}-${JSON.stringify(item.configurationSelections ?? [])}`, productName: product.name, variantName: variant.name, imageUrl: cartProductImage(product, variant, item.configurationSelections), quantity: item.quantity, unitPrice: formatMoney(unitPrice, store.currency), lineTotal: formatMoney(unitPrice * item.quantity, store.currency), lineTotalMinor: unitPrice * item.quantity, canIncrease: item.quantity < variant.stock, options, onUpdate: (quantity: number) => repository.updateCartItem(cart!.id, variant.id, quantity, item.configurationSelections, item.unitPriceMinor) };
   }).filter((line): line is NonNullable<typeof line> => Boolean(line));
   const Cart = shell.CartPage;
   if (publication?.kind === "v4" && resolvedRoute?.status === "ready") {

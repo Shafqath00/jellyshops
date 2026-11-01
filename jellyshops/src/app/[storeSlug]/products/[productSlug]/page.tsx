@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getServerStorefront } from "@/features/storefront/server-storefront";
+import { productMetaDescription, productMetaTitle, productSocialTitle } from "@/lib/seo";
 import ProductPageClient from "./product-client";
 type Props = { params: Promise<{ storeSlug: string; productSlug: string }> };
 async function productData(params: Props["params"]) {
@@ -11,7 +12,7 @@ async function productData(params: Props["params"]) {
 }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { data, product } = await productData(params);
-  return { title: `${product.name} · ${data.store.name}`, description: product.description, openGraph: { title: product.name, description: product.description, images: product.imageUrl ? [product.imageUrl] : [] }, alternates: { canonical: `/${data.store.slug}/products/${product.slug}` } };
+  return { title: productMetaTitle(product, data.store.name), description: productMetaDescription(product), openGraph: { title: productSocialTitle(product), description: productMetaDescription(product), images: product.imageUrl ? [product.imageUrl] : [] }, alternates: { canonical: `/${data.store.slug}/products/${product.slug}` } };
 }
 export default async function ProductPage({ params }: Props) {
   const { data, product } = await productData(params);

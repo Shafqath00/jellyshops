@@ -1,5 +1,6 @@
 import type { DynamicValueType, StorefrontDocument } from "@jelly/storefront-schema";
 import type { V4StarterPackId } from "@jelly/storefront-registry";
+import { resolveMediaUrls } from "@/lib/media-urls";
 import {
   StoreEditorApiError,
   type CompilationResult,
@@ -36,6 +37,12 @@ export interface StoreEditorApi {
   createTemplate(storeId: string, input: { type: StorefrontTemplateType; name: string; handle?: string; layout: Record<string, unknown> }): Promise<TemplateMutationResult>;
   updateTemplate(storeId: string, templateId: string, expectedRevision: number, patch: { name?: string; handle?: string; layout?: Record<string, unknown> }): Promise<TemplateMutationResult>;
   cloneTemplate(storeId: string, templateId: string, input: { name: string; handle: string }): Promise<TemplateMutationResult>;
+  /** Refused for a page type's main template and for templates still used by a product, collection or page. */
+  deleteTemplate(storeId: string, templateId: string, expectedRevision: number): Promise<{ templateId: string; generation: number }>;
+  /** Earlier published versions, newest first. */
+  listPublications(storeId: string): Promise<{ publications: Array<{ id: string; sourceGeneration: number; publishedAt: string; isCurrent: boolean }> }>;
+  /** Makes an earlier published version live again; the draft is not changed. */
+  restorePublication(storeId: string, publicationId: string): Promise<{ ok: boolean }>;
 
   listGlobalSections(storeId: string): Promise<GlobalSectionRecord[]>;
   createGlobalSection(storeId: string, input: { name: string; section: Record<string, unknown> }): Promise<{ globalSection: GlobalSectionRecord; generation: number }>;
@@ -53,6 +60,8 @@ export interface StoreEditorApi {
 
   getAssignment(storeId: string, resourceType: TemplateAssignmentRecord["resourceType"], resourceId: string): Promise<TemplateAssignmentRecord | null>;
   assignTemplate(storeId: string, resourceType: TemplateAssignmentRecord["resourceType"], resourceId: string, templateId: string, expectedRevision: number | null): Promise<{ assignment: TemplateAssignmentRecord; generation: number }>;
+  /** Puts the resource back on its page type's main template. */
+  removeAssignment(storeId: string, resourceType: TemplateAssignmentRecord["resourceType"], resourceId: string, expectedRevision: number): Promise<{ generation: number }>;
 
   listDynamicSources(storeId: string, context: StorefrontTemplateType, acceptedTypes?: DynamicValueType[]): Promise<DynamicSourceDescriptor[]>;
   validate(storeId: string, expectedGeneration: number): Promise<CompilationResult>;
@@ -69,13 +78,14 @@ export interface StoreEditorApi {
   listBlogs(storeId: string): Promise<BlogResource[]>;
   listArticles(storeId: string): Promise<ArticleResource[]>;
   uploadMedia(storeId: string, file: File, onProgress?: (percent: number) => void): Promise<MediaRecord>;
+  listMedia?(storeId: string): Promise<MediaRecord[]>;
   deleteMedia(storeId: string, mediaId: string): Promise<void>;
   listProducts(storeId: string): Promise<{ nodes: CatalogAdminProduct[]; nextCursor: string | null }>;
   /** Full, store-scoped catalog record for runtime-only editor preview. */
   getProduct(storeId: string, productId: string): Promise<CatalogAdminProduct | null>;
   getCollection(storeId: string, collectionId: string): Promise<CatalogAdminCollectionDetail | null>;
-  createProduct(storeId: string, input: { imageUrl?: string; handle: string; title: string; description?: string; productType?: string; status?: "DRAFT" | "ACTIVE" | "ARCHIVED"; primaryCategoryId?: string; additionalCategoryIds?: string[]; brandId?: string; collectionIds?: string[]; categoryMetadata?: unknown | null; brandMetadata?: unknown | null; collectionMetadata?: unknown[]; options?: unknown[]; inventoryOptionIds?: string[]; variants?: Array<{ title: string; sku?: string; priceMinor: number; quantity?: number; trackInventory?: boolean; options?: Record<string, string> }> }): Promise<CatalogAdminProduct>;
-  updateProduct(storeId: string, productId: string, input: { imageUrl?: string; handle?: string; title?: string; description?: string; productType?: string; status?: "DRAFT" | "ACTIVE" | "ARCHIVED"; primaryCategoryId?: string | null; additionalCategoryIds?: string[]; brandId?: string | null; collectionIds?: string[]; categoryMetadata?: unknown | null; brandMetadata?: unknown | null; collectionMetadata?: unknown[]; options?: unknown[]; inventoryOptionIds?: string[]; variants?: Array<{ id?: string; title: string; sku?: string; priceMinor: number; quantity?: number; trackInventory?: boolean; options?: Record<string, string> }> }): Promise<CatalogAdminProduct>;
+  createProduct(storeId: string, input: { media?: Array<{ mediaId: string; altText?: string | null; appliesTo?: Record<string, string[]> }>; imageUrl?: string; handle: string; title: string; description?: string; productType?: string | null; vendor?: string | null; tags?: string[]; status?: "DRAFT" | "ACTIVE" | "ARCHIVED"; primaryCategoryId?: string | null; additionalCategoryIds?: string[]; brandId?: string | null; collectionIds?: string[]; categoryMetadata?: unknown | null; brandMetadata?: unknown | null; collectionMetadata?: unknown[]; options?: unknown[]; inventoryOptionIds?: string[]; variants?: Array<{ title: string; sku?: string; priceMinor: number; compareAtPriceMinor?: number | null; costMinor?: number | null; unitPricing?: { totalAmount: number; totalUnit: string; baseAmount: number; baseUnit: string } | null; quantity?: number; trackInventory?: boolean; options?: Record<string, string> }> }): Promise<CatalogAdminProduct>;
+  updateProduct(storeId: string, productId: string, input: { media?: Array<{ mediaId: string; altText?: string | null; appliesTo?: Record<string, string[]> }>; imageUrl?: string; handle?: string; title?: string; description?: string; productType?: string | null; vendor?: string | null; tags?: string[]; status?: "DRAFT" | "ACTIVE" | "ARCHIVED"; primaryCategoryId?: string | null; additionalCategoryIds?: string[]; brandId?: string | null; collectionIds?: string[]; categoryMetadata?: unknown | null; brandMetadata?: unknown | null; collectionMetadata?: unknown[]; options?: unknown[]; inventoryOptionIds?: string[]; variants?: Array<{ id?: string; title: string; sku?: string; priceMinor: number; compareAtPriceMinor?: number | null; costMinor?: number | null; unitPricing?: { totalAmount: number; totalUnit: string; baseAmount: number; baseUnit: string } | null; quantity?: number; trackInventory?: boolean; options?: Record<string, string> }> }): Promise<CatalogAdminProduct>;
 }
 
 interface ClientOptions { baseUrl: string; token: string; fetch?: typeof fetch }
@@ -83,6 +93,13 @@ interface ClientOptions { baseUrl: string; token: string; fetch?: typeof fetch }
 export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }: ClientOptions): StoreEditorApi {
   const origin = baseUrl.replace(/\/$/, "");
   const url = (path: string) => `${origin}${path}`;
+  const absolute = (value: string) => (value.startsWith("/") ? `${origin}${value}` : value);
+  // Media paths are API-relative; the browser would otherwise request them from the frontend origin.
+  const withAbsoluteMedia = <T extends { imageUrl?: string | null; media?: { url: string }[] }>(product: T): T => ({
+    ...product,
+    ...(product.imageUrl ? { imageUrl: absolute(product.imageUrl) } : {}),
+    ...(product.media ? { media: product.media.map((photo) => ({ ...photo, url: absolute(photo.url) })) } : {}),
+  });
   const headers = (init: RequestInit, authenticated: boolean) => ({
     ...(init.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
     ...(authenticated ? { Authorization: `Bearer ${token}` } : {}),
@@ -111,12 +128,12 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
     const response = await fetcher(url(path), { ...init, headers: headers(init, authenticated) });
     if (!response.ok) throw await apiError(response);
     if (response.status === 204) return undefined as T;
-    return await response.json() as T;
+    return resolveMediaUrls(await response.json() as T, origin);
   };
   const compilerRequest = async (path: string, expectedGeneration: number): Promise<CompilationResult> => {
     const init: RequestInit = { method: "POST", body: JSON.stringify({ expectedGeneration }) };
     const response = await fetcher(url(path), { ...init, headers: headers(init, true) });
-    if (response.ok || response.status === 422) return await response.json() as CompilationResult;
+    if (response.ok || response.status === 422) return resolveMediaUrls(await response.json() as CompilationResult, origin);
     throw await apiError(response);
   };
 
@@ -133,6 +150,9 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
     createTemplate: (storeId, input) => request(storefrontPath(storeId, "/templates"), { method: "POST", body: JSON.stringify(input) }),
     updateTemplate: (storeId, templateId, expectedRevision, patch) => request(storefrontPath(storeId, `/templates/${encodeURIComponent(templateId)}`), { method: "PATCH", body: JSON.stringify({ expectedRevision, ...patch }) }),
     cloneTemplate: (storeId, templateId, input) => request(storefrontPath(storeId, `/templates/${encodeURIComponent(templateId)}/clone`), { method: "POST", body: JSON.stringify(input) }),
+    deleteTemplate: (storeId, templateId, expectedRevision) => request(storefrontPath(storeId, `/templates/${encodeURIComponent(templateId)}`), { method: "DELETE", body: JSON.stringify({ expectedRevision }) }),
+    listPublications: (storeId) => request(storefrontPath(storeId, "/publications")),
+    restorePublication: (storeId, publicationId) => request(storefrontPath(storeId, `/publications/${encodeURIComponent(publicationId)}/restore`), { method: "POST" }),
 
     listGlobalSections: (storeId) => request(storefrontPath(storeId, "/global-sections")),
     createGlobalSection: (storeId, input) => request(storefrontPath(storeId, "/global-sections"), { method: "POST", body: JSON.stringify(input) }),
@@ -150,6 +170,7 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
 
     getAssignment: (storeId, resourceType, resourceId) => request(storefrontPath(storeId, `/assignments/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}`)),
     assignTemplate: (storeId, resourceType, resourceId, templateId, expectedRevision) => request(storefrontPath(storeId, `/assignments/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}`), { method: "PUT", body: JSON.stringify({ templateId, expectedRevision }) }),
+    removeAssignment: (storeId, resourceType, resourceId, expectedRevision) => request(storefrontPath(storeId, `/assignments/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}`), { method: "DELETE", body: JSON.stringify({ expectedRevision }) }),
 
     listDynamicSources: (storeId, context, acceptedTypes) => {
       const query = new URLSearchParams({ context });
@@ -167,7 +188,7 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
         headers: headers({ method: "POST", body: JSON.stringify({ expectedGeneration, idempotencyKey }) }, true),
         body: JSON.stringify({ expectedGeneration, idempotencyKey }),
       }).then(async (response) => {
-        if (response.ok || response.status === 422) return await response.json() as PublishResult;
+        if (response.ok || response.status === 422) return resolveMediaUrls(await response.json() as PublishResult, origin);
         throw await apiError(response);
       });
     },
@@ -204,17 +225,44 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
     listBlogs: (storeId) => request(contentPath(storeId, "/blogs")),
     listArticles: (storeId) => request(contentPath(storeId, "/articles")),
     uploadMedia: async (storeId, file, onProgress) => {
-      onProgress?.(0);
       const form = new FormData(); form.append("file", file);
-      const result = await request<MediaRecord>(`/api/stores/${encodeURIComponent(storeId)}/media`, { method: "POST", body: form });
-      onProgress?.(100);
+      const path = `/api/stores/${encodeURIComponent(storeId)}/media`;
+      let result: MediaRecord;
+      if (onProgress) {
+        result = await new Promise<MediaRecord>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open("POST", url(path));
+          xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+          xhr.upload.onprogress = (event) => { if (event.lengthComputable) onProgress(Math.round((event.loaded / event.total) * 100)); };
+          xhr.onerror = () => reject(new Error("Photo upload failed. Check your connection and retry."));
+          xhr.onabort = () => reject(new Error("Photo upload was cancelled."));
+          xhr.onload = () => {
+            let body: MediaRecord & { error?: { code?: string; message?: string } };
+            try { body = JSON.parse(xhr.responseText) as typeof body; }
+            catch { reject(new StoreEditorApiError(xhr.status, "REQUEST_FAILED", "The server returned an invalid upload response.")); return; }
+            if (xhr.status < 200 || xhr.status >= 300) {
+              reject(new StoreEditorApiError(xhr.status, body.error?.code ?? "REQUEST_FAILED", body.error?.message ?? "Photo upload failed."));
+              return;
+            }
+            onProgress(100);
+            resolve(body);
+          };
+          xhr.send(form);
+        });
+      } else {
+        result = await request<MediaRecord>(path, { method: "POST", body: form });
+      }
       return { ...result, url: result.url.startsWith("/") ? `${origin}${result.url}` : result.url };
+    },
+    listMedia: async (storeId) => {
+      const result = await request<MediaRecord[] | { nodes: MediaRecord[] }>(`/api/stores/${encodeURIComponent(storeId)}/media?limit=100`);
+      return (Array.isArray(result) ? result : result.nodes).map((item) => ({ ...item, url: item.url.startsWith("/") ? `${origin}${item.url}` : item.url }));
     },
     deleteMedia: (storeId, mediaId) => request(`/api/stores/${encodeURIComponent(storeId)}/media/${encodeURIComponent(mediaId)}`, { method: "DELETE" }),
     listProducts: (storeId) => request(`/api/stores/${encodeURIComponent(storeId)}/catalog/products?limit=100`),
-    getProduct: (storeId, productId) => request(`/api/stores/${encodeURIComponent(storeId)}/catalog/products/${encodeURIComponent(productId)}`),
+    getProduct: async (storeId, productId) => withAbsoluteMedia(await request<CatalogAdminProduct>(`/api/stores/${encodeURIComponent(storeId)}/catalog/products/${encodeURIComponent(productId)}`)),
     getCollection: (storeId, collectionId) => request(`/api/stores/${encodeURIComponent(storeId)}/catalog/collections/${encodeURIComponent(collectionId)}`),
-    createProduct: (storeId, input) => request<CatalogAdminProduct>(`/api/stores/${encodeURIComponent(storeId)}/catalog/products`, { method: "POST", body: JSON.stringify(input) }),
-    updateProduct: (storeId, productId, input) => request<CatalogAdminProduct>(`/api/stores/${encodeURIComponent(storeId)}/catalog/products/${encodeURIComponent(productId)}`, { method: "PATCH", body: JSON.stringify(input) }),
+    createProduct: async (storeId, input) => withAbsoluteMedia(await request<CatalogAdminProduct>(`/api/stores/${encodeURIComponent(storeId)}/catalog/products`, { method: "POST", body: JSON.stringify(input) })),
+    updateProduct: async (storeId, productId, input) => withAbsoluteMedia(await request<CatalogAdminProduct>(`/api/stores/${encodeURIComponent(storeId)}/catalog/products/${encodeURIComponent(productId)}`, { method: "PATCH", body: JSON.stringify(input) })),
   };
 }

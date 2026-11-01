@@ -2,24 +2,41 @@
 
 import { useEffect, useState, type CSSProperties } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useResourceLinks } from "@/features/navigation/use-resource-links";
 import { CartPanel } from "./cart-panel";
 import { SharedCartPresentation, ThemedStorefrontShell } from "./storefront-shell";
 import { useShop } from "@/contexts/shop-context";
 import { loadPublicStorefrontPublication } from "@/features/storefront/public-storefront-api";
-import { isCompleteStorefrontTheme, resolveStorefrontThemeTokens, resolveTheme, resolveThemeShellComponent } from "@jelly/storefront-themes";
+import { isCompleteStorefrontTheme, mainLanguageName, resolveStorefrontThemeTokens, resolveTheme, resolveThemeShellComponent, storeLanguages, themeSocialLinks } from "@jelly/storefront-themes";
+import { LanguageSwitcher, StorefrontLanguageContext, useStorefrontLanguageState } from "@/features/storefront/storefront-language";
 import { useInitialStorefrontPublication } from "@/features/storefront/storefront-bootstrap";
 import { StorefrontChromeContext } from "@/features/storefront/chrome-context";
-import { RegistrySectionRenderer, withStoreIdentity } from "@jelly/storefront-renderer";
-import type { SectionNode } from "@jelly/storefront-schema";
+import { RegistrySectionRenderer, ThemeCustomCss, createCollectionLinks, withStoreIdentity } from "@jelly/storefront-renderer";
+import type { RuntimeTemplateV4, SectionNode } from "@jelly/storefront-schema";
+import { expandRuntimeLayout } from "@/features/storefront/resource-loader";
+
+function pageTypeFor(segments: string[]): RuntimeTemplateV4["type"] {
+  if (!segments.length) return "home";
+  if (segments[0] === "account") {
+    const accountPages: Record<string, RuntimeTemplateV4["type"]> = { login: "customer-login", register: "customer-register", recover: "customer-recovery", addresses: "customer-addresses" };
+    return segments[1] === "orders" ? (segments[2] ? "customer-order" : "customer-orders") : accountPages[segments[1]] ?? "customer-account";
+  }
+  const pages: Record<string, RuntimeTemplateV4["type"]> = { products: "product", collections: "collection", shop: "collection", pages: "page", blogs: segments[2] ? "article" : "blog", search: "search", cart: "cart", checkout: "checkout", wishlist: "wishlist", order: "order-success" };
+  return pages[segments[0]] ?? "not-found";
+}
 
 export function StorefrontFrame({ storeSlug, children }: { storeSlug: string; children: React.ReactNode }) {
+  const pathname = usePathname();
   const { repository, state } = useShop();
   const [cartOpen, setCartOpen] = useState(false);
   const store = repository.getStoreBySlug(storeSlug);
   const storeId = store?.id;
+  const resourceLinks = useResourceLinks(storeId ?? "", storeSlug, state.products);
   const initialPublication = useInitialStorefrontPublication();
   const initialTheme = initialPublication?.kind === "v4" ? { id: initialPublication.snapshot.theme.id ?? initialPublication.snapshot.theme.presetId, version: initialPublication.snapshot.theme.version, settings: initialPublication.snapshot.theme.settings } : initialPublication?.kind === "v3" ? { id: initialPublication.document.theme.presetId, settings: initialPublication.document.theme.settings as unknown as Record<string, unknown> } : undefined;
   const [publishedTheme, setPublishedTheme] = useState<{ id: string; version?: string; settings: Record<string, unknown> } | undefined>(initialTheme);
+  const languageState = useStorefrontLanguageState(storeSlug, storeLanguages(publishedTheme?.settings), mainLanguageName(publishedTheme?.settings));
   useEffect(() => {
     if (!storeId) return;
     let active = true;
@@ -41,9 +58,18 @@ export function StorefrontFrame({ storeSlug, children }: { storeSlug: string; ch
   const snapshot = initialPublication?.kind === "v4" ? initialPublication.snapshot : null;
   const branding = resolvedTheme.settings.branding as { logoUrl?: string } | undefined;
   const headerSettings = resolvedTheme.settings.header as Record<string, unknown> | undefined;
-  const globals = snapshot ? Object.values(snapshot.globalSections).map((item) => item.section as unknown as SectionNode) : [];
-  const renderGlobal = (section: SectionNode) => <RegistrySectionRenderer key={section.id} section={withStoreIdentity(section, { name: store.name, logoUrl: branding?.logoUrl || undefined, headerSettings })} mode="published" commerce={{ getProducts: async () => [] }} region={section.type === "footer" ? "footer" : "header"} themeId={resolvedTheme.id} menus={snapshot?.menus} storeSlug={store.slug} />;
-  const headerContent = signature ? <>{globals.filter((item) => item.type === "announcement-bar").map(renderGlobal)}{globals.filter((item) => item.type === "header").map(renderGlobal)}</> : undefined;
-  const footerContent = signature ? <>{globals.filter((item) => item.type === "footer").map(renderGlobal)}</> : undefined;
-  return <StorefrontChromeContext.Provider value={Boolean(signature)}><div data-jelly-theme={resolvedTheme.id} style={style}><ThemedStorefrontShell headerContent={headerContent} footerContent={footerContent} themeId={resolvedTheme.id} settings={resolvedTheme.settings} store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} navigation={[{ label: "Home", href: `/${store.slug}` }, { label: "Shop all", href: `/${store.slug}/shop` }, { label: "Search", href: `/${store.slug}/search` }, { label: "Cart", href: `/${store.slug}/cart` }, { label: "Account", href: `/${store.slug}/account` }, { label: "Wishlist", href: `/${store.slug}/wishlist` }]} cartCount={cartCount} onCartOpen={() => setCartOpen(true)} cart={<CartPanel storeSlug={storeSlug} open={cartOpen} onClose={() => setCartOpen(false)} Presentation={CartPresentation} />}>{children}<span hidden>{state.version}</span></ThemedStorefrontShell></div></StorefrontChromeContext.Provider>;
+  const segments = (pathname ?? "").split("/").filter(Boolean).slice(1);
+  const pageType = pageTypeFor(segments);
+  const resource = pageType === "product" ? state.products.find((product) => product.storeId === storeId && product.slug === segments[1])
+    : pageType === "collection" ? state.collections.find((collection) => collection.storeId === storeId && collection.slug === segments[1]) : undefined;
+  const assignment = resource ? snapshot?.assignments.find((item) => item.resourceType === pageType && item.resourceId === resource.id) : undefined;
+  const assignedTemplate = assignment ? snapshot?.templates[assignment.templateId] : undefined;
+  const templateId = snapshot?.templateDefaults[pageType] ?? snapshot?.templateDefaults.home;
+  const template = assignedTemplate?.type === pageType ? assignedTemplate : templateId ? snapshot?.templates[templateId] : undefined;
+  // Saved global sections can include old themes. Render only placements in the selected template.
+  const layout = snapshot && template ? expandRuntimeLayout(snapshot, template) : null;
+  const renderGlobal = (section: SectionNode) => <RegistrySectionRenderer key={section.id} section={withStoreIdentity(section, { name: store.name, logoUrl: branding?.logoUrl || undefined, headerSettings, socialLinks: themeSocialLinks(resolvedTheme.settings) })} mode="published" commerce={{ getProducts: async () => [] }} region={section.type === "footer" ? "footer" : "header"} themeId={resolvedTheme.id} menus={snapshot?.menus} resourceLinks={resourceLinks} collectionLinks={createCollectionLinks(store.id, store.slug, state.collections)} storeSlug={store.slug} language={languageState.language} />;
+  const headerContent = signature ? <>{layout?.announcement.map(renderGlobal)}{layout?.header.map(renderGlobal)}</> : undefined;
+  const footerContent = signature ? <>{layout?.footer.map(renderGlobal)}<LanguageSwitcher /></> : undefined;
+  return <StorefrontLanguageContext.Provider value={languageState}><StorefrontChromeContext.Provider value={Boolean(signature)}><div data-jelly-theme={resolvedTheme.id} style={style} lang={languageState.language ?? undefined}><ThemeCustomCss settings={resolvedTheme.settings} /><ThemedStorefrontShell headerContent={headerContent} footerContent={footerContent} themeId={resolvedTheme.id} settings={resolvedTheme.settings} store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} navigation={[{ label: "Home", href: `/${store.slug}` }, { label: "Shop all", href: `/${store.slug}/shop` }, { label: "Search", href: `/${store.slug}/search` }, { label: "Cart", href: `/${store.slug}/cart` }, { label: "Account", href: `/${store.slug}/account` }, { label: "Wishlist", href: `/${store.slug}/wishlist` }]} cartCount={cartCount} onCartOpen={() => setCartOpen(true)} cart={<CartPanel storeSlug={storeSlug} open={cartOpen} onClose={() => setCartOpen(false)} Presentation={CartPresentation} />}>{children}<span hidden>{state.version}</span></ThemedStorefrontShell></div></StorefrontChromeContext.Provider></StorefrontLanguageContext.Provider>;
 }

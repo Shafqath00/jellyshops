@@ -11,6 +11,12 @@ export interface StorefrontRuntimeContext {
   page?: StorefrontPageContext;
   menus?: Record<string, RuntimeMenuV4>;
   storeSlug?: string;
+  collectionLinks?: Record<string, string>;
+  resourceLinks?: Record<string, string>;
+}
+
+export function createCollectionLinks(storeId: string, storeSlug: string, collections: Array<{ id: string; storeId: string; slug: string }>): Record<string, string> {
+  return Object.fromEntries(collections.filter(item => item.storeId === storeId && item.slug).map(item => [item.id, `/${encodeURIComponent(storeSlug)}/collections/${encodeURIComponent(item.slug)}`]));
 }
 
 export function createStorefrontRuntimeContext(input: StorefrontRuntimeContext): StorefrontRuntimeContext {

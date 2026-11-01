@@ -8,6 +8,7 @@ import type {
   MediaRecord,
 } from "../../api/types";
 import { ImageControl } from "../controls/image-control";
+import { OptionalColorControl, SliderNumberControl } from "./style-controls";
 
 const inputClass =
   "h-10 w-full rounded-xl border border-[var(--line)] bg-card px-3 text-[13px] font-medium text-[var(--ink)] outline-none transition placeholder:text-muted-foreground hover:border-tint-border focus:border-tint-border focus:ring-2 focus:ring-ring/40";
@@ -114,57 +115,6 @@ function ToggleControl({
   );
 }
 
-function ColorControl({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange(value: string): void;
-}) {
-  const pickerValue =
-    /^#[0-9a-fA-F]{6}$/.test(value)
-      ? value
-      : "#ffffff";
-
-  return (
-    <div>
-      <label
-        htmlFor={`control-color-${label}`}
-        className={labelClass}
-      >
-        {label}
-      </label>
-
-      <div className="flex h-9 items-center gap-2 rounded-lg border border-border bg-card px-2 transition hover:border-border focus-within:border-border focus-within:ring-2 focus-within:ring-black/[0.06]">
-        <label className="relative size-5 shrink-0 cursor-pointer overflow-hidden rounded-md border border-black/10">
-          <input
-            type="color"
-            aria-label={`${label} color picker`}
-            value={pickerValue}
-            onChange={(event) =>
-              onChange(event.target.value)
-            }
-            className="absolute -inset-2 size-10 cursor-pointer border-0 p-0"
-          />
-        </label>
-
-        <input
-          id={`control-color-${label}`}
-          aria-label={label}
-          value={value}
-          onChange={(event) =>
-            onChange(event.target.value)
-          }
-          placeholder="#FFFFFF"
-          className="min-w-0 flex-1 bg-transparent text-[12px] font-medium uppercase text-foreground outline-none placeholder:text-muted-foreground"
-        />
-      </div>
-    </div>
-  );
-}
-
 function SegmentedControl({
   label,
   value,
@@ -249,11 +199,11 @@ function RangeControl({
         type="range"
         min={min}
         max={max}
-        step={step}
+        step={Math.abs((value - min) / step - Math.round((value - min) / step)) < 1e-9 ? step : "any"}
         value={value}
         onChange={(event) =>
           onChange(
-            Number(event.target.value)
+            Math.min(max, Math.max(min, min + Math.round((Number(event.target.value) - min) / step) * step))
           )
         }
         className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-muted accent-primary"
@@ -396,6 +346,20 @@ export function ControlRenderer({
   /*
    * Range / spacing
    */
+  if (definition.type === "range" && definition.unit) {
+    return (
+      <SliderNumberControl
+        label={definition.label}
+        value={typeof value === "number" ? value : undefined}
+        min={definition.min}
+        max={definition.max}
+        step={definition.step}
+        unit={definition.unit}
+        onChange={onChange}
+      />
+    );
+  }
+
   if (
     definition.type === "range" ||
     definition.type === "spacing"
@@ -478,12 +442,9 @@ export function ControlRenderer({
     definition.type === "color"
   ) {
     return (
-      <ColorControl
+      <OptionalColorControl
         label={definition.label}
-        value={
-          stringValue ||
-          "#ffffff"
-        }
+        value={stringValue || undefined}
         onChange={onChange}
       />
     );

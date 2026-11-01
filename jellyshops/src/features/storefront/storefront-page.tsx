@@ -1,9 +1,15 @@
 "use client";
+import { useResourceLinks } from "@/features/navigation/use-resource-links";
+import { useShop } from "@/contexts/shop-context";
 import { useStorefrontChrome } from "./chrome-context";
+import { fetchPublicMetaobjects } from "./metaobjects-api";
+import { useStorefrontLanguage } from "./storefront-language";
 import type { CSSProperties } from "react";
 import {
   RegistrySectionRenderer,
+  createCollectionLinks,
   StorefrontRenderer,
+  ThemeCustomCss,
   type CommerceDataProvider,
 } from "@jelly/storefront-renderer";
 import {
@@ -24,6 +30,7 @@ function commerceProvider(storeSlug: string, currency: Currency, products: Produ
   const initialProducts = products.filter((product) => product.published && !product.archived).map((product) => ({ id: product.id, name: product.name, href: `/${storeSlug}/products/${product.slug}`, imageUrl: product.imageUrl, price: formatMoney(product.variants[0]?.priceMinor ?? 0, currency) }));
   return {
     initialProducts,
+    getMetaobjects: storeId ? (handle) => fetchPublicMetaobjects(storeId, handle) : undefined,
     subscribeNewsletter: storeId ? async (email, source) => {
       const origin = process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
       const response = await fetch(`${origin}/api/public/stores/${encodeURIComponent(storeId)}/engagement/newsletter`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, source, consent: true }) });
@@ -77,6 +84,10 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
   products: Product[];
 }) {
   const chromeHandled = useStorefrontChrome();
+  const { language } = useStorefrontLanguage();
+  const { state } = useShop();
+  const resourceLinks = useResourceLinks(snapshot.storeId, storeSlug, state.products);
+  const collectionLinks = createCollectionLinks(snapshot.storeId, storeSlug, state.collections);
   if (route.status !== "ready") return null;
   const resolvedTheme = resolveTheme(snapshot.theme.id ?? snapshot.theme.presetId, snapshot.theme.settings, snapshot.theme.version);
   const themeId = resolvedTheme.id as ThemeId;
@@ -85,9 +96,11 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
 
   return (
     <div className={`jelly-storefront jelly-theme-layout-${resolvedTheme.layout}`} data-jelly-theme={resolvedTheme.id} data-jelly-theme-version={resolvedTheme.version} style={style}>
+      {/* Inside the storefront frame the frame already adds the theme's custom CSS. */}
+      {!chromeHandled && <ThemeCustomCss settings={resolvedTheme.settings} />}
       {resolvedTheme.layout === "editorial" ? <div className="jelly-theme-masthead"><span>JellyShop collection</span><img src={`${resolvedTheme.assetPrefix}monogram.svg`} alt="" /></div> : null}
-      {!chromeHandled && route.layout.announcement.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="header" themeId={resolvedTheme.id} page={route.context} menus={snapshot.menus} storeSlug={storeSlug} />)}
-      {!chromeHandled && route.layout.header.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="header" themeId={resolvedTheme.id} page={route.context} menus={snapshot.menus} storeSlug={storeSlug} />)}
+      {!chromeHandled && route.layout.announcement.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="header" themeId={resolvedTheme.id} page={route.context} menus={snapshot.menus} resourceLinks={resourceLinks} collectionLinks={collectionLinks} storeSlug={storeSlug} language={language} />)}
+      {!chromeHandled && route.layout.header.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="header" themeId={resolvedTheme.id} page={route.context} menus={snapshot.menus} resourceLinks={resourceLinks} collectionLinks={collectionLinks} storeSlug={storeSlug} language={language} />)}
       <main className={resolvedTheme.layout === "editorial" ? "jelly-theme-editorial-main" : undefined}>
         {route.layout.template.map((section) => (
           <RegistrySectionRenderer
@@ -98,12 +111,12 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
             region="template"
             themeId={resolvedTheme.id}
             page={route.context}
-            menus={snapshot.menus}
+            menus={snapshot.menus} resourceLinks={resourceLinks} collectionLinks={collectionLinks}
             storeSlug={storeSlug}
           />
         ))}
       </main>
-      {!chromeHandled && route.layout.footer.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="footer" themeId={resolvedTheme.id} page={route.context} menus={snapshot.menus} storeSlug={storeSlug} />)}
+      {!chromeHandled && route.layout.footer.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="footer" themeId={resolvedTheme.id} page={route.context} menus={snapshot.menus} resourceLinks={resourceLinks} collectionLinks={collectionLinks} storeSlug={storeSlug} language={language} />)}
     </div>
   );
 }

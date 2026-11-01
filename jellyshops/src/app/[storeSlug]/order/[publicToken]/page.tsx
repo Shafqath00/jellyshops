@@ -21,22 +21,36 @@ function PublicOrderContent() {
     let sequence = 0;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let storeId: string | undefined;
+    let inFlight = false;
+    let retryNotBefore = 0;
+    let failures = 0;
     async function refresh() {
+      if (!active || inFlight || Date.now() < retryNotBefore) return;
+      inFlight = true;
       const request = ++sequence;
       try {
         if (!storeId) storeId = (await api.getPublicStoreBySlug(storeSlug)).store.id;
         const next = await api.getPublicOrder(storeId, publicToken);
         if (!active || request !== sequence) return;
         setResult(next); setMissing(false); setRefreshError(false);
-        if (next.order.status === "PENDING_PAYMENT" || next.payment?.status === "PROCESSING" || Number(next.order.balanceDueMinor ?? 0) > 0) timer = setTimeout(refresh, 5000);
+        failures = 0;
+        retryNotBefore = 0;
+        // The public endpoint allows five lookups per minute for each store/IP.
+        if (next.order.status === "PENDING_PAYMENT" || next.payment?.status === "PROCESSING" || Number(next.order.balanceDueMinor ?? 0) > 0) timer = setTimeout(refresh, 15000);
       } catch (error) {
         if (!active || request !== sequence) return;
         if (error && typeof error === "object" && "status" in error && error.status === 404) { setMissing(true); return; }
         setRefreshError(true);
-        timer = setTimeout(refresh, 5000);
+        failures++;
+        const rateLimited = error && typeof error === "object" && "status" in error && error.status === 429;
+        const delay = rateLimited ? 60000 : Math.min(15000 * 2 ** (failures - 1), 60000);
+        retryNotBefore = Date.now() + delay;
+        timer = setTimeout(refresh, delay);
+      } finally {
+        inFlight = false;
       }
     }
-    const focus = () => { if (timer) clearTimeout(timer); void refresh(); };
+    const focus = () => { if (inFlight || Date.now() < retryNotBefore) return; if (timer) clearTimeout(timer); void refresh(); };
     void refresh(); window.addEventListener("focus", focus);
     return () => { active = false; if (timer) clearTimeout(timer); window.removeEventListener("focus", focus); };
   }, [api, publicToken, storeSlug]);

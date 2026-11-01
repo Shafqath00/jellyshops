@@ -6,14 +6,15 @@ import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
 import { blockStyle } from "../block-style";
 import { buttonProps } from "./block-content";
-import { choice, imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
+import { blockLabel } from "@jelly/storefront-registry";
+import { choice, editorBlockData, imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
 
 function setting(block: SectionNode["blocks"][number], key: string): string | undefined {
   const value = block.settings[key];
   return typeof value === "string" ? value : undefined;
 }
 
-export function HeroSection({ section, editor = false, context }: { section: SectionNode; editor?: boolean; context: StorefrontRuntimeContext }) {
+export function HeroSection({ section, editor = false, context, selectedBlockId }: { section: SectionNode; editor?: boolean; context: StorefrontRuntimeContext; selectedBlockId?: string }) {
   const settings = section.settings;
   const image = imageValue(settings);
   const focalPoint = image?.focalPoint && Number.isFinite(image.focalPoint.x) && Number.isFinite(image.focalPoint.y) ? image.focalPoint : { x: 50, y: 50 };
@@ -27,7 +28,7 @@ export function HeroSection({ section, editor = false, context }: { section: Sec
   };
   const overlay = numberValue(settings, "overlay", layout === "overlay" ? 30 : 0, 0, 100) / 100;
   const blocks = visibleBlocks(section);
-  const editorProps = (block: SectionNode["blocks"][number]) => editor ? { "data-editor-block-id": block.id, "data-editor-field-key": block.type === "button" ? "label" : "text" } : {};
+  const editorProps = (block: SectionNode["blocks"][number]) => editor ? editorBlockData(block.id, blockLabel(block.type), selectedBlockId, block.type === "button" ? "label" : "text") : {};
   const buttons = blocks.filter((block) => block.type === "button").flatMap((block) => {
     const label = setting(block, "label");
     return label ? [{ block, label, href: resolveStorefrontHref(setting(block, "href") ?? "#", context.storeSlug) }] : [];

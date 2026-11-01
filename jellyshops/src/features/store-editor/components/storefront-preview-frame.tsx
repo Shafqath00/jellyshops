@@ -57,7 +57,7 @@ export function StorefrontPreviewFrame({
       onLoad={(event) => syncDocument(event.currentTarget)}
     />
     {mountNode ? createPortal(
-      <div data-jelly-theme={themeId} style={style}>{children}</div>,
+      <div className="theme-preview-viewport" data-jelly-theme={themeId} style={style}>{children}</div>,
       mountNode,
     ) : null}
   </>;

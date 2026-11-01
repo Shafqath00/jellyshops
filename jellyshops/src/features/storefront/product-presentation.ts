@@ -4,6 +4,8 @@ import { formatMoney } from "@/lib/domain";
 import { getConfiguredPriceMinor, resolveProductVariant } from "@/lib/product-configuration";
 import { getVisibleOptions, toggleSelection, validateProductSelections } from "@/lib/product-builder";
 import type { CatalogAdminProduct } from "@/features/store-editor/api/types";
+import { productGallery } from "@/lib/product-media";
+import { isProductMediaEnabled } from "@jelly/storefront-schema";
 
 /** Maps the catalog detail DTO to the existing storefront Product domain shape. */
 export function catalogProductToProduct(product: CatalogAdminProduct): Product {
@@ -17,7 +19,7 @@ export function catalogProductToProduct(product: CatalogAdminProduct): Product {
     id: product.id, storeId: product.storeId, name: product.title, slug: product.handle,
     description: product.description, specifications: product.specifications ?? {}, category: product.productType ?? "", imageUrl: product.media[0]?.url ?? "",
     published: product.status === "ACTIVE", archived: product.status === "ARCHIVED", featured: false,
-    media: product.media.map((media) => ({ id: media.id, url: media.url, ...(media.altText ? { altText: media.altText } : {}) })),
+    media: product.media.map((media) => ({ ...media, altText: media.altText ?? undefined })),
     ...(product.vendor ? { vendor: product.vendor } : {}),
     variants: product.variants.map((variant) => ({
       id: variant.id, name: variant.title, sku: variant.sku ?? "", priceMinor: variant.priceMinor,
@@ -41,6 +43,8 @@ export function createProductPresentationContext({ product, currency, shippingCo
   relatedProducts?: ProductPresentationContext["relatedProducts"];
 }): ProductPresentationContext {
   const allOptions = [...(product.options ?? [])].sort((left, right) => left.position - right.position);
+  const gallery = productGallery(product, selections);
+  const galleryEnabled = isProductMediaEnabled(product.storeId, process.env.NEXT_PUBLIC_PRODUCT_MEDIA_STORE_IDS);
   // Choices hidden by a condition (e.g. "extra long" only for King) are not shown or required.
   const visibleIds = new Set(getVisibleOptions(allOptions, selections).map((option) => option.id));
   const options = allOptions.filter((option) => visibleIds.has(option.id));
@@ -52,17 +56,19 @@ export function createProductPresentationContext({ product, currency, shippingCo
   const requiredMissing = inventoryChoiceMissing || missingOptionIds.size > 0;
   const variant = resolveProductVariant(product, selections);
   const priceMinor = getConfiguredPriceMinor(variant, options, selections);
-  const untrackedAvailable = variant?.available === true && variant.stock === 0;
-  const maxQuantity = !requiredMissing && variant && variant.stock > 0 ? variant.stock : untrackedAvailable ? undefined : 0;
+  // A combination the merchant stopped selling cannot be bought, whatever stock it has left.
+  const notSold = variant?.sellable === false;
+  const untrackedAvailable = !notSold && variant?.available === true && variant.stock === 0;
+  const maxQuantity = !requiredMissing && variant && !notSold && variant.stock > 0 ? variant.stock : untrackedAvailable ? undefined : 0;
   const clampedQuantity = maxQuantity === undefined ? Math.max(1, quantity) : Math.max(1, Math.min(quantity, maxQuantity));
   const availability = requiredMissing ? { state: "selection-required" as const, message: "Choose the required options", maxQuantity: 0 }
-    : !variant ? { state: "unavailable" as const, message: "This combination is unavailable", maxQuantity: 0 }
+    : !variant || notSold ? { state: "unavailable" as const, message: "This combination is unavailable", maxQuantity: 0 }
       : variant.stock <= 0 && !untrackedAvailable ? { state: "out-of-stock" as const, message: "Out of stock", maxQuantity: 0 }
         : untrackedAvailable ? { state: "available" as const, message: "Available" }
           : { state: "available" as const, message: `${variant.stock} available`, maxQuantity: variant.stock };
 
   return {
-    product: { id: product.id, title: product.name, description: product.description, imageUrl: product.imageUrl, specifications: product.specifications ?? {}, shippingCopy, media: product.media ?? (product.imageUrl ? [{ id: `${product.id}-primary`, url: product.imageUrl }] : []), sku: variant?.sku || undefined, vendor: product.vendor, options: options.map((option) => ({ id: option.id, name: option.name, required: option.required, ...(option.type !== "variant" && option.multiple ? { multiple: true } : {}), ...(missingOptionIds.has(option.id) ? { missing: true } : {}), values: option.values.map((value) => ({ id: value.id, label: value.label, selected: isSelected(option.id, value.id), available: true, ...(value.priceAdjustmentMinor > 0 && option.type !== "variant" ? { priceAdjustment: formatMoney(value.priceAdjustmentMinor, currency) } : {}) })) })) },
+    product: { id: product.id, title: product.name, description: product.description, descriptionDoc: product.descriptionDoc ?? null, imageUrl: gallery[0]?.url ?? "", galleryEnabled, specifications: product.specifications ?? {}, shippingCopy, media: gallery, sku: variant?.sku || undefined, vendor: product.vendor, options: options.map((option) => ({ id: option.id, name: option.name, required: option.required, ...(option.type !== "variant" && option.multiple ? { multiple: true } : {}), ...(missingOptionIds.has(option.id) ? { missing: true } : {}), values: option.values.map((value) => ({ id: value.id, label: value.label, selected: isSelected(option.id, value.id), available: true, ...(value.priceAdjustmentMinor > 0 && option.type !== "variant" ? { priceAdjustment: formatMoney(value.priceAdjustmentMinor, currency) } : {}) })) })) },
     selection: selections,
     quantity: clampedQuantity,
     pricing: { price: formatMoney(priceMinor ?? (inventoryChoiceMissing && product.variants.length ? Math.min(...product.variants.map((candidate) => candidate.priceMinor)) : 0), currency), ...(variant?.compareAtPriceMinor ?? product.compareAtPriceMinor ? { compareAtPrice: formatMoney(variant?.compareAtPriceMinor ?? product.compareAtPriceMinor ?? 0, currency) } : {}) },

@@ -6,6 +6,7 @@ import { Minus, Plus, ShoppingBag, X } from "lucide-react";
 import { useEffect } from "react";
 import { useShop } from "@/contexts/shop-context";
 import { formatMoney } from "@/lib/domain";
+import { cartProductImage } from "@/lib/product-media";
 import type { ComponentType } from "react";
 import type { StorefrontCartProps } from "@jelly/storefront-themes";
 import { CartDrawer, CartItem, CartSummary, EmptyCart } from "@/components/jelly/cart";
@@ -90,7 +91,7 @@ export function CartPanel({
                 line && (
                   <CartItem
                     key={`${line.variant.id}-${JSON.stringify(line.item.configurationSelections ?? [])}`}
-                    imageUrl={line.product.imageUrl}
+                    imageUrl={cartProductImage(line.product, line.variant, line.item.configurationSelections)}
                     name={line.product.name}
                     variantName={line.variant.name}
                     options={line.item.configurationSelections?.map((selection) => {

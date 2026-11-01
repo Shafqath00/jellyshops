@@ -1,5 +1,5 @@
 import { resolveRichTextDocument, richTextStyleCss, safeRichTextHref, type RichTextBlock, type RichTextInline, type SectionNode } from "@jelly/storefront-schema";
-import { cloneElement, isValidElement, type ReactNode } from "react";
+import { cloneElement, isValidElement, type CSSProperties, type ReactNode } from "react";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import { blockStyle } from "../block-style";
 
@@ -10,6 +10,7 @@ export function renderInline(content: RichTextInline[]): ReactNode[] {
     for (const mark of node.marks ?? []) {
       if (mark.type === "bold") value = <strong>{value}</strong>;
       else if (mark.type === "italic") value = <em>{value}</em>;
+      else if (mark.type === "underline") value = <u>{value}</u>;
       else if (mark.type === "textStyle") value = <span style={richTextStyleCss(mark.attrs)}>{value}</span>;
       else {
         const href = safeRichTextHref(mark.attrs.href);
@@ -20,14 +21,21 @@ export function renderInline(content: RichTextInline[]): ReactNode[] {
   });
 }
 
+const tableCellStyle: CSSProperties = { border: "1px solid color-mix(in srgb, currentColor 25%, transparent)", padding: "0.5rem 0.75rem", textAlign: "left", verticalAlign: "top" };
+
 export function renderBlocks(blocks: RichTextBlock[]): ReactNode[] {
   return blocks.map((block, index) => {
-    if (block.type === "paragraph") return <p key={index}>{renderInline(block.content)}</p>;
+    if (block.type === "paragraph") return <p key={index} style={block.attrs ? { textAlign: block.attrs.textAlign } : undefined}>{renderInline(block.content)}</p>;
     if (block.type === "heading") {
       const Heading = (`h${block.attrs.level}` as "h1" | "h2" | "h3");
-      return <Heading key={index}>{renderInline(block.content)}</Heading>;
+      return <Heading key={index} style={block.attrs.textAlign ? { textAlign: block.attrs.textAlign } : undefined}>{renderInline(block.content)}</Heading>;
     }
     if (block.type === "blockquote") return <blockquote key={index} style={{ borderLeft: "3px solid currentColor", paddingLeft: "1rem" }}>{renderBlocks(block.content)}</blockquote>;
+    if (block.type === "table") {
+      return <div key={index} style={{ overflowX: "auto" }}><table style={{ borderCollapse: "collapse", width: "100%" }}><tbody>{block.content.map((row, rowIndex) => <tr key={rowIndex}>{row.content.map((cell, cellIndex) => cell.type === "tableHeader"
+        ? <th key={cellIndex} scope={rowIndex === 0 ? "col" : "row"} style={{ ...tableCellStyle, fontWeight: 600 }}>{renderBlocks(cell.content)}</th>
+        : <td key={cellIndex} style={tableCellStyle}>{renderBlocks(cell.content)}</td>)}</tr>)}</tbody></table></div>;
+    }
     const items = block.content.map((item, itemIndex) => <li key={itemIndex}>{renderBlocks(item.content)}</li>);
     return block.type === "bulletList"
       ? <ul key={index} style={{ listStyleType: "disc", paddingLeft: "1.5rem" }}>{items}</ul>
