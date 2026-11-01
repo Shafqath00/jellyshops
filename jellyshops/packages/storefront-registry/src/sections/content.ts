@@ -154,7 +154,7 @@ export const contentSections: SectionDefinition[] = [
       { type: "range", key: "gap", mobile: true, label: "Gap", group: "layout", min: 0, max: 80, step: 4, unit: "px" },
       { type: "select", key: "contentWidth", label: "Content width", group: "layout", options: [{ label: "Narrow", value: "narrow" }, { label: "Normal", value: "normal" }, { label: "Wide", value: "wide" }, { label: "Full page", value: "full" }] },
     ],
-    allowedBlockTypes: ["heading", "text", "button", "image", "video", "group"], maxBlocks: 12,
+    allowedBlockTypes: ["heading", "text", "button", "image", "video", "app", "group"], maxBlocks: 12,
     defaultSettings: { direction: "vertical", contentAlignment: "center", gap: 16, contentWidth: "normal" },
     defaultBlocks: [
       { id: "custom-heading", type: "heading", enabled: true, settings: { text: "Tell your story" } },
@@ -206,6 +206,46 @@ export const contentSections: SectionDefinition[] = [
     allowedBlockTypes: ["logo"], maxBlocks: 12,
     defaultSettings: { heading: "As featured in", logoHeight: 48 },
     defaultBlocks: [], responsiveFields: [], presets: [{ id: "logo-list", label: "Logo list", category: "content" }],
+  }
+  ,{
+    // Entries of one metaobject (Content > Metaobjects) as cards, each linking to its own page.
+    type: "metaobject-list", category: "content", supportedPages: [...home, "page"],
+    settingsSchema: z.object({
+      heading: z.string().max(120).optional(),
+      metaobject: z.string().max(64).regex(/^([a-z][a-z0-9_]*)?$/, "Use the metaobject's handle, for example designers").optional(),
+      layout: z.enum(["grid", "list"]).optional(),
+      columns: z.number().int().min(1).max(4).optional(),
+      limit: z.number().int().min(1).max(48).optional(),
+      showFields: z.boolean().optional(),
+      linkToPages: z.boolean().optional(),
+      colorScheme: schemeSchema,
+    }).passthrough(),
+    controls: [
+      sectionHeading,
+      { type: "text", key: "metaobject", label: "Metaobject handle", group: "content", maxLength: 64, description: "The handle shown in Content > Metaobjects, for example designers. Only metaobjects visible on the storefront are listed." },
+      { type: "segmented", key: "layout", label: "Layout", group: "layout", options: [{ label: "Grid", value: "grid" }, { label: "List", value: "list" }] },
+      { type: "range", key: "columns", label: "Columns", group: "layout", min: 1, max: 4, step: 1 },
+      { type: "range", key: "limit", label: "Entries to show", group: "content", min: 1, max: 48, step: 1 },
+      { type: "checkbox", key: "showFields", label: "Show each entry's details", group: "content" },
+      { type: "checkbox", key: "linkToPages", label: "Link each entry to its own page", group: "content" },
+      colorScheme,
+    ],
+    allowedBlockTypes: [],
+    defaultSettings: { heading: "Meet the makers", metaobject: "", layout: "grid", columns: 3, limit: 12, showFields: true, linkToPages: true },
+    defaultBlocks: [], responsiveFields: [], presets: [{ id: "metaobject-list", label: "Metaobject entries", category: "content" }],
+  }
+  ,{
+    // Shopify-style "Apps" section: app blocks only (maps, booking, forms, players).
+    type: "apps", category: "content", supportedPages: [...reusableContentPages],
+    settingsSchema: z.object({ contentWidth: z.enum(["narrow", "normal", "wide", "full"]).optional(), gap: z.number().int().min(0).max(80).optional() }).passthrough(),
+    controls: [
+      { type: "select", key: "contentWidth", label: "Content width", group: "layout", options: [{ label: "Narrow", value: "narrow" }, { label: "Normal", value: "normal" }, { label: "Wide", value: "wide" }, { label: "Full page", value: "full" }] },
+      { type: "range", key: "gap", label: "Gap", group: "layout", min: 0, max: 80, step: 4, unit: "px" },
+    ],
+    allowedBlockTypes: ["app"], maxBlocks: 6,
+    defaultSettings: { direction: "vertical", contentAlignment: "center", gap: 24, contentWidth: "normal" },
+    defaultBlocks: [{ id: "app-1", type: "app", enabled: true, settings: { provider: "", url: "" } }],
+    responsiveFields: [], presets: [{ id: "apps", label: "Apps", category: "content" }],
   }
   ,{ type: "journal-teaser", category: "content", supportedPages: [...home], settingsSchema: empty, controls: comprehensiveControls, allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: ["contentAlignment"] }
   ,{ type: "trust-strip", category: "content", supportedPages: [...home, "product", "cart"], settingsSchema: z.object({ colorScheme: schemeSchema }).passthrough(), controls: [colorScheme], allowedBlockTypes: ["heading", "text"], defaultSettings: { contentAlignment: "center" }, defaultBlocks: [], responsiveFields: ["contentAlignment"] }

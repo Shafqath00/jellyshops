@@ -205,3 +205,62 @@ export function moveBefore(
   items[index] = { ...items[index], section: { ...section, blocks } };
   return { layout: withSections(layout, items), select: target };
 }
+
+export interface BlockDropList { parentId: string | null; ids: string[] }
+
+/** Every list in the block's section it may be dragged into: its own, the section's and groups that accept it. */
+export function blockDropLists(layout: Record<string, unknown>, target: SelectionTarget): BlockDropList[] {
+  const found = findTarget(layout, target);
+  if (!found?.location) return [];
+  const { section, location } = found;
+  const moving = location.block;
+  const height = blockTreeHeight(moving);
+  const lists: BlockDropList[] = [];
+  const own = location.parent?.id ?? null;
+  const visit = (blocks: BlockNode[], parent: BlockNode | null, depth: number) => {
+    const parentId = parent?.id ?? null;
+    const rules = listRules(section, parent);
+    const allowed = parent ? allowedChildBlockTypes(parent.type, depth - 1) : rules.allowed;
+    const fits = parentId === own || (allowed.includes(moving.type) && depth - 1 + height <= MAX_BLOCK_DEPTH && hasRoom(rules, blocks.length));
+    if (fits) lists.push({ parentId, ids: blocks.map((block) => block.id) });
+    // Nothing goes inside the block being moved.
+    for (const block of blocks) if (block.id !== moving.id && getBlockDefinition(block.type)?.allowedBlockTypes?.length) visit(childBlocks(block), block, depth + 1);
+  };
+  visit(section.blocks, null, 1);
+  // Leaving a list must keep its minimum.
+  const ownRules = listRules(section, location.parent);
+  if (ownRules.min !== undefined && location.siblings.length <= ownRules.min) return lists.filter((list) => list.parentId === own);
+  return lists;
+}
+
+/**
+ * Drag and drop between levels: moves the block into the list held by `parentId`
+ * (null = the section's own blocks), before `beforeId` or at the end. Returns null
+ * when the list can't take it or nothing would change.
+ */
+export function moveBlockTo(
+  layout: Record<string, unknown>,
+  target: SelectionTarget,
+  parentId: string | null,
+  beforeId: string | null,
+): { layout: Record<string, unknown>; select: SelectionTarget } | null {
+  if (!target.blockId) return null;
+  const found = findTarget(layout, target);
+  if (!found?.location) return null;
+  const ownParent = found.location.parent?.id ?? null;
+  if (parentId === ownParent) return moveBefore(layout, target, beforeId);
+  const list = blockDropLists(layout, target).find((item) => item.parentId === parentId);
+  if (!list || (beforeId !== null && !list.ids.includes(beforeId))) return null;
+  const items = placements(layout);
+  const index = inlineIndex(items, target.sectionId);
+  const section = items[index].section as SectionNode;
+  const block = found.location.block;
+  let blocks = updateBlockList(section.blocks, ownParent ?? undefined, (siblings) => siblings.filter((item) => item.id !== block.id));
+  blocks = updateBlockList(blocks, parentId ?? undefined, (siblings) => {
+    const at = beforeId === null ? siblings.length : siblings.findIndex((item) => item.id === beforeId);
+    siblings.splice(at < 0 ? siblings.length : at, 0, block);
+    return siblings;
+  });
+  items[index] = { ...items[index], section: { ...section, blocks } };
+  return { layout: withSections(layout, items), select: target };
+}

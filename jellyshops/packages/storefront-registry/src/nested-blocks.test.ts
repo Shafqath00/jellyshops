@@ -8,7 +8,7 @@ const section = (blocks: BlockNode[]): SectionNode => ({ id: "s", type: "custom-
 
 it("defines a group block that holds content blocks and has the shared style settings", () => {
   const definition = getBlockDefinition("group")!;
-  expect(definition.allowedBlockTypes).toEqual(["heading", "text", "button", "image", "video", "group"]);
+  expect(definition.allowedBlockTypes).toEqual(["heading", "text", "button", "image", "video", "app", "group"]);
   expect(definition.maxBlocks).toBe(8);
   expect(definition.controls.map(({ key }) => key)).toEqual(expect.arrayContaining(["groupDirection", "groupGap", "blockBackgroundColor", "blockPaddingTop"]));
 });
@@ -40,7 +40,7 @@ it("accepts phone values only for phone settings, and checks them", () => {
 
 it("offers groups inside a group only where they can still hold blocks", () => {
   expect(allowedChildBlockTypes("group", 1)).toContain("group");
-  expect(allowedChildBlockTypes("group", 2)).toEqual(["heading", "text", "button", "image", "video"]);
+  expect(allowedChildBlockTypes("group", 2)).toEqual(["heading", "text", "button", "image", "video", "app"]);
   expect(allowedChildBlockTypes("group", 3)).toEqual([]);
   expect(allowedChildBlockTypes("button", 1)).toEqual([]);
 });

@@ -28,7 +28,12 @@ export type StorefrontPageContext =
   | { pageType: "not-found"; resource: null }
   | { pageType: "search"; resource: null; data: { query: string; state: "empty" | "results" | "none"; resultCount: number; results: PublicProduct[]; searchHref?: string } }
   | { pageType: "product" | "collection" | "page" | "blog" | "article"; resource: { id: string; handle: string; data: Record<string, unknown> } };
-export interface CommerceDataProvider { initialProducts?: PublicProduct[]; getProducts(input?: { featured?: boolean; limit?: number; sort?: string; collectionId?: string }): Promise<PublicProduct[]>; subscribeNewsletter?: (email: string, source: string) => Promise<void> }
+/** A metaobject's entries as shoppers see them (visible fields only), from the public metaobjects route. */
+export interface PublicMetaobjectList {
+  definition: { handle: string; name: string; fields: Array<{ handle: string; name: string; type: string }> };
+  entries: Array<{ handle: string; displayName: string; values: Record<string, string | number | boolean> }>;
+}
+export interface CommerceDataProvider { initialProducts?: PublicProduct[]; getProducts(input?: { featured?: boolean; limit?: number; sort?: string; collectionId?: string }): Promise<PublicProduct[]>; subscribeNewsletter?: (email: string, source: string) => Promise<void>; getMetaobjects?: (handle: string) => Promise<PublicMetaobjectList | null> }
 export interface AssetResolver { resolve(assetId: string): Promise<string | null> }
 export type RendererMode = "preview" | "editor" | "published";
 export interface RendererSelection { kind: "theme" | "section" | "block"; region?: "header" | "template" | "footer"; sectionId?: string; blockId?: string; fieldKey?: string }

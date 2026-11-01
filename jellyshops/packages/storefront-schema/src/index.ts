@@ -91,3 +91,7 @@ export type {
   SelectionProblem,
 } from "./product-options.js";
 export { MAX_SECTION_CSS_LENGTH, customCssProblem, scopeCustomCss } from "./custom-css.js";
+export { LANGUAGE_CODE, MAX_TRANSLATION_LENGTH, readTranslations, translateSection, translateSettings, translationsProblem, withTranslation } from "./translations.js";
+export type { Translations } from "./translations.js";
+export { appEmbedSource, getAppBlockProvider, listAppBlockProviders, registerAppBlockProvider } from "./app-blocks.js";
+export type { AppBlockProvider } from "./app-blocks.js";

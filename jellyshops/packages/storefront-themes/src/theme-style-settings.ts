@@ -9,6 +9,8 @@
  * theme's default, so untouched stores keep the theme's own responsive sizes.
  */
 
+import { scopeCustomCss } from "@jelly/storefront-schema";
+
 export const TEXT_STYLE_LEVELS = ["h1", "h2", "h3", "h4", "body", "small"] as const;
 export type TextStyleLevel = typeof TEXT_STYLE_LEVELS[number];
 /** Up to eight schemes; `colorSchemes.count` (4-8) says how many the merchant uses. */
@@ -108,23 +110,84 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     color("badges.background", "Background", "Badges", ""),
     color("badges.text", "Text", "Badges", ""),
   ];
+  const cardContentSchema = [
+    select("productCard.order", "Card layout", "Product cards", "photo-title-price", [["photo-title-price", "Photo, name, price"], ["photo-price-title", "Photo, price, name"], ["title-price-photo", "Name and price above the photo"]], "Used by every product list: product grids, related products and search."),
+    select("productCard.showTitle", "Product name", "Product cards", "show", [["show", "Show"], ["hide", "Hide"]]),
+    select("productCard.titleLines", "Long names", "Product cards", theme, [[theme, "Show in full"], ["1", "Cut to one line"], ["2", "Cut to two lines"]]),
+    select("productCard.showPrice", "Price", "Product cards", "show", [["show", "Show"], ["hide", "Hide"]]),
+    select("productCard.button", "Button", "Product cards", "none", [["none", "None"], ["view", "View product"], ["shop", "Shop now"]], "A button under each card that opens the product."),
+  ];
+  const socialSchema = SOCIAL_PLATFORMS.map(({ id, label }) => ({ id: `social.${id}`, type: "url", label, group: "Social media", default: "", ...(id === "instagram" ? { description: "Full https:// links. Shown in the footer when it has no social links of its own." } : {}) }));
+  const languageSchema = [
+    { id: "languages.defaultName", type: "text", label: "Main language", group: "Languages", default: "English", description: "The language your store is written in." },
+    { id: "languages.extra", type: "text", label: "Other languages", group: "Languages", default: "", description: "Language codes separated by commas, for example hi, ta, fr. Shoppers pick one in the footer; you add the text in the editor's Language menu. Text you haven't translated shows in the main language." },
+  ];
+  const advancedSchema = [
+    { id: "advanced.customCss", type: "textarea", label: "Custom CSS", group: "Custom CSS", default: "", description: `Applies to the whole store. Up to ${MAX_THEME_CSS_LENGTH} characters; @import, fonts and non-https links aren't allowed.` },
+  ];
   return {
     defaults: {
       textStyles,
       colorSchemes: { count: String(MIN_COLOR_SCHEMES), ...Object.fromEntries(COLOR_SCHEME_IDS.map((id) => [id, { name: "", ...schemes[id] }])) },
       fields: { radius: theme, borderWidth: theme, height: theme },
       badges: { sale: "hide", position: theme, shape: theme, background: "", text: "" },
+      social: Object.fromEntries(SOCIAL_PLATFORMS.map(({ id }) => [id, ""])),
+      advanced: { customCss: "" },
+      languages: { defaultName: "English", extra: "" },
     },
     buttonDefaults: { size: theme, textCase: theme, borderWidth: theme, hover: theme },
-    cardDefaults: { radius: theme, shadow: theme, hover: theme },
+    cardDefaults: { radius: theme, shadow: theme, hover: theme, order: "photo-title-price", showTitle: "show", titleLines: theme, showPrice: "show", button: "none" },
     textStyleSchema,
     colorSchemeSchema,
     buttonSchema,
     fieldSchema,
     cardSchema,
     badgeSchema,
+    cardContentSchema,
+    socialSchema,
+    advancedSchema,
+    languageSchema,
   };
 }
+
+/** Social networks merchants can link to from theme settings, in footer order. */
+export const SOCIAL_PLATFORMS = [
+  { id: "instagram", label: "Instagram" },
+  { id: "facebook", label: "Facebook" },
+  { id: "tiktok", label: "TikTok" },
+  { id: "youtube", label: "YouTube" },
+  { id: "x", label: "X (Twitter)" },
+  { id: "pinterest", label: "Pinterest" },
+  { id: "linkedin", label: "LinkedIn" },
+  { id: "whatsapp", label: "WhatsApp" },
+] as const;
+
+/** A language the store offers: its code and its name in that language (e.g. hi -> हिन्दी). */
+export interface StoreLanguage { code: string; name: string }
+
+function languageName(code: string): string {
+  try {
+    const name = new Intl.DisplayNames([code], { type: "language" }).of(code);
+    return name ? name.charAt(0).toLocaleUpperCase(code) + name.slice(1) : code;
+  } catch { return code; }
+}
+
+/** The store's other languages from theme settings (valid codes, no repeats, at most 10). */
+export function storeLanguages(settings: Record<string, unknown> | undefined): StoreLanguage[] {
+  const raw = record(settings?.languages).extra;
+  const codes = typeof raw === "string" ? raw.split(",").map((code) => code.trim()).filter(Boolean) : [];
+  const unique = [...new Set(codes.map((code) => code.replace(/^([a-z]{2,3})-([a-z]{2})$/i, (_, lang: string, region: string) => `${lang.toLowerCase()}-${region.toUpperCase()}`).replace(/^[A-Z]{2,3}$/, (code) => code.toLowerCase())))];
+  return unique.filter((code) => /^[a-z]{2,3}(-[A-Z]{2})?$/.test(code)).slice(0, 10).map((code) => ({ code, name: languageName(code) }));
+}
+
+/** The name of the store's main language ("English" unless the merchant changed it). */
+export function mainLanguageName(settings: Record<string, unknown> | undefined): string {
+  const name = record(settings?.languages).defaultName;
+  return typeof name === "string" && name.trim() ? name.trim().slice(0, 40) : "English";
+}
+
+/** Theme-wide custom CSS may be longer than a section's. */
+export const MAX_THEME_CSS_LENGTH = 10000;
 
 const hex = /^#[0-9a-fA-F]{6}$/;
 const record = (value: unknown): Record<string, unknown> => value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
@@ -221,5 +284,34 @@ export function resolveThemeStyleTokens(settings: Record<string, unknown>, defau
   if (typeof badges.shape === "string" && badgeRadii[badges.shape]) tokens["--jelly-badge-radius"] = badgeRadii[badges.shape];
   if (typeof badges.background === "string" && hex.test(badges.background)) tokens["--jelly-badge-bg"] = badges.background;
   if (typeof badges.text === "string" && hex.test(badges.text)) tokens["--jelly-badge-text"] = badges.text;
+
+  // Card content: CSS order of the photo and the name/price, hidden parts and the button.
+  if (card.order === "photo-price-title") tokens["--jelly-card-price-order"] = "-1";
+  else if (card.order === "title-price-photo") tokens["--jelly-card-media-order"] = "1";
+  if (card.showTitle === "hide") tokens["--jelly-card-title-display"] = "none";
+  else if (card.titleLines === "1" || card.titleLines === "2") Object.assign(tokens, { "--jelly-card-title-display": "-webkit-box", "--jelly-card-title-lines": card.titleLines });
+  if (card.showPrice === "hide") tokens["--jelly-card-price-display"] = "none";
+  const buttonLabel = productCardButtonLabel(settings);
+  if (buttonLabel) Object.assign(tokens, { "--jelly-card-button-display": "inline-flex", "--jelly-card-button-label": JSON.stringify(buttonLabel) });
   return tokens;
+}
+
+/** The label of the product card button, or null when the theme shows none. */
+export function productCardButtonLabel(settings: Record<string, unknown> | undefined): string | null {
+  const button = record(settings?.productCard).button;
+  return button === "view" ? "View product" : button === "shop" ? "Shop now" : null;
+}
+
+/** The social links set in theme settings (https only), in footer order. */
+export function themeSocialLinks(settings: Record<string, unknown> | undefined): Array<{ id: string; label: string; href: string }> {
+  const social = record(settings?.social);
+  return SOCIAL_PLATFORMS.flatMap(({ id, label }) => {
+    const href = typeof social[id] === "string" ? (social[id] as string).trim() : "";
+    return /^https:\/\/[^\s"'<>]+$/i.test(href) ? [{ id, label: label.replace(/ \(.*\)$/, ""), href }] : [];
+  });
+}
+
+/** The theme's custom CSS limited to the store (selectors start at `[data-jelly-theme]`), or null. */
+export function themeCustomCss(settings: Record<string, unknown> | undefined): string | null {
+  return scopeCustomCss(record(settings?.advanced).customCss, "[data-jelly-theme]", MAX_THEME_CSS_LENGTH);
 }

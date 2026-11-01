@@ -24,3 +24,20 @@ it("adds nothing for sections without custom CSS or with CSS that isn't allowed"
     unmount();
   }
 });
+
+it("adds the theme's custom CSS, and the footer falls back to the theme's social links", async () => {
+  const { ThemeCustomCss } = await import("./section-custom-css");
+  const { withStoreIdentity } = await import("./store-identity");
+  const css = render(<ThemeCustomCss settings={{ advanced: { customCss: "body { margin: 0 }" } }} />);
+  expect(css.container.querySelector("style[data-theme-css]")!.innerHTML).toBe("[data-jelly-theme] body{margin: 0}");
+  css.unmount();
+  const socialLinks = [{ id: "instagram", label: "Instagram", href: "https://instagram.com/shop" }];
+  const footer: SectionNode = { id: "f", type: "footer", enabled: true, settings: {}, blocks: [] };
+  const plain = render(<RegistrySectionRenderer section={withStoreIdentity(footer, { name: "Shop", socialLinks })} mode="published" commerce={commerce} region="footer" />);
+  expect(plain.getByRole("link", { name: "Instagram" })).toHaveAttribute("href", "https://instagram.com/shop");
+  plain.unmount();
+  const own: SectionNode = { ...footer, blocks: [{ id: "s", type: "social-link", enabled: true, settings: { label: "TikTok", href: "https://tiktok.com/@shop" } }] };
+  const withBlocks = render(<RegistrySectionRenderer section={withStoreIdentity(own, { name: "Shop", socialLinks })} mode="published" commerce={commerce} region="footer" />);
+  expect(withBlocks.queryByRole("link", { name: "Instagram" })).toBeNull();
+  expect(withBlocks.getByRole("link", { name: "TikTok" })).toBeInTheDocument();
+});

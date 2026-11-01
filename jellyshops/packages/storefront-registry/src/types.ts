@@ -16,6 +16,8 @@ interface ControlBase {
   responsive?: boolean;
   /** Has a separate phone value (saved under `responsive.mobile`, screens up to 767px) and tablet value (`responsive.tablet`, 768-1023px). */
   mobile?: boolean;
+  /** false for text that must not change per language (links, handles, code). */
+  translatable?: boolean;
   dynamicTypes?: DynamicValueType[];
 }
 export type ControlDefinition =

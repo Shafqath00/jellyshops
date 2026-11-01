@@ -1,6 +1,7 @@
 import { expect, it } from "vitest";
 import { resolveStorefrontThemeTokens } from "./storefront-theme-tokens";
 import { resolveTheme, validateThemeSettings } from "./theme-resolver";
+import { themeCustomCss, themeSocialLinks } from "./theme-style-settings";
 
 const tokensFor = (themeId: string, settings: Record<string, unknown> = {}) => resolveStorefrontThemeTokens(themeId, resolveTheme(themeId, settings).settings);
 
@@ -55,5 +56,33 @@ it("adds field, product card and badge tokens only for changed settings", () => 
     });
     expect(tokens["--jelly-badge-text"]).toBeUndefined();
     expect(validateThemeSettings(id, { fields: { height: "huge" }, badges: { sale: "yes" } }).map((issue) => issue.path)).toEqual(["badges.sale", "fields.height"]);
+  }
+});
+
+it("turns the product card content settings into card tokens", () => {
+  for (const id of ["jelly-signature", "jelly-avenue"]) {
+    const untouched = tokensFor(id);
+    expect(Object.keys(untouched).filter((key) => /--jelly-card-(media-order|price-order|title|price-display|button)/.test(key))).toEqual([]);
+    const tokens = tokensFor(id, { productCard: { order: "title-price-photo", titleLines: "2", showPrice: "hide", button: "shop" } });
+    expect(tokens).toMatchObject({ "--jelly-card-media-order": "1", "--jelly-card-title-display": "-webkit-box", "--jelly-card-title-lines": "2", "--jelly-card-price-display": "none", "--jelly-card-button-display": "inline-flex", "--jelly-card-button-label": '"Shop now"' });
+    expect(tokensFor(id, { productCard: { showTitle: "hide", titleLines: "1", order: "photo-price-title" } })).toMatchObject({ "--jelly-card-title-display": "none", "--jelly-card-price-order": "-1" });
+  }
+});
+
+it("lists only https social links from theme settings, in footer order", () => {
+  expect(themeSocialLinks({ social: { youtube: "https://youtube.com/@shop", instagram: " https://instagram.com/shop ", facebook: "http://facebook.com/shop", x: "javascript:alert(1)" } })).toEqual([
+    { id: "instagram", label: "Instagram", href: "https://instagram.com/shop" },
+    { id: "youtube", label: "YouTube", href: "https://youtube.com/@shop" },
+  ]);
+  expect(themeSocialLinks(undefined)).toEqual([]);
+});
+
+it("scopes theme custom CSS to the store and refuses unsafe CSS on save", () => {
+  expect(themeCustomCss({ advanced: { customCss: "h2 { color: red } & { --x: 1 }" } })).toBe("[data-jelly-theme] h2{color: red}\n[data-jelly-theme]{--x: 1}");
+  expect(themeCustomCss({ advanced: { customCss: "@import url(https://x.test/a.css);" } })).toBeNull();
+  for (const id of ["jelly-signature", "jelly-avenue"]) {
+    expect(validateThemeSettings(id, { advanced: { customCss: "p { color: red }" } })).toEqual([]);
+    expect(validateThemeSettings(id, { advanced: { customCss: "p { color: red } </style>" } })).toEqual([{ path: "advanced.customCss", message: "Custom CSS: CSS can't contain the < character." }]);
+    expect(validateThemeSettings(id, { advanced: { customCss: "p{}".repeat(4000) } })[0]?.message).toMatch(/at most 10000/);
   }
 });

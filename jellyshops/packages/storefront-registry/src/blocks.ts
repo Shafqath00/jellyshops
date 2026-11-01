@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { settingValueSchema, type DynamicValueType } from "@jelly/storefront-schema";
+import { appEmbedSource, getAppBlockProvider, listAppBlockProviders } from "@jelly/storefront-schema";
 import { withBlockStyle } from "./block-style.js";
 import type { BlockDefinition, ControlDefinition } from "./types.js";
 
@@ -38,7 +39,7 @@ const linkSchema = z.union([z.string(), settingValueSchema(z.string())]).optiona
 
 /** Blocks a group may hold. Groups do not hold groups (one level of nesting). */
 /** A group may hold another group; `allowedChildBlockTypes` drops "group" where a group could hold nothing. */
-export const GROUP_CHILD_TYPES = ["heading", "text", "button", "image", "video", "group"];
+export const GROUP_CHILD_TYPES = ["heading", "text", "button", "image", "video", "app", "group"];
 /** A group lays its blocks out in a row or a column, like Shopify's group block. */
 const groupBlock: BlockDefinition = {
   type: "group",
@@ -65,6 +66,30 @@ const groupBlock: BlockDefinition = {
   ],
 };
 
+/** An app (map, booking calendar, form, music player…) from the providers in storefront-schema's app-blocks. */
+function appBlock(): BlockDefinition {
+  const providers = listAppBlockProviders();
+  return {
+    type: "app",
+    settingsSchema: z.object({
+      provider: z.string().optional(),
+      url: z.string().max(2000).optional(),
+      height: z.number().int().min(120).max(1200).optional(),
+      title: z.string().max(120).optional(),
+    }).passthrough().superRefine((settings, context) => {
+      if (settings.provider !== undefined && settings.provider !== "" && !getAppBlockProvider(settings.provider)) context.addIssue({ code: "custom", path: ["provider"], message: "Pick one of the listed apps." });
+      if (settings.url && !appEmbedSource(settings.provider, settings.url)) context.addIssue({ code: "custom", path: ["url"], message: `This link can't be used for ${getAppBlockProvider(settings.provider)?.name ?? "this app"}.` });
+    }),
+    controls: [
+      { type: "select", key: "provider", label: "App", group: "content", options: [{ label: "Choose an app", value: "" }, ...providers.map((provider) => ({ label: provider.name, value: provider.id }))] },
+      { type: "text", key: "url", label: "Embed link", description: "Paste the app's embed link. " + providers.map((provider) => `${provider.name}: ${provider.help}`).join(" "), group: "content", maxLength: 2000 },
+      { type: "text", key: "title", label: "Name for screen readers", description: "For example: Map to our shop.", group: "content", maxLength: 120 },
+      { type: "range", key: "height", label: "Height", group: "layout", min: 120, max: 1200, step: 20, unit: "px" },
+    ],
+    defaultSettings: { provider: "", url: "" },
+  };
+}
+
 const blocks: BlockDefinition[] = [
   { type: "slide", settingsSchema: z.object({ image: imageReference.optional(), eyebrow: z.string().max(80).optional(), heading: dynamicString.optional(), text: dynamicString.optional(), buttonLabel: z.string().max(40).optional(), buttonLink: linkSchema }).passthrough(), controls: [{ type: "image", key: "image", label: "Image", group: "content" }, { type: "text", key: "eyebrow", label: "Small text above heading", group: "content", maxLength: 80 }, { type: "text", key: "heading", label: "Heading", group: "content", maxLength: 120, dynamicTypes: stringTypes }, { type: "textarea", key: "text", label: "Text", group: "content", maxLength: 400, dynamicTypes: stringTypes }, { type: "text", key: "buttonLabel", label: "Button text", group: "content", maxLength: 40 }, { type: "link", key: "buttonLink", label: "Button link", group: "content", dynamicTypes: urlTypes }], defaultSettings: { heading: "A new season", text: "Introduce your latest collection.", buttonLabel: "Shop now", buttonLink: "/shop" } },
   { type: "product-tab", settingsSchema: z.object({ label: z.string().max(40), sort: z.string().max(40).optional(), collectionId: z.unknown().optional() }).passthrough(), controls: [{ type: "text", key: "label", label: "Tab name", group: "content", maxLength: 40 }, { type: "collection", key: "collectionId", label: "Show products from", group: "content", dynamicTypes: ["collection_reference"] }, { type: "select", key: "sort", label: "Order", group: "content", options: [{ label: "Featured", value: "" }, { label: "Newest first", value: "newest" }, { label: "Best selling", value: "best-selling" }, { label: "Price: low to high", value: "price-asc" }] }], defaultSettings: { label: "New in", sort: "newest" } },
@@ -86,6 +111,7 @@ const blocks: BlockDefinition[] = [
   { type: "spec-row", settingsSchema: z.object({ label: z.string().max(60), value: z.string().max(240) }).passthrough(), controls: [{ type: "text", key: "label", label: "Name, e.g. Warranty", group: "content", maxLength: 60 }, { type: "text", key: "value", label: "Value, e.g. 10 years", group: "content", maxLength: 240 }], defaultSettings: { label: "Warranty", value: "10 years" } },
   { type: "contact-item", settingsSchema: z.object({ label: z.string(), value: dynamicString }).passthrough(), controls: [{ type: "text", key: "label", label: "Label", group: "content", maxLength: 40 }, { type: "text", key: "value", label: "Value", group: "content", maxLength: 160, dynamicTypes: stringTypes }], defaultSettings: { label: "Email", value: "hello@example.com" } },
   groupBlock,
+  appBlock(),
   { type: "social-link", settingsSchema: z.object({ label: z.string(), href: z.union([z.string(), settingValueSchema(z.string())]) }).passthrough(), controls: [{ type: "link", key: "href", label: "Link", group: "content", dynamicTypes: urlTypes }], defaultSettings: { label: "Instagram", href: "https://example.com" } }
 ];
 

@@ -1,3 +1,4 @@
+import { appEmbedSource, getAppBlockProvider } from "@jelly/storefront-schema";
 import type { CSSProperties, ReactNode } from "react";
 import type { BlockNode } from "@jelly/storefront-schema";
 import { resolveStorefrontHref } from "../runtime-context";
@@ -92,6 +93,19 @@ export function videoSource(url: unknown, autoplay: boolean, controls: boolean):
     return vimeo ? { kind: "embed", src: `https://player.vimeo.com/video/${vimeo}?${flags({ controls: controls ? "1" : "0", ...(autoplay ? { autoplay: "1", muted: "1", loop: "1" } : {}) })}` } : null;
   }
   return /\.(mp4|webm|mov)$/i.test(parsed.pathname) ? { kind: "file", src: parsed.toString() } : null;
+}
+
+/** An app block: the provider's embed link in a sandboxed frame; nothing on the live store until the link is valid. */
+export function AppBlock({ block, editor = false, extra = {} }: { block: BlockNode; editor?: boolean; extra?: Record<string, string> }): ReactNode {
+  const provider = getAppBlockProvider(block.settings.provider);
+  const src = appEmbedSource(block.settings.provider, block.settings.url);
+  const height = typeof block.settings.height === "number" ? Math.min(1200, Math.max(120, block.settings.height)) : provider?.defaultHeight ?? 400;
+  const props = { className: "jelly-app-block", "data-app": provider?.id, ...extra, style: { minHeight: src ? undefined : 120 } };
+  if (!src) return editor ? <div {...props} data-empty="true">{!provider ? "Choose an app and paste its embed link." : stringValue(block.settings, "url") ? `This link can't be used for ${provider.name}. ${provider.help}` : `Paste the ${provider.name} embed link. ${provider.help}`}</div> : null;
+  const title = stringValue(block.settings, "title").trim() || provider!.name;
+  const sandbox = ["allow-scripts", "allow-same-origin", ...(provider!.sandbox ?? [])].join(" ");
+  // In the editor the frame ignores clicks so selecting the block still works.
+  return <div {...props}><iframe src={src} title={title} height={height} loading="lazy" sandbox={sandbox} referrerPolicy="strict-origin-when-cross-origin" allow="fullscreen; clipboard-write" style={{ pointerEvents: editor ? "none" : undefined }} /></div>;
 }
 
 export function VideoBlock({ block, editor = false, extra = {} }: { block: BlockNode; editor?: boolean; extra?: Record<string, string> }): ReactNode {

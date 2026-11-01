@@ -57,8 +57,16 @@ export function FooterSection({ section, context, subscribe, mode = "preview" }:
   const socials = blocks.filter((block) => block.type === "social-link").flatMap((block) => {
     const label = stringSetting(block.settings.label);
     const href = safeRichTextHref(stringSetting(block.settings.href));
-    return label && href ? [{ id: block.id, label, href, block }] : [];
+    return label && href ? [{ id: block.id, label, href, block: block as typeof block | undefined }] : [];
   });
+  // No social link blocks: use the links from theme settings (filled in by withStoreIdentity).
+  if (!socials.length && Array.isArray(section.settings.themeSocialLinks)) {
+    for (const item of section.settings.themeSocialLinks as Array<{ id?: unknown; label?: unknown; href?: unknown }>) {
+      const href = safeRichTextHref(stringSetting(item?.href));
+      const label = stringSetting(item?.label);
+      if (href && label) socials.push({ id: `theme-social-${stringSetting(item?.id)}`, label, href, block: undefined });
+    }
+  }
   const contacts = blocks.filter((block) => block.type === "contact-item").flatMap((block) => {
     const label = stringSetting(block.settings.label);
     const value = stringSetting(block.settings.value);
@@ -82,7 +90,7 @@ export function FooterSection({ section, context, subscribe, mode = "preview" }:
       </div>)}</nav>}
       {(contacts.length > 0 || socials.length > 0) && <div className="jelly-footer-contact">
         {contacts.length > 0 && <ul>{contacts.map((item) => <li key={item.id} {...blockEditorData(item.block, editor, "Contact detail")}>{item.label && <span>{item.label}</span>}{item.value}</li>)}</ul>}
-        {socials.length > 0 && <ul className="jelly-footer-social" aria-label="Social media">{socials.map((item) => <li key={item.id} {...blockEditorData(item.block, editor, "Social link")}><a href={item.href} rel="noopener noreferrer" target="_blank">{item.label}</a></li>)}</ul>}
+        {socials.length > 0 && <ul className="jelly-footer-social" aria-label="Social media">{socials.map((item) => <li key={item.id} {...(item.block ? blockEditorData(item.block, editor, "Social link") : {})}><a href={item.href} rel="noopener noreferrer" target="_blank">{item.label}</a></li>)}</ul>}
       </div>}
     </div>
     <p className="jelly-footer-credit">{copyright}</p>

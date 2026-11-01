@@ -1,4 +1,4 @@
-import type { RuntimeMenuV4, SectionNode } from "@jelly/storefront-schema";
+import { translateSection, type RuntimeMenuV4, type SectionNode } from "@jelly/storefront-schema";
 import { createElement } from "react";
 import {
   defaultSectionRenderRegistry,
@@ -17,7 +17,7 @@ function sectionComponent(themeId: string, type: string, registry: SectionRender
 }
 
 export function RegistrySectionRenderer({
-  section,
+  section: sourceSection,
   mode,
   commerce,
   region,
@@ -28,6 +28,7 @@ export function RegistrySectionRenderer({
   page,
   menus,
   storeSlug,
+  language,
 }: {
   section: SectionNode;
   mode: RendererMode;
@@ -40,8 +41,11 @@ export function RegistrySectionRenderer({
   page?: StorefrontPageContext;
   menus?: Record<string, RuntimeMenuV4>;
   storeSlug?: string;
+  /** Shows the section's text in this language when it has a translation (null/undefined = main language). */
+  language?: string | null;
 }) {
-  if (!section.enabled) return null;
+  if (!sourceSection.enabled) return null;
+  const section = translateSection(sourceSection, language);
 
   const RenderComponent = sectionComponent(themeId ?? DEFAULT_THEME_ID, section.type, registry);
   const context = createStorefrontRuntimeContext({ mode, region, commerce, page, menus, storeSlug });

@@ -6,7 +6,7 @@ import { StorefrontContainer } from "@jelly/storefront-ui";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
 import { blockStyle } from "../block-style";
-import { blockEditorData, buttonProps, ImageBlock, VideoBlock } from "./block-content";
+import { AppBlock, blockEditorData, buttonProps, ImageBlock, VideoBlock } from "./block-content";
 import { formattedSetting, inlineSetting, SettingText } from "./setting-text";
 import { choice, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
 
@@ -36,6 +36,7 @@ function renderBlocks(blocks: BlockNode[], options: BlockContext): ReactNode[] {
     }
     if (block.type === "image") return <ImageBlock key={block.id} block={block} storeSlug={context.storeSlug} editor={editor} extra={blockEditorData(block, editor, label, selectedBlockId)} />;
     if (block.type === "video") return <VideoBlock key={block.id} block={block} editor={editor} extra={blockEditorData(block, editor, label, selectedBlockId, "url")} />;
+    if (block.type === "app") return <AppBlock key={block.id} block={block} editor={editor} extra={blockEditorData(block, editor, label, selectedBlockId, "url")} />;
     if (block.type === "group") return <GroupBlock key={block.id} block={block} options={options} />;
     return null;
   });

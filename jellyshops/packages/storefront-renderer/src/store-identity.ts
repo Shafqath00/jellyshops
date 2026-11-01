@@ -5,6 +5,8 @@ export interface StoreIdentity {
   logoUrl?: string;
   /** Theme-level header defaults (for example header.sticky); section settings win over them. */
   headerSettings?: Record<string, unknown>;
+  /** Social links from theme settings; the footer shows them when it has no social link blocks. */
+  socialLinks?: Array<{ id: string; label: string; href: string }>;
 }
 
 /**
@@ -18,6 +20,6 @@ export function withStoreIdentity(section: SectionNode, store: StoreIdentity): S
     const logo = section.settings.logo ?? (store.logoUrl ? { url: store.logoUrl, alt: store.name } : undefined);
     return { ...section, settings: { ...store.headerSettings, ...section.settings, storeName: name, ...(logo ? { logo } : {}) } };
   }
-  if (section.type === "footer") return { ...section, settings: { ...section.settings, storeName: name } };
+  if (section.type === "footer") return { ...section, settings: { ...section.settings, storeName: name, ...(store.socialLinks?.length ? { themeSocialLinks: store.socialLinks } : {}) } };
   return section;
 }

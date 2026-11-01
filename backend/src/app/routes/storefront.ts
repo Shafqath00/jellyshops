@@ -12,6 +12,7 @@ import { SqlCustomDataRepository } from "../../custom-data/sql-repository.js";
 import { StorefrontBindingValueService } from "../../dynamic-sources/binding-values.js";
 import { createEditorBindingValuesRouter, createPublicBindingValuesRouter } from "../../dynamic-sources/binding-values-routes.js";
 import { DynamicValueResolver } from "../../dynamic-sources/resolver.js";
+import { createPublicMetaobjectRouter, PublicMetaobjectService } from "../../custom-data/public-metaobjects.js";
 
 const bindingValueServices = new WeakMap<AppContext, StorefrontBindingValueService | null>();
 
@@ -44,6 +45,10 @@ export function mountPublicStorefrontContextRoutes(app: Express, context: AppCon
   const bindingValues = bindingValueService(context);
   if (bindingValues) {
     app.use("/api/public/stores/:storeId/storefront/binding-values", createPublicBindingValuesRouter(bindingValues));
+  }
+  const metaobjects = context.routeDependencies.metaobjectService;
+  if (metaobjects) {
+    app.use("/api/public/stores/:storeId/storefront/metaobjects", createPublicMetaobjectRouter(new PublicMetaobjectService(metaobjects)));
   }
   if (publicStorefrontContextService) {
     app.use(

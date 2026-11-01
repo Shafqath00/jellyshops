@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, GripVertical, ListIndentDecrease, ListIndentIncrease, Trash2 } from "lucide-react";
-import { dropPosition } from "../drag-position";
-import type { SelectionAction, SelectionTarget } from "../selection-actions";
+import { dropPosition, nestedDropPosition, type DropLine, type NestedDragRect } from "../drag-position";
+import type { BlockDropList, SelectionAction, SelectionTarget } from "../selection-actions";
 
 /**
  * Shopify-style floating toolbar for the selected section or block, drawn inside
@@ -64,6 +64,8 @@ export function SelectionToolbar({
   onAction,
   siblingIds,
   onMove,
+  dropLists,
+  onMoveTo,
 }: {
   frameTitle?: string;
   target: SelectionTarget | null;
@@ -75,36 +77,71 @@ export function SelectionToolbar({
   siblingIds?: string[];
   /** Drop before the sibling with this id, or at the end of the list when null. */
   onMove?(beforeId: string | null): void;
+  /** For a block: every list it may be dragged into (its own, the section's, groups); with `onMoveTo` it can change level. */
+  dropLists?: BlockDropList[];
+  onMoveTo?(parentId: string | null, beforeId: string | null): void;
 }) {
   const doc = usePreviewDocument(frameTitle);
   const [position, setPosition] = useState<{ top: number; left: number; docked: boolean } | null>(null);
-  const [dropLine, setDropLine] = useState<number | null>(null);
+  const [dropLine, setDropLine] = useState<DropLine | null>(null);
+  const nested = Boolean(target?.blockId && dropLists && onMoveTo);
+  const canDrag = nested ? (dropLists!.length > 1 || (siblingIds?.length ?? 0) > 1) : Boolean(onMove && siblingIds && siblingIds.length > 1);
 
   // Drag the grip over the preview: a line shows where the item would land, and letting go moves it there.
+  // Blocks can also go into or out of groups (any list in `dropLists`).
   const startDrag = (event: React.PointerEvent<HTMLButtonElement>) => {
-    if (!doc || !target || !onMove || !siblingIds || siblingIds.length < 2 || event.button > 0) return;
+    if (!doc || !target || !canDrag || event.button > 0) return;
     event.preventDefault();
     const view = doc.defaultView;
     if (!view) return;
     const grip = event.currentTarget;
     grip.setPointerCapture(event.pointerId);
     const draggedId = target.blockId ?? target.sectionId;
-    let pointerY = event.clientY;
-    let latest: ReturnType<typeof dropPosition> = null;
+    let pointer = { x: event.clientX, y: event.clientY };
+    let latest: { parentId: string | null; beforeId: string | null } | null = null;
     let frame = 0;
-    const measure = () => siblingIds.flatMap((id) => {
-      const element = findElement(doc, target.blockId ? { sectionId: target.sectionId, blockId: id } : { sectionId: id });
+    const box = (element: HTMLElement | null) => {
       const rect = element?.getBoundingClientRect();
-      return rect && (rect.width > 0 || rect.height > 0) ? [{ id, top: rect.top + view.scrollY, bottom: rect.bottom + view.scrollY }] : [];
+      return rect && (rect.width > 0 || rect.height > 0) ? { top: rect.top + view.scrollY, bottom: rect.bottom + view.scrollY, left: rect.left + view.scrollX, right: rect.right + view.scrollX } : null;
+    };
+    const ownParentId = nested ? dropLists!.find((list) => list.ids.includes(draggedId))?.parentId ?? null : null;
+    const measureNested = () => {
+      const rects: NestedDragRect[] = [];
+      const emptyLists: Array<{ parentId: string; rect: NestedDragRect }> = [];
+      for (const list of dropLists!) {
+        for (const id of list.ids) {
+          const found = box(findElement(doc, { sectionId: target.sectionId, blockId: id }));
+          if (found) rects.push({ id, parentId: list.parentId, ...found });
+        }
+        if (list.parentId && list.ids.length === 0) {
+          const found = box(findElement(doc, { sectionId: target.sectionId, blockId: list.parentId }));
+          if (found) emptyLists.push({ parentId: list.parentId, rect: { id: list.parentId, parentId: null, ...found } });
+        }
+      }
+      return { rects, emptyLists };
+    };
+    const measure = () => (siblingIds ?? []).flatMap((id) => {
+      const found = box(findElement(doc, target.blockId ? { sectionId: target.sectionId, blockId: id } : { sectionId: id }));
+      return found ? [{ id, top: found.top, bottom: found.bottom }] : [];
     });
     const tick = () => {
-      if (pointerY < 60) view.scrollBy(0, -14);
-      else if (pointerY > view.innerHeight - 60) view.scrollBy(0, 14);
-      latest = dropPosition(measure(), draggedId, pointerY + view.scrollY);
-      setDropLine(latest ? latest.lineY : null);
+      if (pointer.y < 60) view.scrollBy(0, -14);
+      else if (pointer.y > view.innerHeight - 60) view.scrollBy(0, 14);
+      const x = pointer.x + view.scrollX;
+      const y = pointer.y + view.scrollY;
+      if (nested) {
+        const { rects, emptyLists } = measureNested();
+        const drop = nestedDropPosition(rects, draggedId, ownParentId, x, y, emptyLists);
+        latest = drop;
+        setDropLine(drop ? drop.line : null);
+      } else {
+        const drop = dropPosition(measure(), draggedId, y);
+        latest = drop ? { parentId: null, beforeId: drop.beforeId } : null;
+        setDropLine(drop ? { top: drop.lineY - 2, left: 0, width: doc.documentElement.clientWidth, height: 4 } : null);
+      }
       frame = requestAnimationFrame(tick);
     };
-    const move = (moveEvent: PointerEvent) => { pointerY = moveEvent.clientY; };
+    const move = (moveEvent: PointerEvent) => { pointer = { x: moveEvent.clientX, y: moveEvent.clientY }; };
     const finish = (commit: boolean) => {
       cancelAnimationFrame(frame);
       grip.removeEventListener("pointermove", move);
@@ -112,7 +149,9 @@ export function SelectionToolbar({
       grip.removeEventListener("pointercancel", cancel);
       doc.removeEventListener("keydown", key);
       setDropLine(null);
-      if (commit && latest) onMove(latest.beforeId);
+      if (!commit || !latest) return;
+      if (nested) onMoveTo!(latest.parentId, latest.beforeId);
+      else onMove?.(latest.beforeId);
     };
     const up = () => finish(true);
     const cancel = () => finish(false);
@@ -160,7 +199,7 @@ export function SelectionToolbar({
   if (!doc || !target || !position) return null;
   return createPortal(
     <>
-    {dropLine !== null && <div aria-hidden="true" data-editor-drop-line="" style={{ position: "absolute", left: 0, right: 0, top: dropLine - 2, height: 4, borderRadius: 2, background: "var(--primary, #2563eb)", pointerEvents: "none", zIndex: 2147482999 }} />}
+    {dropLine !== null && <div aria-hidden="true" data-editor-drop-line="" style={{ position: "absolute", left: dropLine.left, top: dropLine.top, width: dropLine.width, height: dropLine.height, borderRadius: 2, background: "var(--primary, #2563eb)", pointerEvents: "none", zIndex: 2147482999 }} />}
     <div
       role="toolbar"
       aria-label={`${label} actions`}
@@ -170,7 +209,7 @@ export function SelectionToolbar({
       className="flex items-center gap-0.5 rounded-lg border border-black/10 bg-white p-1 font-sans text-[#1c1b19] shadow-[0_4px_16px_rgba(0,0,0,0.16)]"
     >
       <style>{currentStyle}</style>
-      {onMove && siblingIds && siblingIds.length > 1 && !hidden && !position.docked && (
+      {canDrag && !hidden && !position.docked && (
         <button type="button" aria-label="Drag to move" title="Drag to move" onPointerDown={startDrag} style={{ touchAction: "none", cursor: "grab" }} className="grid size-7 place-items-center rounded-md hover:bg-black/[0.06]">
           <GripVertical size={14} strokeWidth={1.9} />
         </button>

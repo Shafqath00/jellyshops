@@ -1,4 +1,4 @@
-import { customCssProblem, isRichTextDocument, MAX_BLOCK_DEPTH, type BlockNode, type PageType, type SectionNode } from "@jelly/storefront-schema";
+import { customCssProblem, isRichTextDocument, MAX_BLOCK_DEPTH, translationsProblem, type BlockNode, type PageType, type SectionNode } from "@jelly/storefront-schema";
 import { z } from "zod";
 import { blockDefinitions } from "./blocks.js";
 import { commerceSections } from "./sections/commerce.js";
@@ -67,8 +67,18 @@ export function validateSectionAgainstRegistry(section: SectionNode, pageType: P
   if ((definition.maxBlocks !== undefined && section.blocks.length > definition.maxBlocks) || (definition.minBlocks !== undefined && section.blocks.length < definition.minBlocks)) {
     issues.push({ code: "BLOCK_LIMIT_EXCEEDED", sectionId: section.id, message: "Section block limit exceeded" });
   }
+  const translationProblem = translationsProblem(section.settings.translations, new Set(translatableKeys(definition.controls)));
+  if (translationProblem) issues.push({ code: "SETTINGS_INVALID", sectionId: section.id, message: `Translations: ${translationProblem}` });
   issues.push(...validateBlocks(section.blocks, definition.allowedBlockTypes, section.type, section.id, 1));
   return issues;
+}
+
+/** Text settings never translated even though they are typed as text. */
+const NEVER_TRANSLATED = new Set(["customCss", "url", "metaobject", "provider", "href", "link", "videoUrl"]);
+
+/** Settings that can have text in other languages: text, long text and formatted text. */
+export function translatableKeys(controls: ControlDefinition[]): string[] {
+  return controls.filter((control) => (control.type === "text" || control.type === "textarea" || control.type === "rich-text") && control.translatable !== false && !NEVER_TRANSLATED.has(control.key)).map((control) => control.key);
 }
 
 /** Settings with a separate phone value (controls marked `mobile`). */
@@ -86,6 +96,8 @@ function validateBlocks(blocks: BlockNode[], allowed: string[], owner: string, s
     }
     const blockDefinition = getBlockDefinition(block.type);
     if (!blockDefinition || !blockDefinition.settingsSchema.safeParse(block.settings).success || !formattedCopiesValid(block.settings)) issues.push({ code: "SETTINGS_INVALID", sectionId, blockId: block.id, message: "Block settings are invalid" });
+    const blockTranslationProblem = blockDefinition ? translationsProblem(block.settings.translations, new Set(translatableKeys(blockDefinition.controls))) : null;
+    if (blockTranslationProblem) issues.push({ code: "SETTINGS_INVALID", sectionId, blockId: block.id, message: `Translations: ${blockTranslationProblem}` });
     for (const device of ["mobile", "tablet"] as const) {
       const values = block.responsive?.[device];
       if (!values || !blockDefinition) continue;

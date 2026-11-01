@@ -7,4 +7,7 @@ export type { SectionRenderComponent, SectionRenderProps } from "./render-regist
 export type { RuntimeRegion, StorefrontRuntimeContext } from "./runtime-context";
 export type { AssetResolver, CollectionPresentationContext, CommerceDataProvider, ProductPresentationContext, PublicProduct, StorefrontPageContext, StorefrontRendererProps } from "./types";
 export { withStoreIdentity } from "./store-identity";
+export { ThemeCustomCss } from "./section-custom-css";
+export { MetaobjectEntryContent, metaobjectEntryHref } from "./sections/metaobject-list";
+export type { PublicMetaobjectList } from "./types";
 export type { StoreIdentity } from "./store-identity";

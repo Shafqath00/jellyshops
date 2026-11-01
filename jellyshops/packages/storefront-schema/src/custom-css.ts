@@ -88,15 +88,15 @@ function scopeRules(css: string, scope: string, depth: number): string | null {
 const withoutComments = (css: string) => css.replace(/\/\*[\s\S]*?\*\//g, "");
 
 /** Why this CSS can't be used, in plain words, or null when it can. */
-export function customCssProblem(css: string): string | null {
-  if (css.length > MAX_SECTION_CSS_LENGTH) return `Custom CSS can be at most ${MAX_SECTION_CSS_LENGTH} characters.`;
+export function customCssProblem(css: string, maxLength = MAX_SECTION_CSS_LENGTH): string | null {
+  if (css.length > maxLength) return `Custom CSS can be at most ${maxLength} characters.`;
   const clean = withoutComments(css);
   for (const [pattern, message] of forbidden) if (pattern.test(clean)) return message;
   return scopeRules(clean, "&", 0) === null ? "Check the CSS: every rule needs a selector and matching { }." : null;
 }
 
 /** The CSS limited to elements inside `scope` (a CSS selector), or null when it is empty or not allowed. */
-export function scopeCustomCss(css: unknown, scope: string): string | null {
-  if (typeof css !== "string" || !css.trim() || customCssProblem(css)) return null;
+export function scopeCustomCss(css: unknown, scope: string, maxLength = MAX_SECTION_CSS_LENGTH): string | null {
+  if (typeof css !== "string" || !css.trim() || customCssProblem(css, maxLength)) return null;
   return scopeRules(withoutComments(css), scope, 0) || null;
 }

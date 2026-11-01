@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { applySelectionAction, availableActions, moveBefore, siblingIdsFor } from "./selection-actions";
+import { applySelectionAction, availableActions, blockDropLists, moveBefore, moveBlockTo, siblingIdsFor } from "./selection-actions";
 
 const block = (id: string) => ({ id, type: "button", enabled: true, settings: { label: id } });
 const layout = () => ({
@@ -122,4 +122,26 @@ it("drags sections and blocks to a new place among their siblings", () => {
   expect(inline(moveBefore(three(), { sectionId: "c", blockId: "c1" }, null), 2).section.blocks.map(({ id }) => id)).toEqual(["c2", "c3", "c1"]);
   expect(moveBefore(three(), { sectionId: "c", blockId: "c1" }, "a1")).toBeNull();
   expect(moveBefore(three(), { sectionId: "c", blockId: "c1" }, "c2")).toBeNull();
+});
+
+it("drags blocks between levels: into a group, out of it, never into itself or past three levels", () => {
+  const lists = (blockId: string) => blockDropLists(grouped(), { sectionId: "a", blockId }).map(({ parentId, ids }) => `${parentId ?? "section"}:${ids.join(",")}`);
+  expect(lists("b2")).toEqual(["section:b1,g,b2", "g:g1,g2"]);
+  // A group can't be dropped into itself.
+  expect(lists("g")).toEqual(["section:b1,g,b2"]);
+  expect(ids_of(moveBlockTo(grouped(), { sectionId: "a", blockId: "b2" }, "g", "g2"))).toBe("b1 g[g1,b2,g2]");
+  expect(ids_of(moveBlockTo(grouped(), { sectionId: "a", blockId: "b1" }, "g", null))).toBe("g[g1,g2,b1] b2");
+  expect(ids_of(moveBlockTo(grouped(), { sectionId: "a", blockId: "g1" }, null, "b1"))).toBe("g1 b1 g[g2] b2");
+  // Same list: an ordinary reorder.
+  expect(ids_of(moveBlockTo(grouped(), { sectionId: "a", blockId: "b2" }, null, "b1"))).toBe("b2 b1 g[g1,g2]");
+  // Unknown list or a before-id from another list.
+  expect(moveBlockTo(grouped(), { sectionId: "a", blockId: "b2" }, "missing", null)).toBeNull();
+  expect(moveBlockTo(grouped(), { sectionId: "a", blockId: "b2" }, "g", "b1")).toBeNull();
+  // A group holding a group can't go inside another group (four levels).
+  const deep = { sections: [{ kind: "inline", section: { id: "a", type: "custom-content", enabled: true, settings: {}, blocks: [
+    { id: "g", type: "group", enabled: true, settings: {}, blocks: [block("g1")] },
+    { id: "outer", type: "group", enabled: true, settings: {}, blocks: [{ id: "in", type: "group", enabled: true, settings: {}, blocks: [block("x")] }] },
+  ] } }] };
+  expect(blockDropLists(deep, { sectionId: "a", blockId: "outer" }).map(({ parentId }) => parentId)).toEqual([null]);
+  expect(blockDropLists(deep, { sectionId: "a", blockId: "x" }).map(({ parentId }) => parentId)).toEqual([null, "g", "outer", "in"]);
 });

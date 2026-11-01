@@ -1,3 +1,5 @@
+import { customCssProblem } from "@jelly/storefront-schema";
+import { MAX_THEME_CSS_LENGTH } from "./theme-style-settings.js";
 import { z } from "zod";
 import { getThemeDefinition } from "./theme-registry.js";
 import type { ThemeAssetManifest } from "./types.js";
@@ -123,6 +125,9 @@ export function validateThemeSettings(themeId: string, settings: Record<string, 
   if (!manifest) return [{ path: "themeId", message: "Theme is unavailable" }];
   return manifest.settingsSchema.flatMap((definition) => {
     const value = valueAtPath(settings, definition.id);
-    return valueMatches(definition, value) ? [] : [{ path: definition.id, message: `Invalid value for ${definition.label}` }];
+    if (!valueMatches(definition, value)) return [{ path: definition.id, message: `Invalid value for ${definition.label}` }];
+    // Theme-wide custom CSS is refused with the same plain reason the section field gives.
+    const cssProblem = definition.id === "advanced.customCss" && typeof value === "string" ? customCssProblem(value, MAX_THEME_CSS_LENGTH) : null;
+    return cssProblem ? [{ path: definition.id, message: `Custom CSS: ${cssProblem}` }] : [];
   });
 }
