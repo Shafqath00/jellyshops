@@ -53,6 +53,38 @@ describe("public catalog API client", () => {
 });
 
 describe("merchant commerce API client", () => {
+  it("stops after one refresh when the API still rejects the session", async () => {
+    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(jsonResponse({ error: { message: "Invalid or expired token" } }, 401)));
+    const api = createMerchantCommerceApi({ baseUrl: "http://localhost:3001", token: "old", fetch: fetchMock, getAccessToken: async () => "rejected" });
+    await expect(api.getOrder("store-demo", "order-1")).rejects.toThrow("Invalid or expired token");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not retry a store permission denial", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ error: { message: "Forbidden" } }, 403));
+    const api = createMerchantCommerceApi({ baseUrl: "http://localhost:3001", token: "old", fetch: fetchMock, getAccessToken: async () => "current" });
+    await expect(api.getOrder("store-demo", "order-1")).rejects.toThrow("Forbidden");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("resolves captured order images at the configured API", async () => {
+    const api = createMerchantCommerceApi({ baseUrl: "http://127.0.0.1:5001/project/api", token: "merchant", fetch: vi.fn().mockResolvedValue(jsonResponse({
+      items: [{ imageSnapshot: "/api/public/media/store-demo/photo" }],
+    })) });
+    expect((await api.getOrder("store-demo", "order-1")).items[0].imageSnapshot).toBe("http://127.0.0.1:5001/project/api/api/public/media/store-demo/photo");
+  });
+
+  it("refreshes a rejected session once and retries with the new bearer token", async () => {
+    const fetchMock = vi.fn().mockImplementation((_url, init) => Promise.resolve(
+      init.headers.Authorization === "Bearer fresh" ? jsonResponse({ order: { id: "order-1" } }) : jsonResponse({ error: { message: "Invalid or expired token" } }, 401),
+    ));
+    const api = createMerchantCommerceApi({ baseUrl: "http://localhost:3001", token: "old", fetch: fetchMock,
+      getAccessToken: async (refresh = false) => refresh ? "fresh" : "expired",
+    });
+    await expect(api.getOrder("store-demo", "order-1")).resolves.toMatchObject({ order: { id: "order-1" } });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it("loads merchant orders with the merchant bearer token", async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ orders: [] }));
     const api = createMerchantCommerceApi({

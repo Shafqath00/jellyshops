@@ -1,19 +1,23 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { useState } from "react";
 import { ShopProvider } from "@/contexts/shop-context";
 import type { Product, ProductOption, ProductVariant } from "@/lib/domain";
 import { applyBulk, describeScope } from "./bulk";
 import { choiceFromTemplate, moveChoice, newChoice, unusedTemplates, withAddedValues, withKind, withoutValue } from "./choices";
 import { draftToPayload, emptyDraft, productToDraft, validateBuilderDraft, withOptions, type ProductDraft } from "./draft";
-import { ProductBuilder } from "./ProductBuilder";
+import { ProductBuilder } from "./product-builder";
+import { VariantsSection } from "./sections/variants-section";
 import type { Taxonomy, TaxonomyTemplate } from "./taxonomy";
 
-vi.mock("@/features/auth/auth-provider", () => {
+vi.mock("@/features/auth/providers/auth-provider", () => {
   const activeStore = { id: "store-demo", currency: "INR", country: "IN" };
   const session = { access_token: "jelly-demo-merchant" };
-  return { useAuth: () => ({ activeStore, session }) };
+  return { authApiOrigin: () => "http://localhost:3001", useAuth: () => ({ activeStore, session }) };
 });
+// The builder tests type into a full page with a rich text editor; a loaded machine needs more than the 5s default.
+vi.setConfig({ testTimeout: 20_000 });
 afterEach(() => vi.unstubAllGlobals());
 
 const template = (extra: Partial<TaxonomyTemplate>): TaxonomyTemplate => ({ id: "t", categoryId: "tees", name: "Size", optionKind: "variant", displayType: "buttons", required: true, multiple: false, defaultValues: ["S", "M", "L"], position: 0, ...extra });
@@ -139,6 +143,17 @@ describe("payload and validation", () => {
     const draft = { ...base(), price: "" };
     expect(validateBuilderDraft(draft).fields.price).toBe("Enter a price.");
   });
+  it("blocks saving when a combination price reaches its saved original price", () => {
+    const draft = base();
+    draft.variants[0] = { ...draft.variants[0], priceMinor: 40000, compareAtPriceMinor: 40000 };
+
+    expect(validateBuilderDraft(draft).problems).toContainEqual(expect.objectContaining({
+      code: "variant_compare_at_price",
+      message: "S: original price must be higher than the price.",
+      variantId: draft.variants[0].id,
+      severity: "error",
+    }));
+  });
   it("does not duplicate title/price errors in the problem list", () => {
     const { problems } = validateBuilderDraft({ ...emptyDraft });
     expect(problems.map((p) => p.code)).toEqual([]);
@@ -151,7 +166,7 @@ describe("opening a saved product", () => {
   it("fills a simple product and remembers the Standard variant", () => {
     const { draft, persisted } = productToDraft(product());
     expect(draft).toMatchObject({ title: "Mug", price: "250.00", compareAtPrice: "300.00", stock: "4", sku: "S1", categoryId: "beds", variants: [] });
-    expect(persisted).toEqual({ variantIds: ["v1"], standardVariantId: "v1", imageUrl: "https://x/m.jpg" });
+    expect(persisted).toEqual({ variantIds: ["v1"], standardVariantId: "v1", imageUrl: "https://x/m.jpg", media: product().media });
     expect(draftToPayload(draft, "Home", persisted).variants[0]).toHaveProperty("id", "v1");
   });
   it("treats the placeholder image as no photo and unlimited stock as blank (left untouched on save)", () => {
@@ -185,6 +200,8 @@ const taxonomy: Taxonomy = {
 function mockApi() {
   const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
     if (String(url).includes("/taxonomy/categories")) return new Response(JSON.stringify(taxonomy));
+    if (String(url).includes("/catalog/collections")) return new Response(JSON.stringify({ nodes: [], nextCursor: null }));
+    if (String(url).includes("/digital-products/")) return new Response(JSON.stringify({ fulfillmentType: "PHYSICAL", assets: [] }));
     const input = JSON.parse(String(init?.body));
     return new Response(JSON.stringify({ ...input, id: "p-saved", storeId: "store-demo", media: [], tags: [], available: true,
       variants: input.variants.map((v: Record<string, unknown>, i: number) => ({ ...v, id: v.id ?? `server-v${i}`, quantity: v.quantity ?? null, available: true })) }));
@@ -195,6 +212,74 @@ function mockApi() {
 const productCalls = (mock: ReturnType<typeof mockApi>) => mock.mock.calls.filter(([url]) => String(url).includes("/catalog/products"));
 
 describe("ProductBuilder choices and combinations", () => {
+  it("explains that choices are optional and names the action plainly", async () => {
+    render(<ShopProvider><ProductBuilder /></ShopProvider>);
+    await screen.findByRole("heading", { name: "Product options" });
+
+    expect(screen.getByText("Add a size or colour when each version needs its own price or stock.")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Add options like size or colour" })).toBeVisible();
+  });
+
+  it("keeps saved combination original prices visible and editable", async () => {
+    const user = userEvent.setup();
+    const size = named(withValues(newChoice(0), "S"), "Size");
+    const variant: ProductVariant = {
+      id: "variant-s",
+      name: "S",
+      sku: "TEE-S",
+      priceMinor: 2500,
+      compareAtPriceMinor: 3000,
+      stock: 4,
+      options: { [size.id]: size.values[0].id },
+    };
+    const onChange = vi.fn();
+    function Harness() {
+      const [variants, setVariants] = useState([variant]);
+      return <VariantsSection options={[size]} variants={variants} currency="GBP" onChange={(next) => { onChange(next); setVariants(next); }} />;
+    }
+    render(<Harness />);
+
+    const originalPrice = screen.getByLabelText("Original price for S");
+    expect(originalPrice).toHaveValue("30.00");
+    await user.clear(originalPrice);
+    await user.type(originalPrice, "35");
+    expect(onChange).toHaveBeenLastCalledWith([{ ...variant, compareAtPriceMinor: 3500 }]);
+  });
+
+  it("explains invalid combination original prices and lets sellers clear a saved value", async () => {
+    const user = userEvent.setup();
+    const size = named(withValues(newChoice(0), "S"), "Size");
+    const variant: ProductVariant = {
+      id: "variant-s",
+      name: "S",
+      sku: "TEE-S",
+      priceMinor: 2500,
+      compareAtPriceMinor: 3000,
+      stock: 4,
+      options: { [size.id]: size.values[0].id },
+    };
+    const onChange = vi.fn();
+    function Harness() {
+      const [variants, setVariants] = useState([variant]);
+      return <VariantsSection options={[size]} variants={variants} currency="GBP" onChange={(next) => { onChange(next); setVariants(next); }} />;
+    }
+    render(<Harness />);
+
+    const originalPrice = screen.getByLabelText("Original price for S");
+    await user.clear(originalPrice);
+    await user.type(originalPrice, "20");
+    expect(originalPrice).toHaveAttribute("aria-invalid", "true");
+    await user.click(screen.getByLabelText("Stock for S"));
+    expect(screen.getByRole("status")).toHaveTextContent("Original price must be higher than this price.");
+    expect(originalPrice).toHaveValue("30.00");
+    expect(onChange).not.toHaveBeenCalled();
+
+    await user.clear(originalPrice);
+    await user.click(screen.getByLabelText("Stock for S"));
+    expect(originalPrice).toHaveValue("");
+    expect(onChange).toHaveBeenLastCalledWith([{ ...variant, compareAtPriceMinor: undefined }]);
+  });
+
   it("builds a T-shirt from category suggestions, edits combinations and saves six variants", async () => {
     const fetchMock = mockApi();
     const user = userEvent.setup();
@@ -214,16 +299,20 @@ describe("ProductBuilder choices and combinations", () => {
     expect(screen.getByRole("button", { name: "Gift wrap" })).toBeVisible();
     expect(await screen.findByText(/6 combinations/)).toBeVisible();
 
+    await user.click(screen.getByRole("button", { name: "Preview" }));
     const preview = screen.getByLabelText(/preview of what shoppers/i);
     expect(within(preview).getAllByTestId("preview-choice")).toHaveLength(2);
     expect(within(preview).getAllByLabelText("required")).toHaveLength(2);
+    await user.click(screen.getByRole("button", { name: "Close" }));
 
     await user.selectOptions(screen.getByLabelText("Bulk scope"), screen.getByRole("option", { name: "all Black" }));
     await user.type(screen.getByLabelText("Bulk value"), "650");
     await user.click(screen.getByRole("button", { name: /apply to all black/i }));
     expect(screen.getByLabelText("Price for S / Black")).toHaveValue("650.00");
     expect(screen.getByLabelText("Price for S / White")).toHaveValue("499.00");
-    expect(within(preview).getByText(/From/)).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Preview" }));
+    expect(within(screen.getByLabelText(/preview of what shoppers/i)).getByText(/From/)).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Close" }));
 
     await user.clear(screen.getByLabelText("Stock for M / White"));
     await user.type(screen.getByLabelText("Stock for M / White"), "0");
@@ -254,18 +343,22 @@ describe("ProductBuilder choices and combinations", () => {
     const user = userEvent.setup();
     render(<ShopProvider><ProductBuilder /></ShopProvider>);
     await user.type(screen.getByLabelText(/^price/i), "1000");
-    await user.click(screen.getByRole("button", { name: /this product comes in different options/i }));
+    await user.click(screen.getByRole("button", { name: "Add options like size or colour" }));
     await user.type(screen.getByLabelText("Choice name"), "Material");
+    await user.click(screen.getByText("Customer customizations", { selector: "summary" }));
     await user.click(screen.getByRole("radio", { name: /changes the price only/i }));
     await user.type(screen.getByLabelText(/add .* values/i), "Wood, Metal{Enter}");
-    expect(screen.queryByText(/Combinations/)).toBeNull();
+    expect(screen.queryByRole("heading", { name: "Variants" })).toBeNull();
     await user.type(screen.getByLabelText(/\+ price/i, { selector: "input#" + (screen.getAllByLabelText(/\+ price/i)[0] as HTMLElement).id }), "250");
+    await user.click(screen.getByRole("button", { name: "Preview" }));
     const preview = screen.getByLabelText(/preview of what shoppers/i);
     expect(within(preview).getByText("Material")).toBeVisible();
     expect(within(preview).getByText(/\+.*250/)).toBeVisible();
     expect(within(preview).getByLabelText("required")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Close" }));
     await user.click(screen.getByLabelText("Shoppers must choose"));
-    expect(within(preview).getByText(/\(optional\)/)).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Preview" }));
+    expect(within(screen.getByLabelText(/preview of what shoppers/i)).getByText(/\(optional\)/)).toBeVisible();
   });
 
   it("blocks saving with plain-language problems and removes them when fixed", async () => {
@@ -274,7 +367,7 @@ describe("ProductBuilder choices and combinations", () => {
     render(<ShopProvider><ProductBuilder /></ShopProvider>);
     await user.type(screen.getByLabelText(/product name/i), "Tee");
     await user.type(screen.getByLabelText(/^price/i), "10");
-    await user.click(screen.getByRole("button", { name: /this product comes in different options/i }));
+    await user.click(screen.getByRole("button", { name: "Add options like size or colour" }));
     await user.click(screen.getByRole("button", { name: /save product/i }));
     const alert = await screen.findByText(/before saving/i);
     expect(alert.closest("[data-problems]")).toHaveTextContent(/needs a name|every choice needs a name/i);
@@ -290,7 +383,7 @@ describe("ProductBuilder choices and combinations", () => {
     render(<ShopProvider><ProductBuilder /></ShopProvider>);
     await user.type(screen.getByLabelText(/^price/i), "10");
     for (const [name, count] of [["A", 11], ["B", 10]] as const) {
-      await user.click(screen.getAllByRole("button", { name: /(this product comes in|add another)/i })[0]);
+      await user.click(screen.getByRole("button", { name: name === "A" ? "Add options like size or colour" : "Add another option" }));
       const names = screen.getAllByLabelText("Choice name");
       await user.type(names[names.length - 1], name);
       const adders = screen.getAllByLabelText(new RegExp(`add ${name} values`, "i"));

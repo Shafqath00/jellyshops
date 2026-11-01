@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MerchantPaymentsPanel } from "./merchant-payments-panel";
 
-vi.mock("@/features/auth/auth-provider", () => {
+vi.mock("@/features/auth/providers/auth-provider", () => {
   const activeStore = { id: "store-demo", currency: "INR", country: "IN" };
   const session = { access_token: "jelly-demo-merchant" };
   return { useAuth: () => ({ activeStore, session }) };

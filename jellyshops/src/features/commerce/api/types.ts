@@ -97,6 +97,8 @@ export interface MerchantOrderItem {
   fulfillmentType?: "PHYSICAL" | "DIGITAL";
   fulfilledQuantity?: number;
   discountMinor?: number | null;
+  /** What the variant's shipping details were when the order line was created; null for older orders. */
+  shippingSnapshot?: { weightGrams?: number; lengthMm?: number; widthMm?: number; heightMm?: number; countryOfOrigin?: string; hsCode?: string } | null;
   variantId: string;
   titleSnapshot: string;
   skuSnapshot: string | null;

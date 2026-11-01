@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { authApiOrigin, useAuth } from "@/features/auth/auth-provider";
+import { authApiOrigin, useAuth } from "@/features/auth/providers/auth-provider";
 interface Asset { id: string; filename: string; sizeBytes: number; maxDownloads: number | null; expiresAfterDays: number | null }
 interface DigitalProduct { fulfillmentType: "PHYSICAL" | "DIGITAL"; assets: Asset[] }
 export function DigitalProductSettings({ productId }: { productId: string }) {

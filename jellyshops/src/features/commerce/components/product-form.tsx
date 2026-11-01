@@ -5,7 +5,7 @@ import { CheckCircle2, ImageIcon, Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { majorToMinor, minorToMajor, slugify, type CategoryOptionDefinition, type Product, type ProductOption, type ProductOptionValue } from "@/lib/domain";
 import { useShop } from "@/contexts/shop-context";
-import { useAuth } from "@/features/auth/auth-provider";
+import { useAuth } from "@/features/auth/providers/auth-provider";
 import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import { CreateCategoryDialog } from "./create-category-dialog";
 import { ProductOptionsEditor } from "./product-options-editor";
@@ -83,7 +83,7 @@ export function ProductForm({ product }: { product?: Product }) {
     setSaving(true);
     try {
       if (!api || !activeStore) throw new Error("Select your authenticated store before saving.");
-      const payload = { imageUrl: local.imageUrl, handle: local.slug, title: local.name, description: local.description, specifications: local.specifications, productType: local.category, status: published ? "ACTIVE" as const : "DRAFT" as const, primaryCategoryId: local.primaryCategoryId, additionalCategoryIds: local.additionalCategoryIds, brandId: local.brandId, collectionIds: local.collectionIds, categoryMetadata: selectedCategory ?? null, brandMetadata: brands.find((item) => item.id === brandId) ?? null, collectionMetadata: collectionIds.map((collectionId) => collections.find((item) => item.id === collectionId)).filter(Boolean), options: local.options, inventoryOptionIds: local.inventoryOptionIds, variants: local.variants.map((item) => ({ ...(persistedProduct?.variants.some((existing) => existing.id === item.id) ? { id: item.id } : {}), title: item.name, sku: item.sku || undefined, priceMinor: item.priceMinor, compareAtPriceMinor: !cleanOptions.length && item.id === reconciled.variants[0]?.id && compareAtMinor > 0 ? compareAtMinor : item.compareAtPriceMinor ?? null, quantity: item.stock, trackInventory: true, options: item.options })) };
+      const payload = { ...(local.imageUrl !== (persistedProduct?.imageUrl ?? FALLBACK_IMAGE) ? { imageUrl: local.imageUrl } : {}), handle: local.slug, title: local.name, description: local.description, specifications: local.specifications, productType: local.category, status: published ? "ACTIVE" as const : "DRAFT" as const, primaryCategoryId: local.primaryCategoryId, additionalCategoryIds: local.additionalCategoryIds, brandId: local.brandId, collectionIds: local.collectionIds, categoryMetadata: selectedCategory ?? null, brandMetadata: brands.find((item) => item.id === brandId) ?? null, collectionMetadata: collectionIds.map((collectionId) => collections.find((item) => item.id === collectionId)).filter(Boolean), options: local.options, inventoryOptionIds: local.inventoryOptionIds, variants: local.variants.map((item) => ({ ...(persistedProduct?.variants.some((existing) => existing.id === item.id) ? { id: item.id } : {}), title: item.name, sku: item.sku || undefined, priceMinor: item.priceMinor, compareAtPriceMinor: !cleanOptions.length && item.id === reconciled.variants[0]?.id && compareAtMinor > 0 ? compareAtMinor : item.compareAtPriceMinor ?? null, quantity: item.stock, trackInventory: true, options: item.options })) };
       const result = persistedProduct?.id ? await api.updateProduct(activeStore.id, persistedProduct.id, payload) : await api.createProduct(activeStore.id, payload);
       const canonical = catalogProductToStorefrontProduct(result);
       repository.saveProduct(canonical);

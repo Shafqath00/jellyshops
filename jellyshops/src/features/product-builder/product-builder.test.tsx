@@ -3,14 +3,16 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ShopProvider } from "@/contexts/shop-context";
 import { draftToPayload, emptyDraft, validateDraftForPublish, validateSimpleDraft } from "./draft";
-import { ProductBuilder } from "./ProductBuilder";
+import { ProductBuilder } from "./product-builder";
 import { buildCategoryPaths, getCategoryTemplates, searchCategoryPaths, type Taxonomy } from "./taxonomy";
 
-vi.mock("@/features/auth/auth-provider", () => {
+vi.mock("@/features/auth/providers/auth-provider", () => {
   const activeStore = { id: "store-demo", currency: "INR", country: "IN" };
   const session = { access_token: "jelly-demo-merchant" };
-  return { useAuth: () => ({ activeStore, session }) };
+  return { authApiOrigin: () => "http://localhost:3001", useAuth: () => ({ activeStore, session }) };
 });
+// These tests type into the full editor page; a loaded machine needs more than the 5s default.
+vi.setConfig({ testTimeout: 20_000 });
 afterEach(() => vi.unstubAllGlobals());
 
 const cat = (id: string, name: string, parentId: string | null = null, position = 0) => ({ id, storeId: "store-demo", parentId, name, slug: name.toLowerCase(), position, source: "platform" as const });
@@ -60,13 +62,13 @@ describe("draft", () => {
   });
   it("builds a one-variant payload in minor units", () => {
     const payload = draftToPayload({ ...valid, compareAtPrice: "599.50", sku: " MUG-1 ", categoryId: "tees", published: false }, "T-Shirts");
-    expect(payload).toMatchObject({ handle: "mug", title: "Mug", productType: "T-Shirts", status: "DRAFT", primaryCategoryId: "tees", options: [], inventoryOptionIds: [] });
-    expect(payload.variants).toEqual([{ title: "Standard", sku: "MUG-1", priceMinor: 49900, compareAtPriceMinor: 59950, costMinor: null, unitPricing: null, quantity: 3, trackInventory: true, options: {} }]);
+    expect(payload).toMatchObject({ handle: "mug", title: "Mug", productType: null, status: "DRAFT", primaryCategoryId: "tees", options: [], inventoryOptionIds: [] });
+    expect(payload.variants).toEqual([{ title: "Standard", sku: "MUG-1", priceMinor: 49900, compareAtPriceMinor: 59950, costMinor: null, unitPricing: null, barcode: null, lowStockThreshold: null, weightGrams: null, lengthMm: null, widthMm: null, heightMm: null, countryOfOrigin: null, hsCode: null, quantity: 3, trackInventory: true, options: {} }]);
   });
   it("omits optional fields and defaults stock to zero", () => {
     const payload = draftToPayload({ ...valid, stock: "" }, undefined);
     expect(payload).not.toHaveProperty("imageUrl");
-    expect(payload).toMatchObject({ productType: "Other", primaryCategoryId: undefined });
+    expect(payload).toMatchObject({ productType: null, primaryCategoryId: null });
     expect(payload.variants[0]).toMatchObject({ quantity: 0, sku: undefined, compareAtPriceMinor: null });
   });
   it("runs the shared publish validator", () => {
@@ -80,6 +82,10 @@ function mockApi() {
   const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
     if (String(url).includes("/taxonomy/categories") && (!init?.method || init.method === "GET")) return new Response(JSON.stringify(taxonomy));
     if (String(url).includes("/taxonomy/categories") && init?.method === "POST") return new Response(JSON.stringify(cat("new", JSON.parse(String(init.body)).name, JSON.parse(String(init.body)).parentId)), { status: 201 });
+    if (String(url).includes("/catalog/collections")) return new Response(JSON.stringify({ nodes: [], nextCursor: null }));
+    if (String(url).includes("/digital-products/")) return new Response(JSON.stringify({ fulfillmentType: "PHYSICAL", assets: [] }));
+    if (String(url).includes("/custom-data/metafield-values")) return new Response(JSON.stringify({ values: [] }));
+    if (String(url).includes("/custom-data/metafields")) return new Response(JSON.stringify([]));
     const input = JSON.parse(String(init?.body));
     return new Response(JSON.stringify({ ...input, id: "canonical-product", storeId: "store-demo", media: [], tags: [], variants: input.variants.map((v: object) => ({ ...v, id: "canonical-variant", quantity: 6, available: true })), available: true }));
   });
@@ -89,6 +95,19 @@ function mockApi() {
 const productCalls = (mock: ReturnType<typeof mockApi>) => mock.mock.calls.filter(([url]) => String(url).includes("/catalog/products"));
 
 describe("ProductBuilder", () => {
+  it("keeps the product sections, shopper preview, and save action easy to find", async () => {
+    render(<ShopProvider><ProductBuilder /></ShopProvider>);
+
+    await screen.findByRole("heading", { name: "Price & stock" });
+    expect(screen.getByRole("heading", { name: "Product details" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Photos" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Category" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Product options" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Price & stock" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Preview" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Save product" })).toBeVisible();
+  });
+
   it("creates a simple product with a category and shows a live preview", async () => {
     const fetchMock = mockApi();
     const user = userEvent.setup();
@@ -97,7 +116,9 @@ describe("ProductBuilder", () => {
     await user.type(screen.getByLabelText(/product name/i), "Mango Tee");
     await user.type(screen.getByLabelText(/^price/i), "650");
     await user.type(screen.getByLabelText(/original price/i), "800");
+    await user.click(screen.getByRole("button", { name: "Preview" }));
     expect(within(screen.getByLabelText(/preview of what shoppers/i)).getByRole("heading", { name: "Mango Tee" })).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Close" }));
 
     await user.type(await screen.findByLabelText(/search categories/i), "t-shirts");
     await user.click(await screen.findByRole("button", { name: "Fashion › Men › T-Shirts" }));
@@ -107,7 +128,7 @@ describe("ProductBuilder", () => {
     expect(await screen.findByText(/Product saved successfully/)).toBeVisible();
     const [call] = productCalls(fetchMock);
     expect(call[1]).toMatchObject({ method: "POST" });
-    expect(JSON.parse(String(call[1]?.body))).toMatchObject({ title: "Mango Tee", primaryCategoryId: "tees", productType: "T-Shirts", status: "ACTIVE", variants: [{ priceMinor: 65000, compareAtPriceMinor: 80000 }] });
+    expect(JSON.parse(String(call[1]?.body))).toMatchObject({ title: "Mango Tee", primaryCategoryId: "tees", productType: null, status: "ACTIVE", variants: [{ priceMinor: 65000, compareAtPriceMinor: 80000 }] });
   });
 
   it("blocks saving, explains what is missing and focuses the first problem", async () => {

@@ -7,7 +7,7 @@ import {
   ExternalLink,
   Loader2,
 } from "lucide-react";
-import { useAuth } from "@/features/auth/auth-provider";
+import { useAuth } from "@/features/auth/providers/auth-provider";
 import { createMerchantCommerceApi } from "../api/client";
 import type { StripeMerchantStatus } from "../api/types";
 

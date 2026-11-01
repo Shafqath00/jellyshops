@@ -1,0 +1,31 @@
+"use client";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { AdminPageHeader,AdminEmptyState,AdminNotice,AdminStatus } from "@/components/admin-ui";
+import { useAdminCatalog,type InventoryRow,type CatalogPage } from "@/features/admin/api/catalog-api";
+import { StockHistory } from "@/features/admin/components/stock-history";
+import { STOCK_STATUS_LABEL,STOCK_STATUS_TONE } from "@/features/product-builder/stock";
+export default function StockPage(){
+  const {request,ready,storeId}=useAdminCatalog();
+  const [notes,setNotes]=useState<Record<string,string>>({}),[historyRow,setHistoryRow]=useState<InventoryRow|null>(null);
+  const [rows,setRows]=useState<InventoryRow[]>([]),[drafts,setDrafts]=useState<Record<string,string>>({});
+  const [query,setQuery]=useState(""),[search,setSearch]=useState(""),[cursor,setCursor]=useState<string|null>(null),[history,setHistory]=useState<Array<string|null>>([]),[next,setNext]=useState<string|null>(null);
+  const [error,setError]=useState(""),[messages,setMessages]=useState<Record<string,string>>({}),[busy,setBusy]=useState<string|null>(null),[loading,setLoading]=useState(true),[revision,setRevision]=useState(0);
+  useEffect(()=>{let active=true;if(!ready)return;setLoading(true);void request<CatalogPage<InventoryRow>>("/inventory?limit=50&query="+encodeURIComponent(search)+(cursor?"&cursor="+encodeURIComponent(cursor):"")).then(page=>{if(active){setRows(page.nodes);setNext(page.nextCursor);setError("");}}).catch(e=>{if(active)setError(e.message);}).finally(()=>{if(active)setLoading(false);});return()=>{active=false;};},[request,ready,storeId,search,cursor,revision]);
+  useEffect(()=>{setDrafts({});setMessages({});setRows([]);setCursor(null);setHistory([]);},[storeId]);
+  async function save(row:InventoryRow){
+    const text=drafts[row.variantId]??String(row.quantity??0);
+    if(!/^\d+$/.test(text)||!Number.isSafeInteger(Number(text))){setMessages(current=>({...current,[row.variantId]:"Enter a whole number, zero or more."}));return;}
+    setBusy(row.variantId);setMessages(current=>({...current,[row.variantId]:""}));
+    try{const saved=await request<InventoryRow>("/inventory/"+encodeURIComponent(row.variantId),{method:"PATCH",body:JSON.stringify({quantity:Number(text),expectedRevision:row.revision,...(notes[row.variantId]?.trim()?{note:notes[row.variantId].trim()}:{})})});setNotes(current=>({...current,[row.variantId]:""}));setRows(current=>current.map(item=>item.variantId===saved.variantId?saved:item));setDrafts(current=>{const next={...current};delete next[row.variantId];return next;});setMessages(current=>({...current,[row.variantId]:"Stock saved."}));}
+    catch(e){setMessages(current=>({...current,[row.variantId]:e instanceof Error?e.message:"Could not save stock."}));}finally{setBusy(null);}
+  }
+  return <div><AdminPageHeader title="Stock" description="On hand includes stock reserved by active checkouts." actions={<button className="admin-button" onClick={()=>setRevision(n=>n+1)}>Refresh stock</button>}/>
+    {error&&<AdminNotice error>{error}</AdminNotice>}
+    <div className="admin-table-wrap"><form className="admin-toolbar" onSubmit={event=>{event.preventDefault();setSearch(query);setCursor(null);setHistory([]);}}><input type="search" className="admin-search" aria-label="Search stock" placeholder="Search products, SKU or barcode" value={query} onChange={event=>setQuery(event.target.value)}/><button className="admin-button" type="submit">Search</button></form>
+      {loading?<p className="p-6" role="status">Loading stock…</p>:!rows.length?<AdminEmptyState title="No products found">Add products or try a different search.</AdminEmptyState>:<table className="admin-table"><thead><tr><th>Product</th><th>SKU</th><th>Status</th><th>On hand</th><th>Reserved</th><th>Available</th><th>Update</th></tr></thead><tbody>{rows.map(row=><tr key={row.variantId}><td><Link className="font-medium hover:underline" href={"/admin/products/"+row.productId}>{row.productTitle}</Link><span className="block text-xs text-muted-foreground">{row.variantTitle}</span></td><td>{row.sku||"—"}{row.barcode&&<span className="block text-xs text-muted-foreground">{row.barcode}</span>}</td><td>{row.stockStatus&&<AdminStatus tone={STOCK_STATUS_TONE[row.stockStatus]}>{STOCK_STATUS_LABEL[row.stockStatus]}</AdminStatus>}</td><td>{row.trackInventory?<input className="admin-search !w-24 !min-w-0" aria-label={"On hand for "+row.productTitle+" "+row.variantTitle} inputMode="numeric" value={drafts[row.variantId]??String(row.quantity??0)} onChange={event=>setDrafts(current=>({...current,[row.variantId]:event.target.value}))}/>:<AdminStatus>Not tracked</AdminStatus>}</td><td>{row.trackInventory?row.reserved:"—"}</td><td>{row.availableQuantity??"—"}</td><td>{row.trackInventory&&row.revision&&drafts[row.variantId]!==undefined&&<input className="admin-search !mb-2 !block !w-48 !min-w-0" aria-label={"Reason for changing "+row.productTitle+" "+row.variantTitle} placeholder="Reason (optional)" maxLength={500} value={notes[row.variantId]??""} onChange={event=>setNotes(current=>({...current,[row.variantId]:event.target.value}))}/>}{row.trackInventory&&row.revision?<button className="admin-button" disabled={busy!==null||drafts[row.variantId]===undefined} onClick={()=>void save(row)}>{busy===row.variantId?"Saving…":"Save"}</button>:<Link className="underline text-xs" href={"/admin/products/"+row.productId}>Set up tracking</Link>}{row.trackInventory&&<button className="admin-button ml-2" aria-label={"Stock history for "+row.productTitle+" "+row.variantTitle} onClick={()=>setHistoryRow(row)}>History</button>}{messages[row.variantId]&&<p className="mt-2 max-w-56 text-xs" role="status">{messages[row.variantId]}</p>}</td></tr>)}</tbody></table>}
+    </div>
+    <div className="mt-4 flex justify-end gap-2"><button className="admin-button" disabled={!history.length||loading} onClick={()=>{setCursor(history.at(-1)??null);setHistory(current=>current.slice(0,-1));}}>Previous</button><button className="admin-button" disabled={!next||loading} onClick={()=>{setHistory(current=>[...current,cursor]);setCursor(next);}}>Next</button></div>
+    {historyRow&&<StockHistory variantId={historyRow.variantId} title={historyRow.productTitle+" · "+historyRow.variantTitle} request={request} onClose={()=>setHistoryRow(null)}/>}
+  </div>;
+}

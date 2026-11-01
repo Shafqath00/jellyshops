@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { ConfiguredOptionSelection, ProductOption } from "@/lib/domain";
 import { newChoice, withAddedValues, withKind } from "./choices";
 import { emptyDraft, withOptions, type ProductDraft } from "./draft";
-import { BuyerPreview } from "./BuyerPreview";
+import { BuyerPreview } from "./buyer-preview";
 import { computePreview, draftToProduct, pruneSelections, toggleSelection } from "./preview";
 
 const choice = (name: string, values: string, kind: ProductOption["type"] = "variant", extra: Partial<ProductOption> = {}): ProductOption =>

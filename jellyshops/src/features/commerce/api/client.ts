@@ -13,8 +13,11 @@ import type {
   OrderListQuery, OrderListResult, OrderEditInput, OrderEditPreview,
 } from "./types";
 import type { Collection, Product, ProductOption } from "@/lib/domain";
+import { resolveMediaUrls } from "@/lib/media-urls";
 
 export interface PublicCatalogVariant {
+  trackInventory?: boolean;
+  reserved?: number | null;
   id: string;
   title: string;
   sku: string | null;
@@ -22,18 +25,32 @@ export interface PublicCatalogVariant {
   compareAtPriceMinor?: number | null;
   costMinor?: number | null;
   unitPricing?: { totalAmount: number; totalUnit: string; baseAmount: number; baseUnit: string } | null;
+  barcode?: string | null;
+  lowStockThreshold?: number | null;
+  weightGrams?: number | null;
+  lengthMm?: number | null;
+  widthMm?: number | null;
+  heightMm?: number | null;
+  countryOfOrigin?: string | null;
+  hsCode?: string | null;
+  sellable?: boolean;
+  mediaId?: string | null;
   quantity: number | null;
   available: boolean;
   options?: Record<string, unknown>;
 }
 
 export interface PublicCatalogProduct {
+  vendor?: string | null;
   fulfillmentType?: "PHYSICAL" | "DIGITAL";
   id: string;
   storeId: string;
   handle: string;
   title: string;
   description: string;
+  descriptionDoc?: import("@jelly/storefront-schema").RichTextDocument | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
   specifications?: Record<string, string>;
   productType: string | null;
   tags?: string[];
@@ -44,7 +61,7 @@ export interface PublicCatalogProduct {
   collectionIds?: string[];
   options?: unknown[];
   inventoryOptionIds?: string[];
-  media: Array<{ id: string; url: string; altText: string | null; position: number }>;
+  media: Array<import("@jelly/storefront-schema").ProductMediaLike & { position: number }>;
   variants: PublicCatalogVariant[];
   available: boolean;
 }
@@ -61,6 +78,7 @@ export interface PublicCatalogCollection {
   handle: string;
   title: string;
   description: string;
+  descriptionDoc?: import("@jelly/storefront-schema").RichTextDocument | null;
   productIds: string[];
 }
 
@@ -88,8 +106,14 @@ export function catalogProductToStorefrontProduct(product: PublicCatalogProduct)
     name: product.title,
     slug: product.handle,
     description: product.description,
+    descriptionDoc: product.descriptionDoc ?? null,
+    seoTitle: product.seoTitle ?? undefined,
+    seoDescription: product.seoDescription ?? undefined,
     specifications: product.specifications ?? {},
     category: product.productType ?? product.tags?.[0] ?? "Collection",
+    productType: product.productType ?? "",
+    vendor: product.vendor ?? undefined,
+    tags: product.tags ?? [],
     imageUrl: image?.url ?? "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1200&q=85",
     published: product.status === undefined || product.status === "ACTIVE",
     archived: product.status === "ARCHIVED",
@@ -99,16 +123,28 @@ export function catalogProductToStorefrontProduct(product: PublicCatalogProduct)
     collectionIds: product.collectionIds ?? [],
     options: (product.options ?? []) as ProductOption[],
     inventoryOptionIds: product.inventoryOptionIds ?? [],
-    media: product.media.map((entry) => ({ id: entry.id, url: entry.url, altText: entry.altText ?? undefined })),
+    media: product.media.map((entry) => ({ ...entry, altText: entry.altText ?? undefined })),
     featured: false,
     variants: product.variants.map((variant) => ({
       id: variant.id,
       name: variant.title,
       sku: variant.sku ?? "",
+      trackInventory: variant.trackInventory,
+      reserved: variant.reserved ?? 0,
       priceMinor: variant.priceMinor,
       compareAtPriceMinor: variant.compareAtPriceMinor ?? undefined,
       costMinor: variant.costMinor ?? undefined,
       unitPricing: variant.unitPricing ?? undefined,
+      barcode: variant.barcode ?? undefined,
+      lowStockThreshold: variant.lowStockThreshold ?? undefined,
+      weightGrams: variant.weightGrams ?? undefined,
+      lengthMm: variant.lengthMm ?? undefined,
+      widthMm: variant.widthMm ?? undefined,
+      heightMm: variant.heightMm ?? undefined,
+      countryOfOrigin: variant.countryOfOrigin ?? undefined,
+      hsCode: variant.hsCode ?? undefined,
+      sellable: variant.sellable ?? true,
+      mediaId: variant.mediaId ?? undefined,
       stock: product.fulfillmentType === "DIGITAL" ? Number.MAX_SAFE_INTEGER : variant.quantity ?? (variant.available ? Number.MAX_SAFE_INTEGER : 0),
       available: product.fulfillmentType === "DIGITAL" || variant.available,
       options: variant.options as Record<string, string> | undefined,
@@ -129,7 +165,7 @@ export function createCommerceApi({ baseUrl, token, fetch: fetcher = fetch }: Co
       const body = await response.json().catch(() => ({})) as { error?: { message?: string } };
       throw Object.assign(new Error(body.error?.message ?? "Commerce request failed"), { status: response.status });
     }
-    return response.json() as Promise<T>;
+    return resolveMediaUrls(await response.json() as T, origin);
   }
   return {
     getPublicStore: (storeId: string) => request<{ store: PublicStoreDetails }>(`/api/public/stores/${encodeURIComponent(storeId)}`),
@@ -152,6 +188,7 @@ export function createCommerceApi({ baseUrl, token, fetch: fetcher = fetch }: Co
         name: collection.title,
         slug: collection.handle,
         ...(collection.description ? { description: collection.description } : {}),
+        ...(collection.descriptionDoc ? { descriptionDoc: collection.descriptionDoc } : {}),
       }));
     },
     createAttempt: (storeId: string, input: CommerceAttemptInput) => request<CommerceAttemptResult>(`/api/public/stores/${encodeURIComponent(storeId)}/checkout/attempts`, { method: "POST", body: JSON.stringify(input) }),
@@ -164,28 +201,35 @@ export type CommerceApi = ReturnType<typeof createCommerceApi>;
 
 interface MerchantCommerceClientOptions extends CommerceClientOptions {
   token: string;
+  getAccessToken?: (refresh?: boolean) => Promise<string>;
 }
 
 /**
  * Authenticated browser boundary for merchant-only order actions.
  * The token comes from the merchant-session adapter, never from local order data.
  */
-export function createMerchantCommerceApi({ baseUrl, token, fetch: fetcher = fetch }: MerchantCommerceClientOptions) {
+export function createMerchantCommerceApi({ baseUrl, token, getAccessToken, fetch: fetcher = fetch }: MerchantCommerceClientOptions) {
   const origin = baseUrl.replace(/\/$/, "");
-  async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
-    const response = await fetcher(`${origin}${path}`, {
+  async function authenticatedFetch(path: string, init: RequestInit = {}): Promise<Response> {
+    const send = (accessToken: string) => fetcher(`${origin}${path}`, {
       ...init,
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
         ...init.headers,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
+    const response = await send(getAccessToken ? await getAccessToken() : token);
+    // A 401 is rejected before the command runs. Retry once, preserving its body/idempotency key.
+    return response.status === 401 && getAccessToken ? send(await getAccessToken(true)) : response;
+  }
+  async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+    const response = await authenticatedFetch(path, init);
     if (!response.ok) {
       const body = await response.json().catch(() => ({})) as { error?: { message?: string } };
       throw new Error(body.error?.message ?? "Merchant commerce request failed");
     }
-    return response.json() as Promise<T>;
+    return resolveMediaUrls(await response.json() as T, origin);
   }
   const ordersPath = (storeId: string) => `/api/stores/${encodeURIComponent(storeId)}/orders`;
   const stripeConnectPath = (storeId: string) => `/api/stores/${encodeURIComponent(storeId)}/stripe-connect`;
@@ -219,7 +263,7 @@ export function createMerchantCommerceApi({ baseUrl, token, fetch: fetcher = fet
     resendOrderNotification: (storeId: string, orderId: string, type: string) => command(storeId, orderId, "notifications/resend", { type }),
     listOrderNotifications: (storeId: string, orderId: string) => request<{ notifications: NonNullable<MerchantOrderDetail["notifications"]> }>(`/api/stores/${encodeURIComponent(storeId)}/order-notifications?orderId=${encodeURIComponent(orderId)}`),
     downloadInvoice: async (storeId: string, orderId: string, format: "pdf" | "html" = "pdf", revision?: number) => {
-      const response = await fetcher(`${origin}${orderPath(storeId, orderId)}/invoice?format=${format}${revision ? `&revision=${revision}` : ""}`, { headers: { Authorization: `Bearer ${token}` } });
+      const response = await authenticatedFetch(`${orderPath(storeId, orderId)}/invoice?format=${format}${revision ? `&revision=${revision}` : ""}`);
       if (!response.ok) throw new Error("Unable to download invoice");
       return response.blob();
     },

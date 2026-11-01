@@ -46,6 +46,8 @@ export interface StoreDesignRecord {
 }
 
 export interface ProductVariant {
+  trackInventory?: boolean;
+  reserved?: number;
   id: string;
   name: string;
   sku: string;
@@ -54,6 +56,22 @@ export interface ProductVariant {
   /** Merchant-only cost per item (never sent to shoppers). */
   costMinor?: number;
   unitPricing?: { totalAmount: number; totalUnit: string; baseAmount: number; baseUnit: string };
+  barcode?: string;
+  /** Merchant-only: warn when this many or fewer are still available. */
+  lowStockThreshold?: number;
+  /** Packed weight in grams and size in millimetres; for fulfilment and customs. */
+  weightGrams?: number;
+  lengthMm?: number;
+  widthMm?: number;
+  heightMm?: number;
+  /** ISO 3166-1 alpha-2. */
+  countryOfOrigin?: string;
+  /** Digits only. */
+  hsCode?: string;
+  /** False once the merchant stops selling this combination. */
+  sellable?: boolean;
+  /** The product photo shown first for this combination. */
+  mediaId?: string;
   stock: number;
   /** Explicit catalog availability covers untracked inventory, where quantity is unknown. */
   available?: boolean;
@@ -100,7 +118,7 @@ export interface Category {
 }
 
 export interface Brand { id: string; storeId: string; name: string; slug?: string; logo?: string; }
-export interface Collection { id: string; storeId: string; name: string; slug: string; description?: string; imageUrl?: string; }
+export interface Collection { id: string; storeId: string; name: string; slug: string; description?: string; descriptionDoc?: import("@jelly/storefront-schema").RichTextDocument | null; imageUrl?: string; }
 export interface CategoryOptionDefinition {
   id: string;
   storeId: string;
@@ -113,16 +131,23 @@ export interface CategoryOptionDefinition {
 }
 
 export interface Product {
+  productType?: string;
+  tags?: string[];
   fulfillmentType?: "PHYSICAL" | "DIGITAL";
   id: string;
   storeId: string;
   name: string;
   slug: string;
   description: string;
+  /** Rich text behind `description`; null or absent for plain-text descriptions. */
+  descriptionDoc?: import("@jelly/storefront-schema").RichTextDocument | null;
+  /** Search engine title and description; empty means the storefront uses the product name and description. */
+  seoTitle?: string;
+  seoDescription?: string;
   specifications?: Record<string, string>;
   category: string;
   imageUrl: string;
-  media?: Array<{ id: string; url: string; altText?: string }>;
+  media?: import("@jelly/storefront-schema").ProductMediaLike[];
   vendor?: string;
   published: boolean;
   archived: boolean;

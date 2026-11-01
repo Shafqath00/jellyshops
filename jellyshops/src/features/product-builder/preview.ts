@@ -21,6 +21,7 @@ export function draftToProduct(draft: ProductDraft): Product {
   const usableAxes = options.filter((option) => axisIds.has(option.id));
   const variants: ProductVariant[] = (usableAxes.length > 0 ? draft.variants : effectiveVariants({ ...draft, options: [] })).map((variant, index) => ({
     ...variant,
+    stock: variant.trackInventory === false || (usableAxes.length === 0 && draft.trackInventory === false) ? Number.MAX_SAFE_INTEGER : variant.stock,
     id: variant.id || `preview-${index}`,
     compareAtPriceMinor: usableAxes.length === 0 && draft.compareAtPrice.trim() && Number.isFinite(majorToMinor(draft.compareAtPrice)) ? majorToMinor(draft.compareAtPrice) : variant.compareAtPriceMinor,
   }));
