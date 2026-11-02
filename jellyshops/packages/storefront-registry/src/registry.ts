@@ -23,6 +23,8 @@ const sectionDefinitions = new Map(sections.map((definition) => [definition.type
 
 export function getSectionDefinition(type: string): SectionDefinition | undefined { return sectionDefinitions.get(type); }
 export function getBlockDefinition(type: string) { return blockDefinitions.get(type); }
+/** Every block definition, in registration order. */
+export function listBlockDefinitions() { return [...blockDefinitions.values()]; }
 
 /**
  * The block types a block at `depth` (1 = placed in the section) may hold.

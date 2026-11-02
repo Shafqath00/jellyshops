@@ -438,7 +438,10 @@ The full chain: **theme source** (manifest, CSS, registry definitions, renderers
 | Task | Command | Notes |
 | --- | --- | --- |
 | Run the app | `cd jellyshops && npm run dev` | Builds schema, registry and themes first, then `next dev --turbopack` |
-| Hot reload | automatic for **renderer and UI** source and for CSS | `storefront-renderer` and `storefront-ui` are consumed as source. **Schema, registry and themes are consumed as built output**: after changing them run `npm run build:storefront-packages` (no watch mode yet) |
+| Hot reload | automatic for **renderer and UI** source and for CSS | `storefront-renderer` and `storefront-ui` are consumed as source |
+| Rebuild on change | `npm run watch:packages` (watch only) or `npm run dev:watch` (watch and dev server) | **Schema, registry and themes are consumed as built output.** The watcher builds them once, then rebuilds each on every change. Without it, run `npm run build:storefront-packages` after each edit |
+| Validate a theme folder | `node scripts/validate-theme.mjs <folder>` (add `--json` for tools) | Checks `theme.json` and `starter.json` with the platform's own rules; errors exit with code 1 |
+| Regenerate the schemas | `node scripts/generate-schemas.mjs` (`--check` to verify) | Writes `docs/schemas/theme.schema.json` and `sections.json`; a test fails when they are stale |
 | Type check, lint | `npm run typecheck`, `npm run lint` | |
 | Unit tests | `npm test` (Vitest) | Add tests beside each file |
 | Browser tests | `npm run test:e2e` (Playwright) | Needs a test merchant login; see `docs/development/testing.md` |
@@ -448,6 +451,7 @@ The full chain: **theme source** (manifest, CSS, registry definitions, renderers
 
 ### Validation layers (all exist)
 
+0. **Whole theme project:** `validateThemeProject()` (`storefront-themes/src/validate-theme-project.ts`), run by `node scripts/validate-theme.mjs <folder>`. It runs layers 1 to 3 below and adds: every setting's default agrees with `settingsDefaults`, unique ids, templates for the recommended pages, files named in the manifest exist, and **nothing executable** (no scripts, script links, inline handlers, HTML tags that load code, CSS imports, or links that are not local or https). The upload API will reuse it unchanged.
 1. **Manifest:** `validateThemeManifest()` (strict zod schema) and `validateThemeSettings(themeId, settings)` (each setting's type and bounds; custom CSS length and safety).
 2. **Starter pack:** `validateV4StarterPack()`.
 3. **Section placement:** `validateSectionAgainstRegistry(section, pageType)`: known type, allowed on the page, valid settings, allowed blocks and limits, valid phone/tablet and translation keys.
@@ -474,8 +478,11 @@ Real files, validated by `docs/examples/jelly-studio` tests:
 ```text
 docs/examples/jelly-studio/
   theme.json      the manifest above (14 settings in 6 groups)
-  starter.json    global header, announcement and footer; home, product and collection templates
+  starter.json    global header, announcement and footer; home, product, collection, cart, search, page and 404 templates
+  assets/         preview.svg, mark.svg (a theme folder keeps its files in assets/; today they are copied to public/themes/<id>/)
 ```
+
+Check it yourself: `node scripts/validate-theme.mjs docs/examples/jelly-studio` prints `No errors.`
 
 **What the example demonstrates**
 
@@ -500,7 +507,7 @@ docs/examples/jelly-studio/
 6. Add the preview config and route (step 12).
 7. Repack (`node scripts/prepare-shared-packages.mjs`), run the tests, open `/theme-preview/jelly-studio` at three widths, then install the starter on a staging store and publish.
 
-The example uses only existing sections, so it needs no custom section code. The `promo-banner` in step 8 shows how to add one. **Sketched, not compiled:** the TypeScript and CSS snippets in this guide follow the real files they were taken from, but only the JSON in `docs/examples/jelly-studio` is machine-checked.
+The example uses only existing sections, so it needs no custom section code. It also shows the layout a future theme package will have (`theme.json`, `starter.json`, `assets/`). The `promo-banner` in step 8 shows how to add one. **Sketched, not compiled:** the TypeScript and CSS snippets in this guide follow the real files they were taken from, but only the JSON in `docs/examples/jelly-studio` is machine-checked.
 
 ---
 

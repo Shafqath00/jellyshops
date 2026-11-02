@@ -50,7 +50,7 @@ describe("docs example theme: Jelly Studio", () => {
   });
 
   it("uses unique ids and has a template for each page the guide builds", () => {
-    expect(Object.keys(starter.templates).sort()).toEqual(["collection", "home", "product"]);
+    expect(Object.keys(starter.templates).sort()).toEqual(["cart", "collection", "home", "not-found", "page", "product", "search"]);
     const ids = [...Object.values(starter.globalSections).map((section) => section.id), ...Object.values(starter.templates).flatMap((template) => template.sections.flatMap((placement) => placement.kind === "inline" ? [placement.section.id, ...placement.section.blocks.map((block) => block.id)] : []))];
     expect(new Set(ids).size).toBe(ids.length);
   });

@@ -31,7 +31,7 @@ const settingDefinitionSchema = z.object({
   }
 });
 
-const manifestSchema = z.object({
+export const themeManifestSchema = z.object({
   id: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   name: z.string().min(1),
   version: z.string().regex(/^\d+\.\d+\.\d+(?:[-+][\w.-]+)?$/),
@@ -49,7 +49,7 @@ const manifestSchema = z.object({
   }
 });
 
-export type ThemeManifest = z.infer<typeof manifestSchema>;
+export type ThemeManifest = z.infer<typeof themeManifestSchema>;
 export type ThemeSettingDefinition = z.infer<typeof settingDefinitionSchema>;
 export type ThemeSettingValidationIssue = { path: string; message: string };
 export type ResolvedTheme = {
@@ -88,7 +88,7 @@ function valueMatches(definition: ThemeSettingDefinition, value: unknown): boole
 function availableManifest(id: string): ThemeManifest | null {
   try {
     const definition = getThemeDefinition(id);
-    const manifest = manifestSchema.safeParse(definition.manifest);
+    const manifest = themeManifestSchema.safeParse(definition.manifest);
     return manifest.success && manifest.data.enabled ? manifest.data : null;
   } catch { return null; }
 }
@@ -117,7 +117,7 @@ export function getThemeAsset(themeId: string, assetId: string): string | undefi
   return [...manifest.stylesheets, ...manifest.scripts, ...manifest.icons, ...manifest.assets, ...manifest.fonts.filter((font) => font.path).map((font) => ({ id: font.id, path: font.path! }))].find((asset) => asset.id === assetId)?.path;
 }
 
-export function validateThemeManifest(value: unknown): ThemeManifest { return manifestSchema.parse(value); }
+export function validateThemeManifest(value: unknown): ThemeManifest { return themeManifestSchema.parse(value); }
 
 /** Validates only declared keys; unknown keys survive upgrades and extensions. */
 export function validateThemeSettings(themeId: string, settings: Record<string, unknown>): ThemeSettingValidationIssue[] {

@@ -1,5 +1,8 @@
 export { applyThemePreset, COMPLETE_STOREFRONT_THEME_IDS, getThemeDefinition, isCompleteStorefrontTheme, listThemes, resolveDesignTokens } from "./theme-registry.js";
 export { DEFAULT_THEME_ID, getThemeAsset, resolveTheme, resolveThemePreview, validateThemeManifest, validateThemeSettings } from "./theme-resolver.js";
+export { buildSchemaFiles } from "./schema-export.js";
+export { validateThemeProject } from "./validate-theme-project.js";
+export type { ThemeProjectInput, ThemeProjectIssue } from "./validate-theme-project.js";
 export { resolveThemeShell, resolveThemeShellComponent } from "./theme-shell-resolver.js";
 export { resolveStorefrontThemeTokens } from "./storefront-theme-tokens.js";
 export type { LegacyStoreThemeValues } from "./storefront-theme-tokens.js";

@@ -23,7 +23,9 @@ Status: **Exists** = works and is tested. **Partial** = part of it works or a pl
 | Safe migration of merchant customisations | **Missing** | No migration step between theme versions. Renaming a setting key or section type breaks saved data. Only manual "ship a new theme id" |
 | Theme library per store | **Partial** | "Saved looks" store a theme + settings snapshot (`ThemeLibraryEntry`). Pages and sections are shared, so it is not several full themes |
 | Local preview without a store | **Partial** | `/theme-preview/<theme>` inside the monorepo app (three widths, every template, sample data). No standalone dev server, no mock data for arbitrary themes, not usable outside the repo |
-| Hot reload | **Partial** | Works for renderer, UI and CSS (consumed as source). Schema, registry and themes are consumed as built output with no watch mode (`npm run build:storefront-packages`) |
+| Hot reload | **Exists** (2026-11-03) | Renderer, UI and CSS reload as source. `npm run watch:packages` / `dev:watch` rebuild the schema, registry and themes packages on change (`jellyshops/scripts/watch-packages.mjs`) |
+| Theme project validator (CLI-ready) | **Exists** (2026-11-03) | `validateThemeProject()` and `node scripts/validate-theme.mjs <folder>`: manifest, settings, starter, assets, and a declarative-only check that rejects anything executable. Same rules the upload API will use |
+| JSON Schema and section catalogue | **Exists** (2026-11-03) | `docs/schemas/theme.schema.json` and `sections.json`, generated from the platform's own schemas by `scripts/generate-schemas.mjs`; a test fails if stale |
 | Schema-based tests and CI | **Partial** | Vitest, axe, Playwright and CI exist. No theme conformance test suite a third party can run; only the validators above |
 | Runtime registration of themes | **Missing** | Themes are a hard-coded array in `theme-registry.ts`; manifests are imported statically. `listThemes()` and the backend theme catalogue read that array |
 | Runtime registration of sections and blocks | **Partial** | The renderer's `SectionRenderRegistry` has `register()` and `unregister()`, but the default registry is built in code. The definition registry (`registry.ts`) is a static array with no register function |
@@ -54,6 +56,10 @@ So "upload a theme" needs an explicit trust model. Options:
 | **D. Private registry** | C delivered as versioned packages from a private registry with signing | Strong | High; fits partner agencies | Medium |
 
 **Recommendation: ship A first for everyone, and offer C or D to vetted partners. Treat B as a later research item.** This gives merchants and developers a real upload path soon, without making every theme a security review.
+
+> **Decision (2026-11-03): declarative first.** Uploaded themes will contain data, CSS and assets only: no developer code runs in shoppers' browsers or the merchant's editor. Reviewed code themes (options C and D) stay a later, partner-only phase (Phase 6). Consequences for the plan: section recipes and the primitive catalogue are on the critical path for Phase 3, and the validators must reject anything executable (scripts, remote CSS, raw HTML, unsafe URLs) from the first upload.
+>
+> **Progress:** Phase 0 started 2026-11-03. Done: theme project validator and `validate-theme` script, JSON Schema and section catalogue export, package watch mode. Open: starter packs owned by the theme, theme auto-discovery, `registerSection` (the three that change shared code and need a snapshot test of the existing packs).
 
 A also matches the product: merchants customise through settings, not code. The core sections already cover most storefront needs (47 sections, 21 block types).
 
@@ -154,12 +160,12 @@ Each phase ends in something usable. Sizes: S ≤ 1 week, M 2 to 3 weeks, L 4 to
 
 | Task | Acceptance |
 | --- | --- |
-| Starter packs move into each theme (`starter.json`), `makePack` becomes a loader | Adding a theme needs no edit to shared starter code; existing four packs produce identical output (snapshot test) |
-| Theme auto-discovery from `themes/*/theme.json` | A new folder appears in the catalogue without editing `theme-registry.ts` |
-| `registerSection` with namespacing in the definition registry | A section added from a theme folder shows in the editor and validates on Publish |
-| JSON Schema export for manifest, section, block, starter | `npm run schemas` writes files; a test fails if they drift from the zod schemas |
-| `scripts/validate-theme.mjs <folder>` using the existing validators | `docs/examples/jelly-studio` passes; a broken manifest prints a plain error |
-| Watch mode for schema, registry and themes | Editing a registry file updates the dev app without a manual build |
+| Starter packs move into each theme (`starter.json`), `makePack` becomes a loader (open) | Adding a theme needs no edit to shared starter code; existing four packs produce identical output (snapshot test) |
+| Theme auto-discovery from `themes/*/theme.json` (open) | A new folder appears in the catalogue without editing `theme-registry.ts` |
+| `registerSection` with namespacing in the definition registry (open) | A section added from a theme folder shows in the editor and validates on Publish |
+| JSON Schema export for manifest, section, block, starter **(done; starter schema still open)** | `node scripts/generate-schemas.mjs` writes files; a test fails if they drift from the zod schemas |
+| `scripts/validate-theme.mjs <folder>` using the existing validators **(done)** | `docs/examples/jelly-studio` passes; a broken manifest prints a plain error |
+| Watch mode for schema, registry and themes **(done)** | Editing a registry file updates the dev app without a manual build |
 
 ### Phase 1: Theme SDK and conformance tests (M)
 
