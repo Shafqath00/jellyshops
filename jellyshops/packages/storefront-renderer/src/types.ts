@@ -9,7 +9,7 @@ export interface CollectionPresentationContext {
   totalProducts: number;
 }
 export interface ProductPresentationContext {
-  product: { id: string; title: string; description: string; descriptionDoc?: RichTextDocument | null; imageUrl: string; galleryEnabled?: boolean; specifications?: Record<string, string>; shippingCopy?: string; media?: ProductMediaLike[]; sku?: string; vendor?: string; options: Array<{ id: string; name: string; required: boolean; multiple?: boolean; missing?: boolean; values: Array<{ id: string; label: string; selected: boolean; available: boolean; priceAdjustment?: string; previewImageUrl?: string }> }> };
+  product: { id: string; title: string; description: string; descriptionDoc?: RichTextDocument | null; imageUrl: string; galleryEnabled?: boolean; specifications?: Record<string, string>; shippingCopy?: string; media?: ProductMediaLike[]; sku?: string; vendor?: string; options: Array<{ id: string; name: string; required: boolean; /** "color" or "image" draws swatches instead of text buttons. */ display?: "color" | "image"; multiple?: boolean; missing?: boolean; values: Array<{ id: string; label: string; selected: boolean; available: boolean; priceAdjustment?: string; previewImageUrl?: string; color?: string; image?: string }> }> };
   selection: Array<{ optionId: string; valueId: string }>;
   quantity: number;
   pricing: { price: string; compareAtPrice?: string };

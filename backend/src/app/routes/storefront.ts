@@ -14,6 +14,32 @@ import { StorefrontBindingValueService } from "../../dynamic-sources/binding-val
 import { createEditorBindingValuesRouter, createPublicBindingValuesRouter } from "../../dynamic-sources/binding-values-routes.js";
 import { DynamicValueResolver } from "../../dynamic-sources/resolver.js";
 import { createPublicMetaobjectRouter, PublicMetaobjectService } from "../../custom-data/public-metaobjects.js";
+import { createMerchantAccessRouter, createPublicAccessRouter } from "../../storefront/access/routes.js";
+import { StorefrontAccessService } from "../../storefront/access/service.js";
+import { createThemeLibraryRouter } from "../../storefront/theme-library/routes.js";
+import { ThemeLibraryService } from "../../storefront/theme-library/service.js";
+
+const accessServices = new WeakMap<AppContext, StorefrontAccessService | null>();
+
+/** Password protection for storefronts; needs the database, so it is off in the local JSON mode. */
+function accessService(context: AppContext): StorefrontAccessService | undefined {
+  if (!accessServices.has(context)) {
+    const database = context.routeDependencies.commerceDatabase;
+    accessServices.set(context, database ? new StorefrontAccessService({ query: (text: string, values?: unknown[]) => database.transaction((transaction) => transaction.query(text, values)) } as never) : null);
+  }
+  return accessServices.get(context) ?? undefined;
+}
+
+const libraryServices = new WeakMap<AppContext, ThemeLibraryService | null>();
+
+/** The theme library (saved looks); needs the database, so it is off in the local JSON mode. */
+function libraryService(context: AppContext): ThemeLibraryService | undefined {
+  if (!libraryServices.has(context)) {
+    const database = context.routeDependencies.commerceDatabase;
+    libraryServices.set(context, database ? new ThemeLibraryService({ query: (text: string, values?: unknown[]) => database.transaction((transaction) => transaction.query(text, values)) } as never) : null);
+  }
+  return libraryServices.get(context) ?? undefined;
+}
 
 const bindingValueServices = new WeakMap<AppContext, StorefrontBindingValueService | null>();
 
@@ -55,6 +81,8 @@ export function mountPublicStorefrontContextRoutes(app: Express, context: AppCon
   if (bindingValues) {
     app.use("/api/public/stores/:storeId/storefront/binding-values", createPublicBindingValuesRouter(bindingValues));
   }
+  const access = accessService(context);
+  if (access) app.use("/api/public/stores/:storeId/storefront/access", createPublicAccessRouter(access));
   const metaobjects = context.routeDependencies.metaobjectService;
   if (metaobjects) {
     app.use("/api/public/stores/:storeId/storefront/metaobjects", createPublicMetaobjectRouter(new PublicMetaobjectService(metaobjects)));
@@ -83,6 +111,10 @@ export function mountStorefrontRoutes(app: Express, context: AppContext): void {
     ),
   );
 
+  const access = accessService(context);
+  if (access) app.use("/api/stores/:storeId/storefront", createMerchantAccessRouter(access, authProvider));
+  const library = libraryService(context);
+  if (library) app.use("/api/stores/:storeId/storefront", createThemeLibraryRouter(library, authProvider));
   const bindingValues = bindingValueService(context);
   if (bindingValues) {
     app.use("/api/stores/:storeId/storefront", createEditorBindingValuesRouter(bindingValues, authProvider));

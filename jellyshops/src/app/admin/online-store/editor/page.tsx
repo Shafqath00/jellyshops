@@ -47,6 +47,7 @@ import type {
   StorefrontTemplateRecord,
   ThemeCatalogEntry,
   ThemeConfigurationRecord,
+  ThemeLookRecord,
   PageResource,
   WorkspaceRecord,
 } from "@/features/store-editor/api/types";
@@ -54,6 +55,7 @@ import { GlobalSectionPanel } from "@/features/store-editor/components/global-se
 import { SettingGroups } from "@/features/store-editor/components/inspector/setting-groups";
 import { RichTextDocumentEditor } from "@/features/store-editor/components/inspector/rich-text-document-editor";
 import { ThemeSettingsPanel } from "@/features/store-editor/components/inspector/theme-settings-panel";
+import { ThemeLibraryPanel } from "@/features/store-editor/components/theme-library-panel";
 import { PublishControls } from "@/features/store-editor/components/publish-controls";
 import { PublishHistory } from "@/features/store-editor/components/publish-history";
 import { PublishDiagnostics } from "@/features/store-editor/components/publish-diagnostics";
@@ -130,6 +132,10 @@ function StoreEditorWorkspace() {
   };
   const [menuRecords, setMenuRecords] = useState<MenuRecord[]>([]);
   const [presets, setPresets] = useState<SectionPresetRecord[]>([]);
+  // Theme library (saved looks); stays empty on a backend without it.
+  const [looks, setLooks] = useState<ThemeLookRecord[]>([]);
+  const [looksError, setLooksError] = useState("");
+  const [looksBusy, setLooksBusy] = useState(false);
   const [dynamicSources, setDynamicSources] = useState<DynamicSourceDescriptor[]>([]);
   const [catalog, setCatalog] = useState<DemoCatalog>({ products: [], collections: [] });
   const [pages, setPages] = useState<PageResource[]>([]);
@@ -503,14 +509,50 @@ function StoreEditorWorkspace() {
     }) ?? false;
   };
 
-  const persistThemeSetting = async (path: string, value: unknown, record = true) => {
+  useEffect(() => {
+    if (!api || !backendStoreId) return;
+    let active = true;
+    api.listThemeLooks(backendStoreId).then((result) => { if (active) setLooks(result.looks); }).catch(() => undefined);
+    return () => { active = false; };
+  }, [api, backendStoreId]);
+
+  const saveThemeLook = async (name: string) => {
+    if (!api || !themeDraft.current || looksBusy) return;
+    setLooksBusy(true); setLooksError("");
+    try {
+      if (!await saveQueue.current?.flush()) return;
+      const current = themeDraft.current;
+      const result = await api.saveThemeLook(backendStoreId, { name, themeId: current.themeId, ...(current.themeVersion ? { themeVersion: current.themeVersion } : {}), settings: current.settings });
+      setLooks((existing) => [...existing, result.look]);
+    } catch (error) { setLooksError(error instanceof Error ? error.message : "Could not save this look. Try again."); }
+    finally { setLooksBusy(false); }
+  };
+
+  const renameThemeLook = async (look: { id: string }, name: string) => {
+    if (!api || looksBusy) return;
+    setLooksBusy(true); setLooksError("");
+    try { const result = await api.renameThemeLook(backendStoreId, look.id, name); setLooks((existing) => existing.map((item) => item.id === look.id ? result.look : item)); }
+    catch (error) { setLooksError(error instanceof Error ? error.message : "Could not rename this look. Try again."); }
+    finally { setLooksBusy(false); }
+  };
+
+  const deleteThemeLook = async (look: { id: string }) => {
+    if (!api || looksBusy) return;
+    setLooksBusy(true); setLooksError("");
+    try { await api.deleteThemeLook(backendStoreId, look.id); setLooks((existing) => existing.filter((item) => item.id !== look.id)); }
+    catch (error) { setLooksError(error instanceof Error ? error.message : "Could not delete this look. Try again."); }
+    finally { setLooksBusy(false); }
+  };
+
+  const persistThemeSetting = async (path: string, value: unknown, record = true, look?: { themeId: string; themeVersion: string; settings: Record<string, unknown> }) => {
     if (convertingRef.current) return;
     if (!api || !themeDraft.current) return;
     const previous = themeDraft.current;
-    const settings = path ? setThemeSetting(previous.settings, path, value) : value as Record<string, unknown>;
-    if (record) recordHistory({ kind: "theme", id: "theme", before: previous.settings, after: settings });
-    const draft = { ...previous, settings };
-    rememberUnsaved(backendStoreId, { kind: "theme", id: "theme", baseRevision: draft.revision, value: settings });
+    const settings = look ? structuredClone(look.settings) : path ? setThemeSetting(previous.settings, path, value) : value as Record<string, unknown>;
+    // Applying a saved look also changes the theme itself, which undo does not bring back; save the current look first to keep it.
+    if (record && !look) recordHistory({ kind: "theme", id: "theme", before: previous.settings, after: settings });
+    const draft = { ...previous, settings, ...(look ? { themeId: look.themeId, themeVersion: look.themeVersion } : {}) };
+    if (!look) rememberUnsaved(backendStoreId, { kind: "theme", id: "theme", baseRevision: draft.revision, value: settings });
     setThemeConfiguration(draft);
     invalidatePreview();
     setDiagnostics([]);
@@ -859,6 +901,18 @@ function StoreEditorWorkspace() {
   const renderInspectorPanel = () => (
     <>
       {selection?.kind === "theme" && (
+        <>
+        <ThemeLibraryPanel
+          looks={looks}
+          currentThemeName={selectedTheme?.name ?? "Current theme"}
+          themeName={(themeId) => themeCatalog.find((theme) => theme.id === themeId)?.name ?? themeId}
+          busy={looksBusy}
+          error={looksError}
+          onSave={(name) => { void saveThemeLook(name); }}
+          onApply={(look) => { void persistThemeSetting("", undefined, false, look); }}
+          onRename={(look, name) => { void renameThemeLook(look, name); }}
+          onDelete={(look) => { void deleteThemeLook(look); }}
+        />
         <ThemeSettingsPanel
           schema={selectedTheme?.settingsSchema ?? []}
           settings={themeConfiguration?.settings ?? {}}
@@ -866,6 +920,7 @@ function StoreEditorWorkspace() {
           upload={(file, onProgress) => api.uploadMedia(backendStoreId, file, onProgress)}
           onChange={(path, value) => { void persistThemeSetting(path, value); }}
         />
+        </>
       )}
 
       {diagnostics.length > 0 && (

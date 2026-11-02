@@ -368,3 +368,12 @@
 @keyframes jelly-cart-slide { from { transform: translateX(100%); } }
 @keyframes jelly-cart-fade { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .jelly-cart-drawer-panel, .jelly-cart-drawer-backdrop { animation: none; } }
+
+/* Colour and image swatches for product choices (Choices > Show as > Colour swatches / Photos). */
+[data-jelly-theme] .jelly-product-option-values[data-display] button { display: inline-grid; place-items: center; width: 44px; height: 44px; min-width: 44px; padding: 0; border-radius: 50%; background: transparent; }
+[data-jelly-theme] .jelly-product-option-values[data-display="image"] button { width: 56px; height: 56px; border-radius: var(--jelly-card-radius, 4px); overflow: hidden; }
+[data-jelly-theme] .jelly-product-option-values[data-display] button .jelly-swatch { display: block; width: 28px; height: 28px; border-radius: 50%; background: var(--swatch); box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.18); }
+[data-jelly-theme] .jelly-product-option-values[data-display="image"] button .jelly-swatch { width: 100%; height: 100%; border-radius: 0; object-fit: cover; }
+[data-jelly-theme] .jelly-product-option-values[data-display] button[aria-pressed="true"] { background: transparent; color: inherit; border-color: var(--theme-text, currentColor); box-shadow: 0 0 0 2px var(--theme-background, #fff), 0 0 0 4px var(--theme-text, currentColor); }
+[data-jelly-theme] .jelly-product-option-values[data-display] button:disabled { text-decoration: none; opacity: 0.4; position: relative; }
+[data-jelly-theme] .jelly-product-option-values[data-display] button:disabled::after { content: ""; position: absolute; inset: 50% 6px auto; height: 1px; background: currentColor; transform: rotate(-45deg); }

@@ -1,5 +1,5 @@
 import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import type { ProductPresentationContext } from "../types";
 import { choice } from "./shared";
@@ -53,6 +53,13 @@ export function ProductInformationSection({ context, section }: { context: Store
   </StorefrontContainer></section>;
 }
 
+/** A colour or image swatch for a value, or null (plain button) when the choice isn't a swatch or the value has no safe colour or image. */
+export function swatchFor(display: "color" | "image" | undefined, value: { color?: string; image?: string }): { kind: "color" | "image"; value: string } | null {
+  if (display === "color" && typeof value.color === "string" && /^#[0-9a-fA-F]{6}$/.test(value.color)) return { kind: "color", value: value.color };
+  if (display === "image" && typeof value.image === "string" && /^(https:\/\/|\/api\/public\/media\/)[^\s"'<>]+$/.test(value.image)) return { kind: "image", value: value.image };
+  return null;
+}
+
 export function ProductOptionsSection({ context, section }: { context: StorefrontRuntimeContext; section?: { settings: Record<string, unknown> } }) {
   const product = productContext(context);
   if (!product || product.product.options.length === 0) return null;
@@ -71,7 +78,15 @@ export function ProductOptionsSection({ context, section }: { context: Storefron
       </label>;
       return <fieldset key={option.id} aria-invalid={option.missing || undefined} data-missing={option.missing || undefined}>
         <legend>{option.name}{chosen.length > 0 && <span>: {chosen.map((value) => value.label).join(", ")}</span>}{!option.required && chosen.length === 0 && <span> (optional)</span>}{option.missing && <span className="jelly-product-option-required" role="note"> (required)</span>}</legend>
-        <div className="jelly-product-option-values">{option.values.map((value) => <button key={value.id} type="button" aria-pressed={value.selected} disabled={!value.available} onClick={() => product.selectOption(option.id, value.id)}>{value.label}{value.priceAdjustment && <span className="jelly-product-option-price"> +{value.priceAdjustment}</span>}</button>)}</div>
+        <div className="jelly-product-option-values" data-display={option.display}>{option.values.map((value) => {
+          const swatch = swatchFor(option.display, value);
+          return <button key={value.id} type="button" aria-pressed={value.selected} disabled={!value.available} onClick={() => product.selectOption(option.id, value.id)} {...(swatch ? { "data-swatch": swatch.kind, "aria-label": `${value.label}${value.priceAdjustment ? `, +${value.priceAdjustment}` : ""}${value.available ? "" : ", sold out"}`, title: value.label } : {})}>
+            {swatch?.kind === "color" && <span className="jelly-swatch" style={{ "--swatch": swatch.value } as CSSProperties} aria-hidden="true" />}
+            {/* eslint-disable-next-line @next/next/no-img-element -- merchant media may be served by the API, not as Next Image assets */}
+            {swatch?.kind === "image" && <img className="jelly-swatch" src={swatch.value} alt="" loading="lazy" />}
+            {!swatch && <>{value.label}{value.priceAdjustment && <span className="jelly-product-option-price"> +{value.priceAdjustment}</span>}</>}
+          </button>;
+        })}</div>
       </fieldset>;
     })}
   </StorefrontContainer></section>;

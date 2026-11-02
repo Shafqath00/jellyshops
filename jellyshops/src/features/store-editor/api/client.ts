@@ -24,6 +24,7 @@ import {
   type TemplateAssignmentRecord,
   type TemplateMutationResult,
   type ThemeConfigurationRecord,
+  type ThemeLookRecord,
   type ThemeCatalogEntry,
   type WorkspaceRecord,
 } from "./types";
@@ -40,6 +41,10 @@ export interface StoreEditorApi {
   /** Refused for a page type's main template and for templates still used by a product, collection or page. */
   deleteTemplate(storeId: string, templateId: string, expectedRevision: number): Promise<{ templateId: string; generation: number }>;
   /** Earlier published versions, newest first. */
+  listThemeLooks(storeId: string): Promise<{ looks: ThemeLookRecord[] }>;
+  saveThemeLook(storeId: string, input: { name: string; themeId: string; themeVersion?: string; settings: Record<string, unknown> }): Promise<{ look: ThemeLookRecord }>;
+  renameThemeLook(storeId: string, lookId: string, name: string): Promise<{ look: ThemeLookRecord }>;
+  deleteThemeLook(storeId: string, lookId: string): Promise<void>;
   listPublications(storeId: string): Promise<{ publications: Array<{ id: string; sourceGeneration: number; publishedAt: string; isCurrent: boolean }> }>;
   /** Makes an earlier published version live again; the draft is not changed. */
   restorePublication(storeId: string, publicationId: string): Promise<{ ok: boolean }>;
@@ -152,6 +157,10 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
     updateTemplate: (storeId, templateId, expectedRevision, patch) => request(storefrontPath(storeId, `/templates/${encodeURIComponent(templateId)}`), { method: "PATCH", body: JSON.stringify({ expectedRevision, ...patch }) }),
     cloneTemplate: (storeId, templateId, input) => request(storefrontPath(storeId, `/templates/${encodeURIComponent(templateId)}/clone`), { method: "POST", body: JSON.stringify(input) }),
     deleteTemplate: (storeId, templateId, expectedRevision) => request(storefrontPath(storeId, `/templates/${encodeURIComponent(templateId)}`), { method: "DELETE", body: JSON.stringify({ expectedRevision }) }),
+    listThemeLooks: (storeId) => request(storefrontPath(storeId, "/theme-library")),
+    saveThemeLook: (storeId, input) => request(storefrontPath(storeId, "/theme-library"), { method: "POST", body: JSON.stringify(input) }),
+    renameThemeLook: (storeId, lookId, name) => request(storefrontPath(storeId, `/theme-library/${encodeURIComponent(lookId)}`), { method: "PATCH", body: JSON.stringify({ name }) }),
+    deleteThemeLook: (storeId, lookId) => request(storefrontPath(storeId, `/theme-library/${encodeURIComponent(lookId)}`), { method: "DELETE" }),
     listPublications: (storeId) => request(storefrontPath(storeId, "/publications")),
     restorePublication: (storeId, publicationId) => request(storefrontPath(storeId, `/publications/${encodeURIComponent(publicationId)}/restore`), { method: "POST" }),
 

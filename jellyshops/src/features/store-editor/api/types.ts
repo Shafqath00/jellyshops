@@ -70,6 +70,17 @@ export interface MenuRecord {
   items: unknown[];
 }
 
+/** A saved look in the store's theme library. */
+export interface ThemeLookRecord {
+  id: string;
+  name: string;
+  themeId: string;
+  themeVersion: string;
+  settings: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ThemeConfigurationRecord {
   storeId: string;
   revision: number;

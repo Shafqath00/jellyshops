@@ -23,6 +23,8 @@ const schemaMigrations = [
   "20261028040000_variant_shipping_details.sql",
   "20261028050000_variant_sellable_and_photo.sql",
   "20261029000000_product_seo_fields.sql",
+  "20261102000000_storefront_access.sql",
+  "20261102010000_theme_library.sql",
 ] as const;
 
 export type IntegrationDatabase = PGlite;
