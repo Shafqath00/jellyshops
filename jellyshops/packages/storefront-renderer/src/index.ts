@@ -12,4 +12,5 @@ export { ThemeCustomCss } from "./section-custom-css";
 export { MetaobjectEntryContent, metaobjectEntryHref } from "./sections/metaobject-list";
 export type { PublicMetaobjectList } from "./types";
 export type { StoreIdentity } from "./store-identity";
+export type { RendererSelection } from "./types";
 export { formattedSetting, inlineSetting, SettingText } from "./sections/setting-text";
