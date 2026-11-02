@@ -11,6 +11,7 @@ import type {
 import { DynamicSourcePicker } from "../dynamic-source-picker";
 import { ControlRenderer } from "./control-renderer";
 import { RichTextSetting } from "./rich-text-setting";
+import { isPaddingControl, LinkedPaddingControl } from "./linked-padding";
 
 const groups: Array<{
   id: ControlGroup;
@@ -80,6 +81,19 @@ export function SettingGroups({
             <DynamicSourcePicker acceptedTypes={control.dynamicTypes ?? []} sources={dynamicSources} onSelect={(binding) => onChange(control.key, { kind: "dynamic", binding })} />
           </div>
         );
+        // The padding sides of one element share one box with a link button.
+        const renderPart = (partControls: ControlDefinition[]) => {
+          const sides = partControls.filter(isPaddingControl);
+          if (sides.length < 2) return partControls.map(renderControl);
+          const box = (
+            <div key="padding-box" data-editor-control-key={sides[0].key}>
+              <LinkedPaddingControl controls={sides} values={Object.fromEntries(sides.map((side) => [side.key, displayValue(settings[side.key])]))} onPatch={(patch) => onPatch ? onPatch(patch) : Object.entries(patch).forEach(([key, value]) => onChange(key, value))} />
+              {sides[0].description && <p className="mt-1 text-xs text-muted-foreground">{sides[0].description}</p>}
+            </div>
+          );
+          // The box takes the place of the first side; the other sides are part of it.
+          return partControls.flatMap((control) => control === sides[0] ? [box] : sides.includes(control as typeof sides[number]) ? [] : [renderControl(control)]);
+        };
         const contents = grouped.map(renderControl);
         // Controls with sub-headings (Layout, Typography, Padding…) get one titled part per heading, like Shopify's panel.
         if (id !== "advanced" && grouped.some((control) => control.heading)) {
@@ -91,9 +105,9 @@ export function SettingGroups({
             else parts.push({ heading, controls: [control] });
           }
           return parts.map((part, index) => (
-            <section key={`${id}-${index}`} aria-label={part.heading} className="border-t border-border pt-5">
+            <section key={`${id}-${index}`} className="border-t border-border pt-5">
               <h2 className="mb-3 text-[13px] font-semibold text-foreground">{part.heading}</h2>
-              <div className="space-y-4">{part.controls.map(renderControl)}</div>
+              <div className="space-y-4">{renderPart(part.controls)}</div>
             </section>
           ));
         }

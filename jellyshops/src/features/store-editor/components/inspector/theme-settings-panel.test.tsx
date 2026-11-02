@@ -16,8 +16,9 @@ describe("ThemeSettingsPanel", () => {
     expect(screen.getByRole("complementary", { name: "Theme settings" })).toHaveClass("bg-[var(--white)]");
     await userEvent.click(screen.getByText("Layout"));
     await userEvent.click(screen.getByText("Colors"));
-    await userEvent.selectOptions(screen.getByLabelText("Page width"), "wide");
-    expect(screen.getByLabelText("Accent color picker")).toHaveValue("#a75b38");
+    // Two choices show as buttons, like section settings.
+    await userEvent.click(screen.getByRole("button", { name: "Wide" }));
+    expect(screen.getByLabelText("Accent color colour picker")).toHaveValue("#a75b38");
     expect(onChange).toHaveBeenCalledWith("layout.containerWidth", "wide");
   });
 });

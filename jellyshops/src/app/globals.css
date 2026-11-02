@@ -190,7 +190,7 @@
   --muted-foreground: #45516a;  /* jelly-ink-soft */
   --accent: #ffd85a;            /* jelly-citrus */
   --accent-foreground: #14213d;
-  --destructive: #e03e5a;
+  --destructive: #c92a47;       /* AA contrast (4.7:1+) for error and delete text on white and soft backgrounds */
   --destructive-foreground: #ffffff;
   --success: #27b36a;
   --success-foreground: #ffffff;

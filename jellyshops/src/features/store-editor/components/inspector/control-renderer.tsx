@@ -8,13 +8,8 @@ import type {
   MediaRecord,
 } from "../../api/types";
 import { ImageControl } from "../controls/image-control";
+import { inputClass, labelClass, textareaClass } from "./control-styles";
 import { OptionalColorControl, SliderNumberControl } from "./style-controls";
-
-const inputClass =
-  "h-10 w-full rounded-xl border border-[var(--line)] bg-card px-3 text-[13px] font-medium text-[var(--ink)] outline-none transition placeholder:text-muted-foreground hover:border-tint-border focus:border-tint-border focus:ring-2 focus:ring-ring/40";
-
-const labelClass =
-  "mb-2 block text-xs font-medium text-[var(--ink-soft)]";
 
 function SelectControl({
   label,
@@ -296,7 +291,7 @@ export function ControlRenderer({
               event.target.value
             )
           }
-          className="w-full resize-y rounded-lg border border-border bg-card px-3 py-2.5 text-[12px] font-medium leading-5 text-foreground outline-none transition placeholder:text-muted-foreground hover:border-border focus:border-border focus:ring-2 focus:ring-black/[0.06]"
+          className={textareaClass}
         />
       </label>
     );

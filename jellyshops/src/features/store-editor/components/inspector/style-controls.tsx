@@ -1,13 +1,16 @@
 import { useState } from "react";
-import { RotateCcw } from "lucide-react";
+import { ChevronDown, RotateCcw } from "lucide-react";
+import { normalizeHex, readRecentColors, rememberColor } from "../../color-palette";
+import { useColorPalette } from "./color-palette-context";
+import { fieldShellClass, iconButtonClass, labelClass } from "./control-styles";
 
 /**
  * Shopify-style setting controls: a slider paired with an exact number box,
- * and a colour field that can stay empty ("Default", follows the theme).
+ * and a colour field that can stay empty ("Default", follows the theme) with
+ * one-click theme colours and the colours used lately.
  * Clearing either one saves `undefined`, which removes the setting.
  */
 
-const labelClass = "mb-2 block text-xs font-medium text-[var(--ink-soft)]";
 const hex = /^#[0-9a-fA-F]{6}$/;
 
 function clamp(value: number, min: number, max: number, step: number): number {
@@ -57,7 +60,7 @@ export function SliderNumberControl({
           onChange={(event) => onChange(clamp(Number(event.target.value), min, max, step))}
           className={`h-1.5 min-w-0 flex-1 cursor-pointer appearance-none rounded-full bg-muted accent-primary ${value === undefined ? "opacity-50" : ""}`}
         />
-        <label className="flex h-9 w-[84px] shrink-0 items-center rounded-lg border border-border bg-card px-2 focus-within:ring-2 focus-within:ring-black/[0.06]">
+        <label className={`${fieldShellClass} w-[84px] shrink-0`}>
           <input
             aria-label={label}
             inputMode="numeric"
@@ -71,7 +74,7 @@ export function SliderNumberControl({
           <span className="text-[11px] text-muted-foreground">{unit}</span>
         </label>
         {value !== undefined && (
-          <button type="button" aria-label={`Reset ${label}`} title="Use the theme's value" onClick={() => onChange(undefined)} className="grid size-7 shrink-0 place-items-center rounded-md text-muted-foreground transition hover:bg-muted hover:text-foreground">
+          <button type="button" aria-label={`Reset ${label}`} title="Use the theme's value" onClick={() => onChange(undefined)} className={iconButtonClass}>
             <RotateCcw size={13} strokeWidth={1.8} />
           </button>
         )}
@@ -92,20 +95,38 @@ export function OptionalColorControl({
   const color = value && hex.test(value) ? value : undefined;
   const [draft, setDraft] = useState(color ?? "");
   const [shown, setShown] = useState(color);
+  const [open, setOpen] = useState(false);
+  const [recent, setRecent] = useState<string[]>(() => readRecentColors());
+  const palette = useColorPalette();
   if (shown !== color) { setShown(color); setDraft(color ?? ""); }
 
+  // Picking or typing a colour also puts it first in the recent colours.
+  const choose = (next: string) => { onChange(next); setRecent(rememberColor(next)); };
   const commit = (text: string) => {
     const next = text.trim();
-    if (!next) onChange(undefined);
-    else if (hex.test(next)) onChange(next.toLowerCase());
-    else if (/^[0-9a-fA-F]{6}$/.test(next)) onChange(`#${next.toLowerCase()}`);
+    if (!next) { onChange(undefined); return; }
+    const parsed = normalizeHex(next);
+    if (parsed) choose(parsed);
     else setDraft(color ?? "");
   };
+  const swatch = (item: { label: string; color: string }) => (
+    <button
+      key={item.color}
+      type="button"
+      aria-label={`Use ${item.label} ${item.color}`}
+      title={`${item.label} ${item.color}`}
+      aria-pressed={color === item.color}
+      onClick={() => choose(item.color)}
+      className="size-6 rounded-md border border-black/15 transition hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring aria-pressed:ring-2 aria-pressed:ring-foreground aria-pressed:ring-offset-1"
+      style={{ background: item.color }}
+    />
+  );
+  const recentOnly = recent.filter((item) => !palette.some((entry) => entry.color === item));
 
   return (
     <div>
       <label htmlFor={`optional-color-${label}`} className={labelClass}>{label}</label>
-      <div className="flex h-9 items-center gap-2 rounded-lg border border-border bg-card px-2 focus-within:ring-2 focus-within:ring-black/[0.06]">
+      <div className={`${fieldShellClass} gap-2`}>
         <label
           className="relative size-5 shrink-0 cursor-pointer overflow-hidden rounded-md border border-black/10"
           style={color ? { background: color } : { background: "linear-gradient(to top right, transparent calc(50% - 1px), #9ca3af, transparent calc(50% + 1px))" }}
@@ -115,6 +136,7 @@ export function OptionalColorControl({
             aria-label={`${label} colour picker`}
             value={color ?? "#ffffff"}
             onChange={(event) => onChange(event.target.value)}
+            onBlur={(event) => setRecent(rememberColor(event.target.value))}
             className="absolute -inset-2 size-10 cursor-pointer border-0 p-0 opacity-0"
           />
         </label>
@@ -128,12 +150,23 @@ export function OptionalColorControl({
           onKeyDown={(event) => { if (event.key === "Enter") commit(event.currentTarget.value); }}
           className="min-w-0 flex-1 bg-transparent text-[12px] font-medium text-foreground outline-none placeholder:text-muted-foreground"
         />
+        {(palette.length > 0 || recentOnly.length > 0) && (
+          <button type="button" aria-label={`${label} palette`} aria-expanded={open} title="Theme and recent colours" onClick={() => setOpen((current) => !current)} className={iconButtonClass}>
+            <ChevronDown size={14} strokeWidth={1.8} className={open ? "rotate-180" : ""} />
+          </button>
+        )}
         {color && (
-          <button type="button" aria-label={`Clear ${label}`} title="Use the theme's colour" onClick={() => onChange(undefined)} className="grid size-6 shrink-0 place-items-center rounded-md text-muted-foreground transition hover:bg-muted hover:text-foreground">
+          <button type="button" aria-label={`Clear ${label}`} title="Use the theme's colour" onClick={() => onChange(undefined)} className={iconButtonClass}>
             <RotateCcw size={12} strokeWidth={1.8} />
           </button>
         )}
       </div>
+      {open && (
+        <div className="mt-2 space-y-2 rounded-lg border border-border bg-card p-2" role="group" aria-label={`${label} colour choices`}>
+          {palette.length > 0 && <div><p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Theme colours</p><div className="flex flex-wrap gap-1.5">{palette.map(swatch)}</div></div>}
+          {recentOnly.length > 0 && <div><p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Recent</p><div className="flex flex-wrap gap-1.5">{recentOnly.map((item) => swatch({ label: "Recent colour", color: item }))}</div></div>}
+        </div>
+      )}
     </div>
   );
 }

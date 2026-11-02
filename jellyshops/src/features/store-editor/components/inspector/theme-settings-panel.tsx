@@ -1,7 +1,30 @@
 "use client";
 
+import type { ControlDefinition } from "@jelly/storefront-registry";
 import type { MediaRecord, ThemeSettingDefinition } from "../../api/types";
 import { themeSchemaForPanel } from "../../color-schemes";
+import { ControlRenderer } from "./control-renderer";
+import { inputClass } from "./control-styles";
+
+/**
+ * The editor control for a theme setting, so theme settings look and behave like
+ * section and block settings (same boxes, sliders, colour palette, focus ring).
+ * Image and radio settings keep their own markup (below) but use the same classes.
+ */
+export function controlForThemeSetting(field: ThemeSettingDefinition): ControlDefinition | null {
+  const base = { key: field.id, label: field.label, group: "style" as const };
+  switch (field.type) {
+    case "text": case "url": return { ...base, type: "text", maxLength: 500 };
+    case "textarea": case "richtext": return { ...base, type: "textarea", maxLength: 5000 };
+    case "number": case "range": return { ...base, type: "range", min: field.min ?? 0, max: field.max ?? 100, step: field.step ?? 1 };
+    case "checkbox": return { ...base, type: "checkbox" };
+    case "color": return { ...base, type: "color", allowAlpha: false };
+    case "select": case "font": case "alignment": return { ...base, type: (field.options?.length ?? 0) <= 3 && field.type !== "font" ? "segmented" : "select", options: field.options ?? [] };
+    default: return null;
+  }
+}
+
+const emptyCatalog = { products: [], collections: [] };
 
 function read(settings: Record<string, unknown>, path: string): unknown {
   return path.split(".").reduce<unknown>((value, key) => value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>)[key] : undefined, settings);
@@ -34,16 +57,16 @@ export function ThemeSettingsPanel({ schema, settings, saving, error, upload, on
 }
 
 function ThemeSettingControl({ field, value, disabled, upload, onChange }: { field: ThemeSettingDefinition; value: unknown; disabled: boolean; upload?: (file: File, onProgress?: (percent: number) => void) => Promise<MediaRecord>; onChange(value: unknown): void }) {
-  const inputClass = "mt-1.5 min-h-10 w-full rounded-xl border border-[var(--line)] bg-[var(--white)] px-3 py-2 text-[13px] text-[var(--ink)] outline-none focus:border-tint-border focus:ring-2 focus:ring-ring/40 disabled:bg-[var(--paper-deep)]";
   const stringValue = typeof value === "string" ? value : "";
   const choices = field.options ?? [];
-  const label = <><span className="text-[12px] font-medium text-[var(--ink)]">{field.label}</span>{field.description ? <span className="mt-1 block text-[11px] text-[var(--ink-soft)]">{field.description}</span> : null}</>;
-  if (field.type === "checkbox") return <label className="flex items-center justify-between gap-3">{label}<input aria-label={field.label} type="checkbox" checked={Boolean(value)} disabled={disabled} onChange={(event) => onChange(event.target.checked)} /></label>;
-  if (["select", "font", "alignment"].includes(field.type)) return <label className="block">{label}<select aria-label={field.label} className={inputClass} value={stringValue} disabled={disabled} onChange={(event) => onChange(event.target.value)}>{choices.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>;
-  if (field.type === "radio") return <fieldset><legend className="text-[12px] font-medium text-[var(--ink)]">{field.label}</legend><div className="mt-2 flex flex-wrap gap-2">{choices.map((option) => <label key={option.value} className="rounded-lg border border-[var(--line)] px-2 py-1 text-[11px] text-[var(--ink-soft)]"><input className="mr-1" type="radio" name={field.id} value={option.value} checked={stringValue === option.value} disabled={disabled} onChange={() => onChange(option.value)} />{option.label}</label>)}</div></fieldset>;
-  if (field.type === "color") return <label className="block">{label}<div className="mt-1.5 flex gap-2"><input aria-label={`${field.label} picker`} type="color" value={/^#[0-9a-f]{6}$/i.test(stringValue) ? stringValue : "#ffffff"} disabled={disabled} onChange={(event) => onChange(event.target.value)} /><input aria-label={field.label} className={inputClass} value={stringValue} disabled={disabled} onChange={(event) => onChange(event.target.value)} /></div></label>;
-  if (field.type === "image") return <label className="block">{label}<input aria-label={field.label} className={inputClass} type="url" value={stringValue} disabled={disabled} onChange={(event) => onChange(event.target.value)} />{upload ? <input aria-label={`Upload ${field.label}`} className="mt-2 block w-full text-[11px]" type="file" accept="image/*" disabled={disabled} onChange={(event) => { const file = event.target.files?.[0]; if (file) void upload(file).then((media) => onChange(media.url)); }} /> : null}</label>;
-  if (["number", "range"].includes(field.type)) return <label className="block">{label}<input aria-label={field.label} className={inputClass} type={field.type === "range" ? "range" : "number"} min={field.min} max={field.max} step={field.step ?? 1} value={typeof value === "number" ? value : field.min ?? 0} disabled={disabled} onChange={(event) => onChange(Number(event.target.value))} /></label>;
-  if (["textarea", "richtext"].includes(field.type)) return <label className="block">{label}<textarea aria-label={field.label} className={inputClass} rows={field.type === "richtext" ? 6 : 4} value={stringValue} disabled={disabled} onChange={(event) => onChange(event.target.value)} /></label>;
-  return <label className="block">{label}<input aria-label={field.label} className={inputClass} type={field.type === "url" ? "url" : "text"} value={stringValue} disabled={disabled} onChange={(event) => onChange(event.target.value)} /></label>;
+  const description = field.description ? <p className="mt-1 text-xs text-muted-foreground">{field.description}</p> : null;
+  const control = controlForThemeSetting(field);
+  if (control) {
+    // A disabled fieldset disables every control inside it while a save is running.
+    return <fieldset disabled={disabled} className="m-0 min-w-0 border-0 p-0"><ControlRenderer definition={control} value={control.type === "checkbox" ? Boolean(value) : control.type === "range" ? (typeof value === "number" ? value : undefined) : value} catalog={emptyCatalog} onChange={onChange} />{description}</fieldset>;
+  }
+  const label = <span className="mb-2 block text-xs font-medium text-[var(--ink-soft)]">{field.label}</span>;
+  if (field.type === "radio") return <fieldset disabled={disabled} className="m-0 min-w-0 border-0 p-0"><legend className="mb-2 text-xs font-medium text-[var(--ink-soft)]">{field.label}</legend><div className="flex flex-wrap gap-2">{choices.map((option) => <label key={option.value} className="flex min-h-8 cursor-pointer items-center gap-1.5 rounded-lg border border-border px-2.5 text-[12px] text-foreground has-[:checked]:bg-muted has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring/40"><input className="size-3.5" type="radio" name={field.id} value={option.value} checked={stringValue === option.value} onChange={() => onChange(option.value)} />{option.label}</label>)}</div>{description}</fieldset>;
+  // Image settings hold a link, so they take a link or an uploaded file.
+  return <fieldset disabled={disabled} className="m-0 min-w-0 border-0 p-0"><label className="block">{label}<input aria-label={field.label} className={inputClass} type="url" value={stringValue} onChange={(event) => onChange(event.target.value)} /></label>{upload ? <input aria-label={`Upload ${field.label}`} className="mt-2 block w-full text-[11px]" type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; if (file) void upload(file).then((media) => onChange(media.url)); }} /> : null}{description}</fieldset>;
 }
