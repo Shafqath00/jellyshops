@@ -77,6 +77,7 @@ export const signatureManifest = {
     ...styleSettings.cardContentSchema,
     ...styleSettings.badgeSchema,
     ...styleSettings.fieldSchema,
+    ...styleSettings.cartSchema,
     ...styleSettings.socialSchema,
     ...styleSettings.languageSchema,
     ...styleSettings.advancedSchema,

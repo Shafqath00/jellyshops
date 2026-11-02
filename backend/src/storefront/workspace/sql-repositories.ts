@@ -81,6 +81,7 @@ class SqlWorkspaceRepositories implements TemplateRepository, GlobalSectionRepos
   updateGlobalSection(tx: unknown, storeId: string, id: string, revision: number, patch: Parameters<GlobalSectionRepository["updateGlobalSection"]>[4]) { return this.update<GlobalSectionRecord>(tx, "GlobalSection", storeId, id, revision, { ...patch }); }
   async getPreset(storeId: string, id: string) { return (await this.read<SectionPresetRecord>("SectionPreset", storeId, id))[0] ?? null; }
   listPresets(storeId: string) { return this.read<SectionPresetRecord>("SectionPreset", storeId); }
+  async deletePreset(tx: unknown, storeId: string, id: string) { return (await sql(tx).query(`DELETE FROM "SectionPreset" WHERE "storeId" = $1 AND "id" = $2 RETURNING "id"`, [storeId, id])).rows.length > 0; }
   createPreset(tx: unknown, input: Parameters<PresetRepository["createPreset"]>[1]) { return this.insert<SectionPresetRecord>(tx, "SectionPreset", { ...input }); }
   async getMenu(storeId: string, id: string) { return (await this.read<NavigationMenuRecord>("NavigationMenu", storeId, id))[0] ?? null; }
   listMenus(storeId: string) { return this.read<NavigationMenuRecord>("NavigationMenu", storeId); }

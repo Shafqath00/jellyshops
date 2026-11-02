@@ -95,6 +95,15 @@ export class GlobalSectionService {
     return { preset: mutation.result, generation: mutation.generation };
   }
 
+  /** Deletes a saved section and returns the new workspace generation. */
+  async deletePreset(storeId: string, presetId: string): Promise<{ generation: number }> {
+    const mutation = await this.coordinator.run(storeId, async (transaction) => {
+      if (!await this.presets.deletePreset(transaction, storeId, presetId)) throw new Error("Section preset was not found");
+      return true;
+    });
+    return { generation: mutation.generation };
+  }
+
   async instantiatePreset(storeId: string, presetId: string): Promise<SectionDocument> {
     const preset = await this.presets.getPreset(storeId, presetId);
     if (!preset) throw new Error("Section preset was not found");

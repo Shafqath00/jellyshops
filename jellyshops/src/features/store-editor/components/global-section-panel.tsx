@@ -13,6 +13,8 @@ export function GlobalSectionPanel({
   onMakeGlobal,
   onInsertGlobal,
   onDetachGlobal,
+  onSaveToLibrary,
+  suggestedName,
 }: {
   globalSections: GlobalSectionOption[];
   localSection?: SectionNode;
@@ -20,6 +22,10 @@ export function GlobalSectionPanel({
   onMakeGlobal(section: SectionNode): void;
   onInsertGlobal(globalSectionId: string): void;
   onDetachGlobal(section: SectionNode): void;
+  /** Saves a copy of the section as a reusable saved section (not linked: later edits don't spread). */
+  onSaveToLibrary?(section: SectionNode, name: string): void;
+  /** The name suggested when saving. */
+  suggestedName?: string;
 }) {
   const attached = attachedGlobalId
     ? globalSections.find((global) => global.id === attachedGlobalId)
@@ -57,6 +63,19 @@ export function GlobalSectionPanel({
           className="h-8 rounded-md bg-primary px-3 text-[11px] font-semibold text-primary-foreground"
         >
           Share this section
+        </button>
+      )}
+      {localSection && onSaveToLibrary && (
+        <button
+          type="button"
+          aria-label="Save this section to the library"
+          onClick={() => {
+            const name = window.prompt("Name for this saved section. You can add a copy of it to any page from Add section > Saved sections.", suggestedName ?? "Saved section");
+            if (name?.trim()) onSaveToLibrary(structuredClone(localSection), name.trim().slice(0, 80));
+          }}
+          className="ml-2 h-8 rounded-md border border-border bg-card px-3 text-[11px] font-semibold text-foreground hover:bg-muted/50"
+        >
+          Save to library
         </button>
       )}
 

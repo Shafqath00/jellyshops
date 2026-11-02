@@ -25,6 +25,7 @@ export interface StorefrontWorkspaceApi {
   listPresets(storeId: string): Promise<unknown[]>;
   createPreset(storeId: string, input: { name: string; section: Record<string, unknown> }): Promise<unknown>;
   instantiatePreset(storeId: string, presetId: string): Promise<Record<string, unknown>>;
+  deletePreset?(storeId: string, presetId: string): Promise<{ generation: number }>;
 
   listMenus(storeId: string): Promise<unknown[]>;
   getMenu(storeId: string, id: string): Promise<unknown | null>;
@@ -191,6 +192,14 @@ export function createStorefrontWorkspaceRouter(api: StorefrontWorkspaceApi, aut
   router.post("/presets", requireStorePermission("storefront:edit"), async (request, response, next) => {
     try { response.status(201).json(await api.createPreset(storeId(request), presetCreateSchema.parse(request.body))); }
     catch (error) { next(error); }
+  });
+  router.delete("/presets/:presetId", requireStorePermission("storefront:edit"), async (request, response, next) => {
+    try {
+      if (!api.deletePreset) notFound("Saved section");
+      response.json(await api.deletePreset(storeId(request), String(request.params.presetId)));
+    } catch (error) {
+      next(error instanceof Error && error.message === "Section preset was not found" ? new ApiError(404, "STOREFRONT_RESOURCE_NOT_FOUND", "Saved section was not found") : error);
+    }
   });
   router.post("/presets/:presetId/instantiate", requireStorePermission("storefront:edit"), async (request, response, next) => {
     try { response.json(await api.instantiatePreset(storeId(request), String(request.params.presetId))); }

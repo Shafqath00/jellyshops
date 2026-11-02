@@ -53,3 +53,16 @@ it("searches the built-in section catalog and inserts the selected section", asy
   await userEvent.click(screen.getByRole("button", { name: "Add Newsletter" }));
   expect(onInsertBuiltIn).toHaveBeenCalledWith("newsletter");
 });
+
+it("removes a saved section after asking", async () => {
+  const section = { id: "s", type: "rich-text", enabled: true, settings: {}, blocks: [] };
+  const onDelete = vi.fn();
+  const confirm = vi.spyOn(window, "confirm").mockReturnValueOnce(false).mockReturnValueOnce(true);
+  render(<SectionLibrary presets={[{ id: "preset-1", name: "Story", section }]} onInsertPreset={vi.fn()} onDeletePreset={onDelete} />);
+  const remove = screen.getByRole("button", { name: "Remove Story from saved sections" });
+  await userEvent.click(remove);
+  expect(onDelete).not.toHaveBeenCalled();
+  await userEvent.click(remove);
+  expect(onDelete).toHaveBeenCalledWith("preset-1");
+  confirm.mockRestore();
+});

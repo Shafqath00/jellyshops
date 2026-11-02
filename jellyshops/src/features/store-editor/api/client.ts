@@ -50,6 +50,7 @@ export interface StoreEditorApi {
   listPresets(storeId: string): Promise<SectionPresetRecord[]>;
   createPreset(storeId: string, input: { name: string; section: Record<string, unknown> }): Promise<{ preset: SectionPresetRecord; generation: number }>;
   instantiatePreset(storeId: string, presetId: string): Promise<Record<string, unknown>>;
+  deletePreset(storeId: string, presetId: string): Promise<{ generation: number }>;
 
   listMenus(storeId: string): Promise<MenuRecord[]>;
   createMenu(storeId: string, input: { name: string; handle: string; items: unknown[] }): Promise<{ menu: MenuRecord; generation: number }>;
@@ -159,6 +160,7 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
     updateGlobalSection: (storeId, sectionId, expectedRevision, patch) => request(storefrontPath(storeId, `/global-sections/${encodeURIComponent(sectionId)}`), { method: "PATCH", body: JSON.stringify({ expectedRevision, ...patch }) }),
     listPresets: (storeId) => request(storefrontPath(storeId, "/presets")),
     createPreset: (storeId, input) => request(storefrontPath(storeId, "/presets"), { method: "POST", body: JSON.stringify(input) }),
+    deletePreset: (storeId, presetId) => request(storefrontPath(storeId, `/presets/${encodeURIComponent(presetId)}`), { method: "DELETE" }),
     instantiatePreset: (storeId, presetId) => request(storefrontPath(storeId, `/presets/${encodeURIComponent(presetId)}/instantiate`), { method: "POST" }),
 
     listMenus: (storeId) => request(storefrontPath(storeId, "/menus")),

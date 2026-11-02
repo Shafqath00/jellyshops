@@ -84,7 +84,7 @@ export function ProductPurchaseSection({ context, section }: { context: Storefro
   async function purchase(now = false) {
     if (!product || busy || context.mode !== "published") return;
     setBusy(true); setMessage(undefined); setError(undefined);
-    try { const result = await (now ? product.buyNow?.() : product.addToCart()); if (!result?.ok) throw new Error(result?.message ?? "Unable to add this product."); if (!now) setMessage("Added to your bag."); }
+    try { const result = await (now ? product.buyNow?.() : product.addToCart()); if (!result?.ok) throw new Error(result?.message ?? "Unable to add this product."); if (!now) { setMessage("Added to your bag."); window.dispatchEvent(new CustomEvent("jelly:cart-added")); } }
     catch (caught) { setError(caught instanceof Error ? caught.message : "Unable to add this product."); }
     finally { setBusy(false); }
   }

@@ -30,6 +30,7 @@ function setup() {
     createPreset: vi.fn(async (_tx, input) => ({
       id: "preset-1", revision: 0, createdAt: new Date(0), updatedAt: new Date(0), ...structuredClone(input),
     })),
+    deletePreset: vi.fn(async (_tx, _storeId, id) => id === "preset-1"),
   };
   const coordinator = {
     async run<T>(_storeId: string, operation: (transaction: WorkspaceTransaction) => Promise<T>) {
@@ -74,5 +75,12 @@ describe("GlobalSectionService", () => {
 
     expect(saved.preset.revision).toBe(0);
     expect(saved.generation).toBe(1);
+  });
+
+  it("deletes a saved section, and says when it doesn't exist", async () => {
+    const { service, presets } = setup();
+    await expect(service.deletePreset("store-a", "preset-1")).resolves.toEqual({ generation: 1 });
+    expect(presets.deletePreset).toHaveBeenCalledWith(tx, "store-a", "preset-1");
+    await expect(service.deletePreset("store-a", "missing")).rejects.toThrow("Section preset was not found");
   });
 });

@@ -21,11 +21,14 @@ export function SectionLibrary({
   builtIns = [],
   onInsertPreset,
   onInsertBuiltIn,
+  onDeletePreset,
 }: {
   presets: SectionLibraryPreset[];
   builtIns?: BuiltInSectionOption[];
   onInsertPreset(section: SectionNode): void;
   onInsertBuiltIn?(presetId: string): void;
+  /** Removes a saved section from the library (pages that already use a copy keep it). */
+  onDeletePreset?(presetId: string): void;
 }) {
   const [query, setQuery] = useState("");
   const filtered = useMemo(() => {
@@ -84,15 +87,26 @@ export function SectionLibrary({
           <div className="border-t border-border pt-4">
             <h3 className="mb-2 text-[11px] font-semibold text-muted-foreground">Saved sections</h3>
             {presets.map((preset) => (
-              <button
-                key={preset.id}
-                type="button"
-                aria-label={`Insert ${preset.name}`}
-                onClick={() => onInsertPreset(structuredClone(preset.section))}
-                className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-[12px] font-medium text-muted-foreground hover:bg-muted/50"
-              >
-                <span className="truncate">{preset.name}</span>
-              </button>
+              <div key={preset.id} className="flex items-center gap-1">
+                <button
+                  type="button"
+                  aria-label={`Insert ${preset.name}`}
+                  onClick={() => onInsertPreset(structuredClone(preset.section))}
+                  className="flex min-h-10 min-w-0 flex-1 items-center rounded-lg px-3 text-left text-[12px] font-medium text-muted-foreground hover:bg-muted/50"
+                >
+                  <span className="truncate">{preset.name}</span>
+                </button>
+                {onDeletePreset && (
+                  <button
+                    type="button"
+                    aria-label={`Remove ${preset.name} from saved sections`}
+                    onClick={() => { if (window.confirm(`Remove "${preset.name}" from your saved sections? Pages that already use it keep their copy.`)) onDeletePreset(preset.id); }}
+                    className="h-8 shrink-0 rounded-md px-2 text-[11px] font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         )}

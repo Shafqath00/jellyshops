@@ -93,6 +93,10 @@ export class DefaultStorefrontWorkspaceApi implements StorefrontWorkspaceApi {
     return this.globals.createPreset(storeId, input);
   }
 
+  deletePreset(storeId: string, presetId: string) {
+    return this.globals.deletePreset(storeId, presetId);
+  }
+
   instantiatePreset(storeId: string, presetId: string) {
     return this.globals.instantiatePreset(storeId, presetId);
   }

@@ -118,6 +118,9 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     select("productCard.button", "Button", "Product cards", "none", [["none", "None"], ["view", "View product"], ["shop", "Shop now"]], "A button under each card that opens the product."),
   ];
   const socialSchema = SOCIAL_PLATFORMS.map(({ id, label }) => ({ id: `social.${id}`, type: "url", label, group: "Social media", default: "", ...(id === "instagram" ? { description: "Full https:// links. Shown in the footer when it has no social links of its own." } : {}) }));
+  const cartSchema = [
+    select("cart.type", "When a shopper opens the bag", "Cart", "page", [["page", "Go to the bag page"], ["drawer", "Slide out the bag"]], "The slide-out bag also opens after Add to cart."),
+  ];
   const languageSchema = [
     { id: "languages.defaultName", type: "text", label: "Main language", group: "Languages", default: "English", description: "The language your store is written in." },
     { id: "languages.extra", type: "text", label: "Other languages", group: "Languages", default: "", description: "Language codes separated by commas, for example hi, ta, fr. Shoppers pick one in the footer; you add the text in the editor's Language menu. Text you haven't translated shows in the main language." },
@@ -134,6 +137,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
       social: Object.fromEntries(SOCIAL_PLATFORMS.map(({ id }) => [id, ""])),
       advanced: { customCss: "" },
       languages: { defaultName: "English", extra: "" },
+      cart: { type: "page" },
     },
     buttonDefaults: { size: theme, textCase: theme, borderWidth: theme, hover: theme },
     cardDefaults: { radius: theme, shadow: theme, hover: theme, order: "photo-title-price", showTitle: "show", titleLines: theme, showPrice: "show", button: "none" },
@@ -147,6 +151,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     socialSchema,
     advancedSchema,
     languageSchema,
+    cartSchema,
   };
 }
 
@@ -178,6 +183,11 @@ export function storeLanguages(settings: Record<string, unknown> | undefined): S
   const codes = typeof raw === "string" ? raw.split(",").map((code) => code.trim()).filter(Boolean) : [];
   const unique = [...new Set(codes.map((code) => code.replace(/^([a-z]{2,3})-([a-z]{2})$/i, (_, lang: string, region: string) => `${lang.toLowerCase()}-${region.toUpperCase()}`).replace(/^[A-Z]{2,3}$/, (code) => code.toLowerCase())))];
   return unique.filter((code) => /^[a-z]{2,3}(-[A-Z]{2})?$/.test(code)).slice(0, 10).map((code) => ({ code, name: languageName(code) }));
+}
+
+/** True when the theme opens a slide-out bag instead of going to the bag page. */
+export function usesCartDrawer(settings: Record<string, unknown> | undefined): boolean {
+  return record(settings?.cart).type === "drawer";
 }
 
 /** The name of the store's main language ("English" unless the merchant changed it). */

@@ -27,7 +27,7 @@ import type {
   RichTextDocument,
   ThemeId,
 } from "@jelly/storefront-schema";
-import { updateBlock } from "@jelly/storefront-schema";
+import { copyBlockWithNewIds, updateBlock } from "@jelly/storefront-schema";
 import { mainLanguageName, resolveStorefrontThemeTokens, resolveTheme, storeLanguages, themeSocialLinks } from "@jelly/storefront-themes";
 import { expandRawRuntimeLayout } from "@/features/storefront/resource-loader";
 import { usePreviewBindingValues } from "@/features/store-editor/use-preview-binding-values";
@@ -574,9 +574,37 @@ function StoreEditorWorkspace() {
     else await persistThemeSetting("", value, false);
   };
 
+  // A saved section is added as its own copy, with new ids each time.
   const insertPreset = async (section: SectionNode) => {
     if (!activeTemplate) return;
-    if (!await persistLayout(appendInlineSection(activeTemplate.layout, section))) return;
+    const createId = () => crypto.randomUUID();
+    const copy = { ...structuredClone(section), id: createId(), blocks: section.blocks.map((block) => copyBlockWithNewIds(block, createId)) };
+    if (!await persistLayout(appendInlineSection(activeTemplate.layout, copy))) return;
+    setSelection({ kind: "section", region: "template", sectionId: copy.id });
+  };
+
+  const saveToLibrary = async (section: SectionNode, name: string) => {
+    if (!api) return;
+    try {
+      const created = await api.createPreset(backendStoreId, { name, section: structuredClone(section) as unknown as Record<string, unknown> });
+      setPresets((current) => [...current, created.preset]);
+      setWorkspace((current) => current ? { ...current, generation: created.generation } : current);
+    } catch (error) {
+      setSaveState("error");
+      setSaveError(error instanceof Error ? error.message : "Could not save this section. Try again.");
+    }
+  };
+
+  const deletePreset = async (presetId: string) => {
+    if (!api) return;
+    try {
+      const result = await api.deletePreset(backendStoreId, presetId);
+      setPresets((current) => current.filter((preset) => preset.id !== presetId));
+      setWorkspace((current) => current ? { ...current, generation: result.generation } : current);
+    } catch (error) {
+      setSaveState("error");
+      setSaveError(error instanceof Error ? error.message : "Could not remove the saved section. Try again.");
+    }
   };
 
   const insertBuiltIn = async (sectionType: string) => {
@@ -867,6 +895,7 @@ function StoreEditorWorkspace() {
             builtIns={builtInSections}
             onInsertPreset={(section) => { void insertPreset(section); setLibraryRegion(undefined); }}
             onInsertBuiltIn={(sectionType) => { void insertBuiltIn(sectionType); }}
+            onDeletePreset={(presetId) => { void deletePreset(presetId); }}
           />
         </>
       )}
@@ -1016,7 +1045,7 @@ function StoreEditorWorkspace() {
       {selection?.kind !== "theme" && !libraryRegion && !blockPickerSectionId && (
         <>
           <details className="border-t border-border">
-            <summary className="cursor-pointer px-4 py-3 text-[13px] font-medium">Shared sections</summary>
+            <summary className="cursor-pointer px-4 py-3 text-[13px] font-medium">Shared and saved sections</summary>
           <GlobalSectionPanel
             globalSections={globalOptions}
             localSection={selectedGlobal ? undefined : localSection ?? undefined}
@@ -1024,6 +1053,8 @@ function StoreEditorWorkspace() {
             onMakeGlobal={(section) => { void makeGlobal(section); }}
             onInsertGlobal={(globalId) => { void insertGlobal(globalId); }}
             onDetachGlobal={(section) => { void detachGlobal(section); }}
+            onSaveToLibrary={(section, name) => { void saveToLibrary(section, name); }}
+            suggestedName={localSection ? displayName(localSection.type) : undefined}
           />
           </details>
         </>

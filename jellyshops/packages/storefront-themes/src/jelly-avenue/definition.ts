@@ -76,6 +76,7 @@ export const avenueManifest = {
     ...styleSettings.cardContentSchema,
     ...styleSettings.badgeSchema,
     ...styleSettings.fieldSchema,
+    ...styleSettings.cartSchema,
     ...styleSettings.socialSchema,
     ...styleSettings.languageSchema,
     ...styleSettings.advancedSchema,
