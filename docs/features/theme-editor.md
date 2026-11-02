@@ -1,6 +1,6 @@
 # Theme editor
 
-Entry: `jellyshops/src/app/admin/online-store/editor/page.tsx` (about 1,300 lines; the V4 editor page). Supporting code: `jellyshops/src/features/store-editor/`. Backend: `backend/src/storefront/workspace/`. Publish flow: [publishing](publishing.md).
+Entry: `jellyshops/src/app/admin/online-store/editor/page.tsx` (a ~50-line entry). Its logic lives in six hooks under `jellyshops/src/features/store-editor/hooks/` (composed by `use-editor-controller.ts`) and its layout in `components/workspace/`. Supporting code: `jellyshops/src/features/store-editor/`. Backend: `backend/src/storefront/workspace/`. Publish flow: [publishing](publishing.md).
 
 ## Frontend structure
 

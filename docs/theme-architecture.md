@@ -1,5 +1,7 @@
 # Storefront theme architecture
 
+Step-by-step building guide (with a validated example theme): [theme developer guide](guides/theme-developer-guide.md). What is missing for third-party developers (CLI, packaging, upload): [theme SDK plan](plans/theme-sdk-plan.md).
+
 A Jelly Shop theme is a look, not a separate storefront. Every theme renders the same section markup, so the editor preview, the published store and future themes stay in step. A theme decides how that markup looks and which defaults a merchant starts from.
 
 ```text
