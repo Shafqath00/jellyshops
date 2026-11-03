@@ -43,3 +43,33 @@ export async function upload(target, flags = {}) {
   process.stdout.write(`${created ? "Uploaded" : "Already uploaded"} ${label}\n  theme ${result.package?.themeId}  version ${result.version?.version}  id ${result.version?.id}\n`);
   return 0;
 }
+
+/**
+ * `jelly-theme install <version id> --store <id> --token <token> [--api <url>] [--replace <generation>]`
+ *
+ * Puts an uploaded version on a store: its starter pages go into the store's draft and the draft
+ * starts using the version. A store that already has a draft needs `--replace <generation>`, the
+ * workspace generation shown by the editor, to confirm the draft is replaced.
+ */
+export async function install(versionId, flags = {}) {
+  const token = typeof flags.token === "string" ? flags.token : process.env.JELLY_TOKEN;
+  const store = typeof flags.store === "string" ? flags.store : process.env.JELLY_STORE_ID;
+  const api = (typeof flags.api === "string" ? flags.api : process.env.JELLY_API_URL ?? "http://127.0.0.1:3001").replace(/\/+$/, "");
+  if (!versionId || !token || !store) {
+    process.stderr.write("Usage: jelly-theme install <version id> --store <id> --token <token> [--replace <generation>]\n");
+    return 2;
+  }
+  const replace = typeof flags.replace === "string" ? Number(flags.replace) : undefined;
+  if (flags.replace !== undefined && (!Number.isInteger(replace) || replace < 0)) { process.stderr.write("--replace needs the workspace generation, a whole number.\n"); return 2; }
+  let response;
+  try {
+    response = await fetch(`${api}/api/stores/${encodeURIComponent(store)}/theme-packages/versions/${encodeURIComponent(versionId)}/install`, {
+      method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+      body: JSON.stringify(replace === undefined ? {} : { replaceDraft: true, expectedGeneration: replace }),
+    });
+  } catch (error) { process.stderr.write(`Could not reach ${api}: ${error.message}\n`); return 1; }
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) { process.stderr.write(`${result?.error?.message ?? `The platform answered ${response.status}.`}\n`); return 1; }
+  process.stdout.write(`Installed ${result.themeId} ${result.version} on the draft of store ${store} (workspace generation ${result.generation}). Open the editor to review it, then publish.\n`);
+  return 0;
+}

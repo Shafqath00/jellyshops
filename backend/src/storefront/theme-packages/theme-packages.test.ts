@@ -4,7 +4,10 @@ import express from "express";
 import request from "supertest";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createPGliteDatabase, seedStore, type IntegrationDatabase } from "../../../test/integration/pglite.js";
+import type { SqlExecutor } from "../../commerce/repository.js";
 import { errorHandler } from "../../http/errors.js";
+import { StorefrontStarterInstallationService } from "../starter/installation-service.js";
+import { createLocalV4CompilationService } from "../local-v4-compilation.js";
 import type { MediaStorage } from "../../media/storage.js";
 import { compareVersions, parseThemePackage } from "./package-format.js";
 import { createPublicThemeVersionRouter, isThemePackageUpload } from "./routes.js";
@@ -197,5 +200,62 @@ describe("a package made by the jelly-theme CLI", () => {
       expect(stored?.css).toContain('[data-jelly-theme="from-cli"]');
       expect(stored?.starter).toBeTruthy();
     } finally { await database.close(); }
+  });
+});
+
+describe("installing an uploaded theme on a store", () => {
+  let database: IntegrationDatabase;
+  let service: ThemePackageService;
+  beforeEach(async () => {
+    database = await createPGliteDatabase();
+    await seedStore(database, "store-a", "a");
+    await seedStore(database, "store-b", "b");
+    const installer = new StorefrontStarterInstallationService({ transaction: (work: never) => database.transaction(work) } as never);
+    service = new ThemePackageService(database as never, new MemoryStorage(), installer);
+  });
+  afterEach(async () => database.close());
+
+  it("puts the starter in the draft, pins the uploaded version, and publishes with the theme resolved", async () => {
+    const { version } = await service.upload("store-a", themePackage({ id: "install-me" }));
+    const result = await service.install("store-a", version.id);
+    expect(result).toMatchObject({ themeId: "install-me", version: "1.0.0", installed: true });
+
+    const config = (await database.query(`SELECT "themeId", "themeVersion", "draftArtifactId" FROM "ThemeConfiguration" WHERE "storeId" = 'store-a'`)).rows[0];
+    expect(config).toMatchObject({ themeId: "install-me", themeVersion: "1.0.0", draftArtifactId: version.id });
+    expect((await database.query(`SELECT "versionId" FROM "ThemeInstall" WHERE "storeId" = 'store-a'`)).rows).toEqual([{ versionId: version.id }]);
+    expect((await database.query(`SELECT COUNT(*)::int AS n FROM "StorefrontTemplate" WHERE "storeId" = 'store-a'`)).rows[0]).toMatchObject({ n: 9 });
+
+    const compilation = await createLocalV4CompilationService(database as unknown as SqlExecutor).compile("store-a", result.generation);
+    expect(compilation).toMatchObject({ ok: true, snapshot: { theme: { id: "install-me", version: "1.0.0", artifactId: version.id } } });
+    expect((compilation as { snapshot: { theme: { fallbackReason?: string } } }).snapshot.theme.fallbackReason).toBeUndefined();
+  });
+
+  it("installs on the owner's stores only, refuses yanked versions and themes without a starter", async () => {
+    const { version } = await service.upload("store-a", themePackage({ id: "private-one" }));
+    await expect(service.install("store-b", version.id)).rejects.toMatchObject({ status: 404 });
+    await expect(service.install("store-a", "missing")).rejects.toMatchObject({ status: 404 });
+    await service.yank("store-a", version.id);
+    await expect(service.install("store-a", version.id)).rejects.toMatchObject({ status: 409, code: "VERSION_YANKED" });
+
+    const bare = themePackage({ id: "no-starter" }) as Record<string, unknown>;
+    delete bare.starter;
+    const { version: bareVersion } = await service.upload("store-a", bare);
+    await expect(service.install("store-a", bareVersion.id)).rejects.toMatchObject({ status: 422, code: "NO_STARTER" });
+  });
+
+  it("will not replace an existing draft unless the merchant confirms the generation they saw", async () => {
+    const { version } = await service.upload("store-a", themePackage({ id: "again" }));
+    const first = await service.install("store-a", version.id);
+    await expect(service.install("store-a", version.id, { replaceDraft: true, expectedGeneration: first.generation + 5 })).rejects.toMatchObject({ code: "STARTER_INSTALL_CONFLICT" });
+    await expect(service.install("store-a", version.id, { replaceDraft: true, expectedGeneration: first.generation })).resolves.toMatchObject({ themeId: "again" });
+  });
+
+  it("registers a store's installed themes for the process, and tolerates stores with none", async () => {
+    await expect(service.registerStoreThemes("store-b")).resolves.toBeUndefined();
+    const { version } = await service.upload("store-a", themePackage({ id: "loaded-theme" }));
+    await service.install("store-a", version.id);
+    await service.registerStoreThemes("store-a");
+    const { getThemeDefinition } = await import("@jelly/storefront-themes");
+    expect(getThemeDefinition("loaded-theme").id).toBe("loaded-theme");
   });
 });

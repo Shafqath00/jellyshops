@@ -1,4 +1,5 @@
 import express, { Router } from "express";
+import { z } from "zod";
 import { requireMerchant, requireStorePermission } from "../../auth/middleware.js";
 import type { AuthProvider } from "../../auth/types.js";
 import { ApiError } from "../../http/errors.js";
@@ -7,7 +8,14 @@ import type { ThemePackageService } from "./service.js";
 /** A package is JSON with its files inside as base64; the whole body stays under this size. */
 export const THEME_PACKAGE_BODY_LIMIT = "8mb";
 
-type MerchantApi = Pick<ThemePackageService, "upload" | "list" | "yank">;
+const installSchema = z.union([z.object({}).strict(), z.object({ replaceDraft: z.literal(true), expectedGeneration: z.number().int().nonnegative() }).strict()]);
+
+/** The body is empty (first install) or confirms replacing the draft at the generation the merchant saw. */
+function replace(body: z.infer<typeof installSchema>): { replaceDraft: boolean; expectedGeneration: number } | undefined {
+  return "replaceDraft" in body && body.replaceDraft ? { replaceDraft: true, expectedGeneration: body.expectedGeneration } : undefined;
+}
+
+type MerchantApi = Pick<ThemePackageService, "upload" | "list" | "yank" | "install">;
 type PublicApi = Pick<ThemePackageService, "getVersion" | "openAsset">;
 
 /** True for the one request that carries a theme package, so the app-wide 2 MB body limit can step aside for it. */
@@ -29,6 +37,13 @@ export function createThemePackageRouter(service: MerchantApi, authProvider: Aut
   });
   router.post("/theme-packages/versions/:versionId/yank", requireMerchant(authProvider), requireStorePermission("storefront:edit"), async (request, response, next) => {
     try { await service.yank(request.storeContext!.storeId, String(request.params.versionId)); response.status(204).end(); } catch (error) { next(error); }
+  });
+  router.post("/theme-packages/versions/:versionId/install", requireMerchant(authProvider), requireStorePermission("storefront:edit"), async (request, response, next) => {
+    try {
+      const body = installSchema.safeParse(request.body ?? {});
+      if (!body.success) throw new ApiError(422, "INSTALL_INPUT_INVALID", "Confirm replacing the draft with the current workspace generation.");
+      response.status(201).json(await service.install(request.storeContext!.storeId, String(request.params.versionId), replace(body.data)));
+    } catch (error) { next(error); }
   });
   return router;
 }

@@ -5,6 +5,7 @@
    change. Effects list only the values that should re-run them. */
 
 import { useEffect } from "react";
+import { loadInstalledTheme } from "@/features/storefront/installed-theme";
 import { createRevisionedSaveQueue } from "@/features/store-editor/state/revisioned-save-queue";
 import { pickInitialTemplate } from "@/features/store-editor/template-selection";
 import { clearUnsaved, findRestorableWork, readUnsaved } from "@/features/store-editor/state/unsaved-work";
@@ -93,7 +94,8 @@ export function useEditorLifecycle(ctx: ReturnType<typeof useEditorState>) {
       api.listBlogs(backendStoreId),
       api.listArticles(backendStoreId),
       api.listThemeCatalog(backendStoreId),
-      api.getThemeConfiguration(backendStoreId),
+      // A draft on an uploaded theme needs that version registered before anything resolves the theme.
+      api.getThemeConfiguration(backendStoreId).then(async (configuration) => { await loadInstalledTheme(configuration?.draftArtifactId, { baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001" }); return configuration; }),
     ]).then(([nextWorkspace, nextTemplates, nextGlobals, nextMenus, nextPresets, nextCatalog, nextPages, nextBlogs, nextArticles, nextThemeCatalog, nextThemeConfiguration]) => {
       if (!active) return;
       setWorkspace(nextWorkspace);

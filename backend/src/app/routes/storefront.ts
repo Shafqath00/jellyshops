@@ -50,7 +50,7 @@ function packageService(context: AppContext): ThemePackageService | undefined {
   if (!packageServices.has(context)) {
     const database = context.routeDependencies.commerceDatabase;
     const storage = context.routeDependencies.mediaStorage;
-    packageServices.set(context, database && storage ? new ThemePackageService({ query: (text: string, values?: unknown[]) => database.transaction((transaction) => transaction.query(text, values)) } as never, storage) : null);
+    packageServices.set(context, database && storage ? new ThemePackageService({ query: (text: string, values?: unknown[]) => database.transaction((transaction) => transaction.query(text, values)) } as never, storage, context.storefrontStarterApi) : null);
   }
   return packageServices.get(context) ?? undefined;
 }
@@ -112,6 +112,9 @@ export function mountPublicStorefrontContextRoutes(app: Express, context: AppCon
 }
 
 export function mountStorefrontRoutes(app: Express, context: AppContext): void {
+  // Uploaded themes live in the database; make the ones this store uses known before any storefront route resolves a theme.
+  const themePackages = packageService(context);
+  if (themePackages) app.use("/api/stores/:storeId", (request, _response, next) => { themePackages.registerStoreThemes(String(request.params.storeId)).then(() => next(), next); });
   const { routeDependencies: deps, authProvider, storefrontService, publicStorefrontApi, storefrontStarterApi } = context;
 
   // Public + legacy explicit routes first.
@@ -131,8 +134,7 @@ export function mountStorefrontRoutes(app: Express, context: AppContext): void {
   if (access) app.use("/api/stores/:storeId/storefront", createMerchantAccessRouter(access, authProvider));
   const library = libraryService(context);
   if (library) app.use("/api/stores/:storeId/storefront", createThemeLibraryRouter(library, authProvider));
-  const packages = packageService(context);
-  if (packages) app.use("/api/stores/:storeId", createThemePackageRouter(packages, authProvider));
+  if (themePackages) app.use("/api/stores/:storeId", createThemePackageRouter(themePackages, authProvider));
   const bindingValues = bindingValueService(context);
   if (bindingValues) {
     app.use("/api/stores/:storeId/storefront", createEditorBindingValuesRouter(bindingValues, authProvider));

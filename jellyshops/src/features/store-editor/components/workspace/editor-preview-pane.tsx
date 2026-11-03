@@ -3,6 +3,7 @@
 import clsx from "clsx";
 import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import { ThemeCustomCss, createCollectionLinks, type RendererSelection } from "@jelly/storefront-renderer";
+import { installedThemeCss } from "@/features/storefront/installed-theme";
 import type { RuntimeMenuV4, SectionNode } from "@jelly/storefront-schema";
 import { themeSocialLinks } from "@jelly/storefront-themes";
 import { createResourceLinks } from "@/features/navigation/resource-links";
@@ -112,6 +113,7 @@ export function EditorPreviewPane({ ctx }: { ctx: EditorViewContext }) {
               <ScaledPreview minWidth={viewport === "desktop" ? 1280 : viewport === "tablet" ? 820 : 390}>
               <StorefrontPreviewFrame title="Storefront preview" themeId={themeConfiguration?.themeId ?? "minimal"} style={previewThemeStyle} className="h-full w-full border-0 bg-card">
                 <ThemeCustomCss settings={themeConfiguration?.settings} />
+                {installedThemeCss(themeConfiguration?.draftArtifactId) ? <style data-installed-theme={themeConfiguration?.draftArtifactId ?? undefined}>{installedThemeCss(themeConfiguration?.draftArtifactId)}</style> : null}
                 {renderPreviewSections([...previewLayout.announcement, ...previewLayout.header], "header")}
                 <div data-storefront-template>
                   {renderPreviewSections(previewLayout.template, "template")}

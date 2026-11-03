@@ -117,6 +117,23 @@ describe("jelly-theme", () => {
       expect(errors).toContain("1 problem in the theme");
       expect(errors).toContain("theme.css: nope");
     });
+    it("installs an uploaded version, asking for the generation only when replacing a draft", async () => {
+      answer(201, { themeId: "up", version: "1.0.0", generation: 3, installed: true });
+      expect(await run(["install", "v-9", "--store", "s1", "--token", "t", "--api", "http://api.test"])).toBe(0);
+      const [url, init] = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit];
+      expect(url).toBe("http://api.test/api/stores/s1/theme-packages/versions/v-9/install");
+      expect(init.body).toBe("{}");
+      expect(output).toContain("Installed up 1.0.0");
+      await run(["install", "v-9", "--store", "s1", "--token", "t", "--replace", "3"]);
+      expect(JSON.parse(((fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[1] as [string, RequestInit])[1].body as string)).toEqual({ replaceDraft: true, expectedGeneration: 3 });
+      expect(await run(["install", "v-9", "--store", "s1", "--token", "t", "--replace", "x"])).toBe(2);
+      expect(await run(["install"])).toBe(2);
+    });
+    it("prints the platform's reason when an install is refused", async () => {
+      answer(409, { error: { code: "STARTER_INSTALL_CONFLICT", message: "The draft changed. Reload before replacing it." } });
+      expect(await run(["install", "v", "--store", "s", "--token", "t"])).toBe(1);
+      expect(errors).toContain("The draft changed");
+    });
     it("says so when the platform cannot be reached", async () => {
       await run(["create", "up"]);
       process.chdir(join(directory, "up"));

@@ -43,7 +43,7 @@ export interface ThemeManifestInput {
   version: string;
   description?: string;
   previewAsset?: string;
-  assets?: { preview?: { path?: string } };
+  assets?: { preview?: { path?: string } } & Record<string, unknown>;
   settingsDefaults?: { colors?: Record<string, string>; typography?: Record<string, string> } & Record<string, unknown>;
   [key: string]: unknown;
 }
