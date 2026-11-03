@@ -27,7 +27,7 @@ export async function create(name) {
   }
   writeFileSync(join(target, "package.json"), `${JSON.stringify({
     name: id, version: "1.0.0", private: true, type: "module",
-    scripts: { dev: "jelly-theme dev", validate: "jelly-theme validate", test: "jelly-theme test" },
+    scripts: { dev: "jelly-theme dev", validate: "jelly-theme validate", test: "jelly-theme test", package: "jelly-theme package", upload: "jelly-theme upload" },
     devDependencies: { "@jelly/theme-cli": "^0.1.0" },
   }, null, 2)}\n`);
   writeFileSync(join(target, ".gitignore"), "node_modules/\n.jelly/\n");

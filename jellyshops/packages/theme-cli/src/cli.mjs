@@ -5,10 +5,16 @@ Usage:
   jelly-theme validate [folder]    Check theme.json, starter.json and assets with the platform's rules
   jelly-theme test [folder]        Run the conformance suite (rendering, accessibility, safety)
   jelly-theme dev [folder]         Preview the theme with sample data and edit it live
+  jelly-theme package [folder]     Write <id>-<version>.jellytheme.json (to <folder>/dist)
+  jelly-theme upload [folder]      Send the theme to the platform (needs --store and --token)
 
 Options:
   --json         validate: print the issues as JSON
   --port <n>     dev: port for the preview (default 5273)
+  --out <dir>    package: where to write the file
+  --store <id>   upload: the store that owns the theme (or JELLY_STORE_ID)
+  --token <t>    upload: a signed-in merchant access token (or JELLY_TOKEN)
+  --api <url>    upload: the platform API address (or JELLY_API_URL)
   --no-open      dev: do not open the browser
   -h, --help     Show this help
 `;
@@ -21,6 +27,7 @@ export async function run(argv) {
   for (let i = 0; i < rest.length; i++) {
     const arg = rest[i];
     if (arg === "--port") flags.port = Number(rest[++i]);
+    else if (["--out", "--store", "--token", "--api"].includes(arg)) flags[arg.slice(2)] = rest[++i];
     else if (arg.startsWith("--")) flags[arg.slice(2)] = true;
     else positional.push(arg);
   }
@@ -28,6 +35,8 @@ export async function run(argv) {
     case "create": return (await import("./create.mjs")).create(positional[0], flags);
     case "validate": return (await import("./validate.mjs")).validate(positional[0] ?? ".", flags);
     case "test": return (await import("./test.mjs")).test(positional[0] ?? ".", flags);
+    case "package": return (await import("./package.mjs")).pack(positional[0] ?? ".", flags);
+    case "upload": return (await import("./upload.mjs")).upload(positional[0] ?? ".", flags);
     case "dev": return (await import("./dev.mjs")).dev(positional[0] ?? ".", flags);
     default:
       process.stderr.write(`Unknown command "${command}".\n\n${HELP}`);

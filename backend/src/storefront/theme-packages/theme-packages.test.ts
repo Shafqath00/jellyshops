@@ -170,3 +170,32 @@ describe("isThemePackageUpload", () => {
     expect(isThemePackageUpload({ method: "POST", path: "/api/stores/s1/theme-packages/versions/v/yank" })).toBe(false);
   });
 });
+
+describe("a package made by the jelly-theme CLI", () => {
+  it("is accepted by the upload service exactly as built", async () => {
+    // The CLI and the platform must agree: scaffold a theme, package it, upload it.
+    // @ts-expect-error plain JavaScript modules of the CLI package
+    const { create } = await import("../../../../jellyshops/packages/theme-cli/src/create.mjs");
+    // @ts-expect-error plain JavaScript modules of the CLI package
+    const { buildPackage } = await import("../../../../jellyshops/packages/theme-cli/src/package.mjs");
+    const { mkdtempSync } = await import("node:fs");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    const directory = mkdtempSync(join(tmpdir(), "jelly-contract-"));
+    const original = process.cwd();
+    process.chdir(directory);
+    try { await create("from-cli"); } finally { process.chdir(original); }
+    const built = buildPackage(join(directory, "from-cli"));
+
+    const database = await createPGliteDatabase();
+    try {
+      await seedStore(database, "store-a", "a");
+      const service = new ThemePackageService(database as never, new MemoryStorage());
+      const result = await service.upload("store-a", JSON.parse(JSON.stringify(built.content)));
+      expect(result).toMatchObject({ created: true, package: { themeId: "from-cli" }, version: { version: "1.0.0" } });
+      const stored = await service.getVersion(result.version.id);
+      expect(stored?.css).toContain('[data-jelly-theme="from-cli"]');
+      expect(stored?.starter).toBeTruthy();
+    } finally { await database.close(); }
+  });
+});

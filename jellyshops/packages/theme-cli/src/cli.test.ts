@@ -56,6 +56,76 @@ describe("jelly-theme", () => {
     });
   });
 
+  describe("package", () => {
+    it("writes <id>-<version>.jellytheme.json with the manifest, starter, css and every asset", async () => {
+      await run(["create", "boxed"]);
+      process.chdir(join(directory, "boxed"));
+      expect(await run(["package"])).toBe(0);
+      const file = join(directory, "boxed", "dist", "boxed-1.0.0.jellytheme.json");
+      expect(existsSync(file)).toBe(true);
+      const built = JSON.parse(readFileSync(file, "utf8"));
+      expect(built).toMatchObject({ format: 1, manifest: { id: "boxed" } });
+      expect(built.starter.templates.home).toBeDefined();
+      expect(built.css).toContain("& {");
+      expect(built.assets.map((asset: { path: string; contentType: string }) => [asset.path, asset.contentType]).sort()).toEqual([["mark.svg", "image/svg+xml"], ["preview.svg", "image/svg+xml"]]);
+      expect(Buffer.from(built.assets[0].base64, "base64").toString("utf8")).toContain("<svg");
+    });
+    it("honours --out, and refuses a theme that does not validate or holds a file type that is not allowed", async () => {
+      await run(["create", "boxed"]);
+      process.chdir(join(directory, "boxed"));
+      expect(await run(["package", ".", "--out", join(directory, "elsewhere")])).toBe(0);
+      expect(existsSync(join(directory, "elsewhere", "boxed-1.0.0.jellytheme.json"))).toBe(true);
+      writeFileSync(join(directory, "boxed", "assets", "app.js"), "alert(1)");
+      expect(await run(["package"])).toBe(1);
+      expect(errors).toContain("not allowed");
+      errors = "";
+      const starter = JSON.parse(readFileSync(join(directory, "boxed", "starter.json"), "utf8"));
+      starter.templates.home.type = "homepage";
+      writeFileSync(join(directory, "boxed", "starter.json"), JSON.stringify(starter));
+      expect(await run(["package"])).toBe(1);
+      expect(errors).toContain("jelly-theme validate");
+    });
+  });
+
+  describe("upload", () => {
+    const answer = (status: number, body: unknown) => vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify(body), { status })));
+    afterEach(() => vi.unstubAllGlobals());
+
+    it("needs a store and a token", async () => {
+      await run(["create", "up"]);
+      process.chdir(join(directory, "up"));
+      expect(await run(["upload"])).toBe(2);
+      expect(errors).toContain("--store");
+    });
+    it("posts the package with the bearer token and reports what was stored", async () => {
+      await run(["create", "up"]);
+      process.chdir(join(directory, "up"));
+      answer(201, { package: { id: "p1", themeId: "up", name: "Up" }, version: { id: "v1", version: "1.0.0", status: "active" }, created: true });
+      expect(await run(["upload", ".", "--store", "store-1", "--token", "secret", "--api", "http://api.test/"])).toBe(0);
+      const [url, init] = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0] as [string, RequestInit];
+      expect(url).toBe("http://api.test/api/stores/store-1/theme-packages");
+      expect((init.headers as Record<string, string>).authorization).toBe("Bearer secret");
+      expect(JSON.parse(init.body as string).manifest.id).toBe("up");
+      expect(output).toContain("Uploaded up-1.0.0.jellytheme.json");
+      expect(output).toContain("version 1.0.0");
+    });
+    it("prints the platform's plain message and its issues when it refuses the theme", async () => {
+      await run(["create", "up"]);
+      process.chdir(join(directory, "up"));
+      answer(400, { error: { code: "INVALID_PACKAGE", message: "1 problem in the theme: theme.css: nope.", issues: [{ path: "theme.css", message: "nope" }] } });
+      expect(await run(["upload", "--store", "s", "--token", "t"])).toBe(1);
+      expect(errors).toContain("1 problem in the theme");
+      expect(errors).toContain("theme.css: nope");
+    });
+    it("says so when the platform cannot be reached", async () => {
+      await run(["create", "up"]);
+      process.chdir(join(directory, "up"));
+      vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("connect ECONNREFUSED"); }));
+      expect(await run(["upload", "--store", "s", "--token", "t"])).toBe(1);
+      expect(errors).toContain("Could not reach");
+    });
+  });
+
   describe("validate", () => {
     it("passes the scaffolded theme", async () => {
       await run(["create", "plain"]);
