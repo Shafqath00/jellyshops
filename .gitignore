@@ -51,3 +51,6 @@ backend/.tmp-vitest/
 backend/.test-temp/
 backend/supabase/.temp/
 /jellyshops/tsx-*/
+
+# Third-party agent skills (installed from skills-lock.json)
+.agents/
