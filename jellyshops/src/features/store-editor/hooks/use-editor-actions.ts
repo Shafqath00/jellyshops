@@ -53,7 +53,7 @@ export function useEditorActions(ctx: ReturnType<typeof useEditorState> & Return
 
   const insertBuiltIn = async (sectionType: string) => {
     if (!activeTemplate || !libraryRegion) return;
-    const section = createSectionFromDefinition(sectionType, () => crypto.randomUUID());
+    const section = createSectionFromDefinition(sectionType, () => crypto.randomUUID(), ctx.themeConfiguration?.themeVersion);
     await persistLayout(appendInlineSection(activeTemplate.layout, section));
     setSelection({ kind: "section", region: libraryRegion, sectionId: section.id });
     setLibraryRegion(undefined);

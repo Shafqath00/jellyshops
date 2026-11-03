@@ -10,6 +10,7 @@ export interface PreviewShared {
   mode: "editor" | "preview";
   commerce: CommerceDataProvider;
   themeId?: string;
+  themeVersion?: string;
   page?: StorefrontPageContext;
   language: string | null;
   menus: Record<string, RuntimeMenuV4>;
@@ -45,6 +46,7 @@ export const PreviewSection = memo(function PreviewSection({ section, region, sh
       commerce={shared.commerce}
       region={region}
       themeId={shared.themeId}
+      themeVersion={shared.themeVersion}
       page={shared.page}
       language={shared.language}
       menus={shared.menus}

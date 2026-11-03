@@ -257,6 +257,31 @@ describe("installing an uploaded theme on a store", () => {
   });
   afterEach(async () => database.close());
 
+  it("installs an older pin after v2, compiles its removed recipe, and reloads both draft and published artifacts", async () => {
+    const id = "pinned-both";
+    const old = await service.upload("store-a", themePackage({ id }));
+    const newer = themePackage({ id, version: "2.0.0", mutate: (manifest) => { manifest.sections = []; manifest.migrations = [{ from: "1.0.0", to: "2.0.0", operations: [] }]; } });
+    newer.starter.templates.home.sections = newer.starter.templates.home.sections.filter((placement: any) => placement.section?.type !== `${id}/promo-banner`);
+    const next = await service.upload("store-a", newer);
+    const installedNew = await service.install("store-a", next.version.id);
+    const installedOld = await service.install("store-a", old.version.id, { replaceDraft: true, expectedGeneration: installedNew.generation });
+    expect((await database.query(`SELECT "themeVersion", "draftArtifactId" FROM "ThemeConfiguration" WHERE "storeId" = 'store-a'`)).rows[0]).toMatchObject({ themeVersion: "1.0.0", draftArtifactId: old.version.id });
+    const compilation = await createLocalV4CompilationService(database as unknown as SqlExecutor).compile("store-a", installedOld.generation);
+    expect(compilation).toMatchObject({ ok: true, snapshot: { theme: { id, version: "1.0.0", artifactId: old.version.id } } });
+    if (!compilation.ok) throw new Error("The v1 draft did not compile");
+    await database.query(`INSERT INTO "StorefrontPublication" ("id", "storeId", "sourceRevision", "sourceGeneration", "schemaVersion", "compilerVersion", "document", "themeArtifactId", "idempotencyKey", "publishedAt") VALUES ('published-v1', 'store-a', $1, $1, 4, 'local-v4-1', $2::jsonb, $3, 'published-v1', NOW())`, [installedOld.generation, JSON.stringify(compilation.snapshot), old.version.id]);
+    await service.install("store-a", next.version.id, { replaceDraft: true, expectedGeneration: installedOld.generation });
+    const loadedVersions: string[] = [];
+    const cold = new ThemePackageService({ query: async (text: string, values?: unknown[]) => {
+      const result = await database.query(text, values as never);
+      if (text.includes('"ThemePackageVersion"')) loadedVersions.push(...result.rows.map((row: any) => row.version));
+      return result;
+    } } as never, new MemoryStorage());
+    await cold.registerStoreThemes("store-a");
+    expect(loadedVersions.sort()).toEqual(["1.0.0", "2.0.0"]);
+    expect((await database.query(`SELECT "themeArtifactId", "document"->'theme'->>'version' AS version FROM "StorefrontPublication" WHERE "id" = 'published-v1'`)).rows[0]).toEqual({ themeArtifactId: old.version.id, version: "1.0.0" });
+  });
+
   it("refuses an incompatible stored version before creating draft content or an install", async () => {
     const { version } = await service.upload("store-a", themePackage({ id: "incompatible" }));
     await database.query(`UPDATE "ThemePackageVersion" SET "manifest" = jsonb_set("manifest", '{engines}', '{"jelly": ">=2 <3"}'::jsonb) WHERE "id" = $1`, [version.id]);

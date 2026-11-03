@@ -10,7 +10,7 @@ import { CustomContentSection } from "./custom-content";
  * the editor preview select the whole section.
  */
 export function RecipeSection({ section, context }: SectionRenderProps) {
-  const recipe = getRecipe(section.type);
+  const recipe = getRecipe(section.type, context.themeVersion);
   if (!recipe) return null;
   const { settings, blocks } = expandRecipe(recipe, section.settings);
   const drawn: SectionNode = { ...section, type: "custom-content", settings: { ...section.settings, ...settings }, blocks };

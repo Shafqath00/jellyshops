@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { customCssProblem, MAX_SECTION_CSS_LENGTH, scopeCustomCss } from "./custom-css";
+import { customCssProblem, MAX_SECTION_CSS_LENGTH, rescopeCustomCss, scopeCustomCss } from "./custom-css";
 
 const scope = '[data-section-css="hero-1"]';
 
@@ -16,7 +16,7 @@ describe("section custom CSS", () => {
 
   it("keeps @media, @supports and @keyframes, and drops comments", () => {
     const css = "/* phones */ @media (max-width: 767px) { p { font-size: 14px } } @keyframes pulse { from { opacity: 0 } to { opacity: 1 } }";
-    expect(scopeCustomCss(css, scope)).toBe(`@media (max-width: 767px){${scope} p{font-size: 14px}}\n@keyframes pulse{from { opacity: 0 } to { opacity: 1 }}`);
+    expect(scopeCustomCss(css, scope)).toBe(`@media (max-width: 767px){${scope} p{font-size: 14px}}\n@keyframes pulse-data-section-css-hero-1{from{ opacity: 0 }\nto{ opacity: 1 }}`);
   });
 
   it.each([
@@ -43,5 +43,25 @@ describe("section custom CSS", () => {
   it("returns null for empty or missing CSS", () => {
     expect(scopeCustomCss("   ", scope)).toBeNull();
     expect(scopeCustomCss(undefined, scope)).toBeNull();
+  });
+
+  it("resolves a previously scoped theme selector wherever it appears", () => {
+    const oldScope = '[data-jelly-theme="demo"]';
+    const newScope = `${oldScope}[data-jelly-theme-version="1.0.0"]`;
+    const platformCss = scopeCustomCss(`.dark &{color:red}:is(&,.card){--selector:'${oldScope}'}`, oldScope)!;
+    expect(rescopeCustomCss(platformCss, oldScope, newScope))
+      .toBe(`.dark ${newScope}{color:red}\n:is(${newScope},.card){--selector:'${oldScope}'}`);
+  });
+
+  it("rejects a selector when it has no previous theme scope", () => {
+    expect(rescopeCustomCss("body{color:red}", '[data-jelly-theme="demo"]', '[data-jelly-theme="demo"][data-jelly-theme-version="1"]')).toBeNull();
+  });
+
+  it("namespaces keyframes and their animation references per theme scope", () => {
+    const css = "@keyframes pulse{to{opacity:1}} .card{animation:pulse 1s ease;animation-name:pulse}";
+    expect(scopeCustomCss(css, '[data-jelly-theme="demo"][data-jelly-theme-version="1.0.0"]'))
+      .toContain("@keyframes pulse-data-jelly-theme-demo-data-jelly-theme-version-1-0-0");
+    expect(scopeCustomCss(css, '[data-jelly-theme="demo"][data-jelly-theme-version="1.0.0"]'))
+      .toContain("animation:pulse-data-jelly-theme-demo-data-jelly-theme-version-1-0-0 1s ease");
   });
 });

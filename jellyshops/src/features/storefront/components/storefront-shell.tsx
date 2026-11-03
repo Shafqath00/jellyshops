@@ -54,10 +54,11 @@ export function SharedCartPresentation({ open, onClose, children }: StorefrontCa
   return <Dialog open={open} onOpenChange={(next) => { if (!next) onClose(); }}><DialogContent aria-labelledby="cart-title" className="left-auto right-0 top-0 h-dvh max-w-[470px] translate-x-0 translate-y-0 overflow-auto rounded-none bg-[var(--store-surface)] p-7 text-[var(--store-text)] shadow-[-24px_0_70px_rgba(20,33,61,.16)]">{children}</DialogContent></Dialog>;
 }
 
-export function ThemedStorefrontShell({ themeId, settings, store, navigation, cartCount, cart, children, onCartOpen, headerContent, footerContent }: {
+export function ThemedStorefrontShell({ themeId, themeVersion, settings, store, navigation, cartCount, cart, children, onCartOpen, headerContent, footerContent }: {
   headerContent?: React.ReactNode;
   footerContent?: React.ReactNode;
   themeId?: string;
+  themeVersion?: string;
   settings: Record<string, unknown>;
   store: StorefrontShellStore;
   navigation: StorefrontNavigationItem[];
@@ -66,14 +67,14 @@ export function ThemedStorefrontShell({ themeId, settings, store, navigation, ca
   children: React.ReactNode;
   onCartOpen(): void;
 }) {
-  const shell = resolveThemeShell(themeId, { Layout: SharedStorefrontLayout, Header: SharedStorefrontHeader, Footer: SharedStorefrontFooter, CartPanel: SharedCartPresentation, CollectionPage: SharedCollectionPage, ProductPage: SharedProductPage, SearchPage: SharedSearchPage, CartPage: SharedCartPage, CheckoutPage: SharedCheckoutPage, OrderPage: SharedOrderPage, ContentPage: SharedContentPage });
+  const shell = resolveThemeShell(themeId, { Layout: SharedStorefrontLayout, Header: SharedStorefrontHeader, Footer: SharedStorefrontFooter, CartPanel: SharedCartPresentation, CollectionPage: SharedCollectionPage, ProductPage: SharedProductPage, SearchPage: SharedSearchPage, CartPage: SharedCartPage, CheckoutPage: SharedCheckoutPage, OrderPage: SharedOrderPage, ContentPage: SharedContentPage }, themeVersion);
   const Header = shell.Header;
   const Footer = shell.Footer;
   const Layout = shell.Layout;
-  return <ThemePresentationContext.Provider value={{ themeId, settings, shell }}><Layout store={store} settings={settings} header={headerContent ?? <Header store={store} navigation={navigation} cartCount={cartCount} settings={settings} onCartOpen={onCartOpen} />} footer={footerContent ?? <Footer store={store} settings={settings} />} cart={cart}>{children}</Layout></ThemePresentationContext.Provider>;
+  return <ThemePresentationContext.Provider value={{ themeId, themeVersion, settings, shell }}><Layout store={store} settings={settings} header={headerContent ?? <Header store={store} navigation={navigation} cartCount={cartCount} settings={settings} onCartOpen={onCartOpen} />} footer={footerContent ?? <Footer store={store} settings={settings} />} cart={cart}>{children}</Layout></ThemePresentationContext.Provider>;
 }
 
-const ThemePresentationContext = createContext<{ themeId?: string; settings: Record<string, unknown>; shell: ReturnType<typeof resolveThemeShell> } | null>(null);
+const ThemePresentationContext = createContext<{ themeId?: string; themeVersion?: string; settings: Record<string, unknown>; shell: ReturnType<typeof resolveThemeShell> } | null>(null);
 export function useThemePresentation() {
   const value = useContext(ThemePresentationContext);
   if (!value) throw new Error("useThemePresentation must be used inside ThemedStorefrontShell");

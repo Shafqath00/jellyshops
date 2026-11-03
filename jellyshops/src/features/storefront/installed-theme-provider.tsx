@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { registerInstalledTheme, type InstalledTheme } from "./installed-theme";
+import { installedThemeCss, registerInstalledTheme, type InstalledTheme } from "./installed-theme";
 
 /**
  * Makes an uploaded theme known in the browser before anything below resolves it, and draws its
@@ -10,7 +10,7 @@ import { registerInstalledTheme, type InstalledTheme } from "./installed-theme";
 export function InstalledThemeProvider({ theme, children }: { theme: InstalledTheme | null; children: ReactNode }) {
   if (theme) registerInstalledTheme(theme);
   return <>
-    {theme && theme.css ? <style data-installed-theme={theme.versionId}>{theme.css}</style> : null}
+    {theme && theme.css ? <style data-installed-theme={theme.versionId}>{installedThemeCss(theme.versionId)}</style> : null}
     {children}
   </>;
 }

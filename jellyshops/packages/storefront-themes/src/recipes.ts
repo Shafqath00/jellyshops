@@ -1,6 +1,7 @@
-import { registerSection, unregisterSection, type ControlDefinition, type SectionDefinition } from "@jelly/storefront-registry";
+import { registerThemeSections, type ControlDefinition, type SectionDefinition } from "@jelly/storefront-registry";
 import { storefrontPageTypes, type BlockNode } from "@jelly/storefront-schema";
 import { z } from "zod";
+import { compareThemeVersions } from "@jelly/storefront-schema";
 
 /**
  * Section recipes: a custom section a theme describes as data. A recipe lists the settings the
@@ -119,32 +120,31 @@ export function recipeDefinition(themeId: string, recipe: SectionRecipe): Sectio
   };
 }
 
-const recipes = new Map<string, { themeId: string; recipe: SectionRecipe }>();
+const recipes = new Map<string, Map<string, SectionRecipe[]>>();
 
-export function getRecipe(type: string): SectionRecipe | undefined { return recipes.get(type)?.recipe; }
+export function getRecipe(type: string, themeVersion?: string | null): SectionRecipe | undefined {
+  const versions = recipes.get(type.split("/")[0]);
+  const version = themeVersion ?? (versions && [...versions.keys()].sort(compareThemeVersions).at(-1));
+  return version ? versions?.get(version)?.find((recipe) => recipe.type === type) : undefined;
+}
 
 /**
  * Makes a theme's recipes known: registers each as a section limited to the theme, and removes
  * recipes of the same theme that are no longer listed. Returns a function that puts things back
  * as they were (the project validator uses it to try a theme out without keeping it).
  */
-export function registerRecipes(themeId: string, list: SectionRecipe[]): () => void {
-  const undo: Array<() => void> = [];
-  const keep = new Set(list.map((recipe) => recipe.type));
-  for (const [type, entry] of [...recipes]) {
-    if (entry.themeId !== themeId || keep.has(type)) continue;
-    const old = entry;
-    unregisterSection(type);
-    recipes.delete(type);
-    undo.push(() => { registerSection(recipeDefinition(themeId, old.recipe), { replace: true }); recipes.set(type, old); });
-  }
-  for (const recipe of list) {
-    const previous = recipes.get(recipe.type);
-    const restore = registerSection(recipeDefinition(themeId, recipe), { replace: true });
-    recipes.set(recipe.type, { themeId, recipe });
-    undo.push(() => { restore(); if (previous) recipes.set(recipe.type, previous); else recipes.delete(recipe.type); });
-  }
-  return () => { for (const step of undo.reverse()) step(); };
+export function registerRecipes(themeId: string, list: SectionRecipe[], version = "1.0.0"): () => void {
+  const snapshot = structuredClone(list);
+  const restoreSections = registerThemeSections(themeId, version, snapshot.map((recipe) => recipeDefinition(themeId, recipe)));
+  const versions = recipes.get(themeId) ?? new Map<string, SectionRecipe[]>();
+  const previous = versions.get(version);
+  versions.set(version, snapshot); recipes.set(themeId, versions);
+  return () => {
+    if (versions.get(version) !== snapshot) return;
+    restoreSections();
+    if (previous) versions.set(version, previous); else versions.delete(version);
+    if (!versions.size) recipes.delete(themeId);
+  };
 }
 
 /** The recipes written in a manifest's `sections`, parsed (invalid ones are skipped; the manifest check reports them). */

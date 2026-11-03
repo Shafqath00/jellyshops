@@ -137,7 +137,7 @@ export function expandRuntimeLayout(
   snapshot: RuntimeStorefrontSnapshotV4,
   template: RuntimeTemplateV4,
 ): ResolvedStorefrontLayout {
-  return applyBindingValues(expandRawRuntimeLayout(snapshot, template), new Map());
+  return applyBindingValues(expandRawRuntimeLayout(snapshot, template), new Map(), snapshot.theme.version);
 }
 
 /** Like `expandRuntimeLayout`, with custom-field values looked up for the resource being shown. A failed lookup falls back quietly. */
@@ -149,12 +149,12 @@ export async function expandRuntimeLayoutWithValues(
 ): Promise<ResolvedStorefrontLayout> {
   const raw = expandRawRuntimeLayout(snapshot, template);
   const bindings = collectLayoutBindings(raw);
-  if (!bindings.length) return applyBindingValues(raw, new Map());
+  if (!bindings.length) return applyBindingValues(raw, new Map(), snapshot.theme.version);
   try {
     const values = await loadValues({ storeId: snapshot.storeId, bindings, ...(resource ? { resource: { type: resource.type, id: resource.id } } : {}) });
-    return applyBindingValues(raw, values);
+    return applyBindingValues(raw, values, snapshot.theme.version);
   } catch {
-    return applyBindingValues(raw, new Map());
+    return applyBindingValues(raw, new Map(), snapshot.theme.version);
   }
 }
 

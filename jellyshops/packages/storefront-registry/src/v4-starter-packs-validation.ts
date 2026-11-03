@@ -135,7 +135,7 @@ export function validateV4StarterPack(value: unknown, supportedPackIds: readonly
         continue;
       }
       collectNodes(placement.section, placementPath, nodeIds, issues);
-      const registryIssues = validateSectionAgainstRegistry(placement.section, template.type);
+      const registryIssues = validateSectionAgainstRegistry(placement.section, template.type, pack.theme?.themeId, pack.version);
       if (registryIssues.length) issues.push({ code: "INVALID_SECTION", path: placementPath, message: registryIssues.map(({ message }) => message).join("; ") });
     }
   }

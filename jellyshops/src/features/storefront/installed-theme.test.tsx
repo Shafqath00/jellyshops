@@ -14,6 +14,18 @@ const served = (id: string, versionId: string, version = "1.0.0") => ({ version:
 const answer = (body: unknown, status = 200) => vi.fn(async () => new Response(JSON.stringify(body), { status }));
 
 describe("uploaded themes in the storefront", () => {
+  it("keeps cached versions pinned and limits each legacy stylesheet to its own version wrapper", async () => {
+    for (const version of ["2.0.0", "1.0.0"]) await loadInstalledTheme(`parallel-${version}`, { baseUrl: "http://api.test", fetch: answer(served("parallel-theme", `parallel-${version}`, version)) as never });
+    const fetcher = answer({}, 500);
+    await loadInstalledTheme("parallel-1.0.0", { baseUrl: "http://api.test", fetch: fetcher as never });
+    expect(fetcher).not.toHaveBeenCalled();
+    for (const version of ["1.0.0", "2.0.0"]) {
+      expect(resolveTheme("parallel-theme", {}, version)).toMatchObject({ id: "parallel-theme", version });
+      const css = installedThemeCss(`parallel-${version}`);
+      expect(css).toContain(`[data-jelly-theme="parallel-theme"][data-jelly-theme-version="${version}"]`);
+      expect(css).not.toContain(`[data-jelly-theme-version="${version === "1.0.0" ? "2.0.0" : "1.0.0"}"]`);
+    }
+  });
   it("loads a version from the platform, registers it so the theme resolves, and keeps its stylesheet", async () => {
     const fetcher = answer(served("loaded-one", "v-1"));
     const theme = await loadInstalledTheme("v-1", { baseUrl: "http://api.test/", fetch: fetcher as never });

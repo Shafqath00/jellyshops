@@ -7,7 +7,8 @@ import { GripVertical } from "lucide-react";
 import { ChevronDown, ChevronRight, ChevronUp, Eye, EyeOff, LayoutPanelTop, Plus, Search, Trash2, Type, X } from "lucide-react";
 import type { EditorSelection } from "../model/types";
 import type { StorefrontTemplateRecord } from "../api/types";
-import { blockLabel as blockTypeLabel, sectionLabel } from "@jelly/storefront-registry";
+import { blockLabel as blockTypeLabel } from "@jelly/storefront-registry";
+import { displayName } from "../editor-page-helpers";
 
 /** Block name plus a short preview of its text, so merchants can tell blocks apart. */
 function describeBlock(block: { type: string; settings?: Record<string, unknown> }): string {
@@ -101,15 +102,16 @@ function placementRegion(
   return "template";
 }
 
-function PlacementRow({ placement, globalSections, selection, activeGlobalId, onSelect, onGlobalSelect, onAddBlock, onMove, onToggle, onRemove, onBlockAction, index, count, region, expanded, onExpand, query }: {
+function PlacementRow({ placement, globalSections, selection, activeGlobalId, onSelect, onGlobalSelect, onAddBlock, onMove, onToggle, onRemove, onBlockAction, index, count, region, expanded, onExpand, query, themeVersion }: {
   placement: TemplatePlacement; globalSections: Record<string, GlobalLabel>; selection: EditorSelection; activeGlobalId?: string;
   onSelect(selection: EditorSelection): void; onGlobalSelect?(id: string): void; onAddBlock?(id: string, parentId?: string): void; onMove?(id: string, direction: "up" | "down"): void; onToggle?(id: string, enabled: boolean): void;
   onRemove?(id: string): void; onBlockAction?(sectionId: string, blockId: string, action: "toggle" | "remove"): void;
   index: number; count: number; region: HierarchyRegion; expanded: boolean; onExpand(): void; query: string;
+  themeVersion?: string;
 }) {
   const shared = placement.kind === "global" ? globalSections[placement.globalSectionId] : undefined;
   const id = placement.kind === "inline" ? placement.section.id : placement.globalSectionId;
-  const label = placement.kind === "inline" ? sectionLabel(placement.section.type) : shared?.name ?? "Missing global section";
+  const label = placement.kind === "inline" ? displayName(placement.section.type, themeVersion) : shared?.name ?? "Missing global section";
   const selected = placement.kind === "global" ? activeGlobalId === id : selection?.kind !== "theme" && selection?.sectionId === id;
   const allBlocks = placement.kind === "inline" ? placement.section.blocks : shared?.blocks ?? [];
   // While searching, a section whose own name matches shows all its blocks; otherwise only the blocks that match.
@@ -163,7 +165,9 @@ export function TemplateHierarchy({
   onToggle,
   onRemove,
   onBlockAction,
+  themeVersion,
 }: {
+  themeVersion?: string;
   template: Pick<StorefrontTemplateRecord, "id" | "name" | "layout">;
   globalSections: Record<string, GlobalLabel>;
   selection: EditorSelection;
@@ -205,7 +209,7 @@ export function TemplateHierarchy({
   // While searching, only sections whose name or blocks match are listed, and they open to show the matching blocks.
   const placementMatches = (placement: TemplatePlacement) => {
     if (!query) return true;
-    const label = placement.kind === "inline" ? sectionLabel(placement.section.type) : globalSections[placement.globalSectionId]?.name ?? "";
+    const label = placement.kind === "inline" ? displayName(placement.section.type, themeVersion) : globalSections[placement.globalSectionId]?.name ?? "";
     const blocks = placement.kind === "inline" ? placement.section.blocks : (globalSections[placement.globalSectionId]?.blocks ?? []) as TreeBlock[];
     return label.toLowerCase().includes(query) || blocks.some((block) => blockMatches(block, query));
   };
@@ -245,11 +249,12 @@ export function TemplateHierarchy({
             <div className="space-y-1">
               <SortableContext items={groups[region].map((placement) => String(placement.sourceIndex))} strategy={verticalListSortingStrategy}>
               {groups[region].map((placement, index) => (
-                <SortablePlacement key={placement.sourceIndex} id={String(placement.sourceIndex)} label={placement.kind === "global" ? globalSections[placement.globalSectionId]?.name ?? "shared section" : sectionLabel(placement.section.type)}>
+                <SortablePlacement key={placement.sourceIndex} id={String(placement.sourceIndex)} label={placement.kind === "global" ? globalSections[placement.globalSectionId]?.name ?? "shared section" : displayName(placement.section.type, themeVersion)}>
                 <PlacementRow
                   placement={placement}
                   expanded={Boolean(query) || expandedItems.has(placement.kind === "inline" ? placement.section.id : `global:${placement.sourceIndex}`)}
                   query={query}
+                  themeVersion={themeVersion}
                   onExpand={() => { const key = placement.kind === "inline" ? placement.section.id : `global:${placement.sourceIndex}`; setExpandedItems((current) => { const next = new Set(current); if (next.has(key)) next.delete(key); else next.add(key); return next; }); }}
                   globalSections={globalSections}
                   selection={selection}

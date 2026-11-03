@@ -91,16 +91,16 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
   if (route.status !== "ready") return null;
   const resolvedTheme = resolveTheme(snapshot.theme.id ?? snapshot.theme.presetId, snapshot.theme.settings, snapshot.theme.version);
   const themeId = resolvedTheme.id as ThemeId;
-  const style = resolveStorefrontThemeTokens(themeId, resolvedTheme.settings) as CSSProperties;
+  const style = resolveStorefrontThemeTokens(themeId, resolvedTheme.settings, {}, resolvedTheme.version) as CSSProperties;
   const commerce = commerceProvider(storeSlug, currency, products, snapshot.storeId);
 
   return (
     <div className={`jelly-storefront jelly-theme-layout-${resolvedTheme.layout}`} data-jelly-theme={resolvedTheme.id} data-jelly-theme-version={resolvedTheme.version} style={style}>
       {/* Inside the storefront frame the frame already adds the theme's custom CSS. */}
-      {!chromeHandled && <ThemeCustomCss settings={resolvedTheme.settings} />}
+      {!chromeHandled && <ThemeCustomCss settings={resolvedTheme.settings} themeId={resolvedTheme.id} themeVersion={resolvedTheme.version} />}
       {resolvedTheme.layout === "editorial" ? <div className="jelly-theme-masthead"><span>JellyShop collection</span><img src={`${resolvedTheme.assetPrefix}monogram.svg`} alt="" /></div> : null}
-      {!chromeHandled && route.layout.announcement.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="header" themeId={resolvedTheme.id} page={route.context} menus={snapshot.menus} resourceLinks={resourceLinks} collectionLinks={collectionLinks} storeSlug={storeSlug} language={language} />)}
-      {!chromeHandled && route.layout.header.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="header" themeId={resolvedTheme.id} page={route.context} menus={snapshot.menus} resourceLinks={resourceLinks} collectionLinks={collectionLinks} storeSlug={storeSlug} language={language} />)}
+      {!chromeHandled && route.layout.announcement.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="header" themeId={resolvedTheme.id} themeVersion={resolvedTheme.version} page={route.context} menus={snapshot.menus} resourceLinks={resourceLinks} collectionLinks={collectionLinks} storeSlug={storeSlug} language={language} />)}
+      {!chromeHandled && route.layout.header.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="header" themeId={resolvedTheme.id} themeVersion={resolvedTheme.version} page={route.context} menus={snapshot.menus} resourceLinks={resourceLinks} collectionLinks={collectionLinks} storeSlug={storeSlug} language={language} />)}
       <main className={resolvedTheme.layout === "editorial" ? "jelly-theme-editorial-main" : undefined}>
         {route.layout.template.map((section) => (
           <RegistrySectionRenderer
@@ -109,14 +109,14 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
             mode="published"
             commerce={commerce}
             region="template"
-            themeId={resolvedTheme.id}
+            themeId={resolvedTheme.id} themeVersion={resolvedTheme.version}
             page={route.context}
             menus={snapshot.menus} resourceLinks={resourceLinks} collectionLinks={collectionLinks}
             storeSlug={storeSlug}
           />
         ))}
       </main>
-      {!chromeHandled && route.layout.footer.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="footer" themeId={resolvedTheme.id} page={route.context} menus={snapshot.menus} resourceLinks={resourceLinks} collectionLinks={collectionLinks} storeSlug={storeSlug} language={language} />)}
+      {!chromeHandled && route.layout.footer.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="footer" themeId={resolvedTheme.id} themeVersion={resolvedTheme.version} page={route.context} menus={snapshot.menus} resourceLinks={resourceLinks} collectionLinks={collectionLinks} storeSlug={storeSlug} language={language} />)}
     </div>
   );
 }

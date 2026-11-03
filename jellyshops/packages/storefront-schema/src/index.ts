@@ -92,7 +92,7 @@ export type {
 } from "./product-options.js";
 export { MAX_PRODUCT_PHOTOS, isProductMediaEnabled, resolveProductGallery, validateMediaAssignments, pruneMediaAssignments, suggestAssignmentsFromFilenames, productMediaUrl, productMediaSrcSet } from "./product-media.js";
 export type { MediaAssignments, ProductMediaLike, ProductMediaInput, MediaAssignmentIssue } from "./product-media.js";
-export { MAX_SECTION_CSS_LENGTH, customCssProblem, scopeCustomCss } from "./custom-css.js";
+export { MAX_SECTION_CSS_LENGTH, customCssProblem, scopeCustomCss, rescopeCustomCss } from "./custom-css.js";
 export { LANGUAGE_CODE, MAX_TRANSLATION_LENGTH, readTranslations, translateSection, translateSettings, translationsProblem, withTranslation } from "./translations.js";
 export type { Translations } from "./translations.js";
 export { appEmbedSource, getAppBlockProvider, listAppBlockProviders, registerAppBlockProvider } from "./app-blocks.js";

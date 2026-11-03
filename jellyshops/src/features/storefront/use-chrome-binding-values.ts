@@ -34,5 +34,5 @@ export function useChromeBindingValues(
     // requestKey covers the store, resource and bindings.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestKey, loadValues]);
-  return useMemo(() => raw ? applyBindingValues(raw, loaded?.key === requestKey ? loaded.values : empty) : null, [raw, loaded, requestKey]);
+  return useMemo(() => raw ? applyBindingValues(raw, loaded?.key === requestKey ? loaded.values : empty, snapshot?.theme.version) : null, [raw, loaded, requestKey, snapshot?.theme.version]);
 }

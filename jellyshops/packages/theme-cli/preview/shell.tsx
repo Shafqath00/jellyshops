@@ -101,7 +101,7 @@ function Shell() {
   });
   const remove = (index: number) => editStarter((draft) => { draft.templates[templateKey].sections.splice(index, 1); setSelection(null); });
   const add = (type: string) => {
-    const definition = getSectionDefinition(type);
+    const definition = getSectionDefinition(type, project.manifest.version);
     if (!definition) return;
     editStarter((draft) => {
       const section: SectionNode = { id: uid(type), type, enabled: true, settings: structuredClone(definition.defaultSettings), blocks: structuredClone(definition.defaultBlocks).map((block) => ({ ...block, id: uid(block.type) })) };
@@ -120,7 +120,7 @@ function Shell() {
     const key = Object.keys(project.starter?.globalSections ?? {}).find((candidate) => project.starter!.globalSections[candidate].id === placement.globalSectionId || candidate === placement.globalSectionId);
     return { index, section: key ? project.starter!.globalSections[key] : undefined, shared: true as const, selection: key ? ({ scope: "global", key } as Selection) : null };
   });
-  const allowed = listSectionDefinitionsForPage(pageType, "template", project.manifest.id).filter((definition) => !["header", "footer", "announcement-bar"].includes(definition.type));
+  const allowed = listSectionDefinitionsForPage(pageType, "template", project.manifest.id, project.manifest.version).filter((definition) => !["header", "footer", "announcement-bar"].includes(definition.type));
 
   return <div style={{ ...panel, display: "grid", gridTemplateColumns: "340px 1fr", height: "100vh", background: "#eef0f2" }}>
     <aside style={{ display: "flex", flexDirection: "column", background: "#fff", borderRight: "1px solid #dde1e5", minHeight: 0 }}>
@@ -155,7 +155,7 @@ function Shell() {
             <h2 style={{ fontSize: 14, margin: "0 0 8px" }}>{sectionLabel(selected.type)}</h2>
             <label style={{ display: "flex", gap: 6, marginBottom: 8 }}><input type="checkbox" checked={selected.enabled} onChange={(event) => patchSection((section) => { section.enabled = event.target.checked; })} /> Show this section</label>
             <GroupedFields
-              fields={fieldsFromControls(getSectionDefinition(selected.type)?.controls ?? [])}
+              fields={fieldsFromControls(getSectionDefinition(selected.type, project.manifest.version)?.controls ?? [])}
               read={(key) => selected.settings[key]}
               onChange={(key, value) => patchSection((section) => { if (value === undefined || value === "") delete section.settings[key]; else section.settings[key] = value; })}
             />

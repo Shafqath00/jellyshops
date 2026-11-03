@@ -1,4 +1,4 @@
-import { customCssProblem, isRichTextDocument, MAX_BLOCK_DEPTH, translationsProblem, type BlockNode, type PageType, type SectionNode } from "@jelly/storefront-schema";
+import { compareThemeVersions, customCssProblem, isRichTextDocument, MAX_BLOCK_DEPTH, translationsProblem, type BlockNode, type PageType, type SectionNode } from "@jelly/storefront-schema";
 import { z } from "zod";
 import { defineSection } from "./define.js";
 import { setSectionLabel } from "./labels.js";
@@ -25,6 +25,32 @@ function prepareSection(definition: SectionDefinition): SectionDefinition {
 }
 const sections: SectionDefinition[] = [...layoutSections, ...contentSections, ...commerceSections, ...productExtraSections].map(prepareSection);
 const sectionDefinitions = new Map(sections.map((definition) => [definition.type, definition]));
+const themeSections = new Map<string, Map<string, SectionDefinition[]>>();
+const newestVersion = <T>(versions: Map<string, T>): string | undefined => [...versions.keys()].sort(compareThemeVersions).at(-1);
+
+/** One complete, versioned section snapshot. Empty lists intentionally hide removed recipes. */
+export function registerThemeSections(themeId: string, version: string, definitions: SectionDefinition[]): () => void {
+  const prepared = definitions.map((definition) => {
+    if (!definition.type.startsWith(`${themeId}/`)) throw new Error("Theme section types must belong to their theme.");
+    defineSection(definition);
+    return prepareSection({ ...definition, themes: [themeId] });
+  });
+  const versions = themeSections.get(themeId) ?? new Map<string, SectionDefinition[]>();
+  const previous = versions.get(version);
+  const oldLatest = versions.get(newestVersion(versions) ?? "") ?? [];
+  const refreshLabels = (prior: SectionDefinition[]) => {
+    const latest = versions.get(newestVersion(versions) ?? "") ?? [];
+    for (const definition of [...prior, ...latest]) setSectionLabel(definition.type, latest.find((entry) => entry.type === definition.type)?.label);
+  };
+  versions.set(version, prepared); themeSections.set(themeId, versions); refreshLabels(oldLatest);
+  return () => {
+    if (versions.get(version) !== prepared) return;
+    const prior = versions.get(newestVersion(versions) ?? "") ?? [];
+    if (previous) versions.set(version, previous); else versions.delete(version);
+    refreshLabels(prior);
+    if (!versions.size) themeSections.delete(themeId);
+  };
+}
 
 const NAMESPACED_TYPE = /^[a-z0-9][a-z0-9-]*\/[a-z0-9][a-z0-9-]*$/;
 /**
@@ -60,7 +86,10 @@ export function unregisterSection(type: string): void {
   setSectionLabel(type, undefined);
 }
 
-export function getSectionDefinition(type: string): SectionDefinition | undefined { return sectionDefinitions.get(type); }
+export function getSectionDefinition(type: string, themeVersion?: string | null): SectionDefinition | undefined {
+  const versions = type.includes("/") ? themeSections.get(type.split("/")[0]) : undefined;
+  return versions ? versions.get(themeVersion ?? newestVersion(versions) ?? "")?.find((entry) => entry.type === type) : sectionDefinitions.get(type);
+}
 export function getBlockDefinition(type: string) { return blockDefinitions.get(type); }
 /** Every block definition, in registration order. */
 export function listBlockDefinitions() { return [...blockDefinitions.values()]; }
@@ -75,14 +104,16 @@ export function allowedChildBlockTypes(blockType: string, depth: number): string
   if (!allowed || depth >= MAX_BLOCK_DEPTH) return [];
   return depth + 1 >= MAX_BLOCK_DEPTH ? allowed.filter((type) => !blockDefinitions.get(type)?.allowedBlockTypes) : allowed;
 }
-export function listSectionDefinitions(): SectionDefinition[] { return [...sections]; }
+export function listSectionDefinitions(themeVersion?: string | null): SectionDefinition[] {
+  return [...sections.filter((definition) => !definition.type.includes("/") || !themeSections.has(definition.type.split("/")[0])), ...[...themeSections.values()].flatMap((versions) => versions.get(themeVersion ?? newestVersion(versions) ?? "") ?? [])];
+}
 /** True when a theme may use the section: sections without a `themes` list are open to every theme. */
 function availableOnTheme(definition: SectionDefinition, themeId: string | null | undefined): boolean {
   return !definition.themes || !themeId || definition.themes.includes(themeId);
 }
 /** The sections the editor offers on a page; pass the store's theme to hide sections that belong to other themes. */
-export function listSectionDefinitionsForPage(pageType: PageType, region: RegionName = "template", themeId?: string | null): SectionDefinition[] {
-  return sections.filter((definition) => definition.supportedPages.includes(pageType) && (definition.allowedRegions ?? ["template"]).includes(region) && availableOnTheme(definition, themeId));
+export function listSectionDefinitionsForPage(pageType: PageType, region: RegionName = "template", themeId?: string | null, themeVersion?: string | null): SectionDefinition[] {
+  return listSectionDefinitions(themeVersion).filter((definition) => definition.supportedPages.includes(pageType) && (definition.allowedRegions ?? ["template"]).includes(region) && availableOnTheme(definition, themeId));
 }
 
 /** Rich text settings keep a formatted copy under `<key>Doc` next to the plain text; it must be a real document. */
@@ -90,8 +121,8 @@ function formattedCopiesValid(settings: Record<string, unknown>): boolean {
   return Object.entries(settings).every(([key, value]) => !key.endsWith("Doc") || value === undefined || value === null || isRichTextDocument(value));
 }
 
-export function validateSectionAgainstRegistry(section: SectionNode, pageType: PageType, themeId?: string | null): RegistryValidationIssue[] {
-  const definition = getSectionDefinition(section.type);
+export function validateSectionAgainstRegistry(section: SectionNode, pageType: PageType, themeId?: string | null, themeVersion?: string | null): RegistryValidationIssue[] {
+  const definition = getSectionDefinition(section.type, themeVersion);
   if (!definition) return [{ code: "SECTION_NOT_REGISTERED", sectionId: section.id, message: `Section ${section.type} is not registered` }];
 
   const issues: RegistryValidationIssue[] = [];

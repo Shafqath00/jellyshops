@@ -103,6 +103,7 @@ class SqlWorkspaceRepositories implements TemplateRepository, GlobalSectionRepos
     return true;
   }
   getThemeConfiguration(storeId: string) { return this.db.transaction(async (tx) => (await tx.query<ThemeConfigurationRecord>(`SELECT * FROM "ThemeConfiguration" WHERE "storeId" = $1`, [storeId])).rows[0] ?? null); }
+  getInstalledThemeArtifact(storeId: string, artifactId: string) { return this.db.transaction(async (tx) => (await tx.query<{ themeId: string; themeVersion: string }>(`SELECT p."themeId", v."version" AS "themeVersion" FROM "ThemeInstall" i JOIN "ThemePackageVersion" v ON v."id" = i."versionId" JOIN "ThemePackage" p ON p."id" = i."packageId" WHERE i."storeId" = $1 AND v."id" = $2`, [storeId, artifactId])).rows[0] ?? null); }
   async saveThemeConfiguration(tx: unknown, input: Parameters<ThemeRepository["saveThemeConfiguration"]>[1]) {
     const current = (await sql(tx).query<ThemeConfigurationRecord>(`SELECT * FROM "ThemeConfiguration" WHERE "storeId" = $1 FOR UPDATE`, [input.storeId])).rows[0];
     if ((current?.revision ?? null) !== input.expectedRevision) throw new ResourceRevisionConflictError(current?.revision ?? 0);

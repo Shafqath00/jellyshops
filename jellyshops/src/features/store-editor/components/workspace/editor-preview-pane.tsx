@@ -35,8 +35,9 @@ export function EditorPreviewPane({ ctx }: { ctx: EditorViewContext }) {
   ]), [storeSlug, catalog.products, pages, blogs, articles]);
   const mode = previewInspectorEnabled ? "editor" : "preview";
   const themeId = themeConfiguration?.themeId;
-  const shared = useMemo<PreviewShared>(() => ({ mode, commerce, themeId, page: previewPageContext ?? undefined, language: activeLanguage, menus, collectionLinks, resourceLinks, storeSlug: activeStore?.slug, identity }),
-    [mode, commerce, themeId, previewPageContext, activeLanguage, menus, collectionLinks, resourceLinks, activeStore?.slug, identity]);
+  const themeVersion = themeConfiguration?.themeVersion;
+  const shared = useMemo<PreviewShared>(() => ({ mode, commerce, themeId, themeVersion, page: previewPageContext ?? undefined, language: activeLanguage, menus, collectionLinks, resourceLinks, storeSlug: activeStore?.slug, identity }),
+    [mode, commerce, themeId, themeVersion, previewPageContext, activeLanguage, menus, collectionLinks, resourceLinks, activeStore?.slug, identity]);
 
   // Clicks in the preview. The handler is recreated on every render (it reads the latest state), so
   // sections get a function that never changes and calls the newest one.
@@ -106,13 +107,14 @@ export function EditorPreviewPane({ ctx }: { ctx: EditorViewContext }) {
               )}
               data-testid="preview-viewport"
               data-jelly-theme={themeConfiguration?.themeId ?? "minimal"}
+              data-jelly-theme-version={themeVersion}
               data-viewport={viewport}
               data-preview-width={viewport === "desktop" ? 1440 : viewport === "tablet" ? 820 : 390}
               style={previewThemeStyle}
             >
               <ScaledPreview minWidth={viewport === "desktop" ? 1280 : viewport === "tablet" ? 820 : 390}>
-              <StorefrontPreviewFrame title="Storefront preview" themeId={themeConfiguration?.themeId ?? "minimal"} style={previewThemeStyle} className="h-full w-full border-0 bg-card">
-                <ThemeCustomCss settings={themeConfiguration?.settings} />
+              <StorefrontPreviewFrame title="Storefront preview" themeId={themeConfiguration?.themeId ?? "minimal"} themeVersion={themeVersion} style={previewThemeStyle} className="h-full w-full border-0 bg-card">
+                <ThemeCustomCss settings={themeConfiguration?.settings} themeId={themeConfiguration?.themeId} themeVersion={themeVersion} />
                 {installedThemeCss(themeConfiguration?.draftArtifactId) ? <style data-installed-theme={themeConfiguration?.draftArtifactId ?? undefined}>{installedThemeCss(themeConfiguration?.draftArtifactId)}</style> : null}
                 {renderPreviewSections([...previewLayout.announcement, ...previewLayout.header], "header")}
                 <div data-storefront-template>

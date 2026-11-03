@@ -493,7 +493,7 @@ export const defaultStorefrontWorkspaceApi: StorefrontWorkspaceApi = {
   ) {
     const resolved = resolveTheme(input.themeId, input.settings, input.themeVersion);
     if (resolved.fallbackReason) throw new ApiError(422, "THEME_UNAVAILABLE", `Theme '${input.themeId}' is unavailable`);
-    const issues = validateThemeSettings(resolved.id, input.settings);
+    const issues = validateThemeSettings(resolved.id, input.settings, resolved.version);
     if (issues.length) throw new ApiError(422, "THEME_SETTINGS_INVALID", "Theme settings are invalid", issues);
     const savedInput = { ...input, themeId: resolved.id, themeVersion: resolved.version, settings: resolved.settings };
     if (!supabasePool) {

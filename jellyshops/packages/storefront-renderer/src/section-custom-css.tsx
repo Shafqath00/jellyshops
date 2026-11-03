@@ -27,7 +27,7 @@ export function SectionCustomCss({ section }: { section: SectionNode }) {
  * The theme's custom CSS (theme settings > Custom CSS), limited to the store
  * wrapper (`[data-jelly-theme]`). Render it inside that wrapper.
  */
-export function ThemeCustomCss({ settings }: { settings: Record<string, unknown> | undefined }) {
-  const css = themeCustomCss(settings);
+export function ThemeCustomCss({ settings, themeId, themeVersion }: { settings: Record<string, unknown> | undefined; themeId?: string; themeVersion?: string }) {
+  const css = themeCustomCss(settings, themeId, themeVersion);
   return css ? <style data-theme-css="" dangerouslySetInnerHTML={{ __html: css }} /> : null;
 }

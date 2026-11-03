@@ -43,8 +43,9 @@ function Frame() {
     try {
       registerThemeProject(toTheme(project));
       const id = project.manifest.id as string;
-      const pack = getStarterPack(id);
-      const theme = resolveTheme(id);
+      const version = project.manifest.version as string;
+      const pack = getStarterPack(id, version);
+      const theme = resolveTheme(id, {}, version);
       const menus = Object.fromEntries(pack.menus.map((menu) => [menu.handle, { id: menu.key, handle: menu.handle, items: menu.items }])) as Record<string, RuntimeMenuV4>;
       const layout = pack.templates.find((template) => template.key === templateType)?.layout.sections ?? [];
       const entries = layout.flatMap((placement): Entry[] => {
@@ -55,7 +56,7 @@ function Frame() {
         return [{ region: global.key === "footer" ? "footer" : "header", section }];
       });
       const type = pack.templates.find((template) => template.key === templateType)?.type ?? "home";
-      return { id, menus, entries, type, style: resolveStorefrontThemeTokens(id, theme.settings) };
+      return { id, version, menus, entries, type, style: resolveStorefrontThemeTokens(id, theme.settings, {}, version) };
     } catch (problem) {
       return { failure: (problem as Error).message };
     }
@@ -68,13 +69,13 @@ function Frame() {
   const page = samplePageContext(view.type, { image });
   const draw = ({ region, section }: Entry) => (
     <RegistrySectionRenderer
-      key={section.id} section={section} mode="editor" commerce={commerce} region={region} themeId={view.id}
+      key={section.id} section={section} mode="editor" commerce={commerce} region={region} themeId={view.id} themeVersion={view.version}
       page={page} menus={view.menus} storeSlug="preview"
       selected={selected === section.id ? { kind: "section", region, sectionId: section.id } : null}
       onSelect={(selection) => { setSelected(selection.sectionId ?? null); parent.postMessage({ type: "jelly-select", sectionId: selection.sectionId, blockId: selection.blockId }, location.origin); }}
     />
   );
-  return <div className="theme-preview-viewport" data-jelly-theme={view.id} style={view.style}>
+  return <div className="theme-preview-viewport" data-jelly-theme={view.id} data-jelly-theme-version={view.version} style={view.style}>
     <style>{scopeCustomCss(project.css, `[data-jelly-theme="${view.id}"]`, 150_000) ?? ""}</style>
     <div className="jelly-storefront">
       {view.entries.filter((entry) => entry.region === "header").map(draw)}

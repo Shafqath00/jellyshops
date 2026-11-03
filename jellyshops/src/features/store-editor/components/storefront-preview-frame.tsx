@@ -9,12 +9,14 @@ export function StorefrontPreviewFrame({
   children,
   className,
   themeId,
+  themeVersion,
   style,
 }: {
   title: string;
   children: ReactNode;
   className?: string;
   themeId?: string;
+  themeVersion?: string;
   style?: CSSProperties;
 }) {
   const [mountNode, setMountNode] = useState<HTMLElement | null>(null);
@@ -57,7 +59,7 @@ export function StorefrontPreviewFrame({
       onLoad={(event) => syncDocument(event.currentTarget)}
     />
     {mountNode ? createPortal(
-      <div className="theme-preview-viewport" data-jelly-theme={themeId} style={style}>{children}</div>,
+      <div className="theme-preview-viewport" data-jelly-theme={themeId} data-jelly-theme-version={themeVersion} style={style}>{children}</div>,
       mountNode,
     ) : null}
   </>;

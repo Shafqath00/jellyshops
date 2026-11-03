@@ -3,6 +3,7 @@ import { discoveredThemes } from "./themes/index.generated.js";
 import { isManuallyRegistered, registerFolderTheme, setFolderThemeComplete } from "./theme-registry.js";
 import type { SectionNode } from "@jelly/storefront-schema";
 import type { DiscoveredTheme } from "./types.js";
+import { compareThemeVersions } from "@jelly/storefront-schema";
 
 const TEMPLATE_NAMES: Record<string, string> = { home: "Home page", product: "Product page", collection: "Collection page", cart: "Cart", search: "Search", page: "Information page", "not-found": "Page not found" };
 const GLOBAL_NAMES = { announcement: "Announcement bar", header: "Header", footer: "Footer" } as const;
@@ -57,20 +58,22 @@ const discoveredPacks: V4StarterPack[] = discoveredThemes
   .map(createStarterPack)
   .filter((pack): pack is V4StarterPack => pack !== null);
 
-for (const pack of discoveredPacks) setFolderThemeComplete(pack.id, hasOwnChrome(pack));
+for (const pack of discoveredPacks) setFolderThemeComplete(pack.id, hasOwnChrome(pack), pack.version);
 
 /** Ids of starter packs that come from theme folders (not the built-in ones). */
 export const DISCOVERED_STARTER_PACK_IDS: string[] = discoveredPacks.map((pack) => pack.id);
 
 export function listStarterPacks(): V4StarterPack[] {
-  return [...listV4StarterPacks(), ...structuredClone(discoveredPacks)];
+  const newest = new Map<string, V4StarterPack>();
+  for (const pack of discoveredPacks) if (!newest.has(pack.id) || compareThemeVersions(pack.version, newest.get(pack.id)!.version) >= 0) newest.set(pack.id, pack);
+  return [...listV4StarterPacks(), ...structuredClone([...newest.values()])];
 }
 export function isStarterPackId(value: unknown): value is string {
   return isV4StarterPackId(value) || (typeof value === "string" && DISCOVERED_STARTER_PACK_IDS.includes(value));
 }
-export function getStarterPack(id: string): V4StarterPack {
-  if (isV4StarterPackId(id)) return getV4StarterPack(id);
-  const pack = discoveredPacks.find((candidate) => candidate.id === id);
+export function getStarterPack(id: string, version?: string | null): V4StarterPack {
+  const pack = isV4StarterPackId(id) ? getV4StarterPack(id) : version ? discoveredPacks.find((candidate) => candidate.id === id && candidate.version === version) : listStarterPacks().find((candidate) => candidate.id === id);
+  if (pack && version && pack.version !== version) throw new Error(`Unknown starter pack: ${id}@${version}`);
   if (!pack) throw new Error(`Unknown starter pack: ${id}`);
   return structuredClone(pack);
 }
@@ -84,15 +87,17 @@ export function validateStarterPack(value: unknown) {
  * starter pack when it has one. Registering the same id again replaces it, so a dev server can
  * reload edits. Returns the pack (or null when the folder has no starter).
  */
-export function registerThemeProject(entry: DiscoveredTheme): V4StarterPack | null {
+export function registerThemeProject(source: DiscoveredTheme): V4StarterPack | null {
+  const entry = structuredClone(source);
   registerFolderTheme(entry.manifest);
   const pack = createStarterPack(entry);
-  setFolderThemeComplete(entry.manifest.id, hasOwnChrome(pack));
-  const index = discoveredPacks.findIndex((candidate) => candidate.id === entry.manifest.id);
+  setFolderThemeComplete(entry.manifest.id, hasOwnChrome(pack), entry.manifest.version);
+  const index = discoveredPacks.findIndex((candidate) => candidate.id === entry.manifest.id && candidate.version === entry.manifest.version);
   if (!pack) {
-    if (index !== -1) { discoveredPacks.splice(index, 1); DISCOVERED_STARTER_PACK_IDS.splice(DISCOVERED_STARTER_PACK_IDS.indexOf(entry.manifest.id), 1); }
+    if (index !== -1) discoveredPacks.splice(index, 1);
+    if (!discoveredPacks.some((candidate) => candidate.id === entry.manifest.id)) { const idIndex = DISCOVERED_STARTER_PACK_IDS.indexOf(entry.manifest.id); if (idIndex !== -1) DISCOVERED_STARTER_PACK_IDS.splice(idIndex, 1); }
     return null;
   }
-  if (index === -1) { discoveredPacks.push(pack); DISCOVERED_STARTER_PACK_IDS.push(pack.id); } else discoveredPacks[index] = pack;
+  if (index === -1) { discoveredPacks.push(pack); if (!DISCOVERED_STARTER_PACK_IDS.includes(pack.id)) DISCOVERED_STARTER_PACK_IDS.push(pack.id); } else discoveredPacks[index] = pack;
   return structuredClone(pack);
 }

@@ -14,7 +14,7 @@ export interface LegacyStoreThemeValues {
 const color = (value: unknown, fallback: string) => typeof value === "string" && /^(#[\da-f]{3,8}|(?:rgb|hsl)a?\([^\n]+\)|[a-z]+)$/i.test(value.trim()) ? value.trim() : fallback;
 
 /** Resolves one canonical token layer for every storefront route. */
-export function resolveStorefrontThemeTokens(themeId: ThemeId | string, settings: Record<string, unknown> = {}, legacy: LegacyStoreThemeValues = {}): Record<string, string> {
+export function resolveStorefrontThemeTokens(themeId: ThemeId | string, settings: Record<string, unknown> = {}, legacy: LegacyStoreThemeValues = {}, version?: string | null): Record<string, string> {
   const modern = settings as Record<string, unknown> & { colors?: Record<string, unknown>; typography?: Record<string, unknown>; layout?: Record<string, unknown>; buttons?: Record<string, unknown>; header?: Record<string, unknown>; footer?: Record<string, unknown>; productCards?: Record<string, unknown> };
   const merged = {
     ...modern,
@@ -30,7 +30,7 @@ export function resolveStorefrontThemeTokens(themeId: ThemeId | string, settings
       ...(modern.typography ?? {}),
     },
   } as unknown as GlobalSettings;
-  const base = resolveDesignTokens(themeId, merged);
+  const base = resolveDesignTokens(themeId, merged, version);
   const bounded = (value: unknown, fallback: number, min: number, max: number) => typeof value === "number" && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
   if (typeof modern.layout?.contentWidth === "number") base["--jelly-container-width"] = `${bounded(modern.layout.contentWidth, 1280, 960, 1600)}px`;
   if (typeof modern.layout?.sectionGap === "number") base["--jelly-spacing-section"] = `${bounded(modern.layout.sectionGap, 80, 24, 160)}px`;
@@ -61,7 +61,7 @@ export function resolveStorefrontThemeTokens(themeId: ThemeId | string, settings
   };
   // Text styles, colour schemes and button extras (themes that declare them).
   let styleDefaults: ReturnType<typeof themeStyleDefaultsFrom>;
-  try { styleDefaults = themeStyleDefaultsFrom((getThemeDefinition(themeId as ThemeId).manifest as { settingsDefaults?: Record<string, unknown> }).settingsDefaults); } catch { styleDefaults = undefined; }
+  try { styleDefaults = themeStyleDefaultsFrom((getThemeDefinition(themeId as ThemeId, version).manifest as { settingsDefaults?: Record<string, unknown> }).settingsDefaults); } catch { styleDefaults = undefined; }
   const style = resolveThemeStyleTokens(modern, styleDefaults);
   return { ...base, ...semantic, ...style, "--store-bg": background, "--store-surface": surface, "--store-text": text, "--store-accent": accent, "--store-accent-soft": accentSoft, "--store-display": heading };
 }

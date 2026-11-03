@@ -9,6 +9,7 @@ function setup() {
   let generation = 0;
   const repository: ThemeRepository = {
     getThemeConfiguration: vi.fn(async () => null),
+    getInstalledThemeArtifact: vi.fn(async () => null),
     saveThemeConfiguration: vi.fn(async (_tx, input) => ({
       storeId: input.storeId,
       revision: input.expectedRevision === null ? 0 : input.expectedRevision + 1,
@@ -61,6 +62,24 @@ describe("ThemeService", () => {
       settings: { layout: { containerWidth: "not-a-width" } },
     })).rejects.toMatchObject({ code: "THEME_SETTINGS_INVALID", status: 422 });
 
+    expect(repository.saveThemeConfiguration).not.toHaveBeenCalled();
+  });
+
+  it("rejects an artifact that belongs to a different pinned theme version", async () => {
+    const { service, repository } = setup();
+    vi.mocked(repository.getInstalledThemeArtifact).mockResolvedValue({ themeId: "other", themeVersion: "1.0.0" });
+    await expect(service.saveThemeConfiguration("store-a", null, {
+      themeId: "minimal", settings: {}, draftArtifactId: "artifact-v1",
+    })).rejects.toMatchObject({ code: "THEME_ARTIFACT_MISMATCH", status: 422 });
+    expect(repository.saveThemeConfiguration).not.toHaveBeenCalled();
+  });
+
+  it("checks the existing artifact when a save omits draftArtifactId", async () => {
+    const { service, repository } = setup();
+    vi.mocked(repository.getThemeConfiguration).mockResolvedValue({ storeId: "store-a", revision: 4, themeId: "minimal", themeVersion: "1.0.0", settings: {}, draftArtifactId: "stale-artifact", updatedAt: new Date(0) });
+    vi.mocked(repository.getInstalledThemeArtifact).mockResolvedValue({ themeId: "other", themeVersion: "1.0.0" });
+    await expect(service.saveThemeConfiguration("store-a", 4, { themeId: "minimal", settings: {} }))
+      .rejects.toMatchObject({ code: "THEME_ARTIFACT_MISMATCH", status: 422 });
     expect(repository.saveThemeConfiguration).not.toHaveBeenCalled();
   });
 });

@@ -35,11 +35,8 @@ export interface PublicThemeVersion {
 
 /** What the install route needs from the starter installer: put the theme's starter into the draft and point the draft at the uploaded version. */
 export interface StarterInstaller {
-  install(storeId: string, starterPackId: string, options?: { replaceDraft: boolean; expectedGeneration: number }, artifactId?: string | null): Promise<{ generation: number; installed: boolean }>;
+  install(storeId: string, starterPackId: string, options?: { replaceDraft: boolean; expectedGeneration: number }, artifactId?: string | null, themeVersion?: string): Promise<{ generation: number; installed: boolean }>;
 }
-
-/** Versions this process has already registered, by theme id: the newest wins. */
-const registeredVersions = new Map<string, string>();
 
 interface VersionRow { id: string; packageId: string; version: string; status: "active" | "yanked"; contentHash: string; createdAt: string }
 
@@ -114,13 +111,10 @@ export class ThemePackageService {
 
   /**
    * Makes a stored version known to this process, so publishing, theme saves and starter installs
-   * can resolve it like a built-in theme. Only the newest version of a theme id is kept for now.
+   * can resolve it like a built-in theme. Every pinned version remains available independently.
    */
   private register(row: { themeId: string; version: string; manifest: Record<string, unknown>; starter: Record<string, unknown> | null }): void {
-    const current = registeredVersions.get(row.themeId);
-    if (current && compareVersions(row.version, current) < 0) return;
     registerThemeProject({ manifest: row.manifest as never, ...(row.starter ? { starter: row.starter as never } : {}) });
-    registeredVersions.set(row.themeId, row.version);
   }
 
   /** Registers every uploaded theme a store has installed (cached for 30 seconds per store). Cheap to call on each request. */
@@ -128,7 +122,12 @@ export class ThemePackageService {
     const checkedAt = this.storeThemeCache.get(storeId);
     if (checkedAt && Date.now() - checkedAt < 30_000) return;
     const rows = (await this.sql.query<{ themeId: string; version: string; manifest: Record<string, unknown>; starter: Record<string, unknown> | null }>(
-      `SELECT p."themeId", v."version", v."manifest", v."starter" FROM "ThemeInstall" i JOIN "ThemePackage" p ON p."id" = i."packageId" JOIN "ThemePackageVersion" v ON v."id" = i."versionId" WHERE i."storeId" = $1`,
+      `SELECT p."themeId", v."version", v."manifest", v."starter" FROM "ThemePackageVersion" v JOIN "ThemePackage" p ON p."id" = v."packageId"
+       WHERE v."id" IN (
+         SELECT "versionId" FROM "ThemeInstall" WHERE "storeId" = $1
+         UNION SELECT "draftArtifactId" FROM "ThemeConfiguration" WHERE "storeId" = $1
+         UNION SELECT "themeArtifactId" FROM "StorefrontPublication" WHERE "storeId" = $1
+       )`,
       [storeId],
     )).rows;
     for (const row of rows) this.register(row);
@@ -155,7 +154,7 @@ export class ThemePackageService {
     if (!row.starter) throw new ApiError(422, "NO_STARTER", "This theme has no starter.json, so there is nothing to put on the store. Add one and upload a new version.");
 
     this.register(row);
-    const result = await this.starters.install(storeId, row.themeId, options, row.id);
+    const result = await this.starters.install(storeId, row.themeId, options, row.id, row.version);
     await this.sql.query(
       `INSERT INTO "ThemeInstall" ("id", "storeId", "packageId", "versionId") VALUES ($1, $2, $3, $4)
        ON CONFLICT ("storeId", "packageId") DO UPDATE SET "versionId" = EXCLUDED."versionId", "installedAt" = NOW()`,

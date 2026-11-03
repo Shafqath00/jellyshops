@@ -18,8 +18,8 @@ export const normalizeHex = (value: string): string | null => {
 };
 
 /** The theme's colours with names, without repeats (the first name for a colour wins). */
-export function themePalette(themeId: string | undefined, settings: Record<string, unknown> | undefined): PaletteColor[] {
-  const theme = resolveTheme(themeId, settings ?? {});
+export function themePalette(themeId: string | undefined, settings: Record<string, unknown> | undefined, version?: string): PaletteColor[] {
+  const theme = resolveTheme(themeId, settings ?? {}, version);
   const colors = record(theme.settings.colors);
   const found: PaletteColor[] = [];
   const add = (label: string, value: unknown) => {

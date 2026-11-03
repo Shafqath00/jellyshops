@@ -139,12 +139,12 @@ function applyBlockValues(blocks: BlockNode[], values: BindingValues): BlockNode
 }
 
 /** A copy of the layout with every bound setting replaced by its value (or fallback); the input is not changed. */
-export function applyBindingValues<K extends string>(layout: Regions<K>, values: BindingValues): Regions<K> {
+export function applyBindingValues<K extends string>(layout: Regions<K>, values: BindingValues, themeVersion?: string): Regions<K> {
   const result = {} as Regions<K>;
   for (const region of Object.keys(layout) as K[]) {
     result[region] = layout[region].map((section) => ({
       ...section,
-      settings: applySettings(section.settings, controlTypes(getSectionDefinition(section.type)?.controls), values),
+      settings: applySettings(section.settings, controlTypes(getSectionDefinition(section.type, themeVersion)?.controls), values),
       blocks: applyBlockValues(section.blocks, values),
     }));
   }

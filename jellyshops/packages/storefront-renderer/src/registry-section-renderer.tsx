@@ -1,6 +1,6 @@
 import { translateSection, type RuntimeMenuV4, type SectionNode } from "@jelly/storefront-schema";
 import { createElement } from "react";
-import { sectionLabel } from "@jelly/storefront-registry";
+import { getSectionDefinition, sectionLabel } from "@jelly/storefront-registry";
 import {
   defaultSectionRenderRegistry,
   type SectionRenderComponent,
@@ -13,12 +13,12 @@ import type { CommerceDataProvider, RendererMode, RendererSelection, StorefrontP
 import { getRecipe, getThemeDefinition, DEFAULT_THEME_ID } from "@jelly/storefront-themes";
 import { RecipeSection } from "./sections/recipe-section";
 
-function sectionComponent(themeId: string, type: string, registry: SectionRenderRegistry) {
-  const override = (id: string) => { try { return getThemeDefinition(id).sectionOverrides[type]; } catch { return undefined; } };
+function sectionComponent(themeId: string, type: string, registry: SectionRenderRegistry, version?: string) {
+  const override = (id: string, requestedVersion?: string) => { try { return getThemeDefinition(id, requestedVersion).sectionOverrides[type]; } catch { return undefined; } };
   // Theme overrides consume the same runtime props with a looser commerce type.
-  const component = override(themeId) ?? override(DEFAULT_THEME_ID) ?? registry.get(type);
+  const component = override(themeId, version) ?? override(DEFAULT_THEME_ID) ?? registry.get(type);
   // A section a theme described as data is drawn by the recipe renderer.
-  return (component ?? (getRecipe(type) ? RecipeSection : undefined)) as SectionRenderComponent | undefined;
+  return (component ?? (type.startsWith(`${themeId}/`) && getRecipe(type, version) ? RecipeSection : undefined)) as SectionRenderComponent | undefined;
 }
 
 export function RegistrySectionRenderer({
@@ -30,6 +30,7 @@ export function RegistrySectionRenderer({
   onSelect,
   registry = defaultSectionRenderRegistry,
   themeId,
+  themeVersion,
   page,
   menus,
   storeSlug,
@@ -45,6 +46,7 @@ export function RegistrySectionRenderer({
   onSelect?: (selection: RendererSelection) => void;
   registry?: SectionRenderRegistry;
   themeId?: string;
+  themeVersion?: string;
   page?: StorefrontPageContext;
   menus?: Record<string, RuntimeMenuV4>;
   storeSlug?: string;
@@ -56,8 +58,8 @@ export function RegistrySectionRenderer({
   if (!sourceSection.enabled) return null;
   const section = translateSection(sourceSection, language);
 
-  const RenderComponent = sectionComponent(themeId ?? DEFAULT_THEME_ID, section.type, registry);
-  const context = createStorefrontRuntimeContext({ mode, region, commerce, page, menus, storeSlug, collectionLinks, resourceLinks });
+  const RenderComponent = sectionComponent(themeId ?? DEFAULT_THEME_ID, section.type, registry, themeVersion);
+  const context = createStorefrontRuntimeContext({ mode, region, themeVersion, commerce, page, menus, storeSlug, collectionLinks, resourceLinks });
   const content = RenderComponent
     ? createElement(RenderComponent, {
       section,
@@ -79,7 +81,7 @@ export function RegistrySectionRenderer({
     data-testid={`section-${section.type}`}
     {...sectionCssProps(section)}
     {...sectionStyleProps(section.settings, section.responsive?.mobile, section.responsive?.tablet)}
-    {...(editor ? { "data-editor-section-id": section.id, "data-editor-label": sectionLabel(section.type), "data-editor-selected": String(isSelected) } : {})}
+    {...(editor ? { "data-editor-section-id": section.id, "data-editor-label": getSectionDefinition(section.type, themeVersion)?.label ?? sectionLabel(section.type), "data-editor-selected": String(isSelected) } : {})}
     onClick={editor ? (event) => {
       event.preventDefault();
       event.stopPropagation();

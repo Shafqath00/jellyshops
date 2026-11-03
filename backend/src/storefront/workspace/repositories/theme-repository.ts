@@ -23,6 +23,7 @@ export interface SaveThemeConfigurationInput {
 
 export interface ThemeRepository {
   getThemeConfiguration(storeId: string): Promise<ThemeConfigurationRecord | null>;
+  getInstalledThemeArtifact(storeId: string, artifactId: string): Promise<{ themeId: string; themeVersion: string } | null>;
   saveThemeConfiguration(
     transaction: WorkspaceTransaction,
     input: SaveThemeConfigurationInput,

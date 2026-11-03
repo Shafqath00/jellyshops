@@ -18,6 +18,7 @@ import { defineTheme } from "./define-theme.js";
 import { recipesOf, registerRecipes } from "./recipes.js";
 import { fontStack } from "./fonts.js";
 import { discoveredThemes } from "./themes/index.generated.js";
+import { compareThemeVersions } from "@jelly/storefront-schema";
 
 /** Positional shorthand for the built-in themes; every theme goes through `defineTheme`. */
 function definition(id: ThemeId, label: string, tokens: ThemeTokens, manifest?: unknown, sectionOverrides: Record<string, ComponentType<ThemeSectionProps>> = {}, components?: ThemeShellComponents): ThemeDefinition {
@@ -57,7 +58,7 @@ function folderTheme(manifest: ThemeManifestInput): ThemeDefinition {
 for (const { manifest } of discoveredThemes) {
   if (manualIds.has(manifest.id)) continue;
   themes.push(folderTheme(manifest));
-  registerRecipes(manifest.id, recipesOf(manifest));
+  registerRecipes(manifest.id, recipesOf(manifest), manifest.version);
 }
 
 /**
@@ -68,13 +69,18 @@ for (const { manifest } of discoveredThemes) {
 export function registerFolderTheme(manifest: ThemeManifestInput): ThemeDefinition {
   if (manualIds.has(manifest.id)) throw new Error(`"${manifest.id}" is a built-in theme and cannot be replaced.`);
   const next = folderTheme(manifest);
-  registerRecipes(manifest.id, recipesOf(manifest));
-  const index = themes.findIndex((theme) => theme.id === manifest.id);
+  registerRecipes(manifest.id, recipesOf(manifest), manifest.version);
+  const index = themes.findIndex((theme) => theme.id === manifest.id && versionOf(theme) === manifest.version);
   if (index === -1) themes.push(next); else themes[index] = next;
   return next;
 }
 
-export function listThemes(): ThemeDefinition[] { return [...themes]; }
+const versionOf = (theme: ThemeDefinition) => (theme.manifest as ThemeManifestInput).version;
+export function listThemes(): ThemeDefinition[] {
+  const newest = new Map<string, ThemeDefinition>();
+  for (const theme of themes) if (!newest.has(theme.id) || compareThemeVersions(versionOf(theme), versionOf(newest.get(theme.id)!)) >= 0) newest.set(theme.id, theme);
+  return [...newest.values()];
+}
 
 /**
  * Themes that ship a complete storefront: their own header, footer, catalogue
@@ -87,14 +93,16 @@ export const COMPLETE_STOREFRONT_THEME_IDS = ["jelly-signature", "jelly-avenue"]
  * complete themes they draw the store chrome themselves, so the shared frame must not add another.
  */
 const completeFolderThemes = new Set<string>();
-export function setFolderThemeComplete(id: string, complete: boolean): void {
-  if (complete) completeFolderThemes.add(id); else completeFolderThemes.delete(id);
+export function setFolderThemeComplete(id: string, complete: boolean, version?: string): void {
+  const key = `${id}@${version ?? versionOf(getThemeDefinition(id))}`;
+  if (complete) completeFolderThemes.add(key); else completeFolderThemes.delete(key);
 }
-export function isCompleteStorefrontTheme(id: string | null | undefined): boolean {
-  return typeof id === "string" && ((COMPLETE_STOREFRONT_THEME_IDS as readonly string[]).includes(id) || completeFolderThemes.has(id));
+export function isCompleteStorefrontTheme(id: string | null | undefined, version?: string | null): boolean {
+  if (!id) return false;
+  try { return (COMPLETE_STOREFRONT_THEME_IDS as readonly string[]).includes(id) || completeFolderThemes.has(`${id}@${version ?? versionOf(getThemeDefinition(id))}`); } catch { return false; }
 }
-export function getThemeDefinition(id: ThemeId | string): ThemeDefinition {
-  const theme = themes.find((candidate) => candidate.id === id);
+export function getThemeDefinition(id: ThemeId | string, version?: string | null): ThemeDefinition {
+  const theme = version ? themes.find((candidate) => candidate.id === id && versionOf(candidate) === version) : listThemes().find((candidate) => candidate.id === id);
   if (!theme) throw new Error(`Unknown JellyShop theme: ${id}`);
   return theme;
 }
@@ -117,9 +125,9 @@ const buttonRadii = { square: "0px", soft: "8px", rounded: "16px", pill: "999px"
 const sectionSpacing = { compact: "48px", standard: "72px", spacious: "104px" } as const;
 const containerWidths = { narrow: "56rem", standard: "72rem", wide: "84rem" } as const;
 
-export function resolveDesignTokens(themeId: ThemeId, globalSettings: GlobalSettings): ResolvedDesignTokens {
+export function resolveDesignTokens(themeId: ThemeId, globalSettings: GlobalSettings, version?: string | null): ResolvedDesignTokens {
   const tokens = (() => {
-    try { return getThemeDefinition(themeId).tokens; }
+    try { return getThemeDefinition(themeId, version).tokens; }
     catch { return getThemeDefinition("minimal").tokens; }
   })();
   const c = globalSettings?.colors;

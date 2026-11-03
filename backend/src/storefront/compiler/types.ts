@@ -119,8 +119,8 @@ export interface RegistrySectionIssue {
 }
 
 export interface CompilerRegistry {
-  validateSection(section: CompilerSectionNode, templateType: TemplateType): RegistrySectionIssue[];
-  dynamicSettingType(sectionType: string, fieldKey: string, blockType?: string): DynamicValueType | null;
+  validateSection(section: CompilerSectionNode, templateType: TemplateType, theme?: StorefrontCompilationInput["theme"]): RegistrySectionIssue[];
+  dynamicSettingType(sectionType: string, fieldKey: string, blockType?: string, theme?: StorefrontCompilationInput["theme"]): DynamicValueType | null;
 }
 
 export interface CompilerDynamicSourceResolver {

@@ -1,5 +1,5 @@
 import type { ComponentProps } from "react";
-import { sectionLabel } from "@jelly/storefront-registry";
+import { getSectionDefinition, sectionLabel } from "@jelly/storefront-registry";
 import type { RegistrySectionRenderer } from "@jelly/storefront-renderer";
 import type { SectionNode } from "@jelly/storefront-schema";
 import type { GlobalSectionRecord, StorefrontTemplateRecord } from "./api/types";
@@ -27,8 +27,8 @@ export function defaultTemplateLayout(type: string): Record<string, unknown> {
 export const regionLabels: Record<string, string> = { header: "Header", template: "Page sections", footer: "Footer" };
 
 /** Merchant-facing name for a region or section type. */
-export function displayName(value: string): string {
-  return regionLabels[value] ?? sectionLabel(value);
+export function displayName(value: string, version?: string): string {
+  return regionLabels[value] ?? getSectionDefinition(value, version)?.label ?? sectionLabel(value);
 }
 
 export function setThemeSetting(settings: Record<string, unknown>, path: string, value: unknown): Record<string, unknown> {

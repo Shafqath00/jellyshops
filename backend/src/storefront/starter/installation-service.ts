@@ -91,11 +91,11 @@ export class StorefrontStarterInstallationService {
   ) {}
 
   /** `artifactId` is the uploaded theme version the draft uses (null for the built-in themes). */
-  async install(storeId: string, starterPackId: string, options?: { replaceDraft: boolean; expectedGeneration: number }, artifactId: string | null = null): Promise<StarterInstallationResult> {
+  async install(storeId: string, starterPackId: string, options?: { replaceDraft: boolean; expectedGeneration: number }, artifactId: string | null = null, themeVersion?: string): Promise<StarterInstallationResult> {
     if (!isStarterPackId(starterPackId)) {
       throw new RangeError("Unknown V4 starter pack");
     }
-    const pack = getStarterPack(starterPackId);
+    const pack = getStarterPack(starterPackId, themeVersion);
     const issues = validateStarterPack(pack);
     if (issues.length) throw new Error(`Invalid V4 starter pack: ${issues.map(({ message }) => message).join("; ")}`);
 
@@ -162,7 +162,7 @@ export class StorefrontStarterInstallationService {
         `INSERT INTO "ThemeConfiguration" ("storeId", "revision", "themeId", "themeVersion", "settings", "draftArtifactId", "updatedAt") VALUES ($1, 0, $2, $3, $4::jsonb, $6, $5)
          ON CONFLICT ("storeId") DO UPDATE SET "revision"="ThemeConfiguration"."revision"+1,"themeId"=EXCLUDED."themeId","themeVersion"=EXCLUDED."themeVersion","settings"=EXCLUDED."settings","draftArtifactId"=EXCLUDED."draftArtifactId","updatedAt"=EXCLUDED."updatedAt"`,
         // Published stores pin the theme's own version; the starter pack's version is tracked on the workspace.
-        [storeId, pack.theme.themeId, resolveTheme(pack.theme.themeId, pack.theme.settings).version, JSON.stringify(pack.theme.settings), now, artifactId],
+        [storeId, pack.theme.themeId, resolveTheme(pack.theme.themeId, pack.theme.settings, themeVersion).version, JSON.stringify(pack.theme.settings), now, artifactId],
       );
       if ((COMPLETE_STARTER_PACK_IDS as readonly string[]).includes(pack.id)) {
         for (const page of [{ handle: "about", title: "About" }, { handle: "faq", title: "Frequently asked questions" }, { handle: "shipping", title: "Shipping information" }, { handle: "returns", title: "Returns information" }, { handle: "privacy", title: "Privacy policy" }, { handle: "terms", title: "Terms of service" }]) {

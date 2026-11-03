@@ -7,6 +7,7 @@ export type RuntimeRegion = "header" | "template" | "footer";
 export interface StorefrontRuntimeContext {
   mode: RendererMode;
   region?: RuntimeRegion;
+  themeVersion?: string;
   commerce: CommerceDataProvider;
   page?: StorefrontPageContext;
   menus?: Record<string, RuntimeMenuV4>;

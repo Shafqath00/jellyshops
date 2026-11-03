@@ -42,7 +42,7 @@ export class ThemeLibraryService {
     // Settings are checked against the theme's own schema; the version recorded is the one the theme has now unless the editor sends the one in use.
     const theme = resolveTheme(input.themeId, input.settings, input.themeVersion);
     if (theme.id !== input.themeId) throw new ApiError(400, "UNKNOWN_THEME", "That theme isn't available.");
-    const issues = validateThemeSettings(input.themeId, input.settings);
+    const issues = validateThemeSettings(input.themeId, input.settings, theme.version);
     if (issues.length) throw new ApiError(400, "INVALID_THEME_SETTINGS", issues[0].message);
     if (JSON.stringify(input.settings).length > MAX_SETTINGS_BYTES) throw new ApiError(400, "SETTINGS_TOO_LARGE", "These theme settings are too large to save.");
     const existing = Number((await this.sql.query<{ count: string }>(`SELECT COUNT(*)::text AS count FROM "ThemeLibraryEntry" WHERE "storeId" = $1`, [storeId])).rows[0]?.count ?? 0);

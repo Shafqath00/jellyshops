@@ -42,24 +42,22 @@ function valueMatches(definition: ThemeSettingDefinition, value: unknown): boole
   return typeof value === "string" && Boolean(definition.options?.some((option) => option.value === value));
 }
 
-function availableManifest(id: string): ThemeManifest | null {
+function availableManifest(id: string, version?: string | null): ThemeManifest | null {
   try {
-    const definition = getThemeDefinition(id);
+    const definition = getThemeDefinition(id, version);
     const manifest = themeManifestSchema.safeParse(definition.manifest);
     return manifest.success && manifest.data.enabled ? manifest.data : null;
   } catch { return null; }
 }
 
 export function resolveTheme(requestedId: string | null | undefined, settings: Record<string, unknown> = {}, requestedVersion?: string | null): ResolvedTheme {
-  const requested = requestedId ? availableManifest(requestedId) : null;
+  const requested = requestedId ? availableManifest(requestedId, requestedVersion) : null;
   const fallback = availableManifest(DEFAULT_THEME_ID);
   if (!fallback) throw new Error("Default JellyShop theme manifest is unavailable");
   const selected = requested && (!requestedVersion || requested.version === requestedVersion) ? requested : fallback;
-  const fallbackReason = selected === fallback && requestedId && requestedId !== fallback.id
-    ? "theme-unavailable" as const
-    : requested && requestedVersion && requested.version !== requestedVersion
-      ? "version-unavailable" as const
-      : undefined;
+  const fallbackReason = requestedId && !requested
+    ? requestedVersion && availableManifest(requestedId) ? "version-unavailable" as const : "theme-unavailable" as const
+    : undefined;
   const assets = selected.assets as ThemeAssetManifest;
   return { id: selected.id, version: selected.version, settings: mergeSettings(selected.settingsDefaults, settings), assetPrefix: selected.assetPrefix, layout: selected.layout, assets, previewAsset: assets.preview?.path ?? selected.previewAsset, ...(fallbackReason ? { fallbackReason } : {}) };
 }
@@ -77,8 +75,8 @@ export function getThemeAsset(themeId: string, assetId: string): string | undefi
 export function validateThemeManifest(value: unknown): ThemeManifest { return themeManifestSchema.parse(value); }
 
 /** Validates only declared keys; unknown keys survive upgrades and extensions. */
-export function validateThemeSettings(themeId: string, settings: Record<string, unknown>): ThemeSettingValidationIssue[] {
-  const manifest = availableManifest(themeId);
+export function validateThemeSettings(themeId: string, settings: Record<string, unknown>, version?: string | null): ThemeSettingValidationIssue[] {
+  const manifest = availableManifest(themeId, version);
   if (!manifest) return [{ path: "themeId", message: "Theme is unavailable" }];
   return manifest.settingsSchema.flatMap((definition) => {
     const value = valueAtPath(settings, definition.id);

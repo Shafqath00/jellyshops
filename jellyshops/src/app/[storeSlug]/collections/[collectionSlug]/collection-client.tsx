@@ -58,7 +58,7 @@ export default function CollectionPage() {
         collection: pageContext.collection,
         products: pageContext.products.map((product) => ({ ...product, href: `/${store.slug}/products/${product.href.split("/").pop()}` })),
         collectionPresentation: {
-          ...(isCompleteStorefrontTheme(publication.snapshot.theme?.id ?? publication.snapshot.theme?.presetId) ? { interactiveGrid: <CatalogBrowser storeSlug={store.slug} collectionId={pageContext.collection.id} /> } : {}),
+          ...(isCompleteStorefrontTheme(publication.snapshot.theme?.id ?? publication.snapshot.theme?.presetId, publication.snapshot.theme?.version) ? { interactiveGrid: <CatalogBrowser storeSlug={store.slug} collectionId={pageContext.collection.id} /> } : {}),
           collection: { id: pageContext.collection.id, title: pageContext.collection.name, description: pageContext.collection.description ?? "", ...(pageContext.collection.descriptionDoc ? { descriptionDoc: pageContext.collection.descriptionDoc } : {}), ...(pageContext.collection.imageUrl ? { imageUrl: pageContext.collection.imageUrl } : {}) },
           products: pageContext.products.map((product) => ({ ...product, href: `/${store.slug}/products/${product.href.split("/").pop()}` })),
           totalProducts: pageContext.products.length,

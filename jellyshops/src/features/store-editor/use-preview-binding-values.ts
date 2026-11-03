@@ -16,6 +16,7 @@ export function usePreviewBindingValues(layout: PreviewLayout, options: {
   baseUrl: string;
   token?: string;
   storeId: string;
+  themeVersion?: string;
   resource?: BindingValuesRequest["resource"];
 }): PreviewLayout {
   const { baseUrl, token, storeId, resource } = options;
@@ -39,5 +40,5 @@ export function usePreviewBindingValues(layout: PreviewLayout, options: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [request, baseUrl, token]);
 
-  return useMemo(() => applyBindingValues(layout, loaded?.request === request ? loaded.values : new Map()), [layout, loaded, request]);
+  return useMemo(() => applyBindingValues(layout, loaded?.request === request ? loaded.values : new Map(), options.themeVersion), [layout, loaded, request, options.themeVersion]);
 }

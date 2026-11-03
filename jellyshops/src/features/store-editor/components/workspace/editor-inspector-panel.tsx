@@ -86,7 +86,7 @@ export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
               <ChevronLeft size={16} />
             </button>
             <div>
-              <p className="text-[12px] text-[var(--ink-soft)]">{displayName(blockPickerSection.type)}</p>
+              <p className="text-[12px] text-[var(--ink-soft)]">{displayName(blockPickerSection.type, ctx.themeConfiguration?.themeVersion)}</p>
               <h2 className="text-[13px] font-semibold">{blockPickerParentId ? "Add block to group" : "Add content block"}</h2>
             </div>
           </div>
@@ -132,10 +132,10 @@ export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
               <LayoutPanelTop size={16} className="text-[var(--ink-soft)]" />
               <div className="min-w-0">
                 <p className="text-[12px] text-[var(--ink-soft)]">
-                  {selectedBlock && localSection.type !== "rich-text" ? displayName(localSection.type) : "Section settings"}
+                  {selectedBlock && localSection.type !== "rich-text" ? displayName(localSection.type, ctx.themeConfiguration?.themeVersion) : "Section settings"}
                 </p>
                 <p className="truncate text-[13px] font-semibold">
-                  {localSection.type === "rich-text" || !selectedBlock ? displayName(localSection.type) : blockLabel(selectedBlock.type)}
+                  {localSection.type === "rich-text" || !selectedBlock ? displayName(localSection.type, ctx.themeConfiguration?.themeVersion) : blockLabel(selectedBlock.type)}
                 </p>
               </div>
             </div>
@@ -228,7 +228,7 @@ export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
             onInsertGlobal={(globalId) => { void insertGlobal(globalId); }}
             onDetachGlobal={(section) => { void detachGlobal(section); }}
             onSaveToLibrary={(section, name) => { void saveToLibrary(section, name); }}
-            suggestedName={localSection ? displayName(localSection.type) : undefined}
+            suggestedName={localSection ? displayName(localSection.type, ctx.themeConfiguration?.themeVersion) : undefined}
           />
           </details>
         </>

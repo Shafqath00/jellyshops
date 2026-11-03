@@ -8,7 +8,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { getBlockDefinition, getSectionDefinition, listSectionDefinitionsForPage } from "@jelly/storefront-registry";
 import { type CommerceDataProvider, type StorefrontPageContext } from "@jelly/storefront-renderer";
 import type { ThemeId } from "@jelly/storefront-schema";
-import { resolveStorefrontThemeTokens, resolveTheme, storeLanguages } from "@jelly/storefront-themes";
+import { getThemeDefinition, validateThemeManifest, resolveStorefrontThemeTokens, resolveTheme, storeLanguages } from "@jelly/storefront-themes";
 import { expandRawRuntimeLayout } from "@/features/storefront/resource-loader";
 import { usePreviewBindingValues } from "@/features/store-editor/use-preview-binding-values";
 import { isAssignableTemplateType } from "@/features/store-editor/template-names";
@@ -32,7 +32,7 @@ export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
   const previewThemeStyle = useMemo(() => {
     const resolved = resolveTheme(themeConfiguration?.themeId, themeConfiguration?.settings ?? {}, themeConfiguration?.themeVersion);
     // Same token layer as the published storefront, so the preview matches the live store.
-    return resolveStorefrontThemeTokens(resolved.id as ThemeId, resolved.settings);
+    return resolveStorefrontThemeTokens(resolved.id as ThemeId, resolved.settings, {}, resolved.version);
   }, [themeConfiguration]);
 
   useEffect(() => {
@@ -137,7 +137,7 @@ export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
   const selectedLocation = selection?.kind === "block" ? locateBlock(localSection, selection.blockId) : null;
   const selectedBlock = selectedLocation?.block;
   const selectedChildOptions = localSection && selectedBlock ? childBlockOptions(localSection, selectedBlock.id) : { types: [], full: false };
-  const sectionDefinition = localSection ? getSectionDefinition(localSection.type) : undefined;
+  const sectionDefinition = localSection ? getSectionDefinition(localSection.type, themeConfiguration?.themeVersion) : undefined;
   const blockDefinition = selectedBlock ? getBlockDefinition(selectedBlock.type) : undefined;
   const baseControls = selectedBlock ? blockDefinition?.controls ?? [] : sectionDefinition?.controls ?? [];
   // On the Mobile preview, phone settings show and save their phone values.
@@ -145,7 +145,7 @@ export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
   const selectedNode = selectedBlock ?? localSection;
   // The colour scheme picker shows the theme's schemes by name.
   // Theme and colour scheme colours offered under every colour field.
-  const colorPalette = useMemo(() => themePalette(themeConfiguration?.themeId, themeConfiguration?.settings), [themeConfiguration?.themeId, themeConfiguration?.settings]);
+  const colorPalette = useMemo(() => themePalette(themeConfiguration?.themeId, themeConfiguration?.settings, themeConfiguration?.themeVersion), [themeConfiguration]);
   const languages = storeLanguages(themeConfiguration?.settings);
   const activeLanguage = editLanguage && languages.some((item) => item.code === editLanguage) ? editLanguage : null;
   const activeLanguageName = languages.find((item) => item.code === activeLanguage)?.name ?? "";
@@ -163,6 +163,7 @@ export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
     baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001",
     token,
     storeId: backendStoreId,
+    themeVersion: themeConfiguration?.themeVersion,
     resource: activeTemplate && isAssignableTemplateType(activeTemplate.type) && previewResourceId ? { type: activeTemplate.type, id: previewResourceId } : undefined,
   });
   const previewPageContext: StorefrontPageContext | null = useMemo(() => activeTemplate
@@ -171,19 +172,23 @@ export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
   [activeTemplate?.type, previewResourceId, backendStoreId, catalog, pages, blogs, articles, previewQuery, previewProduct, previewProductSelections, previewProductQuantity, previewCollection]);
   const builtInSections = useMemo(() => {
     if (!activeTemplate || !libraryRegion) return [];
-    return listSectionDefinitionsForPage(activeTemplate.type, libraryRegion, themeConfiguration?.themeId)
+    return listSectionDefinitionsForPage(activeTemplate.type, libraryRegion, themeConfiguration?.themeId, themeConfiguration?.themeVersion)
       .map((definition) => ({
         id: definition.type,
-        name: displayName(definition.type),
+        name: definition.label ?? displayName(definition.type),
         category: sectionCategoryLabels[definition.category],
       }));
-  }, [activeTemplate, libraryRegion, themeConfiguration?.themeId]);
+  }, [activeTemplate, libraryRegion, themeConfiguration]);
   const blockPickerSection = sections.find((section) => section.id === blockPickerSectionId);
-  const blockPickerDefinition = blockPickerSection ? getSectionDefinition(blockPickerSection.type) : undefined;
+  const blockPickerDefinition = blockPickerSection ? getSectionDefinition(blockPickerSection.type, themeConfiguration?.themeVersion) : undefined;
   const blockPickerTypes = blockPickerSection && blockPickerParentId
     ? childBlockOptions(blockPickerSection, blockPickerParentId).types
     : blockPickerDefinition?.allowedBlockTypes ?? [];
-  const selectedTheme = themeCatalog.find((theme) => theme.id === themeConfiguration?.themeId);
+  const selectedTheme = useMemo(() => {
+    if (!themeConfiguration) return undefined;
+    try { const manifest = validateThemeManifest(getThemeDefinition(themeConfiguration.themeId, themeConfiguration.themeVersion).manifest); return { ...manifest, available: manifest.enabled }; }
+    catch { return themeCatalog.find((theme) => theme.id === themeConfiguration.themeId && theme.version === themeConfiguration.themeVersion); }
+  }, [themeCatalog, themeConfiguration]);
 
   const commerce = useMemo<CommerceDataProvider>(() => ({
     getMetaobjects: backendStoreId ? (handle) => fetchPublicMetaobjects(backendStoreId, handle) : undefined,

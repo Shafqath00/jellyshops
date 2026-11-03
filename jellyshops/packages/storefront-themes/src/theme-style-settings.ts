@@ -322,6 +322,7 @@ export function themeSocialLinks(settings: Record<string, unknown> | undefined):
 }
 
 /** The theme's custom CSS limited to the store (selectors start at `[data-jelly-theme]`), or null. */
-export function themeCustomCss(settings: Record<string, unknown> | undefined): string | null {
-  return scopeCustomCss(record(settings?.advanced).customCss, "[data-jelly-theme]", MAX_THEME_CSS_LENGTH);
+export function themeCustomCss(settings: Record<string, unknown> | undefined, themeId?: string, themeVersion?: string): string | null {
+  const scope = themeId && themeVersion ? `[data-jelly-theme="${themeId}"][data-jelly-theme-version="${themeVersion}"]` : "[data-jelly-theme]";
+  return scopeCustomCss(record(settings?.advanced).customCss, scope, MAX_THEME_CSS_LENGTH);
 }

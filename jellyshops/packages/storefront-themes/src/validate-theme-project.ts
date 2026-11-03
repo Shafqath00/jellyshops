@@ -78,7 +78,7 @@ function checkSettings(manifest: Record<string, unknown>, issues: ThemeProjectIs
 
 type Placement = { kind: "inline"; section: SectionNode } | { kind: "global"; globalSectionId: string };
 
-function checkStarter(starterInput: unknown, themeId: string | undefined, issues: ThemeProjectIssue[]): void {
+function checkStarter(starterInput: unknown, themeId: string | undefined, issues: ThemeProjectIssue[], version?: string): void {
   const starter = record(starterInput);
   const globals = record(starter.globalSections) as Record<string, SectionNode>;
   const templates = record(starter.templates) as Record<string, { type?: unknown; sections?: unknown }>;
@@ -111,7 +111,7 @@ function checkStarter(starterInput: unknown, themeId: string | undefined, issues
           for (const child of block?.blocks ?? []) claim(child?.id, `${path}.section.blocks`);
         }
       } else { issues.push({ level: "error", code: "BAD_PLACEMENT", path, message: 'A placement must be { "kind": "inline", "section": … } or { "kind": "global", "globalSectionId": … }.' }); return; }
-      for (const issue of validateSectionAgainstRegistry(section, type, themeId)) {
+      for (const issue of validateSectionAgainstRegistry(section, type, themeId, version)) {
         issues.push({ level: "error", code: issue.code, path: `${path}${issue.blockId ? ` block ${issue.blockId}` : ""}`, message: `${section.type} (${section.id}): ${issue.message}` });
       }
     });
@@ -141,8 +141,8 @@ export function validateThemeProject(input: ThemeProjectInput): ThemeProjectIssu
   if (input.starter !== undefined) {
     // The theme's own sections must be known while its starter is checked, and only then: validating a theme must not leave it registered.
     const id = typeof record(input.manifest).id === "string" ? record(input.manifest).id as string : undefined;
-    const undo = parsed.success && id ? registerRecipes(id, recipesOf(parsed.data)) : () => {};
-    try { checkStarter(input.starter, id, issues); } finally { undo(); }
+    const undo = parsed.success && id ? registerRecipes(id, recipesOf(parsed.data), parsed.data.version) : () => {};
+    try { checkStarter(input.starter, id, issues, parsed.success ? parsed.data.version : undefined); } finally { undo(); }
     scan(input.starter, "starter.json", issues);
   }
   // Same message twice (from the schema and the scan) is noise.
