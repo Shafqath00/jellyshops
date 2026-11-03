@@ -17,7 +17,7 @@ export interface StarterMenuItem {
 }
 
 export interface V4StarterPack {
-  id: V4StarterPackId;
+  id: string;
   version: string;
   name: string;
   description: string;

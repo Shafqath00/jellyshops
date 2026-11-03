@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
-import { COMPLETE_STARTER_PACK_IDS, getV4StarterPack, isV4StarterPackId, validateV4StarterPack, type StarterMenuItem, type V4StarterPack, type V4StarterPackId } from "@jelly/storefront-registry";
+import { COMPLETE_STARTER_PACK_IDS, type StarterMenuItem, type V4StarterPack } from "@jelly/storefront-registry";
 import type { SectionNode } from "@jelly/storefront-schema";
 import type { CommerceDatabase, SqlExecutor } from "../../commerce/repository.js";
 import { ApiError } from "../../http/errors.js";
-import { resolveTheme } from "@jelly/storefront-themes";
+import { getStarterPack, isStarterPackId, resolveTheme, validateStarterPack } from "@jelly/storefront-themes";
 import { RETIRED_TEMPLATE_HANDLE_PREFIX } from "../workspace/repositories/template-repository.js";
 
 const heading = (text: string) => ({ type: "heading", attrs: { level: 2 }, content: [{ type: "text", text }] });
@@ -34,7 +34,7 @@ class StorefrontNotFoundError extends ApiError {
 
 export interface StarterInstallationResult {
   storeId: string;
-  starterPackId: V4StarterPackId;
+  starterPackId: string;
   starterPackVersion: string;
   generation: number;
   installed: boolean;
@@ -91,11 +91,11 @@ export class StorefrontStarterInstallationService {
   ) {}
 
   async install(storeId: string, starterPackId: string, options?: { replaceDraft: boolean; expectedGeneration: number }): Promise<StarterInstallationResult> {
-    if (!isV4StarterPackId(starterPackId)) {
+    if (!isStarterPackId(starterPackId)) {
       throw new RangeError("Unknown V4 starter pack");
     }
-    const pack = getV4StarterPack(starterPackId);
-    const issues = validateV4StarterPack(pack);
+    const pack = getStarterPack(starterPackId);
+    const issues = validateStarterPack(pack);
     if (issues.length) throw new Error(`Invalid V4 starter pack: ${issues.map(({ message }) => message).join("; ")}`);
 
     return this.database.transaction(async (sql) => {
@@ -112,7 +112,7 @@ export class StorefrontStarterInstallationService {
       );
       const current = workspace.rows[0];
       if (options && Number(current?.generation ?? 0) !== options.expectedGeneration) throw new StarterInstallationConflictError("The draft changed. Reload before replacing it.");
-      if (COMPLETE_STARTER_PACK_IDS.includes(pack.id)) {
+      if ((COMPLETE_STARTER_PACK_IDS as readonly string[]).includes(pack.id)) {
         const collisions = await sql.query<{ handle: string }>('SELECT "handle" FROM "StorePage" WHERE "storeId"=$1 AND "handle"=ANY($2::text[])', [storeId, ["account", "wishlist", "checkout", "order", "search", "cart", "collections", "products", "shop", "contact", "newsletter"]]);
         if (collisions.rows.length) throw new StarterInstallationConflictError(`Rename conflicting content paths before installing: ${collisions.rows.map((row) => row.handle).join(", ")}.`);
       }
@@ -163,7 +163,7 @@ export class StorefrontStarterInstallationService {
         // Published stores pin the theme's own version; the starter pack's version is tracked on the workspace.
         [storeId, pack.theme.themeId, resolveTheme(pack.theme.themeId, pack.theme.settings).version, JSON.stringify(pack.theme.settings), now],
       );
-      if (COMPLETE_STARTER_PACK_IDS.includes(pack.id)) {
+      if ((COMPLETE_STARTER_PACK_IDS as readonly string[]).includes(pack.id)) {
         for (const page of [{ handle: "about", title: "About" }, { handle: "faq", title: "Frequently asked questions" }, { handle: "shipping", title: "Shipping information" }, { handle: "returns", title: "Returns information" }, { handle: "privacy", title: "Privacy policy" }, { handle: "terms", title: "Terms of service" }]) {
           await sql.query(`INSERT INTO "StorePage" ("id","storeId","title","handle","content","featuredMediaId","status","publishedAt","seoTitle","seoDescription","socialMediaId","noindex","canonicalOverride","createdAt","updatedAt")
             SELECT $1,$2,$3,$4,$5::jsonb,NULL,'DRAFT',NULL,NULL,NULL,NULL,TRUE,NULL,$6,$6

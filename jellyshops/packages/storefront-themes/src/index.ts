@@ -12,3 +12,5 @@ export { FONT_OPTIONS, fontStack } from "./fonts.js";
 export { COLOR_SCHEME_IDS, colorSchemeCount, colorSchemeLabel, MAX_THEME_CSS_LENGTH, MIN_COLOR_SCHEMES, productCardButtonLabel, resolveThemeStyleTokens, SOCIAL_PLATFORMS, TEXT_STYLE_LEVELS, mainLanguageName, storeLanguages, usesCartDrawer, themeCustomCss, themeSocialLinks, themeStyleDefaultsFrom } from "./theme-style-settings.js";
 export type { StoreLanguage } from "./theme-style-settings.js";
 export type { ColorSchemeId, TextStyleLevel } from "./theme-style-settings.js";
+export { createStarterPack, DISCOVERED_STARTER_PACK_IDS, getStarterPack, isStarterPackId, listStarterPacks, validateStarterPack } from "./starter-packs.js";
+export type { DiscoveredTheme } from "./types.js";

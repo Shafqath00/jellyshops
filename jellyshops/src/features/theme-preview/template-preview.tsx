@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { RegistrySectionRenderer, type CommerceDataProvider, type StorefrontPageContext } from "@jelly/storefront-renderer";
-import { getV4StarterPack } from "@jelly/storefront-registry";
+import { getStarterPack } from "@jelly/storefront-themes";
 import type { RuntimeMenuV4, SectionNode } from "@jelly/storefront-schema";
 import type { ThemePreviewConfig } from "./configs";
 
@@ -73,7 +73,7 @@ function useCartContext(config: ThemePreviewConfig): StorefrontPageContext {
 }
 
 export function TemplatePreview({ template, config }: { template: PreviewTemplate; config: ThemePreviewConfig }) {
-  const pack = getV4StarterPack(config.packId);
+  const pack = getStarterPack(config.packId);
   const productPage = useProductContext(config);
   const cartPage = useCartContext(config);
   const commerce: CommerceDataProvider = { initialProducts: config.products, async getProducts(input) { return config.products.slice(0, input?.limit ?? config.products.length); } };

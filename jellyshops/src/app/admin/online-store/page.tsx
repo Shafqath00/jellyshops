@@ -4,13 +4,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowUpRight, Check, CheckCircle2, Eye, LayoutTemplate, Loader2, Palette, Pencil, RefreshCw, Sparkles } from "lucide-react";
-import { listV4StarterPacks, type V4StarterPackId } from "@jelly/storefront-registry";
+import { listStarterPacks } from "@jelly/storefront-themes";
 import { useAuth } from "@/features/auth/providers/auth-provider";
 import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import type { ThemeCatalogEntry, ThemeConfigurationRecord } from "@/features/store-editor/api/types";
 import { TemplateThumbnail, TemplatePreviewDialog } from "@/features/store-editor/components/template-preview";
 
-const starters = listV4StarterPacks();
+const starters = listStarterPacks();
 const editorHref = "/admin/online-store/editor";
 const primary = "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition hover:bg-primary disabled:cursor-wait disabled:opacity-45";
 const secondary = "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-muted/50 disabled:opacity-45";
@@ -69,7 +69,7 @@ function StoreDesignLibrary() {
     finally { operation.current = false; if (mounted.current) setSaving(undefined); }
   }
 
-  async function installStarter(starterId: V4StarterPackId) {
+  async function installStarter(starterId: string) {
     if (!api || !storeId || operation.current) return;
     if (hasWorkspace && !window.confirm("Switch your draft to this store design? Your page layouts are replaced, and products, collections and pages go back to the main layout for their type. Your live store, products, orders and customers stay the same until you publish.")) return;
     operation.current = true;

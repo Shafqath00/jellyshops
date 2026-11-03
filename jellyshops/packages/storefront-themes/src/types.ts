@@ -1,4 +1,4 @@
-import type { GlobalSettings, ThemeId } from "@jelly/storefront-schema";
+import type { GlobalSettings, PageType, SectionNode, ThemeId } from "@jelly/storefront-schema";
 import type { ComponentType, ReactNode } from "react";
 import type { ThemeSectionProps } from "./themes/example-boutique/hero.js";
 
@@ -35,3 +35,12 @@ export interface ThemeShellComponents { Layout?: ComponentType<StorefrontLayoutP
 export interface ThemeDefinition { id: ThemeId; label: string; tokens: ThemeTokens; sectionVariants: Record<string, string>; manifest: unknown; sectionOverrides: Record<string, ComponentType<ThemeSectionProps>>; components?: ThemeShellComponents }
 export type ResolvedDesignTokens = Record<string, string>;
 export type { GlobalSettings };
+
+/** A theme folder found under src/themes/: its manifest (theme.json) and optional starter content (starter.json). */
+export interface DiscoveredTheme {
+  manifest: Record<string, any>;
+  starter?: {
+    globalSections: Record<string, SectionNode>;
+    templates: Record<string, { type: PageType; sections: Array<{ kind: "inline"; section: SectionNode } | { kind: "global"; globalSectionId: string }> }>;
+  };
+}

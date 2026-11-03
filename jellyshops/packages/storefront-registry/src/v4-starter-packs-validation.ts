@@ -89,12 +89,13 @@ function visitMenu(items: unknown, path: string, issues: V4StarterPackIssue[]): 
   }
 }
 
-export function validateV4StarterPack(value: unknown): V4StarterPackIssue[] {
+/** `supportedPackIds` adds starter packs that ship with themes beyond the four built-in ones. */
+export function validateV4StarterPack(value: unknown, supportedPackIds: readonly string[] = []): V4StarterPackIssue[] {
   const issues: V4StarterPackIssue[] = [];
   if (!isRecord(value)) return [{ code: "INVALID_STARTER", path: "$", message: "Starter pack must be an object" }];
   const pack = value as unknown as V4StarterPack;
 
-  if (!supportedThemes.has(pack.id) || pack.theme?.themeId !== pack.id || !themeVersionPattern.test(pack.version ?? "")) {
+  if ((!supportedThemes.has(pack.id) && !supportedPackIds.includes(pack.id)) || pack.theme?.themeId !== pack.id || !themeVersionPattern.test(pack.version ?? "")) {
     issues.push({ code: "INVALID_THEME", path: "theme", message: "Starter theme identity and semantic version must be supported" });
   }
   if (!isRecord(pack.theme?.settings)) issues.push({ code: "INVALID_THEME", path: "theme.settings", message: "Theme settings must be an object" });

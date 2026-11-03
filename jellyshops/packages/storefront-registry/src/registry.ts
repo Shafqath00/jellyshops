@@ -8,18 +8,35 @@ import { productExtraSections } from "./sections/product-extras.js";
 import { sectionStyleSchema, withSectionStyleControls } from "./section-style.js";
 import type { ControlDefinition, RegionName, RegistryValidationIssue, SectionDefinition } from "./types.js";
 
-const sections: SectionDefinition[] = [...layoutSections, ...contentSections, ...commerceSections, ...productExtraSections].map((definition) => ({
-  ...definition,
-  // Every section gets the shared style settings (colours, fonts, sizes, alignment, spacing).
-  controls: withSectionStyleControls(definition.controls),
-  settingsSchema: z.intersection(definition.settingsSchema, sectionStyleSchema),
-  allowedRegions: definition.type === "header" || definition.type === "announcement-bar"
-    ? ["header"]
-    : definition.type === "footer"
-      ? ["footer"]
-      : ["template"],
-}));
+function prepareSection(definition: SectionDefinition): SectionDefinition {
+  return {
+    ...definition,
+    // Every section gets the shared style settings (colours, fonts, sizes, alignment, spacing).
+    controls: withSectionStyleControls(definition.controls),
+    settingsSchema: z.intersection(definition.settingsSchema, sectionStyleSchema),
+    allowedRegions: definition.type === "header" || definition.type === "announcement-bar"
+      ? ["header"]
+      : definition.type === "footer"
+        ? ["footer"]
+        : ["template"],
+  };
+}
+const sections: SectionDefinition[] = [...layoutSections, ...contentSections, ...commerceSections, ...productExtraSections].map(prepareSection);
 const sectionDefinitions = new Map(sections.map((definition) => [definition.type, definition]));
+
+const NAMESPACED_TYPE = /^[a-z0-9][a-z0-9-]*\/[a-z0-9][a-z0-9-]*$/;
+/**
+ * Adds a section type from outside the built-in set (an integration or a theme). The type must be
+ * namespaced `vendor/name` so it can never shadow a built-in section, and can be registered once.
+ * It gets the same shared style controls as every other section and is validated the same way.
+ */
+export function registerSection(definition: SectionDefinition): void {
+  if (!NAMESPACED_TYPE.test(definition.type)) throw new Error(`Section type "${definition.type}" must be written vendor/name, for example "acme/size-guide".`);
+  if (sectionDefinitions.has(definition.type)) throw new Error(`Section type "${definition.type}" is already registered.`);
+  const prepared = prepareSection(definition);
+  sections.push(prepared);
+  sectionDefinitions.set(prepared.type, prepared);
+}
 
 export function getSectionDefinition(type: string): SectionDefinition | undefined { return sectionDefinitions.get(type); }
 export function getBlockDefinition(type: string) { return blockDefinitions.get(type); }

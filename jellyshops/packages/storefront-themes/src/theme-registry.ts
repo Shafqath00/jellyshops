@@ -16,6 +16,7 @@ import type { ComponentType } from "react";
 import { signatureManifest, signatureTokens } from "./jelly-signature/definition.js";
 import { avenueManifest, avenueTokens } from "./jelly-avenue/definition.js";
 import { fontStack } from "./fonts.js";
+import { discoveredThemes } from "./themes/index.generated.js";
 
 function definition(id: ThemeId, label: string, tokens: ThemeTokens, manifest?: unknown, sectionOverrides: Record<string, ComponentType<ThemeSectionProps>> = {}, components?: ThemeShellComponents): ThemeDefinition {
   const presetManifest = {
@@ -38,6 +39,23 @@ const themes = [
   definition("artisan-boutique", "Artisan Boutique", artisanBoutiqueTokens),
   definition("example-boutique", "Example Boutique", { ...artisanBoutiqueTokens, typography: { display: "Georgia", body: "Inter" } }, exampleBoutiqueManifest, { hero: BoutiqueHero }, boutiqueShellComponents)
 ];
+
+const manualIds = new Set(themes.map((theme) => theme.id));
+export function isManuallyRegistered(id: string): boolean { return manualIds.has(id); }
+
+/**
+ * Themes found in src/themes/<folder>/theme.json become declarative themes: colours and fonts come
+ * from the manifest defaults, everything else is the shared storefront. A folder whose id is
+ * already registered above is skipped (those need code, or predate discovery).
+ */
+for (const { manifest } of discoveredThemes) {
+  if (manualIds.has(manifest.id)) continue;
+  const colors = manifest.settingsDefaults?.colors ?? {};
+  const typography = manifest.settingsDefaults?.typography ?? {};
+  const base = minimalTokens;
+  const tokens: ThemeTokens = { ...base, colors: { ...base.colors, ...colors }, typography: { display: typography.headingFont ?? base.typography.display, body: typography.bodyFont ?? base.typography.body } };
+  themes.push(definition(manifest.id, manifest.name, tokens, manifest));
+}
 
 export function listThemes(): ThemeDefinition[] { return [...themes]; }
 

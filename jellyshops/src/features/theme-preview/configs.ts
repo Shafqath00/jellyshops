@@ -1,5 +1,4 @@
 import type { PublicProduct } from "@jelly/storefront-renderer";
-import type { V4StarterPackId } from "@jelly/storefront-registry";
 
 /**
  * Everything a theme's style guide and template previews need: the theme and
@@ -9,7 +8,7 @@ import type { V4StarterPackId } from "@jelly/storefront-registry";
  */
 export interface ThemePreviewConfig {
   themeId: string;
-  packId: V4StarterPackId;
+  packId: string;
   name: string;
   /** Page background behind the device frame. */
   stageColor: string;

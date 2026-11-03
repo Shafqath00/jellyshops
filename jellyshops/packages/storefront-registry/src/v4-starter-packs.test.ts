@@ -5,11 +5,15 @@ import { validateV4StarterPack } from "./v4-starter-packs-validation";
 const requiredPageTypes = ["home", "product", "collection", "cart", "search", "page", "blog", "article", "not-found"];
 
 describe("V4 starter packs", () => {
+  it("preserves the complete built-in starter packs", () => {
+    expect(listV4StarterPacks()).toMatchSnapshot();
+  });
+
   it("provides versioned Fresh Market and Artisan Boutique definitions with every default page", () => {
     const packs = listV4StarterPacks();
 
     expect(packs.map(({ id }) => id)).toEqual(["jelly-avenue", "jelly-signature", "fresh-market", "artisan-boutique"]);
-    for (const pack of packs.filter(({ id }) => !COMPLETE_STARTER_PACK_IDS.includes(id))) {
+    for (const pack of packs.filter(({ id }) => !(COMPLETE_STARTER_PACK_IDS as readonly string[]).includes(id))) {
       expect(pack.version).toMatch(/^\d+\.\d+\.\d+$/);
       expect(pack.templates.map(({ type }) => type).sort()).toEqual([...requiredPageTypes].sort());
       expect(pack.templates.every(({ handle }) => handle === "default")).toBe(true);

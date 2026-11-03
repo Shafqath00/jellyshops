@@ -58,7 +58,7 @@ The live store never changes until Publish. Published snapshots are immutable, w
 
 ### Today: where a theme's files live
 
-A theme is spread across four packages and the app. Nothing is auto-discovered; each step below is a manual registration.
+A theme is spread across four packages and the app. A theme folder under `storefront-themes/src/themes/<id>/` (`theme.json` plus optional `starter.json`) is found automatically (`node scripts/generate-theme-index.mjs`, checked by a test) and becomes a declarative theme with its starter pack. Themes with their own header, footer or section code, and the CSS, preview and registration steps below, are still manual.
 
 | Responsibility | Path | Purpose |
 | --- | --- | --- |
@@ -229,7 +229,7 @@ The shape is `V4StarterPack` (`globalSections`, `menus`, `templates`). Templates
 
 `validateV4StarterPack(pack)` (`v4-starter-packs-validation.ts`) checks a pack (known sections and blocks, valid settings, unsafe URLs, duplicate ids, required templates). Run it in a test, as `jelly-signature.test.ts` does.
 
-> **Known limitation.** Because `makePack` branches by id, every new theme edits shared code. [The plan](../plans/theme-sdk-plan.md) moves starter packs into the theme.
+> **Data-driven alternative (2026-11-03).** Put `theme.json` and `starter.json` (the format of `docs/examples/jelly-studio`) in `storefront-themes/src/themes/<id>/`, run `node scripts/generate-theme-index.mjs`, rebuild the packages. `createStarterPack` turns the folder into a pack (shared sections get their ids, a plain Blog and Article template are added if you do not design them, a Home/Search main menu is created) and the install route accepts its id. The four built-in packs stay in code, locked by `v4-starter-packs-locked.test.ts`. Custom sections from outside the core set are added with `registerSection({ type: "vendor/name", ... })`, which gives them the shared style controls.
 
 ### Step 7: Override markup only when you must
 
