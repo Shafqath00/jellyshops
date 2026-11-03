@@ -18,3 +18,5 @@ export { defineTheme } from "./define-theme.js";
 export type { ThemeInput } from "./define-theme.js";
 export { starterFileSchema } from "./starter-file-schema.js";
 export type { StarterFile } from "./starter-file-schema.js";
+export { expandRecipe, getRecipe, recipeSchema, recipesOf, registerRecipes } from "./recipes.js";
+export type { SectionRecipe } from "./recipes.js";

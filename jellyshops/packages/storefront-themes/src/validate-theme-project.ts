@@ -1,4 +1,5 @@
 import { storefrontPageTypes, type PageType, type SectionNode } from "@jelly/storefront-schema";
+import { recipesOf, registerRecipes } from "./recipes.js";
 import { validateSectionAgainstRegistry } from "@jelly/storefront-registry";
 import { themeManifestSchema } from "./theme-resolver.js";
 
@@ -39,7 +40,8 @@ function scan(value: unknown, path: string, issues: ThemeProjectIssue[]): void {
   if (Array.isArray(value)) { value.forEach((item, index) => scan(item, `${path}[${index}]`, issues)); return; }
   for (const [key, child] of Object.entries(record(value))) {
     const childPath = path ? `${path}.${key}` : key;
-    if (typeof child === "string" && URL_KEYS.has(key) && child && !(child.startsWith("/") && !child.startsWith("//")) && !/^https:\/\//i.test(child) && !child.startsWith("#") && !/^(mailto|tel):/i.test(child)) {
+    // A section recipe may take a link from a setting ("{buttonLink}"); the value is checked when it is drawn.
+    if (typeof child === "string" && URL_KEYS.has(key) && child && !/^{[a-zA-Z][a-zA-Z0-9]*}$/.test(child) && !(child.startsWith("/") && !child.startsWith("//")) && !/^https:\/\//i.test(child) && !child.startsWith("#") && !/^(mailto|tel):/i.test(child)) {
       issues.push({ level: "error", code: "UNSAFE_URL", path: childPath, message: `${childPath} must be a local path or an https link.` });
     }
     scan(child, childPath, issues);
@@ -134,7 +136,13 @@ export function validateThemeProject(input: ThemeProjectInput): ThemeProjectIssu
     if (input.assetExists) for (const path of new Set(named)) if (!input.assetExists(path)) issues.push({ level: path === parsed.data.previewAsset || path === assets.preview?.path ? "warning" : "error", code: "ASSET_MISSING", path, message: `The file ${path} is named in the manifest but was not found.` });
   }
   scan(input.manifest, "theme.json", issues);
-  if (input.starter !== undefined) { checkStarter(input.starter, typeof record(input.manifest).id === "string" ? record(input.manifest).id as string : undefined, issues); scan(input.starter, "starter.json", issues); }
+  if (input.starter !== undefined) {
+    // The theme's own sections must be known while its starter is checked, and only then: validating a theme must not leave it registered.
+    const id = typeof record(input.manifest).id === "string" ? record(input.manifest).id as string : undefined;
+    const undo = parsed.success && id ? registerRecipes(id, recipesOf(parsed.data)) : () => {};
+    try { checkStarter(input.starter, id, issues); } finally { undo(); }
+    scan(input.starter, "starter.json", issues);
+  }
   // Same message twice (from the schema and the scan) is noise.
   const seen = new Set<string>();
   return issues.filter((issue) => { const key = `${issue.code}|${issue.path}|${issue.message}`; if (seen.has(key)) return false; seen.add(key); return true; });

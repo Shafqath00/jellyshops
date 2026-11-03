@@ -102,6 +102,10 @@ function fallback(value: string): string {
   return words ? words.charAt(0).toUpperCase() + words.slice(1) : value;
 }
 
-export function sectionLabel(type: string): string { return sectionLabels[type] ?? fallback(type); }
+/** Names for sections added at run time (themes with their own sections); built-in names are above. */
+const addedLabels = new Map<string, string>();
+export function setSectionLabel(type: string, label: string | undefined): void { if (label) addedLabels.set(type, label); else addedLabels.delete(type); }
+
+export function sectionLabel(type: string): string { return sectionLabels[type] ?? addedLabels.get(type) ?? fallback(type); }
 export function blockLabel(type: string): string { return blockLabels[type] ?? fallback(type); }
 export function pageTypeLabel(type: PageType | string): string { return pageTypeLabels[type as PageType] ?? fallback(type); }

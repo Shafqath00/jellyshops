@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { getSectionDefinition, listSectionDefinitionsForPage, registerSection, validateSectionAgainstRegistry } from "./registry";
+import { sectionLabel } from "./labels";
+import { getSectionDefinition, listSectionDefinitionsForPage, registerSection, unregisterSection, validateSectionAgainstRegistry } from "./registry";
 import type { SectionDefinition } from "./types";
 
 const definition = (type: string): SectionDefinition => ({
@@ -36,5 +37,25 @@ describe("per-theme section visibility", () => {
     const section = { id: "s", type: "acme/showroom", enabled: true, settings: {}, blocks: [] };
     expect(validateSectionAgainstRegistry(section, "home", "acme-store")).toEqual([]);
     expect(validateSectionAgainstRegistry(section, "home", "jelly-avenue").map((issue) => issue.code)).toEqual(["SECTION_NOT_AVAILABLE_ON_THEME"]);
+  });
+});
+
+describe("replacing and undoing registrations", () => {
+  it("replaces a section on request, undoes it, and removes sections added at run time", () => {
+    const undoFirst = registerSection({ ...definition("acme/swap"), label: "Swap v1" });
+    expect(sectionLabel("acme/swap")).toBe("Swap v1");
+    expect(() => registerSection(definition("acme/swap"))).toThrow(/already registered/);
+    const undoSecond = registerSection({ ...definition("acme/swap"), label: "Swap v2", defaultSettings: { text: "two" } }, { replace: true });
+    expect(sectionLabel("acme/swap")).toBe("Swap v2");
+    expect(getSectionDefinition("acme/swap")?.defaultSettings).toEqual({ text: "two" });
+    undoSecond();
+    expect(sectionLabel("acme/swap")).toBe("Swap v1");
+    undoFirst();
+    expect(getSectionDefinition("acme/swap")).toBeUndefined();
+    registerSection(definition("acme/gone"));
+    unregisterSection("acme/gone");
+    expect(getSectionDefinition("acme/gone")).toBeUndefined();
+    unregisterSection("hero");
+    expect(getSectionDefinition("hero")).toBeDefined();
   });
 });

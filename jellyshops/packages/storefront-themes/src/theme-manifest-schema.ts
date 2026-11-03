@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { recipeSchema } from "./recipes.js";
 
 const settingTypeSchema = z.enum(["text", "textarea", "number", "range", "checkbox", "select", "radio", "color", "font", "image", "url", "richtext", "alignment"]);
 const localAssetPath = z.string().regex(/^\/themes\/[a-z0-9]+(?:-[a-z0-9]+)*\/[A-Za-z0-9._/-]+$/).refine((path) => !path.includes("..") && !path.includes("\\") && !/^\/themes\/[^/]+\/https?:/i.test(path), "Theme assets must be local, namespaced paths");
@@ -37,10 +38,15 @@ export const themeManifestSchema = z.object({
   enabled: z.boolean(),
   settingsDefaults: z.record(z.string(), z.unknown()),
   settingsSchema: z.array(settingDefinitionSchema).default([]),
+  /** Custom sections the theme adds, described as data (see recipes.ts). */
+  sections: z.array(recipeSchema).max(20).optional(),
 }).strict().superRefine((manifest, context) => {
   if (manifest.assetPrefix !== `/themes/${manifest.id}/`) {
     context.addIssue({ code: "custom", message: "Theme assetPrefix must belong to its theme id", path: ["assetPrefix"] });
   }
+  (manifest.sections ?? []).forEach((recipe, index) => {
+    if (!recipe.type.startsWith(`${manifest.id}/`)) context.addIssue({ code: "custom", message: `A section of this theme is named ${manifest.id}/section-name, not "${recipe.type}".`, path: ["sections", index, "type"] });
+  });
 });
 
 export type ThemeManifest = z.infer<typeof themeManifestSchema>;

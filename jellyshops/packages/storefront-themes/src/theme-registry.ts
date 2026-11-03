@@ -15,6 +15,7 @@ import type { ComponentType } from "react";
 import { signatureManifest, signatureTokens } from "./jelly-signature/definition.js";
 import { avenueManifest, avenueTokens } from "./jelly-avenue/definition.js";
 import { defineTheme } from "./define-theme.js";
+import { recipesOf, registerRecipes } from "./recipes.js";
 import { fontStack } from "./fonts.js";
 import { discoveredThemes } from "./themes/index.generated.js";
 
@@ -54,7 +55,9 @@ function folderTheme(manifest: ThemeManifestInput): ThemeDefinition {
   return definition(manifest.id, manifest.name, tokens, manifest);
 }
 for (const { manifest } of discoveredThemes) {
-  if (!manualIds.has(manifest.id)) themes.push(folderTheme(manifest));
+  if (manualIds.has(manifest.id)) continue;
+  themes.push(folderTheme(manifest));
+  registerRecipes(manifest.id, recipesOf(manifest));
 }
 
 /**
@@ -65,6 +68,7 @@ for (const { manifest } of discoveredThemes) {
 export function registerFolderTheme(manifest: ThemeManifestInput): ThemeDefinition {
   if (manualIds.has(manifest.id)) throw new Error(`"${manifest.id}" is a built-in theme and cannot be replaced.`);
   const next = folderTheme(manifest);
+  registerRecipes(manifest.id, recipesOf(manifest));
   const index = themes.findIndex((theme) => theme.id === manifest.id);
   if (index === -1) themes.push(next); else themes[index] = next;
   return next;

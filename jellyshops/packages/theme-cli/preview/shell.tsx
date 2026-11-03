@@ -3,7 +3,8 @@ import { createRoot } from "react-dom/client";
 import { getBlockDefinition, getSectionDefinition, listSectionDefinitionsForPage, sectionLabel } from "@jelly/storefront-registry";
 import type { BlockNode, PageType, SectionNode } from "@jelly/storefront-schema";
 import { Fields, GroupedFields, fieldsFromControls, type Field } from "./controls";
-import { fetchProject, getAtPath, onProjectChanged, setAtPath, type Project } from "./project";
+import { registerThemeProject } from "@jelly/storefront-themes";
+import { fetchProject, getAtPath, onProjectChanged, setAtPath, toTheme, type Project } from "./project";
 
 type Starter = NonNullable<Project["starter"]>;
 type Selection = { scope: "template"; index: number } | { scope: "global"; key: string };
@@ -72,6 +73,8 @@ function Shell() {
   if (error) return <p style={{ ...panel, margin: 24 }} role="alert">{error}</p>;
   if (!project) return <p style={{ ...panel, margin: 24 }}>Loading…</p>;
 
+  // The theme's own sections (recipes) are known here too, so the panel can offer and edit them.
+  registerThemeProject(toTheme(project));
   const templates = Object.entries(project.starter?.templates ?? {});
   const template = project.starter?.templates[templateKey];
   const pageType = (template?.type ?? "home") as PageType;
@@ -117,7 +120,7 @@ function Shell() {
     const key = Object.keys(project.starter?.globalSections ?? {}).find((candidate) => project.starter!.globalSections[candidate].id === placement.globalSectionId || candidate === placement.globalSectionId);
     return { index, section: key ? project.starter!.globalSections[key] : undefined, shared: true as const, selection: key ? ({ scope: "global", key } as Selection) : null };
   });
-  const allowed = listSectionDefinitionsForPage(pageType).filter((definition) => !["header", "footer", "announcement-bar"].includes(definition.type));
+  const allowed = listSectionDefinitionsForPage(pageType, "template", project.manifest.id).filter((definition) => !["header", "footer", "announcement-bar"].includes(definition.type));
 
   return <div style={{ ...panel, display: "grid", gridTemplateColumns: "340px 1fr", height: "100vh", background: "#eef0f2" }}>
     <aside style={{ display: "flex", flexDirection: "column", background: "#fff", borderRight: "1px solid #dde1e5", minHeight: 0 }}>

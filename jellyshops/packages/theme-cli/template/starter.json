@@ -101,6 +101,16 @@
         {
           "kind": "inline",
           "section": {
+            "id": "studio-promo",
+            "type": "__ID__/promo-banner",
+            "enabled": true,
+            "settings": {},
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
             "id": "studio-testimonials",
             "type": "testimonials",
             "enabled": true,

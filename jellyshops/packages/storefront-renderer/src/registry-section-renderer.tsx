@@ -10,12 +10,15 @@ import { createStorefrontRuntimeContext } from "./runtime-context";
 import { SectionCustomCss, sectionCssProps } from "./section-custom-css";
 import { sectionStyleProps } from "./section-style";
 import type { CommerceDataProvider, RendererMode, RendererSelection, StorefrontPageContext } from "./types";
-import { getThemeDefinition, DEFAULT_THEME_ID } from "@jelly/storefront-themes";
+import { getRecipe, getThemeDefinition, DEFAULT_THEME_ID } from "@jelly/storefront-themes";
+import { RecipeSection } from "./sections/recipe-section";
 
 function sectionComponent(themeId: string, type: string, registry: SectionRenderRegistry) {
   const override = (id: string) => { try { return getThemeDefinition(id).sectionOverrides[type]; } catch { return undefined; } };
   // Theme overrides consume the same runtime props with a looser commerce type.
-  return (override(themeId) ?? override(DEFAULT_THEME_ID) ?? registry.get(type)) as SectionRenderComponent | undefined;
+  const component = override(themeId) ?? override(DEFAULT_THEME_ID) ?? registry.get(type);
+  // A section a theme described as data is drawn by the recipe renderer.
+  return (component ?? (getRecipe(type) ? RecipeSection : undefined)) as SectionRenderComponent | undefined;
 }
 
 export function RegistrySectionRenderer({

@@ -44,6 +44,7 @@ export interface ThemeManifestInput {
   description?: string;
   previewAsset?: string;
   assets?: { preview?: { path?: string } } & Record<string, unknown>;
+  sections?: unknown[];
   settingsDefaults?: { colors?: Record<string, string>; typography?: Record<string, string> } & Record<string, unknown>;
   [key: string]: unknown;
 }

@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { recipesOf, registerRecipes } from "./recipes";
 import { validateSectionAgainstRegistry } from "@jelly/storefront-registry";
 import type { PageType, SectionNode } from "@jelly/storefront-schema";
 import { validateThemeManifest } from "./theme-resolver";
@@ -18,6 +19,10 @@ const starter = read("starter.json") as {
   globalSections: Record<string, SectionNode>;
   templates: Record<string, { type: PageType; sections: Array<{ kind: "inline"; section: SectionNode } | { kind: "global"; globalSectionId: string }> }>;
 };
+
+// The example theme adds a section of its own; it is known to the registry while the starter is checked.
+beforeAll(() => { registerRecipes(manifest.id, recipesOf(manifest)); });
+afterAll(() => { registerRecipes(manifest.id, []); });
 
 const at = (settings: Record<string, unknown>, path: string) => path.split(".").reduce<unknown>((value, key) => value && typeof value === "object" ? (value as Record<string, unknown>)[key] : undefined, settings);
 

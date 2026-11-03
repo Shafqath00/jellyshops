@@ -39,5 +39,86 @@
     { "id": "productCard.imageRatio", "type": "select", "label": "Product image shape", "group": "Product cards", "default": "portrait", "options": [{ "value": "portrait", "label": "Portrait" }, { "value": "square", "label": "Square" }, { "value": "landscape", "label": "Landscape" }] },
     { "id": "productCard.alignment", "type": "alignment", "label": "Product text alignment", "group": "Product cards", "default": "left", "options": [{ "value": "left", "label": "Left" }, { "value": "center", "label": "Centre" }] },
     { "id": "branding.logoUrl", "type": "image", "label": "Store logo", "group": "Branding", "default": "" }
+  ],
+  "sections": [
+    {
+      "type": "jelly-studio/promo-banner",
+      "name": "Promo banner",
+      "supportedPages": [
+        "home",
+        "page"
+      ],
+      "settings": [
+        {
+          "id": "heading",
+          "type": "text",
+          "label": "Heading",
+          "default": "Free delivery this month"
+        },
+        {
+          "id": "body",
+          "type": "textarea",
+          "label": "Text",
+          "default": "Order before Friday and we cover the postage."
+        },
+        {
+          "id": "showButton",
+          "type": "checkbox",
+          "label": "Show the button",
+          "default": true
+        },
+        {
+          "id": "buttonLabel",
+          "type": "text",
+          "label": "Button text",
+          "default": "Shop now"
+        },
+        {
+          "id": "buttonLink",
+          "type": "link",
+          "label": "Button link",
+          "default": "/search"
+        },
+        {
+          "id": "photo",
+          "type": "image",
+          "label": "Photo"
+        }
+      ],
+      "layout": {
+        "direction": "horizontal",
+        "align": "left",
+        "gap": 32,
+        "width": "wide"
+      },
+      "elements": [
+        {
+          "kind": "image",
+          "image": "{photo}",
+          "ratio": "landscape"
+        },
+        {
+          "kind": "group",
+          "direction": "vertical",
+          "gap": 12,
+          "elements": [
+            {
+              "kind": "heading",
+              "text": "{heading}"
+            },
+            {
+              "kind": "text",
+              "text": "{body}"
+            },
+            {
+              "kind": "button",
+              "label": "{buttonLabel}",
+              "href": "{buttonLink}",
+              "when": "showButton"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }

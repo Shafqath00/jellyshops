@@ -1,6 +1,7 @@
 import { customCssProblem, isRichTextDocument, MAX_BLOCK_DEPTH, translationsProblem, type BlockNode, type PageType, type SectionNode } from "@jelly/storefront-schema";
 import { z } from "zod";
 import { defineSection } from "./define.js";
+import { setSectionLabel } from "./labels.js";
 import { blockDefinitions } from "./blocks.js";
 import { commerceSections } from "./sections/commerce.js";
 import { contentSections } from "./sections/content.js";
@@ -31,13 +32,32 @@ const NAMESPACED_TYPE = /^[a-z0-9][a-z0-9-]*\/[a-z0-9][a-z0-9-]*$/;
  * namespaced `vendor/name` so it can never shadow a built-in section, and can be registered once.
  * It gets the same shared style controls as every other section and is validated the same way.
  */
-export function registerSection(definition: SectionDefinition): void {
+export function registerSection(definition: SectionDefinition, options: { replace?: boolean } = {}): () => void {
   defineSection(definition);
   if (!NAMESPACED_TYPE.test(definition.type)) throw new Error(`Section type "${definition.type}" must be written vendor/name, for example "acme/size-guide".`);
-  if (sectionDefinitions.has(definition.type)) throw new Error(`Section type "${definition.type}" is already registered.`);
+  const previous = sectionDefinitions.get(definition.type);
+  if (previous && !options.replace) throw new Error(`Section type "${definition.type}" is already registered.`);
   const prepared = prepareSection(definition);
-  sections.push(prepared);
+  const index = previous ? sections.indexOf(previous) : -1;
+  if (index === -1) sections.push(prepared); else sections[index] = prepared;
   sectionDefinitions.set(prepared.type, prepared);
+  setSectionLabel(prepared.type, definition.label);
+  // Puts things back as they were (used to try a theme's sections out while validating it).
+  return () => {
+    const current = sections.indexOf(prepared);
+    if (previous) { if (current !== -1) sections[current] = previous; sectionDefinitions.set(previous.type, previous); setSectionLabel(previous.type, previous.label); }
+    else { if (current !== -1) sections.splice(current, 1); sectionDefinitions.delete(prepared.type); setSectionLabel(prepared.type, undefined); }
+  };
+}
+
+/** Removes a section added with registerSection (built-in sections stay). */
+export function unregisterSection(type: string): void {
+  const definition = sectionDefinitions.get(type);
+  if (!definition || !NAMESPACED_TYPE.test(type)) return;
+  const index = sections.indexOf(definition);
+  if (index !== -1) sections.splice(index, 1);
+  sectionDefinitions.delete(type);
+  setSectionLabel(type, undefined);
 }
 
 export function getSectionDefinition(type: string): SectionDefinition | undefined { return sectionDefinitions.get(type); }

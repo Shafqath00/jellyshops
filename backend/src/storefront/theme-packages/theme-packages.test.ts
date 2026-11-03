@@ -26,7 +26,7 @@ function themePackage(overrides: { id?: string; version?: string; css?: string; 
   const renamed = JSON.parse(text);
   renamed.version = overrides.version ?? renamed.version;
   overrides.mutate?.(renamed);
-  return { format: 1, manifest: renamed, starter: JSON.parse(read("starter.json")), css: overrides.css ?? "& h1 { color: red; }", assets: overrides.assets ?? [asset("preview.svg", "image/svg+xml"), asset("mark.svg", "image/svg+xml")] };
+  return { format: 1, manifest: renamed, starter: JSON.parse(read("starter.json").replaceAll("jelly-studio", id)), css: overrides.css ?? "& h1 { color: red; }", assets: overrides.assets ?? [asset("preview.svg", "image/svg+xml"), asset("mark.svg", "image/svg+xml")] };
 }
 
 class MemoryStorage implements MediaStorage {

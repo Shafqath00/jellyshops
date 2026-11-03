@@ -11,11 +11,14 @@ const example = [resolve(process.cwd(), "../docs/examples/jelly-studio"), resolv
 const read = (name: string) => JSON.parse(readFileSync(join(example, name), "utf8"));
 
 describe("theme-owned starter packs", () => {
-  it("turns a theme folder into a pack the platform validates", () => {
+  it("turns a theme folder into a pack the platform validates", async () => {
+    const { recipesOf, registerRecipes } = await import("./recipes");
+    const undo = registerRecipes("jelly-studio", recipesOf(read("theme.json")));
     const pack = createStarterPack({ manifest: read("theme.json"), starter: read("starter.json") })!;
     expect(pack.id).toBe("jelly-studio");
     expect(pack.templates.map((template) => template.key).sort()).toEqual(["article", "blog", "cart", "collection", "home", "not-found", "page", "product", "search"]);
     expect(validateV4StarterPack(pack, [pack.id])).toEqual([]);
+    undo();
   });
   it("returns nothing for a theme without starter content", () => {
     expect(createStarterPack({ manifest: read("theme.json") })).toBeNull();
