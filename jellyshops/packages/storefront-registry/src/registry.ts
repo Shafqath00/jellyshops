@@ -1,5 +1,6 @@
 import { customCssProblem, isRichTextDocument, MAX_BLOCK_DEPTH, translationsProblem, type BlockNode, type PageType, type SectionNode } from "@jelly/storefront-schema";
 import { z } from "zod";
+import { defineSection } from "./define.js";
 import { blockDefinitions } from "./blocks.js";
 import { commerceSections } from "./sections/commerce.js";
 import { contentSections } from "./sections/content.js";
@@ -31,6 +32,7 @@ const NAMESPACED_TYPE = /^[a-z0-9][a-z0-9-]*\/[a-z0-9][a-z0-9-]*$/;
  * It gets the same shared style controls as every other section and is validated the same way.
  */
 export function registerSection(definition: SectionDefinition): void {
+  defineSection(definition);
   if (!NAMESPACED_TYPE.test(definition.type)) throw new Error(`Section type "${definition.type}" must be written vendor/name, for example "acme/size-guide".`);
   if (sectionDefinitions.has(definition.type)) throw new Error(`Section type "${definition.type}" is already registered.`);
   const prepared = prepareSection(definition);

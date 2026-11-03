@@ -169,6 +169,8 @@ Each phase ends in something usable. Sizes: S ≤ 1 week, M 2 to 3 weeks, L 4 to
 
 ### Phase 1: Theme SDK and conformance tests (M)
 
+> **Progress (2026-11-03): done in the monorepo.** `@jelly/theme-sdk` (`packages/theme-sdk`) re-exports `defineTheme`, `defineSection`, `defineBlock`, `registerSection`, `createStarterPack`, the validators; `@jelly/theme-sdk/testing` has `describeThemeConformance(themeId)` (manifest + settings, starter pack, rendering every template in preview and published mode and every section empty, colour setting reaches the tokens, no script links, axe on every template). Jelly Minimal and Avenue pass it in the normal test run (60 tests), so CI covers it. Every built-in theme is declared through `defineTheme` (in `storefront-themes`, re-exported by the SDK to avoid a circular package). Not done: the example theme folder is not run through the suite (it is not registered); publishing the SDK outside the monorepo is Phase 2.
+
 `@jelly/theme-sdk` package with types, `defineTheme/Section/Block`, validators and test helpers; a conformance suite every theme must pass (renders empty and full, settings reach output, unsafe URL rejection, axe clean). Migrate Jelly Minimal and Avenue to the SDK as proof. **Acceptance:** both built-in themes are defined only through the SDK and pass the suite in CI.
 
 ### Phase 2: CLI and local preview (L)

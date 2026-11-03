@@ -1,3 +1,4 @@
+export { defineBlock, defineSection } from "./define.js";
 export { allowedChildBlockTypes, translatableKeys, getBlockDefinition, listBlockDefinitions, getSectionDefinition, listSectionDefinitions, listSectionDefinitionsForPage, registerSection, mobileSettingKeys, validateSectionAgainstRegistry } from "./registry.js";
 export { createPresetSection, createSectionFromDefinition, listSectionPresets } from "./presets.js";
 export { createThemePackDocument, getThemePack, listThemePacks } from "./theme-packs.js";

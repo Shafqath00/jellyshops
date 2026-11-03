@@ -1,4 +1,3 @@
-import { listSectionDefinitions } from "@jelly/storefront-registry";
 import type { GlobalSettings, ThemeId } from "@jelly/storefront-schema";
 import { boldTokens } from "./bold/tokens.js";
 import { artisanBoutiqueTokens } from "./artisan-boutique/tokens.js";
@@ -15,17 +14,13 @@ import { boutiqueShellComponents } from "./themes/example-boutique/shell.js";
 import type { ComponentType } from "react";
 import { signatureManifest, signatureTokens } from "./jelly-signature/definition.js";
 import { avenueManifest, avenueTokens } from "./jelly-avenue/definition.js";
+import { defineTheme } from "./define-theme.js";
 import { fontStack } from "./fonts.js";
 import { discoveredThemes } from "./themes/index.generated.js";
 
+/** Positional shorthand for the built-in themes; every theme goes through `defineTheme`. */
 function definition(id: ThemeId, label: string, tokens: ThemeTokens, manifest?: unknown, sectionOverrides: Record<string, ComponentType<ThemeSectionProps>> = {}, components?: ThemeShellComponents): ThemeDefinition {
-  const presetManifest = {
-    id, name: label, version: "1.0.0", description: label, assetPrefix: `/themes/${id}/`, layout: "standard", enabled: true,
-    settingsDefaults: { ...defaultManifest.settingsDefaults, colors: tokens.colors, typography: { ...defaultManifest.settingsDefaults.typography, headingFont: tokens.typography.display, bodyFont: tokens.typography.body } },
-    settingsSchema: defaultManifest.settingsSchema,
-    assets: { stylesheets: [], scripts: [], fonts: [], icons: [], assets: [] },
-  };
-  return { id, label, tokens, manifest: manifest ?? presetManifest, sectionOverrides, components, sectionVariants: Object.fromEntries(listSectionDefinitions().map((section) => [section.type, `${id}-${section.type}`])) };
+  return defineTheme({ id, label, tokens, manifest, sectionOverrides, components });
 }
 const themes = [
   definition("jelly-signature", "Jelly Minimal", signatureTokens, signatureManifest),

@@ -126,7 +126,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     { id: "languages.extra", type: "text", label: "Other languages", group: "Languages", default: "", description: "Language codes separated by commas, for example hi, ta, fr. Shoppers pick one in the footer; you add the text in the editor's Language menu. Text you haven't translated shows in the main language." },
   ];
   const advancedSchema = [
-    { id: "advanced.customCss", type: "textarea", label: "Custom CSS", group: "Custom CSS", default: "", description: `Applies to the whole store. Up to ${MAX_THEME_CSS_LENGTH} characters; @import, fonts and non-https links aren't allowed.` },
+    { id: "advanced.customCss", type: "textarea", label: "Custom CSS", group: "Custom CSS", default: "", description: `Applies to the whole store. Up to ${MAX_THEME_CSS_LENGTH} characters; imports, fonts and non-https links aren't allowed.` },
   ];
   return {
     defaults: {

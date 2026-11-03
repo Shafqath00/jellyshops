@@ -14,3 +14,5 @@ export type { StoreLanguage } from "./theme-style-settings.js";
 export type { ColorSchemeId, TextStyleLevel } from "./theme-style-settings.js";
 export { createStarterPack, DISCOVERED_STARTER_PACK_IDS, getStarterPack, isStarterPackId, listStarterPacks, validateStarterPack } from "./starter-packs.js";
 export type { DiscoveredTheme } from "./types.js";
+export { defineTheme } from "./define-theme.js";
+export type { ThemeInput } from "./define-theme.js";
