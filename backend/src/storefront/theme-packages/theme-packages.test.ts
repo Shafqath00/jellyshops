@@ -259,3 +259,43 @@ describe("installing an uploaded theme on a store", () => {
     expect(getThemeDefinition("loaded-theme").id).toBe("loaded-theme");
   });
 });
+
+describe("theme packages in the assembled app", () => {
+  it("are mounted: upload, read publicly, install, and the installed theme publishes", async () => {
+    // The routes depend on the app wiring (database, media storage), which the service tests above bypass.
+    const { createApp } = await import("../../app.js");
+    const { mkdtemp } = await import("node:fs/promises");
+    const { tmpdir } = await import("node:os");
+    const path = await import("node:path");
+    const directory = await mkdtemp(path.join(tmpdir(), "jelly-theme-app-"));
+    const database = await createPGliteDatabase();
+    await seedStore(database, "store-a", "store-a");
+    const commerceDatabase = { transaction: (work: (sql: SqlExecutor) => Promise<unknown>) => database.transaction((tx) => work({ query: (sql: string, values?: unknown[]) => tx.query(sql, values as never) } as never)) };
+    const app = createApp({
+      config: { port: 3001, nodeEnv: "test", corsOrigins: [], trustProxy: false, authProvider: "development", mediaProvider: "local-files", dataDirectory: directory, uploadDirectory: path.join(directory, "uploads"), maxUploadBytes: 1024 * 1024, demoStoreId: "store-a" },
+      storefrontSql: database as never,
+      commerceDatabase: commerceDatabase as never,
+      storefrontStarterApi: new StorefrontStarterInstallationService(commerceDatabase as never),
+    } as never);
+    const auth = { Authorization: "Bearer jelly-demo-merchant" };
+
+    const uploaded = await request(app).post("/api/stores/store-a/theme-packages").set(auth).send(themePackage({ id: "app-theme" }));
+    expect(uploaded.status).toBe(201);
+    const versionId = uploaded.body.version.id as string;
+    expect((await request(app).post("/api/stores/store-a/theme-packages").set(auth).send(themePackage({ id: "app-theme" }))).status).toBe(200);
+    expect((await request(app).post("/api/stores/store-a/theme-packages").send(themePackage())).status).toBe(401);
+
+    const pub = await request(app).get(`/api/public/theme-versions/${versionId}`);
+    expect(pub.status).toBe(200);
+    expect(pub.body.version.themeId).toBe("app-theme");
+    expect((await request(app).get(`/api/public/theme-versions/${versionId}/assets/mark.svg`)).status).toBe(200);
+
+    expect((await request(app).get("/api/stores/store-a/theme-packages").set(auth)).body.packages[0].versions).toHaveLength(1);
+    const installed = await request(app).post(`/api/stores/store-a/theme-packages/versions/${versionId}/install`).set(auth).send({});
+    expect(installed.status).toBe(201);
+    expect(installed.body).toMatchObject({ themeId: "app-theme", version: "1.0.0" });
+    const config = (await database.query(`SELECT "themeId", "draftArtifactId" FROM "ThemeConfiguration" WHERE "storeId" = 'store-a'`)).rows[0];
+    expect(config).toMatchObject({ themeId: "app-theme", draftArtifactId: versionId });
+    await database.close();
+  });
+});

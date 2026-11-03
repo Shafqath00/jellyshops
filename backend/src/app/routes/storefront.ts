@@ -49,7 +49,7 @@ const packageServices = new WeakMap<AppContext, ThemePackageService | null>();
 function packageService(context: AppContext): ThemePackageService | undefined {
   if (!packageServices.has(context)) {
     const database = context.routeDependencies.commerceDatabase;
-    const storage = context.routeDependencies.mediaStorage;
+    const storage = context.mediaStorage;
     packageServices.set(context, database && storage ? new ThemePackageService({ query: (text: string, values?: unknown[]) => database.transaction((transaction) => transaction.query(text, values)) } as never, storage, context.storefrontStarterApi) : null);
   }
   return packageServices.get(context) ?? undefined;

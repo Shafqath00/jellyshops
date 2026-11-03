@@ -79,6 +79,8 @@ export interface AppContext {
   publicStorefrontApi: PublicStorefrontApi;
   storefrontStarterApi: StorefrontStarterApi | undefined;
   mediaService: MediaService;
+  /** Where uploaded files (media, theme package assets) are kept. */
+  mediaStorage: MediaStorage;
   publicStorefrontContextService: PublicStorefrontContextService | undefined;
   adminServices: { summary: AdminSummaryService; customers: CustomerService } | undefined;
   commerceRepository: CommerceRepository | undefined;

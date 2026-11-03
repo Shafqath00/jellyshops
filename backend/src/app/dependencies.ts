@@ -353,5 +353,5 @@ export function resolveAppDependencies(dependencies: Partial<AppDependencies> = 
     contentService,
   };
 
-  return { config, authProvider, routeDependencies: commerceDeps, catalogService, storefrontService, publicStorefrontApi, storefrontStarterApi, mediaService, publicStorefrontContextService, adminServices, commerceRepository, customerService, verifyCustomer };
+  return { config, authProvider, routeDependencies: commerceDeps, catalogService, storefrontService, publicStorefrontApi, storefrontStarterApi, mediaService, mediaStorage, publicStorefrontContextService, adminServices, commerceRepository, customerService, verifyCustomer };
 }
