@@ -1,6 +1,6 @@
 import { getV4StarterPack, isV4StarterPackId, listV4StarterPacks, validateV4StarterPack, type V4StarterPack } from "@jelly/storefront-registry";
 import { discoveredThemes } from "./themes/index.generated.js";
-import { isManuallyRegistered, registerFolderTheme } from "./theme-registry.js";
+import { isManuallyRegistered, registerFolderTheme, setFolderThemeComplete } from "./theme-registry.js";
 import type { SectionNode } from "@jelly/storefront-schema";
 import type { DiscoveredTheme } from "./types.js";
 
@@ -49,10 +49,15 @@ export function createStarterPack({ manifest, starter }: DiscoveredTheme): V4Sta
   };
 }
 
+/** A pack with its own header and footer draws the whole store chrome itself. */
+const hasOwnChrome = (pack: V4StarterPack | null): boolean => Boolean(pack && pack.globalSections.some((entry) => entry.key === "header") && pack.globalSections.some((entry) => entry.key === "footer"));
+
 const discoveredPacks: V4StarterPack[] = discoveredThemes
   .filter((entry) => !isManuallyRegistered(entry.manifest.id))
   .map(createStarterPack)
   .filter((pack): pack is V4StarterPack => pack !== null);
+
+for (const pack of discoveredPacks) setFolderThemeComplete(pack.id, hasOwnChrome(pack));
 
 /** Ids of starter packs that come from theme folders (not the built-in ones). */
 export const DISCOVERED_STARTER_PACK_IDS: string[] = discoveredPacks.map((pack) => pack.id);
@@ -82,6 +87,7 @@ export function validateStarterPack(value: unknown) {
 export function registerThemeProject(entry: DiscoveredTheme): V4StarterPack | null {
   registerFolderTheme(entry.manifest);
   const pack = createStarterPack(entry);
+  setFolderThemeComplete(entry.manifest.id, hasOwnChrome(pack));
   const index = discoveredPacks.findIndex((candidate) => candidate.id === entry.manifest.id);
   if (!pack) {
     if (index !== -1) { discoveredPacks.splice(index, 1); DISCOVERED_STARTER_PACK_IDS.splice(DISCOVERED_STARTER_PACK_IDS.indexOf(entry.manifest.id), 1); }

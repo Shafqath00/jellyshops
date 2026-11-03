@@ -1,3 +1,5 @@
+// The live store loads these same files in this order, so spacing and sizes match.
+import "@app-styles/globals.css";
 import "@theme-styles/storefront-base.css";
 import "./frame.css";
 import { StrictMode, useEffect, useMemo, useState } from "react";

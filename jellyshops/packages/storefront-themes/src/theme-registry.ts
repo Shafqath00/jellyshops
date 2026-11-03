@@ -82,8 +82,16 @@ export function listThemes(): ThemeDefinition[] { return [...themes]; }
  * this instead of checking for one theme id.
  */
 export const COMPLETE_STOREFRONT_THEME_IDS = ["jelly-signature", "jelly-avenue"] as const;
+/**
+ * Uploaded and discovered themes whose starter brings its own header and footer. Like the built-in
+ * complete themes they draw the store chrome themselves, so the shared frame must not add another.
+ */
+const completeFolderThemes = new Set<string>();
+export function setFolderThemeComplete(id: string, complete: boolean): void {
+  if (complete) completeFolderThemes.add(id); else completeFolderThemes.delete(id);
+}
 export function isCompleteStorefrontTheme(id: string | null | undefined): boolean {
-  return typeof id === "string" && (COMPLETE_STOREFRONT_THEME_IDS as readonly string[]).includes(id);
+  return typeof id === "string" && ((COMPLETE_STOREFRONT_THEME_IDS as readonly string[]).includes(id) || completeFolderThemes.has(id));
 }
 export function getThemeDefinition(id: ThemeId | string): ThemeDefinition {
   const theme = themes.find((candidate) => candidate.id === id);

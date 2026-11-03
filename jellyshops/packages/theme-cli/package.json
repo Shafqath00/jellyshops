@@ -7,7 +7,12 @@
   "bin": {
     "jelly-theme": "./bin/jelly-theme.mjs"
   },
-  "files": ["bin", "src", "preview", "template"],
+  "files": [
+    "bin",
+    "src",
+    "preview",
+    "template"
+  ],
   "scripts": {
     "build": "node -e \"0\""
   },
@@ -16,6 +21,7 @@
     "@jelly/storefront-renderer": "0.1.0",
     "@jelly/storefront-schema": "0.1.0",
     "@jelly/storefront-themes": "0.1.0",
-    "@jelly/theme-sdk": "0.1.0"
+    "@jelly/theme-sdk": "0.1.0",
+    "@tailwindcss/postcss": "4.3.3"
   }
 }

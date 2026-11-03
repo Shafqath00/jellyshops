@@ -76,3 +76,22 @@ describe("registerThemeProject", () => {
     expect(() => registerThemeProject({ manifest: { ...manifest, id: "jelly-avenue" } })).toThrow(/built-in/);
   });
 });
+
+describe("themes that draw their own chrome", () => {
+  it("count as complete storefront themes once registered with a header and footer, so the shared frame adds no second one", async () => {
+    const { registerThemeProject } = await import("./starter-packs");
+    const { isCompleteStorefrontTheme } = await import("./theme-registry");
+    const { recipesOf, registerRecipes } = await import("./recipes");
+    const manifest = read("theme.json");
+    expect(isCompleteStorefrontTheme("jelly-studio")).toBe(false);
+    registerThemeProject({ manifest, starter: read("starter.json") });
+    expect(isCompleteStorefrontTheme("jelly-studio")).toBe(true);
+    const bare = read("starter.json");
+    delete bare.globalSections.header;
+    registerThemeProject({ manifest, starter: bare });
+    expect(isCompleteStorefrontTheme("jelly-studio")).toBe(false);
+    registerThemeProject({ manifest });
+    registerRecipes("jelly-studio", recipesOf({}));
+    expect(isCompleteStorefrontTheme("jelly-avenue")).toBe(true);
+  });
+});

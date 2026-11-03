@@ -114,7 +114,8 @@ export function mountPublicStorefrontContextRoutes(app: Express, context: AppCon
 export function mountStorefrontRoutes(app: Express, context: AppContext): void {
   // Uploaded themes live in the database; make the ones this store uses known before any storefront route resolves a theme.
   const themePackages = packageService(context);
-  if (themePackages) app.use("/api/stores/:storeId", (request, _response, next) => { themePackages.registerStoreThemes(String(request.params.storeId)).then(() => next(), next); });
+  // Best effort: a store without uploaded themes must never fail because this lookup did.
+  if (themePackages) app.use("/api/stores/:storeId", (request, _response, next) => { themePackages.registerStoreThemes(String(request.params.storeId)).then(() => next(), () => next()); });
   const { routeDependencies: deps, authProvider, storefrontService, publicStorefrontApi, storefrontStarterApi } = context;
 
   // Public + legacy explicit routes first.

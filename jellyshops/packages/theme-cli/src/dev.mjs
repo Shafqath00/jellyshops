@@ -88,7 +88,9 @@ export async function dev(folder, flags = {}) {
     logLevel: "warn",
     plugins: [projectPlugin],
     server: { port, strictPort: false, open: !flags["no-open"], fs: { allow: [repositoryRoot, root, resolve(root, "../../node_modules")] } },
-    resolve: { alias: { "@theme-styles": join(repositoryRoot, "src", "app", "themes") } },
+    // The live store loads the app stylesheet (Tailwind base plus the shared storefront rules); the preview loads the same files, compiled the same way.
+    css: { postcss: repositoryRoot },
+    resolve: { alias: { "@theme-styles": join(repositoryRoot, "src", "app", "themes"), "@app-styles": join(repositoryRoot, "src", "app") } },
     define: { __JELLY_THEME_DIR__: JSON.stringify(project.directory.replaceAll("\\", "/")) },
   });
   await server.listen();
