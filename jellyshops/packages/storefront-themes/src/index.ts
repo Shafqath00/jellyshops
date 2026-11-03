@@ -20,3 +20,6 @@ export { starterFileSchema } from "./starter-file-schema.js";
 export type { StarterFile } from "./starter-file-schema.js";
 export { expandRecipe, getRecipe, recipeSchema, recipesOf, registerRecipes } from "./recipes.js";
 export type { SectionRecipe } from "./recipes.js";
+export { JELLY_THEME_API_VERSION, compareThemeVersions, supportsJellyVersion, themeVersionSchema, jellyEngineRangeSchema } from "./versioning.js";
+export { applyThemeMigrations, getThemeMigrationPath, themeMigrationSchema } from "./migrations.js";
+export type { ThemeMigration, ThemeMigrationDraft, ThemeMigrationChange } from "./migrations.js";

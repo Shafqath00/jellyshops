@@ -2,6 +2,7 @@ import { storefrontPageTypes, type PageType, type SectionNode } from "@jelly/sto
 import { recipesOf, registerRecipes } from "./recipes.js";
 import { validateSectionAgainstRegistry } from "@jelly/storefront-registry";
 import { themeManifestSchema } from "./theme-resolver.js";
+import { JELLY_THEME_API_VERSION, supportsJellyVersion } from "./versioning.js";
 
 /**
  * Checks a theme project (its manifest and optional starter) with the same rules the platform
@@ -129,6 +130,7 @@ export function validateThemeProject(input: ThemeProjectInput): ThemeProjectIssu
       issues.push({ level: "error", code: "MANIFEST_INVALID", path, message: problem.code === "unrecognized_keys" ? `Unknown field${problem.keys.length > 1 ? "s" : ""} ${problem.keys.map((key) => `"${key}"`).join(", ")}. The manifest only allows the documented fields.` : `${path}: ${problem.message}` });
     }
   } else {
+    if (!supportsJellyVersion(parsed.data.engines?.jelly)) issues.push({ level: "error", code: "ENGINE_INCOMPATIBLE", path: "engines.jelly", message: `This theme needs Jelly ${parsed.data.engines?.jelly}; this platform supports theme API ${JELLY_THEME_API_VERSION}.` });
     checkSettings(record(input.manifest), issues);
     const assets = parsed.data.assets;
     const named = [parsed.data.previewAsset, assets.preview?.path, ...[...assets.stylesheets, ...assets.scripts, ...assets.icons, ...assets.assets].map((asset) => asset.path), ...assets.fonts.map((font) => font.path)].filter((path): path is string => Boolean(path));

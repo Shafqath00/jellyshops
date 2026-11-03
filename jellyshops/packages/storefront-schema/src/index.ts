@@ -97,3 +97,4 @@ export { LANGUAGE_CODE, MAX_TRANSLATION_LENGTH, readTranslations, translateSecti
 export type { Translations } from "./translations.js";
 export { appEmbedSource, getAppBlockProvider, listAppBlockProviders, registerAppBlockProvider } from "./app-blocks.js";
 export type { AppBlockProvider } from "./app-blocks.js";
+export { JELLY_THEME_API_VERSION, compareThemeVersions, supportsJellyVersion, themeVersionSchema, jellyEngineRangeSchema } from "./theme-version.js";

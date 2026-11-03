@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
+import { themeVersionSchema } from "@jelly/storefront-schema";
 import { requireMerchant, requireStorePermission } from "../../auth/middleware.js";
 import type { AuthProvider } from "../../auth/types.js";
 import type { ThemeLibraryService } from "./service.js";
@@ -7,7 +8,7 @@ import type { ThemeLibraryService } from "./service.js";
 const saveSchema = z.object({
   name: z.string(),
   themeId: z.string().min(1).max(100),
-  themeVersion: z.string().regex(/^\d+\.\d+\.\d+(?:[-+][\w.-]+)?$/).optional(),
+  themeVersion: themeVersionSchema.optional(),
   settings: z.record(z.string(), z.unknown()),
 }).strict();
 const renameSchema = z.object({ name: z.string() }).strict();

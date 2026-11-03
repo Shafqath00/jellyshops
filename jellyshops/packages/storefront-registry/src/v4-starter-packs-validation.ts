@@ -1,4 +1,4 @@
-import type { PageType, SectionNode } from "@jelly/storefront-schema";
+import { themeVersionSchema, type PageType, type SectionNode } from "@jelly/storefront-schema";
 import { getBlockDefinition, getSectionDefinition, validateSectionAgainstRegistry } from "./registry.js";
 import { V4_STARTER_PACK_IDS, type V4StarterPack } from "./v4-starter-packs.js";
 
@@ -6,7 +6,6 @@ const pageTypes: PageType[] = ["home", "product", "collection", "cart", "search"
 const globalKeys = ["announcement", "header", "footer"] as const;
 const resourceTypes = ["product", "collection", "page", "blog", "article"] as const;
 const supportedThemes = new Set<string>(V4_STARTER_PACK_IDS);
-const themeVersionPattern = /^\d+\.\d+\.\d+(?:[-+][\w.-]+)?$/;
 
 export interface V4StarterPackIssue {
   code: string;
@@ -95,7 +94,7 @@ export function validateV4StarterPack(value: unknown, supportedPackIds: readonly
   if (!isRecord(value)) return [{ code: "INVALID_STARTER", path: "$", message: "Starter pack must be an object" }];
   const pack = value as unknown as V4StarterPack;
 
-  if ((!supportedThemes.has(pack.id) && !supportedPackIds.includes(pack.id)) || pack.theme?.themeId !== pack.id || !themeVersionPattern.test(pack.version ?? "")) {
+  if ((!supportedThemes.has(pack.id) && !supportedPackIds.includes(pack.id)) || pack.theme?.themeId !== pack.id || !themeVersionSchema.safeParse(pack.version).success) {
     issues.push({ code: "INVALID_THEME", path: "theme", message: "Starter theme identity and semantic version must be supported" });
   }
   if (!isRecord(pack.theme?.settings)) issues.push({ code: "INVALID_THEME", path: "theme.settings", message: "Theme settings must be an object" });

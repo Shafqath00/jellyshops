@@ -48,6 +48,16 @@ function setup() {
 }
 
 describe("normalized storefront workspace routes", () => {
+  it("accepts prerelease plus build metadata and refuses invalid theme versions", async () => {
+    const { app, api } = setup();
+    const input = { expectedRevision: null, themeId: "studio", themeVersion: "2.0.0-rc.1+build.7", settings: {} };
+    expect((await request(app).put("/api/stores/store-a/storefront/theme-settings").set("Authorization", "Bearer token").send(input)).status).toBe(200);
+    expect(api.saveThemeConfiguration).toHaveBeenCalledWith("store-a", null, { themeId: "studio", themeVersion: input.themeVersion, settings: {} });
+    for (const themeVersion of ["01.0.0", "1.0.0-01", "9007199254740992.0.0"]) {
+      expect((await request(app).put("/api/stores/store-a/storefront/theme-settings").set("Authorization", "Bearer token").send({ ...input, themeVersion })).status).toBe(400);
+    }
+    expect(api.saveThemeConfiguration).toHaveBeenCalledTimes(1);
+  });
   it("passes the optional template type filter to the API", async () => {
     const { app, api } = setup();
 

@@ -185,6 +185,8 @@ Package format, `package` and `upload`, the three new tables, storage, validatio
 
 ### Phase 4: Versioning and migrations (M)
 
+> **Progress (2026-11-03): compatibility and migration foundations implemented locally.** Shared SemVer ordering and `engines.jelly` (theme API 1.0.0), optional inline manifest migrations, a cloned-draft migration dry run with path-based diffs, nested blocks and responsive overrides. Upload rejects removed/changed setting types and removed recipes without a major bump, requires a complete migration path for a major bump, and serializes validation/insertion per theme. Install rechecks engine compatibility. The SDK exports the helpers; generated JSON Schema and CLI validation use the same contract. A forward SQL migration aligns version constraints, with a legacy-data preflight; **not applied to staging**. **Remaining:** side-by-side registry versions, transactional draft upgrades, persisted rollback snapshots and the Store designs upgrade/diff UI. The existing starter install does not apply migrations.
+
 Semver rules, `engines`, declarative migrations with diff and rollback, upgrade flow in Store designs, yanked versions. **Acceptance:** upgrading a test store across a version that renames a setting preserves the merchant's value; rollback restores the draft; published snapshots are untouched.
 
 ### Phase 5: Locales and developer docs (M)

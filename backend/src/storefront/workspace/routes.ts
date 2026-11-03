@@ -1,5 +1,6 @@
 import { Router, type Request } from "express";
 import { z } from "zod";
+import { themeVersionSchema } from "@jelly/storefront-schema";
 import { requireMerchant, requireStorePermission } from "../../auth/middleware.js";
 import type { AuthProvider } from "../../auth/types.js";
 import { ApiError } from "../../http/errors.js";
@@ -99,7 +100,7 @@ const menuUpdateSchema = z.object({
 const themeSaveSchema = z.object({
   expectedRevision: nullableExpectedRevisionSchema,
   themeId: z.string().min(1),
-  themeVersion: z.string().regex(/^\d+\.\d+\.\d+(?:[-+][\w.-]+)?$/).optional(),
+  themeVersion: themeVersionSchema.optional(),
   settings: jsonObjectSchema,
   draftArtifactId: z.string().min(1).nullable().optional(),
 }).strict();

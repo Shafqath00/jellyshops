@@ -481,6 +481,33 @@ Use `/theme-preview/<theme>` (three widths, every template) during development; 
 - **Never** rename or remove a setting key, section type or block type that stores have saved, and never tighten a settings schema so existing values become invalid; Publish would start failing for those stores.
 - **Breaking changes today are manual:** ship a new theme id (for example `jelly-studio-2`) and let merchants switch (Saved looks keep their settings). There is **no automatic migration** of saved merchant data between theme versions, and no version side-by-side loading. Both are in the plan.
 
+#### Phase 4 foundations: compatibility and migration dry runs
+
+New projects declare `"engines": { "jelly": ">=1 <2" }` in `theme.json`. The declarative theme API is **1.0.0**, independent of internal npm package versions. Existing manifests may omit `engines`. Ranges are space-separated comparisons (`>=`, `>`, `<=`, `<`, `=`); one to three numeric components are accepted, with missing components padded with zero for comparisons. An exact `1` or `1.0` matches that version prefix. `^`, `~`, wildcards, prerelease ranges and `||` are unsupported and produce an error. Both local validation and upload reject incompatible ranges; install checks again against the current platform.
+
+Theme versions use strict SemVer, including `2.0.0-rc.1+build.7`. Numeric components must be safe integers and the version can be at most 128 characters. Prereleases sort before releases; build metadata does not make a newer release. Uploads cannot overwrite a version or move backwards. Removing a declared setting, changing its type, removing a recipe or dropping a recipe's supported page requires a major version. Each major upload must include a complete migration path from the latest upload (including a yanked latest version). Schema bounds and choice changes still need the developer's compatibility review.
+
+Migration declarations are inline in `theme.json`, preserving package format 1 and immutable manifest storage:
+
+```json
+"migrations": [{
+  "from": "1.0.0",
+  "to": "2.0.0",
+  "operations": [
+    { "op": "renameSetting", "target": { "scope": "theme" }, "from": "branding.oldName", "to": "branding.name" },
+    { "op": "renameSetting", "target": { "scope": "section", "type": "jelly-studio/promo-banner" }, "from": "title", "to": "heading" }
+  ]
+}]
+```
+
+Operations are `renameSetting`, `setDefault` (`key`, `value`), `removeSetting` (`key`), `renameSectionType` (`from`, `to`) and `renameBlockType` (`from`, `to`). Setting targets are `theme`, `section` or `block`; the latter two require `type`. Operations run in order, so rename a type before targeting its new name. Section and block setting renames/removals also apply to existing mobile/tablet overrides. Defaults are added only to base settings, preserving breakpoint inheritance and existing false, zero, empty-string and null values. Missing rename/remove sources are skipped. Existing rename destinations or non-object parents cause a conflict, and prototype paths are forbidden.
+
+`applyThemeMigrations(draft, from, to, migrations)` from `@jelly/theme-sdk` accepts `{settings, sections}` and returns `{draft, changes}` with added, removed and changed paths. Pass all global and inline sections, retaining their ids. It clones input and migration values, walks nested blocks, and requires an unambiguous chain of exact version edges. Keep the input for a future rollback snapshot. This is a **dry run**, with no database writes; a future upgrade service must validate the resulting draft against the destination registry before saving it.
+
+**Still pending:** side-by-side runtime versions, transactional merchant draft upgrades, persisted rollback snapshots, the diff/confirmation screen, and the Store designs upgrade action. Installing a package still installs its starter; it does not preserve and migrate an existing draft. Until the runtime supports simultaneous versions, use a separate test theme id to exercise major changes safely.
+
+**Deployment prerequisite:** migration `20261103010000_theme_semver.sql` is prepared in both backend migration directories, but has not been applied to staging. It checks package and draft rows before changing constraints and aborts without rewriting them if a previously accepted non-SemVer version (for example `01.0.0`) exists. Run that inventory before deploying this backend; keep the previous backend if the preflight fails and agree a legacy-data policy first. Published versions and snapshots must never be silently renamed.
+
 ---
 
 ## 9. Complete example theme: Jelly Studio

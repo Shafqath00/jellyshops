@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { recipeSchema } from "./recipes.js";
+import { compareThemeVersions, jellyEngineRangeSchema, themeVersionSchema } from "./versioning.js";
+import { themeMigrationSchema } from "./migrations.js";
 
 const settingTypeSchema = z.enum(["text", "textarea", "number", "range", "checkbox", "select", "radio", "color", "font", "image", "url", "richtext", "alignment"]);
 const localAssetPath = z.string().regex(/^\/themes\/[a-z0-9]+(?:-[a-z0-9]+)*\/[A-Za-z0-9._/-]+$/).refine((path) => !path.includes("..") && !path.includes("\\") && !/^\/themes\/[^/]+\/https?:/i.test(path), "Theme assets must be local, namespaced paths");
@@ -29,7 +31,9 @@ const settingDefinitionSchema = z.object({
 export const themeManifestSchema = z.object({
   id: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   name: z.string().min(1),
-  version: z.string().regex(/^\d+\.\d+\.\d+(?:[-+][\w.-]+)?$/),
+  version: themeVersionSchema,
+  engines: z.object({ jelly: jellyEngineRangeSchema }).strict().optional(),
+  migrations: z.array(themeMigrationSchema).max(100).optional(),
   description: z.string().min(1),
   assetPrefix: z.string().regex(/^\/themes\/[a-z0-9]+(?:-[a-z0-9]+)*\/$/),
   previewAsset: z.string().regex(/^\/themes\/[a-z0-9]+(?:-[a-z0-9]+)*\/[A-Za-z0-9._-]+$/).optional(),
@@ -41,6 +45,11 @@ export const themeManifestSchema = z.object({
   /** Custom sections the theme adds, described as data (see recipes.ts). */
   sections: z.array(recipeSchema).max(20).optional(),
 }).strict().superRefine((manifest, context) => {
+  (manifest.migrations ?? []).forEach((migration, index, entries) => {
+    if (!themeVersionSchema.safeParse(manifest.version).success || !themeVersionSchema.safeParse(migration.from).success || !themeVersionSchema.safeParse(migration.to).success) return;
+    if (compareThemeVersions(migration.to, manifest.version) > 0) context.addIssue({ code: "custom", message: "A migration cannot target a future theme version.", path: ["migrations", index, "to"] });
+    if (entries.slice(0, index).some((other) => themeVersionSchema.safeParse(other.from).success && compareThemeVersions(other.from, migration.from) === 0)) context.addIssue({ code: "custom", message: "Only one migration may leave each source version.", path: ["migrations", index, "from"] });
+  });
   if (manifest.assetPrefix !== `/themes/${manifest.id}/`) {
     context.addIssue({ code: "custom", message: "Theme assetPrefix must belong to its theme id", path: ["assetPrefix"] });
   }

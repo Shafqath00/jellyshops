@@ -70,6 +70,9 @@ describe("parseThemePackage", () => {
     expect(compareVersions("1.10.0", "1.9.0")).toBeGreaterThan(0);
     expect(compareVersions("2.0.0", "10.0.0")).toBeLessThan(0);
     expect(compareVersions("1.2.3", "1.2.3")).toBe(0);
+    expect(compareVersions("1.0.0-beta.2", "1.0.0-beta.11")).toBeLessThan(0);
+    expect(compareVersions("1.0.0-rc.1", "1.0.0")).toBeLessThan(0);
+    expect(compareVersions("1.0.0+one", "1.0.0+two")).toBe(0);
   });
 });
 
@@ -117,6 +120,45 @@ describe("ThemePackageService", () => {
     await expect(service.upload("store-b", themePackage({ version: "2.0.0" }))).rejects.toMatchObject({ status: 409, code: "THEME_ID_TAKEN" });
   });
 
+  it("requires an actual newer SemVer release, including prerelease ordering and metadata equivalence", async () => {
+    await service.upload("store-a", themePackage({ version: "1.0.0-beta.11" }));
+    await expect(service.upload("store-a", themePackage({ version: "1.0.0-beta.2" }))).rejects.toMatchObject({ code: "VERSION_NOT_NEWER" });
+    await expect(service.upload("store-a", themePackage({ version: "1.0.0" }))).resolves.toMatchObject({ created: true });
+    await expect(service.upload("store-a", themePackage({ version: "1.0.0+metadata" }))).rejects.toMatchObject({ code: "VERSION_NOT_NEWER" });
+  });
+
+  it("rejects removed settings in a minor release and requires a complete migration for a major release", async () => {
+    await service.upload("store-a", themePackage());
+    const removeSetting = (manifest: Record<string, any>) => { manifest.settingsSchema = manifest.settingsSchema.slice(1); };
+    await expect(service.upload("store-a", themePackage({ version: "1.1.0", mutate: removeSetting }))).rejects.toMatchObject({ code: "BREAKING_THEME_CHANGE" });
+    await expect(service.upload("store-a", themePackage({ version: "2.0.0" }))).rejects.toMatchObject({ code: "MIGRATION_REQUIRED" });
+    await expect(service.upload("store-a", themePackage({ version: "2.0.0", mutate: (manifest) => { manifest.migrations = [{ from: "1.1.0", to: "2.0.0", operations: [] }]; } }))).rejects.toMatchObject({ code: "MIGRATION_REQUIRED" });
+    const next = await service.upload("store-a", themePackage({ version: "2.0.0", mutate: (manifest) => {
+      removeSetting(manifest);
+      manifest.migrations = [{ from: "1.0.0", to: "2.0.0", operations: [{ op: "removeSetting", target: { scope: "theme" }, key: "colors.primary" }] }];
+    } }));
+    expect(next.created).toBe(true);
+    expect((await service.getVersion(next.version.id))?.manifest.migrations).toHaveLength(1);
+  });
+
+  it("rejects removed recipes and recipe settings outside a major release", async () => {
+    await service.upload("store-a", themePackage());
+    // Remove the starter so this checks version compatibility, not a missing section in that starter.
+    const removed = themePackage({ version: "1.1.0", mutate: (manifest) => { manifest.sections = []; } }) as Record<string, unknown>;
+    delete removed.starter;
+    await expect(service.upload("store-a", removed)).rejects.toMatchObject({ code: "BREAKING_THEME_CHANGE" });
+    const changed = themePackage({ version: "1.1.0", mutate: (manifest) => { manifest.sections[0].settings.push({ id: "newSetting", type: "text", label: "New setting", default: "" }); } });
+    await expect(service.upload("store-a", changed)).resolves.toMatchObject({ created: true });
+  });
+
+  it("serializes distinct uploads so each major migration starts at the actual latest release", async () => {
+    await service.upload("store-a", themePackage());
+    const next = (version: string) => themePackage({ version, mutate: (manifest) => { manifest.migrations = [{ from: "1.0.0", to: version, operations: [] }]; } });
+    const results = await Promise.allSettled([service.upload("store-a", next("2.0.0")), service.upload("store-a", next("3.0.0"))]);
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1);
+    expect((await service.list("store-a"))[0].versions).toHaveLength(2);
+  });
+
   it("yanks a version for its owner only, and a yanked version stays readable", async () => {
     const { version } = await service.upload("store-a", themePackage());
     await expect(service.yank("store-b", version.id)).rejects.toMatchObject({ status: 404 });
@@ -136,7 +178,7 @@ describe("ThemePackageService", () => {
   });
 
   it("removes stored files when the database write fails", async () => {
-    const failing = new ThemePackageService({ query: async (text: string, values?: unknown[]) => { if (text.includes('INSERT INTO "ThemePackageVersion"')) throw new Error("boom"); return database.query(text, values as never) as never; } } as never, storage);
+    const failing = new ThemePackageService({ transaction: (work: (sql: unknown) => Promise<unknown>) => database.transaction((tx) => work({ query: async (text: string, values?: unknown[]) => { if (text.includes('INSERT INTO "ThemePackageVersion"')) throw new Error("boom"); return tx.query(text, values as never); } })) } as never, storage);
     await expect(failing.upload("store-a", themePackage())).rejects.toThrow("boom");
     expect(storage.files.size).toBe(0);
   });
@@ -214,6 +256,35 @@ describe("installing an uploaded theme on a store", () => {
     service = new ThemePackageService(database as never, new MemoryStorage(), installer);
   });
   afterEach(async () => database.close());
+
+  it("refuses an incompatible stored version before creating draft content or an install", async () => {
+    const { version } = await service.upload("store-a", themePackage({ id: "incompatible" }));
+    await database.query(`UPDATE "ThemePackageVersion" SET "manifest" = jsonb_set("manifest", '{engines}', '{"jelly": ">=2 <3"}'::jsonb) WHERE "id" = $1`, [version.id]);
+    await expect(service.install("store-a", version.id)).rejects.toMatchObject({ status: 422, code: "ENGINE_INCOMPATIBLE" });
+    expect((await database.query(`SELECT "id" FROM "ThemeInstall" WHERE "storeId" = 'store-a'`)).rows).toEqual([]);
+    expect((await database.query(`SELECT "themeId" FROM "ThemeConfiguration" WHERE "storeId" = 'store-a'`)).rows).toEqual([]);
+  });
+
+  it("installs a prerelease with build metadata and the SQL constraints reject invalid SemVer", async () => {
+    const { version } = await service.upload("store-a", themePackage({ id: "semver-install", version: "1.0.0-rc.1+build.7" }));
+    await expect(service.install("store-a", version.id)).resolves.toMatchObject({ version: "1.0.0-rc.1+build.7" });
+    expect((await database.query(`SELECT "themeVersion" FROM "ThemeConfiguration" WHERE "storeId" = 'store-a'`)).rows).toEqual([{ themeVersion: "1.0.0-rc.1+build.7" }]);
+    await expect(database.query(`UPDATE "ThemePackageVersion" SET "version" = '01.0.0' WHERE "id" = $1`, [version.id])).rejects.toThrow(/version_check/);
+    await expect(database.query(`UPDATE "ThemeConfiguration" SET "themeVersion" = '1.0.0-01' WHERE "storeId" = 'store-a'`)).rejects.toThrow(/themeVersion_check/);
+    for (const invalid of ["9007199254740992.0.0", "1.0.0+" + "a".repeat(130)]) {
+      expect((await database.query<{ valid: boolean }>(`SELECT jelly_theme_semver_valid($1) AS valid`, [invalid])).rows[0].valid).toBe(false);
+    }
+  });
+
+  it("aborts the rollout on legacy invalid versions without rewriting them", async () => {
+    const { version } = await service.upload("store-a", themePackage({ id: "legacy-version" }));
+    await database.exec(`ALTER TABLE "ThemePackageVersion" DROP CONSTRAINT "ThemePackageVersion_version_check"`);
+    await database.query(`UPDATE "ThemePackageVersion" SET "version" = '01.0.0' WHERE "id" = $1`, [version.id]);
+    const migration = readFileSync(new URL("../../../sql/migrations/20261103010000_theme_semver.sql", import.meta.url), "utf8");
+    await expect(database.exec(migration)).rejects.toThrow(/Legacy theme versions/);
+    await database.exec("ROLLBACK");
+    expect((await service.getVersion(version.id))?.version).toBe("01.0.0");
+  });
 
   it("puts the starter in the draft, pins the uploaded version, and publishes with the theme resolved", async () => {
     const { version } = await service.upload("store-a", themePackage({ id: "install-me" }));

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { customCssProblem, scopeCustomCss } from "@jelly/storefront-schema";
-import { isPlatformThemeId, validateThemeProject } from "@jelly/storefront-themes";
+import { compareThemeVersions, isPlatformThemeId, validateThemeProject } from "@jelly/storefront-themes";
 import { z } from "zod";
 import { ApiError, type ApiIssue } from "../../http/errors.js";
 
@@ -109,10 +109,5 @@ export function parseThemePackage(raw: unknown): ParsedThemePackage {
   return { themeId, name: manifest.name as string, version: manifest.version as string, manifest, starter: starter ?? null, css: scoped, assets, contentHash };
 }
 
-/** Compares two x.y.z versions: negative when a is older. */
-export function compareVersions(a: string, b: string): number {
-  const left = a.split(".").map(Number);
-  const right = b.split(".").map(Number);
-  for (let index = 0; index < 3; index++) if (left[index] !== right[index]) return left[index] - right[index];
-  return 0;
-}
+/** Backwards-compatible name for the shared SemVer comparator. */
+export const compareVersions = compareThemeVersions;

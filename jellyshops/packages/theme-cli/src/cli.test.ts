@@ -144,6 +144,24 @@ describe("jelly-theme", () => {
   });
 
   describe("validate", () => {
+    it("uses the shared compatibility and migration diagnostics before packaging", async () => {
+      await run(["create", "contract"]);
+      process.chdir(join(directory, "contract"));
+      const manifest = JSON.parse(readFileSync("theme.json", "utf8"));
+      expect(manifest.engines).toEqual({ jelly: ">=1 <2" });
+      manifest.engines.jelly = ">=2 <3";
+      writeFileSync("theme.json", JSON.stringify(manifest));
+      output = "";
+      expect(await run(["validate", "--json"])).toBe(1);
+      expect(JSON.parse(output)).toContainEqual(expect.objectContaining({ code: "ENGINE_INCOMPATIBLE", path: "engines.jelly" }));
+      expect(await run(["package"])).toBe(1);
+      manifest.engines.jelly = ">=1 <2";
+      manifest.migrations = [{ from: "bad", to: "2.0.0", operations: [] }];
+      writeFileSync("theme.json", JSON.stringify(manifest));
+      output = "";
+      expect(await run(["validate", "--json"])).toBe(1);
+      expect(JSON.parse(output)).toContainEqual(expect.objectContaining({ code: "MANIFEST_INVALID" }));
+    });
     it("passes the scaffolded theme", async () => {
       await run(["create", "plain"]);
       process.chdir(join(directory, "plain"));

@@ -1,10 +1,15 @@
 import { randomUUID } from "node:crypto";
-import { registerThemeProject } from "@jelly/storefront-themes";
+import { JELLY_THEME_API_VERSION, registerThemeProject, supportsJellyVersion, validateThemeManifest } from "@jelly/storefront-themes";
 import { ApiError } from "../../http/errors.js";
 import type { MediaStorage } from "../../media/storage.js";
-import { compareVersions, parseThemePackage } from "./package-format.js";
+import { compareVersions, parseThemePackage, type ParsedThemePackage } from "./package-format.js";
+import { assertThemeVersionTransition } from "./version-policy.js";
 
-export interface PackageSql { query<T = Record<string, unknown>>(text: string, values?: unknown[]): Promise<{ rows: T[] }> }
+export interface PackageSql {
+  query<T = Record<string, unknown>>(text: string, values?: unknown[]): Promise<{ rows: T[] }>;
+  transaction?<T>(work: (sql: PackageSql) => Promise<T>): Promise<T>;
+}
+type UploadResult = { package: { id: string; themeId: string; name: string }; version: { id: string; version: string; status: string }; created: boolean };
 
 export interface StoredAsset { path: string; contentType: string; size: number; sha256: string; storageKey: string }
 
@@ -48,22 +53,32 @@ export class ThemePackageService {
 
   private readonly storeThemeCache = new Map<string, number>();
 
-  async upload(storeId: string, raw: unknown): Promise<{ package: { id: string; themeId: string; name: string }; version: { id: string; version: string; status: string }; created: boolean }> {
+  async upload(storeId: string, raw: unknown): Promise<UploadResult> {
     const parsed = parseThemePackage(raw);
+    if (!this.sql.transaction) throw new ApiError(503, "UPLOAD_UNAVAILABLE", "Theme uploads need a transactional database.");
+    return this.sql.transaction(async (sql) => {
+      // Lock even for a new theme id, before reading its owner or latest version. The transaction
+      // holds this lock through storage and INSERT, so another process must validate against us.
+      await sql.query("SELECT pg_advisory_xact_lock(hashtext($1))", [`jelly-theme:${parsed.themeId}`]);
+      return new ThemePackageService(sql, this.storage, this.starters).uploadParsed(storeId, parsed);
+    });
+  }
 
+  private async uploadParsed(storeId: string, parsed: ParsedThemePackage): Promise<UploadResult> {
     const existing = (await this.sql.query<{ id: string; ownerStoreId: string; name: string }>(`SELECT "id", "ownerStoreId", "name" FROM "ThemePackage" WHERE "themeId" = $1`, [parsed.themeId])).rows[0];
     if (existing && existing.ownerStoreId !== storeId) throw new ApiError(409, "THEME_ID_TAKEN", `The theme id "${parsed.themeId}" belongs to another store. Choose a different id.`);
 
     let packageId = existing?.id;
     if (existing) {
-      const versions = (await this.sql.query<VersionRow>(`SELECT "id", "packageId", "version", "status", "contentHash", "createdAt" FROM "ThemePackageVersion" WHERE "packageId" = $1`, [existing.id])).rows;
+      const versions = (await this.sql.query<VersionRow & { manifest: Record<string, unknown> }>(`SELECT "id", "packageId", "version", "status", "contentHash", "createdAt", "manifest" FROM "ThemePackageVersion" WHERE "packageId" = $1`, [existing.id])).rows;
       const same = versions.find((row) => row.version === parsed.version);
       if (same) {
         if (same.contentHash === parsed.contentHash) return { package: { id: existing.id, themeId: parsed.themeId, name: existing.name }, version: { id: same.id, version: same.version, status: same.status }, created: false };
         throw new ApiError(409, "VERSION_EXISTS", `Version ${parsed.version} was already uploaded with different content. Raise the version number in theme.json.`);
       }
-      const newest = versions.map((row) => row.version).sort(compareVersions).pop();
-      if (newest && compareVersions(parsed.version, newest) < 0) throw new ApiError(409, "VERSION_NOT_NEWER", `Version ${parsed.version} is older than ${newest}, which is already uploaded. Raise the version number in theme.json.`);
+      const newest = versions.sort((a, b) => compareVersions(a.version, b.version)).at(-1);
+      if (newest && compareVersions(parsed.version, newest.version) <= 0) throw new ApiError(409, "VERSION_NOT_NEWER", `Version ${parsed.version} must be newer than ${newest.version}, which is already uploaded. Build metadata does not make a new release. Raise the version number in theme.json.`);
+      if (newest) assertThemeVersionTransition(newest.manifest, parsed.manifest);
       await this.sql.query(`UPDATE "ThemePackage" SET "name" = $2, "updatedAt" = NOW() WHERE "id" = $1`, [existing.id, parsed.name]);
     } else {
       packageId = randomUUID();
@@ -135,6 +150,8 @@ export class ThemePackageService {
     // A private theme is invisible to other stores, so they get the same answer as for a missing one.
     if (!row || row.ownerStoreId !== storeId) throw new ApiError(404, "NOT_FOUND", "That theme version was not found.");
     if (row.status === "yanked") throw new ApiError(409, "VERSION_YANKED", "That version was withdrawn by its author. Install a newer one.");
+    const manifest = validateThemeManifest(row.manifest);
+    if (!supportsJellyVersion(manifest.engines?.jelly)) throw new ApiError(422, "ENGINE_INCOMPATIBLE", `This theme needs Jelly ${manifest.engines?.jelly}; this platform supports theme API ${JELLY_THEME_API_VERSION}.`);
     if (!row.starter) throw new ApiError(422, "NO_STARTER", "This theme has no starter.json, so there is nothing to put on the store. Add one and upload a new version.");
 
     this.register(row);

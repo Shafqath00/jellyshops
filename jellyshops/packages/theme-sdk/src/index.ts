@@ -12,3 +12,6 @@ export { defineBlock, defineSection, registerSection } from "@jelly/storefront-r
 export type { BlockDefinition, ControlDefinition, SectionDefinition } from "@jelly/storefront-registry";
 export { createStarterPack, defineTheme, resolveTheme, validateThemeManifest, validateThemeProject, validateThemeSettings } from "@jelly/storefront-themes";
 export type { DiscoveredTheme, ThemeInput, ThemeManifest, ThemeProjectIssue, ThemeTokens } from "@jelly/storefront-themes";
+export { JELLY_THEME_API_VERSION, compareThemeVersions, supportsJellyVersion } from "@jelly/storefront-themes";
+export { applyThemeMigrations, getThemeMigrationPath, themeMigrationSchema } from "@jelly/storefront-themes";
+export type { ThemeMigration, ThemeMigrationDraft, ThemeMigrationChange } from "@jelly/storefront-themes";
