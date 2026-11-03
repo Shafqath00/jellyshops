@@ -4,6 +4,7 @@ import { StrictMode, useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { RegistrySectionRenderer, type CommerceDataProvider } from "@jelly/storefront-renderer";
 import type { RuntimeMenuV4, SectionNode } from "@jelly/storefront-schema";
+import { scopeCustomCss } from "@jelly/storefront-schema";
 import { getStarterPack, registerThemeProject, resolveStorefrontThemeTokens, resolveTheme } from "@jelly/storefront-themes";
 import { samplePageContext, sampleProducts } from "@jelly/theme-sdk/sample-data";
 import { fetchProject, onProjectChanged, placeholderImage, toTheme, type Project } from "./project";
@@ -72,7 +73,7 @@ function Frame() {
     />
   );
   return <div className="theme-preview-viewport" data-jelly-theme={view.id} style={view.style}>
-    <style>{project.css}</style>
+    <style>{scopeCustomCss(project.css, `[data-jelly-theme="${view.id}"]`, 150_000) ?? ""}</style>
     <div className="jelly-storefront">
       {view.entries.filter((entry) => entry.region === "header").map(draw)}
       <main>{view.entries.filter((entry) => entry.region === "template").map(draw)}</main>

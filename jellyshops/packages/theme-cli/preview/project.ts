@@ -2,7 +2,7 @@
 import type { DiscoveredTheme } from "@jelly/storefront-themes";
 
 /** theme.json: the keys the preview reads, plus anything else the file holds. */
-export type Manifest = Record<string, unknown> & { id: string; name: string; settingsDefaults?: Record<string, unknown>; settingsSchema?: Array<Record<string, unknown>> };
+export type Manifest = Record<string, unknown> & { id: string; name: string; version: string; settingsDefaults?: Record<string, unknown>; settingsSchema?: Array<Record<string, unknown>> };
 
 /** What the dev server reads from the theme folder. */
 export interface Project {

@@ -1,6 +1,6 @@
 # Theme packages: design for Phase 3 (packaging, upload, install)
 
-Status: design for review, 2026-11-03. Nothing here is built yet except the migration draft `backend/sql/migrations/20261103000000_theme_packages.sql` (not applied anywhere). Parent plan: [theme-sdk-plan.md](theme-sdk-plan.md). Trust model: declarative only, no uploaded code.
+Status: 2026-11-03. Migration applied to staging. **Built so far (backend):** upload, validation, versions, yank, list and the public version/asset routes (`backend/src/storefront/theme-packages/`). **Not built:** `jelly-theme package` and `upload`, install on a store, runtime loading in the storefront and editor, recipes. Decisions taken while building: asset files go through the existing media storage (no new bucket yet), any store with `storefront:edit` may upload its own themes, private only. Parent plan: [theme-sdk-plan.md](theme-sdk-plan.md). Trust model: declarative only, no uploaded code.
 
 ## What exists that this builds on
 
@@ -36,7 +36,7 @@ Asset files go to object storage (a new bucket, `theme-assets`, written only by 
 1. `validateThemeProject` with no errors: manifest schema, settings, starter against the registry, unsafe URLs, executable content (script tags, handlers, CSS `@import`, remote `url()`).
 2. The theme id is not a built-in id and is either new or owned by the uploader's store.
 3. The version is new and higher than the owner's latest (semver); existing versions are never overwritten.
-4. CSS passes the existing custom-CSS safety check and is scoped under `[data-jelly-theme="<id>"]` on the server (a rule outside the scope is rejected, not rewritten).
+4. CSS passes the custom-CSS safety check and is **scoped on the server** with `scopeCustomCss`: authors write plain CSS (`h1 { … }`, `& { … }` for the theme root) and every selector is prefixed with `[data-jelly-theme="<id>"]`. The CLI preview applies the same step, so what developers see is what stores get. Limits: no `@import`, `@font-face` or non-https `url()`, so images used from CSS must be https links for now.
 5. Assets: allowed types only (png, jpeg, webp, gif, svg without scripts, woff2), sizes within limits, every path the manifest names exists, every file's hash recorded.
 6. Failures come back as the same plain messages the CLI prints, with paths.
 

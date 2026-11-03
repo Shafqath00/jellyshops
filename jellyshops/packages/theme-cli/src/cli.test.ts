@@ -2,6 +2,7 @@ import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { scopeCustomCss } from "@jelly/storefront-schema";
 // @ts-expect-error plain JavaScript module
 import { run } from "./cli.mjs";
 
@@ -34,9 +35,18 @@ describe("jelly-theme", () => {
       for (const file of ["theme.json", "starter.json", "theme.css", "package.json", ".gitignore", "assets/preview.svg", "assets/mark.svg"]) expect(existsSync(join(folder, file)), file).toBe(true);
       const manifest = JSON.parse(readFileSync(join(folder, "theme.json"), "utf8"));
       expect(manifest).toMatchObject({ id: "coastal-home", name: "Coastal Home", assetPrefix: "/themes/coastal-home/" });
-      expect(readFileSync(join(folder, "theme.css"), "utf8")).toContain('[data-jelly-theme="coastal-home"]');
+      expect(readFileSync(join(folder, "theme.css"), "utf8")).toContain("& {");
       expect(JSON.parse(readFileSync(join(folder, "package.json"), "utf8")).scripts).toMatchObject({ dev: "jelly-theme dev", validate: "jelly-theme validate", test: "jelly-theme test" });
       expect(readFileSync(join(folder, "theme.json"), "utf8")).not.toContain("__ID__");
+    });
+    it("writes a stylesheet the platform can scope to the theme (the same step the preview and uploads use)", async () => {
+      await run(["create", "scoped"]);
+      const scoped = scopeCustomCss(readFileSync(join(directory, "scoped", "theme.css"), "utf8"), '[data-jelly-theme="scoped"]', 150_000);
+      expect(scoped).not.toBeNull();
+      expect(scoped).toContain('[data-jelly-theme="scoped"] .jelly-button');
+      expect(scoped).toMatch(/\[data-jelly-theme="scoped"\]\s*\{[^}]*background/);
+      // No rule is left unscoped: every rule starts with the theme's scope or an @-rule.
+      expect(scoped).not.toMatch(/(^|\})\s*h1/);
     });
     it("refuses a folder that already has files, and a name that cannot be an id", async () => {
       writeFileSync(join(directory, "taken.txt"), "x");

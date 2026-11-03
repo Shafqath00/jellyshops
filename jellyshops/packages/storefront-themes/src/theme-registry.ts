@@ -38,6 +38,9 @@ const themes = [
 const manualIds = new Set(themes.map((theme) => theme.id));
 export function isManuallyRegistered(id: string): boolean { return manualIds.has(id); }
 
+/** True for every theme the platform itself ships (built in or found in src/themes/), which an upload may not take over. */
+export function isPlatformThemeId(id: string): boolean { return manualIds.has(id) || discoveredThemes.some((entry) => entry.manifest.id === id); }
+
 /**
  * Themes found in src/themes/<folder>/theme.json become declarative themes: colours and fonts come
  * from the manifest defaults, everything else is the shared storefront. A folder whose id is

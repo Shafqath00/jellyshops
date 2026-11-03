@@ -18,6 +18,8 @@ import { createMerchantAccessRouter, createPublicAccessRouter } from "../../stor
 import { StorefrontAccessService } from "../../storefront/access/service.js";
 import { createThemeLibraryRouter } from "../../storefront/theme-library/routes.js";
 import { ThemeLibraryService } from "../../storefront/theme-library/service.js";
+import { createPublicThemeVersionRouter, createThemePackageRouter } from "../../storefront/theme-packages/routes.js";
+import { ThemePackageService } from "../../storefront/theme-packages/service.js";
 
 const accessServices = new WeakMap<AppContext, StorefrontAccessService | null>();
 
@@ -39,6 +41,18 @@ function libraryService(context: AppContext): ThemeLibraryService | undefined {
     libraryServices.set(context, database ? new ThemeLibraryService({ query: (text: string, values?: unknown[]) => database.transaction((transaction) => transaction.query(text, values)) } as never) : null);
   }
   return libraryServices.get(context) ?? undefined;
+}
+
+const packageServices = new WeakMap<AppContext, ThemePackageService | null>();
+
+/** Uploaded theme packages; need the database and media storage, so they are off in the local JSON mode. */
+function packageService(context: AppContext): ThemePackageService | undefined {
+  if (!packageServices.has(context)) {
+    const database = context.routeDependencies.commerceDatabase;
+    const storage = context.routeDependencies.mediaStorage;
+    packageServices.set(context, database && storage ? new ThemePackageService({ query: (text: string, values?: unknown[]) => database.transaction((transaction) => transaction.query(text, values)) } as never, storage) : null);
+  }
+  return packageServices.get(context) ?? undefined;
 }
 
 const bindingValueServices = new WeakMap<AppContext, StorefrontBindingValueService | null>();
@@ -83,6 +97,8 @@ export function mountPublicStorefrontContextRoutes(app: Express, context: AppCon
   }
   const access = accessService(context);
   if (access) app.use("/api/public/stores/:storeId/storefront/access", createPublicAccessRouter(access));
+  const themePackages = packageService(context);
+  if (themePackages) app.use("/api/public", createPublicThemeVersionRouter(themePackages));
   const metaobjects = context.routeDependencies.metaobjectService;
   if (metaobjects) {
     app.use("/api/public/stores/:storeId/storefront/metaobjects", createPublicMetaobjectRouter(new PublicMetaobjectService(metaobjects)));
@@ -115,6 +131,8 @@ export function mountStorefrontRoutes(app: Express, context: AppContext): void {
   if (access) app.use("/api/stores/:storeId/storefront", createMerchantAccessRouter(access, authProvider));
   const library = libraryService(context);
   if (library) app.use("/api/stores/:storeId/storefront", createThemeLibraryRouter(library, authProvider));
+  const packages = packageService(context);
+  if (packages) app.use("/api/stores/:storeId", createThemePackageRouter(packages, authProvider));
   const bindingValues = bindingValueService(context);
   if (bindingValues) {
     app.use("/api/stores/:storeId/storefront", createEditorBindingValuesRouter(bindingValues, authProvider));

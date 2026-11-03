@@ -15,6 +15,7 @@ import {
 import { mountPublicStorefrontContextRoutes, mountStorefrontRoutes } from "./app/routes/storefront.js";
 import type { AppDependencies } from "./app/types.js";
 import { errorHandler, notFoundHandler } from "./http/errors.js";
+import { isThemePackageUpload } from "./storefront/theme-packages/routes.js";
 
 export { publicDocumentFromTemplate } from "./app/default-storefront-workspace.js";
 export type { AppDependencies } from "./app/types.js";
@@ -29,7 +30,9 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
 
   // Stripe signatures require raw bytes, so mount webhooks before JSON parsing.
   mountStripeWebhooks(app, context);
-  app.use(express.json({ limit: "2mb" }));
+  // Theme package uploads carry their files as base64 and get a larger limit of their own.
+  const defaultJson = express.json({ limit: "2mb" });
+  app.use((request, response, next) => isThemePackageUpload(request) ? next() : defaultJson(request, response, next));
 
   mountOrderRuntimeRoutes(app, context);
   mountStoreSettingsRoutes(app, context);
