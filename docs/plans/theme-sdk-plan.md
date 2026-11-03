@@ -59,7 +59,7 @@ So "upload a theme" needs an explicit trust model. Options:
 
 > **Decision (2026-11-03): declarative first.** Uploaded themes will contain data, CSS and assets only: no developer code runs in shoppers' browsers or the merchant's editor. Reviewed code themes (options C and D) stay a later, partner-only phase (Phase 6). Consequences for the plan: section recipes and the primitive catalogue are on the critical path for Phase 3, and the validators must reject anything executable (scripts, remote CSS, raw HTML, unsafe URLs) from the first upload.
 >
-> **Progress:** Phase 0 started 2026-11-03. Done: theme project validator and `validate-theme` script, JSON Schema and section catalogue export, package watch mode. Also done 2026-11-03: data-driven starter packs (`starter.json` becomes a pack through `createStarterPack`), theme auto-discovery (`scripts/generate-theme-index.mjs` writes `storefront-themes/src/themes/index.generated.ts`), and `registerSection`. The four built-in packs are locked by a hash test (`v4-starter-packs-locked.test.ts`). Still open in this phase: starter JSON Schema, per-theme section visibility.
+> **Progress:** Phase 0 started 2026-11-03. Done: theme project validator and `validate-theme` script, JSON Schema and section catalogue export, package watch mode. Also done 2026-11-03: data-driven starter packs (`starter.json` becomes a pack through `createStarterPack`), theme auto-discovery (`scripts/generate-theme-index.mjs` writes `storefront-themes/src/themes/index.generated.ts`), and `registerSection`. The four built-in packs are locked by a hash test (`v4-starter-packs-locked.test.ts`). Finished 2026-11-03: `docs/schemas/starter.schema.json` (from `starterFileSchema`) and per-theme section visibility (`SectionDefinition.themes`, `listSectionDefinitionsForPage(page, region, themeId)`, `validateSectionAgainstRegistry(section, page, themeId)` with code `SECTION_NOT_AVAILABLE_ON_THEME`; the editor Add section list and the theme project validator pass the theme id; the backend compiler does not yet, that comes with installed themes in Phase 3).
 
 A also matches the product: merchants customise through settings, not code. The core sections already cover most storefront needs (47 sections, 21 block types).
 
@@ -162,8 +162,8 @@ Each phase ends in something usable. Sizes: S ≤ 1 week, M 2 to 3 weeks, L 4 to
 | --- | --- |
 | Starter packs move into each theme (`starter.json`), `makePack` becomes a loader **(done: built-in packs stay in code, locked by hash; new themes use `starter.json`)** | Adding a theme needs no edit to shared starter code; existing four packs produce identical output (snapshot test) |
 | Theme auto-discovery from `themes/*/theme.json` **(done)** | A new folder appears in the catalogue without editing `theme-registry.ts` |
-| `registerSection` with namespacing in the definition registry **(done; per-theme visibility not built)** | A section added from a theme folder shows in the editor and validates on Publish |
-| JSON Schema export for manifest, section, block, starter **(done; starter schema still open)** | `node scripts/generate-schemas.mjs` writes files; a test fails if they drift from the zod schemas |
+| `registerSection` with namespacing in the definition registry **(done, with per-theme visibility)** | A section added from a theme folder shows in the editor and validates on Publish |
+| JSON Schema export for manifest, section, block, starter **(done, including starter)** | `node scripts/generate-schemas.mjs` writes files; a test fails if they drift from the zod schemas |
 | `scripts/validate-theme.mjs <folder>` using the existing validators **(done)** | `docs/examples/jelly-studio` passes; a broken manifest prints a plain error |
 | Watch mode for schema, registry and themes **(done)** | Editing a registry file updates the dev app without a manual build |
 

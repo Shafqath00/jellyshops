@@ -13,6 +13,8 @@ export { COLOR_SCHEME_IDS, colorSchemeCount, colorSchemeLabel, MAX_THEME_CSS_LEN
 export type { StoreLanguage } from "./theme-style-settings.js";
 export type { ColorSchemeId, TextStyleLevel } from "./theme-style-settings.js";
 export { createStarterPack, DISCOVERED_STARTER_PACK_IDS, getStarterPack, isStarterPackId, listStarterPacks, registerThemeProject, validateStarterPack } from "./starter-packs.js";
-export type { DiscoveredTheme } from "./types.js";
+export type { DiscoveredTheme, ThemeManifestInput } from "./types.js";
 export { defineTheme } from "./define-theme.js";
 export type { ThemeInput } from "./define-theme.js";
+export { starterFileSchema } from "./starter-file-schema.js";
+export type { StarterFile } from "./starter-file-schema.js";

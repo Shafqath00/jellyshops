@@ -55,3 +55,14 @@ describe("docs example theme: Jelly Studio", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 });
+
+describe("starter file schema", () => {
+  it("accepts the example starter and refuses structural mistakes", async () => {
+    const { starterFileSchema } = await import("./starter-file-schema");
+    expect(starterFileSchema.safeParse(starter).success).toBe(true);
+    const bad = structuredClone(starter) as unknown as { templates: Record<string, { type: string }> };
+    bad.templates.home.type = "homepage";
+    expect(starterFileSchema.safeParse(bad).success).toBe(false);
+    expect(starterFileSchema.safeParse({ templates: {}, extra: 1 }).success).toBe(false);
+  });
+});

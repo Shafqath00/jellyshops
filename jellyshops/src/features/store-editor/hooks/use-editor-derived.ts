@@ -171,13 +171,13 @@ export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
   [activeTemplate?.type, previewResourceId, backendStoreId, catalog, pages, blogs, articles, previewQuery, previewProduct, previewProductSelections, previewProductQuantity, previewCollection]);
   const builtInSections = useMemo(() => {
     if (!activeTemplate || !libraryRegion) return [];
-    return listSectionDefinitionsForPage(activeTemplate.type, libraryRegion)
+    return listSectionDefinitionsForPage(activeTemplate.type, libraryRegion, themeConfiguration?.themeId)
       .map((definition) => ({
         id: definition.type,
         name: displayName(definition.type),
         category: sectionCategoryLabels[definition.category],
       }));
-  }, [activeTemplate, libraryRegion]);
+  }, [activeTemplate, libraryRegion, themeConfiguration?.themeId]);
   const blockPickerSection = sections.find((section) => section.id === blockPickerSectionId);
   const blockPickerDefinition = blockPickerSection ? getSectionDefinition(blockPickerSection.type) : undefined;
   const blockPickerTypes = blockPickerSection && blockPickerParentId

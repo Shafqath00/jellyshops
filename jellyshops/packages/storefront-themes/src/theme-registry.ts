@@ -6,7 +6,7 @@ import { elegantTokens } from "./elegant/tokens.js";
 import { freshMarketTokens } from "./fresh-market/tokens.js";
 import { minimalTokens } from "./minimal/tokens.js";
 import { playfulTokens } from "./playful/tokens.js";
-import type { ResolvedDesignTokens, ThemeDefinition, ThemeShellComponents, ThemeTokens } from "./types.js";
+import type { ResolvedDesignTokens, ThemeDefinition, ThemeManifestInput, ThemeShellComponents, ThemeTokens } from "./types.js";
 import defaultManifest from "./themes/default/theme.json" with { type: "json" };
 import exampleBoutiqueManifest from "./themes/example-boutique/theme.json" with { type: "json" };
 import { BoutiqueHero, type ThemeSectionProps } from "./themes/example-boutique/hero.js";
@@ -43,7 +43,7 @@ export function isManuallyRegistered(id: string): boolean { return manualIds.has
  * from the manifest defaults, everything else is the shared storefront. A folder whose id is
  * already registered above is skipped (those need code, or predate discovery).
  */
-function folderTheme(manifest: Record<string, any>): ThemeDefinition {
+function folderTheme(manifest: ThemeManifestInput): ThemeDefinition {
   const colors = manifest.settingsDefaults?.colors ?? {};
   const typography = manifest.settingsDefaults?.typography ?? {};
   const base = minimalTokens;
@@ -59,7 +59,7 @@ for (const { manifest } of discoveredThemes) {
  * runner use this for a theme folder that is not part of the platform build. Built-in themes
  * cannot be replaced.
  */
-export function registerFolderTheme(manifest: Record<string, any>): ThemeDefinition {
+export function registerFolderTheme(manifest: ThemeManifestInput): ThemeDefinition {
   if (manualIds.has(manifest.id)) throw new Error(`"${manifest.id}" is a built-in theme and cannot be replaced.`);
   const next = folderTheme(manifest);
   const index = themes.findIndex((theme) => theme.id === manifest.id);

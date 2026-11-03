@@ -1,7 +1,7 @@
 export { STORE_DESIGN_SCHEMA_VERSION } from "./version.js";
 export { createDefaultStoreDesign } from "./defaults.js";
 export { migrateStoreDesignDocument } from "./migrations.js";
-export { storeDesignDocumentSchema, themeIdSchema } from "./schema.js";
+export { sectionNodeSchema, storeDesignDocumentSchema, themeIdSchema } from "./schema.js";
 export { isRichTextDocument, normalizeRichTextDocument, plainTextToRichTextDocument, resolveRichTextDocument, richTextToPlainText, safeRichTextHref } from "./rich-text.js";
 export {
   STOREFRONT_SCHEMA_VERSION,

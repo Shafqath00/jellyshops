@@ -56,8 +56,13 @@ export function allowedChildBlockTypes(blockType: string, depth: number): string
   return depth + 1 >= MAX_BLOCK_DEPTH ? allowed.filter((type) => !blockDefinitions.get(type)?.allowedBlockTypes) : allowed;
 }
 export function listSectionDefinitions(): SectionDefinition[] { return [...sections]; }
-export function listSectionDefinitionsForPage(pageType: PageType, region: RegionName = "template"): SectionDefinition[] {
-  return sections.filter((definition) => definition.supportedPages.includes(pageType) && (definition.allowedRegions ?? ["template"]).includes(region));
+/** True when a theme may use the section: sections without a `themes` list are open to every theme. */
+function availableOnTheme(definition: SectionDefinition, themeId: string | null | undefined): boolean {
+  return !definition.themes || !themeId || definition.themes.includes(themeId);
+}
+/** The sections the editor offers on a page; pass the store's theme to hide sections that belong to other themes. */
+export function listSectionDefinitionsForPage(pageType: PageType, region: RegionName = "template", themeId?: string | null): SectionDefinition[] {
+  return sections.filter((definition) => definition.supportedPages.includes(pageType) && (definition.allowedRegions ?? ["template"]).includes(region) && availableOnTheme(definition, themeId));
 }
 
 /** Rich text settings keep a formatted copy under `<key>Doc` next to the plain text; it must be a real document. */
@@ -65,11 +70,12 @@ function formattedCopiesValid(settings: Record<string, unknown>): boolean {
   return Object.entries(settings).every(([key, value]) => !key.endsWith("Doc") || value === undefined || value === null || isRichTextDocument(value));
 }
 
-export function validateSectionAgainstRegistry(section: SectionNode, pageType: PageType): RegistryValidationIssue[] {
+export function validateSectionAgainstRegistry(section: SectionNode, pageType: PageType, themeId?: string | null): RegistryValidationIssue[] {
   const definition = getSectionDefinition(section.type);
   if (!definition) return [{ code: "SECTION_NOT_REGISTERED", sectionId: section.id, message: `Section ${section.type} is not registered` }];
 
   const issues: RegistryValidationIssue[] = [];
+  if (!availableOnTheme(definition, themeId)) issues.push({ code: "SECTION_NOT_AVAILABLE_ON_THEME", sectionId: section.id, message: `${section.type} is only available on the ${(definition.themes ?? []).join(", ")} theme${(definition.themes ?? []).length === 1 ? "" : "s"}` });
   if (!definition.supportedPages.includes(pageType)) issues.push({ code: "SECTION_NOT_ALLOWED_ON_PAGE", sectionId: section.id, message: `${section.type} is not allowed on ${pageType}` });
   if (!definition.settingsSchema.safeParse(section.settings).success || !formattedCopiesValid(section.settings)) {
     // Custom CSS is the one setting merchants type freely, so say what is wrong with it.

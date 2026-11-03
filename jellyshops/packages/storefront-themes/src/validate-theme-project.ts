@@ -75,7 +75,7 @@ function checkSettings(manifest: Record<string, unknown>, issues: ThemeProjectIs
 
 type Placement = { kind: "inline"; section: SectionNode } | { kind: "global"; globalSectionId: string };
 
-function checkStarter(starterInput: unknown, issues: ThemeProjectIssue[]): void {
+function checkStarter(starterInput: unknown, themeId: string | undefined, issues: ThemeProjectIssue[]): void {
   const starter = record(starterInput);
   const globals = record(starter.globalSections) as Record<string, SectionNode>;
   const templates = record(starter.templates) as Record<string, { type?: unknown; sections?: unknown }>;
@@ -108,7 +108,7 @@ function checkStarter(starterInput: unknown, issues: ThemeProjectIssue[]): void 
           for (const child of block?.blocks ?? []) claim(child?.id, `${path}.section.blocks`);
         }
       } else { issues.push({ level: "error", code: "BAD_PLACEMENT", path, message: 'A placement must be { "kind": "inline", "section": … } or { "kind": "global", "globalSectionId": … }.' }); return; }
-      for (const issue of validateSectionAgainstRegistry(section, type)) {
+      for (const issue of validateSectionAgainstRegistry(section, type, themeId)) {
         issues.push({ level: "error", code: issue.code, path: `${path}${issue.blockId ? ` block ${issue.blockId}` : ""}`, message: `${section.type} (${section.id}): ${issue.message}` });
       }
     });
@@ -134,7 +134,7 @@ export function validateThemeProject(input: ThemeProjectInput): ThemeProjectIssu
     if (input.assetExists) for (const path of new Set(named)) if (!input.assetExists(path)) issues.push({ level: path === parsed.data.previewAsset || path === assets.preview?.path ? "warning" : "error", code: "ASSET_MISSING", path, message: `The file ${path} is named in the manifest but was not found.` });
   }
   scan(input.manifest, "theme.json", issues);
-  if (input.starter !== undefined) { checkStarter(input.starter, issues); scan(input.starter, "starter.json", issues); }
+  if (input.starter !== undefined) { checkStarter(input.starter, typeof record(input.manifest).id === "string" ? record(input.manifest).id as string : undefined, issues); scan(input.starter, "starter.json", issues); }
   // Same message twice (from the schema and the scan) is noise.
   const seen = new Set<string>();
   return issues.filter((issue) => { const key = `${issue.code}|${issue.path}|${issue.message}`; if (seen.has(key)) return false; seen.add(key); return true; });

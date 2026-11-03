@@ -1,6 +1,5 @@
 import { customCssProblem } from "@jelly/storefront-schema";
 import { MAX_THEME_CSS_LENGTH } from "./theme-style-settings.js";
-import { z } from "zod";
 import { getThemeDefinition } from "./theme-registry.js";
 import type { ThemeAssetManifest } from "./types.js";
 

@@ -53,8 +53,10 @@ export interface SectionDefinition {
   defaultBlocks: BlockNode[];
   responsiveFields: string[];
   allowedRegions?: RegionName[];
+  /** Theme ids this section is limited to. Left out, every theme may use it (all built-in sections). */
+  themes?: string[];
   presets?: Array<Omit<SectionPreset, "sectionType">>;
 }
-export type RegistryValidationIssueCode = "SECTION_NOT_REGISTERED" | "SECTION_NOT_ALLOWED_ON_PAGE" | "BLOCK_NOT_ALLOWED" | "BLOCK_LIMIT_EXCEEDED" | "SETTINGS_INVALID" | "RESPONSIVE_FIELD_NOT_ALLOWED";
+export type RegistryValidationIssueCode = "SECTION_NOT_REGISTERED" | "SECTION_NOT_ALLOWED_ON_PAGE" | "SECTION_NOT_AVAILABLE_ON_THEME" | "BLOCK_NOT_ALLOWED" | "BLOCK_LIMIT_EXCEEDED" | "SETTINGS_INVALID" | "RESPONSIVE_FIELD_NOT_ALLOWED";
 export interface RegistryValidationIssue { code: RegistryValidationIssueCode; sectionId: string; blockId?: string; field?: string; message: string }
 export type { SectionNode };

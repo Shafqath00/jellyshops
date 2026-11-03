@@ -36,9 +36,21 @@ export interface ThemeDefinition { id: ThemeId; label: string; tokens: ThemeToke
 export type ResolvedDesignTokens = Record<string, string>;
 export type { GlobalSettings };
 
+/** The parts of theme.json that run-time registration and starter packs read; the full shape is checked by the manifest schema. */
+export interface ThemeManifestInput {
+  id: string;
+  name: string;
+  version: string;
+  description?: string;
+  previewAsset?: string;
+  assets?: { preview?: { path?: string } };
+  settingsDefaults?: { colors?: Record<string, string>; typography?: Record<string, string> } & Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 /** A theme folder found under src/themes/: its manifest (theme.json) and optional starter content (starter.json). */
 export interface DiscoveredTheme {
-  manifest: Record<string, any>;
+  manifest: ThemeManifestInput;
   starter?: {
     globalSections: Record<string, SectionNode>;
     templates: Record<string, { type: PageType; sections: Array<{ kind: "inline"; section: SectionNode } | { kind: "global"; globalSectionId: string }> }>;

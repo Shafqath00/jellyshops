@@ -111,3 +111,14 @@ describe("validateThemeProject", () => {
     });
   });
 });
+
+describe("sections that belong to another theme", () => {
+  it("refuses a section limited to a different theme in the starter", async () => {
+    const { registerSection } = await import("@jelly/storefront-registry");
+    const { z } = await import("zod");
+    registerSection({ type: "other-theme/banner", category: "content", supportedPages: ["home"], settingsSchema: z.object({}), controls: [], allowedBlockTypes: [], defaultSettings: {}, defaultBlocks: [], responsiveFields: [], themes: ["other-theme"] });
+    const bad = starter();
+    bad.templates.home.sections.push({ kind: "inline", section: { id: "ob", type: "other-theme/banner", enabled: true, settings: {}, blocks: [] } });
+    expect(codes(validateThemeProject({ manifest: manifest(), starter: bad }))).toContain("SECTION_NOT_AVAILABLE_ON_THEME");
+  });
+});
