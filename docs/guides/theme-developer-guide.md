@@ -308,6 +308,18 @@ See section 6. In short: sections receive a runtime context with the product, co
 
 You rarely write breakpoints for sections. Sections accept per-device values (padding, text style, direction, gap, alignment) and a "Show on" choice from the editor; the renderer and the theme CSS apply them at the three breakpoints. For your own components use the same three ranges and test at 390, 768 and 1280 px (the theme preview page does this).
 
+### Quick start with the CLI (2026-11-03)
+
+For a data-driven theme (a `theme.json`, a `starter.json`, a stylesheet and images, no custom code) you do not need to touch the platform at all. From `jellyshops/` (the CLI is not published to npm yet, so run it from the repository):
+
+```bash
+node packages/theme-cli/bin/jelly-theme.mjs create ../my-theme    # scaffold a folder named after your theme
+cd ../my-theme
+node <repo>/jellyshops/packages/theme-cli/bin/jelly-theme.mjs dev       # preview at http://localhost:5273
+```
+
+`dev` shows your theme drawn by the platform's own renderer with sample products, at desktop, tablet and phone widths, on every page in your `starter.json`. Click a section in the preview (or in the list) to edit its settings and blocks; change theme settings in the other tab; add, move or remove sections. Edits are written straight back to `theme.json` and `starter.json`, and edits you make in a text editor (including `theme.css`) show up without a reload. `validate` and `test` run the same checks as the platform (the conformance suite renders every template, checks accessibility with axe and refuses unsafe links). `theme.css` is used by the preview today; wiring it into published stores comes with packaging (Phase 3 of [the plan](../plans/theme-sdk-plan.md)). The preview is a lighter editor than the real one (settings as plain fields, no drag and drop, rich text as plain text).
+
 ### Step 12: Preview and test locally
 
 ```bash

@@ -1,0 +1,21 @@
+{
+  "name": "@jelly/theme-cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "jelly-theme: create, validate, test and preview a Jelly Shops theme.",
+  "bin": {
+    "jelly-theme": "./bin/jelly-theme.mjs"
+  },
+  "files": ["bin", "src", "preview", "template"],
+  "scripts": {
+    "build": "node -e \"0\""
+  },
+  "dependencies": {
+    "@jelly/storefront-registry": "0.1.0",
+    "@jelly/storefront-renderer": "0.1.0",
+    "@jelly/storefront-schema": "0.1.0",
+    "@jelly/storefront-themes": "0.1.0",
+    "@jelly/theme-sdk": "0.1.0"
+  }
+}

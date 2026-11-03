@@ -57,3 +57,19 @@ describe("theme discovery", () => {
 function script(): string {
   return [resolve(process.cwd(), "../scripts/generate-theme-index.mjs"), resolve(process.cwd(), "scripts/generate-theme-index.mjs")].find((path) => existsSync(path)) ?? "";
 }
+
+describe("registerThemeProject", () => {
+  it("registers a theme folder at run time, and replaces it when registered again", async () => {
+    const { registerThemeProject } = await import("./starter-packs");
+    const manifest = read("theme.json");
+    const pack = registerThemeProject({ manifest, starter: read("starter.json") })!;
+    expect(pack.id).toBe("jelly-studio");
+    expect(isStarterPackId("jelly-studio")).toBe(true);
+    expect(getThemeDefinition("jelly-studio").label).toBe(manifest.name);
+    registerThemeProject({ manifest: { ...manifest, name: "Renamed" }, starter: read("starter.json") });
+    expect(getThemeDefinition("jelly-studio").label).toBe("Renamed");
+    expect(registerThemeProject({ manifest })).toBeNull();
+    expect(isStarterPackId("jelly-studio")).toBe(false);
+    expect(() => registerThemeProject({ manifest: { ...manifest, id: "jelly-avenue" } })).toThrow(/built-in/);
+  });
+});

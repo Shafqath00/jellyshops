@@ -6,7 +6,8 @@
   "description": "Everything a theme developer imports: define a theme, its sections and blocks, validate a theme project, and run the conformance suite.",
   "exports": {
     ".": "./src/index.ts",
-    "./testing": "./src/testing.tsx"
+    "./testing": "./src/testing.tsx",
+    "./sample-data": "./src/sample-data.ts"
   },
   "dependencies": {
     "@jelly/storefront-registry": "0.1.0",

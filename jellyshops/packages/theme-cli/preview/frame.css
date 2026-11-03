@@ -1,0 +1,11 @@
+body { margin: 0; }
+.jelly-frame-message { margin: 24px; font: 14px/1.5 system-ui, sans-serif; color: #5b6570; }
+/* Selection outlines, as in the platform editor. */
+.theme-preview-viewport [data-editor-section-id] { position: relative; cursor: pointer; }
+.theme-preview-viewport [data-editor-section-id]:hover { outline: 1px dashed #3b82f6; outline-offset: -1px; }
+.theme-preview-viewport [data-editor-selected="true"] { outline: 2px solid #3b82f6; outline-offset: -2px; }
+.theme-preview-viewport [data-editor-section-id]:hover::before,
+.theme-preview-viewport [data-editor-selected="true"]::before {
+  content: attr(data-editor-label); position: absolute; z-index: 10; top: 0; left: 0; padding: 3px 7px; border-radius: 0 0 6px 0;
+  color: #fff; background: #3b82f6; font: 600 10px/1.35 system-ui, sans-serif; pointer-events: none;
+}

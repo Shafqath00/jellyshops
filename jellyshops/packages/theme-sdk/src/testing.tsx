@@ -1,7 +1,8 @@
 import { render } from "@testing-library/react";
 import axe from "axe-core";
 import { describe, expect, it } from "vitest";
-import { RegistrySectionRenderer, type CommerceDataProvider, type StorefrontPageContext } from "@jelly/storefront-renderer";
+import { RegistrySectionRenderer, type CommerceDataProvider } from "@jelly/storefront-renderer";
+import { samplePageContext as pageContext } from "./sample-data";
 import { listSectionDefinitionsForPage } from "@jelly/storefront-registry";
 import type { PageType, RuntimeMenuV4, SectionNode } from "@jelly/storefront-schema";
 import { getStarterPack, getThemeDefinition, resolveStorefrontThemeTokens, resolveTheme, validateStarterPack, validateThemeManifest, validateThemeProject, validateThemeSettings, type ThemeManifest } from "@jelly/storefront-themes";
@@ -11,32 +12,6 @@ type Entry = { region: Region; section: SectionNode };
 
 const commerce: CommerceDataProvider = { initialProducts: [], async getProducts() { return []; } };
 const AXE_OPTIONS = { runOnly: { type: "tag" as const, values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "best-practice"] }, rules: { "color-contrast": { enabled: false }, region: { enabled: false }, "landmark-one-main": { enabled: false }, "page-has-heading-one": { enabled: false } } };
-
-const sampleProduct = { id: "p1", title: "Sample product", vendor: "Conformance Store", description: "A sample product.", imageUrl: "https://images.example.com/p1.jpg", media: [{ id: "m1", url: "https://images.example.com/p1.jpg", altText: "Sample product" }], specifications: { Material: "Cotton" }, shippingCopy: "Free delivery", options: [{ id: "size", name: "Size", required: true, values: [{ id: "s", label: "Small", selected: false, available: true }, { id: "m", label: "Medium", selected: false, available: true }] }] };
-const sampleList = [1, 2, 3].map((n) => ({ id: `p${n}`, name: `Product ${n}`, title: `Product ${n}`, handle: `product-${n}`, price: "£10.00", imageUrl: `https://images.example.com/p${n}.jpg`, description: "", slug: `product-${n}` })) as never[];
-
-/** Sample data for each page type, so sections that need a product, collection or cart have something to draw. */
-function pageContext(pageType: PageType): StorefrontPageContext {
-  const none = { pageType, resource: null } as StorefrontPageContext;
-  switch (pageType) {
-    case "product":
-      return { pageType, resource: { id: "p1", handle: "sample", data: { title: sampleProduct.title, productPresentation: { product: sampleProduct, selection: [], quantity: 1, pricing: { price: "£10.00" }, availability: { state: "selection-required", message: "Choose a size" }, canAddToCart: false, selectOption() {}, setQuantity() {}, addToCart: async () => ({ ok: true }), buyNow: async () => ({ ok: true }), relatedProducts: sampleList } } } } as unknown as StorefrontPageContext;
-    case "collection":
-      return { pageType, resource: { id: "c1", handle: "sample", data: { collectionPresentation: { collection: { id: "c1", title: "Sample collection", description: "", imageUrl: "" }, products: sampleList, totalProducts: sampleList.length } } } } as unknown as StorefrontPageContext;
-    case "search":
-      return { pageType, resource: null, data: { query: "shirt", state: "results", resultCount: 3, results: sampleList, searchHref: "#search" } } as unknown as StorefrontPageContext;
-    case "cart":
-      return { pageType, resource: null, data: { lines: [], subtotal: "£0.00", shippingNote: "", checkoutHref: "#checkout", shopHref: "#shop" } } as unknown as StorefrontPageContext;
-    case "page":
-      return { pageType, resource: { id: "about", handle: "about", data: { title: "About", content: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "About this store." }] }] } } } } as unknown as StorefrontPageContext;
-    case "blog":
-      return { pageType, resource: { id: "news", handle: "news", data: { storeSlug: "conformance", blog: { title: "Journal", handle: "news" }, articles: [{ id: "a1", title: "Spring edit", handle: "spring", excerpt: "New colours.", publishedAt: "2026-03-12T00:00:00Z" }] } } } as unknown as StorefrontPageContext;
-    case "article":
-      return { pageType, resource: { id: "a1", handle: "spring", data: { article: { title: "Spring edit", excerpt: "New colours.", content: { text: "Body" }, publishedAt: "2026-03-12T00:00:00Z" } } } } as unknown as StorefrontPageContext;
-    default:
-      return none;
-  }
-}
 
 /** A theme's starter templates with their shared sections resolved, ready to draw. */
 function entriesFor(packId: string, type: PageType): Entry[] {

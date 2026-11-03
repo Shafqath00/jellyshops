@@ -43,13 +43,28 @@ export function isManuallyRegistered(id: string): boolean { return manualIds.has
  * from the manifest defaults, everything else is the shared storefront. A folder whose id is
  * already registered above is skipped (those need code, or predate discovery).
  */
-for (const { manifest } of discoveredThemes) {
-  if (manualIds.has(manifest.id)) continue;
+function folderTheme(manifest: Record<string, any>): ThemeDefinition {
   const colors = manifest.settingsDefaults?.colors ?? {};
   const typography = manifest.settingsDefaults?.typography ?? {};
   const base = minimalTokens;
   const tokens: ThemeTokens = { ...base, colors: { ...base.colors, ...colors }, typography: { display: typography.headingFont ?? base.typography.display, body: typography.bodyFont ?? base.typography.body } };
-  themes.push(definition(manifest.id, manifest.name, tokens, manifest));
+  return definition(manifest.id, manifest.name, tokens, manifest);
+}
+for (const { manifest } of discoveredThemes) {
+  if (!manualIds.has(manifest.id)) themes.push(folderTheme(manifest));
+}
+
+/**
+ * Registers (or replaces) a declarative theme while the program runs. The CLI preview and test
+ * runner use this for a theme folder that is not part of the platform build. Built-in themes
+ * cannot be replaced.
+ */
+export function registerFolderTheme(manifest: Record<string, any>): ThemeDefinition {
+  if (manualIds.has(manifest.id)) throw new Error(`"${manifest.id}" is a built-in theme and cannot be replaced.`);
+  const next = folderTheme(manifest);
+  const index = themes.findIndex((theme) => theme.id === manifest.id);
+  if (index === -1) themes.push(next); else themes[index] = next;
+  return next;
 }
 
 export function listThemes(): ThemeDefinition[] { return [...themes]; }

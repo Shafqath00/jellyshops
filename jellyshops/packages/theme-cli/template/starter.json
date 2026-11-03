@@ -1,0 +1,430 @@
+{
+  "globalSections": {
+    "announcement": {
+      "id": "studio-announcement",
+      "type": "announcement-bar",
+      "enabled": true,
+      "settings": {
+        "text": "Free delivery on orders over £50"
+      },
+      "blocks": []
+    },
+    "header": {
+      "id": "studio-header",
+      "type": "header",
+      "enabled": true,
+      "settings": {
+        "storeName": "Your studio",
+        "showSearch": true,
+        "showCart": true,
+        "sticky": true
+      },
+      "blocks": []
+    },
+    "footer": {
+      "id": "studio-footer",
+      "type": "footer",
+      "enabled": true,
+      "settings": {
+        "text": "Handmade in small batches.",
+        "showNewsletter": true
+      },
+      "blocks": []
+    }
+  },
+  "templates": {
+    "home": {
+      "type": "home",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "studio-hero",
+            "type": "hero",
+            "enabled": true,
+            "settings": {
+              "contentAlignment": "left",
+              "styleAlign": "left"
+            },
+            "blocks": [
+              {
+                "id": "studio-hero-title",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "Objects made slowly, by hand"
+                }
+              },
+              {
+                "id": "studio-hero-text",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "Small-batch ceramics and textiles from our studio."
+                }
+              },
+              {
+                "id": "studio-hero-button",
+                "type": "button",
+                "enabled": true,
+                "settings": {
+                  "label": "Shop the collection",
+                  "href": "/shop"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "studio-featured",
+            "type": "product-grid",
+            "enabled": true,
+            "settings": {
+              "heading": "New this season",
+              "limit": 4,
+              "columns": 4,
+              "emptyMessage": "Products will appear here once you add them to your store."
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "studio-testimonials",
+            "type": "testimonials",
+            "enabled": true,
+            "settings": {
+              "heading": "What customers say"
+            },
+            "blocks": [
+              {
+                "id": "studio-quote-1",
+                "type": "testimonial",
+                "enabled": true,
+                "settings": {
+                  "quote": "Beautiful, and it arrived beautifully wrapped.",
+                  "author": "Asha"
+                }
+              },
+              {
+                "id": "studio-quote-2",
+                "type": "testimonial",
+                "enabled": true,
+                "settings": {
+                  "quote": "My favourite mug. I bought four more.",
+                  "author": "Tom"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "studio-newsletter",
+            "type": "newsletter",
+            "enabled": true,
+            "settings": {},
+            "blocks": [
+              {
+                "id": "studio-newsletter-title",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "Studio news"
+                }
+              },
+              {
+                "id": "studio-newsletter-text",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "New pieces and open-studio days, once a month."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "product": {
+      "type": "product",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "studio-gallery",
+            "type": "product-gallery",
+            "enabled": true,
+            "settings": {
+              "imageFit": "cover",
+              "layout": "thumbnails"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "studio-info",
+            "type": "product-information",
+            "enabled": true,
+            "settings": {
+              "showVendor": true,
+              "showSku": true,
+              "showCompareAtPrice": true,
+              "showAvailability": true
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "studio-options",
+            "type": "product-options",
+            "enabled": true,
+            "settings": {},
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "studio-purchase",
+            "type": "product-purchase",
+            "enabled": true,
+            "settings": {
+              "showQuantity": true,
+              "label": "Add to cart"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "studio-description",
+            "type": "product-description",
+            "enabled": true,
+            "settings": {},
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "studio-related",
+            "type": "related-products",
+            "enabled": true,
+            "settings": {},
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "collection": {
+      "type": "collection",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "studio-collection-header",
+            "type": "collection-header",
+            "enabled": true,
+            "settings": {
+              "showTitle": true,
+              "showDescription": true,
+              "showImage": true,
+              "layout": "simple"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "studio-collection-grid",
+            "type": "collection-product-grid",
+            "enabled": true,
+            "settings": {},
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "cart": {
+      "type": "cart",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "studio-cart",
+            "type": "cart-summary",
+            "enabled": true,
+            "settings": {},
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "search": {
+      "type": "search",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "studio-search",
+            "type": "search-results",
+            "enabled": true,
+            "settings": {},
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "page": {
+      "type": "page",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "studio-page",
+            "type": "page-content",
+            "enabled": true,
+            "settings": {},
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "not-found": {
+      "type": "not-found",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "studio-not-found",
+            "type": "not-found-message",
+            "enabled": true,
+            "settings": {},
+            "blocks": [
+              {
+                "id": "studio-not-found-title",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "We can't find that page"
+                }
+              },
+              {
+                "id": "studio-not-found-text",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "It may have moved. Try the shop or search."
+                }
+              },
+              {
+                "id": "studio-not-found-button",
+                "type": "button",
+                "enabled": true,
+                "settings": {
+                  "label": "Back to the shop",
+                  "href": "/shop"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    }
+  }
+}

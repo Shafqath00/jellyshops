@@ -1,6 +1,6 @@
 import { getV4StarterPack, isV4StarterPackId, listV4StarterPacks, validateV4StarterPack, type V4StarterPack } from "@jelly/storefront-registry";
 import { discoveredThemes } from "./themes/index.generated.js";
-import { isManuallyRegistered } from "./theme-registry.js";
+import { isManuallyRegistered, registerFolderTheme } from "./theme-registry.js";
 import type { SectionNode } from "@jelly/storefront-schema";
 import type { DiscoveredTheme } from "./types.js";
 
@@ -55,7 +55,7 @@ const discoveredPacks: V4StarterPack[] = discoveredThemes
   .filter((pack): pack is V4StarterPack => pack !== null);
 
 /** Ids of starter packs that come from theme folders (not the built-in ones). */
-export const DISCOVERED_STARTER_PACK_IDS: readonly string[] = discoveredPacks.map((pack) => pack.id);
+export const DISCOVERED_STARTER_PACK_IDS: string[] = discoveredPacks.map((pack) => pack.id);
 
 export function listStarterPacks(): V4StarterPack[] {
   return [...listV4StarterPacks(), ...structuredClone(discoveredPacks)];
@@ -72,4 +72,21 @@ export function getStarterPack(id: string): V4StarterPack {
 /** Checks a pack the same way for built-in and discovered ones. */
 export function validateStarterPack(value: unknown) {
   return validateV4StarterPack(value, DISCOVERED_STARTER_PACK_IDS);
+}
+
+/**
+ * Registers a theme folder (theme.json + optional starter.json) at run time: the theme, and its
+ * starter pack when it has one. Registering the same id again replaces it, so a dev server can
+ * reload edits. Returns the pack (or null when the folder has no starter).
+ */
+export function registerThemeProject(entry: DiscoveredTheme): V4StarterPack | null {
+  registerFolderTheme(entry.manifest);
+  const pack = createStarterPack(entry);
+  const index = discoveredPacks.findIndex((candidate) => candidate.id === entry.manifest.id);
+  if (!pack) {
+    if (index !== -1) { discoveredPacks.splice(index, 1); DISCOVERED_STARTER_PACK_IDS.splice(DISCOVERED_STARTER_PACK_IDS.indexOf(entry.manifest.id), 1); }
+    return null;
+  }
+  if (index === -1) { discoveredPacks.push(pack); DISCOVERED_STARTER_PACK_IDS.push(pack.id); } else discoveredPacks[index] = pack;
+  return structuredClone(pack);
 }

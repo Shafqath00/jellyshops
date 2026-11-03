@@ -1,0 +1,65 @@
+/*
+ * Styles for __NAME__.
+ *
+ * Every rule is scoped to the theme and reads the theme's tokens (--theme-*, --jelly-*), never fixed
+ * colours, so the settings in theme.json and a merchant's own choices apply everywhere.
+ * Change the look by editing this file; the preview reloads as you save.
+ */
+[data-jelly-theme="__ID__"] {
+  background: var(--theme-background);
+  color: var(--theme-text);
+  font-family: var(--theme-font-body);
+  font-size: var(--jelly-body-size);
+  line-height: 1.6;
+}
+[data-jelly-theme="__ID__"] h1,
+[data-jelly-theme="__ID__"] h2,
+[data-jelly-theme="__ID__"] h3 {
+  font-family: var(--theme-font-heading);
+  font-weight: var(--jelly-heading-weight);
+  line-height: 1.15;
+  margin: 0 0 0.5em;
+}
+[data-jelly-theme="__ID__"] h1 { font-size: var(--jelly-heading-size); }
+[data-jelly-theme="__ID__"] h2 { font-size: calc(var(--jelly-heading-size) * 0.62); }
+[data-jelly-theme="__ID__"] a { color: inherit; }
+[data-jelly-theme="__ID__"] ul { list-style: none; margin: 0; padding: 0; }
+
+/* Layout */
+[data-jelly-theme="__ID__"] .jelly-container { max-width: var(--jelly-container-width); margin: 0 auto; padding: 0 var(--jelly-layout-gutter); }
+[data-jelly-theme="__ID__"] .jelly-section { padding: var(--jelly-spacing-section) 0; }
+
+/* Buttons */
+[data-jelly-theme="__ID__"] .jelly-button {
+  display: inline-block; padding: 0.8em 1.6em; border: 1px solid var(--theme-text); border-radius: var(--jelly-radius-button);
+  background: var(--theme-text); color: var(--theme-background); text-decoration: none; font: inherit; cursor: pointer;
+}
+[data-jelly-theme="__ID__"] .jelly-button:hover { background: var(--theme-accent); border-color: var(--theme-accent); color: var(--theme-text); }
+
+/* Announcement, header and footer */
+[data-jelly-theme="__ID__"] .jelly-announcement { padding: 8px var(--jelly-layout-gutter); background: var(--theme-text); color: var(--theme-background); text-align: center; font-size: 0.875rem; }
+[data-jelly-theme="__ID__"] .jelly-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 20px var(--jelly-layout-gutter); border-bottom: 1px solid var(--theme-border); }
+[data-jelly-theme="__ID__"] .jelly-header-brand { font-family: var(--theme-font-heading); font-size: 1.5rem; text-decoration: none; }
+[data-jelly-theme="__ID__"] .jelly-menu { display: flex; gap: 24px; }
+[data-jelly-theme="__ID__"] .jelly-menu a { text-decoration: none; }
+[data-jelly-theme="__ID__"] .jelly-mobile-navigation { display: none; }
+[data-jelly-theme="__ID__"] .jelly-footer { padding: 48px var(--jelly-layout-gutter); background: var(--theme-surface); border-top: 1px solid var(--theme-border); }
+
+/* Hero */
+[data-jelly-theme="__ID__"] .jelly-hero { background: var(--theme-accent-soft); }
+[data-jelly-theme="__ID__"] .jelly-hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+
+/* Product grids and cards */
+[data-jelly-theme="__ID__"] .jelly-product-grid-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px; }
+[data-jelly-theme="__ID__"] .jelly-product-card { background: var(--theme-surface); border-radius: var(--jelly-radius-card); overflow: hidden; box-shadow: var(--jelly-shadow-card); }
+[data-jelly-theme="__ID__"] .jelly-product-card-media img { display: block; width: 100%; aspect-ratio: var(--jelly-card-ratio); object-fit: cover; }
+[data-jelly-theme="__ID__"] .jelly-product-card-body { padding: 16px; }
+[data-jelly-theme="__ID__"] .jelly-product-card-price { color: var(--theme-muted-text); }
+
+/* Phones */
+@media (max-width: 767px) {
+  [data-jelly-theme="__ID__"] .jelly-section { padding: calc(var(--jelly-spacing-section) * 0.6) 0; }
+  [data-jelly-theme="__ID__"] .jelly-header .jelly-menu { display: none; }
+  [data-jelly-theme="__ID__"] .jelly-mobile-navigation { display: block; }
+  [data-jelly-theme="__ID__"] h1 { font-size: calc(var(--jelly-heading-size) * 0.6); }
+}
