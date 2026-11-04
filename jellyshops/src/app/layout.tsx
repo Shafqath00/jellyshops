@@ -6,6 +6,7 @@ import "./globals.css";
 import "./themes/storefront-base.css";
 import "./themes/jelly-minimal.css";
 import "./themes/jelly-avenue.css";
+import "./themes/jelly-resthaven.css";
 import "./shadcn-theme.css";
 
 export const metadata: Metadata = {

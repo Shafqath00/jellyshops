@@ -79,6 +79,7 @@ export function RegistrySectionRenderer({
   const isSelected = selected?.kind === "section" && selected.sectionId === section.id;
   return <div
     data-testid={`section-${section.type}`}
+    data-section-type={section.type}
     {...sectionCssProps(section)}
     {...sectionStyleProps(section.settings, section.responsive?.mobile, section.responsive?.tablet)}
     {...(editor ? { "data-editor-section-id": section.id, "data-editor-label": getSectionDefinition(section.type, themeVersion)?.label ?? sectionLabel(section.type), "data-editor-selected": String(isSelected) } : {})}
