@@ -16,6 +16,8 @@ it.each(["fresh-market", "artisan-boutique", "classic"])("exposes working color 
 it("registers every Store Editor theme", () => {
   expect(listThemes().map((theme) => theme.id)).toEqual([
     "jelly-signature", "jelly-avenue", "minimal", "classic", "bold", "elegant", "playful", "fresh-market", "artisan-boutique", "example-boutique",
+    // Found in src/themes/ (declarative themes).
+    "jelly-resthaven",
   ]);
 });
 
@@ -39,8 +41,9 @@ it("preserves Artisan Boutique's approved visual identity", () => {
   });
 });
 
-it("gives every theme a variant for each registered section", () => {
-  const sectionTypes = listSectionDefinitions().map((section) => section.type);
+it("gives every theme a variant for each core section", () => {
+  // Sections a theme adds itself (vendor/name, limited to that theme) are not core sections.
+  const sectionTypes = listSectionDefinitions().map((section) => section.type).filter((type) => !type.includes("/"));
 
   for (const theme of listThemes()) {
     expect(Object.keys(theme.sectionVariants)).toEqual(expect.arrayContaining(sectionTypes));

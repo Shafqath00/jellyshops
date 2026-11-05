@@ -2,6 +2,8 @@ import { render, screen } from "@testing-library/react";
 import { createDefaultStoreDesign, type RuntimeStorefrontSnapshotV4 } from "@jelly/storefront-schema";
 import type { ResolvedStorefrontRoute } from "./resource-loader";
 import { PublishedRuntimeStorefront, PublishedStorefront } from "./storefront-page";
+// The live store page reads the shop catalogue (for product and collection links) from the shop context.
+import { ShopProvider } from "@/contexts/shop-context";
 
 function documentWithHeading(heading: string) { const document = createDefaultStoreDesign(); document.pages.home.sections[0].blocks[0].settings.text = heading; return document; }
 
@@ -52,7 +54,7 @@ it("renders a resolved compiled route without rebuilding a V3 document", () => {
     }],
   };
 
-  render(<PublishedRuntimeStorefront snapshot={snapshot} route={route} storeSlug="sweet-bakes" currency="INR" products={[]} />);
+  render(<ShopProvider><PublishedRuntimeStorefront snapshot={snapshot} route={route} storeSlug="sweet-bakes" currency="INR" products={[]} /></ShopProvider>);
 
   expect(screen.getByText("COMPILED LIVE")).toBeVisible();
 });
@@ -78,7 +80,7 @@ it("wraps a Collection template with the resolved V4 global regions", () => {
     sections: [],
   };
 
-  render(<PublishedRuntimeStorefront snapshot={snapshot} route={route} storeSlug="sweet-bakes" currency="INR" products={[]} />);
+  render(<ShopProvider><PublishedRuntimeStorefront snapshot={snapshot} route={route} storeSlug="sweet-bakes" currency="INR" products={[]} /></ShopProvider>);
 
   expect(screen.getByText("Free shipping")).toBeVisible();
   expect(screen.getByRole("banner")).toBeVisible();

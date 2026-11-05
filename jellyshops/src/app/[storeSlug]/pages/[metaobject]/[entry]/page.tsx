@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { MetaobjectEntryContent } from "@jelly/storefront-renderer";
+import { MetaobjectEntryContent } from "@/features/storefront/metaobject-entry-view";
 import { getServerStorefront } from "@/features/storefront/server-storefront";
 import { fetchPublicMetaobjectEntry } from "@/features/storefront/metaobjects-api";
 

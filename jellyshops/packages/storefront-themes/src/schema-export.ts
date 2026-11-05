@@ -33,7 +33,8 @@ export function buildSchemaFiles(): Record<string, string> {
   const sharedSectionSettings = jsonSchemaOf(sectionStyleSchema);
   const sharedBlockSettings = jsonSchemaOf(blockStyleSchema);
   const manifest = z.toJSONSchema(themeManifestSchema, { io: "input" });
-  const sections = listSectionDefinitions().map((definition) => ({
+  // Core sections only: a section a theme adds itself (limited to that theme) is described in its own theme.json.
+  const sections = listSectionDefinitions().filter((definition) => !definition.themes).map((definition) => ({
     type: definition.type,
     category: definition.category,
     supportedPages: definition.supportedPages,

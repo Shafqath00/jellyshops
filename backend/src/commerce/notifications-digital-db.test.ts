@@ -42,7 +42,7 @@ describe("transactional notifications and private digital access", () => {
   const service = createNotificationService(transactions, capture, { publicBaseUrl: "https://example.test", tokenSecret: "x".repeat(32) });
   await service.runWorker();
   expect(capture.messages).toHaveLength(3);
-  const url = new URL(capture.messages.find((message) => message.subject.includes("downloads"))!.text.split("guide.pdf: ")[1]!);
+  const url = new URL(capture.messages.find((message) => message.subject.includes("downloads"))!.text.split("guide.pdf: ")[1]!.split(/\s/)[0]!);
   const id = url.pathname.split("/").pop()!; const token = url.searchParams.get("token")!;
   expect(JSON.stringify(await service.list("s"))).not.toContain(token);
   expect((await db.query(`SELECT "tokenHash" FROM "DigitalEntitlement"`)).rows[0]!.tokenHash).not.toBe(token);
