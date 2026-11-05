@@ -184,6 +184,25 @@ export class ThemePackageService {
   }
 
   /** One asset file of a version, for the public asset route. */
+  /**
+   * A file of an uploaded theme by theme id, for the theme's own paths (`/themes/<id>/<file>`) on
+   * the store address. Uses the named version when given, otherwise the newest version that is not
+   * withdrawn and has that file. The theme id is public, so this reveals nothing a storefront doesn't.
+   */
+  async openThemeAsset(themeId: string, path: string, version?: string): Promise<{ data: Buffer; contentType: string; version: string } | null> {
+    const rows = (await this.sql.query<{ id: string; version: string; status: string; assets: StoredAsset[] }>(
+      `SELECT v."id", v."version", v."status", v."assets" FROM "ThemePackageVersion" v JOIN "ThemePackage" p ON p."id" = v."packageId" WHERE p."themeId" = $1`,
+      [themeId],
+    )).rows;
+    const candidates = version
+      ? rows.filter((row) => row.version === version)
+      : rows.filter((row) => row.status === "active").sort((a, b) => compareVersions(b.version, a.version));
+    const row = candidates.find((candidate) => candidate.assets.some((asset) => asset.path === path));
+    if (!row) return null;
+    const file = await this.openAsset(row.id, path);
+    return file ? { ...file, version: row.version } : null;
+  }
+
   async openAsset(versionId: string, path: string): Promise<{ data: Buffer; contentType: string } | null> {
     const row = (await this.sql.query<{ assets: StoredAsset[] }>(`SELECT "assets" FROM "ThemePackageVersion" WHERE "id" = $1`, [versionId])).rows[0];
     const asset = row?.assets.find((candidate) => candidate.path === path);

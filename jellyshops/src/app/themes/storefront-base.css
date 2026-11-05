@@ -377,3 +377,7 @@
 [data-jelly-theme] .jelly-product-option-values[data-display] button[aria-pressed="true"] { background: transparent; color: inherit; border-color: var(--theme-text, currentColor); box-shadow: 0 0 0 2px var(--theme-background, #fff), 0 0 0 4px var(--theme-text, currentColor); }
 [data-jelly-theme] .jelly-product-option-values[data-display] button:disabled { text-decoration: none; opacity: 0.4; position: relative; }
 [data-jelly-theme] .jelly-product-option-values[data-display] button:disabled::after { content: ""; position: absolute; inset: 50% 6px auto; height: 1px; background: currentColor; transform: rotate(-45deg); }
+
+/* Section recipes: generated spacer and product list elements. */
+.jelly-custom-content-inner > .jelly-recipe-spacer { flex: none; width: 100%; }
+.jelly-custom-content-inner > .jelly-recipe-products { width: 100%; }

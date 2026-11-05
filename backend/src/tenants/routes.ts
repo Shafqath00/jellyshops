@@ -6,9 +6,12 @@ import { ApiError } from "../http/errors.js";
 import type { TenantRepository } from "./repository.js";
 import { MARKET_CURRENCIES } from "./settings.js";
 
+/** The storefront's own top-level paths (folders in jellyshops/src/app); a store named like one would be unreachable. */
+export const RESERVED_STORE_SLUGS = ["admin", "api", "auth", "login", "signup", "onboarding", "theme-preview", "themes"];
+
 const createStoreSchema = z.object({
   name: z.string().trim().min(1).max(120),
-  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).min(3).max(63),
+  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).min(3).max(63).refine((slug) => !RESERVED_STORE_SLUGS.includes(slug), { message: "That web address is used by Jelly Shops itself. Choose another." }),
   currency: z.string().regex(/^[A-Z]{3}$/),
   country: z.string().regex(/^[A-Z]{2}$/),
 }).strict().refine((input) => MARKET_CURRENCIES[input.country] === input.currency, { message: "Choose India/INR, United Kingdom/GBP, or United States/USD.", path: ["currency"] });

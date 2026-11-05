@@ -395,3 +395,45 @@ describe("theme packages in the assembled app", () => {
     await database.close();
   });
 });
+
+describe("a theme's own file paths", () => {
+  let database: IntegrationDatabase;
+  let service: ThemePackageService;
+  let app: express.Express;
+  beforeEach(async () => {
+    database = await createPGliteDatabase();
+    await seedStore(database, "store-a", "a");
+    service = new ThemePackageService(database as never, new MemoryStorage());
+    app = express();
+    app.use("/api/public", createPublicThemeVersionRouter(service));
+    app.use(errorHandler);
+  });
+  afterEach(async () => database.close());
+
+  it("serves the newest available version by default and a pinned version on request", async () => {
+    await service.upload("store-a", themePackage({ id: "paths-theme", version: "1.0.0" }));
+    const newer = await service.upload("store-a", themePackage({ id: "paths-theme", version: "1.1.0" }));
+    expect((await service.openThemeAsset("paths-theme", "mark.svg"))?.version).toBe("1.1.0");
+    expect((await service.openThemeAsset("paths-theme", "mark.svg", "1.0.0"))?.version).toBe("1.0.0");
+
+    // A withdrawn version is skipped unless a store asks for it by number (stores pinned to it keep working).
+    await service.yank("store-a", newer.version.id);
+    expect((await service.openThemeAsset("paths-theme", "mark.svg"))?.version).toBe("1.0.0");
+    expect((await service.openThemeAsset("paths-theme", "mark.svg", "1.1.0"))?.version).toBe("1.1.0");
+    expect(await service.openThemeAsset("paths-theme", "missing.svg")).toBeNull();
+    expect(await service.openThemeAsset("no-such-theme", "mark.svg")).toBeNull();
+  });
+
+  it("answers over HTTP with the file, short caching for the newest version and long caching for a pinned one", async () => {
+    await service.upload("store-a", themePackage({ id: "paths-theme" }));
+    const latest = await request(app).get("/api/public/themes/paths-theme/assets/mark.svg");
+    expect(latest.status).toBe(200);
+    expect(latest.headers["content-type"]).toContain("image/svg+xml");
+    expect(latest.headers["cache-control"]).toBe("public, max-age=300");
+    expect(latest.headers["content-security-policy"]).toContain("sandbox");
+    const pinned = await request(app).get("/api/public/themes/paths-theme/assets/mark.svg?version=1.0.0");
+    expect(pinned.headers["cache-control"]).toContain("immutable");
+    expect((await request(app).get("/api/public/themes/paths-theme/assets/other.svg")).status).toBe(404);
+    expect((await request(app).get("/api/public/themes/Bad_Id/assets/mark.svg")).status).toBe(404);
+  });
+});

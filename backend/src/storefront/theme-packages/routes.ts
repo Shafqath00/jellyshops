@@ -1,4 +1,4 @@
-import express, { Router } from "express";
+import express, { Router, type Response } from "express";
 import { z } from "zod";
 import { requireMerchant, requireStorePermission } from "../../auth/middleware.js";
 import type { AuthProvider } from "../../auth/types.js";
@@ -16,7 +16,7 @@ function replace(body: z.infer<typeof installSchema>): { replaceDraft: boolean; 
 }
 
 type MerchantApi = Pick<ThemePackageService, "upload" | "list" | "yank" | "install">;
-type PublicApi = Pick<ThemePackageService, "getVersion" | "openAsset">;
+type PublicApi = Pick<ThemePackageService, "getVersion" | "openAsset" | "openThemeAsset">;
 
 /** True for the one request that carries a theme package, so the app-wide 2 MB body limit can step aside for it. */
 export function isThemePackageUpload(request: { method: string; path: string }): boolean {
@@ -67,15 +67,28 @@ export function createPublicThemeVersionRouter(service: PublicApi): Router {
       const params = request.params as unknown as Record<string, string>;
       const versionId = params["0"];
       const path = params["1"];
-      const asset = await service.openAsset(versionId, path);
-      if (!asset) throw new ApiError(404, "NOT_FOUND", "That file was not found.");
-      response.setHeader("content-type", asset.contentType);
-      response.setHeader("cache-control", "public, max-age=31536000, immutable");
-      response.setHeader("x-content-type-options", "nosniff");
-      // An SVG opened on its own gets no way to run anything.
-      response.setHeader("content-security-policy", "default-src 'none'; style-src 'unsafe-inline'; sandbox");
-      response.send(asset.data);
+      sendAsset(response, await service.openAsset(versionId, path), true);
+    } catch (error) { next(error); }
+  });
+  // A theme's own file paths (`/themes/<id>/<file>` in theme.json), served on the store address by the
+  // storefront. `?version=` pins a version; without it the newest available version answers.
+  router.get(/^\/themes\/([a-z][a-z0-9-]{1,62})\/assets\/(.+)$/, async (request, response, next) => {
+    try {
+      const params = request.params as unknown as Record<string, string>;
+      const version = typeof request.query.version === "string" ? request.query.version : undefined;
+      sendAsset(response, await service.openThemeAsset(params["0"], params["1"], version), Boolean(version));
     } catch (error) { next(error); }
   });
   return router;
+}
+
+function sendAsset(response: Response, asset: { data: Buffer; contentType: string } | null, immutable: boolean): void {
+  if (!asset) throw new ApiError(404, "NOT_FOUND", "That file was not found.");
+  response.setHeader("content-type", asset.contentType);
+  // A pinned version never changes; "the newest version" can, so it is cached briefly.
+  response.setHeader("cache-control", immutable ? "public, max-age=31536000, immutable" : "public, max-age=300");
+  response.setHeader("x-content-type-options", "nosniff");
+  // An SVG opened on its own gets no way to run anything.
+  response.setHeader("content-security-policy", "default-src 'none'; style-src 'unsafe-inline'; sandbox");
+  response.send(asset.data);
 }

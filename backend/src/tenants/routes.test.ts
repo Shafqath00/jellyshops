@@ -86,6 +86,16 @@ describe("merchant routes", () => {
     });
   });
 
+  it("refuses a store address the storefront uses for its own pages", async () => {
+    const { app, tenants, authed } = setup();
+    for (const slug of ["themes", "admin", "theme-preview"]) {
+      const response = await request(app).post("/api/stores").set(authed()).send({ name: "Shop", slug, currency: "USD", country: "US" });
+      expect(response.status, slug).toBe(400);
+      expect(JSON.stringify(response.body)).toContain("used by Jelly Shops itself");
+    }
+    expect(tenants.createStore).not.toHaveBeenCalled();
+  });
+
   it("rejects malformed and extra store fields without calling persistence", async () => {
     const { app, tenants, authed } = setup();
 
@@ -112,5 +122,17 @@ describe("merchant routes", () => {
     expect(response.status).toBe(500);
     expect(response.body.error.code).toBe("PRINCIPAL_INVALID");
     expect(tenants.listStores).not.toHaveBeenCalled();
+  });
+});
+
+describe("reserved store addresses", () => {
+  it("cover every top-level page folder of the storefront app", async () => {
+    const { readdirSync, existsSync } = await import("node:fs");
+    const { resolve } = await import("node:path");
+    const { RESERVED_STORE_SLUGS } = await import("./routes.js");
+    const appDirectory = resolve(process.cwd(), "../jellyshops/src/app");
+    if (!existsSync(appDirectory)) return;
+    const folders = readdirSync(appDirectory, { withFileTypes: true }).filter((entry) => entry.isDirectory() && !entry.name.startsWith("[") && !entry.name.startsWith("(")).map((entry) => entry.name);
+    expect([...RESERVED_STORE_SLUGS].sort()).toEqual(expect.arrayContaining(folders.sort()));
   });
 });

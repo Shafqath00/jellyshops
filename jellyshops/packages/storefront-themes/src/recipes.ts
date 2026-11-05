@@ -5,7 +5,7 @@ import { compareThemeVersions } from "@jelly/storefront-schema";
 
 /**
  * Section recipes: a custom section a theme describes as data. A recipe lists the settings the
- * merchant can edit and a small set of elements (heading, text, button, image, group) that use
+ * merchant can edit and a small set of elements (heading, text, button, image, group, spacer, products) that use
  * those settings. The platform draws it with the existing Custom content section, so a recipe gets
  * the shared style controls, translations and editor support, and can never run code.
  *
@@ -25,6 +25,7 @@ const settingSchema = z.discriminatedUnion("type", [
   z.object({ id: settingId, type: z.literal("color"), label, default: z.string().regex(/^(#[0-9a-fA-F]{6})?$/).default("") }).strict(),
   z.object({ id: settingId, type: z.literal("image"), label }).strict(),
   z.object({ id: settingId, type: z.literal("link"), label, default: z.string().max(300).default("") }).strict(),
+  z.object({ id: settingId, type: z.literal("collection"), label }).strict(),
 ]);
 
 const when = z.string().optional();
@@ -35,6 +36,8 @@ type Element =
   | { kind: "text"; text: string; when?: string }
   | { kind: "button"; label: string; href?: string; style?: "primary" | "secondary" | "link"; when?: string }
   | { kind: "image"; image: string; link?: string; ratio?: string; when?: string }
+  | { kind: "spacer"; size: number; when?: string }
+  | { kind: "products"; limit?: number | string; collection?: string; columns?: number; when?: string }
   | { kind: "group"; direction?: "vertical" | "horizontal"; gap?: number; align?: "start" | "center" | "end" | "between"; elements: Element[]; when?: string };
 
 const leaf = z.discriminatedUnion("kind", [
@@ -42,6 +45,10 @@ const leaf = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("text"), text, when }).strict(),
   z.object({ kind: z.literal("button"), label: z.string().max(60), href: z.string().max(300).optional(), style: z.enum(["primary", "secondary", "link"]).optional(), when }).strict(),
   z.object({ kind: z.literal("image"), image: z.string().max(80), link: z.string().max(300).optional(), ratio: z.enum(["square", "portrait", "landscape", "wide"]).optional(), when }).strict(),
+  // Empty space of a fixed height, in pixels.
+  z.object({ kind: z.literal("spacer"), size: z.number().int().min(4).max(160), when }).strict(),
+  // A grid of the store's products: up to 12, from one collection or the featured list.
+  z.object({ kind: z.literal("products"), limit: z.union([z.number().int().min(1).max(12), z.string().max(80)]).optional(), collection: z.string().max(80).optional(), columns: z.number().int().min(2).max(4).optional(), when }).strict(),
 ]);
 const group = (inner: z.ZodType<Element>): z.ZodType<Element> => z.object({
   kind: z.literal("group"), direction: z.enum(["vertical", "horizontal"]).optional(), gap: z.number().int().min(0).max(80).optional(),
@@ -84,6 +91,14 @@ export const recipeSchema = z.object({
       if (exact) known(exact[1], [...here, "image"], ["image"]); else context.addIssue({ code: "custom", path: [...here, "image"], message: 'An image uses one image setting, written like "{photo}".' });
       placeholders(item.link, [...here, "link"]);
     }
+    if (item.kind === "products") {
+      const single = (value: string, field: string, type: string, example: string) => {
+        const exact = value.match(/^{([^{}]+)}$/);
+        if (exact) known(exact[1], [...here, field], [type]); else context.addIssue({ code: "custom", path: [...here, field], message: `A product list ${field} uses one ${type} setting, written like "${example}".` });
+      };
+      if (typeof item.limit === "string") single(item.limit, "limit", "number", "{count}");
+      if (item.collection !== undefined) single(item.collection, "collection", "collection", "{collection}");
+    }
     if (item.kind === "group") walk(item.elements, [...here, "elements"]);
   });
   walk(recipe.elements, ["elements"]);
@@ -104,6 +119,7 @@ function settingControl(setting: SectionRecipe["settings"][number]): { control: 
     case "color": return { control: { ...base, type: "color", allowAlpha: false }, schema: z.union([z.string().regex(/^#[0-9a-fA-F]{6}$/), z.literal("")]).optional() };
     case "image": return { control: { ...base, type: "image" }, schema: imageValue.nullable().optional() };
     case "link": return { control: { ...base, type: "link" }, schema: z.string().max(500).optional() };
+    case "collection": return { control: { ...base, type: "collection" }, schema: z.string().max(200).optional() };
   }
 }
 
@@ -178,6 +194,13 @@ export function expandRecipe(recipe: SectionRecipe, saved: Record<string, unknow
         const image = values[item.image.slice(1, -1)];
         if (!image) return [];
         return [{ id, type: "image", enabled: true, settings: { image, ...(item.link ? { link: fill(item.link, values) } : {}), ...(item.ratio ? { aspectRatio: item.ratio } : {}) } }];
+      }
+      // Generated block types the Custom content section draws for recipes only (merchants cannot add them).
+      case "spacer": return [{ id, type: "recipe-spacer", enabled: true, settings: { size: item.size } }];
+      case "products": {
+        const limit = typeof item.limit === "string" ? Number(values[item.limit.slice(1, -1)]) : item.limit ?? 4;
+        const collectionId = item.collection ? values[item.collection.slice(1, -1)] : undefined;
+        return [{ id, type: "recipe-products", enabled: true, settings: { limit: Number.isFinite(limit) ? Math.max(1, Math.min(12, Math.round(limit))) : 4, ...(typeof collectionId === "string" && collectionId ? { collectionId } : {}), columns: item.columns ?? 4 } }];
       }
       case "group": return [{ id, type: "group", enabled: true, settings: { groupDirection: item.direction ?? "vertical", ...(item.gap !== undefined ? { groupGap: item.gap } : {}), ...(item.align ? { groupAlign: item.align } : {}) }, blocks: build(item.elements, `${id}-`) }];
     }

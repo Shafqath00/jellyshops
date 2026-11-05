@@ -916,6 +916,30 @@
                     "label"
                   ],
                   "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-zA-Z][a-zA-Z0-9]{0,39}$"
+                    },
+                    "type": {
+                      "type": "string",
+                      "const": "collection"
+                    },
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 60
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "type",
+                    "label"
+                  ],
+                  "additionalProperties": false
                 }
               ]
             }
@@ -1072,6 +1096,66 @@
                         "image"
                       ],
                       "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "spacer"
+                        },
+                        "size": {
+                          "type": "integer",
+                          "minimum": 4,
+                          "maximum": 160
+                        },
+                        "when": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "size"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "kind": {
+                          "type": "string",
+                          "const": "products"
+                        },
+                        "limit": {
+                          "anyOf": [
+                            {
+                              "type": "integer",
+                              "minimum": 1,
+                              "maximum": 12
+                            },
+                            {
+                              "type": "string",
+                              "maxLength": 80
+                            }
+                          ]
+                        },
+                        "collection": {
+                          "type": "string",
+                          "maxLength": 80
+                        },
+                        "columns": {
+                          "type": "integer",
+                          "minimum": 2,
+                          "maximum": 4
+                        },
+                        "when": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "kind"
+                      ],
+                      "additionalProperties": false
                     }
                   ]
                 },
@@ -1215,6 +1299,66 @@
                             "required": [
                               "kind",
                               "image"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "const": "spacer"
+                              },
+                              "size": {
+                                "type": "integer",
+                                "minimum": 4,
+                                "maximum": 160
+                              },
+                              "when": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "kind",
+                              "size"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "kind": {
+                                "type": "string",
+                                "const": "products"
+                              },
+                              "limit": {
+                                "anyOf": [
+                                  {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 12
+                                  },
+                                  {
+                                    "type": "string",
+                                    "maxLength": 80
+                                  }
+                                ]
+                              },
+                              "collection": {
+                                "type": "string",
+                                "maxLength": 80
+                              },
+                              "columns": {
+                                "type": "integer",
+                                "minimum": 2,
+                                "maximum": 4
+                              },
+                              "when": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "kind"
                             ],
                             "additionalProperties": false
                           }
@@ -1375,6 +1519,66 @@
                                   "image"
                                 ],
                                 "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "kind": {
+                                    "type": "string",
+                                    "const": "spacer"
+                                  },
+                                  "size": {
+                                    "type": "integer",
+                                    "minimum": 4,
+                                    "maximum": 160
+                                  },
+                                  "when": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "kind",
+                                  "size"
+                                ],
+                                "additionalProperties": false
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "kind": {
+                                    "type": "string",
+                                    "const": "products"
+                                  },
+                                  "limit": {
+                                    "anyOf": [
+                                      {
+                                        "type": "integer",
+                                        "minimum": 1,
+                                        "maximum": 12
+                                      },
+                                      {
+                                        "type": "string",
+                                        "maxLength": 80
+                                      }
+                                    ]
+                                  },
+                                  "collection": {
+                                    "type": "string",
+                                    "maxLength": 80
+                                  },
+                                  "columns": {
+                                    "type": "integer",
+                                    "minimum": 2,
+                                    "maximum": 4
+                                  },
+                                  "when": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "kind"
+                                ],
+                                "additionalProperties": false
                               }
                             ]
                           },
@@ -1518,6 +1722,66 @@
                                       "required": [
                                         "kind",
                                         "image"
+                                      ],
+                                      "additionalProperties": false
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "kind": {
+                                          "type": "string",
+                                          "const": "spacer"
+                                        },
+                                        "size": {
+                                          "type": "integer",
+                                          "minimum": 4,
+                                          "maximum": 160
+                                        },
+                                        "when": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "kind",
+                                        "size"
+                                      ],
+                                      "additionalProperties": false
+                                    },
+                                    {
+                                      "type": "object",
+                                      "properties": {
+                                        "kind": {
+                                          "type": "string",
+                                          "const": "products"
+                                        },
+                                        "limit": {
+                                          "anyOf": [
+                                            {
+                                              "type": "integer",
+                                              "minimum": 1,
+                                              "maximum": 12
+                                            },
+                                            {
+                                              "type": "string",
+                                              "maxLength": 80
+                                            }
+                                          ]
+                                        },
+                                        "collection": {
+                                          "type": "string",
+                                          "maxLength": 80
+                                        },
+                                        "columns": {
+                                          "type": "integer",
+                                          "minimum": 2,
+                                          "maximum": 4
+                                        },
+                                        "when": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "kind"
                                       ],
                                       "additionalProperties": false
                                     }
