@@ -112,3 +112,34 @@ export function applyThemeMigrations(source: ThemeMigrationDraft, from: string, 
   }
   return { draft, changes };
 }
+
+const majorOf = (version: string) => Number(version.split(".")[0]);
+
+/**
+ * The migration steps a merchant upgrade runs. Steps are followed while they exist; a gap is allowed
+ * only inside one major version, because the version rules let a minor or patch release add things
+ * without saying how settings move. A gap across a major version is an error.
+ */
+export function getThemeUpgradePath(from: string, to: string, input: unknown): { steps: ThemeMigration[]; reached: string } {
+  themeVersionSchema.parse(from); themeVersionSchema.parse(to);
+  if (compareThemeVersions(from, to) >= 0) throw new Error("A theme upgrade must lead to a newer version.");
+  const migrations = z.array(themeMigrationSchema).max(100).parse(input ?? []);
+  const steps: ThemeMigration[] = [];
+  let current = from;
+  while (compareThemeVersions(current, to) < 0) {
+    const next = migrations.find((step) => compareThemeVersions(step.from, current) === 0 && compareThemeVersions(step.to, to) <= 0);
+    if (!next) {
+      if (majorOf(current) === majorOf(to)) break;
+      throw new Error(`Version ${to} has no upgrade path from ${current}. A new major version must say how settings move.`);
+    }
+    steps.push(next); current = next.to;
+  }
+  return { steps, reached: current };
+}
+
+/** Like applyThemeMigrations, for a merchant upgrade: runs the steps that exist (see getThemeUpgradePath). */
+export function applyThemeUpgrade(source: ThemeMigrationDraft, from: string, to: string, migrations: unknown): { draft: ThemeMigrationDraft; changes: ThemeMigrationChange[] } {
+  const { reached } = getThemeUpgradePath(from, to, migrations);
+  if (compareThemeVersions(reached, from) === 0) return { draft: structuredClone(source), changes: [] };
+  return applyThemeMigrations(source, from, reached, migrations);
+}

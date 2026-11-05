@@ -481,6 +481,10 @@ Use `/theme-preview/<theme>` (three widths, every template) during development; 
 - **Never** rename or remove a setting key, section type or block type that stores have saved, and never tighten a settings schema so existing values become invalid; Publish would start failing for those stores.
 - **Breaking changes today are manual:** ship a new theme id (for example `jelly-studio-2`) and let merchants switch (Saved looks keep their settings). There is **no automatic migration** of saved merchant data between theme versions, and no version side-by-side loading. Both are in the plan.
 
+#### How merchants upgrade (2026-11-05)
+
+When you upload a newer version, the store owner sees it under Store designs > Theme updates. They first see what upgrading changes in their draft (your migrations, applied to their theme settings and every section), then upgrade the draft, check it in the editor and publish. They can undo the upgrade until the draft moves to another version. Minor and patch versions need no migrations; a new major version must include a migration path from the previous one, or the upgrade is refused. If your migrations would leave a setting or section invalid, the merchant is told and cannot upgrade, so test your migrations with `applyThemeUpgrade` from `@jelly/theme-sdk` before uploading.
+
 #### Phase 4 foundations: compatibility and migration dry runs
 
 New projects declare `"engines": { "jelly": ">=1 <2" }` in `theme.json`. The declarative theme API is **1.0.0**, independent of internal npm package versions. Existing manifests may omit `engines`. Ranges are space-separated comparisons (`>=`, `>`, `<=`, `<`, `=`); one to three numeric components are accepted, with missing components padded with zero for comparisons. An exact `1` or `1.0` matches that version prefix. `^`, `~`, wildcards, prerelease ranges and `||` are unsupported and produce an error. Both local validation and upload reject incompatible ranges; install checks again against the current platform.

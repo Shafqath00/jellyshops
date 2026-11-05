@@ -11,7 +11,7 @@ const { api, useAuth, router } = vi.hoisted(() => ({
   router: { push: vi.fn() },
 }));
 
-vi.mock("@/features/auth/providers/auth-provider", () => ({ useAuth }));
+vi.mock("@/features/auth/providers/auth-provider", () => ({ useAuth, authApiOrigin: () => "http://api.test" }));
 vi.mock("@/features/store-editor/api/client", () => ({ createStoreEditorApi: () => api }));
 vi.mock("next/navigation", () => ({ useRouter: () => router }));
 
@@ -24,6 +24,8 @@ const catalog = [
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // The Theme updates panel asks whether the draft's uploaded theme has newer versions: here it has none.
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ offer: null }), { status: 200, headers: { "content-type": "application/json" } })));
   useAuth.mockReturnValue({ session: { access_token: "token" }, activeStore: { id: "store-a", slug: "store-a" } });
   api.listThemeCatalog.mockResolvedValue(catalog);
   api.listTemplates.mockResolvedValue([]);

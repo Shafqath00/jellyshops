@@ -8,6 +8,7 @@ import { listStarterPacks } from "@jelly/storefront-themes";
 import { useAuth } from "@/features/auth/providers/auth-provider";
 import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import type { ThemeCatalogEntry, ThemeConfigurationRecord } from "@/features/store-editor/api/types";
+import { ThemeUpgradePanel } from "@/features/theme-upgrade/theme-upgrade-panel";
 import { TemplateThumbnail, TemplatePreviewDialog } from "@/features/store-editor/components/template-preview";
 
 const starters = listStarterPacks();
@@ -113,6 +114,8 @@ function StoreDesignLibrary() {
             </div>
             <div className="bg-muted p-5 sm:p-7"><TemplateThumbnail key={configuration?.themeId} id={configuration?.themeId ?? "minimal"} name={selectedTheme?.name ?? "Your storefront"} image={selectedStarter?.previewAsset ?? selectedTheme?.previewAsset} /></div>
           </section>}
+          {/* Only drafts on an uploaded theme (they carry its version id) can be upgraded. */}
+          {hasWorkspace && configuration?.draftArtifactId && storeId && token && <ThemeUpgradePanel storeId={storeId} token={token} />}
           <section aria-labelledby="template-gallery">
             <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
               <div><p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-tint-foreground">Made for your next chapter</p><h2 id="template-gallery" className="text-2xl font-bold tracking-tight">{hasWorkspace ? "Explore store designs" : "Choose your starting point"}</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{hasWorkspace ? "Browse for inspiration. Edit your current storefront, or change its appearance below." : "Complete, ready-to-edit layouts. Your photos, your words, your products."}</p></div>

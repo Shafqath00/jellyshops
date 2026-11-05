@@ -13,5 +13,5 @@ export type { BlockDefinition, ControlDefinition, SectionDefinition } from "@jel
 export { createStarterPack, defineTheme, resolveTheme, validateThemeManifest, validateThemeProject, validateThemeSettings } from "@jelly/storefront-themes";
 export type { DiscoveredTheme, ThemeInput, ThemeManifest, ThemeProjectIssue, ThemeTokens } from "@jelly/storefront-themes";
 export { JELLY_THEME_API_VERSION, compareThemeVersions, supportsJellyVersion } from "@jelly/storefront-themes";
-export { applyThemeMigrations, getThemeMigrationPath, themeMigrationSchema } from "@jelly/storefront-themes";
+export { applyThemeMigrations, applyThemeUpgrade, getThemeMigrationPath, getThemeUpgradePath, themeMigrationSchema } from "@jelly/storefront-themes";
 export type { ThemeMigration, ThemeMigrationDraft, ThemeMigrationChange } from "@jelly/storefront-themes";

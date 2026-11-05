@@ -22,6 +22,8 @@ import { createPublicThemeVersionRouter, createThemePackageRouter } from "../../
 import { ThemePackageService } from "../../storefront/theme-packages/service.js";
 import { createDeveloperTokenRouter } from "../../developer-tokens/routes.js";
 import { DeveloperTokenService } from "../../developer-tokens/service.js";
+import { createThemeUpgradeRouter } from "../../storefront/theme-packages/upgrade-routes.js";
+import { ThemeUpgradeService } from "../../storefront/theme-packages/upgrade-service.js";
 
 const accessServices = new WeakMap<AppContext, StorefrontAccessService | null>();
 
@@ -151,6 +153,8 @@ export function mountStorefrontRoutes(app: Express, context: AppContext): void {
   const tokens = tokenService(context);
   if (tokens) app.use("/api/stores/:storeId", createDeveloperTokenRouter(tokens, authProvider));
   if (themePackages) app.use("/api/stores/:storeId", createThemePackageRouter(themePackages, authProvider, tokens));
+  const upgradeDatabase = context.routeDependencies.commerceDatabase;
+  if (themePackages && upgradeDatabase) app.use("/api/stores/:storeId", createThemeUpgradeRouter(new ThemeUpgradeService(upgradeDatabase), authProvider));
   const bindingValues = bindingValueService(context);
   if (bindingValues) {
     app.use("/api/stores/:storeId/storefront", createEditorBindingValuesRouter(bindingValues, authProvider));
