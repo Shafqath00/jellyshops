@@ -13,7 +13,8 @@ export interface ProductPresentationContext {
   product: { id: string; title: string; description: string; descriptionDoc?: RichTextDocument | null; imageUrl: string; galleryEnabled?: boolean; specifications?: Record<string, string>; shippingCopy?: string; media?: ProductMediaLike[]; sku?: string; vendor?: string; options: Array<{ id: string; name: string; required: boolean; /** "color" or "image" draws swatches instead of text buttons. */ display?: "color" | "image"; multiple?: boolean; missing?: boolean; values: Array<{ id: string; label: string; selected: boolean; available: boolean; priceAdjustment?: string; previewImageUrl?: string; color?: string; image?: string }> }> };
   selection: Array<{ optionId: string; valueId: string }>;
   quantity: number;
-  pricing: { price: string; compareAtPrice?: string };
+  /** Formatted prices; the optional minor amounts and `format` let themes show "% off", "Save £X" and a monthly finance amount. */
+  pricing: { price: string; compareAtPrice?: string; priceMinor?: number; compareAtPriceMinor?: number; format?(minor: number): string };
   availability: { state: "available" | "out-of-stock" | "selection-required" | "unavailable"; message: string; maxQuantity?: number };
   canAddToCart: boolean;
   selectOption(optionId: string, valueId: string): void;

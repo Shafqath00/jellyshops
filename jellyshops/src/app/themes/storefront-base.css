@@ -478,3 +478,50 @@
 [data-jelly-theme] .jelly-product-card-saving [data-saving="amount"] { display: var(--jelly-card-saving-amount-display, inline); text-decoration: underline; text-underline-offset: 3px; }
 [data-jelly-theme] .jelly-product-card-saving [data-saving="percent"] { display: var(--jelly-card-saving-percent-display, inline); }
 .jelly-product-card-chip { align-self: flex-start; justify-self: start; width: fit-content; display: inline-block; margin-top: 6px; padding: 3px 8px; border-radius: 4px; background: var(--theme-accent-soft, color-mix(in srgb, currentColor 8%, transparent)); color: var(--theme-text, inherit); font-size: 12px; line-height: 1.4; }
+
+
+/* Product options as large tiles, and as tabs (one per option) holding tiles. */
+.jelly-option-tiles { display: grid; grid-template-columns: repeat(var(--jelly-tile-columns, 3), minmax(0, 1fr)); gap: 10px; }
+.jelly-option-tile { display: grid; align-content: start; justify-items: center; gap: 6px; min-height: 64px; padding: 12px 10px; border: 1px solid var(--theme-border, color-mix(in srgb, currentColor 20%, transparent)); border-radius: var(--jelly-card-radius, 6px); background: var(--theme-surface, transparent); color: var(--theme-text, inherit); font: inherit; font-size: 14px; text-align: center; cursor: pointer; }
+.jelly-option-tile:hover { border-color: var(--theme-text, currentColor); }
+.jelly-option-tile:focus-visible { outline: 2px solid var(--theme-text, currentColor); outline-offset: 2px; }
+.jelly-option-tile[aria-pressed="true"] { border-color: var(--theme-text, currentColor); box-shadow: inset 0 0 0 1px var(--theme-text, currentColor); }
+.jelly-option-tile:disabled { opacity: .5; cursor: not-allowed; }
+.jelly-option-tile:disabled .jelly-option-tile-label { text-decoration: line-through; }
+.jelly-option-tile-picture { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: calc(var(--jelly-card-radius, 6px) / 2); }
+.jelly-option-tile-picture[data-kind="color"] { width: 44px; height: 44px; aspect-ratio: auto; border-radius: 50%; background: var(--swatch); box-shadow: inset 0 0 0 1px rgb(0 0 0 / .18); }
+.jelly-option-tile-label { font-weight: 500; line-height: 1.3; }
+.jelly-option-tile-price, .jelly-option-tile-note { font-size: 13px; color: var(--jelly-color-secondary, inherit); }
+.jelly-option-tablist { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.jelly-option-tab { display: inline-flex; flex: 1 1 140px; align-items: center; gap: 10px; min-height: 52px; padding: 8px 14px; border: 1px solid var(--theme-border, color-mix(in srgb, currentColor 20%, transparent)); border-radius: var(--jelly-card-radius, 6px); background: var(--theme-surface, transparent); color: var(--theme-text, inherit); font: inherit; text-align: left; cursor: pointer; }
+.jelly-option-tab[aria-selected="true"] { border-color: var(--theme-text, currentColor); box-shadow: inset 0 -3px 0 var(--theme-text, currentColor); }
+.jelly-option-tab:focus-visible { outline: 2px solid var(--theme-text, currentColor); outline-offset: 2px; }
+.jelly-option-tab[data-missing] { border-color: #c92a47; }
+.jelly-option-tab .jelly-option-tile-picture { width: 32px; height: 32px; aspect-ratio: 1; border-radius: 50%; }
+.jelly-option-tab-step { display: grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 50%; background: color-mix(in srgb, currentColor 8%, transparent); font-size: 13px; font-weight: 600; }
+.jelly-option-tab-text { display: grid; line-height: 1.25; }
+.jelly-option-tab-name { font-size: 13px; color: var(--jelly-color-secondary, inherit); }
+.jelly-option-tab-value { font-weight: 600; font-size: 14px; white-space: nowrap; }
+.jelly-option-tabpanel fieldset { margin: 0; padding: 0; border: 0; }
+@media (max-width: 767px) {
+  .jelly-option-tiles { grid-template-columns: repeat(min(var(--jelly-tile-columns, 3), 2), minmax(0, 1fr)); }
+}
+
+/* Price extras: the sale label beside the price and the monthly finance line. */
+.jelly-price-chip { display: inline-block; align-self: center; padding: 3px 8px; background: var(--jelly-badge-bg, var(--theme-text, #1c1b19)); color: var(--jelly-badge-text, var(--theme-background, #fff)); border-radius: var(--jelly-badge-radius, 4px); font-size: 13px; font-weight: 600; line-height: 1.4; }
+.jelly-finance-line { margin: 4px 0 12px; font-size: 14px; }
+.jelly-finance-line a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+
+/* Add to basket bar that stays on screen once the page's own button has scrolled away. */
+.jelly-sticky-purchase { position: fixed; inset: auto 0 0; z-index: 40; display: flex; align-items: center; gap: 12px; padding: 10px max(16px, calc((100% - 1280px) / 2)); border-top: 1px solid var(--theme-border, color-mix(in srgb, currentColor 15%, transparent)); background: var(--theme-background, #fff); color: var(--theme-text, inherit); box-shadow: 0 -6px 20px rgb(0 0 0 / .08); }
+.jelly-sticky-purchase[hidden] { display: none; }
+.jelly-sticky-purchase-image { width: 48px; height: 48px; flex: none; object-fit: cover; border-radius: 4px; }
+.jelly-sticky-purchase-text { display: grid; flex: 1; min-width: 0; }
+.jelly-sticky-purchase-title { overflow: hidden; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
+.jelly-sticky-purchase-price { display: flex; gap: 8px; font-size: 14px; }
+.jelly-sticky-purchase-price s { color: var(--jelly-color-secondary, inherit); }
+.jelly-sticky-purchase .jelly-button { flex: none; margin: 0; }
+/* Room at the end of the page so the bar never covers the footer. */
+body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
+@media (prefers-reduced-motion: no-preference) { .jelly-sticky-purchase[data-visible] { animation: jelly-sticky-in .2s ease-out; } }
+@keyframes jelly-sticky-in { from { transform: translateY(100%); } to { transform: none; } }

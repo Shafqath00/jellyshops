@@ -1,11 +1,12 @@
 import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui";
-import { useState, type CSSProperties } from "react";
+import { useRef, useState, type CSSProperties } from "react";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import type { ProductPresentationContext } from "../types";
 import { choice } from "./shared";
 import { ProductGalleryViewer } from "../product-gallery-viewer";
 import { normalizeRichTextDocument, productMediaSrcSet } from "@jelly/storefront-schema";
 import { renderBlocks } from "./rich-text";
+import { DiscountChip, FinanceLine, OptionTabs, OptionTileGroups, StickyPurchaseBar, useStickyBar } from "./product-showroom";
 
 function productContext(context: StorefrontRuntimeContext): ProductPresentationContext | null {
   const candidate = context.page?.pageType === "product" ? context.page.resource.data.productPresentation : undefined;
@@ -45,7 +46,9 @@ export function ProductInformationSection({ context, section }: { context: Store
     <p className="jelly-product-price">
       <strong>{product.pricing.price}</strong>
       {show("showCompareAtPrice") && product.pricing.compareAtPrice && <s aria-label={`Was ${product.pricing.compareAtPrice}`}>{product.pricing.compareAtPrice}</s>}
+      <DiscountChip pricing={product.pricing} kind={section.settings.discountChip} />
     </p>
+    <FinanceLine pricing={product.pricing} settings={section.settings} storeSlug={context.storeSlug} />
     {show("showAvailability") && <p className="jelly-product-availability" data-state={state}>{product.availability.message}</p>}
     {show("showSku") && product.product.sku && <p className="jelly-product-sku">SKU: {product.product.sku}</p>}
     {product.product.shippingCopy && <p className="jelly-product-shipping">{product.product.shippingCopy}</p>}
@@ -63,7 +66,12 @@ export function swatchFor(display: "color" | "image" | undefined, value: { color
 export function ProductOptionsSection({ context, section }: { context: StorefrontRuntimeContext; section?: { settings: Record<string, unknown> } }) {
   const product = productContext(context);
   if (!product || product.product.options.length === 0) return null;
-  const style = section?.settings.style === "select" ? "select" : "buttons";
+  const setting = section?.settings.style;
+  const style = setting === "select" || setting === "tiles" || setting === "tabs" ? setting : "buttons";
+  const columns = typeof section?.settings.tileColumns === "number" ? Math.min(4, Math.max(2, Math.round(section.settings.tileColumns))) : 3;
+  if (style === "tiles" || style === "tabs") return <section className="jelly-section jelly-product-options" data-style={style} style={{ "--jelly-tile-columns": columns } as CSSProperties}><StorefrontContainer>
+    {style === "tabs" && product.product.options.length > 1 ? <OptionTabs product={product} /> : <OptionTileGroups product={product} />}
+  </StorefrontContainer></section>;
   return <section className="jelly-section jelly-product-options" data-style={style}><StorefrontContainer>
     {product.product.options.map((option) => {
       const chosen = option.values.filter((value) => value.selected);
@@ -94,6 +102,8 @@ export function ProductOptionsSection({ context, section }: { context: Storefron
 
 export function ProductPurchaseSection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown> } }) {
   const [busy, setBusy] = useState(false); const [message, setMessage] = useState<string>(); const [error, setError] = useState<string>();
+  const actions = useRef<HTMLDivElement>(null);
+  const showBar = useStickyBar(section.settings.stickyBar === true, actions);
   const product = productContext(context);
   if (!product) return null;
   async function purchase(now = false) {
@@ -115,13 +125,14 @@ export function ProductPurchaseSection({ context, section }: { context: Storefro
         <button type="button" aria-label="Increase quantity" disabled={max !== undefined && product.quantity >= max} onClick={() => product.setQuantity(product.quantity + 1)}>+</button>
       </div>
     </div>}
-    <div className="jelly-purchase-actions">
+    <div className="jelly-purchase-actions" ref={actions}>
       <button type="button" className="jelly-button" disabled={disabled} onClick={() => { void purchase(); }}>{busy ? "Please wait…" : label}</button>
       {product.buyNow && <button type="button" className="jelly-button jelly-button--secondary" disabled={disabled} onClick={() => void purchase(true)}>Buy now</button>}
       {product.wishlistControl}
     </div>
     {message && <p role="status" className="jelly-purchase-message">{message}</p>}
     {error && <p role="alert" className="jelly-purchase-error">{error}</p>}
+    {section.settings.stickyBar === true && <StickyPurchaseBar product={product} visible={showBar} label={label} busy={busy} disabled={disabled} onAdd={() => { void purchase(); }} anchor={actions} />}
   </StorefrontContainer></section>;
 }
 

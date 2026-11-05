@@ -75,6 +75,22 @@ Product cards: live cards now get the compare-at price (they never did: the Sale
 (`features/storefront/product-card-data.ts`). Checked on `/theme-preview/*` (Minimal desktop, Avenue phone) with
 a temporary demo; not checked in the signed-in editor.
 
+## Phase 2 done (2026-11-05)
+
+Product page pieces in `storefront-renderer/src/sections/product-showroom.tsx`. "Product options" gains the styles
+**Large tiles** and **Tabs with tiles** (one tab per option showing the chosen value and its colour or photo; arrow
+keys, Home and End move between tabs; missing required choices are marked; a single option falls back to tiles) and
+"Tiles per row" (2-4, two on phones); tile pictures come from the value's swatch image, its preview photo or its
+colour. "Product title and price" gains a sale label beside the price (% off or Save amount, only when the "was"
+price is higher; uses the theme's badge colours) and a finance line ("or {amount} a month for {months} months",
+merchant-chosen months 0-60, 0 = off, payment rounded up, optional link). "Add to cart" gains a bar that stays at the
+bottom of the screen once the page's own button has scrolled away (picture, name, price, button; "Choose options"
+opens the first tab still waiting for a choice); the page gets room at the bottom while it shows. The product page
+now passes price amounts and a formatter (`pricingFor()` in `features/storefront/product-presentation.ts`). The
+Rating section already worked on product pages. Add-ons (assembly etc.) not built: they change the cart and orders.
+Checked on `/theme-preview/*` (Minimal desktop + 390px, Avenue desktop) with a temporary demo; not checked in the
+signed-in editor.
+
 ## Phases
 
 1. **Platform pieces for home and collection:** marquee, header layout + trust row, product card

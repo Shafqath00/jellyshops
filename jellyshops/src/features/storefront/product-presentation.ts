@@ -71,12 +71,22 @@ export function createProductPresentationContext({ product, currency, shippingCo
     product: { id: product.id, title: product.name, description: product.description, descriptionDoc: product.descriptionDoc ?? null, imageUrl: gallery[0]?.url ?? "", galleryEnabled, specifications: product.specifications ?? {}, shippingCopy, media: gallery, sku: variant?.sku || undefined, vendor: product.vendor, options: options.map((option) => ({ id: option.id, name: option.name, required: option.required, ...(option.display === "color" || option.display === "image" ? { display: option.display } : {}), ...(option.type !== "variant" && option.multiple ? { multiple: true } : {}), ...(missingOptionIds.has(option.id) ? { missing: true } : {}), values: option.values.map((value) => ({ id: value.id, label: value.label, selected: isSelected(option.id, value.id), available: true, ...(option.display === "color" && value.color ? { color: value.color } : {}), ...(option.display === "image" && value.image ? { image: value.image } : {}), ...(value.priceAdjustmentMinor > 0 && option.type !== "variant" ? { priceAdjustment: formatMoney(value.priceAdjustmentMinor, currency) } : {}) })) })) },
     selection: selections,
     quantity: clampedQuantity,
-    pricing: { price: formatMoney(priceMinor ?? (inventoryChoiceMissing && product.variants.length ? Math.min(...product.variants.map((candidate) => candidate.priceMinor)) : 0), currency), ...(variant?.compareAtPriceMinor ?? product.compareAtPriceMinor ? { compareAtPrice: formatMoney(variant?.compareAtPriceMinor ?? product.compareAtPriceMinor ?? 0, currency) } : {}) },
+    pricing: pricingFor(priceMinor ?? (inventoryChoiceMissing && product.variants.length ? Math.min(...product.variants.map((candidate) => candidate.priceMinor)) : 0), variant?.compareAtPriceMinor ?? product.compareAtPriceMinor, currency),
     availability,
     canAddToCart: availability.state === "available" && priceMinor !== undefined && Boolean(variant),
     selectOption: (optionId, valueId) => { const option = allOptions.find((candidate) => candidate.id === optionId); if (option) onSelectionsChange(toggleSelection(option, selections, valueId)); },
     setQuantity: (nextQuantity) => onQuantityChange(maxQuantity === undefined ? Math.max(1, nextQuantity) : Math.max(1, Math.min(nextQuantity, maxQuantity))),
     addToCart: () => variant && priceMinor !== undefined && availability.state === "available" ? onAddToCart({ variantId: variant.id, quantity: clampedQuantity, selections, priceMinor }) : Promise.resolve({ ok: false, message: availability.message }),
     relatedProducts,
+  };
+}
+
+/** Formatted prices plus the amounts themes use for "% off", "Save £X" and monthly finance. */
+export function pricingFor(priceMinor: number, compareAtPriceMinor: number | null | undefined, currency: Currency): ProductPresentationContext["pricing"] {
+  return {
+    price: formatMoney(priceMinor, currency),
+    priceMinor,
+    format: (minor: number) => formatMoney(minor, currency),
+    ...(compareAtPriceMinor ? { compareAtPrice: formatMoney(compareAtPriceMinor, currency), compareAtPriceMinor } : {}),
   };
 }

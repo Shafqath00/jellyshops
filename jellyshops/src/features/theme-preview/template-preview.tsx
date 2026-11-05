@@ -28,6 +28,9 @@ const menus: Record<string, RuntimeMenuV4> = {
   ] },
 };
 
+/** "£28.00" to 2800 (sample prices only). */
+const toMinor = (price: string) => Math.round(Number(price.replace(/[^0-9.]/g, "")) * 100);
+
 function useProductContext(config: ThemePreviewConfig): StorefrontPageContext {
   const [size, setSize] = useState<string>();
   const [quantity, setQuantity] = useState(1);
@@ -47,7 +50,7 @@ function useProductContext(config: ThemePreviewConfig): StorefrontPageContext {
       },
       selection: size ? [{ optionId: "size", valueId: size }] : [],
       quantity,
-      pricing: { price: sample.price, compareAtPrice: sample.compareAtPrice },
+      pricing: { price: sample.price, compareAtPrice: sample.compareAtPrice, priceMinor: toMinor(sample.price), ...(sample.compareAtPrice ? { compareAtPriceMinor: toMinor(sample.compareAtPrice) } : {}), format: (minor: number) => `£${(minor / 100).toFixed(2)}` },
       availability: size ? { state: "available", message: "In stock", maxQuantity: 10 } : { state: "selection-required", message: "Choose a size" },
       canAddToCart: Boolean(size),
       selectOption: (_option: string, value: string) => setSize(value),
