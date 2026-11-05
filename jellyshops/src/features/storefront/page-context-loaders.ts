@@ -4,6 +4,7 @@ import type { Collection } from "@/lib/domain";
 import { formatMoney, type Currency } from "@/lib/domain";
 import type { PublicSearchPageContext } from "./public-page-context-api";
 import type { SearchRouteContext } from "./resource-loader";
+import { productCardData } from "./product-card-data";
 
 export type StorefrontPageContext =
   | { type: "collection"; collection: Collection; products: PublicProduct[] }
@@ -21,13 +22,7 @@ export function createCollectionPageContext(
 ): Extract<StorefrontPageContext, { type: "collection" }> {
   const products = catalogProducts
     .filter((product) => product.storeId === collection.storeId && product.published && !product.archived && product.collectionIds?.includes(collection.id))
-    .map((product): PublicProduct => ({
-      id: product.id,
-      name: product.name,
-      href: `/products/${product.slug}`,
-      imageUrl: product.imageUrl,
-      price: product.variants[0] ? formatMoney(product.variants[0].priceMinor, currency) : "",
-    }));
+    .map((product): PublicProduct => ({ ...productCardData(product, `/products/${product.slug}`, currency), ...(product.variants[0] ? {} : { price: "" }) }));
   return { type: "collection", collection, products };
 }
 

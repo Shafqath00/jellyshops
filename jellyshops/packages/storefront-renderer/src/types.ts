@@ -1,7 +1,8 @@
 import type { GlobalSettings, PageType, ProductMediaLike, RichTextDocument, StoreDesignDocument, StorefrontDocument } from "@jelly/storefront-schema";
 import type { ReactNode } from "react";
 
-export interface PublicProduct { id: string; name: string; href: string; imageUrl: string; price: string; compareAtPrice?: string; badge?: string }
+/** A product on a card. `saving` ("£20.00"), `discountPercent` and `chip` ("More colours") are optional extras themes can show. */
+export interface PublicProduct { id: string; name: string; href: string; imageUrl: string; price: string; compareAtPrice?: string; badge?: string; saving?: string; discountPercent?: number; chip?: string }
 export interface CollectionPresentationContext {
   interactiveGrid?: ReactNode;
   collection: { id: string; title: string; description: string; descriptionDoc?: RichTextDocument | null; imageUrl?: string };

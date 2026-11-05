@@ -10,6 +10,7 @@ import { ProductGridSection } from "./sections/product-grid";
 import { RichTextSection } from "./sections/rich-text";
 import { CustomContentSection } from "./sections/custom-content";
 import { LogoListSection } from "./sections/logo-list";
+import { ImageGallerySection, RatingSummarySection } from "./sections/social-proof";
 import { MetaobjectListSection } from "./sections/metaobject-list";
 import { ProductDescriptionSection, ProductGallerySection, ProductInformationSection, ProductOptionsSection, ProductPurchaseSection, RelatedProductsSection } from "./sections/product-sections";
 import { CollectionDescriptionSection, CollectionHeaderSection, CollectionProductGridSection } from "./sections/collection-sections";
@@ -109,7 +110,9 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("metaobject-list", ({ section, context, mode }) => <MetaobjectListSection section={section} context={context} mode={mode} />);
   registry.register("logo-list", ({ section, context, mode, selectedBlockId }) => <LogoListSection section={section} context={context} mode={mode} selectedBlockId={selectedBlockId} />);
   registry.register("testimonials", ({ section, mode }) => <TestimonialsSection section={section} mode={mode} />);
-  registry.register("trust-strip", ({ section }) => <TrustStripSection section={section} />);
+  registry.register("rating-summary", ({ section, context, mode }) => <RatingSummarySection section={section} context={context} mode={mode} />);
+  registry.register("image-gallery", ({ section, context, mode, selectedBlockId }) => <ImageGallerySection section={section} context={context} mode={mode} selectedBlockId={selectedBlockId} />);
+  registry.register("trust-strip", ({ section, context, mode, selectedBlockId }) => <TrustStripSection section={section} context={context} mode={mode} selectedBlockId={selectedBlockId} />);
   registry.register("image-mosaic", ({ section }) => <ImageMosaicSection section={section} />);
   registry.register("journal-teaser", ({ section }) => <JournalTeaserSection section={section} />);
   registry.register("cart-summary", ({ section, context }) => <CartSummarySection section={section} context={context} />);

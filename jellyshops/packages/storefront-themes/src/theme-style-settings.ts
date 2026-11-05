@@ -115,6 +115,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     select("productCard.showTitle", "Product name", "Product cards", "show", [["show", "Show"], ["hide", "Hide"]]),
     select("productCard.titleLines", "Long names", "Product cards", theme, [[theme, "Show in full"], ["1", "Cut to one line"], ["2", "Cut to two lines"]]),
     select("productCard.showPrice", "Price", "Product cards", "show", [["show", "Show"], ["hide", "Hide"]]),
+    select("productCard.savings", "Savings on discounted products", "Product cards", "none", [["none", "Don't show"], ["amount", "Amount saved (Save 10.00)"], ["percent", "Percentage off (20% off)"], ["both", "Both"]], "Shown under the price when a product has a higher \"compare at\" price."),
     select("productCard.button", "Button", "Product cards", "none", [["none", "None"], ["view", "View product"], ["shop", "Shop now"]], "A button under each card that opens the product."),
   ];
   const socialSchema = SOCIAL_PLATFORMS.map(({ id, label }) => ({ id: `social.${id}`, type: "url", label, group: "Social media", default: "", ...(id === "instagram" ? { description: "Full https:// links. Shown in the footer when it has no social links of its own." } : {}) }));
@@ -140,7 +141,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
       cart: { type: "page" },
     },
     buttonDefaults: { size: theme, textCase: theme, borderWidth: theme, hover: theme },
-    cardDefaults: { radius: theme, shadow: theme, hover: theme, order: "photo-title-price", showTitle: "show", titleLines: theme, showPrice: "show", button: "none" },
+    cardDefaults: { radius: theme, shadow: theme, hover: theme, order: "photo-title-price", showTitle: "show", titleLines: theme, showPrice: "show", savings: "none", button: "none" },
     textStyleSchema,
     colorSchemeSchema,
     buttonSchema,
@@ -301,6 +302,11 @@ export function resolveThemeStyleTokens(settings: Record<string, unknown>, defau
   if (card.showTitle === "hide") tokens["--jelly-card-title-display"] = "none";
   else if (card.titleLines === "1" || card.titleLines === "2") Object.assign(tokens, { "--jelly-card-title-display": "-webkit-box", "--jelly-card-title-lines": card.titleLines });
   if (card.showPrice === "hide") tokens["--jelly-card-price-display"] = "none";
+  if (card.savings === "amount" || card.savings === "percent" || card.savings === "both") {
+    tokens["--jelly-card-saving-display"] = "flex";
+    if (card.savings === "amount") tokens["--jelly-card-saving-percent-display"] = "none";
+    if (card.savings === "percent") tokens["--jelly-card-saving-amount-display"] = "none";
+  }
   const buttonLabel = productCardButtonLabel(settings);
   if (buttonLabel) Object.assign(tokens, { "--jelly-card-button-display": "inline-flex", "--jelly-card-button-label": JSON.stringify(buttonLabel) });
   return tokens;

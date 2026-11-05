@@ -83,14 +83,7 @@ export function TestimonialsSection({ section, mode = "published" }: { section: 
   </StorefrontContainer></section>;
 }
 
-export function TrustStripSection({ section }: { section: SectionNode }) {
-  const promises = visibleBlocks(section).map((block) => stringSetting(block.settings, "text")).filter(Boolean);
-  const items = promises.length ? promises : ["Secure checkout", "Carefully packed", "Friendly support"];
-  return <section className="jelly-trust-strip" {...sectionData(section)}><StorefrontContainer><ul>{items.slice(0, 4).map((item) => <li key={item}>
-    <svg className="jelly-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
-    {item}
-  </li>)}</ul></StorefrontContainer></section>;
-}
+export { TrustStripSection } from "./trust-points";
 
 export function ImageMosaicSection({ section }: { section: SectionNode }) {
   const image = imageSetting(section.settings);

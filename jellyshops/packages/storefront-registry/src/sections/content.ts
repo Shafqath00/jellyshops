@@ -248,7 +248,61 @@ export const contentSections: SectionDefinition[] = [
     responsiveFields: [], presets: [{ id: "apps", label: "Apps", category: "content" }],
   }
   ,{ type: "journal-teaser", category: "content", supportedPages: [...home], settingsSchema: empty, controls: comprehensiveControls, allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: ["contentAlignment"] }
-  ,{ type: "trust-strip", category: "content", supportedPages: [...home, "product", "cart"], settingsSchema: z.object({ colorScheme: schemeSchema }).passthrough(), controls: [colorScheme], allowedBlockTypes: ["heading", "text"], defaultSettings: { contentAlignment: "center" }, defaultBlocks: [], responsiveFields: ["contentAlignment"] }
+  ,{
+    // Short trust points ("Free delivery", "5-year warranty") in a row, or as a strip that scrolls sideways.
+    // Older strips hold text blocks; trust-point blocks add an icon and a link.
+    type: "trust-strip", category: "content", supportedPages: [...home, "product", "collection", "cart", "page"],
+    settingsSchema: z.object({ colorScheme: schemeSchema, layout: z.enum(["row", "scroll"]).optional(), speed: z.enum(["slow", "normal", "fast"]).optional(), showIcons: z.boolean().optional() }).passthrough(),
+    controls: [
+      { type: "segmented", key: "layout", label: "Layout", group: "layout", options: [{ label: "In a row", value: "row" }, { label: "Scrolling", value: "scroll" }] },
+      { type: "segmented", key: "speed", label: "Scrolling speed", description: "Shoppers who ask for less motion see the points without movement.", group: "layout", options: [{ label: "Slow", value: "slow" }, { label: "Normal", value: "normal" }, { label: "Fast", value: "fast" }], showWhen: { key: "layout", equals: "scroll" } },
+      { type: "checkbox", key: "showIcons", label: "Show icons", group: "style" },
+      colorScheme,
+    ],
+    allowedBlockTypes: ["trust-point", "heading", "text"], maxBlocks: 10,
+    defaultSettings: { contentAlignment: "center", layout: "row", speed: "normal", showIcons: true }, defaultBlocks: [], responsiveFields: ["contentAlignment"],
+    presets: [{ id: "trust-strip", label: "Trust badges", category: "content" }],
+  }
+  ,{
+    // A star rating line: "4.8 out of 5 from 1,240 reviews". The merchant types the numbers from their review service.
+    type: "rating-summary", category: "content", supportedPages: [...home, "product", "collection", "page"],
+    settingsSchema: z.object({
+      heading: z.string().max(120).optional(), rating: z.number().min(0).max(5).optional(), reviewCount: z.number().int().min(0).max(10_000_000).optional(),
+      text: z.string().max(160).optional(), link: z.string().max(500).optional(), linkLabel: z.string().max(40).optional(),
+      contentAlignment: z.enum(["left", "center"]).optional(), colorScheme: schemeSchema,
+    }).passthrough(),
+    controls: [
+      sectionHeading,
+      { type: "number", key: "rating", label: "Average rating (0 to 5)", group: "content", min: 0, max: 5, step: 0.1 },
+      { type: "number", key: "reviewCount", label: "Number of reviews", description: "Leave at 0 to hide the count.", group: "content", min: 0, max: 10_000_000, step: 1 },
+      { type: "text", key: "text", label: "Text after the rating", description: "Use {count} for the number of reviews, for example: from {count} reviews.", group: "content", maxLength: 160 },
+      { type: "link", key: "link", label: "Link to your reviews", description: "Optional.", group: "content", dynamicTypes: urlTypes },
+      { type: "text", key: "linkLabel", label: "Link text", group: "content", maxLength: 40 },
+      { type: "segmented", key: "contentAlignment", label: "Alignment", group: "layout", options: [{ label: "Left", value: "left" }, { label: "Center", value: "center" }] },
+      colorScheme,
+    ],
+    allowedBlockTypes: [], defaultSettings: { rating: 4.8, reviewCount: 0, text: "from {count} reviews", linkLabel: "Read reviews", contentAlignment: "center" }, defaultBlocks: [], responsiveFields: [],
+    presets: [{ id: "rating-summary", label: "Rating", category: "content" }],
+  }
+  ,{
+    // Photos in a grid or a sideways-scrolling row, e.g. "Loved in homes like yours".
+    type: "image-gallery", category: "content", supportedPages: [...home, "product", "collection", "page"],
+    settingsSchema: z.object({
+      heading: z.string().max(120).optional(), text: z.string().max(400).optional(), layout: z.enum(["grid", "scroll"]).optional(),
+      columns: z.number().int().min(2).max(6).optional(), ratio: z.enum(["square", "portrait", "landscape"]).optional(), colorScheme: schemeSchema,
+    }).passthrough(),
+    controls: [
+      sectionHeading,
+      { type: "textarea", key: "text", label: "Text", group: "content", maxLength: 400 },
+      { type: "segmented", key: "layout", label: "Layout", group: "layout", options: [{ label: "Grid", value: "grid" }, { label: "Scrolling row", value: "scroll" }] },
+      { type: "range", key: "columns", label: "Photos per row", group: "layout", min: 2, max: 6, step: 1 },
+      { type: "segmented", key: "ratio", label: "Photo shape", group: "style", options: [{ label: "Square", value: "square" }, { label: "Portrait", value: "portrait" }, { label: "Landscape", value: "landscape" }] },
+      colorScheme,
+    ],
+    allowedBlockTypes: ["gallery-image"], maxBlocks: 24,
+    defaultSettings: { heading: "Loved in homes like yours", layout: "grid", columns: 4, ratio: "square" }, defaultBlocks: [], responsiveFields: [],
+    presets: [{ id: "image-gallery", label: "Photo gallery", category: "content" }],
+  }
   ,{ type: "image-mosaic", category: "content", supportedPages: [...home], settingsSchema: empty, controls: comprehensiveControls, allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: ["contentAlignment"] }
   ,{ type: "not-found-message", category: "content", supportedPages: ["not-found"], settingsSchema: empty, controls: comprehensiveControls, allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: ["contentAlignment"] }
 ];

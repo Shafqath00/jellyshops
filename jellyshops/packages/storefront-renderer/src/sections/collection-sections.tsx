@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import type { CollectionPresentationContext, PublicProduct } from "../types";
@@ -11,6 +11,32 @@ function CollectionDescriptionText({ collection }: { collection: CollectionPrese
   const document = collection.descriptionDoc ? normalizeRichTextDocument(collection.descriptionDoc) : null;
   if (document?.content.length) return <div className="jelly-rich-description">{renderBlocks(document.content)}</div>;
   return collection.description ? <p>{collection.description}</p> : null;
+}
+
+/**
+ * A description cut to `lines` lines with a Read more / Read less button. The button only appears
+ * when the text is actually longer than that, and the full text stays in the page for search engines.
+ */
+function ClampedText({ lines, children }: { lines: number; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const id = useId();
+  const [open, setOpen] = useState(false);
+  const [long, setLong] = useState(false);
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const measure = () => setLong(element.scrollHeight > element.clientHeight + 1);
+    measure();
+    const view = element.ownerDocument.defaultView;
+    if (!view || typeof view.ResizeObserver !== "function") return;
+    const observer = new view.ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  return <div className="jelly-clamped-text" data-open={open ? "true" : undefined}>
+    <div ref={ref} id={id} className="jelly-clamped-text-body" style={open ? undefined : { "--jelly-clamp-lines": lines } as CSSProperties}>{children}</div>
+    {(long || open) && <button type="button" className="jelly-read-more" aria-expanded={open} aria-controls={id} onClick={() => setOpen((value) => !value)}>{open ? "Read less" : "Read more"}</button>}
+  </div>;
 }
 
 function collectionContext(context: StorefrontRuntimeContext): CollectionPresentationContext | null {
@@ -38,7 +64,9 @@ export function CollectionHeaderSection({ context, section }: { context: Storefr
     <StorefrontContainer>
       <div className="jelly-collection-header-copy">
         {section.settings.showTitle !== false && <h1>{collection.title}</h1>}
-        {section.settings.showDescription === true && <CollectionDescriptionText collection={collection} />}
+        {section.settings.showDescription === true && (["2", "3", "4"].includes(String(section.settings.descriptionLines))
+          ? <ClampedText lines={Number(section.settings.descriptionLines)}><CollectionDescriptionText collection={collection} /></ClampedText>
+          : <CollectionDescriptionText collection={collection} />)}
         <p className="jelly-collection-count">{presentation.totalProducts === 1 ? "1 product" : `${presentation.totalProducts} products`}</p>
       </div>
       {/* eslint-disable-next-line @next/next/no-img-element */}

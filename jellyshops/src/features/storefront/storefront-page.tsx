@@ -3,6 +3,7 @@ import { useResourceLinks } from "@/features/navigation/use-resource-links";
 import { useShop } from "@/contexts/shop-context";
 import { useStorefrontChrome } from "./chrome-context";
 import { fetchPublicMetaobjects } from "./metaobjects-api";
+import { productCardData } from "./product-card-data";
 import { useStorefrontLanguage } from "./storefront-language";
 import type { CSSProperties } from "react";
 import {
@@ -22,12 +23,11 @@ import {
 } from "@jelly/storefront-schema";
 import { resolveDesignTokens, resolveStorefrontThemeTokens, resolveTheme } from "@jelly/storefront-themes";
 import type { Currency, Product } from "@/lib/domain";
-import { formatMoney } from "@/lib/domain";
 import type { ResolvedStorefrontRoute } from "./resource-loader";
 import { catalogProductToStorefrontProduct, type PublicCatalogResponse } from "@/features/commerce/api/client";
 
 function commerceProvider(storeSlug: string, currency: Currency, products: Product[], storeId?: string): CommerceDataProvider {
-  const initialProducts = products.filter((product) => product.published && !product.archived).map((product) => ({ id: product.id, name: product.name, href: `/${storeSlug}/products/${product.slug}`, imageUrl: product.imageUrl, price: formatMoney(product.variants[0]?.priceMinor ?? 0, currency) }));
+  const initialProducts = products.filter((product) => product.published && !product.archived).map((product) => productCardData(product, `/${storeSlug}/products/${product.slug}`, currency));
   return {
     initialProducts,
     getMetaobjects: storeId ? (handle) => fetchPublicMetaobjects(storeId, handle) : undefined,
@@ -44,17 +44,11 @@ function commerceProvider(storeSlug: string, currency: Currency, products: Produ
         const response = await fetch(`${process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001"}/api/public/stores/${encodeURIComponent(storeId)}/catalog/products?${params}`, { cache: "no-store" });
         if (!response.ok) throw new Error("Products are temporarily unavailable.");
         const data = await response.json() as PublicCatalogResponse;
-        return data.nodes.map(catalogProductToStorefrontProduct).map((product) => ({ id: product.id, name: product.name, href: `/${storeSlug}/products/${product.slug}`, imageUrl: product.imageUrl, price: formatMoney(product.variants[0]?.priceMinor ?? 0, currency) }));
+        return data.nodes.map(catalogProductToStorefrontProduct).map((product) => productCardData(product, `/${storeSlug}/products/${product.slug}`, currency));
       }
       return products
         .filter((product) => product.published && !product.archived)
-        .map((product) => ({
-          id: product.id,
-          name: product.name,
-          href: `/${storeSlug}/products/${product.slug}`,
-          imageUrl: product.imageUrl,
-          price: formatMoney(product.variants[0]?.priceMinor ?? 0, currency),
-        }));
+        .map((product) => productCardData(product, `/${storeSlug}/products/${product.slug}`, currency));
     },
   };
 }

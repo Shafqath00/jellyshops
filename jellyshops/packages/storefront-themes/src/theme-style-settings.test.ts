@@ -69,6 +69,16 @@ it("turns the product card content settings into card tokens", () => {
   }
 });
 
+it("shows savings on cards only when chosen, the amount, the percentage or both", () => {
+  for (const id of ["jelly-signature", "jelly-avenue"]) {
+    expect(Object.keys(tokensFor(id)).filter((key) => key.startsWith("--jelly-card-saving"))).toEqual([]);
+    expect(Object.keys(tokensFor(id, { productCard: { savings: "none" } })).filter((key) => key.startsWith("--jelly-card-saving"))).toEqual([]);
+    expect(tokensFor(id, { productCard: { savings: "both" } })).toMatchObject({ "--jelly-card-saving-display": "flex" });
+    expect(tokensFor(id, { productCard: { savings: "amount" } })).toMatchObject({ "--jelly-card-saving-display": "flex", "--jelly-card-saving-percent-display": "none" });
+    expect(tokensFor(id, { productCard: { savings: "percent" } })).toMatchObject({ "--jelly-card-saving-display": "flex", "--jelly-card-saving-amount-display": "none" });
+  }
+});
+
 it("lists only https social links from theme settings, in footer order", () => {
   expect(themeSocialLinks({ social: { youtube: "https://youtube.com/@shop", instagram: " https://instagram.com/shop ", facebook: "http://facebook.com/shop", x: "javascript:alert(1)" } })).toEqual([
     { id: "instagram", label: "Instagram", href: "https://instagram.com/shop" },

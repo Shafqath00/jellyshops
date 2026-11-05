@@ -12,6 +12,7 @@ import { formatMoney, type ConfiguredOptionSelection } from "@/lib/domain";
 import { getConfiguredPriceMinor, resolveProductVariant } from "@/lib/product-configuration";
 import { getVisibleOptions, toggleSelection, validateProductSelections } from "@/lib/product-builder";
 import { createProductPresentationContext } from "@/features/storefront/product-presentation";
+import { productCardData } from "@/features/storefront/product-card-data";
 import { useStorefrontCatalogStatus } from "@/features/commerce/components/storefront-catalog-sync";
 import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
 import { loadPublicStorefrontPublication, type PublicStorefrontPublication } from "@/features/storefront/public-storefront-api";
@@ -57,7 +58,7 @@ export default function ProductPage() {
     onSelectionsChange: setSelections,
     onQuantityChange: setQuantity,
     onAddToCart: ({ variantId, quantity: nextQuantity, selections: nextSelections, priceMinor }) => addCurrentToCart({ variantId, nextQuantity, nextSelections, priceMinor }),
-    relatedProducts: visibleProducts.filter((item) => item.id !== product.id && ((item.collectionIds ?? []).some((id) => (product.collectionIds ?? []).includes(id)) || (item.primaryCategoryId && item.primaryCategoryId === product.primaryCategoryId))).slice(0, 4).map((item) => ({ id: item.id, name: item.name, href: `/${store.slug}/products/${item.slug}`, imageUrl: item.imageUrl, price: formatMoney(item.variants[0]?.priceMinor ?? 0, store.currency) })),
+    relatedProducts: visibleProducts.filter((item) => item.id !== product.id && ((item.collectionIds ?? []).some((id) => (product.collectionIds ?? []).includes(id)) || (item.primaryCategoryId && item.primaryCategoryId === product.primaryCategoryId))).slice(0, 4).map((item) => productCardData(item, `/${store.slug}/products/${item.slug}`, store.currency)),
   }) : undefined;
   if (productPresentation && store && product) {
     productPresentation.wishlistControl = <WishlistButton storeId={store.id} productId={product.id} />;

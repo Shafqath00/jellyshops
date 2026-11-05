@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { settingValueSchema, type DynamicValueType } from "@jelly/storefront-schema";
-import { appEmbedSource, getAppBlockProvider, listAppBlockProviders } from "@jelly/storefront-schema";
+import { appEmbedSource, getAppBlockProvider, listAppBlockProviders, STORE_ICON_LABELS, STORE_ICON_NAMES } from "@jelly/storefront-schema";
 import { withBlockStyle } from "./block-style.js";
 import type { BlockDefinition, ControlDefinition } from "./types.js";
 
@@ -110,6 +110,10 @@ const blocks: BlockDefinition[] = [
   // Fixed rows for the Specifications section, e.g. "Warranty: 10 years". Values are typed, not bound, because bindings are not resolved on the live store yet.
   { type: "spec-row", settingsSchema: z.object({ label: z.string().max(60), value: z.string().max(240) }).passthrough(), controls: [{ type: "text", key: "label", label: "Name, e.g. Warranty", group: "content", maxLength: 60 }, { type: "text", key: "value", label: "Value, e.g. 10 years", group: "content", maxLength: 240 }], defaultSettings: { label: "Warranty", value: "10 years" } },
   { type: "contact-item", settingsSchema: z.object({ label: z.string(), value: dynamicString }).passthrough(), controls: [{ type: "text", key: "label", label: "Label", group: "content", maxLength: 40 }, { type: "text", key: "value", label: "Value", group: "content", maxLength: 160, dynamicTypes: stringTypes }], defaultSettings: { label: "Email", value: "hello@example.com" } },
+  // One trust point ("Free delivery") with a small icon: the Trust badges section and the header's trust row.
+  { type: "trust-point", settingsSchema: z.object({ text: dynamicString, icon: z.enum(STORE_ICON_NAMES).optional(), link: linkSchema }).passthrough(), controls: [{ type: "text", key: "text", label: "Text", group: "content", maxLength: 80, dynamicTypes: stringTypes }, { type: "select", key: "icon", label: "Icon", group: "content", options: STORE_ICON_NAMES.map((value) => ({ label: STORE_ICON_LABELS[value], value })) }, { type: "link", key: "link", label: "Link", description: "Optional.", group: "content", dynamicTypes: urlTypes }], defaultSettings: { text: "Free delivery", icon: "truck" } },
+  // One photo of the Photo gallery section, e.g. a customer's bedroom.
+  { type: "gallery-image", settingsSchema: z.object({ image: imageReference.optional(), caption: z.string().max(120).optional(), link: linkSchema }).passthrough(), controls: [{ type: "image", key: "image", label: "Photo", group: "content" }, { type: "text", key: "caption", label: "Caption", description: "Optional, for example the customer's name or the product.", group: "content", maxLength: 120 }, { type: "link", key: "link", label: "Link", description: "Optional.", group: "content", dynamicTypes: urlTypes }], defaultSettings: {} },
   groupBlock,
   appBlock(),
   { type: "social-link", settingsSchema: z.object({ label: z.string(), href: z.union([z.string(), settingValueSchema(z.string())]) }).passthrough(), controls: [{ type: "link", key: "href", label: "Link", group: "content", dynamicTypes: urlTypes }], defaultSettings: { label: "Instagram", href: "https://example.com" } }

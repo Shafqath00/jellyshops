@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { safeRichTextHref } from "@jelly/storefront-schema";
+import { safeRichTextHref, STORE_ICON_LABELS, STORE_ICON_NAMES } from "@jelly/storefront-schema";
 import type { SectionDefinition } from "../types.js";
 
 const allPages = ["home", "product", "collection", "cart", "search", "page", "blog", "article", "not-found", "checkout", "wishlist", "customer-login", "customer-register", "customer-recovery", "customer-account", "customer-orders", "customer-order", "customer-addresses", "order-success"] as const;
@@ -17,6 +17,11 @@ const headerSettings = z.object({
   showAccount: z.boolean().optional(),
   showWishlist: z.boolean().optional(),
   showCart: z.boolean().optional(),
+  layout: z.enum(["classic", "search-bar"]).optional(),
+  showToolLabels: z.boolean().optional(),
+  extraLinkLabel: z.string().max(40).optional(),
+  extraLink: z.string().max(500).optional(),
+  extraLinkIcon: z.enum(STORE_ICON_NAMES).optional(),
 }).passthrough();
 const footerSettings = z.object({
   storeName: z.string().max(120).optional(),
@@ -40,6 +45,11 @@ const headerControls: SectionDefinition["controls"] = [
   { type: "checkbox", key: "showAccount", label: "Show account", group: "content" },
   { type: "checkbox", key: "showWishlist", label: "Show wishlist", group: "content" },
   { type: "checkbox", key: "showCart", label: "Show bag", group: "content" },
+  { type: "segmented", key: "layout", label: "Header layout", group: "layout", options: [{ label: "Menu beside logo", value: "classic" }, { label: "Search bar, logo in the middle", value: "search-bar" }], description: "Search bar: a search box on the left, the logo in the middle, the menu on its own row and trust points under it." },
+  { type: "checkbox", key: "showToolLabels", label: "Show words next to the icons", group: "style" },
+  { type: "text", key: "extraLinkLabel", label: "Extra link text", description: "Shown beside the bag, for example Free swatches. Leave empty for none.", group: "content", maxLength: 40 },
+  { type: "link", key: "extraLink", label: "Extra link", group: "content" },
+  { type: "select", key: "extraLinkIcon", label: "Extra link icon", group: "content", options: STORE_ICON_NAMES.map((value) => ({ label: STORE_ICON_LABELS[value], value })) },
 ];
 const footerControls: SectionDefinition["controls"] = [
   { type: "text", key: "storeName", label: "Store name", group: "content", maxLength: 120 },
@@ -53,7 +63,7 @@ const footerControls: SectionDefinition["controls"] = [
 
 export const layoutSections: SectionDefinition[] = [
   { type: "announcement-bar", category: "layout", supportedPages: [...allPages], settingsSchema: announcementSettings, controls: [{ type: "text", key: "text", label: "Message", group: "content", maxLength: 160 }, { type: "link", key: "link", label: "Link", group: "content" }], allowedBlockTypes: ["text"], defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
-  { type: "header", category: "layout", supportedPages: [...allPages], settingsSchema: headerSettings, controls: headerControls, allowedBlockTypes: ["menu"], defaultSettings: { storeName: "Storefront" }, defaultBlocks: [], responsiveFields: [] },
+  { type: "header", category: "layout", supportedPages: [...allPages], settingsSchema: headerSettings, controls: headerControls, allowedBlockTypes: ["menu", "trust-point"], defaultSettings: { storeName: "Storefront" }, defaultBlocks: [], responsiveFields: [] },
   { type: "spacer", category: "layout", supportedPages: [...allPages], settingsSchema: z.object({ size: z.string().optional() }).passthrough(), controls: [{ type: "select", key: "size", label: "Size", group: "layout", responsive: true, options: [{ label: "Small", value: "small" }, { label: "Standard", value: "standard" }, { label: "Large", value: "large" }] }], allowedBlockTypes: [], defaultSettings: { size: "standard" }, defaultBlocks: [], responsiveFields: ["size"] },
   { type: "divider", category: "layout", supportedPages: [...allPages], settingsSchema: empty, controls: [], allowedBlockTypes: [], defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
   { type: "spacer-divider", category: "layout", supportedPages: [...allPages], settingsSchema: z.object({ size: z.string().optional() }).passthrough(), controls: [{ type: "range", key: "size", label: "Spacing", group: "layout", min: 0, max: 160, step: 4, unit: "px" }], allowedBlockTypes: [], defaultSettings: { size: 48 }, defaultBlocks: [], responsiveFields: [] },

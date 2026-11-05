@@ -381,3 +381,100 @@
 /* Section recipes: generated spacer and product list elements. */
 .jelly-custom-content-inner > .jelly-recipe-spacer { flex: none; width: 100%; }
 .jelly-custom-content-inner > .jelly-recipe-products { width: 100%; }
+
+/* Trust badges: icons, links and the scrolling layout. The strip pauses while pointed at or focused,
+   and shoppers who ask for less motion see the points wrapped in rows without movement. */
+.jelly-trust-strip li a { display: inline-flex; align-items: center; gap: inherit; color: inherit; text-decoration: none; }
+.jelly-trust-strip li a:hover span { text-decoration: underline; text-underline-offset: 3px; }
+.jelly-trust-strip li .jelly-icon { flex: none; }
+/* Point text follows the strip colour (an older shared rule colours any span in the strip). */
+.jelly-trust-strip li > span, .jelly-trust-strip li > a > span { color: inherit; }
+.jelly-trust-strip[data-layout="scroll"] { overflow: hidden; }
+.jelly-trust-marquee { display: flex; width: max-content; }
+.jelly-trust-strip .jelly-trust-marquee .jelly-trust-track {
+  display: flex; flex: none; align-items: center; gap: 48px; margin: 0; padding: 0 24px; list-style: none;
+  animation: jelly-trust-scroll var(--jelly-marquee-duration, 20s) linear infinite;
+}
+.jelly-trust-strip .jelly-trust-marquee .jelly-trust-track li { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.jelly-trust-marquee:hover .jelly-trust-track,
+.jelly-trust-marquee:focus-within .jelly-trust-track { animation-play-state: paused; }
+@keyframes jelly-trust-scroll { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+@media (prefers-reduced-motion: reduce) {
+  .jelly-trust-strip[data-layout="scroll"] .jelly-trust-marquee { width: auto; justify-content: center; }
+  .jelly-trust-strip .jelly-trust-marquee .jelly-trust-track { flex-wrap: wrap; justify-content: center; gap: 12px 32px; animation: none; }
+  .jelly-trust-strip .jelly-trust-marquee .jelly-trust-track[aria-hidden="true"] { display: none; }
+}
+
+/* Header: "search bar" layout (search left, logo centre, tools right, menu and trust row below),
+   words beside the tool icons, and the trust row. Selectors are longer than each theme's header rules. */
+.jelly-header-search { display: flex; align-items: center; min-width: 0; max-width: 360px; border: 1px solid var(--theme-border, color-mix(in srgb, currentColor 20%, transparent)); border-radius: 999px; background: var(--theme-surface, #fff); }
+.jelly-header-search input { flex: 1; min-width: 0; height: 44px; padding: 0 4px 0 18px; border: 0; background: transparent; color: inherit; font: inherit; font-size: 15px; }
+.jelly-header-search input:focus { outline: none; }
+.jelly-header-search:focus-within { outline: 2px solid currentColor; outline-offset: 2px; }
+.jelly-header-search button { display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 999px; background: transparent; color: inherit; cursor: pointer; }
+.jelly-header-trust { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 32px; margin: 0; padding: 0; list-style: none; font-size: 13px; color: var(--theme-muted-text, inherit); }
+.jelly-header-trust li { display: inline-flex; align-items: center; gap: 8px; }
+.jelly-header-trust li a { display: inline-flex; align-items: center; gap: 8px; color: inherit; text-decoration: none; }
+[data-jelly-theme] .jelly-header.jelly-header[data-tool-labels="true"] .jelly-header-tool-label,
+[data-jelly-theme] .jelly-header.jelly-header a[data-tool="extra"] .jelly-header-tool-label { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; white-space: nowrap; font-size: 13px; }
+[data-jelly-theme] .jelly-header.jelly-header[data-tool-labels="true"] .jelly-header-tools a,
+[data-jelly-theme] .jelly-header.jelly-header .jelly-header-tools a[data-tool="extra"] { display: inline-flex; align-items: center; width: auto; gap: 6px; padding-inline: 8px; }
+@media (min-width: 900px) {
+  [data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-bar"] {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); row-gap: 12px;
+  }
+  [data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-bar"] > .jelly-header-search { grid-column: 1; grid-row: 1; justify-self: start; width: 100%; }
+  [data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-bar"] > .jelly-header-brand { grid-column: 2; grid-row: 1; justify-self: center; justify-content: center; }
+  [data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-bar"] > .jelly-header-tools { grid-column: 3; grid-row: 1; justify-self: end; }
+  [data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-bar"] > nav:not(.jelly-header-tools) { display: block; grid-column: 1 / -1; grid-row: 2; justify-self: center; }
+  [data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-bar"] > .jelly-header-trust { grid-column: 1 / -1; grid-row: 3; padding-top: 12px; border-top: 1px solid var(--theme-border, color-mix(in srgb, currentColor 15%, transparent)); }
+  [data-jelly-theme] .jelly-header.jelly-header:not([data-header-layout="search-bar"]) > .jelly-header-trust { grid-column: 1 / -1; }
+}
+@media (max-width: 899px) {
+  /* Phones and tablets: the search box gets its own row under the logo; the trust row scrolls sideways. */
+  [data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-bar"] > .jelly-header-search { grid-column: 1 / -1; grid-row: 2; max-width: none; width: 100%; }
+  [data-jelly-theme] .jelly-header.jelly-header > .jelly-header-trust { grid-column: 1 / -1; flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; gap: 24px; padding-bottom: 4px; scrollbar-width: none; }
+  [data-jelly-theme] .jelly-header.jelly-header > .jelly-header-trust li { flex: none; white-space: nowrap; }
+  [data-jelly-theme] .jelly-header.jelly-header[data-tool-labels="true"] .jelly-header-tool-label,
+  [data-jelly-theme] .jelly-header.jelly-header a[data-tool="extra"] .jelly-header-tool-label { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); }
+  [data-jelly-theme] .jelly-header.jelly-header .jelly-header-tools a[data-tool="extra"] { width: 44px; padding-inline: 0; justify-content: center; }
+}
+
+/* Rating line: five stars filled to the rating, the score and the review count. */
+.jelly-rating-summary[data-align="center"] { text-align: center; }
+.jelly-rating-summary-heading { margin: 0 0 8px; }
+.jelly-rating-line { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 10px; margin: 0; }
+.jelly-rating-summary[data-align="left"] .jelly-rating-line { justify-content: flex-start; }
+.jelly-rating-line a { color: inherit; text-underline-offset: 3px; }
+.jelly-rating-stars { position: relative; display: inline-block; font-size: 20px; line-height: 1; letter-spacing: 2px; }
+.jelly-rating-stars-empty { color: color-mix(in srgb, currentColor 22%, transparent); }
+.jelly-rating-stars-full { position: absolute; inset: 0 auto 0 0; width: var(--jelly-rating-fill, 0%); overflow: hidden; white-space: nowrap; color: var(--jelly-rating-color, #f2b01e); }
+
+/* Photo gallery: a grid, or a row that scrolls sideways with snap points. */
+.jelly-image-gallery-intro { max-width: 720px; margin: 0 auto 24px; text-align: center; }
+.jelly-image-gallery-intro h2 { margin: 0; }
+.jelly-image-gallery-intro p { margin: 8px 0 0; color: var(--theme-muted-text, inherit); }
+.jelly-image-gallery-items { display: grid; grid-template-columns: repeat(var(--jelly-columns, 4), minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.jelly-image-gallery[data-layout="scroll"] .jelly-image-gallery-items { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; }
+.jelly-image-gallery[data-layout="scroll"] .jelly-image-gallery-items > li { flex: 0 0 calc((100% - (var(--jelly-columns, 4) - 1) * 12px) / var(--jelly-columns, 4)); scroll-snap-align: start; }
+.jelly-image-gallery-items figure { margin: 0; }
+.jelly-image-gallery-items a { color: inherit; text-decoration: none; }
+.jelly-image-gallery-items img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--jelly-card-radius, 4px); }
+.jelly-image-gallery[data-ratio="portrait"] .jelly-image-gallery-items img { aspect-ratio: 4 / 5; }
+.jelly-image-gallery[data-ratio="landscape"] .jelly-image-gallery-items img { aspect-ratio: 4 / 3; }
+.jelly-image-gallery-items figcaption { margin-top: 6px; font-size: 14px; color: var(--theme-muted-text, inherit); }
+@media (max-width: 767px) {
+  .jelly-image-gallery-items { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .jelly-image-gallery[data-layout="scroll"] .jelly-image-gallery-items > li { flex-basis: 70%; }
+}
+
+/* Long collection descriptions cut to a few lines with Read more. */
+.jelly-clamped-text-body[style*="--jelly-clamp-lines"] { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--jelly-clamp-lines); overflow: hidden; }
+.jelly-clamped-text-body > :first-child { margin-top: 0; }
+.jelly-read-more { margin-top: 4px; padding: 0; border: 0; background: none; color: inherit; font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+
+/* Product cards: savings under the price (theme settings > Product cards > Savings) and a chip from a label: tag. */
+[data-jelly-theme] .jelly-product-card .jelly-product-card-saving { display: var(--jelly-card-saving-display, none); flex-wrap: wrap; gap: 4px 8px; margin: 2px 0 0; font-size: 14px; font-weight: 600; color: var(--jelly-card-saving-color, var(--theme-text, currentColor)); }
+[data-jelly-theme] .jelly-product-card-saving [data-saving="amount"] { display: var(--jelly-card-saving-amount-display, inline); text-decoration: underline; text-underline-offset: 3px; }
+[data-jelly-theme] .jelly-product-card-saving [data-saving="percent"] { display: var(--jelly-card-saving-percent-display, inline); }
+.jelly-product-card-chip { align-self: flex-start; justify-self: start; width: fit-content; display: inline-block; margin-top: 6px; padding: 3px 8px; border-radius: 4px; background: var(--theme-accent-soft, color-mix(in srgb, currentColor 8%, transparent)); color: var(--theme-text, inherit); font-size: 12px; line-height: 1.4; }

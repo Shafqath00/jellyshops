@@ -18,6 +18,8 @@ export const renderableHomeSectionTypes: ReadonlySet<string> = new Set([
   "testimonials",
   "trust-strip",
   "logo-list",
+  "rating-summary",
+  "image-gallery",
   "metaobject-list",
   "apps",
   "image-mosaic",

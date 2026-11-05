@@ -1,4 +1,4 @@
-export interface StorefrontProductCardData { name: string; href: string; imageUrl: string; price: string; compareAtPrice?: string; badge?: string }
+export interface StorefrontProductCardData { name: string; href: string; imageUrl: string; price: string; compareAtPrice?: string; badge?: string; saving?: string; discountPercent?: number; chip?: string }
 
 export function StorefrontProductCard({ product }: { product: StorefrontProductCardData }) {
   return <article className="jelly-product-card">
@@ -15,6 +15,12 @@ export function StorefrontProductCard({ product }: { product: StorefrontProductC
           <span>{product.price}</span>
           {product.compareAtPrice && <s aria-label={`Was ${product.compareAtPrice}`}>{product.compareAtPrice}</s>}
         </p>
+        {/* Hidden unless the theme's card "Savings" setting is on. */}
+        {(product.saving || product.discountPercent) && <p className="jelly-product-card-saving">
+          {product.saving && <span data-saving="amount">Save {product.saving}</span>}
+          {product.discountPercent ? <span data-saving="percent">{product.discountPercent}% off</span> : null}
+        </p>}
+        {product.chip && <span className="jelly-product-card-chip">{product.chip}</span>}
         {/* Hidden unless the theme's card "Button" setting is on; the label comes from the theme (the link already names the product). */}
         <span className="jelly-product-card-button" aria-hidden="true" />
       </div>

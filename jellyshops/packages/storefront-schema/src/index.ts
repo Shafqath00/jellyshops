@@ -98,3 +98,5 @@ export type { Translations } from "./translations.js";
 export { appEmbedSource, getAppBlockProvider, listAppBlockProviders, registerAppBlockProvider } from "./app-blocks.js";
 export type { AppBlockProvider } from "./app-blocks.js";
 export { JELLY_THEME_API_VERSION, compareThemeVersions, supportsJellyVersion, themeVersionSchema, jellyEngineRangeSchema } from "./theme-version.js";
+export { STORE_ICON_LABELS, STORE_ICON_NAMES, isStoreIconName } from "./store-icons.js";
+export type { StoreIconName } from "./store-icons.js";

@@ -1,7 +1,10 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useId, useRef, useState, type RefObject } from "react";
 import { safeRichTextHref, type RuntimeMenuV4, type SectionNode } from "@jelly/storefront-schema";
 import type { StorefrontRuntimeContext } from "../runtime-context";
+import { resolveStorefrontHref } from "../runtime-context";
 import { MenuTree, type MenuVariant } from "./menu-tree";
+import { StoreIcon } from "./store-icon";
+import { TrustPointItems, trustPoints } from "./trust-points";
 
 type RuntimeMenuItem = RuntimeMenuV4["items"][number];
 
@@ -62,6 +65,16 @@ function useScrolled(ref: RefObject<HTMLElement | null>, enabled: boolean): bool
   return scrolled;
 }
 
+/** The search box of the "search bar" header layout; sends shoppers to the store's search page. */
+function HeaderSearch({ action }: { action: string }) {
+  const id = useId();
+  return <form className="jelly-header-search" role="search" action={action} method="get">
+    <label className="jelly-visually-hidden" htmlFor={id}>Search products</label>
+    <input id={id} name="q" type="search" placeholder="Search products" autoComplete="off" />
+    <button type="submit" aria-label="Search"><StorefrontIcon name="search" /></button>
+  </form>;
+}
+
 export function HeaderSection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
   const headerRef = useRef<HTMLElement>(null);
   const settings = section.settings;
@@ -70,12 +83,17 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
   const name = typeof settings.storeName === "string" && settings.storeName.trim() ? settings.storeName : "Storefront";
   const logoWidth = typeof settings.logoWidth === "number" ? Math.min(240, Math.max(64, settings.logoWidth)) : undefined;
   const root = context.storeSlug ? `/${encodeURIComponent(context.storeSlug)}` : "";
+  const searchBar = settings.layout === "search-bar";
   const tools = context.storeSlug ? ([
     ["search", "Search", `${root}/search`, settings.showSearch],
     ["account", "Account", `${root}/account`, settings.showAccount],
     ["wishlist", "Wishlist", `${root}/wishlist`, settings.showWishlist],
     ["bag", "Bag", `${root}/cart`, settings.showCart],
-  ] as const).filter(([, , , visible]) => visible !== false) : [];
+  ] as const).filter(([icon, , , visible]) => visible !== false && !(searchBar && icon === "search")) : [];
+  const extraLabel = typeof settings.extraLinkLabel === "string" ? settings.extraLinkLabel.trim() : "";
+  const extraHref = extraLabel ? resolveStorefrontHref(settings.extraLink, context.storeSlug) : null;
+  const trust = trustPoints(section.blocks, context).slice(0, 6);
+  const showTools = tools.length > 0 || Boolean(extraHref);
   const transparent = settings.transparent === true;
   const overlayImage = transparent ? imageSetting(settings.overlayLogo) : undefined;
   const overlayLogoUrl = overlayImage ? safeRichTextHref(overlayImage.url) : null;
@@ -84,7 +102,9 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
     ref={headerRef}
     className="jelly-header"
     data-section-id={section.id}
-    data-logo-position={settings.logoPosition === "center" ? "center" : "left"}
+    data-logo-position={searchBar || settings.logoPosition === "center" ? "center" : "left"}
+    data-header-layout={searchBar ? "search-bar" : undefined}
+    data-tool-labels={settings.showToolLabels === true ? "true" : undefined}
     data-sticky={settings.sticky === true ? "true" : undefined}
     data-transparent={transparent ? "true" : undefined}
     data-scrolled={transparent && scrolled ? "true" : undefined}
@@ -97,6 +117,7 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
         {tools.length > 0 && <nav aria-label="Account and saved items"><ul>{tools.filter(([icon]) => icon !== "search").map(([icon, label, href]) => <li key={icon}><a href={href}>{icon === "bag" ? "Shopping bag" : label}</a></li>)}</ul></nav>}
       </div>
     </details>
+    {searchBar && <HeaderSearch action={`${root}/search`} />}
     <a className="jelly-header-brand" href={root || "/"} style={logoWidth ? { width: logoWidth } : undefined}>
       {logoUrl && !logoUrl.startsWith("#") ? <img src={logoUrl} alt={image?.alt || name} /> : <span>{name}</span>}
       {/* Merchant media URLs may be served by the local API and are not Next Image assets. */}
@@ -104,8 +125,10 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
       {overlayLogoUrl && !overlayLogoUrl.startsWith("#") && <img className="jelly-header-overlay-logo" src={overlayLogoUrl} alt="" aria-hidden="true" />}
     </a>
     <MenuLinks section={section} context={context} label="Primary navigation" variant="bar" />
-    {tools.length > 0 && <nav className="jelly-header-tools" aria-label="Shopping tools">
+    {showTools && <nav className="jelly-header-tools" aria-label="Shopping tools">
+      {extraHref && <a href={extraHref} data-tool="extra" aria-label={extraLabel}><StoreIcon name={settings.extraLinkIcon ?? "palette"} /><span className="jelly-header-tool-label">{extraLabel}</span></a>}
       {tools.map(([icon, label, href]) => <a key={icon} href={href} data-tool={icon} aria-label={label}><StorefrontIcon name={icon} /><span className="jelly-header-tool-label">{label}</span></a>)}
     </nav>}
+    {trust.length > 0 && <ul className="jelly-header-trust" aria-label="Why shop with us"><TrustPointItems points={trust} icons /></ul>}
   </header>;
 }
