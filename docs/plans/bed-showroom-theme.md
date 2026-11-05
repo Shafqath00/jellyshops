@@ -91,6 +91,17 @@ Rating section already worked on product pages. Add-ons (assembly etc.) not buil
 Checked on `/theme-preview/*` (Minimal desktop + 390px, Avenue desktop) with a temporary demo; not checked in the
 signed-in editor.
 
+## Phase 5 (2026-11-05): QA done locally, staging install waiting for approval
+
+Playwright spec `jellyshops/e2e/jelly-resthaven-theme.spec.ts` (18 tests): every page at 1280/768/390 without overflow,
+unnamed controls or page errors; axe WCAG 2.1 A/AA **with colour contrast** on every page (the rendered page is copied
+into its own tab, because the preview frame runs no scripts of its own); Beds dropdown and store links, readable
+footer, "% off" and the add to basket bar, cart totals. All pass, and the Minimal and Avenue specs still pass (20).
+Found and fixed: the add to basket bar never appeared in the editor/theme preview (its IntersectionObserver belonged to
+the preview frame, which runs no callbacks) and missed jumps past the button (an observer only reports changes); it
+now listens to scroll on the page's window and checks whether the button is above the screen. Launch checklist:
+`docs/jelly-resthaven-launch-checklist.md`. Not done: install on a staging test store (needs the user's go-ahead).
+
 ## Phase 4 done (2026-11-05)
 
 Other pages and phone polish, all in Resthaven's `theme.css` (regenerated `jelly-resthaven.css`) and starter:

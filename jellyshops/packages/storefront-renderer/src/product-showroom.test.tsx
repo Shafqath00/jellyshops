@@ -115,41 +115,52 @@ describe("option tiles and tabs", () => {
 });
 
 describe("sticky add to basket bar", () => {
-  type Callback = (entries: Array<{ isIntersecting: boolean; boundingClientRect: { top: number } }>) => void;
-  let observed: Callback | undefined;
-  const original = window.IntersectionObserver;
-  afterEach(() => { window.IntersectionObserver = original; observed = undefined; });
-  function mockObserver() {
-    window.IntersectionObserver = class { constructor(callback: Callback) { observed = callback; } observe() {} disconnect() {} } as unknown as typeof IntersectionObserver;
+  // Where the page's own Add to basket button is: its bottom edge relative to the top of the screen.
+  let buttonBottom = 400;
+  const original = HTMLElement.prototype.getBoundingClientRect;
+  afterEach(() => { HTMLElement.prototype.getBoundingClientRect = original; buttonBottom = 400; });
+  function trackButton() {
+    HTMLElement.prototype.getBoundingClientRect = function (this: HTMLElement) {
+      return (this.classList.contains("jelly-purchase-actions") ? { top: buttonBottom - 50, bottom: buttonBottom } : { top: 0, bottom: 0 }) as DOMRect;
+    };
   }
+  const scrollTo = (bottom: number) => act(() => { buttonBottom = bottom; window.dispatchEvent(new Event("scroll")); });
 
   it("appears once the page's own button has scrolled up, and adds to the basket", async () => {
-    mockObserver();
+    trackButton();
     const presentation = product();
     const { container } = render(<ProductPurchaseSection context={context(presentation)} section={{ settings: { stickyBar: true, label: "Add to basket" } }} />);
     const bar = container.querySelector(".jelly-sticky-purchase") as HTMLElement;
     expect(bar).not.toBeVisible();
-    act(() => observed?.([{ isIntersecting: false, boundingClientRect: { top: -200 } }]));
+    scrollTo(-200);
     expect(bar).toBeVisible();
     expect(within(bar).getByText("Harbour bed")).toBeInTheDocument();
     await act(async () => { fireEvent.click(within(bar).getByRole("button", { name: "Add to basket" })); });
     expect(presentation.addToCart).toHaveBeenCalledTimes(1);
-    act(() => observed?.([{ isIntersecting: true, boundingClientRect: { top: 300 } }]));
+    scrollTo(300);
     expect(bar).not.toBeVisible();
-    act(() => observed?.([{ isIntersecting: false, boundingClientRect: { top: 900 } }]));
+    // Further down than the screen (not scrolled to yet) is not "scrolled past".
+    scrollTo(2000);
     expect(bar).not.toBeVisible();
     expect(await noViolations(container)).toEqual([]);
   });
 
+  it("shows straight away when the page opens already scrolled past the button", () => {
+    trackButton();
+    buttonBottom = -500;
+    const { container } = render(<ProductPurchaseSection context={context(product())} section={{ settings: { stickyBar: true } }} />);
+    expect(container.querySelector(".jelly-sticky-purchase")).toBeVisible();
+  });
+
   it("asks shoppers to choose options first, and is off unless the merchant turns it on", () => {
-    mockObserver();
+    trackButton();
     const scroll = vi.fn();
     const { container } = render(<>
       <section className="jelly-product-options"><button type="button">Double</button></section>
       <ProductPurchaseSection context={context(product({ canAddToCart: false, availability: { state: "selection-required", message: "Choose the required options" } }))} section={{ settings: { stickyBar: true } }} />
     </>);
     (container.querySelector(".jelly-product-options") as HTMLElement).scrollIntoView = scroll;
-    act(() => observed?.([{ isIntersecting: false, boundingClientRect: { top: -10 } }]));
+    scrollTo(-10);
     fireEvent.click(within(container.querySelector(".jelly-sticky-purchase") as HTMLElement).getByRole("button", { name: "Choose options" }));
     expect(scroll).toHaveBeenCalled();
     expect(document.activeElement).toHaveTextContent("Double");

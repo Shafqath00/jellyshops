@@ -121,18 +121,23 @@ export function FinanceLine({ pricing, settings, storeSlug }: { pricing: Pricing
 }
 
 /**
- * Shows the bar once the page's own Add to basket button has scrolled up out of view, and hides it again when
- * the button comes back. Uses the frame's own IntersectionObserver so it works inside the editor preview.
+ * Shows the bar once the page's own Add to basket button has scrolled up above the top of the screen, and hides it
+ * again when the button comes back. A scroll listener on the page's own window (the preview frame's, in the editor)
+ * rather than an IntersectionObserver: an observer only reports changes, so a jump past the button (a link further
+ * down, a restored scroll position) that never shows it would leave the bar hidden, and the editor's preview frame
+ * may not run its own observers or timers at all, while its scroll events still reach this listener.
  */
 export function useStickyBar(enabled: boolean, target: RefObject<HTMLElement | null>): boolean {
   const [show, setShow] = useState(false);
   useEffect(() => {
     const node = target.current;
-    const Observer = node?.ownerDocument.defaultView?.IntersectionObserver;
-    if (!enabled || !node || !Observer) return;
-    const observer = new Observer(([entry]) => setShow(!entry.isIntersecting && entry.boundingClientRect.top < 0));
-    observer.observe(node);
-    return () => { observer.disconnect(); setShow(false); };
+    const view = node?.ownerDocument.defaultView;
+    if (!enabled || !node || !view) return;
+    const update = () => setShow(node.getBoundingClientRect().bottom < 0);
+    update();
+    view.addEventListener("scroll", update, { passive: true });
+    view.addEventListener("resize", update);
+    return () => { view.removeEventListener("scroll", update); view.removeEventListener("resize", update); setShow(false); };
   }, [enabled, target]);
   return enabled && show;
 }
