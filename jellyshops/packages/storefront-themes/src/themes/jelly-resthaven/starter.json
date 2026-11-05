@@ -96,7 +96,6 @@
       "type": "header",
       "enabled": true,
       "settings": {
-        "storeName": "Your store",
         "showSearch": true,
         "showCart": true,
         "sticky": false,

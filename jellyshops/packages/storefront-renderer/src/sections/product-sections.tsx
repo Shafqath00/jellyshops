@@ -132,7 +132,7 @@ export function ProductPurchaseSection({ context, section }: { context: Storefro
     </div>
     {message && <p role="status" className="jelly-purchase-message">{message}</p>}
     {error && <p role="alert" className="jelly-purchase-error">{error}</p>}
-    {section.settings.stickyBar === true && <StickyPurchaseBar product={product} visible={showBar} label={label} busy={busy} disabled={disabled} onAdd={() => { void purchase(); }} anchor={actions} />}
+    {section.settings.stickyBar === true && <StickyPurchaseBar product={product} visible={showBar} label={label} busy={busy} disabled={disabled} onAdd={() => { void purchase(); }} anchor={actions} message={message ?? error} />}
   </StorefrontContainer></section>;
 }
 

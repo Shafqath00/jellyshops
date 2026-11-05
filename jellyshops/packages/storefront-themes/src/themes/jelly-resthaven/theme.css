@@ -245,7 +245,9 @@ ul { list-style: none; margin: 0; padding: 0; }
 :is(.field, .checkout-form, .signature-panel, .signature-filters) :is(input, select, textarea):focus-visible { outline: 2px solid var(--theme-accent); outline-offset: 1px; border-color: var(--theme-accent); }
 :is(.signature-primary, .checkout-form .store-button) { min-height: 50px; padding: 0 24px; border: 0; border-radius: 6px; background: var(--theme-accent); color: var(--theme-surface); font-weight: 600; }
 .signature-secondary { min-height: 50px; padding: 0 24px; border: 1px solid var(--theme-accent); border-radius: 6px; background: transparent; color: var(--theme-accent); font-weight: 600; }
-.checkout-page > header h1, .signature-panel h1 { font-family: var(--theme-font-heading, Georgia), Georgia, serif; font-weight: 400; }
+.checkout-page > header h1, .signature-panel h1 { font-family: var(--theme-font-heading, Georgia), Georgia, serif; font-weight: 400; letter-spacing: 0; }
+/* A product with no photos: no empty gallery block. */
+.jelly-product-gallery[data-count="0"] { display: none; }
 .checkout-summary { border-radius: 8px; background: var(--theme-surface); }
 
 @media (max-width: 899px) {
@@ -253,6 +255,14 @@ ul { list-style: none; margin: 0; padding: 0; }
   .jelly-footer-newsletter form { grid-column: 1; grid-row: auto; }
   .jelly-cart-layout { grid-template-columns: minmax(0, 1fr); }
   .jelly-cart-totals { position: static; }
+}
+@media (max-width: 767px) {
+  /* Phones: product sections use the screen width (the page, container and its padding each added side space). */
+  :is(.jelly-storefront main, [data-storefront-template]):has([data-section-type="product-gallery"]) { padding: 0; }
+  :is(.jelly-product-gallery, .jelly-product-information, .jelly-product-options, .jelly-product-purchase) > .jelly-container { width: auto; max-width: none; margin-inline: 0; padding-inline: 16px; }
+  .jelly-product-gallery { padding: 0 0 8px; }
+  .jelly-product-information { padding: 20px 0 4px; }
+  .jelly-product-options, .jelly-product-purchase { padding: 8px 0; }
 }
 @media (max-width: 599px) {
   .jelly-footer-links { grid-template-columns: repeat(2, minmax(0, 1fr)); }

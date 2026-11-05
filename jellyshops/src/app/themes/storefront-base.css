@@ -519,6 +519,7 @@
 .jelly-sticky-purchase-text { display: grid; flex: 1; min-width: 0; }
 .jelly-sticky-purchase-title { overflow: hidden; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
 .jelly-sticky-purchase-price { display: flex; gap: 8px; font-size: 14px; }
+.jelly-sticky-purchase-message { font-size: 13px; font-weight: 600; }
 .jelly-sticky-purchase-price s { color: var(--jelly-color-secondary, inherit); }
 .jelly-sticky-purchase .jelly-button { flex: none; margin: 0; }
 /* Room at the end of the page so the bar never covers the footer. */

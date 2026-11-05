@@ -56,8 +56,10 @@ Work in a fresh browser profile with a new test merchant.
 
 ## Known limits
 
-- **Account, checkout and order pages** were styled (fields, buttons, headings) but not viewed in a browser yet; check
-  them in the staging journey.
+- **Order confirmation and signed-in account pages** were styled but not viewed; checkout and account sign-in were
+  checked on staging (2026-11-05). Payment was not run.
+- **Loading fallbacks (app, all themes):** the cart and product pages first draw a plain fallback for about a second
+  (the cart one says the bag is empty; the product one shows £0.00 and the first tag) before the theme's page.
 - **Add-ons** (assembly and similar extras on the product page) are not built: they change the cart and orders.
 - **Pictures.** The starter uses the theme's one bedroom photo everywhere; merchants replace it.
 - **Rating and gallery** stay hidden on the live store until the merchant enters a rating or adds photos (nothing made

@@ -91,7 +91,24 @@ Rating section already worked on product pages. Add-ons (assembly etc.) not buil
 Checked on `/theme-preview/*` (Minimal desktop + 390px, Avenue desktop) with a temporary demo; not checked in the
 signed-in editor.
 
-## Phase 5 (2026-11-05): QA done locally, staging install waiting for approval
+## Phase 5 done (2026-11-05): staging install checked
+
+Staging check on a temporary store "Resthaven test" (owner of store "new", GBP): Resthaven installed by the starter
+service, a bed with Colour (swatches) / Size (stock-tracked) / Storage (extra cost), compare-at prices, specifications
+and a `label:` tag, plus a mattress; published with no warnings. The live store (local frontend + local backend on
+staging) matched the preview: the theme's own menu with store-prefixed links, trust row, scrolling strip, rating and
+gallery hidden while empty, readable footer with working links, card "was" prices and chips; product option tabs with
+swatches, "29% off" from the real compare-at price, real stock ("5 available"), the add to basket bar adding to the bag;
+bag, checkout and account sign-in pages in the theme colours; no sideways scroll at 390px. Fixed from it: the header
+showed "Your store" instead of the store's name (the starter hard-coded `storeName`); product sections on phones were
+squeezed to 246 of 390px (page, container and padding each added side space); a product without photos left an empty
+gallery block; the checkout heading's tight letter spacing made words touch; the bar now shows "Added to your bag."
+too (the section's own message is off screen when the bar is used). Test store and all its rows deleted afterwards (in
+one transaction, the publication guard trigger switched off only inside it and checked back on). Seen but not fixed
+(app, not theme): the cart and product pages first draw a fallback for about a second (an empty "Your cart" page; a
+product page showing £0.00 and the first tag as an eyebrow) before the theme's page loads.
+
+## Phase 5 QA (2026-11-05)
 
 Playwright spec `jellyshops/e2e/jelly-resthaven-theme.spec.ts` (18 tests): every page at 1280/768/390 without overflow,
 unnamed controls or page errors; axe WCAG 2.1 A/AA **with colour contrast** on every page (the rendered page is copied

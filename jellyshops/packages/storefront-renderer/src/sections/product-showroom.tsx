@@ -142,7 +142,7 @@ export function useStickyBar(enabled: boolean, target: RefObject<HTMLElement | n
   return enabled && show;
 }
 
-export function StickyPurchaseBar({ product, visible, label, busy, disabled, onAdd, anchor }: { product: ProductPresentationContext; visible: boolean; label: string; busy: boolean; disabled: boolean; onAdd(): void; anchor: RefObject<HTMLElement | null> }) {
+export function StickyPurchaseBar({ product, visible, label, busy, disabled, onAdd, anchor, message }: { product: ProductPresentationContext; visible: boolean; label: string; busy: boolean; disabled: boolean; onAdd(): void; anchor: RefObject<HTMLElement | null>; message?: string }) {
   const needsChoice = product.availability.state === "selection-required";
   const chooseOptions = () => {
     const options = anchor.current?.ownerDocument.querySelector<HTMLElement>(".jelly-product-options");
@@ -158,6 +158,8 @@ export function StickyPurchaseBar({ product, visible, label, busy, disabled, onA
     {image && <img src={image} alt="" className="jelly-sticky-purchase-image" />}
     <div className="jelly-sticky-purchase-text">
       <span className="jelly-sticky-purchase-title">{product.product.title}</span>
+      {/* The section's own status line is what screen readers hear; this copy is for eyes on the bar. */}
+      {message && <span className="jelly-sticky-purchase-message" aria-hidden="true">{message}</span>}
       <span className="jelly-sticky-purchase-price">{product.pricing.price}{product.pricing.compareAtPrice && <s aria-label={`Was ${product.pricing.compareAtPrice}`}>{product.pricing.compareAtPrice}</s>}</span>
     </div>
     {needsChoice
