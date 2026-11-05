@@ -4,10 +4,10 @@ import { buildPackage } from "./package.mjs";
 /**
  * `jelly-theme upload [folder|package file] --store <id> --token <token> [--api <url>]`
  *
- * Sends the theme to the platform, which validates it again with the same rules. The token is the
- * access token of a signed-in merchant session (the same bearer token the admin uses); it can also
- * come from JELLY_TOKEN, the store from JELLY_STORE_ID and the address from JELLY_API_URL.
- * Long-lived developer tokens do not exist yet, so tokens expire with the session.
+ * Sends the theme to the platform, which validates it again with the same rules. The token is a
+ * developer token the store owner creates in Settings > Developer tokens (a signed-in session token
+ * also works); it can also come from JELLY_TOKEN, the store from JELLY_STORE_ID and the address from
+ * JELLY_API_URL.
  */
 export async function upload(target, flags = {}) {
   const token = typeof flags.token === "string" ? flags.token : process.env.JELLY_TOKEN;

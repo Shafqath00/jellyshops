@@ -874,3 +874,9 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .jelly-password-card button { min-height: 48px; border: 0; border-radius: 4px; background: #1c1b19; color: #fff; font: inherit; font-weight: 500; cursor: pointer; }
 .jelly-password-card button:disabled { opacity: 0.55; cursor: not-allowed; }
 .jelly-password-card .jelly-password-error { color: #b42318; opacity: 1; font-size: 14px; }
+
+/* Settings > Developer tokens */
+.developer-token-list { margin: 18px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.developer-token-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid #dedfe4; border-radius: 13px; }
+.developer-token-list small { display: block; margin-top: 4px; color: #5b6170; font-size: 12px; }
+.success-banner code[aria-label="New developer token"] { display: inline-block; margin: 6px 0; word-break: break-all; font-weight: 600; }

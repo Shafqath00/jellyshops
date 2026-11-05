@@ -14,7 +14,7 @@ Options:
   --port <n>     dev: port for the preview (default 5273)
   --out <dir>    package: where to write the file
   --store <id>   upload: the store that owns the theme (or JELLY_STORE_ID)
-  --token <t>    upload: a signed-in merchant access token (or JELLY_TOKEN)
+  --token <t>    upload, install: a developer token from Settings > Developer tokens (or JELLY_TOKEN)
   --api <url>    upload, install: the platform API address (or JELLY_API_URL)
   --replace <n>  install: replace the existing draft (n = the workspace generation)
   --no-open      dev: do not open the browser

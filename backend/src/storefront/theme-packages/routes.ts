@@ -1,8 +1,9 @@
 import express, { Router, type Response } from "express";
 import { z } from "zod";
-import { requireMerchant, requireStorePermission } from "../../auth/middleware.js";
 import type { AuthProvider } from "../../auth/types.js";
 import { ApiError } from "../../http/errors.js";
+import { merchantOrDeveloperToken } from "../../developer-tokens/routes.js";
+import type { DeveloperTokenService } from "../../developer-tokens/service.js";
 import type { ThemePackageService } from "./service.js";
 
 /** A package is JSON with its files inside as base64; the whole body stays under this size. */
@@ -24,21 +25,22 @@ export function isThemePackageUpload(request: { method: string; path: string }):
 }
 
 /** `/api/stores/:storeId/theme-packages`: upload, list and yank the store's own themes. */
-export function createThemePackageRouter(service: MerchantApi, authProvider: AuthProvider): Router {
+/** Developer tokens (`jdt_…`) work here as well as a signed-in merchant, so `jelly-theme upload/install` need no copied sign-in token. */
+export function createThemePackageRouter(service: MerchantApi, authProvider: AuthProvider, tokens?: Pick<DeveloperTokenService, "verify">): Router {
   const router = Router({ mergeParams: true });
-  router.post("/theme-packages", express.json({ limit: THEME_PACKAGE_BODY_LIMIT }), requireMerchant(authProvider), requireStorePermission("storefront:edit"), async (request, response, next) => {
+  router.post("/theme-packages", express.json({ limit: THEME_PACKAGE_BODY_LIMIT }), merchantOrDeveloperToken(authProvider, tokens, "storefront:edit"), async (request, response, next) => {
     try {
       const result = await service.upload(request.storeContext!.storeId, request.body);
       response.status(result.created ? 201 : 200).json(result);
     } catch (error) { next(error); }
   });
-  router.get("/theme-packages", requireMerchant(authProvider), requireStorePermission("storefront:view"), async (request, response, next) => {
+  router.get("/theme-packages", merchantOrDeveloperToken(authProvider, tokens, "storefront:view"), async (request, response, next) => {
     try { response.json({ packages: await service.list(request.storeContext!.storeId) }); } catch (error) { next(error); }
   });
-  router.post("/theme-packages/versions/:versionId/yank", requireMerchant(authProvider), requireStorePermission("storefront:edit"), async (request, response, next) => {
+  router.post("/theme-packages/versions/:versionId/yank", merchantOrDeveloperToken(authProvider, tokens, "storefront:edit"), async (request, response, next) => {
     try { await service.yank(request.storeContext!.storeId, String(request.params.versionId)); response.status(204).end(); } catch (error) { next(error); }
   });
-  router.post("/theme-packages/versions/:versionId/install", requireMerchant(authProvider), requireStorePermission("storefront:edit"), async (request, response, next) => {
+  router.post("/theme-packages/versions/:versionId/install", merchantOrDeveloperToken(authProvider, tokens, "storefront:edit"), async (request, response, next) => {
     try {
       const body = installSchema.safeParse(request.body ?? {});
       if (!body.success) throw new ApiError(422, "INSTALL_INPUT_INVALID", "Confirm replacing the draft with the current workspace generation.");

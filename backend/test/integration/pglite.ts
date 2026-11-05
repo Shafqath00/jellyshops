@@ -27,6 +27,7 @@ const schemaMigrations = [
   "20261102010000_theme_library.sql",
   "20261103000000_theme_packages.sql",
   "20261103010000_theme_semver.sql",
+  "20261105000000_developer_tokens.sql",
 ] as const;
 
 export type IntegrationDatabase = PGlite;

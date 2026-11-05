@@ -20,6 +20,8 @@ import { createThemeLibraryRouter } from "../../storefront/theme-library/routes.
 import { ThemeLibraryService } from "../../storefront/theme-library/service.js";
 import { createPublicThemeVersionRouter, createThemePackageRouter } from "../../storefront/theme-packages/routes.js";
 import { ThemePackageService } from "../../storefront/theme-packages/service.js";
+import { createDeveloperTokenRouter } from "../../developer-tokens/routes.js";
+import { DeveloperTokenService } from "../../developer-tokens/service.js";
 
 const accessServices = new WeakMap<AppContext, StorefrontAccessService | null>();
 
@@ -53,6 +55,17 @@ function packageService(context: AppContext): ThemePackageService | undefined {
     packageServices.set(context, database && storage ? new ThemePackageService({ query: (text: string, values?: unknown[]) => database.transaction((transaction) => transaction.query(text, values)), transaction: (work: Parameters<typeof database.transaction>[0]) => database.transaction(work) } as never, storage, context.storefrontStarterApi) : null);
   }
   return packageServices.get(context) ?? undefined;
+}
+
+const tokenServices = new WeakMap<AppContext, DeveloperTokenService | null>();
+
+/** Developer tokens for jelly-theme; need the database, so they are off in the local JSON mode. */
+function tokenService(context: AppContext): DeveloperTokenService | undefined {
+  if (!tokenServices.has(context)) {
+    const database = context.routeDependencies.commerceDatabase;
+    tokenServices.set(context, database ? new DeveloperTokenService({ query: (text: string, values?: unknown[]) => database.transaction((transaction) => transaction.query(text, values)) } as never) : null);
+  }
+  return tokenServices.get(context) ?? undefined;
 }
 
 const bindingValueServices = new WeakMap<AppContext, StorefrontBindingValueService | null>();
@@ -135,7 +148,9 @@ export function mountStorefrontRoutes(app: Express, context: AppContext): void {
   if (access) app.use("/api/stores/:storeId/storefront", createMerchantAccessRouter(access, authProvider));
   const library = libraryService(context);
   if (library) app.use("/api/stores/:storeId/storefront", createThemeLibraryRouter(library, authProvider));
-  if (themePackages) app.use("/api/stores/:storeId", createThemePackageRouter(themePackages, authProvider));
+  const tokens = tokenService(context);
+  if (tokens) app.use("/api/stores/:storeId", createDeveloperTokenRouter(tokens, authProvider));
+  if (themePackages) app.use("/api/stores/:storeId", createThemePackageRouter(themePackages, authProvider, tokens));
   const bindingValues = bindingValueService(context);
   if (bindingValues) {
     app.use("/api/stores/:storeId/storefront", createEditorBindingValuesRouter(bindingValues, authProvider));

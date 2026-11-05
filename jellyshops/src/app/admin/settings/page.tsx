@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { authApiOrigin, useAuth } from "@/features/auth/providers/auth-provider";
 import { StorefrontAccessSettings } from "@/features/storefront-access/access-settings";
+import { DeveloperTokensSettings } from "@/features/developer-tokens/developer-tokens-settings";
 
 interface Settings {
   id: string; name: string; slug: string; currency: string; country: string;
@@ -58,5 +59,5 @@ function StoreSettingsForm({ storeId, token }: { storeId: string; token: string 
 }
 export default function SettingsPage() {
   const { activeStore, session } = useAuth();
-  return <div className="admin-page narrow-page"><header className="page-head"><span className="page-kicker">Settings</span><h1>General settings</h1><p>The operational details behind your storefront.</p></header>{activeStore && session ? <><StoreSettingsForm key={activeStore.id} storeId={activeStore.id} token={session.access_token} /><StorefrontAccessSettings key={`access-${activeStore.id}`} storeId={activeStore.id} token={session.access_token} /></> : <p>Select a store to manage its settings.</p>}</div>;
+  return <div className="admin-page narrow-page"><header className="page-head"><span className="page-kicker">Settings</span><h1>General settings</h1><p>The operational details behind your storefront.</p></header>{activeStore && session ? <><StoreSettingsForm key={activeStore.id} storeId={activeStore.id} token={session.access_token} /><StorefrontAccessSettings key={`access-${activeStore.id}`} storeId={activeStore.id} token={session.access_token} /><DeveloperTokensSettings key={`tokens-${activeStore.id}`} storeId={activeStore.id} token={session.access_token} /></> : <p>Select a store to manage its settings.</p>}</div>;
 }
