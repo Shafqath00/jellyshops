@@ -91,6 +91,20 @@ Rating section already worked on product pages. Add-ons (assembly etc.) not buil
 Checked on `/theme-preview/*` (Minimal desktop + 390px, Avenue desktop) with a temporary demo; not checked in the
 signed-in editor.
 
+## Phase 4 done (2026-11-05)
+
+Other pages and phone polish, all in Resthaven's `theme.css` (regenerated `jelly-resthaven.css`) and starter:
+**footer fixed** (its text took the page background colour on a white panel and was unreadable on live stores since
+the theme was made): now a plum band with the newsletter row, store text and three link columns (Shop, Help, About,
+linking the pages a new store gets), normal font weight (an old shared rule made header and footer weight 800).
+Bag: full-width page with line cards, quantity stepper, sticky order summary; one column under 900px. Search and 404
+use the full width instead of the old 780px white card. Product page: first photo full width of its column, quantity
+and buttons in a row, outlined Buy now. Form fields, primary/secondary buttons and headings for account, checkout and
+contact pages use the theme colours. New preview page `/theme-preview/jelly-resthaven` (sample beds, all pictures are
+the theme's own bedroom photo, the theme's own menu via `useStarterMenu`). Checked there at 1280 and 375px (home,
+product, cart with items, search, 404, footer). **Not checked:** account, checkout and order pages (they need a
+running store), the signed-in editor.
+
 ## Phase 3 done (2026-11-05)
 
 Resthaven's starter (`storefront-themes/src/themes/jelly-resthaven/starter.json`) now uses the phase 1-2 pieces:

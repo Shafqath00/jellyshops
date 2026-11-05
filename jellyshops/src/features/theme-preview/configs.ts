@@ -20,6 +20,8 @@ export interface ThemePreviewConfig {
   searchQuery: string;
   /** Sample cart: product id to quantity. The second line shows a "Medium" variant. */
   cart: Record<string, number>;
+  /** Show the starter pack's own main menu instead of the sample one. */
+  useStarterMenu?: boolean;
 }
 
 const image = (photo: string, width = 900) => `https://images.unsplash.com/${photo}?auto=format&fit=crop&w=${width}&q=80`;
@@ -123,4 +125,51 @@ export const jellyAvenuePreview: ThemePreviewConfig = {
   },
   searchQuery: "jacket",
   cart: { a4: 1, a3: 2 },
+};
+
+const bedroom = "/themes/jelly-resthaven/bedroom.png";
+const resthavenProducts: PublicProduct[] = [
+  { id: "r1", name: "Harbour upholstered bed", price: "£499.00", compareAtPrice: "£699.00", saving: "£200.00", discountPercent: 29, chip: "More colours", href: "#", imageUrl: bedroom },
+  { id: "r2", name: "Linden ottoman bed", price: "£649.00", href: "#", imageUrl: bedroom },
+  { id: "r3", name: "Calder divan set", price: "£429.00", compareAtPrice: "£529.00", saving: "£100.00", discountPercent: 19, href: "#", imageUrl: bedroom },
+  { id: "r4", name: "Hollis pocket sprung mattress", price: "£359.00", chip: "Medium firm", href: "#", imageUrl: bedroom },
+  { id: "r5", name: "Ashby headboard", price: "£149.00", href: "#", imageUrl: bedroom },
+  { id: "r6", name: "Merrow hybrid mattress", price: "£549.00", href: "#", imageUrl: bedroom },
+];
+
+/** Resthaven (bed showroom). Sample products only; every picture is the theme's own bedroom photo. */
+export const jellyResthavenPreview: ThemePreviewConfig = {
+  themeId: "jelly-resthaven",
+  packId: "jelly-resthaven",
+  name: "Resthaven",
+  stageColor: "#e8dfd8",
+  guide: {
+    heading: "Your best sleep starts here",
+    subheading: "New and trending",
+    body: "Headings are set in Playfair Display and body text in Inter. Warm linen backgrounds, plum buttons and clear prices keep the focus on the beds.",
+    announcement: "Find the bed and mattress that fit your space and your sleep",
+    footerText: "Beds, mattresses and help choosing the right one for your room.",
+  },
+  products: resthavenProducts,
+  product: {
+    id: "r1",
+    title: "Harbour upholstered bed",
+    description: "A tall panelled headboard and a deep upholstered frame in a soft woven fabric. Choose the size, colour and storage that suit your room.\n\nSlats are included; the mattress is sold separately.",
+    media: [{ url: bedroom, alt: "An upholstered bed in a light-filled bedroom" }],
+    specifications: { "Double (W x L x H)": "146 x 205 x 120 cm", "King (W x L x H)": "161 x 215 x 120 cm", Fabric: "Woven polyester", Assembly: "Two people, about 45 minutes" },
+    shippingCopy: "Delivery details are shown at checkout.",
+    price: "£499.00",
+    compareAtPrice: "£699.00",
+  },
+  collection: { title: "Upholstered beds", description: "Soft, tailored frames in a range of fabrics and colours. Every bed lists its exact dimensions so you can check it fits your room before you order. Choose storage drawers or an ottoman lift for extra space.", imageUrl: bedroom },
+  page: {
+    title: "About us",
+    intro: "We help you choose a bed and mattress that suit your room and the way you sleep.",
+    heading: "How we help",
+    body: "Every product page lists the sizes, materials and options, and our team is happy to answer questions before you order.",
+    bullets: ["Clear dimensions on every bed", "Help choosing the right mattress"],
+  },
+  searchQuery: "bed",
+  cart: { r1: 1, r4: 1 },
+  useStarterMenu: true,
 };

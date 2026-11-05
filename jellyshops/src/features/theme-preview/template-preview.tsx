@@ -79,6 +79,8 @@ export function TemplatePreview({ template, config }: { template: PreviewTemplat
   const pack = getStarterPack(config.packId);
   const productPage = useProductContext(config);
   const cartPage = useCartContext(config);
+  // Themes that ship their own main menu are shown with it; the others with a sample menu that has dropdowns.
+  const previewMenus = config.useStarterMenu ? Object.fromEntries(pack.menus.map((menu) => [menu.handle, { id: `preview-${menu.key}`, handle: menu.handle, items: menu.items }])) as Record<string, RuntimeMenuV4> : menus;
   const commerce: CommerceDataProvider = { initialProducts: config.products, async getProducts(input) { return config.products.slice(0, input?.limit ?? config.products.length); } };
   const pages: Record<PreviewTemplate, StorefrontPageContext> = {
     home: { pageType: "home", resource: null },
@@ -112,7 +114,7 @@ export function TemplatePreview({ template, config }: { template: PreviewTemplat
       : global.section;
     return [{ region: global.key === "footer" ? "footer" : "header", section }];
   });
-  const render = (entry: Entry) => <RegistrySectionRenderer key={entry.section.id} section={entry.section} mode="preview" commerce={commerce} region={entry.region} themeId={config.themeId} page={page} menus={menus} storeSlug="preview" />;
+  const render = (entry: Entry) => <RegistrySectionRenderer key={entry.section.id} section={entry.section} mode="preview" commerce={commerce} region={entry.region} themeId={config.themeId} page={page} menus={previewMenus} storeSlug="preview" />;
   return <div className="jelly-storefront">
     {resolved.filter((entry) => entry.region === "header").map(render)}
     <main>{resolved.filter((entry) => entry.region === "template").map(render)}</main>

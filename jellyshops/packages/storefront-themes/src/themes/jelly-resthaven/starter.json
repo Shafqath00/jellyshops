@@ -116,10 +116,140 @@
       "type": "footer",
       "enabled": true,
       "settings": {
-        "text": "Find your perfect place to rest.",
-        "showNewsletter": true
+        "text": "Beds, mattresses and help choosing the right one for your room.",
+        "showNewsletter": true,
+        "newsletterHeading": "Bedroom ideas, new arrivals and offers",
+        "newsletterText": "Sign up for occasional emails. You can unsubscribe at any time."
       },
-      "blocks": []
+      "blocks": [
+        {
+          "id": "resthaven-footer-shop",
+          "type": "link-heading",
+          "enabled": true,
+          "settings": {
+            "text": "Shop"
+          },
+          "blocks": []
+        },
+        {
+          "id": "resthaven-footer-divan",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Divan beds",
+            "link": "/search?q=Divan%20beds"
+          },
+          "blocks": []
+        },
+        {
+          "id": "resthaven-footer-ottoman",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Ottoman beds",
+            "link": "/search?q=Ottoman%20beds"
+          },
+          "blocks": []
+        },
+        {
+          "id": "resthaven-footer-mattresses",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Mattresses",
+            "link": "/search?q=Mattresses"
+          },
+          "blocks": []
+        },
+        {
+          "id": "resthaven-footer-all",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Shop all",
+            "link": "/shop"
+          },
+          "blocks": []
+        },
+        {
+          "id": "resthaven-footer-help",
+          "type": "link-heading",
+          "enabled": true,
+          "settings": {
+            "text": "Help"
+          },
+          "blocks": []
+        },
+        {
+          "id": "resthaven-footer-faq",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Questions and answers",
+            "link": "/pages/faq"
+          },
+          "blocks": []
+        },
+        {
+          "id": "resthaven-footer-delivery",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Delivery",
+            "link": "/pages/shipping"
+          },
+          "blocks": []
+        },
+        {
+          "id": "resthaven-footer-returns",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Returns",
+            "link": "/pages/returns"
+          },
+          "blocks": []
+        },
+        {
+          "id": "resthaven-footer-about",
+          "type": "link-heading",
+          "enabled": true,
+          "settings": {
+            "text": "About"
+          },
+          "blocks": []
+        },
+        {
+          "id": "resthaven-footer-story",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "About us",
+            "link": "/pages/about"
+          },
+          "blocks": []
+        },
+        {
+          "id": "resthaven-footer-privacy",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Privacy policy",
+            "link": "/pages/privacy"
+          },
+          "blocks": []
+        },
+        {
+          "id": "resthaven-footer-terms",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Terms of service",
+            "link": "/pages/terms"
+          },
+          "blocks": []
+        }
+      ]
     }
   },
   "templates": {
