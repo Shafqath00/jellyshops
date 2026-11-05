@@ -91,7 +91,28 @@ Rating section already worked on product pages. Add-ons (assembly etc.) not buil
 Checked on `/theme-preview/*` (Minimal desktop + 390px, Avenue desktop) with a temporary demo; not checked in the
 signed-in editor.
 
-## Phases
+## Phase 3 done (2026-11-05)
+
+Resthaven's starter (`storefront-themes/src/themes/jelly-resthaven/starter.json`) now uses the phase 1-2 pieces:
+search-bar header (words beside icons, "Help choosing" link to the FAQ page), a main menu shipped with the theme
+(Beds dropdown: Divan, Ottoman, Upholstered; Mattresses; Headboards; Shop all; Help; bed types search the catalogue
+until the merchant points them at collections), a light trust row under the menu on home/collection/product/cart/page
+(secure checkout, delivery and returns pages, help choosing), a purple scrolling strip on home, collection and product,
+home in the showroom order (hero, categories, New and trending with Shop all, strip, story, Rating, Photo gallery,
+How it works in three steps, second story, benefits, FAQ, newsletter), collection descriptions cut to two lines and a
+three-column grid, product options as tabs with tiles, "% off" label, sticky "Add to basket" bar, "About this bed",
+"Dimensions and details". Rating starts at 0 and the gallery has no photos, so both stay hidden on a live store until
+the merchant fills them; trust points make no delivery, trial or warranty promises (merchants add their own); finance
+is off (0 months). The old "Bedroom navigation" link row is no longer placed (its recipe stays in theme.json so
+existing stores keep working). Platform changes that made this possible: `starter.json` can carry `menus`; menu links
+can be store paths (`/search?q=…`), put under the store's address by the header, accepted by the Navigation form and
+the backend menu service. Resthaven theme.css: full-width strip/specs/rating/gallery on the product grid, light trust
+row, purple strip, spaced old price, grid follows "columns", plum tiles/tabs, one-line trust row on phones, no menu
+arrow marker; `jelly-resthaven.css` regenerated. Theme id and version unchanged (1.0.0); stores that already
+installed Resthaven keep their own copy. Checked in the CLI preview (`jelly-theme dev`) at 1280 and 375px; the
+conformance suite caught two search boxes with the same name on the search page (header search now "Search the store").
+Not checked: a real install on a staging store, the signed-in editor.
+
 
 1. **Platform pieces for home and collection:** marquee, header layout + trust row, product card
    extras, "Read more", rating line, customer photo gallery. Tests for each.

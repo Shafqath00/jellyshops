@@ -22,8 +22,10 @@ export function MenuLinkForm({ item, collections, onApply, onCancel }: {
     if (kind !== "home" && kind !== "search" && !value) { setError("Choose a destination."); return; }
     if (kind === "collection" && !collections.some(collection => collection.id === value)) { setError("Choose an available collection."); return; }
     if (kind === "external") {
-      try { if (!["http:", "https:"].includes(new URL(value).protocol)) throw new Error(); }
-      catch { setError("Enter an absolute http or https URL."); return; }
+      // A path in the store ("/pages/faq", "/search?q=Beds") or a full http(s) address.
+      const storePath = value.startsWith("/") && !value.startsWith("//") && !/\s/.test(value);
+      try { if (!storePath && !["http:", "https:"].includes(new URL(value).protocol)) throw new Error(); }
+      catch { setError("Enter a full web address (https://…) or a page in your store starting with /."); return; }
     }
     if (kind === "anchor" && !/^[A-Za-z][A-Za-z0-9_:\-.]*$/.test(value.replace(/^#/, ""))) { setError("Enter an anchor name starting with a letter."); return; }
     const target: MenuTarget = kind === "home" || kind === "search" ? { kind }

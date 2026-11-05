@@ -12,7 +12,8 @@ export type V4StarterTemplateType = Exclude<PageType, never>;
 export interface StarterMenuItem {
   id: string;
   label: string;
-  target: { kind: "home" } | { kind: "search" };
+  /** `external` takes a full https address or a path in the store ("/search?q=Beds"), which the header puts under the store's address. */
+  target: { kind: "home" } | { kind: "search" } | { kind: "external"; url: string } | { kind: "anchor"; anchor: string };
   children: StarterMenuItem[];
 }
 

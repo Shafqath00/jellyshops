@@ -31,7 +31,7 @@ it("edits labels while retaining nested items and promotes children when a paren
   expect(onChange).toHaveBeenLastCalledWith([child]);
 });
 
-it("requires labels and destinations and rejects relative external URLs", async () => {
+it("requires labels and destinations, refuses unsafe URLs and accepts store paths", async () => {
   const onChange = vi.fn(); const user = userEvent.setup();
   render(<MenuEditor menu={{ id: "m", storeId: "a", revision: 1, name: "Main", handle: "main", items: [] }} onChange={onChange} onSave={() => {}} />);
   await user.click(screen.getByRole("button", { name: "Add link" }));
@@ -39,10 +39,20 @@ it("requires labels and destinations and rejects relative external URLs", async 
   expect(screen.getByRole("alert")).toHaveTextContent("Enter a link label");
   await user.type(screen.getByLabelText("Link label"), "More");
   await user.selectOptions(screen.getByLabelText("Destination type"), "external");
-  await user.type(screen.getByLabelText("URL", { exact: true }), "/relative");
+  await user.type(screen.getByLabelText("URL", { exact: true }), "javascript:alert(1)");
   await user.click(screen.getByRole("button", { name: "Apply link" }));
-  expect(screen.getByRole("alert")).toHaveTextContent("absolute http or https");
+  expect(screen.getByRole("alert")).toHaveTextContent("full web address");
+  await user.clear(screen.getByLabelText("URL", { exact: true }));
+  await user.type(screen.getByLabelText("URL", { exact: true }), "//other.example/page");
+  await user.click(screen.getByRole("button", { name: "Apply link" }));
+  expect(screen.getByRole("alert")).toHaveTextContent("full web address");
   expect(onChange).not.toHaveBeenCalled();
+  await user.clear(screen.getByLabelText("URL", { exact: true }));
+  await user.type(screen.getByLabelText("URL", { exact: true }), "/pages/faq");
+  await user.click(screen.getByRole("button", { name: "Apply link" }));
+  expect(onChange).toHaveBeenLastCalledWith([expect.objectContaining({ target: { kind: "external", url: "/pages/faq" } })]);
+  await user.click(screen.getByRole("button", { name: "Add link" }));
+  await user.type(screen.getAllByLabelText("Link label").at(-1)!, "More");
   await user.selectOptions(screen.getByLabelText("Destination type"), "anchor");
   await user.type(screen.getByLabelText("Anchor", { exact: true }), "#details");
   await user.click(screen.getByRole("button", { name: "Apply link" }));

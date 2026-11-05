@@ -11,7 +11,8 @@ type RuntimeMenuItem = RuntimeMenuV4["items"][number];
 function menuHref(item: RuntimeMenuItem, context: StorefrontRuntimeContext): string | null {
   const { storeSlug } = context;
   const target = item.target;
-  if (target.kind === "external") return safeRichTextHref(target.url);
+  // A path ("/search?q=Beds", "/pages/faq") is a page of this store, so it goes under the store's address.
+  if (target.kind === "external") return target.url.startsWith("/") && !target.url.startsWith("//") ? resolveStorefrontHref(target.url, storeSlug) : safeRichTextHref(target.url);
   if (target.kind === "anchor") return safeRichTextHref(target.anchor.startsWith("#") ? target.anchor : `#${target.anchor}`);
   if (target.kind === "collection") return safeRichTextHref(context.collectionLinks?.[target.resourceId]);
   if (!storeSlug) return target.kind === "home" ? "/" : target.kind === "search" ? "/search" : null;
@@ -68,7 +69,7 @@ function useScrolled(ref: RefObject<HTMLElement | null>, enabled: boolean): bool
 /** The search box of the "search bar" header layout; sends shoppers to the store's search page. */
 function HeaderSearch({ action }: { action: string }) {
   const id = useId();
-  return <form className="jelly-header-search" role="search" action={action} method="get">
+  return <form className="jelly-header-search" role="search" aria-label="Search the store" action={action} method="get">
     <label className="jelly-visually-hidden" htmlFor={id}>Search products</label>
     <input id={id} name="q" type="search" placeholder="Search products" autoComplete="off" />
     <button type="submit" aria-label="Search"><StorefrontIcon name="search" /></button>

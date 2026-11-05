@@ -41,7 +41,7 @@ export function createStarterPack({ manifest, starter }: DiscoveredTheme): V4Sta
     globalSections: (Object.keys(GLOBAL_NAMES) as Array<keyof typeof GLOBAL_NAMES>)
       .filter((key) => starter.globalSections[key])
       .map((key) => ({ key, name: GLOBAL_NAMES[key], section: starter.globalSections[key] })),
-    menus: [{ key: "main", name: "Main menu", handle: "main", items: [
+    menus: starter.menus ? structuredClone(starter.menus) : [{ key: "main", name: "Main menu", handle: "main", items: [
       { id: `${manifest.id}-menu-home`, label: "Home", target: { kind: "home" }, children: [] },
       { id: `${manifest.id}-menu-search`, label: "Search", target: { kind: "search" }, children: [] },
     ] }],

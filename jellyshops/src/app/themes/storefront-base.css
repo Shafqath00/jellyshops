@@ -525,3 +525,7 @@
 body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 @media (prefers-reduced-motion: no-preference) { .jelly-sticky-purchase[data-visible] { animation: jelly-sticky-in .2s ease-out; } }
 @keyframes jelly-sticky-in { from { transform: translateY(100%); } to { transform: none; } }
+
+/* Trust badges in a row: a plain line of points. Kept at the lowest specificity so each theme's own rules win. */
+:where(.jelly-trust-strip:not([data-layout="scroll"])) ul { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 32px; margin: 0; padding: 12px 16px; list-style: none; }
+:where(.jelly-trust-strip:not([data-layout="scroll"])) li { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }

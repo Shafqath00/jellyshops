@@ -33,6 +33,12 @@ function normalizeTarget(target: MenuTarget): MenuTarget {
     case "search":
       return { kind: target.kind };
     case "external": {
+      // A page of this store ("/pages/faq", "/search?q=Beds"); the storefront puts it under the store's address.
+      const path = target.url.trim();
+      if (path.startsWith("/") && !path.startsWith("//")) {
+        if (/[\s\x00-\x1f\x7f\\]/.test(path) || path.length > 500) throw new Error("Menu link path must not contain spaces");
+        return { kind: "external", url: path };
+      }
       const url = new URL(target.url);
       if (url.protocol !== "https:" && url.protocol !== "http:") {
         throw new Error("External menu URL must use http or https");

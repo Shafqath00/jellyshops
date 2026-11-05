@@ -3,6 +3,43 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {
+    "menus": {
+      "minItems": 1,
+      "maxItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "const": "main"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "handle": {
+            "type": "string",
+            "const": "main"
+          },
+          "items": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/__schema0"
+            }
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "handle",
+          "items"
+        ],
+        "additionalProperties": false
+      }
+    },
     "globalSections": {
       "default": {},
       "type": "object",
@@ -53,7 +90,7 @@
           "blocks": {
             "type": "array",
             "items": {
-              "$ref": "#/$defs/__schema0"
+              "$ref": "#/$defs/__schema1"
             }
           }
         },
@@ -153,7 +190,7 @@
                         "blocks": {
                           "type": "array",
                           "items": {
-                            "$ref": "#/$defs/__schema0"
+                            "$ref": "#/$defs/__schema1"
                           }
                         }
                       },
@@ -214,6 +251,101 @@
           "type": "string",
           "minLength": 1
         },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "target": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "home"
+                }
+              },
+              "required": [
+                "kind"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "search"
+                }
+              },
+              "required": [
+                "kind"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "external"
+                },
+                "url": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 500
+                }
+              },
+              "required": [
+                "kind",
+                "url"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "const": "anchor"
+                },
+                "anchor": {
+                  "type": "string",
+                  "pattern": "^#[A-Za-z][A-Za-z0-9_:\\-.]*$"
+                }
+              },
+              "required": [
+                "kind",
+                "anchor"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "children": {
+          "default": [],
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema0"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "target"
+      ],
+      "additionalProperties": false
+    },
+    "__schema1": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
         "type": {
           "type": "string",
           "minLength": 1
@@ -251,7 +383,7 @@
         "blocks": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/__schema0"
+            "$ref": "#/$defs/__schema1"
           }
         }
       },

@@ -1,5 +1,6 @@
 import type { GlobalSettings, PageType, SectionNode, ThemeId } from "@jelly/storefront-schema";
 import type { ComponentType, ReactNode } from "react";
+import type { V4StarterPack } from "@jelly/storefront-registry";
 import type { ThemeSectionProps } from "./themes/example-boutique/hero.js";
 
 export interface ThemeTokens {
@@ -53,6 +54,8 @@ export interface ThemeManifestInput {
 export interface DiscoveredTheme {
   manifest: ThemeManifestInput;
   starter?: {
+    /** Optional main menu; without it the store starts with Home and Search. */
+    menus?: V4StarterPack["menus"];
     globalSections: Record<string, SectionNode>;
     templates: Record<string, { type: PageType; sections: Array<{ kind: "inline"; section: SectionNode } | { kind: "global"; globalSectionId: string }> }>;
   };

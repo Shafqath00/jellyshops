@@ -1,11 +1,93 @@
 {
+  "menus": [
+    {
+      "key": "main",
+      "name": "Main menu",
+      "handle": "main",
+      "items": [
+        {
+          "id": "resthaven-menu-beds",
+          "label": "Beds",
+          "target": {
+            "kind": "external",
+            "url": "/shop"
+          },
+          "children": [
+            {
+              "id": "resthaven-menu-divan",
+              "label": "Divan beds",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=Divan%20beds"
+              },
+              "children": []
+            },
+            {
+              "id": "resthaven-menu-ottoman",
+              "label": "Ottoman beds",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=Ottoman%20beds"
+              },
+              "children": []
+            },
+            {
+              "id": "resthaven-menu-upholstered",
+              "label": "Upholstered beds",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=Upholstered%20beds"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "resthaven-menu-mattresses",
+          "label": "Mattresses",
+          "target": {
+            "kind": "external",
+            "url": "/search?q=Mattresses"
+          },
+          "children": []
+        },
+        {
+          "id": "resthaven-menu-headboards",
+          "label": "Headboards",
+          "target": {
+            "kind": "external",
+            "url": "/search?q=Headboards"
+          },
+          "children": []
+        },
+        {
+          "id": "resthaven-menu-shop",
+          "label": "Shop all",
+          "target": {
+            "kind": "external",
+            "url": "/shop"
+          },
+          "children": []
+        },
+        {
+          "id": "resthaven-menu-help",
+          "label": "Help",
+          "target": {
+            "kind": "external",
+            "url": "/pages/faq"
+          },
+          "children": []
+        }
+      ]
+    }
+  ],
   "globalSections": {
     "announcement": {
       "id": "studio-announcement",
       "type": "announcement-bar",
       "enabled": true,
       "settings": {
-        "text": "Explore beds and mattresses for every space"
+        "text": "Find the bed and mattress that fit your space and your sleep"
       },
       "blocks": []
     },
@@ -19,8 +101,13 @@
         "showCart": true,
         "sticky": false,
         "logoPosition": "center",
-        "showAccount": false,
-        "showWishlist": false
+        "showAccount": true,
+        "showWishlist": false,
+        "layout": "search-bar",
+        "showToolLabels": true,
+        "extraLinkLabel": "Help choosing",
+        "extraLink": "/pages/faq",
+        "extraLinkIcon": "phone"
       },
       "blocks": []
     },
@@ -50,11 +137,58 @@
         {
           "kind": "inline",
           "section": {
-            "id": "resthaven-navigation",
-            "type": "jelly-resthaven/navigation",
+            "blocks": [
+              {
+                "id": "resthaven-trust-row-1",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Secure checkout",
+                  "icon": "shield"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-trust-row-2",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Delivery details on every bed",
+                  "icon": "truck",
+                  "link": "/pages/shipping"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-trust-row-3",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Clear returns information",
+                  "icon": "return",
+                  "link": "/pages/returns"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-trust-row-4",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Help choosing your size",
+                  "icon": "phone",
+                  "link": "/pages/faq"
+                },
+                "blocks": []
+              }
+            ],
             "enabled": true,
-            "settings": {},
-            "blocks": []
+            "id": "resthaven-trust-row",
+            "type": "trust-strip",
+            "settings": {
+              "layout": "row",
+              "showIcons": true
+            }
           }
         },
         {
@@ -152,7 +286,9 @@
               "contentAlignment": "center",
               "limit": 8,
               "columns": 4,
-              "emptyMessage": "Your beds and mattresses will appear here when you add products."
+              "emptyMessage": "Your beds and mattresses will appear here when you add products.",
+              "viewAllLabel": "Shop all beds",
+              "viewAllLink": "/shop"
             },
             "blocks": []
           }
@@ -160,43 +296,67 @@
         {
           "kind": "inline",
           "section": {
-            "id": "resthaven-benefits",
-            "type": "multicolumn",
-            "enabled": true,
-            "settings": {
-              "heading": "Comfort, considered",
-              "columns": 3,
-              "contentAlignment": "center"
-            },
             "blocks": [
               {
-                "id": "resthaven-benefit-choice",
-                "type": "column",
+                "id": "resthaven-trust-scroll-1",
+                "type": "trust-point",
                 "enabled": true,
                 "settings": {
-                  "heading": "A bed for your space",
-                  "text": "Explore upholstered styles, clever storage and sizes for every bedroom."
-                }
+                  "text": "Sizes from single to super king",
+                  "icon": "home"
+                },
+                "blocks": []
               },
               {
-                "id": "resthaven-benefit-comfort",
-                "type": "column",
+                "id": "resthaven-trust-scroll-2",
+                "type": "trust-point",
                 "enabled": true,
                 "settings": {
-                  "heading": "Comfort your way",
-                  "text": "Compare mattress options and find the support that suits you."
-                }
+                  "text": "Choose your colour and fabric",
+                  "icon": "palette"
+                },
+                "blocks": []
               },
               {
-                "id": "resthaven-benefit-help",
-                "type": "column",
+                "id": "resthaven-trust-scroll-3",
+                "type": "trust-point",
                 "enabled": true,
                 "settings": {
-                  "heading": "Here to help",
-                  "text": "Contact our team for product details and help choosing your next bed."
-                }
+                  "text": "Storage options to suit your room",
+                  "icon": "gift"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-trust-scroll-4",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Secure checkout",
+                  "icon": "shield"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-trust-scroll-5",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Friendly help before and after you buy",
+                  "icon": "phone"
+                },
+                "blocks": []
               }
-            ]
+            ],
+            "enabled": true,
+            "id": "resthaven-trust-scroll",
+            "type": "trust-strip",
+            "settings": {
+              "layout": "scroll",
+              "speed": "normal",
+              "showIcons": true,
+              "colorScheme": "dark"
+            }
           }
         },
         {
@@ -242,38 +402,75 @@
           }
         },
         {
+          "kind": "inline",
+          "section": {
+            "blocks": [],
+            "enabled": true,
+            "id": "resthaven-rating",
+            "type": "rating-summary",
+            "settings": {
+              "heading": "Rated by our customers",
+              "rating": 0,
+              "reviewCount": 0,
+              "text": "from {count} reviews",
+              "linkLabel": "Read reviews",
+              "contentAlignment": "center"
+            }
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "blocks": [],
+            "enabled": true,
+            "id": "resthaven-gallery",
+            "type": "image-gallery",
+            "settings": {
+              "heading": "Bedrooms we love",
+              "text": "Share your photos with us and we may feature your bedroom here.",
+              "layout": "scroll",
+              "columns": 4,
+              "ratio": "portrait"
+            }
+          }
+        },
+        {
           "section": {
             "settings": {
               "columns": 3,
-              "heading": "Find your perfect fit"
+              "heading": "How it works",
+              "contentAlignment": "center"
             },
             "blocks": [
               {
-                "settings": {
-                  "text": "Explore styles and sizes for your bedroom.",
-                  "heading": "Choose your bed"
-                },
+                "id": "resthaven-step-1",
                 "type": "column",
-                "id": "resthaven-choice",
-                "enabled": true
+                "enabled": true,
+                "settings": {
+                  "heading": "1. Choose your bed",
+                  "text": "Pick a style and size that fits your bedroom."
+                },
+                "blocks": []
               },
               {
-                "settings": {
-                  "text": "Browse mattresses suited to your preferences.",
-                  "heading": "Find your comfort"
-                },
+                "id": "resthaven-step-2",
                 "type": "column",
-                "id": "resthaven-comfort",
-                "enabled": true
+                "enabled": true,
+                "settings": {
+                  "heading": "2. Make it yours",
+                  "text": "Choose the colour, storage and headboard on each bed."
+                },
+                "blocks": []
               },
               {
-                "settings": {
-                  "text": "View available options on each product.",
-                  "heading": "Make it yours"
-                },
+                "id": "resthaven-step-3",
                 "type": "column",
-                "id": "resthaven-details",
-                "enabled": true
+                "enabled": true,
+                "settings": {
+                  "heading": "3. Settle in",
+                  "text": "Check the delivery details, then get ready for a better night."
+                },
+                "blocks": []
               }
             ],
             "type": "multicolumn",
@@ -319,6 +516,48 @@
                 "settings": {
                   "label": "Explore the collection",
                   "href": "/shop"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "resthaven-benefits",
+            "type": "multicolumn",
+            "enabled": true,
+            "settings": {
+              "heading": "Comfort, considered",
+              "columns": 3,
+              "contentAlignment": "center"
+            },
+            "blocks": [
+              {
+                "id": "resthaven-benefit-choice",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "A bed for your space",
+                  "text": "Explore upholstered styles, clever storage and sizes for every bedroom."
+                }
+              },
+              {
+                "id": "resthaven-benefit-comfort",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "Comfort your way",
+                  "text": "Compare mattress options and find the support that suits you."
+                }
+              },
+              {
+                "id": "resthaven-benefit-help",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "Here to help",
+                  "text": "Contact our team for product details and help choosing your next bed."
                 }
               }
             ]
@@ -411,16 +650,6 @@
         {
           "kind": "inline",
           "section": {
-            "id": "resthaven-product-navigation",
-            "type": "jelly-resthaven/navigation",
-            "enabled": true,
-            "settings": {},
-            "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
             "id": "studio-gallery",
             "type": "product-gallery",
             "enabled": true,
@@ -439,9 +668,13 @@
             "enabled": true,
             "settings": {
               "showVendor": true,
-              "showSku": true,
+              "showSku": false,
               "showCompareAtPrice": true,
-              "showAvailability": true
+              "showAvailability": true,
+              "discountChip": "percent",
+              "financeMonths": 0,
+              "financeText": "or {amount} a month for {months} months",
+              "financeLinkLabel": "Learn more"
             },
             "blocks": []
           }
@@ -452,7 +685,10 @@
             "id": "studio-options",
             "type": "product-options",
             "enabled": true,
-            "settings": {},
+            "settings": {
+              "style": "tabs",
+              "tileColumns": 3
+            },
             "blocks": []
           }
         },
@@ -464,9 +700,76 @@
             "enabled": true,
             "settings": {
               "showQuantity": true,
-              "label": "Add to cart"
+              "label": "Add to basket",
+              "stickyBar": true
             },
             "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "blocks": [
+              {
+                "id": "resthaven-product-strip-1",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Sizes from single to super king",
+                  "icon": "home"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-product-strip-2",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Choose your colour and fabric",
+                  "icon": "palette"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-product-strip-3",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Storage options to suit your room",
+                  "icon": "gift"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-product-strip-4",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Secure checkout",
+                  "icon": "shield"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-product-strip-5",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Friendly help before and after you buy",
+                  "icon": "phone"
+                },
+                "blocks": []
+              }
+            ],
+            "enabled": true,
+            "id": "resthaven-product-strip",
+            "type": "trust-strip",
+            "settings": {
+              "layout": "scroll",
+              "speed": "normal",
+              "showIcons": true,
+              "colorScheme": "dark"
+            }
           }
         },
         {
@@ -475,8 +778,22 @@
             "id": "studio-description",
             "type": "product-description",
             "enabled": true,
-            "settings": {},
+            "settings": {
+              "heading": "About this bed"
+            },
             "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "blocks": [],
+            "enabled": true,
+            "id": "resthaven-product-specs",
+            "type": "product-specifications",
+            "settings": {
+              "heading": "Dimensions and details"
+            }
           }
         },
         {
@@ -509,11 +826,58 @@
         {
           "kind": "inline",
           "section": {
-            "id": "resthaven-collection-navigation",
-            "type": "jelly-resthaven/navigation",
+            "blocks": [
+              {
+                "id": "resthaven-collection-trust-1",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Secure checkout",
+                  "icon": "shield"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-collection-trust-2",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Delivery details on every bed",
+                  "icon": "truck",
+                  "link": "/pages/shipping"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-collection-trust-3",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Clear returns information",
+                  "icon": "return",
+                  "link": "/pages/returns"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-collection-trust-4",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Help choosing your size",
+                  "icon": "phone",
+                  "link": "/pages/faq"
+                },
+                "blocks": []
+              }
+            ],
             "enabled": true,
-            "settings": {},
-            "blocks": []
+            "id": "resthaven-collection-trust",
+            "type": "trust-strip",
+            "settings": {
+              "layout": "row",
+              "showIcons": true
+            }
           }
         },
         {
@@ -526,7 +890,8 @@
               "showTitle": true,
               "showDescription": true,
               "showImage": true,
-              "layout": "simple"
+              "layout": "simple",
+              "descriptionLines": "2"
             },
             "blocks": []
           }
@@ -538,9 +903,75 @@
             "type": "collection-product-grid",
             "enabled": true,
             "settings": {
-              "columns": 4
+              "columns": 3
             },
             "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "blocks": [
+              {
+                "id": "resthaven-collection-strip-1",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Sizes from single to super king",
+                  "icon": "home"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-collection-strip-2",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Choose your colour and fabric",
+                  "icon": "palette"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-collection-strip-3",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Storage options to suit your room",
+                  "icon": "gift"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-collection-strip-4",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Secure checkout",
+                  "icon": "shield"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-collection-strip-5",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Friendly help before and after you buy",
+                  "icon": "phone"
+                },
+                "blocks": []
+              }
+            ],
+            "enabled": true,
+            "id": "resthaven-collection-strip",
+            "type": "trust-strip",
+            "settings": {
+              "layout": "scroll",
+              "speed": "normal",
+              "showIcons": true,
+              "colorScheme": "dark"
+            }
           }
         },
         {
@@ -563,11 +994,58 @@
         {
           "kind": "inline",
           "section": {
-            "id": "resthaven-cart-navigation",
-            "type": "jelly-resthaven/navigation",
+            "blocks": [
+              {
+                "id": "resthaven-cart-trust-1",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Secure checkout",
+                  "icon": "shield"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-cart-trust-2",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Delivery details on every bed",
+                  "icon": "truck",
+                  "link": "/pages/shipping"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-cart-trust-3",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Clear returns information",
+                  "icon": "return",
+                  "link": "/pages/returns"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-cart-trust-4",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Help choosing your size",
+                  "icon": "phone",
+                  "link": "/pages/faq"
+                },
+                "blocks": []
+              }
+            ],
             "enabled": true,
-            "settings": {},
-            "blocks": []
+            "id": "resthaven-cart-trust",
+            "type": "trust-strip",
+            "settings": {
+              "layout": "row",
+              "showIcons": true
+            }
           }
         },
         {
@@ -600,16 +1078,6 @@
         {
           "kind": "inline",
           "section": {
-            "id": "resthaven-search-navigation",
-            "type": "jelly-resthaven/navigation",
-            "enabled": true,
-            "settings": {},
-            "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
             "id": "studio-search",
             "type": "search-results",
             "enabled": true,
@@ -637,11 +1105,58 @@
         {
           "kind": "inline",
           "section": {
-            "id": "resthaven-page-navigation",
-            "type": "jelly-resthaven/navigation",
+            "blocks": [
+              {
+                "id": "resthaven-page-trust-1",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Secure checkout",
+                  "icon": "shield"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-page-trust-2",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Delivery details on every bed",
+                  "icon": "truck",
+                  "link": "/pages/shipping"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-page-trust-3",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Clear returns information",
+                  "icon": "return",
+                  "link": "/pages/returns"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-page-trust-4",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Help choosing your size",
+                  "icon": "phone",
+                  "link": "/pages/faq"
+                },
+                "blocks": []
+              }
+            ],
             "enabled": true,
-            "settings": {},
-            "blocks": []
+            "id": "resthaven-page-trust",
+            "type": "trust-strip",
+            "settings": {
+              "layout": "row",
+              "showIcons": true
+            }
           }
         },
         {
@@ -670,16 +1185,6 @@
         {
           "kind": "global",
           "globalSectionId": "header"
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "resthaven-not-found-navigation",
-            "type": "jelly-resthaven/navigation",
-            "enabled": true,
-            "settings": {},
-            "blocks": []
-          }
         },
         {
           "kind": "inline",
