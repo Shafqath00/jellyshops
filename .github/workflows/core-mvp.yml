@@ -30,3 +30,30 @@ jobs:
         working-directory: jellyshops
         env:
           NODE_ENV: production
+  design-lint:
+    # Measures every theme preview page at 3 widths against docs/design-contract.md; fails on problems not in
+    # jellyshops/e2e/design-lint.baseline.json. Non-blocking until it has passed on Linux once (the baseline was
+    # recorded on Windows and font rendering differs); then remove continue-on-error.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: jellyshops/package-lock.json
+      - run: npm ci
+        working-directory: jellyshops
+      - run: npx playwright install --with-deps chromium
+        working-directory: jellyshops
+      - run: npx playwright test e2e/design-lint.spec.ts --reporter=line
+        working-directory: jellyshops
+        env:
+          JELLY_E2E_FRONTEND_PORT: "3300"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: design-lint-report
+          path: jellyshops/test-results/design-lint-report.*
