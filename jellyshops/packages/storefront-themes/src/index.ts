@@ -25,3 +25,5 @@ export type { SectionRecipe } from "./recipes.js";
 export { JELLY_THEME_API_VERSION, compareThemeVersions, supportsJellyVersion, themeVersionSchema, jellyEngineRangeSchema } from "./versioning.js";
 export { applyThemeMigrations, applyThemeUpgrade, getThemeMigrationPath, getThemeUpgradePath, themeMigrationSchema } from "./migrations.js";
 export type { ThemeMigration, ThemeMigrationDraft, ThemeMigrationChange } from "./migrations.js";
+export { applyThemeStyle, listThemeStyles } from "./theme-styles.js";
+export type { ThemeStyle } from "./theme-styles.js";

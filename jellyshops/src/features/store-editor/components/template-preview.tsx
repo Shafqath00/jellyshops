@@ -3,10 +3,12 @@
 import { useState, type CSSProperties } from "react";
 import Image from "next/image";
 import { ArrowRight, Check, Monitor, Smartphone } from "lucide-react";
-import { RegistrySectionRenderer, type CommerceDataProvider } from "@jelly/storefront-renderer";
+import { RegistrySectionRenderer, withStoreIdentity, type CommerceDataProvider } from "@jelly/storefront-renderer";
 import type { V4StarterPack } from "@jelly/storefront-registry";
 import type { ThemeId } from "@jelly/storefront-schema";
-import { resolveStorefrontThemeTokens, resolveTheme } from "@jelly/storefront-themes";
+import { applyThemeStyle, listThemeStyles, resolveStorefrontThemeTokens, resolveTheme } from "@jelly/storefront-themes";
+import type { SectionNode } from "@jelly/storefront-schema";
+import { templateStoreCommerce, type TemplateStoreData } from "../template-store-data";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { StorefrontPreviewFrame } from "./storefront-preview-frame";
 
@@ -44,29 +46,39 @@ export function TemplateThumbnail({ id, name, image }: { id: string; name: strin
   </div>;
 }
 
-export function TemplatePreviewDialog({ starter, hasWorkspace, busy, error, onClose, onUse, onEdit }: {
+export function TemplatePreviewDialog({ starter, hasWorkspace, busy, error, store, onClose, onUse, onEdit }: {
   starter: V4StarterPack;
   hasWorkspace: boolean;
   busy: boolean;
   error?: string;
+  /** The merchant's own name, logo and products; the preview shows them in the design. */
+  store?: TemplateStoreData;
   onClose(): void;
-  onUse(): void;
+  /** Starts with this design, in the chosen theme style (if the theme has styles). */
+  onUse(styleId?: string): void;
   onEdit(): void;
 }) {
   const [mobile, setMobile] = useState(false);
+  const styles = listThemeStyles(starter.theme.themeId);
+  const [styleId, setStyleId] = useState(styles[0]?.id);
+  const themeStyle = styles.find((item) => item.id === styleId);
   const home = starter.templates.find((template) => template.type === "home");
+  const identity = (section: SectionNode) => store ? withStoreIdentity(section, { name: store.name, logoUrl: store.logoUrl }) : section;
   const sections = home?.layout.sections.flatMap((placement) => {
     const section = placement.kind === "inline" ? placement.section : starter.globalSections.find((global) => global.section.id === placement.globalSectionId)?.section;
     return section ? [section] : [];
   }) ?? [];
-  const theme = resolveTheme(starter.theme.themeId, starter.theme.settings, starter.version);
+  // The header and footer carry the store's own name and logo, so the merchant sees their brand in the design.
+  const page = sections.map(identity);
+  const commerce = store ? templateStoreCommerce(store.products) : sampleCommerce;
+  const theme = resolveTheme(starter.theme.themeId, themeStyle ? applyThemeStyle(starter.theme.settings, themeStyle) : starter.theme.settings, starter.version);
   const style = resolveStorefrontThemeTokens(theme.id as ThemeId, theme.settings, {}, theme.version) as CSSProperties;
   return <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
     <DialogContent className="flex h-[90dvh] w-[calc(100%_-_24px)] max-w-6xl! flex-col gap-0 overflow-hidden rounded-2xl border-[#e9ddd8] bg-[#fffaf6] p-0! text-[#241f20] sm:w-[calc(100%_-_48px)]">
-      <header className="shrink-0 border-b border-[#e9ddd8] bg-white px-5 py-4 pr-16 sm:px-6"><DialogTitle className="text-xl text-[#241f20]">{starter.name}</DialogTitle><DialogDescription className="mt-1 text-xs leading-5 text-[#74686c]">Sample home page · Your products and content are added in the editor.</DialogDescription></header>
-      <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[#e9ddd8] px-5 py-3"><p className="text-xs text-[#74686c]">Explore the layout</p><div className="flex gap-1 rounded-xl border border-[#e9ddd8] bg-white p-1"><button type="button" aria-label="Desktop template preview" aria-pressed={!mobile} onClick={() => setMobile(false)} className={`grid size-9 place-items-center rounded-lg ${!mobile ? "bg-[#ffe3e9]" : ""}`}><Monitor size={16} /></button><button type="button" aria-label="Mobile template preview" aria-pressed={mobile} onClick={() => setMobile(true)} className={`grid size-9 place-items-center rounded-lg ${mobile ? "bg-[#ffe3e9]" : ""}`}><Smartphone size={16} /></button></div></div>
-      <div className="min-h-0 flex-1 overflow-auto bg-[#f0eae5] p-3 sm:p-5"><div className={`mx-auto h-full overflow-hidden rounded-lg bg-white shadow-sm ${mobile ? "w-[390px] max-w-full" : "w-full"}`}><StorefrontPreviewFrame title="Template preview" themeId={starter.theme.themeId} themeVersion={theme.version} style={style} className="h-full min-h-[360px] w-full border-0 bg-white"><div inert>{sections.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="preview" commerce={sampleCommerce} themeId={starter.theme.themeId} themeVersion={theme.version} page={{ pageType: "home", resource: null }} />)}</div></StorefrontPreviewFrame></div></div>
-      <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-[#e9ddd8] bg-white px-5 py-4"><p className="flex items-center gap-2 text-xs text-[#74686c]"><Check size={14} />{hasWorkspace ? "Your current design stays yours." : "All pages included. Ready to customize."}</p><button type="button" disabled={busy} onClick={hasWorkspace ? onEdit : onUse} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#241f20] px-5 text-sm font-semibold text-white disabled:opacity-45">{busy ? "Preparing your store…" : hasWorkspace ? "Edit current storefront" : "Start with this design"}<ArrowRight size={15} /></button>{error && <p role="alert" className="w-full text-sm text-red-700">{error}</p>}</footer>
+      <header className="shrink-0 border-b border-[#e9ddd8] bg-white px-5 py-4 pr-16 sm:px-6"><DialogTitle className="text-xl text-[#241f20]">{starter.name}</DialogTitle><DialogDescription className="mt-1 text-xs leading-5 text-[#74686c]">{store ? (store.products.length ? `Home page with ${store.name}'s name, logo and products.` : `Home page with ${store.name}'s name and logo. Add products to see them here.`) : "Sample home page · Your products and content are added in the editor."}</DialogDescription></header>
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-[#e9ddd8] px-5 py-3">{styles.length ? <div role="radiogroup" aria-label="Theme style" className="flex flex-wrap items-center gap-2"><span className="text-xs text-[#74686c]">Style</span>{styles.map((item) => <button key={item.id} type="button" role="radio" aria-checked={item.id === styleId} title={item.description} onClick={() => setStyleId(item.id)} className={`inline-flex min-h-9 items-center gap-2 rounded-lg border px-2.5 text-xs font-medium ${item.id === styleId ? "border-[#241f20] bg-white" : "border-[#e9ddd8] bg-white/60"}`}><span className="flex h-4 w-8 overflow-hidden rounded-sm border border-black/10" aria-hidden="true">{item.swatches.map((colour, index) => <span key={`${colour}-${index}`} className="flex-1" style={{ background: colour }} />)}</span>{item.name}</button>)}</div> : <p className="text-xs text-[#74686c]">Explore the layout</p>}<div className="flex gap-1 rounded-xl border border-[#e9ddd8] bg-white p-1"><button type="button" aria-label="Desktop template preview" aria-pressed={!mobile} onClick={() => setMobile(false)} className={`grid size-9 place-items-center rounded-lg ${!mobile ? "bg-[#ffe3e9]" : ""}`}><Monitor size={16} /></button><button type="button" aria-label="Mobile template preview" aria-pressed={mobile} onClick={() => setMobile(true)} className={`grid size-9 place-items-center rounded-lg ${mobile ? "bg-[#ffe3e9]" : ""}`}><Smartphone size={16} /></button></div></div>
+      <div className="min-h-0 flex-1 overflow-auto bg-[#f0eae5] p-3 sm:p-5"><div className={`mx-auto h-full overflow-hidden rounded-lg bg-white shadow-sm ${mobile ? "w-[390px] max-w-full" : "w-full"}`}><StorefrontPreviewFrame title="Template preview" themeId={starter.theme.themeId} themeVersion={theme.version} style={style} className="h-full min-h-[360px] w-full border-0 bg-white"><div inert>{page.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="preview" commerce={commerce} themeId={starter.theme.themeId} themeVersion={theme.version} page={{ pageType: "home", resource: null }} region={section.type === "header" || section.type === "announcement-bar" ? "header" : section.type === "footer" ? "footer" : "template"} />)}</div></StorefrontPreviewFrame></div></div>
+      <footer className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-[#e9ddd8] bg-white px-5 py-4"><p className="flex items-center gap-2 text-xs text-[#74686c]"><Check size={14} />{hasWorkspace ? "Your current design stays yours." : "All pages included. Ready to customize."}</p><button type="button" disabled={busy} onClick={hasWorkspace ? onEdit : () => onUse(styleId)} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#241f20] px-5 text-sm font-semibold text-white disabled:opacity-45">{busy ? "Preparing your store…" : hasWorkspace ? "Edit current storefront" : "Start with this design"}<ArrowRight size={15} /></button>{error && <p role="alert" className="w-full text-sm text-red-700">{error}</p>}</footer>
     </DialogContent>
   </Dialog>;
 }

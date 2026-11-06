@@ -139,6 +139,15 @@ Built (2026-11-06):
 - Checked: full-page screenshots of both themes × 8 preview pages × 3 widths before and after: page sizes identical, every remaining difference is a photo that had loaded in one capture and not the other.
 - Not reached: the 400-line target per theme. The rest of the shared rules differ in a value or in their position; moving them means resolving those overlaps by hand, which can change the look and needs review page by page (7b). Resthaven is not a kit theme (its CSS is generated from its own theme file).
 
+### 2.6b Theme styles and template picker — phase 7b, part 1 (2026-11-06)
+
+- **Designer theme styles** (`packages/storefront-themes/src/theme-styles.ts`, `listThemeStyles`, `applyThemeStyle`): Jelly Minimal ships Warm sand (its default look), Ink and paper, Sage and Blush; Jelly Avenue ships Gallery (default), Midnight (dark), Stone and Coastal. A style is a named set of theme settings (colours, the four base colour schemes, heading/body fonts, button corners). Applying one merges those settings over the store's own; pages, sections, content, logo and other settings stay. The dark scheme stays in each theme's dark slot (Minimal 4, Avenue 3), which the older "Dark" background maps to.
+- **Editor:** Theme settings start with a "Theme styles" row (`components/theme-styles-panel.tsx`): swatches, name, description, the current style marked. Applying is an ordinary theme change, so Undo brings the previous look back.
+- **Template picker** (Store designs > Preview, `components/template-preview.tsx`): the preview shows the merchant's own store name and logo in the header and footer and their active products in product lists (`features/store-editor/template-store-data.ts`, loaded once when a preview opens), and a style switcher for themes with styles. "Start with this design" installs the starter and then applies the chosen style to the new draft.
+- **Theme preview** (`/theme-preview/<theme>`) has the same style switcher, for reviewing every style on every page.
+- Checked: unit tests (styles valid for the theme, WCAG AA text and button colours in every scheme, the first style equals the theme's defaults, applying keeps other settings; panel; preview with store data and style choice); axe colour contrast of all 8 styles on all 8 preview pages (no problems); Sage and Midnight looked at in the browser. Not checked: the editor panel and the Store designs preview while signed in.
+- Not built: styles for themes outside the kit (manifest field for uploaded themes), live thumbnails of styles, the template picker showing the merchant's collections and pages.
+
 ### 2.6 Themes and templates
 
 - A theme = token values + palette and schemes + preset defaults + signature CSS (target ≤ 400 lines for existing themes, ≤ 150 for new ones; no hex, no px except hairlines).

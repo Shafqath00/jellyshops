@@ -4,7 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowUpRight, Check, CheckCircle2, Eye, LayoutTemplate, Loader2, Palette, Pencil, RefreshCw, Sparkles } from "lucide-react";
-import { listStarterPacks } from "@jelly/storefront-themes";
+import { applyThemeStyle, listStarterPacks, listThemeStyles } from "@jelly/storefront-themes";
+import { templateStoreLogo, templateStoreProducts, type TemplateStoreData } from "@/features/store-editor/template-store-data";
 import { useAuth } from "@/features/auth/providers/auth-provider";
 import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import type { ThemeCatalogEntry, ThemeConfigurationRecord } from "@/features/store-editor/api/types";
@@ -38,6 +39,7 @@ function StoreDesignLibrary() {
   const [notice, setNotice] = useState<string>();
   const [retry, setRetry] = useState(0);
   const [previewId, setPreviewId] = useState<string>();
+  const [storeData, setStoreData] = useState<TemplateStoreData>();
   const operation = useRef(false);
   const mounted = useRef(true);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
@@ -55,6 +57,17 @@ function StoreDesignLibrary() {
     return () => { alive = false; };
   }, [api, storeId, retry]);
 
+  // The design preview shows the merchant's own name, logo and products; loaded once, when a preview first opens.
+  useEffect(() => {
+    if (!previewId || storeData || !api || !storeId || !activeStore) return;
+    let alive = true;
+    const base = { name: activeStore.name, logoUrl: templateStoreLogo(configuration?.settings) };
+    api.listProducts(storeId)
+      .then((result) => { if (alive) setStoreData({ ...base, products: templateStoreProducts(result.nodes, activeStore.slug, activeStore.currency) }); })
+      .catch(() => { if (alive) setStoreData({ ...base, products: [] }); });
+    return () => { alive = false; };
+  }, [previewId, storeData, api, storeId, activeStore, configuration]);
+
   async function selectTheme(theme: ThemeCatalogEntry) {
     if (!api || !storeId || operation.current || !theme.available) return;
     operation.current = true;
@@ -70,7 +83,7 @@ function StoreDesignLibrary() {
     finally { operation.current = false; if (mounted.current) setSaving(undefined); }
   }
 
-  async function installStarter(starterId: string) {
+  async function installStarter(starterId: string, styleId?: string) {
     if (!api || !storeId || operation.current) return;
     if (hasWorkspace && !window.confirm("Switch your draft to this store design? Your page layouts are replaced, and products, collections and pages go back to the main layout for their type. Your live store, products, orders and customers stay the same until you publish.")) return;
     operation.current = true;
@@ -80,6 +93,14 @@ function StoreDesignLibrary() {
         const workspace = await api.loadWorkspace(storeId);
         await api.installStarterPack(storeId, starterId, { replaceDraft: true, expectedGeneration: workspace.generation });
       } else await api.installStarterPack(storeId, starterId);
+      // A theme style picked in the preview (other than the theme's default look) is applied to the new draft.
+      const starter = starters.find((item) => item.id === starterId);
+      const styles = listThemeStyles(starter?.theme.themeId);
+      const style = styles.find((item) => item.id === styleId);
+      if (style && style !== styles[0]) {
+        const installed = await api.getThemeConfiguration(storeId);
+        if (installed) await api.saveThemeConfiguration(storeId, installed.revision, { themeId: installed.themeId, themeVersion: installed.themeVersion, settings: applyThemeStyle(installed.settings, style), draftArtifactId: installed.draftArtifactId ?? null });
+      }
       if (mounted.current) router.push(editorHref);
     } catch (reason) { if (mounted.current) setError(reason instanceof Error ? reason.message : "Could not prepare this store design. Try again."); }
     finally { operation.current = false; if (mounted.current) setSaving(undefined); }
@@ -151,7 +172,7 @@ function StoreDesignLibrary() {
           <aside className="flex items-start gap-3 rounded-xl bg-muted px-5 py-4"><Sparkles size={18} className="mt-0.5 shrink-0 text-tint-foreground" /><p className="text-sm leading-6 text-muted-foreground"><strong className="font-semibold text-foreground">Start with a store design. Make it yours.</strong> Customize colors, images, text, and sections in the editor. Preview on different screens before you publish.</p></aside>
         </>}
       </div>
-      {preview && <TemplatePreviewDialog starter={preview} hasWorkspace={hasWorkspace} busy={Boolean(saving)} error={error} onClose={() => setPreviewId(undefined)} onUse={() => void installStarter(preview.id)} onEdit={() => router.push(editorHref)} />}
+      {preview && <TemplatePreviewDialog starter={preview} hasWorkspace={hasWorkspace} busy={Boolean(saving)} error={error} store={storeData} onClose={() => setPreviewId(undefined)} onUse={(styleId) => void installStarter(preview.id, styleId)} onEdit={() => router.push(editorHref)} />}
     </main>
   );
 }

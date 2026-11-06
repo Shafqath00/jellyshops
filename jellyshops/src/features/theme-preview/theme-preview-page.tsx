@@ -3,7 +3,7 @@
 import { useState, useSyncExternalStore, type CSSProperties } from "react";
 import { RegistrySectionRenderer, type CommerceDataProvider } from "@jelly/storefront-renderer";
 import type { RuntimeMenuV4, SectionNode } from "@jelly/storefront-schema";
-import { resolveStorefrontThemeTokens, resolveTheme } from "@jelly/storefront-themes";
+import { applyThemeStyle, listThemeStyles, resolveStorefrontThemeTokens, resolveTheme } from "@jelly/storefront-themes";
 import { StorefrontProductCard } from "@jelly/storefront-ui";
 import { StorefrontPreviewFrame } from "@/features/store-editor/components/storefront-preview-frame";
 import type { ThemePreviewConfig } from "./configs";
@@ -126,7 +126,12 @@ export function ThemePreviewPage({ config }: { config: ThemePreviewConfig }) {
   const [view, setView] = useState<View>("guide");
   // The preview iframe must mount on the client so its load handler is attached before the frame loads.
   const ready = useSyncExternalStore(subscribeNoop, () => true, () => false);
-  const theme = resolveTheme(config.themeId);
+  // Designer theme styles, so each can be reviewed on every page; the first is the theme's default look.
+  const themeStyles = listThemeStyles(config.themeId);
+  const [styleId, setStyleId] = useState(themeStyles[0]?.id);
+  const themeStyle = themeStyles.find((item) => item.id === styleId);
+  const base = resolveTheme(config.themeId);
+  const theme = themeStyle ? resolveTheme(config.themeId, applyThemeStyle(base.settings, themeStyle)) : base;
   const style = resolveStorefrontThemeTokens(theme.id, theme.settings) as CSSProperties;
   const toggle = (active: boolean): CSSProperties => ({ padding: "6px 12px", borderRadius: 6, fontSize: 13, background: active ? "#1c1b19" : "transparent", color: active ? "white" : "#1c1b19" });
   return <main style={{ minHeight: "100vh", background: config.stageColor, padding: 16, display: "grid", gap: 16, gridTemplateRows: "auto 1fr" }}>
@@ -135,6 +140,9 @@ export function ThemePreviewPage({ config }: { config: ThemePreviewConfig }) {
       <div role="group" aria-label="Page" style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: 4, background: "white", borderRadius: 8 }}>
         {views.map(([key, label]) => <button key={key} type="button" aria-pressed={view === key} onClick={() => setView(key)} style={toggle(view === key)}>{label}</button>)}
       </div>
+      {themeStyles.length > 0 && <div role="group" aria-label="Theme style" style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: 4, background: "white", borderRadius: 8 }}>
+        {themeStyles.map((item) => <button key={item.id} type="button" aria-pressed={styleId === item.id} title={item.description} onClick={() => setStyleId(item.id)} style={toggle(styleId === item.id)}>{item.name}</button>)}
+      </div>}
       <div role="group" aria-label="Preview width" style={{ display: "flex", gap: 4, padding: 4, background: "white", borderRadius: 8 }}>
         {(Object.keys(widths) as Device[]).map((key) => <button key={key} type="button" aria-pressed={device === key} onClick={() => setDevice(key)} style={toggle(device === key)}>{key[0].toUpperCase() + key.slice(1)} · {widths[key]}px</button>)}
       </div>
