@@ -1,18 +1,21 @@
 /* Jelly theme kit, late part: shared rules of Jelly Minimal and Jelly Avenue that must come after the theme files,
    because they override earlier theme rules (as they did at the end of each theme file). Loaded after the
    theme files; see theme-kit.css. */
-:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) :where(h1) { font-size: var(--tk-h1); }
-:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) :where(h2) { font-size: var(--tk-h2); }
-:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) :where(h3) { font-size: var(--tk-h3); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) :is(button, .jelly-button):disabled { opacity: .45; cursor: not-allowed; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) :where(textarea) { min-height: 144px; resize: vertical; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) :where(input, textarea)::placeholder { color: color-mix(in srgb, var(--tk-text) 45%, transparent); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) :where(input[type="checkbox"], input[type="radio"]) { width: 18px; height: 18px; accent-color: var(--tk-ink); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-header[data-sticky="true"] { position: sticky; top: 0; }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-header[data-logo-position="center"] > nav:not(.jelly-header-tools) { grid-column: 1; grid-row: 1; }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-header[data-logo-position="center"] .jelly-header-brand { grid-column: 2; grid-row: 1; justify-content: center; }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-header[data-logo-position="center"] .jelly-header-tools { grid-column: 3; grid-row: 1; justify-self: end; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-mobile-navigation summary::-webkit-details-marker { display: none; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-mobile-navigation-panel ul { flex-direction: column; gap: 0; }
 @media (max-width: 899px) {
   :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-mobile-navigation { display: block; grid-column: 1; grid-row: 1; }
+  :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-header .jelly-header-brand,
+    :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-header[data-logo-position="center"] .jelly-header-brand { grid-column: 2; grid-row: 1; justify-self: center; justify-content: center; font-size: var(--tk-header-brand-font-size); }
+  :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-header-brand img { max-height: var(--tk-header-brand-max-height-2); object-position: center; }
   :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-header-tools,
     :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-header[data-logo-position="center"] .jelly-header-tools { grid-column: 3; grid-row: 1; gap: 0; }
   :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-header-tools a:is([data-tool="account"], [data-tool="wishlist"]) { display: none; }
@@ -20,36 +23,49 @@
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-stock-counter[data-low="true"] p { color: #a03b2f; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-product-card-media img { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; object-fit: cover; transition: transform var(--tk-slow) var(--tk-ease); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-product-card-price s { color: var(--tk-muted); }
-:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-image-text:not(.has-image) .jelly-image-text-layout { grid-template-columns: minmax(0, 1fr); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-category-grid[data-image-ratio="square"] .jelly-category-card-media { aspect-ratio: 1 / 1; }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-testimonial-grid cite { color: var(--tk-muted); font-size: var(--tk-text-xs); font-style: normal; letter-spacing: var(--tk-testimonial-grid-letter-spacing); text-transform: uppercase; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-faq-list summary::-webkit-details-marker { display: none; }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-faq-list summary::after { content: "+"; flex: none; font-size: var(--tk-faq-list-font-size); font-weight: 300; line-height: 1; transition: transform var(--tk-fast) var(--tk-ease); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-faq-list details p { max-width: 65ch; padding-bottom: var(--tk-3); color: var(--tk-muted); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-trust-strip li { display: inline-flex; align-items: center; gap: var(--tk-1); font-size: var(--tk-text-sm); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-product-gallery-item img { position: absolute; inset: 0; width: 100%; height: 100%; }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-product-availability::before { content: ""; width: var(--tk-product-availability-width); height: var(--tk-product-availability-height); border-radius: 50%; background: #3f7d4e; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-product-availability:is([data-state="out-of-stock"], [data-state="unavailable"])::before { background: #b5483b; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-product-availability[data-state="selection-required"]::before { background: var(--tk-border-strong); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-product-details dl div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: var(--tk-2); font-size: var(--tk-text-sm); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-product-options fieldset { margin: 0 0 var(--tk-3); padding: 0; border: 0; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-product-options legend { margin-bottom: 12px; padding: 0; font-size: var(--tk-text-sm); font-weight: 500; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-product-options legend span { color: var(--tk-muted); font-weight: 400; }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-product-option-values button:disabled { color: var(--tk-muted); text-decoration: line-through; opacity: var(--tk-product-option-values-opacity); cursor: not-allowed; }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-quantity-stepper button { width: var(--tk-quantity-stepper-width); border: 0; background: none; color: var(--tk-text); font-size: var(--tk-quantity-stepper-font-size); cursor: pointer; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-quantity-stepper button:disabled { color: var(--tk-border-strong); cursor: not-allowed; opacity: 1; }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-quantity-stepper input { width: var(--tk-quantity-stepper-width-2); min-height: 0; padding: 0; border: 0; border-radius: 0; background: none; text-align: center; -moz-appearance: textfield; appearance: textfield; }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-purchase-actions > .jelly-button { width: 100%; min-height: var(--tk-button-min-height); }
+/* 9.9 Collection header and catalog */
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-collection-header { padding-block: var(--tk-collection-header-padding-block); }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-collection-header[data-layout="banner"]::after { content: ""; position: absolute; inset: 0; background: var(--tk-collection-header-background); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-collection-header[data-layout="banner"] > .jelly-container { position: relative; z-index: 1; }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-collection-header[data-layout="banner"] :is(h1, p) { color: var(--tk-collection-header-color); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-collection-product-grid { padding-top: 0; }
 @media (max-width: 899px) {
   :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-product-gallery[data-count="1"] > .jelly-container { grid-auto-columns: 100%; }
 }
 @media (max-width: 767px) {
-  :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-image-text-layout { grid-template-columns: minmax(0, 1fr); }
   :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-multicolumn-grid { grid-template-columns: minmax(0, 1fr); }
   :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-collection-header > .jelly-container { grid-template-columns: minmax(0, 1fr); }
   :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-collection-header-image { display: none; }
 }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-cart-lines { margin: 0; padding: 0; border-top: 1px solid var(--tk-border); list-style: none; }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-cart-line { display: grid; grid-template-columns: var(--tk-cart-line-grid-template-columns); align-items: start; gap: var(--tk-3); padding-block: var(--tk-3); border-bottom: 1px solid var(--tk-border); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-cart-line-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-cart-line-details > span { color: var(--tk-muted); font-size: var(--tk-text-sm); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-quantity-stepper > span { display: grid; place-items: center; min-width: 40px; font-size: var(--tk-text-sm); }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-cart-line-controls .jelly-quantity-stepper { height: var(--tk-quantity-stepper-height); }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-cart-line-controls .jelly-quantity-stepper button { width: var(--tk-quantity-stepper-width-3); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-cart-totals dd { margin: 0; font-weight: 500; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-cart-totals p { color: var(--tk-muted); font-size: var(--tk-text-sm); }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-cart-totals .jelly-button:not(.jelly-button--link) { width: 100%; min-height: var(--tk-button--link-min-height); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-cart-totals .jelly-button--link { justify-self: center; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) :is(.jelly-cart-empty, .jelly-checkout-empty, .jelly-order-confirmation) {
   display: grid;
@@ -62,9 +78,16 @@
   text-align: center;
 }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) :is(.jelly-cart-empty, .jelly-checkout-empty, .jelly-order-confirmation) > p:not(.jelly-eyebrow) { max-width: 46ch; color: var(--tk-muted); }
+/* 10.2 Checkout and order confirmation */
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .checkout-page { width: min(calc(100% - 2 * var(--tk-gutter)), var(--tk-container)); margin-inline: auto; padding-block: var(--tk-5) var(--tk-section); color: var(--tk-text); }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .checkout-page .product-back { display: inline-flex; align-items: center; gap: var(--tk-1); color: var(--tk-muted); font-size: var(--tk-text-sm); text-decoration: none; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .checkout-page > header { display: grid; gap: var(--tk-1); margin-block: var(--tk-4) var(--tk-5); }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .checkout-page > header span { color: var(--tk-muted); font-size: var(--tk-text-xs); font-weight: 500; letter-spacing: var(--tk-checkout-page-letter-spacing); text-transform: uppercase; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .checkout-page > header h1 { font-size: var(--tk-h1); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .checkout-page > header p { color: var(--tk-muted); }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .checkout-form section { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--tk-2); row-gap: var(--tk-3); padding: 0; border: 0; background: none; box-shadow: none; }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .checkout-form .field-grid { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--tk-field-grid-gap); }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .checkout-form .field { display: grid; gap: var(--tk-field-gap); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .checkout-form .field-wide { grid-column: 1 / -1; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .checkout-form .store-button {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--tk-1);
@@ -82,7 +105,9 @@
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-order-confirmation-summary dd { margin: 0; font-weight: 500; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-search-shell h1 { font-size: var(--tk-h1); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-search-shell > p:not(.jelly-search-status) { color: var(--tk-muted); }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-search-shell form > div { display: flex; gap: var(--tk-search-shell-gap); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-search-shell form label { color: var(--tk-muted); font-size: var(--tk-text-sm); font-weight: 500; letter-spacing: 0; text-transform: none; }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-search-shell form :is(input, button) { height: var(--tk-search-shell-height); min-height: var(--tk-search-shell-min-height); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-search-status { color: var(--tk-muted); font-size: var(--tk-text-sm); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-not-found > .jelly-container > div { display: grid; justify-items: center; gap: var(--tk-2); max-width: 560px; margin-inline: auto; padding: 0; border: 0; background: none; box-shadow: none; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-not-found p:not(.jelly-eyebrow) { color: var(--tk-muted); }
@@ -91,16 +116,19 @@
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .signature-panel p { margin: 0; color: var(--tk-muted); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .signature-panel form { gap: var(--tk-2); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .signature-panel label { gap: var(--tk-1); font-weight: 500; }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .signature-panel :is(.signature-primary, .signature-secondary) { justify-self: start; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .signature-auth form { max-width: none; }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .signature-auth form .signature-primary { justify-self: stretch; min-height: var(--tk-signature-primary-min-height); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .signature-auth nav { display: grid; justify-items: center; gap: var(--tk-1); margin-top: var(--tk-1); padding-top: var(--tk-2); border-top: 1px solid var(--tk-border); font-size: var(--tk-text-sm); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .signature-account-nav a[aria-current="page"] { border-bottom-color: var(--tk-ink); font-weight: 500; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .signature-account-nav button { padding: 0; border: 0; background: none; color: var(--tk-muted); font: inherit; font-size: var(--tk-text-sm); text-decoration: underline; cursor: pointer; }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .signature-notice { margin-bottom: var(--tk-3); padding: var(--tk-2) var(--tk-3); border: 0; border-radius: var(--tk-signature-notice-border-radius); background: var(--tk-accent); color: var(--tk-text); font-size: var(--tk-text-sm); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) :is(.signature-address, .signature-order) { padding-block: var(--tk-3); border-color: var(--tk-border); }
 @media (max-width: 899px) {
-  :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) :is(.jelly-cart-layout, .checkout-grid) { grid-template-columns: minmax(0, 1fr); }
   :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) :is(.jelly-cart-totals, .checkout-summary) { position: static; }
 }
 @media (max-width: 599px) {
+  :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-cart-line { grid-template-columns: var(--tk-cart-line-grid-template-columns-2); }
   :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .checkout-form .field-grid { grid-template-columns: minmax(0, 1fr); }
   :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .signature-panel { padding: var(--tk-3); }
 }
@@ -167,6 +195,8 @@
   :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) [data-section-tablet~="pad-top"] > * { padding-top: var(--section-pad-top-t); margin-top: 0; }
   :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) [data-section-tablet~="pad-bottom"] > * { padding-bottom: var(--section-pad-bottom-t); margin-bottom: 0; }
 }
+/* 19 ── Theme settings: form fields, product cards and badges (tokens only exist when the merchant changes a setting) ── */
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) :where(input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"]), select) { min-height: var(--tk-page-min-height); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) :where(input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"]), select, textarea) {
   border-width: var(--jelly-field-border-width, 1px);
   border-radius: var(--jelly-field-radius, var(--jelly-radius-input, var(--tk-radius-button)));
