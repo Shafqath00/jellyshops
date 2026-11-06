@@ -150,6 +150,14 @@ Built (2026-11-06):
 - Checked: unit tests (styles valid for the theme, WCAG AA text and button colours in every scheme, the first style equals the theme's defaults, applying keeps other settings; panel; preview with store data and style choice); axe colour contrast of all 8 styles on all 8 preview pages (no problems); Sage and Midnight looked at in the browser. Not checked: the editor panel and the Store designs preview while signed in.
 - Not built: styles for themes outside the kit (manifest field for uploaded themes), live thumbnails of styles, the template picker showing the merchant's collections and pages.
 
+### 2.6c Generated themes — phase 8 (2026-11-06)
+
+- **Built on a base design.** A theme manifest may name `extends: "jelly-signature" | "jelly-avenue"` (`THEME_BASE_IDS` in `theme-manifest-schema.ts`). The registry (`extendedTheme` in `theme-registry.ts`) merges the base design's manifest, settings schema (showing the theme's own defaults), section designs and shell with the theme's own id, name, version, assets and settings defaults. `themeStyleId()` returns the base id, and every storefront root (live frame, storefront page, editor preview, preview frame, renderer, theme CLI) sets `data-jelly-theme` to it, so the base design's stylesheets and the shared kit draw the theme. Uploaded theme packages may use `extends` too.
+- **Pipeline:** brief JSON → `scripts/new-theme.mjs` → theme folder with `theme.json` + `starter.json` only (no CSS) → `scripts/generate-theme-index.mjs` → design lint as the gate. Details in `docs/guides/template-generation-master-prompt.md` ("Generation pipeline").
+- **Gate:** `e2e/design-lint.spec.ts` lints every theme preview from `themePreviewEntries()` (built-in themes plus every theme with `extends`, previewed at `/theme-preview/<theme-id>` with its base design's sample data via `generatedThemePreview`). A generated theme passes when it adds nothing to its base design's known problems. The conformance suite runs for every generated theme; `validate-theme-project` no longer warns about an empty settings schema when the theme extends a base.
+- **First generated theme:** Harbour (`jelly-harbour`, brief `docs/theme-briefs/jelly-harbour.json`, built on Jelly Minimal): passed the design lint the first time with no fixes (one finding, inherited from Minimal: a 20px newsletter checkbox on phones), passed the conformance suite (30 tests) and the contrast checks.
+- Not built: generating from the full prompt with new section designs (a brief can only restyle and re-word a base design's pages), styles for generated themes, choosing which base sections a generated starter keeps.
+
 ### 2.6 Themes and templates
 
 - A theme = token values + palette and schemes + preset defaults + signature CSS (target ≤ 400 lines for existing themes, ≤ 150 for new ones; no hex, no px except hairlines).

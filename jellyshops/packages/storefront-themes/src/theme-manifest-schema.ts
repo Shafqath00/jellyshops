@@ -28,8 +28,16 @@ const settingDefinitionSchema = z.object({
   }
 });
 
+/**
+ * Built-in designs another theme may build on (`extends`): the theme reuses the base design's stylesheets, shared
+ * kit, section designs and settings, and brings only its own values (colours, fonts, schemes, defaults) and content.
+ */
+export const THEME_BASE_IDS = ["jelly-signature", "jelly-avenue"] as const;
+
 export const themeManifestSchema = z.object({
   id: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  /** A built-in design this theme builds on; it then needs no stylesheet of its own. */
+  extends: z.enum(THEME_BASE_IDS).optional(),
   name: z.string().min(1),
   version: themeVersionSchema,
   engines: z.object({ jelly: jellyEngineRangeSchema }).strict().optional(),
@@ -50,6 +58,7 @@ export const themeManifestSchema = z.object({
     if (compareThemeVersions(migration.to, manifest.version) > 0) context.addIssue({ code: "custom", message: "A migration cannot target a future theme version.", path: ["migrations", index, "to"] });
     if (entries.slice(0, index).some((other) => themeVersionSchema.safeParse(other.from).success && compareThemeVersions(other.from, migration.from) === 0)) context.addIssue({ code: "custom", message: "Only one migration may leave each source version.", path: ["migrations", index, "from"] });
   });
+  if (manifest.extends && manifest.extends === manifest.id) context.addIssue({ code: "custom", message: "A theme cannot extend itself.", path: ["extends"] });
   if (manifest.assetPrefix !== `/themes/${manifest.id}/`) {
     context.addIssue({ code: "custom", message: "Theme assetPrefix must belong to its theme id", path: ["assetPrefix"] });
   }

@@ -1,4 +1,5 @@
 import type { PublicProduct } from "@jelly/storefront-renderer";
+import { getThemeDefinition, isStarterPackId, listThemes } from "@jelly/storefront-themes";
 
 /**
  * Everything a theme's style guide and template previews need: the theme and
@@ -174,3 +175,30 @@ export const jellyResthavenPreview: ThemePreviewConfig = {
   cart: { r1: 1, r4: 1 },
   useStarterMenu: true,
 };
+
+/** Previews of the built-in themes, by the path under /theme-preview/. */
+const builtInPreviews: Record<string, ThemePreviewConfig> = { "jelly-minimal": jellyMinimalPreview, "jelly-avenue": jellyAvenuePreview, "jelly-resthaven": jellyResthavenPreview };
+const previewOfBase: Record<string, ThemePreviewConfig> = { "jelly-signature": jellyMinimalPreview, "jelly-avenue": jellyAvenuePreview };
+
+/**
+ * A theme built on a built-in design (`extends` in theme.json, e.g. one made by scripts/new-theme.mjs) is previewed
+ * with its base design's sample catalogue and copy, its own settings and its own starter pages, at
+ * /theme-preview/<theme id>. That page is what the design lint checks before a generated theme is reviewed.
+ */
+export function generatedThemePreview(themeId: string): ThemePreviewConfig | null {
+  let definition;
+  try { definition = getThemeDefinition(themeId); } catch { return null; }
+  const manifest = definition.manifest as { extends?: string; name?: string };
+  const base = manifest.extends ? previewOfBase[manifest.extends] : undefined;
+  if (!base || !isStarterPackId(themeId)) return null;
+  return { ...base, themeId, packId: themeId, name: manifest.name ?? themeId, stageColor: "#ebedec", useStarterMenu: true };
+}
+
+/** Every theme preview page and its config: the built-in themes, then every generated theme (with its base design's preview path). */
+export function themePreviewEntries(): Array<{ path: string; config: ThemePreviewConfig; base?: string }> {
+  const basePath = (themeId: string) => Object.entries(builtInPreviews).find(([, config]) => config.themeId === themeId)?.[0];
+  const generated = listThemes()
+    .filter((theme) => typeof (theme.manifest as { extends?: unknown }).extends === "string")
+    .flatMap((theme) => { const config = generatedThemePreview(theme.id); return config ? [{ path: theme.id, config, base: basePath((theme.manifest as { extends: string }).extends) }] : []; });
+  return [...Object.entries(builtInPreviews).map(([path, config]) => ({ path, config })), ...generated];
+}

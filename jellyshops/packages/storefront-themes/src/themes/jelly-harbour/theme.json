@@ -1,0 +1,68 @@
+{
+  "id": "jelly-harbour",
+  "extends": "jelly-signature",
+  "name": "Harbour",
+  "version": "1.0.0",
+  "engines": {
+    "jelly": ">=1 <2"
+  },
+  "description": "A calm coastal home store: linen, ceramics and everyday pieces in sea blues and sand.",
+  "assetPrefix": "/themes/jelly-harbour/",
+  "assets": {
+    "stylesheets": [],
+    "scripts": [],
+    "fonts": [],
+    "icons": [],
+    "assets": []
+  },
+  "layout": "standard",
+  "enabled": true,
+  "settingsDefaults": {
+    "colors": {
+      "background": "#f5f7f6",
+      "surface": "#ffffff",
+      "text": "#17262e",
+      "secondary": "#4b5c64",
+      "primary": "#1e4d5c",
+      "accent": "#e2ebe8"
+    },
+    "typography": {
+      "headingFont": "DM Serif Display",
+      "bodyFont": "Figtree"
+    },
+    "buttons": {
+      "radius": "soft"
+    },
+    "colorSchemes": {
+      "scheme1": {
+        "name": "",
+        "background": "#f5f7f6",
+        "text": "#17262e",
+        "button": "#1e4d5c",
+        "buttonText": "#f5f7f6"
+      },
+      "scheme2": {
+        "name": "",
+        "background": "#e2ebe8",
+        "text": "#17262e",
+        "button": "#1e4d5c",
+        "buttonText": "#f5f7f6"
+      },
+      "scheme3": {
+        "name": "",
+        "background": "#ffffff",
+        "text": "#17262e",
+        "button": "#1e4d5c",
+        "buttonText": "#ffffff"
+      },
+      "scheme4": {
+        "name": "",
+        "background": "#17323b",
+        "text": "#f5f7f6",
+        "button": "#f5f7f6",
+        "buttonText": "#17323b"
+      }
+    }
+  },
+  "settingsSchema": []
+}

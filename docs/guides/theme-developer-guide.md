@@ -197,6 +197,8 @@ Create `jellyshops/src/app/themes/jelly-studio.css` and import it in `jellyshops
 [data-jelly-theme="jelly-studio"] .jelly-product-card h3 { font-size: 0.95rem; }
 ```
 
+Building on a base design: a theme.json may say `"extends": "jelly-signature"` (Jelly Minimal) or `"jelly-avenue"`. The theme then needs no theme.css: it uses the base design's stylesheets, settings and section designs with its own colours, fonts, schemes and starter pages. `node scripts/new-theme.mjs <brief.json>` writes such a theme from a short brief (see docs/guides/template-generation-master-prompt.md, "Generation pipeline").
+
 Page edges: every section is wrapped in a section frame and its `.jelly-container` is placed by the platform (docs/design-contract.md §2.3). Do not write a `.jelly-container` width rule; set `--j-page-normal` (content width), `--j-page-narrow`, `--j-page-margin-desktop` / `-tablet` / `-sm` on `&` instead, and pad full-width rows (header, footer) with `var(--j-page-edge)` so they line up with the sections.
 
 Colours: inside a section with a colour scheme, `--j-color-bg`, `--j-color-text`, `--j-color-surface`, `--j-color-muted`, `--j-color-border`, `--j-color-primary` and `--j-color-on-primary` follow that scheme (docs/design-contract.md §2.4a). Read these roles in new CSS instead of fixed colours so a merchant's scheme choice works in your theme.

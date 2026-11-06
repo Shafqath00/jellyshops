@@ -4,7 +4,18 @@ Use this prompt whenever a Claude session (or any generator) creates or reworks 
 
 Background and reasoning: `docs/reports/2026-11-06-template-quality-shopify-analysis.md`.
 
-Status note (2026-11-06): parts of the design contract below (the `--j-*` token names, `SectionFrame`, presets with content, the design lint) are **planned** in that report's roadmap, phases 0–5. Until they exist, the prompt tells the generator to use today's equivalents (listed under "Today's equivalents") and to report anything it could not express.
+Status note (2026-11-06, phase 8): the pipeline is live. The fastest route is a **brief file** (section "Generation pipeline" below): `scripts/new-theme.mjs` turns it into a theme folder built on Jelly Minimal or Jelly Avenue (`extends`), with no CSS, and the design lint is the gate before review. The full prompt below is for themes that need more than a brief can say; its "Today's equivalents" table is kept for reference.
+
+## Generation pipeline (brief → theme folder → lint gate)
+
+1. Write a brief: `docs/theme-briefs/<theme-id>.json` (example: `docs/theme-briefs/jelly-harbour.json`). Fields: `id`, `name`, `extends` (`jelly-signature` = Jelly Minimal's look, `jelly-avenue` = Jelly Avenue's editorial look), `description`, `colors` (`background`, `surface`, `text`, `secondary`, `primary`, `accent`, `dark`; #rrggbb), `typography` (`headingFont`, `bodyFont` from the platform fonts), optional `buttons.radius` (`square`/`soft`/`rounded`/`pill`), optional `copy` (`announcement`, `heroEyebrow`, `heroHeading`, `heroText`, `heroButton`, `footer`) and `images` (`hero`, `heroAlt`; https).
+   A generator (a Claude session with this prompt's sections 2–5 as guidance) only has to produce this JSON.
+2. `node scripts/new-theme.mjs docs/theme-briefs/<theme-id>.json` writes `packages/storefront-themes/src/themes/<theme-id>/theme.json` and `starter.json`. It refuses colours below WCAG AA (text, soft text, button text, text on the accent, text on the dark scheme) and unknown fonts, derives the four colour schemes (keeping the dark one in the base design's dark slot), and copies the base design's pages with the brief's copy and pictures.
+3. `node scripts/generate-theme-index.mjs`, then `npm run build:storefront-packages` in `jellyshops/`.
+4. Gate before review: `cd jellyshops && JELLY_E2E_FRONTEND_PORT=3300 npx playwright test e2e/design-lint.spec.ts`. Every theme with `extends` is linted at `/theme-preview/<theme-id>` (7 pages × 3 widths plus colour contrast); it passes when it adds no problem beyond its base design's known ones. Also `node scripts/validate-theme.mjs <folder>` and the conformance suite (`npx vitest run packages/theme-sdk/src/conformance.test.tsx`; generated themes are included automatically).
+5. Review `/theme-preview/<theme-id>`, including the style guide, then repack the backend packages (`node scripts/prepare-shared-packages.mjs`, reinstall `@jelly` in `backend/`).
+
+Never hand-edit a generated theme's CSS (it has none): change the brief and run the script again (a test checks that the committed folder equals the script's output for its brief).
 
 ---
 
@@ -153,7 +164,8 @@ policies, payment/copyright line.
  9. Theme settings changes (palette, fonts, buttons) reach every page.
 10. theme.css has no hex colours and no pixel values except hairlines.
 11. node scripts/validate-theme.mjs passes; the conformance suite passes
-    (describeThemeConformance(<theme-id>)); the design lint passes when available.
+    (describeThemeConformance(<theme-id>)); the design lint passes
+    (e2e/design-lint.spec.ts, see "Generation pipeline").
 
 If a check fails, fix the data (settings, presets, scheme) and run it again. Do not fix it
 with custom CSS unless the fix is a signature detail.

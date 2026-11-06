@@ -1,0 +1,29 @@
+{
+  "id": "jelly-harbour",
+  "name": "Harbour",
+  "extends": "jelly-signature",
+  "description": "A calm coastal home store: linen, ceramics and everyday pieces in sea blues and sand.",
+  "colors": {
+    "background": "#f5f7f6",
+    "surface": "#ffffff",
+    "text": "#17262e",
+    "secondary": "#4b5c64",
+    "primary": "#1e4d5c",
+    "accent": "#e2ebe8",
+    "dark": "#17323b"
+  },
+  "typography": { "headingFont": "DM Serif Display", "bodyFont": "Figtree" },
+  "buttons": { "radius": "soft" },
+  "copy": {
+    "announcement": "Free delivery on orders over £60, packed without plastic",
+    "heroEyebrow": "Made by the sea",
+    "heroHeading": "Linen, ceramics and calm for the home.",
+    "heroText": "Small-batch pieces from coastal makers, chosen to live with for years.",
+    "heroButton": "Shop the collection",
+    "footer": "Coastal homeware from small makers, packed by hand and sent without plastic."
+  },
+  "images": {
+    "hero": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1600&q=80",
+    "heroAlt": "A bright living room with natural linen and woven textures"
+  }
+}

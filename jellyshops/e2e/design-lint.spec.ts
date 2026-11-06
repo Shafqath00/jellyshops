@@ -5,17 +5,15 @@ import { expect, test, type Page } from "@playwright/test";
 import { axeOnStyledCopy } from "./fixtures/styled-copy";
 import { measureStorefrontPage } from "../src/lib/design-lint/measure";
 import { compareWithBaseline, contrastFinding, findingsReport, lintPage, type DesignFinding } from "../src/lib/design-lint/rules";
+import { themePreviewEntries } from "../src/features/theme-preview/configs";
 
 /**
  * Design lint (docs/design-contract.md): measures every theme preview page at three widths against the
  * Jelly Design Contract. Needs no store, sign-in or backend. Fails only on problems that are not in
  * design-lint.baseline.json; JELLY_DESIGN_LINT_UPDATE=1 rewrites the baseline.
  */
-const themes = [
-  { path: "jelly-minimal", frame: "Jelly Minimal style guide", ready: "Jelly Minimal" },
-  { path: "jelly-avenue", frame: "Jelly Avenue style guide", ready: "Jelly Avenue" },
-  { path: "jelly-resthaven", frame: "Resthaven style guide", ready: "Resthaven" },
-] as const;
+// Every theme preview: the built-in themes and every generated theme (built on a base design with `extends`).
+const themes = themePreviewEntries().map(({ path, config, base }) => ({ path, frame: `${config.name} style guide`, ready: config.name, base }));
 const pages = ["Home", "Collection", "Product", "Cart", "Search", "Page", "404"] as const;
 const devices = [["Desktop", "desktop"], ["Tablet", "tablet"], ["Mobile", "mobile"]] as const;
 
@@ -60,12 +58,15 @@ for (const theme of themes) {
 
 test("design lint: compare with the baseline", () => {
   const baseline: string[] = existsSync(baselinePath) ? JSON.parse(readFileSync(baselinePath, "utf8")).findings : [];
-  const { added, fixed } = compareWithBaseline(findings, baseline);
+  // A generated theme passes when it adds nothing to its base design's known problems (it shares the base's CSS).
+  const inherited = themes.flatMap(({ path, base }) => base ? baseline.filter((id) => id.split("|")[1] === base).map((id) => id.replace(`|${base}|`, `|${path}|`)) : []);
+  const { added } = compareWithBaseline(findings, [...baseline, ...inherited]);
+  const { fixed } = compareWithBaseline(findings, baseline);
   mkdirSync(reportDirectory, { recursive: true });
   writeFileSync(join(reportDirectory, "design-lint-report.json"), `${JSON.stringify({ findings, added: added.map((item) => item.id), fixed }, null, 2)}\n`);
   writeFileSync(join(reportDirectory, "design-lint-report.md"), findingsReport(findings, fixed));
   if (updating) {
-    const ids = [...new Set(findings.map((item) => item.id))].sort();
+    const ids = [...new Set(findings.map((item) => item.id))].filter((id) => !inherited.includes(id)).sort();
     writeFileSync(baselinePath, `${JSON.stringify({ note: "Known design-lint problems when the lint was introduced or last refreshed. Fix them; never add new ones. See docs/design-contract.md.", findings: ids }, null, 2)}\n`);
     return;
   }

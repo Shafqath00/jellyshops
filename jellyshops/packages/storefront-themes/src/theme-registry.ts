@@ -19,6 +19,7 @@ import { recipesOf, registerRecipes } from "./recipes.js";
 import { fontStack } from "./fonts.js";
 import { discoveredThemes } from "./themes/index.generated.js";
 import { compareThemeVersions } from "@jelly/storefront-schema";
+import { THEME_BASE_IDS } from "./theme-manifest-schema.js";
 
 /** Positional shorthand for the built-in themes; every theme goes through `defineTheme`. */
 function definition(id: ThemeId, label: string, tokens: ThemeTokens, manifest?: unknown, sectionOverrides: Record<string, ComponentType<ThemeSectionProps>> = {}, components?: ThemeShellComponents): ThemeDefinition {
@@ -49,12 +50,58 @@ export function isPlatformThemeId(id: string): boolean { return manualIds.has(id
  * already registered above is skipped (those need code, or predate discovery).
  */
 function folderTheme(manifest: ThemeManifestInput): ThemeDefinition {
+  if (typeof manifest.extends === "string" && (THEME_BASE_IDS as readonly string[]).includes(manifest.extends)) return extendedTheme(manifest, manifest.extends);
   const colors = manifest.settingsDefaults?.colors ?? {};
   const typography = manifest.settingsDefaults?.typography ?? {};
   const base = minimalTokens;
   const tokens: ThemeTokens = { ...base, colors: { ...base.colors, ...colors }, typography: { display: typography.headingFont ?? base.typography.display, body: typography.bodyFont ?? base.typography.body } };
   return definition(manifest.id, manifest.name, tokens, manifest);
 }
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+function mergeSettings(base: Record<string, unknown>, own: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = { ...base };
+  for (const [key, value] of Object.entries(own)) result[key] = isRecord(value) && isRecord(base[key]) ? mergeSettings(base[key] as Record<string, unknown>, value) : value;
+  return result;
+}
+const settingAt = (settings: Record<string, unknown>, path: string) => path.split(".").reduce<unknown>((value, key) => isRecord(value) ? value[key] : undefined, settings);
+
+/**
+ * A theme that builds on a built-in design (`extends`): the base design's manifest, settings, section designs and
+ * shell, with the theme's own id, name, version, assets and settings defaults on top. The settings schema shows the
+ * theme's own defaults. The storefront draws it with the base design's stylesheets (`themeStyleId`).
+ */
+function extendedTheme(manifest: ThemeManifestInput, baseId: string): ThemeDefinition {
+  const base = getThemeDefinition(baseId);
+  const baseManifest = base.manifest as ThemeManifestInput & { settingsDefaults: Record<string, unknown>; settingsSchema?: Array<{ id: string; default?: unknown }> };
+  const settingsDefaults = mergeSettings(baseManifest.settingsDefaults, (manifest.settingsDefaults ?? {}) as Record<string, unknown>);
+  const ownSchema = Array.isArray(manifest.settingsSchema) && manifest.settingsSchema.length ? manifest.settingsSchema as Array<{ id: string; default?: unknown }> : undefined;
+  const settingsSchema = (ownSchema ?? baseManifest.settingsSchema ?? []).map((setting) => {
+    const value = settingAt(settingsDefaults, setting.id);
+    return value === undefined ? setting : { ...setting, default: value };
+  });
+  const merged = { ...baseManifest, ...manifest, settingsDefaults, settingsSchema, sections: manifest.sections };
+  if (!manifest.sections) delete (merged as { sections?: unknown }).sections;
+  const colors = (settingsDefaults.colors ?? {}) as Record<string, string>;
+  const typography = (settingsDefaults.typography ?? {}) as Record<string, string>;
+  const tokens: ThemeTokens = { ...base.tokens, colors: { ...base.tokens.colors, ...colors }, typography: { display: typography.headingFont ?? base.tokens.typography.display, body: typography.bodyFont ?? base.tokens.typography.body } };
+  return defineTheme({ id: manifest.id as ThemeId, label: manifest.name, tokens, manifest: merged, sectionOverrides: base.sectionOverrides, components: base.components });
+}
+
+/**
+ * The design whose stylesheets draw a theme: the built-in design it extends, otherwise the theme itself. The
+ * storefront root's `data-jelly-theme` carries this id, so a theme built on Jelly Minimal is styled by Minimal's CSS
+ * while its own settings (colours, fonts, schemes) come from its manifest.
+ */
+export function themeStyleId(id: string | null | undefined, version?: string | null): string {
+  if (!id) return "";
+  try {
+    const base = (getThemeDefinition(id, version).manifest as { extends?: unknown }).extends;
+    return typeof base === "string" && (THEME_BASE_IDS as readonly string[]).includes(base) ? base : id;
+  } catch { return id; }
+}
+
 for (const { manifest } of discoveredThemes) {
   if (manualIds.has(manifest.id)) continue;
   themes.push(folderTheme(manifest));

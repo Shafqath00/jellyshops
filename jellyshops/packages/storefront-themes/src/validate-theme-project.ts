@@ -73,7 +73,8 @@ function checkSettings(manifest: Record<string, unknown>, issues: ThemeProjectIs
     }
     if (setting.type === "color" && typeof setting.default === "string" && setting.default && !hex.test(setting.default)) issues.push({ level: "error", code: "BAD_COLOUR", path, message: `The default of "${id}" must be a colour like #1a2b3c.` });
   });
-  if (!schema.length) issues.push({ level: "warning", code: "NO_SETTINGS", path: "settingsSchema", message: "The theme has no editable settings, so merchants cannot change anything under Theme settings." });
+  // A theme built on a base design (`extends`) gets the base design's settings.
+  if (!schema.length && typeof manifest.extends !== "string") issues.push({ level: "warning", code: "NO_SETTINGS", path: "settingsSchema", message: "The theme has no editable settings, so merchants cannot change anything under Theme settings." });
 }
 
 type Placement = { kind: "inline"; section: SectionNode } | { kind: "global"; globalSectionId: string };
