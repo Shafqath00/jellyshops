@@ -54,7 +54,7 @@ export function resolveStorefrontThemeTokens(themeId: ThemeId | string, settings
   const body = base["--jelly-font-body"];
   const semantic = {
     "--theme-background": background, "--theme-surface": surface, "--theme-text": text,
-    "--theme-muted-text": base["--jelly-color-muted"] || `color-mix(in srgb, ${text} 62%, transparent)`,
+    "--theme-muted-text": base["--jelly-color-muted"] || `color-mix(in srgb, ${text} 75%, transparent)`,
     "--theme-accent": accent, "--theme-accent-soft": accentSoft,
     "--theme-border": base["--jelly-color-border"] || `color-mix(in srgb, ${text} 18%, transparent)`,
     "--theme-font-heading": heading, "--theme-font-body": body,

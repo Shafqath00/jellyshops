@@ -1,6 +1,5 @@
-import { readFileSync } from "node:fs";
-import { createRequire } from "node:module";
 import { expect, test, type Page } from "@playwright/test";
+import { axeOnStyledCopy, describeViolations } from "./fixtures/styled-copy";
 
 /**
  * Resthaven (bed showroom) theme pages, rendered by the theme preview with sample data.
@@ -18,31 +17,11 @@ const pages = [
 ] as const;
 const devices = [["Desktop", 1280], ["Tablet", 768], ["Mobile", 390]] as const;
 const frameTitle = "Resthaven style guide";
-const axeSource = readFileSync(createRequire(import.meta.url).resolve("axe-core/axe.min.js"), "utf8");
 
 async function open(page: Page, tab: string, device: string) {
   await page.getByRole("group", { name: "Page" }).getByRole("button", { name: tab, exact: true }).click();
   await page.getByRole("group", { name: "Preview width" }).getByRole("button", { name: new RegExp(`^${device}`) }).click();
   return page.frameLocator(`iframe[title='${frameTitle}']`);
-}
-
-// The preview frame does not run scripts of its own (and axe can't check a document from another window), so the
-// rendered page, styles included, is copied into a tab of its own at the same width and checked there.
-async function axeViolations(page: Page) {
-  const html = await page.frameLocator(`iframe[title='${frameTitle}']`).locator("html").evaluate((root) => root.outerHTML);
-  const copy = await page.context().newPage();
-  try {
-    await copy.setViewportSize({ width: 1280, height: 900 });
-    await copy.setContent(html.replace("<head>", `<head><base href="${new URL(page.url()).origin}/">`), { waitUntil: "load" });
-    await copy.addScriptTag({ content: axeSource });
-    return await copy.evaluate(async () => {
-      const axe = (window as unknown as { axe: { run(context: Element, options: object): Promise<{ violations: Array<{ id: string; nodes: Array<{ target: string[] }> }> }> } }).axe;
-      const result = await axe.run(document.body, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] } });
-      return result.violations.map((violation) => `${violation.id}: ${violation.nodes.slice(0, 3).map((node) => node.target.join(" ")).join(", ")}`);
-    });
-  } finally {
-    await copy.close();
-  }
 }
 
 test.beforeEach(async ({ page }) => {
@@ -69,7 +48,7 @@ for (const { tab, text } of pages) {
   test(`${tab} page has no WCAG A/AA problems, contrast included`, async ({ page }) => {
     const frame = await open(page, tab, "Desktop");
     await expect(frame.locator("main").getByText(text).first()).toBeVisible();
-    expect(await axeViolations(page)).toEqual([]);
+    expect(describeViolations(await axeOnStyledCopy(page, frameTitle, { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] }))).toEqual([]);
   });
 }
 

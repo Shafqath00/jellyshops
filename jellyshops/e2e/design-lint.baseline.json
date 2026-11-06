@@ -1,16 +1,6 @@
 {
   "note": "Known design-lint problems when the lint was introduced or last refreshed. Fix them; never add new ones. See docs/design-contract.md.",
   "findings": [
-    "contrast|jelly-avenue|Collection|desktop",
-    "contrast|jelly-avenue|Home|desktop",
-    "contrast|jelly-avenue|Product|desktop",
-    "contrast|jelly-avenue|Search|desktop",
-    "contrast|jelly-resthaven|404|desktop",
-    "contrast|jelly-resthaven|Cart|desktop",
-    "contrast|jelly-resthaven|Collection|desktop",
-    "contrast|jelly-resthaven|Home|desktop",
-    "contrast|jelly-resthaven|Product|desktop",
-    "contrast|jelly-resthaven|Search|desktop",
     "edge|jelly-avenue|Home|desktop|jelly-category-grid",
     "edge|jelly-avenue|Home|desktop|jelly-multicolumn",
     "edge|jelly-avenue|Home|desktop|jelly-product-grid",

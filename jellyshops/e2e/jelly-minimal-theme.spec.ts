@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { axeOnStyledCopy, describeViolations } from "./fixtures/styled-copy";
 
 /**
  * Jelly Minimal theme pages, rendered by the theme preview with sample data.
@@ -40,6 +41,12 @@ for (const { tab, text } of pages) {
       expect(unnamed, `${tab} has unnamed links or buttons at ${width}px`).toBe(0);
     }
     expect(errors).toEqual([]);
+  });
+
+  test(`${tab} page has no WCAG A/AA problems, contrast included`, async ({ page }) => {
+    const frame = await open(page, tab, "Desktop");
+    await expect(frame.getByText(text).first()).toBeVisible();
+    expect(describeViolations(await axeOnStyledCopy(page, "Jelly Minimal style guide", { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa"] }))).toEqual([]);
   });
 }
 

@@ -1,8 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, test, type Page } from "@playwright/test";
+import { axeOnStyledCopy } from "./fixtures/styled-copy";
 import { measureStorefrontPage } from "../src/lib/design-lint/measure";
 import { compareWithBaseline, contrastFinding, findingsReport, lintPage, type DesignFinding } from "../src/lib/design-lint/rules";
 
@@ -22,7 +22,6 @@ const devices = [["Desktop", "desktop"], ["Tablet", "tablet"], ["Mobile", "mobil
 const here = dirname(fileURLToPath(import.meta.url));
 const baselinePath = join(here, "design-lint.baseline.json");
 const reportDirectory = join(here, "..", "test-results");
-const axeSource = readFileSync(createRequire(import.meta.url).resolve("axe-core/axe.min.js"), "utf8");
 const updating = process.env.JELLY_DESIGN_LINT_UPDATE === "1";
 
 async function show(page: Page, frameTitle: string, tab: string, device: string) {
@@ -34,38 +33,6 @@ async function show(page: Page, frameTitle: string, tab: string, device: string)
   await page.waitForLoadState("networkidle");
   await page.waitForTimeout(400);
   return frame;
-}
-
-// Contrast needs axe in a real window; the preview frame runs no scripts, so the rendered page is copied
-// into its own tab (same approach as the theme specs).
-async function lowContrastTargets(page: Page, frameTitle: string) {
-  // Stylesheets are inlined: a copied <link> to the dev server's CSS can be refused as a cross-origin request,
-  // and an unstyled copy would pass every contrast check.
-  const { html, background } = await page.frameLocator(`iframe[title='${frameTitle}']`).locator("html").evaluate((root) => {
-    const css = [...document.styleSheets].map((sheet) => { try { return [...sheet.cssRules].map((rule) => rule.cssText).join("\n"); } catch { return ""; } }).join("\n");
-    const clone = root.cloneNode(true) as HTMLElement;
-    clone.querySelectorAll("link[rel='stylesheet'], style, script").forEach((node) => node.remove());
-    const style = document.createElement("style");
-    style.textContent = css;
-    clone.querySelector("head")?.append(style);
-    const themeRoot = document.querySelector("[data-jelly-theme]");
-    return { html: clone.outerHTML, background: themeRoot ? getComputedStyle(themeRoot).backgroundColor : "" };
-  });
-  const copy = await page.context().newPage();
-  try {
-    await copy.setViewportSize({ width: 1280, height: 900 });
-    await copy.setContent(html.replace("<head>", `<head><base href="${new URL(page.url()).origin}/">`), { waitUntil: "load" });
-    const copied = await copy.evaluate(() => { const themeRoot = document.querySelector("[data-jelly-theme]"); return themeRoot ? getComputedStyle(themeRoot).backgroundColor : ""; });
-    expect(copied, "the copied page must keep the theme's styles").toBe(background);
-    await copy.addScriptTag({ content: axeSource });
-    return await copy.evaluate(async () => {
-      const axe = (window as unknown as { axe: { run(context: Element, options: object): Promise<{ violations: Array<{ nodes: Array<{ target: string[] }> }> }> } }).axe;
-      const result = await axe.run(document.body, { runOnly: { type: "rule", values: ["color-contrast"] } });
-      return result.violations.flatMap((violation) => violation.nodes.map((node) => node.target.join(" ")));
-    });
-  } finally {
-    await copy.close();
-  }
 }
 
 test.describe.configure({ mode: "serial" });
@@ -83,7 +50,7 @@ for (const theme of themes) {
         const measurement = await frame.locator("html").evaluate(measureStorefrontPage);
         findings.push(...lintPage(measurement, { theme: theme.path, page: tab, device }));
         if (device === "desktop") {
-          const contrast = contrastFinding({ theme: theme.path, page: tab, device }, await lowContrastTargets(page, theme.frame));
+          const contrast = contrastFinding({ theme: theme.path, page: tab, device }, (await axeOnStyledCopy(page, theme.frame, { type: "rule", values: ["color-contrast"] })).flatMap((violation) => violation.nodes.map((node) => node.target.join(" "))));
           if (contrast) findings.push(contrast);
         }
       }
