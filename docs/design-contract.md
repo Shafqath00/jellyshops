@@ -130,6 +130,15 @@ Built (2026-11-06):
 - Add section lists every preset grouped by its category (Banners, Products, Content, Marketing) with a small layout sketch (`components/preset-sketch.tsx`) and a one-line description that search also matches (`features/store-editor/section-options.ts`).
 - Checked: every preset creates a section the registry accepts (unit test); Bento and Carousel measured in the browser on Minimal (desktop and phone) and Avenue (desktop) with the layout switched on in the preview; not checked by adding a preset in the signed-in editor. Thumbnails are drawn sketches, not live previews.
 
+### 2.6a Theme kit — first part of phase 7 (7a), 2026-11-06
+
+- Jelly Minimal and Jelly Avenue now use the same private token names, `--tk-*` (each theme sets its own values in its own file; they were `--jm-*` and `--av-*`).
+- The rules both themes had word for word now live once in `jellyshops/src/app/themes/theme-kit.css`, scoped to both themes with `:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"])` (same weight as a theme's own scope). It loads after `storefront-base.css` and before the theme files.
+- Only rules that could move without changing anything moved: a shared rule stayed in the themes when a rule that stays behind and came before it could style the same element and property (it would otherwise override the moved rule). 122 rules moved: Minimal 993 → 794 lines, Avenue 1,270 → 1,066, kit 174.
+- `theme-css.test.ts` checks the kit's scope and that every `--tk-*` name the kit reads is set by both themes.
+- Checked: full-page screenshots of both themes × 8 preview pages × 3 widths before and after: page sizes identical, every remaining difference is a photo that had loaded in one capture and not the other.
+- Not reached: the 400-line target per theme. The rest of the shared rules differ in a value or in their position; moving them means resolving those overlaps by hand, which can change the look and needs review page by page (7b). Resthaven is not a kit theme (its CSS is generated from its own theme file).
+
 ### 2.6 Themes and templates
 
 - A theme = token values + palette and schemes + preset defaults + signature CSS (target ≤ 400 lines for existing themes, ≤ 150 for new ones; no hex, no px except hairlines).

@@ -33,7 +33,7 @@ Full file list with imports/importers: [frontend-file-map](../file-structure/fro
 
 ## Conventions to keep
 
-- Storefront CSS reads tokens (`--theme-*`, `--store-*`, `--jm-*`, `--av-*`), never hard-coded colours.
+- Storefront CSS reads tokens (`--theme-*`, `--store-*`, `--j-*` contract tokens, the kit themes' `--tk-*`), never hard-coded colours.
 - Global element rules go inside `@layer base` (Tailwind 4: unlayered CSS beats utilities).
 - The full-screen editor is portalled to `<body>` (the admin shell's animation creates a stacking context).
 - Header/footer store name and logo come from `withStoreIdentity()` in the renderer package for both preview and live.

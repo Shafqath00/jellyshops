@@ -39,7 +39,7 @@ function selectors(css: string): string[] {
   });
 }
 
-describe.each(themes)("$file", ({ file, scope }) => {
+describe.each([...themes, { file: "theme-kit.css", scope: ':is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"])' }])("$file", ({ file, scope }) => {
   const css = readFileSync(path.join(__dirname, file), "utf8");
 
   it("scopes every selector to its theme", () => {
@@ -49,7 +49,22 @@ describe.each(themes)("$file", ({ file, scope }) => {
   });
 
   it("never hard-codes the other theme's scope", () => {
+    if (file === "theme-kit.css") return;
     const other = themes.find((theme) => theme.file !== file)!.scope;
-    expect(css).not.toContain(other);
+    expect(css.replace(/:is\([^)]*\)/g, "")).not.toContain(other);
+  });
+});
+
+describe("theme kit", () => {
+  it("is read through the shared --tk-* token names, which both kit themes set", () => {
+    const kit = readFileSync(path.join(__dirname, "theme-kit.css"), "utf8");
+    const used = new Set(kit.match(/--tk-[a-z0-9-]+/g));
+    expect(used.size).toBeGreaterThan(10);
+    for (const { file } of themes) {
+      const css = readFileSync(path.join(__dirname, file), "utf8");
+      expect(css).not.toMatch(/--(jm|av)-/);
+      const defined = new Set([...css.matchAll(/(--tk-[a-z0-9-]+)\s*:/g)].map(([, name]) => name));
+      expect([...used].filter((name) => !defined.has(name)), file).toEqual([]);
+    }
   });
 });

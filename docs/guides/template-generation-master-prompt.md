@@ -177,7 +177,7 @@ Theme id and name:                  <kebab-case id, display name>
 | Contract term | Use today |
 | --- | --- |
 | Shared section grid | the theme's `.jelly-container` rules; make header, sections and footer share one edge value |
-| Spacing scale | the theme's own scale (Minimal `--jm-1 … --jm-12`), never literal px |
+| Spacing scale | the theme's own scale (contract `--j-space-*`; kit themes alias them as `--tk-1 … --tk-12`), never literal px |
 | Text presets | theme settings text styles H1–H4/Body/Small (`theme-style-settings.ts`) and block `blockTypePreset` |
 | Colour schemes | theme settings `colorSchemes.schemeN` and section `styleScheme`; avoid `styleBackground`/`styleText` hex |
 | Presets with content | not available (`SectionPreset` has no settings/blocks); write the variant's settings into starter.json |
