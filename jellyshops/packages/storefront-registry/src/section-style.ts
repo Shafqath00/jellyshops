@@ -17,14 +17,15 @@ export const SECTION_HEADING_SIZES = ["small", "medium", "large", "x-large"] as 
 export const SECTION_HEADING_WEIGHTS = ["300", "400", "500", "600", "700"] as const;
 export const SECTION_BODY_SIZES = ["small", "regular", "large"] as const;
 export const SECTION_ALIGNMENTS = ["left", "center", "right"] as const;
-export const SECTION_SPACINGS = ["none", "small", "large"] as const;
-export const SECTION_WIDTHS = ["page", "full"] as const;
+/** Space above and below: theme default (Medium, saved as ""), None, Small, Large, or Custom (exact px below). */
+export const SECTION_SPACINGS = ["none", "small", "large", "custom"] as const;
+export const SECTION_WIDTHS = ["page", "narrow", "full"] as const;
 /**
  * Where a section or block shows: every screen (empty), desktop only (1024px and up), desktop and tablet
  * (768px and up), tablet and phones (below 1024px) or phones only (below 768px).
  */
 export const SHOW_ON_CHOICES = ["desktop-only", "desktop", "touch", "mobile"] as const;
-/** The four colour schemes set in theme settings (Theme settings › Colour scheme 1-4). */
+/** The colour schemes set in theme settings (Theme settings › Colour scheme 1-8). */
 export const SECTION_SCHEMES = ["scheme1", "scheme2", "scheme3", "scheme4", "scheme5", "scheme6", "scheme7", "scheme8"] as const;
 
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/);
@@ -64,28 +65,33 @@ export type SectionStyleSettings = z.infer<typeof sectionStyleSchema>;
 const themeDefault = { label: "Theme default", value: "" };
 const fonts = [themeDefault, ...SECTION_FONT_CHOICES.map((font) => ({ label: font, value: font }))];
 
+/**
+ * Every section shows four universal settings (Colour scheme, Width, Spacing, Show on; docs/design-contract.md 2.4).
+ * Everything else here is free-form styling: it sits in the collapsed Advanced group, and saved values keep rendering.
+ */
+const section = "Section";
 export const SECTION_STYLE_CONTROLS: ControlDefinition[] = [
-  { type: "select", key: "styleScheme", label: "Colour scheme", description: "Edit the schemes in theme settings.", group: "style", heading: "Appearance", options: [themeDefault, ...SECTION_SCHEMES.map((value, index) => ({ label: `Scheme ${index + 1}`, value }))] },
-  { type: "checkbox", key: "styleColors", label: "Use my own colours", description: "Turn on to choose this section's background and text colours. They replace the colour scheme.", group: "style", heading: "Appearance" },
-  { type: "color", key: "styleBackground", label: "Background colour", group: "style", heading: "Appearance", allowAlpha: false, showWhen: { key: "styleColors", equals: true } },
-  { type: "color", key: "styleText", label: "Text colour", group: "style", heading: "Appearance", allowAlpha: false, showWhen: { key: "styleColors", equals: true } },
-  { type: "select", key: "styleHeadingFont", label: "Heading font", group: "style", heading: "Typography", options: fonts },
-  { type: "select", key: "styleHeadingSize", mobile: true, label: "Heading size", group: "style", heading: "Typography", options: [themeDefault, { label: "Small", value: "small" }, { label: "Medium", value: "medium" }, { label: "Large", value: "large" }, { label: "Extra large", value: "x-large" }] },
-  { type: "select", key: "styleHeadingWeight", label: "Heading weight", group: "style", heading: "Typography", options: [themeDefault, { label: "Light", value: "300" }, { label: "Regular", value: "400" }, { label: "Medium", value: "500" }, { label: "Semibold", value: "600" }, { label: "Bold", value: "700" }] },
-  { type: "select", key: "styleBodyFont", label: "Text font", group: "style", heading: "Typography", options: fonts },
-  { type: "select", key: "styleBodySize", label: "Text size", group: "style", heading: "Typography", options: [themeDefault, { label: "Small", value: "small" }, { label: "Regular", value: "regular" }, { label: "Large", value: "large" }] },
-  { type: "select", key: "styleAlign", mobile: true, label: "Text alignment", group: "layout", heading: "Layout", options: [themeDefault, { label: "Left", value: "left" }, { label: "Centre", value: "center" }, { label: "Right", value: "right" }] },
-  { type: "select", key: "styleShowOn", label: "Show on", group: "layout", heading: "Layout", options: [{ label: "All screens", value: "" }, { label: "Desktop only", value: "desktop-only" }, { label: "Desktop and tablet", value: "desktop" }, { label: "Tablet and phones", value: "touch" }, { label: "Phones only", value: "mobile" }] },
-  { type: "range", key: "styleMinHeight", label: "Minimum height", group: "layout", heading: "Layout", min: 0, max: 1000, step: 20, unit: "px" },
-  { type: "segmented", key: "styleWidth", label: "Width", group: "layout", heading: "Layout", options: [{ label: "Page", value: "page" }, { label: "Full", value: "full" }] },
-  { type: "color", key: "styleGradientColor", label: "Gradient to colour", description: "Fades the section's background into this colour. Leave empty for a flat background.", group: "style", heading: "Appearance", allowAlpha: false },
-  { type: "range", key: "styleGradientAngle", label: "Gradient angle", group: "style", heading: "Appearance", min: 0, max: 360, step: 15, unit: "°" },
-  { type: "select", key: "styleShadow", label: "Shadow", group: "style", heading: "Appearance", options: [{ label: "None", value: "none" }, { label: "Soft", value: "soft" }, { label: "Medium", value: "medium" }, { label: "Strong", value: "strong" }] },
-  { type: "range", key: "styleOpacity", label: "Opacity", group: "style", heading: "Appearance", min: 10, max: 100, step: 5, unit: "%" },
-  { type: "select", key: "styleSpacing", label: "Space above and below", group: "style", heading: "Padding", description: "Or set exact sizes below.", options: [themeDefault, { label: "None", value: "none" }, { label: "Small", value: "small" }, { label: "Large", value: "large" }] },
-  { type: "range", key: "stylePaddingTop", mobile: true, label: "Top", group: "style", heading: "Padding", min: 0, max: 200, step: 4, unit: "px" },
-  { type: "range", key: "stylePaddingBottom", mobile: true, label: "Bottom", group: "style", heading: "Padding", min: 0, max: 200, step: 4, unit: "px" },
-  { type: "textarea", key: "customCss", label: "Custom CSS", description: "Only changes this section. Example: h2 { letter-spacing: 0.1em; } Use & for the section itself.", group: "advanced", maxLength: MAX_SECTION_CSS_LENGTH },
+  { type: "select", key: "styleScheme", label: "Colour scheme", description: "Edit the schemes in theme settings.", group: "style", heading: section, options: [themeDefault, ...SECTION_SCHEMES.map((value, index) => ({ label: `Scheme ${index + 1}`, value }))] },
+  { type: "segmented", key: "styleWidth", label: "Width", group: "style", heading: section, options: [{ label: "Page", value: "page" }, { label: "Narrow", value: "narrow" }, { label: "Full", value: "full" }] },
+  { type: "select", key: "styleSpacing", label: "Spacing", description: "Space above and below the section.", group: "style", heading: section, options: [{ label: "None", value: "none" }, { label: "Small", value: "small" }, { label: "Medium", value: "" }, { label: "Large", value: "large" }, { label: "Custom", value: "custom" }] },
+  { type: "range", key: "stylePaddingTop", mobile: true, label: "Top", group: "style", heading: section, min: 0, max: 200, step: 4, unit: "px", showWhen: { key: "styleSpacing", equals: "custom" }, visibleWhenSaved: true },
+  { type: "range", key: "stylePaddingBottom", mobile: true, label: "Bottom", group: "style", heading: section, min: 0, max: 200, step: 4, unit: "px", showWhen: { key: "styleSpacing", equals: "custom" }, visibleWhenSaved: true },
+  { type: "select", key: "styleShowOn", label: "Show on", group: "style", heading: section, options: [{ label: "All screens", value: "" }, { label: "Desktop only", value: "desktop-only" }, { label: "Desktop and tablet", value: "desktop" }, { label: "Tablet and phones", value: "touch" }, { label: "Phones only", value: "mobile" }] },
+  { type: "checkbox", key: "styleColors", label: "Use my own colours", description: "Turn on to choose this section's background and text colours. They replace the colour scheme.", group: "advanced", heading: "Colours" },
+  { type: "color", key: "styleBackground", label: "Background colour", group: "advanced", heading: "Colours", allowAlpha: false, showWhen: { key: "styleColors", equals: true } },
+  { type: "color", key: "styleText", label: "Text colour", group: "advanced", heading: "Colours", allowAlpha: false, showWhen: { key: "styleColors", equals: true } },
+  { type: "color", key: "styleGradientColor", label: "Gradient to colour", description: "Fades the section's background into this colour. Leave empty for a flat background.", group: "advanced", heading: "Colours", allowAlpha: false },
+  { type: "range", key: "styleGradientAngle", label: "Gradient angle", group: "advanced", heading: "Colours", min: 0, max: 360, step: 15, unit: "°" },
+  { type: "select", key: "styleHeadingFont", label: "Heading font", group: "advanced", heading: "Typography", options: fonts },
+  { type: "select", key: "styleHeadingSize", mobile: true, label: "Heading size", group: "advanced", heading: "Typography", options: [themeDefault, { label: "Small", value: "small" }, { label: "Medium", value: "medium" }, { label: "Large", value: "large" }, { label: "Extra large", value: "x-large" }] },
+  { type: "select", key: "styleHeadingWeight", label: "Heading weight", group: "advanced", heading: "Typography", options: [themeDefault, { label: "Light", value: "300" }, { label: "Regular", value: "400" }, { label: "Medium", value: "500" }, { label: "Semibold", value: "600" }, { label: "Bold", value: "700" }] },
+  { type: "select", key: "styleBodyFont", label: "Text font", group: "advanced", heading: "Typography", options: fonts },
+  { type: "select", key: "styleBodySize", label: "Text size", group: "advanced", heading: "Typography", options: [themeDefault, { label: "Small", value: "small" }, { label: "Regular", value: "regular" }, { label: "Large", value: "large" }] },
+  { type: "select", key: "styleAlign", mobile: true, label: "Text alignment", group: "advanced", heading: "Typography", options: [themeDefault, { label: "Left", value: "left" }, { label: "Centre", value: "center" }, { label: "Right", value: "right" }] },
+  { type: "range", key: "styleMinHeight", label: "Minimum height", group: "advanced", heading: "Effects", min: 0, max: 1000, step: 20, unit: "px" },
+  { type: "select", key: "styleShadow", label: "Shadow", group: "advanced", heading: "Effects", options: [{ label: "None", value: "none" }, { label: "Soft", value: "soft" }, { label: "Medium", value: "medium" }, { label: "Strong", value: "strong" }] },
+  { type: "range", key: "styleOpacity", label: "Opacity", group: "advanced", heading: "Effects", min: 10, max: 100, step: 5, unit: "%" },
+  { type: "textarea", key: "customCss", label: "Custom CSS", description: "Only changes this section. Example: h2 { letter-spacing: 0.1em; } Use & for the section itself.", group: "advanced", heading: "Custom CSS", maxLength: MAX_SECTION_CSS_LENGTH },
 ];
 
 const styleKeys = new Set(SECTION_STYLE_CONTROLS.map((control) => control.key));

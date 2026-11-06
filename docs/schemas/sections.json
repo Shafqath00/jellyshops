@@ -8,7 +8,7 @@
         "label": "Colour scheme",
         "description": "Edit the schemes in theme settings.",
         "group": "style",
-        "heading": "Appearance",
+        "heading": "Section",
         "options": [
           {
             "label": "Theme default",
@@ -49,19 +49,133 @@
         ]
       },
       {
+        "type": "segmented",
+        "key": "styleWidth",
+        "label": "Width",
+        "group": "style",
+        "heading": "Section",
+        "options": [
+          {
+            "label": "Page",
+            "value": "page"
+          },
+          {
+            "label": "Narrow",
+            "value": "narrow"
+          },
+          {
+            "label": "Full",
+            "value": "full"
+          }
+        ]
+      },
+      {
+        "type": "select",
+        "key": "styleSpacing",
+        "label": "Spacing",
+        "description": "Space above and below the section.",
+        "group": "style",
+        "heading": "Section",
+        "options": [
+          {
+            "label": "None",
+            "value": "none"
+          },
+          {
+            "label": "Small",
+            "value": "small"
+          },
+          {
+            "label": "Medium",
+            "value": ""
+          },
+          {
+            "label": "Large",
+            "value": "large"
+          },
+          {
+            "label": "Custom",
+            "value": "custom"
+          }
+        ]
+      },
+      {
+        "type": "range",
+        "key": "stylePaddingTop",
+        "mobile": true,
+        "label": "Top",
+        "group": "style",
+        "heading": "Section",
+        "min": 0,
+        "max": 200,
+        "step": 4,
+        "unit": "px",
+        "showWhen": {
+          "key": "styleSpacing",
+          "equals": "custom"
+        },
+        "visibleWhenSaved": true
+      },
+      {
+        "type": "range",
+        "key": "stylePaddingBottom",
+        "mobile": true,
+        "label": "Bottom",
+        "group": "style",
+        "heading": "Section",
+        "min": 0,
+        "max": 200,
+        "step": 4,
+        "unit": "px",
+        "showWhen": {
+          "key": "styleSpacing",
+          "equals": "custom"
+        },
+        "visibleWhenSaved": true
+      },
+      {
+        "type": "select",
+        "key": "styleShowOn",
+        "label": "Show on",
+        "group": "style",
+        "heading": "Section",
+        "options": [
+          {
+            "label": "All screens",
+            "value": ""
+          },
+          {
+            "label": "Desktop only",
+            "value": "desktop-only"
+          },
+          {
+            "label": "Desktop and tablet",
+            "value": "desktop"
+          },
+          {
+            "label": "Tablet and phones",
+            "value": "touch"
+          },
+          {
+            "label": "Phones only",
+            "value": "mobile"
+          }
+        ]
+      },
+      {
         "type": "checkbox",
         "key": "styleColors",
         "label": "Use my own colours",
         "description": "Turn on to choose this section's background and text colours. They replace the colour scheme.",
-        "group": "style",
-        "heading": "Appearance"
+        "group": "advanced",
+        "heading": "Colours"
       },
       {
         "type": "color",
         "key": "styleBackground",
         "label": "Background colour",
-        "group": "style",
-        "heading": "Appearance",
+        "group": "advanced",
+        "heading": "Colours",
         "allowAlpha": false,
         "showWhen": {
           "key": "styleColors",
@@ -72,8 +186,8 @@
         "type": "color",
         "key": "styleText",
         "label": "Text colour",
-        "group": "style",
-        "heading": "Appearance",
+        "group": "advanced",
+        "heading": "Colours",
         "allowAlpha": false,
         "showWhen": {
           "key": "styleColors",
@@ -81,10 +195,30 @@
         }
       },
       {
+        "type": "color",
+        "key": "styleGradientColor",
+        "label": "Gradient to colour",
+        "description": "Fades the section's background into this colour. Leave empty for a flat background.",
+        "group": "advanced",
+        "heading": "Colours",
+        "allowAlpha": false
+      },
+      {
+        "type": "range",
+        "key": "styleGradientAngle",
+        "label": "Gradient angle",
+        "group": "advanced",
+        "heading": "Colours",
+        "min": 0,
+        "max": 360,
+        "step": 15,
+        "unit": "°"
+      },
+      {
         "type": "select",
         "key": "styleHeadingFont",
         "label": "Heading font",
-        "group": "style",
+        "group": "advanced",
         "heading": "Typography",
         "options": [
           {
@@ -210,7 +344,7 @@
         "key": "styleHeadingSize",
         "mobile": true,
         "label": "Heading size",
-        "group": "style",
+        "group": "advanced",
         "heading": "Typography",
         "options": [
           {
@@ -239,7 +373,7 @@
         "type": "select",
         "key": "styleHeadingWeight",
         "label": "Heading weight",
-        "group": "style",
+        "group": "advanced",
         "heading": "Typography",
         "options": [
           {
@@ -272,7 +406,7 @@
         "type": "select",
         "key": "styleBodyFont",
         "label": "Text font",
-        "group": "style",
+        "group": "advanced",
         "heading": "Typography",
         "options": [
           {
@@ -397,7 +531,7 @@
         "type": "select",
         "key": "styleBodySize",
         "label": "Text size",
-        "group": "style",
+        "group": "advanced",
         "heading": "Typography",
         "options": [
           {
@@ -423,8 +557,8 @@
         "key": "styleAlign",
         "mobile": true,
         "label": "Text alignment",
-        "group": "layout",
-        "heading": "Layout",
+        "group": "advanced",
+        "heading": "Typography",
         "options": [
           {
             "label": "Theme default",
@@ -445,88 +579,22 @@
         ]
       },
       {
-        "type": "select",
-        "key": "styleShowOn",
-        "label": "Show on",
-        "group": "layout",
-        "heading": "Layout",
-        "options": [
-          {
-            "label": "All screens",
-            "value": ""
-          },
-          {
-            "label": "Desktop only",
-            "value": "desktop-only"
-          },
-          {
-            "label": "Desktop and tablet",
-            "value": "desktop"
-          },
-          {
-            "label": "Tablet and phones",
-            "value": "touch"
-          },
-          {
-            "label": "Phones only",
-            "value": "mobile"
-          }
-        ]
-      },
-      {
         "type": "range",
         "key": "styleMinHeight",
         "label": "Minimum height",
-        "group": "layout",
-        "heading": "Layout",
+        "group": "advanced",
+        "heading": "Effects",
         "min": 0,
         "max": 1000,
         "step": 20,
         "unit": "px"
       },
       {
-        "type": "segmented",
-        "key": "styleWidth",
-        "label": "Width",
-        "group": "layout",
-        "heading": "Layout",
-        "options": [
-          {
-            "label": "Page",
-            "value": "page"
-          },
-          {
-            "label": "Full",
-            "value": "full"
-          }
-        ]
-      },
-      {
-        "type": "color",
-        "key": "styleGradientColor",
-        "label": "Gradient to colour",
-        "description": "Fades the section's background into this colour. Leave empty for a flat background.",
-        "group": "style",
-        "heading": "Appearance",
-        "allowAlpha": false
-      },
-      {
-        "type": "range",
-        "key": "styleGradientAngle",
-        "label": "Gradient angle",
-        "group": "style",
-        "heading": "Appearance",
-        "min": 0,
-        "max": 360,
-        "step": 15,
-        "unit": "°"
-      },
-      {
         "type": "select",
         "key": "styleShadow",
         "label": "Shadow",
-        "group": "style",
-        "heading": "Appearance",
+        "group": "advanced",
+        "heading": "Effects",
         "options": [
           {
             "label": "None",
@@ -550,62 +618,12 @@
         "type": "range",
         "key": "styleOpacity",
         "label": "Opacity",
-        "group": "style",
-        "heading": "Appearance",
+        "group": "advanced",
+        "heading": "Effects",
         "min": 10,
         "max": 100,
         "step": 5,
         "unit": "%"
-      },
-      {
-        "type": "select",
-        "key": "styleSpacing",
-        "label": "Space above and below",
-        "group": "style",
-        "heading": "Padding",
-        "description": "Or set exact sizes below.",
-        "options": [
-          {
-            "label": "Theme default",
-            "value": ""
-          },
-          {
-            "label": "None",
-            "value": "none"
-          },
-          {
-            "label": "Small",
-            "value": "small"
-          },
-          {
-            "label": "Large",
-            "value": "large"
-          }
-        ]
-      },
-      {
-        "type": "range",
-        "key": "stylePaddingTop",
-        "mobile": true,
-        "label": "Top",
-        "group": "style",
-        "heading": "Padding",
-        "min": 0,
-        "max": 200,
-        "step": 4,
-        "unit": "px"
-      },
-      {
-        "type": "range",
-        "key": "stylePaddingBottom",
-        "mobile": true,
-        "label": "Bottom",
-        "group": "style",
-        "heading": "Padding",
-        "min": 0,
-        "max": 200,
-        "step": 4,
-        "unit": "px"
       },
       {
         "type": "textarea",
@@ -613,6 +631,7 @@
         "label": "Custom CSS",
         "description": "Only changes this section. Example: h2 { letter-spacing: 0.1em; } Use & for the section itself.",
         "group": "advanced",
+        "heading": "Custom CSS",
         "maxLength": 2000
       }
     ],
@@ -808,7 +827,8 @@
               "enum": [
                 "none",
                 "small",
-                "large"
+                "large",
+                "custom"
               ]
             },
             {
@@ -823,6 +843,7 @@
               "type": "string",
               "enum": [
                 "page",
+                "narrow",
                 "full"
               ]
             },
@@ -961,8 +982,8 @@
         "type": "range",
         "key": "blockMinHeight",
         "label": "Minimum height",
-        "group": "layout",
-        "heading": "Layout",
+        "group": "advanced",
+        "heading": "Effects",
         "min": 0,
         "max": 800,
         "step": 10,
@@ -1040,23 +1061,23 @@
         "type": "color",
         "key": "blockTextColor",
         "label": "Text colour",
-        "group": "style",
-        "heading": "Appearance",
+        "group": "advanced",
+        "heading": "Colours",
         "allowAlpha": false
       },
       {
         "type": "checkbox",
         "key": "blockBackground",
         "label": "Background",
-        "group": "style",
-        "heading": "Appearance"
+        "group": "advanced",
+        "heading": "Colours"
       },
       {
         "type": "color",
         "key": "blockBackgroundColor",
         "label": "Background colour",
-        "group": "style",
-        "heading": "Appearance",
+        "group": "advanced",
+        "heading": "Colours",
         "allowAlpha": false,
         "showWhen": {
           "key": "blockBackground",
@@ -1068,8 +1089,8 @@
         "key": "blockGradientColor",
         "label": "Gradient to colour",
         "description": "Fades the background colour into this one. Leave empty for a flat colour.",
-        "group": "style",
-        "heading": "Appearance",
+        "group": "advanced",
+        "heading": "Colours",
         "allowAlpha": false,
         "showWhen": {
           "key": "blockBackground",
@@ -1080,8 +1101,8 @@
         "type": "range",
         "key": "blockGradientAngle",
         "label": "Gradient angle",
-        "group": "style",
-        "heading": "Appearance",
+        "group": "advanced",
+        "heading": "Colours",
         "min": 0,
         "max": 360,
         "step": 15,
@@ -1095,8 +1116,8 @@
         "type": "range",
         "key": "blockOpacity",
         "label": "Opacity",
-        "group": "style",
-        "heading": "Appearance",
+        "group": "advanced",
+        "heading": "Effects",
         "min": 10,
         "max": 100,
         "step": 5,
@@ -1106,8 +1127,8 @@
         "type": "select",
         "key": "blockShadow",
         "label": "Shadow",
-        "group": "style",
-        "heading": "Borders",
+        "group": "advanced",
+        "heading": "Effects",
         "options": [
           {
             "label": "None",
@@ -1131,7 +1152,7 @@
         "type": "segmented",
         "key": "blockBorder",
         "label": "Style",
-        "group": "style",
+        "group": "advanced",
         "heading": "Borders",
         "options": [
           {
@@ -1148,7 +1169,7 @@
         "type": "range",
         "key": "blockBorderWidth",
         "label": "Thickness",
-        "group": "style",
+        "group": "advanced",
         "heading": "Borders",
         "min": 1,
         "max": 8,
@@ -1163,7 +1184,7 @@
         "type": "color",
         "key": "blockBorderColor",
         "label": "Border colour",
-        "group": "style",
+        "group": "advanced",
         "heading": "Borders",
         "allowAlpha": false,
         "showWhen": {
@@ -1175,7 +1196,7 @@
         "type": "range",
         "key": "blockRadius",
         "label": "Corner radius",
-        "group": "style",
+        "group": "advanced",
         "heading": "Borders",
         "min": 0,
         "max": 100,
@@ -1186,7 +1207,7 @@
         "type": "range",
         "key": "blockMarginTop",
         "label": "Space above",
-        "group": "style",
+        "group": "advanced",
         "heading": "Margin",
         "min": 0,
         "max": 100,
@@ -1197,7 +1218,7 @@
         "type": "range",
         "key": "blockMarginBottom",
         "label": "Space below",
-        "group": "style",
+        "group": "advanced",
         "heading": "Margin",
         "min": 0,
         "max": 100,
@@ -1209,7 +1230,7 @@
         "key": "blockPaddingTop",
         "mobile": true,
         "label": "Top",
-        "group": "style",
+        "group": "advanced",
         "heading": "Padding",
         "min": 0,
         "max": 100,
@@ -1221,7 +1242,7 @@
         "key": "blockPaddingBottom",
         "mobile": true,
         "label": "Bottom",
-        "group": "style",
+        "group": "advanced",
         "heading": "Padding",
         "min": 0,
         "max": 100,
@@ -1233,7 +1254,7 @@
         "key": "blockPaddingLeft",
         "mobile": true,
         "label": "Left",
-        "group": "style",
+        "group": "advanced",
         "heading": "Padding",
         "min": 0,
         "max": 100,
@@ -1245,7 +1266,7 @@
         "key": "blockPaddingRight",
         "mobile": true,
         "label": "Right",
-        "group": "style",
+        "group": "advanced",
         "heading": "Padding",
         "min": 0,
         "max": 100,

@@ -48,3 +48,10 @@ it("replaces the older Background choice when a colour scheme or own colours is 
   expect(applySettingsPatch(legacy, { styleColors: true }, controls, false).settings).toEqual({ styleColors: true, heading: "Hi" });
   expect(applySettingsPatch(legacy, { heading: "New" }, controls, false).settings).toEqual({ colorScheme: "soft", heading: "New" });
 });
+
+it("lets a preset spacing replace exact sizes on every screen, and keeps them for Custom", () => {
+  const spaced = { settings: { styleSpacing: "custom", stylePaddingTop: 40, stylePaddingBottom: 24, title: "Hi" }, responsive: { mobile: { stylePaddingTop: 8, align: "center" }, tablet: { stylePaddingBottom: 16 } } };
+  expect(applySettingsPatch(spaced, { styleSpacing: "small" }, controls, false)).toEqual({ settings: { styleSpacing: "small", title: "Hi" }, responsive: { mobile: { align: "center" } } });
+  expect(applySettingsPatch(spaced, { styleSpacing: "custom" }, controls, false)).toEqual(spaced);
+  expect(applySettingsPatch(spaced, { title: "New" }, controls, false).settings).toMatchObject({ stylePaddingTop: 40 });
+});

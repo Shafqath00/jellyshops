@@ -10,7 +10,10 @@ function section(settings: Record<string, unknown>): SectionNode {
 it("gives heading and text blocks the shared style settings, grouped like Shopify", () => {
   for (const type of ["heading", "text"]) {
     const controls = getBlockDefinition(type)?.controls ?? [];
-    expect(controls.filter(({ key }) => isBlockStyleKey(key)).map(({ heading }) => heading)).toEqual(expect.arrayContaining(["Layout", "Typography", "Appearance", "Borders", "Padding"]));
+    const styled = controls.filter(({ key }) => isBlockStyleKey(key));
+    expect(styled.map(({ heading }) => heading)).toEqual(expect.arrayContaining(["Layout", "Typography", "Colours", "Borders", "Effects", "Padding"]));
+    // Only width, max width, text style and Show on are shown up front; the free-form styling is under Advanced.
+    expect(styled.filter(({ group }) => group !== "advanced").map(({ key }) => key)).toEqual(["blockWidth", "blockShowOn", "blockMaxWidth", "blockTypePreset"]);
   }
   expect(getBlockDefinition("faq-item")?.controls.some(({ key }) => isBlockStyleKey(key))).toBe(false);
 });

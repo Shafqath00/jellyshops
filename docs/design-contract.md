@@ -92,7 +92,17 @@ Phone up to 767px, tablet 768–1023px, desktop 1024px and up (the same split as
 - **Not changed yet:** the themes' own colour rules (`--jm-*`, `--av-*`, the Page/Soft/Dark rules) still paint sections; they move onto the roles when the themes are rebuilt (phases 7–8). Colour pickers already list theme and scheme colours first; free hex is still allowed in sections and blocks.
 - Checked: full-page screenshots of all 3 themes × 7 pages × 3 widths before and after: page sizes identical, differences only where photos load at different moments.
 
-### 2.4 Settings model
+### 2.4 Settings model — first part built in phase 4
+
+Built (2026-11-06):
+
+- Every section shows the same four universal settings under "Section": **Colour scheme**, **Width** (Page / Narrow / Full), **Spacing** (None / Small / Medium / Large / Custom; Medium is the theme's spacing, saved as empty) and **Show on**. Exact top/bottom sizes appear only for Spacing > Custom, or while an older exact value is saved (`visibleWhenSaved` on the control). Picking a preset spacing removes exact sizes on every screen (`applySettingsPatch`).
+- The rest of the shared styling (own colours, gradient, heading/text fonts and sizes, text alignment, minimum height, shadow, opacity, custom CSS) is in the collapsed **Advanced** group, with sub-headings Colours / Typography / Effects / Custom CSS. Blocks keep Width, Max width, Text style and Show on up front; their colours, borders, effects, margins and padding are under Advanced.
+- Saved values from before still validate and render; nothing in the renderer changed.
+- A typical section now shows 6 settings up front (it was about 25). Sections whose own content controls exceed 12 (header 20, journal teaser, image mosaic and 404 message 18, product grid 15, featured collection and product information 14, store visit 13) need their own controls reworked (later).
+- Not built yet: a theme switch to hide Advanced, palette-only colour pickers (Advanced still allows any hex), type presets in place of the Advanced font/size choices.
+
+Target:
 
 - Universal section settings: colour scheme, width, spacing (none / S / M / L, custom px under "Custom"), show on.
 - Everything else is specific to the section's job and offered as choices.

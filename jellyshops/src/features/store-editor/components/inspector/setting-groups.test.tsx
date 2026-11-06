@@ -72,3 +72,21 @@ it("shows an older setting only on sections that still use it", () => {
   rerender(<SettingGroups controls={[background]} settings={{ colorScheme: "soft" }} catalog={{ products: [], collections: [] }} onChange={vi.fn()} />);
   expect(screen.getByText("Background (older choice)")).toBeInTheDocument();
 });
+
+it("shows exact spacing for Custom or while an older value is saved, and keeps Advanced folded with its sub-headings", () => {
+  const model: ControlDefinition[] = [
+    { type: "select", key: "styleSpacing", label: "Spacing", group: "style", heading: "Section", options: [{ label: "Medium", value: "" }, { label: "Custom", value: "custom" }] },
+    { type: "range", key: "stylePaddingTop", label: "Top", group: "style", heading: "Section", min: 0, max: 200, step: 4, unit: "px", showWhen: { key: "styleSpacing", equals: "custom" }, visibleWhenSaved: true },
+    { type: "checkbox", key: "styleColors", label: "Use my own colours", group: "advanced", heading: "Colours" },
+  ];
+  const view = (settings: Record<string, unknown>) => <SettingGroups controls={model} settings={settings} catalog={{ products: [], collections: [] }} onChange={vi.fn()} />;
+  const { rerender } = render(view({}));
+  expect(screen.queryByText("Top")).not.toBeInTheDocument();
+  rerender(view({ styleSpacing: "custom" }));
+  expect(screen.getByText("Top")).toBeInTheDocument();
+  rerender(view({ stylePaddingTop: 40 }));
+  expect(screen.getByText("Top")).toBeInTheDocument();
+  const advanced = screen.getByText("Advanced").closest("details");
+  expect(advanced).not.toHaveAttribute("open");
+  expect(advanced).toContainElement(screen.getByRole("heading", { name: "Colours", hidden: true }));
+});

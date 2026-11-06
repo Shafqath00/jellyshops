@@ -17,6 +17,8 @@ interface ControlBase {
    * value other than the first option, so new sections never offer it.
    */
   legacy?: boolean;
+  /** With `showWhen`: also shown while the setting itself holds a saved value, so older saved values stay editable. */
+  visibleWhenSaved?: boolean;
   group: ControlGroup;
   responsive?: boolean;
   /** Has a separate phone value (saved under `responsive.mobile`, screens up to 767px) and tablet value (`responsive.tablet`, 768-1023px). */

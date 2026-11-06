@@ -52,27 +52,28 @@ export type BlockStyleSettings = z.infer<typeof blockStyleSchema>;
 
 const themeDefault = { label: "Theme default", value: "" };
 const padding = (side: "Top" | "Bottom" | "Left" | "Right"): ControlDefinition =>
-  ({ type: "range", key: `blockPadding${side}`, mobile: true, label: side, group: "style", heading: "Padding", min: 0, max: 100, step: 1, unit: "px" });
+  ({ type: "range", key: `blockPadding${side}`, mobile: true, label: side, group: "advanced", heading: "Padding", min: 0, max: 100, step: 1, unit: "px" });
 
+/** Width, max width, text style and Show on stay visible; colours, borders, effects and spacing sit in the collapsed Advanced group. */
 export const BLOCK_STYLE_CONTROLS: ControlDefinition[] = [
   { type: "segmented", key: "blockWidth", label: "Width", group: "layout", heading: "Layout", options: [{ label: "Fit", value: "fit" }, { label: "Fill", value: "fill" }] },
   { type: "select", key: "blockShowOn", label: "Show on", group: "layout", heading: "Layout", options: [{ label: "All screens", value: "" }, { label: "Desktop only", value: "desktop-only" }, { label: "Desktop and tablet", value: "desktop" }, { label: "Tablet and phones", value: "touch" }, { label: "Phones only", value: "mobile" }] },
-  { type: "range", key: "blockMinHeight", label: "Minimum height", group: "layout", heading: "Layout", min: 0, max: 800, step: 10, unit: "px" },
+  { type: "range", key: "blockMinHeight", label: "Minimum height", group: "advanced", heading: "Effects", min: 0, max: 800, step: 10, unit: "px" },
   { type: "select", key: "blockMaxWidth", label: "Max width", group: "layout", heading: "Layout", options: [themeDefault, { label: "Narrow", value: "narrow" }, { label: "Normal", value: "normal" }, { label: "Wide", value: "wide" }, { label: "None", value: "none" }] },
   { type: "select", key: "blockTypePreset", mobile: true, label: "Text style", group: "style", heading: "Typography", description: "Uses the sizes and fonts from your theme settings.", options: [themeDefault, { label: "Heading 1", value: "h1" }, { label: "Heading 2", value: "h2" }, { label: "Heading 3", value: "h3" }, { label: "Heading 4", value: "h4" }, { label: "Body", value: "body" }, { label: "Small", value: "small" }] },
-  { type: "color", key: "blockTextColor", label: "Text colour", group: "style", heading: "Appearance", allowAlpha: false },
-  { type: "checkbox", key: "blockBackground", label: "Background", group: "style", heading: "Appearance" },
-  { type: "color", key: "blockBackgroundColor", label: "Background colour", group: "style", heading: "Appearance", allowAlpha: false, showWhen: { key: "blockBackground", equals: true } },
-  { type: "color", key: "blockGradientColor", label: "Gradient to colour", description: "Fades the background colour into this one. Leave empty for a flat colour.", group: "style", heading: "Appearance", allowAlpha: false, showWhen: { key: "blockBackground", equals: true } },
-  { type: "range", key: "blockGradientAngle", label: "Gradient angle", group: "style", heading: "Appearance", min: 0, max: 360, step: 15, unit: "°", showWhen: { key: "blockBackground", equals: true } },
-  { type: "range", key: "blockOpacity", label: "Opacity", group: "style", heading: "Appearance", min: 10, max: 100, step: 5, unit: "%" },
-  { type: "select", key: "blockShadow", label: "Shadow", group: "style", heading: "Borders", options: [{ label: "None", value: "none" }, { label: "Soft", value: "soft" }, { label: "Medium", value: "medium" }, { label: "Strong", value: "strong" }] },
-  { type: "segmented", key: "blockBorder", label: "Style", group: "style", heading: "Borders", options: [{ label: "None", value: "none" }, { label: "Solid", value: "solid" }] },
-  { type: "range", key: "blockBorderWidth", label: "Thickness", group: "style", heading: "Borders", min: 1, max: 8, step: 1, unit: "px", showWhen: { key: "blockBorder", equals: "solid" } },
-  { type: "color", key: "blockBorderColor", label: "Border colour", group: "style", heading: "Borders", allowAlpha: false, showWhen: { key: "blockBorder", equals: "solid" } },
-  { type: "range", key: "blockRadius", label: "Corner radius", group: "style", heading: "Borders", min: 0, max: 100, step: 1, unit: "px" },
-  { type: "range", key: "blockMarginTop", label: "Space above", group: "style", heading: "Margin", min: 0, max: 100, step: 1, unit: "px" },
-  { type: "range", key: "blockMarginBottom", label: "Space below", group: "style", heading: "Margin", min: 0, max: 100, step: 1, unit: "px" },
+  { type: "color", key: "blockTextColor", label: "Text colour", group: "advanced", heading: "Colours", allowAlpha: false },
+  { type: "checkbox", key: "blockBackground", label: "Background", group: "advanced", heading: "Colours" },
+  { type: "color", key: "blockBackgroundColor", label: "Background colour", group: "advanced", heading: "Colours", allowAlpha: false, showWhen: { key: "blockBackground", equals: true } },
+  { type: "color", key: "blockGradientColor", label: "Gradient to colour", description: "Fades the background colour into this one. Leave empty for a flat colour.", group: "advanced", heading: "Colours", allowAlpha: false, showWhen: { key: "blockBackground", equals: true } },
+  { type: "range", key: "blockGradientAngle", label: "Gradient angle", group: "advanced", heading: "Colours", min: 0, max: 360, step: 15, unit: "°", showWhen: { key: "blockBackground", equals: true } },
+  { type: "range", key: "blockOpacity", label: "Opacity", group: "advanced", heading: "Effects", min: 10, max: 100, step: 5, unit: "%" },
+  { type: "select", key: "blockShadow", label: "Shadow", group: "advanced", heading: "Effects", options: [{ label: "None", value: "none" }, { label: "Soft", value: "soft" }, { label: "Medium", value: "medium" }, { label: "Strong", value: "strong" }] },
+  { type: "segmented", key: "blockBorder", label: "Style", group: "advanced", heading: "Borders", options: [{ label: "None", value: "none" }, { label: "Solid", value: "solid" }] },
+  { type: "range", key: "blockBorderWidth", label: "Thickness", group: "advanced", heading: "Borders", min: 1, max: 8, step: 1, unit: "px", showWhen: { key: "blockBorder", equals: "solid" } },
+  { type: "color", key: "blockBorderColor", label: "Border colour", group: "advanced", heading: "Borders", allowAlpha: false, showWhen: { key: "blockBorder", equals: "solid" } },
+  { type: "range", key: "blockRadius", label: "Corner radius", group: "advanced", heading: "Borders", min: 0, max: 100, step: 1, unit: "px" },
+  { type: "range", key: "blockMarginTop", label: "Space above", group: "advanced", heading: "Margin", min: 0, max: 100, step: 1, unit: "px" },
+  { type: "range", key: "blockMarginBottom", label: "Space below", group: "advanced", heading: "Margin", min: 0, max: 100, step: 1, unit: "px" },
   padding("Top"),
   padding("Bottom"),
   padding("Left"),

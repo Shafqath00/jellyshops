@@ -61,6 +61,8 @@ export function settingsForView(node: SettingsNode, controls: ControlDefinition[
   return result;
 }
 
+const SPACING_KEYS = ["stylePaddingTop", "stylePaddingBottom"];
+
 /** Applies a settings change: on Mobile, phone settings go to `responsive.mobile`; everything else changes the desktop value. */
 export function applySettingsPatch<T extends SettingsNode>(node: T, patch: Record<string, unknown>, controls: ControlDefinition[], view: boolean | EditingDevice): T {
   const device = deviceOf(view);
@@ -74,9 +76,20 @@ export function applySettingsPatch<T extends SettingsNode>(node: T, patch: Recor
   }
   // Choosing a colour scheme or own colours replaces the older Background choice (one colour system).
   if ((typeof patch.styleScheme === "string" && patch.styleScheme) || patch.styleColors === true) delete settings.colorScheme;
+  // A preset spacing (None / Small / Medium / Large) replaces exact sizes on every screen; only Custom keeps them.
+  const presetSpacing = "styleSpacing" in patch && patch.styleSpacing !== "custom";
+  if (presetSpacing) for (const key of SPACING_KEYS) { delete settings[key]; delete phone[key]; }
   const { responsive, ...rest } = node;
   const otherResponsive = { ...(responsive ?? {}) };
   if (device !== "desktop") delete otherResponsive[device];
+  if (presetSpacing) {
+    for (const [name, values] of Object.entries(otherResponsive)) {
+      if (!values) continue;
+      const kept = Object.fromEntries(Object.entries(values).filter(([key]) => !SPACING_KEYS.includes(key)));
+      if (Object.keys(kept).length) otherResponsive[name as keyof typeof otherResponsive] = kept;
+      else delete otherResponsive[name as keyof typeof otherResponsive];
+    }
+  }
   const nextResponsive = device !== "desktop" && Object.keys(phone).length ? { ...otherResponsive, [device]: phone } : otherResponsive;
   return { ...rest, settings, ...(Object.keys(nextResponsive).length ? { responsive: nextResponsive } : {}) } as T;
 }
