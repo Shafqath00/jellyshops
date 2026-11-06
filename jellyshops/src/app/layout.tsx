@@ -8,6 +8,7 @@ import "./themes/theme-kit.css";
 import "./themes/jelly-minimal.css";
 import "./themes/jelly-avenue.css";
 import "./themes/jelly-resthaven.css";
+import "./themes/theme-kit-late.css";
 import "./shadcn-theme.css";
 
 export const metadata: Metadata = {

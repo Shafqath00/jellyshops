@@ -39,7 +39,10 @@ function selectors(css: string): string[] {
   });
 }
 
-describe.each([...themes, { file: "theme-kit.css", scope: ':is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"])' }])("$file", ({ file, scope }) => {
+const kitScope = ':is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"])';
+const kitFiles = ["theme-kit.css", "theme-kit-late.css"];
+
+describe.each([...themes, ...kitFiles.map((file) => ({ file, scope: kitScope }))])("$file", ({ file, scope }) => {
   const css = readFileSync(path.join(__dirname, file), "utf8");
 
   it("scopes every selector to its theme", () => {
@@ -49,7 +52,7 @@ describe.each([...themes, { file: "theme-kit.css", scope: ':is([data-jelly-theme
   });
 
   it("never hard-codes the other theme's scope", () => {
-    if (file === "theme-kit.css") return;
+    if (kitFiles.includes(file)) return;
     const other = themes.find((theme) => theme.file !== file)!.scope;
     expect(css.replace(/:is\([^)]*\)/g, "")).not.toContain(other);
   });
@@ -57,7 +60,7 @@ describe.each([...themes, { file: "theme-kit.css", scope: ':is([data-jelly-theme
 
 describe("theme kit", () => {
   it("is read through the shared --tk-* token names, which both kit themes set", () => {
-    const kit = readFileSync(path.join(__dirname, "theme-kit.css"), "utf8");
+    const kit = kitFiles.map((file) => readFileSync(path.join(__dirname, file), "utf8")).join(" ");
     const used = new Set(kit.match(/--tk-[a-z0-9-]+/g));
     expect(used.size).toBeGreaterThan(10);
     for (const { file } of themes) {
