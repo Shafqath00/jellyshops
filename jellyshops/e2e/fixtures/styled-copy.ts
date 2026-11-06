@@ -8,14 +8,14 @@ export interface AxeNode { target: string[]; /** For colour contrast: "#777 on #
 export interface AxeViolation { id: string; nodes: AxeNode[] }
 
 /**
- * Runs axe on the page shown in a theme preview frame. The preview frame runs no scripts of its own (and axe can't
- * check a document from another window), so the rendered page is copied into a tab of its own at the same width.
+ * Opens a copy of the page shown in a theme preview frame in a tab of its own, at `width`. The preview frame runs no
+ * scripts of its own (and axe can't check a document from another window), so checks and screenshots use the copy.
  *
  * The stylesheets are inlined into the copy: copied `<link>` tags point at the dev server's CSS, which it refuses as a
- * cross-origin request from the copy, and an unstyled copy passes every contrast check. The copy is checked to have
- * the theme's background before axe runs.
+ * cross-origin request from the copy, and an unstyled copy passes every contrast check. The copy is checked to keep
+ * the theme's background and font. The caller closes the returned page.
  */
-export async function axeOnStyledCopy(page: Page, frameTitle: string, runOnly: { type: "tag" | "rule"; values: string[] }, width = 1280): Promise<AxeViolation[]> {
+export async function openStyledCopy(page: Page, frameTitle: string, width = 1280): Promise<Page> {
   const { html, background, font } = await page.frameLocator(`iframe[title='${frameTitle}']`).locator("html").evaluate((root) => {
     const css = [...document.styleSheets].map((sheet) => {
       try { return [...sheet.cssRules].map((rule) => rule.cssText).join("\n"); } catch { return ""; }
@@ -38,6 +38,17 @@ export async function axeOnStyledCopy(page: Page, frameTitle: string, runOnly: {
       return { background: computed.backgroundColor, font: computed.fontFamily };
     });
     expect(copied, "the copied page must keep the theme's styles").toEqual({ background, font });
+    return copy;
+  } catch (error) {
+    await copy.close();
+    throw error;
+  }
+}
+
+/** Runs axe (the given tags or rules) on a styled copy of the page in a theme preview frame. */
+export async function axeOnStyledCopy(page: Page, frameTitle: string, runOnly: { type: "tag" | "rule"; values: string[] }, width = 1280): Promise<AxeViolation[]> {
+  const copy = await openStyledCopy(page, frameTitle, width);
+  try {
     await copy.addScriptTag({ content: axeSource });
     return await copy.evaluate(async (options) => {
       const axe = (window as unknown as { axe: { run(context: Element, options: object): Promise<{ violations: Array<{ id: string; nodes: Array<{ target: string[]; any?: Array<{ data?: unknown }> }> }> }> } }).axe;

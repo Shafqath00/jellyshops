@@ -43,9 +43,19 @@ cd jellyshops && JELLY_E2E_FRONTEND_PORT=3300 npx playwright test e2e/design-lin
 
 ## 2. Target contract (roadmap phases 1–6)
 
-### 2.1 Tokens (one namespace, values from theme settings)
+### 2.1 Tokens (one namespace, values from theme settings) — built in phase 1
 
-Themes provide **values**, never new token names. Written by `resolveStorefrontThemeTokens`.
+Themes provide **values**, never new token names.
+
+How it works (phase 1, 2026-11-06):
+
+- The list and platform defaults live in `jellyshops/packages/storefront-themes/src/contract-tokens.ts` (`CONTRACT_TOKENS`, `CONTRACT_SPACE`, `CONTRACT_BREAKPOINTS`, `CONTRACT_TYPE_PRESETS`).
+- `node scripts/generate-contract-css.mjs` writes them into `storefront-base.css` (between the `contract-tokens` markers) as `:where([data-jelly-theme])` rules with zero specificity, plus the tablet and phone overrides (`--j-space-scale` 0.85 / 0.7, `--j-page-margin`). `--check` fails when the file is out of date; a unit test checks the same.
+- Values follow the merchant's theme settings through the existing layers (`--theme-*`, `--jelly-*` from `resolveStorefrontThemeTokens`), so no resolver change was needed.
+- A theme sets its own values in its scope (Minimal and Avenue: type sizes, page width, page margin, radii; Avenue also tight tracking and a 700ms slow duration). Their old names (`--jm-1`, `--jm-edge`, `--av-h2`, …) are now aliases of the contract names. Resthaven still uses the `--jelly-*` layer directly (its CSS is generated from its own `theme.css`); phase 2 moves it onto the contract.
+- A unit test (`contract-tokens.test.ts`) fails if any theme, shared CSS or package file uses a `--j-*` name that is not in the contract.
+- Checked: full-page screenshots of all 3 themes × 8 preview pages × 3 widths were pixel-identical before and after (a 1px change to one contract value broke 24 of them, so the check is sensitive).
+- Known limit until phase 3: `--j-color-*` are resolved on the theme root, so a section's own colour scheme does not change them yet.
 
 | Group | Tokens |
 | --- | --- |

@@ -29,35 +29,51 @@
   --jm-font-heading: var(--theme-font-heading, Georgia, serif);
   --jm-font-body: var(--theme-font-body, Arial, sans-serif);
   --jm-heading-weight: var(--jelly-heading-weight, 400);
-  --jm-text-xs: 12px;
-  --jm-text-sm: var(--jelly-type-small-size, 14px);
-  --jm-text-base: var(--jelly-body-size, 16px);
-  --jm-text-lg: 18px;
-  --jm-h4: var(--jelly-type-h4-size, 20px);
-  --jm-h3: var(--jelly-type-h3-size, clamp(22px, 2.2vw, 28px));
-  --jm-h2: var(--jelly-type-h2-size, clamp(28px, 3.6vw, 44px));
-  --jm-h1: clamp(36px, 5.2vw, var(--jelly-heading-size, 56px));
 
-  /* 8px spacing scale */
-  --jm-1: 8px;
-  --jm-2: 16px;
-  --jm-3: 24px;
-  --jm-4: 32px;
-  --jm-5: 40px;
-  --jm-6: 48px;
-  --jm-8: 64px;
-  --jm-10: 80px;
-  --jm-12: 96px;
+  /* Design contract values (docs/design-contract.md). The --jm-* names below are aliases kept for this file. */
+  --j-type-caption-size: 12px;
+  --j-type-small-size: var(--jelly-type-small-size, 14px);
+  --j-type-body-size: var(--jelly-body-size, 16px);
+  --j-type-h5-size: 18px;
+  --j-type-h4-size: var(--jelly-type-h4-size, 20px);
+  --j-type-h3-size: var(--jelly-type-h3-size, clamp(22px, 2.2vw, 28px));
+  --j-type-h2-size: var(--jelly-type-h2-size, clamp(28px, 3.6vw, 44px));
+  --j-type-h1-size: clamp(36px, 5.2vw, var(--jelly-heading-size, 56px));
+  --j-page-normal: var(--jelly-container-width, 1280px);
+  --j-page-margin: clamp(16px, 4vw, 48px);
+  --j-page-edge: max(var(--j-page-margin), calc((100% - var(--j-page-normal)) / 2));
+  --j-radius-button: var(--jelly-radius-button, 0px);
+  --j-radius-card: var(--jelly-radius-card, 4px);
 
-  --jm-container: var(--jelly-container-width, 1280px);
-  --jm-gutter: clamp(16px, 4vw, 48px);
-  --jm-edge: max(var(--jm-gutter), calc((100% - var(--jm-container)) / 2));
+  --jm-text-xs: var(--j-type-caption-size);
+  --jm-text-sm: var(--j-type-small-size);
+  --jm-text-base: var(--j-type-body-size);
+  --jm-text-lg: var(--j-type-h5-size);
+  --jm-h4: var(--j-type-h4-size);
+  --jm-h3: var(--j-type-h3-size);
+  --jm-h2: var(--j-type-h2-size);
+  --jm-h1: var(--j-type-h1-size);
+
+  /* 8px spacing scale = the contract scale */
+  --jm-1: var(--j-space-xs);
+  --jm-2: var(--j-space-md);
+  --jm-3: var(--j-space-lg);
+  --jm-4: var(--j-space-xl);
+  --jm-5: var(--j-space-2xl);
+  --jm-6: var(--j-space-3xl);
+  --jm-8: var(--j-space-4xl);
+  --jm-10: var(--j-space-5xl);
+  --jm-12: var(--j-space-6xl);
+
+  --jm-container: var(--j-page-normal);
+  --jm-gutter: var(--j-page-margin);
+  --jm-edge: var(--j-page-edge);
   --jm-section: clamp(56px, 8vw, var(--jelly-spacing-section, 96px));
-  --jm-radius-button: var(--jelly-radius-button, 0px);
-  --jm-radius-card: var(--jelly-radius-card, 4px);
-  --jm-ease: cubic-bezier(.2, .7, .2, 1);
-  --jm-fast: 160ms;
-  --jm-slow: 600ms;
+  --jm-radius-button: var(--j-radius-button);
+  --jm-radius-card: var(--j-radius-card);
+  --jm-ease: var(--j-ease);
+  --jm-fast: var(--j-duration-fast);
+  --jm-slow: var(--j-duration-slow);
 
   background: var(--jm-bg);
   color: var(--jm-text);
@@ -856,16 +872,16 @@
 [data-jelly-theme="jelly-signature"] [data-section-style~="heading-font"] { --jm-font-heading: var(--section-heading-font); --jelly-font-display: var(--section-heading-font); --jelly-font-heading: var(--section-heading-font); }
 [data-jelly-theme="jelly-signature"] [data-section-style~="heading-weight"] { --jm-heading-weight: var(--section-heading-weight); }
 [data-jelly-theme="jelly-signature"] [data-section-style~="heading-size"] {
-  --jm-h1: calc(clamp(36px, 5.2vw, var(--jelly-heading-size, 56px)) * var(--section-heading-scale));
-  --jm-h2: calc(var(--jelly-type-h2-size, clamp(28px, 3.6vw, 44px)) * var(--section-heading-scale));
-  --jm-h3: calc(var(--jelly-type-h3-size, clamp(22px, 2.2vw, 28px)) * var(--section-heading-scale));
+  --jm-h1: calc(var(--j-type-h1-size) * var(--section-heading-scale));
+  --jm-h2: calc(var(--j-type-h2-size) * var(--section-heading-scale));
+  --jm-h3: calc(var(--j-type-h3-size) * var(--section-heading-scale));
 }
 [data-jelly-theme="jelly-signature"] [data-section-style~="body-font"] { --jm-font-body: var(--section-body-font); --jelly-font-body: var(--section-body-font); font-family: var(--section-body-font); }
 [data-jelly-theme="jelly-signature"] [data-section-style~="body-size"] {
-  --jm-text-xs: calc(12px * var(--section-body-scale));
-  --jm-text-sm: calc(var(--jelly-type-small-size, 14px) * var(--section-body-scale));
-  --jm-text-base: calc(var(--jelly-body-size, 16px) * var(--section-body-scale));
-  --jm-text-lg: calc(18px * var(--section-body-scale));
+  --jm-text-xs: calc(var(--j-type-caption-size) * var(--section-body-scale));
+  --jm-text-sm: calc(var(--j-type-small-size) * var(--section-body-scale));
+  --jm-text-base: calc(var(--j-type-body-size) * var(--section-body-scale));
+  --jm-text-lg: calc(var(--j-type-h5-size) * var(--section-body-scale));
 }
 [data-jelly-theme="jelly-signature"] [data-section-style~="align"],
 [data-jelly-theme="jelly-signature"] [data-section-style~="align"] :is(h1, h2, h3, h4, p, [class*="-intro"], [class*="-header"], [class*="-content"]) { text-align: var(--section-align); }
@@ -913,9 +929,9 @@
 /* Same selectors with -mobile attributes and -m variables; later in the file, so they win at the same specificity. */
 @media (max-width: 767px) {
   [data-jelly-theme="jelly-signature"] [data-section-mobile~="heading-size"] {
-    --jm-h1: calc(clamp(36px, 5.2vw, var(--jelly-heading-size, 56px)) * var(--section-heading-scale-m));
-    --jm-h2: calc(var(--jelly-type-h2-size, clamp(28px, 3.6vw, 44px)) * var(--section-heading-scale-m));
-    --jm-h3: calc(var(--jelly-type-h3-size, clamp(22px, 2.2vw, 28px)) * var(--section-heading-scale-m));
+    --jm-h1: calc(var(--j-type-h1-size) * var(--section-heading-scale-m));
+    --jm-h2: calc(var(--j-type-h2-size) * var(--section-heading-scale-m));
+    --jm-h3: calc(var(--j-type-h3-size) * var(--section-heading-scale-m));
   }
   [data-jelly-theme="jelly-signature"] [data-section-mobile~="align"],
   [data-jelly-theme="jelly-signature"] [data-section-mobile~="align"] :is(h1, h2, h3, h4, p, [class*="-intro"], [class*="-header"], [class*="-content"]) { text-align: var(--section-align-m); }
@@ -935,9 +951,9 @@
 /* 18 ── Tablet values (editor "Tablet" view): the phone rules above, for screens 768px to 1023px wide ── */
 @media (min-width: 768px) and (max-width: 1023px) {
   [data-jelly-theme="jelly-signature"] [data-section-tablet~="heading-size"] {
-    --jm-h1: calc(clamp(36px, 5.2vw, var(--jelly-heading-size, 56px)) * var(--section-heading-scale-t));
-    --jm-h2: calc(var(--jelly-type-h2-size, clamp(28px, 3.6vw, 44px)) * var(--section-heading-scale-t));
-    --jm-h3: calc(var(--jelly-type-h3-size, clamp(22px, 2.2vw, 28px)) * var(--section-heading-scale-t));
+    --jm-h1: calc(var(--j-type-h1-size) * var(--section-heading-scale-t));
+    --jm-h2: calc(var(--j-type-h2-size) * var(--section-heading-scale-t));
+    --jm-h3: calc(var(--j-type-h3-size) * var(--section-heading-scale-t));
   }
   [data-jelly-theme="jelly-signature"] [data-section-tablet~="align"],
   [data-jelly-theme="jelly-signature"] [data-section-tablet~="align"] :is(h1, h2, h3, h4, p, [class*="-intro"], [class*="-header"], [class*="-content"]) { text-align: var(--section-align-t); }
