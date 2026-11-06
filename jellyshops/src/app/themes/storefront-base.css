@@ -238,6 +238,23 @@
 /* "Full" (the section's Width setting) beats a theme's own width for that section, as it did before the frame. */
 :where([data-jelly-theme]) [data-section-frame][data-frame-width="full"] .jelly-container.jelly-container { width: calc(100% - 2 * var(--j-page-margin)); max-width: none; }
 
+/* Collection list layouts (the "Collection list: Bento / Carousel" presets). Platform rules for every theme; the
+   theme still styles the cards. Bento: the first collection spans two columns and two rows. */
+:where([data-jelly-theme]) .jelly-category-grid[data-layout="bento"] .jelly-category-grid-items { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-flow: dense; }
+:where([data-jelly-theme]) .jelly-category-grid[data-layout="bento"] .jelly-category-card:first-child { grid-column: span 2; grid-row: span 2; display: flex; flex-direction: column; }
+:where([data-jelly-theme]) .jelly-category-grid[data-layout="bento"] .jelly-category-card:first-child .jelly-category-card-media { flex: 1 1 auto; min-height: 0; aspect-ratio: auto; }
+@media (max-width: 767px) {
+  :where([data-jelly-theme]) .jelly-category-grid[data-layout="bento"] .jelly-category-grid-items { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :where([data-jelly-theme]) .jelly-category-grid[data-layout="bento"] .jelly-category-card:first-child { grid-column: 1 / -1; grid-row: auto; }
+  :where([data-jelly-theme]) .jelly-category-grid[data-layout="bento"] .jelly-category-card:first-child .jelly-category-card-media { flex: none; aspect-ratio: 4 / 3; }
+}
+/* Carousel: one row that scrolls sideways, the next collection peeking in at the edge. */
+:where([data-jelly-theme]) .jelly-category-grid[data-layout="carousel"] .jelly-category-grid-items { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: calc(100% / (var(--jelly-columns, 4) + 0.3)); overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: thin; padding-bottom: var(--j-space-xs); }
+:where([data-jelly-theme]) .jelly-category-grid[data-layout="carousel"] .jelly-category-card { scroll-snap-align: start; }
+:where([data-jelly-theme]) .jelly-category-grid[data-layout="carousel"] .jelly-category-grid-items:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+@media (max-width: 1023px) { :where([data-jelly-theme]) .jelly-category-grid[data-layout="carousel"] .jelly-category-grid-items { grid-auto-columns: 42%; } }
+@media (max-width: 767px) { :where([data-jelly-theme]) .jelly-category-grid[data-layout="carousel"] .jelly-category-grid-items { grid-auto-columns: 72%; } }
+
 /* Layout primitives (packages/storefront-renderer/src/layout.tsx). Gaps and text styles come from contract tokens. */
 :where(.jelly-layout-stack) { display: flex; flex-direction: column; gap: var(--jelly-layout-gap); }
 :where(.jelly-layout-stack[data-direction="row"]) { flex-direction: row; flex-wrap: wrap; }

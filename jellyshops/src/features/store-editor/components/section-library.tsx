@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { LayoutPanelTop, Search } from "lucide-react";
 import type { SectionNode } from "@jelly/storefront-schema";
+import type { PresetThumbnail } from "@jelly/storefront-registry";
+import { PresetSketch } from "./preset-sketch";
 
 export interface SectionLibraryPreset {
   id: string;
@@ -11,9 +13,12 @@ export interface SectionLibraryPreset {
 }
 
 export interface BuiltInSectionOption {
+  /** A preset id ("category-grid-bento") or, for a section without presets, its type. */
   id: string;
   name: string;
   category: string;
+  description?: string;
+  thumbnail?: PresetThumbnail;
 }
 
 export function SectionLibrary({
@@ -34,7 +39,7 @@ export function SectionLibrary({
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return normalized
-      ? builtIns.filter((item) => `${item.name} ${item.category}`.toLowerCase().includes(normalized))
+      ? builtIns.filter((item) => `${item.name} ${item.category} ${item.description ?? ""}`.toLowerCase().includes(normalized))
       : builtIns;
   }, [builtIns, query]);
   const categories = useMemo(() => [...new Set(filtered.map((item) => item.category))], [filtered]);
@@ -71,8 +76,13 @@ export function SectionLibrary({
                   onClick={() => onInsertBuiltIn?.(item.id)}
                   className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-[13px] font-medium text-foreground transition hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring"
                 >
-                  <span className="grid size-8 shrink-0 place-items-center rounded-lg border border-border bg-muted/50 text-muted-foreground"><LayoutPanelTop size={16} /></span>
-                  <span className="truncate">{item.name}</span>
+                  {item.thumbnail
+                    ? <PresetSketch kind={item.thumbnail} />
+                    : <span className="grid size-8 shrink-0 place-items-center rounded-lg border border-border bg-muted/50 text-muted-foreground"><LayoutPanelTop size={16} /></span>}
+                  <span className="min-w-0 py-1.5">
+                    <span className="block truncate">{item.name}</span>
+                    {item.description && <span className="block truncate text-[11px] font-normal text-muted-foreground">{item.description}</span>}
+                  </span>
                 </button>
               ))}
             </div>

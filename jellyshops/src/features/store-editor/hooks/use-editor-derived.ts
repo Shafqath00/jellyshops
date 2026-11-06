@@ -14,13 +14,14 @@ import { usePreviewBindingValues } from "@/features/store-editor/use-preview-bin
 import { isAssignableTemplateType } from "@/features/store-editor/template-names";
 import type { GlobalSectionRecord } from "@/features/store-editor/api/types";
 import { themePalette } from "@/features/store-editor/color-palette";
-import { sectionCategoryLabels, displayName, normalizeSection, templateSections, draftPreviewLayout, selectedInlineSection } from "@/features/store-editor/editor-page-helpers";
+import { normalizeSection, templateSections, draftPreviewLayout, selectedInlineSection } from "@/features/store-editor/editor-page-helpers";
 import { editorSearchFor } from "@/features/store-editor/editor-navigation";
 import { createEditorPreviewPageContext, editorPreviewResourceOptions } from "@/features/store-editor/preview-context";
 import { catalogProductToProduct } from "@/features/storefront/product-presentation";
 import { fetchPublicMetaobjects } from "@/features/storefront/metaobjects-api";
 import { childBlockOptions, locateBlock } from "@/features/store-editor/block-editing";
 import { controlsForView, settingsForView } from "@/features/store-editor/mobile-settings";
+import { sectionLibraryOptions } from "@/features/store-editor/section-options";
 import { controlsForLanguage, settingsForLanguage } from "@/features/store-editor/translation-settings";
 import { withColorSchemeNames } from "@/features/store-editor/color-schemes";
 import type { useEditorState } from "./use-editor-state";
@@ -172,12 +173,7 @@ export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
   [activeTemplate?.type, previewResourceId, backendStoreId, catalog, pages, blogs, articles, previewQuery, previewProduct, previewProductSelections, previewProductQuantity, previewCollection]);
   const builtInSections = useMemo(() => {
     if (!activeTemplate || !libraryRegion) return [];
-    return listSectionDefinitionsForPage(activeTemplate.type, libraryRegion, themeConfiguration?.themeId, themeConfiguration?.themeVersion)
-      .map((definition) => ({
-        id: definition.type,
-        name: definition.label ?? displayName(definition.type),
-        category: sectionCategoryLabels[definition.category],
-      }));
+    return sectionLibraryOptions(listSectionDefinitionsForPage(activeTemplate.type, libraryRegion, themeConfiguration?.themeId, themeConfiguration?.themeVersion));
   }, [activeTemplate, libraryRegion, themeConfiguration]);
   const blockPickerSection = sections.find((section) => section.id === blockPickerSectionId);
   const blockPickerDefinition = blockPickerSection ? getSectionDefinition(blockPickerSection.type, themeConfiguration?.themeVersion) : undefined;

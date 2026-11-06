@@ -56,9 +56,11 @@ export function CategoryGridSection({ section, context }: { section: SectionNode
   // Until the merchant adds collection cards, show neutral placeholders that link to the shop.
   const items = cards.length ? cards : ["New arrivals", "Best sellers", "For the home", "Gifts"].map((label) => ({ id: label, label, image: undefined, href: shopHref }));
   const columns = numberValue(section.settings, "columns", 4, 2, 4);
-  return <section className="jelly-section jelly-category-grid" {...sectionData(section, { "data-image-ratio": choice(section.settings, "imageRatio", ["portrait", "square"] as const, "portrait") })}><StorefrontContainer>
+  // Grid, Bento (first collection large) or Carousel (scrolls sideways; focusable so keyboards can scroll it).
+  const layout = choice(section.settings, "layout", ["grid", "bento", "carousel"] as const, "grid");
+  return <section className="jelly-section jelly-category-grid" {...sectionData(section, { "data-image-ratio": choice(section.settings, "imageRatio", ["portrait", "square"] as const, "portrait"), "data-layout": layout })}><StorefrontContainer>
     {!headingHidden(section) && <SectionIntro section={section} fallback="Shop by collection" editor={context?.mode === "editor"} />}
-    <div className="jelly-category-grid-items" style={{ "--jelly-columns": columns } as CSSProperties}>{items.map((item) => <a href={item.href} className="jelly-category-card" key={item.id}>
+    <div className="jelly-category-grid-items" style={{ "--jelly-columns": columns } as CSSProperties} {...(layout === "carousel" ? { role: "region", "aria-label": "Collections", tabIndex: 0 } : {})}>{items.map((item) => <a href={item.href} className="jelly-category-card" key={item.id}>
       <span className="jelly-category-card-media">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {item.image ? <img src={item.image.url} alt="" loading="lazy" /> : null}

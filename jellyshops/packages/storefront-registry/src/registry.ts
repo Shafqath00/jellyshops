@@ -8,6 +8,7 @@ import { contentSections } from "./sections/content.js";
 import { layoutSections } from "./sections/layout.js";
 import { productExtraSections } from "./sections/product-extras.js";
 import { sectionStyleSchema, withSectionStyleControls } from "./section-style.js";
+import { SECTION_VARIANTS } from "./section-variants.js";
 import type { ControlDefinition, RegionName, RegistryValidationIssue, SectionDefinition } from "./types.js";
 
 function prepareSection(definition: SectionDefinition): SectionDefinition {
@@ -16,6 +17,8 @@ function prepareSection(definition: SectionDefinition): SectionDefinition {
     // Every section gets the shared style settings (colours, fonts, sizes, alignment, spacing).
     controls: withSectionStyleControls(definition.controls),
     settingsSchema: z.intersection(definition.settingsSchema, sectionStyleSchema),
+    // Designed variants (section-variants.ts) follow the section's own presets.
+    presets: [...(definition.presets ?? []), ...(SECTION_VARIANTS[definition.type] ?? []).filter((variant) => !definition.presets?.some((preset) => preset.id === variant.id))],
     allowedRegions: definition.type === "header" || definition.type === "announcement-bar"
       ? ["header"]
       : definition.type === "footer"

@@ -113,6 +113,14 @@ Target:
 
 One product card (a block set: media, title, price, swatches, badge, rating, button) used by every product list. Buttons primary/secondary, price, badge, swatch, field and rating read only colour roles and tokens.
 
+### 2.5a Section presets — built in phase 5
+
+- A preset (`SectionPreset` in `packages/storefront-registry/src/types.ts`) is a designed variant of a section: id, label, category, plus optional `description`, `thumbnail` (a layout sketch name) and the `settings` and `blocks` that make the design. `createPresetSection()` merges the preset's settings over the section defaults, uses its blocks (or the default blocks) with new ids at every level, and refuses a preset the registry would not accept.
+- Variants of the built-in sections live in `packages/storefront-registry/src/section-variants.ts` (`SECTION_VARIANTS`, added after each section's own preset by `prepareSection`): Hero: Text over image / Text only; Collection list: Bento / Carousel; Product grid: Large / Tabs; Image with text: Image left / Image right, soft; Feature columns: Three promises / Four columns. Photos are the Unsplash images the starter packs already use.
+- The collection list gained a Layout setting (Grid / Bento / Carousel). Bento: first collection two columns by two rows (full width on phones, then 2×2); Carousel: one row that scrolls sideways with the next collection peeking in, focusable for keyboards. Platform CSS in `storefront-base.css` ("Collection list layouts"), so every theme gets it; the theme still styles the cards.
+- Add section lists every preset grouped by its category (Banners, Products, Content, Marketing) with a small layout sketch (`components/preset-sketch.tsx`) and a one-line description that search also matches (`features/store-editor/section-options.ts`).
+- Checked: every preset creates a section the registry accepts (unit test); Bento and Carousel measured in the browser on Minimal (desktop and phone) and Avenue (desktop) with the layout switched on in the preview; not checked by adding a preset in the signed-in editor. Thumbnails are drawn sketches, not live previews.
+
 ### 2.6 Themes and templates
 
 - A theme = token values + palette and schemes + preset defaults + signature CSS (target ≤ 400 lines for existing themes, ≤ 150 for new ones; no hex, no px except hairlines).

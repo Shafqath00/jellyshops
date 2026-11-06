@@ -67,3 +67,15 @@ it("gives the frame one colour scheme for all three ways a section can be colour
   render(<RegistrySectionRenderer section={{ id: "s2", type: "faq", enabled: true, settings: { colorScheme: "soft" }, blocks: [] }} mode="published" commerce={{ getProducts: async () => [] }} />);
   expect(screen.getByTestId("section-faq")).toHaveAttribute("data-scheme", "soft");
 });
+
+it("draws the collection list as a grid, bento or keyboard-scrollable carousel", () => {
+  const commerce = { getProducts: async () => [] };
+  const { rerender } = render(<RegistrySectionRenderer section={{ id: "c1", type: "category-grid", enabled: true, settings: { layout: "bento" }, blocks: [] }} mode="published" commerce={commerce} />);
+  const section = () => screen.getByTestId("section-category-grid").querySelector(".jelly-category-grid")!;
+  expect(section()).toHaveAttribute("data-layout", "bento");
+  rerender(<RegistrySectionRenderer section={{ id: "c1", type: "category-grid", enabled: true, settings: { layout: "carousel" }, blocks: [] }} mode="published" commerce={commerce} />);
+  expect(screen.getByRole("region", { name: "Collections" })).toHaveAttribute("tabindex", "0");
+  rerender(<RegistrySectionRenderer section={{ id: "c1", type: "category-grid", enabled: true, settings: { layout: "zigzag" }, blocks: [] }} mode="published" commerce={commerce} />);
+  expect(section()).toHaveAttribute("data-layout", "grid");
+  expect(screen.queryByRole("region", { name: "Collections" })).not.toBeInTheDocument();
+});

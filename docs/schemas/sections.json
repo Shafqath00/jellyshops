@@ -1522,6 +1522,7 @@
       "defaultSettings": {},
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "text",
@@ -1587,6 +1588,7 @@
       },
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "text",
@@ -1987,6 +1989,7 @@
       "responsiveFields": [
         "size"
       ],
+      "presets": [],
       "controls": [
         {
           "type": "select",
@@ -2050,6 +2053,7 @@
       "defaultSettings": {},
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [],
       "settingsSchema": {
         "type": "object",
@@ -2089,6 +2093,7 @@
       },
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "range",
@@ -2149,6 +2154,7 @@
       },
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "text",
@@ -2245,6 +2251,7 @@
       "defaultSettings": {},
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [],
       "settingsSchema": {
         "type": "object",
@@ -2264,6 +2271,7 @@
       "defaultSettings": {},
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "rich-text",
@@ -2329,6 +2337,7 @@
       },
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "segmented",
@@ -2435,6 +2444,7 @@
       },
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "checkbox",
@@ -2498,6 +2508,7 @@
       "defaultSettings": {},
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "segmented",
@@ -2581,6 +2592,88 @@
           "id": "hero",
           "label": "Hero",
           "category": "banners"
+        },
+        {
+          "id": "hero-overlay",
+          "label": "Hero: Text over image",
+          "category": "banners",
+          "thumbnail": "overlay",
+          "description": "A large photo with centred text on top.",
+          "settings": {
+            "layout": "overlay",
+            "height": "large",
+            "contentAlignment": "center",
+            "overlay": 35,
+            "image": {
+              "url": "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=2400&q=80",
+              "alt": "Wool coats in warm neutral tones hanging on a rail"
+            }
+          },
+          "blocks": [
+            {
+              "id": "variant-heading",
+              "type": "heading",
+              "enabled": true,
+              "settings": {
+                "text": "The new season is here"
+              }
+            },
+            {
+              "id": "variant-text",
+              "type": "text",
+              "enabled": true,
+              "settings": {
+                "text": "Considered pieces, made to last."
+              }
+            },
+            {
+              "id": "variant-button",
+              "type": "button",
+              "enabled": true,
+              "settings": {
+                "label": "Shop the collection",
+                "href": "/shop"
+              }
+            }
+          ]
+        },
+        {
+          "id": "hero-text",
+          "label": "Hero: Text only",
+          "category": "banners",
+          "thumbnail": "centered",
+          "description": "A bold statement without a photo.",
+          "settings": {
+            "layout": "text",
+            "contentAlignment": "center"
+          },
+          "blocks": [
+            {
+              "id": "variant-heading",
+              "type": "heading",
+              "enabled": true,
+              "settings": {
+                "text": "Everyday things, made well"
+              }
+            },
+            {
+              "id": "variant-text",
+              "type": "text",
+              "enabled": true,
+              "settings": {
+                "text": "Small batches, honest materials and free returns."
+              }
+            },
+            {
+              "id": "variant-button",
+              "type": "button",
+              "enabled": true,
+              "settings": {
+                "label": "Browse the shop",
+                "href": "/shop"
+              }
+            }
+          ]
         }
       ],
       "controls": [
@@ -2898,6 +2991,177 @@
           "id": "category-grid",
           "label": "Collection list",
           "category": "products"
+        },
+        {
+          "id": "category-grid-bento",
+          "label": "Collection list: Bento",
+          "category": "products",
+          "thumbnail": "bento",
+          "description": "One large collection beside four smaller ones.",
+          "settings": {
+            "heading": "Shop by collection",
+            "layout": "bento",
+            "columns": 4
+          },
+          "blocks": [
+            {
+              "id": "variant-collection-card",
+              "type": "collection-card",
+              "enabled": true,
+              "settings": {
+                "label": "New arrivals",
+                "image": {
+                  "url": "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=80",
+                  "alt": "Two people in relaxed autumn outfits"
+                },
+                "link": "/shop"
+              }
+            },
+            {
+              "id": "variant-collection-card",
+              "type": "collection-card",
+              "enabled": true,
+              "settings": {
+                "label": "Knitwear",
+                "image": {
+                  "url": "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1200&q=80",
+                  "alt": "Knitwear, denim and a watch laid out on a blanket"
+                },
+                "link": "/shop"
+              }
+            },
+            {
+              "id": "variant-collection-card",
+              "type": "collection-card",
+              "enabled": true,
+              "settings": {
+                "label": "Accessories",
+                "image": {
+                  "url": "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1200&q=80",
+                  "alt": "A leather bag and accessories"
+                },
+                "link": "/shop"
+              }
+            },
+            {
+              "id": "variant-collection-card",
+              "type": "collection-card",
+              "enabled": true,
+              "settings": {
+                "label": "For the home",
+                "image": {
+                  "url": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80",
+                  "alt": "A calm living room with natural textures"
+                },
+                "link": "/shop"
+              }
+            },
+            {
+              "id": "variant-collection-card",
+              "type": "collection-card",
+              "enabled": true,
+              "settings": {
+                "label": "Gifts",
+                "image": {
+                  "url": "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=1200&q=80",
+                  "alt": "A stoneware mug on a light table"
+                },
+                "link": "/shop"
+              }
+            }
+          ]
+        },
+        {
+          "id": "category-grid-carousel",
+          "label": "Collection list: Carousel",
+          "category": "products",
+          "thumbnail": "carousel",
+          "description": "Collections in a row that scrolls sideways.",
+          "settings": {
+            "heading": "Shop by collection",
+            "layout": "carousel",
+            "columns": 4
+          },
+          "blocks": [
+            {
+              "id": "variant-collection-card",
+              "type": "collection-card",
+              "enabled": true,
+              "settings": {
+                "label": "New arrivals",
+                "image": {
+                  "url": "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=80",
+                  "alt": "Two people in relaxed autumn outfits"
+                },
+                "link": "/shop"
+              }
+            },
+            {
+              "id": "variant-collection-card",
+              "type": "collection-card",
+              "enabled": true,
+              "settings": {
+                "label": "Knitwear",
+                "image": {
+                  "url": "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1200&q=80",
+                  "alt": "Knitwear, denim and a watch laid out on a blanket"
+                },
+                "link": "/shop"
+              }
+            },
+            {
+              "id": "variant-collection-card",
+              "type": "collection-card",
+              "enabled": true,
+              "settings": {
+                "label": "Coats",
+                "image": {
+                  "url": "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=2400&q=80",
+                  "alt": "Wool coats in warm neutral tones hanging on a rail"
+                },
+                "link": "/shop"
+              }
+            },
+            {
+              "id": "variant-collection-card",
+              "type": "collection-card",
+              "enabled": true,
+              "settings": {
+                "label": "Accessories",
+                "image": {
+                  "url": "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1200&q=80",
+                  "alt": "A leather bag and accessories"
+                },
+                "link": "/shop"
+              }
+            },
+            {
+              "id": "variant-collection-card",
+              "type": "collection-card",
+              "enabled": true,
+              "settings": {
+                "label": "For the home",
+                "image": {
+                  "url": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80",
+                  "alt": "A calm living room with natural textures"
+                },
+                "link": "/shop"
+              }
+            },
+            {
+              "id": "variant-collection-card",
+              "type": "collection-card",
+              "enabled": true,
+              "settings": {
+                "label": "Gifts",
+                "image": {
+                  "url": "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=1200&q=80",
+                  "alt": "A stoneware mug on a light table"
+                },
+                "link": "/shop"
+              }
+            }
+          ]
         }
       ],
       "controls": [
@@ -2921,6 +3185,27 @@
           "dynamicTypes": [
             "string",
             "text"
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "layout",
+          "label": "Layout",
+          "description": "Bento shows the first collection large; Carousel scrolls sideways.",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Grid",
+              "value": "grid"
+            },
+            {
+              "label": "Bento",
+              "value": "bento"
+            },
+            {
+              "label": "Carousel",
+              "value": "carousel"
+            }
           ]
         },
         {
@@ -2994,6 +3279,14 @@
               "square"
             ]
           },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "grid",
+              "bento",
+              "carousel"
+            ]
+          },
           "colorScheme": {
             "type": "string",
             "enum": [
@@ -3024,6 +3317,7 @@
       "responsiveFields": [
         "contentAlignment"
       ],
+      "presets": [],
       "controls": [
         {
           "type": "segmented",
@@ -3077,6 +3371,91 @@
           "id": "image-with-text",
           "label": "Image with text",
           "category": "content"
+        },
+        {
+          "id": "image-with-text-left",
+          "label": "Image with text: Image left",
+          "category": "content",
+          "thumbnail": "split",
+          "description": "A photo on the left, your story on the right.",
+          "settings": {
+            "eyebrow": "Our story",
+            "imagePosition": "left",
+            "image": {
+              "url": "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1200&q=80",
+              "alt": "A bright studio shop with clothing on wooden rails"
+            }
+          },
+          "blocks": [
+            {
+              "id": "variant-heading",
+              "type": "heading",
+              "enabled": true,
+              "settings": {
+                "text": "Made in small batches"
+              }
+            },
+            {
+              "id": "variant-text",
+              "type": "text",
+              "enabled": true,
+              "settings": {
+                "text": "Tell customers what makes your shop different: where things come from, who makes them and why it matters."
+              }
+            },
+            {
+              "id": "variant-button",
+              "type": "button",
+              "enabled": true,
+              "settings": {
+                "label": "About us",
+                "href": "/pages/about"
+              }
+            }
+          ]
+        },
+        {
+          "id": "image-with-text-soft",
+          "label": "Image with text: Image right, soft",
+          "category": "content",
+          "thumbnail": "split-reverse",
+          "description": "A photo on the right on a soft background.",
+          "settings": {
+            "eyebrow": "How we work",
+            "imagePosition": "right",
+            "styleScheme": "scheme2",
+            "image": {
+              "url": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80",
+              "alt": "Folded clothes in soft colours on a wooden table"
+            }
+          },
+          "blocks": [
+            {
+              "id": "variant-heading",
+              "type": "heading",
+              "enabled": true,
+              "settings": {
+                "text": "Thoughtful from start to finish"
+              }
+            },
+            {
+              "id": "variant-text",
+              "type": "text",
+              "enabled": true,
+              "settings": {
+                "text": "Explain your process, your materials or your promise to customers."
+              }
+            },
+            {
+              "id": "variant-button",
+              "type": "button",
+              "enabled": true,
+              "settings": {
+                "label": "Read more",
+                "href": "/pages/about"
+              }
+            }
+          ]
         }
       ],
       "controls": [
@@ -3904,6 +4283,97 @@
           "id": "multicolumn",
           "label": "Feature columns",
           "category": "content"
+        },
+        {
+          "id": "multicolumn-promises",
+          "label": "Feature columns: Three promises",
+          "category": "content",
+          "thumbnail": "columns-3",
+          "description": "Three short reasons to shop with you, centred.",
+          "settings": {
+            "heading": "Why shop with us",
+            "columns": 3,
+            "contentAlignment": "center"
+          },
+          "blocks": [
+            {
+              "id": "variant-column",
+              "type": "column",
+              "enabled": true,
+              "settings": {
+                "heading": "Free delivery",
+                "text": "On every order over £50."
+              }
+            },
+            {
+              "id": "variant-column",
+              "type": "column",
+              "enabled": true,
+              "settings": {
+                "heading": "30-day returns",
+                "text": "Changed your mind? Send it back for free."
+              }
+            },
+            {
+              "id": "variant-column",
+              "type": "column",
+              "enabled": true,
+              "settings": {
+                "heading": "Secure checkout",
+                "text": "Pay safely with card, Apple Pay or Google Pay."
+              }
+            }
+          ]
+        },
+        {
+          "id": "multicolumn-four",
+          "label": "Feature columns: Four columns",
+          "category": "content",
+          "thumbnail": "columns-4",
+          "description": "Four compact columns with a left-aligned heading.",
+          "settings": {
+            "heading": "Good to know",
+            "columns": 4,
+            "contentAlignment": "left"
+          },
+          "blocks": [
+            {
+              "id": "variant-column",
+              "type": "column",
+              "enabled": true,
+              "settings": {
+                "heading": "Delivery",
+                "text": "Dispatched within two working days."
+              }
+            },
+            {
+              "id": "variant-column",
+              "type": "column",
+              "enabled": true,
+              "settings": {
+                "heading": "Returns",
+                "text": "Free returns within 30 days."
+              }
+            },
+            {
+              "id": "variant-column",
+              "type": "column",
+              "enabled": true,
+              "settings": {
+                "heading": "Care",
+                "text": "Simple care guides with every order."
+              }
+            },
+            {
+              "id": "variant-column",
+              "type": "column",
+              "enabled": true,
+              "settings": {
+                "heading": "Help",
+                "text": "Real people reply within a day."
+              }
+            }
+          ]
         }
       ],
       "controls": [
@@ -4020,6 +4490,7 @@
       },
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "text",
@@ -4590,6 +5061,7 @@
       "responsiveFields": [
         "contentAlignment"
       ],
+      "presets": [],
       "controls": [
         {
           "type": "text",
@@ -5236,6 +5708,7 @@
       "responsiveFields": [
         "contentAlignment"
       ],
+      "presets": [],
       "controls": [
         {
           "type": "text",
@@ -5412,6 +5885,7 @@
       "responsiveFields": [
         "contentAlignment"
       ],
+      "presets": [],
       "controls": [
         {
           "type": "text",
@@ -5785,6 +6259,54 @@
           "id": "product-grid",
           "label": "Product grid",
           "category": "products"
+        },
+        {
+          "id": "product-grid-three",
+          "label": "Product grid: Large",
+          "category": "products",
+          "thumbnail": "grid-3",
+          "description": "Three bigger products per row, heading centred.",
+          "settings": {
+            "heading": "Best sellers",
+            "contentAlignment": "center",
+            "columns": 3,
+            "limit": 6,
+            "viewAllLabel": "View all",
+            "viewAllLink": "/shop"
+          }
+        },
+        {
+          "id": "product-grid-tabs",
+          "label": "Product grid: Tabs",
+          "category": "products",
+          "thumbnail": "tabs",
+          "description": "Switch between new and best-selling products.",
+          "settings": {
+            "heading": "Shop the edit",
+            "contentAlignment": "center",
+            "columns": 4,
+            "limit": 8
+          },
+          "blocks": [
+            {
+              "id": "variant-product-tab",
+              "type": "product-tab",
+              "enabled": true,
+              "settings": {
+                "label": "New in",
+                "sort": "newest"
+              }
+            },
+            {
+              "id": "variant-product-tab",
+              "type": "product-tab",
+              "enabled": true,
+              "settings": {
+                "label": "Best sellers",
+                "sort": "best-selling"
+              }
+            }
+          ]
         }
       ],
       "controls": [
@@ -5989,6 +6511,7 @@
       "responsiveFields": [
         "imageFit"
       ],
+      "presets": [],
       "controls": [
         {
           "type": "segmented",
@@ -6072,6 +6595,7 @@
       },
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "checkbox",
@@ -6226,6 +6750,7 @@
       },
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "segmented",
@@ -6300,6 +6825,7 @@
       },
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "checkbox",
@@ -6355,6 +6881,7 @@
       },
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "text",
@@ -6399,6 +6926,7 @@
       },
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "text",
@@ -6451,6 +6979,7 @@
       },
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "segmented",
@@ -6590,6 +7119,7 @@
       },
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "range",
@@ -6655,6 +7185,7 @@
       },
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "segmented",
@@ -6705,6 +7236,7 @@
       "defaultSettings": {},
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [],
       "settingsSchema": {
         "type": "object",
@@ -6724,6 +7256,7 @@
       "defaultSettings": {},
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [],
       "settingsSchema": {
         "type": "object",
@@ -6763,6 +7296,7 @@
         }
       ],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "checkbox",
@@ -6800,6 +7334,7 @@
       },
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "text",
@@ -6867,6 +7402,7 @@
       },
       "defaultBlocks": [],
       "responsiveFields": [],
+      "presets": [],
       "controls": [
         {
           "type": "range",

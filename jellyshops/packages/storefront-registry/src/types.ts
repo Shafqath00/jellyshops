@@ -3,7 +3,22 @@ import type { ZodType } from "zod";
 
 export type ControlGroup = "content" | "layout" | "style" | "advanced";
 export type PresetCategory = "banners" | "products" | "content" | "marketing";
-export interface SectionPreset { id: string; label: string; category: PresetCategory; sectionType: string }
+/** A small layout sketch the editor draws for a preset in Add section. */
+export type PresetThumbnail = "split" | "split-reverse" | "overlay" | "centered" | "grid-3" | "grid-4" | "bento" | "carousel" | "tabs" | "columns-3" | "columns-4";
+/**
+ * A designed variant of a section ("Collection list: Bento"): the section type plus the settings and blocks that
+ * make the design. Settings are merged over the section's defaults; blocks replace its default blocks.
+ */
+export interface SectionPreset {
+  id: string;
+  label: string;
+  category: PresetCategory;
+  sectionType: string;
+  description?: string;
+  thumbnail?: PresetThumbnail;
+  settings?: Record<string, unknown>;
+  blocks?: BlockNode[];
+}
 interface ControlBase {
   key: string;
   label: string;

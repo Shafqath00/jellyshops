@@ -66,3 +66,19 @@ it("removes a saved section after asking", async () => {
   expect(onDelete).toHaveBeenCalledWith("preset-1");
   confirm.mockRestore();
 });
+
+it("shows designed presets with a layout sketch and a description, and searches the description", async () => {
+  const onInsert = vi.fn();
+  render(<SectionLibrary presets={[]} builtIns={[
+    { id: "category-grid", name: "Collection list", category: "Products" },
+    { id: "category-grid-bento", name: "Collection list: Bento", category: "Products", description: "One large collection beside four smaller ones.", thumbnail: "bento" },
+  ]} onInsertPreset={vi.fn()} onInsertBuiltIn={onInsert} />);
+  const bento = screen.getByRole("button", { name: "Add Collection list: Bento" });
+  expect(bento.querySelector("[data-preset-sketch='bento']")).not.toBeNull();
+  expect(bento).toHaveTextContent("One large collection beside four smaller ones.");
+  await userEvent.click(bento);
+  expect(onInsert).toHaveBeenCalledWith("category-grid-bento");
+  await userEvent.type(screen.getByRole("searchbox", { name: "Search sections" }), "smaller");
+  expect(screen.queryByRole("button", { name: "Add Collection list" })).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Add Collection list: Bento" })).toBeInTheDocument();
+});

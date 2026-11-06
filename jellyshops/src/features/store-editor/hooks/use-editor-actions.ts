@@ -1,6 +1,5 @@
 "use client";
 
-import { createSectionFromDefinition } from "@jelly/storefront-registry";
 import type { CompilationDiagnosticLocation, BlockNode, SectionNode, RichTextDocument } from "@jelly/storefront-schema";
 import { copyBlockWithNewIds, updateBlock } from "@jelly/storefront-schema";
 import { displayName } from "@/features/store-editor/editor-page-helpers";
@@ -9,6 +8,7 @@ import { useEditorShortcuts } from "@/features/store-editor/use-editor-shortcuts
 import { addBlockTo, createBlock } from "@/features/store-editor/block-editing";
 import { applySettingsPatch, type SettingsNode } from "@/features/store-editor/mobile-settings";
 import { applyLanguagePatch } from "@/features/store-editor/translation-settings";
+import { createLibrarySection } from "@/features/store-editor/section-options";
 import { appendBlock, appendGlobalPlacement, appendInlineSection, detachGlobalPlacement, movePlacement, removeInlineSection, replaceInlineWithGlobal, setInlineSectionEnabled, updateInlineSection } from "@/features/store-editor/template-layout";
 import type { useEditorState } from "./use-editor-state";
 import type { useEditorDerived } from "./use-editor-derived";
@@ -53,7 +53,8 @@ export function useEditorActions(ctx: ReturnType<typeof useEditorState> & Return
 
   const insertBuiltIn = async (sectionType: string) => {
     if (!activeTemplate || !libraryRegion) return;
-    const section = createSectionFromDefinition(sectionType, () => crypto.randomUUID(), ctx.themeConfiguration?.themeVersion);
+    // A designed preset ("Collection list: Bento") brings its own settings and blocks; a plain section its defaults.
+    const section = createLibrarySection(sectionType, () => crypto.randomUUID(), ctx.themeConfiguration?.themeVersion);
     await persistLayout(appendInlineSection(activeTemplate.layout, section));
     setSelection({ kind: "section", region: libraryRegion, sectionId: section.id });
     setLibraryRegion(undefined);
