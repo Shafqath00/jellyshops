@@ -10,19 +10,24 @@ import { cartProductImage } from "@/lib/product-media";
 import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
 import { loadPublicStorefrontPublication, type PublicStorefrontPublication } from "@/features/storefront/public-storefront-api";
 import { resolveStorefrontRoute } from "@/features/storefront/resource-loader";
+import { StorefrontPageLoading } from "@/features/storefront/components/storefront-page-loading";
 
 export default function CartPage() {
   const { storeSlug } = useParams<{ storeSlug: string }>();
-  const { repository, state } = useShop();
+  const { repository, state, hydrated } = useShop();
   const { shell, settings } = useThemePresentation();
   const store = repository.getStoreBySlug(storeSlug);
   const initialPublication = useInitialStorefrontPublication();
   const [publication, setPublication] = useState<PublicStorefrontPublication | null>(initialPublication);
   const [resolvedRoute, setResolvedRoute] = useState<Awaited<ReturnType<typeof resolveStorefrontRoute>> | null>(null);
+  const [publicationChecked, setPublicationChecked] = useState(false);
   useEffect(() => {
     if (!store) return;
     let active = true;
-    void loadPublicStorefrontPublication({ baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001", storeId: store.id }).then((next) => { if (active) setPublication(next); });
+    void loadPublicStorefrontPublication({ baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001", storeId: store.id })
+      .then((next) => { if (active) setPublication(next); })
+      .catch(() => undefined)
+      .finally(() => { if (active) setPublicationChecked(true); });
     return () => { active = false; };
   }, [store]);
   useEffect(() => {
@@ -30,6 +35,10 @@ export default function CartPage() {
     void resolveStorefrontRoute(publication.snapshot, { type: "cart" }, { findByHandle: async () => null, findById: async () => null }).then(setResolvedRoute);
   }, [publication]);
   if (!store) return null;
+  // Until the saved bag and the store's design are in, show a loading state rather than the built-in page,
+  // which would briefly say the bag is empty.
+  const designPending = publication?.kind === "v4" ? !resolvedRoute : !publication && !publicationChecked;
+  if (!hydrated || designPending) return <StorefrontPageLoading label="Loading your bag…" />;
   const cart = repository.getCartForStore(storeSlug);
   const lines = (cart?.items ?? []).map((item) => {
     const product = state.products.find((entry) => entry.variants.some((variant) => variant.id === item.variantId));

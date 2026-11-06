@@ -7,6 +7,8 @@ import { createRepository, memoryStorage, type ShopRepository } from "@/lib/repo
 interface ShopContextValue {
   state: ShopState;
   repository: ShopRepository;
+  /** False until the browser's saved state (bag, wishlist) has replaced the first, in-memory copy. */
+  hydrated: boolean;
   resetDemo: () => void;
 }
 
@@ -19,18 +21,20 @@ export function ShopProvider({ children, initialCatalog }: { children: React.Rea
     return initial;
   });
   const state = useSyncExternalStore(repository.subscribe, repository.getState, repository.getState);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     const persistedRepository = createRepository(window.localStorage, { runtime: true });
     if (initialCatalog) { persistedRepository.saveStore(initialCatalog.store); persistedRepository.replaceCatalog(initialCatalog.store.id, initialCatalog.products); persistedRepository.replaceCollections(initialCatalog.store.id, initialCatalog.collections); }
-    queueMicrotask(() => setRepository(persistedRepository));
+    queueMicrotask(() => { setRepository(persistedRepository); setHydrated(true); });
   }, [initialCatalog]);
 
   const value = useMemo<ShopContextValue>(() => ({
     state,
     repository,
+    hydrated,
     resetDemo: () => repository.reset()
-  }), [repository, state]);
+  }), [repository, state, hydrated]);
 
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;
 }

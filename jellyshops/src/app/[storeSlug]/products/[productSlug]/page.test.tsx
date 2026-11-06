@@ -20,6 +20,14 @@ import ProductPage from "./product-client";
 describe("V4 Product route", () => {
   beforeEach(() => updateCartItem.mockReset());
 
+  it("shows a loading state, not the built-in page, until the store's design is ready", async () => {
+    render(<ProductPage />);
+    expect(screen.getByRole("status")).toHaveTextContent("Loading product…");
+    expect(screen.queryByText("Legacy product")).not.toBeInTheDocument();
+    await screen.findByText("Quantity 1");
+    expect(screen.queryByText("Legacy product")).not.toBeInTheDocument();
+  });
+
   it("passes live quantity and cart actions to the shared V4 Product renderer", async () => {
     render(<ProductPage />);
     await screen.findByText("Quantity 1");

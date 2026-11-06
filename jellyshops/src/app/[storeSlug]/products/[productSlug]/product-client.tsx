@@ -17,6 +17,7 @@ import { useStorefrontCatalogStatus } from "@/features/commerce/components/store
 import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
 import { loadPublicStorefrontPublication, type PublicStorefrontPublication } from "@/features/storefront/public-storefront-api";
 import { resolveStorefrontRoute, type PublicResourceReader } from "@/features/storefront/resource-loader";
+import { StorefrontPageLoading } from "@/features/storefront/components/storefront-page-loading";
 
 export default function ProductPage() {
   const router = useRouter();
@@ -31,6 +32,7 @@ export default function ProductPage() {
   const initialPublication = useInitialStorefrontPublication();
   const [publication, setPublication] = useState<PublicStorefrontPublication | null>(initialPublication);
   const [resolvedRoute, setResolvedRoute] = useState<Awaited<ReturnType<typeof resolveStorefrontRoute>> | null>(null);
+  const [publicationChecked, setPublicationChecked] = useState(false);
   const store = repository.getStoreBySlug(storeSlug);
   const product = store ? repository.getProductBySlug(store.id, decodedProductSlug) : undefined;
   const visibleProducts = repository.listProducts(storeSlug).filter((item) => item.published && !item.archived);
@@ -72,7 +74,9 @@ export default function ProductPage() {
     if (!store) return;
     let active = true;
     void loadPublicStorefrontPublication({ baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001", storeId: store.id })
-      .then((next) => { if (active) setPublication(next); });
+      .then((next) => { if (active) setPublication(next); })
+      .catch(() => undefined)
+      .finally(() => { if (active) setPublicationChecked(true); });
     return () => { active = false; };
   }, [store]);
   useEffect(() => {
@@ -83,8 +87,10 @@ export default function ProductPage() {
     };
     void resolveStorefrontRoute(publication.snapshot, { type: "product", handle: product.slug }, reader).then(setResolvedRoute);
   }, [product, publication, quantity, selections, store]);
-  if (catalogStatus === "loading") return <main className="flex min-h-[75vh] items-center justify-center">Loading product…</main>;
+  if (catalogStatus === "loading") return <StorefrontPageLoading label="Loading product…" />;
   if (!store || !product || product.archived || !product.published) return <main className="flex min-h-[75vh] flex-col items-center justify-center"><h1>Product not found</h1><Link href={`/${storeSlug}/shop`}>Back to shop</Link></main>;
+  // Until the store's design is in, show a loading state rather than the built-in page (which showed £0.00).
+  if (publication?.kind === "v4" ? !resolvedRoute : !publication && !publicationChecked) return <StorefrontPageLoading label="Loading product…" />;
   if (publication?.kind === "v4") {
     if (resolvedRoute?.status === "ready") return <PublishedRuntimeStorefront snapshot={publication.snapshot} route={resolvedRoute} storeSlug={store.slug} currency={store.currency} products={visibleProducts} />;
   }

@@ -110,7 +110,8 @@ export function catalogProductToStorefrontProduct(product: PublicCatalogProduct)
     seoTitle: product.seoTitle ?? undefined,
     seoDescription: product.seoDescription ?? undefined,
     specifications: product.specifications ?? {},
-    category: product.productType ?? product.tags?.[0] ?? "Collection",
+    // Tags written "label:…" are card chips, not a category.
+    category: product.productType ?? product.tags?.find((tag) => !/^label:/i.test(tag.trim())) ?? "Collection",
     productType: product.productType ?? "",
     vendor: product.vendor ?? undefined,
     tags: product.tags ?? [],
