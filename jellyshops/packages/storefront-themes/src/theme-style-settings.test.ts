@@ -125,3 +125,15 @@ it("keeps scheme text readable (contrast fallback)", () => {
     for (const n of [1, 2, 3, 4]) expect(contrastRatio(own[`--jelly-scheme-${n}-text`], own[`--jelly-scheme-${n}-bg`])).toBeGreaterThanOrEqual(4.5);
   }
 });
+
+it("shows the card brand and colour swatches only when the merchant turns them on", () => {
+  for (const id of ["jelly-signature", "jelly-avenue"]) {
+    const plain = tokensFor(id);
+    expect(plain["--jelly-card-vendor-display"]).toBeUndefined();
+    expect(plain["--jelly-card-swatches-display"]).toBeUndefined();
+    const on = tokensFor(id, { productCard: { showBrand: true, swatches: "colors" } });
+    expect(on["--jelly-card-vendor-display"]).toBe("block");
+    expect(on["--jelly-card-swatches-display"]).toBe("flex");
+  }
+  expect(validateThemeSettings("jelly-signature", { productCard: { showBrand: true, swatches: "colors" } })).toEqual([]);
+});

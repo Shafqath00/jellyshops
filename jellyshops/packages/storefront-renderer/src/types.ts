@@ -2,7 +2,8 @@ import type { GlobalSettings, PageType, ProductMediaLike, RichTextDocument, Stor
 import type { ReactNode } from "react";
 
 /** A product on a card. `saving` ("£20.00"), `discountPercent` and `chip` ("More colours") are optional extras themes can show. */
-export interface PublicProduct { id: string; name: string; href: string; imageUrl: string; price: string; compareAtPrice?: string; badge?: string; saving?: string; discountPercent?: number; chip?: string }
+/** A product as every product list draws it (the shared card in @jelly/storefront-ui). */
+export interface PublicProduct { id: string; name: string; href: string; imageUrl: string; price: string; compareAtPrice?: string; badge?: string; saving?: string; discountPercent?: number; chip?: string; vendor?: string; swatches?: Array<{ label: string; color?: string; image?: string }>; moreSwatches?: number }
 export interface CollectionPresentationContext {
   interactiveGrid?: ReactNode;
   collection: { id: string; title: string; description: string; descriptionDoc?: RichTextDocument | null; imageUrl?: string };

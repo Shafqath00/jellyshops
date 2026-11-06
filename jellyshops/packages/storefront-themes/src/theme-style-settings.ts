@@ -158,6 +158,8 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     select("productCard.showPrice", "Price", "Product cards", "show", [["show", "Show"], ["hide", "Hide"]]),
     select("productCard.savings", "Savings on discounted products", "Product cards", "none", [["none", "Don't show"], ["amount", "Amount saved (Save 10.00)"], ["percent", "Percentage off (20% off)"], ["both", "Both"]], "Shown under the price when a product has a higher \"compare at\" price."),
     select("productCard.button", "Button", "Product cards", "none", [["none", "None"], ["view", "View product"], ["shop", "Shop now"]], "A button under each card that opens the product."),
+    { id: "productCard.showBrand", type: "checkbox", label: "Show the brand", group: "Product cards", default: false, description: "The product's brand (vendor) above its name." },
+    select("productCard.swatches", "Colour swatches", "Product cards", "none", [["none", "Don't show"], ["colors", "Show the colours a product comes in"]], "Dots for up to five colours of a product's colour option."),
   ];
   const socialSchema = SOCIAL_PLATFORMS.map(({ id, label }) => ({ id: `social.${id}`, type: "url", label, group: "Social media", default: "", ...(id === "instagram" ? { description: "Full https:// links. Shown in the footer when it has no social links of its own." } : {}) }));
   const cartSchema = [
@@ -182,7 +184,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
       cart: { type: "page" },
     },
     buttonDefaults: { size: theme, textCase: theme, borderWidth: theme, hover: theme },
-    cardDefaults: { radius: theme, shadow: theme, hover: theme, order: "photo-title-price", showTitle: "show", titleLines: theme, showPrice: "show", savings: "none", button: "none" },
+    cardDefaults: { radius: theme, shadow: theme, hover: theme, order: "photo-title-price", showTitle: "show", titleLines: theme, showPrice: "show", savings: "none", button: "none", swatches: "none" },
     textStyleSchema,
     colorSchemeSchema,
     buttonSchema,
@@ -367,6 +369,8 @@ export function resolveThemeStyleTokens(settings: Record<string, unknown>, defau
     if (card.savings === "amount") tokens["--jelly-card-saving-percent-display"] = "none";
     if (card.savings === "percent") tokens["--jelly-card-saving-amount-display"] = "none";
   }
+  if (card.showBrand === true) tokens["--jelly-card-vendor-display"] = "block";
+  if (card.swatches === "colors") tokens["--jelly-card-swatches-display"] = "flex";
   const buttonLabel = productCardButtonLabel(settings);
   if (buttonLabel) Object.assign(tokens, { "--jelly-card-button-display": "inline-flex", "--jelly-card-button-label": JSON.stringify(buttonLabel) });
   return tokens;

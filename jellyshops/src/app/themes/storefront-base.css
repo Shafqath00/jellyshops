@@ -747,6 +747,13 @@
 .jelly-clamped-text-body > :first-child { margin-top: 0; }
 .jelly-read-more { margin-top: 4px; padding: 0; border: 0; background: none; color: inherit; font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 
+/* Product card brand and colour swatches (theme settings > Product cards). Hidden until the setting is on; colours
+   come from the contract roles, so they follow the section's colour scheme. */
+[data-jelly-theme] .jelly-product-card .jelly-product-card-vendor { display: var(--jelly-card-vendor-display, none); order: var(--jelly-card-price-order, 0); margin: 0 0 2px; color: var(--j-color-muted); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
+[data-jelly-theme] .jelly-product-card .jelly-product-card-swatches { display: var(--jelly-card-swatches-display, none); flex-wrap: wrap; align-items: center; gap: 6px; margin: 6px 0 0; }
+:where(.jelly-product-card-swatch) { display: inline-block; width: 16px; height: 16px; border: 1px solid var(--j-color-border); border-radius: 999px; background-position: center; background-size: cover; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--j-color-bg) 60%, transparent); }
+:where(.jelly-product-card-swatch-more) { color: var(--j-color-muted); font-size: 12px; }
+
 /* Product cards: savings under the price (theme settings > Product cards > Savings) and a chip from a label: tag. */
 [data-jelly-theme] .jelly-product-card .jelly-product-card-saving { display: var(--jelly-card-saving-display, none); flex-wrap: wrap; gap: 4px 8px; margin: 2px 0 0; font-size: 14px; font-weight: 600; color: var(--jelly-card-saving-color, var(--theme-text, currentColor)); }
 [data-jelly-theme] .jelly-product-card-saving [data-saving="amount"] { display: var(--jelly-card-saving-amount-display, inline); text-decoration: underline; text-underline-offset: 3px; }

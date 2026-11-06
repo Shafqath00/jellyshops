@@ -23,6 +23,7 @@ export function productCardData(product: Product, href: string, currency: Curren
   const compareMinor = variant?.compareAtPriceMinor ?? product.compareAtPriceMinor;
   const discounted = typeof compareMinor === "number" && compareMinor > priceMinor && priceMinor >= 0;
   const chip = productCardChip(product.tags);
+  const colours = productCardSwatches(product);
   return {
     id: product.id,
     name: product.name,
@@ -35,5 +36,25 @@ export function productCardData(product: Product, href: string, currency: Curren
       discountPercent: Math.max(1, Math.round((1 - priceMinor / compareMinor) * 100)),
     } : {}),
     ...(chip ? { chip } : {}),
+    ...(product.vendor?.trim() ? { vendor: product.vendor.trim().slice(0, 60) } : {}),
+    ...colours,
   };
+}
+
+const HEX = /^#[0-9a-fA-F]{6}$/;
+const SAFE_IMAGE = /^(https:\/\/|\/api\/public\/media\/)[^\s"'<>()]+$/;
+
+/**
+ * The colours a product comes in, for the card's swatches: the values of its first option shown as colour or image
+ * swatches (hex colours and https/media images only), at most five, plus how many more there are.
+ */
+export function productCardSwatches(product: Pick<Product, "options">): Pick<PublicProduct, "swatches" | "moreSwatches"> {
+  const option = [...(product.options ?? [])].sort((a, b) => a.position - b.position).find((item) => item.display === "color" || item.display === "image");
+  if (!option) return {};
+  type Swatch = NonNullable<PublicProduct["swatches"]>[number];
+  const values = option.values.flatMap((value): Swatch[] => option.display === "color"
+    ? (value.color && HEX.test(value.color) ? [{ label: value.label, color: value.color }] : [])
+    : (value.image && SAFE_IMAGE.test(value.image) ? [{ label: value.label, image: value.image }] : []));
+  if (!values.length) return {};
+  return { swatches: values.slice(0, 5), ...(values.length > 5 ? { moreSwatches: values.length - 5 } : {}) };
 }

@@ -29,7 +29,8 @@ const image = (photo: string, width = 900) => `https://images.unsplash.com/${pho
 const minimalProducts: PublicProduct[] = [
   { id: "p1", name: "Linen tote bag", price: "£28.00", href: "#", imageUrl: image("photo-1544816155-12df9643f363") },
   { id: "p2", name: "Stoneware mug", price: "£18.00", href: "#", imageUrl: image("photo-1514228742587-6b1558fcca3d") },
-  { id: "p3", name: "Organic cotton tee", price: "£32.00", href: "#", imageUrl: image("photo-1521572163474-6864f9cf17ab") },
+  // Brand and colours show only when theme settings > Product cards turns them on.
+  { id: "p3", name: "Organic cotton tee", price: "£32.00", vendor: "Jelly Basics", swatches: [{ label: "Chalk", color: "#f1ede4" }, { label: "Charcoal", color: "#2b2a27" }, { label: "Sage", color: "#9aa48f" }], href: "#", imageUrl: image("photo-1521572163474-6864f9cf17ab") },
   { id: "p4", name: "Ceramic vase", price: "£42.00", href: "#", imageUrl: image("photo-1578500494198-246f612d3b3d") },
   { id: "p5", name: "Cream knit top", price: "£64.00", href: "#", imageUrl: image("photo-1434389677669-e08b4cac3105") },
   { id: "p6", name: "Insulated bottle", price: "£24.00", href: "#", imageUrl: image("photo-1602143407151-7111542de6e8") },
@@ -79,7 +80,7 @@ export const jellyMinimalPreview: ThemePreviewConfig = {
 const avenueProducts: PublicProduct[] = [
   { id: "a1", name: "Leather biker jacket", price: "£320.00", badge: "New", href: "#", imageUrl: image("photo-1551028719-00167b16eac5") },
   { id: "a2", name: "Straight-leg jeans", price: "£110.00", compareAtPrice: "£140.00", badge: "Sale", href: "#", imageUrl: image("photo-1624378439575-d8705ad7ae80") },
-  { id: "a3", name: "Heavyweight crewneck", price: "£85.00", href: "#", imageUrl: image("photo-1620799140408-edc6dcb6d633") },
+  { id: "a3", name: "Heavyweight crewneck", price: "£85.00", vendor: "Avenue Studio", swatches: [{ label: "White", color: "#f5f5f2" }, { label: "Navy", color: "#1f2a44" }, { label: "Stone", color: "#b7ad9d" }, { label: "Black", color: "#141414" }, { label: "Rust", color: "#9c4a2f" }], moreSwatches: 2, href: "#", imageUrl: image("photo-1620799140408-edc6dcb6d633") },
   { id: "a4", name: "Belted wool coat", price: "£290.00", href: "#", imageUrl: image("photo-1539533018447-63fcce2678e3") },
   { id: "a5", name: "Utility bomber jacket", price: "£180.00", href: "#", imageUrl: image("photo-1591047139829-d91aecb6caea") },
   { id: "a6", name: "Check double-breasted blazer", price: "£240.00", badge: "New", href: "#", imageUrl: image("photo-1608234808654-2a8875faa7fd") },

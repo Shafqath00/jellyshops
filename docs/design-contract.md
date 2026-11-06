@@ -109,9 +109,18 @@ Target:
 - Colours are palette or scheme references; free hex only in the palette editor.
 - The older free-form style settings move behind an "Advanced" group a theme can switch off; saved values keep rendering.
 
-### 2.5 Components
+### 2.5 Components — product card built in phase 6
 
 One product card (a block set: media, title, price, swatches, badge, rating, button) used by every product list. Buttons primary/secondary, price, badge, swatch, field and rating read only colour roles and tokens.
+
+Built (2026-11-06):
+
+- `StorefrontProductCard` (`packages/storefront-ui/src/product-card.tsx`) is the only card markup; a test fails if any other file in the app or the renderer writes its own `jelly-product-card` markup. It is a fixed set of parts, `PRODUCT_CARD_PARTS`: media (photo + badges), vendor (brand), title, price, savings, swatches, chip, button. Each part is its own small component with `data-card-part`; parts without data are left out.
+- Theme settings > Product cards change every list at once (product grids, collection pages, related products, search, recipe products): photo shape (one ratio site-wide, `--jelly-card-ratio`), layout order, name/price on or off, long names, savings, button (all from earlier work), plus new **Show the brand** (`productCard.showBrand`, existing default now has a control) and **Colour swatches** (`productCard.swatches`: dots for up to five colours of the first colour/image option, "+N" for more, a spoken "Available in N colours").
+- Card data: `productCardData` adds `vendor` and `swatches`/`moreSwatches` (`productCardSwatches`: hex colours and https/media images only).
+- The new parts read contract roles (`--j-color-muted`, `--j-color-border`, `--j-color-bg`), so they follow the section's colour scheme. Existing card parts (price, badge, button) still use theme tokens.
+- Not built: a rating part (the catalogue has no review data yet), per-section card settings, and moving price/badge/button/field styling onto the roles (themes rebuilt, phases 7–8).
+- Checked: screenshots of all 3 themes × 8 preview pages × 3 widths unchanged with the new options off (page sizes identical; differences only where photos load); brand and swatches measured in the Avenue style guide with the tokens switched on by hand.
 
 ### 2.5a Section presets — built in phase 5
 
