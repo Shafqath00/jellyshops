@@ -3,7 +3,8 @@ import type { SectionDefinition } from "../types.js";
 
 const empty = z.object({}).passthrough();
 const productOnly = ["product"] as const;
-const colorScheme = { type: "segmented" as const, key: "colorScheme", label: "Background", group: "style" as const, options: [{ label: "Page", value: "page" }, { label: "Soft", value: "soft" }, { label: "Dark", value: "dark" }] };
+/** The older Background choice: an alias of a theme colour scheme, shown only on sections that still use it ("Colour scheme" replaces it). */
+const colorScheme = { type: "segmented" as const, key: "colorScheme", label: "Background (older choice)", description: "Picking a colour scheme replaces this.", legacy: true, group: "style" as const, options: [{ label: "Page", value: "page" }, { label: "Soft", value: "soft" }, { label: "Dark", value: "dark" }] };
 const columnsControl = { type: "range" as const, key: "columns", label: "Columns on desktop", group: "layout" as const, min: 2, max: 4, step: 1 };
 const productGallerySchema = z.object({ imageFit: z.enum(["cover", "contain"]).default("cover"), layout: z.enum(["stacked", "grid", "thumbnails"]).optional() }).passthrough();
 const productInformationSchema = z.object({ showVendor: z.boolean().default(true), showSku: z.boolean().default(true), showCompareAtPrice: z.boolean().default(true), showAvailability: z.boolean().default(true), showSpecifications: z.boolean().default(true), discountChip: z.enum(["none", "percent", "amount"]).optional(), financeMonths: z.number().int().min(0).max(60).optional(), financeText: z.string().max(120).optional(), financeLink: z.string().max(500).optional(), financeLinkLabel: z.string().max(40).optional() }).passthrough();

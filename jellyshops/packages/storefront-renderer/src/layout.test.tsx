@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { expect, it } from "vitest";
 import { Grid, MediaFrame, Stack, TextBlock } from "./layout";
 import { RegistrySectionRenderer } from "./registry-section-renderer";
-import { sectionFrameWidth } from "./section-frame";
+import { sectionFrameWidth, sectionScheme } from "./section-frame";
 
 it("wraps every section in a section frame with its width", () => {
   const commerce = { getProducts: async () => [] };
@@ -54,4 +54,16 @@ it("lays out with contract spacing and text tokens, keeping the section's own cl
   expect(text).toHaveAttribute("data-max-width", "narrow");
   expect(text.style.getPropertyValue("--jelly-layout-size")).toBe("var(--j-type-h2-size)");
   expect(text.style.getPropertyValue("--jelly-layout-font")).toBe("var(--j-type-h2-font)");
+});
+
+it("gives the frame one colour scheme for all three ways a section can be coloured", () => {
+  expect(sectionScheme({})).toBeUndefined();
+  expect(sectionScheme({ colorScheme: "dark" })).toBe("dark");
+  expect(sectionScheme({ colorScheme: "dark", styleScheme: "scheme2" })).toBe("scheme2");
+  expect(sectionScheme({ styleScheme: "scheme2", styleColors: true, styleBackground: "#112233" })).toBe("custom");
+  // Own colours switched on but none chosen: the scheme still applies.
+  expect(sectionScheme({ styleScheme: "scheme5", styleColors: true })).toBe("scheme5");
+  expect(sectionScheme({ styleScheme: "scheme9", colorScheme: "loud" })).toBeUndefined();
+  render(<RegistrySectionRenderer section={{ id: "s2", type: "faq", enabled: true, settings: { colorScheme: "soft" }, blocks: [] }} mode="published" commerce={{ getProducts: async () => [] }} />);
+  expect(screen.getByTestId("section-faq")).toHaveAttribute("data-scheme", "soft");
 });

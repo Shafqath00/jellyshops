@@ -12,6 +12,11 @@ interface ControlBase {
   heading?: string;
   /** Shows the control only while another setting has this value. */
   showWhen?: { key: string; equals: unknown };
+  /**
+   * An older setting kept so saved stores render the same: the editor shows it only while the section still has a
+   * value other than the first option, so new sections never offer it.
+   */
+  legacy?: boolean;
   group: ControlGroup;
   responsive?: boolean;
   /** Has a separate phone value (saved under `responsive.mobile`, screens up to 767px) and tablet value (`responsive.tablet`, 768-1023px). */

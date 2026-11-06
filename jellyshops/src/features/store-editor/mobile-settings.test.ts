@@ -41,3 +41,10 @@ it("keeps tablet values apart from phone values", () => {
   // Clearing the tablet value leaves the phone value alone.
   expect(applySettingsPatch(tablet, { pad: undefined }, controls, "tablet")).toEqual(both);
 });
+
+it("replaces the older Background choice when a colour scheme or own colours is picked", () => {
+  const legacy = { settings: { colorScheme: "soft", heading: "Hi" } };
+  expect(applySettingsPatch(legacy, { styleScheme: "scheme3" }, controls, false).settings).toEqual({ styleScheme: "scheme3", heading: "Hi" });
+  expect(applySettingsPatch(legacy, { styleColors: true }, controls, false).settings).toEqual({ styleColors: true, heading: "Hi" });
+  expect(applySettingsPatch(legacy, { heading: "New" }, controls, false).settings).toEqual({ colorScheme: "soft", heading: "New" });
+});

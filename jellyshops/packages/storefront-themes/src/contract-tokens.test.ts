@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { CONTRACT_BREAKPOINTS, CONTRACT_PHONE_TOKENS, CONTRACT_SPACE, CONTRACT_TABLET_TOKENS, CONTRACT_TOKENS, CONTRACT_TYPE_PRESETS, contractTokenCss, isContractToken } from "./contract-tokens";
+import { CONTRACT_SCHEMES, contractSchemeRoles, CONTRACT_BREAKPOINTS, CONTRACT_PHONE_TOKENS, CONTRACT_SPACE, CONTRACT_TABLET_TOKENS, CONTRACT_TOKENS, CONTRACT_TYPE_PRESETS, contractTokenCss, isContractToken } from "./contract-tokens";
 
 const appRoot = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const themesCss = join(appRoot, "src/app/themes");
@@ -48,5 +48,16 @@ describe("design contract tokens", () => {
     // A name followed by `${` is a template prefix (`--j-space-${gap}`); the layout primitives build names that way.
     const unknown = files.flatMap((file) => [...read(file).matchAll(/(--j-[a-z0-9-]+)(\$\{)?/g)].filter(([, , template]) => !template).map(([, name]) => name).filter((name) => !isContractToken(name)).map((name) => `${name} (${file.slice(appRoot.length + 1)})`));
     expect([...new Set(unknown)]).toEqual([]);
+  });
+  it("gives every colour scheme the full set of colour roles", () => {
+    for (const scheme of CONTRACT_SCHEMES) {
+      const roles = contractSchemeRoles(scheme);
+      expect(Object.keys(roles).every(isContractToken)).toBe(true);
+      expect(Object.keys(roles).sort()).toEqual(["--j-color-bg", "--j-color-border", "--j-color-muted", "--j-color-on-primary", "--j-color-primary", "--j-color-surface", "--j-color-text"]);
+      expect(contractTokenCss()).toContain(`[data-scheme="${scheme}"] {`);
+    }
+    expect(contractSchemeRoles("scheme3")["--j-color-bg"]).toContain("--jelly-scheme-3-bg");
+    expect(contractSchemeRoles("soft")["--j-color-text"]).toContain("--jelly-scheme-soft-text");
+    expect(contractSchemeRoles("custom")["--j-color-bg"]).toBe("var(--section-bg)");
   });
 });

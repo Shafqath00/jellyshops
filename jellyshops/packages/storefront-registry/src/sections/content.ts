@@ -45,7 +45,8 @@ const comprehensiveControls = [
 ];
 
 // Plain-language controls shared by the merchandising sections below.
-const colorScheme = { type: "segmented" as const, key: "colorScheme", label: "Background", group: "style" as const, options: [{ label: "Page", value: "page" }, { label: "Soft", value: "soft" }, { label: "Dark", value: "dark" }] };
+/** The older Background choice: an alias of a theme colour scheme, shown only on sections that still use it ("Colour scheme" replaces it). */
+const colorScheme = { type: "segmented" as const, key: "colorScheme", label: "Background (older choice)", description: "Picking a colour scheme replaces this.", legacy: true, group: "style" as const, options: [{ label: "Page", value: "page" }, { label: "Soft", value: "soft" }, { label: "Dark", value: "dark" }] };
 const sectionHeading = { type: "text" as const, key: "heading", label: "Heading", group: "content" as const, maxLength: 120, dynamicTypes: stringTypes };
 const sectionText = { type: "rich-text" as const, key: "text", label: "Text", group: "content" as const, maxLength: 400, dynamicTypes: stringTypes };
 const imageControl = { type: "image" as const, key: "image", label: "Image", group: "content" as const, dynamicTypes: imageTypes };
@@ -190,7 +191,7 @@ export const contentSections: SectionDefinition[] = [
       colorScheme,
     ],
     allowedBlockTypes: ["contact-item"], maxBlocks: 6,
-    defaultSettings: { heading: "Visit our showroom", text: "Come and try our products in person. Our team is happy to help.", address: "", hours: "Mon–Sat: 10am–7pm\nSun: 11am–5pm", colorScheme: "soft" },
+    defaultSettings: { heading: "Visit our showroom", text: "Come and try our products in person. Our team is happy to help.", address: "", hours: "Mon–Sat: 10am–7pm\nSun: 11am–5pm", styleScheme: "scheme2" },
     defaultBlocks: [], responsiveFields: [],
   },
   {

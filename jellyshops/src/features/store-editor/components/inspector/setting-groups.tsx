@@ -35,6 +35,13 @@ const descriptions: Record<string, string> = {
   padding: "The space around the content.",
 };
 
+/** An older setting stays visible only while the section still uses it: a saved value other than the first option. */
+export function legacyInUse(control: ControlDefinition, value: unknown): boolean {
+  if (value === undefined || value === null || value === "") return false;
+  const first = "options" in control ? control.options[0]?.value : undefined;
+  return value !== first;
+}
+
 function displayValue(value: unknown): unknown {
   if (!value || typeof value !== "object" || Array.isArray(value)) return value;
   const setting = value as Record<string, unknown>;
@@ -65,7 +72,7 @@ export function SettingGroups({
   onPatch?(patch: Record<string, unknown>): void;
 }) {
   // A control with `showWhen` appears only while the other setting has that value (e.g. border colour once "Solid" is picked).
-  const visible = controls.filter((control) => !control.showWhen || displayValue(settings[control.showWhen.key]) === control.showWhen.equals);
+  const visible = controls.filter((control) => (!control.showWhen || displayValue(settings[control.showWhen.key]) === control.showWhen.equals) && (!control.legacy || legacyInUse(control, settings[control.key])));
   return (
     <div className="space-y-6">
       {groups.map(({ id, label }) => {

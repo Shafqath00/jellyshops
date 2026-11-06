@@ -2638,7 +2638,9 @@
         {
           "type": "segmented",
           "key": "colorScheme",
-          "label": "Background",
+          "label": "Background (older choice)",
+          "description": "Picking a colour scheme replaces this.",
+          "legacy": true,
           "group": "style",
           "options": [
             {
@@ -2928,7 +2930,9 @@
         {
           "type": "segmented",
           "key": "colorScheme",
-          "label": "Background",
+          "label": "Background (older choice)",
+          "description": "Picking a colour scheme replaces this.",
+          "legacy": true,
           "group": "style",
           "options": [
             {
@@ -3094,7 +3098,9 @@
         {
           "type": "segmented",
           "key": "colorScheme",
-          "label": "Background",
+          "label": "Background (older choice)",
+          "description": "Picking a colour scheme replaces this.",
+          "legacy": true,
           "group": "style",
           "options": [
             {
@@ -3623,7 +3629,9 @@
         {
           "type": "segmented",
           "key": "colorScheme",
-          "label": "Background",
+          "label": "Background (older choice)",
+          "description": "Picking a colour scheme replaces this.",
+          "legacy": true,
           "group": "style",
           "options": [
             {
@@ -3710,7 +3718,9 @@
         {
           "type": "segmented",
           "key": "colorScheme",
-          "label": "Background",
+          "label": "Background (older choice)",
+          "description": "Picking a colour scheme replaces this.",
+          "legacy": true,
           "group": "style",
           "options": [
             {
@@ -3800,7 +3810,9 @@
         {
           "type": "segmented",
           "key": "colorScheme",
-          "label": "Background",
+          "label": "Background (older choice)",
+          "description": "Picking a colour scheme replaces this.",
+          "legacy": true,
           "group": "style",
           "options": [
             {
@@ -3913,7 +3925,9 @@
         {
           "type": "segmented",
           "key": "colorScheme",
-          "label": "Background",
+          "label": "Background (older choice)",
+          "description": "Picking a colour scheme replaces this.",
+          "legacy": true,
           "group": "style",
           "options": [
             {
@@ -3981,7 +3995,7 @@
         "text": "Come and try our products in person. Our team is happy to help.",
         "address": "",
         "hours": "Mon–Sat: 10am–7pm\nSun: 11am–5pm",
-        "colorScheme": "soft"
+        "styleScheme": "scheme2"
       },
       "defaultBlocks": [],
       "responsiveFields": [],
@@ -4051,7 +4065,9 @@
         {
           "type": "segmented",
           "key": "colorScheme",
-          "label": "Background",
+          "label": "Background (older choice)",
+          "description": "Picking a colour scheme replaces this.",
+          "legacy": true,
           "group": "style",
           "options": [
             {
@@ -4217,7 +4233,9 @@
         {
           "type": "segmented",
           "key": "colorScheme",
-          "label": "Background",
+          "label": "Background (older choice)",
+          "description": "Picking a colour scheme replaces this.",
+          "legacy": true,
           "group": "style",
           "options": [
             {
@@ -4359,7 +4377,9 @@
         {
           "type": "segmented",
           "key": "colorScheme",
-          "label": "Background",
+          "label": "Background (older choice)",
+          "description": "Picking a colour scheme replaces this.",
+          "legacy": true,
           "group": "style",
           "options": [
             {
@@ -4793,7 +4813,9 @@
         {
           "type": "segmented",
           "key": "colorScheme",
-          "label": "Background",
+          "label": "Background (older choice)",
+          "description": "Picking a colour scheme replaces this.",
+          "legacy": true,
           "group": "style",
           "options": [
             {
@@ -4947,7 +4969,9 @@
         {
           "type": "segmented",
           "key": "colorScheme",
-          "label": "Background",
+          "label": "Background (older choice)",
+          "description": "Picking a colour scheme replaces this.",
+          "legacy": true,
           "group": "style",
           "options": [
             {
@@ -5110,7 +5134,9 @@
         {
           "type": "segmented",
           "key": "colorScheme",
-          "label": "Background",
+          "label": "Background (older choice)",
+          "description": "Picking a colour scheme replaces this.",
+          "legacy": true,
           "group": "style",
           "options": [
             {
@@ -5633,7 +5659,9 @@
         {
           "type": "segmented",
           "key": "colorScheme",
-          "label": "Background",
+          "label": "Background (older choice)",
+          "description": "Picking a colour scheme replaces this.",
+          "legacy": true,
           "group": "style",
           "options": [
             {
@@ -5842,7 +5870,9 @@
         {
           "type": "segmented",
           "key": "colorScheme",
-          "label": "Background",
+          "label": "Background (older choice)",
+          "description": "Picking a colour scheme replaces this.",
+          "legacy": true,
           "group": "style",
           "options": [
             {

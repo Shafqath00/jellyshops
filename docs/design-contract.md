@@ -55,7 +55,7 @@ How it works (phase 1, 2026-11-06):
 - A theme sets its own values in its scope (Minimal and Avenue: type sizes, page width, page margin, radii; Avenue also tight tracking and a 700ms slow duration). Their old names (`--jm-1`, `--jm-edge`, `--av-h2`, …) are now aliases of the contract names. Resthaven still uses the `--jelly-*` layer directly (its CSS is generated from its own `theme.css`); phase 2 moves it onto the contract.
 - A unit test (`contract-tokens.test.ts`) fails if any theme, shared CSS or package file uses a `--j-*` name that is not in the contract.
 - Checked: full-page screenshots of all 3 themes × 8 preview pages × 3 widths were pixel-identical before and after (a 1px change to one contract value broke 24 of them, so the check is sensitive).
-- Known limit until phase 3: `--j-color-*` are resolved on the theme root, so a section's own colour scheme does not change them yet.
+- Colour roles follow each section's colour scheme since phase 3 (section 2.4a).
 
 | Group | Tokens |
 | --- | --- |
@@ -81,6 +81,16 @@ Phone up to 767px, tablet 768–1023px, desktop 1024px and up (the same split as
 - A theme may still change a container's inner layout (grid, gap) and may let one section run edge to edge (Avenue's collection tiles); the lint then checks that its text stays on the page edges.
 - `Stack` (gap, direction, align), `Grid` (columns, tablet columns, mobile columns, gap, row gap), `MediaFrame` (ratio square/portrait/landscape/wide, fit, focal point) and `TextBlock` (contract text preset, alignment, max width) live in `packages/storefront-renderer/src/layout.tsx`; gaps are space-token names, text styles contract presets. Styles at zero specificity in `storefront-base.css` ("Layout primitives"), so a theme's rule for the section's own class still wins while sections move over. Each keeps the `className` it is given.
 - Status: the frame covers every section; the primitives are used by Multicolumn so far. Moving the other sections' inner layouts onto them happens section by section (later phases); colour scheme and rhythm are not applied by the frame yet (phases 3–4).
+
+### 2.4a Colour model — built in phase 3
+
+- **One scheme per section.** The section frame carries `data-scheme`, worked out by `sectionScheme()` (`packages/storefront-renderer/src/section-frame.tsx`) from the three ways a section can be coloured, in this order: its own colours (`custom`, when "Use my own colours" is on with a colour), a theme scheme (`styleScheme`, `scheme1`–`scheme8`), or the older Background choice (`colorScheme` `page` / `soft` / `dark`).
+- **Older choices are aliases.** `resolveThemeStyleTokens` writes `--jelly-scheme-{page,soft,dark}-*` as references to the theme's own schemes (`legacySchemeMap`: Page = Scheme 1, Dark = the darkest of schemes 1–4, Soft = Scheme 2 or the next light one), so they follow the merchant's scheme colours. Minimal: Page 1, Soft 2, Dark 4. Avenue: Page 1, Soft 2, Dark 3. A theme without schemes (Resthaven) gets its theme colours (Dark = text and background swapped).
+- **Colour roles follow the scheme.** `storefront-base.css` (generated from `CONTRACT_SCHEMES` / `contractSchemeRoles` in `contract-tokens.ts`) points `--j-color-bg`, `text`, `surface`, `muted`, `border`, `primary` and `on-primary` at the section's scheme inside every frame that has one.
+- **Contrast fallback.** A scheme whose text (or button text) is below WCAG AA (4.5:1) on its background (or button) gets near-black or white instead (`readableTextColour`). The themes' own schemes all pass, so untouched stores are unchanged.
+- **Editor.** Sections offer only "Colour scheme" (plus own colours). The older Background control (`legacy: true` on the control) appears only on sections that still have Soft or Dark saved; picking a scheme or own colours removes it (`applySettingsPatch`). New Store visit sections start on Scheme 2 instead of Soft. The locked built-in starter packs still save `colorScheme`, and their sections render as before.
+- **Not changed yet:** the themes' own colour rules (`--jm-*`, `--av-*`, the Page/Soft/Dark rules) still paint sections; they move onto the roles when the themes are rebuilt (phases 7–8). Colour pickers already list theme and scheme colours first; free hex is still allowed in sections and blocks.
+- Checked: full-page screenshots of all 3 themes × 7 pages × 3 widths before and after: page sizes identical, differences only where photos load at different moments.
 
 ### 2.4 Settings model
 

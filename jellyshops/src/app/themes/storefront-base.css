@@ -119,6 +119,114 @@
     --j-page-margin: var(--j-page-margin-sm);
   }
 }
+:where([data-jelly-theme]) [data-scheme="scheme1"] {
+  --j-color-bg: var(--jelly-scheme-1-bg, var(--theme-background, #ffffff));
+  --j-color-text: var(--jelly-scheme-1-text, var(--theme-text, #1a1a1a));
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: color-mix(in srgb, var(--j-color-text) 75%, var(--j-color-bg));
+  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-primary: var(--jelly-scheme-1-button, var(--theme-text, #1a1a1a));
+  --j-color-on-primary: var(--jelly-scheme-1-button-text, var(--theme-background, #ffffff));
+}
+:where([data-jelly-theme]) [data-scheme="scheme2"] {
+  --j-color-bg: var(--jelly-scheme-2-bg, var(--theme-background, #ffffff));
+  --j-color-text: var(--jelly-scheme-2-text, var(--theme-text, #1a1a1a));
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: color-mix(in srgb, var(--j-color-text) 75%, var(--j-color-bg));
+  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-primary: var(--jelly-scheme-2-button, var(--theme-text, #1a1a1a));
+  --j-color-on-primary: var(--jelly-scheme-2-button-text, var(--theme-background, #ffffff));
+}
+:where([data-jelly-theme]) [data-scheme="scheme3"] {
+  --j-color-bg: var(--jelly-scheme-3-bg, var(--theme-background, #ffffff));
+  --j-color-text: var(--jelly-scheme-3-text, var(--theme-text, #1a1a1a));
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: color-mix(in srgb, var(--j-color-text) 75%, var(--j-color-bg));
+  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-primary: var(--jelly-scheme-3-button, var(--theme-text, #1a1a1a));
+  --j-color-on-primary: var(--jelly-scheme-3-button-text, var(--theme-background, #ffffff));
+}
+:where([data-jelly-theme]) [data-scheme="scheme4"] {
+  --j-color-bg: var(--jelly-scheme-4-bg, var(--theme-background, #ffffff));
+  --j-color-text: var(--jelly-scheme-4-text, var(--theme-text, #1a1a1a));
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: color-mix(in srgb, var(--j-color-text) 75%, var(--j-color-bg));
+  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-primary: var(--jelly-scheme-4-button, var(--theme-text, #1a1a1a));
+  --j-color-on-primary: var(--jelly-scheme-4-button-text, var(--theme-background, #ffffff));
+}
+:where([data-jelly-theme]) [data-scheme="scheme5"] {
+  --j-color-bg: var(--jelly-scheme-5-bg, var(--theme-background, #ffffff));
+  --j-color-text: var(--jelly-scheme-5-text, var(--theme-text, #1a1a1a));
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: color-mix(in srgb, var(--j-color-text) 75%, var(--j-color-bg));
+  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-primary: var(--jelly-scheme-5-button, var(--theme-text, #1a1a1a));
+  --j-color-on-primary: var(--jelly-scheme-5-button-text, var(--theme-background, #ffffff));
+}
+:where([data-jelly-theme]) [data-scheme="scheme6"] {
+  --j-color-bg: var(--jelly-scheme-6-bg, var(--theme-background, #ffffff));
+  --j-color-text: var(--jelly-scheme-6-text, var(--theme-text, #1a1a1a));
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: color-mix(in srgb, var(--j-color-text) 75%, var(--j-color-bg));
+  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-primary: var(--jelly-scheme-6-button, var(--theme-text, #1a1a1a));
+  --j-color-on-primary: var(--jelly-scheme-6-button-text, var(--theme-background, #ffffff));
+}
+:where([data-jelly-theme]) [data-scheme="scheme7"] {
+  --j-color-bg: var(--jelly-scheme-7-bg, var(--theme-background, #ffffff));
+  --j-color-text: var(--jelly-scheme-7-text, var(--theme-text, #1a1a1a));
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: color-mix(in srgb, var(--j-color-text) 75%, var(--j-color-bg));
+  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-primary: var(--jelly-scheme-7-button, var(--theme-text, #1a1a1a));
+  --j-color-on-primary: var(--jelly-scheme-7-button-text, var(--theme-background, #ffffff));
+}
+:where([data-jelly-theme]) [data-scheme="scheme8"] {
+  --j-color-bg: var(--jelly-scheme-8-bg, var(--theme-background, #ffffff));
+  --j-color-text: var(--jelly-scheme-8-text, var(--theme-text, #1a1a1a));
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: color-mix(in srgb, var(--j-color-text) 75%, var(--j-color-bg));
+  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-primary: var(--jelly-scheme-8-button, var(--theme-text, #1a1a1a));
+  --j-color-on-primary: var(--jelly-scheme-8-button-text, var(--theme-background, #ffffff));
+}
+:where([data-jelly-theme]) [data-scheme="page"] {
+  --j-color-bg: var(--jelly-scheme-page-bg, var(--theme-background, #ffffff));
+  --j-color-text: var(--jelly-scheme-page-text, var(--theme-text, #1a1a1a));
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: color-mix(in srgb, var(--j-color-text) 75%, var(--j-color-bg));
+  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-primary: var(--jelly-scheme-page-button, var(--theme-text, #1a1a1a));
+  --j-color-on-primary: var(--jelly-scheme-page-button-text, var(--theme-background, #ffffff));
+}
+:where([data-jelly-theme]) [data-scheme="soft"] {
+  --j-color-bg: var(--jelly-scheme-soft-bg, var(--theme-background, #ffffff));
+  --j-color-text: var(--jelly-scheme-soft-text, var(--theme-text, #1a1a1a));
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: color-mix(in srgb, var(--j-color-text) 75%, var(--j-color-bg));
+  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-primary: var(--jelly-scheme-soft-button, var(--theme-text, #1a1a1a));
+  --j-color-on-primary: var(--jelly-scheme-soft-button-text, var(--theme-background, #ffffff));
+}
+:where([data-jelly-theme]) [data-scheme="dark"] {
+  --j-color-bg: var(--jelly-scheme-dark-bg, var(--theme-background, #ffffff));
+  --j-color-text: var(--jelly-scheme-dark-text, var(--theme-text, #1a1a1a));
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: color-mix(in srgb, var(--j-color-text) 75%, var(--j-color-bg));
+  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-primary: var(--jelly-scheme-dark-button, var(--theme-text, #1a1a1a));
+  --j-color-on-primary: var(--jelly-scheme-dark-button-text, var(--theme-background, #ffffff));
+}
+:where([data-jelly-theme]) [data-scheme="custom"] {
+  --j-color-bg: var(--section-bg);
+  --j-color-text: var(--section-text);
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: color-mix(in srgb, var(--j-color-text) 75%, var(--j-color-bg));
+  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-primary: var(--section-text);
+  --j-color-on-primary: var(--section-bg);
+}
 /* contract-tokens:end */
 
 /* Section frame (docs/design-contract.md §2.3). Every section, header and footer is wrapped in [data-section-frame]

@@ -97,7 +97,7 @@ export const CONTRACT_TOKENS: Readonly<Record<string, string>> = {
   "--j-track-loose": "0.04em",
   // Text presets.
   ...typeTokens(),
-  // Colour roles. Phase 3 makes these follow each section's colour scheme; today they follow the theme colours.
+  // Colour roles: the theme colours here; inside a section with a colour scheme they follow it (CONTRACT_SCHEMES).
   "--j-color-bg": "var(--theme-background, #ffffff)",
   "--j-color-surface": "var(--theme-surface, var(--j-color-bg))",
   "--j-color-text": "var(--theme-text, #1a1a1a)",
@@ -112,6 +112,37 @@ export const CONTRACT_TOKENS: Readonly<Record<string, string>> = {
   "--j-duration-slow": "600ms",
   "--j-ease": "cubic-bezier(.2, .7, .2, 1)",
 };
+
+/**
+ * Colour schemes a section frame can carry (`data-scheme`): the theme's schemes 1-8, the older Page / Soft / Dark
+ * choices (aliases of theme schemes, resolved in `resolveThemeStyleTokens`) and "custom" (the section's own colours).
+ * Inside a section with a scheme every `--j-color-*` role follows that scheme.
+ */
+export const CONTRACT_SCHEMES = ["scheme1", "scheme2", "scheme3", "scheme4", "scheme5", "scheme6", "scheme7", "scheme8", "page", "soft", "dark", "custom"] as const;
+export type ContractScheme = (typeof CONTRACT_SCHEMES)[number];
+
+/** The colour roles of one scheme, built from its background, text, button and button text colours. */
+export function contractSchemeRoles(scheme: ContractScheme): Record<string, string> {
+  const id = scheme.startsWith("scheme") ? scheme.slice(6) : scheme;
+  const source = scheme === "custom"
+    ? { bg: "var(--section-bg)", text: "var(--section-text)", button: "var(--section-text)", buttonText: "var(--section-bg)" }
+    : {
+      // Fallbacks keep the roles valid where a page has no scheme tokens (they are written by resolveStorefrontThemeTokens).
+      bg: `var(--jelly-scheme-${id}-bg, var(--theme-background, #ffffff))`,
+      text: `var(--jelly-scheme-${id}-text, var(--theme-text, #1a1a1a))`,
+      button: `var(--jelly-scheme-${id}-button, var(--theme-text, #1a1a1a))`,
+      buttonText: `var(--jelly-scheme-${id}-button-text, var(--theme-background, #ffffff))`,
+    };
+  return {
+    "--j-color-bg": source.bg,
+    "--j-color-text": source.text,
+    "--j-color-surface": "color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg))",
+    "--j-color-muted": "color-mix(in srgb, var(--j-color-text) 75%, var(--j-color-bg))",
+    "--j-color-border": "color-mix(in srgb, var(--j-color-text) 18%, transparent)",
+    "--j-color-primary": source.button,
+    "--j-color-on-primary": source.buttonText,
+  };
+}
 
 /** Values that change at the fixed breakpoints. */
 export const CONTRACT_TABLET_TOKENS: Readonly<Record<string, string>> = { "--j-space-scale": "0.85", "--j-page-margin": "var(--j-page-margin-tablet)" };
@@ -133,5 +164,6 @@ export function contractTokenCss(): string {
     block(selector, CONTRACT_TOKENS),
     `@media (max-width: ${CONTRACT_BREAKPOINTS.tabletMax}px) {\n${block(selector, CONTRACT_TABLET_TOKENS, "  ")}\n}`,
     `@media (max-width: ${CONTRACT_BREAKPOINTS.phoneMax}px) {\n${block(selector, CONTRACT_PHONE_TOKENS, "  ")}\n}`,
+    ...CONTRACT_SCHEMES.map((scheme) => block(`${selector} [data-scheme="${scheme}"]`, contractSchemeRoles(scheme))),
   ].join("\n");
 }

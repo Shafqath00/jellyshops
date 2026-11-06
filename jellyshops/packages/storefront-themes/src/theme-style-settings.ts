@@ -28,6 +28,47 @@ export interface ThemeStyleDefaults {
   schemes: Record<BaseSchemeId, ColorSchemeValues> & Partial<Record<ColorSchemeId, ColorSchemeValues>>;
 }
 
+/** The older per-section "Background" choices. Each is an alias of one of the theme's own schemes (see `legacySchemeMap`). */
+export const LEGACY_SCHEME_IDS = ["page", "soft", "dark"] as const;
+export type LegacySchemeId = typeof LEGACY_SCHEME_IDS[number];
+
+/** Relative luminance of a #rrggbb colour (WCAG). */
+function luminance(colour: string): number {
+  const [r, g, b] = [1, 3, 5].map((start) => {
+    const channel = parseInt(colour.slice(start, start + 2), 16) / 255;
+    return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/** WCAG contrast ratio of two #rrggbb colours (1-21). */
+export function contrastRatio(a: string, b: string): number {
+  const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (light + 0.05) / (dark + 0.05);
+}
+
+/**
+ * Text colour that stays readable on `background`: the chosen colour when it reaches WCAG AA (4.5:1), otherwise
+ * near-black or white, whichever reads better. Colours that are not #rrggbb (theme variables) are left alone.
+ */
+export function readableTextColour(text: string, background: string): string {
+  if (!hex.test(text) || !hex.test(background) || contrastRatio(text, background) >= 4.5) return text;
+  return contrastRatio("#111111", background) >= contrastRatio("#ffffff", background) ? "#111111" : "#ffffff";
+}
+
+/**
+ * Which scheme each older "Background" choice means in this theme, chosen from the theme's default schemes:
+ * Page = Scheme 1, Dark = the darkest of schemes 1-4, Soft = Scheme 2 (or the next light one when Scheme 2 is the dark one).
+ */
+export function legacySchemeMap(defaults: ThemeStyleDefaults | undefined): Record<LegacySchemeId, ColorSchemeId> | undefined {
+  if (!defaults) return undefined;
+  const base: BaseSchemeId[] = ["scheme1", "scheme2", "scheme3", "scheme4"];
+  const light = (id: BaseSchemeId) => hex.test(defaults.schemes[id].background) ? luminance(defaults.schemes[id].background) : 1;
+  const dark = [...base].sort((a, b) => light(a) - light(b))[0];
+  const soft = base.find((id) => id !== "scheme1" && id !== dark) ?? "scheme2";
+  return { page: "scheme1", soft, dark };
+}
+
 const levelLabels: Record<TextStyleLevel, string> = { h1: "Heading 1", h2: "Heading 2", h3: "Heading 3", h4: "Heading 4", body: "Body", small: "Small" };
 const schemeNumber = (id: ColorSchemeId) => COLOR_SCHEME_IDS.indexOf(id) + 1;
 /** Smallest size as a share of the largest, and the screen width (px) at which the largest is reached. */
@@ -253,10 +294,29 @@ export function resolveThemeStyleTokens(settings: Record<string, unknown>, defau
     const fallback = defaults?.schemes[id];
     const pick = (key: keyof ColorSchemeValues, otherwise: string) => typeof saved[key] === "string" && hex.test(saved[key] as string) ? saved[key] as string : fallback?.[key] ?? otherwise;
     const n = index + 1;
-    tokens[`--jelly-scheme-${n}-bg`] = pick("background", "var(--theme-background, #ffffff)");
-    tokens[`--jelly-scheme-${n}-text`] = pick("text", "var(--theme-text, #1a1a1a)");
-    tokens[`--jelly-scheme-${n}-button`] = pick("button", "var(--theme-text, #1a1a1a)");
-    tokens[`--jelly-scheme-${n}-button-text`] = pick("buttonText", "var(--theme-background, #ffffff)");
+    const background = pick("background", "var(--theme-background, #ffffff)");
+    const button = pick("button", "var(--theme-text, #1a1a1a)");
+    tokens[`--jelly-scheme-${n}-bg`] = background;
+    // A scheme whose text would be hard to read gets readable text instead (contrast fallback).
+    tokens[`--jelly-scheme-${n}-text`] = readableTextColour(pick("text", "var(--theme-text, #1a1a1a)"), background);
+    tokens[`--jelly-scheme-${n}-button`] = button;
+    tokens[`--jelly-scheme-${n}-button-text`] = readableTextColour(pick("buttonText", "var(--theme-background, #ffffff)"), button);
+  }
+  // The older Page / Soft / Dark choices are aliases of the theme's schemes, so they follow the merchant's scheme
+  // colours. Themes without schemes get the theme colours (Dark = the theme's text and background swapped).
+  const legacy = legacySchemeMap(defaults);
+  const legacyFallback: Record<LegacySchemeId, [string, string]> = {
+    page: ["var(--theme-background, #ffffff)", "var(--theme-text, #1a1a1a)"],
+    soft: ["var(--theme-surface, var(--theme-background, #ffffff))", "var(--theme-text, #1a1a1a)"],
+    dark: ["var(--theme-text, #1a1a1a)", "var(--theme-background, #ffffff)"],
+  };
+  for (const id of LEGACY_SCHEME_IDS) {
+    const n = legacy ? schemeNumber(legacy[id]) : undefined;
+    const [bg, text] = legacyFallback[id];
+    tokens[`--jelly-scheme-${id}-bg`] = n ? `var(--jelly-scheme-${n}-bg)` : bg;
+    tokens[`--jelly-scheme-${id}-text`] = n ? `var(--jelly-scheme-${n}-text)` : text;
+    tokens[`--jelly-scheme-${id}-button`] = n ? `var(--jelly-scheme-${n}-button)` : text;
+    tokens[`--jelly-scheme-${id}-button-text`] = n ? `var(--jelly-scheme-${n}-button-text)` : bg;
   }
 
   const buttons = record(settings.buttons);

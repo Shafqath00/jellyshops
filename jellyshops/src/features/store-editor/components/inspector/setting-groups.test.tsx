@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { ControlDefinition } from "@jelly/storefront-registry";
-import { SettingGroups } from "./setting-groups";
+import { legacyInUse, SettingGroups } from "./setting-groups";
 
 const controls: ControlDefinition[] = [
   { type: "text", key: "heading", label: "Heading", group: "content", maxLength: 120, dynamicTypes: ["string"] },
@@ -60,4 +60,15 @@ it("splits controls under their sub-headings and hides controls until they apply
   expect(screen.queryByLabelText("Border colour")).not.toBeInTheDocument();
   rerender(<SettingGroups controls={styled} settings={{ blockBorder: "solid" }} catalog={{ products: [], collections: [] }} onChange={vi.fn()} />);
   expect(screen.getByLabelText("Border colour")).toBeInTheDocument();
+});
+
+it("shows an older setting only on sections that still use it", () => {
+  const background: ControlDefinition = { type: "segmented", key: "colorScheme", label: "Background (older choice)", legacy: true, group: "style", options: [{ label: "Page", value: "page" }, { label: "Soft", value: "soft" }] };
+  expect(legacyInUse(background, undefined)).toBe(false);
+  expect(legacyInUse(background, "page")).toBe(false);
+  expect(legacyInUse(background, "soft")).toBe(true);
+  const { rerender } = render(<SettingGroups controls={[background]} settings={{}} catalog={{ products: [], collections: [] }} onChange={vi.fn()} />);
+  expect(screen.queryByText("Background (older choice)")).not.toBeInTheDocument();
+  rerender(<SettingGroups controls={[background]} settings={{ colorScheme: "soft" }} catalog={{ products: [], collections: [] }} onChange={vi.fn()} />);
+  expect(screen.getByText("Background (older choice)")).toBeInTheDocument();
 });

@@ -9,7 +9,7 @@ import {
 import { createStorefrontRuntimeContext } from "./runtime-context";
 import { SectionCustomCss, sectionCssProps } from "./section-custom-css";
 import { sectionStyleProps } from "./section-style";
-import { SectionFrame, sectionFrameWidth } from "./section-frame";
+import { SectionFrame, sectionFrameWidth, sectionScheme } from "./section-frame";
 import type { CommerceDataProvider, RendererMode, RendererSelection, StorefrontPageContext } from "./types";
 import { getRecipe, getThemeDefinition, DEFAULT_THEME_ID } from "@jelly/storefront-themes";
 import { RecipeSection } from "./sections/recipe-section";
@@ -80,6 +80,7 @@ export function RegistrySectionRenderer({
   const isSelected = selected?.kind === "section" && selected.sectionId === section.id;
   return <SectionFrame
     width={sectionFrameWidth(section.settings)}
+    scheme={sectionScheme(section.settings)}
     data-testid={`section-${section.type}`}
     data-section-type={section.type}
     {...sectionCssProps(section)}

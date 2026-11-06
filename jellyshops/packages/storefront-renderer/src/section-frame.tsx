@@ -1,4 +1,5 @@
 import type { HTMLAttributes, ReactNode } from "react";
+import type { ContractScheme } from "@jelly/storefront-themes";
 
 /**
  * Section frame (docs/design-contract.md §2.3). `RegistrySectionRenderer` wraps every section, header and footer in
@@ -17,6 +18,22 @@ export function sectionFrameWidth(settings: Record<string, unknown> | undefined)
   return typeof width === "string" && (WIDTHS as readonly string[]).includes(width) ? width as SectionFrameWidth : "page";
 }
 
-export function SectionFrame({ width = "page", children, ...props }: HTMLAttributes<HTMLDivElement> & { width?: SectionFrameWidth; children?: ReactNode }) {
-  return <div {...props} data-section-frame="" data-frame-width={width}>{children}</div>;
+/**
+ * The section's colour scheme, one value for all three ways a section can be coloured: its own colours ("custom",
+ * when "Use my own colours" is on with a colour), else a theme scheme (`styleScheme`, scheme1-8), else the older
+ * Background choice (`colorScheme` page/soft/dark, an alias of a theme scheme). Undefined: the page's colours.
+ * `storefront-base.css` points every colour role (`--j-color-bg`, `--j-color-text`, …) at the scheme inside the frame.
+ */
+export function sectionScheme(settings: Record<string, unknown> | undefined): ContractScheme | undefined {
+  if (!settings) return undefined;
+  const text = (key: string) => typeof settings[key] === "string" ? settings[key] as string : "";
+  if (settings.styleColors === true && (HEX.test(text("styleBackground")) || HEX.test(text("styleText")))) return "custom";
+  if (/^scheme[1-8]$/.test(text("styleScheme"))) return text("styleScheme") as ContractScheme;
+  if (["page", "soft", "dark"].includes(text("colorScheme"))) return text("colorScheme") as ContractScheme;
+  return undefined;
+}
+const HEX = /^#[0-9a-fA-F]{6}$/;
+
+export function SectionFrame({ width = "page", scheme, children, ...props }: HTMLAttributes<HTMLDivElement> & { width?: SectionFrameWidth; scheme?: ContractScheme; children?: ReactNode }) {
+  return <div {...props} data-section-frame="" data-frame-width={width} {...(scheme ? { "data-scheme": scheme } : {})}>{children}</div>;
 }

@@ -72,6 +72,8 @@ export function applySettingsPatch<T extends SettingsNode>(node: T, patch: Recor
     else if (value === undefined || value === null || value === "") delete phone[key];
     else phone[key] = value;
   }
+  // Choosing a colour scheme or own colours replaces the older Background choice (one colour system).
+  if ((typeof patch.styleScheme === "string" && patch.styleScheme) || patch.styleColors === true) delete settings.colorScheme;
   const { responsive, ...rest } = node;
   const otherResponsive = { ...(responsive ?? {}) };
   if (device !== "desktop") delete otherResponsive[device];
