@@ -15,7 +15,7 @@ Measured in `/theme-preview/<theme>` for the pages Home, Collection, Product, Ca
 
 | Rule id | Rule | Why |
 | --- | --- | --- |
-| `edge` | Every top-level part of the page (announcement, header, each section, footer) keeps its content between the page's **content edges** (±1px). The content edges are the left and right edges most sections use. Inside them, content must line up with the left edge, the right edge, or be centred between them (±4px). | One grid for the whole page; this is what makes Shopify themes look aligned. |
+| `edge` | Every top-level part of the page (announcement, header, each section, footer) keeps its content between the page's **content edges** (±1px). The content edges are the left and right edges most sections use. Inside them, content must line up with the left edge, the right edge, or be centred between them (±4px, and clearly narrower: at least 48px or 8% of the page width in from each edge, whichever is smaller). Content = text boxes, form controls, images, coloured panels and rows of items (a grid of 2+ columns or a flex row of 2+ items counts by its own box); a link around a photo counts by its text. Full-width parts may run media edge to edge, but their text must stay inside the edges, except a scrolling strip (`data-scrolling`). A section placed in one column of a page laid out in columns (the product page's details column) is judged with its row and skipped. | One grid for the whole page; this is what makes Shopify themes look aligned. |
 | `rhythm` | A page uses at most **3** different non-zero section paddings (top and bottom together) at one width: small, medium, large. | Spacing from a scale, not one-off values. |
 | `headings` | A page shows at most **4** different heading font sizes (h1–h4) at one width. | A clear type hierarchy. |
 | `overflow` | No horizontal scrolling at any width. | Phones must never scroll sideways. |
@@ -75,10 +75,12 @@ Old theme names (`--jm-*`, `--av-*`) become aliases of these during migration.
 
 Phone up to 767px, tablet 768–1023px, desktop 1024px and up (the same split as the editor's phone/tablet values). Themes may not add breakpoints.
 
-### 2.3 Layout primitives (renderer)
+### 2.3 Layout primitives (renderer) — built in phase 2
 
-- `SectionFrame` wraps every section (applied by `RegistrySectionRenderer`): three-column grid `margin | content | margin`, width page / narrow / full, rhythm, colour scheme. Sections never set their own container or outer padding.
-- `Stack`, `Grid` (columns, mobile columns, gap), `MediaFrame` (ratio, fit, focal point), `TextBlock` (preset, alignment, max width). All gaps are space-token names.
+- `SectionFrame` (`packages/storefront-renderer/src/section-frame.tsx`) wraps every section, header and footer (applied by `RegistrySectionRenderer`, so coverage is automatic) and marks it `data-section-frame` + `data-frame-width="page|narrow|full"` (from the section's Width setting, `styleWidth`). The width rule is in `storefront-base.css` ("Section frame"): the section's `.jelly-container` is the content column, `min(100% - 2 × --j-page-margin, --j-page-normal)` wide and centred (narrow: `--j-page-narrow`; full: the screen minus the page margins). Themes set those token values and **do not write their own container width rule**; the per-theme rules in Minimal, Avenue and Resthaven were deleted. Header, announcement and footer rows that are not inside a container pad with `--j-page-edge`.
+- A theme may still change a container's inner layout (grid, gap) and may let one section run edge to edge (Avenue's collection tiles); the lint then checks that its text stays on the page edges.
+- `Stack` (gap, direction, align), `Grid` (columns, tablet columns, mobile columns, gap, row gap), `MediaFrame` (ratio square/portrait/landscape/wide, fit, focal point) and `TextBlock` (contract text preset, alignment, max width) live in `packages/storefront-renderer/src/layout.tsx`; gaps are space-token names, text styles contract presets. Styles at zero specificity in `storefront-base.css` ("Layout primitives"), so a theme's rule for the section's own class still wins while sections move over. Each keeps the `className` it is given.
+- Status: the frame covers every section; the primitives are used by Multicolumn so far. Moving the other sections' inner layouts onto them happens section by section (later phases); colour scheme and rhythm are not applied by the frame yet (phases 3–4).
 
 ### 2.4 Settings model
 

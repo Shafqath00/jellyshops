@@ -45,7 +45,8 @@ describe("design contract tokens", () => {
       join(appRoot, "src/app/globals.css"),
       ...filesUnder(join(appRoot, "packages"), /\.(css|tsx?)$/).filter((file) => !/\.test\.|contract-tokens\.ts$/.test(file)),
     ];
-    const unknown = files.flatMap((file) => [...read(file).matchAll(/(--j-[a-z0-9-]+)/g)].map(([name]) => name).filter((name) => !isContractToken(name)).map((name) => `${name} (${file.slice(appRoot.length + 1)})`));
+    // A name followed by `${` is a template prefix (`--j-space-${gap}`); the layout primitives build names that way.
+    const unknown = files.flatMap((file) => [...read(file).matchAll(/(--j-[a-z0-9-]+)(\$\{)?/g)].filter(([, , template]) => !template).map(([, name]) => name).filter((name) => !isContractToken(name)).map((name) => `${name} (${file.slice(appRoot.length + 1)})`));
     expect([...new Set(unknown)]).toEqual([]);
   });
 });

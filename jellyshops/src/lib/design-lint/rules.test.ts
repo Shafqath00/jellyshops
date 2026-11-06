@@ -4,7 +4,7 @@ import { compareWithBaseline, contrastFinding, dominantValue, findingsReport, li
 
 const context = { theme: "t", page: "Home", device: "desktop" };
 const part = (key: string, left: number | null, right: number | null, extra: Partial<PartMeasurement> = {}): PartMeasurement =>
-  ({ key, isSection: true, left, right, textLeft: left, textRight: right, fullBleed: false, paddingTop: 96, paddingBottom: 96, ...extra });
+  ({ key, isSection: true, left, right, textLeft: left, textRight: right, fullBleed: false, scrolling: false, inColumn: false, paddingTop: 96, paddingBottom: 96, ...extra });
 const page = (parts: PartMeasurement[], extra: Partial<PageMeasurement> = {}): PageMeasurement =>
   ({ frameWidth: 1280, overflow: 0, parts, headingSizes: [44, 56], smallTargets: [], cardLists: [], ...extra });
 const rules = (measurement: PageMeasurement, device = "desktop") => lintPage(measurement, { ...context, device }).map((item) => item.rule);
@@ -32,6 +32,17 @@ describe("design lint rules", () => {
   it("lets full-width parts run edge to edge but keeps their text inside the page edges", () => {
     const parts = [part("header", 49, 1231, { isSection: false }), part("grid", 49, 1231), part("banner", 0, 1280, { fullBleed: true, textLeft: 126, textRight: 900 }), part("cards", 0, 1280, { fullBleed: true, textLeft: 8, textRight: 1272 })];
     expect(lintPage(page(parts), context).map((item) => item.id)).toEqual(["edge|t|Home|desktop|cards"]);
+    expect(pageEdges(page(parts))).toEqual({ left: 49, right: 1231 });
+  });
+
+  it("counts centred content on a phone as centred with a smaller inset", () => {
+    const phone = page([part("header", 17, 373, { isSection: false }), part("a", 17, 373), part("b", 17, 373), part("columns", 47, 343), part("near", 22, 368)], { frameWidth: 390 });
+    expect(lintPage(phone, { ...context, device: "mobile" }).map((item) => item.id)).toEqual(["edge|t|Home|mobile|near"]);
+  });
+
+  it("lets a scrolling strip's text run across the screen and judges column parts with their row", () => {
+    const parts = [part("header", 49, 1231, { isSection: false }), part("grid", 49, 1231), part("strip", 0, 1280, { fullBleed: true, scrolling: true, textLeft: 0, textRight: 1280 }), part("details", 700, 1100, { inColumn: true }), part("more", 700, 1100, { inColumn: true })];
+    expect(lintPage(page(parts), context)).toEqual([]);
     expect(pageEdges(page(parts))).toEqual({ left: 49, right: 1231 });
   });
 

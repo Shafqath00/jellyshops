@@ -197,6 +197,8 @@ Create `jellyshops/src/app/themes/jelly-studio.css` and import it in `jellyshops
 [data-jelly-theme="jelly-studio"] .jelly-product-card h3 { font-size: 0.95rem; }
 ```
 
+Page edges: every section is wrapped in a section frame and its `.jelly-container` is placed by the platform (docs/design-contract.md §2.3). Do not write a `.jelly-container` width rule; set `--j-page-normal` (content width), `--j-page-narrow`, `--j-page-margin-desktop` / `-tablet` / `-sm` on `&` instead, and pad full-width rows (header, footer) with `var(--j-page-edge)` so they line up with the sections.
+
 Tokens available to every theme (from `resolveStorefrontThemeTokens`): `--theme-background`, `--theme-surface`, `--theme-text`, `--theme-muted-text`, `--theme-border`, `--theme-accent`, `--theme-accent-soft`, `--theme-font-heading`, `--theme-font-body`, `--jelly-color-*`, `--jelly-font-display`, `--jelly-font-body`, `--jelly-container-width`, `--jelly-spacing-section`, `--jelly-heading-size`, `--jelly-body-size`, `--jelly-card-*`, `--store-*`. Plus the optional ones the shared style settings write (`--jelly-type-*`, `--jelly-scheme-*`, `--jelly-button-*`, `--jelly-field-*`, `--jelly-badge-*`).
 
 Rules that matter (learned the hard way):

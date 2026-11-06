@@ -47,7 +47,7 @@ export function TrustStripSection({ section, context, mode = "published", select
     // Each copy takes the speed's seconds per point, so long and short strips move at the same pace.
     const duration = `${points.length * SECONDS[choice(section.settings, "speed", ["slow", "normal", "fast"] as const, "normal")]}s`;
     return <section className="jelly-trust-strip" {...sectionData(section, { "data-layout": "scroll" })}>
-      <div className="jelly-trust-marquee" style={{ "--jelly-marquee-duration": duration } as CSSProperties}>
+      <div className="jelly-trust-marquee" data-scrolling="" style={{ "--jelly-marquee-duration": duration } as CSSProperties}>
         <ul className="jelly-trust-track"><TrustPointItems points={points} icons={icons} editor={editor} selectedBlockId={selectedBlockId} /></ul>
         <ul className="jelly-trust-track" aria-hidden="true"><TrustPointItems points={points} icons={icons} copy /></ul>
       </div>

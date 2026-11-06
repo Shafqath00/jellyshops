@@ -1,4 +1,5 @@
 import { safeRichTextHref, type SectionNode } from "@jelly/storefront-schema";
+import { Grid, Stack } from "../layout";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import { useState, type CSSProperties } from "react";
 import type { RendererMode } from "../types";
@@ -114,9 +115,9 @@ export function MulticolumnSection({ section, context }: { section: SectionNode;
   return <section className="jelly-section jelly-multicolumn" {...sectionData(section, { "data-align": choice(section.settings, "contentAlignment", ["left", "center", "right"] as const, "left") })}>
     <StorefrontContainer>
       {!headingHidden(section) && <div className="jelly-section-intro"><h2 {...content.headingProps}>{content.headingContent}</h2><SettingText text={content.body} document={content.bodyDocument} {...content.bodyProps} /></div>}
-      {columns.length > 0 && <div className="jelly-multicolumn-grid" style={{ "--jelly-columns": count } as CSSProperties}>
-        {columns.map((column) => <article key={column.id}><h3>{column.heading}</h3><SettingText text={column.text} document={column.document} /></article>)}
-      </div>}
+      {columns.length > 0 && <Grid className="jelly-multicolumn-grid" columns={count} gap="xl" rowGap="3xl" style={{ "--jelly-columns": count } as CSSProperties}>
+        {columns.map((column) => <Stack as="article" key={column.id} gap="xs"><h3>{column.heading}</h3><SettingText text={column.text} document={column.document} /></Stack>)}
+      </Grid>}
       <Actions buttons={content.buttons} storeSlug={context?.storeSlug} />
     </StorefrontContainer>
   </section>;

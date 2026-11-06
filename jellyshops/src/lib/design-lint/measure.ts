@@ -14,11 +14,15 @@ export interface PartMeasurement {
   /** Left/right edge of the part's visible content (text, media, coloured panels), in px from the frame's left edge; null when empty. */
   left: number | null;
   right: number | null;
-  /** The same for text, links, controls and product cards only. */
+  /** The same for text, links and controls only (a link around a photo counts by its text). */
   textLeft: number | null;
   textRight: number | null;
   /** Content runs to at least one side of the frame (edge-to-edge media or panels). */
   fullBleed: boolean;
+  /** Its content moves sideways on its own (a scrolling strip), so its text runs past the edges by design. */
+  scrolling: boolean;
+  /** Placed in one column of a page laid out in columns (the product page's info column), not a row of its own. */
+  inColumn: boolean;
   paddingTop: number;
   paddingBottom: number;
 }
@@ -76,6 +80,29 @@ export function measureStorefrontPage(): PageMeasurement {
   const topLevel = candidates.filter((element) => !candidates.some((other) => other !== element && other.contains(element)));
   const seen = new Map<string, number>();
   const contentSelector = "h1, h2, h3, h4, h5, h6, p, a, button, input, select, textarea, label, li, blockquote, figcaption";
+  /** Left/right of the text boxes inside `element`. A link around a photo (a product card) counts by its text only, not its photo's box. */
+  const textExtent = (element: Element): { left: number | null; right: number | null } => {
+    let left: number | null = null;
+    let right: number | null = null;
+    const add = (from: number, to: number) => {
+      left = left === null ? from : Math.min(left, from);
+      right = right === null ? to : Math.max(right, to);
+    };
+    for (const item of element.querySelectorAll(contentSelector)) {
+      if (item.matches("a, li") && item.querySelector("img, picture, video")) continue; // its own text elements are measured on their own
+      const rect = visibleRect(item);
+      if (rect) add(rect.left, rect.right);
+    }
+    return { left, right };
+  };
+  /** Rows laid out in two or more columns, e.g. the product page's photos | details. */
+  const columnCount = (element: Element | null) => element ? getComputedStyle(element).gridTemplateColumns.split(" ").filter((track) => track && track !== "none").length : 0;
+  /** A row of items laid across the content column: a grid of two or more columns, or a flex row of two or more items. */
+  const isRow = (element: Element) => {
+    const style = getComputedStyle(element);
+    if (style.display.includes("grid")) return columnCount(element) >= 2;
+    return style.display.includes("flex") && !style.flexDirection.startsWith("column") && element.children.length >= 2;
+  };
   const parts: PartMeasurement[] = [];
   for (const element of topLevel) {
     const box = element.getBoundingClientRect();
@@ -84,22 +111,17 @@ export function measureStorefrontPage(): PageMeasurement {
     const base = classes[0] ?? element.tagName.toLowerCase();
     const count = (seen.get(base) ?? 0) + 1;
     seen.set(base, count);
-    let textLeft: number | null = null;
-    let textRight: number | null = null;
-    for (const item of element.querySelectorAll(contentSelector)) {
-      const rect = visibleRect(item);
-      if (!rect) continue;
-      textLeft = textLeft === null ? rect.left : Math.min(textLeft, rect.left);
-      textRight = textRight === null ? rect.right : Math.max(textRight, rect.right);
-    }
-    // Images, videos and coloured panels count as content too (a split layout's image is its left edge).
+    const { left: textLeft, right: textRight } = textExtent(element);
+    // Images, videos and coloured panels count as content too (a split layout's image is its left edge), and so do rows
+    // of items (grids, flex rows): three centred columns that fill the page are on its edges even when their text is shorter.
     const style = getComputedStyle(element);
     let left = textLeft;
     let right = textRight;
     for (const item of element.querySelectorAll("*")) {
       const isMedia = /^(IMG|VIDEO|PICTURE|IFRAME|CANVAS)$/.test(item.tagName);
       let isBox = false;
-      if (!isMedia) {
+      if (!isMedia && isRow(item)) isBox = Boolean(item.textContent?.trim()) || Boolean(item.querySelector("img, video, picture"));
+      if (!isMedia && !isBox) {
         const itemStyle = getComputedStyle(item);
         const ownColour = itemStyle.backgroundColor !== "rgba(0, 0, 0, 0)" && itemStyle.backgroundColor !== "transparent" && itemStyle.backgroundColor !== style.backgroundColor;
         isBox = ownColour || itemStyle.backgroundImage !== "none";
@@ -120,6 +142,11 @@ export function measureStorefrontPage(): PageMeasurement {
       paddingBottom = parseFloat(inner.paddingBottom) || 0;
     }
     const isChrome = classes.some((name) => /^jelly-(announcement|header|footer)/.test(name));
+    // A section inside a page laid out in columns that takes only some of them (Avenue and Minimal put product details
+    // in the right-hand column): it is judged as part of that row, not against the page edges.
+    const frame = element.closest("[data-section-frame]") ?? element;
+    const page = frame.parentElement;
+    const inColumn = Boolean(page && getComputedStyle(page).display.includes("grid") && columnCount(page) >= 2 && frame.getBoundingClientRect().width < page.getBoundingClientRect().width - 2);
     parts.push({
       key: count > 1 ? `${base}#${count}` : base,
       isSection: element.hasAttribute("data-section-id") && !isChrome,
@@ -128,6 +155,8 @@ export function measureStorefrontPage(): PageMeasurement {
       textLeft: textLeft === null ? null : round(textLeft),
       textRight: textRight === null ? null : round(textRight),
       fullBleed,
+      scrolling: Boolean(element.matches("[data-scrolling]") || element.querySelector("[data-scrolling]")),
+      inColumn,
       paddingTop: round(paddingTop),
       paddingBottom: round(paddingBottom),
     });

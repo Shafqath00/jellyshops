@@ -8,6 +8,9 @@
  * @font-face and images that are not https links do not. The preview reloads as you save.
  */
 & {
+  /* Page edges for the shared section frame (docs/design-contract.md): content 1136px wide by default. */
+  --j-page-normal: calc(var(--jelly-container-width, 1200px) - 2 * var(--jelly-layout-gutter, 32px));
+  --j-page-margin-desktop: var(--jelly-layout-gutter, 32px);
   background: var(--theme-background);
   color: var(--theme-text);
   font-family: var(--theme-font-body);
@@ -28,7 +31,6 @@ a { color: inherit; }
 ul { list-style: none; margin: 0; padding: 0; }
 
 /* Layout */
-.jelly-container { max-width: var(--jelly-container-width); margin: 0 auto; padding: 0 var(--jelly-layout-gutter); }
 .jelly-section { padding: var(--jelly-spacing-section) 0; }
 
 /* Buttons */
@@ -39,13 +41,13 @@ ul { list-style: none; margin: 0; padding: 0; }
 .jelly-button:hover { background: var(--theme-accent); border-color: var(--theme-accent); color: var(--theme-text); }
 
 /* Announcement, header and footer */
-.jelly-announcement { padding: 8px var(--jelly-layout-gutter); background: var(--theme-accent); color: var(--theme-surface); text-align: center; font-size: 0.875rem; }
-.jelly-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 20px var(--jelly-layout-gutter); background: var(--theme-background); border-bottom: 1px solid var(--theme-border); }
+.jelly-announcement { padding: 8px var(--j-page-edge); background: var(--theme-accent); color: var(--theme-surface); text-align: center; font-size: 0.875rem; }
+.jelly-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 20px var(--j-page-edge); background: var(--theme-background); border-bottom: 1px solid var(--theme-border); }
 .jelly-header-brand { font-family: var(--theme-font-body); font-weight: 700; font-size: 1.5rem; text-decoration: none; }
 .jelly-menu { display: flex; gap: 24px; }
 .jelly-menu a { text-decoration: none; }
 .jelly-mobile-navigation { display: none; }
-.jelly-footer { padding: 48px var(--jelly-layout-gutter); background: var(--theme-surface); border-top: 1px solid var(--theme-border); }
+.jelly-footer { padding: 48px var(--j-page-edge); background: var(--theme-surface); border-top: 1px solid var(--theme-border); }
 
 /* Hero */
 .jelly-hero { background: var(--theme-background); }
@@ -68,7 +70,6 @@ ul { list-style: none; margin: 0; padding: 0; }
 .jelly-multicolumn-grid { display: grid; grid-template-columns: repeat(var(--jelly-columns,3),minmax(0,1fr)); gap: 32px; }
 .jelly-multicolumn h3 { font-size: 23px; margin-bottom: 14px; }
 .jelly-section-intro { text-align: center; margin-bottom: 32px; }
-.jelly-faq .jelly-container { max-width: 1000px; }
 .jelly-faq details { border-bottom: 1px solid var(--theme-border); padding: 20px 0; }
 .jelly-faq summary { font-weight: 600; cursor: pointer; }
 .jelly-faq details p { margin-top: 12px; max-width: 75ch; }
@@ -103,7 +104,7 @@ ul { list-style: none; margin: 0; padding: 0; }
   .jelly-product-gallery img { max-height: 420px; }
 }
 /* Phones */
-.jelly-header { display: grid; grid-template-columns: 1fr auto 1fr; padding: 24px 4%; min-height: 100px; height: auto; color: var(--theme-text); }
+.jelly-header { display: grid; grid-template-columns: 1fr auto 1fr; padding: 24px var(--j-page-edge); min-height: 100px; height: auto; color: var(--theme-text); }
 .jelly-header a { color: var(--theme-text); }
 .jelly-header-brand { grid-column: 2; justify-self: center; font-size: 30px; }
 .jelly-header > nav:not(.jelly-header-tools) { display: block; grid-column: 1 / -1; grid-row: 2; justify-self: center; }
@@ -111,11 +112,11 @@ ul { list-style: none; margin: 0; padding: 0; }
 [data-section-type="jelly-resthaven/navigation"] .jelly-section { padding: 12px 0 20px; }
 [data-section-type="jelly-resthaven/navigation"] .jelly-custom-content-inner { justify-content: center; }
 .jelly-hero[data-layout="overlay"] { padding: 0; }
-.jelly-hero[data-layout="overlay"] .jelly-container { position: relative; max-width: none; padding: 0; min-height: 560px; display: grid; align-items: center; }
+.jelly-hero[data-layout="overlay"] .jelly-container { position: relative; width: 100%; max-width: none; padding: 0 var(--j-page-edge); min-height: 560px; display: grid; align-items: center; }
 .jelly-hero[data-layout="overlay"] .jelly-hero-media { position: absolute; inset: 0; }
 .jelly-hero-media img { width: 100%; height: 100%; object-fit: cover; }
 .jelly-hero-overlay { position: absolute; inset: 0; }
-.jelly-hero[data-layout="overlay"] .jelly-hero-content { position: relative; z-index: 1; color: var(--theme-surface); padding: 60px 6%; max-width: 700px; }
+.jelly-hero[data-layout="overlay"] .jelly-hero-content { position: relative; z-index: 1; color: var(--theme-surface); padding: 60px 0; max-width: 700px; }
 .jelly-hero h1 { font-family: var(--theme-font-heading, Georgia), Georgia, serif; font-size: clamp(38px, 5vw, 64px); }
 .jelly-hero-actions .jelly-button { min-width: 150px; text-align: center; }
 [data-section-type="jelly-resthaven/categories"] .jelly-custom-content-inner > .jelly-block-group { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); }
@@ -133,12 +134,12 @@ ul { list-style: none; margin: 0; padding: 0; }
   .jelly-mobile-navigation { display: block; }
   .jelly-product-grid-items { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   h1 { font-size: calc(var(--jelly-heading-size) * 0.6); }
-  .jelly-header { padding: 22px 16px; }
+  .jelly-header { padding: 22px var(--j-page-edge); }
   .jelly-header-brand { font-size: 24px; }
   .jelly-header > nav:not(.jelly-header-tools) { display: none; }
   [data-section-type="jelly-resthaven/navigation"] .jelly-custom-content-inner { overflow-x: auto; justify-content: start; flex-wrap: nowrap; }
   .jelly-hero[data-layout="overlay"] .jelly-container { min-height: 490px; }
-  .jelly-hero[data-layout="overlay"] .jelly-hero-content { padding: 40px 24px; }
+  .jelly-hero[data-layout="overlay"] .jelly-hero-content { padding: 40px 0; }
   .jelly-hero-actions { flex-direction: column; }
   .jelly-hero-actions .jelly-button { width: 100%; }
   [data-section-type="jelly-resthaven/categories"] .jelly-custom-content-inner > .jelly-block-group { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
@@ -175,7 +176,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 
 /* Footer: plum band with a newsletter row, the store and three link columns, then the credit line.
    (The footer's text used to inherit the page background colour on a white panel and was unreadable.) */
-.jelly-footer { display: grid; gap: 40px; padding: 56px max(20px, calc((100% - 1200px) / 2)) 28px; background: var(--theme-accent); color: var(--theme-surface); border-top: 0; }
+.jelly-footer { display: grid; gap: 40px; padding: 56px var(--j-page-edge) 28px; background: var(--theme-accent); color: var(--theme-surface); border-top: 0; }
 .jelly-footer { font-weight: 400; }
 .jelly-header { font-weight: 500; }
 .jelly-footer a { color: inherit; text-decoration: none; }

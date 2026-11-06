@@ -20,8 +20,10 @@ export interface PageContext { theme: string; page: string; device: string }
 export const DESIGN_LIMITS = {
   edgeTolerance: 1,
   centreTolerance: 4,
-  /** Centred content must be clearly narrower than the page (at least this much in from each edge). */
+  /** Centred content must be clearly narrower than the page: at least this much in from each edge… */
   centredInset: 48,
+  /** …or this share of the page width, whichever is smaller (phones are narrow). */
+  centredInsetShare: 0.08,
   maxSectionPaddings: 3,
   maxHeadingSizes: 4,
   minTarget: 24,
@@ -51,7 +53,7 @@ export function dominantValue(values: number[], tolerance: number, preferLow: bo
 
 export function pageEdges(measurement: PageMeasurement) {
   // Full-bleed parts run edge to edge by design, so they don't vote on where the page edges are.
-  const withContent = measurement.parts.filter((part) => !part.fullBleed && part.left !== null && part.right !== null);
+  const withContent = measurement.parts.filter((part) => !part.fullBleed && !part.inColumn && part.left !== null && part.right !== null);
   return {
     left: dominantValue(withContent.map((part) => part.left as number), DESIGN_LIMITS.edgeTolerance, true),
     right: dominantValue(withContent.map((part) => part.right as number), DESIGN_LIMITS.edgeTolerance, false),
@@ -60,14 +62,17 @@ export function pageEdges(measurement: PageMeasurement) {
 
 export function lintPage(measurement: PageMeasurement, context: PageContext): DesignFinding[] {
   const findings: DesignFinding[] = [];
-  const { edgeTolerance, centreTolerance, centredInset } = DESIGN_LIMITS;
+  const { edgeTolerance, centreTolerance, centredInsetShare } = DESIGN_LIMITS;
 
   const edges = pageEdges(measurement);
   if (edges.left !== null && edges.right !== null) {
+    const centredInset = Math.min(DESIGN_LIMITS.centredInset, (edges.right - edges.left) * centredInsetShare);
     for (const part of measurement.parts) {
+      if (part.inColumn) continue; // judged with the row it sits in
       if (part.fullBleed) {
-        // Edge-to-edge media is fine; its text must still sit inside the page edges.
-        if (part.textLeft === null || part.textRight === null) continue;
+        // Edge-to-edge media is fine; its text must still sit inside the page edges (a scrolling strip's text moves
+        // across the whole screen by design).
+        if (part.scrolling || part.textLeft === null || part.textRight === null) continue;
         if (part.textLeft < edges.left - edgeTolerance || part.textRight > edges.right + edgeTolerance) {
           findings.push(finding("edge", context, `${part.key} (full width) has text outside the page edges (text ${part.textLeft}–${part.textRight}px, page edges ${edges.left}–${edges.right}px)`, part.key));
         }

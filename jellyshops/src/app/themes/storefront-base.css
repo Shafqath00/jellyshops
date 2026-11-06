@@ -121,6 +121,33 @@
 }
 /* contract-tokens:end */
 
+/* Section frame (docs/design-contract.md §2.3). Every section, header and footer is wrapped in [data-section-frame]
+   by the renderer; its .jelly-container is the content column, on the same page edges in every theme. Themes set
+   --j-page-normal / --j-page-narrow / --j-page-margin and do not write their own container width rule. A theme may
+   still change a container's inner layout (grid, gap) or let one section's content run wider. */
+:where([data-jelly-theme]) .jelly-container { width: min(calc(100% - 2 * var(--j-page-margin)), var(--j-page-normal)); margin-inline: auto; }
+:where([data-jelly-theme]) :where([data-frame-width="narrow"]) .jelly-container { width: min(calc(100% - 2 * var(--j-page-margin)), var(--j-page-narrow)); }
+/* "Full" (the section's Width setting) beats a theme's own width for that section, as it did before the frame. */
+:where([data-jelly-theme]) [data-section-frame][data-frame-width="full"] .jelly-container.jelly-container { width: calc(100% - 2 * var(--j-page-margin)); max-width: none; }
+
+/* Layout primitives (packages/storefront-renderer/src/layout.tsx). Gaps and text styles come from contract tokens. */
+:where(.jelly-layout-stack) { display: flex; flex-direction: column; gap: var(--jelly-layout-gap); }
+:where(.jelly-layout-stack[data-direction="row"]) { flex-direction: row; flex-wrap: wrap; }
+:where(.jelly-layout-stack[data-align="start"]) { align-items: flex-start; }
+:where(.jelly-layout-stack[data-align="center"]) { align-items: center; }
+:where(.jelly-layout-stack[data-align="end"]) { align-items: flex-end; }
+:where(.jelly-layout-grid) { display: grid; grid-template-columns: repeat(var(--jelly-layout-columns, 3), minmax(0, 1fr)); gap: var(--jelly-layout-row-gap) var(--jelly-layout-gap); }
+@media (max-width: 1023px) { :where(.jelly-layout-grid) { grid-template-columns: repeat(var(--jelly-layout-columns-tablet, 2), minmax(0, 1fr)); } }
+@media (max-width: 767px) { :where(.jelly-layout-grid) { grid-template-columns: repeat(var(--jelly-layout-columns-mobile, 1), minmax(0, 1fr)); } }
+:where(.jelly-layout-media) { position: relative; overflow: hidden; }
+:where(.jelly-layout-media) > :where(img, video, picture, iframe) { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--jelly-layout-focal, 50% 50%); }
+:where(.jelly-layout-media[data-fit="contain"]) > :where(img, video, picture) { object-fit: contain; }
+:where(.jelly-layout-text) { font-family: var(--jelly-layout-font); font-size: var(--jelly-layout-size); line-height: var(--jelly-layout-line); letter-spacing: var(--jelly-layout-track); text-transform: var(--jelly-layout-case); }
+:where(.jelly-layout-text[data-align="center"]) { text-align: center; margin-inline: auto; }
+:where(.jelly-layout-text[data-align="right"]) { text-align: right; margin-left: auto; }
+:where(.jelly-layout-text[data-max-width="narrow"]) { max-width: var(--j-content-narrow); }
+:where(.jelly-layout-text[data-max-width="normal"]) { max-width: var(--j-content-normal); }
+
 .jelly-visually-hidden {
   position: absolute;
   width: 1px;
