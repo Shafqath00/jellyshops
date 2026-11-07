@@ -1,6 +1,6 @@
 # Jelly Forma — implementation and QA
 
-Built 7 November 2026 from the Jelly CLI scaffold, then refined against captured Hyper desktop, phone and product views. Forma uses a compact header, eight product-cutout category shortcuts, a 480px desktop landscape hero, square product cards and pill controls. Manrope and a white/grey/blue/ink palette keep catalogue details readable. All sections use existing Jelly renderers; no shared renderer or backend behaviour was changed. The source stylesheet is 166 lines (150 before the tablet fix and polish pass of 7 November) and uses scheme roles, contract tokens and relative lengths (apart from 1px borders).
+Built 7 November 2026 from the Jelly CLI scaffold, then refined against captured Hyper desktop, phone and product views. Forma uses a compact header, eight product-cutout category shortcuts, a 480px desktop landscape hero, square product cards and pill controls. Manrope and a white/grey/blue/ink palette keep catalogue details readable. All sections use existing Jelly renderers; no shared renderer or backend behaviour was changed. The source stylesheet is 174 lines (150 before the tablet, polish and phone passes of 7 November) and uses scheme roles, contract tokens and relative lengths (apart from 1px borders).
 
 The refinement excludes Forma from conflicting legacy visual defaults with a zero-specificity selector. Removing that exclusion reproduces the original global stylesheet exactly, preserving existing themes' rules and specificity. The product preview enables the existing thumbnail gallery and uses configurable furniture finishes, while other previews retain their size options and purchase actions. Desktop product details, options and purchase occupy consecutive content-sized grid rows. Original illustrative assets replace the previous mismatched product media; see SOURCES.md.
 
@@ -46,3 +46,7 @@ From `docs/reports/2026-11-07-forma-full-page-audit.md`, findings 1 and 2. Betwe
 ## Polish pass (7 November 2026)
 
 Audit findings 3–6, 8, 9, 12, 14 and 17: calmer page titles, footer with two small-headed link columns and a full-width divider, pill cart stepper with text-link Remove/Continue shopping, card buttons aligned across rows, newsletter on one row with a drawn checkbox, FAQ +/− icons, page-text spacing, three tablet feature columns. The starter footer gains a "Shop" column. Checked by the Forma spec (13 tests), the design lint (all themes), conformance (20) and unit tests.
+
+## Phone pass (7 November 2026)
+
+Designed for 360, 390 and 430px: section spacing scale .55 on phones (pages 8–20% shorter: home 4,267 → 3,926px, product 2,784 → 2,237px at 390), no card buttons on phones (the card is the link), compact feature columns, full-width Subscribe, related products as a swipe row, quantity pill beside Add to cart on every width, the sticky buy bar (already on in the starter) styled for Forma, cart photos on the light surface, tighter phone footer. New Playwright test checks every page at the three widths for sideways scrolling, the buying row, the swipe row, the bar appearing after scroll, hidden card buttons and the Subscribe width.

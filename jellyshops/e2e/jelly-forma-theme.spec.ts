@@ -59,6 +59,45 @@ test("tablet and phone: compact header and continuous purchase column", async ({
   await frame.locator(".jelly-mobile-navigation > summary").click();
   await expect(frame.getByRole("navigation", { name: "Mobile navigation" })).toBeVisible();
 });
+
+test("phones (360, 390, 430px): buying row, sticky bar, swipe row, compact cards", async ({ page }) => {
+  const views = page.getByRole("group", { name: "Page" });
+  const frame = page.frameLocator(`iframe[title='${frameTitle}']`);
+  await page.getByRole("group", { name: "Preview width" }).getByRole("button", { name: /^Mobile/ }).click();
+  for (const width of [360, 390, 430]) {
+    await page.locator("iframe").evaluate((el, w) => { el.parentElement!.style.width = `${w}px`; (el as HTMLElement).style.width = `${w}px`; }, width);
+    for (const view of ["Home", "Collection", "Product", "Cart", "Search", "Page", "404"]) {
+      await views.getByRole("button", { name: view, exact: true }).click();
+      expect(await frame.locator("html").evaluate((html) => html.scrollWidth - html.clientWidth), `${view} at ${width}px scrolls sideways`).toBeLessThanOrEqual(0);
+    }
+    await views.getByRole("button", { name: "Product", exact: true }).click();
+    // Quantity and Add to cart share one row.
+    const stepper = await frame.locator(".jelly-product-purchase .jelly-quantity-stepper").boundingBox();
+    const add = await frame.locator(".jelly-purchase-actions .jelly-button").first().boundingBox();
+    expect(Math.abs(stepper!.y + stepper!.height / 2 - (add!.y + add!.height / 2)), `${width}px buying row`).toBeLessThanOrEqual(6);
+    const origin = await page.locator("iframe").boundingBox();
+    expect(add!.x + add!.width - origin!.x, `${width}px Add to cart inside the page`).toBeLessThanOrEqual(width);
+    // Related products swipe sideways inside their own row, never the page.
+    const row = frame.locator(".jelly-related-products .jelly-product-grid-items");
+    expect(await row.evaluate((el) => el.scrollWidth > el.clientWidth), `${width}px related row swipes`).toBe(true);
+    expect(await row.evaluate((el) => new Set([...el.children].map((c) => Math.round(c.getBoundingClientRect().top))).size), `${width}px related cards in one row`).toBe(1);
+    // The buy bar appears once Add to cart has scrolled away.
+    const bar = frame.locator(".jelly-sticky-purchase");
+    await frame.locator("html").evaluate(() => scrollTo(0, 0));
+    await expect(bar).toBeHidden();
+    await frame.locator("html").evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+    await expect(bar).toBeVisible();
+    const barBox = await bar.boundingBox();
+    expect(barBox!.width, `${width}px bar width`).toBeLessThanOrEqual(width);
+    await frame.locator("html").evaluate(() => scrollTo(0, 0));
+  }
+  // Cards have no button on phones (the card is the link); the newsletter button fills the row.
+  await views.getByRole("button", { name: "Home", exact: true }).click();
+  await expect(frame.locator("main .jelly-product-card-button").first()).toBeHidden();
+  const form = await frame.locator(".jelly-newsletter form").boundingBox();
+  const subscribe = await frame.locator(".jelly-newsletter button[type=submit]").boundingBox();
+  expect(subscribe!.width, "phone Subscribe width").toBeGreaterThan(form!.width * 0.95);
+});
 test("polish: page titles, footer, cards, cart, newsletter and FAQ", async ({ page }) => {
   const views = page.getByRole("group", { name: "Page" });
   const widths = page.getByRole("group", { name: "Preview width" });
