@@ -16066,6 +16066,32 @@
           "maxLength": 80
         },
         {
+          "type": "segmented",
+          "key": "layout",
+          "label": "Show as",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Text",
+              "value": "plain"
+            },
+            {
+              "label": "Expandable panel",
+              "value": "expandable"
+            }
+          ]
+        },
+        {
+          "type": "checkbox",
+          "key": "startOpen",
+          "label": "Open the panel to start with",
+          "group": "layout",
+          "showWhen": {
+            "key": "layout",
+            "equals": "expandable"
+          }
+        },
+        {
           "group": "style",
           "heading": "Style",
           "element": "heading",
@@ -16288,6 +16314,16 @@
           "heading": {
             "type": "string",
             "maxLength": 80
+          },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "plain",
+              "expandable"
+            ]
+          },
+          "startOpen": {
+            "type": "boolean"
           },
           "el_heading_color": {
             "anyOf": [
@@ -16834,6 +16870,12 @@
           "group": "content"
         },
         {
+          "type": "checkbox",
+          "key": "showBreadcrumb",
+          "label": "Show the path back to the home page",
+          "group": "content"
+        },
+        {
           "group": "style",
           "heading": "Style",
           "element": "title",
@@ -17091,6 +17133,9 @@
               "all"
             ]
           },
+          "showBreadcrumb": {
+            "type": "boolean"
+          },
           "el_title_color": {
             "anyOf": [
               {
@@ -17234,6 +17279,18 @@
           "label": "Empty collection message",
           "group": "content",
           "maxLength": 160
+        },
+        {
+          "type": "checkbox",
+          "key": "showSort",
+          "label": "Let shoppers sort products",
+          "group": "content"
+        },
+        {
+          "type": "checkbox",
+          "key": "showFilters",
+          "label": "Let shoppers filter by availability, price and colour",
+          "group": "content"
         }
       ],
       "settingsSchema": {
@@ -17255,6 +17312,12 @@
             "default": "No products are available in this collection yet.",
             "type": "string",
             "maxLength": 160
+          },
+          "showSort": {
+            "type": "boolean"
+          },
+          "showFilters": {
+            "type": "boolean"
           }
         }
       }
@@ -17346,10 +17409,44 @@
       "defaultBlocks": [],
       "responsiveFields": [],
       "presets": [],
-      "controls": [],
+      "controls": [
+        {
+          "type": "checkbox",
+          "key": "showSort",
+          "label": "Let shoppers sort results",
+          "group": "content"
+        },
+        {
+          "type": "checkbox",
+          "key": "showFilters",
+          "label": "Let shoppers filter by availability, price and colour",
+          "group": "content"
+        },
+        {
+          "type": "range",
+          "key": "columns",
+          "label": "Columns",
+          "group": "layout",
+          "min": 2,
+          "max": 4,
+          "step": 1
+        }
+      ],
       "settingsSchema": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "showSort": {
+            "type": "boolean"
+          },
+          "showFilters": {
+            "type": "boolean"
+          },
+          "columns": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 4
+          }
+        }
       }
     },
     {

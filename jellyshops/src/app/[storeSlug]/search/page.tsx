@@ -14,6 +14,7 @@ import { loadPublicStorefrontPublication, type PublicStorefrontPublication } fro
 import { createSearchPageContext } from "@/features/storefront/page-context-loaders";
 import { resolveStorefrontRoute, type ResolvedStorefrontRoute } from "@/features/storefront/resource-loader";
 import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
+import { searchTemplateHasToolbar } from "@/features/storefront/search-template";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
 
@@ -56,7 +57,7 @@ export default function SearchPage() {
   }, [store, publication, context]);
 
   if (!store) return null;
-  if (store && publication?.kind === "v4" && isCompleteStorefrontTheme(publication.snapshot.theme.id ?? publication.snapshot.theme.presetId, publication.snapshot.theme.version)) return <main className="signature-page"><header className="signature-page-heading"><h1>Find your next favourite</h1></header><CatalogBrowser key={query} storeSlug={store.slug} initialQuery={query} /></main>;
+  if (store && publication?.kind === "v4" && isCompleteStorefrontTheme(publication.snapshot.theme.id ?? publication.snapshot.theme.presetId, publication.snapshot.theme.version) && !searchTemplateHasToolbar(publication.snapshot)) return <main className="signature-page"><header className="signature-page-heading"><h1>Find your next favourite</h1></header><CatalogBrowser key={query} storeSlug={store.slug} initialQuery={query} /></main>;
   if (publication?.kind === "v4") {
     if (route?.status === "ready") {
       return <PublishedRuntimeStorefront snapshot={publication.snapshot} route={route} storeSlug={store.slug} currency={store.currency} products={state.products.filter((product) => product.published && !product.archived)} />;

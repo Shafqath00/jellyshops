@@ -6,6 +6,8 @@ import type { CollectionPresentationContext, PublicProduct } from "../types";
 import { choice } from "./shared";
 import { normalizeRichTextDocument } from "@jelly/storefront-schema";
 import { renderBlocks } from "./rich-text";
+import { ProductListBrowser } from "./product-list-browser";
+import { resolveStorefrontHref } from "../runtime-context";
 
 /** The merchant's formatted description when there is one, otherwise the plain text. */
 function CollectionDescriptionText({ collection }: { collection: CollectionPresentationContext["collection"] }) {
@@ -64,6 +66,7 @@ export function CollectionHeaderSection({ context, section }: { context: Storefr
     {/* eslint-disable-next-line @next/next/no-img-element */}
     {showImage && layout === "banner" && <img className="jelly-collection-header-media" src={collection.imageUrl} alt="" {...part("image")} />}
     <StorefrontContainer>
+      {section.settings.showBreadcrumb === true && <nav className="jelly-breadcrumb" aria-label="Breadcrumb"><ol><li><a href={resolveStorefrontHref("/", context.storeSlug) ?? "/"}>Home</a></li><li aria-current="page">{collection.title}</li></ol></nav>}
       <div className="jelly-collection-header-copy">
         {section.settings.showTitle !== false && <h1 {...part("title")}>{collection.title}</h1>}
         {section.settings.showDescription === true && (["2", "3", "4"].includes(String(section.settings.descriptionLines))
@@ -80,10 +83,16 @@ export function CollectionHeaderSection({ context, section }: { context: Storefr
 export function CollectionProductGridSection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown> } }) {
   const presentation = collectionContext(context);
   if (!presentation) return null;
-  if (presentation.interactiveGrid) return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer><h2 className="jelly-visually-hidden">Products</h2>{presentation.interactiveGrid}</StorefrontContainer></section>;
+  const showSort = section.settings.showSort === true;
+  const showFilters = section.settings.showFilters === true;
+  // A section with its own sorting or filters always draws the theme's product list (also on the live store).
+  if (presentation.interactiveGrid && !showSort && !showFilters) return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer><h2 className="jelly-visually-hidden">Products</h2>{presentation.interactiveGrid}</StorefrontContainer></section>;
   const columns = typeof section.settings.columns === "number" && Number.isInteger(section.settings.columns) ? Math.max(2, Math.min(4, section.settings.columns)) : 3;
   const limit = typeof section.settings.limit === "number" && Number.isInteger(section.settings.limit) ? Math.max(1, Math.min(24, section.settings.limit)) : 12;
   const emptyMessage = typeof section.settings.emptyMessage === "string" ? section.settings.emptyMessage : "No products are available in this collection yet.";
+  if (showSort || showFilters) return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer><h2 className="jelly-visually-hidden">Products</h2>
+    <ProductListBrowser products={presentation.products} columns={columns} limit={limit} showSort={showSort} showFilters={showFilters} emptyMessage={emptyMessage} />
+  </StorefrontContainer></section>;
   return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer><h2 className="jelly-visually-hidden">Products</h2>{presentation.products.length
     ? <div className="jelly-product-grid-items" data-testid="collection-product-grid-items" data-columns={columns} style={{ "--jelly-columns": columns } as CSSProperties}>{presentation.products.slice(0, limit).map((product) => <StorefrontProductCard key={product.id} product={product} />)}</div>
     : <p className="jelly-empty-state">{emptyMessage}</p>

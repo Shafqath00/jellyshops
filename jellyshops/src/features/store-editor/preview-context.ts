@@ -10,6 +10,9 @@ function collectionPresentation(detail: CatalogAdminCollectionDetail): Collectio
       id: product.id, name: product.title, href: `/products/${product.handle}`,
       imageUrl: product.media[0]?.url ?? "",
       price: priceMinor === undefined ? "" : new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(priceMinor / 100),
+      // Same facts the live store gives product lists, so sorting and filters behave alike in the preview.
+      ...(priceMinor === undefined ? {} : { priceMinor }),
+      available: product.available,
     };
   });
   const descriptionDoc = (detail as { descriptionDoc?: CollectionPresentationContext["collection"]["descriptionDoc"] }).descriptionDoc;

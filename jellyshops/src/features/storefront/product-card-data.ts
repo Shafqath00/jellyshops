@@ -30,6 +30,8 @@ export function productCardData(product: Product, href: string, currency: Curren
     href,
     imageUrl: product.imageUrl,
     price: formatMoney(priceMinor, currency),
+    priceMinor,
+    available: product.variants.some((item) => item.stock > 0),
     ...(discounted ? {
       compareAtPrice: formatMoney(compareMinor, currency),
       saving: formatMoney(compareMinor - priceMinor, currency),

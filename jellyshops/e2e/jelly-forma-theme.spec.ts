@@ -255,3 +255,48 @@ test("section layout attributes support alternate hero and image-with-text setti
   await hero.evaluate(element => element.setAttribute("data-height", "large"));
   expect(await hero.locator(".jelly-container").evaluate(element => parseFloat(getComputedStyle(element).minHeight))).toBeGreaterThan(phoneMedium);
 });
+
+test("structure: collection and search toolbars, breadcrumb, product panels", async ({ page }) => {
+  const views = page.getByRole("group", { name: "Page" });
+  const frame = page.frameLocator(`iframe[title='${frameTitle}']`);
+  const names = () => frame.locator(".jelly-list-results [data-card-part=title]").allTextContents();
+  // Collection: breadcrumb, count, sort, filters as a sidebar, four columns.
+  await views.getByRole("button", { name: "Collection", exact: true }).click();
+  await expect(frame.getByRole("navigation", { name: "Breadcrumb" })).toContainText("Home");
+  await expect(frame.locator(".jelly-list-count")).toHaveText("4 products");
+  const filters = frame.getByRole("group", { name: "Filters" });
+  await expect(filters).toBeVisible();
+  const cards = await frame.locator(".jelly-list-results .jelly-product-card").evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().top)));
+  expect(new Set(cards).size, "four cards in one row").toBe(1);
+  await frame.getByRole("combobox", { name: "Sort by" }).selectOption("price-desc");
+  expect((await names())[0]).toBe("Sunday lounge sofa");
+  await frame.getByRole("combobox", { name: "Sort by" }).selectOption("price-asc");
+  expect((await names())[0]).toBe("Everyday timber stool");
+  await filters.getByRole("checkbox", { name: "Ink" }).check();
+  await expect(frame.locator(".jelly-list-count")).toHaveText("1 product");
+  await filters.getByRole("button", { name: "Clear all" }).click();
+  await filters.getByRole("spinbutton", { name: "From" }).fill("500");
+  await expect(frame.locator(".jelly-list-count")).toHaveText("2 products");
+  // Phones: the filters fold away behind a Filter button.
+  await page.getByRole("group", { name: "Preview width" }).getByRole("button", { name: /^Mobile/ }).click();
+  await expect(frame.getByRole("group", { name: "Filters" })).toBeHidden();
+  await frame.getByRole("button", { name: /^Filter/ }).click();
+  await expect(frame.getByRole("group", { name: "Filters" })).toBeVisible();
+  await page.getByRole("group", { name: "Preview width" }).getByRole("button", { name: /^Desktop/ }).click();
+  // Search uses the same toolbar.
+  await views.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(frame.locator(".jelly-search-shell .jelly-list-count")).toHaveText("2 products");
+  await expect(frame.getByRole("combobox", { name: "Sort by" })).toBeVisible();
+  // Product: description open, specifications and details fold out, all in the buying column.
+  await views.getByRole("button", { name: "Product", exact: true }).click();
+  const description = frame.locator(".jelly-product-description details");
+  await expect(description).toHaveAttribute("open", "");
+  const specs = frame.locator(".jelly-specifications details");
+  await expect(specs.locator("dl")).toBeHidden();
+  await specs.locator("summary").click();
+  await expect(specs.locator("dt").first()).toHaveText("Material");
+  await expect(frame.locator(".jelly-product-tabs-section summary")).toHaveText(["Materials & care", "Delivery & returns"]);
+  const purchase = await frame.locator(".jelly-product-purchase").boundingBox();
+  const panels = await frame.locator(".jelly-specifications").boundingBox();
+  expect(Math.abs(panels!.x - purchase!.x), "panels sit in the buying column").toBeLessThanOrEqual(2);
+});

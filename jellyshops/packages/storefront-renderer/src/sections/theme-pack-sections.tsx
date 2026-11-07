@@ -9,6 +9,7 @@ import type { RendererMode } from "../types";
 import { choice, headingHidden, imageValue, numberValue, sectionData, visibleBlocks } from "./shared";
 import { blockStyle } from "../block-style";
 import { blockEditorData, buttonProps } from "./block-content";
+import { ProductListBrowser } from "./product-list-browser";
 
 function stringSetting(settings: Record<string, unknown>, key: string, fallback = ""): string {
   const value = settings[key];
@@ -169,7 +170,9 @@ export function SearchResultsSection({ section, context }: { section: SectionNod
     {search?.state === "none" && <p className="jelly-search-status">No products match “{query}”. Check the spelling or try a broader word.</p>}
     {search?.state === "results" && <p className="jelly-search-status">{search.resultCount === 1 ? "1 result" : `${search.resultCount} results`} for “{query}”</p>}
     {search?.state === "results" && <h2 className="jelly-visually-hidden">Search results</h2>}
-    {search?.state === "results" && <div className="jelly-product-grid-items">{results.map((product) => <StorefrontProductCard key={product.id} product={product} />)}</div>}
+    {search?.state === "results" && (section.settings.showSort === true || section.settings.showFilters === true
+      ? <ProductListBrowser products={results} columns={numberValue(section.settings, "columns", 4, 2, 4)} limit={48} showSort={section.settings.showSort === true} showFilters={section.settings.showFilters === true} emptyMessage="No products match your search." />
+      : <div className="jelly-product-grid-items">{results.map((product) => <StorefrontProductCard key={product.id} product={product} />)}</div>)}
   </div></StorefrontContainer></section>;
 }
 

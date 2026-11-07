@@ -20,7 +20,7 @@ describe("V4 page-context loaders", () => {
   it("adapts validated public Search results into renderer-only product cards", () => {
     expect(createSearchPageContext({ type: "search", query: "shoes", state: "results", resultCount: 1, results: [{ id: "shoe", handle: "classic-shoe", title: "Classic shoe", description: "Light", imageUrl: "shoe.jpg", priceMinor: 1200 }] }, "store-a", "USD")).toEqual({
       type: "search", query: "shoes", state: "results", resultCount: 1,
-      results: [{ id: "shoe", name: "Classic shoe", href: "/store-a/products/classic-shoe", imageUrl: "shoe.jpg", price: "$12.00" }],
+      results: [{ id: "shoe", name: "Classic shoe", href: "/store-a/products/classic-shoe", imageUrl: "shoe.jpg", price: "$12.00", priceMinor: 1200 }],
     });
   });
 });

@@ -12,7 +12,7 @@ describe("product card data", () => {
   it("adds the old price, the saving and the percentage off for a discounted variant", () => {
     expect(productCardData(product({}, { compareAtPriceMinor: 50000 }), "/s/products/oslo-bed", "GBP")).toEqual({
       id: "p1", name: "Oslo bed", href: "/s/products/oslo-bed", imageUrl: "https://cdn.test/oslo.jpg",
-      price: "£250.00", compareAtPrice: "£500.00", saving: "£250.00", discountPercent: 50,
+      price: "£250.00", priceMinor: 25000, available: true, compareAtPrice: "£500.00", saving: "£250.00", discountPercent: 50,
     });
   });
 

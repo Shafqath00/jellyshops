@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 /** A product on a card. `saving` ("£20.00"), `discountPercent` and `chip` ("More colours") are optional extras themes can show. */
 /** A product as every product list draws it (the shared card in @jelly/storefront-ui). */
-export interface PublicProduct { id: string; name: string; href: string; imageUrl: string; price: string; compareAtPrice?: string; badge?: string; saving?: string; discountPercent?: number; chip?: string; vendor?: string; swatches?: Array<{ label: string; color?: string; image?: string }>; moreSwatches?: number }
+export interface PublicProduct { id: string; name: string; href: string; imageUrl: string; price: string; compareAtPrice?: string; badge?: string; saving?: string; discountPercent?: number; chip?: string; vendor?: string; swatches?: Array<{ label: string; color?: string; image?: string }>; moreSwatches?: number; /** Exact price in minor units, used to sort and filter product lists. */ priceMinor?: number; /** False when no variant can be bought; product list filters use it. */ available?: boolean }
 export interface CollectionPresentationContext {
   interactiveGrid?: ReactNode;
   collection: { id: string; title: string; description: string; descriptionDoc?: RichTextDocument | null; imageUrl?: string };

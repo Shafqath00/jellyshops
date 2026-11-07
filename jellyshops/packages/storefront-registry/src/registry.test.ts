@@ -52,7 +52,7 @@ it("registers configurable Collection sections only for Collection templates", (
       expect.objectContaining({ code: "SECTION_NOT_ALLOWED_ON_PAGE" }),
     ]));
   }
-  expect(ownKeys("collection-header")).toEqual(["layout", "contentAlignment", "showTitle", "showDescription", "descriptionLines", "showImage"]);
+  expect(ownKeys("collection-header")).toEqual(["layout", "contentAlignment", "showTitle", "showDescription", "descriptionLines", "showImage", "showBreadcrumb"]);
   expect(getSectionDefinition("collection-product-grid")?.defaultSettings).toMatchObject({ columns: 3, limit: 12 });
   expect(getSectionDefinition("collection-description")?.defaultSettings).toMatchObject({ spacing: "standard" });
 });

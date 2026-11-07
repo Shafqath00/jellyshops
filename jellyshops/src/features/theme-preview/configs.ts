@@ -178,10 +178,10 @@ export const jellyResthavenPreview: ThemePreviewConfig = {
 
 const formaAsset = (file: string) => `/themes/jelly-forma/${file}-v2.webp`;
 const formaProducts: PublicProduct[] = [
-  { id: "f1", name: "Everyday timber stool", price: "£149.00", compareAtPrice: "£179.00", badge: "Sale", href: "#", imageUrl: formaAsset("stool"), vendor: "Forma Studio", swatches: [{ label: "Natural", color: "#c9a97c" }, { label: "Ink", color: "#171717" }] },
-  { id: "f2", name: "Sunday lounge sofa", price: "£899.00", href: "#", imageUrl: formaAsset("sofa"), vendor: "Forma Studio" },
-  { id: "f3", name: "Gather oak dining table", price: "£649.00", href: "#", imageUrl: formaAsset("table"), vendor: "Forma Studio" },
-  { id: "f4", name: "Arc table lamp", price: "£429.00", href: "#", imageUrl: formaAsset("lamp"), vendor: "Forma Studio" },
+  { id: "f1", name: "Everyday timber stool", price: "£149.00", compareAtPrice: "£179.00", badge: "Sale", href: "#", imageUrl: formaAsset("stool"), vendor: "Forma Studio", available: true, swatches: [{ label: "Natural", color: "#c9a97c" }, { label: "Ink", color: "#171717" }] },
+  { id: "f2", name: "Sunday lounge sofa", price: "£899.00", href: "#", imageUrl: formaAsset("sofa"), vendor: "Forma Studio", available: true },
+  { id: "f3", name: "Gather oak dining table", price: "£649.00", href: "#", imageUrl: formaAsset("table"), vendor: "Forma Studio", available: true },
+  { id: "f4", name: "Arc table lamp", price: "£429.00", href: "#", imageUrl: formaAsset("lamp"), vendor: "Forma Studio", available: true },
 ];
 
 export const jellyFormaPreview: ThemePreviewConfig = {

@@ -143,11 +143,15 @@ export function ProductDescriptionSection({ context, section }: { context: Store
   const descriptionDoc = product?.product.descriptionDoc ? normalizeRichTextDocument(product.product.descriptionDoc) : null;
   if (!product || (!product.product.description && !descriptionDoc?.content.length)) return null;
   const heading = typeof section?.settings.heading === "string" ? section.settings.heading.trim() : "";
+  const paragraphs = product.product.description.split(/\n{2,}/).map((paragraph, index) => <p key={index}>{paragraph}</p>);
+  const body = descriptionDoc?.content.length ? <div className="jelly-rich-description">{renderBlocks(descriptionDoc.content)}</div> : paragraphs;
+  // "Expandable panel" shows the description as a fold-out panel, open to start with unless the merchant closes it.
+  if (section?.settings.layout === "expandable") return <section className="jelly-section jelly-product-description" data-layout="expandable"><StorefrontContainer>
+    <details open={section.settings.startOpen !== false ? true : undefined}><summary {...elementProps({ type: "product-description", settings: section.settings }, "heading", context.mode === "editor")}>{heading || "Description"}</summary>{body}</details>
+  </StorefrontContainer></section>;
   return <section className="jelly-section jelly-product-description"><StorefrontContainer>
     {heading && <h2 {...elementProps({ type: "product-description", settings: section?.settings ?? {} }, "heading", context.mode === "editor")}>{heading}</h2>}
-    {descriptionDoc?.content.length
-      ? <div className="jelly-rich-description">{renderBlocks(descriptionDoc.content)}</div>
-      : product.product.description.split(/\n{2,}/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+    {body}
   </StorefrontContainer></section>;
 }
 

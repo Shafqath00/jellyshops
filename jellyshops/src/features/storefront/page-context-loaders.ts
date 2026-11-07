@@ -70,6 +70,7 @@ export function createSearchPageContext(
       href: `/${storeSlug}/products/${product.handle}`,
       imageUrl: product.imageUrl ?? "",
       price: formatMoney(product.priceMinor, currency),
+      priceMinor: product.priceMinor,
     })),
   };
 }
