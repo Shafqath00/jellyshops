@@ -2,8 +2,9 @@
 /**
  * Rebuilds the schema, registry and themes packages whenever their source changes.
  *
- *   npm run watch:packages          watch only (run `npm run dev` in another terminal)
- *   npm run dev:watch               watch and run the dev server together
+ *   npm run watch:packages          watch packages only
+ *   npm run dev                     watch and run the dev server together
+ *   npm run dev -- -p 3002           pass options to the dev server
  *
  * The renderer and UI packages are used as source, so the dev server already reloads them. Schema,
  * registry and themes are used as built output; this keeps that output fresh. Press Ctrl+C to stop.
@@ -61,5 +62,6 @@ for (const name of packages) {
 }
 if (process.argv.includes("--dev")) {
   const next = require.resolve("next/dist/bin/next", { paths: [frontend] });
-  start("next", process.execPath, [next, "dev", "--turbopack"], frontend);
+  const nextArgs = process.argv.slice(process.argv.indexOf("--dev") + 1);
+  start("next", process.execPath, [next, "dev", "--turbopack", ...nextArgs], frontend);
 }

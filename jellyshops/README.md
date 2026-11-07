@@ -15,6 +15,10 @@ npm install
 npm run dev
 ```
 
+`npm run dev` builds the storefront packages, watches their source for changes,
+and starts Next.js. This keeps package exports in sync while editing themes,
+schemas, and registry definitions.
+
 The API runs on port 3001 and the frontend on port 3000. Open these routes:
 
 - Merchant studio: [http://localhost:3000/admin](http://localhost:3000/admin)

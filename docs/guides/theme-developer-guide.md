@@ -455,9 +455,9 @@ The full chain: **theme source** (manifest, CSS, registry definitions, renderers
 
 | Task | Command | Notes |
 | --- | --- | --- |
-| Run the app | `cd jellyshops && npm run dev` | Builds schema, registry and themes first, then `next dev --turbopack` |
+| Run the app | `cd jellyshops && npm run dev` | Builds and watches schema, registry and themes, alongside `next dev --turbopack` |
 | Hot reload | automatic for **renderer and UI** source and for CSS | `storefront-renderer` and `storefront-ui` are consumed as source |
-| Rebuild on change | `npm run watch:packages` (watch only) or `npm run dev:watch` (watch and dev server) | **Schema, registry and themes are consumed as built output.** The watcher builds them once, then rebuilds each on every change. Without it, run `npm run build:storefront-packages` after each edit |
+| Rebuild on change | `npm run dev` (watch and dev server; `dev:watch` is also supported) or `npm run watch:packages` (watch only) | **Schema, registry and themes are consumed as built output.** The watcher builds them once, then rebuilds each on every change. If running Next.js directly, run `npm run build:storefront-packages` after each edit |
 | Validate a theme folder | `node scripts/validate-theme.mjs <folder>` (add `--json` for tools) | Checks `theme.json` and `starter.json` with the platform's own rules; errors exit with code 1 |
 | Regenerate the schemas | `node scripts/generate-schemas.mjs` (`--check` to verify) | Writes `docs/schemas/theme.schema.json` and `sections.json`; a test fails when they are stale |
 | Type check, lint | `npm run typecheck`, `npm run lint` | |

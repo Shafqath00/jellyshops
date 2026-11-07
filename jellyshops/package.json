@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "build:storefront-packages": "npm run build --workspace @jelly/storefront-schema && npm run build --workspace @jelly/storefront-registry && npm run build --workspace @jelly/storefront-themes",
-    "dev": "npm run build:storefront-packages && next dev --turbopack",
+    "dev": "node scripts/watch-packages.mjs --dev",
     "watch:packages": "node scripts/watch-packages.mjs",
     "dev:watch": "node scripts/watch-packages.mjs --dev",
     "prebuild": "npm run build:storefront-packages",
