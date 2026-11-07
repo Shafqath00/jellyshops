@@ -45,9 +45,16 @@ editor, never in theme files.
 1. **Foundation + first sections** (this phase): model, styles, renderer helper, click/outline, inspector,
    tree, toolbar, address; sections: hero, image with text, image banner, product grid, featured collection,
    collection list, multicolumn/testimonials/FAQ intros. Contract test: every declared element renders a marker.
-2. **Coverage**: header (logo, menu), footer (newsletter, about text), announcement, product page parts
+2. **Coverage** (done 2026-11-07): header (logo, menu), footer (newsletter, about text), announcement, product page parts
    (title, price, buy buttons, description), collection header, store visit, rating, gallery, logo list,
    metaobject list, blog sections; elements inside blocks (column heading/text, card label/image).
+   Built: header (logo, extra link, shopping icons), footer (newsletter heading/text, store name, about text,
+   email, copyright), announcement message, product title/brand/price, Add to cart button, product description
+   and related products headings, related product cards, collection title and image, store visit, rating,
+   gallery, logo list, metaobject list, specifications, blog header text; block parts in columns, collection
+   cards and testimonials (`BLOCK_ELEMENTS`, selection `{ kind: "block", elementId }`). Parts of shared
+   sections open their settings from the preview. Left for later: the header menu links, article lists,
+   product options/gallery, the collection description, parts inside FAQ and logo blocks.
 3. **Element phone/tablet values, keyboard** (Tab/Shift+Tab between elements, Enter = into, Escape = up),
    hover labels for elements, inline text editing on double click.
 4. **QA**: signed-in editor check in all themes, Playwright spec, docs.

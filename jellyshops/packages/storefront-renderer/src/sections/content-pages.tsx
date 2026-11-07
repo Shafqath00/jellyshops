@@ -1,4 +1,5 @@
 import { isRichTextDocument, type SectionNode } from "@jelly/storefront-schema";
+import { elementProps } from "../element-style";
 import type { ReactNode } from "react";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import { renderBlocks } from "./rich-text";
@@ -67,7 +68,7 @@ export function BlogHeaderSection({ context, section }: { context: StorefrontRun
   if (!blog) return null;
   return <section className="jelly-section jelly-blog-header" {...(section ? sectionData(section, { "data-align": alignment(section) }) : {})}><StorefrontContainer>
     <h1>{blog.title}</h1>
-    {section && <SettingText className="jelly-blog-header-text" text={stringValue(section.settings, "text")} document={formattedSetting(section.settings, "text")} />}
+    {section && <SettingText className="jelly-blog-header-text" text={stringValue(section.settings, "text")} document={formattedSetting(section.settings, "text")} {...elementProps(section, "text", context.mode === "editor")} />}
   </StorefrontContainer></section>;
 }
 

@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { elementProps } from "../element-style";
 import type { SectionNode } from "@jelly/storefront-schema";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import { resolveStorefrontHref, type StorefrontRuntimeContext } from "../runtime-context";
@@ -34,7 +35,7 @@ export function RatingSummarySection({ section, context, mode = "published" }: {
   const linkLabel = stringValue(settings, "linkLabel", "Read reviews").trim();
   const align = choice(settings, "contentAlignment", ["left", "center"] as const, "center");
   return <section className="jelly-section jelly-rating-summary" {...sectionData(section, { "data-align": align })}><StorefrontContainer>
-    {heading && <h2 className="jelly-rating-summary-heading">{heading}</h2>}
+    {heading && <h2 className="jelly-rating-summary-heading" {...elementProps(section, "heading", mode === "editor")}>{heading}</h2>}
     <p className="jelly-rating-line">
       <Stars rating={rating} />
       <strong>{ratingText(rating)} out of 5</strong>
@@ -59,7 +60,7 @@ export function ImageGallerySection({ section, context, mode = "published", sele
   const columns = numberValue(section.settings, "columns", 4, 2, 6);
   const ratio = choice(section.settings, "ratio", ["square", "portrait", "landscape"] as const, "square");
   return <section className="jelly-section jelly-image-gallery" {...sectionData(section, { "data-layout": layout, "data-ratio": ratio })}><StorefrontContainer>
-    {(heading || text) && <div className="jelly-image-gallery-intro">{heading && <h2>{heading}</h2>}{text && <p>{text}</p>}</div>}
+    {(heading || text) && <div className="jelly-image-gallery-intro">{heading && <h2 {...elementProps(section, "heading", editor)}>{heading}</h2>}{text && <p {...elementProps(section, "text", editor)}>{text}</p>}</div>}
     {photos.length
       ? <ul className="jelly-image-gallery-items" style={{ "--jelly-columns": columns } as CSSProperties} {...(layout === "scroll" ? { tabIndex: 0, "aria-label": heading || "Photos" } : {})}>{photos.map(({ block, image, caption, href }) => {
           // Merchant media URLs may be served by the local API and are not Next Image assets.

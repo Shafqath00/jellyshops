@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { elementProps } from "../element-style";
 import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import type { CollectionPresentationContext, PublicProduct } from "../types";
@@ -58,19 +59,20 @@ export function CollectionHeaderSection({ context, section }: { context: Storefr
   const { collection } = presentation;
   const showImage = section.settings.showImage !== false && Boolean(collection.imageUrl);
   const layout = showImage ? choice(section.settings, "layout", ["simple", "banner"] as const, "simple") : "simple";
+  const part = (id: string) => elementProps({ type: "collection-header", settings: section.settings }, id, context.mode === "editor");
   return <section className="jelly-section jelly-collection-header" data-layout={layout} data-align={choice(section.settings, "contentAlignment", ["left", "center"] as const, "left")}>
     {/* eslint-disable-next-line @next/next/no-img-element */}
-    {showImage && layout === "banner" && <img className="jelly-collection-header-media" src={collection.imageUrl} alt="" />}
+    {showImage && layout === "banner" && <img className="jelly-collection-header-media" src={collection.imageUrl} alt="" {...part("image")} />}
     <StorefrontContainer>
       <div className="jelly-collection-header-copy">
-        {section.settings.showTitle !== false && <h1>{collection.title}</h1>}
+        {section.settings.showTitle !== false && <h1 {...part("title")}>{collection.title}</h1>}
         {section.settings.showDescription === true && (["2", "3", "4"].includes(String(section.settings.descriptionLines))
           ? <ClampedText lines={Number(section.settings.descriptionLines)}><CollectionDescriptionText collection={collection} /></ClampedText>
           : <CollectionDescriptionText collection={collection} />)}
         <p className="jelly-collection-count">{presentation.totalProducts === 1 ? "1 product" : `${presentation.totalProducts} products`}</p>
       </div>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      {showImage && layout === "simple" && <img className="jelly-collection-header-image" src={collection.imageUrl} alt={collection.title} />}
+      {showImage && layout === "simple" && <img className="jelly-collection-header-image" src={collection.imageUrl} alt={collection.title} {...part("image")} />}
     </StorefrontContainer>
   </section>;
 }

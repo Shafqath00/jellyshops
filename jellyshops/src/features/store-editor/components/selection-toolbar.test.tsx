@@ -48,3 +48,25 @@ it("offers moving a block out of its group when it can", async () => {
   expect(onAction).toHaveBeenCalledWith("group-out");
   expect(within(toolbar).queryByRole("button", { name: "Move into group above" })).not.toBeInTheDocument();
 });
+
+it("outlines one part: the nth copy in the section, or the part inside the chosen block, and goes up a level", async () => {
+  const doc = previewFrame();
+  doc.body.innerHTML = '<div class="theme-preview-viewport"><div data-editor-section-id="s1"><h2 data-editor-element="heading">Section heading</h2>'
+    + '<article data-editor-block-id="c1"><h3 data-editor-element="heading">Column one</h3></article><article data-editor-block-id="c2"><h3 data-editor-element="heading">Column two</h3></article>'
+    + '<article data-editor-element="productCard">A</article><article data-editor-element="productCard">B</article></div></div>';
+  const onSelectParent = vi.fn();
+  const view = render(<SelectionToolbar target={{ sectionId: "s1", blockId: "c2" }} label="Heading" hidden={false} actions={actions} onAction={vi.fn()} element={{ id: "heading" }} onSelectParent={onSelectParent} parentLabel="Select block" />);
+  const toolbar = await waitFor(() => within(doc.body).getByRole("toolbar", { name: "Heading actions" }));
+  await waitFor(() => expect(within(doc.body).getByText("Column two")).toHaveAttribute("data-editor-current"));
+  expect(within(doc.body).getByText("Section heading")).not.toHaveAttribute("data-editor-current");
+  // A part shows no section or block actions, only the way back up.
+  expect(within(toolbar).queryByRole("button", { name: "Delete" })).not.toBeInTheDocument();
+  await userEvent.setup({ document: doc }).click(within(toolbar).getByRole("button", { name: "Select block" }));
+  expect(onSelectParent).toHaveBeenCalled();
+  view.rerender(<SelectionToolbar target={{ sectionId: "s1" }} label="Product card" hidden={false} actions={actions} onAction={vi.fn()} element={{ id: "productCard", index: 1 }} onSelectParent={vi.fn()} />);
+  await waitFor(() => expect(within(doc.body).getByText("B")).toHaveAttribute("data-editor-current"));
+  expect(within(doc.body).getByText("Column two")).not.toHaveAttribute("data-editor-current");
+  view.rerender(<SelectionToolbar target={{ sectionId: "s1" }} label="Heading" hidden={false} actions={actions} onAction={vi.fn()} element={{ id: "heading" }} onSelectParent={vi.fn()} />);
+  // The section's own heading, not a column's.
+  await waitFor(() => expect(within(doc.body).getByText("Section heading")).toHaveAttribute("data-editor-current"));
+});

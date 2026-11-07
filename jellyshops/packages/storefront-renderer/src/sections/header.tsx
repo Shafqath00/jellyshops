@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState, type RefObject } from "react";
+import { elementProps } from "../element-style";
 import { safeRichTextHref, type RuntimeMenuV4, type SectionNode } from "@jelly/storefront-schema";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
@@ -99,6 +100,7 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
   const overlayImage = transparent ? imageSetting(settings.overlayLogo) : undefined;
   const overlayLogoUrl = overlayImage ? safeRichTextHref(overlayImage.url) : null;
   const scrolled = useScrolled(headerRef, transparent);
+  const editor = context.mode === "editor";
   return <header
     ref={headerRef}
     className="jelly-header"
@@ -119,15 +121,15 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
       </div>
     </details>
     {searchBar && <HeaderSearch action={`${root}/search`} />}
-    <a className="jelly-header-brand" href={root || "/"} style={logoWidth ? { width: logoWidth } : undefined}>
+    <a className="jelly-header-brand" href={root || "/"} {...elementProps(section, "logo", editor, logoWidth ? { width: logoWidth } : undefined)}>
       {logoUrl && !logoUrl.startsWith("#") ? <img src={logoUrl} alt={image?.alt || name} /> : <span>{name}</span>}
       {/* Merchant media URLs may be served by the local API and are not Next Image assets. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {overlayLogoUrl && !overlayLogoUrl.startsWith("#") && <img className="jelly-header-overlay-logo" src={overlayLogoUrl} alt="" aria-hidden="true" />}
     </a>
     <MenuLinks section={section} context={context} label="Primary navigation" variant="bar" />
-    {showTools && <nav className="jelly-header-tools" aria-label="Shopping tools">
-      {extraHref && <a href={extraHref} data-tool="extra" aria-label={extraLabel}><StoreIcon name={settings.extraLinkIcon ?? "palette"} /><span className="jelly-header-tool-label">{extraLabel}</span></a>}
+    {showTools && <nav className="jelly-header-tools" aria-label="Shopping tools" {...elementProps(section, "tools", editor)}>
+      {extraHref && <a href={extraHref} data-tool="extra" aria-label={extraLabel} {...elementProps(section, "extraLink", editor)}><StoreIcon name={settings.extraLinkIcon ?? "palette"} /><span className="jelly-header-tool-label">{extraLabel}</span></a>}
       {tools.map(([icon, label, href]) => <a key={icon} href={href} data-tool={icon} aria-label={label}><StorefrontIcon name={icon} /><span className="jelly-header-tool-label">{label}</span></a>)}
     </nav>}
     {trust.length > 0 && <ul className="jelly-header-trust" aria-label="Why shop with us"><TrustPointItems points={trust} icons /></ul>}

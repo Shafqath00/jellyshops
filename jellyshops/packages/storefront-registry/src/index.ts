@@ -15,4 +15,4 @@ export type { SectionStyleSettings } from "./section-style.js";
 export { BLOCK_MAX_WIDTHS, BLOCK_STYLE_CONTROLS, BLOCK_TYPE_PRESETS, blockStyleSchema, isBlockStyleKey, STYLED_BLOCK_TYPES } from "./block-style.js";
 export type { BlockStyleSettings } from "./block-style.js";
 export { GROUP_CHILD_TYPES } from "./blocks.js";
-export { ELEMENT_ALIGNMENTS, ELEMENT_WEIGHTS, elementControls, elementStyleControls, elementStyleKey, elementStyleProps, elementStyleSchema, SECTION_ELEMENTS, sectionElements, type ElementStyleProp } from "./section-elements.js";
+export { ELEMENT_ALIGNMENTS, ELEMENT_WEIGHTS, elementControls, elementStyleControls, elementStyleKey, elementStyleProps, elementStyleSchema, BLOCK_ELEMENTS, SECTION_ELEMENTS, sectionElements, type ElementStyleProp } from "./section-elements.js";

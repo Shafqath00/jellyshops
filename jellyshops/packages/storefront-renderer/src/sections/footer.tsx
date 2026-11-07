@@ -1,4 +1,5 @@
 import { safeRichTextHref, type BlockNode, type SectionNode } from "@jelly/storefront-schema";
+import { elementProps } from "../element-style";
 import type { RendererMode } from "../types";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
@@ -74,15 +75,15 @@ export function FooterSection({ section, context, subscribe, mode = "preview" }:
   });
   return <footer className="jelly-footer" data-section-id={section.id} data-newsletter={showNewsletter ? "true" : undefined}>
     {showNewsletter && <div className="jelly-footer-newsletter jelly-newsletter">
-      <h2>{newsletterHeading}</h2>
-      <SettingText className="jelly-newsletter-text" text={newsletterText} document={formattedSetting(section.settings, "newsletterText")} />
+      <h2 {...elementProps(section, "newsletterHeading", editor)}>{newsletterHeading}</h2>
+      <SettingText className="jelly-newsletter-text" text={newsletterText} document={formattedSetting(section.settings, "newsletterText")} {...elementProps(section, "newsletterText", editor)} />
       <NewsletterForm source={`${section.id}:footer`} buttonLabel="Subscribe" subscribe={subscribe} mode={mode} />
     </div>}
     <div className="jelly-footer-inner">
       <div className="jelly-footer-brand">
-        {storeName && <strong>{storeName}</strong>}
-        <SettingText text={text} document={formattedSetting(section.settings, "text")} />
-        {contactEmail && <a href={`mailto:${encodeURIComponent(contactEmail)}`}>{contactEmail}</a>}
+        {storeName && <strong {...elementProps(section, "storeName", editor)}>{storeName}</strong>}
+        <SettingText text={text} document={formattedSetting(section.settings, "text")} {...elementProps(section, "about", editor)} />
+        {contactEmail && <a href={`mailto:${encodeURIComponent(contactEmail)}`} {...elementProps(section, "email", editor)}>{contactEmail}</a>}
       </div>
       {columns.length > 0 && <nav className="jelly-footer-links" aria-label="Footer navigation">{columns.map((column) => <div className="jelly-footer-column" key={column.id}>
         {column.heading && <h2 {...blockEditorData(column.block, editor, column.kind === "menu" ? "Menu" : "Column heading")}>{column.heading}</h2>}
@@ -93,6 +94,6 @@ export function FooterSection({ section, context, subscribe, mode = "preview" }:
         {socials.length > 0 && <ul className="jelly-footer-social" aria-label="Social media">{socials.map((item) => <li key={item.id} {...(item.block ? blockEditorData(item.block, editor, "Social link") : {})}><a href={item.href} rel="noopener noreferrer" target="_blank">{item.label}</a></li>)}</ul>}
       </div>}
     </div>
-    <p className="jelly-footer-credit">{copyright}</p>
+    <p className="jelly-footer-credit" {...elementProps(section, "copyright", editor)}>{copyright}</p>
   </footer>;
 }

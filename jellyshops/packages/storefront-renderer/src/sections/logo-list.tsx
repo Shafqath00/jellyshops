@@ -1,4 +1,5 @@
 import { StorefrontContainer } from "@jelly/storefront-ui";
+import { elementProps } from "../element-style";
 import type { CSSProperties } from "react";
 import type { SectionNode } from "@jelly/storefront-schema";
 import type { RendererMode } from "../types";
@@ -25,7 +26,7 @@ export function LogoListSection({ section, context, mode = "published", selected
     {...sectionData(section, { "data-grayscale": section.settings.grayscale === true ? "true" : undefined })}
     style={{ "--logo-height": `${height}px` } as CSSProperties}
   ><StorefrontContainer>
-    {heading && <h2 className="jelly-logo-list-heading">{heading}</h2>}
+    {heading && <h2 className="jelly-logo-list-heading" {...elementProps(section, "heading", editor)}>{heading}</h2>}
     {logos.length
       ? <ul className="jelly-logo-list-items">{logos.map(({ block, image, label, href }) => {
           // Merchant media URLs may be served by the local API and are not Next Image assets.

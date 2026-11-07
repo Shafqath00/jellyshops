@@ -2,6 +2,7 @@ import { z } from "zod";
 import { settingValueSchema, type DynamicValueType } from "@jelly/storefront-schema";
 import { appEmbedSource, getAppBlockProvider, listAppBlockProviders, STORE_ICON_LABELS, STORE_ICON_NAMES } from "@jelly/storefront-schema";
 import { withBlockStyle } from "./block-style.js";
+import { withBlockElements } from "./section-elements.js";
 import type { BlockDefinition, ControlDefinition } from "./types.js";
 
 const dynamicString = z.union([z.string(), settingValueSchema(z.string())]);
@@ -120,4 +121,4 @@ const blocks: BlockDefinition[] = [
 ];
 
 // Heading, text and button blocks get the shared style settings (layout, typography, colours, borders, padding).
-export const blockDefinitions = new Map(blocks.map(withBlockStyle).map((definition) => [definition.type, definition]));
+export const blockDefinitions = new Map(blocks.map(withBlockStyle).map(withBlockElements).map((definition) => [definition.type, definition]));

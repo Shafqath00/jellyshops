@@ -1,4 +1,5 @@
 import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui";
+import { elementProps } from "../element-style";
 import { useRef, useState, type CSSProperties } from "react";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import type { ProductPresentationContext } from "../types";
@@ -33,17 +34,18 @@ export function ProductGallerySection({ context, section }: { context: Storefron
 
 export function ProductInformationSection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown> } }) {
   const product = productContext(context);
+  const part = (id: string) => elementProps({ type: "product-information", settings: section.settings }, id, context.mode === "editor");
   if (!product) {
     const title = context.page?.pageType === "product" ? context.page.resource.data.title : undefined;
-    return typeof title === "string" ? <section className="jelly-section jelly-product-information"><StorefrontContainer><h1>{title}</h1></StorefrontContainer></section> : null;
+    return typeof title === "string" ? <section className="jelly-section jelly-product-information"><StorefrontContainer><h1 {...part("title")}>{title}</h1></StorefrontContainer></section> : null;
   }
   const show = (key: string) => section.settings[key] !== false;
   const specifications = show("showSpecifications") ? Object.entries(product.product.specifications ?? {}) : [];
   const state = product.availability.state;
   return <section className="jelly-section jelly-product-information"><StorefrontContainer>
-    {show("showVendor") && product.product.vendor && <p className="jelly-eyebrow">{product.product.vendor}</p>}
-    <h1>{product.product.title}</h1>
-    <p className="jelly-product-price">
+    {show("showVendor") && product.product.vendor && <p className="jelly-eyebrow" {...part("vendor")}>{product.product.vendor}</p>}
+    <h1 {...part("title")}>{product.product.title}</h1>
+    <p className="jelly-product-price" {...part("price")}>
       <strong>{product.pricing.price}</strong>
       {show("showCompareAtPrice") && product.pricing.compareAtPrice && <s aria-label={`Was ${product.pricing.compareAtPrice}`}>{product.pricing.compareAtPrice}</s>}
       <DiscountChip pricing={product.pricing} kind={section.settings.discountChip} />
@@ -126,7 +128,7 @@ export function ProductPurchaseSection({ context, section }: { context: Storefro
       </div>
     </div>}
     <div className="jelly-purchase-actions" ref={actions}>
-      <button type="button" className="jelly-button" disabled={disabled} onClick={() => { void purchase(); }}>{busy ? "Please wait…" : label}</button>
+      <button type="button" className="jelly-button" disabled={disabled} onClick={() => { void purchase(); }} {...elementProps({ type: "product-purchase", settings: section.settings }, "addToCart", context.mode === "editor")}>{busy ? "Please wait…" : label}</button>
       {product.buyNow && <button type="button" className="jelly-button jelly-button--secondary" disabled={disabled} onClick={() => void purchase(true)}>Buy now</button>}
       {product.wishlistControl}
     </div>
@@ -142,7 +144,7 @@ export function ProductDescriptionSection({ context, section }: { context: Store
   if (!product || (!product.product.description && !descriptionDoc?.content.length)) return null;
   const heading = typeof section?.settings.heading === "string" ? section.settings.heading.trim() : "";
   return <section className="jelly-section jelly-product-description"><StorefrontContainer>
-    {heading && <h2>{heading}</h2>}
+    {heading && <h2 {...elementProps({ type: "product-description", settings: section?.settings ?? {} }, "heading", context.mode === "editor")}>{heading}</h2>}
     {descriptionDoc?.content.length
       ? <div className="jelly-rich-description">{renderBlocks(descriptionDoc.content)}</div>
       : product.product.description.split(/\n{2,}/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
@@ -157,7 +159,7 @@ export function RelatedProductsSection({ context, section }: { context: Storefro
   if (!items.length) return null;
   const heading = typeof section.settings.heading === "string" && section.settings.heading.trim() ? section.settings.heading : "You may also like";
   return <section className="jelly-section jelly-related-products"><StorefrontContainer>
-    <h2>{heading}</h2>
-    <div className="jelly-product-grid-items">{items.map((item) => <StorefrontProductCard key={item.id} product={item} />)}</div>
+    <h2 {...elementProps({ type: "related-products", settings: section.settings }, "heading", context.mode === "editor")}>{heading}</h2>
+    <div className="jelly-product-grid-items">{items.map((item) => <StorefrontProductCard key={item.id} product={item} editorProps={context.mode === "editor" ? elementProps({ type: "related-products", settings: section.settings }, "productCard", true) as Record<string, string> : undefined} />)}</div>
   </StorefrontContainer></section>;
 }

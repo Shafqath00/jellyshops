@@ -97,8 +97,13 @@ export function RegistrySectionRenderer({
       // The innermost target wins: both are ancestors of the click, so the element is inner unless it wraps the block.
       if (element?.dataset.editorElement && (!block || !element.contains(block))) {
         const elementId = element.dataset.editorElement;
-        const copies = [...event.currentTarget.querySelectorAll<HTMLElement>("[data-editor-element]")].filter((item) => item.dataset.editorElement === elementId);
-        onSelect?.({ kind: "section", region, sectionId: section.id, elementId, elementIndex: Math.max(0, copies.indexOf(element)) });
+        // Inside a block it is the block's part (a column's heading); otherwise the section's own (the nth product card).
+        const owner: HTMLElement = block ?? event.currentTarget;
+        const copies = [...owner.querySelectorAll<HTMLElement>("[data-editor-element]")].filter((item) => item.dataset.editorElement === elementId && item.parentElement?.closest("[data-editor-block-id]") === (block ?? null));
+        const elementIndex = Math.max(0, copies.indexOf(element));
+        onSelect?.(block && blockId
+          ? { kind: "block", region, sectionId: section.id, blockId, elementId, elementIndex }
+          : { kind: "section", region, sectionId: section.id, elementId, elementIndex });
         return;
       }
       onSelect?.(blockId

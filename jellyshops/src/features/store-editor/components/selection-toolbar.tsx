@@ -18,13 +18,17 @@ export interface ToolbarElement { id: string; index?: number }
 
 function findElement(doc: Document, target: SelectionTarget, element?: ToolbarElement): HTMLElement | null {
   const section = [...doc.querySelectorAll<HTMLElement>("[data-editor-section-id]")].find((item) => item.dataset.editorSectionId === target.sectionId);
-  if (section && element) {
-    const copies = [...section.querySelectorAll<HTMLElement>("[data-editor-element]")].filter((item) => item.dataset.editorElement === element.id);
-    return copies[element.index ?? 0] ?? copies[0] ?? null;
-  }
-  if (!section || !target.blockId) return section ?? null;
-  const blocks = [...section.querySelectorAll<HTMLElement>("[data-editor-block-id]")].filter((item) => item.dataset.editorBlockId === target.blockId);
-  return blocks.find((item) => !item.parentElement?.closest("[data-editor-block-id]")) ?? blocks[0] ?? null;
+  if (!section) return null;
+  const block = target.blockId ? (() => {
+    const blocks = [...section.querySelectorAll<HTMLElement>("[data-editor-block-id]")].filter((item) => item.dataset.editorBlockId === target.blockId);
+    return blocks.find((item) => !item.parentElement?.closest("[data-editor-block-id]")) ?? blocks[0] ?? null;
+  })() : null;
+  if (target.blockId && !block) return null;
+  if (!element) return block ?? section;
+  // The part belongs to the block (or the section) itself, not to a block inside it.
+  const owner = block ?? section;
+  const copies = [...owner.querySelectorAll<HTMLElement>("[data-editor-element]")].filter((item) => item.dataset.editorElement === element.id && (item.parentElement?.closest("[data-editor-block-id]") ?? null) === block);
+  return copies[element.index ?? 0] ?? copies[0] ?? null;
 }
 
 function usePreviewDocument(frameTitle: string): Document | null {
@@ -75,6 +79,7 @@ export function SelectionToolbar({
   onMoveTo,
   element,
   onSelectParent,
+  parentLabel = "Select section",
 }: {
   frameTitle?: string;
   target: SelectionTarget | null;
@@ -92,6 +97,8 @@ export function SelectionToolbar({
   /** A section element is selected: the toolbar outlines it and offers going up to its section instead of the section's actions. */
   element?: ToolbarElement;
   onSelectParent?(): void;
+  /** Text of the go-up button ("Select section", "Select block"). */
+  parentLabel?: string;
 }) {
   const doc = usePreviewDocument(frameTitle);
   const elementId = element?.id;
@@ -232,7 +239,7 @@ export function SelectionToolbar({
       <span className="max-w-[220px] truncate px-1.5 text-[11px] font-semibold">{hidden ? `${label} (hidden)` : position.docked ? `${label} (not shown at this width)` : label}</span>
       {element && onSelectParent && (
         <button type="button" onClick={onSelectParent} className="h-7 rounded-md px-2 text-[11px] font-medium text-[#55524c] hover:bg-black/[0.06]">
-          Select section
+          {parentLabel}
         </button>
       )}
       {!element && actionButtons.filter(({ action, onlyWhenAvailable }) => !onlyWhenAvailable || actions[action]).map(({ action, label: name, icon }) => {

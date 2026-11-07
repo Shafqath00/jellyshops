@@ -1,5 +1,5 @@
 import { safeRichTextHref, type SectionNode } from "@jelly/storefront-schema";
-import { elementProps } from "../element-style";
+import { blockElementProps, elementProps } from "../element-style";
 import { Grid, Stack } from "../layout";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import { useState, type CSSProperties } from "react";
@@ -52,10 +52,12 @@ function Actions({ buttons, storeSlug }: { buttons: ReturnType<typeof blockCopy>
   return <div className="jelly-section-actions">{links.map((button, index) => <a key={button.id} href={button.href} {...buttonProps(button.settings, index, button.mobile)} {...button.editorData}>{button.label}</a>)}</div>;
 }
 
-export function AnnouncementBarSection({ section }: { section: SectionNode }) {
+export function AnnouncementBarSection({ section, editor = false }: { section: SectionNode; editor?: boolean }) {
   const message = text(section, "Welcome to our store");
   const href = typeof section.settings.link === "string" && section.settings.link ? safeRichTextHref(section.settings.link) : null;
-  return <aside className="jelly-announcement">{href ? <a href={href}>{message}</a> : message}</aside>;
+  // The message is the section's own part when it comes from its settings (not from a block).
+  const own = typeof section.settings.text === "string" ? elementProps(section, "message", editor) : {};
+  return <aside className="jelly-announcement">{href ? <a href={href} {...own}>{message}</a> : <span {...own}>{message}</span>}</aside>;
 }
 
 export function ImageWithTextSection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
@@ -110,15 +112,16 @@ export function ImageBannerSection({ section, context }: { section: SectionNode;
 export function MulticolumnSection({ section, context }: { section: SectionNode; context?: StorefrontRuntimeContext }) {
   const columns = visibleBlocks(section, "column").flatMap((block) => {
     const heading = stringValue(block.settings, "heading");
-    return heading ? [{ id: block.id, heading, text: stringValue(block.settings, "text"), document: formattedSetting(block.settings, "text") }] : [];
+    return heading ? [{ id: block.id, block, heading, text: stringValue(block.settings, "text"), document: formattedSetting(block.settings, "text") }] : [];
   });
-  const content = blockCopy(section, "Why shop with us", context?.mode === "editor");
+  const editor = context?.mode === "editor";
+  const content = blockCopy(section, "Why shop with us", editor);
   const count = numberValue(section.settings, "columns", 3, 2, 4);
   return <section className="jelly-section jelly-multicolumn" {...sectionData(section, { "data-align": choice(section.settings, "contentAlignment", ["left", "center", "right"] as const, "left") })}>
     <StorefrontContainer>
       {!headingHidden(section) && <div className="jelly-section-intro"><h2 {...content.headingProps}>{content.headingContent}</h2><SettingText text={content.body} document={content.bodyDocument} {...content.bodyProps} /></div>}
       {columns.length > 0 && <Grid className="jelly-multicolumn-grid" columns={count} gap="xl" rowGap="3xl" style={{ "--jelly-columns": count } as CSSProperties}>
-        {columns.map((column) => <Stack as="article" key={column.id} gap="xs"><h3>{column.heading}</h3><SettingText text={column.text} document={column.document} /></Stack>)}
+        {columns.map((column) => <Stack as="article" key={column.id} gap="xs" {...blockEditorData(column.block, editor, "Column")}><h3 {...blockElementProps(column.block, "heading", editor)}>{column.heading}</h3><SettingText text={column.text} document={column.document} {...blockElementProps(column.block, "text", editor)} /></Stack>)}
       </Grid>}
       <Actions buttons={content.buttons} storeSlug={context?.storeSlug} />
     </StorefrontContainer>

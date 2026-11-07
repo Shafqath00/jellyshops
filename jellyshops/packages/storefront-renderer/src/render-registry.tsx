@@ -71,7 +71,7 @@ export class SectionRenderRegistry {
 
 function builtInRegistry(): SectionRenderRegistry {
   const registry = new SectionRenderRegistry();
-  registry.register("announcement-bar", ({ section }) => <AnnouncementBarSection section={section} />);
+  registry.register("announcement-bar", ({ section, mode }) => <AnnouncementBarSection section={section} editor={mode === "editor"} />);
   registry.register("header", ({ section, context }) => <HeaderSection section={section} context={context} />);
   registry.register("footer", ({ section, context, commerce, mode }) => <FooterSection section={section} context={context} subscribe={commerce.subscribeNewsletter} mode={mode} />);
   registry.register("hero", ({ section, mode, context, selectedBlockId }) => <HeroSection section={section} editor={mode === "editor"} context={context} selectedBlockId={selectedBlockId} />);

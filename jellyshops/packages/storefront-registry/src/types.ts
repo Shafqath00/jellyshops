@@ -55,7 +55,8 @@ export type ControlDefinition =
   | (ControlBase & { type: "link" | "image" | "product" | "collection" });
 export type RegionName = "header" | "template" | "footer";
 /** What a selectable part of a section is; decides which style settings it gets. */
-export type ElementKind = "heading" | "text" | "button" | "link" | "image" | "product-card";
+/** `group` is a cluster of settings with no style of its own (the logo, the shopping icons). */
+export type ElementKind = "heading" | "text" | "button" | "link" | "image" | "product-card" | "group";
 /**
  * A part of a section drawn from section settings (a heading, an image, a "View all" link, the product cards)
  * that the editor can select on its own. `controls` are the section setting keys the element owns.
@@ -75,6 +76,8 @@ export interface BlockDefinition {
   allowedBlockTypes?: string[];
   maxBlocks?: number;
   defaultBlocks?: BlockNode[];
+  /** Parts of the block the editor can select on their own (section-elements.ts adds the built-in ones). */
+  elements?: ElementDefinition[];
 }
 export interface SectionDefinition {
   type: string;

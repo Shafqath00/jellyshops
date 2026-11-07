@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { elementProps } from "../element-style";
+import { blockElementProps, elementProps } from "../element-style";
 import { inlineSetting } from "./setting-text";
 import type { MediaReference, SectionNode } from "@jelly/storefront-schema";
 import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui";
@@ -53,21 +53,22 @@ export function CategoryGridSection({ section, context }: { section: SectionNode
   const shopHref = context?.storeSlug ? `/${context.storeSlug}/shop` : "#shop";
   const cards = visibleBlocks(section, "collection-card").flatMap((block) => {
     const label = stringSetting(block.settings, "label");
-    return label ? [{ id: block.id, label, image: imageValue(block.settings), href: resolveStorefrontHref(block.settings.link, context?.storeSlug) ?? shopHref }] : [];
+    return label ? [{ id: block.id, block, label, image: imageValue(block.settings), href: resolveStorefrontHref(block.settings.link, context?.storeSlug) ?? shopHref }] : [];
   });
   // Until the merchant adds collection cards, show neutral placeholders that link to the shop.
-  const items = cards.length ? cards : ["New arrivals", "Best sellers", "For the home", "Gifts"].map((label) => ({ id: label, label, image: undefined, href: shopHref }));
+  const items = cards.length ? cards : ["New arrivals", "Best sellers", "For the home", "Gifts"].map((label) => ({ id: label, block: undefined, label, image: undefined, href: shopHref }));
+  const editor = context?.mode === "editor";
   const columns = numberValue(section.settings, "columns", 4, 2, 4);
   // Grid, Bento (first collection large) or Carousel (scrolls sideways; focusable so keyboards can scroll it).
   const layout = choice(section.settings, "layout", ["grid", "bento", "carousel"] as const, "grid");
   return <section className="jelly-section jelly-category-grid" {...sectionData(section, { "data-image-ratio": choice(section.settings, "imageRatio", ["portrait", "square"] as const, "portrait"), "data-layout": layout })}><StorefrontContainer>
     {!headingHidden(section) && <SectionIntro section={section} fallback="Shop by collection" editor={context?.mode === "editor"} />}
-    <div className="jelly-category-grid-items" style={{ "--jelly-columns": columns } as CSSProperties} {...(layout === "carousel" ? { role: "region", "aria-label": "Collections", tabIndex: 0 } : {})}>{items.map((item) => <a href={item.href} className="jelly-category-card" key={item.id}>
-      <span className="jelly-category-card-media">
+    <div className="jelly-category-grid-items" style={{ "--jelly-columns": columns } as CSSProperties} {...(layout === "carousel" ? { role: "region", "aria-label": "Collections", tabIndex: 0 } : {})}>{items.map((item) => <a href={item.href} className="jelly-category-card" key={item.id} {...(item.block ? blockEditorData(item.block, editor, "Collection card") : {})}>
+      <span className="jelly-category-card-media" {...(item.block ? blockElementProps(item.block, "image", editor) : {})}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {item.image ? <img src={item.image.url} alt="" loading="lazy" /> : null}
       </span>
-      <strong>{item.label}</strong>
+      <strong {...(item.block ? blockElementProps(item.block, "label", editor) : {})}>{item.label}</strong>
     </a>)}</div>
   </StorefrontContainer></section>;
 }
@@ -75,14 +76,14 @@ export function CategoryGridSection({ section, context }: { section: SectionNode
 export function TestimonialsSection({ section, mode = "published" }: { section: SectionNode; mode?: RendererMode }) {
   const reviews = visibleBlocks(section, "testimonial").flatMap((block) => {
     const quote = stringSetting(block.settings, "quote");
-    return quote ? [{ id: block.id, quote, author: stringSetting(block.settings, "author") }] : [];
+    return quote ? [{ id: block.id, block, quote, author: stringSetting(block.settings, "author") }] : [];
   });
   // Never invent reviews: with no testimonials the section only shows an editing hint outside the live store.
   if (!reviews.length && mode === "published") return null;
   return <section className="jelly-section jelly-testimonials" {...sectionData(section)}><StorefrontContainer>
     <SectionIntro section={section} fallback="What customers say" editor={mode === "editor"} />
     {reviews.length
-      ? <div className="jelly-testimonial-grid">{reviews.map((review) => <blockquote key={review.id}><p>{review.quote}</p>{review.author && <cite>{review.author}</cite>}</blockquote>)}</div>
+      ? <div className="jelly-testimonial-grid">{reviews.map((review) => <blockquote key={review.id} {...blockEditorData(review.block, mode === "editor", "Testimonial")}><p {...blockElementProps(review.block, "quote", mode === "editor")}>{review.quote}</p>{review.author && <cite {...blockElementProps(review.block, "author", mode === "editor")}>{review.author}</cite>}</blockquote>)}</div>
       : <p className="jelly-editor-hint">Add a testimonial block with a real customer quote. This section stays hidden on your live store until you do.</p>}
   </StorefrontContainer></section>;
 }

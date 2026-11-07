@@ -1,4 +1,5 @@
 import { StorefrontContainer } from "@jelly/storefront-ui";
+import { elementProps } from "../element-style";
 import { useEffect, useState, type CSSProperties } from "react";
 import type { SectionNode } from "@jelly/storefront-schema";
 import type { PublicMetaobjectList, RendererMode } from "../types";
@@ -63,7 +64,7 @@ export function MetaobjectListSection({ section, context, mode = "published" }: 
     : !list ? `No metaobject "${handle}" is visible on your storefront. Check its handle and turn on "Visible on storefront".`
     : "This metaobject has no entries yet.";
   return <section className="jelly-section jelly-metaobject-list" {...sectionData(section, { "data-layout": layout })} style={{ "--metaobject-columns": columns } as CSSProperties}><StorefrontContainer>
-    {heading && <h2 className="jelly-metaobject-list-heading">{heading}</h2>}
+    {heading && <h2 className="jelly-metaobject-list-heading" {...elementProps(section, "heading", mode === "editor")}>{heading}</h2>}
     {entries.length && list
       ? <ul className="jelly-metaobject-items">{entries.map((entry) => {
           const image = firstImage(list.definition.fields, entry);

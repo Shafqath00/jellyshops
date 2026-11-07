@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { SECTION_FONT_CHOICES } from "./section-style.js";
-import type { ControlDefinition, ElementDefinition, ElementKind } from "./types.js";
+import type { BlockDefinition, ControlDefinition, ElementDefinition, ElementKind } from "./types.js";
 
 /**
  * Parts of built-in sections the editor can select on their own (docs/plans/element-selection.md).
@@ -29,7 +29,58 @@ export const SECTION_ELEMENTS: Record<string, ElementDefinition[]> = {
   multicolumn: [heading()],
   testimonials: [heading()],
   faq: [heading(), intro()],
+  // Shared sections
+  "announcement-bar": [{ id: "message", label: "Message", kind: "text", controls: ["text", "link"] }],
+  header: [
+    { id: "logo", label: "Logo", kind: "group", controls: ["logo", "storeName", "logoWidth", "logoPosition", "overlayLogo"] },
+    { id: "extraLink", label: "Extra link", kind: "link", controls: ["extraLinkLabel", "extraLink", "extraLinkIcon"] },
+    { id: "tools", label: "Shopping icons", kind: "group", controls: ["showSearch", "showAccount", "showWishlist", "showCart", "showToolLabels"] },
+  ],
+  footer: [
+    { id: "newsletterHeading", label: "Newsletter heading", kind: "heading", controls: ["showNewsletter", "newsletterHeading"] },
+    { id: "newsletterText", label: "Newsletter text", kind: "text", controls: ["newsletterText"] },
+    { id: "storeName", label: "Store name", kind: "heading", controls: ["storeName"] },
+    { id: "about", label: "About text", kind: "text", controls: ["text"] },
+    { id: "email", label: "Contact email", kind: "link", controls: ["contactEmail"] },
+    { id: "copyright", label: "Copyright", kind: "text", controls: ["copyright"] },
+  ],
+  // Product and collection pages
+  "product-information": [
+    { id: "vendor", label: "Brand", kind: "text", controls: ["showVendor"] },
+    { id: "title", label: "Product title", kind: "heading", controls: [] },
+    { id: "price", label: "Price", kind: "text", controls: ["showCompareAtPrice", "discountChip"] },
+  ],
+  "product-purchase": [{ id: "addToCart", label: "Add to cart button", kind: "button", controls: ["label", "showQuantity", "stickyBar"] }],
+  "product-description": [heading()],
+  "related-products": [heading(), { id: "productCard", label: "Product card", kind: "product-card", controls: ["limit"] }],
+  "collection-header": [
+    { id: "title", label: "Collection title", kind: "heading", controls: ["showTitle"] },
+    image(["showImage", "layout"]),
+  ],
+  // Other sections
+  "contact-store-info": [heading(), intro(), image(["image"])],
+  "rating-summary": [heading()],
+  "image-gallery": [heading(), intro()],
+  "logo-list": [heading()],
+  "metaobject-list": [heading()],
+  "product-specifications": [heading()],
+  "blog-header": [intro()],
 };
+
+/** Parts of built-in blocks (a column's heading, a collection card's image), styled on the block as `el_<id>_<prop>`. */
+export const BLOCK_ELEMENTS: Record<string, ElementDefinition[]> = {
+  column: [heading(), intro()],
+  "collection-card": [{ id: "label", label: "Label", kind: "heading", controls: ["label", "link"] }, image(["image"])],
+  testimonial: [{ id: "quote", label: "Quote", kind: "text", controls: ["quote"] }, { id: "author", label: "Author", kind: "text", controls: ["author"] }],
+};
+
+/** Adds a block's parts and their style settings (blocks.ts runs this on every built-in block). */
+export function withBlockElements(definition: BlockDefinition): BlockDefinition {
+  const elements = [...(definition.elements ?? []), ...(BLOCK_ELEMENTS[definition.type] ?? []).filter((element) => !definition.elements?.some((own) => own.id === element.id))];
+  if (!elements.length) return definition;
+  const styles = elements.flatMap(elementStyleControls).filter((control) => !definition.controls.some((own) => own.key === control.key));
+  return { ...definition, elements, controls: [...definition.controls, ...styles], settingsSchema: z.intersection(definition.settingsSchema, elementStyleSchema(elements)) };
+}
 
 /** Setting names of an element's own style settings. */
 export function elementStyleKey(elementId: string, prop: ElementStyleProp): string {
@@ -46,11 +97,12 @@ const PROPS: Record<ElementKind, ElementStyleProp[]> = {
   button: ["background", "color", "radius", "size"],
   image: ["radius"],
   "product-card": [],
+  group: [],
 };
 
 export const ELEMENT_WEIGHTS = ["300", "400", "500", "600", "700"] as const;
 export const ELEMENT_ALIGNMENTS = ["left", "center", "right"] as const;
-const SIZE_RANGE: Record<ElementKind, [number, number]> = { heading: [12, 120], text: [10, 40], link: [10, 32], button: [10, 32], image: [0, 0], "product-card": [0, 0] };
+const SIZE_RANGE: Record<ElementKind, [number, number]> = { heading: [12, 120], text: [10, 40], link: [10, 32], button: [10, 32], image: [0, 0], "product-card": [0, 0], group: [0, 0] };
 
 /** The style properties an element of this kind can change. */
 export function elementStyleProps(kind: ElementKind): ElementStyleProp[] {

@@ -1,4 +1,5 @@
 import { StorefrontContainer } from "@jelly/storefront-ui";
+import { elementProps } from "../element-style";
 import { safeRichTextHref, type SectionNode } from "@jelly/storefront-schema";
 import { headingHidden, imageValue, sectionData, stringValue, visibleBlocks } from "./shared";
 import { formattedSetting, SettingText } from "./setting-text";
@@ -58,8 +59,8 @@ export function StoreVisitSection({ section, editor = false }: { section: Sectio
   if (!address && !hours.length && !actions.length && !details.length && !text) return null;
   return <section className="jelly-section jelly-store-visit" {...sectionData(section, { "data-has-image": image ? "true" : undefined })}><StorefrontContainer>
     <div className="jelly-store-visit-body">
-      {!headingHidden(section) && <h2>{heading}</h2>}
-      <SettingText className="jelly-store-visit-text" text={text} document={formattedSetting(settings, "text")} />
+      {!headingHidden(section) && <h2 {...elementProps(section, "heading", editor)}>{heading}</h2>}
+      <SettingText className="jelly-store-visit-text" text={text} document={formattedSetting(settings, "text")} {...elementProps(section, "text", editor)} />
       {address && <address className="jelly-store-visit-address">{address.split("\n").map((line, index) => <span key={index}>{line}</span>)}</address>}
       {hours.length > 0 && <div className="jelly-store-visit-hours">
         <h3>Opening hours</h3>
@@ -70,7 +71,7 @@ export function StoreVisitSection({ section, editor = false }: { section: Sectio
         {actions.map((action, index) => <a key={action.key} href={action.href} className={index === 0 ? "jelly-button" : "jelly-button jelly-button--secondary"} {...(action.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>{action.label}</a>)}
       </div>}
     </div>
-    {image && <div className="jelly-store-visit-media">
+    {image && <div className="jelly-store-visit-media" {...elementProps(section, "image", editor)}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={image.url} alt={image.alt ?? ""} loading="lazy" />
     </div>}

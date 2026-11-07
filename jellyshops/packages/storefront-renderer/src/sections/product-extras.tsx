@@ -1,4 +1,5 @@
 import { StorefrontContainer } from "@jelly/storefront-ui";
+import { elementProps } from "../element-style";
 import type { SectionNode } from "@jelly/storefront-schema";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { choice, headingHidden, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
@@ -45,7 +46,7 @@ export function ProductSpecificationsSection({ section, context }: { section: Se
   return <section className="jelly-section jelly-specifications" {...sectionData(section, { "data-layout": layout })}><StorefrontContainer>
     {layout === "expandable"
       ? <details><summary>{heading}</summary>{table}</details>
-      : <>{!headingHidden(section) && <h2>{heading}</h2>}{table}</>}
+      : <>{!headingHidden(section) && <h2 {...elementProps(section, "heading", editor)}>{heading}</h2>}{table}</>}
   </StorefrontContainer></section>;
 }
 

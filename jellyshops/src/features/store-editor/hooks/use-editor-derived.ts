@@ -142,8 +142,12 @@ export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
   const sectionDefinition = localSection ? getSectionDefinition(localSection.type, themeConfiguration?.themeVersion) : undefined;
   const blockDefinition = selectedBlock ? getBlockDefinition(selectedBlock.type) : undefined;
   // A selected element (heading, image, product cards) shows only its own settings; the section shows the rest, without the elements' style settings.
-  const selectedElement = !selectedBlock && selection?.kind === "section" && selection.elementId ? sectionDefinition?.elements?.find((element) => element.id === selection.elementId) : undefined;
-  const baseControls = selectedBlock ? blockDefinition?.controls ?? [] : selectedElement && sectionDefinition ? elementControls(sectionDefinition.controls, selectedElement) : (sectionDefinition?.controls ?? []).filter((control) => !control.element);
+  // A part of a block works the same way, with the block's settings.
+  const selectedElement = selection && selection.kind !== "theme" && selection.elementId
+    ? (selectedBlock ? blockDefinition?.elements : sectionDefinition?.elements)?.find((element) => element.id === selection.elementId)
+    : undefined;
+  const ownerControls = (selectedBlock ? blockDefinition?.controls : sectionDefinition?.controls) ?? [];
+  const baseControls = selectedElement ? elementControls(ownerControls, selectedElement) : ownerControls.filter((control) => !control.element);
   // On the Mobile preview, phone settings show and save their phone values.
   const responsiveView = viewport;
   const selectedNode = selectedBlock ?? localSection;

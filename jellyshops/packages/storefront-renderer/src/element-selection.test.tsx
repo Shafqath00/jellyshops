@@ -1,6 +1,6 @@
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { createSectionFromDefinition, getSectionDefinition, SECTION_ELEMENTS, validateSectionAgainstRegistry } from "@jelly/storefront-registry";
+import { BLOCK_ELEMENTS, createSectionFromDefinition, getSectionDefinition, SECTION_ELEMENTS, validateSectionAgainstRegistry } from "@jelly/storefront-registry";
 import type { SectionNode } from "@jelly/storefront-schema";
 import { RegistrySectionRenderer } from "./registry-section-renderer";
 import type { CommerceDataProvider, RendererMode } from "./types";
@@ -12,9 +12,30 @@ const image = { id: "m1", url: "https://cdn.example.com/photo.jpg", alt: "" };
 /** A section with every element filled in, and without heading/text blocks so the copy comes from section settings. */
 function filled(type: string, extra: Record<string, unknown> = {}): SectionNode {
   const section = createSectionFromDefinition(type, () => `${type}-1`);
-  return { ...section, id: `${type}-1`, blocks: section.blocks.filter((block) => !["heading", "text"].includes(block.type)), settings: { ...section.settings, eyebrow: "New season", heading: "Our picks", text: "Chosen this week", viewAllLabel: "View all", image, ...extra } };
+  const blocks = type === "product-specifications" ? [{ id: "row", type: "spec-row", enabled: true, settings: { label: "Warranty", value: "10 years" } }] : section.blocks.filter((block) => !["heading", "text"].includes(block.type));
+  return { ...section, id: `${type}-1`, blocks, settings: { ...section.settings, eyebrow: "New season", heading: "Our picks", text: "Chosen this week", viewAllLabel: "View all", image, ...(EXTRA[type] ?? {}), ...extra } };
 }
-const draw = (section: SectionNode, mode: RendererMode, onSelect = vi.fn()) => render(<RegistrySectionRenderer section={section} mode={mode} commerce={commerce} region="template" onSelect={onSelect} storeSlug="demo" />);
+/** Settings some sections need before a part shows (a footer newsletter, a header extra link). */
+const EXTRA: Record<string, Record<string, unknown>> = {
+  header: { extraLinkLabel: "Showroom", extraLink: "/pages/showroom" },
+  footer: { showNewsletter: true, newsletterText: "News", storeName: "Harbour", contactEmail: "hi@shop.test", copyright: "© Harbour" },
+  "contact-store-info": { address: "1 High St" },
+  "rating-summary": { rating: 4 },
+  "product-information": { showVendor: true },
+  "collection-header": { showImage: true, layout: "simple" },
+};
+const presentation = {
+  product: { id: "bed", title: "Harbour bed", vendor: "Harbour", description: "A bed.", imageUrl: "", options: [] },
+  selection: [], quantity: 1, pricing: { price: "£499.00" }, availability: { state: "available", message: "In stock" }, canAddToCart: true,
+  selectOption: vi.fn(), setQuantity: vi.fn(), addToCart: vi.fn(async () => ({ ok: true })), relatedProducts: [product, { ...product, id: "p2" }],
+};
+const productPage = { pageType: "product", resource: { id: "bed", handle: "bed", data: { productPresentation: presentation } } };
+const PAGES: Record<string, unknown> = {
+  "product-information": productPage, "product-purchase": productPage, "product-description": productPage, "related-products": productPage,
+  "collection-header": { pageType: "collection", resource: { id: "c1", handle: "c", data: { collectionPresentation: { collection: { id: "c1", title: "Cakes", description: "", imageUrl: "https://cdn.example.com/c.jpg" }, products: [], totalProducts: 0 } } } },
+  "blog-header": { pageType: "blog", resource: { id: "b1", handle: "news", data: { blog: { title: "News", handle: "news" }, articles: [] } } },
+};
+const draw = (section: SectionNode, mode: RendererMode, onSelect = vi.fn()) => render(<RegistrySectionRenderer section={section} mode={mode} commerce={commerce} region="template" onSelect={onSelect} storeSlug="demo" {...(PAGES[section.type] ? { page: PAGES[section.type] as never } : {})} />);
 const marked = (container: HTMLElement) => [...new Set([...container.querySelectorAll<HTMLElement>("[data-editor-element]")].map((item) => item.dataset.editorElement))].sort();
 
 describe("section elements in the editor preview", () => {
@@ -65,5 +86,25 @@ describe("section elements in the editor preview", () => {
   it("element style settings stay out of the section's own panel list but are known to the section", () => {
     const controls = getSectionDefinition("hero")?.controls ?? [];
     expect(controls.filter((control) => control.element === "eyebrow").map((control) => control.key)).toEqual(["el_eyebrow_color", "el_eyebrow_font", "el_eyebrow_size", "el_eyebrow_weight", "el_eyebrow_align"]);
+  });
+
+  // Each block with parts, in a section that draws it.
+  const blockCases: Array<[string, string, Record<string, unknown>]> = [
+    ["column", "multicolumn", { heading: "Free delivery", text: "On every order" }],
+    ["collection-card", "category-grid", { label: "Beds", image, link: "/collections/beds" }],
+    ["testimonial", "testimonials", { quote: "Lovely", author: "Sam" }],
+  ];
+  it("every block part is covered here", () => {
+    expect(blockCases.map(([type]) => type).sort()).toEqual(Object.keys(BLOCK_ELEMENTS).sort());
+  });
+  it.each(blockCases)("%s marks its parts inside the block, and a click selects the block's part", (type, sectionType, settings) => {
+    const onSelect = vi.fn();
+    const section = { ...filled(sectionType), blocks: [{ id: "b1", type, enabled: true, settings }] };
+    const view = draw(section, "editor", onSelect);
+    const block = view.container.querySelector<HTMLElement>('[data-editor-block-id="b1"]')!;
+    const parts = BLOCK_ELEMENTS[type].map((element) => element.id);
+    expect(marked(block)).toEqual([...parts].sort());
+    fireEvent.click(block.querySelector(`[data-editor-element="${parts[0]}"]`)!);
+    expect(onSelect).toHaveBeenLastCalledWith({ kind: "block", region: "template", sectionId: section.id, blockId: "b1", elementId: parts[0], elementIndex: 0 });
   });
 });

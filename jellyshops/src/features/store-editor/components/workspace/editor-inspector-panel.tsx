@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, LayoutPanelTop, Plus, Trash2 } from "lucide-react";
-import { blockLabel } from "@jelly/storefront-registry";
+import { blockLabel, getBlockDefinition } from "@jelly/storefront-registry";
 import { GlobalSectionPanel } from "@/features/store-editor/components/global-section-panel";
 import { SettingGroups } from "@/features/store-editor/components/inspector/setting-groups";
 import { RichTextDocumentEditor } from "@/features/store-editor/components/inspector/rich-text-document-editor";
@@ -125,10 +125,10 @@ export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
             <div className="flex min-w-0 items-center gap-2">
               <button
                 type="button"
-                aria-label={selectedLocation?.parent ? "Back to group" : selectedBlock || selectedElement ? "Back to section settings" : "Back to sections"}
+                aria-label={selectedElement && selectedBlock ? "Back to block settings" : selectedLocation?.parent ? "Back to group" : selectedBlock || selectedElement ? "Back to section settings" : "Back to sections"}
                 onClick={() => {
                   const region = selection && selection.kind !== "theme" ? selection.region : "template";
-                  if (selectedElement) { setSelection({ kind: "section", region, sectionId: localSection.id }); return; }
+                  if (selectedElement) { setSelection(selectedBlock ? { kind: "block", region, sectionId: localSection.id, blockId: selectedBlock.id } : { kind: "section", region, sectionId: localSection.id }); return; }
                   setSelection(selectedLocation?.parent
                     ? { kind: "block", region, sectionId: localSection.id, blockId: selectedLocation.parent.id }
                     : selectedBlock ? { kind: "section", region, sectionId: localSection.id } : null);
@@ -141,7 +141,7 @@ export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
               <LayoutPanelTop size={16} className="text-[var(--ink-soft)]" />
               <div className="min-w-0">
                 <p className="text-[12px] text-[var(--ink-soft)]">
-                  {(selectedBlock || selectedElement) && localSection.type !== "rich-text" ? displayName(localSection.type, ctx.themeConfiguration?.themeVersion) : "Section settings"}
+                  {selectedElement && selectedBlock ? blockLabel(selectedBlock.type) : (selectedBlock || selectedElement) && localSection.type !== "rich-text" ? displayName(localSection.type, ctx.themeConfiguration?.themeVersion) : "Section settings"}
                 </p>
                 <p className="truncate text-[13px] font-semibold">
                   {selectedElement ? selectedElement.label : localSection.type === "rich-text" || !selectedBlock ? displayName(localSection.type, ctx.themeConfiguration?.themeVersion) : blockLabel(selectedBlock.type)}
@@ -201,7 +201,13 @@ export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
               {localSection.blocks.map((block) => <button key={block.id} type="button" onClick={() => setSelection({ kind: "block", region: selection && selection.kind !== "theme" ? selection.region : "template", sectionId: localSection.id, blockId: block.id })} className="flex min-h-9 w-full items-center rounded-lg px-2 text-left text-xs hover:bg-muted">{blockLabel(block.type)}</button>)}
             </div>
           )}
-          {selectedBlock && !selectedGlobal && selectedChildOptions.types.length > 0 && (
+          {selectedBlock && !selectedElement && (getBlockDefinition(selectedBlock.type)?.elements ?? []).length > 0 && (
+            <div className="border-b border-[var(--line)] p-3">
+              <p className="mb-2 text-xs font-semibold text-muted-foreground">Parts of this block</p>
+              {(getBlockDefinition(selectedBlock.type)?.elements ?? []).map((element) => <button key={element.id} type="button" onClick={() => setSelection({ kind: "block", region: selection && selection.kind !== "theme" ? selection.region : "template", sectionId: localSection.id, blockId: selectedBlock.id, elementId: element.id })} className="flex min-h-9 w-full items-center rounded-lg px-2 text-left text-xs hover:bg-muted">{element.label}</button>)}
+            </div>
+          )}
+          {selectedBlock && !selectedElement && !selectedGlobal && selectedChildOptions.types.length > 0 && (
             <div className="border-b border-[var(--line)] p-3">
               {(selectedBlock.blocks ?? []).length > 0 && <p className="mb-2 text-xs font-semibold text-muted-foreground">Blocks in this group</p>}
               {(selectedBlock.blocks ?? []).map((block) => <button key={block.id} type="button" onClick={() => setSelection({ kind: "block", region: selection && selection.kind !== "theme" ? selection.region : "template", sectionId: localSection.id, blockId: block.id })} className="flex min-h-9 w-full items-center rounded-lg px-2 text-left text-xs hover:bg-muted">{blockLabel(block.type)}{block.enabled ? "" : " (hidden)"}</button>)}

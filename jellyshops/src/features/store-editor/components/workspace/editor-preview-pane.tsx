@@ -47,7 +47,10 @@ export function EditorPreviewPane({ ctx }: { ctx: EditorViewContext }) {
     const global = validGlobals.find((item) => item.section.id === next.sectionId);
     if (global) {
       setActiveGlobalId(global.id);
-      setSelection(next.kind === "block" && next.blockId ? { kind: "block", region: next.region ?? region, sectionId: next.sectionId!, blockId: next.blockId } : null);
+      // Shared sections: a block or a part of the section (logo, newsletter heading) opens its settings; the section itself shows the shared panel.
+      const part = next.elementId ? { elementId: next.elementId, elementIndex: next.elementIndex ?? 0 } : {};
+      setSelection(next.kind === "block" && next.blockId ? { kind: "block", region: next.region ?? region, sectionId: next.sectionId!, blockId: next.blockId, ...part }
+        : next.kind === "section" && next.elementId ? { kind: "section", region: next.region ?? region, sectionId: next.sectionId!, ...part as { elementId: string } } : null);
       setMobilePanel("settings");
       return;
     }
@@ -57,7 +60,7 @@ export function EditorPreviewPane({ ctx }: { ctx: EditorViewContext }) {
       setMobilePanel("settings");
     }
     if (next.kind === "block" && next.sectionId && next.blockId) {
-      setSelection({ kind: "block", region: next.region ?? region, sectionId: next.sectionId, blockId: next.blockId, fieldKey: next.fieldKey });
+      setSelection({ kind: "block", region: next.region ?? region, sectionId: next.sectionId, blockId: next.blockId, fieldKey: next.fieldKey, ...(next.elementId ? { elementId: next.elementId, elementIndex: next.elementIndex ?? 0 } : {}) });
       setMobilePanel("settings");
     }
   };

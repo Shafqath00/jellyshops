@@ -25,12 +25,29 @@ export function EditorSidebar({ ctx }: { ctx: EditorViewContext }) {
         >
           <div className="flex h-full min-h-0 flex-col">
             <div className="min-h-0 flex-1 overflow-y-auto">
+              {/* A part of a shared section (header logo, footer newsletter): outline it with a toolbar that only goes up a level. */}
+              {!toolbarTarget && ctx.selectedElement && selection && selection.kind !== "theme" && (
+                <SelectionToolbar
+                  target={{ sectionId: selection.sectionId, ...(selection.kind === "block" ? { blockId: selection.blockId } : {}) }}
+                  label={ctx.selectedElement.label}
+                  hidden={false}
+                  actions={{ "move-up": false, "move-down": false, duplicate: false, toggle: false, remove: false, "group-in": false, "group-out": false }}
+                  onAction={() => {}}
+                  element={{ id: ctx.selectedElement.id, index: selection.elementIndex }}
+                  parentLabel={selection.kind === "block" ? "Select block" : "Select section"}
+                  onSelectParent={() => setSelection(selection.kind === "block" ? { kind: "block", region: selection.region, sectionId: selection.sectionId, blockId: selection.blockId } : null)}
+                />
+              )}
               {toolbarTarget && toolbarFound && activeTemplate && (
                 <SelectionToolbar
                   target={toolbarTarget}
-                  label={toolbarFound.block ? blockLabel(toolbarFound.block.type) : ctx.selectedElement ? ctx.selectedElement.label : displayName(toolbarFound.section.type, ctx.themeConfiguration?.themeVersion)}
-                  element={ctx.selectedElement && selection?.kind === "section" ? { id: ctx.selectedElement.id, index: selection.elementIndex } : undefined}
-                  onSelectParent={() => { if (selection?.kind === "section") setSelection({ kind: "section", region: selection.region, sectionId: selection.sectionId }); }}
+                  label={ctx.selectedElement ? ctx.selectedElement.label : toolbarFound.block ? blockLabel(toolbarFound.block.type) : displayName(toolbarFound.section.type, ctx.themeConfiguration?.themeVersion)}
+                  element={ctx.selectedElement && selection && selection.kind !== "theme" ? { id: ctx.selectedElement.id, index: selection.elementIndex } : undefined}
+                  parentLabel={selection?.kind === "block" ? "Select block" : "Select section"}
+                  onSelectParent={() => {
+                    if (selection?.kind === "section") setSelection({ kind: "section", region: selection.region, sectionId: selection.sectionId });
+                    if (selection?.kind === "block") setSelection({ kind: "block", region: selection.region, sectionId: selection.sectionId, blockId: selection.blockId });
+                  }}
                   hidden={toolbarFound.block ? !toolbarFound.block.enabled : !toolbarFound.section.enabled}
                   actions={availableActions(activeTemplate.layout, toolbarTarget)}
                   onAction={(action) => { void runSelectionAction(action); }}
