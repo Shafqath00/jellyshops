@@ -15,7 +15,7 @@ export interface ThemePreviewConfig {
   stageColor: string;
   guide: { heading: string; subheading: string; body: string; announcement: string; footerText: string };
   products: PublicProduct[];
-  product: { id: string; title: string; description: string; media: Array<{ url: string; alt: string }>; specifications: Record<string, string>; shippingCopy: string; price: string; compareAtPrice?: string };
+  product: { id: string; title: string; description: string; media: Array<{ url: string; alt: string }>; specifications: Record<string, string>; shippingCopy: string; price: string; compareAtPrice?: string; galleryEnabled?: boolean; showBuyNow?: boolean; option?: { id: string; name: string; values: Array<{ id: string; label: string; soldOut?: boolean }> } };
   collection: { title: string; description: string; imageUrl: string };
   page: { title: string; intro: string; heading: string; body: string; bullets: string[] };
   searchQuery: string;
@@ -176,8 +176,36 @@ export const jellyResthavenPreview: ThemePreviewConfig = {
   useStarterMenu: true,
 };
 
+const formaAsset = (file: string) => `/themes/jelly-forma/${file}-v2.webp`;
+const formaProducts: PublicProduct[] = [
+  { id: "f1", name: "Everyday timber stool", price: "£149.00", compareAtPrice: "£179.00", badge: "Sale", href: "#", imageUrl: formaAsset("stool"), vendor: "Forma Studio", swatches: [{ label: "Natural", color: "#c9a97c" }, { label: "Ink", color: "#171717" }] },
+  { id: "f2", name: "Sunday lounge sofa", price: "£899.00", href: "#", imageUrl: formaAsset("sofa"), vendor: "Forma Studio" },
+  { id: "f3", name: "Gather oak dining table", price: "£649.00", href: "#", imageUrl: formaAsset("table"), vendor: "Forma Studio" },
+  { id: "f4", name: "Arc table lamp", price: "£429.00", href: "#", imageUrl: formaAsset("lamp"), vendor: "Forma Studio" },
+];
+
+export const jellyFormaPreview: ThemePreviewConfig = {
+  themeId: "jelly-forma", packId: "jelly-forma", name: "Jelly Forma", stageColor: "#e8ebf1",
+  guide: {
+    heading: "Soft living", subheading: "Make room for something new",
+    body: "Manrope headings, clear product details and generous images make a furniture collection easy to explore. Rounded controls and blue accents carry the design across every page.",
+    announcement: "Make room for everyday living", footerText: "Furniture, lighting and useful objects for the rooms you live in.",
+  },
+  products: formaProducts,
+  product: {
+    id: "f1", title: "Everyday timber stool", description: "A simple timber stool with a handhold in the seat and a footrest below. Pull it up to a counter or use it as an occasional perch.\n\nWipe clean with a soft, damp cloth and dry immediately.",
+    galleryEnabled: true, showBuyNow: false, option: { id: "finish", name: "Finish", values: [{ id: "natural", label: "Natural oak" }, { id: "smoked", label: "Smoked oak" }, { id: "walnut", label: "Walnut", soldOut: true }] },
+    media: [{ url: formaAsset("stool_detail"), alt: "Oak counter stool, three-quarter view" }, { url: formaAsset("stool_front"), alt: "Oak counter stool, front view" }],
+    specifications: { Material: "Timber frame", Care: "Wipe clean with a damp cloth", Assembly: "See the included guide" },
+    shippingCopy: "Delivery options are shown at checkout.", price: "£149.00", compareAtPrice: "£179.00",
+  },
+  collection: { title: "Furniture for everyday living", description: "Chairs, sofas and considered pieces for the spaces you share.", imageUrl: formaAsset("hero") },
+  page: { title: "Our story", intro: "We choose furniture for the way rooms are really used: coffee in the morning, dinner with friends and a quiet place to sit.", heading: "Made for your everyday", body: "Explore materials, measurements and care details before choosing a piece. Our team can help you work out what fits.", bullets: ["Clear dimensions and materials", "Helpful advice before you order"] },
+  searchQuery: "chair", cart: { f1: 2, f2: 1 }, useStarterMenu: true,
+};
+
 /** Previews of the built-in themes, by the path under /theme-preview/. */
-const builtInPreviews: Record<string, ThemePreviewConfig> = { "jelly-minimal": jellyMinimalPreview, "jelly-avenue": jellyAvenuePreview, "jelly-resthaven": jellyResthavenPreview };
+const builtInPreviews: Record<string, ThemePreviewConfig> = { "jelly-minimal": jellyMinimalPreview, "jelly-avenue": jellyAvenuePreview, "jelly-resthaven": jellyResthavenPreview, "jelly-forma": jellyFormaPreview };
 const previewOfBase: Record<string, ThemePreviewConfig> = { "jelly-signature": jellyMinimalPreview, "jelly-avenue": jellyAvenuePreview };
 
 /**

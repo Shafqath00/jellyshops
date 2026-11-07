@@ -42,7 +42,7 @@ function selectors(css: string): string[] {
 const kitScope = ':is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"])';
 const kitFiles = ["theme-kit.css", "theme-kit-late.css"];
 
-describe.each([...themes, ...kitFiles.map((file) => ({ file, scope: kitScope }))])("$file", ({ file, scope }) => {
+describe.each([...themes, { file: "jelly-forma.css", scope: '[data-jelly-theme="jelly-forma"]' }, ...kitFiles.map((file) => ({ file, scope: kitScope }))])("$file", ({ file, scope }) => {
   const css = readFileSync(path.join(__dirname, file), "utf8");
 
   it("scopes every selector to its theme", () => {
