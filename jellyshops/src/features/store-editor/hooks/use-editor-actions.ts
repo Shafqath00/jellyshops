@@ -199,6 +199,7 @@ export function useEditorActions(ctx: ReturnType<typeof useEditorState> & Return
     ? { sectionId: selection.sectionId, ...(selection.kind === "block" ? { blockId: selection.blockId } : {}) }
     : null;
   const toolbarFound = toolbarTarget && activeTemplate ? findTarget(activeTemplate.layout, toolbarTarget) : null;
+  const selectedElementId = selection?.kind === "section" ? selection.elementId : undefined;
   const runSelectionAction = async (action: SelectionAction) => {
     if (!activeTemplate || !toolbarTarget || !toolbarFound) return;
     const result = applySelectionAction(activeTemplate.layout, toolbarTarget, action);
@@ -234,9 +235,10 @@ export function useEditorActions(ctx: ReturnType<typeof useEditorState> & Return
     undo: () => { void playHistory("undo"); },
     redo: () => { void playHistory("redo"); },
     save: () => { void saveQueueRef.current?.flush(); },
-    remove: toolbarFound ? () => { void runSelectionAction("remove"); } : undefined,
-    duplicate: toolbarFound ? () => { void runSelectionAction("duplicate"); } : undefined,
-    deselect: selection ? () => setSelection(null) : undefined,
+    // With a section element selected, Delete/Duplicate would hit the whole section, so they are off; Escape goes up to the section.
+    remove: toolbarFound && !selectedElementId ? () => { void runSelectionAction("remove"); } : undefined,
+    duplicate: toolbarFound && !selectedElementId ? () => { void runSelectionAction("duplicate"); } : undefined,
+    deselect: selection ? () => setSelection(selection.kind === "section" && selection.elementId ? { kind: "section", region: selection.region, sectionId: selection.sectionId } : null) : undefined,
   });
   return { insertPreset, saveToLibrary, deletePreset, insertBuiltIn, addBlock, removeSelectedSection, moveSelectedPlacement, toggleSection, insertGlobal, makeGlobal, detachGlobal, updateSelectedSetting, updateSelectedSettings, saveRichTextDocument, openDiagnostic, toolbarTarget, toolbarFound, runSelectionAction, runActionOn, runMove, runMoveTo };
 }

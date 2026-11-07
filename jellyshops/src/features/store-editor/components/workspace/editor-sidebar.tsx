@@ -28,7 +28,9 @@ export function EditorSidebar({ ctx }: { ctx: EditorViewContext }) {
               {toolbarTarget && toolbarFound && activeTemplate && (
                 <SelectionToolbar
                   target={toolbarTarget}
-                  label={toolbarFound.block ? blockLabel(toolbarFound.block.type) : displayName(toolbarFound.section.type, ctx.themeConfiguration?.themeVersion)}
+                  label={toolbarFound.block ? blockLabel(toolbarFound.block.type) : ctx.selectedElement ? ctx.selectedElement.label : displayName(toolbarFound.section.type, ctx.themeConfiguration?.themeVersion)}
+                  element={ctx.selectedElement && selection?.kind === "section" ? { id: ctx.selectedElement.id, index: selection.elementIndex } : undefined}
+                  onSelectParent={() => { if (selection?.kind === "section") setSelection({ kind: "section", region: selection.region, sectionId: selection.sectionId }); }}
                   hidden={toolbarFound.block ? !toolbarFound.block.enabled : !toolbarFound.section.enabled}
                   actions={availableActions(activeTemplate.layout, toolbarTarget)}
                   onAction={(action) => { void runSelectionAction(action); }}

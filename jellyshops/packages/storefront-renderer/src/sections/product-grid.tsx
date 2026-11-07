@@ -1,4 +1,5 @@
 import { useEffect, useId, useState, type CSSProperties, type KeyboardEvent } from "react";
+import { elementProps } from "../element-style";
 import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui";
 import type { CommerceDataProvider, PublicProduct } from "../types";
 import { resolveStorefrontHref } from "../runtime-context";
@@ -50,6 +51,8 @@ export function ProductGridSection({ commerce, section, storeSlug, editor = fals
   const viewAllHref = viewAllLabel ? resolveStorefrontHref(section.settings.viewAllLink || "/shop", storeSlug) : null;
   const columns = typeof section.settings.columns === "number" && Number.isInteger(section.settings.columns) ? Math.max(2, Math.min(4, section.settings.columns)) : 4;
   const align = section.settings.contentAlignment === "left" || section.settings.contentAlignment === "center" ? section.settings.contentAlignment : undefined;
+  // Each card is the same "Product card" element; the editor outlines the one clicked.
+  const cardEditorProps = editor ? elementProps(section, "productCard", editor) as Record<string, string> : undefined;
   const onTabKey = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
     const step = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
     if (!step) return;
@@ -60,7 +63,7 @@ export function ProductGridSection({ commerce, section, storeSlug, editor = fals
   };
   return <section className="jelly-section jelly-product-grid" {...sectionData(section, { "data-align": align })}><StorefrontContainer>
     {(heading || viewAllHref || tabs.length > 1) && <div className="jelly-section-header">
-      <div>{heading && <h2>{heading}</h2>}<SettingText text={intro} document={formattedSetting(section.settings, "text")} /></div>
+      <div>{heading && <h2 {...elementProps(section, "heading", editor)}>{heading}</h2>}<SettingText text={intro} document={formattedSetting(section.settings, "text")} {...elementProps(section, "text", editor)} /></div>
       {tabs.length > 1 && <div className="jelly-product-tabs" role="tablist" aria-label={heading || "Product lists"}>{tabs.map((tab, index) => <button
         key={tab.id}
         type="button"
@@ -74,9 +77,9 @@ export function ProductGridSection({ commerce, section, storeSlug, editor = fals
         onClick={() => setTabId(tab.id)}
         onKeyDown={(event) => onTabKey(event, index)}
       >{tab.label}</button>)}</div>}
-      {viewAllHref && <a className="jelly-button jelly-button--link" href={viewAllHref}>{viewAllLabel}</a>}
+      {viewAllHref && <a className="jelly-button jelly-button--link" href={viewAllHref} {...elementProps(section, "viewAll", editor)}>{viewAllLabel}</a>}
     </div>}
     {current?.error ? <p role="alert">Products are temporarily unavailable. <button type="button" onClick={() => setRetry((value) => value + 1)}>Retry</button></p> : loaded && products.length === 0 && <p className="jelly-empty-state">{emptyMessage}</p>}
-    <div className="jelly-product-grid-items" style={{ "--jelly-columns": columns } as CSSProperties} {...(tabs.length > 1 ? { id: panelId, role: "tabpanel", "aria-labelledby": `${panelId}-${activeTab?.id}` } : {})}>{products.map((product) => <StorefrontProductCard key={product.id} product={product} />)}</div>
+    <div className="jelly-product-grid-items" style={{ "--jelly-columns": columns } as CSSProperties} {...(tabs.length > 1 ? { id: panelId, role: "tabpanel", "aria-labelledby": `${panelId}-${activeTab?.id}` } : {})}>{products.map((product) => <StorefrontProductCard key={product.id} product={product} editorProps={cardEditorProps} />)}</div>
   </StorefrontContainer></section>;
 }

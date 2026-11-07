@@ -1,4 +1,5 @@
 import { safeRichTextHref, type SectionNode } from "@jelly/storefront-schema";
+import { elementProps } from "../element-style";
 import { Grid, Stack } from "../layout";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import { useState, type CSSProperties } from "react";
@@ -32,8 +33,9 @@ function blockCopy(section: SectionNode, fallbackHeading: string, editor = false
     headingContent: inlineSetting(heading?.settings, "text", stringValue(heading?.settings, "text", stringValue(section.settings, "heading", fallbackHeading))),
     body: stringValue(body?.settings, "text", stringValue(section.settings, "body", stringValue(section.settings, "text"))),
     bodyDocument: stringValue(body?.settings, "text") ? formattedSetting(body?.settings, "text") : stringValue(section.settings, "body") ? null : formattedSetting(section.settings, "text"),
-    headingProps: { ...blockStyle(heading), ...(heading ? blockEditorData(heading, editor, "Heading", undefined, "text") : {}) },
-    bodyProps: { ...blockStyle(body), ...(body ? blockEditorData(body, editor, "Text", undefined, "text") : {}) },
+    // Without a heading or text block the copy comes from section settings: then it is the section's own element.
+    headingProps: heading ? { ...blockStyle(heading), ...blockEditorData(heading, editor, "Heading", undefined, "text") } : elementProps(section, "heading", editor),
+    bodyProps: body ? { ...blockStyle(body), ...blockEditorData(body, editor, "Text", undefined, "text") } : elementProps(section, "text", editor),
     buttons: buttons.flatMap((block) => {
       const label = stringValue(block.settings, "label");
       return label ? [{ id: block.id, label, href: block.settings.href, settings: block.settings, mobile: block.responsive?.mobile, editorData: blockEditorData(block, editor, "Button", undefined, "label") }] : [];
@@ -65,13 +67,13 @@ export function ImageWithTextSection({ section, context }: { section: SectionNod
   return <section className={`jelly-section jelly-image-text${image ? " has-image" : ""}`} {...sectionData(section, { "data-image-position": imagePosition })}>
     <StorefrontContainer>
       <div className={`jelly-image-text-layout align-${alignment}`}>
-        {image && <div className="jelly-image-text-media">
+        {image && <div className="jelly-image-text-media" {...elementProps(section, "image", context.mode === "editor")}>
           {/* Local uploads are served by the media API and are not Next Image assets. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={image.url} alt={typeof image.alt === "string" ? image.alt : ""} loading="lazy" style={{ objectPosition: `${image.focalPoint?.x ?? 50}% ${image.focalPoint?.y ?? 50}%`, objectFit: image.fit === "contain" ? "contain" : "cover" }} />
         </div>}
         <div className="jelly-image-text-content">
-          {eyebrow && <p className="jelly-eyebrow">{eyebrow}</p>}
+          {eyebrow && <p className="jelly-eyebrow" {...elementProps(section, "eyebrow", context.mode === "editor")}>{eyebrow}</p>}
           <h2 {...content.headingProps}>{content.headingContent}</h2>
           <SettingText text={content.body} document={content.bodyDocument} {...content.bodyProps} />
           <Actions buttons={content.buttons} storeSlug={context.storeSlug} />
@@ -93,7 +95,7 @@ export function ImageBannerSection({ section, context }: { section: SectionNode;
   })}>
     {image && <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="jelly-image-banner-media" src={image.url} alt={image.alt ?? ""} loading="lazy" style={{ objectPosition: `${image.focalPoint?.x ?? 50}% ${image.focalPoint?.y ?? 50}%` }} />
+      <img className="jelly-image-banner-media" src={image.url} alt={image.alt ?? ""} loading="lazy" {...elementProps(section, "image", context.mode === "editor", { objectPosition: `${image.focalPoint?.x ?? 50}% ${image.focalPoint?.y ?? 50}%` })} />
       {overlay > 0 && <span className="jelly-image-banner-overlay" aria-hidden="true" style={{ background: `rgba(0, 0, 0, ${overlay})` }} />}
     </>}
     <StorefrontContainer className="jelly-image-banner-content">
@@ -133,7 +135,7 @@ export function FaqSection({ section, editor = false }: { section: SectionNode; 
   return <section className="jelly-section jelly-faq" {...sectionData(section)}>
     <StorefrontContainer>
       <div className="jelly-faq-layout">
-        <div className="jelly-section-intro"><h2>{heading}</h2><SettingText text={intro} document={formattedSetting(section.settings, "text")} /></div>
+        <div className="jelly-section-intro"><h2 {...elementProps(section, "heading", editor)}>{heading}</h2><SettingText text={intro} document={formattedSetting(section.settings, "text")} {...elementProps(section, "text", editor)} /></div>
         <div className="jelly-faq-list">
           {items.map((item) => <details key={item.id} {...blockEditorData(item.block, editor, "Question")}><summary>{item.question}</summary><SettingText text={item.answer} document={item.document} /></details>)}
         </div>

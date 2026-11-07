@@ -4,7 +4,7 @@ import { getSectionDefinition, listSectionDefinitions, listSectionDefinitionsFor
 import { isSectionStyleKey } from "./section-style";
 
 /** A section's own settings, leaving out the style settings every section shares. */
-const ownKeys = (type: string) => getSectionDefinition(type)?.controls.map(({ key }) => key).filter((key) => !isSectionStyleKey(key));
+const ownKeys = (type: string) => getSectionDefinition(type)?.controls.filter((control) => !control.element).map(({ key }) => key).filter((key) => !isSectionStyleKey(key));
 
 function section(type: string, blocks: SectionNode["blocks"] = []): SectionNode {
   return { id: "section-1", type, enabled: true, settings: {}, blocks };

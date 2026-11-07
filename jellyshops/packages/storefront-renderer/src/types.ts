@@ -39,7 +39,7 @@ export interface PublicMetaobjectList {
 export interface CommerceDataProvider { initialProducts?: PublicProduct[]; getProducts(input?: { featured?: boolean; limit?: number; sort?: string; collectionId?: string }): Promise<PublicProduct[]>; subscribeNewsletter?: (email: string, source: string) => Promise<void>; getMetaobjects?: (handle: string) => Promise<PublicMetaobjectList | null> }
 export interface AssetResolver { resolve(assetId: string): Promise<string | null> }
 export type RendererMode = "preview" | "editor" | "published";
-export interface RendererSelection { kind: "theme" | "section" | "block"; region?: "header" | "template" | "footer"; sectionId?: string; blockId?: string; fieldKey?: string }
+export interface RendererSelection { kind: "theme" | "section" | "block"; region?: "header" | "template" | "footer"; sectionId?: string; blockId?: string; fieldKey?: string; /** A part of the section drawn from its settings (section-elements.ts). */ elementId?: string; /** Which copy of a repeated element (the nth product card). */ elementIndex?: number }
 export interface StorefrontRendererProps {
   document: StoreDesignDocument | StorefrontDocument;
   page?: PageType;

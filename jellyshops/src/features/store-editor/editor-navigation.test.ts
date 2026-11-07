@@ -31,4 +31,11 @@ describe("selection in the address", () => {
     // A block without a section is never written.
     expect(editorSearchFor("", { blockId: "b1" })).toBe("");
   });
+
+  it("keeps a selected section element in the address (only without a block)", () => {
+    expect(parseEditorNavigationTarget("?section=s1&element=heading")).toEqual({ sectionId: "s1", elementId: "heading" });
+    expect(parseEditorNavigationTarget("?section=s1&block=b1&element=heading")).toEqual({ sectionId: "s1", blockId: "b1" });
+    expect(editorSearchFor("", { templateId: "t1", sectionId: "s1", elementId: "heading" })).toBe("?templateId=t1&section=s1&element=heading");
+    expect(editorSearchFor("?section=s1&element=heading", { templateId: "t1", sectionId: "s1" })).toBe("?section=s1&templateId=t1");
+  });
 });

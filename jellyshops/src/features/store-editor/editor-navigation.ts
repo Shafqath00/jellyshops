@@ -9,6 +9,8 @@ export interface EditorNavigationTarget {
   /** A section (and block) of the page's template to select when the editor opens: `?section=…&block=…`. */
   sectionId?: string;
   blockId?: string;
+  /** A part of the section (`&element=heading`), when no block is given. */
+  elementId?: string;
 }
 
 export function parseEditorNavigationTarget(search: string): EditorNavigationTarget {
@@ -18,10 +20,12 @@ export function parseEditorNavigationTarget(search: string): EditorNavigationTar
   const resourceId = params.get("resourceId")?.trim() || undefined;
   const sectionId = params.get("section")?.trim() || undefined;
   const blockId = params.get("block")?.trim() || undefined;
+  const elementId = params.get("element")?.trim() || undefined;
   const target: EditorNavigationTarget = {};
   if (sectionId) {
     target.sectionId = sectionId;
     if (blockId) target.blockId = blockId;
+    else if (elementId) target.elementId = elementId;
   }
   if (templateId) target.templateId = templateId;
   if (resourceType && resourceId && resourceTypes.has(resourceType as StorefrontTemplateType)) {
@@ -32,12 +36,13 @@ export function parseEditorNavigationTarget(search: string): EditorNavigationTar
 }
 
 /** The address for the current page and selection, keeping any other parameters (resourceType, resourceId…). Returns the new `search` string. */
-export function editorSearchFor(search: string, current: { templateId?: string; sectionId?: string; blockId?: string }): string {
+export function editorSearchFor(search: string, current: { templateId?: string; sectionId?: string; blockId?: string; elementId?: string }): string {
   const params = new URLSearchParams(search);
   const apply = (key: string, value: string | undefined) => { if (value) params.set(key, value); else params.delete(key); };
   apply("templateId", current.templateId);
   apply("section", current.sectionId);
   apply("block", current.sectionId ? current.blockId : undefined);
+  apply("element", current.sectionId && !current.blockId ? current.elementId : undefined);
   const next = params.toString();
   return next ? `?${next}` : "";
 }

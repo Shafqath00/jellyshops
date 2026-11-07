@@ -3,7 +3,8 @@ import type { RegionName } from "@jelly/storefront-registry";
 
 export type EditorSelection =
   | { kind: "theme" }
-  | { kind: "section"; region: RegionName; sectionId: string }
+  /** With `elementId`: one part of the section drawn from its settings (a heading, an image, the product cards; section-elements.ts). */
+  | { kind: "section"; region: RegionName; sectionId: string; elementId?: string; elementIndex?: number }
   | { kind: "block"; region: RegionName; sectionId: string; blockId: string; fieldKey?: string; focusRequestId?: number }
   | null;
 

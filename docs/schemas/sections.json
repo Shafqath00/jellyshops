@@ -2780,6 +2780,225 @@
           "max": 80,
           "step": 5,
           "unit": "%"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "eyebrow",
+          "type": "color",
+          "key": "el_eyebrow_color",
+          "label": "Colour",
+          "allowAlpha": false
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "eyebrow",
+          "type": "select",
+          "key": "el_eyebrow_font",
+          "label": "Font",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Fraunces",
+              "value": "Fraunces"
+            },
+            {
+              "label": "Inter",
+              "value": "Inter"
+            },
+            {
+              "label": "Playfair Display",
+              "value": "Playfair Display"
+            },
+            {
+              "label": "Cormorant Garamond",
+              "value": "Cormorant Garamond"
+            },
+            {
+              "label": "Lora",
+              "value": "Lora"
+            },
+            {
+              "label": "EB Garamond",
+              "value": "EB Garamond"
+            },
+            {
+              "label": "Libre Baskerville",
+              "value": "Libre Baskerville"
+            },
+            {
+              "label": "DM Serif Display",
+              "value": "DM Serif Display"
+            },
+            {
+              "label": "Crimson Pro",
+              "value": "Crimson Pro"
+            },
+            {
+              "label": "Manrope",
+              "value": "Manrope"
+            },
+            {
+              "label": "DM Sans",
+              "value": "DM Sans"
+            },
+            {
+              "label": "Work Sans",
+              "value": "Work Sans"
+            },
+            {
+              "label": "Montserrat",
+              "value": "Montserrat"
+            },
+            {
+              "label": "Outfit",
+              "value": "Outfit"
+            },
+            {
+              "label": "Plus Jakarta Sans",
+              "value": "Plus Jakarta Sans"
+            },
+            {
+              "label": "Nunito Sans",
+              "value": "Nunito Sans"
+            },
+            {
+              "label": "Raleway",
+              "value": "Raleway"
+            },
+            {
+              "label": "Space Grotesk",
+              "value": "Space Grotesk"
+            },
+            {
+              "label": "Josefin Sans",
+              "value": "Josefin Sans"
+            },
+            {
+              "label": "Figtree",
+              "value": "Figtree"
+            },
+            {
+              "label": "Jost",
+              "value": "Jost"
+            },
+            {
+              "label": "Poppins",
+              "value": "Poppins"
+            },
+            {
+              "label": "Hind",
+              "value": "Hind"
+            },
+            {
+              "label": "Oswald",
+              "value": "Oswald"
+            },
+            {
+              "label": "Bebas Neue",
+              "value": "Bebas Neue"
+            },
+            {
+              "label": "Syne",
+              "value": "Syne"
+            },
+            {
+              "label": "Georgia",
+              "value": "Georgia"
+            },
+            {
+              "label": "Arial",
+              "value": "Arial"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "eyebrow",
+          "type": "range",
+          "key": "el_eyebrow_size",
+          "label": "Text size",
+          "min": 10,
+          "max": 40,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "eyebrow",
+          "type": "select",
+          "key": "el_eyebrow_weight",
+          "label": "Weight",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Light",
+              "value": "300"
+            },
+            {
+              "label": "Regular",
+              "value": "400"
+            },
+            {
+              "label": "Medium",
+              "value": "500"
+            },
+            {
+              "label": "Semibold",
+              "value": "600"
+            },
+            {
+              "label": "Bold",
+              "value": "700"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "eyebrow",
+          "type": "select",
+          "key": "el_eyebrow_align",
+          "label": "Alignment",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Centre",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "image",
+          "type": "range",
+          "key": "el_image_radius",
+          "label": "Corner radius",
+          "min": 0,
+          "max": 60,
+          "step": 1,
+          "unit": "px"
         }
       ],
       "settingsSchema": {
@@ -2820,6 +3039,103 @@
             "type": "number",
             "minimum": 0,
             "maximum": 100
+          },
+          "el_eyebrow_color": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_eyebrow_font": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Fraunces",
+                  "Inter",
+                  "Playfair Display",
+                  "Cormorant Garamond",
+                  "Lora",
+                  "EB Garamond",
+                  "Libre Baskerville",
+                  "DM Serif Display",
+                  "Crimson Pro",
+                  "Manrope",
+                  "DM Sans",
+                  "Work Sans",
+                  "Montserrat",
+                  "Outfit",
+                  "Plus Jakarta Sans",
+                  "Nunito Sans",
+                  "Raleway",
+                  "Space Grotesk",
+                  "Josefin Sans",
+                  "Figtree",
+                  "Jost",
+                  "Poppins",
+                  "Hind",
+                  "Oswald",
+                  "Bebas Neue",
+                  "Syne",
+                  "Georgia",
+                  "Arial"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_eyebrow_size": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 40
+          },
+          "el_eyebrow_weight": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "300",
+                  "400",
+                  "500",
+                  "600",
+                  "700"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_eyebrow_align": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_image_radius": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 60
           }
         }
       }
@@ -3254,6 +3570,420 @@
               "value": "dark"
             }
           ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "color",
+          "key": "el_heading_color",
+          "label": "Colour",
+          "allowAlpha": false
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_font",
+          "label": "Font",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Fraunces",
+              "value": "Fraunces"
+            },
+            {
+              "label": "Inter",
+              "value": "Inter"
+            },
+            {
+              "label": "Playfair Display",
+              "value": "Playfair Display"
+            },
+            {
+              "label": "Cormorant Garamond",
+              "value": "Cormorant Garamond"
+            },
+            {
+              "label": "Lora",
+              "value": "Lora"
+            },
+            {
+              "label": "EB Garamond",
+              "value": "EB Garamond"
+            },
+            {
+              "label": "Libre Baskerville",
+              "value": "Libre Baskerville"
+            },
+            {
+              "label": "DM Serif Display",
+              "value": "DM Serif Display"
+            },
+            {
+              "label": "Crimson Pro",
+              "value": "Crimson Pro"
+            },
+            {
+              "label": "Manrope",
+              "value": "Manrope"
+            },
+            {
+              "label": "DM Sans",
+              "value": "DM Sans"
+            },
+            {
+              "label": "Work Sans",
+              "value": "Work Sans"
+            },
+            {
+              "label": "Montserrat",
+              "value": "Montserrat"
+            },
+            {
+              "label": "Outfit",
+              "value": "Outfit"
+            },
+            {
+              "label": "Plus Jakarta Sans",
+              "value": "Plus Jakarta Sans"
+            },
+            {
+              "label": "Nunito Sans",
+              "value": "Nunito Sans"
+            },
+            {
+              "label": "Raleway",
+              "value": "Raleway"
+            },
+            {
+              "label": "Space Grotesk",
+              "value": "Space Grotesk"
+            },
+            {
+              "label": "Josefin Sans",
+              "value": "Josefin Sans"
+            },
+            {
+              "label": "Figtree",
+              "value": "Figtree"
+            },
+            {
+              "label": "Jost",
+              "value": "Jost"
+            },
+            {
+              "label": "Poppins",
+              "value": "Poppins"
+            },
+            {
+              "label": "Hind",
+              "value": "Hind"
+            },
+            {
+              "label": "Oswald",
+              "value": "Oswald"
+            },
+            {
+              "label": "Bebas Neue",
+              "value": "Bebas Neue"
+            },
+            {
+              "label": "Syne",
+              "value": "Syne"
+            },
+            {
+              "label": "Georgia",
+              "value": "Georgia"
+            },
+            {
+              "label": "Arial",
+              "value": "Arial"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "range",
+          "key": "el_heading_size",
+          "label": "Text size",
+          "min": 12,
+          "max": 120,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_weight",
+          "label": "Weight",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Light",
+              "value": "300"
+            },
+            {
+              "label": "Regular",
+              "value": "400"
+            },
+            {
+              "label": "Medium",
+              "value": "500"
+            },
+            {
+              "label": "Semibold",
+              "value": "600"
+            },
+            {
+              "label": "Bold",
+              "value": "700"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_align",
+          "label": "Alignment",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Centre",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "color",
+          "key": "el_text_color",
+          "label": "Colour",
+          "allowAlpha": false
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "select",
+          "key": "el_text_font",
+          "label": "Font",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Fraunces",
+              "value": "Fraunces"
+            },
+            {
+              "label": "Inter",
+              "value": "Inter"
+            },
+            {
+              "label": "Playfair Display",
+              "value": "Playfair Display"
+            },
+            {
+              "label": "Cormorant Garamond",
+              "value": "Cormorant Garamond"
+            },
+            {
+              "label": "Lora",
+              "value": "Lora"
+            },
+            {
+              "label": "EB Garamond",
+              "value": "EB Garamond"
+            },
+            {
+              "label": "Libre Baskerville",
+              "value": "Libre Baskerville"
+            },
+            {
+              "label": "DM Serif Display",
+              "value": "DM Serif Display"
+            },
+            {
+              "label": "Crimson Pro",
+              "value": "Crimson Pro"
+            },
+            {
+              "label": "Manrope",
+              "value": "Manrope"
+            },
+            {
+              "label": "DM Sans",
+              "value": "DM Sans"
+            },
+            {
+              "label": "Work Sans",
+              "value": "Work Sans"
+            },
+            {
+              "label": "Montserrat",
+              "value": "Montserrat"
+            },
+            {
+              "label": "Outfit",
+              "value": "Outfit"
+            },
+            {
+              "label": "Plus Jakarta Sans",
+              "value": "Plus Jakarta Sans"
+            },
+            {
+              "label": "Nunito Sans",
+              "value": "Nunito Sans"
+            },
+            {
+              "label": "Raleway",
+              "value": "Raleway"
+            },
+            {
+              "label": "Space Grotesk",
+              "value": "Space Grotesk"
+            },
+            {
+              "label": "Josefin Sans",
+              "value": "Josefin Sans"
+            },
+            {
+              "label": "Figtree",
+              "value": "Figtree"
+            },
+            {
+              "label": "Jost",
+              "value": "Jost"
+            },
+            {
+              "label": "Poppins",
+              "value": "Poppins"
+            },
+            {
+              "label": "Hind",
+              "value": "Hind"
+            },
+            {
+              "label": "Oswald",
+              "value": "Oswald"
+            },
+            {
+              "label": "Bebas Neue",
+              "value": "Bebas Neue"
+            },
+            {
+              "label": "Syne",
+              "value": "Syne"
+            },
+            {
+              "label": "Georgia",
+              "value": "Georgia"
+            },
+            {
+              "label": "Arial",
+              "value": "Arial"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "range",
+          "key": "el_text_size",
+          "label": "Text size",
+          "min": 10,
+          "max": 40,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "select",
+          "key": "el_text_weight",
+          "label": "Weight",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Light",
+              "value": "300"
+            },
+            {
+              "label": "Regular",
+              "value": "400"
+            },
+            {
+              "label": "Medium",
+              "value": "500"
+            },
+            {
+              "label": "Semibold",
+              "value": "600"
+            },
+            {
+              "label": "Bold",
+              "value": "700"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "select",
+          "key": "el_text_align",
+          "label": "Alignment",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Centre",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
         }
       ],
       "settingsSchema": {
@@ -3293,6 +4023,190 @@
               "page",
               "soft",
               "dark"
+            ]
+          },
+          "el_heading_color": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_font": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Fraunces",
+                  "Inter",
+                  "Playfair Display",
+                  "Cormorant Garamond",
+                  "Lora",
+                  "EB Garamond",
+                  "Libre Baskerville",
+                  "DM Serif Display",
+                  "Crimson Pro",
+                  "Manrope",
+                  "DM Sans",
+                  "Work Sans",
+                  "Montserrat",
+                  "Outfit",
+                  "Plus Jakarta Sans",
+                  "Nunito Sans",
+                  "Raleway",
+                  "Space Grotesk",
+                  "Josefin Sans",
+                  "Figtree",
+                  "Jost",
+                  "Poppins",
+                  "Hind",
+                  "Oswald",
+                  "Bebas Neue",
+                  "Syne",
+                  "Georgia",
+                  "Arial"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_size": {
+            "type": "integer",
+            "minimum": 12,
+            "maximum": 120
+          },
+          "el_heading_weight": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "300",
+                  "400",
+                  "500",
+                  "600",
+                  "700"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_align": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_text_color": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_text_font": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Fraunces",
+                  "Inter",
+                  "Playfair Display",
+                  "Cormorant Garamond",
+                  "Lora",
+                  "EB Garamond",
+                  "Libre Baskerville",
+                  "DM Serif Display",
+                  "Crimson Pro",
+                  "Manrope",
+                  "DM Sans",
+                  "Work Sans",
+                  "Montserrat",
+                  "Outfit",
+                  "Plus Jakarta Sans",
+                  "Nunito Sans",
+                  "Raleway",
+                  "Space Grotesk",
+                  "Josefin Sans",
+                  "Figtree",
+                  "Jost",
+                  "Poppins",
+                  "Hind",
+                  "Oswald",
+                  "Bebas Neue",
+                  "Syne",
+                  "Georgia",
+                  "Arial"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_text_size": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 40
+          },
+          "el_text_weight": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "300",
+                  "400",
+                  "500",
+                  "600",
+                  "700"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_text_align": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
             ]
           }
         }
@@ -3516,6 +4430,225 @@
               "value": "dark"
             }
           ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "eyebrow",
+          "type": "color",
+          "key": "el_eyebrow_color",
+          "label": "Colour",
+          "allowAlpha": false
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "eyebrow",
+          "type": "select",
+          "key": "el_eyebrow_font",
+          "label": "Font",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Fraunces",
+              "value": "Fraunces"
+            },
+            {
+              "label": "Inter",
+              "value": "Inter"
+            },
+            {
+              "label": "Playfair Display",
+              "value": "Playfair Display"
+            },
+            {
+              "label": "Cormorant Garamond",
+              "value": "Cormorant Garamond"
+            },
+            {
+              "label": "Lora",
+              "value": "Lora"
+            },
+            {
+              "label": "EB Garamond",
+              "value": "EB Garamond"
+            },
+            {
+              "label": "Libre Baskerville",
+              "value": "Libre Baskerville"
+            },
+            {
+              "label": "DM Serif Display",
+              "value": "DM Serif Display"
+            },
+            {
+              "label": "Crimson Pro",
+              "value": "Crimson Pro"
+            },
+            {
+              "label": "Manrope",
+              "value": "Manrope"
+            },
+            {
+              "label": "DM Sans",
+              "value": "DM Sans"
+            },
+            {
+              "label": "Work Sans",
+              "value": "Work Sans"
+            },
+            {
+              "label": "Montserrat",
+              "value": "Montserrat"
+            },
+            {
+              "label": "Outfit",
+              "value": "Outfit"
+            },
+            {
+              "label": "Plus Jakarta Sans",
+              "value": "Plus Jakarta Sans"
+            },
+            {
+              "label": "Nunito Sans",
+              "value": "Nunito Sans"
+            },
+            {
+              "label": "Raleway",
+              "value": "Raleway"
+            },
+            {
+              "label": "Space Grotesk",
+              "value": "Space Grotesk"
+            },
+            {
+              "label": "Josefin Sans",
+              "value": "Josefin Sans"
+            },
+            {
+              "label": "Figtree",
+              "value": "Figtree"
+            },
+            {
+              "label": "Jost",
+              "value": "Jost"
+            },
+            {
+              "label": "Poppins",
+              "value": "Poppins"
+            },
+            {
+              "label": "Hind",
+              "value": "Hind"
+            },
+            {
+              "label": "Oswald",
+              "value": "Oswald"
+            },
+            {
+              "label": "Bebas Neue",
+              "value": "Bebas Neue"
+            },
+            {
+              "label": "Syne",
+              "value": "Syne"
+            },
+            {
+              "label": "Georgia",
+              "value": "Georgia"
+            },
+            {
+              "label": "Arial",
+              "value": "Arial"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "eyebrow",
+          "type": "range",
+          "key": "el_eyebrow_size",
+          "label": "Text size",
+          "min": 10,
+          "max": 40,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "eyebrow",
+          "type": "select",
+          "key": "el_eyebrow_weight",
+          "label": "Weight",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Light",
+              "value": "300"
+            },
+            {
+              "label": "Regular",
+              "value": "400"
+            },
+            {
+              "label": "Medium",
+              "value": "500"
+            },
+            {
+              "label": "Semibold",
+              "value": "600"
+            },
+            {
+              "label": "Bold",
+              "value": "700"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "eyebrow",
+          "type": "select",
+          "key": "el_eyebrow_align",
+          "label": "Alignment",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Centre",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "image",
+          "type": "range",
+          "key": "el_image_radius",
+          "label": "Corner radius",
+          "min": 0,
+          "max": 60,
+          "step": 1,
+          "unit": "px"
         }
       ],
       "settingsSchema": {
@@ -3587,6 +4720,103 @@
               "soft",
               "dark"
             ]
+          },
+          "el_eyebrow_color": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_eyebrow_font": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Fraunces",
+                  "Inter",
+                  "Playfair Display",
+                  "Cormorant Garamond",
+                  "Lora",
+                  "EB Garamond",
+                  "Libre Baskerville",
+                  "DM Serif Display",
+                  "Crimson Pro",
+                  "Manrope",
+                  "DM Sans",
+                  "Work Sans",
+                  "Montserrat",
+                  "Outfit",
+                  "Plus Jakarta Sans",
+                  "Nunito Sans",
+                  "Raleway",
+                  "Space Grotesk",
+                  "Josefin Sans",
+                  "Figtree",
+                  "Jost",
+                  "Poppins",
+                  "Hind",
+                  "Oswald",
+                  "Bebas Neue",
+                  "Syne",
+                  "Georgia",
+                  "Arial"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_eyebrow_size": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 40
+          },
+          "el_eyebrow_weight": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "300",
+                  "400",
+                  "500",
+                  "600",
+                  "700"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_eyebrow_align": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_image_radius": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 60
           }
         }
       }
@@ -3692,6 +4922,18 @@
           "max": 80,
           "step": 5,
           "unit": "%"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "image",
+          "type": "range",
+          "key": "el_image_radius",
+          "label": "Corner radius",
+          "min": 0,
+          "max": 60,
+          "step": 1,
+          "unit": "px"
         }
       ],
       "settingsSchema": {
@@ -3760,6 +5002,11 @@
               "center",
               "right"
             ]
+          },
+          "el_image_radius": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 60
           }
         }
       }
@@ -4047,6 +5294,213 @@
               "value": "dark"
             }
           ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "color",
+          "key": "el_heading_color",
+          "label": "Colour",
+          "allowAlpha": false
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_font",
+          "label": "Font",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Fraunces",
+              "value": "Fraunces"
+            },
+            {
+              "label": "Inter",
+              "value": "Inter"
+            },
+            {
+              "label": "Playfair Display",
+              "value": "Playfair Display"
+            },
+            {
+              "label": "Cormorant Garamond",
+              "value": "Cormorant Garamond"
+            },
+            {
+              "label": "Lora",
+              "value": "Lora"
+            },
+            {
+              "label": "EB Garamond",
+              "value": "EB Garamond"
+            },
+            {
+              "label": "Libre Baskerville",
+              "value": "Libre Baskerville"
+            },
+            {
+              "label": "DM Serif Display",
+              "value": "DM Serif Display"
+            },
+            {
+              "label": "Crimson Pro",
+              "value": "Crimson Pro"
+            },
+            {
+              "label": "Manrope",
+              "value": "Manrope"
+            },
+            {
+              "label": "DM Sans",
+              "value": "DM Sans"
+            },
+            {
+              "label": "Work Sans",
+              "value": "Work Sans"
+            },
+            {
+              "label": "Montserrat",
+              "value": "Montserrat"
+            },
+            {
+              "label": "Outfit",
+              "value": "Outfit"
+            },
+            {
+              "label": "Plus Jakarta Sans",
+              "value": "Plus Jakarta Sans"
+            },
+            {
+              "label": "Nunito Sans",
+              "value": "Nunito Sans"
+            },
+            {
+              "label": "Raleway",
+              "value": "Raleway"
+            },
+            {
+              "label": "Space Grotesk",
+              "value": "Space Grotesk"
+            },
+            {
+              "label": "Josefin Sans",
+              "value": "Josefin Sans"
+            },
+            {
+              "label": "Figtree",
+              "value": "Figtree"
+            },
+            {
+              "label": "Jost",
+              "value": "Jost"
+            },
+            {
+              "label": "Poppins",
+              "value": "Poppins"
+            },
+            {
+              "label": "Hind",
+              "value": "Hind"
+            },
+            {
+              "label": "Oswald",
+              "value": "Oswald"
+            },
+            {
+              "label": "Bebas Neue",
+              "value": "Bebas Neue"
+            },
+            {
+              "label": "Syne",
+              "value": "Syne"
+            },
+            {
+              "label": "Georgia",
+              "value": "Georgia"
+            },
+            {
+              "label": "Arial",
+              "value": "Arial"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "range",
+          "key": "el_heading_size",
+          "label": "Text size",
+          "min": 12,
+          "max": 120,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_weight",
+          "label": "Weight",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Light",
+              "value": "300"
+            },
+            {
+              "label": "Regular",
+              "value": "400"
+            },
+            {
+              "label": "Medium",
+              "value": "500"
+            },
+            {
+              "label": "Semibold",
+              "value": "600"
+            },
+            {
+              "label": "Bold",
+              "value": "700"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_align",
+          "label": "Alignment",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Centre",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
         }
       ],
       "settingsSchema": {
@@ -4062,6 +5516,98 @@
               "page",
               "soft",
               "dark"
+            ]
+          },
+          "el_heading_color": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_font": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Fraunces",
+                  "Inter",
+                  "Playfair Display",
+                  "Cormorant Garamond",
+                  "Lora",
+                  "EB Garamond",
+                  "Libre Baskerville",
+                  "DM Serif Display",
+                  "Crimson Pro",
+                  "Manrope",
+                  "DM Sans",
+                  "Work Sans",
+                  "Montserrat",
+                  "Outfit",
+                  "Plus Jakarta Sans",
+                  "Nunito Sans",
+                  "Raleway",
+                  "Space Grotesk",
+                  "Josefin Sans",
+                  "Figtree",
+                  "Jost",
+                  "Poppins",
+                  "Hind",
+                  "Oswald",
+                  "Bebas Neue",
+                  "Syne",
+                  "Georgia",
+                  "Arial"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_size": {
+            "type": "integer",
+            "minimum": 12,
+            "maximum": 120
+          },
+          "el_heading_weight": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "300",
+                  "400",
+                  "500",
+                  "600",
+                  "700"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_align": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
             ]
           }
         }
@@ -4136,6 +5682,420 @@
               "value": "dark"
             }
           ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "color",
+          "key": "el_heading_color",
+          "label": "Colour",
+          "allowAlpha": false
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_font",
+          "label": "Font",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Fraunces",
+              "value": "Fraunces"
+            },
+            {
+              "label": "Inter",
+              "value": "Inter"
+            },
+            {
+              "label": "Playfair Display",
+              "value": "Playfair Display"
+            },
+            {
+              "label": "Cormorant Garamond",
+              "value": "Cormorant Garamond"
+            },
+            {
+              "label": "Lora",
+              "value": "Lora"
+            },
+            {
+              "label": "EB Garamond",
+              "value": "EB Garamond"
+            },
+            {
+              "label": "Libre Baskerville",
+              "value": "Libre Baskerville"
+            },
+            {
+              "label": "DM Serif Display",
+              "value": "DM Serif Display"
+            },
+            {
+              "label": "Crimson Pro",
+              "value": "Crimson Pro"
+            },
+            {
+              "label": "Manrope",
+              "value": "Manrope"
+            },
+            {
+              "label": "DM Sans",
+              "value": "DM Sans"
+            },
+            {
+              "label": "Work Sans",
+              "value": "Work Sans"
+            },
+            {
+              "label": "Montserrat",
+              "value": "Montserrat"
+            },
+            {
+              "label": "Outfit",
+              "value": "Outfit"
+            },
+            {
+              "label": "Plus Jakarta Sans",
+              "value": "Plus Jakarta Sans"
+            },
+            {
+              "label": "Nunito Sans",
+              "value": "Nunito Sans"
+            },
+            {
+              "label": "Raleway",
+              "value": "Raleway"
+            },
+            {
+              "label": "Space Grotesk",
+              "value": "Space Grotesk"
+            },
+            {
+              "label": "Josefin Sans",
+              "value": "Josefin Sans"
+            },
+            {
+              "label": "Figtree",
+              "value": "Figtree"
+            },
+            {
+              "label": "Jost",
+              "value": "Jost"
+            },
+            {
+              "label": "Poppins",
+              "value": "Poppins"
+            },
+            {
+              "label": "Hind",
+              "value": "Hind"
+            },
+            {
+              "label": "Oswald",
+              "value": "Oswald"
+            },
+            {
+              "label": "Bebas Neue",
+              "value": "Bebas Neue"
+            },
+            {
+              "label": "Syne",
+              "value": "Syne"
+            },
+            {
+              "label": "Georgia",
+              "value": "Georgia"
+            },
+            {
+              "label": "Arial",
+              "value": "Arial"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "range",
+          "key": "el_heading_size",
+          "label": "Text size",
+          "min": 12,
+          "max": 120,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_weight",
+          "label": "Weight",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Light",
+              "value": "300"
+            },
+            {
+              "label": "Regular",
+              "value": "400"
+            },
+            {
+              "label": "Medium",
+              "value": "500"
+            },
+            {
+              "label": "Semibold",
+              "value": "600"
+            },
+            {
+              "label": "Bold",
+              "value": "700"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_align",
+          "label": "Alignment",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Centre",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "color",
+          "key": "el_text_color",
+          "label": "Colour",
+          "allowAlpha": false
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "select",
+          "key": "el_text_font",
+          "label": "Font",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Fraunces",
+              "value": "Fraunces"
+            },
+            {
+              "label": "Inter",
+              "value": "Inter"
+            },
+            {
+              "label": "Playfair Display",
+              "value": "Playfair Display"
+            },
+            {
+              "label": "Cormorant Garamond",
+              "value": "Cormorant Garamond"
+            },
+            {
+              "label": "Lora",
+              "value": "Lora"
+            },
+            {
+              "label": "EB Garamond",
+              "value": "EB Garamond"
+            },
+            {
+              "label": "Libre Baskerville",
+              "value": "Libre Baskerville"
+            },
+            {
+              "label": "DM Serif Display",
+              "value": "DM Serif Display"
+            },
+            {
+              "label": "Crimson Pro",
+              "value": "Crimson Pro"
+            },
+            {
+              "label": "Manrope",
+              "value": "Manrope"
+            },
+            {
+              "label": "DM Sans",
+              "value": "DM Sans"
+            },
+            {
+              "label": "Work Sans",
+              "value": "Work Sans"
+            },
+            {
+              "label": "Montserrat",
+              "value": "Montserrat"
+            },
+            {
+              "label": "Outfit",
+              "value": "Outfit"
+            },
+            {
+              "label": "Plus Jakarta Sans",
+              "value": "Plus Jakarta Sans"
+            },
+            {
+              "label": "Nunito Sans",
+              "value": "Nunito Sans"
+            },
+            {
+              "label": "Raleway",
+              "value": "Raleway"
+            },
+            {
+              "label": "Space Grotesk",
+              "value": "Space Grotesk"
+            },
+            {
+              "label": "Josefin Sans",
+              "value": "Josefin Sans"
+            },
+            {
+              "label": "Figtree",
+              "value": "Figtree"
+            },
+            {
+              "label": "Jost",
+              "value": "Jost"
+            },
+            {
+              "label": "Poppins",
+              "value": "Poppins"
+            },
+            {
+              "label": "Hind",
+              "value": "Hind"
+            },
+            {
+              "label": "Oswald",
+              "value": "Oswald"
+            },
+            {
+              "label": "Bebas Neue",
+              "value": "Bebas Neue"
+            },
+            {
+              "label": "Syne",
+              "value": "Syne"
+            },
+            {
+              "label": "Georgia",
+              "value": "Georgia"
+            },
+            {
+              "label": "Arial",
+              "value": "Arial"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "range",
+          "key": "el_text_size",
+          "label": "Text size",
+          "min": 10,
+          "max": 40,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "select",
+          "key": "el_text_weight",
+          "label": "Weight",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Light",
+              "value": "300"
+            },
+            {
+              "label": "Regular",
+              "value": "400"
+            },
+            {
+              "label": "Medium",
+              "value": "500"
+            },
+            {
+              "label": "Semibold",
+              "value": "600"
+            },
+            {
+              "label": "Bold",
+              "value": "700"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "select",
+          "key": "el_text_align",
+          "label": "Alignment",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Centre",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
         }
       ],
       "settingsSchema": {
@@ -4155,6 +6115,190 @@
               "page",
               "soft",
               "dark"
+            ]
+          },
+          "el_heading_color": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_font": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Fraunces",
+                  "Inter",
+                  "Playfair Display",
+                  "Cormorant Garamond",
+                  "Lora",
+                  "EB Garamond",
+                  "Libre Baskerville",
+                  "DM Serif Display",
+                  "Crimson Pro",
+                  "Manrope",
+                  "DM Sans",
+                  "Work Sans",
+                  "Montserrat",
+                  "Outfit",
+                  "Plus Jakarta Sans",
+                  "Nunito Sans",
+                  "Raleway",
+                  "Space Grotesk",
+                  "Josefin Sans",
+                  "Figtree",
+                  "Jost",
+                  "Poppins",
+                  "Hind",
+                  "Oswald",
+                  "Bebas Neue",
+                  "Syne",
+                  "Georgia",
+                  "Arial"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_size": {
+            "type": "integer",
+            "minimum": 12,
+            "maximum": 120
+          },
+          "el_heading_weight": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "300",
+                  "400",
+                  "500",
+                  "600",
+                  "700"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_align": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_text_color": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_text_font": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Fraunces",
+                  "Inter",
+                  "Playfair Display",
+                  "Cormorant Garamond",
+                  "Lora",
+                  "EB Garamond",
+                  "Libre Baskerville",
+                  "DM Serif Display",
+                  "Crimson Pro",
+                  "Manrope",
+                  "DM Sans",
+                  "Work Sans",
+                  "Montserrat",
+                  "Outfit",
+                  "Plus Jakarta Sans",
+                  "Nunito Sans",
+                  "Raleway",
+                  "Space Grotesk",
+                  "Josefin Sans",
+                  "Figtree",
+                  "Jost",
+                  "Poppins",
+                  "Hind",
+                  "Oswald",
+                  "Bebas Neue",
+                  "Syne",
+                  "Georgia",
+                  "Arial"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_text_size": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 40
+          },
+          "el_text_weight": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "300",
+                  "400",
+                  "500",
+                  "600",
+                  "700"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_text_align": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
             ]
           }
         }
@@ -4434,6 +6578,213 @@
               "value": "dark"
             }
           ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "color",
+          "key": "el_heading_color",
+          "label": "Colour",
+          "allowAlpha": false
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_font",
+          "label": "Font",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Fraunces",
+              "value": "Fraunces"
+            },
+            {
+              "label": "Inter",
+              "value": "Inter"
+            },
+            {
+              "label": "Playfair Display",
+              "value": "Playfair Display"
+            },
+            {
+              "label": "Cormorant Garamond",
+              "value": "Cormorant Garamond"
+            },
+            {
+              "label": "Lora",
+              "value": "Lora"
+            },
+            {
+              "label": "EB Garamond",
+              "value": "EB Garamond"
+            },
+            {
+              "label": "Libre Baskerville",
+              "value": "Libre Baskerville"
+            },
+            {
+              "label": "DM Serif Display",
+              "value": "DM Serif Display"
+            },
+            {
+              "label": "Crimson Pro",
+              "value": "Crimson Pro"
+            },
+            {
+              "label": "Manrope",
+              "value": "Manrope"
+            },
+            {
+              "label": "DM Sans",
+              "value": "DM Sans"
+            },
+            {
+              "label": "Work Sans",
+              "value": "Work Sans"
+            },
+            {
+              "label": "Montserrat",
+              "value": "Montserrat"
+            },
+            {
+              "label": "Outfit",
+              "value": "Outfit"
+            },
+            {
+              "label": "Plus Jakarta Sans",
+              "value": "Plus Jakarta Sans"
+            },
+            {
+              "label": "Nunito Sans",
+              "value": "Nunito Sans"
+            },
+            {
+              "label": "Raleway",
+              "value": "Raleway"
+            },
+            {
+              "label": "Space Grotesk",
+              "value": "Space Grotesk"
+            },
+            {
+              "label": "Josefin Sans",
+              "value": "Josefin Sans"
+            },
+            {
+              "label": "Figtree",
+              "value": "Figtree"
+            },
+            {
+              "label": "Jost",
+              "value": "Jost"
+            },
+            {
+              "label": "Poppins",
+              "value": "Poppins"
+            },
+            {
+              "label": "Hind",
+              "value": "Hind"
+            },
+            {
+              "label": "Oswald",
+              "value": "Oswald"
+            },
+            {
+              "label": "Bebas Neue",
+              "value": "Bebas Neue"
+            },
+            {
+              "label": "Syne",
+              "value": "Syne"
+            },
+            {
+              "label": "Georgia",
+              "value": "Georgia"
+            },
+            {
+              "label": "Arial",
+              "value": "Arial"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "range",
+          "key": "el_heading_size",
+          "label": "Text size",
+          "min": 12,
+          "max": 120,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_weight",
+          "label": "Weight",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Light",
+              "value": "300"
+            },
+            {
+              "label": "Regular",
+              "value": "400"
+            },
+            {
+              "label": "Medium",
+              "value": "500"
+            },
+            {
+              "label": "Semibold",
+              "value": "600"
+            },
+            {
+              "label": "Bold",
+              "value": "700"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_align",
+          "label": "Alignment",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Centre",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
         }
       ],
       "settingsSchema": {
@@ -4462,6 +6813,98 @@
               "page",
               "soft",
               "dark"
+            ]
+          },
+          "el_heading_color": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_font": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Fraunces",
+                  "Inter",
+                  "Playfair Display",
+                  "Cormorant Garamond",
+                  "Lora",
+                  "EB Garamond",
+                  "Libre Baskerville",
+                  "DM Serif Display",
+                  "Crimson Pro",
+                  "Manrope",
+                  "DM Sans",
+                  "Work Sans",
+                  "Montserrat",
+                  "Outfit",
+                  "Plus Jakarta Sans",
+                  "Nunito Sans",
+                  "Raleway",
+                  "Space Grotesk",
+                  "Josefin Sans",
+                  "Figtree",
+                  "Jost",
+                  "Poppins",
+                  "Hind",
+                  "Oswald",
+                  "Bebas Neue",
+                  "Syne",
+                  "Georgia",
+                  "Arial"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_size": {
+            "type": "integer",
+            "minimum": 12,
+            "maximum": 120
+          },
+          "el_heading_weight": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "300",
+                  "400",
+                  "500",
+                  "600",
+                  "700"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_align": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
             ]
           }
         }
@@ -6179,6 +8622,475 @@
           "label": "Message when empty",
           "group": "content",
           "maxLength": 160
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "color",
+          "key": "el_heading_color",
+          "label": "Colour",
+          "allowAlpha": false
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_font",
+          "label": "Font",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Fraunces",
+              "value": "Fraunces"
+            },
+            {
+              "label": "Inter",
+              "value": "Inter"
+            },
+            {
+              "label": "Playfair Display",
+              "value": "Playfair Display"
+            },
+            {
+              "label": "Cormorant Garamond",
+              "value": "Cormorant Garamond"
+            },
+            {
+              "label": "Lora",
+              "value": "Lora"
+            },
+            {
+              "label": "EB Garamond",
+              "value": "EB Garamond"
+            },
+            {
+              "label": "Libre Baskerville",
+              "value": "Libre Baskerville"
+            },
+            {
+              "label": "DM Serif Display",
+              "value": "DM Serif Display"
+            },
+            {
+              "label": "Crimson Pro",
+              "value": "Crimson Pro"
+            },
+            {
+              "label": "Manrope",
+              "value": "Manrope"
+            },
+            {
+              "label": "DM Sans",
+              "value": "DM Sans"
+            },
+            {
+              "label": "Work Sans",
+              "value": "Work Sans"
+            },
+            {
+              "label": "Montserrat",
+              "value": "Montserrat"
+            },
+            {
+              "label": "Outfit",
+              "value": "Outfit"
+            },
+            {
+              "label": "Plus Jakarta Sans",
+              "value": "Plus Jakarta Sans"
+            },
+            {
+              "label": "Nunito Sans",
+              "value": "Nunito Sans"
+            },
+            {
+              "label": "Raleway",
+              "value": "Raleway"
+            },
+            {
+              "label": "Space Grotesk",
+              "value": "Space Grotesk"
+            },
+            {
+              "label": "Josefin Sans",
+              "value": "Josefin Sans"
+            },
+            {
+              "label": "Figtree",
+              "value": "Figtree"
+            },
+            {
+              "label": "Jost",
+              "value": "Jost"
+            },
+            {
+              "label": "Poppins",
+              "value": "Poppins"
+            },
+            {
+              "label": "Hind",
+              "value": "Hind"
+            },
+            {
+              "label": "Oswald",
+              "value": "Oswald"
+            },
+            {
+              "label": "Bebas Neue",
+              "value": "Bebas Neue"
+            },
+            {
+              "label": "Syne",
+              "value": "Syne"
+            },
+            {
+              "label": "Georgia",
+              "value": "Georgia"
+            },
+            {
+              "label": "Arial",
+              "value": "Arial"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "range",
+          "key": "el_heading_size",
+          "label": "Text size",
+          "min": 12,
+          "max": 120,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_weight",
+          "label": "Weight",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Light",
+              "value": "300"
+            },
+            {
+              "label": "Regular",
+              "value": "400"
+            },
+            {
+              "label": "Medium",
+              "value": "500"
+            },
+            {
+              "label": "Semibold",
+              "value": "600"
+            },
+            {
+              "label": "Bold",
+              "value": "700"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_align",
+          "label": "Alignment",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Centre",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "color",
+          "key": "el_text_color",
+          "label": "Colour",
+          "allowAlpha": false
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "select",
+          "key": "el_text_font",
+          "label": "Font",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Fraunces",
+              "value": "Fraunces"
+            },
+            {
+              "label": "Inter",
+              "value": "Inter"
+            },
+            {
+              "label": "Playfair Display",
+              "value": "Playfair Display"
+            },
+            {
+              "label": "Cormorant Garamond",
+              "value": "Cormorant Garamond"
+            },
+            {
+              "label": "Lora",
+              "value": "Lora"
+            },
+            {
+              "label": "EB Garamond",
+              "value": "EB Garamond"
+            },
+            {
+              "label": "Libre Baskerville",
+              "value": "Libre Baskerville"
+            },
+            {
+              "label": "DM Serif Display",
+              "value": "DM Serif Display"
+            },
+            {
+              "label": "Crimson Pro",
+              "value": "Crimson Pro"
+            },
+            {
+              "label": "Manrope",
+              "value": "Manrope"
+            },
+            {
+              "label": "DM Sans",
+              "value": "DM Sans"
+            },
+            {
+              "label": "Work Sans",
+              "value": "Work Sans"
+            },
+            {
+              "label": "Montserrat",
+              "value": "Montserrat"
+            },
+            {
+              "label": "Outfit",
+              "value": "Outfit"
+            },
+            {
+              "label": "Plus Jakarta Sans",
+              "value": "Plus Jakarta Sans"
+            },
+            {
+              "label": "Nunito Sans",
+              "value": "Nunito Sans"
+            },
+            {
+              "label": "Raleway",
+              "value": "Raleway"
+            },
+            {
+              "label": "Space Grotesk",
+              "value": "Space Grotesk"
+            },
+            {
+              "label": "Josefin Sans",
+              "value": "Josefin Sans"
+            },
+            {
+              "label": "Figtree",
+              "value": "Figtree"
+            },
+            {
+              "label": "Jost",
+              "value": "Jost"
+            },
+            {
+              "label": "Poppins",
+              "value": "Poppins"
+            },
+            {
+              "label": "Hind",
+              "value": "Hind"
+            },
+            {
+              "label": "Oswald",
+              "value": "Oswald"
+            },
+            {
+              "label": "Bebas Neue",
+              "value": "Bebas Neue"
+            },
+            {
+              "label": "Syne",
+              "value": "Syne"
+            },
+            {
+              "label": "Georgia",
+              "value": "Georgia"
+            },
+            {
+              "label": "Arial",
+              "value": "Arial"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "range",
+          "key": "el_text_size",
+          "label": "Text size",
+          "min": 10,
+          "max": 40,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "select",
+          "key": "el_text_weight",
+          "label": "Weight",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Light",
+              "value": "300"
+            },
+            {
+              "label": "Regular",
+              "value": "400"
+            },
+            {
+              "label": "Medium",
+              "value": "500"
+            },
+            {
+              "label": "Semibold",
+              "value": "600"
+            },
+            {
+              "label": "Bold",
+              "value": "700"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "select",
+          "key": "el_text_align",
+          "label": "Alignment",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Centre",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "viewAll",
+          "type": "color",
+          "key": "el_viewAll_color",
+          "label": "Colour",
+          "allowAlpha": false
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "viewAll",
+          "type": "range",
+          "key": "el_viewAll_size",
+          "label": "Text size",
+          "min": 10,
+          "max": 32,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "viewAll",
+          "type": "select",
+          "key": "el_viewAll_weight",
+          "label": "Weight",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Light",
+              "value": "300"
+            },
+            {
+              "label": "Regular",
+              "value": "400"
+            },
+            {
+              "label": "Medium",
+              "value": "500"
+            },
+            {
+              "label": "Semibold",
+              "value": "600"
+            },
+            {
+              "label": "Bold",
+              "value": "700"
+            }
+          ]
         }
       ],
       "settingsSchema": {
@@ -6230,6 +9142,225 @@
             "default": "Products will appear here once you add them to your store.",
             "type": "string",
             "maxLength": 160
+          },
+          "el_heading_color": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_font": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Fraunces",
+                  "Inter",
+                  "Playfair Display",
+                  "Cormorant Garamond",
+                  "Lora",
+                  "EB Garamond",
+                  "Libre Baskerville",
+                  "DM Serif Display",
+                  "Crimson Pro",
+                  "Manrope",
+                  "DM Sans",
+                  "Work Sans",
+                  "Montserrat",
+                  "Outfit",
+                  "Plus Jakarta Sans",
+                  "Nunito Sans",
+                  "Raleway",
+                  "Space Grotesk",
+                  "Josefin Sans",
+                  "Figtree",
+                  "Jost",
+                  "Poppins",
+                  "Hind",
+                  "Oswald",
+                  "Bebas Neue",
+                  "Syne",
+                  "Georgia",
+                  "Arial"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_size": {
+            "type": "integer",
+            "minimum": 12,
+            "maximum": 120
+          },
+          "el_heading_weight": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "300",
+                  "400",
+                  "500",
+                  "600",
+                  "700"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_align": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_text_color": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_text_font": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Fraunces",
+                  "Inter",
+                  "Playfair Display",
+                  "Cormorant Garamond",
+                  "Lora",
+                  "EB Garamond",
+                  "Libre Baskerville",
+                  "DM Serif Display",
+                  "Crimson Pro",
+                  "Manrope",
+                  "DM Sans",
+                  "Work Sans",
+                  "Montserrat",
+                  "Outfit",
+                  "Plus Jakarta Sans",
+                  "Nunito Sans",
+                  "Raleway",
+                  "Space Grotesk",
+                  "Josefin Sans",
+                  "Figtree",
+                  "Jost",
+                  "Poppins",
+                  "Hind",
+                  "Oswald",
+                  "Bebas Neue",
+                  "Syne",
+                  "Georgia",
+                  "Arial"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_text_size": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 40
+          },
+          "el_text_weight": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "300",
+                  "400",
+                  "500",
+                  "600",
+                  "700"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_text_align": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_viewAll_color": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_viewAll_size": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 32
+          },
+          "el_viewAll_weight": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "300",
+                  "400",
+                  "500",
+                  "600",
+                  "700"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
           }
         }
       }
@@ -6438,6 +9569,475 @@
           "label": "Message when empty",
           "group": "content",
           "maxLength": 160
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "color",
+          "key": "el_heading_color",
+          "label": "Colour",
+          "allowAlpha": false
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_font",
+          "label": "Font",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Fraunces",
+              "value": "Fraunces"
+            },
+            {
+              "label": "Inter",
+              "value": "Inter"
+            },
+            {
+              "label": "Playfair Display",
+              "value": "Playfair Display"
+            },
+            {
+              "label": "Cormorant Garamond",
+              "value": "Cormorant Garamond"
+            },
+            {
+              "label": "Lora",
+              "value": "Lora"
+            },
+            {
+              "label": "EB Garamond",
+              "value": "EB Garamond"
+            },
+            {
+              "label": "Libre Baskerville",
+              "value": "Libre Baskerville"
+            },
+            {
+              "label": "DM Serif Display",
+              "value": "DM Serif Display"
+            },
+            {
+              "label": "Crimson Pro",
+              "value": "Crimson Pro"
+            },
+            {
+              "label": "Manrope",
+              "value": "Manrope"
+            },
+            {
+              "label": "DM Sans",
+              "value": "DM Sans"
+            },
+            {
+              "label": "Work Sans",
+              "value": "Work Sans"
+            },
+            {
+              "label": "Montserrat",
+              "value": "Montserrat"
+            },
+            {
+              "label": "Outfit",
+              "value": "Outfit"
+            },
+            {
+              "label": "Plus Jakarta Sans",
+              "value": "Plus Jakarta Sans"
+            },
+            {
+              "label": "Nunito Sans",
+              "value": "Nunito Sans"
+            },
+            {
+              "label": "Raleway",
+              "value": "Raleway"
+            },
+            {
+              "label": "Space Grotesk",
+              "value": "Space Grotesk"
+            },
+            {
+              "label": "Josefin Sans",
+              "value": "Josefin Sans"
+            },
+            {
+              "label": "Figtree",
+              "value": "Figtree"
+            },
+            {
+              "label": "Jost",
+              "value": "Jost"
+            },
+            {
+              "label": "Poppins",
+              "value": "Poppins"
+            },
+            {
+              "label": "Hind",
+              "value": "Hind"
+            },
+            {
+              "label": "Oswald",
+              "value": "Oswald"
+            },
+            {
+              "label": "Bebas Neue",
+              "value": "Bebas Neue"
+            },
+            {
+              "label": "Syne",
+              "value": "Syne"
+            },
+            {
+              "label": "Georgia",
+              "value": "Georgia"
+            },
+            {
+              "label": "Arial",
+              "value": "Arial"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "range",
+          "key": "el_heading_size",
+          "label": "Text size",
+          "min": 12,
+          "max": 120,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_weight",
+          "label": "Weight",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Light",
+              "value": "300"
+            },
+            {
+              "label": "Regular",
+              "value": "400"
+            },
+            {
+              "label": "Medium",
+              "value": "500"
+            },
+            {
+              "label": "Semibold",
+              "value": "600"
+            },
+            {
+              "label": "Bold",
+              "value": "700"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_align",
+          "label": "Alignment",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Centre",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "color",
+          "key": "el_text_color",
+          "label": "Colour",
+          "allowAlpha": false
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "select",
+          "key": "el_text_font",
+          "label": "Font",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Fraunces",
+              "value": "Fraunces"
+            },
+            {
+              "label": "Inter",
+              "value": "Inter"
+            },
+            {
+              "label": "Playfair Display",
+              "value": "Playfair Display"
+            },
+            {
+              "label": "Cormorant Garamond",
+              "value": "Cormorant Garamond"
+            },
+            {
+              "label": "Lora",
+              "value": "Lora"
+            },
+            {
+              "label": "EB Garamond",
+              "value": "EB Garamond"
+            },
+            {
+              "label": "Libre Baskerville",
+              "value": "Libre Baskerville"
+            },
+            {
+              "label": "DM Serif Display",
+              "value": "DM Serif Display"
+            },
+            {
+              "label": "Crimson Pro",
+              "value": "Crimson Pro"
+            },
+            {
+              "label": "Manrope",
+              "value": "Manrope"
+            },
+            {
+              "label": "DM Sans",
+              "value": "DM Sans"
+            },
+            {
+              "label": "Work Sans",
+              "value": "Work Sans"
+            },
+            {
+              "label": "Montserrat",
+              "value": "Montserrat"
+            },
+            {
+              "label": "Outfit",
+              "value": "Outfit"
+            },
+            {
+              "label": "Plus Jakarta Sans",
+              "value": "Plus Jakarta Sans"
+            },
+            {
+              "label": "Nunito Sans",
+              "value": "Nunito Sans"
+            },
+            {
+              "label": "Raleway",
+              "value": "Raleway"
+            },
+            {
+              "label": "Space Grotesk",
+              "value": "Space Grotesk"
+            },
+            {
+              "label": "Josefin Sans",
+              "value": "Josefin Sans"
+            },
+            {
+              "label": "Figtree",
+              "value": "Figtree"
+            },
+            {
+              "label": "Jost",
+              "value": "Jost"
+            },
+            {
+              "label": "Poppins",
+              "value": "Poppins"
+            },
+            {
+              "label": "Hind",
+              "value": "Hind"
+            },
+            {
+              "label": "Oswald",
+              "value": "Oswald"
+            },
+            {
+              "label": "Bebas Neue",
+              "value": "Bebas Neue"
+            },
+            {
+              "label": "Syne",
+              "value": "Syne"
+            },
+            {
+              "label": "Georgia",
+              "value": "Georgia"
+            },
+            {
+              "label": "Arial",
+              "value": "Arial"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "range",
+          "key": "el_text_size",
+          "label": "Text size",
+          "min": 10,
+          "max": 40,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "select",
+          "key": "el_text_weight",
+          "label": "Weight",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Light",
+              "value": "300"
+            },
+            {
+              "label": "Regular",
+              "value": "400"
+            },
+            {
+              "label": "Medium",
+              "value": "500"
+            },
+            {
+              "label": "Semibold",
+              "value": "600"
+            },
+            {
+              "label": "Bold",
+              "value": "700"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "text",
+          "type": "select",
+          "key": "el_text_align",
+          "label": "Alignment",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Centre",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "viewAll",
+          "type": "color",
+          "key": "el_viewAll_color",
+          "label": "Colour",
+          "allowAlpha": false
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "viewAll",
+          "type": "range",
+          "key": "el_viewAll_size",
+          "label": "Text size",
+          "min": 10,
+          "max": 32,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "viewAll",
+          "type": "select",
+          "key": "el_viewAll_weight",
+          "label": "Weight",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Light",
+              "value": "300"
+            },
+            {
+              "label": "Regular",
+              "value": "400"
+            },
+            {
+              "label": "Medium",
+              "value": "500"
+            },
+            {
+              "label": "Semibold",
+              "value": "600"
+            },
+            {
+              "label": "Bold",
+              "value": "700"
+            }
+          ]
         }
       ],
       "settingsSchema": {
@@ -6489,6 +10089,225 @@
             "default": "Products will appear here once you add them to your store.",
             "type": "string",
             "maxLength": 160
+          },
+          "el_heading_color": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_font": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Fraunces",
+                  "Inter",
+                  "Playfair Display",
+                  "Cormorant Garamond",
+                  "Lora",
+                  "EB Garamond",
+                  "Libre Baskerville",
+                  "DM Serif Display",
+                  "Crimson Pro",
+                  "Manrope",
+                  "DM Sans",
+                  "Work Sans",
+                  "Montserrat",
+                  "Outfit",
+                  "Plus Jakarta Sans",
+                  "Nunito Sans",
+                  "Raleway",
+                  "Space Grotesk",
+                  "Josefin Sans",
+                  "Figtree",
+                  "Jost",
+                  "Poppins",
+                  "Hind",
+                  "Oswald",
+                  "Bebas Neue",
+                  "Syne",
+                  "Georgia",
+                  "Arial"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_size": {
+            "type": "integer",
+            "minimum": 12,
+            "maximum": 120
+          },
+          "el_heading_weight": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "300",
+                  "400",
+                  "500",
+                  "600",
+                  "700"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_align": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_text_color": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_text_font": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Fraunces",
+                  "Inter",
+                  "Playfair Display",
+                  "Cormorant Garamond",
+                  "Lora",
+                  "EB Garamond",
+                  "Libre Baskerville",
+                  "DM Serif Display",
+                  "Crimson Pro",
+                  "Manrope",
+                  "DM Sans",
+                  "Work Sans",
+                  "Montserrat",
+                  "Outfit",
+                  "Plus Jakarta Sans",
+                  "Nunito Sans",
+                  "Raleway",
+                  "Space Grotesk",
+                  "Josefin Sans",
+                  "Figtree",
+                  "Jost",
+                  "Poppins",
+                  "Hind",
+                  "Oswald",
+                  "Bebas Neue",
+                  "Syne",
+                  "Georgia",
+                  "Arial"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_text_size": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 40
+          },
+          "el_text_weight": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "300",
+                  "400",
+                  "500",
+                  "600",
+                  "700"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_text_align": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_viewAll_color": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_viewAll_size": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 32
+          },
+          "el_viewAll_weight": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "300",
+                  "400",
+                  "500",
+                  "600",
+                  "700"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
           }
         }
       }

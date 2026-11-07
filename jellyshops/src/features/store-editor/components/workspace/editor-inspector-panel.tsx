@@ -18,7 +18,7 @@ import type { EditorViewContext } from "../../hooks/use-editor-controller";
 
 /** The settings panel on the side: theme settings and saved looks, the section library, the block picker, section and block settings and shared sections. */
 export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
-  const { backendStoreId, api, looks, looksError, looksBusy, dynamicSources, catalog, themeCatalog, themeConfiguration, selection, setSelection, activeGlobalId, setMobilePanel, diagnostics, libraryRegion, setLibraryRegion, blockPickerSectionId, setBlockPickerSectionId, blockPickerParentId, setBlockPickerParentId, activeTemplate, presetOptions, globalOptions, selectedGlobal, localSection, selectedLocation, selectedBlock, selectedChildOptions, sectionDefinition, baseControls, responsiveView, selectedControls, selectedSettings, builtInSections, blockPickerSection, blockPickerDefinition, blockPickerTypes, selectedTheme, persistThemeSetting, saveThemeLook, renameThemeLook, deleteThemeLook, insertPreset, saveToLibrary, deletePreset, insertBuiltIn, addBlock, removeSelectedSection, insertGlobal, makeGlobal, detachGlobal, updateSelectedSetting, updateSelectedSettings, saveRichTextDocument, openDiagnostic } = ctx;
+  const { backendStoreId, api, looks, looksError, looksBusy, dynamicSources, catalog, themeCatalog, themeConfiguration, selection, setSelection, activeGlobalId, setMobilePanel, diagnostics, libraryRegion, setLibraryRegion, blockPickerSectionId, setBlockPickerSectionId, blockPickerParentId, setBlockPickerParentId, activeTemplate, presetOptions, globalOptions, selectedGlobal, localSection, selectedLocation, selectedBlock, selectedElement, selectedChildOptions, sectionDefinition, baseControls, responsiveView, selectedControls, selectedSettings, builtInSections, blockPickerSection, blockPickerDefinition, blockPickerTypes, selectedTheme, persistThemeSetting, saveThemeLook, renameThemeLook, deleteThemeLook, insertPreset, saveToLibrary, deletePreset, insertBuiltIn, addBlock, removeSelectedSection, insertGlobal, makeGlobal, detachGlobal, updateSelectedSetting, updateSelectedSettings, saveRichTextDocument, openDiagnostic } = ctx;
   return (
     <>
       {selection?.kind === "theme" && (
@@ -125,9 +125,10 @@ export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
             <div className="flex min-w-0 items-center gap-2">
               <button
                 type="button"
-                aria-label={selectedLocation?.parent ? "Back to group" : selectedBlock ? "Back to section settings" : "Back to sections"}
+                aria-label={selectedLocation?.parent ? "Back to group" : selectedBlock || selectedElement ? "Back to section settings" : "Back to sections"}
                 onClick={() => {
                   const region = selection && selection.kind !== "theme" ? selection.region : "template";
+                  if (selectedElement) { setSelection({ kind: "section", region, sectionId: localSection.id }); return; }
                   setSelection(selectedLocation?.parent
                     ? { kind: "block", region, sectionId: localSection.id, blockId: selectedLocation.parent.id }
                     : selectedBlock ? { kind: "section", region, sectionId: localSection.id } : null);
@@ -140,14 +141,14 @@ export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
               <LayoutPanelTop size={16} className="text-[var(--ink-soft)]" />
               <div className="min-w-0">
                 <p className="text-[12px] text-[var(--ink-soft)]">
-                  {selectedBlock && localSection.type !== "rich-text" ? displayName(localSection.type, ctx.themeConfiguration?.themeVersion) : "Section settings"}
+                  {(selectedBlock || selectedElement) && localSection.type !== "rich-text" ? displayName(localSection.type, ctx.themeConfiguration?.themeVersion) : "Section settings"}
                 </p>
                 <p className="truncate text-[13px] font-semibold">
-                  {localSection.type === "rich-text" || !selectedBlock ? displayName(localSection.type, ctx.themeConfiguration?.themeVersion) : blockLabel(selectedBlock.type)}
+                  {selectedElement ? selectedElement.label : localSection.type === "rich-text" || !selectedBlock ? displayName(localSection.type, ctx.themeConfiguration?.themeVersion) : blockLabel(selectedBlock.type)}
                 </p>
               </div>
             </div>
-            {!selectedBlock && !selectedGlobal && (
+            {!selectedBlock && !selectedElement && !selectedGlobal && (
               <button
                 type="button"
                 aria-label="Remove section"
@@ -161,7 +162,13 @@ export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
 
           <div className="border-b border-[var(--line)] px-4 py-4">
             {responsiveView !== "desktop" && localSection.type !== "rich-text" && <MobileEditingNote device={responsiveView} phoneSettings={mobileKeys(baseControls).size} />}
-            {localSection.type === "rich-text" ? (
+            {selectedElement?.kind === "product-card" && (
+              <div className="mb-4 rounded-xl border border-[var(--line)] bg-[var(--paper)] p-3 text-[12px] text-[var(--ink-soft)]">
+                <p>The card design (corners, shadow, badges, what each card shows) is the same in every product list.</p>
+                <button type="button" onClick={() => setSelection({ kind: "theme" })} className="mt-2 font-semibold text-[var(--ink)] underline underline-offset-2">Edit product card design</button>
+              </div>
+            )}
+            {localSection.type === "rich-text" && !selectedElement ? (
               <RichTextDocumentEditor
                 key={`${activeTemplate.id}:${localSection.id}`}
                 section={localSection}
@@ -182,7 +189,13 @@ export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
             )}
           </div>
 
-          {!selectedBlock && localSection.blocks.length > 0 && (
+          {!selectedBlock && !selectedElement && (sectionDefinition?.elements ?? []).length > 0 && (
+            <div className="border-b border-[var(--line)] p-3">
+              <p className="mb-2 text-xs font-semibold text-muted-foreground">Parts of this section</p>
+              {(sectionDefinition?.elements ?? []).map((element) => <button key={element.id} type="button" onClick={() => setSelection({ kind: "section", region: selection && selection.kind !== "theme" ? selection.region : "template", sectionId: localSection.id, elementId: element.id })} className="flex min-h-9 w-full items-center rounded-lg px-2 text-left text-xs hover:bg-muted">{element.label}</button>)}
+            </div>
+          )}
+          {!selectedBlock && !selectedElement && localSection.blocks.length > 0 && (
             <div className="border-b border-[var(--line)] p-3">
               <p className="mb-2 text-xs font-semibold text-muted-foreground">Content blocks</p>
               {localSection.blocks.map((block) => <button key={block.id} type="button" onClick={() => setSelection({ kind: "block", region: selection && selection.kind !== "theme" ? selection.region : "template", sectionId: localSection.id, blockId: block.id })} className="flex min-h-9 w-full items-center rounded-lg px-2 text-left text-xs hover:bg-muted">{blockLabel(block.type)}</button>)}

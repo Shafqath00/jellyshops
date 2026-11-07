@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowDown, ArrowUp, Copy, Eye, EyeOff, GripVertical, ListIndentDecrease, ListIndentIncrease, Trash2 } from "lucide-react";
 import { dropPosition, nestedDropPosition, type DropLine, type NestedDragRect } from "../drag-position";
@@ -13,8 +13,15 @@ import type { BlockDropList, SelectionAction, SelectionTarget } from "../selecti
  * sits at the top of the preview so the item can be shown again.
  */
 
-function findElement(doc: Document, target: SelectionTarget): HTMLElement | null {
+/** A part of the section drawn from its settings, and which copy of it (the nth product card). */
+export interface ToolbarElement { id: string; index?: number }
+
+function findElement(doc: Document, target: SelectionTarget, element?: ToolbarElement): HTMLElement | null {
   const section = [...doc.querySelectorAll<HTMLElement>("[data-editor-section-id]")].find((item) => item.dataset.editorSectionId === target.sectionId);
+  if (section && element) {
+    const copies = [...section.querySelectorAll<HTMLElement>("[data-editor-element]")].filter((item) => item.dataset.editorElement === element.id);
+    return copies[element.index ?? 0] ?? copies[0] ?? null;
+  }
   if (!section || !target.blockId) return section ?? null;
   const blocks = [...section.querySelectorAll<HTMLElement>("[data-editor-block-id]")].filter((item) => item.dataset.editorBlockId === target.blockId);
   return blocks.find((item) => !item.parentElement?.closest("[data-editor-block-id]")) ?? blocks[0] ?? null;
@@ -66,6 +73,8 @@ export function SelectionToolbar({
   onMove,
   dropLists,
   onMoveTo,
+  element,
+  onSelectParent,
 }: {
   frameTitle?: string;
   target: SelectionTarget | null;
@@ -80,12 +89,18 @@ export function SelectionToolbar({
   /** For a block: every list it may be dragged into (its own, the section's, groups); with `onMoveTo` it can change level. */
   dropLists?: BlockDropList[];
   onMoveTo?(parentId: string | null, beforeId: string | null): void;
+  /** A section element is selected: the toolbar outlines it and offers going up to its section instead of the section's actions. */
+  element?: ToolbarElement;
+  onSelectParent?(): void;
 }) {
   const doc = usePreviewDocument(frameTitle);
+  const elementId = element?.id;
+  const elementIndex = element?.index;
+  const elementTarget = useMemo(() => elementId ? { id: elementId, index: elementIndex } : undefined, [elementId, elementIndex]);
   const [position, setPosition] = useState<{ top: number; left: number; docked: boolean } | null>(null);
   const [dropLine, setDropLine] = useState<DropLine | null>(null);
   const nested = Boolean(target?.blockId && dropLists && onMoveTo);
-  const canDrag = nested ? (dropLists!.length > 1 || (siblingIds?.length ?? 0) > 1) : Boolean(onMove && siblingIds && siblingIds.length > 1);
+  const canDrag = element ? false : nested ? (dropLists!.length > 1 || (siblingIds?.length ?? 0) > 1) : Boolean(onMove && siblingIds && siblingIds.length > 1);
 
   // Drag the grip over the preview: a line shows where the item would land, and letting go moves it there.
   // Blocks can also go into or out of groups (any list in `dropLists`).
@@ -172,14 +187,14 @@ export function SelectionToolbar({
     const place = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
-        const element = findElement(doc, target);
-        doc.querySelectorAll("[data-editor-current]").forEach((item) => { if (item !== element) item.removeAttribute("data-editor-current"); });
-        if (element && !element.hasAttribute("data-editor-current")) element.setAttribute("data-editor-current", "");
+        const found = findElement(doc, target, elementTarget);
+        doc.querySelectorAll("[data-editor-current]").forEach((item) => { if (item !== found) item.removeAttribute("data-editor-current"); });
+        if (found && !found.hasAttribute("data-editor-current")) found.setAttribute("data-editor-current", "");
         const scrollTop = view?.scrollY ?? 0;
         const width = doc.documentElement.clientWidth;
-        const rect = element?.getBoundingClientRect();
+        const rect = found?.getBoundingClientRect();
         // Missing (hidden) or not drawn at this width ("Show on" desktop or phones only): dock at the top.
-        if (!element || !rect || (rect.width === 0 && rect.height === 0)) { set({ top: scrollTop + 8, left: width / 2, docked: true }); return; }
+        if (!found || !rect || (rect.width === 0 && rect.height === 0)) { set({ top: scrollTop + 8, left: width / 2, docked: true }); return; }
         // Above the element's top-right corner, or just inside it when there is no room above.
         const top = rect.top >= 44 ? rect.top + scrollTop - 40 : Math.max(rect.top, 0) + scrollTop + 6;
         set({ top, left: Math.min(Math.max(rect.right - 6, 220), width - 6), docked: false });
@@ -194,7 +209,7 @@ export function SelectionToolbar({
     const size = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(place);
     size?.observe(doc.documentElement);
     return () => { cancelAnimationFrame(frame); content.disconnect(); size?.disconnect(); doc.querySelectorAll("[data-editor-current]").forEach((item) => item.removeAttribute("data-editor-current")); view?.removeEventListener("scroll", place); view?.removeEventListener("resize", place); };
-  }, [doc, target]);
+  }, [doc, target, elementTarget]);
 
   if (!doc || !target || !position) return null;
   return createPortal(
@@ -215,7 +230,12 @@ export function SelectionToolbar({
         </button>
       )}
       <span className="max-w-[220px] truncate px-1.5 text-[11px] font-semibold">{hidden ? `${label} (hidden)` : position.docked ? `${label} (not shown at this width)` : label}</span>
-      {actionButtons.filter(({ action, onlyWhenAvailable }) => !onlyWhenAvailable || actions[action]).map(({ action, label: name, icon }) => {
+      {element && onSelectParent && (
+        <button type="button" onClick={onSelectParent} className="h-7 rounded-md px-2 text-[11px] font-medium text-[#55524c] hover:bg-black/[0.06]">
+          Select section
+        </button>
+      )}
+      {!element && actionButtons.filter(({ action, onlyWhenAvailable }) => !onlyWhenAvailable || actions[action]).map(({ action, label: name, icon }) => {
         const Icon = icon(hidden);
         const text = name(hidden);
         return (

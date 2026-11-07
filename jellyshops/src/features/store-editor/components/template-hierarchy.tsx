@@ -7,7 +7,7 @@ import { GripVertical } from "lucide-react";
 import { ChevronDown, ChevronRight, ChevronUp, Eye, EyeOff, LayoutPanelTop, Plus, Search, Trash2, Type, X } from "lucide-react";
 import type { EditorSelection } from "../model/types";
 import type { StorefrontTemplateRecord } from "../api/types";
-import { blockLabel as blockTypeLabel } from "@jelly/storefront-registry";
+import { blockLabel as blockTypeLabel, getSectionDefinition } from "@jelly/storefront-registry";
 import { displayName } from "../editor-page-helpers";
 
 /** Block name plus a short preview of its text, so merchants can tell blocks apart. */
@@ -30,9 +30,19 @@ type InlinePlacement = {
     id: string;
     type: string;
     enabled?: boolean;
+    settings?: Record<string, unknown>;
     blocks: TreeBlock[];
   };
 };
+
+/** The parts of a section (section-elements.ts) that have something to show: their own settings hold a value. Product cards always do. */
+function shownElements(section: InlinePlacement["section"], themeVersion?: string) {
+  const elements = getSectionDefinition(section.type, themeVersion)?.elements ?? [];
+  return elements.filter((element) => element.kind === "product-card" || element.controls.some((key) => {
+    const value = section.settings?.[key];
+    return typeof value === "string" ? value.trim().length > 0 : value !== undefined && value !== null && typeof value !== "boolean";
+  }));
+}
 
 /** Saved blocks with their children (blocks inside a group). */
 function treeBlocks(value: unknown): TreeBlock[] {
@@ -81,6 +91,7 @@ function placements(template: Pick<StorefrontTemplateRecord, "layout">): Templat
           id: section.id,
           type: section.type,
           enabled: section.enabled !== false,
+            settings: section.settings && typeof section.settings === "object" && !Array.isArray(section.settings) ? section.settings as Record<string, unknown> : undefined,
             blocks: treeBlocks(section.blocks),
           },
         }];
@@ -119,12 +130,15 @@ function PlacementRow({ placement, globalSections, selection, activeGlobalId, on
   const blocks = sectionMatches ? allBlocks : allBlocks.filter((block) => blockMatches(block, query));
   const hidden = placement.kind === "inline" && placement.section.enabled === false;
   return <div className="group/row">
-    <div className={clsx("flex min-h-8 items-center rounded-lg text-[13px] hover:bg-muted", selected && (selection?.kind === "section" ? "bg-primary/10 text-primary" : "bg-muted"))}>
+    <div className={clsx("flex min-h-8 items-center rounded-lg text-[13px] hover:bg-muted", selected && (selection?.kind === "section" && !selection.elementId ? "bg-primary/10 text-primary" : "bg-muted"))}>
       <button type="button" aria-label={`${expanded ? "Collapse" : "Expand"} ${label}`} aria-expanded={expanded} onClick={onExpand} className="grid size-7 shrink-0 place-items-center rounded text-muted-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">{expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</button>
-      <button type="button" aria-label={label} aria-current={selected && selection?.kind === "section" ? "true" : undefined} onClick={() => placement.kind === "global" ? onGlobalSelect?.(id) : onSelect({ kind: "section", region, sectionId: id })} className="flex min-w-0 flex-1 items-center gap-2 py-1 text-left"><LayoutPanelTop size={14} className="shrink-0 text-muted-foreground" /><span className={clsx("truncate", hidden && "text-muted-foreground line-through decoration-muted-foreground/60")}>{label}</span>{hidden && <span className="text-[9px] text-muted-foreground">Hidden</span>}{shared && <span className="text-[9px] text-muted-foreground">Global</span>}</button>
+      <button type="button" aria-label={label} aria-current={selected && selection?.kind === "section" && !selection.elementId ? "true" : undefined} onClick={() => placement.kind === "global" ? onGlobalSelect?.(id) : onSelect({ kind: "section", region, sectionId: id })} className="flex min-w-0 flex-1 items-center gap-2 py-1 text-left"><LayoutPanelTop size={14} className="shrink-0 text-muted-foreground" /><span className={clsx("truncate", hidden && "text-muted-foreground line-through decoration-muted-foreground/60")}>{label}</span>{hidden && <span className="text-[9px] text-muted-foreground">Hidden</span>}{shared && <span className="text-[9px] text-muted-foreground">Global</span>}</button>
       {onMove && <div className="flex shrink-0 items-center opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100 [@media(hover:none)]:opacity-100"><button type="button" aria-label={`Move ${label} up`} disabled={index === 0} onClick={() => onMove(id, "up")} className="grid size-6 place-items-center rounded disabled:opacity-25"><ChevronUp size={13} /></button><button type="button" aria-label={`Move ${label} down`} disabled={index === count - 1} onClick={() => onMove(id, "down")} className="grid size-6 place-items-center rounded disabled:opacity-25"><ChevronDown size={13} /></button>{onToggle && placement.kind === "inline" && <button type="button" aria-label={`${placement.section.enabled === false ? "Show" : "Hide"} ${label}`} onClick={() => onToggle(id, placement.section.enabled === false)} className="grid size-6 place-items-center rounded">{placement.section.enabled === false ? <EyeOff size={13} /> : <Eye size={13} />}</button>}{onRemove && placement.kind === "inline" && <button type="button" aria-label={`Delete ${label}`} onClick={() => onRemove(id)} className="grid size-6 place-items-center rounded text-muted-foreground hover:text-destructive"><Trash2 size={13} /></button>}</div>}
     </div>
-    {expanded && <div className="ml-5 border-l border-border pl-2">{blocks.map(function renderBlock(block: TreeBlock): React.ReactNode {
+    {expanded && <div className="ml-5 border-l border-border pl-2">{placement.kind === "inline" && sectionMatches && shownElements(placement.section, themeVersion).map((element) => {
+      const elementSelected = selection?.kind === "section" && selection.sectionId === id && selection.elementId === element.id;
+      return <button key={`element:${element.id}`} type="button" aria-label={`${element.label} (part of ${label})`} aria-current={elementSelected ? "true" : undefined} onClick={() => onSelect({ kind: "section", region, sectionId: id, elementId: element.id })} className={clsx("flex min-h-8 w-full min-w-0 items-center gap-2 rounded-md px-2 text-left text-xs hover:bg-muted", elementSelected && "bg-primary/10 font-medium text-primary")}><Type size={14} className="shrink-0 text-muted-foreground" /><span className="truncate">{element.label}</span></button>;
+    })}{blocks.map(function renderBlock(block: TreeBlock): React.ReactNode {
       const sectionId = placement.kind === "inline" ? id : shared?.sectionId ?? id;
       const blockSelected = selection?.kind === "block" && selection.sectionId === sectionId && selection.blockId === block.id;
       const blockHidden = block.enabled === false;
@@ -189,7 +203,7 @@ export function TemplateHierarchy({
   const [expandedItems, setExpandedItems] = useState<Set<string>>(() => new Set([...(selection && selection.kind !== "theme" ? [selection.sectionId] : []), ...(activeGlobalId ? placements(template).filter((item) => item.kind === "global" && item.globalSectionId === activeGlobalId).map((item) => `global:${item.sourceIndex}`) : [])]));
   // Selecting something in the preview opens its section here and scrolls it into view, like Shopify.
   const selectedSectionId = selection && selection.kind !== "theme" ? selection.sectionId : undefined;
-  const selectedBlockId = selection?.kind === "block" ? selection.blockId : undefined;
+  const selectedBlockId = selection?.kind === "block" ? selection.blockId : selection?.kind === "section" ? selection.elementId : undefined;
   const [shownSectionId, setShownSectionId] = useState(selectedSectionId);
   if (shownSectionId !== selectedSectionId) {
     setShownSectionId(selectedSectionId);

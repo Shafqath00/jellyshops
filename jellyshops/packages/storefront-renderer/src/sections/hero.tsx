@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { elementProps } from "../element-style";
 import { inlineSetting } from "./setting-text";
 import type { SectionNode } from "@jelly/storefront-schema";
 import { StorefrontContainer } from "@jelly/storefront-ui";
@@ -42,7 +43,7 @@ export function HeroSection({ section, editor = false, context, selectedBlockId 
   >
     <StorefrontContainer className={settings.fullBleed === true ? "is-full-bleed" : undefined}>
       <div className="jelly-hero-content">
-        {eyebrow && <p className="jelly-eyebrow">{eyebrow}</p>}
+        {eyebrow && <p className="jelly-eyebrow" {...elementProps(section, "eyebrow", editor)}>{eyebrow}</p>}
         {blocks.filter((block) => block.type !== "button").map((block) => {
           const text = setting(block, "text");
           if (!text) return null;
@@ -54,7 +55,7 @@ export function HeroSection({ section, editor = false, context, selectedBlockId 
           ? <a href={href} key={block.id} {...buttonProps(block.settings, index, block.responsive?.mobile)} {...editorProps(block)}>{label}</a>
           : <span key={block.id} {...editorProps(block)}>{label}</span>)}</div>}
       </div>
-      {image && layout !== "text" && <div className="jelly-hero-media">
+      {image && layout !== "text" && <div className="jelly-hero-media" {...elementProps(section, "image", editor)}>
         {/* Merchant media URLs may be served by the local API and are not Next Image assets. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={image.url} alt={image.alt ?? ""} style={{ objectPosition: `${focalPoint.x}% ${focalPoint.y}%`, objectFit: image.fit === "contain" ? "contain" : "cover" }} fetchPriority="high" />

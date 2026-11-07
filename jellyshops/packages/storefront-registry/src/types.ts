@@ -41,6 +41,8 @@ interface ControlBase {
   /** false for text that must not change per language (links, handles, code). */
   translatable?: boolean;
   dynamicTypes?: DynamicValueType[];
+  /** Belongs to one element of the section (its own style settings): shown only when that element is selected. */
+  element?: string;
 }
 export type ControlDefinition =
   | (ControlBase & { type: "text" | "textarea" | "rich-text"; maxLength: number; /** One line of formatted text (headings): no paragraphs or lists. */ inline?: boolean })
@@ -52,6 +54,18 @@ export type ControlDefinition =
   | (ControlBase & { type: "spacing"; min: number; max: number })
   | (ControlBase & { type: "link" | "image" | "product" | "collection" });
 export type RegionName = "header" | "template" | "footer";
+/** What a selectable part of a section is; decides which style settings it gets. */
+export type ElementKind = "heading" | "text" | "button" | "link" | "image" | "product-card";
+/**
+ * A part of a section drawn from section settings (a heading, an image, a "View all" link, the product cards)
+ * that the editor can select on its own. `controls` are the section setting keys the element owns.
+ */
+export interface ElementDefinition {
+  id: string;
+  label: string;
+  kind: ElementKind;
+  controls: string[];
+}
 export interface BlockDefinition {
   type: string;
   settingsSchema: ZodType;
@@ -80,6 +94,8 @@ export interface SectionDefinition {
   /** Name shown in the editor (sections added from outside the core set; built-in names live in labels.ts). */
   label?: string;
   presets?: Array<Omit<SectionPreset, "sectionType">>;
+  /** Parts of the section the editor can select on their own (section-elements.ts adds the built-in ones). */
+  elements?: ElementDefinition[];
 }
 export type RegistryValidationIssueCode = "SECTION_NOT_REGISTERED" | "SECTION_NOT_ALLOWED_ON_PAGE" | "SECTION_NOT_AVAILABLE_ON_THEME" | "BLOCK_NOT_ALLOWED" | "BLOCK_LIMIT_EXCEEDED" | "SETTINGS_INVALID" | "RESPONSIVE_FIELD_NOT_ALLOWED";
 export interface RegistryValidationIssue { code: RegistryValidationIssueCode; sectionId: string; blockId?: string; field?: string; message: string }

@@ -53,7 +53,7 @@ export function EditorPreviewPane({ ctx }: { ctx: EditorViewContext }) {
     }
     setActiveGlobalId(undefined);
     if (next.kind === "section" && next.sectionId) {
-      setSelection({ kind: "section", region: next.region ?? region, sectionId: next.sectionId });
+      setSelection({ kind: "section", region: next.region ?? region, sectionId: next.sectionId, ...(next.elementId ? { elementId: next.elementId, elementIndex: next.elementIndex ?? 0 } : {}) });
       setMobilePanel("settings");
     }
     if (next.kind === "block" && next.sectionId && next.blockId) {

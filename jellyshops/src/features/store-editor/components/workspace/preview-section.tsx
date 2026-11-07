@@ -32,7 +32,7 @@ type PreviewSectionProps = {
   onSelect?(next: RendererSelection, region: "header" | "template" | "footer"): void;
 };
 
-const selectionKey = (selected: RendererSelection | undefined) => selected ? `${selected.kind}:${selected.sectionId ?? ""}:${selected.blockId ?? ""}:${selected.fieldKey ?? ""}` : "";
+const selectionKey = (selected: RendererSelection | undefined) => selected ? `${selected.kind}:${selected.sectionId ?? ""}:${selected.blockId ?? ""}:${selected.fieldKey ?? ""}:${selected.elementId ?? ""}:${selected.elementIndex ?? ""}` : "";
 
 /**
  * One section of the preview. It re-renders only when its own content, its selection or the

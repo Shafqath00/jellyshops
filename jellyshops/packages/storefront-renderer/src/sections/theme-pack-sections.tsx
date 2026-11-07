@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { elementProps } from "../element-style";
 import { inlineSetting } from "./setting-text";
 import type { MediaReference, SectionNode } from "@jelly/storefront-schema";
 import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui";
@@ -32,8 +33,9 @@ function copy(section: SectionNode, fallbackHeading: string, editor = false) {
     body: stringSetting(body?.settings ?? section.settings, "text", stringSetting(section.settings, "text")),
     button: stringSetting(button?.settings ?? section.settings, "label"),
     href: stringSetting(button?.settings ?? section.settings, "href", "/shop"),
-    headingProps: { ...blockStyle(heading), ...(heading ? blockEditorData(heading, editor, "Heading", undefined, "text") : {}) },
-    bodyProps: { ...blockStyle(body), ...(body ? blockEditorData(body, editor, "Text", undefined, "text") : {}) },
+    // Without a heading or text block the copy comes from section settings: then it is the section's own element.
+    headingProps: heading ? { ...blockStyle(heading), ...blockEditorData(heading, editor, "Heading", undefined, "text") } : elementProps(section, "heading", editor),
+    bodyProps: body ? { ...blockStyle(body), ...blockEditorData(body, editor, "Text", undefined, "text") } : elementProps(section, "text", editor),
     buttonProps: { ...buttonProps(button?.settings ?? {}, 0, button?.responsive?.mobile), ...(button ? blockEditorData(button, editor, "Button", undefined, "label") : {}) },
   };
 }

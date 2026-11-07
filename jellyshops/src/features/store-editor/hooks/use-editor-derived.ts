@@ -5,7 +5,7 @@
    change. Effects list only the values that should re-run them. */
 
 import { useEffect, useMemo, useRef } from "react";
-import { getBlockDefinition, getSectionDefinition, listSectionDefinitionsForPage } from "@jelly/storefront-registry";
+import { elementControls, getBlockDefinition, getSectionDefinition, listSectionDefinitionsForPage } from "@jelly/storefront-registry";
 import { type CommerceDataProvider, type StorefrontPageContext } from "@jelly/storefront-renderer";
 import type { ThemeId } from "@jelly/storefront-schema";
 import { getThemeDefinition, validateThemeManifest, resolveStorefrontThemeTokens, resolveTheme, storeLanguages } from "@jelly/storefront-themes";
@@ -96,12 +96,13 @@ export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
     const section = handoff.sectionId ? sections.find((item) => item.id === handoff.sectionId) : undefined;
     if (!section) return;
     const hasBlock = handoff.blockId ? section.blocks.some((block) => block.id === handoff.blockId || block.blocks?.some((child) => child.id === handoff.blockId)) : false;
-    setSelection(hasBlock && handoff.blockId ? { kind: "block", region: "template", sectionId: section.id, blockId: handoff.blockId } : { kind: "section", region: "template", sectionId: section.id });
+    const hasElement = handoff.elementId ? getSectionDefinition(section.type)?.elements?.some((element) => element.id === handoff.elementId) : false;
+    setSelection(hasBlock && handoff.blockId ? { kind: "block", region: "template", sectionId: section.id, blockId: handoff.blockId } : { kind: "section", region: "template", sectionId: section.id, ...(hasElement ? { elementId: handoff.elementId } : {}) });
   }, [activeTemplate, sections, handoff]);
   useEffect(() => {
     if (!urlSelectionApplied.current || !activeTemplateId || typeof window === "undefined") return;
     const inTemplate = selection && selection.kind !== "theme" && selection.region === "template" ? selection : null;
-    const search = editorSearchFor(window.location.search, { templateId: activeTemplateId, sectionId: inTemplate?.sectionId, blockId: inTemplate?.kind === "block" ? inTemplate.blockId : undefined });
+    const search = editorSearchFor(window.location.search, { templateId: activeTemplateId, sectionId: inTemplate?.sectionId, blockId: inTemplate?.kind === "block" ? inTemplate.blockId : undefined, elementId: inTemplate?.kind === "section" ? inTemplate.elementId : undefined });
     if (search !== window.location.search) window.history.replaceState(window.history.state, "", `${window.location.pathname}${search}${window.location.hash}`);
   }, [selection, activeTemplateId]);
   const previewResources = useMemo(
@@ -140,7 +141,9 @@ export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
   const selectedChildOptions = localSection && selectedBlock ? childBlockOptions(localSection, selectedBlock.id) : { types: [], full: false };
   const sectionDefinition = localSection ? getSectionDefinition(localSection.type, themeConfiguration?.themeVersion) : undefined;
   const blockDefinition = selectedBlock ? getBlockDefinition(selectedBlock.type) : undefined;
-  const baseControls = selectedBlock ? blockDefinition?.controls ?? [] : sectionDefinition?.controls ?? [];
+  // A selected element (heading, image, product cards) shows only its own settings; the section shows the rest, without the elements' style settings.
+  const selectedElement = !selectedBlock && selection?.kind === "section" && selection.elementId ? sectionDefinition?.elements?.find((element) => element.id === selection.elementId) : undefined;
+  const baseControls = selectedBlock ? blockDefinition?.controls ?? [] : selectedElement && sectionDefinition ? elementControls(sectionDefinition.controls, selectedElement) : (sectionDefinition?.controls ?? []).filter((control) => !control.element);
   // On the Mobile preview, phone settings show and save their phone values.
   const responsiveView = viewport;
   const selectedNode = selectedBlock ?? localSection;
@@ -208,5 +211,5 @@ export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
       setPreviewResourceId(previewResources[0]?.id);
     }
   }, [previewResourceId, previewResources]);
-  return { activeTemplate, previewThemeStyle, validGlobals, sections, previewResources, globalLabels, presetOptions, globalOptions, selectedGlobal, localSection, selectedLocation, selectedBlock, selectedChildOptions, sectionDefinition, baseControls, responsiveView, colorPalette, languages, activeLanguage, selectedControls, selectedSettings, previewLayout, previewPageContext, builtInSections, blockPickerSection, blockPickerDefinition, blockPickerTypes, selectedTheme, commerce };
+  return { activeTemplate, previewThemeStyle, validGlobals, sections, previewResources, globalLabels, presetOptions, globalOptions, selectedGlobal, localSection, selectedLocation, selectedBlock, selectedElement, selectedChildOptions, sectionDefinition, baseControls, responsiveView, colorPalette, languages, activeLanguage, selectedControls, selectedSettings, previewLayout, previewPageContext, builtInSections, blockPickerSection, blockPickerDefinition, blockPickerTypes, selectedTheme, commerce };
 }

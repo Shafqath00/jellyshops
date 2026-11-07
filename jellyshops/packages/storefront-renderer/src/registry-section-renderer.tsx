@@ -77,7 +77,8 @@ export function RegistrySectionRenderer({
   if (!content) return null;
 
   const editor = mode === "editor";
-  const isSelected = selected?.kind === "section" && selected.sectionId === section.id;
+  // With an element of the section selected, only that element is outlined (by the editor), not the section.
+  const isSelected = selected?.kind === "section" && selected.sectionId === section.id && !selected.elementId;
   return <SectionFrame
     width={sectionFrameWidth(section.settings)}
     scheme={sectionScheme(section.settings)}
@@ -91,7 +92,15 @@ export function RegistrySectionRenderer({
       event.stopPropagation();
       const target = event.target as HTMLElement;
       const block = target.closest<HTMLElement>("[data-editor-block-id]");
+      const element = target.closest<HTMLElement>("[data-editor-element]");
       const blockId = block?.dataset.editorBlockId;
+      // The innermost target wins: both are ancestors of the click, so the element is inner unless it wraps the block.
+      if (element?.dataset.editorElement && (!block || !element.contains(block))) {
+        const elementId = element.dataset.editorElement;
+        const copies = [...event.currentTarget.querySelectorAll<HTMLElement>("[data-editor-element]")].filter((item) => item.dataset.editorElement === elementId);
+        onSelect?.({ kind: "section", region, sectionId: section.id, elementId, elementIndex: Math.max(0, copies.indexOf(element)) });
+        return;
+      }
       onSelect?.(blockId
         ? { kind: "block", region, sectionId: section.id, blockId, fieldKey: block?.dataset.editorFieldKey }
         : { kind: "section", region, sectionId: section.id });

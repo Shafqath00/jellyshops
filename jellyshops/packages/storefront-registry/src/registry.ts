@@ -9,14 +9,21 @@ import { layoutSections } from "./sections/layout.js";
 import { productExtraSections } from "./sections/product-extras.js";
 import { sectionStyleSchema, withSectionStyleControls } from "./section-style.js";
 import { SECTION_VARIANTS } from "./section-variants.js";
+import { elementStyleControls, elementStyleSchema, sectionElements } from "./section-elements.js";
 import type { ControlDefinition, RegionName, RegistryValidationIssue, SectionDefinition } from "./types.js";
 
 function prepareSection(definition: SectionDefinition): SectionDefinition {
+  // Selectable parts of the section (headings, images, product cards) and their own style settings.
+  const elements = sectionElements(definition.type, definition.elements);
+  const elementControls = elements.flatMap(elementStyleControls).filter((control) => !definition.controls.some((own) => own.key === control.key));
   return {
     ...definition,
+    elements,
     // Every section gets the shared style settings (colours, fonts, sizes, alignment, spacing).
-    controls: withSectionStyleControls(definition.controls),
-    settingsSchema: z.intersection(definition.settingsSchema, sectionStyleSchema),
+    controls: [...withSectionStyleControls(definition.controls), ...elementControls],
+    settingsSchema: elements.length
+      ? z.intersection(z.intersection(definition.settingsSchema, sectionStyleSchema), elementStyleSchema(elements))
+      : z.intersection(definition.settingsSchema, sectionStyleSchema),
     // Designed variants (section-variants.ts) follow the section's own presets.
     presets: [...(definition.presets ?? []), ...(SECTION_VARIANTS[definition.type] ?? []).filter((variant) => !definition.presets?.some((preset) => preset.id === variant.id))],
     allowedRegions: definition.type === "header" || definition.type === "announcement-bar"

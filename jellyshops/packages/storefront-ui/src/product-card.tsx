@@ -90,8 +90,9 @@ function CardButton() {
   return <span className="jelly-product-card-button" data-card-part="button" aria-hidden="true" />;
 }
 
-export function StorefrontProductCard({ product }: { product: StorefrontProductCardData }) {
-  return <article className="jelly-product-card">
+/** `editorProps` are the editor preview's selection data (data-* attributes only); the live store passes none. */
+export function StorefrontProductCard({ product, editorProps }: { product: StorefrontProductCardData; editorProps?: Record<string, string> }) {
+  return <article className="jelly-product-card" {...editorProps}>
     <a href={product.href}>
       <CardMedia product={product} />
       <div className="jelly-product-card-body">
