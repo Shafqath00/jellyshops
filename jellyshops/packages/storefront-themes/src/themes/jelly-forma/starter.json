@@ -46,6 +46,50 @@
       },
       "blocks": [
         {
+          "id": "forma-footer-shop-title",
+          "type": "link-heading",
+          "enabled": true,
+          "settings": {
+            "text": "Shop"
+          }
+        },
+        {
+          "id": "forma-footer-shop-0",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Sofas & chairs",
+            "link": "/search?q=sofa"
+          }
+        },
+        {
+          "id": "forma-footer-shop-1",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Tables & desks",
+            "link": "/search?q=table"
+          }
+        },
+        {
+          "id": "forma-footer-shop-2",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Lighting",
+            "link": "/search?q=lamp"
+          }
+        },
+        {
+          "id": "forma-footer-shop-3",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Shop all",
+            "link": "/shop"
+          }
+        },
+        {
           "id": "forma-footer-title",
           "type": "link-heading",
           "enabled": true,

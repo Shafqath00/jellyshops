@@ -86,5 +86,5 @@ test("cart quantities update the order total", async ({ page }) => {
   const summary = frame.getByRole("complementary", { name: "Order summary" });
   await expect(summary).toContainText("£858.00");
   await frame.getByRole("button", { name: /Increase quantity of Hollis pocket sprung mattress/ }).click();
-  await expect(summary).toContainText("£1217.00");
+  await expect(summary).toContainText("£1,217.00");
 });

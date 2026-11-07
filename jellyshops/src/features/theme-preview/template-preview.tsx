@@ -31,6 +31,9 @@ const menus: Record<string, RuntimeMenuV4> = {
 /** "£28.00" to 2800 (sample prices only). */
 const toMinor = (price: string) => Math.round(Number(price.replace(/[^0-9.]/g, "")) * 100);
 
+/** Sample prices as a shop shows them: "£1,197.00". */
+const pounds = (value: number) => `£${value.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
 function useProductContext(config: ThemePreviewConfig): StorefrontPageContext {
   const [size, setSize] = useState<string>();
   const [quantity, setQuantity] = useState(1);
@@ -70,10 +73,10 @@ function useCartContext(config: ThemePreviewConfig): StorefrontPageContext {
     const unit = Number(product.price.replace(/[^0-9.]/g, ""));
     const quantity = quantities[product.id];
     const update = (next: number) => setQuantities((current) => { const copy = { ...current }; if (next <= 0) delete copy[product.id]; else copy[product.id] = next; return copy; });
-    return { id: product.id, name: product.name, productName: product.name, variantName: product.id === second ? "Medium" : "Standard", imageUrl: product.imageUrl, quantity, unitPrice: product.price, total: `£${(unit * quantity).toFixed(2)}`, canIncrease: quantity < 5, onDecrease: () => update(quantity - 1), onIncrease: () => update(quantity + 1), onRemove: () => update(0), minor: unit * quantity * 100 };
+    return { id: product.id, name: product.name, productName: product.name, variantName: product.id === second ? "Medium" : "Standard", imageUrl: product.imageUrl, quantity, unitPrice: product.price, total: pounds(unit * quantity), canIncrease: quantity < 5, onDecrease: () => update(quantity - 1), onIncrease: () => update(quantity + 1), onRemove: () => update(0), minor: unit * quantity * 100 };
   });
   const subtotal = lines.reduce((sum, line) => sum + line.minor, 0) / 100;
-  return { pageType: "cart", resource: null, data: { lines, subtotal: `£${subtotal.toFixed(2)}`, shippingNote: "Free delivery on orders over £50. Taxes included.", checkoutHref: "#checkout", shopHref: "#shop" } };
+  return { pageType: "cart", resource: null, data: { lines, subtotal: pounds(subtotal), shippingNote: "Free delivery on orders over £50. Taxes included.", checkoutHref: "#checkout", shopHref: "#shop" } };
 }
 
 export function TemplatePreview({ template, config }: { template: PreviewTemplate; config: ThemePreviewConfig }) {

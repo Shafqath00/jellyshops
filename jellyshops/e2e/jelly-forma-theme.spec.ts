@@ -59,6 +59,52 @@ test("tablet and phone: compact header and continuous purchase column", async ({
   await frame.locator(".jelly-mobile-navigation > summary").click();
   await expect(frame.getByRole("navigation", { name: "Mobile navigation" })).toBeVisible();
 });
+test("polish: page titles, footer, cards, cart, newsletter and FAQ", async ({ page }) => {
+  const views = page.getByRole("group", { name: "Page" });
+  const widths = page.getByRole("group", { name: "Preview width" });
+  const frame = page.frameLocator(`iframe[title='${frameTitle}']`);
+  const fontSize = (locator: ReturnType<typeof frame.locator>) => locator.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+  // Page titles use one calm size, not the hero size.
+  for (const view of ["Collection", "Cart", "Search", "Page", "404"]) {
+    await views.getByRole("button", { name: view, exact: true }).click();
+    expect(await fontSize(frame.locator("main h1").first()), `${view} title size`).toBeLessThanOrEqual(44);
+  }
+  // Footer: small column headings, several columns, divider across the whole footer.
+  const headings = frame.locator(".jelly-footer-column h2");
+  expect(await headings.count(), "footer link columns").toBeGreaterThanOrEqual(2);
+  for (const size of await headings.evaluateAll((els) => els.map((el) => parseFloat(getComputedStyle(el).fontSize)))) expect(size, "footer heading size").toBeLessThanOrEqual(20);
+  const footer = await frame.locator(".jelly-footer-inner").boundingBox();
+  const credit = await frame.locator(".jelly-footer-credit").boundingBox();
+  expect(credit!.width, "footer divider width").toBeGreaterThan(footer!.width * 0.95);
+  // Product card buttons in one row line up, even when one card shows colour swatches.
+  await views.getByRole("button", { name: "Collection", exact: true }).click();
+  const buttonTops = await frame.locator(".jelly-product-card-button").evaluateAll((els) => els.slice(0, 3).map((el) => Math.round(el.getBoundingClientRect().top)));
+  expect(new Set(buttonTops).size, `card buttons share one row: ${buttonTops}`).toBe(1);
+  // Cart: one pill stepper, Remove and Continue shopping are quiet links.
+  await views.getByRole("button", { name: "Cart", exact: true }).click();
+  const stepper = frame.locator(".jelly-cart-line .jelly-quantity-stepper").first();
+  expect((await stepper.boundingBox())!.height, "cart stepper height").toBeLessThanOrEqual(48);
+  expect(await stepper.evaluate((el) => parseFloat(getComputedStyle(el).borderTopLeftRadius)), "cart stepper is a pill").toBeGreaterThan(20);
+  for (const name of ["Remove", "Continue shopping"]) {
+    const background = await frame.getByRole(name === "Remove" ? "button" : "link", { name, exact: true }).first().evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(background, `${name} has no filled background`).toBe("rgba(0, 0, 0, 0)");
+  }
+  await expect(frame.locator(".jelly-cart-totals dd")).toHaveText(/£1,197\.00/);
+  // Home: email and Subscribe on one row, a drawn checkbox, FAQ with a theme icon.
+  await views.getByRole("button", { name: "Home", exact: true }).click();
+  const email = await frame.locator(".jelly-newsletter input[type=email]").boundingBox();
+  const subscribe = await frame.locator(".jelly-newsletter button[type=submit]").boundingBox();
+  expect(Math.abs(email!.y + email!.height - (subscribe!.y + subscribe!.height)), "email and Subscribe share a row").toBeLessThanOrEqual(8);
+  expect((await frame.locator(".jelly-newsletter input[type=checkbox]").boundingBox())!.width, "checkbox size").toBeLessThanOrEqual(24);
+  const summary = frame.locator(".jelly-faq summary").first();
+  expect(await summary.evaluate((el) => getComputedStyle(el, "::after").content)).toBe('"+"');
+  expect(await summary.evaluate((el) => getComputedStyle(el).display)).toBe("flex");
+  // Tablet: three feature columns side by side (no 2 + 1).
+  await widths.getByRole("button", { name: /^Tablet/ }).click();
+  const columnTops = await frame.locator(".jelly-multicolumn-grid > *").evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().top)));
+  expect(new Set(columnTops).size, `tablet feature columns: ${columnTops}`).toBe(1);
+});
+
 const pages = [
   ["Home", "Soft living"],
   ["Collection", "Furniture for everyday living"],
@@ -118,9 +164,9 @@ test("navigation, product options and cart quantities work", async ({ page }) =>
   await expect(frame.getByRole("spinbutton", { name: "Quantity", exact: true })).toHaveValue("2");
   await views.getByRole("button", { name: "Cart", exact: true }).click();
   const summary = frame.getByRole("complementary", { name: "Order summary" });
-  await expect(summary).toContainText("£1197.00");
+  await expect(summary).toContainText("£1,197.00");
   await frame.getByRole("button", { name: "Increase quantity of Everyday timber stool" }).click();
-  await expect(summary).toContainText("£1346.00");
+  await expect(summary).toContainText("£1,346.00");
 });
 
 test("merchant typography, button, field and card tokens reach the rendered components", async ({ page }) => {
