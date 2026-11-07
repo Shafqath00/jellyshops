@@ -8,7 +8,7 @@ import { RichTextDocumentEditor } from "@/features/store-editor/components/inspe
 import { ThemeSettingsPanel } from "@/features/store-editor/components/inspector/theme-settings-panel";
 import { ThemeLibraryPanel } from "@/features/store-editor/components/theme-library-panel";
 import { ThemeStylesPanel } from "@/features/store-editor/components/theme-styles-panel";
-import { applyThemeStyle, listThemeStyles } from "@jelly/storefront-themes";
+import { applyThemeStyle, listThemeStyles, resolveTheme } from "@jelly/storefront-themes";
 import { PublishDiagnostics } from "@/features/store-editor/components/publish-diagnostics";
 import { SectionLibrary } from "@/features/store-editor/components/section-library";
 import { displayName } from "@/features/store-editor/editor-page-helpers";
@@ -25,7 +25,7 @@ export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
         <>
         <ThemeStylesPanel
           styles={listThemeStyles(themeConfiguration?.themeId)}
-          settings={themeConfiguration?.settings ?? {}}
+          settings={themeConfiguration ? resolveTheme(themeConfiguration.themeId, themeConfiguration.settings, themeConfiguration.themeVersion).settings : {}}
           busy={looksBusy}
           onApply={(style) => { void persistThemeSetting("", applyThemeStyle(themeConfiguration?.settings ?? {}, style)); }}
         />

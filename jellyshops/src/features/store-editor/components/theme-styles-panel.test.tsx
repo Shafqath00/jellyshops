@@ -20,3 +20,12 @@ it("knows when a style is already applied, and shows nothing for themes without 
   const { container } = render(<ThemeStylesPanel styles={[]} settings={{}} onApply={vi.fn()} />);
   expect(container).toBeEmptyDOMElement();
 });
+
+it("treats a store that has never changed its theme settings as being on the theme's first style", async () => {
+  const { resolveTheme } = await import("@jelly/storefront-themes");
+  for (const themeId of ["jelly-signature", "jelly-avenue"]) {
+    const first = listThemeStyles(themeId)[0];
+    expect(styleIsApplied({}, first), `${themeId}: saved settings alone are empty`).toBe(false);
+    expect(styleIsApplied(resolveTheme(themeId, {}).settings, first), `${themeId}: with the theme's defaults`).toBe(true);
+  }
+});
