@@ -3,7 +3,7 @@
  */
 import type { PageMeasurement } from "./measure";
 
-export type DesignRule = "edge" | "rhythm" | "headings" | "overflow" | "tap-target" | "card-ratio" | "contrast";
+export type DesignRule = "edge" | "rhythm" | "headings" | "overflow" | "tap-target" | "card-ratio" | "contrast" | "header" | "product-flow" | "title-size" | "footer-headings";
 
 export interface DesignFinding {
   /** Stable id used by the baseline: rule|theme|page|device[|part]. */
@@ -28,6 +28,13 @@ export const DESIGN_LIMITS = {
   maxHeadingSizes: 4,
   minTarget: 24,
   ratioTolerance: 0.02,
+  /** Tallest header on tablets and phones (two rows: logo and icons, then search). */
+  maxCompactHeader: 180,
+  /** Largest gap between the product page's details, options and Add to cart. */
+  maxProductGap: 32,
+  /** Largest main title outside a hero, per width (Shopify themes use about 40px / 32px / 28px). */
+  maxPageTitle: { desktop: 56, tablet: 44, mobile: 36 } as Record<string, number>,
+  maxFooterHeading: 24,
 } as const;
 
 export function findingId(rule: DesignRule, context: PageContext, part?: string) {
@@ -114,6 +121,28 @@ export function lintPage(measurement: PageMeasurement, context: PageContext): De
   if (context.device === "mobile" && measurement.smallTargets.length) {
     const list = measurement.smallTargets.slice(0, 5).join("; ");
     findings.push(finding("tap-target", context, `${measurement.smallTargets.length} targets smaller than ${DESIGN_LIMITS.minTarget}px: ${list}${measurement.smallTargets.length > 5 ? "; …" : ""}`));
+  }
+
+  if (measurement.header?.wrapped.length) {
+    findings.push(finding("header", context, `header text runs onto two lines: ${measurement.header.wrapped.slice(0, 5).join("; ")}`, "wrapped"));
+  }
+  if (measurement.header && context.device !== "desktop" && measurement.header.height > DESIGN_LIMITS.maxCompactHeader) {
+    findings.push(finding("header", context, `header is ${measurement.header.height}px tall; at most ${DESIGN_LIMITS.maxCompactHeader}px on tablets and phones`, "height"));
+  }
+
+  const widestGap = measurement.productGaps.length ? Math.max(...measurement.productGaps) : 0;
+  if (widestGap > DESIGN_LIMITS.maxProductGap) {
+    findings.push(finding("product-flow", context, `product details, options and Add to cart are ${measurement.productGaps.join(" / ")}px apart; at most ${DESIGN_LIMITS.maxProductGap}px`));
+  }
+
+  const titleLimit = DESIGN_LIMITS.maxPageTitle[context.device];
+  if (measurement.pageTitleSize !== null && titleLimit && measurement.pageTitleSize > titleLimit) {
+    findings.push(finding("title-size", context, `page title is ${measurement.pageTitleSize}px; at most ${titleLimit}px outside a hero`));
+  }
+
+  const footerHeading = measurement.footerHeadingSizes.length ? Math.max(...measurement.footerHeadingSizes) : 0;
+  if (footerHeading > DESIGN_LIMITS.maxFooterHeading) {
+    findings.push(finding("footer-headings", context, `footer headings are ${footerHeading}px; at most ${DESIGN_LIMITS.maxFooterHeading}px`));
   }
 
   for (const list of measurement.cardLists) {

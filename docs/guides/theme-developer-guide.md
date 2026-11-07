@@ -314,6 +314,18 @@ See section 6. In short: sections receive a runtime context with the product, co
 
 You rarely write breakpoints for sections. Sections accept per-device values (padding, text style, direction, gap, alignment) and a "Show on" choice from the editor; the renderer and the theme CSS apply them at the three breakpoints. For your own components use the same three ranges and test at 390, 768 and 1280 px (the theme preview page does this).
 
+Layout rules every theme must meet (the design lint checks them on every page at desktop, tablet and phone width; `e2e/design-lint.spec.ts`, rules in `src/lib/design-lint/rules.ts`):
+
+- **Header:** no menu link or store name may wrap onto two lines at any width. Below 1024px fold the menu behind the menu button, as the CLI scaffold does; a desktop menu squeezed into a tablet is the most common way a new theme breaks. On tablets and phones the header is at most 180px tall.
+- **Product page:** details, options and Add to cart read as one column: at most 32px between them at every width. Their sections are separate in the editor, so set their own spacing to zero and space them inside the column (the scaffold and Jelly Forma show how).
+- **Page titles** outside a hero (collection, cart, search, pages, 404) stay at most 56px on desktop, 44px on tablet and 36px on phone; only heroes, slideshows and image banners use the big heading size.
+- **Footer column headings** are labels: at most 24px.
+- Plus the earlier rules: one shared page edge, at most three section paddings and four heading sizes per page, no sideways scrolling, 24px tap targets on phones, same-shaped product card images, WCAG AA contrast.
+
+Known legacy styles: `src/app/globals.css` still has older default rules for the first themes (for example a phone rule that stacks the header into a column). They have no specificity weight beyond one class, so any rule in your theme overrides them; the scaffold sets the header to a row for this reason.
+
+**Comparing with a reference store.** When a theme follows another store's structure, measure both side by side instead of eyeballing: `node scripts/compare-reference.mjs --theme <preview-path> --reference https://<store> --pages home=/,collection=/collections/all,product=/products/<handle>` (in Git Bash prefix `MSYS_NO_PATHCONV=1` or write `home=` for "/"). It saves screenshots of both at 1280/820/390 px and a `report.md` table (header height, wrapped menu items, title size and position, hero position and height, products per row and card width, product column gaps, footer headings, sideways scroll), marking differences over 15%. It loads the reference one page at a time with a pause, reports a page as blocked when the site shows a bot check and never tries to get past one; measure such pages by hand. Use only for structure and proportions: never copy another store's images, copy or branding.
+
 ### Quick start with the CLI (2026-11-03)
 
 For a data-driven theme (a `theme.json`, a `starter.json`, a stylesheet and images, no custom code) you do not need to touch the platform at all. From `jellyshops/` (the CLI is not published to npm yet, so run it from the repository):

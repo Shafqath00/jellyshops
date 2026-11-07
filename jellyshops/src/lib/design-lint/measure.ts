@@ -33,8 +33,22 @@ export interface CardListMeasurement {
   ratios: number[];
 }
 
+export interface HeaderMeasurement {
+  height: number;
+  /** Header menu links and the store name that run onto two or more lines. */
+  wrapped: string[];
+}
+
 export interface PageMeasurement {
   frameWidth: number;
+  /** The site header (null when the page has none). */
+  header: HeaderMeasurement | null;
+  /** Space between the product page's details, options and Add to cart, top to bottom (px); empty on other pages. */
+  productGaps: number[];
+  /** Font size of the page's main title when it is not inside a hero, slideshow or banner (null otherwise). */
+  pageTitleSize: number | null;
+  /** Font sizes of the footer's column headings (the footer newsletter heading is left out). */
+  footerHeadingSizes: number[];
   overflow: number;
   parts: PartMeasurement[];
   headingSizes: number[];
@@ -191,8 +205,50 @@ export function measureStorefrontPage(): PageMeasurement {
     return { key: `${name ?? "list"}#${index + 1}`, ratios };
   });
 
+  // Header: wrapped menu links or store name, and height.
+  let header: HeaderMeasurement | null = null;
+  const headerElement = root.querySelector(".jelly-header");
+  const headerRect = headerElement ? visibleRect(headerElement) : null;
+  if (headerElement && headerRect) {
+    const wrapped: string[] = [];
+    for (const item of headerElement.querySelectorAll(".jelly-header-brand, .jelly-header nav:not(.jelly-header-tools) a, .jelly-header nav:not(.jelly-header-tools) summary")) {
+      if (item.closest(".jelly-mobile-navigation-panel, [role='menu'], .jelly-menu-dropdown")) continue;
+      const rect = visibleRect(item);
+      if (!rect || item.querySelector("img")) continue;
+      // Count the lines the text itself sits on (each line of a text range gets its own box).
+      const range = doc.createRange();
+      range.selectNodeContents(item);
+      const tops: number[] = [];
+      for (const box of range.getClientRects()) {
+        if (box.width < 1 || box.height < 1) continue;
+        if (!tops.some((top) => Math.abs(top - box.top) < box.height / 2)) tops.push(box.top);
+      }
+      if (tops.length > 1) wrapped.push(describe(item));
+    }
+    header = { height: round(headerRect.height ?? 0), wrapped };
+  }
+
+  // Product page: gaps between the buying parts in the order they appear.
+  const productParts = [".jelly-product-information", ".jelly-product-options", ".jelly-product-purchase"]
+    .map((selector) => root.querySelector(selector))
+    .flatMap((element) => { const rect = element ? element.getBoundingClientRect() : null; return rect && rect.height > 1 ? [rect] : []; });
+  const productGaps = productParts.slice(1).map((rect, index) => round(rect.top - productParts[index].bottom));
+
+  // Main title outside heroes.
+  const title = root.querySelector("main h1");
+  const titleIsHero = Boolean(title?.closest(".jelly-hero, .jelly-slideshow, .jelly-image-banner, .jelly-collection-header[data-layout='banner'], [data-section-type='hero'], [data-section-type='slideshow'], [data-section-type='image-banner']"));
+  const pageTitleSize = title && !titleIsHero && visibleRect(title) ? round(parseFloat(getComputedStyle(title).fontSize)) : null;
+
+  const footerHeadingSizes = [...root.querySelectorAll(".jelly-footer h2, .jelly-footer h3, .jelly-footer h4")]
+    .filter((heading) => !heading.closest(".jelly-footer-newsletter, .jelly-newsletter") && visibleRect(heading))
+    .map((heading) => round(parseFloat(getComputedStyle(heading).fontSize)));
+
   return {
     frameWidth,
+    header,
+    productGaps,
+    pageTitleSize,
+    footerHeadingSizes,
     overflow: Math.max(0, doc.documentElement.scrollWidth - doc.documentElement.clientWidth),
     parts,
     headingSizes,

@@ -6,7 +6,7 @@ const context = { theme: "t", page: "Home", device: "desktop" };
 const part = (key: string, left: number | null, right: number | null, extra: Partial<PartMeasurement> = {}): PartMeasurement =>
   ({ key, isSection: true, left, right, textLeft: left, textRight: right, fullBleed: false, scrolling: false, inColumn: false, paddingTop: 96, paddingBottom: 96, ...extra });
 const page = (parts: PartMeasurement[], extra: Partial<PageMeasurement> = {}): PageMeasurement =>
-  ({ frameWidth: 1280, overflow: 0, parts, headingSizes: [44, 56], smallTargets: [], cardLists: [], ...extra });
+  ({ frameWidth: 1280, overflow: 0, parts, headingSizes: [44, 56], smallTargets: [], cardLists: [], header: null, productGaps: [], pageTitleSize: null, footerHeadingSizes: [], ...extra });
 const rules = (measurement: PageMeasurement, device = "desktop") => lintPage(measurement, { ...context, device }).map((item) => item.rule);
 
 describe("design lint rules", () => {
@@ -73,5 +73,17 @@ describe("design lint rules", () => {
     const report = findingsReport(all, ["edge|t|Home|desktop|gone"]);
     expect(report).toContain("## t (2)");
     expect(report).toContain("Fixed since the baseline");
+  });
+
+  it("flags wrapped or tall headers, loose product columns, oversized titles and loud footer headings", () => {
+    expect(rules(page([], { header: { height: 120, wrapped: ['a "Shop by room"'] } }), "tablet")).toEqual(["header"]);
+    expect(rules(page([], { header: { height: 200, wrapped: [] } }), "tablet")).toEqual(["header"]);
+    expect(rules(page([], { header: { height: 200, wrapped: [] } }), "desktop")).toEqual([]);
+    expect(rules(page([], { productGaps: [0, 96] }), "mobile")).toEqual(["product-flow"]);
+    expect(rules(page([], { productGaps: [0, 24] }), "mobile")).toEqual([]);
+    expect(rules(page([], { pageTitleSize: 70 }), "desktop")).toEqual(["title-size"]);
+    expect(rules(page([], { pageTitleSize: 40 }), "desktop")).toEqual([]);
+    expect(rules(page([], { pageTitleSize: 40 }), "mobile")).toEqual(["title-size"]);
+    expect(rules(page([], { footerHeadingSizes: [16, 44] }))).toEqual(["footer-headings"]);
   });
 });

@@ -22,6 +22,10 @@
     "tap-target|jelly-resthaven|Home|mobile",
     "tap-target|jelly-resthaven|Page|mobile",
     "tap-target|jelly-resthaven|Product|mobile",
-    "tap-target|jelly-resthaven|Search|mobile"
+    "tap-target|jelly-resthaven|Search|mobile",
+    "title-size|jelly-avenue|404|desktop",
+    "title-size|jelly-avenue|404|mobile",
+    "title-size|jelly-avenue|404|tablet",
+    "title-size|jelly-resthaven|Page|tablet"
   ]
 }
