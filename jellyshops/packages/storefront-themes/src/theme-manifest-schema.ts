@@ -50,6 +50,13 @@ export const themeManifestSchema = z.object({
   enabled: z.boolean(),
   settingsDefaults: z.record(z.string(), z.unknown()),
   settingsSchema: z.array(settingDefinitionSchema).default([]),
+  /**
+   * Opts the theme in to the old default storefront rules in src/app/globals.css (hero, gallery, product cards,
+   * a header that stacks below 560px, ...). Only themes written against those rules set it; a new theme leaves it
+   * out and starts from storefront-base.css alone. Built-in themes registered in theme-registry.ts use the rules
+   * unless they set it to false, and a theme that `extends` a base design follows the base.
+   */
+  legacyStorefrontStyles: z.boolean().optional(),
   /** Custom sections the theme adds, described as data (see recipes.ts). */
   sections: z.array(recipeSchema).max(20).optional(),
 }).strict().superRefine((manifest, context) => {

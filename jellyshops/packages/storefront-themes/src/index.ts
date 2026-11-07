@@ -1,4 +1,4 @@
-export { applyThemePreset, COMPLETE_STOREFRONT_THEME_IDS, getThemeDefinition, isCompleteStorefrontTheme, isPlatformThemeId, listThemes, resolveDesignTokens, themeStyleId } from "./theme-registry.js";
+export { applyThemePreset, COMPLETE_STOREFRONT_THEME_IDS, getThemeDefinition, isCompleteStorefrontTheme, isPlatformThemeId, legacyStylesAttribute, listThemes, resolveDesignTokens, themeStyleId, usesLegacyStorefrontStyles } from "./theme-registry.js";
 export { THEME_BASE_IDS, themeManifestSchema } from "./theme-manifest-schema.js";
 export { DEFAULT_THEME_ID, getThemeAsset, resolveTheme, resolveThemePreview, validateThemeManifest, validateThemeSettings } from "./theme-resolver.js";
 export { buildSchemaFiles } from "./schema-export.js";

@@ -21,7 +21,7 @@ import {
   type StorefrontDocument,
   type ThemeId,
 } from "@jelly/storefront-schema";
-import { resolveDesignTokens, resolveStorefrontThemeTokens, resolveTheme, themeStyleId } from "@jelly/storefront-themes";
+import { resolveDesignTokens, resolveStorefrontThemeTokens, resolveTheme, legacyStylesAttribute, themeStyleId } from "@jelly/storefront-themes";
 import type { Currency, Product } from "@/lib/domain";
 import type { ResolvedStorefrontRoute } from "./resource-loader";
 import { catalogProductToStorefrontProduct, type PublicCatalogResponse } from "@/features/commerce/api/client";
@@ -89,7 +89,7 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
   const commerce = commerceProvider(storeSlug, currency, products, snapshot.storeId);
 
   return (
-    <div className={`jelly-storefront jelly-theme-layout-${resolvedTheme.layout}`} data-jelly-theme={themeStyleId(resolvedTheme.id, resolvedTheme.version)} data-jelly-theme-version={resolvedTheme.version} style={style}>
+    <div className={`jelly-storefront jelly-theme-layout-${resolvedTheme.layout}`} data-jelly-theme={themeStyleId(resolvedTheme.id, resolvedTheme.version)} data-jelly-legacy-styles={legacyStylesAttribute(resolvedTheme.id, resolvedTheme.version)} data-jelly-theme-version={resolvedTheme.version} style={style}>
       {/* Inside the storefront frame the frame already adds the theme's custom CSS. */}
       {!chromeHandled && <ThemeCustomCss settings={resolvedTheme.settings} themeId={resolvedTheme.id} themeVersion={resolvedTheme.version} />}
       {resolvedTheme.layout === "editorial" ? <div className="jelly-theme-masthead"><span>JellyShop collection</span><img src={`${resolvedTheme.assetPrefix}monogram.svg`} alt="" /></div> : null}

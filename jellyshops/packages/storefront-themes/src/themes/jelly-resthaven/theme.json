@@ -5,6 +5,7 @@
   "engines": {
     "jelly": ">=1 <2"
   },
+  "legacyStorefrontStyles": true,
   "description": "An inviting showroom for beds, mattresses and a better night's sleep.",
   "assetPrefix": "/themes/jelly-resthaven/",
   "previewAsset": "/themes/jelly-resthaven/preview.svg",

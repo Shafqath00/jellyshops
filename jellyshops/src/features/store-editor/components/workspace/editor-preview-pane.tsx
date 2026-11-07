@@ -5,7 +5,7 @@ import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import { ThemeCustomCss, createCollectionLinks, type RendererSelection } from "@jelly/storefront-renderer";
 import { installedThemeCss } from "@/features/storefront/installed-theme";
 import type { RuntimeMenuV4, SectionNode } from "@jelly/storefront-schema";
-import { themeSocialLinks, themeStyleId } from "@jelly/storefront-themes";
+import { themeSocialLinks, legacyStylesAttribute, themeStyleId } from "@jelly/storefront-themes";
 import { createResourceLinks } from "@/features/navigation/resource-links";
 import { ScaledPreview } from "@/features/store-editor/components/scaled-preview";
 import { StorefrontPreviewFrame } from "@/features/store-editor/components/storefront-preview-frame";
@@ -109,7 +109,7 @@ export function EditorPreviewPane({ ctx }: { ctx: EditorViewContext }) {
                 viewport === "mobile" && "max-w-[390px]",
               )}
               data-testid="preview-viewport"
-              data-jelly-theme={themeStyleId(themeConfiguration?.themeId ?? "minimal", themeConfiguration?.themeVersion)}
+              data-jelly-theme={themeStyleId(themeConfiguration?.themeId ?? "minimal", themeConfiguration?.themeVersion)} data-jelly-legacy-styles={legacyStylesAttribute(themeConfiguration?.themeId ?? "minimal", themeConfiguration?.themeVersion)}
               data-jelly-theme-version={themeVersion}
               data-viewport={viewport}
               data-preview-width={viewport === "desktop" ? 1440 : viewport === "tablet" ? 820 : 390}

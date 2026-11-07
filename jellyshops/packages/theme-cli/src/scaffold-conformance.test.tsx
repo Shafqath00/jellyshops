@@ -1,8 +1,8 @@
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { vi } from "vitest";
-import { registerThemeProject } from "@jelly/storefront-themes";
+import { expect, it, vi } from "vitest";
+import { legacyStylesAttribute, registerThemeProject } from "@jelly/storefront-themes";
 import { describeThemeConformance } from "@jelly/theme-sdk/testing";
 // @ts-expect-error plain JavaScript module
 import { create } from "./create.mjs";
@@ -19,3 +19,6 @@ registerThemeProject({ manifest: read("theme.json"), starter: read("starter.json
 vi.restoreAllMocks();
 
 describeThemeConformance("fresh-theme");
+
+// A new theme starts from storefront-base.css alone: the old default rules in globals.css stay off for it.
+it("does not inherit the legacy storefront rules", () => { expect(legacyStylesAttribute("fresh-theme")).toBe("off"); });

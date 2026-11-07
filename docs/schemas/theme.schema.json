@@ -611,6 +611,9 @@
         "additionalProperties": false
       }
     },
+    "legacyStorefrontStyles": {
+      "type": "boolean"
+    },
     "sections": {
       "maxItems": 20,
       "type": "array",

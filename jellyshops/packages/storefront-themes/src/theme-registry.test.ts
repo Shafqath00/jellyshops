@@ -101,3 +101,13 @@ it("can preserve overrides or reset colors when applying a preset", () => {
   );
   expect(current.colors.background).toBe("#123456");
 });
+
+it("applies the old globals.css storefront rules only to themes that use them", async () => {
+  const { legacyStylesAttribute, usesLegacyStorefrontStyles } = await import("./index");
+  // Built-in themes, a folder theme that opts in, and a theme built on a base design follow their data.
+  for (const id of ["minimal", "classic", "fresh-market", "jelly-signature", "jelly-avenue", "jelly-resthaven", "jelly-harbour"]) expect(usesLegacyStorefrontStyles(id), id).toBe(true);
+  // Folder themes without the flag (and so every new or uploaded theme) start from storefront-base.css alone.
+  expect(usesLegacyStorefrontStyles("jelly-forma")).toBe(false);
+  expect(legacyStylesAttribute("jelly-forma")).toBe("off");
+  expect(legacyStylesAttribute("jelly-signature")).toBeUndefined();
+});

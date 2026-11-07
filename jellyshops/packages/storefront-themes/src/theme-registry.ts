@@ -102,6 +102,26 @@ export function themeStyleId(id: string | null | undefined, version?: string | n
   } catch { return id; }
 }
 
+/**
+ * True when the old default storefront rules in src/app/globals.css apply to this theme (the manifest's
+ * `legacyStorefrontStyles`). Built-in themes registered here default to true, folder and uploaded themes to false,
+ * and a theme that `extends` a base design follows the base. The storefront roots carry the answer as
+ * `data-jelly-legacy-styles="off"` (see `legacyStylesAttribute`).
+ */
+export function usesLegacyStorefrontStyles(id: string | null | undefined, version?: string | null): boolean {
+  if (!id) return true;
+  let manifest: { extends?: unknown; legacyStorefrontStyles?: unknown };
+  try { manifest = getThemeDefinition(id, version).manifest as typeof manifest; } catch { return true; }
+  if (typeof manifest.legacyStorefrontStyles === "boolean") return manifest.legacyStorefrontStyles;
+  if (typeof manifest.extends === "string" && manifest.extends !== id && (THEME_BASE_IDS as readonly string[]).includes(manifest.extends)) return usesLegacyStorefrontStyles(manifest.extends);
+  return manualIds.has(id);
+}
+
+/** The `data-jelly-legacy-styles` value for a storefront root: "off" when the theme does not use the old rules. */
+export function legacyStylesAttribute(id: string | null | undefined, version?: string | null): "off" | undefined {
+  return usesLegacyStorefrontStyles(id, version) ? undefined : "off";
+}
+
 for (const { manifest } of discoveredThemes) {
   if (manualIds.has(manifest.id)) continue;
   themes.push(folderTheme(manifest));

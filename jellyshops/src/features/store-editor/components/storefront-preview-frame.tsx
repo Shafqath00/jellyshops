@@ -2,7 +2,7 @@
 
 import { useCallback, useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { themeStyleId } from "@jelly/storefront-themes";
+import { legacyStylesAttribute, themeStyleId } from "@jelly/storefront-themes";
 
 /** Renders the storefront in its own document so responsive CSS uses the chosen preview width. */
 export function StorefrontPreviewFrame({
@@ -60,7 +60,7 @@ export function StorefrontPreviewFrame({
       onLoad={(event) => syncDocument(event.currentTarget)}
     />
     {mountNode ? createPortal(
-      <div className="theme-preview-viewport" data-jelly-theme={themeStyleId(themeId, themeVersion)} data-jelly-theme-version={themeVersion} style={style}>{children}</div>,
+      <div className="theme-preview-viewport" data-jelly-theme={themeStyleId(themeId, themeVersion)} data-jelly-legacy-styles={legacyStylesAttribute(themeId, themeVersion)} data-jelly-theme-version={themeVersion} style={style}>{children}</div>,
       mountNode,
     ) : null}
   </>;
