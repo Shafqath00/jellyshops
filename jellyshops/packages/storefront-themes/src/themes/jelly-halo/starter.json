@@ -192,7 +192,7 @@
               "direction": "vertical",
               "contentAlignment": "left",
               "gap": 16,
-              "contentWidth": "normal",
+              "contentWidth": "full",
               "styleSpacing": "small"
             },
             "blocks": [
@@ -201,8 +201,7 @@
                 "type": "heading",
                 "enabled": true,
                 "settings": {
-                  "text": "Shop by concern",
-                  "blockTypePreset": "h3"
+                  "text": "Shop by concern"
                 }
               },
               {
@@ -642,7 +641,7 @@
             "enabled": true,
             "settings": {
               "styleScheme": "scheme2",
-              "firstOpen": true
+              "layout": "chapters"
             },
             "blocks": [
               {
@@ -763,9 +762,9 @@
               "styleScheme": "scheme1",
               "direction": "vertical",
               "contentAlignment": "left",
-              "gap": 16,
-              "contentWidth": "normal",
-              "styleSpacing": "small"
+              "gap": 12,
+              "contentWidth": "full",
+              "styleSpacing": "none"
             },
             "blocks": [
               {
@@ -773,8 +772,8 @@
                 "type": "heading",
                 "enabled": true,
                 "settings": {
-                  "text": "Shop by concern",
-                  "blockTypePreset": "h3"
+                  "text": "Filter by skin concern",
+                  "blockTypePreset": "small"
                 }
               },
               {

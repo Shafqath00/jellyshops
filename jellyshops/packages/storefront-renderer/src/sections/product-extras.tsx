@@ -62,10 +62,23 @@ export function ProductTabsSection({ section, editor = false }: { section: Secti
   });
   if (!tabs.length) return null;
   const firstOpen = section.settings.firstOpen === true;
+  const body = (tab: (typeof tabs)[number]) => tab.document ? <SettingText text="" document={tab.document} /> : <div>{tab.paragraphs.map((paragraph, position) => <p key={position}>{paragraph}</p>)}</div>;
+  // Chapters: every tab open, side by side on wide screens (a product story such as "What it does / How to use").
+  if (section.settings.layout === "chapters") {
+    return <section className="jelly-section jelly-product-tabs-section" {...sectionData(section, { "data-layout": "chapters" })}><StorefrontContainer>
+      <div className="jelly-product-chapters">
+        {tabs.map((tab, index) => <article key={tab.id} className="jelly-product-chapter" {...blockEditorData(tab.block, editor, "Tab")}>
+          <p className="jelly-product-chapter-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</p>
+          <h2>{tab.title}</h2>
+          {body(tab)}
+        </article>)}
+      </div>
+    </StorefrontContainer></section>;
+  }
   return <section className="jelly-section jelly-product-tabs-section" {...sectionData(section)}><StorefrontContainer>
     {tabs.map((tab, index) => <details key={tab.id} open={firstOpen && index === 0 ? true : undefined} {...blockEditorData(tab.block, editor, "Tab")}>
       <summary>{tab.title}</summary>
-      {tab.document ? <SettingText text="" document={tab.document} /> : <div>{tab.paragraphs.map((paragraph, position) => <p key={position}>{paragraph}</p>)}</div>}
+      {body(tab)}
     </details>)}
   </StorefrontContainer></section>;
 }

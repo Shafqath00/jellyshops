@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useSyncExternalStore, type CSSProperties } from "react";
-import { CardCartContext, CardRatingsContext, ProductCard, RegistrySectionRenderer, type CommerceDataProvider, type StorefrontPageContext, type StorefrontReviewAccess } from "@jelly/storefront-renderer";
+import { CardCartContext, CardRatingsContext, ProductCard, RegistrySectionRenderer, type CommerceDataProvider, type StorefrontPageContext } from "@jelly/storefront-renderer";
 import type { RuntimeMenuV4, SectionNode } from "@jelly/storefront-schema";
 import { applyThemeStyle, listThemeStyles, resolveStorefrontThemeTokens, resolveTheme } from "@jelly/storefront-themes";
 import { StorefrontProductCard } from "@jelly/storefront-ui";
 import { StorefrontPreviewFrame } from "@/features/store-editor/components/storefront-preview-frame";
 import type { ThemePreviewConfig } from "./configs";
+import { sampleReviews } from "./sample-reviews";
 import { TemplatePreview, type PreviewTemplate , usePreviewCart, withPreviewQuickAdd } from "./template-preview";
 
 /**
@@ -22,18 +23,6 @@ const views = [["guide", "Style guide"], ["home", "Home"], ["collection", "Colle
 type View = (typeof views)[number][0];
 
 const commerce: CommerceDataProvider = { async getProducts() { return []; } };
-/** Sample reviews for the style guide's Reviews panel; sending one only pretends. */
-const sampleReviews: StorefrontReviewAccess = {
-  async list(_productId, page = {}) {
-    const reviews = [
-      { id: "r1", rating: 5, title: "Exactly as pictured", body: "Arrived quickly and feels even better in person. I've already ordered a second one.", authorName: "Priya S.", verifiedPurchase: true, createdAt: "2026-10-30T10:00:00Z" },
-      { id: "r2", rating: 4, title: "Lovely, runs a little small", body: "Great quality. I'd size up next time.", authorName: "Tom R.", verifiedPurchase: false, createdAt: "2026-10-21T10:00:00Z" },
-      { id: "r3", rating: 5, title: "", body: "Beautiful finish and well packed.", authorName: "Grace", verifiedPurchase: true, createdAt: "2026-10-02T10:00:00Z" },
-    ].slice(page.offset ?? 0, (page.offset ?? 0) + (page.limit ?? 5));
-    return { summary: { average: 4.7, count: 3, distribution: [2, 1, 0, 0, 0] }, reviews };
-  },
-  async submit() { return { ok: true }; },
-};
 const reviewsCommerce: CommerceDataProvider = { ...commerce, reviews: sampleReviews };
 const reviewsPage = { pageType: "product", resource: { id: "sample", handle: "sample", data: { productPresentation: { product: { id: "sample", title: "Sample" } } } } } as unknown as StorefrontPageContext;
 const menus: Record<string, RuntimeMenuV4> = {

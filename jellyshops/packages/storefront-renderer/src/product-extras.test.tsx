@@ -32,6 +32,15 @@ describe("product information tabs", () => {
     rerender(<ProductTabsSection section={section("product-tabs", {})} />);
     expect(container).toBeEmptyDOMElement();
   });
+
+  it("shows every tab open as numbered chapters when set to chapters", () => {
+    const { container } = render(<ProductTabsSection section={{ ...tabs, settings: { layout: "chapters" } }} />);
+    expect(container.querySelector("details")).toBeNull();
+    expect(container.querySelector("[data-layout='chapters']")).not.toBeNull();
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)).toEqual(["Materials & care", "Shipping & returns"]);
+    expect(screen.getByText("Machine wash cold.")).toBeVisible();
+    expect([...container.querySelectorAll(".jelly-product-chapter-number")].map((number) => number.textContent)).toEqual(["01", "02"]);
+  });
 });
 
 describe("stock counter", () => {

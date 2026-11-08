@@ -1246,3 +1246,10 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 
 /* Spotlight hero with a photo set to fill: the photo covers the whole panel. */
 [data-jelly-theme] .jelly-hero.jelly-hero[data-layout="spotlight"] .jelly-hero-media[data-fit="cover"] img { width: 100%; height: 100%; }
+
+/* Product info tabs shown as open chapters: side by side from 768px, stacked on phones. */
+:where(.jelly-product-chapters) { display: grid; gap: 32px; }
+@media (min-width: 768px) { :where(.jelly-product-chapters) { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 40px; } }
+:where(.jelly-product-chapter) h2 { margin: 0 0 12px; font-size: 1.375rem; line-height: 1.25; }
+:where(.jelly-product-chapter-number) { margin: 0 0 16px; font-size: .8125rem; letter-spacing: .08em; opacity: .75; }
+:where(.jelly-product-chapter) p { margin: 0 0 12px; }

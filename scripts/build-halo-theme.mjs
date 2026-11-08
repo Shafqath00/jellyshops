@@ -82,8 +82,9 @@ const section = (type, settings, blocks = []) => ({ kind: "inline", section: { i
 const global = (key) => ({ kind: "global", globalSectionId: key });
 const chrome = (sections) => [global("announcement"), global("header"), ...sections, global("footer")];
 const concerns = [["Dryness", "dry"], ["Breakouts", "blemish"], ["Dullness", "glow"], ["Sensitivity", "calm"], ["Fine lines", "firm"], ["Sun care", "spf"]];
-const concernPills = (heading) => section("custom-content", { direction: "vertical", contentAlignment: "left", gap: 16, contentWidth: "normal", styleSpacing: "small" }, [
-  block("heading", { text: heading, blockTypePreset: "h3" }),
+// On the home page the pills are a section of their own; on collections a small label above the grid.
+const concernPills = (heading, preset) => section("custom-content", { direction: "vertical", contentAlignment: "left", gap: preset ? 12 : 16, contentWidth: "full", styleSpacing: preset ? "none" : "small" }, [
+  block("heading", { text: heading, ...(preset ? { blockTypePreset: preset } : {}) }),
   block("group", { groupDirection: "horizontal", groupAlign: "start", groupGap: 8 }, concerns.map(([label, query]) => block("button", { label, href: `/search?q=${query}`, buttonStyle: "secondary", buttonSize: "small" }))),
 ]);
 const starter = {
@@ -140,7 +141,7 @@ const starter = {
         block("trust-point", { text: "Two free samples", icon: "gift" }),
         block("trust-point", { text: "30-day returns", icon: "return" }),
       ]),
-      section("product-tabs", { styleScheme: "scheme2", firstOpen: true }, [
+      section("product-tabs", { styleScheme: "scheme2", layout: "chapters" }, [
         block("info-tab", { title: "What it does", text: "Brightens dull skin and evens tone over four to eight weeks, without the sting of stronger acids." }),
         block("info-tab", { title: "Key ingredients", text: "Vitamin C (ascorbyl glucoside) for brightness, niacinamide for an even tone, and panthenol to calm." }),
         block("info-tab", { title: "How to use", text: "Morning and evening, press two drops into clean skin. Follow with moisturiser, and SPF in the day." }),
@@ -151,7 +152,7 @@ const starter = {
     ]) },
     collection: { type: "collection", sections: chrome([
       section("collection-header", { showTitle: true, showDescription: true, showImage: false, layout: "simple", showBreadcrumb: true }),
-      concernPills("Shop by concern"),
+      concernPills("Filter by skin concern", "small"),
       section("collection-product-grid", { columns: 4, limit: 24, showSort: true, listLayout: "chips" }),
     ]) },
     cart: { type: "cart", sections: chrome([section("cart-summary", {})]) },

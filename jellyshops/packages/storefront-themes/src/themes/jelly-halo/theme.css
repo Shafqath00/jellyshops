@@ -259,4 +259,55 @@ main:has(.jelly-list-toolbar) .jelly-collection-count { display: none; } .jelly-
 .jelly-hero[data-layout="spotlight"] > .jelly-container { padding-block: clamp(2rem, 4vw, 3.5rem); }
 @media (min-width: 768px) { .jelly-hero[data-layout="spotlight"] .jelly-hero-media { aspect-ratio: 5 / 4; } }
 /* Product photos come on their own soft backgrounds, so they fill the tinted card instead of sitting inside it. */
-[data-card-layout] .jelly-product-card { --jelly-card-style-media-pad: 0; --jelly-card-style-fit: cover; }
+&[data-card-layout] .jelly-product-card { --jelly-card-style-media-pad: 0; --jelly-card-style-fit: cover; }
+/* The hero button lines up with the left-aligned text. */
+.jelly-hero[data-layout="spotlight"][data-align="left"] .jelly-hero-actions { justify-content: flex-start; }
+
+/* Product story chapters: a full-width blush band under the photos and buying area. */
+:is(main, [data-storefront-template]) > [data-section-type="product-tabs"]:has(.jelly-product-chapters) { grid-column: 1 / -1; margin-top: var(--j-space-xl, 48px); }
+:is(main, [data-storefront-template]) > [data-section-type="product-tabs"]:has(.jelly-product-chapters) > .jelly-section.jelly-section { padding-block: clamp(3rem, 6vw, 5rem); }
+:is(main, [data-storefront-template]) > [data-section-type="product-tabs"]:has(.jelly-product-chapters) .jelly-container.jelly-container { width: min(calc(100% - 2 * var(--j-page-margin, 24px)), var(--j-page-normal, 1280px)); margin-inline: auto; }
+.jelly-product-chapters { gap: clamp(2rem, 4vw, 4rem); }
+.jelly-product-chapter h2 { font-size: clamp(1.375rem, 2vw, 1.75rem); font-weight: 600; letter-spacing: -0.02em; text-transform: lowercase; }
+.jelly-product-chapter-number { display: inline-grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 999rem; background: rgb(255 255 255 / .7); font-weight: 600; opacity: 1; }
+.jelly-product-chapter p { color: var(--j-color-muted); max-width: 34ch; }
+:is(main, [data-storefront-template]) > [data-section-type="product-tabs"]:has(.jelly-product-chapters) { border-radius: var(--halo-radius-card, 20px); overflow: hidden; margin-bottom: var(--j-space-lg, 32px); }
+[data-section-type="trust-strip"] .jelly-trust-strip .jelly-container > ul { justify-content: flex-start; column-gap: 1.5rem; row-gap: .5rem; }
+
+/* Block text styles (Heading 1-4, Body, Small) chosen in the editor beat the section's own heading sizes. */
+[data-type-preset="h1"] { font-family: var(--j-type-h1-font) !important; font-size: var(--j-type-h1-size) !important; font-weight: var(--jelly-heading-weight) !important; line-height: var(--j-type-h1-line) !important; letter-spacing: var(--j-type-h1-track) !important; text-transform: var(--j-type-h1-case) !important; }
+[data-type-preset="h2"] { font-family: var(--j-type-h2-font) !important; font-size: var(--j-type-h2-size) !important; font-weight: var(--jelly-heading-weight) !important; line-height: var(--j-type-h2-line) !important; letter-spacing: var(--j-type-h2-track) !important; text-transform: var(--j-type-h2-case) !important; }
+[data-type-preset="h3"] { font-family: var(--j-type-h3-font) !important; font-size: var(--j-type-h3-size) !important; font-weight: var(--jelly-heading-weight) !important; line-height: var(--j-type-h3-line) !important; letter-spacing: var(--j-type-h3-track) !important; text-transform: var(--j-type-h3-case) !important; }
+[data-type-preset="h4"] { font-family: var(--j-type-h4-font) !important; font-size: var(--j-type-h4-size) !important; font-weight: var(--jelly-heading-weight) !important; line-height: var(--j-type-h4-line) !important; letter-spacing: var(--j-type-h4-track) !important; text-transform: var(--j-type-h4-case) !important; }
+[data-type-preset="body"] { font-family: var(--j-type-body-font) !important; font-size: var(--j-type-body-size) !important; font-weight: 400 !important; line-height: var(--j-type-body-line) !important; letter-spacing: var(--j-type-body-track) !important; text-transform: var(--j-type-body-case) !important; }
+[data-type-preset="small"] { font-family: var(--j-type-small-font) !important; font-size: var(--j-type-small-size) !important; font-weight: 400 !important; line-height: var(--j-type-small-line) !important; letter-spacing: var(--j-type-small-track) !important; text-transform: var(--j-type-small-case) !important; }
+[data-type-preset="small"] { color: var(--j-color-muted); }
+
+/* Phone header: one row (menu, name, icons); tool names stay for screen readers only. */
+@media (max-width: 767px) {
+  .jelly-header.jelly-header { flex-wrap: nowrap; gap: var(--j-space-xs); }
+  .jelly-header > .jelly-header-brand { margin-right: auto; }
+  .jelly-header > .jelly-header-tools { gap: 0; margin-left: auto; }
+  .jelly-header-tools .jelly-header-tool-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+
+/* Spotlight hero: left-aligned copy keeps one edge on every screen; a photo set to fill has no inner frame. */
+.jelly-hero[data-layout="spotlight"][data-align="left"] .jelly-hero-content { justify-items: start; text-align: left; }
+.jelly-hero[data-layout="spotlight"] .jelly-hero-media[data-fit="cover"] { padding: 0; }
+@media (max-width: 767px) { .jelly-hero[data-layout="spotlight"] .jelly-hero-media[data-fit="cover"] { aspect-ratio: 4 / 5; } }
+@media (max-width: 767px) { .jelly-hero[data-layout="spotlight"] .jelly-hero-content { padding-inline: 0; } }
+@media (max-width: 767px) {
+  :is(main, [data-storefront-template]) > [data-section-type="product-tabs"]:has(.jelly-product-chapters) { border-radius: 0; }
+  [data-section-type="trust-strip"] .jelly-trust-strip .jelly-container > ul { padding-inline: 0; }
+}
+
+/* Phones: concern pills scroll sideways in one row; product count and sort share one row. */
+@media (max-width: 767px) {
+  .jelly-custom-content .jelly-block-group:has(> .jelly-button) { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; scrollbar-width: none; margin-inline: calc(-1 * var(--j-page-edge, 16px)); padding-inline: var(--j-page-edge, 16px); }
+  .jelly-custom-content .jelly-block-group:has(> .jelly-button) > .jelly-button { flex: none; }
+  .jelly-custom-content-inner:has(.jelly-block-group > .jelly-button) { max-width: 100%; }
+  .jelly-list-toolbar.jelly-list-toolbar { flex-wrap: nowrap; align-items: center; justify-content: space-between; }
+  .jelly-list-toolbar .jelly-list-count { order: 0; margin: 0; }
+  .jelly-list-toolbar .jelly-list-sort { order: 1; }
+  .jelly-list-toolbar .jelly-list-sort > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}

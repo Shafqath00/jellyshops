@@ -18276,10 +18276,27 @@
       "presets": [],
       "controls": [
         {
+          "type": "select",
+          "key": "layout",
+          "label": "Show as",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Fold-out tabs",
+              "value": "accordion"
+            },
+            {
+              "label": "Open chapters side by side",
+              "value": "chapters"
+            }
+          ]
+        },
+        {
           "type": "checkbox",
           "key": "firstOpen",
           "label": "Open the first tab by default",
-          "group": "layout"
+          "group": "layout",
+          "description": "Fold-out tabs only."
         }
       ],
       "settingsSchema": {
@@ -18287,6 +18304,13 @@
         "properties": {
           "firstOpen": {
             "type": "boolean"
+          },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "accordion",
+              "chapters"
+            ]
           }
         }
       }

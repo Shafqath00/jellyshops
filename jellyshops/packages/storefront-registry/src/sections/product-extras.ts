@@ -9,7 +9,7 @@ import type { SectionDefinition } from "../types.js";
  */
 const productOnly = ["product"] as const;
 
-const productTabsSettings = z.object({ firstOpen: z.boolean().optional() }).passthrough();
+const productTabsSettings = z.object({ firstOpen: z.boolean().optional(), layout: z.enum(["accordion", "chapters"]).optional() }).passthrough();
 const stockCounterSettings = z.object({
   lowStockThreshold: z.number().int().min(1).max(50).optional(),
   showWhenPlentiful: z.boolean().optional(),
@@ -32,7 +32,10 @@ export const productExtraSections: SectionDefinition[] = [
     category: "commerce",
     supportedPages: [...productOnly],
     settingsSchema: productTabsSettings,
-    controls: [{ type: "checkbox", key: "firstOpen", label: "Open the first tab by default", group: "layout" }],
+    controls: [
+      { type: "select", key: "layout", label: "Show as", group: "layout", options: [{ label: "Fold-out tabs", value: "accordion" }, { label: "Open chapters side by side", value: "chapters" }] },
+      { type: "checkbox", key: "firstOpen", label: "Open the first tab by default", group: "layout", description: "Fold-out tabs only." },
+    ],
     allowedBlockTypes: ["info-tab"],
     maxBlocks: 8,
     defaultSettings: { firstOpen: false },
