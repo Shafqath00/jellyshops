@@ -86,14 +86,14 @@ describe("catalog management", () => {
     await user.click(screen.getByRole("button", { name: "Refresh stock" }));
     await screen.findByLabelText("On hand for T-shirt Blue");
     await user.click(screen.getByRole("button", { name: "Save" }));
-    expect(await screen.findByText("Stock saved.")).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole("region", { name: "Unsaved changes" })).not.toBeInTheDocument());
     expect(api.request.mock.calls.filter((call) => call[1]?.method === "PATCH").map((call) => JSON.parse(call[1].body).expectedRevision)).toEqual(["r1", "r2"]);
   });
   it("shows untracked stock with a link to enable tracking", async () => {
     api.request.mockResolvedValue({ nodes: [{ ...row, trackInventory: false, quantity: null, revision: null, availableQuantity: null }], nextCursor: null });
     render(<StockPage />);
     expect(await screen.findByText("Not tracked")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Set up tracking" })).toHaveAttribute("href", "/admin/products/p1");
+    expect(screen.getByRole("link", { name: "Turn on tracking" })).toHaveAttribute("href", "/admin/products/p1");
     expect(screen.queryByRole("button", { name: "Save" })).not.toBeInTheDocument();
   });
 });

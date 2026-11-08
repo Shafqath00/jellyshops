@@ -43,6 +43,14 @@ describe("inventory barcode, low-stock threshold and history", () => {
   }
   const history = async (variantId: string, storeId = "store-a", limit = 50, cursor?: string) => service.listInventoryHistory(storeId, variantId, { limit, cursor });
 
+  it("filters the stock list to low or sold-out variants", async () => {
+    const add = (handle: string, quantity: number, lowStockThreshold?: number) => service.createProduct("store-a", { handle, title: handle, status: "ACTIVE", variants: [{ title: "Standard", priceMinor: 100, quantity, ...(lowStockThreshold !== undefined ? { lowStockThreshold } : {}) }] });
+    await add("plenty", 20); await add("low-default", 2); await add("low-custom", 8, 10); await add("gone", 0);
+    const titles = async (stock: "low" | "out") => (await service.listInventory!("store-a", { limit: 50, stock })).nodes.map((row) => row.productTitle).sort();
+    expect(await titles("low")).toEqual(["low-custom", "low-default"]);
+    expect(await titles("out")).toEqual(["gone"]);
+  });
+
   it("stores barcode and threshold, keeps them when a save omits them, and clears them with null", async () => {
     const { product, variantId } = await createTee();
     expect(product.variants[0]).toMatchObject({ barcode: "5012345678900", lowStockThreshold: 4 });

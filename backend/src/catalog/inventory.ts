@@ -1,6 +1,6 @@
 import type { SqlExecutor } from "../commerce/repository.js";
 import { ApiError } from "../http/errors.js";
-import { stockStatusOf, type CatalogInventoryRow, type Connection, type InventoryAdjustment, type InventoryAdjustmentReason, type ListInventoryHistoryInput, type ListInventoryInput, type UpdateInventoryInput } from "./types.js";
+import { DEFAULT_LOW_STOCK_THRESHOLD, stockStatusOf, type CatalogInventoryRow, type Connection, type InventoryAdjustment, type InventoryAdjustmentReason, type ListInventoryHistoryInput, type ListInventoryInput, type UpdateInventoryInput } from "./types.js";
 
 const revision = `(to_char(i."updatedAt",'YYYY-MM-DD HH24:MI:SS.US') || ':' || i."quantity" || ':' || i."reserved")`;
 const projection = `SELECT p."id" AS "productId",v."id" AS "variantId",p."title" AS "productTitle",
@@ -19,6 +19,9 @@ function row(value: Record<string, unknown>): CatalogInventoryRow {
 export async function listInventory(db: SqlExecutor, storeId: string, input: ListInventoryInput): Promise<Connection<CatalogInventoryRow>> {
   const values: unknown[] = [storeId], filters = ['v."storeId"=$1','v."archivedAt" IS NULL',`p."status" != 'ARCHIVED'`];
   if (input.query) { values.push('%'+input.query+'%'); const bind='$'+values.length; filters.push(`(p."title" ILIKE ${bind} OR v."title" ILIKE ${bind} OR v."sku" ILIKE ${bind} OR v."barcode" ILIKE ${bind})`); }
+  const available = 'GREATEST(COALESCE(i."quantity",0)-COALESCE(i."reserved",0),0)';
+  if (input.stock === "out") filters.push('v."trackInventory"=true AND i."quantity" IS NOT NULL AND '+available+'<=0');
+  if (input.stock === "low") filters.push('v."trackInventory"=true AND i."quantity" IS NOT NULL AND '+available+'>0 AND '+available+'<=COALESCE(v."lowStockThreshold",'+DEFAULT_LOW_STOCK_THRESHOLD+')');
   if (input.cursor) { values.push(input.cursor); filters.push('v."id">$'+values.length); }
   values.push(input.limit+1);
   const result=await db.query(projection+' WHERE '+filters.join(' AND ')+' ORDER BY v."id" LIMIT $'+values.length,values);

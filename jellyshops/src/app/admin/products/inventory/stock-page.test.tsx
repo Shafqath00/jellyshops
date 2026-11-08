@@ -23,8 +23,10 @@ describe("stock page", () => {
     expect(within(table).getByText("Out of stock")).toBeVisible();
     expect(within(table).getAllByText("Not tracked").length).toBeGreaterThan(0);
     await user.type(screen.getByRole("searchbox", { name: "Search stock" }), "5012345678900");
-    await user.click(screen.getByRole("button", { name: "Search" }));
+    await user.keyboard("{Enter}");
     await waitFor(() => expect(api.request.mock.lastCall?.[0]).toContain("query=5012345678900"));
+    await user.click(screen.getByRole("tab", { name: "Out of stock" }));
+    await waitFor(() => expect(api.request.mock.lastCall?.[0]).toContain("stock=out"));
   });
 
   it("sends the reason with a manual change and clears it afterwards", async () => {
@@ -32,14 +34,16 @@ describe("stock page", () => {
     const user = userEvent.setup();
     render(<StockPage />);
     const onHand = await screen.findByLabelText("On hand for T-shirt Blue");
-    expect(screen.queryByLabelText("Reason for changing T-shirt Blue")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Why did the stock change?")).not.toBeInTheDocument();
     await user.clear(onHand);
     await user.type(onHand, "9");
-    await user.type(screen.getByLabelText("Reason for changing T-shirt Blue"), "  Recount  ");
+    await user.selectOptions(screen.getByLabelText("Why did the stock change?"), "Received new stock");
+    await user.type(screen.getByLabelText("Note (optional)"), "  Recount  ");
     await user.click(screen.getByRole("button", { name: "Save" }));
     await waitFor(() => expect(api.request).toHaveBeenCalledTimes(2));
     expect(api.request.mock.calls[1][0]).toBe("/inventory/v1");
-    expect(JSON.parse(api.request.mock.calls[1][1].body)).toEqual({ quantity: 9, expectedRevision: "r1", note: "Recount" });
+    expect(JSON.parse(api.request.mock.calls[1][1].body)).toEqual({ quantity: 9, expectedRevision: "r1", note: "Received new stock: Recount" });
+    await waitFor(() => expect(screen.queryByLabelText("Note (optional)")).not.toBeInTheDocument());
   });
 
   it("opens the history of a tracked variant and offers none for untracked ones", async () => {

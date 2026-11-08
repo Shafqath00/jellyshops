@@ -115,7 +115,7 @@ export function createCatalogAdminRouter(service: AdminCatalogService, authProvi
   router.use(requireMerchant(authProvider));
 
   router.get("/inventory", requireStorePermission("catalog:view"), async (request, response) => {
-    const input = listSchema.extend({ query: z.string().max(200).optional() }).parse(request.query);
+    const input = listSchema.extend({ query: z.string().max(200).optional(), stock: z.enum(["low", "out"]).optional() }).parse(request.query);
     if (!service.listInventory) { response.status(503).json({ error: { message: "Stock management is unavailable." } }); return; }
     response.json(await service.listInventory(request.storeContext!.storeId,input));
   });

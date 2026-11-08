@@ -232,6 +232,13 @@ html.admin-ui.admin-dark {
 .jk-list-row:focus-visible {outline:2px solid var(--jk-focus);outline-offset:-2px}
 @media(min-width:1024px){.jk-list-row{padding:12px 20px}}
 
+/* Inventory */
+.jk-stock-edit {display:inline-flex;flex-direction:column;align-items:flex-end;gap:4px}
+.jk-number-input {width:84px;min-height:32px;padding:4px 8px;border:0;border-radius:var(--jk-radius-sm);box-shadow:0 0 0 1px var(--jk-border-strong) inset;background:var(--jk-surface);color:var(--jk-text);font:400 13px var(--jk-font);text-align:right;font-variant-numeric:tabular-nums}
+.jk-number-input:focus-visible {outline:2px solid var(--jk-focus);outline-offset:0}
+.jk-number-input[aria-invalid=true] {box-shadow:0 0 0 1px var(--jk-critical-dot) inset}
+.jk-banner .jk-field span {font-weight:550}
+
 /* Kit demo */
 .jk-demo-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
 .jk-row {display:flex;align-items:center;gap:8px;flex-wrap:wrap}

@@ -16,7 +16,8 @@ export interface CatalogInventoryRow {
   barcode: string | null; lowStockThreshold: number | null; stockStatus: StockStatus;
   trackInventory: boolean; quantity: number | null; reserved: number; availableQuantity: number | null; revision: string | null;
 }
-export interface ListInventoryInput { query?: string; cursor?: string; limit: number }
+/** `stock` narrows the list: `low` = some left but at or under the warning, `out` = none left to sell. */
+export interface ListInventoryInput { query?: string; cursor?: string; limit: number; stock?: "low" | "out" }
 /** `note` and `actor` describe a manual change and are written to the stock history. */
 export interface UpdateInventoryInput { quantity: number; expectedRevision: string; note?: string; actor?: string }
 
