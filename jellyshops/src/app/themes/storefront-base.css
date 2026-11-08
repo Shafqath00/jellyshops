@@ -829,3 +829,96 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 :where(.jelly-breadcrumb ol) { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; padding: 0; list-style: none; font-size: .875em; color: var(--j-color-muted); }
 :where(.jelly-breadcrumb li + li)::before { content: "/"; margin-right: 8px; }
 :where(.jelly-breadcrumb a) { color: inherit; }
+
+/*
+ * Header layouts (template programme archetypes H1, H4, H5, H8; docs/reports/2026-11-08-twenty-template-categories-research.md).
+ * Each layout places the header parts itself, so it looks the same in every theme; themes style the type, colours and icons.
+ * The doubled class and the attribute beat the header grid rules in each theme file.
+ */
+[data-jelly-theme] .jelly-header.jelly-header:is([data-header-layout="split"], [data-header-layout="minimal"], [data-header-layout="category-bar"], [data-header-layout="search-first"]) {
+  display: grid; align-items: center; column-gap: 24px; row-gap: 12px;
+}
+.jelly-header-note { display: inline-flex; align-items: center; gap: 8px; margin: 0; padding: 6px 12px; border-radius: var(--j-radius-pill, 999px); background: color-mix(in srgb, var(--j-color-primary, currentColor) 10%, transparent); font-size: 14px; font-weight: 600; white-space: nowrap; }
+.jelly-header-note svg { flex: none; width: 18px; height: 18px; }
+
+/* H1 split: the menu is split around a centred logo; the shopping icons sit at the right edge.
+ * Wide screens only (from 1200px): below that the menu moves behind the menu button and the logo stays centred. */
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="split"] { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="split"] > .jelly-header-brand { grid-column: 2; grid-row: 1; justify-self: center; justify-content: center; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="split"] > .jelly-header-tools { grid-column: 3; grid-row: 1; justify-self: end; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="split"] > .jelly-header-trust { grid-column: 1 / -1; grid-row: 2; }
+@media (min-width: 1200px) {
+  [data-jelly-theme] .jelly-header.jelly-header[data-header-layout="split"] > .jelly-mobile-navigation { display: none; }
+  [data-jelly-theme] .jelly-header.jelly-header[data-header-layout="split"] > .jelly-header-menu-first { display: block; grid-column: 1; grid-row: 1; justify-self: end; }
+  [data-jelly-theme] .jelly-header.jelly-header[data-header-layout="split"] > .jelly-header-menu-second { display: block; grid-column: 3; grid-row: 1; justify-self: start; }
+}
+@media (max-width: 1199px) {
+  [data-jelly-theme] .jelly-header.jelly-header[data-header-layout="split"] > :is(.jelly-header-menu-first, .jelly-header-menu-second) { display: none; }
+  [data-jelly-theme] .jelly-header.jelly-header[data-header-layout="split"] > .jelly-mobile-navigation { display: block; grid-column: 1; grid-row: 1; justify-self: start; }
+}
+
+/* H4 minimal: menu button, logo and icons at every width; the menu opens over the whole page. */
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="minimal"] { grid-template-columns: 44px minmax(0, 1fr) auto; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="minimal"] > .jelly-mobile-navigation { display: block; grid-column: 1; grid-row: 1; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="minimal"] > .jelly-header-brand { grid-column: 2; grid-row: 1; justify-self: start; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="minimal"] > .jelly-header-tools { grid-column: 3; grid-row: 1; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="minimal"] > .jelly-header-trust { grid-column: 1 / -1; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="minimal"] .jelly-mobile-navigation > summary { position: relative; z-index: 51; display: grid; place-items: center; width: 44px; height: 44px; cursor: pointer; list-style: none; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="minimal"] .jelly-mobile-navigation > summary::-webkit-details-marker { display: none; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="minimal"] .jelly-mobile-navigation[open] > .jelly-mobile-navigation-panel {
+  position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; gap: 32px; overflow-y: auto;
+  width: auto; max-width: none; margin: 0; padding: 96px var(--j-page-edge, 24px) 48px; border: 0; border-radius: 0; box-shadow: none;
+  background: var(--j-color-bg, #fff); color: var(--j-color-text, #111);
+}
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="minimal"] .jelly-mobile-navigation-panel nav:first-child a,
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="minimal"] .jelly-mobile-navigation-panel nav:first-child .jelly-menu-disclosure > summary {
+  font-family: var(--j-font-heading, inherit); font-size: clamp(28px, 5vw, 56px); line-height: var(--j-line-tight, 1.1); letter-spacing: var(--j-track-tight, 0);
+}
+
+/* H5 category bar: logo, a wide search box and the icons, then the menu on its own full-width row. */
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="category-bar"] { grid-template-columns: auto minmax(0, 1fr) auto; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="category-bar"] > .jelly-header-brand { grid-column: 1; grid-row: 1; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="category-bar"] > .jelly-header-search { grid-column: 2; grid-row: 1; width: 100%; max-width: 720px; justify-self: center; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="category-bar"] > .jelly-header-tools { grid-column: 3; grid-row: 1; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="category-bar"] > nav:not(.jelly-header-tools) { display: block; grid-column: 1 / -1; grid-row: 2; justify-self: stretch; padding-top: 12px; border-top: 1px solid var(--j-color-border, color-mix(in srgb, currentColor 15%, transparent)); }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="category-bar"] > .jelly-header-trust { grid-column: 1 / -1; grid-row: 3; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="category-bar"] > .jelly-mobile-navigation { display: none; }
+
+/* H8 search first: logo, delivery note and a large search box; the menu is a row of departments under it. */
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-first"] { grid-template-columns: auto auto minmax(0, 1fr) auto; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-first"] > .jelly-header-brand { grid-column: 1; grid-row: 1; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-first"] > .jelly-header-note { grid-column: 2; grid-row: 1; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-first"] > .jelly-header-search { grid-column: 3; grid-row: 1; width: 100%; max-width: none; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-first"] > .jelly-header-search input { height: 52px; font-size: 16px; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-first"] > .jelly-header-tools { grid-column: 4; grid-row: 1; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-first"] > nav:not(.jelly-header-tools) { display: block; grid-column: 1 / -1; grid-row: 2; overflow-x: auto; scrollbar-width: none; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-first"] > .jelly-header-trust { grid-column: 1 / -1; grid-row: 3; }
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-first"] > .jelly-mobile-navigation { display: none; }
+[data-jelly-theme] .jelly-header.jelly-header:is([data-header-layout="category-bar"], [data-header-layout="search-first"]) > nav:not(.jelly-header-tools) > ul { flex-wrap: nowrap; }
+[data-jelly-theme] .jelly-header.jelly-header:is([data-header-layout="category-bar"], [data-header-layout="search-first"]) > nav:not(.jelly-header-tools) > ul > li > :is(a, .jelly-menu-toggle) { white-space: nowrap; }
+
+/* Phones and small tablets: the search box gets its own row; the menu stays as a row that scrolls sideways. */
+@media (max-width: 899px) {
+  [data-jelly-theme] .jelly-header.jelly-header:is([data-header-layout="category-bar"], [data-header-layout="search-first"]) { grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 12px; row-gap: 8px; }
+  [data-jelly-theme] .jelly-header.jelly-header:is([data-header-layout="category-bar"], [data-header-layout="search-first"]) > .jelly-header-search input { height: 44px; }
+  [data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-first"] > .jelly-header-note { padding: 4px 10px; font-size: 13px; }
+  [data-jelly-theme] .jelly-header.jelly-header:is([data-header-layout="category-bar"], [data-header-layout="search-first"]) > .jelly-header-brand { grid-column: 1; grid-row: 1; justify-self: start; justify-content: flex-start; }
+  [data-jelly-theme] .jelly-header.jelly-header:is([data-header-layout="category-bar"], [data-header-layout="search-first"]) > .jelly-header-tools { grid-column: 3; grid-row: 1; }
+  [data-jelly-theme] .jelly-header.jelly-header:is([data-header-layout="category-bar"], [data-header-layout="search-first"]) > .jelly-header-search { grid-column: 1 / -1; grid-row: 2; max-width: none; }
+  [data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-first"] > .jelly-header-note { grid-column: 2; grid-row: 1; justify-self: end; max-width: 100%; overflow: hidden; }
+  [data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-first"] > .jelly-header-note span { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  [data-jelly-theme] .jelly-header.jelly-header:is([data-header-layout="category-bar"], [data-header-layout="search-first"]) > nav:not(.jelly-header-tools) { grid-row: 3; overflow-x: auto; scrollbar-width: none; padding-top: 4px; }
+  [data-jelly-theme] .jelly-header.jelly-header:is([data-header-layout="category-bar"], [data-header-layout="search-first"]) > .jelly-header-trust { grid-row: 4; }
+}
+/* Header layouts, every width: a 44px menu button and a logo that shrinks instead of running into the icons. */
+[data-jelly-theme] .jelly-header.jelly-header:is([data-header-layout="split"], [data-header-layout="minimal"], [data-header-layout="category-bar"], [data-header-layout="search-first"]) > .jelly-mobile-navigation > summary { display: grid; place-items: center; min-width: 44px; min-height: 44px; }
+[data-jelly-theme] .jelly-header.jelly-header:is([data-header-layout="split"], [data-header-layout="minimal"], [data-header-layout="category-bar"], [data-header-layout="search-first"]) > .jelly-header-brand { min-width: 0; max-width: 100%; overflow: hidden; }
+[data-jelly-theme] .jelly-header.jelly-header:is([data-header-layout="split"], [data-header-layout="minimal"], [data-header-layout="category-bar"], [data-header-layout="search-first"]) > .jelly-header-brand > span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+@media (max-width: 1199px) {
+  [data-jelly-theme] .jelly-header.jelly-header[data-header-layout="split"] { grid-template-columns: 44px minmax(0, 1fr) auto; }
+}
+@media (max-width: 899px) {
+  [data-jelly-theme] .jelly-header.jelly-header:is([data-header-layout="category-bar"], [data-header-layout="search-first"]) { min-height: 0; padding-block: 12px; }
+}
+/* While the full-screen menu is open, its button stays in the top corner so it can always close it. */
+[data-jelly-theme] .jelly-header.jelly-header[data-header-layout="minimal"] .jelly-mobile-navigation[open] > summary { position: fixed; top: 16px; left: var(--j-page-edge, 16px); background: var(--j-color-bg, #fff); color: var(--j-color-text, #111); border-radius: var(--j-radius-pill, 999px); }

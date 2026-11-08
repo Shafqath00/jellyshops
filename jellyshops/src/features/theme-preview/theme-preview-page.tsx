@@ -41,6 +41,13 @@ const swatches: Array<[string, string]> = [
   ["Soft text", "var(--jelly-color-secondary)"], ["Buttons", "var(--jelly-color-primary)"], ["Highlight", "var(--theme-accent)"],
 ];
 const spacing = [8, 16, 24, 32, 48, 64, 96];
+/** Every header layout, so each theme can be reviewed with all of them. */
+const headerLayouts = [
+  ["split", "Logo in the middle, menu on both sides"],
+  ["minimal", "Minimal: menu button opens a full-screen menu"],
+  ["category-bar", "Two rows: search, then a category bar"],
+  ["search-first", "Search first, with a delivery note"],
+] as const;
 const muted = "var(--jelly-color-secondary)";
 const border = "1px solid var(--theme-border)";
 
@@ -116,6 +123,12 @@ function Guide({ config }: { config: ThemePreviewConfig }) {
     </Block>
     <Block title={altHeader.settings.logoPosition === "center" ? "Header with centred logo" : "Header with logo on the left"}>
       <div style={{ border }}><RegistrySectionRenderer section={altHeader} mode="preview" commerce={commerce} region="header" themeId={themeId} menus={menus} storeSlug="style-guide" /></div>
+    </Block>
+    <Block title="Header layouts">
+      {headerLayouts.map(([layout, label]) => <div key={layout} data-guide-header-layout={layout} style={{ display: "grid", gap: 8 }}>
+        <p style={{ margin: 0, fontSize: 13, color: muted }}>{label}</p>
+        <div style={{ border }}><RegistrySectionRenderer section={section(`guide-header-${layout}`, "header", { storeName: config.name, layout, deliveryNote: layout === "search-first" ? "Delivery today from 6pm" : undefined }, [menuBlock(`guide-header-${layout}-menu`)])} mode="preview" commerce={commerce} region="header" themeId={themeId} menus={menus} storeSlug="style-guide" /></div>
+      </div>)}
     </Block>
     <RegistrySectionRenderer section={footer} mode="preview" commerce={commerce} region="footer" themeId={themeId} menus={menus} storeSlug="style-guide" />
   </>;

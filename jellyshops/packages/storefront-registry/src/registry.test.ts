@@ -77,7 +77,7 @@ it("makes the Home product grid configurable without requiring sample Catalog re
 });
 
 it("exposes store identity, layout and footer content controls in global chrome", () => {
-  expect(ownKeys("header")).toEqual(["storeName", "logo", "logoWidth", "logoPosition", "sticky", "transparent", "overlayLogo", "showSearch", "showAccount", "showWishlist", "showCart", "layout", "showToolLabels", "extraLinkLabel", "extraLink", "extraLinkIcon"]);
+  expect(ownKeys("header")).toEqual(["storeName", "logo", "logoWidth", "logoPosition", "sticky", "transparent", "overlayLogo", "showSearch", "showAccount", "showWishlist", "showCart", "layout", "deliveryNote", "showToolLabels", "extraLinkLabel", "extraLink", "extraLinkIcon"]);
   expect(getSectionDefinition("header")?.settingsSchema.safeParse({ storeName: "Little Market", logo: { id: "logo-1", url: "/api/public/media/store-a/logo-1", alt: "Logo" } }).success).toBe(true);
   expect(ownKeys("footer")).toEqual(["storeName", "text", "contactEmail", "copyright", "showNewsletter", "newsletterHeading", "newsletterText"]);
   expect(ownKeys("announcement-bar")).toEqual(["text", "link"]);

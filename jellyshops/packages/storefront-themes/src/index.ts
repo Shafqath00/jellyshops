@@ -28,3 +28,5 @@ export { applyThemeMigrations, applyThemeUpgrade, getThemeMigrationPath, getThem
 export type { ThemeMigration, ThemeMigrationDraft, ThemeMigrationChange } from "./migrations.js";
 export { applyThemeStyle, listThemeStyles } from "./theme-styles.js";
 export type { ThemeStyle } from "./theme-styles.js";
+export { ARCHETYPE_DIMENSIONS, ARCHETYPES, MAX_SHARED_ARCHETYPES, TEMPLATE_PROGRAMME, checkTemplateDistinctness, sharedArchetypes } from "./template-programme.js";
+export type { ArchetypeDimension, ArchetypeOption, TemplatePlan } from "./template-programme.js";

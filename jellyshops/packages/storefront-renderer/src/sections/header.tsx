@@ -23,11 +23,25 @@ function menuHref(item: RuntimeMenuItem, context: StorefrontRuntimeContext): str
   return safeRichTextHref(context.resourceLinks?.[`${target.kind}:${target.resourceId}`]);
 }
 
-function MenuLinks({ section, context, label = "Store navigation", variant }: { section: SectionNode; context: StorefrontRuntimeContext; label?: string; variant: MenuVariant }) {
+function MenuLinks({ section, context, label = "Store navigation", variant, part, className }: { section: SectionNode; context: StorefrontRuntimeContext; label?: string; variant: MenuVariant; part?: "first" | "second"; className?: string }) {
   const block = section.blocks.find((entry) => entry.enabled && entry.type === "menu");
   const handle = typeof block?.settings.handle === "string" ? block.settings.handle : "main";
   const menu = Object.values(context.menus ?? {}).find(item => item.handle === handle);
-  return (menu?.items.length ?? 0) > 0 ? <nav aria-label={label}><MenuList handle={handle} context={context} variant={variant} /></nav> : null;
+  const all = menu?.items ?? [];
+  if (all.length === 0) return null;
+  if (!part) return <nav aria-label={label} className={className}><MenuList handle={handle} context={context} variant={variant} /></nav>;
+  // The split layout puts the first half of the menu left of the logo and the rest on the right.
+  const half = Math.ceil(all.length / 2);
+  const items = part === "first" ? all.slice(0, half) : all.slice(half);
+  return items.length > 0 ? <nav aria-label={label} className={className} data-menu-part={part}><MenuTree items={items} variant={variant} hrefFor={(item) => menuHref(item, context)} /></nav> : null;
+}
+
+/** Header layouts drawn by this section. "classic" adds no attribute, so older stores render exactly as before. */
+export const HEADER_LAYOUTS = ["classic", "search-bar", "split", "minimal", "category-bar", "search-first"] as const;
+export type HeaderLayout = (typeof HEADER_LAYOUTS)[number];
+
+export function headerLayout(value: unknown): HeaderLayout {
+  return HEADER_LAYOUTS.includes(value as HeaderLayout) ? value as HeaderLayout : "classic";
 }
 
 /** One navigation menu: top-level links (`flat`), or with its dropdowns (`bar`) or fold-out groups (`panel`). */
@@ -85,7 +99,10 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
   const name = typeof settings.storeName === "string" && settings.storeName.trim() ? settings.storeName : "Storefront";
   const logoWidth = typeof settings.logoWidth === "number" ? Math.min(240, Math.max(64, settings.logoWidth)) : undefined;
   const root = context.storeSlug ? `/${encodeURIComponent(context.storeSlug)}` : "";
-  const searchBar = settings.layout === "search-bar";
+  const layout = headerLayout(settings.layout);
+  // Layouts with their own search box drop the search icon.
+  const searchBar = layout === "search-bar" || layout === "category-bar" || layout === "search-first";
+  const deliveryNote = layout === "search-first" && typeof settings.deliveryNote === "string" ? settings.deliveryNote.trim() : "";
   const tools = context.storeSlug ? ([
     ["search", "Search", `${root}/search`, settings.showSearch],
     ["account", "Account", `${root}/account`, settings.showAccount],
@@ -105,8 +122,8 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
     ref={headerRef}
     className="jelly-header"
     data-section-id={section.id}
-    data-logo-position={searchBar || settings.logoPosition === "center" ? "center" : "left"}
-    data-header-layout={searchBar ? "search-bar" : undefined}
+    data-logo-position={layout === "search-bar" || layout === "split" || (layout === "classic" && settings.logoPosition === "center") ? "center" : "left"}
+    data-header-layout={layout === "classic" ? undefined : layout}
     data-tool-labels={settings.showToolLabels === true ? "true" : undefined}
     data-sticky={settings.sticky === true ? "true" : undefined}
     data-transparent={transparent ? "true" : undefined}
@@ -120,14 +137,19 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
         {tools.length > 0 && <nav aria-label="Account and saved items"><ul>{tools.filter(([icon]) => icon !== "search").map(([icon, label, href]) => <li key={icon}><a href={href}>{icon === "bag" ? "Shopping bag" : label}</a></li>)}</ul></nav>}
       </div>
     </details>
-    {searchBar && <HeaderSearch action={`${root}/search`} />}
+    {layout === "split" && <MenuLinks section={section} context={context} label="Primary navigation" variant="bar" part="first" className="jelly-header-menu-first" />}
+    {layout === "search-bar" && <HeaderSearch action={`${root}/search`} />}
     <a className="jelly-header-brand" href={root || "/"} {...elementProps(section, "logo", editor, logoWidth ? { width: logoWidth } : undefined)}>
       {logoUrl && !logoUrl.startsWith("#") ? <img src={logoUrl} alt={image?.alt || name} /> : <span>{name}</span>}
       {/* Merchant media URLs may be served by the local API and are not Next Image assets. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {overlayLogoUrl && !overlayLogoUrl.startsWith("#") && <img className="jelly-header-overlay-logo" src={overlayLogoUrl} alt="" aria-hidden="true" />}
     </a>
-    <MenuLinks section={section} context={context} label="Primary navigation" variant="bar" />
+    {deliveryNote && <p className="jelly-header-note" {...elementProps(section, "deliveryNote", editor)}><StoreIcon name="truck" /><span>{deliveryNote}</span></p>}
+    {(layout === "category-bar" || layout === "search-first") && <HeaderSearch action={`${root}/search`} />}
+    {layout === "split" ? <MenuLinks section={section} context={context} label="More navigation" variant="bar" part="second" className="jelly-header-menu-second" />
+      : layout === "minimal" ? null
+      : <MenuLinks section={section} context={context} label={layout === "search-first" ? "Departments" : "Primary navigation"} variant="bar" />}
     {showTools && <nav className="jelly-header-tools" aria-label="Shopping tools" {...elementProps(section, "tools", editor)}>
       {extraHref && <a href={extraHref} data-tool="extra" aria-label={extraLabel} {...elementProps(section, "extraLink", editor)}><StoreIcon name={settings.extraLinkIcon ?? "palette"} /><span className="jelly-header-tool-label">{extraLabel}</span></a>}
       {tools.map(([icon, label, href]) => <a key={icon} href={href} data-tool={icon} aria-label={label}><StorefrontIcon name={icon} /><span className="jelly-header-tool-label">{label}</span></a>)}

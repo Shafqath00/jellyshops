@@ -34,6 +34,7 @@ export const SECTION_ELEMENTS: Record<string, ElementDefinition[]> = {
   header: [
     { id: "logo", label: "Logo", kind: "group", controls: ["logo", "storeName", "logoWidth", "logoPosition", "overlayLogo"] },
     { id: "extraLink", label: "Extra link", kind: "link", controls: ["extraLinkLabel", "extraLink", "extraLinkIcon"] },
+    { id: "deliveryNote", label: "Delivery note", kind: "text", controls: ["deliveryNote"] },
     { id: "tools", label: "Shopping icons", kind: "group", controls: ["showSearch", "showAccount", "showWishlist", "showCart", "showToolLabels"] },
   ],
   footer: [

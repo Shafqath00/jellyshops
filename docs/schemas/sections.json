@@ -1977,7 +1977,7 @@
           "group": "content"
         },
         {
-          "type": "segmented",
+          "type": "select",
           "key": "layout",
           "label": "Header layout",
           "group": "layout",
@@ -1989,9 +1989,38 @@
             {
               "label": "Search bar, logo in the middle",
               "value": "search-bar"
+            },
+            {
+              "label": "Logo in the middle, menu on both sides",
+              "value": "split"
+            },
+            {
+              "label": "Minimal: menu button opens a full-screen menu",
+              "value": "minimal"
+            },
+            {
+              "label": "Two rows: search, then a category bar",
+              "value": "category-bar"
+            },
+            {
+              "label": "Search first, with a delivery note",
+              "value": "search-first"
             }
           ],
-          "description": "Search bar: a search box on the left, the logo in the middle, the menu on its own row and trust points under it."
+          "description": "How the logo, menu and search are arranged. Phones always show the logo, the menu button and the bag."
+        },
+        {
+          "type": "text",
+          "key": "deliveryNote",
+          "label": "Delivery note",
+          "description": "A short note beside the search box, for example Delivery today from 6pm.",
+          "group": "content",
+          "maxLength": 60,
+          "showWhen": {
+            "key": "layout",
+            "equals": "search-first"
+          },
+          "visibleWhenSaved": true
         },
         {
           "type": "checkbox",
@@ -2139,6 +2168,213 @@
               "value": "700"
             }
           ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "deliveryNote",
+          "type": "color",
+          "key": "el_deliveryNote_color",
+          "label": "Colour",
+          "allowAlpha": false
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "deliveryNote",
+          "type": "select",
+          "key": "el_deliveryNote_font",
+          "label": "Font",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Fraunces",
+              "value": "Fraunces"
+            },
+            {
+              "label": "Inter",
+              "value": "Inter"
+            },
+            {
+              "label": "Playfair Display",
+              "value": "Playfair Display"
+            },
+            {
+              "label": "Cormorant Garamond",
+              "value": "Cormorant Garamond"
+            },
+            {
+              "label": "Lora",
+              "value": "Lora"
+            },
+            {
+              "label": "EB Garamond",
+              "value": "EB Garamond"
+            },
+            {
+              "label": "Libre Baskerville",
+              "value": "Libre Baskerville"
+            },
+            {
+              "label": "DM Serif Display",
+              "value": "DM Serif Display"
+            },
+            {
+              "label": "Crimson Pro",
+              "value": "Crimson Pro"
+            },
+            {
+              "label": "Manrope",
+              "value": "Manrope"
+            },
+            {
+              "label": "DM Sans",
+              "value": "DM Sans"
+            },
+            {
+              "label": "Work Sans",
+              "value": "Work Sans"
+            },
+            {
+              "label": "Montserrat",
+              "value": "Montserrat"
+            },
+            {
+              "label": "Outfit",
+              "value": "Outfit"
+            },
+            {
+              "label": "Plus Jakarta Sans",
+              "value": "Plus Jakarta Sans"
+            },
+            {
+              "label": "Nunito Sans",
+              "value": "Nunito Sans"
+            },
+            {
+              "label": "Raleway",
+              "value": "Raleway"
+            },
+            {
+              "label": "Space Grotesk",
+              "value": "Space Grotesk"
+            },
+            {
+              "label": "Josefin Sans",
+              "value": "Josefin Sans"
+            },
+            {
+              "label": "Figtree",
+              "value": "Figtree"
+            },
+            {
+              "label": "Jost",
+              "value": "Jost"
+            },
+            {
+              "label": "Poppins",
+              "value": "Poppins"
+            },
+            {
+              "label": "Hind",
+              "value": "Hind"
+            },
+            {
+              "label": "Oswald",
+              "value": "Oswald"
+            },
+            {
+              "label": "Bebas Neue",
+              "value": "Bebas Neue"
+            },
+            {
+              "label": "Syne",
+              "value": "Syne"
+            },
+            {
+              "label": "Georgia",
+              "value": "Georgia"
+            },
+            {
+              "label": "Arial",
+              "value": "Arial"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "deliveryNote",
+          "type": "range",
+          "key": "el_deliveryNote_size",
+          "label": "Text size",
+          "min": 10,
+          "max": 40,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "deliveryNote",
+          "type": "select",
+          "key": "el_deliveryNote_weight",
+          "label": "Weight",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Light",
+              "value": "300"
+            },
+            {
+              "label": "Regular",
+              "value": "400"
+            },
+            {
+              "label": "Medium",
+              "value": "500"
+            },
+            {
+              "label": "Semibold",
+              "value": "600"
+            },
+            {
+              "label": "Bold",
+              "value": "700"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "deliveryNote",
+          "type": "select",
+          "key": "el_deliveryNote_align",
+          "label": "Alignment",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Centre",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
         }
       ],
       "settingsSchema": {
@@ -2270,8 +2506,16 @@
             "type": "string",
             "enum": [
               "classic",
-              "search-bar"
+              "search-bar",
+              "split",
+              "minimal",
+              "category-bar",
+              "search-first"
             ]
+          },
+          "deliveryNote": {
+            "type": "string",
+            "maxLength": 60
           },
           "showToolLabels": {
             "type": "boolean"
@@ -2332,6 +2576,98 @@
                   "500",
                   "600",
                   "700"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_deliveryNote_color": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_deliveryNote_font": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Fraunces",
+                  "Inter",
+                  "Playfair Display",
+                  "Cormorant Garamond",
+                  "Lora",
+                  "EB Garamond",
+                  "Libre Baskerville",
+                  "DM Serif Display",
+                  "Crimson Pro",
+                  "Manrope",
+                  "DM Sans",
+                  "Work Sans",
+                  "Montserrat",
+                  "Outfit",
+                  "Plus Jakarta Sans",
+                  "Nunito Sans",
+                  "Raleway",
+                  "Space Grotesk",
+                  "Josefin Sans",
+                  "Figtree",
+                  "Jost",
+                  "Poppins",
+                  "Hind",
+                  "Oswald",
+                  "Bebas Neue",
+                  "Syne",
+                  "Georgia",
+                  "Arial"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_deliveryNote_size": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 40
+          },
+          "el_deliveryNote_weight": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "300",
+                  "400",
+                  "500",
+                  "600",
+                  "700"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_deliveryNote_align": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
                 ]
               },
               {

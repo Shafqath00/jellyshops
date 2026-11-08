@@ -17,7 +17,7 @@ function filled(type: string, extra: Record<string, unknown> = {}): SectionNode 
 }
 /** Settings some sections need before a part shows (a footer newsletter, a header extra link). */
 const EXTRA: Record<string, Record<string, unknown>> = {
-  header: { extraLinkLabel: "Showroom", extraLink: "/pages/showroom" },
+  header: { extraLinkLabel: "Showroom", extraLink: "/pages/showroom", layout: "search-first", deliveryNote: "Delivery today" },
   footer: { showNewsletter: true, newsletterText: "News", storeName: "Harbour", contactEmail: "hi@shop.test", copyright: "© Harbour" },
   "contact-store-info": { address: "1 High St" },
   "rating-summary": { rating: 4 },
