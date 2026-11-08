@@ -152,7 +152,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     color("badges.text", "Text", "Badges", ""),
   ];
   const cardContentSchema = [
-    select("productCard.layout", "Card style", "Product cards", theme, [[theme, "Theme default"], ["tall", "Tall photo, few words"], ["square", "Square photo with details"], ["tinted", "Product on a soft colour"], ["technical", "Outlined, for specifications"], ["landscape", "Wide lifestyle photo"]], "The shape and look of every product card in the store."),
+    select("productCard.layout", "Card style", "Product cards", theme, [[theme, "Theme default"], ["tall", "Tall photo, few words"], ["square", "Square photo with details"], ["tinted", "Product on a soft colour"], ["technical", "Outlined, for specifications"], ["landscape", "Wide lifestyle photo"], ["quick-add", "Quick add, for everyday shopping"]], "The shape and look of every product card in the store. Quick add puts an Add button and quantity on cards of products with no options."),
     select("productCard.order", "Card layout", "Product cards", "photo-title-price", [["photo-title-price", "Photo, name, price"], ["photo-price-title", "Photo, price, name"], ["title-price-photo", "Name and price above the photo"]], "Used by every product list: product grids, related products and search."),
     select("productCard.showTitle", "Product name", "Product cards", "show", [["show", "Show"], ["hide", "Hide"]]),
     select("productCard.titleLines", "Long names", "Product cards", theme, [[theme, "Show in full"], ["1", "Cut to one line"], ["2", "Cut to two lines"]]),
@@ -164,7 +164,8 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
   ];
   const socialSchema = SOCIAL_PLATFORMS.map(({ id, label }) => ({ id: `social.${id}`, type: "url", label, group: "Social media", default: "", ...(id === "instagram" ? { description: "Full https:// links. Shown in the footer when it has no social links of its own." } : {}) }));
   const cartSchema = [
-    select("cart.type", "When a shopper opens the bag", "Cart", "page", [["page", "Go to the bag page"], ["drawer", "Slide out the bag"]], "The slide-out bag also opens after Add to cart."),
+    select("cart.type", "When a shopper opens the bag", "Cart", "page", [["page", "Go to the bag page"], ["drawer", "Slide out the bag"], ["sheet", "Slide out the bag; from the bottom on phones"]], "The slide-out bag also opens after Add to cart."),
+    range("cart.freeDeliveryFrom", "Free delivery from (0 for none)", "Cart", 0, 0, 500, 5),
   ];
   const languageSchema = [
     { id: "languages.defaultName", type: "text", label: "Main language", group: "Languages", default: "English", description: "The language your store is written in." },
@@ -182,10 +183,10 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
       social: Object.fromEntries(SOCIAL_PLATFORMS.map(({ id }) => [id, ""])),
       advanced: { customCss: "" },
       languages: { defaultName: "English", extra: "" },
-      cart: { type: "page" },
+      cart: { type: "page", freeDeliveryFrom: 0 },
     },
     buttonDefaults: { size: theme, textCase: theme, borderWidth: theme, hover: theme },
-    cardDefaults: { radius: theme, shadow: theme, hover: theme, order: "photo-title-price", showTitle: "show", titleLines: theme, showPrice: "show", savings: "none", button: "none", swatches: "none" },
+    cardDefaults: { layout: theme, radius: theme, shadow: theme, hover: theme, order: "photo-title-price", showTitle: "show", titleLines: theme, showPrice: "show", savings: "none", button: "none", swatches: "none" },
     textStyleSchema,
     colorSchemeSchema,
     buttonSchema,
@@ -232,7 +233,19 @@ export function storeLanguages(settings: Record<string, unknown> | undefined): S
 
 /** True when the theme opens a slide-out bag instead of going to the bag page. */
 export function usesCartDrawer(settings: Record<string, unknown> | undefined): boolean {
-  return record(settings?.cart).type === "drawer";
+  const type = record(settings?.cart).type;
+  return type === "drawer" || type === "sheet";
+}
+
+/** How the slide-out bag opens on phones: from the side, or as a sheet from the bottom (template programme K1, K4). */
+export function cartDrawerVariant(settings: Record<string, unknown> | undefined): "drawer" | "sheet" {
+  return record(settings?.cart).type === "sheet" ? "sheet" : "drawer";
+}
+
+/** The order value (in minor units) from which delivery is free, shown as progress in the bag; null when not set. */
+export function freeDeliveryThresholdMinor(settings: Record<string, unknown> | undefined): number | null {
+  const value = record(settings?.cart).freeDeliveryFrom;
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? Math.round(value * 100) : null;
 }
 
 /** The name of the store's main language ("English" unless the merchant changed it). */
@@ -399,8 +412,8 @@ export function themeCustomCss(settings: Record<string, unknown> | undefined, th
   return scopeCustomCss(record(settings?.advanced).customCss, scope, MAX_THEME_CSS_LENGTH);
 }
 
-/** Card styles drawn by storefront-base.css (template programme card archetypes C1, C2, C4, C5, C7). */
-export const PRODUCT_CARD_LAYOUTS = ["tall", "square", "tinted", "technical", "landscape"] as const;
+/** Card styles drawn by storefront-base.css (template programme card archetypes C1, C2, C4, C5, C7, C3). */
+export const PRODUCT_CARD_LAYOUTS = ["tall", "square", "tinted", "technical", "landscape", "quick-add"] as const;
 export type ProductCardLayout = (typeof PRODUCT_CARD_LAYOUTS)[number];
 
 /**

@@ -1,4 +1,5 @@
-import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui";
+import { StorefrontContainer } from "@jelly/storefront-ui";
+import { ProductCard } from "../product-card";
 import { elementProps } from "../element-style";
 import { useRef, useState, type CSSProperties } from "react";
 import type { StorefrontRuntimeContext } from "../runtime-context";
@@ -170,6 +171,6 @@ export function RelatedProductsSection({ context, section }: { context: Storefro
   const heading = typeof section.settings.heading === "string" && section.settings.heading.trim() ? section.settings.heading : "You may also like";
   return <section className="jelly-section jelly-related-products"><StorefrontContainer>
     <h2 {...elementProps({ type: "related-products", settings: section.settings }, "heading", context.mode === "editor")}>{heading}</h2>
-    <div className="jelly-product-grid-items">{items.map((item) => <StorefrontProductCard key={item.id} product={item} editorProps={context.mode === "editor" ? elementProps({ type: "related-products", settings: section.settings }, "productCard", true) as Record<string, string> : undefined} />)}</div>
+    <div className="jelly-product-grid-items">{items.map((item) => <ProductCard key={item.id} product={item} editorProps={context.mode === "editor" ? elementProps({ type: "related-products", settings: section.settings }, "productCard", true) as Record<string, string> : undefined} />)}</div>
   </StorefrontContainer></section>;
 }

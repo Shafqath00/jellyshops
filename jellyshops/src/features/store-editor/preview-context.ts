@@ -3,6 +3,14 @@ import type { StorefrontTemplateType, ArticleResource, BlogResource, CatalogAdmi
 import type { ConfiguredOptionSelection, Product } from "@/lib/domain";
 import { createProductPresentationContext } from "@/features/storefront/product-presentation";
 
+/** The live store's quick-add rule (one buyable variant, no options), from the editor's catalog data. */
+function previewQuickAdd(product: CatalogAdminCollectionDetail["products"][number]): Pick<PublicProduct, "quickAdd"> {
+  const variant = product.variants.length === 1 ? product.variants[0] : undefined;
+  const stock = variant?.trackInventory === false ? 99 : Math.max(0, (variant?.quantity ?? 0) - (variant?.reserved ?? 0));
+  if (!variant || !variant.available || stock <= 0 || (product.options?.length ?? 0) > 0) return {};
+  return { quickAdd: { variantId: variant.id, max: Math.min(stock, 99) } };
+}
+
 function collectionPresentation(detail: CatalogAdminCollectionDetail): CollectionPresentationContext {
   const products = detail.products.filter((product) => product.storeId === detail.storeId).map((product): PublicProduct => {
     const priceMinor = product.variants[0]?.priceMinor;
@@ -13,6 +21,7 @@ function collectionPresentation(detail: CatalogAdminCollectionDetail): Collectio
       // Same facts the live store gives product lists, so sorting and filters behave alike in the preview.
       ...(priceMinor === undefined ? {} : { priceMinor }),
       available: product.available,
+      ...previewQuickAdd(product),
     };
   });
   const descriptionDoc = (detail as { descriptionDoc?: CollectionPresentationContext["collection"]["descriptionDoc"] }).descriptionDoc;

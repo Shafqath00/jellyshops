@@ -1,8 +1,9 @@
 import type { CSSProperties } from "react";
+import { ProductCard } from "../product-card";
 import { blockElementProps, elementProps } from "../element-style";
 import { inlineSetting } from "./setting-text";
 import type { MediaReference, SectionNode } from "@jelly/storefront-schema";
-import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui";
+import { StorefrontContainer } from "@jelly/storefront-ui";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
 import type { RendererMode } from "../types";
@@ -172,7 +173,7 @@ export function SearchResultsSection({ section, context }: { section: SectionNod
     {search?.state === "results" && <h2 className="jelly-visually-hidden">Search results</h2>}
     {search?.state === "results" && (section.settings.showSort === true || section.settings.showFilters === true
       ? <ProductListBrowser products={results} columns={numberValue(section.settings, "columns", 4, 2, 4)} limit={48} showSort={section.settings.showSort === true} showFilters={section.settings.showFilters === true} emptyMessage="No products match your search." />
-      : <div className="jelly-product-grid-items">{results.map((product) => <StorefrontProductCard key={product.id} product={product} />)}</div>)}
+      : <div className="jelly-product-grid-items">{results.map((product) => <ProductCard key={product.id} product={product} />)}</div>)}
   </div></StorefrontContainer></section>;
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { RegistrySectionRenderer, type CommerceDataProvider, type StorefrontPageContext } from "@jelly/storefront-renderer";
+import { useMemo, useState } from "react";
+import { RegistrySectionRenderer, type CommerceDataProvider, type PublicProduct, type StorefrontCartAccess, type StorefrontPageContext } from "@jelly/storefront-renderer";
 import { getStarterPack } from "@jelly/storefront-themes";
 import type { RuntimeMenuV4, SectionNode } from "@jelly/storefront-schema";
 import type { ThemePreviewConfig } from "./configs";
@@ -80,6 +80,20 @@ function useCartContext(config: ThemePreviewConfig): StorefrontPageContext {
 }
 
 /** `productLayout` overrides the product gallery's "Product page layout" setting, to review each layout. */
+/** A bag that lives only in the preview, so the Quick add card style can be tried. */
+export function usePreviewCart(): StorefrontCartAccess {
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  return useMemo(() => ({
+    quantity: (variantId: string) => quantities[variantId] ?? 0,
+    async setQuantity(variantId: string, quantity: number) { setQuantities((current) => ({ ...current, [variantId]: quantity })); return { ok: true }; },
+  }), [quantities]);
+}
+
+/** Sample products all count as single-variant products in the preview, so quick add shows on every card. */
+export function withPreviewQuickAdd(products: PublicProduct[]): PublicProduct[] {
+  return products.map((product) => ({ ...product, quickAdd: product.quickAdd ?? { variantId: `preview-${product.id}`, max: 10 } }));
+}
+
 /** Applies the preview's product or collection layout choice to the template's own section. */
 function previewLayout(section: SectionNode, productLayout: string | undefined, collectionLayout: string | undefined, config: ThemePreviewConfig): SectionNode {
   if (productLayout && section.type === "product-gallery") return { ...section, settings: { ...section.settings, pageLayout: productLayout } };
@@ -96,7 +110,9 @@ export function TemplatePreview({ template, config, productLayout, collectionLay
   const cartPage = useCartContext(config);
   // Themes that ship their own main menu are shown with it; the others with a sample menu that has dropdowns.
   const previewMenus = config.useStarterMenu ? Object.fromEntries(pack.menus.map((menu) => [menu.handle, { id: `preview-${menu.key}`, handle: menu.handle, items: menu.items }])) as Record<string, RuntimeMenuV4> : menus;
-  const commerce: CommerceDataProvider = { initialProducts: config.products, async getProducts(input) { return config.products.slice(0, input?.limit ?? config.products.length); } };
+  const cart = usePreviewCart();
+  const products = withPreviewQuickAdd(config.products);
+  const commerce: CommerceDataProvider = { initialProducts: products, cart, async getProducts(input) { return products.slice(0, input?.limit ?? products.length); } };
   const pages: Record<PreviewTemplate, StorefrontPageContext> = {
     home: { pageType: "home", resource: null },
     product: productPage,

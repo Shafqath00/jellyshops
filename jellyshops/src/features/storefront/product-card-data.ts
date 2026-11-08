@@ -17,6 +17,13 @@ export function productCardChip(tags: readonly string[] | undefined): string | u
  * higher "compare at" price, the old price, the saving and the percentage off. Themes choose which of
  * those to show (theme settings > Product cards and Badges).
  */
+/** A product can go into the cart from its card when it has one buyable variant and no options to choose. */
+export function quickAddFor(product: Product): { quickAdd?: { variantId: string; max: number } } {
+  const variant = product.variants.length === 1 ? product.variants[0] : undefined;
+  if (!variant || variant.sellable === false || variant.stock <= 0 || (product.options?.length ?? 0) > 0) return {};
+  return { quickAdd: { variantId: variant.id, max: Math.min(variant.stock, 99) } };
+}
+
 export function productCardData(product: Product, href: string, currency: Currency): PublicProduct {
   const variant = product.variants[0];
   const priceMinor = variant?.priceMinor ?? 0;
@@ -32,6 +39,7 @@ export function productCardData(product: Product, href: string, currency: Curren
     price: formatMoney(priceMinor, currency),
     priceMinor,
     available: product.variants.some((item) => item.stock > 0),
+    ...quickAddFor(product),
     ...(discounted ? {
       compareAtPrice: formatMoney(compareMinor, currency),
       saving: formatMoney(compareMinor - priceMinor, currency),

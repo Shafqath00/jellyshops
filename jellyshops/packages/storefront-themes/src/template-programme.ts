@@ -43,7 +43,7 @@ export const ARCHETYPES: Record<ArchetypeDimension, ArchetypeOption[]> = {
   card: [
     { code: "C1", label: "Tall image, minimal text", implementation: { section: "theme", setting: "productCard.layout", value: "tall" } },
     { code: "C2", label: "Square with spec chips", implementation: { section: "theme", setting: "productCard.layout", value: "square" } },
-    { code: "C3", label: "Quick-add quantity stepper" },
+    { code: "C3", label: "Quick-add quantity stepper", implementation: { section: "theme", setting: "productCard.layout", value: "quick-add" } },
     { code: "C4", label: "Tinted field with benefit chips", implementation: { section: "theme", setting: "productCard.layout", value: "tinted" } },
     { code: "C5", label: "Outlined technical card with compare", implementation: { section: "theme", setting: "productCard.layout", value: "technical" } },
     { code: "C6", label: "Framed or arched image" },
@@ -70,10 +70,10 @@ export const ARCHETYPES: Record<ArchetypeDimension, ArchetypeOption[]> = {
     { code: "P8", label: "Enquiry or appointment led" },
   ],
   cart: [
-    { code: "K1", label: "Full-height drawer" },
+    { code: "K1", label: "Full-height drawer", implementation: { section: "theme", setting: "cart.type", value: "drawer" } },
     { code: "K2", label: "Cart page with suggestions" },
     { code: "K3", label: "Mini-cart popover" },
-    { code: "K4", label: "Bottom sheet on phones, drawer on desktop" },
+    { code: "K4", label: "Bottom sheet on phones, drawer on desktop", implementation: { section: "theme", setting: "cart.type", value: "sheet" } },
     { code: "K5", label: "Order pad" },
     { code: "K6", label: "Drawer with a gift step" },
   ],

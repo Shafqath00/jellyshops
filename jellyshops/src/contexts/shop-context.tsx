@@ -39,6 +39,11 @@ export function ShopProvider({ children, initialCatalog }: { children: React.Rea
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;
 }
 
+/** The shop state when the page has one; null outside a ShopProvider (some pages render without it). */
+export function useOptionalShop(): ShopContextValue | null {
+  return useContext(ShopContext);
+}
+
 export function useShop(): ShopContextValue {
   const context = useContext(ShopContext);
   if (!context) throw new Error("useShop must be used inside ShopProvider");

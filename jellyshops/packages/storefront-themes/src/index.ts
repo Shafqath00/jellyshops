@@ -32,3 +32,4 @@ export { ARCHETYPE_DIMENSIONS, ARCHETYPES, MAX_SHARED_ARCHETYPES, TEMPLATE_PROGR
 export type { ArchetypeDimension, ArchetypeOption, TemplatePlan } from "./template-programme.js";
 export { cardLayoutAttribute, PRODUCT_CARD_LAYOUTS } from "./theme-style-settings.js";
 export type { ProductCardLayout } from "./theme-style-settings.js";
+export { cartDrawerVariant, freeDeliveryThresholdMinor } from "./theme-style-settings.js";

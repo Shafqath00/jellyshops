@@ -6,7 +6,7 @@ import { fetchPublicMetaobjects } from "./metaobjects-api";
 import { productCardData } from "./product-card-data";
 import { useStorefrontLanguage } from "./storefront-language";
 import type { CSSProperties } from "react";
-import {
+import { type StorefrontCartAccess,
   RegistrySectionRenderer,
   createCollectionLinks,
   StorefrontRenderer,
@@ -24,12 +24,14 @@ import {
 import { cardLayoutAttribute, resolveDesignTokens, resolveStorefrontThemeTokens, resolveTheme, legacyStylesAttribute, themeStyleId } from "@jelly/storefront-themes";
 import type { Currency, Product } from "@/lib/domain";
 import type { ResolvedStorefrontRoute } from "./resource-loader";
+import { useStorefrontCartAccess } from "./storefront-cart-access";
 import { catalogProductToStorefrontProduct, type PublicCatalogResponse } from "@/features/commerce/api/client";
 
-function commerceProvider(storeSlug: string, currency: Currency, products: Product[], storeId?: string): CommerceDataProvider {
+function commerceProvider(storeSlug: string, currency: Currency, products: Product[], storeId?: string, cart?: StorefrontCartAccess): CommerceDataProvider {
   const initialProducts = products.filter((product) => product.published && !product.archived).map((product) => productCardData(product, `/${storeSlug}/products/${product.slug}`, currency));
   return {
     initialProducts,
+    cart,
     getMetaobjects: storeId ? (handle) => fetchPublicMetaobjects(storeId, handle) : undefined,
     subscribeNewsletter: storeId ? async (email, source) => {
       const origin = process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
@@ -67,7 +69,8 @@ function runtimeThemeSettings(snapshot: RuntimeStorefrontSnapshotV4): GlobalSett
 }
 
 export function PublishedStorefront({ document, storeSlug, currency, products, pageId }: { document: StoreDesignDocument | StorefrontDocument; storeSlug: string; currency: Currency; products: Product[]; pageId?: string }) {
-  return <StorefrontRenderer document={document} page="home" pageId={pageId} mode="published" commerce={commerceProvider(storeSlug, currency, products)} assetResolver={{ resolve: async () => null }} />;
+  const cart = useStorefrontCartAccess(storeSlug);
+  return <StorefrontRenderer document={document} page="home" pageId={pageId} mode="published" commerce={commerceProvider(storeSlug, currency, products, undefined, cart)} assetResolver={{ resolve: async () => null }} />;
 }
 
 export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currency, products }: {
@@ -78,6 +81,7 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
   products: Product[];
 }) {
   const chromeHandled = useStorefrontChrome();
+  const cart = useStorefrontCartAccess(storeSlug);
   const { language } = useStorefrontLanguage();
   const { state } = useShop();
   const resourceLinks = useResourceLinks(snapshot.storeId, storeSlug, state.products);
@@ -86,7 +90,7 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
   const resolvedTheme = resolveTheme(snapshot.theme.id ?? snapshot.theme.presetId, snapshot.theme.settings, snapshot.theme.version);
   const themeId = resolvedTheme.id as ThemeId;
   const style = resolveStorefrontThemeTokens(themeId, resolvedTheme.settings, {}, resolvedTheme.version) as CSSProperties;
-  const commerce = commerceProvider(storeSlug, currency, products, snapshot.storeId);
+  const commerce = commerceProvider(storeSlug, currency, products, snapshot.storeId, cart);
 
   return (
     <div className={`jelly-storefront jelly-theme-layout-${resolvedTheme.layout}`} data-jelly-theme={themeStyleId(resolvedTheme.id, resolvedTheme.version)} data-jelly-legacy-styles={legacyStylesAttribute(resolvedTheme.id, resolvedTheme.version)} data-jelly-theme-version={resolvedTheme.version} data-card-layout={cardLayoutAttribute(style)} style={style}>

@@ -1137,3 +1137,47 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 [data-jelly-theme] .jelly-collection-product-grid:has(.jelly-list-browser[data-layout]) > .jelly-container { width: min(calc(100% - 2 * var(--j-page-margin, 16px)), var(--j-page-normal, 1280px)); max-width: none; margin-inline: auto; padding-inline: 0; }
 /* Chips replace the filter panel, so no theme sidebar column is kept for it. */
 [data-jelly-theme] .jelly-list-browser.jelly-list-browser[data-layout="chips"] { display: block; }
+
+/*
+ * Quick add card style (Product cards > Card style > Quick add; template programme C3). The Add button and stepper
+ * are drawn after the card link for products with one variant and no options, and shown only with this card style.
+ */
+.jelly-product-card-actions { display: none; }
+:is([data-jelly-theme][data-card-layout="quick-add"], [data-jelly-theme] [data-card-layout="quick-add"]) .jelly-product-card { --jelly-card-style-ratio: 1 / 1; --jelly-card-style-fit: contain; --jelly-card-style-media-pad: 8%; display: flex; flex-direction: column; }
+:is([data-jelly-theme][data-card-layout="quick-add"], [data-jelly-theme] [data-card-layout="quick-add"]) .jelly-product-card > a { flex: 1; }
+:is([data-jelly-theme][data-card-layout="quick-add"], [data-jelly-theme] [data-card-layout="quick-add"]) .jelly-product-card .jelly-product-card-body { gap: 2px; padding-top: 8px; }
+:is([data-jelly-theme][data-card-layout="quick-add"], [data-jelly-theme] [data-card-layout="quick-add"]) .jelly-product-card .jelly-product-card-body h3 { font-size: 14px; font-weight: 500; line-height: 1.3; }
+:is([data-jelly-theme][data-card-layout="quick-add"], [data-jelly-theme] [data-card-layout="quick-add"]) .jelly-product-card .jelly-product-card-price { order: 2; font-size: 16px; font-weight: 700; }
+:is([data-jelly-theme][data-card-layout="quick-add"], [data-jelly-theme] [data-card-layout="quick-add"]) .jelly-product-card-actions { display: block; margin-top: 8px; }
+.jelly-quick-add-button, .jelly-quick-add-stepper {
+  display: flex; align-items: center; width: 100%; min-height: 44px; border: 1px solid var(--j-color-primary, currentColor);
+  border-radius: var(--jelly-radius-button, var(--j-radius-button, 999px)); font: inherit; font-size: 15px; font-weight: 600;
+}
+.jelly-quick-add-button { justify-content: center; padding: 0 16px; background: transparent; color: var(--j-color-primary, inherit); cursor: pointer; transition: background-color var(--j-duration-fast, 150ms) var(--j-ease, ease), color var(--j-duration-fast, 150ms) var(--j-ease, ease); }
+.jelly-quick-add-button:hover { background: var(--j-color-primary, #111); color: var(--j-color-on-primary, #fff); }
+.jelly-quick-add-stepper { justify-content: space-between; overflow: hidden; background: var(--j-color-primary, #111); color: var(--j-color-on-primary, #fff); }
+.jelly-quick-add-stepper button { display: grid; place-items: center; width: 44px; height: 44px; border: 0; background: transparent; color: inherit; font: inherit; font-size: 20px; cursor: pointer; }
+.jelly-quick-add-stepper button:disabled { opacity: 0.45; cursor: not-allowed; }
+.jelly-quick-add-stepper span { font-variant-numeric: tabular-nums; }
+:is(.jelly-quick-add-button, .jelly-quick-add-stepper button):focus-visible { outline: 2px solid var(--j-color-text, currentColor); outline-offset: 2px; }
+.jelly-quick-add-message { margin: 6px 0 0; color: #b42318; font-size: 13px; }
+
+/* Free delivery progress in the slide-out bag (theme settings > Cart > Free delivery from). */
+.jelly-cart-drawer-progress { display: grid; gap: 8px; margin: 16px 24px 0; font-size: 14px; }
+.jelly-cart-drawer-progress p { margin: 0; }
+.jelly-cart-drawer-progress progress { width: 100%; height: 6px; appearance: none; border: 0; border-radius: 999px; overflow: hidden; background: color-mix(in srgb, currentColor 12%, transparent); }
+.jelly-cart-drawer-progress progress::-webkit-progress-bar { background: color-mix(in srgb, currentColor 12%, transparent); }
+.jelly-cart-drawer-progress progress::-webkit-progress-value { background: var(--j-color-primary, currentColor); border-radius: 999px; }
+.jelly-cart-drawer-progress progress::-moz-progress-bar { background: var(--j-color-primary, currentColor); border-radius: 999px; }
+
+/* Bag as a sheet from the bottom on phones (theme settings > Cart; template programme K4); a side drawer elsewhere. */
+@media (max-width: 767px) {
+  .jelly-cart-drawer[data-variant="sheet"] { align-items: flex-end; justify-content: stretch; }
+  .jelly-cart-drawer[data-variant="sheet"] .jelly-cart-drawer-panel { width: 100%; height: auto; max-height: 88vh; border-radius: 20px 20px 0 0; box-shadow: 0 -16px 48px rgb(0 0 0 / 0.16); animation: jelly-cart-sheet 240ms ease-out; }
+  .jelly-cart-drawer[data-variant="sheet"] .jelly-cart-drawer-header::before { content: ""; position: absolute; top: 8px; left: 50%; width: 40px; height: 4px; margin-left: -20px; border-radius: 999px; background: color-mix(in srgb, currentColor 25%, transparent); }
+}
+@keyframes jelly-cart-sheet { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .jelly-cart-drawer[data-variant="sheet"] .jelly-cart-drawer-panel { animation: none; }
+}
+@media (max-width: 767px) { .jelly-cart-drawer[data-variant="sheet"] .jelly-cart-drawer-header { position: relative; padding-top: 24px; } }

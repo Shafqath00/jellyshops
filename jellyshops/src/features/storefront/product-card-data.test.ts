@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Product } from "@/lib/domain";
-import { productCardChip, productCardData, productCardSwatches } from "./product-card-data";
+import { productCardChip, productCardData, productCardSwatches, quickAddFor } from "./product-card-data";
 
 const product = (over: Partial<Product> = {}, variant: Partial<Product["variants"][number]> = {}) => ({
   id: "p1", name: "Oslo bed", slug: "oslo-bed", imageUrl: "https://cdn.test/oslo.jpg", tags: [],
@@ -12,7 +12,7 @@ describe("product card data", () => {
   it("adds the old price, the saving and the percentage off for a discounted variant", () => {
     expect(productCardData(product({}, { compareAtPriceMinor: 50000 }), "/s/products/oslo-bed", "GBP")).toEqual({
       id: "p1", name: "Oslo bed", href: "/s/products/oslo-bed", imageUrl: "https://cdn.test/oslo.jpg",
-      price: "£250.00", priceMinor: 25000, available: true, compareAtPrice: "£500.00", saving: "£250.00", discountPercent: 50,
+      price: "£250.00", priceMinor: 25000, available: true, quickAdd: { variantId: "v1", max: 3 }, compareAtPrice: "£500.00", saving: "£250.00", discountPercent: 50,
     });
   });
 
@@ -42,4 +42,17 @@ it("gives cards the brand and up to five colours of the first colour option", ()
   expect(productCardSwatches({ options: [option("color", [{ label: "Bad", color: "red" }])] } as never)).toEqual({});
   expect(productCardSwatches({ options: [option("image", [{ label: "Linen", image: "https://cdn.example.com/l.jpg" }, { label: "X", image: "http://insecure.example.com/x.jpg" }])] } as never)).toEqual({ swatches: [{ label: "Linen", image: "https://cdn.example.com/l.jpg" }] });
   expect(productCardSwatches({ options: undefined } as never)).toEqual({});
+});
+
+describe("quick add on cards", () => {
+  it("allows quick add only for one buyable variant with no options", () => {
+    expect(quickAddFor(product())).toEqual({ quickAdd: { variantId: "v1", max: 3 } });
+    expect(productCardData(product(), "/s/p", "GBP").quickAdd).toEqual({ variantId: "v1", max: 3 });
+    expect(quickAddFor(product({}, { stock: 0 }))).toEqual({});
+    expect(quickAddFor(product({}, { sellable: false }))).toEqual({});
+    expect(quickAddFor(product({ options: [{ id: "o", name: "Size", values: [] }] } as unknown as Partial<Product>))).toEqual({});
+    const twoVariants = product();
+    twoVariants.variants.push({ ...twoVariants.variants[0], id: "v2" });
+    expect(quickAddFor(twoVariants)).toEqual({});
+  });
 });

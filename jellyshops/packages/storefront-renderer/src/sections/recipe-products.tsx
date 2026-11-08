@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
+import { ProductCard } from "../product-card";
 import type { BlockNode } from "@jelly/storefront-schema";
-import { StorefrontProductCard } from "@jelly/storefront-ui";
+
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import type { CommerceDataProvider, PublicProduct } from "../types";
 
@@ -26,6 +27,6 @@ export function RecipeProducts({ block, context }: { block: BlockNode; context: 
   const products = current ?? (collectionId ? [] : context.commerce.initialProducts?.slice(0, limit) ?? []);
   if (!products.length) return null;
   return <div className="jelly-product-grid-items jelly-recipe-products" style={{ "--jelly-columns": columns } as CSSProperties}>
-    {products.map((product) => <StorefrontProductCard key={product.id} product={product} />)}
+    {products.map((product) => <ProductCard key={product.id} product={product} />)}
   </div>;
 }

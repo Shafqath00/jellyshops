@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useSyncExternalStore, type CSSProperties } from "react";
-import { RegistrySectionRenderer, type CommerceDataProvider } from "@jelly/storefront-renderer";
+import { CardCartContext, ProductCard, RegistrySectionRenderer, type CommerceDataProvider } from "@jelly/storefront-renderer";
 import type { RuntimeMenuV4, SectionNode } from "@jelly/storefront-schema";
 import { applyThemeStyle, listThemeStyles, resolveStorefrontThemeTokens, resolveTheme } from "@jelly/storefront-themes";
 import { StorefrontProductCard } from "@jelly/storefront-ui";
 import { StorefrontPreviewFrame } from "@/features/store-editor/components/storefront-preview-frame";
 import type { ThemePreviewConfig } from "./configs";
-import { TemplatePreview, type PreviewTemplate } from "./template-preview";
+import { TemplatePreview, type PreviewTemplate , usePreviewCart, withPreviewQuickAdd } from "./template-preview";
 
 /**
  * A theme's style guide: its tokens, type, controls and the shared
@@ -76,6 +76,7 @@ const cardLayouts = [
   ["tinted", "Product on a soft colour"],
   ["technical", "Outlined, for specifications"],
   ["landscape", "Wide lifestyle photo"],
+  ["quick-add", "Quick add, for everyday shopping"],
 ] as const;
 /** Every header layout, so each theme can be reviewed with all of them. */
 const headerLayouts = [
@@ -99,6 +100,7 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
 }
 
 function Guide({ config }: { config: ThemePreviewConfig }) {
+  const previewCart = usePreviewCart();
   const themeId = config.themeId;
   const announcement = section("guide-announcement", "announcement-bar", { text: config.guide.announcement });
   const header = section("guide-header", "header", { storeName: config.name }, [menuBlock("guide-header-menu")]);
@@ -174,10 +176,10 @@ function Guide({ config }: { config: ThemePreviewConfig }) {
       </div>)}
     </Block>
     <Block title="Card styles">
-      {cardLayouts.map(([layout, label]) => <div key={layout} data-card-layout={layout} style={{ display: "grid", gap: 8 }}>
+      <CardCartContext.Provider value={previewCart}>{cardLayouts.map(([layout, label]) => <div key={layout} data-card-layout={layout} style={{ display: "grid", gap: 8 }}>
         <p style={{ margin: 0, fontSize: 13, color: muted }}>{label}</p>
-        <div className="jelly-product-grid-items">{cards.slice(0, 3).map((product) => <StorefrontProductCard key={product.name} product={{ ...product, chip: layout === "technical" ? "USB-C · 40h" : layout === "tinted" ? "For dry skin" : layout === "square" ? "New" : undefined }} />)}</div>
-      </div>)}
+        <div className="jelly-product-grid-items">{withPreviewQuickAdd(cards.slice(0, 3)).map((product) => <ProductCard key={product.name} product={{ ...product, chip: layout === "technical" ? "USB-C · 40h" : layout === "tinted" ? "For dry skin" : layout === "square" ? "New" : undefined }} />)}</div>
+      </div>)}</CardCartContext.Provider>
     </Block>
     <Block title="Header layouts">
       {headerLayouts.map(([layout, label]) => <div key={layout} data-guide-header-layout={layout} style={{ display: "grid", gap: 8 }}>

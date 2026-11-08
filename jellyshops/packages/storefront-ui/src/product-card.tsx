@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 /** One colour or pattern a product comes in, drawn as a dot on its card. */
 export interface StorefrontProductSwatch { label: string; color?: string; image?: string }
 
@@ -90,8 +92,11 @@ function CardButton() {
   return <span className="jelly-product-card-button" data-card-part="button" aria-hidden="true" />;
 }
 
-/** `editorProps` are the editor preview's selection data (data-* attributes only); the live store passes none. */
-export function StorefrontProductCard({ product, editorProps }: { product: StorefrontProductCardData; editorProps?: Record<string, string> }) {
+/**
+ * `editorProps` are the editor preview's selection data (data-* attributes only); the live store passes none.
+ * `actions` (quick add) sit after the link, because a button may not be inside a link.
+ */
+export function StorefrontProductCard({ product, editorProps, actions }: { product: StorefrontProductCardData; editorProps?: Record<string, string>; actions?: ReactNode }) {
   return <article className="jelly-product-card" {...editorProps}>
     <a href={product.href}>
       <CardMedia product={product} />
@@ -105,5 +110,6 @@ export function StorefrontProductCard({ product, editorProps }: { product: Store
         <CardButton />
       </div>
     </a>
+    {actions && <div className="jelly-product-card-actions" data-card-part="actions">{actions}</div>}
   </article>;
 }
