@@ -21,43 +21,43 @@
     "assets": [
       {
         "id": "hero",
-        "path": "/themes/jelly-halo/hero.svg"
+        "path": "/themes/jelly-halo/hero.webp"
       },
       {
         "id": "texture",
-        "path": "/themes/jelly-halo/texture.svg"
+        "path": "/themes/jelly-halo/texture.webp"
       },
       {
         "id": "ingredient",
-        "path": "/themes/jelly-halo/ingredient.svg"
+        "path": "/themes/jelly-halo/ingredient.webp"
       },
       {
         "id": "routine",
-        "path": "/themes/jelly-halo/routine.svg"
+        "path": "/themes/jelly-halo/routine.webp"
       },
       {
         "id": "serum",
-        "path": "/themes/jelly-halo/serum.svg"
+        "path": "/themes/jelly-halo/serum.webp"
       },
       {
         "id": "cream",
-        "path": "/themes/jelly-halo/cream.svg"
+        "path": "/themes/jelly-halo/cream.webp"
       },
       {
         "id": "cleanser",
-        "path": "/themes/jelly-halo/cleanser.svg"
-      },
-      {
-        "id": "oil",
-        "path": "/themes/jelly-halo/oil.svg"
+        "path": "/themes/jelly-halo/cleanser.webp"
       },
       {
         "id": "spf",
-        "path": "/themes/jelly-halo/spf.svg"
+        "path": "/themes/jelly-halo/spf.webp"
+      },
+      {
+        "id": "oil",
+        "path": "/themes/jelly-halo/oil.webp"
       },
       {
         "id": "balm",
-        "path": "/themes/jelly-halo/balm.svg"
+        "path": "/themes/jelly-halo/balm.webp"
       }
     ]
   },

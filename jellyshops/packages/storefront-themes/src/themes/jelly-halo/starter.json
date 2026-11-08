@@ -141,8 +141,13 @@
               "layout": "spotlight",
               "eyebrow": "New · Vitamin C serum",
               "image": {
-                "url": "/themes/jelly-halo/hero.svg",
-                "alt": "An amber serum bottle with a dropper on a soft blush background"
+                "url": "/themes/jelly-halo/hero.webp",
+                "alt": "An amber serum bottle with a dropper on a soft blush background",
+                "fit": "cover",
+                "focalPoint": {
+                  "x": 62,
+                  "y": 50
+                }
               },
               "callouts": "10% vitamin C\nFragrance free\nVegan\nRefillable glass",
               "contentAlignment": "left"
@@ -309,7 +314,7 @@
               "styleScheme": "scheme2",
               "eyebrow": "Texture first",
               "image": {
-                "url": "/themes/jelly-halo/texture.svg",
+                "url": "/themes/jelly-halo/texture.webp",
                 "alt": "A swirl of cream and a drop of golden serum"
               },
               "imagePosition": "right"
@@ -405,7 +410,7 @@
               "styleScheme": "scheme3",
               "eyebrow": "Ingredient spotlight",
               "image": {
-                "url": "/themes/jelly-halo/ingredient.svg",
+                "url": "/themes/jelly-halo/ingredient.webp",
                 "alt": "Sliced citrus and green leaves on a pale sage background"
               },
               "imagePosition": "left"

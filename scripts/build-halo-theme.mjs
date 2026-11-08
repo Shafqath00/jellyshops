@@ -15,25 +15,10 @@ const signature = getThemeDefinition("jelly-signature").manifest;
 const prefix = "/themes/jelly-halo/";
 const asset = (name) => `${prefix}${name}`;
 
-// ---------- placeholder artwork (replaced by generated photography; see SOURCES.md) ----------
-const bottle = (cap, body, label, width = 120, height = 260) => `<g><rect x="${(400 - width) / 2 + 30}" y="70" width="${width - 60}" height="60" rx="10" fill="${cap}"/><rect x="${(400 - width) / 2}" y="125" width="${width}" height="${height}" rx="28" fill="${body}"/><rect x="${(400 - width) / 2 + 18}" y="${125 + height * 0.42}" width="${width - 36}" height="${height * 0.3}" rx="8" fill="${label}"/></g>`;
-const jar = (lid, body, label) => `<g><rect x="105" y="170" width="190" height="44" rx="14" fill="${lid}"/><rect x="95" y="210" width="210" height="150" rx="36" fill="${body}"/><rect x="125" y="255" width="150" height="56" rx="10" fill="${label}"/></g>`;
-const tube = (cap, body, label) => `<g><rect x="170" y="300" width="60" height="50" rx="10" fill="${cap}"/><path d="M140 60 h120 l-12 245 h-96 z" fill="${body}"/><rect x="160" y="140" width="80" height="90" rx="8" fill="${label}"/></g>`;
-const square = (field, art) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="800" height="800"><rect width="400" height="400" fill="${field}"/><ellipse cx="200" cy="372" rx="120" ry="12" fill="#000" opacity=".07"/>${art}</svg>`;
-const wide = (field, art, accents = "") => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520" width="1600" height="1040"><rect width="800" height="520" fill="${field}"/>${accents}<g transform="translate(200 40)">${art}</g></svg>`;
-const products = {
-  "serum.svg": square("#F4ECE6", bottle("#3C2F28", "#C88A5A", "#F7F1EA")),
-  "cream.svg": square("#EEF1EA", jar("#E8E2D8", "#FFFFFF", "#DCE6DA")),
-  "cleanser.svg": square("#F1EEF4", tube("#FFFFFF", "#E7DDF0", "#FFFFFF")),
-  "oil.svg": square("#F6EFE3", bottle("#2E2A26", "#E3B66E", "#FFF8EC", 100, 230)),
-  "spf.svg": square("#EAF1F3", tube("#F2C14E", "#FFFFFF", "#DDEBEF")),
-  "balm.svg": square("#F6E8E8", jar("#C77C7C", "#F3D7D3", "#FFFFFF")),
-};
-for (const [name, svg] of Object.entries(products)) writeFileSync(new URL(name, assets), svg);
-writeFileSync(new URL("hero.svg", assets), wide("#F3E7E0", bottle("#3C2F28", "#C88A5A", "#F7F1EA", 150, 320), `<circle cx="640" cy="120" r="140" fill="#fff" opacity=".45"/><circle cx="110" cy="430" r="110" fill="#fff" opacity=".35"/>`));
-writeFileSync(new URL("texture.svg", assets), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="1600" height="1200"><rect width="800" height="600" fill="#F6EEE8"/><path d="M180 360c60-140 260-170 380-90s70 210-80 230-360-20-300-140z" fill="#FFFFFF"/><path d="M260 340c40-70 170-90 240-40s30 120-60 130-210-20-180-90z" fill="#F4E4DA"/><circle cx="560" cy="200" r="34" fill="#E3B66E" opacity=".85"/><circle cx="548" cy="188" r="8" fill="#fff" opacity=".8"/></svg>`);
-writeFileSync(new URL("ingredient.svg", assets), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="1600" height="1200"><rect width="800" height="600" fill="#E3EBE2"/><circle cx="330" cy="320" r="130" fill="#F2C14E"/><circle cx="330" cy="320" r="110" fill="#F7D774"/><g stroke="#F2C14E" stroke-width="6">${Array.from({ length: 8 }, (_, i) => `<line x1="330" y1="320" x2="${330 + Math.cos(i * Math.PI / 4) * 105}" y2="${320 + Math.sin(i * Math.PI / 4) * 105}"/>`).join("")}</g><path d="M470 180c90-40 170 10 190 90-90 30-170-10-190-90z" fill="#7FA77A"/><path d="M500 330c80-20 140 30 150 100-80 20-140-30-150-100z" fill="#5E8C5A"/></svg>`);
-writeFileSync(new URL("routine.svg", assets), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 750" width="1200" height="1500"><rect width="600" height="750" fill="#EFE7DF"/><rect x="60" y="430" width="480" height="18" rx="9" fill="#D9C8BC"/>${[[100, "#C88A5A"], [220, "#FFFFFF"], [340, "#E7DDF0"], [450, "#F3D7D3"]].map(([x, c]) => `<rect x="${x}" y="${300 + (x % 3) * 10}" width="70" height="${130 - (x % 3) * 10}" rx="18" fill="${c}"/>`).join("")}<path d="M460 300c30-120 90-160 110-160-10 60-40 130-110 160z" fill="#7FA77A"/></svg>`);
+// ---------- artwork ----------
+// Photography: generated with ChatGPT image generation (see SOURCES.md), converted to WebP into assets/.
+const photos = ["hero", "texture", "ingredient", "routine", "serum", "cream", "cleanser", "spf", "oil", "balm"];
+for (const name of photos) if (!existsSync(new URL(`${name}.webp`, assets))) throw new Error(`Missing assets/${name}.webp`);
 writeFileSync(new URL("mark.svg", assets), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="none" stroke="#1F1D1B" stroke-width="2.5"/><circle cx="16" cy="16" r="4" fill="#D9C8BC"/></svg>`);
 writeFileSync(new URL("preview.svg", assets), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200"><rect width="320" height="200" fill="#FBFAF7"/><rect x="16" y="14" width="60" height="8" rx="4" fill="#1F1D1B"/><rect x="16" y="36" width="288" height="96" rx="14" fill="#F3E7E0"/><rect x="190" y="52" width="40" height="70" rx="12" fill="#C88A5A"/><rect x="32" y="62" width="110" height="12" rx="6" fill="#1F1D1B"/><rect x="32" y="84" width="80" height="8" rx="4" fill="#5E5852"/>${[16, 90, 164, 238].map((x) => `<rect x="${x}" y="144" width="66" height="44" rx="10" fill="#F2EEE8"/>`).join("")}</svg>`);
 
@@ -80,7 +65,7 @@ const theme = {
   description: "A calm skincare and beauty storefront: products on soft colour, shop by skin concern, ingredient stories and reviews.",
   assetPrefix: prefix,
   previewAsset: asset("preview.svg"),
-  assets: { stylesheets: [], scripts: [], fonts: [], icons: [{ id: "mark", path: asset("mark.svg") }], assets: ["hero", "texture", "ingredient", "routine", ...Object.keys(products).map((name) => name.replace(".svg", ""))].map((id) => ({ id, path: asset(`${id}.svg`) })) },
+  assets: { stylesheets: [], scripts: [], fonts: [], icons: [{ id: "mark", path: asset("mark.svg") }], assets: photos.map((id) => ({ id, path: asset(`${id}.webp`) })) },
   layout: forma.layout,
   enabled: true,
   settingsDefaults: defaults,
@@ -112,14 +97,14 @@ const starter = {
   },
   templates: {
     home: { type: "home", sections: chrome([
-      section("hero", { layout: "spotlight", eyebrow: "New · Vitamin C serum", image: { url: asset("hero.svg"), alt: "An amber serum bottle with a dropper on a soft blush background" }, callouts: "10% vitamin C\nFragrance free\nVegan\nRefillable glass", contentAlignment: "left", styleScheme: "scheme1" }, [
+      section("hero", { layout: "spotlight", eyebrow: "New · Vitamin C serum", image: { url: asset("hero.webp"), alt: "An amber serum bottle with a dropper on a soft blush background", fit: "cover", focalPoint: { x: 62, y: 50 } }, callouts: "10% vitamin C\nFragrance free\nVegan\nRefillable glass", contentAlignment: "left", styleScheme: "scheme1" }, [
         block("heading", { text: "glow, gently" }),
         block("text", { text: "A daily serum that brightens without stinging. Light enough for morning, gentle enough for every day." }),
         block("button", { label: "Shop the serum", href: "/shop" }),
       ]),
       concernPills("Shop by concern"),
       section("product-grid", { heading: "Bestsellers", text: "The four our customers reorder most.", columns: 4, limit: 4, viewAllLabel: "Shop all", viewAllLink: "/shop" }),
-      section("image-with-text", { styleScheme: "scheme2", eyebrow: "Texture first", image: { url: asset("texture.svg"), alt: "A swirl of cream and a drop of golden serum" }, imagePosition: "right" }, [
+      section("image-with-text", { styleScheme: "scheme2", eyebrow: "Texture first", image: { url: asset("texture.webp"), alt: "A swirl of cream and a drop of golden serum" }, imagePosition: "right" }, [
         block("heading", { text: "light on skin, kind to it" }),
         block("text", { text: "Every formula is tested for how it feels: no sticky finish, no heavy scent, nothing that pills under make-up." }),
         block("button", { label: "Read our formulas", href: "/pages/about" }),
@@ -130,7 +115,7 @@ const starter = {
         block("column", { heading: "3. Moisturise", text: "Seal it in with a cream that suits your skin." }),
         block("column", { heading: "4. Protect", text: "Daily SPF, every morning, all year round." }),
       ]),
-      section("image-with-text", { styleScheme: "scheme3", eyebrow: "Ingredient spotlight", image: { url: asset("ingredient.svg"), alt: "Sliced citrus and green leaves on a pale sage background" }, imagePosition: "left" }, [
+      section("image-with-text", { styleScheme: "scheme3", eyebrow: "Ingredient spotlight", image: { url: asset("ingredient.webp"), alt: "Sliced citrus and green leaves on a pale sage background" }, imagePosition: "left" }, [
         block("heading", { text: "vitamin C, made stable" }),
         block("text", { text: "We use a gentle, stable form of vitamin C so the serum keeps working to the last drop." }),
         block("button", { label: "Shop vitamin C", href: "/search?q=vitamin" }),
@@ -191,4 +176,4 @@ const starter = {
 };
 writeFileSync(new URL("starter.json", folder), `${JSON.stringify(starter, null, 2)}\n`);
 for (const file of ["package.json", ".gitignore"]) if (!existsSync(new URL(file, folder))) writeFileSync(new URL(file, folder), readFileSync(new URL(`jelly-forma/${file}`, root), "utf8").replaceAll("jelly-forma", "jelly-halo"));
-console.log("Built jelly-halo: theme.json, starter.json and placeholder artwork");
+console.log("Built jelly-halo: theme.json and starter.json");

@@ -1243,3 +1243,6 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 .jelly-back-in-stock-done { margin-top: 16px; padding: 14px 16px; border-radius: var(--jelly-card-radius, 8px); background: color-mix(in srgb, var(--j-color-primary, currentColor) 8%, transparent); }
 /* Cards contain their own positioned parts (screen-reader labels, badges), so a sideways-scrolling row clips them. */
 :where(.jelly-product-card) { position: relative; }
+
+/* Spotlight hero with a photo set to fill: the photo covers the whole panel. */
+[data-jelly-theme] .jelly-hero.jelly-hero[data-layout="spotlight"] .jelly-hero-media[data-fit="cover"] img { width: 100%; height: 100%; }

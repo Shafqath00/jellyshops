@@ -30,6 +30,8 @@ export function HeroSection({ section, editor = false, context, selectedBlockId 
   const callouts = layout === "spotlight" ? (stringValue(settings, "callouts") ?? "").split("\n").map((line) => line.trim()).filter(Boolean).slice(0, 4) : [];
   const countdown = layout === "countdown" ? countdownTarget(settings.countdownTo) : null;
   const countdownEnd = stringValue(settings, "countdownEndText");
+  // A spotlight shows the whole product unless the photo is set to fill (a styled shot with its own background).
+  const fit = image?.fit === "contain" || (layout === "spotlight" && image?.fit !== "cover") ? "contain" : "cover";
   const style: CSSProperties = {
     backgroundColor: typeof settings.background === "string" ? settings.background : undefined,
     paddingTop: typeof settings.paddingTop === "number" ? settings.paddingTop : undefined,
@@ -65,10 +67,10 @@ export function HeroSection({ section, editor = false, context, selectedBlockId 
           ? <a href={href} key={block.id} {...buttonProps(block.settings, index, block.responsive?.mobile)} {...editorProps(block)}>{label}</a>
           : <span key={block.id} {...editorProps(block)}>{label}</span>)}</div>}
       </div>
-      {image && layout !== "text" && <div className="jelly-hero-media" {...elementProps(section, "image", editor)}>
+      {image && layout !== "text" && <div className="jelly-hero-media" data-fit={fit} {...elementProps(section, "image", editor)}>
         {/* Merchant media URLs may be served by the local API and are not Next Image assets. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={image.url} alt={image.alt ?? ""} style={{ objectPosition: `${focalPoint.x}% ${focalPoint.y}%`, objectFit: image.fit === "contain" || layout === "spotlight" ? "contain" : "cover" }} fetchPriority="high" />
+        <img src={image.url} alt={image.alt ?? ""} style={{ objectPosition: `${focalPoint.x}% ${focalPoint.y}%`, objectFit: fit }} fetchPriority="high" />
         {overlay > 0 && <span className="jelly-hero-overlay" aria-hidden="true" style={{ background: `rgba(0, 0, 0, ${overlay})` }} />}
         {callouts.length > 0 && <ul className="jelly-hero-callouts" {...elementProps(section, "callouts", editor)}>{callouts.map((callout, index) => <li key={`${index}-${callout}`} data-side={index % 2 === 0 ? "start" : "end"}>{callout}</li>)}</ul>}
       </div>}

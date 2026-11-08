@@ -206,7 +206,7 @@ export const jellyFormaPreview: ThemePreviewConfig = {
   searchQuery: "chair", cart: { f1: 2, f2: 1 }, useStarterMenu: true,
 };
 
-const haloAsset = (file: string) => `/themes/jelly-halo/${file}.svg`;
+const haloAsset = (file: string) => `/themes/jelly-halo/${file}.webp`;
 const haloProducts: PublicProduct[] = [
   { id: "h1", name: "Vitamin C brightening serum", price: "£32.00", href: "#", imageUrl: haloAsset("serum"), chip: "Dullness", available: true },
   { id: "h2", name: "Barrier repair cream", price: "£28.00", href: "#", imageUrl: haloAsset("cream"), chip: "Dryness", available: true },
@@ -231,7 +231,7 @@ export const jellyHaloPreview: ThemePreviewConfig = {
     specifications: { "Skin type": "All, including sensitive", "Full ingredients": "Aqua, ascorbyl glucoside, niacinamide, glycerin, panthenol, sodium hyaluronate", Size: "30 ml" },
     shippingCopy: "Free UK delivery over £40.", price: "£32.00",
   },
-  collection: { title: "Serums", description: "Targeted treatments for one concern at a time. Pick the one that matches your skin today.", imageUrl: haloAsset("hero") },
+  collection: { title: "Serums", description: "Targeted treatments for one concern at a time. Pick the one that matches your skin today.", imageUrl: haloAsset("routine") },
   page: { title: "About Halo", intro: "We make a small range of gentle skincare, each product built around one job.", heading: "How we formulate", body: "Every formula is tested for how it feels and how it works, on people with sensitive skin first.", bullets: ["Fragrance free", "Vegan and cruelty free", "Refillable glass"] },
   searchQuery: "serum", cart: { h1: 1, h2: 1 }, useStarterMenu: true,
   ratings: { h1: { average: 4.8, count: 214 }, h2: { average: 4.6, count: 98 }, h3: { average: 4.7, count: 156 }, h4: { average: 4.5, count: 61 }, h5: { average: 4.9, count: 33 } },
