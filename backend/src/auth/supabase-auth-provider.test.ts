@@ -47,4 +47,23 @@ describe("Supabase merchant authentication", () => {
       code: "MERCHANT_DATA_UNAVAILABLE",
     });
   });
+
+  it("asks Supabase once per token for a minute, never past the token's expiry, and still looks up stores each time", async () => {
+    const jwt = (expSeconds: number) => `x.${Buffer.from(JSON.stringify({ exp: expSeconds })).toString("base64url")}.y`;
+    const local = new SupabaseAuthProvider("https://project.supabase.co", "publishable-key", tenants);
+    let now = 1_000_000_000_000;
+    local.now = () => now;
+    auth.getUser.mockResolvedValue({ data: { user: { id: "merchant-1", email: "m@example.com", user_metadata: {} } }, error: null });
+    vi.mocked(tenants.resolveMerchant).mockResolvedValue({ stores: [{ id: "store-a", role: "OWNER" }] } as never);
+    const long = jwt(now / 1000 + 3600);
+    await local.verify(long); await local.verify(long);
+    expect(auth.getUser).toHaveBeenCalledTimes(1);
+    expect(tenants.resolveMerchant).toHaveBeenCalledTimes(2);
+    now += 61_000;
+    await local.verify(long);
+    expect(auth.getUser).toHaveBeenCalledTimes(2);
+    const short = jwt(now / 1000 + 5);
+    await local.verify(short); now += 6_000; await local.verify(short);
+    expect(auth.getUser).toHaveBeenCalledTimes(4);
+  });
 });

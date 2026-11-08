@@ -29,23 +29,22 @@ export class PostgresTenantRepository implements TenantRepository {
   async resolveMerchant(
     identity: VerifiedMerchantIdentity,
   ): Promise<MerchantAccount> {
-    // Upsert user by Supabase UID
-    const upsertResult = await this.pool.query<{ id: number }>(
-      `INSERT INTO "User" ("name", "email", "firebaseUid", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, NOW(), NOW())
-       ON CONFLICT ("firebaseUid") DO UPDATE
-         SET "name" = EXCLUDED."name",
-             "updatedAt" = NOW()
-       RETURNING "id"`,
+    // One round trip on every signed-in request: keep the user row (written only when it is new or
+    // the name changed) and list the stores they own. The store list does not read the user row.
+    const result = await this.pool.query<{ id: string; name: string; slug: string; currency: string; country: string }>(
+      `WITH upsert AS (
+         INSERT INTO "User" ("name", "email", "firebaseUid", "createdAt", "updatedAt")
+         VALUES ($1, $2, $3, NOW(), NOW())
+         ON CONFLICT ("firebaseUid") DO UPDATE SET "name" = EXCLUDED."name", "updatedAt" = NOW()
+           WHERE "User"."name" IS DISTINCT FROM EXCLUDED."name"
+         RETURNING "id")
+       SELECT s."id", s."name", s."slug", s."currency", s."country"
+       FROM "Store" s
+       WHERE s."owner_user_id" = $3::uuid AND s."archivedAt" IS NULL
+       ORDER BY s."name"`,
       [identity.name, identity.email, identity.uid],
     );
-
-    const internalId = upsertResult.rows[0]?.id;
-    if (!internalId) {
-      throw new Error("Failed to resolve merchant account");
-    }
-
-    const stores = await this._listOwnedStores(identity.uid);
+    const stores = result.rows.map((row) => ({ id: row.id, name: row.name, slug: row.slug, currency: row.currency, country: row.country, role: "OWNER" as const }));
     return { id: identity.uid, stores };
   }
 

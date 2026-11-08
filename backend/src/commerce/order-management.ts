@@ -67,19 +67,22 @@ export class OrderManagementService {
                 where.push(`p.status=$${values.length}`);
             }
             const join = `FROM "Order" o LEFT JOIN "Payment" p ON p."orderId"=o.id AND p."storeId"=o."storeId" WHERE ${where.join(' AND ')}`;
-            const total = Number((await tx.query<Row>(`SELECT count(*)::int AS total ${join}`, values)).rows[0]?.total ?? 0);
             const sort = { date: 'o."createdAt"', status: 'o.status', amount: 'o."totalMinor"' }[q.sort ?? 'date'] ?? 'o."createdAt"';
             const direction = q.direction === 'asc' ? 'ASC' : 'DESC';
-            const orders = (await tx.query<Row>(`SELECT o.*,p.status AS "paymentStatus",p."paymentIntentId", (SELECT COALESCE(jsonb_agg(jsonb_build_object('variantId',i."variantId",'titleSnapshot',i."titleSnapshot",'imageSnapshot',i."imageSnapshot",'quantity',i.quantity)),'[]'::jsonb) FROM "OrderItem" i WHERE i."orderId"=o.id AND i."storeId"=o."storeId") AS items ${join} ORDER BY ${sort} ${direction},o.id ${direction} LIMIT $${values.length + 1} OFFSET $${values.length + 2}`, [...values, pageSize, (page - 1) * pageSize])).rows;
-            const counts = (await tx.query<Row>(`SELECT status,count(*)::int AS count,count(*) FILTER (WHERE "fulfilmentStatus" NOT IN ('FULFILLED','DELIVERED'))::int AS awaiting FROM "Order" WHERE "storeId"=$1 GROUP BY status`, [storeId])).rows;
+            // The total comes with the page (one round trip); an empty page past the end still needs its own count.
+            const listed = (await tx.query<Row>(`SELECT o.*,count(*) OVER()::int AS "__total",p.status AS "paymentStatus",p."paymentIntentId", (SELECT COALESCE(jsonb_agg(jsonb_build_object('variantId',i."variantId",'titleSnapshot',i."titleSnapshot",'imageSnapshot',i."imageSnapshot",'quantity',i.quantity)),'[]'::jsonb) FROM "OrderItem" i WHERE i."orderId"=o.id AND i."storeId"=o."storeId") AS items ${join} ORDER BY ${sort} ${direction},o.id ${direction} LIMIT $${values.length + 1} OFFSET $${values.length + 2}`, [...values, pageSize, (page - 1) * pageSize])).rows;
+            const total = listed.length ? Number(listed[0].__total) : page > 1 ? Number((await tx.query<Row>(`SELECT count(*)::int AS total ${join}`, values)).rows[0]?.total ?? 0) : 0;
+            const orders = listed.map(({ __total: _total, ...order }) => order);
+            // Status counts, the time zone and whether order management is on, in one round trip.
+            const extras = (await tx.query<Row>(`SELECT (SELECT timezone FROM "StoreSettings" WHERE "storeId"=$1) AS timezone, (SELECT enabled FROM "StoreOrderManagementSettings" WHERE "storeId"=$1) AS enabled, COALESCE((SELECT jsonb_agg(c) FROM (SELECT status,count(*)::int AS count,count(*) FILTER (WHERE "fulfilmentStatus" NOT IN ('FULFILLED','DELIVERED'))::int AS awaiting FROM "Order" WHERE "storeId"=$1 GROUP BY status) c),'[]'::jsonb) AS counts`, [storeId])).rows[0];
+            const counts = (extras?.counts ?? []) as Row[];
             const summary: Record<string, number> = { total: 0, PENDING_PAYMENT: 0, PAID: 0, CONFIRMED: 0, PROCESSING: 0, SHIPPED: 0, DELIVERED: 0, CANCELLED: 0, REFUNDED: 0 };
             for (const row of counts) {
                 summary[row.status] = row.status === 'PAID' ? row.awaiting : row.count;
                 summary.total += row.count;
             }
-            const settings = (await tx.query<Row>(`SELECT timezone FROM "StoreSettings" WHERE "storeId"=$1`, [storeId])).rows[0];
-            const feature = (await tx.query<Row>(`SELECT enabled FROM "StoreOrderManagementSettings" WHERE "storeId"=$1`, [storeId])).rows[0];
-            return { orders, total, page, pageSize, summary, timeZone: settings?.timezone ?? "UTC", featureEnabled: feature?.enabled ?? false };
+            const settings = extras?.timezone ? { timezone: extras.timezone } : undefined;
+            return { orders, total, page, pageSize, summary, timeZone: settings?.timezone ?? "UTC", featureEnabled: extras?.enabled ?? false };
         });
     }
     async details(storeId: string, orderId: string, executor?: SqlExecutor) {
