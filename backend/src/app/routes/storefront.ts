@@ -21,6 +21,8 @@ import { ThemeLibraryService } from "../../storefront/theme-library/service.js";
 import { createPublicThemeVersionRouter, createThemePackageRouter } from "../../storefront/theme-packages/routes.js";
 import { ThemePackageService } from "../../storefront/theme-packages/service.js";
 import { createDeveloperTokenRouter } from "../../developer-tokens/routes.js";
+import { createMerchantReviewRouter, createPublicReviewRouter } from "../../reviews/routes.js";
+import { ProductReviewService } from "../../reviews/service.js";
 import { DeveloperTokenService } from "../../developer-tokens/service.js";
 import { createThemeUpgradeRouter } from "../../storefront/theme-packages/upgrade-routes.js";
 import { ThemeUpgradeService } from "../../storefront/theme-packages/upgrade-service.js";
@@ -57,6 +59,17 @@ function packageService(context: AppContext): ThemePackageService | undefined {
     packageServices.set(context, database && storage ? new ThemePackageService({ query: (text: string, values?: unknown[]) => database.transaction((transaction) => transaction.query(text, values)), transaction: (work: Parameters<typeof database.transaction>[0]) => database.transaction(work) } as never, storage, context.storefrontStarterApi) : null);
   }
   return packageServices.get(context) ?? undefined;
+}
+
+const reviewServices = new WeakMap<AppContext, ProductReviewService | null>();
+
+/** Product reviews; need the database, so they are off in the local JSON mode. */
+function reviewService(context: AppContext): ProductReviewService | undefined {
+  if (!reviewServices.has(context)) {
+    const database = context.routeDependencies.commerceDatabase;
+    reviewServices.set(context, database ? new ProductReviewService({ query: (text: string, values?: unknown[]) => database.transaction((transaction) => transaction.query(text, values)) } as never) : null);
+  }
+  return reviewServices.get(context) ?? undefined;
 }
 
 const tokenServices = new WeakMap<AppContext, DeveloperTokenService | null>();
@@ -112,6 +125,8 @@ export function mountPublicStorefrontContextRoutes(app: Express, context: AppCon
   }
   const access = accessService(context);
   if (access) app.use("/api/public/stores/:storeId/storefront/access", createPublicAccessRouter(access));
+  const reviews = reviewService(context);
+  if (reviews) app.use("/api/public/stores/:storeId/reviews", createPublicReviewRouter(reviews));
   const themePackages = packageService(context);
   if (themePackages) app.use("/api/public", createPublicThemeVersionRouter(themePackages));
   const metaobjects = context.routeDependencies.metaobjectService;
@@ -152,6 +167,8 @@ export function mountStorefrontRoutes(app: Express, context: AppContext): void {
   if (library) app.use("/api/stores/:storeId/storefront", createThemeLibraryRouter(library, authProvider));
   const tokens = tokenService(context);
   if (tokens) app.use("/api/stores/:storeId", createDeveloperTokenRouter(tokens, authProvider));
+  const merchantReviews = reviewService(context);
+  if (merchantReviews) app.use("/api/stores/:storeId/reviews", createMerchantReviewRouter(merchantReviews, authProvider));
   if (themePackages) app.use("/api/stores/:storeId", createThemePackageRouter(themePackages, authProvider, tokens));
   const upgradeDatabase = context.routeDependencies.commerceDatabase;
   if (themePackages && upgradeDatabase) app.use("/api/stores/:storeId", createThemeUpgradeRouter(new ThemeUpgradeService(upgradeDatabase), authProvider));
