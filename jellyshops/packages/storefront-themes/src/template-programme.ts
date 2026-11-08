@@ -51,9 +51,9 @@ export const ARCHETYPES: Record<ArchetypeDimension, ArchetypeOption[]> = {
     { code: "C8", label: "List row" },
   ],
   collection: [
-    { code: "L1", label: "Editorial grid with story tiles" },
-    { code: "L2", label: "Dense grid with sidebar filters" },
-    { code: "L3", label: "Filter chips on top" },
+    { code: "L1", label: "Editorial grid with story tiles", implementation: { section: "collection-product-grid", setting: "listLayout", value: "editorial" } },
+    { code: "L2", label: "Dense grid with sidebar filters", implementation: { section: "collection-product-grid", setting: "listLayout", value: "sidebar" } },
+    { code: "L3", label: "Filter chips on top", implementation: { section: "collection-product-grid", setting: "listLayout", value: "chips" } },
     { code: "L4", label: "Shop by need first, then the grid" },
     { code: "L5", label: "Table with bulk add" },
     { code: "L6", label: "Browse by room or scene" },

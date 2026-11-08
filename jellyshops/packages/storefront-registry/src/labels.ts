@@ -70,6 +70,7 @@ const blockLabels: Record<string, string> = {
   "contact-item": "Contact detail",
   "social-link": "Social link",
   "collection-card": "Collection",
+  "story-tile": "Story tile",
   column: "Column",
   slide: "Slide",
   "product-tab": "Product tab",

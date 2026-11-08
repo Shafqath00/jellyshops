@@ -4,9 +4,9 @@ import { StorefrontContainer, StorefrontProductCard } from "@jelly/storefront-ui
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import type { CollectionPresentationContext, PublicProduct } from "../types";
 import { choice } from "./shared";
-import { normalizeRichTextDocument } from "@jelly/storefront-schema";
+import { normalizeRichTextDocument, safeRichTextHref, type SectionNode } from "@jelly/storefront-schema";
 import { renderBlocks } from "./rich-text";
-import { ProductListBrowser } from "./product-list-browser";
+import { PRODUCT_LIST_LAYOUTS, ProductListBrowser, type ProductListLayout, type StoryTile } from "./product-list-browser";
 import { resolveStorefrontHref } from "../runtime-context";
 
 /** The merchant's formatted description when there is one, otherwise the plain text. */
@@ -80,18 +80,40 @@ export function CollectionHeaderSection({ context, section }: { context: Storefr
   </section>;
 }
 
-export function CollectionProductGridSection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown> } }) {
+/** The section's Story tile blocks, ready for the editorial layout. */
+export function storyTiles(blocks: SectionNode["blocks"] | undefined, storeSlug?: string): StoryTile[] {
+  return (blocks ?? []).filter((block) => block.enabled && block.type === "story-tile").flatMap((block) => {
+    const heading = typeof block.settings.heading === "string" ? block.settings.heading.trim() : "";
+    if (!heading) return [];
+    const image = block.settings.image && typeof block.settings.image === "object" ? block.settings.image as { url?: unknown; alt?: unknown } : undefined;
+    const imageUrl = typeof image?.url === "string" ? safeRichTextHref(image.url) ?? undefined : undefined;
+    const link = typeof block.settings.link === "string" && block.settings.link.trim() ? resolveStorefrontHref(block.settings.link, storeSlug) : null;
+    return [{
+      id: block.id, heading,
+      text: typeof block.settings.text === "string" ? block.settings.text : undefined,
+      imageUrl: imageUrl && !imageUrl.startsWith("#") ? imageUrl : undefined,
+      imageAlt: typeof image?.alt === "string" ? image.alt : undefined,
+      href: link,
+      linkLabel: typeof block.settings.linkLabel === "string" ? block.settings.linkLabel : undefined,
+      position: typeof block.settings.position === "number" ? block.settings.position : 4,
+    }];
+  });
+}
+
+export function CollectionProductGridSection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown>; blocks?: SectionNode["blocks"] } }) {
   const presentation = collectionContext(context);
   if (!presentation) return null;
+  const layout = (PRODUCT_LIST_LAYOUTS as readonly unknown[]).includes(section.settings.listLayout) ? section.settings.listLayout as ProductListLayout : "grid";
   const showSort = section.settings.showSort === true;
-  const showFilters = section.settings.showFilters === true;
-  // A section with its own sorting or filters always draws the theme's product list (also on the live store).
-  if (presentation.interactiveGrid && !showSort && !showFilters) return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer><h2 className="jelly-visually-hidden">Products</h2>{presentation.interactiveGrid}</StorefrontContainer></section>;
+  // The sidebar and chip layouts are filter layouts, so they always show the filters.
+  const showFilters = section.settings.showFilters === true || layout === "sidebar" || layout === "chips";
+  // A section with its own layout, sorting or filters always draws the theme's product list (also on the live store).
+  if (presentation.interactiveGrid && !showSort && !showFilters && layout === "grid") return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer><h2 className="jelly-visually-hidden">Products</h2>{presentation.interactiveGrid}</StorefrontContainer></section>;
   const columns = typeof section.settings.columns === "number" && Number.isInteger(section.settings.columns) ? Math.max(2, Math.min(4, section.settings.columns)) : 3;
   const limit = typeof section.settings.limit === "number" && Number.isInteger(section.settings.limit) ? Math.max(1, Math.min(24, section.settings.limit)) : 12;
   const emptyMessage = typeof section.settings.emptyMessage === "string" ? section.settings.emptyMessage : "No products are available in this collection yet.";
-  if (showSort || showFilters) return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer><h2 className="jelly-visually-hidden">Products</h2>
-    <ProductListBrowser products={presentation.products} columns={columns} limit={limit} showSort={showSort} showFilters={showFilters} emptyMessage={emptyMessage} />
+  if (showSort || showFilters || layout !== "grid") return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer><h2 className="jelly-visually-hidden">Products</h2>
+    <ProductListBrowser products={presentation.products} columns={columns} limit={limit} showSort={showSort} showFilters={showFilters} emptyMessage={emptyMessage} layout={layout} stories={layout === "editorial" ? storyTiles(section.blocks, context.storeSlug) : []} />
   </StorefrontContainer></section>;
   return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer><h2 className="jelly-visually-hidden">Products</h2>{presentation.products.length
     ? <div className="jelly-product-grid-items" data-testid="collection-product-grid-items" data-columns={columns} style={{ "--jelly-columns": columns } as CSSProperties}>{presentation.products.slice(0, limit).map((product) => <StorefrontProductCard key={product.id} product={product} />)}</div>

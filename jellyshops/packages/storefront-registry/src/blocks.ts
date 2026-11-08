@@ -97,6 +97,20 @@ const blocks: BlockDefinition[] = [
   { type: "info-tab", settingsSchema: z.object({ title: z.string().max(80), text: z.string().max(2000).optional() }).passthrough(), controls: [{ type: "text", key: "title", label: "Tab title", group: "content", maxLength: 80 }, { type: "rich-text", key: "text", label: "Tab text", group: "content", maxLength: 2000 }], defaultSettings: { title: "Materials & care", text: "Add details customers need before they buy." } },
   { type: "link-heading", settingsSchema: z.object({ text: z.string().max(60) }).passthrough(), controls: [{ type: "text", key: "text", label: "Column heading", group: "content", maxLength: 60 }], defaultSettings: { text: "Help" } },
   { type: "link", settingsSchema: z.object({ label: z.string().max(60), link: linkSchema }).passthrough(), controls: [{ type: "text", key: "label", label: "Link text", group: "content", maxLength: 60 }, { type: "link", key: "link", label: "Link", group: "content", dynamicTypes: urlTypes }], defaultSettings: { label: "Contact us", link: "/contact" } },
+  {
+    // A photo with a short story, placed between products in the editorial collection layout.
+    type: "story-tile",
+    settingsSchema: z.object({ heading: z.string().max(80), text: z.string().max(200).optional(), image: imageReference.optional(), link: z.string().max(500).optional(), linkLabel: z.string().max(40).optional(), position: z.number().int().min(1).max(24).optional() }).passthrough(),
+    controls: [
+      { type: "text", key: "heading", label: "Heading", group: "content", maxLength: 80 },
+      { type: "textarea", key: "text", label: "Text", group: "content", maxLength: 200 },
+      { type: "image", key: "image", label: "Image", group: "content" },
+      { type: "link", key: "link", label: "Link", group: "content", dynamicTypes: urlTypes },
+      { type: "text", key: "linkLabel", label: "Link text", group: "content", maxLength: 40 },
+      { type: "range", key: "position", label: "Show after product number", group: "layout", min: 1, max: 24, step: 1 },
+    ],
+    defaultSettings: { heading: "The story behind it", text: "Tell shoppers what makes this collection special.", linkLabel: "Read more", position: 4 },
+  },
   { type: "collection-card", settingsSchema: z.object({ label: z.string().max(80), image: imageReference.optional(), link: z.string().max(500).optional() }).passthrough(), controls: [{ type: "text", key: "label", label: "Title", group: "content", maxLength: 80 }, { type: "image", key: "image", label: "Image", group: "content" }, { type: "link", key: "link", label: "Link", group: "content", dynamicTypes: urlTypes }], defaultSettings: { label: "Collection", link: "/shop" } },
   { type: "column", settingsSchema: z.object({ heading: z.string().max(80), text: z.string().max(400).optional() }).passthrough(), controls: [{ type: "text", key: "heading", label: "Title", group: "content", maxLength: 80 }, { type: "rich-text", key: "text", label: "Text", group: "content", maxLength: 400 }], defaultSettings: { heading: "Free delivery", text: "Tell customers why they will love shopping with you." } },
   { type: "heading", settingsSchema: text, controls: [{ type: "rich-text", inline: true, key: "text", label: "Heading", group: "content", maxLength: 120, dynamicTypes: stringTypes }], defaultSettings: { text: "Heading" } },

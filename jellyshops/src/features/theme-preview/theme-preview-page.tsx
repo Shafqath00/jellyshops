@@ -52,6 +52,14 @@ function countdownSample(): string {
   const date = new Date(Date.now() + 5 * 86_400_000);
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} 18:00`;
 }
+/** Collection layouts (collection product grid > Layout). */
+const collectionLayouts = [
+  ["theme", "Theme default"],
+  ["grid", "Grid"],
+  ["sidebar", "Filters in a sidebar"],
+  ["chips", "Filter chips"],
+  ["editorial", "Editorial, with a story tile"],
+] as const;
 /** Product page layouts (Product gallery > Product page layout). */
 const productLayouts = [
   ["theme", "Theme default"],
@@ -190,6 +198,7 @@ export function ThemePreviewPage({ config }: { config: ThemePreviewConfig }) {
   const themeStyles = listThemeStyles(config.themeId);
   const [styleId, setStyleId] = useState(themeStyles[0]?.id);
   const [productLayout, setProductLayout] = useState("theme");
+  const [collectionLayout, setCollectionLayout] = useState("theme");
   const themeStyle = themeStyles.find((item) => item.id === styleId);
   const base = resolveTheme(config.themeId);
   const theme = themeStyle ? resolveTheme(config.themeId, applyThemeStyle(base.settings, themeStyle)) : base;
@@ -209,13 +218,18 @@ export function ThemePreviewPage({ config }: { config: ThemePreviewConfig }) {
           {productLayouts.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
         </select>
       </label>}
+      {view === "collection" && <label style={{ display: "flex", gap: 8, alignItems: "center", padding: "4px 10px", background: "white", borderRadius: 8, fontSize: 13 }}>Collection layout
+        <select value={collectionLayout} onChange={(event) => setCollectionLayout(event.target.value)} style={{ fontSize: 13 }}>
+          {collectionLayouts.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+        </select>
+      </label>}
       <div role="group" aria-label="Preview width" style={{ display: "flex", gap: 4, padding: 4, background: "white", borderRadius: 8 }}>
         {(Object.keys(widths) as Device[]).map((key) => <button key={key} type="button" aria-pressed={device === key} onClick={() => setDevice(key)} style={toggle(device === key)}>{key[0].toUpperCase() + key.slice(1)} · {widths[key]}px</button>)}
       </div>
     </header>
     <div style={{ width: widths[device], maxWidth: "100%", margin: "0 auto", minHeight: "80vh", background: "white", boxShadow: "0 1px 3px rgba(0,0,0,.08)" }}>
       {ready && <StorefrontPreviewFrame title={`${config.name} style guide`} themeId={config.themeId} style={style} className="block h-[80vh] w-full border-0">
-        {view === "guide" ? <Guide config={config} /> : <TemplatePreview key={view} template={view as PreviewTemplate} config={config} productLayout={productLayout === "theme" ? undefined : productLayout} />}
+        {view === "guide" ? <Guide config={config} /> : <TemplatePreview key={view} template={view as PreviewTemplate} config={config} productLayout={productLayout === "theme" ? undefined : productLayout} collectionLayout={collectionLayout === "theme" ? undefined : collectionLayout} />}
       </StorefrontPreviewFrame>}
     </div>
   </main>;

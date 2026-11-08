@@ -45,6 +45,40 @@ export function browseProducts(products: readonly PublicProduct[], sort: Product
   return sorted;
 }
 
+export type ProductListLayout = "grid" | "sidebar" | "chips" | "editorial";
+export const PRODUCT_LIST_LAYOUTS: readonly ProductListLayout[] = ["grid", "sidebar", "chips", "editorial"];
+
+/** A photo with a short story, shown between products (editorial layout). `position` is the product it follows. */
+export interface StoryTile { id: string; heading: string; text?: string; imageUrl?: string; imageAlt?: string; href?: string | null; linkLabel?: string; position: number }
+
+type ListItem = { kind: "product"; product: PublicProduct } | { kind: "story"; story: StoryTile };
+
+/** The products with each story tile after its product number; tiles past the end of the list go last. */
+export function withStories(products: readonly PublicProduct[], stories: readonly StoryTile[]): ListItem[] {
+  const ordered = [...stories].sort((a, b) => a.position - b.position);
+  const items: ListItem[] = [];
+  products.forEach((product, index) => {
+    if (index === 0) for (const story of ordered.filter((entry) => entry.position <= 0)) items.push({ kind: "story", story });
+    items.push({ kind: "product", product });
+    for (const story of ordered.filter((entry) => entry.position === index + 1)) items.push({ kind: "story", story });
+  });
+  for (const story of ordered.filter((entry) => entry.position > products.length)) items.push({ kind: "story", story });
+  return items;
+}
+
+function StoryTileCard({ story }: { story: StoryTile }) {
+  return <article className="jelly-story-tile">
+    {/* Merchant media URLs may be served by the local API and are not Next Image assets. */}
+    {/* eslint-disable-next-line @next/next/no-img-element */}
+    {story.imageUrl && <img src={story.imageUrl} alt={story.imageAlt ?? ""} loading="lazy" decoding="async" />}
+    <div className="jelly-story-tile-body">
+      <h3>{story.heading}</h3>
+      {story.text && <p>{story.text}</p>}
+      {story.href && <a className="jelly-button jelly-button--link" href={story.href}>{story.linkLabel || "Read more"}<span className="jelly-visually-hidden">: {story.heading}</span></a>}
+    </div>
+  </article>;
+}
+
 function activeFilterCount(filters: ProductListFilters): number {
   return (filters.inStock ? 1 : 0) + (filters.min.trim() ? 1 : 0) + (filters.max.trim() ? 1 : 0) + filters.colours.length;
 }
@@ -54,7 +88,7 @@ function activeFilterCount(filters: ProductListFilters): number {
  * It works on the products the page already has, so it behaves the same in the editor preview and the live store.
  * Themes switch it on per section ("Show sorting" / "Show filters"); without either it is not used.
  */
-export function ProductListBrowser({ products, columns, limit, showSort, showFilters, emptyMessage, cardProps }: {
+export function ProductListBrowser({ products, columns, limit, showSort, showFilters, emptyMessage, cardProps, layout = "grid", stories = [] }: {
   products: readonly PublicProduct[];
   columns: number;
   limit: number;
@@ -62,6 +96,10 @@ export function ProductListBrowser({ products, columns, limit, showSort, showFil
   showFilters: boolean;
   emptyMessage: string;
   cardProps?: (product: PublicProduct, index: number) => Record<string, string> | undefined;
+  /** Collection layouts (template programme L1 editorial, L2 sidebar, L3 chips). */
+  layout?: ProductListLayout;
+  /** Story tiles placed between products in the editorial layout. */
+  stories?: readonly StoryTile[];
 }) {
   const id = useId();
   const [sort, setSort] = useState<ProductListSort>("featured");
@@ -74,9 +112,11 @@ export function ProductListBrowser({ products, columns, limit, showSort, showFil
   const panelId = `${id}-filters`;
   const count = shown.length === 1 ? "1 product" : `${shown.length} products`;
   const toggleColour = (label: string) => setFilters((current) => ({ ...current, colours: current.colours.includes(label) ? current.colours.filter((item) => item !== label) : [...current.colours, label] }));
-  return <div className="jelly-list-browser" data-filters={showFilters ? "true" : undefined} data-filters-open={showFilters && open ? "true" : undefined}>
+  const chips = layout === "chips" && showFilters;
+  const items = layout === "editorial" ? withStories(shown, stories) : shown.map((product) => ({ kind: "product" as const, product }));
+  return <div className="jelly-list-browser" data-layout={layout === "grid" ? undefined : layout} data-filters={showFilters ? "true" : undefined} data-filters-open={showFilters && open ? "true" : undefined}>
     <div className="jelly-list-toolbar">
-      {showFilters && <button type="button" className="jelly-list-filter-toggle" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen((value) => !value)}>
+      {showFilters && !chips && <button type="button" className="jelly-list-filter-toggle" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen((value) => !value)}>
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" focusable="false"><path d="M2 4h14M5 9h8M7.5 14h3" strokeLinecap="round" /></svg>
         <span>Filter{active ? ` (${active})` : ""}</span>
       </button>}
@@ -85,7 +125,12 @@ export function ProductListBrowser({ products, columns, limit, showSort, showFil
         <select value={sort} onChange={(event) => setSort(event.currentTarget.value as ProductListSort)}>{PRODUCT_LIST_SORTS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select>
       </label>}
     </div>
-    {showFilters && <div className="jelly-list-filters" id={panelId} role="group" aria-label="Filters">
+    {chips && <div className="jelly-list-chips" role="group" aria-label="Filters">
+      {hasAvailability && <button type="button" className="jelly-list-chip" aria-pressed={filters.inStock} onClick={() => setFilters((current) => ({ ...current, inStock: !current.inStock }))}>In stock</button>}
+      {colourOptions.map((label) => <button key={label} type="button" className="jelly-list-chip" aria-pressed={filters.colours.includes(label)} onClick={() => toggleColour(label)}>{label}</button>)}
+      {active > 0 && <button type="button" className="jelly-list-clear" onClick={() => setFilters(NO_FILTERS)}>Clear all</button>}
+    </div>}
+    {showFilters && !chips && <div className="jelly-list-filters" id={panelId} role="group" aria-label="Filters">
       {hasAvailability && <fieldset><legend>Availability</legend>
         <label className="jelly-list-check"><input type="checkbox" checked={filters.inStock} onChange={(event) => { const checked = event.currentTarget.checked; setFilters((current) => ({ ...current, inStock: checked })); }} /><span>In stock only</span></label>
       </fieldset>}
@@ -102,7 +147,9 @@ export function ProductListBrowser({ products, columns, limit, showSort, showFil
     </div>}
     <div className="jelly-list-results">
       {shown.length
-        ? <div className="jelly-product-grid-items" data-testid="collection-product-grid-items" data-columns={columns} style={{ "--jelly-columns": columns } as CSSProperties}>{shown.map((product, index) => <StorefrontProductCard key={product.id} product={product} editorProps={cardProps?.(product, index)} />)}</div>
+        ? <div className="jelly-product-grid-items" data-testid="collection-product-grid-items" data-columns={columns} style={{ "--jelly-columns": columns } as CSSProperties}>{items.map((item, index) => item.kind === "story"
+          ? <StoryTileCard key={`story-${item.story.id}`} story={item.story} />
+          : <StorefrontProductCard key={item.product.id} product={item.product} editorProps={cardProps?.(item.product, shown.indexOf(item.product))} />)}</div>
         : <div className="jelly-empty-state"><p>{active ? "No products match these filters." : emptyMessage}</p>{active > 0 && <button type="button" className="jelly-list-clear" onClick={() => setFilters(NO_FILTERS)}>Clear filters</button>}</div>}
     </div>
   </div>;

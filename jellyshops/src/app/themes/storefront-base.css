@@ -1091,3 +1091,49 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
   /* One column: the theme's own phone layout, minus any desktop grid it would otherwise keep. */
   [data-jelly-theme] :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"] [data-page-layout]) { display: block; }
 }
+
+/*
+ * Collection layouts (collection product grid > Layout; template programme L1 editorial, L2 sidebar, L3 chips).
+ */
+/* L2 sidebar: from 1024px the filters stand in a column beside the products and stay open. */
+@media (min-width: 1024px) {
+  [data-jelly-theme] .jelly-list-browser[data-layout="sidebar"] { display: grid; grid-template-columns: minmax(200px, 240px) minmax(0, 1fr); column-gap: clamp(24px, 3vw, 48px); align-items: start; }
+  [data-jelly-theme] .jelly-list-browser[data-layout="sidebar"] > .jelly-list-toolbar { grid-column: 2; grid-row: 1; }
+  [data-jelly-theme] .jelly-list-browser[data-layout="sidebar"] > .jelly-list-filters { display: grid; grid-column: 1; grid-row: 1 / span 2; position: sticky; top: 24px; align-content: start; padding-right: 8px; }
+  [data-jelly-theme] .jelly-list-browser[data-layout="sidebar"] > .jelly-list-results { grid-column: 2; grid-row: 2; }
+  [data-jelly-theme] .jelly-list-browser[data-layout="sidebar"] .jelly-list-filter-toggle { display: none; }
+  [data-jelly-theme] .jelly-list-browser[data-layout="sidebar"] .jelly-list-filters fieldset { padding-bottom: 16px; border-bottom: 1px solid var(--j-color-border, color-mix(in srgb, currentColor 15%, transparent)); }
+}
+
+/* L3 chips: availability and colours as a row of on/off chips above the products. */
+.jelly-list-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: -8px 0 24px; }
+[data-jelly-theme] .jelly-list-chip {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px;
+  border: 1px solid var(--j-color-border, color-mix(in srgb, currentColor 25%, transparent)); border-radius: var(--j-radius-pill, 999px);
+  background: transparent; color: var(--j-color-text, inherit); font: inherit; font-size: 14px; cursor: pointer;
+  transition: background-color var(--j-duration-fast, 150ms) var(--j-ease, ease), border-color var(--j-duration-fast, 150ms) var(--j-ease, ease);
+}
+[data-jelly-theme] .jelly-list-chip:hover { border-color: var(--j-color-text, currentColor); }
+[data-jelly-theme] .jelly-list-chip[aria-pressed="true"] { border-color: var(--j-color-primary, currentColor); background: var(--j-color-primary, #111); color: var(--j-color-on-primary, #fff); }
+[data-jelly-theme] .jelly-list-chip:focus-visible { outline: 2px solid var(--j-color-text, currentColor); outline-offset: 2px; }
+@media (max-width: 599px) {
+  .jelly-list-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; }
+  [data-jelly-theme] .jelly-list-chip { flex: none; }
+}
+
+/* L1 editorial: story tiles sit between the products, two columns wide (the full row on phones). */
+[data-jelly-theme] .jelly-list-browser[data-layout="editorial"] .jelly-story-tile { grid-column: span 2; display: grid; grid-template-rows: auto 1fr; overflow: hidden; border-radius: var(--jelly-card-radius, 0); background: var(--j-color-surface, color-mix(in srgb, currentColor 5%, transparent)); }
+[data-jelly-theme] .jelly-list-browser[data-layout="editorial"] .jelly-story-tile img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+[data-jelly-theme] .jelly-list-browser[data-layout="editorial"] .jelly-story-tile-body { display: grid; align-content: start; gap: 8px; padding: clamp(16px, 2.5vw, 32px); }
+[data-jelly-theme] .jelly-list-browser[data-layout="editorial"] .jelly-story-tile h3 { margin: 0; font-family: var(--j-font-heading, inherit); font-size: clamp(20px, 2vw, 28px); line-height: var(--j-line-tight, 1.2); }
+[data-jelly-theme] .jelly-list-browser[data-layout="editorial"] .jelly-story-tile p { margin: 0; color: var(--j-color-muted, inherit); }
+[data-jelly-theme] .jelly-list-browser[data-layout="editorial"] .jelly-story-tile .jelly-button { justify-self: start; }
+@media (max-width: 767px) {
+  [data-jelly-theme] .jelly-list-browser[data-layout="editorial"] .jelly-story-tile { grid-column: 1 / -1; }
+}
+/* Later products fill the space a two-column story tile leaves at the end of a row. */
+[data-jelly-theme] .jelly-list-browser[data-layout="editorial"] .jelly-product-grid-items { grid-auto-flow: row dense; }
+/* The collection layouts sit on the page edges, also in themes whose product grid runs edge to edge. */
+[data-jelly-theme] .jelly-collection-product-grid:has(.jelly-list-browser[data-layout]) > .jelly-container { width: min(calc(100% - 2 * var(--j-page-margin, 16px)), var(--j-page-normal, 1280px)); max-width: none; margin-inline: auto; padding-inline: 0; }
+/* Chips replace the filter panel, so no theme sidebar column is kept for it. */
+[data-jelly-theme] .jelly-list-browser.jelly-list-browser[data-layout="chips"] { display: block; }

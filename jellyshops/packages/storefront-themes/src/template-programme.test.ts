@@ -31,6 +31,11 @@ describe("template programme", () => {
     for (const option of ARCHETYPES.product) if (option.implementation) expect(PRODUCT_PAGE_LAYOUTS).toContain(option.implementation.value);
   });
 
+  it("points collection archetypes at layouts that exist", async () => {
+    const { PRODUCT_LIST_LAYOUTS } = await import("../../storefront-renderer/src/sections/product-list-browser");
+    for (const option of ARCHETYPES.collection) if (option.implementation) expect(PRODUCT_LIST_LAYOUTS).toContain(option.implementation.value);
+  });
+
   it("only points header archetypes at header layouts that exist", () => {
     const values = ARCHETYPES.header.flatMap((option) => option.implementation?.setting === "layout" ? [option.implementation.value] : []);
     expect(values).toEqual(["split", "classic", "minimal", "category-bar", "search-first", "search-bar"]);

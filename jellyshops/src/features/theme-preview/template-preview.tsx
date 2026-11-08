@@ -80,7 +80,17 @@ function useCartContext(config: ThemePreviewConfig): StorefrontPageContext {
 }
 
 /** `productLayout` overrides the product gallery's "Product page layout" setting, to review each layout. */
-export function TemplatePreview({ template, config, productLayout }: { template: PreviewTemplate; config: ThemePreviewConfig; productLayout?: string }) {
+/** Applies the preview's product or collection layout choice to the template's own section. */
+function previewLayout(section: SectionNode, productLayout: string | undefined, collectionLayout: string | undefined, config: ThemePreviewConfig): SectionNode {
+  if (productLayout && section.type === "product-gallery") return { ...section, settings: { ...section.settings, pageLayout: productLayout } };
+  if (collectionLayout && section.type === "collection-product-grid") {
+    const story = { id: "preview-story", type: "story-tile", enabled: true, settings: { heading: "Made in small batches", text: "Every piece in this collection is made to order by the same small team.", image: { url: config.products[1]?.imageUrl ?? "", alt: "" }, link: "/pages/about", linkLabel: "Our story", position: 2 } };
+    return { ...section, settings: { ...section.settings, listLayout: collectionLayout }, blocks: collectionLayout === "editorial" ? [...section.blocks, story] : section.blocks } as SectionNode;
+  }
+  return section;
+}
+
+export function TemplatePreview({ template, config, productLayout, collectionLayout }: { template: PreviewTemplate; config: ThemePreviewConfig; productLayout?: string; collectionLayout?: string }) {
   const pack = getStarterPack(config.packId);
   const productPage = useProductContext(config);
   const cartPage = useCartContext(config);
@@ -111,7 +121,7 @@ export function TemplatePreview({ template, config, productLayout }: { template:
   const layout = pack.templates.find((item) => item.type === template)?.layout.sections ?? [];
   type Entry = { region: "header" | "template" | "footer"; section: SectionNode };
   const resolved: Entry[] = layout.flatMap((placement): Entry[] => {
-    if (placement.kind === "inline") return [{ region: "template", section: productLayout && placement.section.type === "product-gallery" ? { ...placement.section, settings: { ...placement.section.settings, pageLayout: productLayout } } : placement.section }];
+    if (placement.kind === "inline") return [{ region: "template", section: previewLayout(placement.section, productLayout, collectionLayout, config) }];
     const global = pack.globalSections.find((entry) => entry.section.id === placement.globalSectionId);
     if (!global) return [];
     const section = global.key === "header" || global.key === "footer"
