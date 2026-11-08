@@ -19,6 +19,16 @@
         "jellyshops/packages/storefront-themes/src/themes/jelly-resthaven"
       ],
       "port": 5273
+    },
+    {
+      "name": "jellyshops-admin",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd jellyshops && set JELLY_E2E_NEXT_DIST_DIR=.next/qa&& set NEXT_PUBLIC_STORE_EDITOR_API_URL=http://127.0.0.1:3001&& npx next dev --turbopack -p 3210"
+      ],
+      "port": 3210,
+      "autoPort": false
     }
   ]
 }

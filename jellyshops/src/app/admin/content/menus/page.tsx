@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { useAuth, authApiOrigin } from "@/features/auth/providers/auth-provider";
 import { useAdminCatalog } from "@/features/admin/api/catalog-api";
 import { createNavigationApi, NavigationApiError, type NavigationApi, type NavigationMenu } from "@/features/navigation/api/client";
@@ -84,7 +82,7 @@ function NavigationWorkspace({ storeId, api, editor, all }: { storeId: string; a
     finally { setSaving(false); }
   }
   return <main className="mx-auto flex max-w-5xl flex-col gap-5 p-6 md:p-8">
-    <header className="flex items-center gap-3"><Link href="/admin/online-store/editor" aria-label="Back to Online Store" className="admin-button"><ArrowLeft size={16} /></Link><h1 className="flex-1 text-2xl font-semibold">Navigation</h1><Button variant="outline" disabled={loading || saving} onClick={() => { setCreating(true); setError(""); }}>Create menu</Button></header>
+    <header className="flex items-center gap-3"><div className="flex-1"><h1 className="text-2xl font-semibold">Menus</h1><p className="text-[13px] text-muted-foreground">The links in your store&apos;s header and footer.</p></div><Button variant="outline" disabled={loading || saving} onClick={() => { setCreating(true); setError(""); }}>Create menu</Button></header>
     {error && <div role="alert" className="rounded-lg border border-destructive p-4 text-sm">{error}</div>}
     {conflict && <div role="alert" className="rounded-lg border border-border p-4 text-sm"><p>Your edits are preserved. Reloading will replace them with the latest saved menus.</p><Button variant="outline" onClick={() => { setNotice(""); setRevision(value => value + 1); }}>Reload saved menus</Button></div>}
     {error && !loading && !menus.length && <Button variant="outline" onClick={() => setRevision(value => value + 1)}>Retry loading navigation</Button>}

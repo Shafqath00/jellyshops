@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import CollectionsPage from "@/app/admin/products/collections/page";
 import ProductsPage from "@/app/admin/products/page";
-import StockPage from "@/app/admin/products/stock/page";
+import StockPage from "@/app/admin/products/inventory/page";
 
 const api = vi.hoisted(() => ({ request: vi.fn(), all: vi.fn() }));
 vi.mock("@/features/admin/api/catalog-api", () => ({ useAdminCatalog: () => ({ ...api, ready: true, storeId: "store-a" }) }));
@@ -14,17 +14,31 @@ const row = { productId: "p1", variantId: "v1", productTitle: "T-shirt", variant
 
 describe("catalog management", () => {
   it("omits an empty query and sends product filters and cursor to the API", async () => {
-    api.request.mockResolvedValue({ nodes: [], nextCursor: "page-2" });
+    const product = { id: "p1", title: "T-shirt", status: "ACTIVE", media: [], productType: null, vendor: null, variants: [{ id: "v1", priceMinor: 1200, quantity: 4, reserved: 0, trackInventory: true }] };
+    api.request.mockResolvedValue({ nodes: [product], nextCursor: "page-2" });
     const user = userEvent.setup(); render(<ProductsPage />);
-    await screen.findByText("Add your first product");
+    await screen.findByText("T-shirt");
+    expect(screen.getByText("4 in stock")).toBeInTheDocument();
     expect(new URL(api.request.mock.calls[0][0], "http://local").searchParams.has("query")).toBe(false);
-    await user.type(screen.getByRole("searchbox", { name: "Search products" }), "TS-B");
-    await user.click(screen.getByRole("button", { name: "Search" }));
+    await user.type(screen.getByRole("searchbox", { name: "Search products" }), "TS-B{Enter}");
     await waitFor(() => expect(api.request.mock.lastCall?.[0]).toContain("query=TS-B"));
-    await user.selectOptions(screen.getByLabelText("Product status filter"), "DRAFT");
+    await user.click(screen.getByRole("tab", { name: "Draft" }));
     await waitFor(() => expect(api.request.mock.lastCall?.[0]).toContain("status=DRAFT"));
-    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(await screen.findByRole("button", { name: "Next" }));
     await waitFor(() => expect(api.request.mock.lastCall?.[0]).toContain("cursor=page-2"));
+  });
+  it("shows a first-product prompt and changes the status of selected products", async () => {
+    const product = { id: "p1", title: "T-shirt", status: "DRAFT", media: [], productType: null, vendor: null, variants: [{ id: "v1", priceMinor: 1200, trackInventory: false }] };
+    api.request.mockResolvedValueOnce({ nodes: [], nextCursor: null });
+    const user = userEvent.setup(); const view = render(<ProductsPage />);
+    expect(await screen.findByText("Add your first product")).toBeInTheDocument();
+    view.unmount();
+    api.request.mockResolvedValue({ nodes: [product], nextCursor: null });
+    render(<ProductsPage />);
+    await user.click(await screen.findByRole("checkbox", { name: "Select T-shirt" }));
+    await user.click(screen.getByRole("button", { name: "Set as active" }));
+    await waitFor(() => expect(api.request).toHaveBeenCalledWith("/products/p1", expect.objectContaining({ method: "PATCH", body: JSON.stringify({ status: "ACTIVE" }) })));
+    expect(screen.getByText("Not tracked")).toBeInTheDocument();
   });
   it("keeps collection membership and name after a failed save, then retries", async () => {
     api.all.mockImplementation(async (path: string) => path === "/products" ? [{ id: "p1", title: "T-shirt" }] : []);

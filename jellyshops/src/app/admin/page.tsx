@@ -74,10 +74,10 @@ export default function DashboardPage() {
   const { actionableOrders: needsAttention, revenueMinor: revenue, orderCount, publishedProductCount, lowStock } = query.data;
   const setup = query.data.setup;
   const setupItems = [
-    { label: "Store details", href: "/admin/settings", complete: setup?.details },
+    { label: "Store details", href: "/admin/settings/general", complete: setup?.details },
     { label: "Products", href: "/admin/products", complete: setup?.products },
     { label: "Publication", href: "/admin/online-store", complete: setup?.publication },
-    { label: "Shipping", href: "/admin/settings", complete: setup?.shipping },
+    { label: "Shipping", href: "/admin/settings/general", complete: setup?.shipping },
     { label: "Payments", href: "/admin/payments", complete: setup?.payments },
   ];
   const completed = setupItems.filter((item) => item.complete).length;

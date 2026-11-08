@@ -1,15 +1,14 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 import { ExternalLink, Menu } from "lucide-react";
 import { useAuth } from "@/features/auth/providers/auth-provider";
 import { AdminNav } from "./admin-nav";
 import { AdminThemeToggle } from "./admin-theme-toggle";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ToastProvider } from "@/components/admin/toast";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname() ?? "";
   const { activeStore: store, stores, setActiveStoreId } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
@@ -21,11 +20,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const storePicker = <div className="admin-store-switch">{stores.length > 1 ?
     <label>Store<select aria-label="Switch store" value={store.id} onChange={event => setActiveStoreId(event.target.value)}>{stores.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label> :
     <p className="truncate font-medium">{store.name}</p>}</div>;
-  const settings = [
-    { href: "/admin/settings", label: "General" }, { href: "/admin/payments", label: "Payments" },
-    { href: "/admin/settings/notifications", label: "Notifications" }, { href: "/admin/settings/custom-data", label: "Extra fields" },
-  ];
-  return <div className="admin-shell">
+  return <ToastProvider><div className="admin-shell">
     <aside className="admin-sidebar">{brand}<div className="min-h-0 flex-1 overflow-y-auto"><AdminNav /></div>{storePicker}</aside>
     <div className="admin-workspace">
       <header className="admin-topbar">
@@ -41,10 +36,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
         <div className="flex items-center gap-2"><AdminThemeToggle /><Link href={`/${store.slug}`} className="admin-button">View store<ExternalLink size={14} /></Link></div>
       </header>
-      <main className="admin-content">
-        {pathname.startsWith("/admin/settings") && <nav className="admin-settings-nav" aria-label="Settings">{settings.map(item => <Link key={item.href} href={item.href} aria-current={pathname === item.href ? "page" : undefined}>{item.label}</Link>)}</nav>}
-        {children}
-      </main>
+      <main className="admin-content">{children}</main>
     </div>
-  </div>;
+  </div></ToastProvider>;
 }

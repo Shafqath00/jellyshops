@@ -1,9 +1,9 @@
 "use client";
 
-import { AdminPageHeader } from "@/components/admin-ui";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Package, Search } from "lucide-react";
+import { Package } from "lucide-react";
+import { AdminPage, Banner, EmptyState, IndexTable, StatusBadge, statusOptions, type IndexColumn, type IndexTab } from "@/components/admin";
 
 import { useAuth } from "@/features/auth/providers/auth-provider";
 import { createMerchantCommerceApi } from "@/features/commerce/api/client";
@@ -12,15 +12,8 @@ import type {
   OrderListQuery,
   OrderListResult,
 } from "@/features/commerce/api/types";
-import {
-  OrderBadge,
-  orderButtonClass as buttonClass,
-  orderInputClass as inputClass,
-  orderLabel,
-  orderMoney,
-  orderPanelClass as panelClass,
-  orderStatuses,
-} from "@/features/commerce/components/order-ui";
+import { orderMoney } from "@/features/commerce/components/order-ui";
+import { downloadOrdersCsv } from "@/features/commerce/orders-csv";
 
 // -----------------------------------------------------------------------------
 // Configuration and types
@@ -54,18 +47,23 @@ const SORT_OPTIONS = [
   { value: "status", label: "Status" },
 ] as const;
 
+/** View tabs: each shows orders at one step. "Paid" orders still need the merchant to confirm them. */
+const ORDER_VIEWS = [
+  { status: "PENDING_PAYMENT", label: "Waiting for payment" },
+  { status: "PAID", label: "To confirm" },
+  { status: "CONFIRMED", label: "Confirmed" },
+  { status: "PROCESSING", label: "Being prepared" },
+  { status: "SHIPPED", label: "Shipped" },
+  { status: "DELIVERED", label: "Delivered" },
+  { status: "CANCELLED", label: "Cancelled" },
+  { status: "REFUNDED", label: "Refunded" },
+] as const;
+
 const OWNER_ROLES = ["OWNER", "ADMIN"];
 const ORDER_MANAGER_ROLES = [...OWNER_ROLES, "ORDER_MANAGER"];
 
 type OrderRowData = OrderListResult["orders"][number];
 type FilterKey = "status" | "paymentStatus" | "sort" | "direction";
-
-type OrderFiltersProps = {
-  query: OrderListQuery;
-  search: string;
-  onSearchChange: (value: string) => void;
-  onFilterChange: (key: FilterKey, value: string) => void;
-};
 
 type OrderRowProps = {
   order: OrderRowData;
@@ -300,397 +298,147 @@ export default function OrdersPage() {
   const totalPages = result
     ? Math.max(1, Math.ceil(result.total / result.pageSize))
     : 1;
+  const summary = result?.summary ?? {};
+  const countFor = (status: string) => summary[status] ?? summary[status.toLowerCase()];
+  const tabs: IndexTab[] = [
+    { id: "", label: "All", count: countFor("TOTAL") ?? countFor("total") ?? (!query.status ? result?.total : undefined) },
+    ...ORDER_VIEWS.map((view) => ({ id: view.status, label: view.label, count: countFor(view.status) })),
+  ];
+  const hasFilters = Boolean(search || query.status || query.paymentStatus);
 
   return (
-    <div className="space-y-5">
-      <AdminPageHeader title="Orders" actions={<button type="button" className={buttonClass} onClick={refreshOrders}>Refresh</button>} />
-
+    <AdminPage
+      title="Orders"
+      description="Every order placed in your store. Open an order to fulfil it, refund it or contact the customer."
+      secondaryActions={[{ label: loading ? "Refreshing…" : "Refresh", onAction: refreshOrders, disabled: loading }]}
+    >
       {result?.featureEnabled === false && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
-          <div>
-            <strong>Order workspace is in preview</strong>
-            <p className="mt-1">
-              {canEnableWorkspace
-                ? "Enable it for this store to manage shipments, financial edits and customer communication."
-                : "An owner or administrator can enable order management for this store."}
-            </p>
-          </div>
-
-          {canEnableWorkspace && (
-            <button
-              type="button"
-              className={buttonClass}
-              disabled={enabling || loading}
-              onClick={() => void enableWorkspace()}
-            >
+        <Banner
+          tone="warning"
+          title="Order workspace is in preview"
+          action={canEnableWorkspace ? (
+            <button type="button" className="jk-button" disabled={enabling || loading} onClick={() => void enableWorkspace()}>
               {enabling ? "Enabling…" : "Enable order workspace"}
             </button>
-          )}
-        </div>
+          ) : undefined}
+        >
+          {canEnableWorkspace
+            ? "Enable it for this store to manage shipments, order edits and customer emails."
+            : "An owner or administrator can enable order management for this store."}
+        </Banner>
       )}
 
-      <OrderSummary result={result} onStatusChange={(status) => updateFilter("status", status)} />
-
-      <section className={`${panelClass} overflow-hidden`}>
-        <OrderFilters
-          query={query}
-          search={search}
-          onSearchChange={setSearch}
-          onFilterChange={updateFilter}
+      {!api && !loading ? (
+        <p className="jk-muted">Sign in as a merchant to manage orders.</p>
+      ) : (
+        <IndexTable
+          label="Orders"
+          rows={result?.orders ?? []}
+          rowKey={(order) => order.id}
+          rowLabel={(order) => `order ${order.number}`}
+          columns={orderColumns({ timeZone: result?.timeZone, canManage: Boolean(result?.featureEnabled) && canManageOrders, updating, onAdvance: (orderId, status) => void advanceOrder(orderId, status) })}
+          loading={loading}
+          error={error}
+          onRetry={refreshOrders}
+          tabs={tabs}
+          activeTab={query.status ?? ""}
+          onTabChange={(status) => updateFilter("status", status)}
+          search={{ value: search, onChange: setSearch, label: "Search orders", placeholder: "Search by order number, customer or product" }}
+          filters={<OrderFilters query={query} onFilterChange={updateFilter} />}
+          bulkActions={[{ label: "Export to CSV", onAction: (ids) => downloadOrdersCsv((result?.orders ?? []).filter((order) => ids.includes(order.id))) }]}
+          emptyState={hasFilters
+            ? <EmptyState icon={Package} title="No matching orders" description="Try another search, or choose All to clear the view." />
+            : <EmptyState icon={Package} title="No orders yet" description="When a customer checks out, their order appears here so you can pack it and send it." />}
+          pagination={result && result.total > 0 ? {
+            summary: `${result.total} ${result.total === 1 ? "order" : "orders"} · Page ${query.page} of ${totalPages}`,
+            hasPrevious: Number(query.page) > 1,
+            hasNext: Number(query.page) < totalPages,
+            onPrevious: () => changePage(-1),
+            onNext: () => changePage(1),
+          } : undefined}
         />
-
-        {error && (
-          <div
-            role="alert"
-            className="m-4 rounded-lg border border-red-200 p-4 text-sm text-red-800"
-          >
-            {error}{" "}
-            <button type="button" className="underline" onClick={refreshOrders}>
-              Try again
-            </button>
-          </div>
-        )}
-
-        {!api && !loading ? (
-          <p className="p-8 text-center text-sm">
-            Sign in as a merchant to manage orders.
-          </p>
-        ) : loading && !result ? (
-          <p role="status" className="p-12 text-center text-sm">
-            Loading orders…
-          </p>
-        ) : !result?.orders.length ? (
-          <EmptyOrders hasFilters={Boolean(search || query.status || query.paymentStatus)} />
-        ) : (
-          <OrderList
-            result={result}
-            loading={loading}
-            updating={updating}
-            canManage={canManageOrders}
-            onAdvance={(orderId, status) => void advanceOrder(orderId, status)}
-          />
-        )}
-
-        {result && result.total > 0 && (
-          <footer className="flex items-center justify-between gap-3 border-t border-border px-4 py-3 text-xs">
-            <span>
-              {result.total} orders · Page {query.page} of {totalPages}
-            </span>
-
-            <div className="flex gap-2">
-              <button
-                type="button"
-                className={buttonClass}
-                disabled={Number(query.page) <= 1 || loading}
-                onClick={() => changePage(-1)}
-              >
-                Previous
-              </button>
-              <button
-                type="button"
-                className={buttonClass}
-                disabled={Number(query.page) >= totalPages || loading}
-                onClick={() => changePage(1)}
-              >
-                Next
-              </button>
-            </div>
-          </footer>
-        )}
-      </section>
-    </div>
+      )}
+    </AdminPage>
   );
 }
 
 // -----------------------------------------------------------------------------
-// Summary and filters
+// Filters, columns and export
 // -----------------------------------------------------------------------------
 
-function OrderSummary({
-  result,
-  onStatusChange,
-}: {
-  result: OrderListResult | null;
-  onStatusChange: (status: string) => void;
-}) {
-  const summary = result?.summary ?? {};
-
+function OrderFilters({ query, onFilterChange }: { query: OrderListQuery; onFilterChange: (key: FilterKey, value: string) => void }) {
   return (
-    <section
-      aria-label="Order summary"
-      className={`${panelClass} grid grid-cols-3 divide-x divide-border overflow-hidden lg:grid-cols-9`}
-    >
-      {["TOTAL", ...orderStatuses].map((status) => {
-        const label =
-          status === "PAID"
-            ? "Awaiting confirmation"
-            : status === "TOTAL"
-              ? "Total orders"
-              : orderLabel(status);
-
-        const count =
-          summary[status] ??
-          summary[status.toLowerCase()] ??
-          (status === "TOTAL" ? result?.total : undefined) ??
-          "—";
-
-        return (
-          <button
-            type="button"
-            key={status}
-            className="min-w-0 px-3 py-4 text-left hover:bg-muted"
-            onClick={() => onStatusChange(status === "TOTAL" ? "" : status)}
-          >
-            <span className="block min-h-8 text-[12px] leading-4 text-muted-foreground">
-              {label}
-            </span>
-            <strong className="text-xl tabular-nums">{count}</strong>
-          </button>
-        );
-      })}
-    </section>
-  );
-}
-
-function OrderFilters({
-  query,
-  search,
-  onSearchChange,
-  onFilterChange,
-}: OrderFiltersProps) {
-  return (
-    <div className="flex flex-wrap gap-3 border-b border-border p-3">
-      <label className="relative min-w-48 flex-1">
-        <span className="sr-only">Search orders</span>
-        <Search
-          size={17}
-          className="absolute left-3 top-2.5 text-muted-foreground"
-        />
-        <input
-          type="search"
-          className={`${inputClass} pl-9`}
-          value={search}
-          onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Search order, customer or product"
-        />
-      </label>
-
-      <label>
-        <span className="sr-only">Order status</span>
-        <select
-          className={inputClass}
-          value={query.status ?? ""}
-          onChange={(event) => onFilterChange("status", event.target.value)}
-        >
-          <option value="">All orders</option>
-          {orderStatuses.map((status) => (
-            <option key={status} value={status}>
-              {status}
-            </option>
-          ))}
-        </select>
-      </label>
-
+    <>
       <label>
         <span className="sr-only">Payment status</span>
-        <select
-          className={inputClass}
-          value={query.paymentStatus ?? ""}
-          onChange={(event) => onFilterChange("paymentStatus", event.target.value)}
-        >
-          <option value="">All payments</option>
-          {PAYMENT_STATUSES.map((status) => (
-            <option key={status} value={status}>
-              {status}
-            </option>
-          ))}
+        <select className="jk-select" value={query.paymentStatus ?? ""} onChange={(event) => onFilterChange("paymentStatus", event.target.value)}>
+          <option value="">Any payment</option>
+          {statusOptions("payment", PAYMENT_STATUSES).map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
         </select>
       </label>
-
       <label>
         <span className="sr-only">Sort orders</span>
-        <select
-          className={inputClass}
-          value={query.sort}
-          onChange={(event) => onFilterChange("sort", event.target.value)}
-        >
-          {SORT_OPTIONS.map(({ value, label }) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
+        <select className="jk-select" value={query.sort} onChange={(event) => onFilterChange("sort", event.target.value)}>
+          {SORT_OPTIONS.map(({ value, label }) => <option key={value} value={value}>Sort by {label.toLowerCase()}</option>)}
         </select>
       </label>
-
-      <button
-        type="button"
-        className={buttonClass}
-        onClick={() =>
-          onFilterChange(
-            "direction",
-            query.direction === "asc" ? "desc" : "asc",
-          )
-        }
-      >
-        {query.direction === "asc" ? "Ascending ↑" : "Descending ↓"}
+      <button type="button" className="jk-button" onClick={() => onFilterChange("direction", query.direction === "asc" ? "desc" : "asc")}>
+        {query.direction === "asc" ? "Oldest first" : "Newest first"}
       </button>
-    </div>
+    </>
   );
 }
 
-// -----------------------------------------------------------------------------
-// Order list and row
-// -----------------------------------------------------------------------------
-
-function EmptyOrders({ hasFilters }: { hasFilters: boolean }) {
-  return (
-    <div className="p-14 text-center">
-      <Package className="mx-auto text-muted-foreground" />
-      <h2 className="mt-3 font-semibold">
-        {hasFilters ? "No matching orders" : "No orders yet"}
-      </h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        {hasFilters
-          ? "Try another search or clear your filters."
-          : "Orders appear here when customers check out."}
-      </p>
-    </div>
-  );
+/** A cancelled or refunded order is not waiting to be sent, so it never shows as "Unfulfilled". */
+function fulfilmentShown(order: OrderRowData) {
+  const closed = order.status === "CANCELLED" || order.status === "REFUNDED";
+  return closed && (!order.fulfilmentStatus || order.fulfilmentStatus === "UNFULFILLED") ? order.status : order.fulfilmentStatus ?? order.status;
 }
 
-function OrderList({
-  result,
-  loading,
-  updating,
-  canManage,
-  onAdvance,
-}: {
-  result: OrderListResult;
-  loading: boolean;
-  updating: string | null;
-  canManage: boolean;
-  onAdvance: OrderRowProps["onAdvance"];
-}) {
-  return (
-    <div aria-busy={loading}>
-      <div className="hidden grid-cols-[1fr_1.2fr_1.5fr_1fr_1fr_1fr_auto] gap-3 bg-muted/50 px-4 py-3 text-xs text-muted-foreground lg:grid">
-        <span>Order / date</span>
-        <span>Customer</span>
-        <span>Items</span>
-        <span>Payment</span>
-        <span>Fulfilment</span>
-        <span>Total</span>
-        <span />
-      </div>
-
-      {result.orders.map((order) => (
-        <OrderRow
-          key={order.id}
-          order={order}
-          timeZone={result.timeZone}
-          canManage={Boolean(result.featureEnabled) && canManage}
-          updating={updating}
-          onAdvance={onAdvance}
-        />
-      ))}
-    </div>
-  );
-}
-
-function OrderRow({
-  order,
-  timeZone,
-  canManage,
-  updating,
-  onAdvance,
-}: OrderRowProps) {
-  const orderUrl = `/admin/orders/${order.id}`;
-  const canAdvance =
-    canManage && (order.status === "PAID" || order.status === "CONFIRMED");
-
-  const nextStatus: MerchantOrderStatus =
-    order.status === "PAID" ? "CONFIRMED" : "PROCESSING";
-
-  const itemsDescription =
-    order.items?.map((item) => `${item.titleSnapshot} × ${item.quantity}`).join(", ") ||
-    `${order.itemCount ?? "—"} items`;
-
-  return (
-    <div className="grid items-center gap-3 border-t border-border px-4 py-4 text-sm hover:bg-muted/50 lg:grid-cols-[1fr_1.2fr_1.5fr_1fr_1fr_1fr_auto]">
-      <div>
-        <Link
-          href={orderUrl}
-          className="font-semibold underline-offset-4 hover:underline"
-        >
-          {order.number}
-        </Link>
-        <p className="mt-1 text-xs text-muted-foreground">
-          {new Date(order.createdAt).toLocaleString("en", {
-            dateStyle: "medium",
-            timeStyle: "short",
-            ...(timeZone ? { timeZone } : {}),
-          })}
-        </p>
-      </div>
-
-      <div>
-        <span>{String(order.customerSnapshot.name ?? "Customer unavailable")}</span>
-        <p className="truncate text-xs text-muted-foreground">
-          {String(order.customerSnapshot.email ?? "")}
-        </p>
-      </div>
-
-      <div className="flex items-center gap-2">
-        {order.items?.[0]?.imageSnapshot && (
-          <img
-            src={order.items[0].imageSnapshot}
-            alt=""
-            className="size-9 rounded border border-border object-cover"
-          />
-        )}
-        <span className="truncate text-xs">{itemsDescription}</span>
-      </div>
-
-      <div>
-        <span className="mr-2 text-xs text-muted-foreground lg:hidden">
-          Payment
-        </span>
-        <OrderBadge value={order.paymentStatus} />
-      </div>
-
-      <div>
-        <span className="mr-2 text-xs text-muted-foreground lg:hidden">
-          Fulfilment
-        </span>
-        <OrderBadge value={order.fulfilmentStatus ?? order.status} />
-      </div>
-
-      <strong className="tabular-nums">
-        {orderMoney(order.totalMinor, order.currency)}
-      </strong>
-
-      {canAdvance ? (
-        <button
-          type="button"
-          className={buttonClass}
-          disabled={updating !== null}
-          onClick={() => onAdvance(order.id, nextStatus)}
-        >
-          {updating === order.id
-            ? "Updating…"
-            : order.status === "PAID"
-              ? "Confirm"
-              : "Process"}
-        </button>
-      ) : (
-        <Link
-          href={orderUrl}
-          className={buttonClass}
-          aria-label={`View ${order.number}`}
-        >
-          <ArrowRight size={15} />
-        </Link>
-      )}
-    </div>
-  );
+function orderColumns({ timeZone, canManage, updating, onAdvance }: Omit<OrderRowProps, "order">): IndexColumn<OrderRowData>[] {
+  return [
+    {
+      id: "order", header: "Order", mobile: "primary",
+      cell: (order) => (
+        <div>
+          <Link href={`/admin/orders/${order.id}`} className="jk-cell-strong">{order.number}</Link>
+          <span className="jk-cell-sub">{new Date(order.createdAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short", ...(timeZone ? { timeZone } : {}) })}</span>
+        </div>
+      ),
+    },
+    {
+      id: "customer", header: "Customer",
+      cell: (order) => (
+        <div className="min-w-0">
+          <span>{String(order.customerSnapshot.name ?? "No name given")}</span>
+          {order.customerSnapshot.email ? <span className="jk-cell-sub truncate">{String(order.customerSnapshot.email)}</span> : null}
+        </div>
+      ),
+    },
+    {
+      id: "items", header: "Items", mobile: "hidden",
+      cell: (order) => (
+        <div className="flex max-w-72 items-center gap-2">
+          {order.items?.[0]?.imageSnapshot && <img src={order.items[0].imageSnapshot} alt="" className="jk-thumb !size-8" />}
+          <span className="truncate">{order.items?.map((item) => `${item.titleSnapshot} × ${item.quantity}`).join(", ") || `${order.itemCount ?? 0} items`}</span>
+        </div>
+      ),
+    },
+    { id: "payment", header: "Payment", cell: (order) => <StatusBadge kind="payment" value={order.paymentStatus} /> },
+    { id: "fulfilment", header: "Fulfilment", cell: (order) => <StatusBadge kind="fulfilment" value={fulfilmentShown(order)} /> },
+    { id: "total", header: "Total", align: "end", cell: (order) => <strong className="tabular-nums">{orderMoney(order.totalMinor, order.currency)}</strong> },
+    {
+      id: "next", header: "Next step", hideHeader: true, align: "end",
+      cell: (order) => {
+        const canAdvance = canManage && (order.status === "PAID" || order.status === "CONFIRMED");
+        if (!canAdvance) return null;
+        const nextStatus: MerchantOrderStatus = order.status === "PAID" ? "CONFIRMED" : "PROCESSING";
+        return (
+          <button type="button" className="jk-button" disabled={updating !== null} onClick={() => onAdvance(order.id, nextStatus)}>
+            {updating === order.id ? "Updating…" : order.status === "PAID" ? "Confirm order" : "Start preparing"}
+          </button>
+        );
+      },
+    },
+  ];
 }

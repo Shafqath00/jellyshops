@@ -10,6 +10,14 @@ const nextConfig: NextConfig = {
     "@jelly/storefront-renderer"
   ],
   allowedDevOrigins: ["127.0.0.1"],
+  // Admin pages that moved in the 2026-11 navigation regroup keep working from old links.
+  async redirects() {
+    return [
+      { source: "/admin/products/stock", destination: "/admin/products/inventory", permanent: true },
+      { source: "/admin/online-store/navigation", destination: "/admin/content/menus", permanent: true },
+      { source: "/admin/engagement", destination: "/admin/customers/messages", permanent: true },
+    ];
+  },
   turbopack: {
     root: process.cwd()
   },

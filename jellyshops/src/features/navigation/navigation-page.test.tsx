@@ -1,7 +1,7 @@
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import NavigationPage from "@/app/admin/online-store/navigation/page";
+import NavigationPage from "@/app/admin/content/menus/page";
 import { NavigationApiError } from "./api/client";
 const mock = vi.hoisted(() => ({ api: { listMenus: vi.fn(), updateMenu: vi.fn(), createMenu: vi.fn() }, editor: { listTemplates: vi.fn(), listGlobalSections: vi.fn() }, all: vi.fn(), token: "one" }));
 vi.mock("@/features/auth/providers/auth-provider", () => ({ authApiOrigin: () => "http://api", useAuth: () => ({ activeStore: { id: "a" }, session: { access_token: mock.token } }) }));

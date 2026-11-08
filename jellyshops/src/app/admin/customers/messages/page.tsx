@@ -51,7 +51,7 @@ export default function EngagementPage() {
   }
   const visible = items.filter((item) => (!statusFilter || item.status === statusFilter) && `${item.name} ${item.email} ${item.message}`.toLowerCase().includes(search.toLowerCase()));
   return <main>
-    <AdminPageHeader title="Messages & subscribers" actions={<button className="admin-button" type="button" onClick={() => void exportSubscribers()} disabled={busy}><Download size={16} /> Export subscribers</button>} />
+    <AdminPageHeader title="Messages & subscribers" description="Questions sent through your store's contact form, and people who joined your newsletter." actions={<button className="admin-button" type="button" onClick={() => void exportSubscribers()} disabled={busy}><Download size={16} /> Export subscribers</button>} />
     {error && <AdminNotice error>{error}<button className="ml-3 underline" onClick={() => { setError(undefined); void load().then(setItems).catch((caught: unknown) => setError(caught instanceof Error ? caught.message : "Unable to load messages.")); }}>Retry</button></AdminNotice>}
     <section className="admin-card !p-0">
       <div className="admin-toolbar"><input className="admin-search" aria-label="Search messages" placeholder="Search name, email or message" value={search} onChange={(event) => setSearch(event.target.value)} /><select aria-label="Filter message status" className="admin-button" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="">All messages</option><option value="NEW">New</option><option value="READ">Read</option><option value="CLOSED">Closed</option></select></div>

@@ -26,5 +26,5 @@ it("links merchant navigation to Online Store", () => {
   render(<AdminNav />);
 
   fireEvent.click(screen.getByText("Online Store"));
-  expect(screen.getByRole("link", { name: "Themes" })).toHaveAttribute("href", "/admin/online-store");
+  expect(screen.getByRole("link", { name: "Store designs" })).toHaveAttribute("href", "/admin/online-store");
 });
