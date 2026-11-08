@@ -1,64 +1,44 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { CheckCircle2 } from "lucide-react";
-import { authApiOrigin, useAuth } from "@/features/auth/providers/auth-provider";
-import { AdminPage } from "@/components/admin";
+import { useState } from "react";
+import { AdminPage, Banner, Card, CardSkeleton, Field, HelpTip, ResourceForm, useToast } from "@/components/admin";
+import { useStoreSettings, type StoreSettings } from "@/features/admin/settings/use-store-settings";
 
-interface Settings {
-  id: string; name: string; slug: string; currency: string; country: string;
-  shippingMinor: number; shippingCopy: string; contactEmail: string | null; timezone: string; revision: number;
-}
-async function settingsResponse(response: Response): Promise<Settings> {
-  const body = await response.json() as { settings?: Settings; error?: { message?: string } };
-  if (!response.ok || !body.settings) throw new Error(body.error?.message ?? "Could not load or save your settings. Try again.");
-  return body.settings;
-}
-function StoreSettingsForm({ storeId, token }: { storeId: string; token: string }) {
-  const [settings, setSettings] = useState<Settings | null>(null);
-  const [error, setError] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [reload, setReload] = useState(0);
-  useEffect(() => {
-    const controller = new AbortController();
-    void fetch(`${authApiOrigin()}/api/stores/${encodeURIComponent(storeId)}/settings`, { signal: controller.signal, headers: { Authorization: `Bearer ${token}` } })
-      .then(settingsResponse).then((value) => { setSettings(value); setError(""); })
-      .catch((failure: unknown) => { if (!controller.signal.aborted) setError(failure instanceof Error ? failure.message : "Could not load settings."); });
-    return () => controller.abort();
-  }, [storeId, token, reload]);
-  async function save(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault(); if (!settings) return;
-    const data = new FormData(event.currentTarget);
-    setSaving(true); setSaved(false); setError("");
-    try {
-      const next = await fetch(`${authApiOrigin()}/api/stores/${encodeURIComponent(storeId)}/settings`, {
-        method: "PATCH", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ revision: settings.revision, name: String(data.get("name")), slug: String(data.get("slug")), contactEmail: String(data.get("email") ?? "").trim() || null, timezone: String(data.get("timezone")), shippingMinor: Math.round(Number(data.get("shipping")) * 100), shippingCopy: String(data.get("shippingCopy") ?? "").trim() }),
-      }).then(settingsResponse);
-      setSettings(next); setSaved(true);
-    } catch (failure) { setError(failure instanceof Error ? failure.message : "Could not save settings."); }
-    finally { setSaving(false); }
-  }
-  return <>
-    {error && <div role="alert" className="error-banner">{error} <button type="button" className="button button-secondary" disabled={saving} onClick={() => setReload((value) => value + 1)}>Reload latest settings</button></div>}
-    {saved && <div className="success-banner" role="status"><CheckCircle2 size={18} /> Settings saved</div>}
-    {!settings ? <p aria-live="polite">Loading settings…</p> : <form key={`${settings.revision}:${reload}`} className="admin-form" onSubmit={save} onChange={() => setSaved(false)}>
-      <section className="form-card"><div className="form-card-title"><div><span>Business</span><h2>Store identity</h2></div></div><div className="field-grid">
-        <label className="field"><span>Store name</span><input name="name" required maxLength={120} defaultValue={settings.name} /></label>
-        <label className="field"><span>Store slug</span><input name="slug" required minLength={3} maxLength={63} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" defaultValue={settings.slug} /><small>Locked after your first publication or order.</small></label>
-        <label className="field"><span>Contact email</span><input name="email" type="email" defaultValue={settings.contactEmail ?? ""} /></label>
-        <label className="field"><span>Timezone</span><input name="timezone" required defaultValue={settings.timezone} placeholder="Asia/Kolkata" /></label>
-        <label className="field"><span>Flat shipping ({settings.currency})</span><input name="shipping" type="number" required min="0" max="21474836.47" step="0.01" defaultValue={settings.shippingMinor / 100} /><small>Charged once per order for domestic delivery. Enter 0 for free shipping.</small></label>
-        <label className="field"><span>Shipping information for customers</span><textarea name="shippingCopy" maxLength={500} rows={3} defaultValue={settings.shippingCopy} placeholder="Delivery details, timing, or packaging information" /></label>
-        <label className="field"><span>Country / currency</span><input value={`${settings.country} / ${settings.currency}`} disabled /></label>
-      </div></section><div className="form-actions"><button className="button button-primary" disabled={saving} type="submit">{saving ? "Saving…" : "Save changes"}</button></div>
-    </form>}
-  </>;
-}
-export default function SettingsPage() {
-  const { activeStore, session } = useAuth();
-  return <AdminPage title="General" width="narrow" back={{ href: "/admin/settings", label: "Settings" }} description="Your store's name and contact details, and what you charge for delivery.">
-    {activeStore && session ? <StoreSettingsForm key={activeStore.id} storeId={activeStore.id} token={session.access_token} /> : <p>Select a store to manage its settings.</p>}
+type Draft = Pick<StoreSettings, "name" | "slug" | "timezone"> & { contactEmail: string };
+const toDraft = (settings: StoreSettings): Draft => ({ name: settings.name, slug: settings.slug, timezone: settings.timezone, contactEmail: settings.contactEmail ?? "" });
+const zones = (current: string) => { const list = typeof Intl.supportedValuesOf === "function" ? Intl.supportedValuesOf("timeZone") : []; return list.includes(current) ? list : [current, ...list]; };
+
+export default function GeneralSettingsPage() {
+  const { settings, error, save, reload } = useStoreSettings();
+  const toast = useToast();
+  const [draft, setDraft] = useState<{ revision: number; value: Draft } | null>(null);
+  const base = settings ? toDraft(settings) : null;
+  const current = draft && settings && draft.revision === settings.revision ? draft.value : base;
+  const dirty = Boolean(current && base && JSON.stringify(current) !== JSON.stringify(base));
+  const set = (patch: Partial<Draft>) => settings && current && setDraft({ revision: settings.revision, value: { ...current, ...patch } });
+
+  return <AdminPage title="General" width="narrow" back={{ href: "/admin/settings", label: "Settings" }} description="Your store's name and how customers reach you.">
+    {error && <Banner tone="critical" title="Could not load your settings" action={<button type="button" className="jk-button" onClick={reload}>Try again</button>}>{error}</Banner>}
+    {!settings || !current ? !error && <CardSkeleton label="Loading settings" /> :
+      <ResourceForm dirty={dirty} onDiscard={() => setDraft(null)} onSubmit={async () => {
+        await save({ name: current.name.trim(), slug: current.slug.trim(), timezone: current.timezone, contactEmail: current.contactEmail.trim() || null });
+        setDraft(null); toast("Settings saved");
+      }}>
+        <Card title="Store details">
+          <div className="jk-stack-sm">
+            <Field id="store-name" label="Store name" help="Shown in your store's header, emails and browser tab."><input id="store-name" required maxLength={120} value={current.name} onChange={(event) => set({ name: event.target.value })} /></Field>
+            <Field id="store-email" label="Contact email" help="Customers' replies to order emails go here."><input id="store-email" type="email" value={current.contactEmail} onChange={(event) => set({ contactEmail: event.target.value })} /></Field>
+            <Field id="store-slug" label={<>Store address <HelpTip>The part after the site name in your store&apos;s web address. It cannot change after your first order or publication.</HelpTip></>} help="Lowercase letters, numbers and hyphens.">
+              <input id="store-slug" required minLength={3} maxLength={63} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" value={current.slug} onChange={(event) => set({ slug: event.target.value })} />
+            </Field>
+          </div>
+        </Card>
+        <Card title="Time and money">
+          <div className="jk-stack-sm">
+            <Field id="store-zone" label="Time zone" help="Used for order dates and your daily sales figures."><select id="store-zone" value={current.timezone} onChange={(event) => set({ timezone: event.target.value })}>{zones(current.timezone).map((zone) => <option key={zone} value={zone}>{zone.replaceAll("_", " ")}</option>)}</select></Field>
+            <p className="jk-muted">Country and currency: <strong>{settings.country} · {settings.currency}</strong>. These are set when the store is created.</p>
+          </div>
+        </Card>
+      </ResourceForm>}
   </AdminPage>;
 }

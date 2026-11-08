@@ -18,7 +18,7 @@ const groups: Array<Destination & { icon: LucideIcon; children?: Destination[] }
     { label: "Pages", href: "/admin/content/pages" }, { label: "Blog posts", href: "/admin/content/blogs" }, { label: "Files", href: "/admin/content/files" }, { label: "Menus", href: "/admin/content/menus" }, { label: "Custom content", href: "/admin/content/metaobjects" },
   ] },
   { label: "Online Store", href: "/admin/online-store", icon: Store, children: [
-    { label: "Store designs", href: "/admin/online-store" }, { label: "Store appearance", href: "/admin/store" },
+    { label: "Store designs", href: "/admin/online-store" }, { label: "Preferences", href: "/admin/online-store/preferences" },
   ] },
   { label: "Payments", href: "/admin/payments", icon: CreditCard },
   { label: "Settings", href: "/admin/settings", icon: Settings },

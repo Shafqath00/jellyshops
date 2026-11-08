@@ -44,7 +44,7 @@ export default function DashboardPage() {
     { label: "Add your store details", help: "Your store name and contact email.", href: "/admin/settings/general", done: setup?.details },
     { label: "Add a product", help: "Make at least one product active so shoppers can buy it.", href: "/admin/products/new", done: setup?.products },
     { label: "Publish your store design", help: "Choose a design and publish it.", href: "/admin/online-store", done: setup?.publication },
-    { label: "Set your delivery charge", help: "What customers pay for delivery.", href: "/admin/settings/general", done: setup?.shipping },
+    { label: "Set your delivery charge", help: "What customers pay for delivery.", href: "/admin/settings/shipping", done: setup?.shipping },
     { label: "Turn on payments", help: "Connect Stripe so you can take card payments.", href: "/admin/payments", done: setup?.payments },
   ];
   const remaining = steps.filter((step) => !step.done);
