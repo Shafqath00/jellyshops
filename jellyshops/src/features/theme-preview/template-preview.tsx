@@ -112,7 +112,7 @@ export function TemplatePreview({ template, config, productLayout, collectionLay
   const previewMenus = config.useStarterMenu ? Object.fromEntries(pack.menus.map((menu) => [menu.handle, { id: `preview-${menu.key}`, handle: menu.handle, items: menu.items }])) as Record<string, RuntimeMenuV4> : menus;
   const cart = usePreviewCart();
   const products = withPreviewQuickAdd(config.products);
-  const commerce: CommerceDataProvider = { initialProducts: products, cart, async getProducts(input) { return products.slice(0, input?.limit ?? products.length); } };
+  const commerce: CommerceDataProvider = { initialProducts: products, cart, ratings: config.ratings, async getProducts(input) { return products.slice(0, input?.limit ?? products.length); } };
   const pages: Record<PreviewTemplate, StorefrontPageContext> = {
     home: { pageType: "home", resource: null },
     product: productPage,

@@ -9,6 +9,7 @@ import "./themes/jelly-minimal.css";
 import "./themes/jelly-avenue.css";
 import "./themes/jelly-resthaven.css";
 import "./themes/jelly-forma.css";
+import "./themes/jelly-halo.css";
 import "./themes/theme-kit-late.css";
 import "./shadcn-theme.css";
 

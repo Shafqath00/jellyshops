@@ -17,7 +17,7 @@ it("registers every Store Editor theme", () => {
   expect(listThemes().map((theme) => theme.id)).toEqual([
     "jelly-signature", "jelly-avenue", "minimal", "classic", "bold", "elegant", "playful", "fresh-market", "artisan-boutique", "example-boutique",
     // Found in src/themes/ (declarative themes; Harbour is generated from docs/theme-briefs/jelly-harbour.json).
-    "jelly-forma", "jelly-harbour", "jelly-resthaven",
+    "jelly-forma", "jelly-halo", "jelly-harbour", "jelly-resthaven",
   ]);
 });
 

@@ -1,0 +1,1152 @@
+{
+  "globalSections": {
+    "announcement": {
+      "id": "halo-announcement",
+      "type": "announcement-bar",
+      "enabled": true,
+      "settings": {
+        "styleScheme": "scheme2",
+        "text": "Free UK delivery over £40 · Two samples with every order"
+      },
+      "blocks": []
+    },
+    "header": {
+      "id": "halo-header",
+      "type": "header",
+      "enabled": true,
+      "settings": {
+        "styleScheme": "scheme1",
+        "layout": "classic",
+        "sticky": true,
+        "showSearch": true,
+        "showAccount": true,
+        "showCart": true,
+        "showWishlist": false,
+        "showToolLabels": false
+      },
+      "blocks": [
+        {
+          "id": "halo-menu-1",
+          "type": "menu",
+          "enabled": true,
+          "settings": {
+            "handle": "main"
+          }
+        }
+      ]
+    },
+    "footer": {
+      "id": "halo-footer",
+      "type": "footer",
+      "enabled": true,
+      "settings": {
+        "styleScheme": "scheme4",
+        "text": "Gentle skincare, made in small batches and tested on people, never animals.",
+        "showNewsletter": false
+      },
+      "blocks": [
+        {
+          "id": "halo-link-heading-2",
+          "type": "link-heading",
+          "enabled": true,
+          "settings": {
+            "text": "Shop"
+          }
+        },
+        {
+          "id": "halo-link-3",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Skincare",
+            "link": "/shop"
+          }
+        },
+        {
+          "id": "halo-link-4",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Body",
+            "link": "/search?q=body"
+          }
+        },
+        {
+          "id": "halo-link-5",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Sets and gifts",
+            "link": "/search?q=set"
+          }
+        },
+        {
+          "id": "halo-link-heading-6",
+          "type": "link-heading",
+          "enabled": true,
+          "settings": {
+            "text": "Help"
+          }
+        },
+        {
+          "id": "halo-link-7",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Delivery and returns",
+            "link": "/pages/shipping"
+          }
+        },
+        {
+          "id": "halo-link-8",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "FAQ",
+            "link": "/pages/faq"
+          }
+        },
+        {
+          "id": "halo-link-9",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Contact",
+            "link": "/pages/contact"
+          }
+        }
+      ]
+    }
+  },
+  "templates": {
+    "home": {
+      "type": "home",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-hero-13",
+            "type": "hero",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "layout": "spotlight",
+              "eyebrow": "New · Vitamin C serum",
+              "image": {
+                "url": "/themes/jelly-halo/hero.svg",
+                "alt": "An amber serum bottle with a dropper on a soft blush background"
+              },
+              "callouts": "10% vitamin C\nFragrance free\nVegan\nRefillable glass",
+              "contentAlignment": "left"
+            },
+            "blocks": [
+              {
+                "id": "halo-heading-10",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "glow, gently"
+                }
+              },
+              {
+                "id": "halo-text-11",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "A daily serum that brightens without stinging. Light enough for morning, gentle enough for every day."
+                }
+              },
+              {
+                "id": "halo-button-12",
+                "type": "button",
+                "enabled": true,
+                "settings": {
+                  "label": "Shop the serum",
+                  "href": "/shop"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-custom-content-22",
+            "type": "custom-content",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "direction": "vertical",
+              "contentAlignment": "left",
+              "gap": 16,
+              "contentWidth": "normal",
+              "styleSpacing": "small"
+            },
+            "blocks": [
+              {
+                "id": "halo-heading-14",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "Shop by concern",
+                  "blockTypePreset": "h3"
+                }
+              },
+              {
+                "id": "halo-group-21",
+                "type": "group",
+                "enabled": true,
+                "settings": {
+                  "groupDirection": "horizontal",
+                  "groupAlign": "start",
+                  "groupGap": 8
+                },
+                "blocks": [
+                  {
+                    "id": "halo-button-15",
+                    "type": "button",
+                    "enabled": true,
+                    "settings": {
+                      "label": "Dryness",
+                      "href": "/search?q=dry",
+                      "buttonStyle": "secondary",
+                      "buttonSize": "small"
+                    }
+                  },
+                  {
+                    "id": "halo-button-16",
+                    "type": "button",
+                    "enabled": true,
+                    "settings": {
+                      "label": "Breakouts",
+                      "href": "/search?q=blemish",
+                      "buttonStyle": "secondary",
+                      "buttonSize": "small"
+                    }
+                  },
+                  {
+                    "id": "halo-button-17",
+                    "type": "button",
+                    "enabled": true,
+                    "settings": {
+                      "label": "Dullness",
+                      "href": "/search?q=glow",
+                      "buttonStyle": "secondary",
+                      "buttonSize": "small"
+                    }
+                  },
+                  {
+                    "id": "halo-button-18",
+                    "type": "button",
+                    "enabled": true,
+                    "settings": {
+                      "label": "Sensitivity",
+                      "href": "/search?q=calm",
+                      "buttonStyle": "secondary",
+                      "buttonSize": "small"
+                    }
+                  },
+                  {
+                    "id": "halo-button-19",
+                    "type": "button",
+                    "enabled": true,
+                    "settings": {
+                      "label": "Fine lines",
+                      "href": "/search?q=firm",
+                      "buttonStyle": "secondary",
+                      "buttonSize": "small"
+                    }
+                  },
+                  {
+                    "id": "halo-button-20",
+                    "type": "button",
+                    "enabled": true,
+                    "settings": {
+                      "label": "Sun care",
+                      "href": "/search?q=spf",
+                      "buttonStyle": "secondary",
+                      "buttonSize": "small"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-product-grid-23",
+            "type": "product-grid",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "heading": "Bestsellers",
+              "text": "The four our customers reorder most.",
+              "columns": 4,
+              "limit": 4,
+              "viewAllLabel": "Shop all",
+              "viewAllLink": "/shop"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-image-with-text-27",
+            "type": "image-with-text",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme2",
+              "eyebrow": "Texture first",
+              "image": {
+                "url": "/themes/jelly-halo/texture.svg",
+                "alt": "A swirl of cream and a drop of golden serum"
+              },
+              "imagePosition": "right"
+            },
+            "blocks": [
+              {
+                "id": "halo-heading-24",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "light on skin, kind to it"
+                }
+              },
+              {
+                "id": "halo-text-25",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "Every formula is tested for how it feels: no sticky finish, no heavy scent, nothing that pills under make-up."
+                }
+              },
+              {
+                "id": "halo-button-26",
+                "type": "button",
+                "enabled": true,
+                "settings": {
+                  "label": "Read our formulas",
+                  "href": "/pages/about"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-multicolumn-32",
+            "type": "multicolumn",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "heading": "A simple routine",
+              "columns": 4,
+              "contentAlignment": "left"
+            },
+            "blocks": [
+              {
+                "id": "halo-column-28",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "1. Cleanse",
+                  "text": "A soft gel that lifts the day without stripping."
+                }
+              },
+              {
+                "id": "halo-column-29",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "2. Treat",
+                  "text": "One targeted serum, chosen for your concern."
+                }
+              },
+              {
+                "id": "halo-column-30",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "3. Moisturise",
+                  "text": "Seal it in with a cream that suits your skin."
+                }
+              },
+              {
+                "id": "halo-column-31",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "4. Protect",
+                  "text": "Daily SPF, every morning, all year round."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-image-with-text-36",
+            "type": "image-with-text",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme3",
+              "eyebrow": "Ingredient spotlight",
+              "image": {
+                "url": "/themes/jelly-halo/ingredient.svg",
+                "alt": "Sliced citrus and green leaves on a pale sage background"
+              },
+              "imagePosition": "left"
+            },
+            "blocks": [
+              {
+                "id": "halo-heading-33",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "vitamin C, made stable"
+                }
+              },
+              {
+                "id": "halo-text-34",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "We use a gentle, stable form of vitamin C so the serum keeps working to the last drop."
+                }
+              },
+              {
+                "id": "halo-button-35",
+                "type": "button",
+                "enabled": true,
+                "settings": {
+                  "label": "Shop vitamin C",
+                  "href": "/search?q=vitamin"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-testimonials-40",
+            "type": "testimonials",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "heading": "What customers say"
+            },
+            "blocks": [
+              {
+                "id": "halo-testimonial-37",
+                "type": "testimonial",
+                "enabled": true,
+                "settings": {
+                  "quote": "My skin feels calmer after two weeks, and it never stings.",
+                  "author": "Priya, combination skin"
+                }
+              },
+              {
+                "id": "halo-testimonial-38",
+                "type": "testimonial",
+                "enabled": true,
+                "settings": {
+                  "quote": "The first serum I've finished and immediately reordered.",
+                  "author": "Grace, dry skin"
+                }
+              },
+              {
+                "id": "halo-testimonial-39",
+                "type": "testimonial",
+                "enabled": true,
+                "settings": {
+                  "quote": "Light, quick to sink in, and the refills are a lovely touch.",
+                  "author": "Tom, sensitive skin"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-newsletter-43",
+            "type": "newsletter",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme4",
+              "buttonLabel": "Sign up",
+              "contentAlignment": "center"
+            },
+            "blocks": [
+              {
+                "id": "halo-heading-41",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "10% off your first order"
+                }
+              },
+              {
+                "id": "halo-text-42",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "Routine tips and new launches, once a month. No spam."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "product": {
+      "type": "product",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-product-gallery-44",
+            "type": "product-gallery",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "imageFit": "contain",
+              "layout": "thumbnails",
+              "pageLayout": "details-below"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-product-information-45",
+            "type": "product-information",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "showVendor": false,
+              "showSku": false,
+              "showCompareAtPrice": true,
+              "showAvailability": true,
+              "showSpecifications": false,
+              "discountChip": "percent"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-product-options-46",
+            "type": "product-options",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "style": "buttons"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-product-purchase-47",
+            "type": "product-purchase",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "showQuantity": true,
+              "label": "Add to bag",
+              "stickyBar": true
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-trust-strip-51",
+            "type": "trust-strip",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1"
+            },
+            "blocks": [
+              {
+                "id": "halo-trust-point-48",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Free UK delivery over £40",
+                  "icon": "truck"
+                }
+              },
+              {
+                "id": "halo-trust-point-49",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Two free samples",
+                  "icon": "gift"
+                }
+              },
+              {
+                "id": "halo-trust-point-50",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "30-day returns",
+                  "icon": "return"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-product-tabs-55",
+            "type": "product-tabs",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme2",
+              "firstOpen": true
+            },
+            "blocks": [
+              {
+                "id": "halo-info-tab-52",
+                "type": "info-tab",
+                "enabled": true,
+                "settings": {
+                  "title": "What it does",
+                  "text": "Brightens dull skin and evens tone over four to eight weeks, without the sting of stronger acids."
+                }
+              },
+              {
+                "id": "halo-info-tab-53",
+                "type": "info-tab",
+                "enabled": true,
+                "settings": {
+                  "title": "Key ingredients",
+                  "text": "Vitamin C (ascorbyl glucoside) for brightness, niacinamide for an even tone, and panthenol to calm."
+                }
+              },
+              {
+                "id": "halo-info-tab-54",
+                "type": "info-tab",
+                "enabled": true,
+                "settings": {
+                  "title": "How to use",
+                  "text": "Morning and evening, press two drops into clean skin. Follow with moisturiser, and SPF in the day."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-product-specifications-56",
+            "type": "product-specifications",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "heading": "Full ingredients and details",
+              "showProductSpecifications": true,
+              "layout": "expandable"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-product-reviews-57",
+            "type": "product-reviews",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "heading": "Reviews",
+              "allowWriting": true,
+              "perPage": 5
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-related-products-58",
+            "type": "related-products",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "limit": 4,
+              "heading": "Pairs well with"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "collection": {
+      "type": "collection",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-collection-header-59",
+            "type": "collection-header",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "showTitle": true,
+              "showDescription": true,
+              "showImage": false,
+              "layout": "simple",
+              "showBreadcrumb": true
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-custom-content-68",
+            "type": "custom-content",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "direction": "vertical",
+              "contentAlignment": "left",
+              "gap": 16,
+              "contentWidth": "normal",
+              "styleSpacing": "small"
+            },
+            "blocks": [
+              {
+                "id": "halo-heading-60",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "Shop by concern",
+                  "blockTypePreset": "h3"
+                }
+              },
+              {
+                "id": "halo-group-67",
+                "type": "group",
+                "enabled": true,
+                "settings": {
+                  "groupDirection": "horizontal",
+                  "groupAlign": "start",
+                  "groupGap": 8
+                },
+                "blocks": [
+                  {
+                    "id": "halo-button-61",
+                    "type": "button",
+                    "enabled": true,
+                    "settings": {
+                      "label": "Dryness",
+                      "href": "/search?q=dry",
+                      "buttonStyle": "secondary",
+                      "buttonSize": "small"
+                    }
+                  },
+                  {
+                    "id": "halo-button-62",
+                    "type": "button",
+                    "enabled": true,
+                    "settings": {
+                      "label": "Breakouts",
+                      "href": "/search?q=blemish",
+                      "buttonStyle": "secondary",
+                      "buttonSize": "small"
+                    }
+                  },
+                  {
+                    "id": "halo-button-63",
+                    "type": "button",
+                    "enabled": true,
+                    "settings": {
+                      "label": "Dullness",
+                      "href": "/search?q=glow",
+                      "buttonStyle": "secondary",
+                      "buttonSize": "small"
+                    }
+                  },
+                  {
+                    "id": "halo-button-64",
+                    "type": "button",
+                    "enabled": true,
+                    "settings": {
+                      "label": "Sensitivity",
+                      "href": "/search?q=calm",
+                      "buttonStyle": "secondary",
+                      "buttonSize": "small"
+                    }
+                  },
+                  {
+                    "id": "halo-button-65",
+                    "type": "button",
+                    "enabled": true,
+                    "settings": {
+                      "label": "Fine lines",
+                      "href": "/search?q=firm",
+                      "buttonStyle": "secondary",
+                      "buttonSize": "small"
+                    }
+                  },
+                  {
+                    "id": "halo-button-66",
+                    "type": "button",
+                    "enabled": true,
+                    "settings": {
+                      "label": "Sun care",
+                      "href": "/search?q=spf",
+                      "buttonStyle": "secondary",
+                      "buttonSize": "small"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-collection-product-grid-69",
+            "type": "collection-product-grid",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "columns": 4,
+              "limit": 24,
+              "showSort": true,
+              "listLayout": "chips"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "cart": {
+      "type": "cart",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-cart-summary-70",
+            "type": "cart-summary",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "search": {
+      "type": "search",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-search-results-71",
+            "type": "search-results",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "showSort": true,
+              "showFilters": true,
+              "columns": 4
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "page": {
+      "type": "page",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-page-content-72",
+            "type": "page-content",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "not-found": {
+      "type": "not-found",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "halo-not-found-message-76",
+            "type": "not-found-message",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1"
+            },
+            "blocks": [
+              {
+                "id": "halo-heading-73",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "this page has wandered off"
+                }
+              },
+              {
+                "id": "halo-text-74",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "Try the shop, or search for what you need."
+                }
+              },
+              {
+                "id": "halo-button-75",
+                "type": "button",
+                "enabled": true,
+                "settings": {
+                  "label": "Back to the shop",
+                  "href": "/shop"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    }
+  },
+  "menus": [
+    {
+      "key": "main",
+      "name": "Main menu",
+      "handle": "main",
+      "items": [
+        {
+          "id": "halo-menu-shop",
+          "label": "Skincare",
+          "target": {
+            "kind": "external",
+            "url": "/shop"
+          },
+          "children": [
+            {
+              "id": "halo-menu-serums",
+              "label": "Serums",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=serum"
+              },
+              "children": []
+            },
+            {
+              "id": "halo-menu-moisturisers",
+              "label": "Moisturisers",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=cream"
+              },
+              "children": []
+            },
+            {
+              "id": "halo-menu-cleansers",
+              "label": "Cleansers",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=cleanser"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "halo-menu-concern",
+          "label": "Shop by concern",
+          "target": {
+            "kind": "external",
+            "url": "/shop"
+          },
+          "children": [
+            {
+              "id": "halo-menu-dry",
+              "label": "Dryness",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=dry"
+              },
+              "children": []
+            },
+            {
+              "id": "halo-menu-blemish",
+              "label": "Breakouts",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=blemish"
+              },
+              "children": []
+            },
+            {
+              "id": "halo-menu-glow",
+              "label": "Dullness",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=glow"
+              },
+              "children": []
+            },
+            {
+              "id": "halo-menu-calm",
+              "label": "Sensitivity",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=calm"
+              },
+              "children": []
+            },
+            {
+              "id": "halo-menu-firm",
+              "label": "Fine lines",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=firm"
+              },
+              "children": []
+            },
+            {
+              "id": "halo-menu-spf",
+              "label": "Sun care",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=spf"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "halo-menu-sets",
+          "label": "Sets",
+          "target": {
+            "kind": "external",
+            "url": "/search?q=set"
+          },
+          "children": []
+        },
+        {
+          "id": "halo-menu-about",
+          "label": "About",
+          "target": {
+            "kind": "external",
+            "url": "/pages/about"
+          },
+          "children": []
+        }
+      ]
+    }
+  ]
+}

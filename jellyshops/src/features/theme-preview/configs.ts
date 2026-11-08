@@ -23,6 +23,8 @@ export interface ThemePreviewConfig {
   cart: Record<string, number>;
   /** Show the starter pack's own main menu instead of the sample one. */
   useStarterMenu?: boolean;
+  /** Sample star ratings by product id, for themes that show ratings on cards. */
+  ratings?: Record<string, { average: number; count: number }>;
 }
 
 const image = (photo: string, width = 900) => `https://images.unsplash.com/${photo}?auto=format&fit=crop&w=${width}&q=80`;
@@ -204,8 +206,39 @@ export const jellyFormaPreview: ThemePreviewConfig = {
   searchQuery: "chair", cart: { f1: 2, f2: 1 }, useStarterMenu: true,
 };
 
+const haloAsset = (file: string) => `/themes/jelly-halo/${file}.svg`;
+const haloProducts: PublicProduct[] = [
+  { id: "h1", name: "Vitamin C brightening serum", price: "£32.00", href: "#", imageUrl: haloAsset("serum"), chip: "Dullness", available: true },
+  { id: "h2", name: "Barrier repair cream", price: "£28.00", href: "#", imageUrl: haloAsset("cream"), chip: "Dryness", available: true },
+  { id: "h3", name: "Soft gel cleanser", price: "£18.00", compareAtPrice: "£22.00", href: "#", imageUrl: haloAsset("cleanser"), chip: "All skin", available: true },
+  { id: "h4", name: "Daily mineral SPF 50", price: "£26.00", href: "#", imageUrl: haloAsset("spf"), chip: "Sun care", available: true },
+  { id: "h5", name: "Overnight facial oil", price: "£34.00", href: "#", imageUrl: haloAsset("oil"), chip: "Fine lines", available: true },
+  { id: "h6", name: "Rose lip balm", price: "£9.00", href: "#", imageUrl: haloAsset("balm"), chip: "Lips", available: false },
+];
+
+export const jellyHaloPreview: ThemePreviewConfig = {
+  themeId: "jelly-halo", packId: "jelly-halo", name: "Jelly Halo", stageColor: "#efe7df",
+  guide: {
+    heading: "glow, gently", subheading: "A simple routine",
+    body: "Plus Jakarta Sans throughout, products on soft colour, and plenty of space. Shoppers browse by skin concern, read the ingredients and see real reviews before they buy.",
+    announcement: "Free UK delivery over £40 · Two samples with every order", footerText: "Gentle skincare, made in small batches and tested on people, never animals.",
+  },
+  products: haloProducts,
+  product: {
+    id: "h1", title: "Vitamin C brightening serum", description: "A daily serum that brightens dull skin without stinging. Light enough for the morning, gentle enough for every day.",
+    galleryEnabled: true, showBuyNow: false, option: { id: "size", name: "Size", values: [{ id: "15", label: "15 ml" }, { id: "30", label: "30 ml" }, { id: "refill", label: "30 ml refill", soldOut: true }] },
+    media: [{ url: haloAsset("serum"), alt: "Amber serum bottle with a dropper" }, { url: haloAsset("texture"), alt: "A drop of serum and a swirl of cream" }],
+    specifications: { "Skin type": "All, including sensitive", "Full ingredients": "Aqua, ascorbyl glucoside, niacinamide, glycerin, panthenol, sodium hyaluronate", Size: "30 ml" },
+    shippingCopy: "Free UK delivery over £40.", price: "£32.00",
+  },
+  collection: { title: "Serums", description: "Targeted treatments for one concern at a time. Pick the one that matches your skin today.", imageUrl: haloAsset("hero") },
+  page: { title: "About Halo", intro: "We make a small range of gentle skincare, each product built around one job.", heading: "How we formulate", body: "Every formula is tested for how it feels and how it works, on people with sensitive skin first.", bullets: ["Fragrance free", "Vegan and cruelty free", "Refillable glass"] },
+  searchQuery: "serum", cart: { h1: 1, h2: 1 }, useStarterMenu: true,
+  ratings: { h1: { average: 4.8, count: 214 }, h2: { average: 4.6, count: 98 }, h3: { average: 4.7, count: 156 }, h4: { average: 4.5, count: 61 }, h5: { average: 4.9, count: 33 } },
+};
+
 /** Previews of the built-in themes, by the path under /theme-preview/. */
-const builtInPreviews: Record<string, ThemePreviewConfig> = { "jelly-minimal": jellyMinimalPreview, "jelly-avenue": jellyAvenuePreview, "jelly-resthaven": jellyResthavenPreview, "jelly-forma": jellyFormaPreview };
+const builtInPreviews: Record<string, ThemePreviewConfig> = { "jelly-minimal": jellyMinimalPreview, "jelly-avenue": jellyAvenuePreview, "jelly-resthaven": jellyResthavenPreview, "jelly-forma": jellyFormaPreview, "jelly-halo": jellyHaloPreview };
 const previewOfBase: Record<string, ThemePreviewConfig> = { "jelly-signature": jellyMinimalPreview, "jelly-avenue": jellyAvenuePreview };
 
 /**

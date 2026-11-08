@@ -3,10 +3,12 @@ import manifest0 from "./default/theme.json" with { type: "json" };
 import manifest1 from "./example-boutique/theme.json" with { type: "json" };
 import manifest2 from "./jelly-forma/theme.json" with { type: "json" };
 import starter2 from "./jelly-forma/starter.json" with { type: "json" };
-import manifest3 from "./jelly-harbour/theme.json" with { type: "json" };
-import starter3 from "./jelly-harbour/starter.json" with { type: "json" };
-import manifest4 from "./jelly-resthaven/theme.json" with { type: "json" };
-import starter4 from "./jelly-resthaven/starter.json" with { type: "json" };
+import manifest3 from "./jelly-halo/theme.json" with { type: "json" };
+import starter3 from "./jelly-halo/starter.json" with { type: "json" };
+import manifest4 from "./jelly-harbour/theme.json" with { type: "json" };
+import starter4 from "./jelly-harbour/starter.json" with { type: "json" };
+import manifest5 from "./jelly-resthaven/theme.json" with { type: "json" };
+import starter5 from "./jelly-resthaven/starter.json" with { type: "json" };
 import type { DiscoveredTheme } from "../types.js";
 
 export const discoveredThemes: DiscoveredTheme[] = [
@@ -15,4 +17,5 @@ export const discoveredThemes: DiscoveredTheme[] = [
   { manifest: manifest2, starter: starter2 },
   { manifest: manifest3, starter: starter3 },
   { manifest: manifest4, starter: starter4 },
+  { manifest: manifest5, starter: starter5 },
 ] as DiscoveredTheme[];
