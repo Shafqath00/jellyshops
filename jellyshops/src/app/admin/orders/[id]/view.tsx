@@ -8,6 +8,9 @@ import { ArrowLeft, Download, Package, X } from "lucide-react";
 
 import { useAuth } from "@/features/auth/providers/auth-provider";
 import { ShipmentActions } from "@/features/commerce/components/shipment-actions";
+import { StatusBadge, statusLabel } from "@/components/admin";
+import { describeActivity, emailName, needsRetry } from "@/features/commerce/order-activity";
+import { printPackingSlips } from "@/features/commerce/packing-slip";
 import { ParcelWeight } from "@/features/commerce/components/parcel-weight";
 import { describeShipping } from "@/features/product-builder/shipping";
 import {
@@ -290,7 +293,7 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
     ...(detail.events ?? []).map((event) => ({
       id: `event-${event.id}`,
       date: event.createdAt,
-      text: event.message ?? orderLabel(event.type),
+      text: describeActivity(event, detail.notifications),
     })),
     ...(detail.notes ?? []).map((comment) => ({
       id: `note-${comment.id}`,
@@ -505,15 +508,16 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="mr-2 text-3xl font-bold tracking-tight">{order.number}</h1>
-            <OrderBadge value={payment?.status} />
-            <OrderBadge value={order.fulfilmentStatus ?? order.status} />
+            <StatusBadge kind="payment" value={payment?.status} />
+            <StatusBadge kind="fulfilment" value={["CANCELLED", "REFUNDED"].includes(order.status) && (!order.fulfilmentStatus || order.fulfilmentStatus === "UNFULFILLED") ? order.status : order.fulfilmentStatus ?? order.status} />
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">{new Date(order.createdAt).toLocaleString("en", { dateStyle: "medium", timeStyle: "short", timeZone: detail.timeZone ?? "UTC" })} · Online store · Revision {revision}</p>
+          <p className="mt-2 text-xs text-muted-foreground">{new Date(order.createdAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: detail.timeZone ?? "UTC" })} · Online store{revision > 1 ? ` · Edited ${revision - 1} ${revision === 2 ? "time" : "times"}` : ""} · {statusLabel("order", order.status)}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link className={button} href="/admin/settings/notifications">Email settings</Link>
           <button className={button} disabled={busy} onClick={() => void invoice("pdf")}><Download size={14} />Invoice PDF</button>
           <button className={button} disabled={busy} onClick={() => void invoice("html")}>Printable invoice</button>
+          {physicalItems && <button className={button} disabled={busy} onClick={() => { if (!printPackingSlips([detail], activeStore?.name ?? "Your store")) setError("Your browser blocked the packing slip window. Allow pop-ups for this site and try again."); }}>Packing slip</button>}
           {canEdit && <button className={button} onClick={() => open("edit")}>Edit items</button>}
           {canRefund && payment?.status === "PAID" && <button className={button} onClick={() => open("refund")}>Refund</button>}
           {canCancel && <button className={button} disabled={busy} onClick={() => open("cancel")}>Cancel order</button>}
@@ -658,17 +662,20 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
             <p className="mt-3 whitespace-pre-wrap text-sm text-muted-foreground">{order.customerNote || "No customer note"}</p>
           </section>
           {canManage && <section className={`${panel} p-5`}>
-            <h2 className="font-semibold">Communication & tracking</h2>
+            <h2 className="font-semibold">Customer emails & tracking</h2>
             <div className="mt-4 flex flex-wrap gap-2">
               <button className={button} disabled={busy || !detail.fulfilments?.length} onClick={() => open("tracking")}>Update tracking</button>
               <button className={button} onClick={() => open("resend")}>Resend email</button>
             </div>
             {!detail.fulfilments?.length && <p className="mt-3 text-xs text-muted-foreground">{physicalItems ? "Create a shipment before adding tracking. If needed, confirm the order and start processing, then choose Create shipment under Items & fulfilment." : "Tracking is available for physical shipments."}</p>}
-            {detail.notifications?.map(notification => <div key={notification.id} className="mt-3 text-xs">
-              <span>{orderLabel(notification.type)}</span>
-              <span className="ml-2 text-muted-foreground">{orderLabel(notification.status)}</span>
-              {(notification.lastError || notification.error) && <p className="mt-1 text-red-800">{notification.lastError || notification.error}</p>}
-            </div>)}
+            {!!detail.notifications?.length && <ul className="mt-4 space-y-3" aria-label="Customer emails">{detail.notifications.map(notification => <li key={notification.id} className="text-xs">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="font-medium">{emailName(notification.type)}</span>
+                <StatusBadge tone={notification.status === "ACCEPTED" ? "success" : needsRetry(notification) ? "critical" : "neutral"}>{EMAIL_STATUS[notification.status] ?? statusLabel("order", notification.status)}</StatusBadge>
+              </div>
+              {needsRetry(notification) && (notification.lastError || notification.error) && <p className="mt-1 text-[var(--jk-critical-text)]">Reason: {notification.lastError || notification.error}</p>}
+              {needsRetry(notification) && <button className={`${button} mt-2`} disabled={busy} onClick={() => void run(() => api!.resendOrderNotification(storeId!, orderId, notification.type), false)}>Retry {emailName(notification.type).toLowerCase()}</button>}
+            </li>)}</ul>}
           </section>}
         </aside>
       </div>
@@ -755,6 +762,8 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
 }
 
 // Shared display components
+const EMAIL_STATUS: Record<string, string> = { QUEUED: "Waiting to send", SENDING: "Sending", ACCEPTED: "Sent", FAILED: "Not sent", UNCERTAIN: "Not confirmed" };
+
 function Address({ title, value }: {
   title: string;
   value?: Record<string, unknown> | null;

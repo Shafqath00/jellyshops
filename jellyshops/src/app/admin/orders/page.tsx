@@ -14,6 +14,7 @@ import type {
 } from "@/features/commerce/api/types";
 import { orderMoney } from "@/features/commerce/components/order-ui";
 import { downloadOrdersCsv } from "@/features/commerce/orders-csv";
+import { printPackingSlips } from "@/features/commerce/packing-slip";
 
 // -----------------------------------------------------------------------------
 // Configuration and types
@@ -279,6 +280,13 @@ export default function OrdersPage() {
     }
   }
 
+  /** Loads each selected order and prints one packing slip per order. */
+  async function printSlips(ids: string[]) {
+    if (!api || !storeId) return;
+    const details = await Promise.all(ids.map((id) => api.getOrder(storeId, id)));
+    if (!printPackingSlips(details, activeStore?.name ?? "Your store")) throw new Error("Your browser blocked the packing slip window. Allow pop-ups for this site and try again.");
+  }
+
   async function enableWorkspace() {
     if (!api || !storeId || enabling) return;
 
@@ -345,7 +353,10 @@ export default function OrdersPage() {
           onTabChange={(status) => updateFilter("status", status)}
           search={{ value: search, onChange: setSearch, label: "Search orders", placeholder: "Search by order number, customer or product" }}
           filters={<OrderFilters query={query} onFilterChange={updateFilter} />}
-          bulkActions={[{ label: "Export to CSV", onAction: (ids) => downloadOrdersCsv((result?.orders ?? []).filter((order) => ids.includes(order.id))) }]}
+          bulkActions={[
+            { label: "Print packing slips", onAction: (ids) => printSlips(ids) },
+            { label: "Export to CSV", onAction: (ids) => downloadOrdersCsv((result?.orders ?? []).filter((order) => ids.includes(order.id))) },
+          ]}
           emptyState={hasFilters
             ? <EmptyState icon={Package} title="No matching orders" description="Try another search, or choose All to clear the view." />
             : <EmptyState icon={Package} title="No orders yet" description="When a customer checks out, their order appears here so you can pack it and send it." />}
