@@ -16,13 +16,19 @@ function productContext(context: StorefrontRuntimeContext): ProductPresentationC
   return typeof product.product?.title === "string" && typeof product.addToCart === "function" ? product : null;
 }
 
+/** Product page layouts (template programme P1 gallery-left, P2 gallery-right, P3 centred, P7 compact, P4 details-below). */
+export const PRODUCT_PAGE_LAYOUTS = ["theme", "gallery-left", "gallery-right", "centred", "compact", "details-below"] as const;
+
 export function ProductGallerySection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown> } }) {
   const product = productContext(context);
   const media = product?.product.media?.length ? product.product.media : product?.product.imageUrl ? [{ id: "primary", url: product.product.imageUrl, altText: product.product.title }] : [];
   if (!product) return null;
   const fit = section.settings.imageFit === "contain" ? "contain" : "cover";
-  if (product.product.galleryEnabled && section.settings.layout !== "stacked" && section.settings.layout !== "grid") return <section className="jelly-section jelly-product-gallery" data-layout="thumbnails"><StorefrontContainer><ProductGalleryViewer media={media} title={product.product.title} fit={fit} /></StorefrontContainer></section>;
-  return <section className="jelly-section jelly-product-gallery" data-layout={choice(section.settings, "layout", ["stacked", "grid"] as const, "stacked")} data-count={media.length}>
+  // The whole product page's arrangement (storefront-base.css "Product page layouts"); "theme" leaves it to the theme.
+  const pageLayout = choice(section.settings, "pageLayout", PRODUCT_PAGE_LAYOUTS, "theme");
+  const page = pageLayout === "theme" ? {} : { "data-page-layout": pageLayout };
+  if (product.product.galleryEnabled && section.settings.layout !== "stacked" && section.settings.layout !== "grid") return <section className="jelly-section jelly-product-gallery" data-layout="thumbnails" {...page}><StorefrontContainer><ProductGalleryViewer media={media} title={product.product.title} fit={fit} /></StorefrontContainer></section>;
+  return <section className="jelly-section jelly-product-gallery" data-layout={choice(section.settings, "layout", ["stacked", "grid"] as const, "stacked")} data-count={media.length} {...page}>
     <StorefrontContainer>
       {media.map((item, index) => <figure key={item.id} className="jelly-product-gallery-item">
         {/* eslint-disable-next-line @next/next/no-img-element */}

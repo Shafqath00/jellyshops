@@ -52,6 +52,15 @@ function countdownSample(): string {
   const date = new Date(Date.now() + 5 * 86_400_000);
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} 18:00`;
 }
+/** Product page layouts (Product gallery > Product page layout). */
+const productLayouts = [
+  ["theme", "Theme default"],
+  ["gallery-left", "Photos left, details right"],
+  ["gallery-right", "Details left, photos right"],
+  ["centred", "Centred"],
+  ["compact", "Small photo, large buying area"],
+  ["details-below", "Then full-width details"],
+] as const;
 /** Every product card style (theme setting Product cards > Card style). */
 const cardLayouts = [
   ["tall", "Tall photo, few words"],
@@ -180,6 +189,7 @@ export function ThemePreviewPage({ config }: { config: ThemePreviewConfig }) {
   // Designer theme styles, so each can be reviewed on every page; the first is the theme's default look.
   const themeStyles = listThemeStyles(config.themeId);
   const [styleId, setStyleId] = useState(themeStyles[0]?.id);
+  const [productLayout, setProductLayout] = useState("theme");
   const themeStyle = themeStyles.find((item) => item.id === styleId);
   const base = resolveTheme(config.themeId);
   const theme = themeStyle ? resolveTheme(config.themeId, applyThemeStyle(base.settings, themeStyle)) : base;
@@ -194,13 +204,18 @@ export function ThemePreviewPage({ config }: { config: ThemePreviewConfig }) {
       {themeStyles.length > 0 && <div role="group" aria-label="Theme style" style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: 4, background: "white", borderRadius: 8 }}>
         {themeStyles.map((item) => <button key={item.id} type="button" aria-pressed={styleId === item.id} title={item.description} onClick={() => setStyleId(item.id)} style={toggle(styleId === item.id)}>{item.name}</button>)}
       </div>}
+      {view === "product" && <label style={{ display: "flex", gap: 8, alignItems: "center", padding: "4px 10px", background: "white", borderRadius: 8, fontSize: 13 }}>Product layout
+        <select value={productLayout} onChange={(event) => setProductLayout(event.target.value)} style={{ fontSize: 13 }}>
+          {productLayouts.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+        </select>
+      </label>}
       <div role="group" aria-label="Preview width" style={{ display: "flex", gap: 4, padding: 4, background: "white", borderRadius: 8 }}>
         {(Object.keys(widths) as Device[]).map((key) => <button key={key} type="button" aria-pressed={device === key} onClick={() => setDevice(key)} style={toggle(device === key)}>{key[0].toUpperCase() + key.slice(1)} · {widths[key]}px</button>)}
       </div>
     </header>
     <div style={{ width: widths[device], maxWidth: "100%", margin: "0 auto", minHeight: "80vh", background: "white", boxShadow: "0 1px 3px rgba(0,0,0,.08)" }}>
       {ready && <StorefrontPreviewFrame title={`${config.name} style guide`} themeId={config.themeId} style={style} className="block h-[80vh] w-full border-0">
-        {view === "guide" ? <Guide config={config} /> : <TemplatePreview key={view} template={view as PreviewTemplate} config={config} />}
+        {view === "guide" ? <Guide config={config} /> : <TemplatePreview key={view} template={view as PreviewTemplate} config={config} productLayout={productLayout === "theme" ? undefined : productLayout} />}
       </StorefrontPreviewFrame>}
     </div>
   </main>;

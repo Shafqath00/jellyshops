@@ -79,7 +79,8 @@ function useCartContext(config: ThemePreviewConfig): StorefrontPageContext {
   return { pageType: "cart", resource: null, data: { lines, subtotal: pounds(subtotal), shippingNote: "Free delivery on orders over £50. Taxes included.", checkoutHref: "#checkout", shopHref: "#shop" } };
 }
 
-export function TemplatePreview({ template, config }: { template: PreviewTemplate; config: ThemePreviewConfig }) {
+/** `productLayout` overrides the product gallery's "Product page layout" setting, to review each layout. */
+export function TemplatePreview({ template, config, productLayout }: { template: PreviewTemplate; config: ThemePreviewConfig; productLayout?: string }) {
   const pack = getStarterPack(config.packId);
   const productPage = useProductContext(config);
   const cartPage = useCartContext(config);
@@ -110,7 +111,7 @@ export function TemplatePreview({ template, config }: { template: PreviewTemplat
   const layout = pack.templates.find((item) => item.type === template)?.layout.sections ?? [];
   type Entry = { region: "header" | "template" | "footer"; section: SectionNode };
   const resolved: Entry[] = layout.flatMap((placement): Entry[] => {
-    if (placement.kind === "inline") return [{ region: "template", section: placement.section }];
+    if (placement.kind === "inline") return [{ region: "template", section: productLayout && placement.section.type === "product-gallery" ? { ...placement.section, settings: { ...placement.section.settings, pageLayout: productLayout } } : placement.section }];
     const global = pack.globalSections.find((entry) => entry.section.id === placement.globalSectionId);
     if (!global) return [];
     const section = global.key === "header" || global.key === "footer"

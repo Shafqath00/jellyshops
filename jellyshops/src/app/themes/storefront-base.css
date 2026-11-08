@@ -1039,3 +1039,55 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 }
 /* Hero layouts: one column until each layout's own wide-screen rule, and no theme minimum heights on the photo. */
 [data-jelly-theme] .jelly-hero.jelly-hero:is([data-layout="spotlight"], [data-layout="statement"]) .jelly-hero-media { min-height: 0; align-self: auto; order: 0; }
+
+/*
+ * Product page layouts (Product gallery > Product page layout; template programme P1, P2, P3, P4, P7).
+ * The gallery section carries data-page-layout; the page arranges the photos and the buying sections around it.
+ * Columns: [page margin] [photos or buying area] [gap] [the other one] [page margin]; anything else runs full width below.
+ * Phones and small tablets (below 900px) always show one column, photos first.
+ */
+@media (min-width: 900px) {
+  [data-jelly-theme] :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"] [data-page-layout]) {
+    --jelly-pdp-a: 0.56; --jelly-pdp-gap: clamp(32px, 4vw, 72px);
+    display: grid; gap: 0; align-items: start; width: auto; max-width: none; margin-inline: 0; padding-inline: 0; padding-top: clamp(16px, 3vw, 40px);
+    --jelly-pdp-w: min(calc(100% - 2 * var(--j-page-margin, 24px)), var(--j-page-normal, 1280px));
+    grid-template-columns:
+      minmax(0, 1fr)
+      calc((var(--jelly-pdp-w) - var(--jelly-pdp-gap)) * var(--jelly-pdp-a))
+      var(--jelly-pdp-gap)
+      calc((var(--jelly-pdp-w) - var(--jelly-pdp-gap)) * (1 - var(--jelly-pdp-a)))
+      minmax(0, 1fr);
+    grid-template-rows: repeat(11, min-content) minmax(min-content, 1fr);
+  }
+  [data-jelly-theme] :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"] [data-page-layout="compact"]) { --jelly-pdp-a: 0.42; }
+  [data-jelly-theme] :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"] [data-page-layout="gallery-right"]) { --jelly-pdp-a: 0.44; }
+
+  /* Everything runs full width unless it is the gallery or part of the buying area. */
+  [data-jelly-theme] :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"] [data-page-layout]) > [data-section-type] { grid-column: 1 / -1; grid-row: auto; min-width: 0; max-width: none; margin-inline: 0; }
+  [data-jelly-theme] :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"] [data-page-layout]) > [data-section-type="product-gallery"] { grid-column: 2; grid-row: 1 / span 12; }
+  [data-jelly-theme] :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"] [data-page-layout]) > :is([data-section-type="product-information"], [data-section-type="rating-summary"], [data-section-type="product-options"], [data-section-type="product-purchase"], [data-section-type="product-stock-counter"], [data-section-type="trust-strip"], [data-section-type="product-description"], [data-section-type="product-tabs"], [data-section-type="product-specifications"]) { grid-column: 4; padding: 0; }
+
+  /* P2: the buying area on the left, the photos on the right. */
+  [data-jelly-theme] :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"] [data-page-layout="gallery-right"]) > [data-section-type="product-gallery"] { grid-column: 4; }
+  [data-jelly-theme] :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"] [data-page-layout="gallery-right"]) > :is([data-section-type="product-information"], [data-section-type="rating-summary"], [data-section-type="product-options"], [data-section-type="product-purchase"], [data-section-type="product-stock-counter"], [data-section-type="trust-strip"], [data-section-type="product-description"], [data-section-type="product-tabs"], [data-section-type="product-specifications"]) { grid-column: 2; }
+
+  /* P4: only the essentials beside the photos; description, tabs and specifications run across the content width below. */
+  [data-jelly-theme] :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"] [data-page-layout="details-below"]) > :is([data-section-type="product-description"], [data-section-type="product-tabs"], [data-section-type="product-specifications"]) { grid-column: 2 / 5; }
+
+  /* Inside the grid each section fills its column; the grid already supplies the page edges. */
+  [data-jelly-theme] :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"] [data-page-layout]) > :is([data-section-type="product-gallery"], [data-section-type="product-information"], [data-section-type="rating-summary"], [data-section-type="product-options"], [data-section-type="product-purchase"], [data-section-type="product-stock-counter"], [data-section-type="trust-strip"], [data-section-type="product-description"], [data-section-type="product-tabs"], [data-section-type="product-specifications"]) .jelly-container { width: 100%; max-width: none; margin-inline: 0; }
+  [data-jelly-theme] :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"] [data-page-layout]) > :is([data-section-type="product-information"], [data-section-type="rating-summary"], [data-section-type="product-options"], [data-section-type="product-purchase"], [data-section-type="product-stock-counter"], [data-section-type="trust-strip"], [data-section-type="product-description"], [data-section-type="product-tabs"], [data-section-type="product-specifications"]) > .jelly-section { padding-block: 0 20px; }
+  [data-jelly-theme] :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"] [data-page-layout]) > [data-section-type="product-gallery"] > .jelly-section { padding-block: 0 32px; }
+
+  /* Full-width sections below (related products, reviews, …) keep the normal page edges. */
+  [data-jelly-theme] :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"] [data-page-layout]) > :not([data-section-type="product-gallery"], [data-section-type="product-information"], [data-section-type="rating-summary"], [data-section-type="product-options"], [data-section-type="product-purchase"], [data-section-type="product-stock-counter"], [data-section-type="trust-strip"], [data-section-type="product-description"], [data-section-type="product-tabs"], [data-section-type="product-specifications"]) .jelly-container { width: min(calc(100% - 2 * var(--j-page-margin, 24px)), var(--j-page-normal, 1280px)); margin-inline: auto; }
+
+  /* P3 centred: one column; photos up to 880px wide, the buying area up to 640px, both centred. */
+  [data-jelly-theme] :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"] [data-page-layout="centred"]) { display: block; }
+  [data-jelly-theme] :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"] [data-page-layout="centred"]) > [data-section-type="product-gallery"] .jelly-container { width: min(calc(100% - 2 * var(--j-page-margin, 24px)), 880px); margin-inline: auto; }
+  [data-jelly-theme] :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"] [data-page-layout="centred"]) > :is([data-section-type="product-information"], [data-section-type="rating-summary"], [data-section-type="product-options"], [data-section-type="product-purchase"], [data-section-type="product-stock-counter"], [data-section-type="trust-strip"], [data-section-type="product-description"], [data-section-type="product-tabs"], [data-section-type="product-specifications"]) .jelly-container { width: min(calc(100% - 2 * var(--j-page-margin, 24px)), 640px); margin-inline: auto; }
+}
+@media (max-width: 899px) {
+  /* One column: the theme's own phone layout, minus any desktop grid it would otherwise keep. */
+  [data-jelly-theme] :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"] [data-page-layout]) { display: block; }
+}

@@ -15461,6 +15461,39 @@
               "value": "contain"
             }
           ]
+        },
+        {
+          "type": "select",
+          "key": "pageLayout",
+          "label": "Product page layout",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": "theme"
+            },
+            {
+              "label": "Photos left, details right",
+              "value": "gallery-left"
+            },
+            {
+              "label": "Details left, photos right",
+              "value": "gallery-right"
+            },
+            {
+              "label": "Centred, details under the photos",
+              "value": "centred"
+            },
+            {
+              "label": "Small photo, large buying area",
+              "value": "compact"
+            },
+            {
+              "label": "Photos and buying area, then full-width details",
+              "value": "details-below"
+            }
+          ],
+          "description": "Where the photos and the buying area (title, price, options, Add to cart) sit on wide screens. Phones always show the photos first."
         }
       ],
       "settingsSchema": {
@@ -15480,6 +15513,17 @@
               "stacked",
               "grid",
               "thumbnails"
+            ]
+          },
+          "pageLayout": {
+            "type": "string",
+            "enum": [
+              "theme",
+              "gallery-left",
+              "gallery-right",
+              "centred",
+              "compact",
+              "details-below"
             ]
           }
         }

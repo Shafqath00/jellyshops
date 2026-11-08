@@ -60,13 +60,13 @@ export const ARCHETYPES: Record<ArchetypeDimension, ArchetypeOption[]> = {
     { code: "L7", label: "Aisle rows" },
   ],
   product: [
-    { code: "P1", label: "Stacked images, sticky details" },
-    { code: "P2", label: "Details left, images scroll right" },
-    { code: "P3", label: "Centred image, details in tabs below" },
-    { code: "P4", label: "Gallery with specification tables" },
+    { code: "P1", label: "Stacked images, sticky details", implementation: { section: "product-gallery", setting: "pageLayout", value: "gallery-left" } },
+    { code: "P2", label: "Details left, images scroll right", implementation: { section: "product-gallery", setting: "pageLayout", value: "gallery-right" } },
+    { code: "P3", label: "Centred image, details in tabs below", implementation: { section: "product-gallery", setting: "pageLayout", value: "centred" } },
+    { code: "P4", label: "Gallery with specification tables", implementation: { section: "product-gallery", setting: "pageLayout", value: "details-below" } },
     { code: "P5", label: "Configurator" },
     { code: "P6", label: "Story chapters" },
-    { code: "P7", label: "Compact buy box with quantity" },
+    { code: "P7", label: "Compact buy box with quantity", implementation: { section: "product-gallery", setting: "pageLayout", value: "compact" } },
     { code: "P8", label: "Enquiry or appointment led" },
   ],
   cart: [
