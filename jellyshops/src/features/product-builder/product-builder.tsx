@@ -69,6 +69,7 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
   const [saveError, setSaveError] = useState("");
   const [justSaved, setJustSaved] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [copy, setCopy] = useState<{ id: string; title: string } | null>(null);
   /** What Discard returns to: the product as opened, then as last saved. */
   const baseline = useRef({ draft: start.draft, persisted: start.persisted });
   const form = useRef<HTMLFormElement>(null);
@@ -139,6 +140,8 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
       baseline.current = { draft: { ...draft, media: canonical.media ?? draft.media, ...(hasVariantAxes(draft) ? { variants: canonical.variants } : {}) }, persisted: { ...saved, imageUrl: draft.imageUrl, media: canonical.media ?? draft.media } };
       // Adopt the server's variant ids so the next save updates these rows instead of adding new ones.
       setDraft((current) => ({ ...current, media: canonical.media ?? current.media, ...(hasVariantAxes(draft) ? { variants: canonical.variants } : {}) }));
+      // A new product gets its own address, so reloading the page edits it instead of creating another.
+      if (!productId && typeof window !== "undefined" && window.location.pathname.startsWith("/admin/products")) window.history.replaceState(null, "", `/admin/products/${encodeURIComponent(result.id)}`);
       setProductId(result.id);
       // Custom data is stored apart from the product, so it is saved once the product and its combinations exist.
       const savedVariantIds: Record<string, string> = {};
@@ -158,6 +161,20 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
     setSaving(true);
     try { await api.updateProduct(storeId, productId, { status: "ARCHIVED" }); setDraft(current => ({ ...current, archived: true, published: false })); repository.archiveProduct(productId); setDirty(false); setJustSaved(true); }
     catch (caught) { setSaveError(caught instanceof Error ? caught.message : "Could not archive product."); }
+    finally { setSaving(false); }
+  }
+
+  /** Saves a draft copy of this product (photos, choices, prices and stock) under a new name and address. */
+  async function duplicate() {
+    if (!api || !storeId || !productId) return;
+    setSaving(true); setSaveError(""); setCopy(null);
+    try {
+      const title = `${draft.title.trim()} (copy)`;
+      const suffix = Math.random().toString(36).slice(2, 6);
+      const payload = draftToPayload({ ...draft, title, handle: `${(draft.handle || "product").slice(0, 60)}-copy-${suffix}`, handleManual: true, published: false, archived: false }, categoryName, { ...NOTHING_SAVED, media: [] });
+      const created = await api.createProduct(storeId, payload);
+      setCopy({ id: created.id, title });
+    } catch (caught) { setSaveError(caught instanceof Error ? caught.message : "Could not duplicate this product."); }
     finally { setSaving(false); }
   }
 
@@ -193,6 +210,7 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
     <form ref={form} aria-label="Product editor" noValidate onSubmit={(event) => { event.preventDefault(); void save(); }} className="admin-product-layout">
       <AdminPageHeader title={productId ? draft.title || "Edit product" : "Add product"} back="/admin/products" actions={<>
         <button type="button" className="admin-button" ref={previewTrigger} onClick={() => setPreviewOpen(true)}>Preview</button>
+        {productId && <button type="button" className="admin-button" disabled={saving || dirty} title={dirty ? "Save your changes first" : undefined} onClick={() => void duplicate()}>Duplicate</button>}
         {productId && !draft.archived && <button type="button" className="admin-button" disabled={saving} onClick={() => void archive()}>Archive</button>}
       </>} />
       <div className="min-w-0 space-y-4">
@@ -205,6 +223,10 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
             </span>
           </div>
         )}
+        {copy && <div role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-border bg-muted/50 px-4 py-3 text-[13px]">
+          <span className="flex items-center gap-2.5"><CheckCircle2 size={16} className="text-success" />Copy saved as a draft.</span>
+          <Link href={`/admin/products/${copy.id}`} className="underline">Open {copy.title}</Link>
+        </div>}
         {saveError && <div role="alert" className="rounded-[18px] border border-tint-border bg-muted/50 px-4 py-3 text-[11px] font-bold text-tint-foreground">{saveError}</div>}
         {problems.length > 0 && (
           <div role="alert" tabIndex={-1} data-problems className="rounded-[18px] border border-tint-border bg-muted/50 px-4 py-3 text-[11px] font-bold text-tint-foreground">

@@ -16,6 +16,8 @@ const nextConfig: NextConfig = {
       { source: "/admin/products/stock", destination: "/admin/products/inventory", permanent: true },
       { source: "/admin/online-store/navigation", destination: "/admin/content/menus", permanent: true },
       { source: "/admin/engagement", destination: "/admin/customers/messages", permanent: true },
+      { source: "/admin/products/builder", destination: "/admin/products/new", permanent: true },
+      { source: "/admin/products/builder/:id", destination: "/admin/products/:id", permanent: true },
     ];
   },
   turbopack: {

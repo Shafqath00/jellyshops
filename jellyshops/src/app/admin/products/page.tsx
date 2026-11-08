@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
 import { ImageIcon, Package } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/features/auth/providers/auth-provider";
-import { AdminPage, EmptyState, IndexTable, StatusBadge, useToast, type IndexColumn, type IndexTab } from "@/components/admin";
-import { useAdminCatalog, type CatalogAdminProduct, type CatalogPage } from "@/features/admin/api/catalog-api";
+import { AdminPage, EmptyState, IndexTable, Picker, StatusBadge, useToast, type IndexColumn, type IndexTab } from "@/components/admin";
+import { useAdminCatalog, type CatalogAdminProduct, type CatalogPage, type CollectionRow } from "@/features/admin/api/catalog-api";
 
 type ProductStatus = CatalogAdminProduct["status"];
 const TABS: IndexTab[] = [{ id: "", label: "All" }, { id: "ACTIVE", label: "Active" }, { id: "DRAFT", label: "Draft" }, { id: "ARCHIVED", label: "Archived" }];
@@ -21,7 +21,9 @@ function stockSummary(product: CatalogAdminProduct) {
 }
 
 export default function ProductsPage() {
-  const { request, ready, storeId } = useAdminCatalog(), { activeStore } = useAuth();
+  const { request, all, ready, storeId } = useAdminCatalog(), { activeStore } = useAuth();
+  const [collectionFor, setCollectionFor] = useState<string[] | null>(null);
+  const [collections, setCollections] = useState<CollectionRow[]>([]);
   const toast = useToast();
   const [rows, setRows] = useState<CatalogAdminProduct[]>([]), [query, setQuery] = useState(""), [search, setSearch] = useState(""), [status, setStatus] = useState(""), [sort, setSort] = useState("title-asc");
   const [cursor, setCursor] = useState<string | null>(null), [history, setHistory] = useState<Array<string | null>>([]), [next, setNext] = useState<string | null>(null);
@@ -48,6 +50,20 @@ export default function ProductsPage() {
     setRevision((n) => n + 1);
     if (failed) throw new Error(`${failed} of ${ids.length} products could not be changed. Try again.`);
     toast(`${ids.length} ${ids.length === 1 ? "product" : "products"} set to ${STATUS_WORDS[value]}`);
+  }
+  const loadCollections = useCallback(async (query: string) => {
+    const rows = await all<CollectionRow>("/collections");
+    setCollections(rows);
+    return rows.filter((row) => row.title.toLowerCase().includes(query.toLowerCase())).map((row) => ({ id: row.id, label: row.title, detail: `${row.productIds.length} ${row.productIds.length === 1 ? "product" : "products"}` }));
+  }, [all]);
+  async function addToCollection(ids: string[], collectionId: string) {
+    const collection = collections.find((row) => row.id === collectionId);
+    if (!collection) return;
+    const productIds = [...new Set([...collection.productIds, ...ids])];
+    try {
+      await request(`/collections/${encodeURIComponent(collectionId)}`, { method: "PATCH", body: JSON.stringify({ productIds }) });
+      toast(`${ids.length} ${ids.length === 1 ? "product" : "products"} added to ${collection.title}`);
+    } catch (failure) { toast(failure instanceof Error ? failure.message : "Could not update the collection.", { tone: "critical" }); }
   }
   const columns: IndexColumn<CatalogAdminProduct>[] = [
     { id: "product", header: "Product", mobile: "primary", cell: (product) => <Link href={"/admin/products/" + product.id} className="flex min-w-44 items-center gap-3 font-semibold">
@@ -78,6 +94,7 @@ export default function ProductsPage() {
         { label: "Set as active", onAction: (ids) => setStatusFor(ids, "ACTIVE") },
         { label: "Set as draft", onAction: (ids) => setStatusFor(ids, "DRAFT") },
         { label: "Archive", onAction: (ids) => setStatusFor(ids, "ARCHIVED") },
+        { label: "Add to collection", onAction: (ids) => setCollectionFor(ids) },
       ]}
       emptyState={filtered
         ? <EmptyState icon={Package} title="No matching products" description="Try another search, or choose All to see every product." />
@@ -89,5 +106,7 @@ export default function ProductsPage() {
         onNext: () => { setHistory((current) => [...current, cursor]); setCursor(next); },
       }}
     />
+    <Picker open={collectionFor !== null} onOpenChange={(open) => { if (!open) setCollectionFor(null); }} title="Add to collection" searchLabel="Search collections" multiple={false} doneLabel="Add products"
+      load={loadCollections} onDone={(picked) => { const ids = collectionFor ?? []; if (picked[0]) void addToCollection(ids, picked[0].id); }} />
   </AdminPage>;
 }

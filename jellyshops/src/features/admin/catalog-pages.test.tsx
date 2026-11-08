@@ -40,6 +40,17 @@ describe("catalog management", () => {
     await waitFor(() => expect(api.request).toHaveBeenCalledWith("/products/p1", expect.objectContaining({ method: "PATCH", body: JSON.stringify({ status: "ACTIVE" }) })));
     expect(screen.getByText("Not tracked")).toBeInTheDocument();
   });
+  it("adds selected products to a collection without dropping the ones already in it", async () => {
+    const product = { id: "p1", title: "T-shirt", status: "ACTIVE", media: [], productType: null, vendor: null, variants: [{ id: "v1", priceMinor: 1200, trackInventory: false }] };
+    api.request.mockResolvedValue({ nodes: [product], nextCursor: null });
+    api.all.mockResolvedValue([{ id: "c1", title: "Summer", handle: "summer", description: "", productIds: ["p9"] }]);
+    const user = userEvent.setup(); render(<ProductsPage />);
+    await user.click(await screen.findByRole("checkbox", { name: "Select T-shirt" }));
+    await user.click(screen.getByRole("button", { name: "Add to collection" }));
+    await user.click(await screen.findByRole("radio", { name: /Summer/ }));
+    await user.click(screen.getByRole("button", { name: "Add products" }));
+    await waitFor(() => expect(api.request).toHaveBeenCalledWith("/collections/c1", expect.objectContaining({ method: "PATCH", body: JSON.stringify({ productIds: ["p9", "p1"] }) })));
+  });
   it("keeps collection membership and name after a failed save, then retries", async () => {
     api.all.mockImplementation(async (path: string) => path === "/products" ? [{ id: "p1", title: "T-shirt" }] : []);
     api.request.mockRejectedValueOnce(new Error("Could not save collection.")).mockResolvedValue({});

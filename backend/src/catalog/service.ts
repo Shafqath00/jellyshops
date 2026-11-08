@@ -1,3 +1,4 @@
+import { assertDistinctVariantChoices } from "./postgres-repository.js";
 import { assertMediaInput } from "./product-media.js";
 import { resolveProductDescription } from "./product-description.js";
 
@@ -106,6 +107,7 @@ export class CatalogService implements CatalogReader {
   }
 
   async createProduct(storeId: string, input: CreateProductInput): Promise<CatalogProduct> {
+    assertDistinctVariantChoices(input.variants);
     assertMediaInput(input);
     assertValidProductConfiguration(input);
     return this.requireWriter().createProduct(storeId, resolveProductDescription(input)).catch(handleConflict);
@@ -113,6 +115,7 @@ export class CatalogService implements CatalogReader {
 
   async updateProduct(storeId: string, productId: string, input: UpdateProductInput): Promise<CatalogProduct> {
     assertMediaInput(input);
+    assertDistinctVariantChoices(input.variants);
     // An update may leave the choices untouched; validate what it sends against what is stored.
     if (input.options !== undefined || input.inventoryOptionIds !== undefined || input.variants !== undefined) {
       const existing = await this.repository.getProduct(storeId, productId);

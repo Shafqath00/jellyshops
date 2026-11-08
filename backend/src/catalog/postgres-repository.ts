@@ -164,7 +164,13 @@ export class CatalogPostgresRepository implements CatalogAdminRepository {
       values.push(storeId, id);
       await this.database.query(`UPDATE "Product" SET ${fields.join(", ")}, "updatedAt" = CURRENT_TIMESTAMP WHERE "storeId" = $${values.length - 1} AND "id" = $${values.length}`, values);
     }
-    for (const variant of input.variants ?? []) {
+    for (const sent of input.variants ?? []) {
+      // A variant sent without an id but with the same choices as a live one updates that one,
+      // so a save that lost its ids can never add a second copy of every combination.
+      const reuse = !sent.id && sent.options && Object.keys(sent.options).length
+        ? await this.database.query<{ id: string }>(`SELECT "id" FROM "ProductVariant" WHERE "storeId" = $1 AND "productId" = $2 AND "archivedAt" IS NULL AND "options" = $3::jsonb ORDER BY "createdAt" LIMIT 1`, [storeId, id, JSON.stringify(sent.options)])
+        : null;
+      const variant = reuse?.rows[0] ? { ...sent, id: reuse.rows[0].id } : sent;
       if (variant.id) {
         const shipping = variantPatchAssignments(variant, 18);
         const updatedVariant = await this.database.query(
@@ -282,4 +288,14 @@ export class CatalogPostgresRepository implements CatalogAdminRepository {
   private product(row: Row, variantRows: Row[], mediaRows: Row[]): CatalogProduct { const variants = variantRows.map((variant) => this.variant({ ...variant, fulfillmentType: row.fulfillmentType })); const prices = variants.map((variant) => variant.priceMinor); return { fulfillmentType: row.fulfillmentType === "DIGITAL" ? "DIGITAL" : "PHYSICAL", id: String(row.id), storeId: String(row.storeId), externalId: row.externalId ? String(row.externalId) : null, handle: String(row.slug), title: String(row.title), description: String(row.description ?? ""), descriptionDoc: (row.descriptionDoc ?? null) as CatalogProduct["descriptionDoc"], seoTitle: row.seoTitle == null ? null : String(row.seoTitle), seoDescription: row.seoDescription == null ? null : String(row.seoDescription), specifications: (row.specifications ?? {}) as Record<string, string>, vendor: row.vendor ? String(row.vendor) : null, productType: row.productType ? String(row.productType) : null, tags: Array.isArray(row.tags) ? row.tags.map(String) : [], status: String(row.status) as CatalogProduct["status"], media: mediaRows.map((media) => ({ id: String(media.id), url: String(media.url), mimeType: String(media.mimeType), width: media.width == null ? null : Number(media.width), height: media.height == null ? null : Number(media.height), altText: media.altText ? String(media.altText) : null, position: Number(media.position ?? 0), appliesTo: (media.appliesTo ?? {}) as Record<string, string[]>, originalName: media.originalName == null ? undefined : String(media.originalName) })), variants, priceRange: prices.length ? { minMinor: Math.min(...prices), maxMinor: Math.max(...prices), currency: String(row.storeCurrency ?? "USD") } : null, available: variants.some((variant) => variant.available), primaryCategoryId: row.primaryCategoryId ? String(row.primaryCategoryId) : null, additionalCategoryIds: Array.isArray(row.additionalCategoryIds) ? row.additionalCategoryIds.map(String) : [], brandId: row.brandId ? String(row.brandId) : null, collectionIds: Array.isArray(row.collectionIds) ? row.collectionIds.map(String) : [], options: Array.isArray(row.options) ? row.options : [], inventoryOptionIds: Array.isArray(row.inventoryOptionIds) ? row.inventoryOptionIds.map(String) : [], categoryMetadata: row.categoryMetadata ?? null, brandMetadata: row.brandMetadata ?? null, collectionMetadata: Array.isArray(row.collectionMetadata) ? row.collectionMetadata : [] }; }
 }
 
-
+/** Two variants of one product may not share the same choices ("Double / With storage" twice). */
+export function assertDistinctVariantChoices(variants: Array<{ title?: string; options?: Record<string, unknown> | null }> | undefined): void {
+  const seen = new Set<string>();
+  for (const variant of variants ?? []) {
+    const entries = Object.entries(variant.options ?? {});
+    if (!entries.length) continue;
+    const key = JSON.stringify(entries.sort(([a], [b]) => a.localeCompare(b)));
+    if (seen.has(key)) throw new ApiError(422, "VARIANT_DUPLICATE", `Two versions have the same choices${variant.title ? ` (${variant.title})` : ""}. Remove one before saving.`);
+    seen.add(key);
+  }
+}

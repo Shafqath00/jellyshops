@@ -158,6 +158,27 @@ describe("ProductBuilder", () => {
     expect(productCalls(fetchMock).map(([, init]) => init?.method)).toEqual(["POST", "PATCH"]);
   });
 
+  it("moves a new product to its own address after the first save, then duplicates it as a draft copy", async () => {
+    window.history.replaceState(null, "", "/admin/products/new");
+    const fetchMock = mockApi();
+    const user = userEvent.setup();
+    render(<ShopProvider><ProductBuilder /></ShopProvider>);
+    await user.type(screen.getByLabelText(/product name/i), "Mug");
+    await user.type(screen.getByLabelText(/^price/i), "100");
+    await user.click(screen.getByRole("button", { name: /save product/i }));
+    await screen.findByText(/Product saved successfully/);
+    expect(window.location.pathname).toMatch(/^\/admin\/products\/(?!new)/);
+    await user.click(screen.getByRole("button", { name: "Duplicate" }));
+    expect(await screen.findByText("Copy saved as a draft.")).toBeVisible();
+    const [, copy] = productCalls(fetchMock);
+    expect(copy[1]).toMatchObject({ method: "POST" });
+    const body = JSON.parse(String(copy[1]?.body));
+    expect(body).toMatchObject({ title: "Mug (copy)", status: "DRAFT" });
+    expect(body.handle).toMatch(/-copy-/);
+    expect(body.variants.every((variant: { id?: string }) => !variant.id)).toBe(true);
+    window.history.replaceState(null, "", "/");
+  });
+
   it("adds a custom category inside a chosen parent and selects it", async () => {
     const fetchMock = mockApi();
     const user = userEvent.setup();
