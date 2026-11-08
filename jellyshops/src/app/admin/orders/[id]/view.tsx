@@ -11,6 +11,8 @@ import { ShipmentActions } from "@/features/commerce/components/shipment-actions
 import { StatusBadge, statusLabel } from "@/components/admin";
 import { describeActivity, emailName, needsRetry } from "@/features/commerce/order-activity";
 import { printPackingSlips } from "@/features/commerce/packing-slip";
+import { OrderTags } from "@/features/commerce/components/order-tags";
+import { createAdminApi } from "@/features/admin/api/admin-api";
 import { ParcelWeight } from "@/features/commerce/components/parcel-weight";
 import { describeShipping } from "@/features/product-builder/shipping";
 import {
@@ -657,6 +659,7 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
           </section>
           <Address title="Shipping address" value={(order.deliverySnapshot?.address ?? order.customerSnapshot.address) as Record<string, unknown> | undefined} />
           <Address title="Billing address" value={order.billingAddress} />
+          {canManage && accessToken && storeId && <OrderTags key={order.id} initial={order.tags ?? []} onSave={async (tags) => (await createAdminApi({ baseUrl: API_BASE_URL, token: accessToken }).setOrderTags(storeId, orderId, tags)).tags} />}
           <section className={`${panel} p-5`}>
             <h2 className="font-semibold">Customer note</h2>
             <p className="mt-3 whitespace-pre-wrap text-sm text-muted-foreground">{order.customerNote || "No customer note"}</p>

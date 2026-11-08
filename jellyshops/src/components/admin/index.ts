@@ -6,4 +6,5 @@ export { Picker, type PickerItem } from "./picker";
 export { Field, ResourceForm, SaveBar, useUnsavedChangesWarning } from "./resource-form";
 export { StatusBadge } from "./status-badge";
 export { humanizeCode, statusInfo, statusLabel, statusOptions, type StatusKind, type StatusTone } from "./status";
+export { TagInput } from "./tag-input";
 export { ToastProvider, useToast } from "./toast";

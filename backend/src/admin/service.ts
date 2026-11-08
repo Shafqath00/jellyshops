@@ -1,4 +1,6 @@
+import { randomUUID } from "node:crypto";
 import type { CommerceRepository, CommerceTransaction } from "../commerce/repository.js";
+import { ApiError } from "../http/errors.js";
 
 export interface AdminOrder {
   id: string;
@@ -52,9 +54,22 @@ export interface MerchantCustomer {
   id: string;
   name: string;
   email: string | null;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  note: string;
+  tags: string[];
+  address: Record<string, string> | null;
+  /** "London, GB" from the saved address or the latest order. */
+  location: string | null;
+  acceptsEmailMarketing: boolean;
+  /** Orders that were not cancelled. */
   orderCount: number;
   lifetimeSpendMinor: number;
   latestOrderAt: Date | null;
+  /** When the merchant added or first edited them; null for customers known only from orders. */
+  createdAt: Date | null;
+  revision: number;
 }
 
 export interface MerchantCustomerDetail extends MerchantCustomer {
@@ -145,40 +160,149 @@ export class AdminSalesService {
   }
 }
 
+export interface CustomerAddressInput { line1?: string; line2?: string; city?: string; region?: string; postalCode?: string; country?: string }
+export interface CustomerProfileInput {
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  note?: string;
+  tags?: string[];
+  address?: CustomerAddressInput | null;
+  /** Email marketing consent. Stored in "NewsletterSubscriber", the store's one record of consent. */
+  acceptsEmailMarketing?: boolean;
+}
+
+const customerId = (email: string) => `email:${email}`;
+const emailOf = (id: string) => id.startsWith("email:") ? id.slice("email:".length).trim().toLowerCase() : "";
+const cleanTags = (tags: string[] = []) => [...new Set(tags.map((tag) => tag.trim()).filter(Boolean))].slice(0, 50);
+const jsonOrNull = (value: unknown) => value == null ? null : JSON.stringify(value);
+const cleanAddress = (address?: CustomerAddressInput | null) => {
+  if (!address) return null;
+  const entries = Object.entries(address).flatMap(([key, value]) => typeof value === "string" && value.trim() ? [[key, value.trim()]] : []);
+  return entries.length ? Object.fromEntries(entries) as Record<string, string> : null;
+};
+
+/**
+ * Customers are everyone who has ordered (grouped by email) plus everyone the merchant added by hand.
+ * A merchant's edits live in "CustomerProfile"; order history is never changed.
+ */
+const CUSTOMER_ROWS = `
+  WITH ordered AS (
+    SELECT lower(o."customerSnapshot"->>'email') AS "email",
+      (array_agg(NULLIF(o."customerSnapshot"->>'name', '') ORDER BY o."createdAt" DESC))[1] AS "orderName",
+      (array_agg(o."customerSnapshot"->'address' ORDER BY o."createdAt" DESC))[1] AS "orderAddress",
+      COUNT(*) FILTER (WHERE o."status" <> 'CANCELLED')::int AS "orderCount",
+      COALESCE(SUM(o."totalMinor") FILTER (WHERE p."status" = 'PAID' AND o."status" <> 'CANCELLED'), 0)::int AS "lifetimeSpendMinor",
+      MAX(o."createdAt") AS "latestOrderAt"
+    FROM "Order" o LEFT JOIN "Payment" p ON p."storeId" = o."storeId" AND p."orderId" = o."id"
+    WHERE o."storeId" = $1 AND COALESCE(o."customerSnapshot"->>'email', '') <> '' GROUP BY 1
+  ), people AS (
+    SELECT COALESCE(c."email", o."email") AS "email", c."firstName", c."lastName", c."phone", c."note", c."tags", c."address",
+      c."revision", c."createdAt" AS "profileCreatedAt", o."orderName", o."orderAddress",
+      COALESCE(o."orderCount", 0) AS "orderCount", COALESCE(o."lifetimeSpendMinor", 0) AS "lifetimeSpendMinor", o."latestOrderAt"
+    FROM ordered o FULL OUTER JOIN (SELECT * FROM "CustomerProfile" WHERE "storeId" = $1) c ON c."email" = o."email"
+  )
+  SELECT people.*, (n."id" IS NOT NULL AND n."unsubscribedAt" IS NULL) AS "acceptsEmailMarketing"
+  FROM people LEFT JOIN "NewsletterSubscriber" n ON n."storeId" = $1 AND lower(n."email") = people."email"`;
+
+type CustomerRow = {
+  email: string; firstName: string | null; lastName: string | null; phone: string | null; note: string | null; tags: string[] | null;
+  address: Record<string, string> | null; revision: number | null; profileCreatedAt: Date | null; orderName: string | null;
+  orderAddress: Record<string, unknown> | null; orderCount: number; lifetimeSpendMinor: number; latestOrderAt: Date | null; acceptsEmailMarketing: boolean;
+};
+
+function toCustomer(row: CustomerRow): MerchantCustomer {
+  const fullName = [row.firstName, row.lastName].filter((part) => part?.trim()).join(" ");
+  const address = (row.address ?? row.orderAddress ?? null) as Record<string, unknown> | null;
+  const location = address ? [address.city, address.country].filter((part) => typeof part === "string" && part).join(", ") : "";
+  return {
+    id: customerId(row.email), name: fullName || row.orderName || row.email, email: row.email,
+    firstName: row.firstName ?? "", lastName: row.lastName ?? "", phone: row.phone ?? "", note: row.note ?? "", tags: row.tags ?? [],
+    address: row.address ?? null, location: location || null, acceptsEmailMarketing: Boolean(row.acceptsEmailMarketing),
+    orderCount: Number(row.orderCount), lifetimeSpendMinor: Number(row.lifetimeSpendMinor), latestOrderAt: row.latestOrderAt,
+    createdAt: row.profileCreatedAt, revision: row.revision ?? 0,
+  };
+}
+
+async function setConsent(tx: CommerceTransaction, storeId: string, email: string, subscribed: boolean) {
+  if (subscribed) {
+    await tx.query(`INSERT INTO "NewsletterSubscriber" ("id","storeId","email","source") VALUES ($1,$2,$3,'admin')
+      ON CONFLICT ("storeId","email") DO UPDATE SET "unsubscribedAt"=NULL,"consentAt"=NOW()`, [`sub_${randomUUID()}`, storeId, email]);
+  } else {
+    await tx.query(`UPDATE "NewsletterSubscriber" SET "unsubscribedAt"=NOW() WHERE "storeId"=$1 AND lower("email")=$2 AND "unsubscribedAt" IS NULL`, [storeId, email]);
+  }
+}
+
+/** Tags on an order, for the merchant's own sorting ("gift", "wholesale"). */
+export class OrderTagService {
+  constructor(private readonly repository: CommerceRepository) {}
+
+  async setTags(storeId: string, orderId: string, tags: string[]): Promise<string[]> {
+    const clean = cleanTags(tags);
+    return this.repository.transaction(async (tx) => {
+      const result = await tx.query<{ tags: string[] }>(`UPDATE "Order" SET "tags" = $3, "updatedAt" = NOW() WHERE "storeId" = $1 AND "id" = $2 RETURNING "tags"`, [storeId, orderId, clean]);
+      if (!result.rows[0]) throw new ApiError(404, "NOT_FOUND", "This order was not found.");
+      return result.rows[0].tags;
+    });
+  }
+}
+
 export class CustomerService {
   constructor(private readonly repository: CommerceRepository) {}
 
   async list(storeId: string): Promise<MerchantCustomer[]> {
     return this.repository.transaction(async (tx) => {
-      const result = await tx.query<MerchantCustomer>(`
-        SELECT CONCAT('email:', lower(COALESCE(o."customerSnapshot"->>'email', 'unknown'))) AS "id",
-          COALESCE(NULLIF(o."customerSnapshot"->>'name', ''), 'Customer') AS "name",
-          NULLIF(lower(o."customerSnapshot"->>'email'), '') AS "email",
-          COUNT(*)::int AS "orderCount", COALESCE(SUM(o."totalMinor") FILTER (WHERE p."status" = 'PAID'), 0)::int AS "lifetimeSpendMinor",
-          MAX(o."createdAt") AS "latestOrderAt"
-        FROM "Order" o LEFT JOIN "Payment" p ON p."storeId" = o."storeId" AND p."orderId" = o."id"
-        WHERE o."storeId" = $1 GROUP BY 1, 2, 3 ORDER BY "latestOrderAt" DESC`, [storeId]);
-      return result.rows;
+      const result = await tx.query<CustomerRow>(`${CUSTOMER_ROWS} ORDER BY COALESCE(people."latestOrderAt", people."profileCreatedAt") DESC NULLS LAST, people."email"`, [storeId]);
+      return result.rows.map(toCustomer);
     });
   }
 
-  async get(storeId: string, customerId: string): Promise<MerchantCustomerDetail | null> {
+  async get(storeId: string, id: string): Promise<MerchantCustomerDetail | null> {
+    const email = emailOf(id);
+    if (!email) return null;
     return this.repository.transaction(async (tx) => {
-      const email = customerId.startsWith("email:") ? customerId.slice("email:".length).toLowerCase() : "";
-      if (!email) return null;
-      const customer = await tx.query<MerchantCustomer>(`
-        SELECT CONCAT('email:', lower(o."customerSnapshot"->>'email')) AS "id", COALESCE(NULLIF(o."customerSnapshot"->>'name', ''), 'Customer') AS "name",
-          lower(o."customerSnapshot"->>'email') AS "email", COUNT(*)::int AS "orderCount",
-          COALESCE(SUM(o."totalMinor") FILTER (WHERE p."status" = 'PAID'), 0)::int AS "lifetimeSpendMinor", MAX(o."createdAt") AS "latestOrderAt"
-        FROM "Order" o LEFT JOIN "Payment" p ON p."storeId" = o."storeId" AND p."orderId" = o."id"
-        WHERE o."storeId" = $1 AND lower(o."customerSnapshot"->>'email') = $2 GROUP BY 1, 2, 3`, [storeId, email]);
-      const row = customer.rows[0];
-      if (!row) return null;
+      const found = await tx.query<CustomerRow>(`${CUSTOMER_ROWS} WHERE people."email" = $2`, [storeId, email]);
+      if (!found.rows[0]) return null;
       const orders = await tx.query<AdminOrder>(`
         SELECT o.*, p."status" AS "paymentStatus", p."paymentIntentId", p."chargeId" FROM "Order" o
         LEFT JOIN "Payment" p ON p."storeId" = o."storeId" AND p."orderId" = o."id"
         WHERE o."storeId" = $1 AND lower(o."customerSnapshot"->>'email') = $2 ORDER BY o."createdAt" DESC`, [storeId, email]);
-      return { ...row, orders: orders.rows };
+      return { ...toCustomer(found.rows[0]), orders: orders.rows };
     });
+  }
+
+  /** Adds a customer by hand. Refused when the email already belongs to a customer of this store. */
+  async create(storeId: string, input: CustomerProfileInput & { email: string }): Promise<MerchantCustomerDetail> {
+    const email = input.email.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new ApiError(422, "EMAIL_INVALID", "Enter a valid email address.");
+    await this.repository.transaction(async (tx) => {
+      const existing = await tx.query(`${CUSTOMER_ROWS} WHERE people."email" = $2`, [storeId, email]);
+      if (existing.rows.length) throw new ApiError(409, "CUSTOMER_EXISTS", "A customer with this email already exists. Open them from the customer list.");
+      await tx.query(`INSERT INTO "CustomerProfile" ("id","storeId","email","firstName","lastName","phone","note","tags","address") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb)`,
+        [`cust_${randomUUID()}`, storeId, email, input.firstName?.trim() ?? "", input.lastName?.trim() ?? "", input.phone?.trim() ?? "", input.note?.trim() ?? "", cleanTags(input.tags), jsonOrNull(cleanAddress(input.address))]);
+      if (input.acceptsEmailMarketing !== undefined) await setConsent(tx, storeId, email, input.acceptsEmailMarketing);
+    });
+    return (await this.get(storeId, customerId(email)))!;
+  }
+
+  /** Saves the merchant's edits. A customer known only from orders gets a profile on the first edit. */
+  async update(storeId: string, id: string, input: CustomerProfileInput & { revision?: number }): Promise<MerchantCustomerDetail> {
+    const email = emailOf(id);
+    const current = email ? await this.get(storeId, id) : null;
+    if (!current) throw new ApiError(404, "NOT_FOUND", "This customer was not found.");
+    if (input.revision !== undefined && input.revision !== current.revision) throw new ApiError(409, "CUSTOMER_CHANGED", "Someone else changed this customer. Reload and try again.");
+    const next = {
+      firstName: input.firstName?.trim() ?? current.firstName, lastName: input.lastName?.trim() ?? current.lastName, phone: input.phone?.trim() ?? current.phone,
+      note: input.note?.trim() ?? current.note, tags: input.tags ? cleanTags(input.tags) : current.tags, address: input.address !== undefined ? cleanAddress(input.address) : current.address,
+    };
+    await this.repository.transaction(async (tx) => {
+      await tx.query(`INSERT INTO "CustomerProfile" ("id","storeId","email","firstName","lastName","phone","note","tags","address") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb)
+        ON CONFLICT ("storeId","email") DO UPDATE SET "firstName"=EXCLUDED."firstName","lastName"=EXCLUDED."lastName","phone"=EXCLUDED."phone","note"=EXCLUDED."note",
+        "tags"=EXCLUDED."tags","address"=EXCLUDED."address","revision"="CustomerProfile"."revision"+1,"updatedAt"=NOW()`,
+        [`cust_${randomUUID()}`, storeId, email, next.firstName, next.lastName, next.phone, next.note, next.tags, jsonOrNull(next.address)]);
+      if (input.acceptsEmailMarketing !== undefined && input.acceptsEmailMarketing !== current.acceptsEmailMarketing) await setConsent(tx, storeId, email, input.acceptsEmailMarketing);
+    });
+    return (await this.get(storeId, id))!;
   }
 }

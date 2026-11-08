@@ -1,215 +1,52 @@
 "use client";
 
-import { AdminPageHeader } from "@/components/admin-ui";
 import Link from "next/link";
-import {
-  ArrowUpRight,
-  Loader2,
-  Search,
-  UserRound,
-} from "lucide-react";
-import {
-  useCallback,
-  useDeferredValue,
-  useMemo,
-  useState,
-} from "react";
-import {
-  authApiOrigin,
-  useAuth,
-} from "@/features/auth/providers/auth-provider";
-import { createAdminApi } from "@/features/admin/api/admin-api";
+import { Users } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { AdminPage, EmptyState, IndexTable, StatusBadge, type IndexColumn, type IndexTab } from "@/components/admin";
+import { authApiOrigin, useAuth } from "@/features/auth/providers/auth-provider";
+import { createAdminApi, type MerchantCustomer } from "@/features/admin/api/admin-api";
 import { useAdminQuery } from "@/features/admin/hooks/use-admin-query";
-import { SkeletonRows } from "@/components/ui/skeleton";
+import { downloadCustomersCsv } from "@/features/admin/customers/customers-csv";
 
-function formatMoney(amountMinor: number, currency: string) {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(amountMinor / 100);
-}
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
+const TABS: IndexTab[] = [{ id: "", label: "All" }, { id: "ordered", label: "Have ordered" }, { id: "never", label: "Never ordered" }, { id: "subscribed", label: "Email subscribers" }];
+const VIEW_TEST: Record<string, (customer: MerchantCustomer) => boolean> = {
+  ordered: (customer) => customer.orderCount > 0,
+  never: (customer) => customer.orderCount === 0,
+  subscribed: (customer) => Boolean(customer.acceptsEmailMarketing),
+};
 
 export default function CustomersPage() {
   const { session, activeStore } = useAuth();
-
-  const api = useMemo(() => {
-    if (!session) return null;
-
-    return createAdminApi({
-      baseUrl: authApiOrigin(),
-      token: session.access_token,
-    });
-  }, [session]);
-
-  const load = useCallback(
-    (_signal: AbortSignal) => api!.listCustomers(activeStore!.id),
-    [api, activeStore]
-  );
-
-  const query = useAdminQuery(
-    api && activeStore ? `customers:${activeStore.id}` : null,
-    load
-  );
-
+  const api = useMemo(() => session ? createAdminApi({ baseUrl: authApiOrigin(), token: session.access_token }) : null, [session]);
+  const load = useCallback(() => api!.listCustomers(activeStore!.id), [api, activeStore]);
+  const query = useAdminQuery(api && activeStore ? `customers:${activeStore.id}` : null, load);
+  const [view, setView] = useState("");
   const [search, setSearch] = useState("");
-  const deferredSearch = useDeferredValue(search);
-  const customers = query.data?.customers ?? [];
+  const all = useMemo(() => query.data?.customers ?? [], [query.data]);
+  const needle = search.trim().toLowerCase();
+  const rows = all.filter((customer) => (!view || VIEW_TEST[view](customer)) && (!needle || [customer.name, customer.email, customer.phone, customer.location, ...(customer.tags ?? [])].some((value) => value?.toLowerCase().includes(needle))));
+  const money = (minor: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: activeStore?.currency ?? "GBP" }).format(minor / 100);
+  const tabs = TABS.map((tab) => ({ ...tab, count: query.data ? (tab.id ? all.filter(VIEW_TEST[tab.id]).length : all.length) : undefined }));
 
-  const filteredCustomers = useMemo(() => {
-    const value = deferredSearch.trim().toLowerCase();
+  const columns: IndexColumn<MerchantCustomer>[] = [
+    { id: "name", header: "Customer", mobile: "primary", cell: (customer) => <div className="min-w-0"><Link href={`/admin/customers/${encodeURIComponent(customer.id)}`} className="jk-cell-strong">{customer.name}</Link>{customer.email && customer.email !== customer.name && <span className="jk-cell-sub truncate">{customer.email}</span>}</div> },
+    { id: "subscription", header: "Email marketing", cell: (customer) => customer.acceptsEmailMarketing ? <StatusBadge tone="success">Subscribed</StatusBadge> : <StatusBadge tone="neutral">Not subscribed</StatusBadge> },
+    { id: "location", header: "Location", mobile: "hidden", cell: (customer) => customer.location || <span className="jk-muted">None</span> },
+    { id: "orders", header: "Orders", align: "end", cell: (customer) => customer.orderCount },
+    { id: "spent", header: "Amount spent", align: "end", cell: (customer) => <span className="tabular-nums">{money(customer.lifetimeSpendMinor)}</span> },
+    { id: "tags", header: "Tags", mobile: "hidden", cell: (customer) => customer.tags?.length ? customer.tags.slice(0, 3).join(", ") + (customer.tags.length > 3 ? ` +${customer.tags.length - 3}` : "") : <span className="jk-muted">None</span> },
+  ];
 
-    if (!value) return customers;
-
-    return customers.filter((customer) =>
-      [customer.name, customer.email]
-        .filter(Boolean)
-        .some((field) =>
-          String(field).toLowerCase().includes(value)
-        )
-    );
-  }, [customers, deferredSearch]);
-
-  const currency = activeStore?.currency ?? "INR";
-
-  return (
-    <div className="space-y-6">
-      <AdminPageHeader title="Customers" description="Find customers and view their orders." />
-
-      <section className="overflow-hidden rounded-xl border border-black/[0.06] bg-card shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-black/[0.06] bg-muted/50 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-          <label className="relative block w-full sm:max-w-sm">
-            <Search
-              size={15}
-              strokeWidth={1.9}
-              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
-            />
-
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              aria-label="Search customers"
-              placeholder="Search by name or email"
-              className="h-10 w-full rounded-lg border border-black/[0.08] bg-card pl-10 pr-4 text-[12px] font-semibold text-foreground outline-none transition placeholder:text-muted-foreground focus:border-tint-border focus:ring-4 focus:ring-ring/40"
-            />
-          </label>
-
-          <p className="text-[12px] font-bold text-muted-foreground">
-            {customers.length}{" "}
-            {customers.length === 1 ? "customer" : "customers"}
-          </p>
-        </div>
-
-        {query.loading ? (
-          <SkeletonRows label="Loading customers…" />
-        ) : query.error ? (
-          <div className="m-5 rounded-xl border border-tint-border bg-muted/50 p-4">
-            <p
-              role="alert"
-              className="text-[12px] font-semibold text-tint-foreground"
-            >
-              {query.error.message}
-            </p>
-
-            <button
-              type="button"
-              onClick={query.retry}
-              className="mt-3 inline-flex h-9 items-center rounded-lg border border-tint-border bg-card px-3.5 text-[12px] font-semibold text-tint-foreground transition hover:bg-muted"
-            >
-              Try again
-            </button>
-          </div>
-        ) : customers.length === 0 ? (
-          <div className="grid min-h-72 place-items-center px-6 py-12 text-center">
-            <div>
-              <span className="mx-auto grid size-14 place-items-center rounded-xl bg-muted text-tint-foreground">
-                <UserRound size={22} strokeWidth={1.8} />
-              </span>
-
-              <h2 className="mt-4 text-[16px] font-semibold tracking-[-0.02em] text-foreground">
-                No customers yet
-              </h2>
-
-              <p className="mx-auto mt-2 max-w-sm text-[12px] leading-5 text-muted-foreground">
-                Customer profiles are created automatically when someone
-                places an order.
-              </p>
-            </div>
-          </div>
-        ) : filteredCustomers.length === 0 ? (
-          <div className="grid min-h-60 place-items-center px-6 text-center">
-            <div>
-              <Search className="mx-auto text-muted-foreground" size={22} />
-              <p className="mt-3 text-[13px] font-semibold text-foreground">
-                No customers match “{search}”
-              </p>
-              <p className="mt-1 text-[13px] text-muted-foreground">
-                Try a different name or email address.
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="grid gap-px bg-black/[0.06] sm:grid-cols-2 xl:grid-cols-3">
-            {filteredCustomers.map((customer) => (
-              <Link
-                key={customer.id}
-                href={`/admin/customers/${encodeURIComponent(customer.id)}`}
-                className="group bg-card p-5 transition duration-200 hover:bg-muted/50"
-              >
-                <div className="flex items-start gap-3.5">
-                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-muted text-[12px] font-semibold text-tint-foreground ring-1 ring-black/[0.04]">
-                    {initials(customer.name)}
-                  </span>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <h2 className="truncate text-[13px] font-semibold tracking-[-0.015em] text-foreground">
-                          {customer.name}
-                        </h2>
-
-                        <p className="mt-1 truncate text-[12px] font-medium text-muted-foreground">
-                          {customer.email ?? "Email unavailable"}
-                        </p>
-                      </div>
-
-                      <ArrowUpRight
-                        size={14}
-                        className="shrink-0 text-muted-foreground transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-muted-foreground"
-                      />
-                    </div>
-
-                    <div className="mt-4 flex items-center gap-2 text-[12px] font-bold text-muted-foreground">
-                      <span>
-                        {customer.orderCount}{" "}
-                        {customer.orderCount === 1 ? "order" : "orders"}
-                      </span>
-                      <span className="text-muted-foreground">•</span>
-                      <span>
-                        {formatMoney(
-                          customer.lifetimeSpendMinor,
-                          currency
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
-    </div>
-  );
+  return <AdminPage title="Customers" description="Everyone who has ordered from you, and people you add yourself. Open a customer to see their orders, add a note or tag them." primaryAction={{ label: "Add customer", href: "/admin/customers/new" }}>
+    <IndexTable label="Customers" rows={rows} rowKey={(customer) => customer.id} rowLabel={(customer) => customer.name} columns={columns}
+      loading={query.loading} error={query.error?.message} onRetry={query.retry}
+      tabs={tabs} activeTab={view} onTabChange={setView}
+      search={{ value: search, onChange: setSearch, label: "Search customers", placeholder: "Search by name, email, phone, place or tag" }}
+      bulkActions={[{ label: "Export to CSV", onAction: (ids) => downloadCustomersCsv(all.filter((customer) => ids.includes(customer.id))) }]}
+      emptyState={all.length
+        ? <EmptyState icon={Users} title="No matching customers" description="Try another search, or choose All." />
+        : <EmptyState icon={Users} title="No customers yet" description="Customers appear here after their first order. You can also add someone yourself, for example a customer who orders by phone." action={<Link href="/admin/customers/new" className="jk-button jk-button-primary">Add customer</Link>} />}
+      pagination={rows.length ? { summary: `${rows.length} ${rows.length === 1 ? "customer" : "customers"}`, hasPrevious: false, hasNext: false, onPrevious: () => undefined, onNext: () => undefined } : undefined} />
+  </AdminPage>;
 }

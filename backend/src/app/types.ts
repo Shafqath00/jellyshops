@@ -1,5 +1,5 @@
 import type express from "express";
-import type { AdminSalesService, AdminSummaryService, CustomerService } from "../admin/service.js";
+import type { AdminSalesService, AdminSummaryService, CustomerService, OrderTagService } from "../admin/service.js";
 import type { AuthProvider } from "../auth/types.js";
 import type { CatalogAdmin } from "../catalog/service.js";
 import type { MerchantOrderService } from "../commerce/merchant-orders.js";
@@ -82,7 +82,7 @@ export interface AppContext {
   /** Where uploaded files (media, theme package assets) are kept. */
   mediaStorage: MediaStorage;
   publicStorefrontContextService: PublicStorefrontContextService | undefined;
-  adminServices: { summary: AdminSummaryService; customers: CustomerService; sales?: AdminSalesService } | undefined;
+  adminServices: { summary: AdminSummaryService; customers: CustomerService; sales?: AdminSalesService; orderTags?: OrderTagService } | undefined;
   commerceRepository: CommerceRepository | undefined;
   customerService: StoreCustomerService | undefined;
   verifyCustomer: ReturnType<typeof supabaseCustomerVerifier> | undefined;

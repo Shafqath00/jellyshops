@@ -1,5 +1,5 @@
 import type express from "express";
-import { AdminSalesService, AdminSummaryService, CustomerService } from "../admin/service.js";
+import { AdminSalesService, AdminSummaryService, CustomerService, OrderTagService } from "../admin/service.js";
 import { DevelopmentAuthProvider } from "../auth/development-auth-provider.js";
 import { FirebaseAuthProvider } from "../auth/firebase-auth-provider.js";
 import { createFirebaseTokenVerifier } from "../auth/firebase-token-verifier.js";
@@ -315,6 +315,7 @@ export function resolveAppDependencies(dependencies: Partial<AppDependencies> = 
       }),
       customers: new CustomerService(commerceRepository),
       sales: new AdminSalesService(commerceRepository),
+      orderTags: new OrderTagService(commerceRepository),
     }
     : undefined;
 

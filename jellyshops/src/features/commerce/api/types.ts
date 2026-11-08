@@ -59,6 +59,8 @@ export type MerchantPaymentStatus = "PENDING" | "PROCESSING" | "PAID" | "FAILED"
 export type RefundStatus = "PENDING" | "REQUIRES_ACTION" | "SUCCEEDED" | "FAILED" | "CANCELLED";
 
 export interface MerchantOrder {
+  /** The merchant's own labels, for example "gift" or "wholesale". */
+  tags?: string[];
   revision?: number;
   taxMinor?: number | null;
   discountMinor?: number | null;

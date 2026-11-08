@@ -438,6 +438,7 @@ function orderColumns({ timeZone, canManage, updating, onAdvance }: Omit<OrderRo
     { id: "payment", header: "Payment", cell: (order) => <StatusBadge kind="payment" value={order.paymentStatus} /> },
     { id: "fulfilment", header: "Fulfilment", cell: (order) => <StatusBadge kind="fulfilment" value={fulfilmentShown(order)} /> },
     { id: "total", header: "Total", align: "end", cell: (order) => <strong className="tabular-nums">{orderMoney(order.totalMinor, order.currency)}</strong> },
+    { id: "tags", header: "Tags", mobile: "hidden", cell: (order) => order.tags?.length ? <span className="jk-cell-sub">{order.tags.join(", ")}</span> : null },
     {
       id: "next", header: "Next step", hideHeader: true, align: "end",
       cell: (order) => {
