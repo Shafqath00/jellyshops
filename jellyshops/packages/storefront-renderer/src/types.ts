@@ -22,6 +22,8 @@ export interface ProductPresentationContext {
   setQuantity(quantity: number): void;
   addToCart(): Promise<{ ok: boolean; message?: string }>;
   buyNow?(): Promise<{ ok: boolean; message?: string }>;
+  /** "Email me when it's back" for the chosen variant while it is sold out; absent where the store cannot send it. */
+  notifyWhenAvailable?(email: string, website?: string): Promise<{ ok: boolean; message?: string }>;
   /** Text fields the shopper fills in for this line (engraving, gift message); absent when the product has none. */
   personalisation?: {
     fields: Array<{ id: string; label: string; required: boolean; maxLength: number; multiline?: boolean; helpText?: string; /** Formatted extra price, "£5.00". */ priceAdjustment?: string }>;

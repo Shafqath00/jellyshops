@@ -5,6 +5,7 @@ import StockPage from "./page";
 
 const api = vi.hoisted(() => ({ request: vi.fn(), all: vi.fn() }));
 vi.mock("@/features/admin/api/catalog-api", () => ({ useAdminCatalog: () => ({ ...api, ready: true, storeId: "store-a" }) }));
+vi.mock("@/features/admin/api/back-in-stock-api", () => ({ useBackInStockWaiting: () => ({ v1: 3 }) }));
 afterEach(cleanup);
 beforeEach(() => { vi.resetAllMocks(); });
 
@@ -18,6 +19,8 @@ describe("stock page", () => {
     render(<StockPage />);
     const table = await screen.findByRole("table");
     expect(within(table).getByText("5012345678900")).toBeVisible();
+    // Shoppers waiting for the low-stock variant to come back.
+    expect(within(table).getByTitle("Shoppers who asked to be emailed when it is back")).toHaveTextContent("3");
     expect(within(table).getByText("Low stock")).toBeVisible();
     expect(within(table).getByText("In stock")).toBeVisible();
     expect(within(table).getByText("Out of stock")).toBeVisible();

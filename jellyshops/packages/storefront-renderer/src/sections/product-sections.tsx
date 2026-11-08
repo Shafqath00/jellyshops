@@ -1,5 +1,6 @@
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import { PersonalisationFields } from "./personalisation-fields";
+import { BackInStockForm } from "./back-in-stock-form";
 import { ProductCard } from "../product-card";
 import { elementProps } from "../element-style";
 import { useRef, useState, type CSSProperties } from "react";
@@ -141,6 +142,7 @@ export function ProductPurchaseSection({ context, section }: { context: Storefro
       {product.buyNow && <button type="button" className="jelly-button jelly-button--secondary" disabled={disabled} onClick={() => void purchase(true)}>Buy now</button>}
       {product.wishlistControl}
     </div>
+    {product.availability.state === "out-of-stock" && product.notifyWhenAvailable && context.mode === "published" && <BackInStockForm onSubmit={product.notifyWhenAvailable} />}
     {message && <p role="status" className="jelly-purchase-message">{message}</p>}
     {error && <p role="alert" className="jelly-purchase-error">{error}</p>}
     {section.settings.stickyBar === true && <StickyPurchaseBar product={product} visible={showBar} label={label} busy={busy} disabled={disabled} onAdd={() => { void purchase(); }} anchor={actions} message={message ?? error} />}

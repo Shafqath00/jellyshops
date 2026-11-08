@@ -19,6 +19,7 @@ import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-pag
 import { loadPublicStorefrontPublication, type PublicStorefrontPublication } from "@/features/storefront/public-storefront-api";
 import { resolveStorefrontRoute, type PublicResourceReader } from "@/features/storefront/resource-loader";
 import { StorefrontPageLoading } from "@/features/storefront/components/storefront-page-loading";
+import { requestBackInStock } from "@/features/storefront/back-in-stock-api";
 
 export default function ProductPage() {
   const router = useRouter();
@@ -74,6 +75,9 @@ export default function ProductPage() {
     // After a refused add, each field shows what is missing.
     const add = productPresentation.addToCart;
     productPresentation.addToCart = async () => { const result = await add(); if (!result.ok) setPersonalisationTried(true); return result; };
+  }
+  if (productPresentation && store && product && variant && productPresentation.availability.state === "out-of-stock") {
+    productPresentation.notifyWhenAvailable = (email, website) => requestBackInStock(store.id, variant.id, email, website);
   }
   if (productPresentation && store && product) {
     productPresentation.wishlistControl = <WishlistButton storeId={store.id} productId={product.id} />;

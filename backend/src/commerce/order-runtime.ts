@@ -8,6 +8,7 @@ import type { CommerceDatabase } from "./repository.js";
 import type { MerchantOrderService } from "./merchant-orders.js";
 import { createNotificationService, CaptureNotificationTransport } from "./notifications.js";
 import { smtpNotificationTransport } from "./notification-transport.js";
+import { BackInStockService } from "../back-in-stock/service.js";
 import { createDigitalService, localPrivateDigitalStorage, supabasePrivateDigitalStorage } from "./digital.js";
 import type { PaymentSettlementHooks } from "../stripe/webhooks/processor.js";
 
@@ -30,6 +31,8 @@ export function createOrderRuntime(database: CommerceDatabase, orders: MerchantO
     ? supabasePrivateDigitalStorage(createClient(config.supabaseUrl, config.supabaseSecretKey, { auth: { persistSession: false, autoRefreshToken: false } }), env.SUPABASE_DIGITAL_BUCKET)
     : !production ? localPrivateDigitalStorage(env.DIGITAL_STORAGE_DIRECTORY || path.join(config.dataDirectory, "private-digital")) : undefined;
   const digital = storage ? createDigitalService(database, storage) : undefined;
+  // Back-in-stock emails use the same sender as order emails; without one, requests are kept and sent later.
+  const backInStock = new BackInStockService({ query: (text: string, values?: unknown[]) => database.transaction((tx) => tx.query(text, values)) } as never, transport && publicBaseUrl ? transport : undefined, publicBaseUrl);
   const hooks: PaymentSettlementHooks = {
     async settleChargeRefund(id, tx, account) {
       // Managed refunds settle through refund.updated. charge.refunded also fires
@@ -53,14 +56,15 @@ export function createOrderRuntime(database: CommerceDatabase, orders: MerchantO
   async function runWorkers() {
     const operations = await orders.management.runOperations(2);
     const email = notifications ? await notifications.runWorker(3) : { configured: false };
+    const restocked = await backInStock.notifyAvailable(25).catch(() => ({ sent: 0, failed: 0, configured: false }));
     const health = await database.transaction(async tx => ({
       pendingWebhooks: Number((await tx.query(`SELECT count(*)::int AS count FROM "StripeWebhookEvent" WHERE "processedAt" IS NULL`)).rows[0]?.count || 0),
       pendingSettlements: Number((await tx.query(`SELECT count(*)::int AS count FROM "OrderRevision" WHERE status='PENDING'`)).rows[0]?.count || 0),
       failedNotifications: Number((await tx.query(`SELECT count(*)::int AS count FROM "OrderNotification" WHERE status IN ('FAILED','UNCERTAIN')`)).rows[0]?.count || 0),
     }));
-    return { operations, email, health };
+    return { operations, email, restocked, health };
   }
-  return { notifications, digital, hooks, runWorkers };
+  return { notifications, digital, hooks, runWorkers, backInStock };
 }
 export type OrderRuntime = ReturnType<typeof createOrderRuntime>;
 

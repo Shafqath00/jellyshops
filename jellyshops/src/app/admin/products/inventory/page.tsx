@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { AdminPage, Banner, EmptyState, IndexTable, SaveBar, StatusBadge, useToast, useUnsavedChangesWarning, type IndexColumn, type IndexTab } from "@/components/admin";
 import { useAdminCatalog, type InventoryRow, type CatalogPage } from "@/features/admin/api/catalog-api";
 import { StockHistory } from "@/features/admin/components/stock-history";
+import { useBackInStockWaiting } from "@/features/admin/api/back-in-stock-api";
 import { STOCK_STATUS_LABEL } from "@/features/product-builder/stock";
 
 const TABS: IndexTab[] = [{ id: "", label: "All" }, { id: "low", label: "Low stock" }, { id: "out", label: "Out of stock" }];
@@ -61,10 +62,12 @@ export default function InventoryPage() {
     if (saved) { toast(`Stock saved for ${saved} ${saved === 1 ? "item" : "items"}`); setNote(""); }
   }
 
+  const waiting = useBackInStockWaiting(revision);
   const columns: IndexColumn<InventoryRow>[] = [
     { id: "product", header: "Product", mobile: "primary", cell: (row) => <div><Link className="jk-cell-strong" href={"/admin/products/" + row.productId}>{row.productTitle}</Link><span className="jk-cell-sub">{row.variantTitle}</span></div> },
     { id: "sku", header: "SKU", mobile: "hidden", cell: (row) => <div>{row.sku || <span className="jk-muted">None</span>}{row.barcode && <span className="jk-cell-sub">{row.barcode}</span>}</div> },
     { id: "status", header: "Status", cell: (row) => { const status = row.trackInventory ? row.stockStatus ?? "in_stock" : "untracked"; return <StatusBadge tone={STATUS_TONE[status]}>{STOCK_STATUS_LABEL[status]}</StatusBadge>; } },
+    { id: "waiting", header: "Waiting for stock", align: "end", mobile: "hidden", cell: (row) => waiting[row.variantId] ? <span title="Shoppers who asked to be emailed when it is back">{waiting[row.variantId]}</span> : <span className="jk-muted">None</span> },
     { id: "held", header: "Held by checkouts", align: "end", cell: (row) => row.trackInventory ? row.reserved : <span className="jk-muted">None</span> },
     { id: "available", header: "Available", align: "end", cell: (row) => row.availableQuantity ?? <span className="jk-muted">None</span> },
     { id: "onhand", header: "On hand", align: "end", cell: (row) => row.trackInventory && row.revision ? <div className="jk-stock-edit">

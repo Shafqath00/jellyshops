@@ -1231,3 +1231,13 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 .jelly-review-website { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .jelly-review-error { margin: 0; color: #b42318; font-size: 14px; }
 .jelly-review-thanks { margin: 0; padding: 16px; border-radius: var(--jelly-card-radius, 8px); background: color-mix(in srgb, var(--j-color-primary, currentColor) 8%, transparent); }
+
+/* "Email me when it's back" on sold-out products (product purchase section). */
+.jelly-back-in-stock { display: grid; gap: 8px; margin-top: 16px; padding: 16px; border: 1px solid var(--j-color-border, color-mix(in srgb, currentColor 15%, transparent)); border-radius: var(--jelly-card-radius, 8px); }
+.jelly-back-in-stock-title { margin: 0; font-weight: 600; }
+.jelly-back-in-stock-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.jelly-back-in-stock-row input { flex: 1 1 200px; min-width: 0; min-height: 44px; }
+.jelly-back-in-stock-row .jelly-button { min-height: 44px; }
+.jelly-back-in-stock-note { margin: 0; color: var(--j-color-muted, inherit); font-size: 13px; }
+.jelly-back-in-stock-error { margin: 0; color: #b42318; font-size: 14px; }
+.jelly-back-in-stock-done { margin-top: 16px; padding: 14px 16px; border-radius: var(--jelly-card-radius, 8px); background: color-mix(in srgb, var(--j-color-primary, currentColor) 8%, transparent); }

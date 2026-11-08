@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import { createMerchantBackInStockRouter, createPublicBackInStockRouter } from "../../back-in-stock/routes.js";
 import { createMerchantOrderRouter } from "../../commerce/merchant-order-routes.js";
 import {
   createDigitalProductRouter,
@@ -58,6 +59,8 @@ export function mountOrderRuntimeRoutes(app: Express, context: AppContext): void
         () => notifications.runWorker(1), config.stripe.schedulerSecret, () => notifications.queueStatus(),
       ));
     }
+    app.use("/api/public/stores/:storeId/back-in-stock", createPublicBackInStockRouter(orderRuntime.backInStock));
+    app.use("/api/stores/:storeId/back-in-stock", createMerchantBackInStockRouter(orderRuntime.backInStock, authProvider));
     if (orderRuntime.digital) {
       app.use("/api/stores/:storeId/digital-products", createDigitalProductRouter(orderRuntime.digital, authProvider));
       app.use("/api/public/stores/:storeId/digital", createPublicDigitalRouter(orderRuntime.digital));
