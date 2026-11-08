@@ -16,7 +16,7 @@ export const hashDigitalToken = (token: string) => createHash("sha256").update(t
 export function notificationRetry(attempts: number, uncertain: boolean) {
   return { status: uncertain ? "UNCERTAIN" : attempts >= 8 ? "FAILED" : "QUEUED", delaySeconds: uncertain || attempts >= 8 ? 0 : Math.min(3600, 30 * 2 ** attempts) };
 }
-export interface NotificationContent { brandName: string; customerName?: string; number: string; totalMinor: number; currency: string; orderUrl: string; accentColor?: string; logoUrl?: string | null; contactEmail?: string; refundAmountMinor?: number; items?: { title: string; quantity: number; unitPriceMinor: number }[]; downloads?: { filename: string; url: string }[]; tracking?: { carrier?: string; number?: string; url?: string }[] }
+export interface NotificationContent { brandName: string; customerName?: string; number: string; totalMinor: number; currency: string; orderUrl: string; accentColor?: string; logoUrl?: string | null; contactEmail?: string; refundAmountMinor?: number; items?: { title: string; quantity: number; unitPriceMinor: number; /** The line's choices and personalisation, "Engraving: SAM". */ details?: string[] }[]; downloads?: { filename: string; url: string }[]; tracking?: { carrier?: string; number?: string; url?: string }[] }
 export interface NotificationTemplate { subject: string; heading: string; message: string; closing: string }
 const defaultMessages: Record<NotificationType, string> = {
   PLACED: "We've received your order. You'll find your order details below.",
@@ -58,7 +58,7 @@ export function renderOrderNotification(type: NotificationType, data: Notificati
   const orderUrl = safeWebUrl(data.orderUrl);
   const logoUrl = safeWebUrl(data.logoUrl);
   const lines = (value: string) => escape(value).replace(/\r\n|\r|\n/g, "<br>");
-  const items = (data.items ?? []).map(item => `<tr><td style="padding:14px 8px 14px 0;border-bottom:1px solid #dcd8ce;font-size:14px;line-height:21px;color:#14213d">${escape(item.title)} <span style="color:#45516a">× ${item.quantity}</span></td><td align="right" style="padding:14px 0 14px 8px;border-bottom:1px solid #dcd8ce;font-size:14px;line-height:21px;color:#14213d;white-space:nowrap">${escape(money(item.unitPriceMinor * item.quantity))}</td></tr>`).join("");
+  const items = (data.items ?? []).map(item => `<tr><td style="padding:14px 8px 14px 0;border-bottom:1px solid #dcd8ce;font-size:14px;line-height:21px;color:#14213d">${escape(item.title)} <span style="color:#45516a">× ${item.quantity}</span>${(item.details ?? []).map((detail) => `<br><span style="font-size:13px;color:#45516a">${escape(detail)}</span>`).join("")}</td><td align="right" style="padding:14px 0 14px 8px;border-bottom:1px solid #dcd8ce;font-size:14px;line-height:21px;color:#14213d;white-space:nowrap">${escape(money(item.unitPriceMinor * item.quantity))}</td></tr>`).join("");
   const refund = data.refundAmountMinor === undefined ? "" : `<tr><td colspan="2" style="padding:0 0 12px;font-size:14px;line-height:22px;color:#14213d"><strong>Refund amount: ${escape(money(data.refundAmountMinor))}</strong></td></tr>`;
   const tracking = (data.tracking ?? []).map(t => {
     const url = safeWebUrl(t.url);
@@ -68,7 +68,7 @@ export function renderOrderNotification(type: NotificationType, data: Notificati
     const url = safeWebUrl(d.url);
     return `<tr><td style="padding:0 0 12px;font-size:14px;line-height:23px;color:#14213d">${url ? `<a href="${escape(url)}" style="color:#14213d;text-decoration:underline">Download ${escape(d.filename)}</a>` : `Download ${escape(d.filename)}`}</td></tr>`;
   }).join("");
-  const plainItems = (data.items ?? []).map(item => `${item.title} × ${item.quantity} — ${money(item.unitPriceMinor * item.quantity)}`).join("\n");
+  const plainItems = (data.items ?? []).map(item => `${item.title} × ${item.quantity} — ${money(item.unitPriceMinor * item.quantity)}${(item.details ?? []).map((detail) => `\n  ${detail}`).join("")}`).join("\n");
   const plainTracking = (data.tracking ?? []).map(t => [t.carrier, t.number, safeWebUrl(t.url)].filter(Boolean).join(" · ")).join("\n");
   const plainDownloads = (data.downloads ?? []).map(d => `${d.filename}${safeWebUrl(d.url) ? `: ${d.url}` : ""}`).join("\n");
   const contact = data.contactEmail && /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(data.contactEmail) ? data.contactEmail : undefined;
@@ -151,7 +151,7 @@ export function createNotificationService(database: CommerceDatabase, transport:
             }
             const tracking = shipmentNotificationTypes.has(String(job.type)) ? (await sql.query(`SELECT carrier,"trackingNumber" AS number,"trackingUrl" AS url FROM "OrderFulfilment" WHERE "storeId"=$1 AND "orderId"=$2 ORDER BY "createdAt"`, [job.storeId, job.orderId])).rows.map((r) => ({ carrier: String(r.carrier ?? ""), number: String(r.number ?? ""), url: typeof r.url === "string" && /^https?:\/\//.test(r.url) ? r.url : undefined })) : [];
             const itemRows = Array.isArray(order.items) ? order.items as Record<string, unknown>[] : (await sql.query(`SELECT * FROM "OrderItem" WHERE "storeId"=$1 AND "orderId"=$2 ORDER BY "variantId"`, [job.storeId, job.orderId])).rows;
-            const items = itemRows.map((r) => ({ title: String(r.titleSnapshot), quantity: Number(r.quantity), unitPriceMinor: Number(r.unitPriceMinor) }));
+            const items = itemRows.map((r) => ({ title: String(r.titleSnapshot), quantity: Number(r.quantity), unitPriceMinor: Number(r.unitPriceMinor), details: lineDetails(r.configurationSnapshot) }));
             return { order, downloads, tracking, items };
           });
           const customer = content.order.customerSnapshot as { name?: string; email?: string };
@@ -182,3 +182,12 @@ export type NotificationService = ReturnType<typeof createNotificationService>;
 
 
 
+
+/** An order line's choices and personalisation as "Name: value", for emails. */
+export function lineDetails(snapshot: unknown): string[] {
+  if (!Array.isArray(snapshot)) return [];
+  return snapshot.flatMap((entry) => {
+    const item = entry as { optionName?: unknown; valueLabel?: unknown } | null;
+    return item && typeof item.optionName === "string" && typeof item.valueLabel === "string" ? [`${item.optionName}: ${item.valueLabel}`] : [];
+  }).slice(0, 12);
+}

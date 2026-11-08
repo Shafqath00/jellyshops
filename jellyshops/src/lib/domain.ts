@@ -1,3 +1,4 @@
+import type { PersonalisationEntry, PersonalisationField } from "@jelly/storefront-schema";
 export type Currency = "INR" | "GBP" | "USD";
 export type OrderStatus = "PENDING" | "CONFIRMED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
 export type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "REFUNDED";
@@ -158,6 +159,8 @@ export interface Product {
   additionalCategoryIds?: string[];
   collectionIds?: string[];
   options?: ProductOption[];
+  /** Text fields the shopper fills in per cart line. */
+  personalisation?: PersonalisationField[];
   inventoryOptionIds?: string[];
   compareAtPriceMinor?: number;
 }
@@ -188,6 +191,8 @@ export interface CartItem {
   variantId: string;
   quantity: number;
   configurationSelections?: ConfiguredOptionSelection[];
+  /** Text the shopper typed for this line (engraving, gift message); see storefront-schema personalisation.ts. */
+  personalisation?: PersonalisationEntry[];
   unitPriceMinor?: number;
 }
 

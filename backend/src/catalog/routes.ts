@@ -80,6 +80,7 @@ const createProductSchema = z.object({
   brandId: z.string().min(1).nullable().optional(),
   collectionIds: z.array(z.string().min(1)).optional(),
   options: z.array(z.unknown()).optional(),
+  personalisation: z.array(z.unknown()).max(5).optional(),
   inventoryOptionIds: z.array(z.string().min(1)).optional(),
   categoryMetadata: z.unknown().nullable().optional(),
   brandMetadata: z.unknown().nullable().optional(),

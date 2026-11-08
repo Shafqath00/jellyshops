@@ -1,3 +1,4 @@
+import type { PersonalisationEntry } from "@jelly/storefront-schema";
 import { migrateStoreDesignDocument, type StoreDesignDocument } from "@jelly/storefront-schema";
 import { validateSectionAgainstRegistry } from "@jelly/storefront-registry";
 import type { Brand, Cart, Category, CategoryOptionDefinition, Collection, ConfiguredOptionSelection, Customer, Order, Product, ProductOption, ProductOptionValue, ProductVariant, ShopState, Store, StoreDesignPublication, StoreDesignRecord } from "./domain";
@@ -52,7 +53,7 @@ export interface ShopRepository {
   listCustomers(storeId?: string): Customer[];
   createCart(storeSlug: string): Cart;
   getCartForStore(storeSlug: string): Cart | undefined;
-  updateCartItem(cartId: string, variantId: string, quantity: number, configurationSelections?: ConfiguredOptionSelection[], unitPriceMinor?: number): Cart;
+  updateCartItem(cartId: string, variantId: string, quantity: number, configurationSelections?: ConfiguredOptionSelection[], unitPriceMinor?: number, personalisation?: PersonalisationEntry[]): Cart;
   reset(): void;
 }
 
@@ -347,15 +348,15 @@ export function createRepository(storage: StorageLike, options: { runtime?: bool
       const store = storeForSlug(storeSlug);
       return store ? state.carts.find((cart) => cart.storeId === store.id) : undefined;
     },
-    updateCartItem(cartId, variantId, quantity, configurationSelections = [], unitPriceMinor) {
+    updateCartItem(cartId, variantId, quantity, configurationSelections = [], unitPriceMinor, personalisation = []) {
       const cart = state.carts.find((item) => item.id === cartId);
       if (!cart) throw new Error("CART_NOT_FOUND");
       if (!findVariant(variantId)) throw new Error("VARIANT_NOT_FOUND");
-      const lineKey = createCartConfigurationKey(variantId, configurationSelections);
-      const existing = cart.items.find((item) => createCartConfigurationKey(item.variantId, item.configurationSelections) === lineKey);
-      if (quantity <= 0) cart.items = cart.items.filter((item) => createCartConfigurationKey(item.variantId, item.configurationSelections) !== lineKey);
+      const lineKey = createCartConfigurationKey(variantId, configurationSelections, personalisation);
+      const existing = cart.items.find((item) => createCartConfigurationKey(item.variantId, item.configurationSelections, item.personalisation) === lineKey);
+      if (quantity <= 0) cart.items = cart.items.filter((item) => createCartConfigurationKey(item.variantId, item.configurationSelections, item.personalisation) !== lineKey);
       else if (existing) existing.quantity = quantity;
-      else cart.items.push({ variantId, quantity, ...(configurationSelections.length ? { configurationSelections } : {}), ...(unitPriceMinor !== undefined ? { unitPriceMinor } : {}) });
+      else cart.items.push({ variantId, quantity, ...(configurationSelections.length ? { configurationSelections } : {}), ...(personalisation.length ? { personalisation } : {}), ...(unitPriceMinor !== undefined ? { unitPriceMinor } : {}) });
       commit();
       return cart;
     },

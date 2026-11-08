@@ -82,3 +82,41 @@ describe("checkout product selections", () => {
     expect(cart.lines[0].unitPriceMinor).toBe(500);
   });
 });
+
+describe("checkout personalisation", () => {
+  const personalisation = [
+    { id: "engraving", label: "Engraving", required: true, maxLength: 12, priceAdjustmentMinor: 500 },
+    { id: "note", label: "Gift message", required: false, maxLength: 200, multiline: true },
+  ];
+  const ring = (): Parameters<typeof validateCart>[0] => {
+    const catalog = {
+      getVariant: async () => ({ id: "ring-v", productId: "ring", title: "Default", sku: "R1", priceMinor: 9000, options: {}, available: true }),
+      getProduct: async () => ({ id: "ring", title: "Ring", options: [], media: [], personalisation }),
+    } as unknown as CatalogReader;
+    return { catalog, repository: {} as CommerceRepository };
+  };
+  const line = (entries?: Array<{ fieldId: string; value: string }>) => ({ variantId: "ring-v", quantity: 1, personalisation: entries });
+
+  it("stores the text with the line's choices, prices it and keeps differently engraved lines apart", async () => {
+    const cart = await validateCart(ring(), "store", "GBP", [line([{ fieldId: "engraving", value: "  SAM " }, { fieldId: "note", value: "Happy\r\nbirthday" }]), line([{ fieldId: "engraving", value: "ALEX" }])], 0);
+    expect(cart.lines[0].configurationSnapshot).toEqual([
+      { optionId: "personalisation:engraving", valueId: "text", optionName: "Engraving", valueLabel: "SAM", priceAdjustmentMinor: 500 },
+      { optionId: "personalisation:note", valueId: "text", optionName: "Gift message", valueLabel: "Happy\nbirthday", priceAdjustmentMinor: 0 },
+    ]);
+    expect(cart.lines[0].unitPriceMinor).toBe(9500);
+    expect(cart.lines[0].configurationKey).toMatch(/^p:[0-9a-f]{8}$/);
+    expect(cart.lines[0].configurationKey).not.toBe(cart.lines[1].configurationKey);
+    expect(cart.lines[0].configurationKey).not.toContain("SAM");
+  });
+
+  it("refuses a missing required field, text that is too long and unknown fields", async () => {
+    await expect(validateCart(ring(), "store", "GBP", [line()], 0)).rejects.toMatchObject({ code: "CHECKOUT_INPUT_INVALID", message: "Please fill in Engraving." });
+    await expect(validateCart(ring(), "store", "GBP", [line([{ fieldId: "engraving", value: "A".repeat(13) }])], 0)).rejects.toMatchObject({ message: "Engraving can be at most 12 characters." });
+    await expect(validateCart(ring(), "store", "GBP", [line([{ fieldId: "engraving", value: "SAM" }, { fieldId: "colour", value: "red" }])], 0)).rejects.toMatchObject({ code: "CHECKOUT_INPUT_INVALID" });
+  });
+
+  it("leaves products without personalisation exactly as before", async () => {
+    const cart = await run("small", [sel("size", "s"), sel("firmness", "soft")]);
+    expect(cart.lines[0].configurationKey).toBe("firmness:soft|size:s");
+  });
+});

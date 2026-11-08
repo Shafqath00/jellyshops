@@ -36,7 +36,7 @@ export function useCartLines(storeSlug: string): {
     itemCount: cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0,
     setQuantity: (line, quantity) => {
       if (!cart) return;
-      repository.updateCartItem(cart.id, line.variant.id, quantity, line.item.configurationSelections, line.item.unitPriceMinor);
+      repository.updateCartItem(cart.id, line.variant.id, quantity, line.item.configurationSelections, line.item.unitPriceMinor, line.item.personalisation);
     },
   };
 }

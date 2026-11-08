@@ -22,6 +22,14 @@ export interface ProductPresentationContext {
   setQuantity(quantity: number): void;
   addToCart(): Promise<{ ok: boolean; message?: string }>;
   buyNow?(): Promise<{ ok: boolean; message?: string }>;
+  /** Text fields the shopper fills in for this line (engraving, gift message); absent when the product has none. */
+  personalisation?: {
+    fields: Array<{ id: string; label: string; required: boolean; maxLength: number; multiline?: boolean; helpText?: string; /** Formatted extra price, "£5.00". */ priceAdjustment?: string }>;
+    values: Record<string, string>;
+    setValue(fieldId: string, value: string): void;
+    /** Problems by field, shown after the shopper tried to add to the bag. */
+    problems?: Record<string, string>;
+  };
   wishlistControl?: ReactNode;
   relatedProducts: PublicProduct[];
 }

@@ -4,10 +4,13 @@ import { reconcileProductVariants } from "@/lib/product-variants";
 import { validateProductDraft, type DraftIssue } from "@/lib/product-builder";
 import { emptyUnitPricing, parseUnitPricing, type UnitPricingDraft } from "./pricing";
 import { dimensionsToDraft, emptyShipping, shippingToValues, validateShipping, weightToDraft, type ShippingDraft } from "./shipping";
+import type { PersonalisationField } from "@jelly/storefront-schema";
 
 /** What the seller has typed so far. Text fields stay strings so partial input is never lost. */
 export interface ProductDraft {
   specificationsText?: string;
+  /** Text fields shoppers fill in per item (engraving, gift message). Undefined leaves the saved fields untouched. */
+  personalisation?: PersonalisationField[];
   additionalCategoryIds?: string[];
   brandId?: string;
   archived?: boolean;
@@ -66,7 +69,7 @@ export interface PersistedState {
   media?: ProductMediaLike[];
 }
 
-export type DraftField = "title" | "description" | "imageUrl" | "categoryId" | "price" | "compareAtPrice" | "cost" | "unitPricing" | "barcode" | "lowStockThreshold" | "weight" | "dimensions" | "hsCode" | "handle" | "sku" | "stock" | "published";
+export type DraftField = "title" | "description" | "imageUrl" | "categoryId" | "price" | "compareAtPrice" | "cost" | "unitPricing" | "barcode" | "lowStockThreshold" | "weight" | "dimensions" | "hsCode" | "handle" | "sku" | "stock" | "published" | "personalisation";
 export type DraftErrors = Partial<Record<DraftField, string>>;
 
 /** Untracked inventory is represented as a huge number by the catalog mapper; never send that back as a quantity. */
@@ -99,6 +102,7 @@ export function validateSimpleDraft(draft: ProductDraft): DraftErrors {
   const price = majorToMinor(draft.price);
   const compareAt = draft.compareAtPrice.trim() ? majorToMinor(draft.compareAtPrice) : undefined;
   if (!draft.title.trim()) errors.title = "Give your product a name.";
+  if (draft.personalisation?.some((field) => !field.label.trim())) errors.personalisation = "Each personalisation field needs a name.";
   const handleIssue = handleProblem(draft);
   if (handleIssue) errors.handle = handleIssue;
   if (!draft.price.trim()) errors.price = "Enter a price.";
@@ -230,6 +234,7 @@ export function draftToPayload(draft: ProductDraft, _categoryName: string | unde
     fulfillmentType: draft.physical ? "PHYSICAL" as const : "DIGITAL" as const,
     options: draft.options.map((option, position) => ({ ...option, name: option.name.trim(), position, values: option.values.map((value, index) => ({ ...value, label: value.label.trim(), position: index })) })) as unknown[],
     inventoryOptionIds: inventoryOptionIdsOf(draft.options),
+    ...(draft.personalisation !== undefined ? { personalisation: draft.personalisation.map((field) => ({ ...field, label: field.label.trim() })) } : {}),
     variants,
   };
 }
@@ -242,6 +247,7 @@ export function productToDraft(product: Product): { draft: ProductDraft; persist
   const hasPhoto = Boolean(product.media?.length);
   const imageUrl = hasPhoto ? product.imageUrl : "";
   const draft: ProductDraft = {
+    personalisation: product.personalisation ?? [],
     specificationsText: Object.entries(product.specifications ?? {}).map(([key, value]) => `${key}: ${value}`).join("\n"),
     additionalCategoryIds: product.additionalCategoryIds ?? [],
     brandId: product.brandId ?? "",

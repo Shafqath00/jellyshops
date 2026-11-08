@@ -127,4 +127,14 @@ describe("PostgreSQL catalog repository", () => {
     });
     await expect(repository.getCollection("store-a", "cb")).resolves.toBeNull();
   });
+
+  it('saves personalisation fields, reads them back and refuses malformed ones', async () => {
+    const fields = [{ id: 'engraving', label: 'Engraving', required: true, maxLength: 12, priceAdjustmentMinor: 500 }];
+    const created = await repository.createProduct('store-a', { title: 'Ring', handle: 'ring', variants: [{ title: 'Default', priceMinor: 9000, quantity: 3, options: {} }], personalisation: fields });
+    expect(created.personalisation).toEqual(fields);
+    const updated = await repository.updateProduct('store-a', created.id, { personalisation: [...fields, { id: 'note', label: 'Gift message', maxLength: 200, multiline: true }] });
+    expect(updated.personalisation?.map((field) => field.id)).toEqual(['engraving', 'note']);
+    await expect(repository.updateProduct('store-a', created.id, { personalisation: [{ id: 'x' }] })).rejects.toMatchObject({ code: 'INVALID_PERSONALISATION' });
+    expect((await repository.getProduct('store-a', 'p1'))?.personalisation).toEqual([]);
+  });
 });

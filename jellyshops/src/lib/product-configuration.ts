@@ -1,3 +1,4 @@
+import { personalisationKey, type PersonalisationEntry } from "@jelly/storefront-schema";
 import type { ConfiguredOptionSelection, Product, ProductOption, ProductVariant } from "./domain";
 import { createVariantCombinationKey, getInventoryOptions } from "./product-variants";
 
@@ -15,6 +16,9 @@ export function getConfiguredPriceMinor(variant: ProductVariant | undefined, opt
   return variant.priceMinor + selections.reduce((total, selection) => total + (options.find((option) => option.id === selection.optionId)?.values.find((value) => value.id === selection.valueId)?.priceAdjustmentMinor ?? 0), 0);
 }
 
-export function createCartConfigurationKey(variantId: string, selections: ConfiguredOptionSelection[] = []): string {
-  return `${variantId}|${selections.map((selection) => `${selection.optionId}:${selection.valueId}`).sort().join("|")}`;
+export function createCartConfigurationKey(variantId: string, selections: ConfiguredOptionSelection[] = [], personalisation: PersonalisationEntry[] = []): string {
+  const base = `${variantId}|${selections.map((selection) => `${selection.optionId}:${selection.valueId}`).sort().join("|")}`;
+  // Lines with different engraving or messages stay separate; plain lines keep their old key.
+  const text = personalisationKey(personalisation);
+  return text ? `${base}|${text}` : base;
 }

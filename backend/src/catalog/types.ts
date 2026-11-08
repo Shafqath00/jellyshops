@@ -1,3 +1,4 @@
+import type { PersonalisationField } from "@jelly/storefront-schema";
 export type ProductStatus = "DRAFT" | "ACTIVE" | "ARCHIVED";
 
 /** Out and low are measured against what shoppers can still buy: on hand minus held by active checkouts. */
@@ -117,6 +118,8 @@ export interface CatalogProduct {
   brandId: string | null;
   collectionIds: string[];
   options: unknown[];
+  /** Text fields the shopper fills in per cart line (engraving, gift message); see storefront-schema personalisation.ts. */
+  personalisation?: PersonalisationField[];
   inventoryOptionIds: string[];
   categoryMetadata: unknown | null;
   brandMetadata: unknown | null;
@@ -218,6 +221,7 @@ export interface CreateProductInput {
   brandId?: string | null;
   collectionIds?: string[];
   options?: unknown[];
+  personalisation?: unknown[];
   inventoryOptionIds?: string[];
   categoryMetadata?: unknown | null;
   brandMetadata?: unknown | null;
@@ -245,6 +249,7 @@ export interface UpdateProductInput {
   brandId?: string | null;
   collectionIds?: string[];
   options?: unknown[];
+  personalisation?: unknown[];
   inventoryOptionIds?: string[];
   categoryMetadata?: unknown | null;
   brandMetadata?: unknown | null;

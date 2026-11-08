@@ -5,7 +5,7 @@ import { getConfiguredPriceMinor, resolveProductVariant } from "@/lib/product-co
 import { getVisibleOptions, toggleSelection, validateProductSelections } from "@/lib/product-builder";
 import type { CatalogAdminProduct } from "@/features/store-editor/api/types";
 import { productGallery } from "@/lib/product-media";
-import { isProductMediaEnabled } from "@jelly/storefront-schema";
+import { isProductMediaEnabled, normalisePersonalisation, personalisationPriceMinor, validatePersonalisation, type PersonalisationEntry } from "@jelly/storefront-schema";
 
 /** Maps the catalog detail DTO to the existing storefront Product domain shape. */
 export function catalogProductToProduct(product: CatalogAdminProduct): Product {
@@ -31,7 +31,7 @@ export function catalogProductToProduct(product: CatalogAdminProduct): Product {
   };
 }
 
-export function createProductPresentationContext({ product, currency, shippingCopy, selections, quantity, onSelectionsChange, onQuantityChange, onAddToCart, relatedProducts = [] }: {
+export function createProductPresentationContext({ product, currency, shippingCopy, selections, quantity, onSelectionsChange, onQuantityChange, onAddToCart, relatedProducts = [], personalisationValues = {}, onPersonalisationChange, showPersonalisationProblems = false }: {
   product: Product;
   currency: Currency;
   shippingCopy?: string;
@@ -39,9 +39,18 @@ export function createProductPresentationContext({ product, currency, shippingCo
   quantity: number;
   onSelectionsChange(selections: ConfiguredOptionSelection[]): void;
   onQuantityChange(quantity: number): void;
-  onAddToCart(input: { variantId: string; quantity: number; selections: ConfiguredOptionSelection[]; priceMinor: number }): Promise<{ ok: boolean; message?: string }>;
+  onAddToCart(input: { variantId: string; quantity: number; selections: ConfiguredOptionSelection[]; priceMinor: number; personalisation: PersonalisationEntry[] }): Promise<{ ok: boolean; message?: string }>;
   relatedProducts?: ProductPresentationContext["relatedProducts"];
+  /** What the shopper typed in the personalisation fields, by field id. */
+  personalisationValues?: Record<string, string>;
+  onPersonalisationChange?(values: Record<string, string>): void;
+  /** Show each field's problem (set after a failed Add to cart). */
+  showPersonalisationProblems?: boolean;
 }): ProductPresentationContext {
+  const personalisationFields = product.personalisation ?? [];
+  const personalisationEntries = Object.entries(personalisationValues).map(([fieldId, value]) => ({ fieldId, value }));
+  const personalisationProblems = validatePersonalisation(personalisationFields, personalisationEntries);
+  const personalised = normalisePersonalisation(personalisationFields, personalisationEntries);
   const allOptions = [...(product.options ?? [])].sort((left, right) => left.position - right.position);
   const gallery = productGallery(product, selections);
   const galleryEnabled = isProductMediaEnabled(product.storeId, process.env.NEXT_PUBLIC_PRODUCT_MEDIA_STORE_IDS);
@@ -55,7 +64,9 @@ export function createProductPresentationContext({ product, currency, shippingCo
   const missingOptionIds = new Set(problems.filter((problem) => problem.code === "required" || problem.code === "too_few").map((problem) => problem.optionId));
   const requiredMissing = inventoryChoiceMissing || missingOptionIds.size > 0;
   const variant = resolveProductVariant(product, selections);
-  const priceMinor = getConfiguredPriceMinor(variant, options, selections);
+  const optionsPriceMinor = getConfiguredPriceMinor(variant, options, selections);
+  // Filled-in personalisation with a price (engraving +£5) is part of the line price, as at checkout.
+  const priceMinor = optionsPriceMinor === undefined ? undefined : optionsPriceMinor + personalisationPriceMinor(personalisationFields, personalised);
   // A combination the merchant stopped selling cannot be bought, whatever stock it has left.
   const notSold = variant?.sellable === false;
   const untrackedAvailable = !notSold && variant?.available === true && variant.stock === 0;
@@ -76,7 +87,14 @@ export function createProductPresentationContext({ product, currency, shippingCo
     canAddToCart: availability.state === "available" && priceMinor !== undefined && Boolean(variant),
     selectOption: (optionId, valueId) => { const option = allOptions.find((candidate) => candidate.id === optionId); if (option) onSelectionsChange(toggleSelection(option, selections, valueId)); },
     setQuantity: (nextQuantity) => onQuantityChange(maxQuantity === undefined ? Math.max(1, nextQuantity) : Math.max(1, Math.min(nextQuantity, maxQuantity))),
-    addToCart: () => variant && priceMinor !== undefined && availability.state === "available" ? onAddToCart({ variantId: variant.id, quantity: clampedQuantity, selections, priceMinor }) : Promise.resolve({ ok: false, message: availability.message }),
+    addToCart: () => personalisationProblems.length ? Promise.resolve({ ok: false, message: personalisationProblems[0].message })
+      : variant && priceMinor !== undefined && availability.state === "available" ? onAddToCart({ variantId: variant.id, quantity: clampedQuantity, selections, priceMinor, personalisation: personalised }) : Promise.resolve({ ok: false, message: availability.message }),
+    ...(personalisationFields.length ? { personalisation: {
+      fields: personalisationFields.map((field) => ({ id: field.id, label: field.label, required: field.required, maxLength: field.maxLength, ...(field.multiline ? { multiline: true } : {}), ...(field.helpText ? { helpText: field.helpText } : {}), ...(field.priceAdjustmentMinor ? { priceAdjustment: formatMoney(field.priceAdjustmentMinor, currency) } : {}) })),
+      values: personalisationValues,
+      setValue: (fieldId: string, value: string) => onPersonalisationChange?.({ ...personalisationValues, [fieldId]: value }),
+      ...(showPersonalisationProblems && personalisationProblems.length ? { problems: Object.fromEntries(personalisationProblems.map((problem) => [problem.fieldId, problem.message])) } : {}),
+    } } : {}),
     relatedProducts,
   };
 }

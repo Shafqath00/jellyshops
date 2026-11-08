@@ -16,3 +16,13 @@ describe("product configuration", () => {
     expect(getConfiguredPriceMinor(variant, product.options, [{ optionId: "colour", valueId: "pink" }, { optionId: "storage", valueId: "drawers" }])).toBe(800000);
   });
 });
+
+describe("cart line keys with personalisation", () => {
+  it("keeps plain lines' keys and separates differently engraved ones", async () => {
+    const { createCartConfigurationKey } = await import("./product-configuration");
+    expect(createCartConfigurationKey("v1", [{ optionId: "size", valueId: "s" }])).toBe("v1|size:s");
+    const sam = createCartConfigurationKey("v1", [], [{ fieldId: "engraving", value: "SAM" }]);
+    expect(sam).toMatch(/^v1\|\|p:[0-9a-f]{8}$/);
+    expect(createCartConfigurationKey("v1", [], [{ fieldId: "engraving", value: "ALEX" }])).not.toBe(sam);
+  });
+});

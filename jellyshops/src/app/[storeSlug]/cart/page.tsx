@@ -11,6 +11,7 @@ import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-pag
 import { loadPublicStorefrontPublication, type PublicStorefrontPublication } from "@/features/storefront/public-storefront-api";
 import { resolveStorefrontRoute } from "@/features/storefront/resource-loader";
 import { StorefrontPageLoading } from "@/features/storefront/components/storefront-page-loading";
+import { cartLineKey, personalisationLabels } from "@/features/storefront/personalisation-display";
 
 export default function CartPage() {
   const { storeSlug } = useParams<{ storeSlug: string }>();
@@ -48,9 +49,9 @@ export default function CartPage() {
       const option = product.options?.find((entry) => entry.id === selection.optionId);
       const value = option?.values.find((entry) => entry.id === selection.valueId);
       return option && value ? [`${option.name}: ${value.label}`] : [];
-    });
+    }).concat(personalisationLabels(product, item));
     const unitPrice = item.unitPriceMinor ?? variant.priceMinor;
-    return { id: `${variant.id}-${JSON.stringify(item.configurationSelections ?? [])}`, productName: product.name, variantName: variant.name, imageUrl: cartProductImage(product, variant, item.configurationSelections), quantity: item.quantity, unitPrice: formatMoney(unitPrice, store.currency), lineTotal: formatMoney(unitPrice * item.quantity, store.currency), lineTotalMinor: unitPrice * item.quantity, canIncrease: item.quantity < variant.stock, options, onUpdate: (quantity: number) => repository.updateCartItem(cart!.id, variant.id, quantity, item.configurationSelections, item.unitPriceMinor) };
+    return { id: cartLineKey(variant.id, item), productName: product.name, variantName: variant.name, imageUrl: cartProductImage(product, variant, item.configurationSelections), quantity: item.quantity, unitPrice: formatMoney(unitPrice, store.currency), lineTotal: formatMoney(unitPrice * item.quantity, store.currency), lineTotalMinor: unitPrice * item.quantity, canIncrease: item.quantity < variant.stock, options, onUpdate: (quantity: number) => repository.updateCartItem(cart!.id, variant.id, quantity, item.configurationSelections, item.unitPriceMinor, item.personalisation) };
   }).filter((line): line is NonNullable<typeof line> => Boolean(line));
   const Cart = shell.CartPage;
   if (publication?.kind === "v4" && resolvedRoute?.status === "ready") {

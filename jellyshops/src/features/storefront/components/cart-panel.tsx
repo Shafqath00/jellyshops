@@ -10,6 +10,7 @@ import { cartProductImage } from "@/lib/product-media";
 import type { ComponentType } from "react";
 import type { StorefrontCartProps } from "@jelly/storefront-themes";
 import { CartDrawer, CartItem, CartSummary, EmptyCart } from "@/components/jelly/cart";
+import { cartLineKey, personalisationLabels } from "../personalisation-display";
 
 /* ──────────────────────────────────────────────────────────────────────
  * CartPanel — connects Jellyshop commerce state to CartDrawer presentation
@@ -90,7 +91,7 @@ export function CartPanel({
               (line) =>
                 line && (
                   <CartItem
-                    key={`${line.variant.id}-${JSON.stringify(line.item.configurationSelections ?? [])}`}
+                    key={cartLineKey(line.variant.id, line.item)}
                     imageUrl={cartProductImage(line.product, line.variant, line.item.configurationSelections)}
                     name={line.product.name}
                     variantName={line.variant.name}
@@ -98,7 +99,7 @@ export function CartPanel({
                       const option = line.product.options?.find((o) => o.id === selection.optionId);
                       const value = option?.values.find((v) => v.id === selection.valueId);
                       return option && value ? `${option.name}: ${value.label}` : "";
-                    }).filter(Boolean)}
+                    }).filter(Boolean).concat(personalisationLabels(line.product, line.item))}
                     quantity={line.item.quantity}
                     lineTotal={formatMoney(
                       (line.item.unitPriceMinor ?? line.variant.priceMinor) * line.item.quantity,
@@ -112,6 +113,7 @@ export function CartPanel({
                         line.item.quantity - 1,
                         line.item.configurationSelections,
                         line.item.unitPriceMinor,
+                        line.item.personalisation,
                       )
                     }
                     onIncrease={() =>
@@ -121,6 +123,7 @@ export function CartPanel({
                         line.item.quantity + 1,
                         line.item.configurationSelections,
                         line.item.unitPriceMinor,
+                        line.item.personalisation,
                       )
                     }
                   />

@@ -1,7 +1,7 @@
 export interface CommerceAttemptInput {
   cartKey: string;
   currency: string;
-  items: Array<{ variantId: string; quantity: number; configurationSelections?: Array<{ optionId: string; valueId: string; optionName?: string; valueLabel?: string; priceAdjustmentMinor?: number }> }>;
+  items: Array<{ variantId: string; quantity: number; configurationSelections?: Array<{ optionId: string; valueId: string; optionName?: string; valueLabel?: string; priceAdjustmentMinor?: number }>; personalisation?: Array<{ fieldId: string; value: string }> }>;
   customerSnapshot: Record<string, unknown>;
   deliverySnapshot?: Record<string, unknown>;
 }

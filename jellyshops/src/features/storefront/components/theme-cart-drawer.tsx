@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { formatMoney } from "@/lib/domain";
 import { cartProductImage } from "@/lib/product-media";
 import { useCartLines } from "../use-cart-lines";
+import { cartLineKey, personalisationLabels } from "../personalisation-display";
 
 /** Events the storefront uses to open the slide-out cart. */
 export const CART_OPEN_EVENT = "jelly:cart-open";
@@ -62,8 +63,8 @@ export function ThemeCartDrawer({ storeSlug, open, onClose, variant = "drawer", 
               return option && value ? [`${option.name}: ${value.label}`] : [];
             }) ?? [];
             const image = cartProductImage(line.product, line.variant, line.item.configurationSelections);
-            const detail = [line.variant.name && line.variant.name !== "Default" ? line.variant.name : "", ...options].filter(Boolean).join(" · ");
-            return <li key={`${line.variant.id}-${JSON.stringify(line.item.configurationSelections ?? [])}`}>
+            const detail = [line.variant.name && line.variant.name !== "Default" ? line.variant.name : "", ...options, ...personalisationLabels(line.product, line.item)].filter(Boolean).join(" · ");
+            return <li key={cartLineKey(line.variant.id, line.item)}>
               {/* Merchant media may be served by the local API, not as Next Image assets. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               {image ? <img src={image} alt="" /> : <span className="jelly-cart-drawer-thumb" aria-hidden="true" />}

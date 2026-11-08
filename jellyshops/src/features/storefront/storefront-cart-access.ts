@@ -17,7 +17,7 @@ export function useStorefrontCartAccess(storeSlug: string): StorefrontCartAccess
     return {
       quantity(variantId) {
         const cart = repository.getCartForStore(storeSlug);
-        return (cart?.items ?? []).filter((item) => item.variantId === variantId && !item.configurationSelections?.length).reduce((sum, item) => sum + item.quantity, 0);
+        return (cart?.items ?? []).filter((item) => item.variantId === variantId && !item.configurationSelections?.length && !item.personalisation?.length).reduce((sum, item) => sum + item.quantity, 0);
       },
       async setQuantity(variantId, quantity) {
         const variant = state.products.flatMap((product) => product.variants).find((item) => item.id === variantId);

@@ -9,7 +9,8 @@ import { WishlistButton } from "@/features/customers/components/wishlist-button"
 import { useThemePresentation } from "@/features/storefront/components/storefront-shell";
 import { useShop } from "@/contexts/shop-context";
 import { formatMoney, type ConfiguredOptionSelection } from "@/lib/domain";
-import { getConfiguredPriceMinor, resolveProductVariant } from "@/lib/product-configuration";
+import { createCartConfigurationKey, getConfiguredPriceMinor, resolveProductVariant } from "@/lib/product-configuration";
+import type { PersonalisationEntry } from "@jelly/storefront-schema";
 import { getVisibleOptions, toggleSelection, validateProductSelections } from "@/lib/product-builder";
 import { createProductPresentationContext } from "@/features/storefront/product-presentation";
 import { productCardData } from "@/features/storefront/product-card-data";
@@ -28,6 +29,9 @@ export default function ProductPage() {
   const catalogStatus = useStorefrontCatalogStatus();
   const [selections, setSelections] = useState<ConfiguredOptionSelection[]>([]);
   const [quantity, setQuantity] = useState(1);
+  // Personalisation text (engraving, gift message) and whether the shopper already tried to add without it.
+  const [personalisationValues, setPersonalisationValues] = useState<Record<string, string>>({});
+  const [personalisationTried, setPersonalisationTried] = useState(false);
   const [added, setAdded] = useState(false);
   const initialPublication = useInitialStorefrontPublication();
   const [publication, setPublication] = useState<PublicStorefrontPublication | null>(initialPublication);
@@ -43,11 +47,12 @@ export default function ProductPage() {
   const requiredMissing = validateProductSelections(allOptions, selections).some((problem) => problem.code === "required" || problem.code === "too_few");
   const variant = product ? resolveProductVariant(product, selections) : undefined;
   const finalPrice = getConfiguredPriceMinor(variant, options, selections) ?? 0;
-  const addCurrentToCart = async ({ variantId, nextQuantity, nextSelections, priceMinor }: { variantId: string; nextQuantity: number; nextSelections: ConfiguredOptionSelection[]; priceMinor: number }) => {
+  const addCurrentToCart = async ({ variantId, nextQuantity, nextSelections, priceMinor, personalisation = [] }: { variantId: string; nextQuantity: number; nextSelections: ConfiguredOptionSelection[]; priceMinor: number; personalisation?: PersonalisationEntry[] }) => {
     if (!product || !variant || variant.id !== variantId || variant.stock <= 0 || requiredMissing) return { ok: false, message: "This product is unavailable" };
     const cart = repository.getCartForStore(storeSlug) ?? repository.createCart(storeSlug);
-    const line = cart.items.find((item) => item.variantId === variantId && JSON.stringify(item.configurationSelections ?? []) === JSON.stringify(nextSelections));
-    repository.updateCartItem(cart.id, variantId, Math.min((line?.quantity ?? 0) + nextQuantity, variant.stock), nextSelections, priceMinor);
+    const key = createCartConfigurationKey(variantId, nextSelections, personalisation);
+    const line = cart.items.find((item) => createCartConfigurationKey(item.variantId, item.configurationSelections, item.personalisation) === key);
+    repository.updateCartItem(cart.id, variantId, Math.min((line?.quantity ?? 0) + nextQuantity, variant.stock), nextSelections, priceMinor, personalisation);
     setAdded(true);
     return { ok: true };
   };
@@ -59,9 +64,17 @@ export default function ProductPage() {
     quantity,
     onSelectionsChange: setSelections,
     onQuantityChange: setQuantity,
-    onAddToCart: ({ variantId, quantity: nextQuantity, selections: nextSelections, priceMinor }) => addCurrentToCart({ variantId, nextQuantity, nextSelections, priceMinor }),
+    onAddToCart: ({ variantId, quantity: nextQuantity, selections: nextSelections, priceMinor, personalisation }) => addCurrentToCart({ variantId, nextQuantity, nextSelections, priceMinor, personalisation }),
+    personalisationValues,
+    onPersonalisationChange: setPersonalisationValues,
+    showPersonalisationProblems: personalisationTried,
     relatedProducts: visibleProducts.filter((item) => item.id !== product.id && ((item.collectionIds ?? []).some((id) => (product.collectionIds ?? []).includes(id)) || (item.primaryCategoryId && item.primaryCategoryId === product.primaryCategoryId))).slice(0, 4).map((item) => productCardData(item, `/${store.slug}/products/${item.slug}`, store.currency)),
   }) : undefined;
+  if (productPresentation?.personalisation) {
+    // After a refused add, each field shows what is missing.
+    const add = productPresentation.addToCart;
+    productPresentation.addToCart = async () => { const result = await add(); if (!result.ok) setPersonalisationTried(true); return result; };
+  }
   if (productPresentation && store && product) {
     productPresentation.wishlistControl = <WishlistButton storeId={store.id} productId={product.id} />;
     productPresentation.buyNow = async () => {

@@ -2,6 +2,8 @@ export interface CheckoutLineInput {
   variantId: string;
   quantity: number;
   configurationSelections?: Array<{ optionId: string; valueId: string; optionName?: string; valueLabel?: string; priceAdjustmentMinor?: number }>;
+  /** Text the shopper typed for this line (engraving, gift message), checked against the product's personalisation fields. */
+  personalisation?: Array<{ fieldId: string; value: string }>;
 }
 
 export interface BeginCheckoutInput {

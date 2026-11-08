@@ -1,6 +1,6 @@
 import { productImageSnapshot } from "../catalog/product-image-snapshot.js";
 import { createHash } from "node:crypto";
-import { validateProductSelections, type ProductOptionLike } from "@jelly/storefront-schema";
+import { normalisePersonalisation, personalisationKey, readPersonalisationFields, validatePersonalisation, validateProductSelections, type ProductOptionLike } from "@jelly/storefront-schema";
 import { z } from "zod";
 
 import type { CatalogReader } from "../catalog/service.js";
@@ -19,6 +19,7 @@ export const checkoutInputSchema = z.object({
         variantId: z.string().min(1),
         quantity: z.number().int().min(1).max(999),
         configurationSelections: z.array(z.object({ optionId: z.string().min(1), valueId: z.string().min(1) })).max(20).optional(),
+        personalisation: z.array(z.object({ fieldId: z.string().min(1).max(80), value: z.string().max(2000) })).max(5).optional(),
       }),
     )
     .min(1).max(50),
@@ -136,6 +137,17 @@ export async function validateCart(
         const priceAdjustmentMinor = Number.isFinite(value.priceAdjustmentMinor) ? Number(value.priceAdjustmentMinor) : Number.isFinite(value.priceAdjustment) ? Math.round(Number(value.priceAdjustment) * 100) : 0;
         return { optionId: option.id, valueId: value.id, optionName: option.name, valueLabel: value.label, priceAdjustmentMinor };
       });
+      // Personalisation (engraving, gift message): checked against the product's fields, stored with the other choices
+      // as "Field: text", priced through the same snapshot, and kept apart from other lines by a hash of the text.
+      const fields = readPersonalisationFields((product as { personalisation?: unknown } | null)?.personalisation);
+      const entries = item.personalisation ?? [];
+      const [personalisationProblem] = validatePersonalisation(fields, entries);
+      if (personalisationProblem) throw new ApiError(422, "CHECKOUT_INPUT_INVALID", personalisationProblem.message);
+      const personalised = normalisePersonalisation(fields, entries);
+      for (const entry of personalised) {
+        const field = fields.find((candidate) => candidate.id === entry.fieldId)!;
+        snapshot.push({ optionId: `personalisation:${field.id}`, valueId: "text", optionName: field.label, valueLabel: entry.value, priceAdjustmentMinor: field.priceAdjustmentMinor ?? 0 });
+      }
       const unitPriceMinor = variant.priceMinor + snapshot.filter((selection) => productOptions.find((option) => option.id === selection.optionId)?.type !== "variant").reduce((total, selection) => total + selection.priceAdjustmentMinor, 0);
       if (!Number.isSafeInteger(unitPriceMinor) || unitPriceMinor < 0) throw new ApiError(422, "CHECKOUT_PRICE_INVALID", "This product's price requires review.");
       return {
@@ -149,7 +161,7 @@ export async function validateCart(
         fulfillmentType,
         unitPriceMinor,
         configurationSnapshot: snapshot,
-        configurationKey: snapshot.map((selection) => `${selection.optionId}:${selection.valueId}`).sort().join("|"),
+        configurationKey: [...snapshot.filter((selection) => selection.valueId !== "text").map((selection) => `${selection.optionId}:${selection.valueId}`).sort(), personalisationKey(personalised)].filter(Boolean).join("|"),
       };
     }),
   );

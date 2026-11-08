@@ -40,7 +40,7 @@ describe("createProductPresentationContext", () => {
     context.setQuantity(99);
     expect(onQuantityChange).toHaveBeenCalledWith(2);
     await expect(context.addToCart()).resolves.toEqual({ ok: true });
-    expect(addToCart).toHaveBeenCalledWith({ variantId: "small", quantity: 2, selections: [{ optionId: "size", valueId: "small" }], priceMinor: 1200 });
+    expect(addToCart).toHaveBeenCalledWith({ variantId: "small", quantity: 2, selections: [{ optionId: "size", valueId: "small" }], priceMinor: 1200, personalisation: [] });
   });
 
   it("preserves catalog detail media, options, compare-at price, and availability for the shared contract", () => {
@@ -103,5 +103,36 @@ describe("createProductPresentationContext", () => {
       expect(king.availability.state).toBe("selection-required");
       expect(build([{ optionId: "size", valueId: "king" }, { optionId: "long", valueId: "yes" }]).canAddToCart).toBe(true);
     });
+  });
+});
+
+describe("personalisation on the product page", () => {
+  const ring: Product = { ...product, personalisation: [{ id: "engraving", label: "Engraving", required: true, maxLength: 12, priceAdjustmentMinor: 500 }, { id: "note", label: "Gift message", required: false, maxLength: 200, multiline: true }] };
+  const build = (values: Record<string, string>, extra: Partial<Parameters<typeof createProductPresentationContext>[0]> = {}) => createProductPresentationContext({ product: ring, currency: "GBP", selections: [{ optionId: "size", valueId: "small" }], quantity: 1, onSelectionsChange: vi.fn(), onQuantityChange: vi.fn(), onAddToCart: vi.fn(async () => ({ ok: true })), personalisationValues: values, ...extra });
+
+  it("lists the fields with the extra price and refuses adding until the required text is there", async () => {
+    const context = build({});
+    expect(context.personalisation?.fields.map((field) => [field.label, field.priceAdjustment ?? ""])).toEqual([["Engraving", "£5.00"], ["Gift message", ""]]);
+    expect(context.personalisation?.problems).toBeUndefined();
+    expect(await context.addToCart()).toEqual({ ok: false, message: "Please fill in Engraving." });
+    expect(build({}, { showPersonalisationProblems: true }).personalisation?.problems).toEqual({ engraving: "Please fill in Engraving." });
+  });
+
+  it("adds the cleaned text to the line and its price", async () => {
+    const onAddToCart = vi.fn(async () => ({ ok: true }));
+    const context = build({ engraving: "  SAM ", note: "" }, { onAddToCart });
+    expect(context.pricing.priceMinor).toBe(1700);
+    await context.addToCart();
+    expect(onAddToCart).toHaveBeenCalledWith(expect.objectContaining({ priceMinor: 1700, personalisation: [{ fieldId: "engraving", value: "SAM" }] }));
+  });
+
+  it("passes typing back to the page", () => {
+    const onPersonalisationChange = vi.fn();
+    build({ engraving: "S" }, { onPersonalisationChange }).personalisation?.setValue("engraving", "SA");
+    expect(onPersonalisationChange).toHaveBeenCalledWith({ engraving: "SA" });
+  });
+
+  it("has no personalisation for products without fields", () => {
+    expect(createProductPresentationContext({ product, currency: "GBP", selections: [], quantity: 1, onSelectionsChange: vi.fn(), onQuantityChange: vi.fn(), onAddToCart: vi.fn() }).personalisation).toBeUndefined();
   });
 });

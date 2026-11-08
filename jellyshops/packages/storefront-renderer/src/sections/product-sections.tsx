@@ -1,4 +1,5 @@
 import { StorefrontContainer } from "@jelly/storefront-ui";
+import { PersonalisationFields } from "./personalisation-fields";
 import { ProductCard } from "../product-card";
 import { elementProps } from "../element-style";
 import { useRef, useState, type CSSProperties } from "react";
@@ -126,6 +127,7 @@ export function ProductPurchaseSection({ context, section }: { context: Storefro
   const max = product.availability.maxQuantity === undefined ? undefined : Math.max(1, product.availability.maxQuantity);
   const label = typeof section.settings.label === "string" && section.settings.label.trim() ? section.settings.label : "Add to cart";
   return <section className="jelly-section jelly-product-purchase"><StorefrontContainer>
+    {product.personalisation && <PersonalisationFields personalisation={product.personalisation} />}
     {section.settings.showQuantity !== false && <div className="jelly-quantity">
       <span aria-hidden="true">Quantity</span>
       <div className="jelly-quantity-stepper">

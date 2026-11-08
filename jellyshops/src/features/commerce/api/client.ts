@@ -1,3 +1,4 @@
+import { readPersonalisationFields } from "@jelly/storefront-schema";
 import type {
   CommerceAttemptInput,
   CommerceAttemptResult,
@@ -123,6 +124,7 @@ export function catalogProductToStorefrontProduct(product: PublicCatalogProduct)
     brandId: product.brandId ?? undefined,
     collectionIds: product.collectionIds ?? [],
     options: (product.options ?? []) as ProductOption[],
+    personalisation: readPersonalisationFields((product as { personalisation?: unknown }).personalisation),
     inventoryOptionIds: product.inventoryOptionIds ?? [],
     media: product.media.map((entry) => ({ ...entry, altText: entry.altText ?? undefined })),
     featured: false,

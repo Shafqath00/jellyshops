@@ -34,6 +34,6 @@ describe("V4 Product route", () => {
     await userEvent.click(screen.getByRole("button", { name: "Choose quantity" }));
     await screen.findByText("Quantity 2");
     await userEvent.click(screen.getByRole("button", { name: "Add to cart" }));
-    expect(updateCartItem).toHaveBeenCalledWith("cart-a", "small", 2, [], 1200);
+    expect(updateCartItem).toHaveBeenCalledWith("cart-a", "small", 2, [], 1200, []);
   });
 });
