@@ -37,5 +37,6 @@ describe("dashboard low-stock list", () => {
 
     const { lowStock } = await admin.getSummary("store-a");
     expect(lowStock.map((item) => item.title)).toEqual(["held", "default-low", "custom-low"]);
+    expect(lowStock[0]).toMatchObject({ available: 2, quantity: 5, variantTitle: null });
   });
 });

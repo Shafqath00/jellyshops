@@ -17,8 +17,25 @@ export interface AdminLowStockItem {
   productId: string;
   variantId: string;
   title: string;
+  /** Option names such as "Double / Without storage", or null for a product with one variant. */
+  variantTitle: string | null;
   sku: string | null;
+  /** What shoppers can still buy: on hand minus what checkouts are holding. */
+  available: number;
   quantity: number;
+}
+
+export const SALES_PERIODS = [1, 7, 30, 90] as const;
+export type SalesPeriod = (typeof SALES_PERIODS)[number];
+export interface SalesFigures { revenueMinor: number; paidOrders: number; averageOrderMinor: number }
+export interface AdminSales {
+  days: SalesPeriod;
+  timezone: string;
+  current: SalesFigures;
+  /** The same number of days just before the current period, for "compared with" figures. */
+  previous: SalesFigures;
+  /** One entry per day of the current period in the store's time zone, oldest first. */
+  daily: Array<{ date: string; revenueMinor: number; paidOrders: number }>;
 }
 
 export interface AdminSummary {
@@ -64,7 +81,9 @@ export class AdminSummaryService {
         WHERE o."storeId" = $1 AND o."status" NOT IN ('DELIVERED', 'CANCELLED', 'REFUNDED')
         ORDER BY o."createdAt" DESC LIMIT 4`, [storeId]);
       const lowStock = await tx.query<AdminLowStockItem>(`
-        SELECT p."id" AS "productId", v."id" AS "variantId", p."title", v."sku", i."quantity"
+        SELECT p."id" AS "productId", v."id" AS "variantId", p."title",
+          CASE WHEN (SELECT COUNT(*) FROM "ProductVariant" s WHERE s."storeId" = v."storeId" AND s."productId" = v."productId" AND s."archivedAt" IS NULL) > 1 THEN NULLIF(v."title", '') END AS "variantTitle",
+          v."sku", i."quantity", GREATEST(i."quantity" - i."reserved", 0)::int AS "available"
         FROM "InventoryLevel" i JOIN "ProductVariant" v ON v."storeId" = i."storeId" AND v."id" = i."variantId"
         JOIN "Product" p ON p."storeId" = v."storeId" AND p."id" = v."productId"
         WHERE i."storeId" = $1 AND v."trackInventory" = true AND i."quantity" - i."reserved" <= COALESCE(v."lowStockThreshold", 3)
@@ -80,6 +99,48 @@ export class AdminSummaryService {
       const settings = configuration.rows[0];
       const publishedProductCount = products.rows[0]?.publishedProductCount ?? 0;
       return { timezone: settings?.timezone ?? "UTC", setup: { details: settings?.details ?? false, products: publishedProductCount > 0, publication: settings?.publication ?? false, shipping: settings?.shipping ?? false, payments }, revenueMinor: totals.rows[0]?.revenueMinor ?? 0, orderCount: totals.rows[0]?.orderCount ?? 0, publishedProductCount, actionableOrders: actionableOrders.rows, lowStock: lowStock.rows };
+    });
+  }
+}
+
+const figures = (row?: { revenueMinor?: number; paidOrders?: number }): SalesFigures => {
+  const revenueMinor = Number(row?.revenueMinor ?? 0), paidOrders = Number(row?.paidOrders ?? 0);
+  return { revenueMinor, paidOrders, averageOrderMinor: paidOrders ? Math.round(revenueMinor / paidOrders) : 0 };
+};
+
+/** Sales count paid orders that were not cancelled, the same rule as the dashboard total. */
+export class AdminSalesService {
+  constructor(private readonly repository: CommerceRepository, private readonly now: () => Date = () => new Date()) {}
+
+  async getSales(storeId: string, days: SalesPeriod): Promise<AdminSales> {
+    const now = this.now();
+    return this.repository.transaction(async (tx) => {
+      const settings = await tx.query<{ timezone: string }>(`SELECT COALESCE("timezone", 'UTC') AS "timezone" FROM "StoreSettings" WHERE "storeId" = $1`, [storeId]);
+      const timezone = settings.rows[0]?.timezone ?? "UTC";
+      const start = new Date(now.getTime() - days * 86_400_000), before = new Date(now.getTime() - 2 * days * 86_400_000);
+      const paid = `FROM "Order" o JOIN "Payment" p ON p."storeId" = o."storeId" AND p."orderId" = o."id"
+        WHERE o."storeId" = $1 AND p."status" = 'PAID' AND o."status" <> 'CANCELLED'`;
+      const totals = await tx.query<{ period: string; revenueMinor: number; paidOrders: number }>(`
+        SELECT CASE WHEN o."createdAt" >= $2 THEN 'current' ELSE 'previous' END AS "period",
+          COALESCE(SUM(o."totalMinor"), 0)::int AS "revenueMinor", COUNT(*)::int AS "paidOrders"
+        ${paid} AND o."createdAt" >= $3 AND o."createdAt" < $4 GROUP BY 1`, [storeId, start, before, now]);
+      const daily = await tx.query<{ date: string; revenueMinor: number; paidOrders: number }>(`
+        SELECT to_char(o."createdAt" AT TIME ZONE $3, 'YYYY-MM-DD') AS "date",
+          COALESCE(SUM(o."totalMinor"), 0)::int AS "revenueMinor", COUNT(*)::int AS "paidOrders"
+        ${paid} AND o."createdAt" >= $2 AND o."createdAt" < $4 GROUP BY 1`, [storeId, start, timezone, now]);
+      const byDate = new Map(daily.rows.map((row) => [row.date, row]));
+      const dayKey = new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit" });
+      const series = Array.from({ length: days }, (_, index) => {
+        const date = dayKey.format(new Date(now.getTime() - (days - 1 - index) * 86_400_000));
+        const row = byDate.get(date);
+        return { date, revenueMinor: Number(row?.revenueMinor ?? 0), paidOrders: Number(row?.paidOrders ?? 0) };
+      });
+      return {
+        days, timezone,
+        current: figures(totals.rows.find((row) => row.period === "current")),
+        previous: figures(totals.rows.find((row) => row.period === "previous")),
+        daily: series,
+      };
     });
   }
 }

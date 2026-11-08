@@ -5,7 +5,17 @@ export interface AdminSummary {
   orderCount: number;
   publishedProductCount: number;
   actionableOrders: Array<{ id: string; number: string; status: string; customerSnapshot: Record<string, unknown>; totalMinor: number; currency: string; createdAt: string }>;
-  lowStock: Array<{ productId: string; variantId: string; title: string; sku: string | null; quantity: number }>;
+  lowStock: Array<{ productId: string; variantId: string; title: string; variantTitle?: string | null; sku: string | null; available?: number; quantity: number }>;
+}
+
+export type SalesPeriod = 1 | 7 | 30 | 90;
+export interface SalesFigures { revenueMinor: number; paidOrders: number; averageOrderMinor: number }
+export interface AdminSales {
+  days: SalesPeriod;
+  timezone: string;
+  current: SalesFigures;
+  previous: SalesFigures;
+  daily: Array<{ date: string; revenueMinor: number; paidOrders: number }>;
 }
 
 export interface MerchantCustomer {
@@ -33,6 +43,7 @@ export function createAdminApi({ baseUrl, token, fetch: fetcher = fetch }: { bas
   }
   return {
     getSummary: (storeId: string) => request<AdminSummary>(`/api/stores/${encodeURIComponent(storeId)}/admin-summary`),
+    getSales: (storeId: string, days: SalesPeriod) => request<AdminSales>(`/api/stores/${encodeURIComponent(storeId)}/admin-summary/sales?days=${days}`),
     listCustomers: (storeId: string) => request<{ customers: MerchantCustomer[] }>(`/api/stores/${encodeURIComponent(storeId)}/customers`),
     getCustomer: (storeId: string, customerId: string) => request<{ customer: MerchantCustomer }>(`/api/stores/${encodeURIComponent(storeId)}/customers/${encodeURIComponent(customerId)}`),
   };

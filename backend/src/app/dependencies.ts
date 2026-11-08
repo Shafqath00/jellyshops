@@ -1,5 +1,5 @@
 import type express from "express";
-import { AdminSummaryService, CustomerService } from "../admin/service.js";
+import { AdminSalesService, AdminSummaryService, CustomerService } from "../admin/service.js";
 import { DevelopmentAuthProvider } from "../auth/development-auth-provider.js";
 import { FirebaseAuthProvider } from "../auth/firebase-auth-provider.js";
 import { createFirebaseTokenVerifier } from "../auth/firebase-token-verifier.js";
@@ -314,6 +314,7 @@ export function resolveAppDependencies(dependencies: Partial<AppDependencies> = 
         return enabledCountries.includes(policy.country) && stripeAccountService.getLivePaymentReadiness(storeId);
       }),
       customers: new CustomerService(commerceRepository),
+      sales: new AdminSalesService(commerceRepository),
     }
     : undefined;
 
