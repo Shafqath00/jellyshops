@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 /** One colour or pattern a product comes in, drawn as a dot on its card. */
 export interface StorefrontProductSwatch { label: string; color?: string; image?: string }
@@ -19,6 +19,8 @@ export interface StorefrontProductCardData {
   swatches?: StorefrontProductSwatch[];
   /** How many more colours there are beyond `swatches`. */
   moreSwatches?: number;
+  /** Average star rating and number of published reviews; shown when the theme's "Show star ratings" setting is on. */
+  rating?: { average: number; count: number };
 }
 
 /**
@@ -28,7 +30,7 @@ export interface StorefrontProductCardData {
  * carries `data-card-part`; the theme's Product cards settings show, hide or reorder parts through `--jelly-card-*`
  * tokens (theme-style-settings.ts), and parts that are off by default are hidden by `storefront-base.css`.
  */
-export const PRODUCT_CARD_PARTS = ["media", "vendor", "title", "price", "savings", "swatches", "chip", "button"] as const;
+export const PRODUCT_CARD_PARTS = ["media", "vendor", "title", "rating", "price", "savings", "swatches", "chip", "button"] as const;
 export type ProductCardPart = (typeof PRODUCT_CARD_PARTS)[number];
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
@@ -49,6 +51,18 @@ function CardVendor({ product }: { product: StorefrontProductCardData }) {
 
 function CardTitle({ product }: { product: StorefrontProductCardData }) {
   return <h3 data-card-part="title">{product.name}</h3>;
+}
+
+/** Five stars filled to the average (one decimal), and the review count. Hidden unless the theme shows ratings. */
+function CardRating({ product }: { product: StorefrontProductCardData }) {
+  const rating = product.rating;
+  if (!rating || rating.count <= 0 || !Number.isFinite(rating.average)) return null;
+  const average = Math.max(0, Math.min(5, rating.average));
+  return <p className="jelly-product-card-rating" data-card-part="rating">
+    <span className="jelly-stars" style={{ "--jelly-stars": average } as CSSProperties} aria-hidden="true">★★★★★</span>
+    <span className="jelly-visually-hidden">{`Rated ${average.toFixed(1)} out of 5 from ${rating.count} ${rating.count === 1 ? "review" : "reviews"}`}</span>
+    <span className="jelly-product-card-rating-count" aria-hidden="true">({rating.count})</span>
+  </p>;
 }
 
 function CardPrice({ product }: { product: StorefrontProductCardData }) {
@@ -103,6 +117,7 @@ export function StorefrontProductCard({ product, editorProps, actions }: { produ
       <div className="jelly-product-card-body">
         <CardVendor product={product} />
         <CardTitle product={product} />
+        <CardRating product={product} />
         <CardPrice product={product} />
         <CardSavings product={product} />
         <CardSwatches product={product} />

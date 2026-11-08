@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 /** A product on a card. `saving` ("£20.00"), `discountPercent` and `chip` ("More colours") are optional extras themes can show. */
 /** A product as every product list draws it (the shared card in @jelly/storefront-ui). */
-export interface PublicProduct { id: string; name: string; href: string; imageUrl: string; price: string; compareAtPrice?: string; badge?: string; saving?: string; discountPercent?: number; chip?: string; vendor?: string; swatches?: Array<{ label: string; color?: string; image?: string }>; moreSwatches?: number; /** Exact price in minor units, used to sort and filter product lists. */ priceMinor?: number; /** False when no variant can be bought; product list filters use it. */ available?: boolean; /** Set when the product can go straight into the cart from its card (one variant, no options, in stock). */ quickAdd?: { variantId: string; max: number } }
+export interface PublicProduct { id: string; name: string; href: string; imageUrl: string; price: string; compareAtPrice?: string; badge?: string; saving?: string; discountPercent?: number; chip?: string; vendor?: string; swatches?: Array<{ label: string; color?: string; image?: string }>; moreSwatches?: number; /** Exact price in minor units, used to sort and filter product lists. */ priceMinor?: number; /** False when no variant can be bought; product list filters use it. */ available?: boolean; /** Set when the product can go straight into the cart from its card (one variant, no options, in stock). */ quickAdd?: { variantId: string; max: number }; /** Average star rating and number of published reviews. */ rating?: { average: number; count: number } }
 export interface CollectionPresentationContext {
   interactiveGrid?: ReactNode;
   collection: { id: string; title: string; description: string; descriptionDoc?: RichTextDocument | null; imageUrl?: string };
@@ -36,7 +36,15 @@ export interface PublicMetaobjectList {
   definition: { handle: string; name: string; fields: Array<{ handle: string; name: string; type: string }> };
   entries: Array<{ handle: string; displayName: string; values: Record<string, string | number | boolean> }>;
 }
-export interface CommerceDataProvider { initialProducts?: PublicProduct[]; getProducts(input?: { featured?: boolean; limit?: number; sort?: string; collectionId?: string }): Promise<PublicProduct[]>; subscribeNewsletter?: (email: string, source: string) => Promise<void>; getMetaobjects?: (handle: string) => Promise<PublicMetaobjectList | null>; /** The shopper's cart, for quick add on product cards. Absent in the editor. */ cart?: StorefrontCartAccess }
+export interface CommerceDataProvider { initialProducts?: PublicProduct[]; getProducts(input?: { featured?: boolean; limit?: number; sort?: string; collectionId?: string }): Promise<PublicProduct[]>; subscribeNewsletter?: (email: string, source: string) => Promise<void>; getMetaobjects?: (handle: string) => Promise<PublicMetaobjectList | null>; /** The shopper's cart, for quick add on product cards. Absent in the editor. */ cart?: StorefrontCartAccess; /** Star ratings by product id, for product cards. */ ratings?: Record<string, { average: number; count: number }>; /** Reading and writing product reviews (the product page's Reviews section). */ reviews?: StorefrontReviewAccess }
+/** A published review as shoppers see it. */
+export interface StorefrontReview { id: string; rating: number; title: string; body: string; authorName: string; verifiedPurchase: boolean; createdAt: string }
+export interface StorefrontReviewPage { summary: { average: number; count: number; distribution: [number, number, number, number, number] }; reviews: StorefrontReview[] }
+/** What the Reviews section may do: read a product's published reviews and send a new one (it waits for the merchant). */
+export interface StorefrontReviewAccess {
+  list(productId: string, page?: { limit?: number; offset?: number }): Promise<StorefrontReviewPage>;
+  submit(productId: string, review: { rating: number; title?: string; body?: string; authorName: string; email?: string }): Promise<{ ok: boolean; message?: string }>;
+}
 /** What product cards may do with the cart: read and set the quantity of one variant. */
 export interface StorefrontCartAccess { quantity(variantId: string): number; setQuantity(variantId: string, quantity: number): Promise<{ ok: boolean; message?: string }> }
 export interface AssetResolver { resolve(assetId: string): Promise<string | null> }

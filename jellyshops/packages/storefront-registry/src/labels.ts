@@ -39,6 +39,7 @@ const sectionLabels: Record<string, string> = {
   "product-tabs": "Product information tabs",
   "product-stock-counter": "Stock counter",
   "product-specifications": "Specifications",
+  "product-reviews": "Reviews",
   "related-products": "Related products",
   "collection-header": "Collection banner",
   "collection-product-grid": "Collection products",

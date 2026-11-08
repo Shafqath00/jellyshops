@@ -6,7 +6,7 @@ export { createStorefrontRuntimeContext, createCollectionLinks } from "./runtime
 export { isRenderableHomeSection, renderableHomeSectionTypes } from "./section-support";
 export type { SectionRenderComponent, SectionRenderProps } from "./render-registry";
 export type { RuntimeRegion, StorefrontRuntimeContext } from "./runtime-context";
-export type { AssetResolver, CollectionPresentationContext, CommerceDataProvider, StorefrontCartAccess, ProductPresentationContext, PublicProduct, StorefrontPageContext, StorefrontRendererProps } from "./types";
+export type { AssetResolver, CollectionPresentationContext, CommerceDataProvider, StorefrontCartAccess, StorefrontReview, StorefrontReviewAccess, StorefrontReviewPage, ProductPresentationContext, PublicProduct, StorefrontPageContext, StorefrontRendererProps } from "./types";
 export { withStoreIdentity } from "./store-identity";
 export { ThemeCustomCss } from "./section-custom-css";
 export { MetaobjectEntryContent, metaobjectEntryHref } from "./sections/metaobject-list";
@@ -14,4 +14,4 @@ export type { PublicMetaobjectList } from "./types";
 export type { StoreIdentity } from "./store-identity";
 export type { RendererSelection } from "./types";
 export { formattedSetting, inlineSetting, SettingText } from "./sections/setting-text";
-export { CardCartContext, ProductCard, QuickAdd } from "./product-card";
+export { CardCartContext, CardRatingsContext, ProductCard, QuickAdd } from "./product-card";

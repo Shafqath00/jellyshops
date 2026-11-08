@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore, type CSSProperties } from "react";
-import { CardCartContext, ProductCard, RegistrySectionRenderer, type CommerceDataProvider } from "@jelly/storefront-renderer";
+import { CardCartContext, CardRatingsContext, ProductCard, RegistrySectionRenderer, type CommerceDataProvider, type StorefrontPageContext, type StorefrontReviewAccess } from "@jelly/storefront-renderer";
 import type { RuntimeMenuV4, SectionNode } from "@jelly/storefront-schema";
 import { applyThemeStyle, listThemeStyles, resolveStorefrontThemeTokens, resolveTheme } from "@jelly/storefront-themes";
 import { StorefrontProductCard } from "@jelly/storefront-ui";
@@ -22,6 +22,20 @@ const views = [["guide", "Style guide"], ["home", "Home"], ["collection", "Colle
 type View = (typeof views)[number][0];
 
 const commerce: CommerceDataProvider = { async getProducts() { return []; } };
+/** Sample reviews for the style guide's Reviews panel; sending one only pretends. */
+const sampleReviews: StorefrontReviewAccess = {
+  async list(_productId, page = {}) {
+    const reviews = [
+      { id: "r1", rating: 5, title: "Exactly as pictured", body: "Arrived quickly and feels even better in person. I've already ordered a second one.", authorName: "Priya S.", verifiedPurchase: true, createdAt: "2026-10-30T10:00:00Z" },
+      { id: "r2", rating: 4, title: "Lovely, runs a little small", body: "Great quality. I'd size up next time.", authorName: "Tom R.", verifiedPurchase: false, createdAt: "2026-10-21T10:00:00Z" },
+      { id: "r3", rating: 5, title: "", body: "Beautiful finish and well packed.", authorName: "Grace", verifiedPurchase: true, createdAt: "2026-10-02T10:00:00Z" },
+    ].slice(page.offset ?? 0, (page.offset ?? 0) + (page.limit ?? 5));
+    return { summary: { average: 4.7, count: 3, distribution: [2, 1, 0, 0, 0] }, reviews };
+  },
+  async submit() { return { ok: true }; },
+};
+const reviewsCommerce: CommerceDataProvider = { ...commerce, reviews: sampleReviews };
+const reviewsPage = { pageType: "product", resource: { id: "sample", handle: "sample", data: { productPresentation: { product: { id: "sample", title: "Sample" } } } } } as unknown as StorefrontPageContext;
 const menus: Record<string, RuntimeMenuV4> = {
   main: {
     id: "style-guide-main",
@@ -175,11 +189,15 @@ function Guide({ config }: { config: ThemePreviewConfig }) {
         ] as SectionNode["blocks"])} mode="preview" commerce={commerce} region="template" themeId={themeId} menus={menus} storeSlug="style-guide" /></div>
       </div>)}
     </Block>
+    <Block title="Reviews">
+      <div style={{ border }}><RegistrySectionRenderer section={section("guide-reviews", "product-reviews", { heading: "Customer reviews", allowWriting: true, perPage: 5 })} mode="preview" commerce={reviewsCommerce} region="template" themeId={themeId} page={reviewsPage} menus={menus} storeSlug="style-guide" /></div>
+    </Block>
     <Block title="Card styles">
-      <CardCartContext.Provider value={previewCart}>{cardLayouts.map(([layout, label]) => <div key={layout} data-card-layout={layout} style={{ display: "grid", gap: 8 }}>
+      <p style={{ margin: 0, fontSize: 13, color: muted }}>Shown with star ratings on (Product cards &gt; Show star ratings).</p>
+      <CardRatingsContext.Provider value={Object.fromEntries(cards.map((product, index) => [product.id, { average: [4.8, 4.2, 3.6, 5][index % 4], count: [128, 12, 5, 1][index % 4] }]))}><div style={{ display: "grid", gap: 24, "--jelly-card-rating-display": "flex" } as CSSProperties}><CardCartContext.Provider value={previewCart}>{cardLayouts.map(([layout, label]) => <div key={layout} data-card-layout={layout} style={{ display: "grid", gap: 8 }}>
         <p style={{ margin: 0, fontSize: 13, color: muted }}>{label}</p>
         <div className="jelly-product-grid-items">{withPreviewQuickAdd(cards.slice(0, 3)).map((product) => <ProductCard key={product.name} product={{ ...product, chip: layout === "technical" ? "USB-C · 40h" : layout === "tinted" ? "For dry skin" : layout === "square" ? "New" : undefined }} />)}</div>
-      </div>)}</CardCartContext.Provider>
+      </div>)}</CardCartContext.Provider></div></CardRatingsContext.Provider>
     </Block>
     <Block title="Header layouts">
       {headerLayouts.map(([layout, label]) => <div key={layout} data-guide-header-layout={layout} style={{ display: "grid", gap: 8 }}>

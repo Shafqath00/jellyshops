@@ -4,6 +4,8 @@ import type { PublicProduct, StorefrontCartAccess } from "./types";
 
 /** The shopper's cart for quick add; provided per section by RegistrySectionRenderer (not in the editor). */
 export const CardCartContext = createContext<StorefrontCartAccess | undefined>(undefined);
+/** Star ratings by product id; provided per section by RegistrySectionRenderer. */
+export const CardRatingsContext = createContext<Record<string, { average: number; count: number }> | undefined>(undefined);
 
 /**
  * Quick add (template programme card archetype C3): "Add", then a − 1 + stepper showing how many are in the bag.
@@ -39,6 +41,9 @@ export function QuickAdd({ product, cart }: { product: PublicProduct & { quickAd
 /** The product card used by every renderer product list: the shared card plus quick add when the cart allows it. */
 export function ProductCard({ product, editorProps }: { product: PublicProduct; editorProps?: Record<string, string> }) {
   const cart = useContext(CardCartContext);
+  const ratings = useContext(CardRatingsContext);
+  const rating = product.rating ?? ratings?.[product.id];
+  if (rating && !product.rating) product = { ...product, rating };
   const quickAdd = cart && product.quickAdd && product.available !== false ? product.quickAdd : undefined;
   return <StorefrontProductCard product={product} editorProps={editorProps} actions={cart && quickAdd ? <QuickAdd product={{ ...product, quickAdd }} cart={cart} /> : undefined} />;
 }

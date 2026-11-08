@@ -1181,3 +1181,53 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
   .jelly-cart-drawer[data-variant="sheet"] .jelly-cart-drawer-panel { animation: none; }
 }
 @media (max-width: 767px) { .jelly-cart-drawer[data-variant="sheet"] .jelly-cart-drawer-header { position: relative; padding-top: 24px; } }
+
+/* Star ratings: five stars, filled to --jelly-stars (0-5) with the theme's text colour. */
+.jelly-stars {
+  --jelly-stars-on: var(--jelly-stars-colour, var(--j-color-text, currentColor));
+  display: inline-block; font-size: 1em; line-height: 1; letter-spacing: 0.1em; white-space: nowrap;
+  background: linear-gradient(90deg, var(--jelly-stars-on) calc(var(--jelly-stars, 0) / 5 * 100%), color-mix(in srgb, currentColor 22%, transparent) 0);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+@media (forced-colors: active) { .jelly-stars { background: none; color: CanvasText; } }
+
+/* Product card rating (theme settings > Product cards > Show star ratings). */
+[data-jelly-theme] .jelly-product-card .jelly-product-card-rating { display: var(--jelly-card-rating-display, none); align-items: center; gap: 6px; margin: 2px 0 0; font-size: 13px; }
+.jelly-product-card-rating-count { color: var(--j-color-muted, inherit); }
+
+/* Reviews section of the product page. */
+.jelly-product-reviews h2 { margin: 0 0 24px; }
+.jelly-reviews-layout { display: grid; gap: 32px; }
+@media (min-width: 900px) { .jelly-reviews-layout { grid-template-columns: minmax(220px, 300px) minmax(0, 1fr); gap: 56px; align-items: start; } }
+.jelly-reviews-summary { display: grid; gap: 10px; justify-items: start; }
+.jelly-reviews-summary > .jelly-stars { font-size: 20px; }
+.jelly-reviews-average { margin: 0; font-family: var(--j-font-heading, inherit); line-height: 1; }
+.jelly-reviews-average strong { font-size: 48px; font-weight: 600; }
+.jelly-reviews-count, .jelly-reviews-empty { margin: 0; color: var(--j-color-muted, inherit); }
+.jelly-reviews-bars { display: grid; gap: 6px; width: 100%; margin: 4px 0 8px; padding: 0; list-style: none; font-size: 13px; }
+.jelly-reviews-bars li { display: grid; grid-template-columns: 2.5em 1fr 2em; align-items: center; gap: 8px; }
+.jelly-reviews-bars li > span:last-child { text-align: right; color: var(--j-color-muted, inherit); }
+.jelly-reviews-bar { height: 6px; border-radius: 999px; background: color-mix(in srgb, currentColor 12%, transparent); overflow: hidden; }
+.jelly-reviews-bar > span { display: block; height: 100%; border-radius: inherit; background: var(--j-color-text, currentColor); }
+.jelly-reviews-main { display: grid; gap: 24px; min-width: 0; }
+.jelly-reviews-list { display: grid; margin: 0; padding: 0; list-style: none; }
+.jelly-review { display: grid; gap: 8px; padding: 20px 0; border-top: 1px solid var(--j-color-border, color-mix(in srgb, currentColor 15%, transparent)); }
+.jelly-review:first-child { border-top: 0; padding-top: 0; }
+.jelly-review-head { display: grid; gap: 6px; }
+.jelly-review-head h3 { margin: 0; font-size: 17px; }
+.jelly-review-body { margin: 0; white-space: pre-line; }
+.jelly-review-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0; color: var(--j-color-muted, inherit); font-size: 13px; }
+.jelly-review-verified { font-weight: 600; color: var(--j-color-text, inherit); }
+.jelly-review-form { display: grid; gap: 14px; padding: 20px; border: 1px solid var(--j-color-border, color-mix(in srgb, currentColor 15%, transparent)); border-radius: var(--jelly-card-radius, 8px); }
+.jelly-review-form h3 { margin: 0; }
+.jelly-review-form > label { display: grid; gap: 6px; font-size: 14px; }
+.jelly-review-form :is(input, textarea) { width: 100%; }
+.jelly-review-rating-input { display: flex; gap: 2px; margin: 0; padding: 0; border: 0; }
+.jelly-review-rating-input legend { margin-bottom: 6px; font-size: 14px; }
+.jelly-review-rating-input label { position: relative; display: grid; place-items: center; width: 44px; height: 44px; font-size: 28px; color: color-mix(in srgb, currentColor 25%, transparent); cursor: pointer; }
+.jelly-review-rating-input label[data-on] { color: var(--j-color-text, currentColor); }
+.jelly-review-rating-input input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.jelly-review-rating-input label:has(input:focus-visible) { outline: 2px solid var(--j-color-text, currentColor); outline-offset: 2px; border-radius: 4px; }
+.jelly-review-website { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.jelly-review-error { margin: 0; color: #b42318; font-size: 14px; }
+.jelly-review-thanks { margin: 0; padding: 16px; border-radius: var(--jelly-card-radius, 8px); background: color-mix(in srgb, var(--j-color-primary, currentColor) 8%, transparent); }

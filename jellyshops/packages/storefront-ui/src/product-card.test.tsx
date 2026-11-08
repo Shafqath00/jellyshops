@@ -15,7 +15,7 @@ it("adds a sale badge (shown by the theme setting) to discounted products withou
 });
 
 it("is built from the fixed set of parts, in order", () => {
-  const { container } = render(<StorefrontProductCard product={{ ...product, vendor: "Jelly Basics", compareAtPrice: "£55.00", saving: "£15.00", chip: "New colours", swatches: [{ label: "Sage", color: "#9aa48f" }] }} />);
+  const { container } = render(<StorefrontProductCard product={{ ...product, vendor: "Jelly Basics", compareAtPrice: "£55.00", saving: "£15.00", chip: "New colours", swatches: [{ label: "Sage", color: "#9aa48f" }], rating: { average: 4.5, count: 3 } }} />);
   expect([...container.querySelectorAll<HTMLElement>("[data-card-part]")].map((part) => part.dataset.cardPart)).toEqual([...PRODUCT_CARD_PARTS]);
   // Parts without data are left out instead of drawn empty.
   const bare = render(<StorefrontProductCard product={product} />).container;

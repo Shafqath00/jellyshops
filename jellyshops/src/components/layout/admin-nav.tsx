@@ -9,7 +9,7 @@ const groups: Array<Destination & { icon: LucideIcon; children?: Destination[] }
   { label: "Home", href: "/admin", icon: Home },
   { label: "Orders", href: "/admin/orders", icon: Package },
   { label: "Products", href: "/admin/products", icon: Package, children: [
-    { label: "All products", href: "/admin/products" }, { label: "Collections", href: "/admin/products/collections" }, { label: "Inventory", href: "/admin/products/inventory" },
+    { label: "All products", href: "/admin/products" }, { label: "Collections", href: "/admin/products/collections" }, { label: "Inventory", href: "/admin/products/inventory" }, { label: "Reviews", href: "/admin/products/reviews" },
   ] },
   { label: "Customers", href: "/admin/customers", icon: Users, children: [
     { label: "All customers", href: "/admin/customers" }, { label: "Messages", href: "/admin/customers/messages" },

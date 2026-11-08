@@ -40,6 +40,23 @@ export const productExtraSections: SectionDefinition[] = [
     responsiveFields: [],
   },
   {
+    // Shoppers' reviews of the product: rating summary, published reviews and a form (reviews wait for the merchant).
+    type: "product-reviews",
+    category: "commerce",
+    supportedPages: [...productOnly],
+    settingsSchema: z.object({ heading: z.string().max(120).optional(), emptyText: z.string().max(200).optional(), allowWriting: z.boolean().optional(), perPage: z.number().int().min(3).max(20).optional() }).passthrough(),
+    controls: [
+      { type: "text", key: "heading", label: "Heading", group: "content", maxLength: 120 },
+      { type: "text", key: "emptyText", label: "Text when there are no reviews yet", group: "content", maxLength: 200 },
+      { type: "checkbox", key: "allowWriting", label: "Let shoppers write reviews", description: "New reviews wait for you under Products > Reviews.", group: "content" },
+      { type: "range", key: "perPage", label: "Reviews shown at first", group: "layout", min: 3, max: 20, step: 1 },
+    ],
+    allowedBlockTypes: [],
+    defaultSettings: { heading: "Customer reviews", allowWriting: true, perPage: 5 },
+    defaultBlocks: [],
+    responsiveFields: [],
+  },
+  {
     // Each product's own specifications (entered on the product form) as a table, plus fixed rows that apply to every product using the template.
     type: "product-specifications",
     category: "commerce",

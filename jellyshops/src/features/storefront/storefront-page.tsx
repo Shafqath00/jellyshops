@@ -25,13 +25,16 @@ import { cardLayoutAttribute, resolveDesignTokens, resolveStorefrontThemeTokens,
 import type { Currency, Product } from "@/lib/domain";
 import type { ResolvedStorefrontRoute } from "./resource-loader";
 import { useStorefrontCartAccess } from "./storefront-cart-access";
+import { useReviewSummaries, useStorefrontReviewAccess } from "./reviews-api";
 import { catalogProductToStorefrontProduct, type PublicCatalogResponse } from "@/features/commerce/api/client";
 
-function commerceProvider(storeSlug: string, currency: Currency, products: Product[], storeId?: string, cart?: StorefrontCartAccess): CommerceDataProvider {
+function commerceProvider(storeSlug: string, currency: Currency, products: Product[], storeId?: string, cart?: StorefrontCartAccess, reviewData?: Pick<CommerceDataProvider, "ratings" | "reviews">): CommerceDataProvider {
   const initialProducts = products.filter((product) => product.published && !product.archived).map((product) => productCardData(product, `/${storeSlug}/products/${product.slug}`, currency));
   return {
     initialProducts,
     cart,
+    ratings: reviewData?.ratings,
+    reviews: reviewData?.reviews,
     getMetaobjects: storeId ? (handle) => fetchPublicMetaobjects(storeId, handle) : undefined,
     subscribeNewsletter: storeId ? async (email, source) => {
       const origin = process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
@@ -82,6 +85,8 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
 }) {
   const chromeHandled = useStorefrontChrome();
   const cart = useStorefrontCartAccess(storeSlug);
+  const ratings = useReviewSummaries(snapshot.storeId, products.map((product) => product.id));
+  const reviews = useStorefrontReviewAccess(snapshot.storeId);
   const { language } = useStorefrontLanguage();
   const { state } = useShop();
   const resourceLinks = useResourceLinks(snapshot.storeId, storeSlug, state.products);
@@ -90,7 +95,7 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
   const resolvedTheme = resolveTheme(snapshot.theme.id ?? snapshot.theme.presetId, snapshot.theme.settings, snapshot.theme.version);
   const themeId = resolvedTheme.id as ThemeId;
   const style = resolveStorefrontThemeTokens(themeId, resolvedTheme.settings, {}, resolvedTheme.version) as CSSProperties;
-  const commerce = commerceProvider(storeSlug, currency, products, snapshot.storeId, cart);
+  const commerce = commerceProvider(storeSlug, currency, products, snapshot.storeId, cart, { ratings, reviews });
 
   return (
     <div className={`jelly-storefront jelly-theme-layout-${resolvedTheme.layout}`} data-jelly-theme={themeStyleId(resolvedTheme.id, resolvedTheme.version)} data-jelly-legacy-styles={legacyStylesAttribute(resolvedTheme.id, resolvedTheme.version)} data-jelly-theme-version={resolvedTheme.version} data-card-layout={cardLayoutAttribute(style)} style={style}>

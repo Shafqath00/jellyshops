@@ -18292,6 +18292,78 @@
       }
     },
     {
+      "type": "product-reviews",
+      "category": "commerce",
+      "supportedPages": [
+        "product"
+      ],
+      "allowedRegions": [
+        "template"
+      ],
+      "allowedBlockTypes": [],
+      "defaultSettings": {
+        "heading": "Customer reviews",
+        "allowWriting": true,
+        "perPage": 5
+      },
+      "defaultBlocks": [],
+      "responsiveFields": [],
+      "presets": [],
+      "controls": [
+        {
+          "type": "text",
+          "key": "heading",
+          "label": "Heading",
+          "group": "content",
+          "maxLength": 120
+        },
+        {
+          "type": "text",
+          "key": "emptyText",
+          "label": "Text when there are no reviews yet",
+          "group": "content",
+          "maxLength": 200
+        },
+        {
+          "type": "checkbox",
+          "key": "allowWriting",
+          "label": "Let shoppers write reviews",
+          "description": "New reviews wait for you under Products > Reviews.",
+          "group": "content"
+        },
+        {
+          "type": "range",
+          "key": "perPage",
+          "label": "Reviews shown at first",
+          "group": "layout",
+          "min": 3,
+          "max": 20,
+          "step": 1
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "heading": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "emptyText": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "allowWriting": {
+            "type": "boolean"
+          },
+          "perPage": {
+            "type": "integer",
+            "minimum": 3,
+            "maximum": 20
+          }
+        }
+      }
+    },
+    {
       "type": "product-specifications",
       "category": "commerce",
       "supportedPages": [
