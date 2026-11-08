@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/features/auth/providers/auth-provider";
+import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import { createContentApi, type ArticleResource, type BlogResource, type ContentTemplate, type TemplateAssignment } from "@/features/content/api/client";
 import { ResourceForm } from "@/features/content/components/resource-form";
 
@@ -30,6 +31,9 @@ export default function BlogsAdminPage() {
     baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001",
     token,
   }) : null, [token, storeId]);
+  // The store's files, for choosing a social sharing image.
+  const mediaApi = useMemo(() => token ? createStoreEditorApi({ baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001", token }) : null, [token]);
+  const listImages = mediaApi?.listMedia && storeId ? () => mediaApi.listMedia!(storeId) : undefined;
   const [blogs, setBlogs] = useState<BlogResource[]>([]);
   const [articles, setArticles] = useState<ArticleResource[]>([]);
   const [articleTemplates, setArticleTemplates] = useState<ContentTemplate[]>([]);
@@ -139,7 +143,8 @@ export default function BlogsAdminPage() {
               </div>
               <ResourceForm
                 key={`${article.id}:${assignment?.revision ?? "new"}:${assignment?.templateId ?? "default"}`}
-                resource={editable(article)}
+                listImages={listImages} storeSlug={activeStore?.slug} pathPrefix="/blogs/"
+              resource={editable(article)}
                 templates={articleTemplates.map(({ id, name }) => ({ id, name }))}
                 assignedTemplateId={assignment?.templateId}
                 onSave={async (value) => {

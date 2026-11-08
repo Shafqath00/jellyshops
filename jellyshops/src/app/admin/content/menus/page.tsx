@@ -12,6 +12,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { referencedHeaderMenu } from "@/features/navigation/header-menu";
 
+/** Menus kept from an earlier store design ("previous-…"). They stay saved but are hidden unless asked for. */
+const isEarlierVersion = (handle: string) => handle.startsWith("previous-");
+
 export default function NavigationPage() {
   const { session, activeStore } = useAuth();
   const { all } = useAdminCatalog();
@@ -38,6 +41,7 @@ function NavigationWorkspace({ storeId, api, editor, all }: { storeId: string; a
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
   const [handle, setHandle] = useState("");
+  const [showEarlier, setShowEarlier] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -93,7 +97,8 @@ function NavigationWorkspace({ storeId, api, editor, all }: { storeId: string; a
       <div className="flex gap-2"><Button type="submit" disabled={saving}>{saving ? "Creating…" : "Create"}</Button><Button type="button" variant="outline" disabled={saving} onClick={() => setCreating(false)}>Cancel</Button></div>
     </form>}
     {loading ? <p role="status">Loading navigation…</p> : <>
-      <nav aria-label="Navigation menus" className="flex flex-wrap gap-2">{menus.map(entry => <Button key={entry.id} variant={entry.id === activeId ? "default" : "outline"} disabled={saving} onClick={() => { setActiveId(entry.id); setNotice(""); setError(""); }}>{entry.name} · {entry.handle}{saved[entry.id] !== JSON.stringify(entry.items) ? " *" : ""}</Button>)}</nav>
+      <nav aria-label="Navigation menus" className="flex flex-wrap gap-2">{menus.filter(entry => showEarlier || !isEarlierVersion(entry.handle) || entry.id === activeId).map(entry => <Button key={entry.id} variant={entry.id === activeId ? "default" : "outline"} disabled={saving} onClick={() => { setActiveId(entry.id); setNotice(""); setError(""); }}>{entry.name}{isEarlierVersion(entry.handle) ? " (earlier version)" : entry.handle !== "main" && entry.handle !== "footer" ? ` · ${entry.handle}` : ""}{saved[entry.id] !== JSON.stringify(entry.items) ? " *" : ""}</Button>)}
+        {menus.some(entry => isEarlierVersion(entry.handle)) && <button type="button" className="text-[12px] underline" onClick={() => setShowEarlier(value => !value)}>{showEarlier ? "Hide earlier versions" : `Show ${menus.filter(entry => isEarlierVersion(entry.handle)).length} earlier versions`}</button>}</nav>
       {menu ? <MenuEditor key={menu.id} menu={menu} collections={collections} saving={saving} dirty={!conflict && saved[menu.id] !== JSON.stringify(menu.items)} onChange={items => { setNotice(""); setMenus(current => current.map(entry => entry.id === menu.id ? { ...entry, items } : entry)); }} onSave={() => void save()} /> : <p>No navigation menus yet. Create a menu to add your collection links.</p>}
     </>}
   </main>;

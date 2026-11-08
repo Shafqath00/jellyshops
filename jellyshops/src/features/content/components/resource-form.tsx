@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { SeoFields, validateSeoFields, type SeoFieldsValue } from "./seo-fields";
+import type { MediaRecord } from "@/features/store-editor/api/types";
 
 export interface EditableContentResource extends SeoFieldsValue {
   id: string;
@@ -15,6 +16,9 @@ export function ResourceForm({
   onSave,
   onAssignTemplate,
   onCustomizeTemplate,
+  listImages,
+  storeSlug,
+  pathPrefix,
 }: {
   resource: EditableContentResource;
   templates: Array<{ id: string; name: string }>;
@@ -22,6 +26,9 @@ export function ResourceForm({
   onSave(value: EditableContentResource): void | Promise<void>;
   onAssignTemplate(input: { resourceId: string; templateId: string }): void | Promise<void>;
   onCustomizeTemplate(input: { resourceId: string; templateId: string }): void;
+  listImages?: () => Promise<MediaRecord[]>;
+  storeSlug?: string;
+  pathPrefix?: string;
 }) {
   const [value, setValue] = useState(resource);
   const [templateId, setTemplateId] = useState(assignedTemplateId ?? templates[0]?.id ?? "");
@@ -43,7 +50,7 @@ export function ResourceForm({
         <input aria-label="Title" value={value.title} onChange={(event) => setValue({ ...value, title: event.target.value })} className="mt-1 h-9 w-full rounded-lg border border-border px-3" />
       </label>
 
-      <SeoFields value={value} onChange={(next) => setValue({ ...value, ...next })} />
+      <SeoFields value={value} fallbackTitle={value.title} listImages={listImages} storeSlug={storeSlug} pathPrefix={pathPrefix} onChange={(next) => setValue({ ...value, ...next })} />
 
       <section className="rounded-xl border border-border bg-muted/50 p-4">
         <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Template</p>

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/features/auth/providers/auth-provider";
+import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import { createContentApi, type ContentTemplate, type PageResource, type TemplateAssignment } from "@/features/content/api/client";
 import { ResourceForm } from "@/features/content/components/resource-form";
 
@@ -28,6 +29,9 @@ export default function PagesAdminPage() {
     baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001",
     token,
   }) : null, [token, storeId]);
+  // The store's files, for choosing a social sharing image.
+  const mediaApi = useMemo(() => token ? createStoreEditorApi({ baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001", token }) : null, [token]);
+  const listImages = mediaApi?.listMedia && storeId ? () => mediaApi.listMedia!(storeId) : undefined;
   const [pages, setPages] = useState<PageResource[]>([]);
   const [templates, setTemplates] = useState<ContentTemplate[]>([]);
   const [activePageId, setActivePageId] = useState("");
@@ -85,6 +89,7 @@ export default function PagesAdminPage() {
           {page ? (
             <ResourceForm
               key={`${page.id}:${assignment?.revision ?? "new"}:${assignment?.templateId ?? "default"}`}
+              listImages={listImages} storeSlug={activeStore?.slug} pathPrefix="/pages/"
               resource={editable(page)}
               templates={templates.map(({ id, name }) => ({ id, name }))}
               assignedTemplateId={assignment?.templateId}
