@@ -60,7 +60,17 @@ const alignmentSchema = z.enum(["left", "center", "right"]).optional();
 const heroControls = [
   eyebrowControl,
   imageControl,
-  { type: "segmented" as const, key: "layout", label: "Layout", group: "layout" as const, options: [{ label: "Image beside text", value: "split" }, { label: "Text over image", value: "overlay" }, { label: "Text only", value: "text" }] },
+  { type: "select" as const, key: "layout", label: "Layout", group: "layout" as const, options: [
+    { label: "Image beside text", value: "split" },
+    { label: "Text over image", value: "overlay" },
+    { label: "Text only", value: "text" },
+    { label: "Product on a colour, with callouts", value: "spotlight" },
+    { label: "Large statement", value: "statement" },
+    { label: "Countdown to a launch", value: "countdown" },
+  ], description: "Spotlight: a product photo (ideally on a plain background) on the section colour, with short callouts beside it. Statement: very large heading, the image small beside it. Countdown: counts down to a date and time over the image." },
+  { type: "textarea" as const, key: "callouts", label: "Callouts", description: "One per line, up to four, for example Vitamin C. Shown beside the product.", group: "content" as const, maxLength: 240, showWhen: { key: "layout", equals: "spotlight" }, visibleWhenSaved: true },
+  { type: "text" as const, key: "countdownTo", label: "Count down to", description: "UK time, written as 2026-12-01 18:00.", group: "content" as const, maxLength: 16, showWhen: { key: "layout", equals: "countdown" }, visibleWhenSaved: true },
+  { type: "text" as const, key: "countdownEndText", label: "Text after the countdown", description: "Shown when the time has come, for example Out now.", group: "content" as const, maxLength: 60, showWhen: { key: "layout", equals: "countdown" }, visibleWhenSaved: true },
   heightControl,
   leftOrCenter,
   colorScheme,
@@ -68,7 +78,10 @@ const heroControls = [
 ];
 const heroSettings = z.object({
   contentAlignment: alignmentSchema,
-  layout: z.enum(["split", "overlay", "text"]).optional(),
+  layout: z.enum(["split", "overlay", "text", "spotlight", "statement", "countdown"]).optional(),
+  callouts: z.string().max(240).optional(),
+  countdownTo: z.string().regex(/^\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?$/, "Write the date and time as 2026-12-01 18:00").or(z.literal("")).optional(),
+  countdownEndText: z.string().max(60).optional(),
   height: z.enum(["medium", "large"]).optional(),
   colorScheme: schemeSchema,
   overlay: z.number().min(0).max(100).optional(),

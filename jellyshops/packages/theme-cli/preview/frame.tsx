@@ -7,7 +7,7 @@ import { createRoot } from "react-dom/client";
 import { RegistrySectionRenderer, type CommerceDataProvider } from "@jelly/storefront-renderer";
 import type { RuntimeMenuV4, SectionNode } from "@jelly/storefront-schema";
 import { scopeCustomCss } from "@jelly/storefront-schema";
-import { getStarterPack, registerThemeProject, resolveStorefrontThemeTokens, resolveTheme, legacyStylesAttribute, themeStyleId } from "@jelly/storefront-themes";
+import { cardLayoutAttribute, getStarterPack, registerThemeProject, resolveStorefrontThemeTokens, resolveTheme, legacyStylesAttribute, themeStyleId } from "@jelly/storefront-themes";
 import { samplePageContext, sampleProducts } from "@jelly/theme-sdk/sample-data";
 import { fetchProject, onProjectChanged, placeholderImage, toTheme, type Project } from "./project";
 
@@ -75,7 +75,7 @@ function Frame() {
       onSelect={(selection) => { setSelected(selection.sectionId ?? null); parent.postMessage({ type: "jelly-select", sectionId: selection.sectionId, blockId: selection.blockId }, location.origin); }}
     />
   );
-  return <div className="theme-preview-viewport" data-jelly-theme={themeStyleId(view.id, view.version)} data-jelly-legacy-styles={legacyStylesAttribute(view.id, view.version)} data-jelly-theme-version={view.version} style={view.style}>
+  return <div className="theme-preview-viewport" data-jelly-theme={themeStyleId(view.id, view.version)} data-jelly-legacy-styles={legacyStylesAttribute(view.id, view.version)} data-jelly-theme-version={view.version} data-card-layout={cardLayoutAttribute(view.style)} style={view.style}>
     <style>{scopeCustomCss(project.css, `[data-jelly-theme="${view.id}"]`, 150_000) ?? ""}</style>
     <div className="jelly-storefront">
       {view.entries.filter((entry) => entry.region === "header").map(draw)}

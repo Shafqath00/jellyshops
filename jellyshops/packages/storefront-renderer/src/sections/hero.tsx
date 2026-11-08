@@ -7,8 +7,12 @@ import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
 import { blockStyle } from "../block-style";
 import { buttonProps } from "./block-content";
+import { countdownTarget, HeroCountdown } from "./hero-countdown";
 import { blockLabel } from "@jelly/storefront-registry";
 import { choice, editorBlockData, imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
+
+/** Hero layouts: split (R2), overlay, text, spotlight (R4), statement (R9) and countdown (R6). */
+export const HERO_LAYOUTS = ["split", "overlay", "text", "spotlight", "statement", "countdown"] as const;
 
 function setting(block: SectionNode["blocks"][number], key: string): string | undefined {
   const value = block.settings[key];
@@ -20,7 +24,12 @@ export function HeroSection({ section, editor = false, context, selectedBlockId 
   const image = imageValue(settings);
   const focalPoint = image?.focalPoint && Number.isFinite(image.focalPoint.x) && Number.isFinite(image.focalPoint.y) ? image.focalPoint : { x: 50, y: 50 };
   const alignment = choice(settings, "contentAlignment", ["left", "center", "right"] as const, "left");
-  const layout = image ? choice(settings, "layout", ["split", "overlay", "text"] as const, "split") : "text";
+  const requested = choice(settings, "layout", HERO_LAYOUTS, "split");
+  // Statement and countdown work without a photo; the photo layouts fall back to text only.
+  const layout = image || requested === "statement" || requested === "countdown" ? requested : "text";
+  const callouts = layout === "spotlight" ? (stringValue(settings, "callouts") ?? "").split("\n").map((line) => line.trim()).filter(Boolean).slice(0, 4) : [];
+  const countdown = layout === "countdown" ? countdownTarget(settings.countdownTo) : null;
+  const countdownEnd = stringValue(settings, "countdownEndText");
   const style: CSSProperties = {
     backgroundColor: typeof settings.background === "string" ? settings.background : undefined,
     paddingTop: typeof settings.paddingTop === "number" ? settings.paddingTop : undefined,
@@ -49,6 +58,7 @@ export function HeroSection({ section, editor = false, context, selectedBlockId 
           if (!text) return null;
           return block.type === "heading" ? <h1 key={block.id} {...blockStyle(block)} {...editorProps(block)}>{inlineSetting(block.settings, "text", text)}</h1> : <p key={block.id} {...blockStyle(block)} {...editorProps(block)}>{text}</p>;
         })}
+        {countdown !== null && <HeroCountdown target={countdown} endText={countdownEnd} />}
         {summary && <p className="jelly-hero-summary">{summary}</p>}
         {typeof settings.body === "string" && settings.body && <div className="jelly-hero-body">{settings.body}</div>}
         {buttons.length > 0 && <div className="jelly-hero-actions">{buttons.map(({ block, label, href }, index) => href
@@ -58,8 +68,9 @@ export function HeroSection({ section, editor = false, context, selectedBlockId 
       {image && layout !== "text" && <div className="jelly-hero-media" {...elementProps(section, "image", editor)}>
         {/* Merchant media URLs may be served by the local API and are not Next Image assets. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={image.url} alt={image.alt ?? ""} style={{ objectPosition: `${focalPoint.x}% ${focalPoint.y}%`, objectFit: image.fit === "contain" ? "contain" : "cover" }} fetchPriority="high" />
+        <img src={image.url} alt={image.alt ?? ""} style={{ objectPosition: `${focalPoint.x}% ${focalPoint.y}%`, objectFit: image.fit === "contain" || layout === "spotlight" ? "contain" : "cover" }} fetchPriority="high" />
         {overlay > 0 && <span className="jelly-hero-overlay" aria-hidden="true" style={{ background: `rgba(0, 0, 0, ${overlay})` }} />}
+        {callouts.length > 0 && <ul className="jelly-hero-callouts" {...elementProps(section, "callouts", editor)}>{callouts.map((callout, index) => <li key={`${index}-${callout}`} data-side={index % 2 === 0 ? "start" : "end"}>{callout}</li>)}</ul>}
       </div>}
     </StorefrontContainer>
   </section>;

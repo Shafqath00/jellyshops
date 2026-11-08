@@ -41,6 +41,25 @@ const swatches: Array<[string, string]> = [
   ["Soft text", "var(--jelly-color-secondary)"], ["Buttons", "var(--jelly-color-primary)"], ["Highlight", "var(--theme-accent)"],
 ];
 const spacing = [8, 16, 24, 32, 48, 64, 96];
+/** The hero layouts added for the template programme (the older split, overlay and text layouts show on the Home tab). */
+const heroLayouts = [
+  ["spotlight", "Product on a colour, with callouts"],
+  ["statement", "Large statement"],
+  ["countdown", "Countdown to a launch"],
+] as const;
+/** Five days from now in the "2026-12-01 18:00" form the countdown setting uses. */
+function countdownSample(): string {
+  const date = new Date(Date.now() + 5 * 86_400_000);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} 18:00`;
+}
+/** Every product card style (theme setting Product cards > Card style). */
+const cardLayouts = [
+  ["tall", "Tall photo, few words"],
+  ["square", "Square photo with details"],
+  ["tinted", "Product on a soft colour"],
+  ["technical", "Outlined, for specifications"],
+  ["landscape", "Wide lifestyle photo"],
+] as const;
 /** Every header layout, so each theme can be reviewed with all of them. */
 const headerLayouts = [
   ["split", "Logo in the middle, menu on both sides"],
@@ -123,6 +142,25 @@ function Guide({ config }: { config: ThemePreviewConfig }) {
     </Block>
     <Block title={altHeader.settings.logoPosition === "center" ? "Header with centred logo" : "Header with logo on the left"}>
       <div style={{ border }}><RegistrySectionRenderer section={altHeader} mode="preview" commerce={commerce} region="header" themeId={themeId} menus={menus} storeSlug="style-guide" /></div>
+    </Block>
+    <Block title="Hero layouts">
+      {heroLayouts.map(([layout, label]) => <div key={layout} data-guide-hero-layout={layout} style={{ display: "grid", gap: 8 }}>
+        <p style={{ margin: 0, fontSize: 13, color: muted }}>{label}</p>
+        <div style={{ border }}><RegistrySectionRenderer section={section(`guide-hero-${layout}`, "hero", {
+          layout, eyebrow: layout === "countdown" ? "Drop 07" : "New",
+          image: { url: (layout === "spotlight" ? config.products[0] : config.products[1]).imageUrl, alt: "" },
+          callouts: "Made to last\nFree delivery\nTwo-year guarantee", countdownTo: countdownSample(), countdownEndText: "Out now",
+        }, [
+          { id: `guide-hero-${layout}-heading`, type: "heading", enabled: true, settings: { text: layout === "statement" ? "Made slowly, worn for years" : config.guide.heading } },
+          { id: `guide-hero-${layout}-button`, type: "button", enabled: true, settings: { label: "Shop now", href: "/shop" } },
+        ] as SectionNode["blocks"])} mode="preview" commerce={commerce} region="template" themeId={themeId} menus={menus} storeSlug="style-guide" /></div>
+      </div>)}
+    </Block>
+    <Block title="Card styles">
+      {cardLayouts.map(([layout, label]) => <div key={layout} data-card-layout={layout} style={{ display: "grid", gap: 8 }}>
+        <p style={{ margin: 0, fontSize: 13, color: muted }}>{label}</p>
+        <div className="jelly-product-grid-items">{cards.slice(0, 3).map((product) => <StorefrontProductCard key={product.name} product={{ ...product, chip: layout === "technical" ? "USB-C · 40h" : layout === "tinted" ? "For dry skin" : layout === "square" ? "New" : undefined }} />)}</div>
+      </div>)}
     </Block>
     <Block title="Header layouts">
       {headerLayouts.map(([layout, label]) => <div key={layout} data-guide-header-layout={layout} style={{ display: "grid", gap: 8 }}>

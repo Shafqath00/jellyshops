@@ -23,6 +23,7 @@ const EXTRA: Record<string, Record<string, unknown>> = {
   "rating-summary": { rating: 4 },
   "product-information": { showVendor: true },
   "collection-header": { showImage: true, layout: "simple" },
+  hero: { layout: "spotlight", callouts: "Vitamin C\nFragrance free" },
 };
 const presentation = {
   product: { id: "bed", title: "Harbour bed", vendor: "Harbour", description: "A bed.", imageUrl: "", options: [] },

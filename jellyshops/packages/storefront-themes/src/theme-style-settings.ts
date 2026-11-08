@@ -152,6 +152,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     color("badges.text", "Text", "Badges", ""),
   ];
   const cardContentSchema = [
+    select("productCard.layout", "Card style", "Product cards", theme, [[theme, "Theme default"], ["tall", "Tall photo, few words"], ["square", "Square photo with details"], ["tinted", "Product on a soft colour"], ["technical", "Outlined, for specifications"], ["landscape", "Wide lifestyle photo"]], "The shape and look of every product card in the store."),
     select("productCard.order", "Card layout", "Product cards", "photo-title-price", [["photo-title-price", "Photo, name, price"], ["photo-price-title", "Photo, price, name"], ["title-price-photo", "Name and price above the photo"]], "Used by every product list: product grids, related products and search."),
     select("productCard.showTitle", "Product name", "Product cards", "show", [["show", "Show"], ["hide", "Hide"]]),
     select("productCard.titleLines", "Long names", "Product cards", theme, [[theme, "Show in full"], ["1", "Cut to one line"], ["2", "Cut to two lines"]]),
@@ -340,6 +341,7 @@ export function resolveThemeStyleTokens(settings: Record<string, unknown>, defau
   if (typeof fields.height === "string" && fieldHeights[fields.height]) tokens["--jelly-field-height"] = fieldHeights[fields.height];
 
   const card = record(settings.productCard);
+  if (typeof card.layout === "string" && (PRODUCT_CARD_LAYOUTS as readonly string[]).includes(card.layout)) tokens["--jelly-card-layout"] = card.layout;
   const cardRadii: Record<string, string> = { square: "0px", soft: "6px", rounded: "16px" };
   if (typeof card.radius === "string" && cardRadii[card.radius]) tokens["--jelly-card-radius"] = cardRadii[card.radius];
   const shadows: Record<string, string> = { soft: "0 1px 4px rgb(0 0 0 / 0.08)", medium: "0 8px 24px rgb(0 0 0 / 0.12)" };
@@ -395,4 +397,17 @@ export function themeSocialLinks(settings: Record<string, unknown> | undefined):
 export function themeCustomCss(settings: Record<string, unknown> | undefined, themeId?: string, themeVersion?: string): string | null {
   const scope = themeId && themeVersion ? `[data-jelly-theme="${themeId}"][data-jelly-theme-version="${themeVersion}"]` : "[data-jelly-theme]";
   return scopeCustomCss(record(settings?.advanced).customCss, scope, MAX_THEME_CSS_LENGTH);
+}
+
+/** Card styles drawn by storefront-base.css (template programme card archetypes C1, C2, C4, C5, C7). */
+export const PRODUCT_CARD_LAYOUTS = ["tall", "square", "tinted", "technical", "landscape"] as const;
+export type ProductCardLayout = (typeof PRODUCT_CARD_LAYOUTS)[number];
+
+/**
+ * The value for the theme root's data-card-layout attribute, read from the theme tokens (the root's style),
+ * so every place that draws a theme root only needs its tokens. Undefined keeps the theme's own card.
+ */
+export function cardLayoutAttribute(style: object | null | undefined): ProductCardLayout | undefined {
+  const value = (style as Record<string, unknown> | null | undefined)?.["--jelly-card-layout"];
+  return typeof value === "string" && (PRODUCT_CARD_LAYOUTS as readonly string[]).includes(value) ? value as ProductCardLayout : undefined;
 }

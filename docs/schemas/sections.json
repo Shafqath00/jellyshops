@@ -5307,7 +5307,7 @@
           ]
         },
         {
-          "type": "segmented",
+          "type": "select",
           "key": "layout",
           "label": "Layout",
           "group": "layout",
@@ -5323,8 +5323,60 @@
             {
               "label": "Text only",
               "value": "text"
+            },
+            {
+              "label": "Product on a colour, with callouts",
+              "value": "spotlight"
+            },
+            {
+              "label": "Large statement",
+              "value": "statement"
+            },
+            {
+              "label": "Countdown to a launch",
+              "value": "countdown"
             }
-          ]
+          ],
+          "description": "Spotlight: a product photo (ideally on a plain background) on the section colour, with short callouts beside it. Statement: very large heading, the image small beside it. Countdown: counts down to a date and time over the image."
+        },
+        {
+          "type": "textarea",
+          "key": "callouts",
+          "label": "Callouts",
+          "description": "One per line, up to four, for example Vitamin C. Shown beside the product.",
+          "group": "content",
+          "maxLength": 240,
+          "showWhen": {
+            "key": "layout",
+            "equals": "spotlight"
+          },
+          "visibleWhenSaved": true
+        },
+        {
+          "type": "text",
+          "key": "countdownTo",
+          "label": "Count down to",
+          "description": "UK time, written as 2026-12-01 18:00.",
+          "group": "content",
+          "maxLength": 16,
+          "showWhen": {
+            "key": "layout",
+            "equals": "countdown"
+          },
+          "visibleWhenSaved": true
+        },
+        {
+          "type": "text",
+          "key": "countdownEndText",
+          "label": "Text after the countdown",
+          "description": "Shown when the time has come, for example Out now.",
+          "group": "content",
+          "maxLength": 60,
+          "showWhen": {
+            "key": "layout",
+            "equals": "countdown"
+          },
+          "visibleWhenSaved": true
         },
         {
           "type": "segmented",
@@ -5608,6 +5660,213 @@
           "max": 60,
           "step": 1,
           "unit": "px"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "callouts",
+          "type": "color",
+          "key": "el_callouts_color",
+          "label": "Colour",
+          "allowAlpha": false
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "callouts",
+          "type": "select",
+          "key": "el_callouts_font",
+          "label": "Font",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Fraunces",
+              "value": "Fraunces"
+            },
+            {
+              "label": "Inter",
+              "value": "Inter"
+            },
+            {
+              "label": "Playfair Display",
+              "value": "Playfair Display"
+            },
+            {
+              "label": "Cormorant Garamond",
+              "value": "Cormorant Garamond"
+            },
+            {
+              "label": "Lora",
+              "value": "Lora"
+            },
+            {
+              "label": "EB Garamond",
+              "value": "EB Garamond"
+            },
+            {
+              "label": "Libre Baskerville",
+              "value": "Libre Baskerville"
+            },
+            {
+              "label": "DM Serif Display",
+              "value": "DM Serif Display"
+            },
+            {
+              "label": "Crimson Pro",
+              "value": "Crimson Pro"
+            },
+            {
+              "label": "Manrope",
+              "value": "Manrope"
+            },
+            {
+              "label": "DM Sans",
+              "value": "DM Sans"
+            },
+            {
+              "label": "Work Sans",
+              "value": "Work Sans"
+            },
+            {
+              "label": "Montserrat",
+              "value": "Montserrat"
+            },
+            {
+              "label": "Outfit",
+              "value": "Outfit"
+            },
+            {
+              "label": "Plus Jakarta Sans",
+              "value": "Plus Jakarta Sans"
+            },
+            {
+              "label": "Nunito Sans",
+              "value": "Nunito Sans"
+            },
+            {
+              "label": "Raleway",
+              "value": "Raleway"
+            },
+            {
+              "label": "Space Grotesk",
+              "value": "Space Grotesk"
+            },
+            {
+              "label": "Josefin Sans",
+              "value": "Josefin Sans"
+            },
+            {
+              "label": "Figtree",
+              "value": "Figtree"
+            },
+            {
+              "label": "Jost",
+              "value": "Jost"
+            },
+            {
+              "label": "Poppins",
+              "value": "Poppins"
+            },
+            {
+              "label": "Hind",
+              "value": "Hind"
+            },
+            {
+              "label": "Oswald",
+              "value": "Oswald"
+            },
+            {
+              "label": "Bebas Neue",
+              "value": "Bebas Neue"
+            },
+            {
+              "label": "Syne",
+              "value": "Syne"
+            },
+            {
+              "label": "Georgia",
+              "value": "Georgia"
+            },
+            {
+              "label": "Arial",
+              "value": "Arial"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "callouts",
+          "type": "range",
+          "key": "el_callouts_size",
+          "label": "Text size",
+          "min": 10,
+          "max": 40,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "callouts",
+          "type": "select",
+          "key": "el_callouts_weight",
+          "label": "Weight",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Light",
+              "value": "300"
+            },
+            {
+              "label": "Regular",
+              "value": "400"
+            },
+            {
+              "label": "Medium",
+              "value": "500"
+            },
+            {
+              "label": "Semibold",
+              "value": "600"
+            },
+            {
+              "label": "Bold",
+              "value": "700"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "callouts",
+          "type": "select",
+          "key": "el_callouts_align",
+          "label": "Alignment",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Centre",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
         }
       ],
       "settingsSchema": {
@@ -5626,8 +5885,31 @@
             "enum": [
               "split",
               "overlay",
-              "text"
+              "text",
+              "spotlight",
+              "statement",
+              "countdown"
             ]
+          },
+          "callouts": {
+            "type": "string",
+            "maxLength": 240
+          },
+          "countdownTo": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}( \\d{2}:\\d{2})?$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "countdownEndText": {
+            "type": "string",
+            "maxLength": 60
           },
           "height": {
             "type": "string",
@@ -5745,6 +6027,98 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 60
+          },
+          "el_callouts_color": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_callouts_font": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Fraunces",
+                  "Inter",
+                  "Playfair Display",
+                  "Cormorant Garamond",
+                  "Lora",
+                  "EB Garamond",
+                  "Libre Baskerville",
+                  "DM Serif Display",
+                  "Crimson Pro",
+                  "Manrope",
+                  "DM Sans",
+                  "Work Sans",
+                  "Montserrat",
+                  "Outfit",
+                  "Plus Jakarta Sans",
+                  "Nunito Sans",
+                  "Raleway",
+                  "Space Grotesk",
+                  "Josefin Sans",
+                  "Figtree",
+                  "Jost",
+                  "Poppins",
+                  "Hind",
+                  "Oswald",
+                  "Bebas Neue",
+                  "Syne",
+                  "Georgia",
+                  "Arial"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_callouts_size": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 40
+          },
+          "el_callouts_weight": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "300",
+                  "400",
+                  "500",
+                  "600",
+                  "700"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_callouts_align": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
           }
         }
       }

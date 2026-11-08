@@ -20,7 +20,7 @@ const productList: ElementDefinition[] = [
 ];
 
 export const SECTION_ELEMENTS: Record<string, ElementDefinition[]> = {
-  hero: [eyebrow, image(["image", "overlay", "layout"])],
+  hero: [eyebrow, image(["image", "overlay", "layout"]), { id: "callouts", label: "Callouts", kind: "text", controls: ["callouts"] }],
   "image-with-text": [eyebrow, image(["image", "imagePosition"])],
   "image-banner": [image(["image", "overlay", "height"])],
   "category-grid": [heading(), intro()],

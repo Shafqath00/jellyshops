@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import { resolveStorefrontThemeTokens } from "./storefront-theme-tokens";
 import { resolveTheme, validateThemeSettings } from "./theme-resolver";
-import { contrastRatio, legacySchemeMap, readableTextColour, resolveThemeStyleTokens, themeCustomCss, themeSocialLinks } from "./theme-style-settings";
+import { cardLayoutAttribute, contrastRatio, legacySchemeMap, readableTextColour, resolveThemeStyleTokens, themeCustomCss, themeSocialLinks } from "./theme-style-settings";
 
 const tokensFor = (themeId: string, settings: Record<string, unknown> = {}) => resolveStorefrontThemeTokens(themeId, resolveTheme(themeId, settings).settings);
 
@@ -136,4 +136,16 @@ it("shows the card brand and colour swatches only when the merchant turns them o
     expect(on["--jelly-card-swatches-display"]).toBe("flex");
   }
   expect(validateThemeSettings("jelly-signature", { productCard: { showBrand: true, swatches: "colors" } })).toEqual([]);
+});
+
+it("passes the chosen card style to the theme root through the tokens", () => {
+  const tokens = resolveThemeStyleTokens({ productCard: { layout: "tinted" } }, undefined);
+  expect(tokens["--jelly-card-layout"]).toBe("tinted");
+  expect(cardLayoutAttribute(tokens)).toBe("tinted");
+});
+
+it("keeps the theme's own card for the default and unknown card styles", () => {
+  expect(resolveThemeStyleTokens({ productCard: { layout: "theme" } }, undefined)["--jelly-card-layout"]).toBeUndefined();
+  expect(cardLayoutAttribute({ "--jelly-card-layout": "zigzag" })).toBeUndefined();
+  expect(cardLayoutAttribute(undefined)).toBeUndefined();
 });

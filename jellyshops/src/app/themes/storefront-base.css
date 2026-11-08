@@ -922,3 +922,120 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 }
 /* While the full-screen menu is open, its button stays in the top corner so it can always close it. */
 [data-jelly-theme] .jelly-header.jelly-header[data-header-layout="minimal"] .jelly-mobile-navigation[open] > summary { position: fixed; top: 16px; left: var(--j-page-edge, 16px); background: var(--j-color-bg, #fff); color: var(--j-color-text, #111); border-radius: var(--j-radius-pill, 999px); }
+
+/*
+ * Product card styles (theme setting Product cards > Card style; template programme card archetypes C1, C2, C4, C5, C7).
+ * The theme root carries data-card-layout (cardLayoutAttribute in storefront-themes). Each style sets the photo shape
+ * and the card's look the same way in every theme; colours, fonts and corners still come from the theme's tokens.
+ */
+:is([data-jelly-theme][data-card-layout], [data-jelly-theme] [data-card-layout]) .jelly-product-card .jelly-product-card-media {
+  position: relative; display: block; overflow: hidden; height: auto; padding: 0; aspect-ratio: var(--jelly-card-style-ratio, 4 / 5);
+  background: var(--jelly-card-style-media-bg, var(--j-color-surface, transparent));
+  border-radius: var(--jelly-card-style-media-radius, var(--jelly-card-radius, 0));
+}
+:is([data-jelly-theme][data-card-layout], [data-jelly-theme] [data-card-layout]) .jelly-product-card .jelly-product-card-media img {
+  position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; padding: var(--jelly-card-style-media-pad, 0);
+  object-fit: var(--jelly-card-style-fit, cover);
+}
+:is([data-jelly-theme][data-card-layout], [data-jelly-theme] [data-card-layout]) .jelly-product-card .jelly-product-card-placeholder { position: absolute; inset: 0; }
+
+/* C1 tall: a 3:4 photo and a quiet line of text. */
+:is([data-jelly-theme][data-card-layout="tall"], [data-jelly-theme] [data-card-layout="tall"]) .jelly-product-card { --jelly-card-style-ratio: 3 / 4; }
+:is([data-jelly-theme][data-card-layout="tall"], [data-jelly-theme] [data-card-layout="tall"]) .jelly-product-card .jelly-product-card-body { gap: 2px; padding-top: 12px; }
+:is([data-jelly-theme][data-card-layout="tall"], [data-jelly-theme] [data-card-layout="tall"]) .jelly-product-card .jelly-product-card-body h3 { font-family: var(--j-font-body, inherit); font-size: 14px; font-weight: 400; letter-spacing: 0.01em; }
+:is([data-jelly-theme][data-card-layout="tall"], [data-jelly-theme] [data-card-layout="tall"]) .jelly-product-card .jelly-product-card-price { font-size: 14px; color: var(--j-color-muted, inherit); }
+
+/* C2 square: a square photo with the details and label chips under it. */
+:is([data-jelly-theme][data-card-layout="square"], [data-jelly-theme] [data-card-layout="square"]) .jelly-product-card { --jelly-card-style-ratio: 1 / 1; }
+:is([data-jelly-theme][data-card-layout="square"], [data-jelly-theme] [data-card-layout="square"]) .jelly-product-card .jelly-product-card-body { padding-top: 12px; }
+:is([data-jelly-theme][data-card-layout="square"], [data-jelly-theme] [data-card-layout="square"]) .jelly-product-card .jelly-product-card-chip { border: 1px solid var(--j-color-border, currentColor); background: transparent; border-radius: var(--j-radius-xs, 2px); font-size: 12px; }
+
+/* C4 tinted: the product sits on a soft colour, with rounded corners and pill chips. */
+:is([data-jelly-theme][data-card-layout="tinted"], [data-jelly-theme] [data-card-layout="tinted"]) .jelly-product-card {
+  --jelly-card-style-ratio: 4 / 5;
+  --jelly-card-style-media-bg: color-mix(in srgb, var(--j-color-accent, var(--j-color-primary, #888)) 14%, var(--j-color-bg, #fff));
+  --jelly-card-style-media-radius: var(--jelly-card-radius, 20px);
+  --jelly-card-style-media-pad: 10%;
+  --jelly-card-style-fit: contain;
+}
+:is([data-jelly-theme][data-card-layout="tinted"], [data-jelly-theme] [data-card-layout="tinted"]) .jelly-product-card .jelly-product-card-body { padding-top: 14px; }
+:is([data-jelly-theme][data-card-layout="tinted"], [data-jelly-theme] [data-card-layout="tinted"]) .jelly-product-card .jelly-product-card-body h3 { font-size: 16px; font-weight: 600; }
+:is([data-jelly-theme][data-card-layout="tinted"], [data-jelly-theme] [data-card-layout="tinted"]) .jelly-product-card .jelly-product-card-chip { border-radius: 999px; padding: 4px 10px; background: color-mix(in srgb, var(--j-color-accent, var(--j-color-primary, #888)) 14%, var(--j-color-bg, #fff)); color: var(--j-color-text, inherit); }
+
+/* C5 technical: an outlined card, the product on the surface colour, and specification chips. */
+:is([data-jelly-theme][data-card-layout="technical"], [data-jelly-theme] [data-card-layout="technical"]) .jelly-product-card {
+  --jelly-card-style-ratio: 1 / 1;
+  --jelly-card-style-media-pad: 8%;
+  --jelly-card-style-fit: contain;
+  --jelly-card-style-media-radius: calc(var(--jelly-card-radius, 8px) / 2);
+}
+:is([data-jelly-theme][data-card-layout="technical"], [data-jelly-theme] [data-card-layout="technical"]) .jelly-product-card > a { display: grid; height: 100%; padding: 12px; border: 1px solid var(--j-color-border, color-mix(in srgb, currentColor 18%, transparent)); border-radius: var(--jelly-card-radius, 8px); background: var(--j-color-bg, transparent); transition: border-color var(--j-duration-fast, 150ms) var(--j-ease, ease); }
+:is([data-jelly-theme][data-card-layout="technical"], [data-jelly-theme] [data-card-layout="technical"]) .jelly-product-card > a:hover { border-color: var(--j-color-text, currentColor); }
+:is([data-jelly-theme][data-card-layout="technical"], [data-jelly-theme] [data-card-layout="technical"]) .jelly-product-card .jelly-product-card-body { padding-top: 12px; }
+:is([data-jelly-theme][data-card-layout="technical"], [data-jelly-theme] [data-card-layout="technical"]) .jelly-product-card .jelly-product-card-body h3 { font-size: 15px; font-weight: 600; }
+:is([data-jelly-theme][data-card-layout="technical"], [data-jelly-theme] [data-card-layout="technical"]) .jelly-product-card .jelly-product-card-price { font-weight: 700; }
+:is([data-jelly-theme][data-card-layout="technical"], [data-jelly-theme] [data-card-layout="technical"]) .jelly-product-card .jelly-product-card-chip { border: 1px solid var(--j-color-border, currentColor); border-radius: var(--j-radius-xs, 2px); background: transparent; font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* C7 landscape: a wide lifestyle photo and a larger name in the heading font. */
+:is([data-jelly-theme][data-card-layout="landscape"], [data-jelly-theme] [data-card-layout="landscape"]) .jelly-product-card { --jelly-card-style-ratio: 3 / 2; }
+:is([data-jelly-theme][data-card-layout="landscape"], [data-jelly-theme] [data-card-layout="landscape"]) .jelly-product-card .jelly-product-card-body { padding-top: 14px; }
+:is([data-jelly-theme][data-card-layout="landscape"], [data-jelly-theme] [data-card-layout="landscape"]) .jelly-product-card .jelly-product-card-body h3 { font-family: var(--j-font-heading, inherit); font-size: clamp(18px, 1.6vw, 22px); line-height: var(--j-line-tight, 1.2); font-weight: 500; }
+
+/*
+ * Hero layouts (template programme hero archetypes R4 spotlight, R9 statement, R6 countdown).
+ * Each layout places the hero's own parts, so it works in every theme; colours, fonts and buttons come from the theme.
+ */
+[data-jelly-theme] .jelly-hero.jelly-hero:is([data-layout="spotlight"], [data-layout="statement"], [data-layout="countdown"]) { position: relative; overflow: hidden; }
+[data-jelly-theme] .jelly-hero.jelly-hero:is([data-layout="spotlight"], [data-layout="statement"], [data-layout="countdown"]) > .jelly-container {
+  width: min(calc(100% - 2 * var(--j-page-margin, 16px)), var(--j-page-normal, 1280px)); margin-inline: auto; border-radius: 0;
+  display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; gap: clamp(24px, 4vw, 64px); min-height: 0; padding-block: clamp(48px, 7vw, 112px);
+}
+
+/* R4 spotlight: text on one side, the product on the section colour on the other, with callouts around it. */
+@media (min-width: 768px) {
+  [data-jelly-theme] .jelly-hero.jelly-hero[data-layout="spotlight"] > .jelly-container { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); }
+}
+[data-jelly-theme] .jelly-hero.jelly-hero[data-layout="spotlight"] .jelly-hero-media { position: relative; inset: auto; display: grid; place-items: center; width: 100%; height: auto; aspect-ratio: 1 / 1; border-radius: var(--j-radius-lg, 24px); background: color-mix(in srgb, var(--j-color-accent, var(--j-color-primary, #888)) 16%, var(--j-color-bg, #fff)); }
+[data-jelly-theme] .jelly-hero.jelly-hero[data-layout="spotlight"] .jelly-hero-media img { position: relative; inset: auto; width: 72%; height: 72%; object-fit: contain; }
+.jelly-hero-callouts { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr 1fr; align-content: space-evenly; margin: 0; padding: 6%; list-style: none; pointer-events: none; }
+.jelly-hero-callouts li { justify-self: start; max-width: 14ch; padding: 8px 14px; border-radius: var(--j-radius-pill, 999px); background: var(--j-color-bg, #fff); color: var(--j-color-text, #111); font-size: 14px; font-weight: 600; line-height: 1.25; box-shadow: 0 6px 20px rgb(0 0 0 / 0.08); }
+.jelly-hero-callouts li[data-side="end"] { grid-column: 2; justify-self: end; }
+.jelly-hero-callouts li[data-side="start"] { grid-column: 1; }
+@media (max-width: 599px) {
+  .jelly-hero-callouts { position: static; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 16px 0 0; }
+  [data-jelly-theme] .jelly-hero.jelly-hero[data-layout="spotlight"] .jelly-hero-media { aspect-ratio: auto; padding-top: 24px; padding-bottom: 16px; }
+  [data-jelly-theme] .jelly-hero.jelly-hero[data-layout="spotlight"] .jelly-hero-media img { width: 72%; height: auto; aspect-ratio: 1 / 1; }
+}
+
+/* R9 statement: a very large heading across the page; the photo sits small beside the text. */
+[data-jelly-theme] .jelly-hero.jelly-hero[data-layout="statement"] .jelly-hero-content h1 { max-width: 16ch; margin: 0; font-size: clamp(48px, 8.5vw, 132px); line-height: 0.98; letter-spacing: var(--j-track-tight, -0.02em); }
+[data-jelly-theme] .jelly-hero.jelly-hero[data-layout="statement"][data-align="center"] .jelly-hero-content h1 { margin-inline: auto; }
+@media (min-width: 900px) {
+  [data-jelly-theme] .jelly-hero.jelly-hero[data-layout="statement"]:has(.jelly-hero-media) > .jelly-container { grid-template-columns: minmax(0, 3fr) minmax(0, 1fr); align-items: end; }
+}
+[data-jelly-theme] .jelly-hero.jelly-hero[data-layout="statement"] .jelly-hero-media { position: relative; inset: auto; width: 100%; max-width: 360px; height: auto; aspect-ratio: 4 / 5; justify-self: end; overflow: hidden; border-radius: var(--jelly-card-radius, 0); }
+[data-jelly-theme] .jelly-hero.jelly-hero[data-layout="statement"] .jelly-hero-media img { position: absolute; inset: 0; width: 100%; height: 100%; }
+@media (max-width: 899px) {
+  [data-jelly-theme] .jelly-hero.jelly-hero[data-layout="statement"] .jelly-hero-media { justify-self: start; max-width: 220px; }
+}
+
+/* R6 countdown: the photo fills the section, darkened, with the count in large numbers over it. */
+[data-jelly-theme] .jelly-hero.jelly-hero[data-layout="countdown"] { color: var(--jelly-hero-countdown-text, #fff); background: var(--j-color-text, #111); }
+[data-jelly-theme] .jelly-hero.jelly-hero[data-layout="countdown"] > .jelly-container { position: static; min-height: min(80vh, 720px); align-content: end; }
+[data-jelly-theme] .jelly-hero.jelly-hero[data-layout="countdown"] .jelly-hero-content { position: relative; z-index: 1; color: inherit; }
+[data-jelly-theme] .jelly-hero.jelly-hero[data-layout="countdown"] .jelly-hero-content :is(h1, p) { color: inherit; }
+[data-jelly-theme] .jelly-hero.jelly-hero[data-layout="countdown"] .jelly-hero-media { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; margin: 0; border-radius: 0; }
+[data-jelly-theme] .jelly-hero.jelly-hero[data-layout="countdown"] .jelly-hero-media img { width: 100%; height: 100%; object-fit: cover; }
+[data-jelly-theme] .jelly-hero.jelly-hero[data-layout="countdown"] .jelly-hero-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgb(0 0 0 / 0.72), rgb(0 0 0 / 0.2)); }
+.jelly-hero-countdown { display: flex; flex-wrap: wrap; gap: clamp(12px, 2vw, 28px); margin: 16px 0 24px; min-height: 1em; }
+[data-align="center"] .jelly-hero-countdown { justify-content: center; }
+.jelly-hero-countdown-unit { display: grid; justify-items: center; min-width: 2.2ch; }
+.jelly-hero-countdown-unit strong { font-family: var(--j-font-heading, inherit); font-size: clamp(40px, 7vw, 96px); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.jelly-hero-countdown-unit small { margin-top: 6px; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.85; }
+.jelly-hero-countdown[data-state="waiting"] { min-height: clamp(64px, 9vw, 120px); }
+.jelly-hero-countdown-done { margin: 16px 0 24px; font-family: var(--j-font-heading, inherit); font-size: clamp(28px, 4vw, 48px); font-weight: 700; }
+@media (prefers-reduced-motion: no-preference) {
+  .jelly-hero-countdown-unit strong { transition: opacity var(--j-duration-fast, 150ms) var(--j-ease, ease); }
+}
+/* Hero layouts: one column until each layout's own wide-screen rule, and no theme minimum heights on the photo. */
+[data-jelly-theme] .jelly-hero.jelly-hero:is([data-layout="spotlight"], [data-layout="statement"]) .jelly-hero-media { min-height: 0; align-self: auto; order: 0; }
