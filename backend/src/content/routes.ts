@@ -38,25 +38,25 @@ const pageCreateSchema = z.object({
   featuredMediaId: z.string().min(1).optional(), seoTitle: z.string().optional(),
   seoDescription: z.string().optional(), socialMediaId: z.string().min(1).optional(),
   noindex: z.boolean().optional(), canonicalOverride: z.string().optional(),
-}).strict();
+}).strip();
 const pageUpdateSchema = z.object({
   title: z.string().min(1).optional(), handle: z.string().min(1).optional(), content: contentDocumentSchema.optional(),
   featuredMediaId: nullableText, seoTitle: nullableText, seoDescription: nullableText,
   socialMediaId: nullableText, noindex: z.boolean().optional(), canonicalOverride: nullableText,
-}).strict();
-const blogCreateSchema = z.object({ title: z.string().min(1), handle: z.string().min(1) }).strict();
-const blogUpdateSchema = blogCreateSchema.partial().strict();
+}).strip();
+const blogCreateSchema = z.object({ title: z.string().min(1), handle: z.string().min(1) }).strip();
+const blogUpdateSchema = blogCreateSchema.partial().strip();
 const articleCreateSchema = z.object({
   blogId: z.string().min(1), title: z.string().min(1), handle: z.string().min(1), excerpt: z.string().optional(),
   content: contentDocumentSchema, featuredMediaId: z.string().min(1).optional(), seoTitle: z.string().optional(),
   seoDescription: z.string().optional(), socialMediaId: z.string().min(1).optional(),
   noindex: z.boolean().optional(), canonicalOverride: z.string().optional(),
-}).strict();
+}).strip();
 const articleUpdateSchema = z.object({
   title: z.string().min(1).optional(), handle: z.string().min(1).optional(), excerpt: z.string().optional(),
   content: contentDocumentSchema.optional(), featuredMediaId: nullableText, seoTitle: nullableText,
   seoDescription: nullableText, socialMediaId: nullableText, noindex: z.boolean().optional(), canonicalOverride: nullableText,
-}).strict();
+}).strip();
 
 function storeId(request: Request): string { return request.storeContext!.storeId; }
 function notFound(resource: string): never { throw new ApiError(404, "CONTENT_NOT_FOUND", `${resource} was not found`); }

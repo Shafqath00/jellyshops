@@ -1,0 +1,264 @@
+/*
+ * shadcn/ui surface normalization
+ *
+ * Semantic design tokens (:root) and the @theme inline bridge now live in
+ * globals.css and reference the Jellyshop brand palette directly.
+ *
+ * This file handles legacy CSS-class overrides that move storefront + admin
+ * UI surfaces toward the unified Jellyshop token system.
+ */
+
+/* ── Body baseline ─────────────────────────────────────────────────── */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-jelly-sans, "Aptos", "Segoe UI", Arial, sans-serif);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ── Legacy .button surface ────────────────────────────────────────── */
+/* These classes are used by storefront CSS — keep consistent with tokens */
+.button,
+.auth-submit {
+  min-height: 36px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  box-shadow: none;
+  font-weight: 600;
+  transform: none;
+}
+.button:hover,
+.auth-submit:hover { transform: none; }
+.button-primary,
+.auth-submit {
+  color: var(--primary-foreground);
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.button-secondary {
+  color: var(--foreground);
+  background: var(--background);
+}
+.button-secondary:hover,
+.button-primary:hover,
+.auth-submit:hover { opacity: .92; }
+
+/* ── Cards, panels and contained surfaces ──────────────────────────── */
+.form-card,
+.data-card,
+.customer-card,
+.empty-state,
+.auth-panel,
+.cart-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+}
+
+.form-card-title span,
+.page-kicker {
+  color: var(--muted-foreground);
+  font-family: inherit;
+  letter-spacing: .08em;
+}
+
+/* ── Form inputs ───────────────────────────────────────────────────── */
+.field input,
+.field textarea,
+.field select,
+.slug-input,
+.search-box,
+.theme-fields input[type="color"] {
+  border: 1px solid var(--input);
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--background);
+  color: var(--foreground);
+}
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  border-color: var(--ring);
+  outline: 1px solid var(--ring);
+}
+
+/* ── Data tables ───────────────────────────────────────────────────── */
+.data-head {
+  background: var(--muted);
+  color: var(--muted-foreground);
+}
+.data-row { border-color: var(--border); }
+.data-row:hover { background: color-mix(in srgb, var(--muted) 45%, transparent); }
+
+/* ── Status & badge surfaces ───────────────────────────────────────── */
+.status-badge,
+.availability-live,
+.availability-draft {
+  border-radius: 9999px;
+  box-shadow: none;
+}
+
+/* ── Empty state ───────────────────────────────────────────────────── */
+.empty-state {
+  border-style: dashed;
+  background: color-mix(in srgb, var(--muted) 30%, transparent);
+}
+.empty-state-icon {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  box-shadow: none;
+}
+
+/* ── Auth page ─────────────────────────────────────────────────────── */
+.auth-page {
+  background:
+    radial-gradient(circle at top left, var(--muted) 0, transparent 28rem),
+    var(--background);
+}
+.auth-brand span,
+.auth-orbit,
+.auth-orbit i { border-color: var(--border); }
+.auth-form input {
+  border: 1px solid var(--input);
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--background);
+}
+
+/* ── Cart overlay & panel ──────────────────────────────────────────── */
+.cart-overlay { background: rgb(0 0 0 / .35); }
+.cart-panel { background: var(--background); }
+.quantity-control,
+.icon-button {
+  border-color: var(--border);
+  border-radius: calc(var(--radius) - 2px);
+}
+
+/* Legacy StoreHeader retains its selector-based logo styles until that unused component is migrated. */
+.store-logo { font-family: inherit; font-weight: 700; }
+.product-card-image {
+  border-radius: var(--radius);
+  box-shadow: none;
+}
+.product-card-copy h3 { font-family: inherit; }
+
+/* ── Launch / marketing page ───────────────────────────────────────── */
+.launch-page { background: var(--background); }
+.eyebrow,
+.demo-pill,
+.jelly-window,
+.preview-card,
+.wordmark-mark,
+.jelly-sticker {
+  border-color: var(--border);
+  box-shadow: none;
+}
+.jelly-window { transform: none; border-radius: var(--radius); }
+.preview-shop { border-radius: 0 0 var(--radius) var(--radius); }
+.launch-copy h1,
+.preview-title,
+.preview-card b,
+.jelly-sticker {
+  font-family: inherit;
+}
+
+/* ── Admin dark mode ───────────────────────────────────────────────── */
+/* Applied to <html> by the admin shell only, so storefronts never go dark. */
+:root {
+  --warn-bg: #fff4e5;
+  --warn-fg: #8a6116;
+  --tint-bg: #fff0f3;
+  --tint-fg: #914f60;
+  --tint-bd: #edcbd2;
+}
+
+/* ── Admin UI: neutral, Shopify-inspired palette with tighter radii ─── */
+/* The admin shell sets `admin-ui` on <html>; storefronts keep brand tokens. */
+:root.admin-ui {
+  --ui-r-sm: 4px;
+  --ui-r-md: 6px;
+  --ui-r-lg: 8px;
+  --ui-r-xl: 12px;
+  --frame: #1a1a1a;
+  --background: #f4f4f5;
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --primary: #1a1a1a;
+  --primary-foreground: #ffffff;
+  --secondary: #ececee;
+  --secondary-foreground: #1a1a1a;
+  --muted: #efeff1;
+  --muted-foreground: #616166;
+  --accent: #ececee;
+  --accent-foreground: #1a1a1a;
+  --border: #e1e1e5;
+  --input: #c9c9ce;
+  --ring: #3b82f6;
+  --success: #1f8a52;
+  --tint-bg: #f7f2f2;
+  --tint-fg: #6b4545;
+  --tint-bd: #e7dada;
+}
+
+:root.admin-dark {
+  color-scheme: dark;
+  --frame: #000000;
+  --background: #0b0b0e;
+  --foreground: #ececf1;
+  --card: #131318;
+  --card-foreground: #ececf1;
+  --popover: #16161c;
+  --popover-foreground: #ececf1;
+  --primary: #ececf1;
+  --primary-foreground: #0b0b0e;
+  --secondary: #1b1b22;
+  --secondary-foreground: #ececf1;
+  --muted: #1b1b22;
+  --muted-foreground: #9a9aab;
+  --accent: #ffd85a;
+  --accent-foreground: #14213d;
+  --destructive: #f0647c;
+  --success: #3ecf86;
+  --border: #26262f;
+  --input: #2f2f3a;
+  --ring: #8ec5ff;
+  --warn-bg: rgba(245, 166, 35, 0.14);
+  --warn-fg: #f5b84a;
+  --tint-bg: rgba(255, 107, 138, 0.12);
+  --tint-fg: #f2a0b2;
+  --tint-bd: rgba(255, 107, 138, 0.28);
+}
+
+/* Stat cards: soft hairline highlight, a quiet lift on hover. */
+.stat-card {
+  position: relative;
+  transition: transform var(--duration-jelly-fast, 150ms) ease, border-color var(--duration-jelly-fast, 150ms) ease;
+}
+.stat-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--foreground) 14%, transparent), transparent);
+  pointer-events: none;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--foreground) 22%, var(--border));
+}
+@media (prefers-reduced-motion: reduce) {
+  .stat-card:hover { transform: none; }
+}

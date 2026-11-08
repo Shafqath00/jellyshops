@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { SectionNode } from "@jelly/storefront-schema";
 import { SectionRenderRegistry } from "./render-registry";
@@ -19,6 +20,106 @@ describe("registry-driven section rendering", () => {
     expect(screen.getByText("Rendered brand-story")).toBeInTheDocument();
   });
 
+  it("renders persisted starter menus and brand settings in preview and published header/footer", () => {
+    const header: SectionNode = { id: "header", type: "header", enabled: true, settings: { storeName: "Little Market" }, blocks: [{ id: "menu-block", type: "menu", enabled: true, settings: { handle: "main" } }] };
+    const footer: SectionNode = { id: "footer", type: "footer", enabled: true, settings: { text: "Made with care" }, blocks: [{ id: "footer-menu", type: "menu", enabled: true, settings: { handle: "main" } }] };
+    const menus = { main: { id: "menu-a", handle: "main", items: [
+      { id: "home", label: "Home", target: { kind: "home" as const }, children: [] },
+      { id: "search", label: "Search", target: { kind: "search" as const }, children: [] },
+      { id: "unsafe", label: "Bad link", target: { kind: "external" as const, url: "javascript:alert(1)" }, children: [] },
+    ] } };
+
+    for (const mode of ["preview", "published"] as const) {
+      const view = render(<>
+        <RegistrySectionRenderer section={header} mode={mode} commerce={commerce} menus={menus} storeSlug="shop-a" />
+        <RegistrySectionRenderer section={footer} mode={mode} commerce={commerce} menus={menus} storeSlug="shop-a" />
+      </>);
+      expect(view.getAllByRole("link", { name: "Home" })).toHaveLength(3);
+      expect(view.getAllByRole("link", { name: "Home" })[0]).toHaveAttribute("href", "/shop-a");
+      expect(view.getAllByRole("link", { name: "Search" })[0]).toHaveAttribute("href", "/shop-a/search");
+      expect(view.queryByRole("link", { name: "Bad link" })).toBeNull();
+      expect(view.getByRole("link", { name: "Little Market" })).toHaveAttribute("href", "/shop-a");
+      expect(view.getByText("Made with care")).toBeInTheDocument();
+      view.unmount();
+    }
+  });
+
+  it("keeps starter CTA and Not Found links inside the selected storefront", () => {
+    const hero: SectionNode = { id: "hero", type: "hero", enabled: true, settings: { image: { url: "/market.jpg", alt: "Fresh produce at the market" } }, blocks: [
+      { id: "headline", type: "heading", enabled: true, settings: { text: "Good food, gathered well." } },
+      { id: "buy", type: "button", enabled: true, settings: { label: "Shop", href: "/" } },
+    ] };
+    const notFound: SectionNode = { id: "not-found", type: "not-found-message", enabled: true, settings: {}, blocks: [{ id: "back", type: "button", enabled: true, settings: { label: "Back", href: "/" } }] };
+    render(<>
+      <RegistrySectionRenderer section={hero} mode="published" commerce={commerce} storeSlug="store-a" />
+      <RegistrySectionRenderer section={notFound} mode="published" commerce={commerce} storeSlug="store-a" page={{ pageType: "not-found", resource: null }} />
+    </>);
+    expect(screen.getByRole("link", { name: "Shop" })).toHaveAttribute("href", "/store-a");
+    expect(screen.getByRole("heading", { name: "Good food, gathered well." })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Fresh produce at the market" })).toHaveAttribute("src", "/market.jpg");
+    expect(screen.getByRole("link", { name: "Back" })).toHaveAttribute("href", "/store-a");
+  });
+
+  it("renders the same configured Rich text section in preview, editor, and published modes across compatible pages", () => {
+    const richText: SectionNode = {
+      id: "story",
+      type: "rich-text",
+      enabled: true,
+      settings: { alignment: "center" },
+      blocks: [{ id: "story-copy", type: "text", enabled: true, settings: { text: "Independent story content" } }],
+    };
+    const compatiblePages = ["home", "product", "collection", "page", "blog", "article"] as const;
+
+    for (const pageType of compatiblePages) {
+      const page = pageType === "home"
+        ? { pageType, resource: null }
+        : { pageType, resource: { id: `${pageType}-1`, handle: pageType, data: { unrelated: "Live resource data" } } };
+      for (const mode of ["preview", "editor", "published"] as const) {
+        const view = render(<RegistrySectionRenderer section={richText} mode={mode} commerce={commerce} page={page} />);
+        expect(view.getByText("Independent story content")).toBeInTheDocument();
+        expect(view.queryByText("Live resource data")).not.toBeInTheDocument();
+        view.unmount();
+      }
+    }
+  });
+
+  it("renders the same structured document in preview and published modes", () => {
+    const structured: SectionNode = { id: "story", type: "rich-text", enabled: true, blocks: [], settings: { document: {
+      type: "doc", content: [
+        { type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: "Our story", marks: [{ type: "bold" }] }] },
+        { type: "paragraph", content: [{ type: "text", text: "Learn more", marks: [{ type: "link", attrs: { href: "/pages/about" } }] }, { type: "hardBreak" }, { type: "text", text: "Today", marks: [{ type: "italic" }] }] },
+        { type: "bulletList", content: [{ type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: "Carefully made" }] }] }] },
+        { type: "blockquote", content: [{ type: "paragraph", content: [{ type: "text", text: "For every day" }] }] },
+      ],
+    } } };
+    for (const mode of ["preview", "published"] as const) {
+      const view = render(<RegistrySectionRenderer section={structured} mode={mode} commerce={commerce} page={{ pageType: "article", resource: { id: "article-1", handle: "story", data: {} } }} />);
+      expect(view.getByRole("heading", { level: 2, name: "Our story" }).querySelector("strong")).not.toBeNull();
+      expect(view.getByRole("link", { name: "Learn more" })).toHaveAttribute("href", "/pages/about");
+      expect(view.getByText("Today").closest("em")).not.toBeNull();
+      expect(view.getByRole("listitem")).toHaveTextContent("Carefully made");
+      expect(view.getByText("For every day").closest("blockquote")).not.toBeNull();
+      view.unmount();
+    }
+  });
+
+  it("escapes text and ignores unsupported nodes and unsafe links in public output", () => {
+    const untrusted: SectionNode = { id: "story", type: "rich-text", enabled: true, blocks: [], settings: { document: {
+      type: "doc", content: [
+        { type: "script", attrs: { src: "https://example.com/evil.js" } },
+        { type: "paragraph", content: [
+          { type: "text", text: "<script>alert(1)</script>" },
+          { type: "text", text: "Click", marks: [{ type: "link", attrs: { href: "javascript:alert(1)" } }] },
+        ] },
+      ],
+    } } };
+    const view = render(<RegistrySectionRenderer section={untrusted} mode="published" commerce={commerce} />);
+    expect(view.getByText("<script>alert(1)</script>")).toBeInTheDocument();
+    expect(view.container.querySelector("script")).toBeNull();
+    expect(view.queryByRole("link", { name: "Click" })).toBeNull();
+    expect(view.getByText("Click")).toBeInTheDocument();
+  });
+
   it("passes a constrained runtime context to registered sections", () => {
     const registry = new SectionRenderRegistry();
     registry.register("runtime-aware", ({ context }) => (
@@ -36,6 +137,233 @@ describe("registry-driven section rendering", () => {
     );
 
     expect(screen.getByText("preview:template:true")).toBeInTheDocument();
+  });
+
+  it("passes live product page context to product sections", () => {
+    const registry = new SectionRenderRegistry();
+    registry.register("product-information", ({ context }) => <span>{context.page?.resource?.data.title as string}</span>);
+
+    render(<RegistrySectionRenderer section={section("product-information")} mode="published" commerce={commerce} registry={registry} page={{ pageType: "product", resource: { id: "product-1", handle: "cake", data: { title: "Live cake" } } }} />);
+    expect(screen.getByText("Live cake")).toBeInTheDocument();
+  });
+
+  it("renders product information from live page context", () => {
+    render(<RegistrySectionRenderer section={section("product-information")} mode="published" commerce={commerce} page={{ pageType: "product", resource: { id: "product-1", handle: "cake", data: { title: "Live cake" } } }} />);
+    expect(screen.getByRole("heading", { name: "Live cake" })).toBeInTheDocument();
+  });
+
+  it("renders Product merchandising sections from live context and delegates purchase", async () => {
+    const addToCart = vi.fn(async () => ({ ok: true }));
+    const selectOption = vi.fn();
+    const setQuantity = vi.fn();
+    const page = {
+      pageType: "product" as const,
+      resource: {
+        id: "cake", handle: "cake", data: {
+          productPresentation: {
+            product: { id: "cake", title: "Celebration cake", description: "Vanilla sponge", imageUrl: "/cake.jpg", sku: "CAKE-S", vendor: "Jelly", options: [{ id: "size", name: "Size", required: true, values: [{ id: "small", label: "Small", selected: true, available: true }] }] },
+            selection: [{ optionId: "size", valueId: "small" }], quantity: 1, pricing: { price: "$12.00", compareAtPrice: "$15.00" }, availability: { state: "available" as const, message: "2 available", maxQuantity: 2 }, canAddToCart: true,
+            selectOption, setQuantity, addToCart, relatedProducts: [{ id: "related", name: "Related cake", href: "/products/related", imageUrl: "", price: "$10.00" }],
+          },
+        },
+      },
+    };
+    render(<>
+      <RegistrySectionRenderer section={section("product-gallery")} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={section("product-information")} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={section("product-options")} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={section("product-purchase")} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={section("product-description")} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={section("related-products")} mode="published" commerce={commerce} page={page} />
+    </>);
+
+    expect(screen.getByRole("img", { name: "Celebration cake" })).toBeInTheDocument();
+    expect(screen.getByText("$15.00")).toBeInTheDocument();
+    expect(screen.getByText("2 available")).toBeInTheDocument();
+    expect(screen.getByRole("spinbutton", { name: "Quantity" })).toHaveValue(1);
+    expect(screen.getByRole("button", { name: "Small" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("Vanilla sponge")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Add to cart" }));
+    expect(addToCart).toHaveBeenCalledOnce();
+  });
+
+  it("renders Image with text media, blocks, and a safe CTA in every storefront mode", () => {
+    const imageWithText: SectionNode = {
+      id: "story",
+      type: "image-with-text",
+      enabled: true,
+      settings: {
+        image: { id: "media-1", url: "/api/public/media/store-a/media-1", alt: "Fresh apples", focalPoint: { x: 40, y: 60 }, fit: "cover" },
+        contentAlignment: "left",
+      },
+      blocks: [
+        { id: "story-title", type: "heading", enabled: true, settings: { text: "Grown with care" } },
+        { id: "story-copy", type: "text", enabled: true, settings: { text: "Picked at their best." } },
+        { id: "story-link", type: "button", enabled: true, settings: { label: "Our growers", href: "/pages/growers" } },
+      ],
+    };
+
+    for (const mode of ["preview", "editor", "published"] as const) {
+      const view = render(<RegistrySectionRenderer section={imageWithText} mode={mode} commerce={commerce} />);
+      const image = view.getByRole("img", { name: "Fresh apples" });
+      expect(image).toHaveAttribute("src", "/api/public/media/store-a/media-1");
+      expect(view.getByRole("heading", { name: "Grown with care" })).toBeInTheDocument();
+      expect(view.getByText("Picked at their best.")).toBeInTheDocument();
+      expect(view.getByRole("link", { name: "Our growers" })).toHaveAttribute("href", "/pages/growers");
+      expect(view.container.querySelector(".jelly-image-text")).toHaveClass("has-image");
+      view.unmount();
+    }
+  });
+
+  it("keeps Image with text valid without media and rejects unsafe CTA targets", () => {
+    const sectionWithoutMedia: SectionNode = {
+      id: "story",
+      type: "image-with-text",
+      enabled: true,
+      settings: { contentAlignment: "center" },
+      blocks: [
+        { id: "story-title", type: "heading", enabled: true, settings: { text: "A small beginning" } },
+        { id: "story-link", type: "button", enabled: true, settings: { label: "Unsafe", href: "javascript:alert(1)" } },
+      ],
+    };
+    const view = render(<RegistrySectionRenderer section={sectionWithoutMedia} mode="published" commerce={commerce} />);
+
+    expect(view.getByRole("heading", { name: "A small beginning" })).toBeInTheDocument();
+    expect(view.queryByRole("img")).toBeNull();
+    expect(view.queryByRole("link", { name: "Unsafe" })).toBeNull();
+    expect(view.container.querySelector(".jelly-image-text")).not.toHaveClass("has-image");
+  });
+
+  it("loads Product grid cards from the supplied live commerce provider and handles an empty catalog", async () => {
+    const products = [{ id: "product-a", name: "Current store jam", href: "/store-a/products/jam", imageUrl: "/jam.jpg", price: "$8.00" }];
+    const provider = { getProducts: vi.fn(async () => products) };
+    const productGrid: SectionNode = { id: "grid", type: "product-grid", enabled: true, settings: { heading: "Shop the pantry", limit: 3 }, blocks: [] };
+    const view = render(<RegistrySectionRenderer section={productGrid} mode="published" commerce={provider} />);
+
+    expect(await view.findByText("Current store jam")).toBeInTheDocument();
+    expect(provider.getProducts).toHaveBeenCalledWith({ featured: true, limit: 3 });
+    expect(view.getByRole("heading", { name: "Shop the pantry" })).toBeInTheDocument();
+
+    const emptyProvider = { getProducts: vi.fn(async () => []) };
+    view.rerender(<RegistrySectionRenderer section={productGrid} mode="preview" commerce={emptyProvider} />);
+    expect(await view.findByText("Products will appear here once you add them to your store.")).toBeInTheDocument();
+  });
+
+  it("renders Collection title, supplied live products, and a safe empty state", () => {
+    const page = {
+      pageType: "collection" as const,
+      resource: {
+        id: "collection-1",
+        handle: "summer",
+        data: {
+          collection: { id: "collection-1", name: "Summer collection", slug: "summer" },
+          products: [{ id: "product-1", name: "Lemon cake", href: "/shop/products/lemon-cake", imageUrl: "", price: "$10" }],
+        },
+      },
+    };
+    const { rerender } = render(<>
+      <RegistrySectionRenderer section={section("collection-header")} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={section("collection-product-grid")} mode="published" commerce={commerce} page={page} />
+    </>);
+
+    expect(screen.getByRole("heading", { name: "Summer collection" })).toBeInTheDocument();
+    expect(screen.getByText("Lemon cake")).toBeInTheDocument();
+
+    rerender(<RegistrySectionRenderer section={section("collection-product-grid")} mode="published" commerce={commerce} page={{ ...page, resource: { ...page.resource, data: { ...page.resource.data, products: [] } } }} />);
+    expect(screen.getByText("No products are available in this collection yet.")).toBeInTheDocument();
+  });
+
+  it("renders Collection merchandising from live detail with section presentation settings", () => {
+    const page = { pageType: "collection" as const, resource: { id: "collection-a", handle: "cakes", data: {
+      collectionPresentation: { collection: { id: "collection-a", title: "Fresh cakes", description: "Baked today", imageUrl: "/cakes.jpg" }, products: [
+        { id: "one", name: "One", href: "/products/one", imageUrl: "", price: "$10.00" },
+        { id: "two", name: "Two", href: "/products/two", imageUrl: "", price: "$20.00" },
+      ], totalProducts: 2 },
+    } } };
+    render(<>
+      <RegistrySectionRenderer section={{ ...section("collection-header"), settings: { showTitle: true, showDescription: false, showImage: true } }} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={{ ...section("collection-product-grid"), settings: { columns: 2, limit: 1 } }} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={{ ...section("collection-description"), settings: { spacing: "compact" } }} mode="published" commerce={commerce} page={page} />
+    </>);
+
+    expect(screen.getByRole("heading", { name: "Fresh cakes" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Fresh cakes" })).toHaveAttribute("src", "/cakes.jpg");
+    expect(screen.getByText("Baked today")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /one/i })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /two/i })).toBeNull();
+    expect(screen.getByTestId("collection-product-grid-items")).toHaveAttribute("data-columns", "2");
+  });
+
+  it("renders configured empty copy without inventing missing Collection content", () => {
+    const page = { pageType: "collection" as const, resource: { id: "empty", handle: "empty", data: { collectionPresentation: { collection: { id: "empty", title: "Empty", description: "" }, products: [], totalProducts: 0 } } } };
+    render(<>
+      <RegistrySectionRenderer section={section("collection-header")} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={{ ...section("collection-product-grid"), settings: { emptyMessage: "Coming soon" } }} mode="published" commerce={commerce} page={page} />
+      <RegistrySectionRenderer section={section("collection-description")} mode="published" commerce={commerce} page={page} />
+    </>);
+
+    expect(screen.getByText("Coming soon")).toBeInTheDocument();
+    expect(screen.queryByRole("img")).toBeNull();
+    expect(screen.queryByText("undefined")).toBeNull();
+  });
+
+  it("renders live Cart data and delegates quantity mutations to the runtime context", () => {
+    const onDecrease = vi.fn();
+    const onIncrease = vi.fn();
+    render(<RegistrySectionRenderer section={section("cart-summary")} mode="published" commerce={commerce} page={{ pageType: "cart", resource: null, data: { lines: [{ id: "line-1", name: "Lemon cake · Default", quantity: 2, total: "$20", onDecrease, onIncrease }], subtotal: "$20", checkoutHref: "/shop/checkout" } }} />);
+
+    expect(screen.getByText("Lemon cake · Default")).toBeInTheDocument();
+    expect(screen.getByRole("complementary", { name: "Order summary" })).toHaveTextContent("Subtotal$20");
+    expect(screen.getByRole("link", { name: "Checkout" })).toHaveAttribute("href", "/shop/checkout");
+    screen.getAllByRole("button")[0]?.click();
+    screen.getAllByRole("button")[1]?.click();
+    expect(onDecrease).toHaveBeenCalledOnce();
+    expect(onIncrease).toHaveBeenCalledOnce();
+  });
+
+  it("renders search results from live context rather than section settings", () => {
+    render(<RegistrySectionRenderer section={{ ...section("search-results"), settings: { heading: "Stale persisted heading" } }} mode="published" commerce={commerce} page={{ pageType: "search", resource: null, data: { query: "shoes", state: "results", resultCount: 1, searchHref: "/store/search", results: [{ id: "shoe", name: "Live Shoe", href: "/store/products/shoe", imageUrl: "shoe.jpg", price: "$12.00" }] } }} />);
+    expect(screen.getByDisplayValue("shoes")).toBeInTheDocument();
+    expect(screen.getByText("Live Shoe")).toBeInTheDocument();
+    expect(screen.getByText("$12.00")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /live shoe/i })).toHaveAttribute("href", "/store/products/shoe");
+  });
+
+  it("lets shoppers edit and submit the search query through the storefront route", async () => {
+    const user = userEvent.setup();
+    render(<RegistrySectionRenderer section={section("search-results")} mode="published" commerce={commerce} page={{ pageType: "search", resource: null, data: { query: "shoes", state: "empty", resultCount: 0, searchHref: "/store/search", results: [] } }} />);
+
+    const input = screen.getByRole("searchbox", { name: "Search products" });
+    expect(input.closest("form")).toHaveAttribute("action", "/store/search");
+    await user.clear(input);
+    await user.type(input, "apples");
+    expect(input).toHaveValue("apples");
+  });
+
+  it("renders custom Page title and safe text content from live resource context", () => {
+    render(<RegistrySectionRenderer section={section("page-content")} mode="published" commerce={commerce} page={{ pageType: "page", resource: { id: "about", handle: "about", data: { title: "About us", content: { text: "We make carefully chosen things.", html: "<script>unsafe</script>" } } } }} />);
+    expect(screen.getByRole("heading", { name: "About us" })).toBeInTheDocument();
+    expect(screen.getByText("We make carefully chosen things.")).toBeInTheDocument();
+    expect(screen.queryByText(/unsafe/i)).toBeNull();
+  });
+
+  it("renders Blog title and live Article links from runtime context", () => {
+    render(<>
+      <RegistrySectionRenderer section={section("blog-header")} mode="published" commerce={commerce} page={{ pageType: "blog", resource: { id: "blog-a", handle: "news", data: { storeSlug: "store-a", blog: { id: "blog-a", title: "News", handle: "news" }, articles: [{ id: "article-a", title: "Opening day", handle: "opening-day", excerpt: "We opened", publishedAt: "2026-09-20T00:00:00.000Z" }] } } }} />
+      <RegistrySectionRenderer section={section("article-list")} mode="published" commerce={commerce} page={{ pageType: "blog", resource: { id: "blog-a", handle: "news", data: { storeSlug: "store-a", blog: { id: "blog-a", title: "News", handle: "news" }, articles: [{ id: "article-a", title: "Opening day", handle: "opening-day", excerpt: "We opened", publishedAt: "2026-09-20T00:00:00.000Z" }] } } }} />
+    </>);
+    expect(screen.getByRole("heading", { name: "News" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /opening day/i })).toHaveAttribute("href", "/store-a/blogs/news/opening-day");
+  });
+
+  it("renders Article identity and safe live content without raw HTML", () => {
+    const page = { pageType: "article" as const, resource: { id: "article-a", handle: "opening", data: { blog: { id: "blog-a", handle: "news", title: "News" }, article: { id: "article-a", title: "Opening day", excerpt: "We opened", publishedAt: "2026-09-20T00:00:00.000Z", content: { text: "Welcome to our shop.", html: "<script>unsafe</script>" } } } } };
+    render(<><RegistrySectionRenderer section={section("article-header")} mode="published" commerce={commerce} page={page} /><RegistrySectionRenderer section={section("article-content")} mode="published" commerce={commerce} page={page} /></>);
+    expect(screen.getByRole("heading", { name: "Opening day" })).toBeInTheDocument();
+    expect(screen.getByText("Published September 20, 2026")).toHaveAttribute("datetime", "2026-09-20T00:00:00.000Z");
+    expect(screen.getByText("We opened")).toBeInTheDocument();
+    expect(screen.getByText("Welcome to our shop.")).toBeInTheDocument();
+    expect(screen.queryByText(/unsafe/i)).toBeNull();
   });
 
   it("keeps unsupported-section diagnostics in editor/preview but not published", () => {
@@ -71,5 +399,61 @@ describe("registry-driven section rendering", () => {
     expect(wrapper).toHaveAttribute("data-editor-selected", "true");
     wrapper.click();
     expect(onSelect).toHaveBeenCalledWith({ kind: "section", region: "template", sectionId: "brand-story-1" });
+  });
+
+  it("highlights and selects the exact hero block in the preview", () => {
+    const hero: SectionNode = {
+      id: "hero-1",
+      type: "hero",
+      enabled: true,
+      settings: {},
+      blocks: [{ id: "hero-heading", type: "heading", enabled: true, settings: { text: "Made for everyday" } }],
+    };
+    const onSelect = vi.fn();
+    render(
+      <RegistrySectionRenderer
+        section={hero}
+        mode="editor"
+        commerce={commerce}
+        region="template"
+        selected={{ kind: "block", region: "template", sectionId: hero.id, blockId: "hero-heading" }}
+        onSelect={onSelect}
+      />,
+    );
+
+    const wrapper = screen.getByTestId("section-hero");
+    const heading = screen.getByRole("heading", { name: "Made for everyday" });
+    expect(wrapper).toHaveAttribute("data-editor-selected", "false");
+    expect(heading).toHaveAttribute("data-editor-block-id", "hero-heading");
+    expect(heading).toHaveAttribute("data-editor-block-label", "Heading");
+    expect(heading).toHaveAttribute("data-editor-block-selected", "true");
+    heading.click();
+    expect(onSelect).toHaveBeenCalledWith({ kind: "block", region: "template", sectionId: hero.id, blockId: "hero-heading", fieldKey: "text" });
+  });
+
+  it("renders choices that take several values as toggle buttons, even in dropdown style, and flags missing required ones", async () => {
+    const selectOption = vi.fn();
+    const page = {
+      pageType: "product" as const,
+      resource: { id: "bed", handle: "bed", data: { productPresentation: {
+        product: { id: "bed", title: "Bed", description: "", imageUrl: "", options: [
+          { id: "size", name: "Size", required: true, missing: true, values: [{ id: "s", label: "Single", selected: false, available: true }] },
+          { id: "extras", name: "Extras", required: false, multiple: true, values: [{ id: "head", label: "Headboard", selected: true, available: true, priceAdjustment: "$50.00" }, { id: "rug", label: "Rug", selected: true, available: true }, { id: "lamp", label: "Lamp", selected: false, available: true }] },
+        ] },
+        selection: [], quantity: 1, pricing: { price: "$100.00" }, availability: { state: "selection-required" as const, message: "Choose the required options", maxQuantity: 0 }, canAddToCart: false,
+        selectOption, setQuantity: vi.fn(), addToCart: vi.fn(), relatedProducts: [],
+      } } },
+    };
+    const dropdown: SectionNode = { ...section("product-options"), settings: { style: "select" } };
+    render(<RegistrySectionRenderer section={dropdown} mode="published" commerce={commerce} page={page} />);
+    expect(screen.getByRole("combobox")).toBeInTheDocument();
+    expect(screen.getAllByRole("combobox")).toHaveLength(1);
+    expect(screen.getByText(/(required)/)).toBeInTheDocument();
+    expect(screen.getByText(": Headboard, Rug")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Headboard/ })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: /Headboard/ })).toHaveTextContent("+$50.00");
+    expect(screen.getByRole("button", { name: "Lamp" })).toHaveAttribute("aria-pressed", "false");
+    await userEvent.click(screen.getByRole("button", { name: "Lamp" }));
+    expect(selectOption).toHaveBeenCalledWith("extras", "lamp");
   });
 });

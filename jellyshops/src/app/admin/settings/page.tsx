@@ -1,13 +1,15 @@
 "use client";
+import Link from "next/link";
+import { AdminPage } from "@/components/admin";
+import { SETTINGS_GROUPS } from "@/features/admin/settings-sections";
 
-import { useState } from "react";
-import { CheckCircle2, RotateCcw } from "lucide-react";
-import { useShop } from "@/contexts/shop-context";
-
-export default function SettingsPage() {
-  const { state, repository, resetDemo } = useShop();
-  const store = state.stores.find((item) => item.id === state.activeStoreId)!;
-  const [saved, setSaved] = useState(false);
-  function save(event: React.FormEvent<HTMLFormElement>) { event.preventDefault(); const data = new FormData(event.currentTarget); repository.saveStore({ ...store, name: String(data.get("name")), slug: String(data.get("slug")), shippingMinor: Math.round(Number(data.get("shipping")) * 100) }); setSaved(true); }
-  return <div className="admin-page narrow-page"><header className="page-head"><span className="page-kicker">Settings</span><h1>Shop essentials</h1><p>The operational details behind your storefront.</p></header>{saved ? <div className="success-banner"><CheckCircle2 size={18} /> Settings saved</div> : null}<form className="admin-form" onSubmit={save} onChange={() => setSaved(false)}><section className="form-card"><div className="form-card-title"><div><span>Business</span><h2>Store identity</h2></div></div><div className="field-grid"><label className="field"><span>Store name</span><input name="name" defaultValue={store.name} /></label><label className="field"><span>Store slug</span><input name="slug" defaultValue={store.slug} /></label><label className="field"><span>Flat shipping ({store.currency === "INR" ? "₹" : "$"})</span><input name="shipping" type="number" min="0" step="0.01" defaultValue={store.shippingMinor / 100} /></label><label className="field"><span>Currency</span><input value={store.currency} disabled /></label></div></section><div className="form-actions"><button className="button button-primary" type="submit">Save changes</button></div></form><section className="danger-zone"><div><h2>Reset local demo</h2><p>Restore seeded products, customers, orders, and storefront settings.</p></div><button className="button button-secondary" type="button" onClick={resetDemo}><RotateCcw size={16} /> Reset demo data</button></section></div>;
+export default function SettingsIndexPage() {
+  return <AdminPage title="Settings" description="Everything about how your store works behind the scenes. Pick a topic to change it.">
+    {SETTINGS_GROUPS.map((group) => <section key={group.label} aria-labelledby={`settings-${group.label}`} className="jk-stack-sm">
+      <h2 id={`settings-${group.label}`} className="jk-muted jk-strong">{group.label}</h2>
+      <div className="jk-settings-list">{group.items.map((item) => <Link key={item.href} href={item.href} className="jk-settings-tile">
+        <item.icon size={18} aria-hidden="true" /><span><span className="jk-strong">{item.label}</span><p>{item.description}</p></span>
+      </Link>)}</div>
+    </section>)}
+  </AdminPage>;
 }

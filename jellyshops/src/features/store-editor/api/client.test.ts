@@ -6,6 +6,38 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 describe("store editor API client", () => {
+  it("resolves saved section images against the current API, including old local server URLs", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({
+      templates: [{ layout: { sections: [{ settings: {
+        image: { id: "hero", url: "http://127.0.0.1:3001/api/public/media/store-demo/hero", alt: "Hero" },
+        logo: { id: "logo", url: "/api/public/media/store-demo/logo", alt: "Logo" },
+        external: { url: "https://images.example.com/photo.jpg" },
+        link: { url: "/shop" },
+        text: "http://127.0.0.1:3001/api/public/media/store-demo/hero",
+      } }] } }],
+    }));
+    const api = createStoreEditorApi({ baseUrl: "http://127.0.0.1:5001/project/us-central1/api/", token: "merchant", fetch: fetchMock });
+    const workspace = await api.loadWorkspace("store-demo");
+    expect(workspace).toMatchObject({ templates: [{ layout: { sections: [{ settings: {
+      image: { url: "http://127.0.0.1:5001/project/us-central1/api/api/public/media/store-demo/hero" },
+      logo: { url: "http://127.0.0.1:5001/project/us-central1/api/api/public/media/store-demo/logo" },
+      external: { url: "https://images.example.com/photo.jpg" },
+      link: { url: "/shop" },
+      text: "http://127.0.0.1:3001/api/public/media/store-demo/hero",
+    } }] } }] });
+  });
+
+  it("installs a V4 starter into the current store through the workspace endpoint", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ storeId: "store-a", starterPackId: "fresh-market", starterPackVersion: "1.0.0", generation: 1, installed: true }, 201));
+    const api = createStoreEditorApi({ baseUrl: "http://localhost:3001", token: "merchant-token", fetch: fetchMock });
+
+    await expect(api.installStarterPack("store-a", "fresh-market")).resolves.toMatchObject({ generation: 1, installed: true });
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:3001/api/stores/store-a/storefront/starters/fresh-market/install", expect.objectContaining({
+      method: "POST",
+      headers: expect.objectContaining({ Authorization: "Bearer merchant-token" }),
+    }));
+  });
+
   it("saves only the edited template revision and receives the new workspace generation", async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse({
       template: {
@@ -60,6 +92,59 @@ describe("store editor API client", () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:3001/api/stores/store-demo/storefront/presets",
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: "Bearer jelly-demo-merchant" }) }),
+    );
+  });
+
+  it("loads page, blog, and article preview resources from the current store", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(jsonResponse([]))
+      .mockResolvedValueOnce(jsonResponse([]))
+      .mockResolvedValueOnce(jsonResponse([]));
+    const api = createStoreEditorApi({ baseUrl: "http://localhost:3001", token: "jelly-demo-merchant", fetch: fetchMock });
+
+    await Promise.all([
+      api.listPages("store-demo"),
+      api.listBlogs("store-demo"),
+      api.listArticles("store-demo"),
+    ]);
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "http://localhost:3001/api/stores/store-demo/content/pages",
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: "Bearer jelly-demo-merchant" }) }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "http://localhost:3001/api/stores/store-demo/content/blogs",
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: "Bearer jelly-demo-merchant" }) }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      "http://localhost:3001/api/stores/store-demo/content/articles",
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: "Bearer jelly-demo-merchant" }) }),
+    );
+  });
+
+  it("loads a selected product detail through the current store catalog boundary", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ id: "product-a", storeId: "store-a", variants: [] }));
+    const api = createStoreEditorApi({ baseUrl: "http://localhost:3001", token: "jelly-demo-merchant", fetch: fetchMock });
+
+    await expect(api.getProduct("store-a", "product-a")).resolves.toMatchObject({ id: "product-a", storeId: "store-a" });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:3001/api/stores/store-a/catalog/products/product-a",
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: "Bearer jelly-demo-merchant" }) }),
+    );
+  });
+
+  it("loads selected Collection detail from the authenticated current-store catalog", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ id: "collection-a", storeId: "store-a", products: [] }));
+    const api = createStoreEditorApi({ baseUrl: "http://localhost:3001", token: "jelly-demo-merchant", fetch: fetchMock });
+
+    await expect(api.getCollection("store-a", "collection-a")).resolves.toMatchObject({ id: "collection-a", storeId: "store-a" });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:3001/api/stores/store-a/catalog/collections/collection-a",
       expect.objectContaining({ headers: expect.objectContaining({ Authorization: "Bearer jelly-demo-merchant" }) }),
     );
   });
@@ -123,5 +208,32 @@ describe("store editor API client", () => {
     const media = await api.uploadMedia("store-demo", new File(["image"], "hero.png", { type: "image/png" }));
 
     expect(media.url).toBe("http://localhost:3001/api/public/media/store-demo/media-1");
+  });
+
+  it("reports actual upload progress and authenticates the progress transport", async () => {
+    let xhrInstance: ProgressXhr;
+    class ProgressXhr {
+      upload: XMLHttpRequestUpload = { onprogress: null } as XMLHttpRequestUpload;
+      status = 201;
+      responseText = JSON.stringify({ id: "media-2", storeId: "store-demo", url: "/api/public/media/store-demo/media-2", mimeType: "image/png", byteSize: 12, width: 100, height: 100, originalName: "hero.png", referenced: false, createdAt: "2026-09-04T00:00:00.000Z" });
+      onload: ((event: ProgressEvent) => void) | null = null;
+      onerror: ((event: ProgressEvent) => void) | null = null;
+      onabort: ((event: ProgressEvent) => void) | null = null;
+      authorization = "";
+      constructor() { xhrInstance = this; }
+      open() {}
+      setRequestHeader(name: string, value: string) { if (name === "Authorization") this.authorization = value; }
+      send() {
+        this.upload.onprogress?.call(this as unknown as XMLHttpRequest, { lengthComputable: true, loaded: 60, total: 100 } as ProgressEvent);
+        this.onload?.({} as ProgressEvent);
+      }
+    }
+    vi.stubGlobal("XMLHttpRequest", ProgressXhr);
+    const api = createStoreEditorApi({ baseUrl: "http://localhost:3001", token: "merchant-token", fetch: vi.fn() as unknown as typeof fetch });
+    const progress = vi.fn();
+
+    await expect(api.uploadMedia("store-demo", new File(["image"], "hero.png", { type: "image/png" }), progress)).resolves.toMatchObject({ id: "media-2" });
+    expect(progress.mock.calls.map(([value]) => value)).toEqual([60, 100]);
+    expect(xhrInstance!.authorization).toBe("Bearer merchant-token");
   });
 });

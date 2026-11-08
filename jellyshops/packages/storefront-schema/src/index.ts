@@ -1,7 +1,8 @@
 export { STORE_DESIGN_SCHEMA_VERSION } from "./version.js";
 export { createDefaultStoreDesign } from "./defaults.js";
 export { migrateStoreDesignDocument } from "./migrations.js";
-export { storeDesignDocumentSchema, themeIdSchema } from "./schema.js";
+export { sectionNodeSchema, storeDesignDocumentSchema, themeIdSchema } from "./schema.js";
+export { isRichTextDocument, normalizeRichTextDocument, plainTextToRichTextDocument, resolveRichTextDocument, richTextToPlainText, safeRichTextHref } from "./rich-text.js";
 export {
   STOREFRONT_SCHEMA_VERSION,
   createDefaultStorefrontDocument,
@@ -57,4 +58,45 @@ export type {
   RuntimeTemplateAssignmentV4,
   RuntimeTemplateV4,
 } from "./runtime-v4.js";
+export { storefrontPageTypes } from "./types.js";
+export { RICH_TEXT_SIZES, normalizeTextStyleMark, richTextStyleCss } from "./rich-text-style.js";
+export type { RichTextSize, RichTextStyleAttrs, RichTextStyleMark } from "./rich-text-style.js";
+export { MAX_BLOCK_DEPTH, blockTreeHeight, childBlocks, copyBlockWithNewIds, findBlock, flattenBlocks, updateBlock, updateBlockList } from "./block-tree.js";
+export type { BlockLocation } from "./block-tree.js";
 export type { BlockNode, GlobalSettings, PageDocument, PageType, SectionNode, StoreDesignDocument, ThemeId } from "./types.js";
+export type { RichTextAlign, RichTextBlock, RichTextDocument, RichTextInline, RichTextMark, RichTextTableCell, RichTextTableRow } from "./rich-text.js";
+export {
+  MAX_VARIANTS,
+  MAX_VARIANT_AXES,
+  dropHiddenSelections,
+  findConditionProblems,
+  getVisibleOptions,
+  selectionKey,
+  toggleSelection,
+  validateProductDraft,
+  validateProductOptions,
+  validateProductSelections,
+  validateVariantCombinations,
+} from "./product-options.js";
+export type {
+  ConditionProblem,
+  DraftIssue,
+  DraftVariantLike,
+  OptionIssue,
+  OptionSelection,
+  ProductDraftInput,
+  ProductOptionConditionLike,
+  ProductOptionLike,
+  ProductOptionValueLike,
+  SelectionProblem,
+} from "./product-options.js";
+export { MAX_PRODUCT_PHOTOS, isProductMediaEnabled, resolveProductGallery, validateMediaAssignments, pruneMediaAssignments, suggestAssignmentsFromFilenames, productMediaUrl, productMediaSrcSet } from "./product-media.js";
+export type { MediaAssignments, ProductMediaLike, ProductMediaInput, MediaAssignmentIssue } from "./product-media.js";
+export { MAX_SECTION_CSS_LENGTH, customCssProblem, scopeCustomCss, rescopeCustomCss } from "./custom-css.js";
+export { LANGUAGE_CODE, MAX_TRANSLATION_LENGTH, readTranslations, translateSection, translateSettings, translationsProblem, withTranslation } from "./translations.js";
+export type { Translations } from "./translations.js";
+export { appEmbedSource, getAppBlockProvider, listAppBlockProviders, registerAppBlockProvider } from "./app-blocks.js";
+export type { AppBlockProvider } from "./app-blocks.js";
+export { JELLY_THEME_API_VERSION, compareThemeVersions, supportsJellyVersion, themeVersionSchema, jellyEngineRangeSchema } from "./theme-version.js";
+export { STORE_ICON_LABELS, STORE_ICON_NAMES, isStoreIconName } from "./store-icons.js";
+export type { StoreIconName } from "./store-icons.js";

@@ -1,2 +1,2 @@
-import type { ThemeTokens } from "../types";
+import type { ThemeTokens } from "../types.js";
 export const elegantTokens: ThemeTokens = { colors: { primary: "#40352f", background: "#f8f5ef", text: "#40352f", surface: "#fffdf9", accent: "#9d7b53" }, typography: { display: "Cormorant Garamond", body: "Helvetica Neue" }, radii: { button: "2px", card: "2px" }, spacing: { section: "104px", container: "76rem" }, cardShadow: "0 14px 36px rgba(64, 53, 47, 0.08)" };

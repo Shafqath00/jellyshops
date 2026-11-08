@@ -1,41 +1,50 @@
-# Store Editor design QA
+# Jelly Shop theme editor design QA
 
-## Evidence
+## Visual truth
 
-- Source: `C:\Users\newbi\AppData\Local\Temp\codex-clipboard-d7f418d8-399d-40e7-96e9-7d6cad38356e.png` (`1917 × 878`).
-- Implementation: `store-editor-qa.png` (`1918 × 878`, device scale factor `1`).
-- Route: `http://localhost:3000/admin/store-design`.
-- State: desktop preview, home-page hierarchy open, published demo draft loaded.
+- Reference: `C:\Users\newbi\Pictures\Screenshots\Screenshot 2026-09-15 012836.png`
+- Reference dimensions: 1917 x 891 px (120 DPI metadata)
+- Implementation capture: `C:\Users\newbi\Downloads\jellyshops-main\jellyshops-main\jellyshops\editor-implementation.png`
+- Implementation viewport: 1440 x 900 px, desktop, density 1
+- Comparison: `C:\Users\newbi\Downloads\jellyshops-main\jellyshops-main\jellyshops\editor-design-comparison.png`
+- Tested state: Home template with the Hero section settings open
 
-## Comparison
+## Full-view comparison
 
-The implementation preserves the reference's primary editor structure: a fixed full-screen
-shell, one-line top command bar, persistent left hierarchy, grouped Header/Template/Footer
-regions, responsive-preview controls, undo/redo, save state, and a separate Publish action.
-The preview remains the dominant canvas and uses real Jelly Shop demo products rather than
-copying the reference store's illustrative theme assets.
+The implementation follows the reference editor structure: compact top toolbar, one contextual left editing rail, and a large live storefront preview. Section settings replace the hierarchy in the same rail, preserving preview space. Merchant storefront content intentionally differs from the Shopify sample.
 
-Focused toolbar/sidebar review confirmed that the 72 px command bar, 376 px hierarchy,
-light dividers, compact rows, blue add-section action, and narrow canvas gutter align with
-the source's density and spatial proportions. Inspector transitions keep the same sidebar
-footprint, so selecting sections does not move the preview.
+Focused regions inspected:
 
-## Iterations
+- Top toolbar: device controls, save status, generation, validation, preview, and publish controls
+- Editing rail: hierarchy, Header/Template/Footer groups, section settings, image controls, color controls, layout controls, and block picker
+- Section library: grouped built-in sections with search
+- Preview: live section output and product media at desktop width
 
-1. Initial comparison found the command bar too short, the hierarchy too narrow, and the
-   canvas gutter too generous (P2 fidelity issues).
-2. Updated those dimensions to `72px`, `376px`, and `4px`, then captured the revised evidence.
-3. Fresh-browser validation found no hydration errors. Save and Publish were exercised
-   against the local API, and the resulting content was confirmed on `/sweet-bakes`.
+## Findings and iteration history
 
-## Findings
+1. P2: The first pass kept a permanent right inspector, which reduced preview width and drifted from the reference. Fixed by moving hierarchy, settings, section library, and block picker into one contextual left rail.
+2. P2: Demo catalog image URLs pointed at assets that the backend did not serve. Fixed by returning working HTTPS image URLs and JPEG media metadata.
+3. Section diagnostics previously occupied the interface even when empty. Fixed by hiding the diagnostics panel when there are no issues.
 
-- P0/P1/P2: none remaining.
-- P3: the screenshot includes Next.js's development-only issue badge; it is not present in a
-  production build and does not overlap the editor's primary controls.
-- Intentional difference: preview content, photography, typography, and branding come from
-  the Jelly Shop theme and demo catalog, while the surrounding editing workflow follows the
-  supplied reference.
+No unresolved P0, P1, or P2 visual or interaction issues were found in the final pass.
 
-Result: **passed** for layout fidelity, core interaction coverage, responsive controls, and
-the private-draft-to-publication journey.
+## Interaction verification
+
+- Opened a section and confirmed editable content, image, product, collection, layout, color, typography, and link controls.
+- Opened the content-block picker and confirmed Heading, Text, and Button options.
+- Opened the Template section library and confirmed grouped built-in sections.
+- Filtered the section library for `newsletter` and confirmed search behavior.
+- Confirmed demo product images render in the preview.
+- Browser console check returned no warnings or errors.
+
+## Automated verification
+
+- Frontend focused tests: 15 passed
+- Backend focused tests: 6 passed
+- Frontend TypeScript check: passed
+- Frontend production build: passed
+- Backend build: blocked by six pre-existing TypeScript errors in catalog and tenant route typings; none are in the editor or Supabase persistence changes.
+
+## Result
+
+passed

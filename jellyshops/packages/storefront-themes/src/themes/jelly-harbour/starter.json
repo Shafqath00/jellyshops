@@ -1,0 +1,835 @@
+{
+  "menus": [
+    {
+      "key": "main",
+      "name": "Main menu",
+      "handle": "main",
+      "items": [
+        {
+          "id": "jelly-harbour-menu-home",
+          "label": "Home",
+          "target": {
+            "kind": "home"
+          },
+          "children": []
+        },
+        {
+          "id": "jelly-harbour-menu-search",
+          "label": "Search",
+          "target": {
+            "kind": "search"
+          },
+          "children": []
+        }
+      ]
+    }
+  ],
+  "globalSections": {
+    "announcement": {
+      "id": "jelly-harbour-global-announcement-section",
+      "type": "announcement-bar",
+      "settings": {
+        "text": "Free delivery on orders over £60, packed without plastic"
+      },
+      "blocks": [
+        {
+          "id": "jelly-harbour-global-announcement-copy",
+          "type": "text",
+          "enabled": true,
+          "settings": {
+            "text": "A little something lovely, delivered with care."
+          }
+        }
+      ],
+      "enabled": true
+    },
+    "header": {
+      "id": "jelly-harbour-global-header-section",
+      "type": "header",
+      "settings": {},
+      "blocks": [
+        {
+          "id": "jelly-harbour-global-header-menu",
+          "type": "menu",
+          "enabled": true,
+          "settings": {
+            "handle": "main"
+          }
+        }
+      ],
+      "enabled": true
+    },
+    "footer": {
+      "id": "jelly-harbour-global-footer-section",
+      "type": "footer",
+      "settings": {
+        "text": "Coastal homeware from small makers, packed by hand and sent without plastic."
+      },
+      "blocks": [
+        {
+          "id": "jelly-harbour-global-footer-menu",
+          "type": "menu",
+          "enabled": true,
+          "settings": {
+            "handle": "main"
+          }
+        }
+      ],
+      "enabled": true
+    }
+  },
+  "templates": {
+    "home": {
+      "type": "home",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-home-hero",
+            "type": "hero",
+            "settings": {
+              "eyebrow": "Made by the sea",
+              "layout": "split",
+              "height": "large",
+              "colorScheme": "soft",
+              "contentAlignment": "left",
+              "image": {
+                "url": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1600&q=80",
+                "alt": "A bright living room with natural linen and woven textures"
+              }
+            },
+            "blocks": [
+              {
+                "id": "jelly-harbour-home-hero-heading",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "Linen, ceramics and calm for the home."
+                }
+              },
+              {
+                "id": "jelly-harbour-home-hero-copy",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "Small-batch pieces from coastal makers, chosen to live with for years."
+                }
+              },
+              {
+                "id": "jelly-harbour-home-hero-button",
+                "type": "button",
+                "enabled": true,
+                "settings": {
+                  "label": "Shop the collection",
+                  "href": "/shop"
+                }
+              },
+              {
+                "id": "jelly-harbour-home-hero-secondary",
+                "type": "button",
+                "enabled": true,
+                "settings": {
+                  "label": "Our story",
+                  "href": "/about"
+                }
+              }
+            ],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-collections",
+            "type": "category-grid",
+            "settings": {
+              "heading": "Shop by collection",
+              "columns": 4,
+              "imageRatio": "portrait"
+            },
+            "blocks": [
+              {
+                "id": "jelly-harbour-collection-new",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "New arrivals",
+                  "link": "/shop",
+                  "image": {
+                    "url": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=900&q=80",
+                    "alt": "Neutral clothing on a rail"
+                  }
+                }
+              },
+              {
+                "id": "jelly-harbour-collection-home",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "For the home",
+                  "link": "/shop",
+                  "image": {
+                    "url": "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?auto=format&fit=crop&w=900&q=80",
+                    "alt": "A tan sofa with a wool throw"
+                  }
+                }
+              },
+              {
+                "id": "jelly-harbour-collection-accessories",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "Accessories",
+                  "link": "/shop",
+                  "image": {
+                    "url": "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=900&q=80",
+                    "alt": "A canvas tote bag"
+                  }
+                }
+              },
+              {
+                "id": "jelly-harbour-collection-kitchen",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "Kitchen & dining",
+                  "link": "/shop",
+                  "image": {
+                    "url": "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=900&q=80",
+                    "alt": "A white ceramic mug"
+                  }
+                }
+              }
+            ],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-featured",
+            "type": "product-grid",
+            "settings": {
+              "heading": "New arrivals",
+              "text": "The latest additions to the shop.",
+              "limit": 8,
+              "columns": 4,
+              "sort": "newest",
+              "viewAllLabel": "View all products",
+              "viewAllLink": "/shop"
+            },
+            "blocks": [],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-home-story",
+            "type": "image-with-text",
+            "settings": {
+              "eyebrow": "Our story",
+              "imagePosition": "left",
+              "colorScheme": "page",
+              "image": {
+                "url": "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1200&q=80",
+                "alt": "Knitwear, denim and a watch laid out on a blanket"
+              }
+            },
+            "blocks": [
+              {
+                "id": "jelly-harbour-home-story-heading",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "Made to be lived with."
+                }
+              },
+              {
+                "id": "jelly-harbour-home-story-copy",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "Tell customers who you are, what you make and why it matters. A few honest sentences go a long way."
+                }
+              },
+              {
+                "id": "jelly-harbour-home-story-button",
+                "type": "button",
+                "enabled": true,
+                "settings": {
+                  "label": "Read our story",
+                  "href": "/about"
+                }
+              }
+            ],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-promises",
+            "type": "multicolumn",
+            "settings": {
+              "heading": "Why shop with us",
+              "columns": 3,
+              "contentAlignment": "left",
+              "colorScheme": "soft"
+            },
+            "blocks": [
+              {
+                "id": "jelly-harbour-promise-packing",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "Carefully packed",
+                  "text": "Every order is wrapped by hand and sent with care."
+                }
+              },
+              {
+                "id": "jelly-harbour-promise-checkout",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "Secure checkout",
+                  "text": "Pay safely with the payment methods you already use."
+                }
+              },
+              {
+                "id": "jelly-harbour-promise-help",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "Here to help",
+                  "text": "Questions about an order? Get in touch and we will reply quickly."
+                }
+              }
+            ],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-bestsellers",
+            "type": "product-grid",
+            "settings": {
+              "heading": "Customer favourites",
+              "limit": 4,
+              "columns": 4,
+              "sort": "best-selling",
+              "hideWhenEmpty": true
+            },
+            "blocks": [],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-newsletter",
+            "type": "newsletter",
+            "settings": {
+              "buttonLabel": "Subscribe",
+              "contentAlignment": "center",
+              "colorScheme": "page"
+            },
+            "blocks": [
+              {
+                "id": "jelly-harbour-newsletter-title",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "A little news, now and then."
+                }
+              },
+              {
+                "id": "jelly-harbour-newsletter-copy",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "New arrivals and occasional notes from the studio. No spam, unsubscribe anytime."
+                }
+              }
+            ],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "product": {
+      "type": "product",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-product-gallery",
+            "type": "product-gallery",
+            "settings": {
+              "imageFit": "cover",
+              "layout": "stacked"
+            },
+            "blocks": [],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-product-information",
+            "type": "product-information",
+            "settings": {
+              "showVendor": true,
+              "showSku": false,
+              "showCompareAtPrice": true,
+              "showAvailability": true
+            },
+            "blocks": [],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-product-options",
+            "type": "product-options",
+            "settings": {
+              "style": "buttons"
+            },
+            "blocks": [],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-product-purchase",
+            "type": "product-purchase",
+            "settings": {
+              "showQuantity": true,
+              "label": "Add to cart"
+            },
+            "blocks": [],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-product-description",
+            "type": "product-description",
+            "settings": {
+              "spacing": "standard",
+              "heading": "Description"
+            },
+            "blocks": [],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-product-related",
+            "type": "related-products",
+            "settings": {
+              "limit": 4,
+              "heading": "You may also like"
+            },
+            "blocks": [],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "collection": {
+      "type": "collection",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-collection-header",
+            "type": "collection-header",
+            "settings": {
+              "showTitle": true,
+              "showDescription": true,
+              "showImage": true
+            },
+            "blocks": [],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-collection-grid",
+            "type": "collection-product-grid",
+            "settings": {
+              "columns": 3,
+              "limit": 12,
+              "emptyMessage": "No products are available in this collection yet."
+            },
+            "blocks": [],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-collection-description",
+            "type": "collection-description",
+            "settings": {
+              "spacing": "standard"
+            },
+            "blocks": [],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "cart": {
+      "type": "cart",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-cart-summary",
+            "type": "cart-summary",
+            "settings": {},
+            "blocks": [],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "search": {
+      "type": "search",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-search-results",
+            "type": "search-results",
+            "settings": {},
+            "blocks": [],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "page": {
+      "type": "page",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-page-content",
+            "type": "page-content",
+            "settings": {},
+            "blocks": [],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "blog": {
+      "type": "blog",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-blog-header",
+            "type": "blog-header",
+            "settings": {},
+            "blocks": [],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-article-list",
+            "type": "article-list",
+            "settings": {},
+            "blocks": [],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "article": {
+      "type": "article",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-article-header",
+            "type": "article-header",
+            "settings": {},
+            "blocks": [],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-article-content",
+            "type": "article-content",
+            "settings": {},
+            "blocks": [],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "not-found": {
+      "type": "not-found",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "jelly-harbour-not-found-message",
+            "type": "not-found-message",
+            "settings": {
+              "contentAlignment": "center"
+            },
+            "blocks": [
+              {
+                "id": "jelly-harbour-not-found-heading",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "This page has moved on."
+                }
+              },
+              {
+                "id": "jelly-harbour-not-found-copy",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "Return to the shop and discover something new."
+                }
+              },
+              {
+                "id": "jelly-harbour-not-found-button",
+                "type": "button",
+                "enabled": true,
+                "settings": {
+                  "label": "Back to the shop",
+                  "href": "/"
+                }
+              }
+            ],
+            "enabled": true
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "checkout": {
+      "type": "checkout",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "wishlist": {
+      "type": "wishlist",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "customer-login": {
+      "type": "customer-login",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "customer-register": {
+      "type": "customer-register",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "customer-recovery": {
+      "type": "customer-recovery",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "customer-account": {
+      "type": "customer-account",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "customer-orders": {
+      "type": "customer-orders",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "customer-order": {
+      "type": "customer-order",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "customer-addresses": {
+      "type": "customer-addresses",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "order-success": {
+      "type": "order-success",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    }
+  }
+}

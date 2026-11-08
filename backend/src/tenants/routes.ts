@@ -4,20 +4,23 @@ import { requireMerchant } from "../auth/middleware.js";
 import type { AuthProvider } from "../auth/types.js";
 import { ApiError } from "../http/errors.js";
 import type { TenantRepository } from "./repository.js";
+import { MARKET_CURRENCIES } from "./settings.js";
+
+/** The storefront's own top-level paths (folders in jellyshops/src/app); a store named like one would be unreachable. */
+export const RESERVED_STORE_SLUGS = ["admin", "api", "auth", "login", "signup", "onboarding", "theme-preview", "themes"];
 
 const createStoreSchema = z.object({
   name: z.string().trim().min(1).max(120),
-  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).min(3).max(63),
+  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).min(3).max(63).refine((slug) => !RESERVED_STORE_SLUGS.includes(slug), { message: "That web address is used by Jelly Shops itself. Choose another." }),
   currency: z.string().regex(/^[A-Z]{3}$/),
   country: z.string().regex(/^[A-Z]{2}$/),
-}).strict();
+}).strict().refine((input) => MARKET_CURRENCIES[input.country] === input.currency, { message: "Choose India/INR, United Kingdom/GBP, or United States/USD.", path: ["currency"] });
 
-function merchantId(value: string | undefined): number {
-  const parsed = Number(value);
-  if (!Number.isSafeInteger(parsed) || parsed <= 0 || String(parsed) !== value) {
+function merchantId(value: string | undefined): string {
+  if (typeof value !== "string" || value.trim() === "") {
     throw new ApiError(500, "PRINCIPAL_INVALID", "The authenticated merchant identity is invalid");
   }
-  return parsed;
+  return value;
 }
 
 export function createMerchantRouter(authProvider: AuthProvider, tenants: TenantRepository): Router {
@@ -25,17 +28,17 @@ export function createMerchantRouter(authProvider: AuthProvider, tenants: Tenant
   const merchant = requireMerchant(authProvider);
 
   router.get("/me", merchant, async (request, response) => {
-    const id = merchantId(request.merchant?.merchantId);
-    response.json({ merchantId: request.merchant?.merchantId, stores: await tenants.listStores(id) });
+    const id = merchantId(request.merchant?.userId);
+    response.json({ merchantId: id, stores: await tenants.listStores(id) });
   });
 
   router.get("/stores", merchant, async (request, response) => {
-    const id = merchantId(request.merchant?.merchantId);
+    const id = merchantId(request.merchant?.userId);
     response.json({ stores: await tenants.listStores(id) });
   });
 
   router.post("/stores", merchant, async (request, response) => {
-    const id = merchantId(request.merchant?.merchantId);
+    const id = merchantId(request.merchant?.userId);
     const input = createStoreSchema.parse(request.body);
     response.status(201).json({ store: await tenants.createStore(id, input) });
   });

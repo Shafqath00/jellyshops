@@ -1,124 +1,53 @@
-import { randomUUID } from "node:crypto";
-import cors from "cors";
 import express, { type Express } from "express";
-import { loadConfig, type AppConfig } from "./config.js";
-import { DevelopmentAuthProvider } from "./auth/development-auth-provider.js";
-import type { AuthProvider } from "./auth/types.js";
-import { createCatalogAdminRouter, createCatalogRouter, createPublicCatalogRouter } from "./catalog/routes.js";
-import type { CatalogAdmin } from "./catalog/service.js";
-import { createContentRouter } from "./content/routes.js";
-import type { ContentService } from "./content/service.js";
-import { createCustomDataRouter } from "./custom-data/routes.js";
-import type { CustomDataService, MetaobjectService } from "./custom-data/service.js";
-import type { DynamicSourceRegistry } from "./dynamic-sources/registry.js";
+import { resolveAppDependencies } from "./app/dependencies.js";
+import { configureMiddleware } from "./app/middleware.js";
+import { mountCommerceRoutes, mountOrderRuntimeRoutes, mountStripeWebhooks } from "./app/routes/commerce.js";
+import { mountInternalRoutes } from "./app/routes/internal.js";
+import { mountMediaRoutes } from "./app/routes/media.js";
+import {
+  mountAdminRoutes,
+  mountCatalogRoutes,
+  mountContentRoutes,
+  mountCustomerRoutes,
+  mountStoreSettingsRoutes,
+  mountTenantRoutes,
+} from "./app/routes/merchant.js";
+import { mountPublicStorefrontContextRoutes, mountStorefrontRoutes } from "./app/routes/storefront.js";
+import type { AppDependencies } from "./app/types.js";
 import { errorHandler, notFoundHandler } from "./http/errors.js";
-import { LocalJsonMediaRepository } from "./media/local-json-media-repository.js";
-import { LocalMediaStorage } from "./media/local-media-storage.js";
-import type { MediaRepository } from "./media/repository.js";
-import { createMediaRouter, createPublicMediaRouter } from "./media/routes.js";
-import { MediaService } from "./media/service.js";
-import type { MediaStorage } from "./media/storage.js";
-import { createStorefrontCompilerRouter, type StorefrontCompilerApi } from "./storefront/compiler/routes.js";
-import { LocalJsonStorefrontRepository } from "./storefront/local-json-repository.js";
-import { createDefaultStorefrontDocument, storefrontDocumentValidator } from "./storefront/document-validator.js";
-import { createStorefrontPublicationRouter, type StorefrontPublicationApi } from "./storefront/publication/routes.js";
-import { createStorefrontRouter } from "./storefront/routes.js";
-import { DefaultStorefrontService, type DocumentValidator } from "./storefront/service.js";
-import type { StorefrontRepository } from "./storefront/repository.js";
-import { createStorefrontWorkspaceRouter, type StorefrontWorkspaceApi } from "./storefront/workspace/routes.js";
-import { createMerchantRouter } from "./tenants/routes.js";
-import type { TenantRepository } from "./tenants/repository.js";
+import { isThemePackageUpload } from "./storefront/theme-packages/routes.js";
 
-declare global {
-  namespace Express {
-    interface Request {
-      id: string;
-    }
-  }
-}
-
-export interface AppDependencies {
-  config: AppConfig;
-  authProvider: AuthProvider;
-  storefrontRepository: StorefrontRepository<unknown>;
-  documentValidator: DocumentValidator<unknown>;
-  tenantRepository: TenantRepository;
-  mediaRepository: MediaRepository;
-  mediaStorage: MediaStorage;
-  catalogService: CatalogAdmin;
-  contentService: ContentService;
-  customDataService: CustomDataService;
-  metaobjectService: MetaobjectService;
-  dynamicSourceRegistry: DynamicSourceRegistry;
-  storefrontWorkspaceApi: StorefrontWorkspaceApi;
-  storefrontCompilerApi: StorefrontCompilerApi;
-  storefrontPublicationApi: StorefrontPublicationApi;
-}
+export { publicDocumentFromTemplate } from "./app/default-storefront-workspace.js";
+export type { AppDependencies } from "./app/types.js";
 
 export function createApp(dependencies: Partial<AppDependencies> = {}): Express {
-  const config = dependencies.config ?? loadConfig();
-  const authProvider = dependencies.authProvider ?? new DevelopmentAuthProvider(config.demoStoreId);
-  const storefrontRepository = dependencies.storefrontRepository ?? new LocalJsonStorefrontRepository(config.dataDirectory);
-  const documentValidator = dependencies.documentValidator ?? storefrontDocumentValidator;
-  const storefrontService = new DefaultStorefrontService(storefrontRepository, documentValidator, createDefaultStorefrontDocument);
-  const mediaRepository = dependencies.mediaRepository ?? new LocalJsonMediaRepository(config.dataDirectory);
-  const mediaStorage = dependencies.mediaStorage ?? new LocalMediaStorage(config.uploadDirectory);
-  const mediaService = new MediaService(mediaRepository, mediaStorage);
+  const context = resolveAppDependencies(dependencies);
   const app = express();
+  const { orderRuntime } = context.routeDependencies;
+  if (orderRuntime) app.locals.runOrderWorkers = orderRuntime.runWorkers;
 
-  app.disable("x-powered-by");
-  app.use((request, response, next) => {
-    request.id = randomUUID();
-    response.setHeader("x-request-id", request.id);
-    next();
-  });
-  app.use(cors({ origin: config.corsOrigins }));
-  app.use(express.json({ limit: "2mb" }));
+  configureMiddleware(app, context.config);
 
-  app.get("/health", (_request, response) => response.json({ ok: true }));
+  // Stripe signatures require raw bytes, so mount webhooks before JSON parsing.
+  mountStripeWebhooks(app, context);
+  // Theme package uploads carry their files as base64 and get a larger limit of their own.
+  const defaultJson = express.json({ limit: "2mb" });
+  app.use((request, response, next) => isThemePackageUpload(request) ? next() : defaultJson(request, response, next));
 
-  app.use("/api/demo/catalog", createCatalogRouter());
-  if (dependencies.catalogService) {
-    app.use("/api/stores/:storeId/catalog", createCatalogAdminRouter(dependencies.catalogService, authProvider));
-    app.use("/api/public/stores/:storeId/catalog", createPublicCatalogRouter(dependencies.catalogService));
-  }
-  if (dependencies.contentService) {
-    app.use("/api/stores/:storeId/content", createContentRouter(dependencies.contentService, authProvider));
-  }
-  if (dependencies.customDataService && dependencies.metaobjectService && dependencies.dynamicSourceRegistry) {
-    app.use(
-      "/api/stores/:storeId/custom-data",
-      createCustomDataRouter({
-        customData: dependencies.customDataService,
-        metaobjects: dependencies.metaobjectService,
-        registry: dependencies.dynamicSourceRegistry,
-      }, authProvider),
-    );
-  }
-  if (dependencies.tenantRepository) app.use("/api", createMerchantRouter(authProvider, dependencies.tenantRepository));
+  mountOrderRuntimeRoutes(app, context);
+  mountStoreSettingsRoutes(app, context);
+  mountCustomerRoutes(app, context);
+  mountInternalRoutes(app, context);
+  mountTenantRoutes(app, context);
+  mountCommerceRoutes(app, context);
+  mountAdminRoutes(app, context);
+  mountCatalogRoutes(app, context);
+  mountPublicStorefrontContextRoutes(app, context);
+  mountContentRoutes(app, context);
+  mountStorefrontRoutes(app, context);
+  mountMediaRoutes(app, context);
 
-  if (dependencies.storefrontWorkspaceApi) {
-    app.use(
-      "/api/stores/:storeId/storefront",
-      createStorefrontWorkspaceRouter(dependencies.storefrontWorkspaceApi, authProvider),
-    );
-  }
-  if (dependencies.storefrontCompilerApi) {
-    app.use(
-      "/api/stores/:storeId/storefront",
-      createStorefrontCompilerRouter(dependencies.storefrontCompilerApi, authProvider),
-    );
-  }
-  if (dependencies.storefrontPublicationApi) {
-    app.use(
-      "/api/stores/:storeId/storefront",
-      createStorefrontPublicationRouter(dependencies.storefrontPublicationApi, authProvider),
-    );
-  }
-  app.use("/api/stores/:storeId/storefront", createStorefrontRouter(storefrontService, authProvider));
-  app.use("/api/stores/:storeId/media", createMediaRouter(mediaService, authProvider, config.maxUploadBytes));
-  app.use("/api/public/media", createPublicMediaRouter(mediaService));
-
+  // Error handling must stay last.
   app.use(notFoundHandler);
   app.use(errorHandler);
   return app;

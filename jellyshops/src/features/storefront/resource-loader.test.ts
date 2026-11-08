@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   expandRuntimeTemplate,
   resolvePublicResourceReference,
+  resolveStorefrontNotFound,
   resolveStorefrontRoute,
   type PublicResourceReader,
   type PublicStorefrontResource,
@@ -53,6 +54,30 @@ function snapshot(): RuntimeStorefrontSnapshotV4 {
   };
 }
 
+function snapshotWithGlobalLayout(): RuntimeStorefrontSnapshotV4 {
+  const current = snapshot();
+  current.templates.home = {
+    id: "home",
+    type: "home",
+    handle: "default",
+    layout: {
+      sections: [
+        { kind: "global", globalSectionId: "announcement" },
+        { kind: "global", globalSectionId: "header" },
+        { kind: "inline", section: { id: "home-copy", type: "rich-text", enabled: true, settings: {}, blocks: [] } },
+        { kind: "global", globalSectionId: "footer" },
+      ],
+    },
+  };
+  current.globalSections = {
+    announcement: { id: "announcement", section: { id: "announcement", type: "announcement-bar", enabled: true, settings: {}, blocks: [] } },
+    header: { id: "header", section: { id: "header", type: "header", enabled: true, settings: {}, blocks: [] } },
+    footer: { id: "footer", section: { id: "footer", type: "footer", enabled: true, settings: {}, blocks: [] } },
+  };
+  current.templateDefaults = { home: "home", product: "product-default" };
+  return current;
+}
+
 function product(overrides: Partial<PublicStorefrontResource> = {}): PublicStorefrontResource {
   return {
     type: "product",
@@ -60,6 +85,17 @@ function product(overrides: Partial<PublicStorefrontResource> = {}): PublicStore
     handle: "classic-cake",
     visible: true,
     data: { title: "Classic Cake" },
+    ...overrides,
+  };
+}
+
+function collection(overrides: Partial<PublicStorefrontResource> = {}): PublicStorefrontResource {
+  return {
+    type: "collection",
+    id: "collection-1",
+    handle: "summer",
+    visible: true,
+    data: { collection: { id: "collection-1", name: "Summer" }, products: [] },
     ...overrides,
   };
 }
@@ -72,6 +108,40 @@ function reader(resource: PublicStorefrontResource | null): PublicResourceReader
 }
 
 describe("resolveStorefrontRoute", () => {
+  it("resolves Cart through its default template without a resource assignment", async () => {
+    const current = snapshot();
+    current.templates["cart-default"] = { id: "cart-default", type: "cart", handle: "default", layout: { sections: [] } };
+    current.templateDefaults.cart = "cart-default";
+
+    await expect(resolveStorefrontRoute(current, { type: "cart" }, reader(null)))
+      .resolves.toMatchObject({ status: "ready", context: { pageType: "cart", resource: null }, template: { id: "cart-default" } });
+  });
+
+  it("resolves Search through its default template without reading a resource", async () => {
+    const current = snapshot();
+    current.templates["search-default"] = { id: "search-default", type: "search", handle: "default", layout: { sections: [] } };
+    current.templateDefaults.search = "search-default";
+    const resources = reader(null);
+
+    await expect(resolveStorefrontRoute(current, {
+      type: "search",
+      context: { type: "search", query: "shoes", state: "results", resultCount: 1, results: [{ id: "shoe", name: "Shoe", href: "/store/products/shoe", imageUrl: "shoe.jpg", price: "$12.00" }] },
+    }, resources)).resolves.toMatchObject({ status: "ready", context: { pageType: "search", data: { query: "shoes", resultCount: 1 } }, template: { id: "search-default" } });
+    expect(resources.findByHandle).not.toHaveBeenCalled();
+  });
+
+  it("resolves home through its default template with named global regions", async () => {
+    const result = await resolveStorefrontRoute(snapshotWithGlobalLayout(), { type: "home" }, reader(null));
+
+    expect(result.status).toBe("ready");
+    if (result.status !== "ready") throw new Error("expected route to resolve");
+    expect(result.context).toEqual({ pageType: "home", resource: null });
+    expect(result.layout.announcement.map((section) => section.id)).toEqual(["announcement"]);
+    expect(result.layout.header.map((section) => section.id)).toEqual(["header"]);
+    expect(result.layout.template.map((section) => section.id)).toEqual(["home-copy"]);
+    expect(result.layout.footer.map((section) => section.id)).toEqual(["footer"]);
+  });
+
   it("resolves a handle to a stable resource id before choosing its assigned template", async () => {
     const resources = reader(product());
 
@@ -101,6 +171,57 @@ describe("resolveStorefrontRoute", () => {
     expect(result.status).toBe("ready");
     if (result.status !== "ready") throw new Error("expected route to resolve");
     expect(result.template.id).toBe("product-featured");
+  });
+
+  it("resolves the default Collection template and lets an explicit assignment override it", async () => {
+    const current = snapshot();
+    current.templates["collection-default"] = { id: "collection-default", type: "collection", handle: "default", layout: { sections: [] } };
+    current.templates["collection-featured"] = { id: "collection-featured", type: "collection", handle: "featured", layout: { sections: [] } };
+    current.templateDefaults.collection = "collection-default";
+
+    await expect(resolveStorefrontRoute(current, { type: "collection", handle: "summer" }, reader(collection())))
+      .resolves.toMatchObject({ status: "ready", template: { id: "collection-default" } });
+
+    current.assignments.push({ resourceType: "collection", resourceId: "collection-1", templateId: "collection-featured" });
+    await expect(resolveStorefrontRoute(current, { type: "collection", handle: "summer" }, reader(collection())))
+      .resolves.toMatchObject({ status: "ready", template: { id: "collection-featured" } });
+  });
+
+  it("resolves the default Article template and lets an explicit assignment override it", async () => {
+    const current = snapshot();
+    current.templates["article-default"] = { id: "article-default", type: "article", handle: "default", layout: { sections: [] } };
+    current.templates["article-featured"] = { id: "article-featured", type: "article", handle: "featured", layout: { sections: [] } };
+    current.templateDefaults.article = "article-default";
+    const article: PublicStorefrontResource = { type: "article", id: "article-1", handle: "opening", visible: true, data: {} };
+
+    await expect(resolveStorefrontRoute(current, { type: "article", handle: "opening" }, reader(article))).resolves.toMatchObject({ status: "ready", template: { id: "article-default" } });
+    current.assignments.push({ resourceType: "article", resourceId: "article-1", templateId: "article-featured" });
+    await expect(resolveStorefrontRoute(current, { type: "article", handle: "opening" }, reader(article))).resolves.toMatchObject({ status: "ready", template: { id: "article-featured" } });
+  });
+
+  it("falls back to the resource-type default when an assigned template is missing or invalid", async () => {
+    const missingAssignment = snapshot();
+    missingAssignment.assignments = [{ resourceType: "product", resourceId: "product-1", templateId: "deleted-template" }];
+
+    const missingResult = await resolveStorefrontRoute(
+      missingAssignment,
+      { type: "product", handle: "classic-cake" },
+      reader(product()),
+    );
+
+    expect(missingResult).toMatchObject({ status: "ready", template: { id: "product-default" } });
+
+    const invalidAssignment = snapshot();
+    invalidAssignment.templates["collection-template"] = {
+      id: "collection-template", type: "collection", handle: "default", layout: { sections: [] },
+    };
+    invalidAssignment.assignments = [{ resourceType: "product", resourceId: "product-1", templateId: "collection-template" }];
+
+    await expect(resolveStorefrontRoute(
+      invalidAssignment,
+      { type: "product", handle: "classic-cake" },
+      reader(product()),
+    )).resolves.toMatchObject({ status: "ready", template: { id: "product-default" } });
   });
 
   it("normalizes omitted enabled flags in compiled section data", () => {
@@ -138,5 +259,37 @@ describe("resolveStorefrontRoute", () => {
       { type: "product", handle: "classic-cake" },
       resources,
     )).resolves.toMatchObject({ status: "not-found", reason: "resource" });
+  });
+
+  it("resolves the compiled Not Found default through the same runtime layout", async () => {
+    const current = snapshot();
+    current.templates["not-found-default"] = {
+      id: "not-found-default",
+      type: "not-found",
+      handle: "default",
+      layout: { sections: [{ kind: "inline", section: { id: "not-found-copy", type: "not-found-message", settings: {}, blocks: [] } }] },
+    } as never;
+    current.templateDefaults["not-found"] = "not-found-default";
+
+    await expect(resolveStorefrontRoute(current, { type: "not-found" } as never, reader(null)))
+      .resolves.toMatchObject({ status: "ready", template: { id: "not-found-default", type: "not-found" }, context: { pageType: "not-found" } });
+  });
+
+  it("selects the compiled Not Found template for an unmatched storefront path", () => {
+    const current = snapshot();
+    current.templates["not-found-default"] = {
+      id: "not-found-default",
+      type: "not-found",
+      handle: "default",
+      layout: { sections: [{ kind: "inline", section: { id: "not-found-copy", type: "not-found-message", settings: {}, blocks: [] } }] },
+    };
+    current.templateDefaults["not-found"] = "not-found-default";
+
+    expect(resolveStorefrontNotFound(current)).toMatchObject({
+      status: "ready",
+      context: { pageType: "not-found", resource: null },
+      template: { id: "not-found-default" },
+      sections: [{ id: "not-found-copy" }],
+    });
   });
 });

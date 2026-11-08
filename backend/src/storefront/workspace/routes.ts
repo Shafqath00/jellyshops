@@ -1,5 +1,6 @@
 import { Router, type Request } from "express";
 import { z } from "zod";
+import { themeVersionSchema } from "@jelly/storefront-schema";
 import { requireMerchant, requireStorePermission } from "../../auth/middleware.js";
 import type { AuthProvider } from "../../auth/types.js";
 import { ApiError } from "../../http/errors.js";
@@ -8,6 +9,7 @@ import type { AssignableResourceType } from "./repositories/assignment-repositor
 import type { MenuItem } from "./repositories/menu-repository.js";
 
 export interface StorefrontWorkspaceApi {
+  listThemeCatalog(storeId: string): Promise<unknown[]>;
   getWorkspace(storeId: string): Promise<{ generation: number; updatedAt: Date } | null>;
 
   listTemplates(storeId: string, type?: TemplateType): Promise<unknown[]>;
@@ -15,6 +17,7 @@ export interface StorefrontWorkspaceApi {
   createTemplate(storeId: string, input: { type: TemplateType; name: string; handle?: string; layout: Record<string, unknown> }): Promise<unknown>;
   updateTemplate(storeId: string, templateId: string, expectedRevision: number, patch: { name?: string; handle?: string; layout?: Record<string, unknown> }): Promise<unknown>;
   cloneTemplate(storeId: string, sourceTemplateId: string, input: { name: string; handle: string }): Promise<unknown>;
+  deleteTemplate(storeId: string, templateId: string, expectedRevision: number): Promise<unknown>;
 
   listGlobalSections(storeId: string): Promise<unknown[]>;
   getGlobalSection(storeId: string, id: string): Promise<unknown | null>;
@@ -23,6 +26,7 @@ export interface StorefrontWorkspaceApi {
   listPresets(storeId: string): Promise<unknown[]>;
   createPreset(storeId: string, input: { name: string; section: Record<string, unknown> }): Promise<unknown>;
   instantiatePreset(storeId: string, presetId: string): Promise<Record<string, unknown>>;
+  deletePreset?(storeId: string, presetId: string): Promise<{ generation: number }>;
 
   listMenus(storeId: string): Promise<unknown[]>;
   getMenu(storeId: string, id: string): Promise<unknown | null>;
@@ -30,10 +34,11 @@ export interface StorefrontWorkspaceApi {
   updateMenu(storeId: string, id: string, expectedRevision: number, patch: { name?: string; handle?: string; items?: MenuItem[] }): Promise<unknown>;
 
   getThemeConfiguration(storeId: string): Promise<unknown | null>;
-  saveThemeConfiguration(storeId: string, expectedRevision: number | null, input: { themeId: string; settings: Record<string, unknown>; draftArtifactId?: string | null }): Promise<unknown>;
+  saveThemeConfiguration(storeId: string, expectedRevision: number | null, input: { themeId: string; themeVersion?: string; settings: Record<string, unknown>; draftArtifactId?: string | null }): Promise<unknown>;
 
   getAssignment(storeId: string, resourceType: AssignableResourceType, resourceId: string): Promise<unknown | null>;
   assignTemplate(storeId: string, input: { resourceType: AssignableResourceType; resourceId: string; templateId: string; expectedRevision: number | null }): Promise<unknown>;
+  removeAssignment(storeId: string, input: { resourceType: AssignableResourceType; resourceId: string; expectedRevision: number }): Promise<unknown>;
 }
 
 const MAX_REVISION = 2_147_483_647;
@@ -54,8 +59,9 @@ const templateUpdateSchema = z.object({
   name: z.string().min(1).optional(),
   handle: z.string().min(1).optional(),
   layout: jsonObjectSchema.optional(),
-}).strict();
+}).strip();
 const templateCloneSchema = z.object({ name: z.string().min(1), handle: z.string().min(1) }).strict();
+const revisionOnlySchema = z.object({ expectedRevision: expectedRevisionSchema }).strict();
 
 const globalCreateSchema = z.object({ name: z.string().min(1), section: jsonObjectSchema }).strict();
 const globalUpdateSchema = z.object({
@@ -83,7 +89,7 @@ const menuItemSchema: z.ZodType<MenuItemInput> = z.lazy(() => z.object({
   target: menuTargetSchema,
   children: z.array(menuItemSchema),
 }).strict());
-const menuCreateSchema = z.object({ name: z.string().min(1), handle: z.string().min(1), items: z.array(menuItemSchema) }).strict();
+const menuCreateSchema = z.object({ name: z.string().min(1), handle: z.string().min(1), items: z.array(menuItemSchema) }).strip();
 const menuUpdateSchema = z.object({
   expectedRevision: expectedRevisionSchema,
   name: z.string().min(1).optional(),
@@ -94,6 +100,7 @@ const menuUpdateSchema = z.object({
 const themeSaveSchema = z.object({
   expectedRevision: nullableExpectedRevisionSchema,
   themeId: z.string().min(1),
+  themeVersion: themeVersionSchema.optional(),
   settings: jsonObjectSchema,
   draftArtifactId: z.string().min(1).nullable().optional(),
 }).strict();
@@ -126,6 +133,10 @@ export function createStorefrontWorkspaceRouter(api: StorefrontWorkspaceApi, aut
     } catch (error) { next(error); }
   });
 
+  router.get("/themes", requireStorePermission("storefront:view"), async (request, response, next) => {
+    try { response.json(await api.listThemeCatalog(storeId(request))); } catch (error) { next(error); }
+  });
+
   router.get("/templates", requireStorePermission("storefront:view"), async (request, response, next) => {
     try {
       const type = request.query.type === undefined ? undefined : templateTypeSchema.parse(request.query.type);
@@ -149,6 +160,13 @@ export function createStorefrontWorkspaceRouter(api: StorefrontWorkspaceApi, aut
   router.post("/templates/:templateId/clone", requireStorePermission("storefront:edit"), async (request, response, next) => {
     try { response.status(201).json(await api.cloneTemplate(storeId(request), String(request.params.templateId), templateCloneSchema.parse(request.body))); }
     catch (error) { next(error); }
+  });
+
+  router.delete("/templates/:templateId", requireStorePermission("storefront:edit"), async (request, response, next) => {
+    try {
+      const { expectedRevision } = revisionOnlySchema.parse(request.body ?? {});
+      response.json(await api.deleteTemplate(storeId(request), String(request.params.templateId), expectedRevision));
+    } catch (error) { next(error); }
   });
 
   router.get("/global-sections", requireStorePermission("storefront:view"), async (request, response, next) => {
@@ -175,6 +193,14 @@ export function createStorefrontWorkspaceRouter(api: StorefrontWorkspaceApi, aut
   router.post("/presets", requireStorePermission("storefront:edit"), async (request, response, next) => {
     try { response.status(201).json(await api.createPreset(storeId(request), presetCreateSchema.parse(request.body))); }
     catch (error) { next(error); }
+  });
+  router.delete("/presets/:presetId", requireStorePermission("storefront:edit"), async (request, response, next) => {
+    try {
+      if (!api.deletePreset) notFound("Saved section");
+      response.json(await api.deletePreset(storeId(request), String(request.params.presetId)));
+    } catch (error) {
+      next(error instanceof Error && error.message === "Section preset was not found" ? new ApiError(404, "STOREFRONT_RESOURCE_NOT_FOUND", "Saved section was not found") : error);
+    }
   });
   router.post("/presets/:presetId/instantiate", requireStorePermission("storefront:edit"), async (request, response, next) => {
     try { response.json(await api.instantiatePreset(storeId(request), String(request.params.presetId))); }
@@ -224,6 +250,18 @@ export function createStorefrontWorkspaceRouter(api: StorefrontWorkspaceApi, aut
         resourceId: String(request.params.resourceId),
         templateId: input.templateId,
         expectedRevision: input.expectedRevision,
+      }));
+    } catch (error) { next(error); }
+  });
+
+  router.delete("/assignments/:resourceType/:resourceId", requireStorePermission("storefront:edit"), async (request, response, next) => {
+    try {
+      const resourceType = assignableResourceTypeSchema.parse(request.params.resourceType);
+      const { expectedRevision } = revisionOnlySchema.parse(request.body ?? {});
+      response.json(await api.removeAssignment(storeId(request), {
+        resourceType,
+        resourceId: String(request.params.resourceId),
+        expectedRevision,
       }));
     } catch (error) { next(error); }
   });

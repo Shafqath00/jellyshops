@@ -1,17 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { createIntegrationDatabase, type IntegrationDatabase } from "./database.js";
-
-async function seedStore(database: IntegrationDatabase, id: string, slug: string) {
-  return database.database.client.store.create({
-    data: { id, name: id, slug, currency: "USD", country: "US" },
-  });
-}
+import { createPGliteDatabase, seedStore, type IntegrationDatabase } from "./pglite.js";
 
 describe("canonical catalog schema", () => {
   let integration: IntegrationDatabase;
 
   beforeEach(async () => {
-    integration = await createIntegrationDatabase();
+    integration = await createPGliteDatabase();
   });
 
   afterEach(async () => {
@@ -22,56 +16,27 @@ describe("canonical catalog schema", () => {
     await seedStore(integration, "store-a", "store-a");
     await seedStore(integration, "store-b", "store-b");
 
-    await integration.database.client.product.create({
-      data: { storeId: "store-a", title: "Cake A", slug: "chocolate-cake" },
-    });
-    await integration.database.client.product.create({
-      data: { storeId: "store-b", title: "Cake B", slug: "chocolate-cake" },
-    });
+    await integration.query(`INSERT INTO "Product" ("id", "storeId", "title", "slug", "updatedAt") VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)`, ["product-a", "store-a", "Cake A", "chocolate-cake"]);
+    await integration.query(`INSERT INTO "Product" ("id", "storeId", "title", "slug", "updatedAt") VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)`, ["product-b", "store-b", "Cake B", "chocolate-cake"]);
 
-    await expect(integration.database.client.product.create({
-      data: { storeId: "store-a", title: "Duplicate", slug: "chocolate-cake" },
-    })).rejects.toBeTruthy();
+    await expect(integration.query(`INSERT INTO "Product" ("id", "storeId", "title", "slug", "updatedAt") VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)`, ["product-duplicate", "store-a", "Duplicate", "chocolate-cake"])).rejects.toBeTruthy();
   });
 
   it("rejects cross-store product media references", async () => {
     await seedStore(integration, "store-a", "store-a");
     await seedStore(integration, "store-b", "store-b");
-    await integration.database.client.product.create({
-      data: { id: "product-a", storeId: "store-a", title: "Cake", slug: "cake" },
-    });
-    await integration.database.client.media.create({
-      data: {
-        id: "media-b",
-        storeId: "store-b",
-        type: "image",
-        storageKey: "store-b/media-b.png",
-        url: "/api/public/media/store-b/media-b",
-        mimeType: "image/png",
-        byteSize: 64,
-        width: 1,
-        height: 1,
-        originalName: "cake.png",
-      },
-    });
+    await integration.query(`INSERT INTO "Product" ("id", "storeId", "title", "slug", "updatedAt") VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)`, ["product-a", "store-a", "Cake", "cake"]);
+    await integration.query(`INSERT INTO "Media" ("id", "storeId", "type", "storageKey", "url", "mimeType", "byteSize", "width", "height", "originalName") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, ["media-b", "store-b", "image", "store-b/media-b.png", "/api/public/media/store-b/media-b", "image/png", 64, 1, 1, "cake.png"]);
 
-    await expect(integration.database.client.productMedia.create({
-      data: { storeId: "store-a", productId: "product-a", mediaId: "media-b" },
-    })).rejects.toBeTruthy();
+    await expect(integration.query(`INSERT INTO "ProductMedia" ("storeId", "productId", "mediaId") VALUES ($1, $2, $3)`, ["store-a", "product-a", "media-b"])).rejects.toBeTruthy();
   });
 
   it("rejects cross-store collection membership", async () => {
     await seedStore(integration, "store-a", "store-a");
     await seedStore(integration, "store-b", "store-b");
-    await integration.database.client.collection.create({
-      data: { id: "collection-a", storeId: "store-a", title: "Featured", slug: "featured" },
-    });
-    await integration.database.client.product.create({
-      data: { id: "product-b", storeId: "store-b", title: "Cake", slug: "cake" },
-    });
+    await integration.query(`INSERT INTO "Collection" ("id", "storeId", "title", "slug", "updatedAt") VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)`, ["collection-a", "store-a", "Featured", "featured"]);
+    await integration.query(`INSERT INTO "Product" ("id", "storeId", "title", "slug", "updatedAt") VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)`, ["product-b", "store-b", "Cake", "cake"]);
 
-    await expect(integration.database.client.collectionProduct.create({
-      data: { storeId: "store-a", collectionId: "collection-a", productId: "product-b" },
-    })).rejects.toBeTruthy();
+    await expect(integration.query(`INSERT INTO "CollectionProduct" ("storeId", "collectionId", "productId") VALUES ($1, $2, $3)`, ["store-a", "collection-a", "product-b"])).rejects.toBeTruthy();
   });
 });

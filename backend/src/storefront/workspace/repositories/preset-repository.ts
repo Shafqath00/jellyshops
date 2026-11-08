@@ -21,4 +21,6 @@ export interface PresetRepository {
   getPreset(storeId: string, id: string): Promise<SectionPresetRecord | null>;
   listPresets(storeId: string): Promise<SectionPresetRecord[]>;
   createPreset(transaction: WorkspaceTransaction, input: CreatePresetInput): Promise<SectionPresetRecord>;
+  /** Removes a saved section; false when it doesn't exist. Sections already added to pages are separate copies and stay. */
+  deletePreset(transaction: WorkspaceTransaction, storeId: string, id: string): Promise<boolean>;
 }

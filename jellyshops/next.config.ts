@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  distDir: process.env.JELLY_E2E_NEXT_DIST_DIR ?? ".next",
   transpilePackages: [
     "@jelly/storefront-schema",
     "@jelly/storefront-registry",
@@ -9,6 +10,18 @@ const nextConfig: NextConfig = {
     "@jelly/storefront-renderer"
   ],
   allowedDevOrigins: ["127.0.0.1"],
+  // Admin pages that moved in the 2026-11 navigation regroup keep working from old links.
+  async redirects() {
+    return [
+      { source: "/admin/products/stock", destination: "/admin/products/inventory", permanent: true },
+      { source: "/admin/online-store/navigation", destination: "/admin/content/menus", permanent: true },
+      { source: "/admin/engagement", destination: "/admin/customers/messages", permanent: true },
+      { source: "/admin/store", destination: "/admin/online-store/preferences", permanent: true },
+      { source: "/admin/settings/store-access", destination: "/admin/online-store/preferences", permanent: true },
+      { source: "/admin/products/builder", destination: "/admin/products/new", permanent: true },
+      { source: "/admin/products/builder/:id", destination: "/admin/products/:id", permanent: true },
+    ];
+  },
   turbopack: {
     root: process.cwd()
   },

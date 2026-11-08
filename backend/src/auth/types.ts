@@ -1,7 +1,7 @@
 import type { StoreRole } from "../tenants/types.js";
 
 export interface MerchantPrincipal {
-  userId: number;
+  userId: string;
   storeIds: string[];
   storeRoles: Record<string, StoreRole>;
 }
@@ -23,8 +23,14 @@ export type StorePermission =
   | "developer:build"
   | "developer:publish"
   | "team:manage"
-  | "settings:manage";
+  | "settings:manage"
+  | "payments:view"
+  | "payments:manage"
+  | "orders:view"
+  | "orders:manage"
+  | "orders:refund";
 
 export interface AuthProvider {
   verify(token: string): Promise<MerchantPrincipal>;
 }
+

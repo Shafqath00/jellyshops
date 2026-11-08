@@ -74,3 +74,16 @@ it("applies hero content, color, spacing, alignment, and uploaded image settings
   expect(hero).toHaveStyle({ backgroundColor: "#123456", paddingTop: "96px", textAlign: "center" });
   expect(image).toHaveStyle({ objectPosition: "20% 70%", objectFit: "cover" });
 });
+
+it("renders legacy hero media without focal point coordinates", () => {
+  const document = createDefaultStorefrontDocument("store-demo");
+  document.regions.template[0].settings.image = {
+    id: "legacy-media",
+    url: "/media/legacy-hero.webp",
+    alt: "Legacy collection",
+  } as never;
+
+  render(<StorefrontRenderer document={document} mode="editor" commerce={commerce} />);
+
+  expect(screen.getByRole("img", { name: "Legacy collection" })).toHaveStyle({ objectPosition: "50% 50%", objectFit: "cover" });
+});

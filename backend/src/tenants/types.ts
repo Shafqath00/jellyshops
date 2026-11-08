@@ -16,7 +16,7 @@ export interface StoreSummary {
 }
 
 export interface MerchantAccount {
-  id: number;
+  id: string;
   stores: StoreSummary[];
 }
 

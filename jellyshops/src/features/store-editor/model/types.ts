@@ -3,8 +3,10 @@ import type { RegionName } from "@jelly/storefront-registry";
 
 export type EditorSelection =
   | { kind: "theme" }
-  | { kind: "section"; region: RegionName; sectionId: string }
-  | { kind: "block"; region: RegionName; sectionId: string; blockId: string; fieldKey?: string; focusRequestId?: number }
+  /** With `elementId`: one part of the section drawn from its settings (a heading, an image, the product cards; section-elements.ts). */
+  | { kind: "section"; region: RegionName; sectionId: string; elementId?: string; elementIndex?: number }
+  /** With `elementId`: one part of the block (a column's heading, a collection card's image). */
+  | { kind: "block"; region: RegionName; sectionId: string; blockId: string; fieldKey?: string; focusRequestId?: number; elementId?: string; elementIndex?: number }
   | null;
 
 export type EditorCommand =

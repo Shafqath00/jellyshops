@@ -7,9 +7,18 @@ it("validates a complete default Store Design document", () => {
   expect(result.success, result.success ? undefined : JSON.stringify(result.error.issues)).toBe(true);
 });
 
-it("rejects an unsupported theme", () => {
+it("validates Fresh Market with every public ecommerce page", () => {
+  const result = storeDesignDocumentSchema.safeParse(createDefaultStoreDesign("fresh-market" as never));
+
+  expect(result.success, result.success ? undefined : JSON.stringify(result.error.issues)).toBe(true);
+  if (result.success) {
+    expect(Object.keys(result.data.pages)).toEqual(["home", "product", "collection", "cart", "search", "not-found"]);
+  }
+});
+
+it("rejects a malformed theme identifier; availability is checked by the manifest registry", () => {
   const document = createDefaultStoreDesign() as { theme: { id: string } };
-  document.theme.id = "neon";
+  document.theme.id = "Neon!";
 
   expect(storeDesignDocumentSchema.safeParse(document).success).toBe(false);
 });

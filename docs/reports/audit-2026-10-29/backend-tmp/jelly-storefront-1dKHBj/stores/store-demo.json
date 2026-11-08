@@ -1,0 +1,19 @@
+{
+  "storeId": "store-demo",
+  "publications": [],
+  "draft": {
+    "storeId": "store-demo",
+    "revision": 1,
+    "document": {
+      "schemaVersion": 2,
+      "storeId": "store-demo",
+      "template": "home",
+      "regions": {
+        "header": [],
+        "template": [],
+        "footer": []
+      }
+    },
+    "updatedAt": "2026-10-29T18:03:47.722Z"
+  }
+}

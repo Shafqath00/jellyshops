@@ -3,9 +3,10 @@ import { createDefaultStoreDesign, createDefaultStorefrontDocument } from "@jell
 import { storefrontDocumentValidator } from "./document-validator.js";
 
 describe("shared storefront validator", () => {
-  it("accepts V1 documents through migration", () => {
+  it("migrates legacy documents into the current V3 shape", () => {
     const parsed = storefrontDocumentValidator.parse(createDefaultStoreDesign(), "store-demo");
-    expect(parsed).toMatchObject({ schemaVersion: 2, storeId: "store-demo", template: "home" });
+    expect(parsed).toMatchObject({ schemaVersion: 3, storeId: "store-demo" });
+    expect(parsed.pages).toEqual(expect.arrayContaining([expect.objectContaining({ type: "home", slug: "/" })]));
   });
 
   it("returns schema issue paths for invalid media", () => {

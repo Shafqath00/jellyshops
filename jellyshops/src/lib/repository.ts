@@ -1,9 +1,9 @@
 import { migrateStoreDesignDocument, type StoreDesignDocument } from "@jelly/storefront-schema";
 import { validateSectionAgainstRegistry } from "@jelly/storefront-registry";
-import type { Cart, Customer, CustomerInput, Order, OrderStatus, Product, ProductVariant, ShopState, Store, StoreDesignPublication, StoreDesignRecord } from "./domain";
-import { canTransitionOrder, slugify } from "./domain";
-import { mockPayments, type PaymentProvider } from "./providers";
-import { createSeedState } from "./seed";
+import type { Brand, Cart, Category, CategoryOptionDefinition, Collection, ConfiguredOptionSelection, Customer, Order, Product, ProductOption, ProductOptionValue, ProductVariant, ShopState, Store, StoreDesignPublication, StoreDesignRecord } from "./domain";
+import { majorToMinor, slugify } from "./domain";
+import { createCartConfigurationKey } from "./product-configuration";
+import { createRuntimeState, createSeedState } from "./seed";
 
 const STORAGE_KEY = "jelly-shop-state-v1";
 
@@ -11,11 +11,6 @@ export interface StorageLike {
   getItem(key: string): string | null;
   setItem(key: string, value: string): void;
   removeItem(key: string): void;
-}
-
-export interface CheckoutInput {
-  cartId: string;
-  customer: CustomerInput;
 }
 
 export interface SaveStoreDesignDraftInput { storeId: string; expectedRevision: number; document: StoreDesignDocument }
@@ -33,19 +28,31 @@ export interface ShopRepository {
   publishStoreDesign(storeId: string, expectedRevision: number): PublishStoreDesignResult;
   getPublishedStoreDesign(storeId: string): StoreDesignPublication | undefined;
   listProducts(storeSlug?: string): Product[];
+  replaceCatalog(storeId: string, products: Product[]): void;
   getProduct(id: string): Product | undefined;
   getProductBySlug(storeId: string, slug: string): Product | undefined;
   getVariant(id: string): ProductVariant | undefined;
   saveProduct(product: Product): Product;
+  getCategories(storeId: string): Category[];
+  createCategory(input: Omit<Category, "id" | "slug"> & { slug?: string }): Category;
+  getBrands(storeId: string): Brand[];
+  createBrand(input: Omit<Brand, "id" | "slug"> & { slug?: string }): Brand;
+  getCollections(storeId: string): Collection[];
+  createCollection(input: Omit<Collection, "id" | "slug"> & { slug?: string }): Collection;
+  replaceCollections(storeId: string, collections: Collection[]): void;
+  getCategoryOptionDefinitions(categoryId: string): CategoryOptionDefinition[];
+  createCategoryOptionDefinition(input: Omit<CategoryOptionDefinition, "id">): CategoryOptionDefinition;
+  updateCategoryOptionDefinition(id: string, patch: Partial<Omit<CategoryOptionDefinition, "id" | "storeId" | "categoryId">>): CategoryOptionDefinition;
+  deleteCategoryOptionDefinition(id: string): void;
+  getRecentCategoryIds(storeId: string): string[];
+  recordRecentCategory(storeId: string, categoryId: string): string[];
   archiveProduct(id: string): void;
   listOrders(storeId?: string): Order[];
   getOrder(id: string): Order | undefined;
   listCustomers(storeId?: string): Customer[];
   createCart(storeSlug: string): Cart;
   getCartForStore(storeSlug: string): Cart | undefined;
-  updateCartItem(cartId: string, variantId: string, quantity: number): Cart;
-  checkout(input: CheckoutInput): Promise<Order>;
-  transitionOrder(orderId: string, next: OrderStatus): Order;
+  updateCartItem(cartId: string, variantId: string, quantity: number, configurationSelections?: ConfiguredOptionSelection[], unitPriceMinor?: number): Cart;
   reset(): void;
 }
 
@@ -62,17 +69,67 @@ function clone<T>(value: T): T {
   return structuredClone(value);
 }
 
+function normalizeOptionValue(value: ProductOptionValue & { priceAdjustment?: number }): ProductOptionValue {
+  const legacy = value.priceAdjustment;
+  const priceAdjustmentMinor = Number.isFinite(value.priceAdjustmentMinor)
+    ? value.priceAdjustmentMinor
+    : legacy === undefined
+      ? 0
+      : majorToMinor(legacy);
+  const { priceAdjustment: _legacy, ...rest } = value;
+  return { ...rest, priceAdjustmentMinor: Number.isFinite(priceAdjustmentMinor) ? priceAdjustmentMinor : 0 };
+}
+
+function normalizeProduct(product: Product): Product {
+  return {
+    ...product,
+    variants: (product.variants ?? []).map((variant) => ({ ...variant })),
+    options: (product.options ?? []).map((option: ProductOption) => ({ ...option, values: (option.values ?? []).map((value) => normalizeOptionValue(value as ProductOptionValue & { priceAdjustment?: number })) })),
+    additionalCategoryIds: product.additionalCategoryIds ?? [],
+    collectionIds: product.collectionIds ?? [],
+  };
+}
+
+function normalizeMetadata(state: ShopState): ShopState {
+  const fallbackStoreId = state.activeStoreId || state.stores[0]?.id || "legacy-store";
+  const products = (state.products ?? []).map(normalizeProduct);
+  const storeForCategory = (category: { id: string; name: string; storeId?: string }): string => {
+    if (category.storeId) return category.storeId;
+    const referencing = products.filter((product) => product.primaryCategoryId === category.id || product.additionalCategoryIds?.includes(category.id));
+    if (referencing.length === 1) return referencing[0].storeId;
+    const named = products.filter((product) => product.category.trim().toLowerCase() === category.name.trim().toLowerCase());
+    return named.length === 1 ? named[0].storeId : fallbackStoreId;
+  };
+  const categories = (state.categories ?? []).map((category) => ({ ...category, storeId: storeForCategory(category), name: category.name.trim(), slug: slugify(category.slug || category.name) }));
+  const categoriesById = new Map(categories.map((category) => [category.id, category.storeId]));
+  const brands = (state.brands ?? []).map((brand) => ({ ...brand, storeId: brand.storeId || fallbackStoreId, name: brand.name.trim(), slug: slugify(brand.slug || brand.name) }));
+  const collections = (state.collections ?? []).map((collection) => ({ ...collection, storeId: collection.storeId || fallbackStoreId, name: collection.name.trim(), slug: slugify(collection.slug || collection.name) }));
+  const categoryOptionDefinitions = (state.categoryOptionDefinitions ?? []).map((definition) => ({
+    ...definition,
+    storeId: definition.storeId || categoriesById.get(definition.categoryId) || fallbackStoreId,
+  }));
+  return { ...state, products, categories, brands, collections, categoryOptionDefinitions };
+}
+
 function addMissingStoreDesigns(state: ShopState): ShopState {
   const existing = Array.isArray(state.storeDesigns) ? state.storeDesigns : [];
-  return {
+  // Stores synced from the API have no seed design; fall back to the first seed design instead of throwing and discarding the whole saved state (carts included).
+  const seedDesigns = createSeedState().storeDesigns;
+  state = normalizeMetadata({
     ...state,
+    categories: Array.isArray(state.categories) ? state.categories : [],
+    brands: Array.isArray(state.brands) ? state.brands : [],
+    collections: Array.isArray(state.collections) ? state.collections : [],
+    categoryOptionDefinitions: Array.isArray(state.categoryOptionDefinitions) ? state.categoryOptionDefinitions : [],
+    recentCategoryIdsByStore: state.recentCategoryIdsByStore ?? {},
     storeDesigns: state.stores.map((store) => existing.find((record) => record.storeId === store.id) ?? {
       storeId: store.id,
-      draftDocument: migrateStoreDesignDocument(createSeedState().storeDesigns.find((record) => record.storeId === store.id)!.draftDocument),
+      draftDocument: migrateStoreDesignDocument((seedDesigns.find((record) => record.storeId === store.id) ?? seedDesigns[0]).draftDocument),
       draftRevision: 1,
       publications: []
     })
-  };
+  });
+  return state;
 }
 
 function readState(storage: StorageLike): ShopState {
@@ -86,8 +143,9 @@ function readState(storage: StorageLike): ShopState {
   }
 }
 
-export function createRepository(storage: StorageLike, payments: PaymentProvider = mockPayments): ShopRepository {
+export function createRepository(storage: StorageLike, options: { runtime?: boolean } = {}): ShopRepository {
   let state = readState(storage);
+  if (options.runtime && !storage.getItem(STORAGE_KEY)) state = createRuntimeState();
   const listeners = new Set<() => void>();
 
   const commit = () => {
@@ -160,6 +218,13 @@ export function createRepository(storage: StorageLike, payments: PaymentProvider
       const store = storeForSlug(storeSlug);
       return store ? state.products.filter((product) => product.storeId === store.id) : [];
     },
+    replaceCatalog(storeId, products) {
+      state.products = [
+        ...state.products.filter((product) => product.storeId !== storeId),
+        ...products.map((product) => clone(product)),
+      ];
+      commit();
+    },
     getProduct: (id) => state.products.find((product) => product.id === id),
     getProductBySlug: (storeId, slug) => state.products.find((product) => product.storeId === storeId && product.slug === slug),
     getVariant: findVariant,
@@ -169,13 +234,89 @@ export function createRepository(storage: StorageLike, payments: PaymentProvider
         ...product,
         id,
         slug: slugify(product.slug || product.name),
-        variants: product.variants.map((variant, index) => ({ ...variant, id: variant.id || `${id}-variant-${index + 1}` }))
+        variants: (product.variants ?? []).map((variant, index) => ({ ...variant, id: variant.id || `${id}-variant-${index + 1}` })),
+        options: product.options ?? [],
+        additionalCategoryIds: product.additionalCategoryIds ?? [],
+        collectionIds: product.collectionIds ?? [],
       };
       const index = state.products.findIndex((item) => item.id === id);
       if (index >= 0) state.products[index] = normalized;
       else state.products.unshift(normalized);
       commit();
       return normalized;
+    },
+    getCategories: (storeId) => clone((state.categories ?? []).filter((category) => category.storeId === storeId)),
+    createCategory(input) {
+      const name = input.name.trim();
+      const slug = slugify(input.slug || name);
+      if (!name) throw new Error("CATEGORY_NAME_REQUIRED");
+      if ((state.categories ?? []).some((item) => item.storeId === input.storeId && item.parentId === input.parentId && (item.slug === slug || item.name.trim().toLowerCase() === name.toLowerCase()))) throw new Error("CATEGORY_DUPLICATE");
+      if (input.parentId && !(state.categories ?? []).some((item) => item.id === input.parentId && item.storeId === input.storeId)) throw new Error("CATEGORY_PARENT_NOT_FOUND");
+      const category: Category = { id: `category-${crypto.randomUUID()}`, storeId: input.storeId, name, slug, ...(input.parentId ? { parentId: input.parentId } : {}) };
+      state.categories.push(category); commit(); return clone(category);
+    },
+    getBrands: (storeId) => clone((state.brands ?? []).filter((brand) => brand.storeId === storeId)),
+    createBrand(input) {
+      const name = input.name.trim();
+      const slug = slugify(input.slug || name);
+      if (!name) throw new Error("BRAND_NAME_REQUIRED");
+      if ((state.brands ?? []).some((item) => item.storeId === input.storeId && (item.slug === slug || item.name.trim().toLowerCase() === name.toLowerCase()))) throw new Error("BRAND_DUPLICATE");
+      const brand: Brand = { ...input, id: `brand-${crypto.randomUUID()}`, name, slug };
+      state.brands.push(brand); commit(); return clone(brand);
+    },
+    getCollections: (storeId) => clone((state.collections ?? []).filter((collection) => collection.storeId === storeId)),
+    createCollection(input) {
+      const name = input.name.trim();
+      const slug = slugify(input.slug || name);
+      if (!name) throw new Error("COLLECTION_NAME_REQUIRED");
+      if ((state.collections ?? []).some((item) => item.storeId === input.storeId && (item.slug === slug || item.name.trim().toLowerCase() === name.toLowerCase()))) throw new Error("COLLECTION_DUPLICATE");
+      const collection: Collection = { id: `collection-${crypto.randomUUID()}`, storeId: input.storeId, name, slug,
+        ...(input.description ? { description: input.description } : {}),
+        ...(input.imageUrl ? { imageUrl: input.imageUrl } : {}),
+      };
+      state.collections.push(collection); commit(); return clone(collection);
+    },
+    replaceCollections(storeId, collections) {
+      const existing = new Map((state.collections ?? []).filter((item) => item.storeId === storeId).map((item) => [item.id, item]));
+      state.collections = [
+        ...(state.collections ?? []).filter((item) => item.storeId !== storeId),
+        ...collections.filter((item) => item.storeId === storeId).map((item) => {
+          const legacyImage = existing.get(item.id)?.imageUrl;
+          return { ...clone(item), ...(legacyImage && !item.imageUrl ? { imageUrl: legacyImage } : {}) };
+        }),
+      ];
+      commit();
+    },
+    getCategoryOptionDefinitions: (categoryId) => {
+      const category = state.categories.find((item) => item.id === categoryId);
+      return clone((state.categoryOptionDefinitions ?? []).filter((item) => item.categoryId === categoryId && (!category || item.storeId === category.storeId)));
+    },
+    createCategoryOptionDefinition(input) {
+      const category = state.categories.find((item) => item.id === input.categoryId);
+      if (!category || category.storeId !== input.storeId) throw new Error("CATEGORY_NOT_FOUND");
+      const definition: CategoryOptionDefinition = { ...input, id: `category-option-${crypto.randomUUID()}` };
+      state.categoryOptionDefinitions.push(definition); commit(); return clone(definition);
+    },
+    updateCategoryOptionDefinition(id, patch) {
+      const index = state.categoryOptionDefinitions.findIndex((item) => item.id === id);
+      if (index < 0) throw new Error("CATEGORY_OPTION_DEFINITION_NOT_FOUND");
+      state.categoryOptionDefinitions[index] = { ...state.categoryOptionDefinitions[index], ...patch };
+      commit(); return clone(state.categoryOptionDefinitions[index]);
+    },
+    deleteCategoryOptionDefinition(id) {
+      const before = state.categoryOptionDefinitions.length;
+      state.categoryOptionDefinitions = state.categoryOptionDefinitions.filter((item) => item.id !== id);
+      if (state.categoryOptionDefinitions.length === before) throw new Error("CATEGORY_OPTION_DEFINITION_NOT_FOUND");
+      commit();
+    },
+    getRecentCategoryIds: (storeId) => [...(state.recentCategoryIdsByStore?.[storeId] ?? [])],
+    recordRecentCategory(storeId, categoryId) {
+      if (!state.categories.some((category) => category.id === categoryId && category.storeId === storeId)) return [];
+      const existing = state.recentCategoryIdsByStore?.[storeId] ?? [];
+      const ids = [categoryId, ...existing.filter((id) => id !== categoryId)].slice(0, 5);
+      state.recentCategoryIdsByStore = { ...(state.recentCategoryIdsByStore ?? {}), [storeId]: ids };
+      commit();
+      return [...ids];
     },
     archiveProduct(id) {
       const product = state.products.find((item) => item.id === id);
@@ -206,82 +347,17 @@ export function createRepository(storage: StorageLike, payments: PaymentProvider
       const store = storeForSlug(storeSlug);
       return store ? state.carts.find((cart) => cart.storeId === store.id) : undefined;
     },
-    updateCartItem(cartId, variantId, quantity) {
+    updateCartItem(cartId, variantId, quantity, configurationSelections = [], unitPriceMinor) {
       const cart = state.carts.find((item) => item.id === cartId);
       if (!cart) throw new Error("CART_NOT_FOUND");
       if (!findVariant(variantId)) throw new Error("VARIANT_NOT_FOUND");
-      const existing = cart.items.find((item) => item.variantId === variantId);
-      if (quantity <= 0) cart.items = cart.items.filter((item) => item.variantId !== variantId);
+      const lineKey = createCartConfigurationKey(variantId, configurationSelections);
+      const existing = cart.items.find((item) => createCartConfigurationKey(item.variantId, item.configurationSelections) === lineKey);
+      if (quantity <= 0) cart.items = cart.items.filter((item) => createCartConfigurationKey(item.variantId, item.configurationSelections) !== lineKey);
       else if (existing) existing.quantity = quantity;
-      else cart.items.push({ variantId, quantity });
+      else cart.items.push({ variantId, quantity, ...(configurationSelections.length ? { configurationSelections } : {}), ...(unitPriceMinor !== undefined ? { unitPriceMinor } : {}) });
       commit();
       return cart;
-    },
-    async checkout({ cartId, customer: input }) {
-      const cart = state.carts.find((item) => item.id === cartId);
-      if (!cart || cart.items.length === 0) throw new Error("CART_EMPTY");
-      const store = state.stores.find((item) => item.id === cart.storeId);
-      if (!store?.published) throw new Error("STORE_UNAVAILABLE");
-
-      const items = cart.items.map((cartItem) => {
-        const product = state.products.find((entry) => entry.storeId === store.id && entry.variants.some((variant) => variant.id === cartItem.variantId));
-        const variant = product?.variants.find((entry) => entry.id === cartItem.variantId);
-        if (!product || !variant || product.archived || !product.published) throw new Error("PRODUCT_UNAVAILABLE");
-        if (variant.stock < cartItem.quantity) throw new Error("OUT_OF_STOCK");
-        return {
-          productId: product.id, variantId: variant.id, productName: product.name, variantName: variant.name,
-          sku: variant.sku, imageUrl: product.imageUrl, unitPriceMinor: variant.priceMinor, quantity: cartItem.quantity
-        };
-      });
-
-      const subtotalMinor = items.reduce((sum, item) => sum + item.unitPriceMinor * item.quantity, 0);
-      const totalMinor = subtotalMinor + store.shippingMinor;
-      const payment = await payments.confirm({ amount: totalMinor, currency: store.currency });
-      let customer = state.customers.find((entry) => entry.storeId === store.id && entry.email.toLowerCase() === input.email.toLowerCase());
-      if (customer) Object.assign(customer, input);
-      else {
-        customer = { ...input, id: `customer-${crypto.randomUUID()}`, storeId: store.id, createdAt: new Date().toISOString() };
-        state.customers.unshift(customer);
-      }
-
-      items.forEach((item) => {
-        const variant = findVariant(item.variantId)!;
-        variant.stock -= item.quantity;
-      });
-
-      const order: Order = {
-        id: `order-${crypto.randomUUID()}`,
-        number: `JS-${1041 + state.orders.length + 1}`,
-        storeId: store.id,
-        customerId: customer.id,
-        customerSnapshot: clone(input),
-        items,
-        subtotalMinor,
-        shippingMinor: store.shippingMinor,
-        totalMinor,
-        currency: store.currency,
-        status: "PENDING",
-        paymentStatus: payment.status,
-        paymentId: payment.id,
-        inventoryRestored: false,
-        createdAt: new Date().toISOString()
-      };
-      state.orders.unshift(order);
-      cart.items = [];
-      commit();
-      return order;
-    },
-    transitionOrder(orderId, next) {
-      const order = state.orders.find((entry) => entry.id === orderId);
-      if (!order) throw new Error("ORDER_NOT_FOUND");
-      if (!canTransitionOrder(order.status, next)) throw new Error("INVALID_ORDER_TRANSITION");
-      if (next === "CANCELLED" && !order.inventoryRestored) {
-        order.items.forEach((item) => { const variant = findVariant(item.variantId); if (variant) variant.stock += item.quantity; });
-        order.inventoryRestored = true;
-      }
-      order.status = next;
-      commit();
-      return order;
     },
     reset() {
       state = createSeedState();

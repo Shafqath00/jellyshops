@@ -1,6 +1,8 @@
-export type ThemeId = "minimal" | "classic" | "bold" | "elegant" | "playful";
+/** Theme IDs are validated by the canonical manifest registry at runtime. */
+export type ThemeId = string;
 
-export type PageType = "home" | "product" | "collection";
+export const storefrontPageTypes = ["home", "product", "collection", "cart", "search", "page", "blog", "article", "not-found", "checkout", "wishlist", "customer-login", "customer-register", "customer-recovery", "customer-account", "customer-orders", "customer-order", "customer-addresses", "order-success"] as const;
+export type PageType = typeof storefrontPageTypes[number];
 
 export interface GlobalSettings {
   colors: { primary: string; background: string; text: string; surface: string; accent: string };
@@ -12,6 +14,8 @@ export interface GlobalSettings {
 
 export interface ResponsiveSettings {
   mobile?: Record<string, unknown>;
+  /** Screens from 768px to 1023px wide; empty values follow the desktop value. */
+  tablet?: Record<string, unknown>;
 }
 
 export interface BlockNode {
@@ -20,6 +24,8 @@ export interface BlockNode {
   enabled: boolean;
   settings: Record<string, unknown>;
   responsive?: ResponsiveSettings;
+  /** Child blocks, for blocks that hold others (e.g. a group). */
+  blocks?: BlockNode[];
 }
 
 export interface SectionNode {
@@ -42,6 +48,13 @@ export interface StoreDesignDocument {
   theme: { id: ThemeId; settings: Record<string, unknown> };
   globalSettings: GlobalSettings;
   header: SectionNode;
-  pages: { home: PageDocument; product: PageDocument; collection: PageDocument };
+  pages: {
+    home: PageDocument;
+    product: PageDocument;
+    collection: PageDocument;
+    cart: PageDocument;
+    search: PageDocument;
+    "not-found": PageDocument;
+  };
   footer: SectionNode;
 }

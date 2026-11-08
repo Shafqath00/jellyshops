@@ -3,6 +3,7 @@ export interface PutMediaInput {
   mediaId: string;
   extension: string;
   contents: Buffer;
+  mimeType?: string;
 }
 
 export interface MediaStorage {

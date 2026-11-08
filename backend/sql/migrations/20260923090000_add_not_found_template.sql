@@ -1,0 +1,1 @@
+ALTER TYPE "StorefrontTemplateType" ADD VALUE IF NOT EXISTS 'NOT_FOUND';

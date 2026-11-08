@@ -9,7 +9,7 @@ import { createMerchantRouter } from "./routes.js";
 function setup() {
   const auth: AuthProvider = {
     verify: vi.fn().mockResolvedValue({
-      merchantId: "42",
+      userId: "user-42",
       storeIds: [],
       storeRoles: {},
     }),
@@ -42,10 +42,10 @@ describe("merchant routes", () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({
-      merchantId: "42",
+      merchantId: "user-42",
       stores: [{ id: "store-a", name: "A", slug: "a-store", currency: "USD", country: "US", role: "OWNER" }],
     });
-    expect(tenants.listStores).toHaveBeenCalledWith(42);
+    expect(tenants.listStores).toHaveBeenCalledWith("user-42");
   });
 
   it("lists stores through the same authenticated merchant", async () => {
@@ -55,7 +55,7 @@ describe("merchant routes", () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ stores: [] });
-    expect(tenants.listStores).toHaveBeenCalledWith(42);
+    expect(tenants.listStores).toHaveBeenCalledWith("user-42");
   });
 
   it("creates a native owner store from a strict validated request", async () => {
@@ -78,12 +78,22 @@ describe("merchant routes", () => {
 
     expect(response.status).toBe(201);
     expect(response.body.store).toMatchObject({ id: "store-new", role: "OWNER" });
-    expect(tenants.createStore).toHaveBeenCalledWith(42, {
+    expect(tenants.createStore).toHaveBeenCalledWith("user-42", {
       name: "Jelly Goods",
       slug: "jelly-goods",
       currency: "USD",
       country: "US",
     });
+  });
+
+  it("refuses a store address the storefront uses for its own pages", async () => {
+    const { app, tenants, authed } = setup();
+    for (const slug of ["themes", "admin", "theme-preview"]) {
+      const response = await request(app).post("/api/stores").set(authed()).send({ name: "Shop", slug, currency: "USD", country: "US" });
+      expect(response.status, slug).toBe(400);
+      expect(JSON.stringify(response.body)).toContain("used by Jelly Shops itself");
+    }
+    expect(tenants.createStore).not.toHaveBeenCalled();
   });
 
   it("rejects malformed and extra store fields without calling persistence", async () => {
@@ -105,12 +115,24 @@ describe("merchant routes", () => {
 
   it("rejects an invalid principal identifier before tenant access", async () => {
     const { app, auth, tenants, authed } = setup();
-    vi.mocked(auth.verify).mockResolvedValue({ merchantId: "0", storeIds: [], storeRoles: {} });
+    vi.mocked(auth.verify).mockResolvedValue({ userId: "", storeIds: [], storeRoles: {} });
 
     const response = await request(app).get("/api/stores").set(authed());
 
     expect(response.status).toBe(500);
     expect(response.body.error.code).toBe("PRINCIPAL_INVALID");
     expect(tenants.listStores).not.toHaveBeenCalled();
+  });
+});
+
+describe("reserved store addresses", () => {
+  it("cover every top-level page folder of the storefront app", async () => {
+    const { readdirSync, existsSync } = await import("node:fs");
+    const { resolve } = await import("node:path");
+    const { RESERVED_STORE_SLUGS } = await import("./routes.js");
+    const appDirectory = resolve(process.cwd(), "../jellyshops/src/app");
+    if (!existsSync(appDirectory)) return;
+    const folders = readdirSync(appDirectory, { withFileTypes: true }).filter((entry) => entry.isDirectory() && !entry.name.startsWith("[") && !entry.name.startsWith("(")).map((entry) => entry.name);
+    expect([...RESERVED_STORE_SLUGS].sort()).toEqual(expect.arrayContaining(folders.sort()));
   });
 });

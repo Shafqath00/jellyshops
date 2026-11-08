@@ -17,7 +17,6 @@ const child = spawn(process.execPath, ["index.js"], {
     NODE_ENV: "test",
     PORT: String(port),
     AUTH_PROVIDER: "development",
-    REPOSITORY_PROVIDER: "local-json",
     MEDIA_PROVIDER: "local-files",
   },
   stdio: ["ignore", "pipe", "pipe"],

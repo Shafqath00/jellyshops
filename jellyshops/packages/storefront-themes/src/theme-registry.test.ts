@@ -2,13 +2,48 @@ import { expect, it } from "vitest";
 import { createDefaultStoreDesign } from "@jelly/storefront-schema";
 import { listSectionDefinitions } from "@jelly/storefront-registry";
 import { applyThemePreset, getThemeDefinition, listThemes, resolveDesignTokens } from "./index";
+import { validateThemeManifest, resolveTheme } from "./theme-resolver";
 
-it("registers the five Store Editor themes", () => {
-  expect(listThemes().map((theme) => theme.id)).toEqual(["minimal", "classic", "bold", "elegant", "playful"]);
+it.each(["fresh-market", "artisan-boutique", "classic"])("exposes working color and font controls for %s", (id) => {
+  const manifest = validateThemeManifest(getThemeDefinition(id).manifest);
+  expect(manifest.settingsSchema).toEqual(expect.arrayContaining([
+    expect.objectContaining({ id: "colors.accent", type: "color" }),
+    expect.objectContaining({ id: "typography.headingFont", type: "font" }),
+  ]));
+  expect(resolveTheme(id).settings).toMatchObject({ colors: getThemeDefinition(id).tokens.colors });
 });
 
-it("gives every theme a variant for each registered section", () => {
-  const sectionTypes = listSectionDefinitions().map((section) => section.type);
+it("registers every Store Editor theme", () => {
+  expect(listThemes().map((theme) => theme.id)).toEqual([
+    "jelly-signature", "jelly-avenue", "minimal", "classic", "bold", "elegant", "playful", "fresh-market", "artisan-boutique", "example-boutique",
+    // Found in src/themes/ (declarative themes; Harbour is generated from docs/theme-briefs/jelly-harbour.json).
+    "jelly-forma", "jelly-harbour", "jelly-resthaven",
+  ]);
+});
+
+it.each(["fresh-market", "artisan-boutique"] as const)("resolves complete ecommerce tokens for %s", (id) => {
+  const tokens = resolveDesignTokens(id, createDefaultStoreDesign(id).globalSettings);
+
+  expect(tokens).toMatchObject({
+    "--jelly-color-primary": expect.any(String),
+    "--jelly-font-display": expect.any(String),
+    "--jelly-radius-card": expect.any(String),
+  });
+});
+
+it("preserves Artisan Boutique's approved visual identity", () => {
+  expect(getThemeDefinition("artisan-boutique").tokens).toEqual({
+    colors: { primary: "#201a1d", background: "#f7f3ed", text: "#201a1d", surface: "#fffdf9", accent: "#7c2d4f" },
+    typography: { display: "Georgia", body: "Inter" },
+    radii: { button: "8px", card: "4px" },
+    spacing: { section: "104px", container: "76rem" },
+    cardShadow: "0 12px 30px rgba(32, 26, 29, 0.08)",
+  });
+});
+
+it("gives every theme a variant for each core section", () => {
+  // Sections a theme adds itself (vendor/name, limited to that theme) are not core sections.
+  const sectionTypes = listSectionDefinitions().map((section) => section.type).filter((type) => !type.includes("/"));
 
   for (const theme of listThemes()) {
     expect(Object.keys(theme.sectionVariants)).toEqual(expect.arrayContaining(sectionTypes));
@@ -65,4 +100,14 @@ it("can preserve overrides or reset colors when applying a preset", () => {
     getThemeDefinition("bold").tokens.colors.background,
   );
   expect(current.colors.background).toBe("#123456");
+});
+
+it("applies the old globals.css storefront rules only to themes that use them", async () => {
+  const { legacyStylesAttribute, usesLegacyStorefrontStyles } = await import("./index");
+  // Built-in themes, a folder theme that opts in, and a theme built on a base design follow their data.
+  for (const id of ["minimal", "classic", "fresh-market", "jelly-signature", "jelly-avenue", "jelly-resthaven", "jelly-harbour"]) expect(usesLegacyStorefrontStyles(id), id).toBe(true);
+  // Folder themes without the flag (and so every new or uploaded theme) start from storefront-base.css alone.
+  expect(usesLegacyStorefrontStyles("jelly-forma")).toBe(false);
+  expect(legacyStylesAttribute("jelly-forma")).toBe("off");
+  expect(legacyStylesAttribute("jelly-signature")).toBeUndefined();
 });

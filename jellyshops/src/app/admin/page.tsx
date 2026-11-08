@@ -1,374 +1,100 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowUpRight,
-  Boxes,
-  CircleDollarSign,
-  PackageCheck,
-  Plus,
-  TriangleAlert,
-} from "lucide-react";
-import { useShop } from "@/contexts/shop-context";
-import { formatMoney } from "@/lib/domain";
-import { OrderStatusBadge } from "@/components/order-status";
+import { Boxes, CheckCircle2, Circle, PackageCheck } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { AdminPage, Banner, Card, CardSkeleton, EmptyState, StatusBadge } from "@/components/admin";
+import { authApiOrigin, useAuth } from "@/features/auth/providers/auth-provider";
+import { createAdminApi, type SalesFigures, type SalesPeriod } from "@/features/admin/api/admin-api";
+import { useAdminQuery } from "@/features/admin/hooks/use-admin-query";
+import { SalesChart } from "@/features/admin/home/sales-chart";
+import { changeText } from "@/features/admin/home/change-text";
+
+const PERIODS: Array<{ days: SalesPeriod; label: string; previous: string }> = [
+  { days: 1, label: "Last 24 hours", previous: "the 24 hours before" },
+  { days: 7, label: "Last 7 days", previous: "the 7 days before" },
+  { days: 30, label: "Last 30 days", previous: "the 30 days before" },
+  { days: 90, label: "Last 90 days", previous: "the 90 days before" },
+];
+
+function customerName(snapshot?: Record<string, unknown> | null) {
+  const name = snapshot?.name;
+  return typeof name === "string" && name.trim() ? name.trim() : "Customer";
+}
+
+function Metric({ label, value, hint }: { label: string; value: string; hint: string }) {
+  return <div className="jk-metric"><span className="jk-muted">{label}</span><strong>{value}</strong><span className="jk-metric-hint">{hint}</span></div>;
+}
 
 export default function DashboardPage() {
-  const { state, repository } = useShop();
+  const { session, activeStore } = useAuth();
+  const [days, setDays] = useState<SalesPeriod>(30);
+  const api = useMemo(() => session ? createAdminApi({ baseUrl: authApiOrigin(), token: session.access_token }) : null, [session]);
+  const loadSummary = useCallback(() => api!.getSummary(activeStore!.id), [api, activeStore]);
+  const loadSales = useCallback(() => api!.getSales(activeStore!.id, days), [api, activeStore, days]);
+  const summary = useAdminQuery(api && activeStore ? `summary:${activeStore.id}` : null, loadSummary);
+  const sales = useAdminQuery(api && activeStore ? `sales:${activeStore.id}:${days}` : null, loadSales);
+  if (!activeStore) return null;
+  const store = activeStore;
+  const money = (minor: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: store.currency }).format(minor / 100);
+  const period = PERIODS.find((item) => item.days === days) ?? PERIODS[2];
+  const data = summary.data;
+  const setup = data?.setup;
+  const steps = [
+    { label: "Add your store details", help: "Your store name and contact email.", href: "/admin/settings/general", done: setup?.details },
+    { label: "Add a product", help: "Make at least one product active so shoppers can buy it.", href: "/admin/products/new", done: setup?.products },
+    { label: "Publish your store design", help: "Choose a design and publish it.", href: "/admin/online-store", done: setup?.publication },
+    { label: "Set your delivery charge", help: "What customers pay for delivery.", href: "/admin/settings/shipping", done: setup?.shipping },
+    { label: "Turn on payments", help: "Connect Stripe so you can take card payments.", href: "/admin/payments", done: setup?.payments },
+  ];
+  const remaining = steps.filter((step) => !step.done);
+  const today = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: data?.timezone ?? "UTC" }).format(new Date());
+  const figures: SalesFigures | undefined = sales.data?.current;
+  const before: SalesFigures | undefined = sales.data?.previous;
 
-  const store = state.stores.find(
-    (item) => item.id === state.activeStoreId
-  )!;
+  return <AdminPage title="Home" description={<>{today}. How {store.name} is doing, and what needs you next.</>}
+    primaryAction={{ label: "Add product", href: "/admin/products/new" }} secondaryActions={[{ label: "View store", href: `/${store.slug}` }]}>
+    {summary.error && <Banner tone="critical" title="Some of your dashboard did not load" action={<button type="button" className="jk-button" onClick={summary.retry}>Try again</button>}>{summary.error.message}</Banner>}
 
-  const products = state.products.filter(
-    (product) => product.storeId === store.id && !product.archived
-  );
+    {data && (remaining.length ? <Card title={`Finish setting up your store · ${steps.length - remaining.length} of ${steps.length} done`} description="Do these once and your store is ready to take orders.">
+      <ol className="jk-steps">{steps.map((step) => <li key={step.label} className={step.done ? "is-done" : ""}>
+        {step.done ? <CheckCircle2 size={18} aria-hidden="true" className="jk-step-icon is-done" /> : <Circle size={18} aria-hidden="true" className="jk-step-icon" />}
+        <div className="min-w-0"><Link href={step.href} className="jk-strong">{step.label}</Link><span className="jk-cell-sub">{step.done ? "Done" : step.help}</span></div>
+      </li>)}</ol>
+    </Card> : <Banner tone="success" title="Your store is ready to take orders">Next ideas: <Link href="/admin/products/collections" className="jk-link">group products into collections</Link>, <Link href="/admin/content/blogs" className="jk-link">write a blog post</Link> or <Link href="/admin/settings/notifications" className="jk-link">check your order emails</Link>.</Banner>)}
 
-  const orders = repository.listOrders(store.id);
+    <Card title="Sales" description="Paid orders only. Cancelled orders are not counted." actions={<label><span className="sr-only">Sales period</span>
+      <select className="jk-select" value={days} onChange={(event) => setDays(Number(event.target.value) as SalesPeriod)}>{PERIODS.map((item) => <option key={item.days} value={item.days}>{item.label}</option>)}</select></label>}>
+      {sales.error ? <Banner tone="critical" action={<button type="button" className="jk-button" onClick={sales.retry}>Try again</button>}>{sales.error.message}</Banner> :
+        !figures || !before ? <div className="jk-metrics" role="status" aria-label="Loading sales">{[0, 1, 2].map((key) => <div key={key} className="jk-metric"><span className="jk-skeleton" style={{ width: "40%", height: 12 }} /><span className="jk-skeleton" style={{ width: "60%", height: 24 }} /></div>)}</div> : <>
+          <div className="jk-metrics">
+            <Metric label="Total sales" value={money(figures.revenueMinor)} hint={changeText(figures.revenueMinor, before.revenueMinor, period.previous)} />
+            <Metric label="Paid orders" value={String(figures.paidOrders)} hint={changeText(figures.paidOrders, before.paidOrders, period.previous)} />
+            <Metric label="Average order" value={figures.paidOrders ? money(figures.averageOrderMinor) : "None yet"} hint={figures.paidOrders ? changeText(figures.averageOrderMinor, before.averageOrderMinor, period.previous) : "Shown after your first paid order"} />
+          </div>
+          {days > 1 && sales.data && <SalesChart daily={sales.data.daily} money={money} label={`Sales per day, ${period.label.toLowerCase()}`} />}
+        </>}
+    </Card>
 
-  const needsAttention = orders.filter(
-    (order) => !["DELIVERED", "CANCELLED"].includes(order.status)
-  );
-
-  const revenue = orders
-    .filter(
-      (order) =>
-        order.paymentStatus === "PAID" &&
-        order.status !== "CANCELLED"
-    )
-    .reduce((sum, order) => sum + order.totalMinor, 0);
-
-  const lowStock = products.filter((product) =>
-    product.variants.some((variant) => variant.stock <= 3)
-  );
-
-  const publishedProducts = products.filter(
-    (product) => product.published
-  );
-
-  return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <header className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0">
-          <p className="mb-1 text-[12px] font-medium text-[#6d7175]">
-            Sunday, 30 August
-          </p>
-
-          <h1 className="text-[24px] font-semibold tracking-[-0.025em] text-[#202223] sm:text-[28px]">
-            Good evening, Maya.
-          </h1>
-
-          <p className="mt-1.5 max-w-xl text-[13px] leading-5 text-[#6d7175]">
-            Here&apos;s what&apos;s happening with{" "}
-            <span className="font-medium text-[#454f5b]">
-              {store.name}
-            </span>{" "}
-            today.
-          </p>
-        </div>
-
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
-          <Link
-            href={`/${store.slug}`}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-[#c9cccf] bg-white px-3.5 text-[13px] font-semibold text-[#303030] shadow-[0_1px_0_rgba(0,0,0,0.04)] transition hover:bg-[#f6f6f7]"
-          >
-            View store
-            <ArrowUpRight size={14} strokeWidth={1.8} />
+    <div className="jk-home-grid">
+      <Card title="Orders that need you" description="Paid or in progress, newest first." actions={<Link href="/admin/orders" className="jk-link">All orders</Link>} flush>
+        {!data ? <CardSkeleton label="Loading orders" /> : data.actionableOrders.length ? <ul className="jk-list">{data.actionableOrders.map((order) => <li key={order.id}>
+          <Link href={`/admin/orders/${order.id}`} className="jk-list-row">
+            <span className="min-w-0"><span className="jk-strong">{order.number}</span><span className="jk-cell-sub truncate">{customerName(order.customerSnapshot)}</span></span>
+            <StatusBadge kind="order" value={order.status} />
+            <strong className="tabular-nums">{money(order.totalMinor)}</strong>
           </Link>
-
-          <Link
-            href="/admin/products/new"
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-[#303030] px-3.5 text-[13px] font-semibold text-white shadow-[0_1px_0_rgba(0,0,0,0.15)] transition hover:bg-[#1f1f1f]"
-          >
-            <Plus size={15} strokeWidth={2} />
-            Add product
-          </Link>
-        </div>
-      </header>
-
-      {/* Store setup */}
-      <section className="rounded-xl border border-[#dfe3e8] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-        <div className="flex flex-col gap-5 p-5 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex min-w-0 items-start gap-3.5">
-            <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-[#eaf7f0]">
-              <span className="text-[13px] font-bold text-[#29845a]">
-                3/3
-              </span>
-            </div>
-
-            <div>
-              <div className="mb-1 flex flex-wrap items-center gap-2">
-                <h2 className="text-[14px] font-semibold text-[#303030]">
-                  Your storefront is ready
-                </h2>
-
-                <span className="rounded-full bg-[#eaf7f0] px-2 py-0.5 text-[10px] font-semibold text-[#237a50]">
-                  Ready
-                </span>
-              </div>
-
-              <p className="text-[12px] leading-5 text-[#6d7175]">
-                Products published, checkout enabled, and shipping
-                configured.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-x-5 gap-y-2 border-t border-[#eeeeee] pt-4 lg:border-0 lg:pt-0">
-            {["Store details", "Products", "Shipping"].map((item) => (
-              <div
-                key={item}
-                className="flex items-center gap-1.5 text-[11px] font-medium text-[#454f5b]"
-              >
-                <span className="grid size-4 place-items-center rounded-full bg-[#eaf7f0] text-[9px] font-bold text-[#29845a]">
-                  ✓
-                </span>
-
-                {item}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Metrics */}
-      <section className="grid gap-3 md:grid-cols-3">
-        <article className="rounded-xl border border-[#e3e3e3] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-[12px] font-medium text-[#6d7175]">
-                Total mock sales
-              </p>
-
-              <p className="mt-2 text-[24px] font-semibold tracking-[-0.025em] text-[#202223]">
-                {formatMoney(revenue, store.currency)}
-              </p>
-
-              <p className="mt-1 text-[11px] text-[#8c9196]">
-                Across {orders.length}{" "}
-                {orders.length === 1 ? "order" : "orders"}
-              </p>
-            </div>
-
-            <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#f1f1f1] text-[#5c5f62]">
-              <CircleDollarSign size={18} strokeWidth={1.7} />
-            </span>
-          </div>
-        </article>
-
-        <article className="rounded-xl border border-[#e3e3e3] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-[12px] font-medium text-[#6d7175]">
-                Needs attention
-              </p>
-
-              <p className="mt-2 text-[24px] font-semibold tracking-[-0.025em] text-[#202223]">
-                {needsAttention.length}
-              </p>
-
-              <p className="mt-1 text-[11px] text-[#8c9196]">
-                Orders to move forward
-              </p>
-            </div>
-
-            <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#f1f1f1] text-[#5c5f62]">
-              <PackageCheck size={18} strokeWidth={1.7} />
-            </span>
-          </div>
-        </article>
-
-        <article className="rounded-xl border border-[#e3e3e3] bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-[12px] font-medium text-[#6d7175]">
-                Live products
-              </p>
-
-              <p className="mt-2 text-[24px] font-semibold tracking-[-0.025em] text-[#202223]">
-                {publishedProducts.length}
-              </p>
-
-              <p className="mt-1 text-[11px] text-[#8c9196]">
-                {lowStock.length}{" "}
-                {lowStock.length === 1 ? "product" : "products"} running
-                low
-              </p>
-            </div>
-
-            <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#f1f1f1] text-[#5c5f62]">
-              <Boxes size={18} strokeWidth={1.7} />
-            </span>
-          </div>
-        </article>
-      </section>
-
-      {/* Dashboard lists */}
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(340px,0.75fr)]">
-        {/* Orders */}
-        <section className="overflow-hidden rounded-xl border border-[#e3e3e3] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          <div className="flex min-h-[64px] items-center justify-between gap-4 border-b border-[#eeeeee] px-5">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8c9196]">
-                Order queue
-              </p>
-
-              <h2 className="mt-0.5 text-[15px] font-semibold text-[#303030]">
-                What&apos;s moving
-              </h2>
-            </div>
-
-            <Link
-              href="/admin/orders"
-              className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#454f5b] hover:text-[#202223]"
-            >
-              View all
-              <ArrowUpRight size={13} />
-            </Link>
-          </div>
-
-          {needsAttention.length > 0 ? (
-            <div className="divide-y divide-[#eeeeee]">
-              {needsAttention.slice(0, 4).map((order) => (
-                <Link
-                  href={`/admin/orders/${order.id}`}
-                  key={order.id}
-                  className="group grid min-h-[68px] grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3 px-5 transition-colors hover:bg-[#fafafa] sm:grid-cols-[36px_minmax(0,1fr)_auto_auto]"
-                >
-                  <span className="grid size-9 place-items-center rounded-full bg-[#f1f1f1] text-[12px] font-semibold text-[#454f5b]">
-                    {order.customerSnapshot.name
-                      .slice(0, 1)
-                      .toUpperCase()}
-                  </span>
-
-                  <div className="min-w-0">
-                    <p className="truncate text-[13px] font-semibold text-[#303030]">
-                      {order.customerSnapshot.name}
-                    </p>
-
-                    <p className="mt-0.5 truncate text-[11px] text-[#8c9196]">
-                      {order.number} · {order.items.length}{" "}
-                      {order.items.length === 1 ? "item" : "items"}
-                    </p>
-                  </div>
-
-                  <div className="hidden sm:block">
-                    <OrderStatusBadge status={order.status} />
-                  </div>
-
-                  <strong className="text-right text-[12px] font-semibold text-[#303030]">
-                    {formatMoney(
-                      order.totalMinor,
-                      order.currency
-                    )}
-                  </strong>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <div className="grid min-h-[220px] place-items-center px-6 py-10 text-center">
-              <div>
-                <span className="mx-auto grid size-10 place-items-center rounded-full bg-[#f1f1f1] text-[#6d7175]">
-                  <PackageCheck size={18} />
-                </span>
-
-                <p className="mt-3 text-[13px] font-semibold text-[#303030]">
-                  No orders need attention
-                </p>
-
-                <p className="mt-1 text-[11px] text-[#8c9196]">
-                  New orders that need action will appear here.
-                </p>
-              </div>
-            </div>
-          )}
-        </section>
-
-        {/* Inventory */}
-        <section className="overflow-hidden rounded-xl border border-[#e3e3e3] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-          <div className="flex min-h-[64px] items-center justify-between gap-4 border-b border-[#eeeeee] px-5">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#8c9196]">
-                Inventory
-              </p>
-
-              <h2 className="mt-0.5 text-[15px] font-semibold text-[#303030]">
-                Running low
-              </h2>
-            </div>
-
-            <Link
-              href="/admin/products"
-              className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#454f5b] hover:text-[#202223]"
-            >
-              Catalog
-              <ArrowUpRight size={13} />
-            </Link>
-          </div>
-
-          {lowStock.length > 0 ? (
-            <div className="divide-y divide-[#eeeeee]">
-              {lowStock.slice(0, 5).map((product) => {
-                const variant =
-                  product.variants.find(
-                    (item) => item.stock <= 3
-                  ) ?? product.variants[0];
-
-                return (
-                  <Link
-                    href={`/admin/products/${product.id}`}
-                    key={product.id}
-                    className="group flex min-h-[68px] items-center gap-3 px-5 transition-colors hover:bg-[#fafafa]"
-                  >
-                    <span className="relative size-10 shrink-0 overflow-hidden rounded-lg border border-[#e3e3e3] bg-[#f7f7f7]">
-                      <Image
-                        src={product.imageUrl}
-                        alt=""
-                        fill
-                        sizes="40px"
-                        className="object-cover"
-                      />
-                    </span>
-
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[13px] font-semibold text-[#303030]">
-                        {product.name}
-                      </p>
-
-                      <p className="mt-0.5 truncate text-[11px] text-[#8c9196]">
-                        {variant?.sku ?? "No SKU"}
-                      </p>
-                    </div>
-
-                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#fff4e5] px-2 py-1 text-[10px] font-semibold text-[#8a6116]">
-                      <TriangleAlert size={11} strokeWidth={2} />
-                      {variant?.stock ?? 0} left
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="grid min-h-[220px] place-items-center px-6 py-10 text-center">
-              <div>
-                <span className="mx-auto grid size-10 place-items-center rounded-full bg-[#f1f1f1] text-[#6d7175]">
-                  <Boxes size={18} />
-                </span>
-
-                <p className="mt-3 text-[13px] font-semibold text-[#303030]">
-                  Inventory looks healthy
-                </p>
-
-                <p className="mt-1 text-[11px] text-[#8c9196]">
-                  Products with low stock will appear here.
-                </p>
-              </div>
-            </div>
-          )}
-        </section>
-      </div>
+        </li>)}</ul> : <EmptyState icon={PackageCheck} title="Nothing waiting" description="New paid orders show up here until they are delivered." />}
+      </Card>
+      <Card title="Running low" description="Active products at or below their low-stock warning." actions={<Link href="/admin/products/inventory" className="jk-link">Inventory</Link>} flush>
+        {!data ? <CardSkeleton label="Loading stock" /> : data.lowStock.length ? <ul className="jk-list">{data.lowStock.map((item) => {
+          const left = item.available ?? item.quantity;
+          return <li key={item.variantId}><Link href={`/admin/products/${item.productId}`} className="jk-list-row">
+            <span className="min-w-0"><span className="jk-strong">{item.title}</span>{(item.variantTitle || item.sku) && <span className="jk-cell-sub truncate">{[item.variantTitle, item.sku && `SKU ${item.sku}`].filter(Boolean).join(" · ")}</span>}</span>
+            <StatusBadge tone={left <= 0 ? "critical" : "warning"}>{left <= 0 ? "Out of stock" : `${left} left`}</StatusBadge>
+          </Link></li>;
+        })}</ul> : <EmptyState icon={Boxes} title="Stock looks healthy" description="Products that are nearly sold out show up here." />}
+      </Card>
     </div>
-  );
+  </AdminPage>;
 }

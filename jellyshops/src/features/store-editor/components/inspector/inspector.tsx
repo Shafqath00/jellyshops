@@ -22,27 +22,11 @@ import type {
   EditorCommand,
   EditorSelection,
 } from "../../model/types";
+import { blockLabel, sectionLabel } from "@jelly/storefront-registry";
 import { SettingGroups } from "./setting-groups";
 
-const sectionLabels: Record<string, string> = {
-  "announcement-bar": "Announcement bar",
-  header: "Header",
-  hero: "Hero",
-  "product-grid": "Product grid",
-  "featured-collection": "Featured collection",
-  "rich-text": "Rich text",
-  "image-with-text": "Image with text",
-  multicolumn: "Multicolumn",
-  newsletter: "Newsletter",
-  "spacer-divider": "Spacer / divider",
-  footer: "Footer",
-};
-
 function title(value: string): string {
-  return sectionLabels[value] ?? value
-    .split("-")
-    .map((word) => word[0]?.toUpperCase() + word.slice(1))
-    .join(" ");
+  return sectionLabel(value);
 }
 
 export function Inspector({
@@ -70,15 +54,13 @@ export function Inspector({
   const requestedFieldKey = selection.kind === "block" ? selection.fieldKey : undefined;
   const focusRequestId = selection.kind === "block" ? selection.focusRequestId : undefined;
 
-  if (!section) return null;
-
-  const sectionDefinition = getSectionDefinition(section.type);
+  const sectionDefinition = section ? getSectionDefinition(section.type) : undefined;
   const selectedBlock = selection.kind === "block"
-    ? section.blocks.find(({ id }) => id === selection.blockId)
+    ? section?.blocks.find(({ id }) => id === selection.blockId)
     : undefined;
   const blockDefinition = selectedBlock ? getBlockDefinition(selectedBlock.type) : undefined;
   const controls = selectedBlock ? blockDefinition?.controls ?? [] : sectionDefinition?.controls ?? [];
-  const settings = selectedBlock?.settings ?? section.settings;
+  const settings = selectedBlock?.settings ?? section?.settings ?? {};
 
   useEffect(() => {
     if (!selectedBlock || !requestedFieldKey) return;
@@ -90,6 +72,8 @@ export function Inspector({
       )
       ?.focus();
   }, [selectedBlock, requestedFieldKey, focusRequestId]);
+
+  if (!section) return null;
 
   const update = (key: string, value: unknown) => {
     if (selectedBlock) {
@@ -118,29 +102,29 @@ export function Inspector({
     : `${title(section.type)} settings`;
 
   return (
-    <aside className="flex h-full min-h-0 flex-col bg-white" aria-label="Section settings">
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-[#eeeeee] px-3">
+    <aside className="flex h-full min-h-0 flex-col bg-card" aria-label="Section settings">
+      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-3">
         <button
           type="button"
           aria-label="Back to page hierarchy"
           onClick={() => onSelect(null)}
-          className="grid size-8 shrink-0 place-items-center rounded-lg text-[#6d7175] transition hover:bg-[#f1f1f1] hover:text-[#202223]"
+          className="grid size-8 shrink-0 place-items-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
         >
           <ArrowLeft size={16} strokeWidth={1.8} />
         </button>
         <div className="min-w-0">
-          <p className="text-[10px] font-medium text-[#8c9196]">{selectedBlock ? title(section.type) : "Section"}</p>
-          <h1 className="mt-0.5 truncate text-[13px] font-semibold text-[#303030]">{heading}</h1>
+          <p className="text-[10px] font-medium text-muted-foreground">{selectedBlock ? title(section.type) : "Section"}</p>
+          <h1 className="mt-0.5 truncate text-[13px] font-semibold text-foreground">{heading}</h1>
         </div>
       </header>
 
       <div ref={bodyRef} className="min-h-0 flex-1 overflow-y-auto">
         {selectedBlock && (
-          <div className="border-b border-[#eeeeee] p-2">
+          <div className="border-b border-border p-2">
             <button
               type="button"
               onClick={() => onSelect({ kind: "section", region: selection.region, sectionId: section.id })}
-              className="flex h-9 w-full items-center gap-2 rounded-lg px-2 text-left text-[11px] font-medium text-[#616161] transition hover:bg-[#f6f6f7] hover:text-[#202223]"
+              className="flex h-9 w-full items-center gap-2 rounded-lg px-2 text-left text-[11px] font-medium text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
             >
               <ArrowLeft size={13} />
               {title(section.type)}
@@ -160,15 +144,15 @@ export function Inspector({
             />
           ) : (
             <div className="py-12 text-center">
-              <p className="text-[12px] font-medium text-[#616161]">No settings</p>
-              <p className="mx-auto mt-1 max-w-[220px] text-[11px] leading-5 text-[#9a9a9a]">This item doesn&apos;t have additional settings.</p>
+              <p className="text-[12px] font-medium text-muted-foreground">No settings</p>
+              <p className="mx-auto mt-1 max-w-[220px] text-[11px] leading-5 text-muted-foreground">This item doesn&apos;t have additional settings.</p>
             </div>
           )}
         </div>
 
         {!selectedBlock && section.blocks.length > 0 && (
-          <section className="border-t border-[#eeeeee] px-2 py-3">
-            <h2 className="px-2 pb-2 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#8c9196]">Content</h2>
+          <section className="border-t border-border px-2 py-3">
+            <h2 className="px-2 pb-2 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Content</h2>
             <div className="space-y-0.5">
               {section.blocks.map((block) => (
                 <button
@@ -180,10 +164,10 @@ export function Inspector({
                     sectionId: section.id,
                     blockId: block.id,
                   })}
-                  className="flex min-h-9 w-full items-center justify-between gap-3 rounded-lg px-2.5 text-left text-[12px] font-medium text-[#454f5b] transition hover:bg-[#f6f6f7] hover:text-[#202223]"
+                  className="flex min-h-9 w-full items-center justify-between gap-3 rounded-lg px-2.5 text-left text-[12px] font-medium text-muted-foreground transition hover:bg-muted/50 hover:text-foreground"
                 >
-                  <span className="truncate">{title(block.type)} block</span>
-                  <ChevronRight size={14} className="shrink-0 text-[#a3a3a3]" />
+                  <span className="truncate">{blockLabel(block.type)} block</span>
+                  <ChevronRight size={14} className="shrink-0 text-muted-foreground" />
                 </button>
               ))}
             </div>

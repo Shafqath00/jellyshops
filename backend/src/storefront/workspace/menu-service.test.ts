@@ -81,4 +81,17 @@ describe("MenuService", () => {
 
     expect(repository.resourceExists).not.toHaveBeenCalled();
   });
+
+  it("keeps links to a page of the store as paths and refuses unsafe ones", async () => {
+    const { service } = setup();
+    const { menu } = await service.createMenu("store-a", {
+      name: "Main",
+      handle: "main",
+      items: [{ id: "beds", label: "Divan beds", target: { kind: "external", url: "/search?q=Divan%20beds" }, children: [] }],
+    });
+    expect(menu.items[0]?.target).toEqual({ kind: "external", url: "/search?q=Divan%20beds" });
+    for (const url of ["//evil.example/x", "/pages/a b", "javascript:alert(1)"]) {
+      await expect(service.createMenu("store-a", { name: "Bad", handle: `bad-${url.length}`, items: [{ id: "x", label: "X", target: { kind: "external", url }, children: [] }] })).rejects.toThrow();
+    }
+  });
 });

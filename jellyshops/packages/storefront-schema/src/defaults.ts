@@ -28,7 +28,10 @@ export function createDefaultStoreDesign(themeId: ThemeId = "minimal"): StoreDes
     pages: {
       home: page("home", [section("hero", [block("heading", { text: "Welcome" }), block("text", { text: "Discover our collection." }), block("button", { label: "Shop now" })]), section("product-grid")]),
       product: page("product", [section("product-information")]),
-      collection: page("collection", [section("collection-product-grid")])
+      collection: page("collection", [section("collection-product-grid")]),
+      cart: page("cart", [section("cart-summary")]),
+      search: page("search", [section("search-results")]),
+      "not-found": page("not-found", [section("not-found-message", [block("heading", { text: "Page not found" }), block("button", { label: "Continue shopping", href: "/shop" })])])
     },
     footer: section("footer", [block("menu")])
   };

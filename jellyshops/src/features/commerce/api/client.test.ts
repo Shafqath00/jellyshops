@@ -1,0 +1,124 @@
+import { describe, expect, it, vi } from "vitest";
+import { createCommerceApi, createMerchantCommerceApi } from "./client";
+
+function jsonResponse(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "content-type": "application/json" },
+  });
+}
+
+describe("public catalog API client", () => {
+  it("loads public store details", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ store: { id: "store-demo", name: "Sweet Bakes", slug: "sweet-bakes", currency: "INR", country: "IN" } }));
+    const api = createCommerceApi({ baseUrl: "http://localhost:3001", fetch: fetchMock });
+    await expect(api.getPublicStore("store-demo")).resolves.toMatchObject({ store: { name: "Sweet Bakes", currency: "INR" } });
+  });
+
+  it("maps canonical backend products and variants", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({
+      nodes: [{ id: "p1", storeId: "store-demo", handle: "cake", title: "Cake", description: "Fresh", productType: "Cakes", tags: [], media: [{ id: "m1", url: "/cake.jpg", altText: "Cake", position: 0 }], variants: [{ id: "v1", title: "1 kg", sku: "CAKE-1", priceMinor: 1200, quantity: 4, available: true }], available: true }],
+      nextCursor: null,
+    }));
+    const api = createCommerceApi({ baseUrl: "http://localhost:3001", fetch: fetchMock });
+    await expect(api.getPublicCatalog("store-demo")).resolves.toEqual([
+      expect.objectContaining({ id: "p1", name: "Cake", variants: [expect.objectContaining({ id: "v1", name: "1 kg", priceMinor: 1200, stock: 4 })] }),
+    ]);
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:3001/api/public/stores/store-demo/catalog/products?limit=100", expect.anything());
+  });
+
+  it("maps authoritative Collection descriptions without inventing absent metadata", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ nodes: [
+      { id: "cakes", storeId: "store-a", externalId: null, handle: "cakes", title: "Cakes", description: "Baked today", productIds: [] },
+      { id: "plain", storeId: "store-a", externalId: null, handle: "plain", title: "Plain", description: "", productIds: [] },
+    ], nextCursor: null }));
+    const api = createCommerceApi({ baseUrl: "http://localhost:3001", fetch: fetchMock });
+
+    await expect(api.getPublicCollections("store-a")).resolves.toEqual([
+      { id: "cakes", storeId: "store-a", name: "Cakes", slug: "cakes", description: "Baked today" },
+      { id: "plain", storeId: "store-a", name: "Plain", slug: "plain" },
+    ]);
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:3001/api/public/stores/store-a/catalog/collections?limit=100", expect.anything());
+  });
+
+  it("loads later Collection pages so their descriptions remain public", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(jsonResponse({ nodes: [{ id: "first", storeId: "store-a", externalId: null, handle: "first", title: "First", description: "", productIds: [] }], nextCursor: "first" }))
+      .mockResolvedValueOnce(jsonResponse({ nodes: [{ id: "later", storeId: "store-a", externalId: null, handle: "later", title: "Later", description: "Next page", productIds: [] }], nextCursor: null }));
+    const api = createCommerceApi({ baseUrl: "http://localhost:3001", fetch: fetchMock });
+
+    await expect(api.getPublicCollections("store-a")).resolves.toContainEqual({ id: "later", storeId: "store-a", name: "Later", slug: "later", description: "Next page" });
+    expect(fetchMock).toHaveBeenLastCalledWith("http://localhost:3001/api/public/stores/store-a/catalog/collections?limit=100&cursor=first", expect.anything());
+  });
+});
+
+describe("merchant commerce API client", () => {
+  it("stops after one refresh when the API still rejects the session", async () => {
+    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(jsonResponse({ error: { message: "Invalid or expired token" } }, 401)));
+    const api = createMerchantCommerceApi({ baseUrl: "http://localhost:3001", token: "old", fetch: fetchMock, getAccessToken: async () => "rejected" });
+    await expect(api.getOrder("store-demo", "order-1")).rejects.toThrow("Invalid or expired token");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not retry a store permission denial", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ error: { message: "Forbidden" } }, 403));
+    const api = createMerchantCommerceApi({ baseUrl: "http://localhost:3001", token: "old", fetch: fetchMock, getAccessToken: async () => "current" });
+    await expect(api.getOrder("store-demo", "order-1")).rejects.toThrow("Forbidden");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("resolves captured order images at the configured API", async () => {
+    const api = createMerchantCommerceApi({ baseUrl: "http://127.0.0.1:5001/project/api", token: "merchant", fetch: vi.fn().mockResolvedValue(jsonResponse({
+      items: [{ imageSnapshot: "/api/public/media/store-demo/photo" }],
+    })) });
+    expect((await api.getOrder("store-demo", "order-1")).items[0].imageSnapshot).toBe("http://127.0.0.1:5001/project/api/api/public/media/store-demo/photo");
+  });
+
+  it("refreshes a rejected session once and retries with the new bearer token", async () => {
+    const fetchMock = vi.fn().mockImplementation((_url, init) => Promise.resolve(
+      init.headers.Authorization === "Bearer fresh" ? jsonResponse({ order: { id: "order-1" } }) : jsonResponse({ error: { message: "Invalid or expired token" } }, 401),
+    ));
+    const api = createMerchantCommerceApi({ baseUrl: "http://localhost:3001", token: "old", fetch: fetchMock,
+      getAccessToken: async (refresh = false) => refresh ? "fresh" : "expired",
+    });
+    await expect(api.getOrder("store-demo", "order-1")).resolves.toMatchObject({ order: { id: "order-1" } });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("loads merchant orders with the merchant bearer token", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ orders: [] }));
+    const api = createMerchantCommerceApi({
+      baseUrl: "http://localhost:3001",
+      token: "jelly-demo-merchant",
+      fetch: fetchMock,
+    });
+
+    await expect(api.listOrders("store-demo")).resolves.toEqual([]);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:3001/api/stores/store-demo/orders",
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: "Bearer jelly-demo-merchant" }) }),
+    );
+  });
+
+  it("loads Stripe readiness and requests a hosted onboarding link as the merchant", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(jsonResponse({ connected: false, checkoutReady: false, closed: false }))
+      .mockResolvedValueOnce(jsonResponse({ url: "https://connect.stripe.test/onboarding" }, 201));
+    const api = createMerchantCommerceApi({ baseUrl: "http://localhost:3001", token: "jelly-demo-merchant", fetch: fetchMock });
+
+    await expect(api.getStripeStatus("store-demo")).resolves.toMatchObject({ connected: false });
+    await expect(api.createOnboardingLink("store-demo", {
+      returnUrl: "http://localhost:3000/admin/payments",
+      refreshUrl: "http://localhost:3000/admin/payments",
+    })).resolves.toEqual({ url: "https://connect.stripe.test/onboarding" });
+
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "http://localhost:3001/api/stores/store-demo/stripe-connect/onboarding-link",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({ Authorization: "Bearer jelly-demo-merchant" }),
+      }),
+    );
+  });
+});

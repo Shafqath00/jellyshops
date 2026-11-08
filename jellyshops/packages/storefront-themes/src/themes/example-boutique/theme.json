@@ -1,0 +1,50 @@
+{
+  "id": "example-boutique",
+  "name": "Example Boutique",
+  "version": "1.0.0",
+  "description": "An editorial theme with a split masthead and boutique hero treatment.",
+  "assetPrefix": "/themes/example-boutique/",
+  "previewAsset": "/themes/example-boutique/preview.svg",
+  "assets": { "stylesheets": [], "scripts": [], "fonts": [], "icons": [{ "id": "monogram", "path": "/themes/example-boutique/monogram.svg" }], "assets": [], "preview": { "path": "/themes/example-boutique/preview.svg", "alt": "Example Boutique theme preview" } },
+  "layout": "editorial",
+  "enabled": true,
+  "settingsDefaults": {
+    "colors": { "primary": "#3f2548", "background": "#fbf7f0", "text": "#2c2130", "surface": "#ffffff", "accent": "#a75b38" },
+    "typography": { "headingFont": "Georgia", "bodyFont": "Inter", "headingScale": "large", "scale": "large" },
+    "buttons": { "style": "outline", "radius": "pill" },
+    "header": { "announcement": "Small-batch goods, thoughtfully made.", "announcementEnabled": true, "style": "editorial", "variant": "logo-centered", "navigationAlignment": "center", "logoSize": "medium", "sticky": false, "showSearch": true, "showCart": true },
+    "footer": { "style": "split", "variant": "columns", "showNewsletter": true, "showSocialLinks": true, "showDescription": true, "alignment": "left", "copyright": "© Example Boutique" },
+    "layout": { "containerWidth": "wide", "sectionSpacing": "spacious", "backgroundStyle": "paper", "density": "airy" },
+    "productCard": { "imageRatio": "portrait", "style": "minimal", "alignment": "left", "showBrand": true },
+    "branding": { "logoUrl": "", "bannerUrl": "" }
+  },
+  "settingsSchema": [
+    { "id": "colors.accent", "type": "color", "label": "Boutique accent", "group": "Colors", "default": "#a75b38" },
+    { "id": "typography.headingFont", "type": "font", "label": "Display font", "group": "Typography", "default": "Georgia", "options": [{ "value": "Georgia", "label": "Georgia" }, { "value": "Inter", "label": "Inter" }, { "value": "Arial", "label": "Arial" }] },
+    { "id": "layout.containerWidth", "type": "select", "label": "Page width", "group": "Layout", "default": "wide", "options": [{ "value": "standard", "label": "Standard" }, { "value": "wide", "label": "Wide" }] },
+    { "id": "header.announcement", "type": "text", "label": "Header announcement", "description": "Shown by Boutique presentation components.", "group": "Header", "default": "Small-batch goods, thoughtfully made." }
+    ,{ "id": "header.announcementEnabled", "type": "checkbox", "label": "Show announcement", "group": "Header", "default": true }
+    ,{ "id": "header.style", "type": "select", "label": "Header style", "group": "Header", "default": "editorial", "options": [{ "value": "editorial", "label": "Editorial" }, { "value": "minimal", "label": "Minimal" }] }
+    ,{ "id": "header.navigationAlignment", "type": "alignment", "label": "Navigation alignment", "group": "Header", "default": "center", "options": [{ "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "right", "label": "Right" }] }
+    ,{ "id": "header.logoSize", "type": "select", "label": "Logo size", "group": "Header", "default": "medium", "options": [{ "value": "small", "label": "Small" }, { "value": "medium", "label": "Medium" }, { "value": "large", "label": "Large" }] }
+    ,{ "id": "header.sticky", "type": "checkbox", "label": "Sticky header", "group": "Header", "default": false }
+    ,{ "id": "footer.style", "type": "select", "label": "Footer style", "group": "Footer", "default": "split", "options": [{ "value": "split", "label": "Split" }, { "value": "stacked", "label": "Stacked" }] }
+    ,{ "id": "footer.showNewsletter", "type": "checkbox", "label": "Show newsletter", "group": "Footer", "default": true }
+    ,{ "id": "footer.showSocialLinks", "type": "checkbox", "label": "Show social links", "group": "Footer", "default": true }
+    ,{ "id": "footer.alignment", "type": "alignment", "label": "Footer alignment", "group": "Footer", "default": "left", "options": [{ "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }] }
+    ,{ "id": "footer.copyright", "type": "text", "label": "Copyright text", "group": "Footer", "default": "© Example Boutique" }
+    ,{ "id": "layout.backgroundStyle", "type": "select", "label": "Background style", "group": "Layout", "default": "paper", "options": [{ "value": "paper", "label": "Paper" }, { "value": "ink", "label": "Ink" }] }
+    ,{ "id": "layout.density", "type": "select", "label": "Storefront density", "group": "Layout", "default": "airy", "options": [{ "value": "compact", "label": "Compact" }, { "value": "comfortable", "label": "Comfortable" }, { "value": "airy", "label": "Airy" }] }
+    ,{ "id": "productCard.imageRatio", "type": "select", "label": "Product image ratio", "group": "Product cards", "default": "portrait", "options": [{ "value": "square", "label": "Square" }, { "value": "portrait", "label": "Portrait" }, { "value": "natural", "label": "Natural" }] }
+    ,{ "id": "productCard.style", "type": "select", "label": "Product card style", "group": "Product cards", "default": "minimal", "options": [{ "value": "minimal", "label": "Minimal" }, { "value": "bordered", "label": "Bordered" }, { "value": "elevated", "label": "Elevated" }] }
+    ,{ "id": "productCard.alignment", "type": "alignment", "label": "Product card alignment", "group": "Product cards", "default": "left", "options": [{ "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }] }
+    ,{ "id": "productCard.showBrand", "type": "checkbox", "label": "Show product category", "group": "Product cards", "default": true }
+    ,{ "id": "header.variant", "type": "select", "label": "Header layout", "group": "Header", "default": "logo-centered", "options": [{ "value": "logo-left", "label": "Logo left" }, { "value": "logo-centered", "label": "Logo centered" }, { "value": "compact", "label": "Compact" }] }
+    ,{ "id": "header.showSearch", "type": "checkbox", "label": "Show search link", "group": "Header", "default": true }
+    ,{ "id": "header.showCart", "type": "checkbox", "label": "Show cart", "group": "Header", "default": true }
+    ,{ "id": "footer.variant", "type": "select", "label": "Footer layout", "group": "Footer", "default": "columns", "options": [{ "value": "simple", "label": "Simple" }, { "value": "columns", "label": "Columns" }, { "value": "newsletter", "label": "Newsletter" }] }
+    ,{ "id": "typography.scale", "type": "select", "label": "Typography scale", "group": "Typography", "default": "large", "options": [{ "value": "compact", "label": "Compact" }, { "value": "default", "label": "Default" }, { "value": "large", "label": "Large" }] }
+    ,{ "id": "branding.logoUrl", "type": "image", "label": "Store logo", "group": "Branding", "default": "" }
+    ,{ "id": "branding.bannerUrl", "type": "image", "label": "Storefront banner", "group": "Branding", "default": "" }
+  ]
+}

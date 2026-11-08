@@ -1,6 +1,10 @@
 import { expect, it } from "vitest";
 import type { SectionNode } from "@jelly/storefront-schema";
-import { getSectionDefinition, listSectionDefinitions, validateSectionAgainstRegistry } from "./index";
+import { getSectionDefinition, listSectionDefinitions, listSectionDefinitionsForPage, validateSectionAgainstRegistry } from "./index";
+import { isSectionStyleKey } from "./section-style";
+
+/** A section's own settings, leaving out the style settings every section shares. */
+const ownKeys = (type: string) => getSectionDefinition(type)?.controls.filter((control) => !control.element).map(({ key }) => key).filter((key) => !isSectionStyleKey(key));
 
 function section(type: string, blocks: SectionNode["blocks"] = []): SectionNode {
   return { id: "section-1", type, enabled: true, settings: {}, blocks };
@@ -13,6 +17,133 @@ it("registers the V1 editor section types", () => {
     "header", "hero", "featured-collection", "product-grid", "rich-text", "faq",
     "product-information", "collection-product-grid", "footer"
   ]));
+});
+
+it("registers the complete ecommerce section catalog", () => {
+  expect(listSectionDefinitions().map((definition) => definition.type)).toEqual(expect.arrayContaining([
+    "cart-summary", "search-results", "not-found-message", "journal-teaser", "trust-strip", "image-mosaic",
+  ]));
+
+  expect(validateSectionAgainstRegistry(section("cart-summary"), "cart")).toEqual([]);
+  expect(validateSectionAgainstRegistry(section("search-results"), "search")).toEqual([]);
+  expect(validateSectionAgainstRegistry(section("not-found-message"), "not-found")).toEqual([]);
+});
+
+it("registers Product merchandising sections only for Product templates", () => {
+  const productSections = ["product-gallery", "product-information", "product-options", "product-purchase", "product-description", "related-products"];
+
+  expect(listSectionDefinitions().map((definition) => definition.type)).toEqual(expect.arrayContaining(productSections));
+  for (const type of productSections) {
+    expect(validateSectionAgainstRegistry(section(type), "product")).toEqual([]);
+    expect(validateSectionAgainstRegistry(section(type), "collection")).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: "SECTION_NOT_ALLOWED_ON_PAGE" }),
+    ]));
+    expect(getSectionDefinition(type)?.controls.length).toBeGreaterThan(0);
+  }
+});
+
+it("registers configurable Collection sections only for Collection templates", () => {
+  const types = ["collection-header", "collection-product-grid", "collection-description"];
+  for (const type of types) {
+    const definition = getSectionDefinition(type);
+    expect(definition?.controls.length).toBeGreaterThan(0);
+    expect(validateSectionAgainstRegistry(section(type), "collection")).toEqual([]);
+    expect(validateSectionAgainstRegistry(section(type), "product")).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: "SECTION_NOT_ALLOWED_ON_PAGE" }),
+    ]));
+  }
+  expect(ownKeys("collection-header")).toEqual(["layout", "contentAlignment", "showTitle", "showDescription", "descriptionLines", "showImage", "showBreadcrumb"]);
+  expect(getSectionDefinition("collection-product-grid")?.defaultSettings).toMatchObject({ columns: 3, limit: 12 });
+  expect(getSectionDefinition("collection-description")?.defaultSettings).toMatchObject({ spacing: "standard" });
+});
+
+it("registers a validated media control for the Home Image with text section", () => {
+  const definition = getSectionDefinition("image-with-text");
+  expect(definition?.controls.map(({ key }) => key)).toContain("image");
+  expect(definition?.settingsSchema.safeParse({ image: {
+    id: "media-1", url: "/api/public/media/store-a/media-1", alt: "Apples",
+    focalPoint: { x: 50, y: 50 }, fit: "cover",
+  } }).success).toBe(true);
+  expect(definition?.settingsSchema.safeParse({ image: { url: "javascript:alert(1)" } }).success).toBe(false);
+  expect(definition?.settingsSchema.safeParse({ image: { url: "//other.example/photo.jpg" } }).success).toBe(false);
+});
+
+it("makes the Home product grid configurable without requiring sample Catalog references", () => {
+  const definition = getSectionDefinition("product-grid");
+  expect(ownKeys("product-grid")).toEqual(["heading", "text", "contentAlignment", "collectionId", "sort", "limit", "columns", "viewAllLabel", "viewAllLink", "hideWhenEmpty", "colorScheme", "emptyMessage"]);
+  expect(definition?.settingsSchema.safeParse({ heading: "New arrivals", limit: 4, emptyMessage: "Coming soon" }).success).toBe(true);
+  expect(definition?.settingsSchema.safeParse({ limit: 25 }).success).toBe(false);
+  expect(validateSectionAgainstRegistry(section("product-grid"), "home")).toEqual([]);
+});
+
+it("exposes store identity, layout and footer content controls in global chrome", () => {
+  expect(ownKeys("header")).toEqual(["storeName", "logo", "logoWidth", "logoPosition", "sticky", "transparent", "overlayLogo", "showSearch", "showAccount", "showWishlist", "showCart", "layout", "showToolLabels", "extraLinkLabel", "extraLink", "extraLinkIcon"]);
+  expect(getSectionDefinition("header")?.settingsSchema.safeParse({ storeName: "Little Market", logo: { id: "logo-1", url: "/api/public/media/store-a/logo-1", alt: "Logo" } }).success).toBe(true);
+  expect(ownKeys("footer")).toEqual(["storeName", "text", "contactEmail", "copyright", "showNewsletter", "newsletterHeading", "newsletterText"]);
+  expect(ownKeys("announcement-bar")).toEqual(["text", "link"]);
+});
+
+it("allows page content only on a custom Page template", () => {
+  expect(validateSectionAgainstRegistry(section("page-content"), "page" as never)).toEqual([]);
+  expect(validateSectionAgainstRegistry(section("page-content"), "home")).toEqual(expect.arrayContaining([
+    expect.objectContaining({ code: "SECTION_NOT_ALLOWED_ON_PAGE" }),
+  ]));
+});
+
+it("allows Blog sections only on Blog templates", () => {
+  expect(validateSectionAgainstRegistry(section("blog-header"), "blog")).toEqual([]);
+  expect(validateSectionAgainstRegistry(section("article-list"), "blog")).toEqual([]);
+  expect(validateSectionAgainstRegistry(section("article-list"), "page")).toEqual(expect.arrayContaining([
+    expect.objectContaining({ code: "SECTION_NOT_ALLOWED_ON_PAGE" }),
+  ]));
+});
+
+it("allows Article sections only on Article templates", () => {
+  expect(validateSectionAgainstRegistry(section("article-header"), "article")).toEqual([]);
+  expect(validateSectionAgainstRegistry(section("article-content"), "article")).toEqual([]);
+  expect(validateSectionAgainstRegistry(section("article-content"), "blog")).toEqual(expect.arrayContaining([
+    expect.objectContaining({ code: "SECTION_NOT_ALLOWED_ON_PAGE" }),
+  ]));
+});
+
+it("makes rich text reusable on compatible content templates only", () => {
+  const richText = section("rich-text", [{ id: "story", type: "text", enabled: true, settings: { text: "Our story" } }]);
+  richText.settings = { alignment: "center" };
+
+  for (const pageType of ["home", "product", "collection", "page", "blog", "article"] as const) {
+    expect(validateSectionAgainstRegistry(richText, pageType)).toEqual([]);
+  }
+  for (const pageType of ["search", "cart", "not-found"] as const) {
+    expect(validateSectionAgainstRegistry(richText, pageType)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ code: "SECTION_NOT_ALLOWED_ON_PAGE" }),
+    ]));
+  }
+  expect(getSectionDefinition("rich-text")?.settingsSchema.parse(richText.settings)).toEqual({ alignment: "center" });
+});
+
+it("accepts structured rich text and rejects unsupported document content", () => {
+  const richText = section("rich-text");
+  richText.settings.document = { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Safe" }] }] };
+  expect(validateSectionAgainstRegistry(richText, "article")).toEqual([]);
+
+  richText.settings.document = { type: "doc", content: [{ type: "script", attrs: { src: "https://example.com/x.js" } }] };
+  expect(validateSectionAgainstRegistry(richText, "article")).toEqual(expect.arrayContaining([
+    expect.objectContaining({ code: "SETTINGS_INVALID" }),
+  ]));
+
+  richText.settings.document = { type: "doc", content: [{ type: "paragraph", content: [
+    { type: "text", text: "Click", marks: [{ type: "link", attrs: { href: "javascript:alert(1)" } }] },
+  ] }] };
+  expect(validateSectionAgainstRegistry(richText, "article")).toEqual(expect.arrayContaining([
+    expect.objectContaining({ code: "SETTINGS_INVALID" }),
+  ]));
+});
+
+it("supplies Add Section options from page and region compatibility", () => {
+  expect(listSectionDefinitionsForPage("article").map(({ type }) => type)).toContain("rich-text");
+  expect(listSectionDefinitionsForPage("article").map(({ type }) => type)).not.toContain("article-list");
+  expect(listSectionDefinitionsForPage("article").map(({ type }) => type)).not.toContain("product-information");
+  expect(listSectionDefinitionsForPage("article", "header").map(({ type }) => type)).not.toContain("rich-text");
 });
 
 it("allows only Hero content blocks", () => {
@@ -62,4 +193,24 @@ it("accepts a dynamic binding in a control that declares a compatible dynamic ty
   }]);
 
   expect(validateSectionAgainstRegistry(hero, "home")).toEqual([]);
+});
+
+it("gives every section the shared style settings and checks their values", () => {
+  for (const definition of listSectionDefinitions()) {
+    expect(definition.controls.filter(({ key }) => isSectionStyleKey(key))).toHaveLength(21);
+  }
+  const schema = getSectionDefinition("rich-text")!.settingsSchema;
+  expect(schema.safeParse({ styleColors: true, styleBackground: "#112233", styleText: "#fefefe", styleHeadingFont: "Fraunces", styleHeadingSize: "large", styleHeadingWeight: "700", styleAlign: "center", styleSpacing: "" }).success).toBe(true);
+  expect(schema.safeParse({ styleBackground: "red; background: url(x)" }).success).toBe(false);
+  expect(schema.safeParse({ styleHeadingFont: "Comic Sans" }).success).toBe(false);
+  expect(schema.safeParse({ styleHeadingWeight: "950" }).success).toBe(false);
+});
+
+it("edits descriptions as rich text and checks the formatted copy", () => {
+  expect(getSectionDefinition("footer")?.controls.find(({ key }) => key === "text")?.type).toBe("rich-text");
+  expect(getSectionDefinition("faq")?.controls.find(({ key }) => key === "text")?.type).toBe("rich-text");
+  const faq = { id: "faq", type: "faq", enabled: true, settings: { heading: "Questions" }, blocks: [{ id: "q1", type: "faq-item", enabled: true, settings: { question: "Returns?", answer: "Yes.", answerDoc: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Yes." }] }] } } }] } as SectionNode;
+  expect(validateSectionAgainstRegistry(faq, "home")).toEqual([]);
+  const broken = { ...faq, blocks: [{ ...faq.blocks[0], settings: { ...faq.blocks[0].settings, answerDoc: "<script>" } }] } as SectionNode;
+  expect(validateSectionAgainstRegistry(broken, "home")).toEqual([expect.objectContaining({ code: "SETTINGS_INVALID", blockId: "q1" })]);
 });

@@ -1,0 +1,908 @@
+{
+  "globalSections": {
+    "announcement": {
+      "id": "forma-section-13",
+      "type": "announcement-bar",
+      "enabled": true,
+      "settings": {
+        "styleScheme": "scheme3",
+        "text": "Make room for everyday living"
+      },
+      "blocks": []
+    },
+    "header": {
+      "id": "forma-section-15",
+      "type": "header",
+      "enabled": true,
+      "settings": {
+        "styleScheme": "scheme1",
+        "layout": "search-bar",
+        "sticky": true,
+        "showSearch": true,
+        "showAccount": true,
+        "showCart": true,
+        "showToolLabels": true,
+        "showWishlist": false
+      },
+      "blocks": [
+        {
+          "id": "forma-block-14",
+          "type": "menu",
+          "enabled": true,
+          "settings": {
+            "handle": "main"
+          }
+        }
+      ]
+    },
+    "footer": {
+      "id": "forma-section-17",
+      "type": "footer",
+      "enabled": true,
+      "settings": {
+        "styleScheme": "scheme2",
+        "text": "Furniture, lighting and useful objects for the rooms you live in.",
+        "showNewsletter": false
+      },
+      "blocks": [
+        {
+          "id": "forma-footer-shop-title",
+          "type": "link-heading",
+          "enabled": true,
+          "settings": {
+            "text": "Shop"
+          }
+        },
+        {
+          "id": "forma-footer-shop-0",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Sofas & chairs",
+            "link": "/search?q=sofa"
+          }
+        },
+        {
+          "id": "forma-footer-shop-1",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Tables & desks",
+            "link": "/search?q=table"
+          }
+        },
+        {
+          "id": "forma-footer-shop-2",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Lighting",
+            "link": "/search?q=lamp"
+          }
+        },
+        {
+          "id": "forma-footer-shop-3",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Shop all",
+            "link": "/shop"
+          }
+        },
+        {
+          "id": "forma-footer-title",
+          "type": "link-heading",
+          "enabled": true,
+          "settings": {
+            "text": "Help & information"
+          }
+        },
+        {
+          "id": "forma-footer-link-0",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "About us",
+            "link": "/pages/about"
+          }
+        },
+        {
+          "id": "forma-footer-link-1",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Delivery",
+            "link": "/pages/shipping"
+          }
+        },
+        {
+          "id": "forma-footer-link-2",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Returns",
+            "link": "/pages/returns"
+          }
+        },
+        {
+          "id": "forma-footer-link-3",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Contact",
+            "link": "/pages/contact"
+          }
+        }
+      ]
+    }
+  },
+  "templates": {
+    "home": {
+      "type": "home",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-section-18",
+            "type": "category-grid",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "heading": "",
+              "layout": "carousel",
+              "imageRatio": "square",
+              "columns": 4
+            },
+            "blocks": [
+              {
+                "id": "forma-category-0",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "Stools",
+                  "image": {
+                    "url": "/themes/jelly-forma/stool-v2.webp",
+                    "alt": "Stools"
+                  },
+                  "link": "/search?q=stools"
+                }
+              },
+              {
+                "id": "forma-category-1",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "Chairs",
+                  "image": {
+                    "url": "/themes/jelly-forma/chair-v2.webp",
+                    "alt": "Chairs"
+                  },
+                  "link": "/search?q=chairs"
+                }
+              },
+              {
+                "id": "forma-category-2",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "Sofas",
+                  "image": {
+                    "url": "/themes/jelly-forma/sofa-v2.webp",
+                    "alt": "Sofas"
+                  },
+                  "link": "/search?q=sofas"
+                }
+              },
+              {
+                "id": "forma-category-3",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "Tables",
+                  "image": {
+                    "url": "/themes/jelly-forma/table-v2.webp",
+                    "alt": "Tables"
+                  },
+                  "link": "/search?q=tables"
+                }
+              },
+              {
+                "id": "forma-category-4",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "Lighting",
+                  "image": {
+                    "url": "/themes/jelly-forma/lamp-v2.webp",
+                    "alt": "Lighting"
+                  },
+                  "link": "/search?q=lighting"
+                }
+              },
+              {
+                "id": "forma-category-5",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "Storage",
+                  "image": {
+                    "url": "/themes/jelly-forma/storage-v2.webp",
+                    "alt": "Storage"
+                  },
+                  "link": "/search?q=storage"
+                }
+              },
+              {
+                "id": "forma-category-6",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "Rugs",
+                  "image": {
+                    "url": "/themes/jelly-forma/rug-v2.webp",
+                    "alt": "Rugs"
+                  },
+                  "link": "/search?q=rugs"
+                }
+              },
+              {
+                "id": "forma-category-7",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "Accessories",
+                  "image": {
+                    "url": "/themes/jelly-forma/vase-v2.webp",
+                    "alt": "Accessories"
+                  },
+                  "link": "/search?q=accessories"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-section-22",
+            "type": "hero",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme4",
+              "image": {
+                "url": "/themes/jelly-forma/hero-v2.webp",
+                "alt": "A navy sofa and oak coffee table in a calm, sunlit living room",
+                "focalPoint": {
+                  "x": 50,
+                  "y": 55
+                }
+              },
+              "layout": "overlay",
+              "height": "large",
+              "contentAlignment": "center",
+              "overlay": 45,
+              "styleSpacing": "none",
+              "eyebrow": "Everyday comfort"
+            },
+            "blocks": [
+              {
+                "id": "forma-block-19",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "Soft living"
+                }
+              },
+              {
+                "id": "forma-block-21",
+                "type": "button",
+                "enabled": true,
+                "settings": {
+                  "label": "Shop sofas",
+                  "href": "/search?q=sofa"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-section-23",
+            "type": "product-grid",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "heading": "New for your home",
+              "sort": "newest",
+              "limit": 8,
+              "columns": 4,
+              "hideWhenEmpty": true
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-section-27",
+            "type": "image-with-text",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme2",
+              "image": {
+                "url": "/themes/jelly-forma/dining-room.jpg",
+                "alt": "A dining space with natural timber furniture"
+              },
+              "imagePosition": "left"
+            },
+            "blocks": [
+              {
+                "id": "forma-block-24",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "A place to come together"
+                }
+              },
+              {
+                "id": "forma-block-25",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "From a quiet morning coffee to a table full of friends. Choose pieces that fit the way you live."
+                }
+              },
+              {
+                "id": "forma-block-26",
+                "type": "button",
+                "enabled": true,
+                "settings": {
+                  "label": "Find your favourites",
+                  "href": "/shop"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-section-31",
+            "type": "multicolumn",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "heading": "Considered from every angle",
+              "columns": 3
+            },
+            "blocks": [
+              {
+                "id": "forma-block-28",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "Know your materials",
+                  "text": "Find materials, dimensions and care details on every product page."
+                }
+              },
+              {
+                "id": "forma-block-29",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "Make it your own",
+                  "text": "Explore available finishes and colours before choosing your piece."
+                }
+              },
+              {
+                "id": "forma-block-30",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "Here to help",
+                  "text": "Get in touch with questions about your space or your order."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-section-35",
+            "type": "faq",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme2",
+              "heading": "Before you make room"
+            },
+            "blocks": [
+              {
+                "id": "forma-block-32",
+                "type": "faq-item",
+                "enabled": true,
+                "settings": {
+                  "question": "How do I choose the right size?",
+                  "answer": "Check the product dimensions and measure your room, doorways and stairs before ordering."
+                }
+              },
+              {
+                "id": "forma-block-33",
+                "type": "faq-item",
+                "enabled": true,
+                "settings": {
+                  "question": "Where can I find delivery information?",
+                  "answer": "See our delivery page and the options available at checkout."
+                }
+              },
+              {
+                "id": "forma-block-34",
+                "type": "faq-item",
+                "enabled": true,
+                "settings": {
+                  "question": "How do I care for my furniture?",
+                  "answer": "Follow the material and care instructions on the product page."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-section-36",
+            "type": "newsletter",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme3",
+              "heading": "Fresh ideas for your space",
+              "text": "New arrivals, room inspiration and thoughtful finds. Join our mailing list."
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "product": {
+      "type": "product",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-studio-gallery",
+            "type": "product-gallery",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "imageFit": "contain",
+              "layout": "thumbnails"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-studio-info",
+            "type": "product-information",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "showVendor": true,
+              "showSku": false,
+              "showCompareAtPrice": true,
+              "showAvailability": true,
+              "showSpecifications": false
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-studio-options",
+            "type": "product-options",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-studio-purchase",
+            "type": "product-purchase",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "showQuantity": true,
+              "label": "Add to cart",
+              "stickyBar": true
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-studio-description",
+            "type": "product-description",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "layout": "expandable",
+              "heading": "Description",
+              "startOpen": true
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-studio-specifications",
+            "type": "product-specifications",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "heading": "Specifications",
+              "showProductSpecifications": true,
+              "layout": "expandable"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-studio-details",
+            "type": "product-tabs",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "firstOpen": false
+            },
+            "blocks": [
+              {
+                "id": "forma-tab-care",
+                "type": "info-tab",
+                "enabled": true,
+                "settings": {
+                  "title": "Materials & care",
+                  "text": "Solid timber and natural finishes. Wipe with a soft, damp cloth and dry straight away; keep out of direct sunlight."
+                }
+              },
+              {
+                "id": "forma-tab-delivery",
+                "type": "info-tab",
+                "enabled": true,
+                "settings": {
+                  "title": "Delivery & returns",
+                  "text": "Delivery options and costs are shown at checkout. If something isn't right, contact us and we'll explain how returns work."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-studio-related",
+            "type": "related-products",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "limit": 4,
+              "heading": "You may also like"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "collection": {
+      "type": "collection",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-studio-collection-header",
+            "type": "collection-header",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "showTitle": true,
+              "showDescription": true,
+              "showImage": true,
+              "layout": "simple",
+              "showBreadcrumb": true
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-studio-collection-grid",
+            "type": "collection-product-grid",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "columns": 4,
+              "limit": 24,
+              "showSort": true,
+              "showFilters": true
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "cart": {
+      "type": "cart",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-studio-cart",
+            "type": "cart-summary",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "search": {
+      "type": "search",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-studio-search",
+            "type": "search-results",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "showSort": true,
+              "showFilters": true,
+              "columns": 4
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "page": {
+      "type": "page",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-studio-page",
+            "type": "page-content",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "not-found": {
+      "type": "not-found",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "forma-studio-not-found",
+            "type": "not-found-message",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1"
+            },
+            "blocks": [
+              {
+                "id": "studio-not-found-title",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "We can't find that page"
+                }
+              },
+              {
+                "id": "studio-not-found-text",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "It may have moved. Try the shop or search."
+                }
+              },
+              {
+                "id": "studio-not-found-button",
+                "type": "button",
+                "enabled": true,
+                "settings": {
+                  "label": "Back to the shop",
+                  "href": "/shop"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    }
+  },
+  "menus": [
+    {
+      "key": "main",
+      "name": "Main menu",
+      "handle": "main",
+      "items": [
+        {
+          "id": "forma-menu-4",
+          "label": "Shop by room",
+          "target": {
+            "kind": "external",
+            "url": "/shop"
+          },
+          "children": [
+            {
+              "id": "forma-menu-1",
+              "label": "Living room",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=sofa"
+              },
+              "children": []
+            },
+            {
+              "id": "forma-menu-2",
+              "label": "Dining room",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=chair"
+              },
+              "children": []
+            },
+            {
+              "id": "forma-menu-3",
+              "label": "Home office",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=desk"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "forma-menu-5",
+          "label": "Sofas & chairs",
+          "target": {
+            "kind": "external",
+            "url": "/search?q=chair"
+          },
+          "children": []
+        },
+        {
+          "id": "forma-menu-6",
+          "label": "Tables & desks",
+          "target": {
+            "kind": "external",
+            "url": "/search?q=table"
+          },
+          "children": []
+        },
+        {
+          "id": "forma-menu-7",
+          "label": "Lighting",
+          "target": {
+            "kind": "external",
+            "url": "/search?q=lamp"
+          },
+          "children": []
+        },
+        {
+          "id": "forma-menu-8",
+          "label": "Our story",
+          "target": {
+            "kind": "external",
+            "url": "/pages/about"
+          },
+          "children": []
+        }
+      ]
+    }
+  ]
+}

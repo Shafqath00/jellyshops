@@ -9,6 +9,7 @@ import type { StorefrontWorkspaceApi } from "./routes.js";
 import type { TemplateService } from "./template-service.js";
 import type { ThemeService } from "./theme-service.js";
 import type { StorefrontWorkspaceReader } from "./workspace-reader.js";
+import { listThemes } from "@jelly/storefront-themes";
 
 export class DefaultStorefrontWorkspaceApi implements StorefrontWorkspaceApi {
   constructor(
@@ -19,6 +20,13 @@ export class DefaultStorefrontWorkspaceApi implements StorefrontWorkspaceApi {
     private readonly theme: ThemeService,
     private readonly assignments: AssignmentService,
   ) {}
+
+  listThemeCatalog(_storeId: string) {
+    return Promise.resolve(listThemes().map(({ manifest: value }) => {
+      const manifest = value as { id: string; name: string; version: string; enabled: boolean; settingsSchema?: unknown[] };
+      return { ...manifest, available: manifest.enabled, settingsSchema: manifest.settingsSchema ?? [] };
+    }));
+  }
 
   getWorkspace(storeId: string) {
     return this.workspace.getWorkspace(storeId);
@@ -52,6 +60,10 @@ export class DefaultStorefrontWorkspaceApi implements StorefrontWorkspaceApi {
     return this.templates.cloneTemplate(storeId, sourceTemplateId, input);
   }
 
+  deleteTemplate(storeId: string, templateId: string, expectedRevision: number) {
+    return this.templates.deleteTemplate(storeId, templateId, expectedRevision);
+  }
+
   listGlobalSections(storeId: string) {
     return this.globals.listGlobalSections(storeId);
   }
@@ -79,6 +91,10 @@ export class DefaultStorefrontWorkspaceApi implements StorefrontWorkspaceApi {
 
   createPreset(storeId: string, input: { name: string; section: Record<string, unknown> }) {
     return this.globals.createPreset(storeId, input);
+  }
+
+  deletePreset(storeId: string, presetId: string) {
+    return this.globals.deletePreset(storeId, presetId);
   }
 
   instantiatePreset(storeId: string, presetId: string) {
@@ -113,7 +129,7 @@ export class DefaultStorefrontWorkspaceApi implements StorefrontWorkspaceApi {
   saveThemeConfiguration(
     storeId: string,
     expectedRevision: number | null,
-    input: { themeId: string; settings: ThemeSettings; draftArtifactId?: string | null },
+    input: { themeId: string; themeVersion?: string; settings: ThemeSettings; draftArtifactId?: string | null },
   ) {
     return this.theme.saveThemeConfiguration(storeId, expectedRevision, input);
   }
@@ -132,5 +148,12 @@ export class DefaultStorefrontWorkspaceApi implements StorefrontWorkspaceApi {
     },
   ) {
     return this.assignments.assignTemplate(storeId, input);
+  }
+
+  removeAssignment(
+    storeId: string,
+    input: { resourceType: AssignableResourceType; resourceId: string; expectedRevision: number },
+  ) {
+    return this.assignments.removeAssignment(storeId, input);
   }
 }

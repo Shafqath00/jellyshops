@@ -13,6 +13,7 @@ export interface MediaRecord {
   altText: string | null;
   referenced: boolean;
   createdAt: string;
+  contentHash?: string | null;
 }
 
 export interface StoredMediaRecord extends MediaRecord {
@@ -22,4 +23,6 @@ export interface StoredMediaRecord extends MediaRecord {
 export interface StoredMedia {
   record: MediaRecord;
   contents: Buffer;
+  mimeType: string;
+  etag: string;
 }

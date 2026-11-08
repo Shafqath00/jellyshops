@@ -1,0 +1,24 @@
+import { readFile } from "node:fs/promises";
+import { afterEach, expect, it } from "vitest";
+import { createPGliteDatabase, seedStore, type IntegrationDatabase } from "../../test/integration/pglite.js";
+import { SqlCustomDataRepository } from "./sql-repository.js";
+import { CustomDataService } from "./service.js";
+import { DynamicSourceRegistry } from "../dynamic-sources/registry.js";
+import { DynamicValueResolver } from "../dynamic-sources/resolver.js";
+let db: IntegrationDatabase;
+afterEach(async () => { await db?.close(); });
+it("persists typed custom data, exposes only visible sources, and isolates owners", async () => {
+  db = await createPGliteDatabase(); await seedStore(db, "a", "a"); await seedStore(db, "b", "b");
+  for (const file of ["20260913220000_add_metafields.sql", "20260913230000_add_metaobjects.sql"]) await db.exec(await readFile(new URL(`../../sql/migrations/${file}`, import.meta.url), "utf8"));
+  const repo = new SqlCustomDataRepository(db); const service = new CustomDataService(repo);
+  const definition = await service.createMetafieldDefinition("a", { ownerType: "store", namespace: "custom", key: "headline", name: "Headline", type: "string", storefrontVisible: true, origin: "jelly" });
+  await service.setMetafieldValue("a", definition.id, "a", "Fresh today");
+  await expect(service.setMetafieldValue("a", definition.id, "b", "Other store")).rejects.toThrow(/owner/);
+  const registry = new DynamicSourceRegistry(repo, repo);
+  expect(await registry.listDynamicSources("a", "home")).toEqual(expect.arrayContaining([expect.objectContaining({ label: "Headline" })]));
+  expect(await registry.listDynamicSources("b", "home")).not.toEqual(expect.arrayContaining([expect.objectContaining({ label: "Headline" })]));
+  const resolver = new DynamicValueResolver(new SqlCustomDataRepository(db), repo);
+  expect(await resolver.resolve("a", { kind: "metafield", resource: "store", namespace: "custom", key: "headline" }, {})).toBe("Fresh today");
+  await service.updateMetafieldDefinition("a", definition.id, { storefrontVisible: false });
+  expect(await resolver.resolve("a", { kind: "metafield", resource: "store", namespace: "custom", key: "headline" }, {})).toBeNull();
+});

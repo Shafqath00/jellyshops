@@ -1,5 +1,5 @@
 import type { DynamicBinding, RuntimeDependencyEdgeV4 } from "@jelly/storefront-schema";
-import { listDynamicBindings, listTemplateSections } from "./traversal.js";
+import { listDynamicBindings, listSectionBlocks, listTemplateSections } from "./traversal.js";
 import type { StorefrontCompilationInput } from "./types.js";
 
 export interface StorefrontDependencyGraph {
@@ -18,7 +18,9 @@ function addMediaReferences(
     return;
   }
   const record = value as Record<string, unknown>;
-  if (record.type === "media" && typeof record.id === "string" && record.id) add(record.id);
+  const isMediaReference = record.type === "media"
+    || typeof record.id === "string" && typeof record.url === "string" && ("alt" in record || "focalPoint" in record);
+  if (isMediaReference && typeof record.id === "string" && record.id) add(record.id);
   Object.values(record).forEach((item) => addMediaReferences(item, add, seen));
 }
 
@@ -87,7 +89,7 @@ export function buildDependencyGraph(input: StorefrontCompilationInput): Storefr
       addMediaReferences(visit.section.settings, (mediaId) => {
         add({ from, to: { type: "media", id: mediaId }, reason: "media" });
       });
-      for (const block of visit.section.blocks ?? []) {
+      for (const block of listSectionBlocks(visit.section)) {
         addMediaReferences(block.settings, (mediaId) => {
           add({ from, to: { type: "media", id: mediaId }, reason: "media" });
         });

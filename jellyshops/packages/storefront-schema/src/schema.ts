@@ -1,18 +1,20 @@
 import { z } from "zod";
+import type { BlockNode } from "./types.js";
 import { STORE_DESIGN_SCHEMA_VERSION } from "./version.js";
 
-export const themeIdSchema = z.enum(["minimal", "classic", "bold", "elegant", "playful"]);
+export const themeIdSchema = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 
 const settingsSchema = z.record(z.string(), z.unknown());
-const responsiveSettingsSchema = z.object({ mobile: settingsSchema.optional() }).strict();
+const responsiveSettingsSchema = z.object({ mobile: settingsSchema.optional(), tablet: settingsSchema.optional() }).strict();
 
-const blockNodeSchema = z.object({
+const blockNodeSchema: z.ZodType<BlockNode> = z.lazy(() => z.object({
   id: z.string().min(1),
   type: z.string().min(1),
   enabled: z.boolean(),
   settings: settingsSchema,
-  responsive: responsiveSettingsSchema.optional()
-});
+  responsive: responsiveSettingsSchema.optional(),
+  blocks: z.array(blockNodeSchema).optional()
+}));
 
 export const sectionNodeSchema = z.object({
   id: z.string().min(1),
@@ -31,7 +33,7 @@ const globalSettingsSchema = z.object({
   productCards: z.object({ imageRatio: z.enum(["square", "portrait", "landscape"]), showVendor: z.boolean(), showQuickAdd: z.boolean() })
 });
 
-const pageDocumentSchema = (type: "home" | "product" | "collection") => z.object({
+const pageDocumentSchema = (type: "home" | "product" | "collection" | "cart" | "search" | "not-found") => z.object({
   id: z.string().min(1),
   type: z.literal(type),
   sections: z.array(sectionNodeSchema)
@@ -42,10 +44,24 @@ export const storeDesignDocumentSchema = z.object({
   theme: z.object({ id: themeIdSchema, settings: settingsSchema }),
   globalSettings: globalSettingsSchema,
   header: sectionNodeSchema,
-  pages: z.object({ home: pageDocumentSchema("home"), product: pageDocumentSchema("product"), collection: pageDocumentSchema("collection") }),
+  pages: z.object({
+    home: pageDocumentSchema("home"),
+    product: pageDocumentSchema("product"),
+    collection: pageDocumentSchema("collection"),
+    cart: pageDocumentSchema("cart"),
+    search: pageDocumentSchema("search"),
+    "not-found": pageDocumentSchema("not-found")
+  }),
   footer: sectionNodeSchema
 }).superRefine((document, context) => {
-  const requiredSections = { home: "hero", product: "product-information", collection: "collection-product-grid" } as const;
+  const requiredSections = {
+    home: "hero",
+    product: "product-information",
+    collection: "collection-product-grid",
+    cart: "cart-summary",
+    search: "search-results",
+    "not-found": "not-found-message"
+  } as const;
 
   for (const [page, requiredType] of Object.entries(requiredSections) as Array<[keyof typeof requiredSections, string]>) {
     if (!document.pages[page].sections.some((section) => section.type === requiredType)) {

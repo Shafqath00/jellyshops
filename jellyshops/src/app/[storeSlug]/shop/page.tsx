@@ -1,21 +1,29 @@
 "use client";
+import { CatalogBrowser } from "@/features/storefront/catalog-browser";
+import { isCompleteStorefrontTheme } from "@jelly/storefront-themes";
+
 
 import { useParams, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import clsx from "clsx";
-import { ProductCard } from "@/components/product-card";
+import { useThemePresentation } from "@/features/storefront/components/storefront-shell";
+import { formatMoney } from "@/lib/domain";
 import { useShop } from "@/contexts/shop-context";
+import { useStorefrontCatalogStatus } from "@/features/commerce/components/storefront-catalog-sync";
 
 export default function ShopPage() {
   const { storeSlug } = useParams<{ storeSlug: string }>();
   const search = useSearchParams();
   const { repository } = useShop();
+  const { shell, settings, themeId, themeVersion } = useThemePresentation();
+  const catalogStatus = useStorefrontCatalogStatus();
   const store = repository.getStoreBySlug(storeSlug);
   if (!store) return null;
+  if (catalogStatus === "loading") return <main className="px-6 py-24 text-center text-[var(--store-text)]"><p className="opacity-70">Loading the collection…</p></main>;
   const products = repository.listProducts(storeSlug).filter((product) => product.published && !product.archived);
   const categories = [...new Set(products.map((product) => product.category))];
   const selected = search.get("category");
   const visible = selected ? products.filter((product) => product.category === selected) : products;
-  const tabClass = (active: boolean) => clsx("rounded-full border border-[color-mix(in_srgb,var(--store-text)_25%,transparent)] px-3.5 py-2 text-[11px] font-bold", active && "bg-[var(--store-text)] text-[var(--store-bg)]");
-  return <main className="px-[clamp(20px,6vw,90px)] pb-[130px] pt-[55px] text-[var(--store-text)] sm:pt-20"><header className="max-w-[700px]"><span className="text-[10px] font-extrabold uppercase tracking-[.12em] text-[var(--store-accent)]">Made for good days</span><h1 className="my-2 font-[var(--store-display,Georgia)] text-[clamp(4rem,8vw,8rem)] leading-[.88] tracking-[-.07em]">Shop everything</h1><p className="opacity-65">{products.length} small-batch treats, ready when you are.</p></header><nav className="my-[35px] mt-[50px] flex flex-wrap gap-2" aria-label="Product categories"><Link className={tabClass(!selected)} href={`/${store.slug}/shop`}>All</Link>{categories.map((category) => <Link className={tabClass(selected === category)} key={category} href={`/${store.slug}/shop?category=${encodeURIComponent(category)}`}>{category}</Link>)}</nav><div className="grid grid-cols-2 gap-[clamp(15px,2.5vw,34px)] md:grid-cols-3 lg:grid-cols-4">{visible.map((product) => <ProductCard key={product.id} product={product} storeSlug={store.slug} currency={store.currency} />)}</div></main>;
+  const CollectionPage = shell.CollectionPage;
+  const productViews = visible.map((product) => { const variant = product.variants[0]; return { id: product.id, name: product.name, slug: product.slug, category: product.category, imageUrl: product.imageUrl, price: formatMoney(variant?.priceMinor ?? 0, store.currency), soldOut: !variant || variant.stock <= 0, lowStock: Boolean(variant && variant.stock > 0 && variant.stock <= 3), href: `/${store.slug}/products/${product.slug}` }; });
+  if (settings && isCompleteStorefrontTheme(themeId, themeVersion)) return <main className="signature-page"><header className="signature-page-heading"><h1>Explore the collection</h1></header><CatalogBrowser storeSlug={store.slug} /></main>;
+  return <CollectionPage store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} settings={settings} products={productViews} categories={categories} selectedCategory={selected ?? undefined} allHref={`/${store.slug}/shop`} categoryHref={(category) => `/${store.slug}/shop?category=${encodeURIComponent(category)}`} />;
 }

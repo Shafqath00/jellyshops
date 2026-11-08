@@ -1,0 +1,510 @@
+{
+  "id": "jelly-resthaven",
+  "name": "Resthaven",
+  "version": "1.0.0",
+  "engines": {
+    "jelly": ">=1 <2"
+  },
+  "legacyStorefrontStyles": true,
+  "description": "An inviting showroom for beds, mattresses and a better night's sleep.",
+  "assetPrefix": "/themes/jelly-resthaven/",
+  "previewAsset": "/themes/jelly-resthaven/preview.svg",
+  "assets": {
+    "stylesheets": [],
+    "scripts": [],
+    "fonts": [],
+    "icons": [
+      {
+        "id": "mark",
+        "path": "/themes/jelly-resthaven/mark.svg"
+      }
+    ],
+    "assets": [],
+    "preview": {
+      "path": "/themes/jelly-resthaven/preview.svg",
+      "alt": "Jelly Resthaven theme preview"
+    }
+  },
+  "layout": "standard",
+  "enabled": true,
+  "settingsDefaults": {
+    "colors": {
+      "primary": "#7d285d",
+      "background": "#f2e8e0",
+      "text": "#353431",
+      "surface": "#ffffff",
+      "accent": "#7d285d",
+      "secondary": "#797571"
+    },
+    "typography": {
+      "headingFont": "Playfair Display",
+      "bodyFont": "Inter",
+      "headingWeight": 400
+    },
+    "buttons": {
+      "style": "solid",
+      "radius": "soft"
+    },
+    "layout": {
+      "contentWidth": 1200,
+      "sectionGap": 80
+    },
+    "productCard": {
+      "imageRatio": "portrait",
+      "alignment": "left"
+    },
+    "branding": {
+      "logoUrl": ""
+    }
+  },
+  "settingsSchema": [
+    {
+      "id": "colors.background",
+      "type": "color",
+      "label": "Page background",
+      "group": "Colours",
+      "default": "#f2e8e0"
+    },
+    {
+      "id": "colors.surface",
+      "type": "color",
+      "label": "Cards and panels",
+      "group": "Colours",
+      "default": "#ffffff"
+    },
+    {
+      "id": "colors.text",
+      "type": "color",
+      "label": "Text",
+      "group": "Colours",
+      "default": "#353431"
+    },
+    {
+      "id": "colors.secondary",
+      "type": "color",
+      "label": "Soft text",
+      "group": "Colours",
+      "default": "#797571"
+    },
+    {
+      "id": "colors.primary",
+      "type": "color",
+      "label": "Buttons",
+      "group": "Colours",
+      "default": "#7d285d"
+    },
+    {
+      "id": "colors.accent",
+      "type": "color",
+      "label": "Highlight",
+      "group": "Colours",
+      "default": "#7d285d"
+    },
+    {
+      "id": "typography.headingFont",
+      "type": "font",
+      "label": "Heading font",
+      "group": "Typography",
+      "default": "Playfair Display",
+      "options": [
+        {
+          "value": "Playfair Display",
+          "label": "Playfair Display"
+        },
+        {
+          "value": "Inter",
+          "label": "Inter"
+        }
+      ]
+    },
+    {
+      "id": "typography.bodyFont",
+      "type": "font",
+      "label": "Body font",
+      "group": "Typography",
+      "default": "Inter",
+      "options": [
+        {
+          "value": "Inter",
+          "label": "Inter"
+        },
+        {
+          "value": "Fraunces",
+          "label": "Fraunces"
+        }
+      ]
+    },
+    {
+      "id": "typography.headingWeight",
+      "type": "range",
+      "label": "Heading weight",
+      "group": "Typography",
+      "default": 400,
+      "min": 300,
+      "max": 700,
+      "step": 100
+    },
+    {
+      "id": "buttons.radius",
+      "type": "select",
+      "label": "Button corners",
+      "group": "Buttons",
+      "default": "soft",
+      "options": [
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "soft",
+          "label": "Slightly rounded"
+        },
+        {
+          "value": "rounded",
+          "label": "Rounded"
+        },
+        {
+          "value": "pill",
+          "label": "Pill"
+        }
+      ]
+    },
+    {
+      "id": "layout.contentWidth",
+      "type": "range",
+      "label": "Page width",
+      "group": "Layout",
+      "default": 1200,
+      "min": 960,
+      "max": 1600,
+      "step": 32
+    },
+    {
+      "id": "layout.sectionGap",
+      "type": "range",
+      "label": "Space between sections",
+      "group": "Layout",
+      "default": 80,
+      "min": 32,
+      "max": 160,
+      "step": 8
+    },
+    {
+      "id": "productCard.imageRatio",
+      "type": "select",
+      "label": "Product image shape",
+      "group": "Product cards",
+      "default": "portrait",
+      "options": [
+        {
+          "value": "portrait",
+          "label": "Portrait"
+        },
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "landscape",
+          "label": "Landscape"
+        }
+      ]
+    },
+    {
+      "id": "productCard.alignment",
+      "type": "alignment",
+      "label": "Product text alignment",
+      "group": "Product cards",
+      "default": "left",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Centre"
+        }
+      ]
+    },
+    {
+      "id": "branding.logoUrl",
+      "type": "image",
+      "label": "Store logo",
+      "group": "Branding",
+      "default": ""
+    }
+  ],
+  "sections": [
+    {
+      "type": "jelly-resthaven/categories",
+      "name": "Bedroom categories",
+      "supportedPages": [
+        "home",
+        "page"
+      ],
+      "layout": {
+        "direction": "vertical",
+        "align": "center",
+        "gap": 24,
+        "width": "full"
+      },
+      "settings": [
+        {
+          "id": "heading",
+          "type": "text",
+          "label": "Heading",
+          "default": "Popular categories"
+        },
+        {
+          "id": "photo0",
+          "type": "image",
+          "label": "Divan beds image"
+        },
+        {
+          "id": "title0",
+          "type": "text",
+          "label": "Category 1 name",
+          "default": "Divan beds"
+        },
+        {
+          "id": "link0",
+          "type": "link",
+          "label": "Category 1 link",
+          "default": "/search?q=Divan%20beds"
+        },
+        {
+          "id": "photo1",
+          "type": "image",
+          "label": "Ottoman beds image"
+        },
+        {
+          "id": "title1",
+          "type": "text",
+          "label": "Category 2 name",
+          "default": "Ottoman beds"
+        },
+        {
+          "id": "link1",
+          "type": "link",
+          "label": "Category 2 link",
+          "default": "/search?q=Ottoman%20beds"
+        },
+        {
+          "id": "photo2",
+          "type": "image",
+          "label": "Mattresses image"
+        },
+        {
+          "id": "title2",
+          "type": "text",
+          "label": "Category 3 name",
+          "default": "Mattresses"
+        },
+        {
+          "id": "link2",
+          "type": "link",
+          "label": "Category 3 link",
+          "default": "/search?q=Mattresses"
+        },
+        {
+          "id": "photo3",
+          "type": "image",
+          "label": "Upholstered beds image"
+        },
+        {
+          "id": "title3",
+          "type": "text",
+          "label": "Category 4 name",
+          "default": "Upholstered beds"
+        },
+        {
+          "id": "link3",
+          "type": "link",
+          "label": "Category 4 link",
+          "default": "/search?q=Upholstered%20beds"
+        }
+      ],
+      "elements": [
+        {
+          "kind": "heading",
+          "text": "{heading}"
+        },
+        {
+          "kind": "group",
+          "direction": "horizontal",
+          "gap": 24,
+          "elements": [
+            {
+              "kind": "group",
+              "direction": "vertical",
+              "gap": 12,
+              "elements": [
+                {
+                  "kind": "image",
+                  "image": "{photo0}",
+                  "ratio": "square",
+                  "link": "{link0}"
+                },
+                {
+                  "kind": "button",
+                  "label": "{title0}",
+                  "href": "{link0}"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "direction": "vertical",
+              "gap": 12,
+              "elements": [
+                {
+                  "kind": "image",
+                  "image": "{photo1}",
+                  "ratio": "square",
+                  "link": "{link1}"
+                },
+                {
+                  "kind": "button",
+                  "label": "{title1}",
+                  "href": "{link1}"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "direction": "vertical",
+              "gap": 12,
+              "elements": [
+                {
+                  "kind": "image",
+                  "image": "{photo2}",
+                  "ratio": "square",
+                  "link": "{link2}"
+                },
+                {
+                  "kind": "button",
+                  "label": "{title2}",
+                  "href": "{link2}"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "direction": "vertical",
+              "gap": 12,
+              "elements": [
+                {
+                  "kind": "image",
+                  "image": "{photo3}",
+                  "ratio": "square",
+                  "link": "{link3}"
+                },
+                {
+                  "kind": "button",
+                  "label": "{title3}",
+                  "href": "{link3}"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "jelly-resthaven/navigation",
+      "name": "Bedroom navigation",
+      "supportedPages": [
+        "home",
+        "page",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "not-found"
+      ],
+      "layout": {
+        "direction": "horizontal",
+        "align": "center",
+        "gap": 24,
+        "width": "full"
+      },
+      "settings": [
+        {
+          "id": "title0",
+          "type": "text",
+          "label": "Link 1",
+          "default": "Divan beds"
+        },
+        {
+          "id": "link0",
+          "type": "link",
+          "label": "Destination 1",
+          "default": "/search?q=Divan%20beds"
+        },
+        {
+          "id": "title1",
+          "type": "text",
+          "label": "Link 2",
+          "default": "Ottoman beds"
+        },
+        {
+          "id": "link1",
+          "type": "link",
+          "label": "Destination 2",
+          "default": "/search?q=Ottoman%20beds"
+        },
+        {
+          "id": "title2",
+          "type": "text",
+          "label": "Link 3",
+          "default": "Mattresses"
+        },
+        {
+          "id": "link2",
+          "type": "link",
+          "label": "Destination 3",
+          "default": "/search?q=Mattresses"
+        },
+        {
+          "id": "title3",
+          "type": "text",
+          "label": "Link 4",
+          "default": "Upholstered beds"
+        },
+        {
+          "id": "link3",
+          "type": "link",
+          "label": "Destination 4",
+          "default": "/search?q=Upholstered%20beds"
+        }
+      ],
+      "elements": [
+        {
+          "kind": "button",
+          "label": "{title0}",
+          "href": "{link0}",
+          "style": "link"
+        },
+        {
+          "kind": "button",
+          "label": "{title1}",
+          "href": "{link1}",
+          "style": "link"
+        },
+        {
+          "kind": "button",
+          "label": "{title2}",
+          "href": "{link2}",
+          "style": "link"
+        },
+        {
+          "kind": "button",
+          "label": "{title3}",
+          "href": "{link3}",
+          "style": "link"
+        }
+      ]
+    }
+  ]
+}

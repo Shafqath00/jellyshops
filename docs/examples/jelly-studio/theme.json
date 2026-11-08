@@ -1,0 +1,124 @@
+{
+  "id": "jelly-studio",
+  "name": "Jelly Studio",
+  "version": "1.0.0",
+  "description": "A calm, image-led theme for small studios and makers.",
+  "assetPrefix": "/themes/jelly-studio/",
+  "previewAsset": "/themes/jelly-studio/preview.svg",
+  "assets": {
+    "stylesheets": [],
+    "scripts": [],
+    "fonts": [],
+    "icons": [{ "id": "mark", "path": "/themes/jelly-studio/mark.svg" }],
+    "assets": [],
+    "preview": { "path": "/themes/jelly-studio/preview.svg", "alt": "Jelly Studio theme preview" }
+  },
+  "layout": "standard",
+  "enabled": true,
+  "settingsDefaults": {
+    "colors": { "primary": "#22313f", "background": "#fbfaf8", "text": "#22313f", "surface": "#ffffff", "accent": "#d9a441", "secondary": "#5b6570" },
+    "typography": { "headingFont": "Fraunces", "bodyFont": "Inter", "headingWeight": 400 },
+    "buttons": { "style": "solid", "radius": "soft" },
+    "layout": { "contentWidth": 1200, "sectionGap": 80 },
+    "productCard": { "imageRatio": "portrait", "alignment": "left" },
+    "branding": { "logoUrl": "" }
+  },
+  "settingsSchema": [
+    { "id": "colors.background", "type": "color", "label": "Page background", "group": "Colours", "default": "#fbfaf8" },
+    { "id": "colors.surface", "type": "color", "label": "Cards and panels", "group": "Colours", "default": "#ffffff" },
+    { "id": "colors.text", "type": "color", "label": "Text", "group": "Colours", "default": "#22313f" },
+    { "id": "colors.secondary", "type": "color", "label": "Soft text", "group": "Colours", "default": "#5b6570" },
+    { "id": "colors.primary", "type": "color", "label": "Buttons", "group": "Colours", "default": "#22313f" },
+    { "id": "colors.accent", "type": "color", "label": "Highlight", "group": "Colours", "default": "#d9a441" },
+    { "id": "typography.headingFont", "type": "font", "label": "Heading font", "group": "Typography", "default": "Fraunces", "options": [{ "value": "Fraunces", "label": "Fraunces" }, { "value": "Inter", "label": "Inter" }] },
+    { "id": "typography.bodyFont", "type": "font", "label": "Body font", "group": "Typography", "default": "Inter", "options": [{ "value": "Inter", "label": "Inter" }, { "value": "Fraunces", "label": "Fraunces" }] },
+    { "id": "typography.headingWeight", "type": "range", "label": "Heading weight", "group": "Typography", "default": 400, "min": 300, "max": 700, "step": 100 },
+    { "id": "buttons.radius", "type": "select", "label": "Button corners", "group": "Buttons", "default": "soft", "options": [{ "value": "square", "label": "Square" }, { "value": "soft", "label": "Slightly rounded" }, { "value": "rounded", "label": "Rounded" }, { "value": "pill", "label": "Pill" }] },
+    { "id": "layout.contentWidth", "type": "range", "label": "Page width", "group": "Layout", "default": 1200, "min": 960, "max": 1600, "step": 32 },
+    { "id": "layout.sectionGap", "type": "range", "label": "Space between sections", "group": "Layout", "default": 80, "min": 32, "max": 160, "step": 8 },
+    { "id": "productCard.imageRatio", "type": "select", "label": "Product image shape", "group": "Product cards", "default": "portrait", "options": [{ "value": "portrait", "label": "Portrait" }, { "value": "square", "label": "Square" }, { "value": "landscape", "label": "Landscape" }] },
+    { "id": "productCard.alignment", "type": "alignment", "label": "Product text alignment", "group": "Product cards", "default": "left", "options": [{ "value": "left", "label": "Left" }, { "value": "center", "label": "Centre" }] },
+    { "id": "branding.logoUrl", "type": "image", "label": "Store logo", "group": "Branding", "default": "" }
+  ],
+  "sections": [
+    {
+      "type": "jelly-studio/promo-banner",
+      "name": "Promo banner",
+      "supportedPages": [
+        "home",
+        "page"
+      ],
+      "settings": [
+        {
+          "id": "heading",
+          "type": "text",
+          "label": "Heading",
+          "default": "Free delivery this month"
+        },
+        {
+          "id": "body",
+          "type": "textarea",
+          "label": "Text",
+          "default": "Order before Friday and we cover the postage."
+        },
+        {
+          "id": "showButton",
+          "type": "checkbox",
+          "label": "Show the button",
+          "default": true
+        },
+        {
+          "id": "buttonLabel",
+          "type": "text",
+          "label": "Button text",
+          "default": "Shop now"
+        },
+        {
+          "id": "buttonLink",
+          "type": "link",
+          "label": "Button link",
+          "default": "/search"
+        },
+        {
+          "id": "photo",
+          "type": "image",
+          "label": "Photo"
+        }
+      ],
+      "layout": {
+        "direction": "horizontal",
+        "align": "left",
+        "gap": 32,
+        "width": "wide"
+      },
+      "elements": [
+        {
+          "kind": "image",
+          "image": "{photo}",
+          "ratio": "landscape"
+        },
+        {
+          "kind": "group",
+          "direction": "vertical",
+          "gap": 12,
+          "elements": [
+            {
+              "kind": "heading",
+              "text": "{heading}"
+            },
+            {
+              "kind": "text",
+              "text": "{body}"
+            },
+            {
+              "kind": "button",
+              "label": "{buttonLabel}",
+              "href": "{buttonLink}",
+              "when": "showButton"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

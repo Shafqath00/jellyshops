@@ -1,0 +1,34 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "jellyshops-qa",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd jellyshops && set JELLY_E2E_NEXT_DIST_DIR=.next/qa&& set NEXT_PUBLIC_STORE_EDITOR_API_URL=http://127.0.0.1:3001&& npx next dev --turbopack -p 3200"
+      ],
+      "port": 3200
+    },
+    {
+      "name": "resthaven-theme",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "jellyshops/packages/theme-cli/bin/jelly-theme.mjs",
+        "dev",
+        "jellyshops/packages/storefront-themes/src/themes/jelly-resthaven"
+      ],
+      "port": 5273
+    },
+    {
+      "name": "jellyshops-admin",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd jellyshops && set JELLY_E2E_NEXT_DIST_DIR=.next/qa&& set NEXT_PUBLIC_STORE_EDITOR_API_URL=http://127.0.0.1:3001&& npx next dev --turbopack -p 3210"
+      ],
+      "port": 3210,
+      "autoPort": false
+    }
+  ]
+}

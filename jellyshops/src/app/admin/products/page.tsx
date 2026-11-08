@@ -1,15 +1,112 @@
 "use client";
-
-import Image from "next/image";
 import Link from "next/link";
-import { PackageOpen, Plus, Search } from "lucide-react";
-import { useShop } from "@/contexts/shop-context";
-import { formatMoney } from "@/lib/domain";
-import { EmptyState } from "@/components/empty-state";
+import { ImageIcon, Package } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "@/features/auth/providers/auth-provider";
+import { AdminPage, EmptyState, IndexTable, Picker, StatusBadge, useToast, type IndexColumn, type IndexTab } from "@/components/admin";
+import { useAdminCatalog, type CatalogAdminProduct, type CatalogPage, type CollectionRow } from "@/features/admin/api/catalog-api";
+
+type ProductStatus = CatalogAdminProduct["status"];
+const TABS: IndexTab[] = [{ id: "", label: "All" }, { id: "ACTIVE", label: "Active" }, { id: "DRAFT", label: "Draft" }, { id: "ARCHIVED", label: "Archived" }];
+const SORTS = [{ value: "title-asc", label: "Name A–Z" }, { value: "newest", label: "Newest first" }, { value: "price-asc", label: "Price, low to high" }, { value: "price-desc", label: "Price, high to low" }];
+const STATUS_WORDS: Record<ProductStatus, string> = { ACTIVE: "active", DRAFT: "draft", ARCHIVED: "archived" };
+
+/** "40 in stock for 4 variants", or "Not tracked" when no variant counts stock. */
+function stockSummary(product: CatalogAdminProduct) {
+  const tracked = product.variants.filter((variant) => variant.trackInventory !== false);
+  if (!tracked.length) return { text: "Not tracked", low: false };
+  const stock = tracked.reduce((sum, variant) => sum + Math.max(0, (variant.quantity ?? 0) - (variant.reserved ?? 0)), 0);
+  const variants = product.variants.length > 1 ? ` for ${product.variants.length} variants` : "";
+  return { text: `${stock} in stock${variants}`, low: stock === 0 };
+}
 
 export default function ProductsPage() {
-  const { state } = useShop();
-  const store = state.stores.find((item) => item.id === state.activeStoreId)!;
-  const products = state.products.filter((product) => product.storeId === store.id && !product.archived);
-  return <div className="admin-page"><header className="page-head split-head"><div><span className="page-kicker">Catalog</span><h1>Products</h1><p>Everything customers can discover in your shop.</p></div><Link className="button button-primary" href="/admin/products/new"><Plus size={17} /> Add product</Link></header><div className="toolbar"><div className="search-box"><Search size={17} /><input aria-label="Search products" placeholder="Search products" /></div><span>{products.length} products</span></div>{products.length === 0 ? <EmptyState icon={PackageOpen} title="Your shelf is empty" body="Add your first product and it will appear here." action="Add product" href="/admin/products/new" /> : <div className="data-card product-table"><div className="data-head"><span>Product</span><span>Status</span><span>Stock</span><span>Price</span></div>{products.map((product) => { const variant = product.variants[0]; return <Link href={`/admin/products/${product.id}`} className="data-row" key={product.id}><div className="product-cell"><span className="table-thumb"><Image src={product.imageUrl} alt="" fill sizes="48px" /></span><span><b>{product.name}</b><small>{product.category} · {variant.sku}</small></span></div><span className={product.published ? "availability-live" : "availability-draft"}>{product.published ? "Live" : "Draft"}</span><span className={variant.stock <= 3 ? "low-stock" : ""}>{variant.stock} in stock</span><b>{formatMoney(variant.priceMinor, store.currency)}</b></Link>; })}</div>}</div>;
+  const { request, all, ready, storeId } = useAdminCatalog(), { activeStore } = useAuth();
+  const [collectionFor, setCollectionFor] = useState<string[] | null>(null);
+  const [collections, setCollections] = useState<CollectionRow[]>([]);
+  const toast = useToast();
+  const [rows, setRows] = useState<CatalogAdminProduct[]>([]), [query, setQuery] = useState(""), [search, setSearch] = useState(""), [status, setStatus] = useState(""), [sort, setSort] = useState("title-asc");
+  const [cursor, setCursor] = useState<string | null>(null), [history, setHistory] = useState<Array<string | null>>([]), [next, setNext] = useState<string | null>(null);
+  const [error, setError] = useState(""), [loading, setLoading] = useState(true), [revision, setRevision] = useState(0);
+  useEffect(() => {
+    let active = true;
+    if (!ready) return;
+    setLoading(true);
+    const params = new URLSearchParams({ limit: "50", sort });
+    if (search.trim()) params.set("query", search.trim());
+    if (status) params.set("status", status);
+    if (cursor) params.set("cursor", cursor);
+    void request<CatalogPage<CatalogAdminProduct>>("/products?" + params)
+      .then((page) => { if (active) { setRows(page.nodes); setNext(page.nextCursor); setError(""); } })
+      .catch((failure: Error) => { if (active) setError(failure.message); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [request, ready, storeId, search, status, sort, cursor, revision]);
+  const reset = () => { setCursor(null); setHistory([]); };
+  const money = (minor: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: activeStore?.currency ?? "GBP" }).format(minor / 100);
+  async function setStatusFor(ids: string[], value: ProductStatus) {
+    const results = await Promise.allSettled(ids.map((id) => request(`/products/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify({ status: value }) })));
+    const failed = results.filter((result) => result.status === "rejected").length;
+    setRevision((n) => n + 1);
+    if (failed) throw new Error(`${failed} of ${ids.length} products could not be changed. Try again.`);
+    toast(`${ids.length} ${ids.length === 1 ? "product" : "products"} set to ${STATUS_WORDS[value]}`);
+  }
+  const loadCollections = useCallback(async (query: string) => {
+    const rows = await all<CollectionRow>("/collections");
+    setCollections(rows);
+    return rows.filter((row) => row.title.toLowerCase().includes(query.toLowerCase())).map((row) => ({ id: row.id, label: row.title, detail: `${row.productIds.length} ${row.productIds.length === 1 ? "product" : "products"}` }));
+  }, [all]);
+  async function addToCollection(ids: string[], collectionId: string) {
+    const collection = collections.find((row) => row.id === collectionId);
+    if (!collection) return;
+    const productIds = [...new Set([...collection.productIds, ...ids])];
+    try {
+      await request(`/collections/${encodeURIComponent(collectionId)}`, { method: "PATCH", body: JSON.stringify({ productIds }) });
+      toast(`${ids.length} ${ids.length === 1 ? "product" : "products"} added to ${collection.title}`);
+    } catch (failure) { toast(failure instanceof Error ? failure.message : "Could not update the collection.", { tone: "critical" }); }
+  }
+  const columns: IndexColumn<CatalogAdminProduct>[] = [
+    { id: "product", header: "Product", mobile: "primary", cell: (product) => <Link href={"/admin/products/" + product.id} className="flex min-w-44 items-center gap-3 font-semibold">
+      {product.media[0] ? <img src={product.media[0].url} alt="" width={40} height={40} className="jk-thumb" /> : <span className="jk-thumb"><ImageIcon size={17} aria-hidden="true" /></span>}{product.title}</Link> },
+    { id: "status", header: "Status", cell: (product) => <StatusBadge kind="product" value={product.status} /> },
+    { id: "stock", header: "Inventory", cell: (product) => { const stock = stockSummary(product); return <span className={stock.low ? "text-[var(--jk-critical-text)]" : ""}>{stock.text}</span>; } },
+    { id: "price", header: "Price", align: "end", cell: (product) => <span className="tabular-nums">{money(product.variants[0]?.priceMinor ?? 0)}</span> },
+    { id: "type", header: "Type", mobile: "hidden", cell: (product) => product.productType || <span className="jk-muted">None</span> },
+    { id: "vendor", header: "Brand or supplier", mobile: "hidden", cell: (product) => product.vendor || <span className="jk-muted">None</span> },
+  ];
+  const filtered = Boolean(search || status);
+  return <AdminPage title="Products" description="Everything you sell. Open a product to change its photos, price or stock." primaryAction={{ label: "Add product", href: "/admin/products/new" }}>
+    <IndexTable
+      label="Products"
+      rows={rows}
+      rowKey={(product) => product.id}
+      rowLabel={(product) => product.title}
+      columns={columns}
+      loading={loading}
+      error={error}
+      onRetry={() => setRevision((n) => n + 1)}
+      tabs={TABS}
+      activeTab={status}
+      onTabChange={(value) => { setStatus(value); reset(); }}
+      search={{ value: query, onChange: setQuery, label: "Search products", placeholder: "Search by name or SKU, then press Enter", onSubmit: () => { setSearch(query); reset(); } }}
+      filters={<label><span className="sr-only">Sort products</span><select className="jk-select" value={sort} onChange={(event) => { setSort(event.target.value); reset(); }}>{SORTS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>}
+      bulkActions={[
+        { label: "Set as active", onAction: (ids) => setStatusFor(ids, "ACTIVE") },
+        { label: "Set as draft", onAction: (ids) => setStatusFor(ids, "DRAFT") },
+        { label: "Archive", onAction: (ids) => setStatusFor(ids, "ARCHIVED") },
+        { label: "Add to collection", onAction: (ids) => setCollectionFor(ids) },
+      ]}
+      emptyState={filtered
+        ? <EmptyState icon={Package} title="No matching products" description="Try another search, or choose All to see every product." />
+        : <EmptyState icon={Package} title="Add your first product" description="Give customers something to discover in your store. You can add photos, prices and sizes in one place." action={<Link href="/admin/products/new" className="jk-button jk-button-primary">Add product</Link>} />}
+      pagination={{
+        hasPrevious: history.length > 0,
+        hasNext: Boolean(next),
+        onPrevious: () => { setCursor(history.at(-1) ?? null); setHistory((current) => current.slice(0, -1)); },
+        onNext: () => { setHistory((current) => [...current, cursor]); setCursor(next); },
+      }}
+    />
+    <Picker open={collectionFor !== null} onOpenChange={(open) => { if (!open) setCollectionFor(null); }} title="Add to collection" searchLabel="Search collections" multiple={false} doneLabel="Add products"
+      load={loadCollections} onDone={(picked) => { const ids = collectionFor ?? []; if (picked[0]) void addToCollection(ids, picked[0].id); }} />
+  </AdminPage>;
 }

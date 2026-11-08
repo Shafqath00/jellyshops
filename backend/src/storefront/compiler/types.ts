@@ -7,6 +7,7 @@ import type { TemplateType } from "../workspace/repositories/template-repository
 
 export interface CompilerResponsiveSettings {
   mobile?: Record<string, unknown>;
+  tablet?: Record<string, unknown>;
 }
 
 export interface CompilerBlockNode {
@@ -15,6 +16,8 @@ export interface CompilerBlockNode {
   enabled?: boolean;
   settings: Record<string, unknown>;
   responsive?: CompilerResponsiveSettings;
+  /** Blocks inside a group block. */
+  blocks?: CompilerBlockNode[];
 }
 
 export interface CompilerSectionNode {
@@ -85,8 +88,11 @@ export interface StorefrontCompilationInput {
   generation: number;
   theme: {
     presetId: string;
+    id?: string;
+    version?: string;
     settings: Record<string, unknown>;
     artifactId: string | null;
+    fallbackReason?: "theme-unavailable" | "version-unavailable";
   };
   templates: CompilerTemplateInput[];
   globalSections: CompilerGlobalSectionInput[];
@@ -113,8 +119,8 @@ export interface RegistrySectionIssue {
 }
 
 export interface CompilerRegistry {
-  validateSection(section: CompilerSectionNode, templateType: TemplateType): RegistrySectionIssue[];
-  dynamicSettingType(sectionType: string, fieldKey: string, blockType?: string): DynamicValueType | null;
+  validateSection(section: CompilerSectionNode, templateType: TemplateType, theme?: StorefrontCompilationInput["theme"]): RegistrySectionIssue[];
+  dynamicSettingType(sectionType: string, fieldKey: string, blockType?: string, theme?: StorefrontCompilationInput["theme"]): DynamicValueType | null;
 }
 
 export interface CompilerDynamicSourceResolver {

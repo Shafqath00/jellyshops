@@ -1,0 +1,67 @@
+import type { GlobalSettings, ThemeId } from "@jelly/storefront-schema";
+import { getThemeDefinition, resolveDesignTokens } from "./theme-registry.js";
+import { resolveThemeStyleTokens, themeStyleDefaultsFrom } from "./theme-style-settings.js";
+
+export interface LegacyStoreThemeValues {
+  accent?: string;
+  accentSoft?: string;
+  background?: string;
+  surface?: string;
+  text?: string;
+  displayFont?: "serif" | "rounded";
+}
+
+const color = (value: unknown, fallback: string) => typeof value === "string" && /^(#[\da-f]{3,8}|(?:rgb|hsl)a?\([^\n]+\)|[a-z]+)$/i.test(value.trim()) ? value.trim() : fallback;
+
+/** Resolves one canonical token layer for every storefront route. */
+export function resolveStorefrontThemeTokens(themeId: ThemeId | string, settings: Record<string, unknown> = {}, legacy: LegacyStoreThemeValues = {}, version?: string | null): Record<string, string> {
+  const modern = settings as Record<string, unknown> & { colors?: Record<string, unknown>; typography?: Record<string, unknown>; layout?: Record<string, unknown>; buttons?: Record<string, unknown>; header?: Record<string, unknown>; footer?: Record<string, unknown>; productCards?: Record<string, unknown> };
+  const merged = {
+    ...modern,
+    colors: {
+      background: legacy.background,
+      surface: legacy.surface,
+      text: legacy.text,
+      accent: legacy.accent,
+      ...(modern.colors ?? {}),
+    },
+    typography: {
+      headingFont: legacy.displayFont === "rounded" ? "Arial Rounded MT Bold" : legacy.displayFont === "serif" ? "Georgia" : undefined,
+      ...(modern.typography ?? {}),
+    },
+  } as unknown as GlobalSettings;
+  const base = resolveDesignTokens(themeId, merged, version);
+  const bounded = (value: unknown, fallback: number, min: number, max: number) => typeof value === "number" && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
+  if (typeof modern.layout?.contentWidth === "number") base["--jelly-container-width"] = `${bounded(modern.layout.contentWidth, 1280, 960, 1600)}px`;
+  if (typeof modern.layout?.sectionGap === "number") base["--jelly-spacing-section"] = `${bounded(modern.layout.sectionGap, 80, 24, 160)}px`;
+  base["--jelly-color-secondary"] = color(modern.colors?.secondary, base["--jelly-color-secondary"]);
+  base["--jelly-heading-weight"] = String(bounded(modern.typography?.headingWeight, 400, 300, 800));
+  base["--jelly-body-weight"] = String(bounded(modern.typography?.bodyWeight, 400, 300, 700));
+  base["--jelly-body-size"] = `${bounded(modern.typography?.bodySize, 16, 14, 22)}px`;
+  base["--jelly-heading-size"] = `${bounded(modern.typography?.headingSize, 56, 28, 88)}px`;
+  const background = color(base["--jelly-color-background"], "#ffffff");
+  const surface = color(base["--jelly-color-surface"], background);
+  const text = color(base["--jelly-color-text"], "#1a1a1a");
+  const accent = color(base["--jelly-color-accent"], "#315e24");
+  const accentSoft = color(modern.colors?.accentSoft ?? legacy.accentSoft, `color-mix(in srgb, ${accent} 18%, ${background})`);
+  const card = (modern as { productCard?: Record<string, unknown> }).productCard ?? {};
+  base["--jelly-card-ratio"] = card.imageRatio === "square" ? "1 / 1" : card.imageRatio === "landscape" ? "4 / 3" : "4 / 5";
+  base["--jelly-card-align"] = card.alignment === "center" ? "center" : "start";
+  base["--jelly-card-border"] = card.style === "bordered" ? "1px solid var(--theme-border)" : "0";
+  base["--jelly-card-padding"] = card.style === "bordered" ? "12px" : "0";
+  if (typeof card.gridSpacing === "string") base["--jelly-grid-gap"] = card.gridSpacing === "none" ? "0px" : card.gridSpacing === "large" ? "32px" : "12px";
+  const heading = base["--jelly-font-display"];
+  const body = base["--jelly-font-body"];
+  const semantic = {
+    "--theme-background": background, "--theme-surface": surface, "--theme-text": text,
+    "--theme-muted-text": base["--jelly-color-muted"] || `color-mix(in srgb, ${text} 75%, transparent)`,
+    "--theme-accent": accent, "--theme-accent-soft": accentSoft,
+    "--theme-border": base["--jelly-color-border"] || `color-mix(in srgb, ${text} 18%, transparent)`,
+    "--theme-font-heading": heading, "--theme-font-body": body,
+  };
+  // Text styles, colour schemes and button extras (themes that declare them).
+  let styleDefaults: ReturnType<typeof themeStyleDefaultsFrom>;
+  try { styleDefaults = themeStyleDefaultsFrom((getThemeDefinition(themeId as ThemeId, version).manifest as { settingsDefaults?: Record<string, unknown> }).settingsDefaults); } catch { styleDefaults = undefined; }
+  const style = resolveThemeStyleTokens(modern, styleDefaults);
+  return { ...base, ...semantic, ...style, "--store-bg": background, "--store-surface": surface, "--store-text": text, "--store-accent": accent, "--store-accent-soft": accentSoft, "--store-display": heading };
+}

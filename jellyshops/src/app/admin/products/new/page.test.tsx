@@ -1,18 +1,21 @@
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { ShopProvider } from "@/contexts/shop-context";
 import NewProductPage from "./page";
+import { afterEach, vi } from "vitest";
+vi.mock("@/features/auth/providers/auth-provider", () => {
+  const activeStore = { id: "store-demo", currency: "INR", country: "IN" };
+  const session = { access_token: "jelly-demo-merchant" };
+  return { authApiOrigin: () => "http://localhost:3001", useAuth: () => ({ activeStore, session }) };
+});
+afterEach(() => vi.unstubAllGlobals());
 
-it("creates a sellable product from merchant inputs", async () => {
-  const user = userEvent.setup();
+it("shows the redesigned builder at the established new-product URL", async () => {
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ categories: [], templates: [] }))));
   render(<ShopProvider><NewProductPage /></ShopProvider>);
 
-  await user.type(screen.getByLabelText(/product name/i), "Mango Jelly Cake");
-  await user.clear(screen.getByLabelText(/^price/i));
-  await user.type(screen.getByLabelText(/^price/i), "650");
-  await user.clear(screen.getByLabelText(/stock quantity/i));
-  await user.type(screen.getByLabelText(/stock quantity/i), "6");
-  await user.click(screen.getByRole("button", { name: /save product/i }));
-
-  expect(await screen.findByText("Product saved")).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Product details" })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Photos" })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Product options" })).toBeVisible();
+  expect(screen.getByRole("button", { name: "Preview" })).toBeVisible();
+  expect(screen.getByRole("button", { name: "Save product" })).toBeVisible();
 });

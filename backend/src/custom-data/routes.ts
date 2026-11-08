@@ -4,6 +4,7 @@ import { requireMerchant, requireStorePermission } from "../auth/middleware.js";
 import type { AuthProvider } from "../auth/types.js";
 import { dynamicValueTypeSchema, metafieldDefinitionSchema, metaobjectDefinitionSchema } from "@jelly/storefront-schema";
 import type { CustomDataService, MetaobjectService } from "./service.js";
+import type { OwnerMetafieldService } from "./owner-values.js";
 import type { DynamicSourceRegistry, TemplateContext } from "../dynamic-sources/registry.js";
 
 const ownerTypeSchema = z.enum(["store", "product", "variant", "collection", "page", "blog", "article"]);
@@ -30,6 +31,8 @@ type CustomDataRoutesDependencies = {
   metaobjects: Pick<MetaobjectService,
     "createDefinition" | "listDefinitions" | "updateDefinition" | "createEntry" | "listEntries" | "updateEntry">;
   registry: Pick<DynamicSourceRegistry, "listDynamicSources">;
+  /** Values of one kind of item at a time (a product and its variants), for the product editor. */
+  ownerValues?: Pick<OwnerMetafieldService, "list" | "save">;
 };
 
 export function createCustomDataRouter(
@@ -64,6 +67,20 @@ export function createCustomDataRouter(
       String(request.params.definitionId),
       definitionPatchSchema.parse(request.body),
     ));
+  });
+
+  router.get("/metafield-values", requireStorePermission("storefront:view"), async (request, response) => {
+    const query = z.object({ ownerType: ownerTypeSchema, ownerId: z.string().min(1).max(200).optional(), ownerIds: z.string().min(1).max(20_000).optional() }).parse(request.query);
+    const ids = query.ownerIds ? query.ownerIds.split(",").map((id) => id.trim()).filter(Boolean) : query.ownerId ? [query.ownerId] : [];
+    if (ids.length === 0) { response.status(400).json({ error: { code: "OWNER_REQUIRED", message: "Say which items to load values for." } }); return; }
+    if (!dependencies.ownerValues) { response.status(503).json({ error: { code: "UNAVAILABLE", message: "Custom data is unavailable." } }); return; }
+    response.json({ values: await dependencies.ownerValues.list(request.storeContext!.storeId, query.ownerType, ids) });
+  });
+
+  router.put("/metafield-values", requireStorePermission("custom_data:edit"), async (request, response) => {
+    const body = z.object({ ownerType: ownerTypeSchema, ownerId: z.string().min(1).max(200), values: z.record(z.string().min(1).max(200), z.unknown()) }).strict().parse(request.body);
+    if (!dependencies.ownerValues) { response.status(503).json({ error: { code: "UNAVAILABLE", message: "Custom data is unavailable." } }); return; }
+    response.json(await dependencies.ownerValues.save(request.storeContext!.storeId, body.ownerType, body.ownerId, body.values));
   });
 
   router.put("/metafields/:definitionId/owners/:ownerId", requireStorePermission("custom_data:edit"), async (request, response) => {

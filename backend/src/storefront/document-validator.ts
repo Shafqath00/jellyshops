@@ -16,7 +16,7 @@ export const storefrontDocumentValidator = {
       input &&
       typeof input === "object" &&
       "schemaVersion" in input &&
-      input.schemaVersion === 2
+      (input.schemaVersion === 2 || input.schemaVersion === 3)
     ) {
       throw direct.error;
     }

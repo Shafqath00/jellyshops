@@ -41,6 +41,7 @@ export async function validateBindings(
           occurrence.sectionType,
           occurrence.fieldKey,
           occurrence.blockType,
+          input.theme,
         );
         if (!expectedType) continue;
         try {

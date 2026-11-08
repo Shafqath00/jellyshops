@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createDefaultStorefrontDocument } from "@jelly/storefront-schema";
 import { describe, expect, it, vi } from "vitest";
@@ -25,7 +25,7 @@ describe("editor shell", () => {
     expect(screen.getByTestId("section-hero")).toHaveAttribute("data-editor-selected", "true");
 
     await user.click(screen.getByTestId("section-rich-text"));
-    expect(screen.getByRole("heading", { name: "Rich text settings" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Text settings" })).toBeInTheDocument();
   });
 
   it("keeps the section tree visible while the selected section inspector is open", async () => {
@@ -36,36 +36,29 @@ describe("editor shell", () => {
 
     expect(screen.getByRole("heading", { name: "Home page" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Rich text section" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Hero settings" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Hero banner settings" })).toBeInTheDocument();
     expect(screen.getByLabelText("Storefront preview")).toBeInTheDocument();
   });
 
-  it("shows blocks below their parent section in the left hierarchy", async () => {
-    const user = userEvent.setup();
+  it("keeps the compatibility hierarchy section-only", () => {
     render(<EditorShell initialDocument={documentWithRichText()} revision={0} commerce={commerce} onSave={vi.fn()} onPublish={vi.fn()} />);
 
-    await user.click(screen.getByRole("button", { name: "Heading block in Hero" }));
-
-    expect(screen.getByRole("heading", { name: "Heading block settings" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Hero section" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /block in Hero/i })).not.toBeInTheDocument();
   });
 
-  it("supports non-drag section ordering and device previews", async () => {
+  it("supports device previews in the compatibility shell", async () => {
     const user = userEvent.setup();
     render(<EditorShell initialDocument={documentWithRichText()} revision={0} commerce={commerce} onSave={vi.fn()} onPublish={vi.fn()} />);
-
-    await user.click(screen.getByRole("button", { name: "Move Hero down" }));
-    expect(within(screen.getByTestId("template-hierarchy")).getAllByTestId("hierarchy-row").map((row) => row.textContent)).toEqual([
-      expect.stringContaining("Product grid"), expect.stringContaining("Hero"), expect.stringContaining("Rich text"),
-    ]);
 
     await user.click(screen.getByRole("button", { name: "Mobile preview" }));
     expect(screen.getByTestId("preview-viewport")).toHaveAttribute("data-viewport", "mobile");
   });
 
-  it("exposes a keyboard-accessible drag handle for sections", () => {
+  it("exposes keyboard-accessible section selection", () => {
     render(<EditorShell initialDocument={documentWithRichText()} revision={0} commerce={commerce} onSave={vi.fn()} onPublish={vi.fn()} />);
 
-    expect(screen.getByRole("button", { name: "Drag Hero section" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Hero section" })).toBeInTheDocument();
   });
 
   it("opens section and block settings and updates the live preview", async () => {
@@ -73,14 +66,15 @@ describe("editor shell", () => {
     render(<EditorShell initialDocument={documentWithRichText()} revision={0} commerce={commerce} onSave={vi.fn()} onPublish={vi.fn()} />);
 
     await user.click(screen.getByRole("button", { name: "Hero section" }));
-    expect(screen.getByRole("heading", { name: "Hero settings" })).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: "Eyebrow" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Hero banner settings" })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Small text above heading" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Heading block" }));
     const heading = screen.getByRole("textbox", { name: "Heading" });
     await user.clear(heading);
     await user.type(heading, "Fresh arrivals");
-    expect(screen.getByText("Fresh arrivals")).toBeInTheDocument();
+    // The heading field is a formatted text box, so check the preview's heading.
+    expect(screen.getByRole("heading", { name: "Fresh arrivals" })).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Back to page hierarchy" }));
     expect(screen.getByRole("heading", { name: "Home page" })).toBeInTheDocument();
@@ -102,47 +96,27 @@ describe("editor shell", () => {
 
     const heading = screen.getByRole("heading", { name: "Welcome" });
     await user.click(heading);
-    await user.click(screen.getByRole("button", { name: "Move Hero down" }));
     await user.click(heading);
 
     expect(screen.getByRole("textbox", { name: "Heading" })).toHaveFocus();
   });
 
-  it("adds a registered section from the section picker", async () => {
-    const user = userEvent.setup();
+  it("does not expose workspace-only section creation in the compatibility shell", () => {
     render(<EditorShell initialDocument={documentWithRichText()} revision={0} commerce={commerce} onSave={vi.fn()} onPublish={vi.fn()} />);
 
-    await user.click(screen.getByRole("button", { name: "Add section" }));
-    expect(screen.getByRole("dialog", { name: "Add section" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Add Newsletter" }));
-
-    expect(screen.getByRole("heading", { name: "Newsletter settings" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Back to page hierarchy" }));
-    expect(screen.getByRole("button", { name: "Newsletter section" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add section" })).not.toBeInTheDocument();
   });
 
-  it("groups add-section presets into Shopify-style categories", async () => {
-    const user = userEvent.setup();
+  it("labels the compatibility hierarchy as a legacy preview", () => {
     render(<EditorShell initialDocument={documentWithRichText()} revision={0} commerce={commerce} onSave={vi.fn()} onPublish={vi.fn()} />);
 
-    await user.click(screen.getByRole("button", { name: "Add section" }));
-
-    expect(screen.getByRole("heading", { name: "Banners" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Products" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Content" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Marketing" })).toBeInTheDocument();
+    expect(screen.getByText("Legacy page preview")).toBeInTheDocument();
   });
 
-  it("edits global theme colors from theme settings", async () => {
-    const user = userEvent.setup();
+  it("does not expose the retired theme inspector", () => {
     render(<EditorShell initialDocument={documentWithRichText()} revision={0} commerce={commerce} onSave={vi.fn()} onPublish={vi.fn()} />);
 
-    await user.click(screen.getByRole("button", { name: "Theme settings" }));
-    expect(screen.getByRole("heading", { name: "Theme settings" })).toBeInTheDocument();
-    await user.clear(screen.getByLabelText("Background color"));
-    await user.type(screen.getByLabelText("Background color"), "#123456");
-
-    expect(screen.getByTestId("preview-viewport").querySelector(".jelly-storefront")).toHaveStyle({ "--jelly-color-background": "#123456" });
+    expect(screen.queryByRole("button", { name: "Theme settings" })).not.toBeInTheDocument();
   });
 
   it("autosaves a changed draft after the debounce delay", async () => {
@@ -151,8 +125,8 @@ describe("editor shell", () => {
     render(<EditorShell initialDocument={documentWithRichText()} revision={2} commerce={commerce} onSave={onSave} onPublish={vi.fn()} />);
 
     await user.click(screen.getByRole("button", { name: "Hero section" }));
-    await user.clear(screen.getByRole("textbox", { name: "Eyebrow" }));
-    await user.type(screen.getByRole("textbox", { name: "Eyebrow" }), "New");
+    await user.clear(screen.getByRole("textbox", { name: "Small text above heading" }));
+    await user.type(screen.getByRole("textbox", { name: "Small text above heading" }), "New");
     expect(onSave).not.toHaveBeenCalled();
 
     await waitFor(() => expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ storeId: "store-demo" }), 2), { timeout: 1200 });
@@ -167,8 +141,8 @@ describe("editor shell", () => {
     render(<EditorShell initialDocument={documentWithRichText()} revision={2} commerce={commerce} onSave={onSave} onPublish={vi.fn()} onReload={onReload} />);
 
     await user.click(screen.getByRole("button", { name: "Hero section" }));
-    await user.clear(screen.getByRole("textbox", { name: "Eyebrow" }));
-    await user.type(screen.getByRole("textbox", { name: "Eyebrow" }), "New");
+    await user.clear(screen.getByRole("textbox", { name: "Small text above heading" }));
+    await user.type(screen.getByRole("textbox", { name: "Small text above heading" }), "New");
 
     await waitFor(() => expect(screen.getByText("Conflict detected")).toBeInTheDocument(), { timeout: 1200 });
     expect(onSave).toHaveBeenCalledTimes(1);
@@ -190,7 +164,7 @@ describe("editor shell", () => {
 
     await waitFor(() => expect(onPublish).toHaveBeenCalledWith(expect.objectContaining({ storeId: "store-demo" }), 8));
     expect(onSave.mock.invocationCallOrder[0]).toBeLessThan(onPublish.mock.invocationCallOrder[0]);
-    expect(onSave.mock.calls[0][0].regions.template[0].blocks[0].settings.text).toBe("Ready to publish");
+    expect(onSave.mock.calls.at(-1)?.[0].regions.template[0].blocks[0].settings.text).toBe("Ready to publish");
   });
 
   it("prevents overlapping save and publish operations", async () => {

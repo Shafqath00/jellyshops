@@ -1,0 +1,18 @@
+[
+  {
+    "id": "41b59687-f58e-4043-9d04-a5e9904e7fd2",
+    "storeId": "store-demo",
+    "type": "image",
+    "storageKey": "store-demo\\41b59687-f58e-4043-9d04-a5e9904e7fd2.png",
+    "contentHash": "431ced6916a2a21a156e38701afe55bbd7f88969fbbfc56d7fe099d47f265460",
+    "url": "/api/public/media/store-demo/41b59687-f58e-4043-9d04-a5e9904e7fd2",
+    "mimeType": "image/png",
+    "byteSize": 91,
+    "width": 1,
+    "height": 1,
+    "originalName": "hero.png",
+    "altText": null,
+    "referenced": false,
+    "createdAt": "2026-10-29T18:01:04.626Z"
+  }
+]

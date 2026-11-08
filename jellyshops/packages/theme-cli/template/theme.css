@@ -1,0 +1,96 @@
+/*
+ * Styles for __NAME__.
+ *
+ * Write plain CSS: the platform limits every rule to this theme when it loads the stylesheet, so
+ * "h1 { … }" only affects this theme's pages and "& { … }" is the theme's page itself. Read the
+ * theme's tokens (--theme-*, --jelly-*), never fixed colours, so the settings in theme.json and a
+ * merchant's own choices apply everywhere. @media, @supports and @keyframes work; @import,
+ * @font-face and images that are not https links do not. The preview reloads as you save.
+ */
+& {
+  background: var(--theme-background);
+  color: var(--theme-text);
+  font-family: var(--theme-font-body);
+  font-size: var(--jelly-body-size);
+  line-height: 1.6;
+}
+h1,
+h2,
+h3 {
+  font-family: var(--theme-font-heading);
+  font-weight: var(--jelly-heading-weight);
+  line-height: 1.15;
+  margin: 0 0 0.5em;
+}
+/* Page titles stay calm; only heroes, slideshows and banners use the big heading size. */
+h1 { font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.5rem); }
+:is(.jelly-hero, .jelly-slideshow, .jelly-image-banner) h1 { font-size: var(--jelly-heading-size); }
+h2 { font-size: calc(var(--jelly-heading-size) * 0.62); }
+a { color: inherit; }
+ul { list-style: none; margin: 0; padding: 0; }
+
+/* Layout */
+.jelly-container { max-width: var(--jelly-container-width); margin: 0 auto; padding: 0 var(--jelly-layout-gutter); }
+.jelly-section { padding: var(--jelly-spacing-section) 0; }
+
+/* Buttons */
+.jelly-button {
+  display: inline-block; padding: 0.8em 1.6em; border: 1px solid var(--theme-text); border-radius: var(--jelly-radius-button);
+  background: var(--theme-text); color: var(--theme-background); text-decoration: none; font: inherit; cursor: pointer;
+}
+.jelly-button:hover { background: var(--theme-accent); border-color: var(--theme-accent); color: var(--theme-text); }
+
+/* Announcement, header and footer */
+.jelly-announcement { padding: 8px var(--jelly-layout-gutter); background: var(--theme-text); color: var(--theme-background); text-align: center; font-size: 0.875rem; }
+.jelly-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 20px var(--jelly-layout-gutter); border-bottom: 1px solid var(--theme-border); }
+.jelly-header-brand { font-family: var(--theme-font-heading); font-size: 1.5rem; text-decoration: none; }
+.jelly-menu { display: flex; gap: 24px; }
+.jelly-menu a { text-decoration: none; }
+.jelly-mobile-navigation { display: none; }
+.jelly-mobile-navigation summary { display: grid; place-items: center; min-width: 44px; min-height: 44px; list-style: none; cursor: pointer; }
+.jelly-mobile-navigation summary::-webkit-details-marker { display: none; }
+/* Search, account, wishlist and bag: one row of icons. */
+.jelly-header-tools { display: flex; align-items: center; gap: 16px; }
+.jelly-header-tools a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; text-decoration: none; }
+.jelly-footer { padding: 48px var(--jelly-layout-gutter); background: var(--theme-surface); border-top: 1px solid var(--theme-border); }
+.jelly-footer h2 { font-size: 1rem; } /* footer column headings are labels, not page headings */
+
+/* Hero */
+.jelly-hero { background: var(--theme-accent-soft); }
+.jelly-hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+
+/* Product grids and cards */
+.jelly-product-grid-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px; }
+.jelly-product-card { background: var(--theme-surface); border-radius: var(--jelly-radius-card); overflow: hidden; box-shadow: var(--jelly-shadow-card); }
+.jelly-product-card-media img { display: block; width: 100%; aspect-ratio: var(--jelly-card-ratio); object-fit: cover; }
+.jelly-product-card-body { padding: 16px; }
+.jelly-product-card-price { color: var(--theme-muted-text); }
+
+/* Product page: details, options and Add to cart read as one column, never three separate sections. */
+:is(.jelly-product-information, .jelly-product-options, .jelly-product-purchase) { padding-block: 0; }
+:is([data-section-type="product-options"], [data-section-type="product-purchase"]) { padding-top: 16px; }
+/* From tablet width: photos on the left, the buying column on the right. */
+@media (min-width: 768px) {
+  :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) { display: grid; grid-template-columns: var(--jelly-layout-gutter) minmax(0, 1.1fr) 40px minmax(0, 1fr) var(--jelly-layout-gutter); grid-template-rows: min-content min-content minmax(min-content, 1fr); align-items: start; padding-top: 32px; }
+  :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > * { grid-column: 1 / -1; }
+  :is(main, [data-storefront-template]) > [data-section-type="product-gallery"] { grid-column: 2; grid-row: 1 / span 3; }
+  :is(main, [data-storefront-template]) > :is([data-section-type="product-information"], [data-section-type="product-options"], [data-section-type="product-purchase"]) { grid-column: 4; }
+  [data-section-type="product-information"] { grid-row: 1; } [data-section-type="product-options"] { grid-row: 2; } [data-section-type="product-purchase"] { grid-row: 3; }
+  :is([data-section-type="product-gallery"], [data-section-type="product-information"], [data-section-type="product-options"], [data-section-type="product-purchase"]) .jelly-container { width: 100%; max-width: none; padding: 0; }
+  .jelly-product-gallery { padding-block: 0; }
+}
+
+/* Tablets and phones (below 1024px): the menu folds behind the menu button so it never wraps word by word. */
+@media (max-width: 1023px) {
+  .jelly-header .jelly-menu { display: none; }
+  .jelly-mobile-navigation { display: block; }
+  .jelly-header-tool-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .jelly-header-tools { gap: 4px; }
+  .jelly-header { gap: 8px; padding-block: 12px; }
+  .jelly-header-brand { flex: 1; min-width: 0; font-size: 1.25rem; }
+}
+
+/* Phones */
+@media (max-width: 767px) {
+  .jelly-section { padding: calc(var(--jelly-spacing-section) * 0.6) 0; }
+}

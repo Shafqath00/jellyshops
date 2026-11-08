@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createDefaultStoreDesign } from "./defaults.js";
 import { storeDesignDocumentSchema, themeIdSchema } from "./schema.js";
-import type { GlobalSettings, SectionNode, ThemeId } from "./types.js";
+import type { BlockNode, GlobalSettings, SectionNode, ThemeId } from "./types.js";
 
 export const STOREFRONT_SCHEMA_VERSION = 3 as const;
 const MAX_DOCUMENT_BYTES = 1_500_000;
@@ -36,8 +36,8 @@ export interface StorefrontDocument {
 }
 
 const settingsSchema = z.record(z.string(), z.unknown());
-const responsiveSchema = z.object({ mobile: settingsSchema.optional() }).strict();
-const blockSchema = z.object({ id: z.string().min(1), type: z.string().min(1), enabled: z.boolean(), settings: settingsSchema, responsive: responsiveSchema.optional() });
+const responsiveSchema = z.object({ mobile: settingsSchema.optional(), tablet: settingsSchema.optional() }).strict();
+const blockSchema: z.ZodType<BlockNode> = z.lazy(() => z.object({ id: z.string().min(1), type: z.string().min(1), enabled: z.boolean(), settings: settingsSchema, responsive: responsiveSchema.optional(), blocks: z.array(blockSchema).optional() }));
 const sectionSchema = z.object({ id: z.string().min(1), type: z.string().min(1), enabled: z.boolean(), settings: settingsSchema, responsive: responsiveSchema.optional(), blocks: z.array(blockSchema) });
 const globalSettingsSchema = storeDesignDocumentSchema.shape.globalSettings;
 const pageSchema = z.object({

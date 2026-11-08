@@ -1,4 +1,6 @@
 import type { WorkspaceMutationRunner } from "./mutation-runner.js";
+import { resolveTheme, validateThemeSettings } from "@jelly/storefront-themes";
+import { ApiError } from "../../http/errors.js";
 import type {
   ThemeConfigurationRecord,
   ThemeRepository,
@@ -36,16 +38,31 @@ export class ThemeService {
   async saveThemeConfiguration(
     storeId: string,
     expectedRevision: number | null,
-    input: { themeId: string; settings: ThemeSettings; draftArtifactId?: string | null },
+  input: { themeId: string; themeVersion?: string; settings: ThemeSettings; draftArtifactId?: string | null },
   ): Promise<ThemeMutationResult> {
+    const requestedId = normalizeThemeId(input.themeId);
+    const settings = normalizeSettings(input.settings);
+    const resolved = resolveTheme(requestedId, settings, input.themeVersion);
+    if (resolved.fallbackReason) throw new Error(`Theme '${requestedId}' is not available`);
+    const current = input.draftArtifactId === undefined ? await this.repository.getThemeConfiguration(storeId) : null;
+    const draftArtifactId = input.draftArtifactId === undefined ? current?.draftArtifactId ?? null : input.draftArtifactId;
+    if (draftArtifactId) {
+      const artifact = await this.repository.getInstalledThemeArtifact(storeId, draftArtifactId);
+      if (!artifact || artifact.themeId !== resolved.id || artifact.themeVersion !== resolved.version) {
+        throw new ApiError(422, "THEME_ARTIFACT_MISMATCH", "The selected theme version does not match its installed package. Reinstall that version before saving it.");
+      }
+    }
+    const issues = validateThemeSettings(requestedId, settings, resolved.version);
+    if (issues.length) throw new ApiError(422, "THEME_SETTINGS_INVALID", "Theme settings are invalid", issues);
     const mutation = await this.coordinator.run(storeId, (transaction) => this.repository.saveThemeConfiguration(
       transaction,
       {
         storeId,
         expectedRevision,
-        themeId: normalizeThemeId(input.themeId),
-        settings: normalizeSettings(input.settings),
-        ...(input.draftArtifactId !== undefined ? { draftArtifactId: input.draftArtifactId } : {}),
+        themeId: resolved.id,
+        themeVersion: resolved.version,
+        settings: resolved.settings,
+        draftArtifactId,
       },
     ));
     return { theme: mutation.result, generation: mutation.generation };

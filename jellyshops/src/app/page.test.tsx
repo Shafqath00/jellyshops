@@ -3,7 +3,7 @@ import HomePage from "./page";
 
 it("renders the Jelly Shop entry point", () => {
   render(<HomePage />);
-  expect(screen.getByRole("heading", { name: /jelly shop/i })).toBeVisible();
+  expect(screen.getByRole("heading", { level: 1, name: /your shop.*beautifully/i })).toBeVisible();
 });
 
 it("uses Tailwind utilities for the primary merchant action", () => {

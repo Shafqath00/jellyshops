@@ -1,4 +1,7 @@
+import { pageTypeLabel } from "@jelly/storefront-registry";
+import { storefrontPageTypes } from "@jelly/storefront-schema";
 import type { StorefrontTemplateType } from "../api/types";
+import { isRetainedTemplate } from "../template-selection";
 
 export interface TemplateSelectorOption {
   id: string;
@@ -19,6 +22,9 @@ export function TemplateResourceSelector({
   previewResourceId,
   onTemplateChange,
   onPreviewResourceChange,
+  onPageTypeChange,
+  previewQuery,
+  onPreviewQueryChange,
 }: {
   templates: TemplateSelectorOption[];
   activeTemplateId: string;
@@ -26,38 +32,45 @@ export function TemplateResourceSelector({
   previewResourceId?: string;
   onTemplateChange(templateId: string): void;
   onPreviewResourceChange(resourceId: string): void;
+  onPageTypeChange?(pageType: StorefrontTemplateType): void;
+  previewQuery?: string;
+  onPreviewQueryChange?(query: string): void;
 }) {
   const activeTemplate = templates.find((template) => template.id === activeTemplateId);
-  const needsPreviewResource = activeTemplate ? activeTemplate.type !== "home" && activeTemplate.type !== "search" && activeTemplate.type !== "cart" : previewResources.length > 0;
+  const resourceFreeTypes: StorefrontTemplateType[] = ["home", "search", "cart", "not-found", "checkout", "wishlist", "customer-login", "customer-register", "customer-recovery", "customer-account", "customer-orders", "customer-order", "customer-addresses", "order-success"];
+  const needsPreviewResource = activeTemplate ? !resourceFreeTypes.includes(activeTemplate.type) : previewResources.length > 0;
+  const pageType = pageTypeLabel(activeTemplate?.type ?? "home");
+  const pageTypes: readonly StorefrontTemplateType[] = storefrontPageTypes;
 
   return (
-    <div className="grid gap-3 border-b border-[#eeeeee] bg-white p-4 sm:grid-cols-2" aria-label="Template and preview resource">
-      <label className="grid gap-1.5 text-[11px] font-semibold text-[#616161]">
-        <span>Template</span>
+    <div className="grid gap-2 bg-card p-2 sm:grid-cols-3" aria-label="Page to edit">
+      <label className="grid gap-1.5 text-[11px] font-semibold text-muted-foreground"><span>Page</span><select aria-label="Page" value={activeTemplate?.type ?? "home"} onChange={(event) => onPageTypeChange?.(event.target.value as StorefrontTemplateType)} className="h-9 rounded-lg border border-border bg-card px-2.5 text-[12px] text-foreground outline-none focus:border-border">{pageTypes.map((type) => <option key={type} value={type}>{pageTypeLabel(type)}</option>)}</select><span className="sr-only">Page: {pageType}</span></label>
+      <label className="grid gap-1.5 text-[11px] font-semibold text-muted-foreground">
+        <span>Layout</span>
         <select
-          aria-label="Template"
+          aria-label="Layout"
           value={activeTemplateId}
           onChange={(event) => onTemplateChange(event.target.value)}
-          className="h-9 rounded-lg border border-[#c9cccf] bg-white px-2.5 text-[12px] text-[#303030] outline-none focus:border-[#616161]"
+          className="h-9 rounded-lg border border-border bg-card px-2.5 text-[12px] text-foreground outline-none focus:border-border"
         >
           {templates.map((template) => (
             <option key={template.id} value={template.id}>
-              {template.name}
+              {template.name}{isRetainedTemplate(template) ? " (previous template)" : ""}
             </option>
           ))}
         </select>
       </label>
 
-      <label className="grid gap-1.5 text-[11px] font-semibold text-[#616161]">
-        <span>Preview resource</span>
+      <label className="grid gap-1.5 text-[11px] font-semibold text-muted-foreground">
+        <span>Preview with</span>
         <select
-          aria-label="Preview resource"
+          aria-label="Preview with"
           value={previewResourceId ?? ""}
           disabled={!needsPreviewResource || previewResources.length === 0}
           onChange={(event) => onPreviewResourceChange(event.target.value)}
-          className="h-9 rounded-lg border border-[#c9cccf] bg-white px-2.5 text-[12px] text-[#303030] outline-none focus:border-[#616161] disabled:bg-[#f6f6f7] disabled:text-[#8c9196]"
+          className="h-9 rounded-lg border border-border bg-card px-2.5 text-[12px] text-foreground outline-none focus:border-border disabled:bg-muted/50 disabled:text-muted-foreground"
         >
-          {!previewResourceId && <option value="">Select resource</option>}
+          {!previewResourceId && <option value="">{needsPreviewResource ? "Choose an item to preview" : "Not needed for this page"}</option>}
           {previewResources.map((resource) => (
             <option key={resource.id} value={resource.id}>
               {resource.label}
@@ -65,6 +78,17 @@ export function TemplateResourceSelector({
           ))}
         </select>
       </label>
+
+      {activeTemplate?.type === "search" && <label className="grid gap-1.5 text-[11px] font-semibold text-muted-foreground">
+        <span>Preview search for</span>
+        <input
+          aria-label="Preview search for"
+          value={previewQuery ?? ""}
+          onChange={(event) => onPreviewQueryChange?.(event.target.value)}
+          placeholder="Search products"
+          className="h-9 rounded-lg border border-border bg-card px-2.5 text-[12px] text-foreground outline-none focus:border-border"
+        />
+      </label>}
     </div>
   );
 }

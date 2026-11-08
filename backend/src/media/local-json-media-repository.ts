@@ -4,14 +4,24 @@ import type { MediaRepository, CreateMediaRecordInput } from "./repository.js";
 import type { StoredMediaRecord } from "./types.js";
 
 export class LocalJsonMediaRepository implements MediaRepository {
+  private static readonly writes = new Map<string, Promise<unknown>>();
   constructor(private readonly dataDirectory: string) {}
 
   async create(input: CreateMediaRecordInput): Promise<StoredMediaRecord> {
-    const records = await this.readRecords(input.storeId);
-    const created: StoredMediaRecord = { ...input, createdAt: new Date().toISOString() };
-    records.push(created);
-    await this.writeRecords(input.storeId, records);
-    return structuredClone(created);
+    return this.withLock(input.storeId, async () => {
+      const records = await this.readRecords(input.storeId);
+      if (input.contentHash && records.some(record => record.contentHash === input.contentHash)) {
+        throw Object.assign(new Error("Duplicate image content"), { code: "23505" });
+      }
+      const created: StoredMediaRecord = { ...input, createdAt: new Date().toISOString() };
+      records.push(created);
+      await this.writeRecords(input.storeId, records);
+      return structuredClone(created);
+    });
+  }
+
+  async findByHash(storeId: string, contentHash: string): Promise<StoredMediaRecord | null> {
+    return (await this.readRecords(storeId)).find(record => record.contentHash === contentHash) ?? null;
   }
 
   async get(storeId: string, mediaId: string): Promise<StoredMediaRecord | null> {
@@ -24,12 +34,24 @@ export class LocalJsonMediaRepository implements MediaRepository {
   }
 
   async delete(storeId: string, mediaId: string): Promise<StoredMediaRecord | null> {
-    const records = await this.readRecords(storeId);
-    const index = records.findIndex(({ id }) => id === mediaId);
-    if (index < 0) return null;
-    const [record] = records.splice(index, 1);
-    await this.writeRecords(storeId, records);
-    return structuredClone(record);
+    return this.withLock(storeId, async () => {
+      const records = await this.readRecords(storeId);
+      const index = records.findIndex(({ id }) => id === mediaId);
+      if (index < 0) return null;
+      const [record] = records.splice(index, 1);
+      await this.writeRecords(storeId, records);
+      return structuredClone(record);
+    });
+  }
+
+  private async withLock<T>(storeId: string, operation: () => Promise<T>): Promise<T> {
+    const key = path.resolve(this.recordPath(storeId));
+    const previous = LocalJsonMediaRepository.writes.get(key) ?? Promise.resolve();
+    const next = previous.catch(() => undefined).then(operation);
+    LocalJsonMediaRepository.writes.set(key, next);
+    try { return await next; } finally {
+      if (LocalJsonMediaRepository.writes.get(key) === next) LocalJsonMediaRepository.writes.delete(key);
+    }
   }
 
   private recordPath(storeId: string): string {

@@ -60,7 +60,7 @@ function normalize(input: ProviderProductInput): ProviderProductInput {
 export class CatalogProviderSync {
   constructor(private readonly writer: CatalogSyncWriter) {}
 
-  upsertProduct(storeId: string, input: ProviderProductInput): Promise<ProviderSyncResult> {
+  async upsertProduct(storeId: string, input: ProviderProductInput): Promise<ProviderSyncResult> {
     return this.writer.upsertProviderProduct(storeId, normalize(input));
   }
 }

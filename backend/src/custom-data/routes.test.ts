@@ -85,7 +85,7 @@ describe("custom data routes", () => {
       .get("/api/stores/store-b/custom-data/metafields?ownerType=product")
       .set("Authorization", "Bearer token");
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(404);
     expect(customData.listMetafieldDefinitions).not.toHaveBeenCalled();
   });
 });

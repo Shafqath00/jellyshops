@@ -1,74 +1,34 @@
-import { PrismaPg } from "@prisma/adapter-pg";
+import { readFileSync } from "node:fs";
 import pg from "pg";
-import { PrismaClient } from "../generated/prisma/client.js";
 
 const { Pool } = pg;
 
-export interface DatabaseResource {
-  client: PrismaClient;
-  close(): Promise<void>;
-}
-
-export interface DatabaseOptions {
-  schema?: string;
-}
-
-function isLoopback(hostname: string): boolean {
-  return hostname === "localhost"
-    || hostname === "::1"
-    || hostname.startsWith("127.");
-}
-
-function parseDatabaseUrl(databaseUrl: string): URL {
-  let parsed: URL;
-  try {
-    parsed = new URL(databaseUrl);
-  } catch {
-    throw new Error("Database URL must be a valid URL");
-  }
-
-  if (parsed.protocol !== "postgres:" && parsed.protocol !== "postgresql:") {
-    throw new Error("Database URL must use PostgreSQL");
-  }
-
-  const sslMode = parsed.searchParams.get("sslmode")?.toLowerCase();
-  if (!isLoopback(parsed.hostname) && !["require", "verify-ca", "verify-full"].includes(sslMode ?? "")) {
-    throw new Error("Remote database connections must require TLS");
-  }
-
-  return parsed;
-}
-
-export function createDatabase(databaseUrl: string, options: DatabaseOptions = {}): DatabaseResource {
-  parseDatabaseUrl(databaseUrl);
-  if (options.schema && !/^[a-z][a-z0-9_]*$/.test(options.schema)) {
-    throw new Error("Database schema name is invalid");
-  }
-
+export function createSupabasePool(connectionString = process.env.SUPABASE_RUNTIME_DATABASE_URL || process.env.SUPABASE_DATABASE_URL): pg.Pool {
+  if (!connectionString) throw new Error("SUPABASE_RUNTIME_DATABASE_URL is required");
+  const url = new URL(connectionString);
+  // pg's URL options otherwise replace the explicit SSL object below.
+  for (const key of ["sslmode", "sslcert", "sslkey", "sslrootcert", "ssl"]) url.searchParams.delete(key);
+  const max = Number(process.env.DATABASE_POOL_MAX ?? 5);
+  if (!Number.isInteger(max) || max < 1 || max > 20) throw new Error("DATABASE_POOL_MAX must be between 1 and 20");
+  const caFile = process.env.SUPABASE_DATABASE_CA_FILE?.trim();
+  const ca = caFile
+    ? readFileSync(caFile, "utf8")
+    : process.env.SUPABASE_DATABASE_CA?.replaceAll("\\n", "\n");
   const pool = new Pool({
-    connectionString: databaseUrl,
-    max: 5,
-    idleTimeoutMillis: 30_000,
-    connectionTimeoutMillis: 10_000,
-    application_name: "jellyshops-api",
-    options: options.schema ? `-c search_path=${options.schema}` : undefined,
-  });
-  const client = new PrismaClient({
-    adapter: new PrismaPg(pool, options.schema ? { schema: options.schema } : undefined),
-  });
-  let closePromise: Promise<void> | undefined;
-
-  return {
-    client,
-    close() {
-      closePromise ??= (async () => {
-        try {
-          await client.$disconnect();
-        } finally {
-          await pool.end();
-        }
-      })();
-      return closePromise;
+    connectionString: url.toString(),
+    max,
+    connectionTimeoutMillis: 10000,
+    idleTimeoutMillis: 30000,
+    keepAlive: true,
+    ssl: {
+      rejectUnauthorized: true,
+      ...(ca ? { ca } : {}),
     },
-  };
+  });
+  // An idle connection the database or network drops (ECONNRESET) emits "error" on the pool. Without a
+  // listener Node treats it as uncaught and the whole server exits; the pool already discards that client.
+  pool.on("error", (error: Error & { code?: string }) => {
+    console.warn(`Database connection dropped while idle (${error.code ?? error.message}); it will be replaced.`);
+  });
+  return pool;
 }

@@ -1,3 +1,4 @@
+import sharp from "sharp";
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -17,6 +18,7 @@ async function createMediaApp() {
     port: 3001,
     nodeEnv: "test",
     corsOrigins: ["http://localhost:3000"],
+    trustProxy: false,
     authProvider: "development",
     repositoryProvider: "local-json",
     mediaProvider: "local-files",
@@ -63,6 +65,22 @@ describe("media routes", () => {
     expect(response.body.error.code).toBe("MEDIA_TYPE_UNSUPPORTED");
   });
 
+  it("serves WebP derivatives with immutable caching and distinct representation validators", async () => {
+    const uploaded = await request(app).post("/api/stores/store-demo/media")
+      .set("Authorization", "Bearer jelly-demo-merchant")
+      .attach("file", tinyPng, { filename: "hero.png", contentType: "image/png" });
+    const original = await request(app).get(uploaded.body.url);
+    const resized = await request(app).get(`${uploaded.body.url}?w=320`);
+    expect(resized.headers["content-type"]).toMatch(/^image\/webp/);
+    expect(resized.headers["cache-control"]).toBe("public, max-age=31536000, immutable");
+    expect(resized.headers.etag).toMatch(/^"[a-f0-9]{64}"$/);
+    expect(resized.headers.etag).not.toBe(original.headers.etag);
+    expect((await request(app).get(`${uploaded.body.url}?w=320`).set("If-None-Match", resized.headers.etag)).status).toBe(304);
+    for (const width of ["0", "500", "320.0", "", "320&w=640"]) {
+      expect((await request(app).get(`${uploaded.body.url}?w=${width}`)).status).toBe(400);
+    }
+  });
+
   it("lists, serves, and deletes an unreferenced upload", async () => {
     const uploaded = await request(app)
       .post("/api/stores/store-demo/media")
@@ -78,7 +96,7 @@ describe("media routes", () => {
     const publicImage = await request(app).get(uploaded.body.url);
     expect(publicImage.status).toBe(200);
     expect(publicImage.headers["content-type"]).toMatch(/^image\/png/);
-    expect(publicImage.body).toEqual(tinyPng);
+    expect(await sharp(publicImage.body).raw().toBuffer()).toEqual(await sharp(tinyPng).raw().toBuffer());
 
     const removed = await request(app)
       .delete(`/api/stores/store-demo/media/${uploaded.body.id}`)

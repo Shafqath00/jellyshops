@@ -1,7 +1,11 @@
 # Secrets and local configuration
 .env
 **/.env
+**/.env.*
+**/.env.onboarding.local
 !.env.example
+.firebaserc
+.vercel/
 
 # Dependencies and build output
 node_modules/
@@ -19,6 +23,12 @@ uploads/
 **/uploads/
 **/.test-postgres-task2-visible/
 *.log
+**/.cache/
+*-mvp-tests*.json
+*-mvp-final-tests.json
+frontend-mvp-lint.json
+catalog-payment-tests.json
+**/.env.staging.local
 *.tsbuildinfo
 
 # Test and local worktree output
@@ -32,3 +42,15 @@ playwright-report/
 # Local generated/runtime artifacts
 backend/generated/
 backend/cloud-sql-proxy.exe
+backend/.tmp-vitest/
+**/.test-tmp/
+**/node-compile-cache/
+**/.next-order-management/
+
+# Local caches and test output
+backend/.test-temp/
+backend/supabase/.temp/
+/jellyshops/tsx-*/
+
+# Third-party agent skills (installed from skills-lock.json)
+.agents/

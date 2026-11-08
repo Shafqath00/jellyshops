@@ -1,0 +1,3335 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`V4 starter packs > preserves the complete built-in starter packs 1`] = `
+[
+  {
+    "description": "An editorial, image-led storefront with full-bleed banners and product-first grids.",
+    "globalSections": [
+      {
+        "key": "announcement",
+        "name": "Announcement",
+        "section": {
+          "blocks": [
+            {
+              "enabled": true,
+              "id": "jelly-avenue-global-announcement-copy",
+              "settings": {
+                "text": "Free delivery and 30-day returns on every order.",
+              },
+              "type": "text",
+            },
+          ],
+          "enabled": true,
+          "id": "jelly-avenue-global-announcement-section",
+          "settings": {},
+          "type": "announcement-bar",
+        },
+      },
+      {
+        "key": "header",
+        "name": "Header",
+        "section": {
+          "blocks": [
+            {
+              "enabled": true,
+              "id": "jelly-avenue-global-header-menu",
+              "settings": {
+                "handle": "main",
+              },
+              "type": "menu",
+            },
+          ],
+          "enabled": true,
+          "id": "jelly-avenue-global-header-section",
+          "settings": {
+            "logoPosition": "center",
+            "sticky": true,
+            "transparent": true,
+          },
+          "type": "header",
+        },
+      },
+      {
+        "key": "footer",
+        "name": "Footer",
+        "section": {
+          "blocks": [
+            {
+              "enabled": true,
+              "id": "jelly-avenue-footer-shop",
+              "settings": {
+                "text": "Shop",
+              },
+              "type": "link-heading",
+            },
+            {
+              "enabled": true,
+              "id": "jelly-avenue-footer-link-all",
+              "settings": {
+                "label": "Shop all",
+                "link": "/shop",
+              },
+              "type": "link",
+            },
+            {
+              "enabled": true,
+              "id": "jelly-avenue-footer-link-search",
+              "settings": {
+                "label": "Search",
+                "link": "/search",
+              },
+              "type": "link",
+            },
+            {
+              "enabled": true,
+              "id": "jelly-avenue-footer-link-account",
+              "settings": {
+                "label": "My account",
+                "link": "/account",
+              },
+              "type": "link",
+            },
+            {
+              "enabled": true,
+              "id": "jelly-avenue-footer-link-wishlist",
+              "settings": {
+                "label": "Wishlist",
+                "link": "/wishlist",
+              },
+              "type": "link",
+            },
+            {
+              "enabled": true,
+              "id": "jelly-avenue-footer-help",
+              "settings": {
+                "text": "Help",
+              },
+              "type": "link-heading",
+            },
+            {
+              "enabled": true,
+              "id": "jelly-avenue-footer-link-shipping",
+              "settings": {
+                "label": "Shipping",
+                "link": "/shipping",
+              },
+              "type": "link",
+            },
+            {
+              "enabled": true,
+              "id": "jelly-avenue-footer-link-returns",
+              "settings": {
+                "label": "Returns",
+                "link": "/returns",
+              },
+              "type": "link",
+            },
+            {
+              "enabled": true,
+              "id": "jelly-avenue-footer-link-faq",
+              "settings": {
+                "label": "FAQ",
+                "link": "/faq",
+              },
+              "type": "link",
+            },
+            {
+              "enabled": true,
+              "id": "jelly-avenue-footer-link-contact",
+              "settings": {
+                "label": "Contact us",
+                "link": "/contact",
+              },
+              "type": "link",
+            },
+            {
+              "enabled": true,
+              "id": "jelly-avenue-footer-about",
+              "settings": {
+                "text": "About",
+              },
+              "type": "link-heading",
+            },
+            {
+              "enabled": true,
+              "id": "jelly-avenue-footer-link-story",
+              "settings": {
+                "label": "Our story",
+                "link": "/about",
+              },
+              "type": "link",
+            },
+            {
+              "enabled": true,
+              "id": "jelly-avenue-footer-link-privacy",
+              "settings": {
+                "label": "Privacy policy",
+                "link": "/privacy",
+              },
+              "type": "link",
+            },
+            {
+              "enabled": true,
+              "id": "jelly-avenue-footer-link-terms",
+              "settings": {
+                "label": "Terms of service",
+                "link": "/terms",
+              },
+              "type": "link",
+            },
+            {
+              "enabled": true,
+              "id": "jelly-avenue-footer-instagram",
+              "settings": {
+                "href": "https://instagram.com",
+                "label": "Instagram",
+              },
+              "type": "social-link",
+            },
+          ],
+          "enabled": true,
+          "id": "jelly-avenue-global-footer-section",
+          "settings": {
+            "newsletterHeading": "Join the list",
+            "newsletterText": "Be the first to hear about new arrivals, restocks and private sales.",
+            "showNewsletter": true,
+            "text": "Modern wardrobe essentials, made to be worn on repeat. Designed in the studio, delivered to your door.",
+          },
+          "type": "footer",
+        },
+      },
+    ],
+    "id": "jelly-avenue",
+    "menus": [
+      {
+        "handle": "main",
+        "items": [
+          {
+            "children": [],
+            "id": "jelly-avenue-menu-home",
+            "label": "Home",
+            "target": {
+              "kind": "home",
+            },
+          },
+          {
+            "children": [],
+            "id": "jelly-avenue-menu-search",
+            "label": "Search",
+            "target": {
+              "kind": "search",
+            },
+          },
+        ],
+        "key": "main",
+        "name": "Main menu",
+      },
+    ],
+    "name": "Jelly Avenue",
+    "previewAsset": "/themes/jelly-avenue/preview.svg",
+    "resourceReferences": [],
+    "summary": "Editorial and image-led, with full-screen banners, edge-to-edge product grids and a complete shopping and customer experience.",
+    "tags": [
+      "Fashion & apparel",
+      "Editorial & bold",
+    ],
+    "templates": [
+      {
+        "handle": "default",
+        "key": "jelly-avenue-template-home",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-avenue-global-announcement-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-slide-city",
+                    "settings": {
+                      "buttonLabel": "Shop the collection",
+                      "buttonLink": "/shop",
+                      "eyebrow": "The new season",
+                      "heading": "Dressed for the city",
+                      "image": {
+                        "alt": "A woman in a tailored check coat on a city street",
+                        "url": "https://images.unsplash.com/photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=2400&q=80",
+                      },
+                      "text": "Considered tailoring and everyday essentials, made to move with you.",
+                    },
+                    "type": "slide",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-slide-her",
+                    "settings": {
+                      "buttonLabel": "Shop women",
+                      "buttonLink": "/shop",
+                      "eyebrow": "For her",
+                      "heading": "Quiet confidence",
+                      "image": {
+                        "alt": "A woman in a pale blue coat in a city square",
+                        "url": "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=2400&q=80",
+                      },
+                      "text": "Soft layers and clean lines for every day of the week.",
+                    },
+                    "type": "slide",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-slide-him",
+                    "settings": {
+                      "buttonLabel": "Shop men",
+                      "buttonLink": "/shop",
+                      "eyebrow": "For him",
+                      "heading": "Sharp, never stiff",
+                      "image": {
+                        "alt": "A man in a navy suit walking past a glass building",
+                        "url": "https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&w=2400&q=80",
+                      },
+                      "text": "Tailoring cut for movement, made to be worn on repeat.",
+                    },
+                    "type": "slide",
+                  },
+                ],
+                "enabled": true,
+                "id": "jelly-avenue-home-slideshow",
+                "settings": {
+                  "autoplay": true,
+                  "contentAlignment": "center",
+                  "height": "large",
+                  "interval": 6,
+                  "overlay": 28,
+                },
+                "type": "slideshow",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-featured-tab-new",
+                    "settings": {
+                      "label": "New in",
+                      "sort": "newest",
+                    },
+                    "type": "product-tab",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-featured-tab-best",
+                    "settings": {
+                      "label": "Best sellers",
+                      "sort": "best-selling",
+                    },
+                    "type": "product-tab",
+                  },
+                ],
+                "enabled": true,
+                "id": "jelly-avenue-featured",
+                "settings": {
+                  "columns": 4,
+                  "contentAlignment": "center",
+                  "heading": "New this season",
+                  "limit": 8,
+                  "sort": "newest",
+                  "text": "The latest arrivals: structured cuts and soft layers for the modern everyday.",
+                  "viewAllLabel": "View all",
+                  "viewAllLink": "/shop",
+                },
+                "type": "product-grid",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-collection-him",
+                    "settings": {
+                      "image": {
+                        "alt": "A man in a navy suit walking past a glass building",
+                        "url": "https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&w=1400&q=80",
+                      },
+                      "label": "For him",
+                      "link": "/shop",
+                    },
+                    "type": "collection-card",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-collection-her",
+                    "settings": {
+                      "image": {
+                        "alt": "A woman in a pale blue coat in a city square",
+                        "url": "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=1400&q=80",
+                      },
+                      "label": "For her",
+                      "link": "/shop",
+                    },
+                    "type": "collection-card",
+                  },
+                ],
+                "enabled": true,
+                "id": "jelly-avenue-collections",
+                "settings": {
+                  "columns": 2,
+                  "heading": "",
+                  "imageRatio": "portrait",
+                },
+                "type": "category-grid",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-avenue-bestsellers",
+                "settings": {
+                  "columns": 4,
+                  "contentAlignment": "center",
+                  "heading": "Quiet favourites",
+                  "hideWhenEmpty": true,
+                  "limit": 4,
+                  "sort": "best-selling",
+                  "text": "Our best-loved staples, chosen for the way they wear.",
+                },
+                "type": "product-grid",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-campaign-heading",
+                    "settings": {
+                      "text": "The new tailoring",
+                    },
+                    "type": "heading",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-campaign-copy",
+                    "settings": {
+                      "text": "Refined materials and considered cuts, made to move between the everyday and the extraordinary.",
+                    },
+                    "type": "text",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-campaign-button",
+                    "settings": {
+                      "href": "/shop",
+                      "label": "View the collection",
+                    },
+                    "type": "button",
+                  },
+                ],
+                "enabled": true,
+                "id": "jelly-avenue-campaign",
+                "settings": {
+                  "contentAlignment": "center",
+                  "height": "large",
+                  "image": {
+                    "alt": "Wool coats in warm neutral tones hanging on a rail",
+                    "url": "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=2400&q=80",
+                  },
+                  "overlay": 30,
+                },
+                "type": "image-banner",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-home-story-heading",
+                    "settings": {
+                      "text": "Designed to outlast the season.",
+                    },
+                    "type": "heading",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-home-story-copy",
+                    "settings": {
+                      "text": "Tell customers what you make and why it matters: the materials you choose, the people who make it and the care that goes into every piece.",
+                    },
+                    "type": "text",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-home-story-button",
+                    "settings": {
+                      "href": "/about",
+                      "label": "Read our story",
+                    },
+                    "type": "button",
+                  },
+                ],
+                "enabled": true,
+                "id": "jelly-avenue-home-story",
+                "settings": {
+                  "colorScheme": "page",
+                  "eyebrow": "Our approach",
+                  "image": {
+                    "alt": "A bright studio shop with clothing on wooden rails",
+                    "url": "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1400&q=80",
+                  },
+                  "imagePosition": "right",
+                },
+                "type": "image-with-text",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-promise-delivery",
+                    "settings": {
+                      "heading": "Free delivery",
+                      "text": "Complimentary delivery on every order, tracked to your door.",
+                    },
+                    "type": "column",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-promise-returns",
+                    "settings": {
+                      "heading": "30-day returns",
+                      "text": "Not quite right? Send it back within 30 days.",
+                    },
+                    "type": "column",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-promise-checkout",
+                    "settings": {
+                      "heading": "Secure checkout",
+                      "text": "Pay safely with the methods you already use.",
+                    },
+                    "type": "column",
+                  },
+                ],
+                "enabled": true,
+                "id": "jelly-avenue-promises",
+                "settings": {
+                  "colorScheme": "soft",
+                  "columns": 3,
+                  "contentAlignment": "center",
+                  "heading": "",
+                },
+                "type": "multicolumn",
+              },
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Home",
+        "type": "home",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-avenue-template-product",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-avenue-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-avenue-product-gallery",
+                "settings": {
+                  "imageFit": "cover",
+                  "layout": "grid",
+                },
+                "type": "product-gallery",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-avenue-product-information",
+                "settings": {
+                  "showAvailability": true,
+                  "showCompareAtPrice": true,
+                  "showSku": false,
+                  "showVendor": true,
+                },
+                "type": "product-information",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-avenue-product-options",
+                "settings": {
+                  "style": "buttons",
+                },
+                "type": "product-options",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-avenue-product-purchase",
+                "settings": {
+                  "label": "Add to cart",
+                  "showQuantity": true,
+                },
+                "type": "product-purchase",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-avenue-product-stock",
+                "settings": {
+                  "lowStockThreshold": 5,
+                  "showWhenPlentiful": true,
+                },
+                "type": "product-stock-counter",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-avenue-product-description",
+                "settings": {
+                  "heading": "Description",
+                  "spacing": "standard",
+                },
+                "type": "product-description",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-tab-care",
+                    "settings": {
+                      "text": "Describe what the piece is made from and how to look after it. For example: 100% organic cotton. Machine wash cold and dry flat to keep its shape.",
+                      "title": "Materials & care",
+                    },
+                    "type": "info-tab",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-tab-shipping",
+                    "settings": {
+                      "text": "Free delivery on every order, dispatched within 2 working days.
+
+Not quite right? Return it within 30 days for a full refund.",
+                      "title": "Shipping & returns",
+                    },
+                    "type": "info-tab",
+                  },
+                ],
+                "enabled": true,
+                "id": "jelly-avenue-product-tabs",
+                "settings": {
+                  "firstOpen": false,
+                },
+                "type": "product-tabs",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-trust-delivery",
+                    "settings": {
+                      "text": "Free delivery",
+                    },
+                    "type": "text",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-trust-returns",
+                    "settings": {
+                      "text": "30-day returns",
+                    },
+                    "type": "text",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-trust-checkout",
+                    "settings": {
+                      "text": "Secure checkout",
+                    },
+                    "type": "text",
+                  },
+                ],
+                "enabled": true,
+                "id": "jelly-avenue-product-trust",
+                "settings": {
+                  "colorScheme": "page",
+                },
+                "type": "trust-strip",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-avenue-product-related",
+                "settings": {
+                  "heading": "Complete the look",
+                  "limit": 4,
+                },
+                "type": "related-products",
+              },
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Product",
+        "type": "product",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-avenue-template-collection",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-avenue-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-avenue-collection-header",
+                "settings": {
+                  "contentAlignment": "center",
+                  "layout": "banner",
+                  "showDescription": true,
+                  "showImage": true,
+                  "showTitle": true,
+                },
+                "type": "collection-header",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-avenue-collection-grid",
+                "settings": {
+                  "columns": 4,
+                  "emptyMessage": "No products are available in this collection yet.",
+                  "limit": 12,
+                },
+                "type": "collection-product-grid",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-avenue-collection-description",
+                "settings": {
+                  "spacing": "standard",
+                },
+                "type": "collection-description",
+              },
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Collection",
+        "type": "collection",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-avenue-template-cart",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-avenue-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-avenue-cart-summary",
+                "settings": {},
+                "type": "cart-summary",
+              },
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Cart",
+        "type": "cart",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-avenue-template-search",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-avenue-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-avenue-search-results",
+                "settings": {},
+                "type": "search-results",
+              },
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Search",
+        "type": "search",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-avenue-template-page",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-avenue-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-avenue-page-content",
+                "settings": {},
+                "type": "page-content",
+              },
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Page",
+        "type": "page",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-avenue-template-blog",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-avenue-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-avenue-blog-header",
+                "settings": {},
+                "type": "blog-header",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-avenue-article-list",
+                "settings": {},
+                "type": "article-list",
+              },
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Blog",
+        "type": "blog",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-avenue-template-article",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-avenue-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-avenue-article-header",
+                "settings": {},
+                "type": "article-header",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-avenue-article-content",
+                "settings": {},
+                "type": "article-content",
+              },
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Article",
+        "type": "article",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-avenue-template-not-found",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-avenue-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-not-found-heading",
+                    "settings": {
+                      "text": "This page has moved on.",
+                    },
+                    "type": "heading",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-not-found-copy",
+                    "settings": {
+                      "text": "Return to the shop and discover something new.",
+                    },
+                    "type": "text",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-not-found-button",
+                    "settings": {
+                      "href": "/",
+                      "label": "Back to the shop",
+                    },
+                    "type": "button",
+                  },
+                ],
+                "enabled": true,
+                "id": "jelly-avenue-not-found-message",
+                "settings": {
+                  "contentAlignment": "center",
+                },
+                "type": "not-found-message",
+              },
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Not Found",
+        "type": "not-found",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-avenue-template-checkout",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-avenue-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "checkout",
+        "type": "checkout",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-avenue-template-wishlist",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-avenue-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "wishlist",
+        "type": "wishlist",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-avenue-template-customer-login",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-avenue-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "customer login",
+        "type": "customer-login",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-avenue-template-customer-register",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-avenue-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "customer register",
+        "type": "customer-register",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-avenue-template-customer-recovery",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-avenue-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "customer recovery",
+        "type": "customer-recovery",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-avenue-template-customer-account",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-avenue-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "customer account",
+        "type": "customer-account",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-avenue-template-customer-orders",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-avenue-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "customer orders",
+        "type": "customer-orders",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-avenue-template-customer-order",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-avenue-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "customer order",
+        "type": "customer-order",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-avenue-template-customer-addresses",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-avenue-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "customer addresses",
+        "type": "customer-addresses",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-avenue-template-order-success",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-avenue-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-avenue-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "order success",
+        "type": "order-success",
+      },
+    ],
+    "theme": {
+      "settings": {},
+      "themeId": "jelly-avenue",
+    },
+    "version": "1.0.0",
+  },
+  {
+    "description": "A modern, minimal storefront in warm white and charcoal for independent brands.",
+    "globalSections": [
+      {
+        "key": "announcement",
+        "name": "Announcement",
+        "section": {
+          "blocks": [
+            {
+              "enabled": true,
+              "id": "jelly-signature-global-announcement-copy",
+              "settings": {
+                "text": "A little something lovely, delivered with care.",
+              },
+              "type": "text",
+            },
+          ],
+          "enabled": true,
+          "id": "jelly-signature-global-announcement-section",
+          "settings": {},
+          "type": "announcement-bar",
+        },
+      },
+      {
+        "key": "header",
+        "name": "Header",
+        "section": {
+          "blocks": [
+            {
+              "enabled": true,
+              "id": "jelly-signature-global-header-menu",
+              "settings": {
+                "handle": "main",
+              },
+              "type": "menu",
+            },
+          ],
+          "enabled": true,
+          "id": "jelly-signature-global-header-section",
+          "settings": {},
+          "type": "header",
+        },
+      },
+      {
+        "key": "footer",
+        "name": "Footer",
+        "section": {
+          "blocks": [
+            {
+              "enabled": true,
+              "id": "jelly-signature-global-footer-menu",
+              "settings": {
+                "handle": "main",
+              },
+              "type": "menu",
+            },
+          ],
+          "enabled": true,
+          "id": "jelly-signature-global-footer-section",
+          "settings": {
+            "text": "Thoughtful everyday goods, chosen with care and delivered to your door.",
+          },
+          "type": "footer",
+        },
+      },
+    ],
+    "id": "jelly-signature",
+    "menus": [
+      {
+        "handle": "main",
+        "items": [
+          {
+            "children": [],
+            "id": "jelly-signature-menu-home",
+            "label": "Home",
+            "target": {
+              "kind": "home",
+            },
+          },
+          {
+            "children": [],
+            "id": "jelly-signature-menu-search",
+            "label": "Search",
+            "target": {
+              "kind": "search",
+            },
+          },
+        ],
+        "key": "main",
+        "name": "Main menu",
+      },
+    ],
+    "name": "Jelly Minimal",
+    "previewAsset": "/themes/jelly-signature/preview.svg",
+    "resourceReferences": [],
+    "summary": "A modern, minimal storefront in warm white and charcoal, with a complete shopping and customer experience.",
+    "tags": [
+      "Fashion & lifestyle",
+      "Clean & minimal",
+    ],
+    "templates": [
+      {
+        "handle": "default",
+        "key": "jelly-signature-template-home",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-signature-global-announcement-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-signature-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-home-hero-heading",
+                    "settings": {
+                      "text": "Everyday pieces, thoughtfully made.",
+                    },
+                    "type": "heading",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-home-hero-copy",
+                    "settings": {
+                      "text": "Considered essentials for the home and wardrobe, chosen to be used and loved for years.",
+                    },
+                    "type": "text",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-home-hero-button",
+                    "settings": {
+                      "href": "/shop",
+                      "label": "Shop the collection",
+                    },
+                    "type": "button",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-home-hero-secondary",
+                    "settings": {
+                      "href": "/about",
+                      "label": "Our story",
+                    },
+                    "type": "button",
+                  },
+                ],
+                "enabled": true,
+                "id": "jelly-signature-home-hero",
+                "settings": {
+                  "colorScheme": "soft",
+                  "contentAlignment": "left",
+                  "eyebrow": "New season",
+                  "height": "large",
+                  "image": {
+                    "alt": "A bright living room with neutral textiles and woven wall decor",
+                    "url": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1600&q=80",
+                  },
+                  "layout": "split",
+                },
+                "type": "hero",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-collection-new",
+                    "settings": {
+                      "image": {
+                        "alt": "Neutral clothing on a rail",
+                        "url": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=900&q=80",
+                      },
+                      "label": "New arrivals",
+                      "link": "/shop",
+                    },
+                    "type": "collection-card",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-collection-home",
+                    "settings": {
+                      "image": {
+                        "alt": "A tan sofa with a wool throw",
+                        "url": "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?auto=format&fit=crop&w=900&q=80",
+                      },
+                      "label": "For the home",
+                      "link": "/shop",
+                    },
+                    "type": "collection-card",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-collection-accessories",
+                    "settings": {
+                      "image": {
+                        "alt": "A canvas tote bag",
+                        "url": "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=900&q=80",
+                      },
+                      "label": "Accessories",
+                      "link": "/shop",
+                    },
+                    "type": "collection-card",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-collection-kitchen",
+                    "settings": {
+                      "image": {
+                        "alt": "A white ceramic mug",
+                        "url": "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=900&q=80",
+                      },
+                      "label": "Kitchen & dining",
+                      "link": "/shop",
+                    },
+                    "type": "collection-card",
+                  },
+                ],
+                "enabled": true,
+                "id": "jelly-signature-collections",
+                "settings": {
+                  "columns": 4,
+                  "heading": "Shop by collection",
+                  "imageRatio": "portrait",
+                },
+                "type": "category-grid",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-signature-featured",
+                "settings": {
+                  "columns": 4,
+                  "heading": "New arrivals",
+                  "limit": 8,
+                  "sort": "newest",
+                  "text": "The latest additions to the shop.",
+                  "viewAllLabel": "View all products",
+                  "viewAllLink": "/shop",
+                },
+                "type": "product-grid",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-home-story-heading",
+                    "settings": {
+                      "text": "Made to be lived with.",
+                    },
+                    "type": "heading",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-home-story-copy",
+                    "settings": {
+                      "text": "Tell customers who you are, what you make and why it matters. A few honest sentences go a long way.",
+                    },
+                    "type": "text",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-home-story-button",
+                    "settings": {
+                      "href": "/about",
+                      "label": "Read our story",
+                    },
+                    "type": "button",
+                  },
+                ],
+                "enabled": true,
+                "id": "jelly-signature-home-story",
+                "settings": {
+                  "colorScheme": "page",
+                  "eyebrow": "Our story",
+                  "image": {
+                    "alt": "Knitwear, denim and a watch laid out on a blanket",
+                    "url": "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1200&q=80",
+                  },
+                  "imagePosition": "left",
+                },
+                "type": "image-with-text",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-promise-packing",
+                    "settings": {
+                      "heading": "Carefully packed",
+                      "text": "Every order is wrapped by hand and sent with care.",
+                    },
+                    "type": "column",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-promise-checkout",
+                    "settings": {
+                      "heading": "Secure checkout",
+                      "text": "Pay safely with the payment methods you already use.",
+                    },
+                    "type": "column",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-promise-help",
+                    "settings": {
+                      "heading": "Here to help",
+                      "text": "Questions about an order? Get in touch and we will reply quickly.",
+                    },
+                    "type": "column",
+                  },
+                ],
+                "enabled": true,
+                "id": "jelly-signature-promises",
+                "settings": {
+                  "colorScheme": "soft",
+                  "columns": 3,
+                  "contentAlignment": "left",
+                  "heading": "Why shop with us",
+                },
+                "type": "multicolumn",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-signature-bestsellers",
+                "settings": {
+                  "columns": 4,
+                  "heading": "Customer favourites",
+                  "hideWhenEmpty": true,
+                  "limit": 4,
+                  "sort": "best-selling",
+                },
+                "type": "product-grid",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-newsletter-title",
+                    "settings": {
+                      "text": "A little news, now and then.",
+                    },
+                    "type": "heading",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-newsletter-copy",
+                    "settings": {
+                      "text": "New arrivals and occasional notes from the studio. No spam, unsubscribe anytime.",
+                    },
+                    "type": "text",
+                  },
+                ],
+                "enabled": true,
+                "id": "jelly-signature-newsletter",
+                "settings": {
+                  "buttonLabel": "Subscribe",
+                  "colorScheme": "page",
+                  "contentAlignment": "center",
+                },
+                "type": "newsletter",
+              },
+            },
+            {
+              "globalSectionId": "jelly-signature-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Home",
+        "type": "home",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-signature-template-product",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-signature-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-signature-product-gallery",
+                "settings": {
+                  "imageFit": "cover",
+                  "layout": "stacked",
+                },
+                "type": "product-gallery",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-signature-product-information",
+                "settings": {
+                  "showAvailability": true,
+                  "showCompareAtPrice": true,
+                  "showSku": false,
+                  "showVendor": true,
+                },
+                "type": "product-information",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-signature-product-options",
+                "settings": {
+                  "style": "buttons",
+                },
+                "type": "product-options",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-signature-product-purchase",
+                "settings": {
+                  "label": "Add to cart",
+                  "showQuantity": true,
+                },
+                "type": "product-purchase",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-signature-product-description",
+                "settings": {
+                  "heading": "Description",
+                  "spacing": "standard",
+                },
+                "type": "product-description",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-signature-product-related",
+                "settings": {
+                  "heading": "You may also like",
+                  "limit": 4,
+                },
+                "type": "related-products",
+              },
+            },
+            {
+              "globalSectionId": "jelly-signature-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Product",
+        "type": "product",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-signature-template-collection",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-signature-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-signature-collection-header",
+                "settings": {
+                  "showDescription": true,
+                  "showImage": true,
+                  "showTitle": true,
+                },
+                "type": "collection-header",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-signature-collection-grid",
+                "settings": {
+                  "columns": 3,
+                  "emptyMessage": "No products are available in this collection yet.",
+                  "limit": 12,
+                },
+                "type": "collection-product-grid",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-signature-collection-description",
+                "settings": {
+                  "spacing": "standard",
+                },
+                "type": "collection-description",
+              },
+            },
+            {
+              "globalSectionId": "jelly-signature-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Collection",
+        "type": "collection",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-signature-template-cart",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-signature-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-signature-cart-summary",
+                "settings": {},
+                "type": "cart-summary",
+              },
+            },
+            {
+              "globalSectionId": "jelly-signature-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Cart",
+        "type": "cart",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-signature-template-search",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-signature-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-signature-search-results",
+                "settings": {},
+                "type": "search-results",
+              },
+            },
+            {
+              "globalSectionId": "jelly-signature-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Search",
+        "type": "search",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-signature-template-page",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-signature-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-signature-page-content",
+                "settings": {},
+                "type": "page-content",
+              },
+            },
+            {
+              "globalSectionId": "jelly-signature-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Page",
+        "type": "page",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-signature-template-blog",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-signature-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-signature-blog-header",
+                "settings": {},
+                "type": "blog-header",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-signature-article-list",
+                "settings": {},
+                "type": "article-list",
+              },
+            },
+            {
+              "globalSectionId": "jelly-signature-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Blog",
+        "type": "blog",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-signature-template-article",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-signature-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-signature-article-header",
+                "settings": {},
+                "type": "article-header",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "jelly-signature-article-content",
+                "settings": {},
+                "type": "article-content",
+              },
+            },
+            {
+              "globalSectionId": "jelly-signature-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Article",
+        "type": "article",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-signature-template-not-found",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-signature-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-not-found-heading",
+                    "settings": {
+                      "text": "This page has moved on.",
+                    },
+                    "type": "heading",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-not-found-copy",
+                    "settings": {
+                      "text": "Return to the shop and discover something new.",
+                    },
+                    "type": "text",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-not-found-button",
+                    "settings": {
+                      "href": "/",
+                      "label": "Back to the shop",
+                    },
+                    "type": "button",
+                  },
+                ],
+                "enabled": true,
+                "id": "jelly-signature-not-found-message",
+                "settings": {
+                  "contentAlignment": "center",
+                },
+                "type": "not-found-message",
+              },
+            },
+            {
+              "globalSectionId": "jelly-signature-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Not Found",
+        "type": "not-found",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-signature-template-checkout",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-signature-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-signature-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "checkout",
+        "type": "checkout",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-signature-template-wishlist",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-signature-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-signature-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "wishlist",
+        "type": "wishlist",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-signature-template-customer-login",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-signature-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-signature-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "customer login",
+        "type": "customer-login",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-signature-template-customer-register",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-signature-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-signature-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "customer register",
+        "type": "customer-register",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-signature-template-customer-recovery",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-signature-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-signature-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "customer recovery",
+        "type": "customer-recovery",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-signature-template-customer-account",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-signature-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-signature-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "customer account",
+        "type": "customer-account",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-signature-template-customer-orders",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-signature-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-signature-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "customer orders",
+        "type": "customer-orders",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-signature-template-customer-order",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-signature-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-signature-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "customer order",
+        "type": "customer-order",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-signature-template-customer-addresses",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-signature-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-signature-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "customer addresses",
+        "type": "customer-addresses",
+      },
+      {
+        "handle": "default",
+        "key": "jelly-signature-template-order-success",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "jelly-signature-global-header-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "jelly-signature-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "order success",
+        "type": "order-success",
+      },
+    ],
+    "theme": {
+      "settings": {},
+      "themeId": "jelly-signature",
+    },
+    "version": "1.0.0",
+  },
+  {
+    "description": "A bright, produce-first storefront for food, grocery, and everyday essentials.",
+    "globalSections": [
+      {
+        "key": "announcement",
+        "name": "Announcement",
+        "section": {
+          "blocks": [
+            {
+              "enabled": true,
+              "id": "fresh-market-global-announcement-copy",
+              "settings": {
+                "text": "Good things are in season.",
+              },
+              "type": "text",
+            },
+          ],
+          "enabled": true,
+          "id": "fresh-market-global-announcement-section",
+          "settings": {},
+          "type": "announcement-bar",
+        },
+      },
+      {
+        "key": "header",
+        "name": "Header",
+        "section": {
+          "blocks": [
+            {
+              "enabled": true,
+              "id": "fresh-market-global-header-menu",
+              "settings": {
+                "handle": "main",
+              },
+              "type": "menu",
+            },
+          ],
+          "enabled": true,
+          "id": "fresh-market-global-header-section",
+          "settings": {},
+          "type": "header",
+        },
+      },
+      {
+        "key": "footer",
+        "name": "Footer",
+        "section": {
+          "blocks": [
+            {
+              "enabled": true,
+              "id": "fresh-market-global-footer-menu",
+              "settings": {
+                "handle": "main",
+              },
+              "type": "menu",
+            },
+          ],
+          "enabled": true,
+          "id": "fresh-market-global-footer-section",
+          "settings": {},
+          "type": "footer",
+        },
+      },
+    ],
+    "id": "fresh-market",
+    "menus": [
+      {
+        "handle": "main",
+        "items": [
+          {
+            "children": [],
+            "id": "fresh-market-menu-home",
+            "label": "Home",
+            "target": {
+              "kind": "home",
+            },
+          },
+          {
+            "children": [],
+            "id": "fresh-market-menu-search",
+            "label": "Search",
+            "target": {
+              "kind": "search",
+            },
+          },
+        ],
+        "key": "main",
+        "name": "Main menu",
+      },
+    ],
+    "name": "Fresh Market",
+    "previewAsset": "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=85",
+    "resourceReferences": [],
+    "summary": "Fresh, friendly, and full of life. A natural home for everyday essentials and local favorites.",
+    "tags": [
+      "Food & essentials",
+      "Fresh & natural",
+    ],
+    "templates": [
+      {
+        "handle": "default",
+        "key": "fresh-market-template-home",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "fresh-market-global-announcement-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "fresh-market-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "fresh-market-home-hero-heading",
+                    "settings": {
+                      "text": "Good food, gathered well.",
+                    },
+                    "type": "heading",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "fresh-market-home-hero-copy",
+                    "settings": {
+                      "text": "Bright flavors and everyday favorites, chosen with care.",
+                    },
+                    "type": "text",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "fresh-market-home-hero-button",
+                    "settings": {
+                      "href": "/",
+                      "label": "Shop fresh finds",
+                    },
+                    "type": "button",
+                  },
+                ],
+                "enabled": true,
+                "id": "fresh-market-home-hero",
+                "settings": {
+                  "contentAlignment": "left",
+                  "eyebrow": "Seasonal picks",
+                  "image": {
+                    "alt": "Fresh produce at a market",
+                    "url": "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1800&q=85",
+                  },
+                  "overlay": 8,
+                },
+                "type": "hero",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "fresh-market-home-products",
+                "settings": {},
+                "type": "product-grid",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "fresh-market-home-story-heading",
+                    "settings": {
+                      "text": "From nearby growers to your table.",
+                    },
+                    "type": "heading",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "fresh-market-home-story-copy",
+                    "settings": {
+                      "text": "Simple ingredients, carefully chosen.",
+                    },
+                    "type": "text",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "fresh-market-home-story-button",
+                    "settings": {
+                      "href": "/",
+                      "label": "Our approach",
+                    },
+                    "type": "button",
+                  },
+                ],
+                "enabled": true,
+                "id": "fresh-market-home-story",
+                "settings": {
+                  "contentAlignment": "left",
+                  "image": {
+                    "alt": "A selection of fresh produce",
+                    "url": "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1200&q=85",
+                  },
+                },
+                "type": "image-with-text",
+              },
+            },
+            {
+              "globalSectionId": "fresh-market-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Home",
+        "type": "home",
+      },
+      {
+        "handle": "default",
+        "key": "fresh-market-template-product",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "fresh-market-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "fresh-market-product-gallery",
+                "settings": {
+                  "imageFit": "cover",
+                },
+                "type": "product-gallery",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "fresh-market-product-information",
+                "settings": {
+                  "showAvailability": true,
+                  "showCompareAtPrice": true,
+                  "showSku": false,
+                  "showVendor": false,
+                },
+                "type": "product-information",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "fresh-market-product-options",
+                "settings": {
+                  "style": "buttons",
+                },
+                "type": "product-options",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "fresh-market-product-purchase",
+                "settings": {
+                  "label": "Add to cart",
+                  "showQuantity": true,
+                },
+                "type": "product-purchase",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "fresh-market-product-description",
+                "settings": {
+                  "spacing": "standard",
+                },
+                "type": "product-description",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "fresh-market-product-related",
+                "settings": {
+                  "limit": 4,
+                },
+                "type": "related-products",
+              },
+            },
+            {
+              "globalSectionId": "fresh-market-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Product",
+        "type": "product",
+      },
+      {
+        "handle": "default",
+        "key": "fresh-market-template-collection",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "fresh-market-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "fresh-market-collection-header",
+                "settings": {
+                  "showDescription": true,
+                  "showImage": true,
+                  "showTitle": true,
+                },
+                "type": "collection-header",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "fresh-market-collection-grid",
+                "settings": {
+                  "columns": 4,
+                  "emptyMessage": "No products are available in this collection yet.",
+                  "limit": 12,
+                },
+                "type": "collection-product-grid",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "fresh-market-collection-description",
+                "settings": {
+                  "spacing": "standard",
+                },
+                "type": "collection-description",
+              },
+            },
+            {
+              "globalSectionId": "fresh-market-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Collection",
+        "type": "collection",
+      },
+      {
+        "handle": "default",
+        "key": "fresh-market-template-cart",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "fresh-market-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "fresh-market-cart-summary",
+                "settings": {},
+                "type": "cart-summary",
+              },
+            },
+            {
+              "globalSectionId": "fresh-market-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Cart",
+        "type": "cart",
+      },
+      {
+        "handle": "default",
+        "key": "fresh-market-template-search",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "fresh-market-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "fresh-market-search-results",
+                "settings": {},
+                "type": "search-results",
+              },
+            },
+            {
+              "globalSectionId": "fresh-market-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Search",
+        "type": "search",
+      },
+      {
+        "handle": "default",
+        "key": "fresh-market-template-page",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "fresh-market-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "fresh-market-page-content",
+                "settings": {},
+                "type": "page-content",
+              },
+            },
+            {
+              "globalSectionId": "fresh-market-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Page",
+        "type": "page",
+      },
+      {
+        "handle": "default",
+        "key": "fresh-market-template-blog",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "fresh-market-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "fresh-market-blog-header",
+                "settings": {},
+                "type": "blog-header",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "fresh-market-article-list",
+                "settings": {},
+                "type": "article-list",
+              },
+            },
+            {
+              "globalSectionId": "fresh-market-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Blog",
+        "type": "blog",
+      },
+      {
+        "handle": "default",
+        "key": "fresh-market-template-article",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "fresh-market-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "fresh-market-article-header",
+                "settings": {},
+                "type": "article-header",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "fresh-market-article-content",
+                "settings": {},
+                "type": "article-content",
+              },
+            },
+            {
+              "globalSectionId": "fresh-market-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Article",
+        "type": "article",
+      },
+      {
+        "handle": "default",
+        "key": "fresh-market-template-not-found",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "fresh-market-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "fresh-market-not-found-heading",
+                    "settings": {
+                      "text": "That page is out of season.",
+                    },
+                    "type": "heading",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "fresh-market-not-found-copy",
+                    "settings": {
+                      "text": "Try a search or head back to the market.",
+                    },
+                    "type": "text",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "fresh-market-not-found-button",
+                    "settings": {
+                      "href": "/",
+                      "label": "Back to the shop",
+                    },
+                    "type": "button",
+                  },
+                ],
+                "enabled": true,
+                "id": "fresh-market-not-found-message",
+                "settings": {
+                  "contentAlignment": "center",
+                },
+                "type": "not-found-message",
+              },
+            },
+            {
+              "globalSectionId": "fresh-market-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Not Found",
+        "type": "not-found",
+      },
+    ],
+    "theme": {
+      "settings": {},
+      "themeId": "fresh-market",
+    },
+    "version": "1.0.0",
+  },
+  {
+    "description": "A quiet, editorial storefront for considered goods and handcrafted pieces.",
+    "globalSections": [
+      {
+        "key": "announcement",
+        "name": "Announcement",
+        "section": {
+          "blocks": [
+            {
+              "enabled": true,
+              "id": "artisan-boutique-global-announcement-copy",
+              "settings": {
+                "text": "Thoughtful finds, made to last.",
+              },
+              "type": "text",
+            },
+          ],
+          "enabled": true,
+          "id": "artisan-boutique-global-announcement-section",
+          "settings": {},
+          "type": "announcement-bar",
+        },
+      },
+      {
+        "key": "header",
+        "name": "Header",
+        "section": {
+          "blocks": [
+            {
+              "enabled": true,
+              "id": "artisan-boutique-global-header-menu",
+              "settings": {
+                "handle": "main",
+              },
+              "type": "menu",
+            },
+          ],
+          "enabled": true,
+          "id": "artisan-boutique-global-header-section",
+          "settings": {},
+          "type": "header",
+        },
+      },
+      {
+        "key": "footer",
+        "name": "Footer",
+        "section": {
+          "blocks": [
+            {
+              "enabled": true,
+              "id": "artisan-boutique-global-footer-menu",
+              "settings": {
+                "handle": "main",
+              },
+              "type": "menu",
+            },
+          ],
+          "enabled": true,
+          "id": "artisan-boutique-global-footer-section",
+          "settings": {},
+          "type": "footer",
+        },
+      },
+    ],
+    "id": "artisan-boutique",
+    "menus": [
+      {
+        "handle": "main",
+        "items": [
+          {
+            "children": [],
+            "id": "artisan-boutique-menu-home",
+            "label": "Home",
+            "target": {
+              "kind": "home",
+            },
+          },
+          {
+            "children": [],
+            "id": "artisan-boutique-menu-search",
+            "label": "Search",
+            "target": {
+              "kind": "search",
+            },
+          },
+        ],
+        "key": "main",
+        "name": "Main menu",
+      },
+    ],
+    "name": "Artisan Boutique",
+    "previewAsset": "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=85",
+    "resourceReferences": [],
+    "summary": "Thoughtful details, beautiful products. A considered canvas for independent brands and makers.",
+    "tags": [
+      "Fashion & lifestyle",
+      "Warm & editorial",
+    ],
+    "templates": [
+      {
+        "handle": "default",
+        "key": "artisan-boutique-template-home",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "artisan-boutique-global-announcement-section",
+              "kind": "global",
+            },
+            {
+              "globalSectionId": "artisan-boutique-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "artisan-boutique-home-hero-heading",
+                    "settings": {
+                      "text": "Made to become part of your story.",
+                    },
+                    "type": "heading",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "artisan-boutique-home-hero-copy",
+                    "settings": {
+                      "text": "Considered pieces, refined materials, and a little more meaning in every day.",
+                    },
+                    "type": "text",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "artisan-boutique-home-hero-button",
+                    "settings": {
+                      "href": "/",
+                      "label": "Explore the collection",
+                    },
+                    "type": "button",
+                  },
+                ],
+                "enabled": true,
+                "id": "artisan-boutique-home-hero",
+                "settings": {
+                  "contentAlignment": "center",
+                  "eyebrow": "The new collection",
+                  "image": {
+                    "alt": "Artisan boutique collection",
+                    "url": "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1800&q=85",
+                  },
+                  "overlay": 12,
+                },
+                "type": "hero",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "artisan-boutique-home-story-heading",
+                    "settings": {
+                      "text": "The beauty is in the making.",
+                    },
+                    "type": "heading",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "artisan-boutique-home-story-copy",
+                    "settings": {
+                      "text": "A considered collection for slow, lasting rituals.",
+                    },
+                    "type": "text",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "artisan-boutique-home-story-button",
+                    "settings": {
+                      "href": "/",
+                      "label": "Our story",
+                    },
+                    "type": "button",
+                  },
+                ],
+                "enabled": true,
+                "id": "artisan-boutique-home-story",
+                "settings": {
+                  "contentAlignment": "right",
+                  "image": {
+                    "alt": "Details from the studio collection",
+                    "url": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=85",
+                  },
+                },
+                "type": "image-with-text",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "artisan-boutique-home-products",
+                "settings": {},
+                "type": "product-grid",
+              },
+            },
+            {
+              "globalSectionId": "artisan-boutique-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Home",
+        "type": "home",
+      },
+      {
+        "handle": "default",
+        "key": "artisan-boutique-template-product",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "artisan-boutique-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "artisan-boutique-product-gallery",
+                "settings": {
+                  "imageFit": "contain",
+                },
+                "type": "product-gallery",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "artisan-boutique-product-information",
+                "settings": {
+                  "showAvailability": true,
+                  "showCompareAtPrice": true,
+                  "showSku": false,
+                  "showVendor": true,
+                },
+                "type": "product-information",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "artisan-boutique-product-options",
+                "settings": {
+                  "style": "select",
+                },
+                "type": "product-options",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "artisan-boutique-product-purchase",
+                "settings": {
+                  "label": "Add to cart",
+                  "showQuantity": true,
+                },
+                "type": "product-purchase",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "artisan-boutique-product-description",
+                "settings": {
+                  "spacing": "standard",
+                },
+                "type": "product-description",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "artisan-boutique-product-related",
+                "settings": {
+                  "limit": 4,
+                },
+                "type": "related-products",
+              },
+            },
+            {
+              "globalSectionId": "artisan-boutique-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Product",
+        "type": "product",
+      },
+      {
+        "handle": "default",
+        "key": "artisan-boutique-template-collection",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "artisan-boutique-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "artisan-boutique-collection-header",
+                "settings": {
+                  "showDescription": true,
+                  "showImage": true,
+                  "showTitle": true,
+                },
+                "type": "collection-header",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "artisan-boutique-collection-grid",
+                "settings": {
+                  "columns": 3,
+                  "emptyMessage": "No products are available in this collection yet.",
+                  "limit": 12,
+                },
+                "type": "collection-product-grid",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "artisan-boutique-collection-description",
+                "settings": {
+                  "spacing": "standard",
+                },
+                "type": "collection-description",
+              },
+            },
+            {
+              "globalSectionId": "artisan-boutique-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Collection",
+        "type": "collection",
+      },
+      {
+        "handle": "default",
+        "key": "artisan-boutique-template-cart",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "artisan-boutique-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "artisan-boutique-cart-summary",
+                "settings": {},
+                "type": "cart-summary",
+              },
+            },
+            {
+              "globalSectionId": "artisan-boutique-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Cart",
+        "type": "cart",
+      },
+      {
+        "handle": "default",
+        "key": "artisan-boutique-template-search",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "artisan-boutique-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "artisan-boutique-search-results",
+                "settings": {},
+                "type": "search-results",
+              },
+            },
+            {
+              "globalSectionId": "artisan-boutique-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Search",
+        "type": "search",
+      },
+      {
+        "handle": "default",
+        "key": "artisan-boutique-template-page",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "artisan-boutique-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "artisan-boutique-page-content",
+                "settings": {},
+                "type": "page-content",
+              },
+            },
+            {
+              "globalSectionId": "artisan-boutique-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Page",
+        "type": "page",
+      },
+      {
+        "handle": "default",
+        "key": "artisan-boutique-template-blog",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "artisan-boutique-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "artisan-boutique-blog-header",
+                "settings": {},
+                "type": "blog-header",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "artisan-boutique-article-list",
+                "settings": {},
+                "type": "article-list",
+              },
+            },
+            {
+              "globalSectionId": "artisan-boutique-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Blog",
+        "type": "blog",
+      },
+      {
+        "handle": "default",
+        "key": "artisan-boutique-template-article",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "artisan-boutique-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "artisan-boutique-article-header",
+                "settings": {},
+                "type": "article-header",
+              },
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [],
+                "enabled": true,
+                "id": "artisan-boutique-article-content",
+                "settings": {},
+                "type": "article-content",
+              },
+            },
+            {
+              "globalSectionId": "artisan-boutique-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Article",
+        "type": "article",
+      },
+      {
+        "handle": "default",
+        "key": "artisan-boutique-template-not-found",
+        "layout": {
+          "sections": [
+            {
+              "globalSectionId": "artisan-boutique-global-header-section",
+              "kind": "global",
+            },
+            {
+              "kind": "inline",
+              "section": {
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "artisan-boutique-not-found-heading",
+                    "settings": {
+                      "text": "This page has moved on.",
+                    },
+                    "type": "heading",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "artisan-boutique-not-found-copy",
+                    "settings": {
+                      "text": "Return to the shop and discover something new.",
+                    },
+                    "type": "text",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "artisan-boutique-not-found-button",
+                    "settings": {
+                      "href": "/",
+                      "label": "Back to the shop",
+                    },
+                    "type": "button",
+                  },
+                ],
+                "enabled": true,
+                "id": "artisan-boutique-not-found-message",
+                "settings": {
+                  "contentAlignment": "center",
+                },
+                "type": "not-found-message",
+              },
+            },
+            {
+              "globalSectionId": "artisan-boutique-global-footer-section",
+              "kind": "global",
+            },
+          ],
+        },
+        "name": "Not Found",
+        "type": "not-found",
+      },
+    ],
+    "theme": {
+      "settings": {},
+      "themeId": "artisan-boutique",
+    },
+    "version": "1.0.0",
+  },
+]
+`;

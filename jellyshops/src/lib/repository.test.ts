@@ -1,4 +1,3 @@
-import type { CustomerInput } from "./domain";
 import { createRepository, type StorageLike } from "./repository";
 
 function memoryStorage(): StorageLike {
@@ -10,14 +9,13 @@ function memoryStorage(): StorageLike {
   };
 }
 
-const customer: CustomerInput = {
-  name: "Nina Shah",
-  email: "nina@example.com",
-  phone: "+91 90000 00000",
-  address: { line1: "4 Lake View", city: "Bengaluru", region: "Karnataka", postalCode: "560001", country: "India" }
-};
-
 describe("shop repository", () => {
+  it("supports an empty runtime catalog before backend hydration", () => {
+    const repo = createRepository(memoryStorage(), { runtime: true });
+    expect(repo.listProducts("sweet-bakes")).toEqual([]);
+    expect(repo.getStoreBySlug("sweet-bakes")?.name).toBe("Sweet Bakes");
+  });
+
   it("persists product changes across repository instances", () => {
     const storage = memoryStorage();
     const first = createRepository(storage);
@@ -27,37 +25,101 @@ describe("shop repository", () => {
     expect(createRepository(storage).getProduct(product.id)?.name).toBe("Vanilla Party Cake");
   });
 
-  it("prices checkout from live variants and snapshots the purchased item", async () => {
+  it("keeps checkout authority on the server and only mutates local cart state", () => {
     const repo = createRepository(memoryStorage());
     const cart = repo.createCart("sweet-bakes");
     repo.updateCartItem(cart.id, "vanilla-cake", 2);
 
-    const order = await repo.checkout({ cartId: cart.id, customer });
-
-    expect(order.paymentStatus).toBe("PAID");
-    expect(order.items[0]).toMatchObject({ productName: "Vanilla Celebration Cake", unitPriceMinor: 149900, quantity: 2 });
-    expect(order.subtotalMinor).toBe(299800);
-    expect(repo.getVariant("vanilla-cake")?.stock).toBe(7);
+    expect("checkout" in repo).toBe(false);
+    expect("transitionOrder" in repo).toBe(false);
+    expect(repo.getCartForStore("sweet-bakes")?.items).toEqual([{ variantId: "vanilla-cake", quantity: 2 }]);
+    expect(repo.getVariant("vanilla-cake")?.stock).toBe(9);
+    expect(repo.listOrders("store-sweet-bakes")).toHaveLength(2);
   });
 
-  it("rejects a cart quantity above live stock", async () => {
+  it("scopes metadata to stores and rejects duplicate siblings", () => {
     const repo = createRepository(memoryStorage());
-    const cart = repo.createCart("sweet-bakes");
-    repo.updateCartItem(cart.id, "berry-cloud", 4);
-
-    await expect(repo.checkout({ cartId: cart.id, customer })).rejects.toThrow("OUT_OF_STOCK");
+    const first = repo.createCategory({ storeId: "store-sweet-bakes", name: "Seasonal" });
+    expect(repo.getCategories("store-sweet-bakes")).toContainEqual(first);
+    expect(repo.getCategories("store-bloom-home")).not.toContainEqual(first);
+    expect(() => repo.createCategory({ storeId: "store-sweet-bakes", name: " seasonal " })).toThrow("CATEGORY_DUPLICATE");
+    const other = repo.createCategory({ storeId: "store-sweet-bakes", name: "Seasonal", parentId: first.id });
+    expect(other.parentId).toBe(first.id);
   });
 
-  it("enforces state transitions and restores inventory once on cancellation", async () => {
-    const repo = createRepository(memoryStorage());
-    const cart = repo.createCart("sweet-bakes");
-    repo.updateCartItem(cart.id, "lemon-tart", 1);
-    const order = await repo.checkout({ cartId: cart.id, customer });
+  it("persists optional Collection description and legacy image without adding absent metadata", () => {
+    const storage = memoryStorage();
+    const repo = createRepository(storage);
+    const described = repo.createCollection({ storeId: "store-sweet-bakes", name: "Seasonal", description: "Fresh this week", imageUrl: "/seasonal.jpg" });
+    const plain = repo.createCollection({ storeId: "store-sweet-bakes", name: "Everyday" });
+    const reloaded = createRepository(storage);
 
-    expect(() => repo.transitionOrder(order.id, "DELIVERED")).toThrow("INVALID_ORDER_TRANSITION");
-    repo.transitionOrder(order.id, "CANCELLED");
-    expect(repo.getVariant("lemon-tart")?.stock).toBe(7);
-    expect(() => repo.transitionOrder(order.id, "CANCELLED")).toThrow("INVALID_ORDER_TRANSITION");
-    expect(repo.getVariant("lemon-tart")?.stock).toBe(7);
+    expect(reloaded.getCollections("store-sweet-bakes")).toContainEqual(expect.objectContaining({ id: described.id, description: "Fresh this week", imageUrl: "/seasonal.jpg" }));
+    expect(reloaded.getCollections("store-sweet-bakes").find((item) => item.id === plain.id)).not.toHaveProperty("description");
+    expect(reloaded.getCollections("store-sweet-bakes").find((item) => item.id === plain.id)).not.toHaveProperty("imageUrl");
+    expect(reloaded.getCollections("store-bloom-home").some((item) => item.id === described.id)).toBe(false);
+  });
+
+  it("replaces only one store's Catalog Collections and retains matching legacy images", () => {
+    const storage = memoryStorage();
+    const repo = createRepository(storage);
+    const local = repo.createCollection({ storeId: "store-sweet-bakes", name: "Old", imageUrl: "/legacy.jpg" });
+    const stale = repo.createCollection({ storeId: "store-sweet-bakes", name: "Stale", description: "No longer in Catalog", imageUrl: "/stale.jpg" });
+    const other = repo.createCollection({ storeId: "store-bloom-home", name: "Other", description: "Private to B" });
+
+    repo.replaceCollections("store-sweet-bakes", [
+      { id: local.id, storeId: "store-sweet-bakes", name: "Fresh", slug: "fresh", description: "From Catalog" },
+      { id: stale.id, storeId: "store-sweet-bakes", name: "Stale", slug: "stale" },
+      { id: "wrong-store", storeId: "store-bloom-home", name: "Wrong", slug: "wrong", description: "Do not leak" },
+    ]);
+
+    const reloaded = createRepository(storage);
+    expect(reloaded.getCollections("store-sweet-bakes")).toContainEqual({ id: local.id, storeId: "store-sweet-bakes", name: "Fresh", slug: "fresh", description: "From Catalog", imageUrl: "/legacy.jpg" });
+    expect(reloaded.getCollections("store-sweet-bakes").find((item) => item.id === stale.id)).toEqual({ id: stale.id, storeId: "store-sweet-bakes", name: "Stale", slug: "stale", imageUrl: "/stale.jpg" });
+    expect(reloaded.getCollections("store-sweet-bakes").some((item) => item.id === "wrong-store")).toBe(false);
+    expect(reloaded.getCollections("store-bloom-home")).toContainEqual(other);
+  });
+
+  it("manages category option definitions", () => {
+    const repo = createRepository(memoryStorage());
+    const definition = repo.createCategoryOptionDefinition({ storeId: "store-sweet-bakes", categoryId: "category-cakes", name: "Size", optionKind: "variant", displayType: "buttons", required: false, position: 0 });
+    expect(repo.getCategoryOptionDefinitions("category-cakes")).toContainEqual(definition);
+    const updated = repo.updateCategoryOptionDefinition(definition.id, { name: "Cake size", required: true });
+    expect(updated.name).toBe("Cake size");
+    repo.deleteCategoryOptionDefinition(definition.id);
+    expect(repo.getCategoryOptionDefinitions("category-cakes")).toEqual([]);
+  });
+
+  it("normalizes legacy unscoped metadata and option money", () => {
+    const storage = memoryStorage();
+    const legacy = createRepository(storage).getState();
+    legacy.categories = [{ id: "legacy-category", name: "Cakes", slug: "cakes" } as typeof legacy.categories[number]];
+    legacy.brands = [{ id: "legacy-brand", name: "Old Brand" } as typeof legacy.brands[number]];
+    legacy.products[0].options = [{ id: "legacy-option", name: "Size", type: "configuration", display: "buttons", required: false, position: 0, values: [{ id: "legacy-value", label: "Large", priceAdjustment: 50, position: 0 } as never] }];
+    storage.setItem("jelly-shop-state-v1", JSON.stringify(legacy));
+    const reloaded = createRepository(storage);
+    expect(reloaded.getCategories("store-sweet-bakes")).toHaveLength(1);
+    expect(reloaded.getProduct(legacy.products[0].id)?.options?.[0].values[0].priceAdjustmentMinor).toBe(5000);
+  });
+
+  it("stores recent categories per store with a five-item limit", () => {
+    const repo = createRepository(memoryStorage());
+    for (let index = 0; index < 6; index += 1) repo.createCategory({ storeId: "store-sweet-bakes", name: `Recent ${index}` });
+    const ids = repo.getCategories("store-sweet-bakes").slice(-6).map((category) => category.id);
+    ids.forEach((id) => repo.recordRecentCategory("store-sweet-bakes", id));
+    expect(repo.getRecentCategoryIds("store-sweet-bakes")).toHaveLength(5);
+    expect(repo.getRecentCategoryIds("store-bloom-home")).toEqual([]);
+    repo.recordRecentCategory("store-sweet-bakes", ids[0]);
+    expect(repo.getRecentCategoryIds("store-sweet-bakes")[0]).toBe(ids[0]);
+  });
+
+  it("keeps saved carts when a synced store has no seed design", () => {
+    const storage = memoryStorage();
+    const first = createRepository(storage);
+    const store = { ...first.getState().stores[0], id: "store-synced", slug: "synced-shop", name: "Synced Shop" };
+    first.saveStore(store);
+    const cart = first.createCart("synced-shop");
+    const reloaded = createRepository(storage);
+    expect(reloaded.getCartForStore("synced-shop")?.id).toBe(cart.id);
   });
 });

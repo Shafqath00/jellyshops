@@ -24,19 +24,30 @@ const productNames = [
   ["apple", "Apple Jelly"],
 ] as const;
 
+const productImages = [
+  "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=900&q=82",
+  "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&w=900&q=82",
+  "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?auto=format&fit=crop&w=900&q=82",
+  "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=900&q=82",
+  "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=900&q=82",
+  "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=900&q=82",
+  "https://images.unsplash.com/photo-1608831540955-35094d48694a?auto=format&fit=crop&w=900&q=82",
+  "https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&w=900&q=82",
+] as const;
+
 const products: DemoProduct[] = productNames.map(([slug, name], index) => ({
   id: `product-${slug}`,
   slug,
   name,
-  imageUrl: `/demo/products/${slug}.svg`,
+  imageUrl: productImages[index],
   priceMinor: 900 + index * 125,
   currency: "USD",
 }));
 
 const collections: DemoCollection[] = [
-  { id: "collection-fruit", slug: "fruit-favorites", name: "Fruit Favorites", imageUrl: "/demo/collections/fruit.svg", productIds: products.slice(0, 4).map(({ id }) => id) },
-  { id: "collection-bright", slug: "bright-flavors", name: "Bright Flavors", imageUrl: "/demo/collections/bright.svg", productIds: [products[2].id, products[4].id, products[6].id, products[7].id] },
-  { id: "collection-all", slug: "all-jellies", name: "All Jellies", imageUrl: "/demo/collections/all.svg", productIds: products.map(({ id }) => id) },
+  { id: "collection-fruit", slug: "fruit-favorites", name: "Fruit Favorites", imageUrl: productImages[0], productIds: products.slice(0, 4).map(({ id }) => id) },
+  { id: "collection-bright", slug: "bright-flavors", name: "Bright Flavors", imageUrl: productImages[4], productIds: [products[2].id, products[4].id, products[6].id, products[7].id] },
+  { id: "collection-all", slug: "all-jellies", name: "All Jellies", imageUrl: productImages[7], productIds: products.map(({ id }) => id) },
 ];
 
 export function getDemoCatalog(): DemoCatalog {
@@ -46,6 +57,7 @@ export function getDemoCatalog(): DemoCatalog {
 function canonicalProduct(storeId: string, product: DemoProduct): CatalogProduct {
   const variant: CatalogVariant = {
     id: `${product.id}-default`,
+    productId: product.id,
     externalId: null,
     title: "Default",
     sku: null,
@@ -64,6 +76,7 @@ function canonicalProduct(storeId: string, product: DemoProduct): CatalogProduct
     handle: product.slug,
     title: product.name,
     description: "",
+    specifications: {},
     vendor: null,
     productType: null,
     tags: [],
@@ -71,7 +84,7 @@ function canonicalProduct(storeId: string, product: DemoProduct): CatalogProduct
     media: [{
       id: `${product.id}-image`,
       url: product.imageUrl,
-      mimeType: "image/svg+xml",
+      mimeType: "image/jpeg",
       width: null,
       height: null,
       altText: product.name,
@@ -80,6 +93,15 @@ function canonicalProduct(storeId: string, product: DemoProduct): CatalogProduct
     variants: [variant],
     priceRange: { minMinor: product.priceMinor, maxMinor: product.priceMinor, currency: product.currency },
     available: true,
+    primaryCategoryId: null,
+    additionalCategoryIds: [],
+    brandId: null,
+    collectionIds: [],
+    options: [],
+    inventoryOptionIds: [],
+    categoryMetadata: null,
+    brandMetadata: null,
+    collectionMetadata: [],
   };
 }
 
@@ -131,9 +153,9 @@ export class DemoCatalogAdapter implements CatalogReader {
     return null;
   }
 
-  async getCollection(storeId: string, id: string): Promise<CatalogCollection | null> {
+  async getCollection(storeId: string, id: string) {
     const collection = collections.find((item) => item.id === id);
-    return collection ? canonicalCollection(storeId, collection) : null;
+    return collection ? { ...canonicalCollection(storeId, collection), products: products.filter((product) => collection.productIds.includes(product.id)).map((product) => canonicalProduct(storeId, product)) } : null;
   }
 
   async listCollections(storeId: string, input: ListCollectionsInput): Promise<Connection<CatalogCollection>> {

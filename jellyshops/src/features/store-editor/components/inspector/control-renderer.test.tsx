@@ -35,3 +35,9 @@ describe("ControlRenderer", () => {
     expect(onChange).toHaveBeenLastCalledWith("Old!");
   });
 });
+
+it("shows the exact saved slider value even when it falls between steps", () => {
+  render(<ControlRenderer definition={definitions[4]} value={28} onChange={vi.fn()} catalog={{ products: [], collections: [] }} />);
+  expect(screen.getByRole("slider", { name: "Overlay" })).toHaveValue("28");
+  expect(screen.getByRole("slider", { name: "Overlay" })).toHaveAttribute("step", "any");
+});

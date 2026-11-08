@@ -24,6 +24,8 @@ describe("createStoreRequestContext", () => {
   it("rejects a store that is not in the principal memberships", () => {
     expect(() => createStoreRequestContext(principal, "store-c", "catalog:view"))
       .toThrowError(ApiError);
+    try { createStoreRequestContext(principal, "store-c", "catalog:view"); }
+    catch (error) { expect(error).toMatchObject({ status: 404 }); }
   });
 
   it("rejects a membership that lacks the requested capability", () => {

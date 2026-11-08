@@ -38,7 +38,7 @@ it("confirms before converting a local section into a synced global section", as
     />,
   );
 
-  await userEvent.click(screen.getByRole("button", { name: "Make global" }));
+  await userEvent.click(screen.getByRole("button", { name: "Share this section" }));
 
   expect(window.confirm).toHaveBeenCalled();
   expect(onMakeGlobal).toHaveBeenCalledTimes(1);
@@ -72,8 +72,23 @@ it("inserts a shared global reference and detaches to a local copy", async () =>
     />,
   );
 
-  await userEvent.click(screen.getByRole("button", { name: "Detach Announcement" }));
+  await userEvent.click(screen.getByRole("button", { name: "Stop sharing Announcement" }));
   const detached = onDetachGlobal.mock.calls[0][0];
   expect(detached).toEqual(globalSection.section);
   expect(detached).not.toBe(globalSection.section);
+});
+
+it("saves a copy of the section to the library under the name the merchant gives", async () => {
+  const section = { id: "s", type: "rich-text", enabled: true, settings: {}, blocks: [] };
+  const onSave = vi.fn();
+  const prompt = vi.spyOn(window, "prompt").mockReturnValueOnce("  Spring story  ").mockReturnValueOnce(null);
+  render(<GlobalSectionPanel globalSections={[]} localSection={section} onMakeGlobal={vi.fn()} onInsertGlobal={vi.fn()} onDetachGlobal={vi.fn()} onSaveToLibrary={onSave} suggestedName="Rich text" />);
+  const save = screen.getByRole("button", { name: "Save this section to the library" });
+  await userEvent.click(save);
+  expect(prompt).toHaveBeenCalledWith(expect.any(String), "Rich text");
+  expect(onSave).toHaveBeenCalledWith(section, "Spring story");
+  expect(onSave.mock.calls[0][0]).not.toBe(section);
+  await userEvent.click(save);
+  expect(onSave).toHaveBeenCalledTimes(1);
+  prompt.mockRestore();
 });

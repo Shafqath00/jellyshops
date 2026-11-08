@@ -1,5 +1,6 @@
 import { dynamicBindingSchema } from "@jelly/storefront-schema";
 import type {
+  CompilerBlockNode,
   CompilerSectionNode,
   CompilerTemplateInput,
   DynamicBindingOccurrence,
@@ -56,6 +57,12 @@ function parseDynamicBinding(value: unknown) {
     : { kind: "invalid" as const, message: parsed.error.issues.map(({ message }) => message).join("; ") };
 }
 
+/** Every block in the section, including blocks inside groups. */
+export function listSectionBlocks(section: CompilerSectionNode): CompilerBlockNode[] {
+  const walk = (blocks: CompilerBlockNode[]): CompilerBlockNode[] => blocks.flatMap((block) => [block, ...walk(block.blocks ?? [])]);
+  return walk(section.blocks ?? []);
+}
+
 export function listDynamicBindings(section: CompilerSectionNode): DynamicBindingOccurrence[] {
   const occurrences: DynamicBindingOccurrence[] = [];
   const add = (
@@ -75,7 +82,7 @@ export function listDynamicBindings(section: CompilerSectionNode): DynamicBindin
   };
 
   for (const [fieldKey, value] of Object.entries(section.settings)) add(fieldKey, value);
-  for (const block of section.blocks ?? []) {
+  for (const block of listSectionBlocks(section)) {
     for (const [fieldKey, value] of Object.entries(block.settings)) add(fieldKey, value, block);
   }
   return occurrences;
@@ -100,7 +107,7 @@ export function listInvalidDynamicSettings(section: CompilerSectionNode): Invali
   };
 
   for (const [fieldKey, value] of Object.entries(section.settings)) add(fieldKey, value);
-  for (const block of section.blocks ?? []) {
+  for (const block of listSectionBlocks(section)) {
     for (const [fieldKey, value] of Object.entries(block.settings)) add(fieldKey, value, block);
   }
   return occurrences;

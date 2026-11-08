@@ -1,0 +1,23 @@
+{
+  "name": "@jelly/theme-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Everything a theme developer imports: define a theme, its sections and blocks, validate a theme project, and run the conformance suite.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./testing": "./src/testing.tsx",
+    "./sample-data": "./src/sample-data.ts"
+  },
+  "dependencies": {
+    "@jelly/storefront-registry": "0.1.0",
+    "@jelly/storefront-renderer": "0.1.0",
+    "@jelly/storefront-schema": "0.1.0",
+    "@jelly/storefront-themes": "0.1.0"
+  },
+  "peerDependencies": {
+    "axe-core": "*",
+    "react": "^19.0.0",
+    "vitest": "*"
+  }
+}

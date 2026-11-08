@@ -24,8 +24,13 @@ export interface RuntimeValueContext {
 
 interface ResolvedValue {
   value: unknown;
+  /** The custom-data type of the value, when known, so callers can turn media ids into URLs. */
+  valueType?: string;
   metaobjectDefinitionId?: string;
 }
+
+/** Types of the built-in resource fields that are not plain text. */
+const resourceFieldTypes: Record<string, string> = { featuredImage: "image", price: "money" };
 
 function ownerId(storeId: string, resource: DynamicResourceType, context: RuntimeValueContext): string | null {
   switch (resource) {
@@ -106,13 +111,24 @@ export class DynamicValueResolver {
     return (await this.resolveDetailed(storeId, binding, context)).value;
   }
 
+  /** The value plus its custom-data type (for example "image" or "list:image"). */
+  async resolveWithType(
+    storeId: string,
+    binding: DynamicBinding,
+    context: RuntimeValueContext,
+  ): Promise<{ value: unknown; valueType?: string }> {
+    const { value, valueType } = await this.resolveDetailed(storeId, binding, context);
+    return valueType ? { value, valueType } : { value };
+  }
+
   private async resolveDetailed(
     storeId: string,
     binding: DynamicBinding,
     context: RuntimeValueContext,
   ): Promise<ResolvedValue> {
     if (binding.kind === "resource_field") {
-      return { value: resourceField(binding.resource, binding.field, context) };
+      const valueType = resourceFieldTypes[binding.field];
+      return { value: resourceField(binding.resource, binding.field, context), ...(valueType ? { valueType } : {}) };
     }
 
     if (binding.kind === "metafield") {
@@ -127,6 +143,7 @@ export class DynamicValueResolver {
       if (!record) return { value: null };
       return {
         value: record.value,
+        valueType: definition.type,
         ...(definition.type === "metaobject_reference" && metaobjectDefinitionId(definition)
           ? { metaobjectDefinitionId: metaobjectDefinitionId(definition) }
           : {}),
@@ -147,6 +164,7 @@ export class DynamicValueResolver {
       : undefined;
     return {
       value,
+      valueType: field.type,
       ...(nextDefinitionId ? { metaobjectDefinitionId: nextDefinitionId } : {}),
     };
   }

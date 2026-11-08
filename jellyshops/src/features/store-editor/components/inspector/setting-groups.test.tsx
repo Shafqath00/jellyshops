@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { ControlDefinition } from "@jelly/storefront-registry";
-import { SettingGroups } from "./setting-groups";
+import { legacyInUse, SettingGroups } from "./setting-groups";
 
 const controls: ControlDefinition[] = [
   { type: "text", key: "heading", label: "Heading", group: "content", maxLength: 120, dynamicTypes: ["string"] },
@@ -16,7 +16,7 @@ describe("setting groups", () => {
 
     expect(screen.getByRole("heading", { name: "Content" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Layout" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Style" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Appearance" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Advanced" })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Heading" })).toHaveValue("Fresh jelly");
   });
@@ -40,4 +40,53 @@ describe("setting groups", () => {
 
     expect(screen.getByRole("textbox", { name: "Heading" })).toHaveValue("Fallback title");
   });
+});
+
+it("keeps advanced controls collapsed until requested", async () => {
+  render(<SettingGroups controls={controls} settings={{}} catalog={{ products: [], collections: [] }} onChange={vi.fn()} />);
+  expect(screen.getByText("Advanced").closest("details")).not.toHaveAttribute("open");
+});
+
+it("splits controls under their sub-headings and hides controls until they apply", () => {
+  const styled: ControlDefinition[] = [
+    { type: "segmented", key: "blockBorder", label: "Style", group: "style", heading: "Borders", options: [{ label: "None", value: "none" }, { label: "Solid", value: "solid" }] },
+    { type: "color", key: "blockBorderColor", label: "Border colour", group: "style", heading: "Borders", allowAlpha: false, showWhen: { key: "blockBorder", equals: "solid" } },
+    { type: "range", key: "blockPaddingTop", label: "Top", group: "style", heading: "Padding", min: 0, max: 100, step: 1, unit: "px" },
+  ];
+  const { rerender } = render(<SettingGroups controls={styled} settings={{}} catalog={{ products: [], collections: [] }} onChange={vi.fn()} />);
+  expect(screen.getByRole("heading", { name: "Borders" })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "Padding" })).toBeInTheDocument();
+  expect(screen.queryByRole("heading", { name: "Appearance" })).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Border colour")).not.toBeInTheDocument();
+  rerender(<SettingGroups controls={styled} settings={{ blockBorder: "solid" }} catalog={{ products: [], collections: [] }} onChange={vi.fn()} />);
+  expect(screen.getByLabelText("Border colour")).toBeInTheDocument();
+});
+
+it("shows an older setting only on sections that still use it", () => {
+  const background: ControlDefinition = { type: "segmented", key: "colorScheme", label: "Background (older choice)", legacy: true, group: "style", options: [{ label: "Page", value: "page" }, { label: "Soft", value: "soft" }] };
+  expect(legacyInUse(background, undefined)).toBe(false);
+  expect(legacyInUse(background, "page")).toBe(false);
+  expect(legacyInUse(background, "soft")).toBe(true);
+  const { rerender } = render(<SettingGroups controls={[background]} settings={{}} catalog={{ products: [], collections: [] }} onChange={vi.fn()} />);
+  expect(screen.queryByText("Background (older choice)")).not.toBeInTheDocument();
+  rerender(<SettingGroups controls={[background]} settings={{ colorScheme: "soft" }} catalog={{ products: [], collections: [] }} onChange={vi.fn()} />);
+  expect(screen.getByText("Background (older choice)")).toBeInTheDocument();
+});
+
+it("shows exact spacing for Custom or while an older value is saved, and keeps Advanced folded with its sub-headings", () => {
+  const model: ControlDefinition[] = [
+    { type: "select", key: "styleSpacing", label: "Spacing", group: "style", heading: "Section", options: [{ label: "Medium", value: "" }, { label: "Custom", value: "custom" }] },
+    { type: "range", key: "stylePaddingTop", label: "Top", group: "style", heading: "Section", min: 0, max: 200, step: 4, unit: "px", showWhen: { key: "styleSpacing", equals: "custom" }, visibleWhenSaved: true },
+    { type: "checkbox", key: "styleColors", label: "Use my own colours", group: "advanced", heading: "Colours" },
+  ];
+  const view = (settings: Record<string, unknown>) => <SettingGroups controls={model} settings={settings} catalog={{ products: [], collections: [] }} onChange={vi.fn()} />;
+  const { rerender } = render(view({}));
+  expect(screen.queryByText("Top")).not.toBeInTheDocument();
+  rerender(view({ styleSpacing: "custom" }));
+  expect(screen.getByText("Top")).toBeInTheDocument();
+  rerender(view({ stylePaddingTop: 40 }));
+  expect(screen.getByText("Top")).toBeInTheDocument();
+  const advanced = screen.getByText("Advanced").closest("details");
+  expect(advanced).not.toHaveAttribute("open");
+  expect(advanced).toContainElement(screen.getByRole("heading", { name: "Colours", hidden: true }));
 });

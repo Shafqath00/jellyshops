@@ -1,4 +1,4 @@
-import type { SectionNode } from "@jelly/storefront-schema";
+import type { BlockNode, SectionNode } from "@jelly/storefront-schema";
 
 export type TemplatePlacement =
   | { kind: "inline"; section: SectionNode }
@@ -11,10 +11,10 @@ function readPlacements(layout: Record<string, unknown>): TemplatePlacement[] {
     if (!item || typeof item !== "object" || Array.isArray(item)) return [];
     const candidate = item as Record<string, unknown>;
     if (candidate.kind === "global" && typeof candidate.globalSectionId === "string") {
-      return [{ kind: "global", globalSectionId: candidate.globalSectionId }];
+      return [{ ...structuredClone(candidate), kind: "global", globalSectionId: candidate.globalSectionId }];
     }
     if (candidate.kind === "inline" && candidate.section && typeof candidate.section === "object" && !Array.isArray(candidate.section)) {
-      return [{ kind: "inline", section: structuredClone(candidate.section) as SectionNode }];
+      return [{ ...structuredClone(candidate), kind: "inline", section: structuredClone(candidate.section) as SectionNode }];
     }
     return [];
   });
@@ -45,9 +45,44 @@ export function updateInlineSection(
 ): Record<string, unknown> {
   const sections = readPlacements(layout).map((placement) => {
     if (placement.kind !== "inline" || placement.section.id !== sectionId) return placement;
-    return { kind: "inline" as const, section: structuredClone(update(structuredClone(placement.section))) };
+    return { ...placement, section: structuredClone(update(structuredClone(placement.section))) };
   });
   return withPlacements(layout, sections);
+}
+
+export function movePlacement(layout: Record<string, unknown>, sectionId: string, direction: "up" | "down"): Record<string, unknown> {
+  const sections = readPlacements(layout);
+  const index = sections.findIndex((placement) => placement.kind === "inline" ? placement.section.id === sectionId : placement.globalSectionId === sectionId);
+  const target = direction === "up" ? index - 1 : index + 1;
+  if (index < 0 || target < 0 || target >= sections.length) return structuredClone(layout);
+  [sections[index], sections[target]] = [sections[target]!, sections[index]!];
+  return withPlacements(layout, sections);
+}
+
+export function setInlineSectionEnabled(layout: Record<string, unknown>, sectionId: string, enabled: boolean): Record<string, unknown> {
+  return updateInlineSection(layout, sectionId, (section) => ({ ...section, enabled }));
+}
+
+export function appendBlock(
+  layout: Record<string, unknown>,
+  sectionId: string,
+  block: BlockNode,
+): Record<string, unknown> {
+  return updateInlineSection(layout, sectionId, (section) => ({
+    ...section,
+    blocks: [...section.blocks, structuredClone(block)],
+  }));
+}
+
+export function removeInlineSection(
+  layout: Record<string, unknown>,
+  sectionId: string,
+): Record<string, unknown> {
+  return withPlacements(
+    layout,
+    readPlacements(layout).filter((placement) =>
+      placement.kind !== "inline" || placement.section.id !== sectionId),
+  );
 }
 
 export function replaceInlineWithGlobal(
@@ -77,4 +112,13 @@ export function detachGlobalPlacement(
     return placement;
   });
   return withPlacements(layout, sections);
+}
+
+/** Move a placement by its array position, preserving its complete stored representation. */
+export function reorderPlacement(layout: Record<string, unknown>, from: number, to: number): Record<string, unknown> {
+  const result = structuredClone(layout);
+  if (!Array.isArray(result.sections) || from < 0 || to < 0 || from >= result.sections.length || to >= result.sections.length || from === to) return result;
+  const [placement] = result.sections.splice(from, 1);
+  result.sections.splice(to, 0, placement);
+  return result;
 }

@@ -1,18 +1,10 @@
 import { z } from "zod";
+import { storefrontPageTypes } from "./types.js";
 
 export const RUNTIME_STOREFRONT_SCHEMA_VERSION = 4 as const;
 
 const jsonObjectSchema = z.record(z.string(), z.unknown());
-const runtimeTemplateTypeSchema = z.enum([
-  "home",
-  "product",
-  "collection",
-  "page",
-  "blog",
-  "article",
-  "search",
-  "cart",
-]);
+const runtimeTemplateTypeSchema = z.enum(storefrontPageTypes);
 const assignableResourceTypeSchema = z.enum(["product", "collection", "page", "blog", "article"]);
 
 const runtimeTemplateSchema = z.object({
@@ -95,8 +87,11 @@ export const runtimeStorefrontSnapshotV4Schema = z.object({
   registryManifestHash: z.string().min(1),
   theme: z.object({
     presetId: z.string().min(1),
+    id: z.string().min(1).optional(),
+    version: z.string().min(1).optional(),
     settings: jsonObjectSchema,
     artifactId: z.string().min(1).nullable(),
+    fallbackReason: z.enum(["theme-unavailable", "version-unavailable"]).optional(),
   }).strict(),
   templates: z.record(z.string().min(1), runtimeTemplateSchema),
   globalSections: z.record(z.string().min(1), runtimeGlobalSectionSchema),
