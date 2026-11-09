@@ -1,7 +1,8 @@
 import type { ComponentProps } from "react";
 import { getSectionDefinition, sectionLabel } from "@jelly/storefront-registry";
 import type { RegistrySectionRenderer } from "@jelly/storefront-renderer";
-import type { SectionNode } from "@jelly/storefront-schema";
+import type { RuntimeStorefrontSnapshotV4, RuntimeTemplateV4, SectionNode } from "@jelly/storefront-schema";
+import { expandRawRuntimeLayout } from "@/features/storefront/resource-loader";
 import type { GlobalSectionRecord, StorefrontTemplateRecord } from "./api/types";
 import type { EditorSelection } from "./model/types";
 
@@ -103,26 +104,10 @@ export function templateSections(template: StorefrontTemplateRecord, globals: Ma
   });
 }
 
+/** The editor's unsaved page laid out by the live store's own expander (one render path). */
 export function draftPreviewLayout(template: StorefrontTemplateRecord, globals: Map<string, GlobalSectionRecord>) {
-  const layout = { announcement: [] as SectionNode[], header: [] as SectionNode[], template: [] as SectionNode[], footer: [] as SectionNode[] };
-  const placements = template.layout.sections;
-  if (!Array.isArray(placements)) return layout;
-  for (const placement of placements) {
-    if (!placement || typeof placement !== "object" || Array.isArray(placement)) continue;
-    const input = placement as Record<string, unknown>;
-    const section = input.kind === "inline"
-      ? normalizeSection(input.section)
-      : input.kind === "global" && typeof input.globalSectionId === "string"
-        ? normalizeSection(globals.get(input.globalSectionId)?.section)
-        : null;
-    if (!section) continue;
-    const region = section.type === "announcement-bar" ? "announcement"
-      : section.type === "header" ? "header"
-        : section.type === "footer" ? "footer"
-          : "template";
-    layout[region].push(section);
-  }
-  return layout;
+  const globalSections = Object.fromEntries([...globals].map(([id, global]) => [id, { id, section: global.section }])) as RuntimeStorefrontSnapshotV4["globalSections"];
+  return expandRawRuntimeLayout({ globalSections }, { layout: template.layout } as Pick<RuntimeTemplateV4, "layout">);
 }
 
 export function selectedInlineSection(template: StorefrontTemplateRecord, selection: EditorSelection): SectionNode | null {

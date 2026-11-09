@@ -61,8 +61,9 @@ test("cart quantities update the order total", async ({ page }) => {
 
 test("choosing a size makes the product available", async ({ page }) => {
   const frame = await open(page, "Product", "Mobile");
-  await expect(frame.getByText("Choose a size")).toBeVisible();
+  // The preview runs the live product logic: its wording, and a sold-out size that can still be chosen.
+  await expect(frame.getByText("Choose the required options")).toBeVisible();
   await frame.getByRole("button", { name: "Medium" }).click();
-  await expect(frame.getByText("In stock")).toBeVisible();
-  await expect(frame.getByRole("button", { name: "Large" })).toBeDisabled();
+  await expect(frame.getByText("10 available")).toBeVisible();
+  await expect(frame.getByRole("button", { name: /^Large/ })).toHaveAttribute("data-sold-out", "true");
 });

@@ -73,3 +73,17 @@ describe("variant in the address", () => {
     expect(addressWithVariant("https://shop.test/demo/products/tee?variant=v-small&utm_source=mail", undefined)).toBe("/demo/products/tee?utm_source=mail");
   });
 });
+
+describe("price before a size is chosen", () => {
+  it("shows the cheapest variant's price and its sale price, as on Shopify", async () => {
+    const { createProductPresentationContext } = await import("./product-presentation");
+    const product: Product = {
+      id: "bed", storeId: "s", name: "Bed", slug: "bed", description: "", category: "", imageUrl: "", published: true, archived: false, featured: false,
+      inventoryOptionIds: ["size"],
+      options: [{ id: "size", name: "Size", type: "variant", display: "buttons", required: true, position: 0, values: [{ id: "double", label: "Double", priceAdjustmentMinor: 0, position: 0 }, { id: "king", label: "King", priceAdjustmentMinor: 0, position: 1 }] }],
+      variants: [variant("king", { size: "king" }, 2, { priceMinor: 69_900, compareAtPriceMinor: 99_900 }), variant("double", { size: "double" }, 2, { priceMinor: 49_900, compareAtPriceMinor: 69_900 })],
+    };
+    const context = createProductPresentationContext({ product, currency: "GBP", selections: [], quantity: 1, onSelectionsChange() {}, onQuantityChange() {}, onAddToCart: async () => ({ ok: true }) });
+    expect(context.pricing).toMatchObject({ priceMinor: 49_900, compareAtPriceMinor: 69_900 });
+  });
+});

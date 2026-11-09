@@ -114,6 +114,27 @@ Tests: `packages/storefront-renderer/src/component-behaviour.test.tsx` (14) and 
 
 Not built (each is a feature of its own): predictive search (suggestions while typing), a count on the header bag icon, and the sticky buy bar and quantity rules beyond the stock limit (minimum, steps of N), which need new product settings.
 
+## 4e. Phase 5 done: one render path (2026-11-09)
+
+Before: four places put a page together, each in its own way.
+
+| Path | Before | Now |
+| --- | --- | --- |
+| Live store | `resolveStorefrontRoute` (picks the template, lays out the regions) and its own page markup in `PublishedRuntimeStorefront`. | Same loader; the markup moved to the shared `RuntimeStorefrontView` (`features/storefront/runtime-storefront-view.tsx`). |
+| Theme preview | Read the starter pack directly, laid sections out by hand, and built the product page from a hand-written copy of the product logic (its own prices, "In stock" wording, sold-out rules). | The starter pack becomes a published snapshot (`snapshotFromStarterPack`, same structure as the backend compiler), `resolveStorefrontRoute` resolves the page from sample resources served like the API, the product page uses the live `createProductPresentationContext` on a catalog-shaped sample product (`previewCatalogProduct`), and `RuntimeStorefrontView` draws it. |
+| Editor | Saved designs went through the live expander; unsaved drafts through a copied version (`draftPreviewLayout`). | Drafts go through the same expander (`expandRawRuntimeLayout`). The editor keeps its own section wrapper for selection and outlines. |
+| Store designs dialog | Laid the home page out by hand: no `<main>`, no menu in the header. | Snapshot, loader and shared view, with the merchant's name and logo. |
+
+Differences the old preview hid, now shown the way shoppers see them: product wording ("Choose the required options", "10 available"), sold-out sizes selectable, store identity in header and footer.
+
+Two live problems the shared path exposed, fixed:
+- **No sale price before a size is chosen.** The old price came only from the chosen variant, so a product on sale showed just its price until the shopper picked a size. It now follows the cheapest variant (as on Shopify), like the price already did.
+- **The swipeable photo strip could not be reached with the keyboard** (an accessibility failure in the Forma spec since the phase 1 gallery). The strip now takes focus; arrow keys move between photos.
+
+Checked by `features/theme-preview/one-render-path.test.tsx` (every theme: the snapshot is valid, the editor lays out every page type exactly as the live loader does, the preview draws the same sections in the same order as the live view; 22 tests), the theme Playwright specs and the design lint (a render loop found by the lint, the preview rebuilding its snapshot on every render, was fixed). Browser-checked on the Minimal preview (all pages, product choices, sale price).
+
+**Still different on purpose, needs a decision:** on the live store, built-in themes (Minimal, Avenue, Resthaven, Halo, Diode, Forma and others with their own header) draw collection pages with the older catalog browser (`CatalogBrowser`: 12 products at a time from the server, search, sort, filters, quick view) in place of the theme's own product grid, when the grid has no sort or filter switched on. The preview and the design lint never see it. Options: (a) retire it and give the theme grid server paging plus sort and filters on by default (one render path, changes live collection pages), or (b) keep it and show it in the preview with sample data.
+
 ## 5. Roadmap
 
 Each phase ends with tests, a browser check and a commit, and starts only after a go-ahead.

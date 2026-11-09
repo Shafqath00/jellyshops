@@ -74,8 +74,9 @@ function GalleryContent({ media, title, fit = "contain", thumbnails = "below", r
 
   if (!count) return <div className="jelly-gallery" style={style}><div className="jelly-gallery-stage"><div className="jelly-gallery-empty" role="img" aria-label={`No photo for ${title}`}>No photo available</div></div></div>;
   return <div className="jelly-gallery" data-thumbs={count > 1 ? thumbnails : undefined} style={style}>
-    <div className="jelly-gallery-stage" role="region" aria-roledescription="carousel" aria-label={`${title} photos`} tabIndex={count > 1 ? 0 : undefined} onKeyDown={count > 1 ? onKeyDown : undefined}>
-      <ul className="jelly-gallery-track" ref={track} onScroll={onScroll}>
+    <div className="jelly-gallery-stage" role="region" aria-roledescription="carousel" aria-label={`${title} photos`} onKeyDown={count > 1 ? onKeyDown : undefined}>
+      {/* The strip itself takes keyboard focus: it is what scrolls (arrow keys move between photos). */}
+      <ul className="jelly-gallery-track" ref={track} onScroll={onScroll} tabIndex={count > 1 ? 0 : undefined}>
         {media.map((photo, index) => <li key={photo.id} className="jelly-gallery-slide" aria-roledescription="slide" aria-label={`Photo ${index + 1} of ${count}`} aria-hidden={index === active ? undefined : true}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img data-testid={index === active ? "gallery-main" : undefined} src={photo.url} srcSet={productMediaSrcSet(photo)} sizes={SIZES} width={photo.width ?? undefined} height={photo.height ?? undefined} alt={photo.altText || title} loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} draggable={false} />

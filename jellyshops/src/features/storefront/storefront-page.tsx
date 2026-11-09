@@ -7,7 +7,6 @@ import { productCardData } from "./product-card-data";
 import { useStorefrontLanguage } from "./storefront-language";
 import type { CSSProperties } from "react";
 import { type StorefrontCartAccess,
-  RegistrySectionRenderer,
   createCollectionLinks,
   StorefrontRenderer,
   ThemeCustomCss,
@@ -24,6 +23,7 @@ import {
 import { cardLayoutAttribute, resolveDesignTokens, resolveStorefrontThemeTokens, resolveTheme, legacyStylesAttribute, themeStyleId, usesProductCompare } from "@jelly/storefront-themes";
 import type { Currency, Product } from "@/lib/domain";
 import type { ResolvedStorefrontRoute } from "./resource-loader";
+import { RuntimeStorefrontView } from "./runtime-storefront-view";
 import { useStorefrontCartAccess } from "./storefront-cart-access";
 import { useCompareList } from "./compare-list";
 import { useReviewSummaries, useStorefrontReviewAccess } from "./reviews-api";
@@ -103,25 +103,7 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
     <div className={`jelly-storefront jelly-theme-layout-${resolvedTheme.layout}`} data-jelly-theme={themeStyleId(resolvedTheme.id, resolvedTheme.version)} data-jelly-legacy-styles={legacyStylesAttribute(resolvedTheme.id, resolvedTheme.version)} data-jelly-theme-version={resolvedTheme.version} data-card-layout={cardLayoutAttribute(style)} style={style}>
       {/* Inside the storefront frame the frame already adds the theme's custom CSS. */}
       {!chromeHandled && <ThemeCustomCss settings={resolvedTheme.settings} themeId={resolvedTheme.id} themeVersion={resolvedTheme.version} />}
-      {resolvedTheme.layout === "editorial" ? <div className="jelly-theme-masthead"><span>JellyShop collection</span><img src={`${resolvedTheme.assetPrefix}monogram.svg`} alt="" /></div> : null}
-      {!chromeHandled && route.layout.announcement.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="header" themeId={resolvedTheme.id} themeVersion={resolvedTheme.version} page={route.context} menus={snapshot.menus} resourceLinks={resourceLinks} collectionLinks={collectionLinks} storeSlug={storeSlug} language={language} />)}
-      {!chromeHandled && route.layout.header.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="header" themeId={resolvedTheme.id} themeVersion={resolvedTheme.version} page={route.context} menus={snapshot.menus} resourceLinks={resourceLinks} collectionLinks={collectionLinks} storeSlug={storeSlug} language={language} />)}
-      <main className={resolvedTheme.layout === "editorial" ? "jelly-theme-editorial-main" : undefined}>
-        {route.layout.template.map((section) => (
-          <RegistrySectionRenderer
-            key={section.id}
-            section={section}
-            mode="published"
-            commerce={commerce}
-            region="template"
-            themeId={resolvedTheme.id} themeVersion={resolvedTheme.version}
-            page={route.context}
-            menus={snapshot.menus} resourceLinks={resourceLinks} collectionLinks={collectionLinks}
-            storeSlug={storeSlug}
-          />
-        ))}
-      </main>
-      {!chromeHandled && route.layout.footer.map((section) => <RegistrySectionRenderer key={section.id} section={section} mode="published" commerce={commerce} region="footer" themeId={resolvedTheme.id} themeVersion={resolvedTheme.version} page={route.context} menus={snapshot.menus} resourceLinks={resourceLinks} collectionLinks={collectionLinks} storeSlug={storeSlug} language={language} />)}
+      <RuntimeStorefrontView route={route} commerce={commerce} themeId={resolvedTheme.id} themeVersion={resolvedTheme.version} menus={snapshot.menus} storeSlug={storeSlug} resourceLinks={resourceLinks} collectionLinks={collectionLinks} language={language} chrome={!chromeHandled} />
     </div>
   );
 }
