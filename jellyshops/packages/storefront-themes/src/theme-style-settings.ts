@@ -161,6 +161,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     select("productCard.button", "Button", "Product cards", "none", [["none", "None"], ["view", "View product"], ["shop", "Shop now"]], "A button under each card that opens the product."),
     { id: "productCard.showBrand", type: "checkbox", label: "Show the brand", group: "Product cards", default: false, description: "The product's brand (vendor) above its name." },
     { id: "productCard.showRating", type: "checkbox", label: "Show star ratings", group: "Product cards", default: false, description: "Stars and the number of reviews under the name, for products with published reviews." },
+    { id: "productCard.compare", type: "checkbox", label: "Let shoppers compare products", group: "Product cards", default: false, description: "A Compare tick on every card. Up to four products dock in a tray at the bottom of the page and open side by side, with their specifications, on a compare page." },
     select("productCard.swatches", "Colour swatches", "Product cards", "none", [["none", "Don't show"], ["colors", "Show the colours a product comes in"]], "Dots for up to five colours of a product's colour option."),
   ];
   const socialSchema = SOCIAL_PLATFORMS.map(({ id, label }) => ({ id: `social.${id}`, type: "url", label, group: "Social media", default: "", ...(id === "instagram" ? { description: "Full https:// links. Shown in the footer when it has no social links of its own." } : {}) }));
@@ -187,7 +188,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
       cart: { type: "page", freeDeliveryFrom: 0 },
     },
     buttonDefaults: { size: theme, textCase: theme, borderWidth: theme, hover: theme },
-    cardDefaults: { layout: theme, showRating: false, radius: theme, shadow: theme, hover: theme, order: "photo-title-price", showTitle: "show", titleLines: theme, showPrice: "show", savings: "none", button: "none", swatches: "none" },
+    cardDefaults: { layout: theme, showRating: false, compare: false, radius: theme, shadow: theme, hover: theme, order: "photo-title-price", showTitle: "show", titleLines: theme, showPrice: "show", savings: "none", button: "none", swatches: "none" },
     textStyleSchema,
     colorSchemeSchema,
     buttonSchema,
@@ -233,6 +234,11 @@ export function storeLanguages(settings: Record<string, unknown> | undefined): S
 }
 
 /** True when the theme opens a slide-out bag instead of going to the bag page. */
+/** Whether product cards carry a Compare tick and the store shows the compare tray (Product cards > Let shoppers compare products). */
+export function usesProductCompare(settings: Record<string, unknown> | undefined): boolean {
+  return record(settings?.productCard).compare === true;
+}
+
 export function usesCartDrawer(settings: Record<string, unknown> | undefined): boolean {
   const type = record(settings?.cart).type;
   return type === "drawer" || type === "sheet";

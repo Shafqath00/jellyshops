@@ -46,7 +46,7 @@ export interface PublicMetaobjectList {
   definition: { handle: string; name: string; fields: Array<{ handle: string; name: string; type: string }> };
   entries: Array<{ handle: string; displayName: string; values: Record<string, string | number | boolean> }>;
 }
-export interface CommerceDataProvider { initialProducts?: PublicProduct[]; getProducts(input?: { featured?: boolean; limit?: number; sort?: string; collectionId?: string }): Promise<PublicProduct[]>; subscribeNewsletter?: (email: string, source: string) => Promise<void>; getMetaobjects?: (handle: string) => Promise<PublicMetaobjectList | null>; /** The shopper's cart, for quick add on product cards. Absent in the editor. */ cart?: StorefrontCartAccess; /** Star ratings by product id, for product cards. */ ratings?: Record<string, { average: number; count: number }>; /** Reading and writing product reviews (the product page's Reviews section). */ reviews?: StorefrontReviewAccess }
+export interface CommerceDataProvider { initialProducts?: PublicProduct[]; getProducts(input?: { featured?: boolean; limit?: number; sort?: string; collectionId?: string }): Promise<PublicProduct[]>; subscribeNewsletter?: (email: string, source: string) => Promise<void>; getMetaobjects?: (handle: string) => Promise<PublicMetaobjectList | null>; /** The shopper's cart, for quick add on product cards. Absent in the editor. */ cart?: StorefrontCartAccess; /** Star ratings by product id, for product cards. */ ratings?: Record<string, { average: number; count: number }>; /** Reading and writing product reviews (the product page's Reviews section). */ reviews?: StorefrontReviewAccess; /** The compare list, when the theme lets shoppers compare products. Absent in the editor. */ compare?: StorefrontCompareAccess }
 /** A published review as shoppers see it. */
 export interface StorefrontReview { id: string; rating: number; title: string; body: string; authorName: string; verifiedPurchase: boolean; createdAt: string }
 export interface StorefrontReviewPage { summary: { average: number; count: number; distribution: [number, number, number, number, number] }; reviews: StorefrontReview[] }
@@ -57,6 +57,8 @@ export interface StorefrontReviewAccess {
 }
 /** What product cards may do with the cart: read and set the quantity of one variant. */
 export interface StorefrontCartAccess { quantity(variantId: string): number; setQuantity(variantId: string, quantity: number): Promise<{ ok: boolean; message?: string }> }
+/** The shopper's compare list (theme setting Product cards > "Let shoppers compare products"); ids of up to `max` products. */
+export interface StorefrontCompareAccess { ids(): readonly string[]; toggle(productId: string): { ok: boolean; message?: string }; max: number; subscribe(listener: () => void): () => void }
 export interface AssetResolver { resolve(assetId: string): Promise<string | null> }
 export type RendererMode = "preview" | "editor" | "published";
 export interface RendererSelection { kind: "theme" | "section" | "block"; region?: "header" | "template" | "footer"; sectionId?: string; blockId?: string; fieldKey?: string; /** A part of the section drawn from its settings (section-elements.ts). */ elementId?: string; /** Which copy of a repeated element (the nth product card). */ elementIndex?: number }

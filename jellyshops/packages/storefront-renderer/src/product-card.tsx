@@ -1,11 +1,31 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useSyncExternalStore } from "react";
 import { StorefrontProductCard } from "@jelly/storefront-ui";
-import type { PublicProduct, StorefrontCartAccess } from "./types";
+import type { PublicProduct, StorefrontCartAccess, StorefrontCompareAccess } from "./types";
 
 /** The shopper's cart for quick add; provided per section by RegistrySectionRenderer (not in the editor). */
 export const CardCartContext = createContext<StorefrontCartAccess | undefined>(undefined);
 /** Star ratings by product id; provided per section by RegistrySectionRenderer. */
 export const CardRatingsContext = createContext<Record<string, { average: number; count: number }> | undefined>(undefined);
+/** The shopper's compare list; provided per section by RegistrySectionRenderer when the theme lets shoppers compare. */
+export const CardCompareContext = createContext<StorefrontCompareAccess | undefined>(undefined);
+const NO_IDS: readonly string[] = [];
+
+/**
+ * "Compare" tick on a product card (signature of the electronics template): adds the product to the shopper's
+ * compare list, up to the list's maximum. Drawn only when the theme turns comparing on.
+ */
+export function CompareToggle({ product, compare }: { product: PublicProduct; compare: StorefrontCompareAccess }) {
+  const ids = useSyncExternalStore(compare.subscribe, compare.ids, () => NO_IDS);
+  const [message, setMessage] = useState("");
+  const checked = ids.includes(product.id);
+  return <div className="jelly-compare-toggle">
+    <label>
+      <input type="checkbox" aria-label={`Compare ${product.name}`} checked={checked} onChange={() => { const result = compare.toggle(product.id); setMessage(result.ok ? "" : result.message ?? ""); }} />
+      <span aria-hidden="true">Compare</span>
+    </label>
+    {message && <p className="jelly-compare-toggle-message" role="alert">{message}</p>}
+  </div>;
+}
 
 /**
  * Quick add (template programme card archetype C3): "Add", then a − 1 + stepper showing how many are in the bag.
@@ -44,6 +64,10 @@ export function ProductCard({ product, editorProps }: { product: PublicProduct; 
   const ratings = useContext(CardRatingsContext);
   const rating = product.rating ?? ratings?.[product.id];
   if (rating && !product.rating) product = { ...product, rating };
+  const compare = useContext(CardCompareContext);
   const quickAdd = cart && product.quickAdd && product.available !== false ? product.quickAdd : undefined;
-  return <StorefrontProductCard product={product} editorProps={editorProps} actions={cart && quickAdd ? <QuickAdd product={{ ...product, quickAdd }} cart={cart} /> : undefined} />;
+  const actions = (cart && quickAdd) || compare
+    ? <>{cart && quickAdd && <QuickAdd product={{ ...product, quickAdd }} cart={cart} />}{compare && <CompareToggle product={product} compare={compare} />}</>
+    : undefined;
+  return <StorefrontProductCard product={product} editorProps={editorProps} actions={actions} />;
 }

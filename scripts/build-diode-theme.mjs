@@ -23,7 +23,7 @@ writeFileSync(new URL("mark.svg", assets), `<svg xmlns="http://www.w3.org/2000/s
 writeFileSync(new URL("preview.svg", assets), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200"><rect width="320" height="200" fill="#F5F6F7"/><rect x="16" y="14" width="44" height="8" rx="1" fill="#0C0E11"/><rect x="16" y="34" width="288" height="98" rx="4" fill="#111317"/><path d="M16 50h288M16 66h288M16 82h288M16 98h288M16 114h288" stroke="#2a2d33" stroke-width=".5"/><circle cx="232" cy="82" r="30" fill="none" stroke="#9aa0a8" stroke-width="7"/><rect x="32" y="62" width="100" height="10" rx="1" fill="#F5F6F7"/><rect x="32" y="82" width="54" height="10" rx="1" fill="#C8F03C"/>${[16, 90, 164, 238].map((x) => `<rect x="${x}.5" y="144.5" width="65" height="43" rx="3" fill="#E9ECEF" stroke="#0C0E11" stroke-opacity=".2"/>`).join("")}</svg>`);
 
 // ---------- theme.json ----------
-const extra = ["productCard.layout", "productCard.showRating", "cart.freeDeliveryFrom"].map((id) => {
+const extra = ["productCard.layout", "productCard.showRating", "productCard.compare", "cart.freeDeliveryFrom"].map((id) => {
   const setting = signature.settingsSchema.find((item) => item.id === id);
   if (!setting) throw new Error(`Built-in schema has no ${id}; run npm run build:storefront-packages`);
   return setting;
@@ -37,7 +37,7 @@ Object.assign(defaults, {
   colors: { background: "#F5F6F7", surface: "#E9ECEF", text: "#0C0E11", secondary: "#525962", primary: "#2D46F5", accent: "#C8F03C" },
   typography: { ...defaults.typography, headingFont: "Space Grotesk", bodyFont: "Inter", headingWeight: 600, bodyWeight: 400, bodySize: 16, headingSize: 64 },
   buttons: { ...defaults.buttons, radius: "soft" },
-  productCard: { ...defaults.productCard, layout: "technical", showRating: true, radius: "soft", alignment: "left", showBrand: true, swatches: "colors", hover: "none" },
+  productCard: { ...defaults.productCard, layout: "technical", showRating: true, compare: true, radius: "soft", alignment: "left", showBrand: true, swatches: "colors", hover: "none" },
   cart: { type: "drawer", freeDeliveryFrom: 50 },
   colorSchemes: {
     ...defaults.colorSchemes,

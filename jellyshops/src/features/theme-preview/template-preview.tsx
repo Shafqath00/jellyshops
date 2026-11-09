@@ -2,9 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { RegistrySectionRenderer, type CommerceDataProvider, type PublicProduct, type StorefrontCartAccess, type StorefrontPageContext } from "@jelly/storefront-renderer";
-import { getStarterPack } from "@jelly/storefront-themes";
+import { getStarterPack, resolveTheme, usesProductCompare } from "@jelly/storefront-themes";
 import type { RuntimeMenuV4, SectionNode } from "@jelly/storefront-schema";
 import { sampleReviews } from "./sample-reviews";
+import { MAX_COMPARE, useCompareList } from "@/features/storefront/compare-list";
+import type { CompareItem } from "@/features/storefront/compare-table";
+import { ComparePageView, CompareTrayView } from "@/features/storefront/components/compare-view";
 import type { ThemePreviewConfig } from "./configs";
 
 /**
@@ -12,7 +15,7 @@ import type { ThemePreviewConfig } from "./configs";
  * page or 404) with sample catalogue data, exactly as the published storefront
  * composes it.
  */
-export type PreviewTemplate = "home" | "product" | "collection" | "cart" | "search" | "page" | "not-found";
+export type PreviewTemplate = "home" | "product" | "collection" | "cart" | "search" | "page" | "not-found" | "compare";
 
 const menus: Record<string, RuntimeMenuV4> = {
   main: { id: "preview-main", handle: "main", items: [
@@ -105,7 +108,12 @@ function previewLayout(section: SectionNode, productLayout: string | undefined, 
   return section;
 }
 
-export function TemplatePreview({ template, config, productLayout, collectionLayout }: { template: PreviewTemplate; config: ThemePreviewConfig; productLayout?: string; collectionLayout?: string }) {
+/** Whether the theme lets shoppers compare products (shows the Compare tab, ticks, tray). */
+export function previewHasCompare(config: ThemePreviewConfig): boolean {
+  return usesProductCompare(resolveTheme(config.themeId).settings);
+}
+
+export function TemplatePreview({ template, config, productLayout, collectionLayout, onOpenCompare }: { template: PreviewTemplate; config: ThemePreviewConfig; productLayout?: string; collectionLayout?: string; onOpenCompare?: () => void }) {
   const pack = getStarterPack(config.packId);
   const productPage = useProductContext(config);
   const cartPage = useCartContext(config);
@@ -113,7 +121,14 @@ export function TemplatePreview({ template, config, productLayout, collectionLay
   const previewMenus = config.useStarterMenu ? Object.fromEntries(pack.menus.map((menu) => [menu.handle, { id: `preview-${menu.key}`, handle: menu.handle, items: menu.items }])) as Record<string, RuntimeMenuV4> : menus;
   const cart = usePreviewCart();
   const products = withPreviewQuickAdd(config.products);
-  const commerce: CommerceDataProvider = { initialProducts: products, cart, ratings: config.ratings, reviews: sampleReviews, async getProducts(input) { return products.slice(0, input?.limit ?? products.length); } };
+  // Comparing in the preview uses its own list, kept in this browser like the live store's.
+  const compareOn = previewHasCompare(config);
+  const { access: compare, ids: compareIds } = useCompareList(`theme-preview-${config.themeId}`);
+  const compareItems = compareIds.flatMap((id): CompareItem[] => {
+    const product = config.products.find((item) => item.id === id);
+    return product ? [{ id: product.id, name: product.name, href: "#", imageUrl: product.imageUrl, price: product.price, vendor: product.vendor, available: product.available !== false, specifications: config.compareSpecifications?.[product.id] }] : [];
+  });
+  const commerce: CommerceDataProvider = { initialProducts: products, cart, ratings: config.ratings, reviews: sampleReviews, compare: compareOn ? compare : undefined, async getProducts(input) { return products.slice(0, input?.limit ?? products.length); } };
   const pages: Record<PreviewTemplate, StorefrontPageContext> = {
     home: { pageType: "home", resource: null },
     product: productPage,
@@ -133,9 +148,11 @@ export function TemplatePreview({ template, config, productLayout, collectionLay
       ] } } },
     } as unknown as StorefrontPageContext,
     "not-found": { pageType: "not-found", resource: null },
+    compare: { pageType: "page", resource: null } as unknown as StorefrontPageContext,
   };
   const page = pages[template];
-  const layout = pack.templates.find((item) => item.type === template)?.layout.sections ?? [];
+  // The compare page is built in (like the bag in other stores): the home page's header and footer around it.
+  const layout = pack.templates.find((item) => item.type === (template === "compare" ? "home" : template))?.layout.sections.filter((placement) => template !== "compare" || placement.kind === "global") ?? [];
   type Entry = { region: "header" | "template" | "footer"; section: SectionNode };
   const resolved: Entry[] = layout.flatMap((placement): Entry[] => {
     if (placement.kind === "inline") return [{ region: "template", section: previewLayout(placement.section, productLayout, collectionLayout, config) }];
@@ -149,7 +166,10 @@ export function TemplatePreview({ template, config, productLayout, collectionLay
   const render = (entry: Entry) => <RegistrySectionRenderer key={entry.section.id} section={entry.section} mode="preview" commerce={commerce} region={entry.region} themeId={config.themeId} page={page} menus={previewMenus} storeSlug="preview" />;
   return <div className="jelly-storefront">
     {resolved.filter((entry) => entry.region === "header").map(render)}
-    <main>{resolved.filter((entry) => entry.region === "template").map(render)}</main>
+    {template === "compare"
+      ? <ComparePageView items={compareItems} max={MAX_COMPARE} shopHref="#shop" onRemove={(id) => compare.remove(id)} />
+      : <main>{resolved.filter((entry) => entry.region === "template").map(render)}</main>}
     {resolved.filter((entry) => entry.region === "footer").map(render)}
+    {compareOn && template !== "compare" && <CompareTrayView items={compareItems} max={MAX_COMPARE} compareHref="#compare" onOpen={onOpenCompare} onRemove={(id) => compare.remove(id)} onClear={() => compare.clear()} />}
   </div>;
 }

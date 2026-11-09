@@ -1253,3 +1253,57 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 :where(.jelly-product-chapter) h2 { margin: 0 0 12px; font-size: 1.375rem; line-height: 1.25; }
 :where(.jelly-product-chapter-number) { margin: 0 0 16px; font-size: .8125rem; letter-spacing: .08em; opacity: .75; }
 :where(.jelly-product-chapter) p { margin: 0 0 12px; }
+
+/*
+ * Product compare (Product cards > Let shoppers compare products; signature of the electronics template). A Compare
+ * tick after each card, a tray docked at the bottom of the page and the compare page's table. Quick add stays hidden
+ * unless the card style is Quick add, even when the actions slot is shown for the tick.
+ */
+.jelly-product-card-actions:has(.jelly-compare-toggle) { display: grid; gap: 8px; margin-top: 8px; }
+.jelly-product-card-actions .jelly-quick-add { display: none; }
+:is([data-jelly-theme][data-card-layout="quick-add"], [data-jelly-theme] [data-card-layout="quick-add"]) .jelly-product-card-actions .jelly-quick-add { display: block; }
+.jelly-compare-toggle label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; cursor: pointer; }
+.jelly-compare-toggle input { width: 24px; height: 24px; margin: 0; accent-color: var(--j-color-primary, currentColor); }
+.jelly-compare-toggle-message { margin: 0; font-size: 13px; color: var(--j-color-muted, inherit); }
+.jelly-sticky-purchase { bottom: var(--jelly-compare-tray-height, 0px); }
+[data-jelly-theme]:has(.jelly-compare-tray) { padding-bottom: var(--jelly-compare-tray-height, 0px); }
+.jelly-compare-tray { position: fixed; inset: auto 0 0; z-index: 39; border-top: 1px solid var(--j-color-border, color-mix(in srgb, currentColor 15%, transparent)); background: var(--j-color-bg, #fff); color: var(--j-color-text, inherit); box-shadow: 0 -6px 20px rgb(0 0 0 / .08); }
+.jelly-compare-tray-inner { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; width: min(calc(100% - 2 * var(--j-page-margin, 16px)), var(--j-page-normal, 1280px)); margin-inline: auto; padding-block: 12px; }
+.jelly-compare-tray-count { margin: 0; font-weight: 600; } .jelly-compare-tray-count span { color: var(--j-color-muted, inherit); font-weight: 400; }
+.jelly-compare-tray-items { display: flex; flex: 1; flex-wrap: wrap; gap: 8px; min-width: 0; margin: 0; padding: 0; list-style: none; }
+.jelly-compare-tray-items li { display: flex; align-items: center; gap: 8px; max-width: 16rem; padding: 4px 4px 4px 4px; border: 1px solid var(--j-color-border, color-mix(in srgb, currentColor 15%, transparent)); border-radius: var(--j-radius-sm, 6px); }
+.jelly-compare-tray-items img, .jelly-compare-tray-placeholder { width: 40px; height: 40px; flex: none; object-fit: cover; border-radius: 4px; background: var(--j-color-surface, #eee); }
+.jelly-compare-tray-name { overflow: hidden; font-size: 14px; white-space: nowrap; text-overflow: ellipsis; }
+.jelly-compare-tray-items button, .jelly-compare-tray-clear { min-width: 44px; min-height: 44px; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.jelly-compare-tray-items button { font-size: 20px; line-height: 1; }
+.jelly-compare-tray-clear { padding-inline: 12px; text-decoration: underline; }
+.jelly-compare-tray-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.jelly-compare-tray-hint { font-size: 14px; color: var(--j-color-muted, inherit); }
+@media (max-width: 767px) {
+  .jelly-compare-tray-inner { gap: 8px 12px; padding-block: 8px; }
+  .jelly-compare-tray-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .jelly-compare-tray-items { order: 3; flex-basis: 100%; flex-wrap: nowrap; }
+  .jelly-compare-tray-items li { gap: 0; }
+}
+.jelly-compare-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; margin-bottom: 24px; }
+.jelly-compare-page .jelly-compare-head h1 { margin: 0; font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.5rem); line-height: 1.15; }
+.jelly-compare-differences { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
+.jelly-compare-differences input { width: 24px; height: 24px; margin: 0; accent-color: var(--j-color-primary, currentColor); }
+.jelly-compare-page .jelly-container { min-width: 0; }
+.jelly-compare-scroll { position: relative; width: 100%; max-width: 100%; min-width: 0; overflow-x: auto; }
+/* The row names stay in view while the products scroll sideways. */
+.jelly-compare-table tbody th { position: sticky; left: 0; z-index: 1; background: var(--j-color-bg, #fff); }
+.jelly-compare-table tr[data-differs] > th { background: color-mix(in srgb, var(--j-color-primary, currentColor) 6%, var(--j-color-bg, #fff)); }
+@media (max-width: 767px) { .jelly-compare-table { min-width: calc(6.5rem + var(--jelly-compare-columns, 2) * 9rem); } .jelly-compare-table tbody th { width: 6.5rem; } .jelly-compare-table thead img { max-width: 7rem; } }
+.jelly-compare-scroll:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.jelly-compare-table { width: 100%; min-width: calc(9rem + var(--jelly-compare-columns, 2) * 11rem); border-collapse: collapse; table-layout: fixed; }
+.jelly-compare-table :is(th, td) { padding: 12px 16px 12px 0; border-bottom: 1px solid var(--j-color-border, color-mix(in srgb, currentColor 15%, transparent)); text-align: left; vertical-align: top; }
+.jelly-compare-table thead th { font-weight: 600; }
+.jelly-compare-table thead a { display: grid; gap: 8px; color: inherit; text-decoration: none; }
+.jelly-compare-table thead img { width: 100%; max-width: 12rem; aspect-ratio: 1 / 1; object-fit: cover; border-radius: var(--j-radius-sm, 6px); background: var(--j-color-surface, #eee); }
+.jelly-compare-remove { min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--j-color-muted, inherit); font: inherit; font-size: 14px; font-weight: 400; text-decoration: underline; cursor: pointer; }
+.jelly-compare-table tbody th { width: 9rem; font-weight: 400; color: var(--j-color-muted, inherit); }
+.jelly-compare-table tr[data-differs] > * { background: color-mix(in srgb, var(--j-color-primary, currentColor) 6%, transparent); }
+.jelly-compare-table tr[data-differs] th { color: var(--j-color-text, inherit); font-weight: 600; }
+.jelly-compare-table tbody :is(th, td):first-child { padding-left: 8px; }
+.jelly-compare-hint { margin-top: 16px; color: var(--j-color-muted, inherit); }

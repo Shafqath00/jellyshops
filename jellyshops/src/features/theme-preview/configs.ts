@@ -25,6 +25,8 @@ export interface ThemePreviewConfig {
   useStarterMenu?: boolean;
   /** Sample star ratings by product id, for themes that show ratings on cards. */
   ratings?: Record<string, { average: number; count: number }>;
+  /** Sample specifications by product id, for the compare page (themes with Product cards > Let shoppers compare products). */
+  compareSpecifications?: Record<string, Record<string, string>>;
 }
 
 const image = (photo: string, width = 900) => `https://images.unsplash.com/${photo}?auto=format&fit=crop&w=${width}&q=80`;
@@ -265,6 +267,14 @@ export const jellyDiodePreview: ThemePreviewConfig = {
   collection: { title: "Audio", description: "Headphones, earbuds and speakers, with the numbers that matter on every card.", imageUrl: diodeAsset("desk") },
   page: { title: "Warranty and support", intro: "Every Diode product comes with a two-year warranty and five years of firmware updates.", heading: "How repairs work", body: "Tell us what is wrong and we send a prepaid label. Most repairs are back with you within ten working days.", bullets: ["2-year warranty, repairs included", "Firmware updates for 5 years"] },
   searchQuery: "headphones", cart: { d1: 1, d5: 1 }, useStarterMenu: true,
+  compareSpecifications: {
+    d1: { "Battery life": "40 hours", Connectivity: "Bluetooth 5.3, multipoint", Charging: "USB-C, 5 min = 4 hours", "Noise cancelling": "Adaptive", Weight: "254 g", "Water resistance": "None", Warranty: "2 years" },
+    d2: { "Battery life": "8 hours (32 with case)", Connectivity: "Bluetooth 5.3, multipoint", Charging: "USB-C and wireless", "Noise cancelling": "Adaptive", Weight: "5 g per earbud", "Water resistance": "IPX4", Warranty: "2 years" },
+    d3: { Connectivity: "USB-C, Bluetooth 5.1 (3 devices)", "Battery life": "200 hours (backlight off)", Switches: "Hot-swap, pre-lubed linear", Layout: "75%, UK ISO", Weight: "1.1 kg", Warranty: "2 years" },
+    d4: { "Battery life": "20 hours", Connectivity: "Bluetooth 5.3", Charging: "USB-C", Weight: "540 g", "Water resistance": "IP67", Warranty: "2 years" },
+    d5: { Output: "65 W total", Ports: "2 × USB-C", Plug: "UK three-pin", Weight: "112 g", Warranty: "2 years" },
+    d6: { Capacity: "10,000 mAh", Output: "20 W USB-C", Charging: "USB-C, 2.5 hours", Weight: "180 g", Warranty: "2 years" },
+  },
   ratings: { d1: { average: 4.7, count: 382 }, d2: { average: 4.5, count: 241 }, d3: { average: 4.8, count: 129 }, d4: { average: 4.4, count: 87 }, d5: { average: 4.9, count: 64 } },
 };
 

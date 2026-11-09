@@ -328,6 +328,15 @@
 [data-jelly-theme="jelly-diode"] .jelly-product-card .jelly-product-card-price{font-family: var(--diode-mono); font-weight: 500; font-size: .9375rem;}
 [data-jelly-theme="jelly-diode"] .jelly-product-card [data-card-part="vendor"]{font-family: var(--diode-mono); font-size: .6875rem; letter-spacing: .06em; text-transform: uppercase; color: var(--j-color-muted);}
 [data-jelly-theme="jelly-diode"] .jelly-product-card > a{align-content: start; grid-template-rows: auto 1fr;}
+[data-jelly-theme="jelly-diode"][data-card-layout] .jelly-product-card{display: flex; flex-direction: column; padding: 12px; border: 1px solid var(--diode-line); border-radius: 6px; background: var(--j-color-bg); transition: border-color 150ms ease;}
+[data-jelly-theme="jelly-diode"][data-card-layout] .jelly-product-card:hover{border-color: var(--j-color-text);}
+[data-jelly-theme="jelly-diode"][data-card-layout] .jelly-product-card > a.jelly-product-card-link,[data-jelly-theme="jelly-diode"][data-card-layout] .jelly-product-card > a{flex: 1; padding: 0; border: 0;}
+[data-jelly-theme="jelly-diode"] .jelly-product-card-actions:has(.jelly-compare-toggle){margin-top: 12px; padding-top: 4px; border-top: 1px solid var(--diode-line);}
+[data-jelly-theme="jelly-diode"] .jelly-compare-toggle label{font-family: var(--diode-mono); font-size: .75rem; letter-spacing: .05em; text-transform: uppercase;}
+[data-jelly-theme="jelly-diode"] .jelly-compare-tray-count{font-family: var(--diode-mono); font-size: .8125rem; letter-spacing: .05em; text-transform: uppercase;}
+[data-jelly-theme="jelly-diode"] .jelly-compare-tray-items li{border-radius: 4px;}
+[data-jelly-theme="jelly-diode"] .jelly-compare-table tbody th{font-family: var(--diode-mono); font-size: .75rem; letter-spacing: .05em; text-transform: uppercase;}
+[data-jelly-theme="jelly-diode"] .jelly-compare-table thead th > a > span{font-family: var(--j-font-heading);}
 [data-jelly-theme="jelly-diode"] .jelly-product-card .jelly-product-card-body{display: flex; flex-direction: column;}
 [data-jelly-theme="jelly-diode"] .jelly-product-card [data-card-part="button"]{margin-top: auto;}
 [data-jelly-theme="jelly-diode"] .jelly-product-card .jelly-stars{--jelly-stars-colour: var(--j-color-text);}

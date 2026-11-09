@@ -8,7 +8,7 @@ import { StorefrontProductCard } from "@jelly/storefront-ui";
 import { StorefrontPreviewFrame } from "@/features/store-editor/components/storefront-preview-frame";
 import type { ThemePreviewConfig } from "./configs";
 import { sampleReviews } from "./sample-reviews";
-import { TemplatePreview, type PreviewTemplate , usePreviewCart, withPreviewQuickAdd } from "./template-preview";
+import { TemplatePreview, type PreviewTemplate , previewHasCompare, usePreviewCart, withPreviewQuickAdd } from "./template-preview";
 
 /**
  * A theme's style guide: its tokens, type, controls and the shared
@@ -19,7 +19,7 @@ import { TemplatePreview, type PreviewTemplate , usePreviewCart, withPreviewQuic
  */
 const widths = { desktop: 1280, tablet: 768, mobile: 390 } as const;
 type Device = keyof typeof widths;
-const views = [["guide", "Style guide"], ["home", "Home"], ["collection", "Collection"], ["product", "Product"], ["cart", "Cart"], ["search", "Search"], ["page", "Page"], ["not-found", "404"]] as const;
+const views = [["guide", "Style guide"], ["home", "Home"], ["collection", "Collection"], ["product", "Product"], ["cart", "Cart"], ["search", "Search"], ["page", "Page"], ["not-found", "404"], ["compare", "Compare"]] as const;
 type View = (typeof views)[number][0];
 
 const commerce: CommerceDataProvider = { async getProducts() { return []; } };
@@ -217,7 +217,7 @@ export function ThemePreviewPage({ config }: { config: ThemePreviewConfig }) {
     <header style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
       <strong style={{ fontSize: 14 }}>{config.name} · theme preview</strong>
       <div role="group" aria-label="Page" style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: 4, background: "white", borderRadius: 8 }}>
-        {views.map(([key, label]) => <button key={key} type="button" aria-pressed={view === key} onClick={() => setView(key)} style={toggle(view === key)}>{label}</button>)}
+        {views.filter(([key]) => key !== "compare" || previewHasCompare(config)).map(([key, label]) => <button key={key} type="button" aria-pressed={view === key} onClick={() => setView(key)} style={toggle(view === key)}>{label}</button>)}
       </div>
       {themeStyles.length > 0 && <div role="group" aria-label="Theme style" style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: 4, background: "white", borderRadius: 8 }}>
         {themeStyles.map((item) => <button key={item.id} type="button" aria-pressed={styleId === item.id} title={item.description} onClick={() => setStyleId(item.id)} style={toggle(styleId === item.id)}>{item.name}</button>)}
@@ -238,7 +238,7 @@ export function ThemePreviewPage({ config }: { config: ThemePreviewConfig }) {
     </header>
     <div style={{ width: widths[device], maxWidth: "100%", margin: "0 auto", minHeight: "80vh", background: "white", boxShadow: "0 1px 3px rgba(0,0,0,.08)" }}>
       {ready && <StorefrontPreviewFrame title={`${config.name} style guide`} themeId={config.themeId} style={style} className="block h-[80vh] w-full border-0">
-        {view === "guide" ? <Guide config={config} /> : <TemplatePreview key={view} template={view as PreviewTemplate} config={config} productLayout={productLayout === "theme" ? undefined : productLayout} collectionLayout={collectionLayout === "theme" ? undefined : collectionLayout} />}
+        {view === "guide" ? <Guide config={config} /> : <TemplatePreview key={view} template={view as PreviewTemplate} config={config} productLayout={productLayout === "theme" ? undefined : productLayout} collectionLayout={collectionLayout === "theme" ? undefined : collectionLayout} onOpenCompare={() => setView("compare")} />}
       </StorefrontPreviewFrame>}
     </div>
   </main>;

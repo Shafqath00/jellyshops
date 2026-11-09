@@ -250,6 +250,17 @@ main:has(.jelly-list-toolbar) .jelly-collection-count { display: none; } .jelly-
 .jelly-product-card .jelly-product-card-price { font-family: var(--diode-mono); font-weight: 500; font-size: .9375rem; }
 .jelly-product-card [data-card-part="vendor"] { font-family: var(--diode-mono); font-size: .6875rem; letter-spacing: .06em; text-transform: uppercase; color: var(--j-color-muted); }
 .jelly-product-card > a { align-content: start; grid-template-rows: auto 1fr; }
+/* The outline wraps the whole card, so the Compare tick sits inside it. */
+&[data-card-layout] .jelly-product-card { display: flex; flex-direction: column; padding: 12px; border: 1px solid var(--diode-line); border-radius: 6px; background: var(--j-color-bg); transition: border-color 150ms ease; }
+&[data-card-layout] .jelly-product-card:hover { border-color: var(--j-color-text); }
+&[data-card-layout] .jelly-product-card > a.jelly-product-card-link, &[data-card-layout] .jelly-product-card > a { flex: 1; padding: 0; border: 0; }
+.jelly-product-card-actions:has(.jelly-compare-toggle) { margin-top: 12px; padding-top: 4px; border-top: 1px solid var(--diode-line); }
+.jelly-compare-toggle label { font-family: var(--diode-mono); font-size: .75rem; letter-spacing: .05em; text-transform: uppercase; }
+/* Compare tray and page: ruled data. */
+.jelly-compare-tray-count { font-family: var(--diode-mono); font-size: .8125rem; letter-spacing: .05em; text-transform: uppercase; }
+.jelly-compare-tray-items li { border-radius: 4px; }
+.jelly-compare-table tbody th { font-family: var(--diode-mono); font-size: .75rem; letter-spacing: .05em; text-transform: uppercase; }
+.jelly-compare-table thead th > a > span { font-family: var(--j-font-heading); }
 .jelly-product-card .jelly-product-card-body { display: flex; flex-direction: column; }
 .jelly-product-card [data-card-part="button"] { margin-top: auto; }
 .jelly-product-card .jelly-stars { --jelly-stars-colour: var(--j-color-text); }
