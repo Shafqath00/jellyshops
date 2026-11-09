@@ -543,6 +543,7 @@
               "styleScheme": "scheme1",
               "imageFit": "contain",
               "layout": "thumbnails",
+              "thumbnailPosition": "left",
               "pageLayout": "details-below"
             },
             "blocks": []

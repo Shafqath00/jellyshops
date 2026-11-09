@@ -88,8 +88,6 @@
 .jelly-prose :is(h2, h3) { margin-top: var(--j-space-xl); } .jelly-prose ul { list-style: disc; padding-left: 1.25em; } .jelly-prose li + li { margin-top: var(--j-space-xs); }
 .jelly-collection-header-image { width: 100%; max-height: 18rem; object-fit: cover; border-radius: var(--j-radius-lg); margin-top: var(--j-space-lg); }
 .jelly-product-gallery img { display: block; width: 100%; object-fit: contain; border-radius: var(--j-radius-md); }
-.jelly-gallery-viewer { --jelly-surface: var(--j-color-surface); display: grid; grid-template-columns: 4rem minmax(0, 1fr); align-items: start; gap: var(--j-space-md); }
-.jelly-gallery-viewer > div:first-child { grid-column: 2; grid-row: 1; border-radius: var(--j-radius-md); } .jelly-gallery-viewer > [role="group"] { grid-column: 1; grid-row: 1; flex-direction: column; padding: 0 !important; }
 .jelly-product-information .jelly-container { display: grid; gap: var(--j-space-sm); } .jelly-product-information :is(h1, p) { margin: 0; }
 .jelly-product-information h1 { max-width: none; font-size: var(--j-type-h2-size); }
 .jelly-purchase-actions { display: flex; gap: var(--j-space-sm); } .jelly-purchase-actions .jelly-button { flex: 1; }
@@ -188,7 +186,6 @@ main:has(.jelly-list-toolbar) .jelly-collection-count { display: none; } .jelly-
   .jelly-image-text[data-image-position="right"] .jelly-image-text-media { order: 0; }
   .jelly-announcement { padding-block: var(--j-space-xs); }
   .jelly-category-grid { padding-block: var(--j-space-sm); } .jelly-category-grid .jelly-category-card-media { width: 4rem; height: 4rem; } .jelly-category-grid .jelly-category-card { gap: var(--j-space-xs); }
-  .jelly-gallery-viewer { grid-template-columns: 1fr; } .jelly-gallery-viewer > div:first-child { grid-column: 1; } .jelly-gallery-viewer > [role="group"] { grid-row: 2; flex-direction: row; }
   .jelly-product-gallery { padding-bottom: var(--j-space-lg); }
   .jelly-product-grid-items { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--j-space-md); }
   .jelly-hero[data-height="large"] { --diode-hero-height: 28rem; }

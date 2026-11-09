@@ -112,9 +112,6 @@
 [data-jelly-theme="jelly-forma"] .jelly-prose li + li{margin-top: var(--j-space-xs);}
 [data-jelly-theme="jelly-forma"] .jelly-collection-header-image{width: 100%; max-height: 18rem; object-fit: cover; border-radius: var(--j-radius-lg); margin-top: var(--j-space-lg);}
 [data-jelly-theme="jelly-forma"] .jelly-product-gallery img{display: block; width: 100%; object-fit: contain; border-radius: var(--j-radius-md);}
-[data-jelly-theme="jelly-forma"] .jelly-gallery-viewer{--jelly-surface: var(--j-color-surface); display: grid; grid-template-columns: 4rem minmax(0, 1fr); align-items: start; gap: var(--j-space-md);}
-[data-jelly-theme="jelly-forma"] .jelly-gallery-viewer > div:first-child{grid-column: 2; grid-row: 1; border-radius: var(--j-radius-md);}
-[data-jelly-theme="jelly-forma"] .jelly-gallery-viewer > [role="group"]{grid-column: 1; grid-row: 1; flex-direction: column; padding: 0 !important;}
 [data-jelly-theme="jelly-forma"] .jelly-product-information .jelly-container{display: grid; gap: var(--j-space-sm);}
 [data-jelly-theme="jelly-forma"] .jelly-product-information :is(h1, p){margin: 0;}
 [data-jelly-theme="jelly-forma"] .jelly-product-information h1{max-width: none; font-size: var(--j-type-h2-size);}
@@ -272,9 +269,6 @@
 [data-jelly-theme="jelly-forma"] .jelly-category-grid{padding-block: var(--j-space-sm);}
 [data-jelly-theme="jelly-forma"] .jelly-category-grid .jelly-category-card-media{width: 4rem; height: 4rem;}
 [data-jelly-theme="jelly-forma"] .jelly-category-grid .jelly-category-card{gap: var(--j-space-xs);}
-[data-jelly-theme="jelly-forma"] .jelly-gallery-viewer{grid-template-columns: 1fr;}
-[data-jelly-theme="jelly-forma"] .jelly-gallery-viewer > div:first-child{grid-column: 1;}
-[data-jelly-theme="jelly-forma"] .jelly-gallery-viewer > [role="group"]{grid-row: 2; flex-direction: row;}
 [data-jelly-theme="jelly-forma"] .jelly-product-gallery{padding-bottom: var(--j-space-lg);}
 [data-jelly-theme="jelly-forma"] .jelly-product-grid-items{grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--j-space-md);}
 [data-jelly-theme="jelly-forma"] .jelly-hero[data-height="large"]{--forma-hero-height: 28rem;}

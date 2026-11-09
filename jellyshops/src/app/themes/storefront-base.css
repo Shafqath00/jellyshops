@@ -1307,3 +1307,75 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 .jelly-compare-table tr[data-differs] th { color: var(--j-color-text, inherit); font-weight: 600; }
 .jelly-compare-table tbody :is(th, td):first-child { padding-left: 8px; }
 .jelly-compare-hint { margin-top: 16px; color: var(--j-color-muted, inherit); }
+
+/*
+ * Product gallery (Product gallery section). Thumbnails layout: one photo at a time in a fixed-shape frame, a
+ * swipeable strip, arrows, counter, thumbnails below or beside, and a full-screen viewer with zoom. The structural
+ * rules (strip, frame, arrows, dialog) work in every theme; looks (corners, colours) use :where() so themes override.
+ * Large first image / Grid: the photo grid is display: contents, so each theme's own gallery grid keeps working; a
+ * photo shape the merchant picks wins over the theme's.
+ */
+.jelly-product-gallery[data-layout] > .jelly-container:has(> .jelly-gallery) { display: block; }
+.jelly-gallery { --jelly-gallery-gap: 12px; display: grid; gap: var(--jelly-gallery-gap); min-width: 0; }
+.jelly-gallery-stage { position: relative; min-width: 0; outline-offset: 4px; }
+.jelly-gallery-track { display: flex; margin: 0; padding: 0; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; list-style: none; }
+.jelly-gallery-track::-webkit-scrollbar { display: none; }
+.jelly-gallery-slide { flex: 0 0 100%; aspect-ratio: var(--jelly-gallery-ratio, 1 / 1); overflow: hidden; scroll-snap-align: start; scroll-snap-stop: always; }
+.jelly-gallery-slide img, .jelly-gallery-empty { display: block; width: 100%; height: 100%; max-height: none; object-fit: var(--jelly-gallery-fit, contain); user-select: none; }
+.jelly-gallery-empty { display: grid; place-items: center; aspect-ratio: var(--jelly-gallery-ratio, 1 / 1); height: auto; font-size: 14px; }
+:where(.jelly-gallery-slide, .jelly-gallery-empty) { border-radius: var(--j-radius-md, 8px); background: var(--j-color-surface, #f4f4f4); }
+.jelly-gallery-arrow { position: absolute; top: 50%; z-index: 1; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; transform: translateY(-50%); border-radius: 999px; cursor: pointer; }
+:where(.jelly-gallery-arrow) { border: 1px solid var(--j-color-border, rgb(0 0 0 / .12)); background: color-mix(in srgb, var(--j-color-bg, #fff) 92%, transparent); color: var(--j-color-text, #111); font-size: 26px; line-height: 1; box-shadow: 0 2px 10px rgb(0 0 0 / .08); }
+.jelly-gallery-arrow[data-direction="previous"] { left: 12px; }
+.jelly-gallery-arrow[data-direction="next"] { right: 12px; }
+.jelly-gallery .jelly-gallery-arrow:disabled, .jelly-gallery-lightbox .jelly-gallery-arrow:disabled { opacity: 0; pointer-events: none; }
+.jelly-gallery-counter { position: absolute; bottom: 12px; left: 12px; margin: 0; padding: 4px 10px; border-radius: 999px; font-size: 13px; line-height: 1.4; font-variant-numeric: tabular-nums; pointer-events: none; }
+:where(.jelly-gallery-counter) { background: color-mix(in srgb, var(--j-color-bg, #fff) 88%, transparent); color: var(--j-color-text, #111); }
+.jelly-gallery-expand { position: absolute; top: 12px; right: 12px; z-index: 1; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 999px; cursor: zoom-in; }
+:where(.jelly-gallery-expand) { border: 1px solid var(--j-color-border, rgb(0 0 0 / .12)); background: color-mix(in srgb, var(--j-color-bg, #fff) 92%, transparent); color: var(--j-color-text, #111); font-size: 20px; }
+.jelly-gallery-thumbs { display: flex; gap: 8px; overflow-x: auto; padding: 2px; scrollbar-width: thin; }
+.jelly-gallery-thumbs button { flex: 0 0 72px; width: 72px; height: 72px; padding: 0; overflow: hidden; border: 2px solid transparent; cursor: pointer; }
+:where(.jelly-gallery-thumbs button) { border-radius: var(--j-radius-sm, 6px); background: var(--j-color-surface, #f4f4f4); opacity: .7; transition: opacity 150ms ease, border-color 150ms ease; }
+.jelly-gallery-thumbs button[aria-pressed="true"] { border-color: var(--j-color-text, currentColor); opacity: 1; }
+.jelly-gallery-thumbs button:hover { opacity: 1; }
+.jelly-gallery-thumbs img { display: block; width: 100%; height: 100%; max-height: none; object-fit: cover; }
+@media (min-width: 768px) {
+  .jelly-gallery[data-thumbs="left"] { grid-template-columns: 72px minmax(0, 1fr); align-items: start; }
+  .jelly-gallery[data-thumbs="left"] > .jelly-gallery-stage { grid-column: 2; grid-row: 1; }
+  .jelly-gallery[data-thumbs="left"] > .jelly-gallery-thumbs { grid-column: 1; grid-row: 1; flex-direction: column; max-height: 100%; overflow: hidden auto; }
+  .jelly-gallery[data-thumbs="left"] .jelly-gallery-thumbs button { flex-basis: 72px; }
+}
+@media (hover: none) and (max-width: 767px) { .jelly-gallery-arrow { display: none; } }
+@media (prefers-reduced-motion: reduce) { .jelly-gallery-track { scroll-behavior: auto; } }
+
+.jelly-photo-grid { display: contents; }
+.jelly-photo-grid[style*="--jelly-gallery-ratio"] .jelly-product-gallery-item { aspect-ratio: var(--jelly-gallery-ratio) !important; overflow: hidden; }
+.jelly-photo-grid[style*="--jelly-gallery-ratio"] .jelly-product-gallery-item img { width: 100%; height: 100% !important; max-height: none !important; object-fit: var(--jelly-gallery-fit, cover) !important; }
+.jelly-product-gallery-item > button { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: none; color: inherit; cursor: zoom-in; }
+.jelly-product-gallery-item > button:focus-visible { outline: 2px solid currentColor; outline-offset: -4px; }
+/* Themes without their own gallery grid: one column on phones, two from tablet; Large first image spans the row. */
+:where(.jelly-product-gallery[data-layout="grid"], .jelly-product-gallery[data-layout="stacked"]) > :where(.jelly-container) { display: grid; gap: 12px; }
+@media (min-width: 768px) {
+  :where(.jelly-product-gallery[data-layout="grid"], .jelly-product-gallery[data-layout="stacked"]) > :where(.jelly-container) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :where(.jelly-product-gallery[data-layout="stacked"]) :where(.jelly-product-gallery-item:first-child) { grid-column: 1 / -1; }
+}
+:where(.jelly-product-gallery-item) { margin: 0; aspect-ratio: 1 / 1; overflow: hidden; border-radius: var(--j-radius-md, 8px); background: var(--j-color-surface, #f4f4f4); }
+:where(.jelly-product-gallery-item) img { display: block; width: 100%; height: 100%; object-fit: var(--jelly-gallery-fit, cover); }
+
+.jelly-gallery-lightbox { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; padding: 0; border: 0; overflow: hidden; background: #0d0d0d; color: #fff; }
+.jelly-gallery-lightbox::backdrop { background: rgb(0 0 0 / .85); }
+.jelly-gallery-lightbox-bar { position: absolute; inset: 0 0 auto; z-index: 2; display: flex; align-items: center; justify-content: space-between; padding: 8px 12px 8px 20px; }
+.jelly-gallery-lightbox-bar p { margin: 0; font-size: 14px; font-variant-numeric: tabular-nums; }
+.jelly-gallery-lightbox-bar button { width: 44px; height: 44px; border: 0; border-radius: 999px; background: rgb(255 255 255 / .12); color: #fff; font-size: 26px; line-height: 1; cursor: pointer; }
+.jelly-gallery-lightbox-photo { display: grid; place-items: center; width: 100%; height: 100%; padding: 60px 0; overflow: hidden; border: 0; background: none; cursor: zoom-in; }
+.jelly-gallery-lightbox .jelly-gallery-lightbox-photo img { width: auto !important; height: auto !important; max-width: min(100%, 100vw) !important; max-height: calc(100dvh - 120px) !important; border-radius: 0; object-fit: contain; transition: transform 200ms ease; user-select: none; }
+.jelly-gallery-lightbox-photo[data-zoomed] { cursor: zoom-out; }
+.jelly-gallery-lightbox .jelly-gallery-lightbox-photo[data-zoomed] img { transform: scale(2.2); }
+.jelly-gallery-lightbox .jelly-gallery-arrow { border: 0; background: rgb(255 255 255 / .14); color: #fff; box-shadow: none; font-size: 30px; }
+.jelly-gallery-lightbox .jelly-gallery-arrow[data-direction="previous"] { left: 16px; }
+.jelly-gallery-lightbox .jelly-gallery-arrow[data-direction="next"] { right: 16px; }
+@media (prefers-reduced-motion: reduce) { .jelly-gallery-lightbox-photo img { transition: none; } }
+
+/* Testimonials: cards side by side for every theme that does not lay them out itself. */
+:where(.jelly-testimonial-grid) { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 16px; align-items: stretch; }
+:where(.jelly-testimonial-grid > blockquote) { display: flex; flex-direction: column; justify-content: space-between; gap: 12px; margin: 0; }

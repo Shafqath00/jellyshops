@@ -15567,7 +15567,10 @@
       "allowedBlockTypes": [],
       "defaultSettings": {
         "imageFit": "cover",
-        "layout": "thumbnails"
+        "layout": "thumbnails",
+        "mediaRatio": "theme",
+        "thumbnailPosition": "below",
+        "enableZoom": true
       },
       "defaultBlocks": [],
       "responsiveFields": [
@@ -15594,6 +15597,63 @@
               "value": "grid"
             }
           ]
+        },
+        {
+          "type": "select",
+          "key": "mediaRatio",
+          "label": "Photo shape",
+          "group": "layout",
+          "description": "Every photo sits in a frame of this shape, so photos of different sizes line up.",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": "theme"
+            },
+            {
+              "label": "Square",
+              "value": "square"
+            },
+            {
+              "label": "Portrait (4:5)",
+              "value": "portrait"
+            },
+            {
+              "label": "Landscape (4:3)",
+              "value": "landscape"
+            },
+            {
+              "label": "Same as the first photo",
+              "value": "original"
+            }
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "thumbnailPosition",
+          "label": "Thumbnails",
+          "group": "layout",
+          "showWhen": {
+            "key": "layout",
+            "equals": "thumbnails"
+          },
+          "visibleWhenSaved": true,
+          "options": [
+            {
+              "label": "Below the photo",
+              "value": "below"
+            },
+            {
+              "label": "Beside the photo",
+              "value": "left"
+            }
+          ],
+          "description": "Beside the photo on wide screens; always below on phones."
+        },
+        {
+          "type": "checkbox",
+          "key": "enableZoom",
+          "label": "Let shoppers open photos full screen and zoom",
+          "group": "layout"
         },
         {
           "type": "segmented",
@@ -15664,6 +15724,26 @@
               "grid",
               "thumbnails"
             ]
+          },
+          "mediaRatio": {
+            "type": "string",
+            "enum": [
+              "theme",
+              "square",
+              "portrait",
+              "landscape",
+              "original"
+            ]
+          },
+          "thumbnailPosition": {
+            "type": "string",
+            "enum": [
+              "below",
+              "left"
+            ]
+          },
+          "enableZoom": {
+            "type": "boolean"
           },
           "pageLayout": {
             "type": "string",

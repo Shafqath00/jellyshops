@@ -136,7 +136,7 @@ const starter = {
       ]),
     ]) },
     product: { type: "product", sections: chrome([
-      section("product-gallery", { imageFit: "contain", layout: "thumbnails", pageLayout: "details-below" }),
+      section("product-gallery", { imageFit: "contain", layout: "thumbnails", thumbnailPosition: "left", pageLayout: "details-below" }),
       section("product-information", { showVendor: true, showSku: true, showCompareAtPrice: true, showAvailability: true, showSpecifications: false, discountChip: "amount" }),
       section("product-options", { style: "buttons" }),
       section("product-purchase", { showQuantity: true, label: "Add to basket", stickyBar: true }),

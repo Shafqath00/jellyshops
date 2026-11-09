@@ -3,7 +3,7 @@
  */
 import type { PageMeasurement } from "./measure";
 
-export type DesignRule = "edge" | "rhythm" | "headings" | "overflow" | "tap-target" | "card-ratio" | "contrast" | "header" | "product-flow" | "title-size" | "footer-headings";
+export type DesignRule = "edge" | "rhythm" | "headings" | "overflow" | "tap-target" | "card-ratio" | "contrast" | "header" | "product-flow" | "title-size" | "footer-headings" | "stacked-row" | "gallery";
 
 export interface DesignFinding {
   /** Stable id used by the baseline: rule|theme|page|device[|part]. */
@@ -143,6 +143,15 @@ export function lintPage(measurement: PageMeasurement, context: PageContext): De
   const footerHeading = measurement.footerHeadingSizes.length ? Math.max(...measurement.footerHeadingSizes) : 0;
   if (footerHeading > DESIGN_LIMITS.maxFooterHeading) {
     findings.push(finding("footer-headings", context, `footer headings are ${footerHeading}px; at most ${DESIGN_LIMITS.maxFooterHeading}px`));
+  }
+
+  // Desktop only: on phones one item per row is right.
+  if (context.device === "desktop") for (const row of measurement.stackedRows ?? []) {
+    findings.push(finding("stacked-row", context, `${row}: its items fill the whole width one under another; they should sit side by side`, row));
+  }
+  const galleryRatios = measurement.galleryRatios ?? [];
+  if (galleryRatios.length > 1 && Math.max(...galleryRatios) / Math.min(...galleryRatios) > 1 + DESIGN_LIMITS.ratioTolerance) {
+    findings.push(finding("gallery", context, `product photo frames differ in shape (${Math.min(...galleryRatios)}–${Math.max(...galleryRatios)}); they should all share one shape`));
   }
 
   for (const list of measurement.cardLists) {

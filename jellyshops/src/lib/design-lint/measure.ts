@@ -54,6 +54,10 @@ export interface PageMeasurement {
   headingSizes: number[];
   smallTargets: string[];
   cardLists: CardListMeasurement[];
+  /** Rows of three or more repeated items (testimonials, columns, tiles) whose items all fill the row: they stacked. */
+  stackedRows: string[];
+  /** Width / height of each product photo frame on the page (gallery slides and gallery photos). */
+  galleryRatios: number[];
 }
 
 export function measureStorefrontPage(): PageMeasurement {
@@ -243,6 +247,19 @@ export function measureStorefrontPage(): PageMeasurement {
     .filter((heading) => !heading.closest(".jelly-footer-newsletter, .jelly-newsletter") && visibleRect(heading))
     .map((heading) => round(parseFloat(getComputedStyle(heading).fontSize)));
 
+  // Rows of repeated items that collapsed into full-width stacks (no layout from the theme or the platform).
+  const stackedRows: string[] = [];
+  for (const row of root.querySelectorAll(".jelly-testimonial-grid, .jelly-multicolumn-grid, .jelly-category-grid-items, .jelly-product-grid-items, .jelly-logo-list-items, .jelly-blog-grid, .jelly-trust-points")) {
+    const rowRect = visibleRect(row);
+    if (!rowRect || row.closest("[data-scrolling]")) continue;
+    const items = [...row.children].map((child) => visibleRect(child)).filter((rect): rect is NonNullable<typeof rect> => Boolean(rect));
+    if (items.length >= 3 && items.every((rect) => rect.width >= rowRect.width * 0.85)) stackedRows.push(describe(row));
+  }
+  const galleryRatios = [...root.querySelectorAll(".jelly-gallery-slide, .jelly-product-gallery-item")].flatMap((frame) => {
+    const rect = frame.getBoundingClientRect();
+    return rect.width > 1 && rect.height > 1 ? [Math.round((rect.width / rect.height) * 1000) / 1000] : [];
+  });
+
   return {
     frameWidth,
     header,
@@ -254,5 +271,7 @@ export function measureStorefrontPage(): PageMeasurement {
     headingSizes,
     smallTargets,
     cardLists,
+    stackedRows,
+    galleryRatios,
   };
 }

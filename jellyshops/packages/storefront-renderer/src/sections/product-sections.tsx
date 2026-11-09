@@ -7,8 +7,8 @@ import { useRef, useState, type CSSProperties } from "react";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import type { ProductPresentationContext } from "../types";
 import { choice } from "./shared";
-import { ProductGalleryViewer } from "../product-gallery-viewer";
-import { normalizeRichTextDocument, productMediaSrcSet } from "@jelly/storefront-schema";
+import { ProductGalleryViewer, ProductPhotoGrid, type GalleryRatio } from "../product-gallery-viewer";
+import { normalizeRichTextDocument } from "@jelly/storefront-schema";
 import { renderBlocks } from "./rich-text";
 import { DiscountChip, FinanceLine, OptionTabs, OptionTileGroups, StickyPurchaseBar, useStickyBar } from "./product-showroom";
 
@@ -30,14 +30,14 @@ export function ProductGallerySection({ context, section }: { context: Storefron
   // The whole product page's arrangement (storefront-base.css "Product page layouts"); "theme" leaves it to the theme.
   const pageLayout = choice(section.settings, "pageLayout", PRODUCT_PAGE_LAYOUTS, "theme");
   const page = pageLayout === "theme" ? {} : { "data-page-layout": pageLayout };
-  if (product.product.galleryEnabled && section.settings.layout !== "stacked" && section.settings.layout !== "grid") return <section className="jelly-section jelly-product-gallery" data-layout="thumbnails" {...page}><StorefrontContainer><ProductGalleryViewer media={media} title={product.product.title} fit={fit} /></StorefrontContainer></section>;
-  return <section className="jelly-section jelly-product-gallery" data-layout={choice(section.settings, "layout", ["stacked", "grid"] as const, "stacked")} data-count={media.length} {...page}>
-    <StorefrontContainer>
-      {media.map((item, index) => <figure key={item.id} className="jelly-product-gallery-item">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={item.url} srcSet={productMediaSrcSet(item)} sizes="(min-width: 1024px) 50vw, 100vw" width={"width" in item ? item.width ?? undefined : undefined} height={"height" in item ? item.height ?? undefined : undefined} alt={item.altText ?? product.product.title} style={{ objectFit: fit }} loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} />
-      </figure>)}
-    </StorefrontContainer>
+  // Photo shape, thumbnails and zoom are the section settings; the layout never depends on a store-level switch.
+  const ratioSetting = choice(section.settings, "mediaRatio", ["theme", "square", "portrait", "landscape", "original"] as const, "theme");
+  const ratio: GalleryRatio | undefined = ratioSetting === "theme" ? undefined : ratioSetting;
+  const zoom = section.settings.enableZoom !== false;
+  const layout = choice(section.settings, "layout", ["thumbnails", "stacked", "grid"] as const, "thumbnails");
+  if (layout === "thumbnails") return <section className="jelly-section jelly-product-gallery" data-layout="thumbnails" {...page}><StorefrontContainer><ProductGalleryViewer media={media} title={product.product.title} fit={fit} ratio={ratio} zoom={zoom} thumbnails={section.settings.thumbnailPosition === "left" ? "left" : "below"} /></StorefrontContainer></section>;
+  return <section className="jelly-section jelly-product-gallery" data-layout={layout} data-count={media.length} {...page}>
+    <StorefrontContainer><ProductPhotoGrid media={media} title={product.product.title} fit={fit} ratio={ratio} zoom={zoom} layout={layout} /></StorefrontContainer>
   </section>;
 }
 
