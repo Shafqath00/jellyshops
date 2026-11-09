@@ -2,13 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
-import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Download, Package, X } from "lucide-react";
+import { Package, X } from "lucide-react";
 
 import { useAuth } from "@/features/auth/providers/auth-provider";
 import { ShipmentActions } from "@/features/commerce/components/shipment-actions";
-import { StatusBadge, statusLabel } from "@/components/admin";
+import { AdminPage, Banner, StatusBadge, statusLabel } from "@/components/admin";
 import { describeActivity, emailName, needsRetry } from "@/features/commerce/order-activity";
 import { printPackingSlips } from "@/features/commerce/packing-slip";
 import { OrderTags } from "@/features/commerce/components/order-tags";
@@ -500,49 +499,43 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
   }
 
   // Order details
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   return (
-    <div className="space-y-5">
-      <Link href="/admin/orders" className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-        <ArrowLeft size={14} />
-        Orders
-      </Link>
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="mr-2 text-3xl font-bold tracking-tight">{order.number}</h1>
-            <StatusBadge kind="payment" value={payment?.status} />
-            <StatusBadge kind="fulfilment" value={["CANCELLED", "REFUNDED"].includes(order.status) && (!order.fulfilmentStatus || order.fulfilmentStatus === "UNFULFILLED") ? order.status : order.fulfilmentStatus ?? order.status} />
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground">{new Date(order.createdAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: detail.timeZone ?? "UTC" })} · Online store{revision > 1 ? ` · Edited ${revision - 1} ${revision === 2 ? "time" : "times"}` : ""} · {statusLabel("order", order.status)}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link className={button} href="/admin/settings/notifications">Email settings</Link>
-          <button className={button} disabled={busy} onClick={() => void invoice("pdf")}><Download size={14} />Invoice PDF</button>
-          <button className={button} disabled={busy} onClick={() => void invoice("html")}>Printable invoice</button>
-          {physicalItems && <button className={button} disabled={busy} onClick={() => { if (!printPackingSlips([detail], activeStore?.name ?? "Your store")) setError("Your browser blocked the packing slip window. Allow pop-ups for this site and try again."); }}>Packing slip</button>}
-          {canEdit && <button className={button} onClick={() => open("edit")}>Edit items</button>}
-          {canRefund && payment?.status === "PAID" && <button className={button} onClick={() => open("refund")}>Refund</button>}
-          {canCancel && <button className={button} disabled={busy} onClick={() => open("cancel")}>Cancel order</button>}
-        </div>
-      </header>
+    <AdminPage
+      title={order.number}
+      width="detail"
+      back={{ href: "/admin/orders", label: "Orders" }}
+      badges={<>
+        <StatusBadge kind="payment" value={payment?.status} />
+        <StatusBadge kind="fulfilment" value={["CANCELLED", "REFUNDED"].includes(order.status) && (!order.fulfilmentStatus || order.fulfilmentStatus === "UNFULFILLED") ? order.status : order.fulfilmentStatus ?? order.status} />
+      </>}
+      description={<>{new Date(order.createdAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short", timeZone: detail.timeZone ?? "UTC" })} · Online store{revision > 1 ? ` · Edited ${revision - 1} ${revision === 2 ? "time" : "times"}` : ""} · {statusLabel("order", order.status)}</>}
+      secondaryActions={[
+        ...(canRefund && payment?.status === "PAID" ? [{ label: "Refund", onAction: () => open("refund") }] : []),
+        ...(canEdit ? [{ label: "Edit items", onAction: () => open("edit") }] : []),
+      ]}
+      moreActions={[
+        { label: "Invoice PDF", disabled: busy, onAction: () => void invoice("pdf") },
+        { label: "Printable invoice", disabled: busy, onAction: () => void invoice("html") },
+        ...(physicalItems ? [{ label: "Packing slip", disabled: busy, onAction: () => { if (!printPackingSlips([detail], activeStore?.name ?? "Your store")) setError("Your browser blocked the packing slip window. Allow pop-ups for this site and try again."); } }] : []),
+        { label: "Email settings", href: "/admin/settings/notifications" },
+        ...(canCancel ? [{ label: "Cancel order", destructive: true, disabled: busy, onAction: () => open("cancel") }] : []),
+      ]}
+    >
+      {error && !action && <Banner tone="critical">{error}</Banner>}
+      {notice && <Banner tone="success" onDismiss={() => setNotice("")}>{notice}</Banner>}
+      {order.isTest && <Banner tone="warning" title="Test order">The payment gateway was in test mode when this order was placed.</Banner>}
 
-      {error && !action && <p role="alert" className="rounded-lg border border-red-200 p-3 text-sm text-red-800">{error}</p>}
-      {notice && <p role="status" className="text-sm text-emerald-800">{notice}</p>}
-      {order.isTest && <div className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">
-        <strong>Test order</strong>
-        <p className="mt-1">The payment gateway was in test mode when this order was placed.</p>
-      </div>}
-
-      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="space-y-5">
-          <section className={panel}>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-5">
+      <div className="jk-detail">
+        <div className="jk-detail-main">
+          <section className={`${panel} is-flush`}>
+            <div className="jk-card-header">
               <div>
                 <h2 className="font-semibold">Items & fulfilment</h2>
-                <p className="mt-1 text-xs text-muted-foreground">{items.reduce((sum, item) => sum + item.quantity, 0)} items</p>
+                <p>{itemCount} {itemCount === 1 ? "item" : "items"}</p>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {canManage && next && <button className={`${button} bg-primary text-primary-foreground`} disabled={busy || (order.balanceDueMinor ?? 0) > 0} onClick={() => void run(async () => {
+              <div className="jk-row">
+                {canManage && next && <button className={`${button} jk-button-primary`} disabled={busy || (order.balanceDueMinor ?? 0) > 0} onClick={() => void run(async () => {
                   if (!api || !storeId)
                     return;
                   const updated = await api.transitionFulfilment(storeId, orderId, next.status);
@@ -552,8 +545,8 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
                 {canManage && physicalItems && ["SHIPPED", "DELIVERED"].includes(order.status) && <button className={button} disabled={busy} onClick={() => open("return")}>Record return</button>}
               </div>
             </div>
-            {items.map((item, index) => <div className="flex items-start gap-3 border-b border-border p-5 last:border-0" key={item.id ?? `${item.variantId}-${index}`}>
-              <div className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-lg border border-border bg-muted">{item.imageSnapshot ? <img className="size-full object-cover" src={item.imageSnapshot} alt={item.productTitleSnapshot ?? item.titleSnapshot} /> : <Package size={22} className="text-muted-foreground" />}</div>
+            {items.map((item, index) => <div className="jk-line-item" key={item.id ?? `${item.variantId}-${index}`}>
+              <div className="jk-line-thumb">{item.imageSnapshot ? <img src={item.imageSnapshot} alt={item.productTitleSnapshot ?? item.titleSnapshot} /> : <Package size={22} className="text-muted-foreground" />}</div>
               <div className="min-w-0 flex-1">
                 <h3 className="text-sm font-semibold">{item.productTitleSnapshot ?? item.titleSnapshot}</h3>
                 {item.variantTitleSnapshot && <p className="text-xs text-muted-foreground">{item.variantTitleSnapshot}</p>}
@@ -573,14 +566,14 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
               <OrderBadge value={fulfilment.status} />
             </div>
             <p className="mt-2 text-sm">{fulfilment.carrier} {fulfilment.trackingNumber || "No tracking number"}</p>
-            {fulfilment.trackingUrl && /^https?:\/\//.test(fulfilment.trackingUrl) && <a className="mt-2 inline-block text-xs underline" href={fulfilment.trackingUrl} target="_blank" rel="noreferrer">Track shipment</a>}
+            {fulfilment.trackingUrl && /^https?:\/\//.test(fulfilment.trackingUrl) && <a className="jk-link mt-2 inline-block" href={fulfilment.trackingUrl} target="_blank" rel="noreferrer">Track shipment</a>}
             {canManage && fulfilment.status !== "DELIVERED" && <button className={`${button} mt-3`} disabled={busy} onClick={() => void run(() => api!.deliverFulfilment(storeId!, orderId, fulfilment.id, { revision }))}>Mark delivered</button>}
           </section>)}
           {canManage && (detail.order.status === "PROCESSING" || (detail.fulfilments ?? []).some(fulfilment => !fulfilment.deliveredAt && fulfilment.status !== "DELIVERED")) && <ShipmentActions orderStatus={detail.order.status} revision={revision} shipments={detail.fulfilments ?? []} onPacked={rev => run(() => api!.markPacked(storeId!, orderId, { revision: rev }), false)} onOutForDelivery={(id, rev) => run(() => api!.markShipmentOutForDelivery(storeId!, orderId, id, { revision: rev }), false)} onException={(id, exception, rev) => run(() => api!.setShipmentException(storeId!, orderId, id, { revision: rev, exception }), false)} />}
 
           <section className={`${panel} p-5`}>
             <h2 className="mb-4 flex items-center gap-2 font-semibold">Payment <OrderBadge value={payment?.status} /></h2>
-            {paymentRows.map(([label, value]) => <div key={label} className="flex justify-between border-b border-border py-2 text-sm last:border-0">
+            {paymentRows.map(([label, value]) => <div key={label} className="jk-summary-row">
               <span className="text-muted-foreground">{label}</span>
               <strong className="font-medium tabular-nums">{value}</strong>
             </div>)}
@@ -593,7 +586,7 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
               <span>Refund {money(refund.amountMinor)}</span>
               <OrderBadge value={refund.status} />
             </div>)}
-            {!!detail.disputes.length && <div aria-label="Payment disputes" className="mt-4 rounded bg-amber-50 p-3 text-xs">{detail.disputes.map(dispute => <p key={dispute.stripeDisputeId}>Payment dispute: {orderLabel(dispute.status)}</p>)}</div>}
+            {!!detail.disputes.length && <div aria-label="Payment disputes" className="jk-preview-box mt-4">{detail.disputes.map(dispute => <p key={dispute.stripeDisputeId}>Payment dispute: {orderLabel(dispute.status)}</p>)}</div>}
           </section>
 
           {!!detail.revisions?.length && <section className={`${panel} p-5`}>
@@ -602,7 +595,7 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
               <span>Revision {item.number ?? item.revision ?? item.id.slice(0, 8)}</span>
               <OrderBadge value={item.status} />
               {item.status === "APPLIED" && item.number && <button className={button} disabled={busy} onClick={() => void invoice("pdf", item.number)}>Revision invoice</button>}
-              {item.balancePaymentUrl && <a href={item.balancePaymentUrl} className="underline" target="_blank" rel="noreferrer">Balance payment link</a>}
+              {item.balancePaymentUrl && <a href={item.balancePaymentUrl} className="jk-link" target="_blank" rel="noreferrer">Balance payment link</a>}
             </div>)}
           </section>}
 
@@ -625,7 +618,7 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
             {detail.operations.filter(operation => ["FAILED", "UNCERTAIN"].includes(operation.status)).map(operation => <div key={operation.id} className="mt-3 text-sm">
               <OrderBadge value={operation.status} />
               <span className="ml-2">{orderLabel(operation.kind)}</span>
-              <p className="mt-1 text-xs text-red-800">{operation.lastError || "Review this action before retrying."}</p>
+              <p className="jk-field-error mt-1">{operation.lastError || "Review this action before retrying."}</p>
             </div>)}
           </section>}
           <section className={`${panel} p-5`}>
@@ -635,7 +628,7 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
               <textarea id="order-note" value={note} onChange={event => setNote(event.target.value)} className={`${input} mt-2`} placeholder="Leave an internal comment…" required maxLength={10000} />
               <button className={`${button} mt-2`} disabled={busy || !note.trim()}>Post comment</button>
             </form>}
-            <ol className="mt-5 space-y-4 border-l border-border pl-4">{timeline.map(event => <li key={event.id} className="text-sm">
+            <ol className="jk-timeline">{timeline.map(event => <li key={event.id}>
               <p className="whitespace-pre-wrap">{event.text}</p>
               <time className="mt-1 block text-xs text-muted-foreground">{new Date(event.date).toLocaleString()}</time>
             </li>)}
@@ -643,11 +636,11 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
           </section>
         </div>
 
-        <aside className="space-y-5">
+        <aside className="jk-detail-side">
           <section className={`${panel} p-5`}>
             <div className="flex items-center justify-between">
               <h2 className="font-semibold">Customer</h2>
-              {canManage && <button className="text-xs underline" onClick={() => open("contact")}>Edit contact</button>}
+              {canManage && <button type="button" className="jk-link" onClick={() => open("contact")}>Edit contact</button>}
             </div>
             <p className="mt-4 text-sm">{String(order.customerSnapshot.name ?? "Not recorded")}</p>
             <p className="mt-1 break-all text-xs text-muted-foreground">{String(order.customerSnapshot.email ?? "Not recorded")}</p>
@@ -688,7 +681,7 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
           setAction(null);
       }}>
         <form onSubmit={submit} className="space-y-4">
-          {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-800">{error}</p>}
+          {error && <Banner tone="critical">{error}</Banner>}
           {["cancel", "refund"].includes(action) && <p className="text-sm text-muted-foreground">{action === "cancel" ? "Cancellation releases unfulfilled inventory. Paid orders require a refund; its progress will appear separately." : "The refund is processed against captured payments. Its final status is confirmed by the payment provider."}</p>}
           {action === "contact" && ["name", "email", "phone"].map(name => <label className="block text-sm" key={name}>
             {orderLabel(name)}
@@ -747,20 +740,20 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
           </label>)}</>}
           {["cancel", "refund", "return"].includes(action) && <label className="block text-sm">Reason<textarea className={`${input} mt-1`} value={form.reason} onChange={event => field("reason", event.target.value)} /></label>}
           {action === "resend" && (availableNotificationTypes.length ? <div><label className="block text-sm">Email type<select className={`${input} mt-1`} value={form.type} onChange={event => field("type", event.target.value)}>{availableNotificationTypes.map(type => <option value={type} key={type}>{orderLabel(type)}</option>)}</select></label><p className="mt-2 text-sm text-muted-foreground">Only emails previously recorded for this order are available to resend.</p></div> : <p className="text-sm text-muted-foreground">No previous emails are recorded for this order. There is nothing to resend yet.</p>)}
-          {preview && <div className="rounded-lg bg-muted p-4 text-sm">
+          {preview && <div className="jk-preview-box">
             <p>Previous total: {money(preview.beforeTotalMinor ?? order.totalMinor)}</p>
             <p>Proposed total: {money(preview.afterTotalMinor ?? preview.totalMinor ?? order.totalMinor)}</p>
             <p className="mt-2 font-semibold">Settlement: {money(preview.deltaMinor ?? preview.settlementMinor ?? preview.differenceMinor ?? 0)}</p>
             <p className="mt-2 text-xs">The original order remains effective until payment or refund is confirmed.</p>
             {preview.message && <p className="mt-2">{preview.message}</p>}
           </div>}
-          <footer className="flex justify-end gap-2 border-t border-border pt-4">
+          <footer>
             <button type="button" className={button} disabled={busy} onClick={() => setAction(null)}>Close</button>
-            <button className={`${button} bg-primary text-primary-foreground`} disabled={busy || (action === "resend" && !availableNotificationTypes.includes(form.type)) || (selectionRequired && !quantities.some(quantity => quantity > 0))}>{busy ? "Working…" : action === "edit" ? preview ? "Confirm financial changes" : "Preview changes" : "Confirm"}</button>
+            <button className={`${button} jk-button-primary`} disabled={busy || (action === "resend" && !availableNotificationTypes.includes(form.type)) || (selectionRequired && !quantities.some(quantity => quantity > 0))}>{busy ? "Working…" : action === "edit" ? preview ? "Confirm financial changes" : "Preview changes" : "Confirm"}</button>
           </footer>
         </form>
       </OrderDialog>}
-    </div>
+    </AdminPage>
   );
 }
 
@@ -805,7 +798,7 @@ function OrderDialog({ title, onClose, children }: {
     <dialog
       ref={dialog}
       aria-labelledby="order-dialog-title"
-      className="fixed inset-0 m-auto max-h-[90vh] w-[calc(100%-2rem)] max-w-xl overflow-auto rounded-xl border border-border bg-card p-5 text-foreground shadow-xl backdrop:bg-black/40"
+      className="jk-native-dialog"
       onCancel={(event) => {
         event.preventDefault();
         onClose();
@@ -814,15 +807,13 @@ function OrderDialog({ title, onClose, children }: {
         if (event.target === dialog.current) onClose();
       }}
     >
-      <header className="mb-5 flex items-center justify-between">
-        <h2 id="order-dialog-title" className="text-lg font-semibold">
-          {title}
-        </h2>
-        <button type="button" className={button} aria-label="Close dialog" onClick={onClose}>
+      <header className="jk-native-dialog-head">
+        <h2 id="order-dialog-title">{title}</h2>
+        <button type="button" className="jk-icon-button" aria-label="Close dialog" onClick={onClose}>
           <X size={16} />
         </button>
       </header>
-      {children}
+      <div className="jk-native-dialog-body">{children}</div>
     </dialog>
   );
 }

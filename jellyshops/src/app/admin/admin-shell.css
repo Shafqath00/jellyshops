@@ -119,7 +119,7 @@
 .admin-drawer > button:last-child:hover {background:var(--jk-sidebar-hover)}
 
 /* Page canvas */
-.admin-workspace {min-width:0;background:var(--jk-bg)}
+.admin-workspace {position:relative;min-width:0;background:var(--jk-bg);overflow-x:clip}
 @media(min-width:1024px){.admin-workspace{border-top-left-radius:var(--jk-radius-lg);box-shadow:inset 1px 1px 0 var(--jk-border)}}
 .admin-content {width:100%;max-width:var(--jk-content-width);margin:0 auto;padding:var(--jk-space-5) var(--jk-space-4) 48px;min-width:0}
 @media(min-width:768px){.admin-content{padding:var(--jk-space-6) var(--jk-space-6) 56px}}

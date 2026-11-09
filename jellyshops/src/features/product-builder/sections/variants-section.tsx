@@ -154,7 +154,7 @@ export function VariantsSection({ options, variants, currency, onChange, media, 
         {bulkError && <p role="alert" className="mt-2 text-[13px] font-bold text-tint-foreground">{bulkError}</p>}
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-border/80 bg-card">
+      <div className="relative overflow-x-auto rounded-xl border border-border/80 bg-card">
         <table className="w-full min-w-[680px] text-left text-[12px]">
           <thead className="bg-muted/65 text-[13px] font-semibold text-muted-foreground">
             <tr>{media && <th className="px-2 py-2.5">Photo</th>}<th className="px-4 py-2.5">Combination</th><th className="px-2 py-2.5">Price ({currency})</th><th className="px-2 py-2.5">Original price</th><th className="px-2 py-2.5">Stock</th><th className="px-2 py-2.5">SKU</th><th className="px-2 py-2.5">Sold</th><th className="px-2 py-2.5"><span className="sr-only">Details</span></th></tr>

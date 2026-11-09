@@ -382,3 +382,74 @@ html.admin-ui.admin-dark {
 .jk-check-list {display:flex;flex-direction:column;gap:2px;max-height:320px;overflow-y:auto;padding:6px;border-radius:var(--jk-radius-sm);box-shadow:0 0 0 1px var(--jk-border) inset}
 .jk-check-list .jk-check {padding:6px 8px;border-radius:6px}
 .jk-check-list .jk-check:hover {background:var(--jk-surface-hover)}
+
+/* Stand-alone input (when a control is not inside .jk-field) */
+.jk-input {display:block;width:100%;min-height:34px;padding:6px 10px;border-radius:var(--jk-radius-sm);border:0;box-shadow:0 0 0 1px var(--jk-border-strong) inset;background:var(--jk-surface);color:var(--jk-text);font:400 var(--jk-text-md) var(--jk-font)}
+.jk-input:focus-visible {outline:2px solid var(--jk-focus);outline-offset:0}
+textarea.jk-input {min-height:80px;resize:vertical}
+
+/* Native <dialog> styled like the kit dialog (order actions) */
+.jk-native-dialog {position:fixed;inset:0;margin:auto;width:min(560px,calc(100vw - 32px));max-height:calc(100dvh - 48px);overflow:auto;padding:0;border:0;border-radius:var(--jk-radius);background:var(--jk-surface);color:var(--jk-text);font-family:var(--jk-font);box-shadow:0 20px 50px #00000059}
+.jk-native-dialog::backdrop {background:#0000005c}
+.jk-native-dialog-head {position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px 14px 20px;border-bottom:1px solid var(--jk-border);background:var(--jk-surface)}
+.jk-native-dialog-head h2 {font-size:var(--jk-text-lg)!important;font-weight:650}
+.jk-native-dialog-body {padding:var(--jk-space-5)}
+.jk-native-dialog-body footer {display:flex;justify-content:flex-end;gap:var(--jk-space-2);padding-top:var(--jk-space-4);border-top:1px solid var(--jk-border)}
+
+/* Order page pieces */
+.jk-line-item {display:flex;align-items:flex-start;gap:var(--jk-space-3);padding:var(--jk-space-4) var(--jk-space-5);border-top:1px solid var(--jk-border)}
+.jk-line-thumb {display:grid;place-items:center;flex:none;width:56px;height:56px;overflow:hidden;border-radius:var(--jk-radius-sm);background:var(--jk-surface-subdued);box-shadow:0 0 0 1px var(--jk-border) inset;color:var(--jk-text-subdued)}
+.jk-line-thumb img {width:100%;height:100%;object-fit:cover}
+.jk-summary-row {display:flex;justify-content:space-between;gap:12px;padding:8px 0;font-size:var(--jk-text-sm);border-bottom:1px solid var(--jk-border)}
+.jk-summary-row:last-of-type {border-bottom:0}
+.jk-summary-row:last-of-type strong {font-weight:650}
+.jk-timeline {display:flex;flex-direction:column;gap:var(--jk-space-4);margin-top:var(--jk-space-4);padding-left:var(--jk-space-4);border-left:2px solid var(--jk-border)}
+.jk-timeline li {position:relative;font-size:var(--jk-text-sm)}
+.jk-timeline li::before {content:"";position:absolute;left:calc(-1 * var(--jk-space-4) - 6px);top:6px;width:10px;height:10px;border-radius:50%;background:var(--jk-surface);box-shadow:0 0 0 2px var(--jk-border-strong)}
+.jk-preview-box {display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:var(--jk-radius-sm);background:var(--jk-surface-subdued);box-shadow:0 0 0 1px var(--jk-border) inset;font-size:var(--jk-text-sm);color:var(--jk-text)}
+
+/* Product builder frame */
+.jk-label {display:block;font-size:var(--jk-text-sm);font-weight:550;color:var(--jk-text)}
+.jk-help {margin-top:6px;font-size:var(--jk-text-xs);line-height:1.45;color:var(--jk-text-subdued)}
+.jk-section-body {display:flex;flex-direction:column;gap:var(--jk-space-4)}
+.jk-builder {display:grid;grid-template-columns:minmax(0,1fr);gap:var(--jk-space-4);max-width:1100px;margin-inline:auto;align-items:start}
+@media(min-width:1024px){.jk-builder{grid-template-columns:minmax(0,1fr) 300px}}
+.jk-builder-header {grid-column:1/-1;margin-bottom:var(--jk-space-1)}
+.jk-builder-main,.jk-builder-side {display:flex;flex-direction:column;gap:var(--jk-space-4);min-width:0}
+@media(min-width:1024px){.jk-builder-side{position:sticky;top:calc(var(--jk-topbar-height) + var(--jk-space-4))}}
+.jk-builder-bar {position:sticky;bottom:12px;z-index:30;display:flex;align-items:center;justify-content:flex-end;gap:var(--jk-space-2);padding:10px 12px 10px 16px;border-radius:var(--jk-radius);background:var(--jk-surface);box-shadow:var(--jk-shadow-raised);font-size:var(--jk-text-sm);color:var(--jk-text-subdued)}
+.jk-builder-bar.is-dirty {background:var(--jk-topbar);color:var(--jk-topbar-text);box-shadow:0 10px 28px #0000003d}
+.jk-builder-bar.is-dirty .jk-button:not(.jk-button-primary) {background:transparent;color:inherit;box-shadow:0 0 0 1px #ffffff55 inset}
+.jk-builder-bar.is-dirty .jk-button-primary {background:#fff;color:#1f1f1f}
+.jk-problems {flex-direction:column;gap:4px}
+.jk-problems:focus-visible {outline:2px solid var(--jk-focus);outline-offset:2px}
+.jk-disclosure > summary {display:flex;align-items:center;gap:6px;cursor:pointer;list-style:none;font-size:var(--jk-text-sm);font-weight:600;color:var(--jk-text)}
+.jk-disclosure > summary::-webkit-details-marker {display:none}
+.jk-disclosure > summary::before {content:"";width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);transition:transform .15s;margin-right:4px}
+.jk-disclosure[open] > summary::before {transform:rotate(45deg)}
+.jk-disclosure[open] > summary {margin-bottom:var(--jk-space-3)}
+.jk-disclosure > summary:focus-visible {outline:2px solid var(--jk-focus);outline-offset:2px;border-radius:4px}
+
+/*
+ * Older class names still used by a few admin components (product builder sections, password
+ * page and developer token settings). They draw with the kit tokens so they match the kit.
+ * New code should use the kit components instead of these names.
+ */
+:is(.admin-content,.jk-sheet) :is(.admin-card,.form-card) {padding:var(--jk-space-4);border:0;border-radius:var(--jk-radius);background:var(--jk-surface);box-shadow:var(--jk-shadow)}
+@media(min-width:1024px){:is(.admin-content,.jk-sheet) :is(.admin-card,.form-card){padding:var(--jk-space-5)}}
+:is(.admin-content,.jk-sheet) .admin-card > summary {cursor:pointer;font-size:var(--jk-text-sm);font-weight:600;color:var(--jk-text)}
+:is(.admin-content,.jk-sheet) .admin-card-heading h2,.admin-content .form-card-title h2 {font-size:var(--jk-text-md)!important;font-weight:650;color:var(--jk-text)}
+.admin-content .form-card-title {padding:0 0 var(--jk-space-3);margin-bottom:var(--jk-space-3);border-bottom:1px solid var(--jk-border)}
+.admin-content .field-grid {padding:0;gap:var(--jk-space-4)}
+:is(.admin-content,.jk-sheet) :is(.admin-field,.field) {display:flex;flex-direction:column;gap:6px;font-size:var(--jk-text-sm);font-weight:550;color:var(--jk-text)}
+:is(.admin-content,.jk-sheet) .field > span {font-size:var(--jk-text-sm);font-weight:550;color:var(--jk-text)}
+:is(.admin-content,.jk-sheet) :is(.admin-field,.field) :is(input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=file]),select,textarea) {width:100%;min-height:34px;height:auto;padding:6px 10px;border:0;border-radius:var(--jk-radius-sm);box-shadow:0 0 0 1px var(--jk-border-strong) inset;background:var(--jk-surface);color:var(--jk-text);font:400 var(--jk-text-md) var(--jk-font)}
+:is(.admin-content,.jk-sheet) :is(.admin-field,.field) :is(input,select,textarea):focus-visible {outline:2px solid var(--jk-focus);outline-offset:0;border-color:transparent}
+:is(.admin-content,.jk-sheet) :is(.admin-field,.field) small {font-size:var(--jk-text-xs);font-weight:400;color:var(--jk-text-subdued)}
+:is(.admin-content,.jk-sheet) .admin-field legend {font-weight:550}
+:is(.admin-content,.jk-sheet) .admin-stack {display:flex;flex-direction:column;gap:var(--jk-space-4)}
+:is(.admin-content,.jk-sheet) .admin-button {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:32px;padding:5px 12px;border:0;border-radius:var(--jk-radius-sm);font:550 var(--jk-text-sm)/1.2 var(--jk-font);color:var(--jk-text);background:var(--jk-surface);box-shadow:0 0 0 1px var(--jk-border-strong) inset,0 1px 0 #0000000d;cursor:pointer}
+:is(.admin-content,.jk-sheet) .admin-button:hover {background:var(--jk-surface-hover)}
+:is(.admin-content,.jk-sheet) .admin-button-primary {background:var(--jk-accent);color:var(--jk-accent-text);box-shadow:0 1px 0 #0000001a}
+:is(.admin-content,.jk-sheet) .admin-photo-tile {border:0;border-radius:var(--jk-radius-sm);background:var(--jk-surface-subdued);box-shadow:0 0 0 1px var(--jk-border) inset}
+.admin-content .form-actions {display:flex;justify-content:flex-end;gap:var(--jk-space-2);padding-top:var(--jk-space-4)}

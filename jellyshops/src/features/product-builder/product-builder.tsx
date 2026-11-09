@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { AdminCard, AdminPageHeader } from "@/components/admin-ui";
+import { Banner, Card, StatusBadge } from "@/components/admin";
 import { TemplatePicker } from "@/features/store-editor/components/template-picker";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { OrganizationSection } from "./sections/organization-section";
 import { DigitalProductSettings } from "@/features/commerce/components/digital-product-settings";
 import { isProductMediaEnabled, pruneMediaAssignments } from "@jelly/storefront-schema";
 import { PhotosSection } from "./sections/photos-section";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { ArrowLeft, Eye, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useShop } from "@/contexts/shop-context";
 import { useAuth } from "@/features/auth/providers/auth-provider";
@@ -208,36 +208,39 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
 
   return (
     <>
-    <form ref={form} aria-label="Product editor" noValidate onSubmit={(event) => { event.preventDefault(); void save(); }} className="admin-product-layout">
-      <AdminPageHeader title={productId ? draft.title || "Edit product" : "Add product"} back="/admin/products" actions={<>
-        <button type="button" className="admin-button" ref={previewTrigger} onClick={() => setPreviewOpen(true)}>Preview</button>
-        {productId && <button type="button" className="admin-button" disabled={saving || dirty} title={dirty ? "Save your changes first" : undefined} onClick={() => void duplicate()}>Duplicate</button>}
-        {productId && !draft.archived && <button type="button" className="admin-button" disabled={saving} onClick={() => void archive()}>Archive</button>}
-      </>} />
-      <div className="min-w-0 space-y-4">
+    <form ref={form} aria-label="Product editor" noValidate onSubmit={(event) => { event.preventDefault(); void save(); }} className="jk-builder">
+      <header className="jk-page-header jk-builder-header">
+        <div className="jk-page-title">
+          <Link href="/admin/products" className="jk-back" aria-label="Back to products"><ArrowLeft size={16} aria-hidden="true" /></Link>
+          <div className="min-w-0"><div className="jk-title-row"><h1>{productId ? draft.title || "Edit product" : "Add product"}</h1>
+            {productId && <StatusBadge kind="product" value={draft.archived ? "ARCHIVED" : draft.published ? "ACTIVE" : "DRAFT"} />}</div></div>
+        </div>
+        <div className="jk-page-actions">
+          <button type="button" className="jk-button" ref={previewTrigger} onClick={() => setPreviewOpen(true)}><Eye size={15} aria-hidden="true" />Preview</button>
+          {productId && <button type="button" className="jk-button" disabled={saving || dirty} title={dirty ? "Save your changes first" : undefined} onClick={() => void duplicate()}>Duplicate</button>}
+          {productId && !draft.archived && <button type="button" className="jk-button" disabled={saving} onClick={() => void archive()}>Archive</button>}
+        </div>
+      </header>
+      <div className="jk-builder-main">
         {justSaved && (
-          <div role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-border bg-muted/50 px-4 py-3 text-[11px] font-black text-success">
-            <span className="flex items-center gap-2.5"><CheckCircle2 size={16} />Product saved successfully</span>
-            <span className="flex gap-4 text-foreground">
-              <Link href="/admin/products" className="underline">Back to products</Link>
-              <button type="button" onClick={startAnother} className="underline">Add another</button>
+          <Banner tone="success" title="Product saved successfully">
+            <span className="jk-row" style={{ gap: 16 }}>
+              <Link href="/admin/products" className="jk-link">Back to products</Link>
+              <button type="button" onClick={startAnother} className="jk-link">Add another</button>
             </span>
-          </div>
+          </Banner>
         )}
-        {copy && <div role="status" className="flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-border bg-muted/50 px-4 py-3 text-[13px]">
-          <span className="flex items-center gap-2.5"><CheckCircle2 size={16} className="text-success" />Copy saved as a draft.</span>
-          <Link href={`/admin/products/${copy.id}`} className="underline">Open {copy.title}</Link>
-        </div>}
-        {saveError && <div role="alert" className="rounded-[18px] border border-tint-border bg-muted/50 px-4 py-3 text-[11px] font-bold text-tint-foreground">{saveError}</div>}
+        {copy && <Banner tone="success" title="Copy saved as a draft."><Link href={`/admin/products/${copy.id}`} className="jk-link">Open {copy.title}</Link></Banner>}
+        {saveError && <Banner tone="critical" title="Not saved">{saveError}</Banner>}
         {problems.length > 0 && (
-          <div role="alert" tabIndex={-1} data-problems className="rounded-[18px] border border-tint-border bg-muted/50 px-4 py-3 text-[11px] font-bold text-tint-foreground">
-            <p>Fix {problems.length === 1 ? "this" : "these"} before saving:</p>
-            <ul className="mt-1 list-disc pl-5">{problems.map((problem, index) => <li key={`${problem.code}-${index}`}>{problem.message}</li>)}</ul>
+          <div role="alert" tabIndex={-1} data-problems className="jk-banner jk-tone-critical jk-problems">
+            <p className="jk-strong">Fix {problems.length === 1 ? "this" : "these"} before saving:</p>
+            <ul className="jk-bullets" style={{ color: "inherit" }}>{problems.map((problem, index) => <li key={`${problem.code}-${index}`}>{problem.message}</li>)}</ul>
           </div>
         )}
 
         <BasicsSection draft={draft} errors={errors} onChange={change} onUpload={upload} hidePhoto />
-        <details className="admin-card"><summary className="cursor-pointer text-[13px]">Product specifications (optional)</summary><label className="admin-field mt-3">Specifications<textarea rows={4} maxLength={12000} value={draft.specificationsText??""} placeholder={"Material: Cotton\nCare: Machine wash cold"} onChange={event=>change("specificationsText",event.target.value)} /><small>One detail per line, for example Material: Cotton.</small></label></details>
+        <details className="jk-card jk-disclosure"><summary>Product specifications <span className="jk-muted">(optional)</span></summary><label className="admin-field mt-3">Specifications<textarea rows={4} maxLength={12000} value={draft.specificationsText??""} placeholder={"Material: Cotton\nCare: Machine wash cold"} onChange={event=>change("specificationsText",event.target.value)} /><small>One detail per line, for example Material: Cotton.</small></label></details>
         <PhotosSection media={draft.media ?? []} options={draft.options} taggingEnabled={taggingEnabled} onChange={(media) => { setDraft((current) => ({ ...current, media, imageUrl: media[0]?.url ?? "", variants: current.variants.map((variant) => variant.mediaId && !media.some((photo) => photo.id === variant.mediaId) ? { ...variant, mediaId: undefined } : variant) })); touch(); }} onBusy={setUploading} onDelete={api && storeId ? (mediaId) => api.deleteMedia(storeId, mediaId) : undefined} onUpload={api && storeId ? (file, progress) => api.uploadMedia(storeId, file, progress) : undefined} onList={api?.listMedia && storeId ? () => api.listMedia!(storeId) : undefined} />
         <CategorySection
           taxonomy={taxonomy}
@@ -260,10 +263,10 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
         {api && <MetafieldsSection state={metafields} context={metafieldContext} />}
         <SeoSection draft={draft} errors={errors} storeName={activeStore?.name ?? ""} storeSlug={activeStore?.slug ?? ""} saved={Boolean(productId) && draft.published} onChange={change} />
 
-        <div className="admin-savebar">
-          {dirty && <span role="status" className="mr-auto text-[13px] text-muted-foreground">Unsaved changes</span>}
-          {dirty && <button type="button" className="admin-button" disabled={saving} onClick={discard}>Discard</button>}
-          <button type="submit" disabled={saving || uploading} className="inline-flex h-11 items-center gap-2 rounded-lg bg-primary px-4 text-[13px] font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-60">
+        <div className={`jk-builder-bar ${dirty ? "is-dirty" : ""}`}>
+          {dirty && <span role="status" className="mr-auto">Unsaved changes</span>}
+          {dirty && <button type="button" className="jk-button" disabled={saving} onClick={discard}>Discard</button>}
+          <button type="submit" disabled={saving || uploading} className="jk-button jk-button-primary">
             {saving && <Loader2 size={14} className="animate-spin" />}
             {productId ? "Save changes" : "Save product"}
           </button>
@@ -271,9 +274,9 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
       </div>
 
       <OrganizationSection key={productId??"new"} draft={draft} onChange={change} categories={categoryPaths} brands={storeId ? repository.getBrands?.(storeId) ?? [] : []}
-        extra={productId && api && storeId ? <AdminCard title="Online store"><TemplatePicker api={api} storeId={storeId} resourceType="product" resourceId={productId} /></AdminCard> : undefined} />
+        extra={productId && api && storeId ? <Card title="Online store"><TemplatePicker api={api} storeId={storeId} resourceType="product" resourceId={productId} /></Card> : undefined} />
       <Sheet open={previewOpen} onOpenChange={setPreviewOpen}><SheetContent onCloseAutoFocus={event => { event.preventDefault(); previewTrigger.current?.focus(); }} className="jk-sheet overflow-y-auto">
-        <SheetTitle>Shopper preview</SheetTitle><SheetDescription>Try the options. Nothing is ordered.</SheetDescription>
+        <SheetTitle>Shopper preview</SheetTitle><SheetDescription className="jk-muted">Try the options. Nothing is ordered.</SheetDescription>
         <BuyerPreview mediaEnabled={taggingEnabled} draft={draft} currency={currency} categoryLabel={category?.label} />
       </SheetContent></Sheet>
     </form>

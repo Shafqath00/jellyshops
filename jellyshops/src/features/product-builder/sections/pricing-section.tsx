@@ -5,7 +5,7 @@ import { useState } from "react";
 import { formatMoney, majorToMinor, type Currency } from "@/lib/domain";
 import { UNIT_GROUPS, parseUnitPricing, profitSummary, unitPriceLabel, unitPriceMinor, unitGroupOf } from "../pricing";
 import type { DraftErrors, ProductDraft } from "../draft";
-import { AdminStatus } from "@/components/admin-ui";
+import { StatusBadge } from "@/components/admin";
 import { DEFAULT_LOW_STOCK_THRESHOLD, STOCK_STATUS_LABEL, STOCK_STATUS_TONE, stockStatusOf } from "../stock";
 import { Field, Section } from "./section-parts";
 
@@ -32,7 +32,7 @@ export function PricingSection({ draft, errors, currency, hasCombinations, onCha
   const unitOptions = () => Object.entries(UNIT_GROUPS).map(([key, group]) => <optgroup key={key} label={group.label}>{group.units.map((entry) => <option key={entry.id} value={entry.id}>{entry.label}</option>)}</optgroup>);
   if (hasCombinations) {
     return (
-      <details open={errors.price ? true : undefined} className="admin-card"><summary className="cursor-pointer text-[13px] font-medium">Defaults for new variants</summary><div className="mt-4 max-w-xs">
+      <details open={errors.price ? true : undefined} className="jk-card jk-disclosure"><summary>Defaults for new variants</summary><div className="mt-4 max-w-xs">
           <Field id="pb-price" label={`Price (${currency})`} error={errors.price}>
             <input id="pb-price" inputMode="decimal" className={inputClass} value={draft.price} aria-invalid={Boolean(errors.price)} onChange={(event) => onChange("price", event.target.value)} />
           </Field>
@@ -55,7 +55,7 @@ export function PricingSection({ draft, errors, currency, hasCombinations, onCha
           <Field id="pb-low-stock" label="Low stock warning at" error={errors.lowStockThreshold} hint={`Warn when this many or fewer are left. Leave blank to use ${DEFAULT_LOW_STOCK_THRESHOLD}.`}>
             <input id="pb-low-stock" inputMode="numeric" className={inputClass} value={draft.lowStockThreshold} aria-invalid={Boolean(errors.lowStockThreshold)} aria-describedby={errors.lowStockThreshold ? "pb-low-stock-error" : undefined} placeholder={String(DEFAULT_LOW_STOCK_THRESHOLD)} onChange={(event) => onChange("lowStockThreshold", event.target.value)} />
           </Field>
-          {stockStatus && <div><p className="text-[13px] font-semibold text-foreground">Stock status</p><div className="mt-2"><AdminStatus tone={STOCK_STATUS_TONE[stockStatus]}>{STOCK_STATUS_LABEL[stockStatus]}</AdminStatus></div></div>}
+          {stockStatus && <div><p className="jk-label">Stock status</p><div className="mt-2"><StatusBadge tone={stockStatus === "out" ? "critical" : STOCK_STATUS_TONE[stockStatus]}>{STOCK_STATUS_LABEL[stockStatus]}</StatusBadge></div></div>}
         </div>
       )}
       <details open={advancedOpen} onToggle={(event) => setAdvancedOpen(event.currentTarget.open)} className="rounded-xl border border-border/80 bg-muted/25 px-4 py-3.5">
