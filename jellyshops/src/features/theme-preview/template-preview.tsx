@@ -38,7 +38,7 @@ const toMinor = (price: string) => Math.round(Number(price.replace(/[^0-9.]/g, "
 /** Sample prices as a shop shows them: "£1,197.00". */
 const pounds = (value: number) => `£${value.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-function useProductContext(config: ThemePreviewConfig): StorefrontPageContext {
+export function useProductContext(config: ThemePreviewConfig): StorefrontPageContext {
   const [size, setSize] = useState<string>();
   const [quantity, setQuantity] = useState(1);
   const sample = config.product;
@@ -70,7 +70,7 @@ function useProductContext(config: ThemePreviewConfig): StorefrontPageContext {
   } as unknown as StorefrontPageContext;
 }
 
-function useCartContext(config: ThemePreviewConfig): StorefrontPageContext {
+export function useCartContext(config: ThemePreviewConfig): StorefrontPageContext {
   const [quantities, setQuantities] = useState<Record<string, number>>(config.cart);
   const second = Object.keys(config.cart)[1];
   const lines = config.products.filter((product) => quantities[product.id]).map((product) => {
@@ -113,23 +113,9 @@ export function previewHasCompare(config: ThemePreviewConfig): boolean {
   return usesProductCompare(resolveTheme(config.themeId).settings);
 }
 
-export function TemplatePreview({ template, config, productLayout, collectionLayout, onOpenCompare }: { template: PreviewTemplate; config: ThemePreviewConfig; productLayout?: string; collectionLayout?: string; onOpenCompare?: () => void }) {
-  const pack = getStarterPack(config.packId);
-  const productPage = useProductContext(config);
-  const cartPage = useCartContext(config);
-  // Themes that ship their own main menu are shown with it; the others with a sample menu that has dropdowns.
-  const previewMenus = config.useStarterMenu ? Object.fromEntries(pack.menus.map((menu) => [menu.handle, { id: `preview-${menu.key}`, handle: menu.handle, items: menu.items }])) as Record<string, RuntimeMenuV4> : menus;
-  const cart = usePreviewCart();
-  const products = withPreviewQuickAdd(config.products);
-  // Comparing in the preview uses its own list, kept in this browser like the live store's.
-  const compareOn = previewHasCompare(config);
-  const { access: compare, ids: compareIds } = useCompareList(`theme-preview-${config.themeId}`);
-  const compareItems = compareIds.flatMap((id): CompareItem[] => {
-    const product = config.products.find((item) => item.id === id);
-    return product ? [{ id: product.id, name: product.name, href: "#", imageUrl: product.imageUrl, price: product.price, vendor: product.vendor, available: product.available !== false, specifications: config.compareSpecifications?.[product.id] }] : [];
-  });
-  const commerce: CommerceDataProvider = { initialProducts: products, cart, ratings: config.ratings, reviews: sampleReviews, compare: compareOn ? compare : undefined, async getProducts(input) { return products.slice(0, input?.limit ?? products.length); } };
-  const pages: Record<PreviewTemplate, StorefrontPageContext> = {
+/** The sample page context of every previewed page (the product and cart pages come from their hooks). */
+export function previewPages(config: ThemePreviewConfig, productPage: StorefrontPageContext, cartPage: StorefrontPageContext): Record<PreviewTemplate, StorefrontPageContext> {
+  return {
     home: { pageType: "home", resource: null },
     product: productPage,
     collection: {
@@ -150,6 +136,25 @@ export function TemplatePreview({ template, config, productLayout, collectionLay
     "not-found": { pageType: "not-found", resource: null },
     compare: { pageType: "page", resource: null } as unknown as StorefrontPageContext,
   };
+}
+
+export function TemplatePreview({ template, config, productLayout, collectionLayout, onOpenCompare }: { template: PreviewTemplate; config: ThemePreviewConfig; productLayout?: string; collectionLayout?: string; onOpenCompare?: () => void }) {
+  const pack = getStarterPack(config.packId);
+  const productPage = useProductContext(config);
+  const cartPage = useCartContext(config);
+  // Themes that ship their own main menu are shown with it; the others with a sample menu that has dropdowns.
+  const previewMenus = config.useStarterMenu ? Object.fromEntries(pack.menus.map((menu) => [menu.handle, { id: `preview-${menu.key}`, handle: menu.handle, items: menu.items }])) as Record<string, RuntimeMenuV4> : menus;
+  const cart = usePreviewCart();
+  const products = withPreviewQuickAdd(config.products);
+  // Comparing in the preview uses its own list, kept in this browser like the live store's.
+  const compareOn = previewHasCompare(config);
+  const { access: compare, ids: compareIds } = useCompareList(`theme-preview-${config.themeId}`);
+  const compareItems = compareIds.flatMap((id): CompareItem[] => {
+    const product = config.products.find((item) => item.id === id);
+    return product ? [{ id: product.id, name: product.name, href: "#", imageUrl: product.imageUrl, price: product.price, vendor: product.vendor, available: product.available !== false, specifications: config.compareSpecifications?.[product.id] }] : [];
+  });
+  const commerce: CommerceDataProvider = { initialProducts: products, cart, ratings: config.ratings, reviews: sampleReviews, compare: compareOn ? compare : undefined, async getProducts(input) { return products.slice(0, input?.limit ?? products.length); } };
+  const pages = previewPages(config, productPage, cartPage);
   const page = pages[template];
   // The compare page is built in (like the bag in other stores): the home page's header and footer around it.
   const layout = pack.templates.find((item) => item.type === (template === "compare" ? "home" : template))?.layout.sections.filter((placement) => template !== "compare" || placement.kind === "global") ?? [];

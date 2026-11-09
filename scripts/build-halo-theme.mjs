@@ -61,6 +61,8 @@ const theme = {
   id: "jelly-halo",
   name: "Jelly Halo",
   version: "1.0.0",
+  // Designed with its own complete CSS before the platform section defaults existed.
+  sectionDefaults: false,
   engines: forma.engines,
   description: "A calm skincare and beauty storefront: products on soft colour, shop by skin concern, ingredient stories and reviews.",
   assetPrefix: prefix,

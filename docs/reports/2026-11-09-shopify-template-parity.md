@@ -81,6 +81,21 @@ What messy data found, and the fixes (all in the platform, so every theme gets t
 
 Result: all 7 themes pass with tidy and messy data at every width checked.
 
+## 4c. Phase 3 done: section baseline (2026-11-09)
+
+**New page `/theme-preview/platform-baseline`** draws every section the platform offers (50 section types, 60 entries counting each preset) with no theme at all: no theme stylesheet, no theme kit and none of the old default rules in `globals.css`. That is exactly what a new, scaffolded or uploaded template starts from. The page has the same Tidy/Messy data and Desktop/Tablet/Phone switches as the theme previews. The design lint measures it on all 7 pages at three widths, with both data sets, using the layout rules (edges, sideways scroll, tap targets, stacked rows, photo shapes, spilled text, title lines).
+
+**What it found.** With the old default rules off, the platform gave sections almost no layout of their own: no buttons, no product grid (cards stacked full width), no section spacing, the header's shopping icons stacked with their labels showing, header and footer outside the page edges, banners with no text over the photo, "Text over image" and "Text only" heroes laid out as split heroes, unstyled sign-up forms, option values as plain words, 11px quantity buttons on phones, headings of some sections at body size, and photo shapes that changed with each photo. Every newer template (Forma, Halo, Diode) had to rebuild all of this in its own CSS, which is cause B and D above.
+
+**Fix: one shared default layer**, `src/app/themes/section-defaults.css` (loaded before the platform rules and every theme, also in the CLI preview):
+- Every rule sits entirely inside `:where()`, so it has no priority: any theme rule wins, even a bare `h2 { }`. Colours and sizes come from the design tokens.
+- It applies to storefronts with `data-jelly-legacy-styles="off"`: every new, scaffolded, generated-from-scratch and uploaded template. Minimal, Avenue, Resthaven and Harbour keep the old defaults they were designed on. Forma, Halo and Diode were designed with their own complete CSS, and the defaults changed their look (centred page text, smaller footer text, more space), so their manifests set `sectionDefaults: false` (root value `"own"`; `usesSectionDefaults()` in storefront-themes). The old defaults in `globals.css` now switch off for any value of the attribute.
+- Checked by comparing 168 full-page pictures of all 7 templates (8 pages × 3 widths) before and after: identical apart from two photos that had not finished loading in the "before" picture.
+- It covers announcement, header (with phone menu and 44px icon targets), footer, section spacing and headings, buttons and fields, every hero layout, image banner, slideshow, image with text, custom content, rich text, collection list, journal, mosaic, testimonials, trust badges, FAQ, sign-up form, store visit, product cards and grids, the product page (price, options, quantity, Add to cart, details, specifications), collection header, bag, search, 404 and page text.
+- Tests (`section-defaults.test.ts`): every selector has no priority and is limited to those storefronts, colours come from tokens, the file loads first, and the baseline page draws every section.
+
+**Empty presets.** "Rich text", "FAQ" and "Feature columns" added an empty section; they now come with sample blocks. Testimonials stay empty on purpose (no invented quotes on a live store; the editor hint explains it). Logo list, photo gallery and apps need the merchant's own images or links, so they still start empty.
+
 ## 5. Roadmap
 
 Each phase ends with tests, a browser check and a commit, and starts only after a go-ahead.

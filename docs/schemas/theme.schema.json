@@ -614,6 +614,9 @@
     "legacyStorefrontStyles": {
       "type": "boolean"
     },
+    "sectionDefaults": {
+      "type": "boolean"
+    },
     "sections": {
       "maxItems": 20,
       "type": "array",

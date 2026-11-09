@@ -66,6 +66,8 @@ const theme = {
   id: "jelly-diode",
   name: "Jelly Diode",
   version: "1.0.0",
+  // Designed with its own complete CSS before the platform section defaults existed.
+  sectionDefaults: false,
   engines: forma.engines,
   description: "A precise electronics storefront: products on seamless grey, key specifications on every card, filters in a sidebar and full specification tables.",
   assetPrefix: prefix,

@@ -2,6 +2,7 @@
   "id": "jelly-diode",
   "name": "Jelly Diode",
   "version": "1.0.0",
+  "sectionDefaults": false,
   "engines": {
     "jelly": ">=1 <2"
   },

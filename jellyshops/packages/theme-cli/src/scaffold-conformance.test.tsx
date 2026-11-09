@@ -20,5 +20,6 @@ vi.restoreAllMocks();
 
 describeThemeConformance("fresh-theme");
 
-// A new theme starts from storefront-base.css alone: the old default rules in globals.css stay off for it.
+// A new theme starts from the platform layer: the old default rules in globals.css stay off and the section defaults
+// (section-defaults.css, data-jelly-legacy-styles="off") apply.
 it("does not inherit the legacy storefront rules", () => { expect(legacyStylesAttribute("fresh-theme")).toBe("off"); });

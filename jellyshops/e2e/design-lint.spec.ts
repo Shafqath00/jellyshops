@@ -6,6 +6,7 @@ import { axeOnStyledCopy } from "./fixtures/styled-copy";
 import { measureStorefrontPage } from "../src/lib/design-lint/measure";
 import { compareWithBaseline, contrastFinding, findingsReport, lintPage, type DesignFinding } from "../src/lib/design-lint/rules";
 import { themePreviewEntries } from "../src/features/theme-preview/configs";
+import { BASELINE_GROUPS } from "../src/features/theme-preview/section-baseline";
 
 /**
  * Design lint (docs/design-contract.md): measures every theme preview page at three widths against the
@@ -71,6 +72,43 @@ for (const theme of themes) {
         const frame = await show(page, theme.frame, tab, button);
         const measurement = await frame.locator("html").evaluate(measureStorefrontPage);
         findings.push(...lintPage(measurement, { theme: theme.path, page: `${tab} (messy)`, device }));
+      }
+    }
+  });
+}
+
+// Section baseline (theme-preview/section-baseline.tsx): every section with the platform's own CSS only, no theme.
+// Only layout rules apply (a page of every section has no single rhythm, heading scale or title by design).
+// JELLY_BASELINE_SHOTS=<folder> also saves a picture of each section there (outside test-results, which Playwright empties).
+const layoutRules = new Set(["edge", "overflow", "tap-target", "stacked-row", "gallery", "text-spill", "card-ratio", "title-lines"]);
+for (const data of ["tidy", "messy"] as const) {
+  test(`design lint: section baseline (${data} data)`, async ({ page }) => {
+    test.setTimeout(300_000);
+    await page.setViewportSize({ width: 1400, height: 900 });
+    await page.goto("/theme-preview/platform-baseline");
+    await expect(page.frameLocator("iframe[title='Section baseline']").locator("[data-baseline-section]").first()).toBeVisible();
+    if (data === "messy") await page.getByRole("group", { name: "Sample data" }).getByRole("button", { name: "Messy data" }).click();
+    for (const [tab] of BASELINE_GROUPS.map(([key, label]) => [label, key] as const)) {
+      for (const [button, device] of devices) {
+        const frame = await show(page, "Section baseline", tab, button);
+        const measurement = await frame.locator("html").evaluate(measureStorefrontPage);
+        const pageName = data === "messy" ? `${tab} (messy)` : tab;
+        findings.push(...lintPage(measurement, { theme: "platform-baseline", page: pageName, device }).filter((item) => layoutRules.has(item.rule)));
+        if (process.env.JELLY_BASELINE_SHOTS) {
+          const directory = join(process.env.JELLY_BASELINE_SHOTS, `${data}-${device}`);
+          mkdirSync(directory, { recursive: true });
+          // The frame covers the window while pictures are taken, so nothing of the preview page overlaps a section.
+          const iframe = page.locator("iframe[title='Section baseline']");
+          await iframe.evaluate((element) => Object.assign((element as HTMLElement).style, { position: "fixed", inset: "0", height: "100vh", zIndex: "10", width: `${element.getBoundingClientRect().width}px` }));
+          const sections = frame.locator("[data-baseline-section]");
+          for (let index = 0; index < await sections.count(); index++) {
+            const item = sections.nth(index);
+            const label = (await item.getAttribute("data-baseline-section")) ?? String(index);
+            if (!(await item.isVisible())) continue;
+            await item.screenshot({ path: join(directory, `${tab}-${String(index).padStart(2, "0")}-${label.replace(/[^a-z0-9]+/gi, "_")}.png`), animations: "disabled" }).catch(() => {});
+          }
+          await iframe.evaluate((element) => { (element as HTMLElement).removeAttribute("style"); });
+        }
       }
     }
   });
