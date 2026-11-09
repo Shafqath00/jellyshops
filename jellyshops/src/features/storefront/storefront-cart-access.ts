@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import type { StorefrontCartAccess } from "@jelly/storefront-renderer";
 import { useOptionalShop } from "@/contexts/shop-context";
+import { isUntrackedStock, variantMaxQuantity } from "@/lib/variant-stock";
 
 /**
  * Quick add on product cards: reads and sets the quantity of a plain variant (no chosen options) in the shopper's
@@ -22,7 +23,8 @@ export function useStorefrontCartAccess(storeSlug: string): StorefrontCartAccess
       async setQuantity(variantId, quantity) {
         const variant = state.products.flatMap((product) => product.variants).find((item) => item.id === variantId);
         if (!variant || variant.sellable === false) return { ok: false, message: "This product is no longer available." };
-        if (quantity > variant.stock) return { ok: false, message: variant.stock > 0 ? `Only ${variant.stock} left.` : "This product is out of stock." };
+        const max = variantMaxQuantity(variant);
+        if (quantity > max) return { ok: false, message: max === 0 ? "This product is out of stock." : isUntrackedStock(variant) ? `You can add up to ${max} at a time.` : `Only ${variant.stock} left.` };
         const cart = repository.getCartForStore(storeSlug) ?? repository.createCart(storeSlug);
         repository.updateCartItem(cart.id, variantId, Math.max(0, quantity), [], variant.priceMinor);
         return { ok: true };

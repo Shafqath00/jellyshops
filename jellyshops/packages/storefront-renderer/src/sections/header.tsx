@@ -50,13 +50,14 @@ export function MenuList({ handle, context, variant = "flat" }: { handle: string
   return <MenuTree items={items} variant={variant} hrefFor={(item) => menuHref(item, context)} />;
 }
 
-type ToolIcon = "search" | "account" | "wishlist" | "bag" | "menu";
+type ToolIcon = "search" | "account" | "wishlist" | "bag" | "menu" | "close";
 const iconPaths: Record<ToolIcon, string> = {
   search: "M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Zm10 2-4.35-4.35",
   account: "M20 21a8 8 0 0 0-16 0M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z",
   wishlist: "M19.5 12.6 12 20l-7.5-7.4A4.8 4.8 0 0 1 12 6.1a4.8 4.8 0 0 1 7.5 6.5Z",
   bag: "M6 7h12l1 14H5L6 7Zm3 0a3 3 0 0 1 6 0",
   menu: "M4 7h16M4 12h16M4 17h16",
+  close: "M6 6l12 12M18 6 6 18",
 };
 
 function StorefrontIcon({ name }: { name: ToolIcon }) {
@@ -79,6 +80,26 @@ function useScrolled(ref: RefObject<HTMLElement | null>, enabled: boolean): bool
     return () => view.removeEventListener("scroll", update);
   }, [ref, enabled]);
   return scrolled;
+}
+
+/**
+ * The phone menu is a <details> element (works without JavaScript). This adds what a menu needs on top: Escape and a
+ * tap outside close it (Escape returns focus to the menu button), and the button says whether it opens or closes.
+ */
+function usePhoneMenu(ref: RefObject<HTMLDetailsElement | null>): { open: boolean; onToggle(): void } {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const menu = ref.current;
+    const doc = menu?.ownerDocument;
+    if (!open || !menu || !doc) return;
+    const close = (focus: boolean) => { menu.open = false; setOpen(false); if (focus) menu.querySelector("summary")?.focus(); };
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") close(true); };
+    const onPointer = (event: Event) => { if (!menu.contains(event.target as Node)) close(false); };
+    doc.addEventListener("keydown", onKey);
+    doc.addEventListener("pointerdown", onPointer);
+    return () => { doc.removeEventListener("keydown", onKey); doc.removeEventListener("pointerdown", onPointer); };
+  }, [open, ref]);
+  return { open, onToggle: () => setOpen(Boolean(ref.current?.open)) };
 }
 
 /** The search box of the "search bar" header layout; sends shoppers to the store's search page. */
@@ -118,6 +139,8 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
   const overlayLogoUrl = overlayImage ? safeRichTextHref(overlayImage.url) : null;
   const scrolled = useScrolled(headerRef, transparent);
   const editor = context.mode === "editor";
+  const phoneMenuRef = useRef<HTMLDetailsElement>(null);
+  const phoneMenu = usePhoneMenu(phoneMenuRef);
   return <header
     ref={headerRef}
     className="jelly-header"
@@ -130,8 +153,8 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
     data-scrolled={transparent && scrolled ? "true" : undefined}
     data-overlay-logo={overlayLogoUrl && !overlayLogoUrl.startsWith("#") ? "true" : undefined}
   >
-    <details className="jelly-mobile-navigation">
-      <summary aria-label="Open menu"><StorefrontIcon name="menu" /><span className="jelly-visually-hidden">Menu</span></summary>
+    <details className="jelly-mobile-navigation" ref={phoneMenuRef} onToggle={phoneMenu.onToggle}>
+      <summary aria-label={phoneMenu.open ? "Close menu" : "Open menu"}><StorefrontIcon name={phoneMenu.open ? "close" : "menu"} /><span className="jelly-visually-hidden">Menu</span></summary>
       <div className="jelly-mobile-navigation-panel">
         <MenuLinks section={section} context={context} label="Mobile navigation" variant="panel" />
         {tools.length > 0 && <nav aria-label="Account and saved items"><ul>{tools.filter(([icon]) => icon !== "search").map(([icon, label, href]) => <li key={icon}><a href={href}>{icon === "bag" ? "Shopping bag" : label}</a></li>)}</ul></nav>}

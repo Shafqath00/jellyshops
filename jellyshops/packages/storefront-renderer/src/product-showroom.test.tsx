@@ -76,7 +76,8 @@ describe("option tiles and tabs", () => {
     const view = within(container);
     expect(view.getByRole("button", { name: "Oat" })).toHaveAttribute("aria-pressed", "true");
     expect(view.getByRole("button", { name: /King/ })).toBeDisabled();
-    expect(view.getByRole("button", { name: /King/ }).textContent).toContain("Sold out");
+    // No variant has King with Oat, so it cannot be chosen (a value that is only out of stock stays selectable).
+    expect(view.getByRole("button", { name: /King/ }).textContent).toContain("Unavailable");
     expect(view.getByRole("button", { name: /2 drawers/ }).querySelector("img")).toHaveAttribute("src", "https://example.com/drawers.jpg");
     fireEvent.click(view.getByRole("button", { name: "Slate" }));
     expect(presentation.selectOption).toHaveBeenCalledWith("colour", "slate");

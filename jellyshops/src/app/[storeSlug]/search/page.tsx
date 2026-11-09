@@ -15,6 +15,7 @@ import { createSearchPageContext } from "@/features/storefront/page-context-load
 import { resolveStorefrontRoute, type ResolvedStorefrontRoute } from "@/features/storefront/resource-loader";
 import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
 import { searchTemplateHasToolbar } from "@/features/storefront/search-template";
+import { isVariantBuyable } from "@/lib/variant-stock";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
 
@@ -68,7 +69,7 @@ export default function SearchPage() {
   const normalized = query.toLowerCase();
   const results = repository.listProducts(storeSlug).filter((product) => product.published && !product.archived && (!normalized || `${product.name} ${product.category} ${product.description}`.toLowerCase().includes(normalized))).map((product) => {
     const variant = product.variants[0];
-    return { id: product.id, name: product.name, slug: product.slug, category: product.category, imageUrl: product.imageUrl, price: formatMoney(variant?.priceMinor ?? 0, store.currency), soldOut: !variant || variant.stock <= 0, lowStock: Boolean(variant && variant.stock > 0 && variant.stock <= 3), href: `/${store.slug}/products/${product.slug}` };
+    return { id: product.id, name: product.name, slug: product.slug, category: product.category, imageUrl: product.imageUrl, price: formatMoney(variant?.priceMinor ?? 0, store.currency), soldOut: !isVariantBuyable(variant), lowStock: Boolean(variant && variant.stock > 0 && variant.stock <= 3), href: `/${store.slug}/products/${product.slug}` };
   });
   const Search = shell.SearchPage;
   return <Search store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} settings={settings} query={query.trim()} results={results} shopHref={`/${store.slug}/shop`} />;

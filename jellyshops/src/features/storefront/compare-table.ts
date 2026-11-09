@@ -1,4 +1,5 @@
 import { formatMoney, type Currency, type Product } from "@/lib/domain";
+import { isVariantBuyable } from "@/lib/variant-stock";
 
 /** One product as the compare tray and page show it. */
 export type CompareItem = { id: string; name: string; href: string; imageUrl: string; price: string; vendor?: string; available: boolean; specifications?: Record<string, string> };
@@ -12,7 +13,7 @@ export function compareItem(product: Product, storeSlug: string, currency: Curre
     imageUrl: product.imageUrl,
     price: formatMoney(product.variants[0]?.priceMinor ?? 0, currency),
     vendor: product.vendor?.trim() || undefined,
-    available: product.variants.some((variant) => variant.stock > 0),
+    available: product.variants.some(isVariantBuyable),
     specifications: product.specifications,
   };
 }

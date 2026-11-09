@@ -5,6 +5,7 @@ import { getConfiguredPriceMinor, resolveProductVariant } from "@/lib/product-co
 import { getVisibleOptions, toggleSelection, validateProductSelections } from "@/lib/product-builder";
 import type { CatalogAdminProduct } from "@/features/store-editor/api/types";
 import { productGallery } from "@/lib/product-media";
+import { isVariantBuyable } from "@/lib/variant-stock";
 import { isProductMediaEnabled, normalisePersonalisation, personalisationPriceMinor, validatePersonalisation, type PersonalisationEntry } from "@jelly/storefront-schema";
 
 /** Maps the catalog detail DTO to the existing storefront Product domain shape. */
@@ -79,7 +80,7 @@ export function createProductPresentationContext({ product, currency, shippingCo
           : { state: "available" as const, message: `${variant.stock} available`, maxQuantity: variant.stock };
 
   return {
-    product: { id: product.id, title: product.name, description: product.description, descriptionDoc: product.descriptionDoc ?? null, imageUrl: gallery[0]?.url ?? "", galleryEnabled, specifications: product.specifications ?? {}, shippingCopy, media: gallery, sku: variant?.sku || undefined, vendor: product.vendor, options: options.map((option) => ({ id: option.id, name: option.name, required: option.required, ...(option.display === "color" || option.display === "image" ? { display: option.display } : {}), ...(option.type !== "variant" && option.multiple ? { multiple: true } : {}), ...(missingOptionIds.has(option.id) ? { missing: true } : {}), values: option.values.map((value) => ({ id: value.id, label: value.label, selected: isSelected(option.id, value.id), available: true, ...(option.display === "color" && value.color ? { color: value.color } : {}), ...(option.display === "image" && value.image ? { image: value.image } : {}), ...(value.priceAdjustmentMinor > 0 && option.type !== "variant" ? { priceAdjustment: formatMoney(value.priceAdjustmentMinor, currency) } : {}) })) })) },
+    product: { id: product.id, title: product.name, description: product.description, descriptionDoc: product.descriptionDoc ?? null, imageUrl: gallery[0]?.url ?? "", galleryEnabled, specifications: product.specifications ?? {}, shippingCopy, media: gallery, sku: variant?.sku || undefined, vendor: product.vendor, options: options.map((option) => ({ id: option.id, name: option.name, required: option.required, ...(option.display === "color" || option.display === "image" ? { display: option.display } : {}), ...(option.type !== "variant" && option.multiple ? { multiple: true } : {}), ...(missingOptionIds.has(option.id) ? { missing: true } : {}), values: option.values.map((value) => ({ id: value.id, label: value.label, selected: isSelected(option.id, value.id), ...optionValueState(product, selections, option.id, value.id), ...(option.display === "color" && value.color ? { color: value.color } : {}), ...(option.display === "image" && value.image ? { image: value.image } : {}), ...(value.priceAdjustmentMinor > 0 && option.type !== "variant" ? { priceAdjustment: formatMoney(value.priceAdjustmentMinor, currency) } : {}) })) })) },
     selection: selections,
     quantity: clampedQuantity,
     pricing: pricingFor(priceMinor ?? (inventoryChoiceMissing && product.variants.length ? Math.min(...product.variants.map((candidate) => candidate.priceMinor)) : 0), variant?.compareAtPriceMinor ?? product.compareAtPriceMinor, currency),
@@ -97,6 +98,22 @@ export function createProductPresentationContext({ product, currency, shippingCo
     } } : {}),
     relatedProducts,
   };
+}
+
+/**
+ * Whether a value of a choice that decides the variant (size, colour) can be bought with the shopper's other such
+ * choices. A value with no buyable variant is shown as sold out but stays selectable (the shopper sees its price and
+ * can ask to be told when it is back); only a value no variant has at all cannot be chosen. Other choices (add-ons,
+ * engraving style) are always available.
+ */
+export function optionValueState(product: Pick<Product, "variants" | "inventoryOptionIds">, selections: ConfiguredOptionSelection[], optionId: string, valueId: string): { available: boolean; soldOut?: true } {
+  const inventory = product.inventoryOptionIds ?? [];
+  if (!inventory.includes(optionId)) return { available: true };
+  const withValue = product.variants.filter((variant) => variant.options?.[optionId] === valueId);
+  if (withValue.length === 0) return { available: false };
+  const others = selections.filter((selection) => selection.optionId !== optionId && inventory.includes(selection.optionId));
+  const matching = withValue.filter((variant) => others.every((selection) => variant.options?.[selection.optionId] === selection.valueId));
+  return matching.some(isVariantBuyable) ? { available: true } : { available: true, soldOut: true };
 }
 
 /** Formatted prices plus the amounts themes use for "% off", "Save £X" and monthly finance. */

@@ -93,18 +93,18 @@ export function ProductOptionsSection({ context, section }: { context: Storefron
         <span>{option.name}{option.missing && <span className="jelly-product-option-required"> (required)</span>}</span>
         <select value={selected?.id ?? ""} onChange={(event) => product.selectOption(option.id, event.target.value)}>
           {!selected && <option value="" disabled>Choose {option.name.toLowerCase()}</option>}
-          {option.values.map((value) => <option key={value.id} value={value.id} disabled={!value.available}>{value.label}{value.available ? "" : " — sold out"}</option>)}
+          {option.values.map((value) => <option key={value.id} value={value.id} disabled={!value.available}>{value.label}{!value.available ? " — unavailable" : value.soldOut ? " — sold out" : ""}</option>)}
         </select>
       </label>;
       return <fieldset key={option.id} aria-invalid={option.missing || undefined} data-missing={option.missing || undefined}>
         <legend>{option.name}{chosen.length > 0 && <span>: {chosen.map((value) => value.label).join(", ")}</span>}{!option.required && chosen.length === 0 && <span> (optional)</span>}{option.missing && <span className="jelly-product-option-required" role="note"> (required)</span>}</legend>
         <div className="jelly-product-option-values" data-display={option.display}>{option.values.map((value) => {
           const swatch = swatchFor(option.display, value);
-          return <button key={value.id} type="button" aria-pressed={value.selected} disabled={!value.available} onClick={() => product.selectOption(option.id, value.id)} {...(swatch ? { "data-swatch": swatch.kind, "aria-label": `${value.label}${value.priceAdjustment ? `, +${value.priceAdjustment}` : ""}${value.available ? "" : ", sold out"}`, title: value.label } : {})}>
+          return <button key={value.id} type="button" aria-pressed={value.selected} disabled={!value.available} data-sold-out={value.soldOut || undefined} onClick={() => product.selectOption(option.id, value.id)} {...(swatch ? { "data-swatch": swatch.kind, "aria-label": `${value.label}${value.priceAdjustment ? `, +${value.priceAdjustment}` : ""}${value.soldOut || !value.available ? ", sold out" : ""}`, title: value.soldOut ? `${value.label} (sold out)` : value.label } : {})}>
             {swatch?.kind === "color" && <span className="jelly-swatch" style={{ "--swatch": swatch.value } as CSSProperties} aria-hidden="true" />}
             {/* eslint-disable-next-line @next/next/no-img-element -- merchant media may be served by the API, not as Next Image assets */}
             {swatch?.kind === "image" && <img className="jelly-swatch" src={swatch.value} alt="" loading="lazy" />}
-            {!swatch && <>{value.label}{value.priceAdjustment && <span className="jelly-product-option-price"> +{value.priceAdjustment}</span>}</>}
+            {!swatch && <>{value.label}{value.priceAdjustment && <span className="jelly-product-option-price"> +{value.priceAdjustment}</span>}{value.soldOut && <span className="jelly-visually-hidden">, sold out</span>}</>}
           </button>;
         })}</div>
       </fieldset>;

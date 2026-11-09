@@ -281,3 +281,4 @@
 }
 :where([data-jelly-legacy-styles="off"] .jelly-product-option-values button[aria-pressed="true"]) { border-color: var(--j-color-primary); background: var(--j-color-primary); color: var(--j-color-on-primary); }
 :where([data-jelly-legacy-styles="off"] .jelly-product-option-values button:disabled) { color: var(--j-color-muted); text-decoration: line-through; cursor: not-allowed; }
+:where([data-jelly-legacy-styles="off"] .jelly-product-option-values button[data-sold-out]) { color: var(--j-color-muted); }

@@ -1,5 +1,6 @@
 import type { PublicProduct } from "@jelly/storefront-renderer";
 import { formatMoney, type Currency, type Product } from "@/lib/domain";
+import { isVariantBuyable, variantMaxQuantity } from "@/lib/variant-stock";
 
 /** Tags written `label:More colours` show as a small chip on the product card. */
 const LABEL_TAG = /^label:\s*(.+)$/i;
@@ -20,8 +21,8 @@ export function productCardChip(tags: readonly string[] | undefined): string | u
 /** A product can go into the cart from its card when it has one buyable variant and no options to choose. */
 export function quickAddFor(product: Product): { quickAdd?: { variantId: string; max: number } } {
   const variant = product.variants.length === 1 ? product.variants[0] : undefined;
-  if (!variant || variant.sellable === false || variant.stock <= 0 || (product.options?.length ?? 0) > 0 || (product.personalisation?.length ?? 0) > 0) return {};
-  return { quickAdd: { variantId: variant.id, max: Math.min(variant.stock, 99) } };
+  if (!variant || !isVariantBuyable(variant) || (product.options?.length ?? 0) > 0 || (product.personalisation?.length ?? 0) > 0) return {};
+  return { quickAdd: { variantId: variant.id, max: Math.min(variantMaxQuantity(variant), 99) } };
 }
 
 export function productCardData(product: Product, href: string, currency: Currency): PublicProduct {
@@ -38,7 +39,7 @@ export function productCardData(product: Product, href: string, currency: Curren
     imageUrl: product.imageUrl,
     price: formatMoney(priceMinor, currency),
     priceMinor,
-    available: product.variants.some((item) => item.stock > 0),
+    available: product.variants.some(isVariantBuyable),
     ...quickAddFor(product),
     ...(discounted ? {
       compareAtPrice: formatMoney(compareMinor, currency),

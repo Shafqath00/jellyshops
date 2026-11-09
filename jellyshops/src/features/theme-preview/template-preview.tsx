@@ -43,6 +43,7 @@ export function useProductContext(config: ThemePreviewConfig): StorefrontPageCon
   const [quantity, setQuantity] = useState(1);
   const sample = config.product;
   const option = sample.option ?? { id: "size", name: "Size", values: [{ id: "s", label: "Small" }, { id: "m", label: "Medium" }, { id: "l", label: "Large", soldOut: true }] };
+  const soldOut = option.values.some((value) => value.id === size && value.soldOut);
   return {
     pageType: "product",
     resource: { id: sample.id, handle: "sample-product", data: { title: sample.title, productPresentation: {
@@ -54,13 +55,13 @@ export function useProductContext(config: ThemePreviewConfig): StorefrontPageCon
         media: sample.media.map((item, index) => ({ id: `m${index + 1}`, url: item.url, altText: item.alt })),
         specifications: sample.specifications,
         shippingCopy: sample.shippingCopy,
-        options: [{ id: option.id, name: option.name, required: true, values: option.values.map((value) => ({ id: value.id, label: value.label, selected: size === value.id, available: !value.soldOut })) }],
+        options: [{ id: option.id, name: option.name, required: true, values: option.values.map((value) => ({ id: value.id, label: value.label, selected: size === value.id, available: true, ...(value.soldOut ? { soldOut: true } : {}) })) }],
       },
       selection: size ? [{ optionId: option.id, valueId: size }] : [],
       quantity,
       pricing: { price: sample.price, compareAtPrice: sample.compareAtPrice, priceMinor: toMinor(sample.price), ...(sample.compareAtPrice ? { compareAtPriceMinor: toMinor(sample.compareAtPrice) } : {}), format: (minor: number) => `£${(minor / 100).toFixed(2)}` },
-      availability: size ? { state: "available", message: "In stock", maxQuantity: 10 } : { state: "selection-required", message: `Choose a ${option.name.toLowerCase()}` },
-      canAddToCart: Boolean(size),
+      availability: !size ? { state: "selection-required", message: `Choose a ${option.name.toLowerCase()}` } : soldOut ? { state: "out-of-stock", message: "Out of stock", maxQuantity: 0 } : { state: "available", message: "In stock", maxQuantity: 10 },
+      canAddToCart: Boolean(size) && !soldOut,
       selectOption: (_option: string, value: string) => setSize(value),
       setQuantity: (next: number) => setQuantity(Math.max(1, Math.min(10, next))),
       addToCart: async () => ({ ok: true }),

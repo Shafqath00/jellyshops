@@ -96,6 +96,24 @@ Result: all 7 themes pass with tidy and messy data at every width checked.
 
 **Empty presets.** "Rich text", "FAQ" and "Feature columns" added an empty section; they now come with sample blocks. Testimonials stay empty on purpose (no invented quotes on a live store; the editor hint explains it). Logo list, photo gallery and apps need the merchant's own images or links, so they still start empty.
 
+## 4d. Phase 4 done: component behaviour (2026-11-09)
+
+Each interactive part was checked against its Shopify counterpart (Dawn's custom elements). Results:
+
+| Part | Before | Now |
+| --- | --- | --- |
+| Stock (product page, bag, quick add, cards, search) | A product whose stock is not counted, and every digital product, arrives as "available" with no stock number; the storefront read that as sold out in 11 places. On the product page it showed "Available", then Add to cart refused it. The bag's + button was disabled. | One rule in `src/lib/variant-stock.ts` (`isVariantBuyable`, `variantMaxQuantity`; untracked limit 99 per add) used everywhere. |
+| Option values | Every value was marked available, so sold-out sizes and colours never showed. Where themes did mark one, it was disabled, so the shopper could not see its price or ask to be told when it is back. | `optionValueState()`: a value with no buyable variant (given the other choices) is shown as sold out but stays selectable; only a value no variant has cannot be chosen. Struck through, swatches with a diagonal line, "sold out" read out by screen readers. |
+| Variant in the address | Not kept: a link could not open a chosen size or colour, and a refresh lost the choice. | `?variant=<id>` is read on load and kept up to date (`use-variant-address.ts`), keeping other parts of the address. |
+| Slideshow | Paused on hover and focus only (none of that exists on touch screens), no swipe, no arrow keys; the editor did not show the selected slide. | Pause/Play button whenever slides move on their own (WCAG 2.2.2), swipe, left and right arrow keys, the selected slide shown in the editor. |
+| Video | YouTube and Vimeo players loaded with the page. | A cover picture (the merchant's or YouTube's) with a play button; the player loads on click. Autoplay is skipped for shoppers who ask for less motion. Nothing loads in the editor. |
+| Phone menu | Stayed open on Escape and when tapping the page; its button always said "Open menu". | Escape (focus back to the button) and a tap outside close it; the button reads "Close menu" while open. |
+| Header dropdowns, slide-out bag, full-screen photo viewer, accordions | Already correct: keyboard, Escape, focus trap, outside click. | Unchanged. |
+
+Tests: `packages/storefront-renderer/src/component-behaviour.test.tsx` (14) and `src/features/storefront/product-behaviour.test.ts` (7). Checked in the browser on the theme previews (sold-out size, phone menu, slideshow controls) and on the staging store "new" read-only (a variant link and a reload keep the choice). The design lint passes for every theme.
+
+Not built (each is a feature of its own): predictive search (suggestions while typing), a count on the header bag icon, and the sticky buy bar and quantity rules beyond the stock limit (minimum, steps of N), which need new product settings.
+
 ## 5. Roadmap
 
 Each phase ends with tests, a browser check and a commit, and starts only after a go-ahead.

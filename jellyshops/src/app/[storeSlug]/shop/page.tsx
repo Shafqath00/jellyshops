@@ -8,6 +8,7 @@ import { useThemePresentation } from "@/features/storefront/components/storefron
 import { formatMoney } from "@/lib/domain";
 import { useShop } from "@/contexts/shop-context";
 import { useStorefrontCatalogStatus } from "@/features/commerce/components/storefront-catalog-sync";
+import { isVariantBuyable } from "@/lib/variant-stock";
 
 export default function ShopPage() {
   const { storeSlug } = useParams<{ storeSlug: string }>();
@@ -23,7 +24,7 @@ export default function ShopPage() {
   const selected = search.get("category");
   const visible = selected ? products.filter((product) => product.category === selected) : products;
   const CollectionPage = shell.CollectionPage;
-  const productViews = visible.map((product) => { const variant = product.variants[0]; return { id: product.id, name: product.name, slug: product.slug, category: product.category, imageUrl: product.imageUrl, price: formatMoney(variant?.priceMinor ?? 0, store.currency), soldOut: !variant || variant.stock <= 0, lowStock: Boolean(variant && variant.stock > 0 && variant.stock <= 3), href: `/${store.slug}/products/${product.slug}` }; });
+  const productViews = visible.map((product) => { const variant = product.variants[0]; return { id: product.id, name: product.name, slug: product.slug, category: product.category, imageUrl: product.imageUrl, price: formatMoney(variant?.priceMinor ?? 0, store.currency), soldOut: !isVariantBuyable(variant), lowStock: Boolean(variant && variant.stock > 0 && variant.stock <= 3), href: `/${store.slug}/products/${product.slug}` }; });
   if (settings && isCompleteStorefrontTheme(themeId, themeVersion)) return <main className="signature-page"><header className="signature-page-heading"><h1>Explore the collection</h1></header><CatalogBrowser storeSlug={store.slug} /></main>;
   return <CollectionPage store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} settings={settings} products={productViews} categories={categories} selectedCategory={selected ?? undefined} allHref={`/${store.slug}/shop`} categoryHref={(category) => `/${store.slug}/shop?category=${encodeURIComponent(category)}`} />;
 }

@@ -11,6 +11,7 @@ import type { ComponentType } from "react";
 import type { StorefrontCartProps } from "@jelly/storefront-themes";
 import { CartDrawer, CartItem, CartSummary, EmptyCart } from "@/components/jelly/cart";
 import { cartLineKey, personalisationLabels } from "../personalisation-display";
+import { variantMaxQuantity } from "@/lib/variant-stock";
 
 /* ──────────────────────────────────────────────────────────────────────
  * CartPanel — connects Jellyshop commerce state to CartDrawer presentation
@@ -105,7 +106,7 @@ export function CartPanel({
                       (line.item.unitPriceMinor ?? line.variant.priceMinor) * line.item.quantity,
                       store.currency,
                     )}
-                    canIncrease={line.item.quantity < line.variant.stock}
+                    canIncrease={line.item.quantity < variantMaxQuantity(line.variant)}
                     onDecrease={() =>
                       repository.updateCartItem(
                         cart!.id,
