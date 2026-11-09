@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
+import { AdminPage, Banner, Card, Field, SkeletonBlock } from "@/components/admin";
 import { authApiOrigin, useAuth } from "@/features/auth/providers/auth-provider";
 type Wording = { subject:string; heading:string; message:string; closing:string };
+const EMAIL_TYPES:Array<[string,string]>=[["PLACED","Order placed"],["PAYMENT_CONFIRMED","Payment confirmed"],["PROCESSING","Being prepared"],["PACKED","Packed"],["SHIPPED","Shipped"],["OUT_FOR_DELIVERY","Out for delivery"],["DELIVERED","Delivered"],["SHIPMENT_DELAYED","Delivery delayed"],["DELIVERY_FAILED","Delivery failed"],["CANCELLED","Order cancelled"],["REFUND_PROCESSED","Refund processed"],["DIGITAL_READY","Download ready"]];
 export default function NotificationSettingsPage() {
  const { session, activeStore } = useAuth(); const token = session?.access_token; const storeId = activeStore?.id;
  const [brandName,setBrandName]=useState(""); const [replyTo,setReplyTo]=useState(""); const [accentColor,setAccentColor]=useState("#192642"); const [logoUrl,setLogoUrl]=useState(""); const [type,setType]=useState("PLACED"); const [preview,setPreview]=useState(""); const [message,setMessage]=useState(""); const [busy,setBusy]=useState(false);
@@ -13,13 +15,33 @@ export default function NotificationSettingsPage() {
  const change=(field:keyof Wording,value:string)=>{if(wording&&storeId)setLoaded({storeId,type,wording:{...wording,[field]:value}});};
  async function submit(previewOnly:boolean){setBusy(true);setMessage("");try{if(previewOnly){if(!wording)return;const response=await fetch(`${endpoint}/preview`,{method:"POST",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify({type,template:wording})});if(!response.ok)throw new Error("Could not generate preview.");const result=await response.json();setPreview(result.html);}else{const save=await fetch(`${endpoint}/branding`,{method:"PUT",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify({brandName:brandName||undefined,replyTo:replyTo||undefined,accentColor,logoUrl:logoUrl||undefined})});if(!save.ok)throw new Error("Could not save branding. Check the email and HTTPS logo URL.");setMessage("Email branding saved.");}}catch(e){setMessage(e instanceof Error?e.message:"Could not update email branding.");}finally{setBusy(false);}}
  async function saveWording(){if(!wording||!token||!storeId)return;setBusy(true);setMessage("");try{const response=await fetch(`${endpoint}/templates/${type}`,{method:"PUT",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify(wording)});if(!response.ok)throw new Error("Could not save email wording.");setMessage("Email wording saved.");}catch(e){setMessage(e instanceof Error?e.message:"Could not save email wording.");}finally{setBusy(false);}}
- return <div className="mx-auto max-w-3xl space-y-6"><h1 className="text-3xl font-bold">Order emails</h1><p className="text-sm text-muted-foreground">Jelly Shop sends order updates using your branding. Replies go to your store email.</p><form className="rounded-xl border border-border bg-card p-6 space-y-4" onSubmit={e=>{e.preventDefault();void submit(false);}}>
- <label className="block text-sm">Store display name<input value={brandName} onChange={e=>setBrandName(e.target.value)} maxLength={100} className="mt-2 block w-full rounded-lg border border-border p-2"/></label>
- <label className="block text-sm">Reply-to email<input type="email" value={replyTo} onChange={e=>setReplyTo(e.target.value)} className="mt-2 block w-full rounded-lg border border-border p-2"/></label>
- <label className="block text-sm">Logo URL<input type="url" placeholder="https://" value={logoUrl} onChange={e=>setLogoUrl(e.target.value)} className="mt-2 block w-full rounded-lg border border-border p-2"/></label>
- <label className="block text-sm">Accent color<input type="color" value={accentColor} onChange={e=>setAccentColor(e.target.value)} className="mt-2 block"/></label>
- <div className="flex flex-wrap gap-3"><button disabled={busy} className="rounded-lg bg-primary px-4 py-2 text-primary-foreground">Save branding</button><select aria-label="Email template" value={type} disabled={busy} onChange={e=>{setPreview("");setType(e.target.value);}} className="rounded-lg border border-border p-2">{["PLACED","PAYMENT_CONFIRMED","PROCESSING","PACKED","SHIPPED","OUT_FOR_DELIVERY","DELIVERED","SHIPMENT_DELAYED","DELIVERY_FAILED","CANCELLED","REFUND_PROCESSED","DIGITAL_READY"].map(t=><option key={t} value={t}>{t.replaceAll("_"," ").toLowerCase()}</option>)}</select></div>
- <p className="text-sm text-muted-foreground">Edit the wording below. Order details and the email layout are added automatically.</p>
- {wording&&<div className="space-y-4"><label className="block text-sm">Subject<input value={wording.subject} maxLength={120} onChange={e=>change("subject",e.target.value)} className="mt-2 block w-full rounded-lg border border-border p-2"/></label><label className="block text-sm">Heading<input value={wording.heading} maxLength={120} onChange={e=>change("heading",e.target.value)} className="mt-2 block w-full rounded-lg border border-border p-2"/></label><label className="block text-sm">Message<textarea value={wording.message} maxLength={2000} rows={4} onChange={e=>change("message",e.target.value)} className="mt-2 block w-full rounded-lg border border-border p-2"/></label><label className="block text-sm">Closing<textarea value={wording.closing} maxLength={1000} rows={2} onChange={e=>change("closing",e.target.value)} className="mt-2 block w-full rounded-lg border border-border p-2"/></label><div className="flex flex-wrap gap-3"><button type="button" disabled={busy} className="rounded-lg bg-primary px-4 py-2 text-primary-foreground" onClick={()=>void saveWording()}>Save wording</button><button type="button" disabled={busy} className="rounded-lg border border-border px-4 py-2" onClick={()=>void submit(true)}>Preview email</button></div></div>}
- {message&&<p role="status" className="text-sm">{message}</p>}</form>{preview&&<iframe title="Order email preview" sandbox="" srcDoc={preview} className="h-[600px] w-full rounded-xl border border-border"/>}</div>;
+ const saved=message.endsWith("saved.");
+ return <AdminPage title="Order emails" width="narrow" back={{ href: "/admin/settings", label: "Settings" }} description="Jelly Shops sends order updates with your branding. Replies go to your store email.">
+  {message&&<Banner tone={saved?"success":"critical"} onDismiss={()=>setMessage("")}>{message}</Banner>}
+  <form className="jk-form" onSubmit={e=>{e.preventDefault();void submit(false);}}>
+   <Card title="Branding" description="Shown at the top of every order email." actions={<button disabled={busy} className="jk-button jk-button-primary">Save branding</button>}>
+    <div className="jk-stack-sm">
+     <div className="jk-grid-2">
+      <Field id="email-brand" label="Store display name"><input id="email-brand" value={brandName} onChange={e=>setBrandName(e.target.value)} maxLength={100}/></Field>
+      <Field id="email-reply" label="Reply-to email"><input id="email-reply" type="email" value={replyTo} onChange={e=>setReplyTo(e.target.value)}/></Field>
+     </div>
+     <Field id="email-logo" label="Logo URL" help="A web address starting with https://"><input id="email-logo" type="url" placeholder="https://" value={logoUrl} onChange={e=>setLogoUrl(e.target.value)}/></Field>
+     <Field id="email-accent" label="Accent colour" help="Used for buttons and headings in the email."><div className="jk-row"><input id="email-accent" type="color" className="jk-color-input" value={accentColor} onChange={e=>setAccentColor(e.target.value)}/><span className="jk-muted tabular-nums">{accentColor}</span></div></Field>
+    </div>
+   </Card>
+  </form>
+  <Card title="Email wording" description="Order details and the email layout are added automatically.">
+   <div className="jk-stack-sm">
+    <Field id="email-type" label="Email"><select id="email-type" aria-label="Email template" value={type} disabled={busy} onChange={e=>{setPreview("");setType(e.target.value);}}>{EMAIL_TYPES.map(([t,label])=><option key={t} value={t}>{label}</option>)}</select></Field>
+    {wording?<>
+     <Field id="email-subject" label="Subject"><input id="email-subject" value={wording.subject} maxLength={120} onChange={e=>change("subject",e.target.value)}/></Field>
+     <Field id="email-heading" label="Heading"><input id="email-heading" value={wording.heading} maxLength={120} onChange={e=>change("heading",e.target.value)}/></Field>
+     <Field id="email-message" label="Message"><textarea id="email-message" value={wording.message} maxLength={2000} rows={4} onChange={e=>change("message",e.target.value)}/></Field>
+     <Field id="email-closing" label="Closing"><textarea id="email-closing" value={wording.closing} maxLength={1000} rows={2} onChange={e=>change("closing",e.target.value)}/></Field>
+     <div className="jk-row"><button type="button" disabled={busy} className="jk-button jk-button-primary" onClick={()=>void saveWording()}>Save wording</button><button type="button" disabled={busy} className="jk-button" onClick={()=>void submit(true)}>Preview email</button></div>
+    </>:<div className="jk-stack-sm" role="status" aria-label="Loading email wording"><SkeletonBlock width="30%" height={14}/><SkeletonBlock height={34}/><SkeletonBlock height={34}/></div>}
+   </div>
+  </Card>
+  {preview&&<Card title="Preview" description="Sample order details. Nothing is sent."><iframe title="Order email preview" sandbox="" srcDoc={preview} className="jk-email-preview"/></Card>}
+ </AdminPage>;
 }

@@ -1,12 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import {
-  AlertCircle,
-  CheckCircle2,
-  ExternalLink,
-  Loader2,
-} from "lucide-react";
+import { CreditCard, ExternalLink, Loader2 } from "lucide-react";
+import { Banner, Card, CardSkeleton, EmptyState, StatusBadge } from "@/components/admin";
 import { useAuth } from "@/features/auth/providers/auth-provider";
 import { createMerchantCommerceApi } from "../api/client";
 import type { StripeMerchantStatus } from "../api/types";
@@ -51,31 +47,11 @@ function requirementLabel(value: string) {
     .replaceAll("_", " ");
 }
 
-function StatusTile({
-  title,
-  value,
-}: {
-  title: string;
-  value?: string | null;
-}) {
-  const active = value === "active";
-
+function StatusTile({ title, value }: { title: string; value?: string | null }) {
   return (
-    <div className="rounded-2xl border border-black/[0.06] bg-muted/50 p-4">
-      <p className="text-[9px] font-black uppercase tracking-[0.1em] text-muted-foreground">
-        {title}
-      </p>
-
-      <div className="mt-2 flex items-center gap-2">
-        <span
-          className={`size-2 rounded-full ${
-            active ? "bg-success/15" : "bg-[var(--warn-bg)]"
-          }`}
-        />
-        <p className="text-[13px] font-black text-foreground">
-          {label(value)}
-        </p>
-      </div>
+    <div className="jk-metric">
+      <span className="jk-muted">{title}</span>
+      <span><StatusBadge tone={value === "active" ? "success" : "warning"}>{label(value)}</StatusBadge></span>
     </div>
   );
 }
@@ -166,221 +142,84 @@ export function MerchantPaymentsPanel({
   }
 
   if (loading) {
-    return (
-      <div className="flex min-h-40 items-center justify-center">
-        <div className="flex items-center gap-2.5 text-[12px] font-bold text-muted-foreground">
-          <Loader2 size={16} className="animate-spin" />
-          Loading payment status…
-        </div>
-      </div>
-    );
+    return <CardSkeleton lines={4} label="Loading payment status" />;
   }
 
   if (!api) {
-    return (
-      <div className="p-2">
-        <h2 className="text-[15px] font-black text-foreground">
-          Payments unavailable
-        </h2>
-        <p className="mt-2 text-[12px] leading-5 text-muted-foreground">
-          Sign in as a merchant to manage Stripe payments.
-        </p>
-      </div>
-    );
+    return <Banner tone="warning" title="Payments unavailable">Sign in as a merchant to manage Stripe payments.</Banner>;
   }
 
   if (error && !status) {
-    return (
-      <div
-        role="alert"
-        className="rounded-2xl border border-tint-border bg-muted/50 p-4 text-[12px] font-semibold text-tint-foreground"
-      >
-        {error}
-      </div>
-    );
+    return <Banner tone="critical" title="Payment status did not load">{error}</Banner>;
   }
 
   if (!status?.connected) {
     return (
-      <div className="p-2">
-        <span className="grid size-11 place-items-center rounded-2xl bg-muted text-tint-foreground">
-          <ExternalLink size={18} strokeWidth={1.8} />
-        </span>
-
-        <h2 className="mt-4 text-[17px] font-black tracking-[-0.025em] text-foreground">
-          Connect Stripe
-        </h2>
-
-        <p className="mt-2 max-w-md text-[12px] leading-5 text-muted-foreground">
-          Complete Stripe onboarding before customers can make payments and
-          payouts can begin.
-        </p>
-
-        <button
-          type="button"
-          onClick={openStripeOnboarding}
-          disabled={opening}
-          className="mt-5 inline-flex h-10 items-center gap-2 rounded-full bg-primary px-4 text-[11px] font-black text-primary-foreground transition hover:-translate-y-0.5 hover:bg-primary disabled:pointer-events-none disabled:opacity-60"
-        >
-          {opening ? (
-            <Loader2 size={14} className="animate-spin" />
-          ) : (
-            <ExternalLink size={14} />
-          )}
-          {opening ? "Opening Stripe…" : "Start onboarding"}
-        </button>
-      </div>
+      <Card>
+        <EmptyState
+          icon={CreditCard}
+          title="Connect Stripe"
+          description="Complete Stripe onboarding before customers can make payments and payouts can begin."
+          action={<button type="button" onClick={openStripeOnboarding} disabled={opening} className="jk-button jk-button-primary">
+            {opening ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <ExternalLink size={14} aria-hidden="true" />}
+            {opening ? "Opening Stripe…" : "Start onboarding"}
+          </button>}
+        />
+      </Card>
     );
   }
 
   if (status.closed) {
-    return (
-      <div className="rounded-2xl border border-tint-border bg-muted/50 p-5">
-        <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-card text-tint-foreground">
-            <AlertCircle size={18} />
-          </span>
-
-          <div>
-            <p className="text-[9px] font-black uppercase tracking-[0.1em] text-tint-foreground">
-              Stripe account
-            </p>
-            <h2 className="mt-1 text-[15px] font-black text-foreground">
-              Payments unavailable
-            </h2>
-            <p className="mt-2 text-[12px] leading-5 text-tint-foreground">
-              This Stripe account is closed.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
+    return <Banner tone="critical" title="Payments unavailable">This Stripe account is closed.</Banner>;
   }
 
   const requirements = getDueRequirements(status.requirements);
   const cardsActive = status.cardPaymentsStatus === "active";
 
   return (
-    <div className="space-y-4">
-      {error && (
-        <div
-          role="alert"
-          className="rounded-2xl border border-tint-border bg-muted/50 p-4 text-[12px] font-semibold text-tint-foreground"
-        >
-          {error}
-        </div>
-      )}
+    <div className="jk-form">
+      {error && <Banner tone="critical">{error}</Banner>}
 
-      <section className="rounded-[18px] border border-black/[0.06] bg-card p-1">
-        <div className="flex items-start justify-between gap-4 p-4">
-          <div>
-            <p className="text-[9px] font-black uppercase tracking-[0.1em] text-tint-foreground">
-              Stripe account
-            </p>
-            <h2 className="mt-1 text-[16px] font-black tracking-[-0.025em] text-foreground">
-              Payment readiness
-            </h2>
+      <Card
+        title="Payment readiness"
+        description="Your Stripe account, which takes card payments and sends payouts."
+        actions={<StatusBadge tone={status.checkoutReady ? "success" : "warning"}>{status.checkoutReady ? "Ready for checkout" : "Not ready yet"}</StatusBadge>}
+      >
+        <div className="jk-stack-sm">
+          <div className="jk-grid-2">
+            <StatusTile title="Card payments" value={status.cardPaymentsStatus} />
+            <StatusTile title="Payouts" value={status.payoutsStatus} />
           </div>
 
-          <span
-            className={`grid size-10 shrink-0 place-items-center rounded-xl ${
-              status.checkoutReady
-                ? "bg-[var(--warn-bg)] text-success"
-                : "bg-[var(--warn-bg)] text-[var(--warn-fg)]"
-            }`}
-          >
-            {status.checkoutReady ? (
-              <CheckCircle2 size={18} />
-            ) : (
-              <AlertCircle size={18} />
-            )}
-          </span>
-        </div>
-
-        <div className="grid gap-3 px-4 pb-4 sm:grid-cols-2">
-          <StatusTile
-            title="Card payments"
-            value={status.cardPaymentsStatus}
-          />
-          <StatusTile title="Payouts" value={status.payoutsStatus} />
-        </div>
-
-        {requirements.length > 0 && (
-          <div className="border-t border-black/[0.06] px-4 py-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.08em] text-muted-foreground">
-              Still required
-            </p>
-
-            <ul className="mt-3 space-y-2">
-              {requirements.map((requirement) => (
-                <li
-                  key={requirement}
-                  className="flex items-start gap-2 text-[11px] leading-5 text-muted-foreground"
-                >
-                  <span className="mt-2 size-1.5 shrink-0 rounded-full bg-[var(--warn-bg)]" />
-                  <span>{requirementLabel(requirement)}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        <div className="border-t border-black/[0.06] px-4 py-4">
-          {cardsActive ? (
-            <div className="flex items-start gap-2.5 text-[11px] leading-5 text-success">
-              <CheckCircle2 size={15} className="mt-0.5 shrink-0" />
-              <p>
-                Customers can pay. Stripe manages payment processing and
-                payouts for this connected account.
-              </p>
-            </div>
-          ) : (
+          {requirements.length > 0 && (
             <div>
-              <p className="text-[11px] leading-5 text-muted-foreground">
-                Card payments are not active yet. Finish the remaining Stripe
-                requirements to start accepting payments.
-              </p>
-
-              <button
-                type="button"
-                onClick={openStripeOnboarding}
-                disabled={opening}
-                className="mt-3 inline-flex h-9 items-center gap-2 rounded-full bg-primary px-3.5 text-[10px] font-black text-primary-foreground transition hover:bg-primary disabled:pointer-events-none disabled:opacity-60"
-              >
-                {opening ? (
-                  <Loader2 size={13} className="animate-spin" />
-                ) : (
-                  <ExternalLink size={13} />
-                )}
-                {opening ? "Opening Stripe…" : "Continue onboarding"}
-              </button>
+              <h3 className="jk-subheading">Still required</h3>
+              <ul className="jk-bullets">
+                {requirements.map((requirement) => <li key={requirement}>{requirementLabel(requirement)}</li>)}
+              </ul>
             </div>
           )}
+
+          {cardsActive ? (
+            <Banner tone="success">Customers can pay. Stripe manages payment processing and payouts for this connected account.</Banner>
+          ) : (
+            <Banner tone="warning" action={<button type="button" onClick={openStripeOnboarding} disabled={opening} className="jk-button">
+              {opening ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <ExternalLink size={13} aria-hidden="true" />}
+              {opening ? "Opening Stripe…" : "Continue onboarding"}
+            </button>}>
+              Card payments are not active yet. Finish the remaining Stripe requirements to start accepting payments.
+            </Banner>
+          )}
         </div>
-      </section>
+      </Card>
 
-      <section className="rounded-[18px] border border-black/[0.06] bg-muted/50 p-5">
-        <h2 className="text-[14px] font-black text-foreground">
-          Stripe Dashboard
-        </h2>
-
-        <p className="mt-2 max-w-xl text-[11px] leading-5 text-muted-foreground">
-          Manage verification, payouts, disputes, and Stripe reporting from
-          the connected account dashboard.
-        </p>
-
-        {status.dashboardUrl && (
-          <a
-            href={status.dashboardUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-4 inline-flex h-9 items-center gap-2 rounded-full border border-black/[0.08] bg-card px-3.5 text-[10px] font-black text-foreground transition hover:bg-muted/50"
-          >
-            Open Stripe Dashboard
-            <ExternalLink size={13} />
-          </a>
-        )}
-      </section>
+      <Card
+        title="Stripe Dashboard"
+        description="Manage verification, payouts, disputes, and Stripe reporting from the connected account dashboard."
+        actions={status.dashboardUrl ? <a href={status.dashboardUrl} target="_blank" rel="noreferrer" className="jk-button">Open Stripe Dashboard<ExternalLink size={13} aria-hidden="true" /></a> : undefined}
+      >
+        <p className="jk-muted">{status.dashboardUrl ? "The dashboard opens in a new tab." : "The dashboard link appears here once Stripe provides it."}</p>
+      </Card>
     </div>
   );
 }

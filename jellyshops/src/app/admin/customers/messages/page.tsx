@@ -1,7 +1,7 @@
 "use client";
-import { AdminPageHeader, AdminEmptyState, AdminNotice } from "@/components/admin-ui";
+import { AdminPage, Banner, EmptyState, StatusBadge, TableSkeleton } from "@/components/admin";
 import { useCallback, useEffect, useState } from "react";
-import { Download } from "lucide-react";
+import { MessageSquare, Search } from "lucide-react";
 import { useAuth } from "@/features/auth/providers/auth-provider";
 
 interface Enquiry { id: string; name: string; email: string; message: string; status: "NEW" | "READ" | "CLOSED"; revision: number; createdAt: string }
@@ -13,6 +13,7 @@ export default function EngagementPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
   const storeId = activeStore?.id ?? ""; const token = session?.access_token;
   const load = useCallback(async () => {
     if (!storeId || !token) return [] as Enquiry[];
@@ -25,7 +26,7 @@ export default function EngagementPage() {
     let active = true;
     void load().then((nextItems) => { if (active) setItems(nextItems); }).catch((caught: unknown) => {
       if (active) setError(caught instanceof Error ? caught.message : "Unable to load messages.");
-    });
+    }).finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [load]);
   async function update(item: Enquiry, status: Enquiry["status"]) {
@@ -50,13 +51,35 @@ export default function EngagementPage() {
     finally { setBusy(false); }
   }
   const visible = items.filter((item) => (!statusFilter || item.status === statusFilter) && `${item.name} ${item.email} ${item.message}`.toLowerCase().includes(search.toLowerCase()));
-  return <main>
-    <AdminPageHeader title="Messages & subscribers" description="Questions sent through your store's contact form, and people who joined your newsletter." actions={<button className="admin-button" type="button" onClick={() => void exportSubscribers()} disabled={busy}><Download size={16} /> Export subscribers</button>} />
-    {error && <AdminNotice error>{error}<button className="ml-3 underline" onClick={() => { setError(undefined); void load().then(setItems).catch((caught: unknown) => setError(caught instanceof Error ? caught.message : "Unable to load messages.")); }}>Retry</button></AdminNotice>}
-    <section className="admin-card !p-0">
-      <div className="admin-toolbar"><input className="admin-search" aria-label="Search messages" placeholder="Search name, email or message" value={search} onChange={(event) => setSearch(event.target.value)} /><select aria-label="Filter message status" className="admin-button" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="">All messages</option><option value="NEW">New</option><option value="READ">Read</option><option value="CLOSED">Closed</option></select></div>
-      {visible.map((item) => <details key={item.id} className="border-b border-border last:border-0"><summary className="cursor-pointer px-4 py-3"><span className="font-medium">{item.name}</span><span className="ml-3 text-muted-foreground">{item.status.toLowerCase()} · {new Date(item.createdAt).toLocaleDateString()}</span><span className="mt-1 block truncate text-muted-foreground">{item.message}</span></summary><div className="border-t border-border px-4 py-3"><a className="underline" href={`mailto:${encodeURIComponent(item.email)}`}>{item.email}</a><p className="my-4 whitespace-pre-wrap leading-6">{item.message}</p><label className="admin-field max-w-48">Status<select aria-label={`Status for ${item.name}`} value={item.status} disabled={busy} onChange={(event) => void update(item, event.target.value as Enquiry["status"])}><option value="NEW">New</option><option value="READ">Read</option><option value="CLOSED">Closed</option></select></label></div></details>)}
-      {!visible.length && !error && <AdminEmptyState title={items.length ? "No matching messages" : "No messages yet"}>Messages sent through your storefront appear here.</AdminEmptyState>}
+  const counts = { "": items.length, NEW: items.filter((item) => item.status === "NEW").length, READ: items.filter((item) => item.status === "READ").length, CLOSED: items.filter((item) => item.status === "CLOSED").length };
+  const retry = () => { setError(undefined); setLoading(true); void load().then(setItems).catch((caught: unknown) => setError(caught instanceof Error ? caught.message : "Unable to load messages.")).finally(() => setLoading(false)); };
+  return <AdminPage title="Messages & subscribers" description="Questions sent through your store's contact form, and people who joined your newsletter."
+    secondaryActions={[{ label: "Export subscribers", onAction: () => void exportSubscribers(), disabled: busy }]}>
+    {error && <Banner tone="critical" title="Something went wrong" action={<button type="button" className="jk-button" onClick={retry}>Retry</button>}>{error}</Banner>}
+    <section className="jk-index">
+      <div className="jk-tabs" role="tablist" aria-label="Message status">
+        {([["", "All"], ["NEW", "New"], ["READ", "Read"], ["CLOSED", "Closed"]] as const).map(([value, text]) => <button key={value} type="button" role="tab" className="jk-tab" aria-selected={statusFilter === value} onClick={() => setStatusFilter(value)}>{text}{counts[value] > 0 && <span className="jk-tab-count">{counts[value]}</span>}</button>)}
+      </div>
+      <div className="jk-toolbar">
+        <label className="jk-search"><Search size={16} aria-hidden="true" /><input type="search" aria-label="Search messages" placeholder="Search name, email or message" value={search} onChange={(event) => setSearch(event.target.value)} /></label>
+      </div>
+      {loading ? <TableSkeleton rows={4} columns={3} label="Loading messages" /> : visible.length ? <ul className="jk-list" style={{ marginTop: 0 }}>{visible.map((item) => <li key={item.id}>
+        <details className="jk-message">
+          <summary className="jk-message-summary">
+            <span className="min-w-0 flex-1"><span className="jk-row" style={{ flexWrap: "nowrap" }}><span className="jk-strong truncate">{item.name}</span><StatusBadge kind="message" value={item.status} /></span>
+              <span className="jk-cell-sub truncate">{item.message}</span></span>
+            <time className="jk-muted" dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</time>
+          </summary>
+          <div className="jk-message-body">
+            <a className="jk-link" href={`mailto:${encodeURIComponent(item.email)}`}>{item.email}</a>
+            <p className="jk-message-text">{item.message}</p>
+            <div className="jk-row">
+              <label className="jk-field"><span className="sr-only">Status</span><select aria-label={`Status for ${item.name}`} value={item.status} disabled={busy} onChange={(event) => void update(item, event.target.value as Enquiry["status"])}><option value="NEW">New</option><option value="READ">Read</option><option value="CLOSED">Closed</option></select></label>
+              <a className="jk-button" href={`mailto:${encodeURIComponent(item.email)}`}>Reply by email</a>
+            </div>
+          </div>
+        </details>
+      </li>)}</ul> : !error && <EmptyState icon={MessageSquare} title={items.length ? "No matching messages" : "No messages yet"} description="Messages sent through your store's contact form appear here." />}
     </section>
-  </main>;
+  </AdminPage>;
 }

@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { Shapes } from "lucide-react";
+import { AdminPage, Banner, Card, EmptyState, SelectList, SplitLayout, StatusBadge } from "@/components/admin";
 import { useAuth } from "@/features/auth/providers/auth-provider";
 
 interface MetaobjectDefinition {
@@ -30,6 +30,7 @@ export default function MetaobjectsPage() {
   const [activeId, setActiveId] = useState("");
   const [entries, setEntries] = useState<MetaobjectEntry[]>([]);
   const [error, setError] = useState<string>();
+  const [loading, setLoading] = useState(true);
   const headers = useMemo(() => token ? { Authorization: `Bearer ${token}` } : null, [token]);
 
   useEffect(() => {
@@ -45,7 +46,8 @@ export default function MetaobjectsPage() {
         setDefinitions(next);
         setActiveId((current) => current || next.find((definition) => !definition.archivedAt)?.id || next[0]?.id || "");
       })
-      .catch((reason: unknown) => active && setError(reason instanceof Error ? reason.message : "Unable to load metaobjects"));
+      .catch((reason: unknown) => active && setError(reason instanceof Error ? reason.message : "Unable to load metaobjects"))
+      .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [headers, origin]);
 
@@ -65,35 +67,23 @@ export default function MetaobjectsPage() {
   }, [activeId, headers, origin]);
 
   const definition = definitions.find((entry) => entry.id === activeId);
-  if (!headers) return <main className="p-8">Metaobjects are unavailable until merchant authentication is connected.</main>;
+  if (!headers) return <AdminPage title="Custom content"><Banner tone="warning">Sign in to manage custom content.</Banner></AdminPage>;
 
   return (
-    <main className="mx-auto max-w-6xl p-6 md:p-8">
-      <div className="mb-6 flex items-center gap-3">
-        <Link href="/admin" aria-label="Back to admin" className="grid size-9 place-items-center rounded-lg border border-border bg-card"><ArrowLeft size={16} /></Link>
-        <div><h1 className="text-2xl font-semibold tracking-[-0.03em]">Custom content</h1></div>
-      </div>
-      {error && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-      <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="rounded-xl border border-border bg-card p-2">
-          {definitions.map((entry) => (
-            <button key={entry.id} type="button" onClick={() => setActiveId(entry.id)} className={`min-h-10 w-full rounded-lg px-3 text-left text-[12px] ${entry.id === activeId ? "bg-muted font-semibold" : "hover:bg-muted/50"}`}>
-              <span className="block truncate">{entry.name}</span><span className="text-[9px] text-muted-foreground">{entry.handle}</span>
-            </button>
-          ))}
-        </aside>
-        <section className="rounded-xl border border-border bg-card">
-          {definition ? (
-            <>
-              <header className="border-b border-border px-5 py-4"><h2 className="text-base font-semibold">{definition.name}</h2><p className="mt-1 text-[13px] text-muted-foreground">{definition.storefrontVisible ? "Available to storefront bindings" : "Admin only"} · {definition.fields.length} fields</p></header>
-              <div className="divide-y divide-border">
-                {entries.map((entry) => <div key={entry.id} className="px-5 py-3"><p className="text-[12px] font-medium">{entry.displayName}</p><p className="text-[12px] text-muted-foreground">{entry.handle}</p></div>)}
-                {entries.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">No entries yet.</p>}
-              </div>
-            </>
-          ) : <p className="p-8 text-center text-sm text-muted-foreground">Choose a metaobject definition.</p>}
-        </section>
-      </div>
-    </main>
+    <AdminPage title="Custom content" description="Your own content types, such as team members or showroom locations, and their entries.">
+      {error && <Banner tone="critical" title="Custom content did not load">{error}</Banner>}
+      <SplitLayout wideList list={<SelectList label="Content types" title="Content types" loading={loading} selectedId={activeId} onSelect={setActiveId}
+        items={definitions.map((entry) => ({ id: entry.id, label: entry.name, sub: entry.handle, badge: entry.archivedAt ? <StatusBadge kind="content" value="ARCHIVED" /> : undefined }))}
+        empty="No content types yet." />}>
+        {definition ? (
+          <Card flush title={definition.name} description={`${definition.storefrontVisible ? "Can be shown in your store" : "Only visible in the admin"} · ${definition.fields.length} ${definition.fields.length === 1 ? "field" : "fields"}`}>
+            {entries.length ? <ul className="jk-list">{entries.map((entry) => <li key={entry.id} className="jk-list-row" style={{ gridTemplateColumns: "minmax(0,1fr) auto" }}>
+              <span className="min-w-0"><span className="jk-strong">{entry.displayName}</span><span className="jk-cell-sub truncate">{entry.handle}</span></span>
+              {entry.archivedAt && <StatusBadge kind="content" value="ARCHIVED" />}
+            </li>)}</ul> : <EmptyState icon={Shapes} title="No entries yet" description="Entries you add for this content type show up here." />}
+          </Card>
+        ) : !loading && <Card><EmptyState icon={Shapes} title={definitions.length ? "Choose a content type" : "No custom content yet"} description={definitions.length ? "Pick a content type to see its entries." : "Content types are set up under Settings > Custom data."} /></Card>}
+      </SplitLayout>
+    </AdminPage>
   );
 }

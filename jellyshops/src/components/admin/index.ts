@@ -8,3 +8,4 @@ export { StatusBadge } from "./status-badge";
 export { humanizeCode, statusInfo, statusLabel, statusOptions, type StatusKind, type StatusTone } from "./status";
 export { TagInput } from "./tag-input";
 export { ToastProvider, useToast } from "./toast";
+export { SelectList, SplitLayout, type SelectListItem } from "./select-list";

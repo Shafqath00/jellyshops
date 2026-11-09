@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Banner, Card, Field } from "@/components/admin";
 import { SeoFields, validateSeoFields, type SeoFieldsValue } from "./seo-fields";
 import type { MediaRecord } from "@/features/store-editor/api/types";
 
@@ -37,7 +38,7 @@ export function ResourceForm({
 
   return (
     <form
-      className="space-y-6"
+      className="jk-form"
       onSubmit={(event) => {
         event.preventDefault();
         setSubmitted(true);
@@ -45,42 +46,46 @@ export function ResourceForm({
         void onSave(value);
       }}
     >
-      <label className="block text-[12px] font-medium text-muted-foreground">
-        Title
-        <input aria-label="Title" value={value.title} onChange={(event) => setValue({ ...value, title: event.target.value })} className="mt-1 h-9 w-full rounded-lg border border-border px-3" />
-      </label>
+      <Card>
+        <Field id={`resource-title-${resource.id}`} label="Title">
+          <input id={`resource-title-${resource.id}`} aria-label="Title" value={value.title} onChange={(event) => setValue({ ...value, title: event.target.value })} />
+        </Field>
+      </Card>
 
-      <SeoFields value={value} fallbackTitle={value.title} listImages={listImages} storeSlug={storeSlug} pathPrefix={pathPrefix} onChange={(next) => setValue({ ...value, ...next })} />
+      <Card>
+        <SeoFields value={value} fallbackTitle={value.title} listImages={listImages} storeSlug={storeSlug} pathPrefix={pathPrefix} onChange={(next) => setValue({ ...value, ...next })} />
+      </Card>
 
-      <section className="rounded-xl border border-border bg-muted/50 p-4">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Template</p>
-        <div className="mt-2 flex flex-wrap gap-2">
-          <select aria-label="Template" value={templateId} onChange={(event) => setTemplateId(event.target.value)} className="h-9 min-w-[180px] flex-1 rounded-lg border border-border bg-card px-3 text-[12px]">
-            {templates.map((template) => <option key={template.id} value={template.id}>{template.name}</option>)}
-          </select>
+      <Card title="Page layout" description="The store design layout this page uses.">
+        <div className="jk-row">
+          <label className="jk-field min-w-[180px] flex-1"><span className="sr-only">Template</span>
+            <select aria-label="Template" value={templateId} onChange={(event) => setTemplateId(event.target.value)}>
+              {templates.map((template) => <option key={template.id} value={template.id}>{template.name}</option>)}
+            </select>
+          </label>
           <button
             type="button"
             aria-label="Assign template"
             disabled={!templateId || templateId === assignedTemplateId}
             onClick={() => templateId && void onAssignTemplate({ resourceId: resource.id, templateId })}
-            className="h-9 rounded-lg border border-border bg-card px-3 text-[11px] font-semibold disabled:opacity-40"
+            className="jk-button"
           >
-            Assign template
+            Use this layout
           </button>
           <button
             type="button"
             aria-label="Customize template"
             disabled={!templateId}
             onClick={() => templateId && onCustomizeTemplate({ resourceId: resource.id, templateId })}
-            className="h-9 rounded-lg border border-border bg-card px-3 text-[11px] font-semibold disabled:opacity-40"
+            className="jk-button jk-button-plain"
           >
-            Customize template
+            Edit in store designer
           </button>
         </div>
-      </section>
+      </Card>
 
-      {submitted && Object.keys(issues).length > 0 && <p role="alert" className="text-[12px] text-destructive">Fix the SEO fields before saving.</p>}
-      <button type="submit" className="h-9 rounded-lg bg-primary px-4 text-[12px] font-semibold text-primary-foreground">Save</button>
+      {submitted && Object.keys(issues).length > 0 && <Banner tone="critical">Fix the search engine fields before saving.</Banner>}
+      <div className="jk-row" style={{ justifyContent: "flex-end" }}><button type="submit" className="jk-button jk-button-primary">Save</button></div>
     </form>
   );
 }

@@ -7,9 +7,8 @@ import { createNavigationApi, NavigationApiError, type NavigationApi, type Navig
 import { createStoreEditorApi, type StoreEditorApi } from "@/features/store-editor/api/client";
 import { MenuEditor } from "@/features/navigation/components/menu-editor";
 import type { CollectionChoice } from "@/features/navigation/components/menu-link-form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { ListTree } from "lucide-react";
+import { AdminPage, Banner, Card, CardSkeleton, EmptyState, Field } from "@/components/admin";
 import { referencedHeaderMenu } from "@/features/navigation/header-menu";
 
 /** Menus kept from an earlier store design ("previous-…"). They stay saved but are hidden unless asked for. */
@@ -21,7 +20,7 @@ export default function NavigationPage() {
   const token = session?.access_token, storeId = activeStore?.id ?? "";
   const api = useMemo(() => token ? createNavigationApi({ baseUrl: authApiOrigin(), token }) : null, [token]);
   const editor = useMemo(() => token ? createStoreEditorApi({ baseUrl: authApiOrigin(), token }) : null, [token]);
-  if (!api || !editor || !storeId) return <main className="p-8">Select a store and sign in to manage navigation.</main>;
+  if (!api || !editor || !storeId) return <AdminPage title="Menus"><Banner tone="warning">Select a store and sign in to manage navigation.</Banner></AdminPage>;
   return <NavigationWorkspace key={storeId} storeId={storeId} api={api} editor={editor} all={all} />;
 }
 
@@ -85,21 +84,25 @@ function NavigationWorkspace({ storeId, api, editor, all }: { storeId: string; a
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Unable to create menu."); }
     finally { setSaving(false); }
   }
-  return <main className="mx-auto flex max-w-5xl flex-col gap-5 p-6 md:p-8">
-    <header className="flex items-center gap-3"><div className="flex-1"><h1 className="text-2xl font-semibold">Menus</h1><p className="text-[13px] text-muted-foreground">The links in your store&apos;s header and footer.</p></div><Button variant="outline" disabled={loading || saving} onClick={() => { setCreating(true); setError(""); }}>Create menu</Button></header>
-    {error && <div role="alert" className="rounded-lg border border-destructive p-4 text-sm">{error}</div>}
-    {conflict && <div role="alert" className="rounded-lg border border-border p-4 text-sm"><p>Your edits are preserved. Reloading will replace them with the latest saved menus.</p><Button variant="outline" onClick={() => { setNotice(""); setRevision(value => value + 1); }}>Reload saved menus</Button></div>}
-    {error && !loading && !menus.length && <Button variant="outline" onClick={() => setRevision(value => value + 1)}>Retry loading navigation</Button>}
-    {notice && <p role="status" className="text-sm text-muted-foreground">{notice}</p>}
-    {creating && <form className="flex flex-col gap-4 rounded-xl border border-border p-5" onSubmit={event => { event.preventDefault(); void create(); }}>
-      <div className="flex flex-col gap-2"><Label htmlFor="menu-name">Menu name</Label><Input id="menu-name" value={name} onChange={event => setName(event.target.value)} required maxLength={120} disabled={saving} /></div>
-      <div className="flex flex-col gap-2"><Label htmlFor="menu-handle">Menu handle</Label><Input id="menu-handle" value={handle} onChange={event => setHandle(event.target.value)} required pattern="[a-z0-9]+(-[a-z0-9]+)*" disabled={saving} /></div>
-      <div className="flex gap-2"><Button type="submit" disabled={saving}>{saving ? "Creating…" : "Create"}</Button><Button type="button" variant="outline" disabled={saving} onClick={() => setCreating(false)}>Cancel</Button></div>
-    </form>}
-    {loading ? <p role="status">Loading navigation…</p> : <>
-      <nav aria-label="Navigation menus" className="flex flex-wrap gap-2">{menus.filter(entry => showEarlier || !isEarlierVersion(entry.handle) || entry.id === activeId).map(entry => <Button key={entry.id} variant={entry.id === activeId ? "default" : "outline"} disabled={saving} onClick={() => { setActiveId(entry.id); setNotice(""); setError(""); }}>{entry.name}{isEarlierVersion(entry.handle) ? " (earlier version)" : entry.handle !== "main" && entry.handle !== "footer" ? ` · ${entry.handle}` : ""}{saved[entry.id] !== JSON.stringify(entry.items) ? " *" : ""}</Button>)}
-        {menus.some(entry => isEarlierVersion(entry.handle)) && <button type="button" className="text-[12px] underline" onClick={() => setShowEarlier(value => !value)}>{showEarlier ? "Hide earlier versions" : `Show ${menus.filter(entry => isEarlierVersion(entry.handle)).length} earlier versions`}</button>}</nav>
-      {menu ? <MenuEditor key={menu.id} menu={menu} collections={collections} saving={saving} dirty={!conflict && saved[menu.id] !== JSON.stringify(menu.items)} onChange={items => { setNotice(""); setMenus(current => current.map(entry => entry.id === menu.id ? { ...entry, items } : entry)); }} onSave={() => void save()} /> : <p>No navigation menus yet. Create a menu to add your collection links.</p>}
+  const visibleMenus = menus.filter(entry => showEarlier || !isEarlierVersion(entry.handle) || entry.id === activeId);
+  const earlierCount = menus.filter(entry => isEarlierVersion(entry.handle)).length;
+  return <AdminPage title="Menus" description="The links in your store's header and footer."
+    primaryAction={{ label: "Create menu", disabled: loading || saving, onAction: () => { setCreating(true); setError(""); } }}>
+    {error && <Banner tone="critical" title="Something went wrong" action={!loading && !menus.length ? <button type="button" className="jk-button" onClick={() => setRevision(value => value + 1)}>Retry loading navigation</button> : undefined}>{error}</Banner>}
+    {conflict && <Banner tone="warning" title="This menu changed somewhere else" action={<button type="button" className="jk-button" onClick={() => { setNotice(""); setRevision(value => value + 1); }}>Reload saved menus</button>}>Your edits are preserved. Reloading will replace them with the latest saved menus.</Banner>}
+    {notice && <Banner tone="success" onDismiss={() => setNotice("")}>{notice}</Banner>}
+    {creating && <Card title="New menu"><form className="jk-stack-sm" onSubmit={event => { event.preventDefault(); void create(); }}>
+      <div className="jk-grid-2">
+        <Field id="menu-name" label="Menu name"><input id="menu-name" value={name} onChange={event => setName(event.target.value)} required maxLength={120} disabled={saving} placeholder="Footer help" /></Field>
+        <Field id="menu-handle" label="Menu handle" help="Lowercase letters, numbers and hyphens."><input id="menu-handle" value={handle} onChange={event => setHandle(event.target.value)} required pattern="[a-z0-9]+(-[a-z0-9]+)*" disabled={saving} placeholder="footer-help" /></Field>
+      </div>
+      <div className="jk-row"><button type="submit" className="jk-button jk-button-primary" disabled={saving}>{saving ? "Creating…" : "Create"}</button><button type="button" className="jk-button" disabled={saving} onClick={() => setCreating(false)}>Cancel</button></div>
+    </form></Card>}
+    {loading ? <CardSkeleton label="Loading navigation" /> : <>
+      <nav aria-label="Navigation menus" className="jk-chips">{visibleMenus.map(entry => <button key={entry.id} type="button" className="jk-chip" aria-pressed={entry.id === activeId} disabled={saving} onClick={() => { setActiveId(entry.id); setNotice(""); setError(""); }}>{entry.name}{isEarlierVersion(entry.handle) ? " (earlier version)" : entry.handle !== "main" && entry.handle !== "footer" ? ` · ${entry.handle}` : ""}{saved[entry.id] !== JSON.stringify(entry.items) ? " *" : ""}</button>)}
+        {earlierCount > 0 && <button type="button" className="jk-button jk-button-plain" onClick={() => setShowEarlier(value => !value)}>{showEarlier ? "Hide earlier versions" : `Show ${earlierCount} earlier versions`}</button>}</nav>
+      {menu ? <MenuEditor key={menu.id} menu={menu} collections={collections} saving={saving} dirty={!conflict && saved[menu.id] !== JSON.stringify(menu.items)} onChange={items => { setNotice(""); setMenus(current => current.map(entry => entry.id === menu.id ? { ...entry, items } : entry)); }} onSave={() => void save()} />
+        : <Card><EmptyState icon={ListTree} title="No navigation menus yet" description="Create a menu to add your collection links." /></Card>}
     </>}
-  </main>;
+  </AdminPage>;
 }

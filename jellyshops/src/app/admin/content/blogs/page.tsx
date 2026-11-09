@@ -1,14 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { Newspaper } from "lucide-react";
+import { AdminPage, Banner, Card, EmptyState, Field, SelectList, SplitLayout, StatusBadge } from "@/components/admin";
 import { useAuth } from "@/features/auth/providers/auth-provider";
 import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import { createContentApi, type ArticleResource, type BlogResource, type ContentTemplate, type TemplateAssignment } from "@/features/content/api/client";
 import { ResourceForm } from "@/features/content/components/resource-form";
-
-
 
 function editable(article: ArticleResource) {
   return {
@@ -43,6 +41,7 @@ export default function BlogsAdminPage() {
   const [title, setTitle] = useState("");
   const [handle, setHandle] = useState("");
   const [error, setError] = useState<string>();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!api) return;
@@ -52,7 +51,8 @@ export default function BlogsAdminPage() {
       setBlogs(nextBlogs);
       setArticleTemplates(nextTemplates);
       setActiveBlogId((current) => current || nextBlogs[0]?.id || "");
-    }).catch((reason: unknown) => active && setError(reason instanceof Error ? reason.message : "Unable to load blogs"));
+    }).catch((reason: unknown) => active && setError(reason instanceof Error ? reason.message : "Unable to load blogs"))
+      .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [api]);
 
@@ -82,95 +82,77 @@ export default function BlogsAdminPage() {
 
   const article = articles.find((entry) => entry.id === activeArticleId);
 
-  if (!api) return <main className="p-8">Blog manager is unavailable until merchant authentication is connected.</main>;
+  if (!api) return <AdminPage title="Blog posts"><Banner tone="warning">Sign in to manage your blog.</Banner></AdminPage>;
+
+  const createBlog = (
+    <form className="jk-stack-sm" onSubmit={(event) => {
+      event.preventDefault();
+      if (!title.trim() || !handle.trim()) return;
+      void api.createBlog(storeId, { title, handle }).then((blog) => {
+        setBlogs((current) => [...current, blog]);
+        setActiveBlogId(blog.id);
+        setTitle("");
+        setHandle("");
+      }).catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Unable to create blog"));
+    }}>
+      <h3 className="jk-subheading">Add a blog</h3>
+      <Field id="blog-title" label="Blog name"><input id="blog-title" aria-label="Blog title" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="News" /></Field>
+      <Field id="blog-handle" label="Web address" help="Lowercase letters, numbers and hyphens."><input id="blog-handle" aria-label="Blog handle" value={handle} onChange={(event) => setHandle(event.target.value)} placeholder="news" /></Field>
+      <button type="submit" className="jk-button">Add blog</button>
+    </form>
+  );
 
   return (
-    <main className="mx-auto max-w-7xl p-6 md:p-8">
-      <div className="mb-6 flex items-center gap-3">
-        <Link href="/admin" aria-label="Back to admin" className="grid size-9 place-items-center rounded-lg border border-border bg-card"><ArrowLeft size={16} /></Link>
-        <div><h1 className="text-2xl font-semibold tracking-[-0.03em]">Blog posts</h1></div>
-      </div>
-      {error && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-      <div className="grid gap-6 xl:grid-cols-[260px_280px_minmax(0,1fr)]">
-        <aside className="space-y-4">
-          <section className="rounded-xl border border-border bg-card p-2">
-            {blogs.map((blog) => (
-              <button key={blog.id} type="button" onClick={() => setActiveBlogId(blog.id)} className={`min-h-10 w-full rounded-lg px-3 text-left text-[12px] font-medium ${blog.id === activeBlogId ? "bg-muted" : "hover:bg-muted/50"}`}>{blog.title}</button>
-            ))}
-          </section>
-          <form className="rounded-xl border border-border bg-card p-4" onSubmit={(event) => {
-            event.preventDefault();
-            if (!title.trim() || !handle.trim()) return;
-            void api.createBlog(storeId, { title, handle }).then((blog) => {
-              setBlogs((current) => [...current, blog]);
-              setActiveBlogId(blog.id);
-              setTitle("");
-              setHandle("");
-            }).catch((reason: unknown) => setError(reason instanceof Error ? reason.message : "Unable to create blog"));
-          }}>
-            <h2 className="text-sm font-semibold">Create blog</h2>
-            <input aria-label="Blog title" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Blog title" className="mt-3 h-9 w-full rounded-lg border border-border px-3 text-[12px]" />
-            <input aria-label="Blog handle" value={handle} onChange={(event) => setHandle(event.target.value)} placeholder="blog-handle" className="mt-2 h-9 w-full rounded-lg border border-border px-3 text-[12px]" />
-            <button type="submit" className="mt-3 h-8 rounded-md bg-primary px-3 text-[13px] font-semibold text-primary-foreground">Create</button>
-          </form>
-        </aside>
-
-        <section className="rounded-xl border border-border bg-card">
-          <header className="border-b border-border px-4 py-3"><h2 className="text-sm font-semibold">Articles</h2></header>
-          <div className="divide-y divide-border">
-            {articles.map((entry) => (
-              <button key={entry.id} type="button" onClick={() => setActiveArticleId(entry.id)} className={`flex min-h-12 w-full items-center gap-3 px-4 text-left ${entry.id === activeArticleId ? "bg-muted/50" : "hover:bg-muted/50"}`}><span className="min-w-0 flex-1 truncate text-[12px] font-medium">{entry.title}</span><span className="text-[12px] uppercase text-muted-foreground">{entry.status ?? "DRAFT"}</span></button>
-            ))}
-            {articles.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">No articles in this blog yet.</p>}
-          </div>
-        </section>
-
-        <section className="rounded-xl border border-border bg-card p-5">
-          {article ? (
-            <>
-              <div className="mb-5 flex items-center justify-between gap-3 border-b border-border pb-4">
-                <div><p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Article lifecycle</p><p className="mt-1 text-[12px] font-medium">{article.status ?? "DRAFT"}</p></div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const action = article.status === "PUBLISHED" ? api.unpublishArticle(storeId, article.id) : api.publishArticle(storeId, article.id);
-                    void action.then((saved) => setArticles((current) => current.map((entry) => entry.id === saved.id ? saved : entry)));
-                  }}
-                  className="h-8 rounded-md border border-border bg-card px-3 text-[13px] font-semibold"
-                >
-                  {article.status === "PUBLISHED" ? "Unpublish" : "Publish"}
-                </button>
-              </div>
-              <ResourceForm
-                key={`${article.id}:${assignment?.revision ?? "new"}:${assignment?.templateId ?? "default"}`}
-                listImages={listImages} storeSlug={activeStore?.slug} pathPrefix="/blogs/"
+    <AdminPage title="Blog posts" description="Your blogs and the posts in them. Write the post itself in the store designer.">
+      {error && <Banner tone="critical" title="Something went wrong" onDismiss={() => setError(undefined)}>{error}</Banner>}
+      <SplitLayout list={<SelectList label="Blogs" title="Blogs" loading={loading} selectedId={activeBlogId} onSelect={setActiveBlogId}
+        items={blogs.map((blog) => ({ id: blog.id, label: blog.title, sub: `/blogs/${blog.handle}` }))} empty="No blogs yet." footer={createBlog} />}>
+        <SelectList label="Posts" title="Posts" selectedId={activeArticleId} onSelect={setActiveArticleId}
+          items={articles.map((entry) => ({ id: entry.id, label: entry.title, badge: <StatusBadge kind="content" value={entry.status ?? "DRAFT"} /> }))}
+          empty={activeBlogId ? "No posts in this blog yet." : "Choose a blog to see its posts."} />
+        {article ? (
+          <>
+            <Card title="Visibility" actions={<button
+              type="button"
+              onClick={() => {
+                const action = article.status === "PUBLISHED" ? api.unpublishArticle(storeId, article.id) : api.publishArticle(storeId, article.id);
+                void action.then((saved) => setArticles((current) => current.map((entry) => entry.id === saved.id ? saved : entry)));
+              }}
+              className={`jk-button ${article.status === "PUBLISHED" ? "" : "jk-button-primary"}`}
+            >
+              {article.status === "PUBLISHED" ? "Unpublish" : "Publish"}
+            </button>}>
+              <div className="jk-row"><StatusBadge kind="content" value={article.status ?? "DRAFT"} /><span className="jk-muted">{article.status === "PUBLISHED" ? "Shoppers can read this post." : "Only you can see this post."}</span></div>
+            </Card>
+            <ResourceForm
+              key={`${article.id}:${assignment?.revision ?? "new"}:${assignment?.templateId ?? "default"}`}
+              listImages={listImages} storeSlug={activeStore?.slug} pathPrefix="/blogs/"
               resource={editable(article)}
-                templates={articleTemplates.map(({ id, name }) => ({ id, name }))}
-                assignedTemplateId={assignment?.templateId}
-                onSave={async (value) => {
-                  const saved = await api.updateArticle(storeId, article.id, {
-                    title: value.title,
-                    handle: value.handle,
-                    seoTitle: value.seoTitle,
-                    seoDescription: value.seoDescription,
-                    socialMediaId: value.socialMediaId,
-                    noindex: value.noindex,
-                    canonicalOverride: value.canonicalOverride,
-                  });
-                  setArticles((current) => current.map((entry) => entry.id === saved.id ? saved : entry));
-                }}
-                onAssignTemplate={async ({ resourceId, templateId }) => {
-                  const result = await api.assignTemplate(storeId, "article", resourceId, templateId, assignment?.revision ?? null);
-                  setAssignment(result.assignment);
-                }}
-                onCustomizeTemplate={({ resourceId, templateId }) => {
-                  window.location.assign(`/admin/online-store/editor?templateId=${encodeURIComponent(templateId)}&resourceType=article&resourceId=${encodeURIComponent(resourceId)}`);
-                }}
-              />
-            </>
-          ) : <p className="p-8 text-center text-sm text-muted-foreground">Choose an article to edit.</p>}
-        </section>
-      </div>
-    </main>
+              templates={articleTemplates.map(({ id, name }) => ({ id, name }))}
+              assignedTemplateId={assignment?.templateId}
+              onSave={async (value) => {
+                const saved = await api.updateArticle(storeId, article.id, {
+                  title: value.title,
+                  handle: value.handle,
+                  seoTitle: value.seoTitle,
+                  seoDescription: value.seoDescription,
+                  socialMediaId: value.socialMediaId,
+                  noindex: value.noindex,
+                  canonicalOverride: value.canonicalOverride,
+                });
+                setArticles((current) => current.map((entry) => entry.id === saved.id ? saved : entry));
+              }}
+              onAssignTemplate={async ({ resourceId, templateId }) => {
+                const result = await api.assignTemplate(storeId, "article", resourceId, templateId, assignment?.revision ?? null);
+                setAssignment(result.assignment);
+              }}
+              onCustomizeTemplate={({ resourceId, templateId }) => {
+                window.location.assign(`/admin/online-store/editor?templateId=${encodeURIComponent(templateId)}&resourceType=article&resourceId=${encodeURIComponent(resourceId)}`);
+              }}
+            />
+          </>
+        ) : articles.length > 0 && <Card><EmptyState icon={Newspaper} title="Choose a post" description="Pick a post above to edit its title, search listing and layout." /></Card>}
+      </SplitLayout>
+    </AdminPage>
   );
 }

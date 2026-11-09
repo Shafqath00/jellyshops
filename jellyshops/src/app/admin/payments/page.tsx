@@ -1,7 +1,9 @@
 "use client";
-import { CreditCard } from "lucide-react";
+import { AdminPage } from "@/components/admin";
 import { MerchantPaymentsPanel } from "@/features/commerce/components/merchant-payments-panel";
 
 export default function PaymentsPage() {
-  return <div className="admin-page"><header className="page-head"><div><span className="page-kicker">Stripe Connect</span><h1>Payments & payouts</h1><p>Check your payment capability and payout readiness.</p></div><CreditCard /></header><MerchantPaymentsPanel /></div>;
+  return <AdminPage title="Payments & payouts" width="detail" description="Check that you can take card payments and that payouts are set up. Payments run through Stripe.">
+    <MerchantPaymentsPanel />
+  </AdminPage>;
 }

@@ -2,7 +2,8 @@
 
 import type { MenuItem, NavigationMenu } from "../api/client";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { ArrowDown, ArrowUp, Plus } from "lucide-react";
+import { humanizeCode } from "@/components/admin";
 import { MenuLinkForm, type CollectionChoice } from "./menu-link-form";
 
 export interface MenuDestination {
@@ -72,44 +73,32 @@ export function MenuEditor({
   const [editing, setEditing] = useState<MenuItem | "new" | null>(null);
 
   return (
-    <section aria-label="Menu editor" className="rounded-xl border border-border bg-card">
-      <header className="flex items-center justify-between border-b border-border px-4 py-3">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Navigation</p>
-          <h2 className="mt-1 text-sm font-semibold text-foreground">{menu.name}</h2>
-        </div>
-        <div className="flex items-center gap-3"><span className="text-xs text-muted-foreground" role="status">{saving ? "Saving…" : dirty ? "Unsaved changes" : "Saved"}</span><Button type="button" disabled={saving || !dirty || editing !== null} onClick={onSave}>Save menu</Button></div>
-      </header>
-      <fieldset disabled={saving} className="min-w-0">
-      <div className="divide-y divide-border">
-        {entries.map(({ item, depth, parentId, index }) => (
-          <div key={item.id} className="flex min-h-11 items-center gap-2 px-3" style={{ paddingLeft: 12 + depth * 20 }}>
-            <span className="min-w-0 flex-1 truncate text-[12px] font-medium text-muted-foreground">{item.label}</span>
-            <span className="text-[10px] text-muted-foreground">{item.target.kind}</span>
-            {depth === 0 && <><Button type="button" variant="ghost" size="sm" aria-label={`Edit ${item.label}`} onClick={() => setEditing(item)}>Edit</Button><Button type="button" variant="ghost" size="sm" aria-label={`Remove ${item.label}`} onClick={() => { onChange(menu.items.flatMap(entry => entry.id === item.id ? entry.children : [entry])); setEditing(null); }}>Remove</Button></>}
-            <button
-              type="button"
-              aria-label={`Move ${item.label} up`}
-              disabled={index === 0}
-              onClick={() => onChange(reorderMenuItem(menu.items, item.id, { parentId, index: index - 1 }))}
-              className="h-7 rounded border border-border px-2 text-[10px] disabled:opacity-30"
-            >
-              Up
-            </button>
-            <button
-              type="button"
-              aria-label={`Move ${item.label} down`}
-              disabled={index === (parentId ? findItem(menu.items, parentId)?.children.length ?? 0 : menu.items.length) - 1}
-              onClick={() => onChange(reorderMenuItem(menu.items, item.id, { parentId, index: index + 1 }))}
-              className="h-7 rounded border border-border px-2 text-[10px]"
-            >
-              Down
-            </button>
-          </div>
-        ))}
-        {entries.length === 0 && <p className="p-6 text-center text-[12px] text-muted-foreground">No menu items yet.</p>}
+    <section aria-label="Menu editor" className="jk-card is-flush">
+      <div className="jk-card-header">
+        <div><h2>{menu.name}</h2><p>Links shoppers see in this menu, in order. Links can hold one level of sub-links.</p></div>
+        <div className="jk-row"><span className="jk-muted" role="status">{saving ? "Saving…" : dirty ? "Unsaved changes" : "Saved"}</span><button type="button" className="jk-button jk-button-primary" disabled={saving || !dirty || editing !== null} onClick={onSave}>Save menu</button></div>
       </div>
-      <div className="p-4">{editing ? <MenuLinkForm key={editing === "new" ? "new" : editing.id} item={editing === "new" ? undefined : editing} collections={collections} onCancel={() => setEditing(null)} onApply={item => { onChange(editing === "new" ? [...menu.items, item] : menu.items.map(entry => entry.id === item.id ? item : entry)); setEditing(null); }} /> : <Button type="button" variant="outline" onClick={() => setEditing("new")}>Add link</Button>}</div>
+      <fieldset disabled={saving} className="min-w-0">
+      <ul className="jk-list">
+        {entries.map(({ item, depth, parentId, index }) => (
+          <li key={item.id} className="jk-menu-row" style={{ paddingLeft: 16 + depth * 24 }}>
+            <span className="min-w-0 flex-1"><span className="jk-strong block truncate">{item.label}</span><span className="jk-cell-sub">{depth > 0 ? "Sub-link · " : ""}{humanizeCode(item.target.kind)}</span></span>
+            <span className="jk-row" style={{ gap: 2, flexWrap: "nowrap" }}>
+              <button type="button" className="jk-icon-button" aria-label={`Move ${item.label} up`} title="Move up" disabled={index === 0}
+                onClick={() => onChange(reorderMenuItem(menu.items, item.id, { parentId, index: index - 1 }))}><ArrowUp size={15} aria-hidden="true" /></button>
+              <button type="button" className="jk-icon-button" aria-label={`Move ${item.label} down`} title="Move down"
+                disabled={index === (parentId ? findItem(menu.items, parentId)?.children.length ?? 0 : menu.items.length) - 1}
+                onClick={() => onChange(reorderMenuItem(menu.items, item.id, { parentId, index: index + 1 }))}><ArrowDown size={15} aria-hidden="true" /></button>
+              {depth === 0 && <>
+                <button type="button" className="jk-button jk-button-plain" aria-label={`Edit ${item.label}`} onClick={() => setEditing(item)}>Edit</button>
+                <button type="button" className="jk-button jk-button-plain jk-button-critical" aria-label={`Remove ${item.label}`} onClick={() => { onChange(menu.items.flatMap(entry => entry.id === item.id ? entry.children : [entry])); setEditing(null); }}>Remove</button>
+              </>}
+            </span>
+          </li>
+        ))}
+        {entries.length === 0 && <li className="jk-select-empty">No links yet. Add your first link below.</li>}
+      </ul>
+      <div className="jk-select-footer">{editing ? <MenuLinkForm key={editing === "new" ? "new" : editing.id} item={editing === "new" ? undefined : editing} collections={collections} onCancel={() => setEditing(null)} onApply={item => { onChange(editing === "new" ? [...menu.items, item] : menu.items.map(entry => entry.id === item.id ? item : entry)); setEditing(null); }} /> : <button type="button" className="jk-button" onClick={() => setEditing("new")}><Plus size={15} aria-hidden="true" />Add link</button>}</div>
       </fieldset>
     </section>
   );

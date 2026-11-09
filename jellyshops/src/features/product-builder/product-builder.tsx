@@ -272,7 +272,7 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
 
       <OrganizationSection key={productId??"new"} draft={draft} onChange={change} categories={categoryPaths} brands={storeId ? repository.getBrands?.(storeId) ?? [] : []}
         extra={productId && api && storeId ? <AdminCard title="Online store"><TemplatePicker api={api} storeId={storeId} resourceType="product" resourceId={productId} /></AdminCard> : undefined} />
-      <Sheet open={previewOpen} onOpenChange={setPreviewOpen}><SheetContent onCloseAutoFocus={event => { event.preventDefault(); previewTrigger.current?.focus(); }} className="admin-shell admin-panel overflow-y-auto">
+      <Sheet open={previewOpen} onOpenChange={setPreviewOpen}><SheetContent onCloseAutoFocus={event => { event.preventDefault(); previewTrigger.current?.focus(); }} className="jk-sheet overflow-y-auto">
         <SheetTitle>Shopper preview</SheetTitle><SheetDescription>Try the options. Nothing is ordered.</SheetDescription>
         <BuyerPreview mediaEnabled={taggingEnabled} draft={draft} currency={currency} categoryLabel={category?.label} />
       </SheetContent></Sheet>

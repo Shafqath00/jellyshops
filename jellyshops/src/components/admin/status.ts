@@ -3,7 +3,7 @@
  * The API keeps its enum codes; the admin never shows them.
  */
 export type StatusTone = "neutral" | "info" | "success" | "warning" | "critical" | "attention";
-export type StatusKind = "order" | "payment" | "fulfilment" | "product" | "stock";
+export type StatusKind = "order" | "payment" | "fulfilment" | "product" | "stock" | "content" | "message" | "stripe";
 
 type Entry = { label: string; tone: StatusTone };
 
@@ -57,6 +57,23 @@ const MAPS: Record<StatusKind, Record<string, Entry>> = {
     LOW_STOCK: { label: "Low stock", tone: "warning" },
     OUT_OF_STOCK: { label: "Out of stock", tone: "critical" },
     NOT_TRACKED: { label: "Not tracked", tone: "neutral" },
+  },
+  content: {
+    PUBLISHED: { label: "Published", tone: "success" },
+    DRAFT: { label: "Draft", tone: "neutral" },
+    ARCHIVED: { label: "Archived", tone: "neutral" },
+    SCHEDULED: { label: "Scheduled", tone: "info" },
+  },
+  message: {
+    NEW: { label: "New", tone: "info" },
+    READ: { label: "Read", tone: "neutral" },
+    CLOSED: { label: "Closed", tone: "success" },
+  },
+  stripe: {
+    ACTIVE: { label: "Active", tone: "success" },
+    PENDING: { label: "Pending", tone: "warning" },
+    INACTIVE: { label: "Not active", tone: "warning" },
+    RESTRICTED: { label: "Restricted", tone: "critical" },
   },
 };
 

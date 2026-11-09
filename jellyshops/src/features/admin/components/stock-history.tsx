@@ -51,7 +51,7 @@ export function StockHistory({ variantId, title, request, onClose }: Props) {
 
   return (
     <Sheet open onOpenChange={(open) => { if (!open) onClose(); }}>
-      <SheetContent className="admin-shell admin-panel overflow-y-auto">
+      <SheetContent className="jk-sheet overflow-y-auto">
         <SheetTitle>Stock history</SheetTitle>
         <SheetDescription>{title}</SheetDescription>
         {error && <div role="alert" className="mt-4 text-[13px] font-semibold text-destructive">{error} <button type="button" className="underline" onClick={() => { setError(""); setLoading(true); setAttempt((count) => count + 1); }}>Try again</button></div>}
