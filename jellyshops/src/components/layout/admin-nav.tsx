@@ -1,14 +1,16 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { Home, Package, Users, FileText, Store, CreditCard, Settings, Search, ChevronRight, type LucideIcon } from "lucide-react";
+import { CreditCard, FileText, Home, Inbox, Settings, Store, Tag, Users, type LucideIcon } from "lucide-react";
 
-type Destination = { label: string; href: string };
-const groups: Array<Destination & { icon: LucideIcon; children?: Destination[] }> = [
+export type AdminDestination = { label: string; href: string };
+export type AdminNavGroup = AdminDestination & { icon: LucideIcon; section?: string; children?: AdminDestination[] };
+
+/** Every admin page the sidebar and the page search know about, in menu order. */
+export const ADMIN_NAV: AdminNavGroup[] = [
   { label: "Home", href: "/admin", icon: Home },
-  { label: "Orders", href: "/admin/orders", icon: Package },
-  { label: "Products", href: "/admin/products", icon: Package, children: [
+  { label: "Orders", href: "/admin/orders", icon: Inbox },
+  { label: "Products", href: "/admin/products", icon: Tag, children: [
     { label: "All products", href: "/admin/products" }, { label: "Collections", href: "/admin/products/collections" }, { label: "Inventory", href: "/admin/products/inventory" }, { label: "Reviews", href: "/admin/products/reviews" },
   ] },
   { label: "Customers", href: "/admin/customers", icon: Users, children: [
@@ -17,24 +19,55 @@ const groups: Array<Destination & { icon: LucideIcon; children?: Destination[] }
   { label: "Content", href: "/admin/content/pages", icon: FileText, children: [
     { label: "Pages", href: "/admin/content/pages" }, { label: "Blog posts", href: "/admin/content/blogs" }, { label: "Files", href: "/admin/content/files" }, { label: "Menus", href: "/admin/content/menus" }, { label: "Custom content", href: "/admin/content/metaobjects" },
   ] },
-  { label: "Online Store", href: "/admin/online-store", icon: Store, children: [
+  { label: "Payments", href: "/admin/payments", icon: CreditCard },
+  { label: "Online Store", href: "/admin/online-store", icon: Store, section: "Sales channels", children: [
     { label: "Store designs", href: "/admin/online-store" }, { label: "Preferences", href: "/admin/online-store/preferences" },
   ] },
-  { label: "Payments", href: "/admin/payments", icon: CreditCard },
-  { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
+export const ADMIN_SETTINGS: AdminNavGroup = { label: "Settings", href: "/admin/settings", icon: Settings };
+
+/** Flat list for the page search: each child page, with the group it belongs to. */
+export function adminDestinations() {
+  return [...ADMIN_NAV, ADMIN_SETTINGS].flatMap((group) => group.children
+    ? group.children.map((child) => ({ ...child, group: group.label, icon: group.icon }))
+    : [{ label: group.label, href: group.href, group: "", icon: group.icon }]);
+}
+
+function isWithin(pathname: string, href: string) {
+  return href === "/admin" ? pathname === href : pathname === href || pathname.startsWith(href + "/");
+}
+
+/** The child page that best matches the address (longest match wins, so /admin/products/123 is "All products"). */
+function activeChild(pathname: string, children: AdminDestination[]) {
+  return children.filter((child) => isWithin(pathname, child.href)).sort((a, b) => b.href.length - a.href.length)[0]?.href;
+}
+
+/**
+ * Sidebar navigation. A group shows its pages only while you are inside it, so the menu stays short
+ * and the open group always says where you are.
+ */
 export function AdminNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname() ?? "";
-  const [query, setQuery] = useState("");
-  const match = (href: string) => href === "/admin" ? pathname === href : pathname === href || pathname.startsWith(href + "/");
-  const link = (item: Destination, nested = false) => <Link key={item.href} href={item.href} onClick={onNavigate} aria-current={pathname === item.href ? "page" : undefined} className={`admin-nav-link ${nested ? "admin-nav-child" : ""} ${pathname === item.href ? "is-active" : ""}`}>{item.label}</Link>;
-  const matches = groups.flatMap(group => group.children ?? [group]).filter(item => item.label.toLowerCase().includes(query.trim().toLowerCase()));
-  return <nav aria-label="Merchant navigation" className="admin-navigation">
-    <label className="admin-nav-search"><Search size={15} aria-hidden="true" /><input type="search" aria-label="Search pages" placeholder="Search pages" value={query} onChange={event => setQuery(event.target.value)} onKeyDown={event => { if (event.key === "Escape") setQuery(""); }} /></label>
-    {query.trim() ? <div className="admin-nav-results">{matches.map(item => link(item))}{!matches.length && <p className="px-3 py-2 text-xs text-white/60">No pages found.</p>}</div> :
-      groups.map(group => group.children ? <details key={group.label} open={match(group.href) || group.children.some(item => match(item.href))} className="admin-nav-group">
-        <summary><group.icon size={17} aria-hidden="true" />{group.label}<ChevronRight size={13} className="ml-auto" /></summary>
-        {group.children.map(item => link(item, true))}
-      </details> : <Link key={group.href} href={group.href} onClick={onNavigate} aria-current={match(group.href) ? "page" : undefined} className={`admin-nav-link ${match(group.href) ? "is-active" : ""}`}><group.icon size={17} aria-hidden="true" />{group.label}</Link>)}
+  const item = (group: AdminNavGroup) => {
+    const childHref = group.children ? activeChild(pathname, group.children) : undefined;
+    const open = Boolean(childHref) || (group.children ? isWithin(pathname, group.href) : false);
+    const exact = !group.children && isWithin(pathname, group.href);
+    return <li key={group.href}>
+      {group.section && <p className="admin-nav-section">{group.section}</p>}
+      <Link href={group.href} onClick={onNavigate} aria-current={exact ? "page" : undefined}
+        className={`admin-nav-link ${exact ? "is-active" : ""} ${open ? "is-open" : ""}`}>
+        <group.icon size={16} aria-hidden="true" />{group.label}
+      </Link>
+      {open && group.children && <ul className="admin-nav-children" aria-label={group.label}>
+        {group.children.map((child) => <li key={child.href}>
+          <Link href={child.href} onClick={onNavigate} aria-current={child.href === childHref ? "page" : undefined}
+            className={`admin-nav-link admin-nav-child ${child.href === childHref ? "is-active" : ""}`}>{child.label}</Link>
+        </li>)}
+      </ul>}
+    </li>;
+  };
+  return <nav aria-label="Merchant navigation" className="admin-sidebar-scroll">
+    <ul className="admin-navigation">{ADMIN_NAV.map(item)}</ul>
+    <ul className="admin-navigation admin-sidebar-footer">{item(ADMIN_SETTINGS)}</ul>
   </nav>;
 }

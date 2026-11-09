@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 const STORAGE_KEY = "jelly-admin-theme";
 const subscribe = () => () => {};
@@ -17,7 +16,7 @@ function readStored(): boolean {
 }
 
 /* Toggles `admin-dark` on <html> while the admin shell is mounted. */
-export function AdminThemeToggle() {
+export function AdminThemeToggle({ className = "jk-icon-button" }: { className?: string }) {
   const storedDark = useSyncExternalStore(subscribe, readStored, serverSnapshot);
   const [selectedDark, setDark] = useState<boolean | null>(null);
   const dark = selectedDark ?? storedDark;
@@ -39,15 +38,15 @@ export function AdminThemeToggle() {
   }
 
   return (
-    <Button
+    <button
       type="button"
-      variant="ghost"
-      size="sm"
+      className={className}
       aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+      title={dark ? "Switch to light mode" : "Switch to dark mode"}
       aria-pressed={dark}
       onClick={toggle}
     >
-      {dark ? <Sun /> : <Moon />}
-    </Button>
+      {dark ? <Sun size={16} aria-hidden="true" /> : <Moon size={16} aria-hidden="true" />}
+    </button>
   );
 }

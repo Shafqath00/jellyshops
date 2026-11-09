@@ -1,0 +1,129 @@
+/*
+ * Admin shell: top bar, sidebar, phone/tablet drawer and the page canvas.
+ * Every value comes from the --jk-* tokens in admin-kit.css, so dark mode only swaps tokens.
+ * Desktop (1024px and up): top bar across, sidebar on the left, page on a rounded canvas.
+ * Below 1024px the sidebar moves into a drawer opened from the top bar.
+ */
+.admin-shell {
+  display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:var(--jk-topbar-height) minmax(0,1fr);
+  min-height:100dvh; background:var(--jk-sidebar); color:var(--jk-text);
+  font:400 var(--jk-text-md)/1.5 var(--jk-font);
+}
+@media(min-width:1024px){.admin-shell{grid-template-columns:var(--jk-sidebar-width) minmax(0,1fr)}}
+
+/* Top bar */
+.admin-topbar {
+  grid-column:1/-1; position:sticky; top:0; z-index:40;
+  display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:var(--jk-space-2);
+  height:var(--jk-topbar-height); padding:0 var(--jk-space-2); background:var(--jk-topbar); color:var(--jk-topbar-text);
+}
+@media(min-width:640px){.admin-topbar{gap:var(--jk-space-3);padding:0 var(--jk-space-3)}}
+@media(min-width:1024px){.admin-topbar{grid-template-columns:calc(var(--jk-sidebar-width) - var(--jk-space-3)) minmax(0,1fr) auto;padding:0 var(--jk-space-4) 0 var(--jk-space-3)}}
+.admin-topbar-start,.admin-topbar-end {display:flex;align-items:center;gap:var(--jk-space-1);min-width:0}
+.admin-topbar-center {display:flex;justify-content:center;min-width:0}
+.admin-brand {display:inline-flex;align-items:center;gap:10px;min-height:36px;padding:4px 8px 4px 4px;border-radius:var(--jk-radius-sm);font-size:15px;font-weight:650;letter-spacing:-.01em;color:inherit;white-space:nowrap}
+.admin-brand:hover {background:var(--jk-topbar-field)}
+.admin-brand-mark {display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:8px;background:var(--jk-brand);color:#fff;font-size:14px;font-weight:750}
+@media(max-width:639px){.admin-brand-name{display:none}.admin-brand{padding-right:4px}}
+.admin-topbar-button {
+  display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:36px; height:36px; padding:0 8px;
+  border-radius:var(--jk-radius-sm); font:550 var(--jk-text-sm)/1 var(--jk-font); color:var(--jk-topbar-text); background:transparent; cursor:pointer; white-space:nowrap;
+}
+.admin-topbar-button:hover,.admin-topbar-button[aria-expanded=true] {background:var(--jk-topbar-field)}
+.admin-topbar-button svg {flex:none}
+.admin-topbar-label {display:none}
+@media(min-width:1280px){.admin-topbar-label{display:inline}}
+.admin-menu-button {display:inline-flex}
+@media(min-width:1024px){.admin-menu-button{display:none}}
+.admin-shell :is(.admin-topbar-button,.admin-brand):focus-visible {outline:2px solid var(--jk-brand-strong);outline-offset:1px}
+
+/* Page search (top bar) */
+.admin-finder {position:relative;width:100%;max-width:560px}
+.admin-finder-field {
+  display:flex; align-items:center; gap:var(--jk-space-2); height:36px; padding:0 10px; border-radius:10px;
+  background:var(--jk-topbar-field); color:var(--jk-topbar-muted); box-shadow:inset 0 0 0 1px #ffffff14; transition:background .12s;
+}
+.admin-finder-field:hover {background:var(--jk-topbar-field-hover)}
+.admin-finder-field:focus-within {background:var(--jk-surface);color:var(--jk-text-subdued);box-shadow:0 0 0 2px var(--jk-brand)}
+.admin-finder-field input {flex:1;min-width:0;height:100%;border:0;outline:none;background:transparent;color:var(--jk-topbar-text);font:400 var(--jk-text-sm) var(--jk-font)}
+.admin-finder-field:focus-within input {color:var(--jk-text)}
+.admin-finder-field input::placeholder {color:inherit;opacity:1}
+.admin-finder-field input::-webkit-search-cancel-button {display:none}
+.admin-finder-kbd {flex:none;padding:1px 6px;border-radius:5px;border:1px solid currentColor;font:550 11px/16px var(--jk-font);opacity:.7}
+@media(max-width:639px){.admin-finder-kbd{display:none}}
+.admin-finder-results {
+  position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:50; max-height:min(420px,70dvh); overflow-y:auto; padding:6px;
+  border-radius:var(--jk-radius); background:var(--jk-surface); color:var(--jk-text); box-shadow:var(--jk-shadow-raised);
+}
+@media(max-width:639px){.admin-finder-results{position:fixed;top:calc(var(--jk-topbar-height) + 4px);left:8px;right:8px}}
+.admin-finder-option {display:flex;align-items:center;gap:10px;min-height:40px;padding:8px 10px;border-radius:var(--jk-radius-sm);font-size:var(--jk-text-sm);cursor:pointer}
+.admin-finder-option svg {flex:none;color:var(--jk-text-subdued)}
+.admin-finder-option small {margin-left:auto;padding-left:12px;font-size:var(--jk-text-xs);color:var(--jk-text-subdued);white-space:nowrap}
+.admin-finder-option[aria-selected=true] {background:var(--jk-surface-hover)}
+.admin-finder-empty {padding:12px 10px;font-size:var(--jk-text-sm);color:var(--jk-text-subdued)}
+
+/* Account menu (top bar) */
+.admin-account {position:relative}
+.admin-avatar {display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:8px;background:var(--jk-brand-soft);color:var(--jk-brand-strong);font-size:12px;font-weight:700;text-transform:uppercase}
+.admin-account-name {max-width:160px;overflow:hidden;text-overflow:ellipsis;display:none}
+@media(min-width:768px){.admin-account-name{display:inline}}
+.admin-account-menu {
+  position:absolute; right:0; top:calc(100% + 6px); z-index:50; width:260px; padding:6px;
+  border-radius:var(--jk-radius); background:var(--jk-surface); color:var(--jk-text); box-shadow:var(--jk-shadow-raised);
+}
+.admin-account-head {display:flex;align-items:center;gap:10px;padding:8px 10px 10px;margin-bottom:4px;border-bottom:1px solid var(--jk-border)}
+.admin-account-head strong {display:block;font-size:var(--jk-text-sm);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-account-head span {display:block;font-size:var(--jk-text-xs);color:var(--jk-text-subdued);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-account-item {display:flex;align-items:center;gap:10px;width:100%;min-height:36px;padding:8px 10px;border-radius:var(--jk-radius-sm);font-size:var(--jk-text-sm);text-align:left;color:var(--jk-text)}
+.admin-account-item svg {color:var(--jk-text-subdued)}
+.admin-account-item:hover {background:var(--jk-surface-hover)}
+.admin-account-item:focus-visible {outline:2px solid var(--jk-focus);outline-offset:-2px}
+
+/* Sidebar (desktop) and drawer (below 1024px) share the navigation */
+.admin-sidebar {display:none}
+@media(min-width:1024px){
+  .admin-sidebar {display:flex;flex-direction:column;position:sticky;top:var(--jk-topbar-height);height:calc(100dvh - var(--jk-topbar-height));padding:var(--jk-space-3) var(--jk-space-2)}
+}
+.admin-sidebar-scroll {display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.admin-navigation {display:flex;flex-direction:column;gap:2px}
+.admin-nav-section {margin:var(--jk-space-4) 10px var(--jk-space-1);font-size:var(--jk-text-xs);font-weight:600;color:var(--jk-text-subdued)}
+.admin-nav-link {
+  display:flex; align-items:center; gap:10px; min-height:32px; padding:5px 10px; border-radius:var(--jk-radius-sm);
+  font-size:var(--jk-text-sm); font-weight:550; color:var(--jk-text); transition:background .12s;
+}
+.admin-nav-link svg {flex:none;color:var(--jk-text-subdued)}
+.admin-nav-link:hover {background:var(--jk-sidebar-hover)}
+.admin-nav-link.is-active {background:var(--jk-surface);box-shadow:var(--jk-shadow);font-weight:650}
+.admin-nav-link.is-active svg,.admin-nav-link.is-open svg {color:var(--jk-brand)}
+.admin-nav-link.is-open {font-weight:650}
+.admin-nav-link:focus-visible {outline:2px solid var(--jk-focus);outline-offset:-2px}
+.admin-nav-children {display:flex;flex-direction:column;gap:2px;margin:2px 0 6px 18px;padding-left:9px;border-left:1px solid var(--jk-border-strong)}
+.admin-nav-child {min-height:30px;font-weight:450;color:var(--jk-text-subdued)}
+.admin-nav-child.is-active {color:var(--jk-text);font-weight:600}
+.admin-sidebar-footer {margin-top:var(--jk-space-2);flex:none;}
+.admin-sidebar-scroll > .admin-sidebar-footer {margin-top:auto;}
+.admin-sidebar-footer {padding-top:var(--jk-space-2);border-top:1px solid var(--jk-border)}
+
+/* Store card at the foot of the sidebar */
+.admin-store-card {display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--jk-radius);min-width:0}
+.admin-store-card > div {min-width:0;flex:1}
+.admin-store-card-label {display:block;font-size:var(--jk-text-xs);color:var(--jk-text-subdued)}
+.admin-store-card-name {display:block;font-size:var(--jk-text-sm);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-store-card select {width:100%;margin-top:2px;min-height:30px;padding:2px 24px 2px 8px;border-radius:6px;border:0;box-shadow:inset 0 0 0 1px var(--jk-border-strong);background-color:var(--jk-surface);color:var(--jk-text);font:550 var(--jk-text-sm) var(--jk-font)}
+.admin-store-card select:focus-visible {outline:2px solid var(--jk-focus);outline-offset:1px}
+
+/* Drawer: the shadcn sheet, re-skinned */
+.admin-drawer {display:flex!important;flex-direction:column;gap:0!important;width:min(300px,86vw)!important;max-width:none!important;padding:var(--jk-space-3) var(--jk-space-2)!important;background:var(--jk-sidebar)!important;color:var(--jk-text);font-family:var(--jk-font);border:0!important}
+.admin-drawer-head {display:flex;align-items:center;gap:10px;min-height:40px;padding:0 44px var(--jk-space-3) 6px;font-size:15px;font-weight:650}
+.admin-drawer > button:last-child {top:14px!important;right:12px!important;width:32px;height:32px;display:grid;place-items:center;border-radius:var(--jk-radius-sm);opacity:1!important;color:var(--jk-text)}
+.admin-drawer > button:last-child:hover {background:var(--jk-sidebar-hover)}
+
+/* Page canvas */
+.admin-workspace {min-width:0;background:var(--jk-bg)}
+@media(min-width:1024px){.admin-workspace{border-top-left-radius:var(--jk-radius-lg);box-shadow:inset 1px 1px 0 var(--jk-border)}}
+.admin-content {width:100%;max-width:var(--jk-content-width);margin:0 auto;padding:var(--jk-space-5) var(--jk-space-4) 48px;min-width:0}
+@media(min-width:768px){.admin-content{padding:var(--jk-space-6) var(--jk-space-6) 56px}}
+@media(min-width:1280px){.admin-content{padding:var(--jk-space-8) var(--jk-space-8) 64px}}
+.admin-content:has(.store-editor-shell) {max-width:none;padding:0}
+
+@media(prefers-reduced-motion:reduce){.admin-shell *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}

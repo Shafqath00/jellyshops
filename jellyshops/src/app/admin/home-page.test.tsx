@@ -4,6 +4,7 @@ import axe from "axe-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import DashboardPage from "./page";
 import { changeText } from "@/features/admin/home/change-text";
+import { niceMax } from "@/features/admin/home/sales-chart";
 
 vi.mock("@/features/auth/providers/auth-provider", () => {
   const activeStore = { id: "store-a", name: "Jelly Beds", slug: "jelly-beds", currency: "GBP" };
@@ -32,8 +33,12 @@ describe("Home", () => {
     const fetchMock = vi.fn((url: string) => Promise.resolve(new Response(JSON.stringify(url.includes("/sales") ? sales(Number(new URL(url).searchParams.get("days"))) : summary))));
     vi.stubGlobal("fetch", fetchMock);
     const { container } = render(<DashboardPage />);
-    expect(await screen.findByText("Finish setting up your store · 4 of 5 done")).toBeVisible();
+    expect(await screen.findByRole("heading", { name: "Set up your store" })).toBeVisible();
+    expect(screen.getByText("4 of 5 done")).toBeVisible();
+    expect(screen.getByRole("progressbar", { name: "Setup progress" })).toHaveAttribute("aria-valuenow", "4");
     expect(screen.getByRole("link", { name: "Publish your store design" })).toHaveAttribute("href", "/admin/online-store");
+    expect(screen.getByRole("link", { name: "Choose a design" })).toHaveAttribute("href", "/admin/online-store");
+    expect(screen.getByRole("link", { name: /Orders to send/ })).toHaveTextContent("1");
     expect((await screen.findAllByText("£2,048.00"))[0]).toBeVisible();
     expect(screen.getAllByText("Up 100% on the 30 days before")).toHaveLength(2);
     expect(screen.getByText("Same as the 30 days before")).toBeVisible();
@@ -46,6 +51,15 @@ describe("Home", () => {
     expect(await screen.findAllByText("Up 100% on the 7 days before", {}, { timeout: 3000 })).toHaveLength(2);
     const results = await axe.run(container, { rules: { "color-contrast": { enabled: false }, region: { enabled: false } } });
     expect(results.violations.map((violation) => violation.id)).toEqual([]);
+  });
+});
+
+describe("niceMax", () => {
+  it("rounds the chart scale up to a value that halves cleanly", () => {
+    expect(niceMax(204800)).toBe(400000);
+    expect(niceMax(150)).toBe(200);
+    expect(niceMax(4100)).toBe(5000);
+    expect(niceMax(0)).toBe(0);
   });
 });
 
