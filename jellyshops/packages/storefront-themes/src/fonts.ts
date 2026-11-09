@@ -30,6 +30,7 @@ export const FONT_OPTIONS = [
   { value: "Oswald", label: "Oswald (display)" },
   { value: "Bebas Neue", label: "Bebas Neue (display)" },
   { value: "Syne", label: "Syne (display)" },
+  { value: "IBM Plex Mono", label: "IBM Plex Mono (monospace)" },
   { value: "Georgia", label: "Georgia (serif)" },
   { value: "Arial", label: "Arial (sans-serif)" },
 ] as const;
@@ -61,6 +62,7 @@ const stacks: Record<string, string> = {
   "Oswald": "var(--font-oswald), Impact, \"Arial Narrow\", sans-serif",
   "Bebas Neue": "var(--font-bebas-neue), Impact, \"Arial Narrow\", sans-serif",
   "Syne": "var(--font-syne), Impact, \"Arial Narrow\", sans-serif",
+  "IBM Plex Mono": "var(--font-ibm-plex-mono), ui-monospace, Menlo, Consolas, monospace",
   "Georgia": "Georgia, \"Times New Roman\", serif",
   "Arial": "Arial, \"Helvetica Neue\", sans-serif",
 };

@@ -237,8 +237,39 @@ export const jellyHaloPreview: ThemePreviewConfig = {
   ratings: { h1: { average: 4.8, count: 214 }, h2: { average: 4.6, count: 98 }, h3: { average: 4.7, count: 156 }, h4: { average: 4.5, count: 61 }, h5: { average: 4.9, count: 33 } },
 };
 
+const diodeAsset = (file: string) => `/themes/jelly-diode/${file}.webp`;
+const diodeProducts: PublicProduct[] = [
+  { id: "d1", name: "Arc ANC headphones", price: "£229.00", compareAtPrice: "£259.00", badge: "Sale", href: "#", imageUrl: diodeAsset("headphones"), vendor: "Diode Audio", chip: "40 h battery", available: true, swatches: [{ label: "Graphite", color: "#2b2d31" }, { label: "Silver", color: "#c9ccd1" }] },
+  { id: "d2", name: "Pulse wireless earbuds", price: "£129.00", href: "#", imageUrl: diodeAsset("earbuds"), vendor: "Diode Audio", chip: "IPX4", available: true },
+  { id: "d3", name: "Field 75 mechanical keyboard", price: "£149.00", href: "#", imageUrl: diodeAsset("keyboard"), vendor: "Diode Desk", chip: "Hot-swap", available: true },
+  { id: "d4", name: "Orbit portable speaker", price: "£89.00", href: "#", imageUrl: diodeAsset("speaker"), vendor: "Diode Audio", chip: "20 h battery", available: true },
+  { id: "d5", name: "Volt 65W USB-C charger", price: "£49.00", href: "#", imageUrl: diodeAsset("charger"), vendor: "Diode Power", chip: "65 W", available: true },
+  { id: "d6", name: "Cell 10K power bank", price: "£39.00", href: "#", imageUrl: diodeAsset("powerbank"), vendor: "Diode Power", chip: "10,000 mAh", available: false },
+];
+
+export const jellyDiodePreview: ThemePreviewConfig = {
+  themeId: "jelly-diode", packId: "jelly-diode", name: "Jelly Diode", stageColor: "#dfe3e8",
+  guide: {
+    heading: "Hear less noise. More music.", subheading: "The numbers",
+    body: "Space Grotesk headings, Inter for reading and a monospace face for specifications. Outlined cards, ruled tables and one electric blue keep every page precise.",
+    announcement: "Free UK delivery over £50 · 2-year warranty on everything", footerText: "Audio, keyboards and power, designed to be used every day and supported for years.",
+  },
+  products: diodeProducts,
+  product: {
+    id: "d1", title: "Arc ANC headphones", description: "Over-ear wireless headphones with adaptive noise cancelling, forty hours of battery and a fold-flat design.\n\nFive minutes on USB-C gives four hours of listening.",
+    galleryEnabled: true, showBuyNow: false, option: { id: "colour", name: "Colour", values: [{ id: "graphite", label: "Graphite" }, { id: "silver", label: "Silver" }, { id: "blue", label: "Signal blue", soldOut: true }] },
+    media: [{ url: diodeAsset("headphones"), alt: "Graphite over-ear headphones, three-quarter view" }, { url: diodeAsset("inthebox"), alt: "Headphones, carry pouch, cable and guide laid out flat" }],
+    specifications: { "Battery life": "Up to 40 hours (ANC on)", Charging: "USB-C, 5 min = 4 hours", Bluetooth: "5.3, multipoint (2 devices)", Codecs: "AAC, SBC, LC3", Weight: "254 g", Drivers: "40 mm dynamic" },
+    shippingCopy: "Free UK delivery over £50.", price: "£229.00", compareAtPrice: "£259.00",
+  },
+  collection: { title: "Audio", description: "Headphones, earbuds and speakers, with the numbers that matter on every card.", imageUrl: diodeAsset("desk") },
+  page: { title: "Warranty and support", intro: "Every Diode product comes with a two-year warranty and five years of firmware updates.", heading: "How repairs work", body: "Tell us what is wrong and we send a prepaid label. Most repairs are back with you within ten working days.", bullets: ["2-year warranty, repairs included", "Firmware updates for 5 years"] },
+  searchQuery: "headphones", cart: { d1: 1, d5: 1 }, useStarterMenu: true,
+  ratings: { d1: { average: 4.7, count: 382 }, d2: { average: 4.5, count: 241 }, d3: { average: 4.8, count: 129 }, d4: { average: 4.4, count: 87 }, d5: { average: 4.9, count: 64 } },
+};
+
 /** Previews of the built-in themes, by the path under /theme-preview/. */
-const builtInPreviews: Record<string, ThemePreviewConfig> = { "jelly-minimal": jellyMinimalPreview, "jelly-avenue": jellyAvenuePreview, "jelly-resthaven": jellyResthavenPreview, "jelly-forma": jellyFormaPreview, "jelly-halo": jellyHaloPreview };
+const builtInPreviews: Record<string, ThemePreviewConfig> = { "jelly-minimal": jellyMinimalPreview, "jelly-avenue": jellyAvenuePreview, "jelly-resthaven": jellyResthavenPreview, "jelly-forma": jellyFormaPreview, "jelly-halo": jellyHaloPreview, "jelly-diode": jellyDiodePreview };
 const previewOfBase: Record<string, ThemePreviewConfig> = { "jelly-signature": jellyMinimalPreview, "jelly-avenue": jellyAvenuePreview };
 
 /**

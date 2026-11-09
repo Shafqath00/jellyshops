@@ -1,0 +1,1037 @@
+{
+  "globalSections": {
+    "announcement": {
+      "id": "diode-announcement",
+      "type": "announcement-bar",
+      "enabled": true,
+      "settings": {
+        "styleScheme": "scheme3",
+        "text": "Free UK delivery over £50 · 2-year warranty on everything"
+      },
+      "blocks": []
+    },
+    "header": {
+      "id": "diode-header",
+      "type": "header",
+      "enabled": true,
+      "settings": {
+        "styleScheme": "scheme1",
+        "layout": "classic",
+        "sticky": true,
+        "showSearch": true,
+        "showAccount": true,
+        "showCart": true,
+        "showWishlist": false,
+        "showToolLabels": false
+      },
+      "blocks": [
+        {
+          "id": "diode-menu-10",
+          "type": "menu",
+          "enabled": true,
+          "settings": {
+            "handle": "main"
+          }
+        }
+      ]
+    },
+    "footer": {
+      "id": "diode-footer",
+      "type": "footer",
+      "enabled": true,
+      "settings": {
+        "styleScheme": "scheme3",
+        "text": "Audio, keyboards and power, designed to be used every day and supported for years.",
+        "showNewsletter": false
+      },
+      "blocks": [
+        {
+          "id": "diode-link-heading-11",
+          "type": "link-heading",
+          "enabled": true,
+          "settings": {
+            "text": "Shop"
+          }
+        },
+        {
+          "id": "diode-link-12",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Audio",
+            "link": "/search?q=audio"
+          }
+        },
+        {
+          "id": "diode-link-13",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Keyboards",
+            "link": "/search?q=keyboard"
+          }
+        },
+        {
+          "id": "diode-link-14",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Charging",
+            "link": "/search?q=charger"
+          }
+        },
+        {
+          "id": "diode-link-heading-15",
+          "type": "link-heading",
+          "enabled": true,
+          "settings": {
+            "text": "Support"
+          }
+        },
+        {
+          "id": "diode-link-16",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Delivery and returns",
+            "link": "/pages/shipping"
+          }
+        },
+        {
+          "id": "diode-link-17",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Warranty",
+            "link": "/pages/warranty"
+          }
+        },
+        {
+          "id": "diode-link-18",
+          "type": "link",
+          "enabled": true,
+          "settings": {
+            "label": "Contact",
+            "link": "/pages/contact"
+          }
+        }
+      ]
+    }
+  },
+  "templates": {
+    "home": {
+      "type": "home",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-hero-22",
+            "type": "hero",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme3",
+              "layout": "spotlight",
+              "eyebrow": "New · Arc headphones",
+              "image": {
+                "url": "/themes/jelly-diode/hero.webp",
+                "alt": "Graphite over-ear wireless headphones on a dark background",
+                "fit": "cover",
+                "focalPoint": {
+                  "x": 66,
+                  "y": 50
+                }
+              },
+              "callouts": "40 h battery\nActive noise cancelling\nBluetooth 5.3\nUSB-C fast charge",
+              "contentAlignment": "left"
+            },
+            "blocks": [
+              {
+                "id": "diode-heading-19",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "Hear less noise. More music."
+                }
+              },
+              {
+                "id": "diode-text-20",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "Adaptive noise cancelling, forty hours on a charge and a fold-flat design that fits the bag you already carry."
+                }
+              },
+              {
+                "id": "diode-button-21",
+                "type": "button",
+                "enabled": true,
+                "settings": {
+                  "label": "Shop headphones",
+                  "href": "/shop"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-custom-content-9",
+            "type": "custom-content",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "direction": "horizontal",
+              "contentAlignment": "left",
+              "gap": 16,
+              "contentWidth": "full",
+              "styleSpacing": "small"
+            },
+            "blocks": [
+              {
+                "id": "diode-heading-1",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "Browse",
+                  "blockTypePreset": "small"
+                }
+              },
+              {
+                "id": "diode-group-8",
+                "type": "group",
+                "enabled": true,
+                "settings": {
+                  "groupDirection": "horizontal",
+                  "groupAlign": "start",
+                  "groupGap": 8
+                },
+                "blocks": [
+                  {
+                    "id": "diode-button-2",
+                    "type": "button",
+                    "enabled": true,
+                    "settings": {
+                      "label": "Audio",
+                      "href": "/search?q=audio",
+                      "buttonStyle": "secondary",
+                      "buttonSize": "small"
+                    }
+                  },
+                  {
+                    "id": "diode-button-3",
+                    "type": "button",
+                    "enabled": true,
+                    "settings": {
+                      "label": "Keyboards",
+                      "href": "/search?q=keyboard",
+                      "buttonStyle": "secondary",
+                      "buttonSize": "small"
+                    }
+                  },
+                  {
+                    "id": "diode-button-4",
+                    "type": "button",
+                    "enabled": true,
+                    "settings": {
+                      "label": "Speakers",
+                      "href": "/search?q=speaker",
+                      "buttonStyle": "secondary",
+                      "buttonSize": "small"
+                    }
+                  },
+                  {
+                    "id": "diode-button-5",
+                    "type": "button",
+                    "enabled": true,
+                    "settings": {
+                      "label": "Charging",
+                      "href": "/search?q=charger",
+                      "buttonStyle": "secondary",
+                      "buttonSize": "small"
+                    }
+                  },
+                  {
+                    "id": "diode-button-6",
+                    "type": "button",
+                    "enabled": true,
+                    "settings": {
+                      "label": "Power banks",
+                      "href": "/search?q=power",
+                      "buttonStyle": "secondary",
+                      "buttonSize": "small"
+                    }
+                  },
+                  {
+                    "id": "diode-button-7",
+                    "type": "button",
+                    "enabled": true,
+                    "settings": {
+                      "label": "Accessories",
+                      "href": "/search?q=accessory",
+                      "buttonStyle": "secondary",
+                      "buttonSize": "small"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-product-grid-23",
+            "type": "product-grid",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "heading": "Bestsellers",
+              "text": "What people are buying this month.",
+              "columns": 4,
+              "limit": 4,
+              "viewAllLabel": "Shop all",
+              "viewAllLink": "/shop"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-image-with-text-27",
+            "type": "image-with-text",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme2",
+              "eyebrow": "Set up",
+              "image": {
+                "url": "/themes/jelly-diode/desk.webp",
+                "alt": "A keyboard, headphones and a small speaker on a tidy wooden desk"
+              },
+              "imagePosition": "right"
+            },
+            "blocks": [
+              {
+                "id": "diode-heading-24",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "Built for the desk you actually have."
+                }
+              },
+              {
+                "id": "diode-text-25",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "Compact sizes, one cable for everything and colours that sit quietly together."
+                }
+              },
+              {
+                "id": "diode-button-26",
+                "type": "button",
+                "enabled": true,
+                "settings": {
+                  "label": "Shop the desk set-up",
+                  "href": "/search?q=desk"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-multicolumn-32",
+            "type": "multicolumn",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "heading": "The numbers",
+              "columns": 4,
+              "contentAlignment": "left"
+            },
+            "blocks": [
+              {
+                "id": "diode-column-28",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "2 years",
+                  "text": "Warranty on every product, repairs included."
+                }
+              },
+              {
+                "id": "diode-column-29",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "30 days",
+                  "text": "To change your mind. Returns are free."
+                }
+              },
+              {
+                "id": "diode-column-30",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "£50",
+                  "text": "Free UK delivery from this order value."
+                }
+              },
+              {
+                "id": "diode-column-31",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "5 years",
+                  "text": "Of firmware updates for every device."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-image-with-text-36",
+            "type": "image-with-text",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme3",
+              "eyebrow": "Detail",
+              "image": {
+                "url": "/themes/jelly-diode/switches.webp",
+                "alt": "Close-up of mechanical keyboard switches and keycaps"
+              },
+              "imagePosition": "left"
+            },
+            "blocks": [
+              {
+                "id": "diode-heading-33",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "Tested to 80 million presses."
+                }
+              },
+              {
+                "id": "diode-text-34",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "Every switch is factory lubed and checked, so the last keystroke feels like the first."
+                }
+              },
+              {
+                "id": "diode-button-35",
+                "type": "button",
+                "enabled": true,
+                "settings": {
+                  "label": "Shop keyboards",
+                  "href": "/search?q=keyboard"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-testimonials-40",
+            "type": "testimonials",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "heading": "From people who use them"
+            },
+            "blocks": [
+              {
+                "id": "diode-testimonial-37",
+                "type": "testimonial",
+                "enabled": true,
+                "settings": {
+                  "quote": "Noise cancelling that actually works on the train, and the battery lasts all week.",
+                  "author": "Sam, commuter"
+                }
+              },
+              {
+                "id": "diode-testimonial-38",
+                "type": "testimonial",
+                "enabled": true,
+                "settings": {
+                  "quote": "The keyboard feels solid and sounds great. Set up in under a minute.",
+                  "author": "Aisha, developer"
+                }
+              },
+              {
+                "id": "diode-testimonial-39",
+                "type": "testimonial",
+                "enabled": true,
+                "settings": {
+                  "quote": "One charger for my laptop, phone and earbuds. My bag is lighter.",
+                  "author": "Ben, frequent traveller"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-newsletter-43",
+            "type": "newsletter",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme4",
+              "buttonLabel": "Sign up",
+              "contentAlignment": "left"
+            },
+            "blocks": [
+              {
+                "id": "diode-heading-41",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "Launches first. No spam."
+                }
+              },
+              {
+                "id": "diode-text-42",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "Be first to new products and firmware updates, about once a month."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "product": {
+      "type": "product",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-product-gallery-44",
+            "type": "product-gallery",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "imageFit": "contain",
+              "layout": "thumbnails",
+              "pageLayout": "details-below"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-product-information-45",
+            "type": "product-information",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "showVendor": true,
+              "showSku": true,
+              "showCompareAtPrice": true,
+              "showAvailability": true,
+              "showSpecifications": false,
+              "discountChip": "amount"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-product-options-46",
+            "type": "product-options",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "style": "buttons"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-product-purchase-47",
+            "type": "product-purchase",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "showQuantity": true,
+              "label": "Add to basket",
+              "stickyBar": true
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-trust-strip-51",
+            "type": "trust-strip",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1"
+            },
+            "blocks": [
+              {
+                "id": "diode-trust-point-48",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Free UK delivery over £50",
+                  "icon": "truck"
+                }
+              },
+              {
+                "id": "diode-trust-point-49",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "2-year warranty",
+                  "icon": "shield"
+                }
+              },
+              {
+                "id": "diode-trust-point-50",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "30-day free returns",
+                  "icon": "return"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-product-specifications-54",
+            "type": "product-specifications",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "heading": "Technical specifications",
+              "showProductSpecifications": true,
+              "layout": "table"
+            },
+            "blocks": [
+              {
+                "id": "diode-spec-row-52",
+                "type": "spec-row",
+                "enabled": true,
+                "settings": {
+                  "label": "Warranty",
+                  "value": "2 years, repairs included"
+                }
+              },
+              {
+                "id": "diode-spec-row-53",
+                "type": "spec-row",
+                "enabled": true,
+                "settings": {
+                  "label": "Firmware updates",
+                  "value": "5 years from launch"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-product-tabs-58",
+            "type": "product-tabs",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "layout": "accordion",
+              "firstOpen": true
+            },
+            "blocks": [
+              {
+                "id": "diode-info-tab-55",
+                "type": "info-tab",
+                "enabled": true,
+                "settings": {
+                  "title": "In the box",
+                  "text": "The product, a USB-C to USB-C cable (1 m), a quick start guide and a recycled-paper carry pouch."
+                }
+              },
+              {
+                "id": "diode-info-tab-56",
+                "type": "info-tab",
+                "enabled": true,
+                "settings": {
+                  "title": "Compatibility",
+                  "text": "Works with any phone, tablet or computer with Bluetooth 5.0 or later, or with a USB-C port. Charges from any USB-C power adapter."
+                }
+              },
+              {
+                "id": "diode-info-tab-57",
+                "type": "info-tab",
+                "enabled": true,
+                "settings": {
+                  "title": "Support and downloads",
+                  "text": "Manuals, firmware and the companion app are on our support page. Our team replies within one working day."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-product-reviews-59",
+            "type": "product-reviews",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "heading": "Reviews",
+              "allowWriting": true,
+              "perPage": 5
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-related-products-60",
+            "type": "related-products",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "limit": 4,
+              "heading": "Works with"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "collection": {
+      "type": "collection",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-collection-header-61",
+            "type": "collection-header",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "showTitle": true,
+              "showDescription": true,
+              "showImage": false,
+              "layout": "simple",
+              "showBreadcrumb": true
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-collection-product-grid-62",
+            "type": "collection-product-grid",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "columns": 3,
+              "limit": 24,
+              "showSort": true,
+              "showFilters": true,
+              "listLayout": "sidebar"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "cart": {
+      "type": "cart",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-cart-summary-63",
+            "type": "cart-summary",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "search": {
+      "type": "search",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-search-results-64",
+            "type": "search-results",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1",
+              "showSort": true,
+              "showFilters": true,
+              "columns": 4
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "page": {
+      "type": "page",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-page-content-65",
+            "type": "page-content",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    },
+    "not-found": {
+      "type": "not-found",
+      "sections": [
+        {
+          "kind": "global",
+          "globalSectionId": "announcement"
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "header"
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "diode-not-found-message-69",
+            "type": "not-found-message",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme1"
+            },
+            "blocks": [
+              {
+                "id": "diode-heading-66",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "Error 404: no signal."
+                }
+              },
+              {
+                "id": "diode-text-67",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "This page does not exist. Try the shop, or search for a product."
+                }
+              },
+              {
+                "id": "diode-button-68",
+                "type": "button",
+                "enabled": true,
+                "settings": {
+                  "label": "Back to the shop",
+                  "href": "/shop"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "global",
+          "globalSectionId": "footer"
+        }
+      ]
+    }
+  },
+  "menus": [
+    {
+      "key": "main",
+      "name": "Main menu",
+      "handle": "main",
+      "items": [
+        {
+          "id": "diode-menu-audio",
+          "label": "Audio",
+          "target": {
+            "kind": "external",
+            "url": "/search?q=audio"
+          },
+          "children": [
+            {
+              "id": "diode-menu-headphones",
+              "label": "Headphones",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=headphones"
+              },
+              "children": []
+            },
+            {
+              "id": "diode-menu-earbuds",
+              "label": "Earbuds",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=earbuds"
+              },
+              "children": []
+            },
+            {
+              "id": "diode-menu-speakers",
+              "label": "Speakers",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=speaker"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "diode-menu-keyboards",
+          "label": "Keyboards",
+          "target": {
+            "kind": "external",
+            "url": "/search?q=keyboard"
+          },
+          "children": []
+        },
+        {
+          "id": "diode-menu-power",
+          "label": "Power",
+          "target": {
+            "kind": "external",
+            "url": "/search?q=power"
+          },
+          "children": [
+            {
+              "id": "diode-menu-chargers",
+              "label": "Chargers",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=charger"
+              },
+              "children": []
+            },
+            {
+              "id": "diode-menu-banks",
+              "label": "Power banks",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=power+bank"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "diode-menu-support",
+          "label": "Support",
+          "target": {
+            "kind": "external",
+            "url": "/pages/contact"
+          },
+          "children": []
+        }
+      ]
+    }
+  ]
+}

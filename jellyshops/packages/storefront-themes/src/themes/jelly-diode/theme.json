@@ -1,0 +1,2256 @@
+{
+  "id": "jelly-diode",
+  "name": "Jelly Diode",
+  "version": "1.0.0",
+  "engines": {
+    "jelly": ">=1 <2"
+  },
+  "description": "A precise electronics storefront: products on seamless grey, key specifications on every card, filters in a sidebar and full specification tables.",
+  "assetPrefix": "/themes/jelly-diode/",
+  "previewAsset": "/themes/jelly-diode/preview.svg",
+  "assets": {
+    "stylesheets": [],
+    "scripts": [],
+    "fonts": [],
+    "icons": [
+      {
+        "id": "mark",
+        "path": "/themes/jelly-diode/mark.svg"
+      }
+    ],
+    "assets": [
+      {
+        "id": "hero",
+        "path": "/themes/jelly-diode/hero.webp"
+      },
+      {
+        "id": "headphones",
+        "path": "/themes/jelly-diode/headphones.webp"
+      },
+      {
+        "id": "earbuds",
+        "path": "/themes/jelly-diode/earbuds.webp"
+      },
+      {
+        "id": "keyboard",
+        "path": "/themes/jelly-diode/keyboard.webp"
+      },
+      {
+        "id": "speaker",
+        "path": "/themes/jelly-diode/speaker.webp"
+      },
+      {
+        "id": "charger",
+        "path": "/themes/jelly-diode/charger.webp"
+      },
+      {
+        "id": "powerbank",
+        "path": "/themes/jelly-diode/powerbank.webp"
+      },
+      {
+        "id": "desk",
+        "path": "/themes/jelly-diode/desk.webp"
+      },
+      {
+        "id": "switches",
+        "path": "/themes/jelly-diode/switches.webp"
+      },
+      {
+        "id": "inthebox",
+        "path": "/themes/jelly-diode/inthebox.webp"
+      }
+    ]
+  },
+  "layout": "standard",
+  "enabled": true,
+  "settingsDefaults": {
+    "colors": {
+      "background": "#F5F6F7",
+      "surface": "#E9ECEF",
+      "text": "#0C0E11",
+      "secondary": "#525962",
+      "primary": "#2D46F5",
+      "accent": "#C8F03C"
+    },
+    "typography": {
+      "headingFont": "Space Grotesk",
+      "bodyFont": "Inter",
+      "headingScale": "standard",
+      "scale": "default",
+      "headingWeight": 600,
+      "bodyWeight": 400,
+      "bodySize": 16,
+      "headingSize": 64
+    },
+    "buttons": {
+      "style": "solid",
+      "radius": "soft",
+      "size": "theme",
+      "textCase": "theme",
+      "borderWidth": "theme",
+      "hover": "darken"
+    },
+    "layout": {
+      "containerWidth": "wide",
+      "sectionSpacing": "standard",
+      "density": "comfortable",
+      "contentWidth": 1280,
+      "sectionGap": 64
+    },
+    "productCard": {
+      "imageRatio": "square",
+      "style": "minimal",
+      "alignment": "left",
+      "showBrand": true,
+      "radius": "soft",
+      "shadow": "none",
+      "hover": "none",
+      "order": "photo-title-price",
+      "showTitle": "show",
+      "titleLines": "theme",
+      "showPrice": "show",
+      "savings": "none",
+      "button": "view",
+      "swatches": "colors",
+      "layout": "technical",
+      "showRating": true
+    },
+    "header": {
+      "variant": "logo-left",
+      "sticky": false,
+      "showSearch": true,
+      "showCart": true
+    },
+    "footer": {
+      "variant": "simple",
+      "showDescription": true
+    },
+    "branding": {
+      "logoUrl": "",
+      "bannerUrl": "",
+      "faviconUrl": ""
+    },
+    "textStyles": {
+      "h1": {
+        "font": "heading",
+        "lineHeight": "theme",
+        "letterSpacing": "theme",
+        "textCase": "theme"
+      },
+      "h2": {
+        "size": 44,
+        "font": "heading",
+        "lineHeight": "theme",
+        "letterSpacing": "theme",
+        "textCase": "theme"
+      },
+      "h3": {
+        "size": 28,
+        "font": "heading",
+        "lineHeight": "theme",
+        "letterSpacing": "theme",
+        "textCase": "theme"
+      },
+      "h4": {
+        "size": 20,
+        "font": "heading",
+        "lineHeight": "theme",
+        "letterSpacing": "theme",
+        "textCase": "theme"
+      },
+      "body": {
+        "font": "body",
+        "lineHeight": "theme",
+        "letterSpacing": "theme",
+        "textCase": "theme"
+      },
+      "small": {
+        "size": 14,
+        "font": "body",
+        "lineHeight": "theme",
+        "letterSpacing": "theme",
+        "textCase": "theme"
+      }
+    },
+    "colorSchemes": {
+      "count": "4",
+      "scheme1": {
+        "name": "Light",
+        "background": "#F5F6F7",
+        "text": "#0C0E11",
+        "button": "#2D46F5",
+        "buttonText": "#FFFFFF"
+      },
+      "scheme2": {
+        "name": "Grey",
+        "background": "#E6E9EC",
+        "text": "#0C0E11",
+        "button": "#0C0E11",
+        "buttonText": "#F5F6F7"
+      },
+      "scheme3": {
+        "name": "Graphite",
+        "background": "#111317",
+        "text": "#F5F6F7",
+        "button": "#C8F03C",
+        "buttonText": "#0C0E11"
+      },
+      "scheme4": {
+        "name": "Electric",
+        "background": "#2D46F5",
+        "text": "#FFFFFF",
+        "button": "#FFFFFF",
+        "buttonText": "#0C0E11"
+      },
+      "scheme5": {
+        "name": "",
+        "background": "#ece7de",
+        "text": "#1c1b19",
+        "button": "#1c1b19",
+        "buttonText": "#faf9f7"
+      },
+      "scheme6": {
+        "name": "",
+        "background": "#1c1b19",
+        "text": "#faf9f7",
+        "button": "#faf9f7",
+        "buttonText": "#1c1b19"
+      },
+      "scheme7": {
+        "name": "",
+        "background": "#ffffff",
+        "text": "#1c1b19",
+        "button": "#1c1b19",
+        "buttonText": "#ffffff"
+      },
+      "scheme8": {
+        "name": "",
+        "background": "#faf9f7",
+        "text": "#1c1b19",
+        "button": "#1c1b19",
+        "buttonText": "#faf9f7"
+      }
+    },
+    "fields": {
+      "radius": "soft",
+      "borderWidth": "theme",
+      "height": "theme"
+    },
+    "badges": {
+      "sale": "hide",
+      "position": "theme",
+      "shape": "theme",
+      "background": "",
+      "text": ""
+    },
+    "social": {
+      "instagram": "",
+      "facebook": "",
+      "tiktok": "",
+      "youtube": "",
+      "x": "",
+      "pinterest": "",
+      "linkedin": "",
+      "whatsapp": ""
+    },
+    "advanced": {
+      "customCss": ""
+    },
+    "languages": {
+      "defaultName": "English",
+      "extra": ""
+    },
+    "cart": {
+      "type": "drawer",
+      "freeDeliveryFrom": 50
+    }
+  },
+  "settingsSchema": [
+    {
+      "id": "colors.background",
+      "type": "color",
+      "label": "Page background",
+      "group": "Colors",
+      "default": "#F5F6F7"
+    },
+    {
+      "id": "colors.surface",
+      "type": "color",
+      "label": "Cards and panels",
+      "group": "Colors",
+      "default": "#E9ECEF"
+    },
+    {
+      "id": "colors.text",
+      "type": "color",
+      "label": "Text",
+      "group": "Colors",
+      "default": "#0C0E11"
+    },
+    {
+      "id": "colors.secondary",
+      "type": "color",
+      "label": "Soft text",
+      "group": "Colors",
+      "default": "#525962"
+    },
+    {
+      "id": "colors.primary",
+      "type": "color",
+      "label": "Buttons",
+      "group": "Colors",
+      "default": "#2D46F5"
+    },
+    {
+      "id": "colors.accent",
+      "type": "color",
+      "label": "Highlight backgrounds",
+      "group": "Colors",
+      "default": "#C8F03C"
+    },
+    {
+      "id": "colorSchemes.count",
+      "type": "select",
+      "label": "Number of colour schemes",
+      "group": "Colour schemes",
+      "default": "4",
+      "description": "Sections using a scheme you remove keep its colours until you pick another.",
+      "options": [
+        {
+          "value": "4",
+          "label": "4"
+        },
+        {
+          "value": "5",
+          "label": "5"
+        },
+        {
+          "value": "6",
+          "label": "6"
+        },
+        {
+          "value": "7",
+          "label": "7"
+        },
+        {
+          "value": "8",
+          "label": "8"
+        }
+      ]
+    },
+    {
+      "id": "colorSchemes.scheme1.name",
+      "type": "text",
+      "label": "Name",
+      "group": "Colour scheme 1",
+      "default": "Light",
+      "description": "Shown when a section picks its colour scheme."
+    },
+    {
+      "id": "colorSchemes.scheme1.background",
+      "type": "color",
+      "label": "Background",
+      "group": "Colour scheme 1",
+      "default": "#F5F6F7"
+    },
+    {
+      "id": "colorSchemes.scheme1.text",
+      "type": "color",
+      "label": "Text",
+      "group": "Colour scheme 1",
+      "default": "#0C0E11"
+    },
+    {
+      "id": "colorSchemes.scheme1.button",
+      "type": "color",
+      "label": "Button",
+      "group": "Colour scheme 1",
+      "default": "#2D46F5"
+    },
+    {
+      "id": "colorSchemes.scheme1.buttonText",
+      "type": "color",
+      "label": "Button text",
+      "group": "Colour scheme 1",
+      "default": "#FFFFFF"
+    },
+    {
+      "id": "colorSchemes.scheme2.name",
+      "type": "text",
+      "label": "Name",
+      "group": "Colour scheme 2",
+      "default": "Grey",
+      "description": "Shown when a section picks its colour scheme."
+    },
+    {
+      "id": "colorSchemes.scheme2.background",
+      "type": "color",
+      "label": "Background",
+      "group": "Colour scheme 2",
+      "default": "#E6E9EC"
+    },
+    {
+      "id": "colorSchemes.scheme2.text",
+      "type": "color",
+      "label": "Text",
+      "group": "Colour scheme 2",
+      "default": "#0C0E11"
+    },
+    {
+      "id": "colorSchemes.scheme2.button",
+      "type": "color",
+      "label": "Button",
+      "group": "Colour scheme 2",
+      "default": "#0C0E11"
+    },
+    {
+      "id": "colorSchemes.scheme2.buttonText",
+      "type": "color",
+      "label": "Button text",
+      "group": "Colour scheme 2",
+      "default": "#F5F6F7"
+    },
+    {
+      "id": "colorSchemes.scheme3.name",
+      "type": "text",
+      "label": "Name",
+      "group": "Colour scheme 3",
+      "default": "Graphite",
+      "description": "Shown when a section picks its colour scheme."
+    },
+    {
+      "id": "colorSchemes.scheme3.background",
+      "type": "color",
+      "label": "Background",
+      "group": "Colour scheme 3",
+      "default": "#111317"
+    },
+    {
+      "id": "colorSchemes.scheme3.text",
+      "type": "color",
+      "label": "Text",
+      "group": "Colour scheme 3",
+      "default": "#F5F6F7"
+    },
+    {
+      "id": "colorSchemes.scheme3.button",
+      "type": "color",
+      "label": "Button",
+      "group": "Colour scheme 3",
+      "default": "#C8F03C"
+    },
+    {
+      "id": "colorSchemes.scheme3.buttonText",
+      "type": "color",
+      "label": "Button text",
+      "group": "Colour scheme 3",
+      "default": "#0C0E11"
+    },
+    {
+      "id": "colorSchemes.scheme4.name",
+      "type": "text",
+      "label": "Name",
+      "group": "Colour scheme 4",
+      "default": "Electric",
+      "description": "Shown when a section picks its colour scheme."
+    },
+    {
+      "id": "colorSchemes.scheme4.background",
+      "type": "color",
+      "label": "Background",
+      "group": "Colour scheme 4",
+      "default": "#2D46F5"
+    },
+    {
+      "id": "colorSchemes.scheme4.text",
+      "type": "color",
+      "label": "Text",
+      "group": "Colour scheme 4",
+      "default": "#FFFFFF"
+    },
+    {
+      "id": "colorSchemes.scheme4.button",
+      "type": "color",
+      "label": "Button",
+      "group": "Colour scheme 4",
+      "default": "#FFFFFF"
+    },
+    {
+      "id": "colorSchemes.scheme4.buttonText",
+      "type": "color",
+      "label": "Button text",
+      "group": "Colour scheme 4",
+      "default": "#0C0E11"
+    },
+    {
+      "id": "colorSchemes.scheme5.name",
+      "type": "text",
+      "label": "Name",
+      "group": "Colour scheme 5",
+      "default": "",
+      "description": "Shown when a section picks its colour scheme."
+    },
+    {
+      "id": "colorSchemes.scheme5.background",
+      "type": "color",
+      "label": "Background",
+      "group": "Colour scheme 5",
+      "default": "#ece7de"
+    },
+    {
+      "id": "colorSchemes.scheme5.text",
+      "type": "color",
+      "label": "Text",
+      "group": "Colour scheme 5",
+      "default": "#1c1b19"
+    },
+    {
+      "id": "colorSchemes.scheme5.button",
+      "type": "color",
+      "label": "Button",
+      "group": "Colour scheme 5",
+      "default": "#1c1b19"
+    },
+    {
+      "id": "colorSchemes.scheme5.buttonText",
+      "type": "color",
+      "label": "Button text",
+      "group": "Colour scheme 5",
+      "default": "#faf9f7"
+    },
+    {
+      "id": "colorSchemes.scheme6.name",
+      "type": "text",
+      "label": "Name",
+      "group": "Colour scheme 6",
+      "default": "",
+      "description": "Shown when a section picks its colour scheme."
+    },
+    {
+      "id": "colorSchemes.scheme6.background",
+      "type": "color",
+      "label": "Background",
+      "group": "Colour scheme 6",
+      "default": "#1c1b19"
+    },
+    {
+      "id": "colorSchemes.scheme6.text",
+      "type": "color",
+      "label": "Text",
+      "group": "Colour scheme 6",
+      "default": "#faf9f7"
+    },
+    {
+      "id": "colorSchemes.scheme6.button",
+      "type": "color",
+      "label": "Button",
+      "group": "Colour scheme 6",
+      "default": "#faf9f7"
+    },
+    {
+      "id": "colorSchemes.scheme6.buttonText",
+      "type": "color",
+      "label": "Button text",
+      "group": "Colour scheme 6",
+      "default": "#1c1b19"
+    },
+    {
+      "id": "colorSchemes.scheme7.name",
+      "type": "text",
+      "label": "Name",
+      "group": "Colour scheme 7",
+      "default": "",
+      "description": "Shown when a section picks its colour scheme."
+    },
+    {
+      "id": "colorSchemes.scheme7.background",
+      "type": "color",
+      "label": "Background",
+      "group": "Colour scheme 7",
+      "default": "#ffffff"
+    },
+    {
+      "id": "colorSchemes.scheme7.text",
+      "type": "color",
+      "label": "Text",
+      "group": "Colour scheme 7",
+      "default": "#1c1b19"
+    },
+    {
+      "id": "colorSchemes.scheme7.button",
+      "type": "color",
+      "label": "Button",
+      "group": "Colour scheme 7",
+      "default": "#1c1b19"
+    },
+    {
+      "id": "colorSchemes.scheme7.buttonText",
+      "type": "color",
+      "label": "Button text",
+      "group": "Colour scheme 7",
+      "default": "#ffffff"
+    },
+    {
+      "id": "colorSchemes.scheme8.name",
+      "type": "text",
+      "label": "Name",
+      "group": "Colour scheme 8",
+      "default": "",
+      "description": "Shown when a section picks its colour scheme."
+    },
+    {
+      "id": "colorSchemes.scheme8.background",
+      "type": "color",
+      "label": "Background",
+      "group": "Colour scheme 8",
+      "default": "#faf9f7"
+    },
+    {
+      "id": "colorSchemes.scheme8.text",
+      "type": "color",
+      "label": "Text",
+      "group": "Colour scheme 8",
+      "default": "#1c1b19"
+    },
+    {
+      "id": "colorSchemes.scheme8.button",
+      "type": "color",
+      "label": "Button",
+      "group": "Colour scheme 8",
+      "default": "#1c1b19"
+    },
+    {
+      "id": "colorSchemes.scheme8.buttonText",
+      "type": "color",
+      "label": "Button text",
+      "group": "Colour scheme 8",
+      "default": "#faf9f7"
+    },
+    {
+      "id": "typography.headingFont",
+      "type": "font",
+      "label": "Heading font",
+      "group": "Typography",
+      "default": "Space Grotesk",
+      "options": [
+        {
+          "value": "Fraunces",
+          "label": "Fraunces (serif)"
+        },
+        {
+          "value": "Inter",
+          "label": "Inter (sans-serif)"
+        },
+        {
+          "value": "Playfair Display",
+          "label": "Playfair Display (serif)"
+        },
+        {
+          "value": "Cormorant Garamond",
+          "label": "Cormorant Garamond (serif)"
+        },
+        {
+          "value": "Lora",
+          "label": "Lora (serif)"
+        },
+        {
+          "value": "EB Garamond",
+          "label": "EB Garamond (serif)"
+        },
+        {
+          "value": "Libre Baskerville",
+          "label": "Libre Baskerville (serif)"
+        },
+        {
+          "value": "DM Serif Display",
+          "label": "DM Serif Display (serif)"
+        },
+        {
+          "value": "Crimson Pro",
+          "label": "Crimson Pro (serif)"
+        },
+        {
+          "value": "Manrope",
+          "label": "Manrope (sans-serif)"
+        },
+        {
+          "value": "DM Sans",
+          "label": "DM Sans (sans-serif)"
+        },
+        {
+          "value": "Work Sans",
+          "label": "Work Sans (sans-serif)"
+        },
+        {
+          "value": "Montserrat",
+          "label": "Montserrat (sans-serif)"
+        },
+        {
+          "value": "Outfit",
+          "label": "Outfit (sans-serif)"
+        },
+        {
+          "value": "Plus Jakarta Sans",
+          "label": "Plus Jakarta Sans (sans-serif)"
+        },
+        {
+          "value": "Nunito Sans",
+          "label": "Nunito Sans (sans-serif)"
+        },
+        {
+          "value": "Raleway",
+          "label": "Raleway (sans-serif)"
+        },
+        {
+          "value": "Space Grotesk",
+          "label": "Space Grotesk (sans-serif)"
+        },
+        {
+          "value": "Josefin Sans",
+          "label": "Josefin Sans (sans-serif)"
+        },
+        {
+          "value": "Figtree",
+          "label": "Figtree (sans-serif)"
+        },
+        {
+          "value": "Jost",
+          "label": "Jost (sans-serif)"
+        },
+        {
+          "value": "Poppins",
+          "label": "Poppins (sans-serif, Hindi)"
+        },
+        {
+          "value": "Hind",
+          "label": "Hind (sans-serif, Hindi)"
+        },
+        {
+          "value": "Oswald",
+          "label": "Oswald (display)"
+        },
+        {
+          "value": "Bebas Neue",
+          "label": "Bebas Neue (display)"
+        },
+        {
+          "value": "Syne",
+          "label": "Syne (display)"
+        },
+        {
+          "value": "IBM Plex Mono",
+          "label": "IBM Plex Mono (monospace)"
+        },
+        {
+          "value": "Georgia",
+          "label": "Georgia (serif)"
+        },
+        {
+          "value": "Arial",
+          "label": "Arial (sans-serif)"
+        }
+      ]
+    },
+    {
+      "id": "typography.bodyFont",
+      "type": "font",
+      "label": "Body font",
+      "group": "Typography",
+      "default": "Inter",
+      "options": [
+        {
+          "value": "Fraunces",
+          "label": "Fraunces (serif)"
+        },
+        {
+          "value": "Inter",
+          "label": "Inter (sans-serif)"
+        },
+        {
+          "value": "Playfair Display",
+          "label": "Playfair Display (serif)"
+        },
+        {
+          "value": "Cormorant Garamond",
+          "label": "Cormorant Garamond (serif)"
+        },
+        {
+          "value": "Lora",
+          "label": "Lora (serif)"
+        },
+        {
+          "value": "EB Garamond",
+          "label": "EB Garamond (serif)"
+        },
+        {
+          "value": "Libre Baskerville",
+          "label": "Libre Baskerville (serif)"
+        },
+        {
+          "value": "DM Serif Display",
+          "label": "DM Serif Display (serif)"
+        },
+        {
+          "value": "Crimson Pro",
+          "label": "Crimson Pro (serif)"
+        },
+        {
+          "value": "Manrope",
+          "label": "Manrope (sans-serif)"
+        },
+        {
+          "value": "DM Sans",
+          "label": "DM Sans (sans-serif)"
+        },
+        {
+          "value": "Work Sans",
+          "label": "Work Sans (sans-serif)"
+        },
+        {
+          "value": "Montserrat",
+          "label": "Montserrat (sans-serif)"
+        },
+        {
+          "value": "Outfit",
+          "label": "Outfit (sans-serif)"
+        },
+        {
+          "value": "Plus Jakarta Sans",
+          "label": "Plus Jakarta Sans (sans-serif)"
+        },
+        {
+          "value": "Nunito Sans",
+          "label": "Nunito Sans (sans-serif)"
+        },
+        {
+          "value": "Raleway",
+          "label": "Raleway (sans-serif)"
+        },
+        {
+          "value": "Space Grotesk",
+          "label": "Space Grotesk (sans-serif)"
+        },
+        {
+          "value": "Josefin Sans",
+          "label": "Josefin Sans (sans-serif)"
+        },
+        {
+          "value": "Figtree",
+          "label": "Figtree (sans-serif)"
+        },
+        {
+          "value": "Jost",
+          "label": "Jost (sans-serif)"
+        },
+        {
+          "value": "Poppins",
+          "label": "Poppins (sans-serif, Hindi)"
+        },
+        {
+          "value": "Hind",
+          "label": "Hind (sans-serif, Hindi)"
+        },
+        {
+          "value": "Oswald",
+          "label": "Oswald (display)"
+        },
+        {
+          "value": "Bebas Neue",
+          "label": "Bebas Neue (display)"
+        },
+        {
+          "value": "Syne",
+          "label": "Syne (display)"
+        },
+        {
+          "value": "IBM Plex Mono",
+          "label": "IBM Plex Mono (monospace)"
+        },
+        {
+          "value": "Georgia",
+          "label": "Georgia (serif)"
+        },
+        {
+          "value": "Arial",
+          "label": "Arial (sans-serif)"
+        }
+      ]
+    },
+    {
+      "id": "typography.headingWeight",
+      "type": "range",
+      "label": "Heading weight",
+      "group": "Typography",
+      "default": 600,
+      "min": 300,
+      "max": 700,
+      "step": 100
+    },
+    {
+      "id": "typography.headingSize",
+      "type": "range",
+      "label": "Size (px)",
+      "group": "Text style: Heading 1",
+      "default": 64,
+      "min": 32,
+      "max": 88,
+      "step": 4
+    },
+    {
+      "id": "textStyles.h1.font",
+      "type": "select",
+      "label": "Font",
+      "group": "Text style: Heading 1",
+      "default": "heading",
+      "description": "Applies where a block uses this text style.",
+      "options": [
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.h1.lineHeight",
+      "type": "select",
+      "label": "Line height",
+      "group": "Text style: Heading 1",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "tight",
+          "label": "Tight"
+        },
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "loose",
+          "label": "Loose"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.h1.letterSpacing",
+      "type": "select",
+      "label": "Letter spacing",
+      "group": "Text style: Heading 1",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "tight",
+          "label": "Tight"
+        },
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "wide",
+          "label": "Wide"
+        },
+        {
+          "value": "wider",
+          "label": "Extra wide"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.h1.textCase",
+      "type": "select",
+      "label": "Case",
+      "group": "Text style: Heading 1",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "none",
+          "label": "As typed"
+        },
+        {
+          "value": "uppercase",
+          "label": "UPPERCASE"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.h2.size",
+      "type": "range",
+      "label": "Size (px)",
+      "group": "Text style: Heading 2",
+      "default": 44,
+      "min": 12,
+      "max": 72,
+      "step": 1
+    },
+    {
+      "id": "textStyles.h2.font",
+      "type": "select",
+      "label": "Font",
+      "group": "Text style: Heading 2",
+      "default": "heading",
+      "description": "Applies where a block uses this text style.",
+      "options": [
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.h2.lineHeight",
+      "type": "select",
+      "label": "Line height",
+      "group": "Text style: Heading 2",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "tight",
+          "label": "Tight"
+        },
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "loose",
+          "label": "Loose"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.h2.letterSpacing",
+      "type": "select",
+      "label": "Letter spacing",
+      "group": "Text style: Heading 2",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "tight",
+          "label": "Tight"
+        },
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "wide",
+          "label": "Wide"
+        },
+        {
+          "value": "wider",
+          "label": "Extra wide"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.h2.textCase",
+      "type": "select",
+      "label": "Case",
+      "group": "Text style: Heading 2",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "none",
+          "label": "As typed"
+        },
+        {
+          "value": "uppercase",
+          "label": "UPPERCASE"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.h3.size",
+      "type": "range",
+      "label": "Size (px)",
+      "group": "Text style: Heading 3",
+      "default": 28,
+      "min": 12,
+      "max": 72,
+      "step": 1
+    },
+    {
+      "id": "textStyles.h3.font",
+      "type": "select",
+      "label": "Font",
+      "group": "Text style: Heading 3",
+      "default": "heading",
+      "description": "Applies where a block uses this text style.",
+      "options": [
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.h3.lineHeight",
+      "type": "select",
+      "label": "Line height",
+      "group": "Text style: Heading 3",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "tight",
+          "label": "Tight"
+        },
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "loose",
+          "label": "Loose"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.h3.letterSpacing",
+      "type": "select",
+      "label": "Letter spacing",
+      "group": "Text style: Heading 3",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "tight",
+          "label": "Tight"
+        },
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "wide",
+          "label": "Wide"
+        },
+        {
+          "value": "wider",
+          "label": "Extra wide"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.h3.textCase",
+      "type": "select",
+      "label": "Case",
+      "group": "Text style: Heading 3",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "none",
+          "label": "As typed"
+        },
+        {
+          "value": "uppercase",
+          "label": "UPPERCASE"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.h4.size",
+      "type": "range",
+      "label": "Size (px)",
+      "group": "Text style: Heading 4",
+      "default": 20,
+      "min": 12,
+      "max": 72,
+      "step": 1
+    },
+    {
+      "id": "textStyles.h4.font",
+      "type": "select",
+      "label": "Font",
+      "group": "Text style: Heading 4",
+      "default": "heading",
+      "description": "Applies where a block uses this text style.",
+      "options": [
+        {
+          "value": "heading",
+          "label": "Heading font"
+        },
+        {
+          "value": "body",
+          "label": "Body font"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.h4.lineHeight",
+      "type": "select",
+      "label": "Line height",
+      "group": "Text style: Heading 4",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "tight",
+          "label": "Tight"
+        },
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "loose",
+          "label": "Loose"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.h4.letterSpacing",
+      "type": "select",
+      "label": "Letter spacing",
+      "group": "Text style: Heading 4",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "tight",
+          "label": "Tight"
+        },
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "wide",
+          "label": "Wide"
+        },
+        {
+          "value": "wider",
+          "label": "Extra wide"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.h4.textCase",
+      "type": "select",
+      "label": "Case",
+      "group": "Text style: Heading 4",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "none",
+          "label": "As typed"
+        },
+        {
+          "value": "uppercase",
+          "label": "UPPERCASE"
+        }
+      ]
+    },
+    {
+      "id": "typography.bodySize",
+      "type": "range",
+      "label": "Size (px)",
+      "group": "Text style: Body",
+      "default": 16,
+      "min": 14,
+      "max": 20,
+      "step": 1
+    },
+    {
+      "id": "textStyles.body.font",
+      "type": "select",
+      "label": "Font",
+      "group": "Text style: Body",
+      "default": "body",
+      "options": [
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.body.lineHeight",
+      "type": "select",
+      "label": "Line height",
+      "group": "Text style: Body",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "tight",
+          "label": "Tight"
+        },
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "loose",
+          "label": "Loose"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.body.letterSpacing",
+      "type": "select",
+      "label": "Letter spacing",
+      "group": "Text style: Body",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "tight",
+          "label": "Tight"
+        },
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "wide",
+          "label": "Wide"
+        },
+        {
+          "value": "wider",
+          "label": "Extra wide"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.body.textCase",
+      "type": "select",
+      "label": "Case",
+      "group": "Text style: Body",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "none",
+          "label": "As typed"
+        },
+        {
+          "value": "uppercase",
+          "label": "UPPERCASE"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.small.size",
+      "type": "range",
+      "label": "Size (px)",
+      "group": "Text style: Small",
+      "default": 14,
+      "min": 10,
+      "max": 16,
+      "step": 1
+    },
+    {
+      "id": "textStyles.small.font",
+      "type": "select",
+      "label": "Font",
+      "group": "Text style: Small",
+      "default": "body",
+      "description": "Applies where a block uses this text style.",
+      "options": [
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.small.lineHeight",
+      "type": "select",
+      "label": "Line height",
+      "group": "Text style: Small",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "tight",
+          "label": "Tight"
+        },
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "loose",
+          "label": "Loose"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.small.letterSpacing",
+      "type": "select",
+      "label": "Letter spacing",
+      "group": "Text style: Small",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "tight",
+          "label": "Tight"
+        },
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "wide",
+          "label": "Wide"
+        },
+        {
+          "value": "wider",
+          "label": "Extra wide"
+        }
+      ]
+    },
+    {
+      "id": "textStyles.small.textCase",
+      "type": "select",
+      "label": "Case",
+      "group": "Text style: Small",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "none",
+          "label": "As typed"
+        },
+        {
+          "value": "uppercase",
+          "label": "UPPERCASE"
+        }
+      ]
+    },
+    {
+      "id": "buttons.radius",
+      "type": "select",
+      "label": "Button corners",
+      "group": "Buttons",
+      "default": "soft",
+      "options": [
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "soft",
+          "label": "Slightly rounded"
+        },
+        {
+          "value": "rounded",
+          "label": "Rounded"
+        },
+        {
+          "value": "pill",
+          "label": "Pill"
+        }
+      ]
+    },
+    {
+      "id": "buttons.size",
+      "type": "select",
+      "label": "Button size",
+      "group": "Buttons",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "small",
+          "label": "Small"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        }
+      ]
+    },
+    {
+      "id": "buttons.textCase",
+      "type": "select",
+      "label": "Button text case",
+      "group": "Buttons",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "none",
+          "label": "As typed"
+        },
+        {
+          "value": "uppercase",
+          "label": "UPPERCASE"
+        }
+      ]
+    },
+    {
+      "id": "buttons.borderWidth",
+      "type": "select",
+      "label": "Border thickness",
+      "group": "Buttons",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "thin",
+          "label": "Thin"
+        },
+        {
+          "value": "thick",
+          "label": "Thick"
+        }
+      ]
+    },
+    {
+      "id": "buttons.hover",
+      "type": "select",
+      "label": "Hover effect",
+      "group": "Buttons",
+      "default": "darken",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "darken",
+          "label": "Darken"
+        },
+        {
+          "value": "lift",
+          "label": "Lift with shadow"
+        },
+        {
+          "value": "underline",
+          "label": "Underline"
+        },
+        {
+          "value": "none",
+          "label": "None"
+        }
+      ]
+    },
+    {
+      "id": "layout.contentWidth",
+      "type": "range",
+      "label": "Page width",
+      "group": "Layout",
+      "default": 1280,
+      "min": 960,
+      "max": 1600,
+      "step": 32
+    },
+    {
+      "id": "layout.sectionGap",
+      "type": "range",
+      "label": "Space between sections",
+      "group": "Layout",
+      "default": 64,
+      "min": 32,
+      "max": 160,
+      "step": 8
+    },
+    {
+      "id": "productCard.imageRatio",
+      "type": "select",
+      "label": "Product image shape",
+      "group": "Product cards",
+      "default": "square",
+      "options": [
+        {
+          "value": "portrait",
+          "label": "Portrait"
+        },
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "landscape",
+          "label": "Landscape"
+        }
+      ]
+    },
+    {
+      "id": "productCard.style",
+      "type": "select",
+      "label": "Product card style",
+      "group": "Product cards",
+      "default": "minimal",
+      "options": [
+        {
+          "value": "minimal",
+          "label": "Minimal"
+        },
+        {
+          "value": "bordered",
+          "label": "Bordered"
+        }
+      ]
+    },
+    {
+      "id": "productCard.alignment",
+      "type": "alignment",
+      "label": "Product text alignment",
+      "group": "Product cards",
+      "default": "left",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ]
+    },
+    {
+      "id": "productCard.radius",
+      "type": "select",
+      "label": "Card corners",
+      "group": "Product cards",
+      "default": "soft",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "soft",
+          "label": "Slightly rounded"
+        },
+        {
+          "value": "rounded",
+          "label": "Rounded"
+        }
+      ]
+    },
+    {
+      "id": "productCard.shadow",
+      "type": "select",
+      "label": "Card shadow",
+      "group": "Product cards",
+      "default": "none",
+      "description": "A shadow also gives the card a background and inner space.",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "soft",
+          "label": "Soft"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        }
+      ]
+    },
+    {
+      "id": "productCard.hover",
+      "type": "select",
+      "label": "Hover effect",
+      "group": "Product cards",
+      "default": "none",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "zoom",
+          "label": "Zoom the photo"
+        },
+        {
+          "value": "lift",
+          "label": "Lift the card"
+        },
+        {
+          "value": "none",
+          "label": "None"
+        }
+      ]
+    },
+    {
+      "id": "productCard.order",
+      "type": "select",
+      "label": "Card layout",
+      "group": "Product cards",
+      "default": "photo-title-price",
+      "description": "Used by every product list: product grids, related products and search.",
+      "options": [
+        {
+          "value": "photo-title-price",
+          "label": "Photo, name, price"
+        },
+        {
+          "value": "photo-price-title",
+          "label": "Photo, price, name"
+        },
+        {
+          "value": "title-price-photo",
+          "label": "Name and price above the photo"
+        }
+      ]
+    },
+    {
+      "id": "productCard.showTitle",
+      "type": "select",
+      "label": "Product name",
+      "group": "Product cards",
+      "default": "show",
+      "options": [
+        {
+          "value": "show",
+          "label": "Show"
+        },
+        {
+          "value": "hide",
+          "label": "Hide"
+        }
+      ]
+    },
+    {
+      "id": "productCard.titleLines",
+      "type": "select",
+      "label": "Long names",
+      "group": "Product cards",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Show in full"
+        },
+        {
+          "value": "1",
+          "label": "Cut to one line"
+        },
+        {
+          "value": "2",
+          "label": "Cut to two lines"
+        }
+      ]
+    },
+    {
+      "id": "productCard.showPrice",
+      "type": "select",
+      "label": "Price",
+      "group": "Product cards",
+      "default": "show",
+      "options": [
+        {
+          "value": "show",
+          "label": "Show"
+        },
+        {
+          "value": "hide",
+          "label": "Hide"
+        }
+      ]
+    },
+    {
+      "id": "productCard.savings",
+      "type": "select",
+      "label": "Savings on discounted products",
+      "group": "Product cards",
+      "default": "none",
+      "description": "Shown under the price when a product has a higher \"compare at\" price.",
+      "options": [
+        {
+          "value": "none",
+          "label": "Don't show"
+        },
+        {
+          "value": "amount",
+          "label": "Amount saved (Save 10.00)"
+        },
+        {
+          "value": "percent",
+          "label": "Percentage off (20% off)"
+        },
+        {
+          "value": "both",
+          "label": "Both"
+        }
+      ]
+    },
+    {
+      "id": "productCard.button",
+      "type": "select",
+      "label": "Button",
+      "group": "Product cards",
+      "default": "view",
+      "description": "A button under each card that opens the product.",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "view",
+          "label": "View product"
+        },
+        {
+          "value": "shop",
+          "label": "Shop now"
+        }
+      ]
+    },
+    {
+      "id": "productCard.showBrand",
+      "type": "checkbox",
+      "label": "Show the brand",
+      "group": "Product cards",
+      "default": true,
+      "description": "The product's brand (vendor) above its name."
+    },
+    {
+      "id": "productCard.swatches",
+      "type": "select",
+      "label": "Colour swatches",
+      "group": "Product cards",
+      "default": "colors",
+      "description": "Dots for up to five colours of a product's colour option.",
+      "options": [
+        {
+          "value": "none",
+          "label": "Don't show"
+        },
+        {
+          "value": "colors",
+          "label": "Show the colours a product comes in"
+        }
+      ]
+    },
+    {
+      "id": "badges.sale",
+      "type": "select",
+      "label": "Sale badge",
+      "group": "Badges",
+      "default": "hide",
+      "options": [
+        {
+          "value": "hide",
+          "label": "Don't show"
+        },
+        {
+          "value": "show",
+          "label": "Show on discounted products"
+        }
+      ]
+    },
+    {
+      "id": "badges.position",
+      "type": "select",
+      "label": "Position",
+      "group": "Badges",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "top-left",
+          "label": "Top left"
+        },
+        {
+          "value": "top-right",
+          "label": "Top right"
+        }
+      ]
+    },
+    {
+      "id": "badges.shape",
+      "type": "select",
+      "label": "Shape",
+      "group": "Badges",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "rounded",
+          "label": "Rounded"
+        },
+        {
+          "value": "pill",
+          "label": "Pill"
+        }
+      ]
+    },
+    {
+      "id": "badges.background",
+      "type": "color",
+      "label": "Background",
+      "group": "Badges",
+      "default": ""
+    },
+    {
+      "id": "badges.text",
+      "type": "color",
+      "label": "Text",
+      "group": "Badges",
+      "default": ""
+    },
+    {
+      "id": "fields.radius",
+      "type": "select",
+      "label": "Field corners",
+      "group": "Form fields",
+      "default": "soft",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "soft",
+          "label": "Slightly rounded"
+        },
+        {
+          "value": "rounded",
+          "label": "Rounded"
+        },
+        {
+          "value": "pill",
+          "label": "Pill"
+        }
+      ]
+    },
+    {
+      "id": "fields.borderWidth",
+      "type": "select",
+      "label": "Border thickness",
+      "group": "Form fields",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "thin",
+          "label": "Thin"
+        },
+        {
+          "value": "thick",
+          "label": "Thick"
+        }
+      ]
+    },
+    {
+      "id": "fields.height",
+      "type": "select",
+      "label": "Field height",
+      "group": "Form fields",
+      "default": "theme",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "small",
+          "label": "Small"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        }
+      ]
+    },
+    {
+      "id": "cart.type",
+      "type": "select",
+      "label": "When a shopper opens the bag",
+      "group": "Cart",
+      "default": "drawer",
+      "description": "The slide-out bag also opens after Add to cart.",
+      "options": [
+        {
+          "value": "page",
+          "label": "Go to the bag page"
+        },
+        {
+          "value": "drawer",
+          "label": "Slide out the bag"
+        }
+      ]
+    },
+    {
+      "id": "social.instagram",
+      "type": "url",
+      "label": "Instagram",
+      "group": "Social media",
+      "default": "",
+      "description": "Full https:// links. Shown in the footer when it has no social links of its own."
+    },
+    {
+      "id": "social.facebook",
+      "type": "url",
+      "label": "Facebook",
+      "group": "Social media",
+      "default": ""
+    },
+    {
+      "id": "social.tiktok",
+      "type": "url",
+      "label": "TikTok",
+      "group": "Social media",
+      "default": ""
+    },
+    {
+      "id": "social.youtube",
+      "type": "url",
+      "label": "YouTube",
+      "group": "Social media",
+      "default": ""
+    },
+    {
+      "id": "social.x",
+      "type": "url",
+      "label": "X (Twitter)",
+      "group": "Social media",
+      "default": ""
+    },
+    {
+      "id": "social.pinterest",
+      "type": "url",
+      "label": "Pinterest",
+      "group": "Social media",
+      "default": ""
+    },
+    {
+      "id": "social.linkedin",
+      "type": "url",
+      "label": "LinkedIn",
+      "group": "Social media",
+      "default": ""
+    },
+    {
+      "id": "social.whatsapp",
+      "type": "url",
+      "label": "WhatsApp",
+      "group": "Social media",
+      "default": ""
+    },
+    {
+      "id": "languages.defaultName",
+      "type": "text",
+      "label": "Main language",
+      "group": "Languages",
+      "default": "English",
+      "description": "The language your store is written in."
+    },
+    {
+      "id": "languages.extra",
+      "type": "text",
+      "label": "Other languages",
+      "group": "Languages",
+      "default": "",
+      "description": "Language codes separated by commas, for example hi, ta, fr. Shoppers pick one in the footer; you add the text in the editor's Language menu. Text you haven't translated shows in the main language."
+    },
+    {
+      "id": "advanced.customCss",
+      "type": "textarea",
+      "label": "Custom CSS",
+      "group": "Custom CSS",
+      "default": "",
+      "description": "Applies to the whole store. Up to 10000 characters; imports, fonts and non-https links aren't allowed."
+    },
+    {
+      "id": "branding.logoUrl",
+      "type": "image",
+      "label": "Store logo",
+      "group": "Branding",
+      "default": ""
+    },
+    {
+      "id": "branding.faviconUrl",
+      "type": "image",
+      "label": "Browser tab icon",
+      "group": "Branding",
+      "default": ""
+    },
+    {
+      "id": "productCard.layout",
+      "type": "select",
+      "label": "Card style",
+      "group": "Product cards",
+      "default": "technical",
+      "description": "The shape and look of every product card in the store. Quick add puts an Add button and quantity on cards of products with no options.",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "tall",
+          "label": "Tall photo, few words"
+        },
+        {
+          "value": "square",
+          "label": "Square photo with details"
+        },
+        {
+          "value": "tinted",
+          "label": "Product on a soft colour"
+        },
+        {
+          "value": "technical",
+          "label": "Outlined, for specifications"
+        },
+        {
+          "value": "landscape",
+          "label": "Wide lifestyle photo"
+        },
+        {
+          "value": "quick-add",
+          "label": "Quick add, for everyday shopping"
+        }
+      ]
+    },
+    {
+      "id": "productCard.showRating",
+      "type": "checkbox",
+      "label": "Show star ratings",
+      "group": "Product cards",
+      "default": true,
+      "description": "Stars and the number of reviews under the name, for products with published reviews."
+    },
+    {
+      "id": "cart.freeDeliveryFrom",
+      "type": "range",
+      "label": "Free delivery from (0 for none)",
+      "group": "Cart",
+      "default": 50,
+      "min": 0,
+      "max": 500,
+      "step": 5
+    }
+  ],
+  "sections": []
+}

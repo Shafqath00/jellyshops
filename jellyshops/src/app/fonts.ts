@@ -25,6 +25,7 @@ import {
   Oswald,
   Bebas_Neue,
   Syne,
+  IBM_Plex_Mono,
 } from "next/font/google";
 
 /**
@@ -59,7 +60,8 @@ const hind = Hind({ subsets: ["latin", "devanagari"], weight: ["400", "500", "60
 const oswald = Oswald({ subsets: ["latin"], variable: "--font-oswald", display: "swap", preload: false });
 const bebasNeue = Bebas_Neue({ subsets: ["latin"], weight: ["400"], variable: "--font-bebas-neue", display: "swap", preload: false });
 const syne = Syne({ subsets: ["latin"], variable: "--font-syne", display: "swap", preload: false });
+const ibmPlexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-ibm-plex-mono", display: "swap", preload: false });
 
 export const storefrontFontVariables = [
-  fraunces.variable, inter.variable, playfairDisplay.variable, cormorantGaramond.variable, lora.variable, ebGaramond.variable, libreBaskerville.variable, dmSerifDisplay.variable, crimsonPro.variable, manrope.variable, dmSans.variable, workSans.variable, montserrat.variable, outfit.variable, plusJakartaSans.variable, nunitoSans.variable, raleway.variable, spaceGrotesk.variable, josefinSans.variable, figtree.variable, jost.variable, poppins.variable, hind.variable, oswald.variable, bebasNeue.variable, syne.variable,
+  fraunces.variable, inter.variable, playfairDisplay.variable, cormorantGaramond.variable, lora.variable, ebGaramond.variable, libreBaskerville.variable, dmSerifDisplay.variable, crimsonPro.variable, manrope.variable, dmSans.variable, workSans.variable, montserrat.variable, outfit.variable, plusJakartaSans.variable, nunitoSans.variable, raleway.variable, spaceGrotesk.variable, josefinSans.variable, figtree.variable, jost.variable, poppins.variable, hind.variable, oswald.variable, bebasNeue.variable, syne.variable, ibmPlexMono.variable,
 ].join(" ");
