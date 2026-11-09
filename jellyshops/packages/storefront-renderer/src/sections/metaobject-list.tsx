@@ -1,3 +1,4 @@
+import { titleLength } from "./shared";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import { elementProps } from "../element-style";
 import { useEffect, useState, type CSSProperties } from "react";
@@ -88,7 +89,7 @@ export function MetaobjectEntryContent({ definition, entry, storeSlug }: { defin
     <div className="jelly-metaobject-entry-layout">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {image && <img src={image} alt={entry.displayName} />}
-      <div><h1>{entry.displayName}</h1><MetaobjectFields fields={definition.fields} entry={entry} /></div>
+      <div><h1 {...titleLength(entry.displayName)}>{entry.displayName}</h1><MetaobjectFields fields={definition.fields} entry={entry} /></div>
     </div>
   </StorefrontContainer></article>;
 }

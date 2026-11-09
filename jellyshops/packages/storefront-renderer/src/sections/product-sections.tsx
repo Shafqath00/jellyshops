@@ -1,3 +1,4 @@
+import { titleLength } from "./shared";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import { PersonalisationFields } from "./personalisation-fields";
 import { BackInStockForm } from "./back-in-stock-form";
@@ -46,14 +47,14 @@ export function ProductInformationSection({ context, section }: { context: Store
   const part = (id: string) => elementProps({ type: "product-information", settings: section.settings }, id, context.mode === "editor");
   if (!product) {
     const title = context.page?.pageType === "product" ? context.page.resource.data.title : undefined;
-    return typeof title === "string" ? <section className="jelly-section jelly-product-information"><StorefrontContainer><h1 {...part("title")}>{title}</h1></StorefrontContainer></section> : null;
+    return typeof title === "string" ? <section className="jelly-section jelly-product-information"><StorefrontContainer><h1 {...part("title")} {...titleLength(title)}>{title}</h1></StorefrontContainer></section> : null;
   }
   const show = (key: string) => section.settings[key] !== false;
   const specifications = show("showSpecifications") ? Object.entries(product.product.specifications ?? {}) : [];
   const state = product.availability.state;
   return <section className="jelly-section jelly-product-information"><StorefrontContainer>
     {show("showVendor") && product.product.vendor && <p className="jelly-eyebrow" {...part("vendor")}>{product.product.vendor}</p>}
-    <h1 {...part("title")}>{product.product.title}</h1>
+    <h1 {...part("title")} {...titleLength(product.product.title)}>{product.product.title}</h1>
     <p className="jelly-product-price" {...part("price")}>
       <strong>{product.pricing.price}</strong>
       {show("showCompareAtPrice") && product.pricing.compareAtPrice && <s aria-label={`Was ${product.pricing.compareAtPrice}`}>{product.pricing.compareAtPrice}</s>}

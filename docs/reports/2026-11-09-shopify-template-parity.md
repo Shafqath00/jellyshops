@@ -57,12 +57,36 @@ A fifth cause sits under all of them: **we test with perfect data**. Our sample 
   - Tests: 9 for the gallery, 1 for the lint rules; 1,012 in the main groups pass.
   - Not yet checked in the signed-in editor or on a live store.
 
+## 4b. Phase 2 done: messy merchant data (2026-11-09)
+
+Every theme preview has a **Sample data: Tidy / Messy** switch. Messy data (`features/theme-preview/messy-data.ts`, photos from `scripts/build-messy-fixtures.mjs`) is a store filled in the way merchants really do it:
+- photos of every shape: tall phone shots, 3:1 banners, a 220px photo, cut-outs on white, off-centre subjects, one product with no photo;
+- names from 3 to 89 characters, including an unbroken 56-character word;
+- sold-out products, five swatches plus "4 more", a £10,000.00 price;
+- a product with twelve photos and nine option values, long descriptions and specifications;
+- long collection, page and search titles.
+
+The design lint runs every theme on six pages with messy data at desktop and phone width. A messy finding that the theme already has with its own data counts as known, so the messy run reports only problems the data causes. New rules: `title-lines` (a page title over 4 lines, 5 on phones; hero headlines excluded), `text-spill` (drawn text outside its card or heading), and side thumbnails running below the photo.
+
+What messy data found, and the fixes (all in the platform, so every theme gets them):
+
+| Problem | Themes | Fix |
+| --- | --- | --- |
+| Long product, collection and page names ran onto 5-6 lines | all | `titleLength()` marks titles over 40 and 70 characters; they step down to the theme's subheading size and drop the narrow width some themes give display titles |
+| Twelve side thumbnails made the gallery far taller than the photo | Halo, Diode, Forma | The thumbnail column takes the photo's height and scrolls |
+| Unbroken words could push past cards and headings | all | Headings and cards wrap anywhere when they must |
+| A product with no photo collapsed its card | Resthaven | The placeholder keeps the card's photo shape |
+| The sale badge added height to the card photo | Resthaven | The badge floats over the photo |
+| The sign-up consent box was 20px, under the tap minimum | Minimal, Avenue, Harbour | 24px minimum in every theme (also cleared 8 old accepted findings) |
+
+Result: all 7 themes pass with tidy and messy data at every width checked.
+
 ## 5. Roadmap
 
 Each phase ends with tests, a browser check and a commit, and starts only after a go-ahead.
 
 1. **Gallery and baseline fixes**: done (above).
-2. **Messy-data fixtures.** One shared set of awkward sample stores: photos of mixed shapes, one photo, twelve photos, no photo, 80-character names, sold-out variants, 30 options, empty collections, long reviews. The theme preview, the conformance suite and the design lint all run on it, so "looks fine with our photos" stops being the test.
+2. **Messy-data fixtures** (done, see 4b). One shared set of awkward sample stores: photos of mixed shapes, one photo, twelve photos, no photo, 80-character names, sold-out variants, 30 options, empty collections, long reviews. The theme preview, the conformance suite and the design lint all run on it, so "looks fine with our photos" stops being the test.
 3. **Section baseline.** Render every section with platform CSS only (no theme) at three widths and lint it. Any section that breaks gets its layout moved into the renderer's section primitives (`SectionFrame`, `Stack`, `Grid`, `MediaFrame`). After this, a theme can only change looks, not break layouts.
 4. **Component behaviour audit.** A checklist and tests per interactive component, modelled on Dawn's custom elements:
    - slideshow: autoplay with pause, swipe, dots, reduced motion;

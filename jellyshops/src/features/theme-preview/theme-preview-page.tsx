@@ -8,6 +8,7 @@ import { StorefrontProductCard } from "@jelly/storefront-ui";
 import { StorefrontPreviewFrame } from "@/features/store-editor/components/storefront-preview-frame";
 import type { ThemePreviewConfig } from "./configs";
 import { sampleReviews } from "./sample-reviews";
+import { messyPreviewConfig } from "./messy-data";
 import { TemplatePreview, type PreviewTemplate , previewHasCompare, usePreviewCart, withPreviewQuickAdd } from "./template-preview";
 
 /**
@@ -198,8 +199,11 @@ function Guide({ config }: { config: ThemePreviewConfig }) {
   </>;
 }
 
-export function ThemePreviewPage({ config }: { config: ThemePreviewConfig }) {
+export function ThemePreviewPage({ config: themeConfig }: { config: ThemePreviewConfig }) {
   const [device, setDevice] = useState<Device>("desktop");
+  // Tidy = the theme's own illustrative data; Messy = a store as merchants really fill it in (messy-data.ts).
+  const [data, setData] = useState<"tidy" | "messy">("tidy");
+  const config = data === "messy" ? messyPreviewConfig(themeConfig) : themeConfig;
   const [view, setView] = useState<View>("guide");
   // The preview iframe must mount on the client so its load handler is attached before the frame loads.
   const ready = useSyncExternalStore(subscribeNoop, () => true, () => false);
@@ -232,13 +236,16 @@ export function ThemePreviewPage({ config }: { config: ThemePreviewConfig }) {
           {collectionLayouts.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
         </select>
       </label>}
+      <div role="group" aria-label="Sample data" style={{ display: "flex", gap: 4, padding: 4, background: "white", borderRadius: 8 }}>
+        {([["tidy", "Tidy data"], ["messy", "Messy data"]] as const).map(([key, label]) => <button key={key} type="button" aria-pressed={data === key} onClick={() => setData(key)} style={toggle(data === key)} title={key === "messy" ? "Photos of every shape, long names, missing photos, sold-out products: a store as merchants really fill it in" : "The theme's own sample photos and copy"}>{label}</button>)}
+      </div>
       <div role="group" aria-label="Preview width" style={{ display: "flex", gap: 4, padding: 4, background: "white", borderRadius: 8 }}>
         {(Object.keys(widths) as Device[]).map((key) => <button key={key} type="button" aria-pressed={device === key} onClick={() => setDevice(key)} style={toggle(device === key)}>{key[0].toUpperCase() + key.slice(1)} · {widths[key]}px</button>)}
       </div>
     </header>
     <div style={{ width: widths[device], maxWidth: "100%", margin: "0 auto", minHeight: "80vh", background: "white", boxShadow: "0 1px 3px rgba(0,0,0,.08)" }}>
       {ready && <StorefrontPreviewFrame title={`${config.name} style guide`} themeId={config.themeId} style={style} className="block h-[80vh] w-full border-0">
-        {view === "guide" ? <Guide config={config} /> : <TemplatePreview key={view} template={view as PreviewTemplate} config={config} productLayout={productLayout === "theme" ? undefined : productLayout} collectionLayout={collectionLayout === "theme" ? undefined : collectionLayout} onOpenCompare={() => setView("compare")} />}
+        {view === "guide" ? <Guide key={data} config={config} /> : <TemplatePreview key={`${view}:${data}`} template={view as PreviewTemplate} config={config} productLayout={productLayout === "theme" ? undefined : productLayout} collectionLayout={collectionLayout === "theme" ? undefined : collectionLayout} onOpenCompare={() => setView("compare")} />}
       </StorefrontPreviewFrame>}
     </div>
   </main>;

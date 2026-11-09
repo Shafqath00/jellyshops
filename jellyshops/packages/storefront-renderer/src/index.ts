@@ -15,3 +15,4 @@ export type { StoreIdentity } from "./store-identity";
 export type { RendererSelection } from "./types";
 export { formattedSetting, inlineSetting, SettingText } from "./sections/setting-text";
 export { CardCartContext, CardCompareContext, CardRatingsContext, CompareToggle, ProductCard, QuickAdd } from "./product-card";
+export { titleLength } from "./sections/shared";

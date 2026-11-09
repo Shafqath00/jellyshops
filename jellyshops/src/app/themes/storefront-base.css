@@ -1342,7 +1342,8 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 @media (min-width: 768px) {
   .jelly-gallery[data-thumbs="left"] { grid-template-columns: 72px minmax(0, 1fr); align-items: start; }
   .jelly-gallery[data-thumbs="left"] > .jelly-gallery-stage { grid-column: 2; grid-row: 1; }
-  .jelly-gallery[data-thumbs="left"] > .jelly-gallery-thumbs { grid-column: 1; grid-row: 1; flex-direction: column; max-height: 100%; overflow: hidden auto; }
+  /* The column never grows taller than the photo: it takes the photo height and scrolls. */
+  .jelly-gallery[data-thumbs="left"] > .jelly-gallery-thumbs { grid-column: 1; grid-row: 1; flex-direction: column; align-self: stretch; height: 0; min-height: 100%; overflow: hidden auto; scrollbar-width: none; }
   .jelly-gallery[data-thumbs="left"] .jelly-gallery-thumbs button { flex-basis: 72px; }
 }
 @media (hover: none) and (max-width: 767px) { .jelly-gallery-arrow { display: none; } }
@@ -1379,3 +1380,22 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 /* Testimonials: cards side by side for every theme that does not lay them out itself. */
 :where(.jelly-testimonial-grid) { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 16px; align-items: stretch; }
 :where(.jelly-testimonial-grid > blockquote) { display: flex; flex-direction: column; justify-content: space-between; gap: 12px; margin: 0; }
+
+/*
+ * Long titles (titleLength() in the renderer): real product, collection and page names run to 60-100 characters.
+ * Long ones step down to a size no theme title is smaller than, so a long name takes about three lines, not six.
+ * Unbroken words (codes, URLs, long compounds) wrap instead of pushing past the page or card edge.
+ */
+[data-jelly-theme] h1[data-title-length="long"] { font-size: min(var(--j-type-h3-size, 2rem), 2rem) !important; line-height: 1.15 !important; max-width: none !important; }
+[data-jelly-theme] h1[data-title-length="very-long"] { font-size: min(var(--j-type-h3-size, 1.5rem), 1.5rem) !important; line-height: 1.2 !important; max-width: none !important; }
+:where([data-jelly-theme]) :where(h1, h2, h3, .jelly-product-card) { overflow-wrap: anywhere; }
+:where([data-jelly-theme] .jelly-product-card) { min-width: 0; }
+/* Sign-up consent box: at least the 24px tap size in every theme (a smaller theme size still loses to min-width). */
+[data-jelly-theme] input[type="checkbox"][name="consent"] { flex: none; min-width: 24px; min-height: 24px; }
+/*
+ * Product card fallbacks for themes that do not set them (zero priority, so a theme's own rules win): the badge sits
+ * over the photo instead of adding height to it, and a product with no photo keeps the card's photo shape.
+ */
+:where(.jelly-product-card-media) { position: relative; }
+:where(.jelly-product-card-media > .jelly-product-card-badge) { position: absolute; top: 8px; left: 8px; z-index: 1; }
+:where(.jelly-product-card-placeholder) { display: block; width: 100%; aspect-ratio: var(--jelly-card-ratio, 4 / 5); background: var(--j-color-surface, #f2f2f2); }

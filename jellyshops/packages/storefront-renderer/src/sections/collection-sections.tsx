@@ -1,3 +1,4 @@
+import { titleLength } from "./shared";
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ProductCard } from "../product-card";
 import { elementProps } from "../element-style";
@@ -69,7 +70,7 @@ export function CollectionHeaderSection({ context, section }: { context: Storefr
     <StorefrontContainer>
       {section.settings.showBreadcrumb === true && <nav className="jelly-breadcrumb" aria-label="Breadcrumb"><ol><li><a href={resolveStorefrontHref("/", context.storeSlug) ?? "/"}>Home</a></li><li aria-current="page">{collection.title}</li></ol></nav>}
       <div className="jelly-collection-header-copy">
-        {section.settings.showTitle !== false && <h1 {...part("title")}>{collection.title}</h1>}
+        {section.settings.showTitle !== false && <h1 {...part("title")} {...titleLength(collection.title)}>{collection.title}</h1>}
         {section.settings.showDescription === true && (["2", "3", "4"].includes(String(section.settings.descriptionLines))
           ? <ClampedText lines={Number(section.settings.descriptionLines)}><CollectionDescriptionText collection={collection} /></ClampedText>
           : <CollectionDescriptionText collection={collection} />)}
