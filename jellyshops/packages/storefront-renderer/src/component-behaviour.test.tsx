@@ -210,3 +210,18 @@ describe("collection product list (the old catalog browser is retired)", () => {
     }
   });
 });
+
+describe("spacer and dividers", () => {
+  it("draws a spacer as empty space of its size, with its own phone size, and dividers as a line", async () => {
+    const { SpacerDividerSection } = await import("./sections/home-sections");
+    const spacer = render(<SpacerDividerSection kind="spacer" section={{ ...section("spacer", { size: "large" }), responsive: { mobile: { size: "small" } } }} />);
+    const space = spacer.container.querySelector(".jelly-spacer") as HTMLElement;
+    expect(space.style.getPropertyValue("--jelly-spacer")).toBe("96px");
+    expect(space.style.getPropertyValue("--jelly-spacer-m")).toBe("24px");
+    expect(spacer.container.querySelector("hr")).toBeNull();
+    spacer.unmount();
+    const divider = render(<SpacerDividerSection kind="spacer-divider" section={section("spacer-divider", { size: 80 })} />);
+    expect((divider.container.querySelector(".jelly-spacer-divider") as HTMLElement).style.getPropertyValue("--jelly-spacer")).toBe("80px");
+    expect(divider.container.querySelector("hr")).not.toBeNull();
+  });
+});

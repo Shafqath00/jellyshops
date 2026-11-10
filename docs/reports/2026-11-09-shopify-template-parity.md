@@ -143,6 +143,27 @@ Checked by `features/theme-preview/one-render-path.test.tsx` (every theme: the s
 
 Checked: on the staging store "new" (read only), Shop all and the Beds collection draw the Avenue templates with the toolbar; Minimal's preview collection page in the browser and every theme's collection page through the design lint and the theme specs; tests for paging, the defaults and the editor default.
 
+## 4f. Phase 6 done: safe customisation (2026-11-10)
+
+**Settings fuzz.** `src/lib/settings-fuzz/generate.ts` makes random but valid settings for every section and block, as a merchant could pick them in the editor: every select, switch, slider, colour, photo, link and text field, with texts from empty to one 56-letter word. Each value is checked against the section's own settings schema before it is kept, and it is seeded, so a failure is reproduced by its seed number.
+- Unit layer (`settings-fuzz.test.tsx`): with 10 seeds, every section (each preset) passes the platform's own validation and draws on every page without failing.
+- Browser layer (`e2e/settings-fuzz.spec.ts`, `JELLY_FUZZ_SEEDS`): the baseline page with random settings (`/theme-preview/platform-baseline?seed=N&theme=<template>`), with no theme and inside every template, at desktop and phone width. It fails when a section cannot draw, the page scrolls sideways, text spills out of its box, or text reaches the side of the screen. Looks, widths and alignment are the merchant's choice and are not judged. Seeds 1 to 5 pass in all 7 templates and without one.
+
+**What it found and fixed:**
+| Problem | Fix |
+| --- | --- |
+| "Spacer and divider" could not be saved as added: its slider saves a number, its schema expected text | The schema takes both. A new test checks that every section's defaults and every preset can be saved (80 checks). |
+| Spacer, Divider and Spacer and divider all drew the same thin line and ignored their size settings | Spacer is empty space (Small/Standard/Large, own phone size), Divider a line within the page width, Spacer and divider a line with its spacing |
+| A long word ran off the screen in buttons, eyebrows, the slideshow, collection cards, the rating line, store visit, footer, FAQ, feature columns and section headers | Text breaks a word only when it would overflow; buttons never grow past their row; text blocks are capped at their container; the single-column grids and tiles that hold section text get columns that can shrink. A stronger rule (break anywhere) was tried and rejected: it split prices and Filter labels in tight rows. |
+| Widths in characters (46 rules such as `max-width: 52ch`) grew past a phone screen at large font sizes | Every one is now `min(Nch, 100%)` (identical at normal sizes) |
+| A text block with "Max width: Narrow" (28rem) was wider than a phone | Block max widths are capped at the space available |
+| Slideshow text sat 24px from the screen edge on wide screens, ignoring the page margins | It keeps the page margins |
+| A price and its old price could spill out of a narrow card | The price row wraps |
+
+Checked: pictures of all 7 templates (8 pages, 3 widths) before and after are identical apart from photo loading and one intended change: on Resthaven phones and tablets a sale card's old price now drops onto its own line instead of running into the card's padding. The design lint's measurement now treats any part that really scrolls sideways (carousels, tab rows) as a scrolling strip.
+
+**Reset design.** The section panel has "Reset design to defaults" (asks once, undoable): every setting outside Content goes back to the section's default, phone and tablet values for them are removed, and blocks are reset the same way; text, photos, links and custom CSS stay (`features/store-editor/reset-design.ts`). Tested with fuzzed sections; not checked in the signed-in editor.
+
 ## 5. Roadmap
 
 Each phase ends with tests, a browser check and a commit, and starts only after a go-ahead.
@@ -161,7 +182,7 @@ Each phase ends with tests, a browser check and a commit, and starts only after 
    - sticky buy bar;
    - quantity rules.
 5. **One render path.** The theme preview and the editor build pages through the same loader as the live store (`resolveStorefrontRoute`), with fixtures in place of the API. Add an automatic editor-vs-live comparison on the fixtures.
-6. **Safe customisation.** A "settings fuzz" test sets random but valid combinations of each section's settings and runs the lint, so no combination a merchant can pick produces overlap, overflow or stacked rows. Also adds "Reset section to the template's design".
+6. **Safe customisation** (done, see 4f). A "settings fuzz" test sets random but valid combinations of each section's settings and runs the lint, so no combination a merchant can pick produces overlap, overflow or stacked rows. Also adds "Reset section to the template's design".
 7. **Media rollout.** Switch photos-per-option on for every store. This is a backend and frontend config change (`PRODUCT_MEDIA_STORE_IDS=*`), only after a staging check with real products.
 
 ## 6. Decisions needed

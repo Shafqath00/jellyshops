@@ -179,7 +179,9 @@ export function measureStorefrontPage(): PageMeasurement {
       textLeft: textLeft === null ? null : round(textLeft),
       textRight: textRight === null ? null : round(textRight),
       fullBleed,
-      scrolling: Boolean(element.matches("[data-scrolling]") || element.querySelector("[data-scrolling]")),
+      // A marked strip, or any part that really scrolls sideways (a carousel, a row of tabs): its text runs past the
+      // screen edges by design.
+      scrolling: Boolean(element.matches("[data-scrolling]") || element.querySelector("[data-scrolling]") || [element, ...element.querySelectorAll("*")].some((node) => { const style = getComputedStyle(node); return (style.overflowX === "auto" || style.overflowX === "scroll") && node.scrollWidth > node.clientWidth + 1; })),
       inColumn,
       paddingTop: round(paddingTop),
       paddingBottom: round(paddingBottom),

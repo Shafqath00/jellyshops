@@ -27,7 +27,7 @@
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-testimonial-grid cite { color: var(--tk-muted); font-size: var(--tk-text-xs); font-style: normal; letter-spacing: var(--tk-testimonial-grid-letter-spacing); text-transform: uppercase; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-faq-list summary::-webkit-details-marker { display: none; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-faq-list summary::after { content: "+"; flex: none; font-size: var(--tk-faq-list-font-size); font-weight: 300; line-height: 1; transition: transform var(--tk-fast) var(--tk-ease); }
-:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-faq-list details p { max-width: 65ch; padding-bottom: var(--tk-3); color: var(--tk-muted); }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-faq-list details p { max-width: min(65ch, 100%); padding-bottom: var(--tk-3); color: var(--tk-muted); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-trust-strip li { display: inline-flex; align-items: center; gap: var(--tk-1); font-size: var(--tk-text-sm); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-product-gallery-item img { position: absolute; inset: 0; width: 100%; height: 100%; }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .jelly-product-availability::before { content: ""; width: var(--tk-product-availability-width); height: var(--tk-product-availability-height); border-radius: 50%; background: #3f7d4e; }
@@ -77,7 +77,7 @@
   color: var(--tk-text);
   text-align: center;
 }
-:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) :is(.jelly-cart-empty, .jelly-checkout-empty, .jelly-order-confirmation) > p:not(.jelly-eyebrow) { max-width: 46ch; color: var(--tk-muted); }
+:is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) :is(.jelly-cart-empty, .jelly-checkout-empty, .jelly-order-confirmation) > p:not(.jelly-eyebrow) { max-width: min(46ch, 100%); color: var(--tk-muted); }
 /* 10.2 Checkout and order confirmation */
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .checkout-page { width: min(calc(100% - 2 * var(--tk-gutter)), var(--tk-container)); margin-inline: auto; padding-block: var(--tk-5) var(--tk-section); color: var(--tk-text); }
 :is([data-jelly-theme="jelly-signature"], [data-jelly-theme="jelly-avenue"]) .checkout-page .product-back { display: inline-flex; align-items: center; gap: var(--tk-1); color: var(--tk-muted); font-size: var(--tk-text-sm); text-decoration: none; }

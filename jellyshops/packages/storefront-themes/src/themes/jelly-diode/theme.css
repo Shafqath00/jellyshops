@@ -13,7 +13,7 @@
 :where(.jelly-section, .jelly-header, .jelly-footer) h3 { font-size: var(--j-type-h3-size); font-family: var(--j-type-h3-font); line-height: var(--j-type-h3-line); letter-spacing: var(--j-type-h3-track); text-transform: var(--j-type-h3-case); }
 :where(.jelly-section, .jelly-header, .jelly-footer) h4 { font-size: var(--j-type-h4-size); font-family: var(--j-type-h4-font); line-height: var(--j-type-h4-line); letter-spacing: var(--j-type-h4-track); text-transform: var(--j-type-h4-case); }
 :where(.jelly-section, .jelly-header, .jelly-footer) a { color: inherit; }
-:where(.jelly-section, .jelly-header, .jelly-footer) p { margin: 0 0 1em; max-width: 65ch; }
+:where(.jelly-section, .jelly-header, .jelly-footer) p { margin: 0 0 1em; max-width: min(65ch, 100%); }
 :where(.jelly-section, .jelly-header, .jelly-footer) ul { list-style: none; margin: 0; padding: 0; }
 :where(.jelly-section, .jelly-header, .jelly-footer) img { max-width: 100%; }
 :where(.jelly-section, .jelly-header, .jelly-footer) button, :where(.jelly-section, .jelly-header, .jelly-footer) input, :where(.jelly-section, .jelly-header, .jelly-footer) select, :where(.jelly-section, .jelly-header, .jelly-footer) textarea { font: inherit; }
@@ -39,7 +39,7 @@
 .jelly-header-search { max-width: none; background: var(--j-color-surface); border: 0; }
 .jelly-footer { padding: var(--j-space-3xl) var(--j-page-edge); background: var(--j-color-bg); color: var(--j-color-text); }
 .jelly-footer-inner { display: grid; grid-template-columns: 1fr 2fr; gap: var(--j-space-3xl); }
-.jelly-footer-brand { max-width: 32ch; } .jelly-footer-brand h2 { font-size: var(--j-type-h3-size); }
+.jelly-footer-brand { max-width: min(32ch, 100%); } .jelly-footer-brand h2 { font-size: var(--j-type-h3-size); }
 .jelly-footer-links { display: flex; flex-wrap: wrap; gap: var(--j-space-3xl); }
 .jelly-footer-links .jelly-menu { display: grid; gap: 0; } .jelly-footer-links a { font-weight: 400; }
 .jelly-footer-credit { margin: var(--j-space-xl) 0 0; padding-top: var(--j-space-lg); border-top: 1px solid var(--j-color-border); font-size: var(--j-type-small-size); }
@@ -99,7 +99,7 @@
 .jelly-product-option-values button[aria-pressed="true"] { background: var(--j-color-primary); color: var(--j-color-on-primary); }
 .jelly-product-purchase > .jelly-container { display: grid; gap: var(--j-space-md); } .jelly-product-purchase input { width: 6rem; }
 .jelly-product-details summary { min-height: var(--j-touch-target); cursor: pointer; }
-.jelly-product-description p { max-width: 65ch; }
+.jelly-product-description p { max-width: min(65ch, 100%); }
 .jelly-cart-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--j-space-3xl); margin-top: var(--j-space-xl); }
 .jelly-cart-line { display: grid; grid-template-columns: 6rem minmax(0, 1fr) auto; gap: var(--j-space-lg); padding-block: var(--j-space-lg); border-bottom: 1px solid var(--j-color-border); }
 .jelly-cart-line-media img { display: block; width: 100%; aspect-ratio: 1; object-fit: contain; padding: .25rem; border-radius: var(--j-radius-md); background: var(--j-color-surface); }
@@ -228,8 +228,8 @@ main:has(.jelly-list-toolbar) .jelly-collection-count { display: none; } .jelly-
 /* Hero spotlight: the product on a graphite field ruled with a faint grid; callouts as outlined data tags. */
 .jelly-hero[data-layout="spotlight"] { padding-block: 0; background-color: var(--j-color-bg); color: var(--j-color-text); background-image: linear-gradient(var(--diode-line) 1px, transparent 1px), linear-gradient(90deg, var(--diode-line) 1px, transparent 1px); background-size: 48px 48px; background-position: -1px -1px; }
 .jelly-hero[data-layout="spotlight"] > .jelly-container { padding-block: clamp(1.5rem, 3vw, 2.5rem); }
-.jelly-hero[data-layout="spotlight"] .jelly-hero-content h1 { font-size: clamp(2.75rem, 5.6vw, 4.75rem); line-height: .98; max-width: 12ch; }
-.jelly-hero[data-layout="spotlight"] .jelly-hero-content p { font-size: 1.0625rem; color: var(--j-color-muted); max-width: 38ch; }
+.jelly-hero[data-layout="spotlight"] .jelly-hero-content h1 { font-size: clamp(2.75rem, 5.6vw, 4.75rem); line-height: .98; max-width: min(12ch, 100%); }
+.jelly-hero[data-layout="spotlight"] .jelly-hero-content p { font-size: 1.0625rem; color: var(--j-color-muted); max-width: min(38ch, 100%); }
 .jelly-hero[data-layout="spotlight"] .jelly-hero-media { border-radius: 6px; background: var(--j-color-surface); }
 .jelly-hero[data-layout="spotlight"][data-align="left"] .jelly-hero-content { justify-items: start; text-align: left; }
 .jelly-hero[data-layout="spotlight"][data-align="left"] .jelly-hero-actions { justify-content: flex-start; }
@@ -266,7 +266,7 @@ main:has(.jelly-list-toolbar) .jelly-collection-count { display: none; } .jelly-
 .jelly-image-with-text img, .jelly-image-text img, .jelly-image-text-media { border-radius: 6px; }
 .jelly-multicolumn-grid > article { padding: 1.25rem 0 0; border-top: 1px solid var(--j-color-text); border-radius: 0; background: transparent; }
 .jelly-multicolumn-grid > article h3 { font-size: var(--j-type-h2-size); letter-spacing: -0.04em; line-height: 1; margin-bottom: .5rem; }
-.jelly-multicolumn-grid > article p { color: var(--j-color-muted); font-size: .9375rem; max-width: 26ch; }
+.jelly-multicolumn-grid > article p { color: var(--j-color-muted); font-size: .9375rem; max-width: min(26ch, 100%); }
 
 /* Product page: specification table and fold-out panels as ruled data. */
 .jelly-specifications-list > div { display: grid; grid-template-columns: minmax(8rem, 1fr) 2fr; gap: 1rem; padding-block: .85rem; border-bottom: 1px solid var(--diode-line); }

@@ -2855,7 +2855,16 @@
         "type": "object",
         "properties": {
           "size": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 160
+              },
+              {
+                "type": "string"
+              }
+            ]
           }
         }
       }
