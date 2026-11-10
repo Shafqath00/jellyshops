@@ -16,7 +16,8 @@ const shadows: Record<string, string> = {
   medium: "0 6px 20px rgba(0, 0, 0, 0.14)",
   strong: "0 14px 40px rgba(0, 0, 0, 0.24)",
 };
-const maxWidths: Record<string, string> = { narrow: "28rem", normal: "42rem", wide: "60rem", none: "none" };
+// Never wider than the space the block has (a 28rem block on a 390px phone ran off the screen; settings fuzz).
+const maxWidths: Record<string, string> = { narrow: "min(28rem, 100%)", normal: "min(42rem, 100%)", wide: "min(60rem, 100%)", none: "100%" };
 
 export interface BlockStyleProps {
   "data-block-style"?: string;

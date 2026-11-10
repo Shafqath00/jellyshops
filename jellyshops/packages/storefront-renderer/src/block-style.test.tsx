@@ -7,7 +7,7 @@ import { RegistrySectionRenderer } from "./registry-section-renderer";
 it("turns block style settings into inline styles", () => {
   const props = blockStyleProps({ blockWidth: "fill", blockMaxWidth: "narrow", blockTextColor: "#112233", blockBackground: true, blockBackgroundColor: "#fafafa", blockBorder: "solid", blockBorderWidth: 2, blockBorderColor: "#000000", blockRadius: 12, blockPaddingTop: 8, blockPaddingLeft: 0, blockTypePreset: "h3" });
   expect(props["data-type-preset"]).toBe("h3");
-  expect(props.style).toMatchObject({ width: "100%", maxWidth: "28rem", color: "#112233", background: "#fafafa", border: "2px solid #000000", borderRadius: "12px", paddingTop: "8px", paddingLeft: "0px" });
+  expect(props.style).toMatchObject({ width: "100%", maxWidth: "min(28rem, 100%)", color: "#112233", background: "#fafafa", border: "2px solid #000000", borderRadius: "12px", paddingTop: "8px", paddingLeft: "0px" });
 });
 
 it("leaves blocks alone when nothing is chosen and ignores unsafe values", () => {

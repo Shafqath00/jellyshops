@@ -36,7 +36,8 @@ it("shows custom content blocks in order, in the editor and the live store", () 
   };
   const { unmount } = render(<RegistrySectionRenderer section={section} mode="published" commerce={{ getProducts: async () => [] }} storeSlug="demo" />);
   const wrapper = screen.getByTestId("section-custom-content");
-  expect([...wrapper.querySelectorAll("h2, img, iframe, a.jelly-button")].map((node) => node.tagName)).toEqual(["H2", "IMG", "IFRAME", "A"]);
+  // The Vimeo video shows its play button; the player loads only when pressed.
+  expect([...wrapper.querySelectorAll("h2, img, .jelly-video-cover, iframe, a.jelly-button")].map((node) => node.tagName)).toEqual(["H2", "IMG", "BUTTON", "A"]);
   expect(screen.getByRole("img", { name: "The studio" }).closest("a")).toHaveAttribute("href", "/demo/about");
   expect(screen.getByRole("link", { name: "Visit us" })).toHaveClass("jelly-button--secondary");
   expect(screen.queryByText("Add a video link")).not.toBeInTheDocument();

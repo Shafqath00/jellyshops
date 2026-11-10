@@ -2855,7 +2855,16 @@
         "type": "object",
         "properties": {
           "size": {
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 160
+              },
+              {
+                "type": "string"
+              }
+            ]
           }
         }
       }
@@ -8283,7 +8292,34 @@
         {
           "id": "rich-text",
           "label": "Rich text",
-          "category": "content"
+          "category": "content",
+          "blocks": [
+            {
+              "id": "preset-heading",
+              "type": "heading",
+              "enabled": true,
+              "settings": {
+                "text": "Talk about your brand"
+              }
+            },
+            {
+              "id": "preset-text",
+              "type": "text",
+              "enabled": true,
+              "settings": {
+                "text": "Share what your shop stands for: where your products come from, who makes them and why they are worth it."
+              }
+            },
+            {
+              "id": "preset-button",
+              "type": "button",
+              "enabled": true,
+              "settings": {
+                "label": "Learn more",
+                "href": "/pages/about"
+              }
+            }
+          ]
         }
       ],
       "controls": [],
@@ -8698,7 +8734,36 @@
         {
           "id": "faq",
           "label": "FAQ",
-          "category": "content"
+          "category": "content",
+          "blocks": [
+            {
+              "id": "preset-faq-item",
+              "type": "faq-item",
+              "enabled": true,
+              "settings": {
+                "question": "How long does delivery take?",
+                "answer": "Most orders arrive within 2 to 4 working days."
+              }
+            },
+            {
+              "id": "preset-faq-item",
+              "type": "faq-item",
+              "enabled": true,
+              "settings": {
+                "question": "Can I return an item?",
+                "answer": "Yes. Send it back within 30 days for a full refund."
+              }
+            },
+            {
+              "id": "preset-faq-item",
+              "type": "faq-item",
+              "enabled": true,
+              "settings": {
+                "question": "How do I contact you?",
+                "answer": "Email us any time and we reply within one working day."
+              }
+            }
+          ]
         }
       ],
       "controls": [
@@ -9499,7 +9564,36 @@
         {
           "id": "multicolumn",
           "label": "Feature columns",
-          "category": "content"
+          "category": "content",
+          "blocks": [
+            {
+              "id": "preset-column",
+              "type": "column",
+              "enabled": true,
+              "settings": {
+                "heading": "Made to last",
+                "text": "Chosen for quality, built for everyday use."
+              }
+            },
+            {
+              "id": "preset-column",
+              "type": "column",
+              "enabled": true,
+              "settings": {
+                "heading": "Free returns",
+                "text": "30 days to change your mind."
+              }
+            },
+            {
+              "id": "preset-column",
+              "type": "column",
+              "enabled": true,
+              "settings": {
+                "heading": "Friendly help",
+                "text": "Real people reply within a day."
+              }
+            }
+          ]
         },
         {
           "id": "multicolumn-promises",
@@ -15567,7 +15661,10 @@
       "allowedBlockTypes": [],
       "defaultSettings": {
         "imageFit": "cover",
-        "layout": "thumbnails"
+        "layout": "thumbnails",
+        "mediaRatio": "theme",
+        "thumbnailPosition": "below",
+        "enableZoom": true
       },
       "defaultBlocks": [],
       "responsiveFields": [
@@ -15594,6 +15691,63 @@
               "value": "grid"
             }
           ]
+        },
+        {
+          "type": "select",
+          "key": "mediaRatio",
+          "label": "Photo shape",
+          "group": "layout",
+          "description": "Every photo sits in a frame of this shape, so photos of different sizes line up.",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": "theme"
+            },
+            {
+              "label": "Square",
+              "value": "square"
+            },
+            {
+              "label": "Portrait (4:5)",
+              "value": "portrait"
+            },
+            {
+              "label": "Landscape (4:3)",
+              "value": "landscape"
+            },
+            {
+              "label": "Same as the first photo",
+              "value": "original"
+            }
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "thumbnailPosition",
+          "label": "Thumbnails",
+          "group": "layout",
+          "showWhen": {
+            "key": "layout",
+            "equals": "thumbnails"
+          },
+          "visibleWhenSaved": true,
+          "options": [
+            {
+              "label": "Below the photo",
+              "value": "below"
+            },
+            {
+              "label": "Beside the photo",
+              "value": "left"
+            }
+          ],
+          "description": "Beside the photo on wide screens; always below on phones."
+        },
+        {
+          "type": "checkbox",
+          "key": "enableZoom",
+          "label": "Let shoppers open photos full screen and zoom",
+          "group": "layout"
         },
         {
           "type": "segmented",
@@ -15664,6 +15818,26 @@
               "grid",
               "thumbnails"
             ]
+          },
+          "mediaRatio": {
+            "type": "string",
+            "enum": [
+              "theme",
+              "square",
+              "portrait",
+              "landscape",
+              "original"
+            ]
+          },
+          "thumbnailPosition": {
+            "type": "string",
+            "enum": [
+              "below",
+              "left"
+            ]
+          },
+          "enableZoom": {
+            "type": "boolean"
           },
           "pageLayout": {
             "type": "string",
@@ -18204,7 +18378,8 @@
         {
           "type": "range",
           "key": "limit",
-          "label": "Products to show",
+          "label": "Products per page",
+          "description": "Shoppers see this many products, then a Show more button.",
           "group": "layout",
           "min": 1,
           "max": 24,
@@ -18221,13 +18396,15 @@
           "type": "checkbox",
           "key": "showSort",
           "label": "Let shoppers sort products",
-          "group": "content"
+          "group": "content",
+          "defaultValue": true
         },
         {
           "type": "checkbox",
           "key": "showFilters",
           "label": "Let shoppers filter by availability, price and colour",
-          "group": "content"
+          "group": "content",
+          "defaultValue": true
         },
         {
           "type": "select",
@@ -18385,13 +18562,15 @@
           "type": "checkbox",
           "key": "showSort",
           "label": "Let shoppers sort results",
-          "group": "content"
+          "group": "content",
+          "defaultValue": true
         },
         {
           "type": "checkbox",
           "key": "showFilters",
           "label": "Let shoppers filter by availability, price and colour",
-          "group": "content"
+          "group": "content",
+          "defaultValue": true
         },
         {
           "type": "range",

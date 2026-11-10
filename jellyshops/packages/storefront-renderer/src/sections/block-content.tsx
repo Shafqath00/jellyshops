@@ -1,5 +1,5 @@
 import { appEmbedSource, getAppBlockProvider } from "@jelly/storefront-schema";
-import type { CSSProperties, ReactNode } from "react";
+import { useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import type { BlockNode } from "@jelly/storefront-schema";
 import { resolveStorefrontHref } from "../runtime-context";
 import { blockStyle, blockStyleProps } from "../block-style";
@@ -74,7 +74,7 @@ export function ImageBlock({ block, storeSlug, editor = false, extra = {} }: { b
 }
 
 /** An embeddable address for a YouTube or Vimeo link, a direct https video file, or null. */
-export function videoSource(url: unknown, autoplay: boolean, controls: boolean): { kind: "embed" | "file"; src: string } | null {
+export function videoSource(url: unknown, autoplay: boolean, controls: boolean): { kind: "embed" | "file"; src: string; /** YouTube's own cover picture, used until the shopper presses play. */ cover?: string } | null {
   if (typeof url !== "string") return null;
   let parsed: URL;
   try { parsed = new URL(url.trim()); } catch { return null; }
@@ -86,7 +86,7 @@ export function videoSource(url: unknown, autoplay: boolean, controls: boolean):
   else if (host === "youtube.com") id = parsed.searchParams.get("v") ?? parsed.pathname.match(/^\/(?:shorts|embed)\/([^/]+)/)?.[1];
   if (id !== undefined) {
     if (!/^[\w-]{6,20}$/.test(id)) return null;
-    return { kind: "embed", src: `https://www.youtube-nocookie.com/embed/${id}?${flags({ rel: "0", controls: controls ? "1" : "0", ...(autoplay ? { autoplay: "1", mute: "1", loop: "1", playlist: id } : {}) })}` };
+    return { kind: "embed", src: `https://www.youtube-nocookie.com/embed/${id}?${flags({ rel: "0", controls: controls ? "1" : "0", ...(autoplay ? { autoplay: "1", mute: "1", loop: "1", playlist: id } : {}) })}`, cover: `https://i.ytimg.com/vi/${id}/hqdefault.jpg` };
   }
   if (host === "vimeo.com" || host === "player.vimeo.com") {
     const vimeo = parsed.pathname.match(/(\d{6,12})/)?.[1];
@@ -108,15 +108,45 @@ export function AppBlock({ block, editor = false, extra = {} }: { block: BlockNo
   return <div {...props}><iframe src={src} title={title} height={height} loading="lazy" sandbox={sandbox} referrerPolicy="strict-origin-when-cross-origin" allow="fullscreen; clipboard-write" style={{ pointerEvents: editor ? "none" : undefined }} /></div>;
 }
 
+/** True when the shopper asked for less motion (no autoplay then). */
+const reducedMotionQuery = () => (typeof window === "undefined" ? undefined : window.matchMedia?.("(prefers-reduced-motion: reduce)"));
+function subscribeReducedMotion(onChange: () => void): () => void {
+  const query = reducedMotionQuery();
+  query?.addEventListener?.("change", onChange);
+  return () => query?.removeEventListener?.("change", onChange);
+}
+function useReducedMotion(): boolean {
+  return useSyncExternalStore(subscribeReducedMotion, () => reducedMotionQuery()?.matches === true, () => false);
+}
+
+/**
+ * A video block. A YouTube or Vimeo video shows a cover picture with a play button and loads the player only when
+ * the shopper presses it (Shopify's "deferred media"): the page stays fast and nothing is fetched from the video
+ * service before then. Autoplaying videos (muted, looping) start at once, except for shoppers who ask for less motion,
+ * who get the cover and controls instead.
+ */
 export function VideoBlock({ block, editor = false, extra = {} }: { block: BlockNode; editor?: boolean; extra?: Record<string, string> }): ReactNode {
-  const autoplay = block.settings.autoplay === true;
-  const controls = block.settings.controls !== false;
+  const reduceMotion = useReducedMotion();
+  const [playing, setPlaying] = useState(false);
+  const autoplay = block.settings.autoplay === true && !reduceMotion && !editor;
+  const controls = block.settings.controls !== false || (block.settings.autoplay === true && !autoplay);
   const source = videoSource(block.settings.url, autoplay, controls);
   const ratio = (typeof block.settings.aspectRatio === "string" && ratios[block.settings.aspectRatio]) || ratios.wide;
   const own = blockStyle(block);
   const props = { className: "jelly-video-block", ...own, ...extra, style: { ...own.style, aspectRatio: ratio } };
   if (!source) return editor ? <div {...props} data-empty="true">{stringValue(block.settings, "url") ? "This video link can't be shown. Use a YouTube, Vimeo or .mp4 link." : "Add a video link"}</div> : null;
-  if (source.kind === "embed") return <div {...props}><iframe src={source.src} title="Video" loading="lazy" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen /></div>;
   const poster = imageValue(block.settings, "poster");
-  return <div {...props}><video src={source.src} poster={poster?.url} controls={controls} autoPlay={autoplay} muted={autoplay} loop={autoplay} playsInline preload="metadata" /></div>;
+  const title = stringValue(block.settings, "title") || "Video";
+  if (source.kind === "embed") {
+    if (autoplay || playing) return <div {...props}><iframe src={playing && !autoplay ? `${source.src}&autoplay=1` : source.src} title={title} loading="lazy" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen /></div>;
+    const cover = poster?.url ?? source.cover;
+    return <div {...props} data-video-cover="true">
+      <button type="button" className="jelly-video-cover" aria-label={`Play video: ${title}`} onClick={() => { if (!editor) setPlaying(true); }}>
+        {/* eslint-disable-next-line @next/next/no-img-element -- merchant or video-service picture, not a Next Image asset */}
+        {cover && <img src={cover} alt="" loading="lazy" />}
+        <span className="jelly-video-play" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z" /></svg></span>
+      </button>
+    </div>;
+  }
+  return <div {...props}><video src={source.src} poster={poster?.url} controls={controls} autoPlay={autoplay} muted={autoplay} loop={autoplay} playsInline preload="metadata" aria-label={title} /></div>;
 }

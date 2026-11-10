@@ -43,7 +43,7 @@
 [data-jelly-theme="jelly-resthaven"] .jelly-section-intro{text-align: center; margin-bottom: 32px;}
 [data-jelly-theme="jelly-resthaven"] .jelly-faq details{border-bottom: 1px solid var(--theme-border); padding: 20px 0;}
 [data-jelly-theme="jelly-resthaven"] .jelly-faq summary{font-weight: 600; cursor: pointer;}
-[data-jelly-theme="jelly-resthaven"] .jelly-faq details p{margin-top: 12px; max-width: 75ch;}
+[data-jelly-theme="jelly-resthaven"] .jelly-faq details p{margin-top: 12px; max-width: min(75ch, 100%);}
 [data-jelly-theme="jelly-resthaven"] .jelly-collection-header{text-align: center; background: var(--theme-surface);}
 [data-jelly-theme="jelly-resthaven"] .jelly-collection-header h1{font-family: var(--theme-font-heading, Georgia), Georgia, serif; font-size: clamp(32px,4vw,48px); text-align: center;}
 [data-jelly-theme="jelly-resthaven"] .jelly-collection-header-image{width: 100%; height: 220px; object-fit: cover; margin-top: 24px; border-radius: 4px;}
@@ -93,7 +93,7 @@
 [data-jelly-theme="jelly-resthaven"] .jelly-image-text-layout{display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center;}
 [data-jelly-theme="jelly-resthaven"] .jelly-image-text-media img{width: 100%; aspect-ratio: 1.15; object-fit: cover; border-radius: 8px;}
 [data-jelly-theme="jelly-resthaven"] .jelly-image-text[data-image-position="right"] .jelly-image-text-media{order: 2;}
-[data-jelly-theme="jelly-resthaven"] .jelly-image-text-content p{max-width: 48ch; margin: 20px 0;}
+[data-jelly-theme="jelly-resthaven"] .jelly-image-text-content p{max-width: min(48ch, 100%); margin: 20px 0;}
 [data-jelly-theme="jelly-resthaven"] .jelly-product-card-price{color: var(--theme-accent); font-weight: 600;}
 [data-jelly-theme="jelly-resthaven"] .jelly-section h2{font-size: clamp(28px,3vw,38px);}
 @media (max-width: 767px){[data-jelly-theme="jelly-resthaven"] .jelly-section{padding: calc(var(--jelly-spacing-section) * 0.6) 0;}
@@ -151,7 +151,7 @@
 [data-jelly-theme="jelly-resthaven"] .jelly-footer-newsletter button:hover{background: var(--theme-surface); color: var(--theme-accent);}
 [data-jelly-theme="jelly-resthaven"] .jelly-footer-newsletter .jelly-newsletter-note{flex: 1 1 100%; order: 4; margin: 0; font-size: 13px; opacity: .85;}
 [data-jelly-theme="jelly-resthaven"] .jelly-footer-inner{display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 2fr) minmax(0, 1fr); gap: 32px; align-items: start;}
-[data-jelly-theme="jelly-resthaven"] .jelly-footer-brand{display: grid; gap: 10px; max-width: 34ch;}
+[data-jelly-theme="jelly-resthaven"] .jelly-footer-brand{display: grid; gap: 10px; max-width: min(34ch, 100%);}
 [data-jelly-theme="jelly-resthaven"] .jelly-footer-brand strong{font-family: var(--theme-font-heading, Georgia), Georgia, serif; font-size: 26px; font-weight: 400;}
 [data-jelly-theme="jelly-resthaven"] .jelly-footer-brand p{margin: 0; opacity: .85; font-size: 14px; line-height: 1.6;}
 [data-jelly-theme="jelly-resthaven"] .jelly-footer-links{display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px;}

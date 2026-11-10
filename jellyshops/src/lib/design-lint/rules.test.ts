@@ -6,7 +6,7 @@ const context = { theme: "t", page: "Home", device: "desktop" };
 const part = (key: string, left: number | null, right: number | null, extra: Partial<PartMeasurement> = {}): PartMeasurement =>
   ({ key, isSection: true, left, right, textLeft: left, textRight: right, fullBleed: false, scrolling: false, inColumn: false, paddingTop: 96, paddingBottom: 96, ...extra });
 const page = (parts: PartMeasurement[], extra: Partial<PageMeasurement> = {}): PageMeasurement =>
-  ({ frameWidth: 1280, overflow: 0, parts, headingSizes: [44, 56], smallTargets: [], cardLists: [], header: null, productGaps: [], pageTitleSize: null, footerHeadingSizes: [], ...extra });
+  ({ frameWidth: 1280, overflow: 0, parts, headingSizes: [44, 56], smallTargets: [], cardLists: [], header: null, productGaps: [], pageTitleSize: null, footerHeadingSizes: [], stackedRows: [], galleryRatios: [], titleLines: 1, thumbsOverhang: 0, spilledText: [], ...extra });
 const rules = (measurement: PageMeasurement, device = "desktop") => lintPage(measurement, { ...context, device }).map((item) => item.rule);
 
 describe("design lint rules", () => {
@@ -62,6 +62,19 @@ describe("design lint rules", () => {
   it("flags product lists whose card images differ in shape", () => {
     const cards = page([part("a", 0, 100)], { cardLists: [{ key: "grid#1", ratios: [0.8, 0.8, 1] }, { key: "grid#2", ratios: [1, 1.01] }] });
     expect(lintPage(cards, context).map((item) => item.id)).toEqual(["card-ratio|t|Home|desktop|grid#1"]);
+  });
+
+  it("flags rows of items that stacked full width on desktop, and product photos of different shapes", () => {
+    const stacked = page([part("a", 0, 100)], { stackedRows: ["div.jelly-testimonial-grid"], galleryRatios: [1, 1, 0.75] });
+    expect(lintPage(stacked, context).map((item) => item.id)).toEqual(["stacked-row|t|Home|desktop|div.jelly-testimonial-grid", "gallery|t|Home|desktop"]);
+    expect(lintPage(stacked, { ...context, device: "mobile" }).map((item) => item.rule)).toEqual(["gallery"]);
+    expect(lintPage(page([part("a", 0, 100)], { galleryRatios: [0.8, 0.8] }), context)).toEqual([]);
+  });
+
+  it("flags long titles, overhanging side thumbnails and text that spills out of its box", () => {
+    const messy = page([part("a", 0, 100)], { titleLines: 6, thumbsOverhang: 300, spilledText: ["h3"] });
+    expect(lintPage(messy, context).map((item) => item.id)).toEqual(["title-lines|t|Home|desktop", "gallery|t|Home|desktop|thumbs", "text-spill|t|Home|desktop"]);
+    expect(lintPage(page([part("a", 0, 100)], { titleLines: 5 }), { ...context, device: "mobile" })).toEqual([]);
   });
 
   it("compares with the baseline and writes a report", () => {

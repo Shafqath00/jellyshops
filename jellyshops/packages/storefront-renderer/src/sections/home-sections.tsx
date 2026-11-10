@@ -168,6 +168,25 @@ export function NewsletterSection({ section, subscribe, mode = "preview" }: { se
   </StorefrontContainer></section>;
 }
 
-export function SpacerDividerSection() {
-  return <div className="jelly-spacer-divider" aria-hidden="true"><hr /></div>;
+/** Space of a spacer's size names, in px. */
+const SPACER_SIZES: Record<string, number> = { small: 24, standard: 48, large: 96 };
+/** A spacer size from a size name or a px number (0-160), or the fallback. */
+export function spacerSize(value: unknown, fallback: number): number {
+  if (typeof value === "number" && Number.isFinite(value)) return Math.max(0, Math.min(160, value));
+  return typeof value === "string" && value in SPACER_SIZES ? SPACER_SIZES[value] : fallback;
+}
+
+/**
+ * Spacer (empty space: Small/Standard/Large, own phone size), Divider (a line within the page width) and Spacer and
+ * divider (a line with "Spacing" px shared above and below). They all drew the same line before and ignored their
+ * settings; the settings fuzz found it.
+ */
+export function SpacerDividerSection({ section, kind }: { section: SectionNode; kind: "spacer" | "divider" | "spacer-divider" }) {
+  if (kind === "spacer") {
+    const size = spacerSize(section.settings.size, 48);
+    const phone = spacerSize(section.responsive?.mobile?.size, size);
+    return <div className="jelly-spacer" aria-hidden="true" style={{ "--jelly-spacer": `${size}px`, "--jelly-spacer-m": `${phone}px` } as CSSProperties} />;
+  }
+  const space = kind === "spacer-divider" ? spacerSize(section.settings.size, 48) : 32;
+  return <div className="jelly-spacer-divider" aria-hidden="true" style={{ "--jelly-spacer": `${space}px` } as CSSProperties}><StorefrontContainer><hr /></StorefrontContainer></div>;
 }

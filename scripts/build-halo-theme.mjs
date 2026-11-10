@@ -61,6 +61,8 @@ const theme = {
   id: "jelly-halo",
   name: "Jelly Halo",
   version: "1.0.0",
+  // Designed with its own complete CSS before the platform section defaults existed.
+  sectionDefaults: false,
   engines: forma.engines,
   description: "A calm skincare and beauty storefront: products on soft colour, shop by skin concern, ingredient stories and reviews.",
   assetPrefix: prefix,
@@ -132,7 +134,7 @@ const starter = {
       ]),
     ]) },
     product: { type: "product", sections: chrome([
-      section("product-gallery", { imageFit: "contain", layout: "thumbnails", pageLayout: "details-below" }),
+      section("product-gallery", { imageFit: "contain", layout: "thumbnails", thumbnailPosition: "left", pageLayout: "details-below" }),
       section("product-information", { showVendor: false, showSku: false, showCompareAtPrice: true, showAvailability: true, showSpecifications: false, discountChip: "percent" }),
       section("product-options", { style: "buttons" }),
       section("product-purchase", { showQuantity: true, label: "Add to bag", stickyBar: true }),

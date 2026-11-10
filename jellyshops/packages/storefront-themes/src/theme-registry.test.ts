@@ -108,6 +108,14 @@ it("applies the old globals.css storefront rules only to themes that use them", 
   for (const id of ["minimal", "classic", "fresh-market", "jelly-signature", "jelly-avenue", "jelly-resthaven", "jelly-harbour"]) expect(usesLegacyStorefrontStyles(id), id).toBe(true);
   // Folder themes without the flag (and so every new or uploaded theme) start from storefront-base.css alone.
   expect(usesLegacyStorefrontStyles("jelly-forma")).toBe(false);
-  expect(legacyStylesAttribute("jelly-forma")).toBe("off");
+  // Forma, Halo and Diode bring all their own CSS ("own"); other folder themes get the section defaults ("off").
+  expect(legacyStylesAttribute("jelly-forma")).toBe("own");
   expect(legacyStylesAttribute("jelly-signature")).toBeUndefined();
+});
+
+it("gives the section defaults to every theme without the old rules unless it opts out", async () => {
+  const { usesSectionDefaults } = await import("./index");
+  for (const id of ["jelly-forma", "jelly-halo", "jelly-diode"]) expect(usesSectionDefaults(id), id).toBe(false);
+  // Themes on the old rules never get them either. A new theme does: see theme-cli scaffold-conformance.test.tsx.
+  for (const id of ["jelly-signature", "jelly-avenue", "jelly-resthaven", "jelly-harbour"]) expect(usesSectionDefaults(id), id).toBe(false);
 });

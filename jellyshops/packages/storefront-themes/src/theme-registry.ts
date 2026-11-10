@@ -117,9 +117,27 @@ export function usesLegacyStorefrontStyles(id: string | null | undefined, versio
   return manualIds.has(id);
 }
 
-/** The `data-jelly-legacy-styles` value for a storefront root: "off" when the theme does not use the old rules. */
-export function legacyStylesAttribute(id: string | null | undefined, version?: string | null): "off" | undefined {
-  return usesLegacyStorefrontStyles(id, version) ? undefined : "off";
+/**
+ * True when the platform's section defaults (src/app/themes/section-defaults.css) apply: every theme without the old
+ * rules, unless its manifest sets `sectionDefaults: false` because it was designed with its own complete CSS before
+ * the defaults existed (Forma, Halo, Diode). A theme that `extends` a base design follows the base.
+ */
+export function usesSectionDefaults(id: string | null | undefined, version?: string | null): boolean {
+  if (usesLegacyStorefrontStyles(id, version)) return false;
+  let manifest: { extends?: unknown; sectionDefaults?: unknown };
+  try { manifest = getThemeDefinition(id as string, version).manifest as typeof manifest; } catch { return true; }
+  if (typeof manifest.sectionDefaults === "boolean") return manifest.sectionDefaults;
+  if (typeof manifest.extends === "string" && manifest.extends !== id && (THEME_BASE_IDS as readonly string[]).includes(manifest.extends)) return usesSectionDefaults(manifest.extends);
+  return true;
+}
+
+/**
+ * The `data-jelly-legacy-styles` value for a storefront root: none for a theme that uses the old rules, "off" for one
+ * that uses the section defaults instead, and "own" for one that brings all of its own CSS (neither applies).
+ */
+export function legacyStylesAttribute(id: string | null | undefined, version?: string | null): "off" | "own" | undefined {
+  if (usesLegacyStorefrontStyles(id, version)) return undefined;
+  return usesSectionDefaults(id, version) ? "off" : "own";
 }
 
 for (const { manifest } of discoveredThemes) {

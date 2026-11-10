@@ -3,7 +3,7 @@
  */
 import type { PageMeasurement } from "./measure";
 
-export type DesignRule = "edge" | "rhythm" | "headings" | "overflow" | "tap-target" | "card-ratio" | "contrast" | "header" | "product-flow" | "title-size" | "footer-headings";
+export type DesignRule = "edge" | "rhythm" | "headings" | "overflow" | "tap-target" | "card-ratio" | "contrast" | "header" | "product-flow" | "title-size" | "footer-headings" | "stacked-row" | "gallery" | "title-lines" | "text-spill";
 
 export interface DesignFinding {
   /** Stable id used by the baseline: rule|theme|page|device[|part]. */
@@ -35,6 +35,8 @@ export const DESIGN_LIMITS = {
   /** Largest main title outside a hero, per width (Shopify themes use about 40px / 32px / 28px). */
   maxPageTitle: { desktop: 56, tablet: 44, mobile: 36 } as Record<string, number>,
   maxFooterHeading: 24,
+  /** Most lines a page title may take, per width (long product names must still fit). */
+  maxTitleLines: { desktop: 4, tablet: 4, mobile: 5 } as Record<string, number>,
 } as const;
 
 export function findingId(rule: DesignRule, context: PageContext, part?: string) {
@@ -143,6 +145,26 @@ export function lintPage(measurement: PageMeasurement, context: PageContext): De
   const footerHeading = measurement.footerHeadingSizes.length ? Math.max(...measurement.footerHeadingSizes) : 0;
   if (footerHeading > DESIGN_LIMITS.maxFooterHeading) {
     findings.push(finding("footer-headings", context, `footer headings are ${footerHeading}px; at most ${DESIGN_LIMITS.maxFooterHeading}px`));
+  }
+
+  // Desktop only: on phones one item per row is right.
+  if (context.device === "desktop") for (const row of measurement.stackedRows ?? []) {
+    findings.push(finding("stacked-row", context, `${row}: its items fill the whole width one under another; they should sit side by side`, row));
+  }
+  const galleryRatios = measurement.galleryRatios ?? [];
+  if (galleryRatios.length > 1 && Math.max(...galleryRatios) / Math.min(...galleryRatios) > 1 + DESIGN_LIMITS.ratioTolerance) {
+    findings.push(finding("gallery", context, `product photo frames differ in shape (${Math.min(...galleryRatios)}–${Math.max(...galleryRatios)}); they should all share one shape`));
+  }
+
+  const lineLimit = DESIGN_LIMITS.maxTitleLines[context.device];
+  if (lineLimit && (measurement.titleLines ?? 0) > lineLimit) {
+    findings.push(finding("title-lines", context, `page title runs onto ${measurement.titleLines} lines; at most ${lineLimit}`));
+  }
+  if ((measurement.thumbsOverhang ?? 0) > 4) {
+    findings.push(finding("gallery", context, `side thumbnails run ${measurement.thumbsOverhang}px below the photo`, "thumbs"));
+  }
+  if (measurement.spilledText?.length) {
+    findings.push(finding("text-spill", context, `text runs outside its box: ${measurement.spilledText.slice(0, 5).join("; ")}`));
   }
 
   for (const list of measurement.cardLists) {

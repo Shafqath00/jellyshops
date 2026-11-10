@@ -72,7 +72,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 .jelly-section-intro { text-align: center; margin-bottom: 32px; }
 .jelly-faq details { border-bottom: 1px solid var(--theme-border); padding: 20px 0; }
 .jelly-faq summary { font-weight: 600; cursor: pointer; }
-.jelly-faq details p { margin-top: 12px; max-width: 75ch; }
+.jelly-faq details p { margin-top: 12px; max-width: min(75ch, 100%); }
 .jelly-collection-header { text-align: center; background: var(--theme-surface); }
 .jelly-collection-header h1 { font-family: var(--theme-font-heading, Georgia), Georgia, serif; font-size: clamp(32px,4vw,48px); text-align: center; }
 .jelly-collection-header-image { width: 100%; height: 220px; object-fit: cover; margin-top: 24px; border-radius: 4px; }
@@ -125,7 +125,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 .jelly-image-text-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
 .jelly-image-text-media img { width: 100%; aspect-ratio: 1.15; object-fit: cover; border-radius: 8px; }
 .jelly-image-text[data-image-position="right"] .jelly-image-text-media { order: 2; }
-.jelly-image-text-content p { max-width: 48ch; margin: 20px 0; }
+.jelly-image-text-content p { max-width: min(48ch, 100%); margin: 20px 0; }
 .jelly-product-card-price { color: var(--theme-accent); font-weight: 600; }
 .jelly-section h2 { font-size: clamp(28px,3vw,38px); }
 @media (max-width: 767px) {
@@ -193,7 +193,7 @@ ul { list-style: none; margin: 0; padding: 0; }
 .jelly-footer-newsletter button:hover { background: var(--theme-surface); color: var(--theme-accent); }
 .jelly-footer-newsletter .jelly-newsletter-note { flex: 1 1 100%; order: 4; margin: 0; font-size: 13px; opacity: .85; }
 .jelly-footer-inner { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 2fr) minmax(0, 1fr); gap: 32px; align-items: start; }
-.jelly-footer-brand { display: grid; gap: 10px; max-width: 34ch; }
+.jelly-footer-brand { display: grid; gap: 10px; max-width: min(34ch, 100%); }
 .jelly-footer-brand strong { font-family: var(--theme-font-heading, Georgia), Georgia, serif; font-size: 26px; font-weight: 400; }
 .jelly-footer-brand p { margin: 0; opacity: .85; font-size: 14px; line-height: 1.6; }
 .jelly-footer-links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }

@@ -1,9 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { RegistrySectionRenderer, type CommerceDataProvider, type PublicProduct, type StorefrontCartAccess, type StorefrontPageContext } from "@jelly/storefront-renderer";
+import { useEffect, useMemo, useState } from "react";
+import type { CommerceDataProvider, PublicProduct, StorefrontCartAccess, StorefrontPageContext } from "@jelly/storefront-renderer";
 import { getStarterPack, resolveTheme, usesProductCompare } from "@jelly/storefront-themes";
 import type { RuntimeMenuV4, SectionNode } from "@jelly/storefront-schema";
+import type { ConfiguredOptionSelection } from "@/lib/domain";
+import { createProductPresentationContext } from "@/features/storefront/product-presentation";
+import { resolveStorefrontRoute, type PublicResourceReader, type PublicResourceType, type ResolvedStorefrontRoute, type StorefrontRouteRequest } from "@/features/storefront/resource-loader";
+import { RuntimeStorefrontView } from "@/features/storefront/runtime-storefront-view";
+import { previewCatalogProduct, snapshotFromStarterPack } from "./preview-fixtures";
 import { sampleReviews } from "./sample-reviews";
 import { MAX_COMPARE, useCompareList } from "@/features/storefront/compare-list";
 import type { CompareItem } from "@/features/storefront/compare-table";
@@ -12,8 +17,10 @@ import type { ThemePreviewConfig } from "./configs";
 
 /**
  * Renders a theme's starter template (home, product, collection, cart, search,
- * page or 404) with sample catalogue data, exactly as the published storefront
- * composes it.
+ * page or 404) with sample catalogue data through the live store's own path: the
+ * starter pack becomes a published snapshot, `resolveStorefrontRoute` picks the
+ * template and lays it out, the product page uses the live product logic, and
+ * `RuntimeStorefrontView` draws the page. Only the data source differs.
  */
 export type PreviewTemplate = "home" | "product" | "collection" | "cart" | "search" | "page" | "not-found" | "compare";
 
@@ -32,45 +39,24 @@ const menus: Record<string, RuntimeMenuV4> = {
   ] },
 };
 
-/** "£28.00" to 2800 (sample prices only). */
-const toMinor = (price: string) => Math.round(Number(price.replace(/[^0-9.]/g, "")) * 100);
-
 /** Sample prices as a shop shows them: "£1,197.00". */
 const pounds = (value: number) => `£${value.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-function useProductContext(config: ThemePreviewConfig): StorefrontPageContext {
-  const [size, setSize] = useState<string>();
+/** The sample product page, built by the live product logic from a catalog-shaped sample product. */
+export function useProductContext(config: ThemePreviewConfig): StorefrontPageContext {
+  const [selections, setSelections] = useState<ConfiguredOptionSelection[]>([]);
   const [quantity, setQuantity] = useState(1);
-  const sample = config.product;
-  const option = sample.option ?? { id: "size", name: "Size", values: [{ id: "s", label: "Small" }, { id: "m", label: "Medium" }, { id: "l", label: "Large", soldOut: true }] };
-  return {
-    pageType: "product",
-    resource: { id: sample.id, handle: "sample-product", data: { title: sample.title, productPresentation: {
-      product: {
-        id: sample.id, title: sample.title, vendor: config.name,
-        description: sample.description,
-        imageUrl: sample.media[0]?.url,
-        galleryEnabled: sample.galleryEnabled,
-        media: sample.media.map((item, index) => ({ id: `m${index + 1}`, url: item.url, altText: item.alt })),
-        specifications: sample.specifications,
-        shippingCopy: sample.shippingCopy,
-        options: [{ id: option.id, name: option.name, required: true, values: option.values.map((value) => ({ id: value.id, label: value.label, selected: size === value.id, available: !value.soldOut })) }],
-      },
-      selection: size ? [{ optionId: option.id, valueId: size }] : [],
-      quantity,
-      pricing: { price: sample.price, compareAtPrice: sample.compareAtPrice, priceMinor: toMinor(sample.price), ...(sample.compareAtPrice ? { compareAtPriceMinor: toMinor(sample.compareAtPrice) } : {}), format: (minor: number) => `£${(minor / 100).toFixed(2)}` },
-      availability: size ? { state: "available", message: "In stock", maxQuantity: 10 } : { state: "selection-required", message: `Choose a ${option.name.toLowerCase()}` },
-      canAddToCart: Boolean(size),
-      selectOption: (_option: string, value: string) => setSize(value),
-      setQuantity: (next: number) => setQuantity(Math.max(1, Math.min(10, next))),
-      addToCart: async () => ({ ok: true }),
-      buyNow: sample.showBuyNow === false ? undefined : async () => ({ ok: true }),
-      relatedProducts: config.products.filter((product) => product.id !== sample.id).slice(0, 4),
-    } } },
-  } as unknown as StorefrontPageContext;
+  const product = previewCatalogProduct(config);
+  const presentation = createProductPresentationContext({
+    product, currency: "GBP", shippingCopy: config.product.shippingCopy, selections, quantity,
+    onSelectionsChange: setSelections, onQuantityChange: setQuantity, onAddToCart: async () => ({ ok: true }),
+    relatedProducts: config.products.filter((item) => item.id !== product.id).slice(0, 4),
+  });
+  if (config.product.showBuyNow !== false) presentation.buyNow = async () => ({ ok: true });
+  return { pageType: "product", resource: { id: product.id, handle: product.slug, data: { title: product.name, product, productPresentation: presentation } } } as unknown as StorefrontPageContext;
 }
 
-function useCartContext(config: ThemePreviewConfig): StorefrontPageContext {
+export function useCartContext(config: ThemePreviewConfig): StorefrontPageContext {
   const [quantities, setQuantities] = useState<Record<string, number>>(config.cart);
   const second = Object.keys(config.cart)[1];
   const lines = config.products.filter((product) => quantities[product.id]).map((product) => {
@@ -113,23 +99,9 @@ export function previewHasCompare(config: ThemePreviewConfig): boolean {
   return usesProductCompare(resolveTheme(config.themeId).settings);
 }
 
-export function TemplatePreview({ template, config, productLayout, collectionLayout, onOpenCompare }: { template: PreviewTemplate; config: ThemePreviewConfig; productLayout?: string; collectionLayout?: string; onOpenCompare?: () => void }) {
-  const pack = getStarterPack(config.packId);
-  const productPage = useProductContext(config);
-  const cartPage = useCartContext(config);
-  // Themes that ship their own main menu are shown with it; the others with a sample menu that has dropdowns.
-  const previewMenus = config.useStarterMenu ? Object.fromEntries(pack.menus.map((menu) => [menu.handle, { id: `preview-${menu.key}`, handle: menu.handle, items: menu.items }])) as Record<string, RuntimeMenuV4> : menus;
-  const cart = usePreviewCart();
-  const products = withPreviewQuickAdd(config.products);
-  // Comparing in the preview uses its own list, kept in this browser like the live store's.
-  const compareOn = previewHasCompare(config);
-  const { access: compare, ids: compareIds } = useCompareList(`theme-preview-${config.themeId}`);
-  const compareItems = compareIds.flatMap((id): CompareItem[] => {
-    const product = config.products.find((item) => item.id === id);
-    return product ? [{ id: product.id, name: product.name, href: "#", imageUrl: product.imageUrl, price: product.price, vendor: product.vendor, available: product.available !== false, specifications: config.compareSpecifications?.[product.id] }] : [];
-  });
-  const commerce: CommerceDataProvider = { initialProducts: products, cart, ratings: config.ratings, reviews: sampleReviews, compare: compareOn ? compare : undefined, async getProducts(input) { return products.slice(0, input?.limit ?? products.length); } };
-  const pages: Record<PreviewTemplate, StorefrontPageContext> = {
+/** The sample page context of every previewed page (the product and cart pages come from their hooks). */
+export function previewPages(config: ThemePreviewConfig, productPage: StorefrontPageContext, cartPage: StorefrontPageContext): Record<PreviewTemplate, StorefrontPageContext> {
+  return {
     home: { pageType: "home", resource: null },
     product: productPage,
     collection: {
@@ -150,26 +122,65 @@ export function TemplatePreview({ template, config, productLayout, collectionLay
     "not-found": { pageType: "not-found", resource: null },
     compare: { pageType: "page", resource: null } as unknown as StorefrontPageContext,
   };
-  const page = pages[template];
-  // The compare page is built in (like the bag in other stores): the home page's header and footer around it.
-  const layout = pack.templates.find((item) => item.type === (template === "compare" ? "home" : template))?.layout.sections.filter((placement) => template !== "compare" || placement.kind === "global") ?? [];
-  type Entry = { region: "header" | "template" | "footer"; section: SectionNode };
-  const resolved: Entry[] = layout.flatMap((placement): Entry[] => {
-    if (placement.kind === "inline") return [{ region: "template", section: previewLayout(placement.section, productLayout, collectionLayout, config) }];
-    const global = pack.globalSections.find((entry) => entry.section.id === placement.globalSectionId);
-    if (!global) return [];
-    const section = global.key === "header" || global.key === "footer"
-      ? { ...global.section, settings: { storeName: config.name, ...global.section.settings } } as SectionNode
-      : global.section;
-    return [{ region: global.key === "footer" ? "footer" : "header", section }];
+}
+
+/** The route the live store would ask for to show this preview page (the compare page sits in the home page's frame). */
+function routeRequest(template: PreviewTemplate, page: StorefrontPageContext): StorefrontRouteRequest {
+  if (template === "compare" || template === "home") return { type: "home" };
+  if (template === "cart" || template === "not-found") return { type: template };
+  if (template === "search") return { type: "search", context: { type: "search", ...(page as Extract<StorefrontPageContext, { pageType: "search" }>).data } } as StorefrontRouteRequest;
+  return { type: template, handle: (page.resource as { handle: string }).handle };
+}
+
+/** Sample resources served to the live loader as the API would serve them. */
+function fixtureReader(pages: Record<PreviewTemplate, StorefrontPageContext>): PublicResourceReader {
+  const resource = (type: PublicResourceType) => {
+    const page = pages[type as PreviewTemplate];
+    const source = page?.resource as { id: string; handle: string; data: Record<string, unknown> } | null | undefined;
+    return source ? { type, id: source.id, handle: source.handle, visible: true, data: source.data } : null;
+  };
+  return {
+    findByHandle: async (type, handle) => { const found = resource(type); return found?.handle === handle ? found : null; },
+    findById: async (type, id) => { const found = resource(type); return found?.id === id ? found : null; },
+  };
+}
+
+export function TemplatePreview({ template, config, productLayout, collectionLayout, onOpenCompare }: { template: PreviewTemplate; config: ThemePreviewConfig; productLayout?: string; collectionLayout?: string; onOpenCompare?: () => void }) {
+  const productPage = useProductContext(config);
+  const cartPage = useCartContext(config);
+  // Built once per theme: getStarterPack returns a fresh copy each call, which would re-run the loader every render.
+  const snapshot = useMemo(() => snapshotFromStarterPack(getStarterPack(config.packId), config.themeId), [config.packId, config.themeId]);
+  // Themes that ship their own main menu are shown with it; the others with a sample menu that has dropdowns.
+  const previewMenus = config.useStarterMenu ? snapshot.menus : menus;
+  const cart = usePreviewCart();
+  const products = withPreviewQuickAdd(config.products);
+  // Comparing in the preview uses its own list, kept in this browser like the live store's.
+  const compareOn = previewHasCompare(config);
+  const { access: compare, ids: compareIds } = useCompareList(`theme-preview-${config.themeId}`);
+  const compareItems = compareIds.flatMap((id): CompareItem[] => {
+    const product = config.products.find((item) => item.id === id);
+    return product ? [{ id: product.id, name: product.name, href: "#", imageUrl: product.imageUrl, price: product.price, vendor: product.vendor, available: product.available !== false, specifications: config.compareSpecifications?.[product.id] }] : [];
   });
-  const render = (entry: Entry) => <RegistrySectionRenderer key={entry.section.id} section={entry.section} mode="preview" commerce={commerce} region={entry.region} themeId={config.themeId} page={page} menus={previewMenus} storeSlug="preview" />;
+  const commerce: CommerceDataProvider = { initialProducts: products, cart, ratings: config.ratings, reviews: sampleReviews, compare: compareOn ? compare : undefined, async getProducts(input) { return products.slice(0, input?.limit ?? products.length); } };
+  const pages = previewPages(config, productPage, cartPage);
+  const page = pages[template];
+  // The live loader picks the template and lays it out; it runs again only when the page or the data set changes.
+  const [resolved, setResolved] = useState<{ key: string; route: ResolvedStorefrontRoute }>();
+  const routeKey = `${template}:${config.themeId}:${config.packId}:${config.product.id}:${config.collection.title}`;
+  useEffect(() => {
+    let active = true;
+    void resolveStorefrontRoute(snapshot, routeRequest(template, page), fixtureReader(pages), async () => new Map()).then((route) => { if (active) setResolved({ key: routeKey, route }); });
+    return () => { active = false; };
+    // The page's own state (chosen size, bag lines) is passed in below; only a different page needs a new route.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routeKey, snapshot]);
+  const route = resolved?.key === routeKey ? resolved.route : undefined;
+  if (!route || route.status !== "ready") return null;
+  // Live pages hand their current data (the chosen size, the bag's lines) to the resolved route the same way.
+  const ready = { ...route, context: (template === "compare" ? { pageType: "home", resource: null } : page) as typeof route.context, layout: { ...route.layout, template: template === "compare" ? [] : route.layout.template.map((section) => previewLayout(section, productLayout, collectionLayout, config)) } };
   return <div className="jelly-storefront">
-    {resolved.filter((entry) => entry.region === "header").map(render)}
-    {template === "compare"
-      ? <ComparePageView items={compareItems} max={MAX_COMPARE} shopHref="#shop" onRemove={(id) => compare.remove(id)} />
-      : <main>{resolved.filter((entry) => entry.region === "template").map(render)}</main>}
-    {resolved.filter((entry) => entry.region === "footer").map(render)}
+    <RuntimeStorefrontView route={ready} commerce={commerce} themeId={config.themeId} menus={previewMenus} storeSlug="preview" mode="preview" identity={{ name: config.name }}
+      main={template === "compare" ? <ComparePageView items={compareItems} max={MAX_COMPARE} shopHref="#shop" onRemove={(id) => compare.remove(id)} /> : undefined} />
     {compareOn && template !== "compare" && <CompareTrayView items={compareItems} max={MAX_COMPARE} compareHref="#compare" onOpen={onOpenCompare} onRemove={(id) => compare.remove(id)} onClear={() => compare.clear()} />}
   </div>;
 }

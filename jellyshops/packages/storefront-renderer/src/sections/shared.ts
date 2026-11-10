@@ -52,3 +52,15 @@ export function editorBlockData(id: string, label: string, selectedBlockId?: str
     ...(fieldKey ? { "data-editor-field-key": fieldKey } : {}),
   };
 }
+
+/**
+ * Marks a page title by length so every theme steps long titles down (storefront-base.css "Long titles"):
+ * merchants' real product, collection and page names are often 60-100 characters, and a title sized for
+ * "Linen tote" would otherwise fill the screen.
+ */
+export function titleLength(text: unknown): { "data-title-length"?: "long" | "very-long" } {
+  const length = typeof text === "string" ? text.trim().length : 0;
+  if (length > 70) return { "data-title-length": "very-long" };
+  if (length > 40) return { "data-title-length": "long" };
+  return {};
+}

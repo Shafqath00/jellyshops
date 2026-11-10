@@ -158,10 +158,14 @@ export async function expandRuntimeLayoutWithValues(
   }
 }
 
-/** The template's sections exactly as saved, with custom-field connections still in place (for the editor preview, which looks values up itself). */
+/**
+ * The template's sections exactly as saved, with custom-field connections still in place (for the editor preview,
+ * which looks values up itself). The one place a template's placements become regions: the live store, the theme
+ * preview and the editor (saved or draft) all lay pages out here.
+ */
 export function expandRawRuntimeLayout(
-  snapshot: RuntimeStorefrontSnapshotV4,
-  template: RuntimeTemplateV4,
+  snapshot: Pick<RuntimeStorefrontSnapshotV4, "globalSections">,
+  template: Pick<RuntimeTemplateV4, "layout">,
 ): ResolvedStorefrontLayout {
   const layoutSections = template.layout.sections;
   const layout: ResolvedStorefrontLayout = { announcement: [], header: [], template: [], footer: [] };

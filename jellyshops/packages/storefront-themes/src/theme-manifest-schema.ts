@@ -57,6 +57,8 @@ export const themeManifestSchema = z.object({
    * unless they set it to false, and a theme that `extends` a base design follows the base.
    */
   legacyStorefrontStyles: z.boolean().optional(),
+  /** false: the theme brings all of its own CSS and does not use the platform's section defaults. */
+  sectionDefaults: z.boolean().optional(),
   /** Custom sections the theme adds, described as data (see recipes.ts). */
   sections: z.array(recipeSchema).max(20).optional(),
 }).strict().superRefine((manifest, context) => {

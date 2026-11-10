@@ -1,5 +1,5 @@
+import { titleLength } from "./shared";
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { ProductCard } from "../product-card";
 import { elementProps } from "../element-style";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import type { StorefrontRuntimeContext } from "../runtime-context";
@@ -69,7 +69,7 @@ export function CollectionHeaderSection({ context, section }: { context: Storefr
     <StorefrontContainer>
       {section.settings.showBreadcrumb === true && <nav className="jelly-breadcrumb" aria-label="Breadcrumb"><ol><li><a href={resolveStorefrontHref("/", context.storeSlug) ?? "/"}>Home</a></li><li aria-current="page">{collection.title}</li></ol></nav>}
       <div className="jelly-collection-header-copy">
-        {section.settings.showTitle !== false && <h1 {...part("title")}>{collection.title}</h1>}
+        {section.settings.showTitle !== false && <h1 {...part("title")} {...titleLength(collection.title)}>{collection.title}</h1>}
         {section.settings.showDescription === true && (["2", "3", "4"].includes(String(section.settings.descriptionLines))
           ? <ClampedText lines={Number(section.settings.descriptionLines)}><CollectionDescriptionText collection={collection} /></ClampedText>
           : <CollectionDescriptionText collection={collection} />)}
@@ -105,21 +105,18 @@ export function CollectionProductGridSection({ context, section }: { context: St
   const presentation = collectionContext(context);
   if (!presentation) return null;
   const layout = (PRODUCT_LIST_LAYOUTS as readonly unknown[]).includes(section.settings.listLayout) ? section.settings.listLayout as ProductListLayout : "grid";
-  const showSort = section.settings.showSort === true;
+  // Sorting and filters are on unless the merchant turned them off (registry defaultValue: true).
+  const showSort = section.settings.showSort !== false;
   // The sidebar and chip layouts are filter layouts, so they always show the filters.
-  const showFilters = section.settings.showFilters === true || layout === "sidebar" || layout === "chips";
-  // A section with its own layout, sorting or filters always draws the theme's product list (also on the live store).
-  if (presentation.interactiveGrid && !showSort && !showFilters && layout === "grid") return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer><h2 className="jelly-visually-hidden">Products</h2>{presentation.interactiveGrid}</StorefrontContainer></section>;
+  const showFilters = section.settings.showFilters !== false || layout === "sidebar" || layout === "chips";
   const columns = typeof section.settings.columns === "number" && Number.isInteger(section.settings.columns) ? Math.max(2, Math.min(4, section.settings.columns)) : 3;
   const limit = typeof section.settings.limit === "number" && Number.isInteger(section.settings.limit) ? Math.max(1, Math.min(24, section.settings.limit)) : 12;
   const emptyMessage = typeof section.settings.emptyMessage === "string" ? section.settings.emptyMessage : "No products are available in this collection yet.";
-  if (showSort || showFilters || layout !== "grid") return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer><h2 className="jelly-visually-hidden">Products</h2>
-    <ProductListBrowser products={presentation.products} columns={columns} limit={limit} showSort={showSort} showFilters={showFilters} emptyMessage={emptyMessage} layout={layout} stories={layout === "editorial" ? storyTiles(section.blocks, context.storeSlug) : []} />
+  // One product list for every collection page, in the preview, the editor and the live store ("Products per page"
+  // is the page size; "Show more" adds the next page).
+  return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer><h2 className="jelly-visually-hidden">Products</h2>
+    <ProductListBrowser products={presentation.products} columns={columns} pageSize={limit} showSort={showSort} showFilters={showFilters} emptyMessage={emptyMessage} layout={layout} stories={layout === "editorial" ? storyTiles(section.blocks, context.storeSlug) : []} />
   </StorefrontContainer></section>;
-  return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer><h2 className="jelly-visually-hidden">Products</h2>{presentation.products.length
-    ? <div className="jelly-product-grid-items" data-testid="collection-product-grid-items" data-columns={columns} style={{ "--jelly-columns": columns } as CSSProperties}>{presentation.products.slice(0, limit).map((product) => <ProductCard key={product.id} product={product} />)}</div>
-    : <p className="jelly-empty-state">{emptyMessage}</p>
-  }</StorefrontContainer></section>;
 }
 
 export function CollectionDescriptionSection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown> } }) {

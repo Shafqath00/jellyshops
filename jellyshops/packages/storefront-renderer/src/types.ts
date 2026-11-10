@@ -5,13 +5,12 @@ import type { ReactNode } from "react";
 /** A product as every product list draws it (the shared card in @jelly/storefront-ui). */
 export interface PublicProduct { id: string; name: string; href: string; imageUrl: string; price: string; compareAtPrice?: string; badge?: string; saving?: string; discountPercent?: number; chip?: string; vendor?: string; swatches?: Array<{ label: string; color?: string; image?: string }>; moreSwatches?: number; /** Exact price in minor units, used to sort and filter product lists. */ priceMinor?: number; /** False when no variant can be bought; product list filters use it. */ available?: boolean; /** Set when the product can go straight into the cart from its card (one variant, no options, in stock). */ quickAdd?: { variantId: string; max: number }; /** Average star rating and number of published reviews. */ rating?: { average: number; count: number } }
 export interface CollectionPresentationContext {
-  interactiveGrid?: ReactNode;
   collection: { id: string; title: string; description: string; descriptionDoc?: RichTextDocument | null; imageUrl?: string };
   products: PublicProduct[];
   totalProducts: number;
 }
 export interface ProductPresentationContext {
-  product: { id: string; title: string; description: string; descriptionDoc?: RichTextDocument | null; imageUrl: string; galleryEnabled?: boolean; specifications?: Record<string, string>; shippingCopy?: string; media?: ProductMediaLike[]; sku?: string; vendor?: string; options: Array<{ id: string; name: string; required: boolean; /** "color" or "image" draws swatches instead of text buttons. */ display?: "color" | "image"; multiple?: boolean; missing?: boolean; values: Array<{ id: string; label: string; selected: boolean; available: boolean; priceAdjustment?: string; previewImageUrl?: string; color?: string; image?: string }> }> };
+  product: { id: string; title: string; description: string; descriptionDoc?: RichTextDocument | null; imageUrl: string; galleryEnabled?: boolean; specifications?: Record<string, string>; shippingCopy?: string; media?: ProductMediaLike[]; sku?: string; vendor?: string; options: Array<{ id: string; name: string; required: boolean; /** "color" or "image" draws swatches instead of text buttons. */ display?: "color" | "image"; multiple?: boolean; missing?: boolean; values: Array<{ id: string; label: string; selected: boolean; /** False when no variant has this value with the other choices (it cannot be chosen). */ available: boolean; /** The value exists but is out of stock: it can still be chosen (price, back-in-stock), shown as sold out. */ soldOut?: boolean; priceAdjustment?: string; previewImageUrl?: string; color?: string; image?: string }> }> };
   selection: Array<{ optionId: string; valueId: string }>;
   quantity: number;
   /** Formatted prices; the optional minor amounts and `format` let themes show "% off", "Save £X" and a monthly finance amount. */

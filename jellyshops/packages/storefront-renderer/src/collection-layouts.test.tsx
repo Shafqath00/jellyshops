@@ -20,7 +20,7 @@ describe("collection layouts", () => {
   });
 
   it("chips: availability and colours are on/off buttons that filter the list", async () => {
-    const { container } = render(<ProductListBrowser products={products} columns={3} limit={12} showSort={false} showFilters emptyMessage="None" layout="chips" />);
+    const { container } = render(<ProductListBrowser products={products} columns={3} pageSize={12} showSort={false} showFilters emptyMessage="None" layout="chips" />);
     expect(container.querySelector(".jelly-list-filters")).toBeNull();
     const blue = screen.getByRole("button", { name: "Blue" });
     expect(blue).toHaveAttribute("aria-pressed", "false");
@@ -33,7 +33,7 @@ describe("collection layouts", () => {
   });
 
   it("sidebar: marks the list so the filters stand beside the products", () => {
-    const { container } = render(<ProductListBrowser products={products} columns={3} limit={12} showSort showFilters emptyMessage="None" layout="sidebar" />);
+    const { container } = render(<ProductListBrowser products={products} columns={3} pageSize={12} showSort showFilters emptyMessage="None" layout="sidebar" />);
     expect(container.querySelector(".jelly-list-browser")).toHaveAttribute("data-layout", "sidebar");
     expect(within(container).getByRole("group", { name: "Filters" })).toBeTruthy();
   });
@@ -47,7 +47,7 @@ describe("collection layouts", () => {
     const tiles = storyTiles(blocks, "demo");
     expect(tiles.map((tile) => tile.heading)).toEqual(["Made by hand"]);
     expect(tiles[0].href).toBe("/demo/pages/about");
-    const { container } = render(<ProductListBrowser products={products} columns={3} limit={12} showSort={false} showFilters={false} emptyMessage="None" layout="editorial" stories={tiles} />);
+    const { container } = render(<ProductListBrowser products={products} columns={3} pageSize={12} showSort={false} showFilters={false} emptyMessage="None" layout="editorial" stories={tiles} />);
     expect(screen.getByRole("link", { name: "Our story: Made by hand" })).toHaveAttribute("href", "/demo/pages/about");
     expect(await noViolations(container)).toEqual([]);
   });

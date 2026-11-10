@@ -15,10 +15,11 @@ import { displayName } from "@/features/store-editor/editor-page-helpers";
 import { mobileKeys } from "@/features/store-editor/mobile-settings";
 import { MobileEditingNote } from "@/features/store-editor/components/mobile-editing-note";
 import type { EditorViewContext } from "../../hooks/use-editor-controller";
+import { ResetDesignButton } from "@/features/store-editor/components/inspector/reset-design-button";
 
 /** The settings panel on the side: theme settings and saved looks, the section library, the block picker, section and block settings and shared sections. */
 export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
-  const { backendStoreId, api, looks, looksError, looksBusy, dynamicSources, catalog, themeCatalog, themeConfiguration, selection, setSelection, activeGlobalId, setMobilePanel, diagnostics, libraryRegion, setLibraryRegion, blockPickerSectionId, setBlockPickerSectionId, blockPickerParentId, setBlockPickerParentId, activeTemplate, presetOptions, globalOptions, selectedGlobal, localSection, selectedLocation, selectedBlock, selectedElement, selectedChildOptions, sectionDefinition, baseControls, responsiveView, selectedControls, selectedSettings, builtInSections, blockPickerSection, blockPickerDefinition, blockPickerTypes, selectedTheme, persistThemeSetting, saveThemeLook, renameThemeLook, deleteThemeLook, insertPreset, saveToLibrary, deletePreset, insertBuiltIn, addBlock, removeSelectedSection, insertGlobal, makeGlobal, detachGlobal, updateSelectedSetting, updateSelectedSettings, saveRichTextDocument, openDiagnostic } = ctx;
+  const { backendStoreId, api, looks, looksError, looksBusy, dynamicSources, catalog, themeCatalog, themeConfiguration, selection, setSelection, activeGlobalId, setMobilePanel, diagnostics, libraryRegion, setLibraryRegion, blockPickerSectionId, setBlockPickerSectionId, blockPickerParentId, setBlockPickerParentId, activeTemplate, presetOptions, globalOptions, selectedGlobal, localSection, selectedLocation, selectedBlock, selectedElement, selectedChildOptions, sectionDefinition, baseControls, responsiveView, selectedControls, selectedSettings, builtInSections, blockPickerSection, blockPickerDefinition, blockPickerTypes, selectedTheme, persistThemeSetting, saveThemeLook, renameThemeLook, deleteThemeLook, insertPreset, saveToLibrary, deletePreset, insertBuiltIn, addBlock, removeSelectedSection, insertGlobal, makeGlobal, detachGlobal, updateSelectedSetting, updateSelectedSettings, resetSelectedDesign, saveRichTextDocument, openDiagnostic } = ctx;
   return (
     <>
       {selection?.kind === "theme" && (
@@ -189,6 +190,9 @@ export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
             )}
           </div>
 
+          {!selectedBlock && !selectedElement && selection?.kind === "section" && (
+            <div className="border-b border-[var(--line)] p-3"><ResetDesignButton onReset={() => { void resetSelectedDesign(); }} /></div>
+          )}
           {!selectedBlock && !selectedElement && (sectionDefinition?.elements ?? []).length > 0 && (
             <div className="border-b border-[var(--line)] p-3">
               <p className="mb-2 text-xs font-semibold text-muted-foreground">Parts of this section</p>

@@ -296,12 +296,12 @@
 :where(.jelly-slide[data-active="true"]) { opacity: 1; visibility: visible; transition: opacity 700ms ease; }
 :where(.jelly-slideshow[data-height="large"] .jelly-slide) { min-height: 86vh; }
 :where(.jelly-slide-media, .jelly-slide-overlay) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-:where(.jelly-slide-content) { position: relative; z-index: 1; align-self: end; display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 48px 24px 96px; text-align: center; }
+:where(.jelly-slide-content) { position: relative; z-index: 1; align-self: end; display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 48px max(24px, var(--j-page-edge, 24px)) 96px; text-align: center; }
 :where(.jelly-slideshow[data-align="left"] .jelly-slide-content) { align-items: flex-start; text-align: left; }
-:where(.jelly-slide :is(h1, h2, p)) { max-width: 22ch; margin: 0; color: #fff; }
-:where(.jelly-slide-content > p:not(.jelly-eyebrow)) { max-width: 46ch; }
+:where(.jelly-slide :is(h1, h2, p)) { max-width: min(22ch, 100%); margin: 0; color: #fff; }
+:where(.jelly-slide-content > p:not(.jelly-eyebrow)) { max-width: min(46ch, 100%); }
 :where(.jelly-slideshow-controls) { position: absolute; right: 0; bottom: 20px; left: 0; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 12px; }
-:where(.jelly-slideshow-arrow) { width: 40px; height: 40px; border: 0; background: none; color: #fff; font-size: 18px; cursor: pointer; }
+:where(.jelly-slideshow-arrow, .jelly-slideshow-pause) { width: 40px; height: 40px; border: 0; background: none; color: #fff; font-size: 18px; cursor: pointer; }
 :where(.jelly-slideshow-dots) { display: flex; gap: 6px; }
 :where(.jelly-slideshow-dots button) { width: 28px; height: 24px; border: 0; background: linear-gradient(rgba(255, 255, 255, .45), rgba(255, 255, 255, .45)) center / 100% 2px no-repeat; cursor: pointer; }
 :where(.jelly-slideshow-dots button[aria-current="true"]) { background-image: linear-gradient(#fff, #fff); }
@@ -344,13 +344,13 @@
 :where(.jelly-specifications-list > div) { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 16px; padding-block: 10px; border-bottom: 1px solid color-mix(in srgb, currentColor 14%, transparent); }
 :where(.jelly-specifications-list dd) { margin: 0; }
 :where(.jelly-specifications details > summary) { cursor: pointer; }
-:where(.jelly-store-visit .jelly-container) { display: grid; gap: 32px; align-items: center; }
+:where(.jelly-store-visit .jelly-container) { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; align-items: center; }
 @media (min-width: 900px) { :where(.jelly-store-visit[data-has-image="true"] .jelly-container) { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 :where(.jelly-store-visit-body) { display: grid; gap: 16px; justify-items: start; }
 :where(.jelly-store-visit-address) { display: grid; font-style: normal; }
 :where(.jelly-store-visit-hours dl) { display: grid; gap: 4px; margin: 0; }
 :where(.jelly-store-visit-hours dl > div) { display: flex; flex-wrap: wrap; gap: 4px 16px; }
-:where(.jelly-store-visit-hours dt) { min-width: 120px; }
+:where(.jelly-store-visit-hours dt) { min-width: min(120px, 100%); }
 :where(.jelly-store-visit-hours dd) { margin: 0; }
 :where(.jelly-store-visit-details) { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
 :where(.jelly-store-visit-details span) { margin-inline-end: 8px; opacity: .7; }
@@ -545,7 +545,7 @@
 
 /* Blog and article section settings (sections/content-pages.tsx). Zero specificity so themes can restyle them. */
 :where(.jelly-blog-header[data-align="center"], .jelly-article-header[data-align="center"]) { text-align: center; }
-:where(.jelly-blog-header-text) { max-width: 60ch; margin-top: 12px; }
+:where(.jelly-blog-header-text) { max-width: min(60ch, 100%); margin-top: 12px; }
 :where(.jelly-blog-header[data-align="center"]) :where(.jelly-blog-header-text) { margin-inline: auto; }
 :where(.jelly-article-list-items) { display: grid; gap: 32px; }
 :where(.jelly-article-list[data-layout="grid"]) :where(.jelly-article-list-items) { grid-template-columns: repeat(var(--article-columns, 3), minmax(0, 1fr)); }
@@ -816,7 +816,7 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
    collection breadcrumb. Lowest specificity so each theme's own rules win; colours come from the contract roles. */
 :where(.jelly-list-toolbar) { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-bottom: 24px; }
 :where(.jelly-list-count) { margin: 0; color: var(--j-color-muted); }
-:where(.jelly-list-sort) { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; }
+:where(.jelly-list-sort) { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; white-space: nowrap; }
 :where(.jelly-list-filter-toggle) { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid var(--j-color-border); border-radius: 999px; background: transparent; color: inherit; font: inherit; cursor: pointer; }
 :where(.jelly-list-filters) { display: none; gap: 20px; margin-bottom: 24px; }
 :where(.jelly-list-browser[data-filters-open] .jelly-list-filters) { display: grid; }
@@ -998,7 +998,7 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 [data-jelly-theme] .jelly-hero.jelly-hero[data-layout="spotlight"] .jelly-hero-media { position: relative; inset: auto; display: grid; place-items: center; width: 100%; height: auto; aspect-ratio: 1 / 1; border-radius: var(--j-radius-lg, 24px); background: color-mix(in srgb, var(--j-color-accent, var(--j-color-primary, #888)) 16%, var(--j-color-bg, #fff)); }
 [data-jelly-theme] .jelly-hero.jelly-hero[data-layout="spotlight"] .jelly-hero-media img { position: relative; inset: auto; width: 72%; height: 72%; object-fit: contain; }
 .jelly-hero-callouts { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr 1fr; align-content: space-evenly; margin: 0; padding: 6%; list-style: none; pointer-events: none; }
-.jelly-hero-callouts li { justify-self: start; max-width: 14ch; padding: 8px 14px; border-radius: var(--j-radius-pill, 999px); background: var(--j-color-bg, #fff); color: var(--j-color-text, #111); font-size: 14px; font-weight: 600; line-height: 1.25; box-shadow: 0 6px 20px rgb(0 0 0 / 0.08); }
+.jelly-hero-callouts li { justify-self: start; max-width: min(14ch, 100%); padding: 8px 14px; border-radius: var(--j-radius-pill, 999px); background: var(--j-color-bg, #fff); color: var(--j-color-text, #111); font-size: 14px; font-weight: 600; line-height: 1.25; box-shadow: 0 6px 20px rgb(0 0 0 / 0.08); }
 .jelly-hero-callouts li[data-side="end"] { grid-column: 2; justify-self: end; }
 .jelly-hero-callouts li[data-side="start"] { grid-column: 1; }
 @media (max-width: 599px) {
@@ -1008,7 +1008,7 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 }
 
 /* R9 statement: a very large heading across the page; the photo sits small beside the text. */
-[data-jelly-theme] .jelly-hero.jelly-hero[data-layout="statement"] .jelly-hero-content h1 { max-width: 16ch; margin: 0; font-size: clamp(48px, 8.5vw, 132px); line-height: 0.98; letter-spacing: var(--j-track-tight, -0.02em); }
+[data-jelly-theme] .jelly-hero.jelly-hero[data-layout="statement"] .jelly-hero-content h1 { max-width: min(16ch, 100%); margin: 0; font-size: clamp(48px, 8.5vw, 132px); line-height: 0.98; letter-spacing: var(--j-track-tight, -0.02em); }
 [data-jelly-theme] .jelly-hero.jelly-hero[data-layout="statement"][data-align="center"] .jelly-hero-content h1 { margin-inline: auto; }
 @media (min-width: 900px) {
   [data-jelly-theme] .jelly-hero.jelly-hero[data-layout="statement"]:has(.jelly-hero-media) > .jelly-container { grid-template-columns: minmax(0, 3fr) minmax(0, 1fr); align-items: end; }
@@ -1307,3 +1307,140 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 .jelly-compare-table tr[data-differs] th { color: var(--j-color-text, inherit); font-weight: 600; }
 .jelly-compare-table tbody :is(th, td):first-child { padding-left: 8px; }
 .jelly-compare-hint { margin-top: 16px; color: var(--j-color-muted, inherit); }
+
+/*
+ * Product gallery (Product gallery section). Thumbnails layout: one photo at a time in a fixed-shape frame, a
+ * swipeable strip, arrows, counter, thumbnails below or beside, and a full-screen viewer with zoom. The structural
+ * rules (strip, frame, arrows, dialog) work in every theme; looks (corners, colours) use :where() so themes override.
+ * Large first image / Grid: the photo grid is display: contents, so each theme's own gallery grid keeps working; a
+ * photo shape the merchant picks wins over the theme's.
+ */
+.jelly-product-gallery[data-layout] > .jelly-container:has(> .jelly-gallery) { display: block; }
+.jelly-gallery { --jelly-gallery-gap: 12px; display: grid; gap: var(--jelly-gallery-gap); min-width: 0; }
+.jelly-gallery-stage { position: relative; min-width: 0; outline-offset: 4px; }
+.jelly-gallery-track { display: flex; margin: 0; padding: 0; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; list-style: none; }
+.jelly-gallery-track::-webkit-scrollbar { display: none; }
+.jelly-gallery-slide { flex: 0 0 100%; aspect-ratio: var(--jelly-gallery-ratio, 1 / 1); overflow: hidden; scroll-snap-align: start; scroll-snap-stop: always; }
+.jelly-gallery-slide img, .jelly-gallery-empty { display: block; width: 100%; height: 100%; max-height: none; object-fit: var(--jelly-gallery-fit, contain); user-select: none; }
+.jelly-gallery-empty { display: grid; place-items: center; aspect-ratio: var(--jelly-gallery-ratio, 1 / 1); height: auto; font-size: 14px; }
+:where(.jelly-gallery-slide, .jelly-gallery-empty) { border-radius: var(--j-radius-md, 8px); background: var(--j-color-surface, #f4f4f4); }
+.jelly-gallery-arrow { position: absolute; top: 50%; z-index: 1; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; transform: translateY(-50%); border-radius: 999px; cursor: pointer; }
+:where(.jelly-gallery-arrow) { border: 1px solid var(--j-color-border, rgb(0 0 0 / .12)); background: color-mix(in srgb, var(--j-color-bg, #fff) 92%, transparent); color: var(--j-color-text, #111); font-size: 26px; line-height: 1; box-shadow: 0 2px 10px rgb(0 0 0 / .08); }
+.jelly-gallery-arrow[data-direction="previous"] { left: 12px; }
+.jelly-gallery-arrow[data-direction="next"] { right: 12px; }
+.jelly-gallery .jelly-gallery-arrow:disabled, .jelly-gallery-lightbox .jelly-gallery-arrow:disabled { opacity: 0; pointer-events: none; }
+.jelly-gallery-counter { position: absolute; bottom: 12px; left: 12px; margin: 0; padding: 4px 10px; border-radius: 999px; font-size: 13px; line-height: 1.4; font-variant-numeric: tabular-nums; pointer-events: none; }
+:where(.jelly-gallery-counter) { background: color-mix(in srgb, var(--j-color-bg, #fff) 88%, transparent); color: var(--j-color-text, #111); }
+.jelly-gallery-expand { position: absolute; top: 12px; right: 12px; z-index: 1; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 999px; cursor: zoom-in; }
+:where(.jelly-gallery-expand) { border: 1px solid var(--j-color-border, rgb(0 0 0 / .12)); background: color-mix(in srgb, var(--j-color-bg, #fff) 92%, transparent); color: var(--j-color-text, #111); font-size: 20px; }
+.jelly-gallery-thumbs { display: flex; gap: 8px; overflow-x: auto; padding: 2px; scrollbar-width: thin; }
+.jelly-gallery-thumbs button { flex: 0 0 72px; width: 72px; height: 72px; padding: 0; overflow: hidden; border: 2px solid transparent; cursor: pointer; }
+:where(.jelly-gallery-thumbs button) { border-radius: var(--j-radius-sm, 6px); background: var(--j-color-surface, #f4f4f4); opacity: .7; transition: opacity 150ms ease, border-color 150ms ease; }
+.jelly-gallery-thumbs button[aria-pressed="true"] { border-color: var(--j-color-text, currentColor); opacity: 1; }
+.jelly-gallery-thumbs button:hover { opacity: 1; }
+.jelly-gallery-thumbs img { display: block; width: 100%; height: 100%; max-height: none; object-fit: cover; }
+@media (min-width: 768px) {
+  .jelly-gallery[data-thumbs="left"] { grid-template-columns: 72px minmax(0, 1fr); align-items: start; }
+  .jelly-gallery[data-thumbs="left"] > .jelly-gallery-stage { grid-column: 2; grid-row: 1; }
+  /* The column never grows taller than the photo: it takes the photo height and scrolls. */
+  .jelly-gallery[data-thumbs="left"] > .jelly-gallery-thumbs { grid-column: 1; grid-row: 1; flex-direction: column; align-self: stretch; height: 0; min-height: 100%; overflow: hidden auto; scrollbar-width: none; }
+  .jelly-gallery[data-thumbs="left"] .jelly-gallery-thumbs button { flex-basis: 72px; }
+}
+@media (hover: none) and (max-width: 767px) { .jelly-gallery-arrow { display: none; } }
+@media (prefers-reduced-motion: reduce) { .jelly-gallery-track { scroll-behavior: auto; } }
+
+.jelly-photo-grid { display: contents; }
+.jelly-photo-grid[style*="--jelly-gallery-ratio"] .jelly-product-gallery-item { aspect-ratio: var(--jelly-gallery-ratio) !important; overflow: hidden; }
+.jelly-photo-grid[style*="--jelly-gallery-ratio"] .jelly-product-gallery-item img { width: 100%; height: 100% !important; max-height: none !important; object-fit: var(--jelly-gallery-fit, cover) !important; }
+.jelly-product-gallery-item > button { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: none; color: inherit; cursor: zoom-in; }
+.jelly-product-gallery-item > button:focus-visible { outline: 2px solid currentColor; outline-offset: -4px; }
+/* Themes without their own gallery grid: one column on phones, two from tablet; Large first image spans the row. */
+:where(.jelly-product-gallery[data-layout="grid"], .jelly-product-gallery[data-layout="stacked"]) > :where(.jelly-container) { display: grid; gap: 12px; }
+@media (min-width: 768px) {
+  :where(.jelly-product-gallery[data-layout="grid"], .jelly-product-gallery[data-layout="stacked"]) > :where(.jelly-container) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :where(.jelly-product-gallery[data-layout="stacked"]) :where(.jelly-product-gallery-item:first-child) { grid-column: 1 / -1; }
+}
+:where(.jelly-product-gallery-item) { margin: 0; aspect-ratio: 1 / 1; overflow: hidden; border-radius: var(--j-radius-md, 8px); background: var(--j-color-surface, #f4f4f4); }
+:where(.jelly-product-gallery-item) img { display: block; width: 100%; height: 100%; object-fit: var(--jelly-gallery-fit, cover); }
+
+.jelly-gallery-lightbox { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; padding: 0; border: 0; overflow: hidden; background: #0d0d0d; color: #fff; }
+.jelly-gallery-lightbox::backdrop { background: rgb(0 0 0 / .85); }
+.jelly-gallery-lightbox-bar { position: absolute; inset: 0 0 auto; z-index: 2; display: flex; align-items: center; justify-content: space-between; padding: 8px 12px 8px 20px; }
+.jelly-gallery-lightbox-bar p { margin: 0; font-size: 14px; font-variant-numeric: tabular-nums; }
+.jelly-gallery-lightbox-bar button { width: 44px; height: 44px; border: 0; border-radius: 999px; background: rgb(255 255 255 / .12); color: #fff; font-size: 26px; line-height: 1; cursor: pointer; }
+.jelly-gallery-lightbox-photo { display: grid; place-items: center; width: 100%; height: 100%; padding: 60px 0; overflow: hidden; border: 0; background: none; cursor: zoom-in; }
+.jelly-gallery-lightbox .jelly-gallery-lightbox-photo img { width: auto !important; height: auto !important; max-width: min(100%, 100vw) !important; max-height: calc(100dvh - 120px) !important; border-radius: 0; object-fit: contain; transition: transform 200ms ease; user-select: none; }
+.jelly-gallery-lightbox-photo[data-zoomed] { cursor: zoom-out; }
+.jelly-gallery-lightbox .jelly-gallery-lightbox-photo[data-zoomed] img { transform: scale(2.2); }
+.jelly-gallery-lightbox .jelly-gallery-arrow { border: 0; background: rgb(255 255 255 / .14); color: #fff; box-shadow: none; font-size: 30px; }
+.jelly-gallery-lightbox .jelly-gallery-arrow[data-direction="previous"] { left: 16px; }
+.jelly-gallery-lightbox .jelly-gallery-arrow[data-direction="next"] { right: 16px; }
+@media (prefers-reduced-motion: reduce) { .jelly-gallery-lightbox-photo img { transition: none; } }
+
+/* Testimonials: cards side by side for every theme that does not lay them out itself. */
+:where(.jelly-testimonial-grid) { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: 16px; align-items: stretch; }
+:where(.jelly-testimonial-grid > blockquote) { display: flex; flex-direction: column; justify-content: space-between; gap: 12px; margin: 0; }
+
+/*
+ * Long titles (titleLength() in the renderer): real product, collection and page names run to 60-100 characters.
+ * Long ones step down to a size no theme title is smaller than, so a long name takes about three lines, not six.
+ * Unbroken words (codes, URLs, long compounds) wrap instead of pushing past the page or card edge.
+ */
+[data-jelly-theme] h1[data-title-length="long"] { font-size: min(var(--j-type-h3-size, 2rem), 2rem) !important; line-height: 1.15 !important; max-width: none !important; }
+[data-jelly-theme] h1[data-title-length="very-long"] { font-size: min(var(--j-type-h3-size, 1.5rem), 1.5rem) !important; line-height: 1.2 !important; max-width: none !important; }
+:where([data-jelly-theme]) :where(h1, h2, h3, .jelly-product-card) { overflow-wrap: anywhere; }
+/* Any text a merchant types may hold one very long word (settings fuzz): it breaks only where it would otherwise run
+   past its box, so ordinary words are never split (a stronger rule split prices and Filter labels in tight rows).
+   The single-column grids that hold section text get a column that can shrink (below), so a long word cannot prop
+   them open either. Buttons never grow past their row. */
+:where([data-jelly-theme]) :where(p, li, blockquote, figcaption, dd, dt, label, h4, h5, h6, strong, em, span, a, cite) { overflow-wrap: break-word; }
+/* Start-aligned grid and flex items are as wide as their longest word; capping text blocks at their container lets the
+   word wrap instead. */
+:where([data-jelly-theme]) :where(h1, h2, h3, h4, h5, h6, p, li, blockquote, figcaption, a) { max-width: 100%; }
+/* Items of the shared grids of columns, tiles and cards may shrink below their longest word (the word wraps). */
+:where([data-jelly-theme]) :where(.jelly-layout-grid, .jelly-multicolumn-grid, .jelly-category-grid-items, .jelly-testimonial-grid, .jelly-journal-grid, .jelly-section-header, .jelly-footer-inner) > * { min-width: 0; }
+/* A price and its old price wrap onto two lines on a narrow card instead of spilling out of it. */
+:where([data-jelly-theme]) :where(.jelly-product-card-price) { flex-wrap: wrap; }
+:where([data-jelly-theme]) :where(.jelly-section-intro, .jelly-section-header > div, .jelly-footer, .jelly-footer-newsletter, .jelly-footer-brand, .jelly-faq-list, .jelly-image-text-content, .jelly-store-visit-body, .jelly-collection-header-copy, .jelly-newsletter .jelly-container, .jelly-multicolumn-grid > *, .jelly-category-card, .jelly-testimonial-grid blockquote, .jelly-journal-grid article, .jelly-mosaic-panel, .jelly-faq-layout, .jelly-not-found .jelly-container) { grid-template-columns: minmax(0, 1fr); }
+:where([data-jelly-theme]) :where(.jelly-button) { max-width: 100%; overflow-wrap: anywhere; }
+/* Short labels in flexible rows and grids give way to a long word instead of pushing the row open. */
+:where([data-jelly-theme]) :where(.jelly-eyebrow, .jelly-category-card strong, .jelly-rating-line > *, .jelly-slide-content > *, .jelly-hero-content > *) { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+:where([data-jelly-theme] .jelly-product-card) { min-width: 0; }
+/* Sign-up consent box: at least the 24px tap size in every theme (a smaller theme size still loses to min-width). */
+[data-jelly-theme] input[type="checkbox"][name="consent"] { flex: none; min-width: 24px; min-height: 24px; }
+/*
+ * Product card fallbacks for themes that do not set them (zero priority, so a theme's own rules win): the badge sits
+ * over the photo instead of adding height to it, and a product with no photo keeps the card's photo shape.
+ */
+:where(.jelly-product-card-media) { position: relative; }
+:where(.jelly-product-card-media > .jelly-product-card-badge) { position: absolute; top: 8px; left: 8px; z-index: 1; }
+:where(.jelly-product-card-placeholder) { display: block; width: 100%; aspect-ratio: var(--jelly-card-ratio, 4 / 5); background: var(--j-color-surface, #f2f2f2); }
+
+/* Sold-out option values (product options): still selectable, so the shopper sees the price and can ask to be told
+   when it is back; shown struck through, swatches with a diagonal line. Zero priority: themes may restyle. */
+:where(.jelly-product-option-values button[data-sold-out], .jelly-option-tile[data-sold-out] .jelly-option-tile-label) { text-decoration: line-through; text-decoration-thickness: 1px; }
+:where(.jelly-product-option-values button[data-sold-out][data-swatch]) { position: relative; overflow: hidden; }
+:where(.jelly-product-option-values button[data-sold-out][data-swatch])::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top right, transparent calc(50% - 1px), currentColor calc(50% - 1px), currentColor calc(50% + 1px), transparent calc(50% + 1px)); pointer-events: none; }
+:where(.jelly-slideshow-pause) { font-size: 12px; letter-spacing: -0.1em; }
+:where(.jelly-slideshow-track) { touch-action: pan-y; }
+
+/* Video cover: the picture and play button shown until the shopper starts a YouTube or Vimeo video. */
+:where(.jelly-video-cover) { position: relative; display: block; width: 100%; height: 100%; padding: 0; overflow: hidden; border: 0; border-radius: inherit; background: #111; color: #fff; cursor: pointer; }
+:where(.jelly-video-cover img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+:where(.jelly-video-play) { position: absolute; top: 50%; left: 50%; display: grid; place-items: center; width: 72px; height: 72px; border-radius: 999px; background: rgb(0 0 0 / 0.6); transform: translate(-50%, -50%); transition: background-color 150ms ease; }
+:where(.jelly-video-cover:hover .jelly-video-play, .jelly-video-cover:focus-visible .jelly-video-play) { background: rgb(0 0 0 / 0.85); }
+:where(.jelly-video-cover:focus-visible) { outline: 3px solid currentColor; outline-offset: -6px; }
+:where(.jelly-gallery-track:focus-visible) { outline: 2px solid currentColor; outline-offset: -4px; }
+
+/* Product lists: "Show more products" under the list (collection, Shop all, search). */
+:where(.jelly-list-more) { display: flex; justify-content: center; margin-top: var(--j-space-xl, 32px); }
+
+/* Spacer (empty space, own phone size) and the line of Divider / Spacer and divider. Zero priority: themes may restyle. */
+:where(.jelly-spacer) { height: var(--jelly-spacer, 48px); }
+@media (max-width: 767px) { :where(.jelly-spacer) { height: var(--jelly-spacer-m, var(--jelly-spacer, 48px)); } }
+:where(.jelly-spacer-divider) { padding-block: calc(var(--jelly-spacer, 32px) / 2); }
+:where(.jelly-spacer-divider hr) { margin: 0; border: 0; border-top: 1px solid var(--j-color-border, currentColor); }
+
+/* Opening hours are short labels in a wrapping row: a very long word may break rather than push the row open.
+   After the general text rule above, which has the same priority. */
+:where(.jelly-store-visit-hours :is(dt, dd)) { overflow-wrap: anywhere; }

@@ -26,11 +26,11 @@ function TilePicture({ picture }: { picture: { kind: "image" | "color"; value: s
 
 /** One option's values as large tiles: picture, name, extra cost, sold out. */
 export function OptionTiles({ option, product }: { option: Option; product: ProductPresentationContext }) {
-  return <div className="jelly-option-tiles">{option.values.map((value) => <button key={value.id} type="button" className="jelly-option-tile" aria-pressed={value.selected} disabled={!value.available} onClick={() => product.selectOption(option.id, value.id)}>
+  return <div className="jelly-option-tiles">{option.values.map((value) => <button key={value.id} type="button" className="jelly-option-tile" aria-pressed={value.selected} disabled={!value.available} data-sold-out={value.soldOut || undefined} onClick={() => product.selectOption(option.id, value.id)}>
     <TilePicture picture={tilePicture(option, value)} />
     <span className="jelly-option-tile-label">{value.label}</span>
     {value.priceAdjustment && <span className="jelly-option-tile-price">+{value.priceAdjustment}</span>}
-    {!value.available && <span className="jelly-option-tile-note">Sold out</span>}
+    {(value.soldOut || !value.available) && <span className="jelly-option-tile-note">{value.available ? "Sold out" : "Unavailable"}</span>}
   </button>)}</div>;
 }
 

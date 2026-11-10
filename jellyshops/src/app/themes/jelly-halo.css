@@ -11,7 +11,7 @@
 [data-jelly-theme="jelly-halo"] :where(.jelly-section, .jelly-header, .jelly-footer) h3{font-size: var(--j-type-h3-size); font-family: var(--j-type-h3-font); line-height: var(--j-type-h3-line); letter-spacing: var(--j-type-h3-track); text-transform: var(--j-type-h3-case);}
 [data-jelly-theme="jelly-halo"] :where(.jelly-section, .jelly-header, .jelly-footer) h4{font-size: var(--j-type-h4-size); font-family: var(--j-type-h4-font); line-height: var(--j-type-h4-line); letter-spacing: var(--j-type-h4-track); text-transform: var(--j-type-h4-case);}
 [data-jelly-theme="jelly-halo"] :where(.jelly-section, .jelly-header, .jelly-footer) a{color: inherit;}
-[data-jelly-theme="jelly-halo"] :where(.jelly-section, .jelly-header, .jelly-footer) p{margin: 0 0 1em; max-width: 65ch;}
+[data-jelly-theme="jelly-halo"] :where(.jelly-section, .jelly-header, .jelly-footer) p{margin: 0 0 1em; max-width: min(65ch, 100%);}
 [data-jelly-theme="jelly-halo"] :where(.jelly-section, .jelly-header, .jelly-footer) ul{list-style: none; margin: 0; padding: 0;}
 [data-jelly-theme="jelly-halo"] :where(.jelly-section, .jelly-header, .jelly-footer) img{max-width: 100%;}
 [data-jelly-theme="jelly-halo"] :where(.jelly-section, .jelly-header, .jelly-footer) button,[data-jelly-theme="jelly-halo"] :where(.jelly-section, .jelly-header, .jelly-footer) input,[data-jelly-theme="jelly-halo"] :where(.jelly-section, .jelly-header, .jelly-footer) select,[data-jelly-theme="jelly-halo"] :where(.jelly-section, .jelly-header, .jelly-footer) textarea{font: inherit;}
@@ -37,7 +37,7 @@
 [data-jelly-theme="jelly-halo"] .jelly-header-search{max-width: none; background: var(--j-color-surface); border: 0;}
 [data-jelly-theme="jelly-halo"] .jelly-footer{padding: var(--j-space-3xl) var(--j-page-edge); background: var(--j-color-bg); color: var(--j-color-text);}
 [data-jelly-theme="jelly-halo"] .jelly-footer-inner{display: grid; grid-template-columns: 1fr 2fr; gap: var(--j-space-3xl);}
-[data-jelly-theme="jelly-halo"] .jelly-footer-brand{max-width: 32ch;}
+[data-jelly-theme="jelly-halo"] .jelly-footer-brand{max-width: min(32ch, 100%);}
 [data-jelly-theme="jelly-halo"] .jelly-footer-brand h2{font-size: var(--j-type-h3-size);}
 [data-jelly-theme="jelly-halo"] .jelly-footer-links{display: flex; flex-wrap: wrap; gap: var(--j-space-3xl);}
 [data-jelly-theme="jelly-halo"] .jelly-footer-links .jelly-menu{display: grid; gap: 0;}
@@ -112,9 +112,6 @@
 [data-jelly-theme="jelly-halo"] .jelly-prose li + li{margin-top: var(--j-space-xs);}
 [data-jelly-theme="jelly-halo"] .jelly-collection-header-image{width: 100%; max-height: 18rem; object-fit: cover; border-radius: var(--j-radius-lg); margin-top: var(--j-space-lg);}
 [data-jelly-theme="jelly-halo"] .jelly-product-gallery img{display: block; width: 100%; object-fit: contain; border-radius: var(--j-radius-md);}
-[data-jelly-theme="jelly-halo"] .jelly-gallery-viewer{--jelly-surface: var(--j-color-surface); display: grid; grid-template-columns: 4rem minmax(0, 1fr); align-items: start; gap: var(--j-space-md);}
-[data-jelly-theme="jelly-halo"] .jelly-gallery-viewer > div:first-child{grid-column: 2; grid-row: 1; border-radius: var(--j-radius-md);}
-[data-jelly-theme="jelly-halo"] .jelly-gallery-viewer > [role="group"]{grid-column: 1; grid-row: 1; flex-direction: column; padding: 0 !important;}
 [data-jelly-theme="jelly-halo"] .jelly-product-information .jelly-container{display: grid; gap: var(--j-space-sm);}
 [data-jelly-theme="jelly-halo"] .jelly-product-information :is(h1, p){margin: 0;}
 [data-jelly-theme="jelly-halo"] .jelly-product-information h1{max-width: none; font-size: var(--j-type-h2-size);}
@@ -131,7 +128,7 @@
 [data-jelly-theme="jelly-halo"] .jelly-product-purchase > .jelly-container{display: grid; gap: var(--j-space-md);}
 [data-jelly-theme="jelly-halo"] .jelly-product-purchase input{width: 6rem;}
 [data-jelly-theme="jelly-halo"] .jelly-product-details summary{min-height: var(--j-touch-target); cursor: pointer;}
-[data-jelly-theme="jelly-halo"] .jelly-product-description p{max-width: 65ch;}
+[data-jelly-theme="jelly-halo"] .jelly-product-description p{max-width: min(65ch, 100%);}
 [data-jelly-theme="jelly-halo"] .jelly-cart-layout{display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--j-space-3xl); margin-top: var(--j-space-xl);}
 [data-jelly-theme="jelly-halo"] .jelly-cart-line{display: grid; grid-template-columns: 6rem minmax(0, 1fr) auto; gap: var(--j-space-lg); padding-block: var(--j-space-lg); border-bottom: 1px solid var(--j-color-border);}
 [data-jelly-theme="jelly-halo"] .jelly-cart-line-media img{display: block; width: 100%; aspect-ratio: 1; object-fit: contain; padding: .25rem; border-radius: var(--j-radius-md); background: var(--j-color-surface);}
@@ -272,9 +269,6 @@
 [data-jelly-theme="jelly-halo"] .jelly-category-grid{padding-block: var(--j-space-sm);}
 [data-jelly-theme="jelly-halo"] .jelly-category-grid .jelly-category-card-media{width: 4rem; height: 4rem;}
 [data-jelly-theme="jelly-halo"] .jelly-category-grid .jelly-category-card{gap: var(--j-space-xs);}
-[data-jelly-theme="jelly-halo"] .jelly-gallery-viewer{grid-template-columns: 1fr;}
-[data-jelly-theme="jelly-halo"] .jelly-gallery-viewer > div:first-child{grid-column: 1;}
-[data-jelly-theme="jelly-halo"] .jelly-gallery-viewer > [role="group"]{grid-row: 2; flex-direction: row;}
 [data-jelly-theme="jelly-halo"] .jelly-product-gallery{padding-bottom: var(--j-space-lg);}
 [data-jelly-theme="jelly-halo"] .jelly-product-grid-items{grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--j-space-md);}
 [data-jelly-theme="jelly-halo"] .jelly-hero[data-height="large"]{--halo-hero-height: 28rem;}
@@ -307,7 +301,7 @@
 [data-jelly-theme="jelly-halo"] .jelly-header-brand{font-size: 1.5rem; font-weight: 700; letter-spacing: -0.03em; text-transform: lowercase;}
 [data-jelly-theme="jelly-halo"] .jelly-menu a{font-weight: 500;}
 [data-jelly-theme="jelly-halo"] .jelly-hero[data-layout="spotlight"] .jelly-hero-content h1{font-size: clamp(2.75rem, 6vw, 5rem); line-height: .98;}
-[data-jelly-theme="jelly-halo"] .jelly-hero[data-layout="spotlight"] .jelly-hero-content p{font-size: 1.125rem; color: var(--j-color-muted); max-width: 34ch;}
+[data-jelly-theme="jelly-halo"] .jelly-hero[data-layout="spotlight"] .jelly-hero-content p{font-size: 1.125rem; color: var(--j-color-muted); max-width: min(34ch, 100%);}
 [data-jelly-theme="jelly-halo"] .jelly-hero[data-layout="spotlight"] .jelly-hero-media{border-radius: 2rem;}
 [data-jelly-theme="jelly-halo"] .jelly-hero-callouts li{font-size: .875rem; font-weight: 600; box-shadow: 0 8px 24px rgb(31 29 27 / .08);}
 [data-jelly-theme="jelly-halo"] .jelly-custom-content .jelly-block-group .jelly-button{min-height: 2.75rem; padding-inline: 1.25rem; border: 1px solid var(--halo-hairline); background: var(--j-color-bg); color: var(--j-color-text); font-weight: 500;}
@@ -337,7 +331,7 @@
 [data-jelly-theme="jelly-halo"] .jelly-product-chapters{gap: clamp(2rem, 4vw, 4rem);}
 [data-jelly-theme="jelly-halo"] .jelly-product-chapter h2{font-size: clamp(1.375rem, 2vw, 1.75rem); font-weight: 600; letter-spacing: -0.02em; text-transform: lowercase;}
 [data-jelly-theme="jelly-halo"] .jelly-product-chapter-number{display: inline-grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 999rem; background: rgb(255 255 255 / .7); font-weight: 600; opacity: 1;}
-[data-jelly-theme="jelly-halo"] .jelly-product-chapter p{color: var(--j-color-muted); max-width: 34ch;}
+[data-jelly-theme="jelly-halo"] .jelly-product-chapter p{color: var(--j-color-muted); max-width: min(34ch, 100%);}
 [data-jelly-theme="jelly-halo"] :is(main, [data-storefront-template]) > [data-section-type="product-tabs"]:has(.jelly-product-chapters){border-radius: var(--halo-radius-card, 20px); overflow: hidden; margin-bottom: var(--j-space-lg, 32px);}
 [data-jelly-theme="jelly-halo"] [data-section-type="trust-strip"] .jelly-trust-strip .jelly-container > ul{justify-content: flex-start; column-gap: 1.5rem; row-gap: .5rem;}
 [data-jelly-theme="jelly-halo"] [data-type-preset="h1"]{font-family: var(--j-type-h1-font) !important; font-size: var(--j-type-h1-size) !important; font-weight: var(--jelly-heading-weight) !important; line-height: var(--j-type-h1-line) !important; letter-spacing: var(--j-type-h1-track) !important; text-transform: var(--j-type-h1-case) !important;}

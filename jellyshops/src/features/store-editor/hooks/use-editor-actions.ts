@@ -9,6 +9,7 @@ import { addBlockTo, createBlock } from "@/features/store-editor/block-editing";
 import { applySettingsPatch, type SettingsNode } from "@/features/store-editor/mobile-settings";
 import { applyLanguagePatch } from "@/features/store-editor/translation-settings";
 import { createLibrarySection } from "@/features/store-editor/section-options";
+import { resetSectionDesign } from "@/features/store-editor/reset-design";
 import { appendBlock, appendGlobalPlacement, appendInlineSection, detachGlobalPlacement, movePlacement, removeInlineSection, replaceInlineWithGlobal, setInlineSectionEnabled, updateInlineSection } from "@/features/store-editor/template-layout";
 import type { useEditorState } from "./use-editor-state";
 import type { useEditorDerived } from "./use-editor-derived";
@@ -160,6 +161,13 @@ export function useEditorActions(ctx: ReturnType<typeof useEditorState> & Return
     await persistLayout(layout);
   };
 
+  // Reset design: the selected section's look back to its defaults; its content stays (reset-design.ts).
+  const resetSelectedDesign = async () => {
+    if (convertingRef.current || !activeTemplate || !localSection || selection?.kind !== "section") return;
+    if (selectedGlobal) { await persistGlobalSection(resetSectionDesign(localSection, ctx.themeConfiguration?.themeVersion)); return; }
+    await persistLayout(updateInlineSection(activeTemplate.layout, localSection.id, (current) => resetSectionDesign(current, ctx.themeConfiguration?.themeVersion)));
+  };
+
   const saveRichTextDocument = async (document: RichTextDocument) => {
     if (convertingRef.current) throw new Error("Wait for the shared section update to finish.");
     if (!activeTemplate || !localSection || localSection.type !== "rich-text") throw new Error("Select a rich text section first.");
@@ -241,5 +249,5 @@ export function useEditorActions(ctx: ReturnType<typeof useEditorState> & Return
     deselect: selection ? () => setSelection(selection.kind === "section" && selection.elementId ? { kind: "section", region: selection.region, sectionId: selection.sectionId }
       : selection.kind === "block" && selection.elementId ? { kind: "block", region: selection.region, sectionId: selection.sectionId, blockId: selection.blockId } : null) : undefined,
   });
-  return { insertPreset, saveToLibrary, deletePreset, insertBuiltIn, addBlock, removeSelectedSection, moveSelectedPlacement, toggleSection, insertGlobal, makeGlobal, detachGlobal, updateSelectedSetting, updateSelectedSettings, saveRichTextDocument, openDiagnostic, toolbarTarget, toolbarFound, runSelectionAction, runActionOn, runMove, runMoveTo };
+  return { insertPreset, saveToLibrary, deletePreset, insertBuiltIn, addBlock, removeSelectedSection, moveSelectedPlacement, toggleSection, insertGlobal, makeGlobal, detachGlobal, updateSelectedSetting, updateSelectedSettings, resetSelectedDesign, saveRichTextDocument, openDiagnostic, toolbarTarget, toolbarFound, runSelectionAction, runActionOn, runMove, runMoveTo };
 }

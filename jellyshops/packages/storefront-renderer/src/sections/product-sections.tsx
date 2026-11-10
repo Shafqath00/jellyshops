@@ -1,3 +1,4 @@
+import { titleLength } from "./shared";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import { PersonalisationFields } from "./personalisation-fields";
 import { BackInStockForm } from "./back-in-stock-form";
@@ -7,8 +8,8 @@ import { useRef, useState, type CSSProperties } from "react";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import type { ProductPresentationContext } from "../types";
 import { choice } from "./shared";
-import { ProductGalleryViewer } from "../product-gallery-viewer";
-import { normalizeRichTextDocument, productMediaSrcSet } from "@jelly/storefront-schema";
+import { ProductGalleryViewer, ProductPhotoGrid, type GalleryRatio } from "../product-gallery-viewer";
+import { normalizeRichTextDocument } from "@jelly/storefront-schema";
 import { renderBlocks } from "./rich-text";
 import { DiscountChip, FinanceLine, OptionTabs, OptionTileGroups, StickyPurchaseBar, useStickyBar } from "./product-showroom";
 
@@ -30,14 +31,14 @@ export function ProductGallerySection({ context, section }: { context: Storefron
   // The whole product page's arrangement (storefront-base.css "Product page layouts"); "theme" leaves it to the theme.
   const pageLayout = choice(section.settings, "pageLayout", PRODUCT_PAGE_LAYOUTS, "theme");
   const page = pageLayout === "theme" ? {} : { "data-page-layout": pageLayout };
-  if (product.product.galleryEnabled && section.settings.layout !== "stacked" && section.settings.layout !== "grid") return <section className="jelly-section jelly-product-gallery" data-layout="thumbnails" {...page}><StorefrontContainer><ProductGalleryViewer media={media} title={product.product.title} fit={fit} /></StorefrontContainer></section>;
-  return <section className="jelly-section jelly-product-gallery" data-layout={choice(section.settings, "layout", ["stacked", "grid"] as const, "stacked")} data-count={media.length} {...page}>
-    <StorefrontContainer>
-      {media.map((item, index) => <figure key={item.id} className="jelly-product-gallery-item">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={item.url} srcSet={productMediaSrcSet(item)} sizes="(min-width: 1024px) 50vw, 100vw" width={"width" in item ? item.width ?? undefined : undefined} height={"height" in item ? item.height ?? undefined : undefined} alt={item.altText ?? product.product.title} style={{ objectFit: fit }} loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} />
-      </figure>)}
-    </StorefrontContainer>
+  // Photo shape, thumbnails and zoom are the section settings; the layout never depends on a store-level switch.
+  const ratioSetting = choice(section.settings, "mediaRatio", ["theme", "square", "portrait", "landscape", "original"] as const, "theme");
+  const ratio: GalleryRatio | undefined = ratioSetting === "theme" ? undefined : ratioSetting;
+  const zoom = section.settings.enableZoom !== false;
+  const layout = choice(section.settings, "layout", ["thumbnails", "stacked", "grid"] as const, "thumbnails");
+  if (layout === "thumbnails") return <section className="jelly-section jelly-product-gallery" data-layout="thumbnails" {...page}><StorefrontContainer><ProductGalleryViewer media={media} title={product.product.title} fit={fit} ratio={ratio} zoom={zoom} thumbnails={section.settings.thumbnailPosition === "left" ? "left" : "below"} /></StorefrontContainer></section>;
+  return <section className="jelly-section jelly-product-gallery" data-layout={layout} data-count={media.length} {...page}>
+    <StorefrontContainer><ProductPhotoGrid media={media} title={product.product.title} fit={fit} ratio={ratio} zoom={zoom} layout={layout} /></StorefrontContainer>
   </section>;
 }
 
@@ -46,14 +47,14 @@ export function ProductInformationSection({ context, section }: { context: Store
   const part = (id: string) => elementProps({ type: "product-information", settings: section.settings }, id, context.mode === "editor");
   if (!product) {
     const title = context.page?.pageType === "product" ? context.page.resource.data.title : undefined;
-    return typeof title === "string" ? <section className="jelly-section jelly-product-information"><StorefrontContainer><h1 {...part("title")}>{title}</h1></StorefrontContainer></section> : null;
+    return typeof title === "string" ? <section className="jelly-section jelly-product-information"><StorefrontContainer><h1 {...part("title")} {...titleLength(title)}>{title}</h1></StorefrontContainer></section> : null;
   }
   const show = (key: string) => section.settings[key] !== false;
   const specifications = show("showSpecifications") ? Object.entries(product.product.specifications ?? {}) : [];
   const state = product.availability.state;
   return <section className="jelly-section jelly-product-information"><StorefrontContainer>
     {show("showVendor") && product.product.vendor && <p className="jelly-eyebrow" {...part("vendor")}>{product.product.vendor}</p>}
-    <h1 {...part("title")}>{product.product.title}</h1>
+    <h1 {...part("title")} {...titleLength(product.product.title)}>{product.product.title}</h1>
     <p className="jelly-product-price" {...part("price")}>
       <strong>{product.pricing.price}</strong>
       {show("showCompareAtPrice") && product.pricing.compareAtPrice && <s aria-label={`Was ${product.pricing.compareAtPrice}`}>{product.pricing.compareAtPrice}</s>}
@@ -92,18 +93,18 @@ export function ProductOptionsSection({ context, section }: { context: Storefron
         <span>{option.name}{option.missing && <span className="jelly-product-option-required"> (required)</span>}</span>
         <select value={selected?.id ?? ""} onChange={(event) => product.selectOption(option.id, event.target.value)}>
           {!selected && <option value="" disabled>Choose {option.name.toLowerCase()}</option>}
-          {option.values.map((value) => <option key={value.id} value={value.id} disabled={!value.available}>{value.label}{value.available ? "" : " — sold out"}</option>)}
+          {option.values.map((value) => <option key={value.id} value={value.id} disabled={!value.available}>{value.label}{!value.available ? " — unavailable" : value.soldOut ? " — sold out" : ""}</option>)}
         </select>
       </label>;
       return <fieldset key={option.id} aria-invalid={option.missing || undefined} data-missing={option.missing || undefined}>
         <legend>{option.name}{chosen.length > 0 && <span>: {chosen.map((value) => value.label).join(", ")}</span>}{!option.required && chosen.length === 0 && <span> (optional)</span>}{option.missing && <span className="jelly-product-option-required" role="note"> (required)</span>}</legend>
         <div className="jelly-product-option-values" data-display={option.display}>{option.values.map((value) => {
           const swatch = swatchFor(option.display, value);
-          return <button key={value.id} type="button" aria-pressed={value.selected} disabled={!value.available} onClick={() => product.selectOption(option.id, value.id)} {...(swatch ? { "data-swatch": swatch.kind, "aria-label": `${value.label}${value.priceAdjustment ? `, +${value.priceAdjustment}` : ""}${value.available ? "" : ", sold out"}`, title: value.label } : {})}>
+          return <button key={value.id} type="button" aria-pressed={value.selected} disabled={!value.available} data-sold-out={value.soldOut || undefined} onClick={() => product.selectOption(option.id, value.id)} {...(swatch ? { "data-swatch": swatch.kind, "aria-label": `${value.label}${value.priceAdjustment ? `, +${value.priceAdjustment}` : ""}${value.soldOut || !value.available ? ", sold out" : ""}`, title: value.soldOut ? `${value.label} (sold out)` : value.label } : {})}>
             {swatch?.kind === "color" && <span className="jelly-swatch" style={{ "--swatch": swatch.value } as CSSProperties} aria-hidden="true" />}
             {/* eslint-disable-next-line @next/next/no-img-element -- merchant media may be served by the API, not as Next Image assets */}
             {swatch?.kind === "image" && <img className="jelly-swatch" src={swatch.value} alt="" loading="lazy" />}
-            {!swatch && <>{value.label}{value.priceAdjustment && <span className="jelly-product-option-price"> +{value.priceAdjustment}</span>}</>}
+            {!swatch && <>{value.label}{value.priceAdjustment && <span className="jelly-product-option-price"> +{value.priceAdjustment}</span>}{value.soldOut && <span className="jelly-visually-hidden">, sold out</span>}</>}
           </button>;
         })}</div>
       </fieldset>;

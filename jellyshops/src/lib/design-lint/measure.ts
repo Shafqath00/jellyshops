@@ -54,6 +54,16 @@ export interface PageMeasurement {
   headingSizes: number[];
   smallTargets: string[];
   cardLists: CardListMeasurement[];
+  /** Rows of three or more repeated items (testimonials, columns, tiles) whose items all fill the row: they stacked. */
+  stackedRows: string[];
+  /** Width / height of each product photo frame on the page (gallery slides and gallery photos). */
+  galleryRatios: number[];
+  /** Lines the page's main title (h1) runs onto (0 when there is none). */
+  titleLines: number;
+  /** How far side thumbnails run below the photo they belong to (px). */
+  thumbsOverhang: number;
+  /** Text that spills outside its product card or heading box (an unbroken long word). */
+  spilledText: string[];
 }
 
 export function measureStorefrontPage(): PageMeasurement {
@@ -169,15 +179,18 @@ export function measureStorefrontPage(): PageMeasurement {
       textLeft: textLeft === null ? null : round(textLeft),
       textRight: textRight === null ? null : round(textRight),
       fullBleed,
-      scrolling: Boolean(element.matches("[data-scrolling]") || element.querySelector("[data-scrolling]")),
+      // A marked strip, or any part that really scrolls sideways (a carousel, a row of tabs): its text runs past the
+      // screen edges by design.
+      scrolling: Boolean(element.matches("[data-scrolling]") || element.querySelector("[data-scrolling]") || [element, ...element.querySelectorAll("*")].some((node) => { const style = getComputedStyle(node); return (style.overflowX === "auto" || style.overflowX === "scroll") && node.scrollWidth > node.clientWidth + 1; })),
       inColumn,
       paddingTop: round(paddingTop),
       paddingBottom: round(paddingBottom),
     });
   }
 
+  // A long page title steps down on purpose (data-title-length), so it does not count as another heading size.
   const headingSizes = [...new Set([...root.querySelectorAll("h1, h2, h3, h4")]
-    .filter((heading) => visibleRect(heading))
+    .filter((heading) => !heading.hasAttribute("data-title-length") && visibleRect(heading))
     .map((heading) => round(parseFloat(getComputedStyle(heading).fontSize))))].sort((a, b) => a - b);
 
   const describe = (element: Element) => {
@@ -243,6 +256,58 @@ export function measureStorefrontPage(): PageMeasurement {
     .filter((heading) => !heading.closest(".jelly-footer-newsletter, .jelly-newsletter") && visibleRect(heading))
     .map((heading) => round(parseFloat(getComputedStyle(heading).fontSize)));
 
+  // Rows of repeated items that collapsed into full-width stacks (no layout from the theme or the platform).
+  const stackedRows: string[] = [];
+  for (const row of root.querySelectorAll(".jelly-testimonial-grid, .jelly-multicolumn-grid, .jelly-category-grid-items, .jelly-product-grid-items, .jelly-logo-list-items, .jelly-blog-grid, .jelly-trust-points")) {
+    const rowRect = visibleRect(row);
+    if (!rowRect || row.closest("[data-scrolling]")) continue;
+    const items = [...row.children].map((child) => visibleRect(child)).filter((rect): rect is NonNullable<typeof rect> => Boolean(rect));
+    if (items.length >= 3 && items.every((rect) => rect.width >= rowRect.width * 0.85)) stackedRows.push(describe(row));
+  }
+  const galleryRatios = [...root.querySelectorAll(".jelly-gallery-slide, .jelly-product-gallery-item")].flatMap((frame) => {
+    const rect = frame.getBoundingClientRect();
+    return rect.width > 1 && rect.height > 1 ? [Math.round((rect.width / rect.height) * 1000) / 1000] : [];
+  });
+
+  // Lines a piece of text sits on (each line of a text range gets its own box).
+  const lineCount = (element: Element) => {
+    const range = doc.createRange();
+    range.selectNodeContents(element);
+    const tops: number[] = [];
+    for (const box of range.getClientRects()) {
+      if (box.width < 1 || box.height < 1) continue;
+      if (!tops.some((top) => Math.abs(top - box.top) < box.height / 2)) tops.push(box.top);
+    }
+    return tops.length;
+  };
+  const mainTitle = root.querySelector("main h1");
+  // Hero headlines are display type and wrap by design; only page titles are judged.
+  const titleLines = mainTitle && visibleRect(mainTitle) && !mainTitle.closest(".jelly-hero, .jelly-slideshow, .jelly-image-banner, [data-section-type='hero'], [data-section-type='slideshow'], [data-section-type='image-banner']") ? lineCount(mainTitle) : 0;
+  let thumbsOverhang = 0;
+  for (const gallery of root.querySelectorAll(".jelly-gallery[data-thumbs='left']")) {
+    const stage = gallery.querySelector(".jelly-gallery-stage")?.getBoundingClientRect();
+    const thumbs = gallery.querySelector(".jelly-gallery-thumbs")?.getBoundingClientRect();
+    if (stage && thumbs && thumbs.left < stage.left) thumbsOverhang = Math.max(thumbsOverhang, round(thumbs.bottom - stage.bottom));
+  }
+  const spilledText: string[] = [];
+  for (const box of root.querySelectorAll(".jelly-product-card, main h1, main h2, main h3")) {
+    const rect = box.getBoundingClientRect();
+    if (rect.width < 2 || box.closest("[data-scrolling]")) continue;
+    // Only text that is drawn: hidden parts report empty boxes at 0,0 and screen-reader-only text is clipped to 1px.
+    const walker = doc.createTreeWalker(box, NodeFilter.SHOW_TEXT);
+    let spilled = false;
+    for (let node = walker.nextNode(); node && !spilled; node = walker.nextNode()) {
+      if (!node.textContent?.trim() || node.parentElement?.closest(".jelly-visually-hidden, [aria-hidden='true'] .jelly-visually-hidden")) continue;
+      const range = doc.createRange();
+      range.selectNodeContents(node);
+      for (const line of range.getClientRects()) {
+        if (line.width < 1 || line.height < 1) continue;
+        if (line.right > rect.right + 2 || line.left < rect.left - 2) { spilled = true; break; }
+      }
+    }
+    if (spilled) spilledText.push(describe(box));
+  }
+
   return {
     frameWidth,
     header,
@@ -254,5 +319,10 @@ export function measureStorefrontPage(): PageMeasurement {
     headingSizes,
     smallTargets,
     cardLists,
+    stackedRows,
+    galleryRatios,
+    titleLines,
+    thumbsOverhang,
+    spilledText,
   };
 }

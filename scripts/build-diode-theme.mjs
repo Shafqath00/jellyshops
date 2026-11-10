@@ -66,6 +66,8 @@ const theme = {
   id: "jelly-diode",
   name: "Jelly Diode",
   version: "1.0.0",
+  // Designed with its own complete CSS before the platform section defaults existed.
+  sectionDefaults: false,
   engines: forma.engines,
   description: "A precise electronics storefront: products on seamless grey, key specifications on every card, filters in a sidebar and full specification tables.",
   assetPrefix: prefix,
@@ -136,7 +138,7 @@ const starter = {
       ]),
     ]) },
     product: { type: "product", sections: chrome([
-      section("product-gallery", { imageFit: "contain", layout: "thumbnails", pageLayout: "details-below" }),
+      section("product-gallery", { imageFit: "contain", layout: "thumbnails", thumbnailPosition: "left", pageLayout: "details-below" }),
       section("product-information", { showVendor: true, showSku: true, showCompareAtPrice: true, showAvailability: true, showSpecifications: false, discountChip: "amount" }),
       section("product-options", { style: "buttons" }),
       section("product-purchase", { showQuantity: true, label: "Add to basket", stickyBar: true }),

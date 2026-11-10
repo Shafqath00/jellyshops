@@ -87,7 +87,7 @@ export function SettingGroups({
           <div key={control.key} data-editor-control-key={control.key}>
             {control.type === "rich-text" && onPatch && (settings[control.key] === undefined || typeof settings[control.key] === "string")
               ? <RichTextSetting id={`setting-${control.key}`} settingKey={control.key} label={control.label} maxLength={control.maxLength} settings={settings} inline={control.inline} onPatch={onPatch} />
-              : <ControlRenderer definition={control} value={displayValue(settings[control.key])} catalog={catalog} upload={upload} onChange={(value) => onChange(control.key, value)} />}
+              : <ControlRenderer definition={control} value={displayValue(settings[control.key] ?? control.defaultValue)} catalog={catalog} upload={upload} onChange={(value) => onChange(control.key, value)} />}
             {(control.description ?? descriptions[control.key]) && <p className="mt-1 text-xs text-muted-foreground">{control.description ?? descriptions[control.key]}</p>}
             <DynamicSourcePicker acceptedTypes={control.dynamicTypes ?? []} sources={dynamicSources} onSelect={(binding) => onChange(control.key, { kind: "dynamic", binding })} />
           </div>

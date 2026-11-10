@@ -5,6 +5,7 @@ import { formatMoney, type Currency } from "@/lib/domain";
 import type { PublicSearchPageContext } from "./public-page-context-api";
 import type { SearchRouteContext } from "./resource-loader";
 import { productCardData } from "./product-card-data";
+import type { PublicStorefrontResource } from "./resource-loader";
 
 export type StorefrontPageContext =
   | { type: "collection"; collection: Collection; products: PublicProduct[] }
@@ -24,6 +25,30 @@ export function createCollectionPageContext(
     .filter((product) => product.storeId === collection.storeId && product.published && !product.archived && product.collectionIds?.includes(collection.id))
     .map((product): PublicProduct => ({ ...productCardData(product, `/products/${product.slug}`, currency), ...(product.variants[0] ? {} : { price: "" }) }));
   return { type: "collection", collection, products };
+}
+
+/**
+ * A collection as the live loader expects it (`resolveStorefrontRoute` reads `collectionPresentation`): the collection
+ * page and the Shop all page (every product, as the collection "all") both use it, so both draw the theme's own
+ * collection template.
+ */
+export function collectionResource(collection: Pick<Collection, "id" | "slug" | "name" | "description" | "descriptionDoc" | "imageUrl">, products: PublicProduct[], storeSlug: string): PublicStorefrontResource {
+  const linked = products.map((product) => ({ ...product, href: `/${storeSlug}/products/${product.href.split("/").pop()}` }));
+  return {
+    type: "collection",
+    id: collection.id,
+    handle: collection.slug,
+    visible: true,
+    data: {
+      collection,
+      products: linked,
+      collectionPresentation: {
+        collection: { id: collection.id, title: collection.name, description: collection.description ?? "", ...(collection.descriptionDoc ? { descriptionDoc: collection.descriptionDoc } : {}), ...(collection.imageUrl ? { imageUrl: collection.imageUrl } : {}) },
+        products: linked,
+        totalProducts: linked.length,
+      },
+    },
+  };
 }
 
 export async function loadCollectionPageContext(

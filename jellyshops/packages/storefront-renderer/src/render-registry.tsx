@@ -120,9 +120,9 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("cart-summary", ({ section, context }) => <CartSummarySection section={section} context={context} />);
   registry.register("search-results", ({ section, context }) => <SearchResultsSection section={section} context={context} />);
   registry.register("not-found-message", ({ section, context }) => <NotFoundMessageSection section={section} context={context} />);
-  registry.register("spacer-divider", () => <SpacerDividerSection />);
-  registry.register("spacer", () => <SpacerDividerSection />);
-  registry.register("divider", () => <SpacerDividerSection />);
+  registry.register("spacer-divider", ({ section }) => <SpacerDividerSection section={section} kind="spacer-divider" />);
+  registry.register("spacer", ({ section }) => <SpacerDividerSection section={section} kind="spacer" />);
+  registry.register("divider", ({ section }) => <SpacerDividerSection section={section} kind="divider" />);
   return registry;
 }
 

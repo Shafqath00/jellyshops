@@ -496,7 +496,8 @@
             "settings": {
               "styleScheme": "scheme1",
               "imageFit": "contain",
-              "layout": "thumbnails"
+              "layout": "thumbnails",
+              "thumbnailPosition": "left"
             },
             "blocks": []
           }
