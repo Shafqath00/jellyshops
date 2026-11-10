@@ -4,7 +4,7 @@ import { PersonalisationFields } from "./personalisation-fields";
 import { BackInStockForm } from "./back-in-stock-form";
 import { ProductCard } from "../product-card";
 import { elementProps } from "../element-style";
-import { useRef, useState, type CSSProperties } from "react";
+import { useId, useRef, useState, type CSSProperties } from "react";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import type { ProductPresentationContext } from "../types";
 import { choice } from "./shared";
@@ -115,6 +115,7 @@ export function ProductOptionsSection({ context, section }: { context: Storefron
 export function ProductPurchaseSection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown> } }) {
   const [busy, setBusy] = useState(false); const [message, setMessage] = useState<string>(); const [error, setError] = useState<string>();
   const actions = useRef<HTMLDivElement>(null);
+  const ruleId = useId();
   const showBar = useStickyBar(section.settings.stickyBar === true, actions);
   const product = productContext(context);
   if (!product) return null;
@@ -126,17 +127,23 @@ export function ProductPurchaseSection({ context, section }: { context: Storefro
     finally { setBusy(false); }
   }
   const disabled = !product.canAddToCart || busy || context.mode !== "published";
-  const max = product.availability.maxQuantity === undefined ? undefined : Math.max(1, product.availability.maxQuantity);
+  const rule = product.quantityRule;
+  const step = rule?.step ?? 1;
+  const least = rule?.min ?? 1;
+  const stockMax = product.availability.maxQuantity === undefined ? undefined : Math.max(least, product.availability.maxQuantity);
+  const ruleMax = rule?.max;
+  const max = stockMax === undefined ? ruleMax : ruleMax === undefined ? stockMax : Math.min(stockMax, ruleMax);
   const label = typeof section.settings.label === "string" && section.settings.label.trim() ? section.settings.label : "Add to cart";
   return <section className="jelly-section jelly-product-purchase"><StorefrontContainer>
     {product.personalisation && <PersonalisationFields personalisation={product.personalisation} />}
     {section.settings.showQuantity !== false && <div className="jelly-quantity">
       <span aria-hidden="true">Quantity</span>
       <div className="jelly-quantity-stepper">
-        <button type="button" aria-label="Decrease quantity" disabled={product.quantity <= 1} onClick={() => product.setQuantity(product.quantity - 1)}>−</button>
-        <input aria-label="Quantity" type="number" min={1} {...(max === undefined ? {} : { max })} value={product.quantity} onChange={(event) => product.setQuantity(Number(event.target.value))} />
-        <button type="button" aria-label="Increase quantity" disabled={max !== undefined && product.quantity >= max} onClick={() => product.setQuantity(product.quantity + 1)}>+</button>
+        <button type="button" aria-label="Decrease quantity" disabled={product.quantity - step < least} onClick={() => product.setQuantity(product.quantity - step)}>−</button>
+        <input aria-label="Quantity" type="number" min={least} step={step} {...(max === undefined ? {} : { max })} {...(rule?.text ? { "aria-describedby": ruleId } : {})} value={product.quantity} onChange={(event) => product.setQuantity(Number(event.target.value))} />
+        <button type="button" aria-label="Increase quantity" disabled={max !== undefined && product.quantity + step > max} onClick={() => product.setQuantity(product.quantity + step)}>+</button>
       </div>
+      {rule?.text && <p className="jelly-quantity-rule" id={ruleId}>{rule.text}</p>}
     </div>}
     <div className="jelly-purchase-actions" ref={actions}>
       <button type="button" className="jelly-button" disabled={disabled} onClick={() => { void purchase(); }} {...elementProps({ type: "product-purchase", settings: section.settings }, "addToCart", context.mode === "editor")}>{busy ? "Please wait…" : label}</button>

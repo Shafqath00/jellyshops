@@ -164,6 +164,15 @@ Checked: pictures of all 7 templates (8 pages, 3 widths) before and after are id
 
 **Reset design.** The section panel has "Reset design to defaults" (asks once, undoable): every setting outside Content goes back to the section's default, phone and tablet values for them are removed, and blocks are reset the same way; text, photos, links and custom CSS stay (`features/store-editor/reset-design.ts`). Tested with fuzzed sections; not checked in the signed-in editor.
 
+## 4g. Phase 4 leftovers and the phase 7 check (2026-11-10)
+
+| Item | What was built | Checked |
+| --- | --- | --- |
+| Bag count | The header bag icon shows how many items are in the bag (99+ above 99); screen readers hear "Bag, 3 items". | Unit tests; theme preview (Minimal) |
+| Search suggestions | Typing in the header search lists up to 5 matching products (photo, name, price) and "Search for …". Arrow keys, Enter and Escape work; the number of suggestions is read out. Layouts without a search bar open a search panel from the search icon. Ranking: names starting with the words first, then names containing them, then brand, category or tags. | Unit tests; theme preview at 1280 and 375px |
+| Quantity rules | Products can have a minimum order, steps (packs of 6) and a most per order, per size or colour. The product page stepper moves in steps and shows the rule, the bag's + and − move a step, checkout refuses anything else in plain words. | Unit tests (rules, builder, product page, bag, checkout, database save). Needs migration `20261110000000_product_quantity_rules.sql` on staging before merchants can save a rule. |
+| Phase 7 check | Photos-per-option switched on for every store locally (`*`) against staging data: 4 product pages, desktop and phone, no errors. Staging has no option-tagged photos yet, so nothing changes for shoppers. | Scripted Chrome, read only |
+
 ## 5. Roadmap
 
 Each phase ends with tests, a browser check and a commit, and starts only after a go-ahead.

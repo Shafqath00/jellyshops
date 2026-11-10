@@ -22,6 +22,7 @@ import { BasicsSection } from "./sections/basics-section";
 import { CategorySection } from "./sections/category-section";
 import { ChoicesSection } from "./sections/choices-section";
 import { PersonalisationSection } from "./sections/personalisation-section";
+import { QuantityRuleSection } from "./sections/quantity-rule-section";
 import { PricingSection } from "./sections/pricing-section";
 import { ShippingSection } from "./sections/shipping-section";
 import { VariantsSection } from "./sections/variants-section";
@@ -34,7 +35,7 @@ import { SeoSection } from "./sections/seo-section";
 import { createVariantCombinationKey } from "@/lib/product-variants";
 
 const API_URL = process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
-const FIELD_IDS: Record<keyof DraftErrors, string> = { title: "pb-title", description: "pb-description", imageUrl: "pb-title", categoryId: "pb-category-search", price: "pb-price", compareAtPrice: "pb-compare", cost: "pb-cost", unitPricing: "pb-unit-total", barcode: "pb-barcode", lowStockThreshold: "pb-low-stock", weight: "pb-weight", dimensions: "pb-length", hsCode: "pb-hs-code", handle: "pb-handle", sku: "pb-sku", stock: "pb-stock", published: "pb-published", personalisation: "pb-personalisation-missing" };
+const FIELD_IDS: Record<keyof DraftErrors, string> = { title: "pb-title", description: "pb-description", imageUrl: "pb-title", categoryId: "pb-category-search", price: "pb-price", compareAtPrice: "pb-compare", cost: "pb-cost", unitPricing: "pb-unit-total", barcode: "pb-barcode", lowStockThreshold: "pb-low-stock", weight: "pb-weight", dimensions: "pb-length", hsCode: "pb-hs-code", handle: "pb-handle", sku: "pb-sku", stock: "pb-stock", published: "pb-published", personalisation: "pb-personalisation-missing", quantityRule: "pb-quantity-min" };
 const NOTHING_SAVED: PersistedState = { variantIds: [], imageUrl: "" };
 
 /**
@@ -254,6 +255,7 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
         <ChoicesSection options={draft.options} templates={templates} categoryName={categoryName} limitError={limitError} onChange={changeOptions} />
         <PricingSection draft={draft} errors={errors} currency={currency} hasCombinations={combinations} onChange={change} />
         <PersonalisationSection fields={draft.personalisation ?? []} onChange={(fields) => change("personalisation", fields)} />
+        <QuantityRuleSection rule={draft.quantityRule ?? null} onChange={(rule) => change("quantityRule", rule)} />
         <ShippingSection draft={draft} errors={errors} hasCombinations={combinations} onChange={change} />
         {combinations && <VariantsSection photos={draft.media ?? []} physical={draft.physical} custom={metafields} customContext={metafieldContext} media={taggingEnabled ? draft.media : undefined} options={draft.options} variants={draft.variants} currency={currency} onChange={(variants) => { setDraft((current) => ({ ...current, variants })); touch(); }} />}
 

@@ -1,4 +1,4 @@
-import type { PersonalisationEntry, PersonalisationField } from "@jelly/storefront-schema";
+import type { PersonalisationEntry, PersonalisationField, QuantityRule } from "@jelly/storefront-schema";
 export type Currency = "INR" | "GBP" | "USD";
 export type OrderStatus = "PENDING" | "CONFIRMED" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
 export type PaymentStatus = "PENDING" | "PAID" | "FAILED" | "REFUNDED";
@@ -161,6 +161,8 @@ export interface Product {
   options?: ProductOption[];
   /** Text fields the shopper fills in per cart line. */
   personalisation?: PersonalisationField[];
+  /** Minimum order, steps and most per order for each variant; absent = no rule. See storefront-schema quantity-rules.ts. */
+  quantityRule?: QuantityRule | null;
   inventoryOptionIds?: string[];
   compareAtPriceMinor?: number;
 }

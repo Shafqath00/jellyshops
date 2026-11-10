@@ -2,10 +2,12 @@ import { useEffect, useId, useRef, useState, type RefObject } from "react";
 import { elementProps } from "../element-style";
 import { safeRichTextHref, type RuntimeMenuV4, type SectionNode } from "@jelly/storefront-schema";
 import type { StorefrontRuntimeContext } from "../runtime-context";
+import type { PublicProduct } from "../types";
 import { resolveStorefrontHref } from "../runtime-context";
 import { MenuTree, type MenuVariant } from "./menu-tree";
 import { StoreIcon } from "./store-icon";
 import { TrustPointItems, trustPoints } from "./trust-points";
+import { PredictiveSearch } from "./predictive-search";
 
 type RuntimeMenuItem = RuntimeMenuV4["items"][number];
 
@@ -102,14 +104,9 @@ function usePhoneMenu(ref: RefObject<HTMLDetailsElement | null>): { open: boolea
   return { open, onToggle: () => setOpen(Boolean(ref.current?.open)) };
 }
 
-/** The search box of the "search bar" header layout; sends shoppers to the store's search page. */
-function HeaderSearch({ action }: { action: string }) {
-  const id = useId();
-  return <form className="jelly-header-search" role="search" aria-label="Search the store" action={action} method="get">
-    <label className="jelly-visually-hidden" htmlFor={id}>Search products</label>
-    <input id={id} name="q" type="search" placeholder="Search products" autoComplete="off" />
-    <button type="submit" aria-label="Search"><StorefrontIcon name="search" /></button>
-  </form>;
+/** The search box of the search-bar header layouts; suggests products while the shopper types (predictive search). */
+function HeaderSearch({ action, suggest, autoFocus, onEscape }: { action: string; suggest?: (query: string, limit: number) => Promise<PublicProduct[]> | PublicProduct[]; autoFocus?: boolean; onEscape?(): void }) {
+  return <PredictiveSearch action={action} suggest={suggest} autoFocus={autoFocus} onEscape={onEscape} icon={<StorefrontIcon name="search" />} />;
 }
 
 export function HeaderSection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
@@ -141,6 +138,10 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
   const editor = context.mode === "editor";
   const phoneMenuRef = useRef<HTMLDetailsElement>(null);
   const phoneMenu = usePhoneMenu(phoneMenuRef);
+  // The search icon opens a search panel with suggestions when the store can suggest products (not in the editor).
+  const suggest = editor ? undefined : context.commerce?.suggestProducts;
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchToolRef = useRef<HTMLAnchorElement>(null);
   return <header
     ref={headerRef}
     className="jelly-header"
@@ -161,7 +162,7 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
       </div>
     </details>
     {layout === "split" && <MenuLinks section={section} context={context} label="Primary navigation" variant="bar" part="first" className="jelly-header-menu-first" />}
-    {layout === "search-bar" && <HeaderSearch action={`${root}/search`} />}
+    {layout === "search-bar" && <HeaderSearch action={`${root}/search`} suggest={suggest} />}
     <a className="jelly-header-brand" href={root || "/"} {...elementProps(section, "logo", editor, logoWidth ? { width: logoWidth } : undefined)}>
       {logoUrl && !logoUrl.startsWith("#") ? <img src={logoUrl} alt={image?.alt || name} /> : <span>{name}</span>}
       {/* Merchant media URLs may be served by the local API and are not Next Image assets. */}
@@ -169,14 +170,20 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
       {overlayLogoUrl && !overlayLogoUrl.startsWith("#") && <img className="jelly-header-overlay-logo" src={overlayLogoUrl} alt="" aria-hidden="true" />}
     </a>
     {deliveryNote && <p className="jelly-header-note" {...elementProps(section, "deliveryNote", editor)}><StoreIcon name="truck" /><span>{deliveryNote}</span></p>}
-    {(layout === "category-bar" || layout === "search-first") && <HeaderSearch action={`${root}/search`} />}
+    {(layout === "category-bar" || layout === "search-first") && <HeaderSearch action={`${root}/search`} suggest={suggest} />}
     {layout === "split" ? <MenuLinks section={section} context={context} label="More navigation" variant="bar" part="second" className="jelly-header-menu-second" />
       : layout === "minimal" ? null
       : <MenuLinks section={section} context={context} label={layout === "search-first" ? "Departments" : "Primary navigation"} variant="bar" />}
     {showTools && <nav className="jelly-header-tools" aria-label="Shopping tools" {...elementProps(section, "tools", editor)}>
       {extraHref && <a href={extraHref} data-tool="extra" aria-label={extraLabel} {...elementProps(section, "extraLink", editor)}><StoreIcon name={settings.extraLinkIcon ?? "palette"} /><span className="jelly-header-tool-label">{extraLabel}</span></a>}
-      {tools.map(([icon, label, href]) => <a key={icon} href={href} data-tool={icon} aria-label={label}><StorefrontIcon name={icon} /><span className="jelly-header-tool-label">{label}</span></a>)}
+      {tools.map(([icon, label, href]) => {
+        // The bag shows how many items it holds (Shopify's cart count bubble); screen readers hear "Bag, 3 items".
+        const count = icon === "bag" && typeof context.commerce?.bagCount === "number" && context.commerce.bagCount > 0 ? context.commerce.bagCount : 0;
+        if (icon === "search" && suggest) return <a key={icon} ref={searchToolRef} href={href} data-tool={icon} role="button" aria-label={label} aria-expanded={searchOpen} onClick={(event) => { event.preventDefault(); setSearchOpen((value) => !value); }} onKeyDown={(event) => { if (event.key === " ") { event.preventDefault(); setSearchOpen((value) => !value); } }}><StorefrontIcon name="search" /><span className="jelly-header-tool-label">{label}</span></a>;
+        return <a key={icon} href={href} data-tool={icon} aria-label={count ? `${label}, ${count} ${count === 1 ? "item" : "items"}` : label}><StorefrontIcon name={icon} /><span className="jelly-header-tool-label">{label}</span>{count > 0 && <span className="jelly-header-count" aria-hidden="true">{count > 99 ? "99+" : count}</span>}</a>;
+      })}
     </nav>}
+    {searchOpen && suggest && <div className="jelly-header-search-panel"><HeaderSearch action={`${root}/search`} suggest={suggest} autoFocus onEscape={() => { setSearchOpen(false); searchToolRef.current?.focus(); }} /></div>}
     {trust.length > 0 && <ul className="jelly-header-trust" aria-label="Why shop with us"><TrustPointItems points={trust} icons /></ul>}
   </header>;
 }

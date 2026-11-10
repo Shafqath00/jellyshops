@@ -1,6 +1,6 @@
 import { productImageSnapshot } from "../catalog/product-image-snapshot.js";
 import { createHash } from "node:crypto";
-import { normalisePersonalisation, personalisationKey, readPersonalisationFields, validatePersonalisation, validateProductSelections, type ProductOptionLike } from "@jelly/storefront-schema";
+import { hasQuantityRule, normalisePersonalisation, personalisationKey, quantityProblem, readPersonalisationFields, readQuantityRule, validatePersonalisation, validateProductSelections, type ProductOptionLike } from "@jelly/storefront-schema";
 import { z } from "zod";
 
 import type { CatalogReader } from "../catalog/service.js";
@@ -91,6 +91,8 @@ export async function validateCart(
   items: BeginCheckoutInput["items"],
   shippingMinor: number,
 ): Promise<ValidatedCart> {
+  // Quantity rules (minimum, steps, most per order) apply per variant, adding up every line of that variant.
+  const ruled = new Map<string, { rule: ReturnType<typeof readQuantityRule>; name: string; quantity: number }>();
   const lines = await Promise.all(
     items.map(async (item) => {
       const variant =
@@ -124,6 +126,12 @@ export async function validateCart(
       if (fulfillmentType === "DIGITAL" && deps.enhancedSnapshots) {
         const assets = await deps.repository.transaction((tx) => tx.query('SELECT "id" FROM "DigitalAsset" WHERE "storeId"=$1 AND "productId"=$2 AND "archivedAt" IS NULL LIMIT 1', [storeId, variant.productId]));
         if (!assets.rows.length) throw new ApiError(409, "DIGITAL_FILE_UNAVAILABLE", "This digital product is not ready for purchase.");
+      }
+      const quantityRule = readQuantityRule((product as { quantityRule?: unknown } | null)?.quantityRule);
+      if (hasQuantityRule(quantityRule)) {
+        const entry = ruled.get(variant.id) ?? { rule: quantityRule, name: String((product as { title?: unknown } | null)?.title ?? "This product"), quantity: 0 };
+        entry.quantity += item.quantity;
+        ruled.set(variant.id, entry);
       }
       const productOptions = (product?.options ?? []) as Array<{ id: string; name: string; type?: string; required?: boolean; multiple?: boolean; values?: Array<{ id: string; label: string; priceAdjustmentMinor?: number; priceAdjustment?: number }> }>;
       const selections = item.configurationSelections ?? [];
@@ -165,6 +173,11 @@ export async function validateCart(
       };
     }),
   );
+
+  for (const { rule, name, quantity } of ruled.values()) {
+    const problem = quantityProblem(rule, quantity, name);
+    if (problem) throw new ApiError(422, "QUANTITY_RULE", problem);
+  }
 
   const subtotalMinor = lines.reduce(
     (total, line) =>

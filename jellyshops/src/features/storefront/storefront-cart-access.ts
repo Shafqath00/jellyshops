@@ -10,6 +10,13 @@ import { isUntrackedStock, variantMaxQuantity } from "@/lib/variant-stock";
  * bag for this store. Refuses more than the stock and products that are no longer for sale. Undefined (no quick add)
  * where the page has no shop state.
  */
+/** How many items are in the shopper's bag for this store (0 outside the shop state). Updates when the bag changes. */
+export function useBagCount(storeSlug: string): number {
+  const shop = useOptionalShop();
+  if (!shop) return 0;
+  return (shop.repository.getCartForStore(storeSlug)?.items ?? []).reduce((sum, item) => sum + item.quantity, 0);
+}
+
 export function useStorefrontCartAccess(storeSlug: string): StorefrontCartAccess | undefined {
   const shop = useOptionalShop();
   return useMemo<StorefrontCartAccess | undefined>(() => {

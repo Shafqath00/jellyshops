@@ -2,6 +2,7 @@
 
 import { useShop } from "@/contexts/shop-context";
 import type { Cart, Product, ProductVariant, Store } from "@/lib/domain";
+import { nextCartQuantity } from "./cart-quantity";
 
 export interface CartLine { item: Cart["items"][number]; product: Product; variant: ProductVariant }
 
@@ -36,7 +37,8 @@ export function useCartLines(storeSlug: string): {
     itemCount: cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0,
     setQuantity: (line, quantity) => {
       if (!cart) return;
-      repository.updateCartItem(cart.id, line.variant.id, quantity, line.item.configurationSelections, line.item.unitPriceMinor, line.item.personalisation);
+      // Quantity rules: + and − move a whole step, never under the minimum (Remove takes the line out).
+      repository.updateCartItem(cart.id, line.variant.id, nextCartQuantity(line.product, line.variant, line.item.quantity, quantity), line.item.configurationSelections, line.item.unitPriceMinor, line.item.personalisation);
     },
   };
 }

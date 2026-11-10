@@ -5,7 +5,7 @@ import { formatMoney } from "@/lib/domain";
 import { cartProductImage } from "@/lib/product-media";
 import { useCartLines } from "../use-cart-lines";
 import { cartLineKey, personalisationLabels } from "../personalisation-display";
-import { variantMaxQuantity } from "@/lib/variant-stock";
+import { canDecreaseCartQuantity, canIncreaseCartQuantity } from "../cart-quantity";
 
 /** Events the storefront uses to open the slide-out cart. */
 export const CART_OPEN_EVENT = "jelly:cart-open";
@@ -73,9 +73,9 @@ export function ThemeCartDrawer({ storeSlug, open, onClose, variant = "drawer", 
                 <a href={`/${store.slug}/products/${line.product.slug}`} onClick={onClose}>{line.product.name}</a>
                 {detail && <p>{detail}</p>}
                 <div className="jelly-cart-drawer-quantity">
-                  <button type="button" aria-label={`Remove one ${line.product.name}`} onClick={() => setQuantity(line, line.item.quantity - 1)}>−</button>
+                  <button type="button" aria-label={`Remove one ${line.product.name}`} disabled={!canDecreaseCartQuantity(line.product, line.variant, line.item.quantity)} onClick={() => setQuantity(line, line.item.quantity - 1)}>−</button>
                   <span aria-label={`Quantity ${line.item.quantity}`}>{line.item.quantity}</span>
-                  <button type="button" aria-label={`Add one more ${line.product.name}`} disabled={line.item.quantity >= variantMaxQuantity(line.variant)} onClick={() => setQuantity(line, line.item.quantity + 1)}>+</button>
+                  <button type="button" aria-label={`Add one more ${line.product.name}`} disabled={!canIncreaseCartQuantity(line.product, line.variant, line.item.quantity)} onClick={() => setQuantity(line, line.item.quantity + 1)}>+</button>
                   <button type="button" className="jelly-cart-drawer-remove" onClick={() => setQuantity(line, 0)}>Remove</button>
                 </div>
               </div>

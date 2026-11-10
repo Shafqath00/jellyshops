@@ -1444,3 +1444,23 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 /* Opening hours are short labels in a wrapping row: a very long word may break rather than push the row open.
    After the general text rule above, which has the same priority. */
 :where(.jelly-store-visit-hours :is(dt, dd)) { overflow-wrap: anywhere; }
+
+/* Bag count on the header's bag icon. Zero priority: themes may restyle. */
+:where(.jelly-header-tools a[data-tool="bag"]) { position: relative; }
+:where(.jelly-header-count) { position: absolute; top: 2px; right: 0; display: grid; place-items: center; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 999px; background: var(--j-color-primary, #111); color: var(--j-color-on-primary, #fff); font-size: 11px; font-weight: 600; line-height: 1; pointer-events: none; }
+
+/* Predictive search: suggestions under the search box, and the search panel the header's search icon opens. */
+:where(.jelly-header-search[data-predictive]) { position: relative; }
+:where(.jelly-predictive) { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 40; min-width: min(320px, 90vw); overflow: hidden; border: 1px solid var(--j-color-border, rgb(0 0 0 / 0.12)); border-radius: var(--j-radius-md, 12px); background: var(--j-color-bg, #fff); color: var(--j-color-text, #111); box-shadow: 0 16px 40px rgb(0 0 0 / 0.12); text-align: left; }
+:where(.jelly-predictive ul) { display: grid; margin: 0; padding: 6px; list-style: none; }
+:where(.jelly-predictive a) { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 44px; padding: 6px 8px; border-radius: var(--j-radius-sm, 8px); color: inherit; text-decoration: none; }
+:where(.jelly-predictive img, .jelly-predictive-photo) { width: 44px; height: 44px; border-radius: var(--j-radius-sm, 6px); object-fit: cover; background: var(--j-color-surface, #f2f2f2); }
+:where(.jelly-predictive-name) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+:where(.jelly-predictive-price) { font-size: 14px; color: var(--j-color-muted, inherit); }
+:where(.jelly-predictive-all a) { display: block; font-size: 14px; font-weight: 600; }
+:where(.jelly-predictive [role="option"]:hover > a, .jelly-predictive [data-active="true"] > a) { background: var(--j-color-surface, #f2f2f2); }
+:where(.jelly-header-search-panel) { position: absolute; top: 100%; left: 0; right: 0; z-index: 35; display: flex; justify-content: center; padding: 12px var(--j-page-edge, 16px) 16px; background: var(--j-color-bg, #fff); color: var(--j-color-text, #111); box-shadow: 0 16px 32px -24px rgb(0 0 0 / 0.4); }
+:where(.jelly-header-search-panel .jelly-header-search) { width: min(640px, 100%); max-width: none; }
+
+/* Quantity rules under the product page stepper ("Sold in steps of 6"). */
+:where(.jelly-quantity-rule) { flex-basis: 100%; margin: 4px 0 0; font-size: 13px; color: var(--j-color-muted, inherit); }

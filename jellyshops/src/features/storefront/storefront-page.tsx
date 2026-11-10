@@ -4,6 +4,7 @@ import { useShop } from "@/contexts/shop-context";
 import { useStorefrontChrome } from "./chrome-context";
 import { fetchPublicMetaobjects } from "./metaobjects-api";
 import { productCardData } from "./product-card-data";
+import { suggestStoreProducts } from "./product-suggestions";
 import { useStorefrontLanguage } from "./storefront-language";
 import type { CSSProperties } from "react";
 import { type StorefrontCartAccess,
@@ -24,7 +25,7 @@ import { cardLayoutAttribute, resolveDesignTokens, resolveStorefrontThemeTokens,
 import type { Currency, Product } from "@/lib/domain";
 import type { ResolvedStorefrontRoute } from "./resource-loader";
 import { RuntimeStorefrontView } from "./runtime-storefront-view";
-import { useStorefrontCartAccess } from "./storefront-cart-access";
+import { useBagCount, useStorefrontCartAccess } from "./storefront-cart-access";
 import { useCompareList } from "./compare-list";
 import { useReviewSummaries, useStorefrontReviewAccess } from "./reviews-api";
 import { catalogProductToStorefrontProduct, type PublicCatalogResponse } from "@/features/commerce/api/client";
@@ -34,6 +35,7 @@ function commerceProvider(storeSlug: string, currency: Currency, products: Produ
   return {
     initialProducts,
     cart,
+    suggestProducts: suggestStoreProducts(products, storeSlug, currency),
     ratings: reviewData?.ratings,
     reviews: reviewData?.reviews,
     getMetaobjects: storeId ? (handle) => fetchPublicMetaobjects(storeId, handle) : undefined,
@@ -86,6 +88,7 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
 }) {
   const chromeHandled = useStorefrontChrome();
   const cart = useStorefrontCartAccess(storeSlug);
+  const bagCount = useBagCount(storeSlug);
   const ratings = useReviewSummaries(snapshot.storeId, products.map((product) => product.id));
   const reviews = useStorefrontReviewAccess(snapshot.storeId);
   const { access: compare } = useCompareList(storeSlug);
@@ -97,7 +100,7 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
   const resolvedTheme = resolveTheme(snapshot.theme.id ?? snapshot.theme.presetId, snapshot.theme.settings, snapshot.theme.version);
   const themeId = resolvedTheme.id as ThemeId;
   const style = resolveStorefrontThemeTokens(themeId, resolvedTheme.settings, {}, resolvedTheme.version) as CSSProperties;
-  const commerce = { ...commerceProvider(storeSlug, currency, products, snapshot.storeId, cart, { ratings, reviews }), compare: usesProductCompare(resolvedTheme.settings) ? compare : undefined };
+  const commerce = { ...commerceProvider(storeSlug, currency, products, snapshot.storeId, cart, { ratings, reviews }), compare: usesProductCompare(resolvedTheme.settings) ? compare : undefined, bagCount };
 
   return (
     <div className={`jelly-storefront jelly-theme-layout-${resolvedTheme.layout}`} data-jelly-theme={themeStyleId(resolvedTheme.id, resolvedTheme.version)} data-jelly-legacy-styles={legacyStylesAttribute(resolvedTheme.id, resolvedTheme.version)} data-jelly-theme-version={resolvedTheme.version} data-card-layout={cardLayoutAttribute(style)} style={style}>

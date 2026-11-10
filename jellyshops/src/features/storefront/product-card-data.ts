@@ -21,7 +21,7 @@ export function productCardChip(tags: readonly string[] | undefined): string | u
 /** A product can go into the cart from its card when it has one buyable variant and no options to choose. */
 export function quickAddFor(product: Product): { quickAdd?: { variantId: string; max: number } } {
   const variant = product.variants.length === 1 ? product.variants[0] : undefined;
-  if (!variant || !isVariantBuyable(variant) || (product.options?.length ?? 0) > 0 || (product.personalisation?.length ?? 0) > 0) return {};
+  if (!variant || !isVariantBuyable(variant) || (product.options?.length ?? 0) > 0 || (product.personalisation?.length ?? 0) > 0 || product.quantityRule) return {};
   return { quickAdd: { variantId: variant.id, max: Math.min(variantMaxQuantity(variant), 99) } };
 }
 

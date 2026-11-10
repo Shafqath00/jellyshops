@@ -137,4 +137,12 @@ describe("PostgreSQL catalog repository", () => {
     await expect(repository.updateProduct('store-a', created.id, { personalisation: [{ id: 'x' }] })).rejects.toMatchObject({ code: 'INVALID_PERSONALISATION' });
     expect((await repository.getProduct('store-a', 'p1'))?.personalisation).toEqual([]);
   });
+
+  it("saves a quantity rule, clears it with null and refuses one off the steps", async () => {
+    const created = await repository.createProduct("store-a", { title: "Tumbler", handle: "tumbler", variants: [{ title: "Default", priceMinor: 300, quantity: 50, options: {} }], quantityRule: { min: 6, step: 6, max: 48 } });
+    expect(created.quantityRule).toEqual({ min: 6, step: 6, max: 48 });
+    await expect(repository.updateProduct("store-a", created.id, { quantityRule: { min: 4, step: 6 } })).rejects.toMatchObject({ code: "INVALID_QUANTITY_RULE", message: "The minimum must be a multiple of the step (6)." });
+    expect((await repository.updateProduct("store-a", created.id, { quantityRule: null })).quantityRule).toBeNull();
+    expect((await repository.getProduct("store-a", "p1"))?.quantityRule).toBeNull();
+  });
 });
