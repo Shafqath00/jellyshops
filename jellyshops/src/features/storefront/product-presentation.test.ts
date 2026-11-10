@@ -136,3 +136,28 @@ describe("personalisation on the product page", () => {
     expect(createProductPresentationContext({ product, currency: "GBP", selections: [], quantity: 1, onSelectionsChange: vi.fn(), onQuantityChange: vi.fn(), onAddToCart: vi.fn() }).personalisation).toBeUndefined();
   });
 });
+
+describe("quantity rules on the product page", () => {
+  const packs: Product = { ...product, variants: product.variants.map((variant) => ({ ...variant, stock: variant.id === "small" ? 4 : 40 })), quantityRule: { min: 6, step: 6, max: 24 } };
+  const build = (valueId: string, quantity: number, onQuantityChange = vi.fn(), onAddToCart = vi.fn(async () => ({ ok: true }))) => createProductPresentationContext({ product: packs, currency: "GBP", selections: [{ optionId: "size", valueId }], quantity, onSelectionsChange: vi.fn(), onQuantityChange, onAddToCart });
+
+  it("starts at the minimum, moves in steps and passes the rule to the stepper", async () => {
+    const onQuantityChange = vi.fn();
+    const onAddToCart = vi.fn(async () => ({ ok: true }));
+    const context = build("large", 1, onQuantityChange, onAddToCart);
+    expect(context.quantity).toBe(6);
+    expect(context.quantityRule).toEqual({ min: 6, step: 6, max: 24, text: "Sold in steps of 6 · at most 24" });
+    context.setQuantity(13);
+    expect(onQuantityChange).toHaveBeenLastCalledWith(12);
+    context.setQuantity(100);
+    expect(onQuantityChange).toHaveBeenLastCalledWith(24);
+    await context.addToCart();
+    expect(onAddToCart).toHaveBeenCalledWith(expect.objectContaining({ quantity: 6 }));
+  });
+
+  it("cannot be bought when less stock is left than the minimum", () => {
+    const context = build("small", 1);
+    expect(context.availability).toMatchObject({ state: "unavailable", message: "Only 4 left, under the minimum order of 6" });
+    expect(context.canAddToCart).toBe(false);
+  });
+});

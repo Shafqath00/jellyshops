@@ -1,5 +1,6 @@
 "use client";
 
+import { rankSuggestions } from "@/features/storefront/product-suggestions";
 import { useEffect, useMemo, useState } from "react";
 import type { CommerceDataProvider, PublicProduct, StorefrontCartAccess, StorefrontPageContext } from "@jelly/storefront-renderer";
 import { getStarterPack, resolveTheme, usesProductCompare } from "@jelly/storefront-themes";
@@ -161,7 +162,9 @@ export function TemplatePreview({ template, config, productLayout, collectionLay
     const product = config.products.find((item) => item.id === id);
     return product ? [{ id: product.id, name: product.name, href: "#", imageUrl: product.imageUrl, price: product.price, vendor: product.vendor, available: product.available !== false, specifications: config.compareSpecifications?.[product.id] }] : [];
   });
-  const commerce: CommerceDataProvider = { initialProducts: products, cart, ratings: config.ratings, reviews: sampleReviews, compare: compareOn ? compare : undefined, async getProducts(input) { return products.slice(0, input?.limit ?? products.length); } };
+  // The sample bag's item count, so each design shows its bag badge.
+  const bagCount = Object.values(config.cart).reduce((sum, quantity) => sum + quantity, 0);
+  const commerce: CommerceDataProvider = { initialProducts: products, cart, bagCount, suggestProducts: (query, limit) => rankSuggestions(products, query, limit), ratings: config.ratings, reviews: sampleReviews, compare: compareOn ? compare : undefined, async getProducts(input) { return products.slice(0, input?.limit ?? products.length); } };
   const pages = previewPages(config, productPage, cartPage);
   const page = pages[template];
   // The live loader picks the template and lays it out; it runs again only when the page or the data set changes.

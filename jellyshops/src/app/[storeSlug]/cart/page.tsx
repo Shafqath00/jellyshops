@@ -12,7 +12,7 @@ import { loadPublicStorefrontPublication, type PublicStorefrontPublication } fro
 import { resolveStorefrontRoute } from "@/features/storefront/resource-loader";
 import { StorefrontPageLoading } from "@/features/storefront/components/storefront-page-loading";
 import { cartLineKey, personalisationLabels } from "@/features/storefront/personalisation-display";
-import { variantMaxQuantity } from "@/lib/variant-stock";
+import { canIncreaseCartQuantity, nextCartQuantity } from "@/features/storefront/cart-quantity";
 
 export default function CartPage() {
   const { storeSlug } = useParams<{ storeSlug: string }>();
@@ -52,7 +52,7 @@ export default function CartPage() {
       return option && value ? [`${option.name}: ${value.label}`] : [];
     }).concat(personalisationLabels(product, item));
     const unitPrice = item.unitPriceMinor ?? variant.priceMinor;
-    return { id: cartLineKey(variant.id, item), productName: product.name, variantName: variant.name, imageUrl: cartProductImage(product, variant, item.configurationSelections), quantity: item.quantity, unitPrice: formatMoney(unitPrice, store.currency), lineTotal: formatMoney(unitPrice * item.quantity, store.currency), lineTotalMinor: unitPrice * item.quantity, canIncrease: item.quantity < variantMaxQuantity(variant), options, onUpdate: (quantity: number) => repository.updateCartItem(cart!.id, variant.id, quantity, item.configurationSelections, item.unitPriceMinor, item.personalisation) };
+    return { id: cartLineKey(variant.id, item), productName: product.name, variantName: variant.name, imageUrl: cartProductImage(product, variant, item.configurationSelections), quantity: item.quantity, unitPrice: formatMoney(unitPrice, store.currency), lineTotal: formatMoney(unitPrice * item.quantity, store.currency), lineTotalMinor: unitPrice * item.quantity, canIncrease: canIncreaseCartQuantity(product, variant, item.quantity), options, onUpdate: (quantity: number) => repository.updateCartItem(cart!.id, variant.id, nextCartQuantity(product, variant, item.quantity, quantity), item.configurationSelections, item.unitPriceMinor, item.personalisation) };
   }).filter((line): line is NonNullable<typeof line> => Boolean(line));
   const Cart = shell.CartPage;
   if (publication?.kind === "v4" && resolvedRoute?.status === "ready") {

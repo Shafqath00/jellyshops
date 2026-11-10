@@ -1,4 +1,4 @@
-import { readPersonalisationFields } from "@jelly/storefront-schema";
+import { hasQuantityRule, readPersonalisationFields, readQuantityRule } from "@jelly/storefront-schema";
 import type {
   CommerceAttemptInput,
   CommerceAttemptResult,
@@ -125,6 +125,7 @@ export function catalogProductToStorefrontProduct(product: PublicCatalogProduct)
     collectionIds: product.collectionIds ?? [],
     options: (product.options ?? []) as ProductOption[],
     personalisation: readPersonalisationFields((product as { personalisation?: unknown }).personalisation),
+    quantityRule: (() => { const rule = readQuantityRule((product as { quantityRule?: unknown }).quantityRule); return hasQuantityRule(rule) ? rule : null; })(),
     inventoryOptionIds: product.inventoryOptionIds ?? [],
     media: product.media.map((entry) => ({ ...entry, altText: entry.altText ?? undefined })),
     featured: false,

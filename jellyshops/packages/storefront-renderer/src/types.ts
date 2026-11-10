@@ -24,6 +24,8 @@ export interface ProductPresentationContext {
   /** "Email me when it's back" for the chosen variant while it is sold out; absent where the store cannot send it. */
   notifyWhenAvailable?(email: string, website?: string): Promise<{ ok: boolean; message?: string }>;
   /** Text fields the shopper fills in for this line (engraving, gift message); absent when the product has none. */
+  /** Quantity rules (minimum order, steps, most per order): the stepper moves in steps and the rule is shown. */
+  quantityRule?: { min: number; step: number; max?: number; text: string };
   personalisation?: {
     fields: Array<{ id: string; label: string; required: boolean; maxLength: number; multiline?: boolean; helpText?: string; /** Formatted extra price, "£5.00". */ priceAdjustment?: string }>;
     values: Record<string, string>;
@@ -45,7 +47,7 @@ export interface PublicMetaobjectList {
   definition: { handle: string; name: string; fields: Array<{ handle: string; name: string; type: string }> };
   entries: Array<{ handle: string; displayName: string; values: Record<string, string | number | boolean> }>;
 }
-export interface CommerceDataProvider { initialProducts?: PublicProduct[]; getProducts(input?: { featured?: boolean; limit?: number; sort?: string; collectionId?: string }): Promise<PublicProduct[]>; subscribeNewsletter?: (email: string, source: string) => Promise<void>; getMetaobjects?: (handle: string) => Promise<PublicMetaobjectList | null>; /** The shopper's cart, for quick add on product cards. Absent in the editor. */ cart?: StorefrontCartAccess; /** Star ratings by product id, for product cards. */ ratings?: Record<string, { average: number; count: number }>; /** Reading and writing product reviews (the product page's Reviews section). */ reviews?: StorefrontReviewAccess; /** The compare list, when the theme lets shoppers compare products. Absent in the editor. */ compare?: StorefrontCompareAccess }
+export interface CommerceDataProvider { /** How many items are in the shopper's bag (the header shows it on the bag icon). */ bagCount?: number; /** Products matching what the shopper is typing in the header search (predictive search). Absent in the editor. */ suggestProducts?: (query: string, limit: number) => Promise<PublicProduct[]> | PublicProduct[]; initialProducts?: PublicProduct[]; getProducts(input?: { featured?: boolean; limit?: number; sort?: string; collectionId?: string }): Promise<PublicProduct[]>; subscribeNewsletter?: (email: string, source: string) => Promise<void>; getMetaobjects?: (handle: string) => Promise<PublicMetaobjectList | null>; /** The shopper's cart, for quick add on product cards. Absent in the editor. */ cart?: StorefrontCartAccess; /** Star ratings by product id, for product cards. */ ratings?: Record<string, { average: number; count: number }>; /** Reading and writing product reviews (the product page's Reviews section). */ reviews?: StorefrontReviewAccess; /** The compare list, when the theme lets shoppers compare products. Absent in the editor. */ compare?: StorefrontCompareAccess }
 /** A published review as shoppers see it. */
 export interface StorefrontReview { id: string; rating: number; title: string; body: string; authorName: string; verifiedPurchase: boolean; createdAt: string }
 export interface StorefrontReviewPage { summary: { average: number; count: number; distribution: [number, number, number, number, number] }; reviews: StorefrontReview[] }

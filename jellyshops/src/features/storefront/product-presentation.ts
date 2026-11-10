@@ -6,7 +6,7 @@ import { getVisibleOptions, toggleSelection, validateProductSelections } from "@
 import type { CatalogAdminProduct } from "@/features/store-editor/api/types";
 import { productGallery } from "@/lib/product-media";
 import { isVariantBuyable } from "@/lib/variant-stock";
-import { isProductMediaEnabled, normalisePersonalisation, personalisationPriceMinor, validatePersonalisation, type PersonalisationEntry } from "@jelly/storefront-schema";
+import { allowedQuantity, hasQuantityRule, quantityRuleText, readQuantityRule, isProductMediaEnabled, normalisePersonalisation, personalisationPriceMinor, validatePersonalisation, type PersonalisationEntry } from "@jelly/storefront-schema";
 
 /** Maps the catalog detail DTO to the existing storefront Product domain shape. */
 export function catalogProductToProduct(product: CatalogAdminProduct): Product {
@@ -72,11 +72,16 @@ export function createProductPresentationContext({ product, currency, shippingCo
   const notSold = variant?.sellable === false;
   const untrackedAvailable = !notSold && variant?.available === true && variant.stock === 0;
   const maxQuantity = !requiredMissing && variant && !notSold && variant.stock > 0 ? variant.stock : untrackedAvailable ? undefined : 0;
-  const clampedQuantity = maxQuantity === undefined ? Math.max(1, quantity) : Math.max(1, Math.min(quantity, maxQuantity));
+  // Quantity rules (minimum order, steps, most per order) snap the quantity to the nearest allowed one within the stock.
+  const quantityRule = readQuantityRule(product.quantityRule);
+  const snapQuantity = (wanted: number) => allowedQuantity(quantityRule, wanted, maxQuantity ?? Number.POSITIVE_INFINITY);
+  const tooFewLeft = hasQuantityRule(quantityRule) && maxQuantity !== undefined && maxQuantity > 0 && snapQuantity(quantityRule.min) === undefined;
+  const clampedQuantity = snapQuantity(quantity) ?? (maxQuantity === undefined ? Math.max(1, quantity) : Math.max(1, Math.min(quantity, maxQuantity)));
   const fromVariant = !variant && inventoryChoiceMissing && product.variants.length ? product.variants.reduce((cheapest, candidate) => candidate.priceMinor < cheapest.priceMinor ? candidate : cheapest) : undefined;
   const availability = requiredMissing ? { state: "selection-required" as const, message: "Choose the required options", maxQuantity: 0 }
     : !variant || notSold ? { state: "unavailable" as const, message: "This combination is unavailable", maxQuantity: 0 }
       : variant.stock <= 0 && !untrackedAvailable ? { state: "out-of-stock" as const, message: "Out of stock", maxQuantity: 0 }
+        : tooFewLeft ? { state: "unavailable" as const, message: `Only ${variant.stock} left, under the minimum order of ${quantityRule.min}`, maxQuantity: 0 }
         : untrackedAvailable ? { state: "available" as const, message: "Available" }
           : { state: "available" as const, message: `${variant.stock} available`, maxQuantity: variant.stock };
 
@@ -89,7 +94,8 @@ export function createProductPresentationContext({ product, currency, shippingCo
     availability,
     canAddToCart: availability.state === "available" && priceMinor !== undefined && Boolean(variant),
     selectOption: (optionId, valueId) => { const option = allOptions.find((candidate) => candidate.id === optionId); if (option) onSelectionsChange(toggleSelection(option, selections, valueId)); },
-    setQuantity: (nextQuantity) => onQuantityChange(maxQuantity === undefined ? Math.max(1, nextQuantity) : Math.max(1, Math.min(nextQuantity, maxQuantity))),
+    setQuantity: (nextQuantity) => onQuantityChange(snapQuantity(nextQuantity) ?? (maxQuantity === undefined ? Math.max(1, nextQuantity) : Math.max(1, Math.min(nextQuantity, maxQuantity)))),
+    ...(hasQuantityRule(quantityRule) ? { quantityRule: { ...quantityRule, text: quantityRuleText(quantityRule) } } : {}),
     addToCart: () => personalisationProblems.length ? Promise.resolve({ ok: false, message: personalisationProblems[0].message })
       : variant && priceMinor !== undefined && availability.state === "available" ? onAddToCart({ variantId: variant.id, quantity: clampedQuantity, selections, priceMinor, personalisation: personalised }) : Promise.resolve({ ok: false, message: availability.message }),
     ...(personalisationFields.length ? { personalisation: {
