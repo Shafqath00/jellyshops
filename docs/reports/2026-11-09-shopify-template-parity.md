@@ -133,7 +133,15 @@ Two live problems the shared path exposed, fixed:
 
 Checked by `features/theme-preview/one-render-path.test.tsx` (every theme: the snapshot is valid, the editor lays out every page type exactly as the live loader does, the preview draws the same sections in the same order as the live view; 22 tests), the theme Playwright specs and the design lint (a render loop found by the lint, the preview rebuilding its snapshot on every render, was fixed). Browser-checked on the Minimal preview (all pages, product choices, sale price).
 
-**Still different on purpose, needs a decision:** on the live store, built-in themes (Minimal, Avenue, Resthaven, Halo, Diode, Forma and others with their own header) draw collection pages with the older catalog browser (`CatalogBrowser`: 12 products at a time from the server, search, sort, filters, quick view) in place of the theme's own product grid, when the grid has no sort or filter switched on. The preview and the design lint never see it. Options: (a) retire it and give the theme grid server paging plus sort and filters on by default (one render path, changes live collection pages), or (b) keep it and show it in the preview with sample data.
+**Old catalog browser retired (decided 2026-11-10, option a).** Built-in themes used to replace the theme's own product grid on live collection pages, the search page and Shop all with an older built-in browser that the preview and the design lint never saw. Now:
+- Collection pages, Shop all and search always draw the store's own templates. Shop all is the collection template showing every product as the collection "all" (`collectionResource()` in `page-context-loaders.ts`, shared with the collection page).
+- The platform product list (`ProductListBrowser`) gained paging: "Products per page" (the old "Products to show"), a Show more button and "Showing 12 of 40 products"; a new sort or filter starts from the first page.
+- Sorting and filters are on unless the merchant turns them off (renderer `!== false`; registry `ControlBase.defaultValue: true` so the editor's checkboxes show the same for sections saved before the change).
+- No server calls are needed for paging: the storefront already loads the whole catalogue (100 products per request, every page). Search still gets its results from the server search.
+- Avenue's collection photos stay edge to edge; its toolbar, filters and Show more keep the page margins.
+- Not carried over from the old browser: searching inside a collection, the category filter, the large/small photo toggle, quick view and the Newest / Best selling sorts (no data for them in the page). The old browser's `signature-*` CSS rules are left in the theme files; they match nothing now.
+
+Checked: on the staging store "new" (read only), Shop all and the Beds collection draw the Avenue templates with the toolbar; Minimal's preview collection page in the browser and every theme's collection page through the design lint and the theme specs; tests for paging, the defaults and the editor default.
 
 ## 5. Roadmap
 

@@ -181,3 +181,32 @@ describe("sold-out option values", () => {
     expect(screen.getByRole("button", { name: /XL.*Unavailable/ })).toBeDisabled();
   });
 });
+
+describe("collection product list (the old catalog browser is retired)", () => {
+  const products = Array.from({ length: 5 }, (_, index) => ({ id: `p${index}`, name: `Product ${index}`, href: `#${index}`, imageUrl: "", price: `£${index + 1}.00`, available: true }));
+  const collectionContext = { ...context, page: { pageType: "collection", resource: { id: "c", handle: "c", data: { collectionPresentation: { collection: { id: "c", title: "All" }, products, totalProducts: products.length } } } } } as StorefrontRuntimeContext;
+
+  it("gives a section saved before the change sorting, filters and paging", async () => {
+    const { CollectionProductGridSection } = await import("./sections/collection-sections");
+    render(<CollectionProductGridSection context={collectionContext} section={{ settings: { limit: 2 } }} />);
+    expect(screen.getByRole("combobox", { name: "Sort by" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Filter/ })).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Showing 2 of 5 products");
+    expect(screen.getByRole("button", { name: "Show more products" })).toBeInTheDocument();
+  });
+
+  it("leaves sorting and filters out when the merchant turned them off", async () => {
+    const { CollectionProductGridSection } = await import("./sections/collection-sections");
+    render(<CollectionProductGridSection context={collectionContext} section={{ settings: { showSort: false, showFilters: false } }} />);
+    expect(screen.queryByRole("combobox")).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Filter/ })).toBeNull();
+  });
+
+  it("tells the editor the same default, so its checkboxes match the page", async () => {
+    const { getSectionDefinition } = await import("@jelly/storefront-registry");
+    for (const type of ["collection-product-grid", "search-results"]) {
+      const controls = getSectionDefinition(type)?.controls ?? [];
+      for (const key of ["showSort", "showFilters"]) expect(controls.find((control) => control.key === key)?.defaultValue, `${type} ${key}`).toBe(true);
+    }
+  });
+});

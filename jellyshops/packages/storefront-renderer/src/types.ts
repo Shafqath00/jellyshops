@@ -5,7 +5,6 @@ import type { ReactNode } from "react";
 /** A product as every product list draws it (the shared card in @jelly/storefront-ui). */
 export interface PublicProduct { id: string; name: string; href: string; imageUrl: string; price: string; compareAtPrice?: string; badge?: string; saving?: string; discountPercent?: number; chip?: string; vendor?: string; swatches?: Array<{ label: string; color?: string; image?: string }>; moreSwatches?: number; /** Exact price in minor units, used to sort and filter product lists. */ priceMinor?: number; /** False when no variant can be bought; product list filters use it. */ available?: boolean; /** Set when the product can go straight into the cart from its card (one variant, no options, in stock). */ quickAdd?: { variantId: string; max: number }; /** Average star rating and number of published reviews. */ rating?: { average: number; count: number } }
 export interface CollectionPresentationContext {
-  interactiveGrid?: ReactNode;
   collection: { id: string; title: string; description: string; descriptionDoc?: RichTextDocument | null; imageUrl?: string };
   products: PublicProduct[];
   totalProducts: number;

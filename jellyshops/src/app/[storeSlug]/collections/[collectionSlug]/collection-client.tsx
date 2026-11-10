@@ -1,13 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { CatalogBrowser } from "@/features/storefront/catalog-browser";
-import { isCompleteStorefrontTheme } from "@jelly/storefront-themes";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useShop } from "@/contexts/shop-context";
 import { useStorefrontCatalogStatus } from "@/features/commerce/components/storefront-catalog-sync";
-import { createCollectionPageContext, loadCollectionPageContext, type StorefrontPageContext } from "@/features/storefront/page-context-loaders";
+import { collectionResource, createCollectionPageContext, loadCollectionPageContext, type StorefrontPageContext } from "@/features/storefront/page-context-loaders";
 import { loadPublicStorefrontPublication, type PublicStorefrontPublication } from "@/features/storefront/public-storefront-api";
 import { resolveStorefrontRoute, type PublicResourceReader } from "@/features/storefront/resource-loader";
 import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
@@ -49,22 +47,7 @@ export default function CollectionPage() {
 
   useEffect(() => {
     if (!store || !pageContext || publication?.kind !== "v4") return;
-    const resource = {
-      type: "collection" as const,
-      id: pageContext.collection.id,
-      handle: pageContext.collection.slug,
-      visible: true,
-      data: {
-        collection: pageContext.collection,
-        products: pageContext.products.map((product) => ({ ...product, href: `/${store.slug}/products/${product.href.split("/").pop()}` })),
-        collectionPresentation: {
-          ...(isCompleteStorefrontTheme(publication.snapshot.theme?.id ?? publication.snapshot.theme?.presetId, publication.snapshot.theme?.version) ? { interactiveGrid: <CatalogBrowser storeSlug={store.slug} collectionId={pageContext.collection.id} /> } : {}),
-          collection: { id: pageContext.collection.id, title: pageContext.collection.name, description: pageContext.collection.description ?? "", ...(pageContext.collection.descriptionDoc ? { descriptionDoc: pageContext.collection.descriptionDoc } : {}), ...(pageContext.collection.imageUrl ? { imageUrl: pageContext.collection.imageUrl } : {}) },
-          products: pageContext.products.map((product) => ({ ...product, href: `/${store.slug}/products/${product.href.split("/").pop()}` })),
-          totalProducts: pageContext.products.length,
-        },
-      },
-    };
+    const resource = collectionResource(pageContext.collection, pageContext.products, store.slug);
     const reader: PublicResourceReader = {
       findByHandle: async (type, handle) => type === "collection" && handle === resource.handle ? resource : null,
       findById: async (type, id) => type === "collection" && id === resource.id ? resource : null,

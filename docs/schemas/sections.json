@@ -18369,7 +18369,8 @@
         {
           "type": "range",
           "key": "limit",
-          "label": "Products to show",
+          "label": "Products per page",
+          "description": "Shoppers see this many products, then a Show more button.",
           "group": "layout",
           "min": 1,
           "max": 24,
@@ -18386,13 +18387,15 @@
           "type": "checkbox",
           "key": "showSort",
           "label": "Let shoppers sort products",
-          "group": "content"
+          "group": "content",
+          "defaultValue": true
         },
         {
           "type": "checkbox",
           "key": "showFilters",
           "label": "Let shoppers filter by availability, price and colour",
-          "group": "content"
+          "group": "content",
+          "defaultValue": true
         },
         {
           "type": "select",
@@ -18550,13 +18553,15 @@
           "type": "checkbox",
           "key": "showSort",
           "label": "Let shoppers sort results",
-          "group": "content"
+          "group": "content",
+          "defaultValue": true
         },
         {
           "type": "checkbox",
           "key": "showFilters",
           "label": "Let shoppers filter by availability, price and colour",
-          "group": "content"
+          "group": "content",
+          "defaultValue": true
         },
         {
           "type": "range",

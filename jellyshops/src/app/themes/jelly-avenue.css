@@ -755,6 +755,8 @@
 [data-jelly-theme="jelly-avenue"] .jelly-collection-header[data-align="center"] .jelly-collection-header-image { display: none; }
 [data-jelly-theme="jelly-avenue"] .jelly-collection-header[data-layout="banner"] { position: relative; display: grid; align-items: end; min-height: min(560px, 70svh); margin-bottom: var(--tk-5); overflow: hidden; background: var(--tk-ink); }
 [data-jelly-theme="jelly-avenue"] .jelly-collection-product-grid > .jelly-container { width: 100%; max-width: none; }
+/* The product tiles run edge to edge; the list toolbar, filters and Show more keep the page margins. */
+[data-jelly-theme="jelly-avenue"] .jelly-collection-product-grid :is(.jelly-list-toolbar, .jelly-list-filters, .jelly-list-chips, .jelly-list-more, .jelly-empty-state) { padding-inline: var(--j-page-edge); }
 [data-jelly-theme="jelly-avenue"] .jelly-collection-description > .jelly-container > p { max-width: 68ch; color: var(--tk-muted); }
 /* 9.10 Small screens */
 @media (max-width: 899px) {

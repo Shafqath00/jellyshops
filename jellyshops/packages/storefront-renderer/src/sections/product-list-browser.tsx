@@ -85,14 +85,16 @@ function activeFilterCount(filters: ProductListFilters): number {
 }
 
 /**
- * A product list with a toolbar: result count, sort and (optionally) filters for availability, price and colour.
- * It works on the products the page already has, so it behaves the same in the editor preview and the live store.
- * Themes switch it on per section ("Show sorting" / "Show filters"); without either it is not used.
+ * A product list with a toolbar: result count, sort and filters for availability, price and colour, and a
+ * "Show more" button that adds a page of products at a time. It works on the products the page already has (the
+ * storefront loads the store's whole catalogue), so it behaves the same in the editor preview and the live store.
+ * Sort and filters are on unless the merchant turns them off; with both off the toolbar shows the count only.
  */
-export function ProductListBrowser({ products, columns, limit, showSort, showFilters, emptyMessage, cardProps, layout = "grid", stories = [] }: {
+export function ProductListBrowser({ products, columns, pageSize, showSort, showFilters, emptyMessage, cardProps, layout = "grid", stories = [] }: {
   products: readonly PublicProduct[];
   columns: number;
-  limit: number;
+  /** Products shown at first, and added by each "Show more". */
+  pageSize: number;
   showSort: boolean;
   showFilters: boolean;
   emptyMessage: string;
@@ -106,12 +108,18 @@ export function ProductListBrowser({ products, columns, limit, showSort, showFil
   const [sort, setSort] = useState<ProductListSort>("featured");
   const [filters, setFilters] = useState<ProductListFilters>(NO_FILTERS);
   const [open, setOpen] = useState(false);
-  const shown = useMemo(() => browseProducts(products, sort, filters).slice(0, limit), [products, sort, filters, limit]);
+  // Pages shown so far; a new sort or filter starts again from the first page.
+  const [paging, setPaging] = useState({ key: "", pages: 1 });
+  const pagingKey = JSON.stringify([sort, filters]);
+  const pages = paging.key === pagingKey ? paging.pages : 1;
+  const matching = useMemo(() => browseProducts(products, sort, filters), [products, sort, filters]);
+  const shown = useMemo(() => matching.slice(0, Math.max(1, pageSize) * pages), [matching, pageSize, pages]);
   const colourOptions = useMemo(() => [...new Set(products.flatMap((product) => (product.swatches ?? []).map((swatch) => swatch.label)))].slice(0, 12), [products]);
   const hasAvailability = products.some((product) => typeof product.available === "boolean");
   const active = activeFilterCount(filters);
   const panelId = `${id}-filters`;
-  const count = shown.length === 1 ? "1 product" : `${shown.length} products`;
+  const total = matching.length === 1 ? "1 product" : `${matching.length} products`;
+  const count = shown.length < matching.length ? `Showing ${shown.length} of ${total}` : total;
   const toggleColour = (label: string) => setFilters((current) => ({ ...current, colours: current.colours.includes(label) ? current.colours.filter((item) => item !== label) : [...current.colours, label] }));
   const chips = layout === "chips" && showFilters;
   const items = layout === "editorial" ? withStories(shown, stories) : shown.map((product) => ({ kind: "product" as const, product }));
@@ -152,6 +160,9 @@ export function ProductListBrowser({ products, columns, limit, showSort, showFil
           ? <StoryTileCard key={`story-${item.story.id}`} story={item.story} />
           : <ProductCard key={item.product.id} product={item.product} editorProps={cardProps?.(item.product, shown.indexOf(item.product))} />)}</div>
         : <div className="jelly-empty-state"><p>{active ? "No products match these filters." : emptyMessage}</p>{active > 0 && <button type="button" className="jelly-list-clear" onClick={() => setFilters(NO_FILTERS)}>Clear filters</button>}</div>}
+      {shown.length < matching.length && <div className="jelly-list-more">
+        <button type="button" className="jelly-button jelly-button--secondary" onClick={() => setPaging({ key: pagingKey, pages: pages + 1 })}>Show more products</button>
+      </div>}
     </div>
   </div>;
 }

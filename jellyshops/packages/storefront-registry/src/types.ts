@@ -28,6 +28,12 @@ interface ControlBase {
   /** Shows the control only while another setting has this value. */
   showWhen?: { key: string; equals: unknown };
   /**
+   * What the editor shows when the section has no saved value for this setting. The renderer must use the same
+   * default (e.g. a checkbox that is on unless the merchant turned it off), so sections saved before the setting
+   * existed look the same in the editor and on the store.
+   */
+  defaultValue?: unknown;
+  /**
    * An older setting kept so saved stores render the same: the editor shows it only while the section still has a
    * value other than the first option, so new sections never offer it.
    */

@@ -37,7 +37,7 @@ describe("browseProducts", () => {
 
 describe("ProductListBrowser", () => {
   it("shows a count, sorts, filters and clears", () => {
-    render(<ProductListBrowser products={products} columns={4} limit={24} showSort showFilters emptyMessage="Nothing here" />);
+    render(<ProductListBrowser products={products} columns={4} pageSize={24} showSort showFilters emptyMessage="Nothing here" />);
     expect(screen.getByRole("status")).toHaveTextContent("3 products");
     fireEvent.change(screen.getByRole("combobox", { name: "Sort by" }), { target: { value: "price-desc" } });
     const names = () => screen.getAllByRole("link").map((link) => link.textContent);
@@ -55,9 +55,21 @@ describe("ProductListBrowser", () => {
   });
 
   it("leaves out filters and sorting the section does not ask for", () => {
-    render(<ProductListBrowser products={products} columns={3} limit={2} showSort={false} showFilters={false} emptyMessage="Nothing here" />);
+    render(<ProductListBrowser products={products} columns={3} pageSize={2} showSort={false} showFilters={false} emptyMessage="Nothing here" />);
     expect(screen.queryByRole("combobox")).toBeNull();
     expect(screen.queryByRole("group", { name: "Filters" })).toBeNull();
-    expect(screen.getByRole("status")).toHaveTextContent("2 products");
+    expect(screen.getByRole("status")).toHaveTextContent("Showing 2 of 3 products");
+  });
+
+  it("shows a page of products at a time and starts again from the first page after a new sort", () => {
+    const { container } = render(<ProductListBrowser products={products} columns={3} pageSize={2} showSort showFilters={false} emptyMessage="Nothing here" />);
+    const cards = () => container.querySelectorAll(".jelly-product-card").length;
+    expect(cards()).toBe(2);
+    fireEvent.click(screen.getByRole("button", { name: "Show more products" }));
+    expect(cards()).toBe(3);
+    expect(screen.getByRole("status")).toHaveTextContent("3 products");
+    expect(screen.queryByRole("button", { name: "Show more products" })).toBeNull();
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "price-asc" } });
+    expect(cards()).toBe(2);
   });
 });
