@@ -26,8 +26,14 @@ export function quickAddFor(product: Product): { quickAdd?: { variantId: string;
   return { quickAdd: { variantId: variant.id, max: Math.min(variantMaxQuantity(variant), 99) } };
 }
 
+/** The variant a card shows: the cheapest one still for sale, else the cheapest (variants arrive in no particular order). */
+export function cardVariant(product: Pick<Product, "variants">): Product["variants"][number] | undefined {
+  const cheapest = (list: Product["variants"]) => list.reduce<Product["variants"][number] | undefined>((best, item) => !best || item.priceMinor < best.priceMinor ? item : best, undefined);
+  return cheapest(product.variants.filter(isVariantBuyable)) ?? cheapest(product.variants);
+}
+
 export function productCardData(product: Product, href: string, currency: Currency): PublicProduct {
-  const variant = product.variants[0];
+  const variant = cardVariant(product);
   const priceMinor = variant?.priceMinor ?? 0;
   const compareMinor = variant?.compareAtPriceMinor ?? product.compareAtPriceMinor;
   const discounted = typeof compareMinor === "number" && compareMinor > priceMinor && priceMinor >= 0;

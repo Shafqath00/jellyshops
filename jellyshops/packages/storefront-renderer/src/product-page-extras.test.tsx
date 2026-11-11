@@ -60,6 +60,12 @@ describe("Dimensions", () => {
     expect(dimensionRows({ "Double (W x L x H)": "146 x 205 cm" }, []).rows).toEqual([]);
   });
 
+  it("starts with the product's first size and lists width, length and height first, whatever order the store saved", () => {
+    const saved = { "Base height": "35 cm", "King (W x L x H)": "161 x 215 x 120 cm", "Double (W x L x H)": "146 x 205 x 120 cm" };
+    expect(dimensionRows(saved, [], ["Double", "King", "No storage"])).toEqual({ size: "Double", rows: [{ letter: "A", name: "Width", cm: 146 }, { letter: "B", name: "Length", cm: 205 }, { letter: "C", name: "Height", cm: 120 }, { letter: "D", name: "Base height", cm: 35 }] });
+    expect(dimensionRows(saved, ["King"], ["Double", "King"]).size).toBe("King");
+  });
+
   it("draws lettered rows for the chosen size with a cm/inches switch", async () => {
     const { container } = render(<ProductDimensionsSection section={section("product-dimensions", { note: "Allow 2 cm either way." })} context={context(product())} product={product()} />);
     expect(screen.getByText("King")).toBeInTheDocument();

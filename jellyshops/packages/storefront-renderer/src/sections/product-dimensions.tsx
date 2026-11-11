@@ -62,17 +62,20 @@ export interface DimensionRows { rows: Array<{ letter: string; name: string; cm:
 
 /**
  * The measurements to show: rows whose name carries a size ("Width (King)") follow the shopper's choice (any chosen
- * option value with that name); with no matching choice the first size listed is shown and named. Rows without a size
- * always show. Values that are not lengths are left to the Specifications section.
+ * option value with that name); with no matching choice the first size in the product's own option order (`optionOrder`,
+ * else as listed) is shown and named. Rows without a size always show. Width, Length, Depth and Height come first, then
+ * the other measurements (the database does not keep the order specifications were typed in). Values that are not
+ * lengths are left to the Specifications section.
  */
-export function dimensionRows(specifications: Record<string, string>, chosenValues: readonly string[]): DimensionRows {
+export function dimensionRows(specifications: Record<string, string>, chosenValues: readonly string[], optionOrder: readonly string[] = []): DimensionRows {
   const entries = Object.entries(specifications).flatMap(([key, value]) => {
     const combined = splitCombined(key, value);
     if (combined) return combined;
     const cm = parseLength(value);
     return cm === null ? [] : [{ ...splitKey(key), cm }];
   });
-  const sizes = [...new Set(entries.flatMap((entry) => entry.size ? [entry.size] : []))];
+  const rank = (size: string) => { const at = optionOrder.findIndex((label) => label.trim().toLowerCase() === size.toLowerCase()); return at < 0 ? Number.MAX_SAFE_INTEGER : at; };
+  const sizes = [...new Set(entries.flatMap((entry) => entry.size ? [entry.size] : []))].map((size, index) => ({ size, index })).sort((a, b) => rank(a.size) - rank(b.size) || a.index - b.index).map((entry) => entry.size);
   const chosen = new Set(chosenValues.map((value) => value.trim().toLowerCase()));
   const size = sizes.find((entry) => chosen.has(entry.toLowerCase())) ?? sizes[0];
   const kept = entries.filter((entry) => !entry.size || entry.size === size);
@@ -83,12 +86,18 @@ export function dimensionRows(specifications: Record<string, string>, chosenValu
     const current = byName.get(key);
     if (!current || (!current.sized && entry.size)) byName.set(key, { name: entry.name, cm: entry.cm, sized: Boolean(entry.size) });
   }
-  const rows = [...byName.values()].map((row, index) => ({ letter: String.fromCharCode(65 + (index % 26)), name: row.name, cm: row.cm }));
+  const main = ["width", "length", "depth", "height"];
+  const order = (name: string) => { const at = main.indexOf(name.toLowerCase()); return at < 0 ? main.length : at; };
+  const rows = [...byName.values()].map((row, index) => ({ row, index })).sort((a, b) => order(a.row.name) - order(b.row.name) || a.index - b.index).map(({ row }) => row).map((row, index) => ({ letter: String.fromCharCode(65 + (index % 26)), name: row.name, cm: row.cm }));
   return { rows, ...(size && kept.some((entry) => entry.size) ? { size } : {}) };
 }
 
 function chosenOptionValues(product: ProductPresentationContext): string[] {
   return product.product.options.flatMap((option) => option.values.filter((value) => value.selected).map((value) => value.label));
+}
+
+function optionOrder(product: ProductPresentationContext): string[] {
+  return product.product.options.flatMap((option) => option.values.map((value) => value.label));
 }
 
 /**
@@ -100,7 +109,7 @@ export function ProductDimensionsSection({ section, context, product }: { sectio
   const [unit, setUnit] = useState<LengthUnit>(startUnit);
   const editor = context.mode === "editor";
   if (!product && !editor) return null;
-  const { rows, size } = product ? dimensionRows(product.product.specifications ?? {}, chosenOptionValues(product)) : { rows: [], size: undefined };
+  const { rows, size } = product ? dimensionRows(product.product.specifications ?? {}, chosenOptionValues(product), optionOrder(product)) : { rows: [], size: undefined };
   if (!rows.length && !editor) return null;
   const heading = typeof section.settings.heading === "string" && section.settings.heading.trim() ? section.settings.heading : "Dimensions";
   const note = typeof section.settings.note === "string" ? section.settings.note.trim() : "";
