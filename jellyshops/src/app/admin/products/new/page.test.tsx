@@ -17,5 +17,5 @@ it("shows the redesigned builder at the established new-product URL", async () =
   expect(screen.getByRole("heading", { name: "Photos" })).toBeVisible();
   expect(screen.getByRole("heading", { name: "Product options" })).toBeVisible();
   expect(screen.getByRole("button", { name: "Preview" })).toBeVisible();
-  expect(screen.getByRole("button", { name: "Save product" })).toBeVisible();
+  expect(screen.getByRole("button", { name: "Publish product" })).toBeVisible();
 });

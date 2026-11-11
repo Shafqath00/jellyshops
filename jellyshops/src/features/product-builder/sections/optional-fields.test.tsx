@@ -15,7 +15,7 @@ describe("optional product details", () => {
     );
 
     const description = screen.getByLabelText("Description");
-    const advancedPricing = screen.getByText("Add original price, SKU or barcode (optional)").closest("details");
+    const advancedPricing = screen.getByText("Original price (optional)").closest("details");
     expect(description).toBeVisible();
     expect(advancedPricing).not.toHaveAttribute("open");
   });
@@ -29,7 +29,7 @@ describe("optional product details", () => {
     );
 
     expect(await screen.findByRole("textbox", { name: "Description" })).toHaveTextContent("Soft cotton, made for everyday.");
-    expect(screen.getByText("Add original price, SKU or barcode (optional)").closest("details")).toHaveAttribute("open");
+    expect(screen.getByText("Original price (optional)").closest("details")).toHaveAttribute("open");
   });
 
   it("explains that category is optional when categories cannot load", () => {

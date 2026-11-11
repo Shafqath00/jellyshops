@@ -111,8 +111,36 @@ export function VariantsSection({ options, variants, currency, onChange, media, 
   if (axes.length === 0) return null;
   return (
     <Section title="Variants" hint={`${variants.length} ${variants.length === 1 ? "combination" : "combinations"}, made from your choices. Set each price, stock and SKU, with an optional original price. Open Details for photo, barcode, cost, weight and more, or stop selling a combination.`}>
+      <div className="product-variants relative overflow-x-auto rounded-xl border border-border/80 bg-card">
+        <table className="w-full min-w-[680px] text-left text-[12px]">
+          <thead className="bg-muted/65 text-[13px] font-semibold text-muted-foreground">
+            <tr>{media && <th className="px-2 py-2.5">Photo</th>}<th className="px-4 py-2.5">Combination</th><th className="px-2 py-2.5">Price ({currency})</th><th className="px-2 py-2.5">Original price</th><th className="px-2 py-2.5">Stock</th><th className="px-2 py-2.5">SKU</th><th className="px-2 py-2.5">Sold</th><th className="px-2 py-2.5"><span className="sr-only">Details</span></th></tr>
+          </thead>
+          <tbody>
+            {variants.map((variant) => (
+              <Fragment key={variant.id}>
+              <tr className={`border-t border-border/80 transition-colors hover:bg-muted/25 ${variant.sellable === false ? "opacity-70" : ""}`}>
+                {media && <td className="px-2 py-2">{ (() => { const photo = resolveProductGallery(media, options, Object.entries(variant.options ?? {}).map(([optionId, valueId]) => ({ optionId, valueId })))[0]; return photo ? <img src={photo.url} alt={photo.altText ?? ""} className="size-10 rounded object-cover" /> : null; })()}</td>}
+                <th scope="row" className="px-4 py-2 font-semibold text-foreground">{variant.name}{variant.sellable === false && <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground">Not sold</span>}</th>
+                <td className="px-2 py-2"><PriceCell id={`price-${variant.id}`} label={`Price for ${variant.name}`} minor={variant.priceMinor} onCommit={(priceMinor) => patch(variant.id, { priceMinor })} /></td>
+                <td className="px-2 py-2"><CompareAtPriceCell id={`compare-${variant.id}`} label={`Original price for ${variant.name}`} minor={variant.compareAtPriceMinor} priceMinor={variant.priceMinor} onCommit={(compareAtPriceMinor) => patch(variant.id, { compareAtPriceMinor })} /></td>
+                <td className="px-2 py-2"><label className="mb-2 flex items-center gap-1 text-xs"><input type="checkbox" aria-label={`Track stock for ${variant.name}`} checked={variant.trackInventory !== false} onChange={event => patch(variant.id, { trackInventory: event.target.checked, ...(event.target.checked && variant.stock >= Number.MAX_SAFE_INTEGER ? { stock: 0 } : {}) })} />Track stock</label>{variant.trackInventory !== false ? <StockCell label={`Stock for ${variant.name}`} stock={variant.stock} onCommit={(stock) => patch(variant.id, { stock })} /> : <span className="text-muted-foreground">Not tracked</span>}</td>
+                <td className="px-2 py-2"><input aria-label={`SKU for ${variant.name}`} className={`${inputClass} !mt-0 h-9 w-36`} value={variant.sku} onChange={(event) => patch(variant.id, { sku: event.target.value })} /></td>
+                <td className="px-2 py-2"><input type="checkbox" aria-label={`Sell ${variant.name}`} checked={variant.sellable !== false} onChange={(event) => patch(variant.id, { sellable: event.target.checked })} /></td>
+                <td className="px-2 py-2"><button type="button" aria-expanded={openId === variant.id} aria-controls={`details-${variant.id}`} aria-label={`${openId === variant.id ? "Hide" : "Show"} details for ${variant.name}`} className="whitespace-nowrap text-[12px] font-semibold underline" onClick={() => setOpenId(openId === variant.id ? null : variant.id)}>{openId === variant.id ? "Hide details" : "Details"}</button></td>
+              </tr>
+              {openId === variant.id && (
+                <tr id={`details-${variant.id}`} className="bg-muted/20"><td colSpan={9 + (media ? 1 : 0)}><VariantDetails variant={variant} photos={photos} physical={physical} currency={currency} custom={custom} customContext={customContext} onPatch={(change) => patch(variant.id, change)} /></td></tr>
+              )}
+              </Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
       <div className="rounded-xl border border-border/80 bg-muted/25 p-4">
-        <p className="text-[13px] font-semibold text-foreground">Update several combinations at once</p>
+        <p className="text-[13px] font-semibold text-foreground">Set the same value for many combinations</p>
+        <p className="mt-1 text-[12px] text-muted-foreground">Handy when you have lots of combinations. Pick what to change, which combinations, then the new value.</p>
         <div className="mt-2 flex flex-wrap items-end gap-2">
           <label className="text-[13px] font-medium text-muted-foreground">Set
             <select aria-label="Bulk field" className={`${inputClass} !mt-1 h-9`} value={field} onChange={(event) => { setField(event.target.value as BulkField); setBulkError(""); }}>
@@ -152,33 +180,6 @@ export function VariantsSection({ options, variants, currency, onChange, media, 
           <button type="button" onClick={() => runBulk("availability", "sell")} className="min-h-9 rounded-lg border border-border bg-card px-3 text-[12px] font-semibold hover:bg-muted">Sell</button>
         </div>
         {bulkError && <p role="alert" className="mt-2 text-[13px] font-bold text-tint-foreground">{bulkError}</p>}
-      </div>
-
-      <div className="relative overflow-x-auto rounded-xl border border-border/80 bg-card">
-        <table className="w-full min-w-[680px] text-left text-[12px]">
-          <thead className="bg-muted/65 text-[13px] font-semibold text-muted-foreground">
-            <tr>{media && <th className="px-2 py-2.5">Photo</th>}<th className="px-4 py-2.5">Combination</th><th className="px-2 py-2.5">Price ({currency})</th><th className="px-2 py-2.5">Original price</th><th className="px-2 py-2.5">Stock</th><th className="px-2 py-2.5">SKU</th><th className="px-2 py-2.5">Sold</th><th className="px-2 py-2.5"><span className="sr-only">Details</span></th></tr>
-          </thead>
-          <tbody>
-            {variants.map((variant) => (
-              <Fragment key={variant.id}>
-              <tr className={`border-t border-border/80 transition-colors hover:bg-muted/25 ${variant.sellable === false ? "opacity-70" : ""}`}>
-                {media && <td className="px-2 py-2">{ (() => { const photo = resolveProductGallery(media, options, Object.entries(variant.options ?? {}).map(([optionId, valueId]) => ({ optionId, valueId })))[0]; return photo ? <img src={photo.url} alt={photo.altText ?? ""} className="size-10 rounded object-cover" /> : null; })()}</td>}
-                <th scope="row" className="px-4 py-2 font-semibold text-foreground">{variant.name}{variant.sellable === false && <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground">Not sold</span>}</th>
-                <td className="px-2 py-2"><PriceCell id={`price-${variant.id}`} label={`Price for ${variant.name}`} minor={variant.priceMinor} onCommit={(priceMinor) => patch(variant.id, { priceMinor })} /></td>
-                <td className="px-2 py-2"><CompareAtPriceCell id={`compare-${variant.id}`} label={`Original price for ${variant.name}`} minor={variant.compareAtPriceMinor} priceMinor={variant.priceMinor} onCommit={(compareAtPriceMinor) => patch(variant.id, { compareAtPriceMinor })} /></td>
-                <td className="px-2 py-2"><label className="mb-2 flex items-center gap-1 text-xs"><input type="checkbox" aria-label={`Track stock for ${variant.name}`} checked={variant.trackInventory !== false} onChange={event => patch(variant.id, { trackInventory: event.target.checked, ...(event.target.checked && variant.stock >= Number.MAX_SAFE_INTEGER ? { stock: 0 } : {}) })} />Track stock</label>{variant.trackInventory !== false ? <StockCell label={`Stock for ${variant.name}`} stock={variant.stock} onCommit={(stock) => patch(variant.id, { stock })} /> : <span className="text-muted-foreground">Not tracked</span>}</td>
-                <td className="px-2 py-2"><input aria-label={`SKU for ${variant.name}`} className={`${inputClass} !mt-0 h-9 w-36`} value={variant.sku} onChange={(event) => patch(variant.id, { sku: event.target.value })} /></td>
-                <td className="px-2 py-2"><input type="checkbox" aria-label={`Sell ${variant.name}`} checked={variant.sellable !== false} onChange={(event) => patch(variant.id, { sellable: event.target.checked })} /></td>
-                <td className="px-2 py-2"><button type="button" aria-expanded={openId === variant.id} aria-controls={`details-${variant.id}`} aria-label={`${openId === variant.id ? "Hide" : "Show"} details for ${variant.name}`} className="whitespace-nowrap text-[12px] font-semibold underline" onClick={() => setOpenId(openId === variant.id ? null : variant.id)}>{openId === variant.id ? "Hide details" : "Details"}</button></td>
-              </tr>
-              {openId === variant.id && (
-                <tr id={`details-${variant.id}`} className="bg-muted/20"><td colSpan={9 + (media ? 1 : 0)}><VariantDetails variant={variant} photos={photos} physical={physical} currency={currency} custom={custom} customContext={customContext} onPatch={(change) => patch(variant.id, change)} /></td></tr>
-              )}
-              </Fragment>
-            ))}
-          </tbody>
-        </table>
       </div>
     </Section>
   );

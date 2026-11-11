@@ -1,9 +1,10 @@
 "use client";
 
+import { AnimatedDetails } from "./animated-details";
 import Link from "next/link";
 import { Banner, Card, StatusBadge } from "@/components/admin";
 import { TemplatePicker } from "@/features/store-editor/components/template-picker";
-import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Sheet, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { OrganizationSection } from "./sections/organization-section";
 import { DigitalProductSettings } from "@/features/commerce/components/digital-product-settings";
 import { isProductMediaEnabled, pruneMediaAssignments } from "@jelly/storefront-schema";
@@ -23,6 +24,7 @@ import { CategorySection } from "./sections/category-section";
 import { ChoicesSection } from "./sections/choices-section";
 import { PersonalisationSection } from "./sections/personalisation-section";
 import { QuantityRuleSection } from "./sections/quantity-rule-section";
+import { InventorySection } from "./sections/inventory-section";
 import { PricingSection } from "./sections/pricing-section";
 import { ShippingSection } from "./sections/shipping-section";
 import { VariantsSection } from "./sections/variants-section";
@@ -34,6 +36,10 @@ import { MetafieldsSection } from "./sections/metafields-section";
 import { SeoSection } from "./sections/seo-section";
 import { createVariantCombinationKey } from "@/lib/product-variants";
 
+import { ProductSurface } from "./product-surface";
+import { ProductSheetContent } from "./product-sheet";
+import { useProductConfirm } from "./use-product-confirm";
+
 const API_URL = process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
 const FIELD_IDS: Record<keyof DraftErrors, string> = { title: "pb-title", description: "pb-description", imageUrl: "pb-title", categoryId: "pb-category-search", price: "pb-price", compareAtPrice: "pb-compare", cost: "pb-cost", unitPricing: "pb-unit-total", barcode: "pb-barcode", lowStockThreshold: "pb-low-stock", weight: "pb-weight", dimensions: "pb-length", hsCode: "pb-hs-code", handle: "pb-handle", sku: "pb-sku", stock: "pb-stock", published: "pb-published", personalisation: "pb-personalisation-missing", quantityRule: "pb-quantity-min" };
 const NOTHING_SAVED: PersistedState = { variantIds: [], imageUrl: "" };
@@ -44,6 +50,7 @@ const NOTHING_SAVED: PersistedState = { variantIds: [], imageUrl: "" };
  */
 export function ProductBuilder({ initial }: { initial?: Product }) {
   const { repository } = useShop();
+  const confirmation = useProductConfirm();
   const { session, activeStore } = useAuth();
   const token = session?.access_token;
   const storeId = activeStore?.id;
@@ -52,7 +59,7 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
   const taxonomyClient = useMemo(() => token ? createTaxonomyClient({ baseUrl: API_URL, token }) : null, [token]);
   const metafieldsApi = useMemo(() => token ? createMetafieldsApi({ baseUrl: API_URL, token }) : null, [token]);
   const lookups = useMemo(() => token ? createLookups({ baseUrl: API_URL, token }) : null, [token]);
-  const start = useMemo(() => initial ? productToDraft(initial) : { draft: { ...emptyDraft, media: [] }, persisted: { ...NOTHING_SAVED, media: [] } }, [initial]);
+  const start = useMemo(() => initial ? productToDraft(initial) : { draft: { ...emptyDraft, published: false, media: [] }, persisted: { ...NOTHING_SAVED, media: [] } }, [initial]);
 
   const [draft, setDraft] = useState<ProductDraft>(start.draft);
   const [persisted, setPersisted] = useState<PersistedState>(start.persisted);
@@ -106,9 +113,9 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
     setJustSaved(false);
   }, []);
 
-  function changeOptions(options: ProductOption[]) {
+  async function changeOptions(options: ProductOption[]) {
     const pruned = pruneMediaAssignments(draft.media ?? [], options);
-    if (pruned.removedMediaIds.length && !window.confirm(`${pruned.removedMediaIds.length} photo(s) will be removed from this product because their last choice tag is being deleted. They stay in your library. Continue?`)) return;
+    if (pruned.removedMediaIds.length && !(await confirmation.ask({ title: "Remove photo assignments?", description: `${pruned.removedMediaIds.length} photo(s) will be removed from this product because their last choice tag is being deleted. They stay in your library.`, confirmLabel: "Remove assignments" }))) return;
     const result = withOptions(draft, options);
     setDraft(result.draft);
     setLimitError(result.error ?? "");
@@ -121,33 +128,44 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
   const categoryName = category?.names[category.names.length - 1];
   const templates = useMemo(() => taxonomy && draft.categoryId ? getCategoryTemplates(draft.categoryId, taxonomy) : [], [taxonomy, draft.categoryId]);
   const combinations = hasVariantAxes(draft);
+  const canPublish = !draft.archived && (!productId || !draft.published);
 
-  async function save() {
+  function focusField(id: string) {
+    const target = form.current?.querySelector<HTMLElement>(`#${id}`);
+    for (let parent = target?.parentElement; parent; parent = parent.parentElement) {
+      if (parent instanceof HTMLDetailsElement) parent.open = true;
+    }
+    target?.focus();
+  }
+
+  async function save(published = draft.published) {
+    if (saving || uploading) return;
+    const savingDraft = { ...draft, published, archived: published ? false : draft.archived };
     setSaveError("");
-    const { fields, problems: found } = validateBuilderDraft(draft);
+    const { fields, problems: found } = validateBuilderDraft(savingDraft);
     setErrors(fields);
     setProblems(found);
     const firstField = (Object.keys(fields) as Array<keyof DraftErrors>)[0];
-    if (firstField) { form.current?.querySelector<HTMLElement>(`#${FIELD_IDS[firstField]}`)?.focus(); return; }
+    if (firstField) { focusField(FIELD_IDS[firstField]); return; }
     if (found.length > 0) { form.current?.querySelector<HTMLElement>("[data-problems]")?.focus(); return; }
     if (!api || !storeId) { setSaveError("Sign in to your store before saving."); return; }
     setSaving(true);
     try {
-      const payload = draftToPayload(draft, categoryName, persisted);
+      const payload = draftToPayload(savingDraft, categoryName, persisted);
       const result = productId ? await api.updateProduct(storeId, productId, payload) : await api.createProduct(storeId, payload);
       const canonical = catalogProductToStorefrontProduct(result);
       repository.saveProduct(canonical);
       const saved = productToDraft(canonical).persisted;
-      setPersisted({ ...saved, imageUrl: draft.imageUrl, media: canonical.media ?? draft.media });
-      baseline.current = { draft: { ...draft, media: canonical.media ?? draft.media, ...(hasVariantAxes(draft) ? { variants: canonical.variants } : {}) }, persisted: { ...saved, imageUrl: draft.imageUrl, media: canonical.media ?? draft.media } };
+      setPersisted({ ...saved, imageUrl: savingDraft.imageUrl, media: canonical.media ?? savingDraft.media });
+      baseline.current = { draft: { ...savingDraft, media: canonical.media ?? savingDraft.media, ...(hasVariantAxes(savingDraft) ? { variants: canonical.variants } : {}) }, persisted: { ...saved, imageUrl: savingDraft.imageUrl, media: canonical.media ?? savingDraft.media } };
       // Adopt the server's variant ids so the next save updates these rows instead of adding new ones.
-      setDraft((current) => ({ ...current, media: canonical.media ?? current.media, ...(hasVariantAxes(draft) ? { variants: canonical.variants } : {}) }));
+      setDraft((current) => ({ ...current, published: savingDraft.published, archived: savingDraft.archived, media: canonical.media ?? current.media, ...(hasVariantAxes(savingDraft) ? { variants: canonical.variants } : {}) }));
       // A new product gets its own address, so reloading the page edits it instead of creating another.
       if (!productId && typeof window !== "undefined" && window.location.pathname.startsWith("/admin/products")) window.history.replaceState(null, "", `/admin/products/${encodeURIComponent(result.id)}`);
       setProductId(result.id);
       // Custom data is stored apart from the product, so it is saved once the product and its combinations exist.
       const savedVariantIds: Record<string, string> = {};
-      if (hasVariantAxes(draft)) for (const entry of draft.variants) {
+      if (hasVariantAxes(savingDraft)) for (const entry of savingDraft.variants) {
         const match = canonical.variants.find((candidate) => createVariantCombinationKey(candidate.options ?? {}) === createVariantCombinationKey(entry.options ?? {}));
         if (match) savedVariantIds[entry.id] = match.id;
       }
@@ -159,7 +177,7 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
   }
 
   async function archive() {
-    if (!api || !storeId || !productId || !window.confirm("Archive this product? It will be hidden from your store.")) return;
+    if (!api || !storeId || !productId || !(await confirmation.ask({ title: "Archive this product?", description: "It will be hidden from your store. You can make it active again later.", confirmLabel: "Archive product", destructive: true }))) return;
     setSaving(true);
     try { await api.updateProduct(storeId, productId, { status: "ARCHIVED" }); setDraft(current => ({ ...current, archived: true, published: false })); repository.archiveProduct(productId); setDirty(false); setJustSaved(true); }
     catch (caught) { setSaveError(caught instanceof Error ? caught.message : "Could not archive product."); }
@@ -180,8 +198,8 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
     finally { setSaving(false); }
   }
 
-  function discard() {
-    if (!window.confirm("Discard your unsaved changes?")) return;
+  async function discard() {
+    if (!(await confirmation.ask({ title: "Discard unsaved changes?", description: "Your changes since the last save will be lost.", confirmLabel: "Discard changes", destructive: true }))) return;
     metafields.reset();
     setDraft(baseline.current.draft);
     setPersisted(baseline.current.persisted);
@@ -193,9 +211,9 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
   }
 
   function startAnother() {
-    setDraft({ ...emptyDraft, media: [] });
+    setDraft({ ...emptyDraft, published: false, media: [] });
     setPersisted(NOTHING_SAVED);
-    baseline.current = { draft: { ...emptyDraft, media: [] }, persisted: NOTHING_SAVED };
+    baseline.current = { draft: { ...emptyDraft, published: false, media: [] }, persisted: NOTHING_SAVED };
     metafields.clear();
     setProductId(null);
     setErrors({});
@@ -208,13 +226,13 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
   const upload = api && storeId ? async (file: File) => (await api.uploadMedia(storeId, file)).url : undefined;
 
   return (
-    <>
+    <ProductSurface>
     <form ref={form} aria-label="Product editor" noValidate onSubmit={(event) => { event.preventDefault(); void save(); }} className="jk-builder">
       <header className="jk-page-header jk-builder-header">
         <div className="jk-page-title">
           <Link href="/admin/products" className="jk-back" aria-label="Back to products"><ArrowLeft size={16} aria-hidden="true" /></Link>
           <div className="min-w-0"><div className="jk-title-row"><h1>{productId ? draft.title || "Edit product" : "Add product"}</h1>
-            {productId && <StatusBadge kind="product" value={draft.archived ? "ARCHIVED" : draft.published ? "ACTIVE" : "DRAFT"} />}</div></div>
+            {productId && <StatusBadge kind="product" value={draft.archived ? "ARCHIVED" : draft.published ? "ACTIVE" : "DRAFT"} />}</div><p className="jk-builder-subtitle">{productId ? "Manage product details, media, and availability." : "Start with a name and price. Add optional details anytime."}</p></div>
         </div>
         <div className="jk-page-actions">
           <button type="button" className="jk-button" ref={previewTrigger} onClick={() => setPreviewOpen(true)}><Eye size={15} aria-hidden="true" />Preview</button>
@@ -222,6 +240,9 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
           {productId && !draft.archived && <button type="button" className="jk-button" disabled={saving} onClick={() => void archive()}>Archive</button>}
         </div>
       </header>
+      <nav className="jk-builder-nav" aria-label="Product sections">
+        <a href="#pb-details">Details & photos</a><a href="#pb-selling">Pricing & inventory</a><a href="#pb-variants">Options & variants</a><a href="#pb-shipping">Shipping</a><a href="#pb-more">More details</a><a href="#pb-organization">Organization</a>
+      </nav>
       <div className="jk-builder-main">
         {justSaved && (
           <Banner tone="success" title="Product saved successfully">
@@ -240,10 +261,33 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
           </div>
         )}
 
-        <BasicsSection draft={draft} errors={errors} onChange={change} onUpload={upload} hidePhoto />
-        <details className="jk-card jk-disclosure"><summary>Product specifications <span className="jk-muted">(optional)</span></summary><label className="admin-field mt-3">Specifications<textarea rows={4} maxLength={12000} value={draft.specificationsText??""} placeholder={"Material: Cotton\nCare: Machine wash cold"} onChange={event=>change("specificationsText",event.target.value)} /><small>One detail per line, for example Material: Cotton.</small></label></details>
+        <div id="pb-details" className="jk-builder-group"><BasicsSection draft={draft} errors={errors} onChange={change} onUpload={upload} hidePhoto />
+
         <PhotosSection media={draft.media ?? []} options={draft.options} taggingEnabled={taggingEnabled} onChange={(media) => { setDraft((current) => ({ ...current, media, imageUrl: media[0]?.url ?? "", variants: current.variants.map((variant) => variant.mediaId && !media.some((photo) => photo.id === variant.mediaId) ? { ...variant, mediaId: undefined } : variant) })); touch(); }} onBusy={setUploading} onDelete={api && storeId ? (mediaId) => api.deleteMedia(storeId, mediaId) : undefined} onUpload={api && storeId ? (file, progress) => api.uploadMedia(storeId, file, progress) : undefined} onList={api?.listMedia && storeId ? () => api.listMedia!(storeId) : undefined} />
-        <CategorySection
+        </div>
+        <div id="pb-selling" className="jk-builder-group">
+          <PricingSection draft={draft} errors={errors} currency={currency} hasCombinations={combinations} onChange={change} />
+          <InventorySection draft={draft} errors={errors} hasCombinations={combinations} onChange={change} />
+        </div>
+        <div id="pb-variants" className="jk-builder-group">
+        <ChoicesSection options={draft.options} templates={templates} categoryName={categoryName} limitError={limitError} onChange={changeOptions} />
+        {combinations && <div id="pb-variant-list"><VariantsSection photos={draft.media ?? []} physical={draft.physical} custom={metafields} customContext={metafieldContext} media={taggingEnabled ? draft.media : undefined} options={draft.options} variants={draft.variants} currency={currency} onChange={(variants) => { setDraft((current) => ({ ...current, variants })); touch(); }} /></div>}
+        </div>
+        <div id="pb-shipping"><ShippingSection draft={draft} errors={errors} hasCombinations={combinations} onChange={change} /></div>
+        <div id="pb-more" className="jk-builder-group">
+          <div className="jk-builder-group-heading"><h2>More details</h2><p>Only add what your product needs.</p></div>
+        <AnimatedDetails className="jk-card jk-disclosure"><summary>Product specifications <span className="jk-muted">(optional)</span></summary><label className="admin-field mt-3">Specifications<textarea rows={4} maxLength={12000} value={draft.specificationsText??""} placeholder={"Material: Cotton\nCare: Machine wash cold"} onChange={event=>change("specificationsText",event.target.value)} /><small>One detail per line, for example Material: Cotton.</small></label></AnimatedDetails>
+          <PersonalisationSection collapsible fields={draft.personalisation ?? []} onChange={(fields) => change("personalisation", fields)} />
+          <QuantityRuleSection collapsible rule={draft.quantityRule ?? null} onChange={(rule) => change("quantityRule", rule)} />
+
+
+        {api && <MetafieldsSection collapsible state={metafields} context={metafieldContext} />}
+        <SeoSection draft={draft} errors={errors} storeName={activeStore?.name ?? ""} storeSlug={activeStore?.slug ?? ""} saved={Boolean(productId) && draft.published} onChange={change} />
+
+        </div>
+      </div>
+
+      <OrganizationSection category={<CategorySection
           taxonomy={taxonomy}
           loading={taxonomyLoading}
           error={taxonomyError}
@@ -254,35 +298,27 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
             setTaxonomy((current) => current ? { ...current, categories: [...current.categories, created] } : current);
             return created;
           } : undefined}
-        />
-        <ChoicesSection options={draft.options} templates={templates} categoryName={categoryName} limitError={limitError} onChange={changeOptions} />
-        <PricingSection draft={draft} errors={errors} currency={currency} hasCombinations={combinations} onChange={change} />
-        <PersonalisationSection fields={draft.personalisation ?? []} onChange={(fields) => change("personalisation", fields)} />
-        <QuantityRuleSection rule={draft.quantityRule ?? null} onChange={(rule) => change("quantityRule", rule)} />
-        <ShippingSection draft={draft} errors={errors} hasCombinations={combinations} onChange={change} />
-        {combinations && <VariantsSection photos={draft.media ?? []} physical={draft.physical} custom={metafields} customContext={metafieldContext} media={taggingEnabled ? draft.media : undefined} options={draft.options} variants={draft.variants} currency={currency} onChange={(variants) => { setDraft((current) => ({ ...current, variants })); touch(); }} />}
-
-        {api && <MetafieldsSection state={metafields} context={metafieldContext} />}
-        <SeoSection draft={draft} errors={errors} storeName={activeStore?.name ?? ""} storeSlug={activeStore?.slug ?? ""} saved={Boolean(productId) && draft.published} onChange={change} />
-
-        <div className={`jk-builder-bar ${dirty ? "is-dirty" : ""}`}>
-          {dirty && <span role="status" className="mr-auto">Unsaved changes</span>}
-          {dirty && <button type="button" className="jk-button" disabled={saving} onClick={discard}>Discard</button>}
-          <button type="submit" disabled={saving || uploading} className="jk-button jk-button-primary">
-            {saving && <Loader2 size={14} className="animate-spin" />}
-            {productId ? "Save changes" : "Save product"}
+        />} key={productId??"new"} draft={draft} onChange={change} categories={categoryPaths} brands={storeId ? repository.getBrands?.(storeId) ?? [] : []}
+        extra={productId && api && storeId ? <Card title="Online store"><TemplatePicker api={api} storeId={storeId} resourceType="product" resourceId={productId} /></Card> : undefined} />
+      <div className={`jk-builder-bar ${dirty ? "is-dirty" : ""}`}>
+        <div className="jk-builder-save-state"><span role="status">{saving ? "Saving product…" : dirty ? "Unsaved changes" : justSaved ? "All changes saved" : productId ? "No unsaved changes" : "New product"}</span><small>{draft.archived ? "Archived · hidden from customers" : draft.published ? "Active · visible when saved" : "Draft · hidden from customers"}</small></div>
+        <div className="jk-builder-save-actions">
+          {dirty && <button type="button" className="jk-button" disabled={saving || uploading} onClick={discard}>Discard</button>}
+          {!productId && <button type="button" className="jk-button" disabled={saving || uploading} onClick={() => void save(false)}>Save draft</button>}
+          {productId && !draft.published && !draft.archived && <button type="submit" className="jk-button" disabled={saving || uploading}>Save changes</button>}
+          <button type={canPublish ? "button" : "submit"} onClick={canPublish ? () => void save(true) : undefined} disabled={saving || uploading} className="jk-button jk-button-primary">
+            {saving && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
+            {canPublish ? "Publish product" : "Save changes"}
           </button>
         </div>
       </div>
-
-      <OrganizationSection key={productId??"new"} draft={draft} onChange={change} categories={categoryPaths} brands={storeId ? repository.getBrands?.(storeId) ?? [] : []}
-        extra={productId && api && storeId ? <Card title="Online store"><TemplatePicker api={api} storeId={storeId} resourceType="product" resourceId={productId} /></Card> : undefined} />
-      <Sheet open={previewOpen} onOpenChange={setPreviewOpen}><SheetContent onCloseAutoFocus={event => { event.preventDefault(); previewTrigger.current?.focus(); }} className="jk-sheet overflow-y-auto">
+      <Sheet open={previewOpen} onOpenChange={setPreviewOpen}><ProductSheetContent onCloseAutoFocus={event => { event.preventDefault(); previewTrigger.current?.focus(); }} className="jk-sheet overflow-y-auto">
         <SheetTitle>Shopper preview</SheetTitle><SheetDescription className="jk-muted">Try the options. Nothing is ordered.</SheetDescription>
         <BuyerPreview mediaEnabled={taggingEnabled} draft={draft} currency={currency} categoryLabel={category?.label} />
-      </SheetContent></Sheet>
+      </ProductSheetContent></Sheet>
     </form>
     {productId && <div className="mt-6"><DigitalProductSettings productId={productId} /></div>}
-    </>
+    {confirmation.dialog}
+    </ProductSurface>
   );
 }

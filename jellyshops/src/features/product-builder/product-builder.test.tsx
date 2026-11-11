@@ -95,17 +95,68 @@ function mockApi() {
 const productCalls = (mock: ReturnType<typeof mockApi>) => mock.mock.calls.filter(([url]) => String(url).includes("/catalog/products"));
 
 describe("ProductBuilder", () => {
+  it("saves privately as a draft before explicitly publishing the same product", async () => {
+    const fetchMock = mockApi();
+    const user = userEvent.setup();
+    render(<ShopProvider><ProductBuilder /></ShopProvider>);
+    expect(screen.getByRole("combobox", { name: "Product status" })).toHaveValue("DRAFT");
+    await user.type(screen.getByLabelText(/product name/i), "Mug");
+    await user.type(screen.getByLabelText(/^price/i), "100");
+    await user.click(screen.getByRole("button", { name: "Save draft" }));
+    await screen.findByText(/Product saved successfully/);
+    expect(JSON.parse(String(productCalls(fetchMock)[0][1]?.body)).status).toBe("DRAFT");
+    await user.click(screen.getByRole("button", { name: "Publish product" }));
+    await waitFor(() => expect(productCalls(fetchMock)).toHaveLength(2));
+    expect(productCalls(fetchMock)[1][1]?.method).toBe("PATCH");
+    expect(JSON.parse(String(productCalls(fetchMock)[1][1]?.body)).status).toBe("ACTIVE");
+    await waitFor(() => expect(screen.getByRole("combobox", { name: "Product status" })).toHaveValue("ACTIVE"));
+  });
+
+  it("reveals a collapsed optional field before focusing a validation error", async () => {
+    mockApi();
+    const user = userEvent.setup();
+    render(<ShopProvider><ProductBuilder /></ShopProvider>);
+    await user.type(screen.getByLabelText(/product name/i), "Mug");
+    await user.type(screen.getByLabelText(/^price/i), "100");
+    const disclosure = screen.getByText("Cost, profit and unit pricing (optional)").closest("details")!;
+    await user.click(within(disclosure).getByText("Cost, profit and unit pricing (optional)"));
+    await user.type(screen.getByLabelText(/cost per item/i), "invalid");
+    await user.click(within(disclosure).getByText("Cost, profit and unit pricing (optional)"));
+    expect(disclosure).not.toHaveAttribute("open");
+    await user.click(screen.getByRole("button", { name: "Save draft" }));
+    expect(disclosure).toHaveAttribute("open");
+    await waitFor(() => expect(screen.getByLabelText(/cost per item/i)).toHaveFocus());
+  });
+
+  it("keeps the product private and retains entered values if publishing fails", async () => {
+    const fetchMock = mockApi();
+    const original = fetchMock.getMockImplementation()!;
+    fetchMock.mockImplementation(async (url, init) => String(url).includes("/catalog/products")
+      ? new Response(JSON.stringify({ error: { message: "Could not publish. Try again." } }), { status: 409 })
+      : original(url, init));
+    const user = userEvent.setup();
+    render(<ShopProvider><ProductBuilder /></ShopProvider>);
+    await user.type(screen.getByLabelText(/product name/i), "Mug");
+    await user.type(screen.getByLabelText(/^price/i), "100");
+    await user.click(screen.getByRole("button", { name: "Publish product" }));
+    expect(await screen.findByText("Could not publish. Try again.")).toBeVisible();
+    expect(screen.getByRole("combobox", { name: "Product status" })).toHaveValue("DRAFT");
+    expect(screen.getByLabelText(/product name/i)).toHaveValue("Mug");
+    expect(screen.getByLabelText(/^price/i)).toHaveValue("100");
+    expect(screen.getByRole("button", { name: "Publish product" })).toBeEnabled();
+  });
+
   it("keeps the product sections, shopper preview, and save action easy to find", async () => {
     render(<ShopProvider><ProductBuilder /></ShopProvider>);
 
-    await screen.findByRole("heading", { name: "Price & stock" });
+    await screen.findByRole("heading", { name: "Pricing" });
     expect(screen.getByRole("heading", { name: "Product details" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Photos" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Category" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Product options" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Price & stock" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Pricing" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Preview" })).toBeVisible();
-    expect(screen.getByRole("button", { name: "Save product" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Publish product" })).toBeVisible();
   });
 
   it("creates a simple product with a category and shows a live preview", async () => {
@@ -124,7 +175,7 @@ describe("ProductBuilder", () => {
     await user.click(await screen.findByRole("button", { name: "Fashion › Men › T-Shirts" }));
     expect(screen.getAllByText("Fashion › Men › T-Shirts").length).toBeGreaterThan(0);
 
-    await user.click(screen.getByRole("button", { name: /save product/i }));
+    await user.click(screen.getByRole("button", { name: /publish product/i }));
     expect(await screen.findByText(/Product saved successfully/)).toBeVisible();
     const [call] = productCalls(fetchMock);
     expect(call[1]).toMatchObject({ method: "POST" });
@@ -135,7 +186,7 @@ describe("ProductBuilder", () => {
     const fetchMock = mockApi();
     const user = userEvent.setup();
     render(<ShopProvider><ProductBuilder /></ShopProvider>);
-    await user.click(screen.getByRole("button", { name: /save product/i }));
+    await user.click(screen.getByRole("button", { name: /publish product/i }));
     expect(await screen.findByText("Give your product a name.")).toBeVisible();
     expect(screen.getByText("Enter a price.")).toBeVisible();
     expect(screen.getByLabelText(/product name/i)).toHaveFocus();
@@ -150,7 +201,7 @@ describe("ProductBuilder", () => {
     render(<ShopProvider><ProductBuilder /></ShopProvider>);
     await user.type(screen.getByLabelText(/product name/i), "Mug");
     await user.type(screen.getByLabelText(/^price/i), "100");
-    await user.click(screen.getByRole("button", { name: /save product/i }));
+    await user.click(screen.getByRole("button", { name: /publish product/i }));
     await screen.findByText(/Product saved successfully/);
     await user.type(screen.getByLabelText(/product name/i), "s");
     await user.click(screen.getByRole("button", { name: /save changes/i }));
@@ -165,7 +216,7 @@ describe("ProductBuilder", () => {
     render(<ShopProvider><ProductBuilder /></ShopProvider>);
     await user.type(screen.getByLabelText(/product name/i), "Mug");
     await user.type(screen.getByLabelText(/^price/i), "100");
-    await user.click(screen.getByRole("button", { name: /save product/i }));
+    await user.click(screen.getByRole("button", { name: /publish product/i }));
     await screen.findByText(/Product saved successfully/);
     expect(window.location.pathname).toMatch(/^\/admin\/products\/(?!new)/);
     await user.click(screen.getByRole("button", { name: "Duplicate" }));
@@ -200,7 +251,7 @@ describe("ProductBuilder", () => {
     fetchMock.mockImplementationOnce(async () => new Response(JSON.stringify({ error: { message: "Nope" } }), { status: 409 }));
     await user.type(screen.getByLabelText(/product name/i), "Mug");
     await user.type(screen.getByLabelText(/^price/i), "100");
-    await user.click(screen.getByRole("button", { name: /save product/i }));
+    await user.click(screen.getByRole("button", { name: /publish product/i }));
     expect(await screen.findByRole("alert")).toBeVisible();
     expect(screen.getByLabelText(/product name/i)).toHaveValue("Mug");
   });

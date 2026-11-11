@@ -316,7 +316,7 @@ describe("ProductBuilder choices and combinations", () => {
 
     await user.clear(screen.getByLabelText("Stock for M / White"));
     await user.type(screen.getByLabelText("Stock for M / White"), "0");
-    await user.click(screen.getByRole("button", { name: /save product/i }));
+    await user.click(screen.getByRole("button", { name: /publish product/i }));
     expect(await screen.findByText(/Product saved successfully/)).toBeVisible();
 
     const [call] = productCalls(fetchMock);
@@ -368,7 +368,7 @@ describe("ProductBuilder choices and combinations", () => {
     await user.type(screen.getByLabelText(/product name/i), "Tee");
     await user.type(screen.getByLabelText(/^price/i), "10");
     await user.click(screen.getByRole("button", { name: "Add options like size or colour" }));
-    await user.click(screen.getByRole("button", { name: /save product/i }));
+    await user.click(screen.getByRole("button", { name: /publish product/i }));
     const alert = await screen.findByText(/before saving/i);
     expect(alert.closest("[data-problems]")).toHaveTextContent(/needs a name|every choice needs a name/i);
     expect(alert.closest("[data-problems]")).toHaveTextContent(/at least one value/i);

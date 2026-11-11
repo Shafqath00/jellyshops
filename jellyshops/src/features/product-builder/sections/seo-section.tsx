@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatedDetails } from "../animated-details";
 import { useSyncExternalStore } from "react";
 import { inputClass } from "@/features/commerce/components/product-form-styles";
 import { slugify } from "@/lib/domain";
@@ -46,7 +47,7 @@ export function SeoSection({ draft, errors, storeName, storeSlug, saved, onChang
         <p className="mt-1 line-clamp-2 text-[13px] leading-5 text-muted-foreground">{description}</p>
       </div>
 
-      <details open={hasContent || Boolean(errors.handle)} className="rounded-xl border border-border/80 bg-muted/25 px-4 py-3.5">
+      <AnimatedDetails open={hasContent || Boolean(errors.handle)} className="rounded-xl border border-border/80 bg-muted/25 px-4 py-3.5">
         <summary className="cursor-pointer text-[13px] font-semibold text-foreground">Edit search engine listing</summary>
         <div className="space-y-4 pt-4">
           <div>
@@ -76,7 +77,7 @@ export function SeoSection({ draft, errors, storeName, storeSlug, saved, onChang
           </Field>
           {handleChanged && <p role="note" className="text-[12px] leading-5 text-tint-foreground">Changing the handle of a product that is already in your store means old links to it, including ones in search results, will stop working.</p>}
         </div>
-      </details>
+      </AnimatedDetails>
     </Section>
   );
 }

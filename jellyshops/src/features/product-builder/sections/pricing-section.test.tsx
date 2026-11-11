@@ -3,11 +3,12 @@ import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { describe, expect, it } from "vitest";
 import { draftToPayload, emptyDraft, productToDraft, validateSimpleDraft, type ProductDraft } from "../draft";
+import { InventorySection } from "./inventory-section";
 import { PricingSection } from "./pricing-section";
 
 function Harness({ initial }: { initial: ProductDraft }) {
   const [draft, setDraft] = useState(initial);
-  return <PricingSection draft={draft} errors={validateSimpleDraft(draft)} currency="GBP" hasCombinations={false} onChange={(field, value) => setDraft((current) => ({ ...current, [field]: value }))} />;
+  return <><InventorySection draft={draft} errors={validateSimpleDraft(draft)} hasCombinations={false} onChange={(field, value) => setDraft((current) => ({ ...current, [field]: value }))} /><PricingSection draft={draft} errors={validateSimpleDraft(draft)} currency="GBP" hasCombinations={false} onChange={(field, value) => setDraft((current) => ({ ...current, [field]: value }))} /></>;
 }
 
 describe("cost, profit and unit pricing", () => {
@@ -85,7 +86,7 @@ describe("barcode and low stock warning", () => {
 
   it("keeps the barcode with the optional details and opens them when one is saved", () => {
     render(<Harness initial={{ ...emptyDraft, price: "10", barcode: "5012345678900" }} />);
-    expect(screen.getByText("Add original price, SKU or barcode (optional)").closest("details")).toHaveAttribute("open");
+    expect(screen.getByText("SKU and barcode").closest("details")).toHaveAttribute("open");
     expect(screen.getByLabelText(/^Barcode/)).toHaveValue("5012345678900");
   });
 

@@ -2,7 +2,8 @@
 
 
 
-import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { AnimatedDetails } from "../animated-details";
+import { Sheet, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 
 
 
@@ -17,6 +18,8 @@ import type { MediaRecord } from "@/features/store-editor/api/types";
 import { inputClass } from "@/features/commerce/components/product-form-styles";
 
 import { Section } from "./section-parts";
+import { ProductSheetContent } from "../product-sheet";
+import { useProductConfirm } from "../use-product-confirm";
 
 
 
@@ -48,6 +51,7 @@ const button = "inline-flex min-h-10 items-center justify-center rounded-lg bord
 
 export function PhotosSection({ media, options, taggingEnabled, onChange, onUpload, onList, onDelete, onBusy }: Props) {
 
+  const confirmation = useProductConfirm();
   const drawerTrigger = useRef<HTMLElement | null>(null);
   const current = useRef(media);
   useLayoutEffect(() => { current.current = media; }, [media]);
@@ -205,9 +209,9 @@ export function PhotosSection({ media, options, taggingEnabled, onChange, onUplo
 
     <Section title="Photos" hint={`${media.length} of 30 · The first photo is your cover. You can reorder photos any time.`}>
 
-      <div className={media.length ? "flex flex-wrap gap-2" : "flex flex-wrap justify-center gap-2 rounded-lg border border-dashed border-border p-6"}>
+      <div className={media.length ? "flex flex-wrap gap-2" : "product-gallery flex flex-wrap justify-center"}>
 
-        {media.length === 0 && <p className="w-full text-center text-sm">Add your first product photo</p>}
+        {media.length === 0 && <p className="w-full text-center text-sm">Add your first product photo<small>Use clear, well-lit images. Your first image becomes the cover.</small></p>}
 
         {onUpload && <label className={`${button} cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90`}>Add photos<input className="sr-only" aria-label="Add product photos" type="file" accept="image/*" multiple onChange={(event) => { upload(event.target.files); event.target.value = ""; }} /></label>}
 
@@ -219,7 +223,7 @@ export function PhotosSection({ media, options, taggingEnabled, onChange, onUplo
 
       {queue.filter((item) => !item.done).map((item) => <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/25 px-3.5 py-3 text-[12px]" aria-live="polite"><span className="min-w-0 truncate font-medium text-foreground">{item.file.name} · {item.error ?? `${item.progress}%`}</span>{item.error ? <button type="button" className={button} onClick={() => void run(item)}>Retry {item.file.name}</button> : <progress className="h-2 w-40 accent-primary" value={item.progress} max={100} aria-label={`Uploading ${item.file.name}`} />}</div>)}
 
-      {selected.length > 0 && <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-muted/30 p-3 text-[12px]"><p className="font-semibold">{selected.length} selected</p><button type="button" className={button} onClick={() => { commit(media.filter((photo) => !selected.includes(photo.id))); setSelected([]); }}>Remove selected from product</button>{taggingEnabled && <details><summary className="cursor-pointer font-semibold">Show selected for…</summary>{tags(selected)}<button type="button" className={button} onClick={() => commit(media.map((photo) => selected.includes(photo.id) ? { ...photo, appliesTo: {} } : photo))}>Show for everything</button></details>}</div>}
+      {selected.length > 0 && <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-muted/30 p-3 text-[12px]"><p className="font-semibold">{selected.length} selected</p><button type="button" className={button} onClick={() => { commit(media.filter((photo) => !selected.includes(photo.id))); setSelected([]); }}>Remove selected from product</button>{taggingEnabled && <AnimatedDetails><summary className="cursor-pointer font-semibold">Show selected for…</summary>{tags(selected)}<button type="button" className={button} onClick={() => commit(media.map((photo) => selected.includes(photo.id) ? { ...photo, appliesTo: {} } : photo))}>Show for everything</button></AnimatedDetails>}</div>}
 
       <div className="admin-photo-grid">
 
@@ -237,7 +241,7 @@ export function PhotosSection({ media, options, taggingEnabled, onChange, onUplo
 
             </button>
 
-            {editingPhoto === photo.id && <Sheet open onOpenChange={(open) => { if (!open) setEditingPhoto(undefined); }}><SheetContent onCloseAutoFocus={event => { event.preventDefault(); if (drawerTrigger.current?.isConnected) drawerTrigger.current.focus(); }} className="jk-sheet overflow-y-auto">
+            {editingPhoto === photo.id && <Sheet open onOpenChange={(open) => { if (!open) setEditingPhoto(undefined); }}><ProductSheetContent onCloseAutoFocus={event => { event.preventDefault(); if (drawerTrigger.current?.isConnected) drawerTrigger.current.focus(); }} className="jk-sheet overflow-y-auto">
 
               <SheetTitle>{index === 0 ? "Cover photo" : `Photo ${index + 1}`}</SheetTitle><SheetDescription>Edit this photo’s description and where it appears.</SheetDescription>
 
@@ -251,9 +255,9 @@ export function PhotosSection({ media, options, taggingEnabled, onChange, onUplo
 
             <div className="mt-2.5 flex flex-wrap gap-1.5"><button type="button" className={`${button} !min-h-9 !px-2.5`} disabled={index === 0} aria-label={`Move photo ${index + 1} up`} onClick={() => move(photo.id, index - 1)}>↑</button><button type="button" className={`${button} !min-h-9 !px-2.5`} disabled={index === media.length - 1} aria-label={`Move photo ${index + 1} down`} onClick={() => move(photo.id, index + 1)}>↓</button>{onUpload && <label className={`${button} !min-h-9 cursor-pointer !px-2.5`}>Replace<input type="file" accept="image/*" className="sr-only" aria-label={`Replace photo ${index + 1}`} onChange={(event) => { upload(event.target.files, photo.id); event.target.value = ""; }} /></label>}<button type="button" className={`${button} !min-h-9 !px-2.5`} onClick={() => commit(media.filter((item) => item.id !== photo.id))}>Remove photo {index + 1}</button></div>
 
-            {taggingEnabled && <details className="mt-3 border-t border-border/70 pt-2.5"><summary className="cursor-pointer text-[13px] font-semibold text-muted-foreground">{Object.keys(photo.appliesTo ?? {}).length ? Object.entries(photo.appliesTo ?? {}).flatMap(([optionId, values]) => values.map((id) => options.find((option) => option.id === optionId)?.values.find((value) => value.id === id)?.label)).filter(Boolean).join(" · ") : "All shoppers"} · Show for…</summary>{tags([photo.id])}</details>}
+            {taggingEnabled && <AnimatedDetails className="mt-3 border-t border-border/70 pt-2.5"><summary className="cursor-pointer text-[13px] font-semibold text-muted-foreground">{Object.keys(photo.appliesTo ?? {}).length ? Object.entries(photo.appliesTo ?? {}).flatMap(([optionId, values]) => values.map((id) => options.find((option) => option.id === optionId)?.values.find((value) => value.id === id)?.label)).filter(Boolean).join(" · ") : "All shoppers"} · Show for…</summary>{tags([photo.id])}</AnimatedDetails>}
 
-            </SheetContent></Sheet>}
+            </ProductSheetContent></Sheet>}
 
           </article>
 
@@ -265,10 +269,11 @@ export function PhotosSection({ media, options, taggingEnabled, onChange, onUplo
 
       {undo && <button type="button" className={button} onClick={() => { commit(media.map((photo) => { const before = undo.find((item) => item.id === photo.id); return before ? { ...photo, appliesTo: before.appliesTo } : photo; })); setUndo(null); }}>Undo suggested tags</button>}
 
-      {taggingEnabled && assignable.map((option) => <details key={option.id} open={option.display === "color" || /colou?r|finish|style|pattern|material/i.test(option.name)} className="rounded-xl border border-border bg-muted/20 p-3 text-[12px]"><summary className="cursor-pointer font-semibold">Photos change with {option.name}</summary>{option.values.map((value) => <div key={value.id} className="mt-3"><p className="font-semibold">{value.label}</p><div className="my-2 flex gap-2">{media.filter((photo) => photo.appliesTo?.[option.id]?.includes(value.id)).map((photo) => <span key={photo.id}>{/* eslint-disable-next-line @next/next/no-img-element */}<img src={photo.url} alt={photo.altText ?? value.label} className="size-12 rounded-md object-cover" /><button type="button" aria-label={`Unassign ${value.label} photo`} onClick={() => toggleTag(option.id, value.id, false, [photo.id])}>×</button></span>)}</div>{!media.some((photo) => photo.appliesTo?.[option.id]?.includes(value.id)) && <p className="mb-2 text-muted-foreground">No assigned photos. Shoppers see shared photos.</p>}{onList && <button type="button" className={button} onClick={() => void openLibrary({ [option.id]: [value.id] })}>Choose photos for {value.label}</button>}{onUpload && <label className={`${button} cursor-pointer`}>Upload for {value.label}<input className="sr-only" aria-label={`Upload photos for ${value.label}`} type="file" multiple accept="image/*" onChange={(event) => { upload(event.target.files, undefined, { [option.id]: [value.id] }); event.target.value = ""; }} /></label>}</div>)}</details>)}
+      {taggingEnabled && assignable.map((option) => <AnimatedDetails key={option.id} open={option.display === "color" || /colou?r|finish|style|pattern|material/i.test(option.name)} className="rounded-xl border border-border bg-muted/20 p-3 text-[12px]"><summary className="cursor-pointer font-semibold">Photos change with {option.name}</summary>{option.values.map((value) => <div key={value.id} className="mt-3"><p className="font-semibold">{value.label}</p><div className="my-2 flex gap-2">{media.filter((photo) => photo.appliesTo?.[option.id]?.includes(value.id)).map((photo) => <span key={photo.id}>{/* eslint-disable-next-line @next/next/no-img-element */}<img src={photo.url} alt={photo.altText ?? value.label} className="size-12 rounded-md object-cover" /><button type="button" aria-label={`Unassign ${value.label} photo`} onClick={() => toggleTag(option.id, value.id, false, [photo.id])}>×</button></span>)}</div>{!media.some((photo) => photo.appliesTo?.[option.id]?.includes(value.id)) && <p className="mb-2 text-muted-foreground">No assigned photos. Shoppers see shared photos.</p>}{onList && <button type="button" className={button} onClick={() => void openLibrary({ [option.id]: [value.id] })}>Choose photos for {value.label}</button>}{onUpload && <label className={`${button} cursor-pointer`}>Upload for {value.label}<input className="sr-only" aria-label={`Upload photos for ${value.label}`} type="file" multiple accept="image/*" onChange={(event) => { upload(event.target.files, undefined, { [option.id]: [value.id] }); event.target.value = ""; }} /></label>}</div>)}</AnimatedDetails>)}
 
-      {library !== null && <Sheet open onOpenChange={(open) => { if (!open) setLibrary(null); }}><SheetContent onCloseAutoFocus={event => { event.preventDefault(); if (drawerTrigger.current?.isConnected) drawerTrigger.current.focus(); }} className="jk-sheet overflow-y-auto p-6"><SheetTitle>Photo library</SheetTitle><SheetDescription>Choose photos to reuse in this product. Removing from a product keeps the original here.</SheetDescription><label className="my-3 flex gap-2 text-xs"><input type="checkbox" checked={unusedOnly} onChange={(event) => { setUnusedOnly(event.target.checked); if (event.target.checked) setUnusedCutoff(Date.now() - 30 * 86400000); }} />Unused for over 30 days</label><button type="button" className={button} autoFocus onClick={() => setLibrary(null)}>Done choosing photos</button>{libraryLoading && <p role="status">Loading photos…</p>}{libraryError && <p role="alert">{libraryError}</p>}<div className="mt-4 grid grid-cols-3 gap-3">{library.filter((record) => !unusedOnly || (!record.referenced && Date.parse(record.createdAt) < unusedCutoff)).map((record) => <div key={record.id}><button type="button" key={record.id} className="rounded-xl border p-2 text-xs" onClick={() => link(record)}>{/* eslint-disable-next-line @next/next/no-img-element */}<img src={record.url} alt={record.originalName} className="aspect-square w-full object-cover" />{record.originalName}<span className="block">{media.some((photo) => photo.id === record.id) ? "In product" : "Add photo"}</span></button>{unusedOnly && onDelete && !media.some((photo) => photo.id === record.id) && <button type="button" className={button} onClick={async () => { if (!window.confirm("Permanently delete this unused library photo?")) return; try { await onDelete(record.id); setLibrary((items) => items?.filter((item) => item.id !== record.id) ?? null); } catch (caught) { setLibraryError(caught instanceof Error ? caught.message : "Could not delete photo."); } }}>Delete unused photo</button>}</div>)}</div></SheetContent></Sheet>}
+      {library !== null && <Sheet open onOpenChange={(open) => { if (!open) setLibrary(null); }}><ProductSheetContent onCloseAutoFocus={event => { event.preventDefault(); if (drawerTrigger.current?.isConnected) drawerTrigger.current.focus(); }} className="jk-sheet overflow-y-auto p-6"><SheetTitle>Photo library</SheetTitle><SheetDescription>Choose photos to reuse in this product. Removing from a product keeps the original here.</SheetDescription><label className="my-3 flex gap-2 text-xs"><input type="checkbox" checked={unusedOnly} onChange={(event) => { setUnusedOnly(event.target.checked); if (event.target.checked) setUnusedCutoff(Date.now() - 30 * 86400000); }} />Unused for over 30 days</label><button type="button" className={button} autoFocus onClick={() => setLibrary(null)}>Done choosing photos</button>{libraryLoading && <p role="status">Loading photos…</p>}{libraryError && <p role="alert">{libraryError}</p>}<div className="mt-4 grid grid-cols-3 gap-3">{library.filter((record) => !unusedOnly || (!record.referenced && Date.parse(record.createdAt) < unusedCutoff)).map((record) => <div key={record.id}><button type="button" key={record.id} className="rounded-xl border p-2 text-xs" onClick={() => link(record)}>{/* eslint-disable-next-line @next/next/no-img-element */}<img src={record.url} alt={record.originalName} className="aspect-square w-full object-cover" />{record.originalName}<span className="block">{media.some((photo) => photo.id === record.id) ? "In product" : "Add photo"}</span></button>{unusedOnly && onDelete && !media.some((photo) => photo.id === record.id) && <button type="button" className={button} onClick={async () => { if (!(await confirmation.ask({ title: "Delete this unused photo?", description: "The photo will be permanently deleted from your library. This cannot be undone.", confirmLabel: "Delete photo", destructive: true }))) return; try { await onDelete(record.id); setLibrary((items) => items?.filter((item) => item.id !== record.id) ?? null); } catch (caught) { setLibraryError(caught instanceof Error ? caught.message : "Could not delete photo."); } }}>Delete unused photo</button>}</div>)}</div></ProductSheetContent></Sheet>}
 
+      {confirmation.dialog}
     </Section>
 
   );

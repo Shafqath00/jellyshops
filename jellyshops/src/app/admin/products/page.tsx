@@ -1,10 +1,13 @@
 "use client";
 import Link from "next/link";
 import { ImageIcon, Package } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/features/auth/providers/auth-provider";
-import { AdminPage, EmptyState, IndexTable, Picker, StatusBadge, useToast, type IndexColumn, type IndexTab } from "@/components/admin";
+import { AdminPage, Banner, ConfirmDialog, EmptyState, IndexTable, Picker, StatusBadge, useToast, type IndexColumn, type IndexTab } from "@/components/admin";
 import { useAdminCatalog, type CatalogAdminProduct, type CatalogPage, type CollectionRow } from "@/features/admin/api/catalog-api";
+
+import { ProductSurface } from "@/features/product-builder/product-surface";
+import { ProductRowActions } from "@/features/product-builder/product-row-actions";
 
 type ProductStatus = CatalogAdminProduct["status"];
 const TABS: IndexTab[] = [{ id: "", label: "All" }, { id: "ACTIVE", label: "Active" }, { id: "DRAFT", label: "Draft" }, { id: "ARCHIVED", label: "Archived" }];
@@ -25,13 +28,33 @@ export default function ProductsPage() {
   const [collectionFor, setCollectionFor] = useState<string[] | null>(null);
   const [collections, setCollections] = useState<CollectionRow[]>([]);
   const toast = useToast();
+  const [rowBusy, setRowBusy] = useState("");
+  const [rowError, setRowError] = useState("");
+  const [archiveTarget, setArchiveTarget] = useState<CatalogAdminProduct | null>(null);
+  const returnFocus = useRef<HTMLElement | null>(null);
+  const rememberFocus = (product?: CatalogAdminProduct) => {
+    returnFocus.current = product
+      ? [...document.querySelectorAll<HTMLButtonElement>("button[data-product-actions]")].find(button => button.dataset.productActions === product.id) ?? null
+      : document.activeElement as HTMLElement;
+  };
+  const restoreFocus = (event: Event) => {
+    event.preventDefault();
+    const target = returnFocus.current?.isConnected ? returnFocus.current : document.querySelector<HTMLElement>('.product-surface a[href="/admin/products/new"]');
+    target?.focus();
+  };
+  async function rowStatus(product: CatalogAdminProduct, status: ProductStatus) {
+    setRowBusy(product.id); setRowError("");
+    try { await setStatusFor([product.id], status); }
+    catch (error) { setRowError(error instanceof Error ? error.message : "Could not update this product."); }
+    finally { setRowBusy(""); }
+  }
   const [rows, setRows] = useState<CatalogAdminProduct[]>([]), [query, setQuery] = useState(""), [search, setSearch] = useState(""), [status, setStatus] = useState(""), [sort, setSort] = useState("title-asc");
   const [cursor, setCursor] = useState<string | null>(null), [history, setHistory] = useState<Array<string | null>>([]), [next, setNext] = useState<string | null>(null);
   const [error, setError] = useState(""), [loading, setLoading] = useState(true), [revision, setRevision] = useState(0);
   useEffect(() => {
     let active = true;
     if (!ready) return;
-    setLoading(true);
+    void Promise.resolve().then(() => { if (active) setLoading(true); });
     const params = new URLSearchParams({ limit: "50", sort });
     if (search.trim()) params.set("query", search.trim());
     if (status) params.set("status", status);
@@ -66,16 +89,18 @@ export default function ProductsPage() {
     } catch (failure) { toast(failure instanceof Error ? failure.message : "Could not update the collection.", { tone: "critical" }); }
   }
   const columns: IndexColumn<CatalogAdminProduct>[] = [
-    { id: "product", header: "Product", mobile: "primary", cell: (product) => <Link href={"/admin/products/" + product.id} className="flex min-w-44 items-center gap-3 font-semibold">
-      {product.media[0] ? <img src={product.media[0].url} alt="" width={40} height={40} className="jk-thumb" /> : <span className="jk-thumb"><ImageIcon size={17} aria-hidden="true" /></span>}{product.title}</Link> },
+    { id: "product", header: "Product", mobile: "primary", cell: (product) => <Link href={"/admin/products/" + product.id} className="product-name">
+      {product.media[0] ? <img src={product.media[0].url} alt="" width={40} height={40} className="jk-thumb" /> : <span className="jk-thumb"><ImageIcon size={17} aria-hidden="true" /></span>}<span>{product.title}</span></Link> },
     { id: "status", header: "Status", cell: (product) => <StatusBadge kind="product" value={product.status} /> },
-    { id: "stock", header: "Inventory", cell: (product) => { const stock = stockSummary(product); return <span className={stock.low ? "text-[var(--jk-critical-text)]" : ""}>{stock.text}</span>; } },
+    { id: "stock", header: "Inventory", cell: (product) => { const stock = stockSummary(product); const [quantity, variants] = stock.text.split(" for "); return <span className={`product-inventory ${stock.low ? "text-[var(--jk-critical-text)]" : ""}`}><span>{quantity}</span>{variants && <small>{variants}</small>}</span>; } },
     { id: "price", header: "Price", align: "end", cell: (product) => <span className="tabular-nums">{money(product.variants[0]?.priceMinor ?? 0)}</span> },
     { id: "type", header: "Type", mobile: "hidden", cell: (product) => product.productType || <span className="jk-muted">None</span> },
     { id: "vendor", header: "Brand or supplier", mobile: "hidden", cell: (product) => product.vendor || <span className="jk-muted">None</span> },
+    { id: "actions", header: "Actions", align: "end", cell: product => <ProductRowActions product={product} busy={rowBusy === product.id} onStatus={status => void rowStatus(product, status)} onArchive={() => { rememberFocus(product); setArchiveTarget(product); }} onCollection={() => { rememberFocus(product); setCollectionFor([product.id]); }} /> },
   ];
   const filtered = Boolean(search || status);
-  return <AdminPage title="Products" description="Everything you sell. Open a product to change its photos, price or stock." primaryAction={{ label: "Add product", href: "/admin/products/new" }}>
+  return <ProductSurface><AdminPage title="Products" description="Manage your products, pricing, and availability." primaryAction={{ label: "Add product", href: "/admin/products/new" }}>
+    {rowError && <Banner tone="critical" title="Product not updated" onDismiss={() => setRowError("")}>{rowError}</Banner>}
     <IndexTable
       label="Products"
       rows={rows}
@@ -88,13 +113,13 @@ export default function ProductsPage() {
       tabs={TABS}
       activeTab={status}
       onTabChange={(value) => { setStatus(value); reset(); }}
-      search={{ value: query, onChange: setQuery, label: "Search products", placeholder: "Search by name or SKU, then press Enter", onSubmit: () => { setSearch(query); reset(); } }}
+      search={{ value: query, onChange: setQuery, label: "Search products", placeholder: "Search by name or SKU", onSubmit: () => { setSearch(query); reset(); } }}
       filters={<label><span className="sr-only">Sort products</span><select className="jk-select" value={sort} onChange={(event) => { setSort(event.target.value); reset(); }}>{SORTS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>}
       bulkActions={[
         { label: "Set as active", onAction: (ids) => setStatusFor(ids, "ACTIVE") },
         { label: "Set as draft", onAction: (ids) => setStatusFor(ids, "DRAFT") },
         { label: "Archive", onAction: (ids) => setStatusFor(ids, "ARCHIVED") },
-        { label: "Add to collection", onAction: (ids) => setCollectionFor(ids) },
+        { label: "Add to collection", onAction: (ids) => { rememberFocus(); setCollectionFor(ids); } },
       ]}
       emptyState={filtered
         ? <EmptyState icon={Package} title="No matching products" description="Try another search, or choose All to see every product." />
@@ -106,7 +131,8 @@ export default function ProductsPage() {
         onNext: () => { setHistory((current) => [...current, cursor]); setCursor(next); },
       }}
     />
-    <Picker open={collectionFor !== null} onOpenChange={(open) => { if (!open) setCollectionFor(null); }} title="Add to collection" searchLabel="Search collections" multiple={false} doneLabel="Add products"
+    <ConfirmDialog open={Boolean(archiveTarget)} onOpenChange={open => { if (!open) setArchiveTarget(null); }} title={`Archive ${archiveTarget?.title ?? "product"}?`} description="This product will be hidden from your store. You can make it active again later." confirmLabel="Archive product" destructive className="product-overlay" overlayClassName="product-backdrop" onCloseAutoFocus={restoreFocus} onConfirm={async () => { if (archiveTarget) await setStatusFor([archiveTarget.id], "ARCHIVED"); }} />
+    <Picker className="product-overlay" overlayClassName="product-backdrop" onCloseAutoFocus={restoreFocus} open={collectionFor !== null} onOpenChange={(open) => { if (!open) setCollectionFor(null); }} title="Add to collection" searchLabel="Search collections" multiple={false} doneLabel="Add products"
       load={loadCollections} onDone={(picked) => { const ids = collectionFor ?? []; if (picked[0]) void addToCollection(ids, picked[0].id); }} />
-  </AdminPage>;
+  </AdminPage></ProductSurface>;
 }

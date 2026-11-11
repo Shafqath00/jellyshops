@@ -8,6 +8,7 @@ import type { ProductMetafields } from "../metafields/use-product-metafields";
 import { Section } from "./section-parts";
 
 type Props = {
+  collapsible?: boolean;
   state: ProductMetafields;
   context: InputContext;
   /** Seller can create fields only with permission; the server decides, so this just hides a button that would fail. */
@@ -15,12 +16,12 @@ type Props = {
 };
 
 /** Extra details about the product that are not part of the standard form: material, care, a size guide link... */
-export function MetafieldsSection({ state, context, canCreate = true }: Props) {
+export function MetafieldsSection({ state, context, canCreate = true, collapsible }: Props) {
   const [adding, setAdding] = useState(false);
   const { productDefinitions } = state;
 
   return (
-    <Section title="Custom data" hint="Extra details your theme can show, like material, care instructions or a size guide. Each field is set up once and used on every product.">
+    <Section collapsible={collapsible && !state.loading && productDefinitions.length === 0 && !state.loadError} summary="Add extra product details such as materials and care instructions." title="Custom data" hint="Extra details your theme can show, like material, care instructions or a size guide. Each field is set up once and used on every product.">
       {state.loading && <p role="status" className="text-[13px] text-muted-foreground">Loading custom fields…</p>}
       {state.loadError && <p role="alert" className="text-[13px] font-semibold text-destructive">{state.loadError}</p>}
 

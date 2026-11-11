@@ -31,11 +31,11 @@ export function BasicsSection({ draft, errors, onChange, onUpload, hidePhoto }: 
   }
 
   return (
-    <Section title="Product details">
-      <Field id="pb-title" label="Product name" error={errors.title}>
-        <input id="pb-title" className={inputClass} value={draft.title} aria-invalid={Boolean(errors.title)} aria-describedby={errors.title ? "pb-title-error" : undefined} placeholder="e.g. Classic cotton T-shirt" onChange={(event) => onChange("title", event.target.value)} />
+    <Section title="Product details" hint="Start with a clear name and a description that helps customers understand your product.">
+      <Field id="pb-title" label="Product name" required error={errors.title}>
+        <input id="pb-title" aria-required="true" className={inputClass} value={draft.title} aria-invalid={Boolean(errors.title)} aria-describedby={errors.title ? "pb-title-error" : undefined} placeholder="e.g. Classic cotton T-shirt" onChange={(event) => onChange("title", event.target.value)} />
       </Field>
-      <Field id="pb-description" label="Description">
+      <Field id="pb-description" label="Description" required={false}>
         <DescriptionEditor id="pb-description" value={draft.descriptionDoc ?? null} fallbackText={draft.description} onChange={(document, plainText) => { onChange("descriptionDoc", document); onChange("description", plainText); }} />
       </Field>
       {!hidePhoto && <div>

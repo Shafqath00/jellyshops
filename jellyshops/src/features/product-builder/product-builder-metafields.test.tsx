@@ -65,7 +65,7 @@ describe("custom data in the product editor", () => {
     await fillProduct(user);
     await user.type(await screen.findByLabelText("Material"), "Organic linen");
     await user.type(screen.getByLabelText("Rating"), "4");
-    await user.click(screen.getByRole("button", { name: /save product/i }));
+    await user.click(screen.getByRole("button", { name: /publish product/i }));
     expect(await screen.findByText("Product saved successfully")).toBeVisible();
     expect(puts()).toHaveLength(1);
     expect(puts()[0].body).toEqual({ ownerType: "product", ownerId: "canonical-product", values: { "def-material": "Organic linen", "def-rating": 4 } });
@@ -81,7 +81,7 @@ describe("custom data in the product editor", () => {
     render(<ShopProvider><ProductBuilder /></ShopProvider>);
     await fillProduct(user);
     await screen.findByLabelText("Material");
-    await user.click(screen.getByRole("button", { name: /save product/i }));
+    await user.click(screen.getByRole("button", { name: /publish product/i }));
     expect(await screen.findByText("Product saved successfully")).toBeVisible();
     expect(puts()).toHaveLength(0);
   });
@@ -92,7 +92,7 @@ describe("custom data in the product editor", () => {
     render(<ShopProvider><ProductBuilder /></ShopProvider>);
     await fillProduct(user);
     await user.type(await screen.findByLabelText("Rating"), "9");
-    await user.click(screen.getByRole("button", { name: /save product/i }));
+    await user.click(screen.getByRole("button", { name: /publish product/i }));
     const alerts = await screen.findAllByRole("alert");
     expect(alerts.map((alert) => alert.textContent).join(" ")).toContain("Your product was saved, but its custom data was not: Rating: Enter 5 or less.");
     expect(screen.queryByText("Product saved successfully")).not.toBeInTheDocument();
@@ -130,6 +130,7 @@ describe("custom data in the product editor", () => {
   it("explains that there are no custom fields yet", async () => {
     mockApi({ definitions: [] });
     render(<ShopProvider><ProductBuilder /></ShopProvider>);
+    await userEvent.setup().click(await screen.findByText("Add extra product details such as materials and care instructions."));
     expect(await screen.findByText(/No custom fields yet/)).toBeVisible();
     expect(screen.getByRole("button", { name: "Add custom field" })).toBeVisible();
   });
@@ -148,7 +149,7 @@ describe("custom data in the product editor", () => {
     render(<ShopProvider><ProductBuilder /></ShopProvider>);
     expect(await screen.findByText("Custom data is unavailable.")).toBeVisible();
     await fillProduct(user);
-    await user.click(screen.getByRole("button", { name: /save product/i }));
+    await user.click(screen.getByRole("button", { name: /publish product/i }));
     expect(await screen.findByText("Product saved successfully")).toBeVisible();
     await waitFor(() => expect(fetchMock.mock.calls.filter(([url, init]) => String(url).includes("/metafield-values") && (init as RequestInit | undefined)?.method === "PUT")).toHaveLength(0));
   });

@@ -3,9 +3,10 @@ import { useState, type ReactNode } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 
 /** Asks before something that cannot be undone. Name the item and the consequence in `description`. */
-export function ConfirmDialog({ open, onOpenChange, title, description, confirmLabel, destructive = false, onConfirm }: {
+export function ConfirmDialog({ open, onOpenChange, title, description, confirmLabel, destructive = false, onConfirm, className = "", overlayClassName = "", onCloseAutoFocus }: {
   open: boolean; onOpenChange: (open: boolean) => void; title: string; description: ReactNode; confirmLabel: string; destructive?: boolean;
   onConfirm: () => void | Promise<void>;
+  className?: string; overlayClassName?: string; onCloseAutoFocus?: React.ComponentProps<typeof DialogPrimitive.Content>["onCloseAutoFocus"];
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -17,8 +18,8 @@ export function ConfirmDialog({ open, onOpenChange, title, description, confirmL
   }
   return <DialogPrimitive.Root open={open} onOpenChange={(value) => { if (!busy) { setError(""); onOpenChange(value); } }}>
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="jk-overlay" />
-      <DialogPrimitive.Content className="jk-dialog" aria-describedby={undefined}>
+      <DialogPrimitive.Overlay className={`jk-overlay ${overlayClassName}`} />
+      <DialogPrimitive.Content className={`jk-dialog ${className}`} onCloseAutoFocus={onCloseAutoFocus} aria-describedby={undefined}>
         <DialogPrimitive.Title className="jk-dialog-title">{title}</DialogPrimitive.Title>
         <div className="jk-dialog-body">{description}{error && <p className="jk-field-error" role="alert">{error}</p>}</div>
         <div className="jk-dialog-footer">

@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatedDetails } from "../animated-details";
 import { Plus, Sparkles } from "lucide-react";
 import type { ProductOption } from "@/lib/domain";
 import { MAX_VARIANT_AXES, MAX_VARIANTS } from "@/lib/product-builder";
@@ -25,7 +26,7 @@ export function ChoicesSection({ options, templates, categoryName, limitError, o
   const update = (next: ProductOption) => onChange(options.map((option) => option.id === next.id ? next : option));
 
   return (
-    <Section title="Product options" hint="Add a size or colour when each version needs its own price or stock.">
+    <div className="product-options"><Section title="Product options" hint="Add a size or colour when each version needs its own price or stock.">
       {suggestions.length > 0 && (
         <div className="rounded-xl border border-accent/70 bg-accent/15 p-4">
           <p className="flex items-center gap-1.5 text-[13px] font-semibold text-foreground"><Sparkles size={14} />Suggested for {categoryName ?? "this category"}</p>
@@ -46,7 +47,7 @@ export function ChoicesSection({ options, templates, categoryName, limitError, o
           onMove={(direction) => onChange(moveChoice(options, option.id, direction))} />
       ); })}
 
-      <details className="rounded-lg border border-border p-3"><summary className="cursor-pointer text-[13px] font-medium">Customer customizations</summary><p className="my-2 text-xs text-muted-foreground">Offer materials, personalization or optional extras without separate stock.</p>{options.filter(option => option.type !== "variant").map(option => <ChoiceCard key={option.id} option={option} index={options.findIndex(item => item.id === option.id)} count={options.length} onChange={update} onRemove={() => onChange(options.filter(item => item.id !== option.id))} onMove={direction => onChange(moveChoice(options, option.id, direction))} />)}<button type="button" className="admin-button mt-3" onClick={() => add(newChoice(options.length, "configuration"))}>Add customization</button></details>
+      <AnimatedDetails className="rounded-lg border border-border p-3"><summary className="cursor-pointer text-[13px] font-medium">Customer customizations</summary><p className="my-2 text-xs text-muted-foreground">Offer materials, personalization or optional extras without separate stock.</p>{options.filter(option => option.type !== "variant").map(option => <ChoiceCard key={option.id} option={option} index={options.findIndex(item => item.id === option.id)} count={options.length} onChange={update} onRemove={() => onChange(options.filter(item => item.id !== option.id))} onMove={direction => onChange(moveChoice(options, option.id, direction))} />)}<button type="button" className="admin-button mt-3" onClick={() => add(newChoice(options.length, "configuration"))}>Add customization</button></AnimatedDetails>
 
       {limitError && <p role="alert" className="rounded-xl border border-destructive/25 bg-destructive/5 px-4 py-3 text-[12px] leading-5 text-destructive">{limitError} Try “Changes the price only” for choices that don&apos;t need separate stock.</p>}
       {axes > MAX_VARIANT_AXES && <p role="alert" className="rounded-xl border border-destructive/25 bg-destructive/5 px-4 py-3 text-[12px] leading-5 text-destructive">Stock can be tracked for at most {MAX_VARIANT_AXES} choices. Switch one to “Changes the price only”.</p>}
@@ -57,6 +58,6 @@ export function ChoicesSection({ options, templates, categoryName, limitError, o
         </button>
         {options.length > 0 && <span className="text-[12px] text-muted-foreground">Up to {MAX_VARIANTS} combinations can have their own stock.</span>}
       </div>
-    </Section>
+    </Section></div>
   );
 }

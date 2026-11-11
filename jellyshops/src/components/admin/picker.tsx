@@ -7,10 +7,11 @@ import { TableSkeleton } from "./feedback";
 export type PickerItem = { id: string; label: string; detail?: string; media?: ReactNode };
 
 /** Searchable modal to pick products, collections, customers or files. `load` is called as the merchant types. */
-export function Picker({ open, onOpenChange, title, searchLabel, load, multiple = true, initialSelection = [], onDone, doneLabel = "Done" }: {
+export function Picker({ open, onOpenChange, title, searchLabel, load, multiple = true, initialSelection = [], onDone, doneLabel = "Done", className = "", overlayClassName = "", onCloseAutoFocus }: {
   open: boolean; onOpenChange: (open: boolean) => void; title: string; searchLabel: string;
   load: (query: string) => Promise<PickerItem[]>; multiple?: boolean; initialSelection?: string[];
   onDone: (items: PickerItem[]) => void; doneLabel?: string;
+  className?: string; overlayClassName?: string; onCloseAutoFocus?: React.ComponentProps<typeof DialogPrimitive.Content>["onCloseAutoFocus"];
 }) {
   const [query, setQuery] = useState("");
   const [items, setItems] = useState<PickerItem[] | null>(null);
@@ -41,8 +42,8 @@ export function Picker({ open, onOpenChange, title, searchLabel, load, multiple 
   }
   return <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="jk-overlay" />
-      <DialogPrimitive.Content className="jk-dialog jk-dialog-wide" aria-describedby={undefined}>
+      <DialogPrimitive.Overlay className={`jk-overlay ${overlayClassName}`} />
+      <DialogPrimitive.Content className={`jk-dialog jk-dialog-wide ${className}`} onCloseAutoFocus={onCloseAutoFocus} aria-describedby={undefined}>
         <DialogPrimitive.Title className="jk-dialog-title">{title}</DialogPrimitive.Title>
         <label className="jk-search"><Search size={16} aria-hidden="true" /><input type="search" aria-label={searchLabel} placeholder={searchLabel} value={query} onChange={(event) => setQuery(event.target.value)} autoFocus /></label>
         <div className="jk-picker-list">

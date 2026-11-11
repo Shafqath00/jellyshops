@@ -5,6 +5,7 @@ import { inputClass } from "@/features/commerce/components/product-form-styles";
 import { Section } from "./section-parts";
 
 type Props = {
+  collapsible?: boolean;
   fields: PersonalisationField[];
   onChange: (fields: PersonalisationField[]) => void;
 };
@@ -17,14 +18,14 @@ const toMinor = (text: string) => {
 };
 
 /** Text the shopper types for each item: engraving, a name to print, a gift message or measurements. */
-export function PersonalisationSection({ fields, onChange }: Props) {
+export function PersonalisationSection({ fields, onChange, collapsible }: Props) {
   const update = (index: number, patch: Partial<PersonalisationField>) => onChange(fields.map((field, position) => position === index ? { ...field, ...patch } : field));
   const remove = (index: number) => onChange(fields.filter((_, position) => position !== index));
   const add = () => onChange([...fields, { id: newId(), label: "", required: false, maxLength: 30 }]);
   // The builder moves focus here when a field still has no name.
   const firstMissing = fields.findIndex((field) => !field.label.trim());
   return (
-    <Section title="Personalisation" hint="Ask shoppers for text with each item, such as an engraving, a name to print or a gift message. It appears on the order.">
+    <Section collapsible={collapsible} defaultOpen={fields.length > 0} summary={fields.length ? `${fields.length} personalisation field${fields.length === 1 ? "" : "s"} configured` : "Ask customers for an engraving, gift message or other text."} title="Personalisation" hint="Ask shoppers for text with each item, such as an engraving, a name to print or a gift message. It appears on the order.">
       {fields.length === 0 && <p className="text-[13px] text-muted-foreground">No personalisation. Shoppers buy this product as it is.</p>}
       <ol className="space-y-3">
         {fields.map((field, index) => {

@@ -5,6 +5,7 @@ import { inputClass } from "@/features/commerce/components/product-form-styles";
 import { Section } from "./section-parts";
 
 type Props = {
+  collapsible?: boolean;
   rule: QuantityRule | null;
   onChange: (rule: QuantityRule | null) => void;
 };
@@ -15,7 +16,7 @@ const read = (text: string): number | undefined => {
 };
 
 /** Quantity rules: a minimum order, steps (sold in sixes) and a most per order, for each size or colour. */
-export function QuantityRuleSection({ rule, onChange }: Props) {
+export function QuantityRuleSection({ rule, onChange, collapsible }: Props) {
   const current = rule ?? { min: 1, step: 1 };
   const problems = rule ? quantityRuleProblems(rule) : [];
   const set = (patch: Partial<QuantityRule>) => {
@@ -25,7 +26,7 @@ export function QuantityRuleSection({ rule, onChange }: Props) {
   };
   const summary = rule && !problems.length ? quantityRuleText(rule) : "";
   return (
-    <Section title="Quantity rules" hint="Set a minimum order, sell in steps (for example packs of 6) or limit how many one shopper can buy. They apply to each size or colour.">
+    <Section collapsible={collapsible} defaultOpen={Boolean(rule)} summary={summary || "Set minimum quantities, packs or purchase limits."} title="Quantity rules" hint="Set a minimum order, sell in steps (for example packs of 6) or limit how many one shopper can buy. They apply to each size or colour.">
       <div className="grid gap-3 sm:grid-cols-3">
         <div>
           <label htmlFor="pb-quantity-min" className="text-[13px] font-semibold text-foreground">Minimum order</label>
