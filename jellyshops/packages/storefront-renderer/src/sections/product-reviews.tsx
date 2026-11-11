@@ -107,7 +107,8 @@ export function ProductReviewsSection({ context, section }: { context: Storefron
     setData((current) => ({ ...current, reviews: [...current.reviews, ...page.reviews] }));
     setMore(page.reviews.length >= perPage);
   };
-  return <section className="jelly-section jelly-product-reviews" aria-busy={access && !loaded ? true : undefined}>
+  // id "reviews": the Rating line and themes link here ("Read reviews").
+  return <section id="reviews" className="jelly-section jelly-product-reviews" aria-busy={access && !loaded ? true : undefined}>
     <StorefrontContainer>
       <h2>{heading}</h2>
       <div className="jelly-reviews-layout">

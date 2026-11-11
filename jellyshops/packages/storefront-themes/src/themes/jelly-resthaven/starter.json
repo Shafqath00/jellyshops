@@ -14,31 +14,144 @@
           },
           "children": [
             {
-              "id": "resthaven-menu-divan",
-              "label": "Divan beds",
+              "id": "resthaven-menu-1",
+              "label": "Bed types",
               "target": {
                 "kind": "external",
-                "url": "/search?q=Divan%20beds"
+                "url": "/shop"
               },
-              "children": []
+              "children": [
+                {
+                  "id": "resthaven-menu-2",
+                  "label": "Divan beds",
+                  "target": {
+                    "kind": "external",
+                    "url": "/search?q=Divan%20beds"
+                  },
+                  "children": []
+                },
+                {
+                  "id": "resthaven-menu-3",
+                  "label": "Ottoman beds",
+                  "target": {
+                    "kind": "external",
+                    "url": "/search?q=Ottoman%20beds"
+                  },
+                  "children": []
+                },
+                {
+                  "id": "resthaven-menu-4",
+                  "label": "Upholstered beds",
+                  "target": {
+                    "kind": "external",
+                    "url": "/search?q=Upholstered%20beds"
+                  },
+                  "children": []
+                },
+                {
+                  "id": "resthaven-menu-5",
+                  "label": "Bed frames",
+                  "target": {
+                    "kind": "external",
+                    "url": "/search?q=Bed%20frame"
+                  },
+                  "children": []
+                }
+              ]
             },
             {
-              "id": "resthaven-menu-ottoman",
-              "label": "Ottoman beds",
+              "id": "resthaven-menu-6",
+              "label": "Bed sizes",
+              "target": {
+                "kind": "external",
+                "url": "/shop"
+              },
+              "children": [
+                {
+                  "id": "resthaven-menu-7",
+                  "label": "Single",
+                  "target": {
+                    "kind": "external",
+                    "url": "/search?q=Single"
+                  },
+                  "children": []
+                },
+                {
+                  "id": "resthaven-menu-8",
+                  "label": "Small double",
+                  "target": {
+                    "kind": "external",
+                    "url": "/search?q=Small%20double"
+                  },
+                  "children": []
+                },
+                {
+                  "id": "resthaven-menu-9",
+                  "label": "Double",
+                  "target": {
+                    "kind": "external",
+                    "url": "/search?q=Double"
+                  },
+                  "children": []
+                },
+                {
+                  "id": "resthaven-menu-10",
+                  "label": "King",
+                  "target": {
+                    "kind": "external",
+                    "url": "/search?q=King"
+                  },
+                  "children": []
+                },
+                {
+                  "id": "resthaven-menu-11",
+                  "label": "Super king",
+                  "target": {
+                    "kind": "external",
+                    "url": "/search?q=Super%20king"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "resthaven-menu-12",
+              "label": "Main bedroom",
+              "target": {
+                "kind": "external",
+                "url": "/search?q=Beds"
+              },
+              "children": [],
+              "image": {
+                "url": "/themes/jelly-resthaven/bedroom.png",
+                "alt": "A calm main bedroom with an upholstered bed"
+              }
+            },
+            {
+              "id": "resthaven-menu-13",
+              "label": "Guest room",
               "target": {
                 "kind": "external",
                 "url": "/search?q=Ottoman%20beds"
               },
-              "children": []
+              "children": [],
+              "image": {
+                "url": "/themes/jelly-resthaven/bedroom.png",
+                "alt": "A guest room with a storage bed"
+              }
             },
             {
-              "id": "resthaven-menu-upholstered",
-              "label": "Upholstered beds",
+              "id": "resthaven-menu-14",
+              "label": "Kids room",
               "target": {
                 "kind": "external",
-                "url": "/search?q=Upholstered%20beds"
+                "url": "/search?q=Single"
               },
-              "children": []
+              "children": [],
+              "image": {
+                "url": "/themes/jelly-resthaven/bedroom.png",
+                "alt": "A bright children's bedroom"
+              }
             }
           ]
         },
@@ -106,7 +219,9 @@
         "showToolLabels": true,
         "extraLinkLabel": "Help choosing",
         "extraLink": "/pages/faq",
-        "extraLinkIcon": "phone"
+        "extraLinkIcon": "phone",
+        "menuStyle": "mega",
+        "megaPhotoShape": "landscape"
       },
       "blocks": []
     },
@@ -543,7 +658,8 @@
               "reviewCount": 0,
               "text": "from {count} reviews",
               "linkLabel": "Read reviews",
-              "contentAlignment": "center"
+              "contentAlignment": "center",
+              "source": "reviews"
             }
           }
         },
@@ -735,6 +851,20 @@
         {
           "kind": "inline",
           "section": {
+            "id": "resthaven-home-recently-viewed",
+            "type": "recently-viewed",
+            "enabled": true,
+            "settings": {
+              "heading": "Recently viewed",
+              "limit": 4,
+              "columns": 4
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
             "id": "studio-newsletter",
             "type": "newsletter",
             "enabled": true,
@@ -811,12 +941,29 @@
         {
           "kind": "inline",
           "section": {
+            "id": "resthaven-product-rating-summary",
+            "type": "rating-summary",
+            "enabled": true,
+            "settings": {
+              "source": "reviews",
+              "text": "from {count} reviews",
+              "linkLabel": "Read reviews",
+              "link": "#reviews",
+              "contentAlignment": "left"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
             "id": "studio-options",
             "type": "product-options",
             "enabled": true,
             "settings": {
               "style": "tabs",
-              "tileColumns": 3
+              "tileColumns": 3,
+              "showFamily": true
             },
             "blocks": []
           }
@@ -921,8 +1068,38 @@
             "id": "resthaven-product-specs",
             "type": "product-specifications",
             "settings": {
-              "heading": "Dimensions and details"
+              "heading": "Dimensions and details",
+              "hideMeasurements": true
             }
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "resthaven-product-product-dimensions",
+            "type": "product-dimensions",
+            "enabled": true,
+            "settings": {
+              "heading": "Dimensions",
+              "unit": "cm",
+              "showUnitSwitch": true,
+              "note": "Measurements can vary by up to 2 cm."
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "resthaven-product-product-reviews",
+            "type": "product-reviews",
+            "enabled": true,
+            "settings": {
+              "heading": "Customer reviews",
+              "allowWriting": true,
+              "perPage": 5
+            },
+            "blocks": []
           }
         },
         {
@@ -932,6 +1109,20 @@
             "type": "related-products",
             "enabled": true,
             "settings": {},
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "resthaven-product-recently-viewed",
+            "type": "recently-viewed",
+            "enabled": true,
+            "settings": {
+              "heading": "Recently viewed",
+              "limit": 4,
+              "columns": 4
+            },
             "blocks": []
           }
         },
@@ -1032,7 +1223,12 @@
             "type": "collection-product-grid",
             "enabled": true,
             "settings": {
-              "columns": 3
+              "columns": 3,
+              "listLayout": "sidebar",
+              "showFilters": true,
+              "showSort": true,
+              "limit": 24,
+              "filterNames": ""
             },
             "blocks": []
           }
@@ -1101,6 +1297,20 @@
               "showIcons": true,
               "colorScheme": "dark"
             }
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "resthaven-collection-recently-viewed",
+            "type": "recently-viewed",
+            "enabled": true,
+            "settings": {
+              "heading": "Recently viewed",
+              "limit": 4,
+              "columns": 4
+            },
+            "blocks": []
           }
         },
         {
@@ -1184,6 +1394,20 @@
             "type": "cart-summary",
             "enabled": true,
             "settings": {},
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "resthaven-cart-recently-viewed",
+            "type": "recently-viewed",
+            "enabled": true,
+            "settings": {
+              "heading": "You recently looked at",
+              "limit": 4,
+              "columns": 4
+            },
             "blocks": []
           }
         },
