@@ -7,7 +7,7 @@ import { axeOnStyledCopy, describeViolations } from "./fixtures/styled-copy";
  * including colour contrast (which the jsdom tests cannot check).
  */
 const pages = [
-  { tab: "Home", text: "Your best sleep starts here" },
+  { tab: "Home", text: "Sleep well. Wake up somewhere beautiful." },
   { tab: "Collection", text: "Upholstered beds" },
   { tab: "Product", text: "Harbour upholstered bed" },
   { tab: "Cart", text: "Your bag" },

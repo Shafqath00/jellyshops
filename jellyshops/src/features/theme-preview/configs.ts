@@ -150,10 +150,10 @@ export const jellyResthavenPreview: ThemePreviewConfig = {
   name: "Resthaven",
   stageColor: "#e9e3da",
   guide: {
-    heading: "Your best sleep starts here",
-    subheading: "New and trending",
+    heading: "Sleep well. Wake up somewhere beautiful.",
+    subheading: "Our most-loved beds",
     body: "Headings are set in Cormorant Garamond and body text in Figtree. Oat backgrounds, midnight buttons, brass highlights and clear prices keep the focus on the beds.",
-    announcement: "Find the bed and mattress that fit your space and your sleep",
+    announcement: "Beds and mattresses in every size, from single to super king",
     footerText: "Beds, mattresses and help choosing the right one for your room.",
   },
   products: resthavenProducts,

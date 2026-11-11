@@ -200,7 +200,7 @@
       "type": "announcement-bar",
       "enabled": true,
       "settings": {
-        "text": "Find the bed and mattress that fit your space and your sleep"
+        "text": "Beds and mattresses in every size, from single to super king"
       },
       "blocks": []
     },
@@ -381,67 +381,11 @@
         {
           "kind": "inline",
           "section": {
-            "blocks": [
-              {
-                "id": "resthaven-trust-row-1",
-                "type": "trust-point",
-                "enabled": true,
-                "settings": {
-                  "text": "Secure checkout",
-                  "icon": "shield"
-                },
-                "blocks": []
-              },
-              {
-                "id": "resthaven-trust-row-2",
-                "type": "trust-point",
-                "enabled": true,
-                "settings": {
-                  "text": "Delivery details on every bed",
-                  "icon": "truck",
-                  "link": "/pages/shipping"
-                },
-                "blocks": []
-              },
-              {
-                "id": "resthaven-trust-row-3",
-                "type": "trust-point",
-                "enabled": true,
-                "settings": {
-                  "text": "Clear returns information",
-                  "icon": "return",
-                  "link": "/pages/returns"
-                },
-                "blocks": []
-              },
-              {
-                "id": "resthaven-trust-row-4",
-                "type": "trust-point",
-                "enabled": true,
-                "settings": {
-                  "text": "Help choosing your size",
-                  "icon": "phone",
-                  "link": "/pages/faq"
-                },
-                "blocks": []
-              }
-            ],
-            "enabled": true,
-            "id": "resthaven-trust-row",
-            "type": "trust-strip",
-            "settings": {
-              "layout": "row",
-              "showIcons": true
-            }
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
             "id": "studio-hero",
             "type": "hero",
             "enabled": true,
             "settings": {
+              "eyebrow": "The bedroom collection",
               "contentAlignment": "left",
               "styleAlign": "left",
               "image": {
@@ -464,7 +408,15 @@
                 "type": "heading",
                 "enabled": true,
                 "settings": {
-                  "text": "Your best sleep starts here"
+                  "text": "Sleep well. Wake up somewhere beautiful."
+                }
+              },
+              {
+                "id": "resthaven-hero-text",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "Upholstered beds, divans and mattresses for real bedrooms, in the size, fabric and storage you choose."
                 }
               },
               {
@@ -472,8 +424,8 @@
                 "type": "button",
                 "enabled": true,
                 "settings": {
-                  "label": "Divan beds",
-                  "href": "/search?q=Divan%20beds"
+                  "label": "Shop beds",
+                  "href": "/shop"
                 }
               },
               {
@@ -481,17 +433,61 @@
                 "type": "button",
                 "enabled": true,
                 "settings": {
-                  "label": "Ottoman beds",
-                  "href": "/search?q=Ottoman%20beds"
+                  "label": "Find your mattress",
+                  "href": "/search?q=Mattresses",
+                  "buttonStyle": "secondary"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "resthaven-trust-row",
+            "type": "trust-strip",
+            "enabled": true,
+            "settings": {
+              "layout": "row",
+              "showIcons": true
+            },
+            "blocks": [
+              {
+                "id": "resthaven-trust-row-1",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Sizes from single to super king",
+                  "icon": "home"
                 }
               },
               {
-                "id": "resthaven-hero-action-2",
-                "type": "button",
+                "id": "resthaven-trust-row-2",
+                "type": "trust-point",
                 "enabled": true,
                 "settings": {
-                  "label": "Mattresses",
-                  "href": "/search?q=Mattresses"
+                  "text": "Delivery details on every bed",
+                  "icon": "truck",
+                  "link": "/pages/shipping"
+                }
+              },
+              {
+                "id": "resthaven-trust-row-3",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Clear returns information",
+                  "icon": "return",
+                  "link": "/pages/returns"
+                }
+              },
+              {
+                "id": "resthaven-trust-row-4",
+                "type": "trust-point",
+                "enabled": true,
+                "settings": {
+                  "text": "Secure checkout",
+                  "icon": "shield"
                 }
               }
             ]
@@ -501,27 +497,82 @@
           "kind": "inline",
           "section": {
             "id": "resthaven-categories",
-            "type": "jelly-resthaven/categories",
+            "type": "category-grid",
             "enabled": true,
             "settings": {
-              "photo0": {
-                "url": "/themes/jelly-resthaven/divan.webp",
-                "alt": "A charcoal velvet divan bed with a storage drawer open"
-              },
-              "photo1": {
-                "url": "/themes/jelly-resthaven/room-guest.webp",
-                "alt": "A grey ottoman bed with its base lifted to show the storage"
-              },
-              "photo2": {
-                "url": "/themes/jelly-resthaven/mattress.webp",
-                "alt": "A cut-away corner of a pocket sprung hybrid mattress showing its layers"
-              },
-              "photo3": {
-                "url": "/themes/jelly-resthaven/headboard.webp",
-                "alt": "A tall terracotta velvet headboard with channel stitching"
-              }
+              "heading": "Shop by category",
+              "text": "Every bed lists its exact sizes, fabrics and storage, so you can choose with confidence.",
+              "layout": "bento",
+              "columns": 4,
+              "imageRatio": "portrait"
             },
-            "blocks": []
+            "blocks": [
+              {
+                "id": "resthaven-category-upholstered",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "Upholstered beds",
+                  "image": {
+                    "url": "/themes/jelly-resthaven/room-main.webp",
+                    "alt": "A sage velvet bed with a winged headboard in a main bedroom"
+                  },
+                  "link": "/search?q=Upholstered%20beds"
+                }
+              },
+              {
+                "id": "resthaven-category-divan",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "Divan beds",
+                  "image": {
+                    "url": "/themes/jelly-resthaven/divan.webp",
+                    "alt": "A charcoal velvet divan bed with a storage drawer open"
+                  },
+                  "link": "/search?q=Divan%20beds"
+                }
+              },
+              {
+                "id": "resthaven-category-ottoman",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "Ottoman beds",
+                  "image": {
+                    "url": "/themes/jelly-resthaven/room-guest.webp",
+                    "alt": "A grey ottoman bed with its base lifted to show the storage"
+                  },
+                  "link": "/search?q=Ottoman%20beds"
+                }
+              },
+              {
+                "id": "resthaven-category-mattresses",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "Mattresses",
+                  "image": {
+                    "url": "/themes/jelly-resthaven/mattress.webp",
+                    "alt": "A cut-away corner of a pocket sprung hybrid mattress showing its layers"
+                  },
+                  "link": "/search?q=Mattresses"
+                }
+              },
+              {
+                "id": "resthaven-category-headboards",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "Headboards",
+                  "image": {
+                    "url": "/themes/jelly-resthaven/headboard.webp",
+                    "alt": "A rust velvet headboard with tall vertical panels"
+                  },
+                  "link": "/search?q=Headboards"
+                }
+              }
+            ]
           }
         },
         {
@@ -531,8 +582,9 @@
             "type": "product-grid",
             "enabled": true,
             "settings": {
-              "heading": "New & trending",
-              "contentAlignment": "center",
+              "heading": "Our most-loved beds",
+              "text": "Customer favourites, ready to make your own.",
+              "contentAlignment": "left",
               "limit": 8,
               "columns": 4,
               "emptyMessage": "Your beds and mattresses will appear here when you add products.",
@@ -545,106 +597,182 @@
         {
           "kind": "inline",
           "section": {
+            "id": "resthaven-storage-story",
+            "type": "image-with-text",
+            "enabled": true,
+            "settings": {
+              "eyebrow": "Storage beds",
+              "image": {
+                "url": "/themes/jelly-resthaven/room-guest.webp",
+                "alt": "A guest room with a grey ottoman storage bed, its base lifted"
+              },
+              "imagePosition": "left",
+              "styleScheme": "scheme2"
+            },
             "blocks": [
               {
-                "id": "resthaven-trust-scroll-1",
-                "type": "trust-point",
+                "id": "resthaven-storage-title",
+                "type": "heading",
                 "enabled": true,
                 "settings": {
-                  "text": "Sizes from single to super king",
-                  "icon": "home"
-                },
-                "blocks": []
+                  "text": "Room for everything, hidden beautifully"
+                }
               },
               {
-                "id": "resthaven-trust-scroll-2",
-                "type": "trust-point",
+                "id": "resthaven-storage-text",
+                "type": "text",
                 "enabled": true,
                 "settings": {
-                  "text": "Choose your colour and fabric",
-                  "icon": "palette"
-                },
-                "blocks": []
+                  "text": "Lift-up ottomans and divans with drawers keep bedding, cases and the things you need close at hand, out of sight."
+                }
               },
               {
-                "id": "resthaven-trust-scroll-3",
-                "type": "trust-point",
+                "id": "resthaven-storage-action",
+                "type": "button",
                 "enabled": true,
                 "settings": {
-                  "text": "Storage options to suit your room",
-                  "icon": "gift"
-                },
-                "blocks": []
-              },
-              {
-                "id": "resthaven-trust-scroll-4",
-                "type": "trust-point",
-                "enabled": true,
-                "settings": {
-                  "text": "Secure checkout",
-                  "icon": "shield"
-                },
-                "blocks": []
-              },
-              {
-                "id": "resthaven-trust-scroll-5",
-                "type": "trust-point",
-                "enabled": true,
-                "settings": {
-                  "text": "Friendly help before and after you buy",
-                  "icon": "phone"
-                },
-                "blocks": []
+                  "label": "Shop storage beds",
+                  "href": "/search?q=Ottoman%20beds"
+                }
               }
-            ],
-            "enabled": true,
-            "id": "resthaven-trust-scroll",
-            "type": "trust-strip",
-            "settings": {
-              "layout": "scroll",
-              "speed": "normal",
-              "showIcons": true,
-              "colorScheme": "dark"
-            }
+            ]
           }
         },
         {
           "kind": "inline",
           "section": {
-            "id": "resthaven-bed-feature",
-            "type": "image-with-text",
+            "id": "resthaven-steps",
+            "type": "multicolumn",
             "enabled": true,
             "settings": {
-              "image": {
-                "url": "/themes/jelly-resthaven/room-main.webp",
-                "alt": "A sage velvet bed with a winged headboard in a main bedroom"
-              },
-              "imagePosition": "left"
+              "heading": "Choosing your bed, made simple",
+              "text": "Four decisions, and every one of them is on the product page.",
+              "columns": 4,
+              "contentAlignment": "left",
+              "styleScheme": "scheme4"
             },
             "blocks": [
               {
-                "id": "resthaven-bed-feature-heading",
+                "id": "resthaven-step-1",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "Pick your size",
+                  "text": "From single to super king, with exact measurements for every frame."
+                }
+              },
+              {
+                "id": "resthaven-step-2",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "Choose your fabric",
+                  "text": "Velvets, boucles and linens in colours for every room."
+                }
+              },
+              {
+                "id": "resthaven-step-3",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "Add storage",
+                  "text": "Drawers, a lift-up ottoman or a clean, simple base."
+                }
+              },
+              {
+                "id": "resthaven-step-4",
+                "type": "column",
+                "enabled": true,
+                "settings": {
+                  "heading": "Settle in",
+                  "text": "Check the delivery details before you order, then enjoy the first night."
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "resthaven-fabric-story",
+            "type": "image-with-text",
+            "enabled": true,
+            "settings": {
+              "eyebrow": "Fabrics",
+              "image": {
+                "url": "/themes/jelly-resthaven/fabrics.webp",
+                "alt": "Velvet, boucle and linen fabric swatches laid out on a wooden table"
+              },
+              "imagePosition": "right"
+            },
+            "blocks": [
+              {
+                "id": "resthaven-fabric-title",
                 "type": "heading",
                 "enabled": true,
                 "settings": {
-                  "text": "Make room for a better night"
+                  "text": "Velvets, boucles and linens you will want to touch"
                 }
               },
               {
-                "id": "resthaven-bed-feature-body",
+                "id": "resthaven-fabric-text",
                 "type": "text",
                 "enabled": true,
                 "settings": {
-                  "text": "A comfortable place to unwind, with a style that feels at home. Explore beds with practical details and room for your everyday life."
+                  "text": "Every bed comes in a choice of soft-touch fabrics and colours, so it fits the room you already love."
                 }
               },
               {
-                "id": "resthaven-bed-feature-button",
+                "id": "resthaven-fabric-action",
                 "type": "button",
                 "enabled": true,
                 "settings": {
-                  "label": "Explore the collection",
-                  "href": "/shop"
+                  "label": "Explore upholstered beds",
+                  "href": "/search?q=Upholstered%20beds"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "resthaven-mattress-feature",
+            "type": "image-with-text",
+            "enabled": true,
+            "settings": {
+              "eyebrow": "Mattresses",
+              "image": {
+                "url": "/themes/jelly-resthaven/mattress.webp",
+                "alt": "A cut-away corner of a pocket sprung hybrid mattress showing its layers"
+              },
+              "imagePosition": "left",
+              "styleScheme": "scheme3"
+            },
+            "blocks": [
+              {
+                "id": "resthaven-mattress-title",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "Find your kind of comfort"
+                }
+              },
+              {
+                "id": "resthaven-mattress-text",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "From a firmer feel to a softer landing, every mattress lists its firmness and layers so you can compare at a glance."
+                }
+              },
+              {
+                "id": "resthaven-mattress-action",
+                "type": "button",
+                "enabled": true,
+                "settings": {
+                  "label": "Compare mattresses",
+                  "href": "/search?q=Mattresses"
                 }
               }
             ]
@@ -658,7 +786,7 @@
             "id": "resthaven-rating",
             "type": "rating-summary",
             "settings": {
-              "heading": "Rated by our customers",
+              "heading": "Loved by our customers",
               "rating": 0,
               "reviewCount": 0,
               "text": "from {count} reviews",
@@ -671,183 +799,48 @@
         {
           "kind": "inline",
           "section": {
-            "blocks": [],
-            "enabled": true,
-            "id": "resthaven-gallery",
-            "type": "image-gallery",
-            "settings": {
-              "heading": "Bedrooms we love",
-              "text": "Share your photos with us and we may feature your bedroom here.",
-              "layout": "scroll",
-              "columns": 4,
-              "ratio": "portrait"
-            }
-          }
-        },
-        {
-          "section": {
-            "settings": {
-              "columns": 3,
-              "heading": "How it works",
-              "contentAlignment": "center"
-            },
-            "blocks": [
-              {
-                "id": "resthaven-step-1",
-                "type": "column",
-                "enabled": true,
-                "settings": {
-                  "heading": "1. Choose your bed",
-                  "text": "Pick a style and size that fits your bedroom."
-                },
-                "blocks": []
-              },
-              {
-                "id": "resthaven-step-2",
-                "type": "column",
-                "enabled": true,
-                "settings": {
-                  "heading": "2. Make it yours",
-                  "text": "Choose the colour, storage and headboard on each bed."
-                },
-                "blocks": []
-              },
-              {
-                "id": "resthaven-step-3",
-                "type": "column",
-                "enabled": true,
-                "settings": {
-                  "heading": "3. Settle in",
-                  "text": "Check the delivery details, then get ready for a better night."
-                },
-                "blocks": []
-              }
-            ],
-            "type": "multicolumn",
-            "id": "resthaven-shopping",
-            "enabled": true
-          },
-          "kind": "inline"
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "resthaven-mattress-feature",
-            "type": "image-with-text",
-            "enabled": true,
-            "settings": {
-              "image": {
-                "url": "/themes/jelly-resthaven/mattress.webp",
-                "alt": "A cut-away corner of a pocket sprung hybrid mattress showing its layers"
-              },
-              "imagePosition": "right"
-            },
-            "blocks": [
-              {
-                "id": "resthaven-mattress-feature-heading",
-                "type": "heading",
-                "enabled": true,
-                "settings": {
-                  "text": "Find your kind of comfort"
-                }
-              },
-              {
-                "id": "resthaven-mattress-feature-body",
-                "type": "text",
-                "enabled": true,
-                "settings": {
-                  "text": "From a firmer feel to a softer landing, discover mattress options designed around different sleep preferences."
-                }
-              },
-              {
-                "id": "resthaven-mattress-feature-button",
-                "type": "button",
-                "enabled": true,
-                "settings": {
-                  "label": "Explore the collection",
-                  "href": "/shop"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "resthaven-benefits",
-            "type": "multicolumn",
-            "enabled": true,
-            "settings": {
-              "heading": "Comfort, considered",
-              "columns": 3,
-              "contentAlignment": "center"
-            },
-            "blocks": [
-              {
-                "id": "resthaven-benefit-choice",
-                "type": "column",
-                "enabled": true,
-                "settings": {
-                  "heading": "A bed for your space",
-                  "text": "Explore upholstered styles, clever storage and sizes for every bedroom."
-                }
-              },
-              {
-                "id": "resthaven-benefit-comfort",
-                "type": "column",
-                "enabled": true,
-                "settings": {
-                  "heading": "Comfort your way",
-                  "text": "Compare mattress options and find the support that suits you."
-                }
-              },
-              {
-                "id": "resthaven-benefit-help",
-                "type": "column",
-                "enabled": true,
-                "settings": {
-                  "heading": "Here to help",
-                  "text": "Contact our team for product details and help choosing your next bed."
-                }
-              }
-            ]
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
             "id": "resthaven-faq",
             "type": "faq",
             "enabled": true,
             "settings": {
-              "heading": "Before you settle in"
+              "heading": "Before you buy",
+              "text": "Answers to the questions we hear most. Still unsure? Our team is happy to help."
             },
             "blocks": [
               {
-                "id": "resthaven-faq-size",
+                "id": "resthaven-faq-1",
                 "type": "faq-item",
                 "enabled": true,
                 "settings": {
                   "question": "How do I choose the right size?",
-                  "answer": "Measure your room and check the dimensions shown on the product page. Leave space around the bed for movement and storage access."
+                  "answer": "Measure your room and check the dimensions shown on the product page. Leave space around the bed to walk and to open drawers or an ottoman lift."
                 }
               },
               {
-                "id": "resthaven-faq-options",
+                "id": "resthaven-faq-2",
                 "type": "faq-item",
                 "enabled": true,
                 "settings": {
                   "question": "Can I choose a different fabric or storage option?",
-                  "answer": "Available choices are listed on each product page. Contact the store if you need help comparing options."
+                  "answer": "The fabrics, colours and storage choices for each bed are listed on its product page. Contact the store if you would like help comparing them."
                 }
               },
               {
-                "id": "resthaven-faq-delivery",
+                "id": "resthaven-faq-3",
+                "type": "faq-item",
+                "enabled": true,
+                "settings": {
+                  "question": "Is the mattress included with a bed?",
+                  "answer": "Each product page says what is included. Beds and mattresses are usually sold separately, so you can pair the comfort you prefer."
+                }
+              },
+              {
+                "id": "resthaven-faq-4",
                 "type": "faq-item",
                 "enabled": true,
                 "settings": {
                   "question": "Where can I find delivery and returns information?",
-                  "answer": "Check the delivery and returns information provided by this store, or contact the team before ordering."
+                  "answer": "See the delivery and returns pages linked at the foot of every page, or contact the team before ordering."
                 }
               }
             ]
@@ -865,33 +858,6 @@
               "columns": 4
             },
             "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "studio-newsletter",
-            "type": "newsletter",
-            "enabled": true,
-            "settings": {},
-            "blocks": [
-              {
-                "id": "studio-newsletter-title",
-                "type": "heading",
-                "enabled": true,
-                "settings": {
-                  "text": "Stay inspired"
-                }
-              },
-              {
-                "id": "studio-newsletter-text",
-                "type": "text",
-                "enabled": true,
-                "settings": {
-                  "text": "Receive updates from our store."
-                }
-              }
-            ]
           }
         },
         {

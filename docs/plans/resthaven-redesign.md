@@ -43,10 +43,10 @@ Measured on `/theme-preview/jelly-resthaven` (1280px and 390px):
 
 ## Phases
 
-1. **Design system and shared pieces** – theme settings defaults and styles, the stylesheet rebuilt in ordered parts
+1. **Design system and shared pieces** (done 2026-11-11) – theme settings defaults and styles, the stylesheet rebuilt in ordered parts
    on the platform section defaults (tokens, type, buttons, fields, badges), announcement, header, large menu, phone
    menu, footer, product card, style guide. Remove the old patches.
-2. **Home page** – new starter order: hero with promise cards, shop by category (bento tiles with "From £"), best
+2. **Home page** (done 2026-11-11) – new starter order: hero with promise cards, shop by category (bento tiles with "From £"), best
    sellers, shop by room, mattress story, reviews, sleep guides and help, newsletter in the footer only.
 3. **Collection and search** – banner header, filter sidebar and phone filter drawer look, toolbar, empty states.
 4. **Product page** – gallery, buying box (rating, title, price and savings, finance line, size and colour tiles,

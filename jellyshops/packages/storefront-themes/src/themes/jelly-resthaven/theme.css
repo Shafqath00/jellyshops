@@ -14,12 +14,16 @@
  */
 
 /* ── 1 Tokens ───────────────────────────────────────────────────────── */
-& {
+/* Colour shortcuts are declared again on every section frame, so they follow that section's colour scheme
+   (a custom property built from another is worked out where it is declared). */
+&, [data-section-frame] {
   --rh-ink: var(--j-color-text);
   --rh-muted: var(--j-color-muted);
   --rh-line: color-mix(in srgb, var(--j-color-text) 13%, transparent);
   --rh-line-strong: color-mix(in srgb, var(--j-color-text) 28%, transparent);
   --rh-wash: color-mix(in srgb, var(--j-color-text) 5%, transparent);
+}
+& {
   --rh-brass: var(--theme-accent);
   --rh-sale: var(--jelly-badge-bg, #a3422c);
   --rh-radius: 4px;
@@ -260,6 +264,26 @@ label { font-size: 14px; }
 [data-section-type="jelly-resthaven/categories"] .jelly-block-group .jelly-button::after { content: "→"; font-family: var(--theme-font-body); font-size: 18px; }
 [data-section-type="jelly-resthaven/categories"] h2 { text-align: left; }
 
+/* Category tiles (Collection list): photos with the name in a pill; Bento makes the first tile large. */
+.jelly-category-grid .jelly-section-intro { max-width: 640px; }
+.jelly-category-grid-items { display: grid; grid-template-columns: repeat(var(--jelly-columns, 4), minmax(0, 1fr)); gap: 20px; }
+.jelly-category-card { position: relative; display: block; min-width: 0; overflow: hidden; border-radius: var(--rh-radius); color: var(--j-color-text); text-decoration: none; }
+.jelly-category-card-media { display: block; overflow: hidden; border-radius: var(--rh-radius); background: var(--rh-wash); }
+.jelly-category-card-media img { display: block; width: 100%; height: 100%; aspect-ratio: 4 / 5; object-fit: cover; transition: transform var(--j-duration-slow, 600ms) var(--rh-ease); }
+.jelly-category-grid[data-image-ratio="square"] .jelly-category-card-media img { aspect-ratio: 1; }
+.jelly-category-card:hover .jelly-category-card-media img { transform: scale(1.04); }
+.jelly-category-card > strong {
+  position: absolute; left: 16px; bottom: 16px; display: inline-flex; align-items: center; gap: 10px; max-width: calc(100% - 32px); padding: 10px 18px;
+  border-radius: 999px; background: var(--j-color-surface); color: var(--j-color-text); font-family: var(--theme-font-body); font-size: 15px; font-weight: 600; letter-spacing: 0; line-height: 1.25; white-space: nowrap;
+  box-shadow: 0 8px 24px -16px color-mix(in srgb, var(--j-color-text) 60%, transparent);
+}
+.jelly-category-card > strong::after { content: "→"; transition: transform var(--j-duration-fast, 160ms) var(--rh-ease); }
+.jelly-category-card:hover > strong::after { transform: translateX(3px); }
+.jelly-category-card:focus-visible { outline-offset: 4px; }
+.jelly-category-grid[data-layout="bento"] .jelly-category-card:first-child > strong { left: 24px; bottom: 24px; padding: 14px 22px; font-size: 17px; }
+.jelly-category-grid[data-layout="bento"] .jelly-category-card:first-child .jelly-category-card-media { height: 100%; }
+.jelly-category-grid[data-layout="bento"] .jelly-category-card:first-child .jelly-category-card-media img { aspect-ratio: auto; }
+
 /* Image with text: photo and copy side by side; the copy column is narrow and vertically centred. */
 .jelly-image-text-layout { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 96px); align-items: center; }
 .jelly-image-text-media { min-height: 0; border-radius: var(--rh-radius); }
@@ -276,13 +300,15 @@ label { font-size: 14px; }
 .jelly-multicolumn p { color: var(--rh-muted); }
 .jelly-multicolumn img { border-radius: var(--rh-radius); }
 
-/* Rating summary: a calm line of stars. */
-.jelly-rating-summary { text-align: center; }
+/* Rating summary: a calm line of stars in a compact band. */
+.jelly-rating-summary { padding-block: clamp(40px, 5vw, 64px); text-align: center; }
 .jelly-rating-summary-heading { margin-bottom: 12px; }
 .jelly-rating-line { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 12px; font-size: 15px; }
 .jelly-rating-stars { font-size: 18px; }
 
-/* Questions (FAQ): ruled rows with a plus that turns into a minus. */
+/* Questions (FAQ): the intro on the left, ruled rows with a plus that turns into a minus on the right. */
+.jelly-faq-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr); gap: 24px clamp(32px, 6vw, 96px); align-items: start; }
+.jelly-faq-layout > .jelly-section-intro { position: sticky; top: 24px; margin-bottom: 0; }
 .jelly-faq-list { border-top: 1px solid var(--rh-line-strong); }
 .jelly-faq details { border-bottom: 1px solid var(--rh-line-strong); }
 .jelly-faq summary { position: relative; display: block; padding: 22px 48px 22px 0; font-size: 17px; font-weight: 600; cursor: pointer; list-style: none; }
@@ -511,6 +537,9 @@ label { font-size: 14px; }
 
 /* ── 15 Phones and tablets ──────────────────────────────────────────── */
 @media (max-width: 1023px) {
+  .jelly-category-card > strong, .jelly-category-grid[data-layout="bento"] .jelly-category-card:first-child > strong { left: 10px; bottom: 10px; max-width: calc(100% - 20px); padding: 8px 14px; font-size: 13px; }
+  .jelly-trust-strip[data-layout="row"] ul { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; padding-inline: 2px; scrollbar-width: none; }
+  .jelly-trust-strip[data-layout="row"] li { flex: none; white-space: nowrap; }
   .jelly-product-grid-items { grid-template-columns: repeat(min(var(--jelly-columns, 4), 3), minmax(0, 1fr)); }
   [data-section-type="jelly-resthaven/categories"] .jelly-custom-content-inner > .jelly-block-group { gap: 16px; }
   [data-section-type="jelly-resthaven/categories"] .jelly-block-group .jelly-button { font-size: 20px; }
@@ -531,14 +560,14 @@ label { font-size: 14px; }
   .jelly-image-text[data-image-position="right"] .jelly-image-text-media { order: 0; }
   :is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > [data-section-type="rating-summary"] .jelly-rating-summary { padding-top: 20px; }
   .jelly-specifications-list { grid-template-columns: minmax(0, 1fr); }
+  .jelly-faq-layout { grid-template-columns: minmax(0, 1fr); }
+  .jelly-faq-layout > .jelly-section-intro { position: static; }
 }
 @media (max-width: 767px) {
   & { --rh-section: 56px; }
   .jelly-announcement { font-size: 12px; padding-block: 8px; }
   .jelly-header.jelly-header { padding-top: 12px; row-gap: 10px; }
   .jelly-header-brand { font-size: 26px; }
-  .jelly-trust-strip[data-layout="row"] ul { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; padding-inline: 2px; scrollbar-width: none; }
-  .jelly-trust-strip[data-layout="row"] li { flex: none; white-space: nowrap; }
   .jelly-product-grid-items { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 14px; }
   .jelly-product-card-body { padding-top: 12px; }
   .jelly-product-card-body h3, .jelly-product-card [data-card-part="title"], .jelly-review h3, .jelly-product-reviews h3, .jelly-multicolumn h3 { font-size: 15px; }
@@ -551,6 +580,8 @@ label { font-size: 14px; }
   .jelly-hero-actions { display: grid; grid-template-columns: minmax(0, 1fr); align-self: stretch; width: 100%; }
   .jelly-hero-actions .jelly-button { width: 100%; }
   [data-section-type="jelly-resthaven/categories"] .jelly-custom-content-inner > .jelly-block-group { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 14px; }
+  .jelly-category-grid-items { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .jelly-category-grid[data-layout="bento"] .jelly-category-card:first-child .jelly-category-card-media img { aspect-ratio: 4 / 3; }
   [data-section-type="jelly-resthaven/categories"] .jelly-block-group .jelly-button { font-size: 19px; }
   .jelly-multicolumn-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .jelly-footer { padding-top: 56px; gap: 40px; }

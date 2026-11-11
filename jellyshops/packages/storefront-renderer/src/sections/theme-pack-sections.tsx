@@ -30,9 +30,10 @@ function copy(section: SectionNode, fallbackHeading: string, editor = false) {
   const body = visible.find((block) => block.type === "text");
   const button = visible.find((block) => block.type === "button");
   return {
-    heading: stringSetting(heading?.settings ?? section.settings, "text", stringSetting(section.settings, "heading", fallbackHeading)),
+    // Without a heading block the heading is the section's own "heading" setting (never its "text", which is the intro).
+    heading: heading ? stringSetting(heading.settings, "text", stringSetting(section.settings, "heading", fallbackHeading)) : stringSetting(section.settings, "heading", fallbackHeading),
     /** The heading with its formatting (bold, italic, links, colour, size) when the heading block has it. */
-    headingContent: inlineSetting(heading?.settings, "text", stringSetting(heading?.settings ?? section.settings, "text", stringSetting(section.settings, "heading", fallbackHeading))),
+    headingContent: heading ? inlineSetting(heading.settings, "text", stringSetting(heading.settings, "text", stringSetting(section.settings, "heading", fallbackHeading))) : stringSetting(section.settings, "heading", fallbackHeading),
     body: stringSetting(body?.settings ?? section.settings, "text", stringSetting(section.settings, "text")),
     button: stringSetting(button?.settings ?? section.settings, "label"),
     href: stringSetting(button?.settings ?? section.settings, "href", "/shop"),
