@@ -1,4 +1,5 @@
 import type { PublicProduct } from "@jelly/storefront-renderer";
+import { productFilterValues } from "@jelly/storefront-schema";
 import { formatMoney, type Currency, type Product } from "@/lib/domain";
 import { isVariantBuyable, variantMaxQuantity } from "@/lib/variant-stock";
 
@@ -25,13 +26,21 @@ export function quickAddFor(product: Product): { quickAdd?: { variantId: string;
   return { quickAdd: { variantId: variant.id, max: Math.min(variantMaxQuantity(variant), 99) } };
 }
 
+/** The variant a card shows: the cheapest one still for sale, else the cheapest (variants arrive in no particular order). */
+export function cardVariant(product: Pick<Product, "variants">): Product["variants"][number] | undefined {
+  const cheapest = (list: Product["variants"]) => list.reduce<Product["variants"][number] | undefined>((best, item) => !best || item.priceMinor < best.priceMinor ? item : best, undefined);
+  return cheapest(product.variants.filter(isVariantBuyable)) ?? cheapest(product.variants);
+}
+
 export function productCardData(product: Product, href: string, currency: Currency): PublicProduct {
-  const variant = product.variants[0];
+  const variant = cardVariant(product);
   const priceMinor = variant?.priceMinor ?? 0;
   const compareMinor = variant?.compareAtPriceMinor ?? product.compareAtPriceMinor;
   const discounted = typeof compareMinor === "number" && compareMinor > priceMinor && priceMinor >= 0;
   const chip = productCardChip(product.tags);
   const colours = productCardSwatches(product);
+  const filters = productFilterValues({ options: product.options, variantOptions: product.variants.map((item) => item.options), tags: product.tags, vendor: product.vendor, productType: product.productType });
+  const hoverImageUrl = productHoverImage(product);
   return {
     id: product.id,
     name: product.name,
@@ -49,7 +58,19 @@ export function productCardData(product: Product, href: string, currency: Curren
     ...(chip ? { chip } : {}),
     ...(product.vendor?.trim() ? { vendor: product.vendor.trim().slice(0, 60) } : {}),
     ...colours,
+    ...(filters.length ? { filters } : {}),
+    ...(hoverImageUrl ? { hoverImageUrl } : {}),
   };
+}
+
+/** Photo addresses a card may load: http(s) (media from a local API is http) or a path on this site. */
+const PHOTO_URL = /^(https?:\/\/|\/(?!\/))[^\s"'<>()\\]+$/;
+
+/** The second photo of a product, shown when the shopper points at its card. */
+export function productHoverImage(product: Pick<Product, "imageUrl" | "media">): string | undefined {
+  // The first photo is the card's own picture; the next one is shown on hover.
+  const second = [...(product.media ?? [])].sort((a, b) => (a.position ?? 0) - (b.position ?? 0))[1]?.url;
+  return typeof second === "string" && PHOTO_URL.test(second) && second !== product.imageUrl ? second : undefined;
 }
 
 const HEX = /^#[0-9a-fA-F]{6}$/;

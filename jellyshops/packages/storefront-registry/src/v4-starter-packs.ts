@@ -14,6 +14,8 @@ export interface StarterMenuItem {
   label: string;
   /** `external` takes a full https address or a path in the store ("/search?q=Beds"), which the header puts under the store's address. */
   target: { kind: "home" } | { kind: "search" } | { kind: "external"; url: string } | { kind: "anchor"; anchor: string };
+  /** Optional photo, drawn as a tile in the mega menu. */
+  image?: { url: string; alt?: string };
   children: StarterMenuItem[];
 }
 

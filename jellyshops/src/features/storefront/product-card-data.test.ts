@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Product } from "@/lib/domain";
-import { productCardChip, productCardData, productCardSwatches, quickAddFor } from "./product-card-data";
+import { cardVariant, productCardChip, productCardData, productCardSwatches, quickAddFor } from "./product-card-data";
 
 const product = (over: Partial<Product> = {}, variant: Partial<Product["variants"][number]> = {}) => ({
   id: "p1", name: "Oslo bed", slug: "oslo-bed", imageUrl: "https://cdn.test/oslo.jpg", tags: [],
@@ -54,5 +54,35 @@ describe("quick add on cards", () => {
     const twoVariants = product();
     twoVariants.variants.push({ ...twoVariants.variants[0], id: "v2" });
     expect(quickAddFor(twoVariants)).toEqual({});
+  });
+});
+
+describe("filters and hover photo on cards", () => {
+  it("adds the product's filters and its second photo", () => {
+    const data = productCardData(product({
+      vendor: "Hush", productType: "Bed", tags: ["Fabric:Velvet", "label:New"],
+      options: [{ id: "size", name: "Size", position: 0, values: [{ id: "k", label: "King" }] }] as unknown as Product["options"],
+      media: [{ id: "m2", url: "https://cdn.test/oslo-room.jpg", position: 1 }, { id: "m1", url: "https://cdn.test/oslo.jpg", position: 0 }],
+    }), "/x", "GBP");
+    expect(data.filters).toEqual([{ name: "Size", values: ["King"] }, { name: "Fabric", values: ["Velvet"] }, { name: "Brand", values: ["Hush"] }, { name: "Type", values: ["Bed"] }]);
+    expect(data.hoverImageUrl).toBe("https://cdn.test/oslo-room.jpg");
+  });
+
+  it("has no hover photo with one photo or an unsafe address", () => {
+    expect(productCardData(product({ media: [{ id: "m1", url: "https://cdn.test/oslo.jpg", position: 0 }] }), "/x", "GBP").hoverImageUrl).toBeUndefined();
+    expect(productCardData(product({ media: [{ id: "m1", url: "https://cdn.test/oslo.jpg", position: 0 }, { id: "m2", url: "javascript:alert(1)", position: 1 }] }), "/x", "GBP").hoverImageUrl).toBeUndefined();
+  });
+});
+
+describe("card variant", () => {
+  it("shows the cheapest variant for sale, whatever order the variants arrive in", () => {
+    const bed = product({}, {});
+    bed.variants = [
+      { ...bed.variants[0], id: "king", priceMinor: 54900, compareAtPriceMinor: 74900 },
+      { ...bed.variants[0], id: "double", priceMinor: 49900, compareAtPriceMinor: 69900 },
+      { ...bed.variants[0], id: "single", priceMinor: 29900, stock: 0, trackInventory: true } as Product["variants"][number],
+    ];
+    expect(cardVariant(bed)?.id).toBe("double");
+    expect(productCardData(bed, "/x", "GBP")).toMatchObject({ price: "£499.00", compareAtPrice: "£699.00" });
   });
 });

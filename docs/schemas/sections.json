@@ -2038,6 +2038,47 @@
           "visibleWhenSaved": true
         },
         {
+          "type": "segmented",
+          "key": "menuStyle",
+          "label": "Menu style",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Dropdown lists",
+              "value": "dropdown"
+            },
+            {
+              "label": "Large menu",
+              "value": "mega"
+            }
+          ],
+          "description": "Large menu opens a full-width panel: links with links inside become columns, and links with a photo become picture tiles (add photos in Content > Menus)."
+        },
+        {
+          "type": "segmented",
+          "key": "megaPhotoShape",
+          "label": "Photo shape in the large menu",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Wide",
+              "value": "landscape"
+            },
+            {
+              "label": "Square",
+              "value": "square"
+            },
+            {
+              "label": "Tall",
+              "value": "portrait"
+            }
+          ],
+          "showWhen": {
+            "key": "menuStyle",
+            "equals": "mega"
+          }
+        },
+        {
           "type": "checkbox",
           "key": "showToolLabels",
           "label": "Show words next to the icons",
@@ -2535,6 +2576,21 @@
           "deliveryNote": {
             "type": "string",
             "maxLength": 60
+          },
+          "menuStyle": {
+            "type": "string",
+            "enum": [
+              "dropdown",
+              "mega"
+            ]
+          },
+          "megaPhotoShape": {
+            "type": "string",
+            "enum": [
+              "landscape",
+              "square",
+              "portrait"
+            ]
           },
           "showToolLabels": {
             "type": "boolean"
@@ -12220,6 +12276,7 @@
       ],
       "allowedBlockTypes": [],
       "defaultSettings": {
+        "source": "manual",
         "rating": 4.8,
         "reviewCount": 0,
         "text": "from {count} reviews",
@@ -12248,13 +12305,35 @@
           ]
         },
         {
+          "type": "segmented",
+          "key": "source",
+          "label": "Where the numbers come from",
+          "description": "Your store's reviews: the product's own reviews on a product page, all published reviews elsewhere. Hidden until there is a review.",
+          "group": "content",
+          "options": [
+            {
+              "label": "Typed by you",
+              "value": "manual"
+            },
+            {
+              "label": "Your store's reviews",
+              "value": "reviews"
+            }
+          ]
+        },
+        {
           "type": "number",
           "key": "rating",
           "label": "Average rating (0 to 5)",
           "group": "content",
           "min": 0,
           "max": 5,
-          "step": 0.1
+          "step": 0.1,
+          "showWhen": {
+            "key": "source",
+            "equals": "manual"
+          },
+          "visibleWhenSaved": true
         },
         {
           "type": "number",
@@ -12264,7 +12343,12 @@
           "group": "content",
           "min": 0,
           "max": 10000000,
-          "step": 1
+          "step": 1,
+          "showWhen": {
+            "key": "source",
+            "equals": "manual"
+          },
+          "visibleWhenSaved": true
         },
         {
           "type": "text",
@@ -12547,6 +12631,13 @@
           "heading": {
             "type": "string",
             "maxLength": 120
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "reviews"
+            ]
           },
           "rating": {
             "type": "number",
@@ -15750,6 +15841,14 @@
           "group": "layout"
         },
         {
+          "type": "text",
+          "key": "badgeText",
+          "label": "Label on the photo",
+          "description": "A short promise shown over the main photo, for example 60-night trial. Leave empty for none.",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
           "type": "segmented",
           "key": "imageFit",
           "label": "Image fit",
@@ -15803,6 +15902,10 @@
       "settingsSchema": {
         "type": "object",
         "properties": {
+          "badgeText": {
+            "type": "string",
+            "maxLength": 40
+          },
           "imageFit": {
             "default": "cover",
             "type": "string",
@@ -16977,11 +17080,22 @@
           "min": 2,
           "max": 4,
           "step": 1
+        },
+        {
+          "type": "checkbox",
+          "key": "showFamily",
+          "label": "Link other colours of this product",
+          "description": "Products that share a tag like family:ascot show as colour swatches that open each other. The colour name comes from a Colour:Natural tag or the product's colour option.",
+          "group": "content",
+          "defaultValue": true
         }
       ],
       "settingsSchema": {
         "type": "object",
         "properties": {
+          "showFamily": {
+            "type": "boolean"
+          },
           "style": {
             "default": "buttons",
             "type": "string",
@@ -17421,6 +17535,383 @@
           },
           "startOpen": {
             "type": "boolean"
+          },
+          "el_heading_color": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_font": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Fraunces",
+                  "Inter",
+                  "Playfair Display",
+                  "Cormorant Garamond",
+                  "Lora",
+                  "EB Garamond",
+                  "Libre Baskerville",
+                  "DM Serif Display",
+                  "Crimson Pro",
+                  "Manrope",
+                  "DM Sans",
+                  "Work Sans",
+                  "Montserrat",
+                  "Outfit",
+                  "Plus Jakarta Sans",
+                  "Nunito Sans",
+                  "Raleway",
+                  "Space Grotesk",
+                  "Josefin Sans",
+                  "Figtree",
+                  "Jost",
+                  "Poppins",
+                  "Hind",
+                  "Oswald",
+                  "Bebas Neue",
+                  "Syne",
+                  "IBM Plex Mono",
+                  "Georgia",
+                  "Arial"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_size": {
+            "type": "integer",
+            "minimum": 12,
+            "maximum": 120
+          },
+          "el_heading_weight": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "300",
+                  "400",
+                  "500",
+                  "600",
+                  "700"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_align": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "recently-viewed",
+      "category": "commerce",
+      "supportedPages": [
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "not-found"
+      ],
+      "allowedRegions": [
+        "template"
+      ],
+      "allowedBlockTypes": [],
+      "defaultSettings": {
+        "limit": 4,
+        "columns": 4,
+        "heading": "Recently viewed"
+      },
+      "defaultBlocks": [],
+      "responsiveFields": [],
+      "presets": [],
+      "controls": [
+        {
+          "type": "text",
+          "key": "heading",
+          "label": "Heading",
+          "group": "content",
+          "maxLength": 120
+        },
+        {
+          "type": "range",
+          "key": "limit",
+          "label": "Products to show",
+          "description": "Shoppers see the products they opened most recently, newest first. Hidden until they have opened one.",
+          "group": "layout",
+          "min": 1,
+          "max": 12,
+          "step": 1
+        },
+        {
+          "type": "range",
+          "key": "columns",
+          "label": "Columns on desktop",
+          "group": "layout",
+          "min": 2,
+          "max": 4,
+          "step": 1
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "color",
+          "key": "el_heading_color",
+          "label": "Colour",
+          "allowAlpha": false
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_font",
+          "label": "Font",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Fraunces",
+              "value": "Fraunces"
+            },
+            {
+              "label": "Inter",
+              "value": "Inter"
+            },
+            {
+              "label": "Playfair Display",
+              "value": "Playfair Display"
+            },
+            {
+              "label": "Cormorant Garamond",
+              "value": "Cormorant Garamond"
+            },
+            {
+              "label": "Lora",
+              "value": "Lora"
+            },
+            {
+              "label": "EB Garamond",
+              "value": "EB Garamond"
+            },
+            {
+              "label": "Libre Baskerville",
+              "value": "Libre Baskerville"
+            },
+            {
+              "label": "DM Serif Display",
+              "value": "DM Serif Display"
+            },
+            {
+              "label": "Crimson Pro",
+              "value": "Crimson Pro"
+            },
+            {
+              "label": "Manrope",
+              "value": "Manrope"
+            },
+            {
+              "label": "DM Sans",
+              "value": "DM Sans"
+            },
+            {
+              "label": "Work Sans",
+              "value": "Work Sans"
+            },
+            {
+              "label": "Montserrat",
+              "value": "Montserrat"
+            },
+            {
+              "label": "Outfit",
+              "value": "Outfit"
+            },
+            {
+              "label": "Plus Jakarta Sans",
+              "value": "Plus Jakarta Sans"
+            },
+            {
+              "label": "Nunito Sans",
+              "value": "Nunito Sans"
+            },
+            {
+              "label": "Raleway",
+              "value": "Raleway"
+            },
+            {
+              "label": "Space Grotesk",
+              "value": "Space Grotesk"
+            },
+            {
+              "label": "Josefin Sans",
+              "value": "Josefin Sans"
+            },
+            {
+              "label": "Figtree",
+              "value": "Figtree"
+            },
+            {
+              "label": "Jost",
+              "value": "Jost"
+            },
+            {
+              "label": "Poppins",
+              "value": "Poppins"
+            },
+            {
+              "label": "Hind",
+              "value": "Hind"
+            },
+            {
+              "label": "Oswald",
+              "value": "Oswald"
+            },
+            {
+              "label": "Bebas Neue",
+              "value": "Bebas Neue"
+            },
+            {
+              "label": "Syne",
+              "value": "Syne"
+            },
+            {
+              "label": "IBM Plex Mono",
+              "value": "IBM Plex Mono"
+            },
+            {
+              "label": "Georgia",
+              "value": "Georgia"
+            },
+            {
+              "label": "Arial",
+              "value": "Arial"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "range",
+          "key": "el_heading_size",
+          "label": "Text size",
+          "min": 12,
+          "max": 120,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_weight",
+          "label": "Weight",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Light",
+              "value": "300"
+            },
+            {
+              "label": "Regular",
+              "value": "400"
+            },
+            {
+              "label": "Medium",
+              "value": "500"
+            },
+            {
+              "label": "Semibold",
+              "value": "600"
+            },
+            {
+              "label": "Bold",
+              "value": "700"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_align",
+          "label": "Alignment",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Centre",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "default": 4,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "columns": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 4
+          },
+          "heading": {
+            "type": "string",
+            "maxLength": 120
           },
           "el_heading_color": {
             "anyOf": [
@@ -18402,9 +18893,17 @@
         {
           "type": "checkbox",
           "key": "showFilters",
-          "label": "Let shoppers filter by availability, price and colour",
+          "label": "Let shoppers filter products",
           "group": "content",
           "defaultValue": true
+        },
+        {
+          "type": "text",
+          "key": "filterNames",
+          "label": "Filters to show",
+          "description": "Names of your product options or tag groups, separated by commas, in the order you want (for example Size, Colour, Fabric). Tags written Fabric:Velvet make a Fabric filter. Leave empty to show every filter.",
+          "group": "content",
+          "maxLength": 300
         },
         {
           "type": "select",
@@ -18457,6 +18956,10 @@
           },
           "showFilters": {
             "type": "boolean"
+          },
+          "filterNames": {
+            "type": "string",
+            "maxLength": 300
           },
           "listLayout": {
             "type": "string",
@@ -18568,9 +19071,17 @@
         {
           "type": "checkbox",
           "key": "showFilters",
-          "label": "Let shoppers filter by availability, price and colour",
+          "label": "Let shoppers filter products",
           "group": "content",
           "defaultValue": true
+        },
+        {
+          "type": "text",
+          "key": "filterNames",
+          "label": "Filters to show",
+          "description": "Names of your product options or tag groups, separated by commas, in the order you want (for example Size, Colour, Fabric). Tags written Fabric:Velvet make a Fabric filter. Leave empty to show every filter.",
+          "group": "content",
+          "maxLength": 300
         },
         {
           "type": "range",
@@ -18590,6 +19101,10 @@
           },
           "showFilters": {
             "type": "boolean"
+          },
+          "filterNames": {
+            "type": "string",
+            "maxLength": 300
           },
           "columns": {
             "type": "integer",
@@ -18779,6 +19294,13 @@
           "type": "checkbox",
           "key": "showProductSpecifications",
           "label": "Show the specifications entered on each product",
+          "group": "content"
+        },
+        {
+          "type": "checkbox",
+          "key": "hideMeasurements",
+          "label": "Leave out measurements",
+          "description": "Use this when the page also has a Dimensions section, so sizes are not listed twice.",
           "group": "content"
         },
         {
@@ -19019,12 +19541,423 @@
           "showProductSpecifications": {
             "type": "boolean"
           },
+          "hideMeasurements": {
+            "type": "boolean"
+          },
           "layout": {
             "type": "string",
             "enum": [
               "table",
               "expandable"
             ]
+          },
+          "el_heading_color": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_font": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Fraunces",
+                  "Inter",
+                  "Playfair Display",
+                  "Cormorant Garamond",
+                  "Lora",
+                  "EB Garamond",
+                  "Libre Baskerville",
+                  "DM Serif Display",
+                  "Crimson Pro",
+                  "Manrope",
+                  "DM Sans",
+                  "Work Sans",
+                  "Montserrat",
+                  "Outfit",
+                  "Plus Jakarta Sans",
+                  "Nunito Sans",
+                  "Raleway",
+                  "Space Grotesk",
+                  "Josefin Sans",
+                  "Figtree",
+                  "Jost",
+                  "Poppins",
+                  "Hind",
+                  "Oswald",
+                  "Bebas Neue",
+                  "Syne",
+                  "IBM Plex Mono",
+                  "Georgia",
+                  "Arial"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_size": {
+            "type": "integer",
+            "minimum": 12,
+            "maximum": 120
+          },
+          "el_heading_weight": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "300",
+                  "400",
+                  "500",
+                  "600",
+                  "700"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "el_heading_align": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "product-dimensions",
+      "category": "commerce",
+      "supportedPages": [
+        "product"
+      ],
+      "allowedRegions": [
+        "template"
+      ],
+      "allowedBlockTypes": [],
+      "defaultSettings": {
+        "heading": "Dimensions",
+        "unit": "cm",
+        "showUnitSwitch": true,
+        "note": ""
+      },
+      "defaultBlocks": [],
+      "responsiveFields": [],
+      "presets": [],
+      "controls": [
+        {
+          "type": "text",
+          "key": "heading",
+          "label": "Heading",
+          "group": "content",
+          "maxLength": 120
+        },
+        {
+          "type": "image",
+          "key": "diagram",
+          "label": "Diagram",
+          "description": "A drawing with letters A, B, C… that match the measurements, in the order they are listed in the product's specifications.",
+          "group": "content"
+        },
+        {
+          "type": "text",
+          "key": "note",
+          "label": "Note under the measurements",
+          "description": "For example: Allow 2 cm either way.",
+          "group": "content",
+          "maxLength": 200
+        },
+        {
+          "type": "segmented",
+          "key": "unit",
+          "label": "Show first in",
+          "group": "layout",
+          "options": [
+            {
+              "label": "cm",
+              "value": "cm"
+            },
+            {
+              "label": "Inches",
+              "value": "in"
+            }
+          ]
+        },
+        {
+          "type": "checkbox",
+          "key": "showUnitSwitch",
+          "label": "Let shoppers switch between cm and inches",
+          "group": "layout"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "color",
+          "key": "el_heading_color",
+          "label": "Colour",
+          "allowAlpha": false
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_font",
+          "label": "Font",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Fraunces",
+              "value": "Fraunces"
+            },
+            {
+              "label": "Inter",
+              "value": "Inter"
+            },
+            {
+              "label": "Playfair Display",
+              "value": "Playfair Display"
+            },
+            {
+              "label": "Cormorant Garamond",
+              "value": "Cormorant Garamond"
+            },
+            {
+              "label": "Lora",
+              "value": "Lora"
+            },
+            {
+              "label": "EB Garamond",
+              "value": "EB Garamond"
+            },
+            {
+              "label": "Libre Baskerville",
+              "value": "Libre Baskerville"
+            },
+            {
+              "label": "DM Serif Display",
+              "value": "DM Serif Display"
+            },
+            {
+              "label": "Crimson Pro",
+              "value": "Crimson Pro"
+            },
+            {
+              "label": "Manrope",
+              "value": "Manrope"
+            },
+            {
+              "label": "DM Sans",
+              "value": "DM Sans"
+            },
+            {
+              "label": "Work Sans",
+              "value": "Work Sans"
+            },
+            {
+              "label": "Montserrat",
+              "value": "Montserrat"
+            },
+            {
+              "label": "Outfit",
+              "value": "Outfit"
+            },
+            {
+              "label": "Plus Jakarta Sans",
+              "value": "Plus Jakarta Sans"
+            },
+            {
+              "label": "Nunito Sans",
+              "value": "Nunito Sans"
+            },
+            {
+              "label": "Raleway",
+              "value": "Raleway"
+            },
+            {
+              "label": "Space Grotesk",
+              "value": "Space Grotesk"
+            },
+            {
+              "label": "Josefin Sans",
+              "value": "Josefin Sans"
+            },
+            {
+              "label": "Figtree",
+              "value": "Figtree"
+            },
+            {
+              "label": "Jost",
+              "value": "Jost"
+            },
+            {
+              "label": "Poppins",
+              "value": "Poppins"
+            },
+            {
+              "label": "Hind",
+              "value": "Hind"
+            },
+            {
+              "label": "Oswald",
+              "value": "Oswald"
+            },
+            {
+              "label": "Bebas Neue",
+              "value": "Bebas Neue"
+            },
+            {
+              "label": "Syne",
+              "value": "Syne"
+            },
+            {
+              "label": "IBM Plex Mono",
+              "value": "IBM Plex Mono"
+            },
+            {
+              "label": "Georgia",
+              "value": "Georgia"
+            },
+            {
+              "label": "Arial",
+              "value": "Arial"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "range",
+          "key": "el_heading_size",
+          "label": "Text size",
+          "min": 12,
+          "max": 120,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_weight",
+          "label": "Weight",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Light",
+              "value": "300"
+            },
+            {
+              "label": "Regular",
+              "value": "400"
+            },
+            {
+              "label": "Medium",
+              "value": "500"
+            },
+            {
+              "label": "Semibold",
+              "value": "600"
+            },
+            {
+              "label": "Bold",
+              "value": "700"
+            }
+          ]
+        },
+        {
+          "group": "style",
+          "heading": "Style",
+          "element": "heading",
+          "type": "select",
+          "key": "el_heading_align",
+          "label": "Alignment",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": ""
+            },
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Centre",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "heading": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "cm",
+              "in"
+            ]
+          },
+          "showUnitSwitch": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "diagram": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
           },
           "el_heading_color": {
             "anyOf": [

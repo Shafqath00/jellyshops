@@ -29,6 +29,16 @@
       ],
       "port": 3210,
       "autoPort": false
+    },
+    {
+      "name": "jellyshops-backend",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd backend && set PORT=3001&& set CORS_ORIGINS=http://localhost:3210,http://127.0.0.1:3210,https://jellyshop.vercel.app&& node --import tsx src/server.ts"
+      ],
+      "port": 3001,
+      "autoPort": false
     }
   ]
 }

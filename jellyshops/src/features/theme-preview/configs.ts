@@ -133,17 +133,17 @@ export const jellyAvenuePreview: ThemePreviewConfig = {
   cart: { a4: 1, a3: 2 },
 };
 
-const bedroom = "/themes/jelly-resthaven/bedroom.png";
+const resthavenPhoto = (name: string) => `/themes/jelly-resthaven/${name}.webp`;
 const resthavenProducts: PublicProduct[] = [
-  { id: "r1", name: "Harbour upholstered bed", price: "£499.00", compareAtPrice: "£699.00", saving: "£200.00", discountPercent: 29, chip: "More colours", href: "#", imageUrl: bedroom },
-  { id: "r2", name: "Linden ottoman bed", price: "£649.00", href: "#", imageUrl: bedroom },
-  { id: "r3", name: "Calder divan set", price: "£429.00", compareAtPrice: "£529.00", saving: "£100.00", discountPercent: 19, href: "#", imageUrl: bedroom },
-  { id: "r4", name: "Hollis pocket sprung mattress", price: "£359.00", chip: "Medium firm", href: "#", imageUrl: bedroom },
-  { id: "r5", name: "Ashby headboard", price: "£149.00", href: "#", imageUrl: bedroom },
-  { id: "r6", name: "Merrow hybrid mattress", price: "£549.00", href: "#", imageUrl: bedroom },
+  { id: "r1", name: "Harbour upholstered bed", price: "£499.00", priceMinor: 49900, available: true, filters: [{ name: "Size", values: ["Double","King","Super king"] }, { name: "Storage", values: ["No storage", "2 drawers"] }, { name: "Fabric", values: ["Velvet", "Boucle"] }, { name: "Type", values: ["Upholstered bed"] }], compareAtPrice: "£699.00", saving: "£200.00", discountPercent: 29, chip: "More colours", href: "#", imageUrl: resthavenPhoto("hero"), hoverImageUrl: resthavenPhoto("detail") },
+  { id: "r2", name: "Linden ottoman bed", price: "£649.00", priceMinor: 64900, available: true, filters: [{ name: "Size", values: ["Double","King"] }, { name: "Storage", values: ["Ottoman lift"] }, { name: "Fabric", values: ["Linen"] }, { name: "Type", values: ["Ottoman bed"] }], href: "#", imageUrl: resthavenPhoto("room-guest") },
+  { id: "r3", name: "Calder divan set", price: "£429.00", priceMinor: 42900, available: false, filters: [{ name: "Size", values: ["Single","Double"] }, { name: "Storage", values: ["No storage", "2 drawers", "4 drawers"] }, { name: "Fabric", values: ["Velvet"] }, { name: "Type", values: ["Divan bed"] }], compareAtPrice: "£529.00", saving: "£100.00", discountPercent: 19, href: "#", imageUrl: resthavenPhoto("divan") },
+  { id: "r4", name: "Hollis pocket sprung mattress", price: "£359.00", priceMinor: 35900, available: true, filters: [{ name: "Size", values: ["Single","Double","King"] }, { name: "Type", values: ["Mattress"] }], chip: "Medium firm", href: "#", imageUrl: resthavenPhoto("mattress") },
+  { id: "r5", name: "Ashby headboard", price: "£149.00", priceMinor: 14900, available: true, filters: [{ name: "Size", values: ["Double","King"] }, { name: "Fabric", values: ["Boucle"] }, { name: "Type", values: ["Headboard"] }], href: "#", imageUrl: resthavenPhoto("headboard") },
+  { id: "r6", name: "Merrow hybrid mattress", price: "£549.00", priceMinor: 54900, available: true, filters: [{ name: "Size", values: ["Double","King","Super king"] }, { name: "Type", values: ["Mattress"] }], href: "#", imageUrl: resthavenPhoto("mattress"), hoverImageUrl: resthavenPhoto("fabrics") },
 ];
 
-/** Resthaven (bed showroom). Sample products only; every picture is the theme's own bedroom photo. */
+/** Resthaven (bed showroom). Sample products only; photos are the theme's own (assets/, see SOURCES.md). */
 export const jellyResthavenPreview: ThemePreviewConfig = {
   themeId: "jelly-resthaven",
   packId: "jelly-resthaven",
@@ -157,17 +157,18 @@ export const jellyResthavenPreview: ThemePreviewConfig = {
     footerText: "Beds, mattresses and help choosing the right one for your room.",
   },
   products: resthavenProducts,
+  ratings: { r1: { average: 4.8, count: 214 }, r2: { average: 4.6, count: 87 }, r3: { average: 4.7, count: 132 }, r4: { average: 4.5, count: 56 }, r6: { average: 4.9, count: 41 } },
   product: {
     id: "r1",
     title: "Harbour upholstered bed",
     description: "A tall panelled headboard and a deep upholstered frame in a soft woven fabric. Choose the size, colour and storage that suit your room.\n\nSlats are included; the mattress is sold separately.",
-    media: [{ url: bedroom, alt: "An upholstered bed in a light-filled bedroom" }],
+    media: [{ url: resthavenPhoto("hero"), alt: "The Harbour bed in oatmeal boucle in a light-filled bedroom" }, { url: resthavenPhoto("detail"), alt: "The rounded corner, piping and oak foot of the Harbour bed" }, { url: resthavenPhoto("fabrics"), alt: "Velvet, boucle and linen fabric swatches" }],
     specifications: { "Double (W x L x H)": "146 x 205 x 120 cm", "King (W x L x H)": "161 x 215 x 120 cm", Fabric: "Woven polyester", Assembly: "Two people, about 45 minutes" },
     shippingCopy: "Delivery details are shown at checkout.",
     price: "£499.00",
     compareAtPrice: "£699.00",
   },
-  collection: { title: "Upholstered beds", description: "Soft, tailored frames in a range of fabrics and colours. Every bed lists its exact dimensions so you can check it fits your room before you order. Choose storage drawers or an ottoman lift for extra space.", imageUrl: bedroom },
+  collection: { title: "Upholstered beds", description: "Soft, tailored frames in a range of fabrics and colours. Every bed lists its exact dimensions so you can check it fits your room before you order. Choose storage drawers or an ottoman lift for extra space.", imageUrl: resthavenPhoto("room-main") },
   page: {
     title: "About us",
     intro: "We help you choose a bed and mattress that suit your room and the way you sleep.",

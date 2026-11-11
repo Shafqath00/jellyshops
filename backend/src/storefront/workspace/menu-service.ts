@@ -1,3 +1,4 @@
+import { MAX_MENU_DEPTH, normalizeMenuImage } from "@jelly/storefront-schema";
 import type { WorkspaceMutationRunner } from "./mutation-runner.js";
 import type {
   MenuItem,
@@ -62,18 +63,22 @@ function normalizeTarget(target: MenuTarget): MenuTarget {
 
 function normalizeItems(items: MenuItem[]): MenuItem[] {
   const seen = new Set<string>();
-  const visit = (item: MenuItem): MenuItem => {
+  const visit = (item: MenuItem, depth: number): MenuItem => {
     const id = normalizeText(item.id, "Menu item id");
     if (seen.has(id)) throw new Error(`Duplicate menu item id: ${id}`);
     seen.add(id);
+    const children = Array.isArray(item.children) ? item.children : [];
+    if (depth >= MAX_MENU_DEPTH && children.length > 0) throw new Error(`Menus can be at most ${MAX_MENU_DEPTH} levels deep`);
+    const image = normalizeMenuImage(item.image);
     return {
       id,
       label: normalizeText(item.label, "Menu item label"),
       target: normalizeTarget(item.target),
-      children: item.children.map(visit),
+      ...(image ? { image } : {}),
+      children: children.map((child) => visit(child, depth + 1)),
     };
   };
-  return items.map(visit);
+  return items.map((item) => visit(item, 1));
 }
 
 function isResourceTarget(target: MenuTarget): target is Extract<MenuTarget, { resourceId: string }> {

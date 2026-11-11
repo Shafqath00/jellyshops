@@ -11,9 +11,10 @@ import { choice } from "./shared";
 import { ProductGalleryViewer, ProductPhotoGrid, type GalleryRatio } from "../product-gallery-viewer";
 import { normalizeRichTextDocument } from "@jelly/storefront-schema";
 import { renderBlocks } from "./rich-text";
+import { ProductFamilyLinks } from "./product-family";
 import { DiscountChip, FinanceLine, OptionTabs, OptionTileGroups, StickyPurchaseBar, useStickyBar } from "./product-showroom";
 
-function productContext(context: StorefrontRuntimeContext): ProductPresentationContext | null {
+export function productContext(context: StorefrontRuntimeContext): ProductPresentationContext | null {
   const candidate = context.page?.pageType === "product" ? context.page.resource.data.productPresentation : undefined;
   if (!candidate || typeof candidate !== "object" || Array.isArray(candidate)) return null;
   const product = candidate as ProductPresentationContext;
@@ -36,9 +37,10 @@ export function ProductGallerySection({ context, section }: { context: Storefron
   const ratio: GalleryRatio | undefined = ratioSetting === "theme" ? undefined : ratioSetting;
   const zoom = section.settings.enableZoom !== false;
   const layout = choice(section.settings, "layout", ["thumbnails", "stacked", "grid"] as const, "thumbnails");
-  if (layout === "thumbnails") return <section className="jelly-section jelly-product-gallery" data-layout="thumbnails" {...page}><StorefrontContainer><ProductGalleryViewer media={media} title={product.product.title} fit={fit} ratio={ratio} zoom={zoom} thumbnails={section.settings.thumbnailPosition === "left" ? "left" : "below"} /></StorefrontContainer></section>;
+  const badge = typeof section.settings.badgeText === "string" ? section.settings.badgeText.slice(0, 40) : undefined;
+  if (layout === "thumbnails") return <section className="jelly-section jelly-product-gallery" data-layout="thumbnails" {...page}><StorefrontContainer><ProductGalleryViewer media={media} title={product.product.title} fit={fit} ratio={ratio} zoom={zoom} thumbnails={section.settings.thumbnailPosition === "left" ? "left" : "below"} badge={badge} /></StorefrontContainer></section>;
   return <section className="jelly-section jelly-product-gallery" data-layout={layout} data-count={media.length} {...page}>
-    <StorefrontContainer><ProductPhotoGrid media={media} title={product.product.title} fit={fit} ratio={ratio} zoom={zoom} layout={layout} /></StorefrontContainer>
+    <StorefrontContainer><ProductPhotoGrid media={media} title={product.product.title} fit={fit} ratio={ratio} zoom={zoom} layout={layout} badge={badge} /></StorefrontContainer>
   </section>;
 }
 
@@ -77,14 +79,18 @@ export function swatchFor(display: "color" | "image" | undefined, value: { color
 
 export function ProductOptionsSection({ context, section }: { context: StorefrontRuntimeContext; section?: { settings: Record<string, unknown> } }) {
   const product = productContext(context);
-  if (!product || product.product.options.length === 0) return null;
+  if (!product) return null;
+  const family = section?.settings.showFamily === false ? null : <ProductFamilyLinks product={product} />;
+  if (product.product.options.length === 0) return family && product.family && product.family.members.length > 1 ? <section className="jelly-section jelly-product-options"><StorefrontContainer>{family}</StorefrontContainer></section> : null;
   const setting = section?.settings.style;
   const style = setting === "select" || setting === "tiles" || setting === "tabs" ? setting : "buttons";
   const columns = typeof section?.settings.tileColumns === "number" ? Math.min(4, Math.max(2, Math.round(section.settings.tileColumns))) : 3;
   if (style === "tiles" || style === "tabs") return <section className="jelly-section jelly-product-options" data-style={style} style={{ "--jelly-tile-columns": columns } as CSSProperties}><StorefrontContainer>
+    {family}
     {style === "tabs" && product.product.options.length > 1 ? <OptionTabs product={product} /> : <OptionTileGroups product={product} />}
   </StorefrontContainer></section>;
   return <section className="jelly-section jelly-product-options" data-style={style}><StorefrontContainer>
+    {family}
     {product.product.options.map((option) => {
       const chosen = option.values.filter((value) => value.selected);
       const selected = chosen[0];

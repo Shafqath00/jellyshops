@@ -132,6 +132,9 @@ ul { list-style: none; margin: 0; padding: 0; }
   .jelly-section { padding: calc(var(--jelly-spacing-section) * 0.6) 0; }
   .jelly-header .jelly-menu { display: none; }
   .jelly-mobile-navigation { display: block; }
+  /* The phone menu opens as a full-width panel under the header (it was squeezed into the header's first column). */
+  .jelly-header:not([data-sticky="true"]) { position: relative; }
+  .jelly-mobile-navigation-panel { position: absolute; z-index: 30; top: 100%; left: 0; right: 0; max-height: calc(100vh - 120px); overflow-y: auto; padding: 8px var(--j-page-edge) 24px; background: var(--theme-background); color: var(--theme-text); border-bottom: 1px solid var(--theme-border); box-shadow: 0 24px 32px -24px rgba(0, 0, 0, 0.35); }
   .jelly-product-grid-items { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   h1 { font-size: calc(var(--jelly-heading-size) * 0.6); }
   .jelly-header { padding: 22px var(--j-page-edge); }
@@ -270,3 +273,16 @@ ul { list-style: none; margin: 0; padding: 0; }
   .jelly-cart-line { grid-template-columns: 88px minmax(0, 1fr); gap: 14px; }
   .jelly-cart-line-total { grid-column: 2; }
 }
+/* Showroom product page (2026-11-11): the rating line sits in the buying column above the title; Dimensions, Reviews and Recently viewed run full width. */
+:is(.jelly-storefront main, [data-storefront-template]):has([data-section-type="product-gallery"]) > [data-section-type="rating-summary"] { grid-column: 2; }
+:is(.jelly-storefront main, [data-storefront-template]):has([data-section-type="product-gallery"]) > [data-section-type="product-gallery"] { grid-row: span 4; }
+[data-section-type="product-dimensions"], [data-section-type="product-reviews"], [data-section-type="recently-viewed"] { grid-column: 1 / -1; }
+:is(.jelly-storefront main, [data-storefront-template]):has([data-section-type="product-gallery"]) .jelly-rating-summary { padding: 28px 0 0; }
+:is(.jelly-storefront main, [data-storefront-template]):has([data-section-type="product-gallery"]) > [data-section-type="rating-summary"] + [data-section-type="product-information"] .jelly-product-information { padding-top: 12px; }
+.jelly-product-reviews h3 { font-size: 16px; }
+/* Showroom collection filters: clear fields, bigger ticks, comfortable rows. */
+.jelly-list-price input, .jelly-list-sort select { box-sizing: border-box; min-height: 44px; padding: 8px 12px; border: 1px solid var(--theme-border); border-radius: 6px; background: var(--theme-surface); color: var(--theme-text); font: inherit; }
+.jelly-list-price input { width: 100%; }
+.jelly-list-check { display: flex; align-items: center; gap: 10px; min-height: 32px; }
+.jelly-list-check input { width: 20px; height: 20px; margin: 0; accent-color: var(--theme-accent); }
+.jelly-list-filters legend { font-weight: 600; margin-bottom: 8px; }

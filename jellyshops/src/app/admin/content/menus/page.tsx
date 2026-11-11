@@ -10,6 +10,7 @@ import type { CollectionChoice } from "@/features/navigation/components/menu-lin
 import { ListTree } from "lucide-react";
 import { AdminPage, Banner, Card, CardSkeleton, EmptyState, Field } from "@/components/admin";
 import { referencedHeaderMenu } from "@/features/navigation/header-menu";
+import { menuItemsForSaving, menuWithShownPhotos } from "@/features/navigation/menu-photos";
 
 /** Menus kept from an earlier store design ("previous-…"). They stay saved but are hidden unless asked for. */
 const isEarlierVersion = (handle: string) => handle.startsWith("previous-");
@@ -45,8 +46,9 @@ function NavigationWorkspace({ storeId, api, editor, all }: { storeId: string; a
   useEffect(() => {
     let active = true;
     const { api, editor, all } = clients.current;
-    void Promise.all([api.listMenus(storeId), editor.listTemplates(storeId, "home"), editor.listGlobalSections(storeId), all<CollectionChoice>("/collections")]).then(([next, templates, globals, choices]) => {
+    void Promise.all([api.listMenus(storeId), editor.listTemplates(storeId, "home"), editor.listGlobalSections(storeId), all<CollectionChoice>("/collections")]).then(([loaded, templates, globals, choices]) => {
       if (!active) return;
+      const next = loaded.map((entry) => menuWithShownPhotos(entry, authApiOrigin()));
       const headerHandle = referencedHeaderMenu(templates, globals);
       setMenus(next); setCollections(choices);
       setSaved(Object.fromEntries(next.map(menu => [menu.id, JSON.stringify(menu.items)])));
@@ -63,9 +65,10 @@ function NavigationWorkspace({ storeId, api, editor, all }: { storeId: string; a
     if (!menu || saving || conflict) return;
     setSaving(true); setError(""); setNotice("");
     try {
-      const result = await api.updateMenu(storeId, menu.id, menu.revision, { items: menu.items });
-      setMenus(current => current.map(entry => entry.id === result.menu.id ? result.menu : entry));
-      setSaved(current => ({ ...current, [result.menu.id]: JSON.stringify(result.menu.items) }));
+      const result = await api.updateMenu(storeId, menu.id, menu.revision, { items: menuItemsForSaving(menu.items) });
+      const shown = menuWithShownPhotos(result.menu, authApiOrigin());
+      setMenus(current => current.map(entry => entry.id === shown.id ? shown : entry));
+      setSaved(current => ({ ...current, [shown.id]: JSON.stringify(shown.items) }));
       setNotice("Menu saved. Publish your storefront in the theme editor to make it live.");
     } catch (reason) {
       if (reason instanceof NavigationApiError && reason.status === 409) setConflictIds(current => [...current, menu.id]);
@@ -101,7 +104,7 @@ function NavigationWorkspace({ storeId, api, editor, all }: { storeId: string; a
     {loading ? <CardSkeleton label="Loading navigation" /> : <>
       <nav aria-label="Navigation menus" className="jk-chips">{visibleMenus.map(entry => <button key={entry.id} type="button" className="jk-chip" aria-pressed={entry.id === activeId} disabled={saving} onClick={() => { setActiveId(entry.id); setNotice(""); setError(""); }}>{entry.name}{isEarlierVersion(entry.handle) ? " (earlier version)" : entry.handle !== "main" && entry.handle !== "footer" ? ` · ${entry.handle}` : ""}{saved[entry.id] !== JSON.stringify(entry.items) ? " *" : ""}</button>)}
         {earlierCount > 0 && <button type="button" className="jk-button jk-button-plain" onClick={() => setShowEarlier(value => !value)}>{showEarlier ? "Hide earlier versions" : `Show ${earlierCount} earlier versions`}</button>}</nav>
-      {menu ? <MenuEditor key={menu.id} menu={menu} collections={collections} saving={saving} dirty={!conflict && saved[menu.id] !== JSON.stringify(menu.items)} onChange={items => { setNotice(""); setMenus(current => current.map(entry => entry.id === menu.id ? { ...entry, items } : entry)); }} onSave={() => void save()} />
+      {menu ? <MenuEditor key={menu.id} menu={menu} collections={collections} saving={saving} uploadImage={async (file) => (await editor.uploadMedia(storeId, file)).url} dirty={!conflict && saved[menu.id] !== JSON.stringify(menu.items)} onChange={items => { setNotice(""); setMenus(current => current.map(entry => entry.id === menu.id ? { ...entry, items } : entry)); }} onSave={() => void save()} />
         : <Card><EmptyState icon={ListTree} title="No navigation menus yet" description="Create a menu to add your collection links." /></Card>}
     </>}
   </AdminPage>;

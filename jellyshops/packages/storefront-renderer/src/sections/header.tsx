@@ -4,7 +4,7 @@ import { safeRichTextHref, type RuntimeMenuV4, type SectionNode } from "@jelly/s
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import type { PublicProduct } from "../types";
 import { resolveStorefrontHref } from "../runtime-context";
-import { MenuTree, type MenuVariant } from "./menu-tree";
+import { MenuTree, type MegaMenuOptions, type MenuVariant } from "./menu-tree";
 import { StoreIcon } from "./store-icon";
 import { TrustPointItems, trustPoints } from "./trust-points";
 import { PredictiveSearch } from "./predictive-search";
@@ -25,17 +25,25 @@ function menuHref(item: RuntimeMenuItem, context: StorefrontRuntimeContext): str
   return safeRichTextHref(context.resourceLinks?.[`${target.kind}:${target.resourceId}`]);
 }
 
+/** The header's "Large menu" setting: a full-width panel with columns and photo tiles instead of dropdown lists. */
+export function headerMegaMenu(settings: Record<string, unknown>): MegaMenuOptions | undefined {
+  if (settings.menuStyle !== "mega") return undefined;
+  const shape = settings.megaPhotoShape;
+  return { photoShape: shape === "square" || shape === "portrait" ? shape : "landscape" };
+}
+
 function MenuLinks({ section, context, label = "Store navigation", variant, part, className }: { section: SectionNode; context: StorefrontRuntimeContext; label?: string; variant: MenuVariant; part?: "first" | "second"; className?: string }) {
   const block = section.blocks.find((entry) => entry.enabled && entry.type === "menu");
   const handle = typeof block?.settings.handle === "string" ? block.settings.handle : "main";
   const menu = Object.values(context.menus ?? {}).find(item => item.handle === handle);
   const all = menu?.items ?? [];
+  const mega = variant === "flat" ? undefined : headerMegaMenu(section.settings);
   if (all.length === 0) return null;
-  if (!part) return <nav aria-label={label} className={className}><MenuList handle={handle} context={context} variant={variant} /></nav>;
+  if (!part) return <nav aria-label={label} className={className}><MenuTree items={all} variant={variant} mega={mega} hrefFor={(item) => menuHref(item, context)} /></nav>;
   // The split layout puts the first half of the menu left of the logo and the rest on the right.
   const half = Math.ceil(all.length / 2);
   const items = part === "first" ? all.slice(0, half) : all.slice(half);
-  return items.length > 0 ? <nav aria-label={label} className={className} data-menu-part={part}><MenuTree items={items} variant={variant} hrefFor={(item) => menuHref(item, context)} /></nav> : null;
+  return items.length > 0 ? <nav aria-label={label} className={className} data-menu-part={part}><MenuTree items={items} variant={variant} mega={mega} hrefFor={(item) => menuHref(item, context)} /></nav> : null;
 }
 
 /** Header layouts drawn by this section. "classic" adds no attribute, so older stores render exactly as before. */
@@ -148,6 +156,7 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
     data-section-id={section.id}
     data-logo-position={layout === "search-bar" || layout === "split" || (layout === "classic" && settings.logoPosition === "center") ? "center" : "left"}
     data-header-layout={layout === "classic" ? undefined : layout}
+    data-menu-style={settings.menuStyle === "mega" ? "mega" : undefined}
     data-tool-labels={settings.showToolLabels === true ? "true" : undefined}
     data-sticky={settings.sticky === true ? "true" : undefined}
     data-transparent={transparent ? "true" : undefined}

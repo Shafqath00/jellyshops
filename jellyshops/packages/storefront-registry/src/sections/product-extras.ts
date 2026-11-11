@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { safeRichTextHref } from "@jelly/storefront-schema";
 import type { SectionDefinition } from "../types.js";
 
 /**
@@ -15,9 +16,17 @@ const stockCounterSettings = z.object({
   showWhenPlentiful: z.boolean().optional(),
 }).passthrough();
 
+const dimensionsSettings = z.object({
+  heading: z.string().max(120).optional(),
+  unit: z.enum(["cm", "in"]).optional(),
+  showUnitSwitch: z.boolean().optional(),
+  note: z.string().max(200).optional(),
+  diagram: z.object({ url: z.string().refine((value) => safeRichTextHref(value) !== null && !value.startsWith("#")), alt: z.string().optional() }).passthrough().optional(),
+}).passthrough();
 const specificationsSettings = z.object({
   heading: z.string().max(120).optional(),
   showProductSpecifications: z.boolean().optional(),
+  hideMeasurements: z.boolean().optional(),
   layout: z.enum(["table", "expandable"]).optional(),
 }).passthrough();
 
@@ -68,11 +77,30 @@ export const productExtraSections: SectionDefinition[] = [
     controls: [
       { type: "text", key: "heading", label: "Heading", group: "content", maxLength: 120 },
       { type: "checkbox", key: "showProductSpecifications", label: "Show the specifications entered on each product", group: "content" },
+      { type: "checkbox", key: "hideMeasurements", label: "Leave out measurements", description: "Use this when the page also has a Dimensions section, so sizes are not listed twice.", group: "content" },
       { type: "segmented", key: "layout", label: "Show as", group: "layout", options: [{ label: "Table", value: "table" }, { label: "Expandable panel", value: "expandable" }] },
     ],
     allowedBlockTypes: ["spec-row"],
     maxBlocks: 12,
     defaultSettings: { heading: "Specifications", showProductSpecifications: true, layout: "table" },
+    defaultBlocks: [],
+    responsiveFields: [],
+  },
+  {
+    // Measurements from the product's specifications ("Width" = "150 cm", or "Width (King)" for one size), lettered to match a diagram, with a cm/inches switch.
+    type: "product-dimensions",
+    category: "commerce",
+    supportedPages: [...productOnly],
+    settingsSchema: dimensionsSettings,
+    controls: [
+      { type: "text", key: "heading", label: "Heading", group: "content", maxLength: 120 },
+      { type: "image", key: "diagram", label: "Diagram", description: "A drawing with letters A, B, C… that match the measurements, in the order they are listed in the product's specifications.", group: "content" },
+      { type: "text", key: "note", label: "Note under the measurements", description: "For example: Allow 2 cm either way.", group: "content", maxLength: 200 },
+      { type: "segmented", key: "unit", label: "Show first in", group: "layout", options: [{ label: "cm", value: "cm" }, { label: "Inches", value: "in" }] },
+      { type: "checkbox", key: "showUnitSwitch", label: "Let shoppers switch between cm and inches", group: "layout" },
+    ],
+    allowedBlockTypes: [],
+    defaultSettings: { heading: "Dimensions", unit: "cm", showUnitSwitch: true, note: "" },
     defaultBlocks: [],
     responsiveFields: [],
   },

@@ -1464,3 +1464,123 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 
 /* Quantity rules under the product page stepper ("Sold in steps of 6"). */
 :where(.jelly-quantity-rule) { flex-basis: 100%; margin: 4px 0 0; font-size: 13px; color: var(--j-color-muted, inherit); }
+
+/*
+ * Large ("mega") menu (sections/menu-tree.tsx, header setting Menu style > Large menu). A full-width panel under the
+ * header: columns of links on the left, photo tiles on the right, "Shop all" underneath. The header becomes the
+ * panel's frame (zero specificity, so a theme's sticky or absolute header keeps its own position).
+ */
+:where(.jelly-header[data-menu-style="mega"]) { position: relative; }
+.jelly-header .jelly-menu-item[data-mega="true"] { position: static; }
+.jelly-header .jelly-menu-item > .jelly-mega {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 40; display: none;
+  border-top: 1px solid color-mix(in srgb, var(--theme-text, #1a1a1a) 12%, transparent);
+  background: var(--theme-background, #ffffff); color: var(--theme-text, #1a1a1a);
+  box-shadow: 0 24px 40px -24px color-mix(in srgb, var(--theme-text, #1a1a1a) 40%, transparent);
+  text-align: left; text-transform: none; letter-spacing: normal; font-weight: 400;
+}
+.jelly-header .jelly-menu-item[data-open="true"] > .jelly-mega { display: block; }
+@media (hover: hover) {
+  .jelly-header .jelly-menu-item:hover:not([data-hover-off="true"]) > .jelly-mega { display: block; }
+}
+.jelly-header .jelly-mega-inner {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 24px 40px; align-items: start;
+  max-height: min(70vh, 640px); overflow-y: auto;
+  padding: 32px var(--j-page-edge, 24px);
+}
+.jelly-header .jelly-mega-inner:not(:has(.jelly-mega-tiles)),
+.jelly-header .jelly-mega-inner:not(:has(.jelly-mega-columns)) { grid-template-columns: minmax(0, 1fr); }
+.jelly-header .jelly-mega-columns { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 24px 32px; }
+.jelly-header .jelly-mega ul {
+  display: flex; flex-direction: column; flex-wrap: nowrap; align-items: stretch; justify-content: flex-start;
+  gap: 0; margin: 0; padding: 0; list-style: none;
+}
+.jelly-header .jelly-mega-heading { margin: 0 0 8px; font-weight: 600; }
+.jelly-header .jelly-mega-heading > :is(a, .jelly-menu-label) { display: block; padding: 4px 0; }
+.jelly-header .jelly-mega-links a { display: block; padding: 6px 0; }
+.jelly-header .jelly-mega :is(.jelly-mega-links, .jelly-mega-heading) a:hover { text-decoration: underline; }
+.jelly-header .jelly-mega ul.jelly-mega-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.jelly-header .jelly-mega ul.jelly-mega-tiles:is([data-count="1"], [data-count="2"]) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.jelly-header .jelly-mega ul.jelly-mega-tiles[data-count="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.jelly-header .jelly-mega-all { grid-column: 1 / -1; justify-self: start; padding: 4px 0; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.jelly-header .jelly-mega-tile { display: flex; flex-direction: column; gap: 8px; min-width: 0; color: inherit; text-decoration: none; }
+.jelly-header .jelly-mega-tile img {
+  display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover;
+  border-radius: var(--j-radius-sm, 4px); background: color-mix(in srgb, var(--theme-text, #1a1a1a) 8%, transparent);
+}
+.jelly-header [data-photo-shape="square"] .jelly-mega-tile img { aspect-ratio: 1; }
+.jelly-header [data-photo-shape="portrait"] .jelly-mega-tile img { aspect-ratio: 3 / 4; }
+.jelly-header .jelly-mega-tile span { font-weight: 600; overflow-wrap: break-word; }
+.jelly-header .jelly-mega-tile:hover span { text-decoration: underline; }
+.jelly-header .jelly-mega-tile:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+/* Phone menu: photo links of a group as a two-column grid of tiles. */
+.jelly-header .jelly-mobile-navigation-panel ul.jelly-menu-tiles {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 8px 0 12px; padding: 0; list-style: none;
+}
+.jelly-header .jelly-mobile-navigation-panel ul.jelly-menu-tiles li > a.jelly-mega-tile { display: flex; min-height: 0; }
+
+/* Recently viewed (sections/recently-viewed.tsx): the note shown only in the theme editor. */
+:where(.jelly-recently-viewed-note) { margin: 0 0 16px; font-size: 14px; color: var(--j-color-muted, inherit); }
+
+/*
+ * Second photo on hover (theme setting Product cards > "Show the second photo on hover", token
+ * --jelly-card-hover-image-display). Fades in over the first photo on pointer devices only.
+ */
+:where([data-jelly-theme] .jelly-product-card-media) { position: relative; }
+[data-jelly-theme] .jelly-product-card .jelly-product-card-hover-image {
+  display: var(--jelly-card-hover-image-display, none);
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  opacity: 0; transition: opacity 250ms ease; pointer-events: none;
+}
+@media (hover: hover) {
+  [data-jelly-theme] .jelly-product-card:is(:hover, :focus-within) .jelly-product-card-hover-image { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-jelly-theme] .jelly-product-card .jelly-product-card-hover-image { transition: none; }
+}
+
+/* Product list filters with counts (sections/product-list-browser.tsx). */
+:where(.jelly-list-values) { display: grid; gap: 4px; max-height: 280px; overflow-y: auto; }
+:where(.jelly-list-value-count) { margin-left: 4px; color: var(--j-color-muted, inherit); font-size: 0.9em; }
+:where(.jelly-list-check[data-empty="true"]) { opacity: 0.55; }
+
+/* Label over the main product photo (Product gallery > "Label on the photo"). Uses the theme's badge colours. */
+:where(.jelly-gallery-stage, .jelly-product-gallery-item) { position: relative; }
+:where(.jelly-gallery-badge) {
+  position: absolute; top: 12px; left: 12px; z-index: 2; max-width: calc(100% - 24px); margin: 0; padding: 6px 12px;
+  background: var(--jelly-badge-bg, var(--theme-text, #1c1b19)); color: var(--jelly-badge-text, var(--theme-background, #fff));
+  border-radius: var(--jelly-badge-radius, 4px); font-size: 13px; font-weight: 600; line-height: 1.3; pointer-events: none;
+}
+
+/* Dimensions (sections/product-dimensions.tsx): lettered measurements beside an optional diagram, with a cm/inches switch. */
+:where(.jelly-dimensions-header) { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+:where(.jelly-dimensions-header h2) { margin: 0; }
+:where(.jelly-dimensions-units) { display: inline-flex; border: 1px solid var(--j-color-border, currentColor); border-radius: var(--j-radius-pill, 999px); padding: 2px; }
+:where(.jelly-dimensions-units button) { min-width: 44px; min-height: 36px; padding: 0 14px; border: 0; border-radius: inherit; background: none; color: inherit; font: inherit; cursor: pointer; }
+:where(.jelly-dimensions-units button[aria-pressed="true"]) { background: var(--j-color-text, #1c1b19); color: var(--j-color-bg, #fff); }
+:where(.jelly-dimensions-size) { margin: 12px 0 0; }
+:where(.jelly-dimensions-body) { display: grid; gap: 24px; margin-top: 20px; align-items: center; }
+@media (min-width: 768px) { :where(.jelly-dimensions-body[data-diagram="true"]) { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+:where(.jelly-dimensions-diagram) { width: 100%; height: auto; border-radius: var(--j-radius-md, 8px); }
+:where(.jelly-dimensions-list) { display: grid; gap: 0; margin: 0; }
+:where(.jelly-dimensions-list > div) { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--j-color-border, rgba(0, 0, 0, 0.12)); }
+:where(.jelly-dimensions-list dt) { display: flex; align-items: center; gap: 10px; }
+:where(.jelly-dimensions-list dd) { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+:where(.jelly-dimensions-letter) { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--j-color-text, #1c1b19); color: var(--j-color-bg, #fff); font-size: 13px; font-weight: 600; }
+:where(.jelly-dimensions-note) { margin: 12px 0 0; color: var(--j-color-muted, inherit); font-size: 14px; }
+
+/* Other colours of a product family (sections/product-family.tsx): round swatches that link to each product. */
+:where(.jelly-product-family) { margin: 0 0 20px; }
+:where(.jelly-product-family-label) { margin: 0 0 8px; font-weight: 600; }
+:where(.jelly-product-family-label span) { font-weight: 400; }
+:where(.jelly-product-family ul) { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+:where(.jelly-product-family li > :is(a, span)) { display: inline-grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--j-color-border, rgba(0, 0, 0, 0.2)); border-radius: 50%; padding: 3px; }
+:where(.jelly-product-family li > [data-current="true"]) { border: 2px solid var(--j-color-text, #1c1b19); }
+:where(.jelly-product-family a:focus-visible) { outline: 2px solid currentColor; outline-offset: 2px; }
+:where(.jelly-product-family-swatch) { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; overflow: hidden; font-size: 13px; font-weight: 600; }
+:where(.jelly-product-family-swatch[data-empty="true"]) { background: var(--j-color-surface, rgba(0, 0, 0, 0.06)); }
+
+/* Bag count with words beside the icons ("Bag 2"): the count follows the word instead of covering it. Phones hide the words, so the count stays on the icon there. */
+@media (min-width: 900px) {
+  [data-jelly-theme] .jelly-header[data-tool-labels="true"] .jelly-header-count { position: static; margin-left: 2px; }
+}
