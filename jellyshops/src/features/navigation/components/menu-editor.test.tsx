@@ -75,3 +75,44 @@ it("reorders a nested item without changing stable ids or targets", () => {
   expect(reordered[0].children.map((item) => item.id)).toEqual(["second", "first"]);
   expect(reordered[0].children[1].target).toEqual({ kind: "page", resourceId: "page-1" });
 });
+
+it("adds a link inside another link, edits and removes nested links", async () => {
+  const onChange = vi.fn(); const user = userEvent.setup();
+  const items = [{ id: "beds", label: "Beds", target: { kind: "home" as const }, children: [{ id: "divan", label: "Divan beds", target: { kind: "search" as const }, children: [{ id: "small", label: "Small double", target: { kind: "search" as const }, children: [] }] }] }];
+  render(<MenuEditor menu={{ id: "m", storeId: "a", revision: 1, name: "Main", handle: "main", items }} onChange={onChange} onSave={() => {}} />);
+  // Third level is the deepest: no "Add inside" on it.
+  expect(screen.getByRole("button", { name: "Add link inside Divan beds" })).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Add link inside Small double" })).toBeNull();
+  await user.click(screen.getByRole("button", { name: "Add link inside Beds" }));
+  expect(screen.getByText("New link inside Beds")).toBeInTheDocument();
+  await user.type(screen.getByLabelText("Link label"), "Ottoman beds");
+  await user.click(screen.getByRole("button", { name: "Apply link" }));
+  expect(onChange).toHaveBeenLastCalledWith([expect.objectContaining({ id: "beds", children: [expect.objectContaining({ id: "divan" }), expect.objectContaining({ label: "Ottoman beds", target: { kind: "home" } })] })]);
+  await user.click(screen.getByRole("button", { name: "Edit Small double" }));
+  await user.clear(screen.getByLabelText("Link label")); await user.type(screen.getByLabelText("Link label"), "Small doubles");
+  await user.click(screen.getByRole("button", { name: "Apply link" }));
+  expect(onChange.mock.lastCall?.[0][0].children[0].children[0]).toMatchObject({ id: "small", label: "Small doubles" });
+  await user.click(screen.getByRole("button", { name: "Remove Divan beds" }));
+  expect(onChange.mock.lastCall?.[0][0].children).toEqual([expect.objectContaining({ id: "small" })]);
+});
+
+it("uploads a photo for the large menu and keeps its description", async () => {
+  const onChange = vi.fn(); const user = userEvent.setup();
+  const uploadImage = vi.fn(async () => "https://api.example/api/public/media/a/photo-1");
+  render(<MenuEditor menu={{ id: "m", storeId: "a", revision: 1, name: "Main", handle: "main", items: [] }} onChange={onChange} onSave={() => {}} uploadImage={uploadImage} />);
+  await user.click(screen.getByRole("button", { name: "Add link" }));
+  await user.type(screen.getByLabelText("Link label"), "Bedroom");
+  await user.upload(screen.getByLabelText("Upload photo"), new File(["x"], "bedroom.webp", { type: "image/webp" }));
+  expect(uploadImage).toHaveBeenCalledTimes(1);
+  await user.type(await screen.findByLabelText("Photo description"), "A calm bedroom");
+  await user.click(screen.getByRole("button", { name: "Apply link" }));
+  expect(onChange).toHaveBeenLastCalledWith([expect.objectContaining({ label: "Bedroom", image: { url: "https://api.example/api/public/media/a/photo-1", alt: "A calm bedroom" } })]);
+});
+
+it("shows a plain message when a photo upload fails", async () => {
+  const user = userEvent.setup();
+  render(<MenuEditor menu={{ id: "m", storeId: "a", revision: 1, name: "Main", handle: "main", items: [] }} onChange={() => {}} onSave={() => {}} uploadImage={async () => { throw new Error("413"); }} />);
+  await user.click(screen.getByRole("button", { name: "Add link" }));
+  await user.upload(screen.getByLabelText("Upload photo"), new File(["x"], "big.webp", { type: "image/webp" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("could not be uploaded");
+});

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { sectionNodeSchema, storefrontPageTypes } from "@jelly/storefront-schema";
+import { menuImageSchema, sectionNodeSchema, storefrontPageTypes, type MenuImage } from "@jelly/storefront-schema";
 
 /**
  * The shape of a theme's starter.json: shared sections by key (announcement, header, footer) and
@@ -7,7 +7,7 @@ import { sectionNodeSchema, storefrontPageTypes } from "@jelly/storefront-schema
  * key). This is the structural check; `validateThemeProject` adds the registry rules (known section
  * types, valid settings, allowed pages and blocks).
  */
-type StarterMenuItemInput = { id: string; label: string; target: { kind: "home" } | { kind: "search" } | { kind: "external"; url: string } | { kind: "anchor"; anchor: string }; children: StarterMenuItemInput[] };
+type StarterMenuItemInput = { id: string; label: string; target: { kind: "home" } | { kind: "search" } | { kind: "external"; url: string } | { kind: "anchor"; anchor: string }; image?: MenuImage; children: StarterMenuItemInput[] };
 const starterMenuItemSchema: z.ZodType<StarterMenuItemInput> = z.lazy(() => z.object({
   id: z.string().min(1),
   label: z.string().min(1).max(80),
@@ -18,6 +18,8 @@ const starterMenuItemSchema: z.ZodType<StarterMenuItemInput> = z.lazy(() => z.ob
     z.object({ kind: z.literal("external"), url: z.string().min(1).max(500).refine((url) => (url.startsWith("/") && !url.startsWith("//")) || url.startsWith("https://"), "Use a path starting with / or an https address") }).strict(),
     z.object({ kind: z.literal("anchor"), anchor: z.string().regex(/^#[A-Za-z][A-Za-z0-9_:\-.]*$/) }).strict(),
   ]),
+  /** Optional photo for the mega menu ("/themes/<id>/room.webp" or an https address). */
+  image: menuImageSchema.optional(),
   children: z.array(starterMenuItemSchema).max(20).default([]),
 }).strict()) as z.ZodType<StarterMenuItemInput>;
 

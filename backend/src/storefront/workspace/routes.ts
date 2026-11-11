@@ -1,6 +1,6 @@
 import { Router, type Request } from "express";
 import { z } from "zod";
-import { themeVersionSchema } from "@jelly/storefront-schema";
+import { MAX_MENU_IMAGE_ALT, isSafeMenuImageUrl, themeVersionSchema } from "@jelly/storefront-schema";
 import { requireMerchant, requireStorePermission } from "../../auth/middleware.js";
 import type { AuthProvider } from "../../auth/types.js";
 import { ApiError } from "../../http/errors.js";
@@ -82,11 +82,17 @@ const menuTargetSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("external"), url: z.string().min(1) }).strict(),
   z.object({ kind: z.literal("anchor"), anchor: z.string().min(1) }).strict(),
 ]);
-type MenuItemInput = { id: string; label: string; target: z.infer<typeof menuTargetSchema>; children: MenuItemInput[] };
+// A photo on a menu link (mega menu tile): an https address or a path on the store.
+const menuImageInputSchema = z.object({
+  url: z.string().trim().refine(isSafeMenuImageUrl, "Menu photo must be an https address or a path on this store"),
+  alt: z.string().trim().max(MAX_MENU_IMAGE_ALT).optional(),
+}).strict();
+type MenuItemInput = { id: string; label: string; target: z.infer<typeof menuTargetSchema>; image?: z.infer<typeof menuImageInputSchema>; children: MenuItemInput[] };
 const menuItemSchema: z.ZodType<MenuItemInput> = z.lazy(() => z.object({
   id: z.string().min(1),
   label: z.string().min(1),
   target: menuTargetSchema,
+  image: menuImageInputSchema.optional(),
   children: z.array(menuItemSchema),
 }).strict());
 const menuCreateSchema = z.object({ name: z.string().min(1), handle: z.string().min(1), items: z.array(menuItemSchema) }).strip();

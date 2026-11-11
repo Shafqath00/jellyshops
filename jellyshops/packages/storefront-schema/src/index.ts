@@ -111,5 +111,6 @@ export {
   validatePersonalisation,
 } from "./personalisation.js";
 export type { PersonalisationEntry, PersonalisationField, PersonalisationProblem } from "./personalisation.js";
+export { MAX_MENU_DEPTH, MAX_MENU_IMAGE_ALT, MAX_MENU_IMAGE_URL, isSafeMenuImageUrl, menuImageSchema, normalizeMenuImage, readMenuImage, type MenuImage } from "./menu-image.js";
 export { MAX_QUANTITY_RULE_VALUE, NO_QUANTITY_RULE, allowedQuantity, hasQuantityRule, quantityProblem, quantityRuleProblems, quantityRuleText, readQuantityRule } from "./quantity-rules.js";
 export type { QuantityRule } from "./quantity-rules.js";

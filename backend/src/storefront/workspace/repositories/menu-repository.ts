@@ -13,6 +13,8 @@ export interface MenuItem {
   id: string;
   label: string;
   target: MenuTarget;
+  /** Optional photo, drawn as a tile in the header's mega menu. */
+  image?: { url: string; alt?: string };
   children: MenuItem[];
 }
 

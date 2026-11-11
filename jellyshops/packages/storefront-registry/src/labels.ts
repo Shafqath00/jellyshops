@@ -41,6 +41,7 @@ const sectionLabels: Record<string, string> = {
   "product-specifications": "Specifications",
   "product-reviews": "Reviews",
   "related-products": "Related products",
+  "recently-viewed": "Recently viewed",
   "collection-header": "Collection banner",
   "collection-product-grid": "Collection products",
   "collection-description": "Collection description",

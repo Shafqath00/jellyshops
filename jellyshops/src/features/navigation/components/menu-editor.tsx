@@ -2,6 +2,7 @@
 
 import type { MenuItem, NavigationMenu } from "../api/client";
 import { useState } from "react";
+import { MAX_MENU_DEPTH } from "@jelly/storefront-schema";
 import { Button } from "@/components/ui/button";
 import { MenuLinkForm, type CollectionChoice } from "./menu-link-form";
 
@@ -43,15 +44,30 @@ export function reorderMenuItem(
   return next;
 }
 
-function rows(items: MenuItem[], depth = 0): Array<{ item: MenuItem; depth: number; parentId: string | null; index: number }> {
+/** Replaces one item (found at any level) and keeps everything else as it was. */
+export function replaceMenuItem(items: MenuItem[], replacement: MenuItem): MenuItem[] {
+  return items.map((item) => item.id === replacement.id ? replacement : { ...item, children: replaceMenuItem(item.children, replacement) });
+}
+
+/** Removes one item; the links inside it move up into its place, so nothing else disappears. */
+export function removeMenuItem(items: MenuItem[], itemId: string): MenuItem[] {
+  return items.flatMap((item) => item.id === itemId ? item.children : [{ ...item, children: removeMenuItem(item.children, itemId) }]);
+}
+
+/** Adds a link at the end of another link's list (the parent becomes a dropdown, column or large-menu group). */
+export function addMenuChild(items: MenuItem[], parentId: string, child: MenuItem): MenuItem[] {
+  return items.map((item) => item.id === parentId ? { ...item, children: [...item.children, child] } : { ...item, children: addMenuChild(item.children, parentId, child) });
+}
+
+type Row = { item: MenuItem; depth: number; parentId: string | null; index: number; siblings: number };
+function rows(items: MenuItem[], depth = 0, parentId: string | null = null): Row[] {
   return items.flatMap((item, index) => [
-    { item, depth, parentId: null as string | null, index },
-    ...item.children.flatMap((child, childIndex) => [
-      { item: child, depth: depth + 1, parentId: item.id, index: childIndex },
-      ...rows(child.children, depth + 2).map((entry) => ({ ...entry, parentId: entry.parentId ?? child.id })),
-    ]),
+    { item, depth, parentId, index, siblings: items.length },
+    ...rows(item.children, depth + 1, item.id),
   ]);
 }
+
+type Editing = { kind: "edit"; item: MenuItem } | { kind: "new"; parentId: string | null; parentLabel?: string } | null;
 
 export function MenuEditor({
   menu,
@@ -60,6 +76,7 @@ export function MenuEditor({
   collections = [],
   saving = false,
   dirty = true,
+  uploadImage,
 }: {
   menu: NavigationMenu;
   onChange(items: MenuItem[]): void;
@@ -67,9 +84,19 @@ export function MenuEditor({
   collections?: CollectionChoice[];
   saving?: boolean;
   dirty?: boolean;
+  /** Uploads a photo for the large menu and returns its address; without it the photo field is hidden. */
+  uploadImage?(file: File): Promise<string>;
 }) {
   const entries = rows(menu.items);
-  const [editing, setEditing] = useState<MenuItem | "new" | null>(null);
+  const [editing, setEditing] = useState<Editing>(null);
+  const editingKey = editing === null ? "" : editing.kind === "edit" ? editing.item.id : `new:${editing.parentId ?? "top"}`;
+
+  function apply(item: MenuItem) {
+    if (editing?.kind === "edit") onChange(replaceMenuItem(menu.items, item));
+    else if (editing?.kind === "new" && editing.parentId) onChange(addMenuChild(menu.items, editing.parentId, item));
+    else onChange([...menu.items, item]);
+    setEditing(null);
+  }
 
   return (
     <section aria-label="Menu editor" className="rounded-xl border border-border bg-card">
@@ -82,11 +109,17 @@ export function MenuEditor({
       </header>
       <fieldset disabled={saving} className="min-w-0">
       <div className="divide-y divide-border">
-        {entries.map(({ item, depth, parentId, index }) => (
-          <div key={item.id} className="flex min-h-11 items-center gap-2 px-3" style={{ paddingLeft: 12 + depth * 20 }}>
+        {entries.map(({ item, depth, parentId, index, siblings }) => (
+          <div key={item.id} className="flex min-h-11 flex-wrap items-center gap-2 px-3 py-1" style={{ paddingLeft: 12 + depth * 20 }}>
+            {item.image?.url && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={item.image.url} alt="" className="size-8 shrink-0 rounded object-cover" />
+            )}
             <span className="min-w-0 flex-1 truncate text-[12px] font-medium text-muted-foreground">{item.label}</span>
-            <span className="text-[10px] text-muted-foreground">{item.target.kind}</span>
-            {depth === 0 && <><Button type="button" variant="ghost" size="sm" aria-label={`Edit ${item.label}`} onClick={() => setEditing(item)}>Edit</Button><Button type="button" variant="ghost" size="sm" aria-label={`Remove ${item.label}`} onClick={() => { onChange(menu.items.flatMap(entry => entry.id === item.id ? entry.children : [entry])); setEditing(null); }}>Remove</Button></>}
+            <span className="text-[10px] text-muted-foreground">{item.image?.url ? "photo · " : ""}{item.target.kind}</span>
+            <Button type="button" variant="ghost" size="sm" aria-label={`Edit ${item.label}`} onClick={() => setEditing({ kind: "edit", item })}>Edit</Button>
+            {depth + 1 < MAX_MENU_DEPTH && <Button type="button" variant="ghost" size="sm" aria-label={`Add link inside ${item.label}`} onClick={() => setEditing({ kind: "new", parentId: item.id, parentLabel: item.label })}>Add inside</Button>}
+            <Button type="button" variant="ghost" size="sm" aria-label={`Remove ${item.label}`} onClick={() => { onChange(removeMenuItem(menu.items, item.id)); setEditing(null); }}>Remove</Button>
             <button
               type="button"
               aria-label={`Move ${item.label} up`}
@@ -99,9 +132,9 @@ export function MenuEditor({
             <button
               type="button"
               aria-label={`Move ${item.label} down`}
-              disabled={index === (parentId ? findItem(menu.items, parentId)?.children.length ?? 0 : menu.items.length) - 1}
+              disabled={index === siblings - 1}
               onClick={() => onChange(reorderMenuItem(menu.items, item.id, { parentId, index: index + 1 }))}
-              className="h-7 rounded border border-border px-2 text-[10px]"
+              className="h-7 rounded border border-border px-2 text-[10px] disabled:opacity-30"
             >
               Down
             </button>
@@ -109,7 +142,20 @@ export function MenuEditor({
         ))}
         {entries.length === 0 && <p className="p-6 text-center text-[12px] text-muted-foreground">No menu items yet.</p>}
       </div>
-      <div className="p-4">{editing ? <MenuLinkForm key={editing === "new" ? "new" : editing.id} item={editing === "new" ? undefined : editing} collections={collections} onCancel={() => setEditing(null)} onApply={item => { onChange(editing === "new" ? [...menu.items, item] : menu.items.map(entry => entry.id === item.id ? item : entry)); setEditing(null); }} /> : <Button type="button" variant="outline" onClick={() => setEditing("new")}>Add link</Button>}</div>
+      <div className="p-4">{editing
+        ? <MenuLinkForm
+            key={editingKey}
+            item={editing.kind === "edit" ? editing.item : undefined}
+            heading={editing.kind === "new" && editing.parentLabel ? `New link inside ${editing.parentLabel}` : undefined}
+            collections={collections}
+            uploadImage={uploadImage}
+            onCancel={() => setEditing(null)}
+            onApply={apply}
+          />
+        : <div className="flex flex-col gap-2">
+            <Button type="button" variant="outline" className="self-start" onClick={() => setEditing({ kind: "new", parentId: null })}>Add link</Button>
+            <p className="text-[12px] text-muted-foreground">Links inside a link open as a dropdown. With the header&apos;s Large menu, links that hold links become columns and links with a photo become picture tiles.</p>
+          </div>}</div>
       </fieldset>
     </section>
   );

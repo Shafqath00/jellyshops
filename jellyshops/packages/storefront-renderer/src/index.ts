@@ -6,7 +6,7 @@ export { createStorefrontRuntimeContext, createCollectionLinks } from "./runtime
 export { isRenderableHomeSection, renderableHomeSectionTypes } from "./section-support";
 export type { SectionRenderComponent, SectionRenderProps } from "./render-registry";
 export type { RuntimeRegion, StorefrontRuntimeContext } from "./runtime-context";
-export type { AssetResolver, CollectionPresentationContext, CommerceDataProvider, StorefrontCartAccess, StorefrontCompareAccess, StorefrontReview, StorefrontReviewAccess, StorefrontReviewPage, ProductPresentationContext, PublicProduct, StorefrontPageContext, StorefrontRendererProps } from "./types";
+export type { AssetResolver, CollectionPresentationContext, CommerceDataProvider, StorefrontCartAccess, StorefrontCompareAccess, StorefrontRecentlyViewedAccess, StorefrontReview, StorefrontReviewAccess, StorefrontReviewPage, ProductPresentationContext, PublicProduct, StorefrontPageContext, StorefrontRendererProps } from "./types";
 export { withStoreIdentity } from "./store-identity";
 export { ThemeCustomCss } from "./section-custom-css";
 export { MetaobjectEntryContent, metaobjectEntryHref } from "./sections/metaobject-list";

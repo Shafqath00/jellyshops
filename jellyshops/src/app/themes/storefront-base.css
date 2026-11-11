@@ -1464,3 +1464,60 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 
 /* Quantity rules under the product page stepper ("Sold in steps of 6"). */
 :where(.jelly-quantity-rule) { flex-basis: 100%; margin: 4px 0 0; font-size: 13px; color: var(--j-color-muted, inherit); }
+
+/*
+ * Large ("mega") menu (sections/menu-tree.tsx, header setting Menu style > Large menu). A full-width panel under the
+ * header: columns of links on the left, photo tiles on the right, "Shop all" underneath. The header becomes the
+ * panel's frame (zero specificity, so a theme's sticky or absolute header keeps its own position).
+ */
+:where(.jelly-header[data-menu-style="mega"]) { position: relative; }
+.jelly-header .jelly-menu-item[data-mega="true"] { position: static; }
+.jelly-header .jelly-menu-item > .jelly-mega {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 40; display: none;
+  border-top: 1px solid color-mix(in srgb, var(--theme-text, #1a1a1a) 12%, transparent);
+  background: var(--theme-background, #ffffff); color: var(--theme-text, #1a1a1a);
+  box-shadow: 0 24px 40px -24px color-mix(in srgb, var(--theme-text, #1a1a1a) 40%, transparent);
+  text-align: left; text-transform: none; letter-spacing: normal; font-weight: 400;
+}
+.jelly-header .jelly-menu-item[data-open="true"] > .jelly-mega { display: block; }
+@media (hover: hover) {
+  .jelly-header .jelly-menu-item:hover:not([data-hover-off="true"]) > .jelly-mega { display: block; }
+}
+.jelly-header .jelly-mega-inner {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 24px 40px; align-items: start;
+  max-height: min(70vh, 640px); overflow-y: auto;
+  padding: 32px var(--j-page-edge, 24px);
+}
+.jelly-header .jelly-mega-inner:not(:has(.jelly-mega-tiles)),
+.jelly-header .jelly-mega-inner:not(:has(.jelly-mega-columns)) { grid-template-columns: minmax(0, 1fr); }
+.jelly-header .jelly-mega-columns { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 24px 32px; }
+.jelly-header .jelly-mega ul {
+  display: flex; flex-direction: column; flex-wrap: nowrap; align-items: stretch; justify-content: flex-start;
+  gap: 0; margin: 0; padding: 0; list-style: none;
+}
+.jelly-header .jelly-mega-heading { margin: 0 0 8px; font-weight: 600; }
+.jelly-header .jelly-mega-heading > :is(a, .jelly-menu-label) { display: block; padding: 4px 0; }
+.jelly-header .jelly-mega-links a { display: block; padding: 6px 0; }
+.jelly-header .jelly-mega :is(.jelly-mega-links, .jelly-mega-heading) a:hover { text-decoration: underline; }
+.jelly-header .jelly-mega ul.jelly-mega-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.jelly-header .jelly-mega ul.jelly-mega-tiles:is([data-count="1"], [data-count="2"]) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.jelly-header .jelly-mega ul.jelly-mega-tiles[data-count="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.jelly-header .jelly-mega-all { grid-column: 1 / -1; justify-self: start; padding: 4px 0; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.jelly-header .jelly-mega-tile { display: flex; flex-direction: column; gap: 8px; min-width: 0; color: inherit; text-decoration: none; }
+.jelly-header .jelly-mega-tile img {
+  display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover;
+  border-radius: var(--j-radius-sm, 4px); background: color-mix(in srgb, var(--theme-text, #1a1a1a) 8%, transparent);
+}
+.jelly-header [data-photo-shape="square"] .jelly-mega-tile img { aspect-ratio: 1; }
+.jelly-header [data-photo-shape="portrait"] .jelly-mega-tile img { aspect-ratio: 3 / 4; }
+.jelly-header .jelly-mega-tile span { font-weight: 600; overflow-wrap: break-word; }
+.jelly-header .jelly-mega-tile:hover span { text-decoration: underline; }
+.jelly-header .jelly-mega-tile:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+/* Phone menu: photo links of a group as a two-column grid of tiles. */
+.jelly-header .jelly-mobile-navigation-panel ul.jelly-menu-tiles {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 8px 0 12px; padding: 0; list-style: none;
+}
+.jelly-header .jelly-mobile-navigation-panel ul.jelly-menu-tiles li > a.jelly-mega-tile { display: flex; min-height: 0; }
+
+/* Recently viewed (sections/recently-viewed.tsx): the note shown only in the theme editor. */
+:where(.jelly-recently-viewed-note) { margin: 0 0 16px; font-size: 14px; color: var(--j-color-muted, inherit); }

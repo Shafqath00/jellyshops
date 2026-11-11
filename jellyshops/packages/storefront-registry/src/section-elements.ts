@@ -53,6 +53,7 @@ export const SECTION_ELEMENTS: Record<string, ElementDefinition[]> = {
   ],
   "product-purchase": [{ id: "addToCart", label: "Add to cart button", kind: "button", controls: ["label", "showQuantity", "stickyBar"] }],
   "product-description": [heading()],
+  "recently-viewed": [heading(), { id: "productCard", label: "Product card", kind: "product-card", controls: ["limit", "columns"] }],
   "related-products": [heading(), { id: "productCard", label: "Product card", kind: "product-card", controls: ["limit"] }],
   "collection-header": [
     { id: "title", label: "Collection title", kind: "heading", controls: ["showTitle"] },

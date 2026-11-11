@@ -94,4 +94,29 @@ describe("MenuService", () => {
       await expect(service.createMenu("store-a", { name: "Bad", handle: `bad-${url.length}`, items: [{ id: "x", label: "X", target: { kind: "external", url }, children: [] }] })).rejects.toThrow();
     }
   });
+
+  it("keeps a safe menu photo and refuses unsafe ones", async () => {
+    const { service } = setup();
+    const result = await service.createMenu("store-a", {
+      name: "Main",
+      handle: "main",
+      items: [{ id: "rooms", label: "Rooms", target: { kind: "home" }, children: [
+        { id: "bedroom", label: "Bedroom", target: { kind: "search" }, image: { url: " /themes/jelly-resthaven/bedroom.webp ", alt: " A calm bedroom " }, children: [] },
+        { id: "living", label: "Living", target: { kind: "search" }, image: { url: "https://cdn.example.com/living.webp" }, children: [] },
+      ] }],
+    });
+    expect(result.menu.items[0].children[0].image).toEqual({ url: "/themes/jelly-resthaven/bedroom.webp", alt: "A calm bedroom" });
+    expect(result.menu.items[0].children[1].image).toEqual({ url: "https://cdn.example.com/living.webp" });
+    expect(result.menu.items[0]).not.toHaveProperty("image");
+    for (const url of ["http://cdn.example.com/a.webp", "//evil.example/a.webp", "javascript:alert(1)", "data:image/png;base64,AAAA", "/a b.webp"]) {
+      await expect(service.createMenu("store-a", { name: "Bad", handle: "bad", items: [{ id: "x", label: "X", target: { kind: "home" }, image: { url }, children: [] }] })).rejects.toThrow("Menu photo");
+    }
+  });
+
+  it("refuses menus deeper than three levels", async () => {
+    const { service } = setup();
+    const leaf = (id: string) => ({ id, label: id, target: { kind: "home" as const }, children: [] });
+    await expect(service.createMenu("store-a", { name: "Main", handle: "main", items: [{ ...leaf("a"), children: [{ ...leaf("b"), children: [{ ...leaf("c"), children: [leaf("d")] }] }] }] })).rejects.toThrow("3 levels");
+    await expect(service.createMenu("store-a", { name: "Main", handle: "main", items: [{ ...leaf("a"), children: [{ ...leaf("b"), children: [leaf("c")] }] }] })).resolves.toBeTruthy();
+  });
 });

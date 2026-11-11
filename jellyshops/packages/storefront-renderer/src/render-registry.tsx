@@ -8,6 +8,7 @@ import { SlideshowSection } from "./sections/slideshow";
 import { ProductSpecificationsSection, ProductStockCounterSection, ProductTabsSection } from "./sections/product-extras";
 import { StoreVisitSection } from "./sections/store-visit";
 import { ProductGridSection } from "./sections/product-grid";
+import { RecentlyViewedSection } from "./sections/recently-viewed";
 import { RichTextSection } from "./sections/rich-text";
 import { CustomContentSection } from "./sections/custom-content";
 import { LogoListSection } from "./sections/logo-list";
@@ -97,6 +98,7 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("product-reviews", ({ context, section }) => <ProductReviewsSection context={context} section={section} />);
   registry.register("product-specifications", ({ section, context }) => <ProductSpecificationsSection section={section} context={context} />);
   registry.register("contact-store-info", ({ section, mode }) => <StoreVisitSection section={section} editor={mode === "editor"} />);
+  registry.register("recently-viewed", ({ commerce, context, section }) => <RecentlyViewedSection commerce={commerce} context={context} section={section} />);
   registry.register("related-products", ({ context, section }) => <RelatedProductsSection context={context} section={section} />);
   registry.register("collection-header", ({ context, section }) => <CollectionHeaderSection context={context} section={section} />);
   registry.register("collection-product-grid", ({ context, section }) => <CollectionProductGridSection context={context} section={section} />);

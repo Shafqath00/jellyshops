@@ -99,6 +99,8 @@
 @media (max-width: 767px){[data-jelly-theme="jelly-resthaven"] .jelly-section{padding: calc(var(--jelly-spacing-section) * 0.6) 0;}
 [data-jelly-theme="jelly-resthaven"] .jelly-header .jelly-menu{display: none;}
 [data-jelly-theme="jelly-resthaven"] .jelly-mobile-navigation{display: block;}
+[data-jelly-theme="jelly-resthaven"] .jelly-header:not([data-sticky="true"]){position: relative;}
+[data-jelly-theme="jelly-resthaven"] .jelly-mobile-navigation-panel{position: absolute; z-index: 30; top: 100%; left: 0; right: 0; max-height: calc(100vh - 120px); overflow-y: auto; padding: 8px var(--j-page-edge) 24px; background: var(--theme-background); color: var(--theme-text); border-bottom: 1px solid var(--theme-border); box-shadow: 0 24px 32px -24px rgba(0, 0, 0, 0.35);}
 [data-jelly-theme="jelly-resthaven"] .jelly-product-grid-items{grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;}
 [data-jelly-theme="jelly-resthaven"] h1{font-size: calc(var(--jelly-heading-size) * 0.6);}
 [data-jelly-theme="jelly-resthaven"] .jelly-header{padding: 22px var(--j-page-edge);}

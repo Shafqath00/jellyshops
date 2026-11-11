@@ -9,6 +9,8 @@ export interface MenuItem {
   id: string;
   label: string;
   target: MenuTarget;
+  /** Optional photo, drawn as a picture tile in the header's large menu. */
+  image?: { url: string; alt?: string };
   children: MenuItem[];
 }
 

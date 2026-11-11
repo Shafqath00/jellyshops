@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { storefrontPageTypes } from "./types.js";
+import { MAX_MENU_IMAGE_ALT, MAX_MENU_IMAGE_URL, type MenuImage } from "./menu-image.js";
 
 export const RUNTIME_STOREFRONT_SCHEMA_VERSION = 4 as const;
 
@@ -31,10 +32,14 @@ const runtimeMenuTargetSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("anchor"), anchor: z.string().min(1) }).strict(),
 ]);
 
+const runtimeMenuImageSchema = z.object({ url: z.string().min(1).max(MAX_MENU_IMAGE_URL), alt: z.string().max(MAX_MENU_IMAGE_ALT).optional() }).strict();
+
 type RuntimeMenuItemInput = {
   id: string;
   label: string;
   target: z.infer<typeof runtimeMenuTargetSchema>;
+  /** Optional photo, drawn as a tile in the mega menu. */
+  image?: MenuImage;
   children: RuntimeMenuItemInput[];
 };
 
@@ -42,6 +47,9 @@ const runtimeMenuItemSchema: z.ZodType<RuntimeMenuItemInput> = z.lazy(() => z.ob
   id: z.string().min(1),
   label: z.string().min(1),
   target: runtimeMenuTargetSchema,
+  // Loose on purpose: the storefront turns saved paths into full (sometimes local http) addresses before this check.
+  // The strict rule runs when a menu is saved; the header checks the address again before drawing it.
+  image: runtimeMenuImageSchema.optional(),
   children: z.array(runtimeMenuItemSchema),
 }).strict());
 
