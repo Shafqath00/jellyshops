@@ -123,8 +123,8 @@
               },
               "children": [],
               "image": {
-                "url": "/themes/jelly-resthaven/bedroom.png",
-                "alt": "A calm main bedroom with an upholstered bed"
+                "url": "/themes/jelly-resthaven/room-main.webp",
+                "alt": "A sage velvet bed in a main bedroom"
               }
             },
             {
@@ -136,8 +136,8 @@
               },
               "children": [],
               "image": {
-                "url": "/themes/jelly-resthaven/bedroom.png",
-                "alt": "A guest room with a storage bed"
+                "url": "/themes/jelly-resthaven/room-guest.webp",
+                "alt": "A guest room with a grey ottoman storage bed"
               }
             },
             {
@@ -149,8 +149,8 @@
               },
               "children": [],
               "image": {
-                "url": "/themes/jelly-resthaven/bedroom.png",
-                "alt": "A bright children's bedroom"
+                "url": "/themes/jelly-resthaven/room-kids.webp",
+                "alt": "A child's room with a blue upholstered single bed"
               }
             }
           ]
@@ -445,8 +445,13 @@
               "contentAlignment": "left",
               "styleAlign": "left",
               "image": {
-                "url": "/themes/jelly-resthaven/bedroom.png",
-                "alt": "An upholstered bed in a light-filled bedroom"
+                "url": "/themes/jelly-resthaven/hero.webp",
+                "alt": "An oatmeal upholstered bed in a calm, light-filled bedroom",
+                "fit": "cover",
+                "focalPoint": {
+                  "x": 62,
+                  "y": 55
+                }
               },
               "layout": "overlay",
               "height": "large",
@@ -500,20 +505,20 @@
             "enabled": true,
             "settings": {
               "photo0": {
-                "url": "/themes/jelly-resthaven/bedroom.png",
-                "alt": "An upholstered bed in a light-filled bedroom"
+                "url": "/themes/jelly-resthaven/divan.webp",
+                "alt": "A charcoal velvet divan bed with a storage drawer open"
               },
               "photo1": {
-                "url": "/themes/jelly-resthaven/bedroom.png",
-                "alt": "An upholstered bed in a light-filled bedroom"
+                "url": "/themes/jelly-resthaven/room-guest.webp",
+                "alt": "A grey ottoman bed with its base lifted to show the storage"
               },
               "photo2": {
-                "url": "/themes/jelly-resthaven/bedroom.png",
-                "alt": "An upholstered bed in a light-filled bedroom"
+                "url": "/themes/jelly-resthaven/mattress.webp",
+                "alt": "A cut-away corner of a pocket sprung hybrid mattress showing its layers"
               },
               "photo3": {
-                "url": "/themes/jelly-resthaven/bedroom.png",
-                "alt": "An upholstered bed in a light-filled bedroom"
+                "url": "/themes/jelly-resthaven/headboard.webp",
+                "alt": "A tall terracotta velvet headboard with channel stitching"
               }
             },
             "blocks": []
@@ -611,8 +616,8 @@
             "enabled": true,
             "settings": {
               "image": {
-                "url": "/themes/jelly-resthaven/bedroom.png",
-                "alt": "An upholstered bed in a light-filled bedroom"
+                "url": "/themes/jelly-resthaven/room-main.webp",
+                "alt": "A sage velvet bed with a winged headboard in a main bedroom"
               },
               "imagePosition": "left"
             },
@@ -732,8 +737,8 @@
             "enabled": true,
             "settings": {
               "image": {
-                "url": "/themes/jelly-resthaven/bedroom.png",
-                "alt": "An upholstered bed in a light-filled bedroom"
+                "url": "/themes/jelly-resthaven/mattress.webp",
+                "alt": "A cut-away corner of a pocket sprung hybrid mattress showing its layers"
               },
               "imagePosition": "right"
             },
@@ -922,6 +927,22 @@
         {
           "kind": "inline",
           "section": {
+            "id": "resthaven-product-rating-summary",
+            "type": "rating-summary",
+            "enabled": true,
+            "settings": {
+              "source": "reviews",
+              "text": "from {count} reviews",
+              "linkLabel": "Read reviews",
+              "link": "#reviews",
+              "contentAlignment": "left"
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
             "id": "studio-info",
             "type": "product-information",
             "enabled": true,
@@ -934,22 +955,6 @@
               "financeMonths": 0,
               "financeText": "or {amount} a month for {months} months",
               "financeLinkLabel": "Learn more"
-            },
-            "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "resthaven-product-rating-summary",
-            "type": "rating-summary",
-            "enabled": true,
-            "settings": {
-              "source": "reviews",
-              "text": "from {count} reviews",
-              "linkLabel": "Read reviews",
-              "link": "#reviews",
-              "contentAlignment": "left"
             },
             "blocks": []
           }

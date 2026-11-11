@@ -1579,3 +1579,8 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 :where(.jelly-product-family a:focus-visible) { outline: 2px solid currentColor; outline-offset: 2px; }
 :where(.jelly-product-family-swatch) { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; overflow: hidden; font-size: 13px; font-weight: 600; }
 :where(.jelly-product-family-swatch[data-empty="true"]) { background: var(--j-color-surface, rgba(0, 0, 0, 0.06)); }
+
+/* Bag count with words beside the icons ("Bag 2"): the count follows the word instead of covering it. Phones hide the words, so the count stays on the icon there. */
+@media (min-width: 900px) {
+  [data-jelly-theme] .jelly-header[data-tool-labels="true"] .jelly-header-count { position: static; margin-left: 2px; }
+}

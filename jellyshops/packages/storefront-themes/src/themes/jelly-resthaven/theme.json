@@ -19,7 +19,48 @@
         "path": "/themes/jelly-resthaven/mark.svg"
       }
     ],
-    "assets": [],
+    "assets": [
+      {
+        "id": "bedroom",
+        "path": "/themes/jelly-resthaven/bedroom.png"
+      },
+      {
+        "id": "hero",
+        "path": "/themes/jelly-resthaven/hero.webp"
+      },
+      {
+        "id": "room-main",
+        "path": "/themes/jelly-resthaven/room-main.webp"
+      },
+      {
+        "id": "room-guest",
+        "path": "/themes/jelly-resthaven/room-guest.webp"
+      },
+      {
+        "id": "room-kids",
+        "path": "/themes/jelly-resthaven/room-kids.webp"
+      },
+      {
+        "id": "divan",
+        "path": "/themes/jelly-resthaven/divan.webp"
+      },
+      {
+        "id": "mattress",
+        "path": "/themes/jelly-resthaven/mattress.webp"
+      },
+      {
+        "id": "headboard",
+        "path": "/themes/jelly-resthaven/headboard.webp"
+      },
+      {
+        "id": "fabrics",
+        "path": "/themes/jelly-resthaven/fabrics.webp"
+      },
+      {
+        "id": "detail",
+        "path": "/themes/jelly-resthaven/detail.webp"
+      }
+    ],
     "preview": {
       "path": "/themes/jelly-resthaven/preview.svg",
       "alt": "Jelly Resthaven theme preview"
