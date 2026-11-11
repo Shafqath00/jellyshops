@@ -1181,8 +1181,10 @@
               "showTitle": true,
               "showDescription": true,
               "showImage": true,
-              "layout": "simple",
-              "descriptionLines": "2"
+              "layout": "banner",
+              "contentAlignment": "left",
+              "descriptionLines": "2",
+              "showBreadcrumb": true
             },
             "blocks": []
           }
@@ -1199,7 +1201,8 @@
               "showFilters": true,
               "showSort": true,
               "limit": 24,
-              "filterNames": ""
+              "filterNames": "",
+              "emptyMessage": "No beds match these filters yet. Try removing one, or browse everything we have."
             },
             "blocks": []
           }
@@ -1207,67 +1210,43 @@
         {
           "kind": "inline",
           "section": {
+            "id": "resthaven-collection-help",
+            "type": "custom-content",
+            "enabled": true,
+            "settings": {
+              "styleScheme": "scheme2",
+              "direction": "vertical",
+              "contentAlignment": "center",
+              "gap": 16,
+              "contentWidth": "narrow"
+            },
             "blocks": [
               {
-                "id": "resthaven-collection-strip-1",
-                "type": "trust-point",
+                "id": "resthaven-collection-help-title",
+                "type": "heading",
                 "enabled": true,
                 "settings": {
-                  "text": "Sizes from single to super king",
-                  "icon": "home"
-                },
-                "blocks": []
+                  "text": "Not sure which bed is right?"
+                }
               },
               {
-                "id": "resthaven-collection-strip-2",
-                "type": "trust-point",
+                "id": "resthaven-collection-help-text",
+                "type": "text",
                 "enabled": true,
                 "settings": {
-                  "text": "Choose your colour and fabric",
-                  "icon": "palette"
-                },
-                "blocks": []
+                  "text": "Measure your room, choose drawers or an ottoman lift for storage, then pair the mattress feel you prefer. Every product page lists the exact sizes."
+                }
               },
               {
-                "id": "resthaven-collection-strip-3",
-                "type": "trust-point",
+                "id": "resthaven-collection-help-action",
+                "type": "button",
                 "enabled": true,
                 "settings": {
-                  "text": "Storage options to suit your room",
-                  "icon": "gift"
-                },
-                "blocks": []
-              },
-              {
-                "id": "resthaven-collection-strip-4",
-                "type": "trust-point",
-                "enabled": true,
-                "settings": {
-                  "text": "Secure checkout",
-                  "icon": "shield"
-                },
-                "blocks": []
-              },
-              {
-                "id": "resthaven-collection-strip-5",
-                "type": "trust-point",
-                "enabled": true,
-                "settings": {
-                  "text": "Friendly help before and after you buy",
-                  "icon": "phone"
-                },
-                "blocks": []
+                  "label": "Read our sizing questions",
+                  "href": "/pages/faq"
+                }
               }
-            ],
-            "enabled": true,
-            "id": "resthaven-collection-strip",
-            "type": "trust-strip",
-            "settings": {
-              "layout": "scroll",
-              "speed": "normal",
-              "showIcons": true,
-              "colorScheme": "dark"
-            }
+            ]
           }
         },
         {
@@ -1405,7 +1384,26 @@
             "id": "studio-search",
             "type": "search-results",
             "enabled": true,
-            "settings": {},
+            "settings": {
+              "showSort": true,
+              "showFilters": true,
+              "filterNames": "",
+              "columns": 4
+            },
+            "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "resthaven-search-recently-viewed",
+            "type": "recently-viewed",
+            "enabled": true,
+            "settings": {
+              "heading": "Recently viewed",
+              "limit": 4,
+              "columns": 4
+            },
             "blocks": []
           }
         },

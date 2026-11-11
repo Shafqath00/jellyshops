@@ -365,9 +365,30 @@ label { font-size: 14px; }
 .jelly-collection-header-copy { max-width: min(68ch, 100%); color: var(--rh-muted); font-size: 17px; }
 .jelly-collection-count { margin: 0; color: var(--rh-muted); font-size: 14px; }
 .jelly-collection-header-image { display: block; width: 100%; height: clamp(200px, 26vw, 360px); margin-top: 20px; object-fit: cover; border-radius: var(--rh-radius); }
-.jelly-collection-product-grid { padding-top: 0; }
+/* Banner header: the collection photo behind the title, with a soft dark wash at the foot so the words stay readable. */
+.jelly-collection-header[data-layout="banner"] { position: relative; display: grid; align-items: end; min-height: clamp(300px, 30vw, 420px); padding: 0; overflow: hidden; background: var(--jelly-scheme-4-bg, #1d2333); color: #fff; }
+.jelly-collection-header[data-layout="banner"] > .jelly-collection-header-media { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; object-fit: cover; border-radius: 0; }
+.jelly-collection-header[data-layout="banner"]::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(0deg, color-mix(in srgb, #10131c 72%, transparent) 0%, color-mix(in srgb, #10131c 38%, transparent) 50%, color-mix(in srgb, #10131c 10%, transparent) 100%); }
+.jelly-collection-header[data-layout="banner"] > .jelly-container { position: relative; z-index: 2; gap: 14px; padding-block: 64px 40px; }
+.jelly-collection-header[data-layout="banner"] :is(h1, .jelly-collection-header-copy, .jelly-breadcrumb, .jelly-breadcrumb a, .jelly-read-more) { color: inherit; }
+.jelly-collection-header[data-layout="banner"] .jelly-collection-header-copy { display: grid; gap: 10px; max-width: min(640px, 100%); }
+.jelly-collection-header[data-layout="banner"] .jelly-clamped-text-body { color: color-mix(in srgb, #fff 90%, transparent); }
+.jelly-collection-header[data-layout="banner"] .jelly-breadcrumb :is(ol, li, a, [aria-current]) { color: #fff; }
+.jelly-breadcrumb ol { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 13px; }
+.jelly-breadcrumb li + li::before { content: "/"; margin-right: 6px; opacity: .6; }
+.jelly-breadcrumb a { display: inline-flex; align-items: center; min-height: 24px; text-decoration: none; }
+.jelly-breadcrumb li { display: inline-flex; align-items: center; }
+.jelly-breadcrumb a:hover { text-decoration: underline; }
+.jelly-read-more { justify-self: start; min-height: 28px; padding: 0; border: 0; background: none; color: inherit; font: inherit; font-size: 14px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+/* The product count lives in the toolbar under the header, so the header does not repeat it. */
+.jelly-collection-header .jelly-collection-count { display: none; }
+.jelly-collection-product-grid { padding-top: clamp(32px, 4vw, 48px); }
 .jelly-list-browser[data-layout="sidebar"] { grid-template-rows: auto 1fr; }
-.jelly-list-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0; margin-bottom: 28px; border-block: 1px solid var(--rh-line); }
+.jelly-list-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 14px 0; margin-bottom: 28px; border-block: 1px solid var(--rh-line); }
+.jelly-list-toolbar .jelly-list-count { margin: 0 auto 0 0; }
+.jelly-list-filter-toggle { display: inline-flex; align-items: center; gap: 8px; }
+.jelly-list-browser[data-filters-open] .jelly-list-filters { margin-bottom: 28px; padding: 20px; border-radius: var(--rh-radius-lg); background: var(--j-color-surface); }
+.jelly-list-browser[data-layout="sidebar"][data-filters-open] .jelly-list-filters { padding: 0; background: none; }
 .jelly-list-count { color: var(--rh-muted); font-size: 14px; }
 .jelly-list-sort { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; }
 .jelly-list-sort select { min-height: 42px; padding-right: 36px; border-radius: 999px; }
@@ -386,7 +407,7 @@ label { font-size: 14px; }
 .jelly-search-shell form > label { grid-column: 1 / -1; }
 .jelly-search-shell form input { width: 100%; min-height: 52px; padding-inline: 22px; border-radius: 999px; }
 .jelly-search-shell form button { min-height: 52px; padding: 0 28px; border: 1px solid var(--j-color-primary); border-radius: var(--jelly-radius-button, 999px); background: var(--j-color-primary); color: var(--j-color-on-primary); font: inherit; font-weight: 600; cursor: pointer; }
-.jelly-search-shell label { color: var(--rh-muted); font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.jelly-search-shell form > label { color: var(--rh-muted); font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .jelly-search-status { margin: 0 0 32px; color: var(--rh-muted); }
 .jelly-search-results { padding-top: clamp(40px, 5vw, 72px); }
 
@@ -593,4 +614,9 @@ label { font-size: 14px; }
   .jelly-product-price strong { font-size: 26px; }
   .jelly-gallery-thumbs { display: none; }
   .jelly-search-shell form { grid-template-columns: minmax(0, 1fr); }
+  .jelly-list-toolbar { gap: 10px; }
+  .jelly-list-toolbar .jelly-list-count { order: 3; flex-basis: 100%; font-size: 13px; }
+  .jelly-list-sort { margin-left: auto; }
+  .jelly-list-sort > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .jelly-collection-header[data-layout="banner"] > .jelly-container { padding-block: 48px 28px; }
 }
