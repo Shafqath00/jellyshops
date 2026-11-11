@@ -21,6 +21,8 @@ export interface StorefrontProductCardData {
   moreSwatches?: number;
   /** Average star rating and number of published reviews; shown when the theme's "Show star ratings" setting is on. */
   rating?: { average: number; count: number };
+  /** Second photo; shown when the shopper points at the card, if the theme's "Second photo on hover" setting is on. */
+  hoverImageUrl?: string;
 }
 
 /**
@@ -39,6 +41,8 @@ const SAFE_IMAGE = /^(https:\/\/|\/api\/public\/media\/)[^\s"'<>()]+$/;
 function CardMedia({ product }: { product: StorefrontProductCardData }) {
   return <div className="jelly-product-card-media" data-card-part="media">
     {product.imageUrl ? <img src={product.imageUrl} alt={product.name} loading="lazy" decoding="async" /> : <span className="jelly-product-card-placeholder" aria-hidden="true" />}
+    {/* Decorative: the name is already on the first photo. Hidden unless the theme setting is on. */}
+    {product.imageUrl && product.hoverImageUrl && <img className="jelly-product-card-hover-image" src={product.hoverImageUrl} alt="" aria-hidden="true" loading="lazy" decoding="async" />}
     {product.badge && <span className="jelly-product-card-badge">{product.badge}</span>}
     {/* Hidden unless the theme's "Sale badge" setting is on. */}
     {!product.badge && product.compareAtPrice && <span className="jelly-product-card-badge" data-badge="sale">Sale</span>}

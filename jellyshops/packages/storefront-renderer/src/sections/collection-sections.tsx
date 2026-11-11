@@ -1,11 +1,11 @@
 import { titleLength } from "./shared";
-import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { elementProps } from "../element-style";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import type { CollectionPresentationContext, PublicProduct } from "../types";
 import { choice } from "./shared";
-import { normalizeRichTextDocument, safeRichTextHref, type SectionNode } from "@jelly/storefront-schema";
+import { normalizeRichTextDocument, safeRichTextHref, type CatalogQuery, type SectionNode } from "@jelly/storefront-schema";
 import { renderBlocks } from "./rich-text";
 import { PRODUCT_LIST_LAYOUTS, ProductListBrowser, type ProductListLayout, type StoryTile } from "./product-list-browser";
 import { resolveStorefrontHref } from "../runtime-context";
@@ -101,8 +101,20 @@ export function storyTiles(blocks: SectionNode["blocks"] | undefined, storeSlug?
   });
 }
 
+/** The collection id of the Shop all page (every product in the store). */
+export const SHOP_ALL_COLLECTION_ID = "all-products";
+
+/** "Filters to show": names separated by commas, in order. */
+export function filterNamesSetting(value: unknown): string[] {
+  return typeof value === "string" ? value.split(",").map((name) => name.trim()).filter(Boolean).slice(0, 10) : [];
+}
+
 export function CollectionProductGridSection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown>; blocks?: SectionNode["blocks"] } }) {
   const presentation = collectionContext(context);
+  // On the live store the backend filters and pages the collection (Shop all asks for the whole store).
+  const browse = context.mode === "published" ? context.commerce?.browseProducts : undefined;
+  const collectionId = presentation?.collection.id;
+  const remote = useMemo(() => browse ? (query: CatalogQuery) => browse({ ...query, ...(collectionId && collectionId !== SHOP_ALL_COLLECTION_ID ? { collectionId } : {}) }) : undefined, [browse, collectionId]);
   if (!presentation) return null;
   const layout = (PRODUCT_LIST_LAYOUTS as readonly unknown[]).includes(section.settings.listLayout) ? section.settings.listLayout as ProductListLayout : "grid";
   // Sorting and filters are on unless the merchant turned them off (registry defaultValue: true).
@@ -115,7 +127,7 @@ export function CollectionProductGridSection({ context, section }: { context: St
   // One product list for every collection page, in the preview, the editor and the live store ("Products per page"
   // is the page size; "Show more" adds the next page).
   return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer><h2 className="jelly-visually-hidden">Products</h2>
-    <ProductListBrowser products={presentation.products} columns={columns} pageSize={limit} showSort={showSort} showFilters={showFilters} emptyMessage={emptyMessage} layout={layout} stories={layout === "editorial" ? storyTiles(section.blocks, context.storeSlug) : []} />
+    <ProductListBrowser products={presentation.products} columns={columns} pageSize={limit} showSort={showSort} showFilters={showFilters} emptyMessage={emptyMessage} layout={layout} stories={layout === "editorial" ? storyTiles(section.blocks, context.storeSlug) : []} filterNames={filterNamesSetting(section.settings.filterNames)} remote={remote} />
   </StorefrontContainer></section>;
 }
 

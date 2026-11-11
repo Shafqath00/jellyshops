@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { SHOP_ALL_COLLECTION_ID } from "@jelly/storefront-renderer";
 import { useParams, useSearchParams } from "next/navigation";
 import { useThemePresentation } from "@/features/storefront/components/storefront-shell";
 import { formatMoney } from "@/lib/domain";
@@ -16,7 +17,7 @@ import { useInitialStorefrontPublication } from "@/features/storefront/storefron
 import { StorefrontPageLoading } from "@/features/storefront/components/storefront-page-loading";
 
 /** "Shop all": every product, drawn with the store's own collection page (the collection "all"). */
-const ALL_PRODUCTS = { id: "all-products", slug: "all", name: "All products", description: "" };
+const ALL_PRODUCTS = { id: SHOP_ALL_COLLECTION_ID, slug: "all", name: "All products", description: "" };
 
 export default function ShopPage() {
   const { storeSlug } = useParams<{ storeSlug: string }>();

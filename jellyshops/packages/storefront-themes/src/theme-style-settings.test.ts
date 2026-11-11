@@ -149,3 +149,8 @@ it("keeps the theme's own card for the default and unknown card styles", () => {
   expect(cardLayoutAttribute({ "--jelly-card-layout": "zigzag" })).toBeUndefined();
   expect(cardLayoutAttribute(undefined)).toBeUndefined();
 });
+
+it("turns on the second photo on hover only when asked", () => {
+  expect(resolveThemeStyleTokens({}, undefined)["--jelly-card-hover-image-display"]).toBeUndefined();
+  expect(resolveThemeStyleTokens({ productCard: { hoverImage: true } }, undefined)["--jelly-card-hover-image-display"]).toBe("block");
+});

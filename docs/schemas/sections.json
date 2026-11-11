@@ -18835,9 +18835,17 @@
         {
           "type": "checkbox",
           "key": "showFilters",
-          "label": "Let shoppers filter by availability, price and colour",
+          "label": "Let shoppers filter products",
           "group": "content",
           "defaultValue": true
+        },
+        {
+          "type": "text",
+          "key": "filterNames",
+          "label": "Filters to show",
+          "description": "Names of your product options or tag groups, separated by commas, in the order you want (for example Size, Colour, Fabric). Tags written Fabric:Velvet make a Fabric filter. Leave empty to show every filter.",
+          "group": "content",
+          "maxLength": 300
         },
         {
           "type": "select",
@@ -18890,6 +18898,10 @@
           },
           "showFilters": {
             "type": "boolean"
+          },
+          "filterNames": {
+            "type": "string",
+            "maxLength": 300
           },
           "listLayout": {
             "type": "string",
@@ -19001,9 +19013,17 @@
         {
           "type": "checkbox",
           "key": "showFilters",
-          "label": "Let shoppers filter by availability, price and colour",
+          "label": "Let shoppers filter products",
           "group": "content",
           "defaultValue": true
+        },
+        {
+          "type": "text",
+          "key": "filterNames",
+          "label": "Filters to show",
+          "description": "Names of your product options or tag groups, separated by commas, in the order you want (for example Size, Colour, Fabric). Tags written Fabric:Velvet make a Fabric filter. Leave empty to show every filter.",
+          "group": "content",
+          "maxLength": 300
         },
         {
           "type": "range",
@@ -19023,6 +19043,10 @@
           },
           "showFilters": {
             "type": "boolean"
+          },
+          "filterNames": {
+            "type": "string",
+            "maxLength": 300
           },
           "columns": {
             "type": "integer",

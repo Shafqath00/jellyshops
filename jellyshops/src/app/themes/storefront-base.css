@@ -1521,3 +1521,25 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 
 /* Recently viewed (sections/recently-viewed.tsx): the note shown only in the theme editor. */
 :where(.jelly-recently-viewed-note) { margin: 0 0 16px; font-size: 14px; color: var(--j-color-muted, inherit); }
+
+/*
+ * Second photo on hover (theme setting Product cards > "Show the second photo on hover", token
+ * --jelly-card-hover-image-display). Fades in over the first photo on pointer devices only.
+ */
+:where([data-jelly-theme] .jelly-product-card-media) { position: relative; }
+[data-jelly-theme] .jelly-product-card .jelly-product-card-hover-image {
+  display: var(--jelly-card-hover-image-display, none);
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  opacity: 0; transition: opacity 250ms ease; pointer-events: none;
+}
+@media (hover: hover) {
+  [data-jelly-theme] .jelly-product-card:is(:hover, :focus-within) .jelly-product-card-hover-image { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-jelly-theme] .jelly-product-card .jelly-product-card-hover-image { transition: none; }
+}
+
+/* Product list filters with counts (sections/product-list-browser.tsx). */
+:where(.jelly-list-values) { display: grid; gap: 4px; max-height: 280px; overflow-y: auto; }
+:where(.jelly-list-value-count) { margin-left: 4px; color: var(--j-color-muted, inherit); font-size: 0.9em; }
+:where(.jelly-list-check[data-empty="true"]) { opacity: 0.55; }

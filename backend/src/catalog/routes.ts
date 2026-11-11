@@ -1,4 +1,5 @@
 import { assertMediaInput } from "./product-media.js";
+import { createCatalogBrowser } from "./browse.js";
 import { Router } from "express";
 import { z } from "zod";
 import { requireMerchant, requireStorePermission } from "../auth/middleware.js";
@@ -180,8 +181,40 @@ export function createCatalogAdminRouter(service: AdminCatalogService, authProvi
   return router;
 }
 
+const filterRecordSchema = z.preprocess((raw) => { if (typeof raw !== "string") return raw; try { return JSON.parse(raw); } catch { return null; } }, z.record(z.string().min(1).max(60), z.array(z.string().min(1).max(80)).max(40)).refine((value) => Object.keys(value).length <= 10));
+/** Query of the live store's product list (collection pages, Shop all, search). Prices are in minor units. */
+const browseSchema = z.object({
+  collectionId: z.string().min(1).max(160).optional(),
+  q: z.string().trim().max(120).optional(),
+  sort: z.enum(["featured", "price-asc", "price-desc", "name-asc"]).optional(),
+  inStock: z.enum(["true", "false"]).transform((value) => value === "true").optional(),
+  min: z.coerce.number().int().nonnegative().max(2147483647).optional(),
+  max: z.coerce.number().int().nonnegative().max(2147483647).optional(),
+  filter: filterRecordSchema.optional(),
+  filterNames: z.string().max(600).optional(),
+  offset: z.coerce.number().int().min(0).max(10000).optional(),
+  limit: z.coerce.number().int().min(1).max(48).optional(),
+});
+
 export function createPublicCatalogRouter(service: PublicCatalogService): Router {
   const router = Router({ mergeParams: true });
+  const browser = createCatalogBrowser(service);
+  router.get<{ storeId: string }>("/browse", async (request, response) => {
+    const input = browseSchema.parse(request.query);
+    response.setHeader("Cache-Control", "public, max-age=30");
+    response.json(await browser.browse(String(request.params.storeId), {
+      ...(input.collectionId ? { collectionId: input.collectionId } : {}),
+      ...(input.q ? { query: input.q } : {}),
+      sort: input.sort,
+      inStock: input.inStock,
+      minPriceMinor: input.min,
+      maxPriceMinor: input.max,
+      filters: input.filter,
+      filterNames: input.filterNames ? input.filterNames.split(",").map((name) => name.trim()).filter(Boolean) : [],
+      offset: input.offset,
+      limit: input.limit,
+    }));
+  });
   router.get<{ storeId: string }>("/products", async (request, response) => {
     const { status: _status, ...input } = productListSchema.parse(request.query);
     response.json(await service.listPublicProducts(String(request.params.storeId), input));
