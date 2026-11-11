@@ -1,5 +1,6 @@
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import { elementProps } from "../element-style";
+import { isMeasurement } from "./product-dimensions";
 import type { SectionNode } from "@jelly/storefront-schema";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { choice, headingHidden, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
@@ -30,7 +31,9 @@ function productSpecifications(context: StorefrontRuntimeContext): Array<[string
  * trial period). A product row wins over a fixed row with the same name.
  */
 export function ProductSpecificationsSection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
-  const own = section.settings.showProductSpecifications === false ? [] : productSpecifications(context);
+  const all = section.settings.showProductSpecifications === false ? [] : productSpecifications(context);
+  // With a Dimensions section on the page the merchant can leave the measurements to it.
+  const own = section.settings.hideMeasurements === true ? all.filter(([, value]) => !isMeasurement(value)) : all;
   const taken = new Set(own.map(([label]) => label.toLowerCase()));
   const fixed = visibleBlocks(section, "spec-row").flatMap((block) => {
     const label = stringValue(block.settings, "label").trim();

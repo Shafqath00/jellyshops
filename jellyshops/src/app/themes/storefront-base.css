@@ -1543,3 +1543,39 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 :where(.jelly-list-values) { display: grid; gap: 4px; max-height: 280px; overflow-y: auto; }
 :where(.jelly-list-value-count) { margin-left: 4px; color: var(--j-color-muted, inherit); font-size: 0.9em; }
 :where(.jelly-list-check[data-empty="true"]) { opacity: 0.55; }
+
+/* Label over the main product photo (Product gallery > "Label on the photo"). Uses the theme's badge colours. */
+:where(.jelly-gallery-stage, .jelly-product-gallery-item) { position: relative; }
+:where(.jelly-gallery-badge) {
+  position: absolute; top: 12px; left: 12px; z-index: 2; max-width: calc(100% - 24px); margin: 0; padding: 6px 12px;
+  background: var(--jelly-badge-bg, var(--theme-text, #1c1b19)); color: var(--jelly-badge-text, var(--theme-background, #fff));
+  border-radius: var(--jelly-badge-radius, 4px); font-size: 13px; font-weight: 600; line-height: 1.3; pointer-events: none;
+}
+
+/* Dimensions (sections/product-dimensions.tsx): lettered measurements beside an optional diagram, with a cm/inches switch. */
+:where(.jelly-dimensions-header) { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+:where(.jelly-dimensions-header h2) { margin: 0; }
+:where(.jelly-dimensions-units) { display: inline-flex; border: 1px solid var(--j-color-border, currentColor); border-radius: var(--j-radius-pill, 999px); padding: 2px; }
+:where(.jelly-dimensions-units button) { min-width: 44px; min-height: 36px; padding: 0 14px; border: 0; border-radius: inherit; background: none; color: inherit; font: inherit; cursor: pointer; }
+:where(.jelly-dimensions-units button[aria-pressed="true"]) { background: var(--j-color-text, #1c1b19); color: var(--j-color-bg, #fff); }
+:where(.jelly-dimensions-size) { margin: 12px 0 0; }
+:where(.jelly-dimensions-body) { display: grid; gap: 24px; margin-top: 20px; align-items: center; }
+@media (min-width: 768px) { :where(.jelly-dimensions-body[data-diagram="true"]) { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+:where(.jelly-dimensions-diagram) { width: 100%; height: auto; border-radius: var(--j-radius-md, 8px); }
+:where(.jelly-dimensions-list) { display: grid; gap: 0; margin: 0; }
+:where(.jelly-dimensions-list > div) { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--j-color-border, rgba(0, 0, 0, 0.12)); }
+:where(.jelly-dimensions-list dt) { display: flex; align-items: center; gap: 10px; }
+:where(.jelly-dimensions-list dd) { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+:where(.jelly-dimensions-letter) { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--j-color-text, #1c1b19); color: var(--j-color-bg, #fff); font-size: 13px; font-weight: 600; }
+:where(.jelly-dimensions-note) { margin: 12px 0 0; color: var(--j-color-muted, inherit); font-size: 14px; }
+
+/* Other colours of a product family (sections/product-family.tsx): round swatches that link to each product. */
+:where(.jelly-product-family) { margin: 0 0 20px; }
+:where(.jelly-product-family-label) { margin: 0 0 8px; font-weight: 600; }
+:where(.jelly-product-family-label span) { font-weight: 400; }
+:where(.jelly-product-family ul) { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+:where(.jelly-product-family li > :is(a, span)) { display: inline-grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--j-color-border, rgba(0, 0, 0, 0.2)); border-radius: 50%; padding: 3px; }
+:where(.jelly-product-family li > [data-current="true"]) { border: 2px solid var(--j-color-text, #1c1b19); }
+:where(.jelly-product-family a:focus-visible) { outline: 2px solid currentColor; outline-offset: 2px; }
+:where(.jelly-product-family-swatch) { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; overflow: hidden; font-size: 13px; font-weight: 600; }
+:where(.jelly-product-family-swatch[data-empty="true"]) { background: var(--j-color-surface, rgba(0, 0, 0, 0.06)); }

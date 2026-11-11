@@ -281,21 +281,22 @@ export const contentSections: SectionDefinition[] = [
     // A star rating line: "4.8 out of 5 from 1,240 reviews". The merchant types the numbers from their review service.
     type: "rating-summary", category: "content", supportedPages: [...home, "product", "collection", "page"],
     settingsSchema: z.object({
-      heading: z.string().max(120).optional(), rating: z.number().min(0).max(5).optional(), reviewCount: z.number().int().min(0).max(10_000_000).optional(),
+      heading: z.string().max(120).optional(), source: z.enum(["manual", "reviews"]).optional(), rating: z.number().min(0).max(5).optional(), reviewCount: z.number().int().min(0).max(10_000_000).optional(),
       text: z.string().max(160).optional(), link: z.string().max(500).optional(), linkLabel: z.string().max(40).optional(),
       contentAlignment: z.enum(["left", "center"]).optional(), colorScheme: schemeSchema,
     }).passthrough(),
     controls: [
       sectionHeading,
-      { type: "number", key: "rating", label: "Average rating (0 to 5)", group: "content", min: 0, max: 5, step: 0.1 },
-      { type: "number", key: "reviewCount", label: "Number of reviews", description: "Leave at 0 to hide the count.", group: "content", min: 0, max: 10_000_000, step: 1 },
+      { type: "segmented", key: "source", label: "Where the numbers come from", description: "Your store's reviews: the product's own reviews on a product page, all published reviews elsewhere. Hidden until there is a review.", group: "content", options: [{ label: "Typed by you", value: "manual" }, { label: "Your store's reviews", value: "reviews" }] },
+      { type: "number", key: "rating", label: "Average rating (0 to 5)", group: "content", min: 0, max: 5, step: 0.1, showWhen: { key: "source", equals: "manual" }, visibleWhenSaved: true },
+      { type: "number", key: "reviewCount", label: "Number of reviews", description: "Leave at 0 to hide the count.", group: "content", min: 0, max: 10_000_000, step: 1, showWhen: { key: "source", equals: "manual" }, visibleWhenSaved: true },
       { type: "text", key: "text", label: "Text after the rating", description: "Use {count} for the number of reviews, for example: from {count} reviews.", group: "content", maxLength: 160 },
       { type: "link", key: "link", label: "Link to your reviews", description: "Optional.", group: "content", dynamicTypes: urlTypes },
       { type: "text", key: "linkLabel", label: "Link text", group: "content", maxLength: 40 },
       { type: "segmented", key: "contentAlignment", label: "Alignment", group: "layout", options: [{ label: "Left", value: "left" }, { label: "Center", value: "center" }] },
       colorScheme,
     ],
-    allowedBlockTypes: [], defaultSettings: { rating: 4.8, reviewCount: 0, text: "from {count} reviews", linkLabel: "Read reviews", contentAlignment: "center" }, defaultBlocks: [], responsiveFields: [],
+    allowedBlockTypes: [], defaultSettings: { source: "manual", rating: 4.8, reviewCount: 0, text: "from {count} reviews", linkLabel: "Read reviews", contentAlignment: "center" }, defaultBlocks: [], responsiveFields: [],
     presets: [{ id: "rating-summary", label: "Rating", category: "content" }],
   }
   ,{

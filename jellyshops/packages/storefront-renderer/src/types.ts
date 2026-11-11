@@ -35,6 +35,8 @@ export interface ProductPresentationContext {
   };
   wishlistControl?: ReactNode;
   relatedProducts: PublicProduct[];
+  /** Other products of the same family (tag `family:<name>`), usually one per colour; the product page links them as swatches. */
+  family?: { label: string; members: Array<{ id: string; label: string; href: string; current: boolean; color?: string; image?: string }> };
 }
 export type StorefrontPageContext =
   | { pageType: "home"; resource: null }

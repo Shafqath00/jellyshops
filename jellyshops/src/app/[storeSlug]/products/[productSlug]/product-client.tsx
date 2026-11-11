@@ -14,6 +14,7 @@ import type { PersonalisationEntry } from "@jelly/storefront-schema";
 import { getVisibleOptions, toggleSelection, validateProductSelections } from "@/lib/product-builder";
 import { createProductPresentationContext } from "@/features/storefront/product-presentation";
 import { productCardData } from "@/features/storefront/product-card-data";
+import { productFamily } from "@/features/storefront/product-family";
 import { useStorefrontCatalogStatus } from "@/features/commerce/components/storefront-catalog-sync";
 import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
 import { loadPublicStorefrontPublication, type PublicStorefrontPublication } from "@/features/storefront/public-storefront-api";
@@ -75,6 +76,11 @@ export default function ProductPage() {
     showPersonalisationProblems: personalisationTried,
     relatedProducts: visibleProducts.filter((item) => item.id !== product.id && ((item.collectionIds ?? []).some((id) => (product.collectionIds ?? []).includes(id)) || (item.primaryCategoryId && item.primaryCategoryId === product.primaryCategoryId))).slice(0, 4).map((item) => productCardData(item, `/${store.slug}/products/${item.slug}`, store.currency)),
   }) : undefined;
+  if (productPresentation && store && product) {
+    // Other colours of the same design (products tagged family:<name>) link to each other.
+    const family = productFamily(product, repository.listProducts(storeSlug), store.slug);
+    if (family) productPresentation.family = family;
+  }
   if (productPresentation?.personalisation) {
     // After a refused add, each field shows what is missing.
     const add = productPresentation.addToCart;

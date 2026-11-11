@@ -22,11 +22,27 @@ function Stars({ rating }: { rating: number }) {
  * The numbers are typed by the merchant from their review service; nothing is invented, so with no
  * rating it stays hidden on the live store.
  */
+/**
+ * The rating to show when the section uses the store's reviews: the product's own on a product page, otherwise every
+ * product's published reviews together (weighted by how many each has).
+ */
+export function storeReviewRating(ratings: Record<string, { average: number; count: number }> | undefined, productId?: string): { rating: number; count: number } {
+  if (!ratings) return { rating: 0, count: 0 };
+  const entries = productId ? [ratings[productId]].filter(Boolean) : Object.values(ratings);
+  const count = entries.reduce((sum, entry) => sum + (entry && entry.count > 0 ? entry.count : 0), 0);
+  if (!count) return { rating: 0, count: 0 };
+  const total = entries.reduce((sum, entry) => sum + (entry && entry.count > 0 ? entry.average * entry.count : 0), 0);
+  return { rating: Math.round((total / count) * 10) / 10, count };
+}
+
 export function RatingSummarySection({ section, context, mode = "published" }: { section: SectionNode; context?: StorefrontRuntimeContext; mode?: RendererMode }) {
   const settings = section.settings;
-  const rating = typeof settings.rating === "number" && Number.isFinite(settings.rating) ? Math.min(5, Math.max(0, settings.rating)) : 0;
+  const fromReviews = settings.source === "reviews";
+  const productId = context?.page?.pageType === "product" ? context.page.resource.id : undefined;
+  const live = fromReviews ? storeReviewRating(context?.commerce?.ratings, productId) : undefined;
+  const rating = live ? live.rating : typeof settings.rating === "number" && Number.isFinite(settings.rating) ? Math.min(5, Math.max(0, settings.rating)) : 0;
   if (rating <= 0 && mode !== "editor") return null;
-  const count = numberValue(settings, "reviewCount", 0, 0, 10_000_000);
+  const count = live ? live.count : numberValue(settings, "reviewCount", 0, 0, 10_000_000);
   const countText = count.toLocaleString("en-GB");
   const after = stringValue(settings, "text").trim();
   const afterText = count > 0 ? after.replaceAll("{count}", countText) : after.includes("{count}") ? "" : after;
@@ -42,7 +58,7 @@ export function RatingSummarySection({ section, context, mode = "published" }: {
       {afterText && <span>{afterText}</span>}
       {href && linkLabel && <a href={href}>{linkLabel}</a>}
     </p>
-    {rating <= 0 && <p className="jelly-editor-hint">Type your average rating (from your review service) to show this on your live store.</p>}
+    {rating <= 0 && <p className="jelly-editor-hint">{fromReviews ? "Shows once your store has a published review." : "Type your average rating (from your review service) to show this on your live store."}</p>}
   </StorefrontContainer></section>;
 }
 

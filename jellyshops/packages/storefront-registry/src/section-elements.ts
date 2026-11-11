@@ -66,6 +66,7 @@ export const SECTION_ELEMENTS: Record<string, ElementDefinition[]> = {
   "logo-list": [heading()],
   "metaobject-list": [heading()],
   "product-specifications": [heading()],
+  "product-dimensions": [heading()],
   "blog-header": [intro()],
 };
 

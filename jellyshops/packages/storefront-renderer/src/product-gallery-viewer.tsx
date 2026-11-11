@@ -27,7 +27,14 @@ type GalleryProps = {
   ratio?: GalleryRatio;
   /** Full-screen viewing with zoom. */
   zoom?: boolean;
+  /** A short label over the main photo ("60-night trial"). */
+  badge?: string;
 };
+
+function GalleryBadge({ text }: { text?: string }) {
+  const label = text?.trim();
+  return label ? <p className="jelly-gallery-badge">{label}</p> : null;
+}
 
 /**
  * The product photo gallery (Product gallery > Thumbnails): one photo at a time in a fixed-shape frame, swipe or
@@ -39,7 +46,7 @@ export function ProductGalleryViewer(props: GalleryProps) {
   return <GalleryContent key={props.media.map((item) => `${item.id}:${item.url}`).join("|")} {...props} />;
 }
 
-function GalleryContent({ media, title, fit = "contain", thumbnails = "below", ratio, zoom = true }: GalleryProps) {
+function GalleryContent({ media, title, fit = "contain", thumbnails = "below", ratio, zoom = true, badge }: GalleryProps) {
   const [active, setActive] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const track = useRef<HTMLUListElement>(null);
@@ -87,6 +94,7 @@ function GalleryContent({ media, title, fit = "contain", thumbnails = "below", r
         <button type="button" className="jelly-gallery-arrow" data-direction="next" onClick={() => show(active + 1)} disabled={active === count - 1} aria-label="Next photo"><span aria-hidden="true">›</span></button>
         <p className="jelly-gallery-counter" aria-live="polite">{active + 1} / {count}</p>
       </>}
+      <GalleryBadge text={badge} />
       {zoom && <button type="button" className="jelly-gallery-expand" onClick={() => setLightbox(active)} aria-label={`View photo ${active + 1} full screen`}><span aria-hidden="true">⤢</span></button>}
     </div>
     {count > 1 && <div className="jelly-gallery-thumbs" role="group" aria-label="Product photos">
@@ -146,7 +154,7 @@ export function GalleryLightbox({ media, title, start, onClose }: { media: Produ
  * Product gallery > Large first image / Grid: every photo on the page at once, each in the same-shape frame, and a
  * click opens the full-screen viewer at that photo.
  */
-export function ProductPhotoGrid({ media, title, fit = "cover", ratio, zoom = true, layout }: { media: ProductMediaLike[]; title: string; fit?: "contain" | "cover"; ratio?: GalleryRatio; zoom?: boolean; layout: "stacked" | "grid" }) {
+export function ProductPhotoGrid({ media, title, fit = "cover", ratio, zoom = true, layout, badge }: { media: ProductMediaLike[]; title: string; fit?: "contain" | "cover"; ratio?: GalleryRatio; zoom?: boolean; layout: "stacked" | "grid"; badge?: string }) {
   const [lightbox, setLightbox] = useState<number | null>(null);
   const style = { "--jelly-gallery-ratio": galleryAspectRatio(ratio, media), "--jelly-gallery-fit": fit } as CSSProperties;
   return <div className="jelly-photo-grid" data-layout={layout} data-count={media.length} style={style}>
@@ -155,6 +163,7 @@ export function ProductPhotoGrid({ media, title, fit = "cover", ratio, zoom = tr
       const image = <img src={photo.url} srcSet={productMediaSrcSet(photo)} sizes={layout === "stacked" && index === 0 ? SIZES : "(min-width: 1024px) 25vw, 50vw"} width={photo.width ?? undefined} height={photo.height ?? undefined} alt={photo.altText || title} loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : "auto"} />;
       return <figure key={photo.id} className="jelly-product-gallery-item">
         {zoom ? <button type="button" onClick={() => setLightbox(index)} aria-label={`View photo ${index + 1} of ${media.length} full screen`}>{image}</button> : image}
+        {index === 0 && <GalleryBadge text={badge} />}
       </figure>;
     })}
     {zoom && lightbox !== null && <GalleryLightbox media={media} title={title} start={lightbox} onClose={() => setLightbox(null)} />}
