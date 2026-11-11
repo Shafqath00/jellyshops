@@ -49,7 +49,7 @@ Measured on `/theme-preview/jelly-resthaven` (1280px and 390px):
 2. **Home page** (done 2026-11-11) – new starter order: hero with promise cards, shop by category (bento tiles with "From £"), best
    sellers, shop by room, mattress story, reviews, sleep guides and help, newsletter in the footer only.
 3. **Collection and search** (done 2026-11-11) – banner header, filter sidebar and phone filter drawer look, toolbar, empty states.
-4. **Product page** – gallery, buying box (rating, title, price and savings, finance line, size and colour tiles,
+4. **Product page** (done 2026-11-11) – gallery, buying box (rating, title, price and savings, finance line, size and colour tiles,
    delivery promise, Add to basket), sticky bar, fold-out details, dimensions, reviews, related and recently viewed.
 5. **Bag, slide-out bag, checkout, account, information pages, 404**.
 6. **QA** – desktop/tablet/phone pass, contrast and accessibility (Resthaven Playwright spec), design lint with

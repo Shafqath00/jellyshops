@@ -885,7 +885,10 @@
             "enabled": true,
             "settings": {
               "imageFit": "cover",
-              "layout": "thumbnails"
+              "layout": "thumbnails",
+              "mediaRatio": "landscape",
+              "thumbnailPosition": "below",
+              "enableZoom": true
             },
             "blocks": []
           }
@@ -920,7 +923,8 @@
               "discountChip": "percent",
               "financeMonths": 0,
               "financeText": "or {amount} a month for {months} months",
-              "financeLinkLabel": "Learn more"
+              "financeLinkLabel": "Learn more",
+              "showSpecifications": false
             },
             "blocks": []
           }
@@ -958,37 +962,29 @@
           "section": {
             "blocks": [
               {
-                "id": "resthaven-product-strip-1",
+                "id": "resthaven-product-promise-1",
                 "type": "trust-point",
                 "enabled": true,
                 "settings": {
-                  "text": "Sizes from single to super king",
-                  "icon": "home"
+                  "text": "Delivery options shown before you pay",
+                  "icon": "truck",
+                  "link": "/pages/shipping"
                 },
                 "blocks": []
               },
               {
-                "id": "resthaven-product-strip-2",
+                "id": "resthaven-product-promise-2",
                 "type": "trust-point",
                 "enabled": true,
                 "settings": {
-                  "text": "Choose your colour and fabric",
-                  "icon": "palette"
+                  "text": "Clear returns information",
+                  "icon": "return",
+                  "link": "/pages/returns"
                 },
                 "blocks": []
               },
               {
-                "id": "resthaven-product-strip-3",
-                "type": "trust-point",
-                "enabled": true,
-                "settings": {
-                  "text": "Storage options to suit your room",
-                  "icon": "gift"
-                },
-                "blocks": []
-              },
-              {
-                "id": "resthaven-product-strip-4",
+                "id": "resthaven-product-promise-3",
                 "type": "trust-point",
                 "enabled": true,
                 "settings": {
@@ -998,12 +994,13 @@
                 "blocks": []
               },
               {
-                "id": "resthaven-product-strip-5",
+                "id": "resthaven-product-promise-4",
                 "type": "trust-point",
                 "enabled": true,
                 "settings": {
-                  "text": "Friendly help before and after you buy",
-                  "icon": "phone"
+                  "text": "Help choosing your size",
+                  "icon": "phone",
+                  "link": "/pages/faq"
                 },
                 "blocks": []
               }
@@ -1012,10 +1009,8 @@
             "id": "resthaven-product-strip",
             "type": "trust-strip",
             "settings": {
-              "layout": "scroll",
-              "speed": "normal",
-              "showIcons": true,
-              "colorScheme": "dark"
+              "layout": "row",
+              "showIcons": true
             }
           }
         },
@@ -1026,7 +1021,9 @@
             "type": "product-description",
             "enabled": true,
             "settings": {
-              "heading": "About this bed"
+              "heading": "About this bed",
+              "layout": "expandable",
+              "startOpen": true
             },
             "blocks": []
           }
@@ -1039,8 +1036,9 @@
             "id": "resthaven-product-specs",
             "type": "product-specifications",
             "settings": {
-              "heading": "Dimensions and details",
-              "hideMeasurements": true
+              "heading": "Details and materials",
+              "hideMeasurements": true,
+              "layout": "expandable"
             }
           }
         },
@@ -1079,7 +1077,10 @@
             "id": "studio-related",
             "type": "related-products",
             "enabled": true,
-            "settings": {},
+            "settings": {
+              "heading": "You may also like",
+              "limit": 4
+            },
             "blocks": []
           }
         },
