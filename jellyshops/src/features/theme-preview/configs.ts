@@ -148,11 +148,11 @@ export const jellyResthavenPreview: ThemePreviewConfig = {
   themeId: "jelly-resthaven",
   packId: "jelly-resthaven",
   name: "Resthaven",
-  stageColor: "#e8dfd8",
+  stageColor: "#e9e3da",
   guide: {
     heading: "Your best sleep starts here",
     subheading: "New and trending",
-    body: "Headings are set in Playfair Display and body text in Inter. Warm linen backgrounds, plum buttons and clear prices keep the focus on the beds.",
+    body: "Headings are set in Cormorant Garamond and body text in Figtree. Oat backgrounds, midnight buttons, brass highlights and clear prices keep the focus on the beds.",
     announcement: "Find the bed and mattress that fit your space and your sleep",
     footerText: "Beds, mattresses and help choosing the right one for your room.",
   },

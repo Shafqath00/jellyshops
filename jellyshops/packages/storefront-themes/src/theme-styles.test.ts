@@ -7,22 +7,23 @@ import { applyThemeStyle, listThemeStyles } from "./theme-styles";
 const defaults = (themeId: string) => structuredClone((getThemeDefinition(themeId as never).manifest as { settingsDefaults: Record<string, unknown> }).settingsDefaults);
 const get = (settings: Record<string, unknown>, path: string) => path.split(".").reduce<unknown>((value, key) => (value as Record<string, unknown> | undefined)?.[key], settings);
 
-it("ships four designer styles for Jelly Minimal and Jelly Avenue, none for other themes", () => {
+it("ships four designer styles for Jelly Minimal, Jelly Avenue and Resthaven, none for other themes", () => {
   expect(listThemeStyles("jelly-signature").map((style) => style.name)).toEqual(["Warm sand", "Ink and paper", "Sage", "Blush"]);
   expect(listThemeStyles("jelly-avenue").map((style) => style.name)).toEqual(["Gallery", "Midnight", "Stone", "Coastal"]);
-  expect(listThemeStyles("jelly-resthaven")).toEqual([]);
+  expect(listThemeStyles("jelly-resthaven").map((style) => style.name)).toEqual(["Midnight oat", "Heather", "Sage linen", "Charcoal and stone"]);
+  expect(listThemeStyles("jelly-diode")).toEqual([]);
   expect(listThemeStyles(undefined)).toEqual([]);
 });
 
 it("makes each theme's first style its default look", () => {
-  for (const themeId of ["jelly-signature", "jelly-avenue"]) {
+  for (const themeId of ["jelly-signature", "jelly-avenue", "jelly-resthaven"]) {
     const base = defaults(themeId);
     expect(applyThemeStyle(base, listThemeStyles(themeId)[0]), themeId).toEqual(base);
   }
 });
 
 it("gives every style settings the theme accepts, readable colours, and the dark scheme in the theme's dark slot", () => {
-  for (const [themeId, darkSlot] of [["jelly-signature", "scheme4"], ["jelly-avenue", "scheme3"]] as const) {
+  for (const [themeId, darkSlot] of [["jelly-signature", "scheme4"], ["jelly-avenue", "scheme3"], ["jelly-resthaven", "scheme4"]] as const) {
     for (const style of listThemeStyles(themeId)) {
       const settings = applyThemeStyle(defaults(themeId), style);
       expect(validateThemeSettings(themeId, settings), `${themeId} ${style.id}`).toEqual([]);

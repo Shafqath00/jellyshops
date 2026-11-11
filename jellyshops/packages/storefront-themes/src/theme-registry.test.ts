@@ -105,7 +105,10 @@ it("can preserve overrides or reset colors when applying a preset", () => {
 it("applies the old globals.css storefront rules only to themes that use them", async () => {
   const { legacyStylesAttribute, usesLegacyStorefrontStyles } = await import("./index");
   // Built-in themes, a folder theme that opts in, and a theme built on a base design follow their data.
-  for (const id of ["minimal", "classic", "fresh-market", "jelly-signature", "jelly-avenue", "jelly-resthaven", "jelly-harbour"]) expect(usesLegacyStorefrontStyles(id), id).toBe(true);
+  for (const id of ["minimal", "classic", "fresh-market", "jelly-signature", "jelly-avenue", "jelly-harbour"]) expect(usesLegacyStorefrontStyles(id), id).toBe(true);
+  // Resthaven was rebuilt on the section defaults (docs/plans/resthaven-redesign.md).
+  expect(usesLegacyStorefrontStyles("jelly-resthaven")).toBe(false);
+  expect(legacyStylesAttribute("jelly-resthaven")).toBe("off");
   // Folder themes without the flag (and so every new or uploaded theme) start from storefront-base.css alone.
   expect(usesLegacyStorefrontStyles("jelly-forma")).toBe(false);
   // Forma, Halo and Diode bring all their own CSS ("own"); other folder themes get the section defaults ("off").
@@ -117,5 +120,6 @@ it("gives the section defaults to every theme without the old rules unless it op
   const { usesSectionDefaults } = await import("./index");
   for (const id of ["jelly-forma", "jelly-halo", "jelly-diode"]) expect(usesSectionDefaults(id), id).toBe(false);
   // Themes on the old rules never get them either. A new theme does: see theme-cli scaffold-conformance.test.tsx.
-  for (const id of ["jelly-signature", "jelly-avenue", "jelly-resthaven", "jelly-harbour"]) expect(usesSectionDefaults(id), id).toBe(false);
+  for (const id of ["jelly-signature", "jelly-avenue", "jelly-harbour"]) expect(usesSectionDefaults(id), id).toBe(false);
+  expect(usesSectionDefaults("jelly-resthaven")).toBe(true);
 });

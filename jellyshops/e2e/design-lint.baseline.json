@@ -4,20 +4,8 @@
     "headings|jelly-avenue|Home|desktop",
     "headings|jelly-avenue|Home|mobile",
     "headings|jelly-avenue|Home|tablet",
-    "headings|jelly-resthaven|Home|desktop",
-    "headings|jelly-resthaven|Home|mobile",
-    "headings|jelly-resthaven|Home|tablet",
-    "headings|jelly-resthaven|Product|desktop",
-    "tap-target|jelly-resthaven|404|mobile",
-    "tap-target|jelly-resthaven|Cart|mobile",
-    "tap-target|jelly-resthaven|Collection|mobile",
-    "tap-target|jelly-resthaven|Home|mobile",
-    "tap-target|jelly-resthaven|Page|mobile",
-    "tap-target|jelly-resthaven|Product|mobile",
-    "tap-target|jelly-resthaven|Search|mobile",
     "title-size|jelly-avenue|404|desktop",
     "title-size|jelly-avenue|404|mobile",
-    "title-size|jelly-avenue|404|tablet",
-    "title-size|jelly-resthaven|Page|tablet"
+    "title-size|jelly-avenue|404|tablet"
   ]
 }

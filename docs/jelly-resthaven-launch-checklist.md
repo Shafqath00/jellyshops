@@ -16,7 +16,7 @@ staging merchant and the Stripe sandbox, so a person runs it by hand. Same shape
 | Types, lint and build | `npm run typecheck && npm run lint && npm run build` | Whole frontend |
 | Backend | `npm run typecheck && npm test && npm run build` (from `backend/`) | API, starter installation (including the theme's own main menu), menus with store paths |
 
-After editing `storefront-themes/src/themes/jelly-resthaven/theme.css`, run `node scripts/generate-resthaven-styles.mjs`
+After editing `storefront-themes/src/themes/jelly-resthaven/theme.css`, run `node scripts/generate-theme-assets.mjs jelly-resthaven`
 (writes `jellyshops/src/app/themes/jelly-resthaven.css`). After changing the starter or the shared packages, repack the
 backend copies (`node scripts/prepare-shared-packages.mjs`, then reinstall `@jelly` in `backend/`).
 

@@ -80,7 +80,37 @@ const avenue: ThemeStyle[] = [
   },
 ];
 
-const styles: Record<string, ThemeStyle[]> = { "jelly-signature": minimal, "jelly-avenue": avenue };
+/** Resthaven (beds and bedroom): the dark scheme sits in scheme 4. "Heather" keeps the theme's earlier plum and linen look. */
+const resthaven: ThemeStyle[] = [
+  {
+    id: "midnight-oat", name: "Midnight oat", description: "The original: oat, midnight ink and brass.",
+    swatches: ["#F7F3EE", "#1D2333", "#1D2333", "#7E5F35"],
+    settings: { ...namedSchemes(palette({ background: "#F7F3EE", surface: "#FFFFFF", text: "#1D2333", secondary: "#5E6270", primary: "#1D2333", accent: "#7E5F35", dark: "#1D2333", darkText: "#F7F3EE", soft: "#ECE4D8" }, "#FFFFFF", "scheme4", "#FFFFFF"), ["Oat", "Sand", "White", "Midnight"]), typography: { headingFont: "Cormorant Garamond", bodyFont: "Figtree" }, buttons: { radius: "pill" } },
+  },
+  {
+    id: "heather", name: "Heather", description: "Plum and warm linen with a classic serif.",
+    swatches: ["#F4ECE5", "#33302D", "#7D285D", "#E8D9CE"],
+    settings: { ...namedSchemes(palette({ background: "#F4ECE5", surface: "#FFFFFF", text: "#33302D", secondary: "#665F59", primary: "#7D285D", accent: "#7D285D", dark: "#4A1838", darkText: "#F4ECE5", soft: "#E8D9CE" }, "#FFFFFF", "scheme4", "#FFFFFF"), ["Linen", "Blush", "White", "Plum"]), typography: { headingFont: "Playfair Display", bodyFont: "Figtree" }, buttons: { radius: "soft" } },
+  },
+  {
+    id: "sage-linen", name: "Sage linen", description: "Soft greens for a calm, natural bedroom.",
+    swatches: ["#F4F3EC", "#232821", "#3E5641", "#E1E5D8"],
+    settings: { ...namedSchemes(palette({ background: "#F4F3EC", surface: "#FFFFFF", text: "#232821", secondary: "#596055", primary: "#3E5641", accent: "#56683F", dark: "#2B3A2E", darkText: "#F4F3EC", soft: "#E1E5D8" }, "#FFFFFF", "scheme4", "#FFFFFF"), ["Linen", "Sage", "White", "Forest"]), typography: { headingFont: "Lora", bodyFont: "DM Sans" }, buttons: { radius: "rounded" } },
+  },
+  {
+    id: "charcoal-stone", name: "Charcoal and stone", description: "Quiet greys and black for a modern bedroom.",
+    swatches: ["#F5F4F2", "#1F1F1F", "#1F1F1F", "#E6E2DC"],
+    settings: { ...namedSchemes(palette({ background: "#F5F4F2", surface: "#FFFFFF", text: "#1F1F1F", secondary: "#5C5955", primary: "#1F1F1F", accent: "#6A5E53", dark: "#1F1F1F", darkText: "#F5F4F2", soft: "#E6E2DC" }, "#FFFFFF", "scheme4", "#FFFFFF"), ["Stone", "Clay", "White", "Charcoal"]), typography: { headingFont: "EB Garamond", bodyFont: "Jost" }, buttons: { radius: "square" } },
+  },
+];
+
+/** Gives the four base schemes their names (shown in the editor's "Colour scheme" choices). */
+function namedSchemes<T extends { colorSchemes: Record<string, Record<string, string>> }>(value: T, names: [string, string, string, string]): T {
+  const colorSchemes = Object.fromEntries(Object.entries(value.colorSchemes).map(([id, scheme]) => [id, { ...scheme, name: names[Number(id.replace("scheme", "")) - 1] }]));
+  return { ...value, colorSchemes };
+}
+
+const styles: Record<string, ThemeStyle[]> = { "jelly-signature": minimal, "jelly-avenue": avenue, "jelly-resthaven": resthaven };
 
 /** The designer styles a theme ships (empty for themes without styles). */
 export function listThemeStyles(themeId: string | null | undefined): ThemeStyle[] {
