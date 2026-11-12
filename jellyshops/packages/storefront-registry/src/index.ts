@@ -18,3 +18,4 @@ export { GROUP_CHILD_TYPES } from "./blocks.js";
 export { ELEMENT_ALIGNMENTS, ELEMENT_WEIGHTS, elementControls, elementStyleControls, elementStyleKey, elementStyleProps, elementStyleSchema, BLOCK_ELEMENTS, SECTION_ELEMENTS, sectionElements, type ElementStyleProp } from "./section-elements.js";
 export { PART_BLOCK_PREFIX, PRODUCT_PART_SECTIONS, partBlockType, partSectionType, type ProductPartSection } from "./sections/main-product.js";
 export { breaksEssentialSections, essentialSectionLabels, essentialSectionsProblem } from "./essential-sections.js";
+export { SECTION_DATA_NEEDS, sectionEmptyMessage } from "./section-data.js";

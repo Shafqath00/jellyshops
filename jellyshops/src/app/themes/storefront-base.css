@@ -1655,3 +1655,14 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
   :where([data-jelly-theme]) .jelly-main-product[data-sticky="media"] .jelly-main-product-media,
   :where([data-jelly-theme]) .jelly-main-product[data-sticky="details"] .jelly-main-product-details { position: sticky; top: var(--mp-sticky-top, 24px); }
 }
+
+/*
+ * Editor only: a section that draws nothing says why (its data contract, sectionEmptyMessage in the registry), in
+ * place of an invisible gap. The renderer adds the note to every section frame in the editor; it shows only when the
+ * frame holds nothing else. Never drawn on the live store.
+ */
+.jelly-section-empty { display: none; }
+[data-section-frame]:not(:has(> :not(style, .jelly-section-empty))) > .jelly-section-empty {
+  display: block; margin: 12px var(--j-page-edge, 16px); padding: 16px 20px; border: 1px dashed currentColor; border-radius: 8px;
+  color: var(--j-color-muted, inherit); font: 14px/1.5 system-ui, sans-serif; opacity: .85; cursor: pointer;
+}

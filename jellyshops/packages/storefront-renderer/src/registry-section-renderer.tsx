@@ -1,7 +1,7 @@
 import { translateSection, type RuntimeMenuV4, type SectionNode } from "@jelly/storefront-schema";
 import { CardCartContext, CardCompareContext, CardRatingsContext } from "./product-card";
 import { createElement } from "react";
-import { getSectionDefinition, sectionLabel } from "@jelly/storefront-registry";
+import { getSectionDefinition, sectionEmptyMessage, sectionLabel } from "@jelly/storefront-registry";
 import {
   defaultSectionRenderRegistry,
   type SectionRenderComponent,
@@ -113,5 +113,5 @@ export function RegistrySectionRenderer({
         ? { kind: "block", region, sectionId: section.id, blockId, fieldKey: block?.dataset.editorFieldKey }
         : { kind: "section", region, sectionId: section.id });
     } : undefined}
-  ><SectionCustomCss section={section} /><CardCartContext.Provider value={editor ? undefined : commerce.cart}><CardRatingsContext.Provider value={commerce.ratings}><CardCompareContext.Provider value={editor ? undefined : commerce.compare}>{content}</CardCompareContext.Provider></CardRatingsContext.Provider></CardCartContext.Provider></SectionFrame>;
+  ><SectionCustomCss section={section} /><CardCartContext.Provider value={editor ? undefined : commerce.cart}><CardRatingsContext.Provider value={commerce.ratings}><CardCompareContext.Provider value={editor ? undefined : commerce.compare}>{content}</CardCompareContext.Provider></CardRatingsContext.Provider></CardCartContext.Provider>{editor ? <p className="jelly-section-empty" data-section-empty="">{sectionEmptyMessage(section.type)}</p> : null}</SectionFrame>;
 }
