@@ -35,7 +35,7 @@ describe("validateV4StarterPack", () => {
 
     const wrongPage = getV4StarterPack("fresh-market");
     const page = wrongPage.templates.find(({ type }) => type === "page")!;
-    page.layout.sections = [{ kind: "inline", section: { id: "home-only", type: "hero", enabled: true, settings: {}, blocks: [] } }];
+    page.layout.sections = [{ kind: "inline", section: { id: "product-only", type: "product-purchase", enabled: true, settings: {}, blocks: [] } }];
     expect(validateV4StarterPack(wrongPage).map(({ code }) => code)).toContain("INVALID_SECTION");
   });
 

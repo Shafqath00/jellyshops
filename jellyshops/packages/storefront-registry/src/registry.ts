@@ -12,6 +12,11 @@ import { SECTION_VARIANTS } from "./section-variants.js";
 import { elementStyleControls, elementStyleSchema, sectionElements } from "./section-elements.js";
 import type { ControlDefinition, RegionName, RegistryValidationIssue, SectionDefinition } from "./types.js";
 
+/** Most blocks one section may hold, whatever its own limit (Shopify's limit too). */
+export const MAX_SECTION_BLOCKS = 50;
+/** Most sections one page template may hold, shared sections included. */
+export const MAX_TEMPLATE_SECTIONS = 25;
+
 function prepareSection(definition: SectionDefinition): SectionDefinition {
   // Selectable parts of the section (headings, images, product cards) and their own style settings.
   const elements = sectionElements(definition.type, definition.elements);
@@ -152,7 +157,7 @@ export function validateSectionAgainstRegistry(section: SectionNode, pageType: P
     }
     if (!definition.settingsSchema.safeParse({ ...section.settings, ...values }).success) issues.push({ code: "SETTINGS_INVALID", sectionId: section.id, message: `Section ${device === "mobile" ? "phone" : "tablet"} settings are invalid` });
   }
-  if ((definition.maxBlocks !== undefined && section.blocks.length > definition.maxBlocks) || (definition.minBlocks !== undefined && section.blocks.length < definition.minBlocks)) {
+  if (section.blocks.length > MAX_SECTION_BLOCKS || (definition.maxBlocks !== undefined && section.blocks.length > definition.maxBlocks) || (definition.minBlocks !== undefined && section.blocks.length < definition.minBlocks)) {
     issues.push({ code: "BLOCK_LIMIT_EXCEEDED", sectionId: section.id, message: "Section block limit exceeded" });
   }
   const translationProblem = translationsProblem(section.settings.translations, new Set(translatableKeys(definition.controls)));

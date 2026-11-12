@@ -198,6 +198,9 @@ describe("TemplateService", () => {
       .rejects.toMatchObject({ status: 400, code: "TEMPLATE_HANDLE_RESERVED" });
     await expect(service.createTemplate("store-a", { type: "product", name: "Mattress", handle: "mattress", layout: {} }))
       .rejects.toMatchObject({ status: 400, code: "TEMPLATE_LAYOUT_INVALID", issues: [{ path: "layout.sections" }] });
+    const tooMany = Array.from({ length: 26 }, (_, index) => ({ kind: "inline", section: { id: `s${index}`, type: "rich-text", enabled: true, settings: {}, blocks: [] } }));
+    await expect(service.createTemplate("store-a", { type: "product", name: "Mattress", handle: "mattress", layout: { sections: tooMany } as never }))
+      .rejects.toMatchObject({ status: 400, code: "TEMPLATE_TOO_MANY_SECTIONS" });
     await expect(service.createTemplate("store-a", {
       type: "product",
       name: "Mattress",

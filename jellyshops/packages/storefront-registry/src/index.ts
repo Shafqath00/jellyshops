@@ -1,5 +1,5 @@
 export { defineBlock, defineSection } from "./define.js";
-export { allowedChildBlockTypes, translatableKeys, getBlockDefinition, listBlockDefinitions, getSectionDefinition, listSectionDefinitions, listSectionDefinitionsForPage, registerSection, registerThemeSections, unregisterSection, mobileSettingKeys, validateSectionAgainstRegistry } from "./registry.js";
+export { allowedChildBlockTypes, MAX_SECTION_BLOCKS, MAX_TEMPLATE_SECTIONS, translatableKeys, getBlockDefinition, listBlockDefinitions, getSectionDefinition, listSectionDefinitions, listSectionDefinitionsForPage, registerSection, registerThemeSections, unregisterSection, mobileSettingKeys, validateSectionAgainstRegistry } from "./registry.js";
 export { createPresetSection, createSectionFromDefinition, listSectionPresets } from "./presets.js";
 export { createThemePackDocument, getThemePack, listThemePacks } from "./theme-packs.js";
 export type { BlockDefinition, ControlDefinition, ControlGroup, PresetCategory, PresetThumbnail, ElementDefinition, ElementKind, RegionName, RegistryValidationIssue, RegistryValidationIssueCode, SectionDefinition, SectionPreset } from "./types.js";

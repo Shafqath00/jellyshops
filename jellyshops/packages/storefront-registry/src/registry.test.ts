@@ -106,17 +106,12 @@ it("allows Article sections only on Article templates", () => {
   ]));
 });
 
-it("makes rich text reusable on compatible content templates only", () => {
+it("makes rich text reusable on every page drawn from sections", () => {
   const richText = section("rich-text", [{ id: "story", type: "text", enabled: true, settings: { text: "Our story" } }]);
   richText.settings = { alignment: "center" };
 
-  for (const pageType of ["home", "product", "collection", "page", "blog", "article"] as const) {
+  for (const pageType of ["home", "product", "collection", "page", "blog", "article", "search", "cart", "not-found"] as const) {
     expect(validateSectionAgainstRegistry(richText, pageType)).toEqual([]);
-  }
-  for (const pageType of ["search", "cart", "not-found"] as const) {
-    expect(validateSectionAgainstRegistry(richText, pageType)).toEqual(expect.arrayContaining([
-      expect.objectContaining({ code: "SECTION_NOT_ALLOWED_ON_PAGE" }),
-    ]));
   }
   expect(getSectionDefinition("rich-text")?.settingsSchema.parse(richText.settings)).toEqual({ alignment: "center" });
 });

@@ -1,3 +1,4 @@
+import { MAX_TEMPLATE_SECTIONS } from "@jelly/storefront-registry";
 import { ApiError } from "../../http/errors.js";
 import type { WorkspaceMutationRunner } from "./mutation-runner.js";
 import {
@@ -55,6 +56,8 @@ function normalizeLayout(layout: TemplateLayout): TemplateLayout {
     issues.push({ path: "layout.sections", message: "Layout must list its sections" });
   } else {
     const sectionIds = new Set<string>();
+    // Like Shopify: a page holds at most 25 sections (shared ones included), so pages stay fast and editable.
+    if (layout.sections.length > MAX_TEMPLATE_SECTIONS) throw new ApiError(400, "TEMPLATE_TOO_MANY_SECTIONS", `A page can hold at most ${MAX_TEMPLATE_SECTIONS} sections. Remove some before adding more.`);
     layout.sections.forEach((placement: unknown, index) => {
       const path = `layout.sections.${index}`;
       const record = placement && typeof placement === "object" && !Array.isArray(placement) ? placement as Record<string, unknown> : null;
