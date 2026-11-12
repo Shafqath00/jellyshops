@@ -2,6 +2,7 @@
 import "@app-styles/globals.css";
 import "@theme-styles/section-defaults.css";
 import "@theme-styles/storefront-base.css";
+import "@theme-styles/platform-base.css";
 import "./frame.css";
 import { StrictMode, useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";

@@ -102,10 +102,19 @@
   --j-color-accent: var(--theme-accent, var(--j-color-text));
   --j-color-primary: var(--jelly-color-primary, var(--j-color-text));
   --j-color-on-primary: var(--j-color-bg);
+  --j-color-sale: var(--jelly-badge-bg, #b42318);
+  --j-page-title-size: clamp(2rem, 4.2vw, 3.25rem);
   --j-touch-target: 44px;
   --j-duration-fast: 160ms;
   --j-duration-slow: 600ms;
   --j-ease: cubic-bezier(.2, .7, .2, 1);
+  --j-button-height: var(--j-touch-target);
+  --j-button-padding: 22px;
+  --j-field-height: var(--j-touch-target);
+  --j-color-divider: color-mix(in srgb, var(--j-color-text) 13%, transparent);
+  --j-color-border-strong: color-mix(in srgb, var(--j-color-text) 28%, transparent);
+  --j-color-wash: color-mix(in srgb, var(--j-color-text) 5%, transparent);
+  --j-shadow-overlay: 0 18px 40px -28px color-mix(in srgb, var(--j-color-text) 45%, transparent);
 }
 @media (max-width: 1023px) {
   :where([data-jelly-theme]) {
@@ -226,6 +235,12 @@
   --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
   --j-color-primary: var(--section-text);
   --j-color-on-primary: var(--section-bg);
+}
+:where([data-jelly-theme] [data-section-frame]) {
+  --j-color-divider: color-mix(in srgb, var(--j-color-text) 13%, transparent);
+  --j-color-border-strong: color-mix(in srgb, var(--j-color-text) 28%, transparent);
+  --j-color-wash: color-mix(in srgb, var(--j-color-text) 5%, transparent);
+  --j-shadow-overlay: 0 18px 40px -28px color-mix(in srgb, var(--j-color-text) 45%, transparent);
 }
 /* contract-tokens:end */
 

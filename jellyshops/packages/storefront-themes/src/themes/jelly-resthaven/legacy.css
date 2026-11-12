@@ -8,11 +8,11 @@
 /* Category tiles (the theme's "Shop by category" recipe): photo, then the name as an underlined link. */
 [data-section-type="jelly-resthaven/categories"] .jelly-custom-content-inner > .jelly-block-group { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
 [data-section-type="jelly-resthaven/categories"] .jelly-block-group > .jelly-block-group { display: grid; gap: 14px; justify-items: start; }
-[data-section-type="jelly-resthaven/categories"] .jelly-image-block, [data-section-type="jelly-resthaven/categories"] .jelly-image-block img { width: 100%; border-radius: var(--rh-radius); }
+[data-section-type="jelly-resthaven/categories"] .jelly-image-block, [data-section-type="jelly-resthaven/categories"] .jelly-image-block img { width: 100%; border-radius: var(--j-radius-sm); }
 [data-section-type="jelly-resthaven/categories"] .jelly-image-block img { aspect-ratio: 4 / 5; object-fit: cover; }
 [data-section-type="jelly-resthaven/categories"] .jelly-block-group .jelly-button {
   min-height: 44px; width: auto; padding: 0; border: 0; background: none; color: var(--j-color-text);
-  font-family: var(--theme-font-heading); font-size: 24px; font-weight: 500; text-decoration: underline; text-decoration-color: var(--rh-brass); text-underline-offset: 6px;
+  font-family: var(--theme-font-heading); font-size: 24px; font-weight: 500; text-decoration: underline; text-decoration-color: var(--j-color-accent); text-underline-offset: 6px;
 }
 [data-section-type="jelly-resthaven/categories"] .jelly-block-group .jelly-button::after { content: "→"; font-family: var(--theme-font-body); font-size: 18px; }
 [data-section-type="jelly-resthaven/categories"] h2 { text-align: left; }
@@ -32,13 +32,13 @@
 }
 :is(.jelly-storefront main, [data-storefront-template]) > [data-section-type="rating-summary"] .jelly-rating-line { justify-content: flex-start; font-size: 14px; }
 [data-section-type="product-gallery"] + [data-section-type="product-information"] .jelly-product-information { padding-top: 32px; }
-:is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > [data-section-type="trust-strip"] .jelly-trust-strip { margin: 4px 0 8px; padding: 18px 20px; border: 1px solid var(--rh-line); border-radius: var(--rh-radius-lg); background: var(--j-color-surface); }
+:is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > [data-section-type="trust-strip"] .jelly-trust-strip { margin: 4px 0 8px; padding: 18px 20px; border: 1px solid var(--j-color-divider); border-radius: var(--j-radius-md); background: var(--j-color-surface); }
 :is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > [data-section-type="trust-strip"] .jelly-trust-strip ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; overflow: visible; }
 :is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > [data-section-type="trust-strip"] .jelly-trust-strip li { white-space: normal; font-size: 13px; line-height: 1.35; }
 :is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > [data-section-type="trust-strip"] .jelly-trust-strip a { text-decoration: none; }
 :is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > [data-section-type="trust-strip"] .jelly-trust-strip a:hover span { text-decoration: underline; }
 [data-section-type="trust-strip"] + [data-section-type="product-description"] .jelly-product-description[data-layout="expandable"] { margin-top: 16px; }
-[data-section-type="product-specifications"] .jelly-specifications[data-layout="expandable"] details { border-bottom: 1px solid var(--rh-line-strong); }
+[data-section-type="product-specifications"] .jelly-specifications[data-layout="expandable"] details { border-bottom: 1px solid var(--j-color-border-strong); }
 
 @media (max-width: 1023px) {
   [data-section-type="jelly-resthaven/categories"] .jelly-custom-content-inner > .jelly-block-group { gap: 16px; }

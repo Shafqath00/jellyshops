@@ -5,6 +5,7 @@ import { storefrontFontVariables } from "./fonts";
 import "./globals.css";
 import "./themes/section-defaults.css";
 import "./themes/storefront-base.css";
+import "./themes/platform-base.css";
 import "./themes/theme-kit.css";
 import "./themes/jelly-minimal.css";
 import "./themes/jelly-avenue.css";

@@ -106,12 +106,34 @@ export const CONTRACT_TOKENS: Readonly<Record<string, string>> = {
   "--j-color-accent": "var(--theme-accent, var(--j-color-text))",
   "--j-color-primary": "var(--jelly-color-primary, var(--j-color-text))",
   "--j-color-on-primary": "var(--j-color-bg)",
+  "--j-color-sale": "var(--jelly-badge-bg, #b42318)",
+  // Page titles outside a hero (collection, bag, search, information pages).
+  "--j-page-title-size": "clamp(2rem, 4.2vw, 3.25rem)",
   // Interaction.
   "--j-touch-target": "44px",
   "--j-duration-fast": "160ms",
   "--j-duration-slow": "600ms",
   "--j-ease": "cubic-bezier(.2, .7, .2, 1)",
+  // Component sizes (buttons and fields), so a theme sets a value instead of restyling the component.
+  "--j-button-height": "var(--j-touch-target)",
+  "--j-button-padding": "22px",
+  "--j-field-height": "var(--j-touch-target)",
+  ...derivedTokenDefaults(),
 };
+
+/**
+ * Lines, tints and shadows made from the text colour. Declared again on every section frame (a custom property
+ * built from another is worked out where it is declared), so inside a dark section they follow its text colour.
+ */
+export const CONTRACT_DERIVED_TOKENS: Readonly<Record<string, string>> = derivedTokenDefaults();
+function derivedTokenDefaults(): Record<string, string> {
+  return {
+    "--j-color-divider": "color-mix(in srgb, var(--j-color-text) 13%, transparent)",
+    "--j-color-border-strong": "color-mix(in srgb, var(--j-color-text) 28%, transparent)",
+    "--j-color-wash": "color-mix(in srgb, var(--j-color-text) 5%, transparent)",
+    "--j-shadow-overlay": "0 18px 40px -28px color-mix(in srgb, var(--j-color-text) 45%, transparent)",
+  };
+}
 
 /**
  * Colour schemes a section frame can carry (`data-scheme`): the theme's schemes 1-8, the older Page / Soft / Dark
@@ -165,5 +187,6 @@ export function contractTokenCss(): string {
     `@media (max-width: ${CONTRACT_BREAKPOINTS.tabletMax}px) {\n${block(selector, CONTRACT_TABLET_TOKENS, "  ")}\n}`,
     `@media (max-width: ${CONTRACT_BREAKPOINTS.phoneMax}px) {\n${block(selector, CONTRACT_PHONE_TOKENS, "  ")}\n}`,
     ...CONTRACT_SCHEMES.map((scheme) => block(`${selector} [data-scheme="${scheme}"]`, contractSchemeRoles(scheme))),
+    block(":where([data-jelly-theme] [data-section-frame])", CONTRACT_DERIVED_TOKENS),
   ].join("\n");
 }
