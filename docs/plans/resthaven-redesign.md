@@ -52,7 +52,7 @@ Measured on `/theme-preview/jelly-resthaven` (1280px and 390px):
 4. **Product page** (done 2026-11-11) – gallery, buying box (rating, title, price and savings, finance line, size and colour tiles,
    delivery promise, Add to basket), sticky bar, fold-out details, dimensions, reviews, related and recently viewed.
 5. **Bag, slide-out bag, checkout, account, information pages, 404** (done 2026-11-12).
-6. **QA** – desktop/tablet/phone pass, contrast and accessibility (Resthaven Playwright spec), design lint with
+6. **QA** (checklist and tablet pass done 2026-11-12; staging install waits for approval) – desktop/tablet/phone pass, contrast and accessibility (Resthaven Playwright spec), design lint with
    tidy and messy data, launch checklist, staging check.
 
 Each phase is committed and reported before the next starts.
