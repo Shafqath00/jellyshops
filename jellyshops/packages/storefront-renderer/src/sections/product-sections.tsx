@@ -13,6 +13,7 @@ import { normalizeRichTextDocument } from "@jelly/storefront-schema";
 import { renderBlocks } from "./rich-text";
 import { ProductFamilyLinks } from "./product-family";
 import { DiscountChip, FinanceLine, OptionTabs, OptionTileGroups, StickyPurchaseBar, useStickyBar } from "./product-showroom";
+import { balancedColumns } from "../row-columns";
 
 export function productContext(context: StorefrontRuntimeContext): ProductPresentationContext | null {
   const candidate = context.page?.pageType === "product" ? context.page.resource.data.productPresentation : undefined;
@@ -189,6 +190,6 @@ export function RelatedProductsSection({ context, section }: { context: Storefro
   const heading = typeof section.settings.heading === "string" && section.settings.heading.trim() ? section.settings.heading : "You may also like";
   return <section className="jelly-section jelly-related-products"><StorefrontContainer>
     <h2 {...elementProps({ type: "related-products", settings: section.settings }, "heading", context.mode === "editor")}>{heading}</h2>
-    <div className="jelly-product-grid-items">{items.map((item) => <ProductCard key={item.id} product={item} editorProps={context.mode === "editor" ? elementProps({ type: "related-products", settings: section.settings }, "productCard", true) as Record<string, string> : undefined} />)}</div>
+    <div className="jelly-product-grid-items" data-count={items.length} style={{ "--jelly-columns": balancedColumns(items.length, 4) } as CSSProperties}>{items.map((item) => <ProductCard key={item.id} product={item} editorProps={context.mode === "editor" ? elementProps({ type: "related-products", settings: section.settings }, "productCard", true) as Record<string, string> : undefined} />)}</div>
   </StorefrontContainer></section>;
 }

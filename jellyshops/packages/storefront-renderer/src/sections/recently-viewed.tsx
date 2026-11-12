@@ -6,6 +6,7 @@ import { elementProps } from "../element-style";
 import type { CommerceDataProvider, PublicProduct } from "../types";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { sectionData } from "./shared";
+import { balancedColumns } from "../row-columns";
 
 const EMPTY: readonly string[] = [];
 const NO_SUBSCRIPTION = () => () => undefined;
@@ -49,6 +50,6 @@ export function RecentlyViewedSection({ context, section, commerce }: { context:
     <div className="jelly-section-header"><h2 {...elementProps(section, "heading", editor)}>{heading}</h2></div>
     {editor && <p className="jelly-recently-viewed-note">Shoppers see the products they opened most recently. The row stays hidden until they have opened one.</p>}
     {editor && products.length === 0 && <p className="jelly-empty-state">Products will appear here once you add them to your store.</p>}
-    <div className="jelly-product-grid-items" style={{ "--jelly-columns": columns } as CSSProperties}>{products.map((product) => <ProductCard key={product.id} product={product} editorProps={cardEditorProps} />)}</div>
+    <div className="jelly-product-grid-items" data-count={products.length} style={{ "--jelly-columns": balancedColumns(products.length, columns) } as CSSProperties}>{products.map((product) => <ProductCard key={product.id} product={product} editorProps={cardEditorProps} />)}</div>
   </StorefrontContainer></section>;
 }

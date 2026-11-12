@@ -30,7 +30,8 @@
   --rh-radius-lg: 8px;
   --rh-shadow: 0 18px 40px -28px color-mix(in srgb, var(--j-color-text) 45%, transparent);
   --rh-ease: cubic-bezier(.2, .7, .2, 1);
-  --rh-section: clamp(56px, 7vw, var(--jelly-spacing-section, 96px));
+  /* Section space on the platform scale (section rhythm in storefront-base.css pads every section from it). */
+  --j-section-md: clamp(56px, 7vw, var(--jelly-spacing-section, 96px));
   --rh-h1: clamp(40px, 5.2vw, var(--jelly-heading-size, 60px));
   --rh-h2: clamp(30px, 3.4vw, 44px);
   --rh-h3: clamp(22px, 2vw, 28px);
@@ -233,7 +234,6 @@ label { font-size: 14px; }
 .jelly-quick-add-button { min-height: 40px; padding: 0 18px; border: 1px solid var(--rh-line-strong); border-radius: 999px; background: var(--j-color-surface); color: var(--j-color-text); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
 
 /* ── 8 Section frames ───────────────────────────────────────────────── */
-.jelly-section { padding-block: var(--rh-section); }
 [data-section-type="product-grid"] .jelly-section-header, .jelly-related-products > .jelly-container > :is(h2, header) { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; }
 .jelly-section-header .jelly-button--link { margin-bottom: 14px; }
 .jelly-product-grid h2, .jelly-related-products h2 { text-align: left; }
@@ -305,7 +305,7 @@ label { font-size: 14px; }
 .jelly-multicolumn img { border-radius: var(--rh-radius); }
 
 /* Rating summary: a calm line of stars in a compact band. */
-.jelly-rating-summary { padding-block: clamp(40px, 5vw, 64px); text-align: center; }
+.jelly-rating-summary { text-align: center; }
 .jelly-rating-summary-heading { margin-bottom: 12px; }
 .jelly-rating-line { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 12px; font-size: 15px; }
 .jelly-rating-stars { font-size: 18px; }
@@ -692,7 +692,7 @@ label { font-size: 14px; }
   .jelly-faq-layout > .jelly-section-intro { position: static; }
 }
 @media (max-width: 767px) {
-  & { --rh-section: 56px; }
+  & { --j-section-md: 56px; }
   .jelly-announcement { font-size: 12px; padding-block: 8px; }
   .jelly-header.jelly-header { padding-top: 12px; row-gap: 10px; }
   .jelly-header-brand { font-size: clamp(20px, 6vw, 26px); text-align: center; white-space: normal; }

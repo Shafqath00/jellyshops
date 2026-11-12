@@ -81,3 +81,10 @@ it("adds a gradient from the section background and a minimum height", () => {
   expect(sectionStyleProps({ styleGradientColor: "red;}", styleMinHeight: 0 })).toEqual({});
   expect(sectionStyleProps({ styleGradientColor: "#112233" }).style).toMatchObject({ "--section-gradient": expect.stringContaining("180deg") });
 });
+
+it("puts the Spacing choices on the theme's one section scale", () => {
+  expect(sectionStyleProps({ styleSpacing: "small" }).style).toMatchObject({ "--section-space": "var(--j-section-sm)" });
+  expect(sectionStyleProps({ styleSpacing: "large" }).style).toMatchObject({ "--section-space": "var(--j-section-lg)" });
+  // Medium is the theme's own section space: nothing to set.
+  expect(sectionStyleProps({ styleSpacing: "medium" })).toEqual({});
+});

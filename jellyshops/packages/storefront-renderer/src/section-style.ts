@@ -15,7 +15,8 @@ const bodySize: Record<string, string> = { small: "14px", regular: "16px", large
 const bodyScale: Record<string, string> = { small: "0.9", regular: "1", large: "1.15" };
 const weights = new Set(["300", "400", "500", "600", "700"]);
 const alignments = new Set(["left", "center", "right"]);
-const spacing: Record<string, string> = { none: "0px", small: "clamp(24px, 4vw, 40px)", large: "clamp(80px, 11vw, 144px)" };
+/** Section Spacing choices on the theme's one scale (medium = the theme's own section space, so no variable). */
+const spacing: Record<string, string> = { none: "0px", small: "var(--j-section-sm)", large: "var(--j-section-lg)" };
 const fonts = new Set<string>(FONT_OPTIONS.map((option) => option.value));
 const showOnChoices = new Set(["desktop-only", "desktop", "touch", "mobile"]);
 /** A saved "Show on" choice, or undefined for every screen (or an unknown value). */

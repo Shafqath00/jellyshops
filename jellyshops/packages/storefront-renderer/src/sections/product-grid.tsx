@@ -7,6 +7,7 @@ import { resolveStorefrontHref } from "../runtime-context";
 import { sectionData, stringValue, visibleBlocks } from "./shared";
 import { formattedSetting, SettingText } from "./setting-text";
 import { blockEditorData } from "./block-content";
+import { balancedColumns } from "../row-columns";
 
 export function ProductGridSection({ commerce, section, storeSlug, editor = false }: { commerce: CommerceDataProvider; section: import("@jelly/storefront-schema").SectionNode; storeSlug?: string; editor?: boolean }) {
   const [result, setResult] = useState<{ source: CommerceDataProvider; limit: number; scope: string; products: PublicProduct[]; error?: boolean }>();
@@ -81,6 +82,6 @@ export function ProductGridSection({ commerce, section, storeSlug, editor = fals
       {viewAllHref && <a className="jelly-button jelly-button--link" href={viewAllHref} {...elementProps(section, "viewAll", editor)}>{viewAllLabel}</a>}
     </div>}
     {current?.error ? <p role="alert">Products are temporarily unavailable. <button type="button" onClick={() => setRetry((value) => value + 1)}>Retry</button></p> : loaded && products.length === 0 && <p className="jelly-empty-state">{emptyMessage}</p>}
-    <div className="jelly-product-grid-items" style={{ "--jelly-columns": columns } as CSSProperties} {...(tabs.length > 1 ? { id: panelId, role: "tabpanel", "aria-labelledby": `${panelId}-${activeTab?.id}` } : {})}>{products.map((product) => <ProductCard key={product.id} product={product} editorProps={cardEditorProps} />)}</div>
+    <div className="jelly-product-grid-items" data-count={products.length} style={{ "--jelly-columns": balancedColumns(products.length, columns) } as CSSProperties} {...(tabs.length > 1 ? { id: panelId, role: "tabpanel", "aria-labelledby": `${panelId}-${activeTab?.id}` } : {})}>{products.map((product) => <ProductCard key={product.id} product={product} editorProps={cardEditorProps} />)}</div>
   </StorefrontContainer></section>;
 }
