@@ -63,8 +63,8 @@ Work in a fresh browser profile with a new test merchant.
 
 - **Staging.** The redesign (home, collection, product, bag, checkout, account) was checked read-only on the test
   store `resthaven-showroom-check` through a local frontend and backend; that store still holds its pre-redesign
-  published design. A clean install of the new starter on staging, then the manual journey above, is the remaining
-  launch gate. Payment was not run.
+  published design. A clean install of the new starter on staging (store `resthaven-redesign-check`, 2026-11-12) matches the
+  preview. The manual journey above, with a Stripe test card, is the remaining launch gate. Payment was not run.
 - **Order confirmation and signed-in account pages** were styled but not viewed.
 - **Add-ons** (assembly and similar extras on the product page) are not built: they change the cart and orders.
 - **Pictures.** Nine generated photos (see the theme's `SOURCES.md`); merchants replace them with real product photos.
