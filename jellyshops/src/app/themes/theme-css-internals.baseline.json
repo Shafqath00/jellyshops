@@ -55,7 +55,6 @@
     "jelly-testimonials"
   ],
   "themes/jelly-resthaven/theme.css": [
-    "jelly-cart-card",
     "jelly-cart-drawer-backdrop",
     "jelly-cart-drawer-close",
     "jelly-cart-drawer-footer",
@@ -129,8 +128,11 @@
     "jelly-stars",
     "jelly-sticky-purchase-price",
     "jelly-sticky-purchase-title",
-    "jelly-storefront",
     "jelly-submenu"
+  ],
+  "themes/jelly-resthaven/legacy.css": [
+    "jelly-rating-line",
+    "jelly-storefront"
   ],
   "app/jelly-minimal.css": [
     "jelly-collection-description",

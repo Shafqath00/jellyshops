@@ -49,7 +49,6 @@
 }
 ::selection { background: color-mix(in srgb, var(--rh-brass) 30%, transparent); }
 :focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
-img { max-width: 100%; }
 a { color: inherit; text-underline-offset: 3px; text-decoration-thickness: 1px; }
 ul { list-style: none; margin: 0; padding: 0; }
 [data-section-frame] { background: var(--j-color-bg); color: var(--j-color-text); }
@@ -99,13 +98,12 @@ p { margin: 0 0 1em; }
 .jelly-section-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
 
 /* ── 4 Fields ───────────────────────────────────────────────────────── */
-:is(.field, .checkout-form, .signature-panel, .signature-filters, .jelly-newsletter, .jelly-product-reviews, .jelly-search-shell) :is(input:not([type="checkbox"], [type="radio"]), select, textarea),
+:is(.field, .checkout-form, .signature-panel, .jelly-newsletter, .jelly-product-reviews, .jelly-search-shell) :is(input:not([type="checkbox"], [type="radio"]), select, textarea),
 .jelly-list-price input, .jelly-list-sort select {
   box-sizing: border-box; min-height: 48px; padding: 10px 16px; border: 1px solid var(--rh-line-strong); border-radius: var(--jelly-radius-input, 6px);
   background: var(--j-color-surface); color: var(--j-color-text); font: inherit; font-size: 15px;
 }
 :is(input, select, textarea):focus-visible { outline: 2px solid var(--j-color-text); outline-offset: 1px; }
-input[type="checkbox"], input[type="radio"] { width: 20px; height: 20px; accent-color: var(--j-color-primary); }
 label { font-size: 14px; }
 
 /* ── 5 Badges and chips ─────────────────────────────────────────────── */
@@ -143,7 +141,7 @@ label { font-size: 14px; }
 .jelly-header .jelly-header-search { max-width: 340px; border-color: var(--rh-line-strong); background: var(--j-color-surface); }
 .jelly-header .jelly-header-search input { height: 44px; font-size: 14px; }
 .jelly-header .jelly-header-search input::placeholder { color: var(--rh-muted); opacity: 1; }
-.jelly-header-tools { display: flex; align-items: center; gap: 4px; }
+.jelly-header-tools { gap: 4px; }
 .jelly-header.jelly-header .jelly-header-tools a { min-height: 44px; border-radius: 999px; font-size: 13px; }
 .jelly-header.jelly-header .jelly-header-tools a:hover { background: var(--rh-wash); }
 .jelly-header-count {
@@ -194,8 +192,7 @@ label { font-size: 14px; }
 [data-scheme] > .jelly-trust-strip .jelly-icon { color: inherit; }
 
 /* Phone menu: a full-width panel under the header. */
-.jelly-mobile-navigation > summary { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 999px; cursor: pointer; list-style: none; }
-.jelly-mobile-navigation > summary::-webkit-details-marker { display: none; }
+.jelly-mobile-navigation > summary { border-radius: 999px; }
 .jelly-header summary { list-style: none; }
 .jelly-header summary::-webkit-details-marker { display: none; }
 .jelly-mobile-navigation-panel { background: var(--j-color-bg); color: var(--j-color-text); }
@@ -256,17 +253,6 @@ label { font-size: 14px; }
 .jelly-hero[data-layout="overlay"] .jelly-hero-actions .jelly-button--secondary { border-color: color-mix(in srgb, #fff 70%, transparent); background: transparent; color: #fff; }
 .jelly-hero[data-layout="overlay"] .jelly-hero-actions .jelly-button--secondary:hover { border-color: #fff; background: color-mix(in srgb, #fff 12%, transparent); }
 
-/* Category tiles (the theme's "Shop by category" recipe): photo, then the name as an underlined link. */
-[data-section-type="jelly-resthaven/categories"] .jelly-custom-content-inner > .jelly-block-group { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
-[data-section-type="jelly-resthaven/categories"] .jelly-block-group > .jelly-block-group { display: grid; gap: 14px; justify-items: start; }
-[data-section-type="jelly-resthaven/categories"] .jelly-image-block, [data-section-type="jelly-resthaven/categories"] .jelly-image-block img { width: 100%; border-radius: var(--rh-radius); }
-[data-section-type="jelly-resthaven/categories"] .jelly-image-block img { aspect-ratio: 4 / 5; object-fit: cover; }
-[data-section-type="jelly-resthaven/categories"] .jelly-block-group .jelly-button {
-  min-height: 44px; width: auto; padding: 0; border: 0; background: none; color: var(--j-color-text);
-  font-family: var(--theme-font-heading); font-size: 24px; font-weight: 500; text-decoration: underline; text-decoration-color: var(--rh-brass); text-underline-offset: 6px;
-}
-[data-section-type="jelly-resthaven/categories"] .jelly-block-group .jelly-button::after { content: "→"; font-family: var(--theme-font-body); font-size: 18px; }
-[data-section-type="jelly-resthaven/categories"] h2 { text-align: left; }
 
 /* Category tiles (Collection list): photos with the name in a pill; Bento makes the first tile large. */
 .jelly-category-grid .jelly-section-intro { max-width: 640px; }
@@ -402,7 +388,6 @@ label { font-size: 14px; }
 .jelly-list-filters fieldset:first-child { padding-top: 0; }
 .jelly-list-filters legend { margin-bottom: 12px; font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .jelly-list-check { display: flex; align-items: center; gap: 10px; min-height: 34px; font-size: 15px; cursor: pointer; }
-.jelly-list-check input { margin: 0; }
 .jelly-list-value-count { color: var(--rh-muted); font-size: 13px; }
 .jelly-list-price { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .jelly-list-price input { width: 100%; min-height: 44px; }
@@ -417,20 +402,6 @@ label { font-size: 14px; }
 .jelly-search-results { padding-top: clamp(40px, 5vw, 72px); }
 
 /* ── 12 Product page ────────────────────────────────────────────────── */
-/* Two columns from 900px: photos on the left (sticky), one buying column on the right; everything else full width. */
-:is(.jelly-storefront main, [data-storefront-template]):has([data-section-type="product-gallery"]) { display: block; }
-@media (min-width: 900px) {
-  :is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) {
-    display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); column-gap: clamp(32px, 5vw, 72px); align-items: start;
-    padding-inline: var(--j-page-edge);
-  }
-  :is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > [data-section-frame] { grid-column: 1 / -1; }
-  /* The buying column: rating, title and price, options, Add to basket, promises, then the fold-out details. Everything else runs full width. */
-  :is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > [data-section-frame]:not([data-section-type="product-gallery"], [data-section-type="rating-summary"], [data-section-type="product-information"], [data-section-type="product-options"], [data-section-type="product-purchase"], [data-section-type="trust-strip"], [data-section-type="product-description"], [data-section-type="product-specifications"]) { margin-inline: calc(-1 * var(--j-page-edge)); }
-  :is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > [data-section-type="product-gallery"] { grid-column: 1; grid-row: 1 / span 7; position: sticky; top: 24px; }
-  :is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > :is([data-section-type="rating-summary"], [data-section-type="product-information"], [data-section-type="product-options"], [data-section-type="product-purchase"], [data-section-type="trust-strip"], [data-section-type="product-description"], [data-section-type="product-specifications"]) { grid-column: 2; }
-  :is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > :is([data-section-type="product-gallery"], [data-section-type="rating-summary"], [data-section-type="product-information"], [data-section-type="product-options"], [data-section-type="product-purchase"], [data-section-type="trust-strip"], [data-section-type="product-description"], [data-section-type="product-specifications"]) > section > .jelly-container { width: auto; max-width: none; margin: 0; padding: 0; }
-}
 .jelly-product-gallery { padding-block: 32px 24px; }
 .jelly-product-gallery[data-count="0"] { display: none; }
 .jelly-product-gallery img { border-radius: var(--rh-radius); }
@@ -440,9 +411,7 @@ label { font-size: 14px; }
 .jelly-gallery-counter { background: var(--j-color-surface); color: var(--j-color-text); font-size: 12px; font-weight: 600; }
 
 .jelly-rating-summary:has(.jelly-rating-line):not(:has(.jelly-rating-summary-heading)) { padding: 32px 0 0; text-align: left; }
-:is(.jelly-storefront main, [data-storefront-template]) > [data-section-type="rating-summary"] .jelly-rating-line { justify-content: flex-start; font-size: 14px; }
 .jelly-product-information { padding: 12px 0 8px; }
-[data-section-type="product-gallery"] + [data-section-type="product-information"] .jelly-product-information { padding-top: 32px; }
 .jelly-product-information .jelly-eyebrow { margin-bottom: 8px; }
 .jelly-product-information h1 { margin: 0 0 16px; font-size: clamp(34px, 3.4vw, 46px); line-height: 1.08; }
 .jelly-product-price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; margin: 0 0 18px; }
@@ -460,7 +429,6 @@ label { font-size: 14px; }
 .jelly-product-options fieldset { margin: 0 0 22px; padding: 0; border: 0; }
 .jelly-product-options legend { margin-bottom: 12px; font-size: 14px; font-weight: 700; }
 .jelly-product-option-required { color: var(--rh-muted); font-weight: 400; }
-.jelly-product-option-values { display: flex; flex-wrap: wrap; gap: 8px; }
 .jelly-product-option-values button, .jelly-option-tile, .jelly-option-tab {
   min-height: 48px; padding: 10px 18px; border: 1px solid var(--rh-line-strong); border-radius: var(--rh-radius-lg);
   background: var(--j-color-surface); color: var(--j-color-text); font: inherit; font-size: 15px; font-weight: 500; cursor: pointer;
@@ -494,15 +462,8 @@ label { font-size: 14px; }
 
 /* In the buying column: the promises as a small two-by-two box, then description and details as fold-out rows. */
 .jelly-product-options:has(+ *), .jelly-product-purchase { padding-bottom: 20px; }
-:is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > [data-section-type="trust-strip"] .jelly-trust-strip { margin: 4px 0 8px; padding: 18px 20px; border: 1px solid var(--rh-line); border-radius: var(--rh-radius-lg); background: var(--j-color-surface); }
-:is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > [data-section-type="trust-strip"] .jelly-trust-strip ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; overflow: visible; }
-:is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > [data-section-type="trust-strip"] .jelly-trust-strip li { white-space: normal; font-size: 13px; line-height: 1.35; }
-:is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > [data-section-type="trust-strip"] .jelly-trust-strip a { text-decoration: none; }
-:is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > [data-section-type="trust-strip"] .jelly-trust-strip a:hover span { text-decoration: underline; }
 :is(.jelly-product-description, .jelly-specifications)[data-layout="expandable"] { padding: 0; border: 0; }
-[data-section-type="trust-strip"] + [data-section-type="product-description"] .jelly-product-description[data-layout="expandable"] { margin-top: 16px; }
 :is(.jelly-product-description, .jelly-specifications)[data-layout="expandable"] details { border-top: 1px solid var(--rh-line-strong); }
-[data-section-type="product-specifications"] .jelly-specifications[data-layout="expandable"] details { border-bottom: 1px solid var(--rh-line-strong); }
 :is(.jelly-product-description, .jelly-specifications)[data-layout="expandable"] summary { position: relative; display: block; padding: 20px 40px 20px 0; font-size: 16px; font-weight: 700; cursor: pointer; list-style: none; }
 :is(.jelly-product-description, .jelly-specifications)[data-layout="expandable"] summary::-webkit-details-marker { display: none; }
 :is(.jelly-product-description, .jelly-specifications)[data-layout="expandable"] summary::after { content: "+"; position: absolute; top: 50%; right: 4px; font-size: 22px; font-weight: 300; line-height: 1; transform: translateY(-50%); }
@@ -532,7 +493,7 @@ label { font-size: 14px; }
 .jelly-review-verified { color: var(--rh-ink); font-weight: 600; }
 
 /* Main product (layout revision 5 and later): the platform draws the photos and buying column as one section, so
-   these rules only style the parts. Stores on earlier layouts still use the column rules above. */
+   these rules only style the parts. Stores on earlier layouts use the column rules in legacy.css. */
 .jelly-main-product { --mp-part-gap: 14px; padding-block: 32px clamp(40px, 5vw, 64px); }
 .jelly-main-product[data-media-width="wide"] { --mp-media: 1.25fr; }
 .jelly-product-part[data-part="rating-summary"] .jelly-rating-summary { padding: 0; text-align: left; }
@@ -550,7 +511,7 @@ label { font-size: 14px; }
 /* ── 13 Bag, slide-out bag, checkout, account ───────────────────────── */
 .jelly-cart-summary, .jelly-search-results, .jelly-not-found { min-height: 0; }
 .jelly-cart-summary { padding-block: clamp(40px, 5vw, 72px) clamp(64px, 7vw, 96px); }
-:is(.jelly-cart-card, .jelly-search-shell, .jelly-not-found > .jelly-container > div) { max-width: none; padding: 0; border-radius: 0; background: none; box-shadow: none; }
+:is(.jelly-search-shell, .jelly-not-found > .jelly-container > div) { max-width: none; padding: 0; border-radius: 0; background: none; box-shadow: none; }
 .jelly-cart-header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px 20px; margin-bottom: 32px; }
 .jelly-cart-header h1, .jelly-cart-empty h1 { margin: 0; font-size: var(--rh-title); }
 .jelly-cart-header p { margin: 0; color: var(--rh-muted); }
@@ -654,18 +615,12 @@ label { font-size: 14px; }
 [data-type-preset="h2"] { font-size: var(--rh-h2) !important; }
 [data-type-preset="h3"] { font-size: var(--rh-h3) !important; }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition-duration: 1ms !important; animation-duration: 1ms !important; }
-}
-
 /* ── 15 Phones and tablets ──────────────────────────────────────────── */
 @media (max-width: 1023px) {
   .jelly-category-card > strong, .jelly-category-grid[data-layout="bento"] .jelly-category-card:first-child > strong { left: 10px; bottom: 10px; max-width: calc(100% - 20px); padding: 8px 14px; font-size: 13px; }
   .jelly-trust-strip[data-layout="row"] ul { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; padding-inline: 2px; scrollbar-width: none; }
   .jelly-trust-strip[data-layout="row"] li { flex: none; white-space: nowrap; }
   .jelly-product-grid-items { grid-template-columns: repeat(min(var(--jelly-columns, 4), 3), minmax(0, 1fr)); }
-  [data-section-type="jelly-resthaven/categories"] .jelly-custom-content-inner > .jelly-block-group { gap: 16px; }
-  [data-section-type="jelly-resthaven/categories"] .jelly-block-group .jelly-button { font-size: 20px; }
   .jelly-footer-inner, .jelly-footer-inner:has(.jelly-footer-contact) { grid-template-columns: minmax(0, 1fr); }
   .jelly-cart-layout { grid-template-columns: minmax(0, 1fr); }
   .jelly-cart-totals { position: static; }
@@ -684,11 +639,8 @@ label { font-size: 14px; }
   .jelly-footer-newsletter form { grid-column: 1; grid-row: auto; }
   .jelly-image-text-layout, .jelly-image-text[data-image-position="right"] .jelly-image-text-layout { grid-template-columns: minmax(0, 1fr); gap: 28px; }
   .jelly-image-text[data-image-position="right"] .jelly-image-text-media { order: 0; }
-  :is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > [data-section-type="rating-summary"] .jelly-rating-summary { padding-top: 20px; }
   .jelly-specifications-list { grid-template-columns: minmax(0, 1fr); }
   .jelly-faq-layout { grid-template-columns: minmax(0, 1fr); }
-  :is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > [data-section-type="trust-strip"] .jelly-trust-strip { margin-inline: var(--j-page-edge); padding: 16px 0; border-width: 1px 0; border-radius: 0; background: none; }
-  :is(.jelly-storefront main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > [data-section-type="trust-strip"] .jelly-trust-strip > .jelly-container { width: auto; max-width: none; margin: 0; padding: 0; }
   .jelly-faq-layout > .jelly-section-intro { position: static; }
 }
 @media (max-width: 767px) {
@@ -708,10 +660,8 @@ label { font-size: 14px; }
   .jelly-hero-content > p { font-size: 16px; }
   .jelly-hero-actions { display: grid; grid-template-columns: minmax(0, 1fr); align-self: stretch; width: 100%; }
   .jelly-hero-actions .jelly-button { width: 100%; }
-  [data-section-type="jelly-resthaven/categories"] .jelly-custom-content-inner > .jelly-block-group { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 14px; }
   .jelly-category-grid-items { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .jelly-category-grid[data-layout="bento"] .jelly-category-card:first-child .jelly-category-card-media img { aspect-ratio: 4 / 3; }
-  [data-section-type="jelly-resthaven/categories"] .jelly-block-group .jelly-button { font-size: 19px; }
   .jelly-multicolumn-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .jelly-footer { padding-top: 56px; gap: 40px; }
   .jelly-footer-links { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 16px; }

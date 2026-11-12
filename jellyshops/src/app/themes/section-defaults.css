@@ -25,6 +25,11 @@
 }
 :where([data-jelly-legacy-styles="off"] .jelly-editor-hint) { color: var(--j-color-muted); font-size: var(--j-type-small-size, 14px); }
 
+/* Shoppers who ask for less motion get none: hovers, fades and slides finish at once. */
+@media (prefers-reduced-motion: reduce) {
+  :where([data-jelly-legacy-styles="off"], [data-jelly-legacy-styles="off"] *, [data-jelly-legacy-styles="off"] *::before, [data-jelly-legacy-styles="off"] *::after) { transition-duration: 1ms !important; animation-duration: 1ms !important; }
+}
+
 /* ── Section spacing and headings ────────────────────────────────────── */
 :where([data-jelly-legacy-styles="off"] main .jelly-section) { padding-block: var(--j-section-md, 64px); }
 :where([data-jelly-legacy-styles="off"] main [data-section-frame] h1) {

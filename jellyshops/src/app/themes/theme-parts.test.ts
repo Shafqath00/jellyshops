@@ -7,13 +7,15 @@ const root = path.join(__dirname, "..", "..", "..");
 const baselinePath = path.join(__dirname, "theme-css-internals.baseline.json");
 const baseline = JSON.parse(readFileSync(baselinePath, "utf8")) as Record<string, string[]>;
 
-/** Theme stylesheets checked: every folder theme's source CSS, the built-in themes and the shared kits. */
+/** Theme stylesheets checked: every folder theme's source CSS (and legacy.css), the built-in themes and the shared kits. */
 function stylesheets(): Record<string, string> {
   const themes = path.join(root, "packages/storefront-themes/src/themes");
   const files: Record<string, string> = {};
   for (const id of readdirSync(themes)) {
-    const file = path.join(themes, id, "theme.css");
-    try { if (statSync(file).isFile()) files[`themes/${id}/theme.css`] = readFileSync(file, "utf8"); } catch { /* no CSS of its own */ }
+    for (const name of ["theme.css", "legacy.css"]) {
+      const file = path.join(themes, id, name);
+      try { if (statSync(file).isFile()) files[`themes/${id}/${name}`] = readFileSync(file, "utf8"); } catch { /* no such file */ }
+    }
   }
   for (const name of ["jelly-minimal.css", "jelly-avenue.css", "theme-kit.css", "theme-kit-late.css"]) files[`app/${name}`] = readFileSync(path.join(__dirname, name), "utf8");
   return files;
