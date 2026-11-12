@@ -1,4 +1,5 @@
-import { MAX_TEMPLATE_SECTIONS } from "@jelly/storefront-registry";
+import { breaksEssentialSections, essentialSectionsProblem, MAX_TEMPLATE_SECTIONS } from "@jelly/storefront-registry";
+import type { PageType, SectionNode } from "@jelly/storefront-schema";
 import { ApiError } from "../../http/errors.js";
 import type { WorkspaceMutationRunner } from "./mutation-runner.js";
 import {
@@ -80,6 +81,18 @@ function normalizeLayout(layout: TemplateLayout): TemplateLayout {
   return structuredClone(layout);
 }
 
+function layoutSections(layout: TemplateLayout): SectionNode[] {
+  return (layout.sections as unknown[]).flatMap((placement) => {
+    const record = placement as { kind?: unknown; section?: unknown };
+    return record?.kind === "inline" && record.section ? [record.section as SectionNode] : [];
+  });
+}
+
+/** A page keeps the section that makes it work (product grid, bag section, way to buy…), whatever sends the layout. */
+function essentialSectionsError(message: string): ApiError {
+  return new ApiError(400, "TEMPLATE_ESSENTIAL_SECTION", message);
+}
+
 function requireTemplate(
   template: StorefrontTemplateRecord | null,
 ): StorefrontTemplateRecord {
@@ -105,6 +118,8 @@ export class TemplateService {
     const name = normalizeName(input.name);
     const handle = normalizeHandle(input.handle ?? "default");
     const layout = normalizeLayout(input.layout);
+    const missing = essentialSectionsProblem(input.type as PageType, layoutSections(layout));
+    if (missing) throw essentialSectionsError(missing);
 
     const mutation = await this.coordinator.run(storeId, (transaction) => this.repository.createTemplate(
       transaction,
@@ -124,6 +139,12 @@ export class TemplateService {
       ...(patch.handle !== undefined ? { handle: normalizeHandle(patch.handle) } : {}),
       ...(patch.layout !== undefined ? { layout: normalizeLayout(patch.layout) } : {}),
     };
+    if (normalizedPatch.layout) {
+      // Only a change that breaks a working page is refused; a page that was already missing it can still be fixed.
+      const current = await this.repository.getTemplate(storeId, templateId);
+      const broken = current ? breaksEssentialSections(current.type as PageType, layoutSections(current.layout), layoutSections(normalizedPatch.layout)) : null;
+      if (broken) throw essentialSectionsError(broken);
+    }
 
     const mutation = await this.coordinator.run(storeId, async (transaction) => requireTemplate(
       await this.repository.updateTemplate(

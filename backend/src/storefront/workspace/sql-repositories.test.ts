@@ -32,7 +32,7 @@ describe("durable workspace services", () => {
     await db.query(`INSERT INTO "Product" ("id", "storeId", "title", "slug", "updatedAt") VALUES ('bed-1', 'store-a', 'Oak bed', 'oak-bed', CURRENT_TIMESTAMP)`);
     const database = { transaction: <T>(work: (sql: IntegrationDatabase) => Promise<T>) => db.transaction((tx) => work(tx as IntegrationDatabase)) };
     const api = createSqlWorkspaceApi(database);
-    const layout = { sections: [] };
+    const layout = { sections: [{ kind: "inline", section: { id: "buy", type: "product-purchase", enabled: true, settings: {}, blocks: [] } }] };
     await api.createTemplate("store-a", { name: "Product", type: "product", layout });
     const bed = await api.createTemplate("store-a", { name: "Bed", handle: "bed", type: "product", layout });
     await expect(api.createTemplate("store-a", { name: "Bed again", handle: "bed", type: "product", layout }))

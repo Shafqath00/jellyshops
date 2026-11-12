@@ -17,12 +17,13 @@ export const sectionCategoryLabels = {
 } as const;
 
 export const defaultTemplateSections: Record<string, string[]> = {
-  home: ["hero"], product: ["product-information"], collection: ["collection-header", "collection-product-grid", "collection-description"],
+  home: ["hero"], product: ["main-product"], collection: ["collection-header", "collection-product-grid", "collection-description"],
   cart: ["cart-summary"], search: ["search-results"], page: ["page-content"], blog: ["blog-header", "article-list"], article: ["article-header", "article-content"], "not-found": ["not-found-message"],
 };
 
 export function defaultTemplateLayout(type: string): Record<string, unknown> {
-  return { sections: (defaultTemplateSections[type] ?? ["rich-text"]).map((sectionType) => ({ kind: "inline", section: { id: `${type}-${sectionType}`, type: sectionType, enabled: true, settings: {}, blocks: [] } })) };
+  // Sections start with their own default blocks (Main product brings title and price, options and Add to cart).
+  return { sections: (defaultTemplateSections[type] ?? ["rich-text"]).map((sectionType) => ({ kind: "inline", section: { id: `${type}-${sectionType}`, type: sectionType, enabled: true, settings: {}, blocks: structuredClone(getSectionDefinition(sectionType)?.defaultBlocks ?? []) } })) };
 }
 
 export const regionLabels: Record<string, string> = { header: "Header", template: "Page sections", footer: "Footer" };

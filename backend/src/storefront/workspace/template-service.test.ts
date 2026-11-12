@@ -120,7 +120,7 @@ describe("TemplateService", () => {
     const created = await service.createTemplate("store-a", {
       type: "product",
       name: "Default product",
-      layout: { sections: [] },
+      layout: { sections: [{ kind: "inline", section: { id: "buy", type: "product-purchase", enabled: true, settings: {}, blocks: [] } }] },
     });
 
     expect(created.template).toMatchObject({
@@ -136,7 +136,7 @@ describe("TemplateService", () => {
     const created = await service.createTemplate("store-a", {
       type: "product",
       name: "Default product",
-      layout: { sections: [] },
+      layout: { sections: [{ kind: "inline", section: { id: "buy", type: "product-purchase", enabled: true, settings: {}, blocks: [] } }] },
     });
 
     const updated = await service.updateTemplate(
@@ -155,7 +155,7 @@ describe("TemplateService", () => {
     const created = await service.createTemplate("store-a", {
       type: "product",
       name: "Default product",
-      layout: { sections: [] },
+      layout: { sections: [{ kind: "inline", section: { id: "buy", type: "product-purchase", enabled: true, settings: {}, blocks: [] } }] },
     });
     await service.updateTemplate("store-a", created.template.id, 0, { name: "Current" });
 
@@ -169,7 +169,7 @@ describe("TemplateService", () => {
     const source = await service.createTemplate("store-a", {
       type: "product",
       name: "Default product",
-      layout: { sections: [{ kind: "inline", section: { id: "hero", type: "hero", enabled: true, settings: { heading: "Hello" }, blocks: [] } }] },
+      layout: { sections: [{ kind: "inline", section: { id: "hero", type: "hero", enabled: true, settings: { heading: "Hello" }, blocks: [] } }, { kind: "inline", section: { id: "buy", type: "product-purchase", enabled: true, settings: {}, blocks: [] } }] },
     });
 
     const cloned = await service.cloneTemplate("store-a", source.template.id, {
@@ -185,6 +185,20 @@ describe("TemplateService", () => {
     });
     expect(cloned.template.id).not.toBe(source.template.id);
     expect(cloned.generation).toBe(2);
+  });
+
+  it("never lets a page lose the section that makes it work", async () => {
+    const { service } = setup();
+    await expect(service.createTemplate("store-a", { type: "collection", name: "Sale", handle: "sale", layout: { sections: [] } }))
+      .rejects.toMatchObject({ status: 400, code: "TEMPLATE_ESSENTIAL_SECTION" });
+    const created = await service.createTemplate("store-a", { type: "product", name: "Bed", handle: "bed", layout: { sections: [{ kind: "inline", section: { id: "buy", type: "product-purchase", enabled: true, settings: {}, blocks: [] } }] } });
+    await expect(service.updateTemplate("store-a", created.template.id, created.template.revision, { layout: { sections: [] } }))
+      .rejects.toMatchObject({ status: 400, code: "TEMPLATE_ESSENTIAL_SECTION" });
+    const hidden = { sections: [{ kind: "inline", section: { id: "buy", type: "product-purchase", enabled: false, settings: {}, blocks: [] } }] };
+    await expect(service.updateTemplate("store-a", created.template.id, created.template.revision, { layout: hidden }))
+      .rejects.toMatchObject({ status: 400, code: "TEMPLATE_ESSENTIAL_SECTION" });
+    const home = await service.createTemplate("store-a", { type: "home", name: "Landing", handle: "landing", layout: { sections: [] } });
+    expect(home.template.handle).toBe("landing");
   });
 
   it("explains invalid names, handles and layouts with 400 errors", async () => {
@@ -230,7 +244,7 @@ describe("TemplateService", () => {
 
   it("deletes an unused alternate template", async () => {
     const { service, repository } = setup();
-    const created = await service.createTemplate("store-a", { type: "product", name: "Mattress", handle: "mattress", layout: { sections: [] } });
+    const created = await service.createTemplate("store-a", { type: "product", name: "Mattress", handle: "mattress", layout: { sections: [{ kind: "inline", section: { id: "buy", type: "product-purchase", enabled: true, settings: {}, blocks: [] } }] } });
 
     const result = await service.deleteTemplate("store-a", created.template.id, 0);
 
@@ -240,8 +254,8 @@ describe("TemplateService", () => {
 
   it("keeps default templates and templates still assigned to something", async () => {
     const { service, repository, generation } = setup();
-    const main = await service.createTemplate("store-a", { type: "product", name: "Product", layout: { sections: [] } });
-    const alternate = await service.createTemplate("store-a", { type: "product", name: "Mattress", handle: "mattress", layout: { sections: [] } });
+    const main = await service.createTemplate("store-a", { type: "product", name: "Product", layout: { sections: [{ kind: "inline", section: { id: "buy", type: "product-purchase", enabled: true, settings: {}, blocks: [] } }] } });
+    const alternate = await service.createTemplate("store-a", { type: "product", name: "Mattress", handle: "mattress", layout: { sections: [{ kind: "inline", section: { id: "buy", type: "product-purchase", enabled: true, settings: {}, blocks: [] } }] } });
     repository.assignmentCounts.set(alternate.template.id, 3);
 
     await expect(service.deleteTemplate("store-a", main.template.id, 0)).rejects.toMatchObject({ status: 409, code: "TEMPLATE_IS_DEFAULT" });

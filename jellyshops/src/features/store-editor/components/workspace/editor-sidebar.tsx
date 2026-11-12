@@ -49,7 +49,7 @@ export function EditorSidebar({ ctx }: { ctx: EditorViewContext }) {
                     if (selection?.kind === "block") setSelection({ kind: "block", region: selection.region, sectionId: selection.sectionId, blockId: selection.blockId });
                   }}
                   hidden={toolbarFound.block ? !toolbarFound.block.enabled : !toolbarFound.section.enabled}
-                  actions={availableActions(activeTemplate.layout, toolbarTarget)}
+                  actions={availableActions(activeTemplate.layout, toolbarTarget, activeTemplate.type)}
                   onAction={(action) => { void runSelectionAction(action); }}
                   siblingIds={siblingIdsFor(activeTemplate.layout, toolbarTarget)}
                   onMove={(beforeId) => { void runMove(beforeId); }}

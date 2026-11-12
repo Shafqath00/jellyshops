@@ -1,6 +1,7 @@
 import type { BlockLocation, BlockNode, SectionNode } from "@jelly/storefront-schema";
 import { blockTreeHeight, childBlocks, copyBlockWithNewIds, findBlock, MAX_BLOCK_DEPTH, updateBlock, updateBlockList } from "@jelly/storefront-schema";
-import { allowedChildBlockTypes, getBlockDefinition, getSectionDefinition } from "@jelly/storefront-registry";
+import type { PageType } from "@jelly/storefront-schema";
+import { allowedChildBlockTypes, breaksEssentialSections, getBlockDefinition, getSectionDefinition } from "@jelly/storefront-registry";
 
 /**
  * Shopify-style actions on the selected section or block of a template layout:
@@ -63,8 +64,32 @@ export function findTarget(layout: Record<string, unknown>, target: SelectionTar
   return location ? { section, sectionIndex, sectionCount: items.length, block: location.block, location } : null;
 }
 
-/** Which actions make sense for the target right now. */
-export function availableActions(layout: Record<string, unknown>, target: SelectionTarget): Record<SelectionAction, boolean> {
+function inlineSections(layout: Record<string, unknown>): SectionNode[] {
+  return placements(layout).flatMap((item) => item?.kind === "inline" && item.section ? [item.section as SectionNode] : []);
+}
+
+/** Why deleting or hiding the target would break the page (it is the page's last essential section or Add to cart part), or null. */
+export function essentialActionProblem(layout: Record<string, unknown>, target: SelectionTarget, action: "remove" | "toggle", pageType: PageType): string | null {
+  const found = findTarget(layout, target);
+  if (!found) return null;
+  // Showing a hidden section or block never breaks a page.
+  if (action === "toggle" && (found.block ?? found.section).enabled === false) return null;
+  const result = applySelectionAction(layout, target, action);
+  return result ? breaksEssentialSections(pageType, inlineSections(layout), inlineSections(result.layout)) : null;
+}
+
+/** Which actions make sense for the target right now. Pass the page type to keep the page's essential sections. */
+export function availableActions(layout: Record<string, unknown>, target: SelectionTarget, pageType?: PageType): Record<SelectionAction, boolean> {
+  const actions = baseActions(layout, target);
+  if (!pageType) return actions;
+  return {
+    ...actions,
+    remove: actions.remove && !essentialActionProblem(layout, target, "remove", pageType),
+    toggle: actions.toggle && !essentialActionProblem(layout, target, "toggle", pageType),
+  };
+}
+
+function baseActions(layout: Record<string, unknown>, target: SelectionTarget): Record<SelectionAction, boolean> {
   const found = findTarget(layout, target);
   if (!found) return { ...none };
   const { section, location } = found;
@@ -101,7 +126,7 @@ export function applySelectionAction(
   action: SelectionAction,
   createId: () => string = () => crypto.randomUUID(),
 ): { layout: Record<string, unknown>; select: SelectionTarget | null } | null {
-  if (!availableActions(layout, target)[action]) return null;
+  if (!baseActions(layout, target)[action]) return null;
   const items = placements(layout);
   const index = inlineIndex(items, target.sectionId);
   const section = items[index].section as SectionNode;

@@ -1,14 +1,25 @@
 "use client";
 
 import type { SectionNode } from "@jelly/storefront-schema";
+import { breaksEssentialSections } from "@jelly/storefront-registry";
 import { setThemeSetting } from "@/features/store-editor/editor-page-helpers";
 import { clearUnsaved, rememberUnsaved } from "@/features/store-editor/state/unsaved-work";
 import type { useEditorState } from "./use-editor-state";
 import type { useEditorDerived } from "./use-editor-derived";
 
+/** The page's own sections (shared header/footer placements left out). */
+function layoutSections(layout: Record<string, unknown>): SectionNode[] {
+  return Array.isArray(layout.sections)
+    ? layout.sections.flatMap((placement: unknown) => {
+      const record = placement as { kind?: unknown; section?: unknown } | null;
+      return record?.kind === "inline" && record.section && typeof record.section === "object" ? [record.section as SectionNode] : [];
+    })
+    : [];
+}
+
 /** Saving templates, shared sections and the theme through the save queue, plus undo, redo and restoring the last session. */
 export function useEditorPersistence(ctx: ReturnType<typeof useEditorState> & ReturnType<typeof useEditorDerived>) {
-  const { backendStoreId, api, setWorkspace, templateDrafts, globalDrafts, setTemplates, setGlobals, themeDraft, setThemeConfiguration, setDiagnostics, invalidatePreview, convertingRef, history, refreshHistory, historyScope, recordHistory, saveQueueRef, restorable, setRestorable, unsavedDecided, activeTemplate, selectedGlobal } = ctx;
+  const { backendStoreId, api, setWorkspace, templateDrafts, globalDrafts, setTemplates, setGlobals, themeDraft, setThemeConfiguration, setDiagnostics, invalidatePreview, convertingRef, history, refreshHistory, historyScope, recordHistory, saveQueueRef, restorable, setRestorable, unsavedDecided, activeTemplate, selectedGlobal, setEditorNotice } = ctx;
   const persistLayout = (layout: Record<string, unknown>, record = true) =>
     activeTemplate ? persistTemplateLayout(activeTemplate.id, layout, record) : Promise.resolve(false);
 
@@ -16,6 +27,10 @@ export function useEditorPersistence(ctx: ReturnType<typeof useEditorState> & Re
     if (convertingRef.current) return false;
     const previous = templateDrafts.current.find((template) => template.id === templateId);
     if (!api || !previous) return false;
+    // Every change to a page passes here, so this is where a page can never lose the section that makes it work
+    // (its product grid, bag section, way to buy…): deleting or hiding the last one is refused with a plain reason.
+    const broken = breaksEssentialSections(previous.type, layoutSections(previous.layout), layoutSections(layout));
+    if (broken) { setEditorNotice(broken); return false; }
     if (record) recordHistory({ kind: "template", id: previous.id, before: previous.layout, after: layout });
     const draft = { ...previous, layout };
     rememberUnsaved(backendStoreId, { kind: "template", id: draft.id, baseRevision: draft.revision, value: layout });
