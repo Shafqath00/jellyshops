@@ -170,7 +170,8 @@ export function measureStorefrontPage(): PageMeasurement {
     // in the right-hand column): it is judged as part of that row, not against the page edges.
     const frame = element.closest("[data-section-frame]") ?? element;
     const page = frame.parentElement;
-    const inColumn = Boolean(page && getComputedStyle(page).display.includes("grid") && columnCount(page) >= 2 && frame.getBoundingClientRect().width < page.getBoundingClientRect().width - 2);
+    // A part of Main product sits in that section's own buying or photo column, so it lines up with the column.
+    const inColumn = Boolean(element.closest(".jelly-main-product-details, .jelly-main-product-media")) || Boolean(page && getComputedStyle(page).display.includes("grid") && columnCount(page) >= 2 && frame.getBoundingClientRect().width < page.getBoundingClientRect().width - 2);
     parts.push({
       key: count > 1 ? `${base}#${count}` : base,
       isSection: element.hasAttribute("data-section-id") && !isChrome,

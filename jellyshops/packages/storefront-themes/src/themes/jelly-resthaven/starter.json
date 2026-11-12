@@ -881,165 +881,142 @@
           "kind": "inline",
           "section": {
             "id": "studio-gallery",
-            "type": "product-gallery",
+            "type": "main-product",
             "enabled": true,
             "settings": {
               "imageFit": "cover",
               "layout": "thumbnails",
               "mediaRatio": "landscape",
               "thumbnailPosition": "below",
-              "enableZoom": true
+              "enableZoom": true,
+              "mediaPosition": "left",
+              "mediaWidth": "wide",
+              "stickyColumn": "media"
             },
-            "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "resthaven-product-rating-summary",
-            "type": "rating-summary",
-            "enabled": true,
-            "settings": {
-              "source": "reviews",
-              "text": "from {count} reviews",
-              "linkLabel": "Read reviews",
-              "link": "#reviews",
-              "contentAlignment": "left"
-            },
-            "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "studio-info",
-            "type": "product-information",
-            "enabled": true,
-            "settings": {
-              "showVendor": true,
-              "showSku": false,
-              "showCompareAtPrice": true,
-              "showAvailability": true,
-              "discountChip": "percent",
-              "financeMonths": 0,
-              "financeText": "or {amount} a month for {months} months",
-              "financeLinkLabel": "Learn more",
-              "showSpecifications": false
-            },
-            "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "studio-options",
-            "type": "product-options",
-            "enabled": true,
-            "settings": {
-              "style": "tabs",
-              "tileColumns": 3,
-              "showFamily": true
-            },
-            "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "studio-purchase",
-            "type": "product-purchase",
-            "enabled": true,
-            "settings": {
-              "showQuantity": true,
-              "label": "Add to basket",
-              "stickyBar": true
-            },
-            "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
             "blocks": [
               {
-                "id": "resthaven-product-promise-1",
-                "type": "trust-point",
+                "id": "resthaven-product-rating-summary",
+                "type": "part-rating-summary",
                 "enabled": true,
                 "settings": {
-                  "text": "Delivery options shown before you pay",
-                  "icon": "truck",
-                  "link": "/pages/shipping"
-                },
-                "blocks": []
+                  "source": "reviews",
+                  "text": "from {count} reviews",
+                  "linkLabel": "Read reviews",
+                  "link": "#reviews",
+                  "contentAlignment": "left"
+                }
               },
               {
-                "id": "resthaven-product-promise-2",
-                "type": "trust-point",
+                "id": "studio-info",
+                "type": "part-product-information",
                 "enabled": true,
                 "settings": {
-                  "text": "Clear returns information",
-                  "icon": "return",
-                  "link": "/pages/returns"
-                },
-                "blocks": []
+                  "showVendor": true,
+                  "showSku": false,
+                  "showCompareAtPrice": true,
+                  "showAvailability": true,
+                  "discountChip": "percent",
+                  "financeMonths": 0,
+                  "financeText": "or {amount} a month for {months} months",
+                  "financeLinkLabel": "Learn more",
+                  "showSpecifications": false
+                }
               },
               {
-                "id": "resthaven-product-promise-3",
-                "type": "trust-point",
+                "id": "studio-options",
+                "type": "part-product-options",
                 "enabled": true,
                 "settings": {
-                  "text": "Secure checkout",
-                  "icon": "shield"
-                },
-                "blocks": []
+                  "style": "tabs",
+                  "tileColumns": 3,
+                  "showFamily": true
+                }
               },
               {
-                "id": "resthaven-product-promise-4",
-                "type": "trust-point",
+                "id": "studio-purchase",
+                "type": "part-product-purchase",
                 "enabled": true,
                 "settings": {
-                  "text": "Help choosing your size",
-                  "icon": "phone",
-                  "link": "/pages/faq"
+                  "showQuantity": true,
+                  "label": "Add to basket",
+                  "stickyBar": true
+                }
+              },
+              {
+                "id": "resthaven-product-strip",
+                "type": "part-trust-strip",
+                "enabled": true,
+                "settings": {
+                  "layout": "row",
+                  "showIcons": true
                 },
-                "blocks": []
+                "blocks": [
+                  {
+                    "id": "resthaven-product-promise-1",
+                    "type": "trust-point",
+                    "enabled": true,
+                    "settings": {
+                      "text": "Delivery options shown before you pay",
+                      "icon": "truck",
+                      "link": "/pages/shipping"
+                    },
+                    "blocks": []
+                  },
+                  {
+                    "id": "resthaven-product-promise-2",
+                    "type": "trust-point",
+                    "enabled": true,
+                    "settings": {
+                      "text": "Clear returns information",
+                      "icon": "return",
+                      "link": "/pages/returns"
+                    },
+                    "blocks": []
+                  },
+                  {
+                    "id": "resthaven-product-promise-3",
+                    "type": "trust-point",
+                    "enabled": true,
+                    "settings": {
+                      "text": "Secure checkout",
+                      "icon": "shield"
+                    },
+                    "blocks": []
+                  },
+                  {
+                    "id": "resthaven-product-promise-4",
+                    "type": "trust-point",
+                    "enabled": true,
+                    "settings": {
+                      "text": "Help choosing your size",
+                      "icon": "phone",
+                      "link": "/pages/faq"
+                    },
+                    "blocks": []
+                  }
+                ]
+              },
+              {
+                "id": "studio-description",
+                "type": "part-product-description",
+                "enabled": true,
+                "settings": {
+                  "heading": "About this bed",
+                  "layout": "expandable",
+                  "startOpen": true
+                }
+              },
+              {
+                "id": "resthaven-product-specs",
+                "type": "part-product-specifications",
+                "enabled": true,
+                "settings": {
+                  "heading": "Details and materials",
+                  "hideMeasurements": true,
+                  "layout": "expandable"
+                }
               }
-            ],
-            "enabled": true,
-            "id": "resthaven-product-strip",
-            "type": "trust-strip",
-            "settings": {
-              "layout": "row",
-              "showIcons": true
-            }
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "studio-description",
-            "type": "product-description",
-            "enabled": true,
-            "settings": {
-              "heading": "About this bed",
-              "layout": "expandable",
-              "startOpen": true
-            },
-            "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "blocks": [],
-            "enabled": true,
-            "id": "resthaven-product-specs",
-            "type": "product-specifications",
-            "settings": {
-              "heading": "Details and materials",
-              "hideMeasurements": true,
-              "layout": "expandable"
-            }
+            ]
           }
         },
         {

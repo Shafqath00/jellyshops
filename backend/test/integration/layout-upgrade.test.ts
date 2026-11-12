@@ -44,9 +44,9 @@ describe("layout upgrade", () => {
     const database = await createPGliteDatabase();
     await seedStore(database, "store-a", "store-a");
     await new StorefrontStarterInstallationService(transactionDatabase(database), () => "install-a").install("store-a", "jelly-resthaven");
-    expect((await database.query<{ layoutRevision: number }>(`SELECT "layoutRevision" FROM "StorefrontWorkspace" WHERE "storeId" = 'store-a'`)).rows[0]!.layoutRevision).toBe(4);
+    expect((await database.query<{ layoutRevision: number }>(`SELECT "layoutRevision" FROM "StorefrontWorkspace" WHERE "storeId" = 'store-a'`)).rows[0]!.layoutRevision).toBe(5);
     const offer = await new LayoutUpgradeService(transactionDatabase(database)).offer("store-a");
-    expect(offer).toMatchObject({ themeId: "jelly-resthaven", draft: { revision: 4, recognised: false }, current: { revision: 4 }, behind: false, lastUpgrade: null });
+    expect(offer).toMatchObject({ themeId: "jelly-resthaven", draft: { revision: 5, recognised: false }, current: { revision: 5 }, behind: false, lastUpgrade: null });
   });
 
   it("recognises an older layout, upgrades the draft keeping the merchant's edits, and undoes it", async () => {
@@ -63,7 +63,7 @@ describe("layout upgrade", () => {
 
     const service = new LayoutUpgradeService(transactionDatabase(database), () => "backup-1");
     const offer = (await service.offer("store-b"))!;
-    expect(offer).toMatchObject({ draft: { revision: 2, recognised: true }, current: { revision: 4 }, behind: true });
+    expect(offer).toMatchObject({ draft: { revision: 2, recognised: true }, current: { revision: 5 }, behind: true });
 
     const preview = await service.preview("store-b");
     expect(preview.problems).toEqual([]);
@@ -73,7 +73,7 @@ describe("layout upgrade", () => {
 
     await expect(service.apply("store-b", offer.generation - 1, "user-1")).rejects.toMatchObject({ status: 409 });
     const applied = await service.apply("store-b", offer.generation, "user-1");
-    expect(applied.revision).toBe(4);
+    expect(applied.revision).toBe(5);
     const newHome = await homeTypes(database, "store-b");
     expect(newHome).toContain("category-grid");
     expect(newHome).not.toContain("jelly-resthaven/categories");
@@ -81,7 +81,7 @@ describe("layout upgrade", () => {
     expect(hero && hero.kind === "inline" && hero.section.settings.heading).toBe("Beds by Newbi");
 
     const afterOffer = (await service.offer("store-b"))!;
-    expect(afterOffer).toMatchObject({ draft: { revision: 4, recognised: false }, behind: false, lastUpgrade: { id: "backup-1", fromRevision: 2, toRevision: 4 } });
+    expect(afterOffer).toMatchObject({ draft: { revision: 5, recognised: false }, behind: false, lastUpgrade: { id: "backup-1", fromRevision: 2, toRevision: 5 } });
     await expect(service.preview("store-b")).rejects.toMatchObject({ status: 409 });
 
     await service.rollback("store-b", afterOffer.generation);

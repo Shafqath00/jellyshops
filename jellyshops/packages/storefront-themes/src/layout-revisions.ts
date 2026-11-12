@@ -1,4 +1,4 @@
-import { sectionLabel, type V4StarterPack } from "@jelly/storefront-registry";
+import { partSectionType, sectionLabel, type V4StarterPack } from "@jelly/storefront-registry";
 import type { BlockNode, PageType, SectionNode } from "@jelly/storefront-schema";
 import { discoveredThemes } from "./themes/index.generated.js";
 import { createStarterPack } from "./starter-packs.js";
@@ -81,9 +81,6 @@ function inlineSections(placements: LayoutPlacement[]): SectionNode[] {
   return placements.flatMap((placement) => placement.kind === "inline" ? [placement.section] : []);
 }
 
-function defaultTemplate(draft: LayoutDraft, type: PageType) {
-  return draft.templates.find((template) => template.type === type && template.handle === "default");
-}
 
 /**
  * Which starter layout the draft was most likely built from, for stores installed before revisions
@@ -148,12 +145,48 @@ export interface LayoutUpgradePlan {
 const describe = (section: SectionNode, extra: Partial<LayoutSectionChange> = {}): LayoutSectionChange => ({ type: section.type, label: sectionLabel(section.type), ...extra });
 
 /**
+ * Section types a new layout may turn into another: Product images became Main product, which keeps the
+ * photo settings and gains the product sections as its parts (see `mergeParts`).
+ */
+const CONVERTS_TO: Record<string, string> = { "product-gallery": "main-product" };
+
+const asSection = (block: BlockNode, type: string): SectionNode => ({ id: block.id, type, enabled: block.enabled, settings: block.settings, blocks: block.blocks ?? [], ...(block.responsive ? { responsive: block.responsive } : {}) });
+
+/**
+ * When a page moves to Main product, each of its parts takes the matching old product section (same starter
+ * id and type), with the merchant's changes carried over, exactly as a section would. Parts the merchant had
+ * removed stay out; new parts come in from the starter.
+ */
+function mergeParts(target: SectionNode, mine: LayoutPlacement[], used: Set<number>, baseSections: SectionNode[], prefix: string, change: LayoutPageChange): BlockNode[] {
+  const blocks: BlockNode[] = [];
+  for (const block of target.blocks) {
+    const type = partSectionType(block.type);
+    if (!type) { blocks.push(rekeyBlocks([structuredClone(block)], prefix)[0]); continue; }
+    const oldStarter = baseSections.find((section) => section.id === block.id && section.type === type);
+    const index = mine.findIndex((candidate, at) => !used.has(at) && candidate.kind === "inline" && candidate.section.type === type && starterIdOf(candidate.section.id) === block.id);
+    if (index === -1) {
+      if (oldStarter) { change.skipped.push(describe(oldStarter)); continue; }
+      blocks.push(rekeyBlocks([structuredClone(block)], prefix)[0]);
+      change.added.push(describe(asSection(block, type)));
+      continue;
+    }
+    const merged = mergeSection(oldStarter, (mine[index] as { section: SectionNode }).section, asSection(block, type), prefix);
+    if (!merged) continue;
+    used.add(index);
+    const { section } = merged;
+    blocks.push({ id: section.id, type: block.type, enabled: section.enabled, settings: section.settings, ...(section.blocks.length ? { blocks: section.blocks } : {}), ...(section.responsive ? { responsive: section.responsive } : {}) });
+    if (merged.keptSettings.length || merged.keptBlocks) change.carried.push(describe(section, { keptSettings: merged.keptSettings, keptBlocks: merged.keptBlocks }));
+  }
+  return blocks;
+}
+
+/**
  * Three-way merge of one section: the new starter's version, with every setting (and the block list)
  * the merchant changed from the old starter carried over. Returns null when the two cannot be merged
  * (the merchant changed the section's type).
  */
 function mergeSection(base: SectionNode | undefined, mine: SectionNode, target: SectionNode, prefix: string): { section: SectionNode; keptSettings: string[]; keptBlocks: boolean } | null {
-  if (mine.type !== target.type) return null;
+  if (mine.type !== target.type && CONVERTS_TO[mine.type] !== target.type) return null;
   if (!base) return { section: { ...rekeySection(target, prefix), id: mine.id, enabled: mine.enabled, settings: { ...structuredClone(target.settings), ...structuredClone(mine.settings) }, blocks: structuredClone(mine.blocks) }, keptSettings: Object.keys(mine.settings), keptBlocks: true };
   const settings: Record<string, unknown> = structuredClone(target.settings);
   const keptSettings: string[] = [];
@@ -237,9 +270,12 @@ export function planLayoutUpgrade(themeId: string, draft: LayoutDraft, from: num
         change.added.push(describe(placement.section));
         continue;
       }
-      const merged = mergeSection(oldStarter, (mine[index] as { section: SectionNode }).section, placement.section, prefix);
+      const current = (mine[index] as { section: SectionNode }).section;
+      const merged = mergeSection(oldStarter, current, placement.section, prefix);
       if (!merged) { placements.push({ kind: "inline", section: rekeySection(placement.section, prefix) }); change.added.push(describe(placement.section)); continue; }
       used.add(index);
+      // Product images turning into Main product: the old product sections become its parts.
+      if (current.type !== placement.section.type) merged.section.blocks = mergeParts(placement.section, mine, used, baseSections, prefix, change);
       placements.push({ kind: "inline", section: merged.section });
       if (merged.keptSettings.length || merged.keptBlocks) change.carried.push(describe(placement.section, { keptSettings: merged.keptSettings, keptBlocks: merged.keptBlocks }));
     }

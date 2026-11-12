@@ -31,6 +31,7 @@ const sectionLabels: Record<string, string> = {
   "spacer-divider": "Spacer (exact height)",
   spacer: "Spacer",
   divider: "Divider",
+  "main-product": "Product photos and details",
   "product-gallery": "Product images",
   "product-information": "Product title and price",
   "product-options": "Product options",
@@ -115,5 +116,9 @@ const addedLabels = new Map<string, string>();
 export function setSectionLabel(type: string, label: string | undefined): void { if (label) addedLabels.set(type, label); else addedLabels.delete(type); }
 
 export function sectionLabel(type: string): string { return sectionLabels[type] ?? addedLabels.get(type) ?? fallback(type); }
-export function blockLabel(type: string): string { return blockLabels[type] ?? fallback(type); }
+export function blockLabel(type: string): string {
+  // A Main product part is named after the product section it draws.
+  if (type.startsWith("part-") && sectionLabels[type.slice(5)]) return sectionLabels[type.slice(5)];
+  return blockLabels[type] ?? fallback(type);
+}
 export function pageTypeLabel(type: PageType | string): string { return pageTypeLabels[type as PageType] ?? fallback(type); }

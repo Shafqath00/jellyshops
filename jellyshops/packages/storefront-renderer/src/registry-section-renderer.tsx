@@ -96,7 +96,9 @@ export function RegistrySectionRenderer({
       const element = target.closest<HTMLElement>("[data-editor-element]");
       const blockId = block?.dataset.editorBlockId;
       // The innermost target wins: both are ancestors of the click, so the element is inner unless it wraps the block.
-      if (element?.dataset.editorElement && (!block || !element.contains(block))) {
+      // A block that draws a whole section (a Main product part) is selected as one piece.
+      const blockHasNoParts = block?.dataset.editorBlockElements === "none" && Boolean(element && block.contains(element));
+      if (element?.dataset.editorElement && !blockHasNoParts && (!block || !element.contains(block))) {
         const elementId = element.dataset.editorElement;
         // Inside a block it is the block's part (a column's heading); otherwise the section's own (the nth product card).
         const owner: HTMLElement = block ?? event.currentTarget;

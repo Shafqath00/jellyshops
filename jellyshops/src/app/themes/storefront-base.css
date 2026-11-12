@@ -1584,3 +1584,24 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 @media (min-width: 900px) {
   [data-jelly-theme] .jelly-header[data-tool-labels="true"] .jelly-header-count { position: static; margin-left: 2px; }
 }
+
+/* Main product (the "Product photos and details" section). The two columns are the section's own markup:
+   photos in one, the product parts (title and price, options, Add to cart, fold-outs…) stacked in the other.
+   Themes style the parts; they never need to place sections on the page. From 900px the columns sit side by
+   side; below that the photos come first. */
+:where([data-jelly-theme]) .jelly-main-product { --mp-media: 1fr; --mp-details: 1fr; }
+:where([data-jelly-theme]) .jelly-main-product[data-media-width="narrow"] { --mp-media: 2fr; --mp-details: 3fr; }
+:where([data-jelly-theme]) .jelly-main-product[data-media-width="wide"] { --mp-media: 1.4fr; --mp-details: 1fr; }
+:where([data-jelly-theme]) .jelly-main-product-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--mp-gap, clamp(24px, 3vw, 40px)); }
+:where([data-jelly-theme]) :is(.jelly-main-product-media, .jelly-main-product-details) { min-width: 0; }
+:where([data-jelly-theme]) .jelly-main-product-details { display: flex; flex-direction: column; gap: var(--mp-part-gap, 20px); }
+/* Inside a column a part is not a page section: no page container and no section padding of its own. */
+:where([data-jelly-theme]) [data-section-frame] .jelly-main-product :is(.jelly-main-product-media, .jelly-main-product-details) .jelly-container.jelly-container { width: auto; max-width: none; margin: 0; padding: 0; }
+:where([data-jelly-theme]) .jelly-main-product :is(.jelly-main-product-media, .jelly-product-part) > .jelly-section.jelly-section { margin: 0; padding-block: 0; }
+@media (min-width: 900px) {
+  :where([data-jelly-theme]) .jelly-main-product-grid { grid-template-columns: minmax(0, var(--mp-media)) minmax(0, var(--mp-details)); column-gap: var(--mp-column-gap, clamp(32px, 5vw, 72px)); align-items: start; }
+  :where([data-jelly-theme]) .jelly-main-product[data-media-position="right"] .jelly-main-product-grid { grid-template-columns: minmax(0, var(--mp-details)) minmax(0, var(--mp-media)); }
+  :where([data-jelly-theme]) .jelly-main-product[data-media-position="right"] .jelly-main-product-media { order: 2; }
+  :where([data-jelly-theme]) .jelly-main-product[data-sticky="media"] .jelly-main-product-media,
+  :where([data-jelly-theme]) .jelly-main-product[data-sticky="details"] .jelly-main-product-details { position: sticky; top: var(--mp-sticky-top, 24px); }
+}

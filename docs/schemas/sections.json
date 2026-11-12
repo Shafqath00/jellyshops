@@ -5273,7 +5273,15 @@
       "type": "hero",
       "category": "content",
       "supportedPages": [
-        "home"
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -6252,7 +6260,15 @@
       "type": "slideshow",
       "category": "content",
       "supportedPages": [
-        "home"
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -6395,7 +6411,15 @@
       "type": "category-grid",
       "category": "content",
       "supportedPages": [
-        "home"
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -7334,7 +7358,15 @@
       "type": "image-text",
       "category": "content",
       "supportedPages": [
-        "home"
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -7382,7 +7414,15 @@
       "type": "image-with-text",
       "category": "content",
       "supportedPages": [
-        "home"
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -7948,7 +7988,15 @@
       "type": "image-banner",
       "category": "content",
       "supportedPages": [
-        "home"
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -8141,9 +8189,12 @@
         "home",
         "product",
         "collection",
+        "cart",
+        "search",
         "page",
         "blog",
         "article",
+        "not-found",
         "checkout",
         "wishlist",
         "customer-login",
@@ -8319,9 +8370,12 @@
         "home",
         "product",
         "collection",
+        "cart",
+        "search",
         "page",
         "blog",
         "article",
+        "not-found",
         "checkout",
         "wishlist",
         "customer-login",
@@ -8390,7 +8444,15 @@
       "type": "testimonials",
       "category": "content",
       "supportedPages": [
-        "home"
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -8772,7 +8834,15 @@
       "type": "faq",
       "category": "content",
       "supportedPages": [
-        "home"
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -9502,7 +9572,15 @@
       "type": "newsletter",
       "category": "content",
       "supportedPages": [
-        "home"
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -9598,7 +9676,15 @@
       "type": "multicolumn",
       "category": "content",
       "supportedPages": [
-        "home"
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -10143,7 +10229,14 @@
       "category": "content",
       "supportedPages": [
         "home",
-        "page"
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -10968,7 +11061,14 @@
       "category": "content",
       "supportedPages": [
         "home",
-        "page"
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -11376,7 +11476,14 @@
       "category": "content",
       "supportedPages": [
         "home",
-        "page"
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -11846,9 +11953,12 @@
         "home",
         "product",
         "collection",
+        "cart",
+        "search",
         "page",
         "blog",
         "article",
+        "not-found",
         "checkout",
         "wishlist",
         "customer-login",
@@ -11950,7 +12060,15 @@
       "type": "journal-teaser",
       "category": "content",
       "supportedPages": [
-        "home"
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -12131,7 +12249,11 @@
         "product",
         "collection",
         "cart",
-        "page"
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -12269,7 +12391,12 @@
         "home",
         "product",
         "collection",
-        "page"
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -12779,7 +12906,12 @@
         "home",
         "product",
         "collection",
-        "page"
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -13544,7 +13676,15 @@
       "type": "image-mosaic",
       "category": "content",
       "supportedPages": [
-        "home"
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -13898,7 +14038,15 @@
       "type": "featured-collection",
       "category": "commerce",
       "supportedPages": [
-        "home"
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -14787,7 +14935,15 @@
       "type": "product-grid",
       "category": "commerce",
       "supportedPages": [
-        "home"
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
       ],
       "allowedRegions": [
         "template"
@@ -17642,6 +17798,8 @@
         "cart",
         "search",
         "page",
+        "blog",
+        "article",
         "not-found"
       ],
       "allowedRegions": [
@@ -20099,6 +20257,301 @@
           },
           "showWhenPlentiful": {
             "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "type": "main-product",
+      "category": "commerce",
+      "supportedPages": [
+        "product"
+      ],
+      "allowedRegions": [
+        "template"
+      ],
+      "allowedBlockTypes": [
+        "part-rating-summary",
+        "part-product-information",
+        "part-product-options",
+        "part-product-purchase",
+        "part-product-stock-counter",
+        "part-trust-strip",
+        "part-product-description",
+        "part-product-tabs",
+        "part-product-specifications"
+      ],
+      "maxBlocks": 16,
+      "defaultSettings": {
+        "imageFit": "cover",
+        "layout": "thumbnails",
+        "mediaRatio": "theme",
+        "thumbnailPosition": "below",
+        "enableZoom": true,
+        "mediaPosition": "left",
+        "mediaWidth": "medium",
+        "stickyColumn": "media"
+      },
+      "defaultBlocks": [
+        {
+          "type": "part-product-information",
+          "settings": {}
+        },
+        {
+          "type": "part-product-options",
+          "settings": {}
+        },
+        {
+          "type": "part-product-purchase",
+          "settings": {}
+        },
+        {
+          "type": "part-product-description",
+          "settings": {
+            "layout": "expandable",
+            "startOpen": true
+          }
+        }
+      ],
+      "responsiveFields": [],
+      "presets": [],
+      "controls": [
+        {
+          "type": "segmented",
+          "key": "mediaPosition",
+          "label": "Photos",
+          "group": "layout",
+          "options": [
+            {
+              "label": "On the left",
+              "value": "left"
+            },
+            {
+              "label": "On the right",
+              "value": "right"
+            }
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "mediaWidth",
+          "label": "Photo column",
+          "group": "layout",
+          "description": "How much of the width the photos take on large screens.",
+          "options": [
+            {
+              "label": "Narrow",
+              "value": "narrow"
+            },
+            {
+              "label": "Half",
+              "value": "medium"
+            },
+            {
+              "label": "Wide",
+              "value": "wide"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "key": "stickyColumn",
+          "label": "Keep in view while scrolling",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Photos",
+              "value": "media"
+            },
+            {
+              "label": "Buying details",
+              "value": "details"
+            },
+            {
+              "label": "Neither",
+              "value": "none"
+            }
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "layout",
+          "label": "Gallery layout",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Thumbnails",
+              "value": "thumbnails"
+            },
+            {
+              "label": "Large first image",
+              "value": "stacked"
+            },
+            {
+              "label": "Grid",
+              "value": "grid"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "key": "mediaRatio",
+          "label": "Photo shape",
+          "group": "layout",
+          "description": "Every photo sits in a frame of this shape, so photos of different sizes line up.",
+          "options": [
+            {
+              "label": "Theme default",
+              "value": "theme"
+            },
+            {
+              "label": "Square",
+              "value": "square"
+            },
+            {
+              "label": "Portrait (4:5)",
+              "value": "portrait"
+            },
+            {
+              "label": "Landscape (4:3)",
+              "value": "landscape"
+            },
+            {
+              "label": "Same as the first photo",
+              "value": "original"
+            }
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "thumbnailPosition",
+          "label": "Thumbnails",
+          "group": "layout",
+          "showWhen": {
+            "key": "layout",
+            "equals": "thumbnails"
+          },
+          "visibleWhenSaved": true,
+          "options": [
+            {
+              "label": "Below the photo",
+              "value": "below"
+            },
+            {
+              "label": "Beside the photo",
+              "value": "left"
+            }
+          ],
+          "description": "Beside the photo on wide screens; always below on phones."
+        },
+        {
+          "type": "checkbox",
+          "key": "enableZoom",
+          "label": "Let shoppers open photos full screen and zoom",
+          "group": "layout"
+        },
+        {
+          "type": "text",
+          "key": "badgeText",
+          "label": "Label on the photo",
+          "description": "A short promise shown over the main photo, for example 60-night trial. Leave empty for none.",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
+          "type": "segmented",
+          "key": "imageFit",
+          "label": "Image fit",
+          "group": "style",
+          "responsive": true,
+          "options": [
+            {
+              "label": "Fill",
+              "value": "cover"
+            },
+            {
+              "label": "Show whole image",
+              "value": "contain"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "badgeText": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "imageFit": {
+            "default": "cover",
+            "type": "string",
+            "enum": [
+              "cover",
+              "contain"
+            ]
+          },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "stacked",
+              "grid",
+              "thumbnails"
+            ]
+          },
+          "mediaRatio": {
+            "type": "string",
+            "enum": [
+              "theme",
+              "square",
+              "portrait",
+              "landscape",
+              "original"
+            ]
+          },
+          "thumbnailPosition": {
+            "type": "string",
+            "enum": [
+              "below",
+              "left"
+            ]
+          },
+          "enableZoom": {
+            "type": "boolean"
+          },
+          "pageLayout": {
+            "type": "string",
+            "enum": [
+              "theme",
+              "gallery-left",
+              "gallery-right",
+              "centred",
+              "compact",
+              "details-below"
+            ]
+          },
+          "mediaPosition": {
+            "type": "string",
+            "enum": [
+              "left",
+              "right"
+            ]
+          },
+          "mediaWidth": {
+            "type": "string",
+            "enum": [
+              "narrow",
+              "medium",
+              "wide"
+            ]
+          },
+          "stickyColumn": {
+            "type": "string",
+            "enum": [
+              "media",
+              "details",
+              "none"
+            ]
           }
         }
       }
@@ -25448,6 +25901,817 @@
             ]
           }
         }
+      }
+    },
+    {
+      "type": "part-rating-summary",
+      "defaultSettings": {
+        "source": "manual",
+        "rating": 4.8,
+        "reviewCount": 0,
+        "text": "from {count} reviews",
+        "linkLabel": "Read reviews",
+        "contentAlignment": "center"
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "heading",
+          "label": "Heading",
+          "group": "content",
+          "maxLength": 120,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "source",
+          "label": "Where the numbers come from",
+          "description": "Your store's reviews: the product's own reviews on a product page, all published reviews elsewhere. Hidden until there is a review.",
+          "group": "content",
+          "options": [
+            {
+              "label": "Typed by you",
+              "value": "manual"
+            },
+            {
+              "label": "Your store's reviews",
+              "value": "reviews"
+            }
+          ]
+        },
+        {
+          "type": "number",
+          "key": "rating",
+          "label": "Average rating (0 to 5)",
+          "group": "content",
+          "min": 0,
+          "max": 5,
+          "step": 0.1,
+          "showWhen": {
+            "key": "source",
+            "equals": "manual"
+          },
+          "visibleWhenSaved": true
+        },
+        {
+          "type": "number",
+          "key": "reviewCount",
+          "label": "Number of reviews",
+          "description": "Leave at 0 to hide the count.",
+          "group": "content",
+          "min": 0,
+          "max": 10000000,
+          "step": 1,
+          "showWhen": {
+            "key": "source",
+            "equals": "manual"
+          },
+          "visibleWhenSaved": true
+        },
+        {
+          "type": "text",
+          "key": "text",
+          "label": "Text after the rating",
+          "description": "Use {count} for the number of reviews, for example: from {count} reviews.",
+          "group": "content",
+          "maxLength": 160
+        },
+        {
+          "type": "link",
+          "key": "link",
+          "label": "Link to your reviews",
+          "description": "Optional.",
+          "group": "content",
+          "dynamicTypes": [
+            "url"
+          ]
+        },
+        {
+          "type": "text",
+          "key": "linkLabel",
+          "label": "Link text",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
+          "type": "segmented",
+          "key": "contentAlignment",
+          "label": "Alignment",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Center",
+              "value": "center"
+            }
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "colorScheme",
+          "label": "Background (older choice)",
+          "description": "Picking a colour scheme replaces this.",
+          "legacy": true,
+          "group": "style",
+          "options": [
+            {
+              "label": "Page",
+              "value": "page"
+            },
+            {
+              "label": "Soft",
+              "value": "soft"
+            },
+            {
+              "label": "Dark",
+              "value": "dark"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "heading": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "reviews"
+            ]
+          },
+          "rating": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 5
+          },
+          "reviewCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000000
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "link": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "linkLabel": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "contentAlignment": {
+            "type": "string",
+            "enum": [
+              "left",
+              "center"
+            ]
+          },
+          "colorScheme": {
+            "type": "string",
+            "enum": [
+              "page",
+              "soft",
+              "dark"
+            ]
+          }
+        },
+        "additionalProperties": {}
+      }
+    },
+    {
+      "type": "part-product-information",
+      "defaultSettings": {
+        "discountChip": "none",
+        "financeMonths": 0,
+        "financeText": "or {amount} a month for {months} months",
+        "financeLinkLabel": "Learn more",
+        "showVendor": true,
+        "showSku": true,
+        "showCompareAtPrice": true,
+        "showAvailability": true
+      },
+      "controls": [
+        {
+          "type": "checkbox",
+          "key": "showVendor",
+          "label": "Show vendor",
+          "group": "content"
+        },
+        {
+          "type": "checkbox",
+          "key": "showSku",
+          "label": "Show SKU",
+          "group": "content"
+        },
+        {
+          "type": "checkbox",
+          "key": "showSpecifications",
+          "label": "Show specifications (turn off if you use the Specifications section)",
+          "group": "content"
+        },
+        {
+          "type": "checkbox",
+          "key": "showCompareAtPrice",
+          "label": "Show compare-at price",
+          "group": "content"
+        },
+        {
+          "type": "checkbox",
+          "key": "showAvailability",
+          "label": "Show availability",
+          "group": "content"
+        },
+        {
+          "type": "segmented",
+          "key": "discountChip",
+          "label": "Sale label next to the price",
+          "group": "content",
+          "heading": "Sale and finance",
+          "options": [
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "% off",
+              "value": "percent"
+            },
+            {
+              "label": "Save amount",
+              "value": "amount"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "key": "financeMonths",
+          "label": "Monthly payments over (months)",
+          "description": "Shows the price split into monthly payments. Leave at 0 unless you offer finance.",
+          "group": "content",
+          "min": 0,
+          "max": 60,
+          "step": 1
+        },
+        {
+          "type": "text",
+          "key": "financeText",
+          "label": "Monthly payment text",
+          "description": "{amount} is the monthly payment, {months} the number of months.",
+          "group": "content",
+          "maxLength": 120
+        },
+        {
+          "type": "link",
+          "key": "financeLink",
+          "label": "Finance details link",
+          "group": "content",
+          "dynamicTypes": [
+            "url"
+          ]
+        },
+        {
+          "type": "text",
+          "key": "financeLinkLabel",
+          "label": "Finance link text",
+          "group": "content",
+          "maxLength": 40
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "showVendor": {
+            "default": true,
+            "type": "boolean"
+          },
+          "showSku": {
+            "default": true,
+            "type": "boolean"
+          },
+          "showCompareAtPrice": {
+            "default": true,
+            "type": "boolean"
+          },
+          "showAvailability": {
+            "default": true,
+            "type": "boolean"
+          },
+          "showSpecifications": {
+            "default": true,
+            "type": "boolean"
+          },
+          "discountChip": {
+            "type": "string",
+            "enum": [
+              "none",
+              "percent",
+              "amount"
+            ]
+          },
+          "financeMonths": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 60
+          },
+          "financeText": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "financeLink": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "financeLinkLabel": {
+            "type": "string",
+            "maxLength": 40
+          }
+        },
+        "additionalProperties": {}
+      }
+    },
+    {
+      "type": "part-product-options",
+      "defaultSettings": {
+        "style": "buttons",
+        "tileColumns": 3
+      },
+      "controls": [
+        {
+          "type": "segmented",
+          "key": "style",
+          "label": "Option style",
+          "group": "style",
+          "options": [
+            {
+              "label": "Buttons",
+              "value": "buttons"
+            },
+            {
+              "label": "Select",
+              "value": "select"
+            },
+            {
+              "label": "Large tiles",
+              "value": "tiles"
+            },
+            {
+              "label": "Tabs with tiles",
+              "value": "tabs"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "key": "tileColumns",
+          "label": "Tiles per row",
+          "description": "For Large tiles and Tabs with tiles.",
+          "group": "layout",
+          "min": 2,
+          "max": 4,
+          "step": 1
+        },
+        {
+          "type": "checkbox",
+          "key": "showFamily",
+          "label": "Link other colours of this product",
+          "description": "Products that share a tag like family:ascot show as colour swatches that open each other. The colour name comes from a Colour:Natural tag or the product's colour option.",
+          "group": "content",
+          "defaultValue": true
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "showFamily": {
+            "type": "boolean"
+          },
+          "style": {
+            "default": "buttons",
+            "type": "string",
+            "enum": [
+              "buttons",
+              "select",
+              "tiles",
+              "tabs"
+            ]
+          },
+          "tileColumns": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 4
+          }
+        },
+        "additionalProperties": {}
+      }
+    },
+    {
+      "type": "part-product-purchase",
+      "defaultSettings": {
+        "showQuantity": true,
+        "label": "Add to cart",
+        "stickyBar": false
+      },
+      "controls": [
+        {
+          "type": "checkbox",
+          "key": "showQuantity",
+          "label": "Show quantity",
+          "group": "content"
+        },
+        {
+          "type": "text",
+          "key": "label",
+          "label": "Button label",
+          "group": "content",
+          "maxLength": 80
+        },
+        {
+          "type": "checkbox",
+          "key": "stickyBar",
+          "label": "Keep an add to basket bar on screen while scrolling",
+          "group": "content"
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "showQuantity": {
+            "default": true,
+            "type": "boolean"
+          },
+          "label": {
+            "default": "Add to cart",
+            "type": "string",
+            "maxLength": 80
+          },
+          "stickyBar": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": {}
+      }
+    },
+    {
+      "type": "part-product-stock-counter",
+      "defaultSettings": {
+        "lowStockThreshold": 5,
+        "showWhenPlentiful": true
+      },
+      "controls": [
+        {
+          "type": "range",
+          "key": "lowStockThreshold",
+          "label": "Say \"only a few left\" at or below",
+          "group": "content",
+          "min": 1,
+          "max": 50,
+          "step": 1
+        },
+        {
+          "type": "checkbox",
+          "key": "showWhenPlentiful",
+          "label": "Show the count when stock is plentiful",
+          "group": "content"
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "lowStockThreshold": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "showWhenPlentiful": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": {}
+      }
+    },
+    {
+      "type": "part-trust-strip",
+      "allowedBlockTypes": [
+        "trust-point",
+        "heading",
+        "text"
+      ],
+      "maxBlocks": 10,
+      "defaultSettings": {
+        "contentAlignment": "center",
+        "layout": "row",
+        "speed": "normal",
+        "showIcons": true
+      },
+      "controls": [
+        {
+          "type": "segmented",
+          "key": "layout",
+          "label": "Layout",
+          "group": "layout",
+          "options": [
+            {
+              "label": "In a row",
+              "value": "row"
+            },
+            {
+              "label": "Scrolling",
+              "value": "scroll"
+            }
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "speed",
+          "label": "Scrolling speed",
+          "description": "Shoppers who ask for less motion see the points without movement.",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Slow",
+              "value": "slow"
+            },
+            {
+              "label": "Normal",
+              "value": "normal"
+            },
+            {
+              "label": "Fast",
+              "value": "fast"
+            }
+          ],
+          "showWhen": {
+            "key": "layout",
+            "equals": "scroll"
+          }
+        },
+        {
+          "type": "checkbox",
+          "key": "showIcons",
+          "label": "Show icons",
+          "group": "style"
+        },
+        {
+          "type": "segmented",
+          "key": "colorScheme",
+          "label": "Background (older choice)",
+          "description": "Picking a colour scheme replaces this.",
+          "legacy": true,
+          "group": "style",
+          "options": [
+            {
+              "label": "Page",
+              "value": "page"
+            },
+            {
+              "label": "Soft",
+              "value": "soft"
+            },
+            {
+              "label": "Dark",
+              "value": "dark"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "colorScheme": {
+            "type": "string",
+            "enum": [
+              "page",
+              "soft",
+              "dark"
+            ]
+          },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "row",
+              "scroll"
+            ]
+          },
+          "speed": {
+            "type": "string",
+            "enum": [
+              "slow",
+              "normal",
+              "fast"
+            ]
+          },
+          "showIcons": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": {}
+      }
+    },
+    {
+      "type": "part-product-description",
+      "defaultSettings": {
+        "spacing": "standard",
+        "heading": "Description"
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "heading",
+          "label": "Heading",
+          "group": "content",
+          "maxLength": 80
+        },
+        {
+          "type": "segmented",
+          "key": "layout",
+          "label": "Show as",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Text",
+              "value": "plain"
+            },
+            {
+              "label": "Expandable panel",
+              "value": "expandable"
+            }
+          ]
+        },
+        {
+          "type": "checkbox",
+          "key": "startOpen",
+          "label": "Open the panel to start with",
+          "group": "layout",
+          "showWhen": {
+            "key": "layout",
+            "equals": "expandable"
+          }
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "spacing": {
+            "default": "standard",
+            "type": "string",
+            "enum": [
+              "compact",
+              "standard",
+              "spacious"
+            ]
+          },
+          "heading": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "plain",
+              "expandable"
+            ]
+          },
+          "startOpen": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": {}
+      }
+    },
+    {
+      "type": "part-product-tabs",
+      "allowedBlockTypes": [
+        "info-tab"
+      ],
+      "maxBlocks": 8,
+      "defaultSettings": {
+        "firstOpen": false
+      },
+      "controls": [
+        {
+          "type": "select",
+          "key": "layout",
+          "label": "Show as",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Fold-out tabs",
+              "value": "accordion"
+            },
+            {
+              "label": "Open chapters side by side",
+              "value": "chapters"
+            }
+          ]
+        },
+        {
+          "type": "checkbox",
+          "key": "firstOpen",
+          "label": "Open the first tab by default",
+          "group": "layout",
+          "description": "Fold-out tabs only."
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "firstOpen": {
+            "type": "boolean"
+          },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "accordion",
+              "chapters"
+            ]
+          }
+        },
+        "additionalProperties": {}
+      }
+    },
+    {
+      "type": "part-product-specifications",
+      "allowedBlockTypes": [
+        "spec-row"
+      ],
+      "maxBlocks": 12,
+      "defaultSettings": {
+        "heading": "Specifications",
+        "showProductSpecifications": true,
+        "layout": "table"
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "heading",
+          "label": "Heading",
+          "group": "content",
+          "maxLength": 120
+        },
+        {
+          "type": "checkbox",
+          "key": "showProductSpecifications",
+          "label": "Show the specifications entered on each product",
+          "group": "content"
+        },
+        {
+          "type": "checkbox",
+          "key": "hideMeasurements",
+          "label": "Leave out measurements",
+          "description": "Use this when the page also has a Dimensions section, so sizes are not listed twice.",
+          "group": "content"
+        },
+        {
+          "type": "segmented",
+          "key": "layout",
+          "label": "Show as",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Table",
+              "value": "table"
+            },
+            {
+              "label": "Expandable panel",
+              "value": "expandable"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "heading": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "showProductSpecifications": {
+            "type": "boolean"
+          },
+          "hideMeasurements": {
+            "type": "boolean"
+          },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "table",
+              "expandable"
+            ]
+          }
+        },
+        "additionalProperties": {}
       }
     }
   ]

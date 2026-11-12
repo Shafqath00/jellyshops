@@ -7,6 +7,7 @@ import { commerceSections } from "./sections/commerce.js";
 import { contentSections } from "./sections/content.js";
 import { layoutSections } from "./sections/layout.js";
 import { productExtraSections } from "./sections/product-extras.js";
+import { mainProductSection, productPartBlocks } from "./sections/main-product.js";
 import { sectionStyleSchema, withSectionStyleControls } from "./section-style.js";
 import { SECTION_VARIANTS } from "./section-variants.js";
 import { elementStyleControls, elementStyleSchema, sectionElements } from "./section-elements.js";
@@ -38,7 +39,10 @@ function prepareSection(definition: SectionDefinition): SectionDefinition {
         : ["template"],
   };
 }
-const sections: SectionDefinition[] = [...layoutSections, ...contentSections, ...commerceSections, ...productExtraSections].map(prepareSection);
+const baseSections: SectionDefinition[] = [...layoutSections, ...contentSections, ...commerceSections, ...productExtraSections];
+// Main product owns the product page's columns; its buying column holds the product sections as blocks.
+for (const part of productPartBlocks(baseSections)) blockDefinitions.set(part.type, part);
+const sections: SectionDefinition[] = [...baseSections, mainProductSection(baseSections)].map(prepareSection);
 const sectionDefinitions = new Map(sections.map((definition) => [definition.type, definition]));
 const themeSections = new Map<string, Map<string, SectionDefinition[]>>();
 const newestVersion = <T>(versions: Map<string, T>): string | undefined => [...versions.keys()].sort(compareThemeVersions).at(-1);

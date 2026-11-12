@@ -531,6 +531,22 @@ label { font-size: 14px; }
 .jelly-review-meta { color: var(--rh-muted); font-size: 13px; }
 .jelly-review-verified { color: var(--rh-ink); font-weight: 600; }
 
+/* Main product (layout revision 5 and later): the platform draws the photos and buying column as one section, so
+   these rules only style the parts. Stores on earlier layouts still use the column rules above. */
+.jelly-main-product { --mp-part-gap: 14px; padding-block: 32px clamp(40px, 5vw, 64px); }
+.jelly-main-product[data-media-width="wide"] { --mp-media: 1.25fr; }
+.jelly-product-part[data-part="rating-summary"] .jelly-rating-summary { padding: 0; text-align: left; }
+.jelly-product-part[data-part="rating-summary"] .jelly-rating-line { justify-content: flex-start; font-size: 14px; }
+.jelly-product-part[data-part="product-information"] h1 { margin-bottom: 14px; }
+.jelly-product-part[data-part="trust-strip"] .jelly-trust-strip { margin: 4px 0; padding: 18px 20px; border: 1px solid var(--rh-line); border-radius: var(--rh-radius-lg); background: var(--j-color-surface); }
+.jelly-product-part[data-part="trust-strip"] .jelly-trust-strip ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; overflow: visible; }
+.jelly-product-part[data-part="trust-strip"] .jelly-trust-strip li { white-space: normal; font-size: 13px; line-height: 1.35; }
+.jelly-product-part[data-part="trust-strip"] .jelly-trust-strip a { text-decoration: none; }
+.jelly-product-part[data-part="trust-strip"] .jelly-trust-strip a:hover span { text-decoration: underline; }
+/* Fold-out rows sit flush against each other, sharing one ruled edge. */
+.jelly-product-part:is([data-part="product-description"], [data-part="product-specifications"], [data-part="product-tabs"]) + .jelly-product-part:is([data-part="product-description"], [data-part="product-specifications"], [data-part="product-tabs"]) { margin-top: calc(-1 * var(--mp-part-gap)); }
+.jelly-product-part[data-part="product-specifications"] .jelly-specifications[data-layout="expandable"] details { border-bottom: 1px solid var(--rh-line-strong); }
+
 /* ── 13 Bag, slide-out bag, checkout, account ───────────────────────── */
 .jelly-cart-summary, .jelly-search-results, .jelly-not-found { min-height: 0; }
 .jelly-cart-summary { padding-block: clamp(40px, 5vw, 72px) clamp(64px, 7vw, 96px); }
@@ -655,6 +671,9 @@ label { font-size: 14px; }
   .jelly-cart-totals { position: static; }
 }
 @media (max-width: 899px) {
+  /* Main product on tablets and phones: the promises become a ruled band. */
+  .jelly-main-product { padding-block: 20px 40px; }
+  .jelly-product-part[data-part="trust-strip"] .jelly-trust-strip { margin: 0; padding: 16px 0; border-width: 1px 0; border-radius: 0; background: none; }
   .jelly-header.jelly-header { padding-bottom: 14px; }
   /* Phones and tablets: the menu button on the left, the name in the middle, the icons on the right, search below. */
   .jelly-header .jelly-mobile-navigation { display: block; }

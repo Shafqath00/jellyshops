@@ -8,7 +8,7 @@ const { push, auth } = vi.hoisted(() => ({
   auth: { session: { access_token: "merchant-token" }, activeStore: { id: "store-1", name: "Little Things", slug: "little-things" } },
 }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
-vi.mock("@/features/auth/providers/auth-provider", () => ({ useAuth: () => auth }));
+vi.mock("@/features/auth/providers/auth-provider", () => ({ useAuth: () => auth, authApiOrigin: () => "http://127.0.0.1:3001" }));
 
 const themes = [{ id: "fresh-market", name: "Fresh Market", version: "1.0.0", description: "Fresh and welcoming", available: true }, { id: "classic", name: "Classic", version: "1.0.0", description: "Timeless essentials", available: true }];
 const requests: Array<{ url: string; method: string; body?: Record<string, unknown> }> = [];

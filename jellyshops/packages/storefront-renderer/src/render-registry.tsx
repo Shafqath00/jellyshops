@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import { ProductReviewsSection } from "./sections/product-reviews";
+import { MainProductSection } from "./sections/main-product";
 import type { SectionNode } from "@jelly/storefront-schema";
 import { FooterSection } from "./sections/footer";
 import { HeaderSection } from "./sections/header";
@@ -90,6 +91,8 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("article-content", ({ context, section }) => <ArticleContentSection context={context} section={section} />);
   registry.register("product-grid", ({ commerce, section, context, mode }) => <ProductGridSection commerce={commerce} section={section} storeSlug={context.storeSlug} editor={mode === "editor"} />);
   registry.register("product-gallery", ({ context, section }) => <ProductGallerySection context={context} section={section} />);
+  // The parts are the registered product sections, looked up when drawn so a theme or test registry can replace them.
+  registry.register("main-product", (props) => <MainProductSection {...props} renderPart={(type) => registry.get(type)} />);
   registry.register("product-information", ({ context, section }) => <ProductInformationSection context={context} section={section} />);
   registry.register("product-options", ({ context, section }) => <ProductOptionsSection context={context} section={section} />);
   registry.register("product-purchase", ({ context, section }) => <ProductPurchaseSection context={context} section={section} />);

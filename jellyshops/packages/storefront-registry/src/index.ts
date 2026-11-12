@@ -16,3 +16,4 @@ export { BLOCK_MAX_WIDTHS, BLOCK_STYLE_CONTROLS, BLOCK_TYPE_PRESETS, blockStyleS
 export type { BlockStyleSettings } from "./block-style.js";
 export { GROUP_CHILD_TYPES } from "./blocks.js";
 export { ELEMENT_ALIGNMENTS, ELEMENT_WEIGHTS, elementControls, elementStyleControls, elementStyleKey, elementStyleProps, elementStyleSchema, BLOCK_ELEMENTS, SECTION_ELEMENTS, sectionElements, type ElementStyleProp } from "./section-elements.js";
+export { PART_BLOCK_PREFIX, PRODUCT_PART_SECTIONS, partBlockType, partSectionType, type ProductPartSection } from "./sections/main-product.js";

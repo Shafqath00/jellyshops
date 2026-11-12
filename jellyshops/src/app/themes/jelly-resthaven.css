@@ -408,6 +408,18 @@
 [data-jelly-theme="jelly-resthaven"] .jelly-review h3,[data-jelly-theme="jelly-resthaven"] .jelly-product-reviews h3{margin: 6px 0; font-family: var(--theme-font-body); font-size: 16px; font-weight: 700; letter-spacing: 0;}
 [data-jelly-theme="jelly-resthaven"] .jelly-review-meta{color: var(--rh-muted); font-size: 13px;}
 [data-jelly-theme="jelly-resthaven"] .jelly-review-verified{color: var(--rh-ink); font-weight: 600;}
+[data-jelly-theme="jelly-resthaven"] .jelly-main-product{--mp-part-gap: 14px; padding-block: 32px clamp(40px, 5vw, 64px);}
+[data-jelly-theme="jelly-resthaven"] .jelly-main-product[data-media-width="wide"]{--mp-media: 1.25fr;}
+[data-jelly-theme="jelly-resthaven"] .jelly-product-part[data-part="rating-summary"] .jelly-rating-summary{padding: 0; text-align: left;}
+[data-jelly-theme="jelly-resthaven"] .jelly-product-part[data-part="rating-summary"] .jelly-rating-line{justify-content: flex-start; font-size: 14px;}
+[data-jelly-theme="jelly-resthaven"] .jelly-product-part[data-part="product-information"] h1{margin-bottom: 14px;}
+[data-jelly-theme="jelly-resthaven"] .jelly-product-part[data-part="trust-strip"] .jelly-trust-strip{margin: 4px 0; padding: 18px 20px; border: 1px solid var(--rh-line); border-radius: var(--rh-radius-lg); background: var(--j-color-surface);}
+[data-jelly-theme="jelly-resthaven"] .jelly-product-part[data-part="trust-strip"] .jelly-trust-strip ul{display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; overflow: visible;}
+[data-jelly-theme="jelly-resthaven"] .jelly-product-part[data-part="trust-strip"] .jelly-trust-strip li{white-space: normal; font-size: 13px; line-height: 1.35;}
+[data-jelly-theme="jelly-resthaven"] .jelly-product-part[data-part="trust-strip"] .jelly-trust-strip a{text-decoration: none;}
+[data-jelly-theme="jelly-resthaven"] .jelly-product-part[data-part="trust-strip"] .jelly-trust-strip a:hover span{text-decoration: underline;}
+[data-jelly-theme="jelly-resthaven"] .jelly-product-part:is([data-part="product-description"], [data-part="product-specifications"], [data-part="product-tabs"]) + .jelly-product-part:is([data-part="product-description"], [data-part="product-specifications"], [data-part="product-tabs"]){margin-top: calc(-1 * var(--mp-part-gap));}
+[data-jelly-theme="jelly-resthaven"] .jelly-product-part[data-part="product-specifications"] .jelly-specifications[data-layout="expandable"] details{border-bottom: 1px solid var(--rh-line-strong);}
 [data-jelly-theme="jelly-resthaven"] .jelly-cart-summary,[data-jelly-theme="jelly-resthaven"] .jelly-search-results,[data-jelly-theme="jelly-resthaven"] .jelly-not-found{min-height: 0;}
 [data-jelly-theme="jelly-resthaven"] .jelly-cart-summary{padding-block: clamp(40px, 5vw, 72px) clamp(64px, 7vw, 96px);}
 [data-jelly-theme="jelly-resthaven"] :is(.jelly-cart-card, .jelly-search-shell, .jelly-not-found > .jelly-container > div){max-width: none; padding: 0; border-radius: 0; background: none; box-shadow: none;}
@@ -513,7 +525,9 @@
 [data-jelly-theme="jelly-resthaven"] .jelly-footer-inner,[data-jelly-theme="jelly-resthaven"] .jelly-footer-inner:has(.jelly-footer-contact){grid-template-columns: minmax(0, 1fr);}
 [data-jelly-theme="jelly-resthaven"] .jelly-cart-layout{grid-template-columns: minmax(0, 1fr);}
 [data-jelly-theme="jelly-resthaven"] .jelly-cart-totals{position: static;}}
-@media (max-width: 899px){[data-jelly-theme="jelly-resthaven"] .jelly-header.jelly-header{padding-bottom: 14px;}
+@media (max-width: 899px){[data-jelly-theme="jelly-resthaven"] .jelly-main-product{padding-block: 20px 40px;}
+[data-jelly-theme="jelly-resthaven"] .jelly-product-part[data-part="trust-strip"] .jelly-trust-strip{margin: 0; padding: 16px 0; border-width: 1px 0; border-radius: 0; background: none;}
+[data-jelly-theme="jelly-resthaven"] .jelly-header.jelly-header{padding-bottom: 14px;}
 [data-jelly-theme="jelly-resthaven"] .jelly-header .jelly-mobile-navigation{display: block;}
 [data-jelly-theme="jelly-resthaven"] .jelly-header > nav:not(.jelly-header-tools){display: none;}
 [data-jelly-theme="jelly-resthaven"] .jelly-header:not([data-sticky="true"]){position: relative;}

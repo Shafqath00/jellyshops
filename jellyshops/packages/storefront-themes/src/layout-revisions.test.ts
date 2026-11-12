@@ -32,13 +32,13 @@ const inline = (placements: LayoutPlacement[]) => placements.flatMap((placement)
 
 describe("layout revisions", () => {
   it("knows Resthaven's layouts, oldest first, with the starter as the newest", () => {
-    expect(currentLayoutRevision(THEME)).toBe(4);
-    expect(layoutRevisions(THEME).map((entry) => entry.revision)).toEqual([1, 2, 3, 4]);
+    expect(currentLayoutRevision(THEME)).toBe(5);
+    expect(layoutRevisions(THEME).map((entry) => entry.revision)).toEqual([1, 2, 3, 4, 5]);
     expect(currentLayoutRevision("jelly-signature")).toBe(1);
   });
 
   it("recognises which layout a fresh install came from", () => {
-    for (const revision of [1, 2, 3, 4]) expect(detectLayoutRevision(THEME, install(packFor(revision)))).toBe(revision);
+    for (const revision of [1, 2, 3, 4, 5]) expect(detectLayoutRevision(THEME, install(packFor(revision)))).toBe(revision);
   });
 
   it("still recognises the starting layout after merchant edits", () => {
@@ -59,7 +59,7 @@ describe("layout revisions", () => {
     const alternate = { id: "alt-1", type: "product" as const, handle: "bed", layout: { sections: [] as LayoutPlacement[] } };
     draft.templates.push(alternate);
     const plan = planLayoutUpgrade(THEME, draft, 2, "upgrade-1");
-    const current = packFor(4);
+    const current = packFor(5);
 
     it("lays every page out as the current starter does", () => {
       for (const template of current.templates) {
@@ -99,11 +99,39 @@ describe("layout revisions", () => {
     });
 
     it("is then recognised as the current layout", () => {
-      expect(detectLayoutRevision(THEME, plan.draft)).toBe(4);
+      expect(detectLayoutRevision(THEME, plan.draft)).toBe(5);
     });
   });
 
+  it("moves the old product sections into Main product's parts, keeping the merchant's changes", () => {
+    const draft = install(packFor(4));
+    const product = draft.templates.find((template) => template.type === "product")!;
+    const sections = inline(product.layout.sections);
+    sections.find((section) => section.type === "product-gallery")!.settings.mediaRatio = "square";
+    sections.find((section) => section.type === "product-purchase")!.settings.label = "Buy this bed";
+    const trust = sections.find((section) => section.type === "trust-strip")!;
+    trust.blocks[0]!.settings.text = "Free delivery in London";
+    const removed = sections.find((section) => section.type === "product-specifications")!;
+    product.layout.sections = product.layout.sections.filter((placement) => placement.kind !== "inline" || placement.section.id !== removed.id);
+
+    const plan = planLayoutUpgrade(THEME, draft, 4, "install-1");
+    const result = inline(plan.draft.templates.find((template) => template.type === "product")!.layout.sections);
+    expect(result.map((section) => section.type)).toEqual(["main-product", "product-dimensions", "product-reviews", "related-products", "recently-viewed"]);
+    const main = result[0]!;
+    expect(main.settings.mediaRatio).toBe("square");
+    expect(main.settings.mediaWidth).toBe("wide");
+    expect(main.blocks.map((block) => block.type)).toEqual(["part-rating-summary", "part-product-information", "part-product-options", "part-product-purchase", "part-trust-strip", "part-product-description"]);
+    expect(main.blocks.find((block) => block.type === "part-product-purchase")!.settings.label).toBe("Buy this bed");
+    expect(main.blocks.find((block) => block.type === "part-trust-strip")!.blocks?.[0]?.settings.text).toBe("Free delivery in London");
+    expect(main.blocks.every((block) => block.id.startsWith("install-1:"))).toBe(true);
+    const page = plan.pages.find((entry) => entry.pageType === "product")!;
+    expect(page.carried.map((entry) => entry.type)).toEqual(expect.arrayContaining(["main-product", "product-purchase", "trust-strip"]));
+    expect(page.skipped.map((entry) => entry.type)).toEqual(["product-specifications"]);
+    expect(page.kept).toEqual([]);
+    expect(validateSectionAgainstRegistry(main, "product", THEME)).toEqual([]);
+  });
+
   it("refuses to upgrade a draft that is already current", () => {
-    expect(() => planLayoutUpgrade(THEME, install(packFor(4)), 4, "x")).toThrow(/already uses the current layout/);
+    expect(() => planLayoutUpgrade(THEME, install(packFor(5)), 5, "x")).toThrow(/already uses the current layout/);
   });
 });
