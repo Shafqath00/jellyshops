@@ -22,6 +22,7 @@ import { StorefrontPageLoading } from "@/features/storefront/components/storefro
 import { requestBackInStock } from "@/features/storefront/back-in-stock-api";
 import { useVariantAddress } from "@/features/storefront/use-variant-address";
 import { isVariantBuyable, variantMaxQuantity } from "@/lib/variant-stock";
+import { productSignals, recommendProducts } from "@/features/storefront/recommendations";
 
 export default function ProductPage({ routeValues }: { routeValues?: Array<[string, unknown]> }) {
   const router = useRouter();
@@ -72,7 +73,7 @@ export default function ProductPage({ routeValues }: { routeValues?: Array<[stri
     personalisationValues,
     onPersonalisationChange: setPersonalisationValues,
     showPersonalisationProblems: personalisationTried,
-    relatedProducts: visibleProducts.filter((item) => item.id !== product.id && ((item.collectionIds ?? []).some((id) => (product.collectionIds ?? []).includes(id)) || (item.primaryCategoryId && item.primaryCategoryId === product.primaryCategoryId))).slice(0, 4).map((item) => productCardData(item, `/${store.slug}/products/${item.slug}`, store.currency)),
+    relatedProducts: recommendProducts(productSignals(product), visibleProducts, productSignals, 12).map((item) => productCardData(item, `/${store.slug}/products/${item.slug}`, store.currency)),
   }) : undefined;
   if (productPresentation && store && product) {
     // Other colours of the same design (products tagged family:<name>) link to each other.

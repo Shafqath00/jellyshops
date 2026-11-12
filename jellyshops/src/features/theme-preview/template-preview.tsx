@@ -15,6 +15,7 @@ import { MAX_COMPARE, useCompareList } from "@/features/storefront/compare-list"
 import type { CompareItem } from "@/features/storefront/compare-table";
 import { ComparePageView, CompareTrayView } from "@/features/storefront/components/compare-view";
 import type { ThemePreviewConfig } from "./configs";
+import { cardSignals, productSignals, recommendProducts } from "@/features/storefront/recommendations";
 
 /**
  * Renders a theme's starter template (home, product, collection, cart, search,
@@ -51,7 +52,7 @@ export function useProductContext(config: ThemePreviewConfig): StorefrontPageCon
   const presentation = createProductPresentationContext({
     product, currency: "GBP", shippingCopy: config.product.shippingCopy, selections, quantity,
     onSelectionsChange: setSelections, onQuantityChange: setQuantity, onAddToCart: async () => ({ ok: true }),
-    relatedProducts: config.products.filter((item) => item.id !== product.id).slice(0, 4),
+    relatedProducts: recommendProducts(productSignals(product), config.products, cardSignals, 12),
   });
   if (config.product.showBuyNow !== false) presentation.buyNow = async () => ({ ok: true });
   return { pageType: "product", resource: { id: product.id, handle: product.slug, data: { title: product.name, product, productPresentation: presentation } } } as unknown as StorefrontPageContext;

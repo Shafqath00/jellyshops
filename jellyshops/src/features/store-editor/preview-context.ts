@@ -2,6 +2,7 @@ import type { CollectionPresentationContext, ProductPresentationContext, PublicP
 import type { StorefrontTemplateType, ArticleResource, BlogResource, CatalogAdminCollectionDetail, DemoCatalog, PageResource } from "./api/types";
 import type { ConfiguredOptionSelection, Product } from "@/lib/domain";
 import { createProductPresentationContext } from "@/features/storefront/product-presentation";
+import { recommendProducts } from "@/features/storefront/recommendations";
 
 /** The live store's quick-add rule (one buyable variant, no options), from the editor's catalog data. */
 function previewQuickAdd(product: CatalogAdminCollectionDetail["products"][number]): Pick<PublicProduct, "quickAdd"> {
@@ -32,6 +33,12 @@ export interface EditorPreviewContent {
   pages: PageResource[];
   blogs: BlogResource[];
   articles: ArticleResource[];
+}
+
+/** The sample store's recommendations for a product, by the live store's rule (collections come from the demo catalogue). */
+function editorRecommendations(catalog: DemoCatalog, productId: string): PublicProduct[] {
+  const signals = (id: string) => ({ id, collectionIds: catalog.collections.filter((collection) => collection.productIds.includes(id)).map((collection) => collection.id) });
+  return recommendProducts(signals(productId), publicProducts(catalog), (card) => signals(card.id), 12);
 }
 
 function publicProducts(catalog: DemoCatalog): PublicProduct[] {
@@ -119,7 +126,7 @@ export function createEditorPreviewPageContext({
   }
   if (type === "product") {
     if (!productDetail || !productRuntime || productDetail.id !== resourceId) return null;
-    return { pageType: "product", resource: { id: productDetail.id, handle: productDetail.slug, data: { title: productDetail.name, product: productDetail, productPresentation: previewProductPresentation(productDetail, productRuntime, publicProducts(catalog).filter((product) => product.id !== productDetail.id)) } } };
+    return { pageType: "product", resource: { id: productDetail.id, handle: productDetail.slug, data: { title: productDetail.name, product: productDetail, productPresentation: previewProductPresentation(productDetail, productRuntime, editorRecommendations(catalog, productDetail.id)) } } };
   }
   if (type === "collection") {
     if (!collectionDetail || collectionDetail.id !== resourceId || collectionDetail.storeId !== storeId) return null;
