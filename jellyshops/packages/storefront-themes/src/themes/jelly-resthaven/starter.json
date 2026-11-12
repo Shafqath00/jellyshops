@@ -1546,6 +1546,20 @@
           }
         },
         {
+          "kind": "inline",
+          "section": {
+            "id": "resthaven-404-recently-viewed",
+            "type": "recently-viewed",
+            "enabled": true,
+            "settings": {
+              "heading": "Recently viewed",
+              "limit": 4,
+              "columns": 4
+            },
+            "blocks": []
+          }
+        },
+        {
           "kind": "global",
           "globalSectionId": "footer"
         }
