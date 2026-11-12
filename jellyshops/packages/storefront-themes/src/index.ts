@@ -33,3 +33,4 @@ export type { ArchetypeDimension, ArchetypeOption, TemplatePlan } from "./templa
 export { cardLayoutAttribute, PRODUCT_CARD_LAYOUTS } from "./theme-style-settings.js";
 export type { ProductCardLayout } from "./theme-style-settings.js";
 export { cartDrawerVariant, freeDeliveryThresholdMinor } from "./theme-style-settings.js";
+export { currentLayoutRevision, detectLayoutRevision, layoutRevisions, planLayoutUpgrade, starterIdOf, type LayoutDraft, type LayoutPageChange, type LayoutPlacement, type LayoutRevisionInfo, type LayoutSectionChange, type LayoutUpgradePlan } from "./layout-revisions.js";

@@ -51,6 +51,18 @@ export interface ThemeManifestInput {
 }
 
 /** A theme folder found under src/themes/: its manifest (theme.json) and optional starter content (starter.json). */
+/** A starter layout a theme used before: shared sections and templates exactly as the starter had them. */
+export interface ThemeLayoutRevision {
+  revision: number;
+  label: string;
+  globalSections: Record<string, SectionNode>;
+  templates: Record<string, { type: PageType; sections: Array<{ kind: "inline"; section: SectionNode } | { kind: "global"; globalSectionId: string }> }>;
+}
+
+export interface ThemeLayoutHistory {
+  revisions: ThemeLayoutRevision[];
+}
+
 export interface DiscoveredTheme {
   manifest: ThemeManifestInput;
   starter?: {
@@ -59,4 +71,6 @@ export interface DiscoveredTheme {
     globalSections: Record<string, SectionNode>;
     templates: Record<string, { type: PageType; sections: Array<{ kind: "inline"; section: SectionNode } | { kind: "global"; globalSectionId: string }> }>;
   };
+  /** Earlier starter layouts, oldest first (`layout-history.json`); the starter itself is the newest. */
+  layoutHistory?: ThemeLayoutHistory;
 }

@@ -3,7 +3,7 @@ import { COMPLETE_STARTER_PACK_IDS, type StarterMenuItem, type V4StarterPack } f
 import type { SectionNode } from "@jelly/storefront-schema";
 import type { CommerceDatabase, SqlExecutor } from "../../commerce/repository.js";
 import { ApiError } from "../../http/errors.js";
-import { getStarterPack, isStarterPackId, resolveTheme, validateStarterPack } from "@jelly/storefront-themes";
+import { currentLayoutRevision, getStarterPack, isStarterPackId, resolveTheme, validateStarterPack } from "@jelly/storefront-themes";
 import { RETIRED_TEMPLATE_HANDLE_PREFIX } from "../workspace/repositories/template-repository.js";
 
 const heading = (text: string) => ({ type: "heading", attrs: { level: 2 }, content: [{ type: "text", text }] });
@@ -82,6 +82,17 @@ async function hasExistingWorkspaceState(sql: SqlExecutor, storeId: string): Pro
     [storeId],
   );
   return result.rows[0]?.hasState === true;
+}
+
+/**
+ * Whether the database has the layout revision column (migration 20261112000000). Until it is applied,
+ * installs work as before and the revision is recognised from the draft later.
+ */
+export async function hasLayoutRevisionColumn(sql: SqlExecutor): Promise<boolean> {
+  const result = await sql.query<{ present: boolean }>(
+    `SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'StorefrontWorkspace' AND column_name = 'layoutRevision') AS "present"`,
+  );
+  return result.rows[0]?.present === true;
 }
 
 export class StorefrontStarterInstallationService {
@@ -175,6 +186,8 @@ export class StorefrontStarterInstallationService {
         `UPDATE "StorefrontWorkspace" SET "generation" = "generation" + 1, "starterPackId" = $2, "starterPackVersion" = $3, "updatedAt" = $4 WHERE "storeId" = $1 RETURNING "generation"`,
         [storeId, pack.id, pack.version, now],
       );
+      // The starter layout this draft is built from: a later layout upgrade starts from here.
+      if (await hasLayoutRevisionColumn(sql)) await sql.query(`UPDATE "StorefrontWorkspace" SET "layoutRevision" = $2 WHERE "storeId" = $1`, [storeId, currentLayoutRevision(pack.theme.themeId)]);
       return { storeId, starterPackId: pack.id, starterPackVersion: pack.version, generation: Number(updatedWorkspace.rows[0]?.generation ?? 1), installed: true };
     });
   }

@@ -33,6 +33,7 @@ const schemaMigrations = [
   "20261108020000_product_personalisation.sql",
   "20261108030000_back_in_stock.sql",
   "20261110000000_product_quantity_rules.sql",
+  "20261112000000_layout_revisions.sql",
 ] as const;
 
 export type IntegrationDatabase = PGlite;

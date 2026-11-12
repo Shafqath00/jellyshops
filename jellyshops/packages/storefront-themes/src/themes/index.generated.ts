@@ -11,6 +11,7 @@ import manifest5 from "./jelly-harbour/theme.json" with { type: "json" };
 import starter5 from "./jelly-harbour/starter.json" with { type: "json" };
 import manifest6 from "./jelly-resthaven/theme.json" with { type: "json" };
 import starter6 from "./jelly-resthaven/starter.json" with { type: "json" };
+import layoutHistory6 from "./jelly-resthaven/layout-history.json" with { type: "json" };
 import type { DiscoveredTheme } from "../types.js";
 
 export const discoveredThemes: DiscoveredTheme[] = [
@@ -20,5 +21,5 @@ export const discoveredThemes: DiscoveredTheme[] = [
   { manifest: manifest3, starter: starter3 },
   { manifest: manifest4, starter: starter4 },
   { manifest: manifest5, starter: starter5 },
-  { manifest: manifest6, starter: starter6 },
+  { manifest: manifest6, starter: starter6, layoutHistory: layoutHistory6 },
 ] as DiscoveredTheme[];
