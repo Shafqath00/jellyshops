@@ -129,6 +129,8 @@ export interface LayoutPageChange {
   removed: LayoutSectionChange[];
   /** New-layout sections left out because the merchant had removed them. */
   skipped: LayoutSectionChange[];
+  /** Old sections that became parts of one new section (the product sections inside Main product). */
+  combined: LayoutSectionChange[];
 }
 
 export interface LayoutUpgradePlan {
@@ -173,6 +175,7 @@ function mergeParts(target: SectionNode, mine: LayoutPlacement[], used: Set<numb
     const merged = mergeSection(oldStarter, (mine[index] as { section: SectionNode }).section, asSection(block, type), prefix);
     if (!merged) continue;
     used.add(index);
+    change.combined.push(describe((mine[index] as { section: SectionNode }).section));
     const { section } = merged;
     blocks.push({ id: section.id, type: block.type, enabled: section.enabled, settings: section.settings, ...(section.blocks.length ? { blocks: section.blocks } : {}), ...(section.responsive ? { responsive: section.responsive } : {}) });
     if (merged.keptSettings.length || merged.keptBlocks) change.carried.push(describe(section, { keptSettings: merged.keptSettings, keptBlocks: merged.keptBlocks }));
@@ -251,7 +254,7 @@ export function planLayoutUpgrade(themeId: string, draft: LayoutDraft, from: num
     const baseSections = baseTemplate ? inlineSections(baseTemplate.layout.sections as LayoutPlacement[]) : [];
     const mine = template.layout.sections;
     const used = new Set<number>();
-    const change: LayoutPageChange = { pageType: targetTemplate.type, added: [], carried: [], kept: [], removed: [], skipped: [] };
+    const change: LayoutPageChange = { pageType: targetTemplate.type, added: [], carried: [], kept: [], removed: [], skipped: [], combined: [] };
     const placements: LayoutPlacement[] = [];
     for (const placement of targetTemplate.layout.sections as LayoutPlacement[]) {
       if (placement.kind === "global") {
@@ -275,7 +278,10 @@ export function planLayoutUpgrade(themeId: string, draft: LayoutDraft, from: num
       if (!merged) { placements.push({ kind: "inline", section: rekeySection(placement.section, prefix) }); change.added.push(describe(placement.section)); continue; }
       used.add(index);
       // Product images turning into Main product: the old product sections become its parts.
-      if (current.type !== placement.section.type) merged.section.blocks = mergeParts(placement.section, mine, used, baseSections, prefix, change);
+      if (current.type !== placement.section.type) {
+        change.combined.push(describe(current));
+        merged.section.blocks = mergeParts(placement.section, mine, used, baseSections, prefix, change);
+      }
       placements.push({ kind: "inline", section: merged.section });
       if (merged.keptSettings.length || merged.keptBlocks) change.carried.push(describe(placement.section, { keptSettings: merged.keptSettings, keptBlocks: merged.keptBlocks }));
     }

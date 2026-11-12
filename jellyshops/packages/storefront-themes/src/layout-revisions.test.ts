@@ -128,6 +128,7 @@ describe("layout revisions", () => {
     expect(page.carried.map((entry) => entry.type)).toEqual(expect.arrayContaining(["main-product", "product-purchase", "trust-strip"]));
     expect(page.skipped.map((entry) => entry.type)).toEqual(["product-specifications"]);
     expect(page.kept).toEqual([]);
+    expect(page.combined.map((entry) => entry.type)).toEqual(["product-gallery", "rating-summary", "product-information", "product-options", "product-purchase", "trust-strip", "product-description"]);
     expect(validateSectionAgainstRegistry(main, "product", THEME)).toEqual([]);
   });
 

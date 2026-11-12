@@ -41,6 +41,8 @@ export interface LayoutUpgradePageSummary {
   kept: string[];
   removed: string[];
   skipped: string[];
+  /** Old sections that became parts of one new section. */
+  combined: string[];
 }
 
 export interface LayoutUpgradePreview {
@@ -58,7 +60,7 @@ const labels = (changes: LayoutSectionChange[]) => changes.map((change) => chang
 const carried = (changes: LayoutSectionChange[]) => changes.map((change) => ({ section: change.label, settings: change.keptSettings ?? [], blocks: Boolean(change.keptBlocks) }));
 
 function summarise(page: LayoutPageChange): LayoutUpgradePageSummary {
-  return { page: pageTypeLabel(page.pageType), added: labels(page.added), carried: carried(page.carried), kept: labels(page.kept), removed: labels(page.removed), skipped: labels(page.skipped) };
+  return { page: pageTypeLabel(page.pageType), added: labels(page.added), carried: carried(page.carried), kept: labels(page.kept), removed: labels(page.removed), skipped: labels(page.skipped), combined: labels(page.combined) };
 }
 
 /**
@@ -90,7 +92,7 @@ export class LayoutUpgradeService {
   async preview(storeId: string): Promise<LayoutUpgradePreview> {
     return this.database.transaction(async (sql) => {
       const { plan, generation, problems } = await this.plan(sql, storeId, false);
-      return { from: plan.from, to: plan.to, generation, shared: { added: labels(plan.shared.added), carried: carried(plan.shared.carried), kept: labels(plan.shared.kept) }, pages: plan.pages.map(summarise).filter((page) => page.added.length + page.carried.length + page.kept.length + page.removed.length + page.skipped.length > 0), problems };
+      return { from: plan.from, to: plan.to, generation, shared: { added: labels(plan.shared.added), carried: carried(plan.shared.carried), kept: labels(plan.shared.kept) }, pages: plan.pages.map(summarise).filter((page) => page.added.length + page.carried.length + page.kept.length + page.removed.length + page.skipped.length + page.combined.length > 0), problems };
     });
   }
 

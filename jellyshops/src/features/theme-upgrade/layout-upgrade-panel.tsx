@@ -12,7 +12,7 @@ export interface LayoutUpgradeOffer {
   generation: number;
   lastUpgrade: { id: string; fromRevision: number; toRevision: number; createdAt: string } | null;
 }
-interface PageSummary { page: string; added: string[]; carried: Array<{ section: string; settings: string[]; blocks: boolean }>; kept: string[]; removed: string[]; skipped: string[] }
+interface PageSummary { page: string; added: string[]; carried: Array<{ section: string; settings: string[]; blocks: boolean }>; kept: string[]; removed: string[]; skipped: string[]; combined?: string[] }
 export interface LayoutUpgradePreview {
   from: { revision: number; label: string };
   to: { revision: number; label: string };
@@ -112,6 +112,7 @@ export function LayoutUpgradePanel({ storeId, token, fetcher = fetch, onChanged 
         {preview.pages.map((page) => <div key={page.page}>
           <p className="text-sm font-semibold">{page.page}</p>
           <ul className="mt-1 grid gap-1 text-sm">
+            <Line label="Now one section with photos and buying details" items={page.combined ?? []} />
             <Line label="New sections" items={page.added} />
             <Line label="Your changes kept" items={page.carried.map((entry) => entry.section)} />
             <Line label="Your own sections kept (moved to the end of the page)" items={page.kept} />

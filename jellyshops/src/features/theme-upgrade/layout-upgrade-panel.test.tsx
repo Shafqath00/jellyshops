@@ -12,7 +12,7 @@ const offer = (over: Partial<LayoutUpgradeOffer> = {}): LayoutUpgradeOffer => ({
 const preview = (over: Partial<LayoutUpgradePreview> = {}): LayoutUpgradePreview => ({
   from: { revision: 2, label: "Showroom layout" }, to: { revision: 4, label: "Current layout" }, generation: 7,
   shared: { added: [], carried: [{ section: "Header", settings: ["showAccount"], blocks: false }], kept: [] },
-  pages: [{ page: "Home page", added: ["Collection list"], carried: [{ section: "Hero banner", settings: ["heading"], blocks: false }], kept: ["Rich text"], removed: ["Image gallery"], skipped: [] }],
+  pages: [{ page: "Product pages", added: [], carried: [], kept: [], removed: [], skipped: [], combined: ["Product images", "Product title and price"] }, { page: "Home page", added: ["Collection list"], carried: [{ section: "Hero banner", settings: ["heading"], blocks: false }], kept: ["Rich text"], removed: ["Image gallery"], skipped: [] }],
   problems: [], ...over,
 });
 
@@ -48,6 +48,7 @@ describe("Store designs > Page layout", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "See what changes" }));
     const changes = await screen.findByLabelText("Changes to your draft pages");
+    expect(changes).toHaveTextContent("Now one section with photos and buying details: Product images, Product title and price");
     expect(changes).toHaveTextContent("New sections: Collection list");
     expect(changes).toHaveTextContent("Your changes kept: Hero banner");
     expect(changes).toHaveTextContent("Your own sections kept (moved to the end of the page): Rich text");
