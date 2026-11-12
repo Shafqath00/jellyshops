@@ -321,6 +321,12 @@ describe("registry-driven section rendering", () => {
     expect(onIncrease).toHaveBeenCalledOnce();
   });
 
+  it("shows a waiting line, not an empty bag, while the saved bag is read (server-drawn page)", () => {
+    render(<RegistrySectionRenderer section={section("cart-summary")} mode="published" commerce={commerce} page={{ pageType: "cart", resource: null, data: { pending: true, shopHref: "/shop/shop" } }} />);
+    expect(screen.getByRole("status")).toHaveTextContent("Loading your bag…");
+    expect(screen.queryByText(/Your bag is empty/)).not.toBeInTheDocument();
+  });
+
   it("renders search results from live context rather than section settings", () => {
     render(<RegistrySectionRenderer section={{ ...section("search-results"), settings: { heading: "Stale persisted heading" } }} mode="published" commerce={commerce} page={{ pageType: "search", resource: null, data: { query: "shoes", state: "results", resultCount: 1, searchHref: "/store/search", results: [{ id: "shoe", name: "Live Shoe", href: "/store/products/shoe", imageUrl: "shoe.jpg", price: "$12.00" }] } }} />);
     expect(screen.getByDisplayValue("shoes")).toBeInTheDocument();

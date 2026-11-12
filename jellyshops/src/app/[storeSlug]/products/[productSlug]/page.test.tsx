@@ -6,8 +6,8 @@ const updateCartItem = vi.fn();
 vi.mock("next/navigation", () => ({ useParams: () => ({ storeSlug: "store-a", productSlug: "cake" }), useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("@/features/storefront/components/storefront-shell", () => ({ useThemePresentation: () => ({ shell: { ProductPage: () => <p>Legacy product</p> }, settings: {} }) }));
 vi.mock("@/features/commerce/components/storefront-catalog-sync", () => ({ useStorefrontCatalogStatus: () => "ready" }));
-vi.mock("@/features/storefront/public-storefront-api", () => ({ loadPublicStorefrontPublication: async () => ({ kind: "v4", snapshot: { templateDefaults: { product: "product-default" }, templates: { "product-default": { id: "product-default", type: "product", layout: { sections: [] } } }, globalSections: {}, assignments: [], theme: { presetId: "minimal", settings: {} } } }) }));
-vi.mock("@/features/storefront/resource-loader", () => ({ resolveStorefrontRoute: async (_snapshot: unknown, _route: unknown, reader: { findByHandle: (type: string, handle: string) => Promise<unknown> }) => ({ status: "ready", layout: { announcement: [], header: [], template: [], footer: [] }, context: { pageType: "product", resource: await reader.findByHandle("product", "cake") } }) }));
+// The published design comes with the page from the server (bootstrap context), not from a browser fetch.
+vi.mock("@/features/storefront/storefront-bootstrap", () => ({ useInitialStorefrontPublication: () => ({ kind: "v4", publicationId: "pub-a", snapshot: { templateDefaults: { product: "product-default" }, templates: { "product-default": { id: "product-default", type: "product", handle: "default", layout: { sections: [] } } }, globalSections: {}, assignments: [], theme: { presetId: "minimal", settings: {} } } }) }));
 vi.mock("@/features/storefront/storefront-page", () => ({ PublishedRuntimeStorefront: ({ route }: { route: { context: { resource: { data: { productPresentation: { quantity: number; addToCart: () => Promise<unknown>; setQuantity: (value: number) => void } } } } } }) => <><p>Quantity {route.context.resource.data.productPresentation.quantity}</p><button onClick={() => route.context.resource.data.productPresentation.setQuantity(2)}>Choose quantity</button><button onClick={() => void route.context.resource.data.productPresentation.addToCart()}>Add to cart</button></> }));
 vi.mock("@/contexts/shop-context", () => ({ useShop: () => ({ repository: {
   getStoreBySlug: () => ({ id: "store-a", slug: "store-a", currency: "USD" }),
@@ -20,11 +20,10 @@ import ProductPage from "./product-client";
 describe("V4 Product route", () => {
   beforeEach(() => updateCartItem.mockReset());
 
-  it("shows a loading state, not the built-in page, until the store's design is ready", async () => {
+  it("draws the store's own product page on the first render (no loading step, so the server sends it)", () => {
     render(<ProductPage />);
-    expect(screen.getByRole("status")).toHaveTextContent("Loading product…");
-    expect(screen.queryByText("Legacy product")).not.toBeInTheDocument();
-    await screen.findByText("Quantity 1");
+    expect(screen.getByText("Quantity 1")).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
     expect(screen.queryByText("Legacy product")).not.toBeInTheDocument();
   });
 

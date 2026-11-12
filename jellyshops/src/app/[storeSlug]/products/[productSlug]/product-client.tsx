@@ -4,7 +4,7 @@ import { useInitialStorefrontPublication } from "@/features/storefront/storefron
 import Link from "next/link";
 import { ProductGalleryViewer } from "@jelly/storefront-renderer";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { WishlistButton } from "@/features/customers/components/wishlist-button";
 import { useThemePresentation } from "@/features/storefront/components/storefront-shell";
 import { useShop } from "@/contexts/shop-context";
@@ -17,14 +17,13 @@ import { productCardData } from "@/features/storefront/product-card-data";
 import { productFamily } from "@/features/storefront/product-family";
 import { useStorefrontCatalogStatus } from "@/features/commerce/components/storefront-catalog-sync";
 import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
-import { loadPublicStorefrontPublication, type PublicStorefrontPublication } from "@/features/storefront/public-storefront-api";
-import { resolveStorefrontRoute, type PublicResourceReader } from "@/features/storefront/resource-loader";
+import { buildStorefrontRoute, deserializeRouteValues, type PublicStorefrontResource } from "@/features/storefront/resource-loader";
 import { StorefrontPageLoading } from "@/features/storefront/components/storefront-page-loading";
 import { requestBackInStock } from "@/features/storefront/back-in-stock-api";
 import { useVariantAddress } from "@/features/storefront/use-variant-address";
 import { isVariantBuyable, variantMaxQuantity } from "@/lib/variant-stock";
 
-export default function ProductPage() {
+export default function ProductPage({ routeValues }: { routeValues?: Array<[string, unknown]> }) {
   const router = useRouter();
   const { storeSlug, productSlug } = useParams<{ storeSlug: string; productSlug: string }>();
   const decodedProductSlug = decodeURIComponent(productSlug);
@@ -37,10 +36,9 @@ export default function ProductPage() {
   const [personalisationValues, setPersonalisationValues] = useState<Record<string, string>>({});
   const [personalisationTried, setPersonalisationTried] = useState(false);
   const [added, setAdded] = useState(false);
-  const initialPublication = useInitialStorefrontPublication();
-  const [publication, setPublication] = useState<PublicStorefrontPublication | null>(initialPublication);
-  const [resolvedRoute, setResolvedRoute] = useState<Awaited<ReturnType<typeof resolveStorefrontRoute>> | null>(null);
-  const [publicationChecked, setPublicationChecked] = useState(false);
+  // The published design arrives with the page from the server, as do custom-field values for its sections.
+  const publication = useInitialStorefrontPublication();
+  const values = useMemo(() => deserializeRouteValues(routeValues), [routeValues]);
   const store = repository.getStoreBySlug(storeSlug);
   const product = store ? repository.getProductBySlug(store.id, decodedProductSlug) : undefined;
   const visibleProducts = repository.listProducts(storeSlug).filter((item) => item.published && !item.archived);
@@ -97,30 +95,12 @@ export default function ProductPage() {
       return result;
     };
   }
-  useEffect(() => {
-    if (!store) return;
-    let active = true;
-    void loadPublicStorefrontPublication({ baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001", storeId: store.id })
-      .then((next) => { if (active) setPublication(next); })
-      .catch(() => undefined)
-      .finally(() => { if (active) setPublicationChecked(true); });
-    return () => { active = false; };
-  }, [store]);
-  useEffect(() => {
-    if (!store || !product || publication?.kind !== "v4") return;
-    const reader: PublicResourceReader = {
-      findByHandle: async (type, handle) => type === "product" && handle === product.slug ? { type: "product", id: product.id, handle: product.slug, visible: true, data: { title: product.name, description: product.description, product, productPresentation } } : null,
-      findById: async (type, id) => type === "product" && id === product.id ? { type: "product", id: product.id, handle: product.slug, visible: true, data: { title: product.name, description: product.description, product, productPresentation } } : null,
-    };
-    void resolveStorefrontRoute(publication.snapshot, { type: "product", handle: product.slug }, reader).then(setResolvedRoute);
-  }, [product, publication, quantity, selections, store]);
+  // Laid out during render (not in an effect), so the server sends the finished page.
+  const productResource: PublicStorefrontResource | null = product ? { type: "product", id: product.id, handle: product.slug, visible: true, data: { title: product.name, description: product.description, product, productPresentation } } : null;
+  const resolvedRoute = publication?.kind === "v4" && productResource ? buildStorefrontRoute(publication.snapshot, { type: "product", handle: productResource.handle }, productResource, values) : null;
   if (catalogStatus === "loading") return <StorefrontPageLoading label="Loading product…" />;
   if (!store || !product || product.archived || !product.published) return <main className="flex min-h-[75vh] flex-col items-center justify-center"><h1>Product not found</h1><Link href={`/${storeSlug}/shop`}>Back to shop</Link></main>;
-  // Until the store's design is in, show a loading state rather than the built-in page (which showed £0.00).
-  if (publication?.kind === "v4" ? !resolvedRoute : !publication && !publicationChecked) return <StorefrontPageLoading label="Loading product…" />;
-  if (publication?.kind === "v4") {
-    if (resolvedRoute?.status === "ready") return <PublishedRuntimeStorefront snapshot={publication.snapshot} route={resolvedRoute} storeSlug={store.slug} currency={store.currency} products={visibleProducts} />;
-  }
+  if (publication?.kind === "v4" && resolvedRoute?.status === "ready") return <PublishedRuntimeStorefront snapshot={publication.snapshot} route={resolvedRoute} storeSlug={store.slug} currency={store.currency} products={visibleProducts} />;
   const addToCart = () => { if (variant) void addCurrentToCart({ variantId: variant.id, nextQuantity: 1, nextSelections: selections, priceMinor: finalPrice }); };
   const ProductTemplate = shell.ProductPage;
   const productOptions = options.map((option) => ({ id: option.id, name: option.name, required: option.required, values: option.values.map((value) => ({ id: value.id, label: value.label, priceAdjustment: value.priceAdjustmentMinor ? formatMoney(value.priceAdjustmentMinor, store.currency) : undefined, selected: isSelected(option.id, value.id) })) }));

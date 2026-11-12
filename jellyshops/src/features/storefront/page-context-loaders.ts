@@ -7,6 +7,11 @@ import type { SearchRouteContext } from "./resource-loader";
 import { productCardData } from "./product-card-data";
 import type { PublicStorefrontResource } from "./resource-loader";
 
+/** "Shop all": every product, drawn with the store's own collection page (the collection "all"). */
+// The id equals the renderer's SHOP_ALL_COLLECTION_ID (checked by a test); importing the renderer here would pull
+// client-only code into server pages.
+export const SHOP_ALL_COLLECTION = { id: "all-products", slug: "all", name: "All products", description: "" };
+
 export type StorefrontPageContext =
   | { type: "collection"; collection: Collection; products: PublicProduct[] }
   | { type: "search"; query: string; resultCount?: number; results: Array<{ id: string }>; state: "empty" | "results" | "none" | "error" };

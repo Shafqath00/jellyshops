@@ -1,12 +1,12 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 
 const metadata = vi.hoisted(() => ({ description: "Baked today" as string | undefined, imageUrl: undefined as string | undefined }));
 
 vi.mock("next/navigation", () => ({ useParams: () => ({ storeSlug: "store-a", collectionSlug: "cakes" }) }));
 vi.mock("@/features/commerce/components/storefront-catalog-sync", () => ({ useStorefrontCatalogStatus: () => "ready" }));
-vi.mock("@/features/storefront/public-storefront-api", () => ({ loadPublicStorefrontPublication: async () => ({ kind: "v4", snapshot: { templates: {}, assignments: [], theme: { id: "minimal", presetId: "minimal" } } }) }));
-vi.mock("@/features/storefront/resource-loader", () => ({ resolveStorefrontRoute: vi.fn(async (_snapshot: unknown, _route: unknown, reader: { findByHandle(type: string, handle: string): Promise<unknown> }) => ({ status: "ready", context: { pageType: "collection", resource: await reader.findByHandle("collection", "cakes") } })) }));
+// The published design comes with the page from the server (bootstrap context), not from a browser fetch.
+vi.mock("@/features/storefront/storefront-bootstrap", () => ({ useInitialStorefrontPublication: () => ({ kind: "v4", publicationId: "pub-a", snapshot: { templateDefaults: { collection: "collection-default" }, templates: { "collection-default": { id: "collection-default", type: "collection", handle: "default", layout: { sections: [] } } }, globalSections: {}, assignments: [], theme: { id: "minimal", presetId: "minimal", settings: {} } } }) }));
 vi.mock("@/features/storefront/storefront-page", () => ({ PublishedRuntimeStorefront: ({ route }: { route: { context: { resource: { data: { collectionPresentation: { collection: { title: string; description: string }; products: Array<{ id: string; price: string }>; totalProducts: number } } } } } }) => <p>{JSON.stringify(route.context.resource.data.collectionPresentation)}</p> }));
 vi.mock("@/contexts/shop-context", () => ({ useShop: () => ({ repository: {
   getStoreBySlug: () => ({ id: "store-a", slug: "store-a", currency: "USD" }),
@@ -15,7 +15,6 @@ vi.mock("@/contexts/shop-context", () => ({ useShop: () => ({ repository: {
 } }) }));
 
 import CollectionPage from "./collection-client";
-import { resolveStorefrontRoute } from "@/features/storefront/resource-loader";
 
 afterEach(() => { metadata.description = "Baked today"; metadata.imageUrl = undefined; });
 
@@ -37,10 +36,8 @@ it("keeps absent description empty and renders an existing local Collection imag
   expect(JSON.parse(output.textContent ?? "").collection).toEqual({ id: "collection-a", title: "Fresh cakes", description: "", imageUrl: "/legacy-collection.jpg" });
 });
 
-it("shows loading while the assigned collection template is resolving", async () => {
-  vi.mocked(resolveStorefrontRoute).mockClear().mockImplementation(() => new Promise(() => {}));
+it("draws the collection on the first render, with no loading step (so the server sends it)", () => {
   render(<CollectionPage />);
-  await waitFor(() => expect(resolveStorefrontRoute).toHaveBeenCalled());
-  expect(screen.getByText("Loading collection…")).toBeVisible();
-  expect(screen.queryByText("Collection not found")).toBeNull();
+  expect(screen.getByText(/"title":"Fresh cakes"/)).toBeInTheDocument();
+  expect(screen.queryByText("Loading collection…")).toBeNull();
 });

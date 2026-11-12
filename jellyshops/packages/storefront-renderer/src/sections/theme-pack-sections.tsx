@@ -122,6 +122,11 @@ export function CartSummarySection({ section, context }: { section: SectionNode;
   const shopHref = typeof data.shopHref === "string" ? data.shopHref : resolveStorefrontHref(content.href, context?.storeSlug) ?? "#";
   const shippingNote = typeof data.shippingNote === "string" ? data.shippingNote : "Shipping is calculated at checkout.";
   const count = lines.reduce((sum, line) => sum + line.quantity, 0);
+  // The bag is saved in the shopper's browser: the server-drawn page shows this until it is read.
+  if (data.pending === true) return <section className="jelly-section jelly-cart-summary" data-pending="true"><StorefrontContainer><div className="jelly-cart-empty">
+    <h1 {...content.headingProps}>{content.headingContent}</h1>
+    <p role="status">Loading your bag…</p>
+  </div></StorefrontContainer></section>;
   if (!lines.length) return <section className="jelly-section jelly-cart-summary" data-empty="true"><StorefrontContainer><div className="jelly-cart-empty">
     <h1 {...content.headingProps}>{content.headingContent}</h1>
     <p {...content.bodyProps}>{content.body || "Your bag is empty. Find something you love and it will appear here."}</p>

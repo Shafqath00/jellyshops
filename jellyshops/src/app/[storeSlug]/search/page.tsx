@@ -1,72 +1,24 @@
-"use client";
+import { notFound } from "next/navigation";
+import { getServerStorefront } from "@/features/storefront/server-storefront";
+import { loadPublicSearchPageContext } from "@/features/storefront/public-page-context-api";
+import { serverRouteValues } from "@/features/storefront/server-route-values";
+import { resolveMediaUrls } from "@/lib/media-urls";
+import SearchPageClient from "./search-client";
 
-import { useInitialStorefrontPublication } from "@/features/storefront/storefront-bootstrap";
+const apiBaseUrl = process.env.STOREFRONT_API_URL ?? process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
 
-import { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "next/navigation";
-import { useThemePresentation } from "@/features/storefront/components/storefront-shell";
-import { useShop } from "@/contexts/shop-context";
-import { formatMoney } from "@/lib/domain";
-import { loadPublicSearchPageContext, type PublicSearchPageContext } from "@/features/storefront/public-page-context-api";
-import { loadPublicStorefrontPublication, type PublicStorefrontPublication } from "@/features/storefront/public-storefront-api";
-import { createSearchPageContext } from "@/features/storefront/page-context-loaders";
-import { resolveStorefrontRoute, type ResolvedStorefrontRoute } from "@/features/storefront/resource-loader";
-import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
-import { isVariantBuyable } from "@/lib/variant-stock";
-
-const apiBaseUrl = process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
-
-export default function SearchPage() {
-  const { storeSlug } = useParams<{ storeSlug: string }>();
-  const query = useSearchParams().get("q") ?? "";
-  const { repository, state } = useShop();
-  const { shell, settings } = useThemePresentation();
-  const store = repository.getStoreBySlug(storeSlug);
-  const initialPublication = useInitialStorefrontPublication();
-  const [publication, setPublication] = useState<PublicStorefrontPublication | null>(initialPublication);
-  const [context, setContext] = useState<PublicSearchPageContext | null>(null);
-  const [route, setRoute] = useState<ResolvedStorefrontRoute | null>(null);
-
-  useEffect(() => {
-    if (!store) return;
-    let active = true;
-    void Promise.all([
-      loadPublicStorefrontPublication({ baseUrl: apiBaseUrl, storeId: store.id }),
-      loadPublicSearchPageContext({ baseUrl: apiBaseUrl, storeId: store.id, query }),
-    ]).then(([nextPublication, nextContext]) => {
-      if (!active) return;
-      setPublication(nextPublication);
-      setContext(nextContext);
-    });
-    return () => { active = false; };
-  }, [store, query]);
-
-  useEffect(() => {
-    if (!store || publication?.kind !== "v4" || !context) {
-      return;
-    }
-    let active = true;
-    void resolveStorefrontRoute(
-      publication.snapshot,
-      { type: "search", context: { ...createSearchPageContext(context, store.slug, store.currency), searchHref: `/${store.slug}/search` } },
-      { findByHandle: async () => null, findById: async () => null },
-    ).then((next) => { if (active) setRoute(next); });
-    return () => { active = false; };
-  }, [store, publication, context]);
-
-  if (!store) return null;
-  if (publication?.kind === "v4") {
-    if (route?.status === "ready") {
-      return <PublishedRuntimeStorefront snapshot={publication.snapshot} route={route} storeSlug={store.slug} currency={store.currency} products={state.products.filter((product) => product.published && !product.archived)} />;
-    }
-    return null;
-  }
-
-  const normalized = query.toLowerCase();
-  const results = repository.listProducts(storeSlug).filter((product) => product.published && !product.archived && (!normalized || `${product.name} ${product.category} ${product.description}`.toLowerCase().includes(normalized))).map((product) => {
-    const variant = product.variants[0];
-    return { id: product.id, name: product.name, slug: product.slug, category: product.category, imageUrl: product.imageUrl, price: formatMoney(variant?.priceMinor ?? 0, store.currency), soldOut: !isVariantBuyable(variant), lowStock: Boolean(variant && variant.stock > 0 && variant.stock <= 3), href: `/${store.slug}/products/${product.slug}` };
-  });
-  const Search = shell.SearchPage;
-  return <Search store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} settings={settings} query={query.trim()} results={results} shopHref={`/${store.slug}/shop`} />;
+export default async function SearchPage({ params, searchParams }: { params: Promise<{ storeSlug: string }>; searchParams: Promise<{ q?: string | string[] }> }) {
+  const { storeSlug } = await params;
+  const raw = (await searchParams).q;
+  const query = Array.isArray(raw) ? raw[0] ?? "" : raw ?? "";
+  const data = await getServerStorefront(storeSlug);
+  if (!data) notFound();
+  const [rawContext, routeValues] = await Promise.all([
+    loadPublicSearchPageContext({ baseUrl: apiBaseUrl, storeId: data.store.id, query }),
+    serverRouteValues(data.publication, { type: "search", context: { type: "search", query, state: "empty", resultCount: 0, results: [] } }, null),
+  ]);
+  // Result photos come back API-relative ("/api/public/media/…"); the store runs on another address.
+  const searchContext = rawContext ? resolveMediaUrls(rawContext, apiBaseUrl) : null;
+  // A new query is a new server render, so the client never shows results for an old query.
+  return <SearchPageClient key={query} searchContext={searchContext} routeValues={routeValues} />;
 }

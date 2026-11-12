@@ -2,63 +2,32 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { useShop } from "@/contexts/shop-context";
 import { useStorefrontCatalogStatus } from "@/features/commerce/components/storefront-catalog-sync";
-import { collectionResource, createCollectionPageContext, loadCollectionPageContext, type StorefrontPageContext } from "@/features/storefront/page-context-loaders";
-import { loadPublicStorefrontPublication, type PublicStorefrontPublication } from "@/features/storefront/public-storefront-api";
-import { resolveStorefrontRoute, type PublicResourceReader } from "@/features/storefront/resource-loader";
+import { collectionResource, createCollectionPageContext } from "@/features/storefront/page-context-loaders";
+import { buildStorefrontRoute, deserializeRouteValues } from "@/features/storefront/resource-loader";
 import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
 import { useInitialStorefrontPublication } from "@/features/storefront/storefront-bootstrap";
 
-export default function CollectionPage() {
+export default function CollectionPage({ routeValues }: { routeValues?: Array<[string, unknown]> }) {
   const { storeSlug, collectionSlug } = useParams<{ storeSlug: string; collectionSlug: string }>();
   const decodedCollectionSlug = decodeURIComponent(collectionSlug);
   const { repository } = useShop();
   const catalogStatus = useStorefrontCatalogStatus();
   const store = repository.getStoreBySlug(storeSlug);
-  const initialPublication = useInitialStorefrontPublication();
-  const [publication, setPublication] = useState<PublicStorefrontPublication | null>(initialPublication);
-  const initialCollection = store ? repository.getCollections(store.id).find((collection) => collection.slug === decodedCollectionSlug) : undefined;
-  const [pageContext, setPageContext] = useState<Extract<StorefrontPageContext, { type: "collection" }> | null | undefined>(() => initialCollection && store ? createCollectionPageContext(initialCollection, repository.listProducts(store.slug), store.currency) : undefined);
-  const [resolvedRoute, setResolvedRoute] = useState<Awaited<ReturnType<typeof resolveStorefrontRoute>> | null>(null);
+  // The published design and the catalogue arrive with the page from the server.
+  const publication = useInitialStorefrontPublication();
+  const values = useMemo(() => deserializeRouteValues(routeValues), [routeValues]);
+  const collection = store ? repository.getCollections(store.id).find((item) => item.slug === decodedCollectionSlug) : undefined;
+  const pageContext = collection && store ? createCollectionPageContext(collection, repository.listProducts(store.slug), store.currency) : null;
+  // Laid out during render (not in an effect), so the server sends the finished page.
+  const resolvedRoute = store && pageContext && publication?.kind === "v4"
+    ? buildStorefrontRoute(publication.snapshot, { type: "collection", handle: pageContext.collection.slug }, collectionResource(pageContext.collection, pageContext.products, store.slug), values)
+    : null;
 
-  useEffect(() => {
-    if (!store) return;
-    let active = true;
-    void loadPublicStorefrontPublication({
-      baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001",
-      storeId: store.id,
-    }).then((next) => { if (active) setPublication(next); });
-    return () => { active = false; };
-  }, [store]);
-
-  useEffect(() => {
-    if (!store) return;
-    let active = true;
-    void loadCollectionPageContext({
-      findCollection: async (handle) => repository.getCollections(store.id).find((collection) => collection.slug === handle) ?? null,
-      listProducts: async () => repository.listProducts(store.slug),
-    }, decodedCollectionSlug, store.currency).then((context) => {
-      if (active) setPageContext(context);
-    });
-    return () => { active = false; };
-  }, [decodedCollectionSlug, repository, store]);
-
-  useEffect(() => {
-    if (!store || !pageContext || publication?.kind !== "v4") return;
-    const resource = collectionResource(pageContext.collection, pageContext.products, store.slug);
-    const reader: PublicResourceReader = {
-      findByHandle: async (type, handle) => type === "collection" && handle === resource.handle ? resource : null,
-      findById: async (type, id) => type === "collection" && id === resource.id ? resource : null,
-    };
-    void resolveStorefrontRoute(publication.snapshot, { type: "collection", handle: resource.handle }, reader).then(setResolvedRoute);
-  }, [pageContext, publication, store]);
-
-  if (catalogStatus === "loading" || pageContext === undefined || (pageContext && publication?.kind === "v4" && !resolvedRoute)) return <main className="flex min-h-[75vh] items-center justify-center" role="status">Loading collection…</main>;
-  if (!store || !pageContext) return <main className="flex min-h-[75vh] flex-col items-center justify-center"><h1>Collection not found</h1><Link href={`/${storeSlug}/shop`}>Back to shop</Link></main>;
-
-  if (publication?.kind === "v4" && resolvedRoute?.status === "ready") {
+  if (catalogStatus === "loading") return <main className="flex min-h-[75vh] items-center justify-center" role="status">Loading collection…</main>;
+  if (store && publication?.kind === "v4" && resolvedRoute?.status === "ready") {
     return <PublishedRuntimeStorefront
       snapshot={publication.snapshot}
       route={resolvedRoute}
