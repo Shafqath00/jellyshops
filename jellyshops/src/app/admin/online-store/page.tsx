@@ -13,6 +13,7 @@ import { useAuth } from "@/features/auth/providers/auth-provider";
 import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import type { ThemeCatalogEntry, ThemeConfigurationRecord } from "@/features/store-editor/api/types";
 import { ThemeUpgradePanel } from "@/features/theme-upgrade/theme-upgrade-panel";
+import { LayoutUpgradePanel } from "@/features/theme-upgrade/layout-upgrade-panel";
 import { TemplatePreviewDialog } from "@/features/store-editor/components/template-preview";
 
 const starters = listStarterPacks();
@@ -165,6 +166,8 @@ function StoreDesignLibrary() {
 
             {/* Only drafts on an uploaded theme (they carry its version id) can be upgraded. */}
             {hasWorkspace && configuration?.draftArtifactId && storeId && token && <ThemeUpgradePanel storeId={storeId} token={token} />}
+            {/* Drafts on a Jelly design built from an earlier page layout can move to the current one. */}
+            {hasWorkspace && !configuration?.draftArtifactId && storeId && token && <LayoutUpgradePanel storeId={storeId} token={token} />}
 
             <section aria-labelledby="template-gallery" className="flex flex-col gap-5">
               <div className="flex flex-wrap items-end justify-between gap-4">

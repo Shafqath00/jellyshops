@@ -12,7 +12,7 @@ const rekey = (section: SectionNode, prefix: string): SectionNode => ({ ...struc
 
 function packFor(revision: number): V4StarterPack {
   const theme = discoveredThemes.find((entry) => entry.manifest.id === THEME)!;
-  const old = (layoutHistory.revisions as Array<{ revision: number; globalSections: never; templates: never }>).find((entry) => entry.revision === revision);
+  const old = (layoutHistory.revisions as unknown as Array<{ revision: number; globalSections: never; templates: never }>).find((entry) => entry.revision === revision);
   return old ? createStarterPack({ manifest: theme.manifest, starter: { globalSections: old.globalSections, templates: old.templates } })! : getStarterPack(THEME);
 }
 
