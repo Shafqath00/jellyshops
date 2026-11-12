@@ -122,3 +122,14 @@ describe("sections that belong to another theme", () => {
     expect(codes(validateThemeProject({ manifest: manifest(), starter: bad }))).toContain("SECTION_NOT_AVAILABLE_ON_THEME");
   });
 });
+
+it("warns when theme.css styles renderer internals, never for named parts", () => {
+  const validate = validateThemeProject;
+  const issues = validate({ manifest: {}, css: ".jelly-hero { color: red } .jelly-mega-inner { gap: 4px } /* .jelly-secret */" });
+  const warning = issues.find((issue) => issue.code === "CSS_INTERNALS");
+  expect(warning?.level).toBe("warning");
+  expect(warning?.message).toContain(".jelly-mega-inner");
+  expect(warning?.message).not.toContain(".jelly-hero,");
+  expect(warning?.message).not.toContain("secret");
+  expect(validate({ manifest: {}, css: ".jelly-hero { color: red }" }).some((issue) => issue.code === "CSS_INTERNALS")).toBe(false);
+});

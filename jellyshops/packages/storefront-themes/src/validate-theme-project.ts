@@ -3,6 +3,7 @@ import { recipesOf, registerRecipes } from "./recipes.js";
 import { validateSectionAgainstRegistry } from "@jelly/storefront-registry";
 import { themeManifestSchema } from "./theme-resolver.js";
 import { JELLY_THEME_API_VERSION, supportsJellyVersion } from "./versioning.js";
+import { themeCssInternals } from "./theme-parts.js";
 
 /**
  * Checks a theme project (its manifest and optional starter) with the same rules the platform
@@ -17,6 +18,8 @@ export interface ThemeProjectInput {
   starter?: unknown;
   /** True when the file exists, for asset paths the manifest names (e.g. `/themes/<id>/preview.svg`). Omit to skip the check. */
   assetExists?(path: string): boolean;
+  /** The theme's theme.css, to warn about renderer internals it styles. Omit to skip the check. */
+  css?: string;
 }
 
 const RECOMMENDED_TEMPLATES: PageType[] = ["home", "product", "collection", "cart", "search", "page", "not-found"];
@@ -124,6 +127,8 @@ function checkStarter(starterInput: unknown, themeId: string | undefined, issues
 
 export function validateThemeProject(input: ThemeProjectInput): ThemeProjectIssue[] {
   const issues: ThemeProjectIssue[] = [];
+  const internals = input.css ? themeCssInternals(input.css) : [];
+  if (internals.length) issues.push({ level: "warning", code: "CSS_INTERNALS", path: "theme.css", message: `Styles renderer internals that may change without notice: ${internals.slice(0, 8).map((name) => `.${name}`).join(", ")}${internals.length > 8 ? ` and ${internals.length - 8} more` : ""}. Use named parts (THEME_PART_GROUPS), --j-* tokens or section settings instead.` });
   const parsed = themeManifestSchema.safeParse(input.manifest);
   if (!parsed.success) {
     for (const problem of parsed.error.issues) {

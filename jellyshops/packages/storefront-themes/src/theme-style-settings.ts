@@ -163,6 +163,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     { id: "productCard.hoverImage", type: "checkbox", label: "Show the second photo on hover", group: "Product cards", default: false, description: "When a shopper points at a card, its product's second photo fades in (for example the bed made up in a room)." },
     { id: "productCard.showRating", type: "checkbox", label: "Show star ratings", group: "Product cards", default: false, description: "Stars and the number of reviews under the name, for products with published reviews." },
     { id: "productCard.compare", type: "checkbox", label: "Let shoppers compare products", group: "Product cards", default: false, description: "A Compare tick on every card. Up to four products dock in a tray at the bottom of the page and open side by side, with their specifications, on a compare page." },
+    select("productCard.photoFit", "Product photos", "Product cards", theme, [[theme, "Theme default"], ["crop", "Fill the frame (room and lifestyle photos)"], ["whole", "Show the whole product on a soft background (cut-out photos)"]], "Every card photo gets the same frame, so photos of different shapes line up. Choose the whole product when your photos are products on a plain background."),
     select("productCard.swatches", "Colour swatches", "Product cards", "none", [["none", "Don't show"], ["colors", "Show the colours a product comes in"]], "Dots for up to five colours of a product's colour option."),
   ];
   const socialSchema = SOCIAL_PLATFORMS.map(({ id, label }) => ({ id: `social.${id}`, type: "url", label, group: "Social media", default: "", ...(id === "instagram" ? { description: "Full https:// links. Shown in the footer when it has no social links of its own." } : {}) }));
@@ -189,7 +190,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
       cart: { type: "page", freeDeliveryFrom: 0 },
     },
     buttonDefaults: { size: theme, textCase: theme, borderWidth: theme, hover: theme },
-    cardDefaults: { layout: theme, showRating: false, hoverImage: false, compare: false, radius: theme, shadow: theme, hover: theme, order: "photo-title-price", showTitle: "show", titleLines: theme, showPrice: "show", savings: "none", button: "none", swatches: "none" },
+    cardDefaults: { layout: theme, showRating: false, hoverImage: false, compare: false, radius: theme, shadow: theme, hover: theme, order: "photo-title-price", showTitle: "show", titleLines: theme, showPrice: "show", savings: "none", button: "none", photoFit: theme, swatches: "none" },
     textStyleSchema,
     colorSchemeSchema,
     buttonSchema,
@@ -363,6 +364,7 @@ export function resolveThemeStyleTokens(settings: Record<string, unknown>, defau
 
   const card = record(settings.productCard);
   if (typeof card.layout === "string" && (PRODUCT_CARD_LAYOUTS as readonly string[]).includes(card.layout)) tokens["--jelly-card-layout"] = card.layout;
+  if (card.photoFit === "crop" || card.photoFit === "whole") tokens["--jelly-card-fit"] = card.photoFit;
   const cardRadii: Record<string, string> = { square: "0px", soft: "6px", rounded: "16px" };
   if (typeof card.radius === "string" && cardRadii[card.radius]) tokens["--jelly-card-radius"] = cardRadii[card.radius];
   const shadows: Record<string, string> = { soft: "0 1px 4px rgb(0 0 0 / 0.08)", medium: "0 8px 24px rgb(0 0 0 / 0.12)" };
@@ -430,6 +432,15 @@ export type ProductCardLayout = (typeof PRODUCT_CARD_LAYOUTS)[number];
  * The value for the theme root's data-card-layout attribute, read from the theme tokens (the root's style),
  * so every place that draws a theme root only needs its tokens. Undefined keeps the theme's own card.
  */
+/**
+ * The theme root's data-card-fit attribute (Product cards > Product photos): "crop" fills a fixed frame, "whole" shows
+ * the whole product inside it on a soft background (packshot). Undefined keeps the theme's own card photos.
+ */
+export function cardFitAttribute(style: object | null | undefined): "crop" | "whole" | undefined {
+  const value = (style as Record<string, unknown> | null | undefined)?.["--jelly-card-fit"];
+  return value === "crop" || value === "whole" ? value : undefined;
+}
+
 export function cardLayoutAttribute(style: object | null | undefined): ProductCardLayout | undefined {
   const value = (style as Record<string, unknown> | null | undefined)?.["--jelly-card-layout"];
   return typeof value === "string" && (PRODUCT_CARD_LAYOUTS as readonly string[]).includes(value) ? value as ProductCardLayout : undefined;

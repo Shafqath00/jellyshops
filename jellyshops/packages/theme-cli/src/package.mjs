@@ -24,7 +24,7 @@ function* files(directory) {
  */
 export function buildPackage(folder) {
   const project = loadProject(folder);
-  const issues = validateThemeProject({ manifest: project.manifest, starter: project.starter, assetExists: project.assetExists });
+  const issues = validateThemeProject({ manifest: project.manifest, starter: project.starter, assetExists: project.assetExists, css: project.css });
   const errors = issues.filter((issue) => issue.level === "error");
   if (errors.length) throw new Error(`The theme has ${errors.length} error${errors.length === 1 ? "" : "s"}. Run \`jelly-theme validate\` and fix them first:\n${errors.slice(0, 5).map((issue) => `  ${issue.path}: ${issue.message}`).join("\n")}`);
 

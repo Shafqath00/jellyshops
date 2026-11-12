@@ -186,20 +186,25 @@ Create `jellyshops/src/app/themes/jelly-studio.css` and import it in `jellyshops
   --st-bg: var(--theme-background, #fbfaf8);
   --st-text: var(--theme-text, #22313f);
   --st-accent: var(--theme-accent, #d9a441);
-  --st-gap: var(--jelly-spacing-section, 80px);
+  --j-section-md: clamp(56px, 7vw, 96px); /* section space; the platform pads every section from it */
   background: var(--st-bg);
   color: var(--st-text);
   font-family: var(--theme-font-body, Inter, sans-serif);
 }
 [data-jelly-theme="jelly-studio"] h1,
 [data-jelly-theme="jelly-studio"] h2 { font-family: var(--theme-font-heading, Georgia, serif); font-weight: var(--jelly-heading-weight, 400); }
-[data-jelly-theme="jelly-studio"] .jelly-section { padding-block: var(--st-gap); }
 [data-jelly-theme="jelly-studio"] .jelly-product-card h3 { font-size: 0.95rem; }
 ```
 
 Building on a base design: a theme.json may say `"extends": "jelly-signature"` (Jelly Minimal) or `"jelly-avenue"`. The theme then needs no theme.css: it uses the base design's stylesheets, settings and section designs with its own colours, fonts, schemes and starter pages. `node scripts/new-theme.mjs <brief.json>` writes such a theme from a short brief (see docs/guides/template-generation-master-prompt.md, "Generation pipeline").
 
 Page edges: every section is wrapped in a section frame and its `.jelly-container` is placed by the platform (docs/design-contract.md §2.3). Do not write a `.jelly-container` width rule; set `--j-page-normal` (content width), `--j-page-narrow`, `--j-page-margin-desktop` / `-tablet` / `-sm` on `&` instead, and pad full-width rows (header, footer) with `var(--j-page-edge)` so they line up with the sections.
+
+Section spacing (Phase 4, 2026-11-12): do not write `.jelly-section` padding. The platform pads every section from one scale (`--j-section-md`, with `--j-section-sm` and `--j-section-lg` for the merchant's Small/Large Spacing choice) and lets two neighbours with the same colour scheme share one gap. Set `--j-section-md` on `&` to change the rhythm. A theme that writes its own `.jelly-section` padding loses the shared gaps.
+
+Named parts (Phase 4): style only the classes listed in `THEME_PART_GROUPS` (`packages/storefront-themes/src/theme-parts.ts`, also exported by `@jelly/theme-sdk`), the data hooks (`[data-part]`, `[data-card-part]`, `[data-section-type]`, `[data-layout]`, `[data-scheme]`) and `--j-*` tokens. The renderer keeps every part (a test fails if one disappears); any other `.jelly-*` class is an internal that may change without notice. `jelly-theme validate` warns about internals your `theme.css` uses (`CSS_INTERNALS`). The built-in themes still use some internals; `src/app/themes/theme-css-internals.baseline.json` freezes them, so a theme can lose internals but never gain new ones. If themes genuinely need a hook, add it to the parts list instead.
+
+Card photos: Product cards > Product photos (`productCard.photoFit`) puts every card photo in the same frame (`data-card-fit` on the theme root): `crop` fills it, `whole` shows the whole product on a soft background (packshot). Folder themes list the setting in their theme.json (and `settingsDefaults`) like any other.
 
 Colours: inside a section with a colour scheme, `--j-color-bg`, `--j-color-text`, `--j-color-surface`, `--j-color-muted`, `--j-color-border`, `--j-color-primary` and `--j-color-on-primary` follow that scheme (docs/design-contract.md §2.4a). Read these roles in new CSS instead of fixed colours so a merchant's scheme choice works in your theme.
 

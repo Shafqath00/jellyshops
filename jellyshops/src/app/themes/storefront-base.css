@@ -962,6 +962,18 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 }
 :is([data-jelly-theme][data-card-layout], [data-jelly-theme] [data-card-layout]) .jelly-product-card .jelly-product-card-placeholder { position: absolute; inset: 0; }
 
+/*
+ * Card photo frame (theme setting Product cards > Product photos; design contract MediaFrame). The theme root carries
+ * data-card-fit (cardFitAttribute). Every card photo sits in the same fixed frame (the card style's shape, else the
+ * theme's --jelly-card-ratio, else square), so photos of mixed shapes line up. "crop" fills it; "whole" (packshot)
+ * shows the whole product with breathing room on the surface colour, for products photographed on a plain background.
+ */
+[data-jelly-theme][data-card-fit] .jelly-product-card .jelly-product-card-media { position: relative; display: block; overflow: hidden; aspect-ratio: var(--jelly-card-style-ratio, var(--jelly-card-ratio, 1 / 1)); }
+[data-jelly-theme][data-card-fit] .jelly-product-card .jelly-product-card-media img { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; object-fit: cover; }
+[data-jelly-theme][data-card-fit="whole"] .jelly-product-card .jelly-product-card-media { background: color-mix(in srgb, var(--j-color-text, #111) 4%, var(--j-color-surface, var(--j-color-bg, #fff))); }
+[data-jelly-theme][data-card-fit="whole"] .jelly-product-card .jelly-product-card-media img { padding: 8%; object-fit: contain; }
+[data-jelly-theme][data-card-fit] .jelly-product-card .jelly-product-card-placeholder { position: absolute; inset: 0; }
+
 /* C1 tall: a 3:4 photo and a quiet line of text. */
 :is([data-jelly-theme][data-card-layout="tall"], [data-jelly-theme] [data-card-layout="tall"]) .jelly-product-card { --jelly-card-style-ratio: 3 / 4; }
 :is([data-jelly-theme][data-card-layout="tall"], [data-jelly-theme] [data-card-layout="tall"]) .jelly-product-card .jelly-product-card-body { gap: 2px; padding-top: 12px; }

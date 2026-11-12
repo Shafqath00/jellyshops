@@ -112,6 +112,7 @@
       "showPrice": "show",
       "savings": "none",
       "button": "view",
+      "photoFit": "theme",
       "swatches": "none",
       "layout": "tinted",
       "showRating": true
@@ -1904,6 +1905,28 @@
       "group": "Product cards",
       "default": false,
       "description": "The product's brand (vendor) above its name."
+    },
+    {
+      "id": "productCard.photoFit",
+      "type": "select",
+      "label": "Product photos",
+      "group": "Product cards",
+      "default": "theme",
+      "description": "Every card photo gets the same frame, so photos of different shapes line up. Choose the whole product when your photos are products on a plain background.",
+      "options": [
+        {
+          "value": "theme",
+          "label": "Theme default"
+        },
+        {
+          "value": "crop",
+          "label": "Fill the frame (room and lifestyle photos)"
+        },
+        {
+          "value": "whole",
+          "label": "Show the whole product on a soft background (cut-out photos)"
+        }
+      ]
     },
     {
       "id": "productCard.swatches",

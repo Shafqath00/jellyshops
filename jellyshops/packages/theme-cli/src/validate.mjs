@@ -5,7 +5,7 @@ import { loadProject } from "./project.mjs";
 export async function validate(folder, flags = {}) {
   let project;
   try { project = loadProject(folder); } catch (error) { process.stderr.write(`${error.message}\n`); return 2; }
-  const issues = validateThemeProject({ manifest: project.manifest, starter: project.starter, assetExists: project.assetExists });
+  const issues = validateThemeProject({ manifest: project.manifest, starter: project.starter, assetExists: project.assetExists, css: project.css });
   const errors = issues.filter((issue) => issue.level === "error");
   const warnings = issues.filter((issue) => issue.level === "warning");
   if (flags.json) {

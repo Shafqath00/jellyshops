@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import { resolveStorefrontThemeTokens } from "./storefront-theme-tokens";
 import { resolveTheme, validateThemeSettings } from "./theme-resolver";
-import { cardLayoutAttribute, contrastRatio, legacySchemeMap, readableTextColour, resolveThemeStyleTokens, themeCustomCss, themeSocialLinks } from "./theme-style-settings";
+import { cardFitAttribute, cardLayoutAttribute, contrastRatio, legacySchemeMap, readableTextColour, resolveThemeStyleTokens, themeCustomCss, themeSocialLinks } from "./theme-style-settings";
 
 const tokensFor = (themeId: string, settings: Record<string, unknown> = {}) => resolveStorefrontThemeTokens(themeId, resolveTheme(themeId, settings).settings);
 
@@ -153,4 +153,11 @@ it("keeps the theme's own card for the default and unknown card styles", () => {
 it("turns on the second photo on hover only when asked", () => {
   expect(resolveThemeStyleTokens({}, undefined)["--jelly-card-hover-image-display"]).toBeUndefined();
   expect(resolveThemeStyleTokens({ productCard: { hoverImage: true } }, undefined)["--jelly-card-hover-image-display"]).toBe("block");
+});
+
+it("turns Product cards > Product photos into the card frame attribute", () => {
+  expect(resolveThemeStyleTokens({ productCard: { photoFit: "whole" } }, undefined)["--jelly-card-fit"]).toBe("whole");
+  expect(resolveThemeStyleTokens({ productCard: { photoFit: "theme" } }, undefined)["--jelly-card-fit"]).toBeUndefined();
+  expect(cardFitAttribute({ "--jelly-card-fit": "crop" })).toBe("crop");
+  expect(cardFitAttribute({ "--jelly-card-fit": "stretch" })).toBeUndefined();
 });

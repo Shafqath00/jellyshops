@@ -21,7 +21,7 @@ import {
   type StorefrontDocument,
   type ThemeId,
 } from "@jelly/storefront-schema";
-import { cardLayoutAttribute, resolveDesignTokens, resolveStorefrontThemeTokens, resolveTheme, legacyStylesAttribute, themeStyleId, usesProductCompare } from "@jelly/storefront-themes";
+import { cardFitAttribute, cardLayoutAttribute, resolveDesignTokens, resolveStorefrontThemeTokens, resolveTheme, legacyStylesAttribute, themeStyleId, usesProductCompare } from "@jelly/storefront-themes";
 import type { Currency, Product } from "@/lib/domain";
 import type { ResolvedStorefrontRoute } from "./resource-loader";
 import { RuntimeStorefrontView } from "./runtime-storefront-view";
@@ -108,7 +108,7 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
   const commerce = { ...commerceProvider(storeSlug, currency, products, snapshot.storeId, cart, { ratings, reviews }), compare: usesProductCompare(resolvedTheme.settings) ? compare : undefined, bagCount, recentlyViewed, browseProducts };
 
   return (
-    <div className={`jelly-storefront jelly-theme-layout-${resolvedTheme.layout}`} data-jelly-theme={themeStyleId(resolvedTheme.id, resolvedTheme.version)} data-jelly-legacy-styles={legacyStylesAttribute(resolvedTheme.id, resolvedTheme.version)} data-jelly-theme-version={resolvedTheme.version} data-card-layout={cardLayoutAttribute(style)} style={style}>
+    <div className={`jelly-storefront jelly-theme-layout-${resolvedTheme.layout}`} data-jelly-theme={themeStyleId(resolvedTheme.id, resolvedTheme.version)} data-jelly-legacy-styles={legacyStylesAttribute(resolvedTheme.id, resolvedTheme.version)} data-jelly-theme-version={resolvedTheme.version} data-card-layout={cardLayoutAttribute(style)} data-card-fit={cardFitAttribute(style)} style={style}>
       {/* Inside the storefront frame the frame already adds the theme's custom CSS. */}
       {!chromeHandled && <ThemeCustomCss settings={resolvedTheme.settings} themeId={resolvedTheme.id} themeVersion={resolvedTheme.version} />}
       <RuntimeStorefrontView route={route} commerce={commerce} themeId={resolvedTheme.id} themeVersion={resolvedTheme.version} menus={snapshot.menus} storeSlug={storeSlug} resourceLinks={resourceLinks} collectionLinks={collectionLinks} language={language} chrome={!chromeHandled} />

@@ -14,6 +14,7 @@ export type { ResolvedDesignTokens, StorefrontCartPageProps, StorefrontCartLineV
 export { FONT_OPTIONS, fontStack } from "./fonts.js";
 export { COLOR_SCHEME_IDS, colorSchemeCount, contrastRatio, LEGACY_SCHEME_IDS, legacySchemeMap, readableTextColour, colorSchemeLabel, MAX_THEME_CSS_LENGTH, MIN_COLOR_SCHEMES, productCardButtonLabel, resolveThemeStyleTokens, SOCIAL_PLATFORMS, TEXT_STYLE_LEVELS, mainLanguageName, storeLanguages, usesCartDrawer, usesProductCompare, themeCustomCss, themeSocialLinks, themeStyleDefaultsFrom } from "./theme-style-settings.js";
 export type { StoreLanguage } from "./theme-style-settings.js";
+export { THEME_PART_GROUPS, THEME_PARTS, themeCssClasses, themeCssInternals } from "./theme-parts.js";
 export type { ColorSchemeId, LegacySchemeId, TextStyleLevel } from "./theme-style-settings.js";
 export { createStarterPack, DISCOVERED_STARTER_PACK_IDS, getStarterPack, isStarterPackId, listStarterPacks, registerThemeProject, validateStarterPack } from "./starter-packs.js";
 export type { DiscoveredTheme, ThemeManifestInput } from "./types.js";
@@ -30,7 +31,7 @@ export { applyThemeStyle, listThemeStyles } from "./theme-styles.js";
 export type { ThemeStyle } from "./theme-styles.js";
 export { ARCHETYPE_DIMENSIONS, ARCHETYPES, MAX_SHARED_ARCHETYPES, TEMPLATE_PROGRAMME, checkTemplateDistinctness, sharedArchetypes } from "./template-programme.js";
 export type { ArchetypeDimension, ArchetypeOption, TemplatePlan } from "./template-programme.js";
-export { cardLayoutAttribute, PRODUCT_CARD_LAYOUTS } from "./theme-style-settings.js";
+export { cardFitAttribute, cardLayoutAttribute, PRODUCT_CARD_LAYOUTS } from "./theme-style-settings.js";
 export type { ProductCardLayout } from "./theme-style-settings.js";
 export { cartDrawerVariant, freeDeliveryThresholdMinor } from "./theme-style-settings.js";
 export { currentLayoutRevision, detectLayoutRevision, layoutRevisions, planLayoutUpgrade, starterIdOf, type LayoutDraft, type LayoutPageChange, type LayoutPlacement, type LayoutRevisionInfo, type LayoutSectionChange, type LayoutUpgradePlan } from "./layout-revisions.js";
