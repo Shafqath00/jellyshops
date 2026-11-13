@@ -50,7 +50,8 @@ describe("product management", () => {
     renderPage();
     await screen.findByRole("link", { name: "Linen shirt" });
     await user.type(screen.getByRole("searchbox", { name: "Search products" }), "linen");
-    expect(api.request).toHaveBeenCalledTimes(1);
+    // Typing alone does not reload the list (the other request is the filter lookup).
+    expect(api.request.mock.calls.filter((call) => String(call[0]).startsWith("/products?"))).toHaveLength(1);
     await user.keyboard("{Enter}");
     await waitFor(() => expect(api.request.mock.lastCall?.[0]).toContain("query=linen"));
     await user.click(screen.getByRole("tab", { name: "Active" }));

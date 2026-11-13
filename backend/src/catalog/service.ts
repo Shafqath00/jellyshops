@@ -47,6 +47,7 @@ export interface CatalogAdmin extends CatalogReader {
   listInventory(storeId: string, input: import("./types.js").ListInventoryInput): Promise<Connection<import("./types.js").CatalogInventoryRow>>;
   updateInventory(storeId: string, variantId: string, input: import("./types.js").UpdateInventoryInput): Promise<import("./types.js").CatalogInventoryRow>;
   listInventoryHistory(storeId: string, variantId: string, input: import("./types.js").ListInventoryHistoryInput): Promise<Connection<import("./types.js").InventoryAdjustment>>;
+  listProductFacets(storeId: string): Promise<import("./types.js").ProductFacets>;
   createProduct(storeId: string, input: CreateProductInput): Promise<CatalogProduct>;
   updateProduct(storeId: string, productId: string, input: UpdateProductInput): Promise<CatalogProduct>;
   createCollection(storeId: string, input: CreateCollectionInput): Promise<CatalogCollection>;
@@ -76,6 +77,11 @@ export class CatalogService implements CatalogReader {
 
   getProduct(storeId: string, id: string): Promise<CatalogProduct | null> {
     return this.repository.getProduct(storeId, id);
+  }
+
+  /** A catalogue that cannot list them (the demo one) simply has none. */
+  async listProductFacets(storeId: string): Promise<import("./types.js").ProductFacets> {
+    return this.repository.listProductFacets ? this.repository.listProductFacets(storeId) : { productTypes: [], vendors: [], tags: [] };
   }
 
   async listProducts(storeId: string, input: ListProductsInput): Promise<Connection<CatalogProduct>> {

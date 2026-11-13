@@ -1,11 +1,14 @@
 "use client";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { Search } from "lucide-react";
 
 export type SelectListItem = { id: string; label: string; sub?: ReactNode; badge?: ReactNode };
+const SEARCH_FROM = 8;
 
 /**
  * A card listing items to pick one from (pages, blogs, menus…). The chosen row is marked with
- * aria-current; on phones the list sits above the detail it controls.
+ * aria-current; on phones the list sits above the detail it controls. Lists of more than eight
+ * items get a search box.
  */
 export function SelectList({ label, title, items, selectedId, onSelect, empty, footer, loading = false }: {
   /** What the items are, for screen readers: "Pages". */
@@ -19,15 +22,20 @@ export function SelectList({ label, title, items, selectedId, onSelect, empty, f
   footer?: ReactNode;
   loading?: boolean;
 }) {
+  const [query, setQuery] = useState("");
+  const searchable = items.length > SEARCH_FROM;
+  const needle = searchable ? query.trim().toLowerCase() : "";
+  const shown = needle ? items.filter((item) => item.label.toLowerCase().includes(needle) || item.id === selectedId) : items;
   return <section className="jk-card is-flush jk-select-card" aria-label={title ? undefined : label}>
     {title && <div className="jk-card-header"><h2>{title}</h2></div>}
+    {searchable && !loading && <div className="jk-select-search"><div className="jk-search"><Search size={16} aria-hidden="true" /><input type="search" aria-label={`Search ${label.toLowerCase()}`} placeholder={`Search ${label.toLowerCase()}`} value={query} onChange={(event) => setQuery(event.target.value)} /></div></div>}
     {loading ? <div className="jk-select-loading" role="status" aria-label={`Loading ${label.toLowerCase()}`}>{[0, 1, 2].map((key) => <span key={key} className="jk-skeleton" style={{ height: 14, width: `${70 - key * 15}%` }} />)}</div> :
-      items.length ? <ul className="jk-select-list" aria-label={label}>{items.map((item) => <li key={item.id}>
+      shown.length ? <ul className="jk-select-list" aria-label={label}>{shown.map((item) => <li key={item.id}>
         <button type="button" className="jk-select-row" aria-current={item.id === selectedId ? "true" : undefined} onClick={() => onSelect(item.id)}>
           <span className="min-w-0 flex-1"><span className="jk-select-label">{item.label}</span>{item.sub && <span className="jk-cell-sub truncate">{item.sub}</span>}</span>
           {item.badge}
         </button>
-      </li>)}</ul> : <p className="jk-select-empty">{empty ?? "Nothing here yet."}</p>}
+      </li>)}</ul> : <p className="jk-select-empty">{items.length ? "Nothing matches your search." : empty ?? "Nothing here yet."}</p>}
     {footer && <div className="jk-select-footer">{footer}</div>}
   </section>;
 }

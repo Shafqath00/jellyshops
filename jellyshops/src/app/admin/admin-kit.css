@@ -3,9 +3,9 @@
  * portalled to <body> get them too. Colours come from tokens only; dark mode swaps the tokens.
  */
 html.admin-ui {
-  --jk-surface:#fff; --jk-surface-subdued:#f7f7f6; --jk-surface-hover:#f3f3f1; --jk-surface-selected:#eef4ff;
+  --jk-surface:#fff; --jk-surface-subdued:#f7f7f6; --jk-surface-hover:#f3f3f1; --jk-surface-selected:#edf1ff;
   --jk-border:#e3e3e0; --jk-border-strong:#c9c9c5; --jk-text:#1f1f1f; --jk-text-subdued:#5f5f5c;
-  --jk-accent:#303030; --jk-accent-text:#fff; --jk-focus:#005bd3;
+  --jk-accent:#2f5bff; --jk-accent-text:#fff; --jk-focus:#1d47e0;
   --jk-info-bg:#e8f1ff; --jk-info-text:#0b4a9e; --jk-info-dot:#2f6fd6;
   --jk-success-bg:#dcf5e7; --jk-success-text:#14532d; --jk-success-dot:#1f8a4c;
   --jk-warning-bg:#fff1c2; --jk-warning-text:#5c3d00; --jk-warning-dot:#b88200;
@@ -16,8 +16,8 @@ html.admin-ui {
   --jk-font:var(--font-inter),"Segoe UI",system-ui,sans-serif;
   /* Shell and layout */
   --jk-bg:#f4f4f6; --jk-sidebar:#ebebef; --jk-sidebar-hover:#e0e0e6;
-  --jk-topbar:#1c1b22; --jk-topbar-text:#f1f0f5; --jk-topbar-muted:#a9a7b3; --jk-topbar-field:#2d2c35; --jk-topbar-field-hover:#383742;
-  --jk-brand:#6447e8; --jk-brand-soft:#eeeafd; --jk-brand-strong:#4b31c4;
+  --jk-topbar:#0f0f10; --jk-topbar-text:#f5f3ec; --jk-topbar-muted:#a8a69f; --jk-topbar-field:#232325; --jk-topbar-field-hover:#2f2f32;
+  --jk-brand:#2f5bff; --jk-brand-soft:#e8edff; --jk-brand-strong:#1d3fc4;
   --jk-topbar-height:56px; --jk-sidebar-width:240px; --jk-content-width:1200px;
   /* Spacing scale (4px grid) */
   --jk-space-1:4px; --jk-space-2:8px; --jk-space-3:12px; --jk-space-4:16px; --jk-space-5:20px; --jk-space-6:24px; --jk-space-8:32px;
@@ -34,14 +34,14 @@ html.admin-ui {
 html.admin-ui.admin-dark {
   --jk-surface:#262626; --jk-surface-subdued:#1f1f1f; --jk-surface-hover:#2f2f2f; --jk-surface-selected:#22324a;
   --jk-border:#3a3a3a; --jk-border-strong:#555; --jk-text:#eee; --jk-text-subdued:#b5b5b5;
-  --jk-accent:#f1f1f1; --jk-accent-text:#1f1f1f; --jk-focus:#7fb0ff;
+  --jk-accent:#8ea6ff; --jk-accent-text:#0a0a0a; --jk-focus:#9db3ff;
   --jk-info-bg:#1d3355; --jk-info-text:#cfe1ff; --jk-success-bg:#173d29; --jk-success-text:#c4f0d6;
   --jk-warning-bg:#433411; --jk-warning-text:#ffe7a3; --jk-attention-bg:#4a2b12; --jk-attention-text:#ffd4ad;
   --jk-critical-bg:#4a1d1a; --jk-critical-text:#ffcdc9; --jk-neutral-bg:#363636; --jk-neutral-text:#e0e0e0;
   --jk-shadow:0 0 0 1px #ffffff14;
   --jk-bg:#161619; --jk-sidebar:#1d1d21; --jk-sidebar-hover:#2a2a30;
   --jk-topbar:#0f0f12; --jk-topbar-field:#24242a; --jk-topbar-field-hover:#2e2e35;
-  --jk-brand:#9d8bff; --jk-brand-soft:#2b2450; --jk-brand-strong:#c3b8ff;
+  --jk-brand:#8ea6ff; --jk-brand-soft:#1c2750; --jk-brand-strong:#bccaff;
   --jk-shadow-raised:0 10px 28px #00000080,0 0 0 1px var(--jk-border);
   --jk-positive:#7fd8a4; --jk-negative:#ff9d94;
 }
@@ -336,6 +336,7 @@ html.admin-ui.admin-dark {
 .jk-split-list,.jk-split-main {display:flex;flex-direction:column;gap:var(--jk-space-4);min-width:0}
 @media(min-width:1024px){.jk-split-list{position:sticky;top:calc(var(--jk-topbar-height) + var(--jk-space-4))}}
 .jk-select-card .jk-card-header {margin-bottom:var(--jk-space-2)}
+.jk-select-search {padding:8px 8px 2px}
 .jk-select-list {display:flex;flex-direction:column;gap:2px;padding:6px}
 .jk-select-row {display:flex;align-items:center;gap:var(--jk-space-2);width:100%;min-height:40px;padding:8px 10px;border-radius:var(--jk-radius-sm);text-align:left;font-size:var(--jk-text-sm);color:var(--jk-text)}
 .jk-select-row:hover {background:var(--jk-surface-hover)}

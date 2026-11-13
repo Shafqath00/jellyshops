@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LayoutGrid } from "lucide-react";
-import { AdminPage, Banner, EmptyState, Field, IndexTable } from "@/components/admin";
+import { AdminPage, Banner, EmptyState, Field, IndexTable, useClientList } from "@/components/admin";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { useAdminCatalog, type CollectionRow, type CatalogAdminProduct } from "@/features/admin/api/catalog-api";
 import { slugify } from "@/lib/domain";
@@ -31,23 +31,25 @@ export default function CollectionsPage(){
     catch(e){setFormError(e instanceof Error?e.message:"Could not save collection.");}finally{setBusy(false);}
   }
   function edit(value:Draft){drawerTrigger.current=document.activeElement as HTMLElement;setDraft(value);setFormError("");setProductQuery("");}
-  const filtered=rows.filter(row=>row.title.toLowerCase().includes(query.toLowerCase()));
+  const shown=useClientList(rows,{text:row=>`${row.title} ${row.handle}`,sortBy:{title:row=>row.title,products:row=>row.productIds?.length??0},initialSort:{key:"title",direction:"asc"},noun:["collection","collections"],searchLabel:"Search collections"});
   const shownProducts=products.filter(product=>product.title.toLowerCase().includes(productQuery.toLowerCase()));
   const address=draft?(draft.handle||slugify(draft.title)||"your-collection"):"";
   return <AdminPage title="Collections" description="Group products to display together in your store." primaryAction={{label:"Create collection",onAction:()=>edit({...blank})}}>
     <IndexTable<CollectionRow>
       label="Collections"
-      rows={filtered}
+      rows={shown.rows}
+      sort={shown.sort}
+      pagination={shown.pagination}
       rowKey={row=>row.id}
       rowLabel={row=>row.title}
       loading={loading}
       error={error||undefined}
       onRetry={()=>setRevision(n=>n+1)}
-      search={{value:query,onChange:setQuery,placeholder:"Search collections",label:"Search collections"}}
+      search={shown.search}
       columns={[
-        {id:"title",header:"Collection",mobile:"primary",cell:row=><button type="button" className="jk-strong jk-row-link" onClick={()=>edit(toDraft(row))}>{row.title}</button>},
+        {id:"title",header:"Collection",mobile:"primary",sortKey:"title",cell:row=><button type="button" className="jk-strong jk-row-link" onClick={()=>edit(toDraft(row))}>{row.title}</button>},
         {id:"handle",header:"Web address",cell:row=><span className="jk-muted">/collections/{row.handle}</span>},
-        {id:"products",header:"Products",align:"end",cell:row=><span className="tabular-nums">{row.productIds?.length??0}</span>},
+        {id:"products",header:"Products",align:"end",sortKey:"products",cell:row=><span className="tabular-nums">{row.productIds?.length??0}</span>},
       ]}
       emptyState={<EmptyState icon={LayoutGrid} title={query?"No matching collections":"Create your first collection"} description="Collections help customers browse related products."/>}
     />

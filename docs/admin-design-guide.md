@@ -58,6 +58,9 @@ When you add or change a kit part: update it in the kit, show it on `/admin/desi
 
 Every list page has, where it makes sense: search, sort, filters, paging, row select with bulk actions, a skeleton while loading, a helpful empty state and an error with "Try again" (`error` + `onRetry`).
 
+- A list the page already holds in full (collections, reviews): `useClientList(rows, { text, sortBy, noun, searchLabel })` gives `rows`, `search`, `sort` and `pagination` to spread onto `IndexTable`. Lists that can grow large (products, orders, customers) are searched, filtered and paged by the API.
+- `SelectList` shows its own search box once it has more than eight items.
+- Filters are small `jk-select` dropdowns in `filters`, each starting with an "All …" choice, left out when the store has nothing to choose from, with a "Clear filters" button while any is set.
 - Sorting: give columns a `sortKey` and pass `sort`. Column headings are hidden on phones, so keep a "Sort" select in `filters` when phone users need to sort.
 - Bulk actions that remove or hide things open a `ConfirmDialog` that says how many items are affected.
 

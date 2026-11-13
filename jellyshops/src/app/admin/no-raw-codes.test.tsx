@@ -7,7 +7,7 @@ import { expectNoRawCodes } from "@/test/raw-codes";
 
 vi.mock("@/features/auth/providers/auth-provider", () => ({ useAuth: () => ({ activeStore: { id: "store-demo", role: "OWNER", currency: "GBP" }, session: { access_token: "token" } }), authApiOrigin: () => "http://api.local" }));
 const catalog = vi.hoisted(() => ({ request: vi.fn() }));
-vi.mock("@/features/admin/api/catalog-api", () => ({ useAdminCatalog: () => ({ request: catalog.request, ready: true, storeId: "store-demo" }) }));
+vi.mock("@/features/admin/api/catalog-api", () => ({ useAdminCatalog: () => ({ request: catalog.request, all: async () => [], ready: true, storeId: "store-demo" }) }));
 afterEach(() => { vi.unstubAllGlobals(); });
 
 const statuses = ["PENDING_PAYMENT", "PAID", "CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED", "REFUNDED"];

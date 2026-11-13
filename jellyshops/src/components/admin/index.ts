@@ -9,6 +9,7 @@ export { Field, ResourceForm, SaveBar, useUnsavedChangesWarning } from "./resour
 export { StatusBadge } from "./status-badge";
 export { humanizeCode, statusInfo, statusLabel, statusOptions, type StatusKind, type StatusTone } from "./status";
 export { Tabs, type TabItem } from "./tabs";
+export { compareValues, useClientList } from "./use-client-list";
 export { TagInput } from "./tag-input";
 export { ToastProvider, useToast } from "./toast";
 export { SelectList, SplitLayout, type SelectListItem } from "./select-list";

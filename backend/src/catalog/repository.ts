@@ -15,6 +15,7 @@ import type {
 export interface CatalogRepository {
   listInventory?(storeId: string, input: import("./types.js").ListInventoryInput): Promise<Connection<import("./types.js").CatalogInventoryRow>>;
   listInventoryHistory?(storeId: string, variantId: string, input: import("./types.js").ListInventoryHistoryInput): Promise<Connection<import("./types.js").InventoryAdjustment>>;
+  listProductFacets?(storeId: string): Promise<import("./types.js").ProductFacets>;
   getProduct(storeId: string, id: string): Promise<CatalogProduct | null>;
   listProducts(storeId: string, input: ListProductsInput): Promise<Connection<CatalogProduct>>;
   getVariant(storeId: string, id: string): Promise<CatalogVariant | null>;
