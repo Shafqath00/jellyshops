@@ -65,6 +65,14 @@ export default function DashboardPage() {
     {data && (remaining.length ? <SetupGuide steps={steps} /> :
       <Banner tone="success" title="Your store is ready to take orders">Next ideas: <Link href="/admin/products/collections" className="jk-link">group products into collections</Link>, <Link href="/admin/content/blogs" className="jk-link">write a blog post</Link> or <Link href="/admin/settings/notifications" className="jk-link">check your order emails</Link>.</Banner>)}
 
+    <nav className="jk-quick" aria-label="Common tasks">
+      <Link href="/admin/products/new" className="jk-chip">Add a product</Link>
+      <Link href="/admin/products/import" className="jk-chip">Import products from a spreadsheet</Link>
+      <Link href="/admin/orders" className="jk-chip">Send out orders</Link>
+      <Link href="/admin/products/inventory?stock=low" className="jk-chip">Update stock that is running low</Link>
+      <Link href="/admin/online-store/editor" className="jk-chip">Edit your store design</Link>
+    </nav>
+
     <div className="jk-dash-toolbar">
       <h2 className="jk-section-title">Performance</h2>
       <label className="jk-period"><span className="sr-only">Sales period</span>
@@ -102,7 +110,7 @@ export default function DashboardPage() {
           </Link>
         </li>)}</ul> : <EmptyState icon={PackageCheck} title="Nothing waiting" description="New paid orders show up here until they are delivered." />}
       </Card>
-      <Card title="Running low" description="Active products at or below their low-stock warning." actions={<Link href="/admin/products/inventory" className="jk-link">Inventory</Link>} flush>
+      <Card title="Running low" description="Active products at or below their low-stock warning." actions={<Link href="/admin/products/inventory?stock=low" className="jk-link">Update stock</Link>} flush>
         {!data ? <CardSkeleton label="Loading stock" /> : data.lowStock.length ? <ul className="jk-list">{data.lowStock.map((item) => {
           const left = item.available ?? item.quantity;
           return <li key={item.variantId}><Link href={`/admin/products/${item.productId}`} className="jk-list-row">

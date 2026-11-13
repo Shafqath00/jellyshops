@@ -167,7 +167,7 @@ export default function ProductsPage() {
       ]}
       emptyState={filtered
         ? <EmptyState icon={Package} title="No matching products" description="Try another search, clear the filters, or choose All to see every product." action={filterCount > 0 ? <button type="button" className="jk-button" onClick={() => { setFilters(NO_FILTERS); reset(); }}>Clear filters</button> : undefined} />
-        : <EmptyState icon={Package} title="Add your first product" description="Give customers something to discover in your store. You can add photos, prices and sizes in one place." action={<Link href="/admin/products/new" className="jk-button jk-button-primary">Add product</Link>} />}
+        : <EmptyState icon={Package} title="Add your first product" description="Give customers something to discover in your store. Add them one at a time, or bring a whole list in from a spreadsheet." action={<Link href="/admin/products/new" className="jk-button jk-button-primary">Add product</Link>} secondaryAction={<Link href="/admin/products/import" className="jk-button">Import from a spreadsheet</Link>} />}
       pagination={{
         hasPrevious: history.length > 0,
         hasNext: Boolean(next),

@@ -590,6 +590,10 @@ textarea.jk-input {min-height:80px;resize:vertical}
 .jk-prefixed:focus-within {outline:var(--jk-focus-ring);outline-offset:0}
 .jk-field .jk-prefixed input:focus-visible {outline:0}
 
+/* Home: common tasks */
+.jk-quick {display:flex;flex-wrap:wrap;gap:var(--jk-space-2)}
+.jk-quick .jk-chip {text-decoration:none}
+
 /* Product builder: checklist and photo drop zone (phase 3) */
 .jk-checklist {display:flex;flex-direction:column;gap:var(--jk-space-2);margin-top:var(--jk-space-3);font-size:var(--jk-text-sm)}
 .jk-checklist li {display:flex;align-items:flex-start;gap:var(--jk-space-2);color:var(--jk-text)}

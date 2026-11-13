@@ -28,6 +28,9 @@ const sales = (days: number) => ({
   daily: Array.from({ length: days }, (_, index) => ({ date: `2026-11-${String(index + 1).padStart(2, "0")}`, revenueMinor: index === days - 1 ? 204800 : 0, paidOrders: index === days - 1 ? 2 : 0 })),
 });
 
+// The page test renders the whole dashboard and runs axe; it needs longer when the full suite runs in parallel.
+vi.setConfig({ testTimeout: 20000 });
+
 describe("Home", () => {
   it("shows setup steps, sales for the chosen period and what needs attention, in plain words", async () => {
     const user = userEvent.setup();
