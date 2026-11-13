@@ -1,4 +1,4 @@
-import { getThemeMigrationPath, validateThemeManifest } from "@jelly/storefront-themes";
+import { getThemeMigrationPath, validateThemeManifest, withPlatformSettings } from "@jelly/storefront-themes";
 import { ApiError } from "../../http/errors.js";
 
 /** Enforce the part of the upgrade contract knowable before any merchant draft is loaded. */
@@ -6,7 +6,10 @@ export function assertThemeVersionTransition(previous: unknown, next: unknown): 
   const before = validateThemeManifest(previous), after = validateThemeManifest(next);
   const major = Number(after.version.split(".")[0]) > Number(before.version.split(".")[0]);
   const removedOrChanged = (oldSettings: Array<{ id: string; type: string }>, newSettings: Array<{ id: string; type: string }>) => oldSettings.some((old) => !newSettings.some((item) => item.id === old.id && item.type === old.type));
-  const breaking = removedOrChanged(before.settingsSchema, after.settingsSchema) || (before.sections ?? []).some((old) => {
+  // Compare the settings stores actually see: the platform list plus the theme's own entries (a theme that stops
+  // copying the platform settings into theme.json removes nothing).
+  const settings = (manifest: typeof before) => (manifest.extends ? manifest.settingsSchema : withPlatformSettings(manifest).settingsSchema) as Array<{ id: string; type: string }>;
+  const breaking = removedOrChanged(settings(before), settings(after)) || (before.sections ?? []).some((old) => {
     const current = after.sections?.find((section) => section.type === old.type);
     return !current || removedOrChanged(old.settings, current.settings) || old.supportedPages.some((page) => !current.supportedPages.includes(page));
   });

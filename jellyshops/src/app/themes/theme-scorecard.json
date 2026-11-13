@@ -3,7 +3,7 @@
     "theme": "jelly-avenue",
     "styling": "legacy",
     "internals": 46,
-    "settingsCopy": 130,
+    "settingsCopy": 0,
     "mainSections": [],
     "pageTypes": [
       "article",
@@ -25,7 +25,7 @@
     "theme": "jelly-diode",
     "styling": "own",
     "internals": 22,
-    "settingsCopy": 128,
+    "settingsCopy": 0,
     "mainSections": [],
     "pageTypes": [
       "article",
@@ -47,7 +47,7 @@
     "theme": "jelly-forma",
     "styling": "own",
     "internals": 7,
-    "settingsCopy": 124,
+    "settingsCopy": 0,
     "mainSections": [],
     "pageTypes": [
       "article",
@@ -69,7 +69,7 @@
     "theme": "jelly-halo",
     "styling": "own",
     "internals": 20,
-    "settingsCopy": 127,
+    "settingsCopy": 0,
     "mainSections": [],
     "pageTypes": [
       "article",
@@ -91,7 +91,7 @@
     "theme": "jelly-harbour",
     "styling": "legacy",
     "internals": 32,
-    "settingsCopy": 129,
+    "settingsCopy": 0,
     "mainSections": [],
     "pageTypes": [
       "article",
@@ -113,7 +113,7 @@
     "theme": "jelly-resthaven",
     "styling": "platform",
     "internals": 5,
-    "settingsCopy": 128,
+    "settingsCopy": 0,
     "mainSections": [
       "product"
     ],
@@ -137,7 +137,7 @@
     "theme": "jelly-signature",
     "styling": "legacy",
     "internals": 32,
-    "settingsCopy": 129,
+    "settingsCopy": 0,
     "mainSections": [],
     "pageTypes": [
       "article",

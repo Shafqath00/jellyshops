@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
+import { withPlatformSettings } from "./platform-settings";
 import { resolve } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { recipesOf, registerRecipes } from "./recipes";
@@ -33,12 +34,14 @@ describe("docs example theme: Jelly Studio", () => {
     expect(parsed.assetPrefix).toBe("/themes/jelly-studio/");
   });
 
-  it("gives every setting a default that matches settingsDefaults, with unique ids", () => {
+  it("gives every setting it sets a value that matches the platform settings, with unique ids", () => {
     const ids = new Set<string>();
-    for (const setting of manifest.settingsSchema as Array<{ id: string; default: unknown; options?: Array<{ value: string }>; min?: number; max?: number }>) {
+    // The platform's settings list with the example's defaults (the example lists no settings of its own).
+    for (const setting of withPlatformSettings(manifest).settingsSchema as Array<{ id: string; default: unknown; options?: Array<{ value: string }>; min?: number; max?: number }>) {
       expect(ids.has(setting.id), `duplicate ${setting.id}`).toBe(false);
       ids.add(setting.id);
-      expect(at(manifest.settingsDefaults, setting.id), setting.id).toEqual(setting.default);
+      const value = at(manifest.settingsDefaults, setting.id);
+      if (value !== undefined) expect(value, setting.id).toEqual(setting.default);
       if (setting.options) expect(setting.options.map((option) => option.value), setting.id).toContain(setting.default);
       if (setting.min !== undefined && typeof setting.default === "number") expect(setting.default).toBeGreaterThanOrEqual(setting.min);
       if (setting.max !== undefined && typeof setting.default === "number") expect(setting.default).toBeLessThanOrEqual(setting.max);

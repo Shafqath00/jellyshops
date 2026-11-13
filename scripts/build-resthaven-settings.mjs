@@ -1,19 +1,17 @@
-// Rewrites the settings part of Resthaven's theme.json (docs/plans/resthaven-redesign.md): the full platform settings
-// schema (colour schemes, text styles, buttons, fields, cards, badges, cart, social, languages, custom CSS) with
-// Resthaven's own defaults. Assets, recipes and the rest of the manifest are kept. Run after
+// Rewrites the settings part of Resthaven's theme.json (docs/plans/resthaven-redesign.md): Resthaven's own defaults for
+// the platform settings (the list itself is the platform's, platform-settings.ts; the theme does not copy it). Assets, recipes and the rest of the manifest are kept. Run after
 // `npm run build:storefront-packages`:
 //   node scripts/build-resthaven-settings.mjs
 // Never change the theme's id or version here: published stores pin them.
 import { readFileSync, writeFileSync } from "node:fs";
-import { FONT_OPTIONS } from "../jellyshops/packages/storefront-themes/dist/index.js";
+import { platformSettingsSchema } from "../jellyshops/packages/storefront-themes/dist/index.js";
 
 const root = new URL("../jellyshops/packages/storefront-themes/src/themes/", import.meta.url);
 const file = new URL("jelly-resthaven/theme.json", root);
 const theme = JSON.parse(readFileSync(file, "utf8"));
-// Diode carries the complete current platform schema (Forma's plus the newer card and cart settings).
+// Diode's defaults are the starting point; the platform settings list is used to check every value below.
 const platform = JSON.parse(readFileSync(new URL("jelly-diode/theme.json", root), "utf8"));
-const schema = structuredClone(platform.settingsSchema);
-for (const setting of schema) if (setting.type === "font") setting.options = FONT_OPTIONS.map(({ value, label }) => ({ value, label }));
+const schema = platformSettingsSchema(platform.settingsDefaults);
 
 const scheme = (name, background, text, button, buttonText) => ({ name, background, text, button, buttonText });
 const defaults = structuredClone(platform.settingsDefaults);
@@ -66,14 +64,9 @@ for (const setting of schema) {
   setting.default = value;
 }
 delete defaults.productCard.compare;
-const compare = schema.findIndex((setting) => setting.id === "productCard.compare");
-if (compare >= 0) schema.splice(compare, 1);
-if (!schema.some((setting) => setting.id === "productCard.hoverImage")) {
-  schema.push({ id: "productCard.hoverImage", type: "checkbox", label: "Show the second photo on hover", group: "Product cards", default: true });
-}
 
-const { legacyStorefrontStyles: _legacy, sectionDefaults: _defaults, ...rest } = theme;
+const { legacyStorefrontStyles: _legacy, sectionDefaults: _defaults, settingsSchema: _schema, ...rest } = theme;
 // Built on the platform section defaults (every section lays out before the theme styles it), not the old globals.css rules.
-const next = { ...rest, settingsDefaults: defaults, settingsSchema: schema };
+const next = { ...rest, settingsDefaults: defaults };
 writeFileSync(file, `${JSON.stringify(next, null, 2)}\n`);
-console.log(`theme.json: ${schema.length} settings`);
+console.log(`theme.json: defaults for ${schema.length} platform settings`);

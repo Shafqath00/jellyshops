@@ -38,7 +38,7 @@ Section renderer ── React components, one per section type ── how it is 
 | Blocks | **Block definitions**, nestable up to three levels | `storefront-registry/src/blocks.ts` |
 | `snippets/` | Shared React components | `packages/storefront-ui`, helpers in the renderer |
 | `assets/` | `jellyshops/public/themes/<id>/` (images, icons) and `jellyshops/src/app/themes/<id>.css` | |
-| `config/settings_schema.json` | `settingsSchema` in the theme manifest | `themes/<id>/theme.json` |
+| `config/settings_schema.json` | the platform's settings list (`platform-settings.ts`); the theme gives `settingsDefaults` and only its own extra `settingsSchema` entries | `themes/<id>/theme.json` |
 | `config/settings_data.json` | The store's saved **theme configuration** (one row per store) | `ThemeConfiguration` table |
 | `locales/*.json` | **Not available for theme text.** Merchants translate section and block text per language; the theme's own built-in words are not translatable yet | see the plan |
 | Theme library | **Saved looks** (theme + settings only; pages and sections are shared) | editor, Theme settings |
@@ -62,7 +62,7 @@ A theme is spread across four packages and the app. A theme folder under `storef
 
 | Responsibility | Path | Purpose |
 | --- | --- | --- |
-| Manifest and settings | `jellyshops/packages/storefront-themes/src/themes/<id>/theme.json` | Identity, version, asset paths, `settingsDefaults`, `settingsSchema`. Validated by `validateThemeManifest()` |
+| Manifest and settings | `jellyshops/packages/storefront-themes/src/themes/<id>/theme.json` | Identity, version, asset paths, `settingsDefaults` (the theme's values for the platform settings) and, only for settings of its own, `settingsSchema`. Validated by `validateThemeManifest()` |
 | Tokens | `.../storefront-themes/src/<id>/tokens.ts` (or in `definition.ts`) | `ThemeTokens`: base colours, fonts, radii, spacing |
 | Registration | `.../storefront-themes/src/theme-registry.ts` | The hard-coded list of themes (`definition(...)`). Also `COMPLETE_STOREFRONT_THEME_IDS` |
 | Shell and section overrides (optional) | `.../storefront-themes/src/themes/<id>/shell.tsx`, `hero.tsx` | Replace the header, footer, cart or pages, or one section's markup |
@@ -92,7 +92,7 @@ Your brief names `layouts/ templates/ sections/ blocks/ components/ assets/ conf
 ```text
 jelly-studio/
   theme.json                      manifest (id, version, engines, entry points)
-  config/settings.schema.json     global settings (today: settingsSchema in theme.json)
+  config/settings.schema.json     global settings (the platform's list; theme.json gives the defaults)
   config/tokens.json              design tokens
   layouts/default.json            header / announcement / footer placement
   templates/*.json                home, product, collection, cart, search, page, blog, article, 404 …
@@ -131,9 +131,15 @@ Copy `docs/examples/jelly-studio/theme.json` to `packages/storefront-themes/src/
   "layout": "standard",              // "standard" | "editorial"
   "enabled": true,
   "settingsDefaults": { "colors": { … }, "typography": { … }, … },
-  "settingsSchema": [ { "id": "colors.accent", "type": "color", "label": "Highlight", "group": "Colours", "default": "#d9a441" } ]
+  // Optional: only settings of the theme's own. The platform supplies every standard setting (colours, schemes,
+  // type, buttons, cards, badges, fields, cart, social, languages, custom CSS); give their values in settingsDefaults.
+  "settingsSchema": [ { "id": "story.tagline", "type": "text", "label": "Tagline", "group": "Story", "default": "Made slowly" } ]
 }
 ```
+
+A `settingsSchema` entry with a platform id changes that setting's wording or choices (`label`, `description`,
+`options`); a new id adds a theme setting after the last setting of its `group` (or after the setting named in
+`after`). Platform settings the theme gives no value for keep the platform's default.
 
 **Settings schema rules** (enforced by `validateThemeManifest()`; the manifest is `.strict()`, so unknown keys are rejected):
 
@@ -458,7 +464,7 @@ Everything the editor can do comes from data the registry exposes. There is no p
 | Question | Answer |
 | --- | --- |
 | Where do editable fields come from? | The section or block `controls`. The inspector (`features/store-editor/components/inspector/`) renders a control per entry, grouped by Content, Layout, Appearance, Advanced, with sub-headings. |
-| Where do theme-wide settings come from? | `settingsSchema` in the manifest, rendered by the Theme settings panel (same controls). |
+| Where do theme-wide settings come from? | The platform's settings list (`platform-settings.ts`) with the theme's `settingsDefaults`, plus any `settingsSchema` entries of the theme's own (same id: new wording or choices; new id: a theme setting), rendered by the Theme settings panel. |
 | Where are defaults? | `defaultSettings` and `defaultBlocks` (sections), the starter pack (pages) and `settingsDefaults` (theme). |
 | What is saved? | Section and block `settings` (plus `responsive.mobile/tablet`, per-language `translations`) inside the template layout; theme settings in the theme configuration. All JSON. |
 | How does the preview match the live store? | The editor renders the draft with `RegistrySectionRenderer`, the same component the storefront uses, inside an iframe with the theme's CSS and tokens. Only `mode` differs (`editor` adds click handlers). |
@@ -563,7 +569,7 @@ Check it yourself: `node scripts/validate-theme.mjs docs/examples/jelly-studio` 
 | Hero section | `hero` with `heading`/`text`/`button` blocks; alignment, colours, padding from the shared Appearance controls |
 | Featured product grid | `product-grid` with `limit`, `columns`, `emptyMessage`; products come from `commerce.getProducts()` |
 | Reusable button component | The platform's button (`StorefrontButton` in `packages/storefront-ui`, `.jelly-button` class). Style it in your CSS; do not rebuild it: `[data-jelly-theme="jelly-studio"] .jelly-button { border-radius: var(--jelly-radius-button, 8px); }` |
-| Global settings | `theme.json` → `settingsSchema` |
+| Global settings | platform list + `theme.json` → `settingsDefaults` (and own `settingsSchema` entries) |
 
 **The steps to register it**
 

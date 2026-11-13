@@ -128,14 +128,19 @@ describe("ThemePackageService", () => {
   });
 
   it("rejects removed settings in a minor release and requires a complete migration for a major release", async () => {
-    await service.upload("store-a", themePackage());
-    const removeSetting = (manifest: Record<string, any>) => { manifest.settingsSchema = manifest.settingsSchema.slice(1); };
+    // A setting of the theme's own (platform settings cannot be removed by a theme: the platform keeps them).
+    const withTagline = (manifest: Record<string, any>) => {
+      manifest.settingsSchema = [{ id: "story.tagline", type: "text", label: "Tagline", group: "Story", default: "Made slowly" }];
+      manifest.settingsDefaults = { ...manifest.settingsDefaults, story: { tagline: "Made slowly" } };
+    };
+    await service.upload("store-a", themePackage({ mutate: withTagline }));
+    const removeSetting = (manifest: Record<string, any>) => { manifest.settingsSchema = []; };
     await expect(service.upload("store-a", themePackage({ version: "1.1.0", mutate: removeSetting }))).rejects.toMatchObject({ code: "BREAKING_THEME_CHANGE" });
     await expect(service.upload("store-a", themePackage({ version: "2.0.0" }))).rejects.toMatchObject({ code: "MIGRATION_REQUIRED" });
     await expect(service.upload("store-a", themePackage({ version: "2.0.0", mutate: (manifest) => { manifest.migrations = [{ from: "1.1.0", to: "2.0.0", operations: [] }]; } }))).rejects.toMatchObject({ code: "MIGRATION_REQUIRED" });
     const next = await service.upload("store-a", themePackage({ version: "2.0.0", mutate: (manifest) => {
       removeSetting(manifest);
-      manifest.migrations = [{ from: "1.0.0", to: "2.0.0", operations: [{ op: "removeSetting", target: { scope: "theme" }, key: "colors.primary" }] }];
+      manifest.migrations = [{ from: "1.0.0", to: "2.0.0", operations: [{ op: "removeSetting", target: { scope: "theme" }, key: "story.tagline" }] }];
     } }));
     expect(next.created).toBe(true);
     expect((await service.getVersion(next.version.id))?.manifest.migrations).toHaveLength(1);

@@ -1,4 +1,5 @@
 import { storefrontPageTypes, type PageType, type SectionNode } from "@jelly/storefront-schema";
+import { PLATFORM_SETTING_IDS, platformSettingsSchema, type PlatformSetting } from "./platform-settings.js";
 import { recipesOf, registerRecipes } from "./recipes.js";
 import { validateSectionAgainstRegistry } from "@jelly/storefront-registry";
 import { themeManifestSchema } from "./theme-resolver.js";
@@ -58,7 +59,15 @@ function valueAt(source: Record<string, unknown>, path: string): unknown {
 
 function checkSettings(manifest: Record<string, unknown>, issues: ThemeProjectIssue[]): void {
   const defaults = record(manifest.settingsDefaults);
-  const schema = Array.isArray(manifest.settingsSchema) ? manifest.settingsSchema as Array<Record<string, unknown>> : [];
+  // The theme's settings are the platform's list with its defaults, plus its own entries (platform-settings.ts); a theme
+  // built on a base design (`extends`) gets the base design's settings, which were checked with the base.
+  const listed = Array.isArray(manifest.settingsSchema) ? manifest.settingsSchema as Array<Record<string, unknown>> : [];
+  const ownIds = listed.map((setting) => setting.id);
+  if (new Set(ownIds).size !== ownIds.length) {
+    const twice = ownIds.find((id, index) => ownIds.indexOf(id) !== index);
+    issues.push({ level: "error", code: "DUPLICATE_SETTING", path: "settingsSchema", message: `The setting "${String(twice)}" is listed twice.` });
+  }
+  const schema = (typeof manifest.extends === "string" ? listed : platformSettingsSchema(defaults, listed as PlatformSetting[])) as Array<Record<string, unknown>>;
   const seen = new Set<string>();
   schema.forEach((setting, index) => {
     const id = typeof setting.id === "string" ? setting.id : `settingsSchema[${index}]`;
@@ -66,7 +75,8 @@ function checkSettings(manifest: Record<string, unknown>, issues: ThemeProjectIs
     if (seen.has(id)) issues.push({ level: "error", code: "DUPLICATE_SETTING", path, message: `The setting "${id}" is listed twice.` });
     seen.add(id);
     const inDefaults = valueAt(defaults, id);
-    if (inDefaults === undefined) issues.push({ level: "error", code: "MISSING_DEFAULT", path, message: `"${id}" has no value in settingsDefaults, so stores would start without it.` });
+    // A platform setting the theme gives no value for keeps the platform's default.
+    if (inDefaults === undefined) { if (!PLATFORM_SETTING_IDS.includes(id)) issues.push({ level: "error", code: "MISSING_DEFAULT", path, message: `"${id}" has no value in settingsDefaults, so stores would start without it.` }); }
     else if (JSON.stringify(inDefaults) !== JSON.stringify(setting.default)) issues.push({ level: "error", code: "DEFAULT_MISMATCH", path, message: `"${id}" says its default is ${JSON.stringify(setting.default)} but settingsDefaults has ${JSON.stringify(inDefaults)}.` });
     const options = Array.isArray(setting.options) ? setting.options as Array<{ value: string }> : undefined;
     if (options && !options.some((option) => option.value === setting.default)) issues.push({ level: "error", code: "DEFAULT_NOT_AN_OPTION", path, message: `The default of "${id}" is not one of its choices.` });
@@ -76,8 +86,6 @@ function checkSettings(manifest: Record<string, unknown>, issues: ThemeProjectIs
     }
     if (setting.type === "color" && typeof setting.default === "string" && setting.default && !hex.test(setting.default)) issues.push({ level: "error", code: "BAD_COLOUR", path, message: `The default of "${id}" must be a colour like #1a2b3c.` });
   });
-  // A theme built on a base design (`extends`) gets the base design's settings.
-  if (!schema.length && typeof manifest.extends !== "string") issues.push({ level: "warning", code: "NO_SETTINGS", path: "settingsSchema", message: "The theme has no editable settings, so merchants cannot change anything under Theme settings." });
 }
 
 type Placement = { kind: "inline"; section: SectionNode } | { kind: "global"; globalSectionId: string };

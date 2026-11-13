@@ -42,3 +42,4 @@ export { cardFitAttribute, cardLayoutAttribute, PRODUCT_CARD_LAYOUTS } from "./t
 export type { ProductCardLayout } from "./theme-style-settings.js";
 export { cartDrawerVariant, freeDeliveryThresholdMinor } from "./theme-style-settings.js";
 export { currentLayoutRevision, detectLayoutRevision, layoutRevisions, planLayoutUpgrade, starterIdOf, type LayoutDraft, type LayoutPageChange, type LayoutPlacement, type LayoutRevisionInfo, type LayoutSectionChange, type LayoutUpgradePlan } from "./layout-revisions.js";
+export { PLATFORM_SETTING_IDS, applyOwnSettings, platformSettingsSchema, withPlatformSettings, type PlatformSetting } from "./platform-settings.js";

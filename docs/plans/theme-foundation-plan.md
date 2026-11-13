@@ -27,10 +27,10 @@ Each phase ends with: unit tests, the theme specs, the design lint (tidy + messy
 theme preview page at 1280/820/390 against the phase start, a commit and a report. Theme ids and versions never
 change; stores keep their saved settings; layout changes reach stores through layout revisions with Undo.
 
-0. **Scorecard.** A test that reports, per theme: styling model, internals styled, which page types use main
+0. **Scorecard** (done 2026-11-13). A test that reports, per theme: styling model, internals styled, which page types use main
    sections, where its settings schema comes from, CSS size, demo content, lint findings. It is the progress meter
    for every later phase and the gate for new themes.
-1. **One settings schema.** The platform owns the theme settings schema (built once in storefront-themes); a theme's
+1. **One settings schema** (done 2026-11-13). The platform owns the theme settings schema (built once in storefront-themes); a theme's
    `theme.json` gives only its defaults, its colour schemes and type, and which optional groups it shows. The nine
    copies and the scripts that write them go. Setting ids stay, so saved settings keep working; validation is checked
    to give the same answers.

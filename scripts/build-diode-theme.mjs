@@ -1,17 +1,16 @@
 // Builds the Jelly Diode theme folder (docs/theme-briefs/jelly-diode.md): theme.json, starter.json and vector artwork.
-// Same settings schema as Halo (Forma's platform settings plus the newer card and cart settings). Run after
+// theme.json holds Diode's defaults only; the settings list is the platform's (platform-settings.ts). Run after
 // `npm run build:storefront-packages`:
 //   node scripts/build-diode-theme.mjs
 // theme.css is hand-written; `node scripts/generate-theme-assets.mjs jelly-diode` turns it into the app stylesheet.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { FONT_OPTIONS, getThemeDefinition } from "../jellyshops/packages/storefront-themes/dist/index.js";
+import { platformSettingsSchema } from "../jellyshops/packages/storefront-themes/dist/index.js";
 
 const root = new URL("../jellyshops/packages/storefront-themes/src/themes/", import.meta.url);
 const folder = new URL("jelly-diode/", root);
 const assets = new URL("assets/", folder);
 mkdirSync(assets, { recursive: true });
 const forma = JSON.parse(readFileSync(new URL("jelly-forma/theme.json", root), "utf8"));
-const signature = getThemeDefinition("jelly-signature").manifest;
 const prefix = "/themes/jelly-diode/";
 const asset = (name) => `${prefix}${name}`;
 
@@ -23,14 +22,9 @@ writeFileSync(new URL("mark.svg", assets), `<svg xmlns="http://www.w3.org/2000/s
 writeFileSync(new URL("preview.svg", assets), `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200"><rect width="320" height="200" fill="#F5F6F7"/><rect x="16" y="14" width="44" height="8" rx="1" fill="#0C0E11"/><rect x="16" y="34" width="288" height="98" rx="4" fill="#111317"/><path d="M16 50h288M16 66h288M16 82h288M16 98h288M16 114h288" stroke="#2a2d33" stroke-width=".5"/><circle cx="232" cy="82" r="30" fill="none" stroke="#9aa0a8" stroke-width="7"/><rect x="32" y="62" width="100" height="10" rx="1" fill="#F5F6F7"/><rect x="32" y="82" width="54" height="10" rx="1" fill="#C8F03C"/>${[16, 90, 164, 238].map((x) => `<rect x="${x}.5" y="144.5" width="65" height="43" rx="3" fill="#E9ECEF" stroke="#0C0E11" stroke-opacity=".2"/>`).join("")}</svg>`);
 
 // ---------- theme.json ----------
-const extra = ["productCard.layout", "productCard.showRating", "productCard.compare", "cart.freeDeliveryFrom"].map((id) => {
-  const setting = signature.settingsSchema.find((item) => item.id === id);
-  if (!setting) throw new Error(`Built-in schema has no ${id}; run npm run build:storefront-packages`);
-  return setting;
-});
-const schema = structuredClone([...forma.settingsSchema.filter((item) => !extra.some((added) => added.id === item.id)), ...extra]);
+// The platform settings list (platform-settings.ts), used to check the defaults below; the theme does not copy it.
+const schema = platformSettingsSchema(forma.settingsDefaults);
 // The font lists follow the platform's current font library.
-for (const setting of schema) if (setting.type === "font") setting.options = FONT_OPTIONS.map(({ value, label }) => ({ value, label }));
 const scheme = (name, background, text, button, buttonText) => ({ name, background, text, button, buttonText });
 const defaults = structuredClone(forma.settingsDefaults);
 Object.assign(defaults, {
@@ -76,7 +70,6 @@ const theme = {
   layout: forma.layout,
   enabled: true,
   settingsDefaults: defaults,
-  settingsSchema: schema,
   sections: [],
 };
 writeFileSync(new URL("theme.json", folder), `${JSON.stringify(theme, null, 2)}\n`);

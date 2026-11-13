@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { getBlockDefinition, getSectionDefinition, listSectionDefinitionsForPage, sectionLabel } from "@jelly/storefront-registry";
 import type { BlockNode, PageType, SectionNode } from "@jelly/storefront-schema";
 import { Fields, GroupedFields, fieldsFromControls, type Field } from "./controls";
-import { registerThemeProject } from "@jelly/storefront-themes";
+import { registerThemeProject, withPlatformSettings } from "@jelly/storefront-themes";
 import { fetchProject, getAtPath, onProjectChanged, setAtPath, toTheme, type Project } from "./project";
 
 type Starter = NonNullable<Project["starter"]>;
@@ -16,7 +16,8 @@ const panel: React.CSSProperties = { font: "13px/1.4 system-ui, sans-serif", col
 const button: React.CSSProperties = { padding: "4px 9px", border: "1px solid #cbd1d8", borderRadius: 6, background: "#fff", font: "inherit", fontSize: 12, cursor: "pointer" };
 
 function settingFields(manifest: Project["manifest"]): Field[] {
-  return (manifest.settingsSchema ?? []).map((setting) => ({ key: String(setting.id), label: String(setting.label), type: String(setting.type), description: setting.description as string | undefined, group: setting.group as string | undefined, options: setting.options as Field["options"], min: setting.min as number | undefined, max: setting.max as number | undefined, step: setting.step as number | undefined }));
+  // The platform settings with the theme's defaults, plus the theme's own entries, as Theme settings shows them.
+  return (withPlatformSettings(manifest).settingsSchema as Array<Record<string, unknown>>).map((setting) => ({ key: String(setting.id), label: String(setting.label), type: String(setting.type), description: setting.description as string | undefined, group: setting.group as string | undefined, options: setting.options as Field["options"], min: setting.min as number | undefined, max: setting.max as number | undefined, step: setting.step as number | undefined }));
 }
 
 function Shell() {

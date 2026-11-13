@@ -3,7 +3,7 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { gzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
-import { getStarterPack, isCompleteStorefrontTheme, legacyStylesAttribute, listThemes, themeCssInternals } from "@jelly/storefront-themes";
+import { getStarterPack, isCompleteStorefrontTheme, legacyStylesAttribute, listThemes, PLATFORM_SETTING_IDS, themeCssInternals } from "@jelly/storefront-themes";
 
 /**
  * Theme foundation scorecard (docs/plans/theme-foundation-plan.md, phase 0): how far each complete theme is from
@@ -73,7 +73,7 @@ function score(id: string): Score {
     theme: id,
     styling: attribute === "off" ? "platform" : attribute === "own" ? "own" : "legacy",
     internals: new Set(Object.values(css).flatMap((text) => themeCssInternals(text))).size,
-    settingsCopy: Array.isArray(manifest.settingsSchema) ? manifest.settingsSchema.length : 0,
+    settingsCopy: settingsCopies(id, styleId),
     mainSections,
     pageTypes,
     // Header and footer as section groups (announcement + header, newsletter + footer): not built yet (phase 2).
@@ -83,6 +83,24 @@ function score(id: string): Score {
     lintFindings: lintBaseline.filter((finding) => finding.split("|")[1] === (id === "jelly-signature" ? "jelly-minimal" : id)).length,
     cssGzipKb: Math.round(gzipSync(Object.values(css).join("\n")).length / 102.4) / 10,
   };
+}
+
+/**
+ * Platform settings a theme's source copies instead of taking from the platform list (platform-settings.ts): entries
+ * in its theme.json `settingsSchema` with a platform id and their own default (a wording change states no default; the
+ * value belongs in settingsDefaults), or, for the two built-in definitions, a schema not built with
+ * platformSettingsSchema. A theme's own extra settings and wording changes are not copies.
+ */
+function settingsCopies(id: string, styleId: string): number {
+  const builtIn = { "jelly-signature": "jelly-signature", "jelly-avenue": "jelly-avenue" }[id];
+  if (builtIn) {
+    const source = readFileSync(path.join(app, `packages/storefront-themes/src/${builtIn}/definition.ts`), "utf8");
+    return /platformSettingsSchema\(/.test(source) ? 0 : (listThemes().find((theme) => theme.id === id)!.manifest as { settingsSchema?: unknown[] }).settingsSchema?.length ?? 0;
+  }
+  const file = path.join(themesSource, id, "theme.json");
+  if (!existsSync(file)) return styleId === id ? 0 : settingsCopies(styleId, styleId);
+  const own = (JSON.parse(readFileSync(file, "utf8")) as { settingsSchema?: Array<{ id: string; default?: unknown }> }).settingsSchema ?? [];
+  return own.filter((setting) => PLATFORM_SETTING_IDS.includes(setting.id) && "default" in setting).length;
 }
 
 /** Pass/fail checks, in plan order. */

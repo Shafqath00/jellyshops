@@ -20,6 +20,7 @@ import { fontStack } from "./fonts.js";
 import { discoveredThemes } from "./themes/index.generated.js";
 import { compareThemeVersions } from "@jelly/storefront-schema";
 import { THEME_BASE_IDS } from "./theme-base-ids.js";
+import { applyOwnSettings, withPlatformSettings, type PlatformSetting } from "./platform-settings.js";
 
 /**
  * Every theme built here is announced, so the main entry (theme-registry-checks.ts) can check its manifest and
@@ -71,8 +72,10 @@ export function isPlatformThemeId(id: string): boolean { return manualIds.has(id
  * from the manifest defaults, everything else is the shared storefront. A folder whose id is
  * already registered above is skipped (those need code, or predate discovery).
  */
-function folderTheme(manifest: ThemeManifestInput): ThemeDefinition {
-  if (typeof manifest.extends === "string" && (THEME_BASE_IDS as readonly string[]).includes(manifest.extends)) return extendedTheme(manifest, manifest.extends);
+function folderTheme(source: ThemeManifestInput): ThemeDefinition {
+  if (typeof source.extends === "string" && (THEME_BASE_IDS as readonly string[]).includes(source.extends)) return extendedTheme(source, source.extends);
+  // The platform owns the settings list; the theme's own entries change wording or add theme settings.
+  const manifest = withPlatformSettings(source) as ThemeManifestInput;
   const colors = manifest.settingsDefaults?.colors ?? {};
   const typography = manifest.settingsDefaults?.typography ?? {};
   const base = minimalTokens;
@@ -98,11 +101,13 @@ function extendedTheme(manifest: ThemeManifestInput, baseId: string): ThemeDefin
   const base = getThemeDefinition(baseId);
   const baseManifest = base.manifest as ThemeManifestInput & { settingsDefaults: Record<string, unknown>; settingsSchema?: Array<{ id: string; default?: unknown }> };
   const settingsDefaults = mergeSettings(baseManifest.settingsDefaults, (manifest.settingsDefaults ?? {}) as Record<string, unknown>);
-  const ownSchema = Array.isArray(manifest.settingsSchema) && manifest.settingsSchema.length ? manifest.settingsSchema as Array<{ id: string; default?: unknown }> : undefined;
-  const settingsSchema = (ownSchema ?? baseManifest.settingsSchema ?? []).map((setting) => {
+  // The base design's settings (the platform list plus the base's own entries) with this theme's defaults; the
+  // theme's own entries change wording or add settings, as for any theme.
+  const own = Array.isArray(manifest.settingsSchema) ? manifest.settingsSchema as PlatformSetting[] : [];
+  const settingsSchema = applyOwnSettings((baseManifest.settingsSchema ?? []).map((setting) => {
     const value = settingAt(settingsDefaults, setting.id);
-    return value === undefined ? setting : { ...setting, default: value };
-  });
+    return (value === undefined ? setting : { ...setting, default: value }) as PlatformSetting;
+  }), own);
   const merged = { ...baseManifest, ...manifest, settingsDefaults, settingsSchema, sections: manifest.sections };
   if (!manifest.sections) delete (merged as { sections?: unknown }).sections;
   const colors = (settingsDefaults.colors ?? {}) as Record<string, string>;

@@ -24,18 +24,22 @@ describe("validateThemeProject", () => {
 
     it("catches settings whose defaults disagree, repeat, or fall outside their choices and bounds", () => {
       const bad = manifest();
-      bad.settingsSchema.push({ ...bad.settingsSchema[0] });
-      bad.settingsSchema.find((s: { id: string }) => s.id === "buttons.radius").default = "triangle";
-      bad.settingsSchema.find((s: { id: string }) => s.id === "layout.contentWidth").default = 5000;
-      bad.settingsDefaults.layout.contentWidth = 5000;
-      bad.settingsSchema.find((s: { id: string }) => s.id === "colors.accent").default = "gold";
+      const tagline = { id: "story.tagline", type: "text", label: "Tagline", group: "Story", default: "Made slowly" };
+      // A theme setting listed twice, a platform setting whose stated default disagrees with settingsDefaults, and
+      // platform defaults outside the platform's choices, bounds and colour format.
+      bad.settingsSchema = [tagline, { ...tagline }, { id: "colors.text", type: "color", label: "Text", group: "Colors", default: "#000000" }];
+      bad.settingsDefaults.story = { tagline: "Made slowly" };
+      bad.settingsDefaults.buttons = { ...bad.settingsDefaults.buttons, radius: "triangle" };
+      bad.settingsDefaults.layout = { ...bad.settingsDefaults.layout, contentWidth: 5000 };
+      bad.settingsDefaults.colors = { ...bad.settingsDefaults.colors, accent: "gold" };
       const found = codes(validateThemeProject({ manifest: bad }));
       expect(found).toEqual(expect.arrayContaining(["DUPLICATE_SETTING", "DEFAULT_MISMATCH", "DEFAULT_NOT_AN_OPTION", "DEFAULT_OUT_OF_RANGE", "BAD_COLOUR"]));
     });
 
-    it("flags a setting with no default value, and missing asset files (a missing preview is only a warning)", () => {
+    it("flags a theme setting with no default value, and missing asset files (a missing preview is only a warning)", () => {
       const bad = manifest();
-      delete bad.settingsDefaults.branding;
+      // The theme's own settings need a value in settingsDefaults; platform settings it leaves out keep the platform's.
+      bad.settingsSchema = [{ id: "story.tagline", type: "text", label: "Tagline", group: "Story", default: "Made slowly" }];
       const issues = validateThemeProject({ manifest: bad, assetExists: (path) => path.endsWith("mark.svg") });
       expect(codes(issues)).toContain("MISSING_DEFAULT");
       expect(codes(issues, "warning")).toContain("ASSET_MISSING");
@@ -132,4 +136,14 @@ it("warns when theme.css styles renderer internals, never for named parts", () =
   expect(warning?.message).not.toContain(".jelly-hero,");
   expect(warning?.message).not.toContain("secret");
   expect(validate({ manifest: {}, css: ".jelly-hero { color: red }" }).some((issue) => issue.code === "CSS_INTERNALS")).toBe(false);
+});
+
+describe("platform settings", () => {
+  it("lets a theme leave out platform settings, and checks the values it does give against the platform's choices", () => {
+    const theme = { ...manifest(), settingsSchema: [] };
+    delete (theme.settingsDefaults as Record<string, unknown>).branding;
+    expect(codes(validateThemeProject({ manifest: theme }))).not.toContain("MISSING_DEFAULT");
+    (theme.settingsDefaults as Record<string, Record<string, unknown>>).buttons = { radius: "zigzag" };
+    expect(codes(validateThemeProject({ manifest: theme }))).toContain("DEFAULT_NOT_AN_OPTION");
+  });
 });
