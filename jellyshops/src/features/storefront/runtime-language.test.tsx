@@ -10,7 +10,7 @@ describe("the shopper's language reaches every section", () => {
       context: { pageType: "search", resource: null, data: { type: "search", query: "lit", state: "empty", resultCount: 0, results: [] } },
       layout: { announcement: [], header: [], template: [search], footer: [] },
     };
-    const html = renderToStaticMarkup(<RuntimeStorefrontView route={route as never} commerce={{ getProducts: async () => [] } as never} themeId="jelly-resthaven" storeSlug="s" language="fr" />);
+    const html = renderToStaticMarkup(<RuntimeStorefrontView route={route as never} commerce={{ getProducts: async () => [] } as never} themeId="jelly-resthaven" menus={{}} storeSlug="s" language="fr" />);
     expect(html).toContain("Trouver un lit");
     expect(html).toContain("Saisissez un ou deux mots pour trouver des produits.");
     expect(html).not.toContain("Find a bed");

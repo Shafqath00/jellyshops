@@ -140,7 +140,7 @@ const resthavenProducts: PublicProduct[] = [
   { id: "r3", name: "Calder divan set", price: "£429.00", priceMinor: 42900, available: false, filters: [{ name: "Size", values: ["Single","Double"] }, { name: "Storage", values: ["No storage", "2 drawers", "4 drawers"] }, { name: "Fabric", values: ["Velvet"] }, { name: "Type", values: ["Divan bed"] }], compareAtPrice: "£529.00", saving: "£100.00", discountPercent: 19, href: "#", imageUrl: resthavenPhoto("divan") },
   { id: "r4", name: "Hollis pocket sprung mattress", price: "£359.00", priceMinor: 35900, available: true, filters: [{ name: "Size", values: ["Single","Double","King"] }, { name: "Type", values: ["Mattress"] }], chip: "Medium firm", href: "#", imageUrl: resthavenPhoto("mattress") },
   { id: "r5", name: "Ashby headboard", price: "£149.00", priceMinor: 14900, available: true, filters: [{ name: "Size", values: ["Double","King"] }, { name: "Fabric", values: ["Boucle"] }, { name: "Type", values: ["Headboard"] }], href: "#", imageUrl: resthavenPhoto("headboard") },
-  { id: "r6", name: "Merrow hybrid mattress", price: "£549.00", priceMinor: 54900, available: true, filters: [{ name: "Size", values: ["Double","King","Super king"] }, { name: "Type", values: ["Mattress"] }], href: "#", imageUrl: resthavenPhoto("mattress"), hoverImageUrl: resthavenPhoto("fabrics") },
+  { id: "r6", name: "Merrow hybrid mattress", price: "£549.00", priceMinor: 54900, available: true, filters: [{ name: "Size", values: ["Double","King","Super king"] }, { name: "Type", values: ["Mattress"] }], href: "#", imageUrl: resthavenPhoto("room-main"), hoverImageUrl: resthavenPhoto("fabrics") },
 ];
 
 /** Resthaven (bed showroom). Sample products only; photos are the theme's own (assets/, see SOURCES.md). */

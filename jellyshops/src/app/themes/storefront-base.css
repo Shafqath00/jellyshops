@@ -1666,3 +1666,11 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
   display: block; margin: 12px var(--j-page-edge, 16px); padding: 16px 20px; border: 1px dashed currentColor; border-radius: 8px;
   color: var(--j-color-muted, inherit); font: 14px/1.5 system-ui, sans-serif; opacity: .85; cursor: pointer;
 }
+
+/*
+ * Balanced rows on tablets: curated rows of cards (they carry data-count) use the tablet columns the renderer balanced
+ * (rowColumnStyle: 4 cards = 2 + 2, not 3 + 1). Paged lists and sideways strips keep the theme's own tablet columns.
+ */
+@media (min-width: 768px) and (max-width: 1023px) {
+  [data-jelly-theme] .jelly-product-grid-items[data-count]:not(.jelly-list-browser *) { grid-template-columns: repeat(var(--jelly-columns-tablet, min(var(--jelly-columns, 4), 3)), minmax(0, 1fr)); }
+}

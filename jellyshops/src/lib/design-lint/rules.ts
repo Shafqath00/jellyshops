@@ -3,7 +3,7 @@
  */
 import type { PageMeasurement } from "./measure";
 
-export type DesignRule = "edge" | "rhythm" | "headings" | "overflow" | "tap-target" | "card-ratio" | "contrast" | "header" | "product-flow" | "title-size" | "footer-headings" | "stacked-row" | "gallery" | "title-lines" | "text-spill";
+export type DesignRule = "edge" | "rhythm" | "headings" | "overflow" | "tap-target" | "card-ratio" | "contrast" | "header" | "product-flow" | "title-size" | "footer-headings" | "stacked-row" | "gallery" | "title-lines" | "text-spill" | "uneven-row" | "repeated-photo" | "section-gap" | "page-ends";
 
 export interface DesignFinding {
   /** Stable id used by the baseline: rule|theme|page|device[|part]. */
@@ -37,6 +37,8 @@ export const DESIGN_LIMITS = {
   maxFooterHeading: 24,
   /** Most lines a page title may take, per width (long product names must still fit). */
   maxTitleLines: { desktop: 4, tablet: 4, mobile: 5 } as Record<string, number>,
+  /** Largest gap between neighbouring sections on the same background with no dividing line (two full paddings is a doubled gap). */
+  maxSectionGap: { desktop: 168, tablet: 150, mobile: 120 } as Record<string, number>,
 } as const;
 
 export function findingId(rule: DesignRule, context: PageContext, part?: string) {
@@ -166,6 +168,16 @@ export function lintPage(measurement: PageMeasurement, context: PageContext): De
   if (measurement.spilledText?.length) {
     findings.push(finding("text-spill", context, `text runs outside its box: ${measurement.spilledText.slice(0, 5).join("; ")}`));
   }
+
+  // Composition (Phase 6): rows end evenly, photos are not repeated within a section, neighbours share one gap, and a
+  // product page does not stop at Add to cart.
+  for (const row of measurement.unevenRows ?? []) findings.push(finding("uneven-row", context, row, row.split(":")[0]));
+  for (const section of measurement.repeatedPhotos ?? []) findings.push(finding("repeated-photo", context, section, section.split(":")[0]));
+  const gapLimit = DESIGN_LIMITS.maxSectionGap[context.device];
+  for (const { pair, gap } of measurement.sectionGaps ?? []) {
+    if (gapLimit && gap > gapLimit) findings.push(finding("section-gap", context, `${pair}: ${gap}px between them on the same background; at most ${gapLimit}px`, pair));
+  }
+  if (measurement.sectionsAfterPurchase === 0) findings.push(finding("page-ends", context, "the product page ends after Add to cart: add related products, reviews or details below it"));
 
   for (const list of measurement.cardLists) {
     if (list.ratios.length < 2) continue;

@@ -64,6 +64,14 @@ export interface PageMeasurement {
   thumbsOverhang: number;
   /** Text that spills outside its product card or heading box (an unbroken long word). */
   spilledText: string[];
+  /** Curated rows of cards (not paged lists or scrolling strips) that end in empty slots or a lone card. */
+  unevenRows?: string[];
+  /** Sections that show the same photo more than once. */
+  repeatedPhotos?: string[];
+  /** Gaps (px) between neighbouring body sections on the same background with no dividing line, with the pair. */
+  sectionGaps?: Array<{ pair: string; gap: number }>;
+  /** Product pages: body sections with content below the Add to cart button (null on other pages). */
+  sectionsAfterPurchase?: number | null;
 }
 
 export function measureStorefrontPage(): PageMeasurement {
@@ -309,6 +317,57 @@ export function measureStorefrontPage(): PageMeasurement {
     if (spilled) spilledText.push(describe(box));
   }
 
+  // Composition (Phase 6). Rows of cards picked by the merchant end evenly; paged lists and strips may not.
+  const unevenRows: string[] = [];
+  for (const row of root.querySelectorAll(".jelly-product-grid-items, .jelly-category-grid-items")) {
+    if (row.closest(".jelly-list-browser, [data-scrolling], [data-layout='carousel'], [data-layout='bento']") || !visibleRect(row)) continue;
+    const style = getComputedStyle(row);
+    if (style.display !== "grid" || style.gridAutoFlow.includes("column")) continue;
+    const columns = style.gridTemplateColumns.split(" ").filter(Boolean).length;
+    const items = [...row.children].filter((child) => visibleRect(child)).length;
+    if (columns < 2 || items === 0) continue;
+    if (items < columns) unevenRows.push(`${describe(row)}: ${items} card${items === 1 ? "" : "s"} in ${columns} columns`);
+    else if (items % columns === 1 && columns >= 3) unevenRows.push(`${describe(row)}: one card alone on the last row`);
+  }
+  const bodyFrames = [...root.querySelectorAll("[data-section-frame]")].filter((frame) => !frame.matches("[data-section-type='header'], [data-section-type='footer'], [data-section-type='announcement-bar']") && visibleRect(frame));
+  const repeatedPhotos: string[] = [];
+  for (const frame of bodyFrames) {
+    const seen = new Map<string, number>();
+    for (const img of frame.querySelectorAll("img")) {
+      if (img.closest(".jelly-gallery-thumbs, .jelly-product-card-media img + img") || (img.previousElementSibling?.tagName === "IMG" && img.closest(".jelly-product-card-media"))) continue;
+      const box = visibleRect(img);
+      const source = (img.currentSrc || img.src).split("?")[0];
+      if (!box || box.width < 120 || !source) continue;
+      seen.set(source, (seen.get(source) ?? 0) + 1);
+    }
+    const repeated = [...seen.values()].filter((count) => count > 1).length;
+    if (repeated) repeatedPhotos.push(`${(frame as HTMLElement).dataset.sectionType ?? describe(frame)}: ${repeated} photo${repeated === 1 ? "" : "s"} shown more than once`);
+  }
+  const contentBox = (frame: Element) => {
+    let top = Infinity; let bottom = -Infinity;
+    for (const item of frame.querySelectorAll("h1, h2, h3, h4, p, img, a, button, li, input, select, svg, blockquote, dt, dd, td, th, summary, label, figure")) {
+      const box = item.getBoundingClientRect();
+      if (box.width < 2 || box.height < 2 || !visibleRect(item)) continue;
+      top = Math.min(top, box.top); bottom = Math.max(bottom, box.bottom);
+    }
+    return Number.isFinite(top) ? { top, bottom } : null;
+  };
+  const background = (element: Element) => getComputedStyle(element).backgroundColor;
+  const ruled = (element: Element | null) => Boolean(element) && [element as Element, ...(element as Element).children].some((item) => parseFloat(getComputedStyle(item).borderTopWidth) > 0 || parseFloat(getComputedStyle(item).borderBottomWidth) > 0);
+  const sectionGaps: Array<{ pair: string; gap: number }> = [];
+  for (let index = 1; index < bodyFrames.length; index += 1) {
+    const before = bodyFrames[index - 1]; const after = bodyFrames[index];
+    // Only sections stacked one above the other across the page (not columns of the product page).
+    const ra = before.getBoundingClientRect(); const rb = after.getBoundingClientRect();
+    if (rb.top < ra.bottom - 2 || Math.abs(ra.width - rb.width) > 24 || ra.width < frameWidth * 0.8) continue;
+    if (background(before) !== background(after) || ruled(after.firstElementChild) || ruled(before.firstElementChild)) continue;
+    const a = contentBox(before); const b = contentBox(after);
+    if (a && b) sectionGaps.push({ pair: `${(before as HTMLElement).dataset.sectionType} → ${(after as HTMLElement).dataset.sectionType}`, gap: round(b.top - a.bottom) });
+  }
+  const purchase = root.querySelector(".jelly-product-purchase .jelly-purchase-actions, [data-part='product-purchase'] .jelly-purchase-actions");
+  const purchaseBottom = purchase && visibleRect(purchase) ? purchase.getBoundingClientRect().bottom : null;
+  const sectionsAfterPurchase = purchaseBottom === null ? null : bodyFrames.filter((frame) => { const box = contentBox(frame); return Boolean(box && box.top > purchaseBottom && box.bottom - box.top > 40); }).length;
+
   return {
     frameWidth,
     header,
@@ -325,5 +384,9 @@ export function measureStorefrontPage(): PageMeasurement {
     titleLines,
     thumbsOverhang,
     spilledText,
+    unevenRows,
+    repeatedPhotos,
+    sectionGaps,
+    sectionsAfterPurchase,
   };
 }

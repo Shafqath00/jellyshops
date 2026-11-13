@@ -13,6 +13,7 @@ import { blockEditorData, buttonProps } from "./block-content";
 import { ProductListBrowser } from "./product-list-browser";
 import { filterNamesSetting } from "./collection-sections";
 import { useWords } from "../words";
+import { rowColumnStyle } from "../row-columns";
 
 function stringSetting(settings: Record<string, unknown>, key: string, fallback = ""): string {
   const value = settings[key];
@@ -186,7 +187,7 @@ export function SearchResultsSection({ section, context }: { section: SectionNod
     {search?.state === "results" && <h2 className="jelly-visually-hidden">{word("search.heading")}</h2>}
     {search?.state === "results" && (section.settings.showSort === true || section.settings.showFilters === true
       ? <ProductListBrowser products={results} columns={numberValue(section.settings, "columns", 4, 2, 4)} pageSize={24} showSort={section.settings.showSort !== false} showFilters={section.settings.showFilters !== false} filterNames={filterNamesSetting(section.settings.filterNames)} emptyMessage={word("search.noMatch")} remote={remote} address={context.mode === "published" ? context.commerce?.listAddress : undefined} />
-      : <div className="jelly-product-grid-items">{results.map((product) => <ProductCard key={product.id} product={product} />)}</div>)}
+      : <div className="jelly-product-grid-items" data-count={results.length} style={rowColumnStyle(results.length, numberValue(section.settings, "columns", 4, 2, 4))}>{results.map((product) => <ProductCard key={product.id} product={product} />)}</div>)}
   </div></StorefrontContainer></section>;
 }
 

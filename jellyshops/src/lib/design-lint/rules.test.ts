@@ -100,3 +100,26 @@ describe("design lint rules", () => {
     expect(rules(page([], { footerHeadingSizes: [16, 44] }))).toEqual(["footer-headings"]);
   });
 });
+
+describe("composition rules (Phase 6)", () => {
+  const desktop = { theme: "t", page: "Home", device: "desktop" };
+  const composition = (overrides: Partial<PageMeasurement>, at = desktop) => lintPage(page([], overrides), at).map((item) => item.rule);
+
+  it("flags rows that end unevenly and photos repeated within a section", () => {
+    expect(composition({ unevenRows: ["div.jelly-product-grid-items: 3 cards in 4 columns"] })).toContain("uneven-row");
+    expect(composition({ repeatedPhotos: ["category-grid: 1 photo shown more than once"] })).toContain("repeated-photo");
+    expect(composition({ unevenRows: [], repeatedPhotos: [] })).toEqual([]);
+  });
+
+  it("flags doubled gaps between same-background neighbours, per screen width", () => {
+    expect(composition({ sectionGaps: [{ pair: "product-grid → rating-summary", gap: 192 }] })).toContain("section-gap");
+    expect(composition({ sectionGaps: [{ pair: "product-grid → rating-summary", gap: 104 }] })).toEqual([]);
+    expect(composition({ sectionGaps: [{ pair: "a → b", gap: 130 }] }, { ...desktop, device: "mobile" })).toContain("section-gap");
+  });
+
+  it("flags a product page that stops at Add to cart, and only product pages", () => {
+    expect(composition({ sectionsAfterPurchase: 0 })).toContain("page-ends");
+    expect(composition({ sectionsAfterPurchase: 2 })).toEqual([]);
+    expect(composition({ sectionsAfterPurchase: null })).toEqual([]);
+  });
+});
