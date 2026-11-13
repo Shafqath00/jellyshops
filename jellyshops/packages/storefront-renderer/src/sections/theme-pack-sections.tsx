@@ -12,6 +12,7 @@ import { blockStyle } from "../block-style";
 import { blockEditorData, buttonProps } from "./block-content";
 import { ProductListBrowser } from "./product-list-browser";
 import { filterNamesSetting } from "./collection-sections";
+import { useWords } from "../words";
 
 function stringSetting(settings: Record<string, unknown>, key: string, fallback = ""): string {
   const value = settings[key];
@@ -114,23 +115,24 @@ export function JournalTeaserSection({ section, context }: { section: SectionNod
 interface CartLineView { id: string; name: string; productName?: string; variantName?: string; imageUrl?: string; options?: string[]; quantity: number; unitPrice?: string; total: string; canIncrease?: boolean; onDecrease?: () => void; onIncrease?: () => void; onRemove?: () => void }
 
 export function CartSummarySection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
-  const content = copy(section, "Your bag", context.mode === "editor");
+  const word = useWords();
+  const content = copy(section, word("cart.title"), context.mode === "editor");
   const data = context?.page?.pageType === "cart" ? context.page.data ?? {} : {};
   const lines = Array.isArray(data.lines) ? data.lines as CartLineView[] : [];
   const subtotal = typeof data.subtotal === "string" ? data.subtotal : undefined;
   const checkoutHref = typeof data.checkoutHref === "string" ? data.checkoutHref : undefined;
   const shopHref = typeof data.shopHref === "string" ? data.shopHref : resolveStorefrontHref(content.href, context?.storeSlug) ?? "#";
-  const shippingNote = typeof data.shippingNote === "string" ? data.shippingNote : "Shipping is calculated at checkout.";
+  const shippingNote = typeof data.shippingNote === "string" ? data.shippingNote : word("cart.shippingNote");
   const count = lines.reduce((sum, line) => sum + line.quantity, 0);
   // The bag is saved in the shopper's browser: the server-drawn page shows this until it is read.
   if (data.pending === true) return <section className="jelly-section jelly-cart-summary" data-pending="true"><StorefrontContainer><div className="jelly-cart-empty">
     <h1 {...content.headingProps}>{content.headingContent}</h1>
-    <p role="status">Loading your bag…</p>
+    <p role="status">{word("cart.loading")}</p>
   </div></StorefrontContainer></section>;
   if (!lines.length) return <section className="jelly-section jelly-cart-summary" data-empty="true"><StorefrontContainer><div className="jelly-cart-empty">
     <h1 {...content.headingProps}>{content.headingContent}</h1>
     <p {...content.bodyProps}>{content.body || "Your bag is empty. Find something you love and it will appear here."}</p>
-    <a className="jelly-button" href={shopHref}>Continue shopping</a>
+    <a className="jelly-button" href={shopHref}>{word("cart.continue")}</a>
   </div></StorefrontContainer></section>;
   return <section className="jelly-section jelly-cart-summary"><StorefrontContainer>
     <header className="jelly-cart-header"><h1 {...content.headingProps}>{content.headingContent}</h1><p>{count === 1 ? "1 item" : `${count} items`}</p></header>
@@ -148,25 +150,26 @@ export function CartSummarySection({ section, context }: { section: SectionNode;
               <span aria-live="polite" aria-label={`Quantity ${line.quantity}`}>{line.quantity}</span>
               <button type="button" aria-label={`Increase quantity of ${line.productName ?? line.name}`} disabled={line.canIncrease === false} onClick={line.onIncrease}>+</button>
             </div>
-            {line.onRemove && <button type="button" className="jelly-button jelly-button--link" onClick={line.onRemove}>Remove</button>}
+            {line.onRemove && <button type="button" className="jelly-button jelly-button--link" onClick={line.onRemove}>{word("cart.remove")}</button>}
           </div>
         </div>
         <strong className="jelly-cart-line-total">{line.total}</strong>
       </li>)}</ul>
-      <aside className="jelly-cart-totals" aria-label="Order summary">
-        <h2>Order summary</h2>
-        <dl><div><dt>Subtotal</dt><dd>{subtotal}</dd></div></dl>
+      <aside className="jelly-cart-totals" aria-label={word("cart.summary")}>
+        <h2>{word("cart.summary")}</h2>
+        <dl><div><dt>{word("cart.subtotal")}</dt><dd>{subtotal}</dd></div></dl>
         <p>{shippingNote}</p>
-        {checkoutHref && <a className="jelly-button" href={checkoutHref}>Checkout</a>}
-        <a className="jelly-button jelly-button--link" href={shopHref}>Continue shopping</a>
+        {checkoutHref && <a className="jelly-button" href={checkoutHref}>{word("cart.checkout")}</a>}
+        <a className="jelly-button jelly-button--link" href={shopHref}>{word("cart.continue")}</a>
       </aside>
     </div>
   </StorefrontContainer></section>;
 }
 
 export function SearchResultsSection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
+  const word = useWords();
   const search = context.page?.pageType === "search" ? context.page.data : null;
-  const content = copy(section, "Search", context.mode === "editor");
+  const content = copy(section, word("search.title"), context.mode === "editor");
   const query = search?.query ?? "";
   const results = search?.results ?? [];
   // On the live store the backend sorts, filters and pages the matches (the same browse as collection pages, with the words).
@@ -176,19 +179,20 @@ export function SearchResultsSection({ section, context }: { section: SectionNod
   return <section className="jelly-section jelly-search-results"><StorefrontContainer><div className="jelly-search-shell">
     <h1 {...content.headingProps}>{content.headingContent}</h1>
     {content.body && <p {...content.bodyProps}>{content.body}</p>}
-    <form action={action} role="search"><label htmlFor="storefront-search">Search products</label><div><input id="storefront-search" type="search" name="q" defaultValue={query} placeholder="What are you looking for?" /><button type="submit">Search</button></div></form>
-    {search?.state === "empty" && <p className="jelly-search-status">Enter a word or two to find products.</p>}
-    {search?.state === "none" && <p className="jelly-search-status">No products match “{query}”. Check the spelling or try a broader word.</p>}
-    {search?.state === "results" && <p className="jelly-search-status">{search.resultCount === 1 ? "1 result" : `${search.resultCount} results`} for “{query}”</p>}
-    {search?.state === "results" && <h2 className="jelly-visually-hidden">Search results</h2>}
+    <form action={action} role="search"><label htmlFor="storefront-search">{word("search.label")}</label><div><input id="storefront-search" type="search" name="q" defaultValue={query} placeholder={word("search.placeholder")} /><button type="submit">{word("search.button")}</button></div></form>
+    {search?.state === "empty" && <p className="jelly-search-status">{word("search.enterWords")}</p>}
+    {search?.state === "none" && <p className="jelly-search-status">{word("search.noResults", { query })}</p>}
+    {search?.state === "results" && <p className="jelly-search-status">{search.resultCount === 1 ? word("search.oneResult", { query }) : word("search.results", { count: search.resultCount, query })}</p>}
+    {search?.state === "results" && <h2 className="jelly-visually-hidden">{word("search.heading")}</h2>}
     {search?.state === "results" && (section.settings.showSort === true || section.settings.showFilters === true
-      ? <ProductListBrowser products={results} columns={numberValue(section.settings, "columns", 4, 2, 4)} pageSize={24} showSort={section.settings.showSort !== false} showFilters={section.settings.showFilters !== false} filterNames={filterNamesSetting(section.settings.filterNames)} emptyMessage="No products match your search." remote={remote} address={context.mode === "published" ? context.commerce?.listAddress : undefined} />
+      ? <ProductListBrowser products={results} columns={numberValue(section.settings, "columns", 4, 2, 4)} pageSize={24} showSort={section.settings.showSort !== false} showFilters={section.settings.showFilters !== false} filterNames={filterNamesSetting(section.settings.filterNames)} emptyMessage={word("search.noMatch")} remote={remote} address={context.mode === "published" ? context.commerce?.listAddress : undefined} />
       : <div className="jelly-product-grid-items">{results.map((product) => <ProductCard key={product.id} product={product} />)}</div>)}
   </div></StorefrontContainer></section>;
 }
 
 export function NotFoundMessageSection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
-  const content = copy(section, "We couldn't find that page", context.mode === "editor");
+  const word = useWords();
+  const content = copy(section, word("notFound.heading"), context.mode === "editor");
   const href = resolveStorefrontHref(content.href, context.storeSlug);
-  return <section className="jelly-section jelly-not-found"><StorefrontContainer><div><p className="jelly-eyebrow">404</p><h1 {...content.headingProps}>{content.headingContent}</h1><p {...content.bodyProps}>{content.body || "The page may have moved, but there is plenty more to discover."}</p>{href && <a className="jelly-button" href={href}>{content.button || "Back to the shop"}</a>}</div></StorefrontContainer></section>;
+  return <section className="jelly-section jelly-not-found"><StorefrontContainer><div><p className="jelly-eyebrow">404</p><h1 {...content.headingProps}>{content.headingContent}</h1><p {...content.bodyProps}>{content.body || word("notFound.body")}</p>{href && <a className="jelly-button" href={href}>{content.button || word("notFound.back")}</a>}</div></StorefrontContainer></section>;
 }

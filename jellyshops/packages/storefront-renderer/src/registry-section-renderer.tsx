@@ -14,6 +14,7 @@ import { SectionFrame, sectionFrameWidth, sectionScheme } from "./section-frame"
 import type { CommerceDataProvider, RendererMode, RendererSelection, StorefrontPageContext } from "./types";
 import { getRecipe, getThemeDefinition, DEFAULT_THEME_ID } from "@jelly/storefront-themes";
 import { RecipeSection } from "./sections/recipe-section";
+import { StorefrontLanguage } from "./words";
 
 function sectionComponent(themeId: string, type: string, registry: SectionRenderRegistry, version?: string) {
   const override = (id: string, requestedVersion?: string) => { try { return getThemeDefinition(id, requestedVersion).sectionOverrides[type]; } catch { return undefined; } };
@@ -113,5 +114,5 @@ export function RegistrySectionRenderer({
         ? { kind: "block", region, sectionId: section.id, blockId, fieldKey: block?.dataset.editorFieldKey }
         : { kind: "section", region, sectionId: section.id });
     } : undefined}
-  ><SectionCustomCss section={section} /><CardCartContext.Provider value={editor ? undefined : commerce.cart}><CardRatingsContext.Provider value={commerce.ratings}><CardCompareContext.Provider value={editor ? undefined : commerce.compare}>{content}</CardCompareContext.Provider></CardRatingsContext.Provider></CardCartContext.Provider>{editor ? <p className="jelly-section-empty" data-section-empty="">{sectionEmptyMessage(section.type)}</p> : null}</SectionFrame>;
+  ><SectionCustomCss section={section} /><CardCartContext.Provider value={editor ? undefined : commerce.cart}><CardRatingsContext.Provider value={commerce.ratings}><CardCompareContext.Provider value={editor ? undefined : commerce.compare}><StorefrontLanguage.Provider value={language ?? null}>{content}</StorefrontLanguage.Provider></CardCompareContext.Provider></CardRatingsContext.Provider></CardCartContext.Provider>{editor ? <p className="jelly-section-empty" data-section-empty="">{sectionEmptyMessage(section.type)}</p> : null}</SectionFrame>;
 }

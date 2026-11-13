@@ -115,3 +115,4 @@ export { CATALOG_SORTS, MAX_CATALOG_FILTERS, MAX_CATALOG_PAGE, MAX_FILTER_VALUES
 export { MAX_MENU_DEPTH, MAX_MENU_IMAGE_ALT, MAX_MENU_IMAGE_URL, isSafeMenuImageUrl, menuImageSchema, normalizeMenuImage, readMenuImage, type MenuImage } from "./menu-image.js";
 export { MAX_QUANTITY_RULE_VALUE, NO_QUANTITY_RULE, allowedQuantity, hasQuantityRule, quantityProblem, quantityRuleProblems, quantityRuleText, readQuantityRule } from "./quantity-rules.js";
 export type { QuantityRule } from "./quantity-rules.js";
+export { STOREFRONT_WORDS, STOREFRONT_WORD_TRANSLATIONS, storefrontWord, type StorefrontWordKey } from "./storefront-words.js";

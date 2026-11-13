@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { ListAddress, PublicProduct } from "../types";
 import { readListAddress, writeListAddress } from "./list-address";
 import { ProductListBrowser } from "./product-list-browser";
@@ -78,7 +78,7 @@ describe("Search results on the live store", () => {
     const section = { id: "search", type: "search-results", enabled: true, settings: { showSort: true, showFilters: true }, blocks: [] };
     render(<RegistrySectionRenderer section={section} mode="published" commerce={commerce as never} page={page as never} />);
     await screen.findAllByText("Ascot bed");
-    await new Promise((resolve) => setTimeout(resolve, 450));
+    await vi.waitFor(() => expect(calls.length).toBeGreaterThan(0), { timeout: 5000 });
     expect(calls[0]).toMatchObject({ query: "bed", offset: 0 });
     expect(calls[0]).not.toHaveProperty("collectionId");
   });

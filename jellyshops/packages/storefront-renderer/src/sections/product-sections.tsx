@@ -14,6 +14,7 @@ import { renderBlocks } from "./rich-text";
 import { ProductFamilyLinks } from "./product-family";
 import { DiscountChip, FinanceLine, OptionTabs, OptionTileGroups, StickyPurchaseBar, useStickyBar } from "./product-showroom";
 import { balancedColumns } from "../row-columns";
+import { useWords } from "../words";
 
 export function productContext(context: StorefrontRuntimeContext): ProductPresentationContext | null {
   const candidate = context.page?.pageType === "product" ? context.page.resource.data.productPresentation : undefined;
@@ -123,14 +124,15 @@ export function ProductPurchaseSection({ context, section }: { context: Storefro
   const [busy, setBusy] = useState(false); const [message, setMessage] = useState<string>(); const [error, setError] = useState<string>();
   const actions = useRef<HTMLDivElement>(null);
   const ruleId = useId();
+  const word = useWords();
   const showBar = useStickyBar(section.settings.stickyBar === true, actions);
   const product = productContext(context);
   if (!product) return null;
   async function purchase(now = false) {
     if (!product || busy || context.mode !== "published") return;
     setBusy(true); setMessage(undefined); setError(undefined);
-    try { const result = await (now ? product.buyNow?.() : product.addToCart()); if (!result?.ok) throw new Error(result?.message ?? "Unable to add this product."); if (!now) { setMessage("Added to your bag."); window.dispatchEvent(new CustomEvent("jelly:cart-added")); } }
-    catch (caught) { setError(caught instanceof Error ? caught.message : "Unable to add this product."); }
+    try { const result = await (now ? product.buyNow?.() : product.addToCart()); if (!result?.ok) throw new Error(result?.message ?? word("product.unableToAdd")); if (!now) { setMessage(word("product.added")); window.dispatchEvent(new CustomEvent("jelly:cart-added")); } }
+    catch (caught) { setError(caught instanceof Error ? caught.message : word("product.unableToAdd")); }
     finally { setBusy(false); }
   }
   const disabled = !product.canAddToCart || busy || context.mode !== "published";
@@ -140,21 +142,21 @@ export function ProductPurchaseSection({ context, section }: { context: Storefro
   const stockMax = product.availability.maxQuantity === undefined ? undefined : Math.max(least, product.availability.maxQuantity);
   const ruleMax = rule?.max;
   const max = stockMax === undefined ? ruleMax : ruleMax === undefined ? stockMax : Math.min(stockMax, ruleMax);
-  const label = typeof section.settings.label === "string" && section.settings.label.trim() ? section.settings.label : "Add to cart";
+  const label = typeof section.settings.label === "string" && section.settings.label.trim() ? section.settings.label : word("product.addToCart");
   return <section className="jelly-section jelly-product-purchase"><StorefrontContainer>
     {product.personalisation && <PersonalisationFields personalisation={product.personalisation} />}
     {section.settings.showQuantity !== false && <div className="jelly-quantity">
-      <span aria-hidden="true">Quantity</span>
+      <span aria-hidden="true">{word("product.quantity")}</span>
       <div className="jelly-quantity-stepper">
-        <button type="button" aria-label="Decrease quantity" disabled={product.quantity - step < least} onClick={() => product.setQuantity(product.quantity - step)}>−</button>
-        <input aria-label="Quantity" type="number" min={least} step={step} {...(max === undefined ? {} : { max })} {...(rule?.text ? { "aria-describedby": ruleId } : {})} value={product.quantity} onChange={(event) => product.setQuantity(Number(event.target.value))} />
-        <button type="button" aria-label="Increase quantity" disabled={max !== undefined && product.quantity + step > max} onClick={() => product.setQuantity(product.quantity + step)}>+</button>
+        <button type="button" aria-label={word("product.decrease")} disabled={product.quantity - step < least} onClick={() => product.setQuantity(product.quantity - step)}>−</button>
+        <input aria-label={word("product.quantity")} type="number" min={least} step={step} {...(max === undefined ? {} : { max })} {...(rule?.text ? { "aria-describedby": ruleId } : {})} value={product.quantity} onChange={(event) => product.setQuantity(Number(event.target.value))} />
+        <button type="button" aria-label={word("product.increase")} disabled={max !== undefined && product.quantity + step > max} onClick={() => product.setQuantity(product.quantity + step)}>+</button>
       </div>
       {rule?.text && <p className="jelly-quantity-rule" id={ruleId}>{rule.text}</p>}
     </div>}
     <div className="jelly-purchase-actions" ref={actions}>
-      <button type="button" className="jelly-button" disabled={disabled} onClick={() => { void purchase(); }} {...elementProps({ type: "product-purchase", settings: section.settings }, "addToCart", context.mode === "editor")}>{busy ? "Please wait…" : label}</button>
-      {product.buyNow && <button type="button" className="jelly-button jelly-button--secondary" disabled={disabled} onClick={() => void purchase(true)}>Buy now</button>}
+      <button type="button" className="jelly-button" disabled={disabled} onClick={() => { void purchase(); }} {...elementProps({ type: "product-purchase", settings: section.settings }, "addToCart", context.mode === "editor")}>{busy ? word("product.pleaseWait") : label}</button>
+      {product.buyNow && <button type="button" className="jelly-button jelly-button--secondary" disabled={disabled} onClick={() => void purchase(true)}>{word("product.buyNow")}</button>}
       {product.wishlistControl}
     </div>
     {product.availability.state === "out-of-stock" && product.notifyWhenAvailable && context.mode === "published" && <BackInStockForm onSubmit={product.notifyWhenAvailable} />}
@@ -182,12 +184,13 @@ export function ProductDescriptionSection({ context, section }: { context: Store
 }
 
 export function RelatedProductsSection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown> } }) {
+  const word = useWords();
   const product = productContext(context);
   if (!product) return null;
   const limit = typeof section.settings.limit === "number" ? section.settings.limit : 4;
   const items = product.relatedProducts.slice(0, limit);
   if (!items.length) return null;
-  const heading = typeof section.settings.heading === "string" && section.settings.heading.trim() ? section.settings.heading : "You may also like";
+  const heading = typeof section.settings.heading === "string" && section.settings.heading.trim() ? section.settings.heading : word("product.related");
   return <section className="jelly-section jelly-related-products"><StorefrontContainer>
     <h2 {...elementProps({ type: "related-products", settings: section.settings }, "heading", context.mode === "editor")}>{heading}</h2>
     <div className="jelly-product-grid-items" data-count={items.length} style={{ "--jelly-columns": balancedColumns(items.length, 4) } as CSSProperties}>{items.map((item) => <ProductCard key={item.id} product={item} editorProps={context.mode === "editor" ? elementProps({ type: "related-products", settings: section.settings }, "productCard", true) as Record<string, string> : undefined} />)}</div>

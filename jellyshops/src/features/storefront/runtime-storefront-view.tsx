@@ -34,17 +34,18 @@ export function RuntimeStorefrontView({ route, commerce, themeId, themeVersion, 
 }) {
   const chromeSection = (section: SectionNode) => identity ? withStoreIdentity(section, identity) : section;
   const theme = resolveTheme(themeId, undefined, themeVersion);
-  const shared = { mode, commerce, themeId: theme.id, themeVersion: theme.version, page: route.context, menus, resourceLinks, collectionLinks, storeSlug } as const;
+  // Every section, the page's own included, reads its text and built-in words in the shopper's language.
+  const shared = { mode, commerce, themeId: theme.id, themeVersion: theme.version, page: route.context, menus, resourceLinks, collectionLinks, storeSlug, language } as const;
   return <>
     {theme.layout === "editorial" ? <div className="jelly-theme-masthead"><span>JellyShop collection</span>
       {/* eslint-disable-next-line @next/next/no-img-element -- theme asset, not a Next Image */}
       <img src={`${theme.assetPrefix}monogram.svg`} alt="" />
     </div> : null}
-    {chrome && route.layout.announcement.map((section) => <RegistrySectionRenderer key={section.id} section={chromeSection(section)} region="header" language={language} {...shared} />)}
-    {chrome && route.layout.header.map((section) => <RegistrySectionRenderer key={section.id} section={chromeSection(section)} region="header" language={language} {...shared} />)}
+    {chrome && route.layout.announcement.map((section) => <RegistrySectionRenderer key={section.id} section={chromeSection(section)} region="header" {...shared} />)}
+    {chrome && route.layout.header.map((section) => <RegistrySectionRenderer key={section.id} section={chromeSection(section)} region="header" {...shared} />)}
     <main className={theme.layout === "editorial" ? "jelly-theme-editorial-main" : undefined}>
       {main ?? route.layout.template.map((section) => <RegistrySectionRenderer key={section.id} section={section} region="template" {...shared} />)}
     </main>
-    {chrome && route.layout.footer.map((section) => <RegistrySectionRenderer key={section.id} section={chromeSection(section)} region="footer" language={language} {...shared} />)}
+    {chrome && route.layout.footer.map((section) => <RegistrySectionRenderer key={section.id} section={chromeSection(section)} region="footer" {...shared} />)}
   </>;
 }

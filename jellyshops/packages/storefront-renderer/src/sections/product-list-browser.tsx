@@ -1,17 +1,18 @@
 import { ProductCard } from "../product-card";
 import { useEffect, useId, useMemo, useState, type CSSProperties } from "react";
-import { browseCatalog, filterKey, type BrowsableProduct, type CatalogFacet, type CatalogQuery } from "@jelly/storefront-schema";
+import { browseCatalog, filterKey, type BrowsableProduct, type CatalogFacet, type CatalogQuery, type StorefrontWordKey } from "@jelly/storefront-schema";
+import { useWords } from "../words";
 import type { CatalogBrowsePage, ListAddress, PublicProduct } from "../types";
 import { listQuery, readListAddress, writeListAddress, type ProductListFilters, type ProductListSort } from "./list-address";
 
 export type { ProductListFilters, ProductListSort } from "./list-address";
 export { listQuery } from "./list-address";
 
-export const PRODUCT_LIST_SORTS: ReadonlyArray<{ value: ProductListSort; label: string }> = [
-  { value: "featured", label: "Featured" },
-  { value: "price-asc", label: "Price, low to high" },
-  { value: "price-desc", label: "Price, high to low" },
-  { value: "name-asc", label: "Name, A to Z" },
+export const PRODUCT_LIST_SORTS: ReadonlyArray<{ value: ProductListSort; label: string; word: StorefrontWordKey }> = [
+  { value: "featured", label: "Featured", word: "list.sort.featured" },
+  { value: "price-asc", label: "Price, low to high", word: "list.sort.priceAsc" },
+  { value: "price-desc", label: "Price, high to low", word: "list.sort.priceDesc" },
+  { value: "name-asc", label: "Name, A to Z", word: "list.sort.nameAsc" },
 ];
 
 const NO_FILTERS: ProductListFilters = { inStock: false, min: "", max: "", colours: [], values: {} };
@@ -70,6 +71,7 @@ export function withStories(products: readonly PublicProduct[], stories: readonl
 }
 
 function StoryTileCard({ story }: { story: StoryTile }) {
+  const word = useWords();
   return <article className="jelly-story-tile">
     {/* Merchant media URLs may be served by the local API and are not Next Image assets. */}
     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -77,7 +79,7 @@ function StoryTileCard({ story }: { story: StoryTile }) {
     <div className="jelly-story-tile-body">
       <h3>{story.heading}</h3>
       {story.text && <p>{story.text}</p>}
-      {story.href && <a className="jelly-button jelly-button--link" href={story.href}>{story.linkLabel || "Read more"}<span className="jelly-visually-hidden">: {story.heading}</span></a>}
+      {story.href && <a className="jelly-button jelly-button--link" href={story.href}>{story.linkLabel || word("list.readMore")}<span className="jelly-visually-hidden">: {story.heading}</span></a>}
     </div>
   </article>;
 }
@@ -97,7 +99,8 @@ function useSettled<T>(value: T, delay: number): T {
   return settled;
 }
 
-const countText = (count: number) => count === 1 ? "1 product" : `${count} products`;
+type Words = ReturnType<typeof useWords>;
+const countText = (word: Words, count: number) => count === 1 ? word("list.oneProduct") : word("list.products", { count });
 
 /**
  * A product list with a toolbar: result count, sort, filters (availability, price, and every product option or tag
@@ -128,6 +131,7 @@ export function ProductListBrowser({ products, columns, pageSize, showSort, show
   address?: ListAddress;
 }) {
   const id = useId();
+  const word = useWords();
   // A shared or reloaded address opens the list with its sort and filters already chosen (drawn on the server too).
   const [initial] = useState(() => address ? readListAddress(address.search) : undefined);
   const [sort, setSort] = useState<ProductListSort>(initial?.sort ?? "featured");
@@ -177,7 +181,7 @@ export function ProductListBrowser({ products, columns, pageSize, showSort, show
   const hasAvailability = products.some((product) => typeof product.available === "boolean") || Boolean(live);
   const active = activeFilterCount(filters);
   const panelId = `${id}-filters`;
-  const count = shown.length < total ? `Showing ${shown.length} of ${countText(total)}` : countText(total);
+  const count = shown.length < total ? word("list.showing", { shown: shown.length, total: countText(word, total) }) : countText(word, total);
   const chosen = (key: string) => (filters.values ?? {})[key] ?? (key === "colour" ? filters.colours : []);
   const toggleValue = (key: string, value: string) => setFilters((current) => {
     const values = { ...(current.values ?? {}) };
@@ -195,26 +199,26 @@ export function ProductListBrowser({ products, columns, pageSize, showSort, show
     <div className="jelly-list-toolbar">
       {showFilters && !chips && <button type="button" className="jelly-list-filter-toggle" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen((value) => !value)}>
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" focusable="false"><path d="M2 4h14M5 9h8M7.5 14h3" strokeLinecap="round" /></svg>
-        <span>Filter{active ? ` (${active})` : ""}</span>
+        <span>{word("list.filter")}{active ? ` (${active})` : ""}</span>
       </button>}
       <p className="jelly-list-count" role="status" aria-live="polite">{count}</p>
-      {showSort && <label className="jelly-list-sort"><span>Sort by</span>
-        <select value={sort} onChange={(event) => setSort(event.currentTarget.value as ProductListSort)}>{PRODUCT_LIST_SORTS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select>
+      {showSort && <label className="jelly-list-sort"><span>{word("list.sortBy")}</span>
+        <select value={sort} onChange={(event) => setSort(event.currentTarget.value as ProductListSort)}>{PRODUCT_LIST_SORTS.map((option) => <option key={option.value} value={option.value}>{word(option.word)}</option>)}</select>
       </label>}
     </div>
-    {chips && <div className="jelly-list-chips" role="group" aria-label="Filters">
-      {hasAvailability && <button type="button" className="jelly-list-chip" aria-pressed={filters.inStock} onClick={() => setFilters((current) => ({ ...current, inStock: !current.inStock }))}>In stock</button>}
+    {chips && <div className="jelly-list-chips" role="group" aria-label={word("list.filters")}>
+      {hasAvailability && <button type="button" className="jelly-list-chip" aria-pressed={filters.inStock} onClick={() => setFilters((current) => ({ ...current, inStock: !current.inStock }))}>{word("list.inStock")}</button>}
       {chipFacets.flatMap((facet) => facet.values.map((value) => <button key={`${facet.key}:${value.value}`} type="button" className="jelly-list-chip" aria-pressed={isChosen(facet.key, value.value)} disabled={value.count === 0 && !isChosen(facet.key, value.value)} onClick={() => toggleValue(facet.key, value.value)}>{value.value}</button>))}
-      {active > 0 && <button type="button" className="jelly-list-clear" onClick={clear}>Clear all</button>}
+      {active > 0 && <button type="button" className="jelly-list-clear" onClick={clear}>{word("list.clearAll")}</button>}
     </div>}
-    {showFilters && !chips && <div className="jelly-list-filters" id={panelId} role="group" aria-label="Filters">
-      {hasAvailability && <fieldset><legend>Availability</legend>
-        <label className="jelly-list-check"><input type="checkbox" checked={filters.inStock} onChange={(event) => { const checked = event.currentTarget.checked; setFilters((current) => ({ ...current, inStock: checked })); }} /><span>In stock only</span></label>
+    {showFilters && !chips && <div className="jelly-list-filters" id={panelId} role="group" aria-label={word("list.filters")}>
+      {hasAvailability && <fieldset><legend>{word("list.availability")}</legend>
+        <label className="jelly-list-check"><input type="checkbox" checked={filters.inStock} onChange={(event) => { const checked = event.currentTarget.checked; setFilters((current) => ({ ...current, inStock: checked })); }} /><span>{word("list.inStockOnly")}</span></label>
       </fieldset>}
-      <fieldset><legend>Price</legend>
+      <fieldset><legend>{word("list.price")}</legend>
         <div className="jelly-list-price">
-          <label><span>From</span><input type="number" inputMode="decimal" min="0" step="1" value={filters.min} placeholder="0" onChange={(event) => { const value = event.currentTarget.value; setFilters((current) => ({ ...current, min: value })); }} /></label>
-          <label><span>To</span><input type="number" inputMode="decimal" min="0" step="1" value={filters.max} placeholder="Any" onChange={(event) => { const value = event.currentTarget.value; setFilters((current) => ({ ...current, max: value })); }} /></label>
+          <label><span>{word("list.from")}</span><input type="number" inputMode="decimal" min="0" step="1" value={filters.min} placeholder="0" onChange={(event) => { const value = event.currentTarget.value; setFilters((current) => ({ ...current, min: value })); }} /></label>
+          <label><span>{word("list.to")}</span><input type="number" inputMode="decimal" min="0" step="1" value={filters.max} placeholder={word("list.any")} onChange={(event) => { const value = event.currentTarget.value; setFilters((current) => ({ ...current, max: value })); }} /></label>
         </div>
       </fieldset>
       {facets.map((facet) => <fieldset key={facet.key} data-filter={filterKey(facet.label)}><legend>{facet.label}</legend>
@@ -222,20 +226,20 @@ export function ProductListBrowser({ products, columns, pageSize, showSort, show
           const checked = isChosen(facet.key, value.value);
           return <label key={value.value} className="jelly-list-check" data-empty={value.count === 0 && !checked ? "true" : undefined}>
             <input type="checkbox" checked={checked} disabled={value.count === 0 && !checked} onChange={() => toggleValue(facet.key, value.value)} />
-            <span>{value.value}</span><span className="jelly-list-value-count" aria-label={countText(value.count)}>({value.count})</span>
+            <span>{value.value}</span><span className="jelly-list-value-count" aria-label={countText(word, value.count)}>({value.count})</span>
           </label>;
         })}</div>
       </fieldset>)}
-      {active > 0 && <button type="button" className="jelly-list-clear" onClick={clear}>Clear all</button>}
+      {active > 0 && <button type="button" className="jelly-list-clear" onClick={clear}>{word("list.clearAll")}</button>}
     </div>}
     <div className="jelly-list-results">
       {shown.length
         ? <div className="jelly-product-grid-items" data-testid="collection-product-grid-items" data-columns={columns} style={{ "--jelly-columns": columns } as CSSProperties}>{items.map((item) => item.kind === "story"
           ? <StoryTileCard key={`story-${item.story.id}`} story={item.story} />
           : <ProductCard key={item.product.id} product={item.product} editorProps={cardProps?.(item.product, shown.indexOf(item.product))} />)}</div>
-        : <div className="jelly-empty-state"><p>{active ? "No products match these filters." : emptyMessage}</p>{active > 0 && <button type="button" className="jelly-list-clear" onClick={clear}>Clear filters</button>}</div>}
+        : <div className="jelly-empty-state"><p>{active ? word("list.noMatches") : emptyMessage}</p>{active > 0 && <button type="button" className="jelly-list-clear" onClick={clear}>{word("list.clearFilters")}</button>}</div>}
       {shown.length < total && <div className="jelly-list-more">
-        <button type="button" className="jelly-button jelly-button--secondary" disabled={loadingMore} onClick={() => void showMore()}>{loadingMore ? "Loading…" : "Show more products"}</button>
+        <button type="button" className="jelly-button jelly-button--secondary" disabled={loadingMore} onClick={() => void showMore()}>{loadingMore ? word("list.loading") : word("list.showMore")}</button>
       </div>}
     </div>
   </div>;
