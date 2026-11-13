@@ -41,6 +41,7 @@ describe("Settings > Developer tokens", () => {
     render(<DeveloperTokensSettings storeId="store-1" token="session" fetcher={fetcher as never} />);
     expect(await screen.findByText(/Last used/)).toHaveTextContent(/Expires/);
     await userEvent.click(screen.getByRole("button", { name: "Revoke Studio laptop" }));
+    await userEvent.click(await screen.findByRole("button", { name: "Switch off token" }));
     await waitFor(() => expect(screen.getByText(/Revoked/)).toBeInTheDocument());
     expect(screen.queryByRole("button", { name: "Revoke Studio laptop" })).toBeNull();
   });

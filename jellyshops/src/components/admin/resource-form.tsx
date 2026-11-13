@@ -65,7 +65,7 @@ export function Field({ id, label, help, error, required = false, children }: { 
     })
     : children;
   return <div className={`jk-field ${error ? "has-error" : ""}`}>
-    <label htmlFor={id}>{label}{required && <span className="jk-required" aria-hidden="true"> *</span>}</label>
+    <label htmlFor={id} data-required={required || undefined}>{label}</label>
     {control}
     {help && <small id={`${id}-help`} className="jk-muted">{help}</small>}
     {error && <small id={`${id}-error`} className="jk-field-error" role="alert">{error}</small>}

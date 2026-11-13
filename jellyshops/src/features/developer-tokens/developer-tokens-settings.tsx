@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { CheckCircle2, Copy } from "lucide-react";
+import { Copy, KeyRound } from "lucide-react";
+import { Banner, Button, Card, ConfirmDialog, EmptyState, Field, SkeletonBlock, StatusBadge, useToast } from "@/components/admin";
 import { authApiOrigin } from "@/features/auth/providers/auth-provider";
 
 export interface DeveloperTokenSummary {
@@ -23,9 +24,10 @@ async function read<T>(response: Response, fallback: string): Promise<T> {
 
 const day = (value: string | null) => value ? new Date(value).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" }) : null;
 
+const expired = (token: DeveloperTokenSummary) => Boolean(token.expiresAt && new Date(token.expiresAt).getTime() <= Date.now());
 function state(token: DeveloperTokenSummary): string {
   if (token.revokedAt) return `Revoked ${day(token.revokedAt)}`;
-  if (token.expiresAt && new Date(token.expiresAt).getTime() <= Date.now()) return `Expired ${day(token.expiresAt)}`;
+  if (expired(token)) return `Expired ${day(token.expiresAt)}`;
   return token.expiresAt ? `Expires ${day(token.expiresAt)}` : "Never expires";
 }
 
@@ -41,6 +43,9 @@ export function DeveloperTokensSettings({ storeId, token, fetcher = fetch }: { s
   const [busy, setBusy] = useState(false);
   const [created, setCreated] = useState<{ name: string; token: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [revoking, setRevoking] = useState<DeveloperTokenSummary | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const toast = useToast();
 
   const fetchList = useCallback((signal?: AbortSignal) => fetcher(url, { signal, headers: { Authorization: `Bearer ${token}` } })
     .then((response) => read<{ tokens: DeveloperTokenSummary[] }>(response, "Could not load the developer tokens."))
@@ -52,7 +57,7 @@ export function DeveloperTokensSettings({ storeId, token, fetcher = fetch }: { s
       .then((list) => { setTokens(list); setError(""); })
       .catch((failure: unknown) => { if (!controller.signal.aborted) setError(failure instanceof Error ? failure.message : "Could not load the developer tokens."); });
     return () => controller.abort();
-  }, [fetchList]);
+  }, [fetchList, attempt]);
 
   async function create(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -71,51 +76,61 @@ export function DeveloperTokensSettings({ storeId, token, fetcher = fetch }: { s
     } finally { setBusy(false); }
   }
 
+  /** Throws on failure so the confirm dialog stays open and says why. */
   async function revoke(item: DeveloperTokenSummary) {
-    setBusy(true); setError("");
-    try {
-      const response = await fetcher(`${url}/${encodeURIComponent(item.id)}/revoke`, { method: "POST", headers: { Authorization: `Bearer ${token}` } });
-      if (!response.ok) await read(response, "Could not revoke the token.");
-      if (created) setCreated(null);
-      setTokens(await fetchList());
-    } catch (failure) {
-      setError(failure instanceof Error ? failure.message : "Could not revoke the token.");
-    } finally { setBusy(false); }
+    const response = await fetcher(`${url}/${encodeURIComponent(item.id)}/revoke`, { method: "POST", headers: { Authorization: `Bearer ${token}` } });
+    if (!response.ok) await read(response, "Could not switch the token off. Try again.");
+    if (created) setCreated(null);
+    setTokens(await fetchList());
+    toast(`${item.name} switched off`);
   }
 
   async function copy() {
     if (!created) return;
-    try { await navigator.clipboard.writeText(created.token); setCopied(true); } catch { setCopied(false); }
+    try { await navigator.clipboard.writeText(created.token); setCopied(true); toast("Token copied"); } catch { setCopied(false); }
   }
 
-  return <section className="form-card" aria-labelledby="developer-tokens-title">
-    <div className="form-card-title"><div><span>Themes</span><h2 id="developer-tokens-title">Developer tokens</h2></div></div>
-    <p className="muted">For <code>jelly-theme upload</code> and <code>jelly-theme install</code>. A token works only on this store&apos;s themes. Treat it like a password: anyone who has it can upload themes to this store.</p>
-    {error && <div role="alert" className="error-banner">{error}</div>}
-    {created && <div className="success-banner" role="status">
-      <CheckCircle2 size={18} />
-      <div>
-        <p><strong>Copy the token for “{created.name}” now.</strong> It will not be shown again.</p>
-        <p><code aria-label="New developer token">{created.token}</code></p>
-        <button type="button" className="button button-secondary" onClick={copy}><Copy size={16} /> {copied ? "Copied" : "Copy token"}</button>
-      </div>
-    </div>}
-    {tokens && <form className="field-grid" onSubmit={create}>
-      <label className="field"><span>Name</span><input name="name" required maxLength={80} placeholder="Studio laptop" /><small>Who or what uses it, so you know which one to revoke later.</small></label>
-      <label className="field"><span>Expires</span><select name="expiry" defaultValue="90"><option value="30">After 30 days</option><option value="90">After 90 days</option><option value="365">After a year</option><option value="">Never</option></select></label>
-      <div className="form-actions"><button className="button button-primary" type="submit" disabled={busy}>{busy ? "Working…" : "Create token"}</button></div>
-    </form>}
-    {!tokens && !error && <p aria-live="polite">Loading developer tokens…</p>}
-    {tokens && (tokens.length === 0
-      ? <p className="muted">No tokens yet.</p>
-      : <ul className="developer-token-list" aria-label="Developer tokens">
-        {tokens.map((item) => <li key={item.id}>
-          <div>
-            <strong>{item.name}</strong> <code>{item.prefix}…</code>
-            <small>Created {day(item.createdAt)} · {item.lastUsedAt ? `Last used ${day(item.lastUsedAt)}` : "Never used"} · {state(item)}</small>
-          </div>
-          {!item.revokedAt && <button type="button" className="button button-secondary" disabled={busy} onClick={() => revoke(item)} aria-label={`Revoke ${item.name}`}>Revoke</button>}
-        </li>)}
-      </ul>)}
-  </section>;
+  if (!tokens) return <Card title="Developer tokens">
+    {error
+      ? <Banner tone="critical" title="Could not load the tokens" action={<Button size="small" onClick={() => { setError(""); setAttempt((count) => count + 1); }}>Try again</Button>}>{error}</Banner>
+      : <div className="jk-stack-sm" role="status" aria-label="Loading developer tokens"><SkeletonBlock width="40%" height={14} /><SkeletonBlock height={34} /><SkeletonBlock height={34} /></div>}
+  </Card>;
+
+  return <>
+    {error && <Banner tone="critical" onDismiss={() => setError("")}>{error}</Banner>}
+    {created && <Banner tone="success" title={`Copy the token for “${created.name}” now`}>
+      <p>It will not be shown again. Send it to your developer in a private message.</p>
+      <p><code className="jk-code" aria-label="New developer token">{created.token}</code></p>
+      <div className="jk-banner-action"><Button size="small" icon={<Copy size={14} aria-hidden="true" />} onClick={() => void copy()}>{copied ? "Copied" : "Copy token"}</Button></div>
+    </Banner>}
+    <Card title="Create a token" description={<>A developer uses it with <code>jelly-theme upload</code> and <code>jelly-theme install</code>. It works only on this store&apos;s store designs. Treat it like a password: anyone who has it can upload designs to this store.</>}>
+      <form className="jk-stack-sm" onSubmit={(event) => void create(event)}>
+        <div className="jk-grid-2">
+          <Field id="developer-token-name" label="Name" required help="Who or what uses it, so you know which one to switch off later.">
+            <input id="developer-token-name" name="name" required maxLength={80} placeholder="Studio laptop" />
+          </Field>
+          <Field id="developer-token-expiry" label="Stops working" help="A shorter time is safer.">
+            <select id="developer-token-expiry" name="expiry" defaultValue="90"><option value="30">After 30 days</option><option value="90">After 90 days</option><option value="365">After a year</option><option value="">Never</option></select>
+          </Field>
+        </div>
+        <div className="jk-row"><Button type="submit" variant="primary" loading={busy}>Create token</Button></div>
+      </form>
+    </Card>
+    <Card title="Your tokens" flush>
+      {tokens.length === 0
+        ? <EmptyState icon={KeyRound} title="No tokens yet." description="Create one above when a developer needs to upload a store design for you." />
+        : <ul className="jk-rows" aria-label="Developer tokens">
+          {tokens.map((item) => <li key={item.id} className="jk-rows-item">
+            <div className="min-w-0 flex-1">
+              <p className="jk-row"><strong>{item.name}</strong><code className="jk-code">{item.prefix}…</code>{item.revokedAt ? <StatusBadge tone="neutral">Switched off</StatusBadge> : expired(item) ? <StatusBadge tone="warning">Expired</StatusBadge> : <StatusBadge tone="success">Working</StatusBadge>}</p>
+              <p className="jk-cell-sub">Created {day(item.createdAt)} · {item.lastUsedAt ? `Last used ${day(item.lastUsedAt)}` : "Never used"} · {state(item)}</p>
+            </div>
+            {!item.revokedAt && <Button size="small" variant="destructive-quiet" onClick={() => setRevoking(item)} aria-label={`Revoke ${item.name}`}>Switch off</Button>}
+          </li>)}
+        </ul>}
+    </Card>
+    <ConfirmDialog open={Boolean(revoking)} onOpenChange={(open) => { if (!open) setRevoking(null); }} title={`Switch off “${revoking?.name ?? "this token"}”?`}
+      description="Anything that uses this token stops working straight away. This cannot be undone, but you can create a new token at any time."
+      confirmLabel="Switch off token" destructive onConfirm={async () => { if (revoking) await revoke(revoking); }} />
+  </>;
 }

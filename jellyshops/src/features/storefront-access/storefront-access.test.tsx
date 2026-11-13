@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { accessCookieName, loadAccessStatus, requestAccessToken } from "./access-api";
+import { ToastProvider } from "@/components/admin";
 import { StorefrontAccessSettings } from "./access-settings";
 import { StorefrontPasswordPage } from "./password-page";
 
@@ -47,7 +48,7 @@ it("lets the merchant turn protection on with a password, never showing a saved 
   const fetcher = vi.fn()
     .mockResolvedValueOnce(json({ enabled: false, hasPassword: false, message: "" }))
     .mockResolvedValueOnce(json({ enabled: true, hasPassword: true, message: "Soon" }));
-  render(<StorefrontAccessSettings storeId="store-1" token="t" fetcher={fetcher as never} />);
+  render(<ToastProvider><StorefrontAccessSettings storeId="store-1" token="t" fetcher={fetcher as never} /></ToastProvider>);
   const password = await screen.findByLabelText(/^Password/);
   fireEvent.change(password, { target: { value: "tulip" } });
   fireEvent.click(screen.getByLabelText(/Ask shoppers for a password/));

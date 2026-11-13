@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AlertTriangle, CheckCircle2, LayoutTemplate, Loader2, RotateCcw } from "lucide-react";
+import { RotateCcw } from "lucide-react";
+import { Banner, Button, Card } from "@/components/admin";
 import { authApiOrigin } from "@/features/auth/providers/auth-provider";
 
 export interface LayoutUpgradeOffer {
@@ -28,13 +29,11 @@ async function read<T>(response: Response, fallback: string): Promise<T> {
   return body;
 }
 
-const primary = "inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50";
-const secondary = "inline-flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold transition hover:bg-muted disabled:opacity-50";
 const list = (items: string[]) => [...new Set(items)].join(", ");
 
 function Line({ label, items }: { label: string; items: string[] }) {
   if (!items.length) return null;
-  return <li><span className="font-medium">{label}:</span> {list(items)}</li>;
+  return <li><span className="jk-strong">{label}:</span> {list(items)}</li>;
 }
 
 /**
@@ -82,64 +81,56 @@ export function LayoutUpgradePanel({ storeId, token, fetcher = fetch, onChanged 
 
   if (!offer || (!offer.behind && !offer.lastUpgrade && !notice)) return null;
 
-  return <section aria-labelledby="layout-updates" className="rounded-3xl border border-border bg-card p-5 sm:p-7">
-    <div className="mb-5 flex items-start gap-3">
-      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-muted text-tint-foreground"><LayoutTemplate size={19} /></span>
-      <div>
-        <h2 id="layout-updates" className="text-xl font-bold tracking-tight">Page layout</h2>
-        <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          {offer.behind
-            ? <>Your store&apos;s pages use an earlier layout of this design (<strong className="font-semibold text-foreground">{offer.draft.label}</strong>). The design&apos;s styles were made for the current layout, so some pages may look out of place. Upgrading rebuilds your draft pages in the current layout and keeps your own changes.</>
-            : <>Your draft uses the current layout of this design.</>}
-        </p>
-      </div>
-    </div>
-    {error && <p role="alert" className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p>}
-    {notice && <p role="status" className="mb-4 flex items-start gap-2 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800"><CheckCircle2 className="mt-0.5 shrink-0" size={16} />{notice}</p>}
+  return <Card title="Page layout" description={offer.behind
+    ? <>Your store&apos;s pages use an earlier layout of this design (<strong>{offer.draft.label}</strong>). The design&apos;s styles were made for the current layout, so some pages may look out of place. Upgrading rebuilds your draft pages in the current layout and keeps your own changes.</>
+    : <>Your draft uses the current layout of this design.</>}>
+    <div className="jk-stack-sm">
+      {error && <Banner tone="critical" onDismiss={() => setError("")}>{error}</Banner>}
+      {notice && <Banner tone="success" onDismiss={() => setNotice("")}>{notice}</Banner>}
 
-    {offer.behind && <div className="grid gap-4">
-      <div><button type="button" className={secondary} disabled={Boolean(busy)} onClick={() => run("preview", async () => {
-        setPreview((await post<{ preview: LayoutUpgradePreview }>("/preview")).preview);
-      })}>{busy === "preview" ? <Loader2 size={15} className="animate-spin motion-reduce:animate-none" /> : null}See what changes</button></div>
-      {preview && <div className="grid gap-3 rounded-2xl bg-muted/60 p-4" aria-label="Changes to your draft pages">
-        {(preview.shared.carried.length > 0 || preview.shared.kept.length > 0) && <div>
-          <p className="text-sm font-semibold">Header, footer and announcement bar</p>
-          <ul className="mt-1 grid gap-1 text-sm">
-            <Line label="Your changes kept" items={preview.shared.carried.map((entry) => entry.section)} />
-            <Line label="Kept as they are" items={preview.shared.kept} />
-          </ul>
+      {offer.behind && <>
+        <div><Button disabled={Boolean(busy)} loading={busy === "preview"} loadingLabel="See what changes" onClick={() => run("preview", async () => {
+          setPreview((await post<{ preview: LayoutUpgradePreview }>("/preview")).preview);
+        })}>See what changes</Button></div>
+        {preview && <div className="jk-changes" aria-label="Changes to your draft pages">
+          {(preview.shared.carried.length > 0 || preview.shared.kept.length > 0) && <div>
+            <p className="jk-strong">Header, footer and announcement bar</p>
+            <ul>
+              <Line label="Your changes kept" items={preview.shared.carried.map((entry) => entry.section)} />
+              <Line label="Kept as they are" items={preview.shared.kept} />
+            </ul>
+          </div>}
+          {preview.pages.map((page) => <div key={page.page}>
+            <p className="jk-strong">{page.page}</p>
+            <ul>
+              <Line label="Now one section with photos and buying details" items={page.combined ?? []} />
+              <Line label="New sections" items={page.added} />
+              <Line label="Your changes kept" items={page.carried.map((entry) => entry.section)} />
+              <Line label="Your own sections kept (moved to the end of the page)" items={page.kept} />
+              <Line label="Replaced (you had not changed them)" items={page.removed} />
+              <Line label="Left out (you had removed them)" items={page.skipped} />
+            </ul>
+          </div>)}
+          <p className="jk-muted">Menus, products, pages, extra page layouts and your colours and fonts stay as they are. To get the design&apos;s current look as well, choose a theme style in the editor.</p>
+          {preview.problems.length > 0 && <Banner tone="critical" title="This upgrade can't be done yet">
+            <ul className="jk-bullets">{preview.problems.slice(0, 5).map((problem) => <li key={problem}>{problem}</li>)}</ul>
+          </Banner>}
+          <div><Button variant="primary" disabled={preview.problems.length > 0 || Boolean(busy)} loading={busy === "apply"} loadingLabel="Upgrade draft pages" onClick={() => run("apply", async () => {
+            await post("/apply", { expectedGeneration: preview.generation });
+            await refresh();
+            setNotice("Your draft pages now use the current layout. Check them in the editor, then publish when you're happy. You can undo this until then.");
+          })}>Upgrade draft pages</Button></div>
         </div>}
-        {preview.pages.map((page) => <div key={page.page}>
-          <p className="text-sm font-semibold">{page.page}</p>
-          <ul className="mt-1 grid gap-1 text-sm">
-            <Line label="Now one section with photos and buying details" items={page.combined ?? []} />
-            <Line label="New sections" items={page.added} />
-            <Line label="Your changes kept" items={page.carried.map((entry) => entry.section)} />
-            <Line label="Your own sections kept (moved to the end of the page)" items={page.kept} />
-            <Line label="Replaced (you had not changed them)" items={page.removed} />
-            <Line label="Left out (you had removed them)" items={page.skipped} />
-          </ul>
-        </div>)}
-        <p className="text-sm text-muted-foreground">Menus, products, pages, extra page layouts and your colours and fonts stay as they are. To get the design&apos;s current look as well, choose a theme style in the editor.</p>
-        {preview.problems.length > 0 && <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-          <p className="flex items-center gap-2 font-semibold"><AlertTriangle size={15} />This upgrade can&apos;t be done yet</p>
-          <ul className="mt-1 list-disc pl-5">{preview.problems.slice(0, 5).map((problem) => <li key={problem}>{problem}</li>)}</ul>
-        </div>}
-        <div><button type="button" className={primary} disabled={preview.problems.length > 0 || Boolean(busy)} onClick={() => run("apply", async () => {
-          await post("/apply", { expectedGeneration: preview.generation });
+      </>}
+
+      {offer.lastUpgrade && <div className="jk-row is-between jk-ruled">
+        <p className="jk-muted">Your draft pages were moved to the current layout. Undo puts them back as they were before.</p>
+        <Button disabled={Boolean(busy)} loading={busy === "undo"} loadingLabel="Undo layout upgrade" icon={<RotateCcw size={14} aria-hidden="true" />} onClick={() => run("undo", async () => {
+          await post("/rollback", { expectedGeneration: offer.generation });
           await refresh();
-          setNotice("Your draft pages now use the current layout. Check them in the editor, then publish when you're happy. You can undo this until then.");
-        })}>{busy === "apply" ? <Loader2 size={15} className="animate-spin motion-reduce:animate-none" /> : null}Upgrade draft pages</button></div>
+          setNotice("Your draft pages are back as they were before the upgrade.");
+        })}>Undo layout upgrade</Button>
       </div>}
-    </div>}
-
-    {offer.lastUpgrade && <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
-      <p className="text-sm text-muted-foreground">Your draft pages were moved to the current layout. Undo puts them back as they were before.</p>
-      <button type="button" className={secondary} disabled={Boolean(busy)} onClick={() => run("undo", async () => {
-        await post("/rollback", { expectedGeneration: offer.generation });
-        await refresh();
-        setNotice("Your draft pages are back as they were before the upgrade.");
-      })}>{busy === "undo" ? <Loader2 size={15} className="animate-spin motion-reduce:animate-none" /> : <RotateCcw size={15} />}Undo layout upgrade</button>
-    </div>}
-  </section>;
+    </div>
+  </Card>;
 }

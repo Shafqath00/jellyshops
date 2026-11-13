@@ -2,9 +2,25 @@
 
 import { useId, useState } from "react";
 import { MAX_MENU_IMAGE_ALT, isSafeMenuImageUrl } from "@jelly/storefront-schema";
+import { Button, Field } from "@/components/admin";
 import type { MenuItem, MenuTarget } from "../api/client";
 
 export interface CollectionChoice { id: string; title: string; handle: string }
+
+const KINDS = ["home", "search", "collection", "product", "page", "blog", "article", "external", "anchor"] as const;
+/** What a link can point to, in the words merchants use. */
+const KIND_LABEL: Record<(typeof KINDS)[number], string> = {
+  home: "Home page", search: "Search page", collection: "A collection", product: "A product", page: "A page", blog: "A blog", article: "A blog post",
+  external: "A web address", anchor: "A place on the same page",
+};
+const DESTINATION: Partial<Record<(typeof KINDS)[number], { label: string; help: string; placeholder?: string }>> = {
+  external: { label: "Web address", help: "A full address (https://…) or a page in your store starting with /, like /pages/faq.", placeholder: "https://" },
+  anchor: { label: "Section name", help: "The name of a section on the page, without the #.", placeholder: "reviews" },
+  product: { label: "Product reference", help: "Open the product in Products and copy the last part of its address." },
+  page: { label: "Page reference", help: "Open the page in Content and copy the last part of its address." },
+  blog: { label: "Blog reference", help: "Open the blog in Content and copy the last part of its address." },
+  article: { label: "Blog post reference", help: "Open the post in Content and copy the last part of its address." },
+};
 
 /** Photo for the large menu: upload, a short description for screen readers, remove. */
 function MenuPhotoField({ id, url, alt, onUrl, onAlt, upload }: { id: string; url: string; alt: string; onUrl(url: string): void; onAlt(alt: string): void; upload(file: File): Promise<string> }) {
@@ -46,8 +62,8 @@ export function MenuLinkForm({ item, heading, collections, uploadImage, onApply,
   const [error, setError] = useState("");
   function apply() {
     const value = destination.trim();
-    if (!label.trim()) { setError("Enter a link label."); return; }
-    if (kind !== "home" && kind !== "search" && !value) { setError("Choose a destination."); return; }
+    if (!label.trim()) { setError("Enter the words for this link."); return; }
+    if (kind !== "home" && kind !== "search" && !value) { setError("Choose where this link goes."); return; }
     if (kind === "collection" && !collections.some(collection => collection.id === value)) { setError("Choose an available collection."); return; }
     if (kind === "external") {
       // A path in the store ("/pages/faq", "/search?q=Beds") or a full http(s) address.
@@ -55,7 +71,7 @@ export function MenuLinkForm({ item, heading, collections, uploadImage, onApply,
       try { if (!storePath && !["http:", "https:"].includes(new URL(value).protocol)) throw new Error(); }
       catch { setError("Enter a full web address (https://…) or a page in your store starting with /."); return; }
     }
-    if (kind === "anchor" && !/^[A-Za-z][A-Za-z0-9_:\-.]*$/.test(value.replace(/^#/, ""))) { setError("Enter an anchor name starting with a letter."); return; }
+    if (kind === "anchor" && !/^[A-Za-z][A-Za-z0-9_:\-.]*$/.test(value.replace(/^#/, ""))) { setError("Enter a section name that starts with a letter."); return; }
     if (photo && !isSafeMenuImageUrl(photo, { allowLocalHttp: true })) { setError("This photo cannot be used. Upload it again."); return; }
     const target: MenuTarget = kind === "home" || kind === "search" ? { kind }
       : kind === "external" ? { kind, url: value }
@@ -67,17 +83,23 @@ export function MenuLinkForm({ item, heading, collections, uploadImage, onApply,
   }
   return <div className="jk-stack-sm" role="group" aria-label={item ? "Edit menu link" : heading ?? "New menu link"}>
     {heading && <p className="jk-strong">{heading}</p>}
-    <div className="jk-field"><label htmlFor={`${id}-label`}>Link label</label><input id={`${id}-label`} value={label} onChange={event => setLabel(event.target.value)} maxLength={120} /></div>
-    <div className="jk-field"><label htmlFor={`${id}-type`}>Destination type</label><select id={`${id}-type`} value={kind} onChange={event => { setKind(event.target.value as MenuTarget["kind"]); setDestination(""); setError(""); }}>
-      {(["home", "search", "collection", "product", "page", "blog", "article", "external", "anchor"] as const).map(value => <option key={value} value={value}>{value === "external" ? "URL" : value[0].toUpperCase() + value.slice(1)}</option>)}
-    </select></div>
+    <Field id={`${id}-label`} label="Link label" required help="The words shoppers click, like Beds or Contact us.">
+      <input id={`${id}-label`} value={label} onChange={event => setLabel(event.target.value)} maxLength={120} />
+    </Field>
+    <Field id={`${id}-type`} label="Destination type">
+      <select id={`${id}-type`} value={kind} onChange={event => { setKind(event.target.value as MenuTarget["kind"]); setDestination(""); setError(""); }}>
+        {KINDS.map(value => <option key={value} value={value}>{KIND_LABEL[value]}</option>)}
+      </select>
+    </Field>
     {kind === "collection" ? <>
       <div className="jk-field"><label htmlFor={`${id}-search`}>Search collections</label><input id={`${id}-search`} type="search" value={query} onChange={event => setQuery(event.target.value)} /></div>
-      <div className="jk-field"><label htmlFor={`${id}-collection`}>Collection</label><select id={`${id}-collection`} value={destination} onChange={event => setDestination(event.target.value)}><option value="">Choose a collection</option>{collections.filter(collection => collection.id === destination || `${collection.title} ${collection.handle}`.toLowerCase().includes(query.toLowerCase())).map(collection => <option key={collection.id} value={collection.id}>{collection.title} · {collection.handle}</option>)}</select></div>
-    </> : kind !== "home" && kind !== "search" ? <div className="jk-field"><label htmlFor={`${id}-destination`}>{kind === "external" ? "URL" : kind === "anchor" ? "Anchor" : "Resource ID"}</label><input id={`${id}-destination`} value={destination} onChange={event => setDestination(event.target.value)} /></div> : null}
+      <div className="jk-field"><label htmlFor={`${id}-collection`}>Collection</label><select id={`${id}-collection`} value={destination} onChange={event => setDestination(event.target.value)}><option value="">Choose a collection</option>{collections.filter(collection => collection.id === destination || `${collection.title} ${collection.handle}`.toLowerCase().includes(query.toLowerCase())).map(collection => <option key={collection.id} value={collection.id}>{collection.title}</option>)}</select></div>
+    </> : DESTINATION[kind] ? <Field id={`${id}-destination`} label={DESTINATION[kind]!.label} help={DESTINATION[kind]!.help}>
+      <input id={`${id}-destination`} value={destination} placeholder={DESTINATION[kind]!.placeholder} onChange={event => setDestination(event.target.value)} />
+    </Field> : null}
     {uploadImage && <MenuPhotoField id={id} url={photo} alt={photoAlt} onUrl={setPhoto} onAlt={setPhotoAlt} upload={uploadImage} />}
     {!uploadImage && photo && <p className="jk-muted">This link has a photo for the large menu.</p>}
     {error && <p role="alert" className="jk-field-error">{error}</p>}
-    <div className="jk-row"><button type="button" className="jk-button jk-button-primary" onClick={apply}>Apply link</button><button type="button" className="jk-button" onClick={onCancel}>Cancel</button></div>
+    <div className="jk-row"><Button variant="primary" onClick={apply}>Apply link</Button><Button onClick={onCancel}>Cancel</Button></div>
   </div>;
 }

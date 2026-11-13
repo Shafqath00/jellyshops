@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Banner, Button, SkeletonBlock } from "@/components/admin";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { ADJUSTMENT_REASON_LABEL, type InventoryAdjustmentReason } from "@/features/product-builder/stock";
 
@@ -54,27 +55,27 @@ export function StockHistory({ variantId, title, request, onClose }: Props) {
       <SheetContent className="jk-sheet overflow-y-auto">
         <SheetTitle>Stock history</SheetTitle>
         <SheetDescription>{title}</SheetDescription>
-        {error && <div role="alert" className="mt-4 text-[13px] font-semibold text-destructive">{error} <button type="button" className="underline" onClick={() => { setError(""); setLoading(true); setAttempt((count) => count + 1); }}>Try again</button></div>}
-        {!error && !loading && entries.length === 0 && <p className="mt-4 text-[13px] text-muted-foreground">No changes recorded yet. Stock changes made before history was added are not listed.</p>}
+        {error && <Banner tone="critical" title="Could not load the stock history" action={<Button size="small" onClick={() => { setError(""); setLoading(true); setAttempt((count) => count + 1); }}>Try again</Button>}>{error}</Banner>}
+        {!error && !loading && entries.length === 0 && <p className="jk-muted">No changes recorded yet. Stock changes made before history was added are not listed.</p>}
         {entries.length > 0 && (
-          <ol aria-label="Stock changes" className="mt-4 divide-y divide-border">
+          <ol aria-label="Stock changes" className="jk-rows">
             {entries.map((entry) => (
-              <li key={entry.id} className="flex items-start justify-between gap-4 py-3 text-[13px]">
-                <div>
-                  <p className="font-semibold">{ADJUSTMENT_REASON_LABEL[entry.reason] ?? entry.reason}</p>
-                  {entry.note && <p className="mt-0.5 text-muted-foreground">{entry.note}</p>}
-                  <p className="mt-0.5 text-xs text-muted-foreground"><time dateTime={entry.createdAt}>{new Date(entry.createdAt).toLocaleString()}</time></p>
+              <li key={entry.id} className="jk-rows-item is-top">
+                <div className="min-w-0 flex-1">
+                  <p className="jk-strong">{ADJUSTMENT_REASON_LABEL[entry.reason] ?? "Stock change"}</p>
+                  {entry.note && <p className="jk-muted">{entry.note}</p>}
+                  <p className="jk-cell-sub"><time dateTime={entry.createdAt}>{new Date(entry.createdAt).toLocaleString()}</time></p>
                 </div>
-                <div className="text-right">
-                  <p className={entry.quantityDelta < 0 ? "font-semibold text-destructive" : "font-semibold"} aria-label={`${entry.quantityDelta > 0 ? "Added" : "Removed"} ${Math.abs(entry.quantityDelta)}`}>{entry.quantityDelta > 0 ? "+" : "−"}{Math.abs(entry.quantityDelta)}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{entry.quantityAfter} on hand</p>
+                <div className="jk-end">
+                  <p className={`jk-strong tabular-nums ${entry.quantityDelta < 0 ? "jk-negative" : ""}`} aria-label={`${entry.quantityDelta > 0 ? "Added" : "Removed"} ${Math.abs(entry.quantityDelta)}`}>{entry.quantityDelta > 0 ? "+" : "−"}{Math.abs(entry.quantityDelta)}</p>
+                  <p className="jk-cell-sub">{entry.quantityAfter} on hand</p>
                 </div>
               </li>
             ))}
           </ol>
         )}
-        {loading && <p role="status" className="mt-4 text-[13px] text-muted-foreground">Loading…</p>}
-        {next && !loading && <button type="button" className="admin-button mt-4" onClick={() => void loadOlder(next)}>Show older changes</button>}
+        {loading && <div className="jk-stack-sm" role="status" aria-label="Loading stock history"><SkeletonBlock height={14} width="60%" /><SkeletonBlock height={14} width="40%" /></div>}
+        {next && !loading && <div><Button onClick={() => void loadOlder(next)}>Show older changes</Button></div>}
       </SheetContent>
     </Sheet>
   );

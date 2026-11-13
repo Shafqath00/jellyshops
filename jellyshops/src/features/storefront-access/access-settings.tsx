@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { CheckCircle2 } from "lucide-react";
+import { Banner, Button, Field, SkeletonBlock, useToast } from "@/components/admin";
 import { authApiOrigin } from "@/features/auth/providers/auth-provider";
 import type { AccessSettings } from "./access-api";
 
@@ -22,7 +22,8 @@ export function StorefrontAccessSettings({ storeId, token, fetcher = fetch }: { 
   const [settings, setSettings] = useState<AccessSettings | null>(null);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const toast = useToast();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -31,7 +32,7 @@ export function StorefrontAccessSettings({ storeId, token, fetcher = fetch }: { 
       .then((value) => { setSettings(value); setError(""); })
       .catch((failure: unknown) => { if (!controller.signal.aborted) setError(failure instanceof Error ? failure.message : "Could not load the password settings."); });
     return () => controller.abort();
-  }, [url, token, fetcher]);
+  }, [url, token, fetcher, attempt]);
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -40,11 +41,11 @@ export function StorefrontAccessSettings({ storeId, token, fetcher = fetch }: { 
     const data = new FormData(form);
     const password = String(data.get("password") ?? "");
     const enabled = data.get("enabled") === "on";
-    setSaving(true); setSaved(false); setError("");
+    setSaving(true); setError("");
     try {
       const next = await fetcher(url, { method: "PUT", headers, body: JSON.stringify({ enabled, message: String(data.get("message") ?? ""), ...(password ? { password } : {}) }) }).then(parse);
       setSettings(next);
-      setSaved(true);
+      toast("Password settings saved");
       form.reset();
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : "Could not save the password settings.");
@@ -53,19 +54,19 @@ export function StorefrontAccessSettings({ storeId, token, fetcher = fetch }: { 
     }
   }
 
-  if (!settings) return <section className="form-card"><div className="form-card-title"><div><span>Storefront</span><h2>Password protection</h2></div></div>{error ? <div role="alert" className="error-banner">{error}</div> : <p aria-live="polite">Loading…</p>}</section>;
-  return <form className="admin-form" onSubmit={save} onChange={() => setSaved(false)}>
-    <section className="form-card">
-      <div className="form-card-title"><div><span>Storefront</span><h2>Password protection</h2></div></div>
-      {error && <div role="alert" className="error-banner">{error}</div>}
-      {saved && <div className="success-banner" role="status"><CheckCircle2 size={18} /> Password settings saved</div>}
-      <div className="field-grid">
-        <label className="field"><span>Ask shoppers for a password</span><input type="checkbox" name="enabled" defaultChecked={settings.enabled} /><small>While this is on, shoppers see a password page instead of your store. Your own editor preview is not affected.</small></label>
-        <label className="field"><span>{settings.hasPassword ? "New password" : "Password"}</span><input type="password" name="password" autoComplete="new-password" minLength={4} maxLength={100} placeholder={settings.hasPassword ? "Leave empty to keep the current password" : "At least 4 characters"} /><small>Changing the password signs every shopper out. The password is stored scrambled; nobody, including us, can read it back.</small></label>
-        <label className="field"><span>Message above the password box</span><textarea name="message" rows={3} maxLength={500} defaultValue={settings.message} placeholder="We open on 1 December. Enter the password if you have an early invitation." /></label>
-      </div>
-      <p className="muted">This keeps the storefront pages private. It does not hide your products from the public catalogue feed, so don&apos;t use it for secrets.</p>
-    </section>
-    <div className="form-actions"><button className="button button-primary" disabled={saving} type="submit">{saving ? "Saving…" : "Save password settings"}</button></div>
+  if (!settings) return error
+    ? <Banner tone="critical" title="Could not load the password settings" action={<Button size="small" onClick={() => { setError(""); setAttempt((count) => count + 1); }}>Try again</Button>}>{error}</Banner>
+    : <div className="jk-stack-sm" role="status" aria-label="Loading password settings"><SkeletonBlock width="50%" height={14} /><SkeletonBlock height={34} /><SkeletonBlock height={64} /></div>;
+  return <form className="jk-stack-sm" onSubmit={(event) => void save(event)}>
+    {error && <Banner tone="critical" title="Not saved">{error}</Banner>}
+    <label className="jk-check"><input type="checkbox" name="enabled" defaultChecked={settings.enabled} /><span>Ask shoppers for a password<span className="jk-cell-sub">While this is on, shoppers see a password page instead of your store. Your own editor preview is not affected.</span></span></label>
+    <Field id="access-password" label={settings.hasPassword ? "New password" : "Password"} help="Changing the password signs every shopper out. It is stored scrambled; nobody, including us, can read it back.">
+      <input id="access-password" type="password" name="password" autoComplete="new-password" minLength={4} maxLength={100} placeholder={settings.hasPassword ? "Leave empty to keep the current password" : "At least 4 characters"} />
+    </Field>
+    <Field id="access-message" label="Message above the password box" help="Tell visitors when you open, or who to ask for the password.">
+      <textarea id="access-message" name="message" rows={3} maxLength={500} defaultValue={settings.message} placeholder="We open on 1 December. Enter the password if you have an early invitation." />
+    </Field>
+    <p className="jk-muted">This keeps your store&apos;s pages private. It does not hide your products from the public catalogue feed, so don&apos;t use it for secrets.</p>
+    <div className="jk-row"><Button type="submit" variant="primary" loading={saving} loadingLabel="Saving…">Save password settings</Button></div>
   </form>;
 }

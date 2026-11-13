@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, expect, it, vi } from "vitest";
+import { ToastProvider } from "@/components/admin";
 import NotificationSettingsPage from "./page";
 
 vi.mock("@/features/auth/providers/auth-provider", () => ({ authApiOrigin: () => "http://api.test", useAuth: () => ({ session: { access_token: "token" }, activeStore: { id: "store-1" } }) }));
@@ -15,7 +16,7 @@ it("edits and previews email wording without changing the order details or sendi
     return new Response("{}", { status: 404 });
   });
   vi.stubGlobal("fetch", fetcher);
-  render(<NotificationSettingsPage />);
+  render(<ToastProvider><NotificationSettingsPage /></ToastProvider>);
   const message = await screen.findByLabelText("Message");
   await user.clear(message);
   await user.type(message, "We are delighted to make this for you.");
@@ -24,5 +25,5 @@ it("edits and previews email wording without changing the order details or sendi
   expect(screen.getByTitle("Order email preview")).toHaveAttribute("srcdoc", "<p>Example item</p>");
   await user.click(screen.getByRole("button", { name: "Save wording" }));
   await waitFor(() => expect(fetcher).toHaveBeenCalledWith("http://api.test/api/stores/store-1/order-notifications/templates/PLACED", expect.objectContaining({ method: "PUT", body: expect.stringContaining("We are delighted to make this for you.") })));
-  expect(await screen.findByRole("status")).toHaveTextContent("Email wording saved");
+  expect(await screen.findByText("Email wording saved")).toBeVisible();
 });

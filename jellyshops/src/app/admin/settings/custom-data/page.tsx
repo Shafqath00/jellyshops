@@ -30,6 +30,7 @@ export default function CustomDataSettingsPage() {
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(true);
   const [attempt, setAttempt] = useState(0);
+  const [technical, setTechnical] = useState(false);
   const headers = useMemo(() => token ? { Authorization: `Bearer ${token}` } : null, [token]);
 
   useEffect(() => {
@@ -37,11 +38,11 @@ export default function CustomDataSettingsPage() {
     let active = true;
     void fetch(`${origin}/api/stores/${storeId}/custom-data/metafields?ownerType=${encodeURIComponent(ownerType)}`, { headers })
       .then(async (response) => {
-        if (!response.ok) throw new Error(`Custom data request failed (${response.status})`);
+        if (!response.ok) throw new Error("We could not load your custom fields. Check your connection and try again.");
         return await response.json() as MetafieldDefinition[];
       })
       .then((next) => { if (active) { setDefinitions(next); setError(undefined); } })
-      .catch((reason: unknown) => active && setError(reason instanceof Error ? reason.message : "Unable to load custom data"))
+      .catch((reason: unknown) => active && setError(reason instanceof Error ? reason.message : "We could not load your custom fields."))
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [headers, origin, ownerType, attempt]);
@@ -49,7 +50,7 @@ export default function CustomDataSettingsPage() {
   if (!headers) return <AdminPage title="Custom data" back={{ href: "/admin/settings", label: "Settings" }}><Banner tone="warning">Sign in to manage custom data.</Banner></AdminPage>;
 
   return (
-    <AdminPage title="Custom data" back={{ href: "/admin/settings", label: "Settings" }} description="Extra fields you can fill in on products, collections and other items, and show in your store.">
+    <AdminPage title="Custom data" back={{ href: "/admin/settings", label: "Settings" }} description="Extra fields you can fill in on products, collections and other items, and show in your store. Store designs use a field's technical name, which never changes once the field exists.">
       <IndexTable<MetafieldDefinition>
         label="Custom fields"
         rows={definitions}
@@ -61,12 +62,13 @@ export default function CustomDataSettingsPage() {
         tabs={ownerTypes.map((type) => ({ id: type, label: OWNER_LABELS[type] }))}
         activeTab={ownerType}
         onTabChange={(id) => { setOwnerType(id as (typeof ownerTypes)[number]); setLoading(true); }}
+        filters={<label className="jk-check"><input type="checkbox" checked={technical} onChange={(event) => setTechnical(event.target.checked)} /><span>Show technical names</span></label>}
         columns={[
-          { id: "name", header: "Field", mobile: "primary", cell: (row) => <><span className="jk-strong">{row.name}</span><span className="jk-cell-sub">{row.namespace}.{row.key}</span></> },
+          { id: "name", header: "Field", mobile: "primary", cell: (row) => <><span className="jk-strong">{row.name}</span>{row.description && <span className="jk-cell-sub">{row.description}</span>}{technical && <span className="jk-cell-sub"><code className="jk-code">{row.namespace}.{row.key}</code></span>}</> },
           { id: "type", header: "Type", cell: (row) => humanizeCode(row.type) },
           { id: "visibility", header: "Shown in store", cell: (row) => <StatusBadge tone={row.storefrontVisible ? "success" : "neutral"}>{row.storefrontVisible ? "Yes" : "Admin only"}</StatusBadge> },
         ]}
-        emptyState={<EmptyState icon={Braces} title={`No custom fields for ${OWNER_LABELS[ownerType].toLowerCase()} yet`} description="Fields keep their key once created, so store designs that use them keep working." />}
+        emptyState={<EmptyState icon={Braces} title={`No custom fields for ${OWNER_LABELS[ownerType].toLowerCase()} yet`} description={ownerType === "product" ? "Add one from a product: open the product, then More details, then Custom data." : "Extra fields for these items will be listed here once they exist."} />}
       />
     </AdminPage>
   );
