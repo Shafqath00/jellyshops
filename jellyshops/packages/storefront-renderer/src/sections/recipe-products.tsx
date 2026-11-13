@@ -4,7 +4,7 @@ import type { BlockNode } from "@jelly/storefront-schema";
 
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import type { CommerceDataProvider, PublicProduct } from "../types";
-import { rowColumnStyle } from "../row-columns";
+import { rowColumnProps } from "../row-columns";
 
 /**
  * The "products" element of a section recipe: a grid of the store's products (the featured list,
@@ -27,7 +27,7 @@ export function RecipeProducts({ block, context }: { block: BlockNode; context: 
   const current = result?.source === context.commerce && result.scope === scope ? result.products : undefined;
   const products = current ?? (collectionId ? [] : context.commerce.initialProducts?.slice(0, limit) ?? []);
   if (!products.length) return null;
-  return <div className="jelly-product-grid-items jelly-recipe-products" data-count={products.length} style={rowColumnStyle(products.length, columns)}>
+  return <div className="jelly-product-grid-items jelly-recipe-products" {...rowColumnProps(products.length, columns)}>
     {products.map((product) => <ProductCard key={product.id} product={product} />)}
   </div>;
 }

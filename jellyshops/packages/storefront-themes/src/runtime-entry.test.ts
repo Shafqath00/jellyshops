@@ -24,7 +24,7 @@ function runtimeGraph(entry: string): Set<string> {
     if (seen.has(file)) return;
     seen.add(file);
     const source = readFileSync(join(packages, file), "utf8");
-    for (const match of source.matchAll(/^\s*(?:import|export)\s+(?!type\b)([^;]*?)\s+from\s+"([^"]+)"/gms)) {
+    for (const match of source.matchAll(/^\s*(?:import|export)\s+(?!type\b)([^;]*?)\s+from\s+"([^"]+)"/gm)) {
       const [, names, specifier] = match;
       if (specifier === "zod") { seen.add("zod"); continue; }
       if (specifier.startsWith(".")) {

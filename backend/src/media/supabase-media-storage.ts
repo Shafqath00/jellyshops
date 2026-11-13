@@ -78,22 +78,26 @@ export class SupabaseMediaStorage
   async open(
     storageKey: string,
   ): Promise<Buffer | null> {
-    const { data, error } =
-      await this.client.storage
-        .from(this.bucket)
-        .download(storageKey);
+    // One more try when the download fails for a reason other than a missing file: storage occasionally drops a
+    // request under load (StorageUnknownError), which showed shoppers a broken photo.
+    for (let attempt = 1; ; attempt += 1) {
+      const { data, error } =
+        await this.client.storage
+          .from(this.bucket)
+          .download(storageKey);
 
-    if (error) {
+      if (!error) {
+        return Buffer.from(
+          await data.arrayBuffer(),
+        );
+      }
       if (isNotFound(error)) {
         return null;
       }
-
-      throw error;
+      if (attempt >= 2) {
+        throw error;
+      }
     }
-
-    return Buffer.from(
-      await data.arrayBuffer(),
-    );
   }
 
   async remove(

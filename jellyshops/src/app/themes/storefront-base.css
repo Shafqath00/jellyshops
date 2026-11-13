@@ -752,7 +752,7 @@
 @media (max-width: 899px) {
   /* Phones and tablets: the search box gets its own row under the logo; the trust row scrolls sideways. */
   [data-jelly-theme] .jelly-header.jelly-header[data-header-layout="search-bar"] > .jelly-header-search { grid-column: 1 / -1; grid-row: 2; max-width: none; width: 100%; }
-  [data-jelly-theme] .jelly-header.jelly-header > .jelly-header-trust { grid-column: 1 / -1; flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; gap: 24px; padding-bottom: 4px; scrollbar-width: none; }
+  [data-jelly-theme] .jelly-header.jelly-header > .jelly-header-trust { grid-column: 1 / -1; flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; gap: 24px; padding-bottom: 4px; padding-right: 32px; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 48px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 48px), transparent); }
   [data-jelly-theme] .jelly-header.jelly-header > .jelly-header-trust li { flex: none; white-space: nowrap; }
   [data-jelly-theme] .jelly-header.jelly-header[data-tool-labels="true"] .jelly-header-tool-label,
   [data-jelly-theme] .jelly-header.jelly-header a[data-tool="extra"] .jelly-header-tool-label { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); }
@@ -1679,5 +1679,16 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
  * (rowColumnStyle: 4 cards = 2 + 2, not 3 + 1). Paged lists and sideways strips keep the theme's own tablet columns.
  */
 @media (min-width: 768px) and (max-width: 1023px) {
-  [data-jelly-theme] .jelly-product-grid-items[data-count]:not(.jelly-list-browser *) { grid-template-columns: repeat(var(--jelly-columns-tablet, min(var(--jelly-columns, 4), 3)), minmax(0, 1fr)); }
+  [data-jelly-theme] .jelly-product-grid-items[data-count]:not(.jelly-list-browser *) { grid-template-columns: repeat(var(--jelly-columns-tablet, min(var(--jelly-columns, 4), 3)), minmax(0, calc((100% - (var(--jelly-row-slots-tablet, 1) - 1) * var(--jelly-row-gap, 1.5rem)) / var(--jelly-row-slots-tablet, 1)))); }
+}
+
+/*
+ * Short rows: a curated row with fewer cards than columns (two related products, one recently viewed) keeps each card
+ * the width it would have in a full row instead of stretching it across the page. The renderer sets
+ * data-short-row and --jelly-row-slots only for such rows (desktop); on tablets the balanced rule above reads
+ * --jelly-row-slots-tablet, and without it each track grows to the usual even split. Tracks never grow past the free
+ * space, so a different theme gap cannot make the row overflow.
+ */
+@media (min-width: 1024px) {
+  [data-jelly-theme] .jelly-product-grid-items[data-short-row]:not(.jelly-list-browser *) { grid-template-columns: repeat(var(--jelly-columns, 4), minmax(0, calc((100% - (var(--jelly-row-slots, 1) - 1) * var(--jelly-row-gap, 1.5rem)) / var(--jelly-row-slots, 1)))); }
 }

@@ -63,7 +63,9 @@
   ],
   "themes/jelly-resthaven/legacy.css": [
     "jelly-rating-line",
-    "jelly-storefront"
+    "jelly-storefront",
+    "jelly-trust-marquee",
+    "jelly-trust-track"
   ],
   "app/jelly-minimal.css": [
     "jelly-collection-description",

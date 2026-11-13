@@ -17,6 +17,19 @@ export function balancedColumns(count: number, columns: number): number {
  * tablet's three (storefront-base.css "Balanced rows on tablets" reads --jelly-columns-tablet), so 4 cards are 2 + 2
  * on a tablet rather than 3 + 1.
  */
+/** The props for a curated row of cards: its column variables, and `data-short-row` when it has fewer cards than columns. */
+export function rowColumnProps(count: number, columns: number): { style: CSSProperties; "data-count": number; "data-short-row"?: "" } {
+  return { style: rowColumnStyle(count, columns), "data-count": count, ...(count > 0 && count < columns ? { "data-short-row": "" as const } : {}) };
+}
+
 export function rowColumnStyle(count: number, columns: number): CSSProperties {
-  return { "--jelly-columns": balancedColumns(count, columns), "--jelly-columns-tablet": balancedColumns(count, Math.min(columns, 3)) } as CSSProperties;
+  const tablet = Math.min(columns, 3);
+  return {
+    "--jelly-columns": balancedColumns(count, columns),
+    "--jelly-columns-tablet": balancedColumns(count, tablet),
+    // Fewer cards than columns: each card keeps the width it would have in the full row (storefront-base.css "Short
+    // rows"), so two related products are not drawn half the page wide each.
+    ...(count > 0 && count < columns ? { "--jelly-row-slots": columns } : {}),
+    ...(count > 0 && count < tablet ? { "--jelly-row-slots-tablet": tablet } : {}),
+  } as CSSProperties;
 }

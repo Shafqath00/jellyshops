@@ -106,6 +106,21 @@ describe("SupabaseMediaStorage", () => {
     ).resolves.toBeNull();
   });
 
+  it("tries a failed download once more, then reports the error", async () => {
+    mocks.download.mockReset();
+    mocks.download
+      .mockResolvedValueOnce({ data: null, error: { name: "StorageUnknownError", message: "fetch failed" } })
+      .mockResolvedValueOnce({ data: new Blob([new Uint8Array([4, 5])]), error: null });
+    const storage = new SupabaseMediaStorage("https://example.supabase.co", "secret-key", "media");
+    await expect(storage.open("store-1/photo.webp")).resolves.toEqual(Buffer.from([4, 5]));
+    expect(mocks.download).toHaveBeenCalledTimes(2);
+
+    mocks.download.mockReset();
+    mocks.download.mockResolvedValue({ data: null, error: { name: "StorageUnknownError", message: "fetch failed" } });
+    await expect(storage.open("store-1/photo.webp")).rejects.toMatchObject({ name: "StorageUnknownError" });
+    expect(mocks.download).toHaveBeenCalledTimes(2);
+  });
+
   it("removes media", async () => {
     mocks.remove.mockResolvedValue({
       data: [],
