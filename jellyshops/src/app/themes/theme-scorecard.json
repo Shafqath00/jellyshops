@@ -1,0 +1,158 @@
+{
+  "jelly-avenue": {
+    "theme": "jelly-avenue",
+    "styling": "legacy",
+    "internals": 46,
+    "settingsCopy": 130,
+    "mainSections": [],
+    "pageTypes": [
+      "article",
+      "blog",
+      "cart",
+      "collection",
+      "not-found",
+      "page",
+      "product",
+      "search"
+    ],
+    "sectionGroups": false,
+    "demoContent": false,
+    "conformance": true,
+    "lintFindings": 6,
+    "cssGzipKb": 18.6
+  },
+  "jelly-diode": {
+    "theme": "jelly-diode",
+    "styling": "own",
+    "internals": 22,
+    "settingsCopy": 128,
+    "mainSections": [],
+    "pageTypes": [
+      "article",
+      "blog",
+      "cart",
+      "collection",
+      "not-found",
+      "page",
+      "product",
+      "search"
+    ],
+    "sectionGroups": false,
+    "demoContent": false,
+    "conformance": true,
+    "lintFindings": 0,
+    "cssGzipKb": 8.8
+  },
+  "jelly-forma": {
+    "theme": "jelly-forma",
+    "styling": "own",
+    "internals": 7,
+    "settingsCopy": 124,
+    "mainSections": [],
+    "pageTypes": [
+      "article",
+      "blog",
+      "cart",
+      "collection",
+      "not-found",
+      "page",
+      "product",
+      "search"
+    ],
+    "sectionGroups": false,
+    "demoContent": false,
+    "conformance": false,
+    "lintFindings": 0,
+    "cssGzipKb": 6.2
+  },
+  "jelly-halo": {
+    "theme": "jelly-halo",
+    "styling": "own",
+    "internals": 20,
+    "settingsCopy": 127,
+    "mainSections": [],
+    "pageTypes": [
+      "article",
+      "blog",
+      "cart",
+      "collection",
+      "not-found",
+      "page",
+      "product",
+      "search"
+    ],
+    "sectionGroups": false,
+    "demoContent": false,
+    "conformance": true,
+    "lintFindings": 0,
+    "cssGzipKb": 8.4
+  },
+  "jelly-harbour": {
+    "theme": "jelly-harbour",
+    "styling": "legacy",
+    "internals": 32,
+    "settingsCopy": 129,
+    "mainSections": [],
+    "pageTypes": [
+      "article",
+      "blog",
+      "cart",
+      "collection",
+      "not-found",
+      "page",
+      "product",
+      "search"
+    ],
+    "sectionGroups": false,
+    "demoContent": false,
+    "conformance": true,
+    "lintFindings": 0,
+    "cssGzipKb": 14.9
+  },
+  "jelly-resthaven": {
+    "theme": "jelly-resthaven",
+    "styling": "platform",
+    "internals": 5,
+    "settingsCopy": 128,
+    "mainSections": [
+      "product"
+    ],
+    "pageTypes": [
+      "article",
+      "blog",
+      "cart",
+      "collection",
+      "not-found",
+      "page",
+      "product",
+      "search"
+    ],
+    "sectionGroups": false,
+    "demoContent": true,
+    "conformance": true,
+    "lintFindings": 0,
+    "cssGzipKb": 3.5
+  },
+  "jelly-signature": {
+    "theme": "jelly-signature",
+    "styling": "legacy",
+    "internals": 32,
+    "settingsCopy": 129,
+    "mainSections": [],
+    "pageTypes": [
+      "article",
+      "blog",
+      "cart",
+      "collection",
+      "not-found",
+      "page",
+      "product",
+      "search"
+    ],
+    "sectionGroups": false,
+    "demoContent": false,
+    "conformance": true,
+    "lintFindings": 2,
+    "cssGzipKb": 14.9
+  }
+}
