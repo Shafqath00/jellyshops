@@ -12,8 +12,9 @@ import { createSearchPageContext } from "@/features/storefront/page-context-load
 import { buildStorefrontRoute, deserializeRouteValues } from "@/features/storefront/resource-loader";
 import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
 import { isVariantBuyable } from "@/lib/variant-stock";
+import type { PublicProduct } from "@jelly/storefront-renderer";
 
-export default function SearchPage({ searchContext, routeValues, listSearch }: { searchContext: PublicSearchPageContext | null; routeValues?: Array<[string, unknown]>; listSearch?: string }) {
+export default function SearchPage({ searchContext, routeValues, listSearch, serverResults }: { searchContext: PublicSearchPageContext | null; routeValues?: Array<[string, unknown]>; listSearch?: string; serverResults?: { products: PublicProduct[]; total: number } | null }) {
   const { storeSlug } = useParams<{ storeSlug: string }>();
   const query = useSearchParams().get("q") ?? "";
   const { repository, state } = useShop();
@@ -24,6 +25,13 @@ export default function SearchPage({ searchContext, routeValues, listSearch }: {
   const values = useMemo(() => deserializeRouteValues(routeValues), [routeValues]);
   // When the search service is down, the page still draws with "no results" rather than staying blank.
   const searchRouteContext = store ? (searchContext ? createSearchPageContext(searchContext, store.slug, store.currency) : { type: "search" as const, query: query.trim(), state: query.trim() ? "none" as const : "empty" as const, resultCount: 0, results: [] }) : null;
+  // The server's first page from the catalogue browse replaces the search service's plain results: the same matches,
+  // with the filter data the product list needs and the full count (the search service stops at 100).
+  if (searchRouteContext && serverResults && searchRouteContext.state !== "empty") {
+    searchRouteContext.results = serverResults.products;
+    searchRouteContext.resultCount = serverResults.total;
+    if (serverResults.total > 0 && searchRouteContext.state === "none") searchRouteContext.state = "results";
+  }
   const route = store && publication?.kind === "v4" && searchRouteContext
     ? buildStorefrontRoute(publication.snapshot, { type: "search", context: { ...searchRouteContext, searchHref: `/${store.slug}/search` } }, null, values)
     : null;

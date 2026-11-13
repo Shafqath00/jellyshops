@@ -8,6 +8,7 @@ export type { SectionRenderComponent, SectionRenderProps } from "./render-regist
 export type { RuntimeRegion, StorefrontRuntimeContext } from "./runtime-context";
 export type { AssetResolver, CollectionPresentationContext, CommerceDataProvider, StorefrontCartAccess, StorefrontCompareAccess, StorefrontRecentlyViewedAccess, CatalogBrowsePage, ListAddress, StorefrontReview, StorefrontReviewAccess, StorefrontReviewPage, ProductPresentationContext, PublicProduct, StorefrontPageContext, StorefrontRendererProps } from "./types";
 export { readListAddress, writeListAddress } from "./sections/list-address";
+export { listQuery } from "./sections/list-address";
 export { withStoreIdentity } from "./store-identity";
 export { ThemeCustomCss } from "./section-custom-css";
 export { MetaobjectEntryContent, metaobjectEntryHref } from "./sections/metaobject-list";

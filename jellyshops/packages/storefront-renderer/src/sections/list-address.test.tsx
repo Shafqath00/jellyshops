@@ -64,3 +64,22 @@ describe("ProductListBrowser with the page address", () => {
     expect(state.search).toBe("?q=bed&sort=name-asc&f.fabric=Velvet");
   });
 });
+
+describe("Search results on the live store", () => {
+  it("sorts, filters and pages through the backend with the shopper's words", async () => {
+    const { RegistrySectionRenderer } = await import("../registry-section-renderer");
+    const card: PublicProduct = { id: "b1", name: "Ascot bed", href: "/p/b1", imageUrl: "", price: "£289", priceMinor: 28900, available: true, filters: [{ name: "Size", values: ["King"] }] };
+    const calls: Array<Record<string, unknown>> = [];
+    const commerce = {
+      getProducts: async () => [],
+      browseProducts: async (input: Record<string, unknown>) => { calls.push(input); return { products: [card], total: 1, facets: [], price: { min: 28900, max: 28900 }, filtered: false }; },
+    };
+    const page = { pageType: "search", data: { query: "bed", state: "results", resultCount: 1, results: [card], searchHref: "/s/search" } };
+    const section = { id: "search", type: "search-results", enabled: true, settings: { showSort: true, showFilters: true }, blocks: [] };
+    render(<RegistrySectionRenderer section={section} mode="published" commerce={commerce as never} page={page as never} />);
+    await screen.findAllByText("Ascot bed");
+    await new Promise((resolve) => setTimeout(resolve, 450));
+    expect(calls[0]).toMatchObject({ query: "bed", offset: 0 });
+    expect(calls[0]).not.toHaveProperty("collectionId");
+  });
+});

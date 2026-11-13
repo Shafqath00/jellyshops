@@ -1,5 +1,21 @@
-import { CATALOG_SORTS, filterKey } from "@jelly/storefront-schema";
-import type { ProductListFilters, ProductListSort } from "./product-list-browser";
+import { CATALOG_SORTS, filterKey, type CatalogQuery, type CatalogSort } from "@jelly/storefront-schema";
+
+export type ProductListSort = CatalogSort;
+/** The shopper's choices. Prices are typed in whole currency units ("200"); `values` holds chosen filter values by filter key. */
+export interface ProductListFilters { inStock: boolean; min: string; max: string; colours: string[]; values?: Record<string, string[]> }
+
+const toMinor = (value: string) => {
+  if (value.trim() === "") return undefined;
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0 ? Math.round(number * 100) : undefined;
+};
+
+/** The toolbar choices as a catalogue query (the older `colours` list is the Colour filter). */
+export function listQuery(sort: ProductListSort, filters: ProductListFilters, filterNames: readonly string[] = []): CatalogQuery {
+  const values: Record<string, string[]> = { ...(filters.values ?? {}) };
+  if (filters.colours.length) values.colour = [...new Set([...(values.colour ?? []), ...filters.colours])];
+  return { sort, inStock: filters.inStock, minPriceMinor: toMinor(filters.min), maxPriceMinor: toMinor(filters.max), filters: values, filterNames };
+}
 
 /**
  * Product list choices in the page address, so a filtered collection or search can be shared, bookmarked, reloaded

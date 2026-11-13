@@ -1,10 +1,11 @@
 import { ProductCard } from "../product-card";
 import { useEffect, useId, useMemo, useState, type CSSProperties } from "react";
-import { browseCatalog, filterKey, type BrowsableProduct, type CatalogFacet, type CatalogQuery, type CatalogSort } from "@jelly/storefront-schema";
+import { browseCatalog, filterKey, type BrowsableProduct, type CatalogFacet, type CatalogQuery } from "@jelly/storefront-schema";
 import type { CatalogBrowsePage, ListAddress, PublicProduct } from "../types";
-import { readListAddress, writeListAddress } from "./list-address";
+import { listQuery, readListAddress, writeListAddress, type ProductListFilters, type ProductListSort } from "./list-address";
 
-export type ProductListSort = CatalogSort;
+export type { ProductListFilters, ProductListSort } from "./list-address";
+export { listQuery } from "./list-address";
 
 export const PRODUCT_LIST_SORTS: ReadonlyArray<{ value: ProductListSort; label: string }> = [
   { value: "featured", label: "Featured" },
@@ -13,8 +14,6 @@ export const PRODUCT_LIST_SORTS: ReadonlyArray<{ value: ProductListSort; label: 
   { value: "name-asc", label: "Name, A to Z" },
 ];
 
-/** The shopper's choices. Prices are typed in whole currency units ("200"); `values` holds chosen filter values by filter key. */
-export interface ProductListFilters { inStock: boolean; min: string; max: string; colours: string[]; values?: Record<string, string[]> }
 const NO_FILTERS: ProductListFilters = { inStock: false, min: "", max: "", colours: [], values: {} };
 
 /** A product's price in minor units: the exact amount when the store sent it, otherwise read from the shown price. */
@@ -35,18 +34,7 @@ export function browsablePublicProduct(product: PublicProduct): BrowsableProduct
   return { name: product.name, priceMinor: productPriceMinor(product), available: product.available !== false, filters };
 }
 
-const toMinor = (value: string) => {
-  if (value.trim() === "") return undefined;
-  const number = Number(value);
-  return Number.isFinite(number) && number >= 0 ? Math.round(number * 100) : undefined;
-};
 
-/** The toolbar choices as a catalogue query (the older `colours` list is the Colour filter). */
-export function listQuery(sort: ProductListSort, filters: ProductListFilters, filterNames: readonly string[] = []): CatalogQuery {
-  const values: Record<string, string[]> = { ...(filters.values ?? {}) };
-  if (filters.colours.length) values.colour = [...new Set([...(values.colour ?? []), ...filters.colours])];
-  return { sort, inStock: filters.inStock, minPriceMinor: toMinor(filters.min), maxPriceMinor: toMinor(filters.max), filters: values, filterNames };
-}
 
 /** Sorts and filters a product list the way the toolbar does (also used by tests). */
 export function browseProducts(products: readonly PublicProduct[], sort: ProductListSort, filters: ProductListFilters): PublicProduct[] {

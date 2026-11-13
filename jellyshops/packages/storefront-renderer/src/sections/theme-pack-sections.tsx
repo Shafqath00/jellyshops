@@ -1,8 +1,8 @@
-import type { CSSProperties } from "react";
+import { useMemo, type CSSProperties } from "react";
 import { ProductCard } from "../product-card";
 import { blockElementProps, elementProps } from "../element-style";
 import { inlineSetting } from "./setting-text";
-import type { MediaReference, SectionNode } from "@jelly/storefront-schema";
+import type { CatalogQuery, MediaReference, SectionNode } from "@jelly/storefront-schema";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
@@ -169,6 +169,9 @@ export function SearchResultsSection({ section, context }: { section: SectionNod
   const content = copy(section, "Search", context.mode === "editor");
   const query = search?.query ?? "";
   const results = search?.results ?? [];
+  // On the live store the backend sorts, filters and pages the matches (the same browse as collection pages, with the words).
+  const browse = context.mode === "published" ? context.commerce?.browseProducts : undefined;
+  const remote = useMemo(() => browse && query.trim() ? (list: CatalogQuery) => browse({ ...list, query }) : undefined, [browse, query]);
   const action = search?.searchHref ?? (context.storeSlug ? `/${context.storeSlug}/search` : "/search");
   return <section className="jelly-section jelly-search-results"><StorefrontContainer><div className="jelly-search-shell">
     <h1 {...content.headingProps}>{content.headingContent}</h1>
@@ -179,7 +182,7 @@ export function SearchResultsSection({ section, context }: { section: SectionNod
     {search?.state === "results" && <p className="jelly-search-status">{search.resultCount === 1 ? "1 result" : `${search.resultCount} results`} for “{query}”</p>}
     {search?.state === "results" && <h2 className="jelly-visually-hidden">Search results</h2>}
     {search?.state === "results" && (section.settings.showSort === true || section.settings.showFilters === true
-      ? <ProductListBrowser products={results} columns={numberValue(section.settings, "columns", 4, 2, 4)} pageSize={24} showSort={section.settings.showSort !== false} showFilters={section.settings.showFilters !== false} filterNames={filterNamesSetting(section.settings.filterNames)} emptyMessage="No products match your search." address={context.mode === "published" ? context.commerce?.listAddress : undefined} />
+      ? <ProductListBrowser products={results} columns={numberValue(section.settings, "columns", 4, 2, 4)} pageSize={24} showSort={section.settings.showSort !== false} showFilters={section.settings.showFilters !== false} filterNames={filterNamesSetting(section.settings.filterNames)} emptyMessage="No products match your search." remote={remote} address={context.mode === "published" ? context.commerce?.listAddress : undefined} />
       : <div className="jelly-product-grid-items">{results.map((product) => <ProductCard key={product.id} product={product} />)}</div>)}
   </div></StorefrontContainer></section>;
 }
