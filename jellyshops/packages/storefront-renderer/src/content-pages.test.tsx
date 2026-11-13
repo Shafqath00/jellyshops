@@ -30,3 +30,17 @@ describe("information page content", () => {
     expect(container.querySelectorAll("article p")).toHaveLength(1);
   });
 });
+
+describe("information page from the live store", () => {
+  it("draws a page handed over as { page: { title, content } }, the shape of the public page context", () => {
+    const context = createStorefrontRuntimeContext({
+      mode: "published",
+      region: "template",
+      commerce: { async getProducts() { return []; } },
+      page: { pageType: "page", resource: { id: "p1", handle: "delivery", data: { type: "page", storeSlug: "shop", page: { id: "p1", handle: "delivery", title: "Delivery", content: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Free to most UK addresses." }] }] } } } } } as unknown as StorefrontPageContext,
+    });
+    render(<PageContentSection context={context} />);
+    expect(screen.getByRole("heading", { name: "Delivery", level: 1 })).toBeInTheDocument();
+    expect(screen.getByText("Free to most UK addresses.")).toBeInTheDocument();
+  });
+});

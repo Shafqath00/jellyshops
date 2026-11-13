@@ -30,7 +30,11 @@ function textFromContent(value: unknown): string[] {
 
 export function PageContentSection({ context }: { context: StorefrontRuntimeContext }) {
   if (context.page?.pageType !== "page") return null;
-  const data = context.page.resource.data;
+  const resourceData = context.page.resource.data;
+  // The live store hands the page over as { page: { title, content } } (the public page context); the editor and the
+  // previews give { title, content } directly. Both draw the same page.
+  const nested = resourceData.page;
+  const data = nested && typeof nested === "object" && !Array.isArray(nested) ? nested as Record<string, unknown> : resourceData;
   const title = typeof data.title === "string" ? data.title : "Page";
   const content = renderContent(data.content);
   return <section className="jelly-section jelly-page-content"><StorefrontContainer><article className="jelly-prose"><h1 {...titleLength(title)}>{title}</h1>{content}</article></StorefrontContainer></section>;

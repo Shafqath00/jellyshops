@@ -1,5 +1,5 @@
 {
-  "$comment": "Resthaven demo store content (Phase 6). Photos are file names in this theme's assets/ folder. Prices in minor units (pence). Install with scripts/install-demo-content.mjs (not written yet).",
+  "$comment": "Resthaven demo store content (Phase 6). Photos are file names in this theme's assets/ folder. Prices in minor units (pence). Install with backend/scripts/install-resthaven-demo.ts. Menus: the Resthaven starter's own main menu is kept; the menus here are reference copy for the large menu and footer (information pages live at /<handle>).",
   "currency": "GBP",
   "collections": [
     {
@@ -1585,19 +1585,19 @@
     "footer": [
       {
         "label": "Delivery",
-        "href": "/pages/delivery"
+        "href": "/delivery"
       },
       {
         "label": "Returns",
-        "href": "/pages/returns"
+        "href": "/returns"
       },
       {
         "label": "Mattress guide",
-        "href": "/pages/mattress-guide"
+        "href": "/mattress-guide"
       },
       {
         "label": "About us",
-        "href": "/pages/about"
+        "href": "/about"
       }
     ]
   },
