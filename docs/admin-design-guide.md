@@ -64,6 +64,11 @@ Every list page has, where it makes sense: search, sort, filters, paging, row se
 - Sorting: give columns a `sortKey` and pass `sort`. Column headings are hidden on phones, so keep a "Sort" select in `filters` when phone users need to sort.
 - Bulk actions that remove or hide things open a `ConfirmDialog` that says how many items are affected.
 
+## Spreadsheets
+
+- Any CSV the admin writes in the browser uses `csvCell` from `@/lib/csv-cell` (it stops values being run as formulas).
+- Product import, export and bulk edit live in `features/product-bulk/`. A new bulk change goes into `bulk-edit.ts` (pure, with a test) and then into the dialog.
+
 ## Confirming
 
 The title names the thing ("Delete Linen Tote Bag?"). The description says what will happen and whether it can be undone ("The product and its photos are removed from your store. This cannot be undone." / "You can make it active again later."). The confirm button repeats the verb ("Delete product"), never "OK" or "Yes".

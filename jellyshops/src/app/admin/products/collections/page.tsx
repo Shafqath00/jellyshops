@@ -20,7 +20,7 @@ export default function CollectionsPage(){
   const editorApi = useMemo(() => token ? createStoreEditorApi({ baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001", token }) : null, [token]);
   const {all,request,ready,storeId}=useAdminCatalog();
   const [rows,setRows]=useState<CollectionRow[]>([]),[products,setProducts]=useState<CatalogAdminProduct[]>([]);
-  const [draft,setDraft]=useState<Draft|null>(null),[query,setQuery]=useState(""),[productQuery,setProductQuery]=useState("");
+  const [draft,setDraft]=useState<Draft|null>(null),[productQuery,setProductQuery]=useState("");
   const [error,setError]=useState(""),[formError,setFormError]=useState(""),[busy,setBusy]=useState(false),[loading,setLoading]=useState(true),[revision,setRevision]=useState(0);
   useEffect(()=>{let active=true;if(!ready)return;setLoading(true);void Promise.all([all<CollectionRow>("/collections"),all<CatalogAdminProduct>("/products")]).then(([collections,catalog])=>{if(active){setRows(collections);setProducts(catalog);setError("");}}).catch(e=>{if(active)setError(e.message);}).finally(()=>{if(active)setLoading(false);});return()=>{active=false;};},[all,ready,storeId,revision]);
   useEffect(()=>{setDraft(null);setRows([]);setProducts([]);setFormError("");},[storeId]);
@@ -51,7 +51,7 @@ export default function CollectionsPage(){
         {id:"handle",header:"Web address",cell:row=><span className="jk-muted">/collections/{row.handle}</span>},
         {id:"products",header:"Products",align:"end",sortKey:"products",cell:row=><span className="tabular-nums">{row.productIds?.length??0}</span>},
       ]}
-      emptyState={<EmptyState icon={LayoutGrid} title={query?"No matching collections":"Create your first collection"} description="Collections help customers browse related products."/>}
+      emptyState={<EmptyState icon={LayoutGrid} title={shown.filtered?"No matching collections":"Create your first collection"} description={shown.filtered?"Try another search.":"Collections help customers browse related products."}/>}
     />
     <Sheet open={draft!==null} onOpenChange={open=>{if(!open&&!busy)setDraft(null);}}><SheetContent onCloseAutoFocus={event=>{event.preventDefault();drawerTrigger.current?.focus();}} className="jk-sheet overflow-y-auto"><SheetTitle>{draft?.id?"Edit collection":"Create collection"}</SheetTitle><SheetDescription className="jk-muted">Choose the products customers will find in this collection.</SheetDescription>{draft&&<form className="jk-form" onSubmit={event=>{event.preventDefault();void save();}}>
       {formError&&<Banner tone="critical">{formError}</Banner>}

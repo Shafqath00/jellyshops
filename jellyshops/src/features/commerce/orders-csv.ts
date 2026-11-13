@@ -1,9 +1,10 @@
+import { csvCell } from "@/lib/csv-cell";
 import { statusLabel } from "@/components/admin/status";
 import type { OrderListResult } from "@/features/commerce/api/types";
 
 type OrderCsvRow = OrderListResult["orders"][number];
 
-const csvCell = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
+
 
 /** Builds a CSV of the selected orders in the browser; nothing is sent anywhere. */
 export function ordersCsv(orders: OrderCsvRow[]): string {

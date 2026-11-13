@@ -16,6 +16,10 @@ export interface CatalogRepository {
   listInventory?(storeId: string, input: import("./types.js").ListInventoryInput): Promise<Connection<import("./types.js").CatalogInventoryRow>>;
   listInventoryHistory?(storeId: string, variantId: string, input: import("./types.js").ListInventoryHistoryInput): Promise<Connection<import("./types.js").InventoryAdjustment>>;
   listProductFacets?(storeId: string): Promise<import("./types.js").ProductFacets>;
+  /** Products with these handles or ids, in one go (bulk import, export of selected rows). */
+  findProducts?(storeId: string, by: { handles?: string[]; ids?: string[] }): Promise<CatalogProduct[]>;
+  /** Which product owns each of these SKUs (lower case in, lower case out). */
+  findSkuOwners?(storeId: string, skus: string[]): Promise<Array<{ sku: string; productId: string; handle: string }>>;
   getProduct(storeId: string, id: string): Promise<CatalogProduct | null>;
   listProducts(storeId: string, input: ListProductsInput): Promise<Connection<CatalogProduct>>;
   getVariant(storeId: string, id: string): Promise<CatalogVariant | null>;

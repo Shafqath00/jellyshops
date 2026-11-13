@@ -1,6 +1,7 @@
+import { csvCell } from "@/lib/csv-cell";
 import type { MerchantCustomer } from "@/features/admin/api/admin-api";
 
-const cell = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
+const cell = csvCell;
 
 /** CSV of the chosen customers, built in the browser. Amounts are in the store currency's main unit. */
 export function customersCsv(customers: MerchantCustomer[]): string {

@@ -88,6 +88,16 @@ export class CatalogPostgresRepository implements CatalogAdminRepository {
     return productRows.map((row) => this.product(row, variants.rows.filter((v) => String(v.productId) === String(row.id)), media.rows.filter((m) => String(m.productId) === String(row.id))));
   }
 
+  async findProducts(storeId: string, by: { handles?: string[]; ids?: string[] }): Promise<CatalogProduct[]> {
+    if (!by.handles?.length && !by.ids?.length) return [];
+    const result = await this.database.query<Row>(`SELECT p.*, s."currency" AS "storeCurrency" FROM "Product" p JOIN "Store" s ON s."id" = p."storeId" WHERE p."storeId" = $1 AND (p."slug" = ANY($2::text[]) OR p."id" = ANY($3::text[])) ORDER BY p."title", p."id"`, [storeId, by.handles ?? [], by.ids ?? []]);
+    return this.hydrateProducts(storeId, result.rows);
+  }
+  async findSkuOwners(storeId: string, skus: string[]): Promise<Array<{ sku: string; productId: string; handle: string }>> {
+    if (!skus.length) return [];
+    const result = await this.database.query<Row>(`SELECT lower(v."sku") AS "sku", p."id" AS "productId", p."slug" AS "handle" FROM "ProductVariant" v JOIN "Product" p ON p."storeId" = v."storeId" AND p."id" = v."productId" WHERE v."storeId" = $1 AND lower(v."sku") = ANY($2::text[])`, [storeId, skus.map((sku) => sku.toLowerCase())]);
+    return result.rows.map((row) => ({ sku: String(row.sku), productId: String(row.productId), handle: String(row.handle) }));
+  }
   async getProduct(storeId: string, id: string): Promise<CatalogProduct | null> {
     const result = await this.database.query<Row>(`SELECT p.*, s."currency" AS "storeCurrency" FROM "Product" p JOIN "Store" s ON s."id" = p."storeId" WHERE p."storeId" = $1 AND p."id" = $2`, [storeId, id]);
     return (await this.hydrateProducts(storeId, result.rows))[0] ?? null;

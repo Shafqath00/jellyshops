@@ -48,6 +48,8 @@ export interface CatalogAdmin extends CatalogReader {
   updateInventory(storeId: string, variantId: string, input: import("./types.js").UpdateInventoryInput): Promise<import("./types.js").CatalogInventoryRow>;
   listInventoryHistory(storeId: string, variantId: string, input: import("./types.js").ListInventoryHistoryInput): Promise<Connection<import("./types.js").InventoryAdjustment>>;
   listProductFacets(storeId: string): Promise<import("./types.js").ProductFacets>;
+  findProducts(storeId: string, by: { handles?: string[]; ids?: string[] }): Promise<CatalogProduct[]>;
+  findSkuOwners(storeId: string, skus: string[]): Promise<Array<{ sku: string; productId: string; handle: string }>>;
   createProduct(storeId: string, input: CreateProductInput): Promise<CatalogProduct>;
   updateProduct(storeId: string, productId: string, input: UpdateProductInput): Promise<CatalogProduct>;
   createCollection(storeId: string, input: CreateCollectionInput): Promise<CatalogCollection>;
@@ -77,6 +79,16 @@ export class CatalogService implements CatalogReader {
 
   getProduct(storeId: string, id: string): Promise<CatalogProduct | null> {
     return this.repository.getProduct(storeId, id);
+  }
+
+  async findProducts(storeId: string, by: { handles?: string[]; ids?: string[] }): Promise<CatalogProduct[]> {
+    if (!this.repository.findProducts) throw new ApiError(503, "CATALOG_BULK_UNAVAILABLE", "Bulk product tools are not available for this store.");
+    return this.repository.findProducts(storeId, by);
+  }
+
+  async findSkuOwners(storeId: string, skus: string[]): Promise<Array<{ sku: string; productId: string; handle: string }>> {
+    if (!this.repository.findSkuOwners) throw new ApiError(503, "CATALOG_BULK_UNAVAILABLE", "Bulk product tools are not available for this store.");
+    return this.repository.findSkuOwners(storeId, skus);
   }
 
   /** A catalogue that cannot list them (the demo one) simply has none. */

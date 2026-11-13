@@ -503,6 +503,42 @@ textarea.jk-input {min-height:80px;resize:vertical}
 .jk-swatch {display:flex;flex-direction:column;gap:4px;font-size:var(--jk-text-xs);color:var(--jk-text-subdued)}
 .jk-swatch span {display:block;height:40px;border-radius:var(--jk-radius-sm);box-shadow:0 0 0 1px var(--jk-border) inset}
 
+/* Import wizard and bulk edit (product-bulk) */
+.jk-steps {display:flex;flex-wrap:wrap;gap:var(--jk-space-2) var(--jk-space-4);font-size:var(--jk-text-sm);color:var(--jk-text-subdued)}
+.jk-steps li {display:flex;align-items:center;gap:6px}
+.jk-steps-number {display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--jk-neutral-bg);color:var(--jk-neutral-text);font-size:var(--jk-text-xs);font-weight:650}
+.jk-steps li.is-current {color:var(--jk-text);font-weight:650}
+.jk-steps li.is-current .jk-steps-number {background:var(--jk-accent);color:var(--jk-accent-text)}
+.jk-steps li.is-done .jk-steps-number {background:var(--jk-success-bg);color:var(--jk-success-text)}
+.jk-step-heading {font-size:var(--jk-text-lg)!important;font-weight:650;color:var(--jk-text);margin-bottom:var(--jk-space-2);outline:0}
+.jk-step-heading:focus-visible {outline:var(--jk-focus-ring);outline-offset:4px;border-radius:4px}
+.jk-card:has(> .jk-step-heading) {display:flex;flex-direction:column;gap:var(--jk-space-3)}
+.jk-dropzone {display:flex;flex-direction:column;align-items:center;gap:var(--jk-space-2);padding:var(--jk-space-8) var(--jk-space-4);border-radius:var(--jk-radius);border:2px dashed var(--jk-border-strong);background:var(--jk-surface-subdued);text-align:center;color:var(--jk-text-subdued);transition:border-color var(--jk-motion-fast) var(--jk-ease),background var(--jk-motion-fast) var(--jk-ease)}
+.jk-dropzone.is-dragging {border-color:var(--jk-accent);background:var(--jk-surface-selected)}
+.jk-dropzone .jk-strong {color:var(--jk-text)}
+.jk-dropzone label {margin-top:var(--jk-space-2);cursor:pointer}
+.jk-dropzone label:focus-within {outline:var(--jk-focus-ring);outline-offset:2px}
+.jk-button.is-disabled {opacity:.55;cursor:not-allowed}
+.jk-progress-block {display:flex;flex-direction:column;gap:6px;font-size:var(--jk-text-sm);color:var(--jk-text)}
+.jk-progress {width:100%;height:10px;border:0;border-radius:999px;overflow:hidden;background:var(--jk-neutral-bg);accent-color:var(--jk-accent)}
+.jk-progress::-webkit-progress-bar {background:var(--jk-neutral-bg);border-radius:999px}
+.jk-progress::-webkit-progress-value {background:var(--jk-accent);border-radius:999px;transition:width var(--jk-motion) var(--jk-ease)}
+.jk-progress::-moz-progress-bar {background:var(--jk-accent);border-radius:999px}
+.jk-metrics-4 {grid-template-columns:repeat(4,minmax(0,1fr))}
+.jk-metrics dd {margin:0}
+@media(max-width:639px){.jk-metrics-4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.jk-preview-table {max-height:420px;overflow-y:auto}
+.jk-preview-table thead th {position:sticky;top:0;z-index:1}
+.jk-table tbody tr.is-muted {color:var(--jk-text-subdued)}
+.jk-dialog .jk-table tbody tr,.jk-preview-table .jk-table tbody tr,.jk-match-table tbody tr {cursor:default}
+.jk-match-table td {vertical-align:top}
+.jk-match-table .jk-select {max-width:100%}
+.jk-dialog-scroll {overflow-y:auto}
+.jk-dialog-wide {width:min(760px,calc(100vw - 32px))}
+.jk-grid-3 {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--jk-space-3);align-items:start}
+@media(max-width:639px){.jk-grid-3{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){.jk-dropzone,.jk-progress::-webkit-progress-value{transition:none}}
+
 /*
  * Older class names still used by a few admin components (product builder sections, password
  * page and developer token settings). They draw with the kit tokens so they match the kit.
@@ -553,3 +589,13 @@ textarea.jk-input {min-height:80px;resize:vertical}
 .jk-field.has-error .jk-prefixed input {box-shadow:none}
 .jk-prefixed:focus-within {outline:var(--jk-focus-ring);outline-offset:0}
 .jk-field .jk-prefixed input:focus-visible {outline:0}
+
+/* Product builder: checklist and photo drop zone (phase 3) */
+.jk-checklist {display:flex;flex-direction:column;gap:var(--jk-space-2);margin-top:var(--jk-space-3);font-size:var(--jk-text-sm)}
+.jk-checklist li {display:flex;align-items:flex-start;gap:var(--jk-space-2);color:var(--jk-text)}
+.jk-checklist li > svg {flex:none;margin-top:2px;color:var(--jk-text-subdued)}
+.jk-checklist li.is-done > svg {color:var(--jk-success-dot)}
+.jk-checklist li.is-done .jk-strong {font-weight:400;color:var(--jk-text-subdued)}
+.jk-card > .jk-progress {margin-bottom:var(--jk-space-2)}
+.jk-photo-drop {border-radius:var(--jk-radius);outline:2px dashed transparent;outline-offset:6px;transition:outline-color var(--jk-motion-fast) var(--jk-ease),background var(--jk-motion-fast) var(--jk-ease)}
+.jk-photo-drop.is-dragging {outline-color:var(--jk-accent);background:var(--jk-surface-selected)}

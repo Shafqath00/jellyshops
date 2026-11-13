@@ -8,6 +8,9 @@ import { useAdminCatalog, type CatalogAdminProduct, type CatalogPage, type Colle
 
 import { ProductSurface } from "@/features/product-builder/product-surface";
 import { ProductRowActions } from "@/features/product-builder/product-row-actions";
+import { useProductBulkApi } from "@/features/product-bulk/api";
+import { BulkEditDialog } from "@/features/product-bulk/bulk-edit-dialog";
+import { ExportDialog } from "@/features/product-bulk/export-dialog";
 
 type ProductStatus = CatalogAdminProduct["status"];
 const TABS: IndexTab[] = [{ id: "", label: "All" }, { id: "ACTIVE", label: "Active" }, { id: "DRAFT", label: "Draft" }, { id: "ARCHIVED", label: "Archived" }];
@@ -41,6 +44,10 @@ export default function ProductsPage() {
   const [rowError, setRowError] = useState("");
   const [archiveTarget, setArchiveTarget] = useState<CatalogAdminProduct | null>(null);
   const [archiveMany, setArchiveMany] = useState<string[] | null>(null);
+  const bulkApi = useProductBulkApi();
+  /** null = closed; an empty list = opened from the page header (no rows ticked). */
+  const [exporting, setExporting] = useState<string[] | null>(null);
+  const [editing, setEditing] = useState<string[] | null>(null);
   const [filters, setFilters] = useState<Filters>(NO_FILTERS);
   const [facets, setFacets] = useState<Facets>({ productTypes: [], vendors: [], tags: [] });
   const returnFocus = useRef<HTMLElement | null>(null);
@@ -90,7 +97,9 @@ export default function ProductsPage() {
   const filter = (key: keyof Filters, value: string) => { setFilters((current) => ({ ...current, [key]: value })); reset(); };
   const filterCount = Object.values(filters).filter(Boolean).length;
   const words = (values: string[]) => values.map((value) => ({ value, label: value }));
-  const money = (minor: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: activeStore?.currency ?? "GBP" }).format(minor / 100);
+  const currency = activeStore?.currency ?? "GBP";
+  const money = useCallback((minor: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency }).format(minor / 100), [currency]);
+  const saveProduct = useCallback((productId: string, body: Record<string, unknown>) => request(`/products/${encodeURIComponent(productId)}`, { method: "PATCH", body: JSON.stringify(body) }), [request]);
   async function setStatusFor(ids: string[], value: ProductStatus) {
     const results = await Promise.allSettled(ids.map((id) => request(`/products/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify({ status: value }) })));
     const failed = results.filter((result) => result.status === "rejected").length;
@@ -123,7 +132,8 @@ export default function ProductsPage() {
     { id: "actions", header: "Actions", align: "end", cell: product => <ProductRowActions product={product} busy={rowBusy === product.id} onStatus={status => void rowStatus(product, status)} onArchive={() => { rememberFocus(product); setArchiveTarget(product); }} onCollection={() => { rememberFocus(product); setCollectionFor([product.id]); }} /> },
   ];
   const filtered = Boolean(search || status || filterCount);
-  return <ProductSurface><AdminPage title="Products" description="Manage your products, pricing, and availability." primaryAction={{ label: "Add product", href: "/admin/products/new" }}>
+  return <ProductSurface><AdminPage title="Products" description="Manage your products, pricing, and availability." primaryAction={{ label: "Add product", href: "/admin/products/new" }}
+    secondaryActions={[{ label: "Import", href: "/admin/products/import" }, { label: "Export", onAction: () => { rememberFocus(); setExporting([]); } }]}>
     {rowError && <Banner tone="critical" title="Product not updated" onDismiss={() => setRowError("")}>{rowError}</Banner>}
     <IndexTable
       label="Products"
@@ -148,6 +158,8 @@ export default function ProductsPage() {
         <label><span className="sr-only">Sort products</span><select className="jk-select" value={sort} onChange={(event) => { setSort(event.target.value); reset(); }}>{SORTS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
       </>}
       bulkActions={[
+        { label: "Bulk edit", onAction: (ids) => { rememberFocus(); setEditing(ids); } },
+        { label: "Export", onAction: (ids) => { rememberFocus(); setExporting(ids); } },
         { label: "Set as active", onAction: (ids) => setStatusFor(ids, "ACTIVE") },
         { label: "Set as draft", onAction: (ids) => setStatusFor(ids, "DRAFT") },
         { label: "Archive", destructive: true, onAction: (ids) => { rememberFocus(); setArchiveMany(ids); } },
@@ -165,6 +177,8 @@ export default function ProductsPage() {
     />
     <ConfirmDialog open={Boolean(archiveTarget)} onOpenChange={open => { if (!open) setArchiveTarget(null); }} title={`Archive ${archiveTarget?.title ?? "product"}?`} description="This product will be hidden from your store. You can make it active again later." confirmLabel="Archive product" destructive className="product-overlay" overlayClassName="product-backdrop" onCloseAutoFocus={restoreFocus} onConfirm={async () => { if (archiveTarget) await setStatusFor([archiveTarget.id], "ARCHIVED"); }} />
     <ConfirmDialog open={Boolean(archiveMany)} onOpenChange={open => { if (!open) setArchiveMany(null); }} title={`Archive ${archiveMany?.length ?? 0} ${archiveMany?.length === 1 ? "product" : "products"}?`} description="They will be hidden from your store. You can make them active again later from the Archived tab." confirmLabel="Archive products" destructive className="product-overlay" overlayClassName="product-backdrop" onCloseAutoFocus={restoreFocus} onConfirm={async () => { if (archiveMany) await setStatusFor(archiveMany, "ARCHIVED"); }} />
+    <ExportDialog open={exporting !== null} onOpenChange={(open) => { if (!open) setExporting(null); }} api={bulkApi} selectedIds={exporting ?? []} filters={{ query: search.trim(), status, ...filters }} className="product-overlay" overlayClassName="product-backdrop" />
+    {editing !== null && <BulkEditDialog open onOpenChange={(open) => { if (!open) setEditing(null); }} products={rows.filter((product) => editing.includes(product.id))} collections={collections.map((row) => ({ id: row.id, title: row.title }))} money={money} save={saveProduct} onDone={() => setRevision((n) => n + 1)} className="product-overlay" overlayClassName="product-backdrop" />}
     <Picker className="product-overlay" overlayClassName="product-backdrop" onCloseAutoFocus={restoreFocus} open={collectionFor !== null} onOpenChange={(open) => { if (!open) setCollectionFor(null); }} title="Add to collection" searchLabel="Search collections" multiple={false} doneLabel="Add products"
       load={loadCollections} onDone={(picked) => { const ids = collectionFor ?? []; if (picked[0]) void addToCollection(ids, picked[0].id); }} />
   </AdminPage></ProductSurface>;
