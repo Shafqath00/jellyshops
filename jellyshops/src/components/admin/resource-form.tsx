@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { cloneElement, isValidElement, useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Banner } from "./feedback";
+import { Button } from "./button";
 
 /** Warns before leaving the page while there are unsaved changes. */
 export function useUnsavedChangesWarning(dirty: boolean) {
@@ -19,7 +20,7 @@ export function SaveBar({ dirty, saving = false, onSave, onDiscard, saveLabel = 
     <span>{saving ? "Saving…" : "Unsaved changes"}</span>
     <div className="jk-savebar-actions">
       <button type="button" className="jk-button" disabled={saving} onClick={onDiscard}>Discard</button>
-      <button type={onSave ? "button" : "submit"} className="jk-button jk-button-primary" disabled={saving} onClick={onSave}>{saving ? "Saving…" : saveLabel}</button>
+      <Button type={onSave ? "button" : "submit"} variant="primary" loading={saving} loadingLabel="Saving…" onClick={onSave}>{saveLabel}</Button>
     </div>
   </div>;
 }
@@ -49,11 +50,23 @@ export function ResourceForm({ dirty, onSubmit, onDiscard, children, saveLabel }
   </form>;
 }
 
-/** Label + control + help text + error, wired for screen readers. */
-export function Field({ id, label, help, error, children }: { id: string; label: ReactNode; help?: ReactNode; error?: string; children: ReactNode }) {
-  return <div className="jk-field">
-    <label htmlFor={id}>{label}</label>
-    {children}
+/**
+ * Label + control + help text + error, wired for screen readers. Give the control the same `id`:
+ * it is then told about the help text and the error (`aria-describedby`, `aria-invalid`) and, with
+ * `required`, that it must be filled in. `required` marks the label; the page still checks the value.
+ */
+export function Field({ id, label, help, error, required = false, children }: { id: string; label: ReactNode; help?: ReactNode; error?: string; required?: boolean; children: ReactNode }) {
+  const describedBy = [help ? `${id}-help` : "", error ? `${id}-error` : ""].filter(Boolean).join(" ") || undefined;
+  const control = isValidElement<Record<string, unknown>>(children) && children.props.id === id
+    ? cloneElement(children, {
+      "aria-describedby": children.props["aria-describedby"] ?? describedBy,
+      "aria-invalid": children.props["aria-invalid"] ?? (error ? true : undefined),
+      "aria-required": children.props["aria-required"] ?? (required || undefined),
+    })
+    : children;
+  return <div className={`jk-field ${error ? "has-error" : ""}`}>
+    <label htmlFor={id}>{label}{required && <span className="jk-required" aria-hidden="true"> *</span>}</label>
+    {control}
     {help && <small id={`${id}-help`} className="jk-muted">{help}</small>}
     {error && <small id={`${id}-error`} className="jk-field-error" role="alert">{error}</small>}
   </div>;

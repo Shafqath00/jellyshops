@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import { expectNoRawCodes } from "@/test/raw-codes";
 import userEvent from "@testing-library/user-event";
 import axe from "axe-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -35,6 +36,7 @@ describe("Home", () => {
     const { container } = render(<DashboardPage />);
     expect(await screen.findByRole("heading", { name: "Set up your store" })).toBeVisible();
     expect(screen.getByText("4 of 5 done")).toBeVisible();
+    expectNoRawCodes();
     expect(screen.getByRole("progressbar", { name: "Setup progress" })).toHaveAttribute("aria-valuenow", "4");
     expect(screen.getByRole("link", { name: "Publish your store design" })).toHaveAttribute("href", "/admin/online-store");
     expect(screen.getByRole("link", { name: "Choose a design" })).toHaveAttribute("href", "/admin/online-store");

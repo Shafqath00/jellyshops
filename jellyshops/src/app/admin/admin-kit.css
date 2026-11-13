@@ -25,6 +25,11 @@ html.admin-ui {
   --jk-text-xs:12px; --jk-text-sm:13px; --jk-text-md:14px; --jk-text-lg:16px; --jk-text-xl:20px; --jk-text-2xl:24px; --jk-text-3xl:28px;
   --jk-radius-lg:16px; --jk-shadow-raised:0 10px 28px #0000001f,0 0 0 1px var(--jk-border);
   --jk-positive:#14783f; --jk-negative:#b3261e;
+  /* Focus ring, motion and stacking order: use these instead of writing the values again. */
+  --jk-focus-ring:2px solid var(--jk-focus);
+  --jk-motion-fast:120ms; --jk-motion:180ms; --jk-ease:cubic-bezier(.2,0,0,1);
+  --jk-z-sticky:30; --jk-z-dropdown:40; --jk-z-overlay:90; --jk-z-dialog:91; --jk-z-toast:100;
+  --jk-on-critical:#fff;
 }
 html.admin-ui.admin-dark {
   --jk-surface:#262626; --jk-surface-subdued:#1f1f1f; --jk-surface-hover:#2f2f2f; --jk-surface-selected:#22324a;
@@ -75,13 +80,13 @@ html.admin-ui.admin-dark {
 .jk-button-primary {background:var(--jk-accent);color:var(--jk-accent-text);box-shadow:0 1px 0 #0000001a}
 .jk-button-primary:hover {background:var(--jk-accent);filter:brightness(1.15)}
 .jk-button-critical {color:var(--jk-critical-text)}
-.jk-button-critical-solid {background:var(--jk-critical-dot);color:#fff;box-shadow:none}
-.jk-button-critical-solid:hover {background:var(--jk-critical-text)}
+.jk-button-critical-solid {background:var(--jk-critical-dot);color:var(--jk-on-critical);box-shadow:none}
+.jk-button-critical-solid:hover {background:var(--jk-critical-dot);filter:brightness(.88)}
 .jk-button-plain {box-shadow:none;background:transparent;color:var(--jk-text-subdued)}
 .jk-icon-button {display:grid;place-items:center;width:28px;height:28px;border-radius:6px;color:inherit;opacity:.8}
 .jk-icon-button:hover {background:#0000000f;opacity:1}
 .jk-link {font-size:13px;color:var(--jk-info-text);text-decoration:underline;text-underline-offset:3px}
-:is(.jk-button,.jk-icon-button,.jk-tab,.jk-more-item,.jk-back,.jk-help,.jk-link):focus-visible,.jk-search:focus-within,.jk-table input:focus-visible {outline:2px solid var(--jk-focus);outline-offset:1px}
+:is(.jk-button,.jk-icon-button,.jk-tab,.jk-more-item,.jk-back,.jk-help,.jk-link):focus-visible,.jk-search:focus-within,.jk-table input:focus-visible {outline:var(--jk-focus-ring);outline-offset:1px}
 
 /* More actions */
 .jk-more {position:relative}
@@ -459,6 +464,43 @@ textarea.jk-input {min-height:80px;resize:vertical}
 .jk-disclosure[open] > summary::before {transform:rotate(45deg)}
 .jk-disclosure[open] > summary {margin-bottom:var(--jk-space-3)}
 .jk-disclosure > summary:focus-visible {outline:2px solid var(--jk-focus);outline-offset:2px;border-radius:4px}
+
+/* Button sizes and the loading spinner (Button component) */
+.jk-button-sm {min-height:28px;padding:3px 10px;font-size:var(--jk-text-xs)}
+.jk-button-lg {min-height:40px;padding:8px 16px;font-size:var(--jk-text-md)}
+.jk-button[aria-busy=true] {cursor:progress}
+.jk-spinner {flex:none;width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:jk-spin .7s linear infinite}
+@keyframes jk-spin {to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.jk-spinner{animation-duration:2.4s}}
+
+/* Required marker and fields with an error */
+.jk-required {color:var(--jk-critical-text);font-weight:650}
+.jk-field.has-error :is(input:not([type=checkbox]):not([type=radio]):not([type=color]),select,textarea) {box-shadow:0 0 0 1px var(--jk-critical-dot) inset}
+
+/* Sortable column headings */
+.jk-sort {display:inline-flex;align-items:center;gap:4px;margin:-4px -6px;padding:4px 6px;border-radius:6px;font:inherit;color:inherit;cursor:pointer}
+.jk-sort svg {opacity:.45}
+.jk-sort:hover,.jk-sort.is-sorted {color:var(--jk-text)}
+.jk-sort.is-sorted svg {opacity:1}
+.jk-sort:focus-visible {outline:var(--jk-focus-ring);outline-offset:1px}
+.jk-tab:focus-visible {outline-offset:-2px}
+
+/* Combobox: a dropdown you can type in */
+.jk-combobox {position:relative}
+.jk-combobox > .jk-input {padding-right:32px;text-overflow:ellipsis}
+.jk-combobox > .jk-input[aria-invalid=true] {box-shadow:0 0 0 1px var(--jk-critical-dot) inset}
+.jk-combobox-arrow {position:absolute;right:10px;top:9px;color:var(--jk-text-subdued);pointer-events:none}
+.jk-combobox-list {position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:var(--jk-z-dropdown);max-height:240px;overflow-y:auto;padding:4px;border-radius:var(--jk-radius-sm);background:var(--jk-surface);box-shadow:var(--jk-shadow-raised)}
+.jk-combobox-list[hidden] {display:none}
+.jk-combobox-option {display:flex;align-items:center;gap:var(--jk-space-2);min-height:34px;padding:6px 10px;border-radius:6px;font-size:var(--jk-text-sm);font-weight:400;color:var(--jk-text);cursor:pointer}
+.jk-combobox-option.is-active {background:var(--jk-surface-hover)}
+.jk-combobox-option[aria-selected=true] {font-weight:600}
+.jk-combobox-empty {padding:10px 12px;font-size:var(--jk-text-sm);color:var(--jk-text-subdued)}
+
+/* Kit demo page */
+.jk-swatches {display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:var(--jk-space-3)}
+.jk-swatch {display:flex;flex-direction:column;gap:4px;font-size:var(--jk-text-xs);color:var(--jk-text-subdued)}
+.jk-swatch span {display:block;height:40px;border-radius:var(--jk-radius-sm);box-shadow:0 0 0 1px var(--jk-border) inset}
 
 /*
  * Older class names still used by a few admin components (product builder sections, password

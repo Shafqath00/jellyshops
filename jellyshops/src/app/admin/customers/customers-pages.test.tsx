@@ -1,4 +1,5 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
+import { expectNoRawCodes } from "@/test/raw-codes";
 import userEvent from "@testing-library/user-event";
 import axe from "axe-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -26,6 +27,7 @@ describe("customer pages", () => {
     const user = userEvent.setup();
     const { container } = render(<CustomersPage />);
     expect(await screen.findByText("Asha Rao")).toBeVisible();
+    expectNoRawCodes();
     expect(screen.getByRole("tab", { name: /Never ordered/ })).toHaveTextContent("1");
     await user.click(screen.getByRole("tab", { name: /Email subscribers/ }));
     expect(screen.queryByText("Sam Lee")).toBeNull();

@@ -1,4 +1,5 @@
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
+import { expectNoRawCodes } from "@/test/raw-codes";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import StockPage from "./page";
@@ -19,6 +20,7 @@ describe("stock page", () => {
     render(<StockPage />);
     const table = await screen.findByRole("table");
     expect(within(table).getByText("5012345678900")).toBeVisible();
+    expectNoRawCodes();
     // Shoppers waiting for the low-stock variant to come back.
     expect(within(table).getByTitle("Shoppers who asked to be emailed when it is back")).toHaveTextContent("3");
     expect(within(table).getByText("Low stock")).toBeVisible();

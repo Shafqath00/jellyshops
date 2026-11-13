@@ -1,11 +1,14 @@
 export { AdminPage, Card, DetailLayout, MoreActions, type AdminPageProps, type PageAction } from "./admin-page";
 export { Banner, CardSkeleton, EmptyState, HelpTip, SkeletonBlock, TableSkeleton } from "./feedback";
+export { Button, buttonClass, type ButtonSize, type ButtonVariant } from "./button";
+export { Combobox, type ComboboxOption } from "./combobox";
 export { ConfirmDialog } from "./confirm-dialog";
-export { IndexTable, type BulkAction, type IndexColumn, type IndexTab, type IndexTableProps } from "./index-table";
+export { IndexTable, type BulkAction, type IndexColumn, type IndexSort, type IndexTab, type IndexTableProps, type SortDirection } from "./index-table";
 export { Picker, type PickerItem } from "./picker";
 export { Field, ResourceForm, SaveBar, useUnsavedChangesWarning } from "./resource-form";
 export { StatusBadge } from "./status-badge";
 export { humanizeCode, statusInfo, statusLabel, statusOptions, type StatusKind, type StatusTone } from "./status";
+export { Tabs, type TabItem } from "./tabs";
 export { TagInput } from "./tag-input";
 export { ToastProvider, useToast } from "./toast";
 export { SelectList, SplitLayout, type SelectListItem } from "./select-list";

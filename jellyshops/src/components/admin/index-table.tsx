@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from "react";
-import { Search } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Search } from "lucide-react";
 import { Banner, TableSkeleton } from "./feedback";
+import { Button } from "./button";
+import { Tabs } from "./tabs";
 
 export type IndexColumn<T> = {
   id: string;
@@ -11,7 +13,12 @@ export type IndexColumn<T> = {
   /** On phones each row becomes a card: `primary` is its heading, `hidden` columns are left out. */
   mobile?: "primary" | "show" | "hidden";
   hideHeader?: boolean;
+  /** Set to let merchants sort by this column from its heading. The page does the sorting (usually the API). */
+  sortKey?: string;
 };
+
+export type SortDirection = "asc" | "desc";
+export type IndexSort = { key: string; direction: SortDirection; onChange: (key: string, direction: SortDirection) => void };
 
 export type BulkAction = { label: string; onAction: (ids: string[]) => void | Promise<void>; destructive?: boolean };
 export type IndexTab = { id: string; label: string; count?: number };
@@ -33,6 +40,11 @@ export type IndexTableProps<T> = {
   search?: { value: string; onChange: (value: string) => void; placeholder: string; label: string; onSubmit?: () => void };
   /** Extra filter and sort controls shown beside the search box. */
   filters?: ReactNode;
+  /**
+   * Which column the rows are sorted by. Column headings are hidden on phones, so a page that
+   * must sort on phones also keeps a "Sort" select in `filters`.
+   */
+  sort?: IndexSort;
   bulkActions?: BulkAction[];
   emptyState: ReactNode;
   pagination?: { summary?: string; hasPrevious: boolean; hasNext: boolean; onPrevious: () => void; onNext: () => void };
@@ -45,7 +57,7 @@ function openRow(event: MouseEvent<HTMLTableRowElement>) {
   event.currentTarget.querySelector<HTMLAnchorElement>("a[href]")?.click();
 }
 
-export function IndexTable<T>({ label, rows, rowKey, rowLabel, columns, loading = false, error, onRetry, tabs, activeTab, onTabChange, search, filters, bulkActions = [], emptyState, pagination }: IndexTableProps<T>) {
+export function IndexTable<T>({ label, rows, rowKey, rowLabel, columns, loading = false, error, onRetry, tabs, activeTab, onTabChange, search, filters, sort, bulkActions = [], emptyState, pagination }: IndexTableProps<T>) {
   const [picked, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState("");
   const [bulkError, setBulkError] = useState("");
@@ -65,10 +77,10 @@ export function IndexTable<T>({ label, rows, rowKey, rowLabel, columns, loading 
   }
   const showSkeleton = loading && rows.length === 0;
   return <section className="jk-index" aria-label={label}>
-    {tabs && <div className="jk-tabs" role="tablist" aria-label={`${label} views`}>{tabs.map((tab) => <button key={tab.id} type="button" role="tab" aria-selected={tab.id === activeTab} className="jk-tab" onClick={() => onTabChange?.(tab.id)}>{tab.label}{tab.count !== undefined && <span className="jk-tab-count">{tab.count}</span>}</button>)}</div>}
+    {tabs && <Tabs label={`${label} views`} tabs={tabs} active={activeTab} onChange={onTabChange} />}
     {selected.size > 0 ? <div className="jk-bulkbar">
       <strong>{selected.size} selected</strong>
-      {bulkActions.map((action) => <button key={action.label} type="button" className={`jk-button ${action.destructive ? "jk-button-critical" : ""}`} disabled={Boolean(busy)} onClick={() => void runBulk(action)}>{busy === action.label ? "Working…" : action.label}</button>)}
+      {bulkActions.map((action) => <Button key={action.label} variant={action.destructive ? "destructive-quiet" : "secondary"} loading={busy === action.label} disabled={Boolean(busy)} onClick={() => void runBulk(action)}>{action.label}</Button>)}
       <button type="button" className="jk-button jk-button-plain" onClick={() => setSelected(new Set())}>Clear selection</button>
     </div> : (search || filters) && <div className="jk-toolbar">
       {search && <form className="jk-search" role="search" onSubmit={(event) => { event.preventDefault(); search.onSubmit?.(); }}>
@@ -83,7 +95,12 @@ export function IndexTable<T>({ label, rows, rowKey, rowLabel, columns, loading 
       <div className="jk-table-scroll"><table className="jk-table" aria-busy={loading}>
         <thead><tr>
           {selectable && <th className="jk-check-cell"><input ref={selectAll} type="checkbox" aria-label={`Select all ${label.toLowerCase()} on this page`} checked={allSelected} onChange={() => setSelected(allSelected ? new Set() : new Set(keys))} /></th>}
-          {columns.map((column) => <th key={column.id} scope="col" className={column.align === "end" ? "is-end" : ""}>{column.hideHeader ? <span className="sr-only">{column.header}</span> : column.header}</th>)}
+          {columns.map((column) => { const sorted = sort && column.sortKey === sort.key ? sort.direction : undefined; const Arrow = sorted === "asc" ? ArrowUp : sorted === "desc" ? ArrowDown : ArrowUpDown;
+            return <th key={column.id} scope="col" className={column.align === "end" ? "is-end" : ""} aria-sort={sort && column.sortKey ? (sorted === "asc" ? "ascending" : sorted === "desc" ? "descending" : "none") : undefined}>
+              {sort && column.sortKey
+                ? <button type="button" className={`jk-sort ${sorted ? "is-sorted" : ""}`} onClick={() => sort.onChange(column.sortKey!, sorted === "asc" ? "desc" : "asc")}>{column.header}<Arrow size={13} aria-hidden="true" /></button>
+                : column.hideHeader ? <span className="sr-only">{column.header}</span> : column.header}
+            </th>; })}
         </tr></thead>
         <tbody>{rows.map((row) => { const key = rowKey(row); return <tr key={key} onClick={openRow} className={selected.has(key) ? "is-selected" : ""}>
           {selectable && <td className="jk-check-cell"><input type="checkbox" aria-label={`Select ${rowLabel(row)}`} checked={selected.has(key)} onChange={() => toggle(key)} /></td>}

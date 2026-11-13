@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { expectNoRawCodes } from "@/test/raw-codes";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import PaymentsPage from "./page";
 
@@ -20,5 +21,6 @@ describe("PaymentsPage", () => {
 
     expect(screen.getByRole("heading", { name: /payments & payouts/i })).toBeVisible();
     expect(await screen.findByRole("heading", { name: /payment readiness/i })).toBeVisible();
+    expectNoRawCodes();
   });
 });
