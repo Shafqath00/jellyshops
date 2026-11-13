@@ -1,5 +1,9 @@
 import { getV4StarterPack, isV4StarterPackId, listV4StarterPacks, validateV4StarterPack, type V4StarterPack } from "@jelly/storefront-registry";
-import { discoveredThemes } from "./themes/index.generated.js";
+import { discoveredThemes as discoveredManifests } from "./themes/index.generated.js";
+import { discoveredStarters } from "./themes/starters.generated.js";
+
+/** Folder themes with their starters (only installing, upgrading and previewing load the starters file). */
+const discoveredThemes: DiscoveredTheme[] = discoveredManifests.map((entry) => ({ ...entry, ...discoveredStarters[entry.manifest.id] }));
 import { isManuallyRegistered, registerFolderTheme, setFolderThemeComplete } from "./theme-registry.js";
 import type { SectionNode } from "@jelly/storefront-schema";
 import type { DiscoveredTheme } from "./types.js";

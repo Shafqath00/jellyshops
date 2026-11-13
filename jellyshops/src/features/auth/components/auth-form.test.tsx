@@ -8,7 +8,9 @@ const { supabase, useAuth, router } = vi.hoisted(() => ({
   router: { replace: vi.fn() },
 }));
 
-vi.mock("@/features/auth/providers/auth-provider", () => ({ supabase, useAuth }));
+vi.mock("@/features/auth/providers/auth-provider", () => ({ useAuth }));
+// The sign-in client is loaded on demand (supabase-clients.ts).
+vi.mock("@/features/auth/lib/supabase-clients", () => ({ merchantSupabase: async () => supabase, supabaseConfigured: true }));
 vi.mock("next/navigation", () => ({
   useRouter: () => router,
   useSearchParams: () => new URLSearchParams(),

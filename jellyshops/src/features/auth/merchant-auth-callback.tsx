@@ -2,15 +2,15 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "./providers/auth-provider";
+import { merchantSupabase, supabaseConfigured } from "./lib/supabase-clients";
 
 export function MerchantAuthCallback({ code, nextPath }: { code: string; nextPath: string }) {
   const router = useRouter(); const [error, setError] = useState("");
-  const confirmationError = !supabase || !code ? "This confirmation link is incomplete or expired. Please sign in and request a new link." : error;
+  const confirmationError = !supabaseConfigured || !code ? "This confirmation link is incomplete or expired. Please sign in and request a new link." : error;
   useEffect(() => {
     let active = true;
-    if (!supabase || !code) return () => { active = false; };
-    void supabase.auth.exchangeCodeForSession(code).then(({ error: exchangeError }) => {
+    if (!supabaseConfigured || !code) return () => { active = false; };
+    void merchantSupabase().then(async (supabase) => supabase ? (await supabase.auth.exchangeCodeForSession(code)).error : new Error("Sign-in is not set up.")).then((exchangeError) => {
       if (!active) return;
       if (exchangeError) { setError("This confirmation link has expired or was already used. Please sign in and request a new link."); return; }
       const target = nextPath.startsWith("/") && !nextPath.startsWith("//") ? nextPath : "/admin";

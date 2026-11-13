@@ -1,6 +1,7 @@
 import { partSectionType, sectionLabel, type V4StarterPack } from "@jelly/storefront-registry";
 import type { BlockNode, PageType, SectionNode } from "@jelly/storefront-schema";
-import { discoveredThemes } from "./themes/index.generated.js";
+import { discoveredThemes as discoveredManifests } from "./themes/index.generated.js";
+import { discoveredStarters } from "./themes/starters.generated.js";
 import { createStarterPack } from "./starter-packs.js";
 import type { DiscoveredTheme } from "./types.js";
 
@@ -27,7 +28,8 @@ interface RevisionLayout extends LayoutRevisionInfo { pack: V4StarterPack }
 const CURRENT_LABEL = "Current layout";
 
 function folderTheme(themeId: string): DiscoveredTheme | undefined {
-  return discoveredThemes.find((entry) => entry.manifest.id === themeId);
+  const entry = discoveredManifests.find((item) => item.manifest.id === themeId);
+  return entry ? { ...entry, ...discoveredStarters[entry.manifest.id] } : undefined;
 }
 
 /** Every layout the theme's starter has had, oldest first; the last one is the current starter. */

@@ -182,6 +182,20 @@ export function setFolderThemeComplete(id: string, complete: boolean, version?: 
   const key = `${id}@${version ?? versionOf(getThemeDefinition(id))}`;
   if (complete) completeFolderThemes.add(key); else completeFolderThemes.delete(key);
 }
+// Folder themes whose starter brings its own header and footer (known from the manifest index, no starter needed).
+for (const { manifest, ownChrome } of discoveredThemes) if (ownChrome && !manualIds.has(manifest.id)) completeFolderThemes.add(`${manifest.id}@${manifest.version}`);
+
+/**
+ * Registers an uploaded theme for drawing pages: its manifest, and whether its starter brings its own header and
+ * footer. Store pages use this instead of registerThemeProject, so they never load the starter-pack code.
+ */
+export function registerThemeForPages(manifest: ThemeManifestInput, starter?: { globalSections?: Record<string, { type?: string }> } | null): ThemeDefinition {
+  const theme = registerFolderTheme(manifest);
+  const globals = Object.values(starter?.globalSections ?? {});
+  setFolderThemeComplete(manifest.id, globals.some((section) => section?.type === "header") && globals.some((section) => section?.type === "footer"), manifest.version);
+  return theme;
+}
+
 export function isCompleteStorefrontTheme(id: string | null | undefined, version?: string | null): boolean {
   if (!id) return false;
   try { return (COMPLETE_STOREFRONT_THEME_IDS as readonly string[]).includes(id) || completeFolderThemes.has(`${id}@${version ?? versionOf(getThemeDefinition(id))}`); } catch { return false; }

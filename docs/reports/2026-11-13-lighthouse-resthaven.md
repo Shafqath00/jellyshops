@@ -42,3 +42,14 @@ Result (two runs, local production build, same store): **performance average 73*
 ### What still holds phones back
 
 The page sends **547 KB of JavaScript (compressed, 19 files)** before the photo's turn on a slow phone connection, and the phone spends 1.1–1.3 s running it. The largest parts: Zod validation schemas checked in the browser (91 KB), React itself (72 KB), the themes package with every theme's settings, starter pages and Resthaven's layout history (65 KB), the Supabase sign-in library (56 KB, loaded on public store pages by the merchant and customer sign-in providers in the root layout), the renderer (53 KB). Cutting these is the next step: load Supabase only on sign-in and account pages, keep starter pages and layout history out of the shopper's bundle, and validate published snapshots on the server only.
+
+## Speed fixes, round 2: less JavaScript (same day)
+
+- **Sign-in library on demand.** The merchant and customer sign-in clients are created on first use (`src/features/auth/lib/supabase-clients.ts`, dynamic `import()`), so the Supabase library is no longer part of every store page's start-up JavaScript.
+- **Starter pages and layout history out of store pages.** The theme index script now writes two files: `index.generated.ts` (manifests, plus whether a theme's starter brings its own header and footer) and `starters.generated.ts` (starters and layout histories, used only by installing, upgrading and previewing). Uploaded themes are registered for pages with `registerThemeForPages` (manifest and header/footer flag only), and the themes package marks `theme-registry.js` as its only module with load-time work (`sideEffects`), so the bundler drops the rest when a page does not use it.
+
+Start-up JavaScript on the store home page: **547 KB to 457 KB** (compressed). Phone main-thread work: about 3 s to 2.2–2.6 s.
+
+Lighthouse (two runs): performance 70 and 75 (desktop 82–96, phone 49–65). The phone score is now dominated by the server's first response in this setup: **2.2–5.2 s**, because a local frontend and backend talk to the remote staging database for every page. A store deployed next to its database needs its own measurement. Caching each store's data for a short time on the server (for example 30 seconds) would remove most of that wait for repeat visitors; it means a newly published design or product change can take up to that long to appear, so it needs a decision.
+
+Still in the start-up JavaScript: Zod validation schemas (shared schemas and section definitions used by the renderer in the browser), React, the renderer and the built-in starter packs in the registry package.

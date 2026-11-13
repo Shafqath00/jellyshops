@@ -1,4 +1,4 @@
-import { registerThemeProject, type DiscoveredTheme } from "@jelly/storefront-themes";
+import { registerThemeForPages, type DiscoveredTheme } from "@jelly/storefront-themes";
 import { rescopeCustomCss } from "@jelly/storefront-schema";
 
 /**
@@ -22,7 +22,8 @@ const loaded = new Map<string, InstalledTheme>();
 /** Makes the theme known to the registry (once per version in this process). */
 export function registerInstalledTheme(theme: InstalledTheme): void {
   if (!registered.has(theme.versionId)) {
-    registerThemeProject({ manifest: theme.manifest, ...(theme.starter ? { starter: theme.starter } : {}) });
+    // The manifest and its header-and-footer flag are all a page needs (the starter-pack code stays out of store pages).
+    registerThemeForPages(theme.manifest, theme.starter);
     registered.add(theme.versionId);
   }
   loaded.set(theme.versionId, theme);

@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { ArrowRight, Store } from "lucide-react";
-import { supabase, useAuth } from "@/features/auth/providers/auth-provider";
+import { useAuth } from "@/features/auth/providers/auth-provider";
+import { merchantSupabase } from "@/features/auth/lib/supabase-clients";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,9 +22,9 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!supabase) return;
-
     const data = new FormData(event.currentTarget);
+    const supabase = await merchantSupabase();
+    if (!supabase) return;
     const email = String(data.get("email") ?? "");
     const password = String(data.get("password") ?? "");
 

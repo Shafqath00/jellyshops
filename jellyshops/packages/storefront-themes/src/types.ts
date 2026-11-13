@@ -65,6 +65,8 @@ export interface ThemeLayoutHistory {
 
 export interface DiscoveredTheme {
   manifest: ThemeManifestInput;
+  /** The starter brings its own header and footer (worked out by the theme index script, so store pages need no starter). */
+  ownChrome?: boolean;
   starter?: {
     /** Optional main menu; without it the store starts with Home and Search. */
     menus?: V4StarterPack["menus"];
