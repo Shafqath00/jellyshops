@@ -14,8 +14,9 @@ it("self-hosts every font the theme settings offer", () => {
   }
 });
 
-it("only preloads the two default fonts", () => {
-  expect(source.match(/preload: false/g)).toHaveLength(FONT_OPTIONS.length - 4);
+it("preloads no font, so a page downloads only the fonts its own CSS uses", () => {
+  // Every font loader sets preload: false (the library has no fonts of its own besides Georgia and Arial).
+  expect(source.match(/preload: false/g)).toHaveLength(FONT_OPTIONS.length - 2);
 });
 
 it("offers the same fonts in section settings as in theme settings", () => {

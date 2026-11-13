@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { ShopProvider } from "@/contexts/shop-context";
-import { AuthProvider } from "@/features/auth/providers/auth-provider";
 import { storefrontFontVariables } from "./fonts";
 import "./globals.css";
 import "./themes/section-defaults.css";
@@ -31,9 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth" className={storefrontFontVariables}>
       <body>
-        <AuthProvider>
-          <ShopProvider>{children}</ShopProvider>
-        </AuthProvider>
+        <ShopProvider>{children}</ShopProvider>
       </body>
     </html>
   );

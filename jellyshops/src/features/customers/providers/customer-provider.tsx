@@ -27,6 +27,11 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<{ session: Session | null; loading: boolean; error: string | null }>({ session: null, loading: supabaseConfigured, error: null });
   useEffect(() => {
     if (!supabaseConfigured) return;
+    // Most visitors never signed in: with no saved customer session and no sign-in link to finish, nothing needs the
+    // sign-in library, so store pages do not download it (it loads when someone signs in or returns from an email link).
+    let saved = false;
+    try { saved = Object.keys(window.localStorage).some((key) => key.startsWith("jelly-customer-auth")); } catch { saved = true; }
+    if (!saved && !new URL(window.location.href).searchParams.get("code")) { setState({ session: null, loading: false, error: null }); return; }
     let active = true; let changed = false; let unsubscribe: () => void = () => undefined;
     void customerSupabase().then((client) => {
       if (!active) return;

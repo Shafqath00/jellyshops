@@ -30,11 +30,12 @@ import {
 
 /**
  * Self-hosted storefront fonts. Theme settings refer to them by family name; see `fontStack` in
- * @jelly/storefront-themes (every font listed there needs its variable here). Only Fraunces and
- * Inter are preloaded; the others download when a store's CSS uses them.
+ * @jelly/storefront-themes (every font listed there needs its variable here). None is preloaded: a page
+ * downloads the fonts its own CSS uses. (Fraunces and Inter used to be preloaded for every page, 83 KB that
+ * stores on other fonts never drew; Phase 6 phone speed work.)
  */
-export const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", display: "swap" });
-export const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+export const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", display: "swap", preload: false });
+export const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap", preload: false });
 
 const playfairDisplay = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair-display", display: "swap", preload: false });
 const cormorantGaramond = Cormorant_Garamond({ subsets: ["latin"], variable: "--font-cormorant-garamond", display: "swap", preload: false });

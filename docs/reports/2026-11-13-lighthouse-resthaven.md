@@ -59,3 +59,22 @@ Still in the start-up JavaScript: Zod validation schemas (shared schemas and sec
 The store's details, published design, products and collections are now reused for 30 seconds between page views (`STOREFRONT_CACHE_SECONDS` in `src/features/storefront/server-storefront.ts`, Next's `fetch` cache with the tag `storefront:<slug>`). A newly published design or product change can take up to 30 seconds to reach shoppers; prices and stock are checked again at checkout. The password check, search results and custom-field values are still fetched every time.
 
 First byte on a repeat visit: about 3 s to **0.57 s** in this setup. Lighthouse (two runs): **75 and 77** (desktop 82–97, phone 57–71). Still under the 80 budget on phones; what is left is mostly start-up JavaScript (Zod schemas, React, the renderer, built-in starter packs in the registry package) and the remaining uncached calls.
+
+## Speed fixes, round 4: phone speed on the demo store (same day)
+
+Measured on the 24-product demo store (`resthaven-demo`), local production build.
+
+**What the score is made of.** Lighthouse scores a phone by simulating a slow 4G connection (about 200 KB per second) and a processor four times slower. Everything the page asks for before its largest picture shares that connection, so the score follows the *bytes* the page requests (HTML, CSS, fonts, JavaScript and the picture itself) and the main-thread work. An HTTP/2 front (what a CDN gives real visitors) changed phone scores by only a few points (home 56 to 65, first paint 2.3 s to 1.9 s), so queueing on this machine's HTTP/1.1 server was not the main problem.
+
+**Fixes**
+- **No font is preloaded.** Fraunces and Inter were preloaded on every store page (83 KB), including stores on other fonts (Resthaven uses Cormorant Garamond and Figtree). A page now downloads only the fonts its CSS uses. Best practices 96 to 100.
+- **Smaller copies of Resthaven's photos.** `scripts/generate-theme-assets.mjs` writes `name-640.webp` and `name-1024.webp` next to every 1536 px photo in `public/themes/jelly-resthaven/`; `cardPhotoSrcSet` sends them as `srcset`. The home hero goes from 171 KB to 30 KB on a phone. A test keeps the list of themes with copies, the copies and the assumed width in step.
+- **Merchant sign-in only where it is used.** `AuthProvider` moved from the root layout to the admin, login, signup and onboarding layouts. Every store page used to start it (it loaded the sign-in library and asked for a session).
+- **Customer sign-in loads on demand.** The customer provider only loads the sign-in library when a customer session is saved in the browser or a sign-in link (`?code=`) is being finished.
+
+**Result** (3 runs, standard setup): performance average **76-77** (before 73); phone home 57 to 66-67, collection 56-64, product 55-66; desktop 80-98. Accessibility 100, best practices 100, SEO 100. With the HTTP/2 front: phone home 65-81, average 69 (before 62).
+
+**What still holds phones under 80** (not fixed, each is its own piece of work)
+1. **JavaScript, 456 KB compressed:** Zod validation (89 KB, the section and theme definitions are built from Zod schemas that run in the browser), React (72 KB), the renderer (52 KB) and the themes package, which still carries every theme's settings (about 60 KB). Fixing the first and last needs the section and theme definitions split from their validation.
+2. **CSS, 120 KB compressed, render-blocking:** a Resthaven store also downloads the CSS of the other five themes (about 50 KB). Loading only the active theme's CSS means moving theme styles out of the root layout into per-theme files for the store layout, the editor and every preview.
+3. **Store photos come from the API origin**, a second connection, with 1 s or more of server time per photo in this setup (local backend, remote database). A deployed store needs its own measurement; serving photos from a CDN would remove most of it.

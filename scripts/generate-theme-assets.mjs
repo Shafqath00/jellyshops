@@ -1,6 +1,8 @@
 // Turns a folder theme's theme.css into the app stylesheet (scoped to the theme) and copies its assets to public/.
 //   node scripts/generate-theme-assets.mjs jelly-halo
-import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
 import { scopeCustomCss } from "../jellyshops/packages/storefront-schema/dist/index.js";
 
 const id = process.argv[2];
@@ -15,4 +17,15 @@ writeFileSync(new URL(`../jellyshops/src/app/themes/${id}.css`, import.meta.url)
 const publicAssets = new URL(`../jellyshops/public/themes/${id}/`, import.meta.url);
 mkdirSync(publicAssets, { recursive: true });
 cpSync(new URL("assets/", source), publicAssets, { recursive: true });
-console.log(`Generated ${id} styles and public assets`);
+
+// Smaller copies of wide photos for phones: name-640.webp and name-1024.webp next to the original, in public/ only.
+// The renderer asks for them with srcset (cardPhotoSrcSet in storefront-ui lists which themes have them).
+const sharp = createRequire(import.meta.url)(fileURLToPath(new URL("../jellyshops/node_modules/sharp", import.meta.url)));
+let variants = 0;
+for (const file of readdirSync(new URL("assets/", source)).filter((name) => /^[a-z0-9-]+\.webp$/.test(name) && !/-(640|1024)\.webp$/.test(name))) {
+  const original = fileURLToPath(new URL(`assets/${file}`, source));
+  const { width = 0 } = await sharp(original).metadata();
+  if (width < 1500) continue;
+  for (const size of [640, 1024]) { await sharp(original).resize({ width: size }).webp({ quality: 80 }).toFile(fileURLToPath(new URL(`${file.replace(/\.webp$/, "")}-${size}.webp`, publicAssets))); variants += 1; }
+}
+console.log(`Generated ${id} styles and public assets${variants ? ` (${variants} smaller photo copies)` : ""}`);

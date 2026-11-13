@@ -43,7 +43,20 @@ const SAFE_IMAGE = /^(https:\/\/|\/api\/public\/media\/)[^\s"'<>()]+$/;
  * fits it instead of the 1536px original. Other addresses (sample photos, outside images) are used as they are.
  */
 const MEDIA_PHOTO = /\/api\/public\/media\/[^/?#]+\/[^/?#]+(?:[?#]|$)/;
+/**
+ * Theme photos that ship with smaller copies (name-640.webp, name-1024.webp, written next to the original by
+ * scripts/generate-theme-assets.mjs). Only built-in themes listed here have them, and every original is 1536px wide
+ * (a test keeps the list, the copies and the width in step); uploaded themes' photos are used as they are.
+ */
+export const THEME_PHOTOS_WITH_COPIES = ["jelly-resthaven"] as const;
+export const THEME_PHOTO_ORIGINAL_WIDTH = 1536;
+const THEME_PHOTO = new RegExp(`^/themes/(${THEME_PHOTOS_WITH_COPIES.join("|")})/([a-z0-9-]+)\\.webp$`);
 export function cardPhotoSrcSet(url: string): string | undefined {
+  const theme = THEME_PHOTO.exec(url);
+  if (theme && !/-(640|1024)$/.test(theme[2])) {
+    const base = `/themes/${theme[1]}/${theme[2]}`;
+    return `${base}-640.webp 640w, ${base}-1024.webp 1024w, ${url} ${THEME_PHOTO_ORIGINAL_WIDTH}w`;
+  }
   if (!MEDIA_PHOTO.test(url)) return undefined;
   return [320, 640, 1280].map((width) => `${url}${url.includes("?") ? "&" : "?"}w=${width} ${width}w`).join(", ");
 }

@@ -71,7 +71,9 @@ export async function dev(folder, flags = {}) {
         const prefix = `/themes/${project.manifest.id}/`;
         if (url.pathname.startsWith(prefix)) {
           const relative = normalize(decodeURIComponent(url.pathname.slice(prefix.length)));
-          const file = join(project.directory, "assets", relative);
+          let file = join(project.directory, "assets", relative);
+          // Smaller photo copies (name-640.webp) exist only in the app's public folder: use the original here.
+          if (!existsSync(file) && /-(640|1024)\.webp$/.test(file)) file = file.replace(/-(640|1024)\.webp$/, ".webp");
           if (relative.startsWith("..") || !file.startsWith(join(project.directory, "assets")) || !existsSync(file) || !statSync(file).isFile()) { response.statusCode = 404; return response.end("Not found"); }
           response.setHeader("content-type", MIME[extname(file).toLowerCase()] ?? "application/octet-stream");
           return response.end(readFileSync(file));
