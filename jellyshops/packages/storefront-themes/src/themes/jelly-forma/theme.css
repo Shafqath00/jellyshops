@@ -43,7 +43,8 @@
 .jelly-footer-links { display: flex; flex-wrap: wrap; gap: var(--j-space-3xl); }
 .jelly-footer-links .jelly-menu { display: grid; gap: 0; } .jelly-footer-links a { font-weight: 400; }
 .jelly-footer-credit { margin: var(--j-space-xl) 0 0; padding-top: var(--j-space-lg); border-top: 1px solid var(--j-color-border); font-size: var(--j-type-small-size); }
-[data-section-type="hero"], .jelly-hero { background: transparent; }
+/* Heroes sit on the page, or on their photo, unless a hero without a photo behind it has a colour scheme: then it paints it (its text follows the scheme). */
+[data-section-type="hero"]:is(:not([data-scheme]), :has(> .jelly-hero[data-layout="overlay"])), [data-section-type="hero"]:is(:not([data-scheme]), :has(> .jelly-hero[data-layout="overlay"])) .jelly-hero { background: transparent; }
 .jelly-hero.has-image > .jelly-container { grid-template-columns: 1fr; gap: 0; }
 .jelly-hero > .jelly-container { position: relative; display: grid; min-height: var(--forma-hero-height, 24rem); overflow: hidden; border-radius: var(--j-radius-lg); }
 .jelly-hero-media { position: absolute; inset: 0; min-height: 0; overflow: hidden; } .jelly-hero-media img { width: 100%; height: 100%; object-fit: cover; }

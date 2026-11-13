@@ -31,11 +31,11 @@ jobs:
         env:
           NODE_ENV: production
   design-lint:
-    # Measures every theme preview page at 3 widths against docs/design-contract.md; fails on problems not in
+    # Measures every theme preview page at 3 widths against docs/design-contract.md (then the merchant-edit fuzz); fails on problems not in
     # jellyshops/e2e/design-lint.baseline.json. Non-blocking until it has passed on Linux once (the baseline was
     # recorded on Windows and font rendering differs); then remove continue-on-error.
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -52,6 +52,14 @@ jobs:
         working-directory: jellyshops
         env:
           JELLY_E2E_FRONTEND_PORT: "3300"
+      # Merchant-edit fuzz: every theme after merchant-style edits (sections moved, schemes swapped, fonts changed,
+      # blocks removed) must still lay out and pass WCAG A/AA. Seeds 1-3; reproduce with /theme-preview/<id>?edits=<seed>.
+      - run: npx playwright test e2e/merchant-edit-fuzz.spec.ts --reporter=line
+        if: always()
+        working-directory: jellyshops
+        env:
+          JELLY_E2E_FRONTEND_PORT: "3300"
+          JELLY_EDIT_SEEDS: "1,2,3"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

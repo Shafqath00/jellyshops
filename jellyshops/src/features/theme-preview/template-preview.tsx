@@ -16,6 +16,7 @@ import type { CompareItem } from "@/features/storefront/compare-table";
 import { ComparePageView, CompareTrayView } from "@/features/storefront/components/compare-view";
 import type { ThemePreviewConfig } from "./configs";
 import { cardSignals, productSignals, recommendProducts } from "@/features/storefront/recommendations";
+import { merchantEditedSnapshot } from "@/lib/settings-fuzz/merchant-edits";
 
 /**
  * Renders a theme's starter template (home, product, collection, cart, search,
@@ -147,11 +148,14 @@ function fixtureReader(pages: Record<PreviewTemplate, StorefrontPageContext>): P
   };
 }
 
-export function TemplatePreview({ template, config, productLayout, collectionLayout, onOpenCompare }: { template: PreviewTemplate; config: ThemePreviewConfig; productLayout?: string; collectionLayout?: string; onOpenCompare?: () => void }) {
+export function TemplatePreview({ template, config, productLayout, collectionLayout, onOpenCompare, edits = 0 }: { /** Merchant-edit fuzz seed (0 = the starter as shipped). */ edits?: number; template: PreviewTemplate; config: ThemePreviewConfig; productLayout?: string; collectionLayout?: string; onOpenCompare?: () => void }) {
   const productPage = useProductContext(config);
   const cartPage = useCartContext(config);
   // Built once per theme: getStarterPack returns a fresh copy each call, which would re-run the loader every render.
-  const snapshot = useMemo(() => snapshotFromStarterPack(getStarterPack(config.packId), config.themeId), [config.packId, config.themeId]);
+  const snapshot = useMemo(() => {
+    const shipped = snapshotFromStarterPack(getStarterPack(config.packId), config.themeId);
+    return edits ? merchantEditedSnapshot(shipped, edits) : shipped;
+  }, [config.packId, config.themeId, edits]);
   // Themes that ship their own main menu are shown with it; the others with a sample menu that has dropdowns.
   const previewMenus = config.useStarterMenu ? snapshot.menus : menus;
   const cart = usePreviewCart();
@@ -170,7 +174,7 @@ export function TemplatePreview({ template, config, productLayout, collectionLay
   const page = pages[template];
   // The live loader picks the template and lays it out; it runs again only when the page or the data set changes.
   const [resolved, setResolved] = useState<{ key: string; route: ResolvedStorefrontRoute }>();
-  const routeKey = `${template}:${config.themeId}:${config.packId}:${config.product.id}:${config.collection.title}`;
+  const routeKey = `${template}:${config.themeId}:${config.packId}:${config.product.id}:${config.collection.title}:${edits}`;
   useEffect(() => {
     let active = true;
     void resolveStorefrontRoute(snapshot, routeRequest(template, page), fixtureReader(pages), async () => new Map()).then((route) => { if (active) setResolved({ key: routeKey, route }); });

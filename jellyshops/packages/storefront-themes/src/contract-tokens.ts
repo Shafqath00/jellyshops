@@ -159,7 +159,8 @@ export function contractSchemeRoles(scheme: ContractScheme): Record<string, stri
     "--j-color-bg": source.bg,
     "--j-color-text": source.text,
     "--j-color-surface": "color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg))",
-    "--j-color-muted": "color-mix(in srgb, var(--j-color-text) 75%, var(--j-color-bg))",
+    // 82%, not 75%: on strong mid-tone backgrounds (a bright blue scheme) 75% fell under WCAG AA (merchant-edit fuzz, Phase 6).
+    "--j-color-muted": "color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg))",
     "--j-color-border": "color-mix(in srgb, var(--j-color-text) 18%, transparent)",
     "--j-color-primary": source.button,
     "--j-color-on-primary": source.buttonText,

@@ -10,6 +10,7 @@ import type { ThemePreviewConfig } from "./configs";
 import { sampleReviews } from "./sample-reviews";
 import { messyPreviewConfig } from "./messy-data";
 import { TemplatePreview, type PreviewTemplate , previewHasCompare, usePreviewCart, withPreviewQuickAdd } from "./template-preview";
+import { merchantEditedSettings } from "@/lib/settings-fuzz/merchant-edits";
 
 /**
  * A theme's style guide: its tokens, type, controls and the shared
@@ -207,6 +208,9 @@ export function ThemePreviewPage({ config: themeConfig }: { config: ThemePreview
   const [view, setView] = useState<View>("guide");
   // The preview iframe must mount on the client so its load handler is attached before the frame loads.
   const ready = useSyncExternalStore(subscribeNoop, () => true, () => false);
+  // Merchant-edit fuzz (Phase 6): ?edits=<seed> shows every page as a merchant might have edited it (sections moved,
+  // schemes swapped, other fonts, blocks removed). e2e/merchant-edit-fuzz.spec.ts checks the result.
+  const edits = useSyncExternalStore(subscribeNoop, () => Number(new URLSearchParams(window.location.search).get("edits")) || 0, () => 0);
   // Designer theme styles, so each can be reviewed on every page; the first is the theme's default look.
   const themeStyles = listThemeStyles(config.themeId);
   const [styleId, setStyleId] = useState(themeStyles[0]?.id);
@@ -215,7 +219,7 @@ export function ThemePreviewPage({ config: themeConfig }: { config: ThemePreview
   const themeStyle = themeStyles.find((item) => item.id === styleId);
   const base = resolveTheme(config.themeId);
   const theme = themeStyle ? resolveTheme(config.themeId, applyThemeStyle(base.settings, themeStyle)) : base;
-  const style = resolveStorefrontThemeTokens(theme.id, theme.settings) as CSSProperties;
+  const style = resolveStorefrontThemeTokens(theme.id, edits ? merchantEditedSettings(theme.settings, edits) : theme.settings) as CSSProperties;
   const toggle = (active: boolean): CSSProperties => ({ padding: "6px 12px", borderRadius: 6, fontSize: 13, background: active ? "#1c1b19" : "transparent", color: active ? "white" : "#1c1b19" });
   return <main style={{ minHeight: "100vh", background: config.stageColor, padding: 16, display: "grid", gap: 16, gridTemplateRows: "auto 1fr" }}>
     <header style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
@@ -245,7 +249,7 @@ export function ThemePreviewPage({ config: themeConfig }: { config: ThemePreview
     </header>
     <div style={{ width: widths[device], maxWidth: "100%", margin: "0 auto", minHeight: "80vh", background: "white", boxShadow: "0 1px 3px rgba(0,0,0,.08)" }}>
       {ready && <StorefrontPreviewFrame title={`${config.name} style guide`} themeId={config.themeId} style={style} className="block h-[80vh] w-full border-0">
-        {view === "guide" ? <Guide key={data} config={config} /> : <TemplatePreview key={`${view}:${data}`} template={view as PreviewTemplate} config={config} productLayout={productLayout === "theme" ? undefined : productLayout} collectionLayout={collectionLayout === "theme" ? undefined : collectionLayout} onOpenCompare={() => setView("compare")} />}
+        {view === "guide" ? <Guide key={data} config={config} /> : <TemplatePreview key={`${view}:${data}:${edits}`} template={view as PreviewTemplate} config={config} edits={edits} productLayout={productLayout === "theme" ? undefined : productLayout} collectionLayout={collectionLayout === "theme" ? undefined : collectionLayout} onOpenCompare={() => setView("compare")} />}
       </StorefrontPreviewFrame>}
     </div>
   </main>;
