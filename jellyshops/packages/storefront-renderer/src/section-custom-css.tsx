@@ -1,5 +1,5 @@
 import { scopeCustomCss, type SectionNode } from "@jelly/storefront-schema";
-import { themeCustomCss } from "@jelly/storefront-themes";
+import { themeCustomCss } from "@jelly/storefront-themes/runtime";
 
 /** The section's own selector for its custom CSS, or null when it has none worth applying. */
 function scopeFor(section: SectionNode): { id: string; css: string } | null {

@@ -1,5 +1,5 @@
 import { createElement, type ComponentType } from "react";
-import { blockLabel, partSectionType } from "@jelly/storefront-registry";
+import { blockLabel, partSectionType } from "@jelly/storefront-registry/runtime";
 import type { BlockNode, SectionNode } from "@jelly/storefront-schema";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import type { StorefrontRuntimeContext } from "../runtime-context";

@@ -32,7 +32,8 @@ const settingDefinitionSchema = z.object({
  * Built-in designs another theme may build on (`extends`): the theme reuses the base design's stylesheets, shared
  * kit, section designs and settings, and brings only its own values (colours, fonts, schemes, defaults) and content.
  */
-export const THEME_BASE_IDS = ["jelly-signature", "jelly-avenue"] as const;
+export { THEME_BASE_IDS } from "./theme-base-ids.js";
+import { THEME_BASE_IDS } from "./theme-base-ids.js";
 
 export const themeManifestSchema = z.object({
   id: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),

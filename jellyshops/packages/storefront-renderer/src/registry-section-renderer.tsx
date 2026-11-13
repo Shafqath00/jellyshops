@@ -1,7 +1,7 @@
 import { translateSection, type RuntimeMenuV4, type SectionNode } from "@jelly/storefront-schema";
 import { CardCartContext, CardCompareContext, CardRatingsContext } from "./product-card";
 import { createElement } from "react";
-import { getSectionDefinition, sectionEmptyMessage, sectionLabel } from "@jelly/storefront-registry";
+import { sectionDisplayLabel, sectionEmptyMessage } from "@jelly/storefront-registry/runtime";
 import {
   defaultSectionRenderRegistry,
   type SectionRenderComponent,
@@ -12,7 +12,7 @@ import { SectionCustomCss, sectionCssProps } from "./section-custom-css";
 import { sectionStyleProps } from "./section-style";
 import { SectionFrame, sectionFrameWidth, sectionScheme } from "./section-frame";
 import type { CommerceDataProvider, RendererMode, RendererSelection, StorefrontPageContext } from "./types";
-import { getRecipe, getThemeDefinition, DEFAULT_THEME_ID } from "@jelly/storefront-themes";
+import { getRecipe, getThemeDefinition, DEFAULT_THEME_ID } from "@jelly/storefront-themes/runtime";
 import { RecipeSection } from "./sections/recipe-section";
 import { StorefrontLanguage } from "./words";
 
@@ -88,7 +88,7 @@ export function RegistrySectionRenderer({
     data-section-type={section.type}
     {...sectionCssProps(section)}
     {...sectionStyleProps(section.settings, section.responsive?.mobile, section.responsive?.tablet)}
-    {...(editor ? { "data-editor-section-id": section.id, "data-editor-label": getSectionDefinition(section.type, themeVersion)?.label ?? sectionLabel(section.type), "data-editor-selected": String(isSelected) } : {})}
+    {...(editor ? { "data-editor-section-id": section.id, "data-editor-label": sectionDisplayLabel(section.type, themeVersion), "data-editor-selected": String(isSelected) } : {})}
     onClick={editor ? (event) => {
       event.preventDefault();
       event.stopPropagation();

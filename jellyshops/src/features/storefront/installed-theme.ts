@@ -1,4 +1,4 @@
-import { registerThemeForPages, type DiscoveredTheme } from "@jelly/storefront-themes";
+import { registerThemeForPages, type DiscoveredTheme } from "@jelly/storefront-themes/runtime";
 import { rescopeCustomCss } from "@jelly/storefront-schema";
 
 /**

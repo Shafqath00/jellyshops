@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { storefrontPageTypes } from "./types.js";
-import { MAX_MENU_IMAGE_ALT, MAX_MENU_IMAGE_URL, type MenuImage } from "./menu-image.js";
+import { MAX_MENU_IMAGE_ALT, MAX_MENU_IMAGE_URL, type MenuImage } from "./menu-image-read.js";
 
 export const RUNTIME_STOREFRONT_SCHEMA_VERSION = 4 as const;
 

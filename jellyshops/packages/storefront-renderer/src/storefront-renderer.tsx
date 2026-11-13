@@ -3,7 +3,7 @@ import {
   getStorefrontPage,
   type StorefrontDocument,
 } from "@jelly/storefront-schema";
-import { resolveDesignTokens, legacyStylesAttribute, themeStyleId } from "@jelly/storefront-themes";
+import { resolveDesignTokens, legacyStylesAttribute, themeStyleId } from "@jelly/storefront-themes/runtime";
 import { PageRenderer } from "./page-renderer";
 import { RegistrySectionRenderer } from "./registry-section-renderer";
 import type { StorefrontRendererProps } from "./types";

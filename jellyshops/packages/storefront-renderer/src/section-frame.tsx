@@ -1,5 +1,5 @@
 import type { HTMLAttributes, ReactNode } from "react";
-import type { ContractScheme } from "@jelly/storefront-themes";
+import type { ContractScheme } from "@jelly/storefront-themes/runtime";
 
 /**
  * Section frame (docs/design-contract.md §2.3). `RegistrySectionRenderer` wraps every section, header and footer in

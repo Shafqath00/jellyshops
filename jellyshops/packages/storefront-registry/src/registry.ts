@@ -2,6 +2,7 @@ import { compareThemeVersions, customCssProblem, isRichTextDocument, MAX_BLOCK_D
 import { z } from "zod";
 import { defineSection } from "./define.js";
 import { setSectionLabel } from "./labels.js";
+import { setRuntimeDefinitionLookup } from "./runtime-lookup.js";
 import { blockDefinitions } from "./blocks.js";
 import { commerceSections } from "./sections/commerce.js";
 import { contentSections } from "./sections/content.js";
@@ -110,6 +111,7 @@ export function getSectionDefinition(type: string, themeVersion?: string | null)
   return versions ? versions.get(themeVersion ?? newestVersion(versions) ?? "")?.find((entry) => entry.type === type) : sectionDefinitions.get(type);
 }
 export function getBlockDefinition(type: string) { return blockDefinitions.get(type); }
+setRuntimeDefinitionLookup({ section: getSectionDefinition, block: getBlockDefinition, sectionTypes: () => listSectionDefinitions().map((definition) => definition.type) });
 /** Every block definition, in registration order. */
 export function listBlockDefinitions() { return [...blockDefinitions.values()]; }
 

@@ -21,7 +21,7 @@ import {
   type StorefrontDocument,
   type ThemeId,
 } from "@jelly/storefront-schema";
-import { cardFitAttribute, cardLayoutAttribute, resolveDesignTokens, resolveStorefrontThemeTokens, resolveTheme, legacyStylesAttribute, themeStyleId, usesProductCompare } from "@jelly/storefront-themes";
+import { cardFitAttribute, cardLayoutAttribute, resolveDesignTokens, resolveStorefrontThemeTokens, resolveTheme, legacyStylesAttribute, themeStyleId, usesProductCompare } from "@jelly/storefront-themes/runtime";
 import type { Currency, Product } from "@/lib/domain";
 import type { ResolvedStorefrontRoute } from "./resource-loader";
 import { RuntimeStorefrontView } from "./runtime-storefront-view";

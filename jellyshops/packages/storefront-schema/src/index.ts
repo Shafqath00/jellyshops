@@ -3,15 +3,8 @@ export { createDefaultStoreDesign } from "./defaults.js";
 export { migrateStoreDesignDocument } from "./migrations.js";
 export { sectionNodeSchema, storeDesignDocumentSchema, themeIdSchema } from "./schema.js";
 export { isRichTextDocument, normalizeRichTextDocument, plainTextToRichTextDocument, resolveRichTextDocument, richTextToPlainText, safeRichTextHref } from "./rich-text.js";
-export {
-  STOREFRONT_SCHEMA_VERSION,
-  createDefaultStorefrontDocument,
-  createStorefrontTemplate,
-  getStorefrontPage,
-  migrateStorefrontDocument,
-  storefrontDocumentSchema,
-  validateStorefrontDocument,
-} from "./storefront-v2.js";
+export { STOREFRONT_SCHEMA_VERSION, createDefaultStorefrontDocument, createStorefrontTemplate, getStorefrontPage } from "./storefront-v2-pages.js";
+export { migrateStorefrontDocument, storefrontDocumentSchema, validateStorefrontDocument } from "./storefront-v2.js";
 export {
   customDataOwnerTypeSchema,
   dynamicScalarValueTypes,
@@ -97,7 +90,8 @@ export { LANGUAGE_CODE, MAX_TRANSLATION_LENGTH, readTranslations, translateSecti
 export type { Translations } from "./translations.js";
 export { appEmbedSource, getAppBlockProvider, listAppBlockProviders, registerAppBlockProvider } from "./app-blocks.js";
 export type { AppBlockProvider } from "./app-blocks.js";
-export { JELLY_THEME_API_VERSION, compareThemeVersions, supportsJellyVersion, themeVersionSchema, jellyEngineRangeSchema } from "./theme-version.js";
+export { JELLY_THEME_API_VERSION, compareThemeVersions, supportsJellyVersion } from "./theme-version-compare.js";
+export { themeVersionSchema, jellyEngineRangeSchema } from "./theme-version.js";
 export { STORE_ICON_LABELS, STORE_ICON_NAMES, isStoreIconName } from "./store-icons.js";
 export type { StoreIconName } from "./store-icons.js";
 export {
@@ -112,7 +106,8 @@ export {
 } from "./personalisation.js";
 export type { PersonalisationEntry, PersonalisationField, PersonalisationProblem } from "./personalisation.js";
 export { CATALOG_SORTS, MAX_CATALOG_FILTERS, MAX_CATALOG_PAGE, MAX_FILTER_VALUES, browseCatalog, filterKey, normalizeCatalogQuery, productFilterValues, type BrowsableProduct, type CatalogFacet, type CatalogPage, type CatalogQuery, type CatalogSort, type ProductFilterValues } from "./catalog-browse.js";
-export { MAX_MENU_DEPTH, MAX_MENU_IMAGE_ALT, MAX_MENU_IMAGE_URL, isSafeMenuImageUrl, menuImageSchema, normalizeMenuImage, readMenuImage, type MenuImage } from "./menu-image.js";
+export { MAX_MENU_DEPTH, MAX_MENU_IMAGE_ALT, MAX_MENU_IMAGE_URL, isSafeMenuImageUrl, readMenuImage, type MenuImage } from "./menu-image-read.js";
+export { menuImageSchema, normalizeMenuImage } from "./menu-image.js";
 export { MAX_QUANTITY_RULE_VALUE, NO_QUANTITY_RULE, allowedQuantity, hasQuantityRule, quantityProblem, quantityRuleProblems, quantityRuleText, readQuantityRule } from "./quantity-rules.js";
 export type { QuantityRule } from "./quantity-rules.js";
 export { STOREFRONT_WORDS, STOREFRONT_WORD_TRANSLATIONS, storefrontWord, type StorefrontWordKey } from "./storefront-words.js";

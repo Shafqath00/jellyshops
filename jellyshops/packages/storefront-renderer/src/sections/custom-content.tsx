@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import type { BlockNode, SectionNode } from "@jelly/storefront-schema";
 import { childBlocks } from "@jelly/storefront-schema";
-import { blockLabel } from "@jelly/storefront-registry";
+import { blockLabel } from "@jelly/storefront-registry/runtime";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";

@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { FONT_OPTIONS, fontStack } from "@jelly/storefront-themes";
+import { FONT_OPTIONS, fontStack } from "@jelly/storefront-themes/runtime";
 
 /**
  * Turns a section's shared style settings into CSS variables on its wrapper.

@@ -1,3 +1,5 @@
+// Starter packs need recipe sections in the section registry and checked manifests.
+import "./theme-registry-checks.js";
 import { getV4StarterPack, isV4StarterPackId, listV4StarterPacks, validateV4StarterPack, type V4StarterPack } from "@jelly/storefront-registry";
 import { discoveredThemes as discoveredManifests } from "./themes/index.generated.js";
 import { discoveredStarters } from "./themes/starters.generated.js";

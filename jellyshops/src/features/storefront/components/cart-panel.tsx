@@ -8,7 +8,7 @@ import { useShop } from "@/contexts/shop-context";
 import { formatMoney } from "@/lib/domain";
 import { cartProductImage } from "@/lib/product-media";
 import type { ComponentType } from "react";
-import type { StorefrontCartProps } from "@jelly/storefront-themes";
+import type { StorefrontCartProps } from "@jelly/storefront-themes/runtime";
 import { CartDrawer, CartItem, CartSummary, EmptyCart } from "@/components/jelly/cart";
 import { cartLineKey, personalisationLabels } from "../personalisation-display";
 import { canIncreaseCartQuantity, nextCartQuantity } from "../cart-quantity";

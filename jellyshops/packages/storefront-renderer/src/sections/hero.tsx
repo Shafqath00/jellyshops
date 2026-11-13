@@ -8,7 +8,7 @@ import { resolveStorefrontHref } from "../runtime-context";
 import { blockStyle } from "../block-style";
 import { buttonProps } from "./block-content";
 import { countdownTarget, HeroCountdown } from "./hero-countdown";
-import { blockLabel } from "@jelly/storefront-registry";
+import { blockLabel } from "@jelly/storefront-registry/runtime";
 import { choice, editorBlockData, imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
 import { mediaPhoto } from "../media-photo";
 

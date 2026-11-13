@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { BlockNode, SectionNode } from "@jelly/storefront-schema";
-import { elementStyleKey, elementStyleProps, getBlockDefinition, getSectionDefinition, type ElementDefinition } from "@jelly/storefront-registry";
-import { FONT_OPTIONS, fontStack } from "@jelly/storefront-themes";
+import { blockElementList, elementStyleKey, elementStyleProps, sectionElementList, type ElementDefinition } from "@jelly/storefront-registry/runtime";
+import { FONT_OPTIONS, fontStack } from "@jelly/storefront-themes/runtime";
 
 const fonts = new Set<string>(FONT_OPTIONS.map((font) => font.value));
 const hex = /^#[0-9a-fA-F]{6}$/;
@@ -35,8 +35,8 @@ function propsFor(element: ElementDefinition | undefined, settings: Record<strin
   };
 }
 
-const sectionElement = (type: string, id: string) => getSectionDefinition(type)?.elements?.find((item) => item.id === id);
-const blockElement = (type: string, id: string) => getBlockDefinition(type)?.elements?.find((item) => item.id === id);
+const sectionElement = (type: string, id: string) => sectionElementList(type).find((item) => item.id === id);
+const blockElement = (type: string, id: string) => blockElementList(type).find((item) => item.id === id);
 
 export function elementStyle(section: SectionNode, elementId: string): CSSProperties {
   return styleFor(sectionElement(section.type, elementId), section.settings);

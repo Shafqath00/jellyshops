@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import { DEFAULT_THEME_ID } from "./theme-resolver.js";
+import { DEFAULT_THEME_ID } from "./theme-resolve.js";
 import { getThemeDefinition } from "./theme-registry.js";
 import type { StorefrontCartPageProps, StorefrontCartProps, StorefrontCheckoutProps, StorefrontCollectionProps, StorefrontContentPageProps, StorefrontFooterProps, StorefrontHeaderProps, StorefrontLayoutProps, StorefrontOrderProps, StorefrontProductProps, StorefrontSearchProps, ThemeShellComponents } from "./types.js";
 

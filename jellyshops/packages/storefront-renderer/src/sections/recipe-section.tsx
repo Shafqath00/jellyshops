@@ -1,5 +1,5 @@
 import type { SectionNode } from "@jelly/storefront-schema";
-import { expandRecipe, getRecipe } from "@jelly/storefront-themes";
+import { expandRecipe, getRecipe } from "@jelly/storefront-themes/runtime";
 import type { SectionRenderProps } from "../render-registry";
 import { CustomContentSection } from "./custom-content";
 

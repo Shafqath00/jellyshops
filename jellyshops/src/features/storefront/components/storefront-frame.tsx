@@ -7,8 +7,7 @@ import { useResourceLinks } from "@/features/navigation/use-resource-links";
 import { CartPanel } from "./cart-panel";
 import { SharedCartPresentation, ThemedStorefrontShell } from "./storefront-shell";
 import { useShop } from "@/contexts/shop-context";
-import { loadPublicStorefrontPublication } from "@/features/storefront/public-storefront-api";
-import { cardFitAttribute, cardLayoutAttribute, cartDrawerVariant, freeDeliveryThresholdMinor, isCompleteStorefrontTheme, mainLanguageName, resolveStorefrontThemeTokens, resolveTheme, resolveThemeShellComponent, storeLanguages, themeSocialLinks, legacyStylesAttribute, themeStyleId, usesCartDrawer, usesProductCompare } from "@jelly/storefront-themes";
+import { cardFitAttribute, cardLayoutAttribute, cartDrawerVariant, freeDeliveryThresholdMinor, isCompleteStorefrontTheme, mainLanguageName, resolveStorefrontThemeTokens, resolveTheme, resolveThemeShellComponent, storeLanguages, themeSocialLinks, legacyStylesAttribute, themeStyleId, usesCartDrawer, usesProductCompare } from "@jelly/storefront-themes/runtime";
 import { ThemeCartDrawer } from "./theme-cart-drawer";
 import { CompareTray } from "./compare-tray";
 import { LanguageSwitcher, StorefrontLanguageContext, useStorefrontLanguageState } from "@/features/storefront/storefront-language";
@@ -59,17 +58,20 @@ export function StorefrontFrame({ storeSlug, children }: { storeSlug: string; ch
     return () => { window.removeEventListener("jelly:cart-added", open); document.removeEventListener("click", click); };
   }, [cartDrawer, storeSlug]);
   const languageState = useStorefrontLanguageState(storeSlug, storeLanguages(publishedTheme?.settings), mainLanguageName(publishedTheme?.settings));
+  // The server already sent the published design (storefront bootstrap); the browser only asks for it when it did not.
+  const hasInitialPublication = Boolean(initialPublication);
   useEffect(() => {
-    if (!storeId) return;
+    if (!storeId || hasInitialPublication) return;
     let active = true;
-    void loadPublicStorefrontPublication({ baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001", storeId })
+    // Loaded when needed: it checks the publication with the schema library, which store pages otherwise never download.
+    void import("@/features/storefront/public-storefront-api").then(({ loadPublicStorefrontPublication }) => loadPublicStorefrontPublication({ baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001", storeId }))
       .then((publication) => {
         if (!active || !publication) return;
         if (publication.kind === "v4") setPublishedTheme({ id: publication.snapshot.theme.id ?? publication.snapshot.theme.presetId, version: publication.snapshot.theme.version, settings: publication.snapshot.theme.settings });
         else setPublishedTheme({ id: publication.document.theme.presetId, settings: publication.document.theme.settings as unknown as Record<string, unknown> });
       });
     return () => { active = false; };
-  }, [storeId]);
+  }, [storeId, hasInitialPublication]);
   const snapshot = initialPublication?.kind === "v4" ? initialPublication.snapshot : null;
   const segments = (pathname ?? "").split("/").filter(Boolean).slice(1);
   const pageType = pageTypeFor(segments);

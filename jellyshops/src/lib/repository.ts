@@ -1,6 +1,5 @@
 import type { PersonalisationEntry } from "@jelly/storefront-schema";
-import { migrateStoreDesignDocument, type StoreDesignDocument } from "@jelly/storefront-schema";
-import { validateSectionAgainstRegistry } from "@jelly/storefront-registry";
+import { STORE_DESIGN_SCHEMA_VERSION, type StoreDesignDocument } from "@jelly/storefront-schema";
 import type { Brand, Cart, Category, CategoryOptionDefinition, Collection, ConfiguredOptionSelection, Customer, Order, Product, ProductOption, ProductOptionValue, ProductVariant, ShopState, Store, StoreDesignPublication, StoreDesignRecord } from "./domain";
 import { majorToMinor, slugify } from "./domain";
 import { createCartConfigurationKey } from "./product-configuration";
@@ -125,7 +124,7 @@ function addMissingStoreDesigns(state: ShopState): ShopState {
     recentCategoryIdsByStore: state.recentCategoryIdsByStore ?? {},
     storeDesigns: state.stores.map((store) => existing.find((record) => record.storeId === store.id) ?? {
       storeId: store.id,
-      draftDocument: migrateStoreDesignDocument((seedDesigns.find((record) => record.storeId === store.id) ?? seedDesigns[0]).draftDocument),
+      draftDocument: structuredClone((seedDesigns.find((record) => record.storeId === store.id) ?? seedDesigns[0]).draftDocument),
       draftRevision: 1,
       publications: []
     })
@@ -159,15 +158,11 @@ export function createRepository(storage: StorageLike, options: { runtime?: bool
   const findVariant = (id: string) => state.products.flatMap((product) => product.variants).find((variant) => variant.id === id);
   const findStoreDesign = (storeId: string) => state.storeDesigns.find((record) => record.storeId === storeId);
 
+  // Legacy browser-only designs (nothing in the app saves them any more; the editor saves through the API, which
+  // checks every section). Only the version is checked here, so store pages do not load the section registry.
   const validateDesign = (input: StoreDesignDocument) => {
-    const document = migrateStoreDesignDocument(input);
-    const issues = [
-      ...validateSectionAgainstRegistry(document.header, "home"),
-      ...validateSectionAgainstRegistry(document.footer, "home"),
-      ...Object.values(document.pages).flatMap((page) => page.sections.flatMap((section) => validateSectionAgainstRegistry(section, page.type)))
-    ];
-    if (issues.length > 0) throw new Error(`Invalid Store Design registry entry: ${issues[0].code}`);
-    return document;
+    if (input?.schemaVersion !== STORE_DESIGN_SCHEMA_VERSION) throw new Error("Invalid Store Design document");
+    return structuredClone(input);
   };
 
   return {

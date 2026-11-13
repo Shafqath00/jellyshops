@@ -1,5 +1,5 @@
 import { createElement, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
-import type { ContractSpace, ContractTypePreset } from "@jelly/storefront-themes";
+import type { ContractSpace, ContractTypePreset } from "@jelly/storefront-themes/runtime";
 
 /**
  * Layout primitives (docs/design-contract.md §2.3). Sections lay things out with these instead of their own

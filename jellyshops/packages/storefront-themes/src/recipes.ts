@@ -1,7 +1,9 @@
 import { registerThemeSections, type ControlDefinition, type SectionDefinition } from "@jelly/storefront-registry";
 import { storefrontPageTypes, type BlockNode } from "@jelly/storefront-schema";
 import { z } from "zod";
-import { compareThemeVersions } from "@jelly/storefront-schema";
+import { storeRecipes } from "./recipes-runtime.js";
+
+export { expandRecipe, getRecipe, storeRecipes, uncheckedRecipes } from "./recipes-runtime.js";
 
 /**
  * Section recipes: a custom section a theme describes as data. A recipe lists the settings the
@@ -31,14 +33,7 @@ const settingSchema = z.discriminatedUnion("type", [
 const when = z.string().optional();
 const text = z.string().max(400);
 
-type Element =
-  | { kind: "heading"; text: string; when?: string }
-  | { kind: "text"; text: string; when?: string }
-  | { kind: "button"; label: string; href?: string; style?: "primary" | "secondary" | "link"; when?: string }
-  | { kind: "image"; image: string; link?: string; ratio?: string; when?: string }
-  | { kind: "spacer"; size: number; when?: string }
-  | { kind: "products"; limit?: number | string; collection?: string; columns?: number; when?: string }
-  | { kind: "group"; direction?: "vertical" | "horizontal"; gap?: number; align?: "start" | "center" | "end" | "between"; elements: Element[]; when?: string };
+type Element = import("./recipes-runtime.js").RecipeElement;
 
 const leaf = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("heading"), text, when }).strict(),
@@ -136,14 +131,6 @@ export function recipeDefinition(themeId: string, recipe: SectionRecipe): Sectio
   };
 }
 
-const recipes = new Map<string, Map<string, SectionRecipe[]>>();
-
-export function getRecipe(type: string, themeVersion?: string | null): SectionRecipe | undefined {
-  const versions = recipes.get(type.split("/")[0]);
-  const version = themeVersion ?? (versions && [...versions.keys()].sort(compareThemeVersions).at(-1));
-  return version ? versions?.get(version)?.find((recipe) => recipe.type === type) : undefined;
-}
-
 /**
  * Makes a theme's recipes known: registers each as a section limited to the theme, and removes
  * recipes of the same theme that are no longer listed. Returns a function that puts things back
@@ -152,62 +139,12 @@ export function getRecipe(type: string, themeVersion?: string | null): SectionRe
 export function registerRecipes(themeId: string, list: SectionRecipe[], version = "1.0.0"): () => void {
   const snapshot = structuredClone(list);
   const restoreSections = registerThemeSections(themeId, version, snapshot.map((recipe) => recipeDefinition(themeId, recipe)));
-  const versions = recipes.get(themeId) ?? new Map<string, SectionRecipe[]>();
-  const previous = versions.get(version);
-  versions.set(version, snapshot); recipes.set(themeId, versions);
-  return () => {
-    if (versions.get(version) !== snapshot) return;
-    restoreSections();
-    if (previous) versions.set(version, previous); else versions.delete(version);
-    if (!versions.size) recipes.delete(themeId);
-  };
+  const restoreRecipes = storeRecipes(themeId, snapshot, version);
+  return () => { restoreSections(); restoreRecipes(); };
 }
 
 /** The recipes written in a manifest's `sections`, parsed (invalid ones are skipped; the manifest check reports them). */
 export function recipesOf(manifest: { sections?: unknown }): SectionRecipe[] {
   const parsed = z.array(recipeSchema).safeParse(manifest.sections ?? []);
   return parsed.success ? parsed.data : [];
-}
-
-const BUTTON_STYLES = { primary: "primary", secondary: "secondary", link: "link" } as const;
-
-function fill(template: string, values: Record<string, unknown>): string {
-  return template.replace(/\{([^{}]*)\}/g, (_match, id: string) => { const value = values[id]; return value === undefined || value === null ? "" : String(value); });
-}
-
-/**
- * Turns a recipe and a section's settings into what the Custom content section draws: its own
- * settings and a list of blocks. Settings the merchant never touched use the recipe's defaults.
- */
-export function expandRecipe(recipe: SectionRecipe, saved: Record<string, unknown>): { settings: Record<string, unknown>; blocks: BlockNode[] } {
-  const values: Record<string, unknown> = {};
-  for (const setting of recipe.settings) values[setting.id] = saved[setting.id] !== undefined ? saved[setting.id] : "default" in setting ? setting.default : undefined;
-  const shown = (item: Element) => !item.when || Boolean(values[item.when]);
-  const build = (items: Element[], prefix: string): BlockNode[] => items.flatMap((item, index): BlockNode[] => {
-    if (!shown(item)) return [];
-    const id = `${prefix}${index}`;
-    switch (item.kind) {
-      case "heading": return [{ id, type: "heading", enabled: true, settings: { text: fill(item.text, values) } }];
-      case "text": return [{ id, type: "text", enabled: true, settings: { text: fill(item.text, values) } }];
-      case "button": return [{ id, type: "button", enabled: true, settings: { label: fill(item.label, values), href: item.href ? fill(item.href, values) : "", ...(item.style ? { buttonStyle: BUTTON_STYLES[item.style] } : {}) } }];
-      case "image": {
-        const image = values[item.image.slice(1, -1)];
-        if (!image) return [];
-        return [{ id, type: "image", enabled: true, settings: { image, ...(item.link ? { link: fill(item.link, values) } : {}), ...(item.ratio ? { aspectRatio: item.ratio } : {}) } }];
-      }
-      // Generated block types the Custom content section draws for recipes only (merchants cannot add them).
-      case "spacer": return [{ id, type: "recipe-spacer", enabled: true, settings: { size: item.size } }];
-      case "products": {
-        const limit = typeof item.limit === "string" ? Number(values[item.limit.slice(1, -1)]) : item.limit ?? 4;
-        const collectionId = item.collection ? values[item.collection.slice(1, -1)] : undefined;
-        return [{ id, type: "recipe-products", enabled: true, settings: { limit: Number.isFinite(limit) ? Math.max(1, Math.min(12, Math.round(limit))) : 4, ...(typeof collectionId === "string" && collectionId ? { collectionId } : {}), columns: item.columns ?? 4 } }];
-      }
-      case "group": return [{ id, type: "group", enabled: true, settings: { groupDirection: item.direction ?? "vertical", ...(item.gap !== undefined ? { groupGap: item.gap } : {}), ...(item.align ? { groupAlign: item.align } : {}) }, blocks: build(item.elements, `${id}-`) }];
-    }
-  });
-  const layout = recipe.layout;
-  return {
-    settings: { direction: layout.direction ?? "vertical", contentAlignment: layout.align ?? "center", gap: layout.gap ?? 16, contentWidth: layout.width ?? "normal" },
-    blocks: build(recipe.elements, "recipe-"),
-  };
 }

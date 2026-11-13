@@ -14,16 +14,38 @@ import { boutiqueShellComponents } from "./themes/example-boutique/shell.js";
 import type { ComponentType } from "react";
 import { signatureManifest, signatureTokens } from "./jelly-signature/definition.js";
 import { avenueManifest, avenueTokens } from "./jelly-avenue/definition.js";
-import { defineTheme } from "./define-theme.js";
-import { recipesOf, registerRecipes } from "./recipes.js";
+import { buildThemeDefinition } from "./define-theme-core.js";
+import { storeRecipes, uncheckedRecipes } from "./recipes-runtime.js";
 import { fontStack } from "./fonts.js";
 import { discoveredThemes } from "./themes/index.generated.js";
 import { compareThemeVersions } from "@jelly/storefront-schema";
-import { THEME_BASE_IDS } from "./theme-manifest-schema.js";
+import { THEME_BASE_IDS } from "./theme-base-ids.js";
 
-/** Positional shorthand for the built-in themes; every theme goes through `defineTheme`. */
+/**
+ * Every theme built here is announced, so the main entry (theme-registry-checks.ts) can check its manifest and
+ * register its recipes as sections. Store pages load only this file, without zod or the section registry.
+ */
+export type ThemeRegistration = { kind: "theme"; theme: ThemeDefinition } | { kind: "recipes"; manifest: ThemeManifestInput };
+const announced: ThemeRegistration[] = [];
+const listeners = new Set<(registration: ThemeRegistration) => void>();
+function announce(registration: ThemeRegistration): void {
+  for (const listener of listeners) listener(registration);
+  announced.push(registration);
+}
+/** Calls the listener for every theme built so far and every one built later. */
+export function onThemeRegistered(listener: (registration: ThemeRegistration) => void): void {
+  for (const registration of announced) listener(registration);
+  listeners.add(listener);
+}
+function built(theme: ThemeDefinition): ThemeDefinition { announce({ kind: "theme", theme }); return theme; }
+function keepRecipes(manifest: ThemeManifestInput): void {
+  storeRecipes(manifest.id, uncheckedRecipes(manifest), manifest.version);
+  announce({ kind: "recipes", manifest });
+}
+
+/** Positional shorthand for the built-in themes. */
 function definition(id: ThemeId, label: string, tokens: ThemeTokens, manifest?: unknown, sectionOverrides: Record<string, ComponentType<ThemeSectionProps>> = {}, components?: ThemeShellComponents): ThemeDefinition {
-  return defineTheme({ id, label, tokens, manifest, sectionOverrides, components });
+  return built(buildThemeDefinition({ id, label, tokens, manifest, sectionOverrides, components }));
 }
 const themes = [
   definition("jelly-signature", "Jelly Minimal", signatureTokens, signatureManifest),
@@ -86,7 +108,7 @@ function extendedTheme(manifest: ThemeManifestInput, baseId: string): ThemeDefin
   const colors = (settingsDefaults.colors ?? {}) as Record<string, string>;
   const typography = (settingsDefaults.typography ?? {}) as Record<string, string>;
   const tokens: ThemeTokens = { ...base.tokens, colors: { ...base.tokens.colors, ...colors }, typography: { display: typography.headingFont ?? base.tokens.typography.display, body: typography.bodyFont ?? base.tokens.typography.body } };
-  return defineTheme({ id: manifest.id as ThemeId, label: manifest.name, tokens, manifest: merged, sectionOverrides: base.sectionOverrides, components: base.components });
+  return built(buildThemeDefinition({ id: manifest.id as ThemeId, label: manifest.name, tokens, manifest: merged, sectionOverrides: base.sectionOverrides, components: base.components }));
 }
 
 /**
@@ -143,7 +165,7 @@ export function legacyStylesAttribute(id: string | null | undefined, version?: s
 for (const { manifest } of discoveredThemes) {
   if (manualIds.has(manifest.id)) continue;
   themes.push(folderTheme(manifest));
-  registerRecipes(manifest.id, recipesOf(manifest), manifest.version);
+  keepRecipes(manifest);
 }
 
 /**
@@ -154,7 +176,7 @@ for (const { manifest } of discoveredThemes) {
 export function registerFolderTheme(manifest: ThemeManifestInput): ThemeDefinition {
   if (manualIds.has(manifest.id)) throw new Error(`"${manifest.id}" is a built-in theme and cannot be replaced.`);
   const next = folderTheme(manifest);
-  registerRecipes(manifest.id, recipesOf(manifest), manifest.version);
+  keepRecipes(manifest);
   const index = themes.findIndex((theme) => theme.id === manifest.id && versionOf(theme) === manifest.version);
   if (index === -1) themes.push(next); else themes[index] = next;
   return next;

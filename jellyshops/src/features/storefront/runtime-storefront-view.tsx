@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { RegistrySectionRenderer, withStoreIdentity, type CommerceDataProvider } from "@jelly/storefront-renderer";
 import type { SectionNode } from "@jelly/storefront-schema";
 import type { RuntimeMenuV4 } from "@jelly/storefront-schema";
-import { resolveTheme } from "@jelly/storefront-themes";
+import { resolveTheme } from "@jelly/storefront-themes/runtime";
 import type { ResolvedStorefrontRoute } from "./resource-loader";
 
 type ReadyRoute = Extract<ResolvedStorefrontRoute, { status: "ready" }>;

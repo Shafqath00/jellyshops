@@ -1,6 +1,6 @@
 import type { BlockNode, DynamicBinding, RichTextDocument, SectionNode } from "@jelly/storefront-schema";
 import { flattenBlocks, isRichTextDocument } from "@jelly/storefront-schema";
-import { getBlockDefinition, getSectionDefinition } from "@jelly/storefront-registry";
+import { blockControlTypes, sectionControlTypes } from "@jelly/storefront-registry/runtime";
 
 /**
  * Section settings connected to a custom field are saved as
@@ -126,14 +126,10 @@ function applySettings(settings: Record<string, unknown>, controlTypes: Map<stri
   return next;
 }
 
-function controlTypes(controls: Array<{ key: string; type: string }> | undefined): Map<string, string> {
-  return new Map((controls ?? []).map((control) => [control.key, control.type]));
-}
-
 function applyBlockValues(blocks: BlockNode[], values: BindingValues): BlockNode[] {
   return blocks.map((block) => ({
     ...block,
-    settings: applySettings(block.settings, controlTypes(getBlockDefinition(block.type)?.controls), values),
+    settings: applySettings(block.settings, blockControlTypes(block.type), values),
     ...(block.blocks ? { blocks: applyBlockValues(block.blocks, values) } : {}),
   }));
 }
@@ -144,7 +140,7 @@ export function applyBindingValues<K extends string>(layout: Regions<K>, values:
   for (const region of Object.keys(layout) as K[]) {
     result[region] = layout[region].map((section) => ({
       ...section,
-      settings: applySettings(section.settings, controlTypes(getSectionDefinition(section.type, themeVersion)?.controls), values),
+      settings: applySettings(section.settings, sectionControlTypes(section.type, themeVersion), values),
       blocks: applyBlockValues(section.blocks, values),
     }));
   }

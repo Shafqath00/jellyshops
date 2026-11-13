@@ -2,8 +2,13 @@
   "name": "@jelly/storefront-themes",
   "version": "0.1.0",
   "private": true,
-  "files": ["dist"],
-  "sideEffects": ["./dist/theme-registry.js"],
+  "files": [
+    "dist"
+  ],
+  "sideEffects": [
+    "./dist/theme-registry.js",
+    "./dist/theme-registry-checks.js"
+  ],
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.build.json"
@@ -13,6 +18,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime.d.ts",
+      "import": "./dist/runtime.js",
+      "default": "./dist/runtime.js"
     }
   },
   "dependencies": {

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, Minus, Plus, ShoppingBag } from "lucide-react";
-import type { StorefrontCartPageProps, StorefrontCheckoutProps, StorefrontCollectionProps, StorefrontContentPageProps, StorefrontOrderProps, StorefrontProductProps, StorefrontSearchProps } from "@jelly/storefront-themes";
+import type { StorefrontCartPageProps, StorefrontCheckoutProps, StorefrontCollectionProps, StorefrontContentPageProps, StorefrontOrderProps, StorefrontProductProps, StorefrontSearchProps } from "@jelly/storefront-themes/runtime";
 import { AddToCartButton } from "@/components/jelly/product";
 
 const setting = (settings: Record<string, unknown>, path: string, fallback: string) => { const value = path.split(".").reduce<unknown>((current, key) => current && typeof current === "object" ? (current as Record<string, unknown>)[key] : undefined, settings); return typeof value === "string" ? value : fallback; };

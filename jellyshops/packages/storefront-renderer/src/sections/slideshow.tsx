@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import type { SectionNode } from "@jelly/storefront-schema";
-import { blockLabel } from "@jelly/storefront-registry";
+import { blockLabel } from "@jelly/storefront-registry/runtime";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
 import { choice, editorBlockData, imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";

@@ -5,7 +5,7 @@ import Link from "next/link";
 import clsx from "clsx";
 import { createContext, useContext } from "react";
 import { ShoppingBag } from "lucide-react";
-import { resolveThemeShell, type StorefrontCartProps, type StorefrontFooterProps, type StorefrontHeaderProps, type StorefrontLayoutProps, type StorefrontNavigationItem, type StorefrontShellStore } from "@jelly/storefront-themes";
+import { resolveThemeShell, type StorefrontCartProps, type StorefrontFooterProps, type StorefrontHeaderProps, type StorefrontLayoutProps, type StorefrontNavigationItem, type StorefrontShellStore } from "@jelly/storefront-themes/runtime";
 import { SharedCartPage, SharedCheckoutPage, SharedCollectionPage, SharedContentPage, SharedOrderPage, SharedProductPage, SharedSearchPage } from "./storefront-pages";
 import { CartBadge } from "@/components/jelly/cart";
 import { Dialog, DialogContent } from "@/components/ui/dialog";

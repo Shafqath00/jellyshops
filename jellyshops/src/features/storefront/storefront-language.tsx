@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import type { StoreLanguage } from "@jelly/storefront-themes";
+import type { StoreLanguage } from "@jelly/storefront-themes/runtime";
 
 /**
  * The language a shopper reads the store in. The main language is `null`; the

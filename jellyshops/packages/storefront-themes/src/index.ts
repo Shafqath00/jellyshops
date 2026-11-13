@@ -1,6 +1,10 @@
+// Checks every theme manifest and registers recipe sections (see theme-registry-checks.ts); store pages use ./runtime.
+import "./theme-registry-checks.js";
 export { applyThemePreset, registerThemeForPages, COMPLETE_STOREFRONT_THEME_IDS, getThemeDefinition, isCompleteStorefrontTheme, isPlatformThemeId, legacyStylesAttribute, listThemes, resolveDesignTokens, themeStyleId, usesLegacyStorefrontStyles, usesSectionDefaults } from "./theme-registry.js";
-export { THEME_BASE_IDS, themeManifestSchema } from "./theme-manifest-schema.js";
-export { DEFAULT_THEME_ID, getThemeAsset, resolveTheme, resolveThemePreview, validateThemeManifest, validateThemeSettings } from "./theme-resolver.js";
+export { THEME_BASE_IDS } from "./theme-base-ids.js";
+export { themeManifestSchema } from "./theme-manifest-schema.js";
+export { DEFAULT_THEME_ID, getThemeAsset, resolveTheme, resolveThemePreview } from "./theme-resolve.js";
+export { validateThemeManifest, validateThemeSettings } from "./theme-resolver.js";
 export { buildSchemaFiles } from "./schema-export.js";
 export { validateThemeProject } from "./validate-theme-project.js";
 export type { ThemeProjectInput, ThemeProjectIssue } from "./validate-theme-project.js";
@@ -9,7 +13,8 @@ export { resolveStorefrontThemeTokens } from "./storefront-theme-tokens.js";
 export { CONTRACT_BREAKPOINTS, CONTRACT_PHONE_TOKENS, CONTRACT_SCHEMES, contractSchemeRoles, CONTRACT_SPACE, CONTRACT_TABLET_TOKENS, CONTRACT_TOKEN_NAMES, CONTRACT_TOKENS, CONTRACT_TYPE_PRESETS, contractTokenCss, isContractToken } from "./contract-tokens.js";
 export type { ContractScheme, ContractSpace, ContractTypePreset } from "./contract-tokens.js";
 export type { LegacyStoreThemeValues } from "./storefront-theme-tokens.js";
-export type { ResolvedTheme, ThemeManifest, ThemeSettingDefinition, ThemeSettingValidationIssue } from "./theme-resolver.js";
+export type { ResolvedTheme } from "./theme-resolve.js";
+export type { ThemeManifest, ThemeSettingDefinition, ThemeSettingValidationIssue } from "./theme-resolver.js";
 export type { ResolvedDesignTokens, StorefrontCartPageProps, StorefrontCartLineView, StorefrontCartProps, StorefrontCheckoutProps, StorefrontCollectionProps, StorefrontContentPageProps, StorefrontFooterProps, StorefrontHeaderProps, StorefrontLayoutProps, StorefrontNavigationItem, StorefrontOrderProps, StorefrontProductCardView, StorefrontProductOption, StorefrontProductOptionValue, StorefrontProductProps, StorefrontSearchProps, StorefrontSearchResultView, StorefrontShellStore, ThemeAsset, ThemeAssetManifest, ThemeDefinition, ThemeFontAsset, ThemePreviewAsset, ThemeShellComponents, ThemeTokens } from "./types.js";
 export { FONT_OPTIONS, fontStack } from "./fonts.js";
 export { COLOR_SCHEME_IDS, colorSchemeCount, contrastRatio, LEGACY_SCHEME_IDS, legacySchemeMap, readableTextColour, colorSchemeLabel, MAX_THEME_CSS_LENGTH, MIN_COLOR_SCHEMES, productCardButtonLabel, resolveThemeStyleTokens, SOCIAL_PLATFORMS, TEXT_STYLE_LEVELS, mainLanguageName, storeLanguages, usesCartDrawer, usesProductCompare, themeCustomCss, themeSocialLinks, themeStyleDefaultsFrom } from "./theme-style-settings.js";
@@ -18,11 +23,13 @@ export { THEME_PART_GROUPS, THEME_PARTS, themeCssClasses, themeCssInternals } fr
 export type { ColorSchemeId, LegacySchemeId, TextStyleLevel } from "./theme-style-settings.js";
 export { createStarterPack, DISCOVERED_STARTER_PACK_IDS, getStarterPack, isStarterPackId, listStarterPacks, registerThemeProject, validateStarterPack } from "./starter-packs.js";
 export type { DiscoveredTheme, ThemeManifestInput } from "./types.js";
-export { defineTheme } from "./define-theme.js";
+export { checkThemeManifest, defineTheme } from "./define-theme.js";
+export { buildThemeDefinition } from "./define-theme-core.js";
 export type { ThemeInput } from "./define-theme.js";
 export { starterFileSchema } from "./starter-file-schema.js";
 export type { StarterFile } from "./starter-file-schema.js";
-export { expandRecipe, getRecipe, recipeSchema, recipesOf, registerRecipes } from "./recipes.js";
+export { expandRecipe, getRecipe, storeRecipes, uncheckedRecipes } from "./recipes-runtime.js";
+export { recipeSchema, recipesOf, registerRecipes } from "./recipes.js";
 export type { SectionRecipe } from "./recipes.js";
 export { JELLY_THEME_API_VERSION, compareThemeVersions, supportsJellyVersion, themeVersionSchema, jellyEngineRangeSchema } from "./versioning.js";
 export { applyThemeMigrations, applyThemeUpgrade, getThemeMigrationPath, getThemeUpgradePath, themeMigrationSchema } from "./migrations.js";
