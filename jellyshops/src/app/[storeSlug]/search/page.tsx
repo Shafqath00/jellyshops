@@ -4,12 +4,14 @@ import { loadPublicSearchPageContext } from "@/features/storefront/public-page-c
 import { serverRouteValues } from "@/features/storefront/server-route-values";
 import { resolveMediaUrls } from "@/lib/media-urls";
 import SearchPageClient from "./search-client";
+import { searchFromParams } from "@/features/storefront/list-search";
 
 const apiBaseUrl = process.env.STOREFRONT_API_URL ?? process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
 
-export default async function SearchPage({ params, searchParams }: { params: Promise<{ storeSlug: string }>; searchParams: Promise<{ q?: string | string[] }> }) {
+export default async function SearchPage({ params, searchParams }: { params: Promise<{ storeSlug: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { storeSlug } = await params;
-  const raw = (await searchParams).q;
+  const allParams = await searchParams;
+  const raw = allParams.q;
   const query = Array.isArray(raw) ? raw[0] ?? "" : raw ?? "";
   const data = await getServerStorefront(storeSlug);
   if (!data) notFound();
@@ -20,5 +22,5 @@ export default async function SearchPage({ params, searchParams }: { params: Pro
   // Result photos come back API-relative ("/api/public/media/…"); the store runs on another address.
   const searchContext = rawContext ? resolveMediaUrls(rawContext, apiBaseUrl) : null;
   // A new query is a new server render, so the client never shows results for an old query.
-  return <SearchPageClient key={query} searchContext={searchContext} routeValues={routeValues} />;
+  return <SearchPageClient key={query} searchContext={searchContext} routeValues={routeValues} listSearch={searchFromParams(allParams)} />;
 }

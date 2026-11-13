@@ -31,6 +31,7 @@ import { useRecentlyViewed } from "./recently-viewed";
 import { useCatalogBrowse } from "./catalog-browse-api";
 import { useReviewSummaries, useStorefrontReviewAccess } from "./reviews-api";
 import { catalogProductToStorefrontProduct, type PublicCatalogResponse } from "@/features/commerce/api/client";
+import { useListAddress } from "./list-address";
 
 function commerceProvider(storeSlug: string, currency: Currency, products: Product[], storeId?: string, cart?: StorefrontCartAccess, reviewData?: Pick<CommerceDataProvider, "ratings" | "reviews">): CommerceDataProvider {
   const initialProducts = products.filter((product) => product.published && !product.archived).map((product) => productCardData(product, `/${storeSlug}/products/${product.slug}`, currency));
@@ -81,12 +82,14 @@ export function PublishedStorefront({ document, storeSlug, currency, products, p
   return <StorefrontRenderer document={document} page="home" pageId={pageId} mode="published" commerce={commerceProvider(storeSlug, currency, products, undefined, cart)} assetResolver={{ resolve: async () => null }} />;
 }
 
-export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currency, products }: {
+export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currency, products, listSearch }: {
   snapshot: RuntimeStorefrontSnapshotV4;
   route: ResolvedStorefrontRoute;
   storeSlug: string;
   currency: Currency;
   products: Product[];
+  /** The page address's query as the server saw it; product lists keep their sort and filters in it (collection, Shop all, search). */
+  listSearch?: string;
 }) {
   const chromeHandled = useStorefrontChrome();
   const cart = useStorefrontCartAccess(storeSlug);
@@ -97,6 +100,7 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
   // Opening a product page adds it to the shopper's own "Recently viewed" list (kept in their browser).
   const recentlyViewed = useRecentlyViewed(storeSlug, route.status === "ready" && route.context.pageType === "product" ? route.context.resource.id : undefined);
   const browseProducts = useCatalogBrowse(snapshot.storeId, storeSlug, currency);
+  const listAddress = useListAddress(listSearch);
   const { language } = useStorefrontLanguage();
   const { state } = useShop();
   const resourceLinks = useResourceLinks(snapshot.storeId, storeSlug, state.products);
@@ -105,7 +109,7 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
   const resolvedTheme = resolveTheme(snapshot.theme.id ?? snapshot.theme.presetId, snapshot.theme.settings, snapshot.theme.version);
   const themeId = resolvedTheme.id as ThemeId;
   const style = resolveStorefrontThemeTokens(themeId, resolvedTheme.settings, {}, resolvedTheme.version) as CSSProperties;
-  const commerce = { ...commerceProvider(storeSlug, currency, products, snapshot.storeId, cart, { ratings, reviews }), compare: usesProductCompare(resolvedTheme.settings) ? compare : undefined, bagCount, recentlyViewed, browseProducts };
+  const commerce = { ...commerceProvider(storeSlug, currency, products, snapshot.storeId, cart, { ratings, reviews }), compare: usesProductCompare(resolvedTheme.settings) ? compare : undefined, bagCount, recentlyViewed, browseProducts, listAddress };
 
   return (
     <div className={`jelly-storefront jelly-theme-layout-${resolvedTheme.layout}`} data-jelly-theme={themeStyleId(resolvedTheme.id, resolvedTheme.version)} data-jelly-legacy-styles={legacyStylesAttribute(resolvedTheme.id, resolvedTheme.version)} data-jelly-theme-version={resolvedTheme.version} data-card-layout={cardLayoutAttribute(style)} data-card-fit={cardFitAttribute(style)} style={style}>

@@ -15,7 +15,7 @@ import { useInitialStorefrontPublication } from "@/features/storefront/storefron
 import { StorefrontPageLoading } from "@/features/storefront/components/storefront-page-loading";
 
 
-export default function ShopPage({ routeValues }: { routeValues?: Array<[string, unknown]> }) {
+export default function ShopPage({ routeValues, listSearch }: { routeValues?: Array<[string, unknown]>; listSearch?: string }) {
   const { storeSlug } = useParams<{ storeSlug: string }>();
   const search = useSearchParams();
   const { repository } = useShop();
@@ -35,7 +35,7 @@ export default function ShopPage({ routeValues }: { routeValues?: Array<[string,
 
   if (!store) return null;
   if (catalogStatus === "loading") return <StorefrontPageLoading label="Loading the collection…" />;
-  if (publication?.kind === "v4" && route?.status === "ready") return <PublishedRuntimeStorefront snapshot={publication.snapshot} route={route} storeSlug={store.slug} currency={store.currency} products={products} />;
+  if (publication?.kind === "v4" && route?.status === "ready") return <PublishedRuntimeStorefront snapshot={publication.snapshot} route={route} storeSlug={store.slug} currency={store.currency} products={products} listSearch={listSearch} />;
 
   // Stores without a published design keep the built-in page.
   const categories = [...new Set(products.map((product) => product.category))];

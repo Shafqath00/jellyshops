@@ -13,7 +13,7 @@ import { buildStorefrontRoute, deserializeRouteValues } from "@/features/storefr
 import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
 import { isVariantBuyable } from "@/lib/variant-stock";
 
-export default function SearchPage({ searchContext, routeValues }: { searchContext: PublicSearchPageContext | null; routeValues?: Array<[string, unknown]> }) {
+export default function SearchPage({ searchContext, routeValues, listSearch }: { searchContext: PublicSearchPageContext | null; routeValues?: Array<[string, unknown]>; listSearch?: string }) {
   const { storeSlug } = useParams<{ storeSlug: string }>();
   const query = useSearchParams().get("q") ?? "";
   const { repository, state } = useShop();
@@ -30,7 +30,7 @@ export default function SearchPage({ searchContext, routeValues }: { searchConte
 
   if (!store) return null;
   if (publication?.kind === "v4" && route?.status === "ready") {
-    return <PublishedRuntimeStorefront snapshot={publication.snapshot} route={route} storeSlug={store.slug} currency={store.currency} products={state.products.filter((product) => product.published && !product.archived)} />;
+    return <PublishedRuntimeStorefront snapshot={publication.snapshot} route={route} storeSlug={store.slug} currency={store.currency} products={state.products.filter((product) => product.published && !product.archived)} listSearch={listSearch} />;
   }
 
   const normalized = query.toLowerCase();

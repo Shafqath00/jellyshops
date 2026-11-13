@@ -127,7 +127,7 @@ export function CollectionProductGridSection({ context, section }: { context: St
   // One product list for every collection page, in the preview, the editor and the live store ("Products per page"
   // is the page size; "Show more" adds the next page).
   return <section className="jelly-section jelly-collection-product-grid"><StorefrontContainer><h2 className="jelly-visually-hidden">Products</h2>
-    <ProductListBrowser products={presentation.products} columns={columns} pageSize={limit} showSort={showSort} showFilters={showFilters} emptyMessage={emptyMessage} layout={layout} stories={layout === "editorial" ? storyTiles(section.blocks, context.storeSlug) : []} filterNames={filterNamesSetting(section.settings.filterNames)} remote={remote} />
+    <ProductListBrowser products={presentation.products} columns={columns} pageSize={limit} showSort={showSort} showFilters={showFilters} emptyMessage={emptyMessage} layout={layout} stories={layout === "editorial" ? storyTiles(section.blocks, context.storeSlug) : []} filterNames={filterNamesSetting(section.settings.filterNames)} remote={remote} address={context.mode === "published" ? context.commerce?.listAddress : undefined} />
   </StorefrontContainer></section>;
 }
 

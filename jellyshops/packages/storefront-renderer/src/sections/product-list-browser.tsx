@@ -1,7 +1,8 @@
 import { ProductCard } from "../product-card";
 import { useEffect, useId, useMemo, useState, type CSSProperties } from "react";
 import { browseCatalog, filterKey, type BrowsableProduct, type CatalogFacet, type CatalogQuery, type CatalogSort } from "@jelly/storefront-schema";
-import type { CatalogBrowsePage, PublicProduct } from "../types";
+import type { CatalogBrowsePage, ListAddress, PublicProduct } from "../types";
+import { readListAddress, writeListAddress } from "./list-address";
 
 export type ProductListSort = CatalogSort;
 
@@ -118,7 +119,7 @@ const countText = (count: number) => count === 1 ? "1 product" : `${count} produ
  * store) the store's backend filters, counts, sorts and pages, so the browser only receives the products it shows;
  * the page's own products are drawn until the first answer arrives, and stay if the backend cannot be reached.
  */
-export function ProductListBrowser({ products, columns, pageSize, showSort, showFilters, emptyMessage, cardProps, layout = "grid", stories = [], filterNames = [], remote }: {
+export function ProductListBrowser({ products, columns, pageSize, showSort, showFilters, emptyMessage, cardProps, layout = "grid", stories = [], filterNames = [], remote, address }: {
   products: readonly PublicProduct[];
   columns: number;
   /** Products shown at first, and added by each "Show more". */
@@ -135,10 +136,17 @@ export function ProductListBrowser({ products, columns, pageSize, showSort, show
   filterNames?: readonly string[];
   /** Asks the store's backend for one page of the list (live store only). */
   remote?: (query: CatalogQuery) => Promise<CatalogBrowsePage>;
+  /** The page address: the first sort and filters come from it, and every change is written back (live store only). */
+  address?: ListAddress;
 }) {
   const id = useId();
-  const [sort, setSort] = useState<ProductListSort>("featured");
-  const [filters, setFilters] = useState<ProductListFilters>(NO_FILTERS);
+  // A shared or reloaded address opens the list with its sort and filters already chosen (drawn on the server too).
+  const [initial] = useState(() => address ? readListAddress(address.search) : undefined);
+  const [sort, setSort] = useState<ProductListSort>(initial?.sort ?? "featured");
+  const [filters, setFilters] = useState<ProductListFilters>(initial?.filters ?? NO_FILTERS);
+  useEffect(() => {
+    address?.update((current) => writeListAddress(current, sort, filters));
+  }, [address, sort, filters]);
   const [open, setOpen] = useState(false);
   // Pages shown so far; a new sort or filter starts again from the first page.
   const [paging, setPaging] = useState({ key: "", pages: 1 });

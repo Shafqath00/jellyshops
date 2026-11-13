@@ -179,7 +179,7 @@ export function SearchResultsSection({ section, context }: { section: SectionNod
     {search?.state === "results" && <p className="jelly-search-status">{search.resultCount === 1 ? "1 result" : `${search.resultCount} results`} for “{query}”</p>}
     {search?.state === "results" && <h2 className="jelly-visually-hidden">Search results</h2>}
     {search?.state === "results" && (section.settings.showSort === true || section.settings.showFilters === true
-      ? <ProductListBrowser products={results} columns={numberValue(section.settings, "columns", 4, 2, 4)} pageSize={24} showSort={section.settings.showSort !== false} showFilters={section.settings.showFilters !== false} filterNames={filterNamesSetting(section.settings.filterNames)} emptyMessage="No products match your search." />
+      ? <ProductListBrowser products={results} columns={numberValue(section.settings, "columns", 4, 2, 4)} pageSize={24} showSort={section.settings.showSort !== false} showFilters={section.settings.showFilters !== false} filterNames={filterNamesSetting(section.settings.filterNames)} emptyMessage="No products match your search." address={context.mode === "published" ? context.commerce?.listAddress : undefined} />
       : <div className="jelly-product-grid-items">{results.map((product) => <ProductCard key={product.id} product={product} />)}</div>)}
   </div></StorefrontContainer></section>;
 }

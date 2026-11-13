@@ -10,7 +10,7 @@ import { buildStorefrontRoute, deserializeRouteValues } from "@/features/storefr
 import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
 import { useInitialStorefrontPublication } from "@/features/storefront/storefront-bootstrap";
 
-export default function CollectionPage({ routeValues }: { routeValues?: Array<[string, unknown]> }) {
+export default function CollectionPage({ routeValues, listSearch }: { routeValues?: Array<[string, unknown]>; listSearch?: string }) {
   const { storeSlug, collectionSlug } = useParams<{ storeSlug: string; collectionSlug: string }>();
   const decodedCollectionSlug = decodeURIComponent(collectionSlug);
   const { repository } = useShop();
@@ -34,6 +34,7 @@ export default function CollectionPage({ routeValues }: { routeValues?: Array<[s
       storeSlug={store.slug}
       currency={store.currency}
       products={repository.listProducts(store.slug).filter((product) => product.published && !product.archived)}
+      listSearch={listSearch}
     />;
   }
 
