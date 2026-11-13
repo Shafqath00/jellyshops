@@ -352,7 +352,9 @@ export function measureStorefrontPage(): PageMeasurement {
     }
     return Number.isFinite(top) ? { top, bottom } : null;
   };
-  const background = (element: Element) => getComputedStyle(element).backgroundColor;
+  // The colour a section paints: its frame's, else the section's own (themes often colour the section, not the frame).
+  const painted = (colour: string) => colour !== "rgba(0, 0, 0, 0)" && colour !== "transparent";
+  const background = (element: Element) => { const own = getComputedStyle(element).backgroundColor; const inner = element.firstElementChild ? getComputedStyle(element.firstElementChild).backgroundColor : ""; return painted(own) ? own : painted(inner) ? inner : "page"; };
   const ruled = (element: Element | null) => Boolean(element) && [element as Element, ...(element as Element).children].some((item) => parseFloat(getComputedStyle(item).borderTopWidth) > 0 || parseFloat(getComputedStyle(item).borderBottomWidth) > 0);
   const sectionGaps: Array<{ pair: string; gap: number }> = [];
   for (let index = 1; index < bodyFrames.length; index += 1) {
