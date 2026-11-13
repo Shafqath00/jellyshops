@@ -4,18 +4,29 @@ import { notFound } from "next/navigation";
 import { getServerStorefront } from "@/features/storefront/server-storefront";
 import { StorefrontBootstrap } from "@/features/storefront/storefront-bootstrap";
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { accessCookieName, loadAccessStatus } from "@/features/storefront-access/access-api";
 import { StorefrontPasswordPage } from "@/features/storefront-access/password-page";
 import { loadInstalledTheme } from "@/features/storefront/installed-theme";
 import { InstalledThemeProvider } from "@/features/storefront/installed-theme-provider";
 
+/** The address the shopper reached the store on, so canonical links and share images are full addresses (search engines and Lighthouse need them). */
+async function siteAddress(): Promise<URL | undefined> {
+  const request = await headers();
+  const host = request.get("x-forwarded-host") ?? request.get("host");
+  if (!host || !/^[a-z0-9.:[\]-]+$/i.test(host)) return undefined;
+  const local = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/i.test(host);
+  const protocol = request.get("x-forwarded-proto")?.split(",")[0]?.trim() || (local ? "http" : "https");
+  return new URL(`${protocol === "http" ? "http" : "https"}://${host}`);
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ storeSlug: string }> }): Promise<Metadata> {
   const { storeSlug } = await params; const data = await getServerStorefront(storeSlug);
-  if (!data) return { title: "Store not found", robots: { index: false, follow: false } };
+  const metadataBase = await siteAddress();
+  if (!data) return { metadataBase, title: "Store not found", robots: { index: false, follow: false } };
   // A protected store keeps its description and images out of search results and link previews.
-  if ((await loadAccessStatus(data.store.id, undefined)).protected) return { title: data.store.name, robots: { index: false, follow: false } };
-  return { title: data.store.name, description: data.store.description, openGraph: { title: data.store.name, description: data.store.description, images: data.products[0]?.imageUrl ? [data.products[0].imageUrl] : [] } };
+  if ((await loadAccessStatus(data.store.id, undefined)).protected) return { metadataBase, title: data.store.name, robots: { index: false, follow: false } };
+  return { metadataBase, title: data.store.name, description: data.store.description, openGraph: { title: data.store.name, description: data.store.description, images: data.products[0]?.imageUrl ? [data.products[0].imageUrl] : [] } };
 }
 
 export default async function StoreLayout({ children, params }: { children: React.ReactNode; params: Promise<{ storeSlug: string }> }) {

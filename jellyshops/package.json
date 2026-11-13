@@ -7,6 +7,7 @@
     "packages/*"
   ],
   "scripts": {
+    "lighthouse": "node scripts/lighthouse-budget.mjs",
     "build:storefront-packages": "npm run build --workspace @jelly/storefront-schema && npm run build --workspace @jelly/storefront-registry && npm run build --workspace @jelly/storefront-themes",
     "dev": "node scripts/watch-packages.mjs --dev",
     "watch:packages": "node scripts/watch-packages.mjs",
@@ -76,6 +77,7 @@
     "eslint": "9.39.5",
     "eslint-config-next": "16.3.3",
     "jsdom": "29.0.0",
+    "lighthouse": "^12.8.2",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
     "vitest": "4.1.11"
