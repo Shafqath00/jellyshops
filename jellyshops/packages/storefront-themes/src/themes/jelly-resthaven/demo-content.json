@@ -1,0 +1,1638 @@
+{
+  "$comment": "Resthaven demo store content (Phase 6). Photos are file names in this theme's assets/ folder. Prices in minor units (pence). Install with scripts/install-demo-content.mjs (not written yet).",
+  "currency": "GBP",
+  "collections": [
+    {
+      "handle": "beds",
+      "title": "Beds",
+      "image": "room-main",
+      "description": "Upholstered, wooden, ottoman and divan beds in every size, each with its exact measurements so you can check it fits."
+    },
+    {
+      "handle": "mattresses",
+      "title": "Mattresses",
+      "image": "mattress",
+      "description": "Hybrid, pocket sprung and memory foam mattresses with a 100-night trial."
+    },
+    {
+      "handle": "headboards",
+      "title": "Headboards",
+      "image": "headboard",
+      "description": "Velvet headboards for divan bases or straight onto the wall."
+    },
+    {
+      "handle": "bedroom-furniture",
+      "title": "Bedroom furniture",
+      "image": "hazel-drawers",
+      "description": "Bedside tables, chests of drawers, wardrobes, benches and rugs to finish the room."
+    },
+    {
+      "handle": "bedding",
+      "title": "Bedding",
+      "image": "linen-bedding",
+      "description": "Linen bedding, pillows, toppers and throws."
+    },
+    {
+      "handle": "sale",
+      "title": "Sale",
+      "image": "larch-storage-bed",
+      "description": "Beds and furniture with money off while stocks last."
+    }
+  ],
+  "products": [
+    {
+      "handle": "harbour-upholstered-bed",
+      "title": "Harbour upholstered bed",
+      "type": "Bed",
+      "vendor": "Resthaven",
+      "collections": [
+        "beds",
+        "sale"
+      ],
+      "description": "A tall channel-stitched headboard and a softly padded frame in oatmeal boucle. Sprung slats under the mattress, solid oak feet and a frame that sits low and calm in the room.",
+      "images": [
+        "hero",
+        "detail",
+        "fabrics"
+      ],
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "Single",
+            "Small double",
+            "Double",
+            "King",
+            "Super king"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "sku": "harbour-upholstered-bed-single",
+          "options": {
+            "Size": "Single"
+          },
+          "priceMinor": 49900,
+          "stock": 6
+        },
+        {
+          "sku": "harbour-upholstered-bed-small-double",
+          "options": {
+            "Size": "Small double"
+          },
+          "priceMinor": 53900,
+          "stock": 4
+        },
+        {
+          "sku": "harbour-upholstered-bed-double",
+          "options": {
+            "Size": "Double"
+          },
+          "priceMinor": 57900,
+          "stock": 9
+        },
+        {
+          "sku": "harbour-upholstered-bed-king",
+          "options": {
+            "Size": "King"
+          },
+          "priceMinor": 63900,
+          "stock": 7
+        },
+        {
+          "sku": "harbour-upholstered-bed-super-king",
+          "options": {
+            "Size": "Super king"
+          },
+          "priceMinor": 71900,
+          "stock": 3
+        }
+      ],
+      "tags": [
+        "Fabric:Boucle",
+        "Style:Upholstered",
+        "family:harbour",
+        "Colour:Oatmeal"
+      ],
+      "specifications": {
+        "Single (W x L x H)": "101 x 205 x 120 cm",
+        "Small double (W x L x H)": "131 x 205 x 120 cm",
+        "Double (W x L x H)": "146 x 205 x 120 cm",
+        "King (W x L x H)": "161 x 220 x 120 cm",
+        "Super king (W x L x H)": "191 x 220 x 120 cm",
+        "Delivery": "Free, in 5-7 working days",
+        "Assembly": "Two people, about 45 minutes"
+      },
+      "compareAtPriceMinor": 69900
+    },
+    {
+      "handle": "harbour-upholstered-bed-sage",
+      "title": "Harbour upholstered bed in sage",
+      "type": "Bed",
+      "vendor": "Resthaven",
+      "collections": [
+        "beds",
+        "sale"
+      ],
+      "description": "The Harbour bed in a soft sage velvet: the same tall channel-stitched headboard, padded frame and solid oak feet.",
+      "images": [
+        "harbour-sage",
+        "detail"
+      ],
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "Single",
+            "Small double",
+            "Double",
+            "King",
+            "Super king"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "sku": "harbour-upholstered-bed-sage-single",
+          "options": {
+            "Size": "Single"
+          },
+          "priceMinor": 49900,
+          "stock": 6
+        },
+        {
+          "sku": "harbour-upholstered-bed-sage-small-double",
+          "options": {
+            "Size": "Small double"
+          },
+          "priceMinor": 53900,
+          "stock": 4
+        },
+        {
+          "sku": "harbour-upholstered-bed-sage-double",
+          "options": {
+            "Size": "Double"
+          },
+          "priceMinor": 57900,
+          "stock": 9
+        },
+        {
+          "sku": "harbour-upholstered-bed-sage-king",
+          "options": {
+            "Size": "King"
+          },
+          "priceMinor": 63900,
+          "stock": 7
+        },
+        {
+          "sku": "harbour-upholstered-bed-sage-super-king",
+          "options": {
+            "Size": "Super king"
+          },
+          "priceMinor": 71900,
+          "stock": 3
+        }
+      ],
+      "tags": [
+        "Fabric:Velvet",
+        "Style:Upholstered",
+        "family:harbour",
+        "Colour:Sage"
+      ],
+      "specifications": {
+        "Single (W x L x H)": "101 x 205 x 120 cm",
+        "Small double (W x L x H)": "131 x 205 x 120 cm",
+        "Double (W x L x H)": "146 x 205 x 120 cm",
+        "King (W x L x H)": "161 x 220 x 120 cm",
+        "Super king (W x L x H)": "191 x 220 x 120 cm",
+        "Delivery": "Free, in 5-7 working days",
+        "Assembly": "Two people, about 45 minutes"
+      },
+      "compareAtPriceMinor": 69900
+    },
+    {
+      "handle": "linden-ottoman-bed",
+      "title": "Linden ottoman bed",
+      "type": "Bed",
+      "vendor": "Resthaven",
+      "collections": [
+        "beds"
+      ],
+      "description": "Lift the whole base on gas struts to reach a deep storage well under the mattress. Upholstered in a washable linen blend.",
+      "images": [
+        "room-guest"
+      ],
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "Single",
+            "Small double",
+            "Double",
+            "King",
+            "Super king"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "sku": "linden-ottoman-bed-single",
+          "options": {
+            "Size": "Single"
+          },
+          "priceMinor": 64900,
+          "stock": 6
+        },
+        {
+          "sku": "linden-ottoman-bed-small-double",
+          "options": {
+            "Size": "Small double"
+          },
+          "priceMinor": 68900,
+          "stock": 4
+        },
+        {
+          "sku": "linden-ottoman-bed-double",
+          "options": {
+            "Size": "Double"
+          },
+          "priceMinor": 72900,
+          "stock": 9
+        },
+        {
+          "sku": "linden-ottoman-bed-king",
+          "options": {
+            "Size": "King"
+          },
+          "priceMinor": 78900,
+          "stock": 7
+        },
+        {
+          "sku": "linden-ottoman-bed-super-king",
+          "options": {
+            "Size": "Super king"
+          },
+          "priceMinor": 86900,
+          "stock": 3
+        }
+      ],
+      "tags": [
+        "Fabric:Linen",
+        "Style:Ottoman",
+        "Storage:Ottoman lift"
+      ],
+      "specifications": {
+        "Single (W x L x H)": "101 x 205 x 110 cm",
+        "Small double (W x L x H)": "131 x 205 x 110 cm",
+        "Double (W x L x H)": "146 x 205 x 110 cm",
+        "King (W x L x H)": "161 x 220 x 110 cm",
+        "Super king (W x L x H)": "191 x 220 x 110 cm",
+        "Delivery": "Free, in 5-7 working days",
+        "Assembly": "Two people, about 45 minutes",
+        "Storage": "Ottoman lift, 380 litres in a king"
+      }
+    },
+    {
+      "handle": "calder-divan-set",
+      "title": "Calder divan set",
+      "type": "Bed",
+      "vendor": "Resthaven",
+      "collections": [
+        "beds",
+        "sale"
+      ],
+      "description": "A divan base with a matching headboard and two or four drawers, ready to take any mattress. Made in Britain.",
+      "images": [
+        "divan"
+      ],
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "Single",
+            "Small double",
+            "Double",
+            "King",
+            "Super king"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "sku": "calder-divan-set-single",
+          "options": {
+            "Size": "Single"
+          },
+          "priceMinor": 42900,
+          "stock": 6
+        },
+        {
+          "sku": "calder-divan-set-small-double",
+          "options": {
+            "Size": "Small double"
+          },
+          "priceMinor": 46900,
+          "stock": 4
+        },
+        {
+          "sku": "calder-divan-set-double",
+          "options": {
+            "Size": "Double"
+          },
+          "priceMinor": 50900,
+          "stock": 9
+        },
+        {
+          "sku": "calder-divan-set-king",
+          "options": {
+            "Size": "King"
+          },
+          "priceMinor": 56900,
+          "stock": 7
+        },
+        {
+          "sku": "calder-divan-set-super-king",
+          "options": {
+            "Size": "Super king"
+          },
+          "priceMinor": 64900,
+          "stock": 3
+        }
+      ],
+      "tags": [
+        "Fabric:Velvet",
+        "Style:Divan",
+        "Storage:Drawers"
+      ],
+      "specifications": {
+        "Single (W x L x H)": "101 x 205 x 105 cm",
+        "Small double (W x L x H)": "131 x 205 x 105 cm",
+        "Double (W x L x H)": "146 x 205 x 105 cm",
+        "King (W x L x H)": "161 x 220 x 105 cm",
+        "Super king (W x L x H)": "191 x 220 x 105 cm",
+        "Delivery": "Free, in 5-7 working days",
+        "Assembly": "Two people, about 45 minutes",
+        "Storage": "Two or four drawers"
+      },
+      "compareAtPriceMinor": 52900
+    },
+    {
+      "handle": "wren-oak-bed",
+      "title": "Wren oak bed",
+      "type": "Bed",
+      "vendor": "Resthaven",
+      "collections": [
+        "beds"
+      ],
+      "description": "A solid oak frame with a slatted headboard and tapered legs, finished in a clear matt oil that shows the grain.",
+      "images": [
+        "wren-oak-bed"
+      ],
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "Single",
+            "Small double",
+            "Double",
+            "King",
+            "Super king"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "sku": "wren-oak-bed-single",
+          "options": {
+            "Size": "Single"
+          },
+          "priceMinor": 54900,
+          "stock": 6
+        },
+        {
+          "sku": "wren-oak-bed-small-double",
+          "options": {
+            "Size": "Small double"
+          },
+          "priceMinor": 58900,
+          "stock": 4
+        },
+        {
+          "sku": "wren-oak-bed-double",
+          "options": {
+            "Size": "Double"
+          },
+          "priceMinor": 62900,
+          "stock": 9
+        },
+        {
+          "sku": "wren-oak-bed-king",
+          "options": {
+            "Size": "King"
+          },
+          "priceMinor": 68900,
+          "stock": 7
+        },
+        {
+          "sku": "wren-oak-bed-super-king",
+          "options": {
+            "Size": "Super king"
+          },
+          "priceMinor": 76900,
+          "stock": 3
+        }
+      ],
+      "tags": [
+        "Material:Oak",
+        "Style:Wooden"
+      ],
+      "specifications": {
+        "Single (W x L x H)": "101 x 205 x 100 cm",
+        "Small double (W x L x H)": "131 x 205 x 100 cm",
+        "Double (W x L x H)": "146 x 205 x 100 cm",
+        "King (W x L x H)": "161 x 220 x 100 cm",
+        "Super king (W x L x H)": "191 x 220 x 100 cm",
+        "Delivery": "Free, in 5-7 working days",
+        "Assembly": "Two people, about 45 minutes"
+      }
+    },
+    {
+      "handle": "elm-wingback-bed",
+      "title": "Elm wingback bed",
+      "type": "Bed",
+      "vendor": "Resthaven",
+      "collections": [
+        "beds"
+      ],
+      "description": "A curved wingback headboard in deep navy velvet that wraps the bed in a little shelter. Oak feet and sprung slats.",
+      "images": [
+        "elm-wingback-bed"
+      ],
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "Single",
+            "Small double",
+            "Double",
+            "King",
+            "Super king"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "sku": "elm-wingback-bed-single",
+          "options": {
+            "Size": "Single"
+          },
+          "priceMinor": 69900,
+          "stock": 6
+        },
+        {
+          "sku": "elm-wingback-bed-small-double",
+          "options": {
+            "Size": "Small double"
+          },
+          "priceMinor": 73900,
+          "stock": 4
+        },
+        {
+          "sku": "elm-wingback-bed-double",
+          "options": {
+            "Size": "Double"
+          },
+          "priceMinor": 77900,
+          "stock": 9
+        },
+        {
+          "sku": "elm-wingback-bed-king",
+          "options": {
+            "Size": "King"
+          },
+          "priceMinor": 83900,
+          "stock": 7
+        },
+        {
+          "sku": "elm-wingback-bed-super-king",
+          "options": {
+            "Size": "Super king"
+          },
+          "priceMinor": 91900,
+          "stock": 3
+        }
+      ],
+      "tags": [
+        "Fabric:Velvet",
+        "Style:Upholstered"
+      ],
+      "specifications": {
+        "Single (W x L x H)": "101 x 205 x 135 cm",
+        "Small double (W x L x H)": "131 x 205 x 135 cm",
+        "Double (W x L x H)": "146 x 205 x 135 cm",
+        "King (W x L x H)": "161 x 220 x 135 cm",
+        "Super king (W x L x H)": "191 x 220 x 135 cm",
+        "Delivery": "Free, in 5-7 working days",
+        "Assembly": "Two people, about 45 minutes"
+      }
+    },
+    {
+      "handle": "rowan-four-poster",
+      "title": "Rowan four-poster bed",
+      "type": "Bed",
+      "vendor": "Resthaven",
+      "collections": [
+        "beds"
+      ],
+      "description": "A slim black metal four-poster with a light, airy outline. Leave it bare or drape it with linen.",
+      "images": [
+        "rowan-four-poster"
+      ],
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "Single",
+            "Small double",
+            "Double",
+            "King",
+            "Super king"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "sku": "rowan-four-poster-single",
+          "options": {
+            "Size": "Single"
+          },
+          "priceMinor": 59900,
+          "stock": 6
+        },
+        {
+          "sku": "rowan-four-poster-small-double",
+          "options": {
+            "Size": "Small double"
+          },
+          "priceMinor": 63900,
+          "stock": 4
+        },
+        {
+          "sku": "rowan-four-poster-double",
+          "options": {
+            "Size": "Double"
+          },
+          "priceMinor": 67900,
+          "stock": 9
+        },
+        {
+          "sku": "rowan-four-poster-king",
+          "options": {
+            "Size": "King"
+          },
+          "priceMinor": 73900,
+          "stock": 7
+        },
+        {
+          "sku": "rowan-four-poster-super-king",
+          "options": {
+            "Size": "Super king"
+          },
+          "priceMinor": 81900,
+          "stock": 3
+        }
+      ],
+      "tags": [
+        "Material:Metal",
+        "Style:Four-poster"
+      ],
+      "specifications": {
+        "Single (W x L x H)": "101 x 205 x 205 cm",
+        "Small double (W x L x H)": "131 x 205 x 205 cm",
+        "Double (W x L x H)": "146 x 205 x 205 cm",
+        "King (W x L x H)": "161 x 220 x 205 cm",
+        "Super king (W x L x H)": "191 x 220 x 205 cm",
+        "Delivery": "Free, in 5-7 working days",
+        "Assembly": "Two people, about 45 minutes"
+      }
+    },
+    {
+      "handle": "larch-storage-bed",
+      "title": "Larch four-drawer storage bed",
+      "type": "Bed",
+      "vendor": "Resthaven",
+      "collections": [
+        "beds"
+      ],
+      "description": "Four deep drawers on smooth runners, two on each side, in an oatmeal weave that suits any bedroom.",
+      "images": [
+        "larch-storage-bed"
+      ],
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "Single",
+            "Small double",
+            "Double",
+            "King",
+            "Super king"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "sku": "larch-storage-bed-single",
+          "options": {
+            "Size": "Single"
+          },
+          "priceMinor": 57900,
+          "stock": 6
+        },
+        {
+          "sku": "larch-storage-bed-small-double",
+          "options": {
+            "Size": "Small double"
+          },
+          "priceMinor": 61900,
+          "stock": 4
+        },
+        {
+          "sku": "larch-storage-bed-double",
+          "options": {
+            "Size": "Double"
+          },
+          "priceMinor": 65900,
+          "stock": 9
+        },
+        {
+          "sku": "larch-storage-bed-king",
+          "options": {
+            "Size": "King"
+          },
+          "priceMinor": 71900,
+          "stock": 7
+        },
+        {
+          "sku": "larch-storage-bed-super-king",
+          "options": {
+            "Size": "Super king"
+          },
+          "priceMinor": 79900,
+          "stock": 3
+        }
+      ],
+      "tags": [
+        "Fabric:Weave",
+        "Style:Divan",
+        "Storage:Drawers"
+      ],
+      "specifications": {
+        "Single (W x L x H)": "101 x 205 x 110 cm",
+        "Small double (W x L x H)": "131 x 205 x 110 cm",
+        "Double (W x L x H)": "146 x 205 x 110 cm",
+        "King (W x L x H)": "161 x 220 x 110 cm",
+        "Super king (W x L x H)": "191 x 220 x 110 cm",
+        "Delivery": "Free, in 5-7 working days",
+        "Assembly": "Two people, about 45 minutes",
+        "Storage": "Four drawers"
+      }
+    },
+    {
+      "handle": "juniper-kids-bed",
+      "title": "Juniper single bed",
+      "type": "Bed",
+      "vendor": "Resthaven",
+      "collections": [
+        "beds"
+      ],
+      "description": "A painted wooden single bed with a softly rounded headboard, low to the floor and built for years of climbing.",
+      "images": [
+        "juniper-kids-bed"
+      ],
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "Single"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "sku": "juniper-kids-bed-single",
+          "options": {
+            "Size": "Single"
+          },
+          "priceMinor": 24900,
+          "stock": 12
+        }
+      ],
+      "tags": [
+        "Material:Painted wood",
+        "Style:Kids"
+      ],
+      "specifications": {
+        "Single (W x L x H)": "101 x 205 x 90 cm",
+        "Delivery": "Free, in 5-7 working days",
+        "Assembly": "Two people, about 45 minutes"
+      }
+    },
+    {
+      "handle": "ivy-daybed",
+      "title": "Ivy daybed with trundle",
+      "type": "Bed",
+      "vendor": "Resthaven",
+      "collections": [
+        "beds"
+      ],
+      "description": "A sofa by day and a bed for two guests by night: the trundle rolls out from underneath on castors.",
+      "images": [
+        "ivy-daybed"
+      ],
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "Single"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "sku": "ivy-daybed-single",
+          "options": {
+            "Size": "Single"
+          },
+          "priceMinor": 47900,
+          "stock": 5
+        }
+      ],
+      "tags": [
+        "Fabric:Boucle",
+        "Style:Daybed"
+      ],
+      "specifications": {
+        "Single (W x L x H)": "101 x 205 x 85 cm",
+        "Delivery": "Free, in 5-7 working days",
+        "Assembly": "Two people, about 45 minutes"
+      }
+    },
+    {
+      "handle": "merrow-hybrid-mattress",
+      "title": "Merrow hybrid mattress",
+      "type": "Mattress",
+      "vendor": "Resthaven",
+      "collections": [
+        "mattresses"
+      ],
+      "description": "Pocket springs under layers of cooling foam and natural wool, for support that moves with you.",
+      "images": [
+        "mattress"
+      ],
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "Single",
+            "Double",
+            "King",
+            "Super king"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "sku": "merrow-hybrid-mattress-single",
+          "options": {
+            "Size": "Single"
+          },
+          "priceMinor": 54900,
+          "stock": 8
+        },
+        {
+          "sku": "merrow-hybrid-mattress-double",
+          "options": {
+            "Size": "Double"
+          },
+          "priceMinor": 66900,
+          "stock": 10
+        },
+        {
+          "sku": "merrow-hybrid-mattress-king",
+          "options": {
+            "Size": "King"
+          },
+          "priceMinor": 74900,
+          "stock": 6
+        },
+        {
+          "sku": "merrow-hybrid-mattress-super-king",
+          "options": {
+            "Size": "Super king"
+          },
+          "priceMinor": 82900,
+          "stock": 4
+        }
+      ],
+      "tags": [
+        "Firmness:Medium",
+        "Type:Hybrid"
+      ],
+      "specifications": {
+        "Depth": "28 cm",
+        "Firmness": "Medium",
+        "Trial": "100 nights",
+        "Delivery": "Free, rolled in a box"
+      }
+    },
+    {
+      "handle": "hollis-pocket-sprung-mattress",
+      "title": "Hollis pocket sprung mattress",
+      "type": "Mattress",
+      "vendor": "Resthaven",
+      "collections": [
+        "mattresses"
+      ],
+      "description": "1,500 individually wrapped springs under a quilted cotton cover with side handles.",
+      "images": [
+        "hollis-mattress"
+      ],
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "Single",
+            "Double",
+            "King",
+            "Super king"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "sku": "hollis-pocket-sprung-mattress-single",
+          "options": {
+            "Size": "Single"
+          },
+          "priceMinor": 35900,
+          "stock": 8
+        },
+        {
+          "sku": "hollis-pocket-sprung-mattress-double",
+          "options": {
+            "Size": "Double"
+          },
+          "priceMinor": 47900,
+          "stock": 10
+        },
+        {
+          "sku": "hollis-pocket-sprung-mattress-king",
+          "options": {
+            "Size": "King"
+          },
+          "priceMinor": 55900,
+          "stock": 6
+        },
+        {
+          "sku": "hollis-pocket-sprung-mattress-super-king",
+          "options": {
+            "Size": "Super king"
+          },
+          "priceMinor": 63900,
+          "stock": 4
+        }
+      ],
+      "tags": [
+        "Firmness:Medium firm",
+        "Type:Pocket sprung"
+      ],
+      "specifications": {
+        "Depth": "26 cm",
+        "Firmness": "Medium firm",
+        "Trial": "100 nights",
+        "Delivery": "Free, rolled in a box"
+      }
+    },
+    {
+      "handle": "fern-memory-foam-mattress",
+      "title": "Fern memory foam mattress",
+      "type": "Mattress",
+      "vendor": "Resthaven",
+      "collections": [
+        "mattresses"
+      ],
+      "description": "Layers of memory foam that soften to your shape, under a removable, washable cover.",
+      "images": [
+        "fern-mattress"
+      ],
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "Single",
+            "Double",
+            "King",
+            "Super king"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "sku": "fern-memory-foam-mattress-single",
+          "options": {
+            "Size": "Single"
+          },
+          "priceMinor": 29900,
+          "stock": 8
+        },
+        {
+          "sku": "fern-memory-foam-mattress-double",
+          "options": {
+            "Size": "Double"
+          },
+          "priceMinor": 41900,
+          "stock": 10
+        },
+        {
+          "sku": "fern-memory-foam-mattress-king",
+          "options": {
+            "Size": "King"
+          },
+          "priceMinor": 49900,
+          "stock": 6
+        },
+        {
+          "sku": "fern-memory-foam-mattress-super-king",
+          "options": {
+            "Size": "Super king"
+          },
+          "priceMinor": 57900,
+          "stock": 4
+        }
+      ],
+      "tags": [
+        "Firmness:Soft",
+        "Type:Memory foam"
+      ],
+      "specifications": {
+        "Depth": "24 cm",
+        "Firmness": "Soft",
+        "Trial": "100 nights",
+        "Delivery": "Free, rolled in a box"
+      }
+    },
+    {
+      "handle": "cedar-mattress-topper",
+      "title": "Cedar mattress topper",
+      "type": "Topper",
+      "vendor": "Resthaven",
+      "collections": [
+        "mattresses",
+        "bedding"
+      ],
+      "description": "A thick quilted topper with elastic corner straps that turns a firm mattress into a soft one.",
+      "images": [
+        "cedar-topper"
+      ],
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "Single",
+            "Double",
+            "King",
+            "Super king"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "sku": "cedar-mattress-topper-single",
+          "options": {
+            "Size": "Single"
+          },
+          "priceMinor": 8900,
+          "stock": 14
+        },
+        {
+          "sku": "cedar-mattress-topper-double",
+          "options": {
+            "Size": "Double"
+          },
+          "priceMinor": 11900,
+          "stock": 12
+        },
+        {
+          "sku": "cedar-mattress-topper-king",
+          "options": {
+            "Size": "King"
+          },
+          "priceMinor": 13900,
+          "stock": 9
+        },
+        {
+          "sku": "cedar-mattress-topper-super-king",
+          "options": {
+            "Size": "Super king"
+          },
+          "priceMinor": 15900,
+          "stock": 6
+        }
+      ],
+      "tags": [
+        "Type:Topper"
+      ],
+      "specifications": {
+        "Depth": "7 cm",
+        "Filling": "Hollowfibre",
+        "Care": "Machine washable at 40°C"
+      }
+    },
+    {
+      "handle": "ashby-headboard",
+      "title": "Ashby headboard",
+      "type": "Headboard",
+      "vendor": "Resthaven",
+      "collections": [
+        "headboards"
+      ],
+      "description": "A channel-stitched velvet headboard that bolts to any divan base or fixes straight to the wall.",
+      "images": [
+        "headboard"
+      ],
+      "tags": [
+        "Fabric:Velvet"
+      ],
+      "specifications": {
+        "Double (W x H)": "140 x 120 cm",
+        "King (W x H)": "155 x 120 cm"
+      },
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "Double",
+            "King",
+            "Super king"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "sku": "ashby-headboard-double",
+          "options": {
+            "Size": "Double"
+          },
+          "priceMinor": 14900,
+          "stock": 10
+        },
+        {
+          "sku": "ashby-headboard-king",
+          "options": {
+            "Size": "King"
+          },
+          "priceMinor": 16900,
+          "stock": 10
+        },
+        {
+          "sku": "ashby-headboard-super-king",
+          "options": {
+            "Size": "Super king"
+          },
+          "priceMinor": 18900,
+          "stock": 10
+        }
+      ]
+    },
+    {
+      "handle": "moss-scalloped-headboard",
+      "title": "Moss scalloped headboard",
+      "type": "Headboard",
+      "vendor": "Resthaven",
+      "collections": [
+        "headboards"
+      ],
+      "description": "A softly scalloped outline in sage velvet: a headboard that becomes the centre of the room.",
+      "images": [
+        "moss-headboard"
+      ],
+      "tags": [
+        "Fabric:Velvet"
+      ],
+      "specifications": {
+        "Double (W x H)": "145 x 110 cm",
+        "King (W x H)": "160 x 110 cm"
+      },
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "Double",
+            "King"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "sku": "moss-scalloped-headboard-double",
+          "options": {
+            "Size": "Double"
+          },
+          "priceMinor": 19900,
+          "stock": 10
+        },
+        {
+          "sku": "moss-scalloped-headboard-king",
+          "options": {
+            "Size": "King"
+          },
+          "priceMinor": 22900,
+          "stock": 10
+        }
+      ]
+    },
+    {
+      "handle": "bramble-bedside-table",
+      "title": "Bramble bedside table",
+      "type": "Bedside table",
+      "vendor": "Resthaven",
+      "collections": [
+        "bedroom-furniture"
+      ],
+      "description": "Solid oak with one soft-close drawer and an open shelf for books and a basket.",
+      "images": [
+        "bramble-bedside"
+      ],
+      "tags": [
+        "Material:Oak"
+      ],
+      "specifications": {
+        "Dimensions (W x D x H)": "45 x 38 x 58 cm",
+        "Material": "Solid oak, matt oil"
+      },
+      "variants": [
+        {
+          "sku": "bramble-bedside-table",
+          "options": {},
+          "priceMinor": 17900,
+          "stock": 15
+        }
+      ]
+    },
+    {
+      "handle": "hazel-chest-of-drawers",
+      "title": "Hazel chest of drawers",
+      "type": "Chest of drawers",
+      "vendor": "Resthaven",
+      "collections": [
+        "bedroom-furniture",
+        "sale"
+      ],
+      "description": "Five deep drawers in solid oak with turned oak knobs and dovetail joints.",
+      "images": [
+        "hazel-drawers"
+      ],
+      "tags": [
+        "Material:Oak"
+      ],
+      "specifications": {
+        "Dimensions (W x D x H)": "80 x 45 x 115 cm",
+        "Material": "Solid oak, matt oil"
+      },
+      "variants": [
+        {
+          "sku": "hazel-chest-of-drawers",
+          "options": {},
+          "priceMinor": 54900,
+          "stock": 4
+        }
+      ],
+      "compareAtPriceMinor": 64900
+    },
+    {
+      "handle": "alder-wardrobe",
+      "title": "Alder double wardrobe",
+      "type": "Wardrobe",
+      "vendor": "Resthaven",
+      "collections": [
+        "bedroom-furniture"
+      ],
+      "description": "A tall two-door wardrobe in soft oat paint with oak handles, a hanging rail and two shelves.",
+      "images": [
+        "alder-wardrobe"
+      ],
+      "tags": [
+        "Material:Painted wood"
+      ],
+      "specifications": {
+        "Dimensions (W x D x H)": "100 x 60 x 200 cm",
+        "Material": "Painted oak veneer"
+      },
+      "variants": [
+        {
+          "sku": "alder-wardrobe",
+          "options": {},
+          "priceMinor": 89900,
+          "stock": 3
+        }
+      ]
+    },
+    {
+      "handle": "willow-end-of-bed-bench",
+      "title": "Willow end-of-bed bench",
+      "type": "Bench",
+      "vendor": "Resthaven",
+      "collections": [
+        "bedroom-furniture"
+      ],
+      "description": "A padded bench in cream boucle on slim oak legs, for the foot of the bed or a hallway.",
+      "images": [
+        "willow-bench"
+      ],
+      "tags": [
+        "Fabric:Boucle"
+      ],
+      "specifications": {
+        "Dimensions (W x D x H)": "120 x 40 x 46 cm"
+      },
+      "variants": [
+        {
+          "sku": "willow-end-of-bed-bench",
+          "options": {},
+          "priceMinor": 24900,
+          "stock": 8
+        }
+      ]
+    },
+    {
+      "handle": "washed-linen-bedding-set",
+      "title": "Washed linen bedding set",
+      "type": "Bedding",
+      "vendor": "Resthaven",
+      "collections": [
+        "bedding"
+      ],
+      "description": "Stone-washed French linen in oat, soft from the first night. Duvet cover and two pillowcases.",
+      "images": [
+        "linen-bedding"
+      ],
+      "tags": [
+        "Material:Linen"
+      ],
+      "specifications": {
+        "Material": "100% linen",
+        "Care": "Machine washable at 40°C"
+      },
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "Double",
+            "King",
+            "Super king"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "sku": "washed-linen-bedding-set-double",
+          "options": {
+            "Size": "Double"
+          },
+          "priceMinor": 12900,
+          "stock": 20
+        },
+        {
+          "sku": "washed-linen-bedding-set-king",
+          "options": {
+            "Size": "King"
+          },
+          "priceMinor": 14900,
+          "stock": 20
+        },
+        {
+          "sku": "washed-linen-bedding-set-super-king",
+          "options": {
+            "Size": "Super king"
+          },
+          "priceMinor": 16900,
+          "stock": 20
+        }
+      ]
+    },
+    {
+      "handle": "hotel-pillow-pair",
+      "title": "Hotel pillow pair",
+      "type": "Pillows",
+      "vendor": "Resthaven",
+      "collections": [
+        "bedding"
+      ],
+      "description": "Two plump pillows with a soft microfibre filling and a cotton cover, as in a good hotel.",
+      "images": [
+        "pillows"
+      ],
+      "tags": [],
+      "specifications": {
+        "Size": "48 x 74 cm each",
+        "Care": "Machine washable at 40°C"
+      },
+      "variants": [
+        {
+          "sku": "hotel-pillow-pair",
+          "options": {},
+          "priceMinor": 5900,
+          "stock": 30
+        }
+      ]
+    },
+    {
+      "handle": "chunky-wool-throw",
+      "title": "Chunky wool throw",
+      "type": "Throw",
+      "vendor": "Resthaven",
+      "collections": [
+        "bedding",
+        "sale"
+      ],
+      "description": "A hand-knitted throw in undyed cream wool for the foot of the bed.",
+      "images": [
+        "wool-throw"
+      ],
+      "tags": [
+        "Material:Wool"
+      ],
+      "specifications": {
+        "Size": "130 x 170 cm",
+        "Material": "100% wool"
+      },
+      "variants": [
+        {
+          "sku": "chunky-wool-throw",
+          "options": {},
+          "priceMinor": 8900,
+          "stock": 12
+        }
+      ],
+      "compareAtPriceMinor": 11000
+    },
+    {
+      "handle": "textured-wool-rug",
+      "title": "Textured wool rug",
+      "type": "Rug",
+      "vendor": "Resthaven",
+      "collections": [
+        "bedroom-furniture"
+      ],
+      "description": "A hand-tufted cream wool rug with a raised lattice pattern that feels warm under bare feet.",
+      "images": [
+        "rug"
+      ],
+      "tags": [
+        "Material:Wool"
+      ],
+      "specifications": {
+        "Material": "Wool, cotton backing"
+      },
+      "options": [
+        {
+          "name": "Size",
+          "values": [
+            "120 x 170 cm",
+            "160 x 230 cm"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "sku": "textured-wool-rug-120-x-170-cm",
+          "options": {
+            "Size": "120 x 170 cm"
+          },
+          "priceMinor": 22900,
+          "stock": 6
+        },
+        {
+          "sku": "textured-wool-rug-160-x-230-cm",
+          "options": {
+            "Size": "160 x 230 cm"
+          },
+          "priceMinor": 34900,
+          "stock": 6
+        }
+      ]
+    }
+  ],
+  "reviews": [
+    {
+      "product": "harbour-upholstered-bed",
+      "rating": 5,
+      "title": "Even better in person",
+      "body": "The boucle is lovely and the headboard is properly tall. Easy to put together in under an hour.",
+      "author": "Hannah, Bristol"
+    },
+    {
+      "product": "harbour-upholstered-bed",
+      "rating": 4,
+      "title": "Beautiful bed",
+      "body": "Looks great and feels solid. Took a week longer to arrive than I expected.",
+      "author": "Tom, Leeds"
+    },
+    {
+      "product": "harbour-upholstered-bed",
+      "rating": 5,
+      "title": "So comfortable",
+      "body": "We sit up and read in bed every night now. Worth every penny.",
+      "author": "Priya, London"
+    },
+    {
+      "product": "linden-ottoman-bed",
+      "rating": 5,
+      "title": "Storage heaven",
+      "body": "All our spare bedding and suitcases fit underneath. The lift is smooth and holds open safely.",
+      "author": "Gareth, Cardiff"
+    },
+    {
+      "product": "linden-ottoman-bed",
+      "rating": 4,
+      "title": "Great for a small flat",
+      "body": "Saved us buying a chest of drawers. The fabric marks a little if you rub it.",
+      "author": "Ellie, Manchester"
+    },
+    {
+      "product": "calder-divan-set",
+      "rating": 5,
+      "title": "Good value",
+      "body": "Solid base and the drawers run nicely. Delivery team were careful and quick.",
+      "author": "Margaret, York"
+    },
+    {
+      "product": "wren-oak-bed",
+      "rating": 5,
+      "title": "Simple and well made",
+      "body": "Real oak, no wobble at all. Looks calm in our bedroom.",
+      "author": "Sam, Edinburgh"
+    },
+    {
+      "product": "merrow-hybrid-mattress",
+      "rating": 5,
+      "title": "Best sleep in years",
+      "body": "Supportive but soft on top. No more waking up with a sore back.",
+      "author": "Kate, Norwich"
+    },
+    {
+      "product": "merrow-hybrid-mattress",
+      "rating": 4,
+      "title": "Very comfortable",
+      "body": "Took a couple of nights to settle in. Sleeps cool.",
+      "author": "James, Bath"
+    },
+    {
+      "product": "hollis-pocket-sprung-mattress",
+      "rating": 4,
+      "title": "Firm and supportive",
+      "body": "Exactly the firmness we wanted. Handles make it easy to turn.",
+      "author": "Olivia, Brighton"
+    },
+    {
+      "product": "washed-linen-bedding-set",
+      "rating": 5,
+      "title": "Soft from day one",
+      "body": "Washed beautifully and gets softer every time.",
+      "author": "Rachel, Oxford"
+    },
+    {
+      "product": "bramble-bedside-table",
+      "rating": 5,
+      "title": "Lovely quality",
+      "body": "Solid, smooth drawer, perfect height next to the Harbour bed.",
+      "author": "Anna, Cambridge"
+    }
+  ],
+  "menus": {
+    "main": [
+      {
+        "label": "Beds",
+        "href": "/collections/beds",
+        "image": "room-main",
+        "children": [
+          {
+            "label": "Bed types",
+            "href": "/collections/beds",
+            "children": [
+              {
+                "label": "Upholstered beds",
+                "href": "/search?q=Upholstered"
+              },
+              {
+                "label": "Ottoman beds",
+                "href": "/search?q=Ottoman"
+              },
+              {
+                "label": "Divan beds",
+                "href": "/search?q=Divan"
+              },
+              {
+                "label": "Wooden beds",
+                "href": "/search?q=Oak"
+              },
+              {
+                "label": "Kids' beds",
+                "href": "/search?q=Single"
+              }
+            ]
+          },
+          {
+            "label": "Main bedroom",
+            "href": "/collections/beds",
+            "image": "room-main"
+          },
+          {
+            "label": "Guest room",
+            "href": "/collections/beds",
+            "image": "room-guest"
+          },
+          {
+            "label": "Kids' room",
+            "href": "/collections/beds",
+            "image": "room-kids"
+          }
+        ]
+      },
+      {
+        "label": "Mattresses",
+        "href": "/collections/mattresses"
+      },
+      {
+        "label": "Headboards",
+        "href": "/collections/headboards"
+      },
+      {
+        "label": "Bedroom furniture",
+        "href": "/collections/bedroom-furniture"
+      },
+      {
+        "label": "Bedding",
+        "href": "/collections/bedding"
+      },
+      {
+        "label": "Sale",
+        "href": "/collections/sale"
+      }
+    ],
+    "footer": [
+      {
+        "label": "Delivery",
+        "href": "/pages/delivery"
+      },
+      {
+        "label": "Returns",
+        "href": "/pages/returns"
+      },
+      {
+        "label": "Mattress guide",
+        "href": "/pages/mattress-guide"
+      },
+      {
+        "label": "About us",
+        "href": "/pages/about"
+      }
+    ]
+  },
+  "pages": [
+    {
+      "handle": "about",
+      "title": "About Resthaven",
+      "body": [
+        "We make beds and bedroom furniture for calm, comfortable rooms: honest materials, careful making and measurements you can trust.",
+        "Every bed is built to order in our partner workshops in the UK and delivered free by our own two-person team."
+      ]
+    },
+    {
+      "handle": "delivery",
+      "title": "Delivery",
+      "body": [
+        "Delivery is free to most UK addresses. Beds and furniture arrive in 5-7 working days; mattresses and bedding in 2-3.",
+        "Our two-person team brings large pieces to the room of your choice and takes the packaging away."
+      ]
+    },
+    {
+      "handle": "returns",
+      "title": "Returns",
+      "body": [
+        "Return anything within 30 days for a full refund. Mattresses come with a 100-night trial: if it isn't right, we collect it for free.",
+        "Made-to-order fabrics and sizes can be returned if they arrive damaged or faulty."
+      ]
+    },
+    {
+      "handle": "mattress-guide",
+      "title": "Choosing a mattress",
+      "body": [
+        "Side sleepers usually prefer soft to medium, back sleepers medium to medium firm, and front sleepers firm.",
+        "Hybrid mattresses combine springs and foam; pocket sprung mattresses feel cooler and bouncier; memory foam hugs your shape."
+      ]
+    }
+  ]
+}
