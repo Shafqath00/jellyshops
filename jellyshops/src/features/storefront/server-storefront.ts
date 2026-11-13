@@ -7,9 +7,18 @@ import { resolveMediaUrls } from "@/lib/media-urls";
 
 export interface StorefrontBootstrapData { store: Store; products: Product[]; collections: Collection[]; publication: PublicStorefrontPublication }
 const origin = (process.env.STOREFRONT_API_URL ?? process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001").replace(/\/$/, "");
+/**
+ * How long a store's published design, products and collections are reused between page views (seconds). Shoppers
+ * then get pages without waiting on four backend calls each time; a newly published design or a product change can
+ * take up to this long to appear (prices and stock are checked again at checkout). Each store's entries carry the
+ * tag `storefront:<slug>`, so `revalidateTag` can refresh one store at once if Publish ever needs to be instant.
+ */
+export const STOREFRONT_CACHE_SECONDS = 30;
+export const storefrontCacheTag = (slug: string) => `storefront:${slug}`;
+
 export async function loadServerStorefront(slug: string, fetcher: typeof fetch = fetch): Promise<StorefrontBootstrapData | null> {
   async function read<T>(path: string): Promise<T | null> {
-    const response = await fetcher(`${origin}${path}`, { cache: "no-store", headers: { Accept: "application/json" } });
+    const response = await fetcher(`${origin}${path}`, { next: { revalidate: STOREFRONT_CACHE_SECONDS, tags: [storefrontCacheTag(slug)] }, headers: { Accept: "application/json" } });
     if (response.status === 404) return null;
     if (!response.ok) throw new Error("The storefront service is temporarily unavailable.");
     return resolveMediaUrls(await response.json() as T, origin);
@@ -63,5 +72,5 @@ export async function loadServerStorefront(slug: string, fetcher: typeof fetch =
   const store: Store = { id, businessId: id, name: details.store.name, slug: details.store.slug, country: details.store.country, tagline: details.store.name, description: `Welcome to ${details.store.name}.`, currency: details.store.currency as Store["currency"], published: true, bannerUrl: products[0]?.imageUrl ?? "", shippingMinor: details.store.shippingMinor ?? 0, shippingCopy: details.store.shippingCopy ?? "", theme: { accent: "#172a1b", accentSoft: "#e8f3d6", background: "#fffdf8", surface: "#ffffff", text: "#172a1b", displayFont: "serif" } };
   return { store, products, collections: collections.map((collection) => ({ id: collection.id, storeId: id, name: collection.title, slug: collection.handle, description: collection.description, ...(collection.descriptionDoc ? { descriptionDoc: collection.descriptionDoc } : {}) })), publication };
 }
-// Request-scoped deduplication only. Published HTML/data never fall back to drafts.
+// Request-scoped deduplication on top of the 30-second data cache. Published HTML/data never fall back to drafts.
 export const getServerStorefront = cache((slug: string) => loadServerStorefront(slug));

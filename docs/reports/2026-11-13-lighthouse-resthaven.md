@@ -53,3 +53,9 @@ Start-up JavaScript on the store home page: **547 KB to 457 KB** (compressed). P
 Lighthouse (two runs): performance 70 and 75 (desktop 82–96, phone 49–65). The phone score is now dominated by the server's first response in this setup: **2.2–5.2 s**, because a local frontend and backend talk to the remote staging database for every page. A store deployed next to its database needs its own measurement. Caching each store's data for a short time on the server (for example 30 seconds) would remove most of that wait for repeat visitors; it means a newly published design or product change can take up to that long to appear, so it needs a decision.
 
 Still in the start-up JavaScript: Zod validation schemas (shared schemas and section definitions used by the renderer in the browser), React, the renderer and the built-in starter packs in the registry package.
+
+## Speed fixes, round 3: 30-second store data cache (same day, user's choice)
+
+The store's details, published design, products and collections are now reused for 30 seconds between page views (`STOREFRONT_CACHE_SECONDS` in `src/features/storefront/server-storefront.ts`, Next's `fetch` cache with the tag `storefront:<slug>`). A newly published design or product change can take up to 30 seconds to reach shoppers; prices and stock are checked again at checkout. The password check, search results and custom-field values are still fetched every time.
+
+First byte on a repeat visit: about 3 s to **0.57 s** in this setup. Lighthouse (two runs): **75 and 77** (desktop 82–97, phone 57–71). Still under the 80 budget on phones; what is left is mostly start-up JavaScript (Zod schemas, React, the renderer, built-in starter packs in the registry package) and the remaining uncached calls.
