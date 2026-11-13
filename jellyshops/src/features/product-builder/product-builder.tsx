@@ -9,6 +9,8 @@ import { OrganizationSection } from "./sections/organization-section";
 import { DigitalProductSettings } from "@/features/commerce/components/digital-product-settings";
 import { isProductMediaEnabled, pruneMediaAssignments } from "@jelly/storefront-schema";
 import { PhotosSection } from "./sections/photos-section";
+import { productReadiness } from "./readiness";
+import { ReadinessCard } from "./readiness-card";
 import { ArrowLeft, Eye, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useShop } from "@/contexts/shop-context";
@@ -176,6 +178,14 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
     finally { setSaving(false); }
   }
 
+  /** Brings an archived product back as a draft, so it can be checked before it goes live again. */
+  async function restore() {
+    if (!api || !storeId || !productId) return;
+    setSaving(true); setSaveError("");
+    try { await api.updateProduct(storeId, productId, { status: "DRAFT" }); setDraft(current => ({ ...current, archived: false, published: false })); setDirty(false); setJustSaved(true); }
+    catch (caught) { setSaveError(caught instanceof Error ? caught.message : "Could not restore this product. Try again."); }
+    finally { setSaving(false); }
+  }
   async function archive() {
     if (!api || !storeId || !productId || !(await confirmation.ask({ title: "Archive this product?", description: "It will be hidden from your store. You can make it active again later.", confirmLabel: "Archive product", destructive: true }))) return;
     setSaving(true);
@@ -238,6 +248,7 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
           <button type="button" className="jk-button" ref={previewTrigger} onClick={() => setPreviewOpen(true)}><Eye size={15} aria-hidden="true" />Preview</button>
           {productId && <button type="button" className="jk-button" disabled={saving || dirty} title={dirty ? "Save your changes first" : undefined} onClick={() => void duplicate()}>Duplicate</button>}
           {productId && !draft.archived && <button type="button" className="jk-button" disabled={saving} onClick={() => void archive()}>Archive</button>}
+          {productId && draft.archived && <button type="button" className="jk-button" disabled={saving} onClick={() => void restore()}>Restore</button>}
         </div>
       </header>
       <nav className="jk-builder-nav" aria-label="Product sections">
@@ -287,7 +298,7 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
         </div>
       </div>
 
-      <OrganizationSection category={<CategorySection
+      <OrganizationSection category={<><ReadinessCard readiness={productReadiness(draft)} /><CategorySection
           taxonomy={taxonomy}
           loading={taxonomyLoading}
           error={taxonomyError}
@@ -298,7 +309,7 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
             setTaxonomy((current) => current ? { ...current, categories: [...current.categories, created] } : current);
             return created;
           } : undefined}
-        />} key={productId??"new"} draft={draft} onChange={change} categories={categoryPaths} brands={storeId ? repository.getBrands?.(storeId) ?? [] : []}
+        /></>} key={productId??"new"} draft={draft} onChange={change} categories={categoryPaths} brands={storeId ? repository.getBrands?.(storeId) ?? [] : []}
         extra={productId && api && storeId ? <Card title="Online store"><TemplatePicker api={api} storeId={storeId} resourceType="product" resourceId={productId} /></Card> : undefined} />
       <div className={`jk-builder-bar ${dirty ? "is-dirty" : ""}`}>
         <div className="jk-builder-save-state"><span role="status">{saving ? "Saving product…" : dirty ? "Unsaved changes" : justSaved ? "All changes saved" : productId ? "No unsaved changes" : "New product"}</span><small>{draft.archived ? "Archived · hidden from customers" : draft.published ? "Active · visible when saved" : "Draft · hidden from customers"}</small></div>

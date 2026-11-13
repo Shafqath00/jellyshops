@@ -38,10 +38,10 @@ export function InventorySection({ draft, errors, hasCombinations, onChange }: P
         <AnimatedDetails className="jk-disclosure jk-inset-disclosure" open={codesOpen} onToggle={event => setCodesOpen(event.currentTarget.open)}>
           <summary>SKU and barcode <span className="jk-field-kind">Optional</span></summary>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field id="pb-sku" label="SKU — your stock code" hint="An internal code to identify this item, for example MUG-001.">
+            <Field id="pb-sku" label="Stock code (SKU)" hint="Your own code for this item, for example MUG-001. It is also how a spreadsheet import finds the item again.">
               <input id="pb-sku" className={inputClass} value={draft.sku} onChange={event => onChange("sku", event.target.value)} />
             </Field>
-            <Field id="pb-barcode" label="Barcode (ISBN, UPC, GTIN, etc.)" error={errors.barcode}>
+            <Field id="pb-barcode" label="Barcode" hint="The number under the barcode on the packaging, if it has one." error={errors.barcode}>
               <input id="pb-barcode" className={inputClass} maxLength={80} value={draft.barcode} aria-invalid={Boolean(errors.barcode)} aria-describedby={errors.barcode ? "pb-barcode-error" : undefined} onChange={event => onChange("barcode", event.target.value)} />
             </Field>
           </div>
