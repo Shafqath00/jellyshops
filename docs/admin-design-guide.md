@@ -104,7 +104,7 @@ Dark mode swaps the colour tokens (`html.admin-dark`); a page that uses only tok
 | --- | --- |
 | Build from kit parts | Write new card, table, button or field styles in a page |
 | Use tokens | Hard-code colours or utility colour classes (`bg-amber-50`, `text-[#333]`) |
-| Use the old class names nowhere | Add `admin-card`, `form-card`, `admin-field`, `admin-button`, `.field` to new code (they are being removed) |
+| Use kit classes and components | Bring back `admin-card`, `form-card`, `admin-field`, `admin-button` (they are gone) or give one page its own colours, buttons or tabs |
 | Show loading, empty and error states on every page | Leave a blank page while loading or after a failed request |
 | Check the page at 1440, 768 and 375px, light and dark | Rely on desktop only |
 | Add an axe test for new UI | Skip accessibility because "it is the admin" |

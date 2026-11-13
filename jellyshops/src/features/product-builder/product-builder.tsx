@@ -287,7 +287,7 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
         <div id="pb-shipping"><ShippingSection draft={draft} errors={errors} hasCombinations={combinations} onChange={change} /></div>
         <div id="pb-more" className="jk-builder-group">
           <div className="jk-builder-group-heading"><h2>More details</h2><p>Only add what your product needs.</p></div>
-        <AnimatedDetails className="jk-card jk-disclosure"><summary>Product specifications <span className="jk-muted">(optional)</span></summary><label className="admin-field mt-3">Specifications<textarea rows={4} maxLength={12000} value={draft.specificationsText??""} placeholder={"Material: Cotton\nCare: Machine wash cold"} onChange={event=>change("specificationsText",event.target.value)} /><small>One detail per line, for example Material: Cotton.</small></label></AnimatedDetails>
+        <AnimatedDetails className="jk-card jk-disclosure"><summary>Product specifications <span className="jk-muted">(optional)</span></summary><label className="jk-field mt-3">Specifications<textarea rows={4} maxLength={12000} value={draft.specificationsText??""} placeholder={"Material: Cotton\nCare: Machine wash cold"} onChange={event=>change("specificationsText",event.target.value)} /><small>One detail per line, for example Material: Cotton.</small></label></AnimatedDetails>
           <PersonalisationSection collapsible fields={draft.personalisation ?? []} onChange={(fields) => change("personalisation", fields)} />
           <QuantityRuleSection collapsible rule={draft.quantityRule ?? null} onChange={(rule) => change("quantityRule", rule)} />
 

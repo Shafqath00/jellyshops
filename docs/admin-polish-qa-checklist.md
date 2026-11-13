@@ -41,6 +41,8 @@ At 1440px, 768px and 375px, in light and dark (the sun/moon button in the top ba
 - [ ] New product: the checklist says "Add name and price before you publish"; each "Add" link jumps to the right field.
 - [ ] Drag two photos from your desktop onto the Photos area: both upload with progress. Drag a PDF: it is refused with a plain message.
 - [ ] Archive a product from the editor, then **Restore**: it comes back as a draft.
+- [ ] Products list and the editor now look like the rest of the admin: blue main button, the same tabs, badges and cards, in light and dark. Tell me if anything on these two pages looks broken, since their styling changed the most.
+- [ ] A product with sizes or colours, on a phone: each combination is a card with Price, Original price, Stock and SKU, and nothing scrolls sideways.
 
 ## 5. Other pages changed
 
@@ -56,5 +58,4 @@ At 1440px, 768px and 375px, in light and dark (the sun/moon button in the top ba
 - An import runs while its page is open. If the page closes it waits for "Carry on".
 - Bulk edit works on the rows ticked on the page shown (up to 50). For more, filter and repeat, or export, edit and import.
 - Stock changed by bulk edit or import is not labelled with a reason in stock history.
-- The product editor's inner sections still use their earlier styling (Phase 2d was not done).
 - Customers has no filters yet; Messages has no search.

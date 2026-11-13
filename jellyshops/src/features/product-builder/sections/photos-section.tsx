@@ -235,11 +235,11 @@ export function PhotosSection({ media, options, taggingEnabled, onChange, onUplo
 
       {selected.length > 0 && <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-muted/30 p-3 text-[12px]"><p className="font-semibold">{selected.length} selected</p><button type="button" className={button} onClick={() => { commit(media.filter((photo) => !selected.includes(photo.id))); setSelected([]); }}>Remove selected from product</button>{taggingEnabled && <AnimatedDetails><summary className="cursor-pointer font-semibold">Show selected for…</summary>{tags(selected)}<button type="button" className={button} onClick={() => commit(media.map((photo) => selected.includes(photo.id) ? { ...photo, appliesTo: {} } : photo))}>Show for everything</button></AnimatedDetails>}</div>}
 
-      <div className="admin-photo-grid">
+      <div className="jk-photo-grid">
 
         {media.map((photo, index) => (
 
-          <article key={photo.id} aria-label={index === 0 ? "Cover photo" : `Product photo ${index + 1}`} draggable onDragStart={() => setDrag(photo.id)} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); if (drag) move(drag, index); setDrag(undefined); }} className="admin-photo-tile">
+          <article key={photo.id} aria-label={index === 0 ? "Cover photo" : `Product photo ${index + 1}`} draggable onDragStart={() => setDrag(photo.id)} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); if (drag) move(drag, index); setDrag(undefined); }} className="jk-photo-tile">
 
             <label className="flex min-h-8 items-center gap-2 px-2 text-[13px] font-medium text-foreground"><input type="checkbox" checked={selected.includes(photo.id)} onChange={(event) => setSelected((ids) => event.target.checked ? [...ids, photo.id] : ids.filter((id) => id !== photo.id))} /><span className={index === 0 ? "rounded-md bg-accent px-2 py-1 text-[13px]" : "text-[13px] text-muted-foreground"}>{index === 0 ? "Cover photo" : `Photo ${index + 1}`}</span></label>
 

@@ -1,48 +1,26 @@
-/* Older admin page styles (pages not yet on the admin kit). The shell is in admin-shell.css. */
+/* What is left of the older admin styles: variable names and a few element rules. New code uses admin-kit.css. */
+/* Older variable names a few components still read. They point at the kit tokens, which also handle dark mode. */
 .admin-shell,.jk-sheet {
-  --background:#f5f5f5; --foreground:#1f1f1f; --card:#fff; --card-foreground:#1f1f1f;
-  --popover:#fff; --popover-foreground:#1f1f1f; --muted:#f3f3f3; --muted-foreground:#616161;
-  --border:#e3e3e3; --input:#c9c9c9; --primary:var(--jk-accent); --primary-foreground:var(--jk-accent-text);
-  --accent:#ededed; --accent-foreground:#202020; --ring:#005bd3; --radius:12px;
-  --tint-foreground:#303030; --tint-border:#c9c9c9; --frame:#171717;
-  --destructive:#b42318; --success:#177245;
+  --background:var(--jk-bg); --foreground:var(--jk-text); --card:var(--jk-surface); --card-foreground:var(--jk-text);
+  --popover:var(--jk-surface); --popover-foreground:var(--jk-text); --muted:var(--jk-surface-subdued); --muted-foreground:var(--jk-text-subdued);
+  --border:var(--jk-border); --input:var(--jk-border-strong); --primary:var(--jk-accent); --primary-foreground:var(--jk-accent-text);
+  --accent:var(--jk-surface-hover); --accent-foreground:var(--jk-text); --ring:var(--jk-focus); --radius:12px;
+  --tint-foreground:var(--jk-text); --tint-border:var(--jk-border-strong); --frame:var(--jk-topbar);
+  --destructive:var(--jk-critical-text); --success:var(--jk-positive);
 }
-.admin-dark .admin-shell,.admin-dark .jk-sheet {--background:#1f1f1f;--foreground:#eee;--card:#292929;--card-foreground:#eee;--popover:#292929;--popover-foreground:#eee;--muted:#333;--muted-foreground:#b5b5b5;--border:#444;--input:#666;--primary:var(--jk-accent);--primary-foreground:var(--jk-accent-text);--accent:#393939;--accent-foreground:#fff;--tint-foreground:#eee;--tint-border:#666;--success:#8bd4ac}
 .admin-content h1 {font:600 24px/1.3 Arial,"Segoe UI",sans-serif!important;letter-spacing:-.025em!important}
 .admin-content h2 {font-size:15px;font-weight:600;letter-spacing:0}
 .admin-content h3 {font-size:14px;font-weight:600}
-.admin-content .page-kicker,.admin-content .page-head>span {display:none}
 .admin-content button,.admin-content input,.admin-content select,.admin-content textarea {font-family:inherit}
 .admin-content input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=file]),.admin-content select,.admin-content textarea {border-radius:8px;font-size:14px;font-weight:400}
 .admin-content input:focus-visible,.admin-content textarea:focus-visible,.admin-content select:focus-visible {outline:2px solid var(--ring);outline-offset:1px}
-.admin-content .button,.admin-button {display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:34px;padding:6px 12px;border:1px solid var(--input);border-radius:8px;font-size:13px;font-weight:500;background:var(--card);color:var(--foreground);box-shadow:0 1px 1px #00000008;cursor:pointer}
-.admin-button-primary {background:var(--primary);border-color:var(--primary);color:var(--primary-foreground)}
-.admin-button:disabled {opacity:.5;cursor:default}
-.admin-content .form-card {border:1px solid var(--border);background:var(--card);border-radius:12px;box-shadow:0 1px 3px #00000005;overflow:clip}
-.admin-stack {display:flex;flex-direction:column;gap:16px}
-.admin-field {display:flex;flex-direction:column;gap:6px;font-size:13px}
-.admin-field input,.admin-field select,.admin-field textarea {min-height:36px;background:var(--card);color:var(--foreground);border:1px solid var(--input);padding:7px 10px;border-radius:8px}
-.admin-field small {font-size:12px;color:var(--muted-foreground)}
-.admin-photo-grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px}
-.admin-photo-tile {border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--muted);min-width:0}
-.admin-photo-tile img {width:100%;aspect-ratio:1;object-fit:cover}
-.admin-photo-tile button {width:100%;text-align:left}
 .admin-content :is(section,article)[class*=shadow-] {box-shadow:0 1px 3px #00000005}
 .admin-content table {font-size:13px}
 .admin-content table th {font-weight:500;text-transform:none;letter-spacing:0}
-@media(max-width:767px){.admin-page-header{align-items:flex-start;flex-wrap:wrap}.admin-product-sidebar{display:flex;flex-direction:column}.admin-page-actions{width:100%}.admin-table th,.admin-table td{padding:10px 12px}.admin-content h1{font-size:24px!important}}
 
 
-.admin-content>.admin-page {max-width:none;padding:0;margin:0}
 .admin-content>main {padding:0;max-width:none;margin:0}
 .admin-content>main>.max-w-6xl {max-width:none}
-.admin-content .form-card-title {padding:16px;border-bottom:1px solid var(--border)}
-.admin-content .form-card-title h2 {font-family:inherit;font-size:15px;font-weight:600}
-.admin-content .form-card-title>div>span {display:none}
-.admin-content .field-grid {gap:16px;padding:16px}
-.admin-content .field>span {font-size:13px;font-weight:500;text-transform:none;letter-spacing:0}
-.admin-content .form-actions {padding-top:16px}
-.admin-content .page-head::before,.admin-content .page-head::after {display:none}
 .admin-panel h2 {font-size:20px;letter-spacing:-.02em}
 
 .admin-content>div.space-y-6>header>div>p[class*="uppercase"] {display:none}
@@ -51,7 +29,6 @@
 .admin-content .admin-store-editor button {font-size:13px}
 .admin-content .admin-store-editor {font-family:inherit}
 .admin-content .admin-store-editor :focus-visible {outline:2px solid var(--ring);outline-offset:2px}
-.admin-content .field-grid,.admin-content .theme-fields {min-width:0}
 .admin-content .narrow-page {max-width:900px}
 .admin-content .admin-form input,.admin-content .admin-form textarea {max-width:100%}
 .admin-shell :focus-visible {outline:2px solid var(--ring);outline-offset:2px}
