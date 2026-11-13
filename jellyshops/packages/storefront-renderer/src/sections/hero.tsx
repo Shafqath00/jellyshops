@@ -10,6 +10,7 @@ import { buttonProps } from "./block-content";
 import { countdownTarget, HeroCountdown } from "./hero-countdown";
 import { blockLabel } from "@jelly/storefront-registry";
 import { choice, editorBlockData, imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
+import { mediaPhoto } from "../media-photo";
 
 /** Hero layouts: split (R2), overlay, text, spotlight (R4), statement (R9) and countdown (R6). */
 export const HERO_LAYOUTS = ["split", "overlay", "text", "spotlight", "statement", "countdown"] as const;
@@ -70,7 +71,7 @@ export function HeroSection({ section, editor = false, context, selectedBlockId 
       {image && layout !== "text" && <div className="jelly-hero-media" data-fit={fit} {...elementProps(section, "image", editor)}>
         {/* Merchant media URLs may be served by the local API and are not Next Image assets. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={image.url} alt={image.alt ?? ""} style={{ objectPosition: `${focalPoint.x}% ${focalPoint.y}%`, objectFit: fit }} fetchPriority="high" />
+        <img src={image.url} {...mediaPhoto(image.url, "100vw")} alt={image.alt ?? ""} style={{ objectPosition: `${focalPoint.x}% ${focalPoint.y}%`, objectFit: fit }} fetchPriority="high" />
         {overlay > 0 && <span className="jelly-hero-overlay" aria-hidden="true" style={{ background: `rgba(0, 0, 0, ${overlay})` }} />}
         {callouts.length > 0 && <ul className="jelly-hero-callouts" {...elementProps(section, "callouts", editor)}>{callouts.map((callout, index) => <li key={`${index}-${callout}`} data-side={index % 2 === 0 ? "start" : "end"}>{callout}</li>)}</ul>}
       </div>}

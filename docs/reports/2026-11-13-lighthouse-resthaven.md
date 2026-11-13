@@ -29,3 +29,16 @@ Accessibility, best practices and SEO: 100 / 96 / 100 on every page and device (
 5. Small layout shift on desktop (0.05) when the theme's fonts arrive.
 
 Measure again on a deployed store before and after each fix; `next dev` scores mean nothing for speed.
+
+## Speed fixes, round 1 (same day)
+
+- **Measurement fixed.** The script's desktop runs used a desktop screen with the phone network and processor slow-down, which is not Lighthouse's desktop test; it now uses Lighthouse's desktop settings (fast network, no slow-down). The first table's desktop numbers were too low for that reason.
+- **Photos sized to their frame.** Product cards, hover photos, heroes, banners, the collection banner, slideshow slides, image-with-text and category tiles now send `srcset` with the media API's 320/640/1280px copies (a 186 KB original is 32 KB at 640px). Sample and outside photos are unchanged.
+- **First photos load first.** The first row of a product list loads at once with high priority (it was lazy); the collection banner asks for high priority.
+- **Fewer waits on the server.** The store's design, products and collections are fetched side by side (they were fetched one after another); the password check and an uploaded theme's files too. First response 1.6 s to about 1.3 s in this setup.
+
+Result (two runs, local production build, same store): **performance average 73** (budget 80). Desktop 83–95 on every page; phone 52–68. Accessibility 100, best practices 96, SEO 100.
+
+### What still holds phones back
+
+The page sends **547 KB of JavaScript (compressed, 19 files)** before the photo's turn on a slow phone connection, and the phone spends 1.1–1.3 s running it. The largest parts: Zod validation schemas checked in the browser (91 KB), React itself (72 KB), the themes package with every theme's settings, starter pages and Resthaven's layout history (65 KB), the Supabase sign-in library (56 KB, loaded on public store pages by the merchant and customer sign-in providers in the root layout), the renderer (53 KB). Cutting these is the next step: load Supabase only on sign-in and account pages, keep starter pages and layout history out of the shopper's bundle, and validate published snapshots on the server only.

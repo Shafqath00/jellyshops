@@ -236,7 +236,7 @@ export function ProductListBrowser({ products, columns, pageSize, showSort, show
       {shown.length
         ? <div className="jelly-product-grid-items" data-testid="collection-product-grid-items" data-columns={columns} style={{ "--jelly-columns": columns } as CSSProperties}>{items.map((item) => item.kind === "story"
           ? <StoryTileCard key={`story-${item.story.id}`} story={item.story} />
-          : <ProductCard key={item.product.id} product={item.product} editorProps={cardProps?.(item.product, shown.indexOf(item.product))} />)}</div>
+          : <ProductCard key={item.product.id} product={item.product} editorProps={cardProps?.(item.product, shown.indexOf(item.product))} priority={shown.indexOf(item.product) < columns} />)}</div>
         : <div className="jelly-empty-state"><p>{active ? word("list.noMatches") : emptyMessage}</p>{active > 0 && <button type="button" className="jelly-list-clear" onClick={clear}>{word("list.clearFilters")}</button>}</div>}
       {shown.length < total && <div className="jelly-list-more">
         <button type="button" className="jelly-button jelly-button--secondary" disabled={loadingMore} onClick={() => void showMore()}>{loadingMore ? word("list.loading") : word("list.showMore")}</button>

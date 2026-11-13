@@ -34,9 +34,13 @@ export default async function StoreLayout({ children, params }: { children: Reac
   const data = await getServerStorefront(storeSlug);
   if (!data) notFound();
   // A password-protected store shows only the password page until the shopper enters it.
-  const access = await loadAccessStatus(data.store.id, (await cookies()).get(accessCookieName(data.store.id))?.value);
+  const accessToken = (await cookies()).get(accessCookieName(data.store.id))?.value;
+  // The password check and an uploaded theme's files are asked for side by side (a store on an uploaded theme loads
+  // that exact version so the page can resolve and style it).
+  const [access, installedTheme] = await Promise.all([
+    loadAccessStatus(data.store.id, accessToken),
+    data.publication.kind === "v4" ? loadInstalledTheme(data.publication.snapshot.theme.artifactId, { baseUrl: process.env.STOREFRONT_API_URL ?? process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001" }) : Promise.resolve(null),
+  ]);
   if (access.protected && !access.unlocked) return <StorefrontPasswordPage storeSlug={data.store.slug} storeName={data.store.name} message={access.message} />;
-  // A store on an uploaded theme: load that exact version so the page can resolve and style it.
-  const installedTheme = data.publication.kind === "v4" ? await loadInstalledTheme(data.publication.snapshot.theme.artifactId, { baseUrl: process.env.STOREFRONT_API_URL ?? process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001" }) : null;
   return <InstalledThemeProvider theme={installedTheme}><StorefrontBootstrap key={`${data.store.id}:${data.publication.publicationId}`} data={data}><StorefrontCatalogSync storeSlug={storeSlug} initialReady><StorefrontFrame storeSlug={storeSlug}>{children}</StorefrontFrame></StorefrontCatalogSync></StorefrontBootstrap></InstalledThemeProvider>;
 }

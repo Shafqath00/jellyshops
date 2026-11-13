@@ -4,6 +4,7 @@ import { blockLabel } from "@jelly/storefront-registry";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { resolveStorefrontHref } from "../runtime-context";
 import { choice, editorBlockData, imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
+import { mediaPhoto } from "../media-photo";
 
 /**
  * Full-width image slideshow. Slides change automatically when the merchant
@@ -97,7 +98,7 @@ export function SlideshowSection({ section, context, editor = false, selectedBlo
       >
         {slide.image && <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="jelly-slide-media" src={slide.image.url} alt={slide.image.alt ?? ""} style={{ objectPosition: `${slide.image.focalPoint?.x ?? 50}% ${slide.image.focalPoint?.y ?? 50}%` }} loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : undefined} />
+          <img className="jelly-slide-media" src={slide.image.url} {...mediaPhoto(slide.image.url, "100vw")} alt={slide.image.alt ?? ""} style={{ objectPosition: `${slide.image.focalPoint?.x ?? 50}% ${slide.image.focalPoint?.y ?? 50}%` }} loading={index === 0 ? "eager" : "lazy"} fetchPriority={index === 0 ? "high" : undefined} />
           {overlay > 0 && <span className="jelly-slide-overlay" aria-hidden="true" style={{ background: `rgba(0, 0, 0, ${overlay})` }} />}
         </>}
         <div className="jelly-slide-content">

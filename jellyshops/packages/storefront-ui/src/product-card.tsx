@@ -38,11 +38,25 @@ export type ProductCardPart = (typeof PRODUCT_CARD_PARTS)[number];
 const HEX = /^#[0-9a-fA-F]{6}$/;
 const SAFE_IMAGE = /^(https:\/\/|\/api\/public\/media\/)[^\s"'<>()]+$/;
 
-function CardMedia({ product }: { product: StorefrontProductCardData }) {
+/**
+ * Store photos (served by the media API) come in 320, 640 and 1280px copies (`?w=`), so a card downloads the copy that
+ * fits it instead of the 1536px original. Other addresses (sample photos, outside images) are used as they are.
+ */
+const MEDIA_PHOTO = /\/api\/public\/media\/[^/?#]+\/[^/?#]+(?:[?#]|$)/;
+export function cardPhotoSrcSet(url: string): string | undefined {
+  if (!MEDIA_PHOTO.test(url)) return undefined;
+  return [320, 640, 1280].map((width) => `${url}${url.includes("?") ? "&" : "?"}w=${width} ${width}w`).join(", ");
+}
+/** How wide a card shows: a quarter of the page on desktop, a third on tablets, half on phones. */
+export const CARD_PHOTO_SIZES = "(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw";
+
+function CardMedia({ product, priority }: { product: StorefrontProductCardData; priority?: boolean }) {
+  const photo = (url: string) => ({ src: url, srcSet: cardPhotoSrcSet(url), sizes: cardPhotoSrcSet(url) ? CARD_PHOTO_SIZES : undefined });
   return <div className="jelly-product-card-media" data-card-part="media">
-    {product.imageUrl ? <img src={product.imageUrl} alt={product.name} loading="lazy" decoding="async" /> : <span className="jelly-product-card-placeholder" aria-hidden="true" />}
+    {/* The first cards on screen load at once and first in line (they are often the largest thing in view). */}
+    {product.imageUrl ? <img {...photo(product.imageUrl)} alt={product.name} loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : undefined} decoding="async" /> : <span className="jelly-product-card-placeholder" aria-hidden="true" />}
     {/* Decorative: the name is already on the first photo. Hidden unless the theme setting is on. */}
-    {product.imageUrl && product.hoverImageUrl && <img className="jelly-product-card-hover-image" src={product.hoverImageUrl} alt="" aria-hidden="true" loading="lazy" decoding="async" />}
+    {product.imageUrl && product.hoverImageUrl && <img className="jelly-product-card-hover-image" {...photo(product.hoverImageUrl)} alt="" aria-hidden="true" loading="lazy" decoding="async" />}
     {product.badge && <span className="jelly-product-card-badge">{product.badge}</span>}
     {/* Hidden unless the theme's "Sale badge" setting is on. */}
     {!product.badge && product.compareAtPrice && <span className="jelly-product-card-badge" data-badge="sale">Sale</span>}
@@ -114,10 +128,10 @@ function CardButton() {
  * `editorProps` are the editor preview's selection data (data-* attributes only); the live store passes none.
  * `actions` (quick add) sit after the link, because a button may not be inside a link.
  */
-export function StorefrontProductCard({ product, editorProps, actions }: { product: StorefrontProductCardData; editorProps?: Record<string, string>; actions?: ReactNode }) {
+export function StorefrontProductCard({ product, editorProps, actions, priority }: { product: StorefrontProductCardData; editorProps?: Record<string, string>; actions?: ReactNode; /** One of the first cards on screen: its photo loads at once. */ priority?: boolean }) {
   return <article className="jelly-product-card" {...editorProps}>
     <a href={product.href}>
-      <CardMedia product={product} />
+      <CardMedia product={product} priority={priority} />
       <div className="jelly-product-card-body">
         <CardVendor product={product} />
         <CardTitle product={product} />

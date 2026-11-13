@@ -14,6 +14,7 @@ import { ProductListBrowser } from "./product-list-browser";
 import { filterNamesSetting } from "./collection-sections";
 import { useWords } from "../words";
 import { rowColumnStyle } from "../row-columns";
+import { mediaPhoto } from "../media-photo";
 
 function stringSetting(settings: Record<string, unknown>, key: string, fallback = ""): string {
   const value = settings[key];
@@ -72,7 +73,7 @@ export function CategoryGridSection({ section, context }: { section: SectionNode
     <div className="jelly-category-grid-items" style={{ "--jelly-columns": columns } as CSSProperties} {...(layout === "carousel" ? { role: "region", "aria-label": "Collections", tabIndex: 0 } : {})}>{items.map((item) => <a href={item.href} className="jelly-category-card" key={item.id} {...(item.block ? blockEditorData(item.block, editor, "Collection card") : {})}>
       <span className="jelly-category-card-media" {...(item.block ? blockElementProps(item.block, "image", editor) : {})}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {item.image ? <img src={item.image.url} alt="" loading="lazy" /> : null}
+        {item.image ? <img src={item.image.url} {...mediaPhoto(item.image.url, "(min-width: 1024px) 25vw, 50vw")} alt="" loading="lazy" /> : null}
       </span>
       <strong {...(item.block ? blockElementProps(item.block, "label", editor) : {})}>{item.label}</strong>
     </a>)}</div>

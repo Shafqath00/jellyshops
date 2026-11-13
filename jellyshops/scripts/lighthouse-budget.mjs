@@ -38,7 +38,8 @@ try {
       const result = await lighthouse(base + path, { port: chrome.port, output: "json", logLevel: "error", onlyCategories: categories }, {
         extends: "lighthouse:default",
         settings: formFactor === "desktop"
-          ? { formFactor: "desktop", screenEmulation: { mobile: false, width: 1350, height: 940, deviceScaleFactor: 1, disabled: false }, throttlingMethod: "simulate" }
+          // Lighthouse's own desktop settings (fast network, no processor slow-down); phones keep its default slow 4G and 4x slower processor.
+          ? { formFactor: "desktop", screenEmulation: { mobile: false, width: 1350, height: 940, deviceScaleFactor: 1, disabled: false }, throttlingMethod: "simulate", throttling: { rttMs: 40, throughputKbps: 10240, requestLatencyMs: 0, downloadThroughputKbps: 0, uploadThroughputKbps: 0, cpuSlowdownMultiplier: 1 } }
           : { formFactor: "mobile", throttlingMethod: "simulate" },
       });
       const lhr = result.lhr;

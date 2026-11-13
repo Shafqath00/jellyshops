@@ -11,6 +11,7 @@ import { formattedSetting, inlineSetting, SettingText } from "./setting-text";
 import { blockStyle } from "../block-style";
 import { blockEditorData, buttonProps } from "./block-content";
 import { SectionGroups } from "./custom-content";
+import { mediaPhoto } from "../media-photo";
 
 function text(section: SectionNode, fallback: string): string {
   const setting = section.settings.heading ?? section.settings.text;
@@ -72,7 +73,7 @@ export function ImageWithTextSection({ section, context }: { section: SectionNod
         {image && <div className="jelly-image-text-media" {...elementProps(section, "image", context.mode === "editor")}>
           {/* Local uploads are served by the media API and are not Next Image assets. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={image.url} alt={typeof image.alt === "string" ? image.alt : ""} loading="lazy" style={{ objectPosition: `${image.focalPoint?.x ?? 50}% ${image.focalPoint?.y ?? 50}%`, objectFit: image.fit === "contain" ? "contain" : "cover" }} />
+          <img src={image.url} {...mediaPhoto(image.url, "(min-width: 768px) 50vw, 100vw")} alt={typeof image.alt === "string" ? image.alt : ""} loading="lazy" style={{ objectPosition: `${image.focalPoint?.x ?? 50}% ${image.focalPoint?.y ?? 50}%`, objectFit: image.fit === "contain" ? "contain" : "cover" }} />
         </div>}
         <div className="jelly-image-text-content">
           {eyebrow && <p className="jelly-eyebrow" {...elementProps(section, "eyebrow", context.mode === "editor")}>{eyebrow}</p>}
@@ -97,7 +98,7 @@ export function ImageBannerSection({ section, context }: { section: SectionNode;
   })}>
     {image && <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="jelly-image-banner-media" src={image.url} alt={image.alt ?? ""} loading="lazy" {...elementProps(section, "image", context.mode === "editor", { objectPosition: `${image.focalPoint?.x ?? 50}% ${image.focalPoint?.y ?? 50}%` })} />
+      <img className="jelly-image-banner-media" src={image.url} {...mediaPhoto(image.url, "100vw")} alt={image.alt ?? ""} loading="lazy" {...elementProps(section, "image", context.mode === "editor", { objectPosition: `${image.focalPoint?.x ?? 50}% ${image.focalPoint?.y ?? 50}%` })} />
       {overlay > 0 && <span className="jelly-image-banner-overlay" aria-hidden="true" style={{ background: `rgba(0, 0, 0, ${overlay})` }} />}
     </>}
     <StorefrontContainer className="jelly-image-banner-content">

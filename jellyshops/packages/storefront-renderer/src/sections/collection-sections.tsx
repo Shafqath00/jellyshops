@@ -9,6 +9,7 @@ import { normalizeRichTextDocument, safeRichTextHref, type CatalogQuery, type Se
 import { renderBlocks } from "./rich-text";
 import { PRODUCT_LIST_LAYOUTS, ProductListBrowser, type ProductListLayout, type StoryTile } from "./product-list-browser";
 import { resolveStorefrontHref } from "../runtime-context";
+import { mediaPhoto } from "../media-photo";
 
 /** The merchant's formatted description when there is one, otherwise the plain text. */
 function CollectionDescriptionText({ collection }: { collection: CollectionPresentationContext["collection"] }) {
@@ -65,7 +66,7 @@ export function CollectionHeaderSection({ context, section }: { context: Storefr
   const part = (id: string) => elementProps({ type: "collection-header", settings: section.settings }, id, context.mode === "editor");
   return <section className="jelly-section jelly-collection-header" data-layout={layout} data-align={choice(section.settings, "contentAlignment", ["left", "center"] as const, "left")}>
     {/* eslint-disable-next-line @next/next/no-img-element */}
-    {showImage && layout === "banner" && <img className="jelly-collection-header-media" src={collection.imageUrl} alt="" {...part("image")} />}
+    {showImage && layout === "banner" && <img className="jelly-collection-header-media" src={collection.imageUrl} {...mediaPhoto(collection.imageUrl, "100vw")} fetchPriority="high" alt="" {...part("image")} />}
     <StorefrontContainer>
       {section.settings.showBreadcrumb === true && <nav className="jelly-breadcrumb" aria-label="Breadcrumb"><ol><li><a href={resolveStorefrontHref("/", context.storeSlug) ?? "/"}>Home</a></li><li aria-current="page">{collection.title}</li></ol></nav>}
       <div className="jelly-collection-header-copy">
@@ -76,7 +77,7 @@ export function CollectionHeaderSection({ context, section }: { context: Storefr
         <p className="jelly-collection-count">{presentation.totalProducts === 1 ? "1 product" : `${presentation.totalProducts} products`}</p>
       </div>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      {showImage && layout === "simple" && <img className="jelly-collection-header-image" src={collection.imageUrl} alt={collection.title} {...part("image")} />}
+      {showImage && layout === "simple" && <img className="jelly-collection-header-image" src={collection.imageUrl} {...mediaPhoto(collection.imageUrl, "100vw")} fetchPriority="high" alt={collection.title} {...part("image")} />}
     </StorefrontContainer>
   </section>;
 }

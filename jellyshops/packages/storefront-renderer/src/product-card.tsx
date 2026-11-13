@@ -59,7 +59,7 @@ export function QuickAdd({ product, cart }: { product: PublicProduct & { quickAd
 }
 
 /** The product card used by every renderer product list: the shared card plus quick add when the cart allows it. */
-export function ProductCard({ product, editorProps }: { product: PublicProduct; editorProps?: Record<string, string> }) {
+export function ProductCard({ product, editorProps, priority }: { product: PublicProduct; editorProps?: Record<string, string>; /** One of the first cards on screen: its photo loads at once. */ priority?: boolean }) {
   const cart = useContext(CardCartContext);
   const ratings = useContext(CardRatingsContext);
   const rating = product.rating ?? ratings?.[product.id];
@@ -69,5 +69,5 @@ export function ProductCard({ product, editorProps }: { product: PublicProduct; 
   const actions = (cart && quickAdd) || compare
     ? <>{cart && quickAdd && <QuickAdd product={{ ...product, quickAdd }} cart={cart} />}{compare && <CompareToggle product={product} compare={compare} />}</>
     : undefined;
-  return <StorefrontProductCard product={product} editorProps={editorProps} actions={actions} />;
+  return <StorefrontProductCard product={product} editorProps={editorProps} actions={actions} priority={priority} />;
 }
