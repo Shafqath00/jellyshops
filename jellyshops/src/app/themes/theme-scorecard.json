@@ -4,7 +4,15 @@
     "styling": "legacy",
     "internals": 46,
     "settingsCopy": 0,
-    "mainSections": [],
+    "mainSections": [
+      "article",
+      "blog",
+      "cart",
+      "collection",
+      "not-found",
+      "page",
+      "search"
+    ],
     "pageTypes": [
       "article",
       "blog",
@@ -26,7 +34,15 @@
     "styling": "own",
     "internals": 22,
     "settingsCopy": 0,
-    "mainSections": [],
+    "mainSections": [
+      "article",
+      "blog",
+      "cart",
+      "collection",
+      "not-found",
+      "page",
+      "search"
+    ],
     "pageTypes": [
       "article",
       "blog",
@@ -48,7 +64,15 @@
     "styling": "own",
     "internals": 7,
     "settingsCopy": 0,
-    "mainSections": [],
+    "mainSections": [
+      "article",
+      "blog",
+      "cart",
+      "collection",
+      "not-found",
+      "page",
+      "search"
+    ],
     "pageTypes": [
       "article",
       "blog",
@@ -70,7 +94,15 @@
     "styling": "own",
     "internals": 20,
     "settingsCopy": 0,
-    "mainSections": [],
+    "mainSections": [
+      "article",
+      "blog",
+      "cart",
+      "collection",
+      "not-found",
+      "page",
+      "search"
+    ],
     "pageTypes": [
       "article",
       "blog",
@@ -92,7 +124,15 @@
     "styling": "legacy",
     "internals": 32,
     "settingsCopy": 0,
-    "mainSections": [],
+    "mainSections": [
+      "article",
+      "blog",
+      "cart",
+      "collection",
+      "not-found",
+      "page",
+      "search"
+    ],
     "pageTypes": [
       "article",
       "blog",
@@ -115,7 +155,14 @@
     "internals": 5,
     "settingsCopy": 0,
     "mainSections": [
-      "product"
+      "article",
+      "blog",
+      "cart",
+      "collection",
+      "not-found",
+      "page",
+      "product",
+      "search"
     ],
     "pageTypes": [
       "article",
@@ -138,7 +185,15 @@
     "styling": "legacy",
     "internals": 32,
     "settingsCopy": 0,
-    "mainSections": [],
+    "mainSections": [
+      "article",
+      "blog",
+      "cart",
+      "collection",
+      "not-found",
+      "page",
+      "search"
+    ],
     "pageTypes": [
       "article",
       "blog",

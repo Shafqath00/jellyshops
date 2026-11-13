@@ -34,14 +34,21 @@ change; stores keep their saved settings; layout changes reach stores through la
    `theme.json` gives only its defaults, its colour schemes and type, and which optional groups it shows. The nine
    copies and the scripts that write them go. Setting ids stay, so saved settings keep working; validation is checked
    to give the same answers.
-2. **Pages composed like Shopify.** Main sections with blocks for collection (header, toolbar, grid), search, bag,
-   information page, article and 404, like Main product; header group (announcement + header) and footer group
-   (newsletter + footer) as section groups. Every theme's starter moves to them through a new layout revision with an
-   upgrade path, as Resthaven's product page did.
-3. **One styling model.** Minimal, Harbour, Avenue, Forma, Halo and Diode move onto the platform base: their CSS
-   becomes tokens plus identity (type, hero, signature pieces). `theme-kit.css`, `theme-kit-late.css` and the old
-   storefront rules in `globals.css` are deleted. The seven token-preset themes become token presets on the platform
-   base. Internals styled go to 0 (only layout-history `legacy.css` files may keep theirs).
+2. **Pages composed like Shopify.** Checked 2026-11-13: collection, search, bag, information page, blog, article
+   and 404 already have their main section in every theme (collection header + product grid like Dawn's
+   main-collection-banner + main-collection-product-grid, search results, bag, page content, post list, post,
+   404 message; essential, so they cannot be deleted). The gaps are the product page (only Resthaven uses Main
+   product; the other six stack separate product sections that their CSS lines up with `:has()` and section-type
+   selectors) and header/footer groups. Because moving a product page to Main product means rewriting that theme's
+   product CSS, phases 2 and 3 run **theme by theme**: for each theme, Main product (layout revision with Undo), then
+   its CSS onto the platform base, checked with before/after screenshots. Order: Diode, Halo, Forma (folder themes,
+   own CSS), then Minimal + Harbour and Avenue (built-in starters, theme kit). Header and footer groups are built
+   once for the platform before the first built-in theme.
+3. **One styling model.** (Run with phase 2, theme by theme.) Minimal, Harbour, Avenue, Forma, Halo and Diode move
+   onto the platform base: their CSS becomes tokens plus identity (type, hero, signature pieces). `theme-kit.css`,
+   `theme-kit-late.css` and the old storefront rules in `globals.css` are deleted once no theme uses them. The seven
+   token-preset themes become token presets on the platform base. Internals styled go to 0 (only layout-history
+   `legacy.css` files may keep theirs).
 4. **Only the active theme's CSS.** Store pages load the platform CSS plus the one theme they use; the editor and
    previews load a theme's CSS when it is shown. Phone Lighthouse checked again.
 5. **Every template finished.** Each complete theme gets a demo content pack (products, collections, reviews, pages,

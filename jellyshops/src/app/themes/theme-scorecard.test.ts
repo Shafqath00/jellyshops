@@ -19,10 +19,14 @@ const themesSource = path.join(app, "packages/storefront-themes/src/themes");
 const baselinePath = path.join(__dirname, "theme-scorecard.json");
 const reportPath = path.join(repo, "docs/reports/theme-scorecard.md");
 
-/** The main section each page type should be drawn by (Shopify's main-* sections), so pages are composed, not stacked. */
+/**
+ * The main section each page type is drawn by (Shopify's main-* sections): the one section that makes the page work,
+ * which cannot be deleted. A product page must use Main product (photos and buying parts in one section, not separate
+ * sections the theme's CSS lines up); the other page types already have theirs.
+ */
 export const MAIN_SECTIONS: Record<string, string> = {
-  product: "main-product", collection: "main-collection", search: "main-search", cart: "main-cart",
-  page: "main-page", blog: "main-blog", article: "main-article", "not-found": "main-not-found",
+  product: "main-product", collection: "collection-product-grid", search: "search-results", cart: "cart-summary",
+  page: "page-content", blog: "article-list", article: "article-content", "not-found": "not-found-message",
 };
 
 /** Stylesheets that draw a theme: its own file(s), plus the shared kits for the two themes still built on them. */
