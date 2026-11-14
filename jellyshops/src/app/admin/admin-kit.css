@@ -237,7 +237,7 @@ html.admin-ui.admin-dark {
 .jk-settings-link {display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;font-size:13px;color:var(--jk-text)}
 .jk-settings-link:hover {background:var(--jk-surface-hover)}
 .jk-settings-link[aria-current=page] {background:var(--jk-surface);box-shadow:var(--jk-shadow);font-weight:600}
-.jk-settings-list {display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.jk-settings-list {display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .jk-settings-tile {display:flex;gap:14px;align-items:flex-start;padding:16px;border-radius:var(--jk-radius);background:var(--jk-surface);box-shadow:var(--jk-shadow);color:var(--jk-text);transition:box-shadow var(--jk-motion-fast),transform var(--jk-motion-fast)}
 .jk-settings-tile:hover {background:var(--jk-surface);box-shadow:var(--jk-shadow-raised);transform:translateY(-1px)}
 .jk-settings-tile p {font-size:12px;color:var(--jk-text-subdued);margin-top:2px}
@@ -499,7 +499,7 @@ textarea.jk-input {min-height:80px;resize:vertical}
 .jk-field.has-error :is(input:not([type=checkbox]):not([type=radio]):not([type=color]),select,textarea) {box-shadow:0 0 0 1px var(--jk-critical-dot) inset}
 
 /* Sortable column headings */
-.jk-sort {display:inline-flex;align-items:center;gap:4px;margin:-4px -6px;padding:4px 6px;border-radius:6px;font:inherit;color:inherit;cursor:pointer}
+.jk-sort {display:inline-flex;align-items:center;gap:4px;margin:-4px -6px;padding:4px 6px;border-radius:6px;font:inherit;text-transform:inherit;letter-spacing:inherit;color:inherit;cursor:pointer}
 .jk-sort svg {opacity:.45}
 .jk-sort:hover,.jk-sort.is-sorted {color:var(--jk-text)}
 .jk-sort.is-sorted svg {opacity:1}
@@ -656,3 +656,14 @@ fieldset.jk-field {border:0;padding:0;margin:0;min-width:0}
 /* Status badges: a touch rounder and bolder to match pills elsewhere */
 .jk-badge {padding:3px 10px;font-weight:600}
 .admin-dark .jk-kpis > :is(:nth-child(4n+3),:nth-child(4n+4)) .jk-kpi-icon {color:#fff}
+.jk-settings-group h2 {display:flex;align-items:center;gap:6px;font-size:11px!important;letter-spacing:var(--jk-tracking-label);text-transform:uppercase}
+/* Phones: filters two per row at full width; Home quick links scroll sideways in one row. */
+@media(max-width:639px){
+  .jk-filters {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}
+  .jk-filters > * {min-width:0}
+  .jk-filters select,.jk-filters .jk-select {width:100%}
+  .jk-quick {flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding:2px 16px}
+  .jk-quick::-webkit-scrollbar {display:none}
+  .jk-quick .jk-chip {flex:none}
+}
+.admin-content :is(h2,h3).jk-eyebrow {font-size:11px;letter-spacing:var(--jk-tracking-label)}

@@ -62,8 +62,8 @@ html.admin-dark :is(.product-surface,.product-overlay) {color-scheme:dark}
 .product-surface .jk-builder {max-width:1180px;gap:24px}
 .product-surface :is(.jk-builder-main,.jk-builder-side,.jk-builder-group) {gap:24px}
 .product-surface .jk-builder-side {position:static}
-.product-surface .jk-builder-nav {gap:4px;padding:6px;border:1px solid var(--jk-border);border-radius:var(--jk-radius-sm);background:var(--jk-surface);box-shadow:var(--jk-shadow)}
-.product-surface .jk-builder-nav a {font-size:12px;padding:8px 11px;line-height:1.4;border-radius:8px}
+.product-surface .jk-builder-nav {gap:4px;padding:6px;border:0;border-radius:var(--jk-radius-pill);background:var(--jk-surface);box-shadow:var(--jk-shadow);flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.product-surface .jk-builder-nav a {font-size:13px;font-weight:550;padding:8px 14px;line-height:1.3;border-radius:var(--jk-radius-pill);white-space:nowrap;flex:none}
 .product-surface .jk-builder-nav a:hover {background:var(--jk-surface-subdued);color:var(--jk-text)}
 .product-surface .jk-builder-group-heading {padding:8px 0 0}
 .product-surface .jk-builder-group-heading h2 {font-size:16px;font-weight:600}

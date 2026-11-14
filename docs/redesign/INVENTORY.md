@@ -29,35 +29,35 @@ Baseline (2026-11-14, before any change): see "Baseline" at the end of this file
 
 | # | Route | File(s) doing the work | Kit frame | Done |
 | --- | --- | --- | --- | --- |
-| 1 | `/admin` Home | `page.tsx`, `features/admin/home/*` | AdminPage | ☐ |
-| 2 | `/admin/orders` list | `orders/page.tsx` | AdminPage + IndexTable | ☐ |
-| 3 | `/admin/orders/[id]` detail | `features/commerce/...order view` (refund, edit items, packing slip, tags, timeline) | AdminPage | ☐ |
-| 4 | `/admin/products` list | `products/page.tsx`, bulk edit/export dialogs | AdminPage + IndexTable | ☐ |
-| 5 | `/admin/products/new`, `/admin/products/[id]` builder | `features/product-builder/*` | own frame (`jk-builder`) | ☐ |
-| 6 | `/admin/products/collections` | `collections/page.tsx` | AdminPage | ☐ |
-| 7 | `/admin/products/inventory` | `inventory/page.tsx`, stock history drawer | AdminPage | ☐ |
-| 8 | `/admin/products/reviews` | `reviews/page.tsx` | AdminPage | ☐ |
-| 9 | `/admin/products/import` | `features/product-bulk/import-wizard.tsx` | wizard | ☐ |
-| 10 | `/admin/products/photos` | `features/product-bulk/bulk-photos.tsx` | AdminPage | ☐ |
-| 11 | `/admin/customers` list | `customers/page.tsx` | AdminPage + IndexTable | ☐ |
-| 12 | `/admin/customers/new`, `/[id]` | customer form/detail | AdminPage | ☐ |
-| 13 | `/admin/customers/messages` | messages page | AdminPage + SplitLayout | ☐ |
-| 14 | `/admin/content/pages` | pages editor | AdminPage + SplitLayout | ☐ |
-| 15 | `/admin/content/blogs` | blog posts | AdminPage + SplitLayout | ☐ |
-| 16 | `/admin/content/files` | files | AdminPage | ☐ |
-| 17 | `/admin/content/menus` | menu editor, link form | AdminPage | ☐ |
-| 18 | `/admin/content/metaobjects` | custom content | AdminPage | ☐ |
-| 19 | `/admin/payments` | merchant payments panel | AdminPage | ☐ |
-| 20 | `/admin/online-store` Store designs | gallery, upgrade panels | AdminPage | ☐ |
-| 21 | `/admin/online-store/preferences` | password page settings | AdminPage | ☐ |
+| 1 | `/admin` Home | `page.tsx`, `features/admin/home/*` | AdminPage | ✅ |
+| 2 | `/admin/orders` list | `orders/page.tsx` | AdminPage + IndexTable | ✅ |
+| 3 | `/admin/orders/[id]` detail | `features/commerce/...order view` (refund, edit items, packing slip, tags, timeline) | AdminPage | ✅ |
+| 4 | `/admin/products` list | `products/page.tsx`, bulk edit/export dialogs | AdminPage + IndexTable | ✅ |
+| 5 | `/admin/products/new`, `/admin/products/[id]` builder | `features/product-builder/*` | own frame (`jk-builder`) | ✅ |
+| 6 | `/admin/products/collections` | `collections/page.tsx` | AdminPage | ✅ |
+| 7 | `/admin/products/inventory` | `inventory/page.tsx`, stock history drawer | AdminPage | ✅ |
+| 8 | `/admin/products/reviews` | `reviews/page.tsx` | AdminPage | ✅ |
+| 9 | `/admin/products/import` | `features/product-bulk/import-wizard.tsx` | wizard | ✅ |
+| 10 | `/admin/products/photos` | `features/product-bulk/bulk-photos.tsx` | AdminPage | ✅ |
+| 11 | `/admin/customers` list | `customers/page.tsx` | AdminPage + IndexTable | ✅ |
+| 12 | `/admin/customers/new`, `/[id]` | customer form/detail | AdminPage | ✅ |
+| 13 | `/admin/customers/messages` | messages page | AdminPage + SplitLayout | ✅ |
+| 14 | `/admin/content/pages` | pages editor | AdminPage + SplitLayout | ✅ |
+| 15 | `/admin/content/blogs` | blog posts | AdminPage + SplitLayout | ✅ |
+| 16 | `/admin/content/files` | files | AdminPage | ✅ |
+| 17 | `/admin/content/menus` | menu editor, link form | AdminPage | ✅ |
+| 18 | `/admin/content/metaobjects` | custom content | AdminPage | ✅ |
+| 19 | `/admin/payments` | merchant payments panel | AdminPage | ✅ |
+| 20 | `/admin/online-store` Store designs | gallery, upgrade panels | AdminPage | ✅ |
+| 21 | `/admin/online-store/preferences` | password page settings | AdminPage | ✅ |
 | 22 | `/admin/online-store/editor` | theme editor | full screen, own design | out of scope (see below) |
-| 23 | `/admin/settings` index | `settings/page.tsx`, `settings/layout.tsx` | settings frame | ☐ |
-| 24 | `/admin/settings/general` | general form | AdminPage | ☐ |
-| 25 | `/admin/settings/shipping` | shipping | AdminPage | ☐ |
-| 26 | `/admin/settings/notifications` | order emails | AdminPage | ☐ |
-| 27 | `/admin/settings/custom-data` | extra fields | AdminPage | ☐ |
-| 28 | `/admin/settings/developers` | developer tokens | AdminPage | ☐ |
-| 29 | `/admin/design-kit` | kit demo (not in menu) | AdminPage | ☐ |
+| 23 | `/admin/settings` index | `settings/page.tsx`, `settings/layout.tsx` | settings frame | ✅ |
+| 24 | `/admin/settings/general` | general form | AdminPage | ✅ |
+| 25 | `/admin/settings/shipping` | shipping | AdminPage | ✅ |
+| 26 | `/admin/settings/notifications` | order emails | AdminPage | ✅ |
+| 27 | `/admin/settings/custom-data` | extra fields | AdminPage | ✅ |
+| 28 | `/admin/settings/developers` | developer tokens | AdminPage | ✅ |
+| 29 | `/admin/design-kit` | kit demo (not in menu) | AdminPage | ✅ |
 | 30 | `/admin/onboarding`, `/admin/store-design` | redirects only | – | n/a |
 
 Outside the admin frame (entry pages): `/login`, `/signup`, `/onboarding`. They share the Jelly identity but not the shell; restyled only if time allows.
@@ -92,3 +92,20 @@ Page-level patterns in CSS: KPI tiles (`jk-kpi`), sales chart (`jk-chart`), setu
 - Typecheck: no errors in the source. `tsc` reports 2 errors only from stale generated route types in `.next/dev` vs `.next/qa` (left over from two dev servers); not code.
 - Lint (admin folders): 7 errors, 27 warnings, all pre-existing (`react-hooks/set-state-in-effect`, `refs`, `preserve-manual-memoization` in `orders/page.tsx`, `orders/[id]/view.tsx`, `products/collections/page.tsx`; `<img>` warnings).
 - Unit tests (admin, kit, product builder, bulk, commerce folders): 68 files, 412 tests, all passing.
+
+## Browser check (2026-11-14, signed in, staging data through a local backend)
+
+Desktop (1536px) in Chrome, phone (390px) and tablet (820px) through same-origin frames.
+
+| Checked | Result |
+| --- | --- |
+| Home, Orders list + order detail, Products list, product editor, Inventory, Collections, Reviews (empty state), Import, Customers, Pages, Menus, Payments, Store designs, Settings index, General | Restyled and working; no sideways scroll at 390/820px on Orders, product editor, Inventory, Store designs, General, Customers, Products |
+| Search a table (orders Rahul) | 1 match shown |
+| Filter tabs (products Draft) | Draft products only |
+| Row selection + bulk bar (orders) | Bulk bar with packing slips / CSV / clear |
+| Edit a product | Name changed → dark unsaved bar with lime Save → Discard → confirm dialog → change thrown away. **Not saved to staging on purpose** |
+| Dark mode | Checked on the frame, Home and kit |
+| Fixed during the check | Old table rules overriding kit headings; sortable headings losing small caps; phone filters cut off; Home quick links too tall on phones; settings group labels |
+
+Not exercised (would write to the staging database): saving a product, saving a stock count, changing a setting, running a bulk action that changes data. Their buttons and forms were seen, not submitted.
+Screenshots of order and customer pages were not saved because they show real customer emails.

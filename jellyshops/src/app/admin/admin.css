@@ -15,8 +15,8 @@
 .admin-content input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=file]),.admin-content select,.admin-content textarea {border-radius:12px;font-size:14px;font-weight:400}
 .admin-content input:focus-visible,.admin-content textarea:focus-visible,.admin-content select:focus-visible {outline:2px solid var(--ring);outline-offset:1px}
 .admin-content :is(section,article)[class*=shadow-] {box-shadow:0 1px 3px #00000005}
-.admin-content table {font-size:13px}
-.admin-content table th {font-weight:500;text-transform:none;letter-spacing:0}
+.admin-content table:not(.jk-table) {font-size:13px}
+.admin-content table:not(.jk-table) th {font-weight:500;text-transform:none;letter-spacing:0}
 
 
 .admin-content>main {padding:0;max-width:none;margin:0}
