@@ -8,6 +8,7 @@ import { EditorPreviewPane } from "./editor-preview-pane";
 import { EditorInspectorPanel } from "./editor-inspector-panel";
 import { EditorTopBar } from "./editor-top-bar";
 import { EditorSidebar } from "./editor-sidebar";
+import { EditorTour } from "@/features/store-editor/components/editor-tour";
 import type { EditorViewContext } from "../../hooks/use-editor-controller";
 
 /** The full-screen editor layout. */
@@ -20,6 +21,7 @@ export function EditorWorkspaceView({ ctx }: { ctx: EditorViewContext }) {
       className="admin-store-editor fixed inset-0 z-[60] flex h-dvh flex-col overflow-hidden bg-[var(--paper-deep)] text-[var(--ink)]"
     >
       <EditorTopBar ctx={ctx} />
+      <EditorTour />
 
 
       <EditorPanelNavigation value={mobilePanel} onChange={setMobilePanel} editPanel={selection || activeGlobalId || libraryRegion || blockPickerSectionId ? "settings" : "sections"} />

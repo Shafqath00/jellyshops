@@ -10,6 +10,7 @@ import { TemplateActions } from "@/features/store-editor/components/template-act
 import { EditorPagePicker } from "@/features/store-editor/components/editor-page-picker";
 import { WorkspaceToolbar } from "@/features/store-editor/components/workspace-toolbar";
 import { defaultTemplateLayout } from "@/features/store-editor/editor-page-helpers";
+import { OPEN_TOUR_EVENT } from "@/features/store-editor/components/editor-tour";
 import { RestoreSessionBanner } from "@/features/store-editor/components/restore-session-banner";
 import { describeUnsaved } from "@/features/store-editor/state/unsaved-work";
 import type { EditorViewContext } from "../../hooks/use-editor-controller";
@@ -124,7 +125,7 @@ export function EditorTopBar({ ctx }: { ctx: EditorViewContext }) {
               { label: "Undo", action: () => { void playHistory("undo"); }, disabled: !history.canUndo(historyScope) || isPublishing },
               { label: "Redo", action: () => { void playHistory("redo"); }, disabled: !history.canRedo(historyScope) || isPublishing },
             ]}
-            historyMenu={<PublishHistory disabled={isPublishing} list={async () => (await api.listPublications(backendStoreId)).publications} restore={async (publicationId) => { await api.restorePublication(backendStoreId, publicationId); }} />}
+            historyMenu={<><PublishHistory disabled={isPublishing} list={async () => (await api.listPublications(backendStoreId)).publications} restore={async (publicationId) => { await api.restorePublication(backendStoreId, publicationId); }} /><button type="button" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); window.dispatchEvent(new Event(OPEN_TOUR_EVENT)); }} className="block w-full rounded-md px-3 py-2 text-left text-xs hover:bg-muted">Show the editor tour</button></>}
             onSaveDraft={() => { void saveQueueRef.current?.flush(); }}
             saveState={saveState}
             flushDraft={() => saveQueueRef.current?.flush() ?? Promise.resolve(false)}
