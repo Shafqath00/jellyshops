@@ -115,6 +115,7 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
   const [busy, setBusy] = useState(false);
   const [action, setAction] = useState<Action | null>(null);
   const [note, setNote] = useState("");
+  const [allEvents, setAllEvents] = useState(false);
   const [form, setForm] = useState<Record<string, string>>({});
   const [quantities, setQuantities] = useState<number[]>([]);
   const [preview, setPreview] = useState<OrderEditPreview | null>(null);
@@ -573,7 +574,7 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
 
           <section className={`${panel} p-5`}>
             <h2 className="mb-4 flex items-center gap-2 font-semibold">Payment <OrderBadge value={payment?.status} /></h2>
-            {paymentRows.map(([label, value]) => <div key={label} className="jk-summary-row">
+            {paymentRows.filter(([, value]) => value !== "Not recorded").map(([label, value]) => <div key={label} className="jk-summary-row">
               <span className="text-muted-foreground">{label}</span>
               <strong className="font-medium tabular-nums">{value}</strong>
             </div>)}
@@ -628,11 +629,12 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
               <textarea id="order-note" value={note} onChange={event => setNote(event.target.value)} className={`${input} mt-2`} placeholder="Leave an internal comment…" required maxLength={10000} />
               <button className={`${button} mt-2`} disabled={busy || !note.trim()}>Post comment</button>
             </form>}
-            <ol className="jk-timeline">{timeline.map(event => <li key={event.id}>
+            <ol className="jk-timeline">{(allEvents ? timeline : timeline.slice(0, 8)).map(event => <li key={event.id}>
               <p className="whitespace-pre-wrap">{event.text}</p>
               <time className="mt-1 block text-xs text-muted-foreground">{new Date(event.date).toLocaleString()}</time>
             </li>)}
               {!timeline.length && <li className="text-xs text-muted-foreground">No activity recorded yet.</li>}</ol>
+            {timeline.length > 8 && <button type="button" className="jk-link mt-3" aria-expanded={allEvents} onClick={() => setAllEvents(value => !value)}>{allEvents ? "Show fewer" : `Show all ${timeline.length} events`}</button>}
           </section>
         </div>
 

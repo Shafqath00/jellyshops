@@ -152,3 +152,8 @@ html.admin-dark :is(.product-surface,.product-overlay) {color-scheme:dark}
 .product-surface .jk-optional-section > summary p {margin-top:2px;font-size:13px;color:var(--jk-text-subdued)}
 .product-surface .jk-checklist li.is-done {display:none}
 .product-surface .jk-field-kind:not(.is-required) {display:none}
+@media(max-width:639px){
+  .product-surface .jk-builder-bar:not(.is-dirty) .jk-builder-save-state {display:none}
+  .product-surface .jk-builder-save-state small {display:none}
+  .product-surface .jk-builder-bar {padding:10px}
+}

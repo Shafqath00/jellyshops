@@ -16,7 +16,7 @@ export function OrderTags({ initial, onSave }: { initial: string[]; onSave: (tag
     catch (failure) { setError(failure instanceof Error ? failure.message : "Could not save tags."); }
     finally { setBusy(false); }
   }
-  return <Card title="Tags" description="Your own labels for this order, for example gift or wholesale.">
+  return <Card title="Tags">
     <TagInput label="Order tags" value={tags} onChange={setTags} />
     {error && <p className="jk-field-error mt-2" role="alert">{error}</p>}
     {dirty && <div className="jk-row mt-3"><button type="button" className="jk-button jk-button-primary" disabled={busy} onClick={() => void save()}>{busy ? "Saving…" : "Save tags"}</button><button type="button" className="jk-button" disabled={busy} onClick={() => setTags(saved)}>Cancel</button></div>}

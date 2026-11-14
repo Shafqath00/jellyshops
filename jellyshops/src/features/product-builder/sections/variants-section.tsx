@@ -138,9 +138,9 @@ export function VariantsSection({ options, variants, currency, onChange, media, 
         </table>
       </div>
 
-      <div className="rounded-xl border border-border/80 bg-muted/25 p-4">
-        <p className="text-[13px] font-semibold text-foreground">Set the same value for many combinations</p>
-        <p className="mt-1 text-[12px] text-muted-foreground">Handy when you have lots of combinations. Pick what to change, which combinations, then the new value.</p>
+      <details className="jk-disclosure jk-inset-disclosure" open={variants.length >= 6 || undefined}>
+        <summary>Set the same value for many combinations</summary>
+        <p className="mt-2 text-[12px] text-muted-foreground">Pick what to change, which combinations, then the new value.</p>
         <div className="mt-2 flex flex-wrap items-end gap-2">
           <label className="text-[13px] font-medium text-muted-foreground">Set
             <select aria-label="Bulk field" className={`${inputClass} !mt-1 h-9`} value={field} onChange={(event) => { setField(event.target.value as BulkField); setBulkError(""); }}>
@@ -180,7 +180,7 @@ export function VariantsSection({ options, variants, currency, onChange, media, 
           <button type="button" onClick={() => runBulk("availability", "sell")} className="min-h-9 rounded-lg border border-border bg-card px-3 text-[12px] font-semibold hover:bg-muted">Sell</button>
         </div>
         {bulkError && <p role="alert" className="mt-2 text-[13px] font-bold text-tint-foreground">{bulkError}</p>}
-      </div>
+      </details>
     </Section>
   );
 }

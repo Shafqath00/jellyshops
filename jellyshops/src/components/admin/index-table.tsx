@@ -66,13 +66,13 @@ function openRow(event: MouseEvent<HTMLTableRowElement>) {
 }
 
 /** Which optional columns the merchant has turned on or off, remembered per list in this browser. */
-function useColumnChoices<T>(label: string, columns: IndexColumn<T>[]) {
+function useColumnChoices<T>(label: string) {
   const storageKey = `jelly-admin-columns:${label}`;
-  const [choices, setChoices] = useState<Record<string, boolean>>({});
-  // Read after the first render so the server and the browser draw the same table first.
-  useEffect(() => {
-    try { setChoices(JSON.parse(window.localStorage.getItem(storageKey) ?? "{}") as Record<string, boolean>); } catch { /* keep the defaults */ }
-  }, [storageKey]);
+  // Admin tables only draw in the browser (after sign-in), so the saved choice can be read straight away.
+  const [choices, setChoices] = useState<Record<string, boolean>>(() => {
+    if (typeof window === "undefined") return {};
+    try { return JSON.parse(window.localStorage.getItem(storageKey) ?? "{}") as Record<string, boolean>; } catch { return {}; }
+  });
   const isShown = (column: IndexColumn<T>) => column.defaultHidden === undefined ? true : choices[column.id] ?? !column.defaultHidden;
   const setShown = (id: string, shown: boolean) => setChoices((current) => {
     const next = { ...current, [id]: shown };
@@ -102,7 +102,7 @@ function ToolbarMenu({ label, count, children, align = "end" }: { label: string;
 }
 
 export function IndexTable<T>({ label, rows, rowKey, rowLabel, columns: allColumns, loading = false, error, onRetry, tabs, activeTab, onTabChange, search, filters, moreFilters, moreFiltersActive, sort, bulkActions = [], emptyState, pagination }: IndexTableProps<T>) {
-  const { isShown, setShown } = useColumnChoices(label, allColumns);
+  const { isShown, setShown } = useColumnChoices<T>(label);
   const optionalColumns = allColumns.filter((column) => column.defaultHidden !== undefined);
   const columns = allColumns.filter(isShown);
   const [picked, setSelected] = useState<Set<string>>(new Set());

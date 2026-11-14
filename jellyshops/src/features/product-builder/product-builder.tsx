@@ -293,7 +293,7 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
         </div>
         <div id="pb-selling" className="jk-builder-group">
           <PricingSection draft={draft} errors={shownErrors} currency={currency} hasCombinations={combinations} onChange={change} />
-          <InventorySection draft={draft} errors={shownErrors} hasCombinations={combinations} onChange={change} />
+          {!combinations && <InventorySection draft={draft} errors={shownErrors} hasCombinations={combinations} onChange={change} />}
         </div>
         <div id="pb-variants" className="jk-builder-group">
         <ChoicesSection options={draft.options} templates={templates} categoryName={categoryName} limitError={limitError} onChange={changeOptions} />
