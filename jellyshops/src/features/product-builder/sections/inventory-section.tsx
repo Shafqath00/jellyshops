@@ -38,7 +38,7 @@ export function InventorySection({ draft, errors, hasCombinations, onChange }: P
         <AnimatedDetails className="jk-disclosure jk-inset-disclosure" open={codesOpen} onToggle={event => setCodesOpen(event.currentTarget.open)}>
           <summary>SKU and barcode <span className="jk-field-kind">Optional</span></summary>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field id="pb-sku" label="Stock code (SKU)" hint="Your own code for this item, for example MUG-001. It is also how a spreadsheet import finds the item again.">
+            <Field id="pb-sku" label="Stock code (SKU)" hint="Your own code for this item, for example MUG-001. It is also how a spreadsheet import finds the item again." error={errors.sku}>
               <input id="pb-sku" className={inputClass} value={draft.sku} onChange={event => onChange("sku", event.target.value)} />
             </Field>
             <Field id="pb-barcode" label="Barcode" hint="The number under the barcode on the packaging, if it has one." error={errors.barcode}>

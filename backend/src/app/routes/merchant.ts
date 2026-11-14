@@ -85,15 +85,14 @@ export function mountCatalogRoutes(app: Express, context: AppContext): void {
   // Product import and export need the database for the import record; mounted first so its paths are found before the catalogue's.
   const bulkDatabase = context.routeDependencies.commerceDatabase;
   if (bulkDatabase) {
-    app.use("/api/stores/:storeId/catalog", createProductBulkRouter(
-      new ProductBulkService(
+    const bulk = new ProductBulkService(
         { query: (text: string, values?: unknown[]) => bulkDatabase.transaction((transaction) => transaction.query(text, values)) } as never, deps.catalogService, Date.now,
         // Photos go through the same media service as every other upload, so they are checked and resized the same way.
         { upload: (storeId, fileName, contents) => context.mediaService.upload(storeId, { buffer: contents, originalname: fileName } as Express.Multer.File) },
-      ),
-      authProvider,
-      context.config.maxUploadBytes,
-    ));
+      );
+    app.use("/api/stores/:storeId/catalog", createProductBulkRouter(bulk, authProvider, context.config.maxUploadBytes));
+    // The scheduled worker carries on imports whose page was closed (see createApp).
+    app.locals.continueProductImports = () => bulk.continueStalled();
   }
 
   app.use(

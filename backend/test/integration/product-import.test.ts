@@ -169,4 +169,24 @@ describe("product import and export", () => {
     await runToEnd(uploaded.id);
     expect((await catalog.findProducts("store-a", { handles: ["tote"] }))[0].variants[0]).toMatchObject({ sku: "00123", priceMinor: 2400 });
   });
+  it("carries on in the background once the page has gone quiet, and leaves a live import alone", async () => {
+    const many = Array.from({ length: IMPORT_CHUNK + 3 }, (_, index) => ({ handle: `bg-${index + 1}`, title: `Background ${index + 1}`, price: "5" }));
+    const uploaded = await bulk.upload("store-a", "user-1", "bg.csv", file(many));
+    await bulk.check("store-a", uploaded.id, uploaded.mapping, "create");
+    await bulk.run("store-a", uploaded.id);
+    // The merchant's page called a moment ago: the worker does not touch it.
+    expect(await bulk.continueStalled()).toEqual({ continued: 0, finished: 0 });
+    expect(await handles()).toHaveLength(IMPORT_CHUNK);
+    // Two minutes of silence: the worker takes the next step and finishes it.
+    await database.query(`UPDATE "ProductImport" SET "updatedAt" = NOW() - INTERVAL '2 minutes' WHERE "id" = $1`, [uploaded.id]);
+    expect(await bulk.continueStalled()).toEqual({ continued: 1, finished: 1 });
+    expect(await handles()).toHaveLength(many.length);
+    expect(await bulk.get("store-a", uploaded.id)).toMatchObject({ status: "finished", counts: { created: many.length, updated: 0, skipped: 0, failed: 0 } });
+    // Nothing is left to carry on, and checked-but-not-started imports are never started by the worker.
+    const waiting = await bulk.upload("store-a", "user-1", "later.csv", file([{ handle: "later", title: "Later", price: "5" }]));
+    await bulk.check("store-a", waiting.id, waiting.mapping, "create");
+    await database.query(`UPDATE "ProductImport" SET "updatedAt" = NOW() - INTERVAL '2 minutes' WHERE "id" = $1`, [waiting.id]);
+    expect(await bulk.continueStalled()).toEqual({ continued: 0, finished: 0 });
+    expect(await handles()).not.toContain("later");
+  });
 });

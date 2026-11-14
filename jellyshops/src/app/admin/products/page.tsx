@@ -9,7 +9,7 @@ import { useAdminCatalog, type CatalogAdminProduct, type CatalogPage, type Colle
 import { ProductSurface } from "@/features/product-builder/product-surface";
 import { ProductRowActions } from "@/features/product-builder/product-row-actions";
 import { useProductBulkApi } from "@/features/product-bulk/api";
-import { BulkEditDialog } from "@/features/product-bulk/bulk-edit-dialog";
+import { BULK_EDIT_MAX, BulkEditDialog } from "@/features/product-bulk/bulk-edit-dialog";
 import { ExportDialog } from "@/features/product-bulk/export-dialog";
 
 type ProductStatus = CatalogAdminProduct["status"];
@@ -94,6 +94,22 @@ export default function ProductsPage() {
     return () => { active = false; };
   }, [request, all, ready, storeId, revision]);
   const reset = () => { setCursor(null); setHistory([]); };
+  /** Every product the list would show across all its pages, for a bulk edit of "everything that matches". */
+  const loadAllMatching = useCallback(async () => {
+    const found: CatalogAdminProduct[] = [];
+    let next: string | null = null;
+    do {
+      const params = new URLSearchParams({ limit: "100", sort });
+      if (search.trim()) params.set("query", search.trim());
+      if (status) params.set("status", status);
+      if (next) params.set("cursor", next);
+      for (const [key, value] of Object.entries(filters)) if (value) params.set(key, value);
+      const page: CatalogPage<CatalogAdminProduct> = await request<CatalogPage<CatalogAdminProduct>>("/products?" + params);
+      found.push(...page.nodes);
+      next = page.nextCursor;
+    } while (next && found.length < BULK_EDIT_MAX);
+    return { products: found.slice(0, BULK_EDIT_MAX), more: Boolean(next) || found.length > BULK_EDIT_MAX };
+  }, [request, sort, search, status, filters]);
   const filter = (key: keyof Filters, value: string) => { setFilters((current) => ({ ...current, [key]: value })); reset(); };
   const filterCount = Object.values(filters).filter(Boolean).length;
   const words = (values: string[]) => values.map((value) => ({ value, label: value }));
@@ -179,7 +195,7 @@ export default function ProductsPage() {
     <ConfirmDialog open={Boolean(archiveTarget)} onOpenChange={open => { if (!open) setArchiveTarget(null); }} title={`Archive ${archiveTarget?.title ?? "product"}?`} description="This product will be hidden from your store. You can make it active again later." confirmLabel="Archive product" destructive className="product-overlay" overlayClassName="product-backdrop" onCloseAutoFocus={restoreFocus} onConfirm={async () => { if (archiveTarget) await setStatusFor([archiveTarget.id], "ARCHIVED"); }} />
     <ConfirmDialog open={Boolean(archiveMany)} onOpenChange={open => { if (!open) setArchiveMany(null); }} title={`Archive ${archiveMany?.length ?? 0} ${archiveMany?.length === 1 ? "product" : "products"}?`} description="They will be hidden from your store. You can make them active again later from the Archived tab." confirmLabel="Archive products" destructive className="product-overlay" overlayClassName="product-backdrop" onCloseAutoFocus={restoreFocus} onConfirm={async () => { if (archiveMany) await setStatusFor(archiveMany, "ARCHIVED"); }} />
     <ExportDialog open={exporting !== null} onOpenChange={(open) => { if (!open) setExporting(null); }} api={bulkApi} selectedIds={exporting ?? []} filters={{ query: search.trim(), status, ...filters }} className="product-overlay" overlayClassName="product-backdrop" />
-    {editing !== null && <BulkEditDialog open onOpenChange={(open) => { if (!open) setEditing(null); }} products={rows.filter((product) => editing.includes(product.id))} collections={collections.map((row) => ({ id: row.id, title: row.title }))} money={money} save={saveProduct} onDone={() => setRevision((n) => n + 1)} className="product-overlay" overlayClassName="product-backdrop" />}
+    {editing !== null && <BulkEditDialog open onOpenChange={(open) => { if (!open) setEditing(null); }} products={rows.filter((product) => editing.includes(product.id))} collections={collections.map((row) => ({ id: row.id, title: row.title }))} money={money} save={saveProduct} loadAllMatching={loadAllMatching} onDone={() => setRevision((n) => n + 1)} className="product-overlay" overlayClassName="product-backdrop" />}
     <Picker className="product-overlay" overlayClassName="product-backdrop" onCloseAutoFocus={restoreFocus} open={collectionFor !== null} onOpenChange={(open) => { if (!open) setCollectionFor(null); }} title="Add to collection" searchLabel="Search collections" multiple={false} doneLabel="Add products"
       load={loadCollections} onDone={(picked) => { const ids = collectionFor ?? []; if (picked[0]) void addToCollection(ids, picked[0].id); }} />
   </AdminPage></ProductSurface>;

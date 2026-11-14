@@ -10,6 +10,7 @@ import { DigitalProductSettings } from "@/features/commerce/components/digital-p
 import { isProductMediaEnabled, pruneMediaAssignments } from "@jelly/storefront-schema";
 import { PhotosSection } from "./sections/photos-section";
 import { productReadiness } from "./readiness";
+import { useSkuCheck, type FindBySku, type SkuOwner } from "./use-sku-check";
 import { ReadinessCard } from "./readiness-card";
 import { ArrowLeft, Eye, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -108,9 +109,25 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
   const metafields = useProductMetafields({ api: metafieldsApi, storeId, productId, variantIds: persisted.variantIds, onChange: touch });
   const metafieldContext = useMemo(() => ({ storeId: storeId ?? "", currency, lookups }), [storeId, currency, lookups]);
 
+  // Fields the merchant has edited show their problem as they type; untouched fields wait until Save.
+  const [touched, setTouched] = useState<Set<string>>(new Set());
+  const findBySku = useMemo<FindBySku | null>(() => token && storeId ? async (sku) => {
+    const response = await fetch(`${API_URL}/api/stores/${encodeURIComponent(storeId)}/catalog/products?limit=10&query=${encodeURIComponent(sku)}`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!response.ok) throw new Error("lookup failed");
+    return ((await response.json()) as { nodes: SkuOwner[] }).nodes;
+  } : null, [token, storeId]);
+  const skuTaken = useSkuCheck(hasVariantAxes(draft) ? "" : draft.sku, productId, findBySku);
+  const shownErrors = useMemo(() => {
+    const live = validateBuilderDraft(draft).fields;
+    const shown: DraftErrors = { ...errors };
+    for (const field of touched) if (field in live || field in shown) shown[field as keyof DraftErrors] = live[field as keyof DraftErrors];
+    if (!shown.sku && skuTaken) shown.sku = skuTaken;
+    return shown;
+  }, [draft, errors, touched, skuTaken]);
   const change = useCallback(<K extends keyof ProductDraft>(field: K, value: ProductDraft[K]) => {
     setDraft((current) => ({ ...current, [field]: value }));
     setErrors((current) => (current[field as keyof DraftErrors] ? { ...current, [field]: undefined } : current));
+    setTouched((current) => current.has(field as string) ? current : new Set(current).add(field as string));
     setDirty(true);
     setJustSaved(false);
   }, []);
@@ -272,19 +289,19 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
           </div>
         )}
 
-        <div id="pb-details" className="jk-builder-group"><BasicsSection draft={draft} errors={errors} onChange={change} onUpload={upload} hidePhoto />
+        <div id="pb-details" className="jk-builder-group"><BasicsSection draft={draft} errors={shownErrors} onChange={change} onUpload={upload} hidePhoto />
 
         <PhotosSection media={draft.media ?? []} options={draft.options} taggingEnabled={taggingEnabled} onChange={(media) => { setDraft((current) => ({ ...current, media, imageUrl: media[0]?.url ?? "", variants: current.variants.map((variant) => variant.mediaId && !media.some((photo) => photo.id === variant.mediaId) ? { ...variant, mediaId: undefined } : variant) })); touch(); }} onBusy={setUploading} onDelete={api && storeId ? (mediaId) => api.deleteMedia(storeId, mediaId) : undefined} onUpload={api && storeId ? (file, progress) => api.uploadMedia(storeId, file, progress) : undefined} onList={api?.listMedia && storeId ? () => api.listMedia!(storeId) : undefined} />
         </div>
         <div id="pb-selling" className="jk-builder-group">
-          <PricingSection draft={draft} errors={errors} currency={currency} hasCombinations={combinations} onChange={change} />
-          <InventorySection draft={draft} errors={errors} hasCombinations={combinations} onChange={change} />
+          <PricingSection draft={draft} errors={shownErrors} currency={currency} hasCombinations={combinations} onChange={change} />
+          <InventorySection draft={draft} errors={shownErrors} hasCombinations={combinations} onChange={change} />
         </div>
         <div id="pb-variants" className="jk-builder-group">
         <ChoicesSection options={draft.options} templates={templates} categoryName={categoryName} limitError={limitError} onChange={changeOptions} />
         {combinations && <div id="pb-variant-list"><VariantsSection photos={draft.media ?? []} physical={draft.physical} custom={metafields} customContext={metafieldContext} media={taggingEnabled ? draft.media : undefined} options={draft.options} variants={draft.variants} currency={currency} onChange={(variants) => { setDraft((current) => ({ ...current, variants })); touch(); }} /></div>}
         </div>
-        <div id="pb-shipping"><ShippingSection draft={draft} errors={errors} hasCombinations={combinations} onChange={change} /></div>
+        <div id="pb-shipping"><ShippingSection draft={draft} errors={shownErrors} hasCombinations={combinations} onChange={change} /></div>
         <div id="pb-more" className="jk-builder-group">
           <div className="jk-builder-group-heading"><h2>More details</h2><p>Only add what your product needs.</p></div>
         <AnimatedDetails className="jk-card jk-disclosure"><summary>Product specifications <span className="jk-muted">(optional)</span></summary><label className="jk-field mt-3">Specifications<textarea rows={4} maxLength={12000} value={draft.specificationsText??""} placeholder={"Material: Cotton\nCare: Machine wash cold"} onChange={event=>change("specificationsText",event.target.value)} /><small>One detail per line, for example Material: Cotton.</small></label></AnimatedDetails>
@@ -293,7 +310,7 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
 
 
         {api && <MetafieldsSection collapsible state={metafields} context={metafieldContext} />}
-        <SeoSection draft={draft} errors={errors} storeName={activeStore?.name ?? ""} storeSlug={activeStore?.slug ?? ""} saved={Boolean(productId) && draft.published} onChange={change} />
+        <SeoSection draft={draft} errors={shownErrors} storeName={activeStore?.name ?? ""} storeSlug={activeStore?.slug ?? ""} saved={Boolean(productId) && draft.published} onChange={change} />
 
         </div>
       </div>

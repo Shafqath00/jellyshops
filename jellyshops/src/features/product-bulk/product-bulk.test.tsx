@@ -223,6 +223,30 @@ describe("bulk edit dialog", () => {
     expect(onDone).toHaveBeenCalledOnce();
   });
 
+  it("can widen from the ticked rows to every matching product, and back", async () => {
+    const user = userEvent.setup();
+    const more = Array.from({ length: 5 }, (_, index) => ({ ...products[0], id: `m${index}`, title: `Matching ${index}`, variants: [{ ...products[0].variants[0], id: `mv${index}` }] })) as unknown as CatalogAdminProduct[];
+    const loadAllMatching = vi.fn(async () => ({ products: more, more: false }));
+    const save = vi.fn(async () => ({}));
+    render(<ToastProvider><BulkEditDialog open onOpenChange={vi.fn()} products={products} collections={[]} money={money} save={save} onDone={vi.fn()} loadAllMatching={loadAllMatching} /></ToastProvider>);
+    expect(screen.getByText("Editing the 2 you ticked.")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Edit every matching product instead" }));
+    expect(await screen.findByText("Editing all 5 products that match your search and filters.")).toBeVisible();
+    expect(screen.getByRole("dialog", { name: "Bulk edit 5 products" })).toBeVisible();
+    await user.type(screen.getByLabelText("Amount"), "50");
+    await user.click(screen.getByRole("button", { name: "Change 5 products" }));
+    await waitFor(() => expect(save).toHaveBeenCalledTimes(5));
+    expect(save).toHaveBeenCalledWith("m0", { variants: [expect.objectContaining({ id: "mv0", priceMinor: 5000 })] });
+  });
+
+  it("says so when the matching products cannot be loaded and keeps the ticked ones", async () => {
+    const user = userEvent.setup();
+    render(<ToastProvider><BulkEditDialog open onOpenChange={vi.fn()} products={products} collections={[]} money={money} save={vi.fn()} onDone={vi.fn()} loadAllMatching={vi.fn().mockRejectedValue(new Error("Could not load this information."))} /></ToastProvider>);
+    await user.click(screen.getByRole("button", { name: "Edit every matching product instead" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Could not load this information.");
+    expect(screen.getByText("Editing the 2 you ticked.")).toBeVisible();
+  });
+
   it("explains a value it cannot use and offers the store's collections", async () => {
     const user = userEvent.setup();
     render(<ToastProvider><BulkEditDialog open onOpenChange={vi.fn()} products={products} collections={[{ id: "c1", title: "Bedroom" }]} money={money} save={vi.fn()} onDone={vi.fn()} /></ToastProvider>);

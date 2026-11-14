@@ -211,6 +211,22 @@ export class ProductBulkService {
     return this.view(await this.load(storeId, id));
   }
 
+  /**
+   * For the scheduled worker: takes one step of imports nobody is driving any more (the merchant closed the
+   * page). An import whose page is still open is touched every few seconds and is left alone. This is the one
+   * query that looks across stores; each import is then run inside its own store as usual.
+   */
+  async continueStalled(limit = 2): Promise<{ continued: number; finished: number }> {
+    const stalled = await this.database.query<{ id: string; storeId: string }>(
+      `SELECT "id","storeId" FROM "ProductImport" WHERE "status"='running' AND ("lockedUntil" IS NULL OR "lockedUntil" < NOW()) AND "updatedAt" < NOW() - INTERVAL '90 seconds' ORDER BY "updatedAt" LIMIT $1`, [Math.max(1, Math.min(5, limit))]);
+    let continued = 0, finished = 0;
+    for (const entry of stalled.rows) {
+      try { const view = await this.run(String(entry.storeId), String(entry.id)); continued++; if (view.status === "finished") finished++; }
+      catch { /* a busy store or a failing step is tried again on the next tick */ }
+    }
+    return { continued, finished };
+  }
+
   async get(storeId: string, id: string): Promise<ImportDetail> { return this.detail(await this.load(storeId, id)); }
 
   async list(storeId: string): Promise<ImportView[]> {

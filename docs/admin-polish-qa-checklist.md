@@ -4,7 +4,7 @@
 
 ## Before you start
 
-1. **Apply the migration** `backend/sql/migrations/20261113000000_product_imports.sql` to staging (Supabase project `ayvpxqwleurhkfyujzlu`). Until it is applied, **Import** answers with an error; Export, the template, Bulk edit and everything else work without it. After applying, check: table `ProductImport` exists, row level security is on, only `jelly_backend` has a policy, `anon` and `authenticated` have no grants.
+1. The import migration (`20261113000000_product_imports.sql`) **was applied to staging on 14 November 2026** and checked. Still missing on staging: `20261108000000_customer_profiles_order_tags.sql`; until it is applied, Customers shows "Could not load customers" and order tags cannot be saved.
 2. Deploy or run the backend from this branch (it has the new routes and two new libraries: run `npm install` in `backend/`).
 3. Run `npm install` in `jellyshops/` if the admin fails to start with "Can't resolve '@jelly/storefront-schema'".
 4. Use a test store, not a live one, for the import and bulk edit checks.
@@ -58,7 +58,6 @@ At 1440px, 768px and 375px, in light and dark (the sun/moon button in the top ba
 
 - Photos in an import need a public https address of the picture itself; links to Google Drive or Dropbox pages do not work.
 - Undoing an import does not take photos off products it changed.
-- An import runs while its page is open. If the page closes it waits for "Carry on".
-- Bulk edit works on the rows ticked on the page shown (up to 50). For more, filter and repeat, or export, edit and import.
+- An import is quickest with its page open. If the page closes it carries on by itself, about 20 products a minute, as long as the backend's scheduled worker is running.
+- Bulk edit covers the ticked rows, or every product that matches the search and filters, up to 1,000 at a time.
 - Stock changed by bulk edit or import is not labelled with a reason in stock history.
-- Customers has no filters yet; Messages has no search.

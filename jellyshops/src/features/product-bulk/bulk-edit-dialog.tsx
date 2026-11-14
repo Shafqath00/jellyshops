@@ -24,13 +24,17 @@ const VALUE_HELP: Partial<Record<Kind, string>> = {
   stock: "Only items that track stock change.", compareAt: "The price before a discount, shown crossed out.",
 };
 const PREVIEW_ROWS = 100;
+/** The most products one bulk edit will load and change. */
+export const BULK_EDIT_MAX = 1000;
 
 /**
  * Changes one thing on every selected product: choose the change, see each value before and after,
  * then confirm. Products are saved one at a time; a failure is listed and the rest carry on.
  */
-export function BulkEditDialog({ open, onOpenChange, products, collections, money, save, onDone, className = "", overlayClassName = "" }: {
+export function BulkEditDialog({ open, onOpenChange, products: ticked, collections, money, save, onDone, loadAllMatching, className = "", overlayClassName = "" }: {
   open: boolean; onOpenChange: (open: boolean) => void; products: CatalogAdminProduct[]; collections: Array<{ id: string; title: string }>;
+  /** Loads every product that matches the list's search, tab and filters (up to BULK_EDIT_MAX), so the change can cover more than the ticked rows. */
+  loadAllMatching?: () => Promise<{ products: CatalogAdminProduct[]; more: boolean }>;
   money: (minor: number) => string; save: (productId: string, body: Record<string, unknown>) => Promise<unknown>; onDone: () => void; className?: string; overlayClassName?: string;
 }) {
   const toast = useToast();
@@ -41,6 +45,17 @@ export function BulkEditDialog({ open, onOpenChange, products, collections, mone
   const [collectionId, setCollectionId] = useState("");
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [failures, setFailures] = useState<string[]>([]);
+  const [all, setAll] = useState<{ products: CatalogAdminProduct[]; more: boolean } | null>(null);
+  const [loadingAll, setLoadingAll] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const products = all?.products ?? ticked;
+  async function widen() {
+    if (!loadAllMatching) return;
+    setLoadingAll(true); setLoadError("");
+    try { setAll(await loadAllMatching()); }
+    catch (failure) { setLoadError(failure instanceof Error ? failure.message : "The products could not be loaded. Try again."); }
+    finally { setLoadingAll(false); }
+  }
   const change = useMemo((): BulkChange => {
     switch (kind) {
       case "price": return { kind, how: how as Extract<BulkChange, { kind: "price" }>["how"], amount: value };
@@ -79,9 +94,15 @@ export function BulkEditDialog({ open, onOpenChange, products, collections, mone
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay className={`jk-overlay ${overlayClassName}`} />
       <DialogPrimitive.Content className={`jk-dialog jk-dialog-wide ${className}`} aria-describedby={undefined}>
-        <DialogPrimitive.Title className="jk-dialog-title">Bulk edit {products.length} {products.length === 1 ? "product" : "products"}</DialogPrimitive.Title>
+        <DialogPrimitive.Title className="jk-dialog-title">Bulk edit {products.length.toLocaleString("en-GB")} {products.length === 1 ? "product" : "products"}</DialogPrimitive.Title>
         <div className="jk-dialog-body jk-dialog-scroll">
           {failures.length > 0 && <Banner tone="critical" title={`${failures.length} ${failures.length === 1 ? "product was" : "products were"} not changed`}><ul className="jk-bullets">{failures.slice(0, 8).map((line) => <li key={line}>{line}</li>)}</ul></Banner>}
+          {loadAllMatching && <div className="jk-row is-between jk-scope">
+            <p className="jk-muted" role="status">{all ? `Editing all ${products.length.toLocaleString("en-GB")} products that match your search and filters${all.more ? ` (the first ${BULK_EDIT_MAX.toLocaleString("en-GB")}; repeat for the rest)` : ""}.` : `Editing the ${products.length} you ticked.`}</p>
+            {all ? <Button size="small" variant="quiet" disabled={busy} onClick={() => setAll(null)}>Back to the ticked ones</Button>
+              : <Button size="small" loading={loadingAll} loadingLabel="Loading products…" disabled={busy} onClick={() => void widen()}>Edit every matching product instead</Button>}
+          </div>}
+          {loadError && <Banner tone="critical">{loadError}</Banner>}
           <div className="jk-grid-3">
             <Field id="bulk-kind" label="Change"><select id="bulk-kind" value={kind} disabled={busy} onChange={(event) => choose(event.target.value as Kind)}>{KINDS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></Field>
             {HOWS[kind] && <Field id="bulk-how" label="How"><select id="bulk-how" value={how} disabled={busy} onChange={(event) => setHow(event.target.value)}>{HOWS[kind]!.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></Field>}

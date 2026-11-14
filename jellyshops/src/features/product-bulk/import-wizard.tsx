@@ -235,8 +235,8 @@ export function ImportWizard({ api }: { api: ProductBulkApi | null }) {
       </div>
       {view && <p className="jk-muted">{view.counts.created} created · {view.counts.updated} updated · {view.counts.skipped} skipped · {view.counts.failed} not imported</p>}
       {paused
-        ? <><Banner tone="warning" title="The import has not finished">What was done so far is saved. Carry on to do the rest; nothing will be imported twice.</Banner><div className="jk-row"><Button variant="primary" onClick={() => void runImport(runningId)}>Carry on</Button><Button onClick={startAgain}>Back to start</Button></div></>
-        : <><p className="jk-muted">Keep this page open. If it closes, come back to Import products and choose Carry on.</p><div><Button onClick={() => { stop.current = true; }}>Pause</Button></div></>}
+        ? <><Banner tone="warning" title="The import has not finished">What was done so far is saved. Carry on to finish it now; nothing will be imported twice. Left alone, it carries on by itself within a couple of minutes.</Banner><div className="jk-row"><Button variant="primary" onClick={() => void runImport(runningId)}>Carry on</Button><Button onClick={startAgain}>Back to start</Button></div></>
+        : <><p className="jk-muted">It is quickest with this page open. If you leave, the import carries on by itself more slowly; come back to Import products to see how far it has got.</p><div><Button onClick={() => { stop.current = true; }}>Pause</Button></div></>}
     </Card>}
 
     {step === 4 && view && <Card>

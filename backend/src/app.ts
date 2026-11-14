@@ -42,6 +42,16 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
   mountCommerceRoutes(app, context);
   mountAdminRoutes(app, context);
   mountCatalogRoutes(app, context);
+  // One scheduled tick does the order work and then a step of any product import left running.
+  const continueImports = app.locals.continueProductImports as undefined | (() => Promise<unknown>);
+  if (continueImports) {
+    const orderWork = app.locals.runOrderWorkers as undefined | (() => Promise<unknown>);
+    app.locals.runOrderWorkers = async () => {
+      const result = orderWork ? await orderWork() : {};
+      const imports = await continueImports().catch(() => ({ continued: 0, finished: 0 }));
+      return { ...(result as object), imports };
+    };
+  }
   mountPublicStorefrontContextRoutes(app, context);
   mountContentRoutes(app, context);
   mountStorefrontRoutes(app, context);
