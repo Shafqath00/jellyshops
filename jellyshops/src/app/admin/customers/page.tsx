@@ -49,11 +49,11 @@ export default function CustomersPage() {
 
   const columns: IndexColumn<MerchantCustomer>[] = [
     { id: "name", header: "Customer", mobile: "primary", cell: (customer) => <div className="min-w-0"><Link href={`/admin/customers/${encodeURIComponent(customer.id)}`} className="jk-cell-strong">{customer.name}</Link>{customer.email && customer.email !== customer.name && <span className="jk-cell-sub truncate">{customer.email}</span>}</div> },
-    { id: "subscription", header: "Email marketing", cell: (customer) => customer.acceptsEmailMarketing ? <StatusBadge tone="success">Subscribed</StatusBadge> : <StatusBadge tone="neutral">Not subscribed</StatusBadge> },
-    { id: "location", header: "Location", mobile: "hidden", cell: (customer) => customer.location || <span className="jk-muted">None</span> },
+    { id: "subscription", header: "Email marketing", defaultHidden: true, cell: (customer) => customer.acceptsEmailMarketing ? <StatusBadge tone="success">Subscribed</StatusBadge> : <StatusBadge tone="neutral">Not subscribed</StatusBadge> },
+    { id: "location", header: "Location", mobile: "hidden", defaultHidden: true, cell: (customer) => customer.location || <span className="jk-muted">None</span> },
     { id: "orders", header: "Orders", align: "end", cell: (customer) => customer.orderCount },
     { id: "spent", header: "Amount spent", align: "end", cell: (customer) => <span className="tabular-nums">{money(customer.lifetimeSpendMinor)}</span> },
-    { id: "tags", header: "Tags", mobile: "hidden", cell: (customer) => customer.tags?.length ? customer.tags.slice(0, 3).join(", ") + (customer.tags.length > 3 ? ` +${customer.tags.length - 3}` : "") : <span className="jk-muted">None</span> },
+    { id: "tags", header: "Tags", mobile: "hidden", defaultHidden: true, cell: (customer) => customer.tags?.length ? customer.tags.slice(0, 3).join(", ") + (customer.tags.length > 3 ? ` +${customer.tags.length - 3}` : "") : <span className="jk-muted">None</span> },
   ];
 
   return <AdminPage title="Customers" description="Everyone who has ordered from you, and people you add yourself. Open a customer to see their orders, add a note or tag them." primaryAction={{ label: "Add customer", href: "/admin/customers/new" }}>

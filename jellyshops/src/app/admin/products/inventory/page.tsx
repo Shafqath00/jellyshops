@@ -67,8 +67,8 @@ export default function InventoryPage() {
     { id: "product", header: "Product", mobile: "primary", cell: (row) => <div><Link className="jk-cell-strong" href={"/admin/products/" + row.productId}>{row.productTitle}</Link><span className="jk-cell-sub">{row.variantTitle}</span></div> },
     { id: "sku", header: "SKU", mobile: "hidden", cell: (row) => <div>{row.sku || <span className="jk-muted">None</span>}{row.barcode && <span className="jk-cell-sub">{row.barcode}</span>}</div> },
     { id: "status", header: "Status", cell: (row) => { const status = row.trackInventory ? row.stockStatus ?? "in_stock" : "untracked"; return <StatusBadge tone={STATUS_TONE[status]}>{STOCK_STATUS_LABEL[status]}</StatusBadge>; } },
-    { id: "waiting", header: "Waiting for stock", align: "end", mobile: "hidden", cell: (row) => waiting[row.variantId] ? <span title="Shoppers who asked to be emailed when it is back">{waiting[row.variantId]}</span> : <span className="jk-muted">None</span> },
-    { id: "held", header: "Held by checkouts", align: "end", cell: (row) => row.trackInventory ? row.reserved : <span className="jk-muted">None</span> },
+    { id: "waiting", header: "Waiting for stock", align: "end", mobile: "hidden", defaultHidden: !Object.values(waiting).some((count) => count > 0), cell: (row) => waiting[row.variantId] ? <span title="Shoppers who asked to be emailed when it is back">{waiting[row.variantId]}</span> : <span className="jk-muted">None</span> },
+    { id: "held", header: "Held by checkouts", align: "end", defaultHidden: true, cell: (row) => row.trackInventory ? row.reserved : <span className="jk-muted">None</span> },
     { id: "available", header: "Available", align: "end", cell: (row) => row.availableQuantity ?? <span className="jk-muted">None</span> },
     { id: "onhand", header: "On hand", align: "end", cell: (row) => row.trackInventory && row.revision ? <div className="jk-stock-edit">
       <input className="jk-number-input" aria-label={"On hand for " + row.productTitle + " " + row.variantTitle} aria-invalid={Boolean(rowErrors[row.variantId])} inputMode="numeric"

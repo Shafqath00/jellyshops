@@ -143,8 +143,8 @@ export default function ProductsPage() {
     { id: "status", header: "Status", cell: (product) => <StatusBadge kind="product" value={product.status} /> },
     { id: "stock", header: "Inventory", cell: (product) => { const stock = stockSummary(product); const [quantity, variants] = stock.text.split(" for "); return <span className={`product-inventory ${stock.low ? "text-[var(--jk-critical-text)]" : ""}`}><span>{quantity}</span>{variants && <small>{variants}</small>}</span>; } },
     { id: "price", header: "Price", align: "end", cell: (product) => <span className="tabular-nums">{money(product.variants[0]?.priceMinor ?? 0)}</span> },
-    { id: "type", header: "Type", mobile: "hidden", cell: (product) => product.productType || <span className="jk-muted">None</span> },
-    { id: "vendor", header: "Brand or supplier", mobile: "hidden", cell: (product) => product.vendor || <span className="jk-muted">None</span> },
+    { id: "type", header: "Type", mobile: "hidden", defaultHidden: true, cell: (product) => product.productType || <span className="jk-muted">None</span> },
+    { id: "vendor", header: "Brand or supplier", mobile: "hidden", defaultHidden: true, cell: (product) => product.vendor || <span className="jk-muted">None</span> },
     { id: "actions", header: "Actions", align: "end", cell: product => <ProductRowActions product={product} busy={rowBusy === product.id} onStatus={status => void rowStatus(product, status)} onArchive={() => { rememberFocus(product); setArchiveTarget(product); }} onCollection={() => { rememberFocus(product); setCollectionFor([product.id]); }} /> },
   ];
   const filtered = Boolean(search || status || filterCount);
@@ -165,11 +165,14 @@ export default function ProductsPage() {
       activeTab={status}
       onTabChange={(value) => { setStatus(value); reset(); }}
       search={{ value: query, onChange: setQuery, label: "Search products", placeholder: "Search by name or SKU", onSubmit: () => { setSearch(query); reset(); } }}
-      filters={<>
+      moreFiltersActive={[filters.productType, filters.vendor, filters.collectionId, filters.tag].filter(Boolean).length}
+      moreFilters={<>
         <FilterSelect label="Filter by type" all="All types" value={filters.productType} options={words(facets.productTypes)} onChange={(value) => filter("productType", value)} />
         <FilterSelect label="Filter by brand or supplier" all="All brands" value={filters.vendor} options={words(facets.vendors)} onChange={(value) => filter("vendor", value)} />
         <FilterSelect label="Filter by collection" all="All collections" value={filters.collectionId} options={collections.map((row) => ({ value: row.id, label: row.title }))} onChange={(value) => filter("collectionId", value)} />
         <FilterSelect label="Filter by tag" all="All tags" value={filters.tag} options={words(facets.tags)} onChange={(value) => filter("tag", value)} />
+      </>}
+      filters={<>
         <FilterSelect label="Filter by stock" all="Any stock" value={filters.available} options={[{ value: "true", label: "In stock" }, { value: "false", label: "Out of stock" }]} onChange={(value) => filter("available", value)} />
         {filterCount > 0 && <button type="button" className="jk-button jk-button-plain" onClick={() => { setFilters(NO_FILTERS); reset(); }}>Clear filters</button>}
         <label><span className="sr-only">Sort products</span><select className="jk-select" value={sort} onChange={(event) => { setSort(event.target.value); reset(); }}>{SORTS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
