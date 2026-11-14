@@ -31,6 +31,16 @@ export class CatalogPostgresRepository implements CatalogAdminRepository {
   listInventoryHistory(storeId: string, variantId: string, input: import("./types.js").ListInventoryHistoryInput) { return listInventoryHistory(this.database, storeId, variantId, input); }
   constructor(private readonly database: SqlExecutor, private readonly transactions?: CommerceDatabase) {}
 
+  /** Types, brands and tags in use (archived products included, so a filter can still find them), A to Z, at most 200 each. */
+  async listProductFacets(storeId: string): Promise<import("./types.js").ProductFacets> {
+    const distinct = async (expression: string, from: string) => (await this.database.query<{ value: string }>(
+      `SELECT DISTINCT ON (lower(value)) value FROM (SELECT btrim(${expression}) AS value FROM ${from} WHERE p."storeId" = $1) found WHERE value <> '' ORDER BY lower(value) LIMIT 200`, [storeId])).rows.map((row) => String(row.value));
+    const [productTypes, vendors, tags] = await Promise.all([
+      distinct(`p."productType"`, `"Product" p`), distinct(`p."vendor"`, `"Product" p`), distinct("tag", `"Product" p, unnest(p."tags") AS tag`),
+    ]);
+    return { productTypes, vendors, tags };
+  }
+
   async listProducts(storeId: string, input: ListProductsInput): Promise<Connection<CatalogProduct>> {
     const values: unknown[] = [storeId];
     const filters = [`p."storeId" = $1`];
@@ -38,6 +48,9 @@ export class CatalogPostgresRepository implements CatalogAdminRepository {
     if (input.status) filters.push(`p."status" = ${bind(input.status)}::"ProductStatus"`);
     if (input.query) { values.push(`%${input.query}%`); filters.push(`(p."title" ILIKE $${values.length} OR p."slug" ILIKE $${values.length} OR EXISTS (SELECT 1 FROM "ProductVariant" sv WHERE sv."storeId"=p."storeId" AND sv."productId"=p."id" AND sv."archivedAt" IS NULL AND (sv."sku" ILIKE $${values.length} OR sv."barcode" ILIKE $${values.length})))`); }
     if (input.collectionId) filters.push(`p."collectionIds" @> ARRAY[${bind(input.collectionId)}]::text[]`);
+    if (input.productType) filters.push(`lower(p."productType") = lower(${bind(input.productType)})`);
+    if (input.vendor) filters.push(`lower(p."vendor") = lower(${bind(input.vendor)})`);
+    if (input.tag) filters.push(`EXISTS (SELECT 1 FROM unnest(p."tags") AS tag WHERE lower(tag) = lower(${bind(input.tag)}))`);
     if (input.categoryId) { const category = bind(input.categoryId); filters.push(`(p."primaryCategoryId"=${category} OR p."additionalCategoryIds" @> ARRAY[${category}]::text[])`); }
     const variants = ['v."storeId"=p."storeId"', 'v."productId"=p."id"', 'v."archivedAt" IS NULL'];
     if (input.minPriceMinor !== undefined) variants.push(`v."priceMinor">=${bind(input.minPriceMinor)}`);
@@ -75,6 +88,16 @@ export class CatalogPostgresRepository implements CatalogAdminRepository {
     return productRows.map((row) => this.product(row, variants.rows.filter((v) => String(v.productId) === String(row.id)), media.rows.filter((m) => String(m.productId) === String(row.id))));
   }
 
+  async findProducts(storeId: string, by: { handles?: string[]; ids?: string[] }): Promise<CatalogProduct[]> {
+    if (!by.handles?.length && !by.ids?.length) return [];
+    const result = await this.database.query<Row>(`SELECT p.*, s."currency" AS "storeCurrency" FROM "Product" p JOIN "Store" s ON s."id" = p."storeId" WHERE p."storeId" = $1 AND (p."slug" = ANY($2::text[]) OR p."id" = ANY($3::text[])) ORDER BY p."title", p."id"`, [storeId, by.handles ?? [], by.ids ?? []]);
+    return this.hydrateProducts(storeId, result.rows);
+  }
+  async findSkuOwners(storeId: string, skus: string[]): Promise<Array<{ sku: string; productId: string; handle: string }>> {
+    if (!skus.length) return [];
+    const result = await this.database.query<Row>(`SELECT lower(v."sku") AS "sku", p."id" AS "productId", p."slug" AS "handle" FROM "ProductVariant" v JOIN "Product" p ON p."storeId" = v."storeId" AND p."id" = v."productId" WHERE v."storeId" = $1 AND lower(v."sku") = ANY($2::text[])`, [storeId, skus.map((sku) => sku.toLowerCase())]);
+    return result.rows.map((row) => ({ sku: String(row.sku), productId: String(row.productId), handle: String(row.handle) }));
+  }
   async getProduct(storeId: string, id: string): Promise<CatalogProduct | null> {
     const result = await this.database.query<Row>(`SELECT p.*, s."currency" AS "storeCurrency" FROM "Product" p JOIN "Store" s ON s."id" = p."storeId" WHERE p."storeId" = $1 AND p."id" = $2`, [storeId, id]);
     return (await this.hydrateProducts(storeId, result.rows))[0] ?? null;

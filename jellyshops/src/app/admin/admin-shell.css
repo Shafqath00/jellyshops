@@ -23,7 +23,7 @@
 .admin-topbar-center {display:flex;justify-content:center;min-width:0}
 .admin-brand {display:inline-flex;align-items:center;gap:10px;min-height:36px;padding:4px 8px 4px 4px;border-radius:var(--jk-radius-sm);font-size:15px;font-weight:650;letter-spacing:-.01em;color:inherit;white-space:nowrap}
 .admin-brand:hover {background:var(--jk-topbar-field)}
-.admin-brand-mark {display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:8px;background:var(--jk-brand);color:#fff;font-size:14px;font-weight:750}
+.admin-brand-mark {display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:8px;background:var(--jk-brand);color:var(--jk-accent-text);font-size:14px;font-weight:750}
 @media(max-width:639px){.admin-brand-name{display:none}.admin-brand{padding-right:4px}}
 .admin-topbar-button {
   display:inline-flex; align-items:center; justify-content:center; gap:6px; min-width:36px; height:36px; padding:0 8px;

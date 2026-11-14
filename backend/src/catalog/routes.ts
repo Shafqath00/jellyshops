@@ -22,6 +22,9 @@ const productListSchema = listSchema.extend({
   variantOptions: z.preprocess((raw) => { if (typeof raw !== "string") return raw; try { return JSON.parse(raw); } catch { return null; } }, z.record(z.string().min(1).max(160), z.string().min(1).max(160)).refine((value) => Object.keys(value).length <= 20)).optional(),
   collectionId: z.string().min(1).optional(),
   status: productStatusSchema.optional(),
+  productType: z.string().trim().min(1).max(160).optional(),
+  vendor: z.string().trim().min(1).max(160).optional(),
+  tag: z.string().trim().min(1).max(160).optional(),
 }).refine((value) => value.minPriceMinor === undefined || value.maxPriceMinor === undefined || value.minPriceMinor <= value.maxPriceMinor, { message: "Minimum price must not exceed maximum price", path: ["minPriceMinor"] });
 const UNIT_DIMENSION: Record<string, string> = { mg: "mass", g: "mass", kg: "mass", ml: "volume", cl: "volume", l: "volume", mm: "length", cm: "length", m: "length", m2: "area", item: "count" };
 const unitPricingSchema = z.object({
@@ -104,7 +107,7 @@ type AdminCatalogService = Pick<
   CatalogAdmin,
   "listProducts" | "getProduct" | "createProduct" | "updateProduct" |
   "listCollections" | "getCollection" | "createCollection" | "updateCollection"
-> & Partial<Pick<CatalogAdmin, "listInventory" | "updateInventory" | "listInventoryHistory">>;
+> & Partial<Pick<CatalogAdmin, "listInventory" | "updateInventory" | "listInventoryHistory" | "listProductFacets">>;
 type PublicCatalogService = Pick<CatalogAdmin, "listPublicProducts" | "listCollections">;
 
 export function createCatalogRouter(): Router {
@@ -136,6 +139,11 @@ export function createCatalogAdminRouter(service: AdminCatalogService, authProvi
   router.get("/products", requireStorePermission("catalog:view"), async (request, response) => {
     const input = productListSchema.parse(request.query);
     response.json(await service.listProducts(request.storeContext!.storeId, input));
+  });
+
+  // Before "/products/:productId" so "facets" is not read as a product id.
+  router.get("/products/facets", requireStorePermission("catalog:view"), async (request, response) => {
+    response.json(service.listProductFacets ? await service.listProductFacets(request.storeContext!.storeId) : { productTypes: [], vendors: [], tags: [] });
   });
 
   router.get("/products/:productId", requireStorePermission("catalog:view"), async (request, response) => {

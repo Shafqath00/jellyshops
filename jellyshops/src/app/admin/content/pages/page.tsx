@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { FileText } from "lucide-react";
-import { AdminPage, Banner, Card, EmptyState, SelectList, SplitLayout, StatusBadge } from "@/components/admin";
+import { AdminPage, Banner, Button, Card, EmptyState, SelectList, SplitLayout, StatusBadge } from "@/components/admin";
 import { useAuth } from "@/features/auth/providers/auth-provider";
 import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import { createContentApi, type ContentTemplate, type PageResource, type TemplateAssignment } from "@/features/content/api/client";
@@ -38,6 +38,7 @@ export default function PagesAdminPage() {
   const [assignment, setAssignment] = useState<TemplateAssignment | null>(null);
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(true);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (!api || !storeId) return;
@@ -49,10 +50,11 @@ export default function PagesAdminPage() {
         setTemplates(nextTemplates);
         setActivePageId((current) => current || nextPages[0]?.id || "");
       })
-      .catch((reason: unknown) => active && setError(reason instanceof Error ? reason.message : "Unable to load pages"))
+      .catch((reason: unknown) => active && setError(reason instanceof Error ? reason.message : "We could not load your pages."))
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [api]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [api, attempt]);
 
   useEffect(() => {
     if (!api || !activePageId) {
@@ -71,7 +73,7 @@ export default function PagesAdminPage() {
 
   return (
     <AdminPage title="Pages" description="Information pages such as About, Delivery and Returns. Their content is edited in the store designer.">
-      {error && <Banner tone="critical" title="Pages did not load">{error}</Banner>}
+      {error && <Banner tone="critical" title="Pages did not load" action={<Button size="small" onClick={() => { setError(undefined); setLoading(true); setAttempt((count) => count + 1); }}>Try again</Button>}>{error}</Banner>}
       <SplitLayout list={<SelectList label="Pages" loading={loading} selectedId={activePageId} onSelect={setActivePageId}
         items={pages.map((entry) => ({ id: entry.id, label: entry.title, sub: `/pages/${entry.handle}`, badge: <StatusBadge kind="content" value={entry.status ?? "DRAFT"} /> }))}
         empty="No pages yet." />}>

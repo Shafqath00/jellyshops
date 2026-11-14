@@ -24,6 +24,8 @@ Neither generated output nor narrative is automatically authoritative: check the
 | Call or change an API | [api/endpoints.md](api/endpoints.md), [api/authentication.md](api/authentication.md) |
 | Understand a table | [architecture/database-schema.md](architecture/database-schema.md), [architecture/database-architecture.md](architecture/database-architecture.md) |
 | Work on a feature | [features/](features/) |
+| Build or change an admin page | [admin-design-guide.md](admin-design-guide.md) |
+| Import, export or bulk edit products | [plans/bulk-products.md](plans/bulk-products.md), [admin-polish-qa-checklist.md](admin-polish-qa-checklist.md) |
 | Test or deploy | [development/testing.md](development/testing.md), [development/deployment.md](development/deployment.md) |
 
 ## Contents

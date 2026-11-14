@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Shapes } from "lucide-react";
-import { AdminPage, Banner, Card, EmptyState, SelectList, SplitLayout, StatusBadge } from "@/components/admin";
+import { AdminPage, Banner, Button, Card, EmptyState, SelectList, SplitLayout, StatusBadge } from "@/components/admin";
 import { useAuth } from "@/features/auth/providers/auth-provider";
 
 interface MetaobjectDefinition {
@@ -31,6 +31,7 @@ export default function MetaobjectsPage() {
   const [entries, setEntries] = useState<MetaobjectEntry[]>([]);
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(true);
+  const [attempt, setAttempt] = useState(0);
   const headers = useMemo(() => token ? { Authorization: `Bearer ${token}` } : null, [token]);
 
   useEffect(() => {
@@ -38,7 +39,7 @@ export default function MetaobjectsPage() {
     let active = true;
     void fetch(`${origin}/api/stores/${storeId}/custom-data/metaobjects`, { headers })
       .then(async (response) => {
-        if (!response.ok) throw new Error(`Metaobject request failed (${response.status})`);
+        if (!response.ok) throw new Error("We could not load your custom content. Check your connection and try again.");
         return await response.json() as MetaobjectDefinition[];
       })
       .then((next) => {
@@ -46,10 +47,11 @@ export default function MetaobjectsPage() {
         setDefinitions(next);
         setActiveId((current) => current || next.find((definition) => !definition.archivedAt)?.id || next[0]?.id || "");
       })
-      .catch((reason: unknown) => active && setError(reason instanceof Error ? reason.message : "Unable to load metaobjects"))
+      .catch((reason: unknown) => active && setError(reason instanceof Error ? reason.message : "We could not load your custom content."))
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [headers, origin]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [headers, origin, attempt]);
 
   useEffect(() => {
     if (!headers || !activeId) {
@@ -71,7 +73,7 @@ export default function MetaobjectsPage() {
 
   return (
     <AdminPage title="Custom content" description="Your own content types, such as team members or showroom locations, and their entries.">
-      {error && <Banner tone="critical" title="Custom content did not load">{error}</Banner>}
+      {error && <Banner tone="critical" title="Custom content did not load" action={<Button size="small" onClick={() => { setError(undefined); setLoading(true); setAttempt((count) => count + 1); }}>Try again</Button>}>{error}</Banner>}
       <SplitLayout wideList list={<SelectList label="Content types" title="Content types" loading={loading} selectedId={activeId} onSelect={setActiveId}
         items={definitions.map((entry) => ({ id: entry.id, label: entry.name, sub: entry.handle, badge: entry.archivedAt ? <StatusBadge kind="content" value="ARCHIVED" /> : undefined }))}
         empty="No content types yet." />}>

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check, Eye, Loader2, Palette, Pencil, RefreshCw, Sparkles } from "lucide-react";
 import { applyThemeStyle, listStarterPacks, listThemeStyles } from "@jelly/storefront-themes";
-import { AdminPage, Banner } from "@/components/admin";
+import { AdminPage, Banner, ConfirmDialog, buttonClass } from "@/components/admin";
 import { templateStoreLogo, templateStoreProducts, type TemplateStoreData } from "@/features/store-editor/template-store-data";
 import { galleryTemplate, templateDisplayName, usedCategories, type GalleryTemplate, type TemplateCategory } from "@/features/store-editor/template-gallery";
 import { useAuth } from "@/features/auth/providers/auth-provider";
@@ -22,8 +22,8 @@ const categories = usedCategories(gallery);
 const editorHref = "/admin/online-store/editor";
 const surface = "rounded-2xl bg-[var(--jk-surface)] shadow-[var(--jk-shadow)]";
 const subdued = "text-[var(--jk-text-subdued)]";
-const primary = "inline-flex min-h-10 items-center justify-center gap-2 rounded-[var(--jk-radius-sm)] bg-[var(--jk-accent)] px-4 text-[13px] font-semibold text-[var(--jk-accent-text)] transition hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--jk-focus)] disabled:cursor-wait disabled:opacity-50";
-const secondary = "inline-flex min-h-10 items-center justify-center gap-2 rounded-[var(--jk-radius-sm)] bg-[var(--jk-surface)] px-4 text-[13px] font-semibold text-[var(--jk-text)] shadow-[inset_0_0_0_1px_var(--jk-border-strong)] transition hover:bg-[var(--jk-surface-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--jk-focus)] disabled:opacity-50";
+const primary = buttonClass("primary", "large");
+const secondary = buttonClass("secondary", "large");
 
 export default function OnlineStorePage() {
   const { activeStore } = useAuth();
@@ -59,6 +59,8 @@ function StoreDesignLibrary() {
   const [previewId, setPreviewId] = useState<string>();
   const [category, setCategory] = useState<TemplateCategory | "all">("all");
   const [storeData, setStoreData] = useState<TemplateStoreData>();
+  /** The design waiting for a yes before it replaces the draft. */
+  const [switching, setSwitching] = useState<{ starterId: string; styleId?: string } | null>(null);
   const operation = useRef(false);
   const mounted = useRef(true);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
@@ -102,9 +104,14 @@ function StoreDesignLibrary() {
     finally { operation.current = false; if (mounted.current) setSaving(undefined); }
   }
 
+  /** A store that already has a draft is asked first; a new store starts straight away. */
+  function chooseStarter(starterId: string, styleId?: string) {
+    if (hasWorkspace) setSwitching({ starterId, styleId });
+    else void installStarter(starterId, styleId);
+  }
+
   async function installStarter(starterId: string, styleId?: string) {
     if (!api || !storeId || operation.current) return;
-    if (hasWorkspace && !window.confirm("Switch your draft to this store design? Your page layouts are replaced, and products, collections and pages go back to the main layout for their type. Your live store, products, orders and customers stay the same until you publish.")) return;
     operation.current = true;
     setSaving(`starter:${starterId}`); setError(undefined); setNotice(undefined);
     try {
@@ -182,7 +189,7 @@ function StoreDesignLibrary() {
                 {(["all", ...categories] as const).map((item) => {
                   const active = category === item;
                   const count = item === "all" ? gallery.length : gallery.filter((template) => template.category === item).length;
-                  return <button key={item} type="button" aria-pressed={active} onClick={() => setCategory(item)} className={`inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--jk-focus)] ${active ? "bg-[var(--jk-accent)] text-[var(--jk-accent-text)]" : "bg-[var(--jk-surface)] text-[var(--jk-text)] shadow-[inset_0_0_0_1px_var(--jk-border)] hover:bg-[var(--jk-surface-hover)]"}`}>
+                  return <button key={item} type="button" aria-pressed={active} onClick={() => setCategory(item)} className="jk-chip shrink-0">
                     {item === "all" ? "All designs" : item}<span className={active ? "opacity-70" : subdued}>{count}</span>
                   </button>;
                 })}
@@ -191,7 +198,7 @@ function StoreDesignLibrary() {
               <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">{shown.map((template, index) => {
                 const selected = configuration?.themeId === template.id;
                 const busy = saving === `starter:${template.id}`;
-                return <article key={template.id} aria-label={template.name} className={`${surface} group flex flex-col overflow-hidden transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_-12px_rgba(0,0,0,0.22),0_0_0_1px_var(--jk-border)] motion-reduce:transform-none ${selected ? "ring-2 ring-[var(--jk-accent)]" : ""}`}>
+                return <article key={template.id} aria-label={template.name} className={`${surface} group flex flex-col overflow-hidden transition duration-200 hover:-translate-y-0.5 hover:shadow-[var(--jk-shadow-raised)] motion-reduce:transform-none ${selected ? "ring-2 ring-[var(--jk-accent)]" : ""}`}>
                   <button type="button" aria-label={`Preview ${template.name}`} onClick={() => setPreviewId(template.id)} className="relative block w-full text-left focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-[var(--jk-focus)]">
                     <TemplateCover template={template} sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 400px" priority={index < 3} />
                     <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 transition group-hover:opacity-100 motion-reduce:transition-none" aria-hidden="true" />
@@ -205,10 +212,10 @@ function StoreDesignLibrary() {
                     {template.tags.length > 0 && <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Style">{template.tags.map((tag) => <li key={tag} className="rounded-full bg-[var(--jk-neutral-bg)] px-2.5 py-0.5 text-xs font-medium text-[var(--jk-neutral-text)]">{tag}</li>)}</ul>}
                     <div className="mt-auto flex flex-wrap items-center gap-2 pt-5">
                       {!hasWorkspace
-                        ? <button type="button" disabled={!api || Boolean(saving)} onClick={() => void installStarter(template.id)} className={`${primary} flex-1`}>{busy ? <><Loader2 size={15} className="animate-spin motion-reduce:animate-none" aria-hidden="true" />Preparing your store…</> : <>Start with this design<ArrowRight size={15} aria-hidden="true" /></>}</button>
+                        ? <button type="button" disabled={!api || Boolean(saving)} onClick={() => chooseStarter(template.id)} className={`${primary} flex-1`}>{busy ? <><Loader2 size={15} className="animate-spin motion-reduce:animate-none" aria-hidden="true" />Preparing your store…</> : <>Start with this design<ArrowRight size={15} aria-hidden="true" /></>}</button>
                         : selected
                           ? <Link href={editorHref} className={`${primary} flex-1`}><Pencil size={14} aria-hidden="true" />Customize design</Link>
-                          : <button type="button" className={`${secondary} flex-1`} disabled={Boolean(saving)} onClick={() => void installStarter(template.id)}>{busy ? <><Loader2 size={15} className="animate-spin motion-reduce:animate-none" aria-hidden="true" />Switching…</> : <>Switch to this design<ArrowRight size={15} aria-hidden="true" /></>}</button>}
+                          : <button type="button" className={`${secondary} flex-1`} disabled={Boolean(saving)} onClick={() => chooseStarter(template.id)}>{busy ? <><Loader2 size={15} className="animate-spin motion-reduce:animate-none" aria-hidden="true" />Switching…</> : <>Switch to this design<ArrowRight size={15} aria-hidden="true" /></>}</button>}
                       <button type="button" onClick={() => setPreviewId(template.id)} className={secondary}><Eye size={15} aria-hidden="true" />Preview</button>
                     </div>
                   </div>
@@ -221,7 +228,7 @@ function StoreDesignLibrary() {
                 <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[var(--jk-surface-hover)]"><Palette size={18} aria-hidden="true" /></span>
                 <div><h2 id="appearance-heading" className="text-base font-semibold tracking-tight">Change the theme, keep your pages</h2><p className={`mt-0.5 text-sm leading-6 ${subdued}`}>Switch only the colours, fonts and styling. Your pages, sections and content stay as they are.</p></div>
               </div>
-              {unavailable && <p role="alert" className="mb-4 rounded-xl bg-[var(--jk-warning-bg)] px-4 py-3 text-sm text-[var(--jk-warning-text)]">Your selected theme “{configuration.themeId}” is unavailable. Choose an available theme to continue.</p>}
+              {unavailable && <div className="mb-4"><Banner tone="warning" title="Your theme is no longer available">Choose one of the themes below to carry on.</Banner></div>}
               {themes.length ? <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{themes.map((theme) => {
                 const selected = theme.id === configuration?.themeId;
                 return <div key={theme.id} className={`flex items-center justify-between gap-3 rounded-xl p-4 shadow-[inset_0_0_0_1px_var(--jk-border)] ${selected ? "bg-[var(--jk-surface-selected)] shadow-[inset_0_0_0_2px_var(--jk-accent)]" : ""}`}>
@@ -238,7 +245,11 @@ function StoreDesignLibrary() {
           </div>}
         </AdminPage>
       </div>
-      {preview && <TemplatePreviewDialog starter={{ ...preview, name: templateDisplayName(preview.name) }} hasWorkspace={hasWorkspace} busy={Boolean(saving)} error={error} store={storeData} onClose={() => setPreviewId(undefined)} onUse={(styleId) => void installStarter(preview.id, styleId)} onEdit={() => router.push(editorHref)} />}
+      <ConfirmDialog open={Boolean(switching)} onOpenChange={(open) => { if (!open) setSwitching(null); }}
+        title={`Switch to ${templateDisplayName(starters.find((item) => item.id === switching?.starterId)?.name ?? "this design")}?`}
+        description={<><p>Your draft page layouts are replaced, and products, collections and pages go back to the main layout for their type.</p><p>Your live store, products, orders and customers stay the same until you publish. This cannot be undone, so publish or note anything you want to keep first.</p></>}
+        confirmLabel="Switch design" onConfirm={() => { const choice = switching; if (choice) void installStarter(choice.starterId, choice.styleId); }} />
+      {preview && <TemplatePreviewDialog starter={{ ...preview, name: templateDisplayName(preview.name) }} hasWorkspace={hasWorkspace} busy={Boolean(saving)} error={error} store={storeData} onClose={() => setPreviewId(undefined)} onUse={(styleId) => chooseStarter(preview.id, styleId)} onEdit={() => router.push(editorHref)} />}
     </main>
   );
 }

@@ -1,4 +1,5 @@
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
+import { expectNoRawCodes } from "@/test/raw-codes";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import ReviewsPage from "./page";
@@ -19,6 +20,7 @@ describe("reviews page", () => {
     const table = await screen.findByRole("table");
     expect(api.list).toHaveBeenCalledWith("pending");
     expect(within(table).getByText("Vitamin C serum")).toBeVisible();
+    expectNoRawCodes();
     expect(within(table).getByRole("link", { name: "ana@example.test" })).toHaveAttribute("href", "mailto:ana@example.test");
     expect(within(table).getByLabelText("4 out of 5 stars")).toBeVisible();
     await user.click(within(table).getByRole("button", { name: "Publish" }));

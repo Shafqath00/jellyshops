@@ -25,8 +25,8 @@ export function Field({ id, label, error, hint, children, required }: { id: stri
     <div>
       <div className="jk-field-label"><label htmlFor={id} className="jk-label">{label}</label>{required !== undefined && <span className="jk-field-kind">{required ? "Required" : "Optional"}</span>}</div>
       {children}
-      {hint && !error && <p className="jk-help">{hint}</p>}
-      {error && <p id={`${id}-error`} role="alert" className="jk-field-error jk-help">{error}</p>}
+      {hint && !error && <p className="jk-hint">{hint}</p>}
+      {error && <p id={`${id}-error`} role="alert" className="jk-field-error jk-hint">{error}</p>}
     </div>
   );
 }

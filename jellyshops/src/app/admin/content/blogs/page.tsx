@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Newspaper } from "lucide-react";
-import { AdminPage, Banner, Card, EmptyState, Field, SelectList, SplitLayout, StatusBadge } from "@/components/admin";
+import { AdminPage, Banner, Button, Card, EmptyState, Field, SelectList, SplitLayout, StatusBadge } from "@/components/admin";
 import { useAuth } from "@/features/auth/providers/auth-provider";
 import { createStoreEditorApi } from "@/features/store-editor/api/client";
 import { createContentApi, type ArticleResource, type BlogResource, type ContentTemplate, type TemplateAssignment } from "@/features/content/api/client";
@@ -42,6 +42,7 @@ export default function BlogsAdminPage() {
   const [handle, setHandle] = useState("");
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(true);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (!api) return;
@@ -51,10 +52,11 @@ export default function BlogsAdminPage() {
       setBlogs(nextBlogs);
       setArticleTemplates(nextTemplates);
       setActiveBlogId((current) => current || nextBlogs[0]?.id || "");
-    }).catch((reason: unknown) => active && setError(reason instanceof Error ? reason.message : "Unable to load blogs"))
+    }).catch((reason: unknown) => active && setError(reason instanceof Error ? reason.message : "We could not load your blogs."))
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [api]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [api, attempt]);
 
   useEffect(() => {
     if (!api || !activeBlogId) {
@@ -104,7 +106,7 @@ export default function BlogsAdminPage() {
 
   return (
     <AdminPage title="Blog posts" description="Your blogs and the posts in them. Write the post itself in the store designer.">
-      {error && <Banner tone="critical" title="Something went wrong" onDismiss={() => setError(undefined)}>{error}</Banner>}
+      {error && <Banner tone="critical" title="Something went wrong" onDismiss={() => setError(undefined)} action={!blogs.length ? <Button size="small" onClick={() => { setError(undefined); setLoading(true); setAttempt((count) => count + 1); }}>Try again</Button> : undefined}>{error}</Banner>}
       <SplitLayout list={<SelectList label="Blogs" title="Blogs" loading={loading} selectedId={activeBlogId} onSelect={setActiveBlogId}
         items={blogs.map((blog) => ({ id: blog.id, label: blog.title, sub: `/blogs/${blog.handle}` }))} empty="No blogs yet." footer={createBlog} />}>
         <SelectList label="Posts" title="Posts" selectedId={activeArticleId} onSelect={setActiveArticleId}

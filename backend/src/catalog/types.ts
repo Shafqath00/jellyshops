@@ -160,9 +160,16 @@ export interface ListProductsInput {
   query?: string;
   collectionId?: string;
   status?: ProductStatus;
+  /** Exact product type, brand (vendor) or tag, compared without regard to case. */
+  productType?: string;
+  vendor?: string;
+  tag?: string;
   cursor?: string;
   limit: number;
 }
+
+/** The product types, brands and tags a store already uses, for filters and suggestions. */
+export interface ProductFacets { productTypes: string[]; vendors: string[]; tags: string[] }
 
 export interface ListCollectionsInput {
   query?: string;

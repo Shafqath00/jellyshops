@@ -1,4 +1,5 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
+import { expectNoRawCodes } from "@/test/raw-codes";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import FilesPage from "./page";
@@ -19,6 +20,7 @@ describe("Files", () => {
     const user = userEvent.setup();
     render(<FilesPage />);
     expect(await screen.findByText("bed.jpg")).toBeVisible();
+    expectNoRawCodes();
     expect(screen.getAllByText("2.4 MB")).toHaveLength(2);
     await user.click(screen.getByRole("tab", { name: "Not used" }));
     expect(screen.queryByText("bed.jpg")).toBeNull();

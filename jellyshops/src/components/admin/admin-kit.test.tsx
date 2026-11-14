@@ -4,7 +4,7 @@ import axe, { type AxeResults } from "axe-core";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import {
-  AdminPage, Banner, ConfirmDialog, EmptyState, HelpTip, IndexTable, Picker, ResourceForm, StatusBadge, TableSkeleton, ToastProvider,
+  AdminPage, Banner, Button, Combobox, ConfirmDialog, EmptyState, Field, HelpTip, IndexTable, Picker, ResourceForm, StatusBadge, TableSkeleton, Tabs, ToastProvider,
   humanizeCode, statusLabel, statusOptions, useToast, type IndexColumn,
 } from "./index";
 
@@ -202,5 +202,151 @@ describe("feedback", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Payment failed");
     expect(screen.getByRole("button", { name: "More information" })).toBeInTheDocument();
     expect(await violations(container)).toEqual([]);
+  });
+});
+
+describe("Button", () => {
+  it("cannot be pressed while loading and tells screen readers it is busy", async () => {
+    const user = userEvent.setup();
+    const save = vi.fn();
+    const view = render(<Button variant="primary" onClick={save}>Save product</Button>);
+    await user.click(screen.getByRole("button", { name: "Save product" }));
+    expect(save).toHaveBeenCalledOnce();
+    view.rerender(<Button variant="primary" loading loadingLabel="Saving…" onClick={save}>Save product</Button>);
+    const busy = screen.getByRole("button", { name: "Saving…" });
+    expect(busy).toBeDisabled();
+    expect(busy).toHaveAttribute("aria-busy", "true");
+    await user.click(busy);
+    expect(save).toHaveBeenCalledOnce();
+    expect(await violations(view.container)).toEqual([]);
+  });
+
+  it("maps variants and sizes to kit classes and defaults to type=button", () => {
+    render(<><Button variant="destructive" size="small">Delete product</Button><Button variant="quiet">Clear</Button></>);
+    expect(screen.getByRole("button", { name: "Delete product" })).toHaveClass("jk-button", "jk-button-critical-solid", "jk-button-sm");
+    expect(screen.getByRole("button", { name: "Delete product" })).toHaveAttribute("type", "button");
+    expect(screen.getByRole("button", { name: "Clear" })).toHaveClass("jk-button-plain");
+  });
+});
+
+describe("Tabs", () => {
+  it("moves between tabs with the arrow keys and chooses with Enter", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const { container } = render(<Tabs label="Order views" tabs={[{ id: "", label: "All" }, { id: "open", label: "Open" }, { id: "done", label: "Done" }]} active="" onChange={onChange} />);
+    await user.tab();
+    expect(screen.getByRole("tab", { name: "All" })).toHaveFocus();
+    await user.keyboard("{ArrowRight}");
+    expect(screen.getByRole("tab", { name: "Open" })).toHaveFocus();
+    expect(onChange).not.toHaveBeenCalled();
+    await user.keyboard("{Enter}");
+    expect(onChange).toHaveBeenCalledWith("open");
+    await user.keyboard("{End}");
+    expect(screen.getByRole("tab", { name: "Done" })).toHaveFocus();
+    await user.keyboard("{ArrowRight}");
+    expect(screen.getByRole("tab", { name: "All" })).toHaveFocus();
+    await user.keyboard("{ArrowLeft}{Home}");
+    expect(screen.getByRole("tab", { name: "All" })).toHaveFocus();
+    expect(await violations(container)).toEqual([]);
+  });
+});
+
+describe("IndexTable sorting", () => {
+  it("sorts from a column heading and says which way the rows are sorted", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const sortable: IndexColumn<Row>[] = [{ ...columns[0], sortKey: "name" }, columns[1]];
+    const props = { label: "Orders", rows, rowKey: (row: Row) => row.id, rowLabel: (row: Row) => row.name, columns: sortable, emptyState: <p>None</p> };
+    const view = render(<IndexTable {...props} sort={{ key: "name", direction: "asc", onChange }} />);
+    expect(screen.getByRole("columnheader", { name: "Name" })).toHaveAttribute("aria-sort", "ascending");
+    expect(screen.getByRole("columnheader", { name: "Status" })).not.toHaveAttribute("aria-sort");
+    await user.click(screen.getByRole("button", { name: "Name" }));
+    expect(onChange).toHaveBeenCalledWith("name", "desc");
+    view.rerender(<IndexTable {...props} sort={{ key: "other", direction: "desc", onChange }} />);
+    expect(screen.getByRole("columnheader", { name: "Name" })).toHaveAttribute("aria-sort", "none");
+    await user.click(screen.getByRole("button", { name: "Name" }));
+    expect(onChange).toHaveBeenLastCalledWith("name", "asc");
+    expect(await violations(view.container)).toEqual([]);
+  });
+});
+
+describe("Field", () => {
+  it("marks required fields and ties help and error text to the control", async () => {
+    const { container } = render(<Field id="price" label="Price" required help="Like 499 or 499.50." error="Enter a price."><input id="price" defaultValue="" /></Field>);
+    const input = screen.getByLabelText(/Price/);
+    expect(input).toHaveAttribute("aria-required", "true");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveAccessibleDescription("Like 499 or 499.50. Enter a price.");
+    expect(screen.getByRole("alert")).toHaveTextContent("Enter a price.");
+    expect(await violations(container)).toEqual([]);
+  });
+
+  it("leaves a control alone when it has no help, error or required mark", () => {
+    render(<Field id="name" label="Name"><input id="name" /></Field>);
+    const input = screen.getByLabelText("Name");
+    expect(input).not.toHaveAttribute("aria-invalid");
+    expect(input).not.toHaveAttribute("aria-describedby");
+    expect(input).not.toHaveAttribute("aria-required");
+  });
+});
+
+const COUNTRY_OPTIONS = [{ value: "GB", label: "United Kingdom" }, { value: "IN", label: "India" }, { value: "IE", label: "Ireland" }];
+function DemoCombobox({ allowCustom = false, onValue }: { allowCustom?: boolean; onValue: (value: string) => void }) {
+  const [value, setValue] = useState("GB");
+  return <Field id="country" label="Country" help="Type to search."><Combobox id="country" value={value} options={COUNTRY_OPTIONS} allowCustom={allowCustom} onChange={(next) => { setValue(next); onValue(next); }} /></Field>;
+}
+
+describe("Combobox", () => {
+  it("shows the current choice, narrows as you type and picks with the keyboard", async () => {
+    const user = userEvent.setup();
+    const onValue = vi.fn();
+    const { container } = render(<DemoCombobox onValue={onValue} />);
+    const input = screen.getByRole("combobox", { name: "Country" });
+    expect(input).toHaveValue("United Kingdom");
+    expect(input).toHaveAttribute("aria-expanded", "false");
+    await user.click(input);
+    expect(input).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getAllByRole("option")).toHaveLength(3);
+    expect(await violations(container)).toEqual([]);
+    await user.clear(input);
+    await user.type(input, "i");
+    expect(screen.getAllByRole("option").map((option) => option.textContent)).toEqual(["United Kingdom", "India", "Ireland"]);
+    await user.type(input, "r");
+    expect(screen.getAllByRole("option").map((option) => option.textContent)).toEqual(["Ireland"]);
+    await user.keyboard("{Enter}");
+    expect(onValue).toHaveBeenLastCalledWith("IE");
+    expect(input).toHaveValue("Ireland");
+    expect(input).toHaveAttribute("aria-expanded", "false");
+    await user.keyboard("{ArrowDown}{ArrowDown}{Enter}");
+    expect(onValue).toHaveBeenLastCalledWith("IN");
+  });
+
+  it("keeps the old choice when Escape is pressed or nothing matches", async () => {
+    const user = userEvent.setup();
+    const onValue = vi.fn();
+    render(<DemoCombobox onValue={onValue} />);
+    const input = screen.getByRole("combobox", { name: "Country" });
+    await user.clear(input);
+    await user.type(input, "zzz");
+    expect(screen.getByRole("status")).toHaveTextContent("No matches");
+    await user.keyboard("{Escape}");
+    expect(input).toHaveValue("United Kingdom");
+    await user.type(input, "zzz");
+    await user.tab();
+    expect(input).toHaveValue("United Kingdom");
+    expect(onValue).not.toHaveBeenCalledWith("zzz");
+  });
+
+  it("with allowCustom keeps a typed value that is not in the list", async () => {
+    const user = userEvent.setup();
+    const onValue = vi.fn();
+    render(<DemoCombobox allowCustom onValue={onValue} />);
+    const input = screen.getByRole("combobox", { name: "Country" });
+    await user.clear(input);
+    await user.type(input, "Wales");
+    expect(screen.getByRole("option", { name: 'Use "Wales"' })).toBeVisible();
+    await user.click(screen.getByRole("option", { name: 'Use "Wales"' }));
+    expect(onValue).toHaveBeenLastCalledWith("Wales");
+    expect(input).toHaveValue("Wales");
   });
 });

@@ -3,6 +3,8 @@ import { createAdminRouter } from "../../admin/routes.js";
 import { requireMerchant, requireStorePermission } from "../../auth/middleware.js";
 import { createPublicStoreBySlugRouter, createPublicStoreRouter } from "../../catalog/public-store.js";
 import { createCatalogAdminRouter, createCatalogRouter, createPublicCatalogRouter } from "../../catalog/routes.js";
+import { createProductBulkRouter } from "../../catalog-bulk/routes.js";
+import { ProductBulkService } from "../../catalog-bulk/service.js";
 import { PublicOrderRateLimiter } from "../../commerce/rate-limit.js";
 import { createContentRouter } from "../../content/routes.js";
 import { createCustomDataRouter } from "../../custom-data/routes.js";
@@ -78,6 +80,19 @@ export function mountCatalogRoutes(app: Express, context: AppContext): void {
 
   if (!deps.catalogService) {
     return;
+  }
+
+  // Product import and export need the database for the import record; mounted first so its paths are found before the catalogue's.
+  const bulkDatabase = context.routeDependencies.commerceDatabase;
+  if (bulkDatabase) {
+    const bulk = new ProductBulkService(
+        { query: (text: string, values?: unknown[]) => bulkDatabase.transaction((transaction) => transaction.query(text, values)) } as never, deps.catalogService, Date.now,
+        // Photos go through the same media service as every other upload, so they are checked and resized the same way.
+        { upload: (storeId, fileName, contents) => context.mediaService.upload(storeId, { buffer: contents, originalname: fileName } as Express.Multer.File) },
+      );
+    app.use("/api/stores/:storeId/catalog", createProductBulkRouter(bulk, authProvider, context.config.maxUploadBytes));
+    // The scheduled worker carries on imports whose page was closed (see createApp).
+    app.locals.continueProductImports = () => bulk.continueStalled();
   }
 
   app.use(

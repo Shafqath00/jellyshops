@@ -1,4 +1,5 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
+import { expectNoRawCodes } from "@/test/raw-codes";
 import userEvent from "@testing-library/user-event";
 import axe from "axe-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -26,6 +27,7 @@ describe("customer pages", () => {
     const user = userEvent.setup();
     const { container } = render(<CustomersPage />);
     expect(await screen.findByText("Asha Rao")).toBeVisible();
+    expectNoRawCodes();
     expect(screen.getByRole("tab", { name: /Never ordered/ })).toHaveTextContent("1");
     await user.click(screen.getByRole("tab", { name: /Email subscribers/ }));
     expect(screen.queryByText("Sam Lee")).toBeNull();
@@ -35,6 +37,32 @@ describe("customer pages", () => {
     expect(screen.queryByText("Sam Lee")).toBeNull();
     const results = await axe.run(container, { rules: { "color-contrast": { enabled: false }, region: { enabled: false } } });
     expect(results.violations.map((violation) => violation.id)).toEqual([]);
+  });
+
+  it("filters by tag and place, sorts, and pages through long lists", async () => {
+    const lou = { ...asha, id: "email:lou@example.com", name: "Lou Park", email: "lou@example.com", tags: ["Trade"], location: "Leeds, GB", orderCount: 9, lifetimeSpendMinor: 90000 };
+    const crowd = Array.from({ length: 60 }, (_, index) => ({ ...sam, id: `email:c${index}@example.com`, name: `Customer ${String(index).padStart(2, "0")}`, email: `c${index}@example.com` }));
+    vi.stubGlobal("fetch", vi.fn(() => json({ customers: [asha, sam, lou, ...crowd] })));
+    const user = userEvent.setup();
+    render(<CustomersPage />);
+    expect(await screen.findByText("Asha Rao")).toBeVisible();
+    expect(screen.getByText("63 customers · Page 1 of 2")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByText("Sam Lee")).toBeVisible();
+    expect(screen.queryByText("Asha Rao")).toBeNull();
+    // A filter goes back to the first page and narrows the list.
+    await user.selectOptions(screen.getByRole("combobox", { name: "Filter by tag" }), "Trade");
+    expect(screen.getByText("1 customer")).toBeVisible();
+    expect(screen.getByText("Lou Park")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
+    await user.selectOptions(screen.getByRole("combobox", { name: "Filter by place" }), "London, GB");
+    expect(screen.getByText("Asha Rao")).toBeVisible();
+    expect(screen.queryByText("Lou Park")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
+    await user.selectOptions(screen.getByRole("combobox", { name: "Sort customers" }), "spent");
+    const names = screen.getAllByRole("row").slice(1, 3).map((row) => row.textContent);
+    expect(names[0]).toContain("Lou Park");
+    expect(names[1]).toContain("Asha Rao");
   });
 
   it("adds a customer and opens them", async () => {

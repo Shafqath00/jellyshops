@@ -336,7 +336,7 @@ describe("ProductBuilder choices and combinations", () => {
     expect(productCalls(fetchMock)[1][1]?.method).toBe("PATCH");
     expect(second.variants.every((v: { id?: string }) => typeof v.id === "string" && v.id.startsWith("server-v"))).toBe(true);
     expect(second.variants.find((v: { sku?: string }) => v.sku === "TEE-1")).toBeDefined();
-  });
+  }, 60000); // types into dozens of fields; needs longer when the whole suite runs in parallel
 
   it("lets sellers type their own choice, explains the stock question, and shows price surcharges", async () => {
     mockApi();

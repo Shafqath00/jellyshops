@@ -79,7 +79,8 @@ it("saves catalog id and version with the current revision and preserved setting
 it("shows unavailable configured themes without saving on load", async () => {
   api.getThemeConfiguration.mockResolvedValue({ storeId: "store-a", revision: 4, themeId: "removed-theme", themeVersion: "1.0.0", settings: {}, draftArtifactId: null });
   render(<OnlineStorePage />);
-  expect(await screen.findByRole("alert")).toHaveTextContent("removed-theme");
+  expect(await screen.findByText("Your theme is no longer available")).toBeVisible();
+  expect(screen.queryByText(/removed-theme/)).toBeNull();
   expect(api.saveThemeConfiguration).not.toHaveBeenCalled();
   expect(screen.getAllByRole("button", { name: "Use API Two" })[0]).toBeEnabled();
 });

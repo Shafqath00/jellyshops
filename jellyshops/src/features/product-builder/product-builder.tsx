@@ -9,6 +9,9 @@ import { OrganizationSection } from "./sections/organization-section";
 import { DigitalProductSettings } from "@/features/commerce/components/digital-product-settings";
 import { isProductMediaEnabled, pruneMediaAssignments } from "@jelly/storefront-schema";
 import { PhotosSection } from "./sections/photos-section";
+import { productReadiness } from "./readiness";
+import { useSkuCheck, type FindBySku, type SkuOwner } from "./use-sku-check";
+import { ReadinessCard } from "./readiness-card";
 import { ArrowLeft, Eye, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useShop } from "@/contexts/shop-context";
@@ -106,9 +109,25 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
   const metafields = useProductMetafields({ api: metafieldsApi, storeId, productId, variantIds: persisted.variantIds, onChange: touch });
   const metafieldContext = useMemo(() => ({ storeId: storeId ?? "", currency, lookups }), [storeId, currency, lookups]);
 
+  // Fields the merchant has edited show their problem as they type; untouched fields wait until Save.
+  const [touched, setTouched] = useState<Set<string>>(new Set());
+  const findBySku = useMemo<FindBySku | null>(() => token && storeId ? async (sku) => {
+    const response = await fetch(`${API_URL}/api/stores/${encodeURIComponent(storeId)}/catalog/products?limit=10&query=${encodeURIComponent(sku)}`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!response.ok) throw new Error("lookup failed");
+    return ((await response.json()) as { nodes: SkuOwner[] }).nodes;
+  } : null, [token, storeId]);
+  const skuTaken = useSkuCheck(hasVariantAxes(draft) ? "" : draft.sku, productId, findBySku);
+  const shownErrors = useMemo(() => {
+    const live = validateBuilderDraft(draft).fields;
+    const shown: DraftErrors = { ...errors };
+    for (const field of touched) if (field in live || field in shown) shown[field as keyof DraftErrors] = live[field as keyof DraftErrors];
+    if (!shown.sku && skuTaken) shown.sku = skuTaken;
+    return shown;
+  }, [draft, errors, touched, skuTaken]);
   const change = useCallback(<K extends keyof ProductDraft>(field: K, value: ProductDraft[K]) => {
     setDraft((current) => ({ ...current, [field]: value }));
     setErrors((current) => (current[field as keyof DraftErrors] ? { ...current, [field]: undefined } : current));
+    setTouched((current) => current.has(field as string) ? current : new Set(current).add(field as string));
     setDirty(true);
     setJustSaved(false);
   }, []);
@@ -176,6 +195,14 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
     finally { setSaving(false); }
   }
 
+  /** Brings an archived product back as a draft, so it can be checked before it goes live again. */
+  async function restore() {
+    if (!api || !storeId || !productId) return;
+    setSaving(true); setSaveError("");
+    try { await api.updateProduct(storeId, productId, { status: "DRAFT" }); setDraft(current => ({ ...current, archived: false, published: false })); setDirty(false); setJustSaved(true); }
+    catch (caught) { setSaveError(caught instanceof Error ? caught.message : "Could not restore this product. Try again."); }
+    finally { setSaving(false); }
+  }
   async function archive() {
     if (!api || !storeId || !productId || !(await confirmation.ask({ title: "Archive this product?", description: "It will be hidden from your store. You can make it active again later.", confirmLabel: "Archive product", destructive: true }))) return;
     setSaving(true);
@@ -238,6 +265,7 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
           <button type="button" className="jk-button" ref={previewTrigger} onClick={() => setPreviewOpen(true)}><Eye size={15} aria-hidden="true" />Preview</button>
           {productId && <button type="button" className="jk-button" disabled={saving || dirty} title={dirty ? "Save your changes first" : undefined} onClick={() => void duplicate()}>Duplicate</button>}
           {productId && !draft.archived && <button type="button" className="jk-button" disabled={saving} onClick={() => void archive()}>Archive</button>}
+          {productId && draft.archived && <button type="button" className="jk-button" disabled={saving} onClick={() => void restore()}>Restore</button>}
         </div>
       </header>
       <nav className="jk-builder-nav" aria-label="Product sections">
@@ -261,33 +289,33 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
           </div>
         )}
 
-        <div id="pb-details" className="jk-builder-group"><BasicsSection draft={draft} errors={errors} onChange={change} onUpload={upload} hidePhoto />
+        <div id="pb-details" className="jk-builder-group"><BasicsSection draft={draft} errors={shownErrors} onChange={change} onUpload={upload} hidePhoto />
 
         <PhotosSection media={draft.media ?? []} options={draft.options} taggingEnabled={taggingEnabled} onChange={(media) => { setDraft((current) => ({ ...current, media, imageUrl: media[0]?.url ?? "", variants: current.variants.map((variant) => variant.mediaId && !media.some((photo) => photo.id === variant.mediaId) ? { ...variant, mediaId: undefined } : variant) })); touch(); }} onBusy={setUploading} onDelete={api && storeId ? (mediaId) => api.deleteMedia(storeId, mediaId) : undefined} onUpload={api && storeId ? (file, progress) => api.uploadMedia(storeId, file, progress) : undefined} onList={api?.listMedia && storeId ? () => api.listMedia!(storeId) : undefined} />
         </div>
         <div id="pb-selling" className="jk-builder-group">
-          <PricingSection draft={draft} errors={errors} currency={currency} hasCombinations={combinations} onChange={change} />
-          <InventorySection draft={draft} errors={errors} hasCombinations={combinations} onChange={change} />
+          <PricingSection draft={draft} errors={shownErrors} currency={currency} hasCombinations={combinations} onChange={change} />
+          <InventorySection draft={draft} errors={shownErrors} hasCombinations={combinations} onChange={change} />
         </div>
         <div id="pb-variants" className="jk-builder-group">
         <ChoicesSection options={draft.options} templates={templates} categoryName={categoryName} limitError={limitError} onChange={changeOptions} />
         {combinations && <div id="pb-variant-list"><VariantsSection photos={draft.media ?? []} physical={draft.physical} custom={metafields} customContext={metafieldContext} media={taggingEnabled ? draft.media : undefined} options={draft.options} variants={draft.variants} currency={currency} onChange={(variants) => { setDraft((current) => ({ ...current, variants })); touch(); }} /></div>}
         </div>
-        <div id="pb-shipping"><ShippingSection draft={draft} errors={errors} hasCombinations={combinations} onChange={change} /></div>
+        <div id="pb-shipping"><ShippingSection draft={draft} errors={shownErrors} hasCombinations={combinations} onChange={change} /></div>
         <div id="pb-more" className="jk-builder-group">
           <div className="jk-builder-group-heading"><h2>More details</h2><p>Only add what your product needs.</p></div>
-        <AnimatedDetails className="jk-card jk-disclosure"><summary>Product specifications <span className="jk-muted">(optional)</span></summary><label className="admin-field mt-3">Specifications<textarea rows={4} maxLength={12000} value={draft.specificationsText??""} placeholder={"Material: Cotton\nCare: Machine wash cold"} onChange={event=>change("specificationsText",event.target.value)} /><small>One detail per line, for example Material: Cotton.</small></label></AnimatedDetails>
+        <AnimatedDetails className="jk-card jk-disclosure"><summary>Product specifications <span className="jk-muted">(optional)</span></summary><label className="jk-field mt-3">Specifications<textarea rows={4} maxLength={12000} value={draft.specificationsText??""} placeholder={"Material: Cotton\nCare: Machine wash cold"} onChange={event=>change("specificationsText",event.target.value)} /><small>One detail per line, for example Material: Cotton.</small></label></AnimatedDetails>
           <PersonalisationSection collapsible fields={draft.personalisation ?? []} onChange={(fields) => change("personalisation", fields)} />
           <QuantityRuleSection collapsible rule={draft.quantityRule ?? null} onChange={(rule) => change("quantityRule", rule)} />
 
 
         {api && <MetafieldsSection collapsible state={metafields} context={metafieldContext} />}
-        <SeoSection draft={draft} errors={errors} storeName={activeStore?.name ?? ""} storeSlug={activeStore?.slug ?? ""} saved={Boolean(productId) && draft.published} onChange={change} />
+        <SeoSection draft={draft} errors={shownErrors} storeName={activeStore?.name ?? ""} storeSlug={activeStore?.slug ?? ""} saved={Boolean(productId) && draft.published} onChange={change} />
 
         </div>
       </div>
 
-      <OrganizationSection category={<CategorySection
+      <OrganizationSection category={<><ReadinessCard readiness={productReadiness(draft)} /><CategorySection
           taxonomy={taxonomy}
           loading={taxonomyLoading}
           error={taxonomyError}
@@ -298,7 +326,7 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
             setTaxonomy((current) => current ? { ...current, categories: [...current.categories, created] } : current);
             return created;
           } : undefined}
-        />} key={productId??"new"} draft={draft} onChange={change} categories={categoryPaths} brands={storeId ? repository.getBrands?.(storeId) ?? [] : []}
+        /></>} key={productId??"new"} draft={draft} onChange={change} categories={categoryPaths} brands={storeId ? repository.getBrands?.(storeId) ?? [] : []}
         extra={productId && api && storeId ? <Card title="Online store"><TemplatePicker api={api} storeId={storeId} resourceType="product" resourceId={productId} /></Card> : undefined} />
       <div className={`jk-builder-bar ${dirty ? "is-dirty" : ""}`}>
         <div className="jk-builder-save-state"><span role="status">{saving ? "Saving product…" : dirty ? "Unsaved changes" : justSaved ? "All changes saved" : productId ? "No unsaved changes" : "New product"}</span><small>{draft.archived ? "Archived · hidden from customers" : draft.published ? "Active · visible when saved" : "Draft · hidden from customers"}</small></div>

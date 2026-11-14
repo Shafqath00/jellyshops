@@ -1,7 +1,7 @@
 "use client";
 import { MessageSquareText } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { AdminPage, ConfirmDialog, EmptyState, IndexTable, StatusBadge, useToast, type IndexColumn, type IndexTab } from "@/components/admin";
+import { AdminPage, ConfirmDialog, EmptyState, IndexTable, StatusBadge, useClientList, useToast, type IndexColumn, type IndexTab } from "@/components/admin";
 import { useAdminReviews, type MerchantReview, type ReviewStatus } from "@/features/admin/api/reviews-api";
 
 const STATUS_LABEL: Record<ReviewStatus, string> = { pending: "Waiting", published: "Published", hidden: "Hidden" };
@@ -39,6 +39,7 @@ export default function ReviewsPage() {
       setRevision((value) => value + 1);
     } catch (failure) { toast((failure as Error).message); }
   }, [setStatus, toast]);
+  const shown = useClientList(rows, { text: (row) => `${row.productTitle} ${row.authorName} ${row.authorEmail ?? ""} ${row.title ?? ""} ${row.body ?? ""}`, noun: ["review", "reviews"], searchLabel: "Search reviews" });
   const tabs: IndexTab[] = [
     { id: "pending", label: "Waiting", count: counts.pending },
     { id: "published", label: "Published", count: counts.published },
@@ -64,7 +65,9 @@ export default function ReviewsPage() {
   return <AdminPage title="Reviews" description="Reviews from shoppers wait here until you publish them. Only published reviews appear in your store.">
     <IndexTable
       label="Reviews"
-      rows={rows}
+      rows={shown.rows}
+      search={shown.search}
+      pagination={shown.pagination}
       rowKey={(row) => row.id}
       rowLabel={(row) => `Review from ${row.authorName}`}
       columns={columns}
@@ -78,7 +81,7 @@ export default function ReviewsPage() {
         { label: "Publish", onAction: (ids) => change(ids, "published") },
         { label: "Hide", onAction: (ids) => change(ids, "hidden") },
       ]}
-      emptyState={<EmptyState icon={MessageSquareText} title={tab === "pending" ? "No reviews waiting" : "No reviews here yet"} description="Add the Reviews section to your product page in the theme editor so shoppers can write reviews." />}
+      emptyState={shown.filtered ? <EmptyState icon={MessageSquareText} title="No matching reviews" description="Try another search, or another tab." /> : <EmptyState icon={MessageSquareText} title={tab === "pending" ? "No reviews waiting" : "No reviews here yet"} description="Add the Reviews section to your product page in the theme editor so shoppers can write reviews." />}
     />
     <ConfirmDialog
       open={Boolean(deleting)}

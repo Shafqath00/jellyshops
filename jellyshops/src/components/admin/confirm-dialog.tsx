@@ -1,6 +1,7 @@
 "use client";
 import { useState, type ReactNode } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { Button } from "./button";
 
 /** Asks before something that cannot be undone. Name the item and the consequence in `description`. */
 export function ConfirmDialog({ open, onOpenChange, title, description, confirmLabel, destructive = false, onConfirm, className = "", overlayClassName = "", onCloseAutoFocus }: {
@@ -24,7 +25,7 @@ export function ConfirmDialog({ open, onOpenChange, title, description, confirmL
         <div className="jk-dialog-body">{description}{error && <p className="jk-field-error" role="alert">{error}</p>}</div>
         <div className="jk-dialog-footer">
           <DialogPrimitive.Close asChild><button type="button" className="jk-button" disabled={busy}>Cancel</button></DialogPrimitive.Close>
-          <button type="button" className={`jk-button ${destructive ? "jk-button-critical-solid" : "jk-button-primary"}`} disabled={busy} onClick={() => void confirm()}>{busy ? "Working…" : confirmLabel}</button>
+          <Button variant={destructive ? "destructive" : "primary"} loading={busy} onClick={() => void confirm()}>{confirmLabel}</Button>
         </div>
       </DialogPrimitive.Content>
     </DialogPrimitive.Portal>

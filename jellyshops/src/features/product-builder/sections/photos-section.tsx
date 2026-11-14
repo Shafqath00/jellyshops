@@ -80,6 +80,7 @@ export function PhotosSection({ media, options, taggingEnabled, onChange, onUplo
   const [error, setError] = useState("");
 
   const [drag, setDrag] = useState<string>();
+  const [dropping, setDropping] = useState(false);
 
   const [editingPhoto, setEditingPhoto] = useState<string>();
 
@@ -127,7 +128,13 @@ export function PhotosSection({ media, options, taggingEnabled, onChange, onUplo
 
   }
 
-  function upload(files: FileList | null, replaceId?: string, assignment?: Record<string, string[]>) {
+  /** Photos dragged in from the computer. Anything that is not an image is left out, with a note. */
+  function dropFiles(files: FileList) {
+    const images = Array.from(files).filter((file) => file.type.startsWith("image/"));
+    if (images.length < files.length) setError(images.length ? "Only image files can be added. The other files were left out." : "Only image files can be added here, such as JPEG, PNG or WebP photos.");
+    if (images.length) upload(images);
+  }
+  function upload(files: FileList | File[] | null, replaceId?: string, assignment?: Record<string, string[]>) {
 
     if (!files) return;
 
@@ -209,11 +216,14 @@ export function PhotosSection({ media, options, taggingEnabled, onChange, onUplo
 
     <Section title="Photos" hint={`${media.length} of 30 · The first photo is your cover. You can reorder photos any time.`}>
 
-      <div className={media.length ? "flex flex-wrap gap-2" : "product-gallery flex flex-wrap justify-center"}>
+      <div className={`${media.length ? "flex flex-wrap gap-2" : "product-gallery flex flex-wrap justify-center"} jk-photo-drop ${dropping ? "is-dragging" : ""}`}
+        onDragOver={(event) => { if (onUpload && event.dataTransfer.types.includes("Files")) { event.preventDefault(); setDropping(true); } }}
+        onDragLeave={() => setDropping(false)}
+        onDrop={(event) => { if (!onUpload || !event.dataTransfer.files.length) return; event.preventDefault(); setDropping(false); dropFiles(event.dataTransfer.files); }}>
 
-        {media.length === 0 && <p className="w-full text-center text-sm">Add your first product photo<small>Use clear, well-lit images. Your first image becomes the cover.</small></p>}
+        {media.length === 0 && <p className="w-full text-center text-sm">Add your first product photo<small>Drag photos here from your computer, or choose them. Use clear, well-lit images; the first one becomes the cover.</small></p>}
 
-        {onUpload && <label className={`${button} cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90`}>Add photos<input className="sr-only" aria-label="Add product photos" type="file" accept="image/*" multiple onChange={(event) => { upload(event.target.files); event.target.value = ""; }} /></label>}
+        {onUpload && <label className={`${button} cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90`}>Add photos<input id="pb-photos" className="sr-only" aria-label="Add product photos" type="file" accept="image/*" multiple onChange={(event) => { upload(event.target.files); event.target.value = ""; }} /></label>}
 
         {onList && <button type="button" className={button} onClick={event => { drawerTrigger.current = event.currentTarget; void openLibrary(); }}>Choose from library</button>}
 
@@ -225,11 +235,11 @@ export function PhotosSection({ media, options, taggingEnabled, onChange, onUplo
 
       {selected.length > 0 && <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-muted/30 p-3 text-[12px]"><p className="font-semibold">{selected.length} selected</p><button type="button" className={button} onClick={() => { commit(media.filter((photo) => !selected.includes(photo.id))); setSelected([]); }}>Remove selected from product</button>{taggingEnabled && <AnimatedDetails><summary className="cursor-pointer font-semibold">Show selected for…</summary>{tags(selected)}<button type="button" className={button} onClick={() => commit(media.map((photo) => selected.includes(photo.id) ? { ...photo, appliesTo: {} } : photo))}>Show for everything</button></AnimatedDetails>}</div>}
 
-      <div className="admin-photo-grid">
+      <div className="jk-photo-grid">
 
         {media.map((photo, index) => (
 
-          <article key={photo.id} aria-label={index === 0 ? "Cover photo" : `Product photo ${index + 1}`} draggable onDragStart={() => setDrag(photo.id)} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); if (drag) move(drag, index); setDrag(undefined); }} className="admin-photo-tile">
+          <article key={photo.id} aria-label={index === 0 ? "Cover photo" : `Product photo ${index + 1}`} draggable onDragStart={() => setDrag(photo.id)} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); if (drag) move(drag, index); setDrag(undefined); }} className="jk-photo-tile">
 
             <label className="flex min-h-8 items-center gap-2 px-2 text-[13px] font-medium text-foreground"><input type="checkbox" checked={selected.includes(photo.id)} onChange={(event) => setSelected((ids) => event.target.checked ? [...ids, photo.id] : ids.filter((id) => id !== photo.id))} /><span className={index === 0 ? "rounded-md bg-accent px-2 py-1 text-[13px]" : "text-[13px] text-muted-foreground"}>{index === 0 ? "Cover photo" : `Photo ${index + 1}`}</span></label>
 

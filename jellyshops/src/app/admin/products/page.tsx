@@ -8,11 +8,23 @@ import { useAdminCatalog, type CatalogAdminProduct, type CatalogPage, type Colle
 
 import { ProductSurface } from "@/features/product-builder/product-surface";
 import { ProductRowActions } from "@/features/product-builder/product-row-actions";
+import { useProductBulkApi } from "@/features/product-bulk/api";
+import { BULK_EDIT_MAX, BulkEditDialog } from "@/features/product-bulk/bulk-edit-dialog";
+import { ExportDialog } from "@/features/product-bulk/export-dialog";
 
 type ProductStatus = CatalogAdminProduct["status"];
 const TABS: IndexTab[] = [{ id: "", label: "All" }, { id: "ACTIVE", label: "Active" }, { id: "DRAFT", label: "Draft" }, { id: "ARCHIVED", label: "Archived" }];
 const SORTS = [{ value: "title-asc", label: "Name A–Z" }, { value: "newest", label: "Newest first" }, { value: "price-asc", label: "Price, low to high" }, { value: "price-desc", label: "Price, high to low" }];
 const STATUS_WORDS: Record<ProductStatus, string> = { ACTIVE: "active", DRAFT: "draft", ARCHIVED: "archived" };
+type Facets = { productTypes: string[]; vendors: string[]; tags: string[] };
+type Filters = { productType: string; vendor: string; tag: string; collectionId: string; available: string };
+const NO_FILTERS: Filters = { productType: "", vendor: "", tag: "", collectionId: "", available: "" };
+
+/** One filter dropdown; left out when the store has nothing to choose from. */
+function FilterSelect({ label, all, value, options, onChange }: { label: string; all: string; value: string; options: Array<{ value: string; label: string }>; onChange: (value: string) => void }) {
+  if (!options.length) return null;
+  return <label><span className="sr-only">{label}</span><select className="jk-select" value={value} onChange={(event) => onChange(event.target.value)}><option value="">{all}</option>{options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>;
+}
 
 /** "40 in stock for 4 variants", or "Not tracked" when no variant counts stock. */
 function stockSummary(product: CatalogAdminProduct) {
@@ -31,6 +43,13 @@ export default function ProductsPage() {
   const [rowBusy, setRowBusy] = useState("");
   const [rowError, setRowError] = useState("");
   const [archiveTarget, setArchiveTarget] = useState<CatalogAdminProduct | null>(null);
+  const [archiveMany, setArchiveMany] = useState<string[] | null>(null);
+  const bulkApi = useProductBulkApi();
+  /** null = closed; an empty list = opened from the page header (no rows ticked). */
+  const [exporting, setExporting] = useState<string[] | null>(null);
+  const [editing, setEditing] = useState<string[] | null>(null);
+  const [filters, setFilters] = useState<Filters>(NO_FILTERS);
+  const [facets, setFacets] = useState<Facets>({ productTypes: [], vendors: [], tags: [] });
   const returnFocus = useRef<HTMLElement | null>(null);
   const rememberFocus = (product?: CatalogAdminProduct) => {
     returnFocus.current = product
@@ -59,14 +78,44 @@ export default function ProductsPage() {
     if (search.trim()) params.set("query", search.trim());
     if (status) params.set("status", status);
     if (cursor) params.set("cursor", cursor);
+    for (const [key, value] of Object.entries(filters)) if (value) params.set(key, value);
     void request<CatalogPage<CatalogAdminProduct>>("/products?" + params)
       .then((page) => { if (active) { setRows(page.nodes); setNext(page.nextCursor); setError(""); } })
       .catch((failure: Error) => { if (active) setError(failure.message); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [request, ready, storeId, search, status, sort, cursor, revision]);
+  }, [request, ready, storeId, search, status, sort, cursor, revision, filters]);
+  // What the filters can offer. A backend without the lookup, or a failed request, just leaves those filters out.
+  useEffect(() => {
+    let active = true;
+    if (!ready) return;
+    void Promise.resolve(request<Facets>("/products/facets")).then((found) => { if (active && Array.isArray(found?.productTypes) && Array.isArray(found.vendors) && Array.isArray(found.tags)) setFacets(found); }).catch(() => undefined);
+    void Promise.resolve(all<CollectionRow>("/collections")).then((rows) => { if (active && Array.isArray(rows)) setCollections(rows); }).catch(() => undefined);
+    return () => { active = false; };
+  }, [request, all, ready, storeId, revision]);
   const reset = () => { setCursor(null); setHistory([]); };
-  const money = (minor: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: activeStore?.currency ?? "GBP" }).format(minor / 100);
+  /** Every product the list would show across all its pages, for a bulk edit of "everything that matches". */
+  const loadAllMatching = useCallback(async () => {
+    const found: CatalogAdminProduct[] = [];
+    let next: string | null = null;
+    do {
+      const params = new URLSearchParams({ limit: "100", sort });
+      if (search.trim()) params.set("query", search.trim());
+      if (status) params.set("status", status);
+      if (next) params.set("cursor", next);
+      for (const [key, value] of Object.entries(filters)) if (value) params.set(key, value);
+      const page: CatalogPage<CatalogAdminProduct> = await request<CatalogPage<CatalogAdminProduct>>("/products?" + params);
+      found.push(...page.nodes);
+      next = page.nextCursor;
+    } while (next && found.length < BULK_EDIT_MAX);
+    return { products: found.slice(0, BULK_EDIT_MAX), more: Boolean(next) || found.length > BULK_EDIT_MAX };
+  }, [request, sort, search, status, filters]);
+  const filter = (key: keyof Filters, value: string) => { setFilters((current) => ({ ...current, [key]: value })); reset(); };
+  const filterCount = Object.values(filters).filter(Boolean).length;
+  const words = (values: string[]) => values.map((value) => ({ value, label: value }));
+  const currency = activeStore?.currency ?? "GBP";
+  const money = useCallback((minor: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency }).format(minor / 100), [currency]);
+  const saveProduct = useCallback((productId: string, body: Record<string, unknown>) => request(`/products/${encodeURIComponent(productId)}`, { method: "PATCH", body: JSON.stringify(body) }), [request]);
   async function setStatusFor(ids: string[], value: ProductStatus) {
     const results = await Promise.allSettled(ids.map((id) => request(`/products/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify({ status: value }) })));
     const failed = results.filter((result) => result.status === "rejected").length;
@@ -98,8 +147,10 @@ export default function ProductsPage() {
     { id: "vendor", header: "Brand or supplier", mobile: "hidden", cell: (product) => product.vendor || <span className="jk-muted">None</span> },
     { id: "actions", header: "Actions", align: "end", cell: product => <ProductRowActions product={product} busy={rowBusy === product.id} onStatus={status => void rowStatus(product, status)} onArchive={() => { rememberFocus(product); setArchiveTarget(product); }} onCollection={() => { rememberFocus(product); setCollectionFor([product.id]); }} /> },
   ];
-  const filtered = Boolean(search || status);
-  return <ProductSurface><AdminPage title="Products" description="Manage your products, pricing, and availability." primaryAction={{ label: "Add product", href: "/admin/products/new" }}>
+  const filtered = Boolean(search || status || filterCount);
+  return <ProductSurface><AdminPage title="Products" description="Manage your products, pricing, and availability." primaryAction={{ label: "Add product", href: "/admin/products/new" }}
+    secondaryActions={[{ label: "Import", href: "/admin/products/import" }, { label: "Export", onAction: () => { rememberFocus(); setExporting([]); } }]}
+    moreActions={[{ label: "Add photos in bulk", href: "/admin/products/photos" }]}>
     {rowError && <Banner tone="critical" title="Product not updated" onDismiss={() => setRowError("")}>{rowError}</Banner>}
     <IndexTable
       label="Products"
@@ -114,16 +165,26 @@ export default function ProductsPage() {
       activeTab={status}
       onTabChange={(value) => { setStatus(value); reset(); }}
       search={{ value: query, onChange: setQuery, label: "Search products", placeholder: "Search by name or SKU", onSubmit: () => { setSearch(query); reset(); } }}
-      filters={<label><span className="sr-only">Sort products</span><select className="jk-select" value={sort} onChange={(event) => { setSort(event.target.value); reset(); }}>{SORTS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>}
+      filters={<>
+        <FilterSelect label="Filter by type" all="All types" value={filters.productType} options={words(facets.productTypes)} onChange={(value) => filter("productType", value)} />
+        <FilterSelect label="Filter by brand or supplier" all="All brands" value={filters.vendor} options={words(facets.vendors)} onChange={(value) => filter("vendor", value)} />
+        <FilterSelect label="Filter by collection" all="All collections" value={filters.collectionId} options={collections.map((row) => ({ value: row.id, label: row.title }))} onChange={(value) => filter("collectionId", value)} />
+        <FilterSelect label="Filter by tag" all="All tags" value={filters.tag} options={words(facets.tags)} onChange={(value) => filter("tag", value)} />
+        <FilterSelect label="Filter by stock" all="Any stock" value={filters.available} options={[{ value: "true", label: "In stock" }, { value: "false", label: "Out of stock" }]} onChange={(value) => filter("available", value)} />
+        {filterCount > 0 && <button type="button" className="jk-button jk-button-plain" onClick={() => { setFilters(NO_FILTERS); reset(); }}>Clear filters</button>}
+        <label><span className="sr-only">Sort products</span><select className="jk-select" value={sort} onChange={(event) => { setSort(event.target.value); reset(); }}>{SORTS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
+      </>}
       bulkActions={[
+        { label: "Bulk edit", onAction: (ids) => { rememberFocus(); setEditing(ids); } },
+        { label: "Export", onAction: (ids) => { rememberFocus(); setExporting(ids); } },
         { label: "Set as active", onAction: (ids) => setStatusFor(ids, "ACTIVE") },
         { label: "Set as draft", onAction: (ids) => setStatusFor(ids, "DRAFT") },
-        { label: "Archive", onAction: (ids) => setStatusFor(ids, "ARCHIVED") },
+        { label: "Archive", destructive: true, onAction: (ids) => { rememberFocus(); setArchiveMany(ids); } },
         { label: "Add to collection", onAction: (ids) => { rememberFocus(); setCollectionFor(ids); } },
       ]}
       emptyState={filtered
-        ? <EmptyState icon={Package} title="No matching products" description="Try another search, or choose All to see every product." />
-        : <EmptyState icon={Package} title="Add your first product" description="Give customers something to discover in your store. You can add photos, prices and sizes in one place." action={<Link href="/admin/products/new" className="jk-button jk-button-primary">Add product</Link>} />}
+        ? <EmptyState icon={Package} title="No matching products" description="Try another search, clear the filters, or choose All to see every product." action={filterCount > 0 ? <button type="button" className="jk-button" onClick={() => { setFilters(NO_FILTERS); reset(); }}>Clear filters</button> : undefined} />
+        : <EmptyState icon={Package} title="Add your first product" description="Give customers something to discover in your store. Add them one at a time, or bring a whole list in from a spreadsheet." action={<Link href="/admin/products/new" className="jk-button jk-button-primary">Add product</Link>} secondaryAction={<Link href="/admin/products/import" className="jk-button">Import from a spreadsheet</Link>} />}
       pagination={{
         hasPrevious: history.length > 0,
         hasNext: Boolean(next),
@@ -132,6 +193,9 @@ export default function ProductsPage() {
       }}
     />
     <ConfirmDialog open={Boolean(archiveTarget)} onOpenChange={open => { if (!open) setArchiveTarget(null); }} title={`Archive ${archiveTarget?.title ?? "product"}?`} description="This product will be hidden from your store. You can make it active again later." confirmLabel="Archive product" destructive className="product-overlay" overlayClassName="product-backdrop" onCloseAutoFocus={restoreFocus} onConfirm={async () => { if (archiveTarget) await setStatusFor([archiveTarget.id], "ARCHIVED"); }} />
+    <ConfirmDialog open={Boolean(archiveMany)} onOpenChange={open => { if (!open) setArchiveMany(null); }} title={`Archive ${archiveMany?.length ?? 0} ${archiveMany?.length === 1 ? "product" : "products"}?`} description="They will be hidden from your store. You can make them active again later from the Archived tab." confirmLabel="Archive products" destructive className="product-overlay" overlayClassName="product-backdrop" onCloseAutoFocus={restoreFocus} onConfirm={async () => { if (archiveMany) await setStatusFor(archiveMany, "ARCHIVED"); }} />
+    <ExportDialog open={exporting !== null} onOpenChange={(open) => { if (!open) setExporting(null); }} api={bulkApi} selectedIds={exporting ?? []} filters={{ query: search.trim(), status, ...filters }} className="product-overlay" overlayClassName="product-backdrop" />
+    {editing !== null && <BulkEditDialog open onOpenChange={(open) => { if (!open) setEditing(null); }} products={rows.filter((product) => editing.includes(product.id))} collections={collections.map((row) => ({ id: row.id, title: row.title }))} money={money} save={saveProduct} loadAllMatching={loadAllMatching} onDone={() => setRevision((n) => n + 1)} className="product-overlay" overlayClassName="product-backdrop" />}
     <Picker className="product-overlay" overlayClassName="product-backdrop" onCloseAutoFocus={restoreFocus} open={collectionFor !== null} onOpenChange={(open) => { if (!open) setCollectionFor(null); }} title="Add to collection" searchLabel="Search collections" multiple={false} doneLabel="Add products"
       load={loadCollections} onDone={(picked) => { const ids = collectionFor ?? []; if (picked[0]) void addToCollection(ids, picked[0].id); }} />
   </AdminPage></ProductSurface>;
