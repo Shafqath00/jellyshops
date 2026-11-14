@@ -82,16 +82,19 @@ The title names the thing ("Delete Linen Tote Bag?"). The description says what 
 
 ## Tokens (in `admin-kit.css`)
 
+The full Jelly design system (palette, type, layout, states) is in `docs/redesign/DESIGN_SYSTEM.md`.
+
 Pages and components never write a colour, a font size in px, or a z-index. Use:
 
 | Group | Tokens |
 | --- | --- |
-| Surfaces and text | `--jk-surface`, `-subdued`, `-hover`, `-selected`, `--jk-bg`, `--jk-border`, `--jk-border-strong`, `--jk-text`, `--jk-text-subdued` |
-| Actions and brand | `--jk-accent`, `--jk-accent-text`, `--jk-brand`, `--jk-brand-soft`, `--jk-brand-strong` |
+| Surfaces and text | `--jk-page` (stone), `--jk-bg` (canvas), `--jk-surface`, `-subdued`, `-hover`, `-selected`, `--jk-border`, `--jk-border-strong`, `--jk-control-border` (inputs), `--jk-text`, `--jk-text-subdued` |
+| Actions and brand | `--jk-accent` (Jelly blue), `--jk-accent-hover`, `--jk-accent-text`, `--jk-lime` / `--jk-brand` (highlight, ink text on it), `--jk-ink`, `--jk-brand-soft`, `--jk-brand-strong` |
+| Icon tiles and washes | `--jk-tone-{lime,blue,pink,peach,violet,mint}-{bg,fg}`, `--jk-wash-{lime,blue,pink,peach}` (summary tiles and the welcome card only) |
 | Tones | `--jk-{info,success,warning,attention,critical,neutral}-{bg,text,dot}`, `--jk-on-critical`, `--jk-positive`, `--jk-negative` |
-| Space | `--jk-space-1` (4px) to `--jk-space-8` (32px) |
-| Type | `--jk-text-xs` (12px) to `--jk-text-3xl` (28px); weights 400, 550, 650 |
-| Shape | `--jk-radius-sm` (8px, controls), `--jk-radius` (12px, cards), `--jk-radius-lg`, `--jk-shadow`, `--jk-shadow-raised` |
+| Space | `--jk-space-1` (4px) to `--jk-space-10` (40px) |
+| Type | `--jk-text-xs` (12px) to `--jk-text-3xl` (30px); weights 400, 550, 650, 680; `--jk-tracking-tight`, `--jk-tracking-label` |
+| Shape | `--jk-radius-sm` (10px), inputs 12px, `--jk-radius` (16px, cards), `--jk-radius-lg` (24px, canvas), `--jk-radius-pill` (buttons, tabs, chips), `--jk-shadow`, `--jk-shadow-raised` |
 | Focus | `outline: var(--jk-focus-ring)` on anything focusable that is not a native control inside `Field` |
 | Motion | `--jk-motion-fast` (120ms), `--jk-motion` (180ms), `--jk-ease`; switch movement off under `prefers-reduced-motion` |
 | Stacking | `--jk-z-sticky`, `--jk-z-dropdown`, `--jk-z-overlay`, `--jk-z-dialog`, `--jk-z-toast` |
