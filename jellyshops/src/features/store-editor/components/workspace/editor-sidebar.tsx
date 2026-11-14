@@ -16,9 +16,9 @@ export function EditorSidebar({ ctx }: { ctx: EditorViewContext }) {
         <section
           className={clsx(
             "min-h-0 overflow-hidden rounded-xl border border-border bg-card",
-            mobilePanel !== "sections" && "hidden",
+            mobilePanel !== "sections" && "hidden lg:block",
             desktopSidebarOpen
-              ? "lg:col-start-1 lg:row-start-1 lg:border-r lg:border-b-0"
+              ? "lg:col-start-1 lg:row-start-1"
               : "lg:hidden",
           )}
           aria-label="Page structure"

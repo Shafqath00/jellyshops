@@ -27,9 +27,10 @@ export function EditorWorkspaceView({ ctx }: { ctx: EditorViewContext }) {
       <div
         className={clsx(
           "grid min-h-0 flex-1 grid-cols-1 grid-rows-1 gap-1 bg-muted/50 p-1",
+          // Desktop: page outline | live preview | settings of the selection, all visible together.
           desktopSidebarOpen
-              ? "lg:grid-cols-[300px_minmax(0,1fr)] lg:grid-rows-1"
-            : "lg:grid-cols-[minmax(0,1fr)] lg:grid-rows-1",
+              ? "lg:grid-cols-[264px_minmax(0,1fr)_316px] xl:grid-cols-[280px_minmax(0,1fr)_340px] lg:grid-rows-1"
+            : "lg:grid-cols-[minmax(0,1fr)_316px] xl:grid-cols-[minmax(0,1fr)_340px] lg:grid-rows-1",
         )}
         inert={isConverting || isPublishing}
         aria-busy={isConverting || isPublishing}
@@ -41,10 +42,8 @@ export function EditorWorkspaceView({ ctx }: { ctx: EditorViewContext }) {
         <aside
           className={clsx(
             "min-h-0 overflow-y-auto rounded-xl border border-border bg-card",
-            mobilePanel !== "settings" && "hidden",
-            desktopSidebarOpen
-              ? "lg:col-start-1 lg:row-start-1 lg:border-r lg:border-[var(--line)]"
-              : "lg:hidden",
+            mobilePanel !== "settings" && "hidden lg:block",
+            desktopSidebarOpen ? "lg:col-start-3 lg:row-start-1" : "lg:col-start-2 lg:row-start-1",
           )}
           aria-label="Section settings"
         >

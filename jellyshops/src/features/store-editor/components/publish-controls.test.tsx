@@ -120,10 +120,10 @@ it("does not publish when pending draft saves fail", async () => {
   expect(publish).not.toHaveBeenCalled();
 });
 
-it("keeps publish accessible from the compact save menu", async () => {
+it("shows Publish as the main button and keeps Save now in More actions", async () => {
   const publish = vi.fn().mockResolvedValue({ ok: true, diagnostics: [] });
   render(<PublishControls compact onSaveDraft={vi.fn()} generation={7} diagnostics={[]} validate={vi.fn()} compilePreview={vi.fn()} publish={publish} refreshWorkspace={vi.fn()} onDiagnostics={vi.fn()} onPreview={vi.fn()} onGeneration={vi.fn()} />);
-  await userEvent.click(screen.getByLabelText("Publishing options"));
+  expect(screen.getByRole("button", { name: "Save now" })).toBeInTheDocument();
   await userEvent.click(screen.getByRole("button", { name: "Publish" }));
   expect(publish).toHaveBeenCalledOnce();
 });

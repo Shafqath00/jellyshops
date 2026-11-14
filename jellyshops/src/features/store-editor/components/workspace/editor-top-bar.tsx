@@ -114,7 +114,7 @@ export function EditorTopBar({ ctx }: { ctx: EditorViewContext }) {
               invalidatePreview();
             }}
           /></div>}
-        actions={<><span role="status" className="flex items-center gap-1.5 px-1 text-[11px] text-muted-foreground"><span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${saveState === "error" ? "bg-destructive" : saveState === "saving" ? "bg-muted-foreground/50" : "bg-emerald-500"}`} /><span className="sr-only md:not-sr-only md:max-w-24 md:truncate">{saveState === "saving" ? "Saving…" : saveState === "error" ? "Not saved" : "Saved"}</span></span>          <PublishControls
+        actions={<><span role="status" className="flex items-center gap-1.5 px-1 text-[11px] text-muted-foreground"><span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${saveState === "error" ? "bg-destructive" : saveState === "saving" ? "bg-muted-foreground/50" : "bg-emerald-500"}`} /><span className="sr-only md:not-sr-only md:whitespace-nowrap">{saveState === "saving" ? "Saving…" : saveState === "error" ? "Not saved" : "All changes saved"}</span></span>          <PublishControls
             compact
             mobileActions={[
               { label: "Sections", action: () => { setSelection(null); setActiveGlobalId(undefined); setMobilePanel("sections"); } },
