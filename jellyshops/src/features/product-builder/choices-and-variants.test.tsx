@@ -403,8 +403,9 @@ describe("ProductBuilder editing", () => {
     render(<ShopProvider><ProductBuilder initial={product} /></ShopProvider>);
     expect(screen.getByLabelText(/product name/i)).toHaveValue("Mug");
     expect(screen.getByLabelText(/^price/i)).toHaveValue("250.00");
-    expect(screen.getByRole("button", { name: /save changes/i })).toBeVisible();
+    expect(screen.queryByRole("button", { name: /save changes/i })).not.toBeInTheDocument();
     await user.type(screen.getByLabelText(/product name/i), "s");
+    expect(screen.getByRole("button", { name: /save changes/i })).toBeVisible();
     await user.click(screen.getByRole("button", { name: /save changes/i }));
     await waitFor(() => expect(productCalls(fetchMock)).toHaveLength(1));
     const [call] = productCalls(fetchMock);

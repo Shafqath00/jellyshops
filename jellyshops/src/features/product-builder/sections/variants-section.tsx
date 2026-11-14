@@ -110,7 +110,7 @@ export function VariantsSection({ options, variants, currency, onChange, media, 
 
   if (axes.length === 0) return null;
   return (
-    <Section title="Variants" hint={`${variants.length} ${variants.length === 1 ? "combination" : "combinations"}, made from your choices. Set each price, stock and SKU, with an optional original price. Open Details for photo, barcode, cost, weight and more, or stop selling a combination.`}>
+    <Section title="Variants" description={`${variants.length} ${variants.length === 1 ? "combination" : "combinations"}, made from your choices.`} hint="Set each price, stock and SKU, with an optional original price. Open Details for photo, barcode, cost, weight and more, or stop selling a combination.">
       <div className="product-variants relative overflow-x-auto rounded-xl border border-border/80 bg-card">
         <table className="w-full min-w-[680px] text-left text-[12px]">
           <thead className="bg-muted/65 text-[13px] font-semibold text-muted-foreground">

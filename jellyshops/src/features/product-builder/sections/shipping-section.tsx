@@ -22,7 +22,7 @@ export function ShippingSection({ draft, errors, hasCombinations, onChange }: Pr
   const set = (patch: Partial<ShippingDraft>) => onChange("shipping", { ...shipping, ...patch });
 
   return (
-    <Section title="Shipping" hint="Saved with every order, for packing and customs forms. Shoppers pay your store's flat shipping rate.">
+    <Section collapsible forceOpen={Boolean(errors.weight || errors.dimensions || errors.hsCode)} title="Shipping" summary={draft.physical ? "Physical product. Weight, size and customs details." : "Not shipped (digital or service)."} hint="Saved with every order, for packing and customs forms. Shoppers pay your store's flat shipping rate.">
       <label className="flex items-center gap-2 text-[13px] font-medium">
         <input type="checkbox" checked={draft.physical} onChange={(event) => onChange("physical", event.target.checked)} />
         This is a physical product that needs shipping

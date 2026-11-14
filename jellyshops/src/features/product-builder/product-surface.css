@@ -141,3 +141,14 @@ html.admin-dark :is(.product-surface,.product-overlay) {color-scheme:dark}
   :is(.product-surface,.product-overlay) .jk-button:active:not(:disabled){transform:none}
 }
 @media(max-width:767px){.product-surface .jk-builder-bar{border-radius:20px}}
+/* Declutter pass: field hints show while the field is in use; card help sits behind an (i) tip. */
+.product-surface .jk-hint-on-focus {display:none}
+.product-surface .jk-pb-field:focus-within .jk-hint-on-focus {display:block}
+.product-surface .jk-card-header .jk-title-row {gap:6px}
+.product-surface .jk-builder-main {gap:20px}
+.product-surface .jk-builder-group-heading {padding-top:12px}
+.product-surface .jk-builder-group-heading h2 {font-size:13px;font-weight:600;letter-spacing:var(--jk-tracking-label);text-transform:uppercase;color:var(--jk-text-subdued)}
+.product-surface .jk-optional-section > summary {gap:12px}
+.product-surface .jk-optional-section > summary p {margin-top:2px;font-size:13px;color:var(--jk-text-subdued)}
+.product-surface .jk-checklist li.is-done {display:none}
+.product-surface .jk-field-kind:not(.is-required) {display:none}

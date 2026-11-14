@@ -2,7 +2,7 @@
 
 import { AnimatedDetails } from "./animated-details";
 import Link from "next/link";
-import { Banner, Card, StatusBadge } from "@/components/admin";
+import { Banner, Card, MoreActions, StatusBadge } from "@/components/admin";
 import { TemplatePicker } from "@/features/store-editor/components/template-picker";
 import { Sheet, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { OrganizationSection } from "./sections/organization-section";
@@ -259,18 +259,16 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
         <div className="jk-page-title">
           <Link href="/admin/products" className="jk-back" aria-label="Back to products"><ArrowLeft size={16} aria-hidden="true" /></Link>
           <div className="min-w-0"><div className="jk-title-row"><h1>{productId ? draft.title || "Edit product" : "Add product"}</h1>
-            {productId && <StatusBadge kind="product" value={draft.archived ? "ARCHIVED" : draft.published ? "ACTIVE" : "DRAFT"} />}</div><p className="jk-builder-subtitle">{productId ? "Manage product details, media, and availability." : "Start with a name and price. Add optional details anytime."}</p></div>
+            {productId && <StatusBadge kind="product" value={draft.archived ? "ARCHIVED" : draft.published ? "ACTIVE" : "DRAFT"} />}</div>{!productId && <p className="jk-builder-subtitle">Start with a name and price. Everything else is optional.</p>}</div>
         </div>
         <div className="jk-page-actions">
           <button type="button" className="jk-button" ref={previewTrigger} onClick={() => setPreviewOpen(true)}><Eye size={15} aria-hidden="true" />Preview</button>
-          {productId && <button type="button" className="jk-button" disabled={saving || dirty} title={dirty ? "Save your changes first" : undefined} onClick={() => void duplicate()}>Duplicate</button>}
-          {productId && !draft.archived && <button type="button" className="jk-button" disabled={saving} onClick={() => void archive()}>Archive</button>}
-          {productId && draft.archived && <button type="button" className="jk-button" disabled={saving} onClick={() => void restore()}>Restore</button>}
+          {productId && <MoreActions actions={[
+            { label: dirty ? "Duplicate (save first)" : "Duplicate", disabled: saving || dirty, onAction: () => void duplicate() },
+            draft.archived ? { label: "Restore", disabled: saving, onAction: () => void restore() } : { label: "Archive", destructive: true, disabled: saving, onAction: () => void archive() },
+          ]} />}
         </div>
       </header>
-      <nav className="jk-builder-nav" aria-label="Product sections">
-        <a href="#pb-details">Details & photos</a><a href="#pb-selling">Pricing & inventory</a><a href="#pb-variants">Options & variants</a><a href="#pb-shipping">Shipping</a><a href="#pb-more">More details</a><a href="#pb-organization">Organization</a>
-      </nav>
       <div className="jk-builder-main">
         {justSaved && (
           <Banner tone="success" title="Product saved successfully">
@@ -303,8 +301,8 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
         </div>
         <div id="pb-shipping"><ShippingSection draft={draft} errors={shownErrors} hasCombinations={combinations} onChange={change} /></div>
         <div id="pb-more" className="jk-builder-group">
-          <div className="jk-builder-group-heading"><h2>More details</h2><p>Only add what your product needs.</p></div>
-        <AnimatedDetails className="jk-card jk-disclosure"><summary>Product specifications <span className="jk-muted">(optional)</span></summary><label className="jk-field mt-3">Specifications<textarea rows={4} maxLength={12000} value={draft.specificationsText??""} placeholder={"Material: Cotton\nCare: Machine wash cold"} onChange={event=>change("specificationsText",event.target.value)} /><small>One detail per line, for example Material: Cotton.</small></label></AnimatedDetails>
+          <div className="jk-builder-group-heading"><h2>More options</h2></div>
+        <AnimatedDetails className="jk-card jk-disclosure"><summary>Product specifications</summary><label className="jk-field mt-3">Specifications<textarea rows={4} maxLength={12000} value={draft.specificationsText??""} placeholder={"Material: Cotton\nCare: Machine wash cold"} onChange={event=>change("specificationsText",event.target.value)} /><small>One detail per line, for example Material: Cotton.</small></label></AnimatedDetails>
           <PersonalisationSection collapsible fields={draft.personalisation ?? []} onChange={(fields) => change("personalisation", fields)} />
           <QuantityRuleSection collapsible rule={draft.quantityRule ?? null} onChange={(rule) => change("quantityRule", rule)} />
 
@@ -328,7 +326,7 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
           } : undefined}
         /></>} key={productId??"new"} draft={draft} onChange={change} categories={categoryPaths} brands={storeId ? repository.getBrands?.(storeId) ?? [] : []}
         extra={productId && api && storeId ? <Card title="Online store"><TemplatePicker api={api} storeId={storeId} resourceType="product" resourceId={productId} /></Card> : undefined} />
-      <div className={`jk-builder-bar ${dirty ? "is-dirty" : ""}`}>
+      {(!productId || dirty || saving || (!draft.published && !draft.archived)) && <div className={`jk-builder-bar ${dirty ? "is-dirty" : ""}`}>
         <div className="jk-builder-save-state"><span role="status">{saving ? "Saving product…" : dirty ? "Unsaved changes" : justSaved ? "All changes saved" : productId ? "No unsaved changes" : "New product"}</span><small>{draft.archived ? "Archived · hidden from customers" : draft.published ? "Active · visible when saved" : "Draft · hidden from customers"}</small></div>
         <div className="jk-builder-save-actions">
           {dirty && <button type="button" className="jk-button" disabled={saving || uploading} onClick={discard}>Discard</button>}
@@ -339,7 +337,7 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
             {canPublish ? "Publish product" : "Save changes"}
           </button>
         </div>
-      </div>
+      </div>}
       <Sheet open={previewOpen} onOpenChange={setPreviewOpen}><ProductSheetContent onCloseAutoFocus={event => { event.preventDefault(); previewTrigger.current?.focus(); }} className="jk-sheet overflow-y-auto">
         <SheetTitle>Shopper preview</SheetTitle><SheetDescription className="jk-muted">Try the options. Nothing is ordered.</SheetDescription>
         <BuyerPreview mediaEnabled={taggingEnabled} draft={draft} currency={currency} categoryLabel={category?.label} />

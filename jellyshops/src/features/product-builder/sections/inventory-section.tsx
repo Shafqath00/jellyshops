@@ -16,7 +16,7 @@ type Props = {
 };
 
 export function InventorySection({ draft, errors, hasCombinations, onChange }: Props) {
-  const [codesOpen, setCodesOpen] = useState(Boolean(draft.sku.trim() || draft.barcode.trim()));
+  const [codesOpen, setCodesOpen] = useState(Boolean(draft.sku.trim() || draft.barcode.trim() || draft.lowStockThreshold.trim()));
   const stock = /^\d{1,9}$/.test(draft.stock.trim()) ? Number(draft.stock.trim()) : 0;
   const threshold = /^\d{1,7}$/.test(draft.lowStockThreshold.trim()) ? Number(draft.lowStockThreshold.trim()) : null;
   const status = stockStatusOf(true, stock, 0, threshold);
@@ -31,12 +31,9 @@ export function InventorySection({ draft, errors, hasCombinations, onChange }: P
             </Field>
             <div><p className="jk-label">Stock status</p><div className="mt-2"><StatusBadge tone={status === "out" ? "critical" : STOCK_STATUS_TONE[status]}>{STOCK_STATUS_LABEL[status]}</StatusBadge></div></div>
           </div>
-          <Field id="pb-low-stock" label="Low stock warning at" error={errors.lowStockThreshold} hint={`Warn when this many or fewer are left. Leave blank to use ${DEFAULT_LOW_STOCK_THRESHOLD}.`}>
-            <input id="pb-low-stock" inputMode="numeric" className={inputClass} value={draft.lowStockThreshold} aria-invalid={Boolean(errors.lowStockThreshold)} aria-describedby={errors.lowStockThreshold ? "pb-low-stock-error" : undefined} placeholder={String(DEFAULT_LOW_STOCK_THRESHOLD)} onChange={event => onChange("lowStockThreshold", event.target.value)} />
-          </Field>
         </> : <p className="jk-section-hint">Stock is not counted. Customers can keep buying this product.</p>}
-        <AnimatedDetails className="jk-disclosure jk-inset-disclosure" open={codesOpen} onToggle={event => setCodesOpen(event.currentTarget.open)}>
-          <summary>SKU and barcode <span className="jk-field-kind">Optional</span></summary>
+        <AnimatedDetails className="jk-disclosure jk-inset-disclosure" open={codesOpen || Boolean(errors.sku || errors.barcode || errors.lowStockThreshold)} onToggle={event => setCodesOpen(event.currentTarget.open)}>
+          <summary>SKU, barcode and low stock warning</summary>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field id="pb-sku" label="Stock code (SKU)" hint="Your own code for this item, for example MUG-001. It is also how a spreadsheet import finds the item again." error={errors.sku}>
               <input id="pb-sku" className={inputClass} value={draft.sku} onChange={event => onChange("sku", event.target.value)} />
@@ -45,6 +42,9 @@ export function InventorySection({ draft, errors, hasCombinations, onChange }: P
               <input id="pb-barcode" className={inputClass} maxLength={80} value={draft.barcode} aria-invalid={Boolean(errors.barcode)} aria-describedby={errors.barcode ? "pb-barcode-error" : undefined} onChange={event => onChange("barcode", event.target.value)} />
             </Field>
           </div>
+          {draft.trackInventory !== false && <Field id="pb-low-stock" label="Low stock warning at" error={errors.lowStockThreshold} hint={`Warn when this many or fewer are left. Leave blank to use ${DEFAULT_LOW_STOCK_THRESHOLD}.`}>
+            <input id="pb-low-stock" inputMode="numeric" className={inputClass} value={draft.lowStockThreshold} aria-invalid={Boolean(errors.lowStockThreshold)} aria-describedby={errors.lowStockThreshold ? "pb-low-stock-error" : undefined} placeholder={String(DEFAULT_LOW_STOCK_THRESHOLD)} onChange={event => onChange("lowStockThreshold", event.target.value)} />
+          </Field>}
         </AnimatedDetails>
       </>}
     </Section>

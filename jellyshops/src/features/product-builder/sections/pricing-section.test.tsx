@@ -86,7 +86,7 @@ describe("barcode and low stock warning", () => {
 
   it("keeps the barcode with the optional details and opens them when one is saved", () => {
     render(<Harness initial={{ ...emptyDraft, price: "10", barcode: "5012345678900" }} />);
-    expect(screen.getByText("SKU and barcode").closest("details")).toHaveAttribute("open");
+    expect(screen.getByText("SKU, barcode and low stock warning").closest("details")).toHaveAttribute("open");
     expect(screen.getByLabelText(/^Barcode/)).toHaveValue("5012345678900");
   });
 

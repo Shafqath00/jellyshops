@@ -26,7 +26,7 @@ export function ChoicesSection({ options, templates, categoryName, limitError, o
   const update = (next: ProductOption) => onChange(options.map((option) => option.id === next.id ? next : option));
 
   return (
-    <div className="product-options"><Section title="Product options" hint="Add a size or colour when each version needs its own price or stock.">
+    <div className="product-options"><Section title="Product options" description={options.length === 0 ? "Add a size or colour when each version needs its own price or stock." : undefined}>
       {suggestions.length > 0 && (
         <div className="rounded-xl border border-accent/70 bg-accent/15 p-4">
           <p className="flex items-center gap-1.5 text-[13px] font-semibold text-foreground"><Sparkles size={14} />Suggested for {categoryName ?? "this category"}</p>

@@ -219,6 +219,7 @@ describe("ProductBuilder", () => {
     await user.click(screen.getByRole("button", { name: /publish product/i }));
     await screen.findByText(/Product saved successfully/);
     expect(window.location.pathname).toMatch(/^\/admin\/products\/(?!new)/);
+    await user.click(screen.getByRole("button", { name: "More actions" }));
     await user.click(screen.getByRole("button", { name: "Duplicate" }));
     expect(await screen.findByText("Copy saved as a draft.")).toBeVisible();
     const [, copy] = productCalls(fetchMock);
