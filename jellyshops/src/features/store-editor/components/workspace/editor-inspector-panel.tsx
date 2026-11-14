@@ -11,6 +11,7 @@ import { ThemeStylesPanel } from "@/features/store-editor/components/theme-style
 import { applyThemeStyle, listThemeStyles, resolveTheme } from "@jelly/storefront-themes";
 import { PublishDiagnostics } from "@/features/store-editor/components/publish-diagnostics";
 import { SectionLibrary } from "@/features/store-editor/components/section-library";
+import { blockIcon } from "@/features/store-editor/components/outline-parts";
 import { displayName } from "@/features/store-editor/editor-page-helpers";
 import { mobileKeys } from "@/features/store-editor/mobile-settings";
 import { MobileEditingNote } from "@/features/store-editor/components/mobile-editing-note";
@@ -108,7 +109,7 @@ export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
                 className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-[13px] font-medium hover:bg-[var(--paper)]"
               >
                 <span className="grid size-8 place-items-center rounded-lg border border-[var(--line)] text-[var(--ink)]">
-                  <Plus size={15} />
+                  {(() => { const Glyph = blockIcon(blockType); return <Glyph size={15} aria-hidden="true" />; })()}
                 </span>
                 {blockLabel(blockType)}
               </button>

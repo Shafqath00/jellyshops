@@ -1,10 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { LayoutPanelTop, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import type { SectionNode } from "@jelly/storefront-schema";
 import type { PresetThumbnail } from "@jelly/storefront-registry";
 import { PresetSketch } from "./preset-sketch";
+import { sectionIcon } from "./outline-parts";
+import { LIBRARY_CATEGORY_ORDER } from "../section-options";
 
 export interface SectionLibraryPreset {
   id: string;
@@ -20,6 +22,8 @@ export interface BuiltInSectionOption {
   description?: string;
   thumbnail?: PresetThumbnail;
 }
+
+const rank = (category: string) => { const index = LIBRARY_CATEGORY_ORDER.indexOf(category); return index < 0 ? LIBRARY_CATEGORY_ORDER.length - 1 : index; };
 
 export function SectionLibrary({
   presets,
@@ -42,7 +46,7 @@ export function SectionLibrary({
       ? builtIns.filter((item) => `${item.name} ${item.category} ${item.description ?? ""}`.toLowerCase().includes(normalized))
       : builtIns;
   }, [builtIns, query]);
-  const categories = useMemo(() => [...new Set(filtered.map((item) => item.category))], [filtered]);
+  const categories = useMemo(() => [...new Set(filtered.map((item) => item.category))].sort((a, b) => rank(a) - rank(b)), [filtered]);
 
   return (
     <section aria-label="Section library" className="min-h-0 bg-card">
@@ -78,7 +82,7 @@ export function SectionLibrary({
                 >
                   {item.thumbnail
                     ? <PresetSketch kind={item.thumbnail} />
-                    : <span className="grid size-8 shrink-0 place-items-center rounded-lg border border-border bg-muted/50 text-muted-foreground"><LayoutPanelTop size={16} /></span>}
+                    : (() => { const Glyph = sectionIcon(item.id); return <span className="grid h-10 w-14 shrink-0 place-items-center rounded-lg border border-border bg-muted/50 text-muted-foreground"><Glyph size={16} aria-hidden="true" /></span>; })()}
                   <span className="min-w-0 py-1.5">
                     <span className="block truncate">{item.name}</span>
                     {item.description && <span className="block truncate text-[11px] font-normal text-muted-foreground">{item.description}</span>}
