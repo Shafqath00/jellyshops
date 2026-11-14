@@ -550,7 +550,7 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
               <div className="min-w-0 flex-1">
                 <h3 className="text-sm font-semibold">{item.productTitleSnapshot ?? item.titleSnapshot}</h3>
                 {item.variantTitleSnapshot && <p className="text-xs text-muted-foreground">{item.variantTitleSnapshot}</p>}
-                <p className="mt-1 text-xs text-muted-foreground">SKU {item.skuSnapshot ?? "Not recorded"} · {(item.fulfillmentType ?? item.fulfilmentType) === "DIGITAL" ? "Digital delivery" : "Physical item"}</p>
+                {(item.skuSnapshot || (item.fulfillmentType ?? item.fulfilmentType) === "DIGITAL") && <p className="mt-1 text-xs text-muted-foreground">{[item.skuSnapshot && `SKU ${item.skuSnapshot}`, (item.fulfillmentType ?? item.fulfilmentType) === "DIGITAL" && "Digital delivery"].filter(Boolean).join(" · ")}</p>}
                 {describeShipping(item.shippingSnapshot) && <p className="text-xs text-muted-foreground">{describeShipping(item.shippingSnapshot)}</p>}
                 {item.configurationSnapshot?.map(selection => <p className="text-xs text-muted-foreground" key={selection.optionId}>{selection.optionName}: {selection.valueLabel}</p>)}
                 <p className="mt-2 text-xs">{money(item.unitPriceMinor)} × {item.quantity}{item.discountMinor != null && ` · Discount ${money(item.discountMinor)}`}</p>
@@ -577,7 +577,7 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
               <span className="text-muted-foreground">{label}</span>
               <strong className="font-medium tabular-nums">{value}</strong>
             </div>)}
-            <p className="mt-3 break-all text-xs text-muted-foreground">Payment reference: {payment?.paymentIntentId ?? "Not recorded"}</p>
+            <details className="jk-side-more"><summary>Payment reference</summary><p className="mt-2 break-all text-xs text-muted-foreground">{payment?.paymentIntentId ?? "Not recorded"}</p></details>
             {detail.transactions?.map(transaction => <div className="mt-3 flex items-center justify-between text-sm" key={transaction.id}>
               <span>{orderLabel(transaction.kind)} {money(transaction.amountMinor)}</span>
               <OrderBadge value={transaction.status} />
@@ -642,21 +642,18 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
               <h2 className="font-semibold">Customer</h2>
               {canManage && <button type="button" className="jk-link" onClick={() => open("contact")}>Edit contact</button>}
             </div>
-            <p className="mt-4 text-sm">{String(order.customerSnapshot.name ?? "Not recorded")}</p>
+            <p className="mt-3 text-sm font-medium">{String(order.customerSnapshot.name ?? "Not recorded")}</p>
             <p className="mt-1 break-all text-xs text-muted-foreground">{String(order.customerSnapshot.email ?? "Not recorded")}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{String(order.customerSnapshot.phone ?? "Not recorded")}</p>
+            {Boolean(order.customerSnapshot.phone) && <p className="mt-1 text-xs text-muted-foreground">{String(order.customerSnapshot.phone)}</p>}
+            <Address inline title="Shipping address" value={(order.deliverySnapshot?.address ?? order.customerSnapshot.address) as Record<string, unknown> | undefined} />
+            <div className="jk-side-sub"><h3>Shipping method</h3><p>{String(order.deliverySnapshot?.method ?? order.deliverySnapshot?.shippingMethod ?? "Not recorded")}</p></div>
+            <details className="jk-side-more"><summary>Billing address</summary><Address inline title="Billing address" value={order.billingAddress} /></details>
           </section>
-          <section className={`${panel} p-5`}>
-            <h2 className="font-semibold">Shipping method</h2>
-            <p className="mt-3 text-sm text-muted-foreground">{String(order.deliverySnapshot?.method ?? order.deliverySnapshot?.shippingMethod ?? "Not recorded")}</p>
-          </section>
-          <Address title="Shipping address" value={(order.deliverySnapshot?.address ?? order.customerSnapshot.address) as Record<string, unknown> | undefined} />
-          <Address title="Billing address" value={order.billingAddress} />
           {canManage && accessToken && storeId && <OrderTags key={order.id} initial={order.tags ?? []} onSave={async (tags) => (await createAdminApi({ baseUrl: API_BASE_URL, token: accessToken }).setOrderTags(storeId, orderId, tags)).tags} />}
-          <section className={`${panel} p-5`}>
+          {order.customerNote ? <section className={`${panel} p-5`}>
             <h2 className="font-semibold">Customer note</h2>
-            <p className="mt-3 whitespace-pre-wrap text-sm text-muted-foreground">{order.customerNote || "No customer note"}</p>
-          </section>
+            <p className="mt-3 whitespace-pre-wrap text-sm text-muted-foreground">{order.customerNote}</p>
+          </section> : null}
           {canManage && <section className={`${panel} p-5`}>
             <h2 className="font-semibold">Customer emails & tracking</h2>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -664,14 +661,14 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
               <button className={button} onClick={() => open("resend")}>Resend email</button>
             </div>
             {!detail.fulfilments?.length && <p className="mt-3 text-xs text-muted-foreground">{physicalItems ? "Create a shipment before adding tracking. If needed, confirm the order and start processing, then choose Create shipment under Items & fulfilment." : "Tracking is available for physical shipments."}</p>}
-            {!!detail.notifications?.length && <ul className="mt-4 space-y-3" aria-label="Customer emails">{detail.notifications.map(notification => <li key={notification.id} className="text-xs">
+            {!!detail.notifications?.length && <details className="jk-side-more" open={detail.notifications.some(needsRetry) || undefined}><summary>Emails sent ({detail.notifications.length})</summary><ul className="mt-3 space-y-3" aria-label="Customer emails">{detail.notifications.map(notification => <li key={notification.id} className="text-xs">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="font-medium">{emailName(notification.type)}</span>
                 <StatusBadge tone={notification.status === "ACCEPTED" ? "success" : needsRetry(notification) ? "critical" : "neutral"}>{EMAIL_STATUS[notification.status] ?? statusLabel("order", notification.status)}</StatusBadge>
               </div>
               {needsRetry(notification) && (notification.lastError || notification.error) && <p className="mt-1 text-[var(--jk-critical-text)]">Reason: {notification.lastError || notification.error}</p>}
               {needsRetry(notification) && <button className={`${button} mt-2`} disabled={busy} onClick={() => void run(() => api!.resendOrderNotification(storeId!, orderId, notification.type), false)}>Retry {emailName(notification.type).toLowerCase()}</button>}
-            </li>)}</ul>}
+            </li>)}</ul></details>}
           </section>}
         </aside>
       </div>
@@ -760,22 +757,26 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
 // Shared display components
 const EMAIL_STATUS: Record<string, string> = { QUEUED: "Waiting to send", SENDING: "Sending", ACCEPTED: "Sent", FAILED: "Not sent", UNCERTAIN: "Not confirmed" };
 
-function Address({ title, value }: {
+function Address({ title, value, inline = false }: {
   title: string;
   value?: Record<string, unknown> | null;
+  /** Draw as a part of another card (no card of its own). */
+  inline?: boolean;
 }) {
   const lines = value
     ? Object.entries(value).filter(([, entry]) => typeof entry === "string" && entry)
     : [];
 
+  const body = <address className="mt-2 text-sm not-italic leading-6 text-muted-foreground">
+    {lines.length > 0
+      ? lines.map(([name, entry]) => <p key={name}>{String(entry)}</p>)
+      : "Not recorded"}
+  </address>;
+  if (inline) return <div className="jk-side-sub"><h3>{title}</h3>{body}</div>;
   return (
     <section className={`${panel} p-5`}>
       <h2 className="font-semibold">{title}</h2>
-      <address className="mt-3 text-sm not-italic leading-6 text-muted-foreground">
-        {lines.length > 0
-          ? lines.map(([name, entry]) => <p key={name}>{String(entry)}</p>)
-          : "Not recorded"}
-      </address>
+      {body}
     </section>
   );
 }

@@ -667,3 +667,24 @@ fieldset.jk-field {border:0;padding:0;margin:0;min-width:0}
   .jk-quick .jk-chip {flex:none}
 }
 .admin-content :is(h2,h3).jk-eyebrow {font-size:11px;letter-spacing:var(--jk-tracking-label)}
+/* Declutter pass: parts inside one side card, and fold-outs for rarely used details */
+.jk-side-sub {margin-top:16px;padding-top:14px;border-top:1px solid var(--jk-border)}
+.jk-side-sub h3 {font-size:11px!important;font-weight:600;letter-spacing:var(--jk-tracking-label);text-transform:uppercase;color:var(--jk-text-subdued)}
+.jk-side-sub > p {margin-top:6px;font-size:13px;color:var(--jk-text-subdued)}
+.jk-side-more {margin-top:14px}
+.jk-side-more > summary {display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:550;color:var(--jk-accent);cursor:pointer;list-style:none}
+.jk-side-more > summary::-webkit-details-marker {display:none}
+.jk-side-more > summary::after {content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform var(--jk-motion-fast)}
+.jk-side-more[open] > summary::after {transform:rotate(225deg) translateY(-1px)}
+.jk-side-more > summary:focus-visible {outline:var(--jk-focus-ring);outline-offset:2px;border-radius:4px}
+.jk-side-more .jk-side-sub {margin-top:8px;padding-top:0;border-top:0}
+/* Toolbar menus: More filters and Columns */
+.jk-toolbar-menu {position:relative}
+.jk-toolbar-menu > summary {list-style:none}
+.jk-toolbar-menu > summary::-webkit-details-marker {display:none}
+.jk-toolbar-menu > summary:focus-visible {outline:var(--jk-focus-ring);outline-offset:1px}
+.jk-toolbar-menu-panel {position:absolute;top:calc(100% + 6px);z-index:var(--jk-z-dropdown);min-width:240px;padding:14px;border-radius:var(--jk-radius);background:var(--jk-surface);box-shadow:var(--jk-shadow-raised)}
+.jk-toolbar-menu.is-end .jk-toolbar-menu-panel {right:0}
+.jk-toolbar-menu.is-start .jk-toolbar-menu-panel {left:0}
+.jk-toolbar-menu-panel select,.jk-toolbar-menu-panel .jk-select {width:100%}
+@media(max-width:639px){.jk-toolbar-menu-panel{position:fixed;left:16px!important;right:16px!important;top:auto;bottom:16px;min-width:0}}

@@ -15,6 +15,11 @@ export type IndexColumn<T> = {
   hideHeader?: boolean;
   /** Set to let merchants sort by this column from its heading. The page does the sorting (usually the API). */
   sortKey?: string;
+  /**
+   * Set to make the column optional in the "Columns" menu: true = hidden until the merchant turns it on,
+   * false = shown but can be turned off. Leave unset for columns that always show.
+   */
+  defaultHidden?: boolean;
 };
 
 export type SortDirection = "asc" | "desc";
@@ -38,8 +43,11 @@ export type IndexTableProps<T> = {
   activeTab?: string;
   onTabChange?: (id: string) => void;
   search?: { value: string; onChange: (value: string) => void; placeholder: string; label: string; onSubmit?: () => void };
-  /** Extra filter and sort controls shown beside the search box. */
+  /** Extra filter and sort controls shown beside the search box. Keep it to one or two plus sort. */
   filters?: ReactNode;
+  /** Less used filters, behind a "More filters" button. `moreFiltersActive` counts the ones in use. */
+  moreFilters?: ReactNode;
+  moreFiltersActive?: number;
   /**
    * Which column the rows are sorted by. Column headings are hidden on phones, so a page that
    * must sort on phones also keeps a "Sort" select in `filters`.
@@ -57,7 +65,46 @@ function openRow(event: MouseEvent<HTMLTableRowElement>) {
   event.currentTarget.querySelector<HTMLAnchorElement>("a[href]")?.click();
 }
 
-export function IndexTable<T>({ label, rows, rowKey, rowLabel, columns, loading = false, error, onRetry, tabs, activeTab, onTabChange, search, filters, sort, bulkActions = [], emptyState, pagination }: IndexTableProps<T>) {
+/** Which optional columns the merchant has turned on or off, remembered per list in this browser. */
+function useColumnChoices<T>(label: string, columns: IndexColumn<T>[]) {
+  const storageKey = `jelly-admin-columns:${label}`;
+  const [choices, setChoices] = useState<Record<string, boolean>>({});
+  // Read after the first render so the server and the browser draw the same table first.
+  useEffect(() => {
+    try { setChoices(JSON.parse(window.localStorage.getItem(storageKey) ?? "{}") as Record<string, boolean>); } catch { /* keep the defaults */ }
+  }, [storageKey]);
+  const isShown = (column: IndexColumn<T>) => column.defaultHidden === undefined ? true : choices[column.id] ?? !column.defaultHidden;
+  const setShown = (id: string, shown: boolean) => setChoices((current) => {
+    const next = { ...current, [id]: shown };
+    try { window.localStorage.setItem(storageKey, JSON.stringify(next)); } catch { /* the choice still applies until the page is reloaded */ }
+    return next;
+  });
+  return { isShown, setShown };
+}
+
+/** A small menu that opens under its button. Escape or a click outside closes it. */
+function ToolbarMenu({ label, count, children, align = "end" }: { label: string; count?: number; children: ReactNode; align?: "start" | "end" }) {
+  const ref = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const close = (event: Event) => {
+      const menu = ref.current;
+      if (!menu?.open) return;
+      if (event instanceof KeyboardEvent ? event.key === "Escape" : !menu.contains(event.target as Node)) menu.open = false;
+    };
+    document.addEventListener("keydown", close);
+    document.addEventListener("pointerdown", close);
+    return () => { document.removeEventListener("keydown", close); document.removeEventListener("pointerdown", close); };
+  }, []);
+  return <details ref={ref} className={`jk-toolbar-menu is-${align}`}>
+    <summary className="jk-button">{label}{count ? <span className="jk-tab-count">{count}</span> : null}</summary>
+    <div className="jk-toolbar-menu-panel">{children}</div>
+  </details>;
+}
+
+export function IndexTable<T>({ label, rows, rowKey, rowLabel, columns: allColumns, loading = false, error, onRetry, tabs, activeTab, onTabChange, search, filters, moreFilters, moreFiltersActive, sort, bulkActions = [], emptyState, pagination }: IndexTableProps<T>) {
+  const { isShown, setShown } = useColumnChoices(label, allColumns);
+  const optionalColumns = allColumns.filter((column) => column.defaultHidden !== undefined);
+  const columns = allColumns.filter(isShown);
   const [picked, setSelected] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState("");
   const [bulkError, setBulkError] = useState("");
@@ -82,12 +129,18 @@ export function IndexTable<T>({ label, rows, rowKey, rowLabel, columns, loading 
       <strong>{selected.size} selected</strong>
       {bulkActions.map((action) => <Button key={action.label} variant={action.destructive ? "destructive-quiet" : "secondary"} loading={busy === action.label} disabled={Boolean(busy)} onClick={() => void runBulk(action)}>{action.label}</Button>)}
       <button type="button" className="jk-button jk-button-plain" onClick={() => setSelected(new Set())}>Clear selection</button>
-    </div> : (search || filters) && <div className="jk-toolbar">
+    </div> : (search || filters || moreFilters || optionalColumns.length > 0) && <div className="jk-toolbar">
       {search && <form className="jk-search" role="search" onSubmit={(event) => { event.preventDefault(); search.onSubmit?.(); }}>
         <Search size={16} aria-hidden="true" />
         <input type="search" aria-label={search.label} placeholder={search.placeholder} value={search.value} onChange={(event) => search.onChange(event.target.value)} />
       </form>}
       {filters && <div className="jk-filters">{filters}</div>}
+      {moreFilters && <ToolbarMenu label="More filters" count={moreFiltersActive}><div className="jk-stack-sm">{moreFilters}</div></ToolbarMenu>}
+      {optionalColumns.length > 0 && <ToolbarMenu label="Columns">
+        <fieldset className="jk-stack-sm"><legend className="sr-only">Columns to show</legend>
+          {optionalColumns.map((column) => <label key={column.id} className="jk-check"><input type="checkbox" checked={isShown(column)} onChange={(event) => setShown(column.id, event.target.checked)} />{column.header}</label>)}
+        </fieldset>
+      </ToolbarMenu>}
     </div>}
     {error && <div className="jk-pad"><Banner tone="critical" title={`Could not load ${label.toLowerCase()}`} action={onRetry && <button type="button" className="jk-button" onClick={onRetry}>Try again</button>}>{error}</Banner></div>}
     {bulkError && <div className="jk-pad"><Banner tone="critical" onDismiss={() => setBulkError("")}>{bulkError}</Banner></div>}

@@ -427,7 +427,7 @@ function orderColumns({ timeZone, canManage, updating, onAdvance }: Omit<OrderRo
       ),
     },
     {
-      id: "items", header: "Items", mobile: "hidden",
+      id: "items", header: "Items", mobile: "hidden", defaultHidden: true,
       cell: (order) => (
         <div className="flex max-w-72 items-center gap-2">
           {order.items?.[0]?.imageSnapshot && <img src={order.items[0].imageSnapshot} alt="" className="jk-thumb !size-8" />}
@@ -438,7 +438,7 @@ function orderColumns({ timeZone, canManage, updating, onAdvance }: Omit<OrderRo
     { id: "payment", header: "Payment", cell: (order) => <StatusBadge kind="payment" value={order.paymentStatus} /> },
     { id: "fulfilment", header: "Fulfilment", cell: (order) => <StatusBadge kind="fulfilment" value={fulfilmentShown(order)} /> },
     { id: "total", header: "Total", align: "end", cell: (order) => <strong className="tabular-nums">{orderMoney(order.totalMinor, order.currency)}</strong> },
-    { id: "tags", header: "Tags", mobile: "hidden", cell: (order) => order.tags?.length ? <span className="jk-cell-sub">{order.tags.join(", ")}</span> : null },
+    { id: "tags", header: "Tags", mobile: "hidden", defaultHidden: true, cell: (order) => order.tags?.length ? <span className="jk-cell-sub">{order.tags.join(", ")}</span> : null },
     {
       id: "next", header: "Next step", hideHeader: true, align: "end",
       cell: (order) => {
