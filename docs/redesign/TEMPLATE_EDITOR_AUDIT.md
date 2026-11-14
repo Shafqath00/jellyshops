@@ -55,3 +55,35 @@ Counted from the page as it opens, desktop, Resthaven home page. "Screens" = how
 Live preview with click-to-select; floating toolbar; drag on the preview; autosave with save queue and conflict handling; undo/redo per page; restore last session; phone/tablet values; element (part) selection; translations; shared sections; publish checks, version history.
 </content>
 </invoke>
+
+## After the redesign (2026-11-14)
+
+Layout now: outline on the left (always visible), live preview in the middle, settings of the selection on the right (from 1024px; below that the existing Outline / Preview / Settings tabs). Top bar: page picker, labelled "Theme settings", device buttons, undo/redo, "All changes saved", ⋯ (Save now, Check changes, Compiled preview, Version history, Show the editor tour) and **Publish**.
+
+Measured in the signed-in editor on staging store "new" (draft only; the test section was removed again afterwards; nothing was published).
+
+| Task | Before (steps / column changes) | After (steps / column changes) | Checked how |
+| --- | --- | --- | --- |
+| Add a section | 3–4 / 2 | **2 / 0** (Add section in the empty settings panel or under the list, pick; the new section is selected with its settings open) | Done: "Hero: Text only" added, selected, saved |
+| Edit text | 2 from preview, 3 from outline / 2 | **2 / 0** (select, type) — the outline stays in view | Done: typed into the new section, preview updated |
+| Change colours | 3 / 1 | **2 / 0** (select, pick colour scheme) | Done: scheme 2 applied, preview `data-scheme="scheme2"` |
+| Hide | 1 hover-click / 0 | 1 / 0, and a hidden item keeps its eye visible | Done |
+| Reorder | 1 drag or 2 / 0–1 | 1 drag, or 2 (⋯, Move up) / 0 | Done: Move up |
+| Duplicate | 2, only from the preview toolbar / 1 | **2 (⋯, Duplicate) / 0**, the copy is selected | Done |
+| Delete | 2 / 0–1 | 2 (⋯ Delete, or Remove section at the bottom of the settings) / 0 | Done (Remove section) |
+| Change an image | 4 / 2 | 3 (select, Replace, choose) / 0; position, fit and decorative are folded under the image | Not swapped on staging (would change the real draft); counted from the panel |
+| Switch device | 1 | 1 | Done: preview 390px on Mobile, back to desktop |
+| Undo / redo | 1 | 1 | Done: Undo removed the duplicate |
+| Save | 0 (autosave) with a confusing "Save draft" button | 0, with "All changes saved" / "Saving…"; Save now in ⋯ | Watched the status change |
+| Publish | 2 (hidden behind ▾) | **1** (Publish button) | Button checked, not pressed (would make the draft live on staging) |
+| Back to the outline from a block | 2 / 2 | **0** (the outline never leaves) | — |
+| Theme colours and fonts | 2, unlabelled icon | 1 labelled button ("Theme settings") | — |
+
+Also new: breadcrumb at the top of the settings ("Home page › Hero banner › Heading", each part clickable), section and block icons by kind, a ⋯ menu on every outline row, "Shared" instead of "Global", picker groups in order of use with a sketch or icon for every choice, "Use store data" link instead of "Dynamic source" boxes, an empty settings panel that explains what to do, and a 4-step first-time tour.
+
+Widths: desktop 1536px (outline 280, preview ~900, settings 340); 820px and 390px use the tabs, no sideways scroll, Publish visible.
+
+Not done / limits:
+- The announcement bar is still listed under Template: moving it into the Header group changes the selection's region, which saving relies on.
+- No screenshots of the editor: Chrome times out capturing this page (the same happened during the audit); before pictures are the owner's.
+- Publish was not pressed and an image was not replaced on staging, to keep the real draft and live store unchanged.
