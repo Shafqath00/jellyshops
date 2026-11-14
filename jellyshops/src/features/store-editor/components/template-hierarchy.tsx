@@ -4,11 +4,12 @@ import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, us
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
-import { ChevronDown, ChevronRight, ChevronUp, Eye, EyeOff, LayoutPanelTop, Plus, Search, Trash2, Type, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Eye, EyeOff, Plus, Search, Type, X } from "lucide-react";
 import type { EditorSelection } from "../model/types";
 import type { StorefrontTemplateRecord } from "../api/types";
 import { blockLabel as blockTypeLabel, getSectionDefinition } from "@jelly/storefront-registry";
 import { displayName } from "../editor-page-helpers";
+import { RowMenu, blockIcon, sectionIcon } from "./outline-parts";
 
 /** Block name plus a short preview of its text, so merchants can tell blocks apart. */
 function describeBlock(block: { type: string; settings?: Record<string, unknown> }): string {
@@ -113,10 +114,10 @@ function placementRegion(
   return "template";
 }
 
-function PlacementRow({ placement, globalSections, selection, activeGlobalId, onSelect, onGlobalSelect, onAddBlock, onMove, onToggle, onRemove, onBlockAction, index, count, region, expanded, onExpand, query, themeVersion }: {
+function PlacementRow({ placement, globalSections, selection, activeGlobalId, onSelect, onGlobalSelect, onAddBlock, onMove, onToggle, onRemove, onBlockAction, onDuplicate, index, count, region, expanded, onExpand, query, themeVersion }: {
   placement: TemplatePlacement; globalSections: Record<string, GlobalLabel>; selection: EditorSelection; activeGlobalId?: string;
   onSelect(selection: EditorSelection): void; onGlobalSelect?(id: string): void; onAddBlock?(id: string, parentId?: string): void; onMove?(id: string, direction: "up" | "down"): void; onToggle?(id: string, enabled: boolean): void;
-  onRemove?(id: string): void; onBlockAction?(sectionId: string, blockId: string, action: "toggle" | "remove"): void;
+  onRemove?(id: string): void; onBlockAction?(sectionId: string, blockId: string, action: "toggle" | "remove" | "duplicate"): void; onDuplicate?(id: string): void;
   index: number; count: number; region: HierarchyRegion; expanded: boolean; onExpand(): void; query: string;
   themeVersion?: string;
 }) {
@@ -129,11 +130,20 @@ function PlacementRow({ placement, globalSections, selection, activeGlobalId, on
   const sectionMatches = !query || label.toLowerCase().includes(query);
   const blocks = sectionMatches ? allBlocks : allBlocks.filter((block) => blockMatches(block, query));
   const hidden = placement.kind === "inline" && placement.section.enabled === false;
+  const SectionGlyph = sectionIcon(placement.kind === "inline" ? placement.section.type : shared?.sectionType ?? "");
   return <div className="group/row">
     <div className={clsx("flex min-h-8 items-center rounded-lg text-[13px] hover:bg-muted", selected && (selection?.kind === "section" && !selection.elementId ? "bg-primary/10 text-primary" : "bg-muted"))}>
       <button type="button" aria-label={`${expanded ? "Collapse" : "Expand"} ${label}`} aria-expanded={expanded} onClick={onExpand} className="grid size-7 shrink-0 place-items-center rounded text-muted-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">{expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</button>
-      <button type="button" aria-label={label} aria-current={selected && selection?.kind === "section" && !selection.elementId ? "true" : undefined} onClick={() => placement.kind === "global" ? onGlobalSelect?.(id) : onSelect({ kind: "section", region, sectionId: id })} className="flex min-w-0 flex-1 items-center gap-2 py-1 text-left"><LayoutPanelTop size={14} className="shrink-0 text-muted-foreground" /><span className={clsx("truncate", hidden && "text-muted-foreground line-through decoration-muted-foreground/60")}>{label}</span>{hidden && <span className="text-[9px] text-muted-foreground">Hidden</span>}{shared && <span className="text-[9px] text-muted-foreground">Global</span>}</button>
-      {onMove && <div className="flex shrink-0 items-center opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100 [@media(hover:none)]:opacity-100"><button type="button" aria-label={`Move ${label} up`} disabled={index === 0} onClick={() => onMove(id, "up")} className="grid size-6 place-items-center rounded disabled:opacity-25"><ChevronUp size={13} /></button><button type="button" aria-label={`Move ${label} down`} disabled={index === count - 1} onClick={() => onMove(id, "down")} className="grid size-6 place-items-center rounded disabled:opacity-25"><ChevronDown size={13} /></button>{onToggle && placement.kind === "inline" && <button type="button" aria-label={`${placement.section.enabled === false ? "Show" : "Hide"} ${label}`} onClick={() => onToggle(id, placement.section.enabled === false)} className="grid size-6 place-items-center rounded">{placement.section.enabled === false ? <EyeOff size={13} /> : <Eye size={13} />}</button>}{onRemove && placement.kind === "inline" && <button type="button" aria-label={`Delete ${label}`} onClick={() => onRemove(id)} className="grid size-6 place-items-center rounded text-muted-foreground hover:text-destructive"><Trash2 size={13} /></button>}</div>}
+      <button type="button" aria-label={label} aria-current={selected && selection?.kind === "section" && !selection.elementId ? "true" : undefined} onClick={() => placement.kind === "global" ? onGlobalSelect?.(id) : onSelect({ kind: "section", region, sectionId: id })} className="flex min-w-0 flex-1 items-center gap-2 py-1 text-left" title={label}><SectionGlyph size={14} className="shrink-0 text-muted-foreground" aria-hidden="true" /><span className={clsx("truncate", hidden && "text-muted-foreground line-through decoration-muted-foreground/60")}>{label}</span>{hidden && <span className="text-[9px] text-muted-foreground">Hidden</span>}{shared && <span className="rounded-full bg-muted px-1.5 text-[10px] text-muted-foreground" title="Shared: changes show on every page that uses it">Shared</span>}</button>
+      {onMove && <div className="flex shrink-0 items-center gap-0.5 pr-1">
+        {onToggle && placement.kind === "inline" && <button type="button" aria-label={`${hidden ? "Show" : "Hide"} ${label}`} title={hidden ? "Show on the page" : "Hide from the page"} onClick={() => onToggle(id, hidden)} className={clsx("grid size-6 place-items-center rounded text-muted-foreground hover:bg-card hover:text-foreground", !hidden && "opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100 [@media(hover:none)]:opacity-100")}>{hidden ? <EyeOff size={13} /> : <Eye size={13} />}</button>}
+        <div className="opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100 has-[details[open]]:opacity-100 [@media(hover:none)]:opacity-100"><RowMenu label={label} actions={[
+          { label: "Move up", ariaLabel: `Move ${label} up`, disabled: index === 0, onAction: () => onMove(id, "up") },
+          { label: "Move down", ariaLabel: `Move ${label} down`, disabled: index === count - 1, onAction: () => onMove(id, "down") },
+          ...(onDuplicate && placement.kind === "inline" ? [{ label: "Duplicate", ariaLabel: `Duplicate ${label}`, onAction: () => onDuplicate(id) }] : []),
+          ...(onRemove && placement.kind === "inline" ? [{ label: "Delete", ariaLabel: `Delete ${label}`, destructive: true, onAction: () => onRemove(id) }] : []),
+        ]} /></div>
+      </div>}
     </div>
     {expanded && <div className="ml-5 border-l border-border pl-2">{placement.kind === "inline" && sectionMatches && shownElements(placement.section, themeVersion).map((element) => {
       const elementSelected = selection?.kind === "section" && selection.sectionId === id && selection.elementId === element.id;
@@ -143,10 +153,13 @@ function PlacementRow({ placement, globalSections, selection, activeGlobalId, on
       const blockSelected = selection?.kind === "block" && selection.sectionId === sectionId && selection.blockId === block.id;
       const blockHidden = block.enabled === false;
       const row = <div key={block.id} className="group/block flex items-center rounded-md hover:bg-muted">
-        <button type="button" aria-label={describeBlock(block)} aria-current={blockSelected ? "true" : undefined} onClick={() => onSelect({ kind: "block", region, sectionId, blockId: block.id })} className={clsx("flex min-h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-2 text-left text-xs", blockSelected && "bg-primary/10 font-medium text-primary")}><Type size={14} className="shrink-0" /><span className={clsx("truncate", blockHidden && "text-muted-foreground line-through decoration-muted-foreground/60")}>{describeBlock(block)}</span>{blockHidden && <span className="text-[9px] text-muted-foreground">Hidden</span>}</button>
-        {onBlockAction && placement.kind === "inline" && <div className="flex shrink-0 items-center opacity-0 group-hover/block:opacity-100 group-focus-within/block:opacity-100 [@media(hover:none)]:opacity-100">
-          <button type="button" aria-label={`${blockHidden ? "Show" : "Hide"} ${describeBlock(block)}`} onClick={() => onBlockAction(id, block.id, "toggle")} className="grid size-6 place-items-center rounded">{blockHidden ? <EyeOff size={13} /> : <Eye size={13} />}</button>
-          <button type="button" aria-label={`Delete ${describeBlock(block)}`} onClick={() => onBlockAction(id, block.id, "remove")} className="grid size-6 place-items-center rounded text-muted-foreground hover:text-destructive"><Trash2 size={13} /></button>
+        <button type="button" aria-label={describeBlock(block)} aria-current={blockSelected ? "true" : undefined} onClick={() => onSelect({ kind: "block", region, sectionId, blockId: block.id })} title={describeBlock(block)} className={clsx("flex min-h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-2 text-left text-xs", blockSelected && "bg-primary/10 font-medium text-primary")}>{(() => { const Glyph = blockIcon(block.type); return <Glyph size={14} className="shrink-0" aria-hidden="true" />; })()}<span className={clsx("truncate", blockHidden && "text-muted-foreground line-through decoration-muted-foreground/60")}>{describeBlock(block)}</span>{blockHidden && <span className="text-[9px] text-muted-foreground">Hidden</span>}</button>
+        {onBlockAction && placement.kind === "inline" && <div className="flex shrink-0 items-center gap-0.5 pr-1">
+          <button type="button" aria-label={`${blockHidden ? "Show" : "Hide"} ${describeBlock(block)}`} title={blockHidden ? "Show" : "Hide"} onClick={() => onBlockAction(id, block.id, "toggle")} className={clsx("grid size-6 place-items-center rounded text-muted-foreground hover:bg-card hover:text-foreground", !blockHidden && "opacity-0 group-hover/block:opacity-100 group-focus-within/block:opacity-100 [@media(hover:none)]:opacity-100")}>{blockHidden ? <EyeOff size={13} /> : <Eye size={13} />}</button>
+          <div className="opacity-0 group-hover/block:opacity-100 group-focus-within/block:opacity-100 has-[details[open]]:opacity-100 [@media(hover:none)]:opacity-100"><RowMenu label={describeBlock(block)} actions={[
+            { label: "Duplicate", ariaLabel: `Duplicate ${describeBlock(block)}`, onAction: () => onBlockAction(id, block.id, "duplicate") },
+            { label: "Delete", ariaLabel: `Delete ${describeBlock(block)}`, destructive: true, onAction: () => onBlockAction(id, block.id, "remove") },
+          ]} /></div>
         </div>}
       </div>;
       if (!block.blocks) return row;
@@ -179,6 +192,7 @@ export function TemplateHierarchy({
   onToggle,
   onRemove,
   onBlockAction,
+  onDuplicate,
   themeVersion,
 }: {
   themeVersion?: string;
@@ -196,7 +210,9 @@ export function TemplateHierarchy({
   /** Deletes a section of this template. */
   onRemove?(id: string): void;
   /** Hides/shows or deletes one block of a section. */
-  onBlockAction?(sectionId: string, blockId: string, action: "toggle" | "remove"): void;
+  onBlockAction?(sectionId: string, blockId: string, action: "toggle" | "remove" | "duplicate"): void;
+  /** Copies a section of this template and selects the copy. */
+  onDuplicate?(id: string): void;
 }) {
   const [search, setSearch] = useState("");
   const query = search.trim().toLowerCase();
@@ -283,6 +299,7 @@ export function TemplateHierarchy({
                   onToggle={onToggle}
                   onRemove={onRemove}
                   onBlockAction={onBlockAction}
+                  onDuplicate={onDuplicate}
                   index={index}
                   count={groups[region].length}
                   region={region}

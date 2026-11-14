@@ -52,7 +52,7 @@ describe("TemplateHierarchy", () => {
     expect(screen.getByText("Hero banner")).toBeVisible();
     expect(screen.getByText("Summer promo")).toBeVisible();
     expect(screen.getByText("Main footer")).toBeVisible();
-    expect(screen.getAllByText("Global")).toHaveLength(3);
+    expect(screen.getAllByText("Shared")).toHaveLength(3);
   });
 
   it("selects a section from the active template without page-level mutation", async () => {

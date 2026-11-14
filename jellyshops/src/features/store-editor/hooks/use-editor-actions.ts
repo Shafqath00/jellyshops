@@ -217,10 +217,15 @@ export function useEditorActions(ctx: ReturnType<typeof useEditorState> & Return
     if (!result.select) setMobilePanel("sections");
   };
   // The same actions from the page tree's hover buttons (hide/show or delete a section or block); the selection stays unless it was deleted.
-  const runActionOn = async (target: SelectionTarget, action: "toggle" | "remove") => {
+  const runActionOn = async (target: SelectionTarget, action: "toggle" | "remove" | "duplicate") => {
     if (!activeTemplate) return;
     const result = applySelectionAction(activeTemplate.layout, target, action);
     if (!result || !await persistLayout(result.layout)) return;
+    if (action === "duplicate" && result.select) {
+      setActiveGlobalId(undefined);
+      setSelection(result.select.blockId ? { kind: "block", region: "template", sectionId: result.select.sectionId, blockId: result.select.blockId } : { kind: "section", region: "template", sectionId: result.select.sectionId });
+      return;
+    }
     const removedSelected = action === "remove" && selection && selection.kind !== "theme" && selection.sectionId === target.sectionId && (!target.blockId || (selection.kind === "block" && selection.blockId === target.blockId));
     if (removedSelected) {
       const region = selection.region ?? "template";

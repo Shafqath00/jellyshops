@@ -90,6 +90,7 @@ export function EditorSidebar({ ctx }: { ctx: EditorViewContext }) {
                 onToggle={(id, enabled) => { void toggleSection(id, enabled); }}
                 onRemove={(id) => { if (window.confirm("Delete this section? You can undo this with Ctrl+Z.")) void runActionOn({ sectionId: id }, "remove"); }}
                 onBlockAction={(sectionId, blockId, action) => { void runActionOn({ sectionId, blockId }, action); }}
+                onDuplicate={(id) => { void runActionOn({ sectionId: id }, "duplicate"); }}
               />
             </div>
           </div>
