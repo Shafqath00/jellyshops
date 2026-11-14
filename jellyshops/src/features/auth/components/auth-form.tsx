@@ -3,13 +3,9 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { ArrowRight, Store } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useAuth } from "@/features/auth/providers/auth-provider";
 import { merchantSupabase } from "@/features/auth/lib/supabase-clients";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const { configured } = useAuth();
@@ -58,103 +54,40 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   }
 
   return (
-    <main className="grid min-h-screen place-items-center bg-muted/30 px-4 py-12">
-      <div className="w-full max-w-md">
-        <Link
-          href="/"
-          className="mb-6 inline-flex items-center gap-2 text-sm font-semibold"
-        >
-          <span className="grid size-8 place-items-center rounded-md bg-primary text-primary-foreground">
-            <Store size={15} />
-          </span>
-          Jelly Shop
-        </Link>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">
-              {isSignup ? "Create your merchant account" : "Welcome back"}
-            </CardTitle>
-            <CardDescription>
-              {isSignup
-                ? "Start your store and manage products, orders, and your storefront."
-                : "Sign in to manage your Jelly Shop workspace."}
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent>
-            {!configured ? (
-              <div
-                className="rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm"
-                role="alert"
-              >
-                <strong>Authentication is not configured.</strong>
-                <p className="mt-1 text-muted-foreground">
-                  Add <code>NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
-                  <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to enable merchant access.
-                </p>
-              </div>
-            ) : (
-              <form className="space-y-4" onSubmit={submit}>
-                {isSignup && (
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Your name</Label>
-                    <Input id="name" name="name" autoComplete="name" required />
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" name="email" type="email" autoComplete="email" required />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete={isSignup ? "new-password" : "current-password"}
-                    minLength={6}
-                    required
-                  />
-                </div>
-
-                {error && (
-                  <p className="text-sm text-destructive" role="alert">
-                    {error}
-                  </p>
-                )}
-
-                {notice && (
-                  <p className="text-sm text-muted-foreground" role="status">
-                    {notice}
-                  </p>
-                )}
-
-                <Button className="w-full" disabled={pending} type="submit">
-                  {pending
-                    ? "Working…"
-                    : isSignup
-                      ? "Create account"
-                      : "Sign in"}
-                  <ArrowRight />
-                </Button>
-              </form>
-            )}
-
-            <p className="mt-6 text-center text-sm text-muted-foreground">
-              {isSignup ? "Already have an account?" : "New to Jelly Shop?"}{" "}
-              <Link
-                className="font-medium text-foreground underline underline-offset-4"
-                href={isSignup ? "/login" : "/signup"}
-              >
-                {isSignup ? "Sign in" : "Create an account"}
-              </Link>
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+    <main className="auth-page">
+      <section className="auth-panel">
+        <Link href="/" className="auth-brand"><span aria-hidden="true">J</span>jelly shop</Link>
+        <div className="auth-intro">
+          <p>{isSignup ? "Start selling" : "Merchant sign in"}</p>
+          <h1>{isSignup ? "Create your merchant account" : "Welcome back"}</h1>
+          <span className="auth-lede">{isSignup
+            ? "Start your store and manage products, orders, and your storefront."
+            : "Sign in to manage your Jelly Shop workspace."}</span>
+          <div className="auth-orbit" aria-hidden="true"><i /><i /><i /></div>
+        </div>
+        {!configured ? (
+          <div className="auth-message" role="alert">
+            <strong>Authentication is not configured.</strong>
+            <p>Add <code>NEXT_PUBLIC_SUPABASE_URL</code> and <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to enable merchant access.</p>
+          </div>
+        ) : (
+          <form className="auth-form" onSubmit={submit}>
+            {isSignup && <label htmlFor="name"><span>Your name</span><input id="name" name="name" autoComplete="name" required /></label>}
+            <label htmlFor="email"><span>Email</span><input id="email" name="email" type="email" autoComplete="email" required /></label>
+            <label htmlFor="password"><span>Password</span><input id="password" name="password" type="password" autoComplete={isSignup ? "new-password" : "current-password"} minLength={6} required /></label>
+            {error && <p className="auth-error" role="alert">{error}</p>}
+            {notice && <p className="auth-notice" role="status">{notice}</p>}
+            <button className="auth-submit" disabled={pending} type="submit">
+              {pending ? "Working…" : isSignup ? "Create account" : "Sign in"}
+              <ArrowRight size={16} aria-hidden="true" />
+            </button>
+          </form>
+        )}
+        <p className="auth-switch">
+          {isSignup ? "Already have an account?" : "New to Jelly Shop?"}{" "}
+          <Link href={isSignup ? "/login" : "/signup"}>{isSignup ? "Sign in" : "Create an account"}</Link>
+        </p>
+      </section>
     </main>
   );
 }

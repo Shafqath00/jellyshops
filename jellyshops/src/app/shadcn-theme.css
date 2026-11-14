@@ -28,8 +28,7 @@ body {
 
 /* ── Legacy .button surface ────────────────────────────────────────── */
 /* These classes are used by storefront CSS — keep consistent with tokens */
-.button,
-.auth-submit {
+.button {
   min-height: 36px;
   border: 1px solid var(--border);
   border-radius: calc(var(--radius) - 2px);
@@ -37,10 +36,8 @@ body {
   font-weight: 600;
   transform: none;
 }
-.button:hover,
-.auth-submit:hover { transform: none; }
-.button-primary,
-.auth-submit {
+.button:hover { transform: none; }
+.button-primary {
   color: var(--primary-foreground);
   background: var(--primary);
   border-color: var(--primary);
@@ -50,15 +47,13 @@ body {
   background: var(--background);
 }
 .button-secondary:hover,
-.button-primary:hover,
-.auth-submit:hover { opacity: .92; }
+.button-primary:hover { opacity: .92; }
 
 /* ── Cards, panels and contained surfaces ──────────────────────────── */
 .form-card,
 .data-card,
 .customer-card,
 .empty-state,
-.auth-panel,
 .cart-panel {
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -120,20 +115,7 @@ body {
   box-shadow: none;
 }
 
-/* ── Auth page ─────────────────────────────────────────────────────── */
-.auth-page {
-  background:
-    radial-gradient(circle at top left, var(--muted) 0, transparent 28rem),
-    var(--background);
-}
-.auth-brand span,
-.auth-orbit,
-.auth-orbit i { border-color: var(--border); }
-.auth-form input {
-  border: 1px solid var(--input);
-  border-radius: calc(var(--radius) - 2px);
-  background: var(--background);
-}
+/* Auth pages: styled in globals.css (Jelly entry pages). */
 
 /* ── Cart overlay & panel ──────────────────────────────────────────── */
 .cart-overlay { background: rgb(0 0 0 / .35); }
