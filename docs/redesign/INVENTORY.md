@@ -107,5 +107,16 @@ Desktop (1536px) in Chrome, phone (390px) and tablet (820px) through same-origin
 | Dark mode | Checked on the frame, Home and kit |
 | Fixed during the check | Old table rules overriding kit headings; sortable headings losing small caps; phone filters cut off; Home quick links too tall on phones; settings group labels |
 
-Not exercised (would write to the staging database): saving a product, saving a stock count, changing a setting, running a bulk action that changes data. Their buttons and forms were seen, not submitted.
+Saving flows (run later the same day with the owner's go-ahead, on staging store "new", with a clearly named test product):
+
+| Flow | Result |
+| --- | --- |
+| Create a draft product (name, price, stock) | Saved, page moved to the product address, success banner |
+| Edit it and save again | Saved ("All changes saved") |
+| Change its stock in Inventory | Only that row changed, toast "Stock saved for 1 item", available 5 to 12 |
+| Bulk edit (price set to 14.50) | Before/after preview, "1 product changed", list shows the new price |
+| Change a setting (Shipping > Delivery details) | "Shipping saved", value kept after reload; then cleared and saved, back to the original empty value |
+| Bulk Archive | Confirm dialog, "1 product set to archived" |
+
+Left behind on staging: one archived product named "ZZ Redesign Test Product v2" (there is no delete in the admin; remove it in the database or leave it archived). Nothing else changed.
 Screenshots of order and customer pages were not saved because they show real customer emails.
