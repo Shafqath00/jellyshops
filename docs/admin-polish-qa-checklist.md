@@ -34,6 +34,8 @@ At 1440px, 768px and 375px, in light and dark (the sun/moon button in the top ba
 - [ ] Put a mistake in a file (a price of "ten", a collection that does not exist): the check lists the row, the column and the reason; that product is left out and the others import; **Download the report** lists the same reasons.
 - [ ] Start an import of 60+ rows, press **Pause**, leave the page, come back: the import is listed as "Not finished" with **Carry on**; carrying on finishes it without duplicates.
 - [ ] On a finished import choose **Undo this import**: products it created are archived, changed prices and names are back, stock is unchanged.
+- [ ] Put two photo addresses (https://…jpg; https://…jpg) in the Image URLs cell of a product and import: both photos appear on the product. Use one address that does not exist: the product is still imported and the report names that photo.
+- [ ] Products > More actions > Add photos in bulk: name three photos after a product's SKU or web address ending (for example `oak-bed-frame-1.jpg`), drop them in with one unrelated photo: the three are matched, the fourth says "Not matched"; upload; the product shows the three photos in order.
 - [ ] Keyboard only: Tab to "Choose file", upload, then complete every step without the mouse. Focus should land on each step's heading.
 
 ## 4. Product editor (10 minutes)
@@ -54,7 +56,8 @@ At 1440px, 768px and 375px, in light and dark (the sun/moon button in the top ba
 
 ## Known limits (not bugs)
 
-- Photos cannot be imported from a file; the Image URLs column is export only.
+- Photos in an import need a public https address of the picture itself; links to Google Drive or Dropbox pages do not work.
+- Undoing an import does not take photos off products it changed.
 - An import runs while its page is open. If the page closes it waits for "Carry on".
 - Bulk edit works on the rows ticked on the page shown (up to 50). For more, filter and repeat, or export, edit and import.
 - Stock changed by bulk edit or import is not labelled with a reason in stock history.

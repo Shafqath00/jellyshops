@@ -86,8 +86,13 @@ export function mountCatalogRoutes(app: Express, context: AppContext): void {
   const bulkDatabase = context.routeDependencies.commerceDatabase;
   if (bulkDatabase) {
     app.use("/api/stores/:storeId/catalog", createProductBulkRouter(
-      new ProductBulkService({ query: (text: string, values?: unknown[]) => bulkDatabase.transaction((transaction) => transaction.query(text, values)) } as never, deps.catalogService),
+      new ProductBulkService(
+        { query: (text: string, values?: unknown[]) => bulkDatabase.transaction((transaction) => transaction.query(text, values)) } as never, deps.catalogService, Date.now,
+        // Photos go through the same media service as every other upload, so they are checked and resized the same way.
+        { upload: (storeId, fileName, contents) => context.mediaService.upload(storeId, { buffer: contents, originalname: fileName } as Express.Multer.File) },
+      ),
       authProvider,
+      context.config.maxUploadBytes,
     ));
   }
 

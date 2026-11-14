@@ -11,7 +11,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
   { label: "Home", href: "/admin", icon: Home },
   { label: "Orders", href: "/admin/orders", icon: Inbox },
   { label: "Products", href: "/admin/products", icon: Tag, children: [
-    { label: "All products", href: "/admin/products" }, { label: "Collections", href: "/admin/products/collections" }, { label: "Inventory", href: "/admin/products/inventory" }, { label: "Reviews", href: "/admin/products/reviews" }, { label: "Import", href: "/admin/products/import" },
+    { label: "All products", href: "/admin/products" }, { label: "Collections", href: "/admin/products/collections" }, { label: "Inventory", href: "/admin/products/inventory" }, { label: "Reviews", href: "/admin/products/reviews" }, { label: "Import", href: "/admin/products/import" }, { label: "Add photos in bulk", href: "/admin/products/photos" },
   ] },
   { label: "Customers", href: "/admin/customers", icon: Users, children: [
     { label: "All customers", href: "/admin/customers" }, { label: "Messages", href: "/admin/customers/messages" },

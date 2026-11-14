@@ -44,7 +44,9 @@ function fakeApi(overrides: Partial<ProductBulkApi> = {}): ProductBulkApi {
       .mockResolvedValue(view({ status: "finished", finishedAt: "2026-11-13T10:01:00Z", progress: { done: 3, total: 3 }, counts: { created: 1, updated: 1, skipped: 0, failed: 1 }, canUndo: true })),
     get: vi.fn(async () => detail()), list: vi.fn(async () => []),
     undo: vi.fn(async () => ({ ...view({ status: "undone", counts: { created: 1, updated: 1, skipped: 0, failed: 1 } }), undone: { archived: 1, restored: 1, failed: 0 } })),
-    download: vi.fn(async () => ({ truncated: false, products: 2 })), ...overrides,
+    download: vi.fn(async () => ({ truncated: false, products: 2 })),
+    matchPhotos: vi.fn(async (names: string[]) => names.map((name) => ({ name, product: /oak/i.test(name) ? { id: "p1", title: "Oak bed frame", handle: "oak-bed-frame", photoCount: 2 } : null, matchedBy: /oak/i.test(name) ? "sku" as const : null }))),
+    addPhoto: vi.fn(async (productId: string) => ({ productId, photoCount: 3, added: true })), ...overrides,
   };
 }
 const csvFile = () => new File(["Handle,Name\noak-bed,Oak bed\n"], "beds.csv", { type: "text/csv" });

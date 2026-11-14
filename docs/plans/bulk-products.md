@@ -35,7 +35,7 @@ One row per variant. A product with no options is one row. Rows of the same prod
 | Weight (g) | variant | Whole grams. |
 | SEO title | product | Up to 70. |
 | SEO description | product | Up to 160. |
-| Image URLs | product | https addresses separated by `;`. **Exported, but not imported yet** (section 9). |
+| Image URLs | product | https addresses separated by `;`, up to 10 per product per import, 8 MB each. Added to the product's photos; none are removed. The store's own photo addresses (as written by an export) are linked without downloading (section 9). |
 
 Headers are matched without regard to case, spaces or punctuation, with common aliases ("Vendor" = Brand, "Product type" = Type, "Variant SKU" = SKU, "Body" = Description). The merchant can re-match any column or choose "Don't import".
 
@@ -103,7 +103,13 @@ Possible, with one limit. Undo **archives** the products the import created (pro
 
 ## 9. Images
 
-Not built in this phase. Importing images from web addresses needs a server-side fetch with protection against internal addresses (SSRF), size and type limits and a retry queue; bulk upload by file name needs a matching screen. Both are designed as Phase 4d: the Image URLs column is exported today and ignored on import with a notice.
+Built on 14 November 2026.
+
+**From web addresses in an import.** The Image URLs cell of a product's first row lists photo addresses. They are checked when the file is checked (https only, no sign-in details, no port, never a local or private address, at most 10) and a bad address holds the product back like any other problem. During the import, after a product is saved, each photo is fetched by the server, stored through the same media service as every other upload (which checks the bytes really are a JPEG, PNG, WebP, GIF or AVIF and makes the resized copies), and added after the product's existing photos. A photo that cannot be fetched or is not a picture is reported ("Imported, but a photo was not added", with the address and the reason); the product stays imported. Undo does not take photos off a product.
+
+**Safe fetching (`backend/src/catalog-bulk/image-fetch.ts`).** The address comes from a merchant's file, so it is treated as hostile: the host name is looked up once, every address it returns must be on the public internet (loopback, private, link-local and cloud metadata, carrier NAT, multicast, documentation ranges, IPv4-mapped and NAT64 IPv6 are refused, and one private address among several refuses the name), and the connection is made to exactly the address that was checked. Redirects are followed by hand, three at most, with the same checks each time. 8 MB and 8 seconds per photo. A step of the import stops taking new products after 25 seconds, so slow downloads cannot run into the request limit.
+
+**Photo files in bulk (`/admin/products/photos`).** The merchant drops up to 300 photo files. `POST …/catalog/bulk/photo-matches` matches each file name to a product: first as an item's SKU, then as a product's handle, ignoring capitals, the extension and a trailing number or word such as `-2`, `_3`, `(4)`, `-front`. The page shows every file with the product it will go to, and files with no match, before anything is uploaded. `POST …/catalog/bulk/photos` (multipart: `productId`, `file`) then stores one photo and adds it to the end of the product's photos; files go up one at a time in name order. A product keeps to 30 photos; the same photo is not added twice. 600 photos per 10 minutes per store and user.
 
 ## 10. Security
 
@@ -139,7 +145,7 @@ The selection is the rows ticked on the page shown (up to 50). To change more, f
 
 Built as designed: sections 1 to 8 and 10 to 12. Code: `backend/src/catalog-bulk/` (`sheet.ts` format and file reading/writing, `plan.ts` the planner, `service.ts`, `routes.ts`), `jellyshops/src/features/product-bulk/` (`api.ts`, `import-wizard.tsx`, `export-dialog.tsx`, `bulk-edit.ts`, `bulk-edit-dialog.tsx`), page `/admin/products/import`.
 
-Not built: images (section 9); a server worker that carries an import on while the browser is closed (the merchant chooses "Carry on"); "select all matching" for bulk edit beyond the 50 rows on a page; an import that changes a product's handle.
+Not built: a server worker that carries an import on while the browser is closed (the merchant chooses "Carry on"); "select all matching" for bulk edit beyond the 50 rows on a page; an import that changes a product's handle.
 
 The migration is written and tested against the in-memory test database only. **It must be applied to staging and production before import works there**; export, the template and bulk edit need no migration.
 

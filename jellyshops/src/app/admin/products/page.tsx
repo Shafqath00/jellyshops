@@ -133,7 +133,8 @@ export default function ProductsPage() {
   ];
   const filtered = Boolean(search || status || filterCount);
   return <ProductSurface><AdminPage title="Products" description="Manage your products, pricing, and availability." primaryAction={{ label: "Add product", href: "/admin/products/new" }}
-    secondaryActions={[{ label: "Import", href: "/admin/products/import" }, { label: "Export", onAction: () => { rememberFocus(); setExporting([]); } }]}>
+    secondaryActions={[{ label: "Import", href: "/admin/products/import" }, { label: "Export", onAction: () => { rememberFocus(); setExporting([]); } }]}
+    moreActions={[{ label: "Add photos in bulk", href: "/admin/products/photos" }]}>
     {rowError && <Banner tone="critical" title="Product not updated" onDismiss={() => setRowError("")}>{rowError}</Banner>}
     <IndexTable
       label="Products"

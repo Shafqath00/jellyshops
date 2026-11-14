@@ -11,6 +11,30 @@ export const MAX_IMPORT_ROWS = 5000;
 export const MAX_IMPORT_BYTES = 5 * 1024 * 1024;
 export const MAX_IMPORT_COLUMNS = 60;
 export const MAX_EXPORT_PRODUCTS = 5000;
+export const MAX_IMPORT_IMAGES = 10;
+
+/** A photo already in this platform's files: "/api/public/media/<store>/<id>", with or without a site in front. Gives the store and file ids. */
+export function storeMediaRef(text: string): { storeId: string; mediaId: string } | null {
+  const match = /^(?:https?:\/\/[^/\s]+)?\/api\/public\/media\/([^/?#\s]+)\/([^/?#\s]+)(?:[?#].*)?$/.exec(text.trim());
+  return match ? { storeId: decodeURIComponent(match[1]), mediaId: decodeURIComponent(match[2]) } : null;
+}
+
+/**
+ * The product a photo file belongs to, going by its name: "OAK-BED-DBL.jpg", "oak-bed-frame_2.png" and
+ * "oak-bed-frame (3).webp" give the keys to try, most exact first.
+ */
+export function photoKeys(fileName: string): string[] {
+  const base = fileName.replace(/^.*[\\/]/, "").replace(/\.[a-z0-9]{2,5}$/i, "").trim().toLowerCase();
+  const keys = [base];
+  let current = base;
+  for (let round = 0; round < 3; round++) {
+    const shorter = current.replace(/\s*\(\d{1,3}\)$/, "").replace(/[-_ ](?:\d{1,3}|front|back|side|main|detail|alt)$/, "").trim();
+    if (!shorter || shorter === current) break;
+    keys.push(shorter);
+    current = shorter;
+  }
+  return [...new Set(keys.filter(Boolean))];
+}
 
 export type ColumnKey =
   | "handle" | "title" | "description" | "status" | "vendor" | "productType" | "collections" | "tags"
@@ -58,7 +82,7 @@ export const SHEET_COLUMNS: SheetColumn[] = [
   { key: "weightGrams", label: "Weight (g)", level: "variant", imported: true, aliases: ["weight", "weight g", "variant grams", "grams", "weight grams"], example: "42000", help: "Packed weight in whole grams (1 kg = 1000).", mistake: "Kilograms (42) instead of grams (42000)." },
   { key: "seoTitle", label: "SEO title", level: "product", imported: true, aliases: ["search title", "title in search results", "meta title", "page title"], example: "Oak bed frame | Harbour", help: "The title shown in search results. Up to 70 characters.", mistake: "Longer than 70 characters." },
   { key: "seoDescription", label: "SEO description", level: "product", imported: true, aliases: ["search description", "description in search results", "meta description"], example: "A solid oak bed frame, made in the UK.", help: "The description shown in search results. Up to 160 characters.", mistake: "Longer than 160 characters." },
-  { key: "imageUrls", label: "Image URLs", level: "product", imported: false, aliases: ["images", "image src", "image url", "image", "photos"], example: "https://example.com/bed.jpg", help: "Web addresses of the product's photos, separated by a semicolon (;). Included in exports. Importing photos from a file is not available yet.", mistake: "Expecting photos to be added on import." },
+  { key: "imageUrls", label: "Image URLs", level: "product", imported: true, aliases: ["images", "image src", "image url", "image", "photos", "photo urls"], example: "https://example.com/bed-front.jpg; https://example.com/bed-side.jpg", help: "Web addresses of the product's photos, separated by a semicolon (;). Each must start with https:// and open without signing in. Up to 10 per product in one import, 8 MB each. Photos are added to the ones the product already has; none are removed.", mistake: "A link to a web page or a private folder (Google Drive, Dropbox) instead of the picture itself." },
 ];
 
 export const columnByKey = new Map(SHEET_COLUMNS.map((column) => [column.key, column]));

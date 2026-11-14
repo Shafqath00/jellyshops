@@ -3,8 +3,9 @@ import type { CatalogAdmin } from "../catalog/service.js";
 import type { CatalogCollection, CatalogProduct, CatalogVariantInput, ListProductsInput, UpdateProductInput } from "../catalog/types.js";
 import { ApiError } from "../http/errors.js";
 import { countPlans, planImport, referencedKeys, type ImportMode, type PlanCounts, type PlanReason, type ProductPlan, type StoreSnapshot } from "./plan.js";
+import { ImageFetchError, fetchImage } from "./image-fetch.js";
 import {
-  MAX_EXPORT_PRODUCTS, SHEET_COLUMNS, cleanMapping, headerRow, parseSheetFile, productToRows, suggestMapping, templateTable, toCsv, toXlsx,
+  MAX_EXPORT_PRODUCTS, SHEET_COLUMNS, cleanMapping, headerRow, parseSheetFile, photoKeys, productToRows, storeMediaRef, suggestMapping, templateTable, toCsv, toXlsx,
   type ColumnMapping,
 } from "./sheet.js";
 
@@ -21,7 +22,18 @@ const UNDO_DAYS = 30;
 
 export type ImportStatus = "uploaded" | "checked" | "running" | "finished" | "undone";
 export interface ImportResult { rows: number[]; handle: string; title: string; outcome: "created" | "updated" | "skipped" | "failed"; productId?: string; reasons: PlanReason[] }
-export interface ImportCounts { created: number; updated: number; skipped: number; failed: number }
+export interface ImportCounts { created: number; updated: number; skipped: number; failed: number; /** Products that were saved but had a photo that could not be added. */ photoProblems?: number }
+
+/** How photos get stored. Left out where there is no file storage; photos in a file are then reported, not added. */
+export interface ImageTools {
+  upload(storeId: string, fileName: string, contents: Buffer): Promise<{ id: string }>;
+  fetch?: (url: string) => Promise<{ buffer: Buffer; fileName: string }>;
+}
+export interface PhotoMatch { name: string; product: { id: string; title: string; handle: string; photoCount: number } | null; matchedBy: "sku" | "handle" | null }
+const MAX_PRODUCT_PHOTOS = 30;
+/** A step stops taking new products after this long, so slow photo downloads never run into the request limit. */
+const STEP_BUDGET_MS = 25_000;
+const PHOTOS_PER_WINDOW = 600;
 interface UndoData {
   created: string[];
   updated: Array<{ productId: string; before: UpdateProductInput }>;
@@ -63,8 +75,9 @@ export interface ExportFilter extends Omit<ListProductsInput, "limit" | "cursor"
  */
 export class ProductBulkService {
   private readonly uploads = new Map<string, number[]>();
+  private readonly photoUploads = new Map<string, number[]>();
 
-  constructor(private readonly database: BulkDatabase, private readonly catalog: Catalog, private readonly now: () => number = Date.now) {}
+  constructor(private readonly database: BulkDatabase, private readonly catalog: Catalog, private readonly now: () => number = Date.now, private readonly images?: ImageTools) {}
 
   // ---- Export and template
 
@@ -152,7 +165,11 @@ export class ProductBulkService {
       const results: ImportResult[] = [];
       const undo: UndoData = { created: [], updated: [], added: [] };
       const counts: ImportCounts = { ...record.counts };
+      const started = Date.now();
+      let handled = 0;
       for (const plan of batch) {
+        if (handled > 0 && Date.now() - started > STEP_BUDGET_MS) break;
+        handled++;
         const base = { rows: plan.rows, handle: plan.handle, title: plan.title };
         if (plan.action === "skip") { results.push({ ...base, outcome: "skipped", reasons: plan.reasons }); counts.skipped++; continue; }
         if (plan.action === "problem") { results.push({ ...base, outcome: "failed", reasons: plan.reasons }); counts.failed++; continue; }
@@ -160,7 +177,9 @@ export class ProductBulkService {
           if (plan.create) {
             const created = await this.catalog.createProduct(storeId, plan.create);
             undo.created.push(created.id);
-            results.push({ ...base, outcome: "created", productId: created.id, reasons: [] }); counts.created++;
+            const notes = await this.addImages(storeId, created, plan.images, plan.rows[0]);
+            if (notes.length) counts.photoProblems = (counts.photoProblems ?? 0) + 1;
+            results.push({ ...base, outcome: "created", productId: created.id, reasons: notes }); counts.created++;
           } else if (plan.update) {
             const before = await this.catalog.getProduct(storeId, plan.update.productId);
             const after = await this.catalog.updateProduct(storeId, plan.update.productId, plan.update.input);
@@ -170,13 +189,15 @@ export class ProductBulkService {
               const added = after.variants.filter((variant) => !known.has(variant.id)).map((variant) => variant.id);
               if (added.length) undo.added.push({ productId: before.id, variantIds: added });
             }
-            results.push({ ...base, outcome: "updated", productId: plan.update.productId, reasons: [] }); counts.updated++;
+            const notes = await this.addImages(storeId, after, plan.images, plan.rows[0]);
+            if (notes.length) counts.photoProblems = (counts.photoProblems ?? 0) + 1;
+            results.push({ ...base, outcome: "updated", productId: plan.update.productId, reasons: notes }); counts.updated++;
           }
         } catch (failure) {
           results.push({ ...base, outcome: "failed", reasons: [{ row: plan.rows[0], message: plainFailure(failure) }] }); counts.failed++;
         }
       }
-      const cursor = record.cursor + batch.length;
+      const cursor = record.cursor + handled;
       const finished = cursor >= plans.length;
       await this.database.query(
         `UPDATE "ProductImport" SET "cursor"=$3, "total"=$4, "results"="results" || $5::jsonb, "counts"=$6::jsonb,
@@ -198,14 +219,15 @@ export class ProductBulkService {
     return result.rows.map((row) => this.view(normalise(row)));
   }
 
-  /** Every product that was skipped or could not be imported, with the reason, as a table for a CSV file. */
+  /** Every product that was skipped or could not be imported, and every photo that could not be added, with the reason, as a table for a CSV file. */
   async report(storeId: string, id: string): Promise<string[][]> {
     const record = await this.load(storeId, id);
     const table = [["Row", "Handle", "Product", "Column", "What happened", "Reason"]];
     for (const result of record.results) {
-      if (result.outcome !== "failed" && result.outcome !== "skipped") continue;
+      const saved = result.outcome === "created" || result.outcome === "updated";
+      if (saved && !result.reasons.length) continue;
       for (const reason of result.reasons.length ? result.reasons : [{ row: result.rows[0], message: "No reason was recorded." }]) {
-        table.push([String(reason.row), result.handle, result.title, reason.column ?? "", result.outcome === "failed" ? "Not imported" : "Skipped", reason.column ? `${reason.column} ${reason.message}` : reason.message]);
+        table.push([String(reason.row), result.handle, result.title, reason.column ?? "", saved ? "Imported, but a photo was not added" : result.outcome === "failed" ? "Not imported" : "Skipped", reason.column ? `${reason.column} ${reason.message}` : reason.message]);
       }
     }
     return table;
@@ -237,6 +259,83 @@ export class ProductBulkService {
     }
     await this.database.query(`UPDATE "ProductImport" SET "status"='undone', "undoneAt"=NOW(), "updatedAt"=NOW() WHERE "storeId"=$1 AND "id"=$2`, [storeId, id]);
     return { ...this.view(await this.load(storeId, id)), undone };
+  }
+
+  // ---- Photos
+
+  /**
+   * Adds the photos an import row lists to a saved product. A photo that cannot be fetched or is not an
+   * image is reported and the rest carry on; the product itself stays imported. Nothing is ever removed.
+   */
+  private async addImages(storeId: string, product: CatalogProduct, images: string[] | undefined, row: number): Promise<PlanReason[]> {
+    if (!images?.length) return [];
+    const notes: PlanReason[] = [];
+    const note = (entry: string, message: string) => { notes.push({ row, column: "Image URLs", message: `"${entry.length > 70 ? `${entry.slice(0, 70)}…` : entry}" ${message}.` }); };
+    const have = new Set(product.media.map((media) => media.id));
+    const add: string[] = [];
+    for (const entry of images) {
+      if (have.size + add.length >= MAX_PRODUCT_PHOTOS) { note(entry, `was left out: a product can have ${MAX_PRODUCT_PHOTOS} photos`); continue; }
+      const stored = storeMediaRef(entry);
+      if (stored) {
+        // A photo that is already in this store's files (as written by an export) is linked, not downloaded again.
+        if (stored.storeId !== storeId) note(entry, "belongs to another store");
+        else if (!have.has(stored.mediaId) && !add.includes(stored.mediaId)) add.push(stored.mediaId);
+        continue;
+      }
+      if (!this.images) { note(entry, "was not added: photos cannot be imported on this server"); continue; }
+      try {
+        const file = await (this.images.fetch ?? fetchImage)(entry);
+        const media = await this.images.upload(storeId, file.fileName, file.buffer);
+        if (!have.has(media.id) && !add.includes(media.id)) add.push(media.id);
+      } catch (failure) {
+        note(entry, failure instanceof ImageFetchError ? failure.message : failure instanceof ApiError && failure.status < 500 ? "is not a picture we can use. Use a JPEG, PNG, WebP, GIF or AVIF file" : "could not be added");
+      }
+    }
+    if (add.length) {
+      try {
+        await this.catalog.updateProduct(storeId, product.id, { media: [...product.media.map((media) => ({ mediaId: media.id, altText: media.altText, appliesTo: media.appliesTo })), ...add.map((mediaId) => ({ mediaId }))] });
+      } catch (failure) {
+        notes.push({ row, column: "Image URLs", message: failure instanceof ApiError && failure.status < 500 ? failure.message : "The photos were downloaded but could not be linked to the product. Add them in the product editor." });
+      }
+    }
+    return notes;
+  }
+
+  /** Which product each photo file belongs to, going by its name: an item's SKU first, then a product's handle. */
+  async matchPhotos(storeId: string, names: string[]): Promise<PhotoMatch[]> {
+    const wanted = names.slice(0, 300).map((name) => ({ name, keys: photoKeys(name) }));
+    const keys = [...new Set(wanted.flatMap((item) => item.keys))];
+    const owners = await this.catalog.findSkuOwners(storeId, keys);
+    const products = await this.catalog.findProducts(storeId, { handles: keys, ids: owners.map((owner) => owner.productId) });
+    const byHandle = new Map(products.map((product) => [product.handle.toLowerCase(), product]));
+    const byId = new Map(products.map((product) => [product.id, product]));
+    const bySku = new Map(owners.map((owner) => [owner.sku, byId.get(owner.productId)]));
+    return wanted.map(({ name, keys: candidates }) => {
+      for (const key of candidates) {
+        const viaSku = bySku.get(key);
+        const found = viaSku ?? byHandle.get(key);
+        if (found) return { name, product: { id: found.id, title: found.title, handle: found.handle, photoCount: found.media.length }, matchedBy: viaSku ? "sku" as const : "handle" as const };
+      }
+      return { name, product: null, matchedBy: null };
+    });
+  }
+
+  /** Stores one photo and adds it to the end of a product's photos. */
+  async addPhoto(storeId: string, userId: string | undefined, productId: string, fileName: string, contents: Buffer): Promise<{ productId: string; photoCount: number; added: boolean }> {
+    if (!this.images) throw new ApiError(503, "PHOTOS_UNAVAILABLE", "Photos cannot be uploaded on this server.");
+    const key = `${storeId}:${userId ?? ""}`;
+    const now = this.now();
+    const recent = (this.photoUploads.get(key) ?? []).filter((time) => now - time < UPLOAD_WINDOW_MS);
+    if (recent.length >= PHOTOS_PER_WINDOW) throw new ApiError(429, "PHOTOS_RATE_LIMITED", "You have uploaded a lot of photos in a short time. Wait a few minutes, then carry on.");
+    recent.push(now);
+    this.photoUploads.set(key, recent);
+    const product = await this.catalog.getProduct(storeId, productId);
+    if (!product) throw new ApiError(404, "PRODUCT_NOT_FOUND", "This product was not found.");
+    if (product.media.length >= MAX_PRODUCT_PHOTOS) throw new ApiError(422, "MEDIA_LIMIT_EXCEEDED", `This product already has ${MAX_PRODUCT_PHOTOS} photos, which is the most a product can have.`);
+    const media = await this.images.upload(storeId, fileName, contents);
+    if (product.media.some((item) => item.id === media.id)) return { productId, photoCount: product.media.length, added: false };
+    const after = await this.catalog.updateProduct(storeId, productId, { media: [...product.media.map((item) => ({ mediaId: item.id, altText: item.altText, appliesTo: item.appliesTo })), { mediaId: media.id }] });
+    return { productId, photoCount: after.media.length, added: true };
   }
 
   // ---- Helpers

@@ -1,5 +1,6 @@
 import type { CatalogCollection, CatalogProduct, CatalogVariant, CatalogVariantInput, CreateProductInput, UpdateProductInput } from "../catalog/types.js";
-import { columnByKey, parseList, parseMoney, parseStatus, parseWholeNumber, parseYesNo, slugify, variantOptionsOf, type ColumnKey, type ColumnMapping } from "./sheet.js";
+import { checkImageUrl } from "./image-fetch.js";
+import { MAX_IMPORT_IMAGES, columnByKey, parseList, parseMoney, parseStatus, parseWholeNumber, parseYesNo, slugify, storeMediaRef, variantOptionsOf, type ColumnKey, type ColumnMapping } from "./sheet.js";
 
 /**
  * Decides what an import would do, without saving anything. Pure: it is given the rows, the column
@@ -22,6 +23,8 @@ export interface ProductPlan {
   columns: string[];
   create?: CreateProductInput;
   update?: { productId: string; input: UpdateProductInput };
+  /** Photos to add once the product is saved: https addresses to fetch, or files already in the store. */
+  images?: string[];
 }
 
 export interface StoreSnapshot {
@@ -129,6 +132,15 @@ export function planImport(rows: string[][], mapping: ColumnMapping, mode: Impor
       else problem(first, "collections", `"${name}" is not a collection in your store. Create it first, or remove it from this cell.`);
     }
 
+    const images: string[] = [];
+    for (const entry of parseList(cellOf(first, "imageUrls"), ";")) {
+      if (storeMediaRef(entry)) { images.push(entry); continue; }
+      const checked = checkImageUrl(entry);
+      if (checked.ok) images.push(checked.url.toString());
+      else problem(first, "imageUrls", `"${entry.length > 70 ? `${entry.slice(0, 70)}…` : entry}" ${checked.reason}.`);
+    }
+    if (images.length > MAX_IMPORT_IMAGES) problem(first, "imageUrls", `has ${images.length} photos. The most in one import is ${MAX_IMPORT_IMAGES} per product.`);
+
     // Option names come from the first row that gives them; other rows may repeat them or leave them empty.
     const names = ([1, 2, 3] as const).map((position) => {
       const key = `option${position}Name` as ColumnKey;
@@ -196,7 +208,7 @@ export function planImport(rows: string[][], mapping: ColumnMapping, mode: Impor
         vendor: cellOf(first, "vendor") || null, productType: cellOf(first, "productType") || null, tags, collectionIds,
         seoTitle: cellOf(first, "seoTitle") || null, seoDescription: cellOf(first, "seoDescription") || null,
         options, inventoryOptionIds: optionIds, variants,
-      } });
+      }, ...(images.length ? { images } : {}) });
       continue;
     }
 
@@ -244,8 +256,8 @@ export function planImport(rows: string[][], mapping: ColumnMapping, mode: Impor
         const found: CatalogVariant | undefined = bySku ?? byChoices;
         if (found) {
           const next: CatalogVariantInput = { id: found.id, title: found.title, sku: found.sku, priceMinor: found.priceMinor, compareAtPriceMinor: found.compareAtPriceMinor, trackInventory: found.trackInventory, options: found.options };
-          if (mapped("sku") && fields.sku) { next.sku = fields.sku; write("sku"); }
-          if (mapped("price") && fields.price != null) { next.priceMinor = fields.price; write("price"); }
+          if (mapped("sku") && fields.sku) { next.sku = fields.sku; if (fields.sku !== found.sku) write("sku"); }
+          if (mapped("price") && fields.price != null) { next.priceMinor = fields.price; if (fields.price !== found.priceMinor) write("price"); }
           if (mapped("compareAtPrice") && fields.compareAt !== undefined) { next.compareAtPriceMinor = fields.compareAt; write("compareAtPrice"); }
           if (mapped("cost") && fields.cost != null) { next.costMinor = fields.cost; write("cost"); }
           if (mapped("barcode")) { next.barcode = fields.barcode || null; write("barcode"); }
@@ -286,9 +298,10 @@ export function planImport(rows: string[][], mapping: ColumnMapping, mode: Impor
       if (variants.length) input.variants = variants;
       if (optionsChanged) input.options = options;
     }
+    if (images.length) columns.add("Photos");
     if (reasons.length) { plans.push({ ...base, action: "problem", reasons }); continue; }
     if (!columns.size) { plans.push({ ...base, action: "skip", reasons: [{ row: first.row, message: "Nothing to change: the file has no columns for this product that can be updated." }] }); continue; }
-    plans.push({ ...base, action: "update", reasons: [], columns: [...columns], update: { productId: existing.id, input } });
+    plans.push({ ...base, action: "update", reasons: [], columns: [...columns], update: { productId: existing.id, input }, ...(images.length ? { images } : {}) });
   }
   return plans.sort((a, b) => a.rows[0] - b.rows[0]);
 }

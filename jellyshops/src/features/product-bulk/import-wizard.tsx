@@ -146,7 +146,7 @@ export function ImportWizard({ api }: { api: ProductBulkApi | null }) {
           <li>To change products you already have, export them from Products, edit the file and import it here. Nothing is duplicated.</li>
           <li>Items are found by their SKU, or by their Handle and option values (such as Size).</li>
           <li>A column you leave out of the file is not touched in your store.</li>
-          <li>Photos cannot be imported from a file yet. Add them in the product editor.</li>
+          <li>For photos, put their web addresses (starting with https://) in the Image URLs column, or <Link href="/admin/products/photos" className="jk-link">add photo files in bulk</Link> afterwards.</li>
         </ul>
       </Card>
       <Card title="Earlier imports" flush>
@@ -249,7 +249,8 @@ export function ImportWizard({ api }: { api: ProductBulkApi | null }) {
         <div className="jk-metric"><dt className="jk-metric-hint">Not imported</dt><dd><strong>{view.counts.failed}</strong></dd></div>
       </dl>
       {view.status === "undone" && <Banner tone="info">Products this import created were archived and changed values were put back. Stock was left as it is.</Banner>}
-      {view.status === "finished" && view.counts.failed === 0 && view.counts.created + view.counts.updated > 0 && <Banner tone="success">Everything in the file was imported. New products are drafts unless your file said otherwise.</Banner>}
+      {view.status === "finished" && view.counts.failed === 0 && !(view.counts.photoProblems ?? 0) && view.counts.created + view.counts.updated > 0 && <Banner tone="success">Everything in the file was imported. New products are drafts unless your file said otherwise.</Banner>}
+      {(view.counts.photoProblems ?? 0) > 0 && <Banner tone="warning" title={`${plural(view.counts.photoProblems ?? 0, "product was", "products were")} imported without all of ${view.counts.photoProblems === 1 ? "its" : "their"} photos`} action={<Button size="small" onClick={() => report(view.id)}>Download the report</Button>}>The report says which photo addresses could not be used and why. You can add those photos in the product editor, or fix the addresses and import the file again.</Banner>}
       {view.counts.failed + view.counts.skipped > 0 && <Banner tone={view.counts.failed ? "warning" : "info"} title={view.counts.failed ? `${plural(view.counts.failed, "product was", "products were")} not imported` : `${plural(view.counts.skipped, "product was", "products were")} skipped`} action={<Button size="small" onClick={() => report(view.id)}>Download the report</Button>}>The report lists each row, the column and the reason. Fix the file and import it again; products already imported are not duplicated.</Banner>}
       <div className="jk-row is-between">
         <div className="jk-row"><Link href="/admin/products" className={buttonClass("primary")}>View products</Link><Button onClick={startAgain}>Import another file</Button></div>

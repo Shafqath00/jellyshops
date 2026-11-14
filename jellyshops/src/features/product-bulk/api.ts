@@ -7,7 +7,8 @@ export type ImportMode = "create" | "update" | "upsert";
 export type ImportStatus = "uploaded" | "checked" | "running" | "finished" | "undone";
 export type ColumnMapping = Record<string, number>;
 export interface PlanCounts { products: number; create: number; update: number; skip: number; problem: number; rows: number; problemRows: number }
-export interface ImportCounts { created: number; updated: number; skipped: number; failed: number }
+export interface ImportCounts { created: number; updated: number; skipped: number; failed: number; photoProblems?: number }
+export interface PhotoMatch { name: string; product: { id: string; title: string; handle: string; photoCount: number } | null; matchedBy: "sku" | "handle" | null }
 export interface ImportView {
   id: string; fileName: string; format: "csv" | "xlsx"; status: ImportStatus; mode: ImportMode; rowCount: number;
   createdAt: string; finishedAt: string | null; undoneAt: string | null;
@@ -30,6 +31,10 @@ export interface ProductBulkApi {
   get(id: string): Promise<ImportDetail>;
   list(): Promise<ImportView[]>;
   undo(id: string): Promise<UndoResult>;
+  /** Which product each photo file name belongs to (by SKU, then by web address ending). */
+  matchPhotos(names: string[]): Promise<PhotoMatch[]>;
+  /** Uploads one photo onto a product. `added` is false when the product already had that exact photo. */
+  addPhoto(productId: string, file: File): Promise<{ productId: string; photoCount: number; added: boolean }>;
   /** Fetches a file with the merchant's sign-in and hands it to the browser to save. Says whether an export was cut short. */
   download(path: string): Promise<{ truncated: boolean; products: number | null }>;
 }
@@ -67,6 +72,8 @@ export function createProductBulkApi(origin: string, storeId: string, token: str
     get: (id) => fetcher(`${base}/imports/${encodeURIComponent(id)}`, { headers: auth }).then((response) => read<ImportDetail>(response)),
     list: () => fetcher(`${base}/imports`, { headers: auth }).then((response) => read<{ imports: ImportView[] }>(response)).then((body) => body.imports),
     undo: (id) => post<UndoResult>(`/imports/${encodeURIComponent(id)}/undo`),
+    matchPhotos: (names) => post<{ matches: PhotoMatch[] }>("/bulk/photo-matches", { names }).then((body) => body.matches),
+    addPhoto: (productId, file) => { const form = new FormData(); form.append("productId", productId); form.append("file", file); return fetcher(`${base}/bulk/photos`, { method: "POST", headers: auth, body: form }).then((response) => read<{ productId: string; photoCount: number; added: boolean }>(response)); },
     async download(path) {
       const response = await fetcher(base + path, { headers: auth });
       if (!response.ok) await read(response);

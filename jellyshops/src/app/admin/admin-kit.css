@@ -566,6 +566,10 @@ textarea.jk-input {min-height:80px;resize:vertical}
 .jk-prefixed:focus-within {outline:var(--jk-focus-ring);outline-offset:0}
 .jk-field .jk-prefixed input:focus-visible {outline:0}
 
+/* Bulk photos */
+.jk-photo-name {display:flex;align-items:center;gap:var(--jk-space-3);min-width:0}
+.jk-photo-name .jk-strong {display:block;overflow-wrap:anywhere}
+
 /* Home: common tasks */
 .jk-quick {display:flex;flex-wrap:wrap;gap:var(--jk-space-2)}
 .jk-quick .jk-chip {text-decoration:none}

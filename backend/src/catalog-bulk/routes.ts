@@ -19,6 +19,7 @@ const exportSchema = z.object({
   collectionId: z.string().min(1).max(160).optional(),
   available: z.enum(["true", "false"]).transform((value) => value === "true").optional(),
 });
+const matchSchema = z.object({ names: z.array(z.string().min(1).max(255)).min(1).max(300) }).strict();
 const checkSchema = z.object({ mapping: z.record(z.string(), z.number().int().min(0).max(200)), mode: z.enum(["create", "update", "upsert"]) }).strict();
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -29,7 +30,7 @@ const today = () => new Date().toISOString().slice(0, 10);
  * `POST /imports/:id/check`, `POST /imports/:id/run`, `GET /imports/:id`, `GET /imports/:id/report`,
  * `POST /imports/:id/undo`, `GET /imports`. Mounted before the catalogue router.
  */
-export function createProductBulkRouter(service: ProductBulkService, authProvider: AuthProvider): Router {
+export function createProductBulkRouter(service: ProductBulkService, authProvider: AuthProvider, maxPhotoBytes = 10 * 1024 * 1024): Router {
   const router = Router({ mergeParams: true });
   const view = [requireMerchant(authProvider), requireStorePermission("catalog:view")];
   const edit = [requireMerchant(authProvider), requireStorePermission("catalog:edit")];
@@ -45,6 +46,27 @@ export function createProductBulkRouter(service: ProductBulkService, authProvide
     response.setHeader("Cache-Control", "no-store");
     response.send(file.body);
   };
+
+  const photo = multer({ storage: multer.memoryStorage(), limits: { fileSize: maxPhotoBytes, files: 1 } }).single("file");
+  const receivePhoto: RequestHandler = (request, response, next) => photo(request, response, (error: unknown) => {
+    if (!error) { next(); return; }
+    next((error as { code?: string }).code === "LIMIT_FILE_SIZE" ? new ApiError(413, "PHOTO_TOO_LARGE", `This photo is larger than ${Math.round(maxPhotoBytes / 1024 / 1024)} MB. Make it smaller and try again.`) : new ApiError(400, "PHOTO_UPLOAD_FAILED", "The photo could not be uploaded. Try again."));
+  });
+
+  // Bulk photos: which product each file name belongs to, then one photo at a time.
+  router.post("/bulk/photo-matches", ...view, async (request, response, next) => {
+    try { response.json({ matches: await service.matchPhotos(request.storeContext!.storeId, matchSchema.parse(request.body ?? {}).names) }); } catch (error) { next(error); }
+  });
+
+  router.post("/bulk/photos", ...edit, receivePhoto, async (request, response, next) => {
+    try {
+      const file = (request as typeof request & { file?: { originalname: string; buffer: Buffer } }).file;
+      const productId = String((request.body as { productId?: unknown } | undefined)?.productId ?? "");
+      if (!file?.buffer?.length) throw new ApiError(422, "PHOTO_REQUIRED", "Choose a photo to upload.");
+      if (!productId) throw new ApiError(422, "PRODUCT_REQUIRED", "Say which product this photo is for.");
+      response.status(201).json(await service.addPhoto(request.storeContext!.storeId, request.storeContext!.userId, productId, file.originalname, file.buffer));
+    } catch (error) { next(error); }
+  });
 
   router.get("/bulk/template", ...view, async (request, response, next) => {
     try { send(response, "jelly-products-template", await service.template(formatSchema.parse(request.query.format))); } catch (error) { next(error); }
