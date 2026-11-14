@@ -46,15 +46,18 @@ export type AdminPageProps = {
   moreActions?: PageAction[];
   /** full = lists, detail = 2/3 + 1/3 pages, narrow = settings forms */
   width?: "full" | "detail" | "narrow";
+  /** Welcome card look (Home): dark Jelly card with a small line above the title. */
+  hero?: { eyebrow?: ReactNode };
   children: ReactNode;
 };
 
-export function AdminPage({ title, description, back, badges, primaryAction, secondaryActions = [], moreActions = [], width = "full", children }: AdminPageProps) {
+export function AdminPage({ title, description, back, badges, primaryAction, secondaryActions = [], moreActions = [], width = "full", hero, children }: AdminPageProps) {
   return <div className={`jk-page jk-page-${width}`}>
-    <header className="jk-page-header">
+    <header className={`jk-page-header ${hero ? "jk-welcome" : ""}`}>
       <div className="jk-page-title">
         {back && <Link href={back.href} className="jk-back" aria-label={`Back to ${back.label}`}><ArrowLeft size={16} aria-hidden="true" /></Link>}
         <div className="min-w-0">
+          {hero?.eyebrow && <p className="jk-eyebrow">{hero.eyebrow}</p>}
           <div className="jk-title-row"><h1>{title}</h1>{badges}</div>
           {description && <p className="jk-page-description">{description}</p>}
         </div>

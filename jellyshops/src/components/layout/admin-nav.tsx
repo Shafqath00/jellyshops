@@ -9,14 +9,14 @@ export type AdminNavGroup = AdminDestination & { icon: LucideIcon; section?: str
 /** Every admin page the sidebar and the page search know about, in menu order. */
 export const ADMIN_NAV: AdminNavGroup[] = [
   { label: "Home", href: "/admin", icon: Home },
-  { label: "Orders", href: "/admin/orders", icon: Inbox },
+  { label: "Orders", href: "/admin/orders", icon: Inbox, section: "Sell" },
   { label: "Products", href: "/admin/products", icon: Tag, children: [
     { label: "All products", href: "/admin/products" }, { label: "Collections", href: "/admin/products/collections" }, { label: "Inventory", href: "/admin/products/inventory" }, { label: "Reviews", href: "/admin/products/reviews" }, { label: "Import", href: "/admin/products/import" }, { label: "Add photos in bulk", href: "/admin/products/photos" },
   ] },
   { label: "Customers", href: "/admin/customers", icon: Users, children: [
     { label: "All customers", href: "/admin/customers" }, { label: "Messages", href: "/admin/customers/messages" },
   ] },
-  { label: "Content", href: "/admin/content/pages", icon: FileText, children: [
+  { label: "Content", href: "/admin/content/pages", icon: FileText, section: "Manage", children: [
     { label: "Pages", href: "/admin/content/pages" }, { label: "Blog posts", href: "/admin/content/blogs" }, { label: "Files", href: "/admin/content/files" }, { label: "Menus", href: "/admin/content/menus" }, { label: "Custom content", href: "/admin/content/metaobjects" },
   ] },
   { label: "Payments", href: "/admin/payments", icon: CreditCard },
@@ -46,6 +46,12 @@ function activeChild(pathname: string, children: AdminDestination[]) {
  * Sidebar navigation. A group shows its pages only while you are inside it, so the menu stays short
  * and the open group always says where you are.
  */
+/** Colour of each group's icon tile, in the Jelly style (one colour per area). */
+const NAV_TONES: Record<string, string> = {
+  "/admin": "lime", "/admin/orders": "blue", "/admin/products": "peach", "/admin/customers": "pink",
+  "/admin/content/pages": "violet", "/admin/payments": "mint", "/admin/online-store": "lime", "/admin/settings": "neutral",
+};
+
 export function AdminNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname() ?? "";
   const item = (group: AdminNavGroup) => {
@@ -56,7 +62,7 @@ export function AdminNav({ onNavigate }: { onNavigate?: () => void }) {
       {group.section && <p className="admin-nav-section">{group.section}</p>}
       <Link href={group.href} onClick={onNavigate} aria-current={exact ? "page" : undefined}
         className={`admin-nav-link ${exact ? "is-active" : ""} ${open ? "is-open" : ""}`}>
-        <group.icon size={16} aria-hidden="true" />{group.label}
+        <span className="admin-nav-icon" data-tone={NAV_TONES[group.href] ?? "neutral"} aria-hidden="true"><group.icon size={15} /></span>{group.label}
       </Link>
       {open && group.children && <ul className="admin-nav-children" aria-label={group.label}>
         {group.children.map((child) => <li key={child.href}>

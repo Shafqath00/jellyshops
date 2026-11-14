@@ -4,15 +4,15 @@
   --background:var(--jk-bg); --foreground:var(--jk-text); --card:var(--jk-surface); --card-foreground:var(--jk-text);
   --popover:var(--jk-surface); --popover-foreground:var(--jk-text); --muted:var(--jk-surface-subdued); --muted-foreground:var(--jk-text-subdued);
   --border:var(--jk-border); --input:var(--jk-border-strong); --primary:var(--jk-accent); --primary-foreground:var(--jk-accent-text);
-  --accent:var(--jk-surface-hover); --accent-foreground:var(--jk-text); --ring:var(--jk-focus); --radius:12px;
+  --accent:var(--jk-surface-hover); --accent-foreground:var(--jk-text); --ring:var(--jk-focus); --radius:16px;
   --tint-foreground:var(--jk-text); --tint-border:var(--jk-border-strong); --frame:var(--jk-topbar);
   --destructive:var(--jk-critical-text); --success:var(--jk-positive);
 }
-.admin-content h1 {font:600 24px/1.3 Arial,"Segoe UI",sans-serif!important;letter-spacing:-.025em!important}
+.admin-content h1 {font-family:var(--jk-font)!important;font-size:24px;font-weight:680;line-height:1.25;letter-spacing:var(--jk-tracking-tight)}
 .admin-content h2 {font-size:15px;font-weight:600;letter-spacing:0}
 .admin-content h3 {font-size:14px;font-weight:600}
 .admin-content button,.admin-content input,.admin-content select,.admin-content textarea {font-family:inherit}
-.admin-content input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=file]),.admin-content select,.admin-content textarea {border-radius:8px;font-size:14px;font-weight:400}
+.admin-content input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=file]),.admin-content select,.admin-content textarea {border-radius:12px;font-size:14px;font-weight:400}
 .admin-content input:focus-visible,.admin-content textarea:focus-visible,.admin-content select:focus-visible {outline:2px solid var(--ring);outline-offset:1px}
 .admin-content :is(section,article)[class*=shadow-] {box-shadow:0 1px 3px #00000005}
 .admin-content table {font-size:13px}

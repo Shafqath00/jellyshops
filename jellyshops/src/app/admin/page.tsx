@@ -58,7 +58,7 @@ export default function DashboardPage() {
   const salesLoading = !figures || !before;
   const retry = (action: () => void) => <button type="button" className="jk-button" onClick={action}>Try again</button>;
 
-  return <AdminPage title={`${greeting(timeZone)}`} description={<>{today}. Here is how {store.name} is doing, and what needs you next.</>}
+  return <AdminPage title={`${greeting(timeZone)}`} hero={{ eyebrow: today }} description={<>Here is how {store.name} is doing, and what needs you next.</>}
     primaryAction={{ label: "Add product", href: "/admin/products/new" }} secondaryActions={[{ label: "View store", href: `/${store.slug}` }]}>
     {summary.error && <Banner tone="critical" title="Some of your dashboard did not load" action={retry(summary.retry)}>{summary.error.message}</Banner>}
 
