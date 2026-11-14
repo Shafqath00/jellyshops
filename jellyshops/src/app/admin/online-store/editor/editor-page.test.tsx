@@ -61,7 +61,7 @@ it("selects a section, shows its settings, and saves a hidden block through the 
   const user = userEvent.setup();
   const tree = await loaded();
   await user.click(within(tree).getByRole("button", { name: "Custom content" }));
-  expect(await screen.findByText("Section settings")).toBeInTheDocument();
+  expect(await screen.findByRole("navigation", { name: "You are editing" })).toBeInTheDocument();
   // Selecting a section opens it in the tree.
   expect(within(tree).getByRole("button", { name: "Collapse Custom content" })).toBeInTheDocument();
   await user.click(within(tree).getByRole("button", { name: /^Hide Button: Shop now/ }));

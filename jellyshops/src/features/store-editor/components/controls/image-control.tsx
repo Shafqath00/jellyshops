@@ -321,6 +321,10 @@ export function ImageControl({
             </p>
           </div>
 
+          {/* Less used image options, folded away so the panel starts with the image and its description. */}
+          <details className="rounded-lg border border-border px-3 py-2" open={value.fit === "contain" || (value.focalPoint !== undefined && (value.focalPoint.x !== 50 || value.focalPoint.y !== 50)) || undefined}>
+            <summary className="cursor-pointer text-[12px] font-medium text-foreground">Position, fit and accessibility</summary>
+            <div className="mt-3 space-y-4">
           {/* Decorative */}
           <label className="flex min-h-8 cursor-pointer items-center justify-between gap-4">
             <div>
@@ -450,22 +454,9 @@ export function ImageControl({
             </div>
           </section>
 
-          {/* Destructive action */}
-          <div className="border-t border-border pt-4">
-            <button
-              type="button"
-              onClick={() =>
-                onChange(undefined)
-              }
-              className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2 text-[11px] font-medium text-destructive transition hover:bg-muted/50"
-            >
-              <Trash2
-                size={13}
-              />
+            </div>
+          </details>
 
-              Remove image
-            </button>
-          </div>
         </>
       )}
     </div>

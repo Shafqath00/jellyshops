@@ -21,9 +21,9 @@ export function DynamicSourcePicker({
   if (compatible.length === 0) return null;
 
   return (
-    <div className="mt-2 rounded-lg border border-border bg-muted/50 p-2" aria-label="Dynamic sources">
-      <p className="px-1 pb-1.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Dynamic source</p>
-      <div className="space-y-0.5">
+    <details className="mt-1.5" aria-label="Dynamic sources">
+      <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground [&::-webkit-details-marker]:hidden" title="Fill this in automatically from your store, such as the store name or the product shown">Use store data</summary>
+      <div className="mt-1 space-y-0.5 rounded-lg border border-border bg-muted/50 p-1">
         {compatible.map((source) => (
           <button
             key={source.id}
@@ -36,6 +36,6 @@ export function DynamicSourcePicker({
           </button>
         ))}
       </div>
-    </div>
+    </details>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, LayoutPanelTop, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, LayoutPanelTop, MousePointerClick, Plus, Trash2 } from "lucide-react";
 import { blockLabel, getBlockDefinition } from "@jelly/storefront-registry";
 import { GlobalSectionPanel } from "@/features/store-editor/components/global-section-panel";
 import { SettingGroups } from "@/features/store-editor/components/inspector/setting-groups";
@@ -142,24 +142,16 @@ export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
               </button>
               <LayoutPanelTop size={16} className="text-[var(--ink-soft)]" />
               <div className="min-w-0">
-                <p className="text-[12px] text-[var(--ink-soft)]">
-                  {selectedElement && selectedBlock ? blockLabel(selectedBlock.type) : (selectedBlock || selectedElement) && localSection.type !== "rich-text" ? displayName(localSection.type, ctx.themeConfiguration?.themeVersion) : "Section settings"}
-                </p>
+                <nav aria-label="You are editing" className="flex min-w-0 items-center gap-1 text-[12px] text-[var(--ink-soft)]">
+                  <span className="truncate">{activeTemplate.name}</span>
+                  {(selectedBlock || selectedElement) && localSection.type !== "rich-text" && <><span aria-hidden="true">›</span><button type="button" className="truncate underline-offset-2 hover:text-[var(--ink)] hover:underline" onClick={() => setSelection({ kind: "section", region: selection && selection.kind !== "theme" ? selection.region : "template", sectionId: localSection.id })}>{displayName(localSection.type, ctx.themeConfiguration?.themeVersion)}</button></>}
+                  {selectedElement && selectedBlock && <><span aria-hidden="true">›</span><button type="button" className="truncate underline-offset-2 hover:text-[var(--ink)] hover:underline" onClick={() => setSelection({ kind: "block", region: selection && selection.kind !== "theme" ? selection.region : "template", sectionId: localSection.id, blockId: selectedBlock.id })}>{blockLabel(selectedBlock.type)}</button></>}
+                </nav>
                 <p className="truncate text-[13px] font-semibold">
                   {selectedElement ? selectedElement.label : localSection.type === "rich-text" || !selectedBlock ? displayName(localSection.type, ctx.themeConfiguration?.themeVersion) : blockLabel(selectedBlock.type)}
                 </p>
               </div>
             </div>
-            {!selectedBlock && !selectedElement && !selectedGlobal && (
-              <button
-                type="button"
-                aria-label="Remove section"
-                onClick={() => { void removeSelectedSection(); }}
-                className="grid size-8 place-items-center rounded-lg text-[var(--destructive)] hover:bg-[var(--paper-deep)]"
-              >
-                <Trash2 size={15} />
-              </button>
-            )}
           </div>
 
           <div className="border-b border-[var(--line)] px-4 py-4">
@@ -237,14 +229,25 @@ export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
               </button>
             </div>
           )}
+          {!selectedBlock && !selectedElement && !selectedGlobal && (
+            <div className="p-3">
+              <button type="button" aria-label="Remove section" onClick={() => { void removeSelectedSection(); }} className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl text-[13px] font-semibold text-[var(--destructive)] hover:bg-[var(--paper-deep)]">
+                <Trash2 size={15} aria-hidden="true" /> Remove section
+              </button>
+            </div>
+          )}
         </>
       )}
 
       {!localSection && selection?.kind !== "theme" && !libraryRegion && !blockPickerSectionId && (
         <div className="px-6 py-12 text-center">
-          <LayoutPanelTop className="mx-auto text-[var(--ink-soft)]" size={28} />
-          <p className="mt-3 text-[13px] font-semibold">Select a section to edit</p>
-          <p className="mt-1 text-[13px] leading-5 text-[var(--ink-soft)]">Choose a section or content block from the page structure, or add a new section.</p>
+          <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-[var(--jk-tone-lime-bg)] text-[var(--jk-tone-lime-fg)]"><MousePointerClick size={24} aria-hidden="true" /></span>
+          <p className="mt-4 text-[15px] font-semibold">Select a section to edit</p>
+          <p className="mx-auto mt-1 max-w-[240px] text-[13px] leading-5 text-[var(--ink-soft)]">Click anything in the preview, or pick a section in the list on the left. Its settings open here.</p>
+          <div className="mt-5 flex flex-col items-center gap-2">
+            <button type="button" onClick={() => { setLibraryRegion("template"); setMobilePanel("settings"); }} className="inline-flex h-9 items-center gap-2 rounded-full bg-[var(--jk-accent)] px-4 text-[13px] font-semibold text-[var(--jk-accent-text)]"><Plus size={15} aria-hidden="true" /> Add section</button>
+            <button type="button" onClick={() => setSelection({ kind: "theme" })} className="inline-flex h-9 items-center gap-2 rounded-full px-4 text-[13px] font-medium text-[var(--ink)] hover:bg-[var(--paper)]">Theme settings: colours and fonts</button>
+          </div>
         </div>
       )}
 

@@ -16,7 +16,7 @@ describe("setting groups", () => {
 
     expect(screen.getByRole("heading", { name: "Content" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Layout" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Appearance" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Style" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Advanced" })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Heading" })).toHaveValue("Fresh jelly");
   });
@@ -56,7 +56,7 @@ it("splits controls under their sub-headings and hides controls until they apply
   const { rerender } = render(<SettingGroups controls={styled} settings={{}} catalog={{ products: [], collections: [] }} onChange={vi.fn()} />);
   expect(screen.getByRole("heading", { name: "Borders" })).toBeInTheDocument();
   expect(screen.getByRole("heading", { name: "Padding" })).toBeInTheDocument();
-  expect(screen.queryByRole("heading", { name: "Appearance" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("heading", { name: "Style" })).not.toBeInTheDocument();
   expect(screen.queryByLabelText("Border colour")).not.toBeInTheDocument();
   rerender(<SettingGroups controls={styled} settings={{ blockBorder: "solid" }} catalog={{ products: [], collections: [] }} onChange={vi.fn()} />);
   expect(screen.getByLabelText("Border colour")).toBeInTheDocument();

@@ -28,6 +28,7 @@ it("shows only sources compatible with the control's declared dynamic types", as
     />,
   );
 
+  await userEvent.click(screen.getByText("Use store data"));
   expect(screen.getByRole("button", { name: "Product title" })).toBeVisible();
   expect(screen.queryByRole("button", { name: "Product featured image" })).toBeNull();
 

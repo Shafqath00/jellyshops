@@ -19,7 +19,7 @@ const groups: Array<{
 }> = [
   { id: "content", label: "Content" },
   { id: "layout", label: "Layout" },
-  { id: "style", label: "Appearance" },
+  { id: "style", label: "Style" },
   { id: "advanced", label: "Advanced" },
 ];
 
