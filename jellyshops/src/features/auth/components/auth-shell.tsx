@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, PoundSterling, ShoppingBag } from "lucide-react";
+import { PoundSterling } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
@@ -13,9 +13,8 @@ import styles from "./merchant-auth.module.css";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
+// The picture already shows "Store published" and "New order", so only the payout card floats over it.
 const CARDS = [
-  { id: "published", icon: Check, label: "Store published", value: "fern-studio", className: styles.cardTop, delay: 0.5 },
-  { id: "order", icon: ShoppingBag, label: "New order", value: "£86.00", className: styles.cardMiddle, delay: 0.7 },
   { id: "payout", icon: PoundSterling, label: "Payout on its way", value: "£1,240.50", className: styles.cardBottom, delay: 0.9 },
 ];
 
@@ -52,7 +51,7 @@ function AuthVisual() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 1, ease: EASE, delay: 0.15 }}
         >
-          <Image src="/assets/hero-dashboard-storefront.webp" alt="" width={1536} height={1024} sizes="(max-width: 1023px) 0px, 46vw" priority />
+          <Image src="/assets/auth-visual.webp" alt="" width={768} height={1152} sizes="(max-width: 1023px) 0px, 420px" priority />
         </motion.div>
         {CARDS.map(({ id, icon: Icon, label, value, className, delay }) => (
           <motion.div

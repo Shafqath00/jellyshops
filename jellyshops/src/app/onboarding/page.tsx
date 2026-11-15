@@ -417,7 +417,9 @@ function Stage({ step, answers, logo, active, reduced }: { step: VisibleStep; an
           <motion.div key={active ? picture : "idle"} className={styles.stageImage}
             initial={reduced ? { opacity: 0 } : { opacity: 0, y: 24, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduced ? { opacity: 0 } : { opacity: 0, y: -16, scale: 0.98 }} transition={{ duration: 0.5, ease: EASE }}>
-            <Image src={active ? picture : stepVisual.store} alt="" width={1200} height={800} sizes="(max-width: 1023px) 0px, 44vw" data-colour={step === "branding" || undefined} />
+            {step === "branding" && active
+              ? <Image src={picture} alt="" width={1200} height={800} sizes="(max-width: 1023px) 0px, 44vw" data-colour />
+              : <Image src={active ? picture : stepVisual.store} alt="" width={1024} height={1024} sizes="(max-width: 1023px) 0px, 36vw" />}
           </motion.div>
         </AnimatePresence>
       </div>

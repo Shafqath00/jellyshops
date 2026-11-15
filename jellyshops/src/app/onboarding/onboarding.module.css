@@ -250,10 +250,12 @@ select.input { appearance: none; padding-right: 36px; background-image: url("dat
   .stageGrid { z-index: -2; object-fit: cover; object-position: center 80%; opacity: .45; }
   :global(html[data-home-theme="light"]) .stageGrid { filter: invert(1); opacity: .3; }
   .stageGlow { position: absolute; inset: 20% 10% 10%; z-index: -1; background: radial-gradient(ellipse at center, var(--glow), transparent 65%); filter: blur(50px); }
-  .stageVisual { position: relative; display: grid; align-items: center; min-height: 0; }
-  .stageImage { overflow: hidden; border: 1px solid var(--line-strong); border-radius: 18px; background: var(--bg); box-shadow: 0 40px 100px -40px rgb(0 0 0 / 80%); }
-  .stageImage img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
-  .stageImage img:not([data-colour]) { object-position: center 60%; }
+  /* The picture fits the space left above the preview: square step pictures, 3:2 design covers. */
+  .stageVisual { position: relative; display: grid; place-items: center; height: 100%; min-height: 0; container-type: size; }
+  .stageImage { width: min(100cqw, 100cqh); overflow: hidden; border: 1px solid var(--line-strong); border-radius: 18px; background: var(--bg); box-shadow: 0 40px 100px -40px rgb(0 0 0 / 80%); }
+  .stageImage:has(img[data-colour]) { width: min(100cqw, 150cqh); }
+  .stageImage img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; }
+  .stageImage img[data-colour] { aspect-ratio: 3 / 2; }
 
   .preview { display: grid; gap: 10px; width: min(100%, 380px); justify-self: center; }
   .previewBar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg-raised); color: var(--fg-muted); font: 500 .75rem/1.2 var(--mono); overflow-wrap: anywhere; }

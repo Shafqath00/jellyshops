@@ -28,13 +28,13 @@ export const stepContent: Record<VisibleStep, { label: string; title: string; de
   products: { label: "First product", title: "Add your first product", description: "Just the basics for now. You can add photos, sizes and stock details from your dashboard." },
 };
 
-/** Placeholder visuals beside each step (the dedicated illustrations are still to be generated). */
+/** Square pictures beside each step (prompts in docs/redesign/ASSETS.md). The design step shows the chosen design's own cover instead. */
 export const stepVisual: Record<VisibleStep, string> = {
-  store: "/assets/hero-dashboard-storefront.webp",
-  business: "/assets/feature-products.webp",
-  profile: "/assets/feature-orders.webp",
+  store: "/assets/onboarding-store.webp",
+  business: "/assets/onboarding-sell.webp",
+  profile: "/assets/onboarding-channels.webp",
   branding: "",
-  products: "/assets/feature-checkout.webp",
+  products: "/assets/onboarding-product.webp",
 };
 
 export const categories = [

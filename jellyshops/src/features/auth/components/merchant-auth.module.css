@@ -170,9 +170,10 @@
   .artCopy { display: grid; gap: 12px; }
   .artTitle { color: var(--fg); font-size: clamp(2rem, 3.4vw, 3.25rem); font-weight: 600; line-height: 1; letter-spacing: -.05em; }
   .artTitle span { color: var(--fg-muted); }
-  .artStage { position: relative; align-self: center; transform-style: preserve-3d; will-change: transform; }
-  .artFrame { overflow: hidden; border: 1px solid var(--line-strong); border-radius: 18px; background: var(--bg); box-shadow: 0 40px 100px -40px rgb(0 0 0 / 80%); }
-  .artFrame img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; object-position: center 72%; }
+  /* Portrait picture: as tall as the space between the title and the note allows, 2:3, centred. */
+  .artStage { position: relative; justify-self: center; height: 100%; max-height: 640px; aspect-ratio: 2 / 3; max-width: 100%; min-height: 0; transform-style: preserve-3d; will-change: transform; }
+  .artFrame { height: 100%; overflow: hidden; border: 1px solid var(--line-strong); border-radius: 18px; background: var(--bg); box-shadow: 0 40px 100px -40px rgb(0 0 0 / 80%); }
+  .artFrame img { display: block; width: 100%; height: 100%; object-fit: cover; }
   .card { position: absolute; z-index: 2; }
 
   .cardInner {
@@ -190,9 +191,7 @@
   .cardInner small { display: block; color: var(--fg-muted); font: 500 .6875rem/1.3 var(--mono); letter-spacing: .03em; text-transform: uppercase; }
   .cardInner strong { color: var(--fg); font-size: .9375rem; font-weight: 550; }
   .cardIcon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 999px; background: var(--fg); color: var(--bg); }
-  .cardTop { top: -8%; right: 6%; }
-  .cardMiddle { top: 42%; left: -6%; }
-  .cardBottom { bottom: -10%; right: 10%; }
+  .cardBottom { bottom: 8%; left: -18%; }
   .artNote { color: var(--fg-subtle); font: 500 .75rem/1.4 var(--mono); letter-spacing: .02em; }
 }
 
