@@ -84,8 +84,11 @@ export function Counter({ value, prefix = "", suffix = "", decimals = 0 }: { val
   const final = format(value);
 
   // Server HTML and no-JS show the real number; with JS it starts at 0 and counts up once seen.
+  // `reduced` is false on the first render and may turn true just after (hydration-safe), so put the real number back then.
   useEffect(() => {
-    if (!reduced && text.current && !inView) text.current.textContent = format(0);
+    if (!text.current) return;
+    if (reduced) text.current.textContent = final;
+    else if (!inView) text.current.textContent = format(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reduced]);
 

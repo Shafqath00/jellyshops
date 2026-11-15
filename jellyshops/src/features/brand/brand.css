@@ -1,5 +1,7 @@
 /*
- * Jellyshop brand tokens (docs/redesign/DESIGN_TOKENS.md): black-and-white premium.
+ * Jellyshop brand tokens (docs/redesign/DESIGN_TOKENS.md): premium dark base with a vibrant accent system
+ * (electric violet #7C5CFF, blue #3B82F6, cyan #22D3EE, warm magenta #F0449A and amber #FFB547).
+ * Every text token below is measured for WCAG AA against its page colour (see DESIGN_TOKENS.md).
  * Shared by the home page, sign-in/sign-up and onboarding. Put `data-brand` on the page root.
  * Dark is the default; the saved light-mode choice sets `html[data-home-theme="light"]`
  * before paint (script in the root layout).
@@ -22,6 +24,31 @@
   --danger: #ff8a8a;
   --danger-bg: rgb(255 138 138 / 10%);
   --ok: #86efac;
+
+  /* Accents. Fill colours are for shapes and glows; text colours pass AA on --bg (contrast in brackets). */
+  --violet: #7c5cff;
+  --blue: #3b82f6;
+  --cyan: #22d3ee;
+  --magenta: #f0449a;
+  --amber: #ffb547;
+  --accent: #9b87ff;            /* violet text and icons (6.9:1) */
+  --accent-2: #22d3ee;          /* cyan text and icons (11:1) */
+  --accent-warm: #ffb547;       /* amber text and icons (11.3:1) */
+  --accent-line: rgb(124 92 255 / 45%);
+  --accent-soft: rgb(124 92 255 / 14%);
+  --grad-brand: linear-gradient(135deg, #7c5cff 0%, #3b82f6 55%, #22d3ee 100%);
+  --grad-warm: linear-gradient(135deg, #f0449a 0%, #ffb547 100%);
+  --grad-text: linear-gradient(90deg, #a78bfa 0%, #60a5fa 50%, #22d3ee 100%);      /* weakest stop 7.3:1 */
+  --grad-text-warm: linear-gradient(90deg, #f472b6 0%, #ffb547 100%);              /* weakest stop 7.5:1 */
+  --btn-primary: linear-gradient(135deg, #6d4aff 0%, #2563eb 100%);                 /* white text 5.15:1 */
+  --btn-primary-fg: #fff;
+  --glow-accent: rgb(124 92 255 / 40%);
+  --glow-cyan: rgb(34 211 238 / 28%);
+  --glow-warm: rgb(240 68 154 / 24%);
+  --tint-violet: rgb(124 92 255 / 8%);
+  --tint-cyan: rgb(34 211 238 / 6%);
+  --tint-warm: rgb(255 181 71 / 6%);
+
   --ease: cubic-bezier(.22, 1, .36, 1);
   --sans: var(--font-geist), "Inter", system-ui, sans-serif;
   --mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -45,6 +72,19 @@ html[data-home-theme="light"] [data-brand] {
   --danger: #b42318;
   --danger-bg: rgb(180 35 24 / 7%);
   --ok: #15803d;
+  --accent: #5b3df5;            /* 5.9:1 on #FAFAFA */
+  --accent-2: #0e7490;          /* 5.1:1 */
+  --accent-warm: #b45309;       /* 4.8:1 */
+  --accent-line: rgb(91 61 245 / 35%);
+  --accent-soft: rgb(91 61 245 / 9%);
+  --grad-text: linear-gradient(90deg, #6d28d9 0%, #2563eb 50%, #0e7490 100%);      /* weakest stop 4.95:1 */
+  --grad-text-warm: linear-gradient(90deg, #be185d 0%, #b45309 100%);              /* weakest stop 4.8:1 */
+  --glow-accent: rgb(124 92 255 / 28%);
+  --glow-cyan: rgb(34 211 238 / 20%);
+  --glow-warm: rgb(240 68 154 / 16%);
+  --tint-violet: rgb(124 92 255 / 7%);
+  --tint-cyan: rgb(34 211 238 / 7%);
+  --tint-warm: rgb(255 181 71 / 9%);
   color-scheme: light;
 }
 

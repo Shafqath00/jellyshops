@@ -35,7 +35,7 @@ export function Hero() {
   return (
     <section className={styles.hero} aria-labelledby="hero-title">
       <div className={styles.heroBackdrop} aria-hidden="true">
-        <Image src="/assets/bg-hero-grid.webp" alt="" fill priority sizes="100vw" className={styles.heroGrid} />
+        <Image src="/assets/hero-bg.webp" alt="" fill priority sizes="100vw" className={styles.heroGrid} />
         <div className={styles.heroGlow} />
       </div>
 
@@ -55,11 +55,15 @@ export function Hero() {
 
         <h1 id="hero-title" className={styles.heroTitle}>
           {LINES.map((line, lineIndex) => (
-            <span key={lineIndex} className={`${styles.heroLine} ${lineIndex === 1 ? styles.heroLineMuted : ""}`}>
-              {line.map((w) => {
+            <span key={lineIndex} className={styles.heroLine}>
+              {line.map((w, wordIndex) => {
                 const i = index++;
+                // The outcome line ("Sell from day one.") is in the signature gradient; each word shows its own slice of it.
+                const gradient = lineIndex === 1
+                  ? { backgroundSize: `${line.length * 100}% 100%`, backgroundPosition: `${(wordIndex / (line.length - 1)) * 100}% 0` }
+                  : undefined;
                 return (
-                  <motion.span key={`${w}-${i}`} className={styles.word} custom={i} variants={word} initial={reduced ? false : "hidden"} animate="show">
+                  <motion.span key={`${w}-${i}`} className={`${styles.word} ${gradient ? styles.gradientWord : ""}`} style={gradient} custom={i} variants={word} initial={reduced ? false : "hidden"} animate="show">
                     {w}{" "}
                   </motion.span>
                 );
@@ -104,8 +108,8 @@ export function Hero() {
             transition={{ duration: 1.1, ease: EASE, delay: 0.6 }}
           >
             <Image
-              src="/assets/hero-dashboard-storefront.webp"
-              alt="The Jellyshop dashboard on a laptop showing £24,860 in sales and recent orders, next to a phone showing the store a shopper sees"
+              src="/assets/hero-mockup.webp"
+              alt="The Jellyshop dashboard on a laptop showing £24,860 in sales, a sales chart and recent orders, next to a phone showing the shop a customer sees"
               width={1536}
               height={1024}
               priority
