@@ -474,8 +474,9 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .auth-page { position: relative; isolation: isolate; overflow: hidden; min-height: 100svh; display: grid; place-items: center; padding: 24px; color: #0a0a0a; background: #f3f2ec; font-family: var(--font-inter), "Segoe UI", system-ui, sans-serif; }
 .auth-page::before { content: ""; position: absolute; z-index: -1; inset: -20%; background: radial-gradient(closest-side at 18% 22%, #d9ff5c99, transparent 70%), radial-gradient(closest-side at 84% 78%, #9fb4ff99, transparent 70%), radial-gradient(closest-side at 88% 14%, #f7b6d866, transparent 70%); filter: blur(30px); }
 .auth-panel { position: relative; width: min(100%, 460px); padding: clamp(28px, 6vw, 44px); overflow: hidden; border-radius: 28px; background: #fffffff2; box-shadow: inset 0 1px 0 #fff, 0 0 0 1px #e6e3da, 0 24px 60px #0a0a0a1a; backdrop-filter: blur(12px); }
-.auth-brand { display: inline-flex; align-items: center; gap: 10px; color: #0a0a0a; font-size: 19px; font-weight: 750; letter-spacing: -.04em; text-decoration: none; }
-.auth-brand span { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 50%; background: #c9ff18; color: #0a0a0a; font-size: 15px; box-shadow: inset 0 -2px 0 #0a0a0a1f, inset 0 2px 0 #ffffff80; }
+.auth-brand { display: inline-flex; align-items: center; }
+.brand-logo-dark, .admin-dark .brand-logo-light { display: none; }
+.admin-dark .brand-logo-dark { display: block; }
 .auth-intro { position: relative; margin: 32px 0 26px; }
 .auth-intro > p { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; color: #6b675f; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
 .auth-intro > p::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }

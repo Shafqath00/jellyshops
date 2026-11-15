@@ -617,10 +617,10 @@ fieldset.jk-field {border:0;padding:0;margin:0;min-width:0}
 .jk-eyebrow {display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:11px;font-weight:600;letter-spacing:var(--jk-tracking-label);text-transform:uppercase;color:var(--jk-text-subdued)}
 .jk-eyebrow::before {content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
 
-/* Welcome card (Home). Text sits on solid ink; the watercolour washes stay in the right-hand corner. */
+/* Welcome card (Home). Text sits on solid ink; the lime wash stays in the right-hand corner. */
 .jk-welcome {position:relative;isolation:isolate;overflow:hidden;align-items:flex-end;padding:28px 24px;border-radius:var(--jk-radius-lg);background:var(--jk-ink);color:#fff;box-shadow:0 12px 32px #0a0a0a29}
 .jk-welcome::before {content:"";position:absolute;z-index:-1;inset:0;background-image:radial-gradient(#ffffff14 1px,transparent 1px);background-size:14px 14px;mask-image:linear-gradient(90deg,transparent 30%,#000)}
-.jk-welcome::after {content:"";position:absolute;z-index:-1;right:-80px;top:-120px;width:420px;height:360px;background:radial-gradient(closest-side,#2f5bffaa,transparent),radial-gradient(closest-side at 70% 80%,#c9ff1866,transparent);filter:blur(20px);opacity:.9}
+.jk-welcome::after {content:"";position:absolute;z-index:-1;right:-80px;top:-120px;width:420px;height:360px;background:radial-gradient(closest-side at 70% 80%,#c9ff1866,transparent);filter:blur(20px);opacity:.9}
 .jk-welcome .jk-eyebrow {color:#c9c6bd}
 .jk-welcome .jk-title-row h1 {color:#fff;font-size:clamp(28px,4vw,40px)!important;font-weight:720;letter-spacing:-.035em;line-height:1.1}
 .jk-welcome .jk-page-description {color:#d6d3ca;font-size:14px}

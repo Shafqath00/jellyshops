@@ -84,7 +84,7 @@ export function StorefrontFrame({ storeSlug, children }: { storeSlug: string; ch
   // Saved global sections can include old themes. Render only placements in the selected template.
   // Header, announcement and footer settings connected to custom fields show the store's (or this product's) values.
   const layout = useChromeBindingValues(snapshot, template, resource && (pageType === "product" || pageType === "collection") ? { type: pageType, id: resource.id } : undefined);
-  if (!store) return <main className="store-missing"><span>404</span><h1>This Jelly Shop isn’t here.</h1><p>Check the storefront URL and try again.</p><Link className="button button-primary" href="/">Back to Jelly Shop</Link></main>;
+  if (!store) return <main className="store-missing"><span>404</span><h1>This store isn’t here.</h1><p>Check the storefront URL and try again.</p><Link className="button button-primary" href="/">Back to Jellyshop</Link></main>;
   const resolvedTheme = resolveTheme(publishedTheme?.id, publishedTheme?.settings ?? {}, publishedTheme?.version);
   const cart = repository.getCartForStore(storeSlug);
   const cartCount = cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;

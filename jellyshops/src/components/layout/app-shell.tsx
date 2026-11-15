@@ -7,6 +7,7 @@ import { AdminNav } from "./admin-nav";
 import { AdminSearch } from "./admin-search";
 import { AccountMenu, storeInitial } from "./account-menu";
 import { AdminThemeToggle } from "./admin-theme-toggle";
+import { BrandLogo } from "./brand-logo";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ToastProvider } from "@/components/admin/toast";
 
@@ -14,11 +15,6 @@ import { ToastProvider } from "@/components/admin/toast";
  * Admin frame (Jelly look): sidebar with the brand on the stone page from 1024px, and a rounded canvas
  * whose header row holds page search and store actions. Below 1024px the sidebar moves into a drawer. Styles: app/admin/admin-shell.css.
  */
-/** Lime Jelly mark used in the sidebar, the phone header and the drawer. */
-function BrandMark() {
-  return <span className="admin-brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 9.5a7 7 0 0 1 14 0v4.2c0 .9-.7 1.6-1.6 1.6-.6 0-1.1-.3-1.4-.8a1.8 1.8 0 0 0-3.2 0 1.8 1.8 0 0 1-3.2 0 1.8 1.8 0 0 0-3.2 0c-.3.5-.8.8-1.4.8-.9 0-1.6-.7-1.6-1.6V9.5Z" fill="currentColor"/><circle cx="9.5" cy="10" r="1.3" fill="var(--jk-lime)"/><circle cx="14.5" cy="10" r="1.3" fill="var(--jk-lime)"/></svg></span>;
-}
-
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { activeStore: store, stores, setActiveStoreId, session, signOut } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -35,7 +31,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   </div></div>;
   return <ToastProvider><div className="admin-shell">
     <aside className="admin-sidebar" aria-label="Sidebar">
-      <Link href="/admin" className="admin-brand admin-sidebar-brand" aria-label="Jelly Shop home"><BrandMark /><span className="admin-brand-name">jelly shop</span></Link>
+      <Link href="/admin" className="admin-brand admin-sidebar-brand" aria-label="Jellyshop home">
+        <BrandLogo height={36} variant="adaptive" />
+      </Link>
       <AdminNav />{storeCard}
     </aside>
     <div className="admin-workspace">
@@ -44,12 +42,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild><button type="button" aria-label="Open navigation" className="admin-topbar-button admin-menu-button"><Menu size={20} /></button></SheetTrigger>
             <SheetContent side="left" className="admin-drawer">
-              <SheetTitle className="admin-drawer-head"><BrandMark />jelly shop</SheetTitle>
+              <SheetTitle className="admin-drawer-head">
+                <BrandLogo height={36} variant="adaptive" />
+                <span className="sr-only">Jellyshop</span>
+              </SheetTitle>
               <SheetDescription className="sr-only">Find a page in your store admin.</SheetDescription>
               <AdminNav onNavigate={() => setMenuOpen(false)} />{storeCard}
             </SheetContent>
           </Sheet>
-          <Link href="/admin" className="admin-brand admin-brand-compact" aria-label="Jelly Shop home"><BrandMark /><span className="admin-brand-name">jelly shop</span></Link>
+          <Link href="/admin" className="admin-brand admin-brand-compact" aria-label="Jellyshop home">
+            <BrandLogo className="admin-brand-name" height={32} variant="adaptive" />
+            <BrandLogo className="admin-brand-icon" height={32} variant="icon" />
+          </Link>
         </div>
         <div className="admin-topbar-center"><AdminSearch /></div>
         <div className="admin-topbar-end">

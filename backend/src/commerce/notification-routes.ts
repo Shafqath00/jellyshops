@@ -25,7 +25,7 @@ export function createNotificationRouter(service: NotificationService, auth: Aut
   }));
   router.post("/preview", requireStorePermission("settings:manage"), asyncRoute(async (req, res) => {
     const { type, template } = typeSchema.extend({ template: templateSchema.optional() }).parse(req.body); const branding = await service.branding(req.storeContext!.storeId);
-    res.json(renderOrderNotification(type, { brandName: String(branding.brandName ?? "Jelly Shop"), accentColor: String(branding.accentColor ?? "#14213d"), logoUrl: typeof branding.logoUrl === "string" ? branding.logoUrl : undefined, contactEmail: typeof branding.replyTo === "string" ? branding.replyTo : undefined, number: "PREVIEW-001", totalMinor: 2500, currency: "USD", orderUrl: "https://example.invalid/order", customerName: "Customer", items: [{ title: "Example item", quantity: 2, unitPriceMinor: 1250 }] }, template ?? await service.template(req.storeContext!.storeId, type)));
+    res.json(renderOrderNotification(type, { brandName: String(branding.brandName ?? "Jellyshop"), accentColor: String(branding.accentColor ?? "#14213d"), logoUrl: typeof branding.logoUrl === "string" ? branding.logoUrl : undefined, contactEmail: typeof branding.replyTo === "string" ? branding.replyTo : undefined, number: "PREVIEW-001", totalMinor: 2500, currency: "USD", orderUrl: "https://example.invalid/order", customerName: "Customer", items: [{ title: "Example item", quantity: 2, unitPriceMinor: 1250 }] }, template ?? await service.template(req.storeContext!.storeId, type)));
   })); return router;
 }
 export function createOrderNotificationRouter(service: NotificationService, auth: AuthProvider) {

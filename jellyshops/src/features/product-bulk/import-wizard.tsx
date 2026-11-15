@@ -170,7 +170,7 @@ export function ImportWizard({ api }: { api: ProductBulkApi | null }) {
       <h2 className="jk-step-heading" tabIndex={-1} ref={heading}>Match your columns</h2>
       <p className="jk-muted">We found {plural(detail.rowCount, "row")} in {detail.fileName}. Check that each of our columns points at the right column in your file. Choose &ldquo;Not in my file&rdquo; to leave something alone.</p>
       <div className="jk-table-scroll"><table className="jk-table jk-match-table" aria-label="Column matching">
-        <thead><tr><th scope="col">Jelly Shops column</th><th scope="col">Column in your file</th><th scope="col">First value</th></tr></thead>
+        <thead><tr><th scope="col">Jellyshop column</th><th scope="col">Column in your file</th><th scope="col">First value</th></tr></thead>
         <tbody>{importable.map((column) => {
           const index = mapping[column.key];
           return <tr key={column.key}>

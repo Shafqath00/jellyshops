@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { compareThemeVersions, jellyEngineRangeSchema, supportsJellyVersion, themeVersionSchema } from "./versioning.js";
 import { validateThemeProject } from "./validate-theme-project.js";
-import example from "../../../../docs/examples/jelly-studio/theme.json";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
+// Read at run time (not imported) so a build that only has the app folder still type-checks.
+const exampleDirectory = [resolve(process.cwd(), "../docs/examples/jelly-studio"), resolve(process.cwd(), "docs/examples/jelly-studio")].find((path) => existsSync(path)) ?? "";
+const example = JSON.parse(readFileSync(resolve(exampleDirectory, "theme.json"), "utf8"));
 import { buildSchemaFiles } from "./schema-export.js";
 
 describe("theme version contract", () => {

@@ -37,7 +37,7 @@ export function RuntimeStorefrontView({ route, commerce, themeId, themeVersion, 
   // Every section, the page's own included, reads its text and built-in words in the shopper's language.
   const shared = { mode, commerce, themeId: theme.id, themeVersion: theme.version, page: route.context, menus, resourceLinks, collectionLinks, storeSlug, language } as const;
   return <>
-    {theme.layout === "editorial" ? <div className="jelly-theme-masthead"><span>JellyShop collection</span>
+    {theme.layout === "editorial" ? <div className="jelly-theme-masthead"><span>Jellyshop collection</span>
       {/* eslint-disable-next-line @next/next/no-img-element -- theme asset, not a Next Image */}
       <img src={`${theme.assetPrefix}monogram.svg`} alt="" />
     </div> : null}

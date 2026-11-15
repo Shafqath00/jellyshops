@@ -47,7 +47,7 @@ export function SharedStorefrontFooter({ store, settings }: StorefrontFooterProp
     "[&>div:nth-child(2)]:grid [&>div:nth-child(2)]:gap-[9px] [&>div:nth-child(2)]:text-[11px] [&>a]:justify-self-end [&>a]:text-[10px] [&>a]:opacity-65 max-[800px]:[&>a]:justify-self-start",
     variant === "simple" && "[&>div:nth-child(2)]:hidden",
     variant === "newsletter" && "grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]",
-  )}><div><b>{store.name}</b>{footer.showDescription !== false ? <p>{store.tagline}</p> : null}</div><div><span>Shipping &amp; returns</span><span>Care guide</span><span>Instagram</span></div><Link href="/admin">Made with Jelly Shop ↗</Link></footer>;
+  )}><div><b>{store.name}</b>{footer.showDescription !== false ? <p>{store.tagline}</p> : null}</div><div><span>Shipping &amp; returns</span><span>Care guide</span><span>Instagram</span></div><Link href="/admin">Made with Jellyshop ↗</Link></footer>;
 }
 export function SharedCartPresentation({ open, onClose, children }: StorefrontCartProps) {
   if (!open) return null;

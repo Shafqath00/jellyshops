@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "@/components/layout/brand-logo";
 import {
   AlertCircle,
   ArrowLeft,
@@ -137,8 +138,9 @@ export function EditorToolbar({
 
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-1.5">
-            <span className="hidden truncate text-[12px] font-semibold text-foreground sm:inline">
-              Jelly Shop
+            <span className="hidden shrink-0 sm:block">
+              <BrandLogo height={22} variant="adaptive" />
+              <span className="sr-only">Jellyshop</span>
             </span>
 
             <span className="hidden text-muted-foreground sm:inline">

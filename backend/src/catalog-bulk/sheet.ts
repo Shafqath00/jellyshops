@@ -277,7 +277,7 @@ export function toCsv(table: string[][]): string {
 
 export async function toXlsx(table: string[][], options: { sheetName: string; guide?: boolean }): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = "Jelly Shops";
+  workbook.creator = "Jellyshop";
   const sheet = workbook.addWorksheet(options.sheetName, { views: [{ state: "frozen", ySplit: 1 }] });
   table.forEach((row, index) => {
     const added = sheet.addRow(row.map(guardCell));

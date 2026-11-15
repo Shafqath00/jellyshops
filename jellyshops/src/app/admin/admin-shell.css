@@ -12,14 +12,12 @@
 @media(min-width:1024px){.admin-shell{grid-template-columns:var(--jk-sidebar-width) minmax(0,1fr)}}
 
 /* Brand */
-.admin-brand {display:inline-flex;align-items:center;gap:10px;min-height:40px;padding:4px 10px 4px 4px;border-radius:var(--jk-radius-pill);font-size:19px;font-weight:750;letter-spacing:-.04em;color:var(--jk-text);white-space:nowrap}
+.admin-brand {display:inline-flex;align-items:center;min-height:40px;padding:4px 10px 4px 4px;border-radius:var(--jk-radius-pill)}
 .admin-brand:hover {background:var(--jk-sidebar-hover)}
-.admin-brand-mark {display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:50%;background:var(--jk-lime);color:var(--jk-ink);box-shadow:inset 0 -2px 0 #0a0a0a1f,inset 0 2px 0 #ffffff80}
 .admin-sidebar-brand {margin:2px 4px var(--jk-space-4)}
-.admin-brand-compact {font-size:17px}
-.admin-brand-compact .admin-brand-mark {width:32px;height:32px}
+.admin-brand-icon {display:none}
 @media(min-width:1024px){.admin-brand-compact{display:none}}
-@media(max-width:479px){.admin-brand-compact .admin-brand-name{display:none}}
+@media(max-width:479px){.admin-brand-name{display:none}.admin-brand-icon{display:block}}
 
 /* Header row inside the canvas */
 .admin-topbar {
