@@ -5,8 +5,9 @@ import { authApiOrigin, useAuth } from "@/features/auth/providers/auth-provider"
 export interface StoreSettings {
   id: string; name: string; slug: string; currency: string; country: string;
   shippingMinor: number; shippingCopy: string; contactEmail: string | null; timezone: string; revision: number;
+  description?: string; category?: string; businessType?: string;
 }
-export type StoreSettingsPatch = Partial<Pick<StoreSettings, "name" | "slug" | "contactEmail" | "timezone" | "shippingMinor" | "shippingCopy">>;
+export type StoreSettingsPatch = Partial<Pick<StoreSettings, "name" | "slug" | "contactEmail" | "timezone" | "shippingMinor" | "shippingCopy" | "description" | "category" | "businessType">>;
 
 async function read(response: Response): Promise<StoreSettings> {
   const body = await response.json().catch(() => ({})) as { settings?: StoreSettings; error?: { message?: string } };

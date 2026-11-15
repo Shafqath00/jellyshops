@@ -7,6 +7,8 @@ import type {
   VerifiedMerchantIdentity,
 } from "./types.js";
 import type { TenantRepository } from "./repository.js";
+import type { SqlExecutor } from "../commerce/repository.js";
+import { ApiError } from "../http/errors.js";
 
 const { Pool } = pg;
 
@@ -58,42 +60,10 @@ export class PostgresTenantRepository implements TenantRepository {
   ): Promise<StoreSummary> {
     const client = await this.pool.connect();
     try {
-    await client.query("BEGIN");
-    // Look up internal integer id
-    const userResult = await client.query<{ id: number }>(
-      `SELECT "id" FROM "User" WHERE "firebaseUid" = $1 LIMIT 1`,
-      [userId],
-    );
-    const internalId = userResult.rows[0]?.id;
-    if (!internalId) {
-      throw new Error("User not found");
-    }
-
-    const storeId = `store-${randomUUID()}`;
-
-    await client.query(
-      `INSERT INTO "Store" ("id", "name", "slug", "currency", "country", "owner_user_id", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
-      [storeId, input.name, input.slug, input.currency, input.country, userId],
-    );
-
-    await client.query(
-      `INSERT INTO "StoreMembership" ("storeId", "userId", "role", "createdAt")
-       VALUES ($1, $2, 'OWNER', NOW())`,
-      [storeId, internalId],
-    );
-
-    await client.query(`INSERT INTO "StoreSettings" ("storeId") VALUES ($1)`, [storeId]);
-    await client.query(`INSERT INTO "StorefrontWorkspace" ("storeId", "generation", "updatedAt") VALUES ($1, 0, NOW())`, [storeId]);
-    await client.query("COMMIT");
-    return {
-      id: storeId,
-      name: input.name,
-      slug: input.slug,
-      currency: input.currency,
-      country: input.country,
-      role: "OWNER",
-    };
+      await client.query("BEGIN");
+      const store = await createOwnedStore(client, userId, input);
+      await client.query("COMMIT");
+      return store;
     } catch (error) {
       await client.query("ROLLBACK");
       throw error;
@@ -127,4 +97,29 @@ export class PostgresTenantRepository implements TenantRepository {
       role: "OWNER",
     }));
   }
+}
+
+/** Create the core store records in an existing transaction. */
+export async function createOwnedStore(sql: SqlExecutor, userId: string, input: CreateStoreInput): Promise<StoreSummary> {
+  const user = await sql.query<{ id: number }>(
+    `SELECT "id" FROM "User" WHERE "firebaseUid" = $1 LIMIT 1`, [userId],
+  );
+  const internalId = user.rows[0]?.id;
+  if (!internalId) throw new ApiError(409, "MERCHANT_NOT_FOUND", "Sign in again before creating a store.");
+
+  const storeId = `store-${randomUUID()}`;
+  const inserted = await sql.query<{ id: string }>(
+    `INSERT INTO "Store" ("id", "name", "slug", "currency", "country", "owner_user_id", "updatedAt")
+     VALUES ($1, $2, $3, $4, $5, $6, NOW()) ON CONFLICT ("slug") DO NOTHING RETURNING "id"`,
+    [storeId, input.name, input.slug, input.currency, input.country, userId],
+  );
+  if (!inserted.rows[0]) throw new ApiError(409, "STORE_SLUG_TAKEN", "That store address is already in use. Choose another.");
+
+  await sql.query(
+    `INSERT INTO "StoreMembership" ("storeId", "userId", "role", "createdAt") VALUES ($1, $2, 'OWNER', NOW())`,
+    [storeId, internalId],
+  );
+  await sql.query(`INSERT INTO "StoreSettings" ("storeId") VALUES ($1)`, [storeId]);
+  await sql.query(`INSERT INTO "StorefrontWorkspace" ("storeId", "generation", "updatedAt") VALUES ($1, 0, NOW())`, [storeId]);
+  return { id: storeId, name: input.name, slug: input.slug, currency: input.currency, country: input.country, role: "OWNER" };
 }

@@ -66,4 +66,19 @@ describe("Supabase merchant authentication", () => {
     await local.verify(short); now += 6_000; await local.verify(short);
     expect(auth.getUser).toHaveBeenCalledTimes(4);
   });
+
+  it("prefills a Google name and derives email verification from Supabase's verified user response", async () => {
+    auth.getUser.mockResolvedValue({
+      data: { user: { id: "merchant-1", email: "merchant@example.com", email_confirmed_at: "2026-11-14", user_metadata: { full_name: " Maya Kim " } } },
+      error: null,
+    });
+    vi.mocked(tenants.resolveMerchant).mockResolvedValue({ id: "merchant-1", stores: [] });
+
+    await expect(provider.verify("google-token")).resolves.toMatchObject({
+      email: "merchant@example.com",
+      emailVerified: true,
+      displayName: "Maya Kim",
+    });
+    expect(tenants.resolveMerchant).toHaveBeenCalledWith({ uid: "merchant-1", email: "merchant@example.com", name: "Maya Kim" });
+  });
 });

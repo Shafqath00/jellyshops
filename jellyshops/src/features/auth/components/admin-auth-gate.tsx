@@ -53,7 +53,7 @@ export function AdminAuthGate({
 
           <div className="mt-5 inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.12em] text-tint-foreground">
             <Sparkles size={11} />
-            Jelly Shop setup
+            Jellyshop setup
           </div>
 
           <h1 className="mt-3 text-[22px] font-black tracking-[-0.04em] text-foreground">
@@ -69,7 +69,7 @@ export function AdminAuthGate({
             href="/"
             className="mt-6 inline-flex h-10 items-center justify-center rounded-full bg-primary px-4 text-[11px] font-black text-primary-foreground shadow-[0_10px_28px_rgba(36,31,32,0.16)] transition hover:-translate-y-0.5 hover:bg-primary"
           >
-            Back to Jelly Shop
+            Back to Jellyshop
           </Link>
         </section>
       </main>

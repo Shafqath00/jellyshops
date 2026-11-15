@@ -5,6 +5,7 @@ describe("PostgresTenantRepository", () => {
   it("rolls back all store records when membership creation fails", async () => {
     const query = vi.fn(async (sql: string) => {
       if (sql.includes('FROM "User"')) return { rows: [{ id: 42 }] };
+      if (sql.includes('INSERT INTO "Store"')) return { rows: [{ id: "store" }] };
       if (sql.includes('INSERT INTO "StoreMembership"')) throw new Error("membership failed");
       return { rows: [] };
     });
@@ -15,6 +16,14 @@ describe("PostgresTenantRepository", () => {
     expect(query).toHaveBeenCalledWith("ROLLBACK");
     expect(query).not.toHaveBeenCalledWith("COMMIT");
     expect(release).toHaveBeenCalled();
+  });
+  it("reports a claimed address without creating membership or workspace records", async () => {
+    const query = vi.fn(async (sql: string) => ({ rows: sql.includes('FROM "User"') ? [{ id: 42 }] : [] }));
+    const repository = new PostgresTenantRepository({ connect: async () => ({ query, release: vi.fn() }) } as never);
+    await expect(repository.createStore("owner", { name: "Shop", slug: "shop", currency: "USD", country: "US" }))
+      .rejects.toMatchObject({ code: "STORE_SLUG_TAKEN" });
+    expect(query).not.toHaveBeenCalledWith(expect.stringContaining("StoreMembership"), expect.anything());
+    expect(query).toHaveBeenCalledWith("ROLLBACK");
   });
   it("lists stores only by the recorded Supabase owner", async () => {
     const query = vi.fn().mockResolvedValue({

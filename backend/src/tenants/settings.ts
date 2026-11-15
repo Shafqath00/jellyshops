@@ -4,20 +4,26 @@ import { requireMerchant, requireStorePermission } from "../auth/middleware.js";
 import type { AuthProvider } from "../auth/types.js";
 import type { CommerceDatabase, SqlExecutor } from "../commerce/repository.js";
 import { ApiError } from "../http/errors.js";
+import { businessTypeSchema, storeCategorySchema, storeDescriptionSchema, validTimezone } from "../onboarding/schema.js";
+import { storeSlugSchema } from "./store-slug.js";
 
 export const MARKET_CURRENCIES: Readonly<Record<string, string>> = { IN: "INR", GB: "GBP", US: "USD" };
 export interface CheckoutPolicy { currency: string; country: string; shippingMinor: number }
 export interface StoreSettings extends CheckoutPolicy {
   id: string; name: string; slug: string; contactEmail: string | null; timezone: string; revision: number; shippingCopy: string;
+  description: string; category: string; businessType: string;
 }
 const patchSchema = z.object({
   revision: z.number().int().nonnegative(),
   name: z.string().trim().min(1).max(120).optional(),
-  slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).min(3).max(63).optional(),
+  slug: storeSlugSchema.optional(),
   contactEmail: z.email().nullable().optional(),
-  timezone: z.string().refine((value) => { try { new Intl.DateTimeFormat("en", { timeZone: value }); return true; } catch { return false; } }).optional(),
+  timezone: z.string().refine(validTimezone).optional(),
   shippingMinor: z.number().int().nonnegative().max(2147483647).optional(),
   shippingCopy: z.string().trim().max(500).optional(),
+  description: storeDescriptionSchema.optional(),
+  category: storeCategorySchema.optional(),
+  businessType: businessTypeSchema.optional(),
 }).strict();
 type Patch = z.infer<typeof patchSchema>;
 
@@ -25,7 +31,18 @@ export class StoreSettingsRepository {
   constructor(private readonly db: CommerceDatabase) {}
 
   private async read(sql: SqlExecutor, storeId: string): Promise<StoreSettings> {
-    const result = await sql.query<StoreSettings>(`SELECT s."id", s."name", s."slug", s."currency", s."country", ss."contactEmail", COALESCE(ss."timezone", 'UTC') AS timezone, COALESCE(ss."revision", 0) AS revision, COALESCE(ss."shippingMinor", 0) AS "shippingMinor", COALESCE(ss."shippingCopy", '') AS "shippingCopy" FROM "Store" s LEFT JOIN "StoreSettings" ss ON ss."storeId" = s."id" WHERE s."id" = $1 AND s."archivedAt" IS NULL`, [storeId]);
+    const result = await sql.query<StoreSettings>(`
+      SELECT s."id", s."name", s."slug", s."currency", s."country", ss."contactEmail",
+        COALESCE(ss."timezone", 'UTC') AS timezone,
+        COALESCE(ss."revision", 0) AS revision,
+        COALESCE(ss."shippingMinor", 0) AS "shippingMinor",
+        COALESCE(ss."shippingCopy", '') AS "shippingCopy",
+        COALESCE(ss."description", '') AS "description",
+        COALESCE(ss."category", '') AS "category",
+        COALESCE(ss."businessType", '') AS "businessType"
+      FROM "Store" s LEFT JOIN "StoreSettings" ss ON ss."storeId" = s."id"
+      WHERE s."id" = $1 AND s."archivedAt" IS NULL
+    `, [storeId]);
     if (!result.rows[0]) throw new ApiError(404, "STORE_NOT_FOUND", "Store not found.");
     return result.rows[0];
   }
@@ -49,7 +66,21 @@ export class StoreSettingsRepository {
           if (used.rows.length) throw new ApiError(422, "STORE_SLUG_LOCKED", "The store address cannot change after publication or an order.");
         }
         await sql.query(`UPDATE "Store" SET "name" = $2, "slug" = $3, "updatedAt" = NOW() WHERE "id" = $1`, [storeId, input.name ?? current.name, input.slug ?? current.slug]);
-        await sql.query(`INSERT INTO "StoreSettings" ("storeId", "contactEmail", "timezone", "shippingMinor", "shippingCopy", "revision") VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT ("storeId") DO UPDATE SET "contactEmail" = EXCLUDED."contactEmail", "timezone" = EXCLUDED."timezone", "shippingMinor" = EXCLUDED."shippingMinor", "shippingCopy" = EXCLUDED."shippingCopy", "revision" = EXCLUDED."revision"`, [storeId, input.contactEmail === undefined ? current.contactEmail : input.contactEmail, input.timezone ?? current.timezone, input.shippingMinor ?? current.shippingMinor, input.shippingCopy ?? current.shippingCopy, current.revision + 1]);
+        await sql.query(`
+          INSERT INTO "StoreSettings" ("storeId", "contactEmail", "timezone", "shippingMinor", "shippingCopy", "revision", "description", "category", "businessType")
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          ON CONFLICT ("storeId") DO UPDATE SET
+            "contactEmail" = EXCLUDED."contactEmail", "timezone" = EXCLUDED."timezone",
+            "shippingMinor" = EXCLUDED."shippingMinor", "shippingCopy" = EXCLUDED."shippingCopy",
+            "revision" = EXCLUDED."revision", "description" = EXCLUDED."description",
+            "category" = EXCLUDED."category", "businessType" = EXCLUDED."businessType"
+        `, [
+          storeId, input.contactEmail === undefined ? current.contactEmail : input.contactEmail,
+          input.timezone ?? current.timezone, input.shippingMinor ?? current.shippingMinor,
+          input.shippingCopy ?? current.shippingCopy, current.revision + 1,
+          input.description ?? current.description, input.category ?? current.category,
+          input.businessType ?? current.businessType,
+        ]);
         return this.read(sql, storeId);
       });
     } catch (error) {

@@ -15,6 +15,13 @@ function tokenExpiry(token: string): number | null {
   } catch { return null; }
 }
 
+function merchantDisplayName(user: User): string {
+  for (const value of [user.user_metadata?.name, user.user_metadata?.full_name]) {
+    if (typeof value === "string" && value.trim()) return value.trim().slice(0, 120);
+  }
+  return "";
+}
+
 export class SupabaseAuthProvider implements AuthProvider {
   private readonly supabase: SupabaseClient;
   /** Confirmed sign-ins by token hash. Every request otherwise waited on a network call to Supabase Auth. */
@@ -72,10 +79,11 @@ export class SupabaseAuthProvider implements AuthProvider {
     // 1. We know the user's Supabase UUID.
     // 2. Resolve their merchant identity and stores in the application database.
     try {
+      const displayName = merchantDisplayName(user);
       const account = await this.tenants.resolveMerchant({
         uid: user.id,
         email: user.email ?? "",
-        name: user.user_metadata?.name ?? user.email?.split("@")[0] ?? "Unknown",
+        name: displayName || user.email?.split("@")[0] || "Unknown",
       });
 
       const storeIds = account.stores.map((s) => s.id);
@@ -83,6 +91,9 @@ export class SupabaseAuthProvider implements AuthProvider {
 
       return {
         userId: user.id,
+        email: user.email,
+        emailVerified: Boolean(user.email && user.email_confirmed_at),
+        displayName,
         storeIds,
         storeRoles,
       };

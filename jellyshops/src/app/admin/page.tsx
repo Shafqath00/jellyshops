@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Boxes, Inbox, PackageCheck, Banknote, Receipt, ShoppingBag } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { AdminPage, Banner, Card, CardSkeleton, EmptyState, StatusBadge } from "@/components/admin";
 import { authApiOrigin, useAuth } from "@/features/auth/providers/auth-provider";
 import { createAdminApi, type SalesFigures, type SalesPeriod } from "@/features/admin/api/admin-api";
@@ -21,6 +21,23 @@ const PERIODS: Array<{ days: SalesPeriod; label: string; previous: string }> = [
 function customerName(snapshot?: Record<string, unknown> | null) {
   const name = snapshot?.name;
   return typeof name === "string" && name.trim() ? name.trim() : "Customer";
+}
+
+/** Shown once when someone arrives straight from store setup (`/admin?welcome=1`). */
+function WelcomeBanner({ storeName }: { storeName: string }) {
+  const [hidden, setHidden] = useState(false);
+  const welcome = useSyncExternalStore(() => () => undefined, () => new URLSearchParams(window.location.search).get("welcome") === "1", () => false);
+  if (!welcome || hidden) return null;
+  function dismiss() {
+    setHidden(true);
+    const url = new URL(window.location.href);
+    url.searchParams.delete("welcome");
+    window.history.replaceState(window.history.state, "", url);
+  }
+  return <Banner tone="success" title={`Welcome to Jelly Shop. ${storeName} is set up`}
+    action={<button type="button" className="jk-button" onClick={dismiss}>Dismiss</button>}>
+    Your store is a private draft for now. Work through the steps below, then publish when you’re ready.
+  </Banner>;
 }
 
 function greeting(timeZone: string) {
@@ -60,6 +77,7 @@ export default function DashboardPage() {
 
   return <AdminPage title={`${greeting(timeZone)}`} hero={{ eyebrow: today }} description={<>Here is how {store.name} is doing, and what needs you next.</>}
     primaryAction={{ label: "Add product", href: "/admin/products/new" }} secondaryActions={[{ label: "View store", href: `/${store.slug}` }]}>
+    <WelcomeBanner storeName={store.name} />
     {summary.error && <Banner tone="critical" title="Some of your dashboard did not load" action={retry(summary.retry)}>{summary.error.message}</Banner>}
 
     {data && (remaining.length ? <SetupGuide steps={steps} /> :

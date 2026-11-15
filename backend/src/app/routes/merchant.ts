@@ -10,6 +10,9 @@ import { createContentRouter } from "../../content/routes.js";
 import { createCustomDataRouter } from "../../custom-data/routes.js";
 import { createCustomerRouter, createEngagementRouter, createMerchantEngagementRouter } from "../../customers/routes.js";
 import { createMerchantRouter } from "../../tenants/routes.js";
+import { createOnboardingProvisioner } from "../../onboarding/provision-store.js";
+import { createOnboardingRouter } from "../../onboarding/routes.js";
+import { OnboardingService } from "../../onboarding/service.js";
 import { createTaxonomyRouter } from "../../taxonomy/routes.js";
 import { SqlTaxonomyRepository } from "../../taxonomy/sql-repository.js";
 import { TaxonomyService } from "../../taxonomy/service.js";
@@ -42,11 +45,17 @@ export function mountTenantRoutes(app: Express, context: AppContext): void {
     return;
   }
 
+  const onboarding = deps.commerceDatabase
+    ? new OnboardingService(deps.commerceDatabase, createOnboardingProvisioner(context.mediaStorage))
+    : undefined;
+  if (onboarding) app.use("/api/onboarding", createOnboardingRouter(authProvider, onboarding));
+
   app.use(
     "/api",
     createMerchantRouter(
       authProvider,
       deps.tenantRepository,
+      onboarding,
     ),
   );
 }

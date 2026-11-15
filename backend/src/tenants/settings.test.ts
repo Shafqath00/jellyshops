@@ -11,6 +11,7 @@ describe("durable store settings", () => {
     await db.exec(await readFile(new URL("../../sql/migrations/20260915120000_add_stripe_connect_commerce.sql", import.meta.url), "utf8"));
     await db.exec(await readFile(new URL("../../sql/migrations/20261020140329_store_settings_checkout.sql", import.meta.url), "utf8"));
     await db.exec(await readFile(new URL("../../sql/migrations/20261020163817_jelly_signature_customer_services.sql", import.meta.url), "utf8"));
+    await db.exec(await readFile(new URL("../../sql/migrations/20261114000000_merchant_onboarding.sql", import.meta.url), "utf8"));
     repository = new StoreSettingsRepository({ transaction: (work) => db.transaction((tx) => work(tx)) });
   });
   afterEach(async () => { await db.close(); });
@@ -24,5 +25,10 @@ describe("durable store settings", () => {
   it("rejects unsupported or mismatched market currencies", async () => {
     await db.query(`UPDATE "Store" SET "country" = 'IN', "currency" = 'USD' WHERE id = 'store-a'`);
     await expect(repository.getCheckoutPolicy("store-a")).rejects.toMatchObject({ code: "STORE_MARKET_INVALID" });
+  });
+  it("stores optional business details without clearing them on unrelated updates", async () => {
+    const details = { description: "Handmade pots", category: "Home", businessType: "Individual" };
+    await expect(repository.update("store-a", { revision: 0, ...details })).resolves.toMatchObject(details);
+    await expect(repository.update("store-a", { revision: 1, shippingMinor: 450 })).resolves.toMatchObject(details);
   });
 });

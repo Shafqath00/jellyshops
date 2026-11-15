@@ -1,32 +1,43 @@
 import { expect, test } from "@playwright/test";
 import { signInAsE2eMerchant, signInAsOnboardingE2eMerchant } from "./fixtures/merchant-auth";
 
-test("dedicated storeless merchant creates a store, installs Fresh Market, and enters the editor", async ({ page }) => {
+test("dedicated storeless merchant resumes setup and opens the dashboard with a draft store", async ({ page }) => {
   test.setTimeout(120_000);
   await signInAsOnboardingE2eMerchant(page, "/onboarding");
   await expect(page).toHaveURL(/\/onboarding$/);
-  await expect(page.getByRole("heading", { name: "What should customers call your shop?" })).toBeVisible();
+  const accept = page.getByRole("button", { name: "Accept and continue" });
+  await expect(accept.or(page.getByLabel("Full name")).first()).toBeVisible();
+  if (await accept.isVisible()) {
+    await page.getByRole("checkbox", { name: "I agree to the JellyShop Terms of Service." }).check();
+    await accept.click();
+  }
+  await page.getByLabel("Full name").fill("Onboarding Test Merchant");
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
 
   const suffix = Date.now().toString();
   const storeName = `Onboarding E2E ${suffix}`;
   const slug = `onboarding-e2e-${suffix}`;
   await page.getByLabel("Store name").fill(storeName);
   await page.getByLabel("Store address").fill(slug);
-  const created = page.waitForResponse((response) => response.url().endsWith("/api/stores") && response.request().method() === "POST");
-  await page.getByRole("button", { name: "Create my shop" }).click();
-  expect((await created).status()).toBe(201);
-
-  await expect(page).toHaveURL(/\/admin\/online-store$/);
-  await expect(page.getByRole("heading", { name: "Choose a ready-to-edit storefront." })).toBeVisible();
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Make it feel like your shop" })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Make it feel like your shop" })).toBeVisible();
+  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await expect(page.getByLabel("Store address")).toHaveValue(slug);
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.getByRole("button", { name: "Skip for now" }).click();
+  await page.getByLabel("Store country and currency").selectOption("GB");
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.getByRole("button", { name: "Skip for now" }).click();
+  await expect(page.getByRole("heading", { name: "Review your store setup" })).toBeVisible();
+  const completion = page.waitForResponse(response => response.url().endsWith("/api/onboarding/complete") && response.request().method() === "POST");
+  await page.getByRole("button", { name: "Create my store" }).click();
+  const created = await completion;
+  expect(created.ok()).toBe(true);
+  expect((await created.json()).store).toMatchObject({ name: storeName, slug, currency: "GBP" });
+  await expect(page).toHaveURL(/\/admin$/);
   await expect(page.getByRole("complementary")).toContainText(storeName);
-  await expect(page.getByText("Active store", { exact: true })).toBeVisible();
-  const installation = page.waitForResponse((response) => response.url().includes("/storefront/starters/fresh-market/install") && response.request().method() === "POST");
-  await page.getByRole("button", { name: "Start with Fresh Market" }).click();
-  expect([200, 201]).toContain((await installation).status());
-  await expect(page).toHaveURL(/\/admin\/online-store\/editor$/);
-  await expect(page.getByRole("heading", { name: "Theme editor" })).toBeVisible();
-  await expect(page.getByLabel("Page type")).toHaveValue("home");
-  await expect(page.getByTestId("section-hero")).toBeVisible();
 });
 
 test("merchant with an existing store still goes directly to admin", async ({ page }) => {

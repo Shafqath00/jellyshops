@@ -1,127 +1,153 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, expect, it, vi } from "vitest";
 
-const { useAuth, router, authApiOrigin } = vi.hoisted(() => ({
+const { useAuth, router, authApiOrigin, getAccessToken, refreshMerchant, setActiveStoreId } = vi.hoisted(() => ({
   useAuth: vi.fn(),
   router: { replace: vi.fn() },
   authApiOrigin: vi.fn(() => "http://api.test"),
+  getAccessToken: vi.fn(async () => "merchant-token"),
+  refreshMerchant: vi.fn(async () => undefined),
+  setActiveStoreId: vi.fn(),
 }));
 
 vi.mock("@/features/auth/providers/auth-provider", () => ({ useAuth, authApiOrigin }));
 vi.mock("next/navigation", () => ({ useRouter: () => router }));
+vi.mock("next/font/google", () => ({ Geist: () => ({ variable: "geist" }), Geist_Mono: () => ({ variable: "geist-mono" }) }));
 
 import OnboardingPage from "./page";
 
-const session = { access_token: "merchant-token" };
+const store = { id: "store-a", name: "Fern Studio", slug: "fern-studio", country: "GB", currency: "GBP", role: "OWNER" };
+const session = { user: { id: "merchant-a", email: "maya@example.com", user_metadata: { name: "Maya Patel" } } };
 
-function store(name = "Maya's pottery") {
-  return { id: "store-a", name, slug: "mayas-pottery", currency: "INR", country: "IN", role: "owner" };
-}
-
-function setAuth({
-  stores = [],
-  refreshMerchant = vi.fn().mockResolvedValue(undefined),
-}: {
-  stores?: ReturnType<typeof store>[];
-  refreshMerchant?: ReturnType<typeof vi.fn>;
-} = {}) {
-  useAuth.mockReturnValue({
-    configured: true,
-    loading: false,
-    session,
-    stores,
-    refreshMerchant,
+function mockBackend(overrides: Record<string, unknown> = {}) {
+  let current = {
+    revision: 2, step: "store", answers: {}, store: null,
+    images: { profile: false, logo: false }, consentRequired: false, ...overrides,
+  };
+  const calls: string[] = [];
+  vi.mocked(fetch).mockImplementation(async (input, init) => {
+    const url = new URL(String(input));
+    const request = init?.method ?? "GET";
+    const path = url.pathname.replace("/api/onboarding", "") || "/";
+    calls.push(request + " " + path);
+    if (path === "/policies") return Response.json({ termsUrl: "https://example.com/terms", privacyUrl: "https://example.com/privacy", version: "v1" });
+    expect(new Headers(init?.headers).get("Authorization")).toBe("Bearer merchant-token");
+    if (path === "/consent") {
+      expect(JSON.parse(String(init?.body))).toEqual({ version: "v1" });
+      current = { ...current, consentRequired: false };
+      return new Response(null, { status: 204 });
+    }
+    if (path === "/availability") return Response.json({ available: true });
+    if (path === "/complete") return Response.json({ store });
+    if (request === "PATCH") {
+      const { revision, step, answers } = JSON.parse(String(init?.body));
+      expect(revision).toBe(current.revision);
+      current = { ...current, step, answers, revision: current.revision + 1 };
+    }
+    return Response.json(current);
   });
-  return refreshMerchant;
+  return { calls, snapshot: () => current };
 }
+
+beforeAll(() => {
+  window.matchMedia ??= vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn(), addListener: vi.fn(), removeListener: vi.fn() });
+});
 
 beforeEach(() => {
   vi.clearAllMocks();
-  setAuth();
+  useAuth.mockReturnValue({ configured: true, loading: false, session, stores: [], getAccessToken, refreshMerchant, setActiveStoreId, merchantStatus: "ready" });
   vi.stubGlobal("fetch", vi.fn());
 });
 
-it("creates a store and refreshes merchant context before opening the starter chooser", async () => {
-  const events: string[] = [];
-  let releaseRefresh: () => void = () => {};
-  const refreshGate = new Promise<void>((resolve) => { releaseRefresh = resolve; });
-  let rerenderWithCreatedStore: () => void = () => {};
-  const authState = {
-    configured: true,
-    loading: false,
-    session,
-    stores: [] as ReturnType<typeof store>[],
-    refreshMerchant: vi.fn(async () => {
-      events.push("refresh-merchant");
-      authState.stores = [store()];
-      rerenderWithCreatedStore();
-      await refreshGate;
-    }),
-  };
-  useAuth.mockReturnValue(authState);
-  const refreshMerchant = authState.refreshMerchant;
-  vi.mocked(fetch).mockImplementation(async (_input, init) => {
-    events.push("create-store");
-    expect(init?.headers).toEqual({ "Content-Type": "application/json", Authorization: "Bearer merchant-token" });
-    expect(JSON.parse(String(init?.body))).toEqual({ name: "Maya's pottery", slug: "maya-s-pottery", currency: "INR", country: "IN" });
-    return new Response("{}", { status: 201 });
-  });
-  const user = userEvent.setup();
-  const view = render(<OnboardingPage />);
-  rerenderWithCreatedStore = () => view.rerender(<OnboardingPage />);
+const ready = { fullName: "Maya Patel", name: "Fern Studio", slug: "fern-studio", country: "GB" };
 
-  await user.type(screen.getByLabelText("Store name"), "Maya's pottery");
-  await user.click(screen.getByRole("button", { name: /create my shop/i }));
-
-  await waitFor(() => expect(events).toEqual(["create-store", "refresh-merchant"]));
-  expect(router.replace).not.toHaveBeenCalled();
-  releaseRefresh();
-  await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/admin/online-store"));
-  expect(router.replace).toHaveBeenCalledTimes(1);
-  expect(events).toEqual(["create-store", "refresh-merchant"]);
-  expect(refreshMerchant).toHaveBeenCalledTimes(1);
-});
-
-it("sends a returning merchant to the dashboard without creating another store", async () => {
-  setAuth({ stores: [store()] });
-  render(<OnboardingPage />);
-
-  await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/admin"));
-  expect(fetch).not.toHaveBeenCalled();
-});
-
-it.each([
-  ["an HTTP error", async () => new Response(JSON.stringify({ error: { message: "That address is taken." } }), { status: 409 })],
-  ["a network error", async () => { throw new Error("Network unavailable"); }],
-])("keeps the form available after %s", async (_label, response) => {
-  const refreshMerchant = setAuth();
-  vi.mocked(fetch).mockImplementation(response as typeof fetch);
+it("shows the setup steps only after accepting the current policies", async () => {
+  const backend = mockBackend({ consentRequired: true });
   const user = userEvent.setup();
   render(<OnboardingPage />);
 
-  await user.type(screen.getByLabelText("Store name"), "Maya's pottery");
-  await user.click(screen.getByRole("button", { name: /create my shop/i }));
+  await screen.findByRole("heading", { name: /our terms/i });
+  expect(screen.queryByLabelText("Store name")).toBeNull();
+  expect(screen.getByRole("button", { name: /accept and continue/i })).toBeDisabled();
+  await user.click(screen.getByRole("checkbox", { name: /agree/i }));
+  await user.click(screen.getByRole("button", { name: /accept and continue/i }));
 
-  expect(await screen.findByRole("alert")).toBeVisible();
-  expect(screen.getByRole("button", { name: /create my shop/i })).toBeEnabled();
-  expect(refreshMerchant).not.toHaveBeenCalled();
-  expect(router.replace).not.toHaveBeenCalled();
+  expect(await screen.findByLabelText("Store name")).toBeVisible();
+  expect(screen.getByLabelText("Your name")).toHaveValue("Maya Patel");
+  expect(backend.calls).toContain("POST /consent");
 });
 
-it("offers a refresh-only retry when creation succeeds but merchant refresh fails", async () => {
-  const refreshMerchant = vi.fn().mockRejectedValueOnce(new Error("Context unavailable")).mockResolvedValueOnce(undefined);
-  setAuth({ refreshMerchant });
-  vi.mocked(fetch).mockResolvedValue(new Response("{}", { status: 201 }));
+it("walks the five steps with a progress bar and keeps answers when going back", async () => {
+  const backend = mockBackend();
   const user = userEvent.setup();
   render(<OnboardingPage />);
 
-  await user.type(screen.getByLabelText("Store name"), "Maya's pottery");
-  await user.click(screen.getByRole("button", { name: /create my shop/i }));
-  expect(await screen.findByRole("alert")).toHaveTextContent(/shop was created, but we couldn't load it yet/i);
-  await user.click(screen.getByRole("button", { name: /retry loading/i }));
+  expect(await screen.findByRole("progressbar", { name: /store setup progress/i })).toHaveAttribute("aria-valuetext", "Step 1 of 5: Your store");
+  await user.type(screen.getByLabelText("Store name"), "Fern Studio");
+  expect(screen.getByLabelText("Store web address")).toHaveValue("fern-studio");
+  await user.selectOptions(screen.getByLabelText("Where you’re based"), "GB");
+  await user.click(screen.getByRole("button", { name: /continue/i }));
 
-  await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/admin/online-store"));
-  expect(fetch).toHaveBeenCalledTimes(1);
-  expect(refreshMerchant).toHaveBeenCalledTimes(2);
+  expect(await screen.findByRole("heading", { name: "What do you sell?" })).toBeInTheDocument();
+  await user.click(screen.getByRole("radio", { name: /beauty & wellness/i }));
+  await user.click(screen.getByRole("button", { name: /continue/i }));
+
+  expect(await screen.findByRole("heading", { name: "How do you sell today?" })).toBeInTheDocument();
+  await user.click(screen.getByRole("checkbox", { name: /social media/i }));
+  await user.click(screen.getByRole("button", { name: /continue/i }));
+
+  const design = await screen.findByRole("heading", { name: "Pick a design" });
+  const halo = screen.getByRole("radio", { name: /halo/i });
+  expect(halo).toBeChecked();
+  expect(within(halo.closest("label")!).getByText("Suggested for you")).toBeInTheDocument();
+  expect(design).toBeInTheDocument();
+
+  await user.click(screen.getByRole("button", { name: "Back" }));
+  expect(await screen.findByRole("checkbox", { name: /social media/i })).toBeChecked();
+  await waitFor(() => expect(backend.snapshot()).toMatchObject({
+    step: "profile",
+    answers: { name: "Fern Studio", slug: "fern-studio", country: "GB", category: "Beauty & wellness", sellingChannels: ["social"] },
+  }));
+});
+
+it("stops on step 1 until the required details are filled in", async () => {
+  mockBackend({ answers: { fullName: "Maya Patel" } });
+  const user = userEvent.setup();
+  render(<OnboardingPage />);
+
+  await screen.findByLabelText("Store name");
+  await user.click(screen.getByRole("button", { name: /continue/i }));
+  expect(await screen.findByText("Enter a store name.")).toBeInTheDocument();
+  expect(screen.getByText("Choose where your business is based.")).toBeInTheDocument();
+  expect(screen.getByLabelText("Store name")).toHaveFocus();
+});
+
+it("creates the store from the last step with the suggested design and opens the dashboard", async () => {
+  const backend = mockBackend({ step: "products", answers: { ...ready, category: "Electronics" } });
+  const user = userEvent.setup();
+  render(<OnboardingPage />);
+
+  await user.type(await screen.findByLabelText("Product name"), "Wireless earbuds");
+  await user.type(screen.getByLabelText(/^Price/), "49.99");
+  await user.click(screen.getByRole("button", { name: /create my store/i }));
+
+  await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/admin?welcome=1"));
+  expect(backend.snapshot().answers).toMatchObject({ theme: "jelly-diode", product: { title: "Wireless earbuds", priceMinor: 4999 } });
+  expect(backend.calls.filter((call) => call === "POST /complete")).toHaveLength(1);
+});
+
+it("retries dashboard loading after completion without creating a second store", async () => {
+  const backend = mockBackend({ step: "review", answers: ready });
+  refreshMerchant.mockRejectedValueOnce(new Error("Network unavailable"));
+  const user = userEvent.setup();
+  render(<OnboardingPage />);
+
+  await user.click(await screen.findByRole("button", { name: /skip and create store/i }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(/store was created/i);
+  await user.click(screen.getByRole("button", { name: /open your dashboard/i }));
+
+  await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/admin?welcome=1"));
+  expect(setActiveStoreId).toHaveBeenCalledWith(store.id);
+  expect(backend.calls.filter((call) => call === "POST /complete")).toHaveLength(1);
 });

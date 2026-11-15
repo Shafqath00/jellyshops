@@ -17,7 +17,7 @@ let customer: Promise<SupabaseClient | null> | undefined;
 /** The merchant (admin) sign-in client, or null when sign-in is not set up. */
 export function merchantSupabase(): Promise<SupabaseClient | null> {
   merchant ??= url && key
-    ? import("@supabase/supabase-js").then(({ createClient }) => createClient(url, key, { auth: { detectSessionInUrl: false } }))
+    ? import("@supabase/supabase-js").then(({ createClient }) => createClient(url, key, { auth: { flowType: "pkce", detectSessionInUrl: false } }))
     : Promise.resolve(null);
   return merchant;
 }

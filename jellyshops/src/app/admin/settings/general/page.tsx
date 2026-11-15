@@ -4,8 +4,16 @@ import { useState } from "react";
 import { AdminPage, Banner, Card, CardSkeleton, Field, HelpTip, ResourceForm, useToast } from "@/components/admin";
 import { useStoreSettings, type StoreSettings } from "@/features/admin/settings/use-store-settings";
 
-type Draft = Pick<StoreSettings, "name" | "slug" | "timezone"> & { contactEmail: string };
-const toDraft = (settings: StoreSettings): Draft => ({ name: settings.name, slug: settings.slug, timezone: settings.timezone, contactEmail: settings.contactEmail ?? "" });
+type Draft = Pick<StoreSettings, "name" | "slug" | "timezone"> & {
+  contactEmail: string;
+  description: string;
+  category: string;
+  businessType: string;
+};
+const toDraft = (settings: StoreSettings): Draft => ({
+  name: settings.name, slug: settings.slug, timezone: settings.timezone, contactEmail: settings.contactEmail ?? "",
+  description: settings.description ?? "", category: settings.category ?? "", businessType: settings.businessType ?? "",
+});
 const zones = (current: string) => { const list = typeof Intl.supportedValuesOf === "function" ? Intl.supportedValuesOf("timeZone") : []; return list.includes(current) ? list : [current, ...list]; };
 
 export default function GeneralSettingsPage() {
@@ -21,7 +29,10 @@ export default function GeneralSettingsPage() {
     {error && <Banner tone="critical" title="Could not load your settings" action={<button type="button" className="jk-button" onClick={reload}>Try again</button>}>{error}</Banner>}
     {!settings || !current ? !error && <CardSkeleton label="Loading settings" /> :
       <ResourceForm dirty={dirty} onDiscard={() => setDraft(null)} onSubmit={async () => {
-        await save({ name: current.name.trim(), slug: current.slug.trim(), timezone: current.timezone, contactEmail: current.contactEmail.trim() || null });
+        await save({
+          name: current.name.trim(), slug: current.slug.trim(), timezone: current.timezone, contactEmail: current.contactEmail.trim() || null,
+          description: current.description.trim(), category: current.category.trim(), businessType: current.businessType.trim(),
+        });
         setDraft(null); toast("Settings saved");
       }}>
         <Card title="Store details">
@@ -31,6 +42,9 @@ export default function GeneralSettingsPage() {
             <Field id="store-slug" label={<>Store address <HelpTip>The part after the site name in your store&apos;s web address. It cannot change after your first order or publication.</HelpTip></>} help="Lowercase letters, numbers and hyphens.">
               <input id="store-slug" required minLength={3} maxLength={63} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" value={current.slug} onChange={(event) => set({ slug: event.target.value })} />
             </Field>
+            <Field id="store-description" label="Store description"><textarea id="store-description" rows={3} maxLength={500} value={current.description} onChange={(event) => set({ description: event.target.value })} /></Field>
+            <Field id="store-category" label="Store category"><input id="store-category" maxLength={80} value={current.category} onChange={(event) => set({ category: event.target.value })} /></Field>
+            <Field id="store-business-type" label="Business type"><input id="store-business-type" maxLength={80} value={current.businessType} onChange={(event) => set({ businessType: event.target.value })} /></Field>
           </div>
         </Card>
         <Card title="Time and money">

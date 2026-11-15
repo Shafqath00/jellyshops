@@ -2,6 +2,9 @@ import type { StoreRole } from "../tenants/types.js";
 
 export interface MerchantPrincipal {
   userId: string;
+  email?: string;
+  emailVerified?: boolean;
+  displayName?: string;
   storeIds: string[];
   storeRoles: Record<string, StoreRole>;
 }

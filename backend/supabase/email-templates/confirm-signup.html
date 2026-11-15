@@ -1,0 +1,37 @@
+<!-- Paste into Supabase: Authentication > Emails > Templates > Confirm signup.
+     Subject suggestion: Confirm your Jellyshop account -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1ec;padding:32px 16px;font-family:Inter,Arial,Helvetica,sans-serif;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:16px;padding:40px 32px;">
+        <tr>
+          <td style="font-size:20px;font-weight:700;color:#1d2333;padding-bottom:24px;">Jellyshop</td>
+        </tr>
+        <tr>
+          <td style="font-size:24px;font-weight:700;color:#1d2333;padding-bottom:12px;">Confirm your email address</td>
+        </tr>
+        <tr>
+          <td style="font-size:16px;line-height:24px;color:#4a5060;padding-bottom:28px;">
+            Thanks for signing up. Confirm this email address to finish creating your account and start setting up your store.
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-bottom:28px;">
+            <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#2f5bff;color:#ffffff;text-decoration:none;font-weight:600;font-size:16px;padding:14px 28px;border-radius:999px;">Confirm email address</a>
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size:13px;line-height:20px;color:#7a8090;">
+            Button not working? Copy this link into your browser:<br>
+            <span style="word-break:break-all;">{{ .ConfirmationURL }}</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="font-size:13px;line-height:20px;color:#7a8090;padding-top:24px;">
+            If you didn't sign up for Jellyshop, you can ignore this email.
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>

@@ -1,0 +1,7 @@
+# Merchant onboarding rollout
+
+1. Apply `20261114000000_merchant_onboarding.sql` before deploying the backend. For projects where it was applied through Supabase, confirm the migration list and table grants instead of rerunning the SQL. The browser uses the merchant API to access onboarding data.
+2. Set `JELLYSHOP_TERMS_URL`, `JELLYSHOP_PRIVACY_URL`, and `JELLYSHOP_TERMS_VERSION` on the backend using the approved JellyShop policies. Check that `GET /api/onboarding/policies` returns the expected version and links. Increase the version whenever first-store merchants must review updated terms.
+3. Keep email confirmation enabled in Supabase. Allow the deployed application's `/auth/callback` URL with the supported query strings. Confirm that signup and password recovery email templates link to Supabase’s confirmation URL so the flow can return a PKCE code to JellyShop.
+4. Configure Google OAuth in the environment’s Supabase project. In Google Cloud, register the Supabase callback URI shown in the Google provider settings. Set `NEXT_PUBLIC_JELLYSHOP_GOOGLE_SIGN_IN=true` for the frontend build after the provider and application callback are configured.
+5. Use dedicated staging accounts to check email confirmation, password recovery, Google sign-in, terms acceptance, and onboarding through `/admin`. Confirm the test store starts with no current publication. Repeat sign-in as a merchant who already has a store and verify the requested admin page opens.

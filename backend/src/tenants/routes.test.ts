@@ -91,7 +91,7 @@ describe("merchant routes", () => {
     for (const slug of ["themes", "admin", "theme-preview"]) {
       const response = await request(app).post("/api/stores").set(authed()).send({ name: "Shop", slug, currency: "USD", country: "US" });
       expect(response.status, slug).toBe(400);
-      expect(JSON.stringify(response.body)).toContain("used by Jelly Shops itself");
+      expect(response.body.error.issues).toEqual(expect.arrayContaining([expect.objectContaining({ path: "slug" })]));
     }
     expect(tenants.createStore).not.toHaveBeenCalled();
   });
@@ -132,7 +132,11 @@ describe("reserved store addresses", () => {
     const { RESERVED_STORE_SLUGS } = await import("./routes.js");
     const appDirectory = resolve(process.cwd(), "../jellyshops/src/app");
     if (!existsSync(appDirectory)) return;
-    const folders = readdirSync(appDirectory, { withFileTypes: true }).filter((entry) => entry.isDirectory() && !entry.name.startsWith("[") && !entry.name.startsWith("(")).map((entry) => entry.name);
+    const folders = readdirSync(appDirectory, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory() && !/^[\[(_]/.test(entry.name))
+      .filter(({ name }) => readdirSync(resolve(appDirectory, name), { recursive: true })
+        .some(file => /(?:^|[\\/])(?:page|route)\.[jt]sx?$/.test(file)))
+      .map(({ name }) => name);
     expect([...RESERVED_STORE_SLUGS].sort()).toEqual(expect.arrayContaining(folders.sort()));
   });
 });
