@@ -1,6 +1,6 @@
 # Handoff: Jelly Shop marketing site, sign-in and onboarding (black-and-white design system)
 
-Branch: `redesign/jelly-shop-ui`. Written 2026-11-15 for the developer taking this over.
+Branch: `redesign/jelly-shop-ui`. Written 2026-11-15 for the developer taking this over; updated the same day after the images, browser check, staging run and owner decisions.
 
 ## What the brief asked for
 
@@ -14,9 +14,24 @@ A bold, premium black-and-white SaaS look (references: Vercel, Shopify, Linear, 
 | Design tokens | Done: `docs/redesign/DESIGN_TOKENS.md`, code in `jellyshops/src/features/brand/brand.css` |
 | Logos | Done: `docs/redesign/LOGOS.md`, SVGs in `jellyshops/public/logos/` (Stripe, YouTube, Vimeo, Spotify, SoundCloud only) |
 | Home page | Done and browser-checked (1440px and 390px, light mode, reduced motion, 60 fps scroll in a local headless run) |
-| Sign-in screens | Built: split screen, check-your-email screen with resend, Google button above the form (hidden until `NEXT_PUBLIC_JELLYSHOP_GOOGLE_SIGN_IN=true`). Unit tests pass. **Not yet looked at in a browser.** |
-| Onboarding | Built: five steps, animated progress bar and step transitions, live store preview, success state, `/admin?welcome=1` welcome banner. Unit tests pass. **Not yet looked at in a browser or run against the backend.** |
-| Images for sign-in and onboarding | **Not made.** The owner's ChatGPT account hit its daily image limit. Placeholders are images already made today in the same style. Prompts below. |
+| Sign-in screens | Done and browser-checked 2026-11-15 (1440 and 390px, dark, light, reduced motion, keyboard focus): split screen with the portrait `auth-visual.webp`, check-your-email screen with resend, Google button above the form (still hidden: `NEXT_PUBLIC_JELLYSHOP_GOOGLE_SIGN_IN` not set, Google provider not configured). |
+| Onboarding | Done, browser-checked (same widths and modes, fake backend) and run end to end on staging 2026-11-15 (see "Staging run"). |
+| Images for sign-in and onboarding | Done 2026-11-15: `auth-visual.webp` and `onboarding-store/-sell/-channels/-product.webp` (ChatGPT, logged in `ASSETS.md`). `onboarding-design.webp` skipped: step 4 shows the chosen design's cover. |
+| Changelog | Done: `/changelog` (`src/app/changelog/`, entries in `changelog-content.ts`, newest first, only shipped features). The home "New" pill and the footer link to it. |
+
+## Owner decisions (2026-11-15)
+
+- Name: **"Jellyshop"** (one word) on the home page, sign-in, onboarding and the dashboard welcome banner. Not yet changed: the home hero picture (`hero-dashboard-storefront.webp`) has "Jelly Shop" drawn on the laptop screen (needs a new ChatGPT image), and other parts of the repo (backend messages, theme wording, `storefront-registry/src/sections/layout.ts`).
+- Prices: keep **£0 / £19 / £49** a month.
+- "Book a demo" became **"Take the tour"** (opens the product tour dialog).
+- Changelog page: built (above).
+- Social links: the owner will send the addresses; footer links in `home-content.ts` (`social`) are still `#`.
+- Terms / Privacy / Cookies pages: **not yet; launch blocker.** The backend also needs `JELLYSHOP_TERMS_URL`, `JELLYSHOP_PRIVACY_URL` and `JELLYSHOP_TERMS_VERSION`; without them sign-up shows "New accounts are temporarily unavailable" and onboarding stops at the terms.
+- Google sign-in: skipped for now (setup steps in `backend/docs/merchant-onboarding-rollout.md`).
+
+## Staging run (2026-11-15)
+
+Local frontend (port 3210) + local backend against staging, with placeholder policy settings (`https://example.test/terms|privacy`, version `qa-test-only`) on the local backend only. Dedicated merchant from `npm run provision:onboarding-e2e` (login only in the git-ignored `jellyshops/.env.onboarding.local`). `e2e/onboarding.spec.ts` (rewritten for the five steps) passed every step: terms, address check, progress across a reload, resume on the saved step, channels, design (Halo chosen over the suggested Forma), first product, store created in GBP, `/admin?welcome=1` with the banner and "Set up your store" checklist, product saved as DRAFT, theme `jelly-halo` installed. **Test store left on staging:** "Onboarding E2E 1794764997116" (`onboarding-e2e-1794764997116`, id `store-9ac621e6-dae1-49f8-93af-e8caf46b2438`). `npm run reset:onboarding-e2e` currently refuses to run ("The Store foreign-key dependency graph changed"): its allowlist in `backend/scripts/lib/onboarding-e2e-reset.ts` must be updated before the store can be reset and the spec re-run. Run the spec against an already running dev server with a temporary Playwright config that only sets `baseURL` (this machine cannot hold a second Next server).
 
 ## Where things live
 
@@ -56,23 +71,17 @@ The database only accepts the step names `profile, store, branding, business, pr
 
 ## To do next
 
-1. **Generate the six missing images** when the ChatGPT limit resets (owner's account; it said "try again tomorrow at 6:45 PM" on 2026-11-15). Prefix each with the `S3` style line from `ASSETS.md`, save as WebP in `public/assets/`, add to `ASSETS.md`, then point the code at them:
-   - `auth-visual.webp` (portrait 1024x1536): a tall black phone showing a dark store (black vase hero, two £ product cards, white "Add to bag"), floating glass cards "Store published", "New order £86.00" and a small rising sales line; lots of dark space top and bottom. Replace `hero-dashboard-storefront.webp` in `auth-shell.tsx`.
-   - `onboarding-store.webp` (1024x1024): a glass address bar reading "jelly.shop/fern-studio" with a tick, above a matte black shopfront with a blank sign.
-   - `onboarding-sell.webp`: a still life of five black and white products (vase, tote, headphones, serum bottle, notebook) on graphite plinths with tiny glass tags.
-   - `onboarding-channels.webp`: a phone with a social post, a laptop store, a market-stall card reader and a parcel, joined by thin glowing lines.
-   - `onboarding-design.webp` (optional; step 4 already shows the chosen design's real cover).
-   - `onboarding-product.webp`: a product card being created: vase photo, title, price £42, white "Add product" button.
-   Swap the paths in `stepVisual` in `src/app/onboarding/steps.tsx`.
-2. **Browser check** sign-in, sign-up, check-your-email, forgot/reset password and the onboarding steps at 1440px and 390px, dark and light. The home page checks are the model (see "How to check" below).
-3. **Run onboarding end to end** with a test merchant on a local backend against staging (ask the owner first; it creates a store). Confirm the chosen design installs and the product is saved as a draft.
-4. **Google sign-in:** configure the provider in Supabase (see `backend/docs/merchant-onboarding-rollout.md`), then set `NEXT_PUBLIC_JELLYSHOP_GOOGLE_SIGN_IN=true`.
-5. **Open decisions for the owner:** prices (£0/£19/£49 are placeholders), a demo booking link for "Book a demo", social account addresses, the Terms/Privacy/Cookies pages, a changelog page for the "New" pill, "Jellyshop" vs "Jelly Shop" spelling.
+1. **Social links:** put the owner's account addresses in `social` in `src/app/home-content.ts` (they are `#`).
+2. **Legal pages (launch blocker):** Terms, Privacy and Cookies pages, then set `JELLYSHOP_TERMS_URL`, `JELLYSHOP_PRIVACY_URL` and `JELLYSHOP_TERMS_VERSION` on every backend that takes sign-ups.
+3. **Google sign-in:** when the owner has set up the Google provider and callback URLs in Supabase (`backend/docs/merchant-onboarding-rollout.md`), set `NEXT_PUBLIC_JELLYSHOP_GOOGLE_SIGN_IN=true` for the frontend build and check the button and the redirect.
+4. **Home hero picture:** regenerate `hero-dashboard-storefront.webp` with "Jellyshop" on the laptop screen (same prompt in `ASSETS.md`, name changed).
+5. **Reset script:** update the table allowlist in `backend/scripts/lib/onboarding-e2e-reset.ts`, then reset the staging test store and re-run `e2e/onboarding.spec.ts`.
+6. Small: on a phone, onboarding step 4 opens about 15px down (the "Back" link is half hidden).
 
 ## How to run and check
 
 - Frontend: `cd jellyshops && npm install` (adds `motion` and `lenis`), then the "jellyshops-admin" launch entry (port 3210) or the dev command in `CLAUDE.md`.
-- Tests: `NODE_OPTIONS=--no-experimental-webstorage npx vitest run src/app/page.test.tsx src/app/onboarding src/features/auth src/app/admin/home-page.test.tsx` (36 pass).
+- Tests: `NODE_OPTIONS=--no-experimental-webstorage npx vitest run src/app/page.test.tsx src/app/onboarding src/features/auth src/app/admin/home-page.test.tsx src/app/changelog` (37 pass on 2026-11-15).
 - Backend onboarding: `cd backend && npx vitest run src/onboarding`.
 - Visual checks used for the home page: Playwright at 1440x900 and 390x844, scroll the page in steps, take viewport screenshots (full-page captures break the pinned "How it works" section), check `scrollWidth` for sideways scroll, emulate `prefers-reduced-motion: reduce`, switch light mode with the sun button.
 - Machine note: this computer runs out of memory with two Next dev servers; stop one first.
