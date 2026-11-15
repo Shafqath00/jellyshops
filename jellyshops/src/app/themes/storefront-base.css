@@ -1764,3 +1764,9 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 [data-jelly-theme] .jelly-footer-base > .jelly-footer-credit { margin: 0; padding: 0; border: 0; }
 [data-jelly-theme] .jelly-footer-payments { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
 [data-jelly-theme] .jelly-footer-payments li { padding: 4px 10px; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); border-radius: 6px; font-size: 12px; font-weight: 600; letter-spacing: .02em; }
+
+/* Lenis smooth scrolling (StorefrontMotion; theme setting Animations > Smooth scrolling). */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }

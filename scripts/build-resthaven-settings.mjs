@@ -37,6 +37,8 @@ Object.assign(defaults, {
   badges: { ...defaults.badges, sale: "show", position: "theme", shape: "theme", background: "#B5452B", text: "#FFFFFF" },
   fields: { ...defaults.fields, radius: "soft", borderWidth: "theme", height: "theme" },
   cart: { type: "drawer", freeDeliveryFrom: 0 },
+  // Bright edition: sections fade up as shoppers scroll, and the page scrolls smoothly (never with reduced motion).
+  animations: { reveal: true, smoothScroll: true },
   colorSchemes: {
     ...defaults.colorSchemes,
     count: "4",

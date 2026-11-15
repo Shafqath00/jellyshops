@@ -9,6 +9,7 @@ import { accessCookieName, loadAccessStatus } from "@/features/storefront-access
 import { StorefrontPasswordPage } from "@/features/storefront-access/password-page";
 import { loadInstalledTheme } from "@/features/storefront/installed-theme";
 import { InstalledThemeProvider } from "@/features/storefront/installed-theme-provider";
+import { StorefrontMotion } from "@/features/storefront/components/storefront-motion";
 
 /** The address the shopper reached the store on, so canonical links and share images are full addresses (search engines and Lighthouse need them). */
 async function siteAddress(): Promise<URL | undefined> {
@@ -42,5 +43,5 @@ export default async function StoreLayout({ children, params }: { children: Reac
     data.publication.kind === "v4" ? loadInstalledTheme(data.publication.snapshot.theme.artifactId, { baseUrl: process.env.STOREFRONT_API_URL ?? process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001" }) : Promise.resolve(null),
   ]);
   if (access.protected && !access.unlocked) return <StorefrontPasswordPage storeSlug={data.store.slug} storeName={data.store.name} message={access.message} />;
-  return <InstalledThemeProvider theme={installedTheme}><StorefrontBootstrap key={`${data.store.id}:${data.publication.publicationId}`} data={data}><StorefrontCatalogSync storeSlug={storeSlug} initialReady><StorefrontFrame storeSlug={storeSlug}>{children}</StorefrontFrame></StorefrontCatalogSync></StorefrontBootstrap></InstalledThemeProvider>;
+  return <InstalledThemeProvider theme={installedTheme}><StorefrontBootstrap key={`${data.store.id}:${data.publication.publicationId}`} data={data}><StorefrontCatalogSync storeSlug={storeSlug} initialReady><StorefrontFrame storeSlug={storeSlug}>{children}</StorefrontFrame><StorefrontMotion /></StorefrontCatalogSync></StorefrontBootstrap></InstalledThemeProvider>;
 }

@@ -269,6 +269,10 @@
     "cart": {
       "type": "drawer",
       "freeDeliveryFrom": 0
+    },
+    "animations": {
+      "reveal": true,
+      "smoothScroll": true
     }
   },
   "sections": [

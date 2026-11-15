@@ -171,6 +171,11 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     select("cart.type", "When a shopper opens the bag", "Cart", "page", [["page", "Go to the bag page"], ["drawer", "Slide out the bag"], ["sheet", "Slide out the bag; from the bottom on phones"]], "The slide-out bag also opens after Add to cart."),
     range("cart.freeDeliveryFrom", "Free delivery from (0 for none)", "Cart", 0, 0, 500, 5),
   ];
+  // Movement on the live store (StorefrontMotion in the app): sections fade up into view, and the page scrolls smoothly. Never for shoppers who ask their device for less motion.
+  const animationSchema = [
+    { id: "animations.reveal", type: "checkbox", label: "Reveal sections as shoppers scroll", group: "Animations", default: false, description: "Sections fade gently up into view, and product cards lift when pointed at. Off for shoppers whose device asks for less motion." },
+    { id: "animations.smoothScroll", type: "checkbox", label: "Smooth scrolling", group: "Animations", default: false, description: "Softens scrolling with a mouse wheel. Off for shoppers whose device asks for less motion." },
+  ];
   const languageSchema = [
     { id: "languages.defaultName", type: "text", label: "Main language", group: "Languages", default: "English", description: "The language your store is written in." },
     { id: "languages.extra", type: "text", label: "Other languages", group: "Languages", default: "", description: "Language codes separated by commas, for example hi, ta, fr. Shoppers pick one in the footer; you add the text in the editor's Language menu. Text you haven't translated shows in the main language." },
@@ -188,6 +193,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
       advanced: { customCss: "" },
       languages: { defaultName: "English", extra: "" },
       cart: { type: "page", freeDeliveryFrom: 0 },
+      animations: { reveal: false, smoothScroll: false },
     },
     buttonDefaults: { size: theme, textCase: theme, borderWidth: theme, hover: theme },
     cardDefaults: { layout: theme, showRating: false, hoverImage: false, compare: false, radius: theme, shadow: theme, hover: theme, order: "photo-title-price", showTitle: "show", titleLines: theme, showPrice: "show", savings: "none", button: "none", photoFit: theme, swatches: "none" },
@@ -198,6 +204,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     cardSchema,
     badgeSchema,
     cardContentSchema,
+    animationSchema,
     socialSchema,
     advancedSchema,
     languageSchema,
@@ -398,6 +405,9 @@ export function resolveThemeStyleTokens(settings: Record<string, unknown>, defau
   if (card.showRating === true) tokens["--jelly-card-rating-display"] = "flex";
   if (card.hoverImage === true) tokens["--jelly-card-hover-image-display"] = "block";
   if (card.swatches === "colors") tokens["--jelly-card-swatches-display"] = "flex";
+  const animations = record(settings?.animations);
+  if (animations.reveal === true) tokens["--jelly-motion-reveal"] = "1";
+  if (animations.smoothScroll === true) tokens["--jelly-motion-smooth"] = "1";
   const buttonLabel = productCardButtonLabel(settings);
   if (buttonLabel) Object.assign(tokens, { "--jelly-card-button-display": "inline-flex", "--jelly-card-button-label": JSON.stringify(buttonLabel) });
   return tokens;
