@@ -101,7 +101,11 @@ export default function OnboardingPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attempt, hasStore, request, router, userId]);
 
-  useEffect(() => { heading.current?.focus({ preventScroll: true }); }, [draft?.consentRequired, step]);
+  useEffect(() => {
+    // A new step starts at the top: on phones Continue sits low on the page, and the next step would otherwise open part-way down.
+    if (heading.current && heading.current.getBoundingClientRect().top < 0) window.scrollTo({ top: 0, behavior: "instant" });
+    heading.current?.focus({ preventScroll: true });
+  }, [draft?.consentRequired, step]);
 
   const save = useCallback(async (nextStep: SetupStep, nextAnswers: SetupAnswers) => {
     while (write.current) await write.current;

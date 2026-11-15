@@ -231,9 +231,10 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           <span className={styles.verifyIcon} aria-hidden="true"><MailCheck size={24} strokeWidth={1.5} /></span>
           <p>We sent a confirmation link to <span className={styles.verifyEmail}>{sentTo}</span>.</p>
           <ol className={styles.verifySteps}>
-            <li>Open the email from Jelly Shop.</li>
-            <li>Select <strong>Confirm your email</strong>. Use this browser if you can.</li>
-            <li>You’ll come straight back here to set up your store.</li>
+            {/* One <span> per step: the <li> is a flex row, so bare text and <strong> would become separate columns. */}
+            <li><span>Open the email from Jelly Shop.</span></li>
+            <li><span>Select <strong>Confirm your email</strong>. Use this browser if you can.</span></li>
+            <li><span>You’ll come straight back here to set up your store.</span></li>
           </ol>
           {error && <p className={styles.alert} role="alert">{error}</p>}
           {notice && <p className={styles.notice} role="status">{notice}</p>}

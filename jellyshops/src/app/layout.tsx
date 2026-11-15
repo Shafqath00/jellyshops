@@ -29,7 +29,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-scroll-behavior="smooth" className={storefrontFontVariables}>
+    // suppressHydrationWarning: the home-theme script below sets data-home-theme on <html> before React loads.
+    <html lang="en" data-scroll-behavior="smooth" className={storefrontFontVariables} suppressHydrationWarning>
       <body>
         {/* Home page light/dark choice, applied before paint so light mode doesn't flash dark. Only the home page reads it. */}
         <Script id="home-theme" strategy="beforeInteractive">
