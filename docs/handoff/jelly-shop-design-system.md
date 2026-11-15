@@ -33,6 +33,12 @@ A bold, premium black-and-white SaaS look (references: Vercel, Shopify, Linear, 
 
 Local frontend (port 3210) + local backend against staging, with placeholder policy settings (`https://example.test/terms|privacy`, version `qa-test-only`) on the local backend only. Dedicated merchant from `npm run provision:onboarding-e2e` (login only in the git-ignored `jellyshops/.env.onboarding.local`). `e2e/onboarding.spec.ts` (rewritten for the five steps) passed every step: terms, address check, progress across a reload, resume on the saved step, channels, design (Halo chosen over the suggested Forma), first product, store created in GBP, `/admin?welcome=1` with the banner and "Set up your store" checklist, product saved as DRAFT, theme `jelly-halo` installed. **Test store left on staging:** "Onboarding E2E 1794764997116" (`onboarding-e2e-1794764997116`, id `store-9ac621e6-dae1-49f8-93af-e8caf46b2438`). `npm run reset:onboarding-e2e` currently refuses to run ("The Store foreign-key dependency graph changed"): its allowlist in `backend/scripts/lib/onboarding-e2e-reset.ts` must be updated before the store can be reset and the spec re-run. Run the spec against an already running dev server with a temporary Playwright config that only sets `baseURL` (this machine cannot hold a second Next server).
 
+## Colour pass (2026-11-15)
+
+
+The owner asked to move from black-and-white to a vibrant accent system on the dark base. Done: image audit (`docs/redesign/IMAGE_AUDIT.md`), accent tokens, all home, sign-in and onboarding pictures regenerated in colour, colour layer at the end of `home.module.css`, `merchant-auth.module.css` and `onboarding.module.css` (marked "Colour layer"), original-colour integration logos, CSS glows for the final call to action, `/changelog` header and footer links back to the home page. Checks at 1440/768/390px, dark and light: axe (no violations), a measured contrast check of every text item on gradients/pictures (none below AA), an edge check of every image (no bright edges), motion and Lenis still running. Open: the hero background is an upscale of a 1672px original; `bg-hero-grid.webp` (grey grid) still sits behind the sign-in and onboarding panels.
+
+
 ## Where things live
 
 | What | Path |
@@ -51,11 +57,11 @@ Local frontend (port 3210) + local backend against staging, with placeholder pol
 
 ## Rules to keep
 
-- **Colours:** only the tokens in `brand.css`. No hue anywhere except the tiny green "live" dot. No Jelly Links colours (the Jelly Shop logo's lime tile is replaced by `JellyShopLogo` on these pages).
+- **Colours (changed 2026-11-15):** dark base plus the accent system in `brand.css` (violet #7C5CFF, blue #3B82F6, cyan #22D3EE, magenta #F0449A, amber #FFB547; gradients, glows, tints; table in `DESIGN_TOKENS.md`). Only tokens, never raw colours, and only the AA-measured text tokens for text. No Jelly Links colours (`JellyShopLogo` replaces the lime tile).
 - **Motion:** animate only `transform` and `opacity`, easing `[0.22, 1, 0.36, 1]`. Always use `useReducedMotion` from `features/brand/motion` (not Motion's own; ours is hydration-safe). Never hide real content behind an `opacity: 0` entrance (see the sign-in panel: it slides, it doesn't fade).
-- **Logos:** a real brand logo only for a real integration; customers are invented names shown as text. Read `LOGOS.md` before adding one.
+- **Logos:** a real brand logo only for a real integration, in its own colour (`public/logos/<slug>-color.svg`); customers are invented names shown as text. Read `LOGOS.md` before adding one.
 - **Copy:** anything not built is marked "Soon"; stories and shop names are labelled illustrative.
-- **Images:** generated with ChatGPT in the black-and-white style (style lines `S3` and `T3` in `ASSETS.md`), saved as WebP in `public/assets/`, every prompt logged in `ASSETS.md`. No stock photos.
+- **Images:** generated with ChatGPT in the colour style (style lines `S4` and `T4` in `ASSETS.md`; `S3`/`T3` were the black-and-white ones), saved as WebP in `public/assets/`, every prompt logged in `ASSETS.md`. No stock photos.
 
 ## Onboarding: how the five steps map to the backend
 

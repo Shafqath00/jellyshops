@@ -34,3 +34,15 @@ Checked on the running app (`/`, port 3210) at 1440x900 and 390x844, dark and li
 ## Other things found
 
 - **Counters stuck at zero with reduced motion** (proof band "0 store designs", stories "+0%"): `Counter` reset the text to 0 on the first render and never restored it once reduced motion turned on. Fixed in `features/brand/motion.tsx`.
+
+## Result (2026-11-15, after the fixes)
+
+- **Every image marked "Regenerate" was regenerated in colour** with ChatGPT in the owner's Chrome (prompts in `ASSETS.md`): hero background and mockup, six feature visuals, six store design previews, three avatars, the social card, the sign-in picture and four onboarding pictures. `bg-cta-glow.webp` was replaced by CSS glows; `hero-dashboard-storefront.webp` was removed.
+- **White and hard edges, by cause:**
+  - Hero: frame border and ring removed; the mockup is a transparent picture with no frame.
+  - "How it works": inline pictures use `object-fit: cover` (no stretching), no light border.
+  - Avatars: border removed; the files are circles with transparent corners, so no square shows in light mode.
+  - Four feature renders have light streaks drawn up to their edges. Every place a feature picture appears now fades its outer 5% (CSS mask), so they never end in a hard cut.
+- **Measured check:** a script compares the 2px band on every image's edge with the pixels just inside and just outside, at 2x zoom. Home page at 1440, 768 and 390px, dark and light, plus the sign-in page: **0 images with a bright edge** (17 images per page). Corner crops were also checked by eye.
+- **Light mode:** the hero uses soft colour washes instead of the dark photograph; mockups have coloured, softer shadows.
+- **Still a limit:** ChatGPT's largest landscape output is 1672px (background) and 1536px (mockup), so the hero background was upscaled to 2400px. It is soft light, so this is not visible, but it is not native 2400px detail.

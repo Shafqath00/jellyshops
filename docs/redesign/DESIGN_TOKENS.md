@@ -20,7 +20,34 @@ Only neutrals. The single "accent" is light: soft white glows and gradients.
 | `--glow` | `rgb(255 255 255 / 14%)` | `rgb(0 0 0 / 6%)` | Radial glows behind the hero and CTA |
 | `--success` | `#4ADE80` (text on dark only, small dot) | `#15803D` | Live status dots only |
 
-Rules: no hue except the tiny status dot. Brand logos render in `--fg-muted`, turning `--fg` on hover. Images use the same black-and-white palette.
+`--fg-subtle` was raised on 2026-11-15 to `#858585` (dark, 5.1:1 or better on every dark surface) and `#6B6B6B` (light, 4.8:1 or better), because it is used for small text (footer, hints) and failed AA before.
+
+### Accent system (2026-11-15, owner's request: "add colour to the system")
+
+The dark foundation stays; a vibrant accent palette sits on top. Code: `features/brand/brand.css`.
+
+| Token | Dark | Light | Use |
+| --- | --- | --- | --- |
+| `--violet` `--blue` `--cyan` `--magenta` `--amber` | `#7C5CFF` `#3B82F6` `#22D3EE` `#F0449A` `#FFB547` | same | Fills, glows, gradients (not text) |
+| `--accent` | `#9B87FF` (6.9:1) | `#5B3DF5` (5.9:1) | Eyebrow labels, icons, links |
+| `--accent-2` | `#22D3EE` (11:1) | `#0E7490` (5.1:1) | Cyan text and icons |
+| `--accent-warm` | `#FFB547` (11.3:1) | `#B45309` (4.8:1) | Amber text and icons |
+| `--grad-brand` | violet → blue → cyan, 135° | same | Signature gradient for fills, bars, borders |
+| `--grad-warm` | magenta → amber | same | Warm highlights |
+| `--grad-text` | `#A78BFA` → `#60A5FA` → `#22D3EE` (weakest 7.3:1) | `#6D28D9` → `#2563EB` → `#0E7490` (weakest 4.95:1) | Gradient words: hero outcome line, final CTA, proof numbers |
+| `--grad-text-warm` | `#F472B6` → `#FFB547` (7.5:1) | `#BE185D` → `#B45309` (4.8:1) | Story numbers |
+| `--btn-primary` | `#6D4AFF` → `#2563EB` with white text (5.15:1) | same | Primary buttons, "New" tag, badges, billing pill |
+| `--glow-accent` / `--glow-cyan` / `--glow-warm` | 40% / 28% / 24% | 28% / 20% / 16% | Glows behind the hero mockup, cards, CTA |
+| `--tint-violet` / `--tint-cyan` / `--tint-warm` | 6-8% | 7-9% | Section background tints (each section a different one) |
+| `--accent-line` / `--accent-soft` | violet at 45% / 14% | 35% / 9% | Coloured borders, icon tiles |
+
+Rules:
+- Text colours above are measured on the page colour; gradient text is measured at every stop. A page-level check (axe plus a script that photographs the background behind every text item axe cannot judge) found nothing below AA at 1440, 768 and 390px in either mode on 2026-11-15.
+- Hover glows fade in with opacity only (a pseudo-element), so motion still animates only transform and opacity.
+- Icons are Lucide (stroke 1.5) in duotone tiles that cycle violet, cyan and amber.
+- Real brand logos appear in their own colours (`LOGOS.md`).
+- Images are full colour in one style (`S4` / `T4` in `ASSETS.md`).
+- The live dot stays green.
 
 ## Typography
 

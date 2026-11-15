@@ -15,7 +15,7 @@
   --line-strong: rgb(255 255 255 / 18%);
   --fg: #fafafa;
   --fg-muted: #a1a1a1;
-  --fg-subtle: #6e6e6e;
+  --fg-subtle: #858585;         /* small text: 5.1:1 or better on every dark surface (was #6e6e6e, 3.9:1) */
   --btn-bg: #fafafa;
   --btn-fg: #0a0a0a;
   --glow: rgb(255 255 255 / 14%);
@@ -63,7 +63,7 @@ html[data-home-theme="light"] [data-brand] {
   --line-strong: rgb(0 0 0 / 16%);
   --fg: #0a0a0a;
   --fg-muted: #5c5c5c;
-  --fg-subtle: #8f8f8f;
+  --fg-subtle: #6b6b6b;         /* 4.8:1 or better on every light surface (was #8f8f8f, 3.1:1) */
   --btn-bg: #0a0a0a;
   --btn-fg: #fafafa;
   --glow: rgb(0 0 0 / 6%);

@@ -111,6 +111,9 @@ export function Integrations() {
             <div className={styles.terminalBar} aria-hidden="true"><span /><span /><span /><em>terminal</em></div>
             <motion.pre
               aria-label="Example theme kit commands: create, preview, package and upload a theme"
+              // Scrolls sideways on phones, so it must be reachable with the keyboard (WCAG scrollable region).
+              tabIndex={0}
+              role="region"
               variants={{ show: { transition: { staggerChildren: reduced ? 0 : 0.35 } } }}
               initial="hidden"
               whileInView="show"
@@ -307,11 +310,10 @@ export function FinalCta() {
     <section className={styles.ctaWrap} aria-labelledby="cta-title">
       <div className={styles.container}>
         <div ref={ref} className={styles.cta}>
-          <motion.div className={styles.ctaGlow} style={{ scale: glowScale }} aria-hidden="true">
-            <Image src="/assets/bg-cta-glow.webp" alt="" fill sizes="(max-width: 1240px) 100vw, 1200px" loading="lazy" />
-          </motion.div>
+          {/* Colour glows drawn in CSS (no image to load); the scale follows the scroll. */}
+          <motion.div className={styles.ctaGlow} style={{ scale: glowScale }} aria-hidden="true" />
           <Reveal>
-            <h2 id="cta-title" className={styles.ctaTitle}>Your store could be live this afternoon.</h2>
+            <h2 id="cta-title" className={styles.ctaTitle}>Your store could be <span className={styles.gradientText}>live this afternoon.</span></h2>
           </Reveal>
           <Reveal delay={0.1}><p>Start free, pick a design and add your first product. No card needed.</p></Reveal>
           <Reveal delay={0.2} className={styles.heroActions}>

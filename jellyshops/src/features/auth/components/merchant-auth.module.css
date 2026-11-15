@@ -200,3 +200,21 @@
   .shell *::before,
   .shell *::after { transition-duration: .01ms !important; }
 }
+
+/* Colour layer (2026-11-15): same accent system as the home page (features/brand/brand.css). */
+.eyebrow { color: var(--accent); }
+.primary { position: relative; isolation: isolate; background: var(--btn-primary); color: var(--btn-primary-fg); box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%); }
+.primary::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; box-shadow: 0 10px 32px -8px var(--glow-accent); opacity: 0; transition: opacity .25s var(--ease); pointer-events: none; }
+.primary:hover:not(:disabled) { background: var(--btn-primary); }
+.primary:hover:not(:disabled)::after, .primary:focus-visible::after { opacity: 1; }
+.textLink { text-decoration-color: var(--accent); }
+.input:focus-visible { border-color: var(--accent-line); box-shadow: 0 0 0 3px var(--accent-soft); }
+.verifyIcon { border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent); }
+.verifySteps li::before { border-color: var(--accent-line); color: var(--accent); }
+
+@media (min-width: 1024px) {
+  .artTitle span { background-image: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .artGlow { background: radial-gradient(ellipse at 35% 50%, var(--glow-accent), transparent 60%), radial-gradient(ellipse at 70% 60%, var(--glow-cyan), transparent 60%); }
+  .cardIcon { background: var(--btn-primary); color: #fff; }
+  .artFrame { border: 0; box-shadow: 0 40px 100px -40px var(--glow-accent); }
+}

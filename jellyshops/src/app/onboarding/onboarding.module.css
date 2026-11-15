@@ -284,3 +284,24 @@ select.input { appearance: none; padding-right: 36px; background-image: url("dat
   .shell *::before,
   .shell *::after { transition-duration: .01ms !important; }
 }
+
+/* Colour layer (2026-11-15): same accent system as the home page (features/brand/brand.css). */
+.eyebrow { color: var(--accent); }
+.track > span { background: var(--grad-brand); }
+.stepList li[data-state="current"] { color: var(--accent); }
+.tile:has(input:checked),
+.option:has(input:checked),
+.design:has(input:checked) { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 16px 40px -20px var(--glow-accent); }
+.tile:has(input:checked) svg { color: var(--accent); }
+.option:has(input:checked) .optionCheck { border-color: transparent; background: var(--btn-primary); color: #fff; }
+/* Design covers show in their real colours (they were greyed out until chosen). */
+.designImage img { filter: none; }
+.primary { position: relative; isolation: isolate; background: var(--btn-primary); color: var(--btn-primary-fg); box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%); }
+.primary::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; box-shadow: 0 10px 32px -8px var(--glow-accent); opacity: 0; transition: opacity .25s var(--ease); pointer-events: none; }
+.primary:hover:not(:disabled) { background: var(--btn-primary); }
+.primary:hover:not(:disabled)::after, .primary:focus-visible::after { opacity: 1; }
+
+@media (min-width: 1024px) {
+  .stageGlow { background: radial-gradient(ellipse at 35% 40%, var(--glow-accent), transparent 60%), radial-gradient(ellipse at 70% 55%, var(--glow-cyan), transparent 60%); }
+  .stageImage { border: 0; box-shadow: 0 40px 100px -40px var(--glow-accent); }
+}

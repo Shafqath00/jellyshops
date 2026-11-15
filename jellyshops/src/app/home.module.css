@@ -224,7 +224,7 @@
 /* Hero */
 .hero { position: relative; isolation: isolate; margin-top: -64px; padding-top: calc(64px + clamp(40px, 6vw, 80px)); overflow: hidden; }
 /* About one screen tall, so the picture's light band sits behind the top of the mockup instead of far below it. */
-.heroBackdrop { position: absolute; inset: 0 0 auto; height: clamp(760px, 62vw + 160px, 1120px); z-index: -1; pointer-events: none; }
+.heroBackdrop { position: absolute; inset: 0 0 auto; height: clamp(1040px, 62vw + 160px, 1120px); z-index: -1; pointer-events: none; }
 /* Full-colour light scene (docs/redesign/ASSETS.md, hero-bg). Calm and dark at the top behind the headline; faded into the page at the bottom so no edge shows. */
 .heroGrid { object-fit: cover; object-position: center 62%; mask-image: linear-gradient(to bottom, #000 55%, transparent 92%); }
 /* Light mode: soft colour washes instead of the dark photograph. */
@@ -648,8 +648,6 @@
 }
 
 .ctaGlow { position: absolute; inset: -10%; z-index: -1; }
-.ctaGlow img { object-fit: cover; opacity: .9; }
-:global(html[data-home-theme="light"]) .ctaGlow img { filter: invert(1); opacity: .5; }
 .ctaTitle { max-width: 14ch; font-size: clamp(2.5rem, 7vw, 5.5rem); font-weight: 600; line-height: 1; letter-spacing: -.055em; }
 .cta p { max-width: 38rem; font-size: 1.125rem; }
 .cta .heroActions { margin-top: 12px; }
@@ -763,4 +761,149 @@
   .home *,
   .home *::before,
   .home *::after { transition-duration: .01ms !important; }
+}
+
+/* ======================================================================
+   Colour layer (2026-11-15): the accent system from features/brand/brand.css
+   applied to every section. Kept at the end so it reads as one change.
+   Text colours used here pass WCAG AA in both modes (DESIGN_TOKENS.md).
+   ====================================================================== */
+
+/* Eyebrows and labels in the brand violet; footer headings stay quiet. */
+.label { color: var(--accent); }
+.footer nav .label { color: var(--fg-subtle); }
+.gradientText { background-image: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* Soft colour tints so sections don't all look the same (decorative, behind the content). */
+.section, .how { position: relative; isolation: isolate; }
+.section::before, .how::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+.how::before { background: radial-gradient(50% 40% at 12% 30%, var(--tint-violet), transparent 70%); }
+.section[id="features"]::before { background: radial-gradient(45% 35% at 85% 10%, var(--tint-cyan), transparent 70%), radial-gradient(40% 35% at 5% 80%, var(--tint-violet), transparent 70%); }
+.section[id="templates"]::before { background: radial-gradient(50% 40% at 90% 40%, var(--tint-violet), transparent 70%); }
+.section[id="sell-everywhere"]::before { background: radial-gradient(45% 45% at 80% 50%, var(--tint-warm), transparent 70%); }
+.section[id="stories"]::before { background: radial-gradient(45% 40% at 10% 40%, var(--tint-warm), transparent 70%); }
+.section[id="pricing"]::before { background: radial-gradient(40% 45% at 50% 60%, var(--tint-violet), transparent 70%), radial-gradient(30% 30% at 80% 30%, var(--tint-cyan), transparent 70%); }
+
+/* Proof band and story numbers in gradient. */
+.stats strong { background-image: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.metric strong { background-image: var(--grad-text-warm); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* Icons: duotone tiles, each set cycling through the accents. */
+.channelIcon, .trustIcon, .megaIcon, .genericMark { border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent); border-radius: 12px; }
+.genericMark { width: 32px; height: 32px; border: 1px solid var(--accent-line); }
+.channelList li:nth-child(4n + 2) .channelIcon,
+.trustGrid li:nth-child(4n + 2) .trustIcon,
+.integrationGrid li:nth-child(3n + 2) .genericMark { border-color: color-mix(in srgb, var(--cyan) 40%, transparent); background: var(--tint-cyan); color: var(--accent-2); }
+.channelList li:nth-child(4n + 3) .channelIcon,
+.trustGrid li:nth-child(4n + 3) .trustIcon,
+.integrationGrid li:nth-child(3n) .genericMark { border-color: color-mix(in srgb, var(--amber) 40%, transparent); background: var(--tint-warm); color: var(--accent-warm); }
+
+/* How it works: pictures fill their frame (no stretching), no light border. */
+.howNum { color: var(--accent); }
+.howInlineImage { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; border: 0; border-radius: 16px; box-shadow: 0 30px 60px -30px var(--glow-accent); }
+.howImage { border: 0; background: transparent; box-shadow: 0 40px 100px -40px var(--glow-accent); }
+
+/* Bento: colour border and glow on hover, coloured chart bars. */
+.bentoCard { background: linear-gradient(180deg, var(--tint-violet), transparent 40%), var(--bg-raised); }
+.bentoCard:hover { border-color: var(--accent-line); }
+.bentoCard::after { background: radial-gradient(600px circle at 50% 0%, var(--glow-accent), transparent 50%); }
+.bentoCard:nth-child(3n + 2) { background: linear-gradient(180deg, var(--tint-cyan), transparent 40%), var(--bg-raised); }
+.bentoCard:nth-child(3n + 2)::after { background: radial-gradient(600px circle at 50% 0%, var(--glow-cyan), transparent 50%); }
+.miniBars span { background: var(--grad-brand); opacity: .9; }
+.miniChartHead em { color: var(--accent-2); }
+.miniOrders b { border-color: color-mix(in srgb, var(--cyan) 45%, transparent); color: var(--accent-2); }
+.paidChip svg { color: var(--accent-2); }
+
+/* Store designs: colour hover. */
+.templateLink:hover { border-color: var(--accent-line); box-shadow: 0 30px 70px -40px var(--glow-accent); }
+.templateHover { background: var(--btn-primary); color: #fff; }
+
+/* Sell everywhere diagram. */
+.diagram {
+  background:
+    radial-gradient(circle at 50% 50%, var(--glow-accent), transparent 55%),
+    radial-gradient(circle at 85% 20%, var(--glow-cyan), transparent 40%),
+    linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0 / 40px 40px,
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0 / 40px 40px,
+    var(--bg-sunken);
+  color: var(--accent);
+}
+.hub { border-color: var(--accent-line); box-shadow: 0 0 40px -6px var(--glow-accent); }
+.hubPulse { border-color: var(--accent); }
+
+/* Integrations: brand logos in their own colours (LOGOS.md); no grey mask. */
+.brandMark { width: 28px; height: 28px; background: none; mask: none; -webkit-mask: none; }
+.integrationGrid li { transition: background-color .2s var(--ease); }
+.integrationGrid li:hover { background: color-mix(in srgb, var(--accent) 6%, var(--bg)); }
+
+/* Terminal accents. */
+.code_cmd { color: var(--accent-2); }
+.code_ok { color: var(--accent); }
+.caret { background: var(--accent-2); }
+
+/* Stories: avatars without a light ring. */
+.story figcaption img { border: 0; }
+
+/* Pricing: gradient pill, colour "Most popular" plan. */
+.billing button[aria-checked="true"] { color: #fff; }
+.billingPill { background: var(--btn-primary); }
+.planFeatured {
+  border-color: transparent;
+  /* Tint, then a solid card colour, both inside the border; the gradient shows only in the 1px border. */
+  background:
+    linear-gradient(180deg, var(--tint-violet), transparent 55%) padding-box,
+    linear-gradient(var(--bg-raised), var(--bg-raised)) padding-box,
+    var(--grad-brand) border-box;
+  box-shadow: 0 40px 90px -40px var(--glow-accent);
+}
+.badge { background: var(--btn-primary); color: #fff; }
+.checkList svg { color: var(--accent-2); }
+.planFeatured .checkList svg { color: var(--accent); }
+
+/* FAQ: accent on hover and when open. */
+.faqItem button:hover .faqIcon,
+.faqItem button[aria-expanded="true"] .faqIcon { border-color: var(--accent-line); color: var(--accent); }
+
+/* Final call to action: colour glows in CSS instead of the old grey picture. */
+.ctaGlow {
+  background:
+    radial-gradient(45% 55% at 15% 100%, var(--glow-accent), transparent 70%),
+    radial-gradient(40% 50% at 85% 100%, var(--glow-cyan), transparent 70%),
+    radial-gradient(35% 40% at 50% 0%, var(--glow-warm), transparent 70%);
+  filter: blur(20px);
+}
+.cta { border-color: var(--accent-line); }
+
+/* Tour dialog. */
+.tourDots span[data-active="true"] { background: var(--grad-brand); }
+.btnOutline:hover { border-color: var(--accent-line); }
+
+/* Contrast fixes found by the measured check (text over pictures and glows). */
+.miniOrders li, .paidChip { background: color-mix(in srgb, var(--bg-raised) 94%, transparent); }
+.miniOrders b { background: var(--bg-raised); }
+.nodeSoon { color: var(--fg); }
+:global(html[data-home-theme="light"]) .heroNote { color: var(--fg-muted); }
+
+/* Light mode: text over the hero's colour washes and over the glass cards stays AA. */
+:global(html[data-home-theme="light"]) .navTrigger,
+:global(html[data-home-theme="light"]) .navList > li > a,
+:global(html[data-home-theme="light"]) .loginLink { color: color-mix(in srgb, var(--fg) 82%, var(--bg)); }
+:global(html[data-home-theme="light"]) .floatInner { background: color-mix(in srgb, var(--bg-raised) 95%, transparent); }
+
+/* Some feature renders have light streaks that run to the picture's edge; a soft fade on all four sides keeps that
+   from ending in a hard cut (IMAGE_AUDIT.md). Same treatment everywhere the feature pictures appear. */
+.howInlineImage,
+.howImage img,
+.bentoImage img,
+.tourStage img {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent), linear-gradient(to bottom, transparent, #000 5%, #000 95%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent), linear-gradient(to bottom, transparent, #000 5%, #000 95%, transparent);
+  mask-composite: intersect;
 }

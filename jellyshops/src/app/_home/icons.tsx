@@ -2,6 +2,7 @@ import {
   CalendarDays, ChartColumn, CodeXml, CreditCard, FileSpreadsheet, Globe, History, LayoutTemplate, LifeBuoy, Lock, Mail, MapPin,
   Megaphone, Package, Rocket, Share2, ShieldCheck, ShoppingBag, Smartphone, Star, Store, Truck, Users, type LucideIcon,
 } from "lucide-react";
+import Image from "next/image";
 import type { IconName } from "../home-content";
 
 const ICONS: Record<IconName, LucideIcon> = {
@@ -16,7 +17,7 @@ export function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
   return <Component size={size} strokeWidth={1.5} aria-hidden="true" />;
 }
 
-/** Official single-colour brand mark, drawn in the current text colour through a CSS mask. */
+/** Official brand mark in the brand's own colour (`/logos/<slug>-color.svg`, sources in docs/redesign/LOGOS.md). Decorative: the name is next to it. */
 export function BrandMark({ slug, className }: { slug: string; className?: string }) {
-  return <span className={className} aria-hidden="true" style={{ WebkitMaskImage: `url(/logos/${slug}.svg)`, maskImage: `url(/logos/${slug}.svg)` }} />;
+  return <Image className={className} src={`/logos/${slug}-color.svg`} alt="" width={28} height={28} unoptimized />;
 }

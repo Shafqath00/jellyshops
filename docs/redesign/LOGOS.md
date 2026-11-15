@@ -2,7 +2,17 @@
 
 Rule: a real brand's logo appears only where Jelly Shop **actually integrates** with it today. We have **no named real customers**, so the customer marquee uses clearly invented shop names as plain text, never a real company's logo.
 
-Logos are the official single-colour marks published through Simple Icons (CC0 for the SVG file; the marks stay their owners' trademarks), version 16.37.0, downloaded 2026-11-15 from `https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/<slug>.svg`. Simple Icons records each brand's own source page, listed below. They are drawn in one neutral colour (grey, white on hover) through a CSS mask, unchanged in shape.
+Logos are the official single-colour marks published through Simple Icons (CC0 for the SVG file; the marks stay their owners' trademarks), version 16.37.0, downloaded 2026-11-15 from `https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons/<slug>.svg`. Simple Icons records each brand's own source page, listed below. Since 2026-11-15 (colour direction) they are shown **in each brand's own colour**, unchanged in shape, from `public/logos/<slug>-color.svg`: the single-colour file with Simple Icons' official brand hex as its fill (from `simple-icons@16.37.0/data/simple-icons.json`). The plain `<slug>.svg` files are kept as the neutral versions. Each colour version was checked against the brand's rule (last column) for use on a dark and a light page.
+
+| Brand | Colour file | Brand hex | Colour on our dark and light pages |
+| --- | --- | --- | --- |
+| Stripe | `stripe-color.svg` | `#635BFF` | Stripe's own blurple mark; allowed on dark and light backgrounds |
+| YouTube | `youtube-color.svg` | `#FF0000` | The official icon is red with a **white** play triangle, so the triangle is filled white (the single-colour file leaves it cut out, which would show the page through it). Red icon on dark and light is the standard full-colour version |
+| Vimeo | `vimeo-color.svg` | `#1AB7EA` | Vimeo blue mark; allowed on dark and light |
+| Spotify | `spotify-color.svg` | `#1ED760` | Spotify only allows its icon in green, black or white; green is used on both modes, as their guidelines show |
+| SoundCloud | `soundcloud-color.svg` | `#FF5500` | SoundCloud orange; allowed on dark and light |
+
+Brands without a confirmed colour rule stay as names with a Lucide icon in an accent-coloured tile (table below).
 
 | Brand | File | Why it's on the page (real support) | Official source / guidelines | Recolouring |
 | --- | --- | --- | --- | --- |
