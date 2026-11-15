@@ -19,7 +19,7 @@ const GALLERY: Record<string, GalleryEntry> = {
   "jelly-forma": { category: "Home & living", cover: "/templates/jelly-forma.webp", tags: ["Furniture", "Search-first"] },
   "jelly-halo": { category: "Beauty", cover: "/templates/jelly-halo.webp", tags: ["Skincare", "Reviews"] },
   "jelly-harbour": { category: "Home & living", cover: "/templates/jelly-harbour.webp", tags: ["Coastal", "Calm"] },
-  "jelly-resthaven": { category: "Home & living", cover: "/templates/jelly-resthaven.webp", tags: ["Showroom", "Big-ticket"] },
+  "jelly-resthaven": { category: "Home & living", cover: "/templates/jelly-resthaven.webp", tags: ["Bright", "Showroom", "Big-ticket"] },
 };
 
 /** Merchant-facing name: short, without "Jelly" ("Jelly Avenue" -> "Avenue"). Ids never change. */

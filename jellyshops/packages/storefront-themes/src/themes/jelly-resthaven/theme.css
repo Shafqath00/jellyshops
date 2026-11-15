@@ -117,10 +117,10 @@ p { margin: 0 0 1em; }
 .jelly-footer-newsletter .jelly-newsletter-note { flex: 1 1 100%; order: 4; margin: 0; font-size: 13px; color: var(--j-color-muted); }
 .jelly-footer-brand strong { font-family: var(--theme-font-heading); font-size: 32px; font-weight: 600; letter-spacing: .04em; line-height: 1; }
 
-/* Banner header: the collection photo behind the title, with a soft dark wash at the foot so the words stay readable. */
-.jelly-collection-header[data-layout="banner"] { position: relative; display: grid; align-items: end; min-height: clamp(300px, 30vw, 420px); padding: 0; overflow: hidden; background: var(--jelly-scheme-4-bg, #1d2333); color: #fff; }
+/* Banner header: the collection photo behind the title, with a soft navy wash at the foot so the words stay readable. */
+.jelly-collection-header[data-layout="banner"] { position: relative; display: grid; align-items: end; min-height: clamp(300px, 30vw, 420px); padding: 0; overflow: hidden; background: var(--jelly-scheme-4-bg, #1f2a44); color: #fff; }
 .jelly-collection-header[data-layout="banner"] > .jelly-collection-header-media { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; object-fit: cover; border-radius: 0; }
-.jelly-collection-header[data-layout="banner"]::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(0deg, color-mix(in srgb, #10131c 72%, transparent) 0%, color-mix(in srgb, #10131c 38%, transparent) 50%, color-mix(in srgb, #10131c 10%, transparent) 100%); }
+.jelly-collection-header[data-layout="banner"]::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(0deg, color-mix(in srgb, var(--jelly-scheme-4-bg, #1f2a44) 70%, transparent) 0%, color-mix(in srgb, var(--jelly-scheme-4-bg, #1f2a44) 28%, transparent) 55%, transparent 100%); }
 .jelly-collection-header[data-layout="banner"] > .jelly-container { position: relative; z-index: 2; gap: 14px; padding-block: 64px 40px; }
 .jelly-collection-header[data-layout="banner"] :is(h1, .jelly-collection-header-copy, .jelly-breadcrumb, .jelly-breadcrumb a, .jelly-read-more) { color: inherit; }
 .jelly-collection-header[data-layout="banner"] .jelly-collection-header-copy { display: grid; gap: 10px; max-width: min(640px, 100%); }
