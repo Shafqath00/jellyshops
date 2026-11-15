@@ -123,8 +123,8 @@
               },
               "children": [],
               "image": {
-                "url": "/themes/jelly-resthaven/room-main.webp",
-                "alt": "A sage velvet bed in a main bedroom"
+                "url": "/themes/jelly-resthaven/bright-room-main.webp",
+                "alt": "A sky-blue upholstered bed with blush bedding in a sunny main bedroom"
               }
             },
             {
@@ -136,8 +136,8 @@
               },
               "children": [],
               "image": {
-                "url": "/themes/jelly-resthaven/room-guest.webp",
-                "alt": "A guest room with a grey ottoman storage bed"
+                "url": "/themes/jelly-resthaven/bright-room-guest.webp",
+                "alt": "A bright guest room with a sage-green ottoman storage bed lifted open"
               }
             },
             {
@@ -149,8 +149,8 @@
               },
               "children": [],
               "image": {
-                "url": "/themes/jelly-resthaven/room-kids.webp",
-                "alt": "A child's room with a blue upholstered single bed"
+                "url": "/themes/jelly-resthaven/bright-room-kids.webp",
+                "alt": "A bright child's room with a white single bed and pale-blue and blush bedding"
               }
             }
           ]
@@ -563,8 +563,8 @@
                 "settings": {
                   "label": "Decor",
                   "image": {
-                    "url": "/themes/jelly-resthaven/rug.webp",
-                    "alt": "A textured rug beside a bed"
+                    "url": "/themes/jelly-resthaven/bright-decor.webp",
+                    "alt": "A cream and sky-blue rug beside a bed with a lamp on the bedside table"
                   },
                   "link": "/search?q=Decor"
                 },
@@ -577,8 +577,8 @@
                 "settings": {
                   "label": "Sale",
                   "image": {
-                    "url": "/themes/jelly-resthaven/wool-throw.webp",
-                    "alt": "A wool throw over the foot of a bed"
+                    "url": "/themes/jelly-resthaven/bright-sale.webp",
+                    "alt": "A coral wool throw folded over the end of a white-bedded bed"
                   },
                   "link": "/search?q=Sale"
                 },
@@ -662,8 +662,8 @@
               "heading": "The sunny main bedroom",
               "text": "A calm room built around one beautiful bed. Tap a pin to see each piece.",
               "image": {
-                "url": "/themes/jelly-resthaven/room-main.webp",
-                "alt": "A main bedroom with an upholstered bed, bedside table and rug"
+                "url": "/themes/jelly-resthaven/bright-room-look.webp",
+                "alt": "A sunny main bedroom with a sky-blue bed, oak bedside table and cream rug"
               },
               "imagePosition": "left",
               "styleScheme": "scheme2"
@@ -674,8 +674,8 @@
                 "type": "hotspot",
                 "enabled": true,
                 "settings": {
-                  "x": 48,
-                  "y": 58
+                  "x": 50,
+                  "y": 50
                 },
                 "blocks": []
               },
@@ -684,8 +684,8 @@
                 "type": "hotspot",
                 "enabled": true,
                 "settings": {
-                  "x": 16,
-                  "y": 64
+                  "x": 14,
+                  "y": 58
                 },
                 "blocks": []
               },
@@ -694,8 +694,8 @@
                 "type": "hotspot",
                 "enabled": true,
                 "settings": {
-                  "x": 70,
-                  "y": 86
+                  "x": 62,
+                  "y": 88
                 },
                 "blocks": []
               }
@@ -711,8 +711,8 @@
             "settings": {
               "eyebrow": "Fabrics",
               "image": {
-                "url": "/themes/jelly-resthaven/fabrics.webp",
-                "alt": "Velvet, boucle and linen fabric swatches on a table"
+                "url": "/themes/jelly-resthaven/bright-fabrics.webp",
+                "alt": "Sky-blue, blush, sage and cream fabric swatches with eucalyptus on an oak table"
               },
               "imagePosition": "left"
             },
@@ -936,8 +936,8 @@
             "settings": {
               "eyebrow": "Our story",
               "image": {
-                "url": "/themes/jelly-resthaven/detail.webp",
-                "alt": "Close-up of hand-finished stitching on an upholstered headboard"
+                "url": "/themes/jelly-resthaven/bright-story.webp",
+                "alt": "Close-up of hand-finished piping on a sky-blue upholstered headboard"
               },
               "imagePosition": "left"
             },
@@ -993,7 +993,7 @@
                 "enabled": true,
                 "settings": {
                   "image": {
-                    "url": "/themes/jelly-resthaven/room-kids.webp",
+                    "url": "/themes/jelly-resthaven/bright-room-kids.webp",
                     "alt": "A bright children's room with a white bed"
                   }
                 },
@@ -1005,7 +1005,7 @@
                 "enabled": true,
                 "settings": {
                   "image": {
-                    "url": "/themes/jelly-resthaven/harbour-sage.webp",
+                    "url": "/themes/jelly-resthaven/bright-bed-sage.webp",
                     "alt": "A sage upholstered bed"
                   }
                 },
@@ -1017,7 +1017,7 @@
                 "enabled": true,
                 "settings": {
                   "image": {
-                    "url": "/themes/jelly-resthaven/room-guest.webp",
+                    "url": "/themes/jelly-resthaven/bright-room-guest.webp",
                     "alt": "A guest room with a storage bed"
                   }
                 },
@@ -1029,8 +1029,8 @@
                 "enabled": true,
                 "settings": {
                   "image": {
-                    "url": "/themes/jelly-resthaven/ivy-daybed.webp",
-                    "alt": "A daybed with cushions"
+                    "url": "/themes/jelly-resthaven/bright-daybed.webp",
+                    "alt": "A pale-blue daybed with blush and coral cushions"
                   }
                 },
                 "blocks": []
@@ -1053,8 +1053,8 @@
                 "enabled": true,
                 "settings": {
                   "image": {
-                    "url": "/themes/jelly-resthaven/wool-throw.webp",
-                    "alt": "A wool throw on a bed"
+                    "url": "/themes/jelly-resthaven/bright-sale.webp",
+                    "alt": "A coral wool throw on a bed"
                   }
                 },
                 "blocks": []

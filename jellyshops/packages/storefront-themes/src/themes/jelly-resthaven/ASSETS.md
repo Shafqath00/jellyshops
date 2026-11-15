@@ -1,6 +1,6 @@
 # Resthaven bright photography: prompt log
 
-Generated with ChatGPT image generation (the user's own account, free plan) on 15 November 2026, in one conversation, so every photo shares one house style. The plan ran out of images after five, so the set is incomplete (see "Still to make").
+Generated with ChatGPT image generation (the user's own account, free plan) on 15 November 2026, in one conversation, so every photo shares one house style. The first five were made on a free plan; the other ten followed (see "Made on 15 November 2026, second batch").
 
 PNG originals were encoded as WebP (quality 80, 1536 px wide) with Sharp and saved in `assets/` as `bright-*.webp`. The PNGs are in the user's Downloads folder as `resthaven-bright-*.png`. All are illustrative images, not photographs of merchant inventory. Replace them with real product photography before selling.
 
@@ -18,16 +18,26 @@ PNG originals were encoded as WebP (quality 80, 1536 px wide) with Sharp and sav
 | `bright-bedding.webp` (1:1) | Bedding tile, offer banner | Photo 4 (square 1:1): folded washed-linen bedding set in pale blush and soft sky blue stacked on a light oak bench, sage plant beside it, bright morning light. |
 | `bright-pillows.webp` (1:1) | Pillows tile | Photo 5 (square 1:1): two plump white and pale-blue pillows stacked against a light oak headboard, crisp white sheet, soft morning window light. |
 
-## Still to make
+## Made on 15 November 2026, second batch
 
-A developer is continuing this set: the list of ten photos, their prompts and where each goes is in `docs/handoff/resthaven-bright-photos.md` (use `scripts/resthaven-photos-to-webp.mjs` to convert them).
+Made in ChatGPT (Plus plan), one fresh chat per photo with `bright-hero.webp` and `bright-beds.webp` attached as style references, the house style above and "Create one single image (not a collage)". A first attempt that reused one chat drifted into a three-panel collage for photo 3, which is why each photo has its own chat. Converted with `node scripts/resthaven-photos-to-webp.mjs <png> <name>`; the PNGs are in `Downloads/resthaven-bright-2/`.
 
-Original notes:
+| File | Shape | Used for | Prompt after the house style |
+| --- | --- | --- | --- |
+| `bright-decor.webp` | 1:1 | Decor category tile | A soft textured cream and sky-blue rug on a pale oak floor beside the corner of a bed, a small ceramic lamp on a bedside table, bright morning light. |
+| `bright-sale.webp` | 1:1 | Sale category tile, gallery photo 6 | A coral wool throw folded across the end of a white-bedded bed, a blush cushion beside it, bright morning light, soft background. |
+| `bright-room-look.webp` | 4:3 | Shop the look room (pins on bed, bedside table, rug) | A wide view of a sunny main bedroom: a sky-blue upholstered bed with blush bedding in the centre, a light oak bedside table with a lamp on the left, a cream woven rug on the floor in front, a window with sheer curtains, pale oak floor. Everything clearly visible so product pins can sit on the bed, the bedside table and the rug. |
+| `bright-fabrics.webp` | 4:3 | Fabrics story | A flat lay of upholstery fabric swatches in sky blue, blush, sage and cream (linen, boucle and velvet) on a light oak table, soft daylight, a sprig of eucalyptus. |
+| `bright-story.webp` | 4:3 | Brand story | Close-up of hand-finished stitching and piping on a sky-blue upholstered headboard, a blush pillow in the corner, soft morning light, shallow depth of field. |
+| `bright-room-main.webp` | 4:3 | Large menu tile "Main bedroom" | A bright main bedroom with an upholstered bed in sky-blue linen, white and blush bedding, morning light, oak floor (three-quarter view from the foot of the bed). |
+| `bright-room-guest.webp` | 4:3 | Large menu tile "Guest room", gallery photo 3 | A bright guest room with a sage-green ottoman storage bed, its base lifted to show the storage, white bedding, oak floor, morning light. |
+| `bright-room-kids.webp` | 4:3 | Large menu tile "Kids room", gallery photo 1 | A bright children's bedroom with a white single bed, pale-blue and blush bedding, a small oak shelf with books, morning light. |
+| `bright-bed-sage.webp` | 1:1 | Gallery photo 2 | A sage-green upholstered bed with a winged headboard, white and blush bedding, bright morning light. |
+| `bright-daybed.webp` | 1:1 | Gallery photo 4 | A pale-blue upholstered daybed with cushions in blush and coral against a bright wall, morning light. |
 
-Photo 6 (Decor tile) was sent ("a soft textured cream and sky-blue rug on a pale oak floor beside the corner of a bed, a small ceramic lamp on a bedside table, bright morning light") but ChatGPT answered "You're out of images". Also needed:
+The Shop the look pins in `starter.json` sit at 50/50 (bed), 14/58 (bedside table) and 62/88 (rug) of `bright-room-look.webp`.
 
-- Sale tile (a coral throw folded on a bed)
-- Shop the look room photo (bed, bedside table, rug, 4:3)
-- Fabrics swatches, brand story detail, product photos with a second photo each, room tiles for the large menu, reviewer photos
+## Still to make (optional)
 
-Until they exist, those parts keep the earlier oat-toned photos from `SOURCES.md`.
+- Bright photos for the 24 demo-store products in `demo-content.json` (two each, for the hover photo) and for the theme preview's sample beds. They keep the earlier oat-toned photos until then.
+- Reviewer photos.

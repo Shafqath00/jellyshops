@@ -11,3 +11,5 @@ They are illustrative images, not photographs of merchant inventory. Replace the
 `mark.svg` and `preview.svg` are original vector artwork.
 
 Five brighter photographs (`bright-hero`, `bright-beds`, `bright-mattresses`, `bright-bedding`, `bright-pillows`) were generated on 15 November 2026 for the bright edition of the theme; their prompts are logged in `ASSETS.md`.
+
+Ten more bright photographs (`bright-decor`, `bright-sale`, `bright-room-look`, `bright-fabrics`, `bright-story`, `bright-room-main`, `bright-room-guest`, `bright-room-kids`, `bright-bed-sage`, `bright-daybed`) were generated on 15 November 2026 the same way, each in its own ChatGPT chat with the first two bright photos as style references; their prompts are in `ASSETS.md`.
