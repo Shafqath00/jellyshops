@@ -151,6 +151,8 @@
 [data-jelly-legacy-styles="off"] .jelly-faq details[open] summary::after { content: "–"; }
 [data-jelly-legacy-styles="off"] .jelly-faq details > :not(summary) { max-width: min(72ch, 100%); margin: -6px 0 22px; color: var(--j-color-muted); }
 [data-jelly-legacy-styles="off"] .jelly-newsletter:not(.jelly-footer-newsletter) > .jelly-container { display: grid; justify-items: center; gap: 12px; text-align: center; }
+/* Centred sign-up copy keeps a readable line length (and a clear centred inset on tablets). */
+[data-jelly-legacy-styles="off"] .jelly-newsletter:not(.jelly-footer-newsletter) > .jelly-container > :is(h2, p, .jelly-newsletter-text) { max-width: min(36rem, 100%); }
 [data-jelly-legacy-styles="off"] .jelly-newsletter:not(.jelly-footer-newsletter) form { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: min(560px, 100%); }
 [data-jelly-legacy-styles="off"] .jelly-newsletter:not(.jelly-footer-newsletter) form label:first-of-type { flex: 1 1 260px; }
 [data-jelly-legacy-styles="off"] .jelly-footer { display: grid; gap: 48px; padding: 72px var(--j-page-edge) 32px; border-top: 0; background: var(--j-color-bg); color: var(--j-color-text); font-size: 15px; }

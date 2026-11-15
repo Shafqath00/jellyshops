@@ -1714,13 +1714,16 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 [data-jelly-theme] .jelly-hotspot[data-side="left"] .jelly-hotspot-card { left: auto; right: calc(100% + 10px); }
 [data-jelly-theme] .jelly-hotspot-card[hidden] { display: none; }
 [data-jelly-theme] .jelly-hotspot-card img { width: 64px; aspect-ratio: 4 / 5; object-fit: cover; border-radius: calc(var(--j-radius-sm, 4px) * .66); }
-[data-jelly-theme] :is(.jelly-hotspot-card, .jelly-shop-look-list) a { color: inherit; font-weight: 600; text-decoration: none; line-height: 1.3; }
+[data-jelly-theme] :is(.jelly-hotspot-card, .jelly-shop-look-list) a { display: inline-block; min-height: 24px; padding-block: 2px; color: inherit; font-weight: 600; text-decoration: none; line-height: 1.3; }
 [data-jelly-theme] :is(.jelly-hotspot-card, .jelly-shop-look-list) a:hover { text-decoration: underline; }
+/* The whole row is the link's tap target. */
+[data-jelly-theme] .jelly-shop-look-list a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
 [data-jelly-theme] .jelly-showcase-price { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; margin: 4px 0 0; font-weight: 600; }
-[data-jelly-theme] .jelly-showcase-price .is-sale { color: var(--j-color-sale, #b42318); }
+/* A little of the text colour keeps the sale price readable (AA) on tinted bands too. */
+[data-jelly-theme] .jelly-showcase-price .is-sale { color: color-mix(in srgb, var(--j-color-sale, #b42318) 85%, var(--j-color-text, #000)); }
 [data-jelly-theme] .jelly-showcase-price s { color: var(--j-color-muted); font-weight: 400; }
 [data-jelly-theme] .jelly-shop-look-list { display: grid; gap: 12px; margin: 24px 0 0; padding: 0; list-style: none; }
-[data-jelly-theme] .jelly-shop-look-list li { display: grid; grid-template-columns: 32px 56px minmax(0, 1fr); gap: 14px; align-items: center; padding: 10px; border-radius: var(--j-radius-md, 8px); background: color-mix(in srgb, var(--j-color-surface, #fff) 70%, transparent); }
+[data-jelly-theme] .jelly-shop-look-list li { position: relative; display: grid; grid-template-columns: 32px 56px minmax(0, 1fr); gap: 14px; align-items: center; padding: 10px; border-radius: var(--j-radius-md, 8px); background: var(--j-color-surface, #fff); }
 [data-jelly-theme] .jelly-shop-look-list img { width: 56px; aspect-ratio: 4 / 5; object-fit: cover; border-radius: calc(var(--j-radius-sm, 4px) * .66); }
 [data-jelly-theme] .jelly-shop-look-number { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--j-color-primary, #222); color: var(--j-color-on-primary, #fff); font-size: 14px; font-weight: 700; }
 @media (max-width: 599px) { [data-jelly-theme] .jelly-hotspot-card { display: none !important; } }
@@ -1739,7 +1742,14 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 [data-jelly-theme] .jelly-featured-product-swatches { display: flex; gap: 8px; margin: 0; padding: 0; list-style: none; }
 [data-jelly-theme] .jelly-featured-product-swatches li { width: 24px; height: 24px; border: 1px solid var(--j-color-divider, rgba(0, 0, 0, .15)); border-radius: 50%; background: var(--j-color-wash, #eee); }
 
-[data-jelly-theme] .jelly-announcement--rotating { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 0; padding-block: 0; }
+/* The arrows sit on the page edges (44px tap targets, their marks against the edge), the message centred between them. */
+/* Doubled class: wins over a theme's own .jelly-announcement layout. Arrows beside the message on wide screens. */
+[data-jelly-theme] .jelly-announcement.jelly-announcement--rotating { display: grid; grid-template-columns: 44px minmax(0, auto) 44px; justify-content: center; align-items: center; gap: 0 8px; padding-block: 0; padding-inline: var(--j-page-edge, 16px); }
+@media (max-width: 767px) { [data-jelly-theme] .jelly-announcement.jelly-announcement--rotating { grid-template-columns: 44px minmax(0, 1fr) 44px; justify-content: stretch; gap: 0; } }
+@media (max-width: 767px) {
+  [data-jelly-theme] .jelly-announcement--rotating > .jelly-announcement-step:first-child { text-align: left; }
+  [data-jelly-theme] .jelly-announcement--rotating > .jelly-announcement-step:last-child { text-align: right; }
+}
 [data-jelly-theme] .jelly-announcement-message { margin: 0; padding-block: 10px; text-align: center; animation: jelly-announcement-in 400ms ease both; }
 [data-jelly-theme] .jelly-announcement-step { width: 44px; height: 40px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; font-size: 20px; line-height: 1; cursor: pointer; opacity: .75; }
 [data-jelly-theme] .jelly-announcement-step:hover, [data-jelly-theme] .jelly-announcement-step:focus-visible { opacity: 1; }
