@@ -69,15 +69,15 @@
   "enabled": true,
   "settingsDefaults": {
     "colors": {
-      "background": "#F7F3EE",
+      "background": "#FBF7F1",
       "surface": "#FFFFFF",
-      "text": "#1D2333",
-      "secondary": "#5E6270",
-      "primary": "#1D2333",
-      "accent": "#7E5F35"
+      "text": "#1F2A44",
+      "secondary": "#5A6478",
+      "primary": "#3D6E96",
+      "accent": "#B5452B"
     },
     "typography": {
-      "headingFont": "Cormorant Garamond",
+      "headingFont": "Fraunces",
       "bodyFont": "Figtree",
       "headingScale": "standard",
       "scale": "default",
@@ -102,7 +102,7 @@
       "sectionGap": 96
     },
     "productCard": {
-      "imageRatio": "landscape",
+      "imageRatio": "portrait",
       "style": "minimal",
       "alignment": "left",
       "showBrand": false,
@@ -181,32 +181,32 @@
     "colorSchemes": {
       "count": "4",
       "scheme1": {
-        "name": "Oat",
-        "background": "#F7F3EE",
-        "text": "#1D2333",
-        "button": "#1D2333",
-        "buttonText": "#F7F3EE"
+        "name": "Linen",
+        "background": "#FBF7F1",
+        "text": "#1F2A44",
+        "button": "#3D6E96",
+        "buttonText": "#FFFFFF"
       },
       "scheme2": {
-        "name": "Sand",
-        "background": "#ECE4D8",
-        "text": "#1D2333",
-        "button": "#1D2333",
-        "buttonText": "#F7F3EE"
+        "name": "Sky",
+        "background": "#E3EEF7",
+        "text": "#1F2A44",
+        "button": "#1F2A44",
+        "buttonText": "#FBF7F1"
       },
       "scheme3": {
-        "name": "White",
-        "background": "#FFFFFF",
-        "text": "#1D2333",
-        "button": "#1D2333",
+        "name": "Blush",
+        "background": "#F8E6DE",
+        "text": "#1F2A44",
+        "button": "#B5452B",
         "buttonText": "#FFFFFF"
       },
       "scheme4": {
-        "name": "Midnight",
-        "background": "#1D2333",
-        "text": "#F7F3EE",
-        "button": "#F7F3EE",
-        "buttonText": "#1D2333"
+        "name": "Night",
+        "background": "#1F2A44",
+        "text": "#FBF7F1",
+        "button": "#F2A488",
+        "buttonText": "#1F2A44"
       },
       "scheme5": {
         "name": "",
@@ -246,7 +246,7 @@
       "sale": "show",
       "position": "theme",
       "shape": "theme",
-      "background": "#A3422C",
+      "background": "#B5452B",
       "text": "#FFFFFF"
     },
     "social": {

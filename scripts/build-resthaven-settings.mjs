@@ -16,9 +16,9 @@ const schema = platformSettingsSchema(platform.settingsDefaults);
 const scheme = (name, background, text, button, buttonText) => ({ name, background, text, button, buttonText });
 const defaults = structuredClone(platform.settingsDefaults);
 Object.assign(defaults, {
-  // Midnight oat: oat page, white cards, midnight ink and buttons, brass highlights (all AA on their backgrounds).
-  colors: { background: "#F7F3EE", surface: "#FFFFFF", text: "#1D2333", secondary: "#5E6270", primary: "#1D2333", accent: "#7E5F35" },
-  typography: { ...defaults.typography, headingFont: "Cormorant Garamond", bodyFont: "Figtree", headingWeight: 500, bodyWeight: 400, bodySize: 16, headingSize: 60 },
+  // Morning sky (RESEARCH.md): linen page, night navy text, sky blue buttons, clay for sales (all AA on their backgrounds).
+  colors: { background: "#FBF7F1", surface: "#FFFFFF", text: "#1F2A44", secondary: "#5A6478", primary: "#3D6E96", accent: "#B5452B" },
+  typography: { ...defaults.typography, headingFont: "Fraunces", bodyFont: "Figtree", headingWeight: 500, bodyWeight: 400, bodySize: 16, headingSize: 60 },
   textStyles: {
     ...defaults.textStyles,
     h2: { ...defaults.textStyles.h2, size: 44 },
@@ -30,20 +30,20 @@ Object.assign(defaults, {
   layout: { ...defaults.layout, contentWidth: 1280, sectionGap: 96 },
   productCard: {
     ...defaults.productCard,
-    imageRatio: "landscape", style: "minimal", alignment: "left", radius: "theme", shadow: "none", hover: "none",
+    imageRatio: "portrait", style: "minimal", alignment: "left", radius: "theme", shadow: "none", hover: "none",
     order: "photo-title-price", showTitle: "show", titleLines: "theme", showPrice: "show", savings: "percent", button: "none",
     showBrand: false, swatches: "colors", layout: "theme", showRating: true, compare: false, hoverImage: true,
   },
-  badges: { ...defaults.badges, sale: "show", position: "theme", shape: "theme", background: "#A3422C", text: "#FFFFFF" },
+  badges: { ...defaults.badges, sale: "show", position: "theme", shape: "theme", background: "#B5452B", text: "#FFFFFF" },
   fields: { ...defaults.fields, radius: "soft", borderWidth: "theme", height: "theme" },
   cart: { type: "drawer", freeDeliveryFrom: 0 },
   colorSchemes: {
     ...defaults.colorSchemes,
     count: "4",
-    scheme1: scheme("Oat", "#F7F3EE", "#1D2333", "#1D2333", "#F7F3EE"),
-    scheme2: scheme("Sand", "#ECE4D8", "#1D2333", "#1D2333", "#F7F3EE"),
-    scheme3: scheme("White", "#FFFFFF", "#1D2333", "#1D2333", "#FFFFFF"),
-    scheme4: scheme("Midnight", "#1D2333", "#F7F3EE", "#F7F3EE", "#1D2333"),
+    scheme1: scheme("Linen", "#FBF7F1", "#1F2A44", "#3D6E96", "#FFFFFF"),
+    scheme2: scheme("Sky", "#E3EEF7", "#1F2A44", "#1F2A44", "#FBF7F1"),
+    scheme3: scheme("Blush", "#F8E6DE", "#1F2A44", "#B5452B", "#FFFFFF"),
+    scheme4: scheme("Night", "#1F2A44", "#FBF7F1", "#F2A488", "#1F2A44"),
   },
   branding: { ...defaults.branding, logoUrl: "" },
 });

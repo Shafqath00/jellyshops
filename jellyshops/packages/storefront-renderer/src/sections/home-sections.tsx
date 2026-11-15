@@ -10,6 +10,7 @@ import { choice, headingHidden, imageValue, numberValue, sectionData, stringValu
 import { formattedSetting, inlineSetting, SettingText } from "./setting-text";
 import { blockStyle } from "../block-style";
 import { blockEditorData, buttonProps } from "./block-content";
+import { announcementMessages, RotatingAnnouncement } from "./showcase";
 import { SectionGroups } from "./custom-content";
 import { mediaPhoto } from "../media-photo";
 
@@ -58,6 +59,13 @@ export function AnnouncementBarSection({ section, editor = false }: { section: S
   const href = typeof section.settings.link === "string" && section.settings.link ? safeRichTextHref(section.settings.link) : null;
   // The message is the section's own part when it comes from its settings (not from a block).
   const own = typeof section.settings.text === "string" ? elementProps(section, "message", editor) : {};
+  // Message blocks take turns with the section's own message (RotatingAnnouncement).
+  const blocks = announcementMessages(section);
+  if (blocks.length) {
+    const first = typeof section.settings.text === "string" && section.settings.text.trim() ? [{ id: "message", text: section.settings.text, href }] : [];
+    const messages = [...first, ...blocks];
+    if (messages.length > 1) return <RotatingAnnouncement section={section} messages={messages} editor={editor} />;
+  }
   return <aside className="jelly-announcement">{href ? <a href={href} {...own}>{message}</a> : <span {...own}>{message}</span>}</aside>;
 }
 

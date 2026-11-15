@@ -32,13 +32,13 @@ const inline = (placements: LayoutPlacement[]) => placements.flatMap((placement)
 
 describe("layout revisions", () => {
   it("knows Resthaven's layouts, oldest first, with the starter as the newest", () => {
-    expect(currentLayoutRevision(THEME)).toBe(5);
-    expect(layoutRevisions(THEME).map((entry) => entry.revision)).toEqual([1, 2, 3, 4, 5]);
+    expect(currentLayoutRevision(THEME)).toBe(6);
+    expect(layoutRevisions(THEME).map((entry) => entry.revision)).toEqual([1, 2, 3, 4, 5, 6]);
     expect(currentLayoutRevision("jelly-signature")).toBe(1);
   });
 
   it("recognises which layout a fresh install came from", () => {
-    for (const revision of [1, 2, 3, 4, 5]) expect(detectLayoutRevision(THEME, install(packFor(revision)))).toBe(revision);
+    for (const revision of [1, 2, 3, 4, 5, 6]) expect(detectLayoutRevision(THEME, install(packFor(revision)))).toBe(revision);
   });
 
   it("still recognises the starting layout after merchant edits", () => {
@@ -59,7 +59,7 @@ describe("layout revisions", () => {
     const alternate = { id: "alt-1", type: "product" as const, handle: "bed", layout: { sections: [] as LayoutPlacement[] } };
     draft.templates.push(alternate);
     const plan = planLayoutUpgrade(THEME, draft, 2, "upgrade-1");
-    const current = packFor(5);
+    const current = packFor(6);
 
     it("lays every page out as the current starter does", () => {
       for (const template of current.templates) {
@@ -99,7 +99,7 @@ describe("layout revisions", () => {
     });
 
     it("is then recognised as the current layout", () => {
-      expect(detectLayoutRevision(THEME, plan.draft)).toBe(5);
+      expect(detectLayoutRevision(THEME, plan.draft)).toBe(6);
     });
   });
 
@@ -133,6 +133,6 @@ describe("layout revisions", () => {
   });
 
   it("refuses to upgrade a draft that is already current", () => {
-    expect(() => planLayoutUpgrade(THEME, install(packFor(5)), 5, "x")).toThrow(/already uses the current layout/);
+    expect(() => planLayoutUpgrade(THEME, install(packFor(6)), 6, "x")).toThrow(/already uses the current layout/);
   });
 });

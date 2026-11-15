@@ -21,6 +21,10 @@ export const SECTION_CONTROL_TYPES: Record<string, Record<string, string>> = {
     "collectionId": "collection",
     "viewAllLink": "link"
   },
+  "featured-product": {
+    "productId": "product",
+    "image": "image"
+  },
   "footer": {
     "text": "rich-text",
     "newsletterText": "rich-text"
@@ -73,9 +77,15 @@ export const SECTION_CONTROL_TYPES: Record<string, Record<string, string>> = {
   },
   "rating-summary": {
     "link": "link"
+  },
+  "shop-the-look": {
+    "image": "image"
   }
 };
 export const BLOCK_CONTROL_TYPES: Record<string, Record<string, string>> = {
+  "announcement-message": {
+    "link": "link"
+  },
   "button": {
     "href": "link"
   },
@@ -95,6 +105,9 @@ export const BLOCK_CONTROL_TYPES: Record<string, Record<string, string>> = {
   },
   "heading": {
     "text": "rich-text"
+  },
+  "hotspot": {
+    "productId": "product"
   },
   "image": {
     "image": "image",
@@ -129,6 +142,9 @@ export const BLOCK_CONTROL_TYPES: Record<string, Record<string, string>> = {
   "story-tile": {
     "image": "image",
     "link": "link"
+  },
+  "testimonial": {
+    "avatar": "image"
   },
   "text": {
     "text": "rich-text"

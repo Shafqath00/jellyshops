@@ -1,5 +1,5 @@
 /*
- * Resthaven: quiet luxury for beds and the bedroom (docs/plans/resthaven-redesign.md).
+ * Resthaven: a bright, calm home and bedroom store (RESEARCH.md: "a bright Sunday morning bedroom").
  *
  * Plain CSS; the platform limits every rule to this theme ("&" is the theme's page). The components themselves
  * (header, menus, cards, sections, footer, lists, product page, bag, checkout, account) come from the platform base
@@ -12,7 +12,10 @@
 /* ── Tokens ───────────────────────────────────────────────────────── */
 & {
   /* Resthaven's values for the shared tokens; the platform components read them. */
-  --j-color-sale: var(--jelly-badge-bg, #a3422c);
+  --j-color-sale: var(--jelly-badge-bg, #b5452b);
+  /* Soft 12px photo corners, 16px panels. */
+  --j-radius-sm: 12px;
+  --j-radius-md: 16px;
   /* Section space on the platform scale (section rhythm in storefront-base.css pads every section from it). */
   --j-section-md: clamp(56px, 7vw, var(--jelly-spacing-section, 96px));
   --j-type-h1-size: var(--jelly-type-h1-size, clamp(40px, 5.2vw, var(--jelly-heading-size, 60px)));
@@ -51,7 +54,7 @@ p { margin: 0 0 1em; }
 /* ── Announcement and header ─────────────────────────────────────────────── */
 .jelly-announcement {
   display: flex; justify-content: center; gap: 24px; padding: 10px var(--j-page-edge);
-  background: var(--jelly-color-primary, var(--j-color-text)); color: var(--theme-background, var(--j-color-bg));
+  background: var(--jelly-scheme-2-bg, #e3eef7); color: var(--jelly-scheme-2-text, #1f2a44);
   font-size: 13px; font-weight: 500; letter-spacing: .03em; line-height: 1.4; text-align: center;
 }
 .jelly-announcement a { color: inherit; }
@@ -70,16 +73,19 @@ p { margin: 0 0 1em; }
 .jelly-hero[data-layout="overlay"] > .jelly-container { position: relative; display: grid; align-items: end; width: 100%; max-width: none; min-height: clamp(520px, 46vw, 680px); margin: 0; padding: 0 var(--j-page-edge); }
 .jelly-hero[data-layout="overlay"] .jelly-hero-media { position: absolute; inset: 0; margin: 0; border-radius: 0; }
 .jelly-hero-media img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 0; }
-.jelly-hero[data-layout="overlay"] .jelly-hero-overlay { position: absolute; inset: 0; background: linear-gradient(90deg, color-mix(in srgb, #10131c 62%, transparent) 0%, color-mix(in srgb, #10131c 30%, transparent) 45%, transparent 75%); opacity: 1; }
-.jelly-hero[data-layout="overlay"] .jelly-hero-content { position: relative; z-index: 1; max-width: 620px; padding: 96px 0 88px; color: #fff; }
+/* A bright morning wash behind the words (linen, fading to clear), so the photo stays light and the text stays navy.
+   It sits on the photo; the merchant's own darkness setting still draws on top (the starter sets it to 0). */
+.jelly-hero[data-layout="overlay"] .jelly-hero-overlay { position: absolute; inset: 0; }
+.jelly-hero[data-layout="overlay"] .jelly-hero-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--jelly-scheme-1-bg, #fbf7f1) 92%, transparent) 0%, color-mix(in srgb, var(--jelly-scheme-1-bg, #fbf7f1) 72%, transparent) 40%, transparent 70%); }
+.jelly-hero[data-layout="overlay"] .jelly-hero-content :is(h1, h2, p) { color: inherit; }
+.jelly-hero[data-layout="overlay"] .jelly-hero-content { position: relative; z-index: 1; max-width: 620px; padding: 96px 0 88px; color: var(--jelly-scheme-1-text, #1f2a44); }
 .jelly-hero h1 { margin-bottom: 18px; font-size: clamp(44px, 5.6vw, 76px); line-height: 1.02; }
 .jelly-hero-content > p { max-width: min(46ch, 100%); font-size: 18px; line-height: 1.6; }
 .jelly-hero[data-layout="overlay"] .jelly-hero-content .jelly-eyebrow { color: inherit; }
 .jelly-hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
-.jelly-hero[data-layout="overlay"] .jelly-hero-actions .jelly-button { border-color: #fff; background: #fff; color: #10131c; }
-.jelly-hero[data-layout="overlay"] .jelly-hero-actions .jelly-button:hover { background: color-mix(in srgb, #fff 86%, transparent); }
-.jelly-hero[data-layout="overlay"] .jelly-hero-actions .jelly-button--secondary { border-color: color-mix(in srgb, #fff 70%, transparent); background: transparent; color: #fff; }
-.jelly-hero[data-layout="overlay"] .jelly-hero-actions .jelly-button--secondary:hover { border-color: #fff; background: color-mix(in srgb, #fff 12%, transparent); }
+.jelly-hero[data-layout="overlay"] .jelly-hero-actions .jelly-button--secondary { border-color: currentColor; background: color-mix(in srgb, #fff 55%, transparent); color: inherit; }
+.jelly-hero[data-layout="overlay"] .jelly-hero-actions .jelly-button--secondary:hover { background: #fff; }
+.jelly-hero .jelly-eyebrow { color: var(--jelly-badge-bg, #b5452b); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; font-size: 13px; }
 
 /* Category tiles (Collection list): photos with the name in a pill; Bento makes the first tile large. */
 .jelly-category-card > strong {
@@ -91,12 +97,11 @@ p { margin: 0 0 1em; }
 .jelly-category-card:hover > strong::after { transform: translateX(3px); }
 .jelly-category-grid[data-layout="bento"] .jelly-category-card:first-child > strong { left: 24px; bottom: 24px; padding: 14px 22px; font-size: 17px; }
 
-/* The footer is a band in the store's main button colour (midnight by default; plum on stores installed earlier)
-   unless the merchant chose a colour scheme for it. */
+/* The footer is a night band (colour scheme 4) unless the merchant chose a colour scheme for it. */
 [data-section-type="footer"]:not([data-scheme]) {
-  --j-color-bg: var(--jelly-color-primary, #1d2333); --j-color-text: var(--theme-background, #f7f3ee);
-  --j-color-muted: color-mix(in srgb, var(--j-color-text) 78%, transparent); --j-color-primary: var(--theme-background, #f7f3ee);
-  --j-color-on-primary: var(--jelly-color-primary, #1d2333); --j-color-surface: color-mix(in srgb, var(--j-color-text) 8%, var(--j-color-bg));
+  --j-color-bg: var(--jelly-scheme-4-bg, #1f2a44); --j-color-text: var(--jelly-scheme-4-text, #fbf7f1);
+  --j-color-muted: color-mix(in srgb, var(--j-color-text) 80%, transparent); --j-color-primary: var(--jelly-scheme-4-button, #f2a488);
+  --j-color-on-primary: var(--jelly-scheme-4-button-text, #1f2a44); --j-color-surface: color-mix(in srgb, var(--j-color-text) 8%, var(--j-color-bg));
   --j-color-accent: currentColor;
 }
 .jelly-footer-newsletter { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px 64px; align-items: center; padding-bottom: 48px; border-bottom: 1px solid color-mix(in srgb, currentColor 18%, transparent); }
@@ -136,10 +141,11 @@ p { margin: 0 0 1em; }
 @media (max-width: 767px) {
   & { --j-section-md: 56px; }
   .jelly-announcement { font-size: 12px; padding-block: 8px; }
-  .jelly-header-brand { font-size: clamp(20px, 6vw, 26px); text-align: center; white-space: normal; }
-  .jelly-header-brand > span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-height: 1.05; overflow-wrap: anywhere; }
+  .jelly-header-brand { font-size: clamp(19px, 5.4vw, 24px); text-align: center; white-space: normal; }
+  /* Wrap between words; break a word only when it cannot fit on its own line. */
+  .jelly-header-brand > span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-height: 1.05; overflow-wrap: break-word; }
   .jelly-hero[data-layout="overlay"] > .jelly-container { min-height: 560px; }
-  .jelly-hero[data-layout="overlay"] .jelly-hero-overlay { background: linear-gradient(0deg, color-mix(in srgb, #10131c 72%, transparent) 0%, color-mix(in srgb, #10131c 35%, transparent) 55%, transparent 85%); }
+  .jelly-hero[data-layout="overlay"] .jelly-hero-media::after { background: linear-gradient(0deg, color-mix(in srgb, var(--jelly-scheme-1-bg, #fbf7f1) 94%, transparent) 0%, color-mix(in srgb, var(--jelly-scheme-1-bg, #fbf7f1) 78%, transparent) 50%, transparent 80%); }
   .jelly-hero[data-layout="overlay"] .jelly-hero-content { padding: 48px 0 40px; }
   .jelly-hero h1 { font-size: 42px; }
   .jelly-hero-content > p { font-size: 16px; }

@@ -15,6 +15,7 @@ import { filterNamesSetting } from "./collection-sections";
 import { useWords } from "../words";
 import { rowColumnProps } from "../row-columns";
 import { mediaPhoto } from "../media-photo";
+import { TestimonialCards, testimonialReviews } from "./showcase";
 
 function stringSetting(settings: Record<string, unknown>, key: string, fallback = ""): string {
   const value = settings[key];
@@ -81,16 +82,14 @@ export function CategoryGridSection({ section, context }: { section: SectionNode
 }
 
 export function TestimonialsSection({ section, mode = "published" }: { section: SectionNode; mode?: RendererMode }) {
-  const reviews = visibleBlocks(section, "testimonial").flatMap((block) => {
-    const quote = stringSetting(block.settings, "quote");
-    return quote ? [{ id: block.id, block, quote, author: stringSetting(block.settings, "author") }] : [];
-  });
+  const reviews = testimonialReviews(section);
+  const layout = section.settings.layout === "carousel" ? "carousel" : "grid";
   // Never invent reviews: with no testimonials the section only shows an editing hint outside the live store.
   if (!reviews.length && mode === "published") return null;
   return <section className="jelly-section jelly-testimonials" {...sectionData(section)}><StorefrontContainer>
     <SectionIntro section={section} fallback="What customers say" editor={mode === "editor"} />
     {reviews.length
-      ? <div className="jelly-testimonial-grid">{reviews.map((review) => <blockquote key={review.id} {...blockEditorData(review.block, mode === "editor", "Testimonial")}><p {...blockElementProps(review.block, "quote", mode === "editor")}>{review.quote}</p>{review.author && <cite {...blockElementProps(review.block, "author", mode === "editor")}>{review.author}</cite>}</blockquote>)}</div>
+      ? <TestimonialCards reviews={reviews} mode={mode} layout={layout} />
       : <p className="jelly-editor-hint">Add a testimonial block with a real customer quote. This section stays hidden on your live store until you do.</p>}
   </StorefrontContainer></section>;
 }

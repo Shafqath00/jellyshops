@@ -1692,3 +1692,75 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 @media (min-width: 1024px) {
   [data-jelly-theme] .jelly-product-grid-items[data-short-row]:not(.jelly-list-browser *) { grid-template-columns: repeat(var(--jelly-columns, 4), minmax(0, calc((100% - (var(--jelly-row-slots, 1) - 1) * var(--jelly-row-gap, 1.5rem)) / var(--jelly-row-slots, 1)))); }
 }
+
+/*
+ * Showcase sections (sections/showcase.tsx): Shop the look, Featured product, rotating announcement, reviews
+ * carousel and the footer's payment methods. Colours come from the section's scheme roles, so every theme can use them.
+ */
+[data-jelly-theme] .jelly-shop-look-layout, [data-jelly-theme] .jelly-featured-product-layout { display: grid; gap: clamp(24px, 4vw, 56px); align-items: center; }
+@media (min-width: 900px) {
+  [data-jelly-theme] .jelly-shop-look-layout { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+  [data-jelly-theme] .jelly-featured-product-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  [data-jelly-theme] [data-image-position="right"] :is(.jelly-shop-look-layout, .jelly-featured-product-layout) > :first-child { order: 2; }
+}
+[data-jelly-theme] .jelly-shop-look-media { position: relative; overflow: visible; }
+[data-jelly-theme] .jelly-shop-look-media > img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--j-radius-sm, 4px); }
+[data-jelly-theme] .jelly-shop-look-placeholder { display: grid; place-items: center; aspect-ratio: 4 / 3; border-radius: var(--j-radius-sm, 4px); background: var(--j-color-wash, rgba(0, 0, 0, .05)); color: var(--j-color-muted); }
+[data-jelly-theme] .jelly-hotspot { position: absolute; left: var(--x); top: var(--y); z-index: 1; transform: translate(-50%, -50%); }
+[data-jelly-theme] .jelly-hotspot[data-open] { z-index: 3; }
+[data-jelly-theme] .jelly-hotspot-pin { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 3px solid #fff; border-radius: 50%; background: var(--j-color-primary, #222); color: var(--j-color-on-primary, #fff); font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 18px -6px rgba(0, 0, 0, .45); transition: transform 160ms ease; }
+[data-jelly-theme] .jelly-hotspot-pin:hover, [data-jelly-theme] .jelly-hotspot[data-open] .jelly-hotspot-pin { transform: scale(1.08); }
+[data-jelly-theme] .jelly-hotspot-card { position: absolute; top: 50%; left: calc(100% + 10px); display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; align-items: center; width: min(260px, 70vw); padding: 10px; border-radius: var(--j-radius-md, 8px); background: var(--j-color-surface, #fff); color: var(--j-color-text); box-shadow: 0 18px 40px -18px rgba(0, 0, 0, .45); transform: translateY(-50%); }
+[data-jelly-theme] .jelly-hotspot[data-side="left"] .jelly-hotspot-card { left: auto; right: calc(100% + 10px); }
+[data-jelly-theme] .jelly-hotspot-card[hidden] { display: none; }
+[data-jelly-theme] .jelly-hotspot-card img { width: 64px; aspect-ratio: 4 / 5; object-fit: cover; border-radius: calc(var(--j-radius-sm, 4px) * .66); }
+[data-jelly-theme] :is(.jelly-hotspot-card, .jelly-shop-look-list) a { color: inherit; font-weight: 600; text-decoration: none; line-height: 1.3; }
+[data-jelly-theme] :is(.jelly-hotspot-card, .jelly-shop-look-list) a:hover { text-decoration: underline; }
+[data-jelly-theme] .jelly-showcase-price { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; margin: 4px 0 0; font-weight: 600; }
+[data-jelly-theme] .jelly-showcase-price .is-sale { color: var(--j-color-sale, #b42318); }
+[data-jelly-theme] .jelly-showcase-price s { color: var(--j-color-muted); font-weight: 400; }
+[data-jelly-theme] .jelly-shop-look-list { display: grid; gap: 12px; margin: 24px 0 0; padding: 0; list-style: none; }
+[data-jelly-theme] .jelly-shop-look-list li { display: grid; grid-template-columns: 32px 56px minmax(0, 1fr); gap: 14px; align-items: center; padding: 10px; border-radius: var(--j-radius-md, 8px); background: color-mix(in srgb, var(--j-color-surface, #fff) 70%, transparent); }
+[data-jelly-theme] .jelly-shop-look-list img { width: 56px; aspect-ratio: 4 / 5; object-fit: cover; border-radius: calc(var(--j-radius-sm, 4px) * .66); }
+[data-jelly-theme] .jelly-shop-look-number { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--j-color-primary, #222); color: var(--j-color-on-primary, #fff); font-size: 14px; font-weight: 700; }
+@media (max-width: 599px) { [data-jelly-theme] .jelly-hotspot-card { display: none !important; } }
+
+[data-jelly-theme] .jelly-featured-product-media { position: relative; display: block; overflow: hidden; border-radius: var(--j-radius-sm, 4px); background: var(--j-color-wash, rgba(0, 0, 0, .05)); }
+[data-jelly-theme] .jelly-featured-product-media img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; transition: transform 600ms ease; }
+[data-jelly-theme] .jelly-featured-product-media:hover img { transform: scale(1.03); }
+[data-jelly-theme] .jelly-featured-product-badge { position: absolute; top: 16px; left: 16px; padding: 6px 12px; border-radius: 999px; background: var(--jelly-badge-bg, var(--j-color-sale, #b42318)); color: var(--jelly-badge-text, #fff); font-size: 13px; font-weight: 700; }
+[data-jelly-theme] .jelly-featured-product-copy { display: grid; gap: 12px; justify-items: start; max-width: 520px; }
+[data-jelly-theme] .jelly-featured-product-copy h2 { margin: 0; }
+[data-jelly-theme] .jelly-featured-product-copy h2 a { color: inherit; text-decoration: none; }
+[data-jelly-theme] .jelly-featured-product-vendor { margin: 0; color: var(--j-color-muted); font-size: 14px; letter-spacing: .04em; text-transform: uppercase; }
+[data-jelly-theme] .jelly-featured-product-rating { display: flex; gap: 8px; align-items: center; margin: 0; color: var(--j-color-muted); font-size: 14px; }
+[data-jelly-theme] .jelly-featured-product-copy .jelly-showcase-price { font-size: 22px; }
+[data-jelly-theme] .jelly-featured-product-text { margin: 0; color: var(--j-color-muted); font-size: 17px; line-height: 1.65; }
+[data-jelly-theme] .jelly-featured-product-swatches { display: flex; gap: 8px; margin: 0; padding: 0; list-style: none; }
+[data-jelly-theme] .jelly-featured-product-swatches li { width: 24px; height: 24px; border: 1px solid var(--j-color-divider, rgba(0, 0, 0, .15)); border-radius: 50%; background: var(--j-color-wash, #eee); }
+
+[data-jelly-theme] .jelly-announcement--rotating { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 0; padding-block: 0; }
+[data-jelly-theme] .jelly-announcement-message { margin: 0; padding-block: 10px; text-align: center; animation: jelly-announcement-in 400ms ease both; }
+[data-jelly-theme] .jelly-announcement-step { width: 44px; height: 40px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; font-size: 20px; line-height: 1; cursor: pointer; opacity: .75; }
+[data-jelly-theme] .jelly-announcement-step:hover, [data-jelly-theme] .jelly-announcement-step:focus-visible { opacity: 1; }
+@keyframes jelly-announcement-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { [data-jelly-theme] .jelly-announcement-message { animation: none; } }
+
+[data-jelly-theme] .jelly-testimonial-card { display: grid; align-content: start; gap: 14px; margin: 0; padding: clamp(20px, 2.4vw, 32px); border-radius: var(--j-radius-md, 8px); background: var(--j-color-surface, #fff); color: var(--j-color-text); }
+[data-jelly-theme] .jelly-testimonial-card > p { margin: 0; font-size: 17px; line-height: 1.6; }
+[data-jelly-theme] .jelly-testimonial-card footer { display: flex; gap: 12px; align-items: center; }
+[data-jelly-theme] .jelly-testimonial-card footer img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+[data-jelly-theme] .jelly-testimonial-card footer span { display: grid; gap: 2px; }
+[data-jelly-theme] .jelly-testimonial-card cite { font-style: normal; font-weight: 600; }
+[data-jelly-theme] .jelly-testimonial-card small { color: var(--j-color-muted); font-size: 14px; }
+[data-jelly-theme] .jelly-testimonial-track { display: grid; grid-auto-flow: column; grid-auto-columns: min(380px, 84%); gap: 24px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x mandatory; scrollbar-width: thin; }
+[data-jelly-theme] .jelly-testimonial-track > * { scroll-snap-align: start; }
+[data-jelly-theme] .jelly-testimonial-controls { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+[data-jelly-theme] .jelly-testimonial-controls button { width: 44px; height: 44px; border: 1px solid currentColor; border-radius: 50%; background: transparent; color: inherit; font: inherit; font-size: 18px; cursor: pointer; }
+[data-jelly-theme] .jelly-testimonial-controls button:hover { background: var(--j-color-text); color: var(--j-color-bg); }
+
+[data-jelly-theme] .jelly-footer-base { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; justify-content: space-between; }
+[data-jelly-theme] .jelly-footer-base { padding-top: 24px; border-top: 1px solid color-mix(in srgb, currentColor 18%, transparent); }
+[data-jelly-theme] .jelly-footer-base > .jelly-footer-credit { margin: 0; padding: 0; border: 0; }
+[data-jelly-theme] .jelly-footer-payments { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+[data-jelly-theme] .jelly-footer-payments li { padding: 4px 10px; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); border-radius: 6px; font-size: 12px; font-weight: 600; letter-spacing: .02em; }

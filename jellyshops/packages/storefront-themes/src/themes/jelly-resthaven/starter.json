@@ -165,29 +165,38 @@
           "children": []
         },
         {
-          "id": "resthaven-menu-headboards",
-          "label": "Headboards",
+          "id": "resthaven-menu-bedding",
+          "label": "Bedding",
           "target": {
             "kind": "external",
-            "url": "/search?q=Headboards"
+            "url": "/search?q=Bedding"
           },
           "children": []
         },
         {
-          "id": "resthaven-menu-shop",
-          "label": "Shop all",
+          "id": "resthaven-menu-pillows",
+          "label": "Pillows",
           "target": {
             "kind": "external",
-            "url": "/shop"
+            "url": "/search?q=Pillows"
           },
           "children": []
         },
         {
-          "id": "resthaven-menu-help",
-          "label": "Help",
+          "id": "resthaven-menu-decor",
+          "label": "Decor",
           "target": {
             "kind": "external",
-            "url": "/pages/faq"
+            "url": "/search?q=Decor"
+          },
+          "children": []
+        },
+        {
+          "id": "resthaven-menu-sale",
+          "label": "Sale",
+          "target": {
+            "kind": "external",
+            "url": "/search?q=Sale"
           },
           "children": []
         }
@@ -200,9 +209,40 @@
       "type": "announcement-bar",
       "enabled": true,
       "settings": {
-        "text": "Beds and mattresses in every size, from single to super king"
+        "text": "Free delivery on orders over £50",
+        "rotateSeconds": 5
       },
-      "blocks": []
+      "blocks": [
+        {
+          "id": "resthaven-message-trial",
+          "type": "announcement-message",
+          "enabled": true,
+          "settings": {
+            "text": "100-night sleep trial on every mattress",
+            "link": "/pages/faq"
+          },
+          "blocks": []
+        },
+        {
+          "id": "resthaven-message-guarantee",
+          "type": "announcement-message",
+          "enabled": true,
+          "settings": {
+            "text": "10-year guarantee on every bed frame"
+          },
+          "blocks": []
+        },
+        {
+          "id": "resthaven-message-returns",
+          "type": "announcement-message",
+          "enabled": true,
+          "settings": {
+            "text": "Changed your mind? Free returns within 30 days",
+            "link": "/pages/returns"
+          },
+          "blocks": []
+        }
+      ]
     },
     "header": {
       "id": "studio-header",
@@ -231,9 +271,10 @@
       "enabled": true,
       "settings": {
         "text": "Beds, mattresses and help choosing the right one for your room.",
-        "showNewsletter": true,
+        "showNewsletter": false,
         "newsletterHeading": "Bedroom ideas, new arrivals and offers",
-        "newsletterText": "Sign up for occasional emails. You can unsubscribe at any time."
+        "newsletterText": "Sign up for occasional emails. You can unsubscribe at any time.",
+        "paymentMethods": "Visa, Mastercard, American Express, PayPal, Apple Pay, Google Pay, Klarna"
       },
       "blocks": [
         {
@@ -385,22 +426,22 @@
             "type": "hero",
             "enabled": true,
             "settings": {
-              "eyebrow": "The bedroom collection",
+              "eyebrow": "New season, softer mornings",
               "contentAlignment": "left",
               "styleAlign": "left",
+              "layout": "overlay",
+              "height": "large",
+              "fullBleed": true,
+              "overlay": 0,
               "image": {
                 "url": "/themes/jelly-resthaven/hero.webp",
-                "alt": "An oatmeal upholstered bed in a calm, light-filled bedroom",
+                "alt": "A bright bedroom with an upholstered bed, soft linen and morning light",
                 "fit": "cover",
                 "focalPoint": {
                   "x": 62,
                   "y": 55
                 }
-              },
-              "layout": "overlay",
-              "height": "large",
-              "fullBleed": true,
-              "overlay": 35
+              }
             },
             "blocks": [
               {
@@ -408,16 +449,18 @@
                 "type": "heading",
                 "enabled": true,
                 "settings": {
-                  "text": "Sleep well. Wake up somewhere beautiful."
-                }
+                  "text": "Bright bedrooms, beautifully rested."
+                },
+                "blocks": []
               },
               {
                 "id": "resthaven-hero-text",
                 "type": "text",
                 "enabled": true,
                 "settings": {
-                  "text": "Upholstered beds, divans and mattresses for real bedrooms, in the size, fabric and storage you choose."
-                }
+                  "text": "Beds, mattresses and bedding in calm, sunny colours, made to order in the size, fabric and storage you choose."
+                },
+                "blocks": []
               },
               {
                 "id": "resthaven-hero-action-0",
@@ -426,7 +469,8 @@
                 "settings": {
                   "label": "Shop beds",
                   "href": "/shop"
-                }
+                },
+                "blocks": []
               },
               {
                 "id": "resthaven-hero-action-1",
@@ -436,59 +480,8 @@
                   "label": "Find your mattress",
                   "href": "/search?q=Mattresses",
                   "buttonStyle": "secondary"
-                }
-              }
-            ]
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "resthaven-trust-row",
-            "type": "trust-strip",
-            "enabled": true,
-            "settings": {
-              "layout": "row",
-              "showIcons": true
-            },
-            "blocks": [
-              {
-                "id": "resthaven-trust-row-1",
-                "type": "trust-point",
-                "enabled": true,
-                "settings": {
-                  "text": "Sizes from single to super king",
-                  "icon": "home"
-                }
-              },
-              {
-                "id": "resthaven-trust-row-2",
-                "type": "trust-point",
-                "enabled": true,
-                "settings": {
-                  "text": "Delivery details on every bed",
-                  "icon": "truck",
-                  "link": "/pages/shipping"
-                }
-              },
-              {
-                "id": "resthaven-trust-row-3",
-                "type": "trust-point",
-                "enabled": true,
-                "settings": {
-                  "text": "Clear returns information",
-                  "icon": "return",
-                  "link": "/pages/returns"
-                }
-              },
-              {
-                "id": "resthaven-trust-row-4",
-                "type": "trust-point",
-                "enabled": true,
-                "settings": {
-                  "text": "Secure checkout",
-                  "icon": "shield"
-                }
+                },
+                "blocks": []
               }
             ]
           }
@@ -501,50 +494,25 @@
             "enabled": true,
             "settings": {
               "heading": "Shop by category",
-              "text": "Every bed lists its exact sizes, fabrics and storage, so you can choose with confidence.",
-              "layout": "bento",
-              "columns": 4,
-              "imageRatio": "portrait"
+              "text": "Everything for the bedroom, from the frame to the final cushion.",
+              "layout": "grid",
+              "columns": 3,
+              "imageRatio": "square"
             },
             "blocks": [
               {
-                "id": "resthaven-category-upholstered",
+                "id": "resthaven-category-beds",
                 "type": "collection-card",
                 "enabled": true,
                 "settings": {
-                  "label": "Upholstered beds",
+                  "label": "Beds",
                   "image": {
                     "url": "/themes/jelly-resthaven/room-main.webp",
-                    "alt": "A sage velvet bed with a winged headboard in a main bedroom"
+                    "alt": "An upholstered bed in a light main bedroom"
                   },
-                  "link": "/search?q=Upholstered%20beds"
-                }
-              },
-              {
-                "id": "resthaven-category-divan",
-                "type": "collection-card",
-                "enabled": true,
-                "settings": {
-                  "label": "Divan beds",
-                  "image": {
-                    "url": "/themes/jelly-resthaven/divan.webp",
-                    "alt": "A charcoal velvet divan bed with a storage drawer open"
-                  },
-                  "link": "/search?q=Divan%20beds"
-                }
-              },
-              {
-                "id": "resthaven-category-ottoman",
-                "type": "collection-card",
-                "enabled": true,
-                "settings": {
-                  "label": "Ottoman beds",
-                  "image": {
-                    "url": "/themes/jelly-resthaven/room-guest.webp",
-                    "alt": "A grey ottoman bed with its base lifted to show the storage"
-                  },
-                  "link": "/search?q=Ottoman%20beds"
-                }
+                  "link": "/search?q=Beds"
+                },
+                "blocks": []
               },
               {
                 "id": "resthaven-category-mattresses",
@@ -554,23 +522,67 @@
                   "label": "Mattresses",
                   "image": {
                     "url": "/themes/jelly-resthaven/mattress.webp",
-                    "alt": "A cut-away corner of a pocket sprung hybrid mattress showing its layers"
+                    "alt": "The layers of a pocket sprung mattress"
                   },
                   "link": "/search?q=Mattresses"
-                }
+                },
+                "blocks": []
               },
               {
-                "id": "resthaven-category-headboards",
+                "id": "resthaven-category-bedding",
                 "type": "collection-card",
                 "enabled": true,
                 "settings": {
-                  "label": "Headboards",
+                  "label": "Bedding",
                   "image": {
-                    "url": "/themes/jelly-resthaven/headboard.webp",
-                    "alt": "A rust velvet headboard with tall vertical panels"
+                    "url": "/themes/jelly-resthaven/linen-bedding.webp",
+                    "alt": "Washed linen bedding folded on a bed"
                   },
-                  "link": "/search?q=Headboards"
-                }
+                  "link": "/search?q=Bedding"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-category-pillows",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "Pillows",
+                  "image": {
+                    "url": "/themes/jelly-resthaven/pillows.webp",
+                    "alt": "Soft pillows stacked against a headboard"
+                  },
+                  "link": "/search?q=Pillows"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-category-decor",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "Decor",
+                  "image": {
+                    "url": "/themes/jelly-resthaven/rug.webp",
+                    "alt": "A textured rug beside a bed"
+                  },
+                  "link": "/search?q=Decor"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-category-sale",
+                "type": "collection-card",
+                "enabled": true,
+                "settings": {
+                  "label": "Sale",
+                  "image": {
+                    "url": "/themes/jelly-resthaven/wool-throw.webp",
+                    "alt": "A wool throw over the foot of a bed"
+                  },
+                  "link": "/search?q=Sale"
+                },
+                "blocks": []
               }
             ]
           }
@@ -582,14 +594,12 @@
             "type": "product-grid",
             "enabled": true,
             "settings": {
-              "heading": "Our most-loved beds",
-              "text": "Customer favourites, ready to make your own.",
+              "heading": "Best sellers",
+              "text": "The beds, mattresses and bedding our customers love most.",
               "contentAlignment": "left",
               "limit": 8,
               "columns": 4,
-              "emptyMessage": "Your beds and mattresses will appear here when you add products.",
-              "viewAllLabel": "Shop all beds",
-              "viewAllLink": "/shop"
+              "emptyMessage": "Your best sellers will appear here when you add products."
             },
             "blocks": []
           }
@@ -597,43 +607,46 @@
         {
           "kind": "inline",
           "section": {
-            "id": "resthaven-storage-story",
+            "id": "resthaven-promo",
             "type": "image-with-text",
             "enabled": true,
             "settings": {
-              "eyebrow": "Storage beds",
+              "eyebrow": "This month only",
               "image": {
-                "url": "/themes/jelly-resthaven/room-guest.webp",
-                "alt": "A guest room with a grey ottoman storage bed, its base lifted"
+                "url": "/themes/jelly-resthaven/linen-bedding.webp",
+                "alt": "Linen bedding in sky blue and blush"
               },
-              "imagePosition": "left",
-              "styleScheme": "scheme2"
+              "imagePosition": "right",
+              "styleScheme": "scheme3"
             },
             "blocks": [
               {
-                "id": "resthaven-storage-title",
+                "id": "resthaven-promo-title",
                 "type": "heading",
                 "enabled": true,
                 "settings": {
-                  "text": "Room for everything, hidden beautifully"
-                }
+                  "text": "Up to 25% off bedding sets"
+                },
+                "blocks": []
               },
               {
-                "id": "resthaven-storage-text",
+                "id": "resthaven-promo-text",
                 "type": "text",
                 "enabled": true,
                 "settings": {
-                  "text": "Lift-up ottomans and divans with drawers keep bedding, cases and the things you need close at hand, out of sight."
-                }
+                  "text": "Washed linen and cotton sateen in six fresh colours. Mix a duvet cover, sheet and pillowcases for a bed that feels new tonight."
+                },
+                "blocks": []
               },
               {
-                "id": "resthaven-storage-action",
+                "id": "resthaven-promo-action",
                 "type": "button",
                 "enabled": true,
                 "settings": {
-                  "label": "Shop storage beds",
-                  "href": "/search?q=Ottoman%20beds"
-                }
+                  "label": "Shop the bedding sale",
+                  "href": "/search?q=Bedding"
+                },
+                "blocks": []
               }
             ]
           }
@@ -641,52 +654,50 @@
         {
           "kind": "inline",
           "section": {
-            "id": "resthaven-steps",
-            "type": "multicolumn",
+            "id": "resthaven-shop-look",
+            "type": "shop-the-look",
             "enabled": true,
             "settings": {
-              "heading": "Choosing your bed, made simple",
-              "text": "Four decisions, and every one of them is on the product page.",
-              "columns": 4,
-              "contentAlignment": "left",
-              "styleScheme": "scheme4"
+              "eyebrow": "Shop by room",
+              "heading": "The sunny main bedroom",
+              "text": "A calm room built around one beautiful bed. Tap a pin to see each piece.",
+              "image": {
+                "url": "/themes/jelly-resthaven/room-main.webp",
+                "alt": "A main bedroom with an upholstered bed, bedside table and rug"
+              },
+              "imagePosition": "left",
+              "styleScheme": "scheme2"
             },
             "blocks": [
               {
-                "id": "resthaven-step-1",
-                "type": "column",
+                "id": "resthaven-pin-bed",
+                "type": "hotspot",
                 "enabled": true,
                 "settings": {
-                  "heading": "Pick your size",
-                  "text": "From single to super king, with exact measurements for every frame."
-                }
+                  "x": 48,
+                  "y": 58
+                },
+                "blocks": []
               },
               {
-                "id": "resthaven-step-2",
-                "type": "column",
+                "id": "resthaven-pin-bedside",
+                "type": "hotspot",
                 "enabled": true,
                 "settings": {
-                  "heading": "Choose your fabric",
-                  "text": "Velvets, boucles and linens in colours for every room."
-                }
+                  "x": 16,
+                  "y": 64
+                },
+                "blocks": []
               },
               {
-                "id": "resthaven-step-3",
-                "type": "column",
+                "id": "resthaven-pin-rug",
+                "type": "hotspot",
                 "enabled": true,
                 "settings": {
-                  "heading": "Add storage",
-                  "text": "Drawers, a lift-up ottoman or a clean, simple base."
-                }
-              },
-              {
-                "id": "resthaven-step-4",
-                "type": "column",
-                "enabled": true,
-                "settings": {
-                  "heading": "Settle in",
-                  "text": "Check the delivery details before you order, then enjoy the first night."
-                }
+                  "x": 70,
+                  "y": 86
+                },
+                "blocks": []
               }
             ]
           }
@@ -701,9 +712,9 @@
               "eyebrow": "Fabrics",
               "image": {
                 "url": "/themes/jelly-resthaven/fabrics.webp",
-                "alt": "Velvet, boucle and linen fabric swatches laid out on a wooden table"
+                "alt": "Velvet, boucle and linen fabric swatches on a table"
               },
-              "imagePosition": "right"
+              "imagePosition": "left"
             },
             "blocks": [
               {
@@ -711,25 +722,28 @@
                 "type": "heading",
                 "enabled": true,
                 "settings": {
-                  "text": "Velvets, boucles and linens you will want to touch"
-                }
+                  "text": "Choose a colour you will love waking up to"
+                },
+                "blocks": []
               },
               {
                 "id": "resthaven-fabric-text",
                 "type": "text",
                 "enabled": true,
                 "settings": {
-                  "text": "Every bed comes in a choice of soft-touch fabrics and colours, so it fits the room you already love."
-                }
+                  "text": "Every bed comes in soft velvets, nubby boucle and washable linen. Order free swatches and see them in your own light first."
+                },
+                "blocks": []
               },
               {
                 "id": "resthaven-fabric-action",
                 "type": "button",
                 "enabled": true,
                 "settings": {
-                  "label": "Explore upholstered beds",
-                  "href": "/search?q=Upholstered%20beds"
-                }
+                  "label": "Order free swatches",
+                  "href": "/pages/faq"
+                },
+                "blocks": []
               }
             ]
           }
@@ -744,10 +758,9 @@
               "eyebrow": "Mattresses",
               "image": {
                 "url": "/themes/jelly-resthaven/mattress.webp",
-                "alt": "A cut-away corner of a pocket sprung hybrid mattress showing its layers"
+                "alt": "A cut-away corner of a hybrid mattress"
               },
-              "imagePosition": "left",
-              "styleScheme": "scheme3"
+              "imagePosition": "right"
             },
             "blocks": [
               {
@@ -755,25 +768,28 @@
                 "type": "heading",
                 "enabled": true,
                 "settings": {
-                  "text": "Find your kind of comfort"
-                }
+                  "text": "Sleep on it for 100 nights"
+                },
+                "blocks": []
               },
               {
                 "id": "resthaven-mattress-text",
                 "type": "text",
                 "enabled": true,
                 "settings": {
-                  "text": "From a firmer feel to a softer landing, every mattress lists its firmness and layers so you can compare at a glance."
-                }
+                  "text": "Pocket springs for support, natural fillings for comfort. If it is not right, we collect it and refund you in full."
+                },
+                "blocks": []
               },
               {
                 "id": "resthaven-mattress-action",
                 "type": "button",
                 "enabled": true,
                 "settings": {
-                  "label": "Compare mattresses",
+                  "label": "Find your mattress",
                   "href": "/search?q=Mattresses"
-                }
+                },
+                "blocks": []
               }
             ]
           }
@@ -781,67 +797,54 @@
         {
           "kind": "inline",
           "section": {
-            "blocks": [],
-            "enabled": true,
-            "id": "resthaven-rating",
-            "type": "rating-summary",
-            "settings": {
-              "heading": "Loved by our customers",
-              "rating": 0,
-              "reviewCount": 0,
-              "text": "from {count} reviews",
-              "linkLabel": "Read reviews",
-              "contentAlignment": "center",
-              "source": "reviews"
-            }
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "resthaven-faq",
-            "type": "faq",
+            "id": "resthaven-trust-row",
+            "type": "trust-strip",
             "enabled": true,
             "settings": {
-              "heading": "Before you buy",
-              "text": "Answers to the questions we hear most. Still unsure? Our team is happy to help."
+              "layout": "row",
+              "showIcons": true,
+              "styleScheme": "scheme2"
             },
             "blocks": [
               {
-                "id": "resthaven-faq-1",
-                "type": "faq-item",
+                "id": "resthaven-trust-delivery",
+                "type": "trust-point",
                 "enabled": true,
                 "settings": {
-                  "question": "How do I choose the right size?",
-                  "answer": "Measure your room and check the dimensions shown on the product page. Leave space around the bed to walk and to open drawers or an ottoman lift."
-                }
+                  "text": "Free delivery over £50",
+                  "icon": "truck"
+                },
+                "blocks": []
               },
               {
-                "id": "resthaven-faq-2",
-                "type": "faq-item",
+                "id": "resthaven-trust-trial",
+                "type": "trust-point",
                 "enabled": true,
                 "settings": {
-                  "question": "Can I choose a different fabric or storage option?",
-                  "answer": "The fabrics, colours and storage choices for each bed are listed on its product page. Contact the store if you would like help comparing them."
-                }
+                  "text": "100-night sleep trial",
+                  "icon": "moon"
+                },
+                "blocks": []
               },
               {
-                "id": "resthaven-faq-3",
-                "type": "faq-item",
+                "id": "resthaven-trust-guarantee",
+                "type": "trust-point",
                 "enabled": true,
                 "settings": {
-                  "question": "Is the mattress included with a bed?",
-                  "answer": "Each product page says what is included. Beds and mattresses are usually sold separately, so you can pair the comfort you prefer."
-                }
+                  "text": "10-year guarantee",
+                  "icon": "shield"
+                },
+                "blocks": []
               },
               {
-                "id": "resthaven-faq-4",
-                "type": "faq-item",
+                "id": "resthaven-trust-returns",
+                "type": "trust-point",
                 "enabled": true,
                 "settings": {
-                  "question": "Where can I find delivery and returns information?",
-                  "answer": "See the delivery and returns pages linked at the foot of every page, or contact the team before ordering."
-                }
+                  "text": "Easy 30-day returns",
+                  "icon": "return"
+                },
+                "blocks": []
               }
             ]
           }
@@ -849,15 +852,247 @@
         {
           "kind": "inline",
           "section": {
-            "id": "resthaven-home-recently-viewed",
-            "type": "recently-viewed",
+            "id": "resthaven-spotlight",
+            "type": "featured-product",
             "enabled": true,
             "settings": {
-              "heading": "Recently viewed",
-              "limit": 4,
-              "columns": 4
+              "eyebrow": "Product spotlight",
+              "text": "Our most-loved bed: a deep, padded headboard, a solid base and a choice of twelve fabrics. Made to order and delivered to the room of your choice.",
+              "buttonLabel": "View the bed",
+              "imagePosition": "left"
             },
             "blocks": []
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "resthaven-reviews",
+            "type": "testimonials",
+            "enabled": true,
+            "settings": {
+              "heading": "What our customers say",
+              "layout": "carousel",
+              "styleScheme": "scheme3"
+            },
+            "blocks": [
+              {
+                "id": "resthaven-review-1",
+                "type": "testimonial",
+                "enabled": true,
+                "settings": {
+                  "quote": "The bed arrived on the day they promised, the fitters were lovely and the sage velvet is even prettier in person.",
+                  "author": "Hannah, Bristol",
+                  "detail": "Bought the Harbour bed",
+                  "rating": 5
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-review-2",
+                "type": "testimonial",
+                "enabled": true,
+                "settings": {
+                  "quote": "I was nervous buying a mattress online. Three weeks in I sleep through the night for the first time in years.",
+                  "author": "Tom, Leeds",
+                  "detail": "Bought the Hollis mattress",
+                  "rating": 5
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-review-3",
+                "type": "testimonial",
+                "enabled": true,
+                "settings": {
+                  "quote": "The free swatches made choosing so easy. The colour matches our curtains perfectly.",
+                  "author": "Priya, Manchester",
+                  "detail": "Bought the Wren bed",
+                  "rating": 5
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-review-4",
+                "type": "testimonial",
+                "enabled": true,
+                "settings": {
+                  "quote": "Beautiful linen, washes softer every time. I have bought a second set in blush.",
+                  "author": "Claire, Edinburgh",
+                  "detail": "Bought linen bedding",
+                  "rating": 4
+                },
+                "blocks": []
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "resthaven-brand-story",
+            "type": "image-with-text",
+            "enabled": true,
+            "settings": {
+              "eyebrow": "Our story",
+              "image": {
+                "url": "/themes/jelly-resthaven/detail.webp",
+                "alt": "Close-up of hand-finished stitching on an upholstered headboard"
+              },
+              "imagePosition": "left"
+            },
+            "blocks": [
+              {
+                "id": "resthaven-story-title",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "Made slowly, for rooms full of light"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-story-text",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "Resthaven began in a small upholstery workshop. We still make every bed to order, choose fabrics that last, and answer every question ourselves."
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-story-action",
+                "type": "button",
+                "enabled": true,
+                "settings": {
+                  "label": "About us",
+                  "href": "/pages/about"
+                },
+                "blocks": []
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "resthaven-gallery",
+            "type": "image-gallery",
+            "enabled": true,
+            "settings": {
+              "heading": "Loved in homes like yours",
+              "text": "Real bedrooms from our customers. Share yours with #RestedAtHome.",
+              "layout": "scroll",
+              "columns": 4,
+              "ratio": "square"
+            },
+            "blocks": [
+              {
+                "id": "resthaven-gallery-1",
+                "type": "gallery-image",
+                "enabled": true,
+                "settings": {
+                  "image": {
+                    "url": "/themes/jelly-resthaven/room-kids.webp",
+                    "alt": "A bright children's room with a white bed"
+                  }
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-gallery-2",
+                "type": "gallery-image",
+                "enabled": true,
+                "settings": {
+                  "image": {
+                    "url": "/themes/jelly-resthaven/harbour-sage.webp",
+                    "alt": "A sage upholstered bed"
+                  }
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-gallery-3",
+                "type": "gallery-image",
+                "enabled": true,
+                "settings": {
+                  "image": {
+                    "url": "/themes/jelly-resthaven/room-guest.webp",
+                    "alt": "A guest room with a storage bed"
+                  }
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-gallery-4",
+                "type": "gallery-image",
+                "enabled": true,
+                "settings": {
+                  "image": {
+                    "url": "/themes/jelly-resthaven/ivy-daybed.webp",
+                    "alt": "A daybed with cushions"
+                  }
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-gallery-5",
+                "type": "gallery-image",
+                "enabled": true,
+                "settings": {
+                  "image": {
+                    "url": "/themes/jelly-resthaven/pillows.webp",
+                    "alt": "Pillows on a made bed"
+                  }
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-gallery-6",
+                "type": "gallery-image",
+                "enabled": true,
+                "settings": {
+                  "image": {
+                    "url": "/themes/jelly-resthaven/wool-throw.webp",
+                    "alt": "A wool throw on a bed"
+                  }
+                },
+                "blocks": []
+              }
+            ]
+          }
+        },
+        {
+          "kind": "inline",
+          "section": {
+            "id": "resthaven-newsletter",
+            "type": "newsletter",
+            "enabled": true,
+            "settings": {
+              "buttonLabel": "Sign up",
+              "contentAlignment": "center",
+              "styleScheme": "scheme3"
+            },
+            "blocks": [
+              {
+                "id": "resthaven-newsletter-title",
+                "type": "heading",
+                "enabled": true,
+                "settings": {
+                  "text": "Brighter mornings, in your inbox"
+                },
+                "blocks": []
+              },
+              {
+                "id": "resthaven-newsletter-text",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "New colours, bedroom ideas and early access to offers. Once or twice a month, never more."
+                },
+                "blocks": []
+              }
+            ]
           }
         },
         {

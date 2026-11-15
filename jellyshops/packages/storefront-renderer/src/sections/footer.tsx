@@ -47,6 +47,7 @@ export function FooterSection({ section, context, subscribe, mode = "preview" }:
   const text = stringSetting(section.settings.text);
   const storeName = stringSetting(section.settings.storeName);
   const contactEmail = stringSetting(section.settings.contactEmail);
+  const payments = stringSetting(section.settings.paymentMethods).split(",").map((method) => method.trim()).filter(Boolean).slice(0, 10);
   const copyright = stringSetting(section.settings.copyright).trim() || `© ${new Date().getFullYear()} ${storeName}`.trim();
   const showNewsletter = section.settings.showNewsletter === true;
   const newsletterHeading = stringSetting(section.settings.newsletterHeading).trim() || "Join our newsletter";
@@ -94,6 +95,10 @@ export function FooterSection({ section, context, subscribe, mode = "preview" }:
         {socials.length > 0 && <ul className="jelly-footer-social" aria-label="Social media">{socials.map((item) => <li key={item.id} {...(item.block ? blockEditorData(item.block, editor, "Social link") : {})}><a href={item.href} rel="noopener noreferrer" target="_blank">{item.label}</a></li>)}</ul>}
       </div>}
     </div>
-    <p className="jelly-footer-credit" {...elementProps(section, "copyright", editor)}>{copyright}</p>
+    {/* With payment methods the credit and the methods share one row; without, the credit stays as it always was. */}
+    {payments.length > 0 ? <div className="jelly-footer-base">
+      <p className="jelly-footer-credit" {...elementProps(section, "copyright", editor)}>{copyright}</p>
+      <ul className="jelly-footer-payments" aria-label="Ways to pay">{payments.map((method) => <li key={method}>{method}</li>)}</ul>
+    </div> : <p className="jelly-footer-credit" {...elementProps(section, "copyright", editor)}>{copyright}</p>}
   </footer>;
 }

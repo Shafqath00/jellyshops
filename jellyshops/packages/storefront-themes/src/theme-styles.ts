@@ -80,27 +80,35 @@ const avenue: ThemeStyle[] = [
   },
 ];
 
-/** Resthaven (beds and bedroom): the dark scheme sits in scheme 4. "Heather" keeps the theme's earlier plum and linen look. */
+/**
+ * Resthaven (beds and bedroom), the bright edition (RESEARCH.md): light bands that sections switch between, a night
+ * band in scheme 4. "Midnight oat" keeps the theme's earlier dark look for stores that want it back.
+ */
+type SchemeRow = [name: string, background: string, text: string, button: string, buttonText: string];
+function brightLook(colors: Omit<Palette, "dark" | "darkText" | "soft">, rows: [SchemeRow, SchemeRow, SchemeRow, SchemeRow]) {
+  const colorSchemes = Object.fromEntries(rows.map(([name, background, text, button, buttonText], index) => [`scheme${index + 1}`, { name, background, text, button, buttonText }]));
+  return { colors, colorSchemes };
+}
 const resthaven: ThemeStyle[] = [
   {
-    id: "midnight-oat", name: "Midnight oat", description: "The original: oat, midnight ink and brass.",
+    id: "morning-sky", name: "Morning sky", description: "Linen, sky blue and sunset coral: bright and calm.",
+    swatches: ["#FBF7F1", "#1F2A44", "#3D6E96", "#F2A488"],
+    settings: { ...brightLook({ background: "#FBF7F1", surface: "#FFFFFF", text: "#1F2A44", secondary: "#5A6478", primary: "#3D6E96", accent: "#B5452B" }, [["Linen", "#FBF7F1", "#1F2A44", "#3D6E96", "#FFFFFF"], ["Sky", "#E3EEF7", "#1F2A44", "#1F2A44", "#FBF7F1"], ["Blush", "#F8E6DE", "#1F2A44", "#B5452B", "#FFFFFF"], ["Night", "#1F2A44", "#FBF7F1", "#F2A488", "#1F2A44"]]), typography: { headingFont: "Fraunces", bodyFont: "Figtree" }, buttons: { radius: "pill" } },
+  },
+  {
+    id: "sage-garden", name: "Sage garden", description: "Cream, sage green and terracotta.",
+    swatches: ["#FAF8F2", "#22301F", "#4E6E4B", "#E6EEE3"],
+    settings: { ...brightLook({ background: "#FAF8F2", surface: "#FFFFFF", text: "#22301F", secondary: "#56604F", primary: "#4E6E4B", accent: "#A8462F" }, [["Cream", "#FAF8F2", "#22301F", "#4E6E4B", "#FFFFFF"], ["Sage", "#E6EEE3", "#22301F", "#22301F", "#FAF8F2"], ["Sand", "#F4EADB", "#22301F", "#A8462F", "#FFFFFF"], ["Forest", "#2F3E2D", "#FAF8F2", "#E9C9A4", "#22301F"]]), typography: { headingFont: "Cormorant Garamond", bodyFont: "Inter" }, buttons: { radius: "rounded" } },
+  },
+  {
+    id: "sunset-blush", name: "Sunset blush", description: "Warm blush, clay and plum navy.",
+    swatches: ["#FCEFEA", "#2B2440", "#A8462F", "#F2A488"],
+    settings: { ...brightLook({ background: "#FCEFEA", surface: "#FFFFFF", text: "#2B2440", secondary: "#5E5568", primary: "#A8462F", accent: "#A8462F" }, [["Blush", "#FCEFEA", "#2B2440", "#A8462F", "#FFFFFF"], ["Peach", "#F9DFD3", "#2B2440", "#2B2440", "#FCEFEA"], ["Lilac", "#ECE8F4", "#2B2440", "#A8462F", "#FFFFFF"], ["Plum", "#2B2440", "#FCEFEA", "#F2A488", "#2B2440"]]), typography: { headingFont: "Fraunces", bodyFont: "Inter" }, buttons: { radius: "pill" } },
+  },
+  {
+    id: "midnight-oat", name: "Midnight oat", description: "The earlier look: oat, midnight ink and brass.",
     swatches: ["#F7F3EE", "#1D2333", "#1D2333", "#7E5F35"],
     settings: { ...namedSchemes(palette({ background: "#F7F3EE", surface: "#FFFFFF", text: "#1D2333", secondary: "#5E6270", primary: "#1D2333", accent: "#7E5F35", dark: "#1D2333", darkText: "#F7F3EE", soft: "#ECE4D8" }, "#FFFFFF", "scheme4", "#FFFFFF"), ["Oat", "Sand", "White", "Midnight"]), typography: { headingFont: "Cormorant Garamond", bodyFont: "Figtree" }, buttons: { radius: "pill" } },
-  },
-  {
-    id: "heather", name: "Heather", description: "Plum and warm linen with a classic serif.",
-    swatches: ["#F4ECE5", "#33302D", "#7D285D", "#E8D9CE"],
-    settings: { ...namedSchemes(palette({ background: "#F4ECE5", surface: "#FFFFFF", text: "#33302D", secondary: "#665F59", primary: "#7D285D", accent: "#7D285D", dark: "#4A1838", darkText: "#F4ECE5", soft: "#E8D9CE" }, "#FFFFFF", "scheme4", "#FFFFFF"), ["Linen", "Blush", "White", "Plum"]), typography: { headingFont: "Playfair Display", bodyFont: "Figtree" }, buttons: { radius: "soft" } },
-  },
-  {
-    id: "sage-linen", name: "Sage linen", description: "Soft greens for a calm, natural bedroom.",
-    swatches: ["#F4F3EC", "#232821", "#3E5641", "#E1E5D8"],
-    settings: { ...namedSchemes(palette({ background: "#F4F3EC", surface: "#FFFFFF", text: "#232821", secondary: "#596055", primary: "#3E5641", accent: "#56683F", dark: "#2B3A2E", darkText: "#F4F3EC", soft: "#E1E5D8" }, "#FFFFFF", "scheme4", "#FFFFFF"), ["Linen", "Sage", "White", "Forest"]), typography: { headingFont: "Lora", bodyFont: "DM Sans" }, buttons: { radius: "rounded" } },
-  },
-  {
-    id: "charcoal-stone", name: "Charcoal and stone", description: "Quiet greys and black for a modern bedroom.",
-    swatches: ["#F5F4F2", "#1F1F1F", "#1F1F1F", "#E6E2DC"],
-    settings: { ...namedSchemes(palette({ background: "#F5F4F2", surface: "#FFFFFF", text: "#1F1F1F", secondary: "#5C5955", primary: "#1F1F1F", accent: "#6A5E53", dark: "#1F1F1F", darkText: "#F5F4F2", soft: "#E6E2DC" }, "#FFFFFF", "scheme4", "#FFFFFF"), ["Stone", "Clay", "White", "Charcoal"]), typography: { headingFont: "EB Garamond", bodyFont: "Jost" }, buttons: { radius: "square" } },
   },
 ];
 

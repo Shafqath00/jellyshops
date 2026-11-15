@@ -1527,8 +1527,10 @@
         "header"
       ],
       "allowedBlockTypes": [
-        "text"
+        "text",
+        "announcement-message"
       ],
+      "maxBlocks": 6,
       "defaultSettings": {},
       "defaultBlocks": [],
       "responsiveFields": [],
@@ -1546,6 +1548,16 @@
           "key": "link",
           "label": "Link",
           "group": "content"
+        },
+        {
+          "type": "range",
+          "key": "rotateSeconds",
+          "label": "Seconds per message",
+          "description": "Used when you add more than one message block.",
+          "group": "layout",
+          "min": 3,
+          "max": 12,
+          "step": 1
         },
         {
           "group": "style",
@@ -1769,6 +1781,11 @@
           "link": {
             "type": "string",
             "maxLength": 500
+          },
+          "rotateSeconds": {
+            "type": "integer",
+            "minimum": 3,
+            "maximum": 12
           },
           "el_message_color": {
             "anyOf": [
@@ -3015,6 +3032,14 @@
           "maxLength": 240
         },
         {
+          "type": "text",
+          "key": "paymentMethods",
+          "label": "Payment methods",
+          "description": "Shown at the foot of the page, separated by commas, for example: Visa, Mastercard, PayPal.",
+          "group": "content",
+          "maxLength": 200
+        },
+        {
           "group": "style",
           "heading": "Style",
           "element": "newsletterHeading",
@@ -4154,6 +4179,10 @@
           "newsletterText": {
             "type": "string",
             "maxLength": 240
+          },
+          "paymentMethods": {
+            "type": "string",
+            "maxLength": 200
           },
           "el_newsletterHeading_color": {
             "anyOf": [
@@ -8487,6 +8516,22 @@
         },
         {
           "type": "segmented",
+          "key": "layout",
+          "label": "Layout",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Grid",
+              "value": "grid"
+            },
+            {
+              "label": "Carousel",
+              "value": "carousel"
+            }
+          ]
+        },
+        {
+          "type": "segmented",
           "key": "colorScheme",
           "label": "Background (older choice)",
           "description": "Picking a colour scheme replaces this.",
@@ -8725,6 +8770,13 @@
           "heading": {
             "type": "string",
             "maxLength": 120
+          },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "grid",
+              "carousel"
+            ]
           },
           "colorScheme": {
             "type": "string",
@@ -13667,6 +13719,345 @@
                 "type": "string",
                 "const": ""
               }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "shop-the-look",
+      "category": "content",
+      "supportedPages": [
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
+      ],
+      "allowedRegions": [
+        "template"
+      ],
+      "allowedBlockTypes": [
+        "hotspot"
+      ],
+      "maxBlocks": 6,
+      "defaultSettings": {
+        "heading": "Shop the look",
+        "imagePosition": "left"
+      },
+      "defaultBlocks": [
+        {
+          "type": "hotspot",
+          "settings": {
+            "x": 32,
+            "y": 62
+          }
+        },
+        {
+          "type": "hotspot",
+          "settings": {
+            "x": 70,
+            "y": 48
+          }
+        }
+      ],
+      "responsiveFields": [],
+      "presets": [
+        {
+          "id": "shop-the-look",
+          "label": "Shop the look",
+          "category": "products"
+        }
+      ],
+      "controls": [
+        {
+          "type": "text",
+          "key": "eyebrow",
+          "label": "Small text above heading",
+          "group": "content",
+          "maxLength": 80,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "text",
+          "key": "heading",
+          "label": "Heading",
+          "group": "content",
+          "maxLength": 120,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "textarea",
+          "key": "text",
+          "label": "Text",
+          "group": "content",
+          "maxLength": 400
+        },
+        {
+          "type": "image",
+          "key": "image",
+          "label": "Image",
+          "group": "content",
+          "dynamicTypes": [
+            "image"
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "imagePosition",
+          "label": "Photo position",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "heading": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 400
+          },
+          "eyebrow": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "image": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              },
+              "focalPoint": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "y": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  }
+                },
+                "required": [
+                  "x",
+                  "y"
+                ]
+              },
+              "fit": {
+                "type": "string",
+                "enum": [
+                  "cover",
+                  "contain"
+                ]
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
+          },
+          "imagePosition": {
+            "type": "string",
+            "enum": [
+              "left",
+              "right"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "featured-product",
+      "category": "content",
+      "supportedPages": [
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
+      ],
+      "allowedRegions": [
+        "template"
+      ],
+      "allowedBlockTypes": [],
+      "defaultSettings": {
+        "eyebrow": "Product spotlight",
+        "buttonLabel": "View details",
+        "imagePosition": "left"
+      },
+      "defaultBlocks": [],
+      "responsiveFields": [],
+      "presets": [
+        {
+          "id": "featured-product",
+          "label": "Featured product",
+          "category": "products"
+        }
+      ],
+      "controls": [
+        {
+          "type": "product",
+          "key": "productId",
+          "label": "Product",
+          "description": "Leave empty to show your first featured product.",
+          "group": "content"
+        },
+        {
+          "type": "text",
+          "key": "eyebrow",
+          "label": "Small text above heading",
+          "group": "content",
+          "maxLength": 80,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "textarea",
+          "key": "text",
+          "label": "Why it is special",
+          "group": "content",
+          "maxLength": 400
+        },
+        {
+          "type": "image",
+          "key": "image",
+          "label": "Photo",
+          "group": "content",
+          "dynamicTypes": [
+            "image"
+          ],
+          "description": "Optional. The product's own photo is used when empty."
+        },
+        {
+          "type": "text",
+          "key": "buttonLabel",
+          "label": "Button text",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
+          "type": "segmented",
+          "key": "imagePosition",
+          "label": "Photo position",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "eyebrow": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 400
+          },
+          "image": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              },
+              "focalPoint": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "y": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                  }
+                },
+                "required": [
+                  "x",
+                  "y"
+                ]
+              },
+              "fit": {
+                "type": "string",
+                "enum": [
+                  "cover",
+                  "contain"
+                ]
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
+          },
+          "buttonLabel": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "imagePosition": {
+            "type": "string",
+            "enum": [
+              "left",
+              "right"
             ]
           }
         }
@@ -23474,6 +23865,31 @@
           "maxLength": 80
         },
         {
+          "type": "text",
+          "key": "detail",
+          "label": "What they bought",
+          "description": "Optional, for example: Bought the Harbour bed.",
+          "group": "content",
+          "maxLength": 80
+        },
+        {
+          "type": "range",
+          "key": "rating",
+          "label": "Stars",
+          "description": "0 hides the stars.",
+          "group": "content",
+          "min": 0,
+          "max": 5,
+          "step": 1
+        },
+        {
+          "type": "image",
+          "key": "avatar",
+          "label": "Customer photo",
+          "description": "Optional. Use only with the customer's permission.",
+          "group": "content"
+        },
+        {
           "group": "style",
           "heading": "Style",
           "element": "quote",
@@ -23947,6 +24363,30 @@
           },
           "author": {
             "type": "string"
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5
+          },
+          "detail": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "avatar": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
           },
           "el_quote_color": {
             "anyOf": [
@@ -25250,6 +25690,246 @@
             ]
           }
         }
+      }
+    },
+    {
+      "type": "announcement-message",
+      "defaultSettings": {
+        "text": "Free delivery on orders over £50"
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "text",
+          "label": "Message",
+          "group": "content",
+          "maxLength": 160
+        },
+        {
+          "type": "link",
+          "key": "link",
+          "label": "Link",
+          "description": "Optional.",
+          "group": "content",
+          "dynamicTypes": [
+            "url"
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "link": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "additionalProperties": {},
+        "$defs": {
+          "__schema0": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "resource_field"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "field"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metafield"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "namespace",
+                  "key"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metaobject_field"
+                  },
+                  "source": {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source",
+                  "field"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "hotspot",
+      "defaultSettings": {
+        "x": 50,
+        "y": 50
+      },
+      "controls": [
+        {
+          "type": "product",
+          "key": "productId",
+          "label": "Product",
+          "description": "Leave empty to use your products in order.",
+          "group": "content"
+        },
+        {
+          "type": "range",
+          "key": "x",
+          "label": "From the left",
+          "group": "content",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%"
+        },
+        {
+          "type": "range",
+          "key": "y",
+          "label": "From the top",
+          "group": "content",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%"
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "x": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "y": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        "additionalProperties": {}
       }
     },
     {

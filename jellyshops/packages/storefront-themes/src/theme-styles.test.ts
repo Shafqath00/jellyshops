@@ -10,7 +10,7 @@ const get = (settings: Record<string, unknown>, path: string) => path.split(".")
 it("ships four designer styles for Jelly Minimal, Jelly Avenue and Resthaven, none for other themes", () => {
   expect(listThemeStyles("jelly-signature").map((style) => style.name)).toEqual(["Warm sand", "Ink and paper", "Sage", "Blush"]);
   expect(listThemeStyles("jelly-avenue").map((style) => style.name)).toEqual(["Gallery", "Midnight", "Stone", "Coastal"]);
-  expect(listThemeStyles("jelly-resthaven").map((style) => style.name)).toEqual(["Midnight oat", "Heather", "Sage linen", "Charcoal and stone"]);
+  expect(listThemeStyles("jelly-resthaven").map((style) => style.name)).toEqual(["Morning sky", "Sage garden", "Sunset blush", "Midnight oat"]);
   expect(listThemeStyles("jelly-diode")).toEqual([]);
   expect(listThemeStyles(undefined)).toEqual([]);
 });

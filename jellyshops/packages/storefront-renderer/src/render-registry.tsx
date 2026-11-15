@@ -10,6 +10,7 @@ import { ProductSpecificationsSection, ProductStockCounterSection, ProductTabsSe
 import { StoreVisitSection } from "./sections/store-visit";
 import { ProductGridSection } from "./sections/product-grid";
 import { RecentlyViewedSection } from "./sections/recently-viewed";
+import { FeaturedProductSection, ShopTheLookSection } from "./sections/showcase";
 import { ProductDimensionsSection } from "./sections/product-dimensions";
 import { RichTextSection } from "./sections/rich-text";
 import { CustomContentSection } from "./sections/custom-content";
@@ -103,6 +104,8 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("product-dimensions", ({ section, context }) => <ProductDimensionsSection section={section} context={context} product={productContext(context)} />);
   registry.register("product-specifications", ({ section, context }) => <ProductSpecificationsSection section={section} context={context} />);
   registry.register("contact-store-info", ({ section, mode }) => <StoreVisitSection section={section} editor={mode === "editor"} />);
+  registry.register("shop-the-look", ({ commerce, context, section }) => <ShopTheLookSection commerce={commerce} context={context} section={section} />);
+  registry.register("featured-product", ({ commerce, context, section }) => <FeaturedProductSection commerce={commerce} context={context} section={section} />);
   registry.register("recently-viewed", ({ commerce, context, section }) => <RecentlyViewedSection commerce={commerce} context={context} section={section} />);
   registry.register("related-products", ({ context, section }) => <RelatedProductsSection context={context} section={section} />);
   registry.register("collection-header", ({ context, section }) => <CollectionHeaderSection context={context} section={section} />);
