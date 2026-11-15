@@ -1,0 +1,54 @@
+/*
+ * Jelly Shop brand tokens (docs/redesign/DESIGN_TOKENS.md): black-and-white premium.
+ * Shared by the home page, sign-in/sign-up and onboarding. Put `data-brand` on the page root.
+ * Dark is the default; the saved light-mode choice sets `html[data-home-theme="light"]`
+ * before paint (script in the root layout).
+ */
+
+[data-brand] {
+  --bg: #0a0a0a;
+  --bg-raised: #111;
+  --bg-sunken: #050505;
+  --line: rgb(255 255 255 / 10%);
+  --line-strong: rgb(255 255 255 / 18%);
+  --fg: #fafafa;
+  --fg-muted: #a1a1a1;
+  --fg-subtle: #6e6e6e;
+  --btn-bg: #fafafa;
+  --btn-fg: #0a0a0a;
+  --glow: rgb(255 255 255 / 14%);
+  --grid-line: rgb(255 255 255 / 6%);
+  --card-shadow: none;
+  --danger: #ff8a8a;
+  --danger-bg: rgb(255 138 138 / 10%);
+  --ok: #86efac;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --sans: var(--font-geist), "Inter", system-ui, sans-serif;
+  --mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: dark;
+}
+
+html[data-home-theme="light"] [data-brand] {
+  --bg: #fafafa;
+  --bg-raised: #fff;
+  --bg-sunken: #f2f2f2;
+  --line: rgb(0 0 0 / 9%);
+  --line-strong: rgb(0 0 0 / 16%);
+  --fg: #0a0a0a;
+  --fg-muted: #5c5c5c;
+  --fg-subtle: #8f8f8f;
+  --btn-bg: #0a0a0a;
+  --btn-fg: #fafafa;
+  --glow: rgb(0 0 0 / 6%);
+  --grid-line: rgb(0 0 0 / 5%);
+  --card-shadow: 0 1px 2px rgb(0 0 0 / 5%), 0 12px 32px -16px rgb(0 0 0 / 20%);
+  --danger: #b42318;
+  --danger-bg: rgb(180 35 24 / 7%);
+  --ok: #15803d;
+  color-scheme: light;
+}
+
+/* Lenis smooth scrolling */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
