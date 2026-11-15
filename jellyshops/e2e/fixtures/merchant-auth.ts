@@ -22,7 +22,7 @@ async function signInWithMerchantCredentials(page: Page, email: string, password
   await page.goto(`/login?next=${encodeURIComponent(destination)}`);
   await expect(page.getByLabel("Email")).toBeVisible();
   await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill(password);
+  await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
   if (destination === "/admin/online-store/editor") {
     await expect(page.getByTestId("theme-editor-shell")).toBeVisible();
