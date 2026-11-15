@@ -1,4 +1,4 @@
-/* Jelly Shop home page: black-and-white premium. Tokens: docs/redesign/DESIGN_TOKENS.md. Dark by default, mobile first. */
+/* Jellyshop home page: black-and-white premium. Tokens: docs/redesign/DESIGN_TOKENS.md. Dark by default, mobile first. */
 
 .home {
   --gutter: clamp(20px, 4vw, 40px);

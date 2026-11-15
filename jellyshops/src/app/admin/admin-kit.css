@@ -3,7 +3,7 @@
  * portalled to <body> get them too. Colours come from tokens only; dark mode swaps the tokens.
  */
 html.admin-ui {
-  /* Jelly Shop palette: warm neutrals, Jelly blue for actions, lime as the family highlight.
+  /* Jellyshop palette: warm neutrals, Jelly blue for actions, lime as the family highlight.
      docs/redesign/DESIGN_SYSTEM.md explains every token. */
   --jk-ink:#0a0a0a; --jk-lime:#c9ff18; --jk-blue:#2f5bff;
   --jk-surface:#fff; --jk-surface-subdued:#f7f6f1; --jk-surface-hover:#f2f0ea; --jk-surface-selected:#eef2ff;

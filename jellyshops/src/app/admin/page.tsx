@@ -34,7 +34,7 @@ function WelcomeBanner({ storeName }: { storeName: string }) {
     url.searchParams.delete("welcome");
     window.history.replaceState(window.history.state, "", url);
   }
-  return <Banner tone="success" title={`Welcome to Jelly Shop. ${storeName} is set up`}
+  return <Banner tone="success" title={`Welcome to Jellyshop. ${storeName} is set up`}
     action={<button type="button" className="jk-button" onClick={dismiss}>Dismiss</button>}>
     Your store is a private draft for now. Work through the steps below, then publish when you’re ready.
   </Banner>;

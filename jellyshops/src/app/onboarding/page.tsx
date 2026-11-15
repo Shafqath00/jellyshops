@@ -312,14 +312,14 @@ export default function OnboardingPage() {
       <div className={styles.intro}>
         <p className={styles.eyebrow}>Before you start</p>
         <h1 ref={heading} tabIndex={-1}>Our terms, in brief</h1>
-        <p>Please read and accept Jelly Shop’s terms before you set up your store.</p>
+        <p>Please read and accept Jellyshop’s terms before you set up your store.</p>
       </div>
       {policies ? <>
         <ul className={styles.policyLinks} role="list">
           <li><a href={policies.termsUrl} target="_blank" rel="noreferrer">Terms of Service</a></li>
           <li><a href={policies.privacyUrl} target="_blank" rel="noreferrer">Privacy Policy</a></li>
         </ul>
-        <label className={styles.consent}><input type="checkbox" checked={agreed} onChange={(event) => setAgreed(event.target.checked)} /> I agree to the Jelly Shop Terms of Service.</label>
+        <label className={styles.consent}><input type="checkbox" checked={agreed} onChange={(event) => setAgreed(event.target.checked)} /> I agree to the Jellyshop Terms of Service.</label>
         <button type="submit" className={styles.primary} disabled={!agreed || busy}>{busy ? "Saving…" : "Accept and continue"} <ArrowRight size={16} aria-hidden="true" /></button>
       </> : <><p className={styles.alert}>The policy links couldn’t load. You need them before you can continue.</p><button type="button" className={styles.primary} onClick={reloadSavedVersion}>Try again</button></>}
       {error && <p className={styles.alert} role="alert">{error}</p>}

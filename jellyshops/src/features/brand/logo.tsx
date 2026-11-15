@@ -1,8 +1,8 @@
-// Monochrome Jelly Shop logo for the marketing pages (same shapes as public/brand/jellyshop.svg,
+// Monochrome Jellyshop logo for the marketing pages (same shapes as public/brand/jellyshop.svg,
 // drawn in the current text colour so it follows dark and light mode).
 export function JellyShopLogo({ height = 28, className }: { height?: number; className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 314 72" height={height} width={Math.round((height * 314) / 72)} role="img" aria-label="Jelly Shop">
+    <svg className={className} viewBox="0 0 314 72" height={height} width={Math.round((height * 314) / 72)} role="img" aria-label="Jellyshop">
       <rect width="72" height="72" rx="18" fill="currentColor" />
       <path d="M28 26v-3a8 8 0 0 1 16 0v3" fill="none" stroke="var(--bg)" strokeWidth="3.8" />
       <path fill="var(--bg)" fillRule="evenodd" d="M19.9 26h32.2a3.7 3.7 0 0 1 3.69 3.38l2.27 24.5a4.7 4.7 0 0 1-4.68 5.12H18.62a4.7 4.7 0 0 1-4.68-5.12l2.27-24.5A3.7 3.7 0 0 1 19.9 26ZM37 33h5.5v11.1c0 6-3.8 9.4-9.1 9.4-3.8 0-6.5-1.8-8.3-4.9l4.45-2.85c.86 1.45 2.04 2.44 3.73 2.44 2.4 0 3.72-1.52 3.72-4.38Z" />

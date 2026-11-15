@@ -14,12 +14,12 @@ beforeAll(() => {
   globalThis.IntersectionObserver ??= class { observe() {} unobserve() {} disconnect() {} takeRecords() { return []; } } as unknown as typeof IntersectionObserver;
 });
 
-it("says what Jelly Shop does and who it is for in the hero", () => {
+it("says what Jellyshop does and who it is for in the hero", () => {
   render(<HomePage />);
   expect(screen.getByRole("heading", { level: 1 }).textContent?.replace(/\s+/g, " ").trim()).toBe("Launch your store. Sell from day one.");
   expect(screen.getByText(/all-in-one platform for independent brands/i)).toBeInTheDocument();
   expect(screen.getAllByRole("link", { name: /start free/i })[0]).toHaveAttribute("href", "/signup");
-  expect(screen.getAllByRole("button", { name: /book a demo/i }).length).toBeGreaterThan(0);
+  expect(screen.getAllByRole("button", { name: /take the tour/i }).length).toBeGreaterThan(0);
 });
 
 it("has every section in the agreed order", () => {
@@ -75,8 +75,8 @@ it("marks channels that are not built yet", () => {
   expect(within(sell).getAllByText("Soon")).toHaveLength(2);
 });
 
-it("opens the demo dialog and is honest that live demos are coming", () => {
+it("opens the product tour", () => {
   render(<HomePage />);
-  fireEvent.click(screen.getAllByRole("button", { name: /book a demo/i })[0]);
-  expect(screen.getAllByText(/live demos with our team are coming soon/i)[0]).toBeInTheDocument();
+  fireEvent.click(screen.getAllByRole("button", { name: /take the tour/i })[0]);
+  expect(screen.getAllByText(/from a blank store to your first order/i)[0]).toBeInTheDocument();
 });

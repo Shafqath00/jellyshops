@@ -9,15 +9,15 @@ import { navigation } from "./home-content";
 import "@/features/brand/brand.css";
 import styles from "./home.module.css";
 
-const description = "Jelly Shop is the all-in-one platform for independent brands to design an online store, take payments and manage orders, with no code.";
+const description = "Jellyshop is the all-in-one platform for independent brands to design an online store, take payments and manage orders, with no code.";
 
 export const metadata: Metadata = {
-  title: "Jelly Shop | Launch your online store. Sell from day one.",
+  title: "Jellyshop | Launch your online store. Sell from day one.",
   description,
   openGraph: {
-    title: "Jelly Shop | Launch your store. Sell from day one.",
+    title: "Jellyshop | Launch your store. Sell from day one.",
     description,
-    images: [{ url: "/assets/og-image.jpg", width: 1200, height: 630, alt: "Jelly Shop: launch your store, sell from day one" }],
+    images: [{ url: "/assets/og-image.jpg", width: 1200, height: 630, alt: "Jellyshop: launch your store, sell from day one" }],
     type: "website",
   },
   twitter: { card: "summary_large_image", images: ["/assets/og-image.jpg"] },

@@ -41,7 +41,7 @@ function AuthVisual() {
       <Image className={styles.artGrid} src="/assets/bg-hero-grid.webp" alt="" fill sizes="50vw" priority />
       <div className={styles.artGlow} />
       <div className={styles.artCopy}>
-        <p className={styles.eyebrow}>Jelly Shop</p>
+        <p className={styles.eyebrow}>Jellyshop</p>
         <p className={styles.artTitle}>Launch your store.<br /><span>Sell from day one.</span></p>
       </div>
       <motion.div className={styles.artStage} style={{ rotateX, rotateY, transformPerspective: 1200 }}>

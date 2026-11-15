@@ -1,5 +1,5 @@
 /*
- * Jelly Shop brand tokens (docs/redesign/DESIGN_TOKENS.md): black-and-white premium.
+ * Jellyshop brand tokens (docs/redesign/DESIGN_TOKENS.md): black-and-white premium.
  * Shared by the home page, sign-in/sign-up and onboarding. Put `data-brand` on the page root.
  * Dark is the default; the saved light-mode choice sets `html[data-home-theme="light"]`
  * before paint (script in the root layout).

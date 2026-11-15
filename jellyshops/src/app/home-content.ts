@@ -1,4 +1,4 @@
-// Copy for the public home page. Keep every claim true to what Jelly Shop does today:
+// Copy for the public home page. Keep every claim true to what Jellyshop does today:
 // anything not built is marked `soon`, customers are invented names (no real logos),
 // and real brand logos appear only for real integrations (docs/redesign/LOGOS.md).
 
@@ -93,7 +93,7 @@ export const navigation: NavItem[] = [
   },
 ];
 
-/** Invented shop names (Jelly Shop has no named customers yet). Shown as text, never as real logos. */
+/** Invented shop names (Jellyshop has no named customers yet). Shown as text, never as real logos. */
 export const shops = ["Clay & Co.", "NORTHSIDE AUDIO", "kindly skin", "Fern+Field", "Little Loom", "Oxbow Supply", "MERIDIAN", "Salt House", "paper/ink", "Tallow & Wick"] as const;
 
 export const stats = [
@@ -178,27 +178,27 @@ export const trust = [
   { title: "Secure payments", text: "Card details go straight to Stripe (PCI DSS Level 1). We never see or store them.", icon: "lock" },
   { title: "Safe publishing", text: "Edit a draft, publish when ready, roll back to an earlier version in two clicks.", icon: "history" },
   { title: "Your data, your call", text: "Each store's data is kept separate. Export products and orders any time.", icon: "shield" },
-  { title: "Real people", text: "Email support from the team that builds Jelly Shop.", icon: "lifebuoy" },
+  { title: "Real people", text: "Email support from the team that builds Jellyshop.", icon: "lifebuoy" },
 ] as const;
 
 export const faqs = [
-  { q: "What is Jelly Shop?", a: "An online store builder for independent brands: a storefront you design, products and stock, checkout and orders in one dashboard." },
+  { q: "What is Jellyshop?", a: "An online store builder for independent brands: a storefront you design, products and stock, checkout and orders in one dashboard." },
   { q: "Do I need to code?", a: "No. Pick a design, then change words, photos and layout in the visual editor. Developers can go further with the theme kit." },
   { q: "How do I get paid?", a: "Connect a Stripe account during setup. Customers pay by card and the money goes to your Stripe balance." },
   { q: "Can I move from another platform?", a: "Yes. Export a CSV or Excel file from your old shop and import it. Every row is checked before anything is saved." },
   { q: "Is there really a free plan?", a: "Yes. Starter is free with up to 25 products. Upgrade when you need more and cancel any time." },
-  { q: "Can I use my own domain?", a: "Every store gets a Jelly Shop web address straight away. Connecting your own domain is coming soon." },
+  { q: "Can I use my own domain?", a: "Every store gets a Jellyshop web address straight away. Connecting your own domain is coming soon." },
 ] as const;
 
 export const footer = [
   { title: "Product", links: [["Storefront builder", "#features"], ["Store designs", "#templates"], ["Pricing", "#pricing"], ["Integrations", "#integrations"]] },
   { title: "Solutions", links: [["Online store", "#sell-everywhere"], ["Social selling", "#sell-everywhere"], ["New shops", "#how-it-works"]] },
-  { title: "Resources", links: [["Questions", "#faq"], ["Developers", "#developers"], ["Live demo store", "/theme-preview/jelly-forma"]] },
+  { title: "Resources", links: [["Questions", "#faq"], ["Developers", "#developers"], ["Live demo store", "/theme-preview/jelly-forma"], ["Changelog", "/changelog"]] },
   { title: "Company", links: [["Security", "#trust"], ["Merchant stories", "#stories"], ["Log in", "/login"]] },
   { title: "Legal", links: [["Terms", "/legal/terms"], ["Privacy", "/legal/privacy"], ["Cookies", "/legal/cookies"]] },
 ] as const;
 
-/** Jelly Shop's own social accounts. Addresses still to be confirmed by the owner (see open items). */
+/** Jellyshop's own social accounts. Addresses still to be confirmed by the owner (see open items). */
 export const social = [
   { label: "Instagram", href: "#" },
   { label: "LinkedIn", href: "#" },

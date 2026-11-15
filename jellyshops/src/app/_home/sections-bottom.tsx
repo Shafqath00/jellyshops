@@ -98,7 +98,7 @@ export function Integrations() {
             </motion.li>
           ))}
         </motion.ul>
-        <p className={styles.footnoteCenter}>Logos belong to their owners and are shown only for integrations Jelly Shop supports today.</p>
+        <p className={styles.footnoteCenter}>Logos belong to their owners and are shown only for integrations Jellyshop supports today.</p>
 
         <Reveal className={styles.devPanel}>
           <div id="developers" className={styles.devCopy}>
@@ -161,7 +161,7 @@ export function Stories() {
             </motion.li>
           ))}
         </motion.ul>
-        <p className={styles.footnote}>Illustrative merchants and results, shown to explain what Jelly Shop does.</p>
+        <p className={styles.footnote}>Illustrative merchants and results, shown to explain what Jellyshop does.</p>
       </div>
     </section>
   );
@@ -328,7 +328,8 @@ export function FinalCta() {
 
 /* ---------- 14. Footer ---------- */
 
-export function SiteFooter() {
+/** `base` is put in front of in-page links ("#faq"), so pages other than the home page can link back to its sections. */
+export function SiteFooter({ base = "" }: { base?: string } = {}) {
   return (
     <footer className={styles.footer}>
       <div className={styles.container}>
@@ -341,14 +342,14 @@ export function SiteFooter() {
             <nav key={title} aria-labelledby={`footer-${title}`}>
               <h2 id={`footer-${title}`} className={styles.label}>{title}</h2>
               <ul role="list">
-                {links.map(([label, href]) => <li key={label}><a href={href}>{label}</a></li>)}
+                {links.map(([label, href]) => <li key={label}><a href={href.startsWith("#") ? base + href : href}>{label}</a></li>)}
               </ul>
             </nav>
           ))}
         </div>
         <div className={styles.legal}>
           <p>© {new Date().getFullYear()} Jelly Labs. All rights reserved.</p>
-          <ul role="list" className={styles.social} aria-label="Jelly Shop on social media">
+          <ul role="list" className={styles.social} aria-label="Jellyshop on social media">
             {social.map(({ label, href }) => <li key={label}><a href={href}>{label}</a></li>)}
           </ul>
         </div>

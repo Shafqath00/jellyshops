@@ -10,8 +10,8 @@ import { EASE, SPRING, useReducedMotion } from "@/features/brand/motion";
 import styles from "../home.module.css";
 
 /**
- * "Book a demo". Live demo booking isn't set up yet, so the dialog says so and
- * offers a guided product tour that advances every 5 seconds (paused for reduced motion).
+ * "Take the tour" (the owner chose the tour over live demo booking, 2026-11-15):
+ * a guided product tour that advances every 5 seconds (paused for reduced motion).
  */
 export function DemoDialog({ variant = "outline" }: { variant?: "outline" | "ghost" }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -44,7 +44,7 @@ export function DemoDialog({ variant = "outline" }: { variant?: "outline" | "gho
         whileTap={{ scale: 0.97 }}
         transition={SPRING}
       >
-        Book a demo
+        Take the tour
       </motion.button>
       <dialog
         ref={dialog}
@@ -56,8 +56,8 @@ export function DemoDialog({ variant = "outline" }: { variant?: "outline" | "gho
         <div className={styles.dialogInner}>
           <div className={styles.dialogHead}>
             <div>
-              <h2 id="demo-title">Book a demo</h2>
-              <p>Live demos with our team are coming soon. In the meantime, here&apos;s a two-minute tour of Jelly Shop.</p>
+              <h2 id="demo-title">A two-minute tour</h2>
+              <p>See how Jellyshop takes you from a blank store to your first order.</p>
             </div>
             <button type="button" className={styles.iconButton} onClick={() => dialog.current?.close()}>
               <X size={16} strokeWidth={1.5} aria-hidden="true" /><span className={styles.srOnly}>Close</span>

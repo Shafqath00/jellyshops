@@ -232,7 +232,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           <p>We sent a confirmation link to <span className={styles.verifyEmail}>{sentTo}</span>.</p>
           <ol className={styles.verifySteps}>
             {/* One <span> per step: the <li> is a flex row, so bare text and <strong> would become separate columns. */}
-            <li><span>Open the email from Jelly Shop.</span></li>
+            <li><span>Open the email from Jellyshop.</span></li>
             <li><span>Select <strong>Confirm your email</strong>. Use this browser if you can.</span></li>
             <li><span>You’ll come straight back here to set up your store.</span></li>
           </ol>
@@ -316,7 +316,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       )}
       <p className={styles.switch}>
         {recovery ? <button className={styles.textLink} type="button" onClick={() => openRecovery(false)} disabled={busy}>Back to sign in</button> : <>
-          {signup ? "Already have an account?" : "New to Jelly Shop?"}{" "}
+          {signup ? "Already have an account?" : "New to Jellyshop?"}{" "}
           <Link className={styles.textLink} href={signup ? "/login" : "/signup"}>{signup ? "Log in" : "Start free"}</Link>
         </>}
       </p>

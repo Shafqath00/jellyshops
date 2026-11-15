@@ -1,0 +1,29 @@
+/* Changelog page. Same black-and-white tokens as the home page (features/brand/brand.css). */
+.intro { display: grid; gap: 16px; max-width: 44rem; padding-top: clamp(128px, 16vw, 184px); padding-bottom: clamp(48px, 7vw, 80px); }
+.intro p:not(:first-child) { color: var(--fg-muted); font-size: 1.125rem; line-height: 1.55; }
+
+.list { display: grid; gap: 0; padding-bottom: var(--section); }
+
+.entry {
+  display: grid;
+  gap: 12px;
+  padding-block: clamp(32px, 4vw, 48px);
+  border-top: 1px solid var(--line);
+}
+
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.areas { display: flex; flex-wrap: wrap; gap: 6px; }
+.meta time { color: var(--fg-muted); font: 500 .75rem/1.4 var(--mono); letter-spacing: .04em; text-transform: uppercase; }
+
+.body { display: grid; gap: 12px; max-width: 44rem; }
+.body h2 { font-size: clamp(1.5rem, 2.6vw, 2rem); font-weight: 600; line-height: 1.15; letter-spacing: -.035em; }
+.body > p { color: var(--fg-muted); font-size: 1.0625rem; line-height: 1.6; }
+
+.points { display: grid; gap: 8px; margin-top: 4px; }
+.points li { position: relative; padding-left: 20px; color: var(--fg-muted); line-height: 1.6; }
+.points li::before { content: ""; position: absolute; top: .7em; left: 0; width: 8px; height: 1px; background: var(--fg-subtle); }
+
+@media (min-width: 900px) {
+  .entry { grid-template-columns: 220px minmax(0, 1fr); gap: 32px; }
+  .meta { flex-direction: column; align-items: flex-start; }
+}

@@ -41,7 +41,7 @@ export function Hero() {
 
       <div className={`${styles.container} ${styles.heroInner}`}>
         <motion.a
-          href="#features"
+          href="/changelog"
           className={styles.announce}
           initial={reduced ? false : { opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -74,7 +74,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: EASE, delay: 0.7 }}
         >
-          Jelly Shop is the all-in-one platform for independent brands: design your store, take payments and manage orders, with no code.
+          Jellyshop is the all-in-one platform for independent brands: design your store, take payments and manage orders, with no code.
         </motion.p>
 
         <motion.div
@@ -105,7 +105,7 @@ export function Hero() {
           >
             <Image
               src="/assets/hero-dashboard-storefront.webp"
-              alt="The Jelly Shop dashboard on a laptop showing £24,860 in sales and recent orders, next to a phone showing the store a shopper sees"
+              alt="The Jellyshop dashboard on a laptop showing £24,860 in sales and recent orders, next to a phone showing the store a shopper sees"
               width={1536}
               height={1024}
               priority
