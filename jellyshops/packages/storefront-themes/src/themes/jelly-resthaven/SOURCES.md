@@ -9,3 +9,5 @@ Nineteen more photographs were generated with ChatGPT image generation on 13 Nov
 They are illustrative images, not photographs of merchant inventory. Replace them with real product photography before selling.
 
 `mark.svg` and `preview.svg` are original vector artwork.
+
+Five brighter photographs (`bright-hero`, `bright-beds`, `bright-mattresses`, `bright-bedding`, `bright-pillows`) were generated on 15 November 2026 for the bright edition of the theme; their prompts are logged in `ASSETS.md`.

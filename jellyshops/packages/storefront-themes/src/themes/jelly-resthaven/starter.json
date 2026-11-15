@@ -434,8 +434,8 @@
               "fullBleed": true,
               "overlay": 0,
               "image": {
-                "url": "/themes/jelly-resthaven/hero.webp",
-                "alt": "A bright bedroom with an upholstered bed, soft linen and morning light",
+                "url": "/themes/jelly-resthaven/bright-hero.webp",
+                "alt": "A bright bedroom in morning sun with a sky-blue upholstered bed, white and blush bedding and a coral throw",
                 "fit": "cover",
                 "focalPoint": {
                   "x": 62,
@@ -507,8 +507,8 @@
                 "settings": {
                   "label": "Beds",
                   "image": {
-                    "url": "/themes/jelly-resthaven/room-main.webp",
-                    "alt": "An upholstered bed in a light main bedroom"
+                    "url": "/themes/jelly-resthaven/bright-beds.webp",
+                    "alt": "A sky-blue upholstered bed with a winged headboard and blush bedding"
                   },
                   "link": "/search?q=Beds"
                 },
@@ -521,8 +521,8 @@
                 "settings": {
                   "label": "Mattresses",
                   "image": {
-                    "url": "/themes/jelly-resthaven/mattress.webp",
-                    "alt": "The layers of a pocket sprung mattress"
+                    "url": "/themes/jelly-resthaven/bright-mattresses.webp",
+                    "alt": "A cut-away mattress corner showing its quilted cover and springs"
                   },
                   "link": "/search?q=Mattresses"
                 },
@@ -535,8 +535,8 @@
                 "settings": {
                   "label": "Bedding",
                   "image": {
-                    "url": "/themes/jelly-resthaven/linen-bedding.webp",
-                    "alt": "Washed linen bedding folded on a bed"
+                    "url": "/themes/jelly-resthaven/bright-bedding.webp",
+                    "alt": "Folded washed-linen bedding in blush and sky blue"
                   },
                   "link": "/search?q=Bedding"
                 },
@@ -549,8 +549,8 @@
                 "settings": {
                   "label": "Pillows",
                   "image": {
-                    "url": "/themes/jelly-resthaven/pillows.webp",
-                    "alt": "Soft pillows stacked against a headboard"
+                    "url": "/themes/jelly-resthaven/bright-pillows.webp",
+                    "alt": "Plump white and pale blue pillows against an oak headboard"
                   },
                   "link": "/search?q=Pillows"
                 },
@@ -613,8 +613,8 @@
             "settings": {
               "eyebrow": "This month only",
               "image": {
-                "url": "/themes/jelly-resthaven/linen-bedding.webp",
-                "alt": "Linen bedding in sky blue and blush"
+                "url": "/themes/jelly-resthaven/bright-bedding.webp",
+                "alt": "Folded washed-linen bedding in blush and sky blue"
               },
               "imagePosition": "right",
               "styleScheme": "scheme3"
@@ -757,8 +757,8 @@
             "settings": {
               "eyebrow": "Mattresses",
               "image": {
-                "url": "/themes/jelly-resthaven/mattress.webp",
-                "alt": "A cut-away corner of a hybrid mattress"
+                "url": "/themes/jelly-resthaven/bright-mattresses.webp",
+                "alt": "A cut-away mattress corner showing its quilted cover and springs"
               },
               "imagePosition": "right"
             },
