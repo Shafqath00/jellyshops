@@ -20,6 +20,10 @@ PNG originals were encoded as WebP (quality 80, 1536 px wide) with Sharp and sav
 
 ## Still to make
 
+A developer is continuing this set: the list of ten photos, their prompts and where each goes is in `docs/handoff/resthaven-bright-photos.md` (use `scripts/resthaven-photos-to-webp.mjs` to convert them).
+
+Original notes:
+
 Photo 6 (Decor tile) was sent ("a soft textured cream and sky-blue rug on a pale oak floor beside the corner of a bed, a small ceramic lamp on a bedside table, bright morning light") but ChatGPT answered "You're out of images". Also needed:
 
 - Sale tile (a coral throw folded on a bed)
