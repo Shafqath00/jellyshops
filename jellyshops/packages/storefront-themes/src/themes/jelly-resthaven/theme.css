@@ -70,7 +70,7 @@ p { margin: 0 0 1em; }
 /* Hero over a photo: copy on a soft dark wash at the left, 640px tall on desktop. */
 .jelly-hero { position: relative; }
 .jelly-hero[data-layout="overlay"] { padding: 0; }
-.jelly-hero[data-layout="overlay"] > .jelly-container { position: relative; display: grid; align-items: end; width: 100%; max-width: none; min-height: clamp(520px, 46vw, 680px); margin: 0; padding: 0 var(--j-page-edge); }
+.jelly-hero[data-layout="overlay"] > .jelly-container { position: relative; display: grid; align-items: end; width: 100%; max-width: none; min-height: clamp(520px, 46vw, 680px); margin: 0; padding: 0 var(--j-page-edge); border-radius: 0; overflow: hidden; }
 .jelly-hero[data-layout="overlay"] .jelly-hero-media { position: absolute; inset: 0; margin: 0; border-radius: 0; }
 .jelly-hero-media img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 0; }
 /* A bright morning wash behind the words (linen, fading to clear), so the photo stays light and the text stays navy.
