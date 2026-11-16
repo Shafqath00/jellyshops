@@ -1,7 +1,7 @@
 "use client";
 
 import type { SectionNode } from "@jelly/storefront-schema";
-import { breaksEssentialSections } from "@jelly/storefront-registry";
+import { breaksEssentialSections, pageSectionLimitProblem } from "@jelly/storefront-registry";
 import { setThemeSetting } from "@/features/store-editor/editor-page-helpers";
 import { clearUnsaved, rememberUnsaved } from "@/features/store-editor/state/unsaved-work";
 import type { useEditorState } from "./use-editor-state";
@@ -31,6 +31,9 @@ export function useEditorPersistence(ctx: ReturnType<typeof useEditorState> & Re
     // (its product grid, bag section, way to buy…): deleting or hiding the last one is refused with a plain reason.
     const broken = breaksEssentialSections(previous.type, layoutSections(previous.layout), layoutSections(layout));
     if (broken) { setEditorNotice(broken); return false; }
+    // Sections with a limit (one Main product per page) can't be added past it.
+    const overLimit = pageSectionLimitProblem(layoutSections(previous.layout), layoutSections(layout));
+    if (overLimit) { setEditorNotice(overLimit); return false; }
     if (record) recordHistory({ kind: "template", id: previous.id, before: previous.layout, after: layout });
     const draft = { ...previous, layout };
     rememberUnsaved(backendStoreId, { kind: "template", id: draft.id, baseRevision: draft.revision, value: layout });

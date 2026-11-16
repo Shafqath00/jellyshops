@@ -5,7 +5,7 @@
    change. Effects list only the values that should re-run them. */
 
 import { useEffect, useMemo, useRef } from "react";
-import { elementControls, getBlockDefinition, getSectionDefinition, listSectionDefinitionsForPage } from "@jelly/storefront-registry";
+import { elementControls, getBlockDefinition, getSectionDefinition, listSectionDefinitionsForPage, sectionFitsLimit } from "@jelly/storefront-registry";
 import { type CommerceDataProvider, type StorefrontPageContext } from "@jelly/storefront-renderer";
 import type { ThemeId } from "@jelly/storefront-schema";
 import { getThemeDefinition, validateThemeManifest, resolveStorefrontThemeTokens, resolveTheme, storeLanguages } from "@jelly/storefront-themes";
@@ -180,8 +180,11 @@ export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
   [activeTemplate?.type, previewResourceId, backendStoreId, catalog, pages, blogs, articles, previewQuery, previewProduct, previewProductSelections, previewProductQuantity, previewCollection]);
   const builtInSections = useMemo(() => {
     if (!activeTemplate || !libraryRegion) return [];
-    return sectionLibraryOptions(listSectionDefinitionsForPage(activeTemplate.type, libraryRegion, themeConfiguration?.themeId, themeConfiguration?.themeVersion));
-  }, [activeTemplate, libraryRegion, themeConfiguration]);
+    // A section that has reached its limit on this page (one Main product) is not offered again.
+    const definitions = listSectionDefinitionsForPage(activeTemplate.type, libraryRegion, themeConfiguration?.themeId, themeConfiguration?.themeVersion)
+      .filter((definition) => sectionFitsLimit(definition.type, sections, (type) => getSectionDefinition(type, themeConfiguration?.themeVersion)));
+    return sectionLibraryOptions(definitions);
+  }, [activeTemplate, libraryRegion, themeConfiguration, sections]);
   const blockPickerSection = sections.find((section) => section.id === blockPickerSectionId);
   const blockPickerDefinition = blockPickerSection ? getSectionDefinition(blockPickerSection.type, themeConfiguration?.themeVersion) : undefined;
   const blockPickerTypes = blockPickerSection && blockPickerParentId

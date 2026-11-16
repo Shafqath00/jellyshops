@@ -42,6 +42,8 @@ export function mainProductSection(sections: SectionDefinition[]): SectionDefini
     type: "main-product",
     category: "commerce",
     supportedPages: ["product"],
+    // One buying area per product page.
+    limit: 1,
     settingsSchema: z.intersection(gallery.settingsSchema, layoutSchema),
     controls: [
       { type: "segmented", key: "mediaPosition", label: "Photos", group: "layout", options: [{ label: "On the left", value: "left" }, { label: "On the right", value: "right" }] },

@@ -4,10 +4,10 @@ import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, us
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
-import { ChevronDown, ChevronRight, Eye, EyeOff, Plus, Search, Type, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Eye, EyeOff, Lock, Plus, Search, Type, X } from "lucide-react";
 import type { EditorSelection } from "../model/types";
 import type { StorefrontTemplateRecord } from "../api/types";
-import { blockLabel as blockTypeLabel, getSectionDefinition } from "@jelly/storefront-registry";
+import { blockLabel as blockTypeLabel, getSectionDefinition, isStaticBlock } from "@jelly/storefront-registry";
 import { displayName } from "../editor-page-helpers";
 import { RowMenu, blockIcon, sectionIcon } from "./outline-parts";
 
@@ -152,9 +152,11 @@ function PlacementRow({ placement, globalSections, selection, activeGlobalId, on
       const sectionId = placement.kind === "inline" ? id : shared?.sectionId ?? id;
       const blockSelected = selection?.kind === "block" && selection.sectionId === sectionId && selection.blockId === block.id;
       const blockHidden = block.enabled === false;
+      // A static block is a fixed part of its section: it can be edited but not hidden, copied or deleted.
+      const fixed = placement.kind === "inline" && blocks.includes(block) && isStaticBlock(placement.section.type, block.type, themeVersion);
       const row = <div key={block.id} className="group/block flex items-center rounded-md hover:bg-muted">
-        <button type="button" aria-label={describeBlock(block)} aria-current={blockSelected ? "true" : undefined} onClick={() => onSelect({ kind: "block", region, sectionId, blockId: block.id })} title={describeBlock(block)} className={clsx("flex min-h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-2 text-left text-xs", blockSelected && "bg-primary/10 font-medium text-primary")}>{(() => { const Glyph = blockIcon(block.type); return <Glyph size={14} className="shrink-0" aria-hidden="true" />; })()}<span className={clsx("truncate", blockHidden && "text-muted-foreground line-through decoration-muted-foreground/60")}>{describeBlock(block)}</span>{blockHidden && <span className="text-[9px] text-muted-foreground">Hidden</span>}</button>
-        {onBlockAction && placement.kind === "inline" && <div className="flex shrink-0 items-center gap-0.5 pr-1">
+        <button type="button" aria-label={describeBlock(block)} aria-current={blockSelected ? "true" : undefined} onClick={() => onSelect({ kind: "block", region, sectionId, blockId: block.id })} title={describeBlock(block)} className={clsx("flex min-h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-2 text-left text-xs", blockSelected && "bg-primary/10 font-medium text-primary")}>{(() => { const Glyph = blockIcon(block.type); return <Glyph size={14} className="shrink-0" aria-hidden="true" />; })()}<span className={clsx("truncate", blockHidden && "text-muted-foreground line-through decoration-muted-foreground/60")}>{describeBlock(block)}</span>{blockHidden && <span className="text-[9px] text-muted-foreground">Hidden</span>}{fixed && <span className="ml-auto flex shrink-0 items-center gap-0.5 text-[9px] text-muted-foreground" title="A fixed part of this section"><Lock size={10} aria-hidden="true" />Fixed</span>}</button>
+        {onBlockAction && placement.kind === "inline" && !fixed && <div className="flex shrink-0 items-center gap-0.5 pr-1">
           <button type="button" aria-label={`${blockHidden ? "Show" : "Hide"} ${describeBlock(block)}`} title={blockHidden ? "Show" : "Hide"} onClick={() => onBlockAction(id, block.id, "toggle")} className={clsx("grid size-6 place-items-center rounded text-muted-foreground hover:bg-card hover:text-foreground", !blockHidden && "opacity-0 group-hover/block:opacity-100 group-focus-within/block:opacity-100 [@media(hover:none)]:opacity-100")}>{blockHidden ? <EyeOff size={13} /> : <Eye size={13} />}</button>
           <div className="opacity-0 group-hover/block:opacity-100 group-focus-within/block:opacity-100 has-[details[open]]:opacity-100 [@media(hover:none)]:opacity-100"><RowMenu label={describeBlock(block)} actions={[
             { label: "Duplicate", ariaLabel: `Duplicate ${describeBlock(block)}`, onAction: () => onBlockAction(id, block.id, "duplicate") },

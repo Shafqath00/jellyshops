@@ -201,6 +201,16 @@ describe("TemplateService", () => {
     expect(home.template.handle).toBe("landing");
   });
 
+  it("refuses a second copy of a section limited to one per page", async () => {
+    const { service } = setup();
+    const main = (id: string) => ({ kind: "inline", section: { id, type: "main-product", enabled: true, settings: {}, blocks: [{ id: `${id}-buy`, type: "part-product-purchase", enabled: true, settings: {} }] } });
+    await expect(service.createTemplate("store-a", { type: "product", name: "Two", handle: "two", layout: { sections: [main("a"), main("b")] } }))
+      .rejects.toMatchObject({ status: 400, code: "TEMPLATE_SECTION_LIMIT" });
+    const created = await service.createTemplate("store-a", { type: "product", name: "One", handle: "one", layout: { sections: [main("a")] } });
+    await expect(service.updateTemplate("store-a", created.template.id, created.template.revision, { layout: { sections: [main("a"), main("b")] } }))
+      .rejects.toMatchObject({ status: 400, code: "TEMPLATE_SECTION_LIMIT" });
+  });
+
   it("explains invalid names, handles and layouts with 400 errors", async () => {
     const { service, generation } = setup();
 

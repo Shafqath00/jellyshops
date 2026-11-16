@@ -1,8 +1,9 @@
 export { defineBlock, defineSection } from "./define.js";
-export { allowedChildBlockTypes, MAX_SECTION_BLOCKS, MAX_TEMPLATE_SECTIONS, translatableKeys, getBlockDefinition, listBlockDefinitions, getSectionDefinition, listSectionDefinitions, listSectionDefinitionsForPage, registerSection, registerThemeSections, unregisterSection, mobileSettingKeys, validateSectionAgainstRegistry } from "./registry.js";
+export { allowedChildBlockTypes, MAX_SECTION_BLOCKS, MAX_TEMPLATE_SECTIONS, translatableKeys, getBlockDefinition, listBlockDefinitions, getSectionDefinition, listSectionDefinitions, listSectionDefinitionsForPage, registerSection, registerThemeSections, unregisterSection, isStaticBlock, pageSectionLimitProblem, staticBlockTypes, mobileSettingKeys, validateSectionAgainstRegistry } from "./registry.js";
 export { createPresetSection, createSectionFromDefinition, listSectionPresets } from "./presets.js";
 export { createThemePackDocument, getThemePack, listThemePacks } from "./theme-packs.js";
-export type { BlockDefinition, ControlDefinition, ControlGroup, PresetCategory, PresetThumbnail, ElementDefinition, ElementKind, RegionName, RegistryValidationIssue, RegistryValidationIssueCode, SectionDefinition, SectionPreset } from "./types.js";
+export { BLOCK_SETS, blockSetsIn, breaksSectionLimits, controlConditionMet, controlConditionProblem, expandBlockTypes, isBlockSet, isHelpUrl, SECTION_GROUP_NAMES, resolvePlacement, sectionFitsLimit, sectionLimitProblem } from "./composition.js";
+export type { AllowedBlockEntry, BlockSet, ControlCondition, SectionGroupName, SectionPlacement, StaticBlockDefinition, BlockDefinition, ControlDefinition, ControlGroup, PresetCategory, PresetThumbnail, ElementDefinition, ElementKind, RegionName, RegistryValidationIssue, RegistryValidationIssueCode, SectionDefinition, SectionPreset } from "./types.js";
 export { SECTION_VARIANTS } from "./section-variants.js";
 export type { ThemePack, ThemePackId } from "./theme-packs.js";
 export { COMPLETE_STARTER_PACK_IDS, getV4StarterPack, isV4StarterPackId, listV4StarterPacks, V4_STARTER_PACK_IDS } from "./v4-starter-packs.js";

@@ -1526,6 +1526,9 @@
       "allowedRegions": [
         "header"
       ],
+      "groups": [
+        "header"
+      ],
       "allowedBlockTypes": [
         "text",
         "announcement-message"
@@ -1908,6 +1911,9 @@
         "order-success"
       ],
       "allowedRegions": [
+        "header"
+      ],
+      "groups": [
         "header"
       ],
       "allowedBlockTypes": [
@@ -2799,6 +2805,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [],
       "defaultSettings": {
         "size": "standard"
@@ -2867,6 +2876,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [],
       "defaultSettings": {},
       "defaultBlocks": [],
@@ -2903,6 +2915,9 @@
         "order-success"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [],
@@ -2967,6 +2982,9 @@
         "order-success"
       ],
       "allowedRegions": [
+        "footer"
+      ],
+      "groups": [
         "footer"
       ],
       "allowedBlockTypes": [
@@ -4696,6 +4714,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [],
       "defaultSettings": {},
       "defaultBlocks": [],
@@ -4714,6 +4735,9 @@
         "blog"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [],
@@ -5081,6 +5105,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [],
       "defaultSettings": {
         "layout": "list",
@@ -5190,6 +5217,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [],
       "defaultSettings": {
         "showDate": true,
@@ -5257,6 +5287,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [],
       "defaultSettings": {},
       "defaultBlocks": [],
@@ -5313,6 +5346,9 @@
         "not-found"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [
@@ -6302,6 +6338,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [
         "slide"
       ],
@@ -6451,6 +6490,9 @@
         "not-found"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [
@@ -7400,6 +7442,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [
         "heading",
         "text",
@@ -7454,6 +7499,9 @@
         "not-found"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [
@@ -8030,6 +8078,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [
         "heading",
         "text",
@@ -8238,6 +8289,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [
         "heading",
         "text",
@@ -8419,6 +8473,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [
         "heading",
         "text",
@@ -8484,6 +8541,9 @@
         "not-found"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [
@@ -8897,6 +8957,9 @@
         "not-found"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [
@@ -9637,6 +9700,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [
         "heading",
         "text"
@@ -9739,6 +9805,9 @@
         "not-found"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [
@@ -10291,6 +10360,9 @@
         "not-found"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [
@@ -11125,6 +11197,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [
         "logo"
       ],
@@ -11538,6 +11613,9 @@
         "not-found"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [],
@@ -12025,6 +12103,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [
         "app"
       ],
@@ -12123,6 +12204,9 @@
         "not-found"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [
@@ -12310,6 +12394,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [
         "trust-point",
         "heading",
@@ -12451,6 +12538,9 @@
         "not-found"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [],
@@ -12966,6 +13056,9 @@
         "not-found"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [
@@ -13741,6 +13834,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [
         "hotspot"
       ],
@@ -13915,6 +14011,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [],
       "defaultSettings": {
         "eyebrow": "Product spotlight",
@@ -14078,6 +14177,9 @@
         "not-found"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [
@@ -14255,6 +14357,9 @@
         "not-found"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [
@@ -14440,6 +14545,9 @@
         "not-found"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [],
@@ -15337,6 +15445,9 @@
         "not-found"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [
@@ -16296,6 +16407,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [],
       "defaultSettings": {
         "imageFit": "cover",
@@ -16510,6 +16624,9 @@
         "product"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [],
@@ -17585,6 +17702,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [],
       "defaultSettings": {
         "style": "buttons",
@@ -17668,6 +17788,9 @@
         "product"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [],
@@ -17801,6 +17924,9 @@
         "product"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [],
@@ -18196,6 +18322,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [],
       "defaultSettings": {
         "limit": 4,
@@ -18567,6 +18696,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [],
       "defaultSettings": {
         "limit": 4,
@@ -18920,6 +19052,9 @@
         "collection"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [],
@@ -19393,6 +19528,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [
         "story-tile"
       ],
@@ -19531,6 +19669,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [],
       "defaultSettings": {
         "spacing": "standard"
@@ -19584,6 +19725,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [],
       "defaultSettings": {},
       "defaultBlocks": [],
@@ -19602,6 +19746,9 @@
         "search"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [],
@@ -19670,6 +19817,9 @@
         "product"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [
@@ -19747,6 +19897,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [],
       "defaultSettings": {
         "heading": "Customer reviews",
@@ -19817,6 +19970,9 @@
         "product"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [
@@ -20203,6 +20359,9 @@
         "product"
       ],
       "allowedRegions": [
+        "template"
+      ],
+      "groups": [
         "template"
       ],
       "allowedBlockTypes": [],
@@ -20613,6 +20772,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [],
       "defaultSettings": {
         "lowStockThreshold": 5,
@@ -20661,6 +20823,9 @@
       "allowedRegions": [
         "template"
       ],
+      "groups": [
+        "template"
+      ],
       "allowedBlockTypes": [
         "part-rating-summary",
         "part-product-information",
@@ -20672,6 +20837,7 @@
         "part-product-tabs",
         "part-product-specifications"
       ],
+      "limit": 1,
       "maxBlocks": 16,
       "defaultSettings": {
         "imageFit": "cover",
@@ -22730,6 +22896,9 @@
     },
     {
       "type": "heading",
+      "sets": [
+        "@content"
+      ],
       "defaultSettings": {
         "text": "Heading"
       },
@@ -22904,6 +23073,9 @@
     },
     {
       "type": "text",
+      "sets": [
+        "@content"
+      ],
       "defaultSettings": {
         "text": "Add your text here."
       },
@@ -23077,6 +23249,9 @@
     },
     {
       "type": "button",
+      "sets": [
+        "@content"
+      ],
       "defaultSettings": {
         "label": "Shop now",
         "href": "/shop"
@@ -23484,6 +23659,9 @@
     },
     {
       "type": "image",
+      "sets": [
+        "@content"
+      ],
       "defaultSettings": {},
       "controls": [
         {
@@ -23734,6 +23912,9 @@
     },
     {
       "type": "video",
+      "sets": [
+        "@content"
+      ],
       "defaultSettings": {
         "controls": true
       },
@@ -26135,6 +26316,9 @@
     },
     {
       "type": "group",
+      "sets": [
+        "@content"
+      ],
       "allowedBlockTypes": [
         "heading",
         "text",
@@ -26311,6 +26495,9 @@
     },
     {
       "type": "app",
+      "sets": [
+        "@app"
+      ],
       "defaultSettings": {
         "provider": "",
         "url": ""

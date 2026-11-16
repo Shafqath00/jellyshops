@@ -39,7 +39,12 @@ export function buildSchemaFiles(): Record<string, string> {
     category: definition.category,
     supportedPages: definition.supportedPages,
     allowedRegions: definition.allowedRegions,
+    groups: definition.groups,
     allowedBlockTypes: definition.allowedBlockTypes,
+    blockSets: definition.blockSets,
+    staticBlocks: definition.staticBlocks,
+    limit: definition.limit,
+    helpUrl: definition.helpUrl,
     minBlocks: definition.minBlocks,
     maxBlocks: definition.maxBlocks,
     defaultSettings: definition.defaultSettings,
@@ -51,6 +56,8 @@ export function buildSchemaFiles(): Record<string, string> {
   }));
   const blocks = listBlockDefinitions().map((definition) => ({
     type: definition.type,
+    sets: definition.sets,
+    helpUrl: definition.helpUrl,
     allowedBlockTypes: definition.allowedBlockTypes,
     maxBlocks: definition.maxBlocks,
     defaultSettings: definition.defaultSettings,

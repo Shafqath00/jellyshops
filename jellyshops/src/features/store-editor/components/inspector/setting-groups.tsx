@@ -2,6 +2,7 @@ import type {
   ControlDefinition,
   ControlGroup,
 } from "@jelly/storefront-registry";
+import { controlConditionMet } from "@jelly/storefront-registry";
 
 import type {
   DemoCatalog,
@@ -73,8 +74,7 @@ export function SettingGroups({
 }) {
   // A control with `showWhen` appears only while the other setting has that value (e.g. border colour once "Solid" is
   // picked), or, with `visibleWhenSaved`, while it still holds a saved value (exact spacing saved before "Custom" existed).
-  const shown = (control: ControlDefinition) => !control.showWhen
-    || displayValue(settings[control.showWhen.key]) === control.showWhen.equals
+  const shown = (control: ControlDefinition) => controlConditionMet(control, (key) => displayValue(settings[key]))
     || (control.visibleWhenSaved === true && settings[control.key] !== undefined && settings[control.key] !== null && settings[control.key] !== "");
   const visible = controls.filter((control) => shown(control) && (!control.legacy || legacyInUse(control, settings[control.key])));
   return (

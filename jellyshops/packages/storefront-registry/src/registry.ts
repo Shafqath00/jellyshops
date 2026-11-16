@@ -1,7 +1,6 @@
 import { compareThemeVersions, customCssProblem, isRichTextDocument, MAX_BLOCK_DEPTH, translationsProblem, type BlockNode, type PageType, type SectionNode } from "@jelly/storefront-schema";
 import { z } from "zod";
 import { defineSection } from "./define.js";
-import { setSectionLabel } from "./labels.js";
 import { setRuntimeDefinitionLookup } from "./runtime-lookup.js";
 import { blockDefinitions } from "./blocks.js";
 import { commerceSections } from "./sections/commerce.js";
@@ -12,19 +11,52 @@ import { mainProductSection, productPartBlocks } from "./sections/main-product.j
 import { sectionStyleSchema, withSectionStyleControls } from "./section-style.js";
 import { SECTION_VARIANTS } from "./section-variants.js";
 import { elementStyleControls, elementStyleSchema, sectionElements } from "./section-elements.js";
-import type { ControlDefinition, RegionName, RegistryValidationIssue, SectionDefinition } from "./types.js";
+import { blockSetsIn, breaksSectionLimits, expandBlockTypes, resolvePlacement } from "./composition.js";
+import { sectionLabel, setSectionLabel } from "./labels.js";
+import type { BlockDefinition, ControlDefinition, RegionName, RegistryValidationIssue, SectionDefinition } from "./types.js";
 
 /** Most blocks one section may hold, whatever its own limit (Shopify's limit too). */
 export const MAX_SECTION_BLOCKS = 50;
 /** Most sections one page template may hold, shared sections included. */
 export const MAX_TEMPLATE_SECTIONS = 25;
 
+/** Header, announcement and footer sections belong to their group; everything else to the page template. */
+function defaultRegions(type: string): RegionName[] {
+  return type === "header" || type === "announcement-bar" ? ["header"] : type === "footer" ? ["footer"] : ["template"];
+}
+
+/** Block sets ("@content") in a block's child list become the block types they stand for. */
+function expandBlockChildren(definition: BlockDefinition): void {
+  if (definition.allowedBlockTypes?.some((entry) => entry.startsWith("@"))) definition.allowedBlockTypes = expandBlockTypes(definition.allowedBlockTypes, blockDefinitions.values());
+}
+
 function prepareSection(definition: SectionDefinition): SectionDefinition {
+  // Block sets become the block types they stand for; `blockSets` remembers what was declared.
+  const blockSets = blockSetsIn(definition.allowedBlockTypes);
+  const allowedBlockTypes = blockSets.length ? expandBlockTypes(definition.allowedBlockTypes, blockDefinitions.values()) : definition.allowedBlockTypes;
+  const staticTypes = (definition.staticBlocks ?? []).map((block) => block.type);
+  const unknownStatic = staticTypes.find((type) => !blockDefinitions.has(type));
+  if (unknownStatic) throw new Error(`Section "${definition.type}" has a static "${unknownStatic}" block that is not registered.`);
+  const stray = definition.defaultBlocks.find((block) => !allowedBlockTypes.includes(block.type) && !staticTypes.includes(block.type));
+  if (stray) throw new Error(`Section "${definition.type}" starts with a "${stray.type}" block it does not allow.`);
+  // A new section starts with every static block it draws.
+  const missingStatic = staticTypes.filter((type) => !definition.defaultBlocks.some((block) => block.type === type));
+  const defaultBlocks = [
+    ...missingStatic.map((type) => ({ id: `static-${type}`, type, enabled: true, settings: structuredClone(blockDefinitions.get(type)!.defaultSettings) })),
+    ...definition.defaultBlocks,
+  ];
+  const placement = definition.enabledOn || definition.disabledOn
+    ? resolvePlacement(definition)
+    : { supportedPages: definition.supportedPages, allowedRegions: defaultRegions(definition.type), groups: defaultRegions(definition.type) };
   // Selectable parts of the section (headings, images, product cards) and their own style settings.
   const elements = sectionElements(definition.type, definition.elements);
   const elementControls = elements.flatMap(elementStyleControls).filter((control) => !definition.controls.some((own) => own.key === control.key));
   return {
     ...definition,
+    ...placement,
+    allowedBlockTypes,
+    blockSets: blockSets.length ? blockSets : undefined,
+    defaultBlocks,
     elements,
     // Every section gets the shared style settings (colours, fonts, sizes, alignment, spacing).
     controls: [...withSectionStyleControls(definition.controls), ...elementControls],
@@ -33,16 +65,12 @@ function prepareSection(definition: SectionDefinition): SectionDefinition {
       : z.intersection(definition.settingsSchema, sectionStyleSchema),
     // Designed variants (section-variants.ts) follow the section's own presets.
     presets: [...(definition.presets ?? []), ...(SECTION_VARIANTS[definition.type] ?? []).filter((variant) => !definition.presets?.some((preset) => preset.id === variant.id))],
-    allowedRegions: definition.type === "header" || definition.type === "announcement-bar"
-      ? ["header"]
-      : definition.type === "footer"
-        ? ["footer"]
-        : ["template"],
   };
 }
 const baseSections: SectionDefinition[] = [...layoutSections, ...contentSections, ...commerceSections, ...productExtraSections];
 // Main product owns the product page's columns; its buying column holds the product sections as blocks.
 for (const part of productPartBlocks(baseSections)) blockDefinitions.set(part.type, part);
+for (const definition of blockDefinitions.values()) expandBlockChildren(definition);
 const sections: SectionDefinition[] = [...baseSections, mainProductSection(baseSections)].map(prepareSection);
 const sectionDefinitions = new Map(sections.map((definition) => [definition.type, definition]));
 const themeSections = new Map<string, Map<string, SectionDefinition[]>>();
@@ -137,6 +165,21 @@ export function listSectionDefinitionsForPage(pageType: PageType, region: Region
   return listSectionDefinitions(themeVersion).filter((definition) => definition.supportedPages.includes(pageType) && (definition.allowedRegions ?? ["template"]).includes(region) && availableOnTheme(definition, themeId));
 }
 
+/** The block types a section always draws itself (its static blocks). */
+export function staticBlockTypes(definition: Pick<SectionDefinition, "staticBlocks"> | undefined): Set<string> {
+  return new Set((definition?.staticBlocks ?? []).map((block) => block.type));
+}
+
+/** True when a block of this type in this section is a static block: it can't be removed, moved, copied or hidden. */
+export function isStaticBlock(sectionType: string, blockType: string, themeVersion?: string | null): boolean {
+  return staticBlockTypes(getSectionDefinition(sectionType, themeVersion)).has(blockType);
+}
+
+/** Why the sections on one page (or in one group) break a section's `limit`, using the registered definitions. */
+export function pageSectionLimitProblem(before: SectionNode[], after: SectionNode[]): string | null {
+  return breaksSectionLimits(before, after, (type) => getSectionDefinition(type), sectionLabel);
+}
+
 /** Rich text settings keep a formatted copy under `<key>Doc` next to the plain text; it must be a real document. */
 function formattedCopiesValid(settings: Record<string, unknown>): boolean {
   return Object.entries(settings).every(([key, value]) => !key.endsWith("Doc") || value === undefined || value === null || isRichTextDocument(value));
@@ -163,12 +206,21 @@ export function validateSectionAgainstRegistry(section: SectionNode, pageType: P
     }
     if (!definition.settingsSchema.safeParse({ ...section.settings, ...values }).success) issues.push({ code: "SETTINGS_INVALID", sectionId: section.id, message: `Section ${device === "mobile" ? "phone" : "tablet"} settings are invalid` });
   }
-  if (section.blocks.length > MAX_SECTION_BLOCKS || (definition.maxBlocks !== undefined && section.blocks.length > definition.maxBlocks) || (definition.minBlocks !== undefined && section.blocks.length < definition.minBlocks)) {
+  // Static blocks (drawn by the section itself) don't count toward its limits, and each appears at most once.
+  const staticTypes = staticBlockTypes(definition);
+  const staticBlocks = section.blocks.filter((block) => staticTypes.has(block.type));
+  const ownBlocks = section.blocks.filter((block) => !staticTypes.has(block.type));
+  for (const type of staticTypes) {
+    const copies = staticBlocks.filter((block) => block.type === type);
+    if (copies.length > 1) issues.push({ code: "STATIC_BLOCK_REPEATED", sectionId: section.id, blockId: copies[1].id, message: `${section.type} can hold only one ${type} block` });
+  }
+  if (ownBlocks.length > MAX_SECTION_BLOCKS || (definition.maxBlocks !== undefined && ownBlocks.length > definition.maxBlocks) || (definition.minBlocks !== undefined && ownBlocks.length < definition.minBlocks)) {
     issues.push({ code: "BLOCK_LIMIT_EXCEEDED", sectionId: section.id, message: "Section block limit exceeded" });
   }
   const translationProblem = translationsProblem(section.settings.translations, new Set(translatableKeys(definition.controls)));
   if (translationProblem) issues.push({ code: "SETTINGS_INVALID", sectionId: section.id, message: `Translations: ${translationProblem}` });
-  issues.push(...validateBlocks(section.blocks, definition.allowedBlockTypes, section.type, section.id, 1));
+  issues.push(...validateBlocks(ownBlocks, definition.allowedBlockTypes, section.type, section.id, 1));
+  issues.push(...validateBlocks(staticBlocks, [...staticTypes], section.type, section.id, 1));
   return issues;
 }
 

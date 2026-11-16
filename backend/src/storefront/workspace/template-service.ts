@@ -1,4 +1,4 @@
-import { breaksEssentialSections, essentialSectionsProblem, MAX_TEMPLATE_SECTIONS } from "@jelly/storefront-registry";
+import { breaksEssentialSections, essentialSectionsProblem, MAX_TEMPLATE_SECTIONS, pageSectionLimitProblem } from "@jelly/storefront-registry";
 import type { PageType, SectionNode } from "@jelly/storefront-schema";
 import { ApiError } from "../../http/errors.js";
 import type { WorkspaceMutationRunner } from "./mutation-runner.js";
@@ -89,6 +89,11 @@ function layoutSections(layout: TemplateLayout): SectionNode[] {
 }
 
 /** A page keeps the section that makes it work (product grid, bag section, way to buy…), whatever sends the layout. */
+/** A section with a limit (one Main product per page) was added past it. */
+function sectionLimitError(message: string): ApiError {
+  return new ApiError(400, "TEMPLATE_SECTION_LIMIT", message);
+}
+
 function essentialSectionsError(message: string): ApiError {
   return new ApiError(400, "TEMPLATE_ESSENTIAL_SECTION", message);
 }
@@ -120,6 +125,8 @@ export class TemplateService {
     const layout = normalizeLayout(input.layout);
     const missing = essentialSectionsProblem(input.type as PageType, layoutSections(layout));
     if (missing) throw essentialSectionsError(missing);
+    const overLimit = pageSectionLimitProblem([], layoutSections(layout));
+    if (overLimit) throw sectionLimitError(overLimit);
 
     const mutation = await this.coordinator.run(storeId, (transaction) => this.repository.createTemplate(
       transaction,
@@ -144,6 +151,9 @@ export class TemplateService {
       const current = await this.repository.getTemplate(storeId, templateId);
       const broken = current ? breaksEssentialSections(current.type as PageType, layoutSections(current.layout), layoutSections(normalizedPatch.layout)) : null;
       if (broken) throw essentialSectionsError(broken);
+      // Like the essential rule: only a change that adds a copy past the limit is refused.
+      const overLimit = current ? pageSectionLimitProblem(layoutSections(current.layout), layoutSections(normalizedPatch.layout)) : null;
+      if (overLimit) throw sectionLimitError(overLimit);
     }
 
     const mutation = await this.coordinator.run(storeId, async (transaction) => requireTemplate(

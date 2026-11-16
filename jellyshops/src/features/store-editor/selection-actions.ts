@@ -1,7 +1,7 @@
 import type { BlockLocation, BlockNode, SectionNode } from "@jelly/storefront-schema";
 import { blockTreeHeight, childBlocks, copyBlockWithNewIds, findBlock, MAX_BLOCK_DEPTH, updateBlock, updateBlockList } from "@jelly/storefront-schema";
 import type { PageType } from "@jelly/storefront-schema";
-import { allowedChildBlockTypes, breaksEssentialSections, getBlockDefinition, getSectionDefinition } from "@jelly/storefront-registry";
+import { allowedChildBlockTypes, breaksEssentialSections, getBlockDefinition, getSectionDefinition, isStaticBlock } from "@jelly/storefront-registry";
 
 /**
  * Shopify-style actions on the selected section or block of a template layout:
@@ -96,6 +96,8 @@ function baseActions(layout: Record<string, unknown>, target: SelectionTarget): 
   if (!location) {
     return { ...none, "move-up": found.sectionIndex > 0, "move-down": found.sectionIndex < found.sectionCount - 1, duplicate: true, toggle: true, remove: true };
   }
+  // A static block is a fixed part of its section (product photos, details column): nothing moves or removes it.
+  if (!location.parent && isStaticBlock(section.type, location.block.type)) return { ...none };
   const rules = listRules(section, location.parent);
   const count = location.siblings.length;
   // "Move out of group" puts the block in the list holding its group: the section's, or an outer group's.
@@ -215,6 +217,7 @@ export function moveBefore(
   const section = items[index].section as SectionNode;
   const location = findBlock(section.blocks, target.blockId);
   if (!location) return null;
+  if (!location.parent && isStaticBlock(section.type, location.block.type)) return null;
   const order = location.siblings.map((item) => item.id);
   let valid = true;
   const blocks = updateBlockList(section.blocks, location.parent?.id, (list) => {
@@ -239,6 +242,7 @@ export function blockDropLists(layout: Record<string, unknown>, target: Selectio
   if (!found?.location) return [];
   const { section, location } = found;
   const moving = location.block;
+  if (!location.parent && isStaticBlock(section.type, moving.type)) return [];
   const height = blockTreeHeight(moving);
   const lists: BlockDropList[] = [];
   const own = location.parent?.id ?? null;
