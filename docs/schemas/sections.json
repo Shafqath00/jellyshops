@@ -8352,12 +8352,13 @@
       "presets": [
         {
           "id": "custom-content",
-          "label": "Custom content",
-          "category": "content"
+          "label": "Custom section",
+          "category": "content",
+          "description": "Start with a heading, text and a button, and build from there."
         },
         {
           "id": "custom-icon-boxes",
-          "label": "Custom content: Icon boxes",
+          "label": "Custom section: Icon boxes",
           "category": "content",
           "thumbnail": "columns-3",
           "description": "A heading with three icon boxes in a grid.",
@@ -8429,7 +8430,7 @@
         },
         {
           "id": "custom-faq-accordion",
-          "label": "Custom content: Questions and answers",
+          "label": "Custom section: Questions and answers",
           "category": "content",
           "thumbnail": "centered",
           "description": "A heading and an accordion of common questions.",
@@ -8490,7 +8491,7 @@
         },
         {
           "id": "custom-counters",
-          "label": "Custom content: Numbers",
+          "label": "Custom section: Numbers",
           "category": "content",
           "thumbnail": "columns-4",
           "description": "A short story with four big numbers.",
@@ -8567,6 +8568,863 @@
               ]
             }
           ]
+        },
+        {
+          "id": "custom-story-split",
+          "label": "Custom section: Story with photo",
+          "category": "content",
+          "thumbnail": "split",
+          "description": "Your story on one side, a photo on the other.",
+          "settings": {
+            "direction": "horizontal",
+            "itemWidths": "equal",
+            "verticalAlign": "middle",
+            "contentAlignment": "left",
+            "contentWidth": "full",
+            "gap": 48
+          },
+          "blocks": [
+            {
+              "id": "variant-group",
+              "type": "group",
+              "enabled": true,
+              "settings": {
+                "groupDirection": "vertical",
+                "groupAlign": "start",
+                "groupGap": 16
+              },
+              "blocks": [
+                {
+                  "id": "variant-subheading-1",
+                  "type": "subheading",
+                  "enabled": true,
+                  "settings": {
+                    "text": "Our story"
+                  }
+                },
+                {
+                  "id": "variant-heading-2",
+                  "type": "heading",
+                  "enabled": true,
+                  "settings": {
+                    "text": "Made slowly, in small batches"
+                  }
+                },
+                {
+                  "id": "variant-text-3",
+                  "type": "text",
+                  "enabled": true,
+                  "settings": {
+                    "text": "We started in a spare room with one sewing machine. Today a small team makes every piece by hand, and we still check each one before it leaves."
+                  }
+                },
+                {
+                  "id": "variant-button-4",
+                  "type": "button",
+                  "enabled": true,
+                  "settings": {
+                    "label": "Read our story",
+                    "href": "/pages/about"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "variant-image",
+              "type": "image",
+              "enabled": true,
+              "settings": {
+                "image": {
+                  "url": "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1200&q=80",
+                  "alt": "A bright studio shop with clothing on wooden rails"
+                },
+                "aspectRatio": "portrait"
+              }
+            }
+          ]
+        },
+        {
+          "id": "custom-text-badges",
+          "label": "Custom section: Text with badges",
+          "category": "content",
+          "thumbnail": "centered",
+          "description": "A centred heading and text with a row of small badges.",
+          "settings": {
+            "contentAlignment": "center",
+            "contentWidth": "normal",
+            "gap": 20
+          },
+          "blocks": [
+            {
+              "id": "variant-heading",
+              "type": "heading",
+              "enabled": true,
+              "settings": {
+                "text": "Good for you, good for the planet"
+              }
+            },
+            {
+              "id": "variant-text",
+              "type": "text",
+              "enabled": true,
+              "settings": {
+                "text": "Every piece is made from natural fibres, coloured without harsh dyes and packed without plastic."
+              }
+            },
+            {
+              "id": "variant-group",
+              "type": "group",
+              "enabled": true,
+              "settings": {
+                "groupDirection": "horizontal",
+                "groupAlign": "center",
+                "groupGap": 12
+              },
+              "blocks": [
+                {
+                  "id": "variant-badge-1",
+                  "type": "badge",
+                  "enabled": true,
+                  "settings": {
+                    "text": "Organic cotton",
+                    "shape": "pill"
+                  }
+                },
+                {
+                  "id": "variant-badge-2",
+                  "type": "badge",
+                  "enabled": true,
+                  "settings": {
+                    "text": "Plastic-free",
+                    "shape": "pill"
+                  }
+                },
+                {
+                  "id": "variant-badge-3",
+                  "type": "badge",
+                  "enabled": true,
+                  "settings": {
+                    "text": "Made in the UK",
+                    "shape": "pill"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "custom-feature-cards",
+          "label": "Custom section: Feature cards",
+          "category": "content",
+          "thumbnail": "grid-4",
+          "description": "A heading and four photo cards in two rows.",
+          "settings": {
+            "contentAlignment": "left",
+            "contentWidth": "full",
+            "gap": 32
+          },
+          "blocks": [
+            {
+              "id": "variant-section-header",
+              "type": "section-header",
+              "enabled": true,
+              "settings": {
+                "eyebrow": "Inside every piece",
+                "heading": "Details you can feel",
+                "layout": "vertical"
+              }
+            },
+            {
+              "id": "variant-grid",
+              "type": "grid",
+              "enabled": true,
+              "settings": {
+                "columns": 2,
+                "gap": 24,
+                "alignItems": "stretch"
+              },
+              "blocks": [
+                {
+                  "id": "variant-card-1",
+                  "type": "card",
+                  "enabled": true,
+                  "settings": {
+                    "image": {
+                      "url": "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1200&q=80",
+                      "alt": "Knitwear, denim and a watch laid out on a blanket"
+                    },
+                    "heading": "Soft, breathable fabric",
+                    "text": "Natural fibres that get softer with every wash.",
+                    "imagePosition": "left",
+                    "imageRatio": "square"
+                  }
+                },
+                {
+                  "id": "variant-card-2",
+                  "type": "card",
+                  "enabled": true,
+                  "settings": {
+                    "image": {
+                      "url": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80",
+                      "alt": "Folded clothes in soft colours on a wooden table"
+                    },
+                    "heading": "Made to last",
+                    "text": "Double-stitched seams and reinforced corners.",
+                    "imagePosition": "left",
+                    "imageRatio": "square"
+                  }
+                },
+                {
+                  "id": "variant-card-3",
+                  "type": "card",
+                  "enabled": true,
+                  "settings": {
+                    "image": {
+                      "url": "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1200&q=80",
+                      "alt": "A leather bag and accessories"
+                    },
+                    "heading": "Thoughtful details",
+                    "text": "Hidden pockets and real horn buttons.",
+                    "imagePosition": "left",
+                    "imageRatio": "square"
+                  }
+                },
+                {
+                  "id": "variant-card-4",
+                  "type": "card",
+                  "enabled": true,
+                  "settings": {
+                    "image": {
+                      "url": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80",
+                      "alt": "A calm living room with natural textures"
+                    },
+                    "heading": "Easy care",
+                    "text": "Machine washable at 30 degrees.",
+                    "imagePosition": "left",
+                    "imageRatio": "square"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "custom-image-cards",
+          "label": "Custom section: Image cards",
+          "category": "content",
+          "thumbnail": "grid-3",
+          "description": "Three photo cards with a heading, text and link.",
+          "settings": {
+            "contentAlignment": "left",
+            "contentWidth": "full",
+            "gap": 32
+          },
+          "blocks": [
+            {
+              "id": "variant-section-header",
+              "type": "section-header",
+              "enabled": true,
+              "settings": {
+                "heading": "Find your favourite",
+                "text": "Three ways to start.",
+                "layout": "horizontal",
+                "linkLabel": "Shop all",
+                "link": "/shop"
+              }
+            },
+            {
+              "id": "variant-grid",
+              "type": "grid",
+              "enabled": true,
+              "settings": {
+                "columns": 3,
+                "gap": 24,
+                "alignItems": "stretch"
+              },
+              "blocks": [
+                {
+                  "id": "variant-card-1",
+                  "type": "card",
+                  "enabled": true,
+                  "settings": {
+                    "image": {
+                      "url": "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=80",
+                      "alt": "Two people in relaxed autumn outfits"
+                    },
+                    "heading": "New in",
+                    "text": "The latest pieces, just arrived.",
+                    "linkLabel": "Shop new in",
+                    "link": "/shop",
+                    "imageRatio": "portrait"
+                  }
+                },
+                {
+                  "id": "variant-card-2",
+                  "type": "card",
+                  "enabled": true,
+                  "settings": {
+                    "image": {
+                      "url": "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=2400&q=80",
+                      "alt": "Wool coats in warm neutral tones hanging on a rail"
+                    },
+                    "heading": "Bestsellers",
+                    "text": "What everyone is buying.",
+                    "linkLabel": "Shop bestsellers",
+                    "link": "/shop",
+                    "imageRatio": "portrait"
+                  }
+                },
+                {
+                  "id": "variant-card-3",
+                  "type": "card",
+                  "enabled": true,
+                  "settings": {
+                    "image": {
+                      "url": "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=1200&q=80",
+                      "alt": "A stoneware mug on a light table"
+                    },
+                    "heading": "Gifts",
+                    "text": "Easy presents for people you love.",
+                    "linkLabel": "Shop gifts",
+                    "link": "/shop",
+                    "imageRatio": "portrait"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "custom-press",
+          "label": "Custom section: Press quotes",
+          "category": "marketing",
+          "thumbnail": "columns-3",
+          "description": "Three short quotes from the press.",
+          "settings": {
+            "contentAlignment": "center",
+            "contentWidth": "full",
+            "gap": 32
+          },
+          "blocks": [
+            {
+              "id": "variant-subheading",
+              "type": "subheading",
+              "enabled": true,
+              "settings": {
+                "text": "As seen in"
+              }
+            },
+            {
+              "id": "variant-grid",
+              "type": "grid",
+              "enabled": true,
+              "settings": {
+                "columns": 3,
+                "gap": 32,
+                "alignItems": "start"
+              },
+              "blocks": [
+                {
+                  "id": "variant-group-1",
+                  "type": "group",
+                  "enabled": true,
+                  "settings": {
+                    "groupDirection": "vertical",
+                    "groupAlign": "center",
+                    "groupGap": 8
+                  },
+                  "blocks": [
+                    {
+                      "id": "variant-text-1",
+                      "type": "text",
+                      "enabled": true,
+                      "settings": {
+                        "text": "“The softest knit we tried this winter.”"
+                      }
+                    },
+                    {
+                      "id": "variant-subheading-2",
+                      "type": "subheading",
+                      "enabled": true,
+                      "settings": {
+                        "text": "The Weekend Paper"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "variant-group-2",
+                  "type": "group",
+                  "enabled": true,
+                  "settings": {
+                    "groupDirection": "vertical",
+                    "groupAlign": "center",
+                    "groupGap": 8
+                  },
+                  "blocks": [
+                    {
+                      "id": "variant-text-1",
+                      "type": "text",
+                      "enabled": true,
+                      "settings": {
+                        "text": "“Simple, well made and fairly priced.”"
+                      }
+                    },
+                    {
+                      "id": "variant-subheading-2",
+                      "type": "subheading",
+                      "enabled": true,
+                      "settings": {
+                        "text": "Style Journal"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "variant-group-3",
+                  "type": "group",
+                  "enabled": true,
+                  "settings": {
+                    "groupDirection": "vertical",
+                    "groupAlign": "center",
+                    "groupGap": 8
+                  },
+                  "blocks": [
+                    {
+                      "id": "variant-text-1",
+                      "type": "text",
+                      "enabled": true,
+                      "settings": {
+                        "text": "“A small brand doing things properly.”"
+                      }
+                    },
+                    {
+                      "id": "variant-subheading-2",
+                      "type": "subheading",
+                      "enabled": true,
+                      "settings": {
+                        "text": "City Living"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "custom-promise-row",
+          "label": "Custom section: Promise row",
+          "category": "marketing",
+          "thumbnail": "centered",
+          "description": "A single row of short promises with icons.",
+          "settings": {
+            "contentAlignment": "center",
+            "contentWidth": "full",
+            "gap": 16
+          },
+          "blocks": [
+            {
+              "id": "variant-icon-list",
+              "type": "icon-list",
+              "enabled": true,
+              "settings": {
+                "listLayout": "horizontal",
+                "iconSize": 22
+              },
+              "blocks": [
+                {
+                  "id": "variant-icon-list-item-1",
+                  "type": "icon-list-item",
+                  "enabled": true,
+                  "settings": {
+                    "icon": "truck",
+                    "text": "Free delivery over £50"
+                  }
+                },
+                {
+                  "id": "variant-icon-list-item-2",
+                  "type": "icon-list-item",
+                  "enabled": true,
+                  "settings": {
+                    "icon": "return",
+                    "text": "Free 30-day returns"
+                  }
+                },
+                {
+                  "id": "variant-icon-list-item-3",
+                  "type": "icon-list-item",
+                  "enabled": true,
+                  "settings": {
+                    "icon": "shield",
+                    "text": "Two-year guarantee"
+                  }
+                },
+                {
+                  "id": "variant-icon-list-item-4",
+                  "type": "icon-list-item",
+                  "enabled": true,
+                  "settings": {
+                    "icon": "leaf",
+                    "text": "Plastic-free packaging"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "custom-tabs",
+          "label": "Custom section: Tabs",
+          "category": "content",
+          "thumbnail": "tabs",
+          "description": "A heading and tabs that switch between short texts.",
+          "settings": {
+            "contentAlignment": "left",
+            "contentWidth": "normal",
+            "gap": 24
+          },
+          "blocks": [
+            {
+              "id": "variant-section-header",
+              "type": "section-header",
+              "enabled": true,
+              "settings": {
+                "eyebrow": "Good to know",
+                "heading": "Before you buy"
+              }
+            },
+            {
+              "id": "variant-tabs",
+              "type": "tabs",
+              "enabled": true,
+              "settings": {},
+              "blocks": [
+                {
+                  "id": "variant-tab-1",
+                  "type": "tab",
+                  "enabled": true,
+                  "settings": {
+                    "title": "Delivery",
+                    "text": "Orders placed before 2pm go out the same day. Most arrive in 2 to 3 working days."
+                  }
+                },
+                {
+                  "id": "variant-tab-2",
+                  "type": "tab",
+                  "enabled": true,
+                  "settings": {
+                    "title": "Returns",
+                    "text": "Return anything unworn within 30 days for a full refund."
+                  }
+                },
+                {
+                  "id": "variant-tab-3",
+                  "type": "tab",
+                  "enabled": true,
+                  "settings": {
+                    "title": "Sizing",
+                    "text": "Our pieces fit true to size. If you are between sizes, choose the larger one."
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "custom-call-to-action",
+          "label": "Custom section: Call to action",
+          "category": "marketing",
+          "thumbnail": "centered",
+          "description": "A coloured panel with a heading, text and two buttons.",
+          "settings": {
+            "contentAlignment": "center",
+            "contentWidth": "full",
+            "gap": 20,
+            "contentBox": true,
+            "boxScheme": "scheme4",
+            "boxPadding": 64,
+            "boxRadius": 16
+          },
+          "blocks": [
+            {
+              "id": "variant-heading",
+              "type": "heading",
+              "enabled": true,
+              "settings": {
+                "text": "Ready when you are"
+              }
+            },
+            {
+              "id": "variant-text",
+              "type": "text",
+              "enabled": true,
+              "settings": {
+                "text": "Join thousands of happy customers. Free delivery on your first order."
+              }
+            },
+            {
+              "id": "variant-button-group",
+              "type": "button-group",
+              "enabled": true,
+              "settings": {
+                "stackOnPhones": true
+              },
+              "blocks": [
+                {
+                  "id": "variant-button-1",
+                  "type": "button",
+                  "enabled": true,
+                  "settings": {
+                    "label": "Shop now",
+                    "href": "/shop"
+                  }
+                },
+                {
+                  "id": "variant-button-2",
+                  "type": "button",
+                  "enabled": true,
+                  "settings": {
+                    "label": "Learn more",
+                    "href": "/pages/about"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "custom-steps",
+          "label": "Custom section: How it works",
+          "category": "content",
+          "thumbnail": "columns-3",
+          "description": "Three numbered steps side by side.",
+          "settings": {
+            "contentAlignment": "left",
+            "contentWidth": "full",
+            "gap": 32
+          },
+          "blocks": [
+            {
+              "id": "variant-section-header",
+              "type": "section-header",
+              "enabled": true,
+              "settings": {
+                "eyebrow": "How it works",
+                "heading": "Three simple steps"
+              }
+            },
+            {
+              "id": "variant-grid",
+              "type": "grid",
+              "enabled": true,
+              "settings": {
+                "columns": 3,
+                "gap": 32,
+                "alignItems": "start"
+              },
+              "blocks": [
+                {
+                  "id": "variant-group-1",
+                  "type": "group",
+                  "enabled": true,
+                  "settings": {
+                    "groupDirection": "vertical",
+                    "groupAlign": "start",
+                    "groupGap": 8
+                  },
+                  "blocks": [
+                    {
+                      "id": "variant-subheading-1",
+                      "type": "subheading",
+                      "enabled": true,
+                      "settings": {
+                        "text": "Step 1"
+                      }
+                    },
+                    {
+                      "id": "variant-heading-2",
+                      "type": "heading",
+                      "enabled": true,
+                      "settings": {
+                        "text": "Choose"
+                      }
+                    },
+                    {
+                      "id": "variant-text-3",
+                      "type": "text",
+                      "enabled": true,
+                      "settings": {
+                        "text": "Pick your favourites from the shop."
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "variant-group-2",
+                  "type": "group",
+                  "enabled": true,
+                  "settings": {
+                    "groupDirection": "vertical",
+                    "groupAlign": "start",
+                    "groupGap": 8
+                  },
+                  "blocks": [
+                    {
+                      "id": "variant-subheading-1",
+                      "type": "subheading",
+                      "enabled": true,
+                      "settings": {
+                        "text": "Step 2"
+                      }
+                    },
+                    {
+                      "id": "variant-heading-2",
+                      "type": "heading",
+                      "enabled": true,
+                      "settings": {
+                        "text": "Order"
+                      }
+                    },
+                    {
+                      "id": "variant-text-3",
+                      "type": "text",
+                      "enabled": true,
+                      "settings": {
+                        "text": "Pay securely in a few taps."
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "variant-group-3",
+                  "type": "group",
+                  "enabled": true,
+                  "settings": {
+                    "groupDirection": "vertical",
+                    "groupAlign": "start",
+                    "groupGap": 8
+                  },
+                  "blocks": [
+                    {
+                      "id": "variant-subheading-1",
+                      "type": "subheading",
+                      "enabled": true,
+                      "settings": {
+                        "text": "Step 3"
+                      }
+                    },
+                    {
+                      "id": "variant-heading-2",
+                      "type": "heading",
+                      "enabled": true,
+                      "settings": {
+                        "text": "Enjoy"
+                      }
+                    },
+                    {
+                      "id": "variant-text-3",
+                      "type": "text",
+                      "enabled": true,
+                      "settings": {
+                        "text": "It arrives at your door in days."
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "custom-details-columns",
+          "label": "Custom section: Details in two columns",
+          "category": "content",
+          "thumbnail": "split",
+          "description": "Six short answers that open, in two columns.",
+          "settings": {
+            "contentAlignment": "left",
+            "contentWidth": "full",
+            "gap": 24
+          },
+          "blocks": [
+            {
+              "id": "variant-section-header",
+              "type": "section-header",
+              "enabled": true,
+              "settings": {
+                "heading": "The details",
+                "text": "Everything you might want to know.",
+                "layout": "horizontal"
+              }
+            },
+            {
+              "id": "variant-grid",
+              "type": "grid",
+              "enabled": true,
+              "settings": {
+                "columns": 2,
+                "gap": 32,
+                "alignItems": "start"
+              },
+              "blocks": [
+                {
+                  "id": "variant-collapsible-text-1",
+                  "type": "collapsible-text",
+                  "enabled": true,
+                  "settings": {
+                    "title": "Materials",
+                    "text": "Organic cotton and recycled wool."
+                  }
+                },
+                {
+                  "id": "variant-collapsible-text-2",
+                  "type": "collapsible-text",
+                  "enabled": true,
+                  "settings": {
+                    "title": "Care",
+                    "text": "Wash cool, dry flat."
+                  }
+                },
+                {
+                  "id": "variant-collapsible-text-3",
+                  "type": "collapsible-text",
+                  "enabled": true,
+                  "settings": {
+                    "title": "Delivery",
+                    "text": "Free over £50, 2 to 3 working days."
+                  }
+                },
+                {
+                  "id": "variant-collapsible-text-4",
+                  "type": "collapsible-text",
+                  "enabled": true,
+                  "settings": {
+                    "title": "Returns",
+                    "text": "Free within 30 days."
+                  }
+                },
+                {
+                  "id": "variant-collapsible-text-5",
+                  "type": "collapsible-text",
+                  "enabled": true,
+                  "settings": {
+                    "title": "Sizing",
+                    "text": "True to size."
+                  }
+                },
+                {
+                  "id": "variant-collapsible-text-6",
+                  "type": "collapsible-text",
+                  "enabled": true,
+                  "settings": {
+                    "title": "Gift wrap",
+                    "text": "Add it at checkout."
+                  }
+                }
+              ]
+            }
+          ]
         }
       ],
       "controls": [
@@ -8576,6 +9434,7 @@
           "mobile": true,
           "label": "Direction",
           "group": "layout",
+          "heading": "Layout",
           "options": [
             {
               "label": "Vertical",
@@ -8592,6 +9451,7 @@
           "key": "contentAlignment",
           "label": "Alignment",
           "group": "layout",
+          "heading": "Layout",
           "options": [
             {
               "label": "Left",
@@ -8608,11 +9468,59 @@
           ]
         },
         {
+          "type": "segmented",
+          "key": "verticalAlign",
+          "label": "Line up",
+          "group": "layout",
+          "heading": "Layout",
+          "options": [
+            {
+              "label": "Top",
+              "value": "top"
+            },
+            {
+              "label": "Middle",
+              "value": "middle"
+            },
+            {
+              "label": "Bottom",
+              "value": "bottom"
+            }
+          ],
+          "visibleIf": {
+            "key": "direction",
+            "equals": "horizontal"
+          }
+        },
+        {
+          "type": "segmented",
+          "key": "itemWidths",
+          "label": "Block widths",
+          "description": "Equal shares the row evenly; Fit keeps each block its own width.",
+          "group": "layout",
+          "heading": "Layout",
+          "options": [
+            {
+              "label": "Equal",
+              "value": "equal"
+            },
+            {
+              "label": "Fit",
+              "value": "fit"
+            }
+          ],
+          "visibleIf": {
+            "key": "direction",
+            "equals": "horizontal"
+          }
+        },
+        {
           "type": "range",
           "key": "gap",
           "mobile": true,
           "label": "Gap",
           "group": "layout",
+          "heading": "Layout",
           "min": 0,
           "max": 80,
           "step": 4,
@@ -8623,6 +9531,7 @@
           "key": "contentWidth",
           "label": "Content width",
           "group": "layout",
+          "heading": "Layout",
           "options": [
             {
               "label": "Narrow",
@@ -8641,6 +9550,115 @@
               "value": "full"
             }
           ]
+        },
+        {
+          "type": "checkbox",
+          "key": "contentBox",
+          "label": "Put the content in a box",
+          "description": "A panel with its own colours, padding and corners, inside the section.",
+          "group": "style",
+          "heading": "Content box"
+        },
+        {
+          "type": "select",
+          "key": "boxScheme",
+          "label": "Box colour scheme",
+          "group": "style",
+          "heading": "Content box",
+          "options": [
+            {
+              "label": "Same as section",
+              "value": ""
+            },
+            {
+              "label": "Scheme 1",
+              "value": "scheme1"
+            },
+            {
+              "label": "Scheme 2",
+              "value": "scheme2"
+            },
+            {
+              "label": "Scheme 3",
+              "value": "scheme3"
+            },
+            {
+              "label": "Scheme 4",
+              "value": "scheme4"
+            },
+            {
+              "label": "Scheme 5",
+              "value": "scheme5"
+            },
+            {
+              "label": "Scheme 6",
+              "value": "scheme6"
+            },
+            {
+              "label": "Scheme 7",
+              "value": "scheme7"
+            },
+            {
+              "label": "Scheme 8",
+              "value": "scheme8"
+            }
+          ],
+          "visibleIf": {
+            "key": "contentBox",
+            "equals": true
+          }
+        },
+        {
+          "type": "range",
+          "key": "boxPadding",
+          "mobile": true,
+          "label": "Box padding",
+          "group": "style",
+          "heading": "Content box",
+          "min": 0,
+          "max": 120,
+          "step": 4,
+          "unit": "px",
+          "visibleIf": {
+            "key": "contentBox",
+            "equals": true
+          }
+        },
+        {
+          "type": "range",
+          "key": "boxRadius",
+          "label": "Box corners",
+          "group": "style",
+          "heading": "Content box",
+          "min": 0,
+          "max": 48,
+          "step": 2,
+          "unit": "px",
+          "visibleIf": {
+            "key": "contentBox",
+            "equals": true
+          }
+        },
+        {
+          "type": "segmented",
+          "key": "boxBorder",
+          "label": "Box border",
+          "group": "style",
+          "heading": "Content box",
+          "options": [
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Line",
+              "value": "solid"
+            }
+          ],
+          "visibleIf": {
+            "key": "contentBox",
+            "equals": true
+          }
         }
       ],
       "settingsSchema": {
@@ -8673,6 +9691,62 @@
               "normal",
               "wide",
               "full"
+            ]
+          },
+          "verticalAlign": {
+            "type": "string",
+            "enum": [
+              "top",
+              "middle",
+              "bottom"
+            ]
+          },
+          "itemWidths": {
+            "type": "string",
+            "enum": [
+              "equal",
+              "fit"
+            ]
+          },
+          "contentBox": {
+            "type": "boolean"
+          },
+          "boxScheme": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "scheme1",
+                  "scheme2",
+                  "scheme3",
+                  "scheme4",
+                  "scheme5",
+                  "scheme6",
+                  "scheme7",
+                  "scheme8"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "boxPadding": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 120
+          },
+          "boxRadius": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 48
+          },
+          "boxBorder": {
+            "type": "string",
+            "enum": [
+              "none",
+              "solid"
             ]
           }
         }

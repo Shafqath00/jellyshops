@@ -31,6 +31,7 @@ export function SectionLibrary({
   onInsertPreset,
   onInsertBuiltIn,
   onDeletePreset,
+  onPreview,
 }: {
   presets: SectionLibraryPreset[];
   builtIns?: BuiltInSectionOption[];
@@ -38,6 +39,8 @@ export function SectionLibrary({
   onInsertBuiltIn?(presetId: string): void;
   /** Removes a saved section from the library (pages that already use a copy keep it). */
   onDeletePreset?(presetId: string): void;
+  /** The choice the pointer or keyboard is on (undefined when it leaves the list), for a live preview of it. */
+  onPreview?(id: string | undefined): void;
 }) {
   const [query, setQuery] = useState("");
   const filtered = useMemo(() => {
@@ -67,7 +70,7 @@ export function SectionLibrary({
         </div>
       )}
 
-      <div className="space-y-5 p-3">
+      <div className="space-y-5 p-3" onMouseLeave={() => onPreview?.(undefined)}>
         {categories.map((category) => (
           <div key={category}>
             <h3 className="mb-2 text-[11px] font-semibold text-muted-foreground">{category}</h3>
@@ -78,6 +81,9 @@ export function SectionLibrary({
                   type="button"
                   aria-label={`Add ${item.name}`}
                   onClick={() => onInsertBuiltIn?.(item.id)}
+                  onMouseEnter={() => onPreview?.(item.id)}
+                  onFocus={() => onPreview?.(item.id)}
+                  onBlur={() => onPreview?.(undefined)}
                   className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-[13px] font-medium text-foreground transition hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring"
                 >
                   {item.thumbnail

@@ -47,7 +47,7 @@ it("shows every block of a section whose own name matches", async () => {
 it("marks hidden sections and blocks, and hides, shows or deletes them from the row", async () => {
   const fns = show();
   expect(screen.getAllByText("Hidden")).toHaveLength(1);
-  await userEvent.click(screen.getByRole("button", { name: "Expand Custom content" }));
+  await userEvent.click(screen.getByRole("button", { name: "Expand Custom section" }));
   expect(screen.getAllByText("Hidden")).toHaveLength(2);
   await userEvent.click(screen.getByRole("button", { name: /^Hide Heading: Our story/ }));
   expect(fns.onBlockAction).toHaveBeenCalledWith("story", "h", "toggle");
@@ -59,7 +59,7 @@ it("marks hidden sections and blocks, and hides, shows or deletes them from the 
 
 it("deletes a section from its row when the page allows it", async () => {
   const fns = show({ onMove: vi.fn() });
-  const row = screen.getByRole("button", { name: "Custom content" }).parentElement as HTMLElement;
-  await userEvent.click(within(row).getByRole("button", { name: "Delete Custom content" }));
+  const row = screen.getByRole("button", { name: "Custom section" }).parentElement as HTMLElement;
+  await userEvent.click(within(row).getByRole("button", { name: "Delete Custom section" }));
   expect(fns.onRemove).toHaveBeenCalledWith("story");
 });

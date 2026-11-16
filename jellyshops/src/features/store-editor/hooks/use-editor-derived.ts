@@ -21,14 +21,14 @@ import { catalogProductToProduct } from "@/features/storefront/product-presentat
 import { fetchPublicMetaobjects } from "@/features/storefront/metaobjects-api";
 import { childBlockOptions, locateBlock } from "@/features/store-editor/block-editing";
 import { controlsForView, settingsForView } from "@/features/store-editor/mobile-settings";
-import { sectionLibraryOptions } from "@/features/store-editor/section-options";
+import { createLibrarySection, sectionLibraryOptions } from "@/features/store-editor/section-options";
 import { controlsForLanguage, settingsForLanguage } from "@/features/store-editor/translation-settings";
 import { withColorSchemeNames } from "@/features/store-editor/color-schemes";
 import type { useEditorState } from "./use-editor-state";
 
 /** Everything worked out from the loaded data: the active template, the selected section and block, its controls and the preview layout. */
 export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
-  const { backendStoreId, token, api, handoff, templates, globals, presets, setDynamicSources, catalog, pages, blogs, articles, themeCatalog, themeConfiguration, activeTemplateId, previewResourceId, setPreviewResourceId, previewQuery, previewProduct, setPreviewProduct, previewCollection, setPreviewCollection, previewProductSelections, setPreviewProductSelections, previewProductQuantity, setPreviewProductQuantity, selection, setSelection, activeGlobalId, viewport, editLanguage, previewSnapshot, libraryRegion, blockPickerSectionId, blockPickerParentId } = ctx;
+  const { backendStoreId, token, api, handoff, templates, globals, presets, setDynamicSources, catalog, pages, blogs, articles, themeCatalog, themeConfiguration, activeTemplateId, previewResourceId, setPreviewResourceId, previewQuery, previewProduct, setPreviewProduct, previewCollection, setPreviewCollection, previewProductSelections, setPreviewProductSelections, previewProductQuantity, setPreviewProductQuantity, selection, setSelection, activeGlobalId, viewport, editLanguage, previewSnapshot, libraryRegion, libraryPreviewId, blockPickerSectionId, blockPickerParentId } = ctx;
   const activeTemplate = templates.find((template) => template.id === activeTemplateId);
   const previewThemeStyle = useMemo(() => {
     const resolved = resolveTheme(themeConfiguration?.themeId, themeConfiguration?.settings ?? {}, themeConfiguration?.themeVersion);
@@ -185,6 +185,12 @@ export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
       .filter((definition) => sectionFitsLimit(definition.type, sections, (type) => getSectionDefinition(type, themeConfiguration?.themeVersion)));
     return sectionLibraryOptions(definitions);
   }, [activeTemplate, libraryRegion, themeConfiguration, sections]);
+  // The section an Add section choice would add, drawn at the end of the page preview while the choice is pointed at (not saved).
+  const libraryPreviewSection = useMemo(() => {
+    if (!libraryRegion || !libraryPreviewId) return null;
+    let count = 0;
+    try { return createLibrarySection(libraryPreviewId, () => `library-preview-${++count}`, themeConfiguration?.themeVersion); } catch { return null; }
+  }, [libraryRegion, libraryPreviewId, themeConfiguration]);
   const blockPickerSection = sections.find((section) => section.id === blockPickerSectionId);
   const blockPickerDefinition = blockPickerSection ? getSectionDefinition(blockPickerSection.type, themeConfiguration?.themeVersion) : undefined;
   const blockPickerTypes = blockPickerSection && blockPickerParentId
@@ -218,5 +224,5 @@ export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
       setPreviewResourceId(previewResources[0]?.id);
     }
   }, [previewResourceId, previewResources]);
-  return { activeTemplate, previewThemeStyle, validGlobals, sections, previewResources, globalLabels, presetOptions, globalOptions, selectedGlobal, localSection, selectedLocation, selectedBlock, selectedElement, selectedChildOptions, sectionDefinition, baseControls, responsiveView, colorPalette, languages, activeLanguage, selectedControls, selectedSettings, previewLayout, previewPageContext, builtInSections, blockPickerSection, blockPickerDefinition, blockPickerTypes, selectedTheme, commerce };
+  return { activeTemplate, previewThemeStyle, validGlobals, sections, previewResources, globalLabels, presetOptions, globalOptions, selectedGlobal, localSection, selectedLocation, selectedBlock, selectedElement, selectedChildOptions, sectionDefinition, baseControls, responsiveView, colorPalette, languages, activeLanguage, selectedControls, selectedSettings, previewLayout, previewPageContext, builtInSections, libraryPreviewSection, blockPickerSection, blockPickerDefinition, blockPickerTypes, selectedTheme, commerce };
 }

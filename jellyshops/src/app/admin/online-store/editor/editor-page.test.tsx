@@ -51,7 +51,7 @@ const loaded = async () => {
 it("loads the workspace and shows the page structure, the preview and the empty settings panel", async () => {
   const tree = await loaded();
   expect(api.listTemplates).toHaveBeenCalled();
-  expect(within(tree).getByRole("button", { name: "Custom content" })).toBeInTheDocument();
+  expect(within(tree).getByRole("button", { name: "Custom section" })).toBeInTheDocument();
   expect(screen.getByLabelText("Storefront preview", { selector: "main" })).toBeInTheDocument();
   expect(screen.getByText("Select a section to edit")).toBeInTheDocument();
   expect(screen.getAllByRole("button", { name: "Theme settings" }).length).toBeGreaterThan(0);
@@ -60,10 +60,10 @@ it("loads the workspace and shows the page structure, the preview and the empty 
 it("selects a section, shows its settings, and saves a hidden block through the save queue", async () => {
   const user = userEvent.setup();
   const tree = await loaded();
-  await user.click(within(tree).getByRole("button", { name: "Custom content" }));
+  await user.click(within(tree).getByRole("button", { name: "Custom section" }));
   expect(await screen.findByRole("navigation", { name: "You are editing" })).toBeInTheDocument();
   // Selecting a section opens it in the tree.
-  expect(within(tree).getByRole("button", { name: "Collapse Custom content" })).toBeInTheDocument();
+  expect(within(tree).getByRole("button", { name: "Collapse Custom section" })).toBeInTheDocument();
   await user.click(within(tree).getByRole("button", { name: /^Hide Button: Shop now/ }));
   await waitFor(() => expect(api.updateTemplate).toHaveBeenCalled(), { timeout: 5000 });
   const [, templateId, revision, patch] = api.updateTemplate.mock.calls[0];

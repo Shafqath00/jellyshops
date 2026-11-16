@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { isRichTextDocument, safeRichTextHref, type DynamicValueType, type RichTextDocument } from "@jelly/storefront-schema";
 import type { SectionDefinition } from "../types.js";
+import { SECTION_SCHEMES } from "../section-style.js";
 
 const home = ["home"] as const;
 /** Every page drawn from sections (checkout, account and order pages are built in). Content sections may go on any of them. */
@@ -163,12 +164,31 @@ export const contentSections: SectionDefinition[] = [
   {
     // Shopify-style free section: any mix of heading, text, button, image and video blocks, in order.
     type: "custom-content", category: "content", supportedPages: [...reusableContentPages],
-    settingsSchema: z.object({ direction: z.enum(["vertical", "horizontal"]).optional(), contentAlignment: alignmentSchema, gap: z.number().int().min(0).max(80).optional(), contentWidth: z.enum(["narrow", "normal", "wide", "full"]).optional() }).passthrough(),
+    settingsSchema: z.object({
+      direction: z.enum(["vertical", "horizontal"]).optional(),
+      contentAlignment: alignmentSchema,
+      gap: z.number().int().min(0).max(80).optional(),
+      contentWidth: z.enum(["narrow", "normal", "wide", "full"]).optional(),
+      verticalAlign: z.enum(["top", "middle", "bottom"]).optional(),
+      itemWidths: z.enum(["equal", "fit"]).optional(),
+      contentBox: z.boolean().optional(),
+      boxScheme: z.union([z.enum(SECTION_SCHEMES), z.literal("")]).optional(),
+      boxPadding: z.number().int().min(0).max(120).optional(),
+      boxRadius: z.number().int().min(0).max(48).optional(),
+      boxBorder: z.enum(["none", "solid"]).optional(),
+    }).passthrough(),
     controls: [
-      { type: "segmented", key: "direction", mobile: true, label: "Direction", group: "layout", options: [{ label: "Vertical", value: "vertical" }, { label: "Horizontal", value: "horizontal" }] },
-      { type: "segmented", key: "contentAlignment", label: "Alignment", group: "layout", options: [{ label: "Left", value: "left" }, { label: "Centre", value: "center" }, { label: "Right", value: "right" }] },
-      { type: "range", key: "gap", mobile: true, label: "Gap", group: "layout", min: 0, max: 80, step: 4, unit: "px" },
-      { type: "select", key: "contentWidth", label: "Content width", group: "layout", options: [{ label: "Narrow", value: "narrow" }, { label: "Normal", value: "normal" }, { label: "Wide", value: "wide" }, { label: "Full page", value: "full" }] },
+      { type: "segmented", key: "direction", mobile: true, label: "Direction", group: "layout", heading: "Layout", options: [{ label: "Vertical", value: "vertical" }, { label: "Horizontal", value: "horizontal" }] },
+      { type: "segmented", key: "contentAlignment", label: "Alignment", group: "layout", heading: "Layout", options: [{ label: "Left", value: "left" }, { label: "Centre", value: "center" }, { label: "Right", value: "right" }] },
+      { type: "segmented", key: "verticalAlign", label: "Line up", group: "layout", heading: "Layout", options: [{ label: "Top", value: "top" }, { label: "Middle", value: "middle" }, { label: "Bottom", value: "bottom" }], visibleIf: { key: "direction", equals: "horizontal" } },
+      { type: "segmented", key: "itemWidths", label: "Block widths", description: "Equal shares the row evenly; Fit keeps each block its own width.", group: "layout", heading: "Layout", options: [{ label: "Equal", value: "equal" }, { label: "Fit", value: "fit" }], visibleIf: { key: "direction", equals: "horizontal" } },
+      { type: "range", key: "gap", mobile: true, label: "Gap", group: "layout", heading: "Layout", min: 0, max: 80, step: 4, unit: "px" },
+      { type: "select", key: "contentWidth", label: "Content width", group: "layout", heading: "Layout", options: [{ label: "Narrow", value: "narrow" }, { label: "Normal", value: "normal" }, { label: "Wide", value: "wide" }, { label: "Full page", value: "full" }] },
+      { type: "checkbox", key: "contentBox", label: "Put the content in a box", description: "A panel with its own colours, padding and corners, inside the section.", group: "style", heading: "Content box" },
+      { type: "select", key: "boxScheme", label: "Box colour scheme", group: "style", heading: "Content box", options: [{ label: "Same as section", value: "" }, ...SECTION_SCHEMES.map((value, index) => ({ label: `Scheme ${index + 1}`, value }))], visibleIf: { key: "contentBox", equals: true } },
+      { type: "range", key: "boxPadding", mobile: true, label: "Box padding", group: "style", heading: "Content box", min: 0, max: 120, step: 4, unit: "px", visibleIf: { key: "contentBox", equals: true } },
+      { type: "range", key: "boxRadius", label: "Box corners", group: "style", heading: "Content box", min: 0, max: 48, step: 2, unit: "px", visibleIf: { key: "contentBox", equals: true } },
+      { type: "segmented", key: "boxBorder", label: "Box border", group: "style", heading: "Content box", options: [{ label: "None", value: "none" }, { label: "Line", value: "solid" }], visibleIf: { key: "contentBox", equals: true } },
     ],
     // The whole shared block library: every "@content" block (text, layout, cards) and app blocks.
     allowedBlockTypes: ["@content", "@app"], maxBlocks: 24,
@@ -178,7 +198,7 @@ export const contentSections: SectionDefinition[] = [
       { id: "custom-text", type: "text", enabled: true, settings: { text: "Share what makes your shop special." } },
       { id: "custom-button", type: "button", enabled: true, settings: { label: "Shop now", href: "/shop" } },
     ],
-    responsiveFields: [], presets: [{ id: "custom-content", label: "Custom content", category: "content" }],
+    responsiveFields: [], presets: [{ id: "custom-content", label: "Custom section", category: "content", description: "Start with a heading, text and a button, and build from there." }],
   },
   { type: "rich-text", category: "content", supportedPages: [...reusableContentPages], settingsSchema: richTextSettings, controls: [], allowedBlockTypes: ["heading", "text", "button"], defaultSettings: {}, defaultBlocks: [], responsiveFields: [], presets: [{ id: "rich-text", label: "Rich text", category: "content", blocks: [{ id: "preset-heading", type: "heading", enabled: true, settings: { text: "Talk about your brand" } }, { id: "preset-text", type: "text", enabled: true, settings: { text: "Share what your shop stands for: where your products come from, who makes them and why they are worth it." } }, { id: "preset-button", type: "button", enabled: true, settings: { label: "Learn more", href: "/pages/about" } }] }] },
   { type: "testimonials", category: "content", supportedPages: [...anyTemplatePage], settingsSchema: z.object({ heading: z.string().max(120).optional(), layout: z.enum(["grid", "carousel"]).optional(), colorScheme: schemeSchema }).passthrough(), controls: [sectionHeading, { type: "segmented", key: "layout", label: "Layout", group: "layout", options: [{ label: "Grid", value: "grid" }, { label: "Carousel", value: "carousel" }] }, colorScheme], allowedBlockTypes: ["testimonial"], maxBlocks: 6, defaultSettings: { heading: "What customers say" }, defaultBlocks: [], responsiveFields: [], presets: [{ id: "testimonials", label: "Testimonials", category: "content" }] },

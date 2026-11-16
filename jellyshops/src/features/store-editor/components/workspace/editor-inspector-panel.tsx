@@ -64,7 +64,7 @@ export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
             <button
               type="button"
               aria-label="Back to sections"
-              onClick={() => { setLibraryRegion(undefined); setMobilePanel("sections"); }}
+              onClick={() => { setLibraryRegion(undefined); ctx.setLibraryPreviewId(undefined); setMobilePanel("sections"); }}
               className="grid size-8 place-items-center rounded-lg text-[var(--ink-soft)] hover:bg-[var(--paper)]"
             >
               <ChevronLeft size={16} />
@@ -80,6 +80,7 @@ export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
             onInsertPreset={(section) => { void insertPreset(section); setLibraryRegion(undefined); }}
             onInsertBuiltIn={(sectionType) => { void insertBuiltIn(sectionType); }}
             onDeletePreset={(presetId) => { void deletePreset(presetId); }}
+            onPreview={ctx.setLibraryPreviewId}
           />
         </>
       )}

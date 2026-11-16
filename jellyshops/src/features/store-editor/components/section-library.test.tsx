@@ -82,3 +82,20 @@ it("shows designed presets with a layout sketch and a description, and searches 
   expect(screen.queryByRole("button", { name: "Add Collection list" })).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Add Collection list: Bento" })).toBeInTheDocument();
 });
+
+it("asks for a live preview of the choice the pointer or keyboard is on", async () => {
+  const onPreview = vi.fn();
+  const builtIns = [
+    { id: "custom-tabs", name: "Custom section: Tabs", category: "Content" },
+    { id: "custom-steps", name: "Custom section: How it works", category: "Content" },
+  ];
+  render(<SectionLibrary presets={[]} builtIns={builtIns} onInsertPreset={vi.fn()} onPreview={onPreview} />);
+  await userEvent.hover(screen.getByRole("button", { name: "Add Custom section: Tabs" }));
+  expect(onPreview).toHaveBeenLastCalledWith("custom-tabs");
+  await userEvent.unhover(screen.getByRole("button", { name: "Add Custom section: Tabs" }));
+  await userEvent.tab();
+  await userEvent.tab();
+  expect(onPreview).toHaveBeenLastCalledWith(expect.stringMatching(/^custom-/));
+  screen.getByRole("button", { name: "Add Custom section: How it works" }).focus();
+  expect(onPreview).toHaveBeenLastCalledWith("custom-steps");
+});

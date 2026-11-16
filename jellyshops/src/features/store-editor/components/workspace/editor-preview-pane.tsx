@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { ThemeCustomCss, createCollectionLinks, type RendererSelection } from "@jelly/storefront-renderer";
 import { installedThemeCss } from "@/features/storefront/installed-theme";
 import type { RuntimeMenuV4, SectionNode } from "@jelly/storefront-schema";
@@ -71,6 +71,19 @@ export function EditorPreviewPane({ ctx }: { ctx: EditorViewContext }) {
   // What is selected, as the renderer wants it; each section only gets it when it points into that section.
   const selected: RendererSelection | undefined = previewSnapshot || !previewInspectorEnabled ? undefined : selection ?? (typeof selectedGlobal?.section.id === "string" ? { kind: "section", region: "template", sectionId: selectedGlobal.section.id } : undefined);
 
+  // An Add section choice being pointed at: drawn after the page's sections, outlined, and scrolled into view.
+  const libraryPreview = ctx.libraryPreviewSection;
+  useEffect(() => {
+    if (!libraryPreview) return;
+    const frame = requestAnimationFrame(() => {
+      const doc = document.querySelector<HTMLIFrameElement>('iframe[title="Storefront preview"]')?.contentDocument;
+      const element = doc?.querySelector(`[data-section-id="${libraryPreview.id}"]`)?.closest("[data-section-frame]") ?? doc?.querySelector(`[data-section-id="${libraryPreview.id}"]`);
+      const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      element?.scrollIntoView({ block: "center", behavior: reduced ? "auto" : "smooth" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [libraryPreview]);
+
   const renderPreviewSections = (items: SectionNode[], region: "header" | "template" | "footer") => items.map((section) => (
     <PreviewSection
       key={section.id}
@@ -122,6 +135,14 @@ export function EditorPreviewPane({ ctx }: { ctx: EditorViewContext }) {
                 {renderPreviewSections([...previewLayout.announcement, ...previewLayout.header], "header")}
                 <div data-storefront-template>
                   {renderPreviewSections(previewLayout.template, "template")}
+                  {libraryPreview && <PreviewSection
+                    key={libraryPreview.id}
+                    section={libraryPreview}
+                    contentKey={JSON.stringify(libraryPreview)}
+                    region="template"
+                    shared={shared}
+                    selected={{ kind: "section", region: "template", sectionId: libraryPreview.id }}
+                  />}
                   {previewLayout.template.length === 0 && (
                     <div className="grid min-h-[360px] place-items-center p-8 text-center text-sm text-[var(--ink-soft)]">
                       This template has no sections yet.

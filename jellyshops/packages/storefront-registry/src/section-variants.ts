@@ -100,10 +100,10 @@ export const SECTION_VARIANTS: Record<string, Variant[]> = {
       blocks: [column("Delivery", "Dispatched within two working days."), column("Returns", "Free returns within 30 days."), column("Care", "Simple care guides with every order."), column("Help", "Real people reply within a day.")],
     },
   ],
-  // Custom content built from the shared block library (content-blocks.ts); more designed presets follow in T3.
+  // Custom section presets: designed starting points built only from the shared block library (content-blocks.ts).
   "custom-content": [
     {
-      id: "custom-icon-boxes", label: "Custom content: Icon boxes", category: "content", thumbnail: "columns-3",
+      id: "custom-icon-boxes", label: "Custom section: Icon boxes", category: "content", thumbnail: "columns-3",
       description: "A heading with three icon boxes in a grid.",
       settings: { contentAlignment: "left", contentWidth: "full", gap: 32 },
       blocks: [
@@ -116,7 +116,7 @@ export const SECTION_VARIANTS: Record<string, Variant[]> = {
       ],
     },
     {
-      id: "custom-faq-accordion", label: "Custom content: Questions and answers", category: "content", thumbnail: "centered",
+      id: "custom-faq-accordion", label: "Custom section: Questions and answers", category: "content", thumbnail: "centered",
       description: "A heading and an accordion of common questions.",
       settings: { contentAlignment: "left", contentWidth: "narrow", gap: 24 },
       blocks: [
@@ -129,7 +129,7 @@ export const SECTION_VARIANTS: Record<string, Variant[]> = {
       ],
     },
     {
-      id: "custom-counters", label: "Custom content: Numbers", category: "content", thumbnail: "columns-4",
+      id: "custom-counters", label: "Custom section: Numbers", category: "content", thumbnail: "columns-4",
       description: "A short story with four big numbers.",
       settings: { contentAlignment: "center", contentWidth: "full", gap: 32 },
       blocks: [
@@ -140,6 +140,139 @@ export const SECTION_VARIANTS: Record<string, Variant[]> = {
           block("counter", { value: 4.9, label: "Average rating" }),
           block("counter", { value: 30, suffix: " days", label: "Free returns" }),
           block("counter", { value: 2016, label: "Making since" }),
+        ]),
+      ],
+    },
+    {
+      id: "custom-story-split", label: "Custom section: Story with photo", category: "content", thumbnail: "split",
+      description: "Your story on one side, a photo on the other.",
+      settings: { direction: "horizontal", itemWidths: "equal", verticalAlign: "middle", contentAlignment: "left", contentWidth: "full", gap: 48 },
+      blocks: [
+        holder("group", { groupDirection: "vertical", groupAlign: "start", groupGap: 16 }, [
+          block("subheading", { text: "Our story" }),
+          heading("Made slowly, in small batches"),
+          text("We started in a spare room with one sewing machine. Today a small team makes every piece by hand, and we still check each one before it leaves."),
+          button("Read our story", "/pages/about"),
+        ]),
+        block("image", { image: pictures.studio, aspectRatio: "portrait" }),
+      ],
+    },
+    {
+      id: "custom-text-badges", label: "Custom section: Text with badges", category: "content", thumbnail: "centered",
+      description: "A centred heading and text with a row of small badges.",
+      settings: { contentAlignment: "center", contentWidth: "normal", gap: 20 },
+      blocks: [
+        heading("Good for you, good for the planet"),
+        text("Every piece is made from natural fibres, coloured without harsh dyes and packed without plastic."),
+        holder("group", { groupDirection: "horizontal", groupAlign: "center", groupGap: 12 }, [
+          block("badge", { text: "Organic cotton", shape: "pill" }),
+          block("badge", { text: "Plastic-free", shape: "pill" }),
+          block("badge", { text: "Made in the UK", shape: "pill" }),
+        ]),
+      ],
+    },
+    {
+      id: "custom-feature-cards", label: "Custom section: Feature cards", category: "content", thumbnail: "grid-4",
+      description: "A heading and four photo cards in two rows.",
+      settings: { contentAlignment: "left", contentWidth: "full", gap: 32 },
+      blocks: [
+        block("section-header", { eyebrow: "Inside every piece", heading: "Details you can feel", layout: "vertical" }),
+        holder("grid", { columns: 2, gap: 24, alignItems: "stretch" }, [
+          block("card", { image: pictures.flatlay, heading: "Soft, breathable fabric", text: "Natural fibres that get softer with every wash.", imagePosition: "left", imageRatio: "square" }),
+          block("card", { image: pictures.outfit, heading: "Made to last", text: "Double-stitched seams and reinforced corners.", imagePosition: "left", imageRatio: "square" }),
+          block("card", { image: pictures.bag, heading: "Thoughtful details", text: "Hidden pockets and real horn buttons.", imagePosition: "left", imageRatio: "square" }),
+          block("card", { image: pictures.home, heading: "Easy care", text: "Machine washable at 30 degrees.", imagePosition: "left", imageRatio: "square" }),
+        ]),
+      ],
+    },
+    {
+      id: "custom-image-cards", label: "Custom section: Image cards", category: "content", thumbnail: "grid-3",
+      description: "Three photo cards with a heading, text and link.",
+      settings: { contentAlignment: "left", contentWidth: "full", gap: 32 },
+      blocks: [
+        block("section-header", { heading: "Find your favourite", text: "Three ways to start.", layout: "horizontal", linkLabel: "Shop all", link: "/shop" }),
+        holder("grid", { columns: 3, gap: 24, alignItems: "stretch" }, [
+          block("card", { image: pictures.model, heading: "New in", text: "The latest pieces, just arrived.", linkLabel: "Shop new in", link: "/shop", imageRatio: "portrait" }),
+          block("card", { image: pictures.rail, heading: "Bestsellers", text: "What everyone is buying.", linkLabel: "Shop bestsellers", link: "/shop", imageRatio: "portrait" }),
+          block("card", { image: pictures.mug, heading: "Gifts", text: "Easy presents for people you love.", linkLabel: "Shop gifts", link: "/shop", imageRatio: "portrait" }),
+        ]),
+      ],
+    },
+    {
+      id: "custom-press", label: "Custom section: Press quotes", category: "marketing", thumbnail: "columns-3",
+      description: "Three short quotes from the press.",
+      settings: { contentAlignment: "center", contentWidth: "full", gap: 32 },
+      blocks: [
+        block("subheading", { text: "As seen in" }),
+        holder("grid", { columns: 3, gap: 32, alignItems: "start" }, [
+          holder("group", { groupDirection: "vertical", groupAlign: "center", groupGap: 8 }, [text("“The softest knit we tried this winter.”"), block("subheading", { text: "The Weekend Paper" })]),
+          holder("group", { groupDirection: "vertical", groupAlign: "center", groupGap: 8 }, [text("“Simple, well made and fairly priced.”"), block("subheading", { text: "Style Journal" })]),
+          holder("group", { groupDirection: "vertical", groupAlign: "center", groupGap: 8 }, [text("“A small brand doing things properly.”"), block("subheading", { text: "City Living" })]),
+        ]),
+      ],
+    },
+    {
+      id: "custom-promise-row", label: "Custom section: Promise row", category: "marketing", thumbnail: "centered",
+      description: "A single row of short promises with icons.",
+      settings: { contentAlignment: "center", contentWidth: "full", gap: 16 },
+      blocks: [
+        holder("icon-list", { listLayout: "horizontal", iconSize: 22 }, [
+          block("icon-list-item", { icon: "truck", text: "Free delivery over £50" }),
+          block("icon-list-item", { icon: "return", text: "Free 30-day returns" }),
+          block("icon-list-item", { icon: "shield", text: "Two-year guarantee" }),
+          block("icon-list-item", { icon: "leaf", text: "Plastic-free packaging" }),
+        ]),
+      ],
+    },
+    {
+      id: "custom-tabs", label: "Custom section: Tabs", category: "content", thumbnail: "tabs",
+      description: "A heading and tabs that switch between short texts.",
+      settings: { contentAlignment: "left", contentWidth: "normal", gap: 24 },
+      blocks: [
+        block("section-header", { eyebrow: "Good to know", heading: "Before you buy" }),
+        holder("tabs", {}, [
+          block("tab", { title: "Delivery", text: "Orders placed before 2pm go out the same day. Most arrive in 2 to 3 working days." }),
+          block("tab", { title: "Returns", text: "Return anything unworn within 30 days for a full refund." }),
+          block("tab", { title: "Sizing", text: "Our pieces fit true to size. If you are between sizes, choose the larger one." }),
+        ]),
+      ],
+    },
+    {
+      id: "custom-call-to-action", label: "Custom section: Call to action", category: "marketing", thumbnail: "centered",
+      description: "A coloured panel with a heading, text and two buttons.",
+      settings: { contentAlignment: "center", contentWidth: "full", gap: 20, contentBox: true, boxScheme: "scheme4", boxPadding: 64, boxRadius: 16 },
+      blocks: [
+        heading("Ready when you are"),
+        text("Join thousands of happy customers. Free delivery on your first order."),
+        holder("button-group", { stackOnPhones: true }, [button("Shop now"), button("Learn more", "/pages/about")]),
+      ],
+    },
+    {
+      id: "custom-steps", label: "Custom section: How it works", category: "content", thumbnail: "columns-3",
+      description: "Three numbered steps side by side.",
+      settings: { contentAlignment: "left", contentWidth: "full", gap: 32 },
+      blocks: [
+        block("section-header", { eyebrow: "How it works", heading: "Three simple steps" }),
+        holder("grid", { columns: 3, gap: 32, alignItems: "start" }, [
+          holder("group", { groupDirection: "vertical", groupAlign: "start", groupGap: 8 }, [block("subheading", { text: "Step 1" }), heading("Choose"), text("Pick your favourites from the shop.")]),
+          holder("group", { groupDirection: "vertical", groupAlign: "start", groupGap: 8 }, [block("subheading", { text: "Step 2" }), heading("Order"), text("Pay securely in a few taps.")]),
+          holder("group", { groupDirection: "vertical", groupAlign: "start", groupGap: 8 }, [block("subheading", { text: "Step 3" }), heading("Enjoy"), text("It arrives at your door in days.")]),
+        ]),
+      ],
+    },
+    {
+      id: "custom-details-columns", label: "Custom section: Details in two columns", category: "content", thumbnail: "split",
+      description: "Six short answers that open, in two columns.",
+      settings: { contentAlignment: "left", contentWidth: "full", gap: 24 },
+      blocks: [
+        block("section-header", { heading: "The details", text: "Everything you might want to know.", layout: "horizontal" }),
+        holder("grid", { columns: 2, gap: 32, alignItems: "start" }, [
+          block("collapsible-text", { title: "Materials", text: "Organic cotton and recycled wool." }),
+          block("collapsible-text", { title: "Care", text: "Wash cool, dry flat." }),
+          block("collapsible-text", { title: "Delivery", text: "Free over £50, 2 to 3 working days." }),
+          block("collapsible-text", { title: "Returns", text: "Free within 30 days." }),
+          block("collapsible-text", { title: "Sizing", text: "True to size." }),
+          block("collapsible-text", { title: "Gift wrap", text: "Add it at checkout." }),
         ]),
       ],
     },

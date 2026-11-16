@@ -59,6 +59,7 @@ export function useEditorActions(ctx: ReturnType<typeof useEditorState> & Return
     await persistLayout(appendInlineSection(activeTemplate.layout, section));
     setSelection({ kind: "section", region: libraryRegion, sectionId: section.id });
     setLibraryRegion(undefined);
+    ctx.setLibraryPreviewId(undefined);
   };
 
   const addBlock = async (blockType: string) => {

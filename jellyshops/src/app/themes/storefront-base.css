@@ -1882,3 +1882,18 @@ html.lenis, html.lenis body { height: auto; }
   :where(.jelly-button-group[data-stack]) { flex-direction: column; align-items: stretch; }
   :where(.jelly-button-group[data-stack] > *) { width: 100%; justify-content: center; }
 }
+
+/* Custom section (theme plan T3): line-up and widths of a horizontal row, and the optional content box. */
+:where(.jelly-custom-content[data-direction="horizontal"][data-vertical-align="top"] .jelly-custom-content-inner) { align-items: flex-start; }
+:where(.jelly-custom-content[data-direction="horizontal"][data-vertical-align="bottom"] .jelly-custom-content-inner) { align-items: flex-end; }
+:where(.jelly-custom-content[data-direction="horizontal"][data-item-widths="equal"] .jelly-custom-content-inner > *) { flex: 1 1 0; min-width: min(240px, 100%); }
+:where(.jelly-custom-content-box) { box-sizing: border-box; max-width: var(--custom-width, 48rem); margin-inline: auto; padding: var(--box-padding, 48px); border-radius: var(--box-radius, 16px); background: var(--j-color-bg); color: var(--j-color-text); }
+/* Without its own scheme the box is a soft panel on the section's colours. */
+:where(.jelly-custom-content-box:not([data-scheme])) { background: var(--j-color-surface, color-mix(in srgb, currentColor 5%, transparent)); }
+:where(.jelly-custom-content-box[data-border]) { border: 1px solid var(--j-color-border, color-mix(in srgb, currentColor 18%, transparent)); }
+:where(.jelly-custom-content-box > .jelly-custom-content-inner) { max-width: none; }
+@media (min-width: 768px) and (max-width: 1023px) { :where(.jelly-custom-content-box) { padding: var(--box-padding-t, var(--box-padding, 48px)); } }
+@media (max-width: 767px) {
+  :where(.jelly-custom-content-box) { padding: var(--box-padding-m, min(var(--box-padding, 48px), 24px)); }
+  :where(.jelly-custom-content[data-direction="horizontal"][data-item-widths="equal"]:not([data-direction-mobile="horizontal"]) .jelly-custom-content-inner > *) { flex-basis: 100%; }
+}

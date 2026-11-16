@@ -11,9 +11,10 @@ const schemeIndex = (value: string) => COLOR_SCHEME_IDS.indexOf(value as ColorSc
 export function withColorSchemeNames(controls: ControlDefinition[], themeSettings: Record<string, unknown> | undefined, current?: Record<string, unknown>): ControlDefinition[] {
   const count = colorSchemeCount(themeSettings);
   return controls.map((control) => {
-    if (control.key !== "styleScheme" || control.type !== "select") return control;
+    // The section's scheme and a Custom section's content box scheme.
+    if ((control.key !== "styleScheme" && control.key !== "boxScheme") || control.type !== "select") return control;
     const options = control.options
-      .filter((option) => !option.value || schemeIndex(option.value) < count || option.value === current?.styleScheme)
+      .filter((option) => !option.value || schemeIndex(option.value) < count || option.value === current?.[control.key])
       .map((option) => schemeIndex(option.value) >= 0 ? { ...option, label: colorSchemeLabel(themeSettings, option.value as ColorSchemeId) } : option);
     return { ...control, options };
   });

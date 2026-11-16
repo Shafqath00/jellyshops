@@ -5,7 +5,7 @@ import { signInAsE2eMerchant } from "./fixtures/merchant-auth";
  * The Shopify-style editor tools: groups of blocks, the floating toolbar and shortcuts,
  * "Show on", and restoring a session that ended before its changes were saved.
  * Needs the dedicated test merchant (JELLY_E2E_EMAIL / JELLY_E2E_PASSWORD); each test adds a
- * "Custom content" section to the home page and removes it again.
+ * "Custom section" section to the home page and removes it again.
  */
 
 const previewFrame = (page: Page) => page.frameLocator('iframe[title="Storefront preview"]');
@@ -16,13 +16,13 @@ async function openHomeAndAddCustomContent(page: Page) {
   await signInAsE2eMerchant(page);
   await page.getByLabel("Page type", { exact: true }).selectOption("home");
   await page.getByRole("button", { name: "Add section to Template" }).click();
-  await page.getByRole("button", { name: "Add Custom content" }).click();
+  await page.getByRole("button", { name: "Add Custom section" }).click();
   await expect(previewFrame(page).locator(".jelly-custom-content")).toBeVisible();
 }
 
 async function removeSelectedSection(page: Page) {
   await page.getByRole("button", { name: "Back to sections" }).click().catch(() => undefined);
-  await page.getByRole("button", { name: "Custom content", exact: true }).last().click();
+  await page.getByRole("button", { name: "Custom section", exact: true }).last().click();
   await page.getByRole("button", { name: "Remove section" }).click();
   await expect(previewFrame(page).locator(".jelly-custom-content")).toHaveCount(0);
   await expect(saveStatus(page, "Saved")).toBeVisible();

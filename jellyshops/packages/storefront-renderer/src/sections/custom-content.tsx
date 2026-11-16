@@ -12,6 +12,7 @@ import { choice, numberValue, sectionData, stringValue, visibleBlocks } from "./
 import { RecipeProducts } from "./recipe-products";
 import { renderContentBlock } from "./content-blocks";
 
+const SECTION_SCHEMES = ["scheme1", "scheme2", "scheme3", "scheme4", "scheme5", "scheme6", "scheme7", "scheme8"] as const;
 const widths: Record<string, string> = { narrow: "36rem", normal: "48rem", wide: "72rem", full: "none" };
 
 interface BlockContext { context: StorefrontRuntimeContext; editor: boolean; selectedBlockId?: string }
@@ -103,7 +104,22 @@ export function CustomContentSection({ section, context, editor = false, selecte
     "--custom-width": widths[width],
   } as CSSProperties;
   const items = renderBlocks(visibleBlocks(section), { context, editor, selectedBlockId });
-  return <section className="jelly-section jelly-custom-content" {...sectionData(section, { "data-direction": direction, "data-align": alignment, ...(mobileDirection ? { "data-direction-mobile": mobileDirection } : {}), ...(tabletDirection ? { "data-direction-tablet": tabletDirection } : {}) })} style={style}>
-    <StorefrontContainer><div className="jelly-custom-content-inner">{items}</div></StorefrontContainer>
+  const settings = section.settings;
+  const verticalAlign = choice(settings, "verticalAlign", ["top", "middle", "bottom"] as const, "middle");
+  const itemWidths = choice(settings, "itemWidths", ["equal", "fit"] as const, "fit");
+  // A content box: a panel inside the section with its own colour scheme, padding, corners and border.
+  const boxed = settings.contentBox === true;
+  const boxScheme = choice(settings, "boxScheme", ["", ...SECTION_SCHEMES] as const, "");
+  const boxStyle = boxed ? {
+    "--box-padding": `${numberValue(settings, "boxPadding", 48, 0, 120)}px`,
+    ...(typeof mobile?.boxPadding === "number" ? { "--box-padding-m": `${numberValue(mobile, "boxPadding", 48, 0, 120)}px` } : {}),
+    ...(typeof tablet?.boxPadding === "number" ? { "--box-padding-t": `${numberValue(tablet, "boxPadding", 48, 0, 120)}px` } : {}),
+    "--box-radius": `${numberValue(settings, "boxRadius", 16, 0, 48)}px`,
+  } as CSSProperties : undefined;
+  const inner = <div className="jelly-custom-content-inner">{items}</div>;
+  return <section className="jelly-section jelly-custom-content" {...sectionData(section, { "data-direction": direction, "data-align": alignment, "data-vertical-align": verticalAlign, "data-item-widths": itemWidths, ...(mobileDirection ? { "data-direction-mobile": mobileDirection } : {}), ...(tabletDirection ? { "data-direction-tablet": tabletDirection } : {}) })} style={style}>
+    <StorefrontContainer>{boxed
+      ? <div className="jelly-custom-content-box" {...(boxScheme ? { "data-scheme": boxScheme } : {})} {...(settings.boxBorder === "solid" ? { "data-border": "" } : {})} style={boxStyle}>{inner}</div>
+      : inner}</StorefrontContainer>
   </section>;
 }

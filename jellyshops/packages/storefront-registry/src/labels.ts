@@ -19,7 +19,7 @@ const sectionLabels: Record<string, string> = {
   newsletter: "Newsletter sign-up",
   "trust-strip": "Trust badges",
   "rich-text": "Text",
-  "custom-content": "Custom content",
+  "custom-content": "Custom section",
   "contact-store-info": "Store visit and contact",
   "logo-list": "Logo list",
   "rating-summary": "Rating",
