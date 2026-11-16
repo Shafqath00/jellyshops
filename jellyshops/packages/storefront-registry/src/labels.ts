@@ -101,6 +101,19 @@ const blockLabels: Record<string, string> = {
   badge: "Badge",
   counter: "Counter",
   "button-group": "Button group",
+  // Wave 2 (media-blocks.ts).
+  "image-card": "Image card",
+  "images-stack": "Images stack",
+  "image-comparison": "Image comparison",
+  "video-card": "Video card",
+  "product-card": "Product card",
+  "product-overlay-card": "Product over photo",
+  press: "Press quote",
+  "newsletter-form": "Email sign-up",
+  "contact-form": "Contact form",
+  share: "Share links",
+  countdown: "Countdown",
+  "store-locator": "Shop address",
 };
 
 const pageTypeLabels: Record<PageType, string> = {

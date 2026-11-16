@@ -17,7 +17,7 @@ export const STYLED_BLOCK_TYPES = ["heading", "text", "button", "image", "video"
 /** Buttons and media have no text style, text colour or background of their own (buttons have their own colours). */
 const TEXT_ONLY_KEYS = new Set(["blockTypePreset", "blockTextColor", "blockBackground", "blockBackgroundColor", "blockGradientColor", "blockGradientAngle"]);
 /** Blocks without text of their own: no text style, text colour or background. Every other styled block has them (a group passes them on to its blocks). */
-const NON_TEXT_BLOCK_TYPES = new Set(["button", "image", "video", "divider", "spacer", "icon"]);
+const NON_TEXT_BLOCK_TYPES = new Set(["button", "image", "video", "divider", "spacer", "icon", "images-stack", "image-comparison"]);
 
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 const empty = z.literal("");

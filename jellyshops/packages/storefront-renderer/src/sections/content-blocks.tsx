@@ -9,6 +9,7 @@ import { blockEditorData, buttonProps } from "./block-content";
 import { formattedSetting, inlineSetting, SettingText } from "./setting-text";
 import { choice, imageValue, numberValue, stringValue } from "./shared";
 import { StoreIcon } from "./store-icon";
+import { renderMediaBlock } from "./media-blocks";
 
 /**
  * The shared content blocks, wave 1 (registry content-blocks.ts): subheading, section header, collapsible text,
@@ -294,6 +295,7 @@ export function renderContentBlock(block: BlockNode, options: ContentBlockOption
     case "badge": return <Badge key={block.id} {...props} />;
     case "counter": return <Counter key={block.id} {...props} />;
     case "button-group": return <ButtonGroup key={block.id} {...props} />;
-    default: return undefined;
+    // Wave 2: media, cards and forms (media-blocks.tsx).
+    default: return renderMediaBlock(block, options);
   }
 }

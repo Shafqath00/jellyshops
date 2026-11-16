@@ -25,7 +25,7 @@ function subscribeMotion(listener: () => void) {
 }
 
 /** The store's products for a section: the page's own list first, then the full list once loaded. */
-function useStoreProducts(commerce: CommerceDataProvider, wanted: boolean): PublicProduct[] {
+export function useStoreProducts(commerce: CommerceDataProvider, wanted: boolean): PublicProduct[] {
   const [loaded, setLoaded] = useState<{ source: CommerceDataProvider; products: PublicProduct[] }>();
   useEffect(() => {
     if (!wanted) return;

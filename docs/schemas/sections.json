@@ -8314,6 +8314,18 @@
         "badge",
         "counter",
         "button-group",
+        "image-card",
+        "images-stack",
+        "image-comparison",
+        "video-card",
+        "product-card",
+        "product-overlay-card",
+        "press",
+        "newsletter-form",
+        "contact-form",
+        "share",
+        "countdown",
+        "store-locator",
         "app"
       ],
       "blockSets": [
@@ -9423,6 +9435,328 @@
                   }
                 }
               ]
+            }
+          ]
+        },
+        {
+          "id": "custom-lookbook",
+          "label": "Custom section: Lookbook",
+          "category": "products",
+          "thumbnail": "grid-3",
+          "description": "Three photos, each with a product to shop.",
+          "settings": {
+            "contentAlignment": "left",
+            "contentWidth": "full",
+            "gap": 32
+          },
+          "blocks": [
+            {
+              "id": "variant-section-header",
+              "type": "section-header",
+              "enabled": true,
+              "settings": {
+                "eyebrow": "Lookbook",
+                "heading": "Shop the look",
+                "layout": "horizontal",
+                "linkLabel": "Shop all",
+                "link": "/shop"
+              }
+            },
+            {
+              "id": "variant-grid",
+              "type": "grid",
+              "enabled": true,
+              "settings": {
+                "columns": 3,
+                "gap": 24,
+                "alignItems": "stretch"
+              },
+              "blocks": [
+                {
+                  "id": "variant-product-overlay-card-1",
+                  "type": "product-overlay-card",
+                  "enabled": true,
+                  "settings": {
+                    "image": {
+                      "url": "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=80",
+                      "alt": "Two people in relaxed autumn outfits"
+                    },
+                    "cardPosition": "bottom-left",
+                    "imageRatio": "portrait"
+                  }
+                },
+                {
+                  "id": "variant-product-overlay-card-2",
+                  "type": "product-overlay-card",
+                  "enabled": true,
+                  "settings": {
+                    "image": {
+                      "url": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80",
+                      "alt": "Folded clothes in soft colours on a wooden table"
+                    },
+                    "cardPosition": "bottom-left",
+                    "imageRatio": "portrait"
+                  }
+                },
+                {
+                  "id": "variant-product-overlay-card-3",
+                  "type": "product-overlay-card",
+                  "enabled": true,
+                  "settings": {
+                    "image": {
+                      "url": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80",
+                      "alt": "A calm living room with natural textures"
+                    },
+                    "cardPosition": "bottom-left",
+                    "imageRatio": "portrait"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "custom-image-tiles",
+          "label": "Custom section: Image tiles",
+          "category": "banners",
+          "thumbnail": "grid-3",
+          "description": "Three photo tiles with text over them.",
+          "settings": {
+            "contentAlignment": "left",
+            "contentWidth": "full",
+            "gap": 24
+          },
+          "blocks": [
+            {
+              "id": "variant-grid",
+              "type": "grid",
+              "enabled": true,
+              "settings": {
+                "columns": 3,
+                "gap": 24,
+                "alignItems": "stretch"
+              },
+              "blocks": [
+                {
+                  "id": "variant-image-card-1",
+                  "type": "image-card",
+                  "enabled": true,
+                  "settings": {
+                    "image": {
+                      "url": "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=2400&q=80",
+                      "alt": "Wool coats in warm neutral tones hanging on a rail"
+                    },
+                    "heading": "Coats",
+                    "text": "Warm layers for cold days.",
+                    "buttonLabel": "Shop coats",
+                    "link": "/shop",
+                    "textPosition": "over",
+                    "overlay": 40,
+                    "imageRatio": "portrait"
+                  }
+                },
+                {
+                  "id": "variant-image-card-2",
+                  "type": "image-card",
+                  "enabled": true,
+                  "settings": {
+                    "image": {
+                      "url": "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1200&q=80",
+                      "alt": "Knitwear, denim and a watch laid out on a blanket"
+                    },
+                    "heading": "Knitwear",
+                    "text": "Soft and made to last.",
+                    "buttonLabel": "Shop knitwear",
+                    "link": "/shop",
+                    "textPosition": "over",
+                    "overlay": 40,
+                    "imageRatio": "portrait"
+                  }
+                },
+                {
+                  "id": "variant-image-card-3",
+                  "type": "image-card",
+                  "enabled": true,
+                  "settings": {
+                    "image": {
+                      "url": "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1200&q=80",
+                      "alt": "A leather bag and accessories"
+                    },
+                    "heading": "Accessories",
+                    "text": "The finishing touch.",
+                    "buttonLabel": "Shop accessories",
+                    "link": "/shop",
+                    "textPosition": "over",
+                    "overlay": 40,
+                    "imageRatio": "portrait"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "custom-before-after",
+          "label": "Custom section: Before and after",
+          "category": "content",
+          "thumbnail": "split",
+          "description": "A photo slider that compares two versions, with text beside it.",
+          "settings": {
+            "direction": "horizontal",
+            "itemWidths": "equal",
+            "verticalAlign": "middle",
+            "contentAlignment": "left",
+            "contentWidth": "full",
+            "gap": 48
+          },
+          "blocks": [
+            {
+              "id": "variant-group",
+              "type": "group",
+              "enabled": true,
+              "settings": {
+                "groupDirection": "vertical",
+                "groupAlign": "start",
+                "groupGap": 16
+              },
+              "blocks": [
+                {
+                  "id": "variant-subheading-1",
+                  "type": "subheading",
+                  "enabled": true,
+                  "settings": {
+                    "text": "The difference"
+                  }
+                },
+                {
+                  "id": "variant-heading-2",
+                  "type": "heading",
+                  "enabled": true,
+                  "settings": {
+                    "text": "See it for yourself"
+                  }
+                },
+                {
+                  "id": "variant-text-3",
+                  "type": "text",
+                  "enabled": true,
+                  "settings": {
+                    "text": "Drag the slider to compare the room before and after."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "variant-image-comparison",
+              "type": "image-comparison",
+              "enabled": true,
+              "settings": {
+                "before": {
+                  "url": "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1200&q=80",
+                  "alt": "A bright studio shop with clothing on wooden rails"
+                },
+                "after": {
+                  "url": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80",
+                  "alt": "A calm living room with natural textures"
+                },
+                "beforeLabel": "Before",
+                "afterLabel": "After",
+                "start": 50,
+                "imageRatio": "landscape"
+              }
+            }
+          ]
+        },
+        {
+          "id": "custom-visit-shop",
+          "label": "Custom section: Visit our shop",
+          "category": "content",
+          "thumbnail": "split",
+          "description": "Your address, opening hours and directions beside a photo.",
+          "settings": {
+            "direction": "horizontal",
+            "itemWidths": "equal",
+            "verticalAlign": "middle",
+            "contentAlignment": "left",
+            "contentWidth": "full",
+            "gap": 48
+          },
+          "blocks": [
+            {
+              "id": "variant-group",
+              "type": "group",
+              "enabled": true,
+              "settings": {
+                "groupDirection": "vertical",
+                "groupAlign": "start",
+                "groupGap": 16
+              },
+              "blocks": [
+                {
+                  "id": "variant-subheading-1",
+                  "type": "subheading",
+                  "enabled": true,
+                  "settings": {
+                    "text": "Come and see us"
+                  }
+                },
+                {
+                  "id": "variant-store-locator-2",
+                  "type": "store-locator",
+                  "enabled": true,
+                  "settings": {
+                    "name": "Our Bath shop",
+                    "address": "12 High Street\nBath BA1 1AA",
+                    "hours": "Mon–Sat: 10am–6pm\nSun: 11am–4pm",
+                    "phone": "01225 000000"
+                  }
+                }
+              ]
+            },
+            {
+              "id": "variant-image",
+              "type": "image",
+              "enabled": true,
+              "settings": {
+                "image": {
+                  "url": "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&w=1200&q=80",
+                  "alt": "A bright studio shop with clothing on wooden rails"
+                },
+                "aspectRatio": "landscape"
+              }
+            }
+          ]
+        },
+        {
+          "id": "custom-contact",
+          "label": "Custom section: Contact us",
+          "category": "marketing",
+          "thumbnail": "centered",
+          "description": "A heading and a short contact form.",
+          "settings": {
+            "contentAlignment": "left",
+            "contentWidth": "narrow",
+            "gap": 24
+          },
+          "blocks": [
+            {
+              "id": "variant-section-header",
+              "type": "section-header",
+              "enabled": true,
+              "settings": {
+                "eyebrow": "Get in touch",
+                "heading": "We would love to hear from you",
+                "text": "We reply within one working day."
+              }
+            },
+            {
+              "id": "variant-contact-form",
+              "type": "contact-form",
+              "enabled": true,
+              "settings": {
+                "buttonLabel": "Send message",
+                "successText": "Thanks, we will reply soon."
+              }
             }
           ]
         }
@@ -27647,6 +27981,18 @@
         "badge",
         "counter",
         "button-group",
+        "image-card",
+        "images-stack",
+        "image-comparison",
+        "video-card",
+        "product-card",
+        "product-overlay-card",
+        "press",
+        "newsletter-form",
+        "contact-form",
+        "share",
+        "countdown",
+        "store-locator",
         "app"
       ],
       "maxBlocks": 8,
@@ -28623,6 +28969,18 @@
         "badge",
         "counter",
         "button-group",
+        "image-card",
+        "images-stack",
+        "image-comparison",
+        "video-card",
+        "product-card",
+        "product-overlay-card",
+        "press",
+        "newsletter-form",
+        "contact-form",
+        "share",
+        "countdown",
+        "store-locator",
         "app"
       ],
       "maxBlocks": 12,
@@ -31109,6 +31467,1486 @@
           },
           "stackOnPhones": {
             "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "type": "image-card",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "heading": "New season",
+        "text": "Fresh colours for warmer days.",
+        "buttonLabel": "Shop now",
+        "link": "/shop",
+        "textPosition": "over",
+        "overlay": 35,
+        "imageRatio": "portrait"
+      },
+      "controls": [
+        {
+          "type": "image",
+          "key": "image",
+          "label": "Image",
+          "group": "content"
+        },
+        {
+          "type": "text",
+          "key": "heading",
+          "label": "Heading",
+          "group": "content",
+          "maxLength": 120,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "textarea",
+          "key": "text",
+          "label": "Text",
+          "group": "content",
+          "maxLength": 400,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "text",
+          "key": "buttonLabel",
+          "label": "Button text",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
+          "type": "link",
+          "key": "link",
+          "label": "Link",
+          "group": "content",
+          "dynamicTypes": [
+            "url"
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "textPosition",
+          "label": "Text",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Over the photo",
+              "value": "over"
+            },
+            {
+              "label": "Below the photo",
+              "value": "below"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "key": "imageRatio",
+          "label": "Image shape",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Landscape (4:3)",
+              "value": "landscape"
+            },
+            {
+              "label": "Square",
+              "value": "square"
+            },
+            {
+              "label": "Portrait (4:5)",
+              "value": "portrait"
+            },
+            {
+              "label": "Wide (16:9)",
+              "value": "wide"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "key": "overlay",
+          "label": "Darken photo",
+          "description": "Keeps text over the photo readable.",
+          "group": "style",
+          "min": 0,
+          "max": 80,
+          "step": 5,
+          "unit": "%",
+          "visibleIf": {
+            "key": "textPosition",
+            "notEquals": "below"
+          }
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
+          },
+          "heading": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 400
+          },
+          "buttonLabel": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "link": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "textPosition": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "over",
+                  "below"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "overlay": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 80
+          },
+          "imageRatio": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "square",
+                  "portrait",
+                  "landscape",
+                  "wide"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          }
+        },
+        "$defs": {
+          "__schema0": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "resource_field"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "field"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metafield"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "namespace",
+                  "key"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metaobject_field"
+                  },
+                  "source": {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source",
+                  "field"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "images-stack",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "stackLayout": "cascade"
+      },
+      "controls": [
+        {
+          "type": "image",
+          "key": "image1",
+          "label": "Back photo",
+          "group": "content"
+        },
+        {
+          "type": "image",
+          "key": "image2",
+          "label": "Middle photo",
+          "group": "content"
+        },
+        {
+          "type": "image",
+          "key": "image3",
+          "label": "Front photo",
+          "group": "content"
+        },
+        {
+          "type": "segmented",
+          "key": "stackLayout",
+          "label": "Arrangement",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Cascade",
+              "value": "cascade"
+            },
+            {
+              "label": "Fan",
+              "value": "fan"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "image1": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
+          },
+          "image2": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
+          },
+          "image3": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
+          },
+          "stackLayout": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "cascade",
+                  "fan"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "image-comparison",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "beforeLabel": "Before",
+        "afterLabel": "After",
+        "start": 50,
+        "imageRatio": "landscape"
+      },
+      "controls": [
+        {
+          "type": "image",
+          "key": "before",
+          "label": "Before photo",
+          "group": "content"
+        },
+        {
+          "type": "image",
+          "key": "after",
+          "label": "After photo",
+          "group": "content"
+        },
+        {
+          "type": "text",
+          "key": "beforeLabel",
+          "label": "Before label",
+          "group": "content",
+          "maxLength": 30
+        },
+        {
+          "type": "text",
+          "key": "afterLabel",
+          "label": "After label",
+          "group": "content",
+          "maxLength": 30
+        },
+        {
+          "type": "range",
+          "key": "start",
+          "label": "Divider starts at",
+          "group": "layout",
+          "min": 5,
+          "max": 95,
+          "step": 5,
+          "unit": "%"
+        },
+        {
+          "type": "select",
+          "key": "imageRatio",
+          "label": "Image shape",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Landscape (4:3)",
+              "value": "landscape"
+            },
+            {
+              "label": "Square",
+              "value": "square"
+            },
+            {
+              "label": "Portrait (4:5)",
+              "value": "portrait"
+            },
+            {
+              "label": "Wide (16:9)",
+              "value": "wide"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "before": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
+          },
+          "after": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
+          },
+          "beforeLabel": {
+            "type": "string",
+            "maxLength": 30
+          },
+          "afterLabel": {
+            "type": "string",
+            "maxLength": 30
+          },
+          "start": {
+            "type": "integer",
+            "minimum": 5,
+            "maximum": 95
+          },
+          "imageRatio": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "square",
+                  "portrait",
+                  "landscape",
+                  "wide"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "video-card",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "heading": "See how it is made",
+        "text": "Two minutes in our studio."
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "url",
+          "label": "Video link",
+          "group": "content",
+          "maxLength": 500,
+          "description": "A YouTube or Vimeo link, or a link to an .mp4 file."
+        },
+        {
+          "type": "image",
+          "key": "poster",
+          "label": "Cover image",
+          "group": "content"
+        },
+        {
+          "type": "text",
+          "key": "heading",
+          "label": "Heading",
+          "group": "content",
+          "maxLength": 120,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "textarea",
+          "key": "text",
+          "label": "Text",
+          "group": "content",
+          "maxLength": 300,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "poster": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
+          },
+          "heading": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "$defs": {
+          "__schema0": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "resource_field"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "field"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metafield"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "namespace",
+                  "key"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metaobject_field"
+                  },
+                  "source": {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source",
+                  "field"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "product-card",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {},
+      "controls": [
+        {
+          "type": "product",
+          "key": "productId",
+          "label": "Product",
+          "description": "Leave empty to show your first product.",
+          "group": "content"
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "maxLength": 120
+          }
+        }
+      }
+    },
+    {
+      "type": "product-overlay-card",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "cardPosition": "bottom-left",
+        "imageRatio": "portrait"
+      },
+      "controls": [
+        {
+          "type": "product",
+          "key": "productId",
+          "label": "Product",
+          "description": "Leave empty to show your first product.",
+          "group": "content"
+        },
+        {
+          "type": "image",
+          "key": "image",
+          "label": "Photo",
+          "group": "content",
+          "description": "A lifestyle photo. Leave empty to use the product photo."
+        },
+        {
+          "type": "select",
+          "key": "cardPosition",
+          "label": "Card position",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Bottom left",
+              "value": "bottom-left"
+            },
+            {
+              "label": "Bottom right",
+              "value": "bottom-right"
+            },
+            {
+              "label": "Top left",
+              "value": "top-left"
+            },
+            {
+              "label": "Top right",
+              "value": "top-right"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "key": "imageRatio",
+          "label": "Image shape",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Landscape (4:3)",
+              "value": "landscape"
+            },
+            {
+              "label": "Square",
+              "value": "square"
+            },
+            {
+              "label": "Portrait (4:5)",
+              "value": "portrait"
+            },
+            {
+              "label": "Wide (16:9)",
+              "value": "wide"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "image": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
+          },
+          "cardPosition": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "bottom-left",
+                  "bottom-right",
+                  "top-left",
+                  "top-right"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "imageRatio": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "square",
+                  "portrait",
+                  "landscape",
+                  "wide"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "press",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "quote": "The softest knit we tried this winter.",
+        "source": "The Weekend Paper"
+      },
+      "controls": [
+        {
+          "type": "textarea",
+          "key": "quote",
+          "label": "Quote",
+          "group": "content",
+          "maxLength": 300,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "text",
+          "key": "source",
+          "label": "Publication",
+          "group": "content",
+          "maxLength": 80
+        },
+        {
+          "type": "image",
+          "key": "logo",
+          "label": "Publication logo",
+          "group": "content"
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "quote": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "source": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "logo": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
+          }
+        },
+        "required": [
+          "quote"
+        ],
+        "$defs": {
+          "__schema0": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "resource_field"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "field"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metafield"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "namespace",
+                  "key"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metaobject_field"
+                  },
+                  "source": {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source",
+                  "field"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "newsletter-form",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "buttonLabel": "Subscribe"
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "buttonLabel",
+          "label": "Button text",
+          "group": "content",
+          "maxLength": 40
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "buttonLabel": {
+            "type": "string",
+            "maxLength": 40
+          }
+        }
+      }
+    },
+    {
+      "type": "contact-form",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "buttonLabel": "Send message",
+        "successText": "Thanks, we will reply soon."
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "buttonLabel",
+          "label": "Button text",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
+          "type": "text",
+          "key": "successText",
+          "label": "Message after sending",
+          "group": "content",
+          "maxLength": 160
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "buttonLabel": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "successText": {
+            "type": "string",
+            "maxLength": 160
+          }
+        }
+      }
+    },
+    {
+      "type": "share",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "label": "Share"
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "label",
+          "label": "Label",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
+          "type": "checkbox",
+          "key": "showCopy",
+          "label": "Copy link",
+          "group": "content",
+          "defaultValue": true
+        },
+        {
+          "type": "checkbox",
+          "key": "showWhatsapp",
+          "label": "WhatsApp",
+          "group": "content",
+          "defaultValue": true
+        },
+        {
+          "type": "checkbox",
+          "key": "showFacebook",
+          "label": "Facebook",
+          "group": "content",
+          "defaultValue": true
+        },
+        {
+          "type": "checkbox",
+          "key": "showX",
+          "label": "X",
+          "group": "content",
+          "defaultValue": true
+        },
+        {
+          "type": "checkbox",
+          "key": "showPinterest",
+          "label": "Pinterest",
+          "group": "content",
+          "defaultValue": true
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "showX": {
+            "type": "boolean"
+          },
+          "showFacebook": {
+            "type": "boolean"
+          },
+          "showWhatsapp": {
+            "type": "boolean"
+          },
+          "showPinterest": {
+            "type": "boolean"
+          },
+          "showCopy": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "type": "countdown",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "label": "Sale ends in",
+        "endText": "The sale has ended."
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "label",
+          "label": "Text above",
+          "group": "content",
+          "maxLength": 80
+        },
+        {
+          "type": "text",
+          "key": "countdownTo",
+          "label": "Count down to",
+          "group": "content",
+          "maxLength": 16,
+          "description": "Date and time in UK time, written YYYY-MM-DD HH:MM, for example 2026-12-24 18:00."
+        },
+        {
+          "type": "text",
+          "key": "endText",
+          "label": "Text when it ends",
+          "group": "content",
+          "maxLength": 120
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "countdownTo": {
+            "type": "string",
+            "maxLength": 16
+          },
+          "endText": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 80
+          }
+        }
+      }
+    },
+    {
+      "type": "store-locator",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "name": "Our shop",
+        "address": "12 High Street\nBath BA1 1AA",
+        "hours": "Mon–Sat: 10am–6pm\nSun: 11am–4pm"
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "name",
+          "label": "Shop name",
+          "group": "content",
+          "maxLength": 80
+        },
+        {
+          "type": "textarea",
+          "key": "address",
+          "label": "Address",
+          "group": "content",
+          "maxLength": 300
+        },
+        {
+          "type": "textarea",
+          "key": "hours",
+          "label": "Opening hours",
+          "description": "One line per day, for example Mon–Fri: 10am–6pm.",
+          "group": "content",
+          "maxLength": 400
+        },
+        {
+          "type": "text",
+          "key": "phone",
+          "label": "Phone number",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
+          "type": "text",
+          "key": "mapLink",
+          "label": "Map link",
+          "description": "Leave empty to search the address on Google Maps.",
+          "group": "content",
+          "maxLength": 500,
+          "translatable": false
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "address": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "hours": {
+            "type": "string",
+            "maxLength": 400
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "mapLink": {
+            "type": "string",
+            "maxLength": 500
           }
         }
       }

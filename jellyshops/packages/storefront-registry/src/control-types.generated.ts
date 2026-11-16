@@ -131,6 +131,19 @@ export const BLOCK_CONTROL_TYPES: Record<string, Record<string, string>> = {
     "image": "image",
     "link": "link"
   },
+  "image-card": {
+    "image": "image",
+    "link": "link"
+  },
+  "image-comparison": {
+    "before": "image",
+    "after": "image"
+  },
+  "images-stack": {
+    "image1": "image",
+    "image2": "image",
+    "image3": "image"
+  },
   "info-tab": {
     "text": "rich-text"
   },
@@ -146,6 +159,16 @@ export const BLOCK_CONTROL_TYPES: Record<string, Record<string, string>> = {
   },
   "part-rating-summary": {
     "link": "link"
+  },
+  "press": {
+    "logo": "image"
+  },
+  "product-card": {
+    "productId": "product"
+  },
+  "product-overlay-card": {
+    "productId": "product",
+    "image": "image"
   },
   "product-tab": {
     "collectionId": "collection"
@@ -179,6 +202,9 @@ export const BLOCK_CONTROL_TYPES: Record<string, Record<string, string>> = {
     "link": "link"
   },
   "video": {
+    "poster": "image"
+  },
+  "video-card": {
     "poster": "image"
   }
 };

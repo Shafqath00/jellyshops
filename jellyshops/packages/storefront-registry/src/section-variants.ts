@@ -276,5 +276,64 @@ export const SECTION_VARIANTS: Record<string, Variant[]> = {
         ]),
       ],
     },
+    {
+      id: "custom-lookbook", label: "Custom section: Lookbook", category: "products", thumbnail: "grid-3",
+      description: "Three photos, each with a product to shop.",
+      settings: { contentAlignment: "left", contentWidth: "full", gap: 32 },
+      blocks: [
+        block("section-header", { eyebrow: "Lookbook", heading: "Shop the look", layout: "horizontal", linkLabel: "Shop all", link: "/shop" }),
+        holder("grid", { columns: 3, gap: 24, alignItems: "stretch" }, [
+          block("product-overlay-card", { image: pictures.model, cardPosition: "bottom-left", imageRatio: "portrait" }),
+          block("product-overlay-card", { image: pictures.outfit, cardPosition: "bottom-left", imageRatio: "portrait" }),
+          block("product-overlay-card", { image: pictures.home, cardPosition: "bottom-left", imageRatio: "portrait" }),
+        ]),
+      ],
+    },
+    {
+      id: "custom-image-tiles", label: "Custom section: Image tiles", category: "banners", thumbnail: "grid-3",
+      description: "Three photo tiles with text over them.",
+      settings: { contentAlignment: "left", contentWidth: "full", gap: 24 },
+      blocks: [
+        holder("grid", { columns: 3, gap: 24, alignItems: "stretch" }, [
+          block("image-card", { image: pictures.rail, heading: "Coats", text: "Warm layers for cold days.", buttonLabel: "Shop coats", link: "/shop", textPosition: "over", overlay: 40, imageRatio: "portrait" }),
+          block("image-card", { image: pictures.flatlay, heading: "Knitwear", text: "Soft and made to last.", buttonLabel: "Shop knitwear", link: "/shop", textPosition: "over", overlay: 40, imageRatio: "portrait" }),
+          block("image-card", { image: pictures.bag, heading: "Accessories", text: "The finishing touch.", buttonLabel: "Shop accessories", link: "/shop", textPosition: "over", overlay: 40, imageRatio: "portrait" }),
+        ]),
+      ],
+    },
+    {
+      id: "custom-before-after", label: "Custom section: Before and after", category: "content", thumbnail: "split",
+      description: "A photo slider that compares two versions, with text beside it.",
+      settings: { direction: "horizontal", itemWidths: "equal", verticalAlign: "middle", contentAlignment: "left", contentWidth: "full", gap: 48 },
+      blocks: [
+        holder("group", { groupDirection: "vertical", groupAlign: "start", groupGap: 16 }, [
+          block("subheading", { text: "The difference" }),
+          heading("See it for yourself"),
+          text("Drag the slider to compare the room before and after."),
+        ]),
+        block("image-comparison", { before: pictures.studio, after: pictures.home, beforeLabel: "Before", afterLabel: "After", start: 50, imageRatio: "landscape" }),
+      ],
+    },
+    {
+      id: "custom-visit-shop", label: "Custom section: Visit our shop", category: "content", thumbnail: "split",
+      description: "Your address, opening hours and directions beside a photo.",
+      settings: { direction: "horizontal", itemWidths: "equal", verticalAlign: "middle", contentAlignment: "left", contentWidth: "full", gap: 48 },
+      blocks: [
+        holder("group", { groupDirection: "vertical", groupAlign: "start", groupGap: 16 }, [
+          block("subheading", { text: "Come and see us" }),
+          block("store-locator", { name: "Our Bath shop", address: "12 High Street\nBath BA1 1AA", hours: "Mon–Sat: 10am–6pm\nSun: 11am–4pm", phone: "01225 000000" }),
+        ]),
+        block("image", { image: pictures.studio, aspectRatio: "landscape" }),
+      ],
+    },
+    {
+      id: "custom-contact", label: "Custom section: Contact us", category: "marketing", thumbnail: "centered",
+      description: "A heading and a short contact form.",
+      settings: { contentAlignment: "left", contentWidth: "narrow", gap: 24 },
+      blocks: [
+        block("section-header", { eyebrow: "Get in touch", heading: "We would love to hear from you", text: "We reply within one working day." }),
+        block("contact-form", { buttonLabel: "Send message", successText: "Thanks, we will reply soon." }),
+      ],
+    },
   ],
 };
