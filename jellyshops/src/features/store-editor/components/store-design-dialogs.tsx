@@ -31,6 +31,11 @@ export function StoreDesignDialogs({ designs, onCustomize }: { designs: StoreDes
   </>;
 }
 
+/** "logo, social links and menus". */
+function listWords(words: string[]): string {
+  return words.length < 2 ? words.join("") : `${words.slice(0, -1).join(", ")} and ${words[words.length - 1]}`;
+}
+
 function ReadyDialog({ designs, onCustomize }: { designs: StoreDesigns; onCustomize(): void }) {
   const { ready, setReady, publishDraft, activeStore } = designs;
   if (!ready) return null;
@@ -61,7 +66,7 @@ function ReadyDialog({ designs, onCustomize }: { designs: StoreDesigns; onCustom
               <p id="design-ready-summary">We saved {ready.name} as a draft with all its pages. Your live store hasn&apos;t changed: shoppers see your current design until you publish.</p>
               <ul className="mt-3 space-y-1.5 text-sm">
                 <li className="flex gap-2"><Check size={16} className="mt-0.5 shrink-0 text-[var(--jk-success-text)]" aria-hidden="true" />Your products, collections and pages are all here.</li>
-                {ready.kept && <li className="flex gap-2"><Check size={16} className="mt-0.5 shrink-0 text-[var(--jk-success-text)]" aria-hidden="true" />Your logo, social links, languages and menus came across.</li>}
+                {ready.kept.length > 0 && <li className="flex gap-2"><Check size={16} className="mt-0.5 shrink-0 text-[var(--jk-success-text)]" aria-hidden="true" />We kept your {listWords(ready.kept)}.</li>}
               </ul>
               {publish.status === "failed" && <p className="jk-field-error mt-3" role="alert">{publish.message}</p>}
             </>}

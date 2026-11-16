@@ -122,7 +122,7 @@ it("asks before switching, and keeps the store's logo, social links and menus", 
   expect(within(confirm).getByRole("checkbox", { name: /Keep my logo, social links, languages and menus/ })).toBeChecked();
   await userEvent.click(within(confirm).getByRole("button", { name: "Switch design" }));
   const ready = await screen.findByRole("dialog", { name: "Avenue is ready" });
-  expect(ready).toHaveTextContent("Your logo, social links, languages and menus came across.");
+  expect(ready).toHaveTextContent("We kept your logo, social links and menus.");
   const saved = requests.find((request) => request.url.endsWith("/theme-settings") && request.method === "PUT");
   expect(saved?.body?.settings).toEqual({ colors: { primary: "#222222" }, branding: { logoUrl: expect.stringMatching(/\/api\/public\/media\/store-1\/logo$/) }, social: ownSettings.social });
   const menu = requests.find((request) => request.url.endsWith("/menus/new-main"));
@@ -137,7 +137,7 @@ it("can switch without keeping the old logo, links and menus", async () => {
   await userEvent.click(within(confirm).getByRole("checkbox", { name: /Keep my logo/ }));
   await userEvent.click(within(confirm).getByRole("button", { name: "Switch design" }));
   const ready = await screen.findByRole("dialog", { name: "Avenue is ready" });
-  expect(ready).not.toHaveTextContent("came across");
+  expect(ready).not.toHaveTextContent("We kept");
   expect(requests.some((request) => request.method === "PUT" || request.method === "PATCH")).toBe(false);
 });
 

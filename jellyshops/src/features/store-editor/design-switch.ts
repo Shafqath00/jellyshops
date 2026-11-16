@@ -34,11 +34,27 @@ export function isCurrentMenu(menu: Pick<MenuRecord, "handle">): boolean {
   return !menu.handle.startsWith("previous-");
 }
 
-/** The new design's menus that take back the store's own links: those with the same handle (main, footer…) as a current menu. */
-export function menusToRestore(before: MenuRecord[], after: MenuRecord[]): Array<{ menu: MenuRecord; items: unknown[] }> {
+/** Menu links without their ids (installing a design gives every link a new id). */
+function linksOnly(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(linksOnly);
+  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).filter(([key]) => key !== "id").map(([key, item]) => [key, linksOnly(item)]));
+  return value;
+}
+const sameLinks = (a: unknown[], b: unknown[]) => JSON.stringify(linksOnly(a)) === JSON.stringify(linksOnly(b));
+
+/**
+ * The new design's menus that take back the store's own links: those with the same handle (main, footer…)
+ * as a current menu the merchant changed. A menu still exactly as the previous design shipped it
+ * (`previousStarterMenus`) is the old design's sample, not the store's content, so the new design keeps its own.
+ */
+export function menusToRestore(before: MenuRecord[], after: MenuRecord[], previousStarterMenus: Array<{ handle: string; items: unknown[] }> = []): Array<{ menu: MenuRecord; items: unknown[] }> {
   const own = new Map(before.filter(isCurrentMenu).map((menu) => [menu.handle, menu]));
+  const shipped = new Map(previousStarterMenus.map((menu) => [menu.handle, menu.items]));
   return after.filter(isCurrentMenu).flatMap((menu) => {
     const previous = own.get(menu.handle);
-    return previous && previous.items.length && JSON.stringify(previous.items) !== JSON.stringify(menu.items) ? [{ menu, items: previous.items }] : [];
+    if (!previous?.items.length || sameLinks(previous.items, menu.items)) return [];
+    const sample = shipped.get(menu.handle);
+    if (sample && sameLinks(previous.items, sample)) return [];
+    return [{ menu, items: previous.items }];
   });
 }

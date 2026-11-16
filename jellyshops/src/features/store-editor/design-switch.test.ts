@@ -31,4 +31,13 @@ describe("switching designs keeps the store's own content", () => {
     const after = [menu("new-main", "main", [{ id: "home" }]), menu("new-footer", "footer", [{ id: "about" }]), menu("new-extra", "help", [])];
     expect(menusToRestore(before, after)).toEqual([{ menu: after[0], items: own }]);
   });
+
+  it("leaves the new design's menu alone when the old menu was still the previous design's sample", () => {
+    const sample = [{ id: "pack:home", label: "Home", target: { kind: "home" }, children: [] }];
+    const before = [menu("old-main", "main", [{ id: "install-1:home", label: "Home", target: { kind: "home" }, children: [] }])];
+    const after = [menu("new-main", "main", [{ id: "install-2:shop", label: "Shop", target: { kind: "search" }, children: [] }])];
+    expect(menusToRestore(before, after, [{ handle: "main", items: sample }])).toEqual([]);
+    const edited = [menu("old-main", "main", [...before[0].items, { id: "mine", label: "Beds", target: { kind: "search" }, children: [] }])];
+    expect(menusToRestore(edited, after, [{ handle: "main", items: sample }])).toEqual([{ menu: after[0], items: edited[0].items }]);
+  });
 });

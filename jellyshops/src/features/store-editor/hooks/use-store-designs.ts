@@ -15,8 +15,8 @@ export type ReadyDraft = {
   name: string;
   /** It replaced an earlier draft. */
   switched: boolean;
-  /** The store's logo, links and menus were carried over. */
-  kept: boolean;
+  /** What of the store's own content was carried over ("logo", "social links", "languages", "menus"). */
+  kept: string[];
   publish: { status: "idle" | "publishing" | "published" } | { status: "blocked"; problems: string[] } | { status: "failed"; message: string };
 };
 
@@ -26,6 +26,17 @@ export const EDITOR_HREF = "/admin/online-store/editor";
 /** The full-page preview of one store design. */
 export function templatePreviewHref(templateId: string): string {
   return `${STORE_DESIGNS_HREF}/preview/${encodeURIComponent(templateId)}`;
+}
+
+/** Names of what a switch carried over, in reading order. */
+export function keptContent(carried: Record<string, unknown>, restoredMenus: number): string[] {
+  const branding = (carried.branding ?? {}) as Record<string, unknown>;
+  return [
+    branding.logoUrl || branding.faviconUrl ? "logo" : "",
+    carried.social ? "social links" : "",
+    carried.languages ? "languages" : "",
+    restoredMenus ? "menus" : "",
+  ].filter(Boolean);
 }
 
 function idempotencyKey(): string {
@@ -111,13 +122,17 @@ export function useStoreDesigns() {
           themeId: installed.themeId, themeVersion: installed.themeVersion, settings: withCarriedSettings(styled, carried), draftArtifactId: installed.draftArtifactId ?? null,
         })).theme;
       }
+      let restoredMenus = 0;
       if (keep && previousMenus.length) {
-        for (const { menu, items } of menusToRestore(previousMenus, await api.listMenus(storeId))) await api.updateMenu(storeId, menu.id, menu.revision, { items });
+        // Menus still exactly as the previous design shipped them are its samples; only the merchant's own menus come across.
+        const previousTheme = previousConfiguration?.themeId;
+        const previousStarter = listStarterPacks().find((item) => item.id === previousTheme || item.theme.themeId === previousTheme);
+        for (const { menu, items } of menusToRestore(previousMenus, await api.listMenus(storeId), previousStarter?.menus ?? [])) { await api.updateMenu(storeId, menu.id, menu.revision, { items }); restoredMenus += 1; }
       }
       if (!mounted.current) return;
       setConfiguration(installed);
       setHasWorkspace(true);
-      setReady({ starterId, name: templateDisplayName(starter?.name ?? "Your design"), switched: hasWorkspace, kept: keep, publish: { status: "idle" } });
+      setReady({ starterId, name: templateDisplayName(starter?.name ?? "Your design"), switched: hasWorkspace, kept: keptContent(carried, restoredMenus), publish: { status: "idle" } });
     } catch (reason) { if (mounted.current) setError(reason instanceof Error ? reason.message : "Could not prepare this store design. Try again."); }
     finally { operation.current = false; if (mounted.current) setSaving(undefined); }
   }
