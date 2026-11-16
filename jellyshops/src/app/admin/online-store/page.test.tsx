@@ -42,6 +42,9 @@ it("installs the chosen starter before opening the editor without saving a theme
   await screen.findByRole("link", { name: "Preview Fresh Market" });
   await user.click(within(screen.getByRole("article", { name: "Fresh Market" })).getByRole("button", { name: "Start with this design" }));
   await waitFor(() => expect(api.installStarterPack).toHaveBeenCalledWith("store-a", "fresh-market"));
+  const ready = await screen.findByRole("dialog", { name: "Fresh Market is ready" });
+  expect(router.push).not.toHaveBeenCalled();
+  await user.click(within(ready).getByRole("button", { name: "Customize" }));
   expect(router.push).toHaveBeenCalledWith("/admin/online-store/editor");
   expect(api.saveThemeConfiguration).not.toHaveBeenCalled();
 });

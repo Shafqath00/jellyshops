@@ -44,11 +44,14 @@ it("links every design card to its full-page preview without installing anything
   expect(requests.filter((request) => request.method !== "GET")).toHaveLength(0);
 });
 
-it("starts a new store straight from a card and opens the editor", async () => {
+it("starts a new store as a draft from a card, then offers to customize it", async () => {
   render(<OnlineStorePage />);
   const card = await screen.findByRole("article", { name: "Fresh Market" });
   await userEvent.click(within(card).getByRole("button", { name: /Start with this design/ }));
   expect(requests.find((request) => request.url.endsWith("/starters/fresh-market/install"))?.method).toBe("POST");
+  const ready = await screen.findByRole("dialog", { name: "Fresh Market is ready" });
+  expect(requests.some((request) => request.url.endsWith("/publish"))).toBe(false);
+  await userEvent.click(within(ready).getByRole("button", { name: "Customize" }));
   expect(push).toHaveBeenCalledWith("/admin/online-store/editor");
 });
 

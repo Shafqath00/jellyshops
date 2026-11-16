@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check, Eye, Loader2, Palette, Pencil, RefreshCw, Sparkles } from "lucide-react";
 import { listStarterPacks } from "@jelly/storefront-themes";
-import { AdminPage, Banner, ConfirmDialog, buttonClass } from "@/components/admin";
+import { AdminPage, Banner, buttonClass } from "@/components/admin";
+import { StoreDesignDialogs } from "@/features/store-editor/components/store-design-dialogs";
 import { galleryTemplate, templateDisplayName, usedCategories, type GalleryTemplate, type TemplateCategory } from "@/features/store-editor/template-gallery";
 import { useAuth } from "@/features/auth/providers/auth-provider";
 import type { ThemeCatalogEntry } from "@/features/store-editor/api/types";
@@ -41,7 +42,7 @@ function TemplateCover({ template, sizes, priority = false }: { template: Galler
 function StoreDesignLibrary() {
   const router = useRouter();
   const designs = useStoreDesigns();
-  const { api, activeStore, themes, configuration, setConfiguration, hasWorkspace, loading, saving, error, reload, chooseStarter, installStarter, switching, setSwitching, runOperation, mounted } = designs;
+  const { api, activeStore, themes, configuration, setConfiguration, hasWorkspace, loading, saving, error, reload, chooseStarter, runOperation, mounted } = designs;
   const storeId = designs.storeId;
   const token = designs.token;
   const [notice, setNotice] = useState<string>();
@@ -172,10 +173,7 @@ function StoreDesignLibrary() {
           </div>}
         </AdminPage>
       </div>
-      <ConfirmDialog open={Boolean(switching)} onOpenChange={(open) => { if (!open) setSwitching(null); }}
-        title={`Switch to ${templateDisplayName(starters.find((item) => item.id === switching?.starterId)?.name ?? "this design")}?`}
-        description={<><p>Your draft page layouts are replaced, and products, collections and pages go back to the main layout for their type.</p><p>Your live store, products, orders and customers stay the same until you publish. This cannot be undone, so publish or note anything you want to keep first.</p></>}
-        confirmLabel="Switch design" onConfirm={() => { const choice = switching; if (choice) void installStarter(choice.starterId, choice.styleId); }} />
+      <StoreDesignDialogs designs={designs} onCustomize={() => router.push(editorHref)} />
     </main>
   );
 }

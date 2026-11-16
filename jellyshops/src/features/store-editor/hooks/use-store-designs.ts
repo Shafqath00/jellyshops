@@ -1,12 +1,24 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { applyThemeStyle, listStarterPacks, listThemeStyles } from "@jelly/storefront-themes";
 import { useAuth } from "@/features/auth/providers/auth-provider";
 import { createStoreEditorApi } from "../api/client";
-import type { ThemeCatalogEntry, ThemeConfigurationRecord } from "../api/types";
+import type { MenuRecord, ThemeCatalogEntry, ThemeConfigurationRecord } from "../api/types";
+import { carriedThemeSettings, menusToRestore, withCarriedSettings } from "../design-switch";
+import { templateDisplayName } from "../template-gallery";
 import { templateStoreLogo, templateStoreProducts, type TemplateStoreData } from "../template-store-data";
+
+/** A design installed as a draft, and how publishing it went. */
+export type ReadyDraft = {
+  starterId: string;
+  name: string;
+  /** It replaced an earlier draft. */
+  switched: boolean;
+  /** The store's logo, links and menus were carried over. */
+  kept: boolean;
+  publish: { status: "idle" | "publishing" | "published" } | { status: "blocked"; problems: string[] } | { status: "failed"; message: string };
+};
 
 export const STORE_DESIGNS_HREF = "/admin/online-store";
 export const EDITOR_HREF = "/admin/online-store/editor";
@@ -16,13 +28,17 @@ export function templatePreviewHref(templateId: string): string {
   return `${STORE_DESIGNS_HREF}/preview/${encodeURIComponent(templateId)}`;
 }
 
+function idempotencyKey(): string {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `publish-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 /**
  * The store's current design and the actions on it, shared by the Store designs library and the
- * full-page template preview: load the theme catalogue and draft, and install a design as a new draft
- * (asking first when the store already has one).
+ * full-page template preview: load the theme catalogue and draft, install a design as a new draft
+ * (asking first when the store already has one, and keeping the store's own logo, links and menus),
+ * then customize or publish it.
  */
 export function useStoreDesigns() {
-  const router = useRouter();
   const { session, activeStore } = useAuth();
   const storeId = activeStore?.id;
   const token = session?.access_token;
@@ -38,6 +54,10 @@ export function useStoreDesigns() {
   const [retry, setRetry] = useState(0);
   /** The design waiting for a yes before it replaces the draft. */
   const [switching, setSwitching] = useState<{ starterId: string; styleId?: string } | null>(null);
+  /** Keep the store's logo, social links, languages and menus when switching (asked in the switch dialog). */
+  const [keepContent, setKeepContent] = useState(true);
+  /** The design just installed as a draft: the merchant chooses to customize it or publish it. */
+  const [ready, setReady] = useState<ReadyDraft | null>(null);
   const operation = useRef(false);
   const mounted = useRef(true);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
@@ -59,7 +79,7 @@ export function useStoreDesigns() {
 
   /** A store that already has a draft is asked first; a new store starts straight away. */
   function chooseStarter(starterId: string, styleId?: string) {
-    if (hasWorkspace) setSwitching({ starterId, styleId });
+    if (hasWorkspace) { setKeepContent(true); setSwitching({ starterId, styleId }); }
     else void installStarter(starterId, styleId);
   }
 
@@ -68,21 +88,56 @@ export function useStoreDesigns() {
     operation.current = true;
     setSaving(`starter:${starterId}`); setError(undefined);
     try {
+      // The store's own logo, links and menus are read first: installing a design replaces them in the draft.
+      const keep = hasWorkspace && keepContent;
+      const [previousConfiguration, previousMenus]: [ThemeConfigurationRecord | null, MenuRecord[]] = keep
+        ? await Promise.all([api.getThemeConfiguration(storeId), api.listMenus(storeId)])
+        : [null, []];
       if (hasWorkspace) {
         const workspace = await api.loadWorkspace(storeId);
         await api.installStarterPack(storeId, starterId, { replaceDraft: true, expectedGeneration: workspace.generation });
       } else await api.installStarterPack(storeId, starterId);
-      // A theme style picked in the preview (other than the theme's default look) is applied to the new draft.
+
+      // A theme style picked in the preview (other than the theme's default look) and the carried values go into one save.
       const starter = listStarterPacks().find((item) => item.id === starterId);
       const styles = listThemeStyles(starter?.theme.themeId);
       const style = styles.find((item) => item.id === styleId);
-      if (style && style !== styles[0]) {
-        const installed = await api.getThemeConfiguration(storeId);
-        if (installed) await api.saveThemeConfiguration(storeId, installed.revision, { themeId: installed.themeId, themeVersion: installed.themeVersion, settings: applyThemeStyle(installed.settings, style), draftArtifactId: installed.draftArtifactId ?? null });
+      const restyle = Boolean(style && style !== styles[0]);
+      const carried = carriedThemeSettings(previousConfiguration?.settings);
+      let installed = await api.getThemeConfiguration(storeId);
+      if (installed && (restyle || Object.keys(carried).length)) {
+        const styled = restyle && style ? applyThemeStyle(installed.settings, style) : installed.settings;
+        installed = (await api.saveThemeConfiguration(storeId, installed.revision, {
+          themeId: installed.themeId, themeVersion: installed.themeVersion, settings: withCarriedSettings(styled, carried), draftArtifactId: installed.draftArtifactId ?? null,
+        })).theme;
       }
-      if (mounted.current) router.push(EDITOR_HREF);
+      if (keep && previousMenus.length) {
+        for (const { menu, items } of menusToRestore(previousMenus, await api.listMenus(storeId))) await api.updateMenu(storeId, menu.id, menu.revision, { items });
+      }
+      if (!mounted.current) return;
+      setConfiguration(installed);
+      setHasWorkspace(true);
+      setReady({ starterId, name: templateDisplayName(starter?.name ?? "Your design"), switched: hasWorkspace, kept: keep, publish: { status: "idle" } });
     } catch (reason) { if (mounted.current) setError(reason instanceof Error ? reason.message : "Could not prepare this store design. Try again."); }
     finally { operation.current = false; if (mounted.current) setSaving(undefined); }
+  }
+
+  /** Publishes the current draft: the new design becomes what shoppers see. */
+  async function publishDraft() {
+    if (!api || !storeId || !ready || ready.publish.status === "publishing") return;
+    setReady((current) => current && { ...current, publish: { status: "publishing" } });
+    try {
+      const workspace = await api.loadWorkspace(storeId);
+      const result = await api.publish(storeId, workspace.generation, idempotencyKey());
+      const problems = result.diagnostics.filter((item) => item.severity === "error").map((item) => item.message);
+      if (!mounted.current) return;
+      setReady((current) => current && {
+        ...current,
+        publish: result.ok ? { status: "published" } : { status: "blocked", problems: problems.length ? problems : ["Something on a page needs fixing before it can go live."] },
+      });
+    } catch (reason) {
+      if (mounted.current) setReady((current) => current && { ...current, publish: { status: "failed", message: reason instanceof Error ? reason.message : "Could not publish. Try again." } });
+    }
   }
 
   /** Runs one change at a time (the library's theme-only switch uses it too). */
@@ -97,12 +152,14 @@ export function useStoreDesigns() {
 
   return {
     api, storeId, token, activeStore, themes, configuration, setConfiguration, hasWorkspace, loading, saving, error, setError,
-    reload, chooseStarter, installStarter, switching, setSwitching, runOperation, mounted,
+    reload, chooseStarter, installStarter, switching, setSwitching, keepContent, setKeepContent, ready, setReady, publishDraft, runOperation, mounted,
   };
 }
 
+export type StoreDesigns = ReturnType<typeof useStoreDesigns>;
+
 /** The merchant's own name, logo and products for the design preview; loaded once `enabled` turns on. */
-export function useTemplateStoreData(designs: Pick<ReturnType<typeof useStoreDesigns>, "api" | "storeId" | "activeStore" | "configuration" | "loading">, enabled: boolean): TemplateStoreData | undefined {
+export function useTemplateStoreData(designs: Pick<StoreDesigns, "api" | "storeId" | "activeStore" | "configuration" | "loading">, enabled: boolean): TemplateStoreData | undefined {
   const { api, storeId, activeStore, configuration, loading } = designs;
   const [storeData, setStoreData] = useState<TemplateStoreData>();
   useEffect(() => {
