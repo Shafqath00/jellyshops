@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /** Top-level app routes cannot also be public store addresses. */
-export const RESERVED_STORE_SLUGS = ["admin", "api", "auth", "login", "signup", "onboarding", "theme-preview", "themes"];
+export const RESERVED_STORE_SLUGS = ["admin", "api", "auth", "changelog", "login", "signup", "onboarding", "theme-preview", "themes"];
 
 export const storeSlugSchema = z.string()
   .min(3).max(63)
