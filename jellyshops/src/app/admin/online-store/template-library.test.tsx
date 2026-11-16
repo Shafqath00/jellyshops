@@ -38,13 +38,16 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
-it("previews a template without installing it, then installs the chosen template and opens the editor", async () => {
+it("links every design card to its full-page preview without installing anything", async () => {
   render(<OnlineStorePage />);
-  await userEvent.click(await screen.findByRole("button", { name: "Preview Fresh Market" }));
-  const dialog = screen.getByRole("dialog");
-  expect(within(dialog).getByRole("heading", { name: "Fresh Market" })).toBeVisible();
+  expect(await screen.findByRole("link", { name: "Preview Fresh Market" })).toHaveAttribute("href", "/admin/online-store/preview/fresh-market");
   expect(requests.filter((request) => request.method !== "GET")).toHaveLength(0);
-  await userEvent.click(within(dialog).getByRole("button", { name: "Start with this design" }));
+});
+
+it("starts a new store straight from a card and opens the editor", async () => {
+  render(<OnlineStorePage />);
+  const card = await screen.findByRole("article", { name: "Fresh Market" });
+  await userEvent.click(within(card).getByRole("button", { name: /Start with this design/ }));
   expect(requests.find((request) => request.url.endsWith("/starters/fresh-market/install"))?.method).toBe("POST");
   expect(push).toHaveBeenCalledWith("/admin/online-store/editor");
 });
@@ -73,5 +76,5 @@ it("allows retrying a failed gallery load without leaving the page", async () =>
   expect(await screen.findByRole("alert")).toHaveTextContent("Unable to reach your store");
   failLoad = false;
   await userEvent.click(screen.getByRole("button", { name: "Try again" }));
-  expect(await screen.findByRole("button", { name: "Preview Fresh Market" })).toBeEnabled();
+  expect(await screen.findByRole("link", { name: "Preview Fresh Market" })).toBeVisible();
 });

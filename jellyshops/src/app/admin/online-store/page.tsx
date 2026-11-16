@@ -1,25 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check, Eye, Loader2, Palette, Pencil, RefreshCw, Sparkles } from "lucide-react";
-import { applyThemeStyle, listStarterPacks, listThemeStyles } from "@jelly/storefront-themes";
+import { listStarterPacks } from "@jelly/storefront-themes";
 import { AdminPage, Banner, ConfirmDialog, buttonClass } from "@/components/admin";
-import { templateStoreLogo, templateStoreProducts, type TemplateStoreData } from "@/features/store-editor/template-store-data";
 import { galleryTemplate, templateDisplayName, usedCategories, type GalleryTemplate, type TemplateCategory } from "@/features/store-editor/template-gallery";
 import { useAuth } from "@/features/auth/providers/auth-provider";
-import { createStoreEditorApi } from "@/features/store-editor/api/client";
-import type { ThemeCatalogEntry, ThemeConfigurationRecord } from "@/features/store-editor/api/types";
+import type { ThemeCatalogEntry } from "@/features/store-editor/api/types";
 import { ThemeUpgradePanel } from "@/features/theme-upgrade/theme-upgrade-panel";
 import { LayoutUpgradePanel } from "@/features/theme-upgrade/layout-upgrade-panel";
-import { TemplatePreviewDialog } from "@/features/store-editor/components/template-preview";
+import { EDITOR_HREF, templatePreviewHref, useStoreDesigns } from "@/features/store-editor/hooks/use-store-designs";
 
 const starters = listStarterPacks();
 const gallery = starters.map(galleryTemplate);
 const categories = usedCategories(gallery);
-const editorHref = "/admin/online-store/editor";
+const editorHref = EDITOR_HREF;
 const surface = "rounded-2xl bg-[var(--jk-surface)] shadow-[var(--jk-shadow)]";
 const subdued = "text-[var(--jk-text-subdued)]";
 const primary = buttonClass("primary", "large");
@@ -42,99 +40,28 @@ function TemplateCover({ template, sizes, priority = false }: { template: Galler
 
 function StoreDesignLibrary() {
   const router = useRouter();
-  const { session, activeStore } = useAuth();
-  const storeId = activeStore?.id;
-  const token = session?.access_token;
-  const api = useMemo(() => token && storeId ? createStoreEditorApi({
-    baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001", token,
-  }) : null, [token, storeId]);
-  const [themes, setThemes] = useState<ThemeCatalogEntry[]>([]);
-  const [configuration, setConfiguration] = useState<ThemeConfigurationRecord | null>(null);
-  const [hasWorkspace, setHasWorkspace] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState<string>();
-  const [error, setError] = useState<string>();
+  const designs = useStoreDesigns();
+  const { api, activeStore, themes, configuration, setConfiguration, hasWorkspace, loading, saving, error, reload, chooseStarter, installStarter, switching, setSwitching, runOperation, mounted } = designs;
+  const storeId = designs.storeId;
+  const token = designs.token;
   const [notice, setNotice] = useState<string>();
-  const [retry, setRetry] = useState(0);
-  const [previewId, setPreviewId] = useState<string>();
   const [category, setCategory] = useState<TemplateCategory | "all">("all");
-  const [storeData, setStoreData] = useState<TemplateStoreData>();
-  /** The design waiting for a yes before it replaces the draft. */
-  const [switching, setSwitching] = useState<{ starterId: string; styleId?: string } | null>(null);
-  const operation = useRef(false);
-  const mounted = useRef(true);
-  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
 
-  useEffect(() => {
-    if (!api || !storeId) return;
-    let alive = true;
-    void Promise.all([api.listThemeCatalog(storeId), api.getThemeConfiguration(storeId), api.listTemplates(storeId), api.listGlobalSections(storeId), api.listMenus(storeId)])
-      .then(([catalog, selected, templates, globals, menus]) => {
-        if (!alive) return;
-        setThemes(catalog); setConfiguration(selected); setError(undefined);
-        setHasWorkspace(Boolean(selected || templates.length || globals.length || menus.length));
-      }).catch((reason: unknown) => { if (alive) setError(reason instanceof Error ? reason.message : "Could not load your store designs. Try again."); })
-      .finally(() => { if (alive) setLoading(false); });
-    return () => { alive = false; };
-  }, [api, storeId, retry]);
-
-  // The design preview shows the merchant's own name, logo and products; loaded once, when a preview first opens.
-  useEffect(() => {
-    if (!previewId || storeData || !api || !storeId || !activeStore) return;
-    let alive = true;
-    const base = { name: activeStore.name, logoUrl: templateStoreLogo(configuration?.settings) };
-    api.listProducts(storeId)
-      .then((result) => { if (alive) setStoreData({ ...base, products: templateStoreProducts(result.nodes, activeStore.slug, activeStore.currency) }); })
-      .catch(() => { if (alive) setStoreData({ ...base, products: [] }); });
-    return () => { alive = false; };
-  }, [previewId, storeData, api, storeId, activeStore, configuration]);
-
-  async function selectTheme(theme: ThemeCatalogEntry) {
-    if (!api || !storeId || operation.current || !theme.available) return;
-    operation.current = true;
-    setSaving(theme.id); setError(undefined); setNotice(undefined);
-    try {
+  function selectTheme(theme: ThemeCatalogEntry) {
+    if (!api || !storeId || !theme.available) return;
+    setNotice(undefined);
+    void runOperation(theme.id, async () => {
       const result = await api.saveThemeConfiguration(storeId, configuration?.revision ?? null, {
         themeId: theme.id, themeVersion: theme.version, settings: configuration?.settings ?? {}, draftArtifactId: configuration?.draftArtifactId ?? null,
       });
       if (!mounted.current) return;
       setConfiguration(result.theme);
       setNotice(`${theme.name} selected. Continue editing to customize it, then publish when you’re ready.`);
-    } catch (reason) { if (mounted.current) setError(reason instanceof Error ? reason.message : "Could not change your theme. Try again."); }
-    finally { operation.current = false; if (mounted.current) setSaving(undefined); }
-  }
-
-  /** A store that already has a draft is asked first; a new store starts straight away. */
-  function chooseStarter(starterId: string, styleId?: string) {
-    if (hasWorkspace) setSwitching({ starterId, styleId });
-    else void installStarter(starterId, styleId);
-  }
-
-  async function installStarter(starterId: string, styleId?: string) {
-    if (!api || !storeId || operation.current) return;
-    operation.current = true;
-    setSaving(`starter:${starterId}`); setError(undefined); setNotice(undefined);
-    try {
-      if (hasWorkspace) {
-        const workspace = await api.loadWorkspace(storeId);
-        await api.installStarterPack(storeId, starterId, { replaceDraft: true, expectedGeneration: workspace.generation });
-      } else await api.installStarterPack(storeId, starterId);
-      // A theme style picked in the preview (other than the theme's default look) is applied to the new draft.
-      const starter = starters.find((item) => item.id === starterId);
-      const styles = listThemeStyles(starter?.theme.themeId);
-      const style = styles.find((item) => item.id === styleId);
-      if (style && style !== styles[0]) {
-        const installed = await api.getThemeConfiguration(storeId);
-        if (installed) await api.saveThemeConfiguration(storeId, installed.revision, { themeId: installed.themeId, themeVersion: installed.themeVersion, settings: applyThemeStyle(installed.settings, style), draftArtifactId: installed.draftArtifactId ?? null });
-      }
-      if (mounted.current) router.push(editorHref);
-    } catch (reason) { if (mounted.current) setError(reason instanceof Error ? reason.message : "Could not prepare this store design. Try again."); }
-    finally { operation.current = false; if (mounted.current) setSaving(undefined); }
+    });
   }
 
   const selectedTheme = themes.find((theme) => theme.id === configuration?.themeId);
   const current = gallery.find((template) => template.id === configuration?.themeId);
-  const preview = starters.find((starter) => starter.id === previewId);
   const unavailable = configuration && (!selectedTheme || !selectedTheme.available);
   const shown = category === "all" ? gallery : gallery.filter((template) => template.category === category);
   const currentName = current?.name ?? (selectedTheme ? templateDisplayName(selectedTheme.name) : "Your storefront");
@@ -147,7 +74,7 @@ function StoreDesignLibrary() {
           description="Choose the look of your online store. Every design includes all pages, and your products are added automatically."
           secondaryActions={activeStore ? [{ label: "View store", href: `/${activeStore.slug}` }] : []}
         >
-          {error && <Banner tone="critical" action={<button type="button" onClick={() => { setLoading(true); setError(undefined); setRetry((value) => value + 1); }} className="jk-button"><RefreshCw size={14} aria-hidden="true" />Try again</button>}>{error}</Banner>}
+          {error && <Banner tone="critical" action={<button type="button" onClick={reload} className="jk-button"><RefreshCw size={14} aria-hidden="true" />Try again</button>}>{error}</Banner>}
           {notice && <Banner tone="success">{notice}</Banner>}
 
           {loading ? <div aria-label="Loading store designs" aria-busy="true" className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -165,7 +92,7 @@ function StoreDesignLibrary() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Link href={editorHref} className={primary}><Pencil size={15} aria-hidden="true" />Continue editing</Link>
-                  <button type="button" className={secondary} onClick={() => current && setPreviewId(current.id)} disabled={!current}><Eye size={15} aria-hidden="true" />Preview design</button>
+                  {current && <Link href={templatePreviewHref(current.id)} className={secondary}><Eye size={15} aria-hidden="true" />Preview design</Link>}
                 </div>
                 <p className={`text-xs ${subdued}`}>Edits stay private until you publish.</p>
               </div>
@@ -199,12 +126,12 @@ function StoreDesignLibrary() {
                 const selected = configuration?.themeId === template.id;
                 const busy = saving === `starter:${template.id}`;
                 return <article key={template.id} aria-label={template.name} className={`${surface} group flex flex-col overflow-hidden transition duration-200 hover:-translate-y-0.5 hover:shadow-[var(--jk-shadow-raised)] motion-reduce:transform-none ${selected ? "ring-2 ring-[var(--jk-accent)]" : ""}`}>
-                  <button type="button" aria-label={`Preview ${template.name}`} onClick={() => setPreviewId(template.id)} className="relative block w-full text-left focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-[var(--jk-focus)]">
+                  <Link href={templatePreviewHref(template.id)} tabIndex={-1} aria-hidden="true" className="relative block w-full text-left focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-[var(--jk-focus)]">
                     <TemplateCover template={template} sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 400px" priority={index < 3} />
                     <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 transition group-hover:opacity-100 motion-reduce:transition-none" aria-hidden="true" />
                     <span className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-[#1f1f1f] shadow-sm opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100 motion-reduce:transition-none" aria-hidden="true"><Eye size={13} />Preview</span>
                     {selected && <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold text-[#1f1f1f] shadow-sm"><Check size={12} aria-hidden="true" />Current</span>}
-                  </button>
+                  </Link>
                   <div className="flex flex-1 flex-col p-5">
                     {template.category && <p className={`text-[11px] font-semibold uppercase tracking-[0.08em] ${subdued}`}>{template.category}</p>}
                     <h3 className="mt-1 text-lg font-semibold tracking-tight">{template.name}</h3>
@@ -216,7 +143,7 @@ function StoreDesignLibrary() {
                         : selected
                           ? <Link href={editorHref} className={`${primary} flex-1`}><Pencil size={14} aria-hidden="true" />Customize design</Link>
                           : <button type="button" className={`${secondary} flex-1`} disabled={Boolean(saving)} onClick={() => chooseStarter(template.id)}>{busy ? <><Loader2 size={15} className="animate-spin motion-reduce:animate-none" aria-hidden="true" />Switching…</> : <>Switch to this design<ArrowRight size={15} aria-hidden="true" /></>}</button>}
-                      <button type="button" onClick={() => setPreviewId(template.id)} className={secondary}><Eye size={15} aria-hidden="true" />Preview</button>
+                      <Link href={templatePreviewHref(template.id)} className={secondary} aria-label={`Preview ${template.name}`}><Eye size={15} aria-hidden="true" />Preview</Link>
                     </div>
                   </div>
                 </article>;
@@ -249,7 +176,6 @@ function StoreDesignLibrary() {
         title={`Switch to ${templateDisplayName(starters.find((item) => item.id === switching?.starterId)?.name ?? "this design")}?`}
         description={<><p>Your draft page layouts are replaced, and products, collections and pages go back to the main layout for their type.</p><p>Your live store, products, orders and customers stay the same until you publish. This cannot be undone, so publish or note anything you want to keep first.</p></>}
         confirmLabel="Switch design" onConfirm={() => { const choice = switching; if (choice) void installStarter(choice.starterId, choice.styleId); }} />
-      {preview && <TemplatePreviewDialog starter={{ ...preview, name: templateDisplayName(preview.name) }} hasWorkspace={hasWorkspace} busy={Boolean(saving)} error={error} store={storeData} onClose={() => setPreviewId(undefined)} onUse={(styleId) => chooseStarter(preview.id, styleId)} onEdit={() => router.push(editorHref)} />}
     </main>
   );
 }
