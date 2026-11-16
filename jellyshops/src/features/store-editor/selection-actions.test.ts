@@ -39,9 +39,9 @@ it("moves, duplicates, hides and deletes blocks within their section's limits", 
   const removed = applySelectionAction(layout(), { sectionId: "a", blockId: "b1" }, "remove");
   expect(inline(removed, 1).section.blocks.map(({ id }) => id)).toEqual(["b2"]);
   expect(removed!.select).toEqual({ sectionId: "a" });
-  // Custom content allows at most 12 blocks.
+  // Custom content allows at most 24 blocks.
   const full = layout();
-  (full.sections[1] as { section: { blocks: unknown[] } }).section.blocks = Array.from({ length: 12 }, (_, index) => block(`x${index}`));
+  (full.sections[1] as { section: { blocks: unknown[] } }).section.blocks = Array.from({ length: 24 }, (_, index) => block(`x${index}`));
   expect(availableActions(full, { sectionId: "a", blockId: "x0" }).duplicate).toBe(false);
   expect(availableActions(layout(), { sectionId: "header" }).remove).toBe(false);
 });

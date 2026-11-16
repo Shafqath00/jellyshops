@@ -36,9 +36,13 @@ describe("block sets", () => {
     expect(validateSectionAgainstRegistry(section("acme/sets", [block("text"), block("app")]), "home")).toEqual([]);
     expect(validateSectionAgainstRegistry(section("acme/sets", [block("slide")]), "home").map((issue) => issue.code)).toEqual(["BLOCK_NOT_ALLOWED"]);
   });
-  it("leaves the built-in sections' block lists as they were", () => {
-    expect(getSectionDefinition("custom-content")!.allowedBlockTypes).toEqual(["heading", "text", "button", "image", "video", "app", "group"]);
-    expect(getSectionDefinition("custom-content")!.blockSets).toBeUndefined();
+  it("gives Custom content and groups the whole library, and leaves other built-in lists as they were", () => {
+    const custom = getSectionDefinition("custom-content")!;
+    expect(custom.blockSets).toEqual(["@content", "@app"]);
+    expect(custom.allowedBlockTypes).toEqual(expect.arrayContaining(["heading", "text", "button", "image", "video", "app", "group", "grid", "accordion", "card"]));
+    expect(custom.allowedBlockTypes).not.toContain("accordion-row");
+    expect(getBlockDefinition("group")!.allowedBlockTypes).toEqual(expect.arrayContaining(["heading", "group", "app", "icon-box"]));
+    expect(getSectionDefinition("image-with-text")!.blockSets).toBeUndefined();
   });
 });
 

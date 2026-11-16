@@ -16,8 +16,8 @@ export const BLOCK_SHADOWS = ["none", "soft", "medium", "strong"] as const;
 export const STYLED_BLOCK_TYPES = ["heading", "text", "button", "image", "video", "group"] as const;
 /** Buttons and media have no text style, text colour or background of their own (buttons have their own colours). */
 const TEXT_ONLY_KEYS = new Set(["blockTypePreset", "blockTextColor", "blockBackground", "blockBackgroundColor", "blockGradientColor", "blockGradientAngle"]);
-/** A group passes its text style and colours on to the blocks inside it. */
-const TEXT_BLOCK_TYPES = new Set(["heading", "text", "group"]);
+/** Blocks without text of their own: no text style, text colour or background. Every other styled block has them (a group passes them on to its blocks). */
+const NON_TEXT_BLOCK_TYPES = new Set(["button", "image", "video", "divider", "spacer", "icon"]);
 
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 const empty = z.literal("");
@@ -87,13 +87,13 @@ export function isBlockStyleKey(key: string): boolean {
   return styleKeys.has(key);
 }
 
-/** Adds the shared style controls to heading, text, button, image, video and group blocks; other blocks are returned unchanged. */
+/** Adds the shared style controls to the content blocks (heading, text, button, media, group and every "@content" block); other blocks are returned unchanged. */
 export function withBlockStyle(definition: BlockDefinition): BlockDefinition {
-  if (!styledTypes.has(definition.type)) return definition;
+  if (!styledTypes.has(definition.type) && !definition.sets?.includes("@content")) return definition;
   const own = new Set(definition.controls.map((control) => control.key));
   return {
     ...definition,
-    controls: [...definition.controls, ...BLOCK_STYLE_CONTROLS.filter((control) => !own.has(control.key) && (TEXT_BLOCK_TYPES.has(definition.type) || !TEXT_ONLY_KEYS.has(control.key)))],
+    controls: [...definition.controls, ...BLOCK_STYLE_CONTROLS.filter((control) => !own.has(control.key) && (!NON_TEXT_BLOCK_TYPES.has(definition.type) || !TEXT_ONLY_KEYS.has(control.key)))],
     settingsSchema: z.intersection(definition.settingsSchema, blockStyleSchema),
   };
 }

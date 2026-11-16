@@ -8,7 +8,10 @@ const section = (blocks: BlockNode[]): SectionNode => ({ id: "s", type: "custom-
 
 it("defines a group block that holds content blocks and has the shared style settings", () => {
   const definition = getBlockDefinition("group")!;
-  expect(definition.allowedBlockTypes).toEqual(["heading", "text", "button", "image", "video", "app", "group"]);
+  // Every "@content" block and app blocks (the shared library), not section-only blocks.
+  expect(definition.allowedBlockTypes).toEqual(expect.arrayContaining(["heading", "text", "button", "image", "video", "app", "group", "grid", "card", "accordion"]));
+  expect(definition.allowedBlockTypes).not.toContain("slide");
+  expect(definition.allowedBlockTypes).not.toContain("accordion-row");
   expect(definition.maxBlocks).toBe(8);
   expect(definition.controls.map(({ key }) => key)).toEqual(expect.arrayContaining(["groupDirection", "groupGap", "blockBackgroundColor", "blockPaddingTop"]));
 });
@@ -40,7 +43,10 @@ it("accepts phone values only for phone settings, and checks them", () => {
 
 it("offers groups inside a group only where they can still hold blocks", () => {
   expect(allowedChildBlockTypes("group", 1)).toContain("group");
-  expect(allowedChildBlockTypes("group", 2)).toEqual(["heading", "text", "button", "image", "video", "app"]);
+  // At the last level, blocks that hold blocks (group, grid, accordion, tabs…) are left out.
+  const lastLevel = allowedChildBlockTypes("group", 2);
+  expect(lastLevel).toEqual(expect.arrayContaining(["heading", "text", "button", "image", "video", "app", "card", "icon-box"]));
+  for (const holder of ["group", "grid", "accordion", "tabs", "icon-list", "button-group"]) expect(lastLevel).not.toContain(holder);
   expect(allowedChildBlockTypes("group", 3)).toEqual([]);
   expect(allowedChildBlockTypes("button", 1)).toEqual([]);
 });

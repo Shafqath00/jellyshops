@@ -11,6 +11,8 @@ type Variant = Omit<SectionPreset, "sectionType">;
 
 const photo = (id: string, alt: string, width = 1200) => ({ url: `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=80`, alt });
 const block = (type: string, settings: Record<string, unknown>): BlockNode => ({ id: `variant-${type}`, type, enabled: true, settings });
+/** A block that holds blocks (grid, accordion): its children get their own placeholder ids. */
+const holder = (type: string, settings: Record<string, unknown>, blocks: BlockNode[]): BlockNode => ({ ...block(type, settings), blocks: blocks.map((child, index) => ({ ...child, id: `${child.id}-${index + 1}` })) });
 const heading = (text: string) => block("heading", { text });
 const text = (value: string) => block("text", { text: value });
 const button = (label: string, href = "/shop") => block("button", { label, href });
@@ -96,6 +98,50 @@ export const SECTION_VARIANTS: Record<string, Variant[]> = {
       description: "Four compact columns with a left-aligned heading.",
       settings: { heading: "Good to know", columns: 4, contentAlignment: "left" },
       blocks: [column("Delivery", "Dispatched within two working days."), column("Returns", "Free returns within 30 days."), column("Care", "Simple care guides with every order."), column("Help", "Real people reply within a day.")],
+    },
+  ],
+  // Custom content built from the shared block library (content-blocks.ts); more designed presets follow in T3.
+  "custom-content": [
+    {
+      id: "custom-icon-boxes", label: "Custom content: Icon boxes", category: "content", thumbnail: "columns-3",
+      description: "A heading with three icon boxes in a grid.",
+      settings: { contentAlignment: "left", contentWidth: "full", gap: 32 },
+      blocks: [
+        block("section-header", { eyebrow: "Why shop with us", heading: "Made to be lived with", text: "Small promises we keep on every order.", layout: "horizontal", linkLabel: "Our story", link: "/pages/about" }),
+        holder("grid", { columns: 3, gap: 24, alignItems: "stretch" }, [
+          block("icon-box", { icon: "truck", heading: "Free delivery", text: "On every order over £50.", boxStyle: "card" }),
+          block("icon-box", { icon: "return", heading: "30-day returns", text: "Changed your mind? Send it back for free.", boxStyle: "card" }),
+          block("icon-box", { icon: "shield", heading: "Two-year guarantee", text: "We stand behind what we make.", boxStyle: "card" }),
+        ]),
+      ],
+    },
+    {
+      id: "custom-faq-accordion", label: "Custom content: Questions and answers", category: "content", thumbnail: "centered",
+      description: "A heading and an accordion of common questions.",
+      settings: { contentAlignment: "left", contentWidth: "narrow", gap: 24 },
+      blocks: [
+        block("section-header", { eyebrow: "Help", heading: "Questions, answered" }),
+        holder("accordion", { openFirst: true, oneAtATime: true }, [
+          block("accordion-row", { title: "How long does delivery take?", text: "Most orders arrive in 3 to 5 working days." }),
+          block("accordion-row", { title: "Can I return my order?", text: "Yes, within 30 days, as long as it is unused." }),
+          block("accordion-row", { title: "Do you deliver abroad?", text: "We deliver across the UK and Europe." }),
+        ]),
+      ],
+    },
+    {
+      id: "custom-counters", label: "Custom content: Numbers", category: "content", thumbnail: "columns-4",
+      description: "A short story with four big numbers.",
+      settings: { contentAlignment: "center", contentWidth: "full", gap: 32 },
+      blocks: [
+        block("subheading", { text: "Our story" }),
+        heading("Small studio, big care"),
+        holder("grid", { columns: 4, gap: 24, alignItems: "start" }, [
+          block("counter", { value: 12000, suffix: "+", label: "Happy customers" }),
+          block("counter", { value: 4.9, label: "Average rating" }),
+          block("counter", { value: 30, suffix: " days", label: "Free returns" }),
+          block("counter", { value: 2016, label: "Making since" }),
+        ]),
+      ],
     },
   ],
 };

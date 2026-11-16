@@ -3,6 +3,7 @@ import { settingValueSchema, type DynamicValueType } from "@jelly/storefront-sch
 import { appEmbedSource, getAppBlockProvider, listAppBlockProviders, STORE_ICON_LABELS, STORE_ICON_NAMES } from "@jelly/storefront-schema";
 import { withBlockStyle } from "./block-style.js";
 import { withBlockElements } from "./section-elements.js";
+import { CONTENT_BLOCKS } from "./content-blocks.js";
 import type { BlockDefinition, ControlDefinition } from "./types.js";
 
 const dynamicString = z.union([z.string(), settingValueSchema(z.string())]);
@@ -62,7 +63,8 @@ const groupBlock: BlockDefinition = {
     { type: "checkbox", key: "groupWrap", label: "Stack on small screens", group: "layout", heading: "Layout", showWhen: { key: "groupDirection", equals: "horizontal" } },
   ],
   defaultSettings: { groupDirection: "horizontal", groupGap: 12, groupWrap: true },
-  allowedBlockTypes: GROUP_CHILD_TYPES,
+  // Any content or app block (the shared library grows without touching this list); groups at the last level hold no groups.
+  allowedBlockTypes: ["@content", "@app"],
   maxBlocks: 8,
   defaultBlocks: [
     { id: "group-button-1", type: "button", enabled: true, settings: { label: "Shop now", href: "/shop" } },
@@ -139,6 +141,7 @@ const blocks: BlockDefinition[] = [
   { type: "gallery-image", settingsSchema: z.object({ image: imageReference.optional(), caption: z.string().max(120).optional(), link: linkSchema }).passthrough(), controls: [{ type: "image", key: "image", label: "Photo", group: "content" }, { type: "text", key: "caption", label: "Caption", description: "Optional, for example the customer's name or the product.", group: "content", maxLength: 120 }, { type: "link", key: "link", label: "Link", description: "Optional.", group: "content", dynamicTypes: urlTypes }], defaultSettings: {} },
   groupBlock,
   appBlock(),
+  ...CONTENT_BLOCKS,
   { type: "social-link", settingsSchema: z.object({ label: z.string(), href: z.union([z.string(), settingValueSchema(z.string())]) }).passthrough(), controls: [{ type: "link", key: "href", label: "Link", group: "content", dynamicTypes: urlTypes }], defaultSettings: { label: "Instagram", href: "https://example.com" } }
 ];
 

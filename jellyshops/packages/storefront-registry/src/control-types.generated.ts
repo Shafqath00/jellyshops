@@ -83,11 +83,22 @@ export const SECTION_CONTROL_TYPES: Record<string, Record<string, string>> = {
   }
 };
 export const BLOCK_CONTROL_TYPES: Record<string, Record<string, string>> = {
+  "accordion-row": {
+    "text": "rich-text"
+  },
   "announcement-message": {
     "link": "link"
   },
   "button": {
     "href": "link"
+  },
+  "card": {
+    "image": "image",
+    "text": "rich-text",
+    "link": "link"
+  },
+  "collapsible-text": {
+    "text": "rich-text"
   },
   "collection-card": {
     "image": "image",
@@ -108,6 +119,13 @@ export const BLOCK_CONTROL_TYPES: Record<string, Record<string, string>> = {
   },
   "hotspot": {
     "productId": "product"
+  },
+  "icon-box": {
+    "text": "rich-text",
+    "link": "link"
+  },
+  "icon-list-item": {
+    "link": "link"
   },
   "image": {
     "image": "image",
@@ -132,6 +150,11 @@ export const BLOCK_CONTROL_TYPES: Record<string, Record<string, string>> = {
   "product-tab": {
     "collectionId": "collection"
   },
+  "section-header": {
+    "heading": "rich-text",
+    "text": "rich-text",
+    "link": "link"
+  },
   "slide": {
     "image": "image",
     "buttonLink": "link"
@@ -142,6 +165,9 @@ export const BLOCK_CONTROL_TYPES: Record<string, Record<string, string>> = {
   "story-tile": {
     "image": "image",
     "link": "link"
+  },
+  "tab": {
+    "text": "rich-text"
   },
   "testimonial": {
     "avatar": "image"

@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react";
 import {
   AlignLeft, Columns3, Footprints, GalleryHorizontal, Heading, Image as ImageIcon, LayoutGrid, LayoutPanelTop, Mail, Megaphone, MessageSquareQuote,
-  MousePointerClick, MoreHorizontal, PanelTop, Rows3, ShoppingBag, Square, Star, Store, Type, Video,
+  MousePointerClick, MoreHorizontal, PanelTop, Rows3, ShoppingBag, Square, Star, Store, Type, Video, ChevronsUpDown, Hash, List, Tag, Sparkles, CreditCard,
   type LucideIcon,
 } from "lucide-react";
 
@@ -27,6 +27,16 @@ export function sectionIcon(type: string): LucideIcon {
 
 /** A recognisable icon for each kind of block or section part. */
 export function blockIcon(type: string): LucideIcon {
+  // Shared content blocks first: their names would otherwise match the general rules below (icon-list has "list"…).
+  if (type === "grid") return LayoutGrid;
+  if (type === "accordion" || type === "accordion-row" || type === "collapsible-text" || type === "tabs" || type === "tab") return ChevronsUpDown;
+  if (type === "divider" || type === "spacer") return Rows3;
+  if (type === "icon-list" || type === "icon-list-item") return List;
+  if (type === "icon" || type === "icon-box") return Sparkles;
+  if (type === "badge") return Tag;
+  if (type === "counter") return Hash;
+  if (type === "card") return CreditCard;
+  if (type === "section-header" || type === "subheading") return Heading;
   if (type.includes("heading") || type === "title") return Heading;
   if (type.includes("button") || type.includes("link")) return MousePointerClick;
   if (type.includes("image") || type.includes("photo") || type.includes("logo")) return ImageIcon;

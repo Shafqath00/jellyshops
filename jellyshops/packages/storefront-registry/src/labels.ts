@@ -82,6 +82,25 @@ const blockLabels: Record<string, string> = {
   "spec-row": "Specification",
   "link-heading": "Link column heading",
   link: "Link",
+  // Shared content blocks (content-blocks.ts).
+  subheading: "Subheading",
+  "section-header": "Section header",
+  "collapsible-text": "Collapsible text",
+  grid: "Grid",
+  accordion: "Accordion",
+  "accordion-row": "Accordion row",
+  tabs: "Tabs",
+  tab: "Tab",
+  divider: "Divider",
+  spacer: "Spacer",
+  icon: "Icon",
+  "icon-list": "Icon list",
+  "icon-list-item": "Icon list item",
+  "icon-box": "Icon box",
+  card: "Card",
+  badge: "Badge",
+  counter: "Counter",
+  "button-group": "Button group",
 };
 
 const pageTypeLabels: Record<PageType, string> = {

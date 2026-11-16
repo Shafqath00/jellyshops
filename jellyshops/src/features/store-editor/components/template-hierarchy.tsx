@@ -14,7 +14,7 @@ import { RowMenu, blockIcon, sectionIcon } from "./outline-parts";
 /** Block name plus a short preview of its text, so merchants can tell blocks apart. */
 function describeBlock(block: { type: string; settings?: Record<string, unknown> }): string {
   const label = blockTypeLabel(block.type);
-  const text = [block.settings?.text, block.settings?.label, block.settings?.heading, block.settings?.question, block.settings?.quote].find((value): value is string => typeof value === "string" && value.trim().length > 0);
+  const text = [block.settings?.text, block.settings?.label, block.settings?.heading, block.settings?.title, block.settings?.question, block.settings?.quote].find((value): value is string => typeof value === "string" && value.trim().length > 0);
   return text ? `${label}: ${text.trim().slice(0, 40)}${text.trim().length > 40 ? "…" : ""}` : label;
 }
 

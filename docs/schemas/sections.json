@@ -8298,10 +8298,29 @@
         "button",
         "image",
         "video",
-        "app",
-        "group"
+        "group",
+        "subheading",
+        "section-header",
+        "collapsible-text",
+        "grid",
+        "accordion",
+        "tabs",
+        "divider",
+        "spacer",
+        "icon",
+        "icon-list",
+        "icon-box",
+        "card",
+        "badge",
+        "counter",
+        "button-group",
+        "app"
       ],
-      "maxBlocks": 12,
+      "blockSets": [
+        "@content",
+        "@app"
+      ],
+      "maxBlocks": 24,
       "defaultSettings": {
         "direction": "vertical",
         "contentAlignment": "center",
@@ -8335,6 +8354,219 @@
           "id": "custom-content",
           "label": "Custom content",
           "category": "content"
+        },
+        {
+          "id": "custom-icon-boxes",
+          "label": "Custom content: Icon boxes",
+          "category": "content",
+          "thumbnail": "columns-3",
+          "description": "A heading with three icon boxes in a grid.",
+          "settings": {
+            "contentAlignment": "left",
+            "contentWidth": "full",
+            "gap": 32
+          },
+          "blocks": [
+            {
+              "id": "variant-section-header",
+              "type": "section-header",
+              "enabled": true,
+              "settings": {
+                "eyebrow": "Why shop with us",
+                "heading": "Made to be lived with",
+                "text": "Small promises we keep on every order.",
+                "layout": "horizontal",
+                "linkLabel": "Our story",
+                "link": "/pages/about"
+              }
+            },
+            {
+              "id": "variant-grid",
+              "type": "grid",
+              "enabled": true,
+              "settings": {
+                "columns": 3,
+                "gap": 24,
+                "alignItems": "stretch"
+              },
+              "blocks": [
+                {
+                  "id": "variant-icon-box-1",
+                  "type": "icon-box",
+                  "enabled": true,
+                  "settings": {
+                    "icon": "truck",
+                    "heading": "Free delivery",
+                    "text": "On every order over £50.",
+                    "boxStyle": "card"
+                  }
+                },
+                {
+                  "id": "variant-icon-box-2",
+                  "type": "icon-box",
+                  "enabled": true,
+                  "settings": {
+                    "icon": "return",
+                    "heading": "30-day returns",
+                    "text": "Changed your mind? Send it back for free.",
+                    "boxStyle": "card"
+                  }
+                },
+                {
+                  "id": "variant-icon-box-3",
+                  "type": "icon-box",
+                  "enabled": true,
+                  "settings": {
+                    "icon": "shield",
+                    "heading": "Two-year guarantee",
+                    "text": "We stand behind what we make.",
+                    "boxStyle": "card"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "custom-faq-accordion",
+          "label": "Custom content: Questions and answers",
+          "category": "content",
+          "thumbnail": "centered",
+          "description": "A heading and an accordion of common questions.",
+          "settings": {
+            "contentAlignment": "left",
+            "contentWidth": "narrow",
+            "gap": 24
+          },
+          "blocks": [
+            {
+              "id": "variant-section-header",
+              "type": "section-header",
+              "enabled": true,
+              "settings": {
+                "eyebrow": "Help",
+                "heading": "Questions, answered"
+              }
+            },
+            {
+              "id": "variant-accordion",
+              "type": "accordion",
+              "enabled": true,
+              "settings": {
+                "openFirst": true,
+                "oneAtATime": true
+              },
+              "blocks": [
+                {
+                  "id": "variant-accordion-row-1",
+                  "type": "accordion-row",
+                  "enabled": true,
+                  "settings": {
+                    "title": "How long does delivery take?",
+                    "text": "Most orders arrive in 3 to 5 working days."
+                  }
+                },
+                {
+                  "id": "variant-accordion-row-2",
+                  "type": "accordion-row",
+                  "enabled": true,
+                  "settings": {
+                    "title": "Can I return my order?",
+                    "text": "Yes, within 30 days, as long as it is unused."
+                  }
+                },
+                {
+                  "id": "variant-accordion-row-3",
+                  "type": "accordion-row",
+                  "enabled": true,
+                  "settings": {
+                    "title": "Do you deliver abroad?",
+                    "text": "We deliver across the UK and Europe."
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "custom-counters",
+          "label": "Custom content: Numbers",
+          "category": "content",
+          "thumbnail": "columns-4",
+          "description": "A short story with four big numbers.",
+          "settings": {
+            "contentAlignment": "center",
+            "contentWidth": "full",
+            "gap": 32
+          },
+          "blocks": [
+            {
+              "id": "variant-subheading",
+              "type": "subheading",
+              "enabled": true,
+              "settings": {
+                "text": "Our story"
+              }
+            },
+            {
+              "id": "variant-heading",
+              "type": "heading",
+              "enabled": true,
+              "settings": {
+                "text": "Small studio, big care"
+              }
+            },
+            {
+              "id": "variant-grid",
+              "type": "grid",
+              "enabled": true,
+              "settings": {
+                "columns": 4,
+                "gap": 24,
+                "alignItems": "start"
+              },
+              "blocks": [
+                {
+                  "id": "variant-counter-1",
+                  "type": "counter",
+                  "enabled": true,
+                  "settings": {
+                    "value": 12000,
+                    "suffix": "+",
+                    "label": "Happy customers"
+                  }
+                },
+                {
+                  "id": "variant-counter-2",
+                  "type": "counter",
+                  "enabled": true,
+                  "settings": {
+                    "value": 4.9,
+                    "label": "Average rating"
+                  }
+                },
+                {
+                  "id": "variant-counter-3",
+                  "type": "counter",
+                  "enabled": true,
+                  "settings": {
+                    "value": 30,
+                    "suffix": " days",
+                    "label": "Free returns"
+                  }
+                },
+                {
+                  "id": "variant-counter-4",
+                  "type": "counter",
+                  "enabled": true,
+                  "settings": {
+                    "value": 2016,
+                    "label": "Making since"
+                  }
+                }
+              ]
+            }
+          ]
         }
       ],
       "controls": [
@@ -26325,8 +26557,23 @@
         "button",
         "image",
         "video",
-        "app",
-        "group"
+        "group",
+        "subheading",
+        "section-header",
+        "collapsible-text",
+        "grid",
+        "accordion",
+        "tabs",
+        "divider",
+        "spacer",
+        "icon",
+        "icon-list",
+        "icon-box",
+        "card",
+        "badge",
+        "counter",
+        "button-group",
+        "app"
       ],
       "maxBlocks": 8,
       "defaultSettings": {
@@ -26591,6 +26838,3205 @@
           }
         },
         "additionalProperties": {}
+      }
+    },
+    {
+      "type": "subheading",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "text": "Our story"
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "text",
+          "label": "Text",
+          "group": "content",
+          "maxLength": 80,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "$defs": {
+          "__schema0": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "resource_field"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "field"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metafield"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "namespace",
+                  "key"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metaobject_field"
+                  },
+                  "source": {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source",
+                  "field"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "section-header",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "eyebrow": "New in",
+        "heading": "Made to last",
+        "text": "A short line about what this part of the page shows.",
+        "layout": "vertical"
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "eyebrow",
+          "label": "Small text above heading",
+          "group": "content",
+          "maxLength": 80
+        },
+        {
+          "type": "rich-text",
+          "inline": true,
+          "key": "heading",
+          "label": "Heading",
+          "group": "content",
+          "maxLength": 120,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "rich-text",
+          "key": "text",
+          "label": "Text",
+          "group": "content",
+          "maxLength": 600,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "text",
+          "key": "linkLabel",
+          "label": "Link text",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
+          "type": "link",
+          "key": "link",
+          "label": "Link",
+          "group": "content",
+          "dynamicTypes": [
+            "url"
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "layout",
+          "mobile": true,
+          "label": "Layout",
+          "description": "Side by side puts the heading on the left and the text and link on the right.",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Stacked",
+              "value": "vertical"
+            },
+            {
+              "label": "Side by side",
+              "value": "horizontal"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "eyebrow": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "heading": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 600
+          },
+          "layout": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "vertical",
+                  "horizontal"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "linkLabel": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "link": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "heading"
+        ],
+        "$defs": {
+          "__schema0": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "resource_field"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "field"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metafield"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "namespace",
+                  "key"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metaobject_field"
+                  },
+                  "source": {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source",
+                  "field"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "collapsible-text",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "title": "Delivery and returns",
+        "text": "Free delivery on orders over £50. Return anything within 30 days."
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "title",
+          "label": "Title",
+          "group": "content",
+          "maxLength": 120,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "rich-text",
+          "key": "text",
+          "label": "Text",
+          "group": "content",
+          "maxLength": 2000,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "checkbox",
+          "key": "startOpen",
+          "label": "Open to start with",
+          "group": "content"
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "startOpen": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "$defs": {
+          "__schema0": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "resource_field"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "field"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metafield"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "namespace",
+                  "key"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metaobject_field"
+                  },
+                  "source": {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source",
+                  "field"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "grid",
+      "sets": [
+        "@content"
+      ],
+      "allowedBlockTypes": [
+        "heading",
+        "text",
+        "button",
+        "image",
+        "video",
+        "group",
+        "subheading",
+        "section-header",
+        "collapsible-text",
+        "grid",
+        "accordion",
+        "tabs",
+        "divider",
+        "spacer",
+        "icon",
+        "icon-list",
+        "icon-box",
+        "card",
+        "badge",
+        "counter",
+        "button-group",
+        "app"
+      ],
+      "maxBlocks": 12,
+      "defaultSettings": {
+        "columns": 3,
+        "gap": 24,
+        "alignItems": "stretch"
+      },
+      "controls": [
+        {
+          "type": "range",
+          "key": "columns",
+          "mobile": true,
+          "label": "Columns",
+          "group": "layout",
+          "heading": "Layout",
+          "min": 1,
+          "max": 6,
+          "step": 1
+        },
+        {
+          "type": "range",
+          "key": "gap",
+          "mobile": true,
+          "label": "Gap",
+          "group": "layout",
+          "heading": "Layout",
+          "min": 0,
+          "max": 80,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "type": "segmented",
+          "key": "alignItems",
+          "label": "Line up",
+          "group": "layout",
+          "heading": "Layout",
+          "options": [
+            {
+              "label": "Top",
+              "value": "start"
+            },
+            {
+              "label": "Middle",
+              "value": "center"
+            },
+            {
+              "label": "Same height",
+              "value": "stretch"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "columns": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 6
+          },
+          "gap": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 80
+          },
+          "alignItems": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "start",
+                  "center",
+                  "stretch"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "accordion",
+      "sets": [
+        "@content"
+      ],
+      "allowedBlockTypes": [
+        "accordion-row"
+      ],
+      "maxBlocks": 20,
+      "defaultSettings": {
+        "openFirst": true
+      },
+      "controls": [
+        {
+          "type": "checkbox",
+          "key": "openFirst",
+          "label": "Open the first row",
+          "group": "content"
+        },
+        {
+          "type": "checkbox",
+          "key": "oneAtATime",
+          "label": "Close the others when one opens",
+          "group": "content"
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "openFirst": {
+            "type": "boolean"
+          },
+          "oneAtATime": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "type": "accordion-row",
+      "defaultSettings": {
+        "title": "Question",
+        "text": "Answer"
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "title",
+          "label": "Title",
+          "group": "content",
+          "maxLength": 120,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "rich-text",
+          "key": "text",
+          "label": "Text",
+          "group": "content",
+          "maxLength": 2000,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": {},
+        "$defs": {
+          "__schema0": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "resource_field"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "field"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metafield"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "namespace",
+                  "key"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metaobject_field"
+                  },
+                  "source": {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source",
+                  "field"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "tabs",
+      "sets": [
+        "@content"
+      ],
+      "allowedBlockTypes": [
+        "tab"
+      ],
+      "maxBlocks": 8,
+      "defaultSettings": {},
+      "controls": [
+        {
+          "type": "segmented",
+          "key": "tabAlign",
+          "label": "Tab position",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Left",
+              "value": "start"
+            },
+            {
+              "label": "Centre",
+              "value": "center"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "tabAlign": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "start",
+                  "center"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "tab",
+      "defaultSettings": {
+        "title": "Tab",
+        "text": "Add the text for this tab."
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "title",
+          "label": "Tab name",
+          "group": "content",
+          "maxLength": 40,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "rich-text",
+          "key": "text",
+          "label": "Text",
+          "group": "content",
+          "maxLength": 2000,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": {},
+        "$defs": {
+          "__schema0": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "resource_field"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "field"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metafield"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "namespace",
+                  "key"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metaobject_field"
+                  },
+                  "source": {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source",
+                  "field"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "divider",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "lineStyle": "solid",
+        "thickness": 1,
+        "length": "full"
+      },
+      "controls": [
+        {
+          "type": "segmented",
+          "key": "lineStyle",
+          "label": "Line",
+          "group": "style",
+          "options": [
+            {
+              "label": "Solid",
+              "value": "solid"
+            },
+            {
+              "label": "Dashed",
+              "value": "dashed"
+            },
+            {
+              "label": "Dotted",
+              "value": "dotted"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "key": "thickness",
+          "label": "Thickness",
+          "group": "style",
+          "min": 1,
+          "max": 8,
+          "step": 1,
+          "unit": "px"
+        },
+        {
+          "type": "segmented",
+          "key": "length",
+          "label": "Length",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Full width",
+              "value": "full"
+            },
+            {
+              "label": "Short",
+              "value": "short"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "lineStyle": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "solid",
+                  "dashed",
+                  "dotted"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "thickness": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 8
+          },
+          "length": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "full",
+                  "short"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "spacer",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "height": 32
+      },
+      "controls": [
+        {
+          "type": "range",
+          "key": "height",
+          "mobile": true,
+          "label": "Height",
+          "group": "layout",
+          "min": 0,
+          "max": 200,
+          "step": 4,
+          "unit": "px"
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "height": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 200
+          }
+        }
+      }
+    },
+    {
+      "type": "icon",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "icon": "star",
+        "size": 32
+      },
+      "controls": [
+        {
+          "type": "select",
+          "key": "icon",
+          "label": "Icon",
+          "group": "content",
+          "options": [
+            {
+              "label": "Tick",
+              "value": "check"
+            },
+            {
+              "label": "Delivery van",
+              "value": "truck"
+            },
+            {
+              "label": "Shield (warranty)",
+              "value": "shield"
+            },
+            {
+              "label": "Calendar",
+              "value": "calendar"
+            },
+            {
+              "label": "Moon (sleep trial)",
+              "value": "moon"
+            },
+            {
+              "label": "House",
+              "value": "home"
+            },
+            {
+              "label": "Payment card",
+              "value": "card"
+            },
+            {
+              "label": "Percent (finance)",
+              "value": "percent"
+            },
+            {
+              "label": "Star",
+              "value": "star"
+            },
+            {
+              "label": "Phone",
+              "value": "phone"
+            },
+            {
+              "label": "Leaf",
+              "value": "leaf"
+            },
+            {
+              "label": "Gift",
+              "value": "gift"
+            },
+            {
+              "label": "Return arrow",
+              "value": "return"
+            },
+            {
+              "label": "Palette (swatches)",
+              "value": "palette"
+            },
+            {
+              "label": "Price tag",
+              "value": "tag"
+            },
+            {
+              "label": "Clock",
+              "value": "clock"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "key": "size",
+          "label": "Size",
+          "group": "style",
+          "min": 16,
+          "max": 96,
+          "step": 4,
+          "unit": "px"
+        },
+        {
+          "type": "text",
+          "key": "label",
+          "label": "Name for screen readers",
+          "group": "content",
+          "maxLength": 80,
+          "description": "Leave empty when the text next to it says the same."
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "icon": {
+            "type": "string",
+            "enum": [
+              "check",
+              "truck",
+              "shield",
+              "calendar",
+              "moon",
+              "home",
+              "card",
+              "percent",
+              "star",
+              "phone",
+              "leaf",
+              "gift",
+              "return",
+              "palette",
+              "tag",
+              "clock"
+            ]
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 16,
+            "maximum": 96
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 80
+          }
+        }
+      }
+    },
+    {
+      "type": "icon-list",
+      "sets": [
+        "@content"
+      ],
+      "allowedBlockTypes": [
+        "icon-list-item"
+      ],
+      "maxBlocks": 12,
+      "defaultSettings": {
+        "listLayout": "vertical",
+        "iconSize": 20
+      },
+      "controls": [
+        {
+          "type": "segmented",
+          "key": "listLayout",
+          "mobile": true,
+          "label": "Layout",
+          "group": "layout",
+          "options": [
+            {
+              "label": "List",
+              "value": "vertical"
+            },
+            {
+              "label": "In a row",
+              "value": "horizontal"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "key": "iconSize",
+          "label": "Icon size",
+          "group": "style",
+          "min": 12,
+          "max": 48,
+          "step": 2,
+          "unit": "px"
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "listLayout": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "vertical",
+                  "horizontal"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "iconSize": {
+            "type": "integer",
+            "minimum": 12,
+            "maximum": 48
+          }
+        }
+      }
+    },
+    {
+      "type": "icon-list-item",
+      "defaultSettings": {
+        "icon": "check",
+        "text": "A good reason to buy"
+      },
+      "controls": [
+        {
+          "type": "select",
+          "key": "icon",
+          "label": "Icon",
+          "group": "content",
+          "options": [
+            {
+              "label": "Tick",
+              "value": "check"
+            },
+            {
+              "label": "Delivery van",
+              "value": "truck"
+            },
+            {
+              "label": "Shield (warranty)",
+              "value": "shield"
+            },
+            {
+              "label": "Calendar",
+              "value": "calendar"
+            },
+            {
+              "label": "Moon (sleep trial)",
+              "value": "moon"
+            },
+            {
+              "label": "House",
+              "value": "home"
+            },
+            {
+              "label": "Payment card",
+              "value": "card"
+            },
+            {
+              "label": "Percent (finance)",
+              "value": "percent"
+            },
+            {
+              "label": "Star",
+              "value": "star"
+            },
+            {
+              "label": "Phone",
+              "value": "phone"
+            },
+            {
+              "label": "Leaf",
+              "value": "leaf"
+            },
+            {
+              "label": "Gift",
+              "value": "gift"
+            },
+            {
+              "label": "Return arrow",
+              "value": "return"
+            },
+            {
+              "label": "Palette (swatches)",
+              "value": "palette"
+            },
+            {
+              "label": "Price tag",
+              "value": "tag"
+            },
+            {
+              "label": "Clock",
+              "value": "clock"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "key": "text",
+          "label": "Text",
+          "group": "content",
+          "maxLength": 120,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "link",
+          "key": "link",
+          "label": "Link",
+          "group": "content",
+          "dynamicTypes": [
+            "url"
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "icon": {
+            "type": "string",
+            "enum": [
+              "check",
+              "truck",
+              "shield",
+              "calendar",
+              "moon",
+              "home",
+              "card",
+              "percent",
+              "star",
+              "phone",
+              "leaf",
+              "gift",
+              "return",
+              "palette",
+              "tag",
+              "clock"
+            ]
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "link": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "additionalProperties": {},
+        "$defs": {
+          "__schema0": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "resource_field"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "field"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metafield"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "namespace",
+                  "key"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metaobject_field"
+                  },
+                  "source": {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source",
+                  "field"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "icon-box",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "icon": "star",
+        "heading": "Why it matters",
+        "text": "One or two lines that explain it.",
+        "boxLayout": "stacked",
+        "boxStyle": "standard"
+      },
+      "controls": [
+        {
+          "type": "select",
+          "key": "icon",
+          "label": "Icon",
+          "group": "content",
+          "options": [
+            {
+              "label": "Tick",
+              "value": "check"
+            },
+            {
+              "label": "Delivery van",
+              "value": "truck"
+            },
+            {
+              "label": "Shield (warranty)",
+              "value": "shield"
+            },
+            {
+              "label": "Calendar",
+              "value": "calendar"
+            },
+            {
+              "label": "Moon (sleep trial)",
+              "value": "moon"
+            },
+            {
+              "label": "House",
+              "value": "home"
+            },
+            {
+              "label": "Payment card",
+              "value": "card"
+            },
+            {
+              "label": "Percent (finance)",
+              "value": "percent"
+            },
+            {
+              "label": "Star",
+              "value": "star"
+            },
+            {
+              "label": "Phone",
+              "value": "phone"
+            },
+            {
+              "label": "Leaf",
+              "value": "leaf"
+            },
+            {
+              "label": "Gift",
+              "value": "gift"
+            },
+            {
+              "label": "Return arrow",
+              "value": "return"
+            },
+            {
+              "label": "Palette (swatches)",
+              "value": "palette"
+            },
+            {
+              "label": "Price tag",
+              "value": "tag"
+            },
+            {
+              "label": "Clock",
+              "value": "clock"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "key": "heading",
+          "label": "Heading",
+          "group": "content",
+          "maxLength": 80,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "rich-text",
+          "key": "text",
+          "label": "Text",
+          "group": "content",
+          "maxLength": 600,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "text",
+          "key": "linkLabel",
+          "label": "Link text",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
+          "type": "link",
+          "key": "link",
+          "label": "Link",
+          "group": "content",
+          "dynamicTypes": [
+            "url"
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "boxLayout",
+          "label": "Icon position",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Above",
+              "value": "stacked"
+            },
+            {
+              "label": "Beside",
+              "value": "inline"
+            }
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "boxStyle",
+          "label": "Style",
+          "group": "style",
+          "options": [
+            {
+              "label": "Plain",
+              "value": "standard"
+            },
+            {
+              "label": "Card",
+              "value": "card"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "icon": {
+            "type": "string",
+            "enum": [
+              "check",
+              "truck",
+              "shield",
+              "calendar",
+              "moon",
+              "home",
+              "card",
+              "percent",
+              "star",
+              "phone",
+              "leaf",
+              "gift",
+              "return",
+              "palette",
+              "tag",
+              "clock"
+            ]
+          },
+          "heading": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 600
+          },
+          "linkLabel": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "link": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "boxLayout": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "stacked",
+                  "inline"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "boxStyle": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "standard",
+                  "card"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          }
+        },
+        "required": [
+          "heading"
+        ],
+        "$defs": {
+          "__schema0": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "resource_field"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "field"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metafield"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "namespace",
+                  "key"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metaobject_field"
+                  },
+                  "source": {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source",
+                  "field"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "card",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "heading": "Card heading",
+        "text": "A sentence or two about this.",
+        "linkLabel": "Find out more",
+        "imageRatio": "landscape",
+        "imagePosition": "top"
+      },
+      "controls": [
+        {
+          "type": "image",
+          "key": "image",
+          "label": "Image",
+          "group": "content"
+        },
+        {
+          "type": "text",
+          "key": "heading",
+          "label": "Heading",
+          "group": "content",
+          "maxLength": 120,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "rich-text",
+          "key": "text",
+          "label": "Text",
+          "group": "content",
+          "maxLength": 600,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "text",
+          "key": "linkLabel",
+          "label": "Link text",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
+          "type": "link",
+          "key": "link",
+          "label": "Link",
+          "group": "content",
+          "dynamicTypes": [
+            "url"
+          ]
+        },
+        {
+          "type": "select",
+          "key": "imageRatio",
+          "label": "Image shape",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Landscape (4:3)",
+              "value": "landscape"
+            },
+            {
+              "label": "Square",
+              "value": "square"
+            },
+            {
+              "label": "Portrait (4:5)",
+              "value": "portrait"
+            },
+            {
+              "label": "Wide (16:9)",
+              "value": "wide"
+            }
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "imagePosition",
+          "mobile": true,
+          "label": "Image position",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Above",
+              "value": "top"
+            },
+            {
+              "label": "Beside",
+              "value": "left"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
+          },
+          "heading": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 600
+          },
+          "linkLabel": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "link": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "imageRatio": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "square",
+                  "portrait",
+                  "landscape",
+                  "wide"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "imagePosition": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "top",
+                  "left"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          }
+        },
+        "required": [
+          "heading"
+        ],
+        "$defs": {
+          "__schema0": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "resource_field"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "field"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metafield"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "namespace",
+                  "key"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metaobject_field"
+                  },
+                  "source": {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source",
+                  "field"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "badge",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "text": "New",
+        "shape": "pill"
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "text",
+          "label": "Text",
+          "group": "content",
+          "maxLength": 40,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "shape",
+          "label": "Shape",
+          "group": "style",
+          "options": [
+            {
+              "label": "Pill",
+              "value": "pill"
+            },
+            {
+              "label": "Circle",
+              "value": "circle"
+            },
+            {
+              "label": "Tag",
+              "value": "tag"
+            }
+          ]
+        },
+        {
+          "type": "checkbox",
+          "key": "spin",
+          "label": "Turn slowly",
+          "description": "Stays still for visitors who ask for less motion.",
+          "group": "style"
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "shape": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "pill",
+                  "circle",
+                  "tag"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "spin": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "$defs": {
+          "__schema0": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "resource_field"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "field"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metafield"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "namespace",
+                  "key"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metaobject_field"
+                  },
+                  "source": {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source",
+                  "field"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "counter",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "value": 12000,
+        "suffix": "+",
+        "label": "Happy customers"
+      },
+      "controls": [
+        {
+          "type": "number",
+          "key": "value",
+          "label": "Number",
+          "description": "Up to two decimals, for example 4.9.",
+          "group": "content",
+          "min": 0,
+          "max": 999999999,
+          "step": 0.1
+        },
+        {
+          "type": "text",
+          "key": "prefix",
+          "label": "Before the number",
+          "group": "content",
+          "maxLength": 8,
+          "description": "For example £."
+        },
+        {
+          "type": "text",
+          "key": "suffix",
+          "label": "After the number",
+          "group": "content",
+          "maxLength": 12,
+          "description": "For example + or %."
+        },
+        {
+          "type": "text",
+          "key": "label",
+          "label": "Label",
+          "group": "content",
+          "maxLength": 80,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 999999999
+          },
+          "prefix": {
+            "type": "string",
+            "maxLength": 8
+          },
+          "suffix": {
+            "type": "string",
+            "maxLength": 12
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "$defs": {
+          "__schema0": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "resource_field"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "field"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metafield"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "namespace",
+                  "key"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metaobject_field"
+                  },
+                  "source": {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source",
+                  "field"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "button-group",
+      "sets": [
+        "@content"
+      ],
+      "allowedBlockTypes": [
+        "button"
+      ],
+      "maxBlocks": 4,
+      "defaultSettings": {
+        "stackOnPhones": true
+      },
+      "controls": [
+        {
+          "type": "segmented",
+          "key": "buttonAlign",
+          "label": "Alignment",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Follow section",
+              "value": ""
+            },
+            {
+              "label": "Left",
+              "value": "start"
+            },
+            {
+              "label": "Centre",
+              "value": "center"
+            },
+            {
+              "label": "Right",
+              "value": "end"
+            }
+          ]
+        },
+        {
+          "type": "checkbox",
+          "key": "stackOnPhones",
+          "label": "Stack on phones",
+          "group": "layout"
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "buttonAlign": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "start",
+                  "center",
+                  "end"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "stackOnPhones": {
+            "type": "boolean"
+          }
+        }
       }
     },
     {
