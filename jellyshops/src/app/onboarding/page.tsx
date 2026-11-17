@@ -414,8 +414,6 @@ function Stage({ step, answers, logo, active, reduced }: { step: VisibleStep; an
   const price = answers.product?.priceMinor;
   return (
     <aside className={styles.stage} aria-label="Store preview">
-      <Image className={styles.stageGrid} src="/assets/bg-hero-grid.webp" alt="" fill sizes="50vw" />
-      <div className={styles.stageGlow} aria-hidden="true" />
       <div className={styles.stageVisual} aria-hidden="true">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div key={active ? picture : "idle"} className={styles.stageImage}

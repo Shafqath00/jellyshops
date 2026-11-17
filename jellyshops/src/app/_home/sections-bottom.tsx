@@ -3,8 +3,8 @@
 import { ArrowRight, Check, Plus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { AnimatePresence, motion, useScroll, useTransform } from "motion/react";
-import { useId, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useId, useState } from "react";
 import { channels, codeLines, faqs, footer, integrations, plans, social, stories, trust } from "../home-content";
 import { DemoDialog } from "./demo-dialog";
 import { BrandMark, Icon } from "./icons";
@@ -302,18 +302,12 @@ export function Faq() {
 /* ---------- 13. Final CTA ---------- */
 
 export function FinalCta() {
-  const ref = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const glowScale = useTransform(scrollYProgress, [0, 0.5, 1], reduced ? [1, 1, 1] : [0.8, 1.1, 0.9]);
   return (
     <section className={styles.ctaWrap} aria-labelledby="cta-title">
       <div className={styles.container}>
-        <div ref={ref} className={styles.cta}>
-          {/* Colour glows drawn in CSS (no image to load); the scale follows the scroll. */}
-          <motion.div className={styles.ctaGlow} style={{ scale: glowScale }} aria-hidden="true" />
+        <div className={styles.cta}>
           <Reveal>
-            <h2 id="cta-title" className={styles.ctaTitle}>Your store could be <span className={styles.gradientText}>live this afternoon.</span></h2>
+            <h2 id="cta-title" className={styles.ctaTitle}>Your store could be <span className={styles.accentWord}>live this afternoon.</span></h2>
           </Reveal>
           <Reveal delay={0.1}><p>Start free, pick a design and add your first product. No card needed.</p></Reveal>
           <Reveal delay={0.2} className={styles.heroActions}>

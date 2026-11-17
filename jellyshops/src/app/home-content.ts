@@ -104,19 +104,19 @@ export const stats = [
 ] as const;
 
 export const steps = [
-  { title: "Create your store", text: "Pick a name, a web address and a design. You're editing your own store in under five minutes.", image: "feature-storefront" },
-  { title: "Add your products", text: "Photos, prices, sizes and stock, one at a time or thousands at once from a spreadsheet.", image: "feature-products" },
-  { title: "Get paid", text: "Connect Stripe and take card payments at a checkout that checks every price on our servers.", image: "feature-checkout" },
-  { title: "Publish and grow", text: "Go live, share one link everywhere, and watch orders and sales from one dashboard.", image: "feature-analytics" },
+  { title: "Create your store", text: "Pick a name, a web address and a design. You're editing your own store in under five minutes.", image: "how-create-store", imageAlt: "Create your store form with the name Fern Studio, its web address and three designs to pick from" },
+  { title: "Add your products", text: "Photos, prices, sizes and stock, one at a time or thousands at once from a spreadsheet.", image: "how-add-products", imageAlt: "New product form for a ceramic vase at £42.00 with 12 in stock, and an option to import 48 products from a spreadsheet" },
+  { title: "Get paid", text: "Connect Stripe and take card payments at a checkout that checks every price on our servers.", image: "how-get-paid", imageAlt: "Checkout totalling £64.00 paid by card, with a payment received notice" },
+  { title: "Publish and grow", text: "Go live, share one link everywhere, and watch orders and sales from one dashboard.", image: "how-publish-grow", imageAlt: "Store published at fern-studio.jellyshop.com with £1,240 in sales this week and 16 orders" },
 ] as const;
 
 export const features = [
-  { id: "storefront", title: "Storefront builder", text: "Drag sections into place and edit live. Draft safely, publish when you're ready.", size: "wide" },
-  { id: "products", title: "Products and inventory", text: "Variants, collections and stock alerts in one list.", size: "tall" },
-  { id: "checkout", title: "Checkout and payments", text: "Card payments through Stripe, money straight to your account.", size: "base" },
-  { id: "orders", title: "Orders and delivery", text: "Packing slips, tracking links and shipping emails.", size: "base" },
-  { id: "analytics", title: "Analytics", text: "Sales, orders and average order value for any period.", size: "base" },
-  { id: "marketing", title: "Marketing", text: "Reviews, newsletter sign-ups and back-in-stock emails.", size: "wide" },
+  { id: "storefront", title: "Storefront builder", text: "Drag sections into place and edit live. Draft safely, publish when you're ready.", size: "wide", imageAlt: "Store editor with a list of sections next to a live preview of the Fern Studio shop" },
+  { id: "products", title: "Products and inventory", text: "Variants, collections and stock alerts in one list.", size: "tall", imageAlt: "Product list with photos, prices and stock, two items marked low stock" },
+  { id: "checkout", title: "Checkout and payments", text: "Card payments through Stripe, money straight to your account.", size: "base", imageAlt: "Phone checkout totalling £86.00 and a payout of £1,240.50 on its way" },
+  { id: "orders", title: "Orders and delivery", text: "Packing slips, tracking links and shipping emails.", size: "base", imageAlt: "Orders list with paid, packed and shipped orders and a delivery tracker" },
+  { id: "analytics", title: "Analytics", text: "Sales, orders and average order value for any period.", size: "base", imageAlt: "Sales of £24,860 over 30 days as a daily bar chart, with 312 orders and an average order of £79.70" },
+  { id: "marketing", title: "Marketing", text: "Reviews, newsletter sign-ups and back-in-stock emails.", size: "wide", imageAlt: "A five-star review, a back-in-stock email and a newsletter sign-up form" },
 ] as const;
 
 export const templates = [
@@ -163,9 +163,9 @@ export const codeLines = [
 ] as const;
 
 export const stories = [
-  { name: "Maya Okafor", role: "Founder, Clay & Co.", avatar: "avatar-1", quote: "I moved my ceramics shop over in an afternoon. Customers say it finally looks like us.", metric: 38, prefix: "+", suffix: "%", metricLabel: "repeat orders in 3 months" },
-  { name: "Dev Patel", role: "Owner, Northside Audio", avatar: "avatar-2", quote: "Spec tables and the compare tray answer the questions I used to get by email every day.", metric: 2.4, prefix: "", suffix: "×", decimals: 1, metricLabel: "product pages viewed per visit" },
-  { name: "Sofia Lind", role: "Co-founder, Kindly Skin", avatar: "avatar-3", quote: "I imported 140 products from a spreadsheet before lunch. Every row was checked first.", metric: 140, prefix: "", suffix: "", metricLabel: "products imported in one go" },
+  { name: "Maya Okafor", role: "Founder, Clay & Co.", avatar: "avatar-maya", quote: "I moved my ceramics shop over in an afternoon. Customers say it finally looks like us.", metric: 38, prefix: "+", suffix: "%", metricLabel: "repeat orders in 3 months" },
+  { name: "Dev Patel", role: "Owner, Northside Audio", avatar: "avatar-dev", quote: "Spec tables and the compare tray answer the questions I used to get by email every day.", metric: 2.4, prefix: "", suffix: "×", decimals: 1, metricLabel: "product pages viewed per visit" },
+  { name: "Sofia Lind", role: "Co-founder, Kindly Skin", avatar: "avatar-sofia", quote: "I imported 140 products from a spreadsheet before lunch. Every row was checked first.", metric: 140, prefix: "", suffix: "", metricLabel: "products imported in one go" },
 ] as const;
 
 export const plans = [

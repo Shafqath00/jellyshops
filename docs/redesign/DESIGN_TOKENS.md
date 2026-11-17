@@ -22,6 +22,10 @@ Only neutrals. The single "accent" is light: soft white glows and gradients.
 
 `--fg-subtle` was raised on 2026-11-15 to `#858585` (dark, 5.1:1 or better on every dark surface) and `#6B6B6B` (light, 4.8:1 or better), because it is used for small text (footer, hints) and failed AA before.
 
+### Solid colours only (2026-11-17, owner's request)
+
+No gradients, glows or blur anywhere on the home, sign-in and onboarding screens. The palette itself is unchanged (recorded in `AUDIT.md` section 0). Removed tokens: `--glow`, `--grid-line`, `--grad-brand`, `--grad-warm`, `--grad-text`, `--grad-text-warm`, `--glow-accent`, `--glow-cyan`, `--glow-warm`. Changed: `--btn-primary` is now solid `#6D4AFF` (white text 5.15:1, the old gradient's first stop) with `--btn-primary-hover` `#5B3DF5` (6.1:1, the existing light accent). Gradient words are now solid `--accent`; proof numbers `--accent`, story numbers `--accent-warm`. `--tint-*` stay as flat translucent fills (icon tiles). The rows below marked with gradients or glows describe the old system and no longer exist in code.
+
 ### Accent system (2026-11-15, owner's request: "add colour to the system")
 
 The dark foundation stays; a vibrant accent palette sits on top. Code: `features/brand/brand.css`.

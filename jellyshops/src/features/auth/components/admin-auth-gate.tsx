@@ -43,10 +43,8 @@ export function AdminAuthGate({
   if (!configured) {
     return (
       <main className="relative grid min-h-screen place-items-center overflow-hidden bg-muted/50 p-6 text-foreground">
-        <div className="pointer-events-none absolute -left-24 top-24 size-72 rounded-full bg-muted/70 blur-3xl" />
-        <div className="pointer-events-none absolute -right-24 bottom-16 size-80 rounded-full bg-[var(--warn-bg)]/60 blur-3xl" />
 
-        <section className="relative w-full max-w-md rounded-[28px] border border-black/[0.06] bg-card/80 p-7 text-center shadow-[0_24px_80px_rgba(83,61,66,0.10)] backdrop-blur-xl sm:p-8">
+        <section className="relative w-full max-w-md rounded-[28px] border border-black/[0.06] bg-card p-7 text-center shadow-[0_24px_80px_rgba(83,61,66,0.10)] sm:p-8">
           <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-muted text-tint-foreground">
             <AlertCircle size={21} strokeWidth={2} />
           </span>
@@ -87,7 +85,6 @@ export function AdminAuthGate({
         aria-live="polite"
         aria-busy="true"
       >
-        <div className="pointer-events-none absolute left-1/2 top-1/2 size-[360px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-muted/45 blur-3xl" />
 
         <div className="relative flex flex-col items-center">
           <span className="grid size-12 place-items-center rounded-2xl bg-secondary text-foreground shadow-[inset_0_-2px_0_rgba(36,31,32,0.12)]">

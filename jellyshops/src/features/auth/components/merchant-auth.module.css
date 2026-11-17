@@ -164,9 +164,6 @@
     background: var(--bg-sunken);
   }
 
-  .artGrid { z-index: -2; object-fit: cover; object-position: center 80%; opacity: .5; }
-  :global(html[data-home-theme="light"]) .artGrid { filter: invert(1); opacity: .3; }
-  .artGlow { position: absolute; inset: 30% 10% 0; z-index: -1; background: radial-gradient(ellipse at center, var(--glow), transparent 65%); filter: blur(50px); }
   .artCopy { display: grid; gap: 12px; }
   .artTitle { color: var(--fg); font-size: clamp(2rem, 3.4vw, 3.25rem); font-weight: 600; line-height: 1; letter-spacing: -.05em; }
   .artTitle span { color: var(--fg-muted); }
@@ -183,8 +180,7 @@
     padding: 10px 14px 10px 10px;
     border: 1px solid var(--line-strong);
     border-radius: 14px;
-    background: color-mix(in srgb, var(--bg-raised) 80%, transparent);
-    backdrop-filter: blur(14px);
+    background: var(--bg-raised);
     box-shadow: 0 20px 50px -20px rgb(0 0 0 / 70%);
   }
 
@@ -203,18 +199,17 @@
 
 /* Colour layer (2026-11-15): same accent system as the home page (features/brand/brand.css). */
 .eyebrow { color: var(--accent); }
-.primary { position: relative; isolation: isolate; background: var(--btn-primary); color: var(--btn-primary-fg); box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%); }
-.primary::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; box-shadow: 0 10px 32px -8px var(--glow-accent); opacity: 0; transition: opacity .25s var(--ease); pointer-events: none; }
-.primary:hover:not(:disabled) { background: var(--btn-primary); }
-.primary:hover:not(:disabled)::after, .primary:focus-visible::after { opacity: 1; }
+.primary { background: var(--btn-primary); color: var(--btn-primary-fg); }
+.primary:hover:not(:disabled) { background: var(--btn-primary-hover); }
 .textLink { text-decoration-color: var(--accent); }
 .input:focus-visible { border-color: var(--accent-line); box-shadow: 0 0 0 3px var(--accent-soft); }
 .verifyIcon { border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent); }
 .verifySteps li::before { border-color: var(--accent-line); color: var(--accent); }
 
 @media (min-width: 1024px) {
-  .artTitle span { background-image: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .artGlow { background: radial-gradient(ellipse at 35% 50%, var(--glow-accent), transparent 60%), radial-gradient(ellipse at 70% 60%, var(--glow-cyan), transparent 60%); }
+  .artTitle span { color: var(--accent); }
   .cardIcon { background: var(--btn-primary); color: #fff; }
-  .artFrame { border: 0; box-shadow: 0 40px 100px -40px var(--glow-accent); }
+  /* Transparent flat illustration: no frame colour, border or shadow around it. */
+  .artFrame { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+  .artFrame img { object-fit: contain; }
 }

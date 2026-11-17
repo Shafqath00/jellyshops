@@ -1,6 +1,6 @@
 /*
- * Jellyshop brand tokens (docs/redesign/DESIGN_TOKENS.md): premium dark base with a vibrant accent system
- * (electric violet #7C5CFF, blue #3B82F6, cyan #22D3EE, warm magenta #F0449A and amber #FFB547).
+ * Jellyshop brand tokens (docs/redesign/DESIGN_TOKENS.md): premium dark base with a solid accent system
+ * (violet #7C5CFF, blue #3B82F6, cyan #22D3EE, magenta #F0449A and amber #FFB547). Solid colours only.
  * Every text token below is measured for WCAG AA against its page colour (see DESIGN_TOKENS.md).
  * Shared by the home page, sign-in/sign-up and onboarding. Put `data-brand` on the page root.
  * Dark is the default; the saved light-mode choice sets `html[data-home-theme="light"]`
@@ -18,14 +18,12 @@
   --fg-subtle: #858585;         /* small text: 5.1:1 or better on every dark surface (was #6e6e6e, 3.9:1) */
   --btn-bg: #fafafa;
   --btn-fg: #0a0a0a;
-  --glow: rgb(255 255 255 / 14%);
-  --grid-line: rgb(255 255 255 / 6%);
   --card-shadow: none;
   --danger: #ff8a8a;
   --danger-bg: rgb(255 138 138 / 10%);
   --ok: #86efac;
 
-  /* Accents. Fill colours are for shapes and glows; text colours pass AA on --bg (contrast in brackets). */
+  /* Accents, solid only (no gradients or glows, 2026-11-17). Text colours pass AA on --bg (contrast in brackets). */
   --violet: #7c5cff;
   --blue: #3b82f6;
   --cyan: #22d3ee;
@@ -36,15 +34,9 @@
   --accent-warm: #ffb547;       /* amber text and icons (11.3:1) */
   --accent-line: rgb(124 92 255 / 45%);
   --accent-soft: rgb(124 92 255 / 14%);
-  --grad-brand: linear-gradient(135deg, #7c5cff 0%, #3b82f6 55%, #22d3ee 100%);
-  --grad-warm: linear-gradient(135deg, #f0449a 0%, #ffb547 100%);
-  --grad-text: linear-gradient(90deg, #a78bfa 0%, #60a5fa 50%, #22d3ee 100%);      /* weakest stop 7.3:1 */
-  --grad-text-warm: linear-gradient(90deg, #f472b6 0%, #ffb547 100%);              /* weakest stop 7.5:1 */
-  --btn-primary: linear-gradient(135deg, #6d4aff 0%, #2563eb 100%);                 /* white text 5.15:1 */
+  --btn-primary: #6d4aff;                                                           /* solid; white text 5.15:1 (was the gradient's first stop) */
+  --btn-primary-hover: #5b3df5;                                                     /* the palette's light accent; white text 6.1:1 */
   --btn-primary-fg: #fff;
-  --glow-accent: rgb(124 92 255 / 40%);
-  --glow-cyan: rgb(34 211 238 / 28%);
-  --glow-warm: rgb(240 68 154 / 24%);
   --tint-violet: rgb(124 92 255 / 8%);
   --tint-cyan: rgb(34 211 238 / 6%);
   --tint-warm: rgb(255 181 71 / 6%);
@@ -66,8 +58,6 @@ html[data-home-theme="light"] [data-brand] {
   --fg-subtle: #6b6b6b;         /* 4.8:1 or better on every light surface (was #8f8f8f, 3.1:1) */
   --btn-bg: #0a0a0a;
   --btn-fg: #fafafa;
-  --glow: rgb(0 0 0 / 6%);
-  --grid-line: rgb(0 0 0 / 5%);
   --card-shadow: 0 1px 2px rgb(0 0 0 / 5%), 0 12px 32px -16px rgb(0 0 0 / 20%);
   --danger: #b42318;
   --danger-bg: rgb(180 35 24 / 7%);
@@ -77,11 +67,6 @@ html[data-home-theme="light"] [data-brand] {
   --accent-warm: #b45309;       /* 4.8:1 */
   --accent-line: rgb(91 61 245 / 35%);
   --accent-soft: rgb(91 61 245 / 9%);
-  --grad-text: linear-gradient(90deg, #6d28d9 0%, #2563eb 50%, #0e7490 100%);      /* weakest stop 4.95:1 */
-  --grad-text-warm: linear-gradient(90deg, #be185d 0%, #b45309 100%);              /* weakest stop 4.8:1 */
-  --glow-accent: rgb(124 92 255 / 28%);
-  --glow-cyan: rgb(34 211 238 / 20%);
-  --glow-warm: rgb(240 68 154 / 16%);
   --tint-violet: rgb(124 92 255 / 7%);
   --tint-cyan: rgb(34 211 238 / 7%);
   --tint-warm: rgb(255 181 71 / 9%);

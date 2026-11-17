@@ -38,8 +38,6 @@ function AuthVisual() {
       }}
       onPointerLeave={() => { x.set(0); y.set(0); }}
     >
-      <Image className={styles.artGrid} src="/assets/bg-hero-grid.webp" alt="" fill sizes="50vw" priority />
-      <div className={styles.artGlow} />
       <div className={styles.artCopy}>
         <p className={styles.eyebrow}>Jellyshop</p>
         <p className={styles.artTitle}>Launch your store.<br /><span>Sell from day one.</span></p>
@@ -51,7 +49,7 @@ function AuthVisual() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 1, ease: EASE, delay: 0.15 }}
         >
-          <Image src="/assets/auth-visual.webp" alt="" width={768} height={1152} sizes="(max-width: 1023px) 0px, 420px" priority />
+          <Image src="/assets/auth-visual.webp" alt="" width={864} height={1296} sizes="(max-width: 1023px) 0px, 420px" priority />
         </motion.div>
         {CARDS.map(({ id, icon: Icon, label, value, className, delay }) => (
           <motion.div

@@ -17,10 +17,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Jellyshop | Launch your store. Sell from day one.",
     description,
-    images: [{ url: "/assets/og-image.jpg", width: 1200, height: 630, alt: "Jellyshop: launch your store, sell from day one" }],
+    images: [{ url: "/assets/og-jellyshop.png", width: 1200, height: 630, alt: "Jellyshop: launch your store, sell from day one" }],
     type: "website",
   },
-  twitter: { card: "summary_large_image", images: ["/assets/og-image.jpg"] },
+  twitter: { card: "summary_large_image", images: ["/assets/og-jellyshop.png"] },
 };
 
 

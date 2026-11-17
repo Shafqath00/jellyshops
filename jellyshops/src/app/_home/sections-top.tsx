@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight, Check } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, useMotionValueEvent, useScroll, useTransform } from "motion/react";
@@ -67,7 +67,7 @@ export function HowItWorks() {
                     <h3>{step.title}</h3>
                     <p>{step.text}</p>
                   </div>
-                  <Image className={styles.howInlineImage} src={`/assets/${step.image}.webp`} alt="" width={1200} height={800} sizes="92vw" loading="lazy" />
+                  <Image className={styles.howInlineImage} src={`/assets/${step.image}.webp`} alt={step.imageAlt} width={1200} height={800} sizes="92vw" loading="lazy" />
                 </li>
               ))}
             </ol>
@@ -112,17 +112,6 @@ function MiniChart() {
   );
 }
 
-function MiniOrders() {
-  const rows = [["#1048", "£86.00", "Paid"], ["#1047", "£42.00", "Packed"], ["#1046", "£128.50", "Shipped"]];
-  return (
-    <motion.ul role="list" className={styles.miniOrders} aria-hidden="true" variants={staggerParent} initial="hidden" whileInView="show" viewport={{ once: true }}>
-      {rows.map(([n, total, status]) => (
-        <motion.li key={n} variants={staggerChild}><span>{n}</span><span>{total}</span><b>{status}</b></motion.li>
-      ))}
-    </motion.ul>
-  );
-}
-
 export function Bento() {
   return (
     <section id="features" className={styles.section} aria-labelledby="features-title">
@@ -141,15 +130,9 @@ export function Bento() {
               <div className={styles.bentoVisual}>
                 {feature.id === "analytics" ? <MiniChart /> : (
                   <motion.div className={styles.bentoImage} variants={{ hover: { scale: 1.04 } }} transition={{ duration: 0.6, ease: EASE }}>
-                    <Image src={`/assets/feature-${feature.id}.webp`} alt="" width={1200} height={800} sizes="(max-width: 899px) 92vw, 600px" loading="lazy" />
+                    <Image src={`/assets/feature-${feature.id}.webp`} alt={feature.imageAlt} width={1200} height={800} sizes="(max-width: 899px) 92vw, 800px" loading="lazy" />
                   </motion.div>
                 )}
-                {feature.id === "orders" ? <MiniOrders /> : null}
-                {feature.id === "checkout" ? (
-                  <motion.span className={styles.paidChip} aria-hidden="true" initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, ease: EASE, delay: 0.5 }}>
-                    <Check size={14} strokeWidth={1.5} /> Payment received · £86.00
-                  </motion.span>
-                ) : null}
               </div>
             </motion.li>
           ))}

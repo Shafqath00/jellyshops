@@ -29,16 +29,10 @@ export function Hero() {
   // The mockup starts tilted back and settles flat as it reaches the middle of the screen.
   const rotateX = useTransform(scrollYProgress, [0, 1], reduced ? [0, 0] : [22, 0]);
   const scale = useTransform(scrollYProgress, [0, 1], reduced ? [1, 1] : [0.92, 1]);
-  const glowOpacity = useTransform(scrollYProgress, [0, 1], [0.5, 1]);
   let index = 0;
 
   return (
     <section className={styles.hero} aria-labelledby="hero-title">
-      <div className={styles.heroBackdrop} aria-hidden="true">
-        <Image src="/assets/hero-bg.webp" alt="" fill priority sizes="100vw" className={styles.heroGrid} />
-        <div className={styles.heroGlow} />
-      </div>
-
       <div className={`${styles.container} ${styles.heroInner}`}>
         <motion.a
           href="/changelog"
@@ -56,14 +50,12 @@ export function Hero() {
         <h1 id="hero-title" className={styles.heroTitle}>
           {LINES.map((line, lineIndex) => (
             <span key={lineIndex} className={styles.heroLine}>
-              {line.map((w, wordIndex) => {
+              {line.map((w) => {
                 const i = index++;
-                // The outcome line ("Sell from day one.") is in the signature gradient; each word shows its own slice of it.
-                const gradient = lineIndex === 1
-                  ? { backgroundSize: `${line.length * 100}% 100%`, backgroundPosition: `${(wordIndex / (line.length - 1)) * 100}% 0` }
-                  : undefined;
+                // The outcome line ("Sell from day one.") is in the solid brand accent.
+                const accent = lineIndex === 1;
                 return (
-                  <motion.span key={`${w}-${i}`} className={`${styles.word} ${gradient ? styles.gradientWord : ""}`} style={gradient} custom={i} variants={word} initial={reduced ? false : "hidden"} animate="show">
+                  <motion.span key={`${w}-${i}`} className={`${styles.word} ${accent ? styles.accentWord : ""}`} custom={i} variants={word} initial={reduced ? false : "hidden"} animate="show">
                     {w}{" "}
                   </motion.span>
                 );
@@ -99,7 +91,6 @@ export function Hero() {
         </motion.p>
 
         <div className={styles.heroStage} ref={visualRef}>
-          <motion.div className={styles.heroStageGlow} style={{ opacity: glowOpacity }} aria-hidden="true" />
           <motion.div
             className={styles.heroFrame}
             style={{ rotateX, scale, transformPerspective: 1400 }}
@@ -108,8 +99,8 @@ export function Hero() {
             transition={{ duration: 1.1, ease: EASE, delay: 0.6 }}
           >
             <Image
-              src="/assets/hero-mockup.webp"
-              alt="The Jellyshop dashboard on a laptop showing £24,860 in sales, a sales chart and recent orders, next to a phone showing the shop a customer sees"
+              src="/assets/hero-dashboard.webp"
+              alt="The Jellyshop dashboard on a laptop showing £24,860 in sales, a sales chart and five recent orders, next to a phone showing the Fern Studio shop a customer sees"
               width={1536}
               height={1024}
               priority
