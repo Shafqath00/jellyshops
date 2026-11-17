@@ -1,0 +1,922 @@
+{
+  "$comment": "Earlier page layouts of this built-in theme, oldest first. The current layout (getV4StarterPack) is the next revision. Never edit an existing revision.",
+  "revisions": [
+    {
+      "revision": 1,
+      "label": "First Minimal layout (separate product sections)",
+      "globalSections": [
+        {
+          "key": "announcement",
+          "name": "Announcement",
+          "section": {
+            "id": "jelly-signature-global-announcement-section",
+            "type": "announcement-bar",
+            "settings": {},
+            "blocks": [
+              {
+                "id": "jelly-signature-global-announcement-copy",
+                "type": "text",
+                "enabled": true,
+                "settings": {
+                  "text": "A little something lovely, delivered with care."
+                }
+              }
+            ],
+            "enabled": true
+          }
+        },
+        {
+          "key": "header",
+          "name": "Header",
+          "section": {
+            "id": "jelly-signature-global-header-section",
+            "type": "header",
+            "settings": {},
+            "blocks": [
+              {
+                "id": "jelly-signature-global-header-menu",
+                "type": "menu",
+                "enabled": true,
+                "settings": {
+                  "handle": "main"
+                }
+              }
+            ],
+            "enabled": true
+          }
+        },
+        {
+          "key": "footer",
+          "name": "Footer",
+          "section": {
+            "id": "jelly-signature-global-footer-section",
+            "type": "footer",
+            "settings": {
+              "text": "Thoughtful everyday goods, chosen with care and delivered to your door."
+            },
+            "blocks": [
+              {
+                "id": "jelly-signature-global-footer-menu",
+                "type": "menu",
+                "enabled": true,
+                "settings": {
+                  "handle": "main"
+                }
+              }
+            ],
+            "enabled": true
+          }
+        }
+      ],
+      "templates": [
+        {
+          "key": "jelly-signature-template-home",
+          "type": "home",
+          "handle": "default",
+          "name": "Home",
+          "layout": {
+            "sections": [
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-announcement-section"
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-header-section"
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-home-hero",
+                  "type": "hero",
+                  "settings": {
+                    "eyebrow": "New season",
+                    "layout": "split",
+                    "height": "large",
+                    "colorScheme": "soft",
+                    "contentAlignment": "left",
+                    "image": {
+                      "url": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1600&q=80",
+                      "alt": "A bright living room with neutral textiles and woven wall decor"
+                    }
+                  },
+                  "blocks": [
+                    {
+                      "id": "jelly-signature-home-hero-heading",
+                      "type": "heading",
+                      "enabled": true,
+                      "settings": {
+                        "text": "Everyday pieces, thoughtfully made."
+                      }
+                    },
+                    {
+                      "id": "jelly-signature-home-hero-copy",
+                      "type": "text",
+                      "enabled": true,
+                      "settings": {
+                        "text": "Considered essentials for the home and wardrobe, chosen to be used and loved for years."
+                      }
+                    },
+                    {
+                      "id": "jelly-signature-home-hero-button",
+                      "type": "button",
+                      "enabled": true,
+                      "settings": {
+                        "label": "Shop the collection",
+                        "href": "/shop"
+                      }
+                    },
+                    {
+                      "id": "jelly-signature-home-hero-secondary",
+                      "type": "button",
+                      "enabled": true,
+                      "settings": {
+                        "label": "Our story",
+                        "href": "/about"
+                      }
+                    }
+                  ],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-collections",
+                  "type": "category-grid",
+                  "settings": {
+                    "heading": "Shop by collection",
+                    "columns": 4,
+                    "imageRatio": "portrait"
+                  },
+                  "blocks": [
+                    {
+                      "id": "jelly-signature-collection-new",
+                      "type": "collection-card",
+                      "enabled": true,
+                      "settings": {
+                        "label": "New arrivals",
+                        "link": "/shop",
+                        "image": {
+                          "url": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=900&q=80",
+                          "alt": "Neutral clothing on a rail"
+                        }
+                      }
+                    },
+                    {
+                      "id": "jelly-signature-collection-home",
+                      "type": "collection-card",
+                      "enabled": true,
+                      "settings": {
+                        "label": "For the home",
+                        "link": "/shop",
+                        "image": {
+                          "url": "https://images.unsplash.com/photo-1578500494198-246f612d3b3d?auto=format&fit=crop&w=900&q=80",
+                          "alt": "A tan sofa with a wool throw"
+                        }
+                      }
+                    },
+                    {
+                      "id": "jelly-signature-collection-accessories",
+                      "type": "collection-card",
+                      "enabled": true,
+                      "settings": {
+                        "label": "Accessories",
+                        "link": "/shop",
+                        "image": {
+                          "url": "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=900&q=80",
+                          "alt": "A canvas tote bag"
+                        }
+                      }
+                    },
+                    {
+                      "id": "jelly-signature-collection-kitchen",
+                      "type": "collection-card",
+                      "enabled": true,
+                      "settings": {
+                        "label": "Kitchen & dining",
+                        "link": "/shop",
+                        "image": {
+                          "url": "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=900&q=80",
+                          "alt": "A white ceramic mug"
+                        }
+                      }
+                    }
+                  ],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-featured",
+                  "type": "product-grid",
+                  "settings": {
+                    "heading": "New arrivals",
+                    "text": "The latest additions to the shop.",
+                    "limit": 8,
+                    "columns": 4,
+                    "sort": "newest",
+                    "viewAllLabel": "View all products",
+                    "viewAllLink": "/shop"
+                  },
+                  "blocks": [],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-home-story",
+                  "type": "image-with-text",
+                  "settings": {
+                    "eyebrow": "Our story",
+                    "imagePosition": "left",
+                    "colorScheme": "page",
+                    "image": {
+                      "url": "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=1200&q=80",
+                      "alt": "Knitwear, denim and a watch laid out on a blanket"
+                    }
+                  },
+                  "blocks": [
+                    {
+                      "id": "jelly-signature-home-story-heading",
+                      "type": "heading",
+                      "enabled": true,
+                      "settings": {
+                        "text": "Made to be lived with."
+                      }
+                    },
+                    {
+                      "id": "jelly-signature-home-story-copy",
+                      "type": "text",
+                      "enabled": true,
+                      "settings": {
+                        "text": "Tell customers who you are, what you make and why it matters. A few honest sentences go a long way."
+                      }
+                    },
+                    {
+                      "id": "jelly-signature-home-story-button",
+                      "type": "button",
+                      "enabled": true,
+                      "settings": {
+                        "label": "Read our story",
+                        "href": "/about"
+                      }
+                    }
+                  ],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-promises",
+                  "type": "multicolumn",
+                  "settings": {
+                    "heading": "Why shop with us",
+                    "columns": 3,
+                    "contentAlignment": "left",
+                    "colorScheme": "soft"
+                  },
+                  "blocks": [
+                    {
+                      "id": "jelly-signature-promise-packing",
+                      "type": "column",
+                      "enabled": true,
+                      "settings": {
+                        "heading": "Carefully packed",
+                        "text": "Every order is wrapped by hand and sent with care."
+                      }
+                    },
+                    {
+                      "id": "jelly-signature-promise-checkout",
+                      "type": "column",
+                      "enabled": true,
+                      "settings": {
+                        "heading": "Secure checkout",
+                        "text": "Pay safely with the payment methods you already use."
+                      }
+                    },
+                    {
+                      "id": "jelly-signature-promise-help",
+                      "type": "column",
+                      "enabled": true,
+                      "settings": {
+                        "heading": "Here to help",
+                        "text": "Questions about an order? Get in touch and we will reply quickly."
+                      }
+                    }
+                  ],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-bestsellers",
+                  "type": "product-grid",
+                  "settings": {
+                    "heading": "Customer favourites",
+                    "limit": 4,
+                    "columns": 4,
+                    "sort": "best-selling",
+                    "hideWhenEmpty": true
+                  },
+                  "blocks": [],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-newsletter",
+                  "type": "newsletter",
+                  "settings": {
+                    "buttonLabel": "Subscribe",
+                    "contentAlignment": "center",
+                    "colorScheme": "page"
+                  },
+                  "blocks": [
+                    {
+                      "id": "jelly-signature-newsletter-title",
+                      "type": "heading",
+                      "enabled": true,
+                      "settings": {
+                        "text": "A little news, now and then."
+                      }
+                    },
+                    {
+                      "id": "jelly-signature-newsletter-copy",
+                      "type": "text",
+                      "enabled": true,
+                      "settings": {
+                        "text": "New arrivals and occasional notes from the studio. No spam, unsubscribe anytime."
+                      }
+                    }
+                  ],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-footer-section"
+              }
+            ]
+          }
+        },
+        {
+          "key": "jelly-signature-template-product",
+          "type": "product",
+          "handle": "default",
+          "name": "Product",
+          "layout": {
+            "sections": [
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-header-section"
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-product-gallery",
+                  "type": "product-gallery",
+                  "settings": {
+                    "imageFit": "cover",
+                    "layout": "stacked"
+                  },
+                  "blocks": [],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-product-information",
+                  "type": "product-information",
+                  "settings": {
+                    "showVendor": true,
+                    "showSku": false,
+                    "showCompareAtPrice": true,
+                    "showAvailability": true
+                  },
+                  "blocks": [],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-product-options",
+                  "type": "product-options",
+                  "settings": {
+                    "style": "buttons"
+                  },
+                  "blocks": [],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-product-purchase",
+                  "type": "product-purchase",
+                  "settings": {
+                    "showQuantity": true,
+                    "label": "Add to cart"
+                  },
+                  "blocks": [],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-product-description",
+                  "type": "product-description",
+                  "settings": {
+                    "spacing": "standard",
+                    "heading": "Description"
+                  },
+                  "blocks": [],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-product-related",
+                  "type": "related-products",
+                  "settings": {
+                    "limit": 4,
+                    "heading": "You may also like"
+                  },
+                  "blocks": [],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-footer-section"
+              }
+            ]
+          }
+        },
+        {
+          "key": "jelly-signature-template-collection",
+          "type": "collection",
+          "handle": "default",
+          "name": "Collection",
+          "layout": {
+            "sections": [
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-header-section"
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-collection-header",
+                  "type": "collection-header",
+                  "settings": {
+                    "showTitle": true,
+                    "showDescription": true,
+                    "showImage": true
+                  },
+                  "blocks": [],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-collection-grid",
+                  "type": "collection-product-grid",
+                  "settings": {
+                    "columns": 3,
+                    "limit": 12,
+                    "emptyMessage": "No products are available in this collection yet."
+                  },
+                  "blocks": [],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-collection-description",
+                  "type": "collection-description",
+                  "settings": {
+                    "spacing": "standard"
+                  },
+                  "blocks": [],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-footer-section"
+              }
+            ]
+          }
+        },
+        {
+          "key": "jelly-signature-template-cart",
+          "type": "cart",
+          "handle": "default",
+          "name": "Cart",
+          "layout": {
+            "sections": [
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-header-section"
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-cart-summary",
+                  "type": "cart-summary",
+                  "settings": {},
+                  "blocks": [],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-footer-section"
+              }
+            ]
+          }
+        },
+        {
+          "key": "jelly-signature-template-search",
+          "type": "search",
+          "handle": "default",
+          "name": "Search",
+          "layout": {
+            "sections": [
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-header-section"
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-search-results",
+                  "type": "search-results",
+                  "settings": {},
+                  "blocks": [],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-footer-section"
+              }
+            ]
+          }
+        },
+        {
+          "key": "jelly-signature-template-page",
+          "type": "page",
+          "handle": "default",
+          "name": "Page",
+          "layout": {
+            "sections": [
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-header-section"
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-page-content",
+                  "type": "page-content",
+                  "settings": {},
+                  "blocks": [],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-footer-section"
+              }
+            ]
+          }
+        },
+        {
+          "key": "jelly-signature-template-blog",
+          "type": "blog",
+          "handle": "default",
+          "name": "Blog",
+          "layout": {
+            "sections": [
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-header-section"
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-blog-header",
+                  "type": "blog-header",
+                  "settings": {},
+                  "blocks": [],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-article-list",
+                  "type": "article-list",
+                  "settings": {},
+                  "blocks": [],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-footer-section"
+              }
+            ]
+          }
+        },
+        {
+          "key": "jelly-signature-template-article",
+          "type": "article",
+          "handle": "default",
+          "name": "Article",
+          "layout": {
+            "sections": [
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-header-section"
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-article-header",
+                  "type": "article-header",
+                  "settings": {},
+                  "blocks": [],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-article-content",
+                  "type": "article-content",
+                  "settings": {},
+                  "blocks": [],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-footer-section"
+              }
+            ]
+          }
+        },
+        {
+          "key": "jelly-signature-template-not-found",
+          "type": "not-found",
+          "handle": "default",
+          "name": "Not Found",
+          "layout": {
+            "sections": [
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-header-section"
+              },
+              {
+                "kind": "inline",
+                "section": {
+                  "id": "jelly-signature-not-found-message",
+                  "type": "not-found-message",
+                  "settings": {
+                    "contentAlignment": "center"
+                  },
+                  "blocks": [
+                    {
+                      "id": "jelly-signature-not-found-heading",
+                      "type": "heading",
+                      "enabled": true,
+                      "settings": {
+                        "text": "This page has moved on."
+                      }
+                    },
+                    {
+                      "id": "jelly-signature-not-found-copy",
+                      "type": "text",
+                      "enabled": true,
+                      "settings": {
+                        "text": "Return to the shop and discover something new."
+                      }
+                    },
+                    {
+                      "id": "jelly-signature-not-found-button",
+                      "type": "button",
+                      "enabled": true,
+                      "settings": {
+                        "label": "Back to the shop",
+                        "href": "/"
+                      }
+                    }
+                  ],
+                  "enabled": true
+                }
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-footer-section"
+              }
+            ]
+          }
+        },
+        {
+          "key": "jelly-signature-template-checkout",
+          "type": "checkout",
+          "handle": "default",
+          "name": "checkout",
+          "layout": {
+            "sections": [
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-header-section"
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-footer-section"
+              }
+            ]
+          }
+        },
+        {
+          "key": "jelly-signature-template-wishlist",
+          "type": "wishlist",
+          "handle": "default",
+          "name": "wishlist",
+          "layout": {
+            "sections": [
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-header-section"
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-footer-section"
+              }
+            ]
+          }
+        },
+        {
+          "key": "jelly-signature-template-customer-login",
+          "type": "customer-login",
+          "handle": "default",
+          "name": "customer login",
+          "layout": {
+            "sections": [
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-header-section"
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-footer-section"
+              }
+            ]
+          }
+        },
+        {
+          "key": "jelly-signature-template-customer-register",
+          "type": "customer-register",
+          "handle": "default",
+          "name": "customer register",
+          "layout": {
+            "sections": [
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-header-section"
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-footer-section"
+              }
+            ]
+          }
+        },
+        {
+          "key": "jelly-signature-template-customer-recovery",
+          "type": "customer-recovery",
+          "handle": "default",
+          "name": "customer recovery",
+          "layout": {
+            "sections": [
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-header-section"
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-footer-section"
+              }
+            ]
+          }
+        },
+        {
+          "key": "jelly-signature-template-customer-account",
+          "type": "customer-account",
+          "handle": "default",
+          "name": "customer account",
+          "layout": {
+            "sections": [
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-header-section"
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-footer-section"
+              }
+            ]
+          }
+        },
+        {
+          "key": "jelly-signature-template-customer-orders",
+          "type": "customer-orders",
+          "handle": "default",
+          "name": "customer orders",
+          "layout": {
+            "sections": [
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-header-section"
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-footer-section"
+              }
+            ]
+          }
+        },
+        {
+          "key": "jelly-signature-template-customer-order",
+          "type": "customer-order",
+          "handle": "default",
+          "name": "customer order",
+          "layout": {
+            "sections": [
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-header-section"
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-footer-section"
+              }
+            ]
+          }
+        },
+        {
+          "key": "jelly-signature-template-customer-addresses",
+          "type": "customer-addresses",
+          "handle": "default",
+          "name": "customer addresses",
+          "layout": {
+            "sections": [
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-header-section"
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-footer-section"
+              }
+            ]
+          }
+        },
+        {
+          "key": "jelly-signature-template-order-success",
+          "type": "order-success",
+          "handle": "default",
+          "name": "order success",
+          "layout": {
+            "sections": [
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-header-section"
+              },
+              {
+                "kind": "global",
+                "globalSectionId": "jelly-signature-global-footer-section"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

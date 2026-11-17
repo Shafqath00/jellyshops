@@ -126,7 +126,8 @@
 /* Product page: Main product draws the photos beside the buying column (side by side from 900px, stacked below),
    with a slightly wider photo column. Rules for stores still on the first layout (separate product sections) are in
    legacy.css. */
-.jelly-main-product { --mp-media: 1.1fr; --mp-details: 1fr; --mp-part-gap: var(--j-space-lg); --mp-sticky-top: var(--j-space-lg); --mp-column-gap: var(--j-space-xl); }
+.jelly-main-product[data-media-width="medium"] { --mp-media: 1.1fr; --mp-details: 1fr; }
+.jelly-main-product { --mp-part-gap: var(--j-space-lg); --mp-sticky-top: var(--j-space-lg); --mp-column-gap: var(--j-space-xl); }
 @media (min-width: 64rem) { .jelly-main-product { --mp-column-gap: var(--j-space-3xl); } }
 :is(.jelly-product-information, .jelly-product-options, .jelly-product-purchase) { padding-block: 0; }
 /* In the buying column the trust strip keeps the room its section padding gave it. */

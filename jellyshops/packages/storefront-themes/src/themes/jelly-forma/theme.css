@@ -124,7 +124,8 @@
   .jelly-header.jelly-header[data-header-layout="search-bar"] > nav:not(.jelly-header-tools) { justify-self: start; }
 }
 /* Product page (Main product): photos beside one continuous buying column from tablet width up. */
-.jelly-main-product { --mp-media: 1.1fr; --mp-details: 1fr; --mp-part-gap: var(--j-space-lg); --mp-sticky-top: var(--j-space-lg); --mp-column-gap: var(--j-space-xl); }
+.jelly-main-product[data-media-width="medium"] { --mp-media: 1.1fr; --mp-details: 1fr; }
+.jelly-main-product { --mp-part-gap: var(--j-space-lg); --mp-sticky-top: var(--j-space-lg); --mp-column-gap: var(--j-space-xl); }
 @media (min-width: 48rem) {
   .jelly-main-product-grid { grid-template-columns: minmax(0, var(--mp-media)) minmax(0, var(--mp-details)); column-gap: var(--mp-column-gap); align-items: start; }
   .jelly-main-product[data-media-position="right"] .jelly-main-product-grid { grid-template-columns: minmax(0, var(--mp-details)) minmax(0, var(--mp-media)); }

@@ -6,6 +6,7 @@ import layoutHistory3 from "./jelly-forma/layout-history.json" with { type: "jso
 import starter4 from "./jelly-halo/starter.json" with { type: "json" };
 import layoutHistory4 from "./jelly-halo/layout-history.json" with { type: "json" };
 import starter5 from "./jelly-harbour/starter.json" with { type: "json" };
+import layoutHistory5 from "./jelly-harbour/layout-history.json" with { type: "json" };
 import starter6 from "./jelly-resthaven/starter.json" with { type: "json" };
 import layoutHistory6 from "./jelly-resthaven/layout-history.json" with { type: "json" };
 import type { DiscoveredTheme } from "../types.js";
@@ -14,6 +15,6 @@ export const discoveredStarters: Record<string, Pick<DiscoveredTheme, "starter" 
   "jelly-diode": { starter: starter2, layoutHistory: layoutHistory2 },
   "jelly-forma": { starter: starter3, layoutHistory: layoutHistory3 },
   "jelly-halo": { starter: starter4, layoutHistory: layoutHistory4 },
-  "jelly-harbour": { starter: starter5 },
+  "jelly-harbour": { starter: starter5, layoutHistory: layoutHistory5 },
   "jelly-resthaven": { starter: starter6, layoutHistory: layoutHistory6 },
 } as Record<string, Pick<DiscoveredTheme, "starter" | "layoutHistory">>;

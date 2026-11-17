@@ -2,6 +2,7 @@ import { validateSectionAgainstRegistry, type V4StarterPack } from "@jelly/store
 import type { BlockNode, SectionNode } from "@jelly/storefront-schema";
 import { describe, expect, it } from "vitest";
 import { currentLayoutRevision, detectLayoutRevision, planLayoutUpgrade, type LayoutDraft, type LayoutPlacement } from "./layout-revisions";
+import { builtInLayoutHistory } from "./builtin-layouts/index";
 import { createStarterPack, getStarterPack } from "./starter-packs";
 import { discoveredThemes } from "./themes/index.generated";
 import { discoveredStarters } from "./themes/starters.generated";
@@ -14,6 +15,9 @@ import { discoveredStarters } from "./themes/starters.generated";
 const MOVED: Array<{ theme: string; from: number; parts: string[] }> = [
   { theme: "jelly-diode", from: 1, parts: ["part-product-information", "part-product-options", "part-product-purchase", "delivery-estimate", "part-trust-strip"] },
   { theme: "jelly-halo", from: 1, parts: ["part-product-information", "part-product-options", "part-product-purchase", "delivery-estimate", "part-trust-strip"] },
+  { theme: "jelly-signature", from: 1, parts: ["part-product-information", "part-product-options", "part-product-purchase", "part-product-description"] },
+  { theme: "jelly-harbour", from: 1, parts: ["part-product-information", "part-product-options", "part-product-purchase", "part-product-description"] },
+  { theme: "jelly-avenue", from: 1, parts: ["part-product-information", "part-product-options", "part-product-purchase", "part-product-stock-counter", "part-product-description", "part-product-tabs", "part-trust-strip"] },
   { theme: "jelly-forma", from: 1, parts: ["part-product-information", "part-product-options", "part-product-purchase", "part-product-description", "part-product-specifications", "part-product-tabs"] },
 ];
 
@@ -21,6 +25,8 @@ const rekeyBlocks = (blocks: BlockNode[], prefix: string): BlockNode[] => blocks
 const rekey = (section: SectionNode, prefix: string): SectionNode => ({ ...structuredClone(section), id: `${prefix}:${section.id}`, blocks: rekeyBlocks(structuredClone(section.blocks), prefix) });
 
 function packFor(theme: string, revision: number): V4StarterPack {
+  const builtIn = builtInLayoutHistory[theme]?.revisions.find((entry) => entry.revision === revision);
+  if (builtIn) return { ...getStarterPack(theme), globalSections: structuredClone(builtIn.globalSections), templates: structuredClone(builtIn.templates) };
   const manifest = discoveredThemes.find((entry) => entry.manifest.id === theme)!.manifest;
   const history = (discoveredStarters[theme].layoutHistory as unknown as { revisions: Array<{ revision: number; globalSections: never; templates: never }> }).revisions;
   const old = history.find((entry) => entry.revision === revision);

@@ -758,6 +758,21 @@
 /* The product tiles run edge to edge; the list toolbar, filters and Show more keep the page margins. */
 [data-jelly-theme="jelly-avenue"] .jelly-collection-product-grid :is(.jelly-list-toolbar, .jelly-list-filters, .jelly-list-chips, .jelly-list-more, .jelly-empty-state) { padding-inline: var(--j-page-edge); }
 [data-jelly-theme="jelly-avenue"] .jelly-collection-description > .jelly-container > p { max-width: min(68ch, 100%); color: var(--tk-muted); }
+/* 9.9 Product page on Main product (layout revision 2): photos to the page edge on the left, a narrow
+   buying column on the right. The rules above stay for stores still on separate product sections. */
+/* The buying column's own gap spaces the parts; the last option group keeps no margin of its own. */
+[data-jelly-theme="jelly-avenue"] .jelly-main-product .jelly-product-options fieldset:last-of-type { margin-bottom: 0; }
+[data-jelly-theme="jelly-avenue"] .jelly-main-product { --mp-column-gap: clamp(32px, 4vw, 72px); --mp-part-gap: var(--tk-3); }
+[data-jelly-theme="jelly-avenue"] .jelly-main-product[data-media-width="wide"] { --mp-media: 1.5fr; --mp-details: 1fr; }
+[data-jelly-theme="jelly-avenue"] .jelly-main-product { padding-top: 0; }
+[data-jelly-theme="jelly-avenue"] .jelly-main-product > .jelly-main-product-grid.jelly-container { box-sizing: border-box; width: 100%; max-width: none; margin-inline: 0; padding-right: var(--tk-gutter); }
+@media (min-width: 900px) {
+  [data-jelly-theme="jelly-avenue"] .jelly-main-product-details { max-width: calc(480px + var(--tk-gutter)); padding-top: clamp(32px, 4vw, 64px); }
+}
+@media (max-width: 899px) {
+  [data-jelly-theme="jelly-avenue"] .jelly-main-product > .jelly-main-product-grid.jelly-container { padding-right: 0; }
+  [data-jelly-theme="jelly-avenue"] .jelly-main-product-details { padding-inline: var(--tk-gutter); padding-top: var(--tk-3); }
+}
 /* 9.10 Small screens */
 @media (max-width: 899px) {
   [data-jelly-theme="jelly-avenue"] :is(main, [data-storefront-template]):has(> [data-testid="section-product-gallery"]) { grid-template-columns: minmax(0, 1fr); padding-right: 0; }

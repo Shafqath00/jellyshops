@@ -381,65 +381,53 @@
           "kind": "inline",
           "section": {
             "id": "jelly-harbour-product-gallery",
-            "type": "product-gallery",
+            "type": "main-product",
             "settings": {
               "imageFit": "cover",
-              "layout": "stacked"
+              "layout": "stacked",
+              "mediaPosition": "left",
+              "mediaWidth": "medium",
+              "stickyColumn": "none"
             },
-            "blocks": [],
-            "enabled": true
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "jelly-harbour-product-information",
-            "type": "product-information",
-            "settings": {
-              "showVendor": true,
-              "showSku": false,
-              "showCompareAtPrice": true,
-              "showAvailability": true
-            },
-            "blocks": [],
-            "enabled": true
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "jelly-harbour-product-options",
-            "type": "product-options",
-            "settings": {
-              "style": "buttons"
-            },
-            "blocks": [],
-            "enabled": true
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "jelly-harbour-product-purchase",
-            "type": "product-purchase",
-            "settings": {
-              "showQuantity": true,
-              "label": "Add to cart"
-            },
-            "blocks": [],
-            "enabled": true
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "jelly-harbour-product-description",
-            "type": "product-description",
-            "settings": {
-              "spacing": "standard",
-              "heading": "Description"
-            },
-            "blocks": [],
+            "blocks": [
+              {
+                "id": "jelly-harbour-product-information",
+                "type": "part-product-information",
+                "enabled": true,
+                "settings": {
+                  "showVendor": true,
+                  "showSku": false,
+                  "showCompareAtPrice": true,
+                  "showAvailability": true
+                }
+              },
+              {
+                "id": "jelly-harbour-product-options",
+                "type": "part-product-options",
+                "enabled": true,
+                "settings": {
+                  "style": "buttons"
+                }
+              },
+              {
+                "id": "jelly-harbour-product-purchase",
+                "type": "part-product-purchase",
+                "enabled": true,
+                "settings": {
+                  "showQuantity": true,
+                  "label": "Add to cart"
+                }
+              },
+              {
+                "id": "jelly-harbour-product-description",
+                "type": "part-product-description",
+                "enabled": true,
+                "settings": {
+                  "spacing": "standard",
+                  "heading": "Description"
+                }
+              }
+            ],
             "enabled": true
           }
         },

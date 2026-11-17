@@ -9,8 +9,8 @@ import { listV4StarterPacks } from "./v4-starter-packs";
  * refactoring how packs are built, you broke the output and must fix the refactor.
  */
 const locked: Record<string, string> = {
-  "jelly-avenue": "3b88c2f127dffd1ae24808b4d460ec0a015da42d5029c246fb5873d4edab474a", // 19 templates
-  "jelly-signature": "25f9193d63c62acf14f948ea396de28f34cd3be1b6c9cee27473c1d57a856251", // 19 templates
+  "jelly-avenue": "55f01dd1ba679918577857dbecfeb080997bb143609fa145d261f273cd914aff", // 19 templates
+  "jelly-signature": "941fffc7a2a7d40b7e646ff5ab3a2411457a98fa2786afac31e4d9b5ffad10a2", // 19 templates
   "fresh-market": "0dabec8fdd896c3fb819f1ea1a125908d227b32f0fa6564fc0ab12b68a30f505", // 9 templates
   "artisan-boutique": "0bf3446e3c482bf5c5798dbef1954bb583c17160315a6cc9e341da248e063fa2", // 9 templates
 };

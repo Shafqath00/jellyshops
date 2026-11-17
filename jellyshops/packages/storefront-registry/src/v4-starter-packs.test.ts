@@ -46,7 +46,9 @@ describe("V4 starter packs", () => {
     // Information pages are served at /<store>/<handle>, never /pages/<handle>.
     expect(JSON.stringify(avenue)).not.toContain("/pages/");
     const types = (pageType: string) => avenue.templates.find(({ type }) => type === pageType)!.layout.sections.flatMap((placement) => placement.kind === "inline" ? [placement.section.type] : []);
-    expect(types("product")).toEqual(["product-gallery", "product-information", "product-options", "product-purchase", "product-stock-counter", "product-description", "product-tabs", "trust-strip", "related-products"]);
+    expect(types("product")).toEqual(["main-product", "related-products"]);
+    const mainProduct = avenue.templates.find(({ type }) => type === "product")!.layout.sections.flatMap((placement) => placement.kind === "inline" && placement.section.type === "main-product" ? [placement.section] : [])[0];
+    expect(mainProduct.blocks.map(({ type }) => type)).toEqual(["part-product-information", "part-product-options", "part-product-purchase", "part-product-stock-counter", "part-product-description", "part-product-tabs", "part-trust-strip"]);
     expect(types("collection")).toEqual(["collection-header", "collection-product-grid", "collection-description"]);
     const collectionHeader = avenue.templates.find(({ type }) => type === "collection")!.layout.sections.flatMap((placement) => placement.kind === "inline" && placement.section.type === "collection-header" ? [placement.section] : [])[0];
     expect(collectionHeader.settings).toMatchObject({ layout: "banner", contentAlignment: "center" });

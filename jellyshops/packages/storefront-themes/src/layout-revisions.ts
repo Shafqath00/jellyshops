@@ -1,8 +1,9 @@
-import { partSectionType, sectionLabel, type V4StarterPack } from "@jelly/storefront-registry";
+import { getV4StarterPack, isV4StarterPackId, partSectionType, sectionLabel, type V4StarterPack } from "@jelly/storefront-registry";
 import type { BlockNode, PageType, SectionNode } from "@jelly/storefront-schema";
 import { discoveredThemes as discoveredManifests } from "./themes/index.generated.js";
 import { discoveredStarters } from "./themes/starters.generated.js";
 import { createStarterPack } from "./starter-packs.js";
+import { builtInLayoutHistory } from "./builtin-layouts/index.js";
 import type { DiscoveredTheme } from "./types.js";
 
 /**
@@ -35,7 +36,7 @@ function folderTheme(themeId: string): DiscoveredTheme | undefined {
 /** Every layout the theme's starter has had, oldest first; the last one is the current starter. */
 function revisionLayouts(themeId: string): RevisionLayout[] {
   const theme = folderTheme(themeId);
-  if (!theme?.starter) return [];
+  if (!theme?.starter) return builtInRevisionLayouts(themeId);
   const history = theme.layoutHistory?.revisions ?? [];
   const layouts: RevisionLayout[] = history.map((revision) => ({
     revision: revision.revision,
@@ -46,9 +47,25 @@ function revisionLayouts(themeId: string): RevisionLayout[] {
   return layouts;
 }
 
+/** Built-in themes (starters made in code): earlier layouts from `builtin-layouts/<id>.json`, then today's pack. */
+function builtInRevisionLayouts(themeId: string): RevisionLayout[] {
+  const history = builtInLayoutHistory[themeId];
+  if (!history || !isV4StarterPackId(themeId)) return [];
+  const current = getV4StarterPack(themeId);
+  const layouts: RevisionLayout[] = history.revisions.map((revision) => ({
+    revision: revision.revision,
+    label: revision.label,
+    pack: { ...structuredClone(current), globalSections: structuredClone(revision.globalSections), templates: structuredClone(revision.templates) },
+  }));
+  layouts.push({ revision: history.revisions.length + 1, label: CURRENT_LABEL, pack: current });
+  return layouts;
+}
+
 /** The revision a store installed today gets. Themes without a layout history are on revision 1. */
 export function currentLayoutRevision(themeId: string): number {
-  return folderTheme(themeId)?.layoutHistory?.revisions.length ? folderTheme(themeId)!.layoutHistory!.revisions.length + 1 : 1;
+  const folder = folderTheme(themeId);
+  const earlier = folder?.starter ? folder.layoutHistory?.revisions.length ?? 0 : builtInLayoutHistory[themeId]?.revisions.length ?? 0;
+  return earlier + 1;
 }
 
 export function layoutRevisions(themeId: string): LayoutRevisionInfo[] {

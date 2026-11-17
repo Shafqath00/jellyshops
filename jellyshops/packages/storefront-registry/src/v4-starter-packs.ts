@@ -77,6 +77,20 @@ function global(globalSectionId: string) {
   return { kind: "global" as const, globalSectionId };
 }
 
+/** Product sections that move into Main product's buying column, in page order. */
+const BUYING_COLUMN = new Set(["product-information", "product-options", "product-purchase", "product-stock-counter", "product-description", "product-tabs", "trust-strip", "product-specifications"]);
+
+/** Product images + the buying-column sections -> one Main product section with those sections as parts. */
+function mainProductLayout(placements: V4StarterPack["templates"][number]["layout"]["sections"], mediaWidth: "medium" | "wide") {
+  const gallery = placements.find((placement) => placement.kind === "inline" && placement.section.type === "product-gallery");
+  if (!gallery || gallery.kind !== "inline") return placements;
+  const parts = placements.flatMap((placement) => placement.kind === "inline" && BUYING_COLUMN.has(placement.section.type)
+    ? [{ id: placement.section.id, type: `part-${placement.section.type}`, enabled: true, settings: placement.section.settings, ...(placement.section.blocks.length ? { blocks: placement.section.blocks } : {}) }]
+    : []);
+  const main = section(gallery.section.id, { type: "main-product", settings: { ...gallery.section.settings, mediaPosition: "left", mediaWidth, stickyColumn: "none" }, blocks: parts });
+  return placements.flatMap((placement) => placement === gallery ? inline(main) : placement.kind === "inline" && BUYING_COLUMN.has(placement.section.type) ? [] : [placement]);
+}
+
 const photo = (id: string, width = 1800) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=80`;
 
 /** Jelly Avenue home page: a full-screen slideshow, then campaign imagery between edge-to-edge product grids. */
@@ -338,6 +352,10 @@ function makePack(id: V4StarterPackId): V4StarterPack {
         if (placement.section.type === "collection-product-grid") placement.section.settings = { columns: 4, limit: 12, emptyMessage: "No products are available in this collection yet." };
       }
     }
+    // Layout revision 2: the photos and the buying column are one Main product section; the old product
+    // sections become its parts (same ids, so stores upgrade with their changes). Revision 1 is kept in
+    // storefront-themes/src/builtin-layouts/<id>.json.
+    product.layout.sections = mainProductLayout(product.layout.sections, avenue ? "wide" : "medium");
     for (const type of ["checkout", "wishlist", "customer-login", "customer-register", "customer-recovery", "customer-account", "customer-orders", "customer-order", "customer-addresses", "order-success"] as const) templates.push({ key: id + "-template-" + type, type, handle: "default", name: type.replaceAll("-", " "), layout: { sections: [] } });
   }
   for (const template of templates) {

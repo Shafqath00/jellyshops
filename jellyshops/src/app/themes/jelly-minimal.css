@@ -501,10 +501,17 @@
 [data-jelly-theme="jelly-signature"] .signature-product-grid { gap: var(--tk-6) var(--tk-3); }
 [data-jelly-theme="jelly-signature"] .signature-product-grid h2 { margin-top: var(--tk-2); font: 500 15px / 1.4 var(--tk-font-body); letter-spacing: 0; }
 [data-jelly-theme="jelly-signature"] .signature-card-image { aspect-ratio: var(--jelly-card-ratio, 4 / 5); border-radius: var(--tk-radius-card); background: var(--tk-accent); }
+/* 9.9 Product page on Main product (layout revision 2): photos left, buying column right. The rules above
+   stay for stores still on separate product sections. */
+/* The buying column's own gap spaces the parts; the last option group keeps no margin of its own. */
+[data-jelly-theme="jelly-signature"] .jelly-main-product .jelly-product-options fieldset:last-of-type { margin-bottom: 0; }
+[data-jelly-theme="jelly-signature"] .jelly-main-product { --mp-column-gap: clamp(32px, 5vw, 80px); --mp-part-gap: var(--tk-3); padding-top: var(--tk-5); }
+[data-jelly-theme="jelly-signature"] .jelly-main-product[data-media-width="medium"] { --mp-media: 1.15fr; --mp-details: 1fr; }
 /* 9.10 Small screens */
 @media (max-width: 899px) {
   [data-jelly-theme="jelly-signature"] :is(main, [data-storefront-template]):has(> [data-testid="section-product-gallery"]) { grid-template-columns: minmax(0, 1fr); padding-top: var(--tk-2); }
   [data-jelly-theme="jelly-signature"] :is(main, [data-storefront-template]):has(> [data-testid="section-product-gallery"]) > * { grid-column: 1 !important; grid-row: auto !important; }
+  [data-jelly-theme="jelly-signature"] .jelly-main-product { padding-top: var(--tk-2); }
   [data-jelly-theme="jelly-signature"] .jelly-product-gallery > .jelly-container { display: grid; grid-auto-columns: 86%; grid-auto-flow: column; grid-template-columns: none; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
 }
 @media (max-width: 767px) {

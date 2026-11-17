@@ -561,150 +561,128 @@ exports[`V4 starter packs > preserves the complete built-in starter packs 1`] = 
             {
               "kind": "inline",
               "section": {
-                "blocks": [],
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-product-information",
+                    "settings": {
+                      "showAvailability": true,
+                      "showCompareAtPrice": true,
+                      "showSku": false,
+                      "showVendor": true,
+                    },
+                    "type": "part-product-information",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-product-options",
+                    "settings": {
+                      "style": "buttons",
+                    },
+                    "type": "part-product-options",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-product-purchase",
+                    "settings": {
+                      "label": "Add to cart",
+                      "showQuantity": true,
+                    },
+                    "type": "part-product-purchase",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-product-stock",
+                    "settings": {
+                      "lowStockThreshold": 5,
+                      "showWhenPlentiful": true,
+                    },
+                    "type": "part-product-stock-counter",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-avenue-product-description",
+                    "settings": {
+                      "heading": "Description",
+                      "spacing": "standard",
+                    },
+                    "type": "part-product-description",
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "enabled": true,
+                        "id": "jelly-avenue-tab-care",
+                        "settings": {
+                          "text": "Describe what the piece is made from and how to look after it. For example: 100% organic cotton. Machine wash cold and dry flat to keep its shape.",
+                          "title": "Materials & care",
+                        },
+                        "type": "info-tab",
+                      },
+                      {
+                        "enabled": true,
+                        "id": "jelly-avenue-tab-shipping",
+                        "settings": {
+                          "text": "Free delivery on every order, dispatched within 2 working days.
+
+Not quite right? Return it within 30 days for a full refund.",
+                          "title": "Shipping & returns",
+                        },
+                        "type": "info-tab",
+                      },
+                    ],
+                    "enabled": true,
+                    "id": "jelly-avenue-product-tabs",
+                    "settings": {
+                      "firstOpen": false,
+                    },
+                    "type": "part-product-tabs",
+                  },
+                  {
+                    "blocks": [
+                      {
+                        "enabled": true,
+                        "id": "jelly-avenue-trust-delivery",
+                        "settings": {
+                          "text": "Free delivery",
+                        },
+                        "type": "text",
+                      },
+                      {
+                        "enabled": true,
+                        "id": "jelly-avenue-trust-returns",
+                        "settings": {
+                          "text": "30-day returns",
+                        },
+                        "type": "text",
+                      },
+                      {
+                        "enabled": true,
+                        "id": "jelly-avenue-trust-checkout",
+                        "settings": {
+                          "text": "Secure checkout",
+                        },
+                        "type": "text",
+                      },
+                    ],
+                    "enabled": true,
+                    "id": "jelly-avenue-product-trust",
+                    "settings": {
+                      "colorScheme": "page",
+                    },
+                    "type": "part-trust-strip",
+                  },
+                ],
                 "enabled": true,
                 "id": "jelly-avenue-product-gallery",
                 "settings": {
                   "imageFit": "cover",
                   "layout": "grid",
+                  "mediaPosition": "left",
+                  "mediaWidth": "wide",
+                  "stickyColumn": "none",
                 },
-                "type": "product-gallery",
-              },
-            },
-            {
-              "kind": "inline",
-              "section": {
-                "blocks": [],
-                "enabled": true,
-                "id": "jelly-avenue-product-information",
-                "settings": {
-                  "showAvailability": true,
-                  "showCompareAtPrice": true,
-                  "showSku": false,
-                  "showVendor": true,
-                },
-                "type": "product-information",
-              },
-            },
-            {
-              "kind": "inline",
-              "section": {
-                "blocks": [],
-                "enabled": true,
-                "id": "jelly-avenue-product-options",
-                "settings": {
-                  "style": "buttons",
-                },
-                "type": "product-options",
-              },
-            },
-            {
-              "kind": "inline",
-              "section": {
-                "blocks": [],
-                "enabled": true,
-                "id": "jelly-avenue-product-purchase",
-                "settings": {
-                  "label": "Add to cart",
-                  "showQuantity": true,
-                },
-                "type": "product-purchase",
-              },
-            },
-            {
-              "kind": "inline",
-              "section": {
-                "blocks": [],
-                "enabled": true,
-                "id": "jelly-avenue-product-stock",
-                "settings": {
-                  "lowStockThreshold": 5,
-                  "showWhenPlentiful": true,
-                },
-                "type": "product-stock-counter",
-              },
-            },
-            {
-              "kind": "inline",
-              "section": {
-                "blocks": [],
-                "enabled": true,
-                "id": "jelly-avenue-product-description",
-                "settings": {
-                  "heading": "Description",
-                  "spacing": "standard",
-                },
-                "type": "product-description",
-              },
-            },
-            {
-              "kind": "inline",
-              "section": {
-                "blocks": [
-                  {
-                    "enabled": true,
-                    "id": "jelly-avenue-tab-care",
-                    "settings": {
-                      "text": "Describe what the piece is made from and how to look after it. For example: 100% organic cotton. Machine wash cold and dry flat to keep its shape.",
-                      "title": "Materials & care",
-                    },
-                    "type": "info-tab",
-                  },
-                  {
-                    "enabled": true,
-                    "id": "jelly-avenue-tab-shipping",
-                    "settings": {
-                      "text": "Free delivery on every order, dispatched within 2 working days.
-
-Not quite right? Return it within 30 days for a full refund.",
-                      "title": "Shipping & returns",
-                    },
-                    "type": "info-tab",
-                  },
-                ],
-                "enabled": true,
-                "id": "jelly-avenue-product-tabs",
-                "settings": {
-                  "firstOpen": false,
-                },
-                "type": "product-tabs",
-              },
-            },
-            {
-              "kind": "inline",
-              "section": {
-                "blocks": [
-                  {
-                    "enabled": true,
-                    "id": "jelly-avenue-trust-delivery",
-                    "settings": {
-                      "text": "Free delivery",
-                    },
-                    "type": "text",
-                  },
-                  {
-                    "enabled": true,
-                    "id": "jelly-avenue-trust-returns",
-                    "settings": {
-                      "text": "30-day returns",
-                    },
-                    "type": "text",
-                  },
-                  {
-                    "enabled": true,
-                    "id": "jelly-avenue-trust-checkout",
-                    "settings": {
-                      "text": "Secure checkout",
-                    },
-                    "type": "text",
-                  },
-                ],
-                "enabled": true,
-                "id": "jelly-avenue-product-trust",
-                "settings": {
-                  "colorScheme": "page",
-                },
-                "type": "trust-strip",
+                "type": "main-product",
               },
             },
             {
@@ -1601,67 +1579,55 @@ Not quite right? Return it within 30 days for a full refund.",
             {
               "kind": "inline",
               "section": {
-                "blocks": [],
+                "blocks": [
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-product-information",
+                    "settings": {
+                      "showAvailability": true,
+                      "showCompareAtPrice": true,
+                      "showSku": false,
+                      "showVendor": true,
+                    },
+                    "type": "part-product-information",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-product-options",
+                    "settings": {
+                      "style": "buttons",
+                    },
+                    "type": "part-product-options",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-product-purchase",
+                    "settings": {
+                      "label": "Add to cart",
+                      "showQuantity": true,
+                    },
+                    "type": "part-product-purchase",
+                  },
+                  {
+                    "enabled": true,
+                    "id": "jelly-signature-product-description",
+                    "settings": {
+                      "heading": "Description",
+                      "spacing": "standard",
+                    },
+                    "type": "part-product-description",
+                  },
+                ],
                 "enabled": true,
                 "id": "jelly-signature-product-gallery",
                 "settings": {
                   "imageFit": "cover",
                   "layout": "stacked",
+                  "mediaPosition": "left",
+                  "mediaWidth": "medium",
+                  "stickyColumn": "none",
                 },
-                "type": "product-gallery",
-              },
-            },
-            {
-              "kind": "inline",
-              "section": {
-                "blocks": [],
-                "enabled": true,
-                "id": "jelly-signature-product-information",
-                "settings": {
-                  "showAvailability": true,
-                  "showCompareAtPrice": true,
-                  "showSku": false,
-                  "showVendor": true,
-                },
-                "type": "product-information",
-              },
-            },
-            {
-              "kind": "inline",
-              "section": {
-                "blocks": [],
-                "enabled": true,
-                "id": "jelly-signature-product-options",
-                "settings": {
-                  "style": "buttons",
-                },
-                "type": "product-options",
-              },
-            },
-            {
-              "kind": "inline",
-              "section": {
-                "blocks": [],
-                "enabled": true,
-                "id": "jelly-signature-product-purchase",
-                "settings": {
-                  "label": "Add to cart",
-                  "showQuantity": true,
-                },
-                "type": "product-purchase",
-              },
-            },
-            {
-              "kind": "inline",
-              "section": {
-                "blocks": [],
-                "enabled": true,
-                "id": "jelly-signature-product-description",
-                "settings": {
-                  "heading": "Description",
-                  "spacing": "standard",
-                },
-                "type": "product-description",
+                "type": "main-product",
               },
             },
             {

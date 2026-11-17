@@ -34,7 +34,10 @@ describe("layout revisions", () => {
   it("knows Resthaven's layouts, oldest first, with the starter as the newest", () => {
     expect(currentLayoutRevision(THEME)).toBe(6);
     expect(layoutRevisions(THEME).map((entry) => entry.revision)).toEqual([1, 2, 3, 4, 5, 6]);
-    expect(currentLayoutRevision("jelly-signature")).toBe(1);
+    // Built-in themes keep their earlier layouts in builtin-layouts/; a theme without any is on revision 1.
+    expect(currentLayoutRevision("jelly-signature")).toBe(2);
+    expect(layoutRevisions("jelly-avenue").map((entry) => entry.revision)).toEqual([1, 2]);
+    expect(currentLayoutRevision("fresh-market")).toBe(1);
   });
 
   it("recognises which layout a fresh install came from", () => {
