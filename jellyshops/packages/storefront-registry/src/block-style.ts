@@ -89,7 +89,7 @@ export function isBlockStyleKey(key: string): boolean {
 
 /** Adds the shared style controls to the content blocks (heading, text, button, media, group and every "@content" block); other blocks are returned unchanged. */
 export function withBlockStyle(definition: BlockDefinition): BlockDefinition {
-  if (!styledTypes.has(definition.type) && !definition.sets?.includes("@content")) return definition;
+  if (!styledTypes.has(definition.type) && !definition.sets?.some((set) => set === "@content" || set === "@product")) return definition;
   const own = new Set(definition.controls.map((control) => control.key));
   return {
     ...definition,

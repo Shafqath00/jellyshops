@@ -19,6 +19,8 @@ export function productPartBlocks(sections: SectionDefinition[]): BlockDefinitio
     if (!section) return [];
     return [{
       type: partBlockType(type),
+      // Parts need the product being shown: only Main product's buying column takes "@product" blocks.
+      sets: ["@product"],
       settingsSchema: section.settingsSchema,
       controls: section.controls,
       defaultSettings: structuredClone(section.defaultSettings),
@@ -52,8 +54,10 @@ export function mainProductSection(sections: SectionDefinition[]): SectionDefini
       // The page arrangement is this section's own job, so the older page layout picker is left out.
       ...gallery.controls.filter((control) => control.key !== "pageLayout"),
     ],
-    allowedBlockTypes: PRODUCT_PART_SECTIONS.filter((type) => sections.some((candidate) => candidate.type === type)).map(partBlockType),
-    maxBlocks: 16,
+    // The buying column takes every product block (parts, breadcrumbs, delivery estimate…) and the whole shared
+    // content library (text, accordion, icons, share links…), so any layout of the buying details can be built.
+    allowedBlockTypes: ["@product", "@content", "@app"],
+    maxBlocks: 30,
     defaultSettings: { ...structuredClone(gallery.defaultSettings), mediaPosition: "left", mediaWidth: "medium", stickyColumn: "media" },
     defaultBlocks: [
       { id: "main-product-information", type: partBlockType("product-information"), enabled: true, settings: {} },

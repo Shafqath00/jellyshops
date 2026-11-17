@@ -20,7 +20,9 @@ describe("block sets", () => {
     expect(content).not.toContain("app");
     expect(content).not.toContain("slide");
     expect(expandBlockTypes(["@app"], listBlockDefinitions())).toEqual(["app"]);
-    expect(expandBlockTypes(["@product"], listBlockDefinitions())).toEqual([]);
+    // Product parts and product page blocks: only Main product takes them.
+    expect(expandBlockTypes(["@product"], listBlockDefinitions())).toEqual(expect.arrayContaining(["part-product-purchase", "part-product-dimensions", "product-breadcrumbs", "delivery-estimate", "complementary-products"]));
+    expect(expandBlockTypes(["@product"], listBlockDefinitions())).not.toContain("notice");
   });
   it("keeps named types, expands sets in place and drops repeats", () => {
     const blocks: BlockDefinition[] = [{ type: "a", sets: ["@content"] } as BlockDefinition, { type: "b", sets: ["@content"] } as BlockDefinition];

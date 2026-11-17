@@ -8326,6 +8326,7 @@
         "share",
         "countdown",
         "store-locator",
+        "notice",
         "app"
       ],
       "blockSets": [
@@ -22467,6 +22468,9 @@
         "template"
       ],
       "allowedBlockTypes": [
+        "product-breadcrumbs",
+        "delivery-estimate",
+        "complementary-products",
         "part-rating-summary",
         "part-product-information",
         "part-product-options",
@@ -22475,10 +22479,51 @@
         "part-trust-strip",
         "part-product-description",
         "part-product-tabs",
-        "part-product-specifications"
+        "part-product-specifications",
+        "part-product-dimensions",
+        "heading",
+        "text",
+        "button",
+        "image",
+        "video",
+        "group",
+        "subheading",
+        "section-header",
+        "collapsible-text",
+        "grid",
+        "accordion",
+        "tabs",
+        "divider",
+        "spacer",
+        "icon",
+        "icon-list",
+        "icon-box",
+        "card",
+        "badge",
+        "counter",
+        "button-group",
+        "image-card",
+        "images-stack",
+        "image-comparison",
+        "video-card",
+        "product-card",
+        "product-overlay-card",
+        "press",
+        "newsletter-form",
+        "contact-form",
+        "share",
+        "countdown",
+        "store-locator",
+        "notice",
+        "app"
+      ],
+      "blockSets": [
+        "@product",
+        "@content",
+        "@app"
       ],
       "limit": 1,
-      "maxBlocks": 16,
+      "maxBlocks": 30,
       "defaultSettings": {
         "imageFit": "cover",
         "layout": "thumbnails",
@@ -27993,6 +28038,7 @@
         "share",
         "countdown",
         "store-locator",
+        "notice",
         "app"
       ],
       "maxBlocks": 8,
@@ -28981,6 +29027,7 @@
         "share",
         "countdown",
         "store-locator",
+        "notice",
         "app"
       ],
       "maxBlocks": 12,
@@ -32952,6 +32999,494 @@
       }
     },
     {
+      "type": "product-breadcrumbs",
+      "sets": [
+        "@product"
+      ],
+      "defaultSettings": {
+        "shopLabel": "Shop"
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "shopLabel",
+          "label": "Shop link text",
+          "description": "The middle step, which links to all your products.",
+          "group": "content",
+          "maxLength": 40
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "shopLabel": {
+            "type": "string",
+            "maxLength": 40
+          }
+        }
+      }
+    },
+    {
+      "type": "delivery-estimate",
+      "sets": [
+        "@product"
+      ],
+      "defaultSettings": {
+        "cutoffHour": 14,
+        "dispatchDays": 0,
+        "deliveryMin": 2,
+        "deliveryMax": 4
+      },
+      "controls": [
+        {
+          "type": "range",
+          "key": "cutoffHour",
+          "label": "Same-day dispatch cut-off",
+          "description": "Orders before this hour (UK time) count as today.",
+          "group": "content",
+          "min": 0,
+          "max": 23,
+          "step": 1,
+          "unit": ":00"
+        },
+        {
+          "type": "range",
+          "key": "dispatchDays",
+          "label": "Working days to dispatch",
+          "group": "content",
+          "min": 0,
+          "max": 10,
+          "step": 1
+        },
+        {
+          "type": "range",
+          "key": "deliveryMin",
+          "label": "Delivery takes at least (working days)",
+          "group": "content",
+          "min": 0,
+          "max": 30,
+          "step": 1
+        },
+        {
+          "type": "range",
+          "key": "deliveryMax",
+          "label": "Delivery takes at most (working days)",
+          "group": "content",
+          "min": 0,
+          "max": 30,
+          "step": 1
+        },
+        {
+          "type": "checkbox",
+          "key": "weekendDispatch",
+          "label": "Dispatch and deliver at weekends",
+          "group": "content"
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "cutoffHour": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 23
+          },
+          "dispatchDays": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "deliveryMin": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30
+          },
+          "deliveryMax": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30
+          },
+          "weekendDispatch": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "type": "complementary-products",
+      "sets": [
+        "@product"
+      ],
+      "defaultSettings": {
+        "heading": "Pairs well with",
+        "limit": 3
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "heading",
+          "label": "Heading",
+          "group": "content",
+          "maxLength": 80
+        },
+        {
+          "type": "range",
+          "key": "limit",
+          "label": "Products to show",
+          "group": "content",
+          "min": 1,
+          "max": 6,
+          "step": 1
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "heading": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 6
+          }
+        }
+      }
+    },
+    {
+      "type": "notice",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "text": "Use code WELCOME10 for 10% off your first order.",
+        "icon": "tag",
+        "tone": "sale"
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "text",
+          "label": "Message",
+          "group": "content",
+          "maxLength": 200
+        },
+        {
+          "type": "select",
+          "key": "icon",
+          "label": "Icon",
+          "group": "content",
+          "options": [
+            {
+              "label": "Tick",
+              "value": "check"
+            },
+            {
+              "label": "Delivery van",
+              "value": "truck"
+            },
+            {
+              "label": "Shield (warranty)",
+              "value": "shield"
+            },
+            {
+              "label": "Calendar",
+              "value": "calendar"
+            },
+            {
+              "label": "Moon (sleep trial)",
+              "value": "moon"
+            },
+            {
+              "label": "House",
+              "value": "home"
+            },
+            {
+              "label": "Payment card",
+              "value": "card"
+            },
+            {
+              "label": "Percent (finance)",
+              "value": "percent"
+            },
+            {
+              "label": "Star",
+              "value": "star"
+            },
+            {
+              "label": "Phone",
+              "value": "phone"
+            },
+            {
+              "label": "Leaf",
+              "value": "leaf"
+            },
+            {
+              "label": "Gift",
+              "value": "gift"
+            },
+            {
+              "label": "Return arrow",
+              "value": "return"
+            },
+            {
+              "label": "Palette (swatches)",
+              "value": "palette"
+            },
+            {
+              "label": "Price tag",
+              "value": "tag"
+            },
+            {
+              "label": "Clock",
+              "value": "clock"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "key": "linkLabel",
+          "label": "Link text",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
+          "type": "link",
+          "key": "link",
+          "label": "Link",
+          "group": "content",
+          "dynamicTypes": [
+            "url"
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "tone",
+          "label": "Colour",
+          "group": "style",
+          "options": [
+            {
+              "label": "Calm",
+              "value": "info"
+            },
+            {
+              "label": "Good news",
+              "value": "success"
+            },
+            {
+              "label": "Heads up",
+              "value": "warning"
+            },
+            {
+              "label": "Sale",
+              "value": "sale"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "icon": {
+            "type": "string",
+            "enum": [
+              "check",
+              "truck",
+              "shield",
+              "calendar",
+              "moon",
+              "home",
+              "card",
+              "percent",
+              "star",
+              "phone",
+              "leaf",
+              "gift",
+              "return",
+              "palette",
+              "tag",
+              "clock"
+            ]
+          },
+          "link": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "linkLabel": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "tone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "info",
+                  "success",
+                  "warning",
+                  "sale"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "$defs": {
+          "__schema0": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "resource_field"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "field"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metafield"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "namespace",
+                  "key"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metaobject_field"
+                  },
+                  "source": {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source",
+                  "field"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
       "type": "social-link",
       "defaultSettings": {
         "label": "Instagram",
@@ -33130,6 +33665,9 @@
     },
     {
       "type": "part-rating-summary",
+      "sets": [
+        "@product"
+      ],
       "defaultSettings": {
         "source": "manual",
         "rating": 4.8,
@@ -33317,6 +33855,9 @@
     },
     {
       "type": "part-product-information",
+      "sets": [
+        "@product"
+      ],
       "defaultSettings": {
         "discountChip": "none",
         "financeMonths": 0,
@@ -33468,6 +34009,9 @@
     },
     {
       "type": "part-product-options",
+      "sets": [
+        "@product"
+      ],
       "defaultSettings": {
         "style": "buttons",
         "tileColumns": 3
@@ -33543,6 +34087,9 @@
     },
     {
       "type": "part-product-purchase",
+      "sets": [
+        "@product"
+      ],
       "defaultSettings": {
         "showQuantity": true,
         "label": "Add to cart",
@@ -33590,6 +34137,9 @@
     },
     {
       "type": "part-product-stock-counter",
+      "sets": [
+        "@product"
+      ],
       "defaultSettings": {
         "lowStockThreshold": 5,
         "showWhenPlentiful": true
@@ -33628,6 +34178,9 @@
     },
     {
       "type": "part-trust-strip",
+      "sets": [
+        "@product"
+      ],
       "allowedBlockTypes": [
         "trust-point",
         "heading",
@@ -33746,6 +34299,9 @@
     },
     {
       "type": "part-product-description",
+      "sets": [
+        "@product"
+      ],
       "defaultSettings": {
         "spacing": "standard",
         "heading": "Description"
@@ -33817,6 +34373,9 @@
     },
     {
       "type": "part-product-tabs",
+      "sets": [
+        "@product"
+      ],
       "allowedBlockTypes": [
         "info-tab"
       ],
@@ -33868,6 +34427,9 @@
     },
     {
       "type": "part-product-specifications",
+      "sets": [
+        "@product"
+      ],
       "allowedBlockTypes": [
         "spec-row"
       ],
@@ -33934,6 +34496,103 @@
               "table",
               "expandable"
             ]
+          }
+        },
+        "additionalProperties": {}
+      }
+    },
+    {
+      "type": "part-product-dimensions",
+      "sets": [
+        "@product"
+      ],
+      "defaultSettings": {
+        "heading": "Dimensions",
+        "unit": "cm",
+        "showUnitSwitch": true,
+        "note": ""
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "heading",
+          "label": "Heading",
+          "group": "content",
+          "maxLength": 120
+        },
+        {
+          "type": "image",
+          "key": "diagram",
+          "label": "Diagram",
+          "description": "A drawing with letters A, B, C… that match the measurements, in the order they are listed in the product's specifications.",
+          "group": "content"
+        },
+        {
+          "type": "text",
+          "key": "note",
+          "label": "Note under the measurements",
+          "description": "For example: Allow 2 cm either way.",
+          "group": "content",
+          "maxLength": 200
+        },
+        {
+          "type": "segmented",
+          "key": "unit",
+          "label": "Show first in",
+          "group": "layout",
+          "options": [
+            {
+              "label": "cm",
+              "value": "cm"
+            },
+            {
+              "label": "Inches",
+              "value": "in"
+            }
+          ]
+        },
+        {
+          "type": "checkbox",
+          "key": "showUnitSwitch",
+          "label": "Let shoppers switch between cm and inches",
+          "group": "layout"
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "heading": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "cm",
+              "in"
+            ]
+          },
+          "showUnitSwitch": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "diagram": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
           }
         },
         "additionalProperties": {}

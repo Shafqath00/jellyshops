@@ -6,6 +6,7 @@ import type { StorefrontRuntimeContext } from "../runtime-context";
 import type { CommerceDataProvider, RendererMode } from "../types";
 import { blockEditorData } from "./block-content";
 import { ProductGallerySection } from "./product-sections";
+import { renderBlocks } from "./custom-content";
 
 type PartRenderer = ComponentType<{ section: SectionNode; mode: RendererMode; commerce: CommerceDataProvider; context: StorefrontRuntimeContext; selectedBlockId?: string }>;
 
@@ -14,7 +15,8 @@ const choice = <T extends string>(value: unknown, options: readonly T[], fallbac
 /**
  * The product page's photos and buying column in one section. The two columns are this markup, so
  * the layout holds whatever parts the merchant adds, hides or moves; each part is drawn by the product
- * section of the same name (`part-product-options` by Product options), with the block's settings.
+ * section of the same name (`part-product-options` by Product options), with the block's settings. Other blocks
+ * (product blocks and the shared content blocks) are drawn as they are in a Custom section.
  */
 export function MainProductSection({ section, mode, commerce, context, selectedBlockId, renderPart }: {
   section: SectionNode;
@@ -49,8 +51,14 @@ function ProductPart({ block, mode, commerce, context, selectedBlockId, editor, 
   renderPart: (sectionType: string) => PartRenderer | undefined;
 }) {
   const type = partSectionType(block.type);
-  const Part = type ? renderPart(type) : undefined;
-  if (!type || !Part) return editor ? <div role="status">Unsupported part: {block.type}</div> : null;
+  // Any other block (breadcrumbs, delivery estimate, accordion, icon list, share links…) is drawn as it is in a
+  // Custom section, so the buying column takes the whole shared block library.
+  if (!type) {
+    const drawn = renderBlocks([block], { context, editor, selectedBlockId }).filter(Boolean);
+    return drawn.length ? <div className="jelly-product-part" data-part="block" data-block-type={block.type}>{drawn}</div> : null;
+  }
+  const Part = renderPart(type);
+  if (!Part) return editor ? <div role="status">Unsupported part: {block.type}</div> : null;
   const section: SectionNode = { id: block.id, type, enabled: true, settings: block.settings, blocks: block.blocks ?? [], ...(block.responsive ? { responsive: block.responsive } : {}) };
   // In the editor a click inside a part selects the part (the block), not one of the drawn section's own parts.
   return <div className="jelly-product-part" data-part={type} {...blockEditorData(block, editor, blockLabel(block.type), selectedBlockId)} {...(editor ? { "data-editor-block-elements": "none" } : {})}>

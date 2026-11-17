@@ -18,7 +18,7 @@ const widths: Record<string, string> = { narrow: "36rem", normal: "48rem", wide:
 interface BlockContext { context: StorefrontRuntimeContext; editor: boolean; selectedBlockId?: string }
 
 /** Heading, text, button, image, video, group and the shared content blocks, in order. Each list numbers its own buttons (first filled, others outlined). */
-function renderBlocks(blocks: BlockNode[], options: BlockContext): ReactNode[] {
+export function renderBlocks(blocks: BlockNode[], options: BlockContext): ReactNode[] {
   let buttonIndex = 0;
   return blocks.filter((block) => block.enabled).map((block) => {
     const { context, editor, selectedBlockId } = options;

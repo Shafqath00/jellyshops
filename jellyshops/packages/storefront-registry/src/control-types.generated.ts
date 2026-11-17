@@ -154,6 +154,12 @@ export const BLOCK_CONTROL_TYPES: Record<string, Record<string, string>> = {
     "image": "image",
     "link": "link"
   },
+  "notice": {
+    "link": "link"
+  },
+  "part-product-dimensions": {
+    "diagram": "image"
+  },
   "part-product-information": {
     "financeLink": "link"
   },

@@ -5,6 +5,7 @@ import { withBlockStyle } from "./block-style.js";
 import { withBlockElements } from "./section-elements.js";
 import { CONTENT_BLOCKS } from "./content-blocks.js";
 import { MEDIA_BLOCKS } from "./media-blocks.js";
+import { PRODUCT_BLOCKS } from "./product-blocks.js";
 import type { BlockDefinition, ControlDefinition } from "./types.js";
 
 const dynamicString = z.union([z.string(), settingValueSchema(z.string())]);
@@ -144,6 +145,7 @@ const blocks: BlockDefinition[] = [
   appBlock(),
   ...CONTENT_BLOCKS,
   ...MEDIA_BLOCKS,
+  ...PRODUCT_BLOCKS,
   { type: "social-link", settingsSchema: z.object({ label: z.string(), href: z.union([z.string(), settingValueSchema(z.string())]) }).passthrough(), controls: [{ type: "link", key: "href", label: "Link", group: "content", dynamicTypes: urlTypes }], defaultSettings: { label: "Instagram", href: "https://example.com" } }
 ];
 

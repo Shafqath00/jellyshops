@@ -114,6 +114,11 @@ const blockLabels: Record<string, string> = {
   share: "Share links",
   countdown: "Countdown",
   "store-locator": "Shop address",
+  // Product page blocks (product-blocks.ts).
+  "product-breadcrumbs": "Breadcrumbs",
+  "delivery-estimate": "Delivery estimate",
+  "complementary-products": "Pairs well with",
+  notice: "Notice",
 };
 
 const pageTypeLabels: Record<PageType, string> = {

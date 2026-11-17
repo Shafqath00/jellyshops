@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react";
 import {
   AlignLeft, Columns3, Footprints, GalleryHorizontal, Heading, Image as ImageIcon, LayoutGrid, LayoutPanelTop, Mail, Megaphone, MessageSquareQuote,
-  MousePointerClick, MoreHorizontal, PanelTop, Rows3, ShoppingBag, Square, Star, Store, Type, Video, ChevronsUpDown, Hash, List, Tag, Sparkles, CreditCard, Columns2, Layers, Mail as MailIcon, MapPin, Quote, Share2, Timer,
+  MousePointerClick, MoreHorizontal, PanelTop, Rows3, ShoppingBag, Square, Star, Store, Type, Video, ChevronsUpDown, Hash, List, Tag, Sparkles, CreditCard, Columns2, Layers, Mail as MailIcon, MapPin, Quote, Share2, Timer, Truck, Navigation, Info,
   type LucideIcon,
 } from "lucide-react";
 
@@ -45,6 +45,10 @@ export function blockIcon(type: string): LucideIcon {
   if (type === "share") return Share2;
   if (type === "countdown") return Timer;
   if (type === "store-locator") return MapPin;
+  if (type === "product-breadcrumbs") return Navigation;
+  if (type === "delivery-estimate") return Truck;
+  if (type === "complementary-products") return ShoppingBag;
+  if (type === "notice") return Info;
   if (type.includes("heading") || type === "title") return Heading;
   if (type.includes("button") || type.includes("link")) return MousePointerClick;
   if (type.includes("image") || type.includes("photo") || type.includes("logo")) return ImageIcon;

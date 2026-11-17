@@ -18,6 +18,18 @@ import { MobileEditingNote } from "@/features/store-editor/components/mobile-edi
 import type { EditorViewContext } from "../../hooks/use-editor-controller";
 import { ResetDesignButton } from "@/features/store-editor/components/inspector/reset-design-button";
 
+/** Add block choices grouped by kind (product blocks first), in their own order inside each group. */
+export function blockPickerGroups(types: string[]): Array<[string, string[]]> {
+  const groupOf = (type: string) => {
+    const sets = getBlockDefinition(type)?.sets ?? [];
+    return sets.includes("@product") ? "Product" : sets.includes("@app") ? "Apps" : sets.includes("@content") ? "Content" : "Blocks";
+  };
+  const order = ["Product", "Blocks", "Content", "Apps"];
+  const groups = new Map<string, string[]>();
+  for (const type of types) groups.set(groupOf(type), [...(groups.get(groupOf(type)) ?? []), type]);
+  return [...groups.entries()].sort(([a], [b]) => order.indexOf(a) - order.indexOf(b));
+}
+
 /** The settings panel on the side: theme settings and saved looks, the section library, the block picker, section and block settings and shared sections. */
 export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
   const { backendStoreId, api, looks, looksError, looksBusy, dynamicSources, catalog, themeCatalog, themeConfiguration, selection, setSelection, activeGlobalId, setMobilePanel, diagnostics, libraryRegion, setLibraryRegion, blockPickerSectionId, setBlockPickerSectionId, blockPickerParentId, setBlockPickerParentId, activeTemplate, presetOptions, globalOptions, selectedGlobal, localSection, selectedLocation, selectedBlock, selectedElement, selectedChildOptions, sectionDefinition, baseControls, responsiveView, selectedControls, selectedSettings, builtInSections, blockPickerSection, blockPickerDefinition, blockPickerTypes, selectedTheme, persistThemeSetting, saveThemeLook, renameThemeLook, deleteThemeLook, insertPreset, saveToLibrary, deletePreset, insertBuiltIn, addBlock, removeSelectedSection, insertGlobal, makeGlobal, detachGlobal, updateSelectedSetting, updateSelectedSettings, resetSelectedDesign, saveRichTextDocument, openDiagnostic } = ctx;
@@ -102,18 +114,23 @@ export function EditorInspectorPanel({ ctx }: { ctx: EditorViewContext }) {
             </div>
           </div>
           <div className="space-y-1 p-3">
-            {blockPickerTypes.map((blockType) => (
-              <button
-                key={blockType}
-                type="button"
-                onClick={() => { void addBlock(blockType); }}
-                className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-[13px] font-medium hover:bg-[var(--paper)]"
-              >
-                <span className="grid size-8 place-items-center rounded-lg border border-[var(--line)] text-[var(--ink)]">
-                  {(() => { const Glyph = blockIcon(blockType); return <Glyph size={15} aria-hidden="true" />; })()}
-                </span>
-                {blockLabel(blockType)}
-              </button>
+            {blockPickerGroups(blockPickerTypes).map(([group, types], index, groups) => (
+              <div key={group} className={index > 0 ? "pt-3" : undefined}>
+                {groups.length > 1 && <h3 className="mb-1 px-3 text-[11px] font-semibold text-[var(--ink-soft)]">{group}</h3>}
+                {types.map((blockType) => (
+                  <button
+                    key={blockType}
+                    type="button"
+                    onClick={() => { void addBlock(blockType); }}
+                    className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-[13px] font-medium hover:bg-[var(--paper)]"
+                  >
+                    <span className="grid size-8 place-items-center rounded-lg border border-[var(--line)] text-[var(--ink)]">
+                      {(() => { const Glyph = blockIcon(blockType); return <Glyph size={15} aria-hidden="true" />; })()}
+                    </span>
+                    {blockLabel(blockType)}
+                  </button>
+                ))}
+              </div>
             ))}
             {blockPickerTypes.length === 0 && (
               <p className="py-8 text-center text-[12px] text-[var(--ink-soft)]">This section does not support content blocks.</p>

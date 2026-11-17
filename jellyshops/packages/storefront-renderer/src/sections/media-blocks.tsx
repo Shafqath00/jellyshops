@@ -11,6 +11,7 @@ import { NewsletterForm } from "./home-sections";
 import { pickProduct, useStoreProducts } from "./showcase";
 import { choice, imageValue, numberValue, stringValue } from "./shared";
 import type { ContentBlockOptions } from "./content-blocks";
+import { renderProductBlock } from "./product-blocks";
 
 /**
  * The shared content blocks, wave 2 (registry media-blocks.ts): image card, images stack, image comparison, video
@@ -261,6 +262,7 @@ export function renderMediaBlock(block: BlockNode, options: ContentBlockOptions)
     case "share": return <Share key={block.id} {...props} />;
     case "countdown": return <Countdown key={block.id} {...props} />;
     case "store-locator": return <StoreLocator key={block.id} {...props} />;
-    default: return undefined;
+    // Product page blocks (product-blocks.tsx).
+    default: return renderProductBlock(block, options);
   }
 }
