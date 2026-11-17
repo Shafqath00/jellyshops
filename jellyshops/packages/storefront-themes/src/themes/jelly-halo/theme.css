@@ -123,18 +123,14 @@
   .jelly-header.jelly-header[data-header-layout="search-bar"] > .jelly-header-search { grid-column: 2; max-width: none; }
   .jelly-header.jelly-header[data-header-layout="search-bar"] > nav:not(.jelly-header-tools) { justify-self: start; }
 }
-/* Product page: gallery beside one continuous buying column from tablet width up. */
-@media (min-width: 48rem) {
-  :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) { display: grid; grid-template-columns: var(--j-page-edge) minmax(0, 1.1fr) var(--halo-product-gap, var(--j-space-xl)) minmax(0, 1fr) var(--j-page-edge); grid-template-rows: repeat(5, min-content) minmax(min-content, 1fr); align-items: start; padding-top: var(--j-space-xl); }
-  :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > * { grid-column: 1 / -1; }
-  :is(main, [data-storefront-template]) > [data-section-type="product-gallery"] { grid-column: 2; grid-row: 1 / span 6; position: sticky; top: var(--j-space-lg); }
-  :is(main, [data-storefront-template]) > :is([data-section-type="product-information"], [data-section-type="product-options"], [data-section-type="product-purchase"], [data-section-type="product-description"], [data-section-type="product-specifications"], [data-section-type="product-tabs"]) { grid-column: 4; }
-  :is([data-section-type="product-gallery"], [data-section-type="product-information"], [data-section-type="product-options"], [data-section-type="product-purchase"]) .jelly-container { width: 100%; }
-  .jelly-product-gallery { padding-block: 0; } [data-section-type="product-information"] { grid-row: 1; } [data-section-type="product-options"] { grid-row: 2; } [data-section-type="product-purchase"] { grid-row: 3; } [data-section-type="product-description"] { grid-row: 4; } [data-section-type="product-specifications"] { grid-row: 5; } [data-section-type="product-tabs"] { grid-row: 6; }
-  :is([data-section-type="product-description"], [data-section-type="product-specifications"], [data-section-type="product-tabs"]) .jelly-container { width: 100%; }
-}
-@media (min-width: 64rem) { & { --halo-product-gap: var(--j-space-3xl); } }
-:is(.jelly-product-information, .jelly-product-options, .jelly-product-purchase) { padding-block: 0; } :is([data-section-type="product-options"], [data-section-type="product-purchase"]) { padding-top: var(--j-space-lg); }
+/* Product page: Main product draws the photos beside the buying column (side by side from 900px, stacked below),
+   with a slightly wider photo column. Rules for stores still on the first layout (separate product sections) are in
+   legacy.css. */
+.jelly-main-product { --mp-media: 1.1fr; --mp-details: 1fr; --mp-part-gap: var(--j-space-lg); --mp-sticky-top: var(--j-space-lg); --mp-column-gap: var(--j-space-xl); }
+@media (min-width: 64rem) { .jelly-main-product { --mp-column-gap: var(--j-space-3xl); } }
+:is(.jelly-product-information, .jelly-product-options, .jelly-product-purchase) { padding-block: 0; }
+/* In the buying column the trust strip keeps the room its section padding gave it. */
+[data-part="trust-strip"] .jelly-trust-strip { padding-block: var(--j-space-md); }
 /* Fold-out product panels (description, specifications, details): one list of rows like the FAQ. */
 :is(.jelly-product-description, .jelly-specifications, .jelly-product-tabs-section):has(details) { padding-block: 0; } :is([data-section-type="product-description"], [data-section-type="product-specifications"], [data-section-type="product-tabs"]):has(details) { padding-top: 0; }
 :is(.jelly-product-description, .jelly-specifications, .jelly-product-tabs-section) details { border-bottom: 1px solid var(--j-color-border); } [data-section-type="product-description"]:has(details) details { margin-top: var(--j-space-lg); border-top: 1px solid var(--j-color-border); }
@@ -271,7 +267,7 @@ main:has(.jelly-list-toolbar) .jelly-collection-count { display: none; } .jelly-
 .jelly-product-chapter-number { display: inline-grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: 999rem; background: color-mix(in srgb, var(--j-color-surface, #fff) 70%, transparent); color: var(--j-color-text); font-weight: 600; opacity: 1; }
 .jelly-product-chapter p { color: var(--j-color-muted); max-width: min(34ch, 100%); }
 :is(main, [data-storefront-template]) > [data-section-type="product-tabs"]:has(.jelly-product-chapters) { border-radius: var(--halo-radius-card, 20px); overflow: hidden; margin-bottom: var(--j-space-lg, 32px); }
-[data-section-type="trust-strip"] .jelly-trust-strip .jelly-container > ul { justify-content: flex-start; column-gap: 1.5rem; row-gap: .5rem; }
+:is([data-section-type="trust-strip"], [data-part="trust-strip"]) .jelly-trust-strip .jelly-container > ul { justify-content: flex-start; column-gap: 1.5rem; row-gap: .5rem; }
 
 /* Block text styles (Heading 1-4, Body, Small) chosen in the editor beat the section's own heading sizes. */
 [data-type-preset="h1"] { font-family: var(--j-type-h1-font) !important; font-size: var(--j-type-h1-size) !important; font-weight: var(--jelly-heading-weight) !important; line-height: var(--j-type-h1-line) !important; letter-spacing: var(--j-type-h1-track) !important; text-transform: var(--j-type-h1-case) !important; }
@@ -297,7 +293,7 @@ main:has(.jelly-list-toolbar) .jelly-collection-count { display: none; } .jelly-
 @media (max-width: 767px) { .jelly-hero[data-layout="spotlight"] .jelly-hero-content { padding-inline: 0; } }
 @media (max-width: 767px) {
   :is(main, [data-storefront-template]) > [data-section-type="product-tabs"]:has(.jelly-product-chapters) { border-radius: 0; }
-  [data-section-type="trust-strip"] .jelly-trust-strip .jelly-container > ul { padding-inline: 0; }
+  :is([data-section-type="trust-strip"], [data-part="trust-strip"]) .jelly-trust-strip .jelly-container > ul { padding-inline: 0; }
 }
 
 /* Phones: concern pills scroll sideways in one row; product count and sort share one row. */

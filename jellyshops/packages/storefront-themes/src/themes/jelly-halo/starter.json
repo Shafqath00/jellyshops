@@ -536,100 +536,94 @@
           "kind": "inline",
           "section": {
             "id": "halo-product-gallery-44",
-            "type": "product-gallery",
+            "type": "main-product",
             "enabled": true,
             "settings": {
               "styleScheme": "scheme1",
               "imageFit": "contain",
               "layout": "thumbnails",
               "thumbnailPosition": "left",
-              "pageLayout": "details-below"
-            },
-            "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "halo-product-information-45",
-            "type": "product-information",
-            "enabled": true,
-            "settings": {
-              "styleScheme": "scheme1",
-              "showVendor": false,
-              "showSku": false,
-              "showCompareAtPrice": true,
-              "showAvailability": true,
-              "showSpecifications": false,
-              "discountChip": "percent"
-            },
-            "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "halo-product-options-46",
-            "type": "product-options",
-            "enabled": true,
-            "settings": {
-              "styleScheme": "scheme1",
-              "style": "buttons"
-            },
-            "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "halo-product-purchase-47",
-            "type": "product-purchase",
-            "enabled": true,
-            "settings": {
-              "styleScheme": "scheme1",
-              "showQuantity": true,
-              "label": "Add to bag",
-              "stickyBar": true
-            },
-            "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "halo-trust-strip-51",
-            "type": "trust-strip",
-            "enabled": true,
-            "settings": {
-              "styleScheme": "scheme1"
+              "mediaPosition": "left",
+              "mediaWidth": "medium",
+              "stickyColumn": "media"
             },
             "blocks": [
               {
-                "id": "halo-trust-point-48",
-                "type": "trust-point",
+                "id": "halo-product-information-45",
+                "type": "part-product-information",
                 "enabled": true,
                 "settings": {
-                  "text": "Free UK delivery over £40",
-                  "icon": "truck"
+                  "showVendor": false,
+                  "showSku": false,
+                  "showCompareAtPrice": true,
+                  "showAvailability": true,
+                  "showSpecifications": false,
+                  "discountChip": "percent"
                 }
               },
               {
-                "id": "halo-trust-point-49",
-                "type": "trust-point",
+                "id": "halo-product-options-46",
+                "type": "part-product-options",
                 "enabled": true,
                 "settings": {
-                  "text": "Two free samples",
-                  "icon": "gift"
+                  "style": "buttons"
                 }
               },
               {
-                "id": "halo-trust-point-50",
-                "type": "trust-point",
+                "id": "halo-product-purchase-47",
+                "type": "part-product-purchase",
                 "enabled": true,
                 "settings": {
-                  "text": "30-day returns",
-                  "icon": "return"
+                  "showQuantity": true,
+                  "label": "Add to bag",
+                  "stickyBar": true
                 }
+              },
+              {
+                "id": "halo-product-delivery",
+                "type": "delivery-estimate",
+                "enabled": true,
+                "settings": {
+                  "cutoffHour": 14,
+                  "dispatchDays": 0,
+                  "deliveryMin": 2,
+                  "deliveryMax": 3
+                }
+              },
+              {
+                "id": "halo-trust-strip-51",
+                "type": "part-trust-strip",
+                "enabled": true,
+                "settings": {},
+                "blocks": [
+                  {
+                    "id": "halo-trust-point-48",
+                    "type": "trust-point",
+                    "enabled": true,
+                    "settings": {
+                      "text": "Free UK delivery over £40",
+                      "icon": "truck"
+                    }
+                  },
+                  {
+                    "id": "halo-trust-point-49",
+                    "type": "trust-point",
+                    "enabled": true,
+                    "settings": {
+                      "text": "Two free samples",
+                      "icon": "gift"
+                    }
+                  },
+                  {
+                    "id": "halo-trust-point-50",
+                    "type": "trust-point",
+                    "enabled": true,
+                    "settings": {
+                      "text": "30-day returns",
+                      "icon": "return"
+                    }
+                  }
+                ]
               }
             ]
           }

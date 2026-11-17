@@ -1,0 +1,13 @@
+/* Stores still on Halo's first layout (layout revision 1: separate product sections laid out by the page grid).
+   Appended after theme.css by generate-theme-assets.mjs and the theme CLI. Delete once no store is on revision 1. */
+@media (min-width: 48rem) {
+  :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) { display: grid; grid-template-columns: var(--j-page-edge) minmax(0, 1.1fr) var(--halo-product-gap, var(--j-space-xl)) minmax(0, 1fr) var(--j-page-edge); grid-template-rows: repeat(5, min-content) minmax(min-content, 1fr); align-items: start; padding-top: var(--j-space-xl); }
+  :is(main, [data-storefront-template]):has(> [data-section-type="product-gallery"]) > * { grid-column: 1 / -1; }
+  :is(main, [data-storefront-template]) > [data-section-type="product-gallery"] { grid-column: 2; grid-row: 1 / span 6; position: sticky; top: var(--j-space-lg); }
+  :is(main, [data-storefront-template]) > :is([data-section-type="product-information"], [data-section-type="product-options"], [data-section-type="product-purchase"], [data-section-type="product-description"], [data-section-type="product-specifications"], [data-section-type="product-tabs"]) { grid-column: 4; }
+  :is([data-section-type="product-gallery"], [data-section-type="product-information"], [data-section-type="product-options"], [data-section-type="product-purchase"]) .jelly-container { width: 100%; }
+  .jelly-product-gallery { padding-block: 0; } [data-section-type="product-information"] { grid-row: 1; } [data-section-type="product-options"] { grid-row: 2; } [data-section-type="product-purchase"] { grid-row: 3; } [data-section-type="product-description"] { grid-row: 4; } [data-section-type="product-specifications"] { grid-row: 5; } [data-section-type="product-tabs"] { grid-row: 6; }
+  :is([data-section-type="product-description"], [data-section-type="product-specifications"], [data-section-type="product-tabs"]) .jelly-container { width: 100%; }
+}
+@media (min-width: 64rem) { & { --halo-product-gap: var(--j-space-3xl); } }
+:is([data-section-type="product-options"], [data-section-type="product-purchase"]) { padding-top: var(--j-space-lg); }

@@ -102,6 +102,7 @@
       "collection",
       "not-found",
       "page",
+      "product",
       "search"
     ],
     "pageTypes": [
@@ -118,7 +119,7 @@
     "demoContent": false,
     "conformance": true,
     "lintFindings": 0,
-    "cssGzipKb": 8.4
+    "cssGzipKb": 8.3
   },
   "jelly-harbour": {
     "theme": "jelly-harbour",
