@@ -28,6 +28,8 @@ export const checkoutInputSchema = z.object({
     .record(z.string(), z.unknown())
     .refine(withinSnapshotSize)
     .optional(),
+  /** A discount code the shopper typed; checked again on the server when the order is made. */
+  discountCode: z.string().trim().max(60).optional(),
 });
 
 /** Largest JSON size accepted for the buyer or delivery details (they are copied into the order). */

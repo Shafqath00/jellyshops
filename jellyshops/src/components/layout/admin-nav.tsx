@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CreditCard, FileText, Home, Inbox, Settings, Store, Tag, Users, type LucideIcon } from "lucide-react";
+import { CreditCard, FileText, Home, Inbox, Percent, Settings, Store, Tag, Users, type LucideIcon } from "lucide-react";
 
 export type AdminDestination = { label: string; href: string };
 export type AdminNavGroup = AdminDestination & { icon: LucideIcon; section?: string; children?: AdminDestination[] };
@@ -16,6 +16,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
   { label: "Customers", href: "/admin/customers", icon: Users, children: [
     { label: "All customers", href: "/admin/customers" }, { label: "Messages", href: "/admin/customers/messages" },
   ] },
+  { label: "Discounts", href: "/admin/discounts", icon: Percent },
   { label: "Content", href: "/admin/content/pages", icon: FileText, section: "Manage", children: [
     { label: "Pages", href: "/admin/content/pages" }, { label: "Blog posts", href: "/admin/content/blogs" }, { label: "Files", href: "/admin/content/files" }, { label: "Menus", href: "/admin/content/menus" }, { label: "Custom content", href: "/admin/content/metaobjects" },
   ] },

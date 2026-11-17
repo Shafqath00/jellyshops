@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { useShop } from "@/contexts/shop-context";
 import { createCommerceApi } from "@/features/commerce/api/client";
-import type { PreparedPayment } from "@/features/commerce/api/types";
+import type { DiscountPreview, PreparedPayment } from "@/features/commerce/api/types";
 import { useCustomer } from "@/features/customers/providers/customer-provider";
 import { checkoutProblem, type CheckoutProblem } from "./checkout-errors";
 import {
@@ -35,6 +35,37 @@ export function useCheckout(storeSlug: string) {
   const [pending, setPending] = useState(false);
   const [problem, setProblem] = useState<CheckoutProblem | null>(null);
   const [prepared, setPrepared] = useState<PreparedPayment | null>(null);
+  const [discount, setDiscount] = useState<DiscountPreview | null>(null);
+  const [discountPending, setDiscountPending] = useState(false);
+  const [discountError, setDiscountError] = useState("");
+  const commerceApi = () => createCommerceApi({ token: session?.user.email_confirmed_at ? session.access_token : undefined, baseUrl: API_URL });
+
+  /** Asks the server what a code takes off this bag; the order checks it again. */
+  async function applyDiscount(raw: string): Promise<boolean> {
+    const code = raw.trim();
+    if (!store || !cart || !code || discountPending) return false;
+    if (!/^[A-Za-z0-9_-]{2,40}$/.test(code)) { setDiscountError("This code isn't valid."); return false; }
+    setDiscountPending(true);
+    setDiscountError("");
+    try {
+      const { items } = attemptInput(cart, lines, details, delivery, store);
+      setDiscount(await commerceApi().checkDiscount(store.id, { code, currency: store.currency.toUpperCase(), items, ...(details.email.trim() ? { email: details.email.trim() } : {}) }));
+      return true;
+    } catch (error) {
+      setDiscount(null);
+      // An older server has no discount route at all.
+      const status = typeof error === "object" && error && "status" in error ? Number((error as { status: unknown }).status) : 0;
+      setDiscountError(status === 404 ? "Discount codes can't be used in this shop yet." : checkoutProblem(error).message);
+      return false;
+    } finally {
+      setDiscountPending(false);
+    }
+  }
+
+  function removeDiscount() {
+    setDiscount(null);
+    setDiscountError("");
+  }
 
   const setField = useCallback((field: CheckoutField, value: string) => {
     setDetails((current) => ({ ...current, [field]: value }));
@@ -51,12 +82,18 @@ export function useCheckout(storeSlug: string) {
     setPending(true);
     setProblem(null);
     try {
-      const api = createCommerceApi({ token: session?.user.email_confirmed_at ? session.access_token : undefined, baseUrl: API_URL });
-      const attempt = await api.createAttempt(store.id, attemptInput(cart, lines, details, delivery, store));
+      const api = commerceApi();
+      const attempt = await api.createAttempt(store.id, attemptInput(cart, lines, details, delivery, store, discount?.code));
       const payment = await api.preparePayment(store.id, attempt.attemptId);
       setPrepared(payment);
       setStep("payment");
     } catch (error) {
+      const code = typeof error === "object" && error && "code" in error ? String((error as { code: unknown }).code) : "";
+      if (code.startsWith("DISCOUNT_")) {
+        // The code stopped working since it was applied (used up, expired): drop it and say why next to the field.
+        setDiscount(null);
+        setDiscountError(checkoutProblem(error).message);
+      }
       setProblem(checkoutProblem(error));
     } finally {
       setPending(false);
@@ -84,6 +121,7 @@ export function useCheckout(storeSlug: string) {
     store, cart, lines, delivery, country, estimatedSubtotal,
     details, setField, fieldErrors,
     step, pending, problem, prepared,
+    discount, discountPending, discountError, applyDiscount, removeDiscount,
     continueToPayment, editDetails, clearBag,
   };
 }

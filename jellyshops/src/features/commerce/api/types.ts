@@ -4,11 +4,16 @@ export interface CommerceAttemptInput {
   items: Array<{ variantId: string; quantity: number; configurationSelections?: Array<{ optionId: string; valueId: string; optionName?: string; valueLabel?: string; priceAdjustmentMinor?: number }>; personalisation?: Array<{ fieldId: string; value: string }> }>;
   customerSnapshot: Record<string, unknown>;
   deliverySnapshot?: Record<string, unknown>;
+  /** Checked again by the server when the order is made. */
+  discountCode?: string;
 }
+
+/** What a discount code takes off the bag, worked out by the server. */
+export interface DiscountPreview { code: string; label: string; subtotalMinor: number; discountMinor: number; shippingMinor: number; totalMinor: number; currency: string }
 
 export interface CommerceAttemptResult { attemptId: string; orderId: string; publicToken: string }
 /** Totals worked out on the server; `amountMinor` is what Stripe will charge. */
-export interface PreparedPaymentTotals { subtotalMinor: number; shippingMinor: number; totalMinor: number; amountMinor: number; currency: string }
+export interface PreparedPaymentTotals { subtotalMinor: number; shippingMinor: number; discountMinor?: number; discountCode?: string | null; totalMinor: number; amountMinor: number; currency: string }
 export interface PreparedPayment { orderId: string; publicToken: string; clientSecret: string; connectedAccountId: string; totals?: PreparedPaymentTotals }
 export interface PublicShipment {
   id: string;

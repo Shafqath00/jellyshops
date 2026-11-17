@@ -10,6 +10,7 @@ const checkoutLineSchema = z.object({
   configurationSelections: z.array(z.object({
     optionId: z.string().min(1), valueId: z.string().min(1),
   })).max(20).optional(),
+  personalisation: z.array(z.object({ fieldId: z.string().min(1).max(80), value: z.string().max(2000) })).max(5).optional(),
 });
 
 const beginCheckoutSchema = z.object({
@@ -18,6 +19,14 @@ const beginCheckoutSchema = z.object({
   items: z.array(checkoutLineSchema).min(1).max(50),
   customerSnapshot: z.record(z.string(), z.unknown()),
   deliverySnapshot: z.record(z.string(), z.unknown()).optional(),
+  discountCode: z.string().trim().max(60).optional(),
+});
+
+const discountCheckSchema = z.object({
+  code: z.string().trim().min(1).max(60),
+  currency: z.string().length(3),
+  items: z.array(checkoutLineSchema).min(1).max(50),
+  email: z.string().trim().max(254).optional(),
 });
 
 const preparePaymentSchema = z.object({
@@ -64,6 +73,22 @@ export function createCommerceRouter(
         response
           .status(201)
           .json(result);
+      } catch (error) {
+        next(error);
+      }
+    },
+  );
+
+  // Checks a discount code against the bag before the order is made, for the order summary.
+  router.post(
+    "/discount",
+    async (request, response, next) => {
+      try {
+        const storeId = getStoreId(request);
+        const parsed = discountCheckSchema.safeParse(request.body);
+        if (!parsed.success) throw new ApiError(422, "DISCOUNT_INPUT_INVALID", "Enter a discount code.");
+        await service.assertDiscountCheckAccess(storeId, request.ip ?? "unknown");
+        response.set("Cache-Control", "no-store").json(await service.previewDiscount(storeId, parsed.data));
       } catch (error) {
         next(error);
       }

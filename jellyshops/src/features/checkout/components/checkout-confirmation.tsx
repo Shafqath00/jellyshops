@@ -1,51 +1,126 @@
+"use client";
+
 import Link from "next/link";
-import type { ReactNode } from "react";
-import { Check, Clock, X } from "lucide-react";
+import { useId, useState, type ReactNode } from "react";
+import { Check, ChevronDown, Clock, X } from "lucide-react";
 import "../checkout.css";
 
 export type ConfirmationState = "paid" | "pending" | "failed" | "cancelled" | "refunded";
+
+export interface ConfirmationLine {
+  key: string;
+  title: string;
+  detail?: string;
+  imageUrl?: string;
+  quantity: number;
+  priceLabel?: string;
+}
+
+export interface ConfirmationSummary {
+  lines: ConfirmationLine[];
+  subtotalLabel?: string;
+  shippingLabel?: string;
+  /** "−£5.00" and the code, when the order used one. */
+  discount?: { label: string; code?: string };
+  currency: string;
+}
 
 interface CheckoutConfirmationProps {
   state: ConfirmationState;
   orderNumber?: string;
   totalLabel: string;
   storeSlug: string;
+  /** The order's items and totals, drawn in the grey column (folded at the top on phones). */
+  summary?: ConfirmationSummary;
   /** Order lines, tracking and so on, drawn below the confirmation. */
   children?: ReactNode;
   actions?: ReactNode;
 }
 
-const COPY: Record<ConfirmationState, { eyebrow: string; title: string; body: string }> = {
-  paid: { eyebrow: "Payment received", title: "Thank you for your order", body: "Your order is confirmed and a receipt is on its way to your inbox." },
-  pending: { eyebrow: "Almost done", title: "We're confirming your payment", body: "This usually takes a few seconds. This page updates by itself, and you'll get an email once it's confirmed." },
-  failed: { eyebrow: "Payment not taken", title: "Your payment didn't go through", body: "Nothing has been charged. Go back to checkout to try again or use another way to pay." },
-  cancelled: { eyebrow: "Order cancelled", title: "This order has been cancelled", body: "Contact the shop if you need help with its payment." },
-  refunded: { eyebrow: "Refunded", title: "Your refund has been confirmed", body: "It can take a few days to appear on your statement." },
+const COPY: Record<ConfirmationState, { eyebrow: string; title: string; body: string; card: string }> = {
+  paid: { eyebrow: "Payment received", title: "Thank you for your order", body: "A receipt is on its way to your inbox.", card: "Your order is confirmed" },
+  pending: { eyebrow: "Almost done", title: "We're confirming your payment", body: "This usually takes a few seconds. This page updates by itself, and you'll get an email once it's confirmed.", card: "Waiting for your bank" },
+  failed: { eyebrow: "Payment not taken", title: "Your payment didn't go through", body: "Nothing has been charged. Go back to checkout to try again or use another way to pay.", card: "Payment not taken" },
+  cancelled: { eyebrow: "Order cancelled", title: "This order has been cancelled", body: "Contact the shop if you need help with its payment.", card: "Order cancelled" },
+  refunded: { eyebrow: "Refunded", title: "Your refund has been confirmed", body: "It can take a few days to appear on your statement.", card: "Refund confirmed" },
 };
 
-/** The order confirmation shared by every theme (the success step of checkout). */
-export function CheckoutConfirmation({ state, orderNumber, totalLabel, storeSlug, children, actions }: CheckoutConfirmationProps) {
+function ConfirmationOrderSummary({ summary, totalLabel, paid }: { summary: ConfirmationSummary; totalLabel: string; paid: boolean }) {
+  const [open, setOpen] = useState(false);
+  const panelId = useId();
+  const count = summary.lines.reduce((sum, line) => sum + line.quantity, 0);
+  return (
+    <aside className="jelly-checkout__summary" aria-labelledby={`${panelId}-title`}>
+      <button type="button" className="jelly-checkout__summary-toggle" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen((value) => !value)}>
+        <span>{open ? "Hide order summary" : "Show order summary"}<ChevronDown size={16} aria-hidden="true" data-open={open ? "" : undefined} /></span>
+        <b>{totalLabel}</b>
+      </button>
+      <div id={panelId} className="jelly-checkout__summary-panel" data-open={open ? "" : undefined}>
+        <h2 id={`${panelId}-title`} className="jelly-checkout__panel-title">Order summary <span className="jelly-checkout__count">({count} {count === 1 ? "item" : "items"})</span></h2>
+        <ul className="jelly-checkout__lines">
+          {summary.lines.map((line) => (
+            <li key={line.key} className="jelly-checkout__line">
+              <span className="jelly-checkout__thumb">
+                {/* eslint-disable-next-line @next/next/no-img-element -- order snapshots may point at any media host */}
+                {line.imageUrl ? <img src={line.imageUrl} alt="" /> : null}
+                <span className="jelly-checkout__qty" aria-hidden="true">{line.quantity}</span>
+              </span>
+              <span className="jelly-checkout__line-text">
+                <strong>{line.title}</strong>
+                {line.detail && <span>{line.detail}</span>}
+                <span className="jelly-checkout__sr">Quantity {line.quantity}</span>
+              </span>
+              <span className="jelly-checkout__line-price">{line.priceLabel}</span>
+            </li>
+          ))}
+        </ul>
+        <dl className="jelly-checkout__totals">
+          {summary.subtotalLabel && <div><dt>Subtotal</dt><dd>{summary.subtotalLabel}</dd></div>}
+          {summary.discount && <div className="jelly-checkout__discount-line"><dt>Discount{summary.discount.code ? <span> · {summary.discount.code}</span> : null}</dt><dd>{summary.discount.label}</dd></div>}
+          {summary.shippingLabel && <div><dt>Delivery</dt><dd>{summary.shippingLabel}</dd></div>}
+          <div className="jelly-checkout__total"><dt>{paid ? "Total paid" : "Total"}</dt><dd><span className="jelly-checkout__currency">{summary.currency}</span> {totalLabel}</dd></div>
+        </dl>
+      </div>
+    </aside>
+  );
+}
+
+/** The order confirmation shared by every theme: the same split page as checkout, status on the left, order on the right. */
+export function CheckoutConfirmation({ state, orderNumber, totalLabel, storeSlug, summary, children, actions }: CheckoutConfirmationProps) {
   const copy = COPY[state];
   const Icon = state === "paid" || state === "refunded" ? Check : state === "pending" ? Clock : X;
+  const paid = state === "paid";
   return (
     <main className="jelly-checkout jelly-checkout--confirmation" data-state={state}>
-      <div className="jelly-checkout__single">
-        <section className="jelly-checkout__confirmation" aria-live="polite">
-          <span className="jelly-checkout__confirmation-icon" aria-hidden="true"><Icon size={24} /></span>
-          <p className="jelly-checkout__eyebrow">{copy.eyebrow}</p>
-          <h1 className="jelly-checkout__title">{copy.title}</h1>
-          <p>{copy.body}</p>
-          <dl className="jelly-checkout__recap-grid">
-            {orderNumber && <div><dt>Order number</dt><dd>{orderNumber}</dd></div>}
-            <div><dt>{state === "paid" ? "Total paid" : "Total"}</dt><dd>{totalLabel}</dd></div>
-          </dl>
+      <div className={summary ? "jelly-checkout__grid" : "jelly-checkout__single"}>
+        {summary && <ConfirmationOrderSummary summary={summary} totalLabel={totalLabel} paid={paid} />}
+        <div className="jelly-checkout__main">
+          <section className="jelly-checkout__confirmation" aria-live="polite">
+            <div className="jelly-checkout__confirmation-head">
+              <span className="jelly-checkout__confirmation-icon" aria-hidden="true"><Icon size={24} /></span>
+              <div>
+                <p className="jelly-checkout__eyebrow">{orderNumber ? `Order ${orderNumber}` : copy.eyebrow}</p>
+                <h1 className="jelly-checkout__title">{copy.title}</h1>
+              </div>
+            </div>
+            <div className="jelly-checkout__card">
+              <h2 className="jelly-checkout__panel-title">{copy.card}</h2>
+              <p>{copy.body}</p>
+              {!summary && (
+                <dl className="jelly-checkout__recap-grid">
+                  {orderNumber && <div><dt>Order number</dt><dd>{orderNumber}</dd></div>}
+                  <div><dt>{paid ? "Total paid" : "Total"}</dt><dd>{totalLabel}</dd></div>
+                </dl>
+              )}
+            </div>
+          </section>
+          {children && <div className="jelly-checkout__confirmation-details">{children}</div>}
           <div className="jelly-checkout__actions">
             {state === "failed" && <Link className="jelly-checkout__primary jelly-checkout__primary--inline" href={`/${storeSlug}/checkout`}>Back to checkout</Link>}
             {actions}
-            <Link className="jelly-checkout__secondary" href={`/${storeSlug}/shop`}>Keep shopping</Link>
+            <Link className={state === "failed" || actions ? "jelly-checkout__secondary" : "jelly-checkout__primary jelly-checkout__primary--inline"} href={`/${storeSlug}/shop`}>Continue shopping</Link>
           </div>
-        </section>
-        {children && <div className="jelly-checkout__confirmation-details">{children}</div>}
+        </div>
       </div>
     </main>
   );

@@ -111,3 +111,36 @@ it("has no automatic accessibility problems on the details step", async () => {
   const results = await axe.run(container, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"] }, rules: { "color-contrast": { enabled: false }, region: { enabled: false } } });
   expect(results.violations.map((violation) => `${violation.id}: ${violation.nodes.map((node) => node.target.join(" ")).join(", ")}`)).toEqual([]);
 });
+
+it("checks a discount code on the server, shows it in the summary and sends it with the order", async () => {
+  bag();
+  const preview = { code: "SAVE10", label: "10% off", subtotalMinor: 50000, discountMinor: 5000, shippingMinor: 5000, totalMinor: 50000, currency: "INR" };
+  const fetcher = vi.fn()
+    .mockResolvedValueOnce(new Response(JSON.stringify({ error: { code: "DISCOUNT_NOT_APPLICABLE", message: "This code has expired." } }), { status: 422 }))
+    .mockResolvedValueOnce(new Response(JSON.stringify(preview), { status: 200 }))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ attemptId: "attempt-1", orderId: "order-1", publicToken: "a-token" }), { status: 201 }))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ ...prepared, totals: { ...prepared.totals, discountMinor: 5000, discountCode: "SAVE10", totalMinor: 50000, amountMinor: 50000 } }), { status: 200 }));
+  vi.stubGlobal("fetch", fetcher);
+  const user = userEvent.setup();
+  render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
+
+  const field = (await screen.findAllByRole("textbox", { name: "Discount code" }))[0]!;
+  await user.type(field, "old");
+  await user.click(screen.getAllByRole("button", { name: "Apply" })[0]!);
+  expect(await screen.findByText("This code has expired.")).toBeVisible();
+  expect(field).toHaveAttribute("aria-invalid", "true");
+
+  await user.clear(field);
+  await user.type(field, "save10");
+  await user.click(screen.getAllByRole("button", { name: "Apply" })[0]!);
+  expect(await screen.findByRole("button", { name: "Remove discount code SAVE10" })).toBeVisible();
+  expect(screen.getAllByText("−₹50.00").length).toBeGreaterThan(0);
+  expect(JSON.parse(fetcher.mock.calls[1]![1]!.body)).toMatchObject({ code: "save10", currency: "INR", items: [{ variantId: "vanilla-cake", quantity: 1 }] });
+
+  await fillDelivery(user);
+  await user.click(screen.getByRole("button", { name: /continue to payment/i }));
+  expect(await screen.findByText("Card payment form for 50000")).toBeVisible();
+  expect(JSON.parse(fetcher.mock.calls[2]![1]!.body)).toMatchObject({ discountCode: "SAVE10" });
+  // Once the payment is being taken the code can't be changed here.
+  expect(screen.queryByRole("textbox", { name: "Discount code" })).toBeNull();
+});

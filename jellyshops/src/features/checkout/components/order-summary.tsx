@@ -1,11 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useId, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { useId, useState, type FormEvent } from "react";
+import { ChevronDown, Tag, X } from "lucide-react";
 import { formatMoney, type Currency } from "@/lib/domain";
 import { cartProductImage } from "@/lib/product-media";
-import type { PreparedPaymentTotals } from "@/features/commerce/api/types";
+import type { DiscountPreview, PreparedPaymentTotals } from "@/features/commerce/api/types";
 import type { CheckoutLine } from "../checkout-model";
 
 interface OrderSummaryProps {
@@ -16,6 +16,64 @@ interface OrderSummaryProps {
   delivery: boolean;
   /** Set once the server has priced the order; replaces the estimate. */
   totals?: PreparedPaymentTotals;
+  discount?: DiscountControls;
+}
+
+export interface DiscountControls {
+  applied: DiscountPreview | null;
+  pending: boolean;
+  error: string;
+  /** False once the payment is being taken: the code is fixed in the order then. */
+  editable: boolean;
+  onApply: (code: string) => Promise<boolean>;
+  onRemove: () => void;
+}
+
+/** "Discount code" box with Apply, or the applied code as a tag with a remove button. */
+function DiscountField({ applied, pending, error, editable, onApply, onRemove }: DiscountControls) {
+  const [value, setValue] = useState("");
+  const id = useId();
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (await onApply(value)) setValue("");
+  }
+  return (
+    <div className="jelly-checkout__discount">
+      {editable && (
+        <form className="jelly-checkout__discount-form" onSubmit={submit} noValidate>
+          <div className="jelly-checkout__field" data-invalid={error ? "" : undefined}>
+            <label htmlFor={`${id}-code`} className="jelly-checkout__sr">Discount code</label>
+            <input
+              id={`${id}-code`}
+              value={value}
+              onChange={(event) => setValue(event.target.value)}
+              placeholder="Discount code"
+              autoComplete="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+              maxLength={40}
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? `${id}-error` : undefined}
+            />
+          </div>
+          <button type="submit" className="jelly-checkout__secondary jelly-checkout__discount-apply" disabled={pending || !value.trim()}>
+            {pending ? <span className="jelly-checkout__spinner" aria-hidden="true" /> : null}
+            {pending ? "Checking…" : "Apply"}
+          </button>
+        </form>
+      )}
+      <p className="jelly-checkout__field-error" id={`${id}-error`} role="alert" hidden={!error}>{error}</p>
+      {applied && (
+        <p className="jelly-checkout__discount-tag">
+          <Tag size={14} aria-hidden="true" />
+          <span><b>{applied.code}</b> · {applied.label}</span>
+          {editable && (
+            <button type="button" onClick={onRemove} aria-label={`Remove discount code ${applied.code}`}><X size={14} aria-hidden="true" /></button>
+          )}
+        </p>
+      )}
+    </div>
+  );
 }
 
 function lineDetail(line: CheckoutLine): string {
@@ -31,13 +89,16 @@ function lineDetail(line: CheckoutLine): string {
 }
 
 /** The bag on the right on desktop; folds to a "Show order summary" bar at the top on phones. */
-export function OrderSummary({ lines, currency, estimatedSubtotal, estimatedShipping, delivery, totals }: OrderSummaryProps) {
+export function OrderSummary({ lines, currency, estimatedSubtotal, estimatedShipping, delivery, totals, discount }: OrderSummaryProps) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const money = (minor: number) => formatMoney(minor, currency);
   const subtotal = totals?.subtotalMinor ?? estimatedSubtotal;
-  const shipping = totals?.shippingMinor ?? (delivery ? estimatedShipping : 0);
-  const total = totals?.amountMinor ?? subtotal + shipping;
+  const applied = discount?.applied ?? null;
+  const shipping = totals?.shippingMinor ?? (applied ? applied.shippingMinor : delivery ? estimatedShipping : 0);
+  const discountMinor = totals ? totals.discountMinor ?? 0 : applied?.discountMinor ?? 0;
+  const discountCode = totals ? totals.discountCode ?? null : applied?.code ?? null;
+  const total = totals?.amountMinor ?? subtotal - discountMinor + shipping;
   const count = lines.reduce((sum, line) => sum + line.item.quantity, 0);
   const changed = totals !== undefined && totals.subtotalMinor !== estimatedSubtotal;
 
@@ -69,8 +130,10 @@ export function OrderSummary({ lines, currency, estimatedSubtotal, estimatedShip
             );
           })}
         </ul>
+        {discount && <DiscountField {...discount} />}
         <dl className="jelly-checkout__totals">
           <div><dt>Subtotal</dt><dd>{money(subtotal)}</dd></div>
+          {discountMinor > 0 && <div className="jelly-checkout__discount-line"><dt>Discount{discountCode ? <span> · {discountCode}</span> : null}</dt><dd>−{money(discountMinor)}</dd></div>}
           {delivery && <div><dt>Delivery</dt><dd>{shipping === 0 ? "Free" : money(shipping)}</dd></div>}
           <div className="jelly-checkout__total"><dt>Total</dt><dd><span className="jelly-checkout__currency">{currency}</span> {money(total)}</dd></div>
         </dl>

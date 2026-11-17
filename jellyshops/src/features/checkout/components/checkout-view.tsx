@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { ArrowLeft } from "lucide-react";
+import { formatMoney } from "@/lib/domain";
 import { useCheckout } from "../use-checkout";
 import { CheckoutLayout } from "./checkout-layout";
 import { CheckoutEmpty, CheckoutLoading, CheckoutProblemBanner } from "./checkout-states";
@@ -35,6 +36,7 @@ export function CheckoutView({ storeSlug }: { storeSlug: string }) {
       estimatedShipping={store.shippingMinor}
       delivery={checkout.delivery}
       totals={prepared?.totals}
+      discount={{ applied: checkout.discount, pending: checkout.discountPending, error: checkout.discountError, editable: step === "details", onApply: checkout.applyDiscount, onRemove: checkout.removeDiscount }}
     />
   );
 
@@ -49,6 +51,7 @@ export function CheckoutView({ storeSlug }: { storeSlug: string }) {
           country={checkout.country}
           pending={checkout.pending}
           onContinue={checkout.continueToPayment}
+          shippingMethod={{ name: "Standard delivery", price: store.shippingMinor === 0 ? "Free" : formatMoney(store.shippingMinor, store.currency) }}
           footer={checkout.problem ? <CheckoutProblemBanner problem={checkout.problem} /> : null}
         />
       ) : prepared ? (

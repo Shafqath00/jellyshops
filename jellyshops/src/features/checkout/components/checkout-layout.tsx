@@ -11,11 +11,14 @@ interface CheckoutLayoutProps {
 
 /** The page frame every theme shares: steps on top, form on the left, summary on the right (on top on phones). */
 export function CheckoutLayout({ storeSlug, step, children, summary }: CheckoutLayoutProps) {
-  const steps: Array<{ key: CheckoutStep | "bag"; label: string }> = [
-    { key: "bag", label: "Bag" },
-    { key: "details", label: "Details" },
+  const steps: Array<{ key: string; label: string }> = [
+    { key: "bag", label: "Cart" },
+    { key: "details", label: "Information" },
+    { key: "shipping", label: "Shipping" },
     { key: "payment", label: "Payment" },
   ];
+  const isDone = (key: string) => key === "bag" || (step === "payment" && (key === "details" || key === "shipping"));
+  const isCurrent = (key: string) => key === step;
   return (
     <main className="jelly-checkout" data-step={step}>
       {step && (
@@ -24,8 +27,8 @@ export function CheckoutLayout({ storeSlug, step, children, summary }: CheckoutL
           <nav aria-label="Checkout steps">
             <ol className="jelly-checkout__steps">
               {steps.map(({ key, label }) => (
-                <li key={key} data-done={key === "bag" || (key === "details" && step === "payment") ? "" : undefined}>
-                  {key === "bag" ? <Link href={`/${storeSlug}/cart`}>{label}</Link> : <span aria-current={key === step ? "step" : undefined}>{label}</span>}
+                <li key={key} data-done={isDone(key) ? "" : undefined}>
+                  {key === "bag" ? <Link href={`/${storeSlug}/cart`}>{label}</Link> : <span aria-current={isCurrent(key) ? "step" : undefined}>{label}</span>}
                 </li>
               ))}
             </ol>

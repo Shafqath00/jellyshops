@@ -223,3 +223,76 @@
 @media (prefers-reduced-motion: reduce) {
   .jelly-checkout *, .jelly-checkout *::before { animation: none !important; transition: none !important; }
 }
+
+/* 9 ── Shopify-style frame: minimal chrome, split page, grey summary ── */
+.jelly-checkout-chrome { box-sizing: border-box; width: 100%; padding: 20px var(--j-page-edge, 16px); background: var(--j-color-bg, #faf9f7); color: var(--j-color-text, #1f2328); font-family: var(--j-font-body, system-ui, sans-serif); }
+.jelly-checkout-chrome--header { display: flex; justify-content: center; border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent); }
+.jelly-checkout-chrome__brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: inherit; font-family: var(--j-font-heading, inherit); font-size: 1.5rem; font-weight: 600; text-decoration: none; }
+.jelly-checkout-chrome__brand img { width: auto; height: 32px; }
+.jelly-checkout-chrome--footer { border-top: 1px solid color-mix(in srgb, currentColor 12%, transparent); }
+.jelly-checkout-chrome--footer ul { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 20px; margin: 0; padding: 0; list-style: none; }
+.jelly-checkout-chrome--footer a { display: inline-flex; align-items: center; min-height: 44px; color: color-mix(in srgb, currentColor 75%, transparent); font-size: 13px; text-decoration: underline; text-underline-offset: 3px; }
+
+.jelly-checkout .jelly-checkout__method { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 56px; padding: 0 16px; border: 1px solid var(--checkout-primary); border-radius: var(--checkout-radius-field); background: color-mix(in srgb, var(--checkout-primary) 5%, var(--checkout-surface)); font-size: 15px; }
+.jelly-checkout .jelly-checkout__method-radio { width: 16px; height: 16px; border: 5px solid var(--checkout-primary); border-radius: 50%; background: var(--checkout-surface); }
+.jelly-checkout .jelly-checkout__trust { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 18px; margin: 0; padding: 0; list-style: none; color: var(--checkout-muted); font-size: 13px; }
+.jelly-checkout .jelly-checkout__trust li { display: inline-flex; align-items: center; gap: 6px; }
+.jelly-checkout .jelly-checkout__form, .jelly-checkout .jelly-checkout__main { gap: 32px; }
+.jelly-checkout .jelly-checkout__panel-title { font-size: 1.125rem; }
+.jelly-checkout .jelly-checkout__steps li[data-done] > a, .jelly-checkout .jelly-checkout__steps li[data-done] > span { color: var(--checkout-text); }
+
+@media (min-width: 1024px) {
+  .jelly-checkout { max-width: none; padding: 0; background: linear-gradient(to right, transparent 50%, var(--checkout-wash) 50%); min-height: calc(100vh - 180px); }
+  .jelly-checkout .jelly-checkout__header { width: min(100%, 632px); margin: 0 auto 0 max(0px, calc(50% - 632px)); padding: 32px 56px 0 clamp(32px, 4vw, 48px); flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 0; }
+  .jelly-checkout .jelly-checkout__header .jelly-checkout__title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .jelly-checkout .jelly-checkout__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; align-items: stretch; min-height: inherit; }
+  .jelly-checkout .jelly-checkout__grid > .jelly-checkout__main { align-content: start; justify-self: end; width: min(100%, 632px); padding: 32px 56px 64px clamp(32px, 4vw, 48px); margin-right: max(0px, calc(50% - 632px - 0px)); }
+  .jelly-checkout .jelly-checkout__grid > .jelly-checkout__summary { border: 0; border-left: 1px solid var(--checkout-divider); border-radius: 0; background: none; padding: 32px 32px 64px 56px; top: 0; align-self: stretch; }
+  .jelly-checkout .jelly-checkout__summary-panel { position: sticky; top: 32px; width: min(100%, 440px); padding: 0; }
+}
+@media (max-width: 1023px) {
+  /* A narrow centred column like Shopify's; the summary bar still runs edge to edge. */
+  .jelly-checkout { max-width: calc(600px + 2 * var(--checkout-edge)); }
+  .jelly-checkout .jelly-checkout__summary { border: 0; border-radius: 0; box-shadow: 0 0 0 100vmax var(--checkout-wash); clip-path: inset(0 -100vmax); }
+  .jelly-checkout.jelly-checkout .jelly-checkout__summary-toggle, .jelly-checkout .jelly-checkout__summary-panel { padding-left: 0; padding-right: 0; }
+}
+@media (max-width: 1023px) {
+  .jelly-checkout .jelly-checkout__title { font-size: 1.5rem; }
+  .jelly-checkout { padding-top: 16px; }
+}
+
+/* 10 ── Confirmation on the split page ── */
+.jelly-checkout--confirmation .jelly-checkout__confirmation { justify-items: stretch; gap: 24px; padding: 0; text-align: left; }
+.jelly-checkout .jelly-checkout__confirmation-head { display: flex; align-items: center; gap: 16px; }
+.jelly-checkout .jelly-checkout__confirmation-head .jelly-checkout__eyebrow { margin-bottom: 2px; letter-spacing: .04em; }
+.jelly-checkout .jelly-checkout__confirmation-head .jelly-checkout__title { font-size: clamp(1.5rem, 2.4vw, 1.875rem); }
+.jelly-checkout .jelly-checkout__confirmation-icon { flex: none; }
+.jelly-checkout .jelly-checkout__card { display: grid; gap: 8px; padding: 20px; border: 1px solid var(--checkout-divider); border-radius: var(--checkout-radius); background: var(--checkout-surface); }
+.jelly-checkout .jelly-checkout__card p { margin: 0; color: var(--checkout-muted); font-size: 15px; max-width: none; }
+.jelly-checkout .jelly-checkout__card .jelly-checkout__recap-grid { margin-top: 8px; max-width: none; }
+.jelly-checkout--confirmation .jelly-checkout__actions { justify-content: flex-end; }
+.jelly-checkout--confirmation .jelly-checkout__confirmation-details > * { padding: 20px; border: 1px solid var(--checkout-divider); border-radius: var(--checkout-radius); background: var(--checkout-surface); }
+.jelly-checkout--confirmation .jelly-checkout__confirmation-details > *:empty { display: none; }
+.jelly-checkout .jelly-checkout__thumb img { position: absolute; inset: 0; width: 100%; height: 100%; }
+@media (max-width: 639px) {
+  .jelly-checkout--confirmation .jelly-checkout__actions { flex-direction: column-reverse; align-items: stretch; }
+  .jelly-checkout--confirmation .jelly-checkout__actions > * { width: 100%; }
+}
+@media (max-width: 1023px) {
+  .jelly-checkout--confirmation:has(.jelly-checkout__summary) { padding-top: 0; }
+  .jelly-checkout--confirmation .jelly-checkout__summary { border-top: 0; }
+}
+
+/* 11 ── Discount code ── */
+.jelly-checkout .jelly-checkout__discount { display: grid; gap: 8px; }
+.jelly-checkout .jelly-checkout__discount-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: start; }
+.jelly-checkout.jelly-checkout .jelly-checkout__discount-apply { min-height: var(--checkout-field-height); padding: 0 18px; gap: 8px; cursor: pointer; font: inherit; font-size: 15px; font-weight: 600; background: var(--checkout-surface); }
+.jelly-checkout.jelly-checkout .jelly-checkout__discount-apply:disabled { cursor: not-allowed; color: var(--checkout-muted); border-color: var(--checkout-divider); }
+.jelly-checkout.jelly-checkout .jelly-checkout__discount-form input { text-transform: uppercase; }
+.jelly-checkout.jelly-checkout .jelly-checkout__discount-form input::placeholder { text-transform: none; color: var(--checkout-muted); }
+.jelly-checkout .jelly-checkout__discount-tag { display: inline-flex; align-items: center; justify-self: start; gap: 6px; margin: 0; padding: 4px 6px 4px 10px; border-radius: 999px; background: color-mix(in srgb, var(--checkout-primary) 10%, var(--checkout-surface)); color: var(--checkout-text); font-size: 13px; }
+.jelly-checkout .jelly-checkout__discount-tag b { font-weight: 600; letter-spacing: .02em; }
+.jelly-checkout.jelly-checkout .jelly-checkout__discount-tag button { display: grid; place-items: center; width: 24px; height: 24px; margin: 0; padding: 0; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; }
+.jelly-checkout.jelly-checkout .jelly-checkout__discount-tag button:hover { background: color-mix(in srgb, var(--checkout-text) 10%, transparent); }
+.jelly-checkout .jelly-checkout__discount-line dd { color: var(--checkout-text); font-weight: 500; }
+.jelly-checkout .jelly-checkout__discount-line dt span { color: var(--checkout-text); font-weight: 600; }

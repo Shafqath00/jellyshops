@@ -25,6 +25,9 @@ export interface PreparedPayment {
   totals: {
     subtotalMinor: number;
     shippingMinor: number;
+    /** Taken off the products by a discount code (0 without one). */
+    discountMinor: number;
+    discountCode: string | null;
     totalMinor: number;
     amountMinor: number;
     currency: string;
@@ -459,6 +462,8 @@ export class PaymentIntentService {
             totals: {
               subtotalMinor: Number(state.order.subtotalMinor),
               shippingMinor: Number(state.order.shippingMinor),
+              discountMinor: Number((state.order as { discountMinor?: unknown }).discountMinor ?? 0),
+              discountCode: ((state.order as { discountCode?: unknown }).discountCode as string | null | undefined) ?? null,
               totalMinor: Number(state.order.totalMinor),
               amountMinor: intent.amount,
               currency: state.order.currency.toUpperCase(),

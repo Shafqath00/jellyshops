@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
-import { LockKeyhole } from "lucide-react";
+import { LockKeyhole, ShieldCheck } from "lucide-react";
 import { formatMoney, type Currency } from "@/lib/domain";
 import { safeReturnUrl } from "../checkout-model";
 import { stripeAppearance } from "../checkout-tokens";
@@ -68,6 +68,10 @@ function PaymentForm({ clientSecret, amountMinor, currency, returnPath, billing,
         {pending ? <span className="jelly-checkout__spinner" aria-hidden="true" /> : <LockKeyhole size={16} aria-hidden="true" />}
         {pending ? "Paying…" : `Pay ${formatMoney(amountMinor, currency)}`}
       </button>
+      <ul className="jelly-checkout__trust" aria-label="Payment security">
+        <li><LockKeyhole size={14} aria-hidden="true" /> Encrypted and secure</li>
+        <li><ShieldCheck size={14} aria-hidden="true" /> Card details go straight to Stripe</li>
+      </ul>
     </form>
   );
 }

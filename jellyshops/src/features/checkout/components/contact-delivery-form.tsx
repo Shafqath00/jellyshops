@@ -54,10 +54,12 @@ interface ContactDeliveryFormProps {
   pending: boolean;
   onContinue: () => Promise<CheckoutField | null>;
   footer?: React.ReactNode;
+  /** Shown as the one delivery method, e.g. "Standard delivery" and its price. */
+  shippingMethod?: { name: string; price: string };
 }
 
 /** Step 1 and 2: who is buying and where it goes. */
-export function ContactDeliveryForm({ details, errors, onChange, delivery, country, pending, onContinue, footer }: ContactDeliveryFormProps) {
+export function ContactDeliveryForm({ details, errors, onChange, delivery, country, pending, onContinue, footer, shippingMethod }: ContactDeliveryFormProps) {
   const form = useRef<HTMLFormElement>(null);
   const wording = addressWording(country);
   const field = (id: CheckoutField) => ({ id, value: details[id], onChange: (value: string) => onChange(id, value), error: errors[id] });
@@ -93,6 +95,17 @@ export function ContactDeliveryForm({ details, errors, onChange, delivery, count
         </section>
       ) : (
         <p className="jelly-checkout__note jelly-checkout__note--panel">Nothing to deliver: your downloads arrive by email once you’ve paid.</p>
+      )}
+
+      {delivery && shippingMethod && (
+        <section className="jelly-checkout__panel" aria-labelledby="checkout-shipping-title">
+          <h2 id="checkout-shipping-title" className="jelly-checkout__panel-title">Shipping method</h2>
+          <div className="jelly-checkout__method">
+            <span className="jelly-checkout__method-radio" aria-hidden="true" />
+            <span>{shippingMethod.name}</span>
+            <strong>{shippingMethod.price}</strong>
+          </div>
+        </section>
       )}
 
       {footer}

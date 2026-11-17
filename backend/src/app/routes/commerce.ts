@@ -1,6 +1,8 @@
 import type { Express } from "express";
 import { createMerchantBackInStockRouter, createPublicBackInStockRouter } from "../../back-in-stock/routes.js";
 import { createMerchantOrderRouter } from "../../commerce/merchant-order-routes.js";
+import { createDiscountRouter } from "../../discounts/routes.js";
+import { DiscountService } from "../../discounts/service.js";
 import {
   createDigitalProductRouter,
   createNotificationRouter,
@@ -78,6 +80,10 @@ export function mountOrderRuntimeRoutes(app: Express, context: AppContext): void
 
 export function mountCommerceRoutes(app: Express, context: AppContext): void {
   const { routeDependencies: deps, authProvider } = context;
+
+  // Discount codes need the database; the public check runs through the checkout router.
+  const discountDatabase = deps.commerceDatabase;
+  if (discountDatabase) app.use("/api/stores/:storeId/discounts", createDiscountRouter(new DiscountService({ query: (text: string, values?: unknown[]) => discountDatabase.transaction((transaction) => transaction.query(text, values)) } as never), authProvider));
 
   if (deps.stripeAccountService) {
     app.use(

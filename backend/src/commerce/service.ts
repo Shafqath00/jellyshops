@@ -26,6 +26,11 @@ import {
   type ValidatedCart,
 } from "./checkout-cart.js";
 import { PublicOrderRateLimiter } from "./rate-limit.js";
+import { allocateDiscount } from "../discounts/rules.js";
+import { resolveDiscount, type AppliedDiscount, type DiscountSql } from "../discounts/service.js";
+
+/** Stripe refuses smaller charges; a code may not bring an order below this. */
+const MIN_CHARGE_MINOR = 50;
 import type {
   CheckoutAttemptRow,
   CommerceRepository,
@@ -49,6 +54,10 @@ export interface CheckoutServiceDeps {
   enabledCountries?: readonly string[];
   enhancedSnapshots?: boolean;
   isTest?: boolean;
+}
+
+function assertChargeable(discount: AppliedDiscount): void {
+  if (discount.totalMinor < MIN_CHARGE_MINOR) throw new ApiError(422, "DISCOUNT_NOT_APPLICABLE", "This code would make the order free, and this shop can't take free orders yet.");
 }
 
 export class CheckoutService {
@@ -125,6 +134,7 @@ export class CheckoutService {
       order: {
         number: source.number, status: source.status, currency: source.currency,
         subtotalMinor: source.subtotalMinor, shippingMinor: source.shippingMinor,
+        ...(Number((source as { discountMinor?: unknown }).discountMinor ?? 0) > 0 ? { discountMinor: (source as { discountMinor?: unknown }).discountMinor, discountCode: (source as { discountCode?: unknown }).discountCode ?? null } : {}),
         totalMinor: source.totalMinor, createdAt: source.createdAt,
         ...("balanceDueMinor" in source ? { balanceDueMinor: source.balanceDueMinor } : {}),
       },
@@ -155,6 +165,26 @@ export class CheckoutService {
     await new PublicOrderRateLimiter(this.deps.repository, { namespace: `${namespace}:cart`, limit: preparation ? 30 : 5, code: "CHECKOUT_RATE_LIMITED" }).assertAllowed(storeId, key);
   }
 
+  async assertDiscountCheckAccess(storeId: string, ip: string): Promise<void> {
+    await new PublicOrderRateLimiter(this.deps.repository, { namespace: "checkout-discount", limit: 30, code: "CHECKOUT_RATE_LIMITED" }).assertAllowed(storeId, ip);
+  }
+
+  /** What a code would take off this bag, for the order summary. The order itself checks the code again. */
+  async previewDiscount(storeId: string, input: { code: string; currency: string; items: BeginCheckoutInput["items"]; email?: string }) {
+    const policy = await this.deps.checkoutPolicy.getCheckoutPolicy(storeId);
+    const currency = input.currency.toUpperCase();
+    if (currency !== policy.currency) throw new ApiError(422, "CHECKOUT_CURRENCY_MISMATCH", "Use the store's currency to check out.");
+    const parsedItems = checkoutInputSchema.shape.items.safeParse(input.items);
+    if (!parsedItems.success) throw new ApiError(422, "DISCOUNT_INPUT_INVALID", "Enter a discount code.");
+    const cart = await validateCart(this.deps, storeId, currency, parsedItems.data, policy.shippingMinor);
+    const applied = await this.deps.repository.transaction((tx) => resolveDiscount(tx as unknown as DiscountSql, storeId, input.code, {
+      subtotalMinor: cart.subtotalMinor, shippingMinor: cart.shippingMinor, currency,
+      hasDelivery: cart.lines.some((line) => line.fulfillmentType !== "DIGITAL"), email: input.email,
+    }));
+    assertChargeable(applied);
+    return { code: applied.code, label: applied.label, subtotalMinor: cart.subtotalMinor, discountMinor: applied.discountMinor, shippingMinor: applied.shippingMinor, totalMinor: applied.totalMinor, currency };
+  }
+
   async begin(
     rawInput: BeginCheckoutInput,
     customerId?: string,
@@ -178,7 +208,8 @@ export class CheckoutService {
     const stripeAccountId = await this.getStripeAccountId(input.storeId);
 
     // Buyer/delivery changes must not reuse an attempt holding an older snapshot.
-    cart.cartHash = createHash("sha256").update(JSON.stringify([cart.cartHash, input.customerSnapshot, input.deliverySnapshot ?? null, customerId ?? null])).digest("hex");
+    const discountCode = input.discountCode?.trim() || undefined;
+    cart.cartHash = createHash("sha256").update(JSON.stringify([cart.cartHash, input.customerSnapshot, input.deliverySnapshot ?? null, customerId ?? null, discountCode?.toUpperCase() ?? null])).digest("hex");
 
     return this.deps.repository.withCheckoutLock(
       input.storeId,
@@ -211,11 +242,21 @@ export class CheckoutService {
           );
         }
 
+        // Checked inside the lock, after any earlier attempt for this bag gave its use back.
+        const discount = discountCode
+          ? await resolveDiscount(tx as unknown as DiscountSql, input.storeId, discountCode, {
+            subtotalMinor: cart.subtotalMinor, shippingMinor: cart.shippingMinor, currency: input.currency,
+            hasDelivery: cart.lines.some((line) => line.fulfillmentType !== "DIGITAL"), email: input.customerSnapshot.email,
+          }, { lock: true })
+          : undefined;
+        if (discount) assertChargeable(discount);
+
         return this.createCheckout(
           tx,
           input,
-          cart,
+          discount ? { ...cart, shippingMinor: discount.shippingMinor, totalMinor: discount.totalMinor } : cart,
           stripeAccountId,
+          discount,
         );
       },
     );
@@ -274,6 +315,7 @@ export class CheckoutService {
     input: z.infer<typeof checkoutInputSchema> & { customerId?: string },
     cart: ValidatedCart,
     stripeAccountId: string,
+    discount?: AppliedDiscount,
   ): Promise<CheckoutAttemptResult> {
     const orderId =
       `order-${randomUUID()}`;
@@ -314,11 +356,15 @@ export class CheckoutService {
       ],
     );
 
+    // Only written when a code is used, so checkout keeps working before the discount migration is applied.
+    if (discount) await tx.query('UPDATE "Order" SET "discountCode" = $3, "discountMinor" = $4, "taxMinor" = 0 WHERE "storeId" = $1 AND "id" = $2', [input.storeId, orderId, discount.code, discount.discountMinor]);
     if (input.customerId) await tx.query('UPDATE "Order" SET "customerId" = $3 WHERE "storeId" = $1 AND "id" = $2', [input.storeId, orderId, input.customerId]);
     if (this.deps.enhancedSnapshots) {
       await tx.query('UPDATE "Order" SET "deliverySnapshot"=$3::jsonb,"billingAddress"=$4::jsonb,"customerNote"=$5,"isTest"=$6 WHERE "storeId"=$1 AND "id"=$2', [input.storeId, orderId, input.deliverySnapshot ? JSON.stringify(input.deliverySnapshot) : null, input.customerSnapshot.billingAddress ? JSON.stringify(input.customerSnapshot.billingAddress) : null, typeof input.customerSnapshot.note === "string" ? input.customerSnapshot.note.slice(0,10000) : null, this.deps.isTest ?? false]);
     }
 
+    // Refunds and order edits read each line's share of the discount.
+    const lineDiscounts = allocateDiscount(cart.lines.map((line) => line.unitPriceMinor * line.quantity), discount?.discountMinor ?? 0);
     for (const line of cart.lines) {
       await tx.query(
         `
@@ -352,6 +398,7 @@ export class CheckoutService {
           line.configurationKey,
         ],
       );
+      if (discount) await tx.query('UPDATE "OrderItem" SET "discountMinor" = $5, "taxMinor" = 0 WHERE "storeId" = $1 AND "orderId" = $2 AND "variantId" = $3 AND "configurationKey" = $4', [input.storeId, orderId, line.variantId, line.configurationKey, lineDiscounts[cart.lines.indexOf(line)] ?? 0]);
       if (this.deps.enhancedSnapshots) await tx.query('UPDATE "OrderItem" SET "productTitleSnapshot"=$4,"variantTitleSnapshot"=$5,"fulfillmentType"=$6 WHERE "storeId"=$1 AND "orderId"=$2 AND "variantId"=$3 AND "configurationKey"=$7', [input.storeId, orderId, line.variantId, line.productTitleSnapshot, line.variantTitleSnapshot, line.fulfillmentType, line.configurationKey]);
     }
 

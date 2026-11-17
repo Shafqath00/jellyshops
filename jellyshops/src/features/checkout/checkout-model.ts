@@ -78,7 +78,7 @@ export function validateDetails(details: CheckoutDetails, delivery: boolean, cou
 }
 
 /** The request body for a checkout attempt. Prices are left out: the server sets them. */
-export function attemptInput(cart: Cart, lines: CheckoutLine[], details: CheckoutDetails, delivery: boolean, store: Store): CommerceAttemptInput {
+export function attemptInput(cart: Cart, lines: CheckoutLine[], details: CheckoutDetails, delivery: boolean, store: Store, discountCode?: string): CommerceAttemptInput {
   const trimmed = Object.fromEntries(Object.entries(details).map(([key, value]) => [key, value.trim()])) as unknown as CheckoutDetails;
   const address = delivery ? { line1: trimmed.line1, ...(trimmed.line2 ? { line2: trimmed.line2 } : {}), city: trimmed.city, region: trimmed.region, postalCode: trimmed.postalCode, country: storeCountry(store) } : undefined;
   const customer = { name: trimmed.name, email: trimmed.email, ...(trimmed.phone ? { phone: trimmed.phone } : {}), ...(address ? { address } : {}) };
@@ -94,7 +94,7 @@ export function attemptInput(cart: Cart, lines: CheckoutLine[], details: Checkou
       }),
     } : {}),
   }));
-  return { cartKey: cart.id, currency: store.currency.toUpperCase(), items, customerSnapshot: customer, ...(address ? { deliverySnapshot: address } : {}) };
+  return { cartKey: cart.id, currency: store.currency.toUpperCase(), items, customerSnapshot: customer, ...(address ? { deliverySnapshot: address } : {}), ...(discountCode ? { discountCode } : {}) };
 }
 
 /** Only send shoppers back to this site, and only over https (http is allowed on localhost for testing). */

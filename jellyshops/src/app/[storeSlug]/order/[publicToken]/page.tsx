@@ -73,10 +73,22 @@ function PublicOrderContent() {
     orderNumber={typeof order.number === "string" ? order.number : undefined}
     totalLabel={money(order.totalMinor)}
     storeSlug={storeSlug}
+    summary={{
+      currency,
+      subtotalLabel: order.subtotalMinor !== undefined ? money(order.subtotalMinor) : undefined,
+      discount: Number(order.discountMinor ?? 0) > 0 ? { label: `−${money(order.discountMinor)}`, code: typeof order.discountCode === "string" ? order.discountCode : undefined } : undefined,
+      shippingLabel: order.shippingMinor !== undefined ? (Number(order.shippingMinor) === 0 ? "Free" : money(order.shippingMinor)) : undefined,
+      lines: items.map((item, index) => ({
+        key: `${String(item.variantId ?? "item")}-${index}`,
+        title: String(item.titleSnapshot),
+        imageUrl: typeof item.imageSnapshot === "string" && item.imageSnapshot ? item.imageSnapshot : undefined,
+        quantity: Number(item.quantity ?? 1),
+        priceLabel: item.unitPriceMinor !== undefined ? money(Number(item.unitPriceMinor) * Number(item.quantity ?? 1)) : undefined,
+      })),
+    }}
     actions={Number(order.balanceDueMinor ?? 0) > 0 ? <Link className="jelly-checkout__primary jelly-checkout__primary--inline" href={`/${storeSlug}/order/${publicToken}/balance`}>Pay balance {money(order.balanceDueMinor)}</Link> : null}
   >
     {refreshError && <p role="alert" className="jelly-checkout__alert">We couldn’t refresh the latest status. Retrying…</p>}
-    {items.length > 0 && <section className="jelly-checkout__panel" aria-labelledby="order-items-title"><h2 id="order-items-title" className="jelly-checkout__panel-title">Your items</h2><ul className="jelly-checkout__order-items">{items.map((item, index) => <li key={`${String(item.variantId ?? "item")}-${index}`}><span>{String(item.titleSnapshot)}<small> × {Number(item.quantity ?? 1)}</small></span>{item.unitPriceMinor !== undefined && <b>{money(Number(item.unitPriceMinor) * Number(item.quantity ?? 1))}</b>}</li>)}</ul></section>}
     <OrderProgress steps={result.progress ?? []} />
     <ShipmentList shipments={result.shipments ?? []} />
     <OrderTimeline entries={result.timeline ?? []} />

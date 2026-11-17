@@ -389,3 +389,51 @@ describe("CheckoutService", () => {
     // We didn't inject StripeGateway, we only injected StripeAccountService.getLivePaymentReadiness
   });
 });
+
+describe("CheckoutService discount codes", () => {
+  const code = { id: "d1", storeId: "store-1", code: "SAVE10", kind: "percent", value: 10, minimumSubtotalMinor: null, usageLimit: null, oncePerCustomer: false, startsAt: null, endsAt: null, active: true, createdAt: new Date() };
+  function withCode(row: Record<string, unknown> | null, uses = 0) {
+    const context = setup();
+    (context.tx.query as ReturnType<typeof vi.fn>).mockImplementation(async (text: string) => {
+      if (text.includes('FROM "DiscountCode"')) return { rows: row ? [row] : [] };
+      if (text.includes("COUNT(*)::int AS uses")) return { rows: [{ uses, mine: 0 }] };
+      return { rows: [] };
+    });
+    return context;
+  }
+  const calls = (tx: CommerceTransaction) => (tx.query as ReturnType<typeof vi.fn>).mock.calls as Array<[string, unknown[]]>;
+
+  it("takes the code off the order and payment, and shares it across the lines", async () => {
+    const { service, tx } = withCode(code);
+    await service.begin({ ...validCart, discountCode: " save10 " });
+    // 3 items at 1500 = 4500; 10% = 450.
+    const order = calls(tx).find(([text]) => text.includes('INSERT INTO "Order"'))!;
+    expect(order[1][6]).toBe(4500);
+    expect(order[1][8]).toBe(4050);
+    expect(calls(tx).find(([text]) => text.includes('INSERT INTO "Payment"'))![1]).toContain(4050);
+    expect(calls(tx).find(([text]) => text.includes('SET "discountCode"'))![1]).toEqual(["store-1", expect.any(String), "SAVE10", 450]);
+    const shares = calls(tx).filter(([text]) => text.includes('UPDATE "OrderItem" SET "discountMinor"')).map(([, values]) => values[4] as number);
+    expect(shares.reduce((sum, value) => sum + value, 0)).toBe(450);
+    expect(calls(tx).find(([text]) => text.includes('FROM "DiscountCode"'))![0]).toContain("FOR UPDATE");
+  });
+
+  it("refuses a code that doesn't exist or is used up, with words for the shopper", async () => {
+    await expect(withCode(null).service.begin({ ...validCart, discountCode: "NOPE" })).rejects.toMatchObject({ code: "DISCOUNT_NOT_FOUND", message: "This code isn't valid." });
+    await expect(withCode({ ...code, usageLimit: 3 }, 3).service.begin({ ...validCart, discountCode: "SAVE10" })).rejects.toMatchObject({ message: "This code has been used up." });
+  });
+
+  it("refuses a code that would make the order free", async () => {
+    await expect(withCode({ ...code, value: 100 }).service.begin({ ...validCart, discountCode: "SAVE10" })).rejects.toMatchObject({ code: "DISCOUNT_NOT_APPLICABLE" });
+  });
+
+  it("never touches discount columns for an order without a code", async () => {
+    const { service, tx } = withCode(code);
+    await service.begin(validCart);
+    expect(calls(tx).some(([text]) => text.includes("discount") || text.includes("Discount"))).toBe(false);
+  });
+
+  it("previews what a code takes off the bag", async () => {
+    const { service } = withCode({ ...code, kind: "fixed", value: 500 });
+    await expect(service.previewDiscount("store-1", { code: "save10", currency: "usd", items: validCart.items })).resolves.toMatchObject({ code: "SAVE10", subtotalMinor: 4500, discountMinor: 500, totalMinor: 4000 });
+  });
+});
