@@ -78,7 +78,7 @@ describe("durable PaymentIntent preparation", () => {
       order: [{ status: "PENDING_PAYMENT" }], payment: [{ status: "PENDING", paymentIntentId: null, chargeId: null }],
       reservations: [{ status: "HELD", quantity: 1 }], inventory: [{ quantity: 3, reserved: 1 }],
     });
-    await expect(service.preparePayment("attempt-1", "store-1")).resolves.toEqual({ orderId: "order-1", publicToken: "public-token", clientSecret: "test-client-result", connectedAccountId: "acct_merchant" });
+    await expect(service.preparePayment("attempt-1", "store-1")).resolves.toEqual({ orderId: "order-1", publicToken: "public-token", clientSecret: "test-client-result", connectedAccountId: "acct_merchant", totals: { subtotalMinor: 1500, shippingMinor: 0, totalMinor: 1500, amountMinor: 1500, currency: "USD" } });
     expect(create.mock.calls).toEqual(Array.from({ length: 2 }, () => [
       { amount: 1500, currency: "usd", orderId: "order-1", checkoutAttemptId: "attempt-1" },
       { connectedAccountId: "acct_merchant", idempotencyKey: "durable-key" },
@@ -190,7 +190,7 @@ describe("durable PaymentIntent preparation", () => {
     expect(invalid.status).toBe(422);
     const result = await request(app).post("/api/public/stores/store-1/checkout/payment-intent").send({ attemptId: "attempt-1", amount: 1, connectedAccountId: "acct_attacker" });
     expect(result.status).toBe(200);
-    expect(result.body).toEqual({ orderId: "order-1", publicToken: "public-token", clientSecret: "test-client-result", connectedAccountId: "acct_merchant" });
+    expect(result.body).toEqual({ orderId: "order-1", publicToken: "public-token", clientSecret: "test-client-result", connectedAccountId: "acct_merchant", totals: { subtotalMinor: 1500, shippingMinor: 0, totalMinor: 1500, amountMinor: 1500, currency: "USD" } });
     expect(result.headers["cache-control"]).toBe("no-store");
     expect(create.mock.calls[0][0].amount).toBe(1500);
   });

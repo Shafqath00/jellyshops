@@ -11,7 +11,7 @@ export const THEME_PART_GROUPS: ReadonlyArray<{ group: string; parts: readonly s
   { group: "Section roots and shared pieces", parts: [
     "jelly-section-header", "jelly-icon", "jelly-image-block", "jelly-main-product",
     "jelly-product-part", "jelly-product-grid", "jelly-product-reviews", "jelly-product-dimensions",
-    "jelly-rating-summary", "jelly-cart-summary", "jelly-order-confirmation",
+    "jelly-rating-summary", "jelly-cart-summary",
   ] },
   { group: "Page and section frame", parts: [
     "jelly-block-group", "jelly-breadcrumb", "jelly-button", "jelly-button--link",
@@ -59,7 +59,6 @@ export const THEME_PART_GROUPS: ReadonlyArray<{ group: string; parts: readonly s
   { group: "Bag and order", parts: [
     "jelly-cart-header", "jelly-cart-layout", "jelly-cart-line", "jelly-cart-line-controls",
     "jelly-cart-line-details", "jelly-cart-line-media", "jelly-cart-line-total", "jelly-cart-totals",
-    "jelly-order-confirmation-summary",
   ] },
 ];
 

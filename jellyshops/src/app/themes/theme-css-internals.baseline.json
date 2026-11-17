@@ -23,6 +23,7 @@
     "jelly-testimonial",
     "jelly-testimonials"
   ],
+  "themes/jelly-diode/legacy.css": [],
   "themes/jelly-forma/theme.css": [
     "jelly-button-secondary",
     "jelly-list-clear",
@@ -32,6 +33,7 @@
     "jelly-product-card-title",
     "jelly-sticky-purchase-image"
   ],
+  "themes/jelly-forma/legacy.css": [],
   "themes/jelly-halo/theme.css": [
     "jelly-back-in-stock",
     "jelly-button-secondary",
@@ -54,6 +56,7 @@
     "jelly-testimonial",
     "jelly-testimonials"
   ],
+  "themes/jelly-halo/legacy.css": [],
   "themes/jelly-resthaven/theme.css": [
     "jelly-clamped-text-body",
     "jelly-collection-header-media",
@@ -73,7 +76,6 @@
     "jelly-image-banner-content",
     "jelly-menu-disclosure",
     "jelly-newsletter-text",
-    "jelly-order-confirmation-icon",
     "jelly-product-card-placeholder",
     "jelly-rich-text",
     "jelly-stock-counter"
@@ -89,7 +91,6 @@
     "jelly-list-more",
     "jelly-menu-disclosure",
     "jelly-newsletter-text",
-    "jelly-order-confirmation-icon",
     "jelly-product-card-placeholder",
     "jelly-product-tabs",
     "jelly-rich-text",
@@ -107,7 +108,6 @@
   "app/theme-kit.css": [
     "jelly-article-content",
     "jelly-cart-empty",
-    "jelly-checkout-empty",
     "jelly-collection-header-media",
     "jelly-custom-content",
     "jelly-faq-layout",
@@ -131,8 +131,6 @@
   "app/theme-kit-late.css": [
     "jelly-cart-empty",
     "jelly-cart-lines",
-    "jelly-checkout-empty",
-    "jelly-order-items",
     "jelly-product-availability",
     "jelly-setting-text",
     "jelly-stock-counter",

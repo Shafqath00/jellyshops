@@ -7,7 +7,9 @@ export interface CommerceAttemptInput {
 }
 
 export interface CommerceAttemptResult { attemptId: string; orderId: string; publicToken: string }
-export interface PreparedPayment { orderId: string; publicToken: string; clientSecret: string; connectedAccountId: string }
+/** Totals worked out on the server; `amountMinor` is what Stripe will charge. */
+export interface PreparedPaymentTotals { subtotalMinor: number; shippingMinor: number; totalMinor: number; amountMinor: number; currency: string }
+export interface PreparedPayment { orderId: string; publicToken: string; clientSecret: string; connectedAccountId: string; totals?: PreparedPaymentTotals }
 export interface PublicShipment {
   id: string;
   status: string;

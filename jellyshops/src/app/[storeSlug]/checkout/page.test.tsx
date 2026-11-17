@@ -1,69 +1,113 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import axe from "axe-core";
 import { vi } from "vitest";
 import { ShopProvider } from "@/contexts/shop-context";
 import { createRepository } from "@/lib/repository";
 import { CheckoutView } from "./view";
 
-vi.mock("@/features/commerce/components/payment-element-checkout", () => ({
-  PaymentElementCheckout: () => <div>Card payment form</div>,
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), useParams: () => ({ storeSlug: "sweet-bakes" }) }));
+vi.mock("@/features/checkout/components/payment-step", () => ({
+  PaymentStep: ({ amountMinor }: { amountMinor: number }) => <section><h2 tabIndex={-1}>Payment</h2><p>Card payment form for {amountMinor}</p></section>,
 }));
 
-it("creates a server checkout attempt and prepares card payment", async () => {
+const prepared = { clientSecret: "cs_test", connectedAccountId: "acct_123", orderId: "order-1", publicToken: "a-token", totals: { subtotalMinor: 50000, shippingMinor: 5000, totalMinor: 55000, amountMinor: 55000, currency: "INR" } };
+
+function bag(digital = false) {
   localStorage.clear();
-  vi.stubGlobal("fetch", vi.fn()
-    .mockResolvedValueOnce(new Response(JSON.stringify({ attemptId: "attempt-1", orderId: "order-1", publicToken: "a-token" }), { status: 201 }))
-    .mockResolvedValueOnce(new Response(JSON.stringify({ clientSecret: "cs_test", connectedAccountId: "acct_123", orderId: "order-1", publicToken: "a-token" }), { status: 200 })));
   const repository = createRepository(localStorage);
+  if (digital) {
+    const product = repository.listProducts("sweet-bakes").find((p) => p.variants.some((v) => v.id === "vanilla-cake"))!;
+    repository.saveProduct({ ...product, fulfillmentType: "DIGITAL" });
+  }
   const cart = repository.createCart("sweet-bakes");
   repository.updateCartItem(cart.id, "vanilla-cake", 1);
+  return repository;
+}
+
+async function fillDelivery(user: ReturnType<typeof userEvent.setup>) {
+  await user.type(await screen.findByLabelText(/^email/i), "riya@example.com");
+  await user.type(screen.getByLabelText(/^full name/i), "Riya Menon");
+  await user.type(screen.getByLabelText(/^phone/i), "+91 98888 11111");
+  await user.type(screen.getByLabelText(/^address$/i), "22 Palm Avenue");
+  await user.type(screen.getByLabelText(/^town or city/i), "Bengaluru");
+  await user.type(screen.getByLabelText(/^state/i), "Karnataka");
+  await user.type(screen.getByLabelText(/^pin code/i), "560001");
+}
+
+it("prices the order on the server, then shows the payment step with the server total", async () => {
+  bag();
+  const fetcher = vi.fn()
+    .mockResolvedValueOnce(new Response(JSON.stringify({ attemptId: "attempt-1", orderId: "order-1", publicToken: "a-token" }), { status: 201 }))
+    .mockResolvedValueOnce(new Response(JSON.stringify(prepared), { status: 200 }));
+  vi.stubGlobal("fetch", fetcher);
   const user = userEvent.setup();
   render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
+  await fillDelivery(user);
+  await user.click(screen.getByRole("button", { name: /continue to payment/i }));
 
-  await user.type(await screen.findByLabelText(/^name$/i), "Riya Menon");
-  await user.type(screen.getByLabelText(/email/i), "riya@example.com");
-  await user.type(screen.getByLabelText(/phone/i), "+91 98888 11111");
-  await user.type(screen.getByLabelText(/address line/i), "22 Palm Avenue");
-  await user.type(screen.getByLabelText(/^city$/i), "Bengaluru");
-  await user.type(screen.getByLabelText(/state/i), "Karnataka");
-  await user.type(screen.getByLabelText(/pin code|postcode|zip code/i), "560001");
-  await user.click(screen.getByRole("button", { name: /continue to card payment/i }));
-
-  expect(await screen.findByText(/card payment form/i)).toBeVisible();
-  expect(screen.queryByRole("button", { name: /place order/i })).not.toBeInTheDocument();
+  expect(await screen.findByText("Card payment form for 55000")).toBeVisible();
+  expect(screen.getByRole("button", { name: /change your details/i })).toBeVisible();
+  const body = JSON.parse(fetcher.mock.calls[0]![1]!.body);
+  expect(body.items[0]).not.toHaveProperty("unitPriceMinor");
+  expect(body.deliverySnapshot).toMatchObject({ city: "Bengaluru", country: "IN" });
+  expect(screen.getAllByText(/550\.00/).length).toBeGreaterThan(0);
 });
 
-it("does not require a shipping address for digital-only carts", async () => {
-  localStorage.clear();
-  const repository = createRepository(localStorage);
-  const product = repository.listProducts("sweet-bakes").find((p) => p.variants.some((v) => v.id === "vanilla-cake"))!;
-  repository.saveProduct({ ...product, fulfillmentType: "DIGITAL" });
-  const cart = repository.createCart("sweet-bakes");
-  repository.updateCartItem(cart.id, "vanilla-cake", 1);
-  const fetcher = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ attemptId: "a", orderId: "o", publicToken: "t" }), { status: 201 })).mockResolvedValueOnce(new Response(JSON.stringify({ clientSecret: "cs", connectedAccountId: "acct", publicToken: "t" })));
+it("shows field problems next to the fields and sends nothing", async () => {
+  bag();
+  const fetcher = vi.fn();
   vi.stubGlobal("fetch", fetcher);
-  render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
-  const name = await screen.findByLabelText(/^name$/i);
-  expect(screen.queryByLabelText(/address line/i)).not.toBeInTheDocument();
   const user = userEvent.setup();
-  await user.type(name, "Buyer");
-  await user.type(screen.getByLabelText(/email/i), "buyer@example.test");
-  await user.click(screen.getByRole("button", { name: /continue to card payment/i }));
+  render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
+  await user.type(await screen.findByLabelText(/^email/i), "not-an-email");
+  await user.click(screen.getByRole("button", { name: /continue to payment/i }));
+  const email = screen.getByLabelText(/^email/i);
+  expect(email).toHaveAttribute("aria-invalid", "true");
+  expect(email).toHaveAccessibleDescription(/name@example\.com/);
+  expect(email).toHaveFocus();
+  expect(screen.getByLabelText(/^full name/i)).toHaveAccessibleDescription(/enter your full name/i);
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+it("shows a plain message when the shop can't take payments", async () => {
+  bag();
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ error: { code: "MERCHANT_PAYMENTS_UNAVAILABLE", message: "Merchant payments are unavailable." } }), { status: 409 })));
+  const user = userEvent.setup();
+  render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
+  await fillDelivery(user);
+  await user.click(screen.getByRole("button", { name: /continue to payment/i }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("This shop isn't taking payments yet");
+});
+
+it("does not ask for an address for digital-only bags", async () => {
+  bag(true);
+  const fetcher = vi.fn()
+    .mockResolvedValueOnce(new Response(JSON.stringify({ attemptId: "a", orderId: "o", publicToken: "t" }), { status: 201 }))
+    .mockResolvedValueOnce(new Response(JSON.stringify(prepared)));
+  vi.stubGlobal("fetch", fetcher);
+  const user = userEvent.setup();
+  render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
+  await user.type(await screen.findByLabelText(/^email/i), "buyer@example.test");
+  expect(screen.queryByLabelText(/^address$/i)).not.toBeInTheDocument();
+  await user.type(screen.getByLabelText(/^full name/i), "Buyer");
+  await user.click(screen.getByRole("button", { name: /continue to payment/i }));
   expect(await screen.findByText(/card payment form/i)).toBeVisible();
   expect(JSON.parse(fetcher.mock.calls[0]![1]!.body)).not.toHaveProperty("deliverySnapshot");
 });
 
-it("keeps delivery details required when a cart mixes digital and physical items", async () => {
+it("shows the empty bag state", async () => {
   localStorage.clear();
-  const repository = createRepository(localStorage);
-  const products = repository.listProducts("sweet-bakes");
-  const digital = products.find((p) => p.variants.some((v) => v.id === "vanilla-cake"))!;
-  const physical = products.find((p) => p.id !== digital.id && p.variants.length)!;
-  repository.saveProduct({ ...digital, fulfillmentType: "DIGITAL" });
-  const cart = repository.createCart("sweet-bakes");
-  repository.updateCartItem(cart.id, "vanilla-cake", 1);
-  repository.updateCartItem(cart.id, physical.variants[0]!.id, 1);
+  createRepository(localStorage);
   render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
-  expect(await screen.findByLabelText(/address line/i)).toBeRequired();
-  expect(screen.getByLabelText(/phone/i)).toBeRequired();
+  expect(await screen.findByRole("heading", { name: /your bag is empty/i })).toBeVisible();
+  expect(screen.getByRole("link", { name: /browse the shop/i })).toHaveAttribute("href", "/sweet-bakes/shop");
+});
+
+it("has no automatic accessibility problems on the details step", async () => {
+  bag();
+  const { container } = render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
+  await screen.findByLabelText(/^email/i);
+  const results = await axe.run(container, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"] }, rules: { "color-contrast": { enabled: false }, region: { enabled: false } } });
+  expect(results.violations.map((violation) => `${violation.id}: ${violation.nodes.map((node) => node.target.join(" ")).join(", ")}`)).toEqual([]);
 });

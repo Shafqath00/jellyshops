@@ -39,6 +39,26 @@
       ],
       "port": 3001,
       "autoPort": false
+    },
+    {
+      "name": "jellyshops-checkout",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd jellyshops && set JELLY_E2E_NEXT_DIST_DIR=.next/checkout&& set NEXT_PUBLIC_STORE_EDITOR_API_URL=http://127.0.0.1:3001&& npx next dev --turbopack -p 3200"
+      ],
+      "port": 3200,
+      "autoPort": false
+    },
+    {
+      "name": "jellyshops-backend-checkout",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd backend && set PORT=3001&& set SUPABASE_DATABASE_CA_FILE=.data/supabase-prod-ca-2021.crt&& set CORS_ORIGINS=http://localhost:3200,http://127.0.0.1:3200,http://localhost:3210,http://127.0.0.1:3210&& node --import tsx src/server.ts"
+      ],
+      "port": 3001,
+      "autoPort": false
     }
   ]
 }

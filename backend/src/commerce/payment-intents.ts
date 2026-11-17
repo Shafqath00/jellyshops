@@ -21,6 +21,14 @@ export interface PreparedPayment {
   publicToken: string;
   clientSecret: string;
   connectedAccountId: string;
+  /** Totals worked out on the server. The amount charged is always the PaymentIntent's amount. */
+  totals: {
+    subtotalMinor: number;
+    shippingMinor: number;
+    totalMinor: number;
+    amountMinor: number;
+    currency: string;
+  };
 }
 
 interface PaymentIntentDeps {
@@ -448,6 +456,13 @@ export class PaymentIntentService {
             clientSecret: intent.client_secret,
             connectedAccountId:
               state.payment.stripeAccountId,
+            totals: {
+              subtotalMinor: Number(state.order.subtotalMinor),
+              shippingMinor: Number(state.order.shippingMinor),
+              totalMinor: Number(state.order.totalMinor),
+              amountMinor: intent.amount,
+              currency: state.order.currency.toUpperCase(),
+            },
           },
         };
       },

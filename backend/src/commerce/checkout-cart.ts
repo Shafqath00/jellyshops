@@ -23,14 +23,35 @@ export const checkoutInputSchema = z.object({
       }),
     )
     .min(1).max(50),
-  customerSnapshot: z.record(
-    z.string(),
-    z.unknown(),
-  ),
+  customerSnapshot: customerSnapshotSchema(),
   deliverySnapshot: z
     .record(z.string(), z.unknown())
+    .refine(withinSnapshotSize)
     .optional(),
 });
+
+/** Largest JSON size accepted for the buyer or delivery details (they are copied into the order). */
+const MAX_SNAPSHOT_BYTES = 8_000;
+
+function withinSnapshotSize(value: unknown): boolean {
+  return JSON.stringify(value).length <= MAX_SNAPSHOT_BYTES;
+}
+
+/**
+ * Buyer details as typed at checkout. A real email is required (receipts go to it); other
+ * fields are kept as sent (emails and the order page read address, billingAddress
+ * and note) but the whole snapshot is capped in size.
+ */
+function customerSnapshotSchema() {
+  return z
+    .object({
+      name: z.string().trim().min(1).max(120).optional(),
+      email: z.string().trim().max(254).email(),
+      phone: z.string().trim().max(40).optional(),
+    })
+    .passthrough()
+    .refine(withinSnapshotSize);
+}
 
 export interface ValidatedLine {
   variantId: string;

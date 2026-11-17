@@ -15,10 +15,10 @@ describe("Public order refresh", () => {
         vi.stubGlobal("fetch", mock);
         render(<PublicOrderPage />);
         await act(async () => { await vi.advanceTimersByTimeAsync(0); });
-        expect(screen.getByRole("heading", { name: "Payment pending" })).toBeVisible();
+        expect(screen.getByRole("heading", { name: "We're confirming your payment" })).toBeVisible();
         paid = true;
         await act(async () => { await vi.advanceTimersByTimeAsync(5000); });
-        expect(screen.getByRole("heading", { name: "Payment pending" })).toBeVisible();
+        expect(screen.getByRole("heading", { name: "We're confirming your payment" })).toBeVisible();
         await act(async () => { await vi.advanceTimersByTimeAsync(10000); });
         expect(screen.getByRole("heading", { name: "Thank you for your order" })).toBeVisible();
         const calls = mock.mock.calls.length;
