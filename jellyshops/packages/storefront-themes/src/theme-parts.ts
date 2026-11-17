@@ -48,6 +48,8 @@ export const THEME_PART_GROUPS: ReadonlyArray<{ group: string; parts: readonly s
     "jelly-related-products", "jelly-search-results", "jelly-search-shell", "jelly-search-status",
   ] },
   { group: "Product page", parts: [
+    // Main product's own layout: the photo and buying columns (themes set the knobs --mp-* on .jelly-main-product).
+    "jelly-main-product-grid", "jelly-main-product-media", "jelly-main-product-details",
     "jelly-product-description", "jelly-product-details", "jelly-product-gallery", "jelly-product-gallery-item",
     "jelly-product-information", "jelly-product-option-values", "jelly-product-options", "jelly-product-price",
     "jelly-product-purchase", "jelly-product-shipping", "jelly-product-sku", "jelly-product-tabs-section",
