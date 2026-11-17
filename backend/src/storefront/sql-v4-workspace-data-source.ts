@@ -51,9 +51,10 @@ export function createSqlV4WorkspaceDataSource(
   return {
     async getWorkspace(storeId) {
       return (
-        await rows<{ generation: number; updatedAt: Date }>(
+        await rows<{ generation: number; updatedAt: Date; sectionGroups?: unknown }>(
           sql,
-          `SELECT "generation", "updatedAt"
+          // * so the section groups column is read once its migration is applied, and ignored before.
+          `SELECT *
            FROM "StorefrontWorkspace"
            WHERE "storeId" = $1`,
           storeId,

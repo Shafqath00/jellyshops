@@ -6493,7 +6493,8 @@
         "template"
       ],
       "groups": [
-        "template"
+        "template",
+        "footer"
       ],
       "allowedBlockTypes": [
         "collection-card"
@@ -7502,7 +7503,8 @@
         "template"
       ],
       "groups": [
-        "template"
+        "template",
+        "footer"
       ],
       "allowedBlockTypes": [
         "heading",
@@ -8079,7 +8081,8 @@
         "template"
       ],
       "groups": [
-        "template"
+        "template",
+        "footer"
       ],
       "allowedBlockTypes": [
         "heading",
@@ -8290,7 +8293,9 @@
         "template"
       ],
       "groups": [
-        "template"
+        "template",
+        "header",
+        "footer"
       ],
       "allowedBlockTypes": [
         "heading",
@@ -10115,7 +10120,9 @@
         "template"
       ],
       "groups": [
-        "template"
+        "template",
+        "header",
+        "footer"
       ],
       "allowedBlockTypes": [
         "heading",
@@ -10185,7 +10192,8 @@
         "template"
       ],
       "groups": [
-        "template"
+        "template",
+        "footer"
       ],
       "allowedBlockTypes": [
         "testimonial"
@@ -10601,7 +10609,8 @@
         "template"
       ],
       "groups": [
-        "template"
+        "template",
+        "footer"
       ],
       "allowedBlockTypes": [
         "faq-item"
@@ -11342,7 +11351,8 @@
         "template"
       ],
       "groups": [
-        "template"
+        "template",
+        "footer"
       ],
       "allowedBlockTypes": [
         "heading",
@@ -11449,7 +11459,8 @@
         "template"
       ],
       "groups": [
-        "template"
+        "template",
+        "footer"
       ],
       "allowedBlockTypes": [
         "column",
@@ -12004,7 +12015,8 @@
         "template"
       ],
       "groups": [
-        "template"
+        "template",
+        "footer"
       ],
       "allowedBlockTypes": [
         "contact-item"
@@ -12839,7 +12851,9 @@
         "template"
       ],
       "groups": [
-        "template"
+        "template",
+        "header",
+        "footer"
       ],
       "allowedBlockTypes": [
         "logo"
@@ -14036,7 +14050,9 @@
         "template"
       ],
       "groups": [
-        "template"
+        "template",
+        "header",
+        "footer"
       ],
       "allowedBlockTypes": [
         "trust-point",
@@ -16189,7 +16205,8 @@
         "template"
       ],
       "groups": [
-        "template"
+        "template",
+        "footer"
       ],
       "allowedBlockTypes": [],
       "defaultSettings": {
@@ -17089,7 +17106,8 @@
         "template"
       ],
       "groups": [
-        "template"
+        "template",
+        "footer"
       ],
       "allowedBlockTypes": [
         "product-tab"
@@ -19964,7 +19982,8 @@
         "template"
       ],
       "groups": [
-        "template"
+        "template",
+        "footer"
       ],
       "allowedBlockTypes": [],
       "defaultSettings": {

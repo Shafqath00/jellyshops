@@ -33,6 +33,16 @@ export interface TemplateMutationResult {
   generation: number;
 }
 
+/** The shared header, footer and overlay groups (theme plan T6), as the backend returns them. */
+export interface SectionGroupsState {
+  /** False until the section groups migration is applied on the backend. */
+  available: boolean;
+  /** False while the groups are worked out from the templates (nothing saved yet). */
+  saved: boolean;
+  groups: import("@jelly/storefront-schema").StorefrontSectionGroups;
+  generation: number;
+}
+
 export interface GlobalSectionRecord {
   id: string;
   storeId: string;

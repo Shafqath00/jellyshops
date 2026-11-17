@@ -1,4 +1,4 @@
-import type { DynamicValueType, StorefrontDocument } from "@jelly/storefront-schema";
+import type { DynamicValueType, StorefrontDocument, StorefrontSectionGroups } from "@jelly/storefront-schema";
 import { resolveMediaUrls } from "@/lib/media-urls";
 import {
   StoreEditorApiError,
@@ -10,6 +10,7 @@ import {
   type DemoCatalog,
   type DraftRecord,
   type DynamicSourceDescriptor,
+  type SectionGroupsState,
   type GlobalSectionRecord,
   type MediaRecord,
   type MenuRecord,
@@ -51,6 +52,9 @@ export interface StoreEditorApi {
   listGlobalSections(storeId: string): Promise<GlobalSectionRecord[]>;
   createGlobalSection(storeId: string, input: { name: string; section: Record<string, unknown> }): Promise<{ globalSection: GlobalSectionRecord; generation: number }>;
   updateGlobalSection(storeId: string, sectionId: string, expectedRevision: number, patch: { name?: string; section?: Record<string, unknown> }): Promise<{ globalSection: GlobalSectionRecord; generation: number }>;
+  /** The shared header, footer and overlay groups (theme plan T6). Optional: older backends and test fakes leave it out. */
+  getSectionGroups?(storeId: string): Promise<SectionGroupsState>;
+  saveSectionGroups?(storeId: string, groups: StorefrontSectionGroups): Promise<SectionGroupsState>;
   listPresets(storeId: string): Promise<SectionPresetRecord[]>;
   createPreset(storeId: string, input: { name: string; section: Record<string, unknown> }): Promise<{ preset: SectionPresetRecord; generation: number }>;
   instantiatePreset(storeId: string, presetId: string): Promise<Record<string, unknown>>;
@@ -166,6 +170,8 @@ export function createStoreEditorApi({ baseUrl, token, fetch: fetcher = fetch }:
     listGlobalSections: (storeId) => request(storefrontPath(storeId, "/global-sections")),
     createGlobalSection: (storeId, input) => request(storefrontPath(storeId, "/global-sections"), { method: "POST", body: JSON.stringify(input) }),
     updateGlobalSection: (storeId, sectionId, expectedRevision, patch) => request(storefrontPath(storeId, `/global-sections/${encodeURIComponent(sectionId)}`), { method: "PATCH", body: JSON.stringify({ expectedRevision, ...patch }) }),
+    getSectionGroups: (storeId) => request(storefrontPath(storeId, "/section-groups")),
+    saveSectionGroups: (storeId, groups) => request(storefrontPath(storeId, "/section-groups"), { method: "PUT", body: JSON.stringify({ groups }) }),
     listPresets: (storeId) => request(storefrontPath(storeId, "/presets")),
     createPreset: (storeId, input) => request(storefrontPath(storeId, "/presets"), { method: "POST", body: JSON.stringify(input) }),
     deletePreset: (storeId, presetId) => request(storefrontPath(storeId, `/presets/${encodeURIComponent(presetId)}`), { method: "DELETE" }),

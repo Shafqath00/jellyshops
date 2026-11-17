@@ -1,6 +1,6 @@
 "use client";
 
-import type { CompilationDiagnosticLocation, BlockNode, SectionNode, RichTextDocument } from "@jelly/storefront-schema";
+import type { CompilationDiagnosticLocation, BlockNode, SectionNode, RichTextDocument, StorefrontSectionGroups } from "@jelly/storefront-schema";
 import { copyBlockWithNewIds, updateBlock } from "@jelly/storefront-schema";
 import { displayName } from "@/features/store-editor/editor-page-helpers";
 import { applySelectionAction, findTarget, moveBefore, moveBlockTo, type SelectionAction, type SelectionTarget } from "@/features/store-editor/selection-actions";
@@ -10,6 +10,7 @@ import { applySettingsPatch, type SettingsNode } from "@/features/store-editor/m
 import { applyLanguagePatch } from "@/features/store-editor/translation-settings";
 import { createLibrarySection } from "@/features/store-editor/section-options";
 import { resetSectionDesign } from "@/features/store-editor/reset-design";
+import { addToGroup, moveInGroup, removeFromGroup, type EditableGroup } from "@/features/store-editor/section-group-editing";
 import { appendBlock, appendGlobalPlacement, appendInlineSection, detachGlobalPlacement, movePlacement, removeInlineSection, replaceInlineWithGlobal, setInlineSectionEnabled, updateInlineSection } from "@/features/store-editor/template-layout";
 import type { useEditorState } from "./use-editor-state";
 import type { useEditorDerived } from "./use-editor-derived";
@@ -52,8 +53,61 @@ export function useEditorActions(ctx: ReturnType<typeof useEditorState> & Return
     }
   };
 
+  // Header and footer groups (T6): saving a new list of shared sections. Every page draws it after Publish.
+  const typeOfGlobal = (id: string) => {
+    const type = ctx.globalDrafts.current.find((global) => global.id === id)?.section.type;
+    return typeof type === "string" ? type : undefined;
+  };
+  const saveGroups = async (groups: StorefrontSectionGroups): Promise<boolean> => {
+    if (!api?.saveSectionGroups) return false;
+    try {
+      if (!await saveQueueRef.current?.flush()) return false;
+      setSaveState("saving");
+      const saved = await api.saveSectionGroups(backendStoreId, groups);
+      ctx.setSectionGroups(saved);
+      setWorkspace((current) => current ? { ...current, generation: saved.generation } : current);
+      invalidatePreview();
+      setSaveState("saved");
+      return true;
+    } catch (error) {
+      setSaveState("error");
+      setSaveError(error instanceof Error ? error.message : "Could not save the header or footer. Try again.");
+      return false;
+    }
+  };
+  /** Adds a new shared section to the header or footer group: every page shows it. */
+  const insertIntoGroup = async (group: EditableGroup, sectionType: string) => {
+    if (!api || !ctx.activeGroups) return;
+    const section = createLibrarySection(sectionType, () => crypto.randomUUID(), ctx.themeConfiguration?.themeVersion);
+    try {
+      setSaveState("saving");
+      const created = await api.createGlobalSection(backendStoreId, { name: displayName(section.type), section: structuredClone(section) as unknown as Record<string, unknown> });
+      if (!created.globalSection?.id) return;
+      setGlobals((current) => [...current, created.globalSection]);
+      setWorkspace((current) => current ? { ...current, generation: created.generation } : current);
+      if (!await saveGroups(addToGroup(ctx.activeGroups, group, created.globalSection.id, section.type, typeOfGlobal))) return;
+      setSelection(null);
+      setActiveGlobalId(created.globalSection.id);
+      setLibraryRegion(undefined);
+      ctx.setLibraryPreviewId(undefined);
+    } catch (error) {
+      setSaveState("error");
+      setSaveError(error instanceof Error ? error.message : "Could not add the section. Try again.");
+    }
+  };
+  const moveGroupSection = async (group: EditableGroup, id: string, direction: "up" | "down") => {
+    const next = ctx.activeGroups ? moveInGroup(ctx.activeGroups, group, id, direction) : null;
+    if (next) await saveGroups(next);
+  };
+  const removeGroupSection = async (group: EditableGroup, id: string) => {
+    const next = ctx.activeGroups ? removeFromGroup(ctx.activeGroups, group, id, typeOfGlobal(id)) : null;
+    if (!next || !await saveGroups(next)) return;
+    if (activeGlobalId === id) setActiveGlobalId(undefined);
+  };
+
   const insertBuiltIn = async (sectionType: string) => {
     if (!activeTemplate || !libraryRegion) return;
+    if (ctx.activeGroups && libraryRegion !== "template") { await insertIntoGroup(libraryRegion, sectionType); return; }
     // A designed preset ("Collection list: Bento") brings its own settings and blocks; a plain section its defaults.
     const section = createLibrarySection(sectionType, () => crypto.randomUUID(), ctx.themeConfiguration?.themeVersion);
     await persistLayout(appendInlineSection(activeTemplate.layout, section));
@@ -255,5 +309,5 @@ export function useEditorActions(ctx: ReturnType<typeof useEditorState> & Return
     deselect: selection ? () => setSelection(selection.kind === "section" && selection.elementId ? { kind: "section", region: selection.region, sectionId: selection.sectionId }
       : selection.kind === "block" && selection.elementId ? { kind: "block", region: selection.region, sectionId: selection.sectionId, blockId: selection.blockId } : null) : undefined,
   });
-  return { insertPreset, saveToLibrary, deletePreset, insertBuiltIn, addBlock, removeSelectedSection, moveSelectedPlacement, toggleSection, insertGlobal, makeGlobal, detachGlobal, updateSelectedSetting, updateSelectedSettings, resetSelectedDesign, saveRichTextDocument, openDiagnostic, toolbarTarget, toolbarFound, runSelectionAction, runActionOn, runMove, runMoveTo };
+  return { moveGroupSection, removeGroupSection, insertPreset, saveToLibrary, deletePreset, insertBuiltIn, addBlock, removeSelectedSection, moveSelectedPlacement, toggleSection, insertGlobal, makeGlobal, detachGlobal, updateSelectedSetting, updateSelectedSettings, resetSelectedDesign, saveRichTextDocument, openDiagnostic, toolbarTarget, toolbarFound, runSelectionAction, runActionOn, runMove, runMoveTo };
 }

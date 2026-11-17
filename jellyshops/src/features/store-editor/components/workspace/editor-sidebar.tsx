@@ -91,6 +91,9 @@ export function EditorSidebar({ ctx }: { ctx: EditorViewContext }) {
                 onRemove={(id) => { if (window.confirm("Delete this section? You can undo this with Ctrl+Z.")) void runActionOn({ sectionId: id }, "remove"); }}
                 onBlockAction={(sectionId, blockId, action) => { void runActionOn({ sectionId, blockId }, action); }}
                 onDuplicate={(id) => { void runActionOn({ sectionId: id }, "duplicate"); }}
+                sectionGroups={ctx.activeGroups}
+                onGroupMove={(group, id, direction) => { void ctx.moveGroupSection(group, id, direction); }}
+                onGroupRemove={(group, id) => { if (window.confirm("Remove this section from every page? You can add it again from Add section.")) void ctx.removeGroupSection(group, id); }}
               />
             </div>
           </div>

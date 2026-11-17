@@ -9,6 +9,7 @@ import type {
   CompilerTemplateInput,
   StorefrontCompilationInput,
 } from "./compiler/types.js";
+import { readSectionGroups } from "@jelly/storefront-schema";
 import { WorkspaceGenerationConflictError } from "./workspace/errors.js";
 import type { TemplateAssignmentRecord } from "./workspace/repositories/assignment-repository.js";
 import type { GlobalSectionRecord } from "./workspace/repositories/global-section-repository.js";
@@ -30,7 +31,7 @@ export interface CompilerResourceIds {
 }
 
 export interface LocalV4WorkspaceDataSource {
-  getWorkspace(storeId: string): Promise<{ generation: number; updatedAt: Date } | null>;
+  getWorkspace(storeId: string): Promise<{ generation: number; updatedAt: Date; sectionGroups?: unknown } | null>;
   listTemplates(storeId: string): Promise<StorefrontTemplateRecord[] | undefined>;
   listGlobalSections(storeId: string): Promise<GlobalSectionRecord[] | undefined>;
   listMenus(storeId: string): Promise<NavigationMenuRecord[] | undefined>;
@@ -128,6 +129,7 @@ export class LocalV4WorkspaceReader implements CompilationInputLoader {
       theme: theme(themeConfiguration),
       templates: liveTemplates(templates ?? [], assignments ?? []).map(template),
       globalSections: (globalSections ?? []).map(globalSection),
+      ...(readSectionGroups(initial.sectionGroups) ? { sectionGroups: readSectionGroups(initial.sectionGroups) } : {}),
       menus: (menus ?? []).map(menu),
       assignments: (assignments ?? []).map(assignment),
       metafieldDefinitions: metafields ?? [],
@@ -137,7 +139,7 @@ export class LocalV4WorkspaceReader implements CompilationInputLoader {
     };
   }
 
-  private async workspace(storeId: string): Promise<{ generation: number; updatedAt: Date }> {
+  private async workspace(storeId: string): Promise<{ generation: number; updatedAt: Date; sectionGroups?: unknown }> {
     return await this.source.getWorkspace(storeId) ?? { generation: 0, updatedAt: new Date(0) };
   }
 }

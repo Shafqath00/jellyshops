@@ -52,6 +52,7 @@ export function assembleRuntimeSnapshot(
     },
     templates,
     globalSections,
+    ...(input.sectionGroups ? { sectionGroups: structuredClone(input.sectionGroups) } : {}),
     menus,
     templateDefaults,
     assignments: input.assignments

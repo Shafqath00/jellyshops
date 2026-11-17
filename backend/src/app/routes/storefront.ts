@@ -28,6 +28,8 @@ import { createThemeUpgradeRouter } from "../../storefront/theme-packages/upgrad
 import { ThemeUpgradeService } from "../../storefront/theme-packages/upgrade-service.js";
 import { createLayoutUpgradeRouter } from "../../storefront/layout-upgrade/routes.js";
 import { LayoutUpgradeService } from "../../storefront/layout-upgrade/service.js";
+import { createSectionGroupsRouter } from "../../storefront/section-groups/routes.js";
+import { SectionGroupService } from "../../storefront/section-groups/service.js";
 
 const accessServices = new WeakMap<AppContext, StorefrontAccessService | null>();
 
@@ -176,6 +178,8 @@ export function mountStorefrontRoutes(app: Express, context: AppContext): void {
   if (themePackages && upgradeDatabase) app.use("/api/stores/:storeId", createThemeUpgradeRouter(new ThemeUpgradeService(upgradeDatabase), authProvider));
   // Moving a draft built from an earlier starter layout of a Jelly theme to the current layout.
   if (upgradeDatabase) app.use("/api/stores/:storeId", createLayoutUpgradeRouter(new LayoutUpgradeService(upgradeDatabase), authProvider));
+  // The shared header, footer and overlay groups (theme plan T6).
+  if (upgradeDatabase) app.use("/api/stores/:storeId", createSectionGroupsRouter(new SectionGroupService(upgradeDatabase), authProvider));
   const bindingValues = bindingValueService(context);
   if (bindingValues) {
     app.use("/api/stores/:storeId/storefront", createEditorBindingValuesRouter(bindingValues, authProvider));

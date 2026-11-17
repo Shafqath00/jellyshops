@@ -13,7 +13,7 @@ import type { useEditorState } from "./use-editor-state";
 
 /** Effects that keep the editor in step with the browser and the server: panel sizes, preview scrolling, the save queue, leaving the page and loading the workspace. */
 export function useEditorLifecycle(ctx: ReturnType<typeof useEditorState>) {
-  const { router, backendStoreId, api, handoff, setWorkspace, setTemplates, setGlobals, setMenuRecords, setPresets, setCatalog, setPages, setBlogs, setArticles, setThemeCatalog, setThemeConfiguration, activeTemplateId, setActiveTemplateId, selection, activeGlobalId, viewport, setMobilePanel, setLoadError, libraryRegion, blockPickerSectionId, saveState, setSaveState, setSaveError, loadAttempt, previewSelectionKind, previewSelectionSectionId, previewSelectionBlockId, saveQueueRef, setRestorable, unsavedDecided } = ctx;
+  const { router, backendStoreId, api, handoff, setWorkspace, setTemplates, setGlobals, setSectionGroups, setMenuRecords, setPresets, setCatalog, setPages, setBlogs, setArticles, setThemeCatalog, setThemeConfiguration, activeTemplateId, setActiveTemplateId, selection, activeGlobalId, viewport, setMobilePanel, setLoadError, libraryRegion, blockPickerSectionId, saveState, setSaveState, setSaveError, loadAttempt, previewSelectionKind, previewSelectionSectionId, previewSelectionBlockId, saveQueueRef, setRestorable, unsavedDecided } = ctx;
   useEffect(() => {
     const desktop = window.matchMedia("(min-width: 64rem)");
     const restoreDesktopPanel = () => {
@@ -125,4 +125,14 @@ export function useEditorLifecycle(ctx: ReturnType<typeof useEditorState>) {
     });
     return () => { active = false; };
   }, [api, backendStoreId, handoff, loadAttempt]);
+
+  // Shared header and footer groups (T6). A backend without them leaves the older header and footer in place.
+  useEffect(() => {
+    if (!api?.getSectionGroups) return;
+    let active = true;
+    void api.getSectionGroups(backendStoreId)
+      .then((state) => { if (active) setSectionGroups(state.available ? state : null); })
+      .catch(() => { if (active) setSectionGroups(null); });
+    return () => { active = false; };
+  }, [api, backendStoreId, loadAttempt]);
 }

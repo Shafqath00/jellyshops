@@ -2,6 +2,8 @@ import type {
   CompilationDiagnostic,
   DynamicBinding,
   DynamicValueType,
+  SectionGroupKey,
+  StorefrontSectionGroups,
 } from "@jelly/storefront-schema";
 import type { TemplateType } from "../workspace/repositories/template-repository.js";
 
@@ -96,6 +98,8 @@ export interface StorefrontCompilationInput {
   };
   templates: CompilerTemplateInput[];
   globalSections: CompilerGlobalSectionInput[];
+  /** Saved section groups (T6); absent when the store has none, so header and footer come from the templates. */
+  sectionGroups?: StorefrontSectionGroups;
   menus: CompilerMenuInput[];
   assignments: CompilerAssignmentInput[];
   metafieldDefinitions: CompilerMetafieldDefinitionInput[];
@@ -119,7 +123,8 @@ export interface RegistrySectionIssue {
 }
 
 export interface CompilerRegistry {
-  validateSection(section: CompilerSectionNode, templateType: TemplateType, theme?: StorefrontCompilationInput["theme"]): RegistrySectionIssue[];
+  /** `place` is the template type, or `{ group }` for a section in a shared header, footer or overlay group. */
+  validateSection(section: CompilerSectionNode, place: TemplateType | { group: SectionGroupKey }, theme?: StorefrontCompilationInput["theme"]): RegistrySectionIssue[];
   dynamicSettingType(sectionType: string, fieldKey: string, blockType?: string, theme?: StorefrontCompilationInput["theme"]): DynamicValueType | null;
 }
 

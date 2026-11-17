@@ -152,7 +152,7 @@
     "demoContent": false,
     "conformance": true,
     "lintFindings": 0,
-    "cssGzipKb": 15
+    "cssGzipKb": 15.1
   },
   "jelly-resthaven": {
     "theme": "jelly-resthaven",
@@ -214,6 +214,6 @@
     "demoContent": false,
     "conformance": true,
     "lintFindings": 2,
-    "cssGzipKb": 15
+    "cssGzipKb": 15.1
   }
 }

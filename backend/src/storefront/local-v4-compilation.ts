@@ -43,7 +43,7 @@ const resourceFieldTypes = new Map<string, DynamicValueType>([
 ]);
 
 const compilerRegistry: CompilerRegistry = {
-  validateSection(section, templateType, theme) {
+  validateSection(section, place, theme) {
     if (!Array.isArray(section.blocks)) {
       return [{
         code: "SETTINGS_INVALID",
@@ -53,7 +53,7 @@ const compilerRegistry: CompilerRegistry = {
     }
     return validateSectionAgainstRegistry(
       section as SectionNode,
-      templateType as PageType,
+      typeof place === "object" ? place : place as PageType,
       theme?.id ?? theme?.presetId,
       theme?.version,
     ).map((issue) => ({

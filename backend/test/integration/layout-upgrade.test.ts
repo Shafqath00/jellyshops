@@ -1,4 +1,4 @@
-import { createStarterPack, getStarterPack } from "@jelly/storefront-themes";
+import { createStarterPack, currentLayoutRevision, getStarterPack } from "@jelly/storefront-themes";
 import { describe, expect, it } from "vitest";
 import { readFile } from "node:fs/promises";
 import type { CommerceDatabase, SqlExecutor } from "../../src/commerce/repository.js";
@@ -8,6 +8,9 @@ import { createPGliteDatabase, seedStore } from "./pglite.js";
 
 type Database = Awaited<ReturnType<typeof createPGliteDatabase>>;
 type Placement = { kind: "inline"; section: { id: string; type: string; settings: Record<string, unknown>; blocks: Array<{ id: string; blocks?: unknown[] }> } } | { kind: "global"; globalSectionId: string };
+
+/** Resthaven's current layout (its starter keeps changing; the tests only care that it is the newest). */
+const CURRENT = currentLayoutRevision("jelly-resthaven");
 
 function transactionDatabase(database: Database): CommerceDatabase {
   return { async transaction(work) { return database.transaction((tx) => work({ query: (sql, values) => tx.query(sql, values) } as SqlExecutor)); } };
@@ -44,9 +47,9 @@ describe("layout upgrade", () => {
     const database = await createPGliteDatabase();
     await seedStore(database, "store-a", "store-a");
     await new StorefrontStarterInstallationService(transactionDatabase(database), () => "install-a").install("store-a", "jelly-resthaven");
-    expect((await database.query<{ layoutRevision: number }>(`SELECT "layoutRevision" FROM "StorefrontWorkspace" WHERE "storeId" = 'store-a'`)).rows[0]!.layoutRevision).toBe(5);
+    expect((await database.query<{ layoutRevision: number }>(`SELECT "layoutRevision" FROM "StorefrontWorkspace" WHERE "storeId" = 'store-a'`)).rows[0]!.layoutRevision).toBe(CURRENT);
     const offer = await new LayoutUpgradeService(transactionDatabase(database)).offer("store-a");
-    expect(offer).toMatchObject({ themeId: "jelly-resthaven", draft: { revision: 5, recognised: false }, current: { revision: 5 }, behind: false, lastUpgrade: null });
+    expect(offer).toMatchObject({ themeId: "jelly-resthaven", draft: { revision: CURRENT, recognised: false }, current: { revision: CURRENT }, behind: false, lastUpgrade: null });
   });
 
   it("recognises an older layout, upgrades the draft keeping the merchant's edits, and undoes it", async () => {
@@ -63,7 +66,7 @@ describe("layout upgrade", () => {
 
     const service = new LayoutUpgradeService(transactionDatabase(database), () => "backup-1");
     const offer = (await service.offer("store-b"))!;
-    expect(offer).toMatchObject({ draft: { revision: 2, recognised: true }, current: { revision: 5 }, behind: true });
+    expect(offer).toMatchObject({ draft: { revision: 2, recognised: true }, current: { revision: CURRENT }, behind: true });
 
     const preview = await service.preview("store-b");
     expect(preview.problems).toEqual([]);
@@ -73,7 +76,7 @@ describe("layout upgrade", () => {
 
     await expect(service.apply("store-b", offer.generation - 1, "user-1")).rejects.toMatchObject({ status: 409 });
     const applied = await service.apply("store-b", offer.generation, "user-1");
-    expect(applied.revision).toBe(5);
+    expect(applied.revision).toBe(CURRENT);
     const newHome = await homeTypes(database, "store-b");
     expect(newHome).toContain("category-grid");
     expect(newHome).not.toContain("jelly-resthaven/categories");
@@ -81,7 +84,7 @@ describe("layout upgrade", () => {
     expect(hero && hero.kind === "inline" && hero.section.settings.heading).toBe("Beds by Newbi");
 
     const afterOffer = (await service.offer("store-b"))!;
-    expect(afterOffer).toMatchObject({ draft: { revision: 5, recognised: false }, behind: false, lastUpgrade: { id: "backup-1", fromRevision: 2, toRevision: 5 } });
+    expect(afterOffer).toMatchObject({ draft: { revision: CURRENT, recognised: false }, behind: false, lastUpgrade: { id: "backup-1", fromRevision: 2, toRevision: CURRENT } });
     await expect(service.preview("store-b")).rejects.toMatchObject({ status: 409 });
 
     await service.rollback("store-b", afterOffer.generation);
@@ -94,7 +97,7 @@ describe("layout upgrade", () => {
   it("offers nothing for themes without earlier layouts", async () => {
     const database = await createPGliteDatabase();
     await seedStore(database, "store-c", "store-c");
-    await new StorefrontStarterInstallationService(transactionDatabase(database), () => "install-c").install("store-c", "jelly-halo");
+    await new StorefrontStarterInstallationService(transactionDatabase(database), () => "install-c").install("store-c", "fresh-market");
     expect(await new LayoutUpgradeService(transactionDatabase(database)).offer("store-c")).toBeNull();
   });
 });

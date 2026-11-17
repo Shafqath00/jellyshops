@@ -9,7 +9,7 @@ export function validateRegistry(
   const diagnostics: CompilationDiagnostic[] = [];
   for (const template of input.templates) {
     for (const visit of listTemplateSections(input, template)) {
-      for (const issue of registry.validateSection(visit.section, template.type, input.theme)) {
+      for (const issue of registry.validateSection(visit.section, visit.group ? { group: visit.group } : template.type, input.theme)) {
         diagnostics.push({
           severity: "error",
           code: issue.code,

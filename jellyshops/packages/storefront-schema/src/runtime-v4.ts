@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { storefrontPageTypes } from "./types.js";
 import { MAX_MENU_IMAGE_ALT, MAX_MENU_IMAGE_URL, type MenuImage } from "./menu-image-read.js";
+import { MAX_GROUP_SECTIONS } from "./section-groups.js";
 
 export const RUNTIME_STOREFRONT_SCHEMA_VERSION = 4 as const;
 
@@ -20,7 +21,10 @@ const runtimeGlobalSectionSchema = z.object({
   section: jsonObjectSchema,
 }).strict();
 
-const runtimeMenuTargetSchema = z.discriminatedUnion("kind", [
+const groupIdsSchema = z.array(z.string().min(1)).max(MAX_GROUP_SECTIONS);
+export const runtimeSectionGroupsSchema = z.object({ header: groupIdsSchema, footer: groupIdsSchema, overlay: groupIdsSchema }).strict();
+
+const runtimeMenuTargetSchema =z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("home") }).strict(),
   z.object({ kind: z.literal("search") }).strict(),
   z.object({ kind: z.literal("product"), resourceId: z.string().min(1) }).strict(),
@@ -103,6 +107,8 @@ export const runtimeStorefrontSnapshotV4Schema = z.object({
   }).strict(),
   templates: z.record(z.string().min(1), runtimeTemplateSchema),
   globalSections: z.record(z.string().min(1), runtimeGlobalSectionSchema),
+  /** Saved section groups (T6). Absent: the header and footer come from each template's shared sections, as before. */
+  sectionGroups: runtimeSectionGroupsSchema.optional(),
   menus: z.record(z.string().min(1), runtimeMenuSchema),
   templateDefaults: z.partialRecord(runtimeTemplateTypeSchema, z.string().min(1)),
   assignments: z.array(runtimeTemplateAssignmentSchema),

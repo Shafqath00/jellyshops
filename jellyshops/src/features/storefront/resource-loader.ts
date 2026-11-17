@@ -1,8 +1,11 @@
-import type {
-  RuntimeGlobalSectionV4,
-  RuntimeStorefrontSnapshotV4,
-  RuntimeTemplateV4,
-  SectionNode,
+import {
+  chromeGroupOf,
+  groupedSectionIds,
+  type RuntimeGlobalSectionV4,
+  type RuntimeStorefrontSnapshotV4,
+  type RuntimeTemplateV4,
+  type SectionNode,
+  type StorefrontSectionGroups,
 } from "@jelly/storefront-schema";
 import type { PublicProduct } from "@jelly/storefront-renderer";
 import { loadPublicBindingValues, type BindingValueLoader } from "./binding-values-api";
@@ -146,24 +149,42 @@ export function expandRuntimeLayout(
  * preview and the editor (saved or draft) all lay pages out here.
  */
 export function expandRawRuntimeLayout(
-  snapshot: Pick<RuntimeStorefrontSnapshotV4, "globalSections">,
+  snapshot: Pick<RuntimeStorefrontSnapshotV4, "globalSections"> & { sectionGroups?: StorefrontSectionGroups },
   template: Pick<RuntimeTemplateV4, "layout">,
 ): ResolvedStorefrontLayout {
   const layoutSections = template.layout.sections;
   const layout: ResolvedStorefrontLayout = { announcement: [], header: [], template: [], footer: [] };
+  const groups = snapshot.sectionGroups;
+  // With saved groups (T6) the header and footer come from the groups; the template's own header and footer
+  // placements are left out, so a page never draws them twice.
+  if (groups) {
+    for (const id of groups.header) {
+      const section = globalSectionNode(snapshot.globalSections[id]);
+      if (!section) continue;
+      // Announcement bars at the top keep their own slot above the header.
+      if (section.type === "announcement-bar" && !layout.header.length) layout.announcement.push(section);
+      else layout.header.push(section);
+    }
+    for (const id of groups.footer) {
+      const section = globalSectionNode(snapshot.globalSections[id]);
+      if (section) layout.footer.push(section);
+    }
+  }
   if (!Array.isArray(layoutSections)) return layout;
+  const grouped = groupedSectionIds(groups);
 
   for (const placement of layoutSections) {
     if (!placement || typeof placement !== "object" || Array.isArray(placement)) continue;
     const candidate = placement as Record<string, unknown>;
     if (candidate.kind === "inline" && candidate.section && typeof candidate.section === "object" && !Array.isArray(candidate.section)) {
       const section = sectionNode(candidate.section as Record<string, unknown>);
-      if (section) layout[regionFor(section)].push(section);
+      if (section && !(groups && chromeGroupOf(section.type))) layout[regionFor(section)].push(section);
       continue;
     }
     if (candidate.kind === "global" && typeof candidate.globalSectionId === "string") {
+      if (grouped.has(candidate.globalSectionId)) continue;
       const section = globalSectionNode(snapshot.globalSections[candidate.globalSectionId]);
-      if (section) layout[regionFor(section)].push(section);
+      if (section && !(groups && chromeGroupOf(section.type))) layout[regionFor(section)].push(section);
     }
   }
   return layout;

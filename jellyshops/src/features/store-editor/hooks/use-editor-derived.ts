@@ -5,7 +5,7 @@
    change. Effects list only the values that should re-run them. */
 
 import { useEffect, useMemo, useRef } from "react";
-import { elementControls, getBlockDefinition, getSectionDefinition, listSectionDefinitionsForPage, sectionFitsLimit } from "@jelly/storefront-registry";
+import { elementControls, getBlockDefinition, getSectionDefinition, listSectionDefinitionsForGroup, listSectionDefinitionsForPage, sectionFitsLimit } from "@jelly/storefront-registry";
 import { type CommerceDataProvider, type StorefrontPageContext } from "@jelly/storefront-renderer";
 import type { ThemeId } from "@jelly/storefront-schema";
 import { getThemeDefinition, validateThemeManifest, resolveStorefrontThemeTokens, resolveTheme, storeLanguages } from "@jelly/storefront-themes";
@@ -28,7 +28,7 @@ import type { useEditorState } from "./use-editor-state";
 
 /** Everything worked out from the loaded data: the active template, the selected section and block, its controls and the preview layout. */
 export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
-  const { backendStoreId, token, api, handoff, templates, globals, presets, setDynamicSources, catalog, pages, blogs, articles, themeCatalog, themeConfiguration, activeTemplateId, previewResourceId, setPreviewResourceId, previewQuery, previewProduct, setPreviewProduct, previewCollection, setPreviewCollection, previewProductSelections, setPreviewProductSelections, previewProductQuantity, setPreviewProductQuantity, selection, setSelection, activeGlobalId, viewport, editLanguage, previewSnapshot, libraryRegion, libraryPreviewId, blockPickerSectionId, blockPickerParentId } = ctx;
+  const { sectionGroups, backendStoreId, token, api, handoff, templates, globals, presets, setDynamicSources, catalog, pages, blogs, articles, themeCatalog, themeConfiguration, activeTemplateId, previewResourceId, setPreviewResourceId, previewQuery, previewProduct, setPreviewProduct, previewCollection, setPreviewCollection, previewProductSelections, setPreviewProductSelections, previewProductQuantity, setPreviewProductQuantity, selection, setSelection, activeGlobalId, viewport, editLanguage, previewSnapshot, libraryRegion, libraryPreviewId, blockPickerSectionId, blockPickerParentId } = ctx;
   const activeTemplate = templates.find((template) => template.id === activeTemplateId);
   const previewThemeStyle = useMemo(() => {
     const resolved = resolveTheme(themeConfiguration?.themeId, themeConfiguration?.settings ?? {}, themeConfiguration?.themeVersion);
@@ -160,12 +160,15 @@ export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
   // In another language, text settings show and save that language's text.
   const selectedControls = controlsForLanguage(controlsForView(withColorSchemeNames(baseControls, themeConfiguration?.settings, selectedNode?.settings), responsiveView, selectedNode?.settings), activeLanguage, activeLanguageName, selectedNode?.settings);
   const selectedSettings = selectedNode ? settingsForLanguage(settingsForView(selectedNode, baseControls, responsiveView), baseControls, activeLanguage) : {};
+  // The header and footer groups (T6): saved ones, or the ones the templates imply. Undefined on an older backend.
+  const activeGroups = sectionGroups?.groups;
+  const savedGroups = sectionGroups?.saved ? sectionGroups.groups : undefined;
   const compiledTemplate = activeTemplate && previewSnapshot ? previewSnapshot.templates[activeTemplate.id] : undefined;
   // Kept stable between renders so the preview only redraws sections whose content changed.
   const rawPreviewLayout = useMemo(() => compiledTemplate && previewSnapshot
     ? expandRawRuntimeLayout(previewSnapshot, compiledTemplate)
-    : activeTemplate ? draftPreviewLayout(activeTemplate, globalMap) : { announcement: [], header: [], template: [], footer: [] },
-  [compiledTemplate, previewSnapshot, activeTemplate, globalMap]);
+    : activeTemplate ? draftPreviewLayout(activeTemplate, globalMap, savedGroups) : { announcement: [], header: [], template: [], footer: [] },
+  [compiledTemplate, previewSnapshot, activeTemplate, globalMap, savedGroups]);
   // Settings connected to custom fields show the value for the item being previewed.
   const previewLayout = usePreviewBindingValues(rawPreviewLayout, {
     baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001",
@@ -180,11 +183,17 @@ export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
   [activeTemplate?.type, previewResourceId, backendStoreId, catalog, pages, blogs, articles, previewQuery, previewProduct, previewProductSelections, previewProductQuantity, previewCollection]);
   const builtInSections = useMemo(() => {
     if (!activeTemplate || !libraryRegion) return [];
+    // With groups, the header and footer offer the sections allowed there (shared on every page); one header, one footer.
+    if (activeGroups && libraryRegion !== "template") {
+      const inGroup = activeGroups[libraryRegion].map((id) => globalMap.get(id)?.section.type);
+      return sectionLibraryOptions(listSectionDefinitionsForGroup(libraryRegion, themeConfiguration?.themeId, themeConfiguration?.themeVersion)
+        .filter((definition) => !["header", "footer"].includes(definition.type) || !inGroup.includes(definition.type)));
+    }
     // A section that has reached its limit on this page (one Main product) is not offered again.
     const definitions = listSectionDefinitionsForPage(activeTemplate.type, libraryRegion, themeConfiguration?.themeId, themeConfiguration?.themeVersion)
       .filter((definition) => sectionFitsLimit(definition.type, sections, (type) => getSectionDefinition(type, themeConfiguration?.themeVersion)));
     return sectionLibraryOptions(definitions);
-  }, [activeTemplate, libraryRegion, themeConfiguration, sections]);
+  }, [activeTemplate, libraryRegion, themeConfiguration, sections, activeGroups, globalMap]);
   // The section an Add section choice would add, drawn at the end of the page preview while the choice is pointed at (not saved).
   const libraryPreviewSection = useMemo(() => {
     if (!libraryRegion || !libraryPreviewId) return null;
@@ -224,5 +233,5 @@ export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
       setPreviewResourceId(previewResources[0]?.id);
     }
   }, [previewResourceId, previewResources]);
-  return { activeTemplate, previewThemeStyle, validGlobals, sections, previewResources, globalLabels, presetOptions, globalOptions, selectedGlobal, localSection, selectedLocation, selectedBlock, selectedElement, selectedChildOptions, sectionDefinition, baseControls, responsiveView, colorPalette, languages, activeLanguage, selectedControls, selectedSettings, previewLayout, previewPageContext, builtInSections, libraryPreviewSection, blockPickerSection, blockPickerDefinition, blockPickerTypes, selectedTheme, commerce };
+  return { activeGroups, activeTemplate, previewThemeStyle, validGlobals, sections, previewResources, globalLabels, presetOptions, globalOptions, selectedGlobal, localSection, selectedLocation, selectedBlock, selectedElement, selectedChildOptions, sectionDefinition, baseControls, responsiveView, colorPalette, languages, activeLanguage, selectedControls, selectedSettings, previewLayout, previewPageContext, builtInSections, libraryPreviewSection, blockPickerSection, blockPickerDefinition, blockPickerTypes, selectedTheme, commerce };
 }

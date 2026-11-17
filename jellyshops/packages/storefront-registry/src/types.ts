@@ -161,6 +161,6 @@ export interface SectionDefinition {
   /** Parts of the section the editor can select on their own (section-elements.ts adds the built-in ones). */
   elements?: ElementDefinition[];
 }
-export type RegistryValidationIssueCode = "SECTION_NOT_REGISTERED" | "SECTION_NOT_ALLOWED_ON_PAGE" | "SECTION_NOT_AVAILABLE_ON_THEME" | "BLOCK_NOT_ALLOWED" | "BLOCK_LIMIT_EXCEEDED" | "SETTINGS_INVALID" | "RESPONSIVE_FIELD_NOT_ALLOWED" | "STATIC_BLOCK_REPEATED";
+export type RegistryValidationIssueCode = "SECTION_NOT_REGISTERED" | "SECTION_NOT_ALLOWED_ON_PAGE" | "SECTION_NOT_ALLOWED_IN_GROUP" | "SECTION_NOT_AVAILABLE_ON_THEME" | "BLOCK_NOT_ALLOWED" | "BLOCK_LIMIT_EXCEEDED" | "SETTINGS_INVALID" | "RESPONSIVE_FIELD_NOT_ALLOWED" | "STATIC_BLOCK_REPEATED";
 export interface RegistryValidationIssue { code: RegistryValidationIssueCode; sectionId: string; blockId?: string; field?: string; message: string }
 export type { SectionNode };

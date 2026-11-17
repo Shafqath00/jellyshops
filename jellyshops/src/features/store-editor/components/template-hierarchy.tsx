@@ -114,10 +114,12 @@ function placementRegion(
   return "template";
 }
 
-function PlacementRow({ placement, globalSections, selection, activeGlobalId, onSelect, onGlobalSelect, onAddBlock, onMove, onToggle, onRemove, onBlockAction, onDuplicate, index, count, region, expanded, onExpand, query, themeVersion }: {
+function PlacementRow({ placement, globalSections, selection, activeGlobalId, onSelect, onGlobalSelect, onAddBlock, onMove, onToggle, onRemove, onRemoveShared, onBlockAction, onDuplicate, index, count, region, expanded, onExpand, query, themeVersion }: {
   placement: TemplatePlacement; globalSections: Record<string, GlobalLabel>; selection: EditorSelection; activeGlobalId?: string;
   onSelect(selection: EditorSelection): void; onGlobalSelect?(id: string): void; onAddBlock?(id: string, parentId?: string): void; onMove?(id: string, direction: "up" | "down"): void; onToggle?(id: string, enabled: boolean): void;
   onRemove?(id: string): void; onBlockAction?(sectionId: string, blockId: string, action: "toggle" | "remove" | "duplicate"): void; onDuplicate?(id: string): void;
+  /** Takes a shared section out of the header or footer group (not offered for the header and footer themselves). */
+  onRemoveShared?(id: string): void;
   index: number; count: number; region: HierarchyRegion; expanded: boolean; onExpand(): void; query: string;
   themeVersion?: string;
 }) {
@@ -142,6 +144,7 @@ function PlacementRow({ placement, globalSections, selection, activeGlobalId, on
           { label: "Move down", ariaLabel: `Move ${label} down`, disabled: index === count - 1, onAction: () => onMove(id, "down") },
           ...(onDuplicate && placement.kind === "inline" ? [{ label: "Duplicate", ariaLabel: `Duplicate ${label}`, onAction: () => onDuplicate(id) }] : []),
           ...(onRemove && placement.kind === "inline" ? [{ label: "Delete", ariaLabel: `Delete ${label}`, destructive: true, onAction: () => onRemove(id) }] : []),
+          ...(onRemoveShared && placement.kind === "global" && shared?.sectionType !== region ? [{ label: `Remove from ${region === "header" ? "header" : "footer"}`, ariaLabel: `Remove ${label} from the ${region}`, destructive: true, onAction: () => onRemoveShared(id) }] : []),
         ]} /></div>
       </div>}
     </div>
@@ -195,9 +198,19 @@ export function TemplateHierarchy({
   onRemove,
   onBlockAction,
   onDuplicate,
+  sectionGroups,
+  onGroupMove,
+  onGroupRemove,
   themeVersion,
 }: {
   themeVersion?: string;
+  /**
+   * The shared header and footer groups (T6). When given, the Header and Footer areas list these (every page shows
+   * them) and the Template area only the page's own sections.
+   */
+  sectionGroups?: { header: string[]; footer: string[] };
+  onGroupMove?(group: "header" | "footer", id: string, direction: "up" | "down"): void;
+  onGroupRemove?(group: "header" | "footer", id: string): void;
   template: Pick<StorefrontTemplateRecord, "id" | "name" | "layout">;
   globalSections: Record<string, GlobalLabel>;
   selection: EditorSelection;
@@ -245,7 +258,20 @@ export function TemplateHierarchy({
     const blocks = placement.kind === "inline" ? placement.section.blocks : (globalSections[placement.globalSectionId]?.blocks ?? []) as TreeBlock[];
     return label.toLowerCase().includes(query) || blocks.some((block) => blockMatches(block, query));
   };
-  templatePlacements.filter(placementMatches).forEach((placement) => groups[placementRegion(placement, globalSections)].push(placement));
+  if (sectionGroups) {
+    // Group rows get their own keys (negative, so they never clash with the template's placement indexes).
+    const grouped = new Set([...sectionGroups.header, ...sectionGroups.footer]);
+    (["header", "footer"] as const).forEach((group, groupIndex) => {
+      groups[group] = sectionGroups[group].map((id, index): TemplatePlacement => ({ kind: "global", globalSectionId: id, sourceIndex: -1 - groupIndex * 1000 - index })).filter(placementMatches);
+    });
+    groups.template = templatePlacements.filter((placement) => {
+      if (placement.kind === "global" && grouped.has(placement.globalSectionId)) return false;
+      const type = placement.kind === "inline" ? placement.section.type : globalSections[placement.globalSectionId]?.sectionType;
+      return !["header", "footer", "announcement-bar"].includes(type ?? "") && placementMatches(placement);
+    });
+  } else {
+    templatePlacements.filter(placementMatches).forEach((placement) => groups[placementRegion(placement, globalSections)].push(placement));
+  }
   const matchCount = groups.header.length + groups.template.length + groups.footer.length;
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
@@ -277,12 +303,13 @@ export function TemplateHierarchy({
           <section key={region} className="mb-3 last:mb-0">
             <h2 className="px-2 py-2 text-[13px] font-semibold text-foreground">
               {region === "template" ? "Template" : region === "header" ? "Header" : "Footer"}
+              {sectionGroups && region !== "template" && <span className="ml-1.5 text-[11px] font-normal text-muted-foreground">On every page</span>}
             </h2>
             <div className="space-y-1">
               <SortableContext items={groups[region].map((placement) => String(placement.sourceIndex))} strategy={verticalListSortingStrategy}>
-              {groups[region].map((placement, index) => (
-                <SortablePlacement key={placement.sourceIndex} id={String(placement.sourceIndex)} label={placement.kind === "global" ? globalSections[placement.globalSectionId]?.name ?? "shared section" : displayName(placement.section.type, themeVersion)}>
-                <PlacementRow
+              {groups[region].map((placement, index) => {
+                const inGroup = Boolean(sectionGroups) && region !== "template";
+                const row = <PlacementRow
                   placement={placement}
                   expanded={Boolean(query) || expandedItems.has(placement.kind === "inline" ? placement.section.id : `global:${placement.sourceIndex}`)}
                   query={query}
@@ -294,20 +321,23 @@ export function TemplateHierarchy({
                   onSelect={onSelect}
                   onGlobalSelect={onGlobalSelect}
                   onAddBlock={onAddBlock}
-                  onMove={onReorder ? (_id, direction) => {
+                  onMove={inGroup ? (onGroupMove ? (id, direction) => onGroupMove(region as "header" | "footer", id, direction) : undefined) : onReorder ? (_id, direction) => {
                     const target = groups[region][index + (direction === "up" ? -1 : 1)];
                     if (target) onReorder(placement.sourceIndex, target.sourceIndex);
                   } : onMove}
                   onToggle={onToggle}
                   onRemove={onRemove}
+                  onRemoveShared={inGroup && onGroupRemove ? (id) => onGroupRemove(region as "header" | "footer", id) : undefined}
                   onBlockAction={onBlockAction}
                   onDuplicate={onDuplicate}
                   index={index}
                   count={groups[region].length}
                   region={region}
-                />
-                </SortablePlacement>
-              ))}
+                />;
+                return inGroup
+                  ? <div key={placement.sourceIndex} className="pl-6">{row}</div>
+                  : <SortablePlacement key={placement.sourceIndex} id={String(placement.sourceIndex)} label={placement.kind === "global" ? globalSections[placement.globalSectionId]?.name ?? "shared section" : displayName(placement.section.type, themeVersion)}>{row}</SortablePlacement>;
+              })}
               </SortableContext>
               {groups[region].length === 0 && !query && (
                 <p className="px-2 py-2 text-[11px] text-[var(--ink-soft)]">No {region} sections.</p>

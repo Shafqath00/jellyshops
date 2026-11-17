@@ -1,5 +1,5 @@
 export { defineBlock, defineSection } from "./define.js";
-export { allowedChildBlockTypes, MAX_SECTION_BLOCKS, MAX_TEMPLATE_SECTIONS, translatableKeys, getBlockDefinition, listBlockDefinitions, getSectionDefinition, listSectionDefinitions, listSectionDefinitionsForPage, registerSection, registerThemeSections, unregisterSection, isStaticBlock, pageSectionLimitProblem, staticBlockTypes, mobileSettingKeys, validateSectionAgainstRegistry } from "./registry.js";
+export { allowedChildBlockTypes, MAX_SECTION_BLOCKS, MAX_TEMPLATE_SECTIONS, translatableKeys, getBlockDefinition, listBlockDefinitions, getSectionDefinition, listSectionDefinitions, listSectionDefinitionsForGroup, listSectionDefinitionsForPage, registerSection, registerThemeSections, unregisterSection, isStaticBlock, pageSectionLimitProblem, staticBlockTypes, mobileSettingKeys, validateSectionAgainstRegistry } from "./registry.js";
 export { createPresetSection, createSectionFromDefinition, listSectionPresets } from "./presets.js";
 export { createThemePackDocument, getThemePack, listThemePacks } from "./theme-packs.js";
 export { BLOCK_SETS, blockSetsIn, breaksSectionLimits, controlConditionMet, controlConditionProblem, expandBlockTypes, isBlockSet, isHelpUrl, SECTION_GROUP_NAMES, resolvePlacement, sectionFitsLimit, sectionLimitProblem } from "./composition.js";
@@ -25,3 +25,4 @@ export { PART_BLOCK_PREFIX, PRODUCT_PART_SECTIONS, partBlockType, partSectionTyp
 export { breaksEssentialSections, essentialSectionLabels, essentialSectionsProblem } from "./essential-sections.js";
 export { SECTION_DATA_NEEDS, sectionEmptyMessage } from "./section-data.js";
 export { blockControlTypes, blockElementList, runtimeSectionTypes, sectionControlTypes, sectionDisplayLabel, sectionElementList, setRuntimeSectionControlTypes } from "./runtime-lookup.js";
+export { GROUP_SECTION_TYPES } from "./group-sections.js";

@@ -26,8 +26,11 @@ export {
 } from "./diagnostics.js";
 export {
   RUNTIME_STOREFRONT_SCHEMA_VERSION,
+  runtimeSectionGroupsSchema,
   runtimeStorefrontSnapshotV4Schema,
 } from "./runtime-v4.js";
+export { MAX_GROUP_SECTIONS, SECTION_GROUP_KEYS, chromeGroupOf, deriveSectionGroups, groupedSectionIds, readSectionGroups } from "./section-groups.js";
+export type { SectionGroupKey, StorefrontSectionGroups } from "./section-groups.js";
 export type { MediaReference, StorefrontDocument, StorefrontPage, StorefrontPageType, StorefrontTemplateId } from "./storefront-v2.js";
 export type {
   CustomDataOwnerType,

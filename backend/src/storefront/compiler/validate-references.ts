@@ -54,6 +54,21 @@ export function validateReferences(input: StorefrontCompilationInput): Compilati
     }
   }
 
+  const seen = new Set<string>();
+  for (const [group, ids] of Object.entries(input.sectionGroups ?? {})) {
+    for (const id of ids) {
+      if (!globalIds.has(id) || seen.has(id)) {
+        diagnostics.push({
+          severity: "error",
+          code: globalIds.has(id) ? "DUPLICATE_GROUP_SECTION" : "MISSING_GLOBAL_SECTION",
+          message: globalIds.has(id) ? `Shared section ${id} is in more than one group` : `Global section ${id} in the ${group} group does not exist`,
+          location: { entityType: "global_section", entityId: id },
+        });
+      }
+      seen.add(id);
+    }
+  }
+
   for (const menu of input.menus) {
     walkMenuItems(menu.items, (target) => {
       if (!target.resourceId || !["product", "collection", "page", "blog", "article"].includes(target.kind)) return;

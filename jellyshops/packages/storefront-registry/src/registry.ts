@@ -13,7 +13,8 @@ import { SECTION_VARIANTS } from "./section-variants.js";
 import { elementStyleControls, elementStyleSchema, sectionElements } from "./section-elements.js";
 import { blockSetsIn, breaksSectionLimits, expandBlockTypes, resolvePlacement } from "./composition.js";
 import { sectionLabel, setSectionLabel } from "./labels.js";
-import type { BlockDefinition, ControlDefinition, RegionName, RegistryValidationIssue, SectionDefinition } from "./types.js";
+import { extraGroupsFor } from "./group-sections.js";
+import type { BlockDefinition, ControlDefinition, RegionName, RegistryValidationIssue, SectionDefinition, SectionGroupName } from "./types.js";
 
 /** Most blocks one section may hold, whatever its own limit (Shopify's limit too). */
 export const MAX_SECTION_BLOCKS = 50;
@@ -51,9 +52,12 @@ function prepareSection(definition: SectionDefinition): SectionDefinition {
   // Selectable parts of the section (headings, images, product cards) and their own style settings.
   const elements = sectionElements(definition.type, definition.elements);
   const elementControls = elements.flatMap(elementStyleControls).filter((control) => !definition.controls.some((own) => own.key === control.key));
+  // Shared header and footer groups take a set list of content sections as well (group-sections.ts).
+  const groups = [...new Set([...placement.groups, ...extraGroupsFor(definition.type)])];
   return {
     ...definition,
     ...placement,
+    groups,
     allowedBlockTypes,
     blockSets: blockSets.length ? blockSets : undefined,
     defaultBlocks,
@@ -185,13 +189,24 @@ function formattedCopiesValid(settings: Record<string, unknown>): boolean {
   return Object.entries(settings).every(([key, value]) => !key.endsWith("Doc") || value === undefined || value === null || isRichTextDocument(value));
 }
 
-export function validateSectionAgainstRegistry(section: SectionNode, pageType: PageType, themeId?: string | null, themeVersion?: string | null): RegistryValidationIssue[] {
+/** The sections the editor offers for a shared group (header, footer or overlay). */
+export function listSectionDefinitionsForGroup(group: SectionGroupName, themeId?: string | null, themeVersion?: string | null): SectionDefinition[] {
+  return listSectionDefinitions(themeVersion).filter((definition) => (definition.groups ?? []).includes(group) && availableOnTheme(definition, themeId));
+}
+
+/**
+ * Checks a section against the registry. `place` is the page type it sits on, or `{ group }` for a section in a
+ * shared header, footer or overlay group (drawn on every page, so the page check becomes a group check).
+ */
+export function validateSectionAgainstRegistry(section: SectionNode, place: PageType | { group: SectionGroupName }, themeId?: string | null, themeVersion?: string | null): RegistryValidationIssue[] {
   const definition = getSectionDefinition(section.type, themeVersion);
   if (!definition) return [{ code: "SECTION_NOT_REGISTERED", sectionId: section.id, message: `Section ${section.type} is not registered` }];
 
   const issues: RegistryValidationIssue[] = [];
   if (!availableOnTheme(definition, themeId)) issues.push({ code: "SECTION_NOT_AVAILABLE_ON_THEME", sectionId: section.id, message: `${section.type} is only available on the ${(definition.themes ?? []).join(", ")} theme${(definition.themes ?? []).length === 1 ? "" : "s"}` });
-  if (!definition.supportedPages.includes(pageType)) issues.push({ code: "SECTION_NOT_ALLOWED_ON_PAGE", sectionId: section.id, message: `${section.type} is not allowed on ${pageType}` });
+  if (typeof place === "object") {
+    if (!(definition.groups ?? []).includes(place.group)) issues.push({ code: "SECTION_NOT_ALLOWED_IN_GROUP", sectionId: section.id, message: `${section.type} is not allowed in the ${place.group} group` });
+  } else if (!definition.supportedPages.includes(place)) issues.push({ code: "SECTION_NOT_ALLOWED_ON_PAGE", sectionId: section.id, message: `${section.type} is not allowed on ${place}` });
   if (!definition.settingsSchema.safeParse(section.settings).success || !formattedCopiesValid(section.settings)) {
     // Custom CSS is the one setting merchants type freely, so say what is wrong with it.
     const cssProblem = typeof section.settings.customCss === "string" ? customCssProblem(section.settings.customCss) : null;

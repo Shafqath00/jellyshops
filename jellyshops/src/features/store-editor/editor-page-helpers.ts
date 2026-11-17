@@ -1,7 +1,7 @@
 import type { ComponentProps } from "react";
 import { getSectionDefinition, sectionLabel } from "@jelly/storefront-registry";
 import type { RegistrySectionRenderer } from "@jelly/storefront-renderer";
-import type { RuntimeStorefrontSnapshotV4, RuntimeTemplateV4, SectionNode } from "@jelly/storefront-schema";
+import type { RuntimeStorefrontSnapshotV4, RuntimeTemplateV4, SectionNode, StorefrontSectionGroups } from "@jelly/storefront-schema";
 import { expandRawRuntimeLayout } from "@/features/storefront/resource-loader";
 import type { GlobalSectionRecord, StorefrontTemplateRecord } from "./api/types";
 import type { EditorSelection } from "./model/types";
@@ -106,9 +106,9 @@ export function templateSections(template: StorefrontTemplateRecord, globals: Ma
 }
 
 /** The editor's unsaved page laid out by the live store's own expander (one render path). */
-export function draftPreviewLayout(template: StorefrontTemplateRecord, globals: Map<string, GlobalSectionRecord>) {
+export function draftPreviewLayout(template: StorefrontTemplateRecord, globals: Map<string, GlobalSectionRecord>, sectionGroups?: StorefrontSectionGroups) {
   const globalSections = Object.fromEntries([...globals].map(([id, global]) => [id, { id, section: global.section }])) as RuntimeStorefrontSnapshotV4["globalSections"];
-  return expandRawRuntimeLayout({ globalSections }, { layout: template.layout } as Pick<RuntimeTemplateV4, "layout">);
+  return expandRawRuntimeLayout({ globalSections, ...(sectionGroups ? { sectionGroups } : {}) }, { layout: template.layout } as Pick<RuntimeTemplateV4, "layout">);
 }
 
 export function selectedInlineSection(template: StorefrontTemplateRecord, selection: EditorSelection): SectionNode | null {
