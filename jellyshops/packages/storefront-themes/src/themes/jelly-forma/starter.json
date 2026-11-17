@@ -491,119 +491,93 @@
           "kind": "inline",
           "section": {
             "id": "forma-studio-gallery",
-            "type": "product-gallery",
+            "type": "main-product",
             "enabled": true,
             "settings": {
               "styleScheme": "scheme1",
               "imageFit": "contain",
               "layout": "thumbnails",
-              "thumbnailPosition": "left"
-            },
-            "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "forma-studio-info",
-            "type": "product-information",
-            "enabled": true,
-            "settings": {
-              "styleScheme": "scheme1",
-              "showVendor": true,
-              "showSku": false,
-              "showCompareAtPrice": true,
-              "showAvailability": true,
-              "showSpecifications": false
-            },
-            "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "forma-studio-options",
-            "type": "product-options",
-            "enabled": true,
-            "settings": {
-              "styleScheme": "scheme1"
-            },
-            "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "forma-studio-purchase",
-            "type": "product-purchase",
-            "enabled": true,
-            "settings": {
-              "styleScheme": "scheme1",
-              "showQuantity": true,
-              "label": "Add to cart",
-              "stickyBar": true
-            },
-            "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "forma-studio-description",
-            "type": "product-description",
-            "enabled": true,
-            "settings": {
-              "styleScheme": "scheme1",
-              "layout": "expandable",
-              "heading": "Description",
-              "startOpen": true
-            },
-            "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "forma-studio-specifications",
-            "type": "product-specifications",
-            "enabled": true,
-            "settings": {
-              "styleScheme": "scheme1",
-              "heading": "Specifications",
-              "showProductSpecifications": true,
-              "layout": "expandable"
-            },
-            "blocks": []
-          }
-        },
-        {
-          "kind": "inline",
-          "section": {
-            "id": "forma-studio-details",
-            "type": "product-tabs",
-            "enabled": true,
-            "settings": {
-              "styleScheme": "scheme1",
-              "firstOpen": false
+              "thumbnailPosition": "left",
+              "mediaPosition": "left",
+              "mediaWidth": "medium",
+              "stickyColumn": "media"
             },
             "blocks": [
               {
-                "id": "forma-tab-care",
-                "type": "info-tab",
+                "id": "forma-studio-info",
+                "type": "part-product-information",
                 "enabled": true,
                 "settings": {
-                  "title": "Materials & care",
-                  "text": "Solid timber and natural finishes. Wipe with a soft, damp cloth and dry straight away; keep out of direct sunlight."
+                  "showVendor": true,
+                  "showSku": false,
+                  "showCompareAtPrice": true,
+                  "showAvailability": true,
+                  "showSpecifications": false
                 }
               },
               {
-                "id": "forma-tab-delivery",
-                "type": "info-tab",
+                "id": "forma-studio-options",
+                "type": "part-product-options",
+                "enabled": true,
+                "settings": {}
+              },
+              {
+                "id": "forma-studio-purchase",
+                "type": "part-product-purchase",
                 "enabled": true,
                 "settings": {
-                  "title": "Delivery & returns",
-                  "text": "Delivery options and costs are shown at checkout. If something isn't right, contact us and we'll explain how returns work."
+                  "showQuantity": true,
+                  "label": "Add to cart",
+                  "stickyBar": true
                 }
+              },
+              {
+                "id": "forma-studio-description",
+                "type": "part-product-description",
+                "enabled": true,
+                "settings": {
+                  "layout": "expandable",
+                  "heading": "Description",
+                  "startOpen": true
+                }
+              },
+              {
+                "id": "forma-studio-specifications",
+                "type": "part-product-specifications",
+                "enabled": true,
+                "settings": {
+                  "heading": "Specifications",
+                  "showProductSpecifications": true,
+                  "layout": "expandable"
+                }
+              },
+              {
+                "id": "forma-studio-details",
+                "type": "part-product-tabs",
+                "enabled": true,
+                "settings": {
+                  "firstOpen": false
+                },
+                "blocks": [
+                  {
+                    "id": "forma-tab-care",
+                    "type": "info-tab",
+                    "enabled": true,
+                    "settings": {
+                      "title": "Materials & care",
+                      "text": "Solid timber and natural finishes. Wipe with a soft, damp cloth and dry straight away; keep out of direct sunlight."
+                    }
+                  },
+                  {
+                    "id": "forma-tab-delivery",
+                    "type": "info-tab",
+                    "enabled": true,
+                    "settings": {
+                      "title": "Delivery & returns",
+                      "text": "Delivery options and costs are shown at checkout. If something isn't right, contact us and we'll explain how returns work."
+                    }
+                  }
+                ]
               }
             ]
           }

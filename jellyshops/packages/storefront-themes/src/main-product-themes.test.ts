@@ -14,6 +14,7 @@ import { discoveredStarters } from "./themes/starters.generated";
 const MOVED: Array<{ theme: string; from: number; parts: string[] }> = [
   { theme: "jelly-diode", from: 1, parts: ["part-product-information", "part-product-options", "part-product-purchase", "delivery-estimate", "part-trust-strip"] },
   { theme: "jelly-halo", from: 1, parts: ["part-product-information", "part-product-options", "part-product-purchase", "delivery-estimate", "part-trust-strip"] },
+  { theme: "jelly-forma", from: 1, parts: ["part-product-information", "part-product-options", "part-product-purchase", "part-product-description", "part-product-specifications", "part-product-tabs"] },
 ];
 
 const rekeyBlocks = (blocks: BlockNode[], prefix: string): BlockNode[] => blocks.map((block) => ({ ...block, id: `${prefix}:${block.id}`, ...(block.blocks ? { blocks: rekeyBlocks(block.blocks, prefix) } : {}) }));
