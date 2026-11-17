@@ -68,6 +68,8 @@ export interface ResolvedStorefrontLayout {
   header: SectionNode[];
   template: SectionNode[];
   footer: SectionNode[];
+  /** Overlay group (T6 part 2): pop-ups and the slide-out bag's settings, drawn over every page. */
+  overlay: SectionNode[];
 }
 
 function blockNode(input: unknown): SectionNode["blocks"][number] | null {
@@ -153,7 +155,7 @@ export function expandRawRuntimeLayout(
   template: Pick<RuntimeTemplateV4, "layout">,
 ): ResolvedStorefrontLayout {
   const layoutSections = template.layout.sections;
-  const layout: ResolvedStorefrontLayout = { announcement: [], header: [], template: [], footer: [] };
+  const layout: ResolvedStorefrontLayout = { announcement: [], header: [], template: [], footer: [], overlay: [] };
   const groups = snapshot.sectionGroups;
   // With saved groups (T6) the header and footer come from the groups; the template's own header and footer
   // placements are left out, so a page never draws them twice.
@@ -169,6 +171,7 @@ export function expandRawRuntimeLayout(
       const section = globalSectionNode(snapshot.globalSections[id]);
       if (section) layout.footer.push(section);
     }
+    layout.overlay = groups.overlay.flatMap((id) => globalSectionNode(snapshot.globalSections[id]) ?? []);
   }
   if (!Array.isArray(layoutSections)) return layout;
   const grouped = groupedSectionIds(groups);

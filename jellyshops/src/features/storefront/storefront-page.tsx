@@ -1,5 +1,6 @@
 "use client";
 import { useResourceLinks } from "@/features/navigation/use-resource-links";
+import { engagementActions } from "./engagement-api";
 import { useShop } from "@/contexts/shop-context";
 import { useStorefrontChrome } from "./chrome-context";
 import { fetchPublicMetaobjects } from "./metaobjects-api";
@@ -42,17 +43,8 @@ function commerceProvider(storeSlug: string, currency: Currency, products: Produ
     ratings: reviewData?.ratings,
     reviews: reviewData?.reviews,
     getMetaobjects: storeId ? (handle) => fetchPublicMetaobjects(storeId, handle) : undefined,
-    subscribeNewsletter: storeId ? async (email, source) => {
-      const origin = process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
-      const response = await fetch(`${origin}/api/public/stores/${encodeURIComponent(storeId)}/engagement/newsletter`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, source, consent: true }) });
-      if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error?.message ?? "Unable to subscribe. Please retry."); }
-    } : undefined,
-    // Contact form blocks: the same public route as the contact page (messages land in Customers > Messages).
-    sendContactMessage: storeId ? async (message) => {
-      const origin = process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
-      const response = await fetch(`${origin}/api/public/stores/${encodeURIComponent(storeId)}/engagement/contact`, { method: "POST", cache: "no-store", headers: { "Content-Type": "application/json" }, body: JSON.stringify(message) });
-      if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error?.message ?? "We couldn’t send your message. Please try again."); }
-    } : undefined,
+    // Email sign-up and contact form blocks: the same public routes as the contact page (messages land in Customers > Messages).
+    ...engagementActions(storeId),
     async getProducts(input) {
       if (storeId && (input?.sort || input?.collectionId)) {
         const params = new URLSearchParams({ limit: String(input.limit ?? 6) });

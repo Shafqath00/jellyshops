@@ -22475,6 +22475,288 @@
       }
     },
     {
+      "type": "popup",
+      "category": "content",
+      "supportedPages": [
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
+      ],
+      "allowedRegions": [],
+      "groups": [
+        "overlay"
+      ],
+      "allowedBlockTypes": [
+        "heading",
+        "text",
+        "button",
+        "image",
+        "video",
+        "group",
+        "subheading",
+        "section-header",
+        "collapsible-text",
+        "grid",
+        "accordion",
+        "tabs",
+        "divider",
+        "spacer",
+        "icon",
+        "icon-list",
+        "icon-box",
+        "card",
+        "badge",
+        "counter",
+        "button-group",
+        "image-card",
+        "images-stack",
+        "image-comparison",
+        "video-card",
+        "product-card",
+        "product-overlay-card",
+        "press",
+        "newsletter-form",
+        "contact-form",
+        "share",
+        "countdown",
+        "store-locator",
+        "notice",
+        "app"
+      ],
+      "blockSets": [
+        "@content",
+        "@app"
+      ],
+      "maxBlocks": 8,
+      "defaultSettings": {
+        "delaySeconds": 5,
+        "showAgainDays": 14,
+        "position": "centre"
+      },
+      "defaultBlocks": [
+        {
+          "type": "heading",
+          "settings": {
+            "text": "Get 10% off your first order"
+          }
+        },
+        {
+          "type": "text",
+          "settings": {
+            "text": "Join our list for new arrivals and members-only offers."
+          }
+        },
+        {
+          "type": "newsletter-form",
+          "settings": {}
+        }
+      ],
+      "responsiveFields": [],
+      "presets": [
+        {
+          "id": "popup",
+          "label": "Pop-up",
+          "category": "marketing",
+          "description": "A message that opens over the page, for example an email sign-up offer."
+        }
+      ],
+      "controls": [
+        {
+          "type": "range",
+          "key": "delaySeconds",
+          "label": "Show after",
+          "group": "content",
+          "min": 0,
+          "max": 120,
+          "step": 1,
+          "unit": "s",
+          "description": "Seconds after a shopper arrives. 0 shows it straight away."
+        },
+        {
+          "type": "range",
+          "key": "showAgainDays",
+          "label": "Show again after",
+          "group": "content",
+          "min": 1,
+          "max": 365,
+          "step": 1,
+          "unit": "days",
+          "description": "A shopper who closes it doesn't see it again for this many days."
+        },
+        {
+          "type": "segmented",
+          "key": "position",
+          "label": "Position",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Centre",
+              "value": "centre"
+            },
+            {
+              "label": "Corner",
+              "value": "corner"
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "key": "image",
+          "label": "Photo (optional)",
+          "group": "content"
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "delaySeconds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 120
+          },
+          "showAgainDays": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 365
+          },
+          "position": {
+            "type": "string",
+            "enum": [
+              "centre",
+              "corner"
+            ]
+          },
+          "image": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
+          }
+        }
+      }
+    },
+    {
+      "type": "cart-drawer",
+      "category": "commerce",
+      "supportedPages": [
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
+      ],
+      "allowedRegions": [],
+      "groups": [
+        "overlay"
+      ],
+      "allowedBlockTypes": [],
+      "limit": 1,
+      "defaultSettings": {
+        "style": "drawer",
+        "heading": "Your bag",
+        "emptyText": "Your bag is empty.",
+        "freeDeliveryFrom": 0
+      },
+      "defaultBlocks": [],
+      "responsiveFields": [],
+      "presets": [
+        {
+          "id": "cart-drawer",
+          "label": "Slide-out bag",
+          "category": "products",
+          "description": "Add to cart and the bag icon open the bag over the page instead of going to the bag page."
+        }
+      ],
+      "controls": [
+        {
+          "type": "segmented",
+          "key": "style",
+          "label": "On phones",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Slides in from the side",
+              "value": "drawer"
+            },
+            {
+              "label": "Rises from the bottom",
+              "value": "sheet"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "key": "heading",
+          "label": "Heading",
+          "group": "content",
+          "maxLength": 60
+        },
+        {
+          "type": "text",
+          "key": "emptyText",
+          "label": "When the bag is empty",
+          "group": "content",
+          "maxLength": 160
+        },
+        {
+          "type": "number",
+          "key": "freeDeliveryFrom",
+          "label": "Free delivery from (0 hides the progress bar)",
+          "group": "content",
+          "min": 0,
+          "max": 100000,
+          "step": 1
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "style": {
+            "type": "string",
+            "enum": [
+              "drawer",
+              "sheet"
+            ]
+          },
+          "heading": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "emptyText": {
+            "type": "string",
+            "maxLength": 160
+          },
+          "freeDeliveryFrom": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100000
+          }
+        }
+      }
+    },
+    {
       "type": "main-product",
       "category": "commerce",
       "supportedPages": [

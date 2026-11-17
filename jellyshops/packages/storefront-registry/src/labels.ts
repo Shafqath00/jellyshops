@@ -5,6 +5,8 @@ const sectionLabels: Record<string, string> = {
   "announcement-bar": "Announcement bar",
   header: "Header",
   footer: "Footer",
+  popup: "Pop-up",
+  "cart-drawer": "Slide-out bag",
   hero: "Hero banner",
   slideshow: "Slideshow",
   "image-banner": "Image banner",

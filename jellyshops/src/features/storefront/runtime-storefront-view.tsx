@@ -47,5 +47,6 @@ export function RuntimeStorefrontView({ route, commerce, themeId, themeVersion, 
       {main ?? route.layout.template.map((section) => <RegistrySectionRenderer key={section.id} section={section} region="template" {...shared} />)}
     </main>
     {chrome && route.layout.footer.map((section) => <RegistrySectionRenderer key={section.id} section={chromeSection(section)} region="footer" {...shared} />)}
+    {chrome && route.layout.overlay?.map((section) => <RegistrySectionRenderer key={section.id} section={section} region="footer" {...shared} />)}
   </>;
 }

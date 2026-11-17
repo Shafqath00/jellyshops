@@ -111,7 +111,7 @@ export function useEditorActions(ctx: ReturnType<typeof useEditorState> & Return
     // A designed preset ("Collection list: Bento") brings its own settings and blocks; a plain section its defaults.
     const section = createLibrarySection(sectionType, () => crypto.randomUUID(), ctx.themeConfiguration?.themeVersion);
     await persistLayout(appendInlineSection(activeTemplate.layout, section));
-    setSelection({ kind: "section", region: libraryRegion, sectionId: section.id });
+    setSelection({ kind: "section", region: libraryRegion === "overlay" ? "footer" : libraryRegion, sectionId: section.id });
     setLibraryRegion(undefined);
     ctx.setLibraryPreviewId(undefined);
   };

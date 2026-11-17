@@ -6,6 +6,8 @@ export const renderableHomeSectionTypes: ReadonlySet<string> = new Set([
   "slideshow",
   "rich-text",
   "custom-content",
+  "popup",
+  "cart-drawer",
   "product-grid",
   "featured-collection",
   "image-with-text",

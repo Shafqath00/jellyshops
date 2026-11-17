@@ -7,6 +7,7 @@ import { commerceSections } from "./sections/commerce.js";
 import { contentSections } from "./sections/content.js";
 import { layoutSections } from "./sections/layout.js";
 import { productExtraSections } from "./sections/product-extras.js";
+import { overlaySections } from "./sections/overlays.js";
 import { mainProductSection, productPartBlocks } from "./sections/main-product.js";
 import { sectionStyleSchema, withSectionStyleControls } from "./section-style.js";
 import { SECTION_VARIANTS } from "./section-variants.js";
@@ -71,7 +72,7 @@ function prepareSection(definition: SectionDefinition): SectionDefinition {
     presets: [...(definition.presets ?? []), ...(SECTION_VARIANTS[definition.type] ?? []).filter((variant) => !definition.presets?.some((preset) => preset.id === variant.id))],
   };
 }
-const baseSections: SectionDefinition[] = [...layoutSections, ...contentSections, ...commerceSections, ...productExtraSections];
+const baseSections: SectionDefinition[] = [...layoutSections, ...contentSections, ...commerceSections, ...productExtraSections, ...overlaySections];
 // Main product owns the product page's columns; its buying column holds the product sections as blocks.
 for (const part of productPartBlocks(baseSections)) blockDefinitions.set(part.type, part);
 for (const definition of blockDefinitions.values()) expandBlockChildren(definition);

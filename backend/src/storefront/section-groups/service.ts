@@ -12,7 +12,7 @@ export interface SectionGroupsState {
   generation: number;
 }
 
-const GROUP_NAMES: Record<SectionGroupKey, string> = { header: "header", footer: "footer", overlay: "overlay" };
+const GROUP_NAMES: Record<SectionGroupKey, string> = { header: "header", footer: "footer", overlay: "overlays" };
 
 /**
  * Whether the database has the section groups column (migration 20261117000000). Until it is applied, stores keep
@@ -64,10 +64,11 @@ export class SectionGroupService {
             throw new ApiError(400, "SECTION_NOT_ALLOWED_IN_GROUP", `"${sectionLabel(type)}" can't go in the ${GROUP_NAMES[group]}.`);
           }
         }
-        // One header in the header group and one footer in the footer group.
-        for (const only of ["header", "footer"]) {
-          if (groups[group].filter((id) => types.get(id) === only).length > 1) {
-            throw new ApiError(400, "SECTION_GROUPS_INVALID", `The ${GROUP_NAMES[group]} can hold only one "${sectionLabel(only)}" section.`);
+        // One header, one footer, and no more copies than a section's own limit (one slide-out bag).
+        for (const type of new Set(groups[group].map((id) => types.get(id)!))) {
+          const most = type === "header" || type === "footer" ? 1 : getSectionDefinition(type)?.limit;
+          if (most !== undefined && groups[group].filter((id) => types.get(id) === type).length > most) {
+            throw new ApiError(400, "SECTION_GROUPS_INVALID", `The ${GROUP_NAMES[group]} can hold only ${most === 1 ? "one" : most} "${sectionLabel(type)}" section${most === 1 ? "" : "s"}.`);
           }
         }
       }

@@ -44,7 +44,7 @@ it("renders a resolved compiled route without rebuilding a V3 document", () => {
       enabled: true,
       settings: {},
       blocks: [{ id: "copy-text", type: "text", enabled: true, settings: { text: "COMPILED LIVE" } }],
-    }], footer: [] },
+    }], footer: [], overlay: [] },
     sections: [{
       id: "copy",
       type: "rich-text",
@@ -75,7 +75,7 @@ it("wraps a Collection template with the resolved V4 global regions", () => {
       announcement: [{ id: "announcement", type: "announcement-bar", enabled: true, settings: { text: "Free shipping" }, blocks: [] }],
       header: [{ id: "header", type: "header", enabled: true, settings: {}, blocks: [] }],
       template: [{ id: "collection-header", type: "collection-header", enabled: true, settings: {}, blocks: [] }],
-      footer: [{ id: "footer", type: "footer", enabled: true, settings: {}, blocks: [] }],
+      footer: [{ id: "footer", type: "footer", enabled: true, settings: {}, blocks: [] }], overlay: [],
     },
     sections: [],
   };

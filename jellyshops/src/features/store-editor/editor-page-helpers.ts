@@ -8,7 +8,8 @@ import type { EditorSelection } from "./model/types";
 
 export type RegistrySection = ComponentProps<typeof RegistrySectionRenderer>["section"];
 
-export type HierarchyRegion = "header" | "template" | "footer";
+/** Areas of the page tree; "overlay" is the overlay group (pop-ups and the slide-out bag), shown once groups exist. */
+export type HierarchyRegion = "header" | "template" | "footer" | "overlay";
 
 export const sectionCategoryLabels = {
   layout: "Layout",

@@ -14,6 +14,7 @@ import { FeaturedProductSection, ShopTheLookSection } from "./sections/showcase"
 import { ProductDimensionsSection } from "./sections/product-dimensions";
 import { RichTextSection } from "./sections/rich-text";
 import { CustomContentSection } from "./sections/custom-content";
+import { CartDrawerSection, PopupSection } from "./sections/overlays";
 import { LogoListSection } from "./sections/logo-list";
 import { ImageGallerySection, RatingSummarySection } from "./sections/social-proof";
 import { MetaobjectListSection } from "./sections/metaobject-list";
@@ -85,6 +86,9 @@ function builtInRegistry(): SectionRenderRegistry {
   // The Apps section is a Custom content section that only takes app blocks.
   registry.register("apps", ({ section, context, mode, selectedBlockId }) => <CustomContentSection section={section} context={context} editor={mode === "editor"} selectedBlockId={selectedBlockId} />);
   registry.register("custom-content", ({ section, context, mode, selectedBlockId }) => <CustomContentSection section={section} context={context} editor={mode === "editor"} selectedBlockId={selectedBlockId} />);
+  // Overlay group (T6 part 2): the pop-up opens over the page; the slide-out bag section only shows a preview in the editor.
+  registry.register("popup", ({ section, context, mode, selectedBlockId }) => <PopupSection section={section} context={context} editor={mode === "editor"} selectedBlockId={selectedBlockId} />);
+  registry.register("cart-drawer", ({ section, mode }) => <CartDrawerSection section={section} editor={mode === "editor"} />);
   registry.register("page-content", ({ context }) => <PageContentSection context={context} />);
   registry.register("blog-header", ({ context, section }) => <BlogHeaderSection context={context} section={section} />);
   registry.register("article-list", ({ context, section }) => <ArticleListSection context={context} section={section} />);

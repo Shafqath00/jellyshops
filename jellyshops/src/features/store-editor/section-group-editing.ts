@@ -1,6 +1,6 @@
 import type { StorefrontSectionGroups } from "@jelly/storefront-schema";
 
-export type EditableGroup = "header" | "footer";
+export type EditableGroup = "header" | "footer" | "overlay";
 
 /**
  * Where a new shared section goes in a group (theme plan T6): announcement bars above the header, anything else

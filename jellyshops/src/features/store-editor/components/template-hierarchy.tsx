@@ -63,7 +63,8 @@ type GlobalPlacement = {
 };
 
 type TemplatePlacement = (InlinePlacement | GlobalPlacement) & { sourceIndex: number };
-type HierarchyRegion = "header" | "template" | "footer";
+type HierarchyRegion = "header" | "template" | "footer" | "overlay";
+const REGION_TITLES: Record<HierarchyRegion, string> = { header: "Header", template: "Template", footer: "Footer", overlay: "Overlays" };
 
 type GlobalLabel = {
   id: string;
@@ -136,7 +137,7 @@ function PlacementRow({ placement, globalSections, selection, activeGlobalId, on
   return <div className="group/row">
     <div className={clsx("flex min-h-8 items-center rounded-lg text-[13px] hover:bg-muted", selected && (selection?.kind === "section" && !selection.elementId ? "bg-primary/10 text-primary" : "bg-muted"))}>
       <button type="button" aria-label={`${expanded ? "Collapse" : "Expand"} ${label}`} aria-expanded={expanded} onClick={onExpand} className="grid size-7 shrink-0 place-items-center rounded text-muted-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">{expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</button>
-      <button type="button" aria-label={label} aria-current={selected && selection?.kind === "section" && !selection.elementId ? "true" : undefined} onClick={() => placement.kind === "global" ? onGlobalSelect?.(id) : onSelect({ kind: "section", region, sectionId: id })} className="flex min-w-0 flex-1 items-center gap-2 py-1 text-left" title={label}><SectionGlyph size={14} className="shrink-0 text-muted-foreground" aria-hidden="true" /><span className={clsx("truncate", hidden && "text-muted-foreground line-through decoration-muted-foreground/60")}>{label}</span>{hidden && <span className="text-[9px] text-muted-foreground">Hidden</span>}{shared && <span className="rounded-full bg-muted px-1.5 text-[10px] text-muted-foreground" title="Shared: changes show on every page that uses it">Shared</span>}</button>
+      <button type="button" aria-label={label} aria-current={selected && selection?.kind === "section" && !selection.elementId ? "true" : undefined} onClick={() => placement.kind === "global" ? onGlobalSelect?.(id) : onSelect({ kind: "section", region: region === "overlay" ? "footer" : region, sectionId: id })} className="flex min-w-0 flex-1 items-center gap-2 py-1 text-left" title={label}><SectionGlyph size={14} className="shrink-0 text-muted-foreground" aria-hidden="true" /><span className={clsx("truncate", hidden && "text-muted-foreground line-through decoration-muted-foreground/60")}>{label}</span>{hidden && <span className="text-[9px] text-muted-foreground">Hidden</span>}{shared && <span className="rounded-full bg-muted px-1.5 text-[10px] text-muted-foreground" title="Shared: changes show on every page that uses it">Shared</span>}</button>
       {onMove && <div className="flex shrink-0 items-center gap-0.5 pr-1">
         {onToggle && placement.kind === "inline" && <button type="button" aria-label={`${hidden ? "Show" : "Hide"} ${label}`} title={hidden ? "Show on the page" : "Hide from the page"} onClick={() => onToggle(id, hidden)} className={clsx("grid size-6 place-items-center rounded text-muted-foreground hover:bg-card hover:text-foreground", !hidden && "opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100 [@media(hover:none)]:opacity-100")}>{hidden ? <EyeOff size={13} /> : <Eye size={13} />}</button>}
         <div className="opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100 has-[details[open]]:opacity-100 [@media(hover:none)]:opacity-100"><RowMenu label={label} actions={[
@@ -144,13 +145,13 @@ function PlacementRow({ placement, globalSections, selection, activeGlobalId, on
           { label: "Move down", ariaLabel: `Move ${label} down`, disabled: index === count - 1, onAction: () => onMove(id, "down") },
           ...(onDuplicate && placement.kind === "inline" ? [{ label: "Duplicate", ariaLabel: `Duplicate ${label}`, onAction: () => onDuplicate(id) }] : []),
           ...(onRemove && placement.kind === "inline" ? [{ label: "Delete", ariaLabel: `Delete ${label}`, destructive: true, onAction: () => onRemove(id) }] : []),
-          ...(onRemoveShared && placement.kind === "global" && shared?.sectionType !== region ? [{ label: `Remove from ${region === "header" ? "header" : "footer"}`, ariaLabel: `Remove ${label} from the ${region}`, destructive: true, onAction: () => onRemoveShared(id) }] : []),
+          ...(onRemoveShared && placement.kind === "global" && shared?.sectionType !== region ? [{ label: `Remove from ${region === "overlay" ? "overlays" : region}`, ariaLabel: `Remove ${label} from the ${region}`, destructive: true, onAction: () => onRemoveShared(id) }] : []),
         ]} /></div>
       </div>}
     </div>
     {expanded && <div className="ml-5 border-l border-border pl-2">{placement.kind === "inline" && sectionMatches && shownElements(placement.section, themeVersion).map((element) => {
       const elementSelected = selection?.kind === "section" && selection.sectionId === id && selection.elementId === element.id;
-      return <button key={`element:${element.id}`} type="button" aria-label={`${element.label} (part of ${label})`} aria-current={elementSelected ? "true" : undefined} onClick={() => onSelect({ kind: "section", region, sectionId: id, elementId: element.id })} className={clsx("flex min-h-8 w-full min-w-0 items-center gap-2 rounded-md px-2 text-left text-xs hover:bg-muted", elementSelected && "bg-primary/10 font-medium text-primary")}><Type size={14} className="shrink-0 text-muted-foreground" /><span className="truncate">{element.label}</span></button>;
+      return <button key={`element:${element.id}`} type="button" aria-label={`${element.label} (part of ${label})`} aria-current={elementSelected ? "true" : undefined} onClick={() => onSelect({ kind: "section", region: region === "overlay" ? "footer" : region, sectionId: id, elementId: element.id })} className={clsx("flex min-h-8 w-full min-w-0 items-center gap-2 rounded-md px-2 text-left text-xs hover:bg-muted", elementSelected && "bg-primary/10 font-medium text-primary")}><Type size={14} className="shrink-0 text-muted-foreground" /><span className="truncate">{element.label}</span></button>;
     })}{blocks.map(function renderBlock(block: TreeBlock): React.ReactNode {
       const sectionId = placement.kind === "inline" ? id : shared?.sectionId ?? id;
       const blockSelected = selection?.kind === "block" && selection.sectionId === sectionId && selection.blockId === block.id;
@@ -158,7 +159,7 @@ function PlacementRow({ placement, globalSections, selection, activeGlobalId, on
       // A static block is a fixed part of its section: it can be edited but not hidden, copied or deleted.
       const fixed = placement.kind === "inline" && blocks.includes(block) && isStaticBlock(placement.section.type, block.type, themeVersion);
       const row = <div key={block.id} className="group/block flex items-center rounded-md hover:bg-muted">
-        <button type="button" aria-label={describeBlock(block)} aria-current={blockSelected ? "true" : undefined} onClick={() => onSelect({ kind: "block", region, sectionId, blockId: block.id })} title={describeBlock(block)} className={clsx("flex min-h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-2 text-left text-xs", blockSelected && "bg-primary/10 font-medium text-primary")}>{(() => { const Glyph = blockIcon(block.type); return <Glyph size={14} className="shrink-0" aria-hidden="true" />; })()}<span className={clsx("truncate", blockHidden && "text-muted-foreground line-through decoration-muted-foreground/60")}>{describeBlock(block)}</span>{blockHidden && <span className="text-[9px] text-muted-foreground">Hidden</span>}{fixed && <span className="ml-auto flex shrink-0 items-center gap-0.5 text-[9px] text-muted-foreground" title="A fixed part of this section"><Lock size={10} aria-hidden="true" />Fixed</span>}</button>
+        <button type="button" aria-label={describeBlock(block)} aria-current={blockSelected ? "true" : undefined} onClick={() => onSelect({ kind: "block", region: region === "overlay" ? "footer" : region, sectionId, blockId: block.id })} title={describeBlock(block)} className={clsx("flex min-h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-2 text-left text-xs", blockSelected && "bg-primary/10 font-medium text-primary")}>{(() => { const Glyph = blockIcon(block.type); return <Glyph size={14} className="shrink-0" aria-hidden="true" />; })()}<span className={clsx("truncate", blockHidden && "text-muted-foreground line-through decoration-muted-foreground/60")}>{describeBlock(block)}</span>{blockHidden && <span className="text-[9px] text-muted-foreground">Hidden</span>}{fixed && <span className="ml-auto flex shrink-0 items-center gap-0.5 text-[9px] text-muted-foreground" title="A fixed part of this section"><Lock size={10} aria-hidden="true" />Fixed</span>}</button>
         {onBlockAction && placement.kind === "inline" && !fixed && <div className="flex shrink-0 items-center gap-0.5 pr-1">
           <button type="button" aria-label={`${blockHidden ? "Show" : "Hide"} ${describeBlock(block)}`} title={blockHidden ? "Show" : "Hide"} onClick={() => onBlockAction(id, block.id, "toggle")} className={clsx("grid size-6 place-items-center rounded text-muted-foreground hover:bg-card hover:text-foreground", !blockHidden && "opacity-0 group-hover/block:opacity-100 group-focus-within/block:opacity-100 [@media(hover:none)]:opacity-100")}>{blockHidden ? <EyeOff size={13} /> : <Eye size={13} />}</button>
           <div className="opacity-0 group-hover/block:opacity-100 group-focus-within/block:opacity-100 has-[details[open]]:opacity-100 [@media(hover:none)]:opacity-100"><RowMenu label={describeBlock(block)} actions={[
@@ -208,9 +209,9 @@ export function TemplateHierarchy({
    * The shared header and footer groups (T6). When given, the Header and Footer areas list these (every page shows
    * them) and the Template area only the page's own sections.
    */
-  sectionGroups?: { header: string[]; footer: string[] };
-  onGroupMove?(group: "header" | "footer", id: string, direction: "up" | "down"): void;
-  onGroupRemove?(group: "header" | "footer", id: string): void;
+  sectionGroups?: { header: string[]; footer: string[]; overlay?: string[] };
+  onGroupMove?(group: "header" | "footer" | "overlay", id: string, direction: "up" | "down"): void;
+  onGroupRemove?(group: "header" | "footer" | "overlay", id: string): void;
   template: Pick<StorefrontTemplateRecord, "id" | "name" | "layout">;
   globalSections: Record<string, GlobalLabel>;
   selection: EditorSelection;
@@ -250,6 +251,7 @@ export function TemplateHierarchy({
     header: [],
     template: [],
     footer: [],
+    overlay: [],
   };
   // While searching, only sections whose name or blocks match are listed, and they open to show the matching blocks.
   const placementMatches = (placement: TemplatePlacement) => {
@@ -260,9 +262,9 @@ export function TemplateHierarchy({
   };
   if (sectionGroups) {
     // Group rows get their own keys (negative, so they never clash with the template's placement indexes).
-    const grouped = new Set([...sectionGroups.header, ...sectionGroups.footer]);
-    (["header", "footer"] as const).forEach((group, groupIndex) => {
-      groups[group] = sectionGroups[group].map((id, index): TemplatePlacement => ({ kind: "global", globalSectionId: id, sourceIndex: -1 - groupIndex * 1000 - index })).filter(placementMatches);
+    const grouped = new Set([...sectionGroups.header, ...sectionGroups.footer, ...(sectionGroups.overlay ?? [])]);
+    (["header", "footer", "overlay"] as const).forEach((group, groupIndex) => {
+      groups[group] = (sectionGroups[group] ?? []).map((id, index): TemplatePlacement => ({ kind: "global", globalSectionId: id, sourceIndex: -1 - groupIndex * 1000 - index })).filter(placementMatches);
     });
     groups.template = templatePlacements.filter((placement) => {
       if (placement.kind === "global" && grouped.has(placement.globalSectionId)) return false;
@@ -272,7 +274,7 @@ export function TemplateHierarchy({
   } else {
     templatePlacements.filter(placementMatches).forEach((placement) => groups[placementRegion(placement, globalSections)].push(placement));
   }
-  const matchCount = groups.header.length + groups.template.length + groups.footer.length;
+  const matchCount = groups.header.length + groups.template.length + groups.footer.length + groups.overlay.length;
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return;
@@ -299,11 +301,11 @@ export function TemplateHierarchy({
       <div ref={treeRef} className="min-h-0 flex-1 overflow-y-auto p-2">
         {query && matchCount === 0 && <p role="status" className="px-2 py-3 text-[12px] text-muted-foreground">Nothing matches &ldquo;{search.trim()}&rdquo;.</p>}
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        {(["header", "template", "footer"] as const).map((region) => (
+        {(sectionGroups ? ["header", "template", "footer", "overlay"] as const : ["header", "template", "footer"] as const).map((region) => (
           <section key={region} className="mb-3 last:mb-0">
             <h2 className="px-2 py-2 text-[13px] font-semibold text-foreground">
-              {region === "template" ? "Template" : region === "header" ? "Header" : "Footer"}
-              {sectionGroups && region !== "template" && <span className="ml-1.5 text-[11px] font-normal text-muted-foreground">On every page</span>}
+              {REGION_TITLES[region]}
+              {sectionGroups && region !== "template" && <span className="ml-1.5 text-[11px] font-normal text-muted-foreground">{region === "overlay" ? "Pop-ups and the slide-out bag" : "On every page"}</span>}
             </h2>
             <div className="space-y-1">
               <SortableContext items={groups[region].map((placement) => String(placement.sourceIndex))} strategy={verticalListSortingStrategy}>
@@ -321,13 +323,13 @@ export function TemplateHierarchy({
                   onSelect={onSelect}
                   onGlobalSelect={onGlobalSelect}
                   onAddBlock={onAddBlock}
-                  onMove={inGroup ? (onGroupMove ? (id, direction) => onGroupMove(region as "header" | "footer", id, direction) : undefined) : onReorder ? (_id, direction) => {
+                  onMove={inGroup ? (onGroupMove ? (id, direction) => onGroupMove(region as "header" | "footer" | "overlay", id, direction) : undefined) : onReorder ? (_id, direction) => {
                     const target = groups[region][index + (direction === "up" ? -1 : 1)];
                     if (target) onReorder(placement.sourceIndex, target.sourceIndex);
                   } : onMove}
                   onToggle={onToggle}
                   onRemove={onRemove}
-                  onRemoveShared={inGroup && onGroupRemove ? (id) => onGroupRemove(region as "header" | "footer", id) : undefined}
+                  onRemoveShared={inGroup && onGroupRemove ? (id) => onGroupRemove(region as "header" | "footer" | "overlay", id) : undefined}
                   onBlockAction={onBlockAction}
                   onDuplicate={onDuplicate}
                   index={index}
@@ -340,12 +342,12 @@ export function TemplateHierarchy({
               })}
               </SortableContext>
               {groups[region].length === 0 && !query && (
-                <p className="px-2 py-2 text-[11px] text-[var(--ink-soft)]">No {region} sections.</p>
+                <p className="px-2 py-2 text-[11px] text-[var(--ink-soft)]">{region === "overlay" ? "No pop-ups or slide-out bag." : `No ${region} sections.`}</p>
               )}
               {onAddSection && !query && (
                 <button
                   type="button"
-                  aria-label={`Add section to ${region === "template" ? "Template" : region === "header" ? "Header" : "Footer"}`}
+                  aria-label={`Add section to ${REGION_TITLES[region]}`}
                   onClick={() => onAddSection(region)}
                   className="mt-1 flex min-h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-[12px] font-medium text-[var(--ink)] hover:bg-[var(--paper-deep)]"
                 >

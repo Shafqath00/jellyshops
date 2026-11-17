@@ -16,7 +16,7 @@ export const CART_OPEN_EVENT = "jelly:cart-open";
  * corners. Escape, the close button and the dimmed page close it; focus moves
  * into it on open and back to where it was on close.
  */
-export function ThemeCartDrawer({ storeSlug, open, onClose, variant = "drawer", freeDeliveryFromMinor = null }: { storeSlug: string; open: boolean; onClose(): void; variant?: "drawer" | "sheet"; freeDeliveryFromMinor?: number | null }) {
+export function ThemeCartDrawer({ storeSlug, open, onClose, variant = "drawer", freeDeliveryFromMinor = null, heading = "Your bag", emptyText = "Your bag is empty." }: { storeSlug: string; open: boolean; onClose(): void; variant?: "drawer" | "sheet"; freeDeliveryFromMinor?: number | null; heading?: string; emptyText?: string }) {
   const { store, lines, staleItems, subtotalMinor, itemCount, setQuantity } = useCartLines(storeSlug);
   const panel = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -46,7 +46,7 @@ export function ThemeCartDrawer({ storeSlug, open, onClose, variant = "drawer", 
     <button type="button" className="jelly-cart-drawer-backdrop" aria-label="Close cart" tabIndex={-1} onClick={onClose} />
     <div ref={panel} className="jelly-cart-drawer-panel" role="dialog" aria-modal="true" aria-labelledby="jelly-cart-drawer-title" tabIndex={-1}>
       <header className="jelly-cart-drawer-header">
-        <h2 id="jelly-cart-drawer-title">Your bag{itemCount ? <span> ({itemCount})</span> : null}</h2>
+        <h2 id="jelly-cart-drawer-title">{heading}{itemCount ? <span> ({itemCount})</span> : null}</h2>
         <button type="button" className="jelly-cart-drawer-close" aria-label="Close cart" onClick={onClose}>×</button>
       </header>
       {freeDeliveryFromMinor && lines.length > 0 && <div className="jelly-cart-drawer-progress">
@@ -55,7 +55,7 @@ export function ThemeCartDrawer({ storeSlug, open, onClose, variant = "drawer", 
       </div>}
       {staleItems > 0 && <p className="jelly-cart-drawer-note" role="status">{staleItems} item{staleItems === 1 ? " is" : "s are"} no longer available and won&apos;t be ordered.</p>}
       {lines.length === 0
-        ? <div className="jelly-cart-drawer-empty"><p>Your bag is empty.</p><a className="jelly-button" href={`/${store.slug}/shop`} onClick={onClose}>Continue shopping</a></div>
+        ? <div className="jelly-cart-drawer-empty"><p>{emptyText}</p><a className="jelly-button" href={`/${store.slug}/shop`} onClick={onClose}>Continue shopping</a></div>
         : <>
           <ul className="jelly-cart-drawer-lines">{lines.map((line) => {
             const options = line.item.configurationSelections?.flatMap((selection) => {

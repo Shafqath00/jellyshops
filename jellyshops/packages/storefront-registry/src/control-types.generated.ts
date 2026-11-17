@@ -64,6 +64,9 @@ export const SECTION_CONTROL_TYPES: Record<string, Record<string, string>> = {
     "productId": "product",
     "collectionId": "collection"
   },
+  "popup": {
+    "image": "image"
+  },
   "product-dimensions": {
     "diagram": "image"
   },

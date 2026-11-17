@@ -19,3 +19,4 @@ export { formattedSetting, inlineSetting, SettingText } from "./sections/setting
 export { CardCartContext, CardCompareContext, CardRatingsContext, CompareToggle, ProductCard, QuickAdd } from "./product-card";
 export { titleLength } from "./sections/shared";
 export { SHOP_ALL_COLLECTION_ID } from "./sections/collection-sections";
+export { cartDrawerSectionSettings, popupDue, type CartDrawerSectionSettings } from "./sections/overlays";

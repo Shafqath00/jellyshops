@@ -167,7 +167,7 @@ export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
   // Kept stable between renders so the preview only redraws sections whose content changed.
   const rawPreviewLayout = useMemo(() => compiledTemplate && previewSnapshot
     ? expandRawRuntimeLayout(previewSnapshot, compiledTemplate)
-    : activeTemplate ? draftPreviewLayout(activeTemplate, globalMap, savedGroups) : { announcement: [], header: [], template: [], footer: [] },
+    : activeTemplate ? draftPreviewLayout(activeTemplate, globalMap, savedGroups) : { announcement: [], header: [], template: [], footer: [], overlay: [] },
   [compiledTemplate, previewSnapshot, activeTemplate, globalMap, savedGroups]);
   // Settings connected to custom fields show the value for the item being previewed.
   const previewLayout = usePreviewBindingValues(rawPreviewLayout, {
@@ -187,8 +187,10 @@ export function useEditorDerived(ctx: ReturnType<typeof useEditorState>) {
     if (activeGroups && libraryRegion !== "template") {
       const inGroup = activeGroups[libraryRegion].map((id) => globalMap.get(id)?.section.type);
       return sectionLibraryOptions(listSectionDefinitionsForGroup(libraryRegion, themeConfiguration?.themeId, themeConfiguration?.themeVersion)
-        .filter((definition) => !["header", "footer"].includes(definition.type) || !inGroup.includes(definition.type)));
+        // One header, one footer, one slide-out bag (the section's own limit).
+        .filter((definition) => !(["header", "footer"].includes(definition.type) || definition.limit === 1) || !inGroup.includes(definition.type)));
     }
+    if (libraryRegion === "overlay") return [];
     // A section that has reached its limit on this page (one Main product) is not offered again.
     const definitions = listSectionDefinitionsForPage(activeTemplate.type, libraryRegion, themeConfiguration?.themeId, themeConfiguration?.themeVersion)
       .filter((definition) => sectionFitsLimit(definition.type, sections, (type) => getSectionDefinition(type, themeConfiguration?.themeVersion)));

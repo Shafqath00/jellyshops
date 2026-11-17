@@ -69,4 +69,22 @@ describe("section groups (theme plan T6)", () => {
     await expect(service.save("store-c", { ...groups, header: [...groups.header, "news"] })).rejects.toMatchObject({ status: 400, code: "SECTION_NOT_ALLOWED_IN_GROUP" });
     await expect(service.save("store-c", { header: "x" })).rejects.toMatchObject({ status: 400 });
   });
+
+  it("keeps pop-ups and one slide-out bag in the overlay group, checked on every page", async () => {
+    const database = await createPGliteDatabase();
+    await seedStore(database, "store-d", "store-d");
+    await new StorefrontStarterInstallationService(transactionDatabase(database), () => "install-d").install("store-d", "jelly-diode");
+    const service = new SectionGroupService(transactionDatabase(database));
+    const { groups } = await service.read("store-d");
+    await addShared(database, "store-d", "pop", "popup", { delaySeconds: 3 });
+    await addShared(database, "store-d", "bag-1", "cart-drawer");
+    await addShared(database, "store-d", "bag-2", "cart-drawer");
+
+    await expect(service.save("store-d", { ...groups, footer: [...groups.footer, "pop"] })).rejects.toMatchObject({ status: 400, code: "SECTION_NOT_ALLOWED_IN_GROUP" });
+    await expect(service.save("store-d", { ...groups, overlay: ["bag-1", "bag-2"] })).rejects.toMatchObject({ status: 400, code: "SECTION_GROUPS_INVALID" });
+    const saved = await service.save("store-d", { ...groups, overlay: ["pop", "bag-1"] });
+    const compiled = await createLocalV4CompilationService(database as unknown as SqlExecutor).compile("store-d", saved.generation);
+    expect(compiled.diagnostics.filter((diagnostic) => diagnostic.severity === "error")).toEqual([]);
+    expect(compiled.snapshot?.sectionGroups?.overlay).toEqual(["pop", "bag-1"]);
+  });
 });

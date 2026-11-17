@@ -5,7 +5,7 @@ import type { SectionNode } from "@jelly/storefront-schema";
 import { createBindingValueLoader, type BindingValuesRequest } from "@/features/storefront/binding-values-api";
 import { applyBindingValues, bindingKey, collectLayoutBindings, type BindingValues } from "@/features/storefront/dynamic-settings";
 
-type PreviewLayout = Record<"announcement" | "header" | "template" | "footer", SectionNode[]>;
+type PreviewLayout = Record<"announcement" | "header" | "template" | "footer" | "overlay", SectionNode[]>;
 
 /**
  * The editor preview with custom-field values filled in, using the signed-in

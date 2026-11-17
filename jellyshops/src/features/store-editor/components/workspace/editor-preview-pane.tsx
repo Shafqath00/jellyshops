@@ -150,6 +150,7 @@ export function EditorPreviewPane({ ctx }: { ctx: EditorViewContext }) {
                   )}
                 </div>
                 {renderPreviewSections(previewLayout.footer, "footer")}
+                {renderPreviewSections(previewLayout.overlay ?? [], "footer")}
               </StorefrontPreviewFrame>
               </ScaledPreview>
             </div>
