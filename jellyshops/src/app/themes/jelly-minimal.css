@@ -88,9 +88,6 @@
   --tk-cart-layout-grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
   --tk-cart-line-grid-template-columns: 96px minmax(0, 1fr) auto; --tk-cart-totals-letter-spacing: 0;
   --tk-cart-line-grid-template-columns-2: 72px minmax(0, 1fr);
-  --tk-checkout-page-letter-spacing: .14em;
-  --tk-checkout-grid-grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
-  --tk-checkout-summary-letter-spacing: 0;
   --tk-collection-header-padding-block: var(--tk-6) var(--tk-5); --tk-collection-header-copy-gap: var(--tk-2);
   --tk-collection-header-background: linear-gradient(to top, rgba(0, 0, 0, .55), rgba(0, 0, 0, 0) 65%);
   --tk-collection-header-color: #fff;
@@ -532,19 +529,6 @@
 [data-jelly-theme="jelly-signature"] .jelly-cart-line-total { font-weight: 500; white-space: nowrap; }
 [data-jelly-theme="jelly-signature"] .jelly-cart-totals { position: sticky; top: var(--tk-3); display: grid; gap: var(--tk-2); padding: var(--tk-4); border: 1px solid var(--tk-border); border-radius: var(--tk-radius-card); background: var(--tk-surface); }
 [data-jelly-theme="jelly-signature"] .jelly-cart-totals dl div { display: flex; justify-content: space-between; gap: var(--tk-2); font-size: var(--tk-text-lg); }
-[data-jelly-theme="jelly-signature"] .checkout-step { position: static; display: grid; place-items: center; width: 32px; height: 32px; font-family: var(--tk-font-body); border: 1px solid var(--tk-border-strong); border-radius: 50%; background: none; color: var(--tk-text); font-size: var(--tk-text-xs); }
-[data-jelly-theme="jelly-signature"] .checkout-form section h2 { align-self: center; margin: 0; font-size: var(--tk-h4); }
-[data-jelly-theme="jelly-signature"] .checkout-form .field > span { font-size: var(--tk-text-sm); font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--tk-text); }
-[data-jelly-theme="jelly-signature"] .checkout-error { padding: var(--tk-2); border: 1px solid #e2b7af; border-radius: var(--tk-radius-card); background: #fbefec; color: #8a2f24; font-size: var(--tk-text-sm); }
-[data-jelly-theme="jelly-signature"] .checkout-summary { position: sticky; top: var(--tk-3); display: grid; gap: var(--tk-2); padding: var(--tk-4); border: 1px solid var(--tk-border); border-radius: var(--tk-radius-card); background: var(--tk-surface); box-shadow: none; }
-[data-jelly-theme="jelly-signature"] .checkout-thumb { position: relative; display: block; width: 56px; aspect-ratio: 4 / 5; overflow: visible; border: 0; border-radius: var(--tk-radius-card); background: var(--tk-accent); }
-[data-jelly-theme="jelly-signature"] .checkout-thumb img { border-radius: var(--tk-radius-card); object-fit: cover; }
-[data-jelly-theme="jelly-signature"] .checkout-totals { display: grid; gap: var(--tk-1); padding-top: var(--tk-2); border-top: 1px solid var(--tk-border); }
-[data-jelly-theme="jelly-signature"] .checkout-totals div { display: flex; justify-content: space-between; gap: var(--tk-2); font-size: var(--tk-text-sm); }
-[data-jelly-theme="jelly-signature"] .checkout-totals div:last-child { margin-top: var(--tk-1); padding-top: var(--tk-2); border-top: 1px solid var(--tk-border); font-size: var(--tk-text-lg); }
-[data-jelly-theme="jelly-signature"] .jelly-order-confirmation-icon { display: grid; place-items: center; width: 64px; height: 64px; margin-bottom: var(--tk-1); border: 1px solid var(--tk-border-strong); border-radius: 50%; background: var(--tk-accent); }
-[data-jelly-theme="jelly-signature"] .jelly-order-confirmation-summary { display: grid; width: min(100%, 480px); margin: var(--tk-2) 0; padding: 0 var(--tk-3); border: 1px solid var(--tk-border); border-radius: var(--tk-radius-card); background: var(--tk-surface); text-align: left; }
-[data-jelly-theme="jelly-signature"] .jelly-order-confirmation-summary div { display: flex; justify-content: space-between; gap: var(--tk-2); padding-block: var(--tk-2); }
 /* 10.3 Search and 404 */
 [data-jelly-theme="jelly-signature"] .jelly-search-results { display: block; min-height: 0; padding-block: var(--tk-6) var(--tk-section); }
 [data-jelly-theme="jelly-signature"] .jelly-search-shell { display: grid; gap: var(--tk-3); max-width: none; padding: 0; border: 0; background: none; box-shadow: none; text-align: left; }

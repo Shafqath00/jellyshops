@@ -2,11 +2,14 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Check, PackageCheck } from "lucide-react";
+import { CheckoutConfirmation, type ConfirmationState } from "@/features/checkout/components/checkout-confirmation";
+import { useClearBagAfterPayment } from "@/features/checkout/use-clear-bag";
 import { createCommerceApi } from "@/features/commerce/api/client";
 import type { PublicOrderResult } from "@/features/commerce/api/types";
 import { OrderProgress, OrderTimeline, ShipmentList } from "@/features/commerce/components/order-tracking";
-import { useMemo } from "react";
+import { useMemo, useSyncExternalStore } from "react";
+
+const noSubscription = () => () => {};
 import { useShop } from "@/contexts/shop-context";
 import { useThemePresentation } from "@/features/storefront/components/storefront-shell";
 
@@ -16,6 +19,10 @@ function PublicOrderContent() {
   const [missing, setMissing] = useState(false);
   const api = useMemo(() => createCommerceApi({ baseUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001" }), []);
   const [refreshError, setRefreshError] = useState(false);
+  const search = new URLSearchParams(useSyncExternalStore(noSubscription, () => window.location.search, () => ""));
+  // Stripe adds redirect_status after a bank or wallet redirect; ?paid=1 is our own in-page success.
+  const redirectFailed = search.get("redirect_status") === "failed";
+  useClearBagAfterPayment(storeSlug, search.get("paid") === "1" && !redirectFailed && result !== null && result.order.status !== "CANCELLED");
   useEffect(() => {
     let active = true;
     let sequence = 0;
@@ -54,28 +61,26 @@ function PublicOrderContent() {
     void refresh(); window.addEventListener("focus", focus);
     return () => { active = false; if (timer) clearTimeout(timer); window.removeEventListener("focus", focus); };
   }, [api, publicToken, storeSlug]);
-  if (missing) return <main className="jelly-checkout-empty"><PackageCheck size={32} aria-hidden="true" /><h1>Order not found</h1><p>Check the link in your confirmation email, or contact the shop if you need help.</p><Link className="jelly-button" href={`/${storeSlug}`}>Back to the shop</Link></main>;
-  if (!result) return <main className="jelly-checkout-empty" aria-busy={!refreshError}><p role={refreshError ? "alert" : "status"}>{refreshError ? "Unable to load your order. Retrying… Check your order link or contact the shop." : "Loading your order…"}</p></main>;
+  if (missing) return <main className="jelly-checkout"><div className="jelly-checkout__single"><div className="jelly-checkout__state"><h1 className="jelly-checkout__title">Order not found</h1><p>Check the link in your confirmation email, or contact the shop if you need help.</p><Link className="jelly-checkout__primary jelly-checkout__primary--inline" href={`/${storeSlug}`}>Back to the shop</Link></div></div></main>;
+  if (!result) return <main className="jelly-checkout"><div className="jelly-checkout__single"><div className="jelly-checkout__state" aria-busy={!refreshError}><p role={refreshError ? "alert" : "status"}>{refreshError ? "We couldn’t load your order. Retrying… Check your order link or contact the shop." : "Loading your order…"}</p></div></div></main>;
   const order = result.order;
-  const pendingPayment = order.status === "PENDING_PAYMENT";
   const currency = String(order.currency ?? "GBP").toUpperCase();
   const money = (minor: unknown) => new Intl.NumberFormat("en", { style: "currency", currency }).format(Number(minor ?? 0) / 100);
-  const status = String(order.status ?? "").replaceAll("_", " ").toLowerCase();
   const items = result.items.filter((item) => typeof item.titleSnapshot === "string");
-  return <main className="jelly-order-confirmation">
-    <span className="jelly-order-confirmation-icon" aria-hidden="true">{pendingPayment ? <PackageCheck /> : <Check />}</span>
-    <p className="jelly-eyebrow">{String(order.number ?? "Your order")}</p>
-    <h1>{pendingPayment ? "Payment pending" : order.status === "CANCELLED" ? "Order cancelled" : order.status === "REFUNDED" ? "Order refunded" : "Thank you for your order"}</h1>
-    {refreshError && <p role="alert">Unable to refresh the latest status. Retrying…</p>}
-    <p>{pendingPayment ? "We are waiting for your payment to be confirmed. This page updates once it is." : order.status === "CANCELLED" ? "This order has been cancelled. Contact the shop if you need help with its payment status." : order.status === "REFUNDED" ? "Your refund has been confirmed. Contact the shop if you need help." : "Your order has been received and the shop is getting it ready."}</p>
-    {items.length > 0 && <ul className="jelly-order-items">{items.map((item, index) => <li key={`${String(item.variantId ?? "item")}-${index}`}><span>{String(item.titleSnapshot)}<small> × {Number(item.quantity ?? 1)}</small></span>{item.unitPriceMinor !== undefined && <b>{money(Number(item.unitPriceMinor) * Number(item.quantity ?? 1))}</b>}</li>)}</ul>}
-    <dl className="jelly-order-confirmation-summary"><div><dt>Status</dt><dd>{status.charAt(0).toUpperCase() + status.slice(1)}</dd></div><div><dt>Total</dt><dd>{money(order.totalMinor)}</dd></div></dl>
+  const state: ConfirmationState = order.status === "CANCELLED" ? "cancelled" : order.status === "REFUNDED" ? "refunded" : order.status === "PENDING_PAYMENT" ? (redirectFailed ? "failed" : "pending") : "paid";
+  return <CheckoutConfirmation
+    state={state}
+    orderNumber={typeof order.number === "string" ? order.number : undefined}
+    totalLabel={money(order.totalMinor)}
+    storeSlug={storeSlug}
+    actions={Number(order.balanceDueMinor ?? 0) > 0 ? <Link className="jelly-checkout__primary jelly-checkout__primary--inline" href={`/${storeSlug}/order/${publicToken}/balance`}>Pay balance {money(order.balanceDueMinor)}</Link> : null}
+  >
+    {refreshError && <p role="alert" className="jelly-checkout__alert">We couldn’t refresh the latest status. Retrying…</p>}
+    {items.length > 0 && <section className="jelly-checkout__panel" aria-labelledby="order-items-title"><h2 id="order-items-title" className="jelly-checkout__panel-title">Your items</h2><ul className="jelly-checkout__order-items">{items.map((item, index) => <li key={`${String(item.variantId ?? "item")}-${index}`}><span>{String(item.titleSnapshot)}<small> × {Number(item.quantity ?? 1)}</small></span>{item.unitPriceMinor !== undefined && <b>{money(Number(item.unitPriceMinor) * Number(item.quantity ?? 1))}</b>}</li>)}</ul></section>}
     <OrderProgress steps={result.progress ?? []} />
     <ShipmentList shipments={result.shipments ?? []} />
     <OrderTimeline entries={result.timeline ?? []} />
-    {Number(order.balanceDueMinor ?? 0) > 0 && <div className="jelly-section-actions"><Link className="jelly-button" href={`/${storeSlug}/order/${publicToken}/balance`}>Pay balance {money(order.balanceDueMinor)}</Link></div>}
-    <div className="jelly-section-actions"><Link className="jelly-button" href={`/${storeSlug}/shop`}>Continue shopping</Link></div>
-  </main>;
+  </CheckoutConfirmation>;
 }
 
 export default function PublicOrderPage() {

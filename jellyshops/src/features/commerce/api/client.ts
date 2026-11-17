@@ -166,8 +166,8 @@ export function createCommerceApi({ baseUrl, token, fetch: fetcher = fetch }: Co
       headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}), ...init.headers },
     });
     if (!response.ok) {
-      const body = await response.json().catch(() => ({})) as { error?: { message?: string } };
-      throw Object.assign(new Error(body.error?.message ?? "Commerce request failed"), { status: response.status });
+      const body = await response.json().catch(() => ({})) as { error?: { message?: string; code?: string } };
+      throw Object.assign(new Error(body.error?.message ?? "Commerce request failed"), { status: response.status, ...(body.error?.code ? { code: body.error.code } : {}) });
     }
     return resolveMediaUrls(await response.json() as T, origin);
   }
