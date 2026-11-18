@@ -10,7 +10,7 @@ import { SHOW_ON_CHOICES } from "./section-style.js";
  * and the live store alike.
  */
 
-export const BLOCK_TYPE_PRESETS = ["h1", "h2", "h3", "h4", "body", "small"] as const;
+export const BLOCK_TYPE_PRESETS = ["h1", "h2", "h3", "h4", "h5", "h6", "body", "small"] as const;
 export const BLOCK_MAX_WIDTHS = ["narrow", "normal", "wide", "none"] as const;
 export const BLOCK_SHADOWS = ["none", "soft", "medium", "strong"] as const;
 export const STYLED_BLOCK_TYPES = ["heading", "text", "button", "image", "video", "group"] as const;
@@ -60,7 +60,7 @@ export const BLOCK_STYLE_CONTROLS: ControlDefinition[] = [
   { type: "select", key: "blockShowOn", label: "Show on", group: "layout", heading: "Layout", options: [{ label: "All screens", value: "" }, { label: "Desktop only", value: "desktop-only" }, { label: "Desktop and tablet", value: "desktop" }, { label: "Tablet and phones", value: "touch" }, { label: "Phones only", value: "mobile" }] },
   { type: "range", key: "blockMinHeight", label: "Minimum height", group: "advanced", heading: "Effects", min: 0, max: 800, step: 10, unit: "px" },
   { type: "select", key: "blockMaxWidth", label: "Max width", group: "layout", heading: "Layout", options: [themeDefault, { label: "Narrow", value: "narrow" }, { label: "Normal", value: "normal" }, { label: "Wide", value: "wide" }, { label: "None", value: "none" }] },
-  { type: "select", key: "blockTypePreset", mobile: true, label: "Text style", group: "style", heading: "Typography", description: "Uses the sizes and fonts from your theme settings.", options: [themeDefault, { label: "Heading 1", value: "h1" }, { label: "Heading 2", value: "h2" }, { label: "Heading 3", value: "h3" }, { label: "Heading 4", value: "h4" }, { label: "Body", value: "body" }, { label: "Small", value: "small" }] },
+  { type: "select", key: "blockTypePreset", mobile: true, label: "Text style", group: "style", heading: "Typography", description: "Uses the sizes and fonts from your theme settings.", options: [themeDefault, { label: "Heading 1", value: "h1" }, { label: "Heading 2", value: "h2" }, { label: "Heading 3", value: "h3" }, { label: "Heading 4", value: "h4" }, { label: "Heading 5", value: "h5" }, { label: "Heading 6", value: "h6" }, { label: "Body", value: "body" }, { label: "Small", value: "small" }] },
   { type: "color", key: "blockTextColor", label: "Text colour", group: "advanced", heading: "Colours", allowAlpha: false },
   { type: "checkbox", key: "blockBackground", label: "Background", group: "advanced", heading: "Colours" },
   { type: "color", key: "blockBackgroundColor", label: "Background colour", group: "advanced", heading: "Colours", allowAlpha: false, showWhen: { key: "blockBackground", equals: true } },

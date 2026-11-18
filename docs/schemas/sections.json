@@ -1098,6 +1098,14 @@
             "value": "h4"
           },
           {
+            "label": "Heading 5",
+            "value": "h5"
+          },
+          {
+            "label": "Heading 6",
+            "value": "h6"
+          },
+          {
             "label": "Body",
             "value": "body"
           },
@@ -1369,6 +1377,8 @@
                 "h2",
                 "h3",
                 "h4",
+                "h5",
+                "h6",
                 "body",
                 "small"
               ]

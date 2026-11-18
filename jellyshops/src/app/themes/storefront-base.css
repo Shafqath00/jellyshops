@@ -42,7 +42,7 @@
   --j-font-body: var(--theme-font-body, system-ui, sans-serif);
   --j-font-heading: var(--theme-font-heading, var(--j-font-body));
   --j-font-subheading: var(--j-font-body);
-  --j-font-accent: var(--j-font-heading);
+  --j-font-accent: var(--theme-font-highlight, var(--j-font-heading));
   --j-line-tight: 1.1;
   --j-line-normal: 1.4;
   --j-line-loose: 1.6;
@@ -69,16 +69,16 @@
   --j-type-h4-track: var(--jelly-type-h4-tracking, var(--j-track-tight));
   --j-type-h4-case: var(--jelly-type-h4-case, none);
   --j-type-h4-font: var(--jelly-type-h4-font, var(--j-font-heading));
-  --j-type-h5-size: 1.125rem;
-  --j-type-h5-line: var(--j-line-tight);
-  --j-type-h5-track: var(--j-track-tight);
-  --j-type-h5-case: none;
-  --j-type-h5-font: var(--j-font-heading);
-  --j-type-h6-size: 1rem;
-  --j-type-h6-line: var(--j-line-tight);
-  --j-type-h6-track: var(--j-track-tight);
-  --j-type-h6-case: none;
-  --j-type-h6-font: var(--j-font-heading);
+  --j-type-h5-size: var(--jelly-type-h5-size, 1.125rem);
+  --j-type-h5-line: var(--jelly-type-h5-line, var(--j-line-tight));
+  --j-type-h5-track: var(--jelly-type-h5-tracking, var(--j-track-tight));
+  --j-type-h5-case: var(--jelly-type-h5-case, none);
+  --j-type-h5-font: var(--jelly-type-h5-font, var(--j-font-heading));
+  --j-type-h6-size: var(--jelly-type-h6-size, 1rem);
+  --j-type-h6-line: var(--jelly-type-h6-line, var(--j-line-tight));
+  --j-type-h6-track: var(--jelly-type-h6-tracking, var(--j-track-tight));
+  --j-type-h6-case: var(--jelly-type-h6-case, none);
+  --j-type-h6-font: var(--jelly-type-h6-font, var(--j-font-heading));
   --j-type-body-size: var(--jelly-type-body-size, var(--jelly-body-size, 1rem));
   --j-type-body-line: var(--jelly-type-body-line, var(--j-line-loose));
   --j-type-body-track: var(--jelly-type-body-tracking, var(--j-track-normal));
@@ -2170,3 +2170,54 @@ html.lenis, html.lenis body { height: auto; }
 [data-jelly-theme][data-secondary-button="filled"] .jelly-button.jelly-button--secondary:not(:is(.jelly-hero[data-layout="overlay"], .jelly-image-banner[data-has-image="true"]) *) { background: var(--j-color-secondary); color: var(--j-color-on-secondary); }
 [data-jelly-theme][data-secondary-button="filled"] .jelly-button.jelly-button--secondary:not(:is(.jelly-hero[data-layout="overlay"], .jelly-image-banner[data-has-image="true"]) *):hover { background: color-mix(in srgb, var(--j-color-secondary) 85%, var(--j-color-bg)); }
 [data-jelly-theme][data-secondary-button="link"] .jelly-button.jelly-button--secondary:not(:is(.jelly-hero[data-layout="overlay"], .jelly-image-banner[data-has-image="true"]) *) { min-height: var(--j-touch-target, 44px); padding-inline: 0; background: transparent; border-color: transparent; box-shadow: none; text-decoration: underline; text-underline-offset: 0.25em; }
+
+/*
+ * Text styles Heading 5 and Heading 6 (Theme settings > Text style; template plan T7 part 2) for blocks, in every theme.
+ * Heading 1-4, Body and Small are drawn by each theme's own rules. The phone and tablet rules repeat their attribute
+ * so they win over a theme's desktop text style rule, which loads later. The size reads the setting first: Minimal and
+ * Avenue use their own --j-type-h5-size for large body text, which the Heading 5 setting leaves alone.
+ */
+[data-jelly-theme] :is([data-type-preset="h5"], [data-type-preset="h6"]) { font-weight: var(--jelly-heading-weight, 600) !important; }
+[data-jelly-theme] [data-type-preset="h5"] { font-family: var(--j-type-h5-font) !important; font-size: var(--jelly-type-h5-size, var(--j-type-h5-size)) !important; line-height: var(--j-type-h5-line) !important; letter-spacing: var(--j-type-h5-track) !important; text-transform: var(--j-type-h5-case) !important; }
+[data-jelly-theme] [data-type-preset="h6"] { font-family: var(--j-type-h6-font) !important; font-size: var(--jelly-type-h6-size, var(--j-type-h6-size)) !important; line-height: var(--j-type-h6-line) !important; letter-spacing: var(--j-type-h6-track) !important; text-transform: var(--j-type-h6-case) !important; }
+@media (min-width: 768px) and (max-width: 1023px) {
+  [data-jelly-theme] [data-type-preset-tablet="h5"][data-type-preset-tablet="h5"] { font-family: var(--j-type-h5-font) !important; font-size: var(--jelly-type-h5-size, var(--j-type-h5-size)) !important; font-weight: var(--jelly-heading-weight, 600) !important; line-height: var(--j-type-h5-line) !important; letter-spacing: var(--j-type-h5-track) !important; text-transform: var(--j-type-h5-case) !important; }
+  [data-jelly-theme] [data-type-preset-tablet="h6"][data-type-preset-tablet="h6"] { font-family: var(--j-type-h6-font) !important; font-size: var(--jelly-type-h6-size, var(--j-type-h6-size)) !important; font-weight: var(--jelly-heading-weight, 600) !important; line-height: var(--j-type-h6-line) !important; letter-spacing: var(--j-type-h6-track) !important; text-transform: var(--j-type-h6-case) !important; }
+}
+@media (max-width: 767px) {
+  [data-jelly-theme] [data-type-preset-mobile="h5"][data-type-preset-mobile="h5"] { font-family: var(--j-type-h5-font) !important; font-size: var(--jelly-type-h5-size, var(--j-type-h5-size)) !important; font-weight: var(--jelly-heading-weight, 600) !important; line-height: var(--j-type-h5-line) !important; letter-spacing: var(--j-type-h5-track) !important; text-transform: var(--j-type-h5-case) !important; }
+  [data-jelly-theme] [data-type-preset-mobile="h6"][data-type-preset-mobile="h6"] { font-family: var(--j-type-h6-font) !important; font-size: var(--jelly-type-h6-size, var(--j-type-h6-size)) !important; font-weight: var(--jelly-heading-weight, 600) !important; line-height: var(--j-type-h6-line) !important; letter-spacing: var(--j-type-h6-track) !important; text-transform: var(--j-type-h6-case) !important; }
+}
+
+/* text-roles:start — Theme settings > Text role: … (template plan T7); generated by scripts/generate-contract-css.mjs from textRoleCss() in theme-style-settings.ts; do not edit by hand. */
+[data-jelly-theme][data-type-roles~="subheading-font"][data-type-roles~="subheading-font"][data-type-roles~="subheading-font"] :is(.jelly-eyebrow, .jelly-subheading) { font-family: var(--jelly-role-subheading-font); }
+[data-jelly-theme][data-type-roles~="subheading-weight"][data-type-roles~="subheading-weight"][data-type-roles~="subheading-weight"] :is(.jelly-eyebrow, .jelly-subheading) { font-weight: var(--jelly-role-subheading-weight); }
+[data-jelly-theme][data-type-roles~="subheading-size"][data-type-roles~="subheading-size"][data-type-roles~="subheading-size"] :is(.jelly-eyebrow, .jelly-subheading) { font-size: var(--jelly-role-subheading-size); }
+[data-jelly-theme][data-type-roles~="subheading-letter-spacing"][data-type-roles~="subheading-letter-spacing"][data-type-roles~="subheading-letter-spacing"] :is(.jelly-eyebrow, .jelly-subheading) { letter-spacing: var(--jelly-role-subheading-letter-spacing); }
+[data-jelly-theme][data-type-roles~="subheading-text-case"][data-type-roles~="subheading-text-case"][data-type-roles~="subheading-text-case"] :is(.jelly-eyebrow, .jelly-subheading) { text-transform: var(--jelly-role-subheading-text-case); }
+[data-jelly-theme][data-type-roles~="navigation-font"][data-type-roles~="navigation-font"][data-type-roles~="navigation-font"] [data-section-type="header"] :is(.jelly-menu a, .jelly-menu-label, .jelly-mobile-navigation a) { font-family: var(--jelly-role-navigation-font); }
+[data-jelly-theme][data-type-roles~="navigation-weight"][data-type-roles~="navigation-weight"][data-type-roles~="navigation-weight"] [data-section-type="header"] :is(.jelly-menu a, .jelly-menu-label, .jelly-mobile-navigation a) { font-weight: var(--jelly-role-navigation-weight); }
+[data-jelly-theme][data-type-roles~="navigation-size"][data-type-roles~="navigation-size"][data-type-roles~="navigation-size"] [data-section-type="header"] :is(.jelly-menu a, .jelly-menu-label, .jelly-mobile-navigation a) { font-size: var(--jelly-role-navigation-size); }
+[data-jelly-theme][data-type-roles~="navigation-letter-spacing"][data-type-roles~="navigation-letter-spacing"][data-type-roles~="navigation-letter-spacing"] [data-section-type="header"] :is(.jelly-menu a, .jelly-menu-label, .jelly-mobile-navigation a) { letter-spacing: var(--jelly-role-navigation-letter-spacing); }
+[data-jelly-theme][data-type-roles~="navigation-text-case"][data-type-roles~="navigation-text-case"][data-type-roles~="navigation-text-case"] [data-section-type="header"] :is(.jelly-menu a, .jelly-menu-label, .jelly-mobile-navigation a) { text-transform: var(--jelly-role-navigation-text-case); }
+[data-jelly-theme][data-type-roles~="button-font"][data-type-roles~="button-font"][data-type-roles~="button-font"] :is(.jelly-button, [data-card-part="button"]) { font-family: var(--jelly-role-button-font); }
+[data-jelly-theme][data-type-roles~="button-weight"][data-type-roles~="button-weight"][data-type-roles~="button-weight"] :is(.jelly-button, [data-card-part="button"]) { font-weight: var(--jelly-role-button-weight); }
+[data-jelly-theme][data-type-roles~="button-size"][data-type-roles~="button-size"][data-type-roles~="button-size"] :is(.jelly-button, [data-card-part="button"]) { font-size: var(--jelly-role-button-size); }
+[data-jelly-theme][data-type-roles~="button-letter-spacing"][data-type-roles~="button-letter-spacing"][data-type-roles~="button-letter-spacing"] :is(.jelly-button, [data-card-part="button"]) { letter-spacing: var(--jelly-role-button-letter-spacing); }
+[data-jelly-theme][data-type-roles~="button-text-case"][data-type-roles~="button-text-case"][data-type-roles~="button-text-case"] :is(.jelly-button, [data-card-part="button"]) { text-transform: var(--jelly-role-button-text-case); }
+[data-jelly-theme][data-type-roles~="card-title-font"][data-type-roles~="card-title-font"][data-type-roles~="card-title-font"] [data-card-part="title"] { font-family: var(--jelly-role-card-title-font); }
+[data-jelly-theme][data-type-roles~="card-title-weight"][data-type-roles~="card-title-weight"][data-type-roles~="card-title-weight"] [data-card-part="title"] { font-weight: var(--jelly-role-card-title-weight); }
+[data-jelly-theme][data-type-roles~="card-title-size"][data-type-roles~="card-title-size"][data-type-roles~="card-title-size"] [data-card-part="title"] { font-size: var(--jelly-role-card-title-size); }
+[data-jelly-theme][data-type-roles~="card-title-letter-spacing"][data-type-roles~="card-title-letter-spacing"][data-type-roles~="card-title-letter-spacing"] [data-card-part="title"] { letter-spacing: var(--jelly-role-card-title-letter-spacing); }
+[data-jelly-theme][data-type-roles~="card-title-text-case"][data-type-roles~="card-title-text-case"][data-type-roles~="card-title-text-case"] [data-card-part="title"] { text-transform: var(--jelly-role-card-title-text-case); }
+[data-jelly-theme][data-type-roles~="card-price-font"][data-type-roles~="card-price-font"][data-type-roles~="card-price-font"] [data-card-part="price"] { font-family: var(--jelly-role-card-price-font); }
+[data-jelly-theme][data-type-roles~="card-price-weight"][data-type-roles~="card-price-weight"][data-type-roles~="card-price-weight"] [data-card-part="price"] { font-weight: var(--jelly-role-card-price-weight); }
+[data-jelly-theme][data-type-roles~="card-price-size"][data-type-roles~="card-price-size"][data-type-roles~="card-price-size"] [data-card-part="price"] { font-size: var(--jelly-role-card-price-size); }
+[data-jelly-theme][data-type-roles~="card-price-letter-spacing"][data-type-roles~="card-price-letter-spacing"][data-type-roles~="card-price-letter-spacing"] [data-card-part="price"] { letter-spacing: var(--jelly-role-card-price-letter-spacing); }
+[data-jelly-theme][data-type-roles~="card-price-text-case"][data-type-roles~="card-price-text-case"][data-type-roles~="card-price-text-case"] [data-card-part="price"] { text-transform: var(--jelly-role-card-price-text-case); }
+[data-jelly-theme][data-type-roles~="badge-font"][data-type-roles~="badge-font"][data-type-roles~="badge-font"] :is(.jelly-product-card-badge, .jelly-badge-block) { font-family: var(--jelly-role-badge-font); }
+[data-jelly-theme][data-type-roles~="badge-weight"][data-type-roles~="badge-weight"][data-type-roles~="badge-weight"] :is(.jelly-product-card-badge, .jelly-badge-block) { font-weight: var(--jelly-role-badge-weight); }
+[data-jelly-theme][data-type-roles~="badge-size"][data-type-roles~="badge-size"][data-type-roles~="badge-size"] :is(.jelly-product-card-badge, .jelly-badge-block) { font-size: var(--jelly-role-badge-size); }
+[data-jelly-theme][data-type-roles~="badge-letter-spacing"][data-type-roles~="badge-letter-spacing"][data-type-roles~="badge-letter-spacing"] :is(.jelly-product-card-badge, .jelly-badge-block) { letter-spacing: var(--jelly-role-badge-letter-spacing); }
+[data-jelly-theme][data-type-roles~="badge-text-case"][data-type-roles~="badge-text-case"][data-type-roles~="badge-text-case"] :is(.jelly-product-card-badge, .jelly-badge-block) { text-transform: var(--jelly-role-badge-text-case); }
+/* text-roles:end */

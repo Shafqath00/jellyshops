@@ -10,8 +10,9 @@
  */
 
 import { scopeCustomCss } from "@jelly/storefront-schema";
+import { fontStack } from "./fonts.js";
 
-export const TEXT_STYLE_LEVELS = ["h1", "h2", "h3", "h4", "body", "small"] as const;
+export const TEXT_STYLE_LEVELS = ["h1", "h2", "h3", "h4", "h5", "h6", "body", "small"] as const;
 export type TextStyleLevel = typeof TEXT_STYLE_LEVELS[number];
 /** Up to sixteen schemes; `colorSchemes.count` (4-16) says how many the merchant uses. */
 export const COLOR_SCHEME_IDS = ["scheme1", "scheme2", "scheme3", "scheme4", "scheme5", "scheme6", "scheme7", "scheme8", "scheme9", "scheme10", "scheme11", "scheme12", "scheme13", "scheme14", "scheme15", "scheme16"] as const;
@@ -38,7 +39,7 @@ export interface ColorSchemeValues { background: string; text: string; button: s
 export const OPTIONAL_SCHEME_COLOURS = ["secondaryButton", "border", "muted"] as const;
 export interface ThemeStyleDefaults {
   /** Largest (desktop) size in px of Heading 2-4 and Small text. Heading 1 and Body use typography.headingSize/bodySize. */
-  sizes: { h2: number; h3: number; h4: number; small: number };
+  sizes: { h2: number; h3: number; h4: number; small: number; h5?: number; h6?: number };
   schemes: Record<BaseSchemeId, ColorSchemeValues> & Partial<Record<ColorSchemeId, ColorSchemeValues>>;
 }
 
@@ -83,7 +84,11 @@ export function legacySchemeMap(defaults: ThemeStyleDefaults | undefined): Recor
   return { page: "scheme1", soft, dark };
 }
 
-const levelLabels: Record<TextStyleLevel, string> = { h1: "Heading 1", h2: "Heading 2", h3: "Heading 3", h4: "Heading 4", body: "Body", small: "Small" };
+const levelLabels: Record<TextStyleLevel, string> = { h1: "Heading 1", h2: "Heading 2", h3: "Heading 3", h4: "Heading 4", h5: "Heading 5", h6: "Heading 6", body: "Body", small: "Small" };
+/** Heading 5 and 6 sizes when a theme gives none (the contract's defaults, 1.125rem and 1rem). */
+const MINOR_HEADING_SIZES = { h5: 18, h6: 16 } as const;
+type SizedLevel = "h2" | "h3" | "h4" | "h5" | "h6" | "small";
+const defaultSize = (defaults: ThemeStyleDefaults, level: SizedLevel): number => level === "h5" || level === "h6" ? defaults.sizes[level] ?? MINOR_HEADING_SIZES[level] : defaults.sizes[level];
 const schemeNumber = (id: ColorSchemeId) => COLOR_SCHEME_IDS.indexOf(id) + 1;
 /** Smallest size as a share of the largest, and the screen width (px) at which the largest is reached. */
 const responsive: Record<"h2" | "h3", { min: number; full: number }> = { h2: { min: 0.64, full: 1220 }, h3: { min: 0.8, full: 1270 } };
@@ -94,7 +99,49 @@ const lineHeightValues: Record<string, string> = { tight: "1.05", normal: "1.3",
 const spacings: Array<[string, string]> = [[theme, "Theme default"], ["tight", "Tight"], ["none", "None"], ["wide", "Wide"], ["wider", "Extra wide"]];
 const spacingValues: Record<string, string> = { tight: "-0.02em", none: "0em", wide: "0.04em", wider: "0.12em" };
 const cases: Array<[string, string]> = [[theme, "Theme default"], ["none", "As typed"], ["uppercase", "UPPERCASE"]];
-const fontsFor = (level: TextStyleLevel): Array<[string, string]> => level.startsWith("h") ? [["heading", "Heading font"], ["body", "Body font"]] : [["body", "Body font"], ["heading", "Heading font"]];
+const fontsFor = (level: TextStyleLevel): Array<[string, string]> => level.startsWith("h") ? [["heading", "Heading font"], ["body", "Body font"], ["highlight", "Highlight font"]] : [["body", "Body font"], ["heading", "Heading font"], ["highlight", "Highlight font"]];
+/** The fonts a text style or text role can use, as CSS (the highlight font falls back to the heading font). */
+const FONT_ROLES: Record<string, string> = { heading: "var(--theme-font-heading)", body: "var(--theme-font-body)", highlight: "var(--theme-font-highlight, var(--theme-font-heading))" };
+
+/**
+ * Text roles (template plan T7 part 2): small pieces of text every theme draws, each with its own font, weight, size,
+ * letter spacing and case, like Shopify's typography roles. "Theme default" keeps the theme's own look; the storefront
+ * only restyles a role's property the merchant changed (`data-type-roles` on the theme root, see `textRoleCss`).
+ */
+export const TEXT_ROLES = [
+  { id: "subheading", label: "Small headings above titles", selector: ":is(.jelly-eyebrow, .jelly-subheading)" },
+  { id: "navigation", label: "Menu links", selector: "[data-section-type=\"header\"] :is(.jelly-menu a, .jelly-menu-label, .jelly-mobile-navigation a)" },
+  { id: "button", label: "Buttons", selector: ":is(.jelly-button, [data-card-part=\"button\"])" },
+  { id: "card-title", label: "Product card names", selector: "[data-card-part=\"title\"]" },
+  { id: "card-price", label: "Product card prices", selector: "[data-card-part=\"price\"]" },
+  { id: "badge", label: "Badges", selector: ":is(.jelly-product-card-badge, .jelly-badge-block)" },
+] as const;
+export type TextRoleId = (typeof TEXT_ROLES)[number]["id"];
+const ROLE_PROPERTIES = [
+  { key: "font", css: "font-family" },
+  { key: "weight", css: "font-weight" },
+  { key: "size", css: "font-size" },
+  { key: "letterSpacing", css: "letter-spacing" },
+  { key: "textCase", css: "text-transform" },
+] as const;
+const roleWeights: Array<[string, string]> = [[theme, "Theme default"], ["400", "Regular"], ["500", "Medium"], ["600", "Semibold"], ["700", "Bold"]];
+const roleSizes: Array<[string, string]> = [[theme, "Theme default"], ...[11, 12, 13, 14, 15, 16, 18, 20, 24].map((px) => [String(px), `${px} px`] as [string, string])];
+const roleFonts: Array<[string, string]> = [[theme, "Theme default"], ["heading", "Heading font"], ["body", "Body font"], ["highlight", "Highlight font"]];
+const roleKey = (id: TextRoleId) => id.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+const roleAttribute = (id: TextRoleId, key: string) => `${id}-${key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`;
+
+/**
+ * The CSS for text roles, written into storefront-base.css by scripts/generate-contract-css.mjs. Each rule applies one
+ * property of one role, only while the theme root lists it in data-type-roles; the attribute is repeated so the rule
+ * outweighs the themes' own rules for those parts (up to four classes or attributes).
+ */
+export function textRoleCss(): string {
+  return TEXT_ROLES.flatMap((role) => ROLE_PROPERTIES.map(({ key, css }) => {
+    const name = roleAttribute(role.id, key);
+    const gate = `[data-type-roles~="${name}"]`;
+    return `[data-jelly-theme]${gate}${gate}${gate} ${role.selector} { ${css}: var(--jelly-role-${name}); }`;
+  })).join("\n");
+}
 
 const select = (id: string, label: string, group: string, value: string, options: Array<[string, string]>, description?: string) => ({ id, type: "select", label, group, default: value, ...(description ? { description } : {}), options: options.map(([optionValue, optionLabel]) => ({ value: optionValue, label: optionLabel })) });
 const range = (id: string, label: string, group: string, value: number, min: number, max: number, step: number) => ({ id, type: "range", label, group, default: value, min, max, step });
@@ -107,7 +154,7 @@ const color = (id: string, label: string, group: string, value: string) => ({ id
  */
 export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { heading: [number, number, number, number]; body: [number, number, number, number] }) {
   const textStyles = Object.fromEntries(TEXT_STYLE_LEVELS.map((level) => [level, {
-    ...(level === "h1" || level === "body" ? {} : { size: defaults.sizes[level] }),
+    ...(level === "h1" || level === "body" ? {} : { size: defaultSize(defaults, level) }),
     font: level.startsWith("h") ? "heading" : "body",
     lineHeight: theme,
     letterSpacing: theme,
@@ -119,7 +166,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
       ? range("typography.headingSize", "Size (px)", group, ...sizes.heading)
       : level === "body"
         ? range("typography.bodySize", "Size (px)", group, ...sizes.body)
-        : range(`textStyles.${level}.size`, "Size (px)", group, defaults.sizes[level], level === "small" ? 10 : 12, level === "small" ? 16 : 72, 1);
+        : range(`textStyles.${level}.size`, "Size (px)", group, defaultSize(defaults, level), level === "small" ? 10 : 12, level === "small" ? 16 : level === "h5" || level === "h6" ? 40 : 72, 1);
     return [
       size,
       select(`textStyles.${level}.font`, "Font", group, level.startsWith("h") ? "heading" : "body", fontsFor(level), level === "body" ? undefined : "Applies where a block uses this text style."),
@@ -152,6 +199,17 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     select("buttons.hover", "Hover effect", "Buttons", theme, [[theme, "Theme default"], ["darken", "Darken"], ["lift", "Lift with shadow"], ["underline", "Underline"], ["none", "None"]]),
     select("buttons.secondaryStyle", "Secondary button style", "Buttons", theme, [[theme, "Theme default"], ["outlined", "Outlined"], ["soft", "Soft fill"], ["filled", "Filled"], ["link", "Text link"]], "Second buttons, such as \"Learn more\" beside a main button. They take the colour scheme's secondary button colour."),
   ];
+  const textRoleSchema = TEXT_ROLES.flatMap((role) => {
+    const group = `Text role: ${role.label}`;
+    const id = `textRoles.${roleKey(role.id)}`;
+    return [
+      select(`${id}.font`, "Font", group, theme, roleFonts),
+      select(`${id}.weight`, "Weight", group, theme, roleWeights),
+      select(`${id}.size`, "Size", group, theme, roleSizes, role.id === "navigation" ? "The same size on every screen." : undefined),
+      select(`${id}.letterSpacing`, "Letter spacing", group, theme, spacings),
+      select(`${id}.textCase`, "Case", group, theme, cases),
+    ];
+  });
   const fieldSchema = [
     select("fields.radius", "Field corners", "Form fields", theme, [[theme, "Theme default"], ["square", "Square"], ["soft", "Slightly rounded"], ["rounded", "Rounded"], ["pill", "Pill"]]),
     select("fields.borderWidth", "Border thickness", "Form fields", theme, [[theme, "Theme default"], ["thin", "Thin"], ["thick", "Thick"]]),
@@ -204,6 +262,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
   return {
     defaults: {
       textStyles,
+      textRoles: Object.fromEntries(TEXT_ROLES.map((role) => [roleKey(role.id), { font: theme, weight: theme, size: theme, letterSpacing: theme, textCase: theme }])),
       colorSchemes: { count: String(MIN_COLOR_SCHEMES), ...Object.fromEntries(COLOR_SCHEME_IDS.map((id) => [id, { name: "", ...schemes[id] }])) },
       fields: { radius: theme, borderWidth: theme, height: theme },
       badges: { sale: "hide", position: theme, shape: theme, background: "", text: "" },
@@ -216,6 +275,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     buttonDefaults: { size: theme, textCase: theme, borderWidth: theme, hover: theme, secondaryStyle: theme },
     cardDefaults: { layout: theme, showRating: false, hoverImage: false, compare: false, radius: theme, shadow: theme, hover: theme, order: "photo-title-price", showTitle: "show", titleLines: theme, showPrice: "show", savings: "none", button: "none", photoFit: theme, swatches: "none" },
     textStyleSchema,
+    textRoleSchema,
     colorSchemeSchema,
     buttonSchema,
     fieldSchema,
@@ -294,8 +354,8 @@ export const MAX_THEME_CSS_LENGTH = 10000;
 const hex = /^#[0-9a-fA-F]{6}$/;
 const record = (value: unknown): Record<string, unknown> => value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
 
-function sizeToken(level: "h2" | "h3" | "h4" | "small", size: number): string {
-  if (level === "h4" || level === "small") return `${size}px`;
+function sizeToken(level: SizedLevel, size: number): string {
+  if (level !== "h2" && level !== "h3") return `${size}px`;
   const { min, full } = responsive[level];
   return `clamp(${Math.round(size * min)}px, ${(size / full * 100).toFixed(2)}vw, ${size}px)`;
 }
@@ -306,7 +366,8 @@ export function themeStyleDefaultsFrom(settingsDefaults: Record<string, unknown>
   const schemes = record(settingsDefaults?.colorSchemes);
   if (!Object.keys(styles).length || !Object.keys(schemes).length) return undefined;
   const size = (level: string) => Number(record(styles[level]).size);
-  return { sizes: { h2: size("h2"), h3: size("h3"), h4: size("h4"), small: size("small") }, schemes: schemes as unknown as ThemeStyleDefaults["schemes"] };
+  const minor = (level: "h5" | "h6") => Number.isFinite(size(level)) ? { [level]: size(level) } : {};
+  return { sizes: { h2: size("h2"), h3: size("h3"), h4: size("h4"), small: size("small"), ...minor("h5"), ...minor("h6") }, schemes: schemes as unknown as ThemeStyleDefaults["schemes"] };
 }
 
 /** A theme's default colours for a scheme; extra schemes the theme does not list copy their source scheme. */
@@ -335,14 +396,32 @@ export function resolveThemeStyleTokens(settings: Record<string, unknown>, defau
     const style = record(styles[level]);
     if (level !== "h1" && level !== "body" && defaults) {
       const size = style.size;
-      if (typeof size === "number" && Number.isFinite(size) && size !== defaults.sizes[level]) tokens[`--jelly-type-${level}-size`] = sizeToken(level, Math.min(96, Math.max(8, Math.round(size))));
+      if (typeof size === "number" && Number.isFinite(size) && size !== defaultSize(defaults, level)) tokens[`--jelly-type-${level}-size`] = sizeToken(level, Math.min(96, Math.max(8, Math.round(size))));
     }
     const ownFont = level.startsWith("h") ? "heading" : "body";
-    if ((style.font === "heading" || style.font === "body") && style.font !== ownFont) tokens[`--jelly-type-${level}-font`] = `var(--theme-font-${style.font})`;
+    if (typeof style.font === "string" && FONT_ROLES[style.font] && style.font !== ownFont) tokens[`--jelly-type-${level}-font`] = FONT_ROLES[style.font];
     if (typeof style.lineHeight === "string" && lineHeightValues[style.lineHeight]) tokens[`--jelly-type-${level}-line`] = lineHeightValues[style.lineHeight];
     if (typeof style.letterSpacing === "string" && spacingValues[style.letterSpacing]) tokens[`--jelly-type-${level}-tracking`] = spacingValues[style.letterSpacing];
     if (style.textCase === "none" || style.textCase === "uppercase") tokens[`--jelly-type-${level}-case`] = style.textCase;
   }
+
+  // The highlight font (Typography > Highlight font); "same-as-heading" (or empty) = the heading font.
+  const highlight = record(settings.typography).highlightFont;
+  if (typeof highlight === "string" && highlight.trim() && highlight !== "same-as-heading") tokens["--theme-font-highlight"] = fontStack(highlight, "Georgia");
+
+  // Text roles: one token per changed property, listed on the theme root by themeRootAttributes (data-type-roles).
+  const roles = record(settings.textRoles);
+  const changed: string[] = [];
+  for (const role of TEXT_ROLES) {
+    const values = record(roles[roleKey(role.id)]);
+    const set = (key: string, value: string | undefined) => { if (!value) return; const name = roleAttribute(role.id, key); tokens[`--jelly-role-${name}`] = value; changed.push(name); };
+    set("font", typeof values.font === "string" ? FONT_ROLES[values.font] : undefined);
+    set("weight", typeof values.weight === "string" && /^[4-7]00$/.test(values.weight) ? values.weight : undefined);
+    set("size", typeof values.size === "string" && /^\d{2}$/.test(values.size) && Number(values.size) >= 11 && Number(values.size) <= 24 ? `${values.size}px` : undefined);
+    set("letterSpacing", typeof values.letterSpacing === "string" ? spacingValues[values.letterSpacing] : undefined);
+    set("textCase", values.textCase === "none" || values.textCase === "uppercase" ? values.textCase : undefined);
+  }
+  if (changed.length) tokens["--jelly-type-roles"] = changed.join(" ");
 
   const schemes = record(settings.colorSchemes);
   for (const [index, id] of COLOR_SCHEME_IDS.entries()) {
@@ -481,12 +560,15 @@ export type SecondaryButtonStyle = (typeof SECONDARY_BUTTON_STYLES)[number];
  * Data attributes for a theme root, read from its tokens (its style): card style, card photo fit and secondary button
  * style. Spread on every element that carries data-jelly-theme; an undefined value keeps the theme's own look.
  */
-export function themeRootAttributes(style: object | null | undefined): Record<"data-card-layout" | "data-card-fit" | "data-secondary-button", string | undefined> {
-  const value = (style as Record<string, unknown> | null | undefined)?.["--jelly-secondary-button-style"];
+export function themeRootAttributes(style: object | null | undefined): Record<"data-card-layout" | "data-card-fit" | "data-secondary-button" | "data-type-roles", string | undefined> {
+  const tokens = style as Record<string, unknown> | null | undefined;
+  const value = tokens?.["--jelly-secondary-button-style"];
+  const roles = tokens?.["--jelly-type-roles"];
   return {
     "data-card-layout": cardLayoutAttribute(style),
     "data-card-fit": cardFitAttribute(style),
     "data-secondary-button": typeof value === "string" && (SECONDARY_BUTTON_STYLES as readonly string[]).includes(value) ? value : undefined,
+    "data-type-roles": typeof roles === "string" && /^[a-z -]+$/.test(roles) ? roles : undefined,
   };
 }
 

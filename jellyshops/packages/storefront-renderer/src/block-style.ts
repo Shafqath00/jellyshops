@@ -10,7 +10,7 @@ import { showOnChoice } from "./section-style";
  * Unknown values are ignored, so nothing a merchant saves can inject CSS.
  */
 const hex = /^#[0-9a-fA-F]{6}$/;
-const presets = new Set(["h1", "h2", "h3", "h4", "body", "small"]);
+const presets = new Set(["h1", "h2", "h3", "h4", "h5", "h6", "body", "small"]);
 const shadows: Record<string, string> = {
   soft: "0 2px 8px rgba(0, 0, 0, 0.08)",
   medium: "0 6px 20px rgba(0, 0, 0, 0.14)",

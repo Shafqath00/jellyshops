@@ -28,14 +28,14 @@ const typeSize: Record<ContractTypePreset, string> = {
   h2: "var(--jelly-type-h2-size, clamp(1.75rem, 3.6vw, 2.75rem))",
   h3: "var(--jelly-type-h3-size, clamp(1.375rem, 2.2vw, 1.75rem))",
   h4: "var(--jelly-type-h4-size, 1.25rem)",
-  h5: "1.125rem",
-  h6: "1rem",
+  h5: "var(--jelly-type-h5-size, 1.125rem)",
+  h6: "var(--jelly-type-h6-size, 1rem)",
   body: "var(--jelly-type-body-size, var(--jelly-body-size, 1rem))",
   small: "var(--jelly-type-small-size, 0.875rem)",
   caption: "0.75rem",
 };
 const isHeading = (preset: ContractTypePreset) => preset.startsWith("h");
-const typeLevel = (preset: ContractTypePreset) => (["h1", "h2", "h3", "h4", "body", "small"] as string[]).includes(preset);
+const typeLevel = (preset: ContractTypePreset) => (["h1", "h2", "h3", "h4", "h5", "h6", "body", "small"] as string[]).includes(preset);
 
 function typeTokens(): Record<string, string> {
   const tokens: Record<string, string> = {};
@@ -87,7 +87,8 @@ export const CONTRACT_TOKENS: Readonly<Record<string, string>> = {
   "--j-font-body": "var(--theme-font-body, system-ui, sans-serif)",
   "--j-font-heading": "var(--theme-font-heading, var(--j-font-body))",
   "--j-font-subheading": "var(--j-font-body)",
-  "--j-font-accent": "var(--j-font-heading)",
+  // The highlight font (Typography > Highlight font), else the heading font.
+  "--j-font-accent": "var(--theme-font-highlight, var(--j-font-heading))",
   // Line height and tracking choices (tight / normal / loose).
   "--j-line-tight": "1.1",
   "--j-line-normal": "1.4",
