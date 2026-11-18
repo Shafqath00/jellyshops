@@ -21,6 +21,18 @@ export interface WebhookReceiptResult {
   row: StripeWebhookEventRow;
 }
 
+/** Keys never stored from a Stripe event: a PaymentIntent client secret lets anyone confirm that payment. */
+const SECRET_KEYS = new Set(["client_secret"]);
+
+/** A copy of the event without secrets, safe to keep in the database. */
+export function redactStripePayload<T>(value: T): T {
+  if (Array.isArray(value)) return value.map((item) => redactStripePayload(item)) as T;
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>).map(([key, item]) => [key, SECRET_KEYS.has(key) ? "[redacted]" : redactStripePayload(item)]),
+  ) as T;
+}
+
 export class WebhookReceiptRepository {
   constructor(
     private readonly sql: SqlExecutor,
@@ -83,7 +95,7 @@ export class WebhookReceiptRepository {
           input.stripeEventId,
           input.stripeAccountId ?? null,
           input.type,
-          input.payload,
+          redactStripePayload(input.payload),
         ],
       );
 

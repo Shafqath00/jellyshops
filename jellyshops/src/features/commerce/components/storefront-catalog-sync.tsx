@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { AlertCircle } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useShop } from "@/contexts/shop-context";
 import { createCommerceApi } from "@/features/commerce/api/client";
 import type { Store } from "@/lib/domain";
@@ -46,7 +47,11 @@ export function StorefrontCatalogSync({
   const [status, setStatus] =
     useState<CatalogStatus>(initialReady ? "ready" : "loading");
 
+  // An order page only shows the order (from its own request); it never needs the whole catalogue.
+  const orderPage = (usePathname() ?? "").includes("/order/");
+
   useEffect(() => {
+    if (orderPage) return;
     let cancelled = false;
 
     async function syncCatalog() {
@@ -117,7 +122,7 @@ export function StorefrontCatalogSync({
     return () => {
       cancelled = true;
     };
-  }, [repository, storeSlug, initialReady]);
+  }, [repository, storeSlug, initialReady, orderPage]);
 
   return (
     <CatalogStatusContext.Provider value={status}>

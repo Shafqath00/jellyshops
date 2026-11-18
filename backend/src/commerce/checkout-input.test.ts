@@ -17,3 +17,11 @@ describe("checkout buyer details", () => {
     expect(checkoutInputSchema.safeParse({ ...base, customerSnapshot: { email: "a@example.com" }, deliverySnapshot: { line1: "x".repeat(9000) } }).success).toBe(false);
   });
 });
+
+describe("public order delivery address", () => {
+  it("keeps only the address lines and the shopper's name", async () => {
+    const { publicDelivery } = await import("./service.js");
+    expect(publicDelivery({ line1: "1 High St", city: "Leeds", postalCode: "LS1", country: "GB", phone: "0700", email: "a@b.test", extra: { x: 1 } }, "Ada")).toEqual({ name: "Ada", line1: "1 High St", city: "Leeds", postalCode: "LS1", country: "GB" });
+    expect(publicDelivery(null, "Ada")).toBeNull();
+  });
+});

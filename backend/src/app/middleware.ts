@@ -35,6 +35,16 @@ export function configureMiddleware(
     },
   );
 
+  // The API only returns data and files, never pages, so browsers may not run, frame or guess the type of anything it sends.
+  app.use((request, response, next) => {
+    response.setHeader("X-Content-Type-Options", "nosniff");
+    response.setHeader("X-Frame-Options", "DENY");
+    response.setHeader("Referrer-Policy", "no-referrer");
+    response.setHeader("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'");
+    if (request.secure) response.setHeader("Strict-Transport-Security", "max-age=63072000; includeSubDomains");
+    next();
+  });
+
   // How long each request took: "Server-Timing: app;dur=123" for the browser's network panel,
   // and a log line for anything slower than a second.
   app.use((request, response, next) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { cardPhotoSrcSet } from "@jelly/storefront-ui";
 import { useId, useState, type FormEvent } from "react";
 import { ChevronDown, Tag, X } from "lucide-react";
 import { formatMoney, type Currency } from "@/lib/domain";
@@ -117,7 +117,8 @@ export function OrderSummary({ lines, currency, estimatedSubtotal, estimatedShip
             return (
               <li key={`${line.variant.id}-${JSON.stringify(line.item.configurationSelections ?? [])}-${JSON.stringify(line.item.personalisation ?? [])}`} className="jelly-checkout__line">
                 <span className="jelly-checkout__thumb">
-                  {image ? <Image src={image} alt="" fill sizes="64px" /> : null}
+                  {/* eslint-disable-next-line @next/next/no-img-element -- small copies come from the media API (srcSet), not next/image */}
+                  {image ? <img src={image} srcSet={cardPhotoSrcSet(image)} sizes="64px" width={64} height={64} alt="" decoding="async" /> : null}
                   <span className="jelly-checkout__qty" aria-hidden="true">{line.item.quantity}</span>
                 </span>
                 <span className="jelly-checkout__line-text">

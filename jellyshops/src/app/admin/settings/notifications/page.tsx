@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { AdminPage, Banner, Button, Card, Field, SkeletonBlock, useToast } from "@/components/admin";
 import { authApiOrigin, useAuth } from "@/features/auth/providers/auth-provider";
 type Wording = { subject:string; heading:string; message:string; closing:string };
-const EMAIL_TYPES:Array<[string,string]>=[["PLACED","Order placed"],["PAYMENT_CONFIRMED","Payment confirmed"],["PROCESSING","Being prepared"],["PACKED","Packed"],["SHIPPED","Shipped"],["OUT_FOR_DELIVERY","Out for delivery"],["DELIVERED","Delivered"],["SHIPMENT_DELAYED","Delivery delayed"],["DELIVERY_FAILED","Delivery failed"],["CANCELLED","Order cancelled"],["REFUND_PROCESSED","Refund processed"],["DIGITAL_READY","Download ready"]];
+const EMAIL_TYPES:Array<[string,string]>=[["PLACED","Order confirmed (after payment)"],["PAYMENT_CONFIRMED","Later payment confirmed"],["PROCESSING","Being prepared"],["PACKED","Packed"],["SHIPPED","Shipped"],["OUT_FOR_DELIVERY","Out for delivery"],["DELIVERED","Delivered"],["SHIPMENT_DELAYED","Delivery delayed"],["DELIVERY_FAILED","Delivery failed"],["CANCELLED","Order cancelled"],["REFUND_PROCESSED","Refund processed"],["DIGITAL_READY","Download ready"]];
 export default function NotificationSettingsPage() {
  const { session, activeStore } = useAuth(); const token = session?.access_token; const storeId = activeStore?.id;
  const [brandName,setBrandName]=useState(""); const [replyTo,setReplyTo]=useState(""); const [accentColor,setAccentColor]=useState("#192642"); const [logoUrl,setLogoUrl]=useState(""); const [type,setType]=useState("PLACED"); const [preview,setPreview]=useState(""); const [message,setMessage]=useState(""); const [busy,setBusy]=useState(false);

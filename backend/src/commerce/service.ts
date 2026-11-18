@@ -60,6 +60,16 @@ function assertChargeable(discount: AppliedDiscount): void {
   if (discount.totalMinor < MIN_CHARGE_MINOR) throw new ApiError(422, "DISCOUNT_NOT_APPLICABLE", "This code would make the order free, and this shop can't take free orders yet.");
 }
 
+const DELIVERY_FIELDS = ["name", "line1", "line2", "city", "region", "postalCode", "country"] as const;
+
+/** Only the address lines of a delivery snapshot, as plain short strings. */
+export function publicDelivery(snapshot: unknown, customerName?: unknown): Partial<Record<(typeof DELIVERY_FIELDS)[number], string>> | null {
+  if (!snapshot || typeof snapshot !== "object") return null;
+  const source: Record<string, unknown> = { name: customerName, ...(snapshot as Record<string, unknown>) };
+  const address = Object.fromEntries(DELIVERY_FIELDS.flatMap((key) => typeof source[key] === "string" && source[key] ? [[key, (source[key] as string).slice(0, 200)]] : []));
+  return Object.keys(address).length ? address : null;
+}
+
 export class CheckoutService {
   private readonly publicOrderRateLimiter: PublicOrderRateLimiter;
 
@@ -67,9 +77,8 @@ export class CheckoutService {
     private readonly deps: CheckoutServiceDeps,
   ) {
     this.publicOrderRateLimiter =
-      new PublicOrderRateLimiter(
-        deps.repository,
-      );
+      // The order page checks every few seconds while a payment is being confirmed; links are long and random, so this only guards load.
+      new PublicOrderRateLimiter(deps.repository, { limit: 30 });
   }
 
   preparePayment(
@@ -136,10 +145,15 @@ export class CheckoutService {
         subtotalMinor: source.subtotalMinor, shippingMinor: source.shippingMinor,
         ...(Number((source as { discountMinor?: unknown }).discountMinor ?? 0) > 0 ? { discountMinor: (source as { discountMinor?: unknown }).discountMinor, discountCode: (source as { discountCode?: unknown }).discountCode ?? null } : {}),
         totalMinor: source.totalMinor, createdAt: source.createdAt,
+        // The delivery address the shopper typed, shown back to the holder of the private order link (never the email or phone).
+        delivery: publicDelivery((source as { deliverySnapshot?: unknown }).deliverySnapshot, (source as { customerSnapshot?: { name?: unknown } }).customerSnapshot?.name),
         ...("balanceDueMinor" in source ? { balanceDueMinor: source.balanceDueMinor } : {}),
       },
-      items: order.items.map(({ titleSnapshot, imageSnapshot, unitPriceMinor, quantity, configurationSnapshot }) =>
-        ({ titleSnapshot, imageSnapshot, unitPriceMinor, quantity, configurationSnapshot })),
+      items: order.items.map((item) => {
+        const { titleSnapshot, imageSnapshot, unitPriceMinor, quantity, configurationSnapshot } = item;
+        const fulfillmentType = (item as { fulfillmentType?: unknown }).fulfillmentType === "DIGITAL" ? "DIGITAL" : "PHYSICAL";
+        return { titleSnapshot, imageSnapshot, unitPriceMinor, quantity, configurationSnapshot, fulfillmentType };
+      }),
       payment: order.payment ? { status: order.payment.status } : null,
       shipments,
       timeline,

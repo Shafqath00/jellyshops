@@ -4,7 +4,14 @@
  * store its own checkout look later, set these properties on the checkout root
  * (or on the theme root); no layout code needs to change.
  */
-import type { Appearance } from "@stripe/stripe-js";
+import type { Appearance, CssFontSource } from "@stripe/stripe-js";
+
+/**
+ * The card form runs in Stripe's own frame, which cannot use our self-hosted font,
+ * so Stripe loads the same family (Inter) itself.
+ */
+export const STRIPE_FONTS: CssFontSource[] = [{ cssSrc: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" }];
+const STRIPE_FONT_FAMILY = "Inter, system-ui, -apple-system, 'Segoe UI', sans-serif";
 
 export const CHECKOUT_TOKENS = [
   "--checkout-bg",
@@ -16,9 +23,19 @@ export const CHECKOUT_TOKENS = [
   "--checkout-on-primary",
   "--checkout-danger",
   "--checkout-success",
+  "--checkout-pending",
   "--checkout-focus",
   "--checkout-font-body",
   "--checkout-font-heading",
+  "--checkout-text-xs",
+  "--checkout-text-sm",
+  "--checkout-text-md",
+  "--checkout-text-lg",
+  "--checkout-text-xl",
+  "--checkout-text-2xl",
+  "--checkout-weight-regular",
+  "--checkout-weight-medium",
+  "--checkout-weight-bold",
   "--checkout-radius",
   "--checkout-radius-field",
   "--checkout-radius-button",
@@ -38,7 +55,6 @@ const FALLBACK = {
   primary: "#1f2328",
   danger: "#b42318",
   radiusField: "8px",
-  font: "system-ui, -apple-system, 'Segoe UI', sans-serif",
 };
 
 const PLAIN = /^(#[0-9a-f]{3,8}|rgba?\([^)]*\)|hsla?\([^)]*\))$/i;
@@ -76,7 +92,6 @@ function length(value: string, fallback: string): string {
 export function stripeAppearance(root: Element | null): Appearance {
   const style = root ? getComputedStyle(root) : null;
   const read = (token: CheckoutToken) => style?.getPropertyValue(token) ?? "";
-  const font = read("--checkout-font-body").trim();
   const surface = plainColour(read("--checkout-surface"), FALLBACK.surface);
   return {
     theme: "stripe",
@@ -87,13 +102,16 @@ export function stripeAppearance(root: Element | null): Appearance {
       colorTextSecondary: plainColour(read("--checkout-muted"), FALLBACK.muted, surface),
       colorDanger: plainColour(read("--checkout-danger"), FALLBACK.danger, surface),
       borderRadius: length(read("--checkout-radius-field"), FALLBACK.radiusField),
-      // The card form is drawn in Stripe's own frame; theme web fonts are not loaded there, so keep a system fallback.
-      fontFamily: font ? `${font}, ${FALLBACK.font}` : FALLBACK.font,
+      fontFamily: STRIPE_FONT_FAMILY,
+      fontSizeBase: "16px",
+      fontWeightNormal: "400",
+      fontWeightMedium: "500",
       spacingUnit: "4px",
     },
     rules: {
       ".Input": { border: `1px solid ${plainColour(read("--checkout-border"), FALLBACK.border, surface)}`, boxShadow: "none" },
-      ".Label": { fontWeight: "500" },
+      ".Label": { fontWeight: "500", fontSize: "14px" },
+      ".Tab--selected": { borderColor: plainColour(read("--checkout-primary"), FALLBACK.primary, surface) },
     },
   };
 }

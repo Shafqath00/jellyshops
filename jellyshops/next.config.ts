@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { securityHeaderRules } from "./src/lib/security-headers";
 
 const nextConfig: NextConfig = {
   distDir: process.env.JELLY_E2E_NEXT_DIST_DIR ?? ".next",
@@ -10,6 +11,14 @@ const nextConfig: NextConfig = {
     "@jelly/storefront-renderer"
   ],
   allowedDevOrigins: ["127.0.0.1"],
+  // HSTS, frame and sniffing protection everywhere; a Stripe-only Content Security Policy on checkout and order pages.
+  async headers() {
+    return securityHeaderRules({
+      production: process.env.NODE_ENV === "production",
+      apiUrl: process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL,
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    });
+  },
   // Admin pages that moved in the 2026-11 navigation regroup keep working from old links.
   async redirects() {
     return [

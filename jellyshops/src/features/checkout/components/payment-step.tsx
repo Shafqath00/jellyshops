@@ -6,7 +6,7 @@ import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import { LockKeyhole, ShieldCheck } from "lucide-react";
 import { formatMoney, type Currency } from "@/lib/domain";
 import { safeReturnUrl } from "../checkout-model";
-import { stripeAppearance } from "../checkout-tokens";
+import { STRIPE_FONTS, stripeAppearance } from "../checkout-tokens";
 
 /** One Stripe.js instance per connected account; Stripe asks for this to be created once. */
 const stripeByAccount = new Map<string, Promise<Stripe | null>>();
@@ -85,7 +85,7 @@ export function PaymentStep(props: PaymentStepProps) {
       <h2 id="checkout-payment-title" className="jelly-checkout__panel-title" tabIndex={-1}>Payment</h2>
       <p className="jelly-checkout__note"><LockKeyhole size={14} aria-hidden="true" /> Secure payment by Stripe. Your card details are never stored by this shop.</p>
       {publishableKey ? (
-        <Elements stripe={stripeFor(publishableKey, props.connectedAccountId)} options={{ clientSecret: props.clientSecret, appearance }}>
+        <Elements stripe={stripeFor(publishableKey, props.connectedAccountId)} options={{ clientSecret: props.clientSecret, appearance, fonts: STRIPE_FONTS }}>
           <PaymentForm {...props} />
         </Elements>
       ) : (

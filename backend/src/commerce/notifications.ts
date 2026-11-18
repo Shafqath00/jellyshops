@@ -6,7 +6,7 @@ export const notificationTypes = ["PLACED", "PAYMENT_CONFIRMED", "PROCESSING", "
 /** Notifications that name a shipment, so they carry its carrier and tracking details. */
 const shipmentNotificationTypes: ReadonlySet<string> = new Set(["SHIPPED", "OUT_FOR_DELIVERY", "DELIVERED", "SHIPMENT_DELAYED", "DELIVERY_FAILED"]);
 export type NotificationType = typeof notificationTypes[number];
-const titles: Record<NotificationType, string> = { PLACED: "Order placed", PAYMENT_CONFIRMED: "Payment confirmed", PROCESSING: "Your order is being prepared", PACKED: "Your order is packed", SHIPPED: "Your order has shipped", OUT_FOR_DELIVERY: "Your order is out for delivery", DELIVERED: "Your order was delivered", SHIPMENT_DELAYED: "Your shipment is delayed", DELIVERY_FAILED: "A delivery attempt failed", CANCELLED: "Order cancelled", REFUND_PROCESSED: "Refund processed", DIGITAL_READY: "Your downloads are ready" };
+const titles: Record<NotificationType, string> = { PLACED: "Order confirmed", PAYMENT_CONFIRMED: "Payment confirmed", PROCESSING: "Your order is being prepared", PACKED: "Your order is packed", SHIPPED: "Your order has shipped", OUT_FOR_DELIVERY: "Your order is out for delivery", DELIVERED: "Your order was delivered", SHIPMENT_DELAYED: "Your shipment is delayed", DELIVERY_FAILED: "A delivery attempt failed", CANCELLED: "Order cancelled", REFUND_PROCESSED: "Refund processed", DIGITAL_READY: "Your downloads are ready" };
 const escape = (value: unknown) => String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 export function digitalToken(id: string, secret: string): string {
   if (secret.length < 32) throw new Error("DIGITAL_TOKEN_SECRET must contain at least 32 characters");
@@ -19,7 +19,7 @@ export function notificationRetry(attempts: number, uncertain: boolean) {
 export interface NotificationContent { brandName: string; customerName?: string; number: string; totalMinor: number; currency: string; orderUrl: string; accentColor?: string; logoUrl?: string | null; contactEmail?: string; refundAmountMinor?: number; items?: { title: string; quantity: number; unitPriceMinor: number; /** The line's choices and personalisation, "Engraving: SAM". */ details?: string[] }[]; downloads?: { filename: string; url: string }[]; tracking?: { carrier?: string; number?: string; url?: string }[] }
 export interface NotificationTemplate { subject: string; heading: string; message: string; closing: string }
 const defaultMessages: Record<NotificationType, string> = {
-  PLACED: "We've received your order. You'll find your order details below.",
+  PLACED: "Your payment went through and your order is confirmed. You'll find your order details below.",
   PAYMENT_CONFIRMED: "Your payment is confirmed. Thank you for shopping with us.",
   PROCESSING: "We're preparing your order and will keep you updated as it moves along.",
   PACKED: "Your order has been packed and is being prepared for shipment.",

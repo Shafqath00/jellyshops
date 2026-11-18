@@ -15,8 +15,9 @@ Code: `backend/src/commerce/{routes,service,payment-intents,repository,rate-limi
 3. **Prepare payment.** `POST .../checkout/payment-intent` with `attemptId`. `PaymentIntentService.preparePayment()` creates or retrieves the Stripe PaymentIntent on the connected account and returns `clientSecret` + `connectedAccountId` for Stripe Elements, plus `totals` (subtotal, shipping, total and the PaymentIntent's `amountMinor`) so the page shows what will really be charged. It never creates orders.
 4. **Pay (browser).** Stripe Payment Element confirms the intent using the publishable key `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` and the connected account id.
 5. **Settle (webhook).** Stripe calls `/webhooks/stripe/connect-payments`; `processConnectPaymentEvent` marks the `Payment` and `Order` and converts or releases reservations. The browser result is never trusted. See [payment-system](payment-system.md).
-6. **Confirmation.** After a card payment the page empties the bag and goes to `/[storeSlug]/order/[publicToken]?paid=1`; bank or wallet methods come back there through Stripe's `return_url` (same site only, https only, http allowed on localhost). The page polls `GET /api/public/stores/:storeId/orders/:publicToken`. A balance-due page exists at `.../order/[publicToken]/balance` for order edits that increase the total.
-7. **Expiry.** `ReservationSweeper` (called by `POST /internal/commerce/reservations/sweep`) releases reservations of abandoned attempts.
+6. **Confirmation.** After a card payment the page empties the bag and goes to `/[storeSlug]/order/[publicToken]?paid=1`; bank or wallet methods come back there through Stripe's `return_url` (same site only, https only, http allowed on localhost). Neither `?paid=1` nor Stripe's `redirect_status` counts as proof: the page asks our server (`GET /api/public/stores/:storeId/orders/:publicToken`) and shows "Thank you for your order" only once the order is `PAID`. While it waits it checks after 1.5, 2, 3, 4, 5, 8 and 10 seconds, then every 15 seconds (the server allows 30 lookups a minute per shop and address), and stops once paid. The store id comes from the server page, so the order is asked for straight away. A balance-due page exists at `.../order/[publicToken]/balance` for order edits that increase the total.
+7. **Emails.** Nothing is emailed when checkout creates the order. The order confirmation (`PLACED`, "Order confirmed") is queued by a database trigger when the order goes from `PENDING_PAYMENT` to `PAID`, which only the webhook does; its dedupe key `placed:<order>` and the stored Stripe event ids make it one email per order however often Stripe retries. A declined card leaves the order waiting (the shopper can try again on the same payment) and sends nothing; an unpaid checkout that is cancelled, abandoned or replaced is cancelled quietly. "Order cancelled" goes only to orders that were paid. Migration `20261118010000_order_email_after_payment.sql`; tests `backend/src/commerce/order-email-timing-db.test.ts`.
+8. **Expiry.** `ReservationSweeper` (called by `POST /internal/commerce/reservations/sweep`) releases reservations of abandoned attempts.
 
 ## Rules that must stay true
 
@@ -24,6 +25,7 @@ Code: `backend/src/commerce/{routes,service,payment-intents,repository,rate-limi
 - Reservations and order insertion happen in the same transaction as the attempt.
 - Any change to buyer/delivery data invalidates attempt reuse (hash).
 - Every query is filtered by `storeId`.
+- Order status changes follow one list, `backend/src/commerce/order-status.ts` (`canTransitionOrder`): an unpaid order can only become paid or cancelled; cancelled and refunded are final. The database refuses anything else (`jelly_order_status_guard` trigger, same migration); `order-status.test.ts` keeps the two lists equal.
 
 ## Checkout template (one for every theme)
 
@@ -44,7 +46,9 @@ Every store and theme draws the same checkout from `jellyshops/src/features/chec
 | `components/payment-step.tsx` | Stripe Payment Element and the Pay button. |
 | `components/order-summary.tsx` | Lines, subtotal, delivery and total (an estimate first, then the server's figures). |
 | `components/checkout-states.tsx` | Loading skeleton, empty bag, error banner. |
-| `components/checkout-confirmation.tsx` | Paid, waiting, failed, cancelled and refunded states, used by the order page. |
+| `components/checkout-confirmation.tsx` | Paid, waiting, failed, cancelled and refunded states, the order details card (payment status, delivery address, delivery) and the loading skeleton, used by the order page. |
+| `use-order-status.ts` | Loads the order from our server and checks again while the payment is being confirmed. |
+| `order-confirmation-model.ts` | Which state to show (paid only when the server says so), payment label, address lines, delivery wording. |
 
 ### Changing the look (theme tokens)
 
@@ -57,11 +61,13 @@ Every store and theme draws the same checkout from `jellyshops/src/features/chec
 | `--checkout-border`, `--checkout-divider` | 58% of the text colour on the field colour (so field edges keep 3:1 contrast), `--j-color-divider` | Field borders, lines |
 | `--checkout-primary`, `--checkout-on-primary` | `--j-color-primary`, `--j-color-on-primary` | Continue and Pay buttons, focus ring |
 | `--checkout-danger`, `--checkout-success` | fixed | Errors, the paid tick |
-| `--checkout-font-body`, `--checkout-font-heading` | `--j-font-body`, `--j-font-heading` | Text and headings |
+| `--checkout-font-body`, `--checkout-font-heading` | Inter (`--font-inter`), then system fonts | Text and headings; the Stripe form loads Inter itself (`STRIPE_FONTS`) |
+| `--checkout-text-xs` … `--checkout-text-2xl`, `--checkout-weight-*` | fixed scale (13, 14, 16, 18, 22px, title) and 400/500/600 | Type sizes and weights |
+| `--checkout-pending` | fixed | The "Confirming…" badge |
 | `--checkout-radius`, `--checkout-radius-field`, `--checkout-radius-button` | `--j-radius-card`, `--j-radius-field`, `--j-radius-button` | Corners |
 | `--checkout-field-height`, `--checkout-button-height`, `--checkout-space`, `--checkout-max-width`, `--checkout-summary-width` | `--j-field-height`, `--j-button-height` | Sizes and the 8px spacing step |
 
-So a theme changes checkout through its normal colour, font and corner settings. To give one store its own checkout look later, set `--checkout-*` values on an ancestor of `.jelly-checkout` (for example from a store setting written as an inline style on the checkout page); no layout or logic changes. The store logo and name come from the theme's header around the page.
+So a theme changes checkout through its normal colour and corner settings; the type is Inter on every store for readability. To give one store its own checkout look later, set `--checkout-*` values on an ancestor of `.jelly-checkout` (for example from a store setting written as an inline style on the checkout page); no layout or logic changes. The store logo and name come from the theme's header around the page.
 
 The Stripe card form runs in Stripe's own frame, so `stripeAppearance()` copies the token values into Stripe's appearance options. Only plain colours are copied, and theme web fonts fall back to the system font there. Never put fixed colours in `checkout.css` outside part 1, and don't style `.jelly-checkout` from a theme file.
 
@@ -78,16 +84,27 @@ Payments go to each store owner's own Stripe account (Stripe Connect, direct cha
    Every request's `Stripe-Signature` is checked against the raw body before anything is read, and each event id is stored once (`receipt-repository.ts`), so Stripe's retries never change anything twice. An order only becomes paid through the webhook, never because the browser says so.
 
    Locally, with the Stripe CLI: `stripe listen --forward-connect-to localhost:3001/webhooks/stripe/connect-payments`, then put the `whsec_…` it prints into `STRIPE_CONNECT_PAYMENTS_WEBHOOK_SECRET`.
-4. **Test cards** (any future expiry date, any CVC, any postcode):
+4. **Test locally.** Run the backend and frontend, then in another terminal:
+
+   ```bash
+   stripe listen --forward-connect-to localhost:3001/webhooks/stripe/connect-payments
+   ```
+
+   Put the `whsec_…` it prints into `STRIPE_CONNECT_PAYMENTS_WEBHOOK_SECRET` and restart the backend. `stripe trigger payment_intent.succeeded --stripe-account acct_…` sends a test event. Use `--forward-connect-to` (not `--forward-to`): payments happen on the merchant's connected account.
+5. **Test cards** (any future expiry date, any CVC, any postcode):
    - `4242 4242 4242 4242`: pays straight away.
    - `4000 0025 0000 3155`: asks for 3D Secure; approve or fail it in the pop-up.
    - `4000 0000 0000 9995`: declined (insufficient funds); the page says nothing was charged.
    - `4000 0000 0000 0002`: generic decline.
 
-   After a successful payment the order page shows "We're confirming your payment" until the webhook arrives, then "Thank you for your order". If it keeps waiting, the webhook isn't reaching the backend.
-5. **Going live.** Switch both keys and both webhook secrets to live values, set `STRIPE_CARD_PAYMENT_METHOD_CONFIGURATION_ID` (required in production), and serve stores over https (the return address refuses plain http except on localhost).
+   After a successful payment the order page shows "We're confirming your payment" until the webhook arrives, then "Thank you for your order", and the "Order confirmed" email is queued. With the declined cards the checkout says the payment didn't go through, nothing is charged and no email is sent. If the order page keeps waiting, the webhook isn't reaching the backend.
+6. **Going live.** Switch both keys and both webhook secrets to live values, set `STRIPE_CARD_PAYMENT_METHOD_CONFIGURATION_ID` (required in production), and serve stores over https (the return address refuses plain http except on localhost).
 
 ### Security notes
+
+- Headers: every page sends `X-Content-Type-Options`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy`, `Permissions-Policy` and, in production, HSTS. Checkout and order pages also send a Content Security Policy that allows scripts and frames only from this site and Stripe (`jellyshops/src/lib/security-headers.ts`, used by `next.config.ts`). The API sends `nosniff`, `X-Frame-Options: DENY`, `default-src 'none'` and HSTS over https (`backend/src/app/middleware.ts`).
+- Stored Stripe events have the PaymentIntent `client_secret` removed before saving (`redactStripePayload`); logs never include card data, client secrets or Stripe payloads.
+- The order page is opened only with its long random link (the confirmation email carries it); it shows the delivery address but never the email or phone, and is kept out of search engines.
 
 - Prices, shipping and totals come from the database (`validateCart`). The browser sends only variant ids, quantities, option ids and personalisation text. The PaymentIntent amount is the server's total.
 - Buyer details are checked on the server: a valid email, name up to 120 characters, phone up to 40, and each snapshot up to 8 KB.

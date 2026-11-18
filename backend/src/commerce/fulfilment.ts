@@ -2,6 +2,7 @@ import { ApiError } from "../http/errors.js";
 import type { CommerceRepository } from "./repository.js";
 import { appendOrderEvent } from "./order-management.js";
 import { randomUUID } from "node:crypto";
+import { canTransitionOrder } from "./order-status.js";
 
 const fulfilmentTransitions: Record<string, string> = {
   PAID: "CONFIRMED",
@@ -56,7 +57,7 @@ export class FulfilmentService {
 
       const allowedNextStatus = fulfilmentTransitions[order.status];
 
-      if (allowedNextStatus !== nextStatus) {
+      if (allowedNextStatus !== nextStatus || !canTransitionOrder(order.status, nextStatus)) {
         throw new ApiError(
           409,
           "ORDER_TRANSITION_INVALID",
