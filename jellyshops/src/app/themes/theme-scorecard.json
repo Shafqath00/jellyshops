@@ -2,7 +2,7 @@
   "jelly-avenue": {
     "theme": "jelly-avenue",
     "styling": "legacy",
-    "internals": 46,
+    "internals": 43,
     "settingsCopy": 0,
     "mainSections": [
       "article",
@@ -28,7 +28,7 @@
     "demoContent": false,
     "conformance": true,
     "lintFindings": 6,
-    "cssGzipKb": 18.9
+    "cssGzipKb": 17.9
   },
   "jelly-diode": {
     "theme": "jelly-diode",
@@ -126,7 +126,7 @@
   "jelly-harbour": {
     "theme": "jelly-harbour",
     "styling": "legacy",
-    "internals": 32,
+    "internals": 29,
     "settingsCopy": 0,
     "mainSections": [
       "article",
@@ -152,7 +152,7 @@
     "demoContent": false,
     "conformance": true,
     "lintFindings": 0,
-    "cssGzipKb": 15.1
+    "cssGzipKb": 14.1
   },
   "jelly-resthaven": {
     "theme": "jelly-resthaven",
@@ -188,7 +188,7 @@
   "jelly-signature": {
     "theme": "jelly-signature",
     "styling": "legacy",
-    "internals": 32,
+    "internals": 29,
     "settingsCopy": 0,
     "mainSections": [
       "article",
@@ -214,6 +214,6 @@
     "demoContent": false,
     "conformance": true,
     "lintFindings": 2,
-    "cssGzipKb": 15.1
+    "cssGzipKb": 14.1
   }
 }

@@ -2019,3 +2019,18 @@ html.lenis, html.lenis body { height: auto; }
 :where([data-jelly-theme]) .jelly-cart-drawer-preview-panel { display: grid; gap: var(--j-space-sm, 12px); width: min(22rem, calc(100% - 2 * var(--j-space-md, 16px))); padding: var(--j-space-lg, 24px); border-radius: var(--j-radius-card, 12px); background: var(--j-color-bg, #fff); color: var(--j-color-text, #111); box-shadow: 0 8px 30px rgb(0 0 0 / .12); }
 :where([data-jelly-theme]) .jelly-cart-drawer-preview-heading { font-size: var(--j-type-h4-size, 1.25rem); }
 :where([data-jelly-theme]) :is(.jelly-cart-drawer-preview-free, .jelly-cart-drawer-preview-empty) { margin: 0; color: var(--j-color-muted, #555); }
+
+/* Email sign-up block (Custom section, pop-up): label above a full-width field, the consent line with its box, then a
+   full-width button. Zero weight, so a theme's own form rules still win. */
+:where(.jelly-newsletter-block) form { display: grid; gap: var(--j-space-sm, 12px); text-align: start; }
+:where(.jelly-newsletter-block) form > label:not(:has(input[type="checkbox"])) { display: grid; gap: var(--j-space-2xs, 4px); font-size: var(--j-type-small-size, .875rem); font-weight: 600; }
+:where(.jelly-newsletter-block) input[type="email"] { box-sizing: border-box; width: 100%; min-height: var(--j-field-height, 44px); padding: 0 12px; border: 1px solid var(--j-color-border-strong, var(--j-color-border, #8a8a8a)); border-radius: var(--j-radius-field, 8px); background: var(--j-color-bg, #fff); color: var(--j-color-text, #111); font: inherit; font-weight: 400; }
+:where(.jelly-newsletter-block) form > label:has(input[type="checkbox"]) { display: flex; align-items: flex-start; gap: var(--j-space-xs, 8px); font-size: var(--j-type-small-size, .875rem); color: var(--j-color-muted, #555); line-height: 1.4; }
+:where(.jelly-newsletter-block) input[type="checkbox"] { flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--j-color-primary, currentColor); }
+:where(.jelly-newsletter-block) form > button { width: 100%; min-height: var(--j-button-height, 44px); padding: 0 var(--j-button-padding, 1.5em); border: 0; border-radius: var(--j-radius-button, 999px); background: var(--j-color-primary, #111); color: var(--j-color-on-primary, #fff); font: inherit; font-weight: 600; cursor: pointer; }
+:where(.jelly-newsletter-block) form > button:disabled { opacity: .6; cursor: default; }
+:where(.jelly-newsletter-block) form > p { margin: 0; font-size: var(--j-type-small-size, .875rem); color: var(--j-color-muted, #555); }
+/* The pop-up sits outside every section, so its heading gets the theme's Heading 3 style here. */
+:where([data-jelly-theme]) .jelly-popup-body > h2 { margin: 0; padding-inline-end: 32px; font-family: var(--j-type-h3-font, var(--j-font-heading, inherit)); font-size: var(--j-type-h3-size, 1.5rem); line-height: var(--j-type-h3-line, 1.2); letter-spacing: var(--j-type-h3-track, normal); text-transform: var(--j-type-h3-case, none); }
+:where([data-jelly-theme]) .jelly-popup-body > :is(p, .jelly-setting-text) { margin: 0; color: var(--j-color-muted, #555); }
+:where([data-jelly-theme]) .jelly-popup-body .jelly-newsletter-block { max-width: none; }
