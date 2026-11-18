@@ -63,7 +63,7 @@ it("gives the frame one colour scheme for all three ways a section can be colour
   expect(sectionScheme({ styleScheme: "scheme2", styleColors: true, styleBackground: "#112233" })).toBe("custom");
   // Own colours switched on but none chosen: the scheme still applies.
   expect(sectionScheme({ styleScheme: "scheme5", styleColors: true })).toBe("scheme5");
-  expect(sectionScheme({ styleScheme: "scheme9", colorScheme: "loud" })).toBeUndefined();
+  expect(sectionScheme({ styleScheme: "scheme17", colorScheme: "loud" })).toBeUndefined();
   render(<RegistrySectionRenderer section={{ id: "s2", type: "faq", enabled: true, settings: { colorScheme: "soft" }, blocks: [] }} mode="published" commerce={{ getProducts: async () => [] }} />);
   expect(screen.getByTestId("section-faq")).toHaveAttribute("data-scheme", "soft");
 });

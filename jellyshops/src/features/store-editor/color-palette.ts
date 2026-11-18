@@ -35,6 +35,7 @@ export function themePalette(themeId: string | undefined, settings: Record<strin
     add(`${name} background`, scheme.background);
     add(`${name} text`, scheme.text);
     add(`${name} button`, scheme.button);
+    add(`${name} secondary button`, scheme.secondaryButton);
   }
   return found;
 }

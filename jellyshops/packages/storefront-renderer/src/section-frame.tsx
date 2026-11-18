@@ -28,7 +28,7 @@ export function sectionScheme(settings: Record<string, unknown> | undefined): Co
   if (!settings) return undefined;
   const text = (key: string) => typeof settings[key] === "string" ? settings[key] as string : "";
   if (settings.styleColors === true && (HEX.test(text("styleBackground")) || HEX.test(text("styleText")))) return "custom";
-  if (/^scheme[1-8]$/.test(text("styleScheme"))) return text("styleScheme") as ContractScheme;
+  if (/^scheme([1-9]|1[0-6])$/.test(text("styleScheme"))) return text("styleScheme") as ContractScheme;
   if (["page", "soft", "dark"].includes(text("colorScheme"))) return text("colorScheme") as ContractScheme;
   return undefined;
 }

@@ -45,7 +45,7 @@ it("uses a colour scheme from theme settings unless the section has its own colo
   expect(props["data-section-style"]).toBe("colors scheme");
   expect(props.style).toMatchObject({ "--section-bg": "var(--jelly-scheme-3-bg)", "--section-button": "var(--jelly-scheme-3-button)" });
   expect(sectionStyleProps({ styleScheme: "scheme3", styleColors: true, styleBackground: "#112233" }).style).toMatchObject({ "--section-bg": "#112233", "--section-button-text": "var(--jelly-scheme-3-button-text)" });
-  expect(sectionStyleProps({ styleScheme: "scheme9" })).toEqual({});
+  expect(sectionStyleProps({ styleScheme: "scheme17" })).toEqual({});
 });
 
 it("adds phone values and Show on, and ignores unknown phone values", () => {

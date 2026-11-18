@@ -21,6 +21,7 @@ import { discoveredThemes } from "./themes/index.generated.js";
 import { compareThemeVersions } from "@jelly/storefront-schema";
 import { THEME_BASE_IDS } from "./theme-base-ids.js";
 import { applyOwnSettings, withPlatformSettings, type PlatformSetting } from "./platform-settings.js";
+import { COLOR_SCHEME_IDS, colorSchemeSource } from "./theme-style-settings.js";
 
 /**
  * Every theme built here is announced, so the main entry (theme-registry-checks.ts) can check its manifest and
@@ -100,7 +101,7 @@ const settingAt = (settings: Record<string, unknown>, path: string) => path.spli
 function extendedTheme(manifest: ThemeManifestInput, baseId: string): ThemeDefinition {
   const base = getThemeDefinition(baseId);
   const baseManifest = base.manifest as ThemeManifestInput & { settingsDefaults: Record<string, unknown>; settingsSchema?: Array<{ id: string; default?: unknown }> };
-  const settingsDefaults = mergeSettings(baseManifest.settingsDefaults, (manifest.settingsDefaults ?? {}) as Record<string, unknown>);
+  const settingsDefaults = withOwnExtraSchemes(mergeSettings(baseManifest.settingsDefaults, (manifest.settingsDefaults ?? {}) as Record<string, unknown>), manifest.settingsDefaults);
   // The base design's settings (the platform list plus the base's own entries) with this theme's defaults; the
   // theme's own entries change wording or add settings, as for any theme.
   const own = Array.isArray(manifest.settingsSchema) ? manifest.settingsSchema as PlatformSetting[] : [];
@@ -114,6 +115,23 @@ function extendedTheme(manifest: ThemeManifestInput, baseId: string): ThemeDefin
   const typography = (settingsDefaults.typography ?? {}) as Record<string, string>;
   const tokens: ThemeTokens = { ...base.tokens, colors: { ...base.tokens.colors, ...colors }, typography: { display: typography.headingFont ?? base.tokens.typography.display, body: typography.bodyFont ?? base.tokens.typography.body } };
   return built(buildThemeDefinition({ id: manifest.id as ThemeId, label: manifest.name, tokens, manifest: merged, sectionOverrides: base.sectionOverrides, components: base.components }));
+}
+
+/**
+ * A theme built on another sets its own schemes 1-4; the extra schemes it does not list copy those, not the base
+ * design's copies of the base's colours.
+ */
+function withOwnExtraSchemes(merged: Record<string, unknown>, own: unknown): Record<string, unknown> {
+  const ownSchemes = ((own as { colorSchemes?: Record<string, unknown> } | undefined)?.colorSchemes ?? {}) as Record<string, Record<string, unknown> | undefined>;
+  const schemes = { ...((merged.colorSchemes ?? {}) as Record<string, Record<string, unknown> | undefined>) };
+  for (const id of COLOR_SCHEME_IDS) {
+    const source = colorSchemeSource(id);
+    if (source === id || ownSchemes[id] || !ownSchemes[source]) continue;
+    // The name stays the extra scheme's own.
+    const colours = Object.fromEntries(Object.entries(ownSchemes[source] as Record<string, unknown>).filter(([key]) => key !== "name"));
+    schemes[id] = { ...schemes[id], ...colours };
+  }
+  return { ...merged, colorSchemes: schemes };
 }
 
 /**

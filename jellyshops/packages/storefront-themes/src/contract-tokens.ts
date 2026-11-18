@@ -101,11 +101,15 @@ export const CONTRACT_TOKENS: Readonly<Record<string, string>> = {
   "--j-color-bg": "var(--theme-background, #ffffff)",
   "--j-color-surface": "var(--theme-surface, var(--j-color-bg))",
   "--j-color-text": "var(--theme-text, #1a1a1a)",
-  "--j-color-muted": "var(--theme-muted-text, color-mix(in srgb, var(--j-color-text) 75%, transparent))",
-  "--j-color-border": "var(--theme-border, color-mix(in srgb, var(--j-color-text) 18%, transparent))",
+  // Outside a section with a scheme, Scheme 1 (the page scheme) gives the optional colours when the merchant sets them.
+  "--j-color-muted": "var(--jelly-scheme-1-muted, var(--theme-muted-text, color-mix(in srgb, var(--j-color-text) 75%, transparent)))",
+  "--j-color-border": "var(--jelly-scheme-1-border, var(--theme-border, color-mix(in srgb, var(--j-color-text) 18%, transparent)))",
   "--j-color-accent": "var(--theme-accent, var(--j-color-text))",
   "--j-color-primary": "var(--jelly-color-primary, var(--j-color-text))",
   "--j-color-on-primary": "var(--j-color-bg)",
+  // Secondary buttons (Buttons > Secondary button style): the scheme's secondary button colour, else its text.
+  "--j-color-secondary": "var(--jelly-scheme-1-secondary, var(--j-color-text))",
+  "--j-color-on-secondary": "var(--jelly-scheme-1-on-secondary, var(--j-color-bg))",
   "--j-color-sale": "var(--jelly-badge-bg, #b42318)",
   // Page titles outside a hero (collection, bag, search, information pages).
   "--j-page-title-size": "clamp(2rem, 4.2vw, 3.25rem)",
@@ -136,16 +140,20 @@ function derivedTokenDefaults(): Record<string, string> {
 }
 
 /**
- * Colour schemes a section frame can carry (`data-scheme`): the theme's schemes 1-8, the older Page / Soft / Dark
+ * Colour schemes a section frame can carry (`data-scheme`): the theme's schemes 1-16, the older Page / Soft / Dark
  * choices (aliases of theme schemes, resolved in `resolveThemeStyleTokens`) and "custom" (the section's own colours).
  * Inside a section with a scheme every `--j-color-*` role follows that scheme.
  */
-export const CONTRACT_SCHEMES = ["scheme1", "scheme2", "scheme3", "scheme4", "scheme5", "scheme6", "scheme7", "scheme8", "page", "soft", "dark", "custom"] as const;
+export const CONTRACT_SCHEMES = ["scheme1", "scheme2", "scheme3", "scheme4", "scheme5", "scheme6", "scheme7", "scheme8", "scheme9", "scheme10", "scheme11", "scheme12", "scheme13", "scheme14", "scheme15", "scheme16", "page", "soft", "dark", "custom"] as const;
 export type ContractScheme = (typeof CONTRACT_SCHEMES)[number];
 
-/** The colour roles of one scheme, built from its background, text, button and button text colours. */
+/**
+ * The colour roles of one scheme, built from its background, text, button and button text colours. A scheme's own
+ * secondary button, border and soft text colours (written only when the merchant sets them) replace the tints.
+ */
 export function contractSchemeRoles(scheme: ContractScheme): Record<string, string> {
   const id = scheme.startsWith("scheme") ? scheme.slice(6) : scheme;
+  const own = (part: string, otherwise: string) => scheme === "custom" ? otherwise : `var(--jelly-scheme-${id}-${part}, ${otherwise})`;
   const source = scheme === "custom"
     ? { bg: "var(--section-bg)", text: "var(--section-text)", button: "var(--section-text)", buttonText: "var(--section-bg)" }
     : {
@@ -160,10 +168,12 @@ export function contractSchemeRoles(scheme: ContractScheme): Record<string, stri
     "--j-color-text": source.text,
     "--j-color-surface": "color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg))",
     // 82%, not 75%: on strong mid-tone backgrounds (a bright blue scheme) 75% fell under WCAG AA (merchant-edit fuzz, Phase 6).
-    "--j-color-muted": "color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg))",
-    "--j-color-border": "color-mix(in srgb, var(--j-color-text) 18%, transparent)",
+    "--j-color-muted": own("muted", "color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg))"),
+    "--j-color-border": own("border", "color-mix(in srgb, var(--j-color-text) 18%, transparent)"),
     "--j-color-primary": source.button,
     "--j-color-on-primary": source.buttonText,
+    "--j-color-secondary": own("secondary", "var(--j-color-text)"),
+    "--j-color-on-secondary": own("on-secondary", "var(--j-color-bg)"),
   };
 }
 

@@ -12,7 +12,7 @@ import { choice, numberValue, sectionData, stringValue, visibleBlocks } from "./
 import { RecipeProducts } from "./recipe-products";
 import { renderContentBlock } from "./content-blocks";
 
-const SECTION_SCHEMES = ["scheme1", "scheme2", "scheme3", "scheme4", "scheme5", "scheme6", "scheme7", "scheme8"] as const;
+const SECTION_SCHEMES = ["scheme1", "scheme2", "scheme3", "scheme4", "scheme5", "scheme6", "scheme7", "scheme8", "scheme9", "scheme10", "scheme11", "scheme12", "scheme13", "scheme14", "scheme15", "scheme16"] as const;
 const widths: Record<string, string> = { narrow: "36rem", normal: "48rem", wide: "72rem", full: "none" };
 
 interface BlockContext { context: StorefrontRuntimeContext; editor: boolean; selectedBlockId?: string }

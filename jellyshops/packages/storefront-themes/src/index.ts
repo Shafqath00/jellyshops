@@ -38,7 +38,7 @@ export { applyThemeStyle, listThemeStyles } from "./theme-styles.js";
 export type { ThemeStyle } from "./theme-styles.js";
 export { ARCHETYPE_DIMENSIONS, ARCHETYPES, MAX_SHARED_ARCHETYPES, TEMPLATE_PROGRAMME, checkTemplateDistinctness, sharedArchetypes } from "./template-programme.js";
 export type { ArchetypeDimension, ArchetypeOption, TemplatePlan } from "./template-programme.js";
-export { cardFitAttribute, cardLayoutAttribute, PRODUCT_CARD_LAYOUTS } from "./theme-style-settings.js";
+export { cardFitAttribute, cardLayoutAttribute, colorSchemeSource, OPTIONAL_SCHEME_COLOURS, PRODUCT_CARD_LAYOUTS, SECONDARY_BUTTON_STYLES, themeRootAttributes } from "./theme-style-settings.js";
 export type { ProductCardLayout } from "./theme-style-settings.js";
 export { cartDrawerVariant, freeDeliveryThresholdMinor } from "./theme-style-settings.js";
 export { currentLayoutRevision, detectLayoutRevision, layoutRevisions, planLayoutUpgrade, starterIdOf, type LayoutDraft, type LayoutPageChange, type LayoutPlacement, type LayoutRevisionInfo, type LayoutSectionChange, type LayoutUpgradePlan } from "./layout-revisions.js";

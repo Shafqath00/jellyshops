@@ -13,15 +13,29 @@ import { scopeCustomCss } from "@jelly/storefront-schema";
 
 export const TEXT_STYLE_LEVELS = ["h1", "h2", "h3", "h4", "body", "small"] as const;
 export type TextStyleLevel = typeof TEXT_STYLE_LEVELS[number];
-/** Up to eight schemes; `colorSchemes.count` (4-8) says how many the merchant uses. */
-export const COLOR_SCHEME_IDS = ["scheme1", "scheme2", "scheme3", "scheme4", "scheme5", "scheme6", "scheme7", "scheme8"] as const;
+/** Up to sixteen schemes; `colorSchemes.count` (4-16) says how many the merchant uses. */
+export const COLOR_SCHEME_IDS = ["scheme1", "scheme2", "scheme3", "scheme4", "scheme5", "scheme6", "scheme7", "scheme8", "scheme9", "scheme10", "scheme11", "scheme12", "scheme13", "scheme14", "scheme15", "scheme16"] as const;
 export type ColorSchemeId = typeof COLOR_SCHEME_IDS[number];
 export const MIN_COLOR_SCHEMES = 4;
 type BaseSchemeId = "scheme1" | "scheme2" | "scheme3" | "scheme4";
-/** Schemes 5-8 start as copies of a theme scheme the merchant can then change. */
-const extraSchemeSources: Record<Exclude<ColorSchemeId, BaseSchemeId>, BaseSchemeId> = { scheme5: "scheme2", scheme6: "scheme4", scheme7: "scheme3", scheme8: "scheme1" };
+/** Schemes 5-16 start as copies of a theme scheme the merchant can then change. */
+const extraSchemeSources: Record<Exclude<ColorSchemeId, BaseSchemeId>, BaseSchemeId> = {
+  scheme5: "scheme2", scheme6: "scheme4", scheme7: "scheme3", scheme8: "scheme1",
+  scheme9: "scheme1", scheme10: "scheme2", scheme11: "scheme3", scheme12: "scheme4",
+  scheme13: "scheme2", scheme14: "scheme4", scheme15: "scheme3", scheme16: "scheme1",
+};
+/** The theme scheme an extra scheme starts as a copy of (itself for schemes 1-4). */
+export function colorSchemeSource(id: ColorSchemeId): ColorSchemeId {
+  return (extraSchemeSources as Record<string, BaseSchemeId>)[id] ?? id;
+}
 
-export interface ColorSchemeValues { background: string; text: string; button: string; buttonText: string }
+/**
+ * One colour scheme. The optional colours are empty by default, which keeps the colours worked out from the scheme's
+ * text: secondary buttons in the text colour, borders and soft text as tints of it.
+ */
+export interface ColorSchemeValues { background: string; text: string; button: string; buttonText: string; secondaryButton?: string; border?: string; muted?: string }
+/** The optional scheme colours (T7): empty means "worked out from the text colour". */
+export const OPTIONAL_SCHEME_COLOURS = ["secondaryButton", "border", "muted"] as const;
 export interface ThemeStyleDefaults {
   /** Largest (desktop) size in px of Heading 2-4 and Small text. Heading 1 and Body use typography.headingSize/bodySize. */
   sizes: { h2: number; h3: number; h4: number; small: number };
@@ -114,7 +128,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
       select(`textStyles.${level}.textCase`, "Case", group, theme, cases),
     ];
   });
-  const schemes = Object.fromEntries(COLOR_SCHEME_IDS.map((id) => [id, { ...(defaults.schemes[id] ?? defaults.schemes[extraSchemeSources[id as keyof typeof extraSchemeSources]]) }])) as Record<ColorSchemeId, ColorSchemeValues>;
+  const schemes = Object.fromEntries(COLOR_SCHEME_IDS.map((id) => [id, { secondaryButton: "", border: "", muted: "", ...(defaults.schemes[id] ?? defaults.schemes[colorSchemeSource(id)]) }])) as Record<ColorSchemeId, Required<ColorSchemeValues>>;
   const colorSchemeSchema = [
     select("colorSchemes.count", "Number of colour schemes", "Colour schemes", String(MIN_COLOR_SCHEMES), COLOR_SCHEME_IDS.slice(MIN_COLOR_SCHEMES - 1).map((_id, index) => [String(MIN_COLOR_SCHEMES + index), String(MIN_COLOR_SCHEMES + index)] as [string, string]), "Sections using a scheme you remove keep its colours until you pick another."),
     ...COLOR_SCHEME_IDS.flatMap((id) => {
@@ -126,6 +140,9 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
         color(`colorSchemes.${id}.text`, "Text", group, values.text),
         color(`colorSchemes.${id}.button`, "Button", group, values.button),
         color(`colorSchemes.${id}.buttonText`, "Button text", group, values.buttonText),
+        { ...color(`colorSchemes.${id}.secondaryButton`, "Secondary button", group, values.secondaryButton), description: "Leave empty to use the text colour." },
+        { ...color(`colorSchemes.${id}.border`, "Lines and borders", group, values.border), description: "Leave empty for a soft tint of the text colour." },
+        { ...color(`colorSchemes.${id}.muted`, "Soft text", group, values.muted), description: "Prices, dates and small print. Leave empty for a lighter text colour. Made darker if it would be hard to read." },
       ];
     })];
   const buttonSchema = [
@@ -133,6 +150,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     select("buttons.textCase", "Button text case", "Buttons", theme, cases),
     select("buttons.borderWidth", "Border thickness", "Buttons", theme, [[theme, "Theme default"], ["none", "None"], ["thin", "Thin"], ["thick", "Thick"]]),
     select("buttons.hover", "Hover effect", "Buttons", theme, [[theme, "Theme default"], ["darken", "Darken"], ["lift", "Lift with shadow"], ["underline", "Underline"], ["none", "None"]]),
+    select("buttons.secondaryStyle", "Secondary button style", "Buttons", theme, [[theme, "Theme default"], ["outlined", "Outlined"], ["soft", "Soft fill"], ["filled", "Filled"], ["link", "Text link"]], "Second buttons, such as \"Learn more\" beside a main button. They take the colour scheme's secondary button colour."),
   ];
   const fieldSchema = [
     select("fields.radius", "Field corners", "Form fields", theme, [[theme, "Theme default"], ["square", "Square"], ["soft", "Slightly rounded"], ["rounded", "Rounded"], ["pill", "Pill"]]),
@@ -195,7 +213,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
       cart: { type: "page", freeDeliveryFrom: 0 },
       animations: { reveal: false, smoothScroll: false },
     },
-    buttonDefaults: { size: theme, textCase: theme, borderWidth: theme, hover: theme },
+    buttonDefaults: { size: theme, textCase: theme, borderWidth: theme, hover: theme, secondaryStyle: theme },
     cardDefaults: { layout: theme, showRating: false, hoverImage: false, compare: false, radius: theme, shadow: theme, hover: theme, order: "photo-title-price", showTitle: "show", titleLines: theme, showPrice: "show", savings: "none", button: "none", photoFit: theme, swatches: "none" },
     textStyleSchema,
     colorSchemeSchema,
@@ -291,7 +309,13 @@ export function themeStyleDefaultsFrom(settingsDefaults: Record<string, unknown>
   return { sizes: { h2: size("h2"), h3: size("h3"), h4: size("h4"), small: size("small") }, schemes: schemes as unknown as ThemeStyleDefaults["schemes"] };
 }
 
-/** How many colour schemes the merchant uses (4-8). */
+/** A theme's default colours for a scheme; extra schemes the theme does not list copy their source scheme. */
+function schemeDefaults(defaults: ThemeStyleDefaults | undefined, id: ColorSchemeId): ColorSchemeValues | undefined {
+  const own = defaults?.schemes[id];
+  return own && typeof own === "object" && Object.keys(own).length ? own : defaults?.schemes[colorSchemeSource(id)];
+}
+
+/** How many colour schemes the merchant uses (4-16). */
 export function colorSchemeCount(settings: Record<string, unknown> | undefined): number {
   const count = Number(record(settings?.colorSchemes).count);
   return Number.isInteger(count) ? Math.min(COLOR_SCHEME_IDS.length, Math.max(MIN_COLOR_SCHEMES, count)) : MIN_COLOR_SCHEMES;
@@ -323,8 +347,8 @@ export function resolveThemeStyleTokens(settings: Record<string, unknown>, defau
   const schemes = record(settings.colorSchemes);
   for (const [index, id] of COLOR_SCHEME_IDS.entries()) {
     const saved = record(schemes[id]);
-    const fallback = defaults?.schemes[id];
-    const pick = (key: keyof ColorSchemeValues, otherwise: string) => typeof saved[key] === "string" && hex.test(saved[key] as string) ? saved[key] as string : fallback?.[key] ?? otherwise;
+    const fallback = schemeDefaults(defaults, id);
+    const pick = (key: keyof ColorSchemeValues, otherwise: string) => typeof saved[key] === "string" && hex.test(saved[key] as string) ? saved[key] as string : (typeof fallback?.[key] === "string" && fallback[key] ? fallback[key] as string : otherwise);
     const n = index + 1;
     const background = pick("background", "var(--theme-background, #ffffff)");
     const button = pick("button", "var(--theme-text, #1a1a1a)");
@@ -333,6 +357,16 @@ export function resolveThemeStyleTokens(settings: Record<string, unknown>, defau
     tokens[`--jelly-scheme-${n}-text`] = readableTextColour(pick("text", "var(--theme-text, #1a1a1a)"), background);
     tokens[`--jelly-scheme-${n}-button`] = button;
     tokens[`--jelly-scheme-${n}-button-text`] = readableTextColour(pick("buttonText", "var(--theme-background, #ffffff)"), button);
+    // Optional colours: written only when set, so the colour roles keep working them out from the text colour.
+    const secondary = pick("secondaryButton", "");
+    if (secondary) {
+      tokens[`--jelly-scheme-${n}-secondary`] = readableTextColour(secondary, background);
+      tokens[`--jelly-scheme-${n}-on-secondary`] = readableTextColour(hex.test(background) ? background : "#ffffff", secondary);
+    }
+    const border = pick("border", "");
+    if (border) tokens[`--jelly-scheme-${n}-border`] = border;
+    const muted = pick("muted", "");
+    if (muted) tokens[`--jelly-scheme-${n}-muted`] = readableTextColour(muted, background);
   }
   // The older Page / Soft / Dark choices are aliases of the theme's schemes, so they follow the merchant's scheme
   // colours. Themes without schemes get the theme colours (Dark = the theme's text and background swapped).
@@ -349,6 +383,10 @@ export function resolveThemeStyleTokens(settings: Record<string, unknown>, defau
     tokens[`--jelly-scheme-${id}-text`] = n ? `var(--jelly-scheme-${n}-text)` : text;
     tokens[`--jelly-scheme-${id}-button`] = n ? `var(--jelly-scheme-${n}-button)` : text;
     tokens[`--jelly-scheme-${id}-button-text`] = n ? `var(--jelly-scheme-${n}-button-text)` : bg;
+    // Only aliased when the theme scheme has them, so the roles' own fallbacks still apply otherwise.
+    for (const part of ["secondary", "on-secondary", "border", "muted"]) {
+      if (n && tokens[`--jelly-scheme-${n}-${part}`]) tokens[`--jelly-scheme-${id}-${part}`] = `var(--jelly-scheme-${n}-${part})`;
+    }
   }
 
   const buttons = record(settings.buttons);
@@ -361,6 +399,7 @@ export function resolveThemeStyleTokens(settings: Record<string, unknown>, defau
   else if (buttons.hover === "underline") Object.assign(tokens, { "--jelly-button-hover-decoration": "underline", "--jelly-button-hover-mix": "100%" });
   else if (buttons.hover === "none") tokens["--jelly-button-hover-mix"] = "100%";
   else if (buttons.hover === "darken") tokens["--jelly-button-hover-mix"] = "72%";
+  if (typeof buttons.secondaryStyle === "string" && (SECONDARY_BUTTON_STYLES as readonly string[]).includes(buttons.secondaryStyle)) tokens["--jelly-secondary-button-style"] = buttons.secondaryStyle;
 
   const fields = record(settings.fields);
   const fieldRadii: Record<string, string> = { square: "0px", soft: "4px", rounded: "10px", pill: "999px" };
@@ -432,6 +471,23 @@ export function themeSocialLinks(settings: Record<string, unknown> | undefined):
 export function themeCustomCss(settings: Record<string, unknown> | undefined, themeId?: string, themeVersion?: string): string | null {
   const scope = themeId && themeVersion ? `[data-jelly-theme="${themeId}"][data-jelly-theme-version="${themeVersion}"]` : "[data-jelly-theme]";
   return scopeCustomCss(record(settings?.advanced).customCss, scope, MAX_THEME_CSS_LENGTH);
+}
+
+/** Secondary button styles drawn by storefront-base.css (Buttons > Secondary button style). */
+export const SECONDARY_BUTTON_STYLES = ["outlined", "soft", "filled", "link"] as const;
+export type SecondaryButtonStyle = (typeof SECONDARY_BUTTON_STYLES)[number];
+
+/**
+ * Data attributes for a theme root, read from its tokens (its style): card style, card photo fit and secondary button
+ * style. Spread on every element that carries data-jelly-theme; an undefined value keeps the theme's own look.
+ */
+export function themeRootAttributes(style: object | null | undefined): Record<"data-card-layout" | "data-card-fit" | "data-secondary-button", string | undefined> {
+  const value = (style as Record<string, unknown> | null | undefined)?.["--jelly-secondary-button-style"];
+  return {
+    "data-card-layout": cardLayoutAttribute(style),
+    "data-card-fit": cardFitAttribute(style),
+    "data-secondary-button": typeof value === "string" && (SECONDARY_BUTTON_STYLES as readonly string[]).includes(value) ? value : undefined,
+  };
 }
 
 /** Card styles drawn by storefront-base.css (template programme card archetypes C1, C2, C4, C5, C7, C3). */

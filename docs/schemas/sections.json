@@ -45,6 +45,38 @@
           {
             "label": "Scheme 8",
             "value": "scheme8"
+          },
+          {
+            "label": "Scheme 9",
+            "value": "scheme9"
+          },
+          {
+            "label": "Scheme 10",
+            "value": "scheme10"
+          },
+          {
+            "label": "Scheme 11",
+            "value": "scheme11"
+          },
+          {
+            "label": "Scheme 12",
+            "value": "scheme12"
+          },
+          {
+            "label": "Scheme 13",
+            "value": "scheme13"
+          },
+          {
+            "label": "Scheme 14",
+            "value": "scheme14"
+          },
+          {
+            "label": "Scheme 15",
+            "value": "scheme15"
+          },
+          {
+            "label": "Scheme 16",
+            "value": "scheme16"
           }
         ]
       },
@@ -659,7 +691,15 @@
                 "scheme5",
                 "scheme6",
                 "scheme7",
-                "scheme8"
+                "scheme8",
+                "scheme9",
+                "scheme10",
+                "scheme11",
+                "scheme12",
+                "scheme13",
+                "scheme14",
+                "scheme15",
+                "scheme16"
               ]
             },
             {
@@ -9941,6 +9981,38 @@
             {
               "label": "Scheme 8",
               "value": "scheme8"
+            },
+            {
+              "label": "Scheme 9",
+              "value": "scheme9"
+            },
+            {
+              "label": "Scheme 10",
+              "value": "scheme10"
+            },
+            {
+              "label": "Scheme 11",
+              "value": "scheme11"
+            },
+            {
+              "label": "Scheme 12",
+              "value": "scheme12"
+            },
+            {
+              "label": "Scheme 13",
+              "value": "scheme13"
+            },
+            {
+              "label": "Scheme 14",
+              "value": "scheme14"
+            },
+            {
+              "label": "Scheme 15",
+              "value": "scheme15"
+            },
+            {
+              "label": "Scheme 16",
+              "value": "scheme16"
             }
           ],
           "visibleIf": {
@@ -10063,7 +10135,15 @@
                   "scheme5",
                   "scheme6",
                   "scheme7",
-                  "scheme8"
+                  "scheme8",
+                  "scheme9",
+                  "scheme10",
+                  "scheme11",
+                  "scheme12",
+                  "scheme13",
+                  "scheme14",
+                  "scheme15",
+                  "scheme16"
                 ]
               },
               {

@@ -53,11 +53,14 @@ describe("design contract tokens", () => {
     for (const scheme of CONTRACT_SCHEMES) {
       const roles = contractSchemeRoles(scheme);
       expect(Object.keys(roles).every(isContractToken)).toBe(true);
-      expect(Object.keys(roles).sort()).toEqual(["--j-color-bg", "--j-color-border", "--j-color-muted", "--j-color-on-primary", "--j-color-primary", "--j-color-surface", "--j-color-text"]);
+      expect(Object.keys(roles).sort()).toEqual(["--j-color-bg", "--j-color-border", "--j-color-muted", "--j-color-on-primary", "--j-color-on-secondary", "--j-color-primary", "--j-color-secondary", "--j-color-surface", "--j-color-text"]);
       expect(contractTokenCss()).toContain(`[data-scheme="${scheme}"] {`);
     }
     expect(contractSchemeRoles("scheme3")["--j-color-bg"]).toContain("--jelly-scheme-3-bg");
     expect(contractSchemeRoles("soft")["--j-color-text"]).toContain("--jelly-scheme-soft-text");
     expect(contractSchemeRoles("custom")["--j-color-bg"]).toBe("var(--section-bg)");
+    // A scheme's own optional colours replace the tints only when set (T7).
+    expect(contractSchemeRoles("scheme12")["--j-color-muted"]).toBe("var(--jelly-scheme-12-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)))");
+    expect(contractSchemeRoles("custom")["--j-color-secondary"]).toBe("var(--j-color-text)");
   });
 });

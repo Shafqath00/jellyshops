@@ -28,7 +28,7 @@
     "demoContent": false,
     "conformance": true,
     "lintFindings": 6,
-    "cssGzipKb": 17.9
+    "cssGzipKb": 18
   },
   "jelly-diode": {
     "theme": "jelly-diode",
@@ -152,7 +152,7 @@
     "demoContent": false,
     "conformance": true,
     "lintFindings": 0,
-    "cssGzipKb": 14.1
+    "cssGzipKb": 14.2
   },
   "jelly-resthaven": {
     "theme": "jelly-resthaven",
@@ -214,6 +214,6 @@
     "demoContent": false,
     "conformance": true,
     "lintFindings": 2,
-    "cssGzipKb": 14.1
+    "cssGzipKb": 14.2
   }
 }

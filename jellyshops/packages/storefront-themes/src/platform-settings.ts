@@ -1,5 +1,5 @@
 import { FONT_OPTIONS } from "./fonts.js";
-import { themeStyleSettings } from "./theme-style-settings.js";
+import { colorSchemeSource, themeStyleSettings, type ColorSchemeId } from "./theme-style-settings.js";
 
 /**
  * The platform's theme settings (docs/plans/theme-foundation-plan.md, phase 1): one list every complete theme shows in
@@ -77,7 +77,7 @@ export const PLATFORM_SETTING_IDS: readonly string[] = PLATFORM_SETTINGS.map((se
  */
 export function platformSettingsSchema(defaults: Record<string, unknown> = {}, own: ReadonlyArray<PlatformSetting> = []): PlatformSetting[] {
   const schema: PlatformSetting[] = PLATFORM_SETTINGS.map((setting) => {
-    const value = settingAt(defaults, setting.id);
+    const value = settingAt(defaults, setting.id) ?? sourceSchemeDefault(defaults, setting.id);
     return structuredClone(value === undefined ? setting : { ...setting, default: value });
   });
   // The theme's own settings take their defaults from the theme's defaults too.
@@ -85,6 +85,14 @@ export function platformSettingsSchema(defaults: Record<string, unknown> = {}, o
     const value = settingAt(defaults, setting.id);
     return setting.default === undefined && value !== undefined ? { ...setting, default: structuredClone(value) } : setting;
   });
+}
+
+/** An extra colour scheme the theme gives no colours for starts as a copy of its source scheme's colours. */
+function sourceSchemeDefault(defaults: Record<string, unknown>, id: string): unknown {
+  const match = /^colorSchemes\.(scheme\d+)\.(background|text|button|buttonText)$/.exec(id);
+  if (!match) return undefined;
+  const source = colorSchemeSource(match[1] as ColorSchemeId);
+  return source === match[1] ? undefined : settingAt(defaults, `colorSchemes.${source}.${match[2]}`);
 }
 
 /** Applies a theme's own entries to a settings list: same id changes the setting, a new id is added (see above). */

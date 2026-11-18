@@ -62,7 +62,7 @@ export function sectionStyleProps(settings: Record<string, unknown> | undefined,
   const text = (key: string) => typeof settings[key] === "string" ? settings[key] as string : "";
 
   // A colour scheme from theme settings; "Use my own colours" below replaces it.
-  const scheme = /^scheme[1-8]$/.test(text("styleScheme")) ? Number(text("styleScheme").slice(6)) : undefined;
+  const scheme = /^scheme([1-9]|1[0-6])$/.test(text("styleScheme")) ? Number(text("styleScheme").slice(6)) : undefined;
   if (scheme) {
     vars["--section-bg"] = `var(--jelly-scheme-${scheme}-bg)`;
     vars["--section-text"] = `var(--jelly-scheme-${scheme}-text)`;

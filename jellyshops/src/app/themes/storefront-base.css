@@ -97,11 +97,13 @@
   --j-color-bg: var(--theme-background, #ffffff);
   --j-color-surface: var(--theme-surface, var(--j-color-bg));
   --j-color-text: var(--theme-text, #1a1a1a);
-  --j-color-muted: var(--theme-muted-text, color-mix(in srgb, var(--j-color-text) 75%, transparent));
-  --j-color-border: var(--theme-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
+  --j-color-muted: var(--jelly-scheme-1-muted, var(--theme-muted-text, color-mix(in srgb, var(--j-color-text) 75%, transparent)));
+  --j-color-border: var(--jelly-scheme-1-border, var(--theme-border, color-mix(in srgb, var(--j-color-text) 18%, transparent)));
   --j-color-accent: var(--theme-accent, var(--j-color-text));
   --j-color-primary: var(--jelly-color-primary, var(--j-color-text));
   --j-color-on-primary: var(--j-color-bg);
+  --j-color-secondary: var(--jelly-scheme-1-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-1-on-secondary, var(--j-color-bg));
   --j-color-sale: var(--jelly-badge-bg, #b42318);
   --j-page-title-size: clamp(2rem, 4.2vw, 3.25rem);
   --j-touch-target: 44px;
@@ -132,100 +134,210 @@
   --j-color-bg: var(--jelly-scheme-1-bg, var(--theme-background, #ffffff));
   --j-color-text: var(--jelly-scheme-1-text, var(--theme-text, #1a1a1a));
   --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
-  --j-color-muted: color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg));
-  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-muted: var(--jelly-scheme-1-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)));
+  --j-color-border: var(--jelly-scheme-1-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
   --j-color-primary: var(--jelly-scheme-1-button, var(--theme-text, #1a1a1a));
   --j-color-on-primary: var(--jelly-scheme-1-button-text, var(--theme-background, #ffffff));
+  --j-color-secondary: var(--jelly-scheme-1-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-1-on-secondary, var(--j-color-bg));
 }
 :where([data-jelly-theme]) [data-scheme="scheme2"] {
   --j-color-bg: var(--jelly-scheme-2-bg, var(--theme-background, #ffffff));
   --j-color-text: var(--jelly-scheme-2-text, var(--theme-text, #1a1a1a));
   --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
-  --j-color-muted: color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg));
-  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-muted: var(--jelly-scheme-2-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)));
+  --j-color-border: var(--jelly-scheme-2-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
   --j-color-primary: var(--jelly-scheme-2-button, var(--theme-text, #1a1a1a));
   --j-color-on-primary: var(--jelly-scheme-2-button-text, var(--theme-background, #ffffff));
+  --j-color-secondary: var(--jelly-scheme-2-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-2-on-secondary, var(--j-color-bg));
 }
 :where([data-jelly-theme]) [data-scheme="scheme3"] {
   --j-color-bg: var(--jelly-scheme-3-bg, var(--theme-background, #ffffff));
   --j-color-text: var(--jelly-scheme-3-text, var(--theme-text, #1a1a1a));
   --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
-  --j-color-muted: color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg));
-  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-muted: var(--jelly-scheme-3-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)));
+  --j-color-border: var(--jelly-scheme-3-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
   --j-color-primary: var(--jelly-scheme-3-button, var(--theme-text, #1a1a1a));
   --j-color-on-primary: var(--jelly-scheme-3-button-text, var(--theme-background, #ffffff));
+  --j-color-secondary: var(--jelly-scheme-3-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-3-on-secondary, var(--j-color-bg));
 }
 :where([data-jelly-theme]) [data-scheme="scheme4"] {
   --j-color-bg: var(--jelly-scheme-4-bg, var(--theme-background, #ffffff));
   --j-color-text: var(--jelly-scheme-4-text, var(--theme-text, #1a1a1a));
   --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
-  --j-color-muted: color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg));
-  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-muted: var(--jelly-scheme-4-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)));
+  --j-color-border: var(--jelly-scheme-4-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
   --j-color-primary: var(--jelly-scheme-4-button, var(--theme-text, #1a1a1a));
   --j-color-on-primary: var(--jelly-scheme-4-button-text, var(--theme-background, #ffffff));
+  --j-color-secondary: var(--jelly-scheme-4-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-4-on-secondary, var(--j-color-bg));
 }
 :where([data-jelly-theme]) [data-scheme="scheme5"] {
   --j-color-bg: var(--jelly-scheme-5-bg, var(--theme-background, #ffffff));
   --j-color-text: var(--jelly-scheme-5-text, var(--theme-text, #1a1a1a));
   --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
-  --j-color-muted: color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg));
-  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-muted: var(--jelly-scheme-5-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)));
+  --j-color-border: var(--jelly-scheme-5-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
   --j-color-primary: var(--jelly-scheme-5-button, var(--theme-text, #1a1a1a));
   --j-color-on-primary: var(--jelly-scheme-5-button-text, var(--theme-background, #ffffff));
+  --j-color-secondary: var(--jelly-scheme-5-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-5-on-secondary, var(--j-color-bg));
 }
 :where([data-jelly-theme]) [data-scheme="scheme6"] {
   --j-color-bg: var(--jelly-scheme-6-bg, var(--theme-background, #ffffff));
   --j-color-text: var(--jelly-scheme-6-text, var(--theme-text, #1a1a1a));
   --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
-  --j-color-muted: color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg));
-  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-muted: var(--jelly-scheme-6-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)));
+  --j-color-border: var(--jelly-scheme-6-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
   --j-color-primary: var(--jelly-scheme-6-button, var(--theme-text, #1a1a1a));
   --j-color-on-primary: var(--jelly-scheme-6-button-text, var(--theme-background, #ffffff));
+  --j-color-secondary: var(--jelly-scheme-6-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-6-on-secondary, var(--j-color-bg));
 }
 :where([data-jelly-theme]) [data-scheme="scheme7"] {
   --j-color-bg: var(--jelly-scheme-7-bg, var(--theme-background, #ffffff));
   --j-color-text: var(--jelly-scheme-7-text, var(--theme-text, #1a1a1a));
   --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
-  --j-color-muted: color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg));
-  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-muted: var(--jelly-scheme-7-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)));
+  --j-color-border: var(--jelly-scheme-7-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
   --j-color-primary: var(--jelly-scheme-7-button, var(--theme-text, #1a1a1a));
   --j-color-on-primary: var(--jelly-scheme-7-button-text, var(--theme-background, #ffffff));
+  --j-color-secondary: var(--jelly-scheme-7-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-7-on-secondary, var(--j-color-bg));
 }
 :where([data-jelly-theme]) [data-scheme="scheme8"] {
   --j-color-bg: var(--jelly-scheme-8-bg, var(--theme-background, #ffffff));
   --j-color-text: var(--jelly-scheme-8-text, var(--theme-text, #1a1a1a));
   --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
-  --j-color-muted: color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg));
-  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-muted: var(--jelly-scheme-8-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)));
+  --j-color-border: var(--jelly-scheme-8-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
   --j-color-primary: var(--jelly-scheme-8-button, var(--theme-text, #1a1a1a));
   --j-color-on-primary: var(--jelly-scheme-8-button-text, var(--theme-background, #ffffff));
+  --j-color-secondary: var(--jelly-scheme-8-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-8-on-secondary, var(--j-color-bg));
+}
+:where([data-jelly-theme]) [data-scheme="scheme9"] {
+  --j-color-bg: var(--jelly-scheme-9-bg, var(--theme-background, #ffffff));
+  --j-color-text: var(--jelly-scheme-9-text, var(--theme-text, #1a1a1a));
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: var(--jelly-scheme-9-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)));
+  --j-color-border: var(--jelly-scheme-9-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
+  --j-color-primary: var(--jelly-scheme-9-button, var(--theme-text, #1a1a1a));
+  --j-color-on-primary: var(--jelly-scheme-9-button-text, var(--theme-background, #ffffff));
+  --j-color-secondary: var(--jelly-scheme-9-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-9-on-secondary, var(--j-color-bg));
+}
+:where([data-jelly-theme]) [data-scheme="scheme10"] {
+  --j-color-bg: var(--jelly-scheme-10-bg, var(--theme-background, #ffffff));
+  --j-color-text: var(--jelly-scheme-10-text, var(--theme-text, #1a1a1a));
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: var(--jelly-scheme-10-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)));
+  --j-color-border: var(--jelly-scheme-10-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
+  --j-color-primary: var(--jelly-scheme-10-button, var(--theme-text, #1a1a1a));
+  --j-color-on-primary: var(--jelly-scheme-10-button-text, var(--theme-background, #ffffff));
+  --j-color-secondary: var(--jelly-scheme-10-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-10-on-secondary, var(--j-color-bg));
+}
+:where([data-jelly-theme]) [data-scheme="scheme11"] {
+  --j-color-bg: var(--jelly-scheme-11-bg, var(--theme-background, #ffffff));
+  --j-color-text: var(--jelly-scheme-11-text, var(--theme-text, #1a1a1a));
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: var(--jelly-scheme-11-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)));
+  --j-color-border: var(--jelly-scheme-11-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
+  --j-color-primary: var(--jelly-scheme-11-button, var(--theme-text, #1a1a1a));
+  --j-color-on-primary: var(--jelly-scheme-11-button-text, var(--theme-background, #ffffff));
+  --j-color-secondary: var(--jelly-scheme-11-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-11-on-secondary, var(--j-color-bg));
+}
+:where([data-jelly-theme]) [data-scheme="scheme12"] {
+  --j-color-bg: var(--jelly-scheme-12-bg, var(--theme-background, #ffffff));
+  --j-color-text: var(--jelly-scheme-12-text, var(--theme-text, #1a1a1a));
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: var(--jelly-scheme-12-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)));
+  --j-color-border: var(--jelly-scheme-12-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
+  --j-color-primary: var(--jelly-scheme-12-button, var(--theme-text, #1a1a1a));
+  --j-color-on-primary: var(--jelly-scheme-12-button-text, var(--theme-background, #ffffff));
+  --j-color-secondary: var(--jelly-scheme-12-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-12-on-secondary, var(--j-color-bg));
+}
+:where([data-jelly-theme]) [data-scheme="scheme13"] {
+  --j-color-bg: var(--jelly-scheme-13-bg, var(--theme-background, #ffffff));
+  --j-color-text: var(--jelly-scheme-13-text, var(--theme-text, #1a1a1a));
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: var(--jelly-scheme-13-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)));
+  --j-color-border: var(--jelly-scheme-13-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
+  --j-color-primary: var(--jelly-scheme-13-button, var(--theme-text, #1a1a1a));
+  --j-color-on-primary: var(--jelly-scheme-13-button-text, var(--theme-background, #ffffff));
+  --j-color-secondary: var(--jelly-scheme-13-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-13-on-secondary, var(--j-color-bg));
+}
+:where([data-jelly-theme]) [data-scheme="scheme14"] {
+  --j-color-bg: var(--jelly-scheme-14-bg, var(--theme-background, #ffffff));
+  --j-color-text: var(--jelly-scheme-14-text, var(--theme-text, #1a1a1a));
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: var(--jelly-scheme-14-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)));
+  --j-color-border: var(--jelly-scheme-14-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
+  --j-color-primary: var(--jelly-scheme-14-button, var(--theme-text, #1a1a1a));
+  --j-color-on-primary: var(--jelly-scheme-14-button-text, var(--theme-background, #ffffff));
+  --j-color-secondary: var(--jelly-scheme-14-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-14-on-secondary, var(--j-color-bg));
+}
+:where([data-jelly-theme]) [data-scheme="scheme15"] {
+  --j-color-bg: var(--jelly-scheme-15-bg, var(--theme-background, #ffffff));
+  --j-color-text: var(--jelly-scheme-15-text, var(--theme-text, #1a1a1a));
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: var(--jelly-scheme-15-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)));
+  --j-color-border: var(--jelly-scheme-15-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
+  --j-color-primary: var(--jelly-scheme-15-button, var(--theme-text, #1a1a1a));
+  --j-color-on-primary: var(--jelly-scheme-15-button-text, var(--theme-background, #ffffff));
+  --j-color-secondary: var(--jelly-scheme-15-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-15-on-secondary, var(--j-color-bg));
+}
+:where([data-jelly-theme]) [data-scheme="scheme16"] {
+  --j-color-bg: var(--jelly-scheme-16-bg, var(--theme-background, #ffffff));
+  --j-color-text: var(--jelly-scheme-16-text, var(--theme-text, #1a1a1a));
+  --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
+  --j-color-muted: var(--jelly-scheme-16-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)));
+  --j-color-border: var(--jelly-scheme-16-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
+  --j-color-primary: var(--jelly-scheme-16-button, var(--theme-text, #1a1a1a));
+  --j-color-on-primary: var(--jelly-scheme-16-button-text, var(--theme-background, #ffffff));
+  --j-color-secondary: var(--jelly-scheme-16-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-16-on-secondary, var(--j-color-bg));
 }
 :where([data-jelly-theme]) [data-scheme="page"] {
   --j-color-bg: var(--jelly-scheme-page-bg, var(--theme-background, #ffffff));
   --j-color-text: var(--jelly-scheme-page-text, var(--theme-text, #1a1a1a));
   --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
-  --j-color-muted: color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg));
-  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-muted: var(--jelly-scheme-page-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)));
+  --j-color-border: var(--jelly-scheme-page-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
   --j-color-primary: var(--jelly-scheme-page-button, var(--theme-text, #1a1a1a));
   --j-color-on-primary: var(--jelly-scheme-page-button-text, var(--theme-background, #ffffff));
+  --j-color-secondary: var(--jelly-scheme-page-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-page-on-secondary, var(--j-color-bg));
 }
 :where([data-jelly-theme]) [data-scheme="soft"] {
   --j-color-bg: var(--jelly-scheme-soft-bg, var(--theme-background, #ffffff));
   --j-color-text: var(--jelly-scheme-soft-text, var(--theme-text, #1a1a1a));
   --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
-  --j-color-muted: color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg));
-  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-muted: var(--jelly-scheme-soft-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)));
+  --j-color-border: var(--jelly-scheme-soft-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
   --j-color-primary: var(--jelly-scheme-soft-button, var(--theme-text, #1a1a1a));
   --j-color-on-primary: var(--jelly-scheme-soft-button-text, var(--theme-background, #ffffff));
+  --j-color-secondary: var(--jelly-scheme-soft-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-soft-on-secondary, var(--j-color-bg));
 }
 :where([data-jelly-theme]) [data-scheme="dark"] {
   --j-color-bg: var(--jelly-scheme-dark-bg, var(--theme-background, #ffffff));
   --j-color-text: var(--jelly-scheme-dark-text, var(--theme-text, #1a1a1a));
   --j-color-surface: color-mix(in srgb, var(--j-color-text) 6%, var(--j-color-bg));
-  --j-color-muted: color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg));
-  --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
+  --j-color-muted: var(--jelly-scheme-dark-muted, color-mix(in srgb, var(--j-color-text) 82%, var(--j-color-bg)));
+  --j-color-border: var(--jelly-scheme-dark-border, color-mix(in srgb, var(--j-color-text) 18%, transparent));
   --j-color-primary: var(--jelly-scheme-dark-button, var(--theme-text, #1a1a1a));
   --j-color-on-primary: var(--jelly-scheme-dark-button-text, var(--theme-background, #ffffff));
+  --j-color-secondary: var(--jelly-scheme-dark-secondary, var(--j-color-text));
+  --j-color-on-secondary: var(--jelly-scheme-dark-on-secondary, var(--j-color-bg));
 }
 :where([data-jelly-theme]) [data-scheme="custom"] {
   --j-color-bg: var(--section-bg);
@@ -235,6 +347,8 @@
   --j-color-border: color-mix(in srgb, var(--j-color-text) 18%, transparent);
   --j-color-primary: var(--section-text);
   --j-color-on-primary: var(--section-bg);
+  --j-color-secondary: var(--j-color-text);
+  --j-color-on-secondary: var(--j-color-bg);
 }
 :where([data-jelly-theme] [data-section-frame]) {
   --j-color-divider: color-mix(in srgb, var(--j-color-text) 13%, transparent);
@@ -411,6 +525,14 @@
   [data-section-frame][data-scheme="scheme6"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])) + [data-section-frame][data-scheme="scheme6"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])),
   [data-section-frame][data-scheme="scheme7"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])) + [data-section-frame][data-scheme="scheme7"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])),
   [data-section-frame][data-scheme="scheme8"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])) + [data-section-frame][data-scheme="scheme8"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])),
+  [data-section-frame][data-scheme="scheme9"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])) + [data-section-frame][data-scheme="scheme9"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])),
+  [data-section-frame][data-scheme="scheme10"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])) + [data-section-frame][data-scheme="scheme10"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])),
+  [data-section-frame][data-scheme="scheme11"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])) + [data-section-frame][data-scheme="scheme11"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])),
+  [data-section-frame][data-scheme="scheme12"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])) + [data-section-frame][data-scheme="scheme12"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])),
+  [data-section-frame][data-scheme="scheme13"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])) + [data-section-frame][data-scheme="scheme13"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])),
+  [data-section-frame][data-scheme="scheme14"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])) + [data-section-frame][data-scheme="scheme14"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])),
+  [data-section-frame][data-scheme="scheme15"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])) + [data-section-frame][data-scheme="scheme15"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])),
+  [data-section-frame][data-scheme="scheme16"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])) + [data-section-frame][data-scheme="scheme16"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])),
   [data-section-frame][data-scheme="soft"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])) + [data-section-frame][data-scheme="soft"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])),
   [data-section-frame][data-scheme="dark"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"])) + [data-section-frame][data-scheme="dark"]:not([data-section-type="announcement-bar"], [data-section-type="header"], [data-section-type="footer"], [data-section-type="slideshow"], [data-section-type="image-banner"], [data-section-type="video"], [data-section-type="collection-header"], [data-section-type="trust-strip"], [data-section-type="hero"]:has(> .jelly-hero[data-layout="overlay"]))
 ) > :where(.jelly-section) { padding-top: 0; }
@@ -2034,3 +2156,17 @@ html.lenis, html.lenis body { height: auto; }
 :where([data-jelly-theme]) .jelly-popup-body > h2 { margin: 0; padding-inline-end: 32px; font-family: var(--j-type-h3-font, var(--j-font-heading, inherit)); font-size: var(--j-type-h3-size, 1.5rem); line-height: var(--j-type-h3-line, 1.2); letter-spacing: var(--j-type-h3-track, normal); text-transform: var(--j-type-h3-case, none); }
 :where([data-jelly-theme]) .jelly-popup-body > :is(p, .jelly-setting-text) { margin: 0; color: var(--j-color-muted, #555); }
 :where([data-jelly-theme]) .jelly-popup-body .jelly-newsletter-block { max-width: none; }
+
+/*
+ * Secondary button style (Theme settings > Buttons > Secondary button style; template plan T7). Only when the merchant
+ * picks one (`data-secondary-button` on the theme root), so every theme keeps its own secondary buttons otherwise.
+ * Colours come from the section's scheme (`--j-color-secondary`); buttons over a photo keep their white look.
+ */
+[data-jelly-theme][data-secondary-button] .jelly-button.jelly-button--secondary:not(:is(.jelly-hero[data-layout="overlay"], .jelly-image-banner[data-has-image="true"]) *) { color: var(--j-color-secondary); border-color: var(--j-color-secondary); border-style: solid; text-decoration: none; }
+[data-jelly-theme][data-secondary-button="outlined"] .jelly-button.jelly-button--secondary:not(:is(.jelly-hero[data-layout="overlay"], .jelly-image-banner[data-has-image="true"]) *) { background: transparent; border-width: var(--jelly-button-border-width, 1px); }
+[data-jelly-theme][data-secondary-button="outlined"] .jelly-button.jelly-button--secondary:not(:is(.jelly-hero[data-layout="overlay"], .jelly-image-banner[data-has-image="true"]) *):hover { background: color-mix(in srgb, var(--j-color-secondary) 8%, transparent); }
+[data-jelly-theme][data-secondary-button="soft"] .jelly-button.jelly-button--secondary:not(:is(.jelly-hero[data-layout="overlay"], .jelly-image-banner[data-has-image="true"]) *) { background: color-mix(in srgb, var(--j-color-secondary) 12%, var(--j-color-bg)); border-color: transparent; }
+[data-jelly-theme][data-secondary-button="soft"] .jelly-button.jelly-button--secondary:not(:is(.jelly-hero[data-layout="overlay"], .jelly-image-banner[data-has-image="true"]) *):hover { background: color-mix(in srgb, var(--j-color-secondary) 20%, var(--j-color-bg)); }
+[data-jelly-theme][data-secondary-button="filled"] .jelly-button.jelly-button--secondary:not(:is(.jelly-hero[data-layout="overlay"], .jelly-image-banner[data-has-image="true"]) *) { background: var(--j-color-secondary); color: var(--j-color-on-secondary); }
+[data-jelly-theme][data-secondary-button="filled"] .jelly-button.jelly-button--secondary:not(:is(.jelly-hero[data-layout="overlay"], .jelly-image-banner[data-has-image="true"]) *):hover { background: color-mix(in srgb, var(--j-color-secondary) 85%, var(--j-color-bg)); }
+[data-jelly-theme][data-secondary-button="link"] .jelly-button.jelly-button--secondary:not(:is(.jelly-hero[data-layout="overlay"], .jelly-image-banner[data-has-image="true"]) *) { min-height: var(--j-touch-target, 44px); padding-inline: 0; background: transparent; border-color: transparent; box-shadow: none; text-decoration: underline; text-underline-offset: 0.25em; }
