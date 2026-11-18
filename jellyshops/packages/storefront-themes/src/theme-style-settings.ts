@@ -242,6 +242,30 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     select("productCard.photoFit", "Product photos", "Product cards", theme, [[theme, "Theme default"], ["crop", "Fill the frame (room and lifestyle photos)"], ["whole", "Show the whole product on a soft background (cut-out photos)"]], "Every card photo gets the same frame, so photos of different shapes line up. Choose the whole product when your photos are products on a plain background."),
     select("productCard.swatches", "Colour swatches", "Product cards", "none", [["none", "Don't show"], ["colors", "Show the colours a product comes in"]], "Dots for up to five colours of a product's colour option."),
   ];
+  // Template plan T7 part 3: pop-ups and drawers, icons, collection cards, blog post cards and prices.
+  const radii: Array<[string, string]> = [[theme, "Theme default"], ["square", "Square"], ["soft", "Slightly rounded"], ["rounded", "Rounded"], ["large", "Very rounded"]];
+  const dialogSchema = [
+    select("dialogs.radius", "Corners", "Pop-ups and drawers", theme, radii, "The pop-up, the slide-out bag and the search panel."),
+    select("dialogs.shadow", "Shadow", "Pop-ups and drawers", theme, [[theme, "Theme default"], ["none", "None"], ["soft", "Soft"], ["strong", "Strong"]]),
+    select("dialogs.overlay", "Darken the page behind", "Pop-ups and drawers", theme, [[theme, "Theme default"], ["light", "A little"], ["medium", "Medium"], ["dark", "A lot"]]),
+  ];
+  const iconSchema = [
+    select("icons.weight", "Line thickness", "Icons", theme, [[theme, "Theme default"], ["thin", "Thin"], ["regular", "Regular"], ["bold", "Bold"]], "The bag, search and account icons, and the icons in trust badges and icon lists."),
+    select("icons.ends", "Line ends", "Icons", theme, [[theme, "Theme default"], ["round", "Rounded"], ["square", "Square"]]),
+  ];
+  const collectionCardSchema = [
+    select("collectionCards.radius", "Photo corners", "Collection cards", theme, radii, "The cards of the Collection list section."),
+    select("collectionCards.textPosition", "Collection name", "Collection cards", theme, [[theme, "Theme default"], ["below", "Below the photo"], ["over", "Over the photo"]]),
+    select("collectionCards.overlay", "Darken the photo", "Collection cards", "medium", [["none", "No"], ["light", "A little"], ["medium", "Medium"], ["dark", "A lot"]], "Only when the name sits over the photo; keeps the white name readable."),
+  ];
+  const blogCardSchema = [
+    select("blogCards.style", "Card style", "Blog post cards", theme, [[theme, "Theme default"], ["plain", "Plain"], ["outlined", "Outlined"], ["filled", "Soft background"]], "The posts listed on a blog page."),
+    select("blogCards.radius", "Corners", "Blog post cards", theme, radii),
+  ];
+  const priceSchema = [
+    select("prices.compareAt", "Price before a discount", "Prices", theme, [[theme, "Theme default"], ["strike", "Crossed out"], ["was", "\"Was\" before it"], ["hide", "Don't show"]], "Shown when a product has a higher \"compare at\" price."),
+    select("prices.sale", "Discounted price", "Prices", theme, [[theme, "Theme default"], ["sale", "In the sale colour"]], "The sale colour is the sale badge colour."),
+  ];
   const socialSchema = SOCIAL_PLATFORMS.map(({ id, label }) => ({ id: `social.${id}`, type: "url", label, group: "Social media", default: "", ...(id === "instagram" ? { description: "Full https:// links. Shown in the footer when it has no social links of its own." } : {}) }));
   const cartSchema = [
     select("cart.type", "When a shopper opens the bag", "Cart", "page", [["page", "Go to the bag page"], ["drawer", "Slide out the bag"], ["sheet", "Slide out the bag; from the bottom on phones"]], "The slide-out bag also opens after Add to cart."),
@@ -271,6 +295,11 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
       languages: { defaultName: "English", extra: "" },
       cart: { type: "page", freeDeliveryFrom: 0 },
       animations: { reveal: false, smoothScroll: false },
+      dialogs: { radius: theme, shadow: theme, overlay: theme },
+      icons: { weight: theme, ends: theme },
+      collectionCards: { radius: theme, textPosition: theme, overlay: "medium" },
+      blogCards: { style: theme, radius: theme },
+      prices: { compareAt: theme, sale: theme },
     },
     buttonDefaults: { size: theme, textCase: theme, borderWidth: theme, hover: theme, secondaryStyle: theme },
     cardDefaults: { layout: theme, showRating: false, hoverImage: false, compare: false, radius: theme, shadow: theme, hover: theme, order: "photo-title-price", showTitle: "show", titleLines: theme, showPrice: "show", savings: "none", button: "none", photoFit: theme, swatches: "none" },
@@ -283,6 +312,11 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     badgeSchema,
     cardContentSchema,
     animationSchema,
+    dialogSchema,
+    iconSchema,
+    collectionCardSchema,
+    blogCardSchema,
+    priceSchema,
     socialSchema,
     advancedSchema,
     languageSchema,
@@ -523,6 +557,39 @@ export function resolveThemeStyleTokens(settings: Record<string, unknown>, defau
   if (card.showRating === true) tokens["--jelly-card-rating-display"] = "flex";
   if (card.hoverImage === true) tokens["--jelly-card-hover-image-display"] = "block";
   if (card.swatches === "colors") tokens["--jelly-card-swatches-display"] = "flex";
+  // Template plan T7 part 3: each changed choice writes its value and a flag; the flags become data-theme-options
+  // on the theme root (themeRootAttributes), so storefront-base.css restyles only what the merchant changed.
+  const options: string[] = [];
+  const option = (flag: string, values: Record<string, string>, value: unknown, token?: string) => {
+    if (typeof value !== "string" || !Object.prototype.hasOwnProperty.call(values, value)) return;
+    if (token) tokens[token] = values[value];
+    options.push(token ? flag : `${flag}-${value}`);
+  };
+  const radiusValues = { square: "0px", soft: "8px", rounded: "16px", large: "24px" };
+  const dialogs = record(settings.dialogs);
+  option("dialog-radius", radiusValues, dialogs.radius, "--jelly-dialog-radius");
+  option("dialog-shadow", { none: "none", soft: "0 8px 24px rgb(0 0 0 / 0.12)", strong: "0 24px 64px rgb(0 0 0 / 0.32)" }, dialogs.shadow, "--jelly-dialog-shadow");
+  option("dialog-overlay", { light: "rgb(0 0 0 / 0.2)", medium: "rgb(0 0 0 / 0.45)", dark: "rgb(0 0 0 / 0.7)" }, dialogs.overlay, "--jelly-dialog-overlay");
+  const icons = record(settings.icons);
+  option("icon-weight", { thin: "1", regular: "1.5", bold: "2.25" }, icons.weight, "--jelly-icon-stroke");
+  option("icon-ends", { round: "round", square: "square" }, icons.ends, "--jelly-icon-ends");
+  if (icons.ends === "square") tokens["--jelly-icon-joins"] = "miter";
+  else if (icons.ends === "round") tokens["--jelly-icon-joins"] = "round";
+  const collectionCards = record(settings.collectionCards);
+  option("collection-radius", radiusValues, collectionCards.radius, "--jelly-collection-radius");
+  option("collection-text", { below: "", over: "" }, collectionCards.textPosition);
+  if (collectionCards.textPosition === "over") {
+    const darken: Record<string, string> = { none: "0", light: "0.25", medium: "0.45", dark: "0.65" };
+    tokens["--jelly-collection-overlay"] = darken[String(collectionCards.overlay)] ?? darken.medium;
+  }
+  const blogCards = record(settings.blogCards);
+  option("blog-style", { plain: "", outlined: "", filled: "" }, blogCards.style);
+  option("blog-radius", radiusValues, blogCards.radius, "--jelly-blog-radius");
+  const prices = record(settings.prices);
+  option("price-compare", { strike: "", was: "", hide: "" }, prices.compareAt);
+  option("price-sale", { sale: "" }, prices.sale);
+  if (options.length) tokens["--jelly-theme-options"] = options.join(" ");
+
   const animations = record(settings?.animations);
   if (animations.reveal === true) tokens["--jelly-motion-reveal"] = "1";
   if (animations.smoothScroll === true) tokens["--jelly-motion-smooth"] = "1";
@@ -560,15 +627,17 @@ export type SecondaryButtonStyle = (typeof SECONDARY_BUTTON_STYLES)[number];
  * Data attributes for a theme root, read from its tokens (its style): card style, card photo fit and secondary button
  * style. Spread on every element that carries data-jelly-theme; an undefined value keeps the theme's own look.
  */
-export function themeRootAttributes(style: object | null | undefined): Record<"data-card-layout" | "data-card-fit" | "data-secondary-button" | "data-type-roles", string | undefined> {
+export function themeRootAttributes(style: object | null | undefined): Record<"data-card-layout" | "data-card-fit" | "data-secondary-button" | "data-type-roles" | "data-theme-options", string | undefined> {
   const tokens = style as Record<string, unknown> | null | undefined;
   const value = tokens?.["--jelly-secondary-button-style"];
   const roles = tokens?.["--jelly-type-roles"];
+  const options = tokens?.["--jelly-theme-options"];
   return {
     "data-card-layout": cardLayoutAttribute(style),
     "data-card-fit": cardFitAttribute(style),
     "data-secondary-button": typeof value === "string" && (SECONDARY_BUTTON_STYLES as readonly string[]).includes(value) ? value : undefined,
     "data-type-roles": typeof roles === "string" && /^[a-z -]+$/.test(roles) ? roles : undefined,
+    "data-theme-options": typeof options === "string" && /^[a-z -]+$/.test(options) ? options : undefined,
   };
 }
 
