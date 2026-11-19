@@ -13,11 +13,12 @@ sonno.co.uk and dusk.com (structure and shopping patterns only; no names, copy, 
 | Navigation | Short product-type menu (Beds, Storage beds, Kids, Headboards, Mattresses, Furniture), "Free swatches" link | Huge mega menus: by type, by size, by colour, by collection, room tiles | Beds / Mattresses / Headboards as large menus (type and size columns plus photo tiles), About, Contact; "Visit our showroom" link in the header |
 | Collection | Read-more description, filter panel, 3 columns | 9 filters with counts, 7 sorts, size quick links, badges, "from" prices, stars | Sidebar filters with counts (size, storage, fabric, comfort, type, price, stock), sort, sale badges, stars, % off |
 | Product | Big option tiles, sale label, finance line, dimensions per size, service promises, sticky add to basket | Breadcrumb, stars, colour siblings, size buttons, "Complete the set", fold-outs, reviews | Gallery with zoom, size tiles (Single/Double/King/Super King), price per size with was-price and % off, promise box, fold-out description and details, dimensions per size (cm/inches), reviews, related, recently viewed |
-| Trust | 60-night trial, 5-year warranty, 0% finance, free 2-person delivery, UK made, Trustpilot count | Review counts everywhere, awards | Free delivery over £299, 100-night trial, 10-year frame guarantee, finance (all placeholder promises) |
+| Trust | 60-night trial, 5-year warranty, 0% finance, free 2-person delivery, UK made, Trustpilot count | Review counts everywhere, awards | Two-person delivery in 5 to 7 days, pay with Klarna, a showroom to visit (owner's terms: no delivery threshold, no sleep trial, no guarantee) |
 | Look | Bright, promotional, British, short benefit copy | Stylish, value-led, playful collection names | Calm and premium: warm oat, midnight ink and brass, Cormorant Garamond + Figtree, pill buttons, warm photography |
 
-Not adopted (platform does not have them yet, see the 11-11 analysis): service add-ons (assembly, old bed removal),
-"Complete the set", discount codes in banners, real pay-monthly, free swatch orders, dispatch dates.
+Service add-ons are built as optional extras on every bed: Professional assembly (£39) and Remove my old bed (£29)
+(see `docs/plans/product-add-ons.md`). Not adopted yet: "Complete the set" with add buttons (plan Phase 2), Klarna at
+checkout (copy mentions it, Stripe is set up for cards only), free swatch orders, dispatch dates.
 
 ## What was built
 
@@ -37,8 +38,17 @@ Not adopted (platform does not have them yet, see the 11-11 analysis): service a
 ## Test data markers
 
 Every test product has the tag `test-product`, SKUs starting `TEST-EB-`, and a description starting "TEST PRODUCT".
-Reviews say "Test review"; home testimonials say "(Sample review.)"; delivery, trial, guarantee, finance, address
-and phone are placeholders.
+Reviews say "Test review"; home testimonials say "(Sample review.)"; delivery times, address and phone are placeholders.
+
+## Update 2026-11-19 (owner's answers)
+
+- No free-delivery threshold, no sleep trial, no guarantee: all removed from copy, pages, product details and the bag
+  (no free-delivery bar). Finance is Klarna: announcement, hero, trust row, FAQ and About say so. **Klarna is not yet
+  offered at checkout**; enable it in Stripe (payment methods on the PaymentIntent) before relying on the copy.
+- Assembly and old bed removal added as priced extras on beds; checked to the bag (King + assembly = £712.99).
+- New admin page `/admin/stores/new` ("Add another store", linked under the store switcher and in the account menu):
+  name, web address with a live availability check, country (sets the currency) and an optional starting design.
+  Checked in the signed-in admin up to the form (taken and free addresses); not submitted, so no extra store exists.
 
 ## Re-running
 

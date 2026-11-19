@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
-import { ExternalLink, LogOut, Settings } from "lucide-react";
+import { ExternalLink, LogOut, Plus, Settings } from "lucide-react";
 
 export function storeInitial(name: string) {
   return name.trim().charAt(0) || "J";
@@ -30,6 +30,7 @@ export function AccountMenu({ storeName, storeSlug, email, onSignOut }: { storeN
         <div className="min-w-0"><strong>{storeName}</strong>{email && <span>{email}</span>}</div></div>
       <Link href={`/${storeSlug}`} className="admin-account-item" onClick={() => setOpen(false)}><ExternalLink size={16} aria-hidden="true" />View your store</Link>
       <Link href="/admin/settings" className="admin-account-item" onClick={() => setOpen(false)}><Settings size={16} aria-hidden="true" />Settings</Link>
+      <Link href="/admin/stores/new" className="admin-account-item" onClick={() => setOpen(false)}><Plus size={16} aria-hidden="true" />Add another store</Link>
       <button type="button" className="admin-account-item" onClick={() => { setOpen(false); onSignOut(); }}><LogOut size={16} aria-hidden="true" />Sign out</button>
     </div>}
   </div>;

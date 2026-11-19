@@ -688,3 +688,12 @@ fieldset.jk-field {border:0;padding:0;margin:0;min-width:0}
 .jk-toolbar-menu.is-start .jk-toolbar-menu-panel {left:0}
 .jk-toolbar-menu-panel select,.jk-toolbar-menu-panel .jk-select {width:100%}
 @media(max-width:639px){.jk-toolbar-menu-panel{position:fixed;left:16px!important;right:16px!important;top:auto;bottom:16px;min-width:0}}
+
+/* Add another store (features/admin/new-store): design choices and the action row. */
+.jk-new-store-designs {display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:var(--jk-space-2);border:0;margin:0;padding:0;min-width:0}
+.jk-new-store-design {display:flex;align-items:flex-start;gap:10px;padding:12px;border-radius:var(--jk-radius);box-shadow:inset 0 0 0 1px var(--jk-control-border);cursor:pointer;min-height:44px}
+.jk-new-store-design:has(input:checked) {box-shadow:inset 0 0 0 2px var(--jk-accent)}
+.jk-new-store-design input {margin-top:3px;accent-color:var(--jk-accent)}
+.jk-new-store-design span {display:grid;gap:2px}
+.jk-new-store-design small {color:var(--jk-text-subdued);font-size:var(--jk-text-sm)}
+.jk-new-store-actions {display:flex;justify-content:flex-end;gap:var(--jk-space-2);flex-wrap:wrap}

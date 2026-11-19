@@ -105,7 +105,11 @@ async function expressBedInstall({ api, plan: planUrl, publish = true }) {
   const catalog = `${base}/catalog`;
   const collectionIds = new Map(list((await call("GET", `${catalog}/collections?limit=100`)).data).map((entry) => [entry.handle, entry.id]));
   for (const entry of plan.collections) {
-    if (collectionIds.has(entry.handle)) continue;
+    if (collectionIds.has(entry.handle)) {
+      try { await call("PATCH", `${catalog}/collections/${collectionIds.get(entry.handle)}`, { title: entry.title, description: entry.description }); }
+      catch (error) { say(`${entry.title} not refreshed: ${error.message}`); }
+      continue;
+    }
     collectionIds.set(entry.handle, (await call("POST", `${catalog}/collections`, entry, [201])).data.id);
   }
   say(`Collections: ${[...collectionIds.keys()].join(", ")}.`);
@@ -114,12 +118,28 @@ async function expressBedInstall({ api, plan: planUrl, publish = true }) {
   const slug = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const productIds = new Map(list((await call("GET", `${catalog}/products?limit=100`)).data).map((entry) => [entry.handle, entry.id]));
   let created = 0;
+  // Size is a stock option (one variant per size); "addon" options are optional priced extras on the bag line.
+  const productOptions = (entry) => entry.options.map((definition, position) => {
+    const type = definition.type ?? "variant";
+    return {
+      id: slug(definition.name), name: definition.name, type, required: type === "variant", position, display: "buttons",
+      ...(type === "addon" ? { multiple: true } : {}),
+      values: definition.values.map((value, index) => ({ id: `${slug(definition.name)}-${slug(value)}`, label: value, position: index, priceAdjustmentMinor: definition.prices?.[index] ?? 0 })),
+    };
+  });
+  let refreshed = 0;
   for (const entry of plan.products) {
-    if (productIds.has(entry.handle)) continue;
-    const options = entry.options.map((definition, position) => ({
-      id: slug(definition.name), name: definition.name, type: "variant", required: true, position,
-      values: definition.values.map((value, index) => ({ id: `${slug(definition.name)}-${slug(value)}`, label: value, position: index, priceAdjustmentMinor: 0 })),
-    }));
+    if (productIds.has(entry.handle)) {
+      // Existing products get the plan's current wording (description, specifications, tags); prices and stock stay.
+      try {
+        const options = productOptions(entry);
+        await call("PATCH", `${catalog}/products/${productIds.get(entry.handle)}`, { description: entry.description, specifications: entry.specifications, tags: entry.tags, options, inventoryOptionIds: options.filter((option) => option.type === "variant").map((option) => option.id) });
+        refreshed += 1;
+      }
+      catch (error) { say(`${entry.title} not refreshed: ${error.message}`); }
+      continue;
+    }
+    const options = productOptions(entry);
     const variants = entry.variants.map((variant) => ({
       title: Object.values(variant.options).join(" / "), sku: variant.sku, priceMinor: variant.priceMinor,
       ...(variant.compareAtPriceMinor ? { compareAtPriceMinor: variant.compareAtPriceMinor } : {}),
@@ -131,12 +151,12 @@ async function expressBedInstall({ api, plan: planUrl, publish = true }) {
       vendor: entry.vendor, productType: entry.type, tags: entry.tags, specifications: entry.specifications,
       media: entry.images.map((name, index) => ({ mediaId: mediaIds.get(`express-bed-${name}.webp`), altText: index === 0 ? entry.title : `${entry.title}, view ${index + 1}` })),
       collectionIds: entry.collections.map((handle) => collectionIds.get(handle)).filter(Boolean),
-      options, variants, inventoryOptionIds: options.map((option) => option.id),
+      options, variants, inventoryOptionIds: options.filter((option) => option.type === "variant").map((option) => option.id),
     }, [201]);
     productIds.set(entry.handle, response.data.id);
     created += 1;
   }
-  say(`Products: ${created} created, ${plan.products.length - created} already there.`);
+  say(`Products: ${created} created, ${refreshed} refreshed.`);
 
   // 6b. Product picks in the layouts (spotlight, shop-the-look pins), now that product ids exist.
   for (const key of [...new Set((plan.productLinks ?? []).map((entry) => entry.template))]) {

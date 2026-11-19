@@ -33,10 +33,12 @@ const MATTRESS_SIZE = { Single: [90, 190], Double: [135, 190], King: [150, 200],
 const HEADBOARD_WIDTH = { Single: 92, Double: 140, King: 155, "Super King": 185 };
 const TEST_NOTE = "TEST PRODUCT: replace this with your real product details.";
 const round = (pounds) => Math.round(pounds) - 0.01;
+// Service add-ons on every bed: an "Optional extra" choice (type addon), priced per pick and added to the bag line.
+const BED_EXTRAS = { name: "Extras", type: "addon", values: ["Professional assembly", "Remove my old bed"], prices: [3900, 2900] };
 
 const collections = [
-  { handle: "beds", title: "Beds", description: "Divan, ottoman storage, upholstered and wooden bed frames in every size from single to super king. Free two-person delivery to the room of your choice." },
-  { handle: "mattresses", title: "Mattresses", description: "Pocket sprung, memory foam and hybrid mattresses, each with a 100-night sleep trial. Not sure which feel suits you? Start with our comfort guide on each product page." },
+  { handle: "beds", title: "Beds", description: "Divan, ottoman storage, upholstered and wooden bed frames in every size from single to super king. Two-person delivery to the room of your choice." },
+  { handle: "mattresses", title: "Mattresses", description: "Pocket sprung, memory foam and hybrid mattresses. Not sure which feel suits you? Every product page lists its comfort, layers and exact sizes." },
   { handle: "headboards", title: "Headboards", description: "Upholstered and wooden headboards that fit most bed frames and divans. Choose your width and fabric." },
 ];
 
@@ -54,7 +56,7 @@ function product(definition) {
   return {
     handle, title, collections: [collection], type, vendor: "Express Bed", images,
     description: `${TEST_NOTE}\n\n${about}`,
-    options: [{ name: "Size", values: SIZES }], variants,
+    options: [{ name: "Size", values: SIZES }, ...(collection === "beds" ? [BED_EXTRAS] : [])], variants,
     tags: ["test-product", ...tags], specifications,
   };
 }
@@ -66,42 +68,42 @@ const headboardSpec = (height) => (size) => ({ [`${size} (W x L x H)`]: `${HEADB
 const products = [
   // Beds
   product({ handle: "ashby-divan-bed", title: "Ashby Divan Bed", collection: "beds", type: "Divan bed", base: 299, images: ["divan", "room-guest"], tags: ["Storage:Two drawers", "Fabric:Woven"],
-    about: "A sturdy divan base with two smooth-running drawers, finished in a soft woven fabric. Delivered and assembled in your room by our two-person team.",
-    specs: { Frame: "Kiln-dried timber", Storage: "Two side drawers", Fabric: "Woven oatmeal", Assembly: "Included" }, sizeSpec: bedSpec(38) }),
+    about: "A sturdy divan base with two smooth-running drawers, finished in a soft woven fabric. Delivered to your room by our two-person team; add assembly as an extra.",
+    specs: { Frame: "Kiln-dried timber", Storage: "Two side drawers", Fabric: "Woven oatmeal", Assembly: "Optional extra (£39)" }, sizeSpec: bedSpec(38) }),
   product({ handle: "calder-ottoman-storage-bed", title: "Calder Ottoman Storage Bed", collection: "beds", type: "Ottoman bed", base: 449, compareAt: 549, images: ["larch-storage-bed", "room-main"], tags: ["Storage:Ottoman lift", "Fabric:Velvet"],
     about: "Lift the base on gas struts and the whole bed becomes storage. A padded headboard and plush velvet make it the centre of the room.",
-    specs: { Frame: "Engineered timber with gas-lift struts", Storage: "Full ottoman lift", Fabric: "Velvet", Assembly: "Included" }, sizeSpec: bedSpec(115) }),
+    specs: { Frame: "Engineered timber with gas-lift struts", Storage: "Full ottoman lift", Fabric: "Velvet", Assembly: "Optional extra (£39)" }, sizeSpec: bedSpec(115) }),
   product({ handle: "wren-oak-bed-frame", title: "Wren Oak Bed Frame", collection: "beds", type: "Bed frame", base: 399, images: ["wren-oak-bed", "room-kids"], tags: ["Storage:None", "Fabric:Wood"],
     about: "Solid oak with a slatted headboard and a sprung slatted base. Simple, warm and built to last for years.",
-    specs: { Frame: "Solid oak", Base: "Sprung slats", Finish: "Natural oil", Assembly: "Included" }, sizeSpec: bedSpec(100) }),
+    specs: { Frame: "Solid oak", Base: "Sprung slats", Finish: "Natural oil", Assembly: "Optional extra (£39)" }, sizeSpec: bedSpec(100) }),
   product({ handle: "elm-wingback-upholstered-bed", title: "Elm Wingback Upholstered Bed", collection: "beds", type: "Upholstered bed", base: 549, compareAt: 649, images: ["elm-wingback-bed", "detail"], tags: ["Storage:None", "Fabric:Boucle"],
     about: "A tall wingback headboard wraps the bed in soft boucle. Piped edges and a padded frame give it a hotel feel.",
-    specs: { Frame: "Hardwood and plywood", Base: "Sprung slats", Fabric: "Boucle", Assembly: "Included" }, sizeSpec: bedSpec(135) }),
+    specs: { Frame: "Hardwood and plywood", Base: "Sprung slats", Fabric: "Boucle", Assembly: "Optional extra (£39)" }, sizeSpec: bedSpec(135) }),
   product({ handle: "rowan-four-poster-bed", title: "Rowan Four Poster Bed", collection: "beds", type: "Bed frame", base: 699, images: ["rowan-four-poster", "room-main"], tags: ["Storage:None", "Fabric:Wood"],
     about: "Slim posts and a light oak finish make a four poster that feels airy rather than heavy. Ideal for rooms with high ceilings.",
-    specs: { Frame: "Oak veneer on hardwood", Base: "Sprung slats", Height: "190 cm to the top of the posts", Assembly: "Included" }, sizeSpec: bedSpec(190) }),
+    specs: { Frame: "Oak veneer on hardwood", Base: "Sprung slats", Height: "190 cm to the top of the posts", Assembly: "Optional extra (£39)" }, sizeSpec: bedSpec(190) }),
   product({ handle: "harlow-velvet-bed", title: "Harlow Velvet Bed", collection: "beds", type: "Upholstered bed", base: 499, images: ["harbour-sage", "fabrics"], tags: ["Storage:None", "Fabric:Velvet"],
     about: "A deep panelled headboard in sage velvet on a low, padded frame. Order free fabric swatches before you choose.",
-    specs: { Frame: "Hardwood", Base: "Sprung slats", Fabric: "Sage velvet", Assembly: "Included" }, sizeSpec: bedSpec(125) }),
+    specs: { Frame: "Hardwood", Base: "Sprung slats", Fabric: "Sage velvet", Assembly: "Optional extra (£39)" }, sizeSpec: bedSpec(125) }),
   // Mattresses
   product({ handle: "hollis-pocket-1000-mattress", title: "Hollis Pocket 1000 Mattress", collection: "mattresses", type: "Pocket sprung", base: 249, compareAt: 299, images: ["hollis-mattress", "mattress"], tags: ["Comfort:Medium", "Fabric:Quilted cover"],
     about: "One thousand individually wrapped springs move with you and keep partners from disturbing each other. Medium feel, quilted cover.",
-    specs: { Comfort: "Medium", Springs: "1,000 pocket springs (king size)", Turn: "Rotate monthly", Trial: "100 nights" }, sizeSpec: mattressSpec(25) }),
+    specs: { Comfort: "Medium", Springs: "1,000 pocket springs (king size)", Turn: "Rotate monthly" }, sizeSpec: mattressSpec(25) }),
   product({ handle: "fern-memory-foam-mattress", title: "Fern Memory Foam Mattress", collection: "mattresses", type: "Memory foam", base: 199, images: ["fern-mattress", "mattress"], tags: ["Comfort:Medium soft", "Fabric:Knitted cover"],
     about: "Layers of cooling memory foam mould to your shape and ease pressure on shoulders and hips. Arrives rolled for easy carrying upstairs.",
-    specs: { Comfort: "Medium soft", Layers: "3 foam layers", Delivery: "Rolled in a box", Trial: "100 nights" }, sizeSpec: mattressSpec(22) }),
+    specs: { Comfort: "Medium soft", Layers: "3 foam layers", Delivery: "Rolled in a box" }, sizeSpec: mattressSpec(22) }),
   product({ handle: "orbit-hybrid-2000-mattress", title: "Orbit Hybrid 2000 Mattress", collection: "mattresses", type: "Hybrid", base: 349, images: ["mattress", "hollis-mattress"], tags: ["Comfort:Medium firm", "Fabric:Quilted cover"],
     about: "Two thousand pocket springs topped with memory foam: the bounce of springs with the hug of foam.",
-    specs: { Comfort: "Medium firm", Springs: "2,000 pocket springs (king size)", Layers: "Springs plus memory foam", Trial: "100 nights" }, sizeSpec: mattressSpec(28) }),
+    specs: { Comfort: "Medium firm", Springs: "2,000 pocket springs (king size)", Layers: "Springs plus memory foam" }, sizeSpec: mattressSpec(28) }),
   product({ handle: "cedar-pillowtop-mattress", title: "Cedar Pillowtop Mattress", collection: "mattresses", type: "Pocket sprung", base: 299, images: ["cedar-topper", "mattress"], tags: ["Comfort:Soft", "Fabric:Quilted cover"],
     about: "A deep pillowtop layer sewn on top of pocket springs for a soft, cloud-like first feel.",
-    specs: { Comfort: "Soft", Springs: "1,500 pocket springs (king size)", Top: "Sewn-on pillowtop", Trial: "100 nights" }, sizeSpec: mattressSpec(30) }),
+    specs: { Comfort: "Soft", Springs: "1,500 pocket springs (king size)", Top: "Sewn-on pillowtop" }, sizeSpec: mattressSpec(30) }),
   product({ handle: "essential-open-coil-mattress", title: "Essential Open Coil Mattress", collection: "mattresses", type: "Open coil", base: 149, images: ["bright-mattresses", "mattress"], tags: ["Comfort:Firm", "Fabric:Quilted cover"],
     about: "A firm, supportive open coil mattress at an everyday price. A good choice for guest rooms and first homes.",
-    specs: { Comfort: "Firm", Springs: "Open coil", Turn: "Turn and rotate monthly", Trial: "100 nights" }, sizeSpec: mattressSpec(20) }),
+    specs: { Comfort: "Firm", Springs: "Open coil", Turn: "Turn and rotate monthly" }, sizeSpec: mattressSpec(20) }),
   product({ handle: "luxe-natural-3000-mattress", title: "Luxe Natural 3000 Mattress", collection: "mattresses", type: "Pocket sprung", base: 549, compareAt: 649, images: ["hollis-mattress", "fern-mattress"], tags: ["Comfort:Medium firm", "Fabric:Wool cover"],
     about: "Three thousand pocket springs with natural wool and cotton fillings that stay cool and breathe through the night.",
-    specs: { Comfort: "Medium firm", Springs: "3,000 pocket springs (king size)", Fillings: "Wool and cotton", Trial: "100 nights" }, sizeSpec: mattressSpec(32) }),
+    specs: { Comfort: "Medium firm", Springs: "3,000 pocket springs (king size)", Fillings: "Wool and cotton" }, sizeSpec: mattressSpec(32) }),
   // Headboards
   product({ handle: "arlo-panelled-headboard", title: "Arlo Panelled Headboard", collection: "headboards", type: "Upholstered headboard", base: 129, images: ["headboard"], tags: ["Fabric:Velvet"],
     about: "Deep vertical panels in rust velvet. Bolts to most divans and bed frames; fixings included.",
@@ -134,7 +136,7 @@ const reviews = [
 const pages = [
   { handle: "about", title: "About Express Bed", body: [
     ["A bed showroom that delivers", "Express Bed is a bed showroom for beds, mattresses and headboards. Come and lie on every mattress in our showroom, or shop online and have your new bed delivered to the room of your choice, usually within a week."],
-    ["What we believe", "A good bed should be simple to choose. That is why every product page lists the exact sizes, every mattress has a 100-night trial and our team will happily talk you through the options."],
+    ["What we believe", "A good bed should be simple to choose. That is why every product page lists the exact sizes, you can spread the cost with Klarna and our team will happily talk you through the options."],
     ["Placeholder copy", "This page was written as sample copy for the Express Bed test store. Replace it with your own story."],
   ] },
   { handle: "contact", title: "Contact us", body: [
@@ -144,18 +146,18 @@ const pages = [
   ] },
   { handle: "faq", title: "Questions and answers", body: [
     ["How fast is delivery?", "Most beds and mattresses are delivered within 5 to 7 working days. Our two-person team carries everything to the room of your choice and takes the packaging away."],
-    ["How does the sleep trial work?", "Sleep on your new mattress for at least 30 nights. If it is not right by night 100, we collect it and refund or exchange it."],
+    ["Can I pay in instalments?", "Yes. Choose Klarna at checkout to split the cost into smaller payments. Klarna checks your eligibility and sets its own terms."],
     ["Which size should I choose?", "Single 90 x 190 cm, double 135 x 190 cm, king 150 x 200 cm, super king 180 x 200 cm. Every product page lists the exact outside measurements."],
     ["Do headboards fit any bed?", "Bolt-on headboards fit most divans and bed frames. Floor-standing and wall-mounted headboards fit every bed."],
   ] },
   { handle: "shipping", title: "Delivery", body: [
-    ["Free delivery", "Free two-person delivery on orders over £299 (placeholder). Smaller orders are £29."],
+    ["Delivery charges", "Delivery is charged by order and shown at checkout before you pay."],
     ["When will it arrive?", "We call you to book a day, usually within 5 to 7 working days of your order."],
-    ["Assembly and old bed removal", "Bed assembly is included. We can take away your old bed or mattress for a small fee."],
+    ["Assembly and old bed removal", "Add professional assembly (£39) or old bed removal (£29) as an extra when you choose your bed."],
   ] },
   { handle: "returns", title: "Returns", body: [
     ["30-day returns", "Changed your mind about a bed or headboard? Return it within 30 days in its original condition."],
-    ["100-night sleep trial", "Mattresses come with a 100-night trial. Keep it for at least 30 nights, then call us if it is not right."],
+    ["Mattresses", "For hygiene reasons a mattress can only be returned unopened in its original packaging."],
   ] },
   { handle: "privacy", title: "Privacy policy", body: [["Placeholder", "This is placeholder text for the Express Bed test store. Replace it with your own privacy policy before you start selling."]] },
   { handle: "terms", title: "Terms of service", body: [["Placeholder", "This is placeholder text for the Express Bed test store. Replace it with your own terms before you start selling."]] },
@@ -166,8 +168,8 @@ const pages = [
 // ---------------------------------------------------------------------------------------------------------------
 const global = (id) => pack.globalSections.find((entry) => entry.section.id === id).section;
 const announcement = global("studio-announcement");
-announcement.settings.text = "Free two-person delivery on orders over £299";
-const announcementLines = ["100-night sleep trial on every mattress", "Beds delivered in 5 to 7 working days", "Interest-free finance available (placeholder)"];
+announcement.settings.text = "Spread the cost with Klarna";
+const announcementLines = ["Beds delivered in 5 to 7 working days", "Two-person delivery to the room of your choice", "Visit our showroom and try before you buy"];
 announcement.blocks.forEach((block, index) => { block.settings.text = announcementLines[index] ?? block.settings.text; });
 
 const header = global("studio-header");
@@ -202,7 +204,7 @@ const hero = inline(home, "studio-hero");
 hero.settings.eyebrow = "Bed showroom, delivered fast";
 hero.settings.image = img("hero", "A calm bedroom with an oatmeal boucle bed, white bedding and a jute rug", { fit: "cover", focalPoint: { x: 62, y: 55 } });
 block(hero, "resthaven-hero-title").settings.text = "Better sleep, delivered this week.";
-block(hero, "resthaven-hero-text").settings.text = "Beds, mattresses and headboards in every size from single to super king, with free two-person delivery to the room of your choice.";
+block(hero, "resthaven-hero-text").settings.text = "Beds, mattresses and headboards in every size from single to super king, with two-person delivery to the room of your choice. Spread the cost with Klarna.";
 Object.assign(block(hero, "resthaven-hero-action-0").settings, { label: "Shop beds", href: "/collections/beds" });
 Object.assign(block(hero, "resthaven-hero-action-1").settings, { label: "Find your mattress", href: "/collections/mattresses" });
 
@@ -223,7 +225,7 @@ const promo = inline(home, "resthaven-promo");
 promo.settings.eyebrow = "Bed and mattress together";
 promo.settings.image = img("room-main", "A main bedroom with an upholstered bed made up in white linen");
 block(promo, "resthaven-promo-title").settings.text = "Pair a bed and mattress in one delivery";
-block(promo, "resthaven-promo-text").settings.text = "Choose your frame, add the mattress that suits how you sleep, and we deliver and assemble both on the same day.";
+block(promo, "resthaven-promo-text").settings.text = "Choose your frame, add the mattress that suits how you sleep, and we deliver both on the same day. Add assembly as an extra.";
 Object.assign(block(promo, "resthaven-promo-action").settings, { label: "Shop beds", href: "/collections/beds" });
 
 const look = inline(home, "resthaven-shop-look");
@@ -237,11 +239,13 @@ Object.assign(block(fabric, fabric.blocks[2].id).settings, { label: "Shop headbo
 
 const mattressStory = inline(home, "resthaven-mattress-feature");
 mattressStory.settings.image = img("hollis-mattress", "A pocket sprung mattress on a bed base");
+block(mattressStory, mattressStory.blocks[0].id).settings.text = "Find the feel that suits you";
+block(mattressStory, mattressStory.blocks[1].id).settings.text = "Pocket sprung, memory foam or hybrid, from soft to firm. Lie on every one in our showroom, or compare comfort and layers on each product page.";
 Object.assign(block(mattressStory, mattressStory.blocks[2].id).settings, { label: "Find your mattress", href: "/collections/mattresses" });
 
-inline(home, "resthaven-trust-row").blocks.forEach((entry, index) => { entry.settings.text = ["Free delivery over £299", "100-night sleep trial", "10-year frame guarantee", "Interest-free finance"][index] ?? entry.settings.text; });
+inline(home, "resthaven-trust-row").blocks.forEach((entry, index) => { entry.settings.text = ["Two-person delivery", "Delivered in 5 to 7 days", "Pay with Klarna", "Showroom you can visit"][index] ?? entry.settings.text; });
 
-Object.assign(inline(home, "resthaven-spotlight").settings, { text: "Our best-selling storage bed: a full ottoman lift, a padded headboard and soft velvet, delivered and assembled in your room.", buttonLabel: "View the bed" });
+Object.assign(inline(home, "resthaven-spotlight").settings, { text: "Our best-selling storage bed: a full ottoman lift, a padded headboard and soft velvet, delivered to the room of your choice.", buttonLabel: "View the bed" });
 
 const testimonials = inline(home, "resthaven-reviews");
 const quotes = [
@@ -317,7 +321,7 @@ const mainMenu = [
 // ---------------------------------------------------------------------------------------------------------------
 const style = themes.listThemeStyles("jelly-resthaven").find((entry) => entry.id === "midnight-oat");
 const themeSettings = themes.applyThemeStyle(structuredClone(pack.theme.settings), style);
-themeSettings.cart = { ...(themeSettings.cart ?? {}), type: "drawer", freeDeliveryFrom: 299 };
+themeSettings.cart = { ...(themeSettings.cart ?? {}), type: "drawer", freeDeliveryFrom: 0 };
 
 // ---------------------------------------------------------------------------------------------------------------
 // Checks: every section must pass the registry, as the editor and publish would require.

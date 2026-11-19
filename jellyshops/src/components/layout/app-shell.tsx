@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ExternalLink, Menu } from "lucide-react";
+import { ExternalLink, Menu, Plus } from "lucide-react";
 import { useAuth } from "@/features/auth/providers/auth-provider";
 import { AdminNav } from "./admin-nav";
 import { AdminSearch } from "./admin-search";
@@ -28,7 +28,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     {stores.length > 1 ? <label className="min-w-0 flex-1"><span className="admin-store-card-label">Active store</span>
       <select aria-label="Switch store" value={store.id} onChange={(event) => setActiveStoreId(event.target.value)}>{stores.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label> :
       <div><span className="admin-store-card-label">Active store</span><span className="admin-store-card-name">{store.name}</span></div>}
-  </div></div>;
+  </div><Link href="/admin/stores/new" className="admin-add-store" onClick={() => setMenuOpen(false)}><Plus size={14} aria-hidden="true" />Add another store</Link></div>;
   return <ToastProvider><div className="admin-shell">
     <aside className="admin-sidebar" aria-label="Sidebar">
       <Link href="/admin" className="admin-brand admin-sidebar-brand" aria-label="Jellyshop home">
