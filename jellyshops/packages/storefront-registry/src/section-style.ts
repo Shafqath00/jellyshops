@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { customCssProblem, MAX_SECTION_CSS_LENGTH } from "@jelly/storefront-schema";
+import { customCssProblem, MAX_SECTION_CSS_LENGTH, COLOR_SETTING_PATTERN } from "@jelly/storefront-schema";
 import type { ControlDefinition } from "./types.js";
 
 /**
@@ -28,7 +28,8 @@ export const SHOW_ON_CHOICES = ["desktop-only", "desktop", "touch", "mobile"] as
 /** The colour schemes set in theme settings (Theme settings › Colour scheme 1-16). */
 export const SECTION_SCHEMES = ["scheme1", "scheme2", "scheme3", "scheme4", "scheme5", "scheme6", "scheme7", "scheme8", "scheme9", "scheme10", "scheme11", "scheme12", "scheme13", "scheme14", "scheme15", "scheme16"] as const;
 
-const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/);
+// A hex colour or a theme palette colour (template plan T7 part 4).
+const hexColor = z.string().regex(COLOR_SETTING_PATTERN);
 /** Empty string means "use the theme's choice"; the editor's select lists it as "Theme default". */
 const optional = <T extends readonly [string, ...string[]]>(values: T) => z.union([z.enum(values), z.literal("")]).optional();
 

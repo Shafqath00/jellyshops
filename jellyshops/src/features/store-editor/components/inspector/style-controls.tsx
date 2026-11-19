@@ -87,40 +87,52 @@ export function OptionalColorControl({
   label,
   value,
   onChange,
+  linkPalette = false,
 }: {
   label: string;
   value: string | undefined;
   onChange(value: string | undefined): void;
+  /**
+   * Template plan T7 part 4: a theme colour picked from the palette is saved as a link to it (palette:…), so the
+   * setting follows the theme when its colours change. Off for theme settings, which are the palette themselves.
+   */
+  linkPalette?: boolean;
 }) {
-  const color = value && hex.test(value) ? value : undefined;
-  const [draft, setDraft] = useState(color ?? "");
-  const [shown, setShown] = useState(color);
+  const palette = useColorPalette();
+  const linked = linkPalette && value ? palette.find((entry) => entry.ref === value) : undefined;
+  const color = linked ? linked.color : value && hex.test(value) ? value : undefined;
+  const shownText = linked ? linked.label : color ?? "";
+  const [draft, setDraft] = useState(shownText);
+  const [shown, setShown] = useState(value);
   const [open, setOpen] = useState(false);
   const [recent, setRecent] = useState<string[]>(() => readRecentColors());
-  const palette = useColorPalette();
-  if (shown !== color) { setShown(color); setDraft(color ?? ""); }
+  if (shown !== value) { setShown(value); setDraft(shownText); }
 
   // Picking or typing a colour also puts it first in the recent colours.
   const choose = (next: string) => { onChange(next); setRecent(rememberColor(next)); };
   const commit = (text: string) => {
     const next = text.trim();
     if (!next) { onChange(undefined); return; }
+    if (linked && next === linked.label) return;
     const parsed = normalizeHex(next);
     if (parsed) choose(parsed);
-    else setDraft(color ?? "");
+    else setDraft(shownText);
   };
-  const swatch = (item: { label: string; color: string }) => (
+  const swatch = (item: { label: string; color: string; ref?: string }) => {
+    const link = linkPalette && item.ref ? item.ref : undefined;
+    return (
     <button
-      key={item.color}
+      key={link ?? item.color}
       type="button"
-      aria-label={`Use ${item.label} ${item.color}`}
-      title={`${item.label} ${item.color}`}
-      aria-pressed={color === item.color}
-      onClick={() => choose(item.color)}
+      aria-label={link ? `Use ${item.label}, linked to the theme` : `Use ${item.label} ${item.color}`}
+      title={link ? `${item.label}: follows the theme when it changes` : `${item.label} ${item.color}`}
+      aria-pressed={link ? value === link : !linked && color === item.color}
+      onClick={() => (link ? onChange(link) : choose(item.color))}
       className="size-6 rounded-md border border-black/15 transition hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring aria-pressed:ring-2 aria-pressed:ring-foreground aria-pressed:ring-offset-1"
       style={{ background: item.color }}
     />
-  );
+    );
+  };
   const recentOnly = recent.filter((item) => !palette.some((entry) => entry.color === item));
 
   return (
@@ -155,7 +167,7 @@ export function OptionalColorControl({
             <ChevronDown size={14} strokeWidth={1.8} className={open ? "rotate-180" : ""} />
           </button>
         )}
-        {color && (
+        {(color || linked) && (
           <button type="button" aria-label={`Clear ${label}`} title="Use the theme's colour" onClick={() => onChange(undefined)} className={iconButtonClass}>
             <RotateCcw size={12} strokeWidth={1.8} />
           </button>
@@ -163,7 +175,7 @@ export function OptionalColorControl({
       </div>
       {open && (
         <div className="mt-2 space-y-2 rounded-lg border border-border bg-card p-2" role="group" aria-label={`${label} colour choices`}>
-          {palette.length > 0 && <div><p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Theme colours</p><div className="flex flex-wrap gap-1.5">{palette.map(swatch)}</div></div>}
+          {palette.length > 0 && <div><p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Theme colours</p>{linkPalette && <p className="mb-1.5 text-[11px] text-muted-foreground">These follow your theme settings when you change them.</p>}<div className="flex flex-wrap gap-1.5">{palette.map(swatch)}</div></div>}
           {recentOnly.length > 0 && <div><p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Recent</p><div className="flex flex-wrap gap-1.5">{recentOnly.map((item) => swatch({ label: "Recent colour", color: item }))}</div></div>}
         </div>
       )}

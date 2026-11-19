@@ -217,11 +217,14 @@ export function ControlRenderer({
       "Image uploads are unavailable"
     );
   },
+  linkPalette = false,
 }: {
   definition: ControlDefinition;
   value: unknown;
   onChange(value: unknown): void;
   catalog: DemoCatalog;
+  /** Section and block colour fields save theme colours as links (template plan T7 part 4); theme settings do not. */
+  linkPalette?: boolean;
   upload?: (
     file: File,
     onProgress?: (
@@ -441,6 +444,7 @@ export function ControlRenderer({
         label={definition.label}
         value={stringValue || undefined}
         onChange={onChange}
+        linkPalette={linkPalette}
       />
     );
   }

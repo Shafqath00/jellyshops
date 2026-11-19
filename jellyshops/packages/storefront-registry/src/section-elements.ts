@@ -1,3 +1,4 @@
+import { COLOR_SETTING_PATTERN } from "@jelly/storefront-schema";
 import { z } from "zod";
 import { SECTION_FONT_CHOICES } from "./section-style.js";
 import type { BlockDefinition, ControlDefinition, ElementDefinition } from "./types.js";
@@ -32,7 +33,7 @@ export function elementStyleControls(element: ElementDefinition): ControlDefinit
   });
 }
 
-const hexColor = z.union([z.string().regex(/^#[0-9a-fA-F]{6}$/), z.literal("")]);
+const hexColor = z.union([z.string().regex(COLOR_SETTING_PATTERN), z.literal("")]);
 const choiceOrEmpty = <T extends readonly [string, ...string[]]>(values: T) => z.union([z.enum(values), z.literal("")]);
 
 /** Validation for the elements' style settings (all optional; empty follows the theme). */

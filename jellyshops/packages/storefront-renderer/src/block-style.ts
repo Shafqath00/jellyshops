@@ -1,3 +1,4 @@
+import { colorSettingCss } from "@jelly/storefront-schema";
 import type { CSSProperties } from "react";
 import { showOnChoice } from "./section-style";
 
@@ -9,7 +10,6 @@ import { showOnChoice } from "./section-style";
  * `data-type-preset-mobile`, applied below 768px; "Show on" becomes `data-show-on`.
  * Unknown values are ignored, so nothing a merchant saves can inject CSS.
  */
-const hex = /^#[0-9a-fA-F]{6}$/;
 const presets = new Set(["h1", "h2", "h3", "h4", "h5", "h6", "body", "small"]);
 const shadows: Record<string, string> = {
   soft: "0 2px 8px rgba(0, 0, 0, 0.08)",
@@ -37,7 +37,8 @@ function px(value: unknown, max: number): number | undefined {
 export function blockStyleProps(settings: Record<string, unknown> | undefined, mobile?: Record<string, unknown>, tablet?: Record<string, unknown>): BlockStyleProps {
   if (!settings) return {};
   const style: CSSProperties = {};
-  const color = (key: string) => typeof settings[key] === "string" && hex.test(settings[key] as string) ? settings[key] as string : undefined;
+  // A hex value or a theme palette colour (template plan T7 part 4).
+  const color = (key: string) => colorSettingCss(settings[key]);
 
   if (settings.blockWidth === "fill") Object.assign(style, { display: "block", width: "100%", boxSizing: "border-box" });
   else if (settings.blockWidth === "fit") Object.assign(style, { width: "fit-content" });

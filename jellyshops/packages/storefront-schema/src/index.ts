@@ -114,3 +114,4 @@ export { menuImageSchema, normalizeMenuImage } from "./menu-image.js";
 export { MAX_QUANTITY_RULE_VALUE, NO_QUANTITY_RULE, allowedQuantity, hasQuantityRule, quantityProblem, quantityRuleProblems, quantityRuleText, readQuantityRule } from "./quantity-rules.js";
 export type { QuantityRule } from "./quantity-rules.js";
 export { STOREFRONT_WORDS, STOREFRONT_WORD_TRANSLATIONS, storefrontWord, type StorefrontWordKey } from "./storefront-words.js";
+export { COLOR_SETTING_PATTERN, colorSettingCss, isPaletteColor, PALETTE_SCHEME_ROLES, PALETTE_THEME_COLORS, paletteReference } from "./palette-colors.js";

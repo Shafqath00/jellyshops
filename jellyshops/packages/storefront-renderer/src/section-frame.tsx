@@ -1,3 +1,4 @@
+import { colorSettingCss } from "@jelly/storefront-schema";
 import type { HTMLAttributes, ReactNode } from "react";
 import type { ContractScheme } from "@jelly/storefront-themes/runtime";
 
@@ -27,12 +28,11 @@ export function sectionFrameWidth(settings: Record<string, unknown> | undefined)
 export function sectionScheme(settings: Record<string, unknown> | undefined): ContractScheme | undefined {
   if (!settings) return undefined;
   const text = (key: string) => typeof settings[key] === "string" ? settings[key] as string : "";
-  if (settings.styleColors === true && (HEX.test(text("styleBackground")) || HEX.test(text("styleText")))) return "custom";
+  if (settings.styleColors === true && (colorSettingCss(settings.styleBackground) || colorSettingCss(settings.styleText))) return "custom";
   if (/^scheme([1-9]|1[0-6])$/.test(text("styleScheme"))) return text("styleScheme") as ContractScheme;
   if (["page", "soft", "dark"].includes(text("colorScheme"))) return text("colorScheme") as ContractScheme;
   return undefined;
 }
-const HEX = /^#[0-9a-fA-F]{6}$/;
 
 export function SectionFrame({ width = "page", scheme, children, ...props }: HTMLAttributes<HTMLDivElement> & { width?: SectionFrameWidth; scheme?: ContractScheme; children?: ReactNode }) {
   return <div {...props} data-section-frame="" data-frame-width={width} {...(scheme ? { "data-scheme": scheme } : {})}>{children}</div>;

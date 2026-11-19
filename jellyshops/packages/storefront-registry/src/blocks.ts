@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { settingValueSchema, type DynamicValueType } from "@jelly/storefront-schema";
+import { settingValueSchema, type DynamicValueType, COLOR_SETTING_PATTERN } from "@jelly/storefront-schema";
 import { appEmbedSource, getAppBlockProvider, listAppBlockProviders, STORE_ICON_LABELS, STORE_ICON_NAMES } from "@jelly/storefront-schema";
 import { withBlockStyle } from "./block-style.js";
 import { withBlockElements } from "./section-elements.js";
@@ -18,7 +18,7 @@ const imageReference = z.object({ url: z.string(), alt: z.string().optional() })
 /** Shapes for image and video blocks. */
 export const MEDIA_RATIOS = ["square", "portrait", "landscape", "wide"] as const;
 const ratioOptions = [{ label: "Square", value: "square" }, { label: "Portrait (4:5)", value: "portrait" }, { label: "Landscape (4:3)", value: "landscape" }, { label: "Wide (16:9)", value: "wide" }];
-const hexColor = z.union([z.string().regex(/^#[0-9a-fA-F]{6}$/), z.literal("")]).optional();
+const hexColor = z.union([z.string().regex(COLOR_SETTING_PATTERN), z.literal("")]).optional();
 const choice = <T extends readonly [string, ...string[]]>(values: T) => z.union([z.enum(values), z.literal("")]).optional();
 const buttonOptionsSchema = {
   buttonStyle: choice(["primary", "secondary", "link"] as const),

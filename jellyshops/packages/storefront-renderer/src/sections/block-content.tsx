@@ -1,4 +1,4 @@
-import { appEmbedSource, getAppBlockProvider } from "@jelly/storefront-schema";
+import { appEmbedSource, colorSettingCss, getAppBlockProvider } from "@jelly/storefront-schema";
 import { useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import type { BlockNode } from "@jelly/storefront-schema";
 import { resolveStorefrontHref } from "../runtime-context";
@@ -12,13 +12,12 @@ import { imageValue, stringValue } from "./shared";
  * Vimeo or a direct https video file.
  */
 
-const hex = /^#[0-9a-fA-F]{6}$/;
 const ratios: Record<string, string> = { square: "1 / 1", portrait: "4 / 5", landscape: "4 / 3", wide: "16 / 9" };
 type Settings = Record<string, unknown>;
 
+/** A hex value or a theme palette colour (template plan T7 part 4). */
 function color(settings: Settings, key: string): string | undefined {
-  const value = settings[key];
-  return typeof value === "string" && hex.test(value) ? value : undefined;
+  return colorSettingCss(settings[key]);
 }
 
 /** Class, link target and inline colours for a button block. `index` decides the theme default (first filled, others outlined). */

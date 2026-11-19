@@ -1,3 +1,4 @@
+import { paletteReference } from "@jelly/storefront-schema";
 import { COLOR_SCHEME_IDS, colorSchemeCount, colorSchemeLabel, resolveTheme } from "@jelly/storefront-themes";
 
 /**
@@ -5,7 +6,8 @@ import { COLOR_SCHEME_IDS, colorSchemeCount, colorSchemeLabel, resolveTheme } fr
  * and the colours of every colour scheme in use, plus the colours the merchant
  * used lately (kept in this browser).
  */
-export interface PaletteColor { label: string; color: string }
+/** `ref` is the palette reference a section saves to stay linked to this theme colour (template plan T7 part 4). */
+export interface PaletteColor { label: string; color: string; ref?: string }
 
 const hex = /^#[0-9a-fA-F]{6}$/;
 const baseColors: Array<[string, string]> = [["background", "Page background"], ["surface", "Cards and panels"], ["text", "Text"], ["secondary", "Soft text"], ["primary", "Buttons"], ["accent", "Highlight"]];
@@ -22,20 +24,20 @@ export function themePalette(themeId: string | undefined, settings: Record<strin
   const theme = resolveTheme(themeId, settings ?? {}, version);
   const colors = record(theme.settings.colors);
   const found: PaletteColor[] = [];
-  const add = (label: string, value: unknown) => {
+  const add = (label: string, value: unknown, ref: string) => {
     const color = typeof value === "string" ? normalizeHex(value) : null;
-    if (color && !found.some((item) => item.color === color)) found.push({ label, color });
+    if (color && !found.some((item) => item.color === color)) found.push({ label, color, ref });
   };
-  for (const [key, label] of baseColors) add(label, colors[key]);
+  for (const [key, label] of baseColors) add(label, colors[key], paletteReference(key));
   const count = colorSchemeCount(theme.settings);
   const schemes = record(theme.settings.colorSchemes);
   for (const id of COLOR_SCHEME_IDS.slice(0, count)) {
     const scheme = record(schemes[id]);
     const name = colorSchemeLabel(theme.settings, id);
-    add(`${name} background`, scheme.background);
-    add(`${name} text`, scheme.text);
-    add(`${name} button`, scheme.button);
-    add(`${name} secondary button`, scheme.secondaryButton);
+    add(`${name} background`, scheme.background, paletteReference(id, "bg"));
+    add(`${name} text`, scheme.text, paletteReference(id, "text"));
+    add(`${name} button`, scheme.button, paletteReference(id, "button"));
+    add(`${name} secondary button`, scheme.secondaryButton, paletteReference(id, "secondary"));
   }
   return found;
 }

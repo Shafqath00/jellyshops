@@ -713,11 +713,11 @@
         },
         "styleBackground": {
           "type": "string",
-          "pattern": "^#[0-9a-fA-F]{6}$"
+          "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
         },
         "styleText": {
           "type": "string",
-          "pattern": "^#[0-9a-fA-F]{6}$"
+          "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
         },
         "styleHeadingFont": {
           "anyOf": [
@@ -956,7 +956,7 @@
           "anyOf": [
             {
               "type": "string",
-              "pattern": "^#[0-9a-fA-F]{6}$"
+              "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
             },
             {
               "type": "string",
@@ -1393,7 +1393,7 @@
           "anyOf": [
             {
               "type": "string",
-              "pattern": "^#[0-9a-fA-F]{6}$"
+              "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
             },
             {
               "type": "string",
@@ -1408,7 +1408,7 @@
           "anyOf": [
             {
               "type": "string",
-              "pattern": "^#[0-9a-fA-F]{6}$"
+              "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
             },
             {
               "type": "string",
@@ -1420,7 +1420,7 @@
           "anyOf": [
             {
               "type": "string",
-              "pattern": "^#[0-9a-fA-F]{6}$"
+              "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
             },
             {
               "type": "string",
@@ -1494,7 +1494,7 @@
           "anyOf": [
             {
               "type": "string",
-              "pattern": "^#[0-9a-fA-F]{6}$"
+              "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
             },
             {
               "type": "string",
@@ -1844,7 +1844,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -2701,7 +2701,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -2736,7 +2736,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -4256,7 +4256,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -4349,7 +4349,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -4442,7 +4442,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -4535,7 +4535,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -4628,7 +4628,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -4663,7 +4663,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -5054,7 +5054,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -6181,7 +6181,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -6279,7 +6279,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -7291,7 +7291,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -7384,7 +7384,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -8016,7 +8016,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -10589,7 +10589,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -11238,7 +11238,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -11331,7 +11331,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -11995,7 +11995,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -12733,7 +12733,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -12826,7 +12826,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -13251,7 +13251,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -13729,7 +13729,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -14696,7 +14696,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -15379,7 +15379,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -15472,7 +15472,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -16958,7 +16958,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -17051,7 +17051,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -17144,7 +17144,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -17927,7 +17927,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -18020,7 +18020,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -18113,7 +18113,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -19164,7 +19164,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -19257,7 +19257,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -19350,7 +19350,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -19633,7 +19633,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -19645,7 +19645,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -19962,7 +19962,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -20345,7 +20345,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -20703,7 +20703,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -21172,7 +21172,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -22010,7 +22010,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -22421,7 +22421,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -24223,7 +24223,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -24782,7 +24782,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -24875,7 +24875,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -25604,7 +25604,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -25616,7 +25616,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -26649,7 +26649,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",
@@ -26742,7 +26742,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^#[0-9a-fA-F]{6}$"
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
               },
               {
                 "type": "string",

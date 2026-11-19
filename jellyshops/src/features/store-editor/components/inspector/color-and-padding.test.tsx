@@ -11,12 +11,12 @@ beforeEach(() => window.localStorage.clear());
 
 it("builds the palette from the theme and its colour schemes, without repeats", () => {
   const palette = themePalette("jelly-signature", { colorSchemes: { count: "5", scheme2: { name: "Sand", background: "#010203" }, scheme5: { text: "#040506" } } });
-  expect(palette[0]).toEqual({ label: "Page background", color: "#faf9f7" });
+  expect(palette[0]).toEqual({ label: "Page background", color: "#faf9f7", ref: "palette:background" });
   expect(new Set(palette.map((item) => item.color)).size).toBe(palette.length);
-  expect(palette).toContainEqual({ label: "Scheme 2: Sand background", color: "#010203" });
-  expect(palette).toContainEqual({ label: "Scheme 5 text", color: "#040506" });
+  expect(palette).toContainEqual({ label: "Scheme 2: Sand background", color: "#010203", ref: "palette:scheme2-bg" });
+  expect(palette).toContainEqual({ label: "Scheme 5 text", color: "#040506", ref: "palette:scheme5-text" });
   // A colour the theme already offers keeps its first name.
-  expect(palette.filter((item) => item.color === "#faf9f7")).toEqual([{ label: "Page background", color: "#faf9f7" }]);
+  expect(palette.filter((item) => item.color === "#faf9f7")).toEqual([{ label: "Page background", color: "#faf9f7", ref: "palette:background" }]);
   expect(palette.every((item) => /^#[0-9a-f]{6}$/.test(item.color))).toBe(true);
 });
 
@@ -44,6 +44,20 @@ it("offers theme and recent colours under a colour field and applies one with a 
   await userEvent.click(screen.getByRole("button", { name: "Use Text #1c1b19" }));
   expect(onChange).toHaveBeenCalledWith("#1c1b19");
   expect(readRecentColors()[0]).toBe("#1c1b19");
+});
+
+it("links a section colour to a theme colour, and shows the link by name", async () => {
+  const onChange = vi.fn();
+  const palette = [{ label: "Scheme 2 button", color: "#3d6e96", ref: "palette:scheme2-button" }];
+  const { rerender } = render(<ColorPaletteProvider value={palette}><OptionalColorControl label="Background" value={undefined} onChange={onChange} linkPalette /></ColorPaletteProvider>);
+  await userEvent.click(screen.getByRole("button", { name: "Background palette" }));
+  await userEvent.click(screen.getByRole("button", { name: "Use Scheme 2 button, linked to the theme" }));
+  expect(onChange).toHaveBeenCalledWith("palette:scheme2-button");
+  rerender(<ColorPaletteProvider value={palette}><OptionalColorControl label="Background" value="palette:scheme2-button" onChange={onChange} linkPalette /></ColorPaletteProvider>);
+  expect(screen.getByRole("textbox", { name: "Background" })).toHaveValue("Scheme 2 button");
+  expect(screen.getByRole("button", { name: "Use Scheme 2 button, linked to the theme" })).toHaveAttribute("aria-pressed", "true");
+  await userEvent.click(screen.getByRole("button", { name: "Clear Background" }));
+  expect(onChange).toHaveBeenLastCalledWith(undefined);
 });
 
 it("takes a typed hex colour with or without #, and ignores nonsense", async () => {

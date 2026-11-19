@@ -1,10 +1,10 @@
+import { colorSettingCss } from "@jelly/storefront-schema";
 import type { CSSProperties } from "react";
 import type { BlockNode, SectionNode } from "@jelly/storefront-schema";
 import { blockElementList, elementStyleKey, elementStyleProps, sectionElementList, type ElementDefinition } from "@jelly/storefront-registry/runtime";
 import { FONT_OPTIONS, fontStack } from "@jelly/storefront-themes/runtime";
 
 const fonts = new Set<string>(FONT_OPTIONS.map((font) => font.value));
-const hex = /^#[0-9a-fA-F]{6}$/;
 
 /** An element's own style (docs/plans/element-selection.md): only colour, type, alignment and corners, so layout never changes. */
 function styleFor(element: ElementDefinition | undefined, settings: Record<string, unknown>): CSSProperties {
@@ -13,9 +13,11 @@ function styleFor(element: ElementDefinition | undefined, settings: Record<strin
   for (const prop of elementStyleProps(element.kind)) {
     const saved = settings[elementStyleKey(element.id, prop)];
     if (saved === undefined || saved === "") continue;
-    if ((prop === "color" || prop === "background") && (typeof saved !== "string" || !hex.test(saved))) continue;
-    if (prop === "color") style.color = saved as string;
-    else if (prop === "background") { style.background = saved as string; style.borderColor = saved as string; }
+    // Colours may be a hex value or a theme palette colour (template plan T7 part 4).
+    const colour = prop === "color" || prop === "background" ? colorSettingCss(saved) : undefined;
+    if ((prop === "color" || prop === "background") && !colour) continue;
+    if (prop === "color") style.color = colour;
+    else if (prop === "background") { style.background = colour; style.borderColor = colour; }
     else if (prop === "font" && typeof saved === "string" && fonts.has(saved)) style.fontFamily = fontStack(saved, "Arial");
     else if (prop === "size" && typeof saved === "number") style.fontSize = `${saved}px`;
     else if (prop === "weight" && typeof saved === "string") style.fontWeight = Number(saved);

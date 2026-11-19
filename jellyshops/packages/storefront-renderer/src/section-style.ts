@@ -1,3 +1,4 @@
+import { colorSettingCss } from "@jelly/storefront-schema";
 import type { CSSProperties } from "react";
 import { FONT_OPTIONS, fontStack } from "@jelly/storefront-themes/runtime";
 
@@ -28,7 +29,6 @@ const shadows: Record<string, string> = {
   medium: "0 6px 20px rgba(0, 0, 0, 0.14)",
   strong: "0 14px 40px rgba(0, 0, 0, 0.24)",
 };
-const hex = /^#[0-9a-fA-F]{6}$/;
 
 export interface SectionStyleProps {
   "data-section-style"?: string;
@@ -71,9 +71,12 @@ export function sectionStyleProps(settings: Record<string, unknown> | undefined,
     used.push("colors", "scheme");
   }
   // A colour left empty keeps the theme's, so ticking "Use my own colours" never blanks the section.
-  if (settings.styleColors === true && (hex.test(text("styleBackground")) || hex.test(text("styleText")))) {
-    vars["--section-bg"] = hex.test(text("styleBackground")) ? text("styleBackground") : "var(--theme-background, #ffffff)";
-    vars["--section-text"] = hex.test(text("styleText")) ? text("styleText") : "var(--theme-text, #1c1b19)";
+  // Own colours may be hex values or theme palette colours (template plan T7 part 4).
+  const ownBackground = colorSettingCss(settings.styleBackground);
+  const ownText = colorSettingCss(settings.styleText);
+  if (settings.styleColors === true && (ownBackground || ownText)) {
+    vars["--section-bg"] = ownBackground ?? "var(--theme-background, #ffffff)";
+    vars["--section-text"] = ownText ?? "var(--theme-text, #1c1b19)";
     if (!used.includes("colors")) used.push("colors");
   }
   if (fonts.has(text("styleHeadingFont"))) { vars["--section-heading-font"] = fontStack(text("styleHeadingFont"), "Arial"); used.push("heading-font"); }
@@ -90,9 +93,10 @@ export function sectionStyleProps(settings: Record<string, unknown> | undefined,
   if (bottom !== undefined) { vars["--section-pad-bottom"] = `${bottom}px`; used.push("pad-bottom"); }
   if (settings.styleWidth === "full") used.push("full-width");
   // A gradient starts at the section's own background (scheme, own colour or theme) and fades to the chosen colour.
-  if (hex.test(text("styleGradientColor"))) {
+  const gradientTo = colorSettingCss(settings.styleGradientColor);
+  if (gradientTo) {
     const angle = typeof settings.styleGradientAngle === "number" && Number.isFinite(settings.styleGradientAngle) ? Math.min(360, Math.max(0, Math.round(settings.styleGradientAngle))) : 180;
-    vars["--section-gradient"] = `linear-gradient(${angle}deg, var(--section-bg, var(--theme-background, #ffffff)), ${text("styleGradientColor")})`;
+    vars["--section-gradient"] = `linear-gradient(${angle}deg, var(--section-bg, var(--theme-background, #ffffff)), ${gradientTo})`;
     used.push("gradient");
   }
   const minHeight = typeof settings.styleMinHeight === "number" && Number.isFinite(settings.styleMinHeight) ? Math.min(1000, Math.max(0, Math.round(settings.styleMinHeight))) : 0;

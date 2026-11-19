@@ -1,3 +1,4 @@
+import { COLOR_SETTING_PATTERN } from "@jelly/storefront-schema";
 import { z } from "zod";
 import type { BlockDefinition, ControlDefinition } from "./types.js";
 import { SHOW_ON_CHOICES } from "./section-style.js";
@@ -19,7 +20,8 @@ const TEXT_ONLY_KEYS = new Set(["blockTypePreset", "blockTextColor", "blockBackg
 /** Blocks without text of their own: no text style, text colour or background. Every other styled block has them (a group passes them on to its blocks). */
 const NON_TEXT_BLOCK_TYPES = new Set(["button", "image", "video", "divider", "spacer", "icon", "images-stack", "image-comparison"]);
 
-const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/);
+// A hex colour or a theme palette colour (template plan T7 part 4).
+const hexColor = z.string().regex(COLOR_SETTING_PATTERN);
 const empty = z.literal("");
 const px = (max: number) => z.number().int().min(0).max(max);
 
