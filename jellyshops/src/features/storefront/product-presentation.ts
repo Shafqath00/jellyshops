@@ -32,7 +32,7 @@ export function catalogProductToProduct(product: CatalogAdminProduct): Product {
   };
 }
 
-export function createProductPresentationContext({ product, currency, shippingCopy, selections, quantity, onSelectionsChange, onQuantityChange, onAddToCart, relatedProducts = [], personalisationValues = {}, onPersonalisationChange, showPersonalisationProblems = false }: {
+export function createProductPresentationContext({ product, currency, shippingCopy, selections, quantity, onSelectionsChange, onQuantityChange, onAddToCart, relatedProducts = [], pairedProducts, personalisationValues = {}, onPersonalisationChange, showPersonalisationProblems = false }: {
   product: Product;
   currency: Currency;
   shippingCopy?: string;
@@ -42,6 +42,7 @@ export function createProductPresentationContext({ product, currency, shippingCo
   onQuantityChange(quantity: number): void;
   onAddToCart(input: { variantId: string; quantity: number; selections: ConfiguredOptionSelection[]; priceMinor: number; personalisation: PersonalisationEntry[] }): Promise<{ ok: boolean; message?: string }>;
   relatedProducts?: ProductPresentationContext["relatedProducts"];
+  pairedProducts?: ProductPresentationContext["pairedProducts"];
   /** What the shopper typed in the personalisation fields, by field id. */
   personalisationValues?: Record<string, string>;
   onPersonalisationChange?(values: Record<string, string>): void;
@@ -105,6 +106,7 @@ export function createProductPresentationContext({ product, currency, shippingCo
       ...(showPersonalisationProblems && personalisationProblems.length ? { problems: Object.fromEntries(personalisationProblems.map((problem) => [problem.fieldId, problem.message])) } : {}),
     } } : {}),
     relatedProducts,
+    ...(pairedProducts ? { pairedProducts } : {}),
   };
 }
 

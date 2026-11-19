@@ -33509,8 +33509,11 @@
         "@product"
       ],
       "defaultSettings": {
-        "heading": "Pairs well with",
-        "limit": 3
+        "heading": "Complete the set",
+        "limit": 3,
+        "source": "pairs",
+        "addToBag": true,
+        "matchSize": true
       },
       "controls": [
         {
@@ -33521,6 +33524,23 @@
           "maxLength": 80
         },
         {
+          "type": "segmented",
+          "key": "source",
+          "label": "Which products",
+          "group": "content",
+          "options": [
+            {
+              "label": "Similar products",
+              "value": "related"
+            },
+            {
+              "label": "From other collections",
+              "value": "pairs"
+            }
+          ],
+          "description": "From other collections suits \"Complete the set\": a bed suggests a mattress and a headboard."
+        },
+        {
           "type": "range",
           "key": "limit",
           "label": "Products to show",
@@ -33528,6 +33548,23 @@
           "min": 1,
           "max": 6,
           "step": 1
+        },
+        {
+          "type": "checkbox",
+          "key": "addToBag",
+          "label": "Let shoppers add them to the bag here",
+          "group": "content",
+          "description": "Each product gets a size choice and an Add button. Products that need other choices first link to their page."
+        },
+        {
+          "type": "checkbox",
+          "key": "matchSize",
+          "label": "Start with the same size as this product",
+          "group": "content",
+          "visibleIf": {
+            "key": "addToBag",
+            "equals": true
+          }
         }
       ],
       "settingsSchema": {
@@ -33541,6 +33578,27 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 6
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "related",
+                  "pairs"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "addToBag": {
+            "type": "boolean"
+          },
+          "matchSize": {
+            "type": "boolean"
           }
         }
       }

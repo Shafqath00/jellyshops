@@ -63,3 +63,10 @@ rewrites layouts, menu and theme settings, so re-running after editing the plan 
 - Bag line reads "King · Size: King" (variant title plus option).
 - The local Functions emulator returned a few one-off 500s on first load (catalogue browse, navigation context); they
   did not repeat.
+
+## Update 2026-11-19: Complete the set
+
+The product page shows "Complete the set" under Add to basket: products from the other collections (a bed suggests
+headboards and a mattress), each with a size choice that starts on the size chosen for the product on the page and an
+Add button. Checked on the live store at 1440 and 390px: choosing King moved every row to King with King prices, Add
+put a King mattress in the bag (count went up, "Added King to your bag."), no sideways scroll, 44px+ controls.

@@ -23,7 +23,20 @@ changes. Merchants set them up in the product builder (Choices > Optional extra)
 per quantity (two beds with assembly cost £39 once per line, priced by quantity as today), and it cannot have its own
 stock.
 
-### Phase 2: "Complete the set" with add buttons (platform, no database change)
+### Phase 2: "Complete the set" with add buttons (built 2026-11-19)
+
+Built as planned with these choices: the existing `complementary-products` block gained `source` (related | pairs),
+`addToBag` and `matchSize`; blocks saved before keep links only. "pairs" = `pairProducts()` in
+`features/storefront/recommendations.ts` (collections the product is not in, one per collection first). Size choices =
+`setChoicesFor()` in `product-card-data.ts` (one stock option; skipped when a required non-stock choice, required
+personalisation, a quantity rule or two stock options are present: the row links to the product instead). The Add
+button uses the existing `StorefrontCartAccess.setQuantity` (current quantity + 1) and fires `jelly:cart-changed`
+(the bag count updates; the slide-out bag does not pop open, so shoppers can add several). Renderer `SetItem` in
+`sections/product-blocks.tsx`; styles at the end of the complementary rules in `storefront-base.css`; tests
+`storefront-renderer/src/complete-the-set.test.tsx` (incl. axe) and `features/storefront/complete-the-set.test.ts`.
+The editor preview shows the rows with disabled Add buttons (sample products have no size choices, so they link).
+
+Original plan:
 
 1. Registry: `complementary-products` gains `addMode` (links / add buttons) and `pickSize` (on/off).
 2. Renderer: each item shows a small size select built from that product's variants (sold-out sizes disabled) and an

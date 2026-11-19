@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 /** A product on a card. `saving` ("£20.00"), `discountPercent` and `chip` ("More colours") are optional extras themes can show. */
 /** A product as every product list draws it (the shared card in @jelly/storefront-ui). */
-export interface PublicProduct { /** Filters the product belongs to (options, Name:Value tags, brand, type), for product list filters. */ filters?: import("@jelly/storefront-schema").ProductFilterValues[]; /** Second photo, shown when the shopper points at the card. */ hoverImageUrl?: string; id: string; name: string; href: string; imageUrl: string; price: string; compareAtPrice?: string; badge?: string; saving?: string; discountPercent?: number; chip?: string; vendor?: string; swatches?: Array<{ label: string; color?: string; image?: string }>; moreSwatches?: number; /** Exact price in minor units, used to sort and filter product lists. */ priceMinor?: number; /** False when no variant can be bought; product list filters use it. */ available?: boolean; /** Set when the product can go straight into the cart from its card (one variant, no options, in stock). */ quickAdd?: { variantId: string; max: number }; /** Average star rating and number of published reviews. */ rating?: { average: number; count: number } }
+export interface PublicProduct { /** Filters the product belongs to (options, Name:Value tags, brand, type), for product list filters. */ filters?: import("@jelly/storefront-schema").ProductFilterValues[]; /** Second photo, shown when the shopper points at the card. */ hoverImageUrl?: string; id: string; name: string; href: string; imageUrl: string; price: string; compareAtPrice?: string; badge?: string; saving?: string; discountPercent?: number; chip?: string; vendor?: string; swatches?: Array<{ label: string; color?: string; image?: string }>; moreSwatches?: number; /** Exact price in minor units, used to sort and filter product lists. */ priceMinor?: number; /** False when no variant can be bought; product list filters use it. */ available?: boolean; /** Set when the product can go straight into the cart from its card (one variant, no options, in stock). */ quickAdd?: { variantId: string; max: number }; /** Average star rating and number of published reviews. */ rating?: { average: number; count: number }; /** Variants by their stock option (usually Size) for "Complete the set" add buttons; absent when the product needs other choices first. `max` 0 = sold out. */ setChoices?: { optionName: string; values: Array<{ variantId: string; label: string; price: string; max: number }> } }
 export interface CollectionPresentationContext {
   collection: { id: string; title: string; description: string; descriptionDoc?: RichTextDocument | null; imageUrl?: string };
   products: PublicProduct[];
@@ -35,6 +35,8 @@ export interface ProductPresentationContext {
   };
   wishlistControl?: ReactNode;
   relatedProducts: PublicProduct[];
+  /** "Complete the set": products from other collections (a bed suggests a mattress and a headboard), with their size choices. */
+  pairedProducts?: PublicProduct[];
   /** Other products of the same family (tag `family:<name>`), usually one per colour; the product page links them as swatches. */
   family?: { label: string; members: Array<{ id: string; label: string; href: string; current: boolean; color?: string; image?: string }> };
 }

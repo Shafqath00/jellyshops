@@ -47,6 +47,29 @@ export function recommendProducts<T>(current: RecommendationSignals, items: read
     .map(({ item }) => item);
 }
 
+/**
+ * "Complete the set": products from collections the current product is NOT in (a bed suggests a mattress and a
+ * headboard, not another bed), one from each other collection first, best match first within each. Products with no
+ * collection come last. When the current product has no collection, this is the ordinary recommendation list.
+ */
+export function pairProducts<T>(current: RecommendationSignals, items: readonly T[], signals: (item: T) => RecommendationSignals, limit = 4): T[] {
+  const own = current.collectionIds ?? [];
+  if (own.length === 0) return recommendProducts(current, items, signals, limit);
+  const ranked = recommendProducts(current, items, signals, items.length).map((item) => ({ item, signal: signals(item) }))
+    .filter(({ signal }) => !shared(own, signal.collectionIds));
+  const groups = new Map<string, T[]>();
+  for (const { item, signal } of ranked) {
+    const key = signal.collectionIds?.[0] ?? "";
+    groups.set(key, [...(groups.get(key) ?? []), item]);
+  }
+  const keyed = [...groups.entries()].sort(([a], [b]) => Number(a === "") - Number(b === "")).map(([, list]) => list);
+  const result: T[] = [];
+  for (let round = 0; result.length < limit && keyed.some((list) => list.length > round); round += 1) {
+    for (const list of keyed) if (list[round] !== undefined && result.length < limit) result.push(list[round]);
+  }
+  return result;
+}
+
 /** Signals of a catalogue product (the live store's products). */
 export function productSignals(product: {
   id: string; collectionIds?: string[]; primaryCategoryId?: string; additionalCategoryIds?: string[]; productType?: string; vendor?: string; tags?: string[]; featured?: boolean;

@@ -1,4 +1,4 @@
-import { useSyncExternalStore, type ReactNode } from "react";
+import { useContext, useId, useState, useSyncExternalStore, type ReactNode } from "react";
 import type { BlockNode } from "@jelly/storefront-schema";
 import { blockLabel } from "@jelly/storefront-registry/runtime";
 import { resolveStorefrontHref } from "../runtime-context";
@@ -8,6 +8,8 @@ import { productContext } from "./product-sections";
 import { choice, numberValue, stringValue } from "./shared";
 import { StoreIcon } from "./store-icon";
 import type { ContentBlockOptions } from "./content-blocks";
+import { CardCartContext } from "../product-card";
+import type { PublicProduct, StorefrontCartAccess } from "../types";
 
 /**
  * Product page blocks (registry product-blocks.ts): breadcrumbs, delivery estimate and "Pairs well with" read the
@@ -89,23 +91,76 @@ function DeliveryEstimate({ block, options }: { block: BlockNode; options: Conte
 }
 
 function ComplementaryProducts({ block, options }: { block: BlockNode; options: ContentBlockOptions }) {
+  const cart = useContext(CardCartContext);
   const product = productContext(options.context);
   if (!product) return needsProduct(block, options);
-  const items = product.relatedProducts.slice(0, numberValue(block.settings, "limit", 3, 1, 6));
+  const limit = numberValue(block.settings, "limit", 3, 1, 6);
+  const pairs = block.settings.source === "pairs" && product.pairedProducts?.length ? product.pairedProducts : undefined;
+  const items = (pairs ?? product.relatedProducts).slice(0, limit);
   if (items.length === 0) return options.editor ? <p className="jelly-block-group-empty" {...editorData(block, options)}>Products show here once your store has more than one</p> : null;
   const heading = stringValue(block.settings, "heading");
-  return <div className="jelly-complementary" {...blockStyle(block)} {...editorData(block, options, "heading")}>
+  const adding = block.settings.addToBag === true;
+  // The size chosen for the product on this page, so a King bed starts its mattress on King.
+  const chosenLabel = (optionName: string) => block.settings.matchSize === false ? undefined
+    : product.product.options.find((option) => option.name.trim().toLowerCase() === optionName.trim().toLowerCase())?.values.find((value) => value.selected)?.label;
+  return <div className="jelly-complementary" data-adding={adding ? "true" : undefined} {...blockStyle(block)} {...editorData(block, options, "heading")}>
     {/* An h2: in the buying column it follows the product title (h1). */}
     {heading && <h2 className="jelly-complementary-heading">{heading}</h2>}
     <ul className="jelly-complementary-list">
       {items.map((item) => <li key={item.id}>
-        <a className="jelly-complementary-item" href={item.href}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          {item.imageUrl ? <img className="jelly-complementary-photo" src={item.imageUrl} alt="" loading="lazy" /> : <span className="jelly-complementary-photo is-empty" aria-hidden="true" />}
-          <span className="jelly-complementary-text"><span className="jelly-complementary-name">{item.name}</span><span className="jelly-complementary-price">{item.price}</span></span>
-        </a>
+        {adding
+          ? <SetItem item={item} cart={options.editor ? undefined : cart} preferred={item.setChoices ? chosenLabel(item.setChoices.optionName) : undefined} editor={Boolean(options.editor)} />
+          : <ItemLink item={item} />}
       </li>)}
     </ul>
+  </div>;
+}
+
+function ItemLink({ item, price }: { item: PublicProduct; price?: string }) {
+  return <a className="jelly-complementary-item" href={item.href}>
+    {/* eslint-disable-next-line @next/next/no-img-element */}
+    {item.imageUrl ? <img className="jelly-complementary-photo" src={item.imageUrl} alt="" loading="lazy" /> : <span className="jelly-complementary-photo is-empty" aria-hidden="true" />}
+    <span className="jelly-complementary-text"><span className="jelly-complementary-name">{item.name}</span><span className="jelly-complementary-price">{price ?? item.price}</span></span>
+  </a>;
+}
+
+/** One "Complete the set" row: photo and name (a link), a size choice and an Add button. */
+export function SetItem({ item, cart, preferred, editor = false }: { item: PublicProduct; cart?: StorefrontCartAccess; preferred?: string; editor?: boolean }) {
+  const id = useId();
+  const choices = item.setChoices?.values ?? [];
+  const buyable = choices.filter((value) => value.max > 0);
+  // Follows the size chosen for the product on this page until the shopper picks one here.
+  const matched = buyable.find((value) => preferred && value.label.toLowerCase() === preferred.toLowerCase()) ?? buyable[0];
+  const [picked, setPicked] = useState<string | null>(null);
+  const [state, setState] = useState<{ status: "idle" | "adding" | "added" | "error"; message?: string }>({ status: "idle" });
+  const current = (picked ? choices.find((value) => value.variantId === picked) : undefined) ?? matched;
+  // Without choices (the product needs other choices first) or with nothing in stock, the row links to its page.
+  if (!item.setChoices || !current) return <div className="jelly-complementary-set"><ItemLink item={item} /><a className="jelly-complementary-view" href={item.href} aria-label={`${choices.length && !buyable.length ? "Sold out" : "Choose options"}: ${item.name}`}>{choices.length && !buyable.length ? "Sold out" : "Choose options"}</a></div>;
+  const showPicker = choices.length > 1;
+  const add = async () => {
+    if (!cart || !current) return;
+    setState({ status: "adding" });
+    const result = await cart.setQuantity(current.variantId, Math.min(current.max, cart.quantity(current.variantId) + 1)).catch(() => ({ ok: false, message: undefined }));
+    if (!result.ok) { setState({ status: "error", message: result.message ?? "Could not add this to your bag." }); return; }
+    setState({ status: "added" });
+    if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("jelly:cart-changed"));
+  };
+  const label = item.setChoices.optionName || "Choice";
+  const verb = state.status === "added" ? "Added" : state.status === "adding" ? "Adding…" : "Add";
+  return <div className="jelly-complementary-set">
+    <ItemLink item={item} price={current.price} />
+    <div className="jelly-complementary-controls">
+      {showPicker && <>
+        <label className="jelly-visually-hidden" htmlFor={`${id}-choice`}>{label} for {item.name}</label>
+        <select id={`${id}-choice`} className="jelly-complementary-select" value={current.variantId} onChange={(event) => { setPicked(event.target.value); setState({ status: "idle" }); }}>
+          {choices.map((value) => <option key={value.variantId} value={value.variantId} disabled={value.max === 0}>{value.label}{value.max === 0 ? " (sold out)" : ""}</option>)}
+        </select>
+      </>}
+      {/* The visible word starts the label, so voice control users can say "Add". */}
+      <button type="button" className="jelly-button jelly-button--secondary jelly-complementary-add" disabled={editor || !cart || state.status === "adding"} onClick={() => void add()}
+        aria-label={`${verb} ${item.name}${showPicker ? `, ${current.label}` : ""} to your bag`}>{verb}</button>
+    </div>
+    <p className="jelly-complementary-status" role="status" aria-live="polite">{state.status === "added" ? `Added ${current.label ? `${current.label} ` : ""}to your bag.` : state.status === "error" ? state.message : ""}</p>
   </div>;
 }
 

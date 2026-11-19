@@ -271,6 +271,15 @@ const newsletter = inline(home, "resthaven-newsletter");
 newsletter.blocks[0].settings.text = "Sleep better, spend less";
 newsletter.blocks[1].settings.text = "Showroom events, new arrivals and early access to offers. Once or twice a month.";
 
+// Product page: "Complete the set" under Add to basket (a bed suggests a mattress and a headboard, each with a size
+// choice that starts on the bed's size and an Add button).
+const mainProduct = template("product").sections.find((placement) => placement.kind === "inline" && placement.section.type === "main-product").section;
+const purchaseAt = mainProduct.blocks.findIndex((entry) => entry.type === "part-product-purchase");
+mainProduct.blocks.splice(purchaseAt + 1, 0, {
+  id: "expressbed-complete-set", type: "complementary-products", enabled: true, blocks: [],
+  settings: { heading: "Complete the set", limit: 3, source: "pairs", addToBag: true, matchSize: true },
+});
+
 const collection = template("collection");
 const help = inline(collection, "resthaven-collection-help");
 block(help, "resthaven-collection-help-title").settings.text = "Not sure which size or feel is right?";

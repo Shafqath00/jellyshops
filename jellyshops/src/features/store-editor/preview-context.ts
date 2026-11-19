@@ -2,7 +2,7 @@ import type { CollectionPresentationContext, ProductPresentationContext, PublicP
 import type { StorefrontTemplateType, ArticleResource, BlogResource, CatalogAdminCollectionDetail, DemoCatalog, PageResource } from "./api/types";
 import type { ConfiguredOptionSelection, Product } from "@/lib/domain";
 import { createProductPresentationContext } from "@/features/storefront/product-presentation";
-import { recommendProducts } from "@/features/storefront/recommendations";
+import { pairProducts, recommendProducts } from "@/features/storefront/recommendations";
 
 /** The live store's quick-add rule (one buyable variant, no options), from the editor's catalog data. */
 function previewQuickAdd(product: CatalogAdminCollectionDetail["products"][number]): Pick<PublicProduct, "quickAdd"> {
@@ -41,6 +41,12 @@ function editorRecommendations(catalog: DemoCatalog, productId: string): PublicP
   return recommendProducts(signals(productId), publicProducts(catalog), (card) => signals(card.id), 12);
 }
 
+/** "Complete the set" in the editor: the sample store's products from other collections. */
+function editorPairings(catalog: DemoCatalog, productId: string): PublicProduct[] {
+  const signals = (id: string) => ({ id, collectionIds: catalog.collections.filter((collection) => collection.productIds.includes(id)).map((collection) => collection.id) });
+  return pairProducts(signals(productId), publicProducts(catalog), (card) => signals(card.id), 6);
+}
+
 function publicProducts(catalog: DemoCatalog): PublicProduct[] {
   return catalog.products.map((product) => ({
     id: product.id,
@@ -58,13 +64,14 @@ export interface EditorProductPreviewRuntime {
   onQuantityChange(quantity: number): void;
 }
 
-function previewProductPresentation(product: Product, runtime: EditorProductPreviewRuntime, relatedProducts: PublicProduct[]): ProductPresentationContext {
+function previewProductPresentation(product: Product, runtime: EditorProductPreviewRuntime, relatedProducts: PublicProduct[], pairedProducts: PublicProduct[]): ProductPresentationContext {
   return createProductPresentationContext({
     product, currency: "USD", selections: runtime.selections, quantity: runtime.quantity,
     onSelectionsChange: runtime.onSelectionsChange, onQuantityChange: runtime.onQuantityChange,
     // Editor preview deliberately exercises the same delegated contract without mutating a shopper cart.
     onAddToCart: async () => ({ ok: false, message: "Cart changes are disabled in editor preview" }),
     relatedProducts,
+    pairedProducts,
   });
 }
 
@@ -126,7 +133,7 @@ export function createEditorPreviewPageContext({
   }
   if (type === "product") {
     if (!productDetail || !productRuntime || productDetail.id !== resourceId) return null;
-    return { pageType: "product", resource: { id: productDetail.id, handle: productDetail.slug, data: { title: productDetail.name, product: productDetail, productPresentation: previewProductPresentation(productDetail, productRuntime, editorRecommendations(catalog, productDetail.id)) } } };
+    return { pageType: "product", resource: { id: productDetail.id, handle: productDetail.slug, data: { title: productDetail.name, product: productDetail, productPresentation: previewProductPresentation(productDetail, productRuntime, editorRecommendations(catalog, productDetail.id), editorPairings(catalog, productDetail.id)) } } };
   }
   if (type === "collection") {
     if (!collectionDetail || collectionDetail.id !== resourceId || collectionDetail.storeId !== storeId) return null;

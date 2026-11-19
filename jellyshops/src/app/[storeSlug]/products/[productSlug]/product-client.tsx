@@ -13,7 +13,7 @@ import { createCartConfigurationKey, getConfiguredPriceMinor, resolveProductVari
 import type { PersonalisationEntry } from "@jelly/storefront-schema";
 import { getVisibleOptions, toggleSelection, validateProductSelections } from "@/lib/product-builder";
 import { createProductPresentationContext } from "@/features/storefront/product-presentation";
-import { productCardData } from "@/features/storefront/product-card-data";
+import { productCardData, setChoicesFor } from "@/features/storefront/product-card-data";
 import { productFamily } from "@/features/storefront/product-family";
 import { useStorefrontCatalogStatus } from "@/features/commerce/components/storefront-catalog-sync";
 import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
@@ -22,7 +22,7 @@ import { StorefrontPageLoading } from "@/features/storefront/components/storefro
 import { requestBackInStock } from "@/features/storefront/back-in-stock-api";
 import { useVariantAddress } from "@/features/storefront/use-variant-address";
 import { isVariantBuyable, variantMaxQuantity } from "@/lib/variant-stock";
-import { productSignals, recommendProducts } from "@/features/storefront/recommendations";
+import { pairProducts, productSignals, recommendProducts } from "@/features/storefront/recommendations";
 
 export default function ProductPage({ routeValues }: { routeValues?: Array<[string, unknown]> }) {
   const router = useRouter();
@@ -74,6 +74,8 @@ export default function ProductPage({ routeValues }: { routeValues?: Array<[stri
     onPersonalisationChange: setPersonalisationValues,
     showPersonalisationProblems: personalisationTried,
     relatedProducts: recommendProducts(productSignals(product), visibleProducts, productSignals, 12).map((item) => productCardData(item, `/${store.slug}/products/${item.slug}`, store.currency)),
+    // "Complete the set": other collections first, each with its size choices for the Add buttons.
+    pairedProducts: pairProducts(productSignals(product), visibleProducts, productSignals, 6).map((item) => ({ ...productCardData(item, `/${store.slug}/products/${item.slug}`, store.currency), ...setChoicesFor(item, store.currency) })),
   }) : undefined;
   if (productPresentation && store && product) {
     // Other colours of the same design (products tagged family:<name>) link to each other.

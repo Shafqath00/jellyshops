@@ -26,6 +26,37 @@ export function quickAddFor(product: Product): { quickAdd?: { variantId: string;
   return { quickAdd: { variantId: variant.id, max: Math.min(variantMaxQuantity(variant), 99) } };
 }
 
+/**
+ * Choices for "Complete the set": the product's variants by their one stock option (usually Size), so a shopper can
+ * add it to the bag without opening its page. Left out when the product needs anything else first (a required
+ * choice that is not a stock option, required personalisation, a quantity rule) or has more than one stock option.
+ * Optional extras (add-ons) are fine: the line simply goes in without them.
+ */
+export function setChoicesFor(product: Product, currency: Currency): { setChoices?: NonNullable<PublicProduct["setChoices"]> } {
+  const options = product.options ?? [];
+  const stockOptions = options.filter((option) => option.type === "variant");
+  if (options.some((option) => option.type !== "variant" && option.required)) return {};
+  if (product.personalisation?.some((field) => field.required) || product.quantityRule || stockOptions.length > 1) return {};
+  const live = product.variants.filter((variant) => variant.sellable !== false);
+  if (live.length === 0) return {};
+  const option = stockOptions[0];
+  const labelOf = (variant: Product["variants"][number]) => {
+    if (!option) return variant.name || product.name;
+    const valueId = variant.options?.[option.id];
+    return option.values.find((value) => value.id === valueId)?.label ?? variant.name;
+  };
+  const order = (variant: Product["variants"][number]) => {
+    const valueId = option ? variant.options?.[option.id] : undefined;
+    const index = option?.values.findIndex((value) => value.id === valueId) ?? -1;
+    return index < 0 ? Number.MAX_SAFE_INTEGER : index;
+  };
+  const values = [...live].sort((a, b) => order(a) - order(b)).map((variant) => ({
+    variantId: variant.id, label: labelOf(variant), price: formatMoney(variant.priceMinor, currency),
+    max: isVariantBuyable(variant) ? Math.min(variantMaxQuantity(variant), 99) : 0,
+  }));
+  return { setChoices: { optionName: option?.name ?? "", values } };
+}
+
 /** The variant a card shows: the cheapest one still for sale, else the cheapest (variants arrive in no particular order). */
 export function cardVariant(product: Pick<Product, "variants">): Product["variants"][number] | undefined {
   const cheapest = (list: Product["variants"]) => list.reduce<Product["variants"][number] | undefined>((best, item) => !best || item.priceMinor < best.priceMinor ? item : best, undefined);

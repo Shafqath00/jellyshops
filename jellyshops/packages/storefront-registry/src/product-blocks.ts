@@ -41,15 +41,25 @@ const deliveryEstimate: BlockDefinition = {
   defaultSettings: { cutoffHour: 14, dispatchDays: 0, deliveryMin: 2, deliveryMax: 4 },
 };
 
-/** A few small product rows ("Pairs well with"), from the same recommendations as Related products. */
+/**
+ * A few small product rows: "Pairs well with" (similar products) or "Complete the set" (products from other
+ * collections, each with a size choice and an Add button). Blocks saved before these options keep the old look:
+ * a missing `source` means similar products and a missing `addToBag` means links only.
+ */
 const complementaryProducts: BlockDefinition = {
   type: "complementary-products", sets: PRODUCT,
-  settingsSchema: z.object({ heading: z.string().max(80).optional(), limit: z.number().int().min(1).max(6).optional() }).passthrough(),
+  settingsSchema: z.object({
+    heading: z.string().max(80).optional(), limit: z.number().int().min(1).max(6).optional(),
+    source: choice(["related", "pairs"] as const), addToBag: z.boolean().optional(), matchSize: z.boolean().optional(),
+  }).passthrough(),
   controls: [
     { type: "text", key: "heading", label: "Heading", group: "content", maxLength: 80 },
+    { type: "segmented", key: "source", label: "Which products", group: "content", options: options(["related", "Similar products"], ["pairs", "From other collections"]), description: "From other collections suits \"Complete the set\": a bed suggests a mattress and a headboard." },
     { type: "range", key: "limit", label: "Products to show", group: "content", min: 1, max: 6, step: 1 },
+    { type: "checkbox", key: "addToBag", label: "Let shoppers add them to the bag here", group: "content", description: "Each product gets a size choice and an Add button. Products that need other choices first link to their page." },
+    { type: "checkbox", key: "matchSize", label: "Start with the same size as this product", group: "content", visibleIf: { key: "addToBag", equals: true } },
   ],
-  defaultSettings: { heading: "Pairs well with", limit: 3 },
+  defaultSettings: { heading: "Complete the set", limit: 3, source: "pairs", addToBag: true, matchSize: true },
 };
 
 /** A short coloured note with an icon, such as a promotion or a delivery message. */

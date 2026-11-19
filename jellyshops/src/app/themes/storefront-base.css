@@ -2117,6 +2117,16 @@ html.lenis, html.lenis body { height: auto; }
 :where(.jelly-complementary-text) { display: flex; flex-direction: column; min-width: 0; font-size: 0.875rem; }
 :where(.jelly-complementary-name) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
 :where(.jelly-complementary-price) { color: var(--j-color-muted, inherit); }
+/* "Complete the set" (addToBag): the row link on top, then the size choice and Add button. */
+:where(.jelly-complementary-set) { display: grid; gap: 8px; padding: 8px; border: 1px solid var(--j-color-divider, color-mix(in srgb, currentColor 15%, transparent)); border-radius: var(--j-radius-md, 10px); }
+:where(.jelly-complementary-set .jelly-complementary-item) { padding: 0; border: 0; border-radius: 0; }
+:where(.jelly-complementary-controls) { display: flex; gap: 8px; align-items: stretch; }
+:where(.jelly-complementary-select) { flex: 1; min-width: 0; min-height: 44px; padding: 0 12px; border: 1px solid var(--j-color-border, color-mix(in srgb, currentColor 25%, transparent)); border-radius: var(--j-radius-sm, 6px); background: var(--j-color-surface, transparent); color: inherit; font: inherit; font-size: 0.875rem; }
+:where(.jelly-complementary-add) { min-height: 44px; min-width: 88px; padding-inline: 16px; }
+:where(.jelly-complementary-controls:not(:has(select)) .jelly-complementary-add) { flex: 1; }
+:where(.jelly-complementary-view) { display: inline-flex; align-items: center; min-height: 44px; font-size: 0.875rem; font-weight: 600; color: inherit; }
+:where(.jelly-complementary-status) { margin: 0; font-size: 0.8125rem; color: var(--j-color-muted, inherit); }
+:where(.jelly-complementary-status:empty) { display: none; }
 
 :where(.jelly-notice) { display: flex; align-items: flex-start; gap: 10px; margin: 0; padding: 12px 14px; border-radius: var(--j-radius-md, 10px); background: var(--j-color-surface, color-mix(in srgb, currentColor 6%, transparent)); font-size: 0.9375rem; text-align: start; }
 :where(.jelly-notice .jelly-icon) { flex: none; margin-top: 1px; }
