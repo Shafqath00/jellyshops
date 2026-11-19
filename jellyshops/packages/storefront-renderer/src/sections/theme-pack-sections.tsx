@@ -1,4 +1,5 @@
-import { useMemo, type CSSProperties } from "react";
+import { useMemo, useRef, type CSSProperties } from "react";
+import { SliderControls, useSlider } from "../slider";
 import { ProductCard } from "../product-card";
 import { blockElementProps, elementProps } from "../element-style";
 import { inlineSetting } from "./setting-text";
@@ -69,15 +70,18 @@ export function CategoryGridSection({ section, context }: { section: SectionNode
   const columns = numberValue(section.settings, "columns", 4, 2, 4);
   // Grid, Bento (first collection large) or Carousel (scrolls sideways; focusable so keyboards can scroll it).
   const layout = choice(section.settings, "layout", ["grid", "bento", "carousel"] as const, "grid");
+  const track = useRef<HTMLDivElement>(null);
+  const slider = useSlider(track, items.length);
   return <section className="jelly-section jelly-category-grid" {...sectionData(section, { "data-image-ratio": choice(section.settings, "imageRatio", ["portrait", "square"] as const, "portrait"), "data-layout": layout })}><StorefrontContainer>
     {!headingHidden(section) && <SectionIntro section={section} fallback="Shop by collection" editor={context?.mode === "editor"} />}
-    <div className="jelly-category-grid-items" style={{ "--jelly-columns": columns } as CSSProperties} {...(layout === "carousel" ? { role: "region", "aria-label": "Collections", tabIndex: 0 } : {})}>{items.map((item) => <a href={item.href} className="jelly-category-card" key={item.id} {...(item.block ? blockEditorData(item.block, editor, "Collection card") : {})}>
+    <div className="jelly-category-grid-items" ref={track} style={{ "--jelly-columns": columns } as CSSProperties} {...(layout === "carousel" ? { role: "region", "aria-label": "Collections", tabIndex: 0, "data-slider-track": "" } : {})}>{items.map((item) => <a href={item.href} className="jelly-category-card" key={item.id} {...(item.block ? blockEditorData(item.block, editor, "Collection card") : {})}>
       <span className="jelly-category-card-media" {...(item.block ? blockElementProps(item.block, "image", editor) : {})}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {item.image ? <img src={item.image.url} {...mediaPhoto(item.image.url, "(min-width: 1024px) 25vw, 50vw")} alt="" loading="lazy" /> : null}
       </span>
       <strong {...(item.block ? blockElementProps(item.block, "label", editor) : {})}>{item.label}</strong>
     </a>)}</div>
+    {layout === "carousel" && <SliderControls slider={slider} label="Collections" />}
   </StorefrontContainer></section>;
 }
 

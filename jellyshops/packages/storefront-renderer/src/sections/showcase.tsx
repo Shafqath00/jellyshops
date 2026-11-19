@@ -14,6 +14,7 @@ import { blockEditorData } from "./block-content";
 import { imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
 import { mediaPhoto } from "../media-photo";
 import { Stars } from "./product-reviews";
+import { SliderControls, useSlider } from "../slider";
 
 const reducedMotion = () => typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -199,33 +200,28 @@ export function RotatingAnnouncement({ section, messages, editor }: { section: S
 
 /* ── Reviews carousel ─────────────────────────────────────────────────────────── */
 
-interface Review { id: string; block: SectionNode["blocks"][number]; quote: string; author: string; detail: string; rating: number; avatar?: string }
+interface Review { id: string; block: SectionNode["blocks"][number]; quote: string; author: string; detail: string; rating: number; avatar?: string; verified?: boolean }
 
 export function TestimonialCards({ reviews, mode, layout }: { reviews: Review[]; mode: RendererMode; layout: "grid" | "carousel" }) {
   const track = useRef<HTMLDivElement>(null);
+  const slider = useSlider(track, reviews.length);
   const editor = mode === "editor";
-  const scroll = (direction: number) => {
-    const element = track.current;
-    if (!element) return;
-    const card = element.firstElementChild as HTMLElement | null;
-    element.scrollBy({ left: direction * ((card?.offsetWidth ?? 320) + 24), behavior: reducedMotion() ? "auto" : "smooth" });
-  };
+  // Each card: stars, the quote, then the name with what they bought and an optional "Verified buyer" label, kept at
+  // the foot so cards of different lengths line up.
   const cards = reviews.map((review) => <blockquote key={review.id} className="jelly-testimonial-card" {...blockEditorData(review.block, editor, "Testimonial")}>
     {review.rating > 0 && <Stars value={review.rating} label={`${review.rating} out of 5 stars`} />}
     <p {...blockElementProps(review.block, "quote", editor)}>{review.quote}</p>
-    {(review.author || review.detail) && <footer>
+    {(review.author || review.detail || review.verified) && <footer>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {review.avatar && <img src={review.avatar} {...mediaPhoto(review.avatar, "48px")} alt="" loading="lazy" />}
       <span>{review.author && <cite {...blockElementProps(review.block, "author", editor)}>{review.author}</cite>}{review.detail && <small>{review.detail}</small>}</span>
+      {review.verified && <span className="jelly-testimonial-verified"><span aria-hidden="true">✓</span> Verified buyer</span>}
     </footer>}
   </blockquote>);
   if (layout === "grid") return <div className="jelly-testimonial-grid">{cards}</div>;
   return <div className="jelly-testimonial-carousel">
-    <div className="jelly-testimonial-track" ref={track} role="region" aria-label="Customer reviews" tabIndex={0}>{cards}</div>
-    {reviews.length > 1 && <div className="jelly-testimonial-controls">
-      <button type="button" onClick={() => scroll(-1)} aria-label="Previous reviews">←</button>
-      <button type="button" onClick={() => scroll(1)} aria-label="Next reviews">→</button>
-    </div>}
+    <div className="jelly-testimonial-track" data-slider-track="" ref={track} role="region" aria-label="Customer reviews" tabIndex={0}>{cards}</div>
+    <SliderControls slider={slider} label="Customer reviews" />
   </div>;
 }
 
@@ -234,6 +230,6 @@ export function testimonialReviews(section: SectionNode): Review[] {
     const quote = stringValue(block.settings, "quote");
     if (!quote) return [];
     const avatar = imageValue(block.settings, "avatar");
-    return [{ id: block.id, block, quote, author: stringValue(block.settings, "author"), detail: stringValue(block.settings, "detail"), rating: numberValue(block.settings, "rating", 0, 0, 5), avatar: avatar?.url }];
+    return [{ id: block.id, block, quote, author: stringValue(block.settings, "author"), detail: stringValue(block.settings, "detail"), rating: numberValue(block.settings, "rating", 0, 0, 5), avatar: avatar?.url, verified: block.settings.verified === true }];
   });
 }

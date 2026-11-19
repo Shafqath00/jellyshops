@@ -183,7 +183,7 @@
     "demoContent": true,
     "conformance": true,
     "lintFindings": 0,
-    "cssGzipKb": 3.7
+    "cssGzipKb": 3.8
   },
   "jelly-signature": {
     "theme": "jelly-signature",

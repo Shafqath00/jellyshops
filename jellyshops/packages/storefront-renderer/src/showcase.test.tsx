@@ -93,7 +93,8 @@ describe("reviews carousel and payment methods", () => {
     expect(screen.getByRole("region", { name: "Customer reviews" })).toBeTruthy();
     expect(screen.getByRole("img", { name: "5 out of 5 stars" })).toBeTruthy();
     expect(screen.getByText("Bought the Harbour bed")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Next reviews" })).toBeTruthy();
+    // The shared slider: native scrolling with snap points; dots and arrows appear once the row overflows (no layout in jsdom).
+    expect(screen.getByRole("region", { name: "Customer reviews" }).hasAttribute("data-slider-track")).toBe(true);
   });
 
   it("lists payment methods in the footer only when set", () => {

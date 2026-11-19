@@ -97,9 +97,13 @@
 [data-jelly-theme="jelly-resthaven"] .jelly-header-brand{font-size: clamp(19px, 5.4vw, 24px); text-align: center; white-space: normal;}
 [data-jelly-theme="jelly-resthaven"] .jelly-header-brand > span{display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-height: 1.05; overflow-wrap: break-word;}
 [data-jelly-theme="jelly-resthaven"] .jelly-hero[data-layout="overlay"] > .jelly-container{min-height: 560px;}
-[data-jelly-theme="jelly-resthaven"] .jelly-hero[data-layout="overlay"] .jelly-hero-media::after{background: linear-gradient(0deg, color-mix(in srgb, var(--jelly-scheme-1-bg, #fbf7f1) 94%, transparent) 0%, color-mix(in srgb, var(--jelly-scheme-1-bg, #fbf7f1) 78%, transparent) 50%, transparent 80%);}
+[data-jelly-theme="jelly-resthaven"] .jelly-hero[data-layout="overlay"] .jelly-hero-media::after{background: linear-gradient(0deg, rgb(15 20 33 / .82) 0%, rgb(15 20 33 / .55) 45%, rgb(15 20 33 / .05) 78%);}
+[data-jelly-theme="jelly-resthaven"] .jelly-hero[data-layout="overlay"] .jelly-hero-content,[data-jelly-theme="jelly-resthaven"] .jelly-hero[data-layout="overlay"] .jelly-hero-content .jelly-eyebrow{color: #fff;}
+[data-jelly-theme="jelly-resthaven"] .jelly-hero[data-layout="overlay"] .jelly-hero-actions .jelly-button:not(.jelly-button--secondary){background: #fff; border-color: #fff; color: #1f2a44;}
+[data-jelly-theme="jelly-resthaven"] .jelly-hero[data-layout="overlay"] .jelly-hero-actions .jelly-button--secondary{background: transparent; border-color: #fff; color: #fff;}
+[data-jelly-theme="jelly-resthaven"] .jelly-hero[data-layout="overlay"] .jelly-hero-media img{object-position: 62% 35%;}
 [data-jelly-theme="jelly-resthaven"] .jelly-hero[data-layout="overlay"] .jelly-hero-content{padding: 48px 0 40px;}
-[data-jelly-theme="jelly-resthaven"] .jelly-hero h1{font-size: 42px;}
+[data-jelly-theme="jelly-resthaven"] .jelly-hero h1{font-size: clamp(34px, 9.5vw, 42px);}
 [data-jelly-theme="jelly-resthaven"] .jelly-hero-content > p{font-size: 16px;}
 [data-jelly-theme="jelly-resthaven"] .jelly-hero-actions{display: grid; grid-template-columns: minmax(0, 1fr); align-self: stretch; width: 100%;}
 [data-jelly-theme="jelly-resthaven"] .jelly-hero-actions .jelly-button{width: 100%;}

@@ -1,4 +1,6 @@
-import type { CSSProperties } from "react";
+import { useRef, type CSSProperties } from "react";
+import { SliderControls, useSlider } from "../slider";
+import { mediaPhoto } from "../media-photo";
 import { elementProps } from "../element-style";
 import type { SectionNode } from "@jelly/storefront-schema";
 import { StorefrontContainer } from "@jelly/storefront-ui";
@@ -65,6 +67,9 @@ export function RatingSummarySection({ section, context, mode = "published" }: {
 /** Photos in a grid or a sideways-scrolling row, each with an optional caption and link. Hidden on the live store until it has a photo. */
 export function ImageGallerySection({ section, context, mode = "published", selectedBlockId }: { section: SectionNode; context?: StorefrontRuntimeContext; mode?: RendererMode; selectedBlockId?: string }) {
   const editor = mode === "editor";
+  const track = useRef<HTMLUListElement>(null);
+  const slides = visibleBlocks(section, "gallery-image").length;
+  const slider = useSlider(track, slides);
   const photos = visibleBlocks(section, "gallery-image").flatMap((block) => {
     const image = imageValue(block.settings);
     return image ? [{ block, image, caption: stringValue(block.settings, "caption").trim(), href: resolveStorefrontHref(block.settings.link, context?.storeSlug) }] : [];
@@ -78,12 +83,16 @@ export function ImageGallerySection({ section, context, mode = "published", sele
   return <section className="jelly-section jelly-image-gallery" {...sectionData(section, { "data-layout": layout, "data-ratio": ratio })}><StorefrontContainer>
     {(heading || text) && <div className="jelly-image-gallery-intro">{heading && <h2 {...elementProps(section, "heading", editor)}>{heading}</h2>}{text && <p {...elementProps(section, "text", editor)}>{text}</p>}</div>}
     {photos.length
-      ? <ul className="jelly-image-gallery-items" style={{ "--jelly-columns": columns } as CSSProperties} {...(layout === "scroll" ? { tabIndex: 0, "aria-label": heading || "Photos" } : {})}>{photos.map(({ block, image, caption, href }) => {
-          // Merchant media URLs may be served by the local API and are not Next Image assets.
+      ? <>
+        <ul className="jelly-image-gallery-items" ref={track} style={{ "--jelly-columns": columns } as CSSProperties} {...(layout === "scroll" ? { tabIndex: 0, "aria-label": heading || "Photos", "data-slider-track": "" } : {})}>{photos.map(({ block, image, caption, href }) => {
+          // Merchant media URLs may be served by the local API and are not Next Image assets. Smaller copies
+          // (srcset) keep a row of large photos quick to show.
           // eslint-disable-next-line @next/next/no-img-element
-          const content = <figure><img src={image.url} alt={image.alt || caption || ""} loading="lazy" decoding="async" />{caption && <figcaption>{caption}</figcaption>}</figure>;
+          const content = <figure><img src={image.url} {...mediaPhoto(image.url, layout === "scroll" ? "(min-width: 1024px) 25vw, 80vw" : "(min-width: 1024px) 25vw, 50vw")} alt={image.alt || caption || ""} loading="lazy" decoding="async" />{caption && <figcaption>{caption}</figcaption>}</figure>;
           return <li key={block.id} {...blockEditorData(block, editor, "Photo", selectedBlockId)}>{href ? <a href={href}>{content}</a> : content}</li>;
         })}</ul>
+        {layout === "scroll" && <SliderControls slider={slider} label={heading || "Photos"} />}
+      </>
       : <p className="jelly-editor-hint">Add photo blocks and upload your photos. This section stays hidden on your live store until you do.</p>}
   </StorefrontContainer></section>;
 }

@@ -2309,3 +2309,47 @@ html.lenis, html.lenis body { height: auto; }
 [data-jelly-theme][data-type-roles~="badge-letter-spacing"][data-type-roles~="badge-letter-spacing"][data-type-roles~="badge-letter-spacing"] :is(.jelly-product-card-badge, .jelly-badge-block) { letter-spacing: var(--jelly-role-badge-letter-spacing); }
 [data-jelly-theme][data-type-roles~="badge-text-case"][data-type-roles~="badge-text-case"][data-type-roles~="badge-text-case"] :is(.jelly-product-card-badge, .jelly-badge-block) { text-transform: var(--jelly-role-badge-text-case); }
 /* text-roles:end */
+
+/*
+ * Sliders (storefront-renderer/src/slider.tsx): every sideways row marked [data-slider-track] (reviews carousel,
+ * photo gallery "scroll", collection list "carousel") scrolls natively with snap points and no visible scrollbar.
+ * On phones the next slide peeks in from the right; dots below show where you are; arrows appear from 768px.
+ * Slide widths come from --slide-size per row (set below), gaps from --slide-gap.
+ */
+[data-jelly-theme] [data-slider-track][data-slider-track] { display: grid; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: var(--slide-size, 80%); gap: var(--slide-gap, 16px); margin: 0; padding: 2px 0 6px; list-style: none; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; }
+[data-jelly-theme] [data-slider-track][data-slider-track]::-webkit-scrollbar { display: none; }
+[data-jelly-theme] [data-slider-track][data-slider-track] > * { min-width: 0; flex: none; scroll-snap-align: start; scroll-snap-stop: normal; }
+[data-jelly-theme] [data-slider-track][data-slider-track]:focus-visible { outline: 2px solid var(--j-color-text, currentColor); outline-offset: 4px; }
+[data-jelly-theme] .jelly-testimonial-track[data-slider-track] { --slide-gap: 20px; --slide-size: calc((100% - 2 * var(--slide-gap)) / 3); }
+[data-jelly-theme] .jelly-image-gallery-items[data-slider-track] { --slide-gap: 12px; --slide-size: calc((100% - (var(--jelly-columns, 4) - 1) * var(--slide-gap)) / var(--jelly-columns, 4)); }
+[data-jelly-theme] .jelly-category-grid-items[data-slider-track] { --slide-gap: 16px; --slide-size: calc((100% - (var(--jelly-columns, 4) - 1) * var(--slide-gap)) / var(--jelly-columns, 4)); }
+@media (max-width: 1023px) {
+  [data-jelly-theme] .jelly-testimonial-track[data-slider-track] { --slide-size: calc((100% - var(--slide-gap)) / 2); }
+  [data-jelly-theme] :is(.jelly-image-gallery-items, .jelly-category-grid-items)[data-slider-track] { --slide-size: 40%; }
+}
+@media (max-width: 767px) {
+  [data-jelly-theme] .jelly-testimonial-track[data-slider-track] { --slide-gap: 12px; --slide-size: 86%; }
+  [data-jelly-theme] :is(.jelly-image-gallery-items, .jelly-category-grid-items)[data-slider-track] { --slide-gap: 12px; --slide-size: 78%; }
+}
+:where(.jelly-slider-controls) { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 18px; }
+:where(.jelly-slider-dots) { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; }
+:where(.jelly-slider-dot) { display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; background: none; cursor: pointer; }
+:where(.jelly-slider-dot)::before { content: ""; width: 8px; height: 8px; border-radius: 999px; background: color-mix(in srgb, var(--j-color-text, currentColor) 28%, transparent); transition: width .2s ease, background-color .2s ease; }
+:where(.jelly-slider-dot[aria-current="true"])::before { width: 20px; background: var(--j-color-text, currentColor); }
+:where(.jelly-slider-dot:focus-visible) { outline: 2px solid var(--j-color-text, currentColor); outline-offset: 1px; border-radius: 999px; }
+:where(.jelly-slider-arrows) { display: flex; gap: 10px; }
+:where(.jelly-slider-arrow) { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid var(--j-color-border-strong, currentColor); border-radius: 50%; background: var(--j-color-surface, transparent); color: var(--j-color-text, inherit); font-size: 18px; cursor: pointer; transition: background-color .16s ease, color .16s ease, opacity .16s ease; }
+:where(.jelly-slider-arrow:hover:not(:disabled)) { background: var(--j-color-text, currentColor); color: var(--j-color-bg, #fff); }
+:where(.jelly-slider-arrow:disabled) { opacity: .35; cursor: default; }
+:where(.jelly-slider-arrow:focus-visible) { outline: 2px solid var(--j-color-text, currentColor); outline-offset: 2px; }
+@media (max-width: 767px) {
+  :where(.jelly-slider-controls) { justify-content: center; }
+  :where(.jelly-slider-arrows) { display: none; }
+}
+/* Reviews: equal-height cards with stars, the quote, then the name, what they bought and "Verified buyer" at the foot. */
+[data-jelly-theme] .jelly-testimonial-track > .jelly-testimonial-card { display: flex; flex-direction: column; gap: 14px; height: 100%; margin: 0; padding: clamp(20px, 2.4vw, 28px); border: 1px solid var(--j-color-divider, color-mix(in srgb, currentColor 12%, transparent)); border-radius: var(--j-radius-md, 12px); background: var(--j-color-surface, transparent); box-sizing: border-box; }
+[data-jelly-theme] .jelly-testimonial-track > .jelly-testimonial-card > p { flex: 1; margin: 0; font-size: clamp(15px, 1.2vw, 17px); line-height: 1.6; overflow-wrap: break-word; }
+[data-jelly-theme] .jelly-testimonial-track > .jelly-testimonial-card footer { flex-wrap: wrap; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--j-color-divider, color-mix(in srgb, currentColor 12%, transparent)); }
+:where(.jelly-testimonial-verified) { display: inline-flex; gap: 6px; align-items: center; margin-left: auto; color: var(--j-color-muted, inherit); font-size: 13px; font-weight: 600; }
+/* Photo gallery tiles keep a soft tint while their photo loads. */
+:where(.jelly-image-gallery-items figure) { margin: 0; overflow: hidden; border-radius: var(--j-radius-md, 8px); background: var(--j-color-wash, color-mix(in srgb, currentColor 6%, transparent)); }

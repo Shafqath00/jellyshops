@@ -91,3 +91,15 @@ put a King mattress in the bag (count went up, "Added King to your bag."), no si
 - **Phones:** photos swipe, buying panel, then the rest; tiles 64px tall; bottom bar with price and Add to basket.
 - Checked on the live store at 1440, 820 and 390px: panel stays in view (fits a 900px screen), no sideways scroll
   (a hidden label in the set cards caused it at first; fixed), set button added bed + headboard (bag 3 to 5).
+
+## Update 2026-11-19: homepage sliders and mobile hero
+
+- One slider behaviour for every sideways row (`storefront-renderer/src/slider.tsx`, `[data-slider-track]` rules at
+  the end of storefront-base.css): reviews carousel, photo gallery (scroll layout) and collection list (carousel).
+  Native swipe with snap points, no scrollbar, next card peeking on phones, dots under every slider, arrows from
+  768px (dimmed at the ends). Desktop rows show whole cards only.
+- Review cards: equal height, stars, quote, name and purchase at the foot, optional "Verified buyer" (new testimonial
+  setting; off for the sample reviews).
+- Photo gallery: smaller photo copies (srcset) and a tint while loading.
+- Resthaven mobile hero: photo clear at the top, dark wash at the foot, white text and buttons, headline 34-41px.
+- Checked at 360, 390, 430, 820 and 1440px: no sideways scroll, equal review heights, arrows move one stop.

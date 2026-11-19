@@ -26148,6 +26148,13 @@
           "group": "content"
         },
         {
+          "type": "checkbox",
+          "key": "verified",
+          "label": "Verified buyer",
+          "description": "Tick only when you know this customer bought from you.",
+          "group": "content"
+        },
+        {
           "group": "style",
           "heading": "Style",
           "element": "quote",
@@ -26645,6 +26652,9 @@
               "url"
             ],
             "additionalProperties": {}
+          },
+          "verified": {
+            "type": "boolean"
           },
           "el_quote_color": {
             "anyOf": [
