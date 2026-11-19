@@ -70,3 +70,24 @@ The product page shows "Complete the set" under Add to basket: products from the
 headboards and a mattress), each with a size choice that starts on the size chosen for the product on the page and an
 Add button. Checked on the live store at 1440 and 390px: choosing King moved every row to King with King prices, Add
 put a King mattress in the bag (count went up, "Added King to your bag."), no sideways scroll, 44px+ controls.
+
+## Update 2026-11-19: product page redesign
+
+- **Layout (large screens):** photos, then under them the delivery promises, "Complete the set", About this bed,
+  Details and materials, Dimensions and Reviews; beside them a short buying panel (rating, title, price, sizes, extras,
+  quantity, Add to basket) that stays in view while scrolling. Platform: every Main product part and product block has
+  "Where it shows" (Buying panel / Under the photos); Reviews can now be a Main product part. A panel taller than
+  the screen sticks with its bottom in view. Found and fixed: `.jelly-storefront { overflow: hidden }` in
+  globals.css disabled every sticky element on store pages (now `overflow-x: clip` + `display: flow-root`).
+- **Options:** size tiles show each size's price, a tick and a wash when chosen, dashed and struck through when sold
+  out; extras are tick cards with their price, one per row on phones.
+- **Default variant:** the merchant picks "Selected when the page opens" per option in the product builder (stored as
+  `isDefault` on the option value, no migration); paid extras can never start ticked. Without a default nothing is
+  chosen and the price reads "From £X" (the cheapest size). A link with `?variant=` still wins. Not built: falling
+  back to the best-selling size (needs per-size sales data on the storefront).
+- **Complete the set:** cards (photo, name, price of the chosen size, was-price, size, "Add to my set" tick), a summary
+  with this bed and the ticked items, total, saving (from was-prices) and one "Add N items to basket" button; three
+  across under the photos, rows in the buying panel, sideways scrolling on phones.
+- **Phones:** photos swipe, buying panel, then the rest; tiles 64px tall; bottom bar with price and Add to basket.
+- Checked on the live store at 1440, 820 and 390px: panel stays in view (fits a 900px screen), no sideways scroll
+  (a hidden label in the set cards caused it at first; fixed), set button added bed + headboard (bag 3 to 5).

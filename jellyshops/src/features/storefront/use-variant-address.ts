@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { ConfiguredOptionSelection, Product } from "@/lib/domain";
 import { resolveProductVariant } from "@/lib/product-configuration";
+import { isVariantBuyable } from "@/lib/variant-stock";
 
 /**
  * The chosen variant lives in the address as `?variant=<id>` (as on Shopify), so a link from an ad, an email or a
@@ -23,6 +24,26 @@ export function selectionsForVariant(product: Pick<Product, "variants" | "invent
   return selections.length === inventory.length && selections.length > 0 ? selections : null;
 }
 
+/**
+ * The choices the merchant marked "Selected when the page opens" (option value `isDefault`), one per single-choice
+ * option. Paid extras (several allowed) never start ticked. When the default stock choices point to a size that
+ * cannot be bought, they are left out, so the page shows "From £X" and the shopper chooses.
+ */
+export function defaultSelections(product: Pick<Product, "options" | "variants" | "inventoryOptionIds">): ConfiguredOptionSelection[] {
+  const picks = (product.options ?? []).flatMap((option) => {
+    if (option.multiple) return [];
+    const value = option.values.find((candidate) => candidate.isDefault);
+    return value ? [{ optionId: option.id, valueId: value.id }] : [];
+  });
+  const inventory = product.inventoryOptionIds ?? [];
+  const stockPicks = picks.filter((pick) => inventory.includes(pick.optionId));
+  if (inventory.length > 0 && stockPicks.length === inventory.length) {
+    const variant = resolveProductVariant(product as Product, picks);
+    if (!variant || variant.sellable === false || !isVariantBuyable(variant)) return picks.filter((pick) => !inventory.includes(pick.optionId));
+  }
+  return picks;
+}
+
 /** The address with `?variant=` set to `variantId` (or removed), keeping every other part. */
 export function addressWithVariant(href: string, variantId: string | undefined): string {
   const url = new URL(href);
@@ -37,8 +58,10 @@ export function useVariantAddress(product: Product | undefined, selections: Conf
   useEffect(() => {
     if (!product || readFor.current === product.id) return;
     readFor.current = product.id;
+    // A shared link wins; otherwise the merchant's "Selected when the page opens" choices.
     const fromAddress = selectionsForVariant(product, window.location.search);
-    if (fromAddress) setSelections(fromAddress);
+    const start = fromAddress ?? defaultSelections(product);
+    if (start.length) setSelections(start);
   }, [product, setSelections]);
   const variantId = product && (product.inventoryOptionIds?.length ?? 0) > 0 ? resolveProductVariant(product, selections)?.id : undefined;
   useEffect(() => {

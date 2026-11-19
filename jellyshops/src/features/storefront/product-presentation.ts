@@ -78,6 +78,13 @@ export function createProductPresentationContext({ product, currency, shippingCo
   const snapQuantity = (wanted: number) => allowedQuantity(quantityRule, wanted, maxQuantity ?? Number.POSITIVE_INFINITY);
   const tooFewLeft = hasQuantityRule(quantityRule) && maxQuantity !== undefined && maxQuantity > 0 && snapQuantity(quantityRule.min) === undefined;
   const clampedQuantity = snapQuantity(quantity) ?? (maxQuantity === undefined ? Math.max(1, quantity) : Math.max(1, Math.min(quantity, maxQuantity)));
+  // With one stock option (Size), each size can show its own price on its button.
+  const singleStockOption = (product.inventoryOptionIds ?? []).length === 1 ? product.inventoryOptionIds![0] : undefined;
+  const variantPriceFor = (optionId: string, valueId: string) => {
+    if (optionId !== singleStockOption) return undefined;
+    const match = product.variants.find((candidate) => candidate.options?.[optionId] === valueId && candidate.sellable !== false);
+    return match ? formatMoney(match.priceMinor, currency) : undefined;
+  };
   const fromVariant = !variant && inventoryChoiceMissing && product.variants.length ? product.variants.reduce((cheapest, candidate) => candidate.priceMinor < cheapest.priceMinor ? candidate : cheapest) : undefined;
   const availability = requiredMissing ? { state: "selection-required" as const, message: "Choose the required options", maxQuantity: 0 }
     : !variant || notSold ? { state: "unavailable" as const, message: "This combination is unavailable", maxQuantity: 0 }
@@ -87,11 +94,11 @@ export function createProductPresentationContext({ product, currency, shippingCo
           : { state: "available" as const, message: `${variant.stock} available`, maxQuantity: variant.stock };
 
   return {
-    product: { id: product.id, title: product.name, description: product.description, descriptionDoc: product.descriptionDoc ?? null, imageUrl: gallery[0]?.url ?? "", galleryEnabled, specifications: product.specifications ?? {}, shippingCopy, media: gallery, sku: variant?.sku || undefined, vendor: product.vendor, options: options.map((option) => ({ id: option.id, name: option.name, required: option.required, ...(option.display === "color" || option.display === "image" ? { display: option.display } : {}), ...(option.type !== "variant" && option.multiple ? { multiple: true } : {}), ...(missingOptionIds.has(option.id) ? { missing: true } : {}), values: option.values.map((value) => ({ id: value.id, label: value.label, selected: isSelected(option.id, value.id), ...optionValueState(product, selections, option.id, value.id), ...(option.display === "color" && value.color ? { color: value.color } : {}), ...(option.display === "image" && value.image ? { image: value.image } : {}), ...(value.priceAdjustmentMinor > 0 && option.type !== "variant" ? { priceAdjustment: formatMoney(value.priceAdjustmentMinor, currency) } : {}) })) })) },
+    product: { id: product.id, title: product.name, description: product.description, descriptionDoc: product.descriptionDoc ?? null, imageUrl: gallery[0]?.url ?? "", galleryEnabled, specifications: product.specifications ?? {}, shippingCopy, media: gallery, sku: variant?.sku || undefined, vendor: product.vendor, options: options.map((option) => ({ id: option.id, name: option.name, required: option.required, ...(option.display === "color" || option.display === "image" ? { display: option.display } : {}), ...(option.type !== "variant" && option.multiple ? { multiple: true } : {}), ...(missingOptionIds.has(option.id) ? { missing: true } : {}), values: option.values.map((value) => ({ id: value.id, label: value.label, selected: isSelected(option.id, value.id), ...optionValueState(product, selections, option.id, value.id), ...(option.display === "color" && value.color ? { color: value.color } : {}), ...(option.display === "image" && value.image ? { image: value.image } : {}), ...(value.priceAdjustmentMinor > 0 && option.type !== "variant" ? { priceAdjustment: formatMoney(value.priceAdjustmentMinor, currency) } : {}), ...(variantPriceFor(option.id, value.id) ? { variantPrice: variantPriceFor(option.id, value.id) } : {}) })) })) },
     selection: selections,
     quantity: clampedQuantity,
     // Before a size is chosen, the price (and its sale price) is the cheapest variant's, as on Shopify.
-    pricing: pricingFor(priceMinor ?? fromVariant?.priceMinor ?? 0, (variant ?? fromVariant)?.compareAtPriceMinor ?? product.compareAtPriceMinor, currency),
+    pricing: { ...pricingFor(priceMinor ?? fromVariant?.priceMinor ?? 0, (variant ?? fromVariant)?.compareAtPriceMinor ?? product.compareAtPriceMinor, currency), ...(priceMinor === undefined && fromVariant && new Set(product.variants.map((item) => item.priceMinor)).size > 1 ? { from: true } : {}) },
     availability,
     canAddToCart: availability.state === "available" && priceMinor !== undefined && Boolean(variant),
     selectOption: (optionId, valueId) => { const option = allOptions.find((candidate) => candidate.id === optionId); if (option) onSelectionsChange(toggleSelection(option, selections, valueId)); },

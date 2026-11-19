@@ -271,14 +271,38 @@ const newsletter = inline(home, "resthaven-newsletter");
 newsletter.blocks[0].settings.text = "Sleep better, spend less";
 newsletter.blocks[1].settings.text = "Showroom events, new arrivals and early access to offers. Once or twice a month.";
 
-// Product page: "Complete the set" under Add to basket (a bed suggests a mattress and a headboard, each with a size
-// choice that starts on the bed's size and an Add button).
-const mainProduct = template("product").sections.find((placement) => placement.kind === "inline" && placement.section.type === "main-product").section;
-const purchaseAt = mainProduct.blocks.findIndex((entry) => entry.type === "part-product-purchase");
+// Product page, two columns on large screens:
+//   left  = photos, then "Complete the set", the description, details, dimensions and reviews (blocks set to
+//           "Under the photos");
+//   right = a short buying panel that stays in view: rating, title and price, size tiles with their prices, extras
+//           as tick cards, quantity and Add to basket (delivery and returns promises sit under the photos).
+// Phones stack photos, buying panel, then the rest; a bottom bar keeps the price and Add to basket in reach.
+const productLayout = template("product");
+const mainProduct = productLayout.sections.find((placement) => placement.kind === "inline" && placement.section.type === "main-product").section;
+Object.assign(mainProduct.settings, { mediaWidth: "medium", stickyColumn: "details" });
+const partOf = (type) => mainProduct.blocks.find((entry) => entry.type === type);
+Object.assign(partOf("part-product-options").settings, { style: "tiles", tileColumns: 2 });
+Object.assign(partOf("part-product-purchase").settings, { stickyBar: true });
+// Delivery and returns promises sit under the photos with the other reading content, keeping the panel short.
+Object.assign(partOf("part-trust-strip").settings, { column: "below" });
+Object.assign(partOf("part-product-description").settings, { layout: "plain", column: "below" });
+Object.assign(partOf("part-product-specifications").settings, { layout: "table", column: "below" });
+const takeSection = (type) => {
+  const index = productLayout.sections.findIndex((placement) => placement.kind === "inline" && placement.section.type === type);
+  return index < 0 ? undefined : productLayout.sections.splice(index, 1)[0].section;
+};
+const dimensions = takeSection("product-dimensions");
+const reviewsSection = takeSection("product-reviews");
+const purchaseAt = mainProduct.blocks.findIndex((entry) => entry.type === "part-product-trust-strip" || entry.type === "part-trust-strip");
 mainProduct.blocks.splice(purchaseAt + 1, 0, {
+  // Under the photos, first: seen right after choosing a size, without making the buying panel taller.
   id: "expressbed-complete-set", type: "complementary-products", enabled: true, blocks: [],
-  settings: { heading: "Complete the set", limit: 3, source: "pairs", addToBag: true, matchSize: true },
+  settings: { heading: "Complete the set", limit: 3, source: "pairs", addToBag: true, matchSize: true, column: "below" },
 });
+mainProduct.blocks.push(
+  ...(dimensions ? [{ id: dimensions.id, type: "part-product-dimensions", enabled: true, blocks: [], settings: { ...dimensions.settings, column: "below" } }] : []),
+  ...(reviewsSection ? [{ id: reviewsSection.id, type: "part-product-reviews", enabled: true, blocks: [], settings: { ...reviewsSection.settings, column: "below" } }] : []),
+);
 
 const collection = template("collection");
 const help = inline(collection, "resthaven-collection-help");

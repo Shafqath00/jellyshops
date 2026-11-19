@@ -51,7 +51,8 @@ export function setChoicesFor(product: Product, currency: Currency): { setChoice
     return index < 0 ? Number.MAX_SAFE_INTEGER : index;
   };
   const values = [...live].sort((a, b) => order(a) - order(b)).map((variant) => ({
-    variantId: variant.id, label: labelOf(variant), price: formatMoney(variant.priceMinor, currency),
+    variantId: variant.id, label: labelOf(variant), price: formatMoney(variant.priceMinor, currency), priceMinor: variant.priceMinor,
+    ...((variant.compareAtPriceMinor ?? product.compareAtPriceMinor ?? 0) > variant.priceMinor ? { compareAtPriceMinor: variant.compareAtPriceMinor ?? product.compareAtPriceMinor } : {}),
     max: isVariantBuyable(variant) ? Math.min(variantMaxQuantity(variant), 99) : 0,
   }));
   return { setChoices: { optionName: option?.name ?? "", values } };

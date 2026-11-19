@@ -22872,6 +22872,7 @@
         "part-product-tabs",
         "part-product-specifications",
         "part-product-dimensions",
+        "part-product-reviews",
         "heading",
         "text",
         "button",
@@ -33399,6 +33400,23 @@
       },
       "controls": [
         {
+          "type": "segmented",
+          "key": "column",
+          "label": "Where it shows",
+          "group": "layout",
+          "description": "Under the photos keeps the buying panel short so it stays in view while scrolling. On phones it shows after the buying panel.",
+          "options": [
+            {
+              "label": "Buying panel",
+              "value": "panel"
+            },
+            {
+              "label": "Under the photos",
+              "value": "below"
+            }
+          ]
+        },
+        {
           "type": "text",
           "key": "shopLabel",
           "label": "Shop link text",
@@ -33413,6 +33431,21 @@
           "shopLabel": {
             "type": "string",
             "maxLength": 40
+          },
+          "column": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "panel",
+                  "below"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
           }
         }
       }
@@ -33429,6 +33462,23 @@
         "deliveryMax": 4
       },
       "controls": [
+        {
+          "type": "segmented",
+          "key": "column",
+          "label": "Where it shows",
+          "group": "layout",
+          "description": "Under the photos keeps the buying panel short so it stays in view while scrolling. On phones it shows after the buying panel.",
+          "options": [
+            {
+              "label": "Buying panel",
+              "value": "panel"
+            },
+            {
+              "label": "Under the photos",
+              "value": "below"
+            }
+          ]
+        },
         {
           "type": "range",
           "key": "cutoffHour",
@@ -33499,6 +33549,21 @@
           },
           "weekendDispatch": {
             "type": "boolean"
+          },
+          "column": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "panel",
+                  "below"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
           }
         }
       }
@@ -33516,6 +33581,23 @@
         "matchSize": true
       },
       "controls": [
+        {
+          "type": "segmented",
+          "key": "column",
+          "label": "Where it shows",
+          "group": "layout",
+          "description": "Under the photos keeps the buying panel short so it stays in view while scrolling. On phones it shows after the buying panel.",
+          "options": [
+            {
+              "label": "Buying panel",
+              "value": "panel"
+            },
+            {
+              "label": "Under the photos",
+              "value": "below"
+            }
+          ]
+        },
         {
           "type": "text",
           "key": "heading",
@@ -33599,6 +33681,21 @@
           },
           "matchSize": {
             "type": "boolean"
+          },
+          "column": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "panel",
+                  "below"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
           }
         }
       }
@@ -34127,6 +34224,23 @@
       },
       "controls": [
         {
+          "type": "segmented",
+          "key": "column",
+          "label": "Where it shows",
+          "group": "layout",
+          "description": "Under the photos keeps the buying panel short so it stays in view while scrolling. On phones it shows after the buying panel.",
+          "options": [
+            {
+              "label": "Buying panel",
+              "value": "panel"
+            },
+            {
+              "label": "Under the photos",
+              "value": "below"
+            }
+          ]
+        },
+        {
           "type": "text",
           "key": "heading",
           "label": "Heading",
@@ -34297,9 +34411,23 @@
               "soft",
               "dark"
             ]
+          },
+          "column": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "panel",
+                  "below"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
           }
-        },
-        "additionalProperties": {}
+        }
       }
     },
     {
@@ -34318,6 +34446,23 @@
         "showAvailability": true
       },
       "controls": [
+        {
+          "type": "segmented",
+          "key": "column",
+          "label": "Where it shows",
+          "group": "layout",
+          "description": "Under the photos keeps the buying panel short so it stays in view while scrolling. On phones it shows after the buying panel.",
+          "options": [
+            {
+              "label": "Buying panel",
+              "value": "panel"
+            },
+            {
+              "label": "Under the photos",
+              "value": "below"
+            }
+          ]
+        },
         {
           "type": "checkbox",
           "key": "showVendor",
@@ -34451,9 +34596,23 @@
           "financeLinkLabel": {
             "type": "string",
             "maxLength": 40
+          },
+          "column": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "panel",
+                  "below"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
           }
-        },
-        "additionalProperties": {}
+        }
       }
     },
     {
@@ -34466,6 +34625,23 @@
         "tileColumns": 3
       },
       "controls": [
+        {
+          "type": "segmented",
+          "key": "column",
+          "label": "Where it shows",
+          "group": "layout",
+          "description": "Under the photos keeps the buying panel short so it stays in view while scrolling. On phones it shows after the buying panel.",
+          "options": [
+            {
+              "label": "Buying panel",
+              "value": "panel"
+            },
+            {
+              "label": "Under the photos",
+              "value": "below"
+            }
+          ]
+        },
         {
           "type": "segmented",
           "key": "style",
@@ -34529,9 +34705,23 @@
             "type": "integer",
             "minimum": 2,
             "maximum": 4
+          },
+          "column": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "panel",
+                  "below"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
           }
-        },
-        "additionalProperties": {}
+        }
       }
     },
     {
@@ -34545,6 +34735,23 @@
         "stickyBar": false
       },
       "controls": [
+        {
+          "type": "segmented",
+          "key": "column",
+          "label": "Where it shows",
+          "group": "layout",
+          "description": "Under the photos keeps the buying panel short so it stays in view while scrolling. On phones it shows after the buying panel.",
+          "options": [
+            {
+              "label": "Buying panel",
+              "value": "panel"
+            },
+            {
+              "label": "Under the photos",
+              "value": "below"
+            }
+          ]
+        },
         {
           "type": "checkbox",
           "key": "showQuantity",
@@ -34579,9 +34786,23 @@
           },
           "stickyBar": {
             "type": "boolean"
+          },
+          "column": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "panel",
+                  "below"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
           }
-        },
-        "additionalProperties": {}
+        }
       }
     },
     {
@@ -34594,6 +34815,23 @@
         "showWhenPlentiful": true
       },
       "controls": [
+        {
+          "type": "segmented",
+          "key": "column",
+          "label": "Where it shows",
+          "group": "layout",
+          "description": "Under the photos keeps the buying panel short so it stays in view while scrolling. On phones it shows after the buying panel.",
+          "options": [
+            {
+              "label": "Buying panel",
+              "value": "panel"
+            },
+            {
+              "label": "Under the photos",
+              "value": "below"
+            }
+          ]
+        },
         {
           "type": "range",
           "key": "lowStockThreshold",
@@ -34620,9 +34858,23 @@
           },
           "showWhenPlentiful": {
             "type": "boolean"
+          },
+          "column": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "panel",
+                  "below"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
           }
-        },
-        "additionalProperties": {}
+        }
       }
     },
     {
@@ -34643,6 +34895,23 @@
         "showIcons": true
       },
       "controls": [
+        {
+          "type": "segmented",
+          "key": "column",
+          "label": "Where it shows",
+          "group": "layout",
+          "description": "Under the photos keeps the buying panel short so it stays in view while scrolling. On phones it shows after the buying panel.",
+          "options": [
+            {
+              "label": "Buying panel",
+              "value": "panel"
+            },
+            {
+              "label": "Under the photos",
+              "value": "below"
+            }
+          ]
+        },
         {
           "type": "segmented",
           "key": "layout",
@@ -34741,9 +35010,23 @@
           },
           "showIcons": {
             "type": "boolean"
+          },
+          "column": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "panel",
+                  "below"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
           }
-        },
-        "additionalProperties": {}
+        }
       }
     },
     {
@@ -34756,6 +35039,23 @@
         "heading": "Description"
       },
       "controls": [
+        {
+          "type": "segmented",
+          "key": "column",
+          "label": "Where it shows",
+          "group": "layout",
+          "description": "Under the photos keeps the buying panel short so it stays in view while scrolling. On phones it shows after the buying panel.",
+          "options": [
+            {
+              "label": "Buying panel",
+              "value": "panel"
+            },
+            {
+              "label": "Under the photos",
+              "value": "below"
+            }
+          ]
+        },
         {
           "type": "text",
           "key": "heading",
@@ -34815,9 +35115,23 @@
           },
           "startOpen": {
             "type": "boolean"
+          },
+          "column": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "panel",
+                  "below"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
           }
-        },
-        "additionalProperties": {}
+        }
       }
     },
     {
@@ -34833,6 +35147,23 @@
         "firstOpen": false
       },
       "controls": [
+        {
+          "type": "segmented",
+          "key": "column",
+          "label": "Where it shows",
+          "group": "layout",
+          "description": "Under the photos keeps the buying panel short so it stays in view while scrolling. On phones it shows after the buying panel.",
+          "options": [
+            {
+              "label": "Buying panel",
+              "value": "panel"
+            },
+            {
+              "label": "Under the photos",
+              "value": "below"
+            }
+          ]
+        },
         {
           "type": "select",
           "key": "layout",
@@ -34869,9 +35200,23 @@
               "accordion",
               "chapters"
             ]
+          },
+          "column": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "panel",
+                  "below"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
           }
-        },
-        "additionalProperties": {}
+        }
       }
     },
     {
@@ -34889,6 +35234,23 @@
         "layout": "table"
       },
       "controls": [
+        {
+          "type": "segmented",
+          "key": "column",
+          "label": "Where it shows",
+          "group": "layout",
+          "description": "Under the photos keeps the buying panel short so it stays in view while scrolling. On phones it shows after the buying panel.",
+          "options": [
+            {
+              "label": "Buying panel",
+              "value": "panel"
+            },
+            {
+              "label": "Under the photos",
+              "value": "below"
+            }
+          ]
+        },
         {
           "type": "text",
           "key": "heading",
@@ -34945,9 +35307,23 @@
               "table",
               "expandable"
             ]
+          },
+          "column": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "panel",
+                  "below"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
           }
-        },
-        "additionalProperties": {}
+        }
       }
     },
     {
@@ -34962,6 +35338,23 @@
         "note": ""
       },
       "controls": [
+        {
+          "type": "segmented",
+          "key": "column",
+          "label": "Where it shows",
+          "group": "layout",
+          "description": "Under the photos keeps the buying panel short so it stays in view while scrolling. On phones it shows after the buying panel.",
+          "options": [
+            {
+              "label": "Buying panel",
+              "value": "panel"
+            },
+            {
+              "label": "Under the photos",
+              "value": "below"
+            }
+          ]
+        },
         {
           "type": "text",
           "key": "heading",
@@ -35042,9 +35435,119 @@
               "url"
             ],
             "additionalProperties": {}
+          },
+          "column": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "panel",
+                  "below"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
           }
+        }
+      }
+    },
+    {
+      "type": "part-product-reviews",
+      "sets": [
+        "@product"
+      ],
+      "defaultSettings": {
+        "heading": "Customer reviews",
+        "allowWriting": true,
+        "perPage": 5
+      },
+      "controls": [
+        {
+          "type": "segmented",
+          "key": "column",
+          "label": "Where it shows",
+          "group": "layout",
+          "description": "Under the photos keeps the buying panel short so it stays in view while scrolling. On phones it shows after the buying panel.",
+          "options": [
+            {
+              "label": "Buying panel",
+              "value": "panel"
+            },
+            {
+              "label": "Under the photos",
+              "value": "below"
+            }
+          ]
         },
-        "additionalProperties": {}
+        {
+          "type": "text",
+          "key": "heading",
+          "label": "Heading",
+          "group": "content",
+          "maxLength": 120
+        },
+        {
+          "type": "text",
+          "key": "emptyText",
+          "label": "Text when there are no reviews yet",
+          "group": "content",
+          "maxLength": 200
+        },
+        {
+          "type": "checkbox",
+          "key": "allowWriting",
+          "label": "Let shoppers write reviews",
+          "description": "New reviews wait for you under Products > Reviews.",
+          "group": "content"
+        },
+        {
+          "type": "range",
+          "key": "perPage",
+          "label": "Reviews shown at first",
+          "group": "layout",
+          "min": 3,
+          "max": 20,
+          "step": 1
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "heading": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "emptyText": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "allowWriting": {
+            "type": "boolean"
+          },
+          "perPage": {
+            "type": "integer",
+            "minimum": 3,
+            "maximum": 20
+          },
+          "column": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "panel",
+                  "below"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          }
+        }
       }
     }
   ]

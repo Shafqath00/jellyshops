@@ -114,6 +114,17 @@ export function ChoiceCard({ option, index, count, onChange, onRemove, onMove }:
             Shoppers can pick several
           </label>
         )}
+        {/* One value can start chosen (the size most people buy). Paid extras never start ticked: shoppers opt in. */}
+        {!option.multiple && option.values.length > 1 && (
+          <label className="flex items-center gap-2 text-[12px] font-medium text-foreground" htmlFor={`${id}-default`}>
+            Selected when the page opens
+            <select id={`${id}-default`} className={`${inputClass} !mt-0 h-9 w-auto`} value={option.values.find((value) => value.isDefault)?.id ?? ""}
+              onChange={(event) => onChange({ ...option, values: option.values.map((value) => ({ ...value, isDefault: value.id === event.target.value || undefined })) })}>
+              <option value="">Nothing (shoppers choose, price shows “From”)</option>
+              {option.values.map((value) => <option key={value.id} value={value.id}>{value.label || "Unnamed value"}</option>)}
+            </select>
+          </label>
+        )}
         <div className="ml-auto flex items-center gap-2 text-[13px] font-bold text-muted-foreground">
           <label htmlFor={`${id}-display`}>Show as</label>
           <select id={`${id}-display`} className={`${inputClass} !mt-0 h-9 w-auto`} value={option.display === "image" ? "buttons" : option.display} onChange={(event) => onChange({ ...option, display: event.target.value as ProductOptionDisplay })}>

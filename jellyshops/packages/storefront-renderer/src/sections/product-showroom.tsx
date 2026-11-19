@@ -26,9 +26,12 @@ function TilePicture({ picture }: { picture: { kind: "image" | "color"; value: s
 
 /** One option's values as large tiles: picture, name, extra cost, sold out. */
 export function OptionTiles({ option, product }: { option: Option; product: ProductPresentationContext }) {
-  return <div className="jelly-option-tiles">{option.values.map((value) => <button key={value.id} type="button" className="jelly-option-tile" aria-pressed={value.selected} disabled={!value.available} data-sold-out={value.soldOut || undefined} onClick={() => product.selectOption(option.id, value.id)}>
+  // Extras that take several picks draw as tick cards (label, price, a tick box); single choices as tiles.
+  return <div className="jelly-option-tiles" data-multiple={option.multiple || undefined}>{option.values.map((value) => <button key={value.id} type="button" className="jelly-option-tile" aria-pressed={value.selected} disabled={!value.available} data-sold-out={value.soldOut || undefined} onClick={() => product.selectOption(option.id, value.id)}>
+    {option.multiple && <span className="jelly-option-tile-check" aria-hidden="true" />}
     <TilePicture picture={tilePicture(option, value)} />
     <span className="jelly-option-tile-label">{value.label}</span>
+    {value.variantPrice && <span className="jelly-option-tile-price">{value.variantPrice}</span>}
     {value.priceAdjustment && <span className="jelly-option-tile-price">+{value.priceAdjustment}</span>}
     {(value.soldOut || !value.available) && <span className="jelly-option-tile-note">{value.available ? "Sold out" : "Unavailable"}</span>}
   </button>)}</div>;
@@ -160,7 +163,7 @@ export function StickyPurchaseBar({ product, visible, label, busy, disabled, onA
       <span className="jelly-sticky-purchase-title">{product.product.title}</span>
       {/* The section's own status line is what screen readers hear; this copy is for eyes on the bar. */}
       {message && <span className="jelly-sticky-purchase-message" aria-hidden="true">{message}</span>}
-      <span className="jelly-sticky-purchase-price">{product.pricing.price}{product.pricing.compareAtPrice && <s aria-label={`Was ${product.pricing.compareAtPrice}`}>{product.pricing.compareAtPrice}</s>}</span>
+      <span className="jelly-sticky-purchase-price">{product.pricing.from && <span className="jelly-price-from">From </span>}{product.pricing.price}{product.pricing.compareAtPrice && <s aria-label={`Was ${product.pricing.compareAtPrice}`}>{product.pricing.compareAtPrice}</s>}</span>
     </div>
     {needsChoice
       ? <button type="button" className="jelly-button" onClick={chooseOptions}>Choose options</button>

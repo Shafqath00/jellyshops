@@ -47,7 +47,8 @@ describe("Main product buying column", () => {
     expect(column.querySelector(".jelly-product-breadcrumbs a[href='/demo/shop']")).not.toBeNull();
     expect(column.querySelector(".jelly-notice")?.textContent).toContain("WELCOME10");
     expect(column.querySelectorAll("details.jelly-accordion-row")).toHaveLength(3);
-    expect([...column.querySelectorAll(".jelly-complementary-name")].map((item) => item.textContent)).toEqual(["Oak bedside table", "Linen duvet cover"]);
+    // New blocks are "Complete the set" cards (these sample products have no size choices, so they link).
+    expect([...column.querySelectorAll(".jelly-set-name")].map((item) => item.textContent)).toEqual(["Oak bedside table", "Linen duvet cover"]);
     expect(column.querySelectorAll(".jelly-product-part[data-part='block']")).toHaveLength(4);
     expect(await noViolations(container)).toEqual([]);
   });

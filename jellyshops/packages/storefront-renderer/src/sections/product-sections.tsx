@@ -47,6 +47,7 @@ export function ProductGallerySection({ context, section }: { context: Storefron
 }
 
 export function ProductInformationSection({ context, section }: { context: StorefrontRuntimeContext; section: { settings: Record<string, unknown> } }) {
+  const word = useWords();
   const product = productContext(context);
   const part = (id: string) => elementProps({ type: "product-information", settings: section.settings }, id, context.mode === "editor");
   if (!product) {
@@ -60,7 +61,7 @@ export function ProductInformationSection({ context, section }: { context: Store
     {show("showVendor") && product.product.vendor && <p className="jelly-eyebrow" {...part("vendor")}>{product.product.vendor}</p>}
     <h1 {...part("title")} {...titleLength(product.product.title)}>{product.product.title}</h1>
     <p className="jelly-product-price" {...part("price")}>
-      <strong>{product.pricing.price}</strong>
+      <strong>{product.pricing.from && <span className="jelly-price-from">{word("product.from")} </span>}{product.pricing.price}</strong>
       {show("showCompareAtPrice") && product.pricing.compareAtPrice && <s aria-label={`Was ${product.pricing.compareAtPrice}`}>{product.pricing.compareAtPrice}</s>}
       <DiscountChip pricing={product.pricing} kind={section.settings.discountChip} />
     </p>

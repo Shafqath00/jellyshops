@@ -1,4 +1,4 @@
-import { createElement, type ComponentType } from "react";
+import { createElement, useEffect, useRef, type ComponentType, type RefObject } from "react";
 import { blockLabel, partSectionType } from "@jelly/storefront-registry/runtime";
 import type { BlockNode, SectionNode } from "@jelly/storefront-schema";
 import { StorefrontContainer } from "@jelly/storefront-ui";
@@ -31,14 +31,44 @@ export function MainProductSection({ section, mode, commerce, context, selectedB
   const width = choice(section.settings.mediaWidth, ["narrow", "medium", "wide"] as const, "medium");
   const sticky = choice(section.settings.stickyColumn, ["media", "details", "none"] as const, "media");
   const parts = section.blocks.filter((block) => block.enabled);
-  return <section className="jelly-section jelly-main-product" data-media-position={position} data-media-width={width} data-sticky={sticky}>
+  // Blocks set to "Under the photos" fill the column below the gallery; the rest make the buying panel.
+  const below = parts.filter((block) => block.settings.column === "below");
+  const panel = parts.filter((block) => block.settings.column !== "below");
+  const panelRef = useRef<HTMLDivElement>(null);
+  const draw = (block: BlockNode) => <ProductPart key={block.id} block={block} mode={mode} commerce={commerce} context={context} selectedBlockId={selectedBlockId} editor={editor} renderPart={renderPart} />;
+  useStickyPanel(panelRef, sticky === "details" || below.length > 0);
+  return <section className="jelly-section jelly-main-product" data-media-position={position} data-media-width={width} data-sticky={below.length ? "details" : sticky} data-has-below={below.length ? "" : undefined}>
     <StorefrontContainer className="jelly-main-product-grid">
       <div className="jelly-main-product-media"><ProductGallerySection context={context} section={section} /></div>
-      <div className="jelly-main-product-details">
-        {parts.map((block) => <ProductPart key={block.id} block={block} mode={mode} commerce={commerce} context={context} selectedBlockId={selectedBlockId} editor={editor} renderPart={renderPart} />)}
-      </div>
+      <div className="jelly-main-product-details" ref={panelRef}>{panel.map(draw)}</div>
+      {below.length > 0 && <div className="jelly-main-product-below">{below.map(draw)}</div>}
     </StorefrontContainer>
   </section>;
+}
+
+/**
+ * A buying panel taller than the screen would hide its Add to basket while it sticks to the top. In that case it
+ * sticks with its bottom edge in view instead (top = screen height - panel height), so every part stays reachable.
+ * Measured on scroll and resize, since the editor's preview frame does not run observers of its own.
+ */
+function useStickyPanel(ref: RefObject<HTMLDivElement | null>, active: boolean) {
+  useEffect(() => {
+    const panel = ref.current;
+    if (!active || !panel || typeof window === "undefined") return;
+    const view = panel.ownerDocument.defaultView ?? window;
+    let frame = 0;
+    const measure = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const room = view.innerHeight - panel.offsetHeight - 24;
+        panel.style.setProperty("--mp-panel-top", room < 24 ? `${room}px` : "");
+      });
+    };
+    measure();
+    view.addEventListener("resize", measure);
+    view.addEventListener("scroll", measure, { passive: true });
+    return () => { cancelAnimationFrame(frame); view.removeEventListener("resize", measure); view.removeEventListener("scroll", measure); };
+  }, [ref, active]);
 }
 
 function ProductPart({ block, mode, commerce, context, selectedBlockId, editor, renderPart }: {

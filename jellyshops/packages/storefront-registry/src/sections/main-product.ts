@@ -9,6 +9,7 @@ import type { BlockDefinition, SectionDefinition } from "../types.js";
  */
 
 import { PRODUCT_PART_SECTIONS, partBlockType, type ProductPartSection } from "../parts.js";
+import { mainProductColumnControl, mainProductColumnSchema } from "../main-product-column.js";
 
 export { PART_BLOCK_PREFIX, PRODUCT_PART_SECTIONS, partBlockType, partSectionType, type ProductPartSection } from "../parts.js";
 
@@ -21,8 +22,8 @@ export function productPartBlocks(sections: SectionDefinition[]): BlockDefinitio
       type: partBlockType(type),
       // Parts need the product being shown: only Main product's buying column takes "@product" blocks.
       sets: ["@product"],
-      settingsSchema: section.settingsSchema,
-      controls: section.controls,
+      settingsSchema: z.intersection(section.settingsSchema, mainProductColumnSchema),
+      controls: [mainProductColumnControl, ...section.controls],
       defaultSettings: structuredClone(section.defaultSettings),
       ...(section.allowedBlockTypes.length ? { allowedBlockTypes: [...section.allowedBlockTypes], defaultBlocks: structuredClone(section.defaultBlocks) } : {}),
       ...(section.maxBlocks !== undefined ? { maxBlocks: section.maxBlocks } : {}),

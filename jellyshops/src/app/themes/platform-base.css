@@ -242,6 +242,27 @@
 [data-jelly-legacy-styles="off"] .jelly-option-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
 [data-jelly-legacy-styles="off"] .jelly-option-tile { display: grid; align-content: center; gap: 2px; justify-items: center; text-align: center; }
 [data-jelly-legacy-styles="off"] .jelly-option-tile-note { color: var(--j-color-muted); font-size: 12px; font-weight: 400; }
+/* Option tiles: a card per value, its own price under the name, a clear chosen state (border, wash, tick), sold-out
+   values faded and struck through. Extras that take several picks are full-width tick cards. */
+[data-jelly-legacy-styles="off"] .jelly-product-options[data-style="tiles"] .jelly-option-tiles { grid-template-columns: repeat(var(--jelly-tile-columns, 2), minmax(0, 1fr)); }
+[data-jelly-legacy-styles="off"] .jelly-option-tile { position: relative; min-height: 64px; padding: 12px 40px 12px 16px; justify-items: start; align-content: center; text-align: left; line-height: 1.25; }
+[data-jelly-legacy-styles="off"] .jelly-option-tile-label { font-size: 15px; font-weight: 600; }
+[data-jelly-legacy-styles="off"] .jelly-option-tile-price { color: var(--j-color-muted); font-size: 13px; font-weight: 500; }
+[data-jelly-legacy-styles="off"] .jelly-option-tile:hover:not(:disabled) { border-color: var(--j-color-text); background: var(--j-color-wash); }
+[data-jelly-legacy-styles="off"] .jelly-option-tile:focus-visible { outline: 2px solid var(--j-color-text); outline-offset: 2px; }
+[data-jelly-legacy-styles="off"] .jelly-option-tile[aria-pressed="true"] { border-color: var(--j-color-text); box-shadow: inset 0 0 0 1px var(--j-color-text); background: var(--j-color-wash); }
+[data-jelly-legacy-styles="off"] .jelly-option-tiles:not([data-multiple]) .jelly-option-tile[aria-pressed="true"]::after { content: "✓"; position: absolute; top: 10px; right: 10px; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--j-color-text); color: var(--j-color-surface); font-size: 12px; font-weight: 700; line-height: 1; }
+[data-jelly-legacy-styles="off"] .jelly-option-tile:disabled, [data-jelly-legacy-styles="off"] .jelly-option-tile[data-sold-out] { border-style: dashed; color: var(--j-color-muted); background: transparent; }
+[data-jelly-legacy-styles="off"] .jelly-option-tile:disabled { cursor: not-allowed; }
+[data-jelly-legacy-styles="off"] .jelly-option-tile[data-sold-out] .jelly-option-tile-label { text-decoration: line-through; }
+[data-jelly-legacy-styles="off"] .jelly-option-tiles[data-multiple] { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+@media (max-width: 599px) { [data-jelly-legacy-styles="off"] .jelly-product-options[data-style] .jelly-option-tiles[data-multiple] { grid-template-columns: minmax(0, 1fr); } }
+[data-jelly-legacy-styles="off"] .jelly-option-tiles[data-multiple] .jelly-option-tile { grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: 12px; min-height: 56px; padding: 10px 16px; }
+[data-jelly-legacy-styles="off"] .jelly-option-tiles[data-multiple] .jelly-option-tile-price { color: var(--j-color-text); font-weight: 600; }
+[data-jelly-legacy-styles="off"] .jelly-option-tile-check { display: grid; place-items: center; width: 22px; height: 22px; border: 1.5px solid var(--j-color-border-strong); border-radius: 6px; background: var(--j-color-surface); }
+[data-jelly-legacy-styles="off"] .jelly-option-tile[aria-pressed="true"] .jelly-option-tile-check { border-color: var(--j-color-text); background: var(--j-color-text); }
+[data-jelly-legacy-styles="off"] .jelly-option-tile[aria-pressed="true"] .jelly-option-tile-check::after { content: "✓"; color: var(--j-color-surface); font-size: 13px; font-weight: 700; line-height: 1; }
+[data-jelly-legacy-styles="off"] .jelly-price-from { font-size: 0.6em; font-weight: 500; color: var(--j-color-muted); letter-spacing: 0; }
 [data-jelly-legacy-styles="off"] [data-sold-out="true"] { color: var(--j-color-muted); }
 [data-jelly-legacy-styles="off"] .jelly-product-purchase { padding: 8px 0 24px; }
 [data-jelly-legacy-styles="off"] .jelly-product-purchase > .jelly-container { display: grid; gap: 4px; }

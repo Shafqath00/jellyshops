@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { STORE_ICON_LABELS, STORE_ICON_NAMES, settingValueSchema } from "@jelly/storefront-schema";
 import type { BlockDefinition } from "./types.js";
+import { mainProductColumnControl, mainProductColumnSchema } from "./main-product-column.js";
 
 /**
  * Blocks for the product page's buying column (theme plan T5, docs/template-analysis.md section 6.4). The
@@ -76,5 +77,11 @@ const notice: BlockDefinition = {
   defaultSettings: { text: "Use code WELCOME10 for 10% off your first order.", icon: "tag", tone: "sale" },
 };
 
-export const PRODUCT_BLOCKS: BlockDefinition[] = [breadcrumbs, deliveryEstimate, complementaryProducts, notice];
+/** Product blocks (not the shared notice) can sit in the buying panel or under the photos. */
+const withColumn = (definition: BlockDefinition): BlockDefinition => ({
+  ...definition,
+  settingsSchema: z.intersection(definition.settingsSchema, mainProductColumnSchema),
+  controls: [mainProductColumnControl, ...definition.controls],
+});
+export const PRODUCT_BLOCKS: BlockDefinition[] = [withColumn(breadcrumbs), withColumn(deliveryEstimate), withColumn(complementaryProducts), notice];
 export const PRODUCT_BLOCK_TYPES = PRODUCT_BLOCKS.map((definition) => definition.type);

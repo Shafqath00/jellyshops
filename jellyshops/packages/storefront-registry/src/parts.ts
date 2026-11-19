@@ -11,6 +11,7 @@ export const PRODUCT_PART_SECTIONS = [
   "product-tabs",
   "product-specifications",
   "product-dimensions",
+  "product-reviews",
 ] as const;
 
 export type ProductPartSection = typeof PRODUCT_PART_SECTIONS[number];
