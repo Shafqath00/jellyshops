@@ -353,3 +353,89 @@
 .jelly-checkout .jelly-checkout__skeleton--card { padding: 20px; border: 1px solid var(--checkout-divider); border-radius: var(--checkout-radius); }
 .jelly-checkout .jelly-checkout__skeleton--card span, .jelly-checkout .jelly-checkout__skeleton--summary span { height: 18px; }
 .jelly-checkout .jelly-checkout__skeleton--summary span:first-child { height: 64px; width: 100%; }
+
+/* 12 ── Jellyshop card stack (the checkout page) ──────────────────────────
+ * One centred column on every screen: progress line, the order summary as a bar that opens in place, then the
+ * numbered step cards. Scoped to [data-flow="cards"] so the order confirmation keeps its own layout. Tokens only. */
+.jelly-checkout[data-flow="cards"] {
+  --checkout-column: 640px;
+  --checkout-card-radius: max(var(--checkout-radius), 14px);
+  --checkout-shadow: 0 1px 2px color-mix(in srgb, var(--checkout-text) 6%, transparent), 0 12px 32px -20px color-mix(in srgb, var(--checkout-text) 28%, transparent);
+  max-width: calc(var(--checkout-column) + 2 * var(--checkout-edge));
+  min-height: auto;
+  padding: calc(var(--checkout-space) * 3) var(--checkout-edge) calc(var(--checkout-space) * 8);
+  background: none;
+}
+.jelly-checkout[data-flow="cards"] .jelly-checkout__header { display: grid; grid-template-columns: minmax(0, 1fr); gap: calc(var(--checkout-space) * 1.5); width: auto; margin: 0 0 calc(var(--checkout-space) * 3); padding: 0; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__header .jelly-checkout__title { position: static; width: auto; height: auto; overflow: visible; clip-path: none; font-size: clamp(1.625rem, 3vw, 2rem); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__back-link { justify-self: start; display: inline-flex; align-items: center; gap: 6px; min-height: 32px; color: var(--checkout-muted); font-size: var(--checkout-text-sm); text-decoration: none; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__back-link::before { content: "\2190"; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__back-link:hover { color: var(--checkout-text); }
+
+/* Progress: labels over a thin track that fills as the shopper moves on. */
+.jelly-checkout[data-flow="cards"] .jelly-checkout__progress { position: relative; display: grid; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; margin: 0; padding: 0 0 12px; list-style: none; font-size: var(--checkout-text-sm); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__progress::before,
+.jelly-checkout[data-flow="cards"] .jelly-checkout__progress::after { content: ""; position: absolute; left: 0; bottom: 0; height: 4px; border-radius: 999px; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__progress::before { right: 0; background: var(--checkout-divider); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__progress::after { width: calc(var(--checkout-progress, 0) * 67% + 33%); background: var(--checkout-primary); transition: width 260ms ease; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__progress li { color: var(--checkout-muted); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__progress li:nth-child(2):not(:last-child) { text-align: center; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__progress li:last-child:not(:first-child) { text-align: right; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__progress li[data-state="done"] { color: var(--checkout-text); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__progress li[data-state="current"] { color: var(--checkout-text); font-weight: var(--checkout-weight-bold); }
+
+.jelly-checkout[data-flow="cards"] .jelly-checkout__column { display: grid; gap: calc(var(--checkout-space) * 2); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__main { display: grid; gap: calc(var(--checkout-space) * 2); }
+
+/* Summary bar: a bar at every width, stays at the top while scrolling, opens in place. */
+.jelly-checkout[data-flow="cards"] .jelly-checkout__summary { position: sticky; top: 8px; z-index: 5; display: grid; gap: 0; padding: 0; border: 1px solid var(--checkout-divider); border-radius: var(--checkout-card-radius); background: var(--checkout-surface); box-shadow: var(--checkout-shadow); clip-path: none; }
+.jelly-checkout[data-flow="cards"].jelly-checkout .jelly-checkout__summary-toggle { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; width: 100%; min-height: 64px; padding: 12px 16px; border: 0; background: none; color: var(--checkout-text); font: inherit; text-align: left; cursor: pointer; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__summary-toggle > .jelly-checkout__summary-label { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; text-decoration: none; font-weight: var(--checkout-weight-medium); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__summary-label small { color: var(--checkout-muted); font-size: var(--checkout-text-sm); font-weight: var(--checkout-weight-regular); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__summary-toggle b { font-size: var(--checkout-text-lg); font-variant-numeric: tabular-nums; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__summary-thumbs { display: inline-flex; padding-left: 10px; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__summary-thumbs img { width: 36px; height: 36px; margin-left: -10px; border: 2px solid var(--checkout-surface); border-radius: 10px; object-fit: cover; background: var(--checkout-wash); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__summary-panel { display: none; position: static; width: auto; max-height: min(62vh, 560px); overflow: auto; padding: 4px 16px 16px; border-top: 1px solid var(--checkout-divider); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__summary-panel[data-open] { display: grid; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__summary-panel > .jelly-checkout__panel-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__summary-trust { justify-content: flex-start; gap: 4px 16px; padding: 10px 16px 12px; border-top: 1px solid var(--checkout-divider); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__summary-trust a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+
+/* Step cards. */
+.jelly-checkout[data-flow="cards"] .jelly-checkout__steps-list { display: grid; gap: 12px; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__step { display: grid; gap: 16px; padding: 20px; border: 1px solid var(--checkout-divider); border-radius: var(--checkout-card-radius); background: var(--checkout-surface); transition: box-shadow 200ms ease, border-color 200ms ease; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__step[data-state="open"] { border-color: color-mix(in srgb, var(--checkout-primary) 45%, var(--checkout-divider)); box-shadow: var(--checkout-shadow); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__step[data-state="waiting"] { padding-block: 16px; background: transparent; border-style: dashed; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__step-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__step-number { display: grid; place-items: center; width: 30px; height: 30px; border: 1.5px solid var(--checkout-border); border-radius: 999px; color: var(--checkout-muted); font-size: var(--checkout-text-sm); font-weight: var(--checkout-weight-bold); font-variant-numeric: tabular-nums; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__step[data-state="open"] .jelly-checkout__step-number { border-color: var(--checkout-primary); background: var(--checkout-primary); color: var(--checkout-on-primary); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__step[data-state="done"] .jelly-checkout__step-number { border-color: var(--checkout-success); background: var(--checkout-success); color: #fff; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__step-title { margin: 0; font-family: var(--checkout-font-heading); font-size: var(--checkout-text-lg); font-weight: var(--checkout-weight-bold); line-height: 1.3; text-transform: none; letter-spacing: 0; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__step-title:focus { outline: none; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__step-title:focus-visible { outline: 2px solid var(--checkout-focus); outline-offset: 4px; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__step[data-state="waiting"] .jelly-checkout__step-title { color: var(--checkout-muted); font-weight: var(--checkout-weight-medium); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__step-recap { padding-left: 42px; color: var(--checkout-text); font-size: var(--checkout-text-sm); overflow-wrap: anywhere; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__step-recap p { margin: 0; line-height: 1.55; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__muted { color: var(--checkout-muted); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__step-head .jelly-checkout__link { min-height: 44px; padding: 0 4px; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__step-body { display: grid; gap: 20px; animation: jelly-checkout-open 220ms ease both; }
+@keyframes jelly-checkout-open { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__form { gap: 20px; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__saved { flex-wrap: wrap; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__check { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: var(--checkout-text-sm); cursor: pointer; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__check input { width: 20px; height: 20px; margin: 0; accent-color: var(--checkout-primary); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__field textarea { width: 100%; min-height: 88px; padding: 12px 14px; border: 1px solid var(--checkout-border); border-radius: var(--checkout-radius-field); background: var(--checkout-surface); color: var(--checkout-text); font: inherit; resize: vertical; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__primary { box-shadow: 0 10px 22px -14px color-mix(in srgb, var(--checkout-primary) 80%, transparent); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__back { justify-self: center; color: var(--checkout-muted); }
+@media (min-width: 640px) {
+  .jelly-checkout[data-flow="cards"] { padding-top: calc(var(--checkout-space) * 5); }
+  .jelly-checkout[data-flow="cards"] .jelly-checkout__step { padding: 24px 28px; }
+  .jelly-checkout[data-flow="cards"].jelly-checkout .jelly-checkout__summary-toggle { padding: 12px 20px; }
+  .jelly-checkout[data-flow="cards"] .jelly-checkout__summary-panel { padding: 4px 20px 20px; }
+  .jelly-checkout[data-flow="cards"] .jelly-checkout__summary-trust { padding: 10px 20px 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jelly-checkout[data-flow="cards"] .jelly-checkout__step-body { animation: none; }
+  .jelly-checkout[data-flow="cards"] .jelly-checkout__progress::after { transition: none; }
+}
+.jelly-checkout[data-flow="cards"] .jelly-checkout__note > svg { flex: none; }

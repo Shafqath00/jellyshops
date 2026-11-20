@@ -49,6 +49,8 @@ export function checkoutContentSecurityPolicy(options: SecurityHeaderOptions): s
       ...(api ? [api] : []),
       ...(supabase ? [supabase] : []),
       ...STRIPE_CONNECT,
+      // Stripe.js fetches the font stylesheet for its card form (STRIPE_FONTS in checkout-tokens.ts) from here.
+      "https://fonts.googleapis.com",
       ...(dev ? ["ws:", "http://localhost:*", "http://127.0.0.1:*"] : []),
     ],
     "frame-src": STRIPE_FRAMES,

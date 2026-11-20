@@ -2,7 +2,7 @@
 
 import { cardPhotoSrcSet } from "@jelly/storefront-ui";
 import { useId, useState, type FormEvent } from "react";
-import { ChevronDown, Tag, X } from "lucide-react";
+import { ChevronDown, LockKeyhole, RotateCcw, Tag, Truck, X } from "lucide-react";
 import { formatMoney, type Currency } from "@/lib/domain";
 import { cartProductImage } from "@/lib/product-media";
 import type { DiscountPreview, PreparedPaymentTotals } from "@/features/commerce/api/types";
@@ -17,6 +17,8 @@ interface OrderSummaryProps {
   /** Set once the server has priced the order; replaces the estimate. */
   totals?: PreparedPaymentTotals;
   discount?: DiscountControls;
+  /** Short merchant lines (theme settings > Checkout) shown with the secure-payment line. */
+  trust?: { delivery?: string; returns?: string; returnsHref?: string };
 }
 
 export interface DiscountControls {
@@ -88,8 +90,8 @@ function lineDetail(line: CheckoutLine): string {
   return parts.join(" · ");
 }
 
-/** The bag on the right on desktop; folds to a "Show order summary" bar at the top on phones. */
-export function OrderSummary({ lines, currency, estimatedSubtotal, estimatedShipping, delivery, totals, discount }: OrderSummaryProps) {
+/** The bag as a bar at the top of the checkout column on every screen: item count and total, opening in place. */
+export function OrderSummary({ lines, currency, estimatedSubtotal, estimatedShipping, delivery, totals, discount, trust }: OrderSummaryProps) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const money = (minor: number) => formatMoney(minor, currency);
@@ -105,7 +107,14 @@ export function OrderSummary({ lines, currency, estimatedSubtotal, estimatedShip
   return (
     <aside className="jelly-checkout__summary" aria-labelledby={`${panelId}-title`}>
       <button type="button" className="jelly-checkout__summary-toggle" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen((value) => !value)}>
-        <span>{open ? "Hide order summary" : "Show order summary"}<ChevronDown size={16} aria-hidden="true" data-open={open ? "" : undefined} /></span>
+        <span className="jelly-checkout__summary-thumbs" aria-hidden="true">
+          {lines.slice(0, 3).map((line) => {
+            const image = cartProductImage(line.product, line.variant, line.item.configurationSelections);
+            // eslint-disable-next-line @next/next/no-img-element -- tiny copies from the media API
+            return image ? <img key={line.variant.id + JSON.stringify(line.item.configurationSelections ?? [])} src={image} srcSet={cardPhotoSrcSet(image)} sizes="32px" width={32} height={32} alt="" decoding="async" /> : null;
+          })}
+        </span>
+        <span className="jelly-checkout__summary-label">{open ? "Hide order" : "Your order"} <small>{count} {count === 1 ? "item" : "items"}</small><ChevronDown size={16} aria-hidden="true" data-open={open ? "" : undefined} /></span>
         <b>{money(total)}</b>
       </button>
       <div id={panelId} className="jelly-checkout__summary-panel" data-open={open ? "" : undefined}>
@@ -142,6 +151,11 @@ export function OrderSummary({ lines, currency, estimatedSubtotal, estimatedShip
           {totals ? (changed ? "Prices were updated by the shop. This is the amount you'll pay." : "This is the amount you'll pay.") : "The final total is confirmed before you pay."}
         </p>
       </div>
+      <ul className="jelly-checkout__trust jelly-checkout__summary-trust" aria-label="About this order">
+        <li><LockKeyhole size={14} aria-hidden="true" /> Secure payment</li>
+        {trust?.delivery && <li><Truck size={14} aria-hidden="true" /> {trust.delivery}</li>}
+        {trust?.returns && <li><RotateCcw size={14} aria-hidden="true" /> {trust.returnsHref ? <a href={trust.returnsHref}>{trust.returns}</a> : trust.returns}</li>}
+      </ul>
     </aside>
   );
 }

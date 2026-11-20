@@ -29,7 +29,8 @@ async function fillDelivery(user: ReturnType<typeof userEvent.setup>) {
   await user.type(await screen.findByLabelText(/^email/i), "riya@example.com");
   await user.type(screen.getByLabelText(/^full name/i), "Riya Menon");
   await user.type(screen.getByLabelText(/^phone/i), "+91 98888 11111");
-  await user.type(screen.getByLabelText(/^address$/i), "22 Palm Avenue");
+  await user.click(screen.getByRole("button", { name: /continue to delivery/i }));
+  await user.type(await screen.findByLabelText(/^address$/i), "22 Palm Avenue");
   await user.type(screen.getByLabelText(/^town or city/i), "Bengaluru");
   await user.type(screen.getByLabelText(/^state/i), "Karnataka");
   await user.type(screen.getByLabelText(/^pin code/i), "560001");
@@ -61,7 +62,7 @@ it("shows field problems next to the fields and sends nothing", async () => {
   const user = userEvent.setup();
   render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
   await user.type(await screen.findByLabelText(/^email/i), "not-an-email");
-  await user.click(screen.getByRole("button", { name: /continue to payment/i }));
+  await user.click(screen.getByRole("button", { name: /continue to delivery/i }));
   const email = screen.getByLabelText(/^email/i);
   expect(email).toHaveAttribute("aria-invalid", "true");
   expect(email).toHaveAccessibleDescription(/name@example\.com/);
@@ -143,4 +144,85 @@ it("checks a discount code on the server, shows it in the summary and sends it w
   expect(JSON.parse(fetcher.mock.calls[2]![1]!.body)).toMatchObject({ discountCode: "SAVE10" });
   // Once the payment is being taken the code can't be changed here.
   expect(screen.queryByRole("textbox", { name: "Discount code" })).toBeNull();
+});
+
+it("opens the cards in turn, folds finished ones into a recap, and lets the shopper change them", async () => {
+  bag();
+  vi.stubGlobal("fetch", vi.fn());
+  const user = userEvent.setup();
+  render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
+  expect(await screen.findByRole("heading", { name: /step 2:s*delivery/i })).toBeVisible();
+  expect(screen.queryByLabelText(/^address$/i)).toBeNull();
+  await user.type(screen.getByLabelText(/^email/i), "riya@example.com");
+  await user.type(screen.getByLabelText(/^full name/i), "Riya Menon");
+  await user.type(screen.getByLabelText(/^phone/i), "+91 98888 11111");
+  await user.click(screen.getByRole("button", { name: /continue to delivery/i }));
+  expect(await screen.findByLabelText(/^address$/i)).toBeVisible();
+  expect(screen.getByText(/Riya Menon · riya@example.com/)).toBeVisible();
+  expect(screen.getByRole("heading", { name: /step 2:s*delivery/i })).toHaveFocus();
+  await user.click(screen.getByRole("button", { name: /change your details/i }));
+  expect(screen.getByLabelText(/^email/i)).toHaveValue("riya@example.com");
+});
+
+it("checks a field when the shopper leaves it, once something is typed", async () => {
+  bag();
+  const user = userEvent.setup();
+  render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
+  const email = await screen.findByLabelText(/^email/i);
+  await user.click(email);
+  await user.tab();
+  expect(email).not.toHaveAttribute("aria-invalid");
+  await user.type(email, "riya@");
+  await user.tab();
+  expect(email).toHaveAttribute("aria-invalid", "true");
+  await user.type(email, "example.com");
+  expect(email).not.toHaveAttribute("aria-invalid");
+});
+
+it("follows the merchant's checkout settings: phone hidden, no second address line, a note for the shop", async () => {
+  bag();
+  const fetcher = vi.fn()
+    .mockResolvedValueOnce(new Response(JSON.stringify({ attemptId: "attempt-1", orderId: "order-1", publicToken: "a-token" }), { status: 201 }))
+    .mockResolvedValueOnce(new Response(JSON.stringify(prepared), { status: 200 }));
+  vi.stubGlobal("fetch", fetcher);
+  const user = userEvent.setup();
+  render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" settings={{ checkout: { accent: "#b5452b", phone: "hidden", addressLine2: "hide", note: "show", deliveryNote: "Delivered in 3 days", returnsNote: "30-day returns" } }} /></ShopProvider>);
+  expect(await screen.findByText("Delivered in 3 days")).toBeVisible();
+  expect(document.querySelector("main.jelly-checkout")?.getAttribute("style")).toContain("--checkout-primary: #b5452b");
+  expect(screen.getByRole("link", { name: "30-day returns" })).toHaveAttribute("href", "/sweet-bakes/pages/returns");
+  await user.type(screen.getByLabelText(/^email/i), "riya@example.com");
+  await user.type(screen.getByLabelText(/^full name/i), "Riya Menon");
+  expect(screen.queryByLabelText(/^phone/i)).toBeNull();
+  await user.click(screen.getByRole("button", { name: /continue to delivery/i }));
+  expect(screen.queryByLabelText(/flat, suite/i)).toBeNull();
+  await user.type(await screen.findByLabelText(/^address$/i), "22 Palm Avenue");
+  await user.type(screen.getByLabelText(/^town or city/i), "Bengaluru");
+  await user.type(screen.getByLabelText(/^state/i), "Karnataka");
+  await user.type(screen.getByLabelText(/^pin code/i), "560001");
+  await user.type(screen.getByLabelText(/^note for the shop/i), "Leave with the neighbour");
+  await user.click(screen.getByRole("button", { name: /continue to payment/i }));
+  expect(await screen.findByText("Card payment form for 55000")).toBeVisible();
+  const body = JSON.parse(fetcher.mock.calls[0]![1]!.body);
+  expect(body.customerSnapshot).toMatchObject({ note: "Leave with the neighbour" });
+  expect(body.customerSnapshot).not.toHaveProperty("phone");
+});
+
+it("remembers details on this device only when asked, and fills them in next time", async () => {
+  bag();
+  vi.stubGlobal("fetch", vi.fn()
+    .mockResolvedValueOnce(new Response(JSON.stringify({ attemptId: "attempt-1", orderId: "order-1", publicToken: "a-token" }), { status: 201 }))
+    .mockResolvedValueOnce(new Response(JSON.stringify(prepared), { status: 200 })));
+  const user = userEvent.setup();
+  const { unmount } = render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
+  await user.click(await screen.findByRole("checkbox", { name: /remember my details/i }));
+  await fillDelivery(user);
+  await user.click(screen.getByRole("button", { name: /continue to payment/i }));
+  await screen.findByText("Card payment form for 55000");
+  expect(JSON.parse(localStorage.getItem("jelly-checkout-details:sweet-bakes")!)).toMatchObject({ email: "riya@example.com", city: "Bengaluru" });
+  unmount();
+  render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
+  expect(await screen.findByDisplayValue("riya@example.com")).toBeVisible();
+  await user.click(screen.getByRole("button", { name: /forget them/i }));
+  expect(localStorage.getItem("jelly-checkout-details:sweet-bakes")).toBeNull();
+  expect(screen.getByLabelText(/^email/i)).toHaveValue("");
 });

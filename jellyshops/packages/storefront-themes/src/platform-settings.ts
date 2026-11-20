@@ -58,6 +58,7 @@ const PLATFORM_SETTINGS: PlatformSetting[] = [
   ...style.badgeSchema,
   ...style.fieldSchema,
   ...style.cartSchema,
+  ...style.checkoutSchema,
   ...style.animationSchema,
   ...style.dialogSchema,
   ...style.iconSchema,

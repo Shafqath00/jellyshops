@@ -15,5 +15,5 @@ export default function CheckoutPage() {
   const store = repository.getStoreBySlug(storeSlug);
   if (!store) return null;
   const Checkout = shell.CheckoutPage;
-  return <Checkout store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} settings={settings}><CheckoutView storeSlug={storeSlug} /></Checkout>;
+  return <Checkout store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} settings={settings}><CheckoutView storeSlug={storeSlug} settings={settings} /></Checkout>;
 }

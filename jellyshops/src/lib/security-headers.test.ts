@@ -8,7 +8,7 @@ describe("security headers", () => {
     const csp = checkoutContentSecurityPolicy(production);
     expect(csp).toContain("script-src 'self' 'unsafe-inline' https://js.stripe.com https://*.js.stripe.com;");
     expect(csp).toContain("frame-src https://js.stripe.com https://*.js.stripe.com https://hooks.stripe.com;");
-    expect(csp).toContain("connect-src 'self' https://api.example.test https://abc.supabase.co https://api.stripe.com;");
+    expect(csp).toContain("connect-src 'self' https://api.example.test https://abc.supabase.co https://api.stripe.com https://fonts.googleapis.com;");
     expect(csp).toContain("object-src 'none'");
     expect(csp).toContain("frame-ancestors 'self'");
     expect(csp).not.toContain("unsafe-eval");

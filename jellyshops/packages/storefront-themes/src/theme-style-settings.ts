@@ -272,6 +272,15 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     select("cart.type", "When a shopper opens the bag", "Cart", "page", [["page", "Go to the bag page"], ["drawer", "Slide out the bag"], ["sheet", "Slide out the bag; from the bottom on phones"]], "The slide-out bag also opens after Add to cart."),
     range("cart.freeDeliveryFrom", "Free delivery from (0 for none)", "Cart", 0, 0, 500, 5),
   ];
+  // Checkout (features/checkout in the app): the same layout for every store, with a few choices for the merchant.
+  const checkoutSchema = [
+    color("checkout.accent", "Accent colour", "Checkout", ""),
+    select("checkout.phone", "Phone number", "Checkout", "required", [["required", "Ask for it (needed)"], ["optional", "Ask for it (optional)"], ["hidden", "Don't ask"]], "Couriers use it to arrange delivery. Only asked when the order has something to deliver."),
+    select("checkout.addressLine2", "Second address line", "Checkout", "show", [["show", "Show (flat, suite or building)"], ["hide", "Hide"]]),
+    select("checkout.note", "Note for the shop", "Checkout", "hide", [["hide", "Don't ask"], ["show", "Ask for an optional note"]], "Shown on the order page in your admin."),
+    { id: "checkout.deliveryNote", type: "text", label: "Delivery line", group: "Checkout", default: "", description: "A short line under the total, for example \"Delivered in 5 to 7 working days\". Empty: not shown." },
+    { id: "checkout.returnsNote", type: "text", label: "Returns line", group: "Checkout", default: "", description: "For example \"30-day returns\". Links to your Returns page. Empty: not shown." },
+  ];
   // Movement on the live store (StorefrontMotion in the app): sections fade up into view, and the page scrolls smoothly. Never for shoppers who ask their device for less motion.
   const animationSchema = [
     { id: "animations.reveal", type: "checkbox", label: "Reveal sections as shoppers scroll", group: "Animations", default: false, description: "Sections fade gently up into view, and product cards lift when pointed at. Off for shoppers whose device asks for less motion." },
@@ -295,6 +304,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
       advanced: { customCss: "" },
       languages: { defaultName: "English", extra: "" },
       cart: { type: "page", freeDeliveryFrom: 0 },
+      checkout: { accent: "", phone: "required", addressLine2: "show", note: "hide", deliveryNote: "", returnsNote: "" },
       animations: { reveal: false, smoothScroll: false },
       dialogs: { radius: theme, shadow: theme, overlay: theme },
       icons: { weight: theme, ends: theme },
@@ -322,6 +332,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     advancedSchema,
     languageSchema,
     cartSchema,
+    checkoutSchema,
   };
 }
 
@@ -364,6 +375,16 @@ export function usesProductCompare(settings: Record<string, unknown> | undefined
 /** Theme setting Product cards > "Quick view on cards". */
 export function usesQuickView(settings: Record<string, unknown> | undefined): boolean {
   return record(settings?.productCard).quickView === true;
+}
+
+export interface CheckoutSettings { accent: string; phone: "required" | "optional" | "hidden"; addressLine2: boolean; note: boolean; deliveryNote: string; returnsNote: string }
+/** Theme settings > Checkout, cleaned up (unknown values fall back to the defaults). */
+export function checkoutSettings(settings: Record<string, unknown> | undefined): CheckoutSettings {
+  const value = record(settings?.checkout);
+  const text = (raw: unknown) => (typeof raw === "string" ? raw.trim().slice(0, 120) : "");
+  const accent = typeof value.accent === "string" && /^#[0-9a-f]{6}$/i.test(value.accent) ? value.accent : "";
+  const phone = value.phone === "optional" || value.phone === "hidden" ? value.phone : "required";
+  return { accent, phone, addressLine2: value.addressLine2 !== "hide", note: value.note === "show", deliveryNote: text(value.deliveryNote), returnsNote: text(value.returnsNote) };
 }
 
 export function usesCartDrawer(settings: Record<string, unknown> | undefined): boolean {

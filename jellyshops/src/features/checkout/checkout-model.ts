@@ -22,11 +22,26 @@ export interface CheckoutDetails {
   city: string;
   region: string;
   postalCode: string;
+  /** Optional note for the shop (only when the merchant asks for one). */
+  note: string;
 }
 
 export type CheckoutField = keyof CheckoutDetails;
 
-export const EMPTY_DETAILS: CheckoutDetails = { email: "", name: "", phone: "", line1: "", line2: "", city: "", region: "", postalCode: "" };
+export const EMPTY_DETAILS: CheckoutDetails = { email: "", name: "", phone: "", line1: "", line2: "", city: "", region: "", postalCode: "", note: "" };
+
+/** What the merchant chose in theme settings > Checkout (see checkoutSettings in storefront-themes). */
+export interface CheckoutOptions { phone: "required" | "optional" | "hidden"; addressLine2: boolean; note: boolean }
+export const DEFAULT_CHECKOUT_OPTIONS: CheckoutOptions = { phone: "required", addressLine2: true, note: false };
+
+/** The fields each checkout card owns, in the order they appear. */
+export const CONTACT_FIELDS: CheckoutField[] = ["email", "name", "phone"];
+export const DELIVERY_FIELDS: CheckoutField[] = ["line1", "line2", "city", "region", "postalCode", "note"];
+
+/** Only the problems for the given fields, keeping their order. */
+export function problemsFor(problems: Partial<Record<CheckoutField, string>>, fields: CheckoutField[]): Partial<Record<CheckoutField, string>> {
+  return Object.fromEntries(fields.filter((field) => problems[field]).map((field) => [field, problems[field]])) as Partial<Record<CheckoutField, string>>;
+}
 
 export function checkoutLines(cart: Cart | undefined, products: Product[]): CheckoutLine[] {
   if (!cart) return [];
@@ -60,15 +75,17 @@ export function addressWording(country: string): AddressWording {
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 /** Field problems in the order the fields appear, so the first can take focus. */
-export function validateDetails(details: CheckoutDetails, delivery: boolean, country: string): Partial<Record<CheckoutField, string>> {
+export function validateDetails(details: CheckoutDetails, delivery: boolean, country: string, options: CheckoutOptions = DEFAULT_CHECKOUT_OPTIONS): Partial<Record<CheckoutField, string>> {
   const wording = addressWording(country);
   const problems: Partial<Record<CheckoutField, string>> = {};
   if (!details.email.trim()) problems.email = "Enter your email address.";
   else if (!EMAIL.test(details.email.trim())) problems.email = "Enter an email address like name@example.com.";
   if (!details.name.trim()) problems.name = "Enter your full name.";
   if (delivery) {
-    if (!details.phone.trim()) problems.phone = "Enter a phone number for the courier.";
-    else if (!/^[+\d][\d\s()-]{5,}$/.test(details.phone.trim())) problems.phone = "Enter a phone number using digits only.";
+    if (options.phone !== "hidden") {
+      if (!details.phone.trim()) { if (options.phone === "required") problems.phone = "Enter a phone number for the courier."; }
+      else if (!/^[+\d][\d\s()-]{5,}$/.test(details.phone.trim())) problems.phone = "Enter a phone number using digits only.";
+    }
     if (!details.line1.trim()) problems.line1 = "Enter the first line of your address.";
     if (!details.city.trim()) problems.city = "Enter a town or city.";
     if (wording.regionRequired && !details.region.trim()) problems.region = `Enter a ${wording.region.toLowerCase()}.`;
@@ -81,7 +98,7 @@ export function validateDetails(details: CheckoutDetails, delivery: boolean, cou
 export function attemptInput(cart: Cart, lines: CheckoutLine[], details: CheckoutDetails, delivery: boolean, store: Store, discountCode?: string): CommerceAttemptInput {
   const trimmed = Object.fromEntries(Object.entries(details).map(([key, value]) => [key, value.trim()])) as unknown as CheckoutDetails;
   const address = delivery ? { line1: trimmed.line1, ...(trimmed.line2 ? { line2: trimmed.line2 } : {}), city: trimmed.city, region: trimmed.region, postalCode: trimmed.postalCode, country: storeCountry(store) } : undefined;
-  const customer = { name: trimmed.name, email: trimmed.email, ...(trimmed.phone ? { phone: trimmed.phone } : {}), ...(address ? { address } : {}) };
+  const customer = { name: trimmed.name, email: trimmed.email, ...(trimmed.phone ? { phone: trimmed.phone } : {}), ...(address ? { address } : {}), ...(trimmed.note ? { note: trimmed.note.slice(0, 1000) } : {}) };
   const items = lines.map(({ item, product }) => ({
     variantId: item.variantId,
     quantity: item.quantity,

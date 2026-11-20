@@ -110,3 +110,35 @@ Payments go to each store owner's own Stripe account (Stripe Connect, direct cha
 - Buyer details are checked on the server: a valid email, name up to 120 characters, phone up to 40, and each snapshot up to 8 KB.
 - Checkout calls are rate limited per store and IP and per cart (`assertCheckoutAccess`).
 - CSRF: the public checkout API uses no cookies (the optional customer sign-in is a Bearer token) and takes JSON only from the allowed origins (`CORS_ORIGINS`), so another site can't submit it on a shopper's behalf.
+
+## Jellyshop checkout layout (2026-11-20)
+
+Concepts considered: (1) guided card stack in one column, (2) separate step pages with a progress bar,
+(3) cards beside a sticky side summary. Chosen: **1**. It is the same layout on phone and desktop, keeps the total in
+view in a bar at the top, and shows one short task at a time; option 3 stayed too close to the usual two-column page.
+
+- **Layout** (`features/checkout/components/checkout-layout.tsx`, `checkout-view.tsx`, section 12 of
+  `checkout.css`, scoped to `[data-flow="cards"]` so the order confirmation keeps its own layout): back link, title,
+  progress line (Details, Delivery, Payment; Delivery is skipped for digital-only bags), the order summary as a sticky
+  bar that opens in place (photos, count, total, discount code, totals), then numbered cards. A finished card folds into
+  a one-line recap with Change; cards still to come show their title only.
+- **Fields**: email, name, phone (merchant choice), address, town, county/state, postcode, optional note. Browser
+  autofill uses `shipping` address tokens; postcode is upper-cased; email/phone get the right keyboards. Fields are
+  checked when the shopper leaves them (only once something is typed) and all together on Continue.
+- **Returning shoppers**: "Remember my details on this device" (off by default) saves contact and address in the
+  shopper's own browser (`jelly-checkout-details:<store>`, `checkout-memory.ts`) after a successful Continue; next time
+  they are filled in with a "Forget them" link. Signed-in customers get their email filled in. Guest checkout always.
+- **Merchant choices**: theme settings > Checkout (`checkoutSettings()` in storefront-themes): accent colour (buttons,
+  progress, open card; text colour picked for contrast), phone required/optional/hidden, second address line,
+  note for the shop (saved as the order's customer note), delivery line and returns line shown under the summary bar.
+  The logo comes from theme settings > branding, else the store logo.
+- **Payment**: Stripe Payment Element with wallets on `auto` (Apple Pay / Google Pay show where the device, domain and
+  Stripe account allow; PayPal only if enabled on the connected Stripe account). The checkout CSP now allows
+  `fonts.googleapis.com` for the font stylesheet Stripe.js fetches for the card form.
+- **Fixed with it**: lines added from product cards (Quick view, quick add, Complete the set) now record their stock
+  choice (Size) like the product page (`variantSelections` in `storefront-cart-access.ts`); checkout refused them before
+  ("Please choose a Size").
+
+Not built: a separate express-pay row above the form (Stripe Express Checkout Element needs deferred PaymentIntents),
+address lookup by postcode (needs a provider and a decision on sending postcodes to it), a tax line (the server returns
+no tax amount yet), sign-in that returns to checkout.

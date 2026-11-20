@@ -55,7 +55,7 @@ function PaymentForm({ clientSecret, amountMinor, currency, returnPath, billing,
     <form className="jelly-checkout__payment-form" onSubmit={submit} aria-busy={pending}>
       {!ready && !error && <p className="jelly-checkout__hint" role="status">Loading the secure payment form…</p>}
       <PaymentElement
-        options={{ layout: "tabs", defaultValues: { billingDetails: billing } }}
+        options={{ layout: "tabs", wallets: { applePay: "auto", googlePay: "auto" }, defaultValues: { billingDetails: billing } }}
         onReady={() => setReady(true)}
         onLoadError={(event) => {
           // Stripe's own text here is technical (keys, account ids); keep it for developers only.
@@ -81,9 +81,8 @@ export function PaymentStep(props: PaymentStepProps) {
   const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim();
   const [appearance] = useState(() => stripeAppearance(typeof document === "undefined" ? null : document.querySelector(".jelly-checkout")));
   return (
-    <section className="jelly-checkout__panel" aria-labelledby="checkout-payment-title">
-      <h2 id="checkout-payment-title" className="jelly-checkout__panel-title" tabIndex={-1}>Payment</h2>
-      <p className="jelly-checkout__note"><LockKeyhole size={14} aria-hidden="true" /> Secure payment by Stripe. Your card details are never stored by this shop.</p>
+    <>
+      <p className="jelly-checkout__note"><LockKeyhole size={14} aria-hidden="true" /> Pay by card, or with Apple Pay, Google Pay or another wallet when your device and this shop support it. Card details go straight to Stripe and are never stored by this shop.</p>
       {publishableKey ? (
         <Elements stripe={stripeFor(publishableKey, props.connectedAccountId)} options={{ clientSecret: props.clientSecret, appearance, fonts: STRIPE_FONTS }}>
           <PaymentForm {...props} />
@@ -91,6 +90,6 @@ export function PaymentStep(props: PaymentStepProps) {
       ) : (
         <div className="jelly-checkout__alert" role="alert"><p>Card payments aren’t set up for this shop yet. Please contact the shop.</p></div>
       )}
-    </section>
+    </>
   );
 }
