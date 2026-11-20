@@ -144,6 +144,16 @@ export function ProductPurchaseSection({ context, section }: { context: Storefro
   const ruleMax = rule?.max;
   const max = stockMax === undefined ? ruleMax : ruleMax === undefined ? stockMax : Math.min(stockMax, ruleMax);
   const label = typeof section.settings.label === "string" && section.settings.label.trim() ? section.settings.label : word("product.addToCart");
+  // "Show the total on the button": Add to bag · £598, or "Choose a size" (enabled; it explains) until a required choice is made.
+  const withPrice = section.settings.showPrice === true;
+  const missing = withPrice && product.availability.state === "selection-required" ? product.product.options.find((option) => option.required && !option.values.some((value) => value.selected)) : undefined;
+  const total = withPrice && !product.pricing.from && product.pricing.priceMinor !== undefined && product.pricing.format ? product.pricing.format(product.pricing.priceMinor * Math.max(1, product.quantity)) : withPrice && !product.pricing.from ? product.pricing.price : undefined;
+  const buttonText = missing ? `Choose a ${missing.name.toLowerCase()}` : total ? `${label} · ${total}` : label;
+  const ask = () => {
+    if (!missing) return;
+    setError(`Choose a ${missing.name.toLowerCase()} first.`);
+    actions.current?.closest(".jelly-main-product-details, .jelly-product-page, main")?.querySelector<HTMLElement>(".jelly-product-options button:not([disabled])")?.focus();
+  };
   return <section className="jelly-section jelly-product-purchase"><StorefrontContainer>
     {product.personalisation && <PersonalisationFields personalisation={product.personalisation} />}
     {section.settings.showQuantity !== false && <div className="jelly-quantity">
@@ -156,7 +166,7 @@ export function ProductPurchaseSection({ context, section }: { context: Storefro
       {rule?.text && <p className="jelly-quantity-rule" id={ruleId}>{rule.text}</p>}
     </div>}
     <div className="jelly-purchase-actions" ref={actions}>
-      <button type="button" className="jelly-button" disabled={disabled} onClick={() => { void purchase(); }} {...elementProps({ type: "product-purchase", settings: section.settings }, "addToCart", context.mode === "editor")}>{busy ? word("product.pleaseWait") : label}</button>
+      <button type="button" className="jelly-button" data-state={missing ? "choose" : undefined} disabled={missing ? context.mode !== "published" : disabled} onClick={() => { if (missing) ask(); else void purchase(); }} {...elementProps({ type: "product-purchase", settings: section.settings }, "addToCart", context.mode === "editor")}>{busy ? word("product.pleaseWait") : buttonText}</button>
       {product.buyNow && <button type="button" className="jelly-button jelly-button--secondary" disabled={disabled} onClick={() => void purchase(true)}>{word("product.buyNow")}</button>}
       {product.wishlistControl}
     </div>

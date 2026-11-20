@@ -31,6 +31,7 @@ const deliveryEstimate: BlockDefinition = {
     deliveryMin: z.number().int().min(0).max(30).optional(),
     deliveryMax: z.number().int().min(0).max(30).optional(),
     weekendDispatch: z.boolean().optional(),
+    style: choice(["line", "clock"] as const),
   }).passthrough(),
   controls: [
     { type: "range", key: "cutoffHour", label: "Same-day dispatch cut-off", description: "Orders before this hour (UK time) count as today.", group: "content", min: 0, max: 23, step: 1, unit: ":00" },
@@ -38,6 +39,7 @@ const deliveryEstimate: BlockDefinition = {
     { type: "range", key: "deliveryMin", label: "Delivery takes at least (working days)", group: "content", min: 0, max: 30, step: 1 },
     { type: "range", key: "deliveryMax", label: "Delivery takes at most (working days)", group: "content", min: 0, max: 30, step: 1 },
     { type: "checkbox", key: "weekendDispatch", label: "Dispatch and deliver at weekends", group: "content" },
+    { type: "segmented", key: "style", label: "Look", description: "Countdown shows the hours and minutes left before the cut-off, updated every minute.", group: "style", options: options(["line", "One line"], ["clock", "Countdown"]) },
   ],
   defaultSettings: { cutoffHour: 14, dispatchDays: 0, deliveryMin: 2, deliveryMax: 4 },
 };

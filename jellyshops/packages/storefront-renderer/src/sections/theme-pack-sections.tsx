@@ -38,7 +38,7 @@ function copy(section: SectionNode, fallbackHeading: string, editor = false) {
     // Without a heading block the heading is the section's own "heading" setting (never its "text", which is the intro).
     heading: heading ? stringSetting(heading.settings, "text", stringSetting(section.settings, "heading", fallbackHeading)) : stringSetting(section.settings, "heading", fallbackHeading),
     /** The heading with its formatting (bold, italic, links, colour, size) when the heading block has it. */
-    headingContent: heading ? inlineSetting(heading.settings, "text", stringSetting(heading.settings, "text", stringSetting(section.settings, "heading", fallbackHeading))) : stringSetting(section.settings, "heading", fallbackHeading),
+    headingContent: heading ? inlineSetting(heading.settings, "text", stringSetting(heading.settings, "text", stringSetting(section.settings, "heading", fallbackHeading))) : inlineSetting(section.settings, "heading", stringSetting(section.settings, "heading", fallbackHeading)),
     body: stringSetting(body?.settings ?? section.settings, "text", stringSetting(section.settings, "text")),
     button: stringSetting(button?.settings ?? section.settings, "label"),
     href: stringSetting(button?.settings ?? section.settings, "href", "/shop"),
@@ -62,10 +62,10 @@ export function CategoryGridSection({ section, context }: { section: SectionNode
   const shopHref = context?.storeSlug ? `/${context.storeSlug}/shop` : "#shop";
   const cards = visibleBlocks(section, "collection-card").flatMap((block) => {
     const label = stringSetting(block.settings, "label");
-    return label ? [{ id: block.id, block, label, image: imageValue(block.settings), href: resolveStorefrontHref(block.settings.link, context?.storeSlug) ?? shopHref }] : [];
+    return label ? [{ id: block.id, block, label, chip: stringSetting(block.settings, "chip"), image: imageValue(block.settings), href: resolveStorefrontHref(block.settings.link, context?.storeSlug) ?? shopHref }] : [];
   });
   // Until the merchant adds collection cards, show neutral placeholders that link to the shop.
-  const items = cards.length ? cards : ["New arrivals", "Best sellers", "For the home", "Gifts"].map((label) => ({ id: label, block: undefined, label, image: undefined, href: shopHref }));
+  const items = cards.length ? cards : ["New arrivals", "Best sellers", "For the home", "Gifts"].map((label) => ({ id: label, block: undefined, label, chip: "", image: undefined, href: shopHref }));
   const editor = context?.mode === "editor";
   const columns = numberValue(section.settings, "columns", 4, 2, 4);
   // Grid, Bento (first collection large) or Carousel (scrolls sideways; focusable so keyboards can scroll it).
@@ -79,6 +79,7 @@ export function CategoryGridSection({ section, context }: { section: SectionNode
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {item.image ? <img src={item.image.url} {...mediaPhoto(item.image.url, "(min-width: 1024px) 25vw, 50vw")} alt="" loading="lazy" /> : null}
       </span>
+      {item.chip && <span className="jelly-category-chip">{item.chip}</span>}
       <strong {...(item.block ? blockElementProps(item.block, "label", editor) : {})}>{item.label}</strong>
     </a>)}</div>
     {layout === "carousel" && <SliderControls slider={slider} label="Collections" />}
@@ -90,7 +91,7 @@ export function TestimonialsSection({ section, mode = "published" }: { section: 
   const layout = section.settings.layout === "carousel" ? "carousel" : "grid";
   // Never invent reviews: with no testimonials the section only shows an editing hint outside the live store.
   if (!reviews.length && mode === "published") return null;
-  return <section className="jelly-section jelly-testimonials" {...sectionData(section)}><StorefrontContainer>
+  return <section className="jelly-section jelly-testimonials" {...sectionData(section, { "data-card-style": section.settings.cardStyle === "tinted" ? "tinted" : undefined })}><StorefrontContainer>
     <SectionIntro section={section} fallback="What customers say" editor={mode === "editor"} />
     {reviews.length
       ? <TestimonialCards reviews={reviews} mode={mode} layout={layout} />

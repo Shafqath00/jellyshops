@@ -1603,6 +1603,23 @@
           "group": "content"
         },
         {
+          "type": "segmented",
+          "key": "style",
+          "label": "With more than one message",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Take turns",
+              "value": "rotate"
+            },
+            {
+              "label": "Scroll sideways",
+              "value": "marquee"
+            }
+          ],
+          "description": "Scroll sideways shows every message in a slow moving line. It stops when pointed at, and stays still for shoppers whose device asks for less motion."
+        },
+        {
           "type": "range",
           "key": "rotateSeconds",
           "label": "Seconds per message",
@@ -1839,6 +1856,13 @@
             "type": "integer",
             "minimum": 3,
             "maximum": 12
+          },
+          "style": {
+            "type": "string",
+            "enum": [
+              "rotate",
+              "marquee"
+            ]
           },
           "el_message_color": {
             "anyOf": [
@@ -3100,6 +3124,12 @@
           "maxLength": 240
         },
         {
+          "type": "checkbox",
+          "key": "wordmark",
+          "label": "Show the store name very large at the foot",
+          "group": "style"
+        },
+        {
           "type": "text",
           "key": "paymentMethods",
           "label": "Payment methods",
@@ -4251,6 +4281,9 @@
           "paymentMethods": {
             "type": "string",
             "maxLength": 200
+          },
+          "wordmark": {
+            "type": "boolean"
           },
           "el_newsletterHeading_color": {
             "anyOf": [
@@ -5404,9 +5437,10 @@
       "allowedBlockTypes": [
         "heading",
         "text",
-        "button"
+        "button",
+        "floating-card"
       ],
-      "maxBlocks": 4,
+      "maxBlocks": 5,
       "defaultSettings": {
         "contentAlignment": "left"
       },
@@ -5615,6 +5649,14 @@
             "equals": "countdown"
           },
           "visibleWhenSaved": true
+        },
+        {
+          "type": "textarea",
+          "key": "promises",
+          "label": "Promises along the bottom",
+          "description": "Optional, one per line, up to four, for example: truck: Two-person delivery. Start a line with an icon name and a colon (truck, card, shield, star, clock, home, phone, return) to show that icon.",
+          "group": "content",
+          "maxLength": 240
         },
         {
           "type": "segmented",
@@ -6156,6 +6198,10 @@
           "countdownEndText": {
             "type": "string",
             "maxLength": 60
+          },
+          "promises": {
+            "type": "string",
+            "maxLength": 240
           },
           "height": {
             "type": "string",
@@ -6736,7 +6782,8 @@
       ],
       "controls": [
         {
-          "type": "text",
+          "type": "rich-text",
+          "inline": true,
           "key": "heading",
           "label": "Heading",
           "group": "content",
@@ -8382,6 +8429,7 @@
         "countdown",
         "store-locator",
         "notice",
+        "code-chip",
         "app"
       ],
       "blockSets": [
@@ -10303,7 +10351,8 @@
       ],
       "controls": [
         {
-          "type": "text",
+          "type": "rich-text",
+          "inline": true,
           "key": "heading",
           "label": "Heading",
           "group": "content",
@@ -10326,6 +10375,23 @@
             {
               "label": "Carousel",
               "value": "carousel"
+            }
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "cardStyle",
+          "label": "Card colours",
+          "description": "Tinted gives each card the next of your colour schemes 2, 3, 6 and 1.",
+          "group": "style",
+          "options": [
+            {
+              "label": "Plain",
+              "value": "plain"
+            },
+            {
+              "label": "Tinted",
+              "value": "tinted"
             }
           ]
         },
@@ -10577,6 +10643,13 @@
               "carousel"
             ]
           },
+          "cardStyle": {
+            "type": "string",
+            "enum": [
+              "plain",
+              "tinted"
+            ]
+          },
           "colorScheme": {
             "type": "string",
             "enum": [
@@ -10749,7 +10822,8 @@
       ],
       "controls": [
         {
-          "type": "text",
+          "type": "rich-text",
+          "inline": true,
           "key": "heading",
           "label": "Heading",
           "group": "content",
@@ -11694,7 +11768,8 @@
       ],
       "controls": [
         {
-          "type": "text",
+          "type": "rich-text",
+          "inline": true,
           "key": "heading",
           "label": "Heading",
           "group": "content",
@@ -12964,7 +13039,8 @@
       ],
       "controls": [
         {
-          "type": "text",
+          "type": "rich-text",
+          "inline": true,
           "key": "heading",
           "label": "Heading",
           "group": "content",
@@ -13384,7 +13460,8 @@
       ],
       "controls": [
         {
-          "type": "text",
+          "type": "rich-text",
+          "inline": true,
           "key": "heading",
           "label": "Heading",
           "group": "content",
@@ -14310,7 +14387,8 @@
       ],
       "controls": [
         {
-          "type": "text",
+          "type": "rich-text",
+          "inline": true,
           "key": "heading",
           "label": "Heading",
           "group": "content",
@@ -14829,7 +14907,8 @@
       ],
       "controls": [
         {
-          "type": "text",
+          "type": "rich-text",
+          "inline": true,
           "key": "heading",
           "label": "Heading",
           "group": "content",
@@ -15629,7 +15708,8 @@
           ]
         },
         {
-          "type": "text",
+          "type": "rich-text",
+          "inline": true,
           "key": "heading",
           "label": "Heading",
           "group": "content",
@@ -16314,7 +16394,8 @@
       ],
       "controls": [
         {
-          "type": "text",
+          "type": "rich-text",
+          "inline": true,
           "key": "heading",
           "label": "Heading",
           "group": "content",
@@ -17267,7 +17348,8 @@
       ],
       "controls": [
         {
-          "type": "text",
+          "type": "rich-text",
+          "inline": true,
           "key": "heading",
           "label": "Heading",
           "group": "content",
@@ -19572,6 +19654,13 @@
           "group": "content"
         },
         {
+          "type": "checkbox",
+          "key": "showPrice",
+          "label": "Show the total on the button",
+          "description": "For example: Add to bag · £598. Until a required choice is made, the button asks for it (Choose a size).",
+          "group": "content"
+        },
+        {
           "group": "style",
           "heading": "Style",
           "element": "addToCart",
@@ -19627,6 +19716,9 @@
             "maxLength": 80
           },
           "stickyBar": {
+            "type": "boolean"
+          },
+          "showPrice": {
             "type": "boolean"
           },
           "el_addToCart_background": {
@@ -20904,6 +20996,14 @@
           "group": "content"
         },
         {
+          "type": "textarea",
+          "key": "quickLinks",
+          "label": "Quick links",
+          "description": "Optional, one per line as Text | link, for example: Ottoman beds | /collections/beds?f.type=Ottoman%20bed. Shown as small buttons under the title.",
+          "group": "content",
+          "maxLength": 600
+        },
+        {
           "group": "style",
           "heading": "Style",
           "element": "title",
@@ -21167,6 +21267,10 @@
           },
           "showBreadcrumb": {
             "type": "boolean"
+          },
+          "quickLinks": {
+            "type": "string",
+            "maxLength": 600
           },
           "el_title_color": {
             "anyOf": [
@@ -22617,6 +22721,7 @@
         "countdown",
         "store-locator",
         "notice",
+        "code-chip",
         "app"
       ],
       "blockSets": [
@@ -22847,6 +22952,812 @@
       }
     },
     {
+      "type": "offer-panel",
+      "category": "content",
+      "supportedPages": [
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
+      ],
+      "allowedRegions": [
+        "template"
+      ],
+      "groups": [
+        "template"
+      ],
+      "allowedBlockTypes": [],
+      "defaultSettings": {
+        "eyebrow": "Limited time",
+        "bigText": "20% off",
+        "heading": "Every bed, every size",
+        "text": "Add the code at checkout. Ends Sunday at midnight.",
+        "code": "SLEEP20",
+        "codeLabel": "Use code",
+        "buttonLabel": "Shop the offer",
+        "buttonLink": "/shop",
+        "imagePosition": "right",
+        "styleScheme": "scheme3"
+      },
+      "defaultBlocks": [],
+      "responsiveFields": [],
+      "presets": [
+        {
+          "id": "offer-panel",
+          "label": "Offer panel",
+          "category": "marketing",
+          "description": "A bold offer with a big number, a code shoppers can copy and an optional countdown."
+        }
+      ],
+      "controls": [
+        {
+          "type": "text",
+          "key": "eyebrow",
+          "label": "Small text above the heading",
+          "group": "content",
+          "maxLength": 80
+        },
+        {
+          "type": "text",
+          "key": "bigText",
+          "label": "Big text",
+          "description": "Short and bold, for example: 30% off.",
+          "group": "content",
+          "maxLength": 24
+        },
+        {
+          "type": "rich-text",
+          "inline": true,
+          "key": "heading",
+          "label": "Heading",
+          "description": "Make a word italic to make it stand out.",
+          "group": "content",
+          "maxLength": 120,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "rich-text",
+          "key": "text",
+          "label": "Text",
+          "group": "content",
+          "maxLength": 400,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "text",
+          "key": "code",
+          "label": "Discount code",
+          "description": "Optional. Shoppers copy it with one tap.",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
+          "type": "text",
+          "key": "codeLabel",
+          "label": "Text before the code",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
+          "type": "text",
+          "key": "countdownTo",
+          "label": "Count down to",
+          "description": "Optional. Year-month-day and time in UK time, for example 2026-11-30 23:59.",
+          "group": "content",
+          "maxLength": 16
+        },
+        {
+          "type": "text",
+          "key": "countdownEndText",
+          "label": "When the countdown ends",
+          "group": "content",
+          "maxLength": 80
+        },
+        {
+          "type": "image",
+          "key": "image",
+          "label": "Photo",
+          "group": "content"
+        },
+        {
+          "type": "text",
+          "key": "imageLabel",
+          "label": "Label on the photo",
+          "description": "Optional, for example: Fabric: Cobalt velvet.",
+          "group": "content",
+          "maxLength": 60
+        },
+        {
+          "type": "text",
+          "key": "buttonLabel",
+          "label": "Button text",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
+          "type": "link",
+          "key": "buttonLink",
+          "label": "Button link",
+          "group": "content",
+          "dynamicTypes": [
+            "url"
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "imagePosition",
+          "label": "Photo position",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "eyebrow": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "heading": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 400
+          },
+          "bigText": {
+            "type": "string",
+            "maxLength": 24
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "codeLabel": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "countdownTo": {
+            "type": "string",
+            "pattern": "^$|^\\d{4}-\\d{2}-\\d{2}( \\d{2}:\\d{2})?$"
+          },
+          "countdownEndText": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "image": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
+          },
+          "imageLabel": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "imagePosition": {
+            "type": "string",
+            "enum": [
+              "left",
+              "right"
+            ]
+          },
+          "buttonLabel": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "buttonLink": {
+            "type": "string",
+            "maxLength": 500
+          }
+        }
+      }
+    },
+    {
+      "type": "size-picker",
+      "category": "content",
+      "supportedPages": [
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
+      ],
+      "allowedRegions": [
+        "template"
+      ],
+      "groups": [
+        "template"
+      ],
+      "allowedBlockTypes": [
+        "size-option"
+      ],
+      "minBlocks": 1,
+      "maxBlocks": 8,
+      "defaultSettings": {
+        "eyebrow": "Shop by size",
+        "heading": "Find your fit",
+        "text": "Every size drawn to scale. Tap one to see the beds that come in it.",
+        "unit": "cm",
+        "contentAlignment": "left"
+      },
+      "defaultBlocks": [
+        {
+          "type": "size-option",
+          "settings": {
+            "label": "Single",
+            "width": 90,
+            "length": 190,
+            "link": "/shop"
+          }
+        },
+        {
+          "type": "size-option",
+          "settings": {
+            "label": "Small double",
+            "width": 120,
+            "length": 190,
+            "link": "/shop"
+          }
+        },
+        {
+          "type": "size-option",
+          "settings": {
+            "label": "Double",
+            "width": 135,
+            "length": 190,
+            "note": "Most popular",
+            "link": "/shop"
+          }
+        },
+        {
+          "type": "size-option",
+          "settings": {
+            "label": "King",
+            "width": 150,
+            "length": 200,
+            "link": "/shop"
+          }
+        },
+        {
+          "type": "size-option",
+          "settings": {
+            "label": "Super king",
+            "width": 180,
+            "length": 200,
+            "link": "/shop"
+          }
+        }
+      ],
+      "responsiveFields": [],
+      "presets": [
+        {
+          "id": "size-picker",
+          "label": "Shop by size",
+          "category": "products",
+          "description": "Sizes drawn to scale, each linking to the products in that size."
+        }
+      ],
+      "controls": [
+        {
+          "type": "text",
+          "key": "eyebrow",
+          "label": "Small text above the heading",
+          "group": "content",
+          "maxLength": 80
+        },
+        {
+          "type": "rich-text",
+          "inline": true,
+          "key": "heading",
+          "label": "Heading",
+          "description": "Make a word italic to make it stand out.",
+          "group": "content",
+          "maxLength": 120,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "rich-text",
+          "key": "text",
+          "label": "Text",
+          "group": "content",
+          "maxLength": 400,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "unit",
+          "label": "Show sizes in",
+          "group": "content",
+          "options": [
+            {
+              "label": "Centimetres",
+              "value": "cm"
+            },
+            {
+              "label": "Feet and inches",
+              "value": "ft"
+            }
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "contentAlignment",
+          "label": "Heading alignment",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Center",
+              "value": "center"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "eyebrow": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "heading": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 400
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "cm",
+              "ft"
+            ]
+          },
+          "contentAlignment": {
+            "type": "string",
+            "enum": [
+              "left",
+              "center"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "steps",
+      "category": "content",
+      "supportedPages": [
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
+      ],
+      "allowedRegions": [
+        "template"
+      ],
+      "groups": [
+        "template"
+      ],
+      "allowedBlockTypes": [
+        "step"
+      ],
+      "minBlocks": 1,
+      "maxBlocks": 6,
+      "defaultSettings": {
+        "eyebrow": "How it works",
+        "heading": "Order today, sleep on it this week",
+        "showDates": true,
+        "cutoffHour": 14,
+        "contentAlignment": "left"
+      },
+      "defaultBlocks": [
+        {
+          "type": "step",
+          "settings": {
+            "title": "Order today",
+            "text": "Pick your bed, size and extras. Pay now or spread the cost.",
+            "icon": "card",
+            "days": 0
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "title": "We call you",
+            "text": "Our team calls to book a two-hour delivery slot.",
+            "icon": "phone",
+            "days": 1
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "title": "In your room",
+            "text": "Two people carry it to the room you choose and take the packaging away.",
+            "icon": "truck",
+            "days": 4
+          }
+        }
+      ],
+      "responsiveFields": [],
+      "presets": [
+        {
+          "id": "steps",
+          "label": "Steps",
+          "category": "content",
+          "description": "Numbered steps, optionally with the real date of each one."
+        }
+      ],
+      "controls": [
+        {
+          "type": "text",
+          "key": "eyebrow",
+          "label": "Small text above the heading",
+          "group": "content",
+          "maxLength": 80
+        },
+        {
+          "type": "rich-text",
+          "inline": true,
+          "key": "heading",
+          "label": "Heading",
+          "description": "Make a word italic to make it stand out.",
+          "group": "content",
+          "maxLength": 120,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "rich-text",
+          "key": "text",
+          "label": "Text",
+          "group": "content",
+          "maxLength": 400,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "checkbox",
+          "key": "showDates",
+          "label": "Show the date of each step",
+          "description": "Worked out from today in UK time, skipping weekends unless you tick the box below.",
+          "group": "content"
+        },
+        {
+          "type": "range",
+          "key": "cutoffHour",
+          "label": "Orders after this hour count as tomorrow",
+          "group": "content",
+          "min": 0,
+          "max": 23,
+          "step": 1,
+          "unit": ":00",
+          "visibleIf": {
+            "key": "showDates",
+            "equals": true
+          }
+        },
+        {
+          "type": "checkbox",
+          "key": "weekends",
+          "label": "Count weekends",
+          "group": "content",
+          "visibleIf": {
+            "key": "showDates",
+            "equals": true
+          }
+        },
+        {
+          "type": "segmented",
+          "key": "contentAlignment",
+          "label": "Heading alignment",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Center",
+              "value": "center"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "eyebrow": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "heading": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 400
+          },
+          "showDates": {
+            "type": "boolean"
+          },
+          "weekends": {
+            "type": "boolean"
+          },
+          "cutoffHour": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 23
+          },
+          "contentAlignment": {
+            "type": "string",
+            "enum": [
+              "left",
+              "center"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "swatch-showcase",
+      "category": "content",
+      "supportedPages": [
+        "home",
+        "product",
+        "collection",
+        "cart",
+        "search",
+        "page",
+        "blog",
+        "article",
+        "not-found"
+      ],
+      "allowedRegions": [
+        "template"
+      ],
+      "groups": [
+        "template"
+      ],
+      "allowedBlockTypes": [
+        "swatch"
+      ],
+      "minBlocks": 1,
+      "maxBlocks": 8,
+      "defaultSettings": {
+        "eyebrow": "Fabrics",
+        "heading": "Feel the difference",
+        "text": "Every frame comes in a choice of hard-wearing fabrics. Pick one to see it in a room.",
+        "imagePosition": "left",
+        "buttonLabel": "Order free swatches",
+        "buttonLink": "/contact"
+      },
+      "defaultBlocks": [
+        {
+          "type": "swatch",
+          "settings": {
+            "name": "Velvet",
+            "color": "#2348E0",
+            "note": "Soft sheen"
+          }
+        },
+        {
+          "type": "swatch",
+          "settings": {
+            "name": "Boucle",
+            "color": "#F3E6C9",
+            "note": "Cosy loops"
+          }
+        },
+        {
+          "type": "swatch",
+          "settings": {
+            "name": "Linen",
+            "color": "#FF7A45",
+            "note": "Washed and relaxed"
+          }
+        },
+        {
+          "type": "swatch",
+          "settings": {
+            "name": "Weave",
+            "color": "#CFEFDF",
+            "note": "Hard-wearing"
+          }
+        }
+      ],
+      "responsiveFields": [],
+      "presets": [
+        {
+          "id": "swatch-showcase",
+          "label": "Fabric swatches",
+          "category": "content",
+          "description": "Fabrics or colours as swatches; picking one shows it in a room."
+        }
+      ],
+      "controls": [
+        {
+          "type": "text",
+          "key": "eyebrow",
+          "label": "Small text above the heading",
+          "group": "content",
+          "maxLength": 80
+        },
+        {
+          "type": "rich-text",
+          "inline": true,
+          "key": "heading",
+          "label": "Heading",
+          "description": "Make a word italic to make it stand out.",
+          "group": "content",
+          "maxLength": 120,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "rich-text",
+          "key": "text",
+          "label": "Text",
+          "group": "content",
+          "maxLength": 400,
+          "dynamicTypes": [
+            "string",
+            "text"
+          ]
+        },
+        {
+          "type": "image",
+          "key": "image",
+          "label": "Photo",
+          "description": "Shown until a shopper picks a swatch with a room photo.",
+          "group": "content"
+        },
+        {
+          "type": "text",
+          "key": "buttonLabel",
+          "label": "Button text",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
+          "type": "link",
+          "key": "buttonLink",
+          "label": "Button link",
+          "group": "content",
+          "dynamicTypes": [
+            "url"
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "imagePosition",
+          "label": "Photo position",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Left",
+              "value": "left"
+            },
+            {
+              "label": "Right",
+              "value": "right"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "eyebrow": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "heading": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 400
+          },
+          "image": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
+          },
+          "imagePosition": {
+            "type": "string",
+            "enum": [
+              "left",
+              "right"
+            ]
+          },
+          "buttonLabel": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "buttonLink": {
+            "type": "string",
+            "maxLength": 500
+          }
+        }
+      }
+    },
+    {
       "type": "main-product",
       "category": "commerce",
       "supportedPages": [
@@ -22907,6 +23818,7 @@
         "countdown",
         "store-locator",
         "notice",
+        "code-chip",
         "app"
       ],
       "blockSets": [
@@ -23956,6 +24868,14 @@
           "maxLength": 80
         },
         {
+          "type": "text",
+          "key": "chip",
+          "label": "Small label on the photo",
+          "description": "Optional, for example: From £299.",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
           "type": "image",
           "key": "image",
           "label": "Image",
@@ -24219,6 +25139,10 @@
           "link": {
             "type": "string",
             "maxLength": 500
+          },
+          "chip": {
+            "type": "string",
+            "maxLength": 40
           },
           "el_label_color": {
             "anyOf": [
@@ -28441,6 +29365,7 @@
         "countdown",
         "store-locator",
         "notice",
+        "code-chip",
         "app"
       ],
       "maxBlocks": 8,
@@ -29430,6 +30355,7 @@
         "countdown",
         "store-locator",
         "notice",
+        "code-chip",
         "app"
       ],
       "maxBlocks": 12,
@@ -33532,6 +34458,23 @@
           "key": "weekendDispatch",
           "label": "Dispatch and deliver at weekends",
           "group": "content"
+        },
+        {
+          "type": "segmented",
+          "key": "style",
+          "label": "Look",
+          "description": "Countdown shows the hours and minutes left before the cut-off, updated every minute.",
+          "group": "style",
+          "options": [
+            {
+              "label": "One line",
+              "value": "line"
+            },
+            {
+              "label": "Countdown",
+              "value": "clock"
+            }
+          ]
         }
       ],
       "settingsSchema": {
@@ -33559,6 +34502,21 @@
           },
           "weekendDispatch": {
             "type": "boolean"
+          },
+          "style": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "line",
+                  "clock"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
           },
           "column": {
             "anyOf": [
@@ -34043,6 +35001,961 @@
       }
     },
     {
+      "type": "code-chip",
+      "sets": [
+        "@content"
+      ],
+      "defaultSettings": {
+        "code": "WELCOME10",
+        "label": "Use code"
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "code",
+          "label": "Discount code",
+          "description": "Shoppers copy it with one tap and type it at checkout.",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
+          "type": "text",
+          "key": "label",
+          "label": "Text before the code",
+          "group": "content",
+          "maxLength": 40
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 40
+          }
+        },
+        "required": [
+          "code"
+        ]
+      }
+    },
+    {
+      "type": "floating-card",
+      "defaultSettings": {
+        "eyebrow": "Shop the look",
+        "position": "bottom-right"
+      },
+      "controls": [
+        {
+          "type": "product",
+          "key": "productId",
+          "label": "Product",
+          "description": "Shows its photo, name, price and stars. Leave empty and fill in the fields below for a note of your own, or for your first product.",
+          "group": "content"
+        },
+        {
+          "type": "text",
+          "key": "eyebrow",
+          "label": "Small text on top",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
+          "type": "text",
+          "key": "title",
+          "label": "Title",
+          "description": "Used when no product is chosen.",
+          "group": "content",
+          "maxLength": 80
+        },
+        {
+          "type": "text",
+          "key": "text",
+          "label": "Text",
+          "group": "content",
+          "maxLength": 120
+        },
+        {
+          "type": "image",
+          "key": "image",
+          "label": "Photo",
+          "group": "content"
+        },
+        {
+          "type": "link",
+          "key": "link",
+          "label": "Link",
+          "group": "content",
+          "dynamicTypes": [
+            "url"
+          ]
+        },
+        {
+          "type": "segmented",
+          "key": "position",
+          "label": "Position",
+          "group": "layout",
+          "options": [
+            {
+              "label": "Bottom right",
+              "value": "bottom-right"
+            },
+            {
+              "label": "Bottom left",
+              "value": "bottom-left"
+            },
+            {
+              "label": "Top right",
+              "value": "top-right"
+            }
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "eyebrow": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "image": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
+          },
+          "link": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "position": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "bottom-right",
+                  "bottom-left",
+                  "top-right"
+                ]
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          }
+        },
+        "additionalProperties": {},
+        "$defs": {
+          "__schema0": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "resource_field"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "field"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metafield"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "namespace",
+                  "key"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metaobject_field"
+                  },
+                  "source": {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source",
+                  "field"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "size-option",
+      "defaultSettings": {
+        "label": "Double",
+        "width": 135,
+        "length": 190
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "label",
+          "label": "Size name",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
+          "type": "number",
+          "key": "width",
+          "label": "Width (cm)",
+          "group": "content",
+          "min": 40,
+          "max": 300,
+          "step": 1
+        },
+        {
+          "type": "number",
+          "key": "length",
+          "label": "Length (cm)",
+          "group": "content",
+          "min": 100,
+          "max": 300,
+          "step": 1
+        },
+        {
+          "type": "text",
+          "key": "note",
+          "label": "Note",
+          "description": "Optional, for example: Most popular.",
+          "group": "content",
+          "maxLength": 60
+        },
+        {
+          "type": "link",
+          "key": "link",
+          "label": "Link",
+          "description": "For example your beds collection filtered by this size.",
+          "group": "content",
+          "dynamicTypes": [
+            "url"
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "width": {
+            "type": "number",
+            "minimum": 40,
+            "maximum": 300
+          },
+          "length": {
+            "type": "number",
+            "minimum": 100,
+            "maximum": 300
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 60
+          },
+          "link": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "label",
+          "width"
+        ],
+        "additionalProperties": {},
+        "$defs": {
+          "__schema0": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "resource_field"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "field"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metafield"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "namespace",
+                  "key"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metaobject_field"
+                  },
+                  "source": {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source",
+                  "field"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "step",
+      "defaultSettings": {
+        "title": "Order today",
+        "text": "Choose your size and add any extras.",
+        "icon": "card",
+        "days": 0
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "title",
+          "label": "Title",
+          "group": "content",
+          "maxLength": 80
+        },
+        {
+          "type": "textarea",
+          "key": "text",
+          "label": "Text",
+          "group": "content",
+          "maxLength": 240
+        },
+        {
+          "type": "select",
+          "key": "icon",
+          "label": "Icon",
+          "group": "content",
+          "options": [
+            {
+              "label": "Tick",
+              "value": "check"
+            },
+            {
+              "label": "Delivery van",
+              "value": "truck"
+            },
+            {
+              "label": "Shield (warranty)",
+              "value": "shield"
+            },
+            {
+              "label": "Calendar",
+              "value": "calendar"
+            },
+            {
+              "label": "Moon (sleep trial)",
+              "value": "moon"
+            },
+            {
+              "label": "House",
+              "value": "home"
+            },
+            {
+              "label": "Payment card",
+              "value": "card"
+            },
+            {
+              "label": "Percent (finance)",
+              "value": "percent"
+            },
+            {
+              "label": "Star",
+              "value": "star"
+            },
+            {
+              "label": "Phone",
+              "value": "phone"
+            },
+            {
+              "label": "Leaf",
+              "value": "leaf"
+            },
+            {
+              "label": "Gift",
+              "value": "gift"
+            },
+            {
+              "label": "Return arrow",
+              "value": "return"
+            },
+            {
+              "label": "Palette (swatches)",
+              "value": "palette"
+            },
+            {
+              "label": "Price tag",
+              "value": "tag"
+            },
+            {
+              "label": "Clock",
+              "value": "clock"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "key": "days",
+          "label": "Working days from today",
+          "description": "Used when the section shows dates. 0 is today.",
+          "group": "content",
+          "min": 0,
+          "max": 30,
+          "step": 1
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 240
+          },
+          "icon": {
+            "type": "string",
+            "enum": [
+              "check",
+              "truck",
+              "shield",
+              "calendar",
+              "moon",
+              "home",
+              "card",
+              "percent",
+              "star",
+              "phone",
+              "leaf",
+              "gift",
+              "return",
+              "palette",
+              "tag",
+              "clock"
+            ]
+          },
+          "days": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": {}
+      }
+    },
+    {
+      "type": "swatch",
+      "defaultSettings": {
+        "name": "Velvet",
+        "color": "#2348E0"
+      },
+      "controls": [
+        {
+          "type": "text",
+          "key": "name",
+          "label": "Name",
+          "group": "content",
+          "maxLength": 40
+        },
+        {
+          "type": "color",
+          "key": "color",
+          "label": "Colour",
+          "description": "Used when there is no close-up photo.",
+          "group": "content",
+          "allowAlpha": false
+        },
+        {
+          "type": "image",
+          "key": "image",
+          "label": "Close-up of the fabric",
+          "group": "content"
+        },
+        {
+          "type": "image",
+          "key": "photo",
+          "label": "Room photo",
+          "description": "Optional. Shown large when a shopper picks this swatch.",
+          "group": "content"
+        },
+        {
+          "type": "text",
+          "key": "note",
+          "label": "Note",
+          "description": "Optional, for example: Soft sheen, easy to clean.",
+          "group": "content",
+          "maxLength": 80
+        },
+        {
+          "type": "link",
+          "key": "link",
+          "label": "Link",
+          "group": "content",
+          "dynamicTypes": [
+            "url"
+          ]
+        }
+      ],
+      "settingsSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "color": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?:#[0-9a-fA-F]{6}|palette:(?:background|surface|text|secondary|primary|accent|scheme(?:[1-9]|1[0-6])-(?:bg|text|button|button-text|secondary)))$"
+              },
+              {
+                "type": "string",
+                "const": ""
+              }
+            ]
+          },
+          "image": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
+          },
+          "photo": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "alt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ],
+            "additionalProperties": {}
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "link": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "static"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "value"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "const": "dynamic"
+                      },
+                      "binding": {
+                        "$ref": "#/$defs/__schema0"
+                      },
+                      "fallback": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "binding"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": {},
+        "$defs": {
+          "__schema0": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "resource_field"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "field"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metafield"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "enum": [
+                      "store",
+                      "product",
+                      "variant",
+                      "collection",
+                      "page",
+                      "blog",
+                      "article"
+                    ]
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  },
+                  "key": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "pattern": "^[a-z][a-z0-9_]*$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "resource",
+                  "namespace",
+                  "key"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "const": "metaobject_field"
+                  },
+                  "source": {
+                    "$ref": "#/$defs/__schema0"
+                  },
+                  "field": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "pattern": "^[A-Za-z0-9_-]+$"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "source",
+                  "field"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
       "type": "social-link",
       "defaultSettings": {
         "label": "Instagram",
@@ -34251,7 +36164,8 @@
           ]
         },
         {
-          "type": "text",
+          "type": "rich-text",
+          "inline": true,
           "key": "heading",
           "label": "Heading",
           "group": "content",
@@ -34780,6 +36694,13 @@
           "key": "stickyBar",
           "label": "Keep an add to basket bar on screen while scrolling",
           "group": "content"
+        },
+        {
+          "type": "checkbox",
+          "key": "showPrice",
+          "label": "Show the total on the button",
+          "description": "For example: Add to bag · £598. Until a required choice is made, the button asks for it (Choose a size).",
+          "group": "content"
         }
       ],
       "settingsSchema": {
@@ -34795,6 +36716,9 @@
             "maxLength": 80
           },
           "stickyBar": {
+            "type": "boolean"
+          },
+          "showPrice": {
             "type": "boolean"
           },
           "column": {

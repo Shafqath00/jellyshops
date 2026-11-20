@@ -11,6 +11,8 @@ import { countdownTarget, HeroCountdown } from "./hero-countdown";
 import { blockLabel } from "@jelly/storefront-registry/runtime";
 import { choice, editorBlockData, imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
 import { mediaPhoto } from "../media-photo";
+import type { CommerceDataProvider } from "../types";
+import { FloatingCard, HeroPromises } from "./showroom";
 
 /** Hero layouts: split (R2), overlay, text, spotlight (R4), statement (R9) and countdown (R6). */
 export const HERO_LAYOUTS = ["split", "overlay", "text", "spotlight", "statement", "countdown"] as const;
@@ -20,7 +22,7 @@ function setting(block: SectionNode["blocks"][number], key: string): string | un
   return typeof value === "string" ? value : undefined;
 }
 
-export function HeroSection({ section, editor = false, context, selectedBlockId }: { section: SectionNode; editor?: boolean; context: StorefrontRuntimeContext; selectedBlockId?: string }) {
+export function HeroSection({ section, editor = false, context, selectedBlockId, commerce }: { section: SectionNode; editor?: boolean; context: StorefrontRuntimeContext; selectedBlockId?: string; commerce?: CommerceDataProvider }) {
   const settings = section.settings;
   const image = imageValue(settings);
   const focalPoint = image?.focalPoint && Number.isFinite(image.focalPoint.x) && Number.isFinite(image.focalPoint.y) ? image.focalPoint : { x: 50, y: 50 };
@@ -47,6 +49,8 @@ export function HeroSection({ section, editor = false, context, selectedBlockId 
     return label ? [{ block, label, href: resolveStorefrontHref(setting(block, "href") ?? "#", context.storeSlug) }] : [];
   });
   const eyebrow = stringValue(settings, "eyebrow");
+  const floating = commerce ? blocks.filter((block) => block.type === "floating-card") : [];
+  const floatingCards = floating.map((block) => <FloatingCard key={block.id} block={block} commerce={commerce!} context={context} editor={editor} selectedBlockId={selectedBlockId} />);
   const summary = stringValue(settings, "summary");
   return <section
     className={`jelly-section jelly-hero${image ? " has-image" : ""}`}
@@ -56,7 +60,7 @@ export function HeroSection({ section, editor = false, context, selectedBlockId 
     <StorefrontContainer className={settings.fullBleed === true ? "is-full-bleed" : undefined}>
       <div className="jelly-hero-content">
         {eyebrow && <p className="jelly-eyebrow" {...elementProps(section, "eyebrow", editor)}>{eyebrow}</p>}
-        {blocks.filter((block) => block.type !== "button").map((block) => {
+        {blocks.filter((block) => block.type === "heading" || block.type === "text").map((block) => {
           const text = setting(block, "text");
           if (!text) return null;
           return block.type === "heading" ? <h1 key={block.id} {...blockStyle(block)} {...editorProps(block)}>{inlineSetting(block.settings, "text", text)}</h1> : <p key={block.id} {...blockStyle(block)} {...editorProps(block)}>{text}</p>;
@@ -73,8 +77,11 @@ export function HeroSection({ section, editor = false, context, selectedBlockId 
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={image.url} {...mediaPhoto(image.url, "100vw")} alt={image.alt ?? ""} style={{ objectPosition: `${focalPoint.x}% ${focalPoint.y}%`, objectFit: fit }} fetchPriority="high" />
         {overlay > 0 && <span className="jelly-hero-overlay" aria-hidden="true" style={{ background: `rgba(0, 0, 0, ${overlay})` }} />}
+        {floatingCards}
         {callouts.length > 0 && <ul className="jelly-hero-callouts" {...elementProps(section, "callouts", editor)}>{callouts.map((callout, index) => <li key={`${index}-${callout}`} data-side={index % 2 === 0 ? "start" : "end"}>{callout}</li>)}</ul>}
       </div>}
+      {!(image && layout !== "text") && floatingCards}
     </StorefrontContainer>
+    <HeroPromises value={settings.promises} />
   </section>;
 }

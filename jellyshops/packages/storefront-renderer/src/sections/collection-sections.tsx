@@ -74,12 +74,23 @@ export function CollectionHeaderSection({ context, section }: { context: Storefr
         {section.settings.showDescription === true && (["2", "3", "4"].includes(String(section.settings.descriptionLines))
           ? <ClampedText lines={Number(section.settings.descriptionLines)}><CollectionDescriptionText collection={collection} /></ClampedText>
           : <CollectionDescriptionText collection={collection} />)}
+        {quickLinks(section.settings.quickLinks, context.storeSlug).length > 0 && <ul className="jelly-quick-links" role="list">{quickLinks(section.settings.quickLinks, context.storeSlug).map((link) => <li key={link.label}><a href={link.href}>{link.label}</a></li>)}</ul>}
         <p className="jelly-collection-count">{presentation.totalProducts === 1 ? "1 product" : `${presentation.totalProducts} products`}</p>
       </div>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {showImage && layout === "simple" && <img className="jelly-collection-header-image" src={collection.imageUrl} {...mediaPhoto(collection.imageUrl, "100vw")} fetchPriority="high" alt={collection.title} {...part("image")} />}
     </StorefrontContainer>
   </section>;
+}
+
+/** "Ottoman beds | /collections/beds?f.type=Ottoman" lines as small links (at most 8). */
+export function quickLinks(value: unknown, storeSlug?: string): Array<{ label: string; href: string }> {
+  if (typeof value !== "string") return [];
+  return value.split("\n").flatMap((line) => {
+    const [label, link] = line.split("|").map((part) => part.trim());
+    const href = label && link ? resolveStorefrontHref(link, storeSlug) : null;
+    return label && href ? [{ label, href }] : [];
+  }).slice(0, 8);
 }
 
 /** The section's Story tile blocks, ready for the editorial layout. */

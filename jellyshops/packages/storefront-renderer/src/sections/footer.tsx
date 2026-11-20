@@ -100,5 +100,6 @@ export function FooterSection({ section, context, subscribe, mode = "preview" }:
       <p className="jelly-footer-credit" {...elementProps(section, "copyright", editor)}>{copyright}</p>
       <ul className="jelly-footer-payments" aria-label="Ways to pay">{payments.map((method) => <li key={method}>{method}</li>)}</ul>
     </div> : <p className="jelly-footer-credit" {...elementProps(section, "copyright", editor)}>{copyright}</p>}
+    {section.settings.wordmark === true && storeName && <p className="jelly-footer-wordmark" aria-hidden="true">{storeName}</p>}
   </footer>;
 }

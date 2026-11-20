@@ -6,6 +6,7 @@ import { withBlockElements } from "./section-elements.js";
 import { CONTENT_BLOCKS } from "./content-blocks.js";
 import { MEDIA_BLOCKS } from "./media-blocks.js";
 import { PRODUCT_BLOCKS } from "./product-blocks.js";
+import { SHOWROOM_BLOCKS } from "./showroom-blocks.js";
 import type { BlockDefinition, ControlDefinition } from "./types.js";
 
 const dynamicString = z.union([z.string(), settingValueSchema(z.string())]);
@@ -119,7 +120,7 @@ const blocks: BlockDefinition[] = [
     ],
     defaultSettings: { heading: "The story behind it", text: "Tell shoppers what makes this collection special.", linkLabel: "Read more", position: 4 },
   },
-  { type: "collection-card", settingsSchema: z.object({ label: z.string().max(80), image: imageReference.optional(), link: z.string().max(500).optional() }).passthrough(), controls: [{ type: "text", key: "label", label: "Title", group: "content", maxLength: 80 }, { type: "image", key: "image", label: "Image", group: "content" }, { type: "link", key: "link", label: "Link", group: "content", dynamicTypes: urlTypes }], defaultSettings: { label: "Collection", link: "/shop" } },
+  { type: "collection-card", settingsSchema: z.object({ label: z.string().max(80), image: imageReference.optional(), link: z.string().max(500).optional(), chip: z.string().max(40).optional() }).passthrough(), controls: [{ type: "text", key: "label", label: "Title", group: "content", maxLength: 80 }, { type: "text", key: "chip", label: "Small label on the photo", description: "Optional, for example: From £299.", group: "content", maxLength: 40 }, { type: "image", key: "image", label: "Image", group: "content" }, { type: "link", key: "link", label: "Link", group: "content", dynamicTypes: urlTypes }], defaultSettings: { label: "Collection", link: "/shop" } },
   { type: "column", settingsSchema: z.object({ heading: z.string().max(80), text: z.string().max(400).optional() }).passthrough(), controls: [{ type: "text", key: "heading", label: "Title", group: "content", maxLength: 80 }, { type: "rich-text", key: "text", label: "Text", group: "content", maxLength: 400 }], defaultSettings: { heading: "Free delivery", text: "Tell customers why they will love shopping with you." } },
   { type: "heading", sets: CONTENT_SET, settingsSchema: text, controls: [{ type: "rich-text", inline: true, key: "text", label: "Heading", group: "content", maxLength: 120, dynamicTypes: stringTypes }], defaultSettings: { text: "Heading" } },
   { type: "text", sets: CONTENT_SET, settingsSchema: text, controls: [{ type: "rich-text", key: "text", label: "Text", group: "content", maxLength: 1000, dynamicTypes: stringTypes }], defaultSettings: { text: "Add your text here." } },
@@ -146,6 +147,7 @@ const blocks: BlockDefinition[] = [
   ...CONTENT_BLOCKS,
   ...MEDIA_BLOCKS,
   ...PRODUCT_BLOCKS,
+  ...SHOWROOM_BLOCKS,
   { type: "social-link", settingsSchema: z.object({ label: z.string(), href: z.union([z.string(), settingValueSchema(z.string())]) }).passthrough(), controls: [{ type: "link", key: "href", label: "Link", group: "content", dynamicTypes: urlTypes }], defaultSettings: { label: "Instagram", href: "https://example.com" } }
 ];
 

@@ -198,6 +198,21 @@ export function RotatingAnnouncement({ section, messages, editor }: { section: S
   </aside>;
 }
 
+/**
+ * Every message in one slow line that scrolls sideways (announcement style "Scroll sideways"). The second copy keeps
+ * the loop seamless and is hidden from screen readers; pointing at or focusing the line stops it, and reduced motion
+ * shows the messages still, wrapped.
+ */
+export function MarqueeAnnouncement({ messages }: { messages: Message[] }) {
+  const items = (copy: boolean) => messages.map((message) => <li key={message.id}>{message.href ? <a href={message.href} tabIndex={copy ? -1 : undefined}>{message.text}</a> : message.text}</li>);
+  return <aside className="jelly-announcement jelly-announcement--marquee" aria-label="Store news" style={{ "--jelly-marquee-items": messages.length } as CSSProperties}>
+    <div className="jelly-marquee">
+      <ul className="jelly-marquee-track" role="list">{items(false)}</ul>
+      <ul className="jelly-marquee-track" aria-hidden="true">{items(true)}</ul>
+    </div>
+  </aside>;
+}
+
 /* ── Reviews carousel ─────────────────────────────────────────────────────────── */
 
 interface Review { id: string; block: SectionNode["blocks"][number]; quote: string; author: string; detail: string; rating: number; avatar?: string; verified?: boolean }

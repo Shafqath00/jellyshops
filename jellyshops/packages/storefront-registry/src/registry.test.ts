@@ -52,7 +52,7 @@ it("registers configurable Collection sections only for Collection templates", (
       expect.objectContaining({ code: "SECTION_NOT_ALLOWED_ON_PAGE" }),
     ]));
   }
-  expect(ownKeys("collection-header")).toEqual(["layout", "contentAlignment", "showTitle", "showDescription", "descriptionLines", "showImage", "showBreadcrumb"]);
+  expect(ownKeys("collection-header")).toEqual(["layout", "contentAlignment", "showTitle", "showDescription", "descriptionLines", "showImage", "showBreadcrumb", "quickLinks"]);
   expect(getSectionDefinition("collection-product-grid")?.defaultSettings).toMatchObject({ columns: 3, limit: 12 });
   expect(getSectionDefinition("collection-description")?.defaultSettings).toMatchObject({ spacing: "standard" });
 });
@@ -79,8 +79,8 @@ it("makes the Home product grid configurable without requiring sample Catalog re
 it("exposes store identity, layout and footer content controls in global chrome", () => {
   expect(ownKeys("header")).toEqual(["storeName", "logo", "logoWidth", "logoPosition", "sticky", "transparent", "overlayLogo", "showSearch", "showAccount", "showWishlist", "showCart", "layout", "deliveryNote", "menuStyle", "megaPhotoShape", "showToolLabels", "extraLinkLabel", "extraLink", "extraLinkIcon"]);
   expect(getSectionDefinition("header")?.settingsSchema.safeParse({ storeName: "Little Market", logo: { id: "logo-1", url: "/api/public/media/store-a/logo-1", alt: "Logo" } }).success).toBe(true);
-  expect(ownKeys("footer")).toEqual(["storeName", "text", "contactEmail", "copyright", "showNewsletter", "newsletterHeading", "newsletterText", "paymentMethods"]);
-  expect(ownKeys("announcement-bar")).toEqual(["text", "link", "rotateSeconds"]);
+  expect(ownKeys("footer")).toEqual(["storeName", "text", "contactEmail", "copyright", "showNewsletter", "newsletterHeading", "newsletterText", "wordmark", "paymentMethods"]);
+  expect(ownKeys("announcement-bar")).toEqual(["text", "link", "style", "rotateSeconds"]);
 });
 
 it("allows page content only on a custom Page template", () => {
@@ -142,7 +142,7 @@ it("supplies Add Section options from page and region compatibility", () => {
 });
 
 it("allows only Hero content blocks", () => {
-  expect(getSectionDefinition("hero")?.allowedBlockTypes).toEqual(["heading", "text", "button"]);
+  expect(getSectionDefinition("hero")?.allowedBlockTypes).toEqual(["heading", "text", "button", "floating-card"]);
 });
 
 it("allows only FAQ item blocks", () => {

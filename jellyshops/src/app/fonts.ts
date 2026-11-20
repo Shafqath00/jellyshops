@@ -34,7 +34,7 @@ import {
  * downloads the fonts its own CSS uses. (Fraunces and Inter used to be preloaded for every page, 83 KB that
  * stores on other fonts never drew; Phase 6 phone speed work.)
  */
-export const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-fraunces", display: "swap", preload: false });
+export const fraunces = Fraunces({ subsets: ["latin"], style: ["normal", "italic"], variable: "--font-fraunces", display: "swap", preload: false });
 export const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap", preload: false });
 
 const playfairDisplay = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair-display", display: "swap", preload: false });
@@ -42,7 +42,7 @@ const cormorantGaramond = Cormorant_Garamond({ subsets: ["latin"], variable: "--
 const lora = Lora({ subsets: ["latin"], variable: "--font-lora", display: "swap", preload: false });
 const ebGaramond = EB_Garamond({ subsets: ["latin"], variable: "--font-eb-garamond", display: "swap", preload: false });
 const libreBaskerville = Libre_Baskerville({ subsets: ["latin"], variable: "--font-libre-baskerville", display: "swap", preload: false });
-const dmSerifDisplay = DM_Serif_Display({ subsets: ["latin"], weight: ["400"], variable: "--font-dm-serif-display", display: "swap", preload: false });
+const dmSerifDisplay = DM_Serif_Display({ subsets: ["latin"], weight: ["400"], style: ["normal", "italic"], variable: "--font-dm-serif-display", display: "swap", preload: false });
 const crimsonPro = Crimson_Pro({ subsets: ["latin"], variable: "--font-crimson-pro", display: "swap", preload: false });
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap", preload: false });
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans", display: "swap", preload: false });

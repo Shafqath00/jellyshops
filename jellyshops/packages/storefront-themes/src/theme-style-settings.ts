@@ -267,6 +267,14 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     select("prices.compareAt", "Price before a discount", "Prices", theme, [[theme, "Theme default"], ["strike", "Crossed out"], ["was", "\"Was\" before it"], ["hide", "Don't show"]], "Shown when a product has a higher \"compare at\" price."),
     select("prices.sale", "Discounted price", "Prices", theme, [[theme, "Theme default"], ["sale", "In the sale colour"]], "The sale colour is the sale badge colour."),
   ];
+  // Editorial look (docs/components/editorial-look.md): magazine-scale headlines, accent words, large photo corners
+  // and raised panels. Every choice starts at "Theme default", so stores keep their look until they pick one.
+  const editorialSchema = [
+    select("editorial.headlines", "Headline size", "Editorial look", theme, [[theme, "Theme default"], ["editorial", "Large, magazine style"]], "Hero and section headings grow much larger on big screens. Phones keep readable sizes."),
+    select("editorial.accentWords", "Italic words in headings", "Editorial look", theme, [[theme, "Theme default"], ["color", "Italic, in the button colour"]], "Make a word italic in a heading and it stands out in the colour scheme's button colour, in the highlight font."),
+    select("editorial.mediaCorners", "Photo corners", "Editorial look", theme, [[theme, "Theme default"], ["rounded", "Rounded"], ["large", "Very rounded"], ["signature", "Very rounded, one corner swept"]], "Photos in heroes, stories, banners and offer panels."),
+    select("editorial.surfaces", "Cards and panels", "Editorial look", theme, [[theme, "Theme default"], ["raised", "Raised, with a soft shadow"]], "Product cards, review cards, question rows and the buying panel sit on panels that lift when pointed at."),
+  ];
   const socialSchema = SOCIAL_PLATFORMS.map(({ id, label }) => ({ id: `social.${id}`, type: "url", label, group: "Social media", default: "", ...(id === "instagram" ? { description: "Full https:// links. Shown in the footer when it has no social links of its own." } : {}) }));
   const cartSchema = [
     select("cart.type", "When a shopper opens the bag", "Cart", "page", [["page", "Go to the bag page"], ["drawer", "Slide out the bag"], ["sheet", "Slide out the bag; from the bottom on phones"]], "The slide-out bag also opens after Add to cart."),
@@ -312,6 +320,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
       collectionCards: { radius: theme, textPosition: theme, overlay: "medium" },
       blogCards: { style: theme, radius: theme },
       prices: { compareAt: theme, sale: theme },
+      editorial: { headlines: theme, accentWords: theme, mediaCorners: theme, surfaces: theme },
     },
     buttonDefaults: { size: theme, textCase: theme, borderWidth: theme, hover: theme, secondaryStyle: theme },
     cardDefaults: { layout: theme, showRating: false, hoverImage: false, compare: false, quickView: false, radius: theme, shadow: theme, hover: theme, order: "photo-title-price", showTitle: "show", titleLines: theme, showPrice: "show", savings: "none", button: "none", photoFit: theme, swatches: "none" },
@@ -329,6 +338,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     collectionCardSchema,
     blogCardSchema,
     priceSchema,
+    editorialSchema,
     socialSchema,
     advancedSchema,
     languageSchema,
@@ -618,6 +628,12 @@ export function resolveThemeStyleTokens(settings: Record<string, unknown>, defau
   const prices = record(settings.prices);
   option("price-compare", { strike: "", was: "", hide: "" }, prices.compareAt);
   option("price-sale", { sale: "" }, prices.sale);
+  const editorial = record(settings.editorial);
+  option("headlines", { editorial: "" }, editorial.headlines);
+  option("accent-words", { color: "" }, editorial.accentWords);
+  option("media-radius", { rounded: "24px", large: "40px", signature: "40px" }, editorial.mediaCorners, "--jelly-media-radius");
+  if (editorial.mediaCorners === "signature") options.push("media-signature");
+  option("surfaces", { raised: "" }, editorial.surfaces);
   if (options.length) tokens["--jelly-theme-options"] = options.join(" ");
 
   const animations = record(settings?.animations);

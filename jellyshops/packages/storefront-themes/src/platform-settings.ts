@@ -65,6 +65,7 @@ const PLATFORM_SETTINGS: PlatformSetting[] = [
   ...style.collectionCardSchema,
   ...style.blogCardSchema,
   ...style.priceSchema,
+  ...style.editorialSchema,
   ...style.socialSchema,
   ...style.languageSchema,
   ...style.advancedSchema,

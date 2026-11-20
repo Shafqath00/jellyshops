@@ -10,7 +10,7 @@ const get = (settings: Record<string, unknown>, path: string) => path.split(".")
 it("ships designer styles for Jelly Minimal, Jelly Avenue and Resthaven, none for other themes", () => {
   expect(listThemeStyles("jelly-signature").map((style) => style.name)).toEqual(["Warm sand", "Ink and paper", "Sage", "Blush"]);
   expect(listThemeStyles("jelly-avenue").map((style) => style.name)).toEqual(["Gallery", "Midnight", "Stone", "Coastal"]);
-  expect(listThemeStyles("jelly-resthaven").map((style) => style.name)).toEqual(["Morning sky", "Fresh cobalt", "Sage garden", "Sunset blush", "Midnight oat"]);
+  expect(listThemeStyles("jelly-resthaven").map((style) => style.name)).toEqual(["Morning sky", "Fresh cobalt", "Express Sunrise", "Sage garden", "Sunset blush", "Midnight oat"]);
   expect(listThemeStyles("jelly-diode")).toEqual([]);
   expect(listThemeStyles(undefined)).toEqual([]);
 });
@@ -30,7 +30,8 @@ it("gives every style settings the theme accepts, readable colours, and the dark
       const colors = settings.colors as Record<string, string>;
       expect(contrastRatio(colors.text, colors.background), `${style.id} text`).toBeGreaterThanOrEqual(4.5);
       expect(contrastRatio(colors.secondary, colors.background), `${style.id} soft text`).toBeGreaterThanOrEqual(4.5);
-      for (const scheme of ["scheme1", "scheme2", "scheme3", "scheme4"]) {
+      const count = Number(get(settings, "colorSchemes.count")) || 4;
+      for (const scheme of Array.from({ length: count }, (_, index) => `scheme${index + 1}`)) {
         const values = get(settings, `colorSchemes.${scheme}`) as Record<string, string>;
         expect(contrastRatio(values.text, values.background), `${style.id} ${scheme} text`).toBeGreaterThanOrEqual(4.5);
         expect(contrastRatio(values.buttonText, values.button), `${style.id} ${scheme} button`).toBeGreaterThanOrEqual(4.5);

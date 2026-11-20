@@ -10,7 +10,7 @@ import { choice, headingHidden, imageValue, numberValue, sectionData, stringValu
 import { formattedSetting, inlineSetting, SettingText } from "./setting-text";
 import { blockStyle } from "../block-style";
 import { blockEditorData, buttonProps } from "./block-content";
-import { announcementMessages, RotatingAnnouncement } from "./showcase";
+import { announcementMessages, MarqueeAnnouncement, RotatingAnnouncement } from "./showcase";
 import { SectionGroups } from "./custom-content";
 import { mediaPhoto } from "../media-photo";
 
@@ -64,7 +64,7 @@ export function AnnouncementBarSection({ section, editor = false }: { section: S
   if (blocks.length) {
     const first = typeof section.settings.text === "string" && section.settings.text.trim() ? [{ id: "message", text: section.settings.text, href }] : [];
     const messages = [...first, ...blocks];
-    if (messages.length > 1) return <RotatingAnnouncement section={section} messages={messages} editor={editor} />;
+    if (messages.length > 1) return section.settings.style === "marquee" ? <MarqueeAnnouncement messages={messages} /> : <RotatingAnnouncement section={section} messages={messages} editor={editor} />;
   }
   return <aside className="jelly-announcement">{href ? <a href={href} {...own}>{message}</a> : <span {...own}>{message}</span>}</aside>;
 }
@@ -147,7 +147,7 @@ export function FaqSection({ section, editor = false }: { section: SectionNode; 
   return <section className="jelly-section jelly-faq" {...sectionData(section)}>
     <StorefrontContainer>
       <div className="jelly-faq-layout">
-        <div className="jelly-section-intro"><h2 {...elementProps(section, "heading", editor)}>{heading}</h2><SettingText text={intro} document={formattedSetting(section.settings, "text")} {...elementProps(section, "text", editor)} /></div>
+        <div className="jelly-section-intro"><h2 {...elementProps(section, "heading", editor)}>{inlineSetting(section.settings, "heading", heading)}</h2><SettingText text={intro} document={formattedSetting(section.settings, "text")} {...elementProps(section, "text", editor)} /></div>
         <div className="jelly-faq-list">
           {items.map((item) => <details key={item.id} {...blockEditorData(item.block, editor, "Question")}><summary>{item.question}</summary><SettingText text={item.answer} document={item.document} /></details>)}
         </div>

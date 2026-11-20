@@ -7,6 +7,7 @@ export const SECTION_CONTROL_TYPES: Record<string, Record<string, string>> = {
     "text": "rich-text"
   },
   "category-grid": {
+    "heading": "rich-text",
     "text": "rich-text"
   },
   "contact-store-info": {
@@ -14,9 +15,11 @@ export const SECTION_CONTROL_TYPES: Record<string, Record<string, string>> = {
     "image": "image"
   },
   "faq": {
+    "heading": "rich-text",
     "text": "rich-text"
   },
   "featured-collection": {
+    "heading": "rich-text",
     "text": "rich-text",
     "collectionId": "collection",
     "viewAllLink": "link"
@@ -40,6 +43,9 @@ export const SECTION_CONTROL_TYPES: Record<string, Record<string, string>> = {
   "image-banner": {
     "image": "image"
   },
+  "image-gallery": {
+    "heading": "rich-text"
+  },
   "image-mosaic": {
     "body": "rich-text",
     "link": "link",
@@ -57,12 +63,27 @@ export const SECTION_CONTROL_TYPES: Record<string, Record<string, string>> = {
     "productId": "product",
     "collectionId": "collection"
   },
+  "logo-list": {
+    "heading": "rich-text"
+  },
+  "metaobject-list": {
+    "heading": "rich-text"
+  },
+  "multicolumn": {
+    "heading": "rich-text"
+  },
   "not-found-message": {
     "body": "rich-text",
     "link": "link",
     "image": "image",
     "productId": "product",
     "collectionId": "collection"
+  },
+  "offer-panel": {
+    "heading": "rich-text",
+    "text": "rich-text",
+    "image": "image",
+    "buttonLink": "link"
   },
   "popup": {
     "image": "image"
@@ -71,6 +92,7 @@ export const SECTION_CONTROL_TYPES: Record<string, Record<string, string>> = {
     "diagram": "image"
   },
   "product-grid": {
+    "heading": "rich-text",
     "text": "rich-text",
     "collectionId": "collection",
     "viewAllLink": "link"
@@ -79,10 +101,29 @@ export const SECTION_CONTROL_TYPES: Record<string, Record<string, string>> = {
     "financeLink": "link"
   },
   "rating-summary": {
+    "heading": "rich-text",
     "link": "link"
   },
   "shop-the-look": {
+    "heading": "rich-text",
     "image": "image"
+  },
+  "size-picker": {
+    "heading": "rich-text",
+    "text": "rich-text"
+  },
+  "steps": {
+    "heading": "rich-text",
+    "text": "rich-text"
+  },
+  "swatch-showcase": {
+    "heading": "rich-text",
+    "text": "rich-text",
+    "image": "image",
+    "buttonLink": "link"
+  },
+  "testimonials": {
+    "heading": "rich-text"
   }
 };
 export const BLOCK_CONTROL_TYPES: Record<string, Record<string, string>> = {
@@ -112,6 +153,11 @@ export const BLOCK_CONTROL_TYPES: Record<string, Record<string, string>> = {
   },
   "faq-item": {
     "answer": "rich-text"
+  },
+  "floating-card": {
+    "productId": "product",
+    "image": "image",
+    "link": "link"
   },
   "gallery-image": {
     "image": "image",
@@ -167,6 +213,7 @@ export const BLOCK_CONTROL_TYPES: Record<string, Record<string, string>> = {
     "financeLink": "link"
   },
   "part-rating-summary": {
+    "heading": "rich-text",
     "link": "link"
   },
   "press": {
@@ -187,6 +234,9 @@ export const BLOCK_CONTROL_TYPES: Record<string, Record<string, string>> = {
     "text": "rich-text",
     "link": "link"
   },
+  "size-option": {
+    "link": "link"
+  },
   "slide": {
     "image": "image",
     "buttonLink": "link"
@@ -196,6 +246,11 @@ export const BLOCK_CONTROL_TYPES: Record<string, Record<string, string>> = {
   },
   "story-tile": {
     "image": "image",
+    "link": "link"
+  },
+  "swatch": {
+    "image": "image",
+    "photo": "image",
     "link": "link"
   },
   "tab": {

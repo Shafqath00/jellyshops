@@ -15,6 +15,7 @@ import { ProductDimensionsSection } from "./sections/product-dimensions";
 import { RichTextSection } from "./sections/rich-text";
 import { CustomContentSection } from "./sections/custom-content";
 import { CartDrawerSection, PopupSection } from "./sections/overlays";
+import { OfferPanelSection, SizePickerSection, StepsSection, SwatchShowcaseSection } from "./sections/showroom";
 import { LogoListSection } from "./sections/logo-list";
 import { ImageGallerySection, RatingSummarySection } from "./sections/social-proof";
 import { MetaobjectListSection } from "./sections/metaobject-list";
@@ -80,7 +81,11 @@ function builtInRegistry(): SectionRenderRegistry {
   registry.register("announcement-bar", ({ section, mode }) => <AnnouncementBarSection section={section} editor={mode === "editor"} />);
   registry.register("header", ({ section, context }) => <HeaderSection section={section} context={context} />);
   registry.register("footer", ({ section, context, commerce, mode }) => <FooterSection section={section} context={context} subscribe={commerce.subscribeNewsletter} mode={mode} />);
-  registry.register("hero", ({ section, mode, context, selectedBlockId }) => <HeroSection section={section} editor={mode === "editor"} context={context} selectedBlockId={selectedBlockId} />);
+  registry.register("hero", ({ section, mode, context, selectedBlockId, commerce }) => <HeroSection section={section} editor={mode === "editor"} context={context} selectedBlockId={selectedBlockId} commerce={commerce} />);
+  registry.register("offer-panel", ({ section, context }) => <OfferPanelSection section={section} context={context} />);
+  registry.register("size-picker", ({ section, context }) => <SizePickerSection section={section} context={context} />);
+  registry.register("steps", ({ section, context }) => <StepsSection section={section} context={context} />);
+  registry.register("swatch-showcase", ({ section, context }) => <SwatchShowcaseSection section={section} context={context} />);
   registry.register("slideshow", ({ section, mode, context, selectedBlockId }) => <SlideshowSection section={section} context={context} editor={mode === "editor"} selectedBlockId={selectedBlockId} />);
   registry.register("rich-text", ({ section }) => <RichTextSection section={section} />);
   // The Apps section is a Custom content section that only takes app blocks.

@@ -35,8 +35,9 @@ const footerSettings = z.object({
   newsletterHeading: z.string().max(120).optional(),
   newsletterText: z.string().max(240).optional(),
   paymentMethods: z.string().max(200).optional(),
+  wordmark: z.boolean().optional(),
 }).passthrough();
-const announcementSettings = z.object({ text: z.string().max(160).optional(), link: z.string().max(500).optional(), rotateSeconds: z.number().int().min(3).max(12).optional() }).passthrough();
+const announcementSettings = z.object({ text: z.string().max(160).optional(), link: z.string().max(500).optional(), rotateSeconds: z.number().int().min(3).max(12).optional(), style: z.enum(["rotate", "marquee"]).optional() }).passthrough();
 const headerControls: SectionDefinition["controls"] = [
   { type: "text", key: "storeName", label: "Store name", group: "content", maxLength: 120 },
   { type: "image", key: "logo", label: "Logo", group: "content", dynamicTypes: ["image"] },
@@ -80,11 +81,12 @@ const footerControls: SectionDefinition["controls"] = [
   { type: "checkbox", key: "showNewsletter", label: "Show newsletter sign-up", group: "content" },
   { type: "text", key: "newsletterHeading", label: "Newsletter heading", group: "content", maxLength: 120 },
   { type: "rich-text", key: "newsletterText", label: "Newsletter text", group: "content", maxLength: 240 },
+  { type: "checkbox", key: "wordmark", label: "Show the store name very large at the foot", group: "style" },
   { type: "text", key: "paymentMethods", label: "Payment methods", description: "Shown at the foot of the page, separated by commas, for example: Visa, Mastercard, PayPal.", group: "content", maxLength: 200 },
 ];
 
 export const layoutSections: SectionDefinition[] = [
-  { type: "announcement-bar", category: "layout", supportedPages: [...allPages], settingsSchema: announcementSettings, controls: [{ type: "text", key: "text", label: "Message", group: "content", maxLength: 160 }, { type: "link", key: "link", label: "Link", group: "content" }, { type: "range", key: "rotateSeconds", label: "Seconds per message", description: "Used when you add more than one message block.", group: "layout", min: 3, max: 12, step: 1 }], allowedBlockTypes: ["text", "announcement-message"], maxBlocks: 6, defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
+  { type: "announcement-bar", category: "layout", supportedPages: [...allPages], settingsSchema: announcementSettings, controls: [{ type: "text", key: "text", label: "Message", group: "content", maxLength: 160 }, { type: "link", key: "link", label: "Link", group: "content" }, { type: "segmented", key: "style", label: "With more than one message", group: "layout", options: [{ label: "Take turns", value: "rotate" }, { label: "Scroll sideways", value: "marquee" }], description: "Scroll sideways shows every message in a slow moving line. It stops when pointed at, and stays still for shoppers whose device asks for less motion." }, { type: "range", key: "rotateSeconds", label: "Seconds per message", description: "Used when you add more than one message block.", group: "layout", min: 3, max: 12, step: 1 }], allowedBlockTypes: ["text", "announcement-message"], maxBlocks: 6, defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },
   { type: "header", category: "layout", supportedPages: [...allPages], settingsSchema: headerSettings, controls: headerControls, allowedBlockTypes: ["menu", "trust-point"], defaultSettings: { storeName: "Storefront" }, defaultBlocks: [], responsiveFields: [] },
   { type: "spacer", category: "layout", supportedPages: [...allPages], settingsSchema: z.object({ size: z.string().optional() }).passthrough(), controls: [{ type: "select", key: "size", label: "Size", group: "layout", responsive: true, options: [{ label: "Small", value: "small" }, { label: "Standard", value: "standard" }, { label: "Large", value: "large" }] }], allowedBlockTypes: [], defaultSettings: { size: "standard" }, defaultBlocks: [], responsiveFields: ["size"] },
   { type: "divider", category: "layout", supportedPages: [...allPages], settingsSchema: empty, controls: [], allowedBlockTypes: [], defaultSettings: {}, defaultBlocks: [], responsiveFields: [] },

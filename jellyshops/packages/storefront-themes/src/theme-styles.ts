@@ -103,6 +103,32 @@ const resthaven: ThemeStyle[] = [
     settings: { ...brightLook({ background: "#FFFFFF", surface: "#FFFFFF", text: "#13213F", secondary: "#4A5875", primary: "#2453D4", accent: "#C2410C" }, [["White", "#FFFFFF", "#13213F", "#2453D4", "#FFFFFF"], ["Cloud", "#EEF3FC", "#13213F", "#13213F", "#FFFFFF"], ["Butter", "#FFF4D1", "#13213F", "#13213F", "#FFFFFF"], ["Navy", "#13213F", "#FFFFFF", "#FFD866", "#13213F"]]), typography: { headingFont: "Fraunces", bodyFont: "Figtree" }, buttons: { radius: "pill" }, badges: { background: "#D12E4F", text: "#FFFFFF" } },
   },
   {
+    // Premium showroom look (Express Bed, 2026-11-20 brief): warm paper, ink, cobalt buttons, tangerine highlights and
+    // six colour bands (paper, mint, butter, ink, cobalt, blush), DM Serif Display with Plus Jakarta Sans, and the
+    // Editorial look switched on (large headlines, coloured italic words, swept photo corners, raised panels).
+    id: "express-sunrise", name: "Express Sunrise", description: "Warm paper, cobalt, tangerine and butter, with magazine-size headlines.",
+    swatches: ["#FFFBF5", "#101A3A", "#2348E0", "#FF7A45"],
+    settings: {
+      colors: { background: "#FFFBF5", surface: "#FFFFFF", text: "#101A3A", secondary: "#4B5470", primary: "#2348E0", accent: "#A3360A" },
+      colorSchemes: {
+        count: "6",
+        scheme1: { name: "Paper", background: "#FFFBF5", text: "#101A3A", button: "#2348E0", buttonText: "#FFFFFF" },
+        scheme2: { name: "Mint", background: "#CFEFDF", text: "#101A3A", button: "#2348E0", buttonText: "#FFFFFF" },
+        scheme3: { name: "Butter", background: "#FFD84D", text: "#101A3A", button: "#101A3A", buttonText: "#FFD84D" },
+        scheme4: { name: "Ink", background: "#101A3A", text: "#FFFBF5", button: "#FFD84D", buttonText: "#101A3A" },
+        scheme5: { name: "Cobalt", background: "#2348E0", text: "#FFFFFF", button: "#FFD84D", buttonText: "#101A3A" },
+        scheme6: { name: "Blush", background: "#FFDCD2", text: "#101A3A", button: "#2348E0", buttonText: "#FFFFFF" },
+      },
+      typography: { headingFont: "DM Serif Display", bodyFont: "Plus Jakarta Sans", headingWeight: 400 },
+      buttons: { radius: "pill", hover: "lift" },
+      badges: { background: "#B71C3C", text: "#FFFFFF" },
+      collectionCards: { radius: "large" },
+      dialogs: { radius: "large" },
+      productCard: { radius: "rounded" },
+      editorial: { headlines: "editorial", accentWords: "color", mediaCorners: "signature", surfaces: "raised" },
+    },
+  },
+  {
     id: "sage-garden", name: "Sage garden", description: "Cream, sage green and terracotta.",
     swatches: ["#FAF8F2", "#22301F", "#4E6E4B", "#E6EEE3"],
     settings: { ...brightLook({ background: "#FAF8F2", surface: "#FFFFFF", text: "#22301F", secondary: "#56604F", primary: "#4E6E4B", accent: "#A8462F" }, [["Cream", "#FAF8F2", "#22301F", "#4E6E4B", "#FFFFFF"], ["Sage", "#E6EEE3", "#22301F", "#22301F", "#FAF8F2"], ["Sand", "#F4EADB", "#22301F", "#A8462F", "#FFFFFF"], ["Forest", "#2F3E2D", "#FAF8F2", "#E9C9A4", "#22301F"]]), typography: { headingFont: "Cormorant Garamond", bodyFont: "Inter" }, buttons: { radius: "rounded" } },

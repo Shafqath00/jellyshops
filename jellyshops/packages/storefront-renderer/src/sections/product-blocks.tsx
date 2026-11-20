@@ -40,13 +40,13 @@ function Breadcrumbs({ block, options }: { block: BlockNode; options: ContentBlo
 }
 
 /** The UK date and hour now, from the shopper's clock. */
-function londonNow(now: number): { date: Date; hour: number } {
-  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23" }).formatToParts(new Date(now));
+export function londonNow(now: number): { date: Date; hour: number; minute: number } {
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/London", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date(now));
   const value = (type: string) => Number(parts.find((part) => part.type === type)?.value ?? 0);
-  return { date: new Date(Date.UTC(value("year"), value("month") - 1, value("day"))), hour: value("hour") };
+  return { date: new Date(Date.UTC(value("year"), value("month") - 1, value("day"))), hour: value("hour"), minute: value("minute") };
 }
 
-function addWorkingDays(from: Date, days: number, weekends: boolean): Date {
+export function addWorkingDays(from: Date, days: number, weekends: boolean): Date {
   const date = new Date(from);
   let left = days;
   while (left > 0) {
@@ -58,10 +58,10 @@ function addWorkingDays(from: Date, days: number, weekends: boolean): Date {
 }
 
 /** The delivery window for an order placed at `now` (exported for tests). */
-export function deliveryWindow(settings: Record<string, unknown>, now: number): { from: Date; to: Date; hoursLeft: number } {
+export function deliveryWindow(settings: Record<string, unknown>, now: number): { from: Date; to: Date; hoursLeft: number; minutesLeft: number } {
   const weekends = settings.weekendDispatch === true;
   const cutoff = numberValue(settings, "cutoffHour", 14, 0, 23);
-  const { date, hour } = londonNow(now);
+  const { date, hour, minute } = londonNow(now);
   // An order after the cut-off, or on a day nothing is sent, is dispatched from the next working day.
   let dispatch = new Date(date);
   const sendsToday = weekends || (date.getUTCDay() !== 0 && date.getUTCDay() !== 6);
@@ -69,21 +69,32 @@ export function deliveryWindow(settings: Record<string, unknown>, now: number): 
   dispatch = addWorkingDays(dispatch, numberValue(settings, "dispatchDays", 0, 0, 10), weekends);
   const min = numberValue(settings, "deliveryMin", 2, 0, 30);
   const max = Math.max(min, numberValue(settings, "deliveryMax", 4, 0, 30));
-  return { from: addWorkingDays(dispatch, min, weekends), to: addWorkingDays(dispatch, max, weekends), hoursLeft: sendsToday && hour < cutoff ? cutoff - hour : 0 };
+  return { from: addWorkingDays(dispatch, min, weekends), to: addWorkingDays(dispatch, max, weekends), hoursLeft: sendsToday && hour < cutoff ? cutoff - hour : 0, minutesLeft: sendsToday && hour < cutoff ? (cutoff - hour) * 60 - minute : 0 };
 }
 
 const dayFormat = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
 const noSubscribe = () => () => undefined;
+/** Re-reads the clock every 30 seconds (the countdown look). */
+const everyHalfMinute = (listener: () => void) => { const timer = window.setInterval(listener, 30_000); return () => window.clearInterval(timer); };
 // Rounded to the minute, so the value stays the same between renders.
 const minuteNow = () => Math.floor(Date.now() / 60_000) * 60_000;
 
 function DeliveryEstimate({ block, options }: { block: BlockNode; options: ContentBlockOptions }) {
   // Dates depend on the shopper's clock, so they are worked out in the browser only.
-  const now = useSyncExternalStore(noSubscribe, minuteNow, () => null);
+  const clock = block.settings.style === "clock";
+  const now = useSyncExternalStore(clock ? everyHalfMinute : noSubscribe, minuteNow, () => null);
   if (!productContext(options.context)) return needsProduct(block, options);
   if (now === null) return <p className="jelly-delivery-estimate" aria-hidden="true" {...editorData(block, options)} />;
   const estimate = deliveryWindow(block.settings, now);
   const range = estimate.from.getTime() === estimate.to.getTime() ? dayFormat.format(estimate.from) : `${dayFormat.format(estimate.from)} – ${dayFormat.format(estimate.to)}`;
+  if (clock) {
+    const left = estimate.minutesLeft;
+    const time = left >= 60 ? `${Math.floor(left / 60)}h ${left % 60}m` : `${left}m`;
+    return <p className="jelly-delivery-estimate" data-style="clock" {...blockStyle(block)} {...editorData(block, options)}>
+      <span className="jelly-delivery-pulse" aria-hidden="true" />
+      <span>{left > 0 ? <>Order in <strong className="jelly-delivery-time">{time}</strong> for delivery </> : "Order now for delivery "}<strong>{range}</strong></span>
+    </p>;
+  }
   return <p className="jelly-delivery-estimate" {...blockStyle(block)} {...editorData(block, options)}>
     <StoreIcon name="truck" size={20} />
     <span>{estimate.hoursLeft > 0 ? <>Order in the next <strong>{estimate.hoursLeft} {estimate.hoursLeft === 1 ? "hour" : "hours"}</strong> for delivery </> : "Get it "}<strong>{range}</strong></span>

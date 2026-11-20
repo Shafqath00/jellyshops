@@ -5,7 +5,7 @@ import { StorefrontContainer } from "@jelly/storefront-ui";
 import type { CommerceDataProvider, PublicProduct } from "../types";
 import { resolveStorefrontHref } from "../runtime-context";
 import { sectionData, stringValue, visibleBlocks } from "./shared";
-import { formattedSetting, SettingText } from "./setting-text";
+import { formattedSetting, inlineSetting, SettingText } from "./setting-text";
 import { blockEditorData } from "./block-content";
 import { rowColumnProps } from "../row-columns";
 
@@ -65,7 +65,7 @@ export function ProductGridSection({ commerce, section, storeSlug, editor = fals
   };
   return <section className="jelly-section jelly-product-grid" {...sectionData(section, { "data-align": align })}><StorefrontContainer>
     {(heading || viewAllHref || tabs.length > 1) && <div className="jelly-section-header">
-      <div>{heading && <h2 {...elementProps(section, "heading", editor)}>{heading}</h2>}<SettingText text={intro} document={formattedSetting(section.settings, "text")} {...elementProps(section, "text", editor)} /></div>
+      <div>{heading && <h2 {...elementProps(section, "heading", editor)}>{inlineSetting(section.settings, "heading", heading)}</h2>}<SettingText text={intro} document={formattedSetting(section.settings, "text")} {...elementProps(section, "text", editor)} /></div>
       {tabs.length > 1 && <div className="jelly-product-tabs" role="tablist" aria-label={heading || "Product lists"}>{tabs.map((tab, index) => <button
         key={tab.id}
         type="button"
