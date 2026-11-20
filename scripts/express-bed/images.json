@@ -1,0 +1,29 @@
+{
+  "_comment": "Express Bed photos (docs/express-bed/image-prompts.md). name = file in jellyshops/public/images/express-bed/, ratio = width:height, width = pixels written, standIn = Resthaven photo used for the labelled placeholder until the real photo arrives.",
+  "images": [
+    { "name": "eb-hero-1", "ratio": "16:9", "width": 2000, "standIn": "bright-hero" },
+    { "name": "eb-hero-2", "ratio": "16:9", "width": 2000, "standIn": "larch-storage-bed" },
+    { "name": "eb-hero-3", "ratio": "16:9", "width": 2000, "standIn": "bright-room-guest" },
+    { "name": "eb-cat-upholstered", "ratio": "4:5", "width": 1200, "standIn": "elm-wingback-bed" },
+    { "name": "eb-cat-ottoman", "ratio": "4:5", "width": 1200, "standIn": "bright-beds" },
+    { "name": "eb-cat-divan", "ratio": "1:1", "width": 1000, "standIn": "divan" },
+    { "name": "eb-cat-mattresses", "ratio": "1:1", "width": 1000, "standIn": "bright-mattresses" },
+    { "name": "eb-cat-headboards", "ratio": "1:1", "width": 1000, "standIn": "headboard" },
+    { "name": "eb-room-main", "ratio": "3:4", "width": 1000, "standIn": "bright-room-main" },
+    { "name": "eb-room-guest", "ratio": "3:4", "width": 1000, "standIn": "room-guest" },
+    { "name": "eb-room-kids", "ratio": "3:4", "width": 1000, "standIn": "bright-room-kids" },
+    { "name": "eb-room-small", "ratio": "3:4", "width": 1000, "standIn": "bright-daybed" },
+    { "name": "eb-offer", "ratio": "4:5", "width": 1200, "standIn": "bright-sale" },
+    { "name": "eb-mattress-layers", "ratio": "3:2", "width": 1600, "standIn": "mattress" },
+    { "name": "eb-fabrics", "ratio": "3:2", "width": 1600, "standIn": "bright-fabrics" },
+    { "name": "eb-swatch-velvet", "ratio": "1:1", "width": 600, "standIn": "harbour-sage" },
+    { "name": "eb-swatch-boucle", "ratio": "1:1", "width": 600, "standIn": "fabrics" },
+    { "name": "eb-swatch-linen", "ratio": "1:1", "width": 600, "standIn": "linen-bedding" },
+    { "name": "eb-swatch-weave", "ratio": "1:1", "width": 600, "standIn": "wool-throw" },
+    { "name": "eb-showroom", "ratio": "16:9", "width": 2000, "standIn": "bright-room-look" },
+    { "name": "eb-delivery", "ratio": "3:2", "width": 1600, "standIn": "bright-story" },
+    { "name": "eb-banner-beds", "ratio": "21:9", "width": 2100, "standIn": "room-main" },
+    { "name": "eb-banner-mattresses", "ratio": "21:9", "width": 2100, "standIn": "bright-mattresses" },
+    { "name": "eb-banner-headboards", "ratio": "21:9", "width": 2100, "standIn": "moss-headboard" }
+  ]
+}

@@ -1,4 +1,5 @@
 import type { PublicProduct } from "@jelly/storefront-renderer";
+import type { V4StarterPack } from "@jelly/storefront-registry";
 import { getThemeDefinition, isStarterPackId, listThemes } from "@jelly/storefront-themes";
 
 /**
@@ -27,6 +28,10 @@ export interface ThemePreviewConfig {
   ratings?: Record<string, { average: number; count: number }>;
   /** Sample specifications by product id, for the compare page (themes with Product cards > Let shoppers compare products). */
   compareSpecifications?: Record<string, Record<string, string>>;
+  /** A store design to show instead of the theme's starter pack (a merchant store's own layout, e.g. Express Bed). */
+  pack?: V4StarterPack;
+  /** That store's theme settings; the style switcher then starts on "Store's own". */
+  themeSettings?: Record<string, unknown>;
 }
 
 const image = (photo: string, width = 900) => `https://images.unsplash.com/${photo}?auto=format&fit=crop&w=${width}&q=80`;

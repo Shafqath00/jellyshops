@@ -169,17 +169,21 @@ const pages = [
 const global = (id) => pack.globalSections.find((entry) => entry.section.id === id).section;
 const announcement = global("studio-announcement");
 announcement.settings.text = "Spread the cost with Klarna";
-const announcementLines = ["Beds delivered in 5 to 7 working days", "Two-person delivery to the room of your choice", "Visit our showroom and try before you buy"];
+// Every message in one slow line that scrolls sideways (announcement style "Scroll sideways").
+announcement.settings.style = "marquee";
+const announcementLines = ["Beds delivered in 5 to 7 working days", "Two-person delivery to the room of your choice", "Try every bed in our showroom, open 7 days"];
 announcement.blocks.forEach((block, index) => { block.settings.text = announcementLines[index] ?? block.settings.text; });
 
 const header = global("studio-header");
-Object.assign(header.settings, { extraLinkLabel: "Visit our showroom", extraLink: "/contact", extraLinkIcon: "phone" });
+Object.assign(header.settings, { extraLinkLabel: "Visit our showroom", extraLink: "/contact", extraLinkIcon: "phone", sticky: true });
 
 const footer = global("studio-footer");
 Object.assign(footer.settings, {
   text: "Beds, mattresses and headboards, delivered fast by our own two-person team.",
   newsletterHeading: "Offers and sleep tips",
   newsletterText: "Occasional emails about new beds and showroom events. Unsubscribe at any time.",
+  paymentMethods: "Visa, Mastercard, American Express, Apple Pay, Klarna",
+  wordmark: true,
 });
 const footerLinks = [
   ["link-heading", { text: "Shop" }], ["link", { label: "Beds", link: "/collections/beds" }], ["link", { label: "Mattresses", link: "/collections/mattresses" }],
@@ -200,97 +204,147 @@ const block = (section, id) => section.blocks.find((entry) => entry.id === id);
 const without = (layout, ids) => { layout.sections = layout.sections.filter((placement) => placement.kind !== "inline" || !ids.includes(placement.section.id)); };
 
 const home = template("home");
+// Express Bed photos: public/images/express-bed/<name>.webp (labelled placeholders until the real photos arrive;
+// docs/express-bed/image-prompts.md, scripts/express-bed/images.mjs).
+const eb = (name, alt, extra = {}) => ({ url: `/images/express-bed/${name}.webp`, alt, ...extra });
+const textNode = (text, italic) => ({ type: "text", text, ...(italic ? { marks: [{ type: "italic" }] } : {}) });
+/** A one-line heading with an italic accent word: the plain text and its formatted copy (Editorial look > accent words). */
+const accented = (key, ...parts) => ({ [key]: parts.map(([text]) => text).join(""), [`${key}Doc`]: { type: "doc", content: [{ type: "paragraph", content: parts.map(([text, italic]) => textNode(text, italic)) }] } });
+const blockOf = (id, type, settings, blocks = []) => ({ id, type, enabled: true, settings, blocks });
+const sectionOf = (id, type, settings, blocks = []) => ({ kind: "inline", section: { id, type, enabled: true, settings, blocks } });
+// "From £299": the cheapest size of the cheapest matching product.
+const fromPrice = (match) => `From £${Math.min(...products.filter(match).flatMap((entry) => entry.variants.map((variant) => variant.priceMinor))) / 100 | 0}`;
+
+// 1. Hero: inset photo with swept corner, magazine headline, floating best-seller card, promises on the bottom edge.
 const hero = inline(home, "studio-hero");
-hero.settings.eyebrow = "Bed showroom, delivered fast";
-hero.settings.image = img("hero", "A calm bedroom with an oatmeal boucle bed, white bedding and a jute rug", { fit: "cover", focalPoint: { x: 62, y: 55 } });
-block(hero, "resthaven-hero-title").settings.text = "Better sleep, delivered this week.";
-block(hero, "resthaven-hero-text").settings.text = "Beds, mattresses and headboards in every size from single to super king, with two-person delivery to the room of your choice. Spread the cost with Klarna.";
+Object.assign(hero.settings, {
+  layout: "overlay", height: "large", overlay: 0, eyebrow: "Beds, mattresses and headboards",
+  image: eb("eb-hero-1", "A sunlit bedroom with a cobalt velvet bed, white bedding and tangerine and yellow cushions", { fit: "cover", focalPoint: { x: 64, y: 55 } }),
+  promises: ["truck: Two-person delivery to your room", "clock: Delivered in 5 to 7 working days", "card: Spread the cost with Klarna", "home: Try every bed in our showroom"].join("\n"),
+});
+Object.assign(block(hero, "resthaven-hero-title").settings, accented("text", ["Beds worth "], ["waking up for.", true]));
+block(hero, "resthaven-hero-text").settings.text = "Beds, mattresses and headboards in every size from single to super king, carried to the room of your choice by our own two-person team.";
 Object.assign(block(hero, "resthaven-hero-action-0").settings, { label: "Shop beds", href: "/collections/beds" });
 Object.assign(block(hero, "resthaven-hero-action-1").settings, { label: "Find your mattress", href: "/collections/mattresses" });
+hero.blocks.push(blockOf("expressbed-hero-card", "floating-card", { eyebrow: "Best seller", position: "bottom-right" }));
 
-const categories = inline(home, "resthaven-categories");
-Object.assign(categories.settings, { heading: "Shop by category", text: "Everything for a better night, from the base to the headboard.", columns: 4 });
-// Four tiles: four across on desktop, two by two on phones (three left one tile alone on phones).
-categories.blocks = [
-  ["all", "Shop all", "room-main", "A main bedroom with an upholstered bed made up in white linen", "/shop"],
-  ["beds", "Beds", "divan", "An oatmeal divan bed with drawers in a bright guest room"],
-  ["mattresses", "Mattresses", "mattress", "A cut-away mattress corner showing its quilted cover and springs"],
-  ["headboards", "Headboards", "headboard", "A rust velvet panelled headboard behind white pillows"],
-].map(([handle, label, image, alt, href]) => ({ id: `expressbed-category-${handle}`, type: "collection-card", enabled: true, settings: { label, image: img(image, alt), link: href ?? `/collections/${handle}` }, blocks: [] }))
-  .sort((a, b) => (a.id.endsWith("-all") ? 1 : 0) - (b.id.endsWith("-all") ? 1 : 0));
+// 2. Shop by type: bento tiles with "From £" labels.
+const types = inline(home, "resthaven-categories");
+Object.assign(types.settings, { ...accented("heading", ["Shop by "], ["type", true]), text: "From storage ottomans to statement wingbacks, every frame comes in every size.", layout: "bento", columns: 3, imageRatio: "portrait" });
+types.blocks = [
+  ["upholstered", "Upholstered beds", "eb-cat-upholstered", "A tall cobalt velvet wingback bed in a bright room", "/collections/beds?f.type=Upholstered%20bed", (entry) => entry.type === "Upholstered bed"],
+  ["ottoman", "Ottoman storage beds", "eb-cat-ottoman", "A tangerine linen ottoman bed with its storage base open", "/collections/beds?f.type=Ottoman%20bed", (entry) => entry.type === "Ottoman bed"],
+  ["divan", "Divan beds", "eb-cat-divan", "A cobalt buttoned divan bed with drawers", "/collections/beds?f.type=Divan%20bed", (entry) => entry.type === "Divan bed"],
+  ["mattresses", "Mattresses", "eb-cat-mattresses", "A deep pocket sprung mattress with a quilted top", "/collections/mattresses", (entry) => entry.collections.includes("mattresses")],
+  ["headboards", "Headboards", "eb-cat-headboards", "A blush velvet scalloped headboard", "/collections/headboards", (entry) => entry.collections.includes("headboards")],
+].map(([handle, label, image, alt, link, match]) => blockOf(`expressbed-type-${handle}`, "collection-card", { label, image: eb(image, alt), link, chip: fromPrice(match) }));
 
-Object.assign(inline(home, "resthaven-featured").settings, { heading: "Best sellers", text: "The beds, mattresses and headboards our customers choose most." });
+// 3. Shop by size, drawn to scale (the four sizes the store sells).
+const sizes = sectionOf("expressbed-sizes", "size-picker", {
+  eyebrow: "Shop by size", ...accented("heading", ["Find your "], ["fit", true]), text: "Every size drawn to scale. Tap one to see the beds that come in it.", unit: "cm", contentAlignment: "left", styleScheme: "scheme2",
+}, [["Single", 90, 190], ["Double", 135, 190, "Most popular"], ["King", 150, 200], ["Super King", 180, 200]].map(([label, width, length, note]) => blockOf(`expressbed-size-${label.toLowerCase().replace(/ /g, "-")}`, "size-option", { label, width, length, ...(note ? { note } : {}), link: `/collections/beds?f.size=${encodeURIComponent(label)}` })));
 
-const promo = inline(home, "resthaven-promo");
-promo.settings.eyebrow = "Bed and mattress together";
-promo.settings.image = img("room-main", "A main bedroom with an upholstered bed made up in white linen");
-block(promo, "resthaven-promo-title").settings.text = "Pair a bed and mattress in one delivery";
-block(promo, "resthaven-promo-text").settings.text = "Choose your frame, add the mattress that suits how you sleep, and we deliver both on the same day. Add assembly as an extra.";
-Object.assign(block(promo, "resthaven-promo-action").settings, { label: "Shop beds", href: "/collections/beds" });
+// 4. Best sellers.
+Object.assign(inline(home, "resthaven-featured").settings, { ...accented("heading", ["Our best "], ["sellers", true]), text: "The beds, mattresses and headboards our customers choose most.", viewAllLabel: "Shop all beds", viewAllLink: "/collections/beds", limit: 8, columns: 4 });
 
-const look = inline(home, "resthaven-shop-look");
-Object.assign(look.settings, { eyebrow: "Shop the room", heading: "A calm main bedroom", text: "One bed, one mattress and a headboard that ties the room together. Tap a pin to see each piece.", image: img("room-main", "A main bedroom with an upholstered bed, bedside table and rug") });
+// 5. Offer panel on Butter. The code must exist in Admin > Discounts before this goes live.
+const offer = sectionOf("expressbed-offer", "offer-panel", {
+  eyebrow: "Weekend offer", bigText: "20% off", ...accented("heading", ["Every bed, "], ["every size", true]),
+  text: "Add the code at checkout. Ends Sunday 30 November at midnight.", code: "SLEEP20", codeLabel: "Use code",
+  countdownTo: "2026-11-30 23:59", countdownEndText: "This offer has ended. Keep an eye out for the next one.",
+  image: eb("eb-offer", "A cobalt velvet bed with a tangerine cushion against a butter yellow wall"), imageLabel: "Calder ottoman in cobalt velvet", imagePosition: "right",
+  buttonLabel: "Shop the offer", buttonLink: "/collections/beds", styleScheme: "scheme3",
+});
 
-const fabric = inline(home, "resthaven-fabric-story");
-fabric.settings.image = img("fabrics", "Fabric swatches in velvet, boucle and linen on an oak table");
-block(fabric, fabric.blocks[0].id).settings.text = "Finish the room with a new headboard";
-block(fabric, fabric.blocks[1].id).settings.text = "Velvet, boucle, linen or solid oak, in widths from single to super king. Most bolt straight onto your existing bed.";
-Object.assign(block(fabric, fabric.blocks[2].id).settings, { label: "Shop headboards", href: "/collections/headboards" });
+// 6. Shop by room.
+const rooms = sectionOf("expressbed-rooms", "category-grid", { ...accented("heading", ["Shop by "], ["room", true]), text: "Beds picked for the way each room is used.", layout: "grid", columns: 4, imageRatio: "portrait" }, [
+  ["main", "Main bedroom", "eb-room-main", "A calm main bedroom with a king-size cobalt bed", "/collections/beds?f.type=Upholstered%20bed"],
+  ["guest", "Guest room", "eb-room-guest", "A welcoming guest room with a blush double bed", "/collections/beds?f.type=Divan%20bed"],
+  ["kids", "Kids room", "eb-room-kids", "A cheerful child's room with a wooden single bed", "/collections/beds?f.size=Single"],
+  ["small", "Small rooms", "eb-room-small", "A narrow box room with a butter boucle ottoman bed", "/collections/beds?f.type=Ottoman%20bed"],
+].map(([handle, label, image, alt, link]) => blockOf(`expressbed-room-${handle}`, "collection-card", { label, image: eb(image, alt), link })));
 
+// 7. Comfort story on Ink.
 const mattressStory = inline(home, "resthaven-mattress-feature");
-mattressStory.settings.image = img("hollis-mattress", "A pocket sprung mattress on a bed base");
-block(mattressStory, mattressStory.blocks[0].id).settings.text = "Find the feel that suits you";
-block(mattressStory, mattressStory.blocks[1].id).settings.text = "Pocket sprung, memory foam or hybrid, from soft to firm. Lie on every one in our showroom, or compare comfort and layers on each product page.";
-Object.assign(block(mattressStory, mattressStory.blocks[2].id).settings, { label: "Find your mattress", href: "/collections/mattresses" });
+Object.assign(mattressStory.settings, { eyebrow: "Mattresses", image: eb("eb-mattress-layers", "A cut-away mattress showing its quilted top, comfort foam and pocket springs"), imagePosition: "right", styleScheme: "scheme4" });
+Object.assign(mattressStory.blocks[0].settings, accented("text", ["Built in layers. "], ["Made for you.", true]));
+mattressStory.blocks[1].settings.text = "Pocket springs, memory foam or both, from soft to firm. Every mattress page lists its layers, feel and exact sizes, and you can lie on all of them in our showroom.";
+Object.assign(mattressStory.blocks[2].settings, { label: "Find your mattress", href: "/collections/mattresses" });
 
-inline(home, "resthaven-trust-row").blocks.forEach((entry, index) => { entry.settings.text = ["Two-person delivery", "Delivered in 5 to 7 days", "Pay with Klarna", "Showroom you can visit"][index] ?? entry.settings.text; });
+// 8. Fabric swatches.
+const fabrics = sectionOf("expressbed-fabrics", "swatch-showcase", {
+  eyebrow: "Fabrics", ...accented("heading", ["Feel the "], ["difference", true]), text: "Every upholstered frame comes in hard-wearing fabrics. Pick one to see it in a room.",
+  image: eb("eb-fabrics", "Fabric swatches in cobalt velvet, tangerine linen, butter boucle and mint weave"), imagePosition: "left", buttonLabel: "Feel them in the showroom", buttonLink: "/contact",
+}, [
+  ["velvet", "Velvet", "#2348E0", "Soft sheen, rich colour", "eb-cat-upholstered", "/collections/beds?f.fabric=Velvet"],
+  ["boucle", "Boucle", "#F3E6C9", "Cosy, looped texture", "eb-room-small", "/collections/beds?f.fabric=Boucle"],
+  ["linen", "Linen", "#FF7A45", "Washed and relaxed", "eb-cat-ottoman", "/collections/headboards"],
+  ["weave", "Weave", "#CFEFDF", "Hard-wearing, family proof", "eb-cat-divan", "/collections/beds?f.fabric=Woven"],
+].map(([handle, name, color, note, photo, link]) => blockOf(`expressbed-swatch-${handle}`, "swatch", { name, color, note, link, image: eb(`eb-swatch-${handle}`, `${name} fabric close up`), photo: eb(photo, `A bed in ${name.toLowerCase()}`) })));
 
-Object.assign(inline(home, "resthaven-spotlight").settings, { text: "Our best-selling storage bed: a full ottoman lift, a padded headboard and soft velvet, delivered to the room of your choice.", buttonLabel: "View the bed" });
+// 9. Shop the look on Blush.
+const look = inline(home, "resthaven-shop-look");
+Object.assign(look.settings, { eyebrow: "Shop the room", ...accented("heading", ["A calm "], ["main bedroom", true]), text: "One bed, one mattress and a headboard that ties the room together. Tap a pin to see each piece.", image: eb("eb-room-main", "A main bedroom with a cobalt upholstered bed, oak bedside tables and lamps"), styleScheme: "scheme6" });
 
+// 10. Reviews: tinted cards that scroll sideways.
 const testimonials = inline(home, "resthaven-reviews");
+Object.assign(testimonials.settings, { ...accented("heading", ["Loved in homes "], ["like yours", true]), layout: "carousel", cardStyle: "tinted" });
 const quotes = [
   ["The bed arrived on the day they promised and the team carried it upstairs and built it in twenty minutes.", "Bought the Calder ottoman bed"],
   ["I tried every mattress in the showroom before choosing. Three weeks in and my back has never felt better.", "Bought the Hollis mattress"],
   ["Ordered a headboard on Monday, fitted by Friday. It has completely changed the room.", "Bought the Arlo headboard"],
   ["Helpful staff, no pressure and the price matched what I saw online.", "Visited the showroom"],
 ];
-testimonials.blocks.forEach((entry, index) => { if (quotes[index]) Object.assign(entry.settings, { quote: `${quotes[index][0]} (Sample review.)`, detail: quotes[index][1] }); });
+testimonials.blocks.forEach((entry, index) => { if (quotes[index]) Object.assign(entry.settings, { quote: `${quotes[index][0]} (Sample review.)`, detail: quotes[index][1], rating: 5 }); });
 
+// 11. How delivery works, with real dates.
+const steps = sectionOf("expressbed-steps", "steps", {
+  eyebrow: "How delivery works", ...accented("heading", ["From our showroom to "], ["your bedroom", true]), text: "Dates are worked out from today. Order before 2pm and today counts.",
+  showDates: true, cutoffHour: 14, weekends: false, contentAlignment: "left", styleScheme: "scheme2",
+}, [
+  ["order", "Order today", "Pick your bed, size and extras. Pay now or spread the cost with Klarna.", "card", 0],
+  ["call", "We call you", "Our team calls to book a two-hour delivery slot that suits you.", "phone", 1],
+  ["deliver", "In your room", "Two people carry it to the room you choose, build it if you added assembly and take the packaging away.", "truck", 5],
+].map(([handle, title, text, icon, days]) => blockOf(`expressbed-step-${handle}`, "step", { title, text, icon, days })));
+
+// 12. Product spotlight.
+Object.assign(inline(home, "resthaven-spotlight").settings, { text: "Our best-selling storage bed: a full ottoman lift, a padded headboard and soft velvet, delivered to the room of your choice.", buttonLabel: "View the bed" });
+
+// 13. Showroom story.
 const story = inline(home, "resthaven-brand-story");
-story.settings.image = img("detail", "Close-up of hand-finished piping on an upholstered headboard");
-block(story, story.blocks[0].id).settings.text = "A showroom you can sleep on";
-block(story, story.blocks[1].id).settings.text = "Lie on every mattress, sit on every bed and feel every fabric before you buy. Then let our own delivery team bring it home, usually within a week.";
+story.settings.image = eb("eb-showroom", "A bright bed showroom with styled beds in cobalt, blush, butter and mint");
+Object.assign(story.blocks[0].settings, accented("text", ["A showroom you can "], ["sleep on", true]));
+story.blocks[1].settings.text = "Lie on every mattress, sit on every bed and feel every fabric before you buy. Then let our own delivery team bring it home.";
 if (story.blocks[2]) Object.assign(story.blocks[2].settings, { label: "Visit our showroom", href: "/contact" });
 
-const gallery = inline(home, "resthaven-gallery");
-Object.assign(gallery.settings, { heading: "Rested at home", text: "Bedrooms from our customers. Share yours with #ExpressBedHome." });
-const galleryPhotos = [["room-main", "A main bedroom with an upholstered bed"], ["room-guest", "A guest room with a divan bed"], ["room-kids", "A child's room with an oak bed"], ["harbour-sage", "A sage velvet bed"], ["rowan-four-poster", "An oak four poster bed"], ["elm-wingback-bed", "A boucle wingback bed"]];
-gallery.blocks.forEach((entry, index) => { entry.settings.image = img(...galleryPhotos[index % galleryPhotos.length]); });
+// 14. Questions.
+const faq = sectionOf("expressbed-home-faq", "faq", { ...accented("heading", ["Questions, "], ["answered", true]), text: "Quick answers about delivery, paying and sizes. More in our help pages." },
+  pages.find((page) => page.handle === "faq").body.map(([question, answer], index) => blockOf(`expressbed-home-faq-${index}`, "faq-item", { question, answer })));
 
+// 15. Sign-up on Cobalt.
 const newsletter = inline(home, "resthaven-newsletter");
-newsletter.blocks[0].settings.text = "Sleep better, spend less";
-newsletter.blocks[1].settings.text = "Showroom events, new arrivals and early access to offers. Once or twice a month.";
+Object.assign(newsletter.blocks[0].settings, accented("text", ["Sleep better, "], ["spend less", true]));
+newsletter.blocks[1].settings.text = "New arrivals, showroom events and early access to offers. Once or twice a month.";
+newsletter.settings.styleScheme = "scheme5";
 
-// Home order (2026-11-20 redesign, after Sonno, Eve, Dreams and Silentnight): promises straight under the hero, then
-// categories and best sellers; colour bands alternate White / Cloud / Butter so the page reads in clear chapters, and the
-// sign-up closes on the Navy band. A short FAQ answers the four questions shoppers ask before buying a bed.
-const scheme = (id, value) => { inline(home, id).settings.styleScheme = value; };
-scheme("resthaven-trust-row", "scheme2");
-scheme("resthaven-promo", "scheme3");
-scheme("resthaven-shop-look", "scheme2");
-scheme("resthaven-reviews", "scheme2");
-scheme("resthaven-newsletter", "scheme4");
-const faq = { kind: "inline", section: { id: "expressbed-home-faq", type: "faq", enabled: true, settings: { heading: "Before you buy", text: "Quick answers about delivery, paying and sizes. More in our help pages." }, blocks: pages.find((page) => page.handle === "faq").body.map(([question, answer], index) => ({ id: `expressbed-home-faq-${index}`, type: "faq-item", enabled: true, settings: { question, answer }, blocks: [] })) } };
 {
-  const order = ["studio-hero", "resthaven-trust-row", "resthaven-categories", "resthaven-featured", "resthaven-promo", "resthaven-shop-look", "resthaven-spotlight", "resthaven-reviews", "resthaven-fabric-story", "resthaven-mattress-feature", "expressbed-home-faq", "resthaven-brand-story", "resthaven-gallery", "resthaven-newsletter"];
-  const placements = [...home.sections, faq];
+  const order = ["studio-hero", "resthaven-categories", "expressbed-sizes", "resthaven-featured", "expressbed-offer", "expressbed-rooms", "resthaven-mattress-feature", "expressbed-fabrics", "resthaven-shop-look", "resthaven-reviews", "expressbed-steps", "resthaven-spotlight", "resthaven-brand-story", "expressbed-home-faq", "resthaven-newsletter"];
+  const placements = [...home.sections, sizes, offer, rooms, fabrics, steps, faq];
   const inlineById = new Map(placements.filter((placement) => placement.kind === "inline").map((placement) => [placement.section.id, placement]));
   const before = home.sections.filter((placement) => placement.kind !== "inline" && home.sections.indexOf(placement) < home.sections.findIndex((entry) => entry.kind === "inline"));
   const after = home.sections.filter((placement) => placement.kind !== "inline" && !before.includes(placement));
-  const missing = [...inlineById.keys()].filter((id) => !order.includes(id));
-  if (missing.length) throw new Error(`Home sections missing from the order: ${missing.join(", ")}`);
+  const unknown = order.filter((id) => !inlineById.has(id));
+  if (unknown.length) throw new Error(`Home sections not found: ${unknown.join(", ")}`);
+  // Left out on purpose: the old promo, fabric story, trust row (the hero's promises replace it) and stock gallery.
   home.sections = [...before, ...order.map((id) => inlineById.get(id)), ...after];
+  // Every band's colour is set here (paper unless chosen above), never inherited from the starter's own choices.
+  for (const id of order) {
+    const settings = inlineById.get(id).section.settings;
+    if (!settings.styleScheme) settings.styleScheme = "scheme1";
+    delete settings.colorScheme;
+  }
 }
+
 
 // Product page, two columns on large screens:
 //   left  = photos, then "Complete the set", the description, details, dimensions and reviews (blocks set to
@@ -300,10 +354,10 @@ const faq = { kind: "inline", section: { id: "expressbed-home-faq", type: "faq",
 // Phones stack photos, buying panel, then the rest; a bottom bar keeps the price and Add to basket in reach.
 const productLayout = template("product");
 const mainProduct = productLayout.sections.find((placement) => placement.kind === "inline" && placement.section.type === "main-product").section;
-Object.assign(mainProduct.settings, { mediaWidth: "medium", stickyColumn: "details" });
+Object.assign(mainProduct.settings, { mediaWidth: "wide", mediaRatio: "square", stickyColumn: "details" });
 const partOf = (type) => mainProduct.blocks.find((entry) => entry.type === type);
 Object.assign(partOf("part-product-options").settings, { style: "tiles", tileColumns: 2 });
-Object.assign(partOf("part-product-purchase").settings, { stickyBar: true });
+Object.assign(partOf("part-product-purchase").settings, { stickyBar: true, showPrice: true, label: "Add to bag" });
 // Delivery and returns promises sit under the photos with the other reading content, keeping the panel short.
 Object.assign(partOf("part-trust-strip").settings, { column: "below" });
 Object.assign(partOf("part-product-description").settings, { layout: "plain", column: "below" });
@@ -312,6 +366,11 @@ const takeSection = (type) => {
   const index = productLayout.sections.findIndex((placement) => placement.kind === "inline" && placement.section.type === type);
   return index < 0 ? undefined : productLayout.sections.splice(index, 1)[0].section;
 };
+// The delivery countdown sits right under Add to bag: "Order in 3h 12m for delivery Tue 2 – Thu 4 Dec".
+mainProduct.blocks.splice(mainProduct.blocks.indexOf(partOf("part-product-purchase")) + 1, 0, {
+  id: "expressbed-delivery-clock", type: "delivery-estimate", enabled: true, blocks: [],
+  settings: { cutoffHour: 14, dispatchDays: 0, deliveryMin: 5, deliveryMax: 7, style: "clock", column: "panel" },
+});
 const dimensions = takeSection("product-dimensions");
 const reviewsSection = takeSection("product-reviews");
 const purchaseAt = mainProduct.blocks.findIndex((entry) => entry.type === "part-product-trust-strip" || entry.type === "part-trust-strip");
@@ -326,10 +385,34 @@ mainProduct.blocks.push(
 );
 
 const collection = template("collection");
+// Quick links under the collection title switch between the main ranges.
+Object.assign(collection.sections.find((placement) => placement.kind === "inline" && placement.section.type === "collection-header").section.settings, {
+  showBreadcrumb: true, showDescription: true, descriptionLines: "2",
+  quickLinks: ["Beds | /collections/beds", "Ottoman storage | /collections/beds?f.type=Ottoman%20bed", "Upholstered | /collections/beds?f.type=Upholstered%20bed", "Mattresses | /collections/mattresses", "Headboards | /collections/headboards"].join("\n"),
+});
 const help = inline(collection, "resthaven-collection-help");
 block(help, "resthaven-collection-help-title").settings.text = "Not sure which size or feel is right?";
 block(help, "resthaven-collection-help-text").settings.text = "Every product page lists exact measurements for each size. Still unsure? Visit the showroom and try them all.";
 Object.assign(block(help, "resthaven-collection-help-action").settings, { label: "Read our size guide", href: "/pages/faq" });
+
+// Bag page: a row of best sellers under the bag, so a bed order can pick up its mattress and headboard.
+{
+  const cart = template("cart");
+  const at = cart.sections.findIndex((placement) => placement.kind === "inline" && placement.section.type === "cart-summary");
+  cart.sections.splice(at + 1, 0, sectionOf("expressbed-cart-more", "product-grid", { ...accented("heading", ["Finish the "], ["bedroom", true]), text: "Mattresses and headboards to go with your bed, delivered together.", limit: 4, columns: 4, styleScheme: "scheme1" }));
+}
+
+// 404: a friendlier line and the best sellers, so a dead link still leads somewhere.
+{
+  const notFound = template("not-found");
+  const message = notFound.sections.find((placement) => placement.kind === "inline" && placement.section.type === "not-found-message")?.section;
+  const heading = message?.blocks.find((entry) => entry.type === "heading");
+  if (heading) Object.assign(heading.settings, accented("text", ["This bed has "], ["already been made.", true]));
+  const text = message?.blocks.find((entry) => entry.type === "text");
+  if (text) text.settings.text = "The page you were looking for has moved or no longer exists. Try a search, or start with our best sellers.";
+  const at = notFound.sections.indexOf(notFound.sections.find((placement) => placement.kind === "inline" && placement.section.type === "not-found-message"));
+  notFound.sections.splice(at + 1, 0, sectionOf("expressbed-404-best", "product-grid", { ...accented("heading", ["Our best "], ["sellers", true]), limit: 4, columns: 4, viewAllLabel: "Shop all beds", viewAllLink: "/collections/beds", styleScheme: "scheme1" }));
+}
 
 // No bedding, pillows or decor in this store: point any leftover search links at the right collections.
 const RELINK = { "/search?q=Beds": "/collections/beds", "/search?q=Mattresses": "/collections/mattresses", "/search?q=Bedding": "/collections/headboards", "/search?q=Pillows": "/collections/headboards", "/search?q=Decor": "/shop", "/search?q=Sale": "/shop" };
@@ -352,9 +435,9 @@ const mainMenu = [
   link("Beds", "/collections/beds", [
     link("Bed types", "/collections/beds", ["Divan bed", "Ottoman bed", "Upholstered bed", "Bed frame"].map((type) => link(`${type}s`, `/collections/beds?f.type=${encodeURIComponent(type)}`))),
     link("Bed sizes", "/collections/beds", sizeLinks("beds")),
-    link("Main bedroom", "/collections/beds", [], img("room-main", "A main bedroom with an upholstered bed")),
-    link("Guest room", "/collections/beds?f.type=Divan%20bed", [], img("room-guest", "A guest room with a divan bed")),
-    link("Kids room", "/collections/beds?f.size=Single", [], img("room-kids", "A child's room with a single oak bed")),
+    link("Main bedroom", "/collections/beds", [], { url: "/images/express-bed/eb-room-main.webp", alt: "A main bedroom with a cobalt upholstered bed" }),
+    link("Guest room", "/collections/beds?f.type=Divan%20bed", [], { url: "/images/express-bed/eb-room-guest.webp", alt: "A guest room with a blush double bed" }),
+    link("Kids room", "/collections/beds?f.size=Single", [], { url: "/images/express-bed/eb-room-kids.webp", alt: "A child's room with a wooden single bed" }),
   ]),
   link("Mattresses", "/collections/mattresses", [
     link("By type", "/collections/mattresses", ["Pocket sprung", "Memory foam", "Hybrid", "Open coil"].map((type) => link(type, `/collections/mattresses?f.type=${encodeURIComponent(type)}`))),
@@ -371,9 +454,10 @@ const mainMenu = [
 ];
 
 // ---------------------------------------------------------------------------------------------------------------
-// Theme settings: Resthaven with the "Fresh cobalt" style (white, cobalt, butter and navy bands; 2026-11-20 redesign).
+// Theme settings: Resthaven with the "Express Sunrise" style (paper, ink, cobalt, tangerine and butter, Editorial look on;
+// 2026-11-20 premium showroom brief, docs/reports/2026-11-20-express-bed-showroom-design-brief.md).
 // ---------------------------------------------------------------------------------------------------------------
-const style = themes.listThemeStyles("jelly-resthaven").find((entry) => entry.id === "fresh-cobalt");
+const style = themes.listThemeStyles("jelly-resthaven").find((entry) => entry.id === "express-sunrise");
 const themeSettings = themes.applyThemeStyle(structuredClone(pack.theme.settings), style);
 themeSettings.cart = { ...(themeSettings.cart ?? {}), type: "drawer", freeDeliveryFrom: 0 };
 // Cards: the theme defaults (stars, % off, second photo on hover, colour dots) plus Quick view.
@@ -409,6 +493,7 @@ const plan = {
   // Product picks in the home page, by handle (the installer swaps in the product ids once products exist).
   productLinks: [
     { template: "home", section: "resthaven-spotlight", product: "calder-ottoman-storage-bed" },
+    { template: "home", section: "studio-hero", block: "expressbed-hero-card", product: "calder-ottoman-storage-bed" },
     { template: "home", section: "resthaven-shop-look", block: "resthaven-pin-bed", product: "elm-wingback-upholstered-bed" },
     { template: "home", section: "resthaven-shop-look", block: "resthaven-pin-bedside", product: "piped-wingback-headboard" },
     { template: "home", section: "resthaven-shop-look", block: "resthaven-pin-rug", product: "hollis-pocket-1000-mattress" },
@@ -419,3 +504,44 @@ const plan = {
 writeFileSync(fileURLToPath(new URL("./plan.json", import.meta.url)), `${JSON.stringify(plan, null, 2)}\n`);
 console.log(`plan.json: ${products.length} products, ${products.reduce((sum, entry) => sum + entry.variants.length, 0)} variants, ${collections.length} collections, ${pages.length} pages, ${reviews.length} reviews.`);
 if (leftovers.length) console.log(`Leftover words to review: ${[...new Set(leftovers)].join(", ")}`);
+
+// ---------------------------------------------------------------------------------------------------------------
+// Local preview (/theme-preview/express-bed): the same design with the products as sample cards, so the store can be
+// reviewed in the browser before it is installed or published. Written into the app; never sent anywhere.
+// ---------------------------------------------------------------------------------------------------------------
+{
+  const money = (minor) => `£${(minor / 100).toFixed(2)}`;
+  const photoUrl = (name) => `/themes/jelly-resthaven/${name}.webp`;
+  const sampleProducts = products.map((entry) => {
+    const cheapest = entry.variants.reduce((low, variant) => (variant.priceMinor < low.priceMinor ? variant : low), entry.variants[0]);
+    const tagFilters = entry.tags.filter((tag) => tag.includes(":")).map((tag) => tag.split(":")).map(([name, value]) => ({ name, values: [value] }));
+    return {
+      id: entry.handle, name: entry.title, price: money(cheapest.priceMinor), priceMinor: cheapest.priceMinor, available: true, href: "#",
+      ...(cheapest.compareAtPriceMinor ? { compareAtPrice: money(cheapest.compareAtPriceMinor), saving: money(cheapest.compareAtPriceMinor - cheapest.priceMinor), discountPercent: Math.round((1 - cheapest.priceMinor / cheapest.compareAtPriceMinor) * 100) } : {}),
+      imageUrl: photoUrl(entry.images[0]), ...(entry.images[1] ? { hoverImageUrl: photoUrl(entry.images[1]) } : {}),
+      filters: [{ name: "Size", values: SIZES }, { name: "Type", values: [entry.type] }, ...tagFilters],
+      collection: entry.collections[0], about: entry.about, specifications: entry.specifications, gallery: entry.images.map(photoUrl),
+      sizes: entry.variants.map((variant) => ({ label: variant.options.Size, price: money(variant.priceMinor) })),
+    };
+  });
+  // Product picks point at products by handle; the preview's product ids are the handles.
+  const previewTemplates = structuredClone(pack.templates);
+  for (const linkEntry of plan.productLinks) {
+    const layout = previewTemplates.find((entry) => entry.key === linkEntry.template)?.layout;
+    const section = layout?.sections.find((placement) => placement.kind === "inline" && placement.section.id === linkEntry.section)?.section;
+    const target = linkEntry.block ? section?.blocks.find((entry) => entry.id === linkEntry.block) : section;
+    if (target) target.settings = { ...target.settings, productId: linkEntry.product };
+  }
+  const design = {
+    _comment: "Generated by scripts/express-bed/build-plan.mjs. Do not edit by hand.",
+    themeSettings,
+    pack: { ...pack, id: "express-bed", name: "Express Bed", theme: { ...pack.theme, settings: themeSettings }, templates: previewTemplates, menus: [{ key: "main", handle: "main", items: mainMenu }] },
+    products: sampleProducts,
+    reviews: reviews.map(({ product, rating }) => ({ product, rating })),
+  };
+  writeFileSync(fileURLToPath(new URL("jellyshops/src/features/theme-preview/express-bed-design.json", `file:///${root.replaceAll("\\", "/")}`)), `${JSON.stringify(design, null, 2)}\n`);
+  const usedPhotos = [...new Set(JSON.stringify(design.pack).match(/\/images\/express-bed\/[a-z0-9-]+\.webp/g) ?? [])];
+  const missing = usedPhotos.filter((url) => { try { readFileSync(fileURLToPath(new URL(`jellyshops/public${url}`, `file:///${root.replaceAll("\\", "/")}`))); return false; } catch { return true; } });
+  if (missing.length) throw new Error(`Missing Express Bed photos (run node scripts/express-bed/images.mjs placeholders): ${missing.join(", ")}`);
+  console.log(`express-bed-design.json: preview design with ${sampleProducts.length} sample products, ${usedPhotos.length} Express Bed photos.`);
+}

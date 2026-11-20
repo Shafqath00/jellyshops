@@ -153,9 +153,9 @@ export function TemplatePreview({ template, config, productLayout, collectionLay
   const cartPage = useCartContext(config);
   // Built once per theme: getStarterPack returns a fresh copy each call, which would re-run the loader every render.
   const snapshot = useMemo(() => {
-    const shipped = snapshotFromStarterPack(getStarterPack(config.packId), config.themeId);
+    const shipped = snapshotFromStarterPack(config.pack ?? getStarterPack(config.packId), config.themeId, config.themeSettings);
     return edits ? merchantEditedSnapshot(shipped, edits) : shipped;
-  }, [config.packId, config.themeId, edits]);
+  }, [config.pack, config.themeSettings, config.packId, config.themeId, edits]);
   // Themes that ship their own main menu are shown with it; the others with a sample menu that has dropdowns.
   const previewMenus = config.useStarterMenu ? snapshot.menus : menus;
   const cart = usePreviewCart();

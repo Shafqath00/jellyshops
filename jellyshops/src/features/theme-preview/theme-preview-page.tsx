@@ -213,11 +213,12 @@ export function ThemePreviewPage({ config: themeConfig }: { config: ThemePreview
   const edits = useSyncExternalStore(subscribeNoop, () => Number(new URLSearchParams(window.location.search).get("edits")) || 0, () => 0);
   // Designer theme styles, so each can be reviewed on every page; the first is the theme's default look.
   const themeStyles = listThemeStyles(config.themeId);
-  const [styleId, setStyleId] = useState(themeStyles[0]?.id);
+  // A store's own design (config.themeSettings) starts on its own settings, not the theme's first style.
+  const [styleId, setStyleId] = useState(config.themeSettings ? undefined : themeStyles[0]?.id);
   const [productLayout, setProductLayout] = useState("theme");
   const [collectionLayout, setCollectionLayout] = useState("theme");
   const themeStyle = themeStyles.find((item) => item.id === styleId);
-  const base = resolveTheme(config.themeId);
+  const base = resolveTheme(config.themeId, config.themeSettings);
   const theme = themeStyle ? resolveTheme(config.themeId, applyThemeStyle(base.settings, themeStyle)) : base;
   const style = resolveStorefrontThemeTokens(theme.id, edits ? merchantEditedSettings(theme.settings, edits) : theme.settings) as CSSProperties;
   const toggle = (active: boolean): CSSProperties => ({ padding: "6px 12px", borderRadius: 6, fontSize: 13, background: active ? "#1c1b19" : "transparent", color: active ? "white" : "#1c1b19" });
@@ -228,6 +229,7 @@ export function ThemePreviewPage({ config: themeConfig }: { config: ThemePreview
         {views.filter(([key]) => key !== "compare" || previewHasCompare(config)).map(([key, label]) => <button key={key} type="button" aria-pressed={view === key} onClick={() => setView(key)} style={toggle(view === key)}>{label}</button>)}
       </div>
       {themeStyles.length > 0 && <div role="group" aria-label="Theme style" style={{ display: "flex", flexWrap: "wrap", gap: 4, padding: 4, background: "white", borderRadius: 8 }}>
+        {config.themeSettings && <button type="button" aria-pressed={styleId === undefined} onClick={() => setStyleId(undefined)} style={toggle(styleId === undefined)}>Store&apos;s own</button>}
         {themeStyles.map((item) => <button key={item.id} type="button" aria-pressed={styleId === item.id} title={item.description} onClick={() => setStyleId(item.id)} style={toggle(styleId === item.id)}>{item.name}</button>)}
       </div>}
       {view === "product" && <label style={{ display: "flex", gap: 8, alignItems: "center", padding: "4px 10px", background: "white", borderRadius: 8, fontSize: 13 }}>Product layout

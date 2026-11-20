@@ -59,6 +59,16 @@
       ],
       "port": 3001,
       "autoPort": false
+    },
+    {
+      "name": "express-preview",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd jellyshops && set JELLY_E2E_NEXT_DIST_DIR=.next/express&& set NEXT_PUBLIC_STORE_EDITOR_API_URL=http://127.0.0.1:3001&& npx next dev --turbopack -p 3220"
+      ],
+      "port": 3220,
+      "autoPort": false
     }
   ]
 }
