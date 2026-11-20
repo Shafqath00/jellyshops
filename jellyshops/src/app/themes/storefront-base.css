@@ -2353,3 +2353,62 @@ html.lenis, html.lenis body { height: auto; }
 :where(.jelly-testimonial-verified) { display: inline-flex; gap: 6px; align-items: center; margin-left: auto; color: var(--j-color-muted, inherit); font-size: 13px; font-weight: 600; }
 /* Photo gallery tiles keep a soft tint while their photo loads. */
 :where(.jelly-image-gallery-items figure) { margin: 0; overflow: hidden; border-radius: var(--j-radius-md, 8px); background: var(--j-color-wash, color-mix(in srgb, currentColor 6%, transparent)); }
+
+/* Quick view (theme setting Product cards > "Quick view on cards"): a button over the card photo opens a pop-up. */
+[data-jelly-theme] .jelly-product-card-actions:has(.jelly-quick-view-button) { display: block; }
+[data-jelly-theme] .jelly-product-card-actions:has(.jelly-quick-view-button):not(:has(.jelly-compare-toggle, [data-in-bag])) { margin: 0; }
+[data-jelly-theme] .jelly-quick-view-button { position: absolute; top: 12px; right: 12px; z-index: 3; display: inline-flex; gap: 6px; align-items: center; min-height: 40px; padding: 0 14px; border: 0; border-radius: 999px; background: color-mix(in srgb, var(--j-color-surface, #fff) 94%, transparent); color: var(--j-color-text, #1c1b19); font: inherit; font-size: 13px; font-weight: 600; box-shadow: 0 6px 18px rgb(15 23 42 / 14%); cursor: pointer; opacity: 0; transform: translateY(-4px); transition: opacity .2s ease, transform .2s ease, background-color .2s ease; }
+[data-jelly-theme] .jelly-product-card:hover .jelly-quick-view-button, [data-jelly-theme] .jelly-quick-view-button:focus-visible { opacity: 1; transform: none; }
+[data-jelly-theme] .jelly-quick-view-button:hover { background: var(--j-color-surface, #fff); }
+[data-jelly-theme] .jelly-quick-view-button:focus-visible { outline: 2px solid var(--j-color-primary, currentColor); outline-offset: 2px; }
+[data-jelly-theme] .jelly-quick-view-button[data-loading] { cursor: progress; opacity: .7; }
+@media (hover: none) { [data-jelly-theme] .jelly-quick-view-button { width: 44px; min-height: 44px; padding: 0; justify-content: center; opacity: 1; transform: none; } [data-jelly-theme] .jelly-quick-view-button span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
+.jelly-quick-view { width: min(980px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 48px); margin: auto; padding: 0; overflow: auto; border: 0; border-radius: var(--jelly-dialog-radius, 20px); background: var(--j-color-surface, #fff); color: var(--j-color-text, #1c1b19); box-shadow: 0 30px 80px rgb(15 23 42 / 28%); }
+.jelly-quick-view::backdrop { background: rgb(15 23 42 / 48%); backdrop-filter: blur(3px); }
+.jelly-quick-view[open] { animation: jelly-quick-view-in .26s cubic-bezier(.2, .8, .2, 1); }
+@keyframes jelly-quick-view-in { from { opacity: 0; transform: translateY(16px) scale(.98); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .jelly-quick-view[open] { animation: none; } }
+.jelly-quick-view-panel { position: relative; display: grid; gap: 28px; padding: 28px; }
+@media (min-width: 768px) { .jelly-quick-view-panel { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); padding: 32px; } }
+.jelly-quick-view-close { position: absolute; top: 12px; right: 12px; z-index: 2; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 999px; background: var(--j-color-surface, #fff); color: inherit; box-shadow: 0 4px 14px rgb(15 23 42 / 16%); cursor: pointer; }
+.jelly-quick-view-close:hover { background: var(--j-color-divider, rgb(0 0 0 / 10%)); }
+.jelly-quick-view-photo { position: relative; overflow: hidden; aspect-ratio: 4 / 3; border-radius: var(--j-radius-md, 12px); background: var(--j-color-wash, #f3f3f1); }
+.jelly-quick-view-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.jelly-quick-view-badge { position: absolute; top: 12px; left: 12px; padding: 4px 10px; border-radius: 999px; background: var(--jelly-badge-background, var(--j-color-sale, #b5452b)); color: var(--jelly-badge-text, #fff); font-size: 12px; font-weight: 700; }
+.jelly-quick-view-thumbs { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; }
+.jelly-quick-view-thumbs button { flex: 0 0 64px; height: 48px; padding: 0; overflow: hidden; border: 2px solid transparent; border-radius: 8px; background: none; cursor: pointer; }
+.jelly-quick-view-thumbs button[aria-pressed="true"] { border-color: var(--j-color-primary, currentColor); }
+.jelly-quick-view-thumbs img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.jelly-quick-view-details { display: flex; flex-direction: column; gap: 14px; min-width: 0; padding-right: 36px; }
+.jelly-quick-view .jelly-quick-view-vendor { margin: 0; color: var(--j-color-muted, inherit); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.jelly-quick-view .jelly-quick-view-title { margin: 0; font-family: var(--theme-font-heading, inherit); font-size: clamp(24px, 2.4vw, 32px); line-height: 1.15; overflow-wrap: break-word; }
+.jelly-quick-view .jelly-quick-view-rating { display: flex; gap: 8px; align-items: center; margin: 0; font-size: 14px; color: var(--j-color-muted, inherit); }
+.jelly-quick-view-rating > span:first-child { color: var(--j-color-accent, #c58b00); letter-spacing: 2px; }
+.jelly-quick-view-rating-rest { opacity: .3; }
+.jelly-quick-view .jelly-quick-view-price { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; margin: 0; font-size: 22px; font-weight: 700; }
+.jelly-quick-view-price [data-sale] { color: var(--j-color-sale, #b5452b); }
+.jelly-quick-view-price s { color: var(--j-color-muted, inherit); font-size: 16px; font-weight: 500; }
+.jelly-quick-view-from { font-size: 15px; font-weight: 500; color: var(--j-color-muted, inherit); }
+.jelly-quick-view .jelly-quick-view-summary { margin: 0; color: var(--j-color-muted, inherit); line-height: 1.6; }
+.jelly-quick-view-choices { margin: 0; padding: 0; border: 0; }
+.jelly-quick-view-choices legend { margin-bottom: 10px; font-weight: 600; }
+.jelly-quick-view-choices legend span { font-weight: 400; color: var(--j-color-muted, inherit); }
+.jelly-quick-view-choices > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.jelly-quick-view-choices label { position: relative; display: grid; gap: 2px; min-height: 56px; padding: 10px 14px; border: 1px solid var(--j-color-border-strong, rgb(0 0 0 / 22%)); border-radius: var(--j-radius-sm, 10px); cursor: pointer; transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease; }
+.jelly-quick-view-choices label:hover { border-color: var(--j-color-text, currentColor); }
+.jelly-quick-view-choices label:has(input:checked) { border-color: var(--j-color-primary, currentColor); background: color-mix(in srgb, var(--j-color-primary, #000) 7%, transparent); box-shadow: inset 0 0 0 1px var(--j-color-primary, currentColor); }
+.jelly-quick-view-choices label:has(input:focus-visible) { outline: 2px solid var(--j-color-primary, currentColor); outline-offset: 2px; }
+.jelly-quick-view-choices label[data-sold-out] { cursor: not-allowed; opacity: .55; border-style: dashed; }
+.jelly-quick-view-choices input { position: absolute; opacity: 0; pointer-events: none; }
+.jelly-quick-view-choice-label { font-weight: 600; }
+.jelly-quick-view-choice-price { font-size: 13px; color: var(--j-color-muted, inherit); }
+.jelly-quick-view-add { width: 100%; min-height: 52px; }
+.jelly-quick-view-add:disabled { cursor: not-allowed; opacity: .6; }
+.jelly-quick-view .jelly-quick-view-message:empty { display: none; }
+.jelly-quick-view .jelly-quick-view-message { margin: 0; color: var(--j-color-sale, #b5452b); font-size: 14px; }
+.jelly-quick-view .jelly-quick-view-link { align-self: flex-start; color: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+@media (max-width: 767px) {
+  .jelly-quick-view { width: 100vw; max-height: 92dvh; margin: auto 0 0; border-radius: var(--jelly-dialog-radius, 20px) var(--jelly-dialog-radius, 20px) 0 0; }
+  .jelly-quick-view-panel { gap: 18px; padding: 20px 16px 24px; }
+  .jelly-quick-view-details { padding-right: 0; }
+}

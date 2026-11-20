@@ -85,7 +85,7 @@ async function expressBedInstall({ api, plan: planUrl, publish = true }) {
 
   const theme = (await call("GET", `${front}/theme-settings`)).data;
   await call("PUT", `${front}/theme-settings`, { expectedRevision: theme.revision ?? null, themeId: theme.themeId, ...(theme.themeVersion ? { themeVersion: theme.themeVersion } : {}), settings: plan.themeSettings, ...(theme.draftArtifactId !== undefined ? { draftArtifactId: theme.draftArtifactId } : {}) });
-  say("Theme settings written (Midnight oat).");
+  say("Theme settings written.");
 
   // 4. Photos.
   const mediaIds = new Map();

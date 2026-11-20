@@ -1,5 +1,6 @@
 import { translateSection, type RuntimeMenuV4, type SectionNode } from "@jelly/storefront-schema";
 import { CardCartContext, CardCompareContext, CardRatingsContext } from "./product-card";
+import { CardQuickViewContext } from "./quick-view";
 import { createElement } from "react";
 import { sectionDisplayLabel, sectionEmptyMessage } from "@jelly/storefront-registry/runtime";
 import {
@@ -114,5 +115,5 @@ export function RegistrySectionRenderer({
         ? { kind: "block", region, sectionId: section.id, blockId, fieldKey: block?.dataset.editorFieldKey }
         : { kind: "section", region, sectionId: section.id });
     } : undefined}
-  ><SectionCustomCss section={section} /><CardCartContext.Provider value={editor ? undefined : commerce.cart}><CardRatingsContext.Provider value={commerce.ratings}><CardCompareContext.Provider value={editor ? undefined : commerce.compare}><StorefrontLanguage.Provider value={language ?? null}>{content}</StorefrontLanguage.Provider></CardCompareContext.Provider></CardRatingsContext.Provider></CardCartContext.Provider>{editor ? <p className="jelly-section-empty" data-section-empty="">{sectionEmptyMessage(section.type)}</p> : null}</SectionFrame>;
+  ><SectionCustomCss section={section} /><CardCartContext.Provider value={editor ? undefined : commerce.cart}><CardRatingsContext.Provider value={commerce.ratings}><CardCompareContext.Provider value={editor ? undefined : commerce.compare}><CardQuickViewContext.Provider value={editor ? undefined : commerce.quickView}><StorefrontLanguage.Provider value={language ?? null}>{content}</StorefrontLanguage.Provider></CardQuickViewContext.Provider></CardCompareContext.Provider></CardRatingsContext.Provider></CardCartContext.Provider>{editor ? <p className="jelly-section-empty" data-section-empty="">{sectionEmptyMessage(section.type)}</p> : null}</SectionFrame>;
 }

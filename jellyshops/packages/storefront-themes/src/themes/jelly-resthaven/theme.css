@@ -130,6 +130,33 @@ p { margin: 0 0 1em; }
 /* ── 404 ───────────────────────────────────── */
 .jelly-not-found .jelly-eyebrow { margin: 0; color: var(--j-color-accent); font-family: var(--theme-font-heading); font-size: 88px; font-weight: 500; letter-spacing: 0; line-height: 1; text-transform: none; }
 
+/* ── Premium details ─────────────────────────────────────────────── */
+/* Product cards sit on a raised panel that lifts a little when pointed at; the photo zooms gently inside it. */
+.jelly-product-card {
+  padding: 10px 10px 18px; border-radius: var(--j-radius-md); background: var(--j-color-surface);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 4%), 0 10px 28px -20px rgb(15 23 42 / 30%);
+  transition: transform .28s var(--j-ease, ease), box-shadow .28s var(--j-ease, ease);
+}
+.jelly-product-card:hover { transform: translateY(-3px); box-shadow: 0 2px 6px rgb(15 23 42 / 5%), 0 24px 44px -24px rgb(15 23 42 / 38%); }
+.jelly-product-card-body { padding: 14px 6px 0; }
+.jelly-product-card-media img { transition: transform .6s var(--j-ease, ease); }
+/* Buttons: a soft coloured shadow and a small lift on hover. */
+.jelly-button { transition: transform .2s var(--j-ease, ease), box-shadow .2s var(--j-ease, ease), background-color .2s ease, color .2s ease; }
+.jelly-button:not(.jelly-button--secondary):hover { transform: translateY(-1px); box-shadow: 0 12px 22px -14px color-mix(in srgb, var(--j-color-primary) 75%, transparent); }
+/* Small headings above titles take the theme accent. */
+.jelly-eyebrow { color: var(--j-color-accent); font-weight: 600; letter-spacing: .1em; }
+/* Trust row: each icon in a tinted circle. */
+.jelly-trust-strip .jelly-icon { box-sizing: content-box; padding: 7px; border-radius: 999px; background: color-mix(in srgb, var(--j-color-primary) 10%, transparent); color: var(--j-color-primary); }
+[data-scheme] > .jelly-trust-strip .jelly-icon { background: color-mix(in srgb, currentColor 12%, transparent); color: inherit; }
+/* Category tiles: rounded, with a gentle zoom. */
+.jelly-category-card { border-radius: var(--j-radius-md); overflow: hidden; }
+.jelly-category-card img { transition: transform .6s var(--j-ease, ease); }
+.jelly-category-card:hover img { transform: scale(1.04); }
+@media (prefers-reduced-motion: reduce) {
+  .jelly-product-card, .jelly-product-card:hover, .jelly-button:hover { transform: none; }
+  .jelly-category-card:hover img { transform: none; }
+}
+
 /* ── Phones and tablets ──────────────────────────────────────────── */
 @media (max-width: 1023px) {
   .jelly-category-card > strong, .jelly-category-grid[data-layout="bento"] .jelly-category-card:first-child > strong { left: 10px; bottom: 10px; max-width: calc(100% - 20px); padding: 8px 14px; font-size: 13px; }
@@ -157,4 +184,7 @@ p { margin: 0 0 1em; }
   .jelly-hero-actions { display: grid; grid-template-columns: minmax(0, 1fr); align-self: stretch; width: 100%; }
   .jelly-hero-actions .jelly-button { width: 100%; }
   .jelly-collection-header[data-layout="banner"] > .jelly-container { padding-block: 48px 28px; }
+  /* Two cards across: a slimmer panel so the photos stay large. */
+  .jelly-product-card { padding: 6px 6px 14px; border-radius: var(--j-radius-sm); }
+  .jelly-product-card-body { padding: 12px 4px 0; }
 }

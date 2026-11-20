@@ -5,6 +5,7 @@ import { useShop } from "@/contexts/shop-context";
 import { useStorefrontChrome } from "./chrome-context";
 import { fetchPublicMetaobjects } from "./metaobjects-api";
 import { productCardData } from "./product-card-data";
+import { quickViewAccess } from "./quick-view-data";
 import { suggestStoreProducts } from "./product-suggestions";
 import { useStorefrontLanguage } from "./storefront-language";
 import type { CSSProperties } from "react";
@@ -22,7 +23,7 @@ import {
   type StorefrontDocument,
   type ThemeId,
 } from "@jelly/storefront-schema";
-import { resolveDesignTokens, resolveStorefrontThemeTokens, resolveTheme, legacyStylesAttribute, themeStyleId, usesProductCompare, themeRootAttributes } from "@jelly/storefront-themes/runtime";
+import { resolveDesignTokens, resolveStorefrontThemeTokens, resolveTheme, legacyStylesAttribute, themeStyleId, usesProductCompare, usesQuickView, themeRootAttributes } from "@jelly/storefront-themes/runtime";
 import type { Currency, Product } from "@/lib/domain";
 import type { ResolvedStorefrontRoute } from "./resource-loader";
 import { RuntimeStorefrontView } from "./runtime-storefront-view";
@@ -107,7 +108,7 @@ export function PublishedRuntimeStorefront({ snapshot, route, storeSlug, currenc
   const resolvedTheme = resolveTheme(snapshot.theme.id ?? snapshot.theme.presetId, snapshot.theme.settings, snapshot.theme.version);
   const themeId = resolvedTheme.id as ThemeId;
   const style = resolveStorefrontThemeTokens(themeId, resolvedTheme.settings, {}, resolvedTheme.version) as CSSProperties;
-  const commerce = { ...commerceProvider(storeSlug, currency, products, snapshot.storeId, cart, { ratings, reviews }), compare: usesProductCompare(resolvedTheme.settings) ? compare : undefined, bagCount, recentlyViewed, browseProducts, listAddress };
+  const commerce = { ...commerceProvider(storeSlug, currency, products, snapshot.storeId, cart, { ratings, reviews }), compare: usesProductCompare(resolvedTheme.settings) ? compare : undefined, quickView: usesQuickView(resolvedTheme.settings) ? quickViewAccess(products, storeSlug, currency, ratings) : undefined, bagCount, recentlyViewed, browseProducts, listAddress };
 
   return (
     <div className={`jelly-storefront jelly-theme-layout-${resolvedTheme.layout}`} data-jelly-theme={themeStyleId(resolvedTheme.id, resolvedTheme.version)} data-jelly-legacy-styles={legacyStylesAttribute(resolvedTheme.id, resolvedTheme.version)} data-jelly-theme-version={resolvedTheme.version} {...themeRootAttributes(style)} style={style}>

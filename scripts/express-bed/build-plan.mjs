@@ -271,6 +271,27 @@ const newsletter = inline(home, "resthaven-newsletter");
 newsletter.blocks[0].settings.text = "Sleep better, spend less";
 newsletter.blocks[1].settings.text = "Showroom events, new arrivals and early access to offers. Once or twice a month.";
 
+// Home order (2026-11-20 redesign, after Sonno, Eve, Dreams and Silentnight): promises straight under the hero, then
+// categories and best sellers; colour bands alternate White / Cloud / Butter so the page reads in clear chapters, and the
+// sign-up closes on the Navy band. A short FAQ answers the four questions shoppers ask before buying a bed.
+const scheme = (id, value) => { inline(home, id).settings.styleScheme = value; };
+scheme("resthaven-trust-row", "scheme2");
+scheme("resthaven-promo", "scheme3");
+scheme("resthaven-shop-look", "scheme2");
+scheme("resthaven-reviews", "scheme2");
+scheme("resthaven-newsletter", "scheme4");
+const faq = { kind: "inline", section: { id: "expressbed-home-faq", type: "faq", enabled: true, settings: { heading: "Before you buy", text: "Quick answers about delivery, paying and sizes. More in our help pages." }, blocks: pages.find((page) => page.handle === "faq").body.map(([question, answer], index) => ({ id: `expressbed-home-faq-${index}`, type: "faq-item", enabled: true, settings: { question, answer }, blocks: [] })) } };
+{
+  const order = ["studio-hero", "resthaven-trust-row", "resthaven-categories", "resthaven-featured", "resthaven-promo", "resthaven-shop-look", "resthaven-spotlight", "resthaven-reviews", "resthaven-fabric-story", "resthaven-mattress-feature", "expressbed-home-faq", "resthaven-brand-story", "resthaven-gallery", "resthaven-newsletter"];
+  const placements = [...home.sections, faq];
+  const inlineById = new Map(placements.filter((placement) => placement.kind === "inline").map((placement) => [placement.section.id, placement]));
+  const before = home.sections.filter((placement) => placement.kind !== "inline" && home.sections.indexOf(placement) < home.sections.findIndex((entry) => entry.kind === "inline"));
+  const after = home.sections.filter((placement) => placement.kind !== "inline" && !before.includes(placement));
+  const missing = [...inlineById.keys()].filter((id) => !order.includes(id));
+  if (missing.length) throw new Error(`Home sections missing from the order: ${missing.join(", ")}`);
+  home.sections = [...before, ...order.map((id) => inlineById.get(id)), ...after];
+}
+
 // Product page, two columns on large screens:
 //   left  = photos, then "Complete the set", the description, details, dimensions and reviews (blocks set to
 //           "Under the photos");
@@ -350,11 +371,14 @@ const mainMenu = [
 ];
 
 // ---------------------------------------------------------------------------------------------------------------
-// Theme settings: Resthaven with the "Midnight oat" style (warm oat, midnight ink, brass), which suits these photos.
+// Theme settings: Resthaven with the "Fresh cobalt" style (white, cobalt, butter and navy bands; 2026-11-20 redesign).
 // ---------------------------------------------------------------------------------------------------------------
-const style = themes.listThemeStyles("jelly-resthaven").find((entry) => entry.id === "midnight-oat");
+const style = themes.listThemeStyles("jelly-resthaven").find((entry) => entry.id === "fresh-cobalt");
 const themeSettings = themes.applyThemeStyle(structuredClone(pack.theme.settings), style);
 themeSettings.cart = { ...(themeSettings.cart ?? {}), type: "drawer", freeDeliveryFrom: 0 };
+// Cards: the theme defaults (stars, % off, second photo on hover, colour dots) plus Quick view.
+const resthavenDefaults = JSON.parse(readFileSync(fileURLToPath(new URL("jellyshops/packages/storefront-themes/src/themes/jelly-resthaven/theme.json", `file:///${root.replaceAll("\\", "/")}`)), "utf8")).settingsDefaults;
+themeSettings.productCard = { ...resthavenDefaults.productCard, ...(themeSettings.productCard ?? {}), quickView: true };
 
 // ---------------------------------------------------------------------------------------------------------------
 // Checks: every section must pass the registry, as the editor and publish would require.

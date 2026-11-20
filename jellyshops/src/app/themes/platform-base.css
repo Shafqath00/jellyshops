@@ -172,7 +172,7 @@
 [data-jelly-legacy-styles="off"] .jelly-footer :focus-visible { outline-color: currentColor; }
 [data-jelly-legacy-styles="off"] .jelly-collection-header { padding-block: clamp(40px, 5vw, 72px) clamp(24px, 3vw, 40px); background: var(--j-color-bg); text-align: left; }
 [data-jelly-legacy-styles="off"] .jelly-collection-header > .jelly-container { display: grid; gap: 12px; }
-[data-jelly-legacy-styles="off"] .jelly-collection-header h1 { margin: 0; font-size: var(--j-page-title-size); }
+[data-jelly-legacy-styles="off"] .jelly-collection-header h1 { margin: 0; color: var(--j-color-text); font-size: var(--j-page-title-size); }
 [data-jelly-legacy-styles="off"] .jelly-collection-header-copy { max-width: min(68ch, 100%); color: var(--j-color-muted); font-size: 17px; }
 [data-jelly-legacy-styles="off"] .jelly-collection-count { margin: 0; color: var(--j-color-muted); font-size: 14px; }
 [data-jelly-legacy-styles="off"] .jelly-collection-header-image { display: block; width: 100%; height: clamp(200px, 26vw, 360px); margin-top: 20px; object-fit: cover; border-radius: var(--j-radius-sm); }

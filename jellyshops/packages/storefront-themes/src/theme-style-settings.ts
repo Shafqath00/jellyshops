@@ -239,6 +239,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     { id: "productCard.hoverImage", type: "checkbox", label: "Show the second photo on hover", group: "Product cards", default: false, description: "When a shopper points at a card, its product's second photo fades in (for example the bed made up in a room)." },
     { id: "productCard.showRating", type: "checkbox", label: "Show star ratings", group: "Product cards", default: false, description: "Stars and the number of reviews under the name, for products with published reviews." },
     { id: "productCard.compare", type: "checkbox", label: "Let shoppers compare products", group: "Product cards", default: false, description: "A Compare tick on every card. Up to four products dock in a tray at the bottom of the page and open side by side, with their specifications, on a compare page." },
+    { id: "productCard.quickView", type: "checkbox", label: "Quick view on cards", group: "Product cards", default: false, description: "A Quick view button on every card opens the product in a pop-up: photos, price, sizes and Add to bag, without leaving the page." },
     select("productCard.photoFit", "Product photos", "Product cards", theme, [[theme, "Theme default"], ["crop", "Fill the frame (room and lifestyle photos)"], ["whole", "Show the whole product on a soft background (cut-out photos)"]], "Every card photo gets the same frame, so photos of different shapes line up. Choose the whole product when your photos are products on a plain background."),
     select("productCard.swatches", "Colour swatches", "Product cards", "none", [["none", "Don't show"], ["colors", "Show the colours a product comes in"]], "Dots for up to five colours of a product's colour option."),
   ];
@@ -302,7 +303,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
       prices: { compareAt: theme, sale: theme },
     },
     buttonDefaults: { size: theme, textCase: theme, borderWidth: theme, hover: theme, secondaryStyle: theme },
-    cardDefaults: { layout: theme, showRating: false, hoverImage: false, compare: false, radius: theme, shadow: theme, hover: theme, order: "photo-title-price", showTitle: "show", titleLines: theme, showPrice: "show", savings: "none", button: "none", photoFit: theme, swatches: "none" },
+    cardDefaults: { layout: theme, showRating: false, hoverImage: false, compare: false, quickView: false, radius: theme, shadow: theme, hover: theme, order: "photo-title-price", showTitle: "show", titleLines: theme, showPrice: "show", savings: "none", button: "none", photoFit: theme, swatches: "none" },
     textStyleSchema,
     textRoleSchema,
     colorSchemeSchema,
@@ -358,6 +359,11 @@ export function storeLanguages(settings: Record<string, unknown> | undefined): S
 /** Whether product cards carry a Compare tick and the store shows the compare tray (Product cards > Let shoppers compare products). */
 export function usesProductCompare(settings: Record<string, unknown> | undefined): boolean {
   return record(settings?.productCard).compare === true;
+}
+
+/** Theme setting Product cards > "Quick view on cards". */
+export function usesQuickView(settings: Record<string, unknown> | undefined): boolean {
+  return record(settings?.productCard).quickView === true;
 }
 
 export function usesCartDrawer(settings: Record<string, unknown> | undefined): boolean {

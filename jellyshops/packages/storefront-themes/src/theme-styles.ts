@@ -96,6 +96,13 @@ const resthaven: ThemeStyle[] = [
     settings: { ...brightLook({ background: "#FBF7F1", surface: "#FFFFFF", text: "#1F2A44", secondary: "#5A6478", primary: "#3D6E96", accent: "#B5452B" }, [["Linen", "#FBF7F1", "#1F2A44", "#3D6E96", "#FFFFFF"], ["Sky", "#E3EEF7", "#1F2A44", "#1F2A44", "#FBF7F1"], ["Blush", "#F8E6DE", "#1F2A44", "#B5452B", "#FFFFFF"], ["Night", "#1F2A44", "#FBF7F1", "#F2A488", "#1F2A44"]]), typography: { headingFont: "Fraunces", bodyFont: "Figtree" }, buttons: { radius: "pill" } },
   },
   {
+    // Bright retail look (Express Bed, 2026-11-20): white page, cool cloud bands, cobalt buttons, a butter promo band
+    // and a navy night band. Every text/background pair is WCAG AA (theme-styles.test.ts checks them).
+    id: "fresh-cobalt", name: "Fresh cobalt", description: "Crisp white, cobalt blue and sunny butter: bright and confident.",
+    swatches: ["#FFFFFF", "#13213F", "#2453D4", "#FFD866"],
+    settings: { ...brightLook({ background: "#FFFFFF", surface: "#FFFFFF", text: "#13213F", secondary: "#4A5875", primary: "#2453D4", accent: "#C2410C" }, [["White", "#FFFFFF", "#13213F", "#2453D4", "#FFFFFF"], ["Cloud", "#EEF3FC", "#13213F", "#13213F", "#FFFFFF"], ["Butter", "#FFF4D1", "#13213F", "#13213F", "#FFFFFF"], ["Navy", "#13213F", "#FFFFFF", "#FFD866", "#13213F"]]), typography: { headingFont: "Fraunces", bodyFont: "Figtree" }, buttons: { radius: "pill" }, badges: { background: "#D12E4F", text: "#FFFFFF" } },
+  },
+  {
     id: "sage-garden", name: "Sage garden", description: "Cream, sage green and terracotta.",
     swatches: ["#FAF8F2", "#22301F", "#4E6E4B", "#E6EEE3"],
     settings: { ...brightLook({ background: "#FAF8F2", surface: "#FFFFFF", text: "#22301F", secondary: "#56604F", primary: "#4E6E4B", accent: "#A8462F" }, [["Cream", "#FAF8F2", "#22301F", "#4E6E4B", "#FFFFFF"], ["Sage", "#E6EEE3", "#22301F", "#22301F", "#FAF8F2"], ["Sand", "#F4EADB", "#22301F", "#A8462F", "#FFFFFF"], ["Forest", "#2F3E2D", "#FAF8F2", "#E9C9A4", "#22301F"]]), typography: { headingFont: "Cormorant Garamond", bodyFont: "Inter" }, buttons: { radius: "rounded" } },

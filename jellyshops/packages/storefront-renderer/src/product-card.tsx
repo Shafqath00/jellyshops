@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useSyncExternalStore } from "react";
 import { StorefrontProductCard } from "@jelly/storefront-ui";
 import type { PublicProduct, StorefrontCartAccess, StorefrontCompareAccess } from "./types";
+import { CardQuickViewContext, QuickViewButton } from "./quick-view";
 
 /** The shopper's cart for quick add; provided per section by RegistrySectionRenderer (not in the editor). */
 export const CardCartContext = createContext<StorefrontCartAccess | undefined>(undefined);
@@ -65,9 +66,10 @@ export function ProductCard({ product, editorProps, priority }: { product: Publi
   const rating = product.rating ?? ratings?.[product.id];
   if (rating && !product.rating) product = { ...product, rating };
   const compare = useContext(CardCompareContext);
+  const quickView = useContext(CardQuickViewContext);
   const quickAdd = cart && product.quickAdd && product.available !== false ? product.quickAdd : undefined;
-  const actions = (cart && quickAdd) || compare
-    ? <>{cart && quickAdd && <QuickAdd product={{ ...product, quickAdd }} cart={cart} />}{compare && <CompareToggle product={product} compare={compare} />}</>
+  const actions = (cart && quickAdd) || compare || quickView
+    ? <>{quickView && <QuickViewButton product={product} quickView={quickView} cart={cart} />}{cart && quickAdd && <QuickAdd product={{ ...product, quickAdd }} cart={cart} />}{compare && <CompareToggle product={product} compare={compare} />}</>
     : undefined;
   return <StorefrontProductCard product={product} editorProps={editorProps} actions={actions} priority={priority} />;
 }

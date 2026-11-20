@@ -7,10 +7,10 @@ import { applyThemeStyle, listThemeStyles } from "./theme-styles";
 const defaults = (themeId: string) => structuredClone((getThemeDefinition(themeId as never).manifest as { settingsDefaults: Record<string, unknown> }).settingsDefaults);
 const get = (settings: Record<string, unknown>, path: string) => path.split(".").reduce<unknown>((value, key) => (value as Record<string, unknown> | undefined)?.[key], settings);
 
-it("ships four designer styles for Jelly Minimal, Jelly Avenue and Resthaven, none for other themes", () => {
+it("ships designer styles for Jelly Minimal, Jelly Avenue and Resthaven, none for other themes", () => {
   expect(listThemeStyles("jelly-signature").map((style) => style.name)).toEqual(["Warm sand", "Ink and paper", "Sage", "Blush"]);
   expect(listThemeStyles("jelly-avenue").map((style) => style.name)).toEqual(["Gallery", "Midnight", "Stone", "Coastal"]);
-  expect(listThemeStyles("jelly-resthaven").map((style) => style.name)).toEqual(["Morning sky", "Sage garden", "Sunset blush", "Midnight oat"]);
+  expect(listThemeStyles("jelly-resthaven").map((style) => style.name)).toEqual(["Morning sky", "Fresh cobalt", "Sage garden", "Sunset blush", "Midnight oat"]);
   expect(listThemeStyles("jelly-diode")).toEqual([]);
   expect(listThemeStyles(undefined)).toEqual([]);
 });
@@ -35,6 +35,9 @@ it("gives every style settings the theme accepts, readable colours, and the dark
         expect(contrastRatio(values.text, values.background), `${style.id} ${scheme} text`).toBeGreaterThanOrEqual(4.5);
         expect(contrastRatio(values.buttonText, values.button), `${style.id} ${scheme} button`).toBeGreaterThanOrEqual(4.5);
       }
+      expect(contrastRatio(colors.primary, colors.background), `${style.id} links and buttons`).toBeGreaterThanOrEqual(4.5);
+      const badges = settings.badges as Record<string, string> | undefined;
+      if (badges?.background && badges.text) expect(contrastRatio(badges.text, badges.background), `${style.id} badges`).toBeGreaterThanOrEqual(4.5);
       // The older "Dark" background maps to this slot, so it must stay the contrasting scheme.
       const dark = get(settings, `colorSchemes.${darkSlot}.background`) as string;
       expect(contrastRatio(dark, colors.background), `${style.id} dark slot`).toBeGreaterThanOrEqual(3);
