@@ -278,6 +278,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     select("checkout.phone", "Phone number", "Checkout", "required", [["required", "Ask for it (needed)"], ["optional", "Ask for it (optional)"], ["hidden", "Don't ask"]], "Couriers use it to arrange delivery. Only asked when the order has something to deliver."),
     select("checkout.addressLine2", "Second address line", "Checkout", "show", [["show", "Show (flat, suite or building)"], ["hide", "Hide"]]),
     select("checkout.note", "Note for the shop", "Checkout", "hide", [["hide", "Don't ask"], ["show", "Ask for an optional note"]], "Shown on the order page in your admin."),
+    select("checkout.deliveryDays", "Delivery time", "Checkout", "none", [["none", "Don't show a date"], ["1-2", "1 to 2 working days"], ["2-3", "2 to 3 working days"], ["3-5", "3 to 5 working days"], ["5-7", "5 to 7 working days"], ["7-10", "7 to 10 working days"], ["10-14", "10 to 14 working days"]], "Shows an expected delivery date in the order summary and on the order confirmation, counted from the day of the order (weekends left out)."),
     { id: "checkout.deliveryNote", type: "text", label: "Delivery line", group: "Checkout", default: "", description: "A short line under the total, for example \"Delivered in 5 to 7 working days\". Empty: not shown." },
     { id: "checkout.returnsNote", type: "text", label: "Returns line", group: "Checkout", default: "", description: "For example \"30-day returns\". Links to your Returns page. Empty: not shown." },
   ];
@@ -304,7 +305,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
       advanced: { customCss: "" },
       languages: { defaultName: "English", extra: "" },
       cart: { type: "page", freeDeliveryFrom: 0 },
-      checkout: { accent: "", phone: "required", addressLine2: "show", note: "hide", deliveryNote: "", returnsNote: "" },
+      checkout: { accent: "", phone: "required", addressLine2: "show", note: "hide", deliveryDays: "none", deliveryNote: "", returnsNote: "" },
       animations: { reveal: false, smoothScroll: false },
       dialogs: { radius: theme, shadow: theme, overlay: theme },
       icons: { weight: theme, ends: theme },
@@ -377,14 +378,16 @@ export function usesQuickView(settings: Record<string, unknown> | undefined): bo
   return record(settings?.productCard).quickView === true;
 }
 
-export interface CheckoutSettings { accent: string; phone: "required" | "optional" | "hidden"; addressLine2: boolean; note: boolean; deliveryNote: string; returnsNote: string }
+export interface CheckoutSettings { accent: string; phone: "required" | "optional" | "hidden"; addressLine2: boolean; note: boolean; deliveryNote: string; returnsNote: string; /** Working days from order to delivery (theme settings > Checkout > Delivery time), or null for no date. */ deliveryDays: [number, number] | null }
 /** Theme settings > Checkout, cleaned up (unknown values fall back to the defaults). */
 export function checkoutSettings(settings: Record<string, unknown> | undefined): CheckoutSettings {
   const value = record(settings?.checkout);
   const text = (raw: unknown) => (typeof raw === "string" ? raw.trim().slice(0, 120) : "");
   const accent = typeof value.accent === "string" && /^#[0-9a-f]{6}$/i.test(value.accent) ? value.accent : "";
   const phone = value.phone === "optional" || value.phone === "hidden" ? value.phone : "required";
-  return { accent, phone, addressLine2: value.addressLine2 !== "hide", note: value.note === "show", deliveryNote: text(value.deliveryNote), returnsNote: text(value.returnsNote) };
+  const days = typeof value.deliveryDays === "string" ? /^(\d{1,2})-(\d{1,2})$/.exec(value.deliveryDays) : null;
+  const deliveryDays: [number, number] | null = days && Number(days[1]) <= Number(days[2]) ? [Number(days[1]), Number(days[2])] : null;
+  return { accent, phone, addressLine2: value.addressLine2 !== "hide", note: value.note === "show", deliveryNote: text(value.deliveryNote), returnsNote: text(value.returnsNote), deliveryDays };
 }
 
 export function usesCartDrawer(settings: Record<string, unknown> | undefined): boolean {

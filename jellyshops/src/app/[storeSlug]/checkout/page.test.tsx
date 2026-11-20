@@ -5,10 +5,12 @@ import { vi } from "vitest";
 import { ShopProvider } from "@/contexts/shop-context";
 import { createRepository } from "@/lib/repository";
 import { CheckoutView } from "./view";
+import { bagKey } from "@/features/checkout/checkout-memory";
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), useParams: () => ({ storeSlug: "sweet-bakes" }) }));
+const mockRouter = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => mockRouter, useParams: () => ({ storeSlug: "sweet-bakes" }) }));
 vi.mock("@/features/checkout/components/payment-step", () => ({
-  PaymentStep: ({ amountMinor }: { amountMinor: number }) => <section><h2 tabIndex={-1}>Payment</h2><p>Card payment form for {amountMinor}</p></section>,
+  PaymentStep: ({ amountMinor, onPaid, onBeforePay }: { amountMinor: number; onPaid: () => void; onBeforePay?: () => void }) => <section><p>Card payment form for {amountMinor}</p><button type="button" onClick={() => { onBeforePay?.(); onPaid(); }}>Pretend to pay</button></section>,
 }));
 
 const prepared = { clientSecret: "cs_test", connectedAccountId: "acct_123", orderId: "order-1", publicToken: "a-token", totals: { subtotalMinor: 50000, shippingMinor: 5000, totalMinor: 55000, amountMinor: 55000, currency: "INR" } };
@@ -225,4 +227,44 @@ it("remembers details on this device only when asked, and fills them in next tim
   await user.click(screen.getByRole("button", { name: /forget them/i }));
   expect(localStorage.getItem("jelly-checkout-details:sweet-bakes")).toBeNull();
   expect(screen.getByLabelText(/^email/i)).toHaveValue("");
+});
+
+it("leaves checkout with replace after paying, so Back cannot return to the payment form", async () => {
+  bag();
+  sessionStorage.clear();
+  vi.stubGlobal("fetch", vi.fn()
+    .mockResolvedValueOnce(new Response(JSON.stringify({ attemptId: "attempt-1", orderId: "order-1", publicToken: "a-token" }), { status: 201 }))
+    .mockResolvedValueOnce(new Response(JSON.stringify(prepared), { status: 200 })));
+  const user = userEvent.setup();
+  render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
+  await fillDelivery(user);
+  await user.click(screen.getByRole("button", { name: /continue to payment/i }));
+  await user.click(await screen.findByRole("button", { name: "Pretend to pay" }));
+  expect(mockRouter.replace).toHaveBeenCalledWith("/sweet-bakes/order/a-token?paid=1");
+  expect(mockRouter.push).not.toHaveBeenCalled();
+  expect(JSON.parse(sessionStorage.getItem("jelly-checkout-paid:sweet-bakes")!)).toMatchObject({ publicToken: "a-token", email: "riya@example.com", paid: true });
+});
+
+it("does not offer a second payment for a bag this tab has just paid for", async () => {
+  const repository = bag();
+  const cart = repository.getCartForStore("sweet-bakes")!;
+  sessionStorage.setItem("jelly-checkout-paid:sweet-bakes", JSON.stringify({ publicToken: "a-token", email: "riya@example.com", bagKey: bagKey(cart.items), at: Date.now(), paid: true }));
+  const user = userEvent.setup();
+  render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
+  expect(await screen.findByRole("heading", { name: "You've already paid for this order" })).toBeVisible();
+  expect(screen.getByRole("link", { name: "View your order" })).toHaveAttribute("href", "/sweet-bakes/order/a-token");
+  expect(screen.queryByLabelText(/^email/i)).toBeNull();
+  await user.click(screen.getByRole("button", { name: "Buy these items again" }));
+  expect(await screen.findByLabelText(/^email/i)).toBeVisible();
+  expect(sessionStorage.getItem("jelly-checkout-paid:sweet-bakes")).toBeNull();
+  sessionStorage.clear();
+});
+
+it("shows the expected delivery date from the shop's delivery time", async () => {
+  bag();
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-11-20T10:00:00Z"));
+  render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" settings={{ checkout: { deliveryDays: "3-5" } }} /></ShopProvider>);
+  expect((await screen.findAllByText("Arrives Wed 25 – Fri 27 Nov")).length).toBeGreaterThan(0);
+  vi.useRealTimers();
 });

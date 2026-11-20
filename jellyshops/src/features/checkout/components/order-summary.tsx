@@ -19,6 +19,8 @@ interface OrderSummaryProps {
   discount?: DiscountControls;
   /** Short merchant lines (theme settings > Checkout) shown with the secure-payment line. */
   trust?: { delivery?: string; returns?: string; returnsHref?: string };
+  /** Expected delivery window ("Tue 25 – Thu 27 Nov"), when the shop gives a delivery time. */
+  arrives?: string;
 }
 
 export interface DiscountControls {
@@ -91,7 +93,7 @@ function lineDetail(line: CheckoutLine): string {
 }
 
 /** The bag as a bar at the top of the checkout column on every screen: item count and total, opening in place. */
-export function OrderSummary({ lines, currency, estimatedSubtotal, estimatedShipping, delivery, totals, discount, trust }: OrderSummaryProps) {
+export function OrderSummary({ lines, currency, estimatedSubtotal, estimatedShipping, delivery, totals, discount, trust, arrives }: OrderSummaryProps) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const money = (minor: number) => formatMoney(minor, currency);
@@ -144,7 +146,7 @@ export function OrderSummary({ lines, currency, estimatedSubtotal, estimatedShip
         <dl className="jelly-checkout__totals">
           <div><dt>Subtotal</dt><dd>{money(subtotal)}</dd></div>
           {discountMinor > 0 && <div className="jelly-checkout__discount-line"><dt>Discount{discountCode ? <span> · {discountCode}</span> : null}</dt><dd>−{money(discountMinor)}</dd></div>}
-          {delivery && <div><dt>Delivery</dt><dd>{shipping === 0 ? "Free" : money(shipping)}</dd></div>}
+          {delivery && <div><dt>Delivery{arrives ? <span className="jelly-checkout__arrives">Arrives {arrives}</span> : null}</dt><dd>{shipping === 0 ? "Free" : money(shipping)}</dd></div>}
           <div className="jelly-checkout__total"><dt>Total</dt><dd><span className="jelly-checkout__currency">{currency}</span> {money(total)}</dd></div>
         </dl>
         <p className="jelly-checkout__hint" aria-live="polite">

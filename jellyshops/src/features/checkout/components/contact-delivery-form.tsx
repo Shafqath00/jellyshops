@@ -136,7 +136,7 @@ export function ContactForm(props: FormProps & {
 export function DeliveryForm(props: FormProps & {
   country: string;
   onContinue: () => Promise<CheckoutField | null>;
-  shippingMethod?: { name: string; price: string };
+  shippingMethod?: { name: string; price: string; detail?: string };
   footer?: ReactNode;
 }) {
   const { country, onContinue, pending, options, shippingMethod, footer } = props;
@@ -161,7 +161,7 @@ export function DeliveryForm(props: FormProps & {
       {shippingMethod && (
         <div className="jelly-checkout__method" role="group" aria-label="Delivery method">
           <span className="jelly-checkout__method-radio" aria-hidden="true" />
-          <span>{shippingMethod.name}</span>
+          <span>{shippingMethod.name}{shippingMethod.detail ? <small className="jelly-checkout__method-detail">{shippingMethod.detail}</small> : null}</span>
           <strong>{shippingMethod.price}</strong>
         </div>
       )}

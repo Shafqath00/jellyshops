@@ -126,3 +126,32 @@ export function safeReturnUrl(path: string, origin: string): string | null {
     return null;
   }
 }
+
+/** Adds working days (Monday to Friday) to a date. */
+function addWorkingDays(from: Date, days: number): Date {
+  const date = new Date(from);
+  let left = days;
+  while (left > 0) {
+    date.setDate(date.getDate() + 1);
+    const day = date.getDay();
+    if (day !== 0 && day !== 6) left--;
+  }
+  return date;
+}
+
+/**
+ * The expected delivery window for an order placed on `from`, from the merchant's delivery time
+ * (theme settings > Checkout), as "Tue 25 Nov" or "Tue 25 – Thu 27 Nov". Undefined without a delivery time.
+ */
+export function expectedDelivery(from: Date | string | undefined, days: [number, number] | null): string | undefined {
+  if (!days || !from) return undefined;
+  const start = new Date(from);
+  if (Number.isNaN(start.getTime())) return undefined;
+  const earliest = addWorkingDays(start, days[0]);
+  const latest = addWorkingDays(start, days[1]);
+  const full = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short" });
+  if (earliest.toDateString() === latest.toDateString()) return full.format(earliest);
+  const sameMonth = earliest.getMonth() === latest.getMonth();
+  const first = sameMonth ? new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric" }).format(earliest) : full.format(earliest);
+  return `${first} – ${full.format(latest)}`;
+}

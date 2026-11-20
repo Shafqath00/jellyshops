@@ -25,9 +25,11 @@ interface PaymentStepProps {
   returnPath: string;
   billing: { name: string; email: string };
   onPaid: () => void;
+  /** Called just before the payment is confirmed (a bank or wallet may leave the page to finish it). */
+  onBeforePay?: () => void;
 }
 
-function PaymentForm({ clientSecret, amountMinor, currency, returnPath, billing, onPaid }: Omit<PaymentStepProps, "connectedAccountId">) {
+function PaymentForm({ clientSecret, amountMinor, currency, returnPath, billing, onPaid, onBeforePay }: Omit<PaymentStepProps, "connectedAccountId">) {
   const stripe = useStripe();
   const elements = useElements();
   const [pending, setPending] = useState(false);
@@ -43,6 +45,7 @@ function PaymentForm({ clientSecret, amountMinor, currency, returnPath, billing,
     setError("");
     const checked = await elements.submit();
     if (checked.error) { setError(checked.error.message ?? "Check your payment details and try again."); setPending(false); return; }
+    onBeforePay?.();
     const result = await stripe.confirmPayment({ elements, confirmParams: { return_url: returnUrl }, redirect: "if_required" });
     const status = result.paymentIntent?.status ?? (result.error ? (await stripe.retrievePaymentIntent(clientSecret)).paymentIntent?.status : undefined);
     // "processing" (some bank payments) is final from the shopper's side: the order page waits for the webhook.

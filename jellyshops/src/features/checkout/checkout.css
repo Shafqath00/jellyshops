@@ -439,3 +439,86 @@
   .jelly-checkout[data-flow="cards"] .jelly-checkout__progress::after { transition: none; }
 }
 .jelly-checkout[data-flow="cards"] .jelly-checkout__note > svg { flex: none; }
+
+/* 13 ── Split screen on desktop (the checkout page) ───────────────────────
+ * From 1024px: the step cards (with the title and progress line) take about three quarters of the width, the order
+ * summary a narrow sticky column on the right, always open. Below 1024px the summary stays a folding bar on top. */
+.jelly-checkout[data-flow="cards"] .jelly-checkout__method-detail { display: block; margin-top: 2px; color: var(--checkout-muted); font-size: var(--checkout-text-sm); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__arrives { display: block; margin-top: 2px; color: var(--checkout-success); font-size: var(--checkout-text-xs); font-weight: var(--checkout-weight-medium); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__already-paid { display: grid; justify-items: center; gap: 12px; padding: 48px 24px; border: 1px solid var(--checkout-divider); border-radius: var(--checkout-card-radius); background: var(--checkout-surface); text-align: center; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__already-paid > svg { color: var(--checkout-success); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__already-paid p { margin: 0; max-width: 46ch; color: var(--checkout-muted); }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__already-paid .jelly-checkout__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 8px; }
+@media (min-width: 1024px) {
+  .jelly-checkout[data-flow="cards"] { --checkout-column: 1240px; }
+  .jelly-checkout[data-flow="cards"]:has(.jelly-checkout__summary) .jelly-checkout__column { grid-template-columns: minmax(0, 1fr) clamp(300px, 27%, 370px); column-gap: clamp(28px, 3.2vw, 48px); align-items: start; }
+  .jelly-checkout[data-flow="cards"] .jelly-checkout__column > .jelly-checkout__main { grid-column: 1; grid-row: 1; }
+  .jelly-checkout[data-flow="cards"] .jelly-checkout__column > .jelly-checkout__summary {
+    grid-column: 2; grid-row: 1; top: 24px; max-height: calc(100vh - 48px); overflow: auto;
+    background: color-mix(in srgb, var(--checkout-primary) 4%, var(--checkout-surface));
+  }
+  .jelly-checkout[data-flow="cards"].jelly-checkout .jelly-checkout__summary-toggle { display: none; }
+  .jelly-checkout[data-flow="cards"] .jelly-checkout__summary-panel,
+  .jelly-checkout[data-flow="cards"] .jelly-checkout__summary-panel[data-open] { display: grid; max-height: none; overflow: visible; padding: 22px 22px 18px; border-top: 0; }
+  .jelly-checkout[data-flow="cards"] .jelly-checkout__summary-panel > .jelly-checkout__panel-title { position: static; width: auto; height: auto; overflow: visible; clip-path: none; font-size: var(--checkout-text-lg); }
+  .jelly-checkout[data-flow="cards"] .jelly-checkout__summary .jelly-checkout__line { grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; }
+  .jelly-checkout[data-flow="cards"] .jelly-checkout__summary .jelly-checkout__thumb { width: 52px; height: 52px; }
+  .jelly-checkout[data-flow="cards"] .jelly-checkout__summary .jelly-checkout__line-text strong { font-size: var(--checkout-text-sm); }
+  .jelly-checkout[data-flow="cards"] .jelly-checkout__summary-trust { flex-direction: column; align-items: flex-start; gap: 6px; padding: 12px 22px 16px; }
+}
+
+/* 14 ── Order confirmation (its own page after checkout) ──────────────────
+ * Same split as checkout ([data-flow="cards"] above): thank-you, next steps, delivery and tracking on the left, the
+ * order summary in the sticky right column (a folding bar on phones). Tokens only, so every store gets its colours. */
+.jelly-order .jelly-order__hero { display: grid; justify-items: start; gap: 10px; padding: 28px; border: 1px solid var(--checkout-divider); border-radius: var(--checkout-card-radius); background: var(--checkout-surface); box-shadow: var(--checkout-shadow); }
+.jelly-order[data-state="paid"] .jelly-order__hero { background: linear-gradient(160deg, color-mix(in srgb, var(--checkout-success) 9%, var(--checkout-surface)) 0%, var(--checkout-surface) 55%); }
+.jelly-order .jelly-order__icon { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 999px; background: var(--checkout-success); color: #fff; }
+.jelly-order[data-state="pending"] .jelly-order__icon { background: var(--checkout-pending); }
+.jelly-order:is([data-state="failed"], [data-state="cancelled"]) .jelly-order__icon { background: var(--checkout-danger); }
+.jelly-order[data-state="refunded"] .jelly-order__icon { background: var(--checkout-muted); }
+.jelly-order .jelly-order__number { margin: 6px 0 0; padding: 4px 12px; border-radius: 999px; background: var(--checkout-wash); color: var(--checkout-muted); font-size: var(--checkout-text-sm); }
+.jelly-order .jelly-order__number b { color: var(--checkout-text); font-variant-numeric: tabular-nums; }
+.jelly-order .jelly-order__hero .jelly-checkout__title { margin: 0; font-size: clamp(1.75rem, 3.4vw, 2.5rem); line-height: 1.1; }
+.jelly-order .jelly-order__lead { margin: 0; max-width: 56ch; color: var(--checkout-muted); font-size: var(--checkout-text-md); }
+.jelly-order .jelly-order__email { display: flex; align-items: center; gap: 10px; margin: 6px 0 0; padding: 12px 14px; border-radius: var(--checkout-radius-field); background: var(--checkout-wash); font-size: var(--checkout-text-sm); }
+.jelly-order .jelly-order__email svg { flex: none; color: var(--checkout-primary); }
+.jelly-order .jelly-order__card { display: grid; gap: 16px; padding: 24px 28px; border: 1px solid var(--checkout-divider); border-radius: var(--checkout-card-radius); background: var(--checkout-surface); }
+.jelly-order .jelly-order__card-title { margin: 0; font-family: var(--checkout-font-heading); font-size: var(--checkout-text-lg); font-weight: var(--checkout-weight-bold); }
+.jelly-order .jelly-order__card:focus { outline: none; }
+
+/* What happens next: four steps along a line (one column on phones). */
+.jelly-order .jelly-order__steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; counter-reset: step; }
+.jelly-order .jelly-order__steps li { position: relative; display: grid; gap: 8px; align-content: start; font-size: var(--checkout-text-sm); }
+.jelly-order .jelly-order__steps li::after { content: ""; position: absolute; top: 13px; left: 34px; right: -6px; height: 2px; background: var(--checkout-divider); }
+.jelly-order .jelly-order__steps li:last-child::after { content: none; }
+.jelly-order .jelly-order__steps li[data-state="done"]::after { background: var(--checkout-success); }
+.jelly-order .jelly-order__step-dot { position: relative; z-index: 1; display: grid; place-items: center; width: 28px; height: 28px; border: 2px solid var(--checkout-border); border-radius: 999px; background: var(--checkout-surface); color: #fff; }
+.jelly-order .jelly-order__steps li[data-state="done"] .jelly-order__step-dot { border-color: var(--checkout-success); background: var(--checkout-success); }
+.jelly-order .jelly-order__steps li[data-state="current"] .jelly-order__step-dot { border-color: var(--checkout-primary); box-shadow: inset 0 0 0 5px var(--checkout-surface), inset 0 0 0 14px var(--checkout-primary); }
+.jelly-order .jelly-order__steps b { display: block; font-weight: var(--checkout-weight-bold); }
+.jelly-order .jelly-order__steps li[data-state="next"] b { color: var(--checkout-muted); font-weight: var(--checkout-weight-medium); }
+.jelly-order .jelly-order__steps small { display: block; margin-top: 2px; color: var(--checkout-muted); font-size: var(--checkout-text-xs); line-height: 1.45; }
+
+/* Delivery facts. */
+.jelly-order .jelly-order__facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px 24px; margin: 0; }
+.jelly-order .jelly-order__facts > div { display: grid; gap: 6px; align-content: start; }
+.jelly-order .jelly-order__facts dt { display: flex; align-items: center; gap: 6px; color: var(--checkout-muted); font-size: var(--checkout-text-sm); }
+.jelly-order .jelly-order__facts dd { display: grid; gap: 4px; justify-items: start; margin: 0; font-size: var(--checkout-text-md); overflow-wrap: anywhere; }
+.jelly-order .jelly-order__facts dd > span:not(.jelly-checkout__badge) { color: var(--checkout-muted); font-size: var(--checkout-text-sm); }
+.jelly-order .jelly-order__facts address { display: grid; font-style: normal; line-height: 1.5; }
+
+.jelly-order .jelly-order__tracking { scroll-margin-top: 24px; }
+.jelly-order .jelly-order__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.jelly-order .jelly-order__actions > * { min-height: var(--checkout-button-height); }
+@media (max-width: 767px) {
+  .jelly-order .jelly-order__hero, .jelly-order .jelly-order__card { padding: 20px; }
+  .jelly-order .jelly-order__steps { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .jelly-order .jelly-order__steps li { grid-template-columns: 28px minmax(0, 1fr); align-items: start; gap: 12px; }
+  .jelly-order .jelly-order__steps li::after { top: 30px; bottom: -14px; left: 13px; right: auto; width: 2px; height: auto; }
+  .jelly-order .jelly-order__actions { flex-direction: column; }
+  .jelly-order .jelly-order__actions > * { width: 100%; justify-content: center; }
+}
+/* Shipments and order history inside "Track your order": small sub-headings, not the theme's page heading size. */
+.jelly-order .jelly-order__tracking :is(.jelly-order-shipments, .jelly-order-timeline) > h2 { margin: 0 0 8px; font-family: var(--checkout-font-body); font-size: var(--checkout-text-md); font-weight: var(--checkout-weight-bold); letter-spacing: 0; line-height: 1.4; text-transform: none; }
+.jelly-order .jelly-order__tracking :is(.jelly-order-shipments, .jelly-order-timeline) { margin: 0; padding: 0; border: 0; background: none; }
+.jelly-checkout[data-flow="cards"] .jelly-checkout__already-paid { max-width: 640px; margin: 0 auto; }

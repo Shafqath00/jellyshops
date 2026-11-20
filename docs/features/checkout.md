@@ -142,3 +142,32 @@ view in a bar at the top, and shows one short task at a time; option 3 stayed to
 Not built: a separate express-pay row above the form (Stripe Express Checkout Element needs deferred PaymentIntents),
 address lookup by postcode (needs a provider and a decision on sending postcodes to it), a tax line (the server returns
 no tax amount yet), sign-in that returns to checkout.
+
+## Split screen and the new order confirmation (2026-11-20, later the same day)
+
+- **Desktop split** (section 13 of `checkout.css`): from 1024px the step cards with the title and progress line take
+  about 72% of the width and the order summary a sticky right column (`clamp(300px, 27%, 370px)`, always open, lightly
+  tinted with the store's accent). Below 1024px the summary is the folding bar at the top. The summary shows photos,
+  names, variants, quantities, the discount, delivery cost and total, and updates as soon as a code is applied or the
+  server prices the order.
+- **Expected delivery date**: theme settings > Checkout > Delivery time (`checkout.deliveryDays`, "none" or 1-2 up to
+  10-14 working days). `expectedDelivery()` in `checkout-model.ts` counts working days (weekends left out) and is shown
+  on the delivery method, in the summary and on the confirmation page.
+- **Confirmation page** (`components/order-thank-you.tsx`, used by `order/[publicToken]/view.tsx`): same split as
+  checkout; "Thank you, <first name>!", order number, confirmation email notice (the masked email typed in this tab;
+  the public order never includes the email), "What happens next" (confirmed, being prepared, on its way, delivered,
+  from the order status and shipments), delivery address, expected delivery and payment, "Track your order" (shipments
+  and order history), Continue shopping and Track order. Pending, failed, cancelled and refunded orders get their own
+  wording. The old `CheckoutConfirmation` was removed; `ConfirmationOrderSummary` and the skeleton stay.
+- **No double payment**: `checkout-memory.ts` keeps a note of the order this tab is paying for (sessionStorage
+  `jelly-checkout-paid:<store>`: public token, email, a fingerprint of the bag, paid yes/no); it is written just
+  before Stripe confirms (`onBeforePay`, so bank redirects keep it) and marked paid on success or when the order page
+  sees the order paid. Checkout then shows "You've already paid for this order" instead of the form for the same bag
+  (or an empty one). After paying, checkout leaves with `router.replace`, so Back skips the payment form. The order
+  page empties the bag once and then removes `paid`, `payment_intent`, `payment_intent_client_secret` and
+  `redirect_status` from the address, so a later refresh never empties a bag the shopper has filled again.
+
+Checked on Express Bed through a local backend (the 5001 emulator could not reach the database that afternoon): split
+layout at 1440 (72/28), phone and tablet stacking, details to payment, the confirmation page at 1440/820/390 with
+the order reported as paid by a stand-in reply (the store's Stripe account cannot take payments), bag emptied and
+address cleaned, Back and reopening checkout. A real Stripe payment is still not tested.
