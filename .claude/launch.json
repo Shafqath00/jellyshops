@@ -69,6 +69,16 @@
       ],
       "port": 3220,
       "autoPort": false
+    },
+    {
+      "name": "express-backend",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "cd backend && set PORT=3002&& set SUPABASE_DATABASE_CA_FILE=.data/supabase-prod-ca-2021.crt&& set CORS_ORIGINS=http://localhost:3200,http://127.0.0.1:3200,http://localhost:3220&& node --import tsx src/server.ts"
+      ],
+      "port": 3002,
+      "autoPort": false
     }
   ]
 }
