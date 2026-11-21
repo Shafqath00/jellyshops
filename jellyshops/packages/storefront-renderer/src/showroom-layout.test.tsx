@@ -83,7 +83,8 @@ describe("header search bar layout", () => {
     expect(within(search).getByRole("searchbox", { name: "Search products" })).toHaveAttribute("name", "q");
     expect(element.firstElementChild?.nextElementSibling).toBe(search);
     expect(container.querySelector('[data-tool="search"]')).toBeNull();
-    expect(screen.getByRole("link", { name: "Free swatches" })).toHaveAttribute("href", "/demo/pages/swatches");
+    // Also listed in the phone menu (the header has no room for it on phones).
+    expect(within(screen.getByRole("navigation", { name: "Shopping tools" })).getByRole("link", { name: "Free swatches" })).toHaveAttribute("href", "/demo/pages/swatches");
     expect(within(screen.getByRole("list", { name: "Why shop with us" })).getAllByRole("listitem")).toHaveLength(2);
     expect(await noViolations(container)).toEqual([]);
   });

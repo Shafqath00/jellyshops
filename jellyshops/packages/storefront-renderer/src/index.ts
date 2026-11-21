@@ -17,6 +17,7 @@ export type { StoreIdentity } from "./store-identity";
 export type { RendererSelection } from "./types";
 export { formattedSetting, inlineSetting, SettingText } from "./sections/setting-text";
 export { CardCartContext, CardCompareContext, CardRatingsContext, CompareToggle, ProductCard, QuickAdd } from "./product-card";
+export { variantNameRepeated } from "./sections/theme-pack-sections";
 export { CardQuickViewContext, QuickViewButton, QuickViewDialog, initialQuickViewChoice } from "./quick-view";
 export { titleLength } from "./sections/shared";
 export { SHOP_ALL_COLLECTION_ID } from "./sections/collection-sections";

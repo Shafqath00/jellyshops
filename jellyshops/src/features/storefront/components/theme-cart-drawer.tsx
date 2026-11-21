@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { variantNameRepeated } from "@jelly/storefront-renderer";
 import { formatMoney } from "@/lib/domain";
 import { cartProductImage } from "@/lib/product-media";
 import { useCartLines } from "../use-cart-lines";
@@ -64,7 +65,7 @@ export function ThemeCartDrawer({ storeSlug, open, onClose, variant = "drawer", 
               return option && value ? [`${option.name}: ${value.label}`] : [];
             }) ?? [];
             const image = cartProductImage(line.product, line.variant, line.item.configurationSelections);
-            const detail = [line.variant.name && line.variant.name !== "Default" ? line.variant.name : "", ...options, ...personalisationLabels(line.product, line.item)].filter(Boolean).join(" · ");
+            const detail = [line.variant.name && line.variant.name !== "Default" && !variantNameRepeated(line.variant.name, options) ? line.variant.name : "", ...options, ...personalisationLabels(line.product, line.item)].filter(Boolean).join(" · ");
             return <li key={cartLineKey(line.variant.id, line.item)}>
               {/* Merchant media may be served by the local API, not as Next Image assets. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}

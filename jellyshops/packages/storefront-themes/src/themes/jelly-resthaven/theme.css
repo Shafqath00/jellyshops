@@ -160,6 +160,8 @@ p { margin: 0 0 1em; }
 /* ── Phones and tablets ──────────────────────────────────────────── */
 @media (max-width: 1023px) {
   .jelly-category-card > strong, .jelly-category-grid[data-layout="bento"] .jelly-category-card:first-child > strong { left: 10px; bottom: 10px; max-width: calc(100% - 20px); padding: 8px 14px; font-size: 13px; }
+  /* A long name wraps inside its label instead of running past the tile edge. */
+  .jelly-category-card > strong { white-space: normal; border-radius: 16px; }
 }
 @media (max-width: 899px) {
   .jelly-footer-newsletter { grid-template-columns: minmax(0, 1fr); }
@@ -172,8 +174,8 @@ p { margin: 0 0 1em; }
   /* Wrap between words; break a word only when it cannot fit on its own line. */
   .jelly-header-brand > span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-height: 1.05; overflow-wrap: break-word; }
   .jelly-hero[data-layout="overlay"] > .jelly-container { min-height: 560px; }
-  /* Phones: the photo stays clear at the top; a dark wash at the foot keeps white text readable. */
-  .jelly-hero[data-layout="overlay"] .jelly-hero-media::after { background: linear-gradient(0deg, rgb(15 20 33 / .82) 0%, rgb(15 20 33 / .55) 45%, rgb(15 20 33 / .05) 78%); }
+  /* Phones: the copy covers most of the photo, so the wash darkens all of it (deepest at the foot) and white text stays readable. */
+  .jelly-hero[data-layout="overlay"] .jelly-hero-media::after { background: linear-gradient(0deg, rgb(15 20 33 / .82) 0%, rgb(15 20 33 / .58) 50%, rgb(15 20 33 / .38) 100%); }
   .jelly-hero[data-layout="overlay"] .jelly-hero-content, .jelly-hero[data-layout="overlay"] .jelly-hero-content .jelly-eyebrow { color: #fff; }
   .jelly-hero[data-layout="overlay"] .jelly-hero-actions .jelly-button:not(.jelly-button--secondary) { background: #fff; border-color: #fff; color: #1f2a44; }
   .jelly-hero[data-layout="overlay"] .jelly-hero-actions .jelly-button--secondary { background: transparent; border-color: #fff; color: #fff; }

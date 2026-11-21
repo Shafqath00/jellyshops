@@ -102,12 +102,26 @@ function usePhoneMenu(ref: RefObject<HTMLDetailsElement | null>): { open: boolea
     const menu = ref.current;
     const doc = menu?.ownerDocument;
     if (!open || !menu || !doc) return;
+    // The open menu fills the screen under the header and the page behind it stops scrolling.
+    // It follows the header if the page still moves (announcement scrolled away, screen turned).
+    const header = menu.closest(".jelly-header");
+    const place = () => menu.style.setProperty("--jelly-menu-top", `${Math.max(0, Math.round(header?.getBoundingClientRect().bottom ?? 0))}px`);
+    place();
+    const view = doc.defaultView;
+    view?.addEventListener("scroll", place, { passive: true });
+    view?.addEventListener("resize", place);
+    doc.documentElement.setAttribute("data-jelly-menu-open", "");
+    const unlock = () => {
+      doc.documentElement.removeAttribute("data-jelly-menu-open");
+      view?.removeEventListener("scroll", place);
+      view?.removeEventListener("resize", place);
+    };
     const close = (focus: boolean) => { menu.open = false; setOpen(false); if (focus) menu.querySelector("summary")?.focus(); };
     const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") close(true); };
     const onPointer = (event: Event) => { if (!menu.contains(event.target as Node)) close(false); };
     doc.addEventListener("keydown", onKey);
     doc.addEventListener("pointerdown", onPointer);
-    return () => { doc.removeEventListener("keydown", onKey); doc.removeEventListener("pointerdown", onPointer); };
+    return () => { unlock(); doc.removeEventListener("keydown", onKey); doc.removeEventListener("pointerdown", onPointer); };
   }, [open, ref]);
   return { open, onToggle: () => setOpen(Boolean(ref.current?.open)) };
 }
@@ -150,6 +164,7 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
   const suggest = editor ? undefined : context.commerce?.suggestProducts;
   const [searchOpen, setSearchOpen] = useState(false);
   const searchToolRef = useRef<HTMLAnchorElement>(null);
+  const searchToggleRef = useRef<HTMLButtonElement>(null);
   return <header
     ref={headerRef}
     className="jelly-header"
@@ -167,11 +182,17 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
       <summary aria-label={phoneMenu.open ? "Close menu" : "Open menu"}><StorefrontIcon name={phoneMenu.open ? "close" : "menu"} /><span className="jelly-visually-hidden">Menu</span></summary>
       <div className="jelly-mobile-navigation-panel">
         <MenuLinks section={section} context={context} label="Mobile navigation" variant="panel" />
-        {tools.length > 0 && <nav aria-label="Account and saved items"><ul>{tools.filter(([icon]) => icon !== "search").map(([icon, label, href]) => <li key={icon}><a href={href}>{icon === "bag" ? "Shopping bag" : label}</a></li>)}</ul></nav>}
+        {(tools.length > 0 || extraHref) && <nav aria-label="Account and saved items"><ul>
+          {tools.filter(([icon]) => icon !== "search").map(([icon, label, href]) => <li key={icon}><a href={href}>{icon === "bag" ? "Shopping bag" : label}</a></li>)}
+          {/* The extra header link (a phone number, the showroom) has no room on phones, so it lives in the menu. */}
+          {extraHref && <li><a href={extraHref}>{extraLabel}</a></li>}
+        </ul></nav>}
       </div>
     </details>
     {layout === "split" && <MenuLinks section={section} context={context} label="Primary navigation" variant="bar" part="first" className="jelly-header-menu-first" />}
     {layout === "search-bar" && <HeaderSearch action={`${root}/search`} suggest={suggest} />}
+    {/* Phones: the search box folds into a button beside the menu, so the header stays one row. */}
+    {layout === "search-bar" && <button type="button" ref={searchToggleRef} className="jelly-header-search-toggle" aria-label={searchOpen ? "Close search" : "Search"} aria-expanded={searchOpen} onClick={() => setSearchOpen((value) => !value)}><StorefrontIcon name={searchOpen ? "close" : "search"} /></button>}
     <a className="jelly-header-brand" href={root || "/"} {...elementProps(section, "logo", editor, logoWidth ? { width: logoWidth } : undefined)}>
       {logoUrl && !logoUrl.startsWith("#") ? <img src={logoUrl} alt={image?.alt || name} /> : <span>{name}</span>}
       {/* Merchant media URLs may be served by the local API and are not Next Image assets. */}
@@ -192,7 +213,7 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
         return <a key={icon} href={href} data-tool={icon} aria-label={count ? `${label}, ${count} ${count === 1 ? "item" : "items"}` : label}><StorefrontIcon name={icon} /><span className="jelly-header-tool-label">{label}</span>{count > 0 && <span className="jelly-header-count" aria-hidden="true">{count > 99 ? "99+" : count}</span>}</a>;
       })}
     </nav>}
-    {searchOpen && suggest && <div className="jelly-header-search-panel"><HeaderSearch action={`${root}/search`} suggest={suggest} autoFocus onEscape={() => { setSearchOpen(false); searchToolRef.current?.focus(); }} /></div>}
+    {searchOpen && (suggest || layout === "search-bar") && <div className="jelly-header-search-panel"><HeaderSearch action={`${root}/search`} suggest={suggest} autoFocus onEscape={() => { setSearchOpen(false); (searchToolRef.current ?? searchToggleRef.current)?.focus(); }} /></div>}
     {trust.length > 0 && <ul className="jelly-header-trust" aria-label="Why shop with us"><TrustPointItems points={trust} icons /></ul>}
   </header>;
 }

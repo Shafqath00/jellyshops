@@ -22,7 +22,9 @@
 [data-jelly-legacy-styles="off"] .jelly-prose ul { list-style: disc; padding-left: 1.2em; }
 [data-jelly-legacy-styles="off"] .jelly-prose li { margin-bottom: .4em; }
 [data-jelly-legacy-styles="off"] .jelly-prose li > p { margin: 0; }
-[data-jelly-legacy-styles="off"] .jelly-stars, [data-jelly-legacy-styles="off"] .jelly-rating-stars { --jelly-rating-color: var(--j-color-accent); color: var(--j-color-accent); letter-spacing: .08em; }
+/* Stars in the accent colour. .jelly-stars is filled through --jelly-stars-colour (setting color hid the partial fill: a 4-star review showed five). */
+[data-jelly-legacy-styles="off"] .jelly-stars { --jelly-stars-colour: var(--j-color-accent); letter-spacing: .08em; }
+[data-jelly-legacy-styles="off"] .jelly-rating-stars { --jelly-rating-color: var(--j-color-accent); color: var(--j-color-accent); letter-spacing: .08em; }
 [data-jelly-legacy-styles="off"] .jelly-button, [data-jelly-legacy-styles="off"] .signature-primary, [data-jelly-legacy-styles="off"] .signature-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: var(--j-button-height); padding: 0 var(--j-button-padding); border: 1px solid var(--j-color-primary); border-radius: var(--jelly-radius-button, 999px); background: var(--j-color-primary); color: var(--j-color-on-primary); font: inherit; font-size: 15px; font-weight: 600; letter-spacing: .01em; line-height: 1.2; text-align: center; text-decoration: none; cursor: pointer; transition: background-color var(--j-duration-fast, 160ms) var(--j-ease), color var(--j-duration-fast, 160ms) var(--j-ease), border-color var(--j-duration-fast, 160ms) var(--j-ease), transform var(--j-duration-fast, 160ms) var(--j-ease); }
 [data-jelly-legacy-styles="off"] .jelly-button:hover, [data-jelly-legacy-styles="off"] .signature-primary:hover { background: color-mix(in srgb, var(--j-color-primary) 86%, var(--j-color-bg)); border-color: color-mix(in srgb, var(--j-color-primary) 86%, var(--j-color-bg)); }
 [data-jelly-legacy-styles="off"] .jelly-button:active { transform: translateY(1px); }
@@ -48,6 +50,9 @@
 [data-jelly-legacy-styles="off"] .jelly-header .jelly-header-search { max-width: 340px; border-color: var(--j-color-border-strong); background: var(--j-color-surface); }
 [data-jelly-legacy-styles="off"] .jelly-header .jelly-header-search input { height: 44px; font-size: 14px; }
 [data-jelly-legacy-styles="off"] .jelly-header .jelly-header-search input::placeholder { color: var(--j-color-muted); opacity: 1; }
+/* The rounded search field shows the focus ring, not a square outline on the input inside it. */
+[data-jelly-legacy-styles="off"] .jelly-header .jelly-header-search:focus-within { outline: 2px solid var(--j-color-text); outline-offset: 2px; }
+[data-jelly-legacy-styles="off"] .jelly-header .jelly-header-search input:focus, [data-jelly-legacy-styles="off"] .jelly-header .jelly-header-search input:focus-visible { outline: none; box-shadow: none; }
 [data-jelly-legacy-styles="off"] .jelly-header-tools { gap: 4px; }
 [data-jelly-legacy-styles="off"] .jelly-header.jelly-header .jelly-header-tools a { min-height: 44px; border-radius: 999px; font-size: 13px; }
 [data-jelly-legacy-styles="off"] .jelly-header.jelly-header .jelly-header-tools a:hover { background: var(--j-color-wash); }
@@ -410,6 +415,45 @@
   [data-jelly-legacy-styles="off"] .jelly-header > nav:not(.jelly-header-tools) { display: none; }
   [data-jelly-legacy-styles="off"] .jelly-header:not([data-sticky="true"]) { position: relative; }
   [data-jelly-legacy-styles="off"] .jelly-mobile-navigation-panel { position: absolute; z-index: 30; top: 100%; left: 0; right: 0; max-height: calc(100vh - 120px); overflow-y: auto; padding: 8px var(--j-page-edge) 28px; border-bottom: 1px solid var(--j-color-divider); box-shadow: 0 24px 32px -24px color-mix(in srgb, var(--j-color-text) 40%, transparent); }
+  /*
+   * Phone header (classic and search-bar layouts): one 60px row. Menu (and search) on the left, the store name centred
+   * on the screen (equal side columns), account and bag on the right, every button 44px. The extra link and wishlist
+   * move into the menu; the search box opens from its button. With "Sticky" on, the header stays at the top.
+   */
+  [data-jelly-legacy-styles="off"] .jelly-header.jelly-header:is(:not([data-header-layout]), [data-header-layout="search-bar"]) {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); column-gap: 8px; row-gap: 0; min-height: 60px; padding-block: 8px;
+  }
+  [data-jelly-legacy-styles="off"] .jelly-header:is(:not([data-header-layout]), [data-header-layout="search-bar"]) > .jelly-mobile-navigation { grid-column: 1; grid-row: 1; justify-self: start; }
+  [data-jelly-legacy-styles="off"] .jelly-header:is(:not([data-header-layout]), [data-header-layout="search-bar"]) > .jelly-header-search-toggle { display: grid; grid-column: 1; grid-row: 1; justify-self: start; place-items: center; width: 44px; height: 44px; margin-left: 44px; padding: 0; border: 0; border-radius: 999px; background: transparent; color: inherit; cursor: pointer; }
+  [data-jelly-legacy-styles="off"] .jelly-header:is(:not([data-header-layout]), [data-header-layout="search-bar"]) > .jelly-header-search { display: none; }
+  [data-jelly-legacy-styles="off"] .jelly-header:is(:not([data-header-layout]), [data-header-layout="search-bar"]) > .jelly-header-brand { grid-column: 2; grid-row: 1; justify-self: center; justify-content: center; max-width: min(56vw, 240px); text-align: center; }
+  [data-jelly-legacy-styles="off"] .jelly-header:is(:not([data-header-layout]), [data-header-layout="search-bar"]) > .jelly-header-brand img { max-height: 40px; }
+  [data-jelly-legacy-styles="off"] .jelly-header:is(:not([data-header-layout]), [data-header-layout="search-bar"]) > .jelly-header-tools { grid-column: 3; grid-row: 1; justify-self: end; gap: 0; }
+  [data-jelly-legacy-styles="off"] .jelly-header.jelly-header:is(:not([data-header-layout]), [data-header-layout="search-bar"]) .jelly-header-tools a { display: inline-grid; place-items: center; position: relative; width: 44px; min-width: 44px; height: 44px; padding: 0; gap: 0; }
+  [data-jelly-legacy-styles="off"] .jelly-header.jelly-header:is(:not([data-header-layout]), [data-header-layout="search-bar"]) .jelly-header-tools a:is([data-tool="extra"], [data-tool="wishlist"]) { display: none; }
+  [data-jelly-legacy-styles="off"] .jelly-header.jelly-header:is(:not([data-header-layout]), [data-header-layout="search-bar"]) .jelly-header-tools .jelly-header-count { position: absolute; top: 4px; right: 2px; margin: 0; }
+  [data-jelly-legacy-styles="off"] .jelly-header:is(:not([data-header-layout]), [data-header-layout="search-bar"]) :is(.jelly-mobile-navigation > summary, .jelly-header-search-toggle, .jelly-header-tools a) .jelly-icon { width: 22px; height: 22px; }
+  [data-jelly-legacy-styles="off"] .jelly-header:is(:not([data-header-layout]), [data-header-layout="search-bar"]) :is(.jelly-header-search-toggle, .jelly-mobile-navigation > summary):hover { background: var(--j-color-wash); }
+  [data-jelly-legacy-styles="off"] [data-section-type="header"]:has(> .jelly-header[data-sticky="true"]) { position: sticky; top: 0; z-index: 40; }
+  [data-jelly-legacy-styles="off"] .jelly-header .jelly-header-search-panel { padding: 8px var(--j-page-edge) 14px; border-bottom: 1px solid var(--j-color-divider); background: var(--j-color-bg); box-shadow: 0 24px 32px -24px color-mix(in srgb, var(--j-color-text) 35%, transparent); }
+  [data-jelly-legacy-styles="off"] .jelly-header .jelly-header-search-panel .jelly-header-search { width: 100%; max-width: none; }
+  /* The open menu: a full-height panel under the header that scrolls on its own while the page behind stays still. */
+  [data-jelly-legacy-styles="off"] .jelly-mobile-navigation[open] > .jelly-mobile-navigation-panel { position: fixed; top: var(--jelly-menu-top, 60px); bottom: 0; max-height: none; overscroll-behavior: contain; box-shadow: none; animation: jelly-menu-in 200ms var(--j-ease, ease-out); }
+  [data-jelly-legacy-styles="off"] .jelly-mobile-navigation-panel > nav:first-child > ul > li { border-bottom: 1px solid var(--j-color-divider); }
+  [data-jelly-legacy-styles="off"] .jelly-mobile-navigation-panel > nav:first-child > ul > li > :is(a, details > summary) { min-height: 56px; font-size: 17px; }
+  [data-jelly-legacy-styles="off"] .jelly-mobile-navigation-panel .jelly-menu-disclosure > :not(summary) { margin-left: 0; }
+  [data-jelly-legacy-styles="off"] .jelly-mobile-navigation-panel .jelly-menu-disclosure .jelly-menu-disclosure > summary,
+  [data-jelly-legacy-styles="off"] .jelly-mobile-navigation-panel .jelly-menu-disclosure li > a { padding-left: 12px; font-size: 15px; }
+  [data-jelly-legacy-styles="off"] .jelly-mobile-navigation-panel .jelly-menu-disclosure .jelly-menu-disclosure li > a { padding-left: 24px; color: var(--j-color-muted); }
+  [data-jelly-legacy-styles="off"] .jelly-mobile-navigation-panel .jelly-menu-view-all { display: flex; align-items: center; min-height: 44px; margin: 0; padding-left: 12px; }
+  [data-jelly-legacy-styles="off"] .jelly-header .jelly-mobile-navigation-panel ul.jelly-menu-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 4px 0 12px; }
+  [data-jelly-legacy-styles="off"] .jelly-header .jelly-mobile-navigation-panel ul.jelly-menu-tiles .jelly-mega-tile { display: grid; gap: 8px; justify-items: start; text-align: left; }
+  [data-jelly-legacy-styles="off"] .jelly-header .jelly-mobile-navigation-panel ul.jelly-menu-tiles .jelly-mega-tile img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+  [data-jelly-legacy-styles="off"] .jelly-header .jelly-mobile-navigation-panel ul.jelly-menu-tiles .jelly-mega-tile span { font-family: var(--theme-font-body, inherit); font-size: 14px; font-weight: 600; }
+  [data-jelly-legacy-styles="off"] .jelly-mobile-navigation-panel > nav + nav { margin-top: 8px; padding-top: 8px; border-top: 0; }
+  [data-jelly-legacy-styles="off"] .jelly-mobile-navigation-panel > nav + nav a { min-height: 48px; color: var(--j-color-muted); font-size: 15px; }
+  /* The copy column spaces its parts with one gap; heading and paragraph margins added two more (49px between heading and text). */
+  [data-jelly-legacy-styles="off"] .jelly-image-text-content > :is(h2, h3, p) { margin-block: 0; }
   [data-jelly-legacy-styles="off"] .jelly-image-text-layout, [data-jelly-legacy-styles="off"] .jelly-image-text[data-image-position="right"] .jelly-image-text-layout { grid-template-columns: minmax(0, 1fr); gap: 28px; }
   [data-jelly-legacy-styles="off"] .jelly-image-text[data-image-position="right"] .jelly-image-text-media { order: 0; }
   [data-jelly-legacy-styles="off"] .jelly-specifications-list { grid-template-columns: minmax(0, 1fr); }
@@ -439,3 +483,6 @@
   [data-jelly-legacy-styles="off"] .jelly-list-sort { margin-left: auto; }
   [data-jelly-legacy-styles="off"] .jelly-list-sort > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
+
+/* The phone menu fades and slides in a little (keyframes jelly-menu-in in storefront-base.css); nothing moves with reduced motion. */
+@media (prefers-reduced-motion: reduce) { [data-jelly-legacy-styles="off"] .jelly-mobile-navigation[open] > .jelly-mobile-navigation-panel { animation: none; } }

@@ -138,6 +138,42 @@ describe("phone menu", () => {
     fireEvent.pointerDown(screen.getByText("Page"));
     expect(menu.open).toBe(false);
   });
+
+  it("stops the page behind from scrolling while open and sits right under the header", () => {
+    const { container } = render(<HeaderSection section={header} context={withMenu} />);
+    const menu = container.querySelector("details.jelly-mobile-navigation") as HTMLDetailsElement;
+    act(() => { menu.open = true; fireEvent(menu, new Event("toggle")); });
+    expect(document.documentElement.hasAttribute("data-jelly-menu-open")).toBe(true);
+    expect(menu.style.getPropertyValue("--jelly-menu-top")).toMatch(/^\d+px$/);
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(document.documentElement.hasAttribute("data-jelly-menu-open")).toBe(false);
+  });
+
+  it("puts the extra header link in the menu, and the search-bar layout gets a search button for phones", () => {
+    const withLinks = { ...withMenu, storeSlug: "demo" } as StorefrontRuntimeContext;
+    const searchBar = section("header", { storeName: "Demo", layout: "search-bar", extraLinkLabel: "Visit our showroom", extraLink: "/pages/contact" }, header.blocks);
+    const { container } = render(<HeaderSection section={searchBar} context={withLinks} />);
+    expect(container.querySelector(".jelly-mobile-navigation-panel")?.textContent).toContain("Visit our showroom");
+    // Only one of the two shows at a time: the search box (desktop) or this button (phones, CSS).
+    const toggle = container.querySelector(".jelly-header-search-toggle") as HTMLButtonElement;
+    expect(toggle).toHaveAttribute("aria-label", "Search");
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute("aria-label", "Close search");
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(container.querySelector(".jelly-header-search-panel input")).not.toBeNull();
+  });
+});
+
+describe("bag line names", () => {
+  it("leaves out a variant name its choices already say", async () => {
+    const { variantNameRepeated } = await import("./sections/theme-pack-sections");
+    expect(variantNameRepeated("Double", ["Size: Double"])).toBe(true);
+    expect(variantNameRepeated("King / Oak", ["Size: King", "Finish: Oak"])).toBe(true);
+    expect(variantNameRepeated("King / Oak", ["Size: King"])).toBe(false);
+    expect(variantNameRepeated("Double", [])).toBe(false);
+    expect(variantNameRepeated("Double", undefined)).toBe(false);
+  });
 });
 
 describe("sold-out option values", () => {

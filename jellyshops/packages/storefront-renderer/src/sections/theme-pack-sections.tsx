@@ -120,6 +120,13 @@ export function JournalTeaserSection({ section, context }: { section: SectionNod
 
 interface CartLineView { id: string; name: string; productName?: string; variantName?: string; imageUrl?: string; options?: string[]; quantity: number; unitPrice?: string; total: string; canIncrease?: boolean; onDecrease?: () => void; onIncrease?: () => void; onRemove?: () => void }
 
+/** True when a bag line's choices ("Size: Double") already say everything its variant name ("Double") says. */
+export function variantNameRepeated(variantName: string, options: readonly string[] | undefined): boolean {
+  if (!options?.length) return false;
+  const values = new Set(options.map((option) => option.slice(option.indexOf(":") + 1).trim().toLowerCase()));
+  return variantName.split("/").map((part) => part.trim().toLowerCase()).every((part) => values.has(part));
+}
+
 export function CartSummarySection({ section, context }: { section: SectionNode; context: StorefrontRuntimeContext }) {
   const word = useWords();
   const content = copy(section, word("cart.title"), context.mode === "editor");
@@ -147,7 +154,7 @@ export function CartSummarySection({ section, context }: { section: SectionNode;
         <span className="jelly-cart-line-media">{/* eslint-disable-next-line @next/next/no-img-element */}{line.imageUrl ? <img src={line.imageUrl} alt="" loading="lazy" /> : null}</span>
         <div className="jelly-cart-line-details">
           <strong>{line.productName ?? line.name}</strong>
-          {line.variantName && line.variantName !== "Standard" && <span>{line.variantName}</span>}
+          {line.variantName && line.variantName !== "Standard" && !variantNameRepeated(line.variantName, line.options) && <span>{line.variantName}</span>}
           {line.options?.map((option) => <span key={option}>{option}</span>)}
           {line.unitPrice && <span>{line.unitPrice} each</span>}
           <div className="jelly-cart-line-controls">
