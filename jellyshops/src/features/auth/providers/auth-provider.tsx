@@ -18,6 +18,15 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 const apiOrigin = process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
 
+/** The store a merchant last picked, kept per sign-in in this browser (storage can be blocked: then nothing is kept). */
+const activeStoreKey = (userId: string) => `jelly-active-store:${userId}`;
+function readRememberedStore(userId: string): string | null {
+  try { return window.localStorage.getItem(activeStoreKey(userId)); } catch { return null; }
+}
+function rememberStore(userId: string, storeId: string) {
+  try { window.localStorage.setItem(activeStoreKey(userId), storeId); } catch { /* not kept */ }
+}
+
 type MerchantState = { userId: string; stores: MerchantStore[]; status: "ready" | "error"; error: string | null };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -42,6 +51,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       generation.current += 1;
       setSession(next); setLoading(false); setRefreshing(false);
       if (!next) { setMerchant(null); setActiveStoreId(null); }
+      // A reload keeps the store the merchant picked (a store that is gone falls back to the first one).
+      else setActiveStoreId((current) => current ?? readRememberedStore(next.user.id));
     };
     void merchantSupabase().then((supabase) => {
       if (!active) return;
@@ -90,7 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       merchantError: current?.error ?? null,
       activeStore: stores.find((store) => store.id === activeStoreId) ?? stores[0] ?? null,
       setActiveStoreId: (storeId) => {
-        const commit = () => setActiveStoreId(storeId);
+        const commit = () => { setActiveStoreId(storeId); if (session) rememberStore(session.user.id, storeId); };
         const event = new CustomEvent("jelly:before-store-change", { cancelable: true, detail: { commit } });
         if (window.dispatchEvent(event)) commit();
       }, refreshMerchant,
