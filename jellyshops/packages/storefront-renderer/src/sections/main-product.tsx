@@ -36,8 +36,11 @@ export function MainProductSection({ section, mode, commerce, context, selectedB
   const panel = parts.filter((block) => block.settings.column !== "below");
   const panelRef = useRef<HTMLDivElement>(null);
   const draw = (block: BlockNode) => <ProductPart key={block.id} block={block} mode={mode} commerce={commerce} context={context} selectedBlockId={selectedBlockId} editor={editor} renderPart={renderPart} />;
-  useStickyPanel(panelRef, sticky === "details" || below.length > 0);
-  return <section className="jelly-section jelly-main-product" data-media-position={position} data-media-width={width} data-sticky={below.length ? "details" : sticky} data-has-below={below.length ? "" : undefined}>
+  // With content under the photos only the buying details can stay in view (the photos share their column), unless
+  // the merchant chose "Neither": then both columns simply scroll with the page.
+  const stuck = below.length > 0 && sticky !== "none" ? "details" : sticky;
+  useStickyPanel(panelRef, stuck === "details");
+  return <section className="jelly-section jelly-main-product" data-media-position={position} data-media-width={width} data-sticky={stuck} data-has-below={below.length ? "" : undefined}>
     <StorefrontContainer className="jelly-main-product-grid">
       <div className="jelly-main-product-media"><ProductGallerySection context={context} section={section} /></div>
       <div className="jelly-main-product-details" ref={panelRef}>{panel.map(draw)}</div>

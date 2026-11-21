@@ -133,6 +133,16 @@ describe("Main product: content under the photos", () => {
     expect([...main.querySelector(".jelly-main-product-grid")!.children].map((child) => child.className)).toEqual(["jelly-main-product-media", "jelly-main-product-details", "jelly-main-product-below"]);
   });
 
+  it("with Keep in view set to Neither, nothing stays in view even with content under the photos", () => {
+    const node = section([part("part-product-information"), part("part-product-purchase"), part("part-product-description", { column: "below" })]);
+    node.settings = { ...node.settings, stickyColumn: "none" };
+    const commerce = { getProducts: async () => [] } as unknown as CommerceDataProvider;
+    const { container } = render(<RegistrySectionRenderer section={node} mode="published" commerce={commerce} page={page(presentation("King")) as never} storeSlug="demo" />);
+    const main = container.querySelector(".jelly-main-product")!;
+    expect(main.hasAttribute("data-has-below")).toBe(true);
+    expect(main.getAttribute("data-sticky")).toBe("none");
+  });
+
   it("without such blocks the section is unchanged", () => {
     const container = draw([part("part-product-information"), part("part-product-purchase")]);
     expect(container.querySelector(".jelly-main-product-below")).toBeNull();

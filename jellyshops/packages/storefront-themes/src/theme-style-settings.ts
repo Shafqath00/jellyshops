@@ -228,7 +228,7 @@ export function themeStyleSettings(defaults: ThemeStyleDefaults, sizes: { headin
     color("badges.text", "Text", "Badges", ""),
   ];
   const cardContentSchema = [
-    select("productCard.layout", "Card style", "Product cards", theme, [[theme, "Theme default"], ["tall", "Tall photo, few words"], ["square", "Square photo with details"], ["tinted", "Product on a soft colour"], ["technical", "Outlined, for specifications"], ["landscape", "Wide lifestyle photo"], ["quick-add", "Quick add, for everyday shopping"]], "The shape and look of every product card in the store. Quick add puts an Add button and quantity on cards of products with no options."),
+    select("productCard.layout", "Card style", "Product cards", theme, [[theme, "Theme default"], ["tall", "Tall photo, few words"], ["square", "Square photo with details"], ["tinted", "Product on a soft colour"], ["technical", "Outlined, for specifications"], ["landscape", "Wide lifestyle photo"], ["quick-add", "Quick add, for everyday shopping"], ["minimal", "Minimal: photo, name and price"]], "The shape and look of every product card in the store. Quick add puts an Add button and quantity on cards of products with no options."),
     select("productCard.order", "Card layout", "Product cards", "photo-title-price", [["photo-title-price", "Photo, name, price"], ["photo-price-title", "Photo, price, name"], ["title-price-photo", "Name and price above the photo"]], "Used by every product list: product grids, related products and search."),
     select("productCard.showTitle", "Product name", "Product cards", "show", [["show", "Show"], ["hide", "Hide"]]),
     select("productCard.titleLines", "Long names", "Product cards", theme, [[theme, "Show in full"], ["1", "Cut to one line"], ["2", "Cut to two lines"]]),
@@ -688,7 +688,7 @@ export function themeRootAttributes(style: object | null | undefined): Record<"d
 }
 
 /** Card styles drawn by storefront-base.css (template programme card archetypes C1, C2, C4, C5, C7, C3). */
-export const PRODUCT_CARD_LAYOUTS = ["tall", "square", "tinted", "technical", "landscape", "quick-add"] as const;
+export const PRODUCT_CARD_LAYOUTS = ["tall", "square", "tinted", "technical", "landscape", "quick-add", "minimal"] as const;
 export type ProductCardLayout = (typeof PRODUCT_CARD_LAYOUTS)[number];
 
 /**

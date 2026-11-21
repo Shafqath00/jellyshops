@@ -65,7 +65,8 @@
     },
     "badges": {
       "background": "#B71C3C",
-      "text": "#FFFFFF"
+      "text": "#FFFFFF",
+      "sale": "hide"
     },
     "collectionCards": {
       "radius": "large"
@@ -85,14 +86,14 @@
       "showTitle": "show",
       "titleLines": "theme",
       "showPrice": "show",
-      "savings": "percent",
+      "savings": "none",
       "button": "none",
       "photoFit": "theme",
-      "swatches": "colors",
-      "layout": "theme",
-      "showRating": true,
-      "hoverImage": true,
-      "quickView": true
+      "swatches": "none",
+      "layout": "minimal",
+      "showRating": false,
+      "hoverImage": false,
+      "quickView": false
     },
     "editorial": {
       "headlines": "editorial",
@@ -180,7 +181,8 @@
         },
         "badges": {
           "background": "#B71C3C",
-          "text": "#FFFFFF"
+          "text": "#FFFFFF",
+          "sale": "hide"
         },
         "collectionCards": {
           "radius": "large"
@@ -200,14 +202,14 @@
           "showTitle": "show",
           "titleLines": "theme",
           "showPrice": "show",
-          "savings": "percent",
+          "savings": "none",
           "button": "none",
           "photoFit": "theme",
-          "swatches": "colors",
-          "layout": "theme",
-          "showRating": true,
-          "hoverImage": true,
-          "quickView": true
+          "swatches": "none",
+          "layout": "minimal",
+          "showRating": false,
+          "hoverImage": false,
+          "quickView": false
         },
         "editorial": {
           "headlines": "editorial",
@@ -842,7 +844,7 @@
                       "y": 55
                     }
                   },
-                  "promises": "truck: Two-person delivery to your room\nclock: Delivered in 5 to 7 working days\ncard: Spread the cost with Klarna\nhome: Try every bed in our showroom",
+                  "promises": "",
                   "styleScheme": "scheme1"
                 },
                 "blocks": [
@@ -905,17 +907,6 @@
                       "label": "Find your mattress",
                       "href": "/collections/mattresses",
                       "buttonStyle": "secondary"
-                    },
-                    "blocks": []
-                  },
-                  {
-                    "id": "expressbed-hero-card",
-                    "type": "floating-card",
-                    "enabled": true,
-                    "settings": {
-                      "eyebrow": "Best seller",
-                      "position": "bottom-right",
-                      "productId": "calder-ottoman-storage-bed"
                     },
                     "blocks": []
                   }
@@ -2014,28 +2005,16 @@
                   "thumbnailPosition": "below",
                   "enableZoom": true,
                   "mediaPosition": "left",
-                  "mediaWidth": "wide",
-                  "stickyColumn": "details"
+                  "mediaWidth": "medium",
+                  "stickyColumn": "none"
                 },
                 "blocks": [
-                  {
-                    "id": "resthaven-product-rating-summary",
-                    "type": "part-rating-summary",
-                    "enabled": true,
-                    "settings": {
-                      "source": "reviews",
-                      "text": "from {count} reviews",
-                      "linkLabel": "Read reviews",
-                      "link": "#reviews",
-                      "contentAlignment": "left"
-                    }
-                  },
                   {
                     "id": "studio-info",
                     "type": "part-product-information",
                     "enabled": true,
                     "settings": {
-                      "showVendor": true,
+                      "showVendor": false,
                       "showSku": false,
                       "showCompareAtPrice": true,
                       "showAvailability": true,
@@ -2088,7 +2067,7 @@
                     "settings": {
                       "layout": "row",
                       "showIcons": true,
-                      "column": "below"
+                      "column": "panel"
                     },
                     "blocks": [
                       {
@@ -2156,9 +2135,9 @@
                     "enabled": true,
                     "settings": {
                       "heading": "About this bed",
-                      "layout": "plain",
+                      "layout": "expandable",
                       "startOpen": true,
-                      "column": "below"
+                      "column": "panel"
                     }
                   },
                   {
@@ -2168,8 +2147,8 @@
                     "settings": {
                       "heading": "Details and materials",
                       "hideMeasurements": true,
-                      "layout": "table",
-                      "column": "below"
+                      "layout": "expandable",
+                      "column": "panel"
                     }
                   },
                   {
@@ -2194,7 +2173,7 @@
                       "heading": "Customer reviews",
                       "allowWriting": true,
                       "perPage": 5,
-                      "column": "below"
+                      "column": "panel"
                     }
                   }
                 ]

@@ -215,18 +215,18 @@ const sectionOf = (id, type, settings, blocks = []) => ({ kind: "inline", sectio
 // "From £299": the cheapest size of the cheapest matching product.
 const fromPrice = (match) => `From £${Math.min(...products.filter(match).flatMap((entry) => entry.variants.map((variant) => variant.priceMinor))) / 100 | 0}`;
 
-// 1. Hero: inset photo with swept corner, magazine headline, floating best-seller card, promises on the bottom edge.
+// 1. Hero: kept clean (2026-11-21 brief): small heading, headline, one supporting line, two buttons and the photo.
+//    No promises row and no floating card on it (both stay in the section library for other stores).
 const hero = inline(home, "studio-hero");
 Object.assign(hero.settings, {
   layout: "overlay", height: "large", overlay: 0, eyebrow: "Beds, mattresses and headboards",
   image: eb("eb-hero-1", "A sunlit bedroom with a cobalt velvet bed, white bedding and tangerine and yellow cushions", { fit: "cover", focalPoint: { x: 64, y: 55 } }),
-  promises: ["truck: Two-person delivery to your room", "clock: Delivered in 5 to 7 working days", "card: Spread the cost with Klarna", "home: Try every bed in our showroom"].join("\n"),
+  promises: "",
 });
 Object.assign(block(hero, "resthaven-hero-title").settings, accented("text", ["Beds worth "], ["waking up for.", true]));
 block(hero, "resthaven-hero-text").settings.text = "Beds, mattresses and headboards in every size from single to super king, carried to the room of your choice by our own two-person team.";
 Object.assign(block(hero, "resthaven-hero-action-0").settings, { label: "Shop beds", href: "/collections/beds" });
 Object.assign(block(hero, "resthaven-hero-action-1").settings, { label: "Find your mattress", href: "/collections/mattresses" });
-hero.blocks.push(blockOf("expressbed-hero-card", "floating-card", { eyebrow: "Best seller", position: "bottom-right" }));
 
 // 2. Shop by type: bento tiles with "From £" labels.
 const types = inline(home, "resthaven-categories");
@@ -346,22 +346,25 @@ newsletter.settings.styleScheme = "scheme5";
 }
 
 
-// Product page, two columns on large screens:
-//   left  = photos, then "Complete the set", the description, details, dimensions and reviews (blocks set to
-//           "Under the photos");
-//   right = a short buying panel that stays in view: rating, title and price, size tiles with their prices, extras
-//           as tick cards, quantity and Add to basket (delivery and returns promises sit under the photos).
-// Phones stack photos, buying panel, then the rest; a bottom bar keeps the price and Add to basket in reach.
+// Product page, two equal columns on large screens:
+//   left  = photos with thumbnails, then "Complete the set" and the dimensions (blocks set to "Under the photos");
+//   right = the buying details, scrolling with the page.
+// Phones stack photos, buying details, then the rest; a bottom bar keeps the price and Add to basket in reach.
 const productLayout = template("product");
 const mainProduct = productLayout.sections.find((placement) => placement.kind === "inline" && placement.section.type === "main-product").section;
-Object.assign(mainProduct.settings, { mediaWidth: "wide", mediaRatio: "square", stickyColumn: "details" });
+// 2026-11-21 brief: an even 50/50 split, both columns starting at the top, nothing floating. Right column, in order:
+// name, price, size and colour, Add to bag, delivery, then fold-outs for the description and specifications, and the
+// reviews. Under the photos: Complete the set and the dimensions.
+Object.assign(mainProduct.settings, { mediaWidth: "medium", mediaRatio: "square", stickyColumn: "none", thumbnailPosition: "below" });
 const partOf = (type) => mainProduct.blocks.find((entry) => entry.type === type);
+// The name comes first: no brand line above it and no rating line (the reviews sit lower in the same column).
+mainProduct.blocks = mainProduct.blocks.filter((entry) => entry.type !== "part-rating-summary");
+Object.assign(partOf("part-product-information").settings, { showVendor: false });
 Object.assign(partOf("part-product-options").settings, { style: "tiles", tileColumns: 2 });
 Object.assign(partOf("part-product-purchase").settings, { stickyBar: true, showPrice: true, label: "Add to bag" });
-// Delivery and returns promises sit under the photos with the other reading content, keeping the panel short.
-Object.assign(partOf("part-trust-strip").settings, { column: "below" });
-Object.assign(partOf("part-product-description").settings, { layout: "plain", column: "below" });
-Object.assign(partOf("part-product-specifications").settings, { layout: "table", column: "below" });
+Object.assign(partOf("part-trust-strip").settings, { column: "panel" });
+Object.assign(partOf("part-product-description").settings, { layout: "expandable", startOpen: true, column: "panel" });
+Object.assign(partOf("part-product-specifications").settings, { layout: "expandable", column: "panel" });
 const takeSection = (type) => {
   const index = productLayout.sections.findIndex((placement) => placement.kind === "inline" && placement.section.type === type);
   return index < 0 ? undefined : productLayout.sections.splice(index, 1)[0].section;
@@ -381,7 +384,7 @@ mainProduct.blocks.splice(purchaseAt + 1, 0, {
 });
 mainProduct.blocks.push(
   ...(dimensions ? [{ id: dimensions.id, type: "part-product-dimensions", enabled: true, blocks: [], settings: { ...dimensions.settings, column: "below" } }] : []),
-  ...(reviewsSection ? [{ id: reviewsSection.id, type: "part-product-reviews", enabled: true, blocks: [], settings: { ...reviewsSection.settings, column: "below" } }] : []),
+  ...(reviewsSection ? [{ id: reviewsSection.id, type: "part-product-reviews", enabled: true, blocks: [], settings: { ...reviewsSection.settings, column: "panel" } }] : []),
 );
 
 const collection = template("collection");
@@ -462,7 +465,12 @@ const themeSettings = themes.applyThemeStyle(structuredClone(pack.theme.settings
 themeSettings.cart = { ...(themeSettings.cart ?? {}), type: "drawer", freeDeliveryFrom: 0 };
 // Cards: the theme defaults (stars, % off, second photo on hover, colour dots) plus Quick view.
 const resthavenDefaults = JSON.parse(readFileSync(fileURLToPath(new URL("jellyshops/packages/storefront-themes/src/themes/jelly-resthaven/theme.json", `file:///${root.replaceAll("\\", "/")}`)), "utf8")).settingsDefaults;
-themeSettings.productCard = { ...resthavenDefaults.productCard, ...(themeSettings.productCard ?? {}), quickView: true };
+// 2026-11-21 brief: minimal cards everywhere (photo, name, price; gentle zoom on hover), so the extras are off.
+themeSettings.productCard = {
+  ...resthavenDefaults.productCard, ...(themeSettings.productCard ?? {}),
+  layout: "minimal", quickView: false, showRating: false, showBrand: false, swatches: "none", savings: "none", hoverImage: false,
+};
+themeSettings.badges = { ...(themeSettings.badges ?? {}), sale: "hide" };
 
 // ---------------------------------------------------------------------------------------------------------------
 // Checks: every section must pass the registry, as the editor and publish would require.
@@ -493,7 +501,6 @@ const plan = {
   // Product picks in the home page, by handle (the installer swaps in the product ids once products exist).
   productLinks: [
     { template: "home", section: "resthaven-spotlight", product: "calder-ottoman-storage-bed" },
-    { template: "home", section: "studio-hero", block: "expressbed-hero-card", product: "calder-ottoman-storage-bed" },
     { template: "home", section: "resthaven-shop-look", block: "resthaven-pin-bed", product: "elm-wingback-upholstered-bed" },
     { template: "home", section: "resthaven-shop-look", block: "resthaven-pin-bedside", product: "piped-wingback-headboard" },
     { template: "home", section: "resthaven-shop-look", block: "resthaven-pin-rug", product: "hollis-pocket-1000-mattress" },
