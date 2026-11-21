@@ -438,7 +438,7 @@
   [data-jelly-legacy-styles="off"] .jelly-header .jelly-header-search-panel { padding: 8px var(--j-page-edge) 14px; border-bottom: 1px solid var(--j-color-divider); background: var(--j-color-bg); box-shadow: 0 24px 32px -24px color-mix(in srgb, var(--j-color-text) 35%, transparent); }
   [data-jelly-legacy-styles="off"] .jelly-header .jelly-header-search-panel .jelly-header-search { width: 100%; max-width: none; }
   /* The open menu: a full-height panel under the header that scrolls on its own while the page behind stays still. */
-  [data-jelly-legacy-styles="off"] .jelly-mobile-navigation[open] > .jelly-mobile-navigation-panel { position: fixed; top: var(--jelly-menu-top, 60px); bottom: 0; max-height: none; overscroll-behavior: contain; box-shadow: none; animation: jelly-menu-in 200ms var(--j-ease, ease-out); }
+  [data-jelly-legacy-styles="off"] .jelly-mobile-navigation[open] > .jelly-mobile-navigation-panel { position: fixed; top: var(--jelly-menu-top, 60px); bottom: 0; max-height: none; overscroll-behavior: contain; align-content: start; box-shadow: none; animation: jelly-menu-in 200ms var(--j-ease, ease-out); }
   [data-jelly-legacy-styles="off"] .jelly-mobile-navigation-panel > nav:first-child > ul > li { border-bottom: 1px solid var(--j-color-divider); }
   [data-jelly-legacy-styles="off"] .jelly-mobile-navigation-panel > nav:first-child > ul > li > :is(a, details > summary) { min-height: 56px; font-size: 17px; }
   [data-jelly-legacy-styles="off"] .jelly-mobile-navigation-panel .jelly-menu-disclosure > :not(summary) { margin-left: 0; }
