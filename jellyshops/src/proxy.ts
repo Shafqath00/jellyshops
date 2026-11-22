@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { storeLinkSettings, storeUrl } from "@jelly/storefront-schema";
 import { decideStoreAccess } from "@/features/storefront-access/access-gate";
 import { classifyHost, type HostRoute } from "@/lib/hosts";
+import { contentSecurityPolicy, securityHeaderOptionsFromEnv, type PageKind } from "@/lib/security-headers";
 
 /**
  * Runs before every page. Two jobs, each in its own module (Next allows one proxy file):
@@ -38,6 +39,20 @@ export async function proxy(request: NextRequest) {
     storeLinks: settings.mode,
   });
 
+  const response = await routeResponse(request, route);
+  if (route.kind !== "redirect") response.headers.set("Content-Security-Policy", contentSecurityPolicy(pageKind(route, request.nextUrl.pathname), securityHeaderOptionsFromEnv()));
+  return response;
+}
+
+/** Which policy a page gets (lib/security-headers.ts). */
+export function pageKind(route: HostRoute, pathname: string): PageKind {
+  if (route.kind === "platform-admin") return "platform";
+  if (route.kind === "merchant-admin" || pathname === "/admin" || pathname.startsWith("/admin/")) return "admin";
+  if (route.kind === "shop") return /^\/sites\/[^/]+\/(checkout|order)(\/|$)/.test(route.path) ? "checkout" : "shop";
+  return "marketing";
+}
+
+async function routeResponse(request: NextRequest, route: HostRoute): Promise<NextResponse> {
   switch (route.kind) {
     case "marketing":
     case "pass":

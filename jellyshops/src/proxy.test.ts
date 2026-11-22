@@ -94,6 +94,17 @@ describe("proxy with shop subdomains", () => {
     expect(response!.headers.get("location")).toBe("https://new-name.jellyshop.io/products/bed?variant=2");
   });
 
+  it("gives each kind of page its own Content Security Policy", async () => {
+    const csp = async (url: string) => (await proxy(request(url)))!.headers.get("content-security-policy") ?? "";
+    expect(await csp("https://myshop.jellyshop.io/")).toContain("https://www.youtube-nocookie.com");
+    expect(await csp("https://myshop.jellyshop.io/")).not.toContain("js.stripe.com");
+    expect(await csp("https://myshop.jellyshop.io/checkout")).toContain("https://js.stripe.com");
+    expect(await csp("https://myshop.jellyshop.io/order/abc")).toContain("https://js.stripe.com");
+    expect(await csp("https://admin.jellyshop.io/orders")).toContain("frame-src 'self'");
+    expect(await csp("https://platform.jellyshop.io/")).toContain("frame-ancestors 'none'");
+    expect(await csp("https://jellyshop.io/")).toContain("default-src 'self'");
+  });
+
   it("shows the password page for a protected shop", async () => {
     vi.stubGlobal("fetch", vi.fn(async (url: string) => {
       if (url.includes("/api/public/storefronts/")) return Response.json({ store: { id: "store-1" } });

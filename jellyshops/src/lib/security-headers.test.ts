@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkoutContentSecurityPolicy, securityHeaderRules } from "./security-headers";
+import { checkoutContentSecurityPolicy, contentSecurityPolicy, securityHeaderRules } from "./security-headers";
 
 describe("security headers", () => {
   const production = { production: true, apiUrl: "https://api.example.test/base", supabaseUrl: "https://abc.supabase.co" };
@@ -22,12 +22,31 @@ describe("security headers", () => {
     expect(csp).not.toContain("upgrade-insecure-requests");
   });
 
-  it("sends HSTS in production only, and the policy on checkout and order pages", () => {
+  it("sends HSTS in production only; page policies come from the proxy", () => {
     const rules = securityHeaderRules(production);
-    const keys = (source: string) => rules.find((rule) => rule.source === source)!.headers.map((header) => header.key);
-    expect(keys("/:path*")).toEqual(expect.arrayContaining(["Strict-Transport-Security", "X-Frame-Options", "X-Content-Type-Options", "Referrer-Policy"]));
-    expect(keys("/:storeSlug/checkout")).toEqual(["Content-Security-Policy"]);
-    expect(keys("/:storeSlug/order/:path*")).toEqual(["Content-Security-Policy"]);
+    expect(rules.map((rule) => rule.source)).toEqual(["/:path*"]);
+    expect(rules[0]!.headers.map((header) => header.key)).toEqual(expect.arrayContaining(["Strict-Transport-Security", "X-Frame-Options", "X-Content-Type-Options", "Referrer-Policy"]));
+    expect(rules[0]!.headers.map((header) => header.key)).not.toContain("Content-Security-Policy");
     expect(securityHeaderRules({ production: false })[0]!.headers.map((header) => header.key)).not.toContain("Strict-Transport-Security");
+  });
+
+  it("lets shops show their embeds but no outside scripts, and keeps Stripe to checkout", () => {
+    const shop = contentSecurityPolicy("shop", production);
+    expect(shop).toContain("script-src 'self' 'unsafe-inline';");
+    expect(shop).toContain("https://www.youtube-nocookie.com");
+    expect(shop).toContain("https://calendly.com");
+    expect(shop).not.toContain("stripe");
+    expect(shop).toContain("frame-ancestors 'self'");
+  });
+
+  it("keeps the platform admin out of every frame and frames nothing itself", () => {
+    const platform = contentSecurityPolicy("platform", production);
+    expect(platform).toContain("frame-src 'none'");
+    expect(platform).toContain("frame-ancestors 'none'");
+    expect(platform).toContain("connect-src 'self' https://api.example.test https://abc.supabase.co;");
+  });
+
+  it("lets the admin's editor frame this site's previews", () => {
+    expect(contentSecurityPolicy("admin", production)).toContain("frame-src 'self' https://www.google.com");
   });
 });

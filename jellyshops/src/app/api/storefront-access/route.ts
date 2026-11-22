@@ -2,12 +2,15 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { accessCookieName, requestAccessToken } from "@/features/storefront-access/access-api";
 import { getServerStorefront } from "@/features/storefront/server-storefront";
+import { isSameOrigin } from "@/lib/same-origin";
 
 /**
  * `POST /api/storefront-access` with `{ storeSlug, password }`: checks the password with the
  * backend and keeps the access token in an httpOnly cookie for 30 days. Wrong passwords are 401.
+ * Only the store's own pages may ask (same-origin check): other sites can't set the cookie on a shopper's behalf.
  */
 export async function POST(request: Request) {
+  if (!isSameOrigin(request)) return NextResponse.json({ error: "Not allowed." }, { status: 403 });
   const body = await request.json().catch(() => null) as { storeSlug?: unknown; password?: unknown } | null;
   if (!body || typeof body.storeSlug !== "string" || typeof body.password !== "string") return NextResponse.json({ error: "Enter the password." }, { status: 400 });
   const data = await getServerStorefront(body.storeSlug);

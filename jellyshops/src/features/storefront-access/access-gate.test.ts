@@ -56,3 +56,9 @@ it("sends a shop's old address to its new one", async () => {
   expect(await decideStoreAccess("/old-name", () => undefined, { origin: "http://api", lookup })).toEqual({ kind: "moved", slug: "shop" });
   expect(lookup).toHaveBeenCalledTimes(2);
 });
+
+it("names the password cookie so only this exact site can set it in production", async () => {
+  const { accessCookieName } = await import("./access-api");
+  expect(accessCookieName("store-1", true)).toBe("__Host-jelly-access-store-1");
+  expect(accessCookieName("store-1", false)).toBe("jelly-access-store-1");
+});

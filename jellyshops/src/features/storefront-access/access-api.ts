@@ -10,7 +10,13 @@ import { storeCacheTag, storefrontFetchInit } from "@/features/storefront/storef
 
 const origin = () => (process.env.STOREFRONT_API_URL ?? process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001").replace(/\/$/, "");
 
-export const accessCookieName = (storeId: string) => `jelly-access-${storeId.replace(/[^\w-]/g, "")}`;
+/**
+ * The cookie that keeps a shopper past a store's password page. In production it carries the `__Host-` prefix, so
+ * browsers only accept it when it is Secure, for the whole site and tied to this exact host: one shop's site can't plant
+ * or overwrite it for another (shops share jellyshop.io). Renaming it asks visitors for the password once more.
+ */
+export const accessCookieName = (storeId: string, production = process.env.NODE_ENV === "production") =>
+  `${production ? "__Host-" : ""}jelly-access-${storeId.replace(/[^\w-]/g, "")}`;
 
 /**
  * Whether the store asks for a password and whether this token unlocks it.
