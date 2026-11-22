@@ -9,6 +9,7 @@ import { merchantSupabase } from "../lib/supabase-clients";
 import { MerchantAuthShell } from "./auth-shell";
 import { MerchantPasswordField, newPasswordMinimum } from "./password-field";
 import styles from "./merchant-auth.module.css";
+import { openAdmin } from "@/features/auth/lib/admin-handoff";
 
 export function MerchantResetPasswordForm() {
   const router = useRouter();
@@ -89,7 +90,7 @@ export function MerchantResetPasswordForm() {
       {changed && (
         <>
           <p className={styles.notice} role="status">Your password has been updated.</p>
-          <p className={styles.switch}><button type="button" className={styles.textLink} onClick={() => router.replace("/admin")}>Continue to your dashboard</button></p>
+          <p className={styles.switch}><button type="button" className={styles.textLink} onClick={() => void openAdmin("/admin", (next) => router.replace(next))}>Continue to your dashboard</button></p>
         </>
       )}
       {valid && !changed && (

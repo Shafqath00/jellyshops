@@ -22,6 +22,8 @@ import {
   SetupFields, slugFromName, stepContent, stepVisual, suggestedTheme, themeCover, themes, validateStep, visibleStep, visibleSteps, type VisibleStep,
 } from "./steps";
 import styles from "./onboarding.module.css";
+import { openAdmin } from "@/features/auth/lib/admin-handoff";
+import { toShopAdmin } from "@/features/admin/admin-paths";
 
 type AddressCheck = { slug: string; state: "checking" | "available" | "taken" | "error" };
 type SaveStatus = "idle" | "saving" | "saved" | "error";
@@ -68,7 +70,7 @@ export default function OnboardingPage() {
   useEffect(() => { latestUser.current = user; }, [user]);
   useEffect(() => {
     if (configured && !loading && !userId) router.replace("/login?next=%2Fonboarding");
-    if (stores.length && !creating) router.replace("/admin");
+    if (stores.length && !creating) void openAdmin("/admin", (next) => router.replace(next));
   }, [configured, creating, loading, router, stores.length, userId]);
 
   const hasStore = stores.length > 0;
@@ -79,7 +81,7 @@ export default function OnboardingPage() {
       if (controller.signal.aborted) return;
       if (state.store) {
         setActiveStoreId(state.store.id);
-        router.replace("/admin");
+        void openAdmin(toShopAdmin(state.store.slug, "/admin"), (next) => router.replace(next));
         return;
       }
       const nextAnswers = prefill(state.answers, latestUser.current?.user_metadata ?? {});
@@ -208,7 +210,7 @@ export default function OnboardingPage() {
     try {
       await refreshMerchant();
       setActiveStoreId(store.id);
-      router.replace("/admin?welcome=1");
+      await openAdmin(toShopAdmin(store.slug, "/admin?welcome=1"), (next) => router.replace(next));
     } catch {
       setError("Your store was created, but the dashboard could not load. Try loading it again.");
       setBusy(false);

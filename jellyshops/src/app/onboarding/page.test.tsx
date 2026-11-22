@@ -132,7 +132,7 @@ it("creates the store from the last step with the suggested design and opens the
   await user.type(screen.getByLabelText(/^Price/), "49.99");
   await user.click(screen.getByRole("button", { name: /create my store/i }));
 
-  await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/admin?welcome=1"));
+  await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/admin/s/fern-studio?welcome=1"));
   expect(backend.snapshot().answers).toMatchObject({ theme: "jelly-diode", product: { title: "Wireless earbuds", priceMinor: 4999 } });
   expect(backend.calls.filter((call) => call === "POST /complete")).toHaveLength(1);
 });
@@ -147,7 +147,7 @@ it("retries dashboard loading after completion without creating a second store",
   expect(await screen.findByRole("alert")).toHaveTextContent(/store was created/i);
   await user.click(screen.getByRole("button", { name: /open your dashboard/i }));
 
-  await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/admin?welcome=1"));
+  await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/admin/s/fern-studio?welcome=1"));
   expect(setActiveStoreId).toHaveBeenCalledWith(store.id);
   expect(backend.calls.filter((call) => call === "POST /complete")).toHaveLength(1);
 });

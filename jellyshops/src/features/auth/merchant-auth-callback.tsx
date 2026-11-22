@@ -8,6 +8,7 @@ import styles from "./components/merchant-auth.module.css";
 import { merchantCallbackUrl, merchantReturnPath } from "./lib/auth-navigation";
 import { beginRecovery } from "./lib/recovery-session";
 import { merchantSupabase, supabaseConfigured } from "./lib/supabase-clients";
+import { openAdmin } from "@/features/auth/lib/admin-handoff";
 
 const invalidLink = "This link has expired, was already used, or was opened in another browser. Return to sign in to try again.";
 
@@ -47,7 +48,7 @@ export function MerchantAuthCallback({ code, nextPath, recovery, providerError }
       exchange.current = { code, result: resolveCallback(code, nextPath, recovery) };
     }
     void exchange.current.result.then((target) => {
-      if (active) router.replace(target);
+      if (active) void openAdmin(target, (next) => router.replace(next));
     }).catch(() => {
       if (active) setError(invalidLink);
     });

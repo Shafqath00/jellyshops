@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createAdminRouter } from "../../admin/routes.js";
 import { requireMerchant, requireStorePermission } from "../../auth/middleware.js";
+import { createSignInHandoffRouter, supabaseHandoffTokenMaker } from "../../auth/sign-in-handoff.js";
 import { createPublicStoreBySlugRouter, createPublicStoreRouter } from "../../catalog/public-store.js";
 import { createCatalogAdminRouter, createCatalogRouter, createPublicCatalogRouter } from "../../catalog/routes.js";
 import { createProductBulkRouter } from "../../catalog-bulk/routes.js";
@@ -49,6 +50,12 @@ export function mountTenantRoutes(app: Express, context: AppContext): void {
     ? new OnboardingService(deps.commerceDatabase, createOnboardingProvisioner(context.mediaStorage))
     : undefined;
   if (onboarding) app.use("/api/onboarding", createOnboardingRouter(authProvider, onboarding));
+  // Signs a merchant in on the admin host from the main site (shop subdomains). Needs Supabase sign-in and its secret key.
+  const { config } = context;
+  const handoffTokens = config.authProvider === "supabase" && config.supabaseUrl && config.supabaseSecretKey
+    ? supabaseHandoffTokenMaker({ url: config.supabaseUrl, secretKey: config.supabaseSecretKey })
+    : null;
+  app.use("/api/auth/handoff", createSignInHandoffRouter(authProvider, handoffTokens));
 
   app.use(
     "/api",

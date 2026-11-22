@@ -10,6 +10,7 @@ import { merchantCallbackUrl, merchantReturnPath } from "../lib/auth-navigation"
 import { MerchantAuthShell } from "./auth-shell";
 import { MerchantPasswordField, newPasswordMinimum } from "./password-field";
 import styles from "./merchant-auth.module.css";
+import { openAdmin } from "@/features/auth/lib/admin-handoff";
 
 type Policies = { version: string; termsUrl: string; privacyUrl: string };
 type Action = "" | "submit" | "google";
@@ -169,7 +170,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         setError(friendlyAuthError(result.error, signup));
         return;
       }
-      if (result.data.session) router.replace(target);
+      if (result.data.session) await openAdmin(target, (next) => router.replace(next));
       else if (signup) { setSentTo(credentials.email); setCooldown(30); }
       else setError("We couldn’t sign you in. Try again.");
     } catch {
