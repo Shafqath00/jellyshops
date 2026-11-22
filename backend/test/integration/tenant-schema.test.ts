@@ -33,6 +33,7 @@ type TableFacts = {
 };
 
 let tables: TableFacts[] = [];
+let rights: Record<string, { select: boolean; insert: boolean; update: boolean; delete: boolean }> = {};
 
 beforeAll(async () => {
   const database = new PGlite();
@@ -56,6 +57,14 @@ beforeAll(async () => {
     WHERE n.nspname = 'public' AND c.relkind = 'r'
     ORDER BY 1`);
   tables = result.rows;
+  for (const name of ["PlatformAdmin", "PlatformAuditEvent"]) {
+    const row = (await database.query<{ select: boolean; insert: boolean; update: boolean; delete: boolean }>(
+      `SELECT has_table_privilege('jelly_backend', $1, 'SELECT') AS "select", has_table_privilege('jelly_backend', $1, 'INSERT') AS "insert",
+              has_table_privilege('jelly_backend', $1, 'UPDATE') AS "update", has_table_privilege('jelly_backend', $1, 'DELETE') AS "delete"`,
+      [`public."${name}"`],
+    )).rows[0]!;
+    rights[name] = row;
+  }
 }, 300_000);
 
 describe("database tables and shops", () => {
@@ -83,6 +92,11 @@ describe("database tables and shops", () => {
       return [];
     });
     expect(problems).toEqual([]);
+  });
+
+  it("lets the backend read platform admins but never add or change them, and only add to their log", () => {
+    expect(rights.PlatformAdmin).toEqual({ select: true, insert: false, update: false, delete: false });
+    expect(rights.PlatformAuditEvent).toEqual({ select: true, insert: true, update: false, delete: false });
   });
 
   it("keeps the list of global tables up to date", () => {
