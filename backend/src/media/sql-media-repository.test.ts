@@ -29,4 +29,14 @@ describe("SQL media metadata", () => {
     await repository.create({ ...input, id: "old-2", storageKey: "old-2.png", contentHash: null });
     expect(await repository.list("store-a")).toHaveLength(3);
   });
+  it("keeps copy widths and the placeholder, and still saves on a database without those columns", async () => {
+    db = await createPGliteDatabase(); await seedStore(db, "store-a", "a");
+    const input = { id: "image-1", storeId: "store-a", type: "image" as const, storageKey: "a/image.png", url: "/image", mimeType: "image/png", byteSize: 10, width: 700, height: 700, originalName: "image.png", altText: null, referenced: false, variantWidths: [320, 640, 960], placeholder: "data:image/webp;base64,AAAA" };
+    await new SqlMediaRepository(db).create(input);
+    expect(await new SqlMediaRepository(db).get("store-a", "image-1")).toMatchObject({ variantWidths: [320, 640, 960], placeholder: "data:image/webp;base64,AAAA" });
+    await expect(db.query(`INSERT INTO "Media" ("id","storeId","type","storageKey","url","mimeType","byteSize","originalName","referenced","placeholder") VALUES (x,store-a,image,k,/u,image/png,1,n,false,not-a-data-url)`)).rejects.toThrow();
+    await db.exec(`ALTER TABLE "Media" DROP CONSTRAINT "Media_placeholder_size"; ALTER TABLE "Media" DROP COLUMN "variantWidths"; ALTER TABLE "Media" DROP COLUMN "placeholder";`);
+    await new SqlMediaRepository(db).create({ ...input, id: "image-2", storageKey: "a/image-2.png" });
+    expect(await new SqlMediaRepository(db).get("store-a", "image-2")).toMatchObject({ id: "image-2" });
+  });
 });

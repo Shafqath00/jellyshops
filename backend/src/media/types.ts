@@ -14,6 +14,10 @@ export interface MediaRecord {
   referenced: boolean;
   createdAt: string;
   contentHash?: string | null;
+  /** Widths of the resized WebP copies that exist; null/absent for images uploaded before this was recorded. */
+  variantWidths?: number[] | null;
+  /** A tiny blurred WebP as a data URL, shown while the photo loads; null when there is none. */
+  placeholder?: string | null;
 }
 
 export interface StoredMediaRecord extends MediaRecord {

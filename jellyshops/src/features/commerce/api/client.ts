@@ -62,7 +62,7 @@ export interface PublicCatalogProduct {
   collectionIds?: string[];
   options?: unknown[];
   inventoryOptionIds?: string[];
-  media: Array<import("@jelly/storefront-schema").ProductMediaLike & { position: number }>;
+  media: Array<import("@jelly/storefront-schema").ProductMediaLike & import("@/lib/domain").MediaHints & { position: number }>;
   variants: PublicCatalogVariant[];
   available: boolean;
 }

@@ -73,6 +73,7 @@ export function productCardData(product: Product, href: string, currency: Curren
   const colours = productCardSwatches(product);
   const filters = productFilterValues({ options: product.options, variantOptions: product.variants.map((item) => item.options), tags: product.tags, vendor: product.vendor, productType: product.productType });
   const hoverImageUrl = productHoverImage(product);
+  const photo = product.media?.find((entry) => entry.url === product.imageUrl);
   return {
     id: product.id,
     name: product.name,
@@ -92,6 +93,8 @@ export function productCardData(product: Product, href: string, currency: Curren
     ...colours,
     ...(filters.length ? { filters } : {}),
     ...(hoverImageUrl ? { hoverImageUrl } : {}),
+    ...(photo?.variantWidths?.length ? { imageWidths: photo.variantWidths } : {}),
+    ...(photo?.placeholder ? { imagePlaceholder: photo.placeholder } : {}),
   };
 }
 

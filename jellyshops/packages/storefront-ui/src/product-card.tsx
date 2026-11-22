@@ -23,6 +23,10 @@ export interface StorefrontProductCardData {
   rating?: { average: number; count: number };
   /** Second photo; shown when the shopper points at the card, if the theme's "Second photo on hover" setting is on. */
   hoverImageUrl?: string;
+  /** Resized copies of the photo the media API has (from the upload); the srcset then lists exactly these. */
+  imageWidths?: number[];
+  /** Tiny blurred copy (a data URL) painted behind the photo until it loads. */
+  imagePlaceholder?: string;
 }
 
 /**
@@ -51,23 +55,30 @@ const MEDIA_PHOTO = /\/api\/public\/media\/[^/?#]+\/[^/?#]+(?:[?#]|$)/;
 export const THEME_PHOTOS_WITH_COPIES = ["jelly-resthaven"] as const;
 export const THEME_PHOTO_ORIGINAL_WIDTH = 1536;
 const THEME_PHOTO = new RegExp(`^/themes/(${THEME_PHOTOS_WITH_COPIES.join("|")})/([a-z0-9-]+)\\.webp$`);
-export function cardPhotoSrcSet(url: string): string | undefined {
+/** Widths the media API makes; a photo's own list (when known) says which of these exist for it. */
+const MEDIA_WIDTHS = [320, 640, 960, 1280, 1920];
+const LEGACY_WIDTHS = [320, 640, 1280];
+export function cardPhotoSrcSet(url: string, widths?: readonly number[]): string | undefined {
   const theme = THEME_PHOTO.exec(url);
   if (theme && !/-(640|1024)$/.test(theme[2])) {
     const base = `/themes/${theme[1]}/${theme[2]}`;
     return `${base}-640.webp 640w, ${base}-1024.webp 1024w, ${url} ${THEME_PHOTO_ORIGINAL_WIDTH}w`;
   }
   if (!MEDIA_PHOTO.test(url)) return undefined;
-  return [320, 640, 1280].map((width) => `${url}${url.includes("?") ? "&" : "?"}w=${width} ${width}w`).join(", ");
+  // Without a list (photos uploaded before copies were recorded) only the three oldest sizes are asked for.
+  const list = widths?.filter((width) => MEDIA_WIDTHS.includes(width)) ?? [];
+  return (list.length ? list : LEGACY_WIDTHS).map((width) => `${url}${url.includes("?") ? "&" : "?"}w=${width} ${width}w`).join(", ");
 }
 /** How wide a card shows: a quarter of the page on desktop, a third on tablets, half on phones. */
 export const CARD_PHOTO_SIZES = "(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw";
 
 function CardMedia({ product, priority }: { product: StorefrontProductCardData; priority?: boolean }) {
-  const photo = (url: string) => ({ src: url, srcSet: cardPhotoSrcSet(url), sizes: cardPhotoSrcSet(url) ? CARD_PHOTO_SIZES : undefined });
+  const photo = (url: string, widths?: number[]) => { const srcSet = cardPhotoSrcSet(url, widths); return { src: url, srcSet, sizes: srcSet ? CARD_PHOTO_SIZES : undefined }; };
+  // The blur sits behind the photo and is covered once the photo has loaded.
+  const blur = product.imagePlaceholder?.startsWith("data:image/webp;base64,") ? { backgroundImage: `url("${product.imagePlaceholder}")`, backgroundSize: "cover", backgroundPosition: "center" } : undefined;
   return <div className="jelly-product-card-media" data-card-part="media">
     {/* The first cards on screen load at once and first in line (they are often the largest thing in view). */}
-    {product.imageUrl ? <img {...photo(product.imageUrl)} alt={product.name} loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : undefined} decoding="async" /> : <span className="jelly-product-card-placeholder" aria-hidden="true" />}
+    {product.imageUrl ? <img {...photo(product.imageUrl, product.imageWidths)} style={blur} alt={product.name} loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : undefined} decoding="async" /> : <span className="jelly-product-card-placeholder" aria-hidden="true" />}
     {/* Decorative: the name is already on the first photo. Hidden unless the theme setting is on. */}
     {product.imageUrl && product.hoverImageUrl && <img className="jelly-product-card-hover-image" {...photo(product.hoverImageUrl)} alt="" aria-hidden="true" loading="lazy" decoding="async" />}
     {product.badge && <span className="jelly-product-card-badge">{product.badge}</span>}

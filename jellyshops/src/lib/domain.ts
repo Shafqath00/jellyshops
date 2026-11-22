@@ -148,7 +148,7 @@ export interface Product {
   specifications?: Record<string, string>;
   category: string;
   imageUrl: string;
-  media?: import("@jelly/storefront-schema").ProductMediaLike[];
+  media?: Array<import("@jelly/storefront-schema").ProductMediaLike & MediaHints>;
   vendor?: string;
   published: boolean;
   archived: boolean;
@@ -334,3 +334,6 @@ export function getEffectiveCategoryOptionDefinitions(categoryId: string, catego
   });
   return [...byName.values()].sort((a, b) => a.position - b.position || a.name.localeCompare(b.name));
 }
+
+/** What the media API knows about a stored photo beyond its address: the resized copies that exist and a blur. */
+export interface MediaHints { variantWidths?: number[]; placeholder?: string }

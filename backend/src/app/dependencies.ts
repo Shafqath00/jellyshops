@@ -49,7 +49,7 @@ import { StoreSettingsRepository } from "../tenants/settings.js";
 import { supabasePool } from "./database.js";
 import type { AppContext, AppDependencies } from "./types.js";
 
-function createDefaultMediaStorage(
+export function createDefaultMediaStorage(
   config: AppConfig,
 ): MediaStorage {
   if (config.mediaProvider === "supabase") {

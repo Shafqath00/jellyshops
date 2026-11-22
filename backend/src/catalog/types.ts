@@ -45,6 +45,10 @@ export interface CatalogMedia {
   position: number;
   appliesTo?: Record<string, string[]>;
   originalName?: string;
+  /** Widths of the resized copies that exist (absent for photos uploaded before they were recorded). */
+  variantWidths?: number[];
+  /** Tiny blurred WebP data URL shown while the photo loads. */
+  placeholder?: string;
 }
 
 /** "Total 500 g, show the price per 100 g". Both units must measure the same thing. */

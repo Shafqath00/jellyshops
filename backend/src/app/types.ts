@@ -1,4 +1,5 @@
 import type { StorefrontRefresher } from "../storefront/cache-refresh.js";
+import type { StoreActivityRecorder } from "../tenants/store-activity.js";
 import type express from "express";
 import type { AdminSalesService, AdminSummaryService, CustomerService, OrderTagService } from "../admin/service.js";
 import type { AuthProvider } from "../auth/types.js";
@@ -86,6 +87,8 @@ export interface AppContext {
   mediaStorage: MediaStorage;
   /** Set by createApp: asks the storefront to rebuild a store's cached pages. */
   storefrontRefresher?: StorefrontRefresher;
+  /** Set by createApp: records when a store was last used. */
+  storeActivity?: StoreActivityRecorder;
   publicStorefrontContextService: PublicStorefrontContextService | undefined;
   adminServices: { summary: AdminSummaryService; customers: CustomerService; sales?: AdminSalesService; orderTags?: OrderTagService } | undefined;
   commerceRepository: CommerceRepository | undefined;

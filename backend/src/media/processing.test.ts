@@ -88,10 +88,12 @@ it("scales very large photos down on upload and makes no copies larger than the 
  const { service, dir } = await setup();
  const bytes = await sharp({ create: { width: 3200, height: 1600, channels: 3, background: "blue" } }).jpeg().toBuffer();
  const uploaded = await service.upload("store", file(bytes));
- expect(uploaded).toMatchObject({ width: 2560, height: 1280 });
+ expect(uploaded).toMatchObject({ width: 2560, height: 1280, variantWidths: [320, 640, 960, 1280, 1920], placeholder: expect.stringMatching(/^data:image\/webp;base64,/) });
+ expect(uploaded.placeholder!.length).toBeLessThanOrEqual(1200);
  expect(await readdir(path.join(dir, "uploads", "store"))).toHaveLength(6);
  const small = await sharp({ create: { width: 700, height: 700, channels: 3, background: "green" } }).png().toBuffer();
  const smallUpload = await service.upload("store", file(small));
  expect((await readdir(path.join(dir, "uploads", "store"))).filter(name => name.startsWith(smallUpload.id))).toHaveLength(4);
+ expect(smallUpload.variantWidths).toEqual([320, 640, 960]);
  expect((await sharp((await service.open("store", smallUpload.id, 1920)).contents).metadata()).width).toBe(700);
 });

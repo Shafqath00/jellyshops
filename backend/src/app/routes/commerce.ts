@@ -43,7 +43,12 @@ export function mountStripeWebhooks(app: Express, context: AppContext): void {
       createConnectPaymentsWebhookRouter(
         deps.stripeGateway,
         deps.webhookSql,
-        { database: deps.commerceDatabase, hooks: deps.orderRuntime?.hooks, onStoreChanged: context.storefrontRefresher?.enabled ? (storeId) => context.storefrontRefresher!.storeChanged(storeId) : undefined },
+        { database: deps.commerceDatabase, hooks: deps.orderRuntime?.hooks, onPaymentEvent: async (storeId, type) => {
+          await Promise.all([
+            context.storefrontRefresher?.storeChanged(storeId),
+            type === "payment_intent.succeeded" ? context.storeActivity?.orderPaid(storeId) : undefined,
+          ]);
+        } },
       ),
     );
   }

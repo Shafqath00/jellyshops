@@ -12,8 +12,8 @@ export function createConnectPaymentsWebhookRouter(
   options: {
     database?: CommerceDatabase;
     hooks?: PaymentSettlementHooks;
-    /** Called once a payment settled, failed or was cancelled, because the stock a store shows may have changed. */
-    onStoreChanged?: (storeId: string) => Promise<void>;
+    /** Called once a payment settled, failed or was cancelled (stock may have changed; a success is also an order). */
+    onPaymentEvent?: (storeId: string, type: string) => Promise<void>;
   } = {},
 ): express.Router {
   const router = express.Router();
@@ -95,7 +95,7 @@ export function createConnectPaymentsWebhookRouter(
           else await process(sql);
         }
 
-        await refreshStoreAfterPayment(sql, event.type, stripeAccountId, payload, options.onStoreChanged);
+        await afterPaymentEvent(sql, event.type, stripeAccountId, payload, options.onPaymentEvent);
 
         return response.status(200).json({
           received: true,
@@ -117,20 +117,20 @@ export function createConnectPaymentsWebhookRouter(
 
 const STOCK_EVENTS = new Set(["payment_intent.succeeded", "payment_intent.payment_failed", "payment_intent.canceled"]);
 
-/** Stock is sold or released when a payment settles, so the store's cached pages are refreshed. Never throws. */
-async function refreshStoreAfterPayment(
+/** Tells the caller which store a payment event belonged to (stock sold or released, order paid). Never throws. */
+async function afterPaymentEvent(
   sql: SqlExecutor,
   type: string,
   stripeAccountId: string | null,
   payload: Record<string, unknown>,
-  onStoreChanged?: (storeId: string) => Promise<void>,
+  onPaymentEvent?: (storeId: string, type: string) => Promise<void>,
 ): Promise<void> {
-  if (!onStoreChanged || !stripeAccountId || !STOCK_EVENTS.has(type)) return;
+  if (!onPaymentEvent || !stripeAccountId || !STOCK_EVENTS.has(type)) return;
   const object = (payload.data as { object?: { id?: unknown } } | undefined)?.object;
   const intentId = typeof object?.id === "string" ? object.id : null;
   if (!intentId) return;
   try {
     const row = (await sql.query<{ storeId: string }>('SELECT "storeId" FROM "Payment" WHERE "stripeAccountId" = $1 AND "paymentIntentId" = $2 LIMIT 1', [stripeAccountId, intentId])).rows[0];
-    if (row) await onStoreChanged(row.storeId);
+    if (row) await onPaymentEvent(row.storeId, type);
   } catch { /* the storefront refreshes on its time limit instead */ }
 }

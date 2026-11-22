@@ -17,6 +17,7 @@ import type { AppDependencies } from "./app/types.js";
 import { errorHandler, notFoundHandler } from "./http/errors.js";
 import { isThemePackageUpload } from "./storefront/theme-packages/routes.js";
 import { refreshStorefrontAfterChanges, storefrontRefresherFromEnv } from "./storefront/cache-refresh.js";
+import { createStoreActivityRecorder, createStoreVisitRouter, recordMerchantActivity } from "./tenants/store-activity.js";
 
 export { publicDocumentFromTemplate } from "./app/default-storefront-workspace.js";
 export type { AppDependencies } from "./app/types.js";
@@ -32,6 +33,11 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
   const refresher = dependencies.storefrontRefresher ?? storefrontRefresherFromEnv();
   context.storefrontRefresher = refresher;
   app.use(refreshStorefrontAfterChanges(refresher));
+  // When each store was last used (merchant, paid order, shopper visit), for the inactive-store stages.
+  const activity = createStoreActivityRecorder(context.routeDependencies.webhookSql);
+  context.storeActivity = activity;
+  app.use(recordMerchantActivity(activity));
+  app.use("/api/public/stores", express.json({ limit: "1kb" }), createStoreVisitRouter(activity));
 
   // Stripe signatures require raw bytes, so mount webhooks before JSON parsing.
   mountStripeWebhooks(app, context);
