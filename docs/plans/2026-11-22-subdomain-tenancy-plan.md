@@ -221,7 +221,7 @@ Optionally, Vercel Firewall can restrict `admin.jellyshop.io` to known IPs. Merc
 8. **Slug change + history**: migration, `jelly_claim_slug`, settings UI, redirects, tests. *Built (2026-11-22):* history table and checks in the backend's own transaction (no database function), 308 redirects from the proxy (no 308→301 switch: 308 is permanent too), migration written but not applied.
 9. **Platform admin shell**: `PlatformAdmin` migration, `requirePlatformAdmin` (aal2 + fresh sign-in), MFA enrol/verify pages, audit log, minimal shop list. *Built (2026-11-22) on `platform.jellyshop.io`* with its own `PlatformAuditEvent` log (the shop audit log needs a shop id); migration written, not applied.
 10. **Security headers**: CSP for `/admin` and storefronts, `__Host-` cookies, `Origin` checks; uploads domain move (needs the new domain bought). *Built (2026-11-22)* except the uploads move: per-page policies from the proxy (with `'unsafe-inline'` scripts; nonces would need uncached pages), `__Host-` password cookie, Origin check on the one cookie-setting route.
-11. **Tenant isolation tests**: cross-tenant route test generated from the route table, plus the schema test.
+11. **Tenant isolation tests**: cross-tenant route test generated from the route table, plus the schema test. *Built (2026-11-22):* found no leaks; non-members already get the same 404 as an unknown shop. One public route under `/api/stores/:storeId` is named as deliberate (the published design).
 12. **Database tenant scope (§5A)**, domain by domain, *only if approved separately*.
 13. **Vercel + DNS go-live** (you, with a checklist), then the PSL submission.
 14. **Custom domains** (later project).
