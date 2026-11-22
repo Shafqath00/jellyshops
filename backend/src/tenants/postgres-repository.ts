@@ -9,6 +9,7 @@ import type {
 import type { TenantRepository } from "./repository.js";
 import type { SqlExecutor } from "../commerce/repository.js";
 import { ApiError } from "../http/errors.js";
+import { isRetiredAddress } from "./slug-history.js";
 
 const { Pool } = pg;
 
@@ -107,6 +108,7 @@ export async function createOwnedStore(sql: SqlExecutor, userId: string, input: 
   const internalId = user.rows[0]?.id;
   if (!internalId) throw new ApiError(409, "MERCHANT_NOT_FOUND", "Sign in again before creating a store.");
 
+  if (await isRetiredAddress(sql, input.slug)) throw new ApiError(409, "STORE_SLUG_TAKEN", "That store address is already in use. Choose another.");
   const storeId = `store-${randomUUID()}`;
   const inserted = await sql.query<{ id: string }>(
     `INSERT INTO "Store" ("id", "name", "slug", "currency", "country", "owner_user_id", "updatedAt")

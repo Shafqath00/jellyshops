@@ -15,11 +15,13 @@ const NOT_STORES = new Set(["admin", "api", "auth", "changelog", "login", "signu
 const CACHE_MS = 60_000;
 const MAX_ENTRIES = 5_000;
 
-export type GateDecision = { kind: "pass" } | { kind: "pass-private" } | { kind: "password"; slug: string };
+export type GateDecision = { kind: "pass" } | { kind: "pass-private" } | { kind: "password"; slug: string } | { kind: "moved"; slug: string };
 interface StoreAccess { storeId: string; protected: boolean }
+/** A shop address that changed: where the shop is now. */
+interface MovedStore { movedTo: string }
 type Lookup = (url: string, headers?: Record<string, string>) => Promise<Response>;
 
-const stores = new Map<string, { at: number; value: StoreAccess | null }>();
+const stores = new Map<string, { at: number; value: StoreAccess | MovedStore | null }>();
 const tokens = new Map<string, { at: number; value: boolean }>();
 
 function remember<T>(map: Map<string, { at: number; value: T }>, key: string, value: T) {
@@ -38,12 +40,18 @@ export function storeSlugFromPath(pathname: string): string | null {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(first) ? first : null;
 }
 
-async function storeAccess(slug: string, origin: string, lookup: Lookup): Promise<StoreAccess | null> {
+async function storeAccess(slug: string, origin: string, lookup: Lookup): Promise<StoreAccess | MovedStore | null> {
   const known = recall(stores, slug);
   if (known) return known.value;
   const details = await lookup(`${origin}/api/public/storefronts/${encodeURIComponent(slug)}`);
-  // A missing store passes through: the page itself shows "not found".
-  if (details.status === 404) { remember(stores, slug, null); return null; }
+  // A missing store: either it changed its address (redirect) or the page itself shows "not found".
+  if (details.status === 404) {
+    const moved = await lookup(`${origin}/api/public/slugs/${encodeURIComponent(slug)}`).catch(() => null);
+    const movedTo = moved?.ok ? ((await moved.json()) as { slug?: string }).slug : undefined;
+    const value = movedTo && movedTo !== slug ? { movedTo } : null;
+    remember(stores, slug, value);
+    return value;
+  }
   if (!details.ok) throw new Error("store lookup failed");
   const storeId = ((await details.json()) as { store?: { id?: string } }).store?.id;
   if (!storeId) throw new Error("store lookup failed");
@@ -75,6 +83,7 @@ export async function decideStoreAccess(
   const lookup: Lookup = options.lookup ?? ((url, headers) => fetch(url, { headers: { Accept: "application/json", ...headers }, signal: AbortSignal.timeout(3000) }));
   try {
     const access = await storeAccess(slug, options.origin, lookup);
+    if (access && "movedTo" in access) return { kind: "moved", slug: access.movedTo };
     if (!access?.protected) return { kind: "pass" };
     const token = readCookie(accessCookieName(access.storeId));
     if (token && await tokenUnlocks(access.storeId, token, options.origin, lookup)) return { kind: "pass-private" };

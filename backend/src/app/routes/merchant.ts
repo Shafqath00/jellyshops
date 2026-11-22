@@ -11,6 +11,7 @@ import { createContentRouter } from "../../content/routes.js";
 import { createCustomDataRouter } from "../../custom-data/routes.js";
 import { createCustomerRouter, createEngagementRouter, createMerchantEngagementRouter } from "../../customers/routes.js";
 import { createMerchantRouter } from "../../tenants/routes.js";
+import { createRetiredAddressRouter } from "../../tenants/slug-history.js";
 import { createOnboardingProvisioner } from "../../onboarding/provision-store.js";
 import { createOnboardingRouter } from "../../onboarding/routes.js";
 import { OnboardingService } from "../../onboarding/service.js";
@@ -50,6 +51,8 @@ export function mountTenantRoutes(app: Express, context: AppContext): void {
     ? new OnboardingService(deps.commerceDatabase, createOnboardingProvisioner(context.mediaStorage))
     : undefined;
   if (onboarding) app.use("/api/onboarding", createOnboardingRouter(authProvider, onboarding));
+  // Where a shop's old (retired) address moved to; the storefront redirects old links with it.
+  if (deps.commerceDatabase) app.use("/api/public/slugs", createRetiredAddressRouter(deps.commerceDatabase));
   // Signs a merchant in on the admin host from the main site (shop subdomains). Needs Supabase sign-in and its secret key.
   const { config } = context;
   const handoffTokens = config.authProvider === "supabase" && config.supabaseUrl && config.supabaseSecretKey

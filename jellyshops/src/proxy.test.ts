@@ -83,6 +83,17 @@ describe("proxy with shop subdomains", () => {
     }
   });
 
+  it("redirects a shop's old address to the same page at its new one", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      if (url.includes("/api/public/storefronts/old-name")) return new Response("{}", { status: 404 });
+      if (url.includes("/api/public/slugs/old-name")) return Response.json({ slug: "new-name" });
+      return Response.json({ store: { id: "store-1" } });
+    }));
+    const response = await proxy(request("https://old-name.jellyshop.io/products/bed?variant=2"));
+    expect(response!.status).toBe(308);
+    expect(response!.headers.get("location")).toBe("https://new-name.jellyshop.io/products/bed?variant=2");
+  });
+
   it("shows the password page for a protected shop", async () => {
     vi.stubGlobal("fetch", vi.fn(async (url: string) => {
       if (url.includes("/api/public/storefronts/")) return Response.json({ store: { id: "store-1" } });

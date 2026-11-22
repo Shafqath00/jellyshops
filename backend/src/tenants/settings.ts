@@ -5,6 +5,7 @@ import type { AuthProvider } from "../auth/types.js";
 import type { CommerceDatabase, SqlExecutor } from "../commerce/repository.js";
 import { ApiError } from "../http/errors.js";
 import { businessTypeSchema, storeCategorySchema, storeDescriptionSchema, validTimezone } from "../onboarding/schema.js";
+import { recordAddressChange } from "./slug-history.js";
 import { existingStoreSlugSchema, storeSlugSchema } from "./store-slug.js";
 
 export const MARKET_CURRENCIES: Readonly<Record<string, string>> = { IN: "INR", GB: "GBP", US: "USD" };
@@ -64,8 +65,12 @@ export class StoreSettingsRepository {
         if (input.slug !== undefined && input.slug !== current.slug) {
           const address = storeSlugSchema.safeParse(input.slug);
           if (!address.success) throw new ApiError(422, "STORE_SLUG_INVALID", address.error.issues[0]?.message ?? "This address isn't available. Try another.");
-          const used = await sql.query(`SELECT 1 FROM "StorefrontPublication" WHERE "storeId" = $1 UNION ALL SELECT 1 FROM "Order" WHERE "storeId" = $1 LIMIT 1`, [storeId]);
-          if (used.rows.length) throw new ApiError(422, "STORE_SLUG_LOCKED", "The store address cannot change after publication or an order.");
+          // With address history the old address keeps redirecting, so a live shop may move. Without it (migration not
+          // applied yet) the earlier rule stands: no change once the shop is published or has an order.
+          if (!await recordAddressChange(sql, storeId, current.slug, input.slug)) {
+            const used = await sql.query(`SELECT 1 FROM "StorefrontPublication" WHERE "storeId" = $1 UNION ALL SELECT 1 FROM "Order" WHERE "storeId" = $1 LIMIT 1`, [storeId]);
+            if (used.rows.length) throw new ApiError(422, "STORE_SLUG_LOCKED", "The store address cannot change after publication or an order.");
+          }
         }
         await sql.query(`UPDATE "Store" SET "name" = $2, "slug" = $3, "updatedAt" = NOW() WHERE "id" = $1`, [storeId, input.name ?? current.name, input.slug ?? current.slug]);
         await sql.query(`

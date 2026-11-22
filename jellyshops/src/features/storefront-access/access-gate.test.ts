@@ -44,3 +44,15 @@ it("keeps the store open when the backend can't be reached, and lets missing sto
   expect(await decideStoreAccess("/shop", () => undefined, { origin: "http://api", lookup: backend({ down: true }) })).toEqual({ kind: "pass" });
   expect(await decideStoreAccess("/gone", () => undefined, { origin: "http://api", lookup: backend() })).toEqual({ kind: "pass" });
 });
+
+it("sends a shop's old address to its new one", async () => {
+  const lookup = vi.fn(async (url: string) => {
+    if (url.endsWith("/api/public/storefronts/old-name")) return json({}, 404);
+    if (url.endsWith("/api/public/slugs/old-name")) return json({ slug: "shop" });
+    return json({}, 500);
+  });
+  expect(await decideStoreAccess("/old-name/cart", () => undefined, { origin: "http://api", lookup })).toEqual({ kind: "moved", slug: "shop" });
+  // Remembered for a minute: no second round of lookups.
+  expect(await decideStoreAccess("/old-name", () => undefined, { origin: "http://api", lookup })).toEqual({ kind: "moved", slug: "shop" });
+  expect(lookup).toHaveBeenCalledTimes(2);
+});

@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { storeLinkSettings } from "@jelly/storefront-schema";
+import { storeLinkSettings, storeUrl } from "@jelly/storefront-schema";
 import { decideStoreAccess } from "@/features/storefront-access/access-gate";
 import { classifyHost, type HostRoute } from "@/lib/hosts";
 
@@ -62,6 +62,11 @@ export async function proxy(request: NextRequest) {
 async function shopResponse(request: NextRequest, slug: string, pathname: string) {
   const origin = (process.env.STOREFRONT_API_URL ?? process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001").replace(/\/$/, "");
   const decision = await decideStoreAccess(`/${slug}`, (name) => request.cookies.get(name)?.value, { origin });
+  if (decision.kind === "moved") {
+    // The shop changed its address: the same page at the new one, for good (old links, bookmarks, emails).
+    const page = pathname.slice(`/sites/${slug}`.length) || "/";
+    return NextResponse.redirect(new URL(storeUrl(decision.slug, page) + request.nextUrl.search, request.url), 308);
+  }
   if (decision.kind === "password") {
     const response = rewrite(request, `/store-password/${decision.slug}`);
     response.headers.set("Cache-Control", "private, no-store");

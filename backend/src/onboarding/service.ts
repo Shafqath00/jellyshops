@@ -1,6 +1,7 @@
 import type { CommerceDatabase, SqlExecutor } from "../commerce/repository.js";
 import { ApiError } from "../http/errors.js";
 import { storeSlugSchema } from "../tenants/store-slug.js";
+import { isRetiredAddress } from "../tenants/slug-history.js";
 import type { StoreSummary } from "../tenants/types.js";
 import {
   completeOnboardingSchema,
@@ -195,7 +196,7 @@ export class OnboardingService {
     if (!storeSlugSchema.safeParse(slug).success) return false;
     return await this.db.transaction(async sql => {
       const result = await sql.query(`SELECT 1 FROM "Store" WHERE "slug" = $1 LIMIT 1`, [slug]);
-      return result.rows.length === 0;
+      return result.rows.length === 0 && !await isRetiredAddress(sql, slug);
     });
   }
 
