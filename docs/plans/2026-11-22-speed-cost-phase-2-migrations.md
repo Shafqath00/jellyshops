@@ -178,3 +178,7 @@ last order date (26 Oct).
 Backfill dry run: 97 images checked, 86 would get their copy widths and a placeholder, nothing written. The other 11
 have no copies in storage: 10 are outside photo links added by the bulk import (nothing stored), 1 is an early upload
 whose file isn't in storage. They are skipped.
+
+Backfill run (2026-11-22, with approval): 86 images written, no problems. Each has 3 copies listed (320/640/1280,
+the sizes made before Phase 1) and a placeholder averaging 158 characters (longest 479, limit 1,200). The 11 skipped
+images are unchanged. A second run would find nothing to do.
