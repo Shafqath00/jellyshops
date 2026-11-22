@@ -14,7 +14,7 @@ import type { ThemeCatalogEntry } from "@/features/store-editor/api/types";
 import { ThemeUpgradePanel } from "@/features/theme-upgrade/theme-upgrade-panel";
 import { LayoutUpgradePanel } from "@/features/theme-upgrade/layout-upgrade-panel";
 import { EDITOR_HREF, templatePreviewHref, useStoreDesigns } from "@/features/store-editor/hooks/use-store-designs";
-import { storePath } from "@jelly/storefront-schema";
+import { storeUrl } from "@jelly/storefront-schema";
 
 const starters = listStarterPacks();
 const gallery = starters.map(galleryTemplate);
@@ -74,7 +74,7 @@ function StoreDesignLibrary() {
         <AdminPage
           title="Store designs"
           description="Choose the look of your online store. Every design includes all pages, and your products are added automatically."
-          secondaryActions={activeStore ? [{ label: "View store", href: storePath(activeStore.slug) }] : []}
+          secondaryActions={activeStore ? [{ label: "View store", href: storeUrl(activeStore.slug) }] : []}
         >
           {error && <Banner tone="critical" action={<button type="button" onClick={reload} className="jk-button"><RefreshCw size={14} aria-hidden="true" />Try again</button>}>{error}</Banner>}
           {notice && <Banner tone="success">{notice}</Banner>}

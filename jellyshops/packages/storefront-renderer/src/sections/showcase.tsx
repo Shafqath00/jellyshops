@@ -5,10 +5,9 @@
  */
 import { useEffect, useId, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import type { SectionNode } from "@jelly/storefront-schema";
-import { safeRichTextHref } from "@jelly/storefront-schema";
 import { StorefrontContainer } from "@jelly/storefront-ui";
 import type { CommerceDataProvider, PublicProduct, RendererMode } from "../types";
-import type { StorefrontRuntimeContext } from "../runtime-context";
+import { resolveStorefrontHref, type StorefrontRuntimeContext } from "../runtime-context";
 import { elementProps, blockElementProps } from "../element-style";
 import { blockEditorData } from "./block-content";
 import { imageValue, numberValue, sectionData, stringValue, visibleBlocks } from "./shared";
@@ -167,11 +166,11 @@ export function FeaturedProductSection({ section, commerce, context }: { section
 
 interface Message { id: string; text: string; href: string | null; block?: SectionNode["blocks"][number] }
 
-export function announcementMessages(section: SectionNode): Message[] {
+export function announcementMessages(section: SectionNode, storeSlug?: string): Message[] {
   const blocks = visibleBlocks(section, "announcement-message").flatMap((block) => {
     const text = stringValue(block.settings, "text");
     const link = stringValue(block.settings, "link");
-    return text ? [{ id: block.id, text, href: link ? safeRichTextHref(link) : null, block }] : [];
+    return text ? [{ id: block.id, text, href: link ? resolveStorefrontHref(link, storeSlug) : null, block }] : [];
   });
   return blocks;
 }

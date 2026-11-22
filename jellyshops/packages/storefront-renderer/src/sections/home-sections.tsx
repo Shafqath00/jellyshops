@@ -1,4 +1,4 @@
-import { safeRichTextHref, type SectionNode } from "@jelly/storefront-schema";
+import type { SectionNode } from "@jelly/storefront-schema";
 import { blockElementProps, elementProps } from "../element-style";
 import { Grid, Stack } from "../layout";
 import { StorefrontContainer } from "@jelly/storefront-ui";
@@ -54,13 +54,13 @@ function Actions({ buttons, storeSlug }: { buttons: ReturnType<typeof blockCopy>
   return <div className="jelly-section-actions">{links.map((button, index) => <a key={button.id} href={button.href} {...buttonProps(button.settings, index, button.mobile)} {...button.editorData}>{button.label}</a>)}</div>;
 }
 
-export function AnnouncementBarSection({ section, editor = false }: { section: SectionNode; editor?: boolean }) {
+export function AnnouncementBarSection({ section, editor = false, storeSlug }: { section: SectionNode; editor?: boolean; storeSlug?: string }) {
   const message = text(section, "Welcome to our store");
-  const href = typeof section.settings.link === "string" && section.settings.link ? safeRichTextHref(section.settings.link) : null;
+  const href = typeof section.settings.link === "string" && section.settings.link ? resolveStorefrontHref(section.settings.link, storeSlug) : null;
   // The message is the section's own part when it comes from its settings (not from a block).
   const own = typeof section.settings.text === "string" ? elementProps(section, "message", editor) : {};
   // Message blocks take turns with the section's own message (RotatingAnnouncement).
-  const blocks = announcementMessages(section);
+  const blocks = announcementMessages(section, storeSlug);
   if (blocks.length) {
     const first = typeof section.settings.text === "string" && section.settings.text.trim() ? [{ id: "message", text: section.settings.text, href }] : [];
     const messages = [...first, ...blocks];

@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { ExternalLink, LogOut, Plus, Settings } from "lucide-react";
-import { storePath } from "@jelly/storefront-schema";
+import { storeUrl } from "@jelly/storefront-schema";
 
 export function storeInitial(name: string) {
   return name.trim().charAt(0) || "J";
@@ -29,7 +29,7 @@ export function AccountMenu({ storeName, storeSlug, email, onSignOut }: { storeN
     {open && <div className="admin-account-menu" id={id}>
       <div className="admin-account-head"><span className="admin-avatar" aria-hidden="true">{storeInitial(storeName)}</span>
         <div className="min-w-0"><strong>{storeName}</strong>{email && <span>{email}</span>}</div></div>
-      <Link href={storePath(storeSlug)} className="admin-account-item" onClick={() => setOpen(false)}><ExternalLink size={16} aria-hidden="true" />View your store</Link>
+      <Link href={storeUrl(storeSlug)} className="admin-account-item" onClick={() => setOpen(false)}><ExternalLink size={16} aria-hidden="true" />View your store</Link>
       <Link href="/admin/settings" className="admin-account-item" onClick={() => setOpen(false)}><Settings size={16} aria-hidden="true" />Settings</Link>
       <Link href="/admin/stores/new" className="admin-account-item" onClick={() => setOpen(false)}><Plus size={16} aria-hidden="true" />Add another store</Link>
       <button type="button" className="admin-account-item" onClick={() => { setOpen(false); onSignOut(); }}><LogOut size={16} aria-hidden="true" />Sign out</button>

@@ -9,7 +9,7 @@ import { expect, it } from "vitest";
  * theme previews and tests may use the main entries.
  */
 const app = path.join(__dirname, "..", "..");
-const folders = ["packages/storefront-renderer/src", "packages/storefront-ui/src", "src/features/storefront", "src/features/commerce", "src/features/customers", "src/components", "src/contexts", "src/lib", "src/app/[storeSlug]"];
+const folders = ["packages/storefront-renderer/src", "packages/storefront-ui/src", "src/features/storefront", "src/features/commerce", "src/features/customers", "src/components", "src/contexts", "src/lib", "src/app/sites/[storeSlug]"];
 const skip = /\.test\.|[\\/]settings-fuzz[\\/]|[\\/]design-lint[\\/]/;
 const files = (folder: string): string[] => readdirSync(folder).flatMap((name) => {
   const full = path.join(folder, name);

@@ -10,7 +10,8 @@ const nextConfig: NextConfig = {
     "@jelly/storefront-ui",
     "@jelly/storefront-renderer"
   ],
-  allowedDevOrigins: ["127.0.0.1"],
+  // *.localhost: shop subdomains in development (myshop.localhost:3000, admin.localhost:3000).
+  allowedDevOrigins: ["127.0.0.1", "*.localhost"],
   // HSTS, frame and sniffing protection everywhere; a Stripe-only Content Security Policy on checkout and order pages.
   async headers() {
     return securityHeaderRules({

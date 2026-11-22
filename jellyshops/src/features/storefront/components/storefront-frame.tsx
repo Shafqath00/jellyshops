@@ -19,7 +19,7 @@ import type { RuntimeTemplateV4, SectionNode } from "@jelly/storefront-schema";
 import { useChromeBindingValues } from "@/features/storefront/use-chrome-binding-values";
 import { suggestStoreProducts } from "@/features/storefront/product-suggestions";
 import { engagementActions } from "@/features/storefront/engagement-api";
-import { storePath } from "@jelly/storefront-schema";
+import { storePagePath, storePath } from "@jelly/storefront-schema";
 
 function pageTypeFor(segments: string[]): RuntimeTemplateV4["type"] {
   if (!segments.length) return "home";
@@ -79,7 +79,8 @@ export function StorefrontFrame({ storeSlug, children }: { storeSlug: string; ch
       });
     return () => { active = false; };
   }, [storeId, hasInitialPublication]);
-  const segments = (pathname ?? "").split("/").filter(Boolean).slice(1);
+  // The same page path on the server (/sites/<slug>/...) and in the browser (/<slug>/... or a subdomain's /...).
+  const segments = storePagePath(storeSlug, pathname ?? "").split("/").filter(Boolean);
   const pageType = pageTypeFor(segments);
   const resource = pageType === "product" ? state.products.find((product) => product.storeId === storeId && product.slug === segments[1])
     : pageType === "collection" ? state.collections.find((collection) => collection.storeId === storeId && collection.slug === segments[1]) : undefined;

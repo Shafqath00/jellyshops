@@ -187,6 +187,36 @@ describe("classifyHost: previews and other hosts", () => {
   });
 });
 
+describe("classifyHost: today's /<slug> addresses (storeLinks: path)", () => {
+  const path = (host: string, p: string, extra: Partial<HostRequest> = {}) => route(host, p, { storeLinks: "path", ...extra });
+
+  it("serves shops under the main address", () => {
+    expect(path("jellyshop.io", "/myshop")).toEqual({ kind: "shop", slug: "myshop", path: "/sites/myshop", mode: "path" });
+    expect(path("localhost:3000", "/myshop/products/bed")).toEqual({ kind: "shop", slug: "myshop", path: "/sites/myshop/products/bed", mode: "path" });
+  });
+
+  it("keeps the admin and app pages where they are", () => {
+    expect(path("jellyshop.io", "/admin/orders")).toEqual({ kind: "marketing" });
+    expect(path("jellyshop.io", "/login")).toEqual({ kind: "marketing" });
+    expect(path("jellyshop.io", "/")).toEqual({ kind: "marketing" });
+    expect(path("jellyshop.io", "/www")).toEqual({ kind: "marketing" });
+  });
+
+  it("still refuses internal folders", () => {
+    expect(path("jellyshop.io", "/sites/myshop")).toEqual({ kind: "not-found" });
+  });
+});
+
+describe("classifyHost: preview addresses (storeLinks: preview)", () => {
+  it("serves /_shop/<slug> and sends old /<slug> links there", () => {
+    expect(route("localhost:3000", "/_shop/myshop/cart", { storeLinks: "preview" })).toEqual({ kind: "shop", slug: "myshop", path: "/sites/myshop/cart", mode: "path" });
+    expect(route("localhost:3000", "/myshop/cart", { storeLinks: "preview", protocol: "http", search: "?a=1" })).toEqual({
+      kind: "redirect",
+      location: "http://localhost:3000/_shop/myshop/cart?a=1",
+    });
+  });
+});
+
 describe("APEX_PATH_SEGMENTS", () => {
   it("lists every top-level app folder and public entry, so they are never taken for old store links", () => {
     const appDir = join(process.cwd(), "src", "app");

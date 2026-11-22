@@ -187,7 +187,7 @@ const dirPurpose = {
   "backend/src/storefront/workspace/repositories": "Workspace repository interfaces/adapters.",
   "jellyshops/src/app": "Next.js App Router: root layout, home, fonts, global CSS.",
   "jellyshops/src/app/admin": "Merchant admin pages.",
-  "jellyshops/src/app/[storeSlug]": "Public storefront routes for one store.",
+  "jellyshops/src/app/sites/[storeSlug]": "Public storefront routes for one store.",
   "jellyshops/src/components": "Shared UI primitives and the deferred admin shell.",
   "jellyshops/src/components/ui": "shadcn-style UI primitives.",
   "jellyshops/src/components/jelly": "Storefront primitives used by theme markup.",

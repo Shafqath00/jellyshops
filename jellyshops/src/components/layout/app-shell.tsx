@@ -10,7 +10,7 @@ import { AdminThemeToggle } from "./admin-theme-toggle";
 import { BrandLogo } from "./brand-logo";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ToastProvider } from "@/components/admin/toast";
-import { storePath } from "@jelly/storefront-schema";
+import { storeUrl } from "@jelly/storefront-schema";
 
 /**
  * Admin frame (Jelly look): sidebar with the brand on the stone page from 1024px, and a rounded canvas
@@ -59,7 +59,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="admin-topbar-center"><AdminSearch /></div>
         <div className="admin-topbar-end">
           <AdminThemeToggle className="admin-topbar-button" />
-          <Link href={storePath(store.slug)} className="admin-topbar-button" aria-label="View store" title="View store"><ExternalLink size={16} aria-hidden="true" /><span className="admin-topbar-label">View store</span></Link>
+          <Link href={storeUrl(store.slug)} className="admin-topbar-button" aria-label="View store" title="View store"><ExternalLink size={16} aria-hidden="true" /><span className="admin-topbar-label">View store</span></Link>
           <AccountMenu storeName={store.name} storeSlug={store.slug} email={session?.user.email ?? undefined} onSignOut={() => { void signOut(); }} />
         </div>
       </header>

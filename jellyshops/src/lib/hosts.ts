@@ -3,7 +3,9 @@
  * can call it on every request and tests can cover every case. Design: docs/plans/2026-11-22-subdomain-tenancy-plan.md
  * (§2, with the owner decisions at the top: the merchant admin is on its own host, the super-admin on `platform.`).
  *
- * Nothing calls this yet; the proxy starts using it in step 4 of the plan.
+ * Used by `src/proxy.ts`. `storeLinks` follows NEXT_PUBLIC_STORE_LINKS (see storefront-schema `store-links.ts`):
+ * "path" keeps today's jellyshop.io/<slug>/... addresses, "subdomain" moves shops to <slug>.<root>, "preview" uses
+ * /_shop/<slug>/... on any host.
  */
 
 import { isSystemStoreAddress } from "@jelly/storefront-schema";
@@ -79,6 +81,8 @@ export type HostRequest = {
   /** `http` or `https`; used for redirects. Defaults to `https`. */
   protocol?: "http" | "https";
   rootDomain?: string;
+  /** How shop links are built on this deployment. Defaults to "subdomain" (the target layout). */
+  storeLinks?: "path" | "subdomain" | "preview";
 };
 
 export type ParsedHost = { hostname: string; port: string };
@@ -145,14 +149,14 @@ export function classifyHost(request: HostRequest): HostRoute {
   else if (hostname === DEV_ROOT_DOMAIN || hostname.endsWith(`.${DEV_ROOT_DOMAIN}`)) base = DEV_ROOT_DOMAIN;
 
   if (base === null) {
-    if (hostname.endsWith(".vercel.app")) return classifyPreview(path);
+    if (hostname.endsWith(".vercel.app")) return classifyPreview(path) ?? { kind: "marketing" };
     return { kind: "custom-domain", hostname };
   }
 
   const label = hostname === base ? "" : hostname.slice(0, -(base.length + 1));
   const origin = (sub: string) => `${scheme}://${sub ? `${sub}.` : ""}${base}${portPart}`;
 
-  if (label === "") return classifyApex(path, search, segment, origin);
+  if (label === "") return classifyApex(path, search, segment, origin, request.storeLinks ?? "subdomain");
   if (label === "www") return { kind: "redirect", location: `${origin("")}${path}${search}` };
   if (label.includes(".")) return { kind: "shop-not-found" };
 
@@ -172,7 +176,17 @@ export function classifyHost(request: HostRequest): HostRoute {
   return { kind: "shop", slug: label, path: shopPath(label, path), mode: "subdomain" };
 }
 
-function classifyApex(path: string, search: string, segment: string, origin: (sub: string) => string): HostRoute {
+function classifyApex(path: string, search: string, segment: string, origin: (sub: string) => string, links: "path" | "subdomain" | "preview"): HostRoute {
+  const preview = classifyPreview(path);
+  if (preview) return preview;
+  if (links !== "subdomain") {
+    // Shops still live under the main address: serve them there (path) or send old links to /_shop (preview).
+    if (segment === "" || APEX_PATH_SEGMENTS.has(segment) || hasFileExtension(path) || !isShopLabel(segment) || SYSTEM_SUBDOMAINS.has(segment)) return { kind: "marketing" };
+    const rest = afterFirstSegment(path);
+    if (links === "preview") return { kind: "redirect", location: `${origin("")}/${PREVIEW_SHOP_PREFIX}/${segment}${rest === "/" ? "" : rest}${search}` };
+    if (SHARED_SEGMENTS.has(firstSegment(rest))) return { kind: "pass" };
+    return { kind: "shop", slug: segment, path: shopPath(segment, rest), mode: "path" };
+  }
   if (segment === "admin") {
     return { kind: "redirect", location: `${origin(MERCHANT_ADMIN_LABEL)}${afterFirstSegment(path)}${search}` };
   }
@@ -184,9 +198,10 @@ function classifyApex(path: string, search: string, segment: string, origin: (su
   return { kind: "marketing" };
 }
 
-function classifyPreview(path: string): HostRoute {
+/** `/_shop/<slug>/...` (preview addresses); null when the path is not one. */
+function classifyPreview(path: string): HostRoute | null {
   const segment = firstSegment(path);
-  if (segment !== PREVIEW_SHOP_PREFIX) return { kind: "marketing" };
+  if (segment !== PREVIEW_SHOP_PREFIX) return null;
   const rest = afterFirstSegment(path);
   const slug = firstSegment(rest);
   if (!isShopLabel(slug) || SYSTEM_SUBDOMAINS.has(slug)) return { kind: "shop-not-found" };

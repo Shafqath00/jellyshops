@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { ImageIcon } from "lucide-react";
 import { Button, Field, HelpTip, Picker } from "@/components/admin";
 import type { MediaRecord } from "@/features/store-editor/api/types";
-import { storePath } from "@jelly/storefront-schema";
+import { storeUrl } from "@jelly/storefront-schema";
 
 export interface SeoFieldsValue {
   seoTitle: string | null;
@@ -59,7 +59,7 @@ export function SeoFields({ value, onChange, fallbackTitle = "", pathPrefix = "/
   }, [listImages]);
   const title = value.seoTitle || fallbackTitle || "Page title";
   const pagePath = `${pathPrefix}${value.handle || "page"}`;
-  const address = storeSlug ? storePath(storeSlug, pagePath) : pagePath;
+  const address = storeSlug ? storeUrl(storeSlug, pagePath) : pagePath;
 
   return (
     <fieldset className="jk-stack-sm">

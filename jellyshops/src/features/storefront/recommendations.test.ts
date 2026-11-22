@@ -45,7 +45,7 @@ describe("recommendProducts", () => {
 describe("one recommendation rule for the live store and both previews", () => {
   const root = path.join(__dirname, "..", "..");
   const callers = [
-    "app/[storeSlug]/products/[productSlug]/product-client.tsx",
+    "app/sites/[storeSlug]/products/[productSlug]/product-client.tsx",
     "features/store-editor/preview-context.ts",
     "features/theme-preview/template-preview.tsx",
   ];

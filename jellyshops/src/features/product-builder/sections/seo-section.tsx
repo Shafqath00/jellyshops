@@ -7,7 +7,7 @@ import { slugify } from "@/lib/domain";
 import { DESCRIPTION_LIMIT, DESCRIPTION_RECOMMENDED_MAX, TITLE_LIMIT, TITLE_RECOMMENDED_MAX, descriptionAdvice, productMetaDescription, productMetaTitle, titleAdvice } from "@/lib/seo";
 import { effectiveHandle, type DraftErrors, type ProductDraft } from "../draft";
 import { Field, Section } from "./section-parts";
-import { storePath } from "@jelly/storefront-schema";
+import { storeUrl } from "@jelly/storefront-schema";
 
 type Props = {
   draft: ProductDraft;
@@ -36,14 +36,14 @@ export function SeoSection({ draft, errors, storeName, storeSlug, saved, onChang
   const description = productMetaDescription({ description: draft.description || "Your product description appears here.", seoDescription: draft.seoDescription });
   const titleHint = titleAdvice(draft.seoTitle);
   const descriptionHint = descriptionAdvice(draft.seoDescription);
-  const path = storePath(storeSlug || "your-store", `/products/${handle || "product-handle"}`);
+  const path = storeUrl(storeSlug || "your-store", `/products/${handle || "product-handle"}`);
   const handleChanged = saved && draft.handleManual && draft.handle.trim() !== draft.initialHandle;
   const hasContent = Boolean(draft.seoTitle || draft.seoDescription || (draft.handleManual && draft.handle !== slugify(draft.title)));
 
   return (
     <Section title="Search engine listing" hint="Add a title and description to control how this product appears in search results and when it is shared.">
       <div role="img" aria-label="Preview of the search result" className="rounded-xl border border-border bg-card p-4">
-        <p className="truncate text-[12px] text-muted-foreground">{origin || "https://yourstore.com"}{path}</p>
+        <p className="truncate text-[12px] text-muted-foreground">{/^https?:\/\//.test(path) ? path : `${origin || "https://yourstore.com"}${path}`}</p>
         <p className="mt-1 truncate text-[18px] leading-6 text-[#1a0dab] dark:text-[#8ab4f8]">{title}</p>
         <p className="mt-1 line-clamp-2 text-[13px] leading-5 text-muted-foreground">{description}</p>
       </div>

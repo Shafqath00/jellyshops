@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getServerStorefront } from "@/features/storefront/server-storefront";
 import { StorefrontBootstrap } from "@/features/storefront/storefront-bootstrap";
 import type { Metadata } from "next";
+import { storeUrl } from "@jelly/storefront-schema";
 import { loadAccessStatus } from "@/features/storefront-access/access-api";
 import { loadInstalledTheme } from "@/features/storefront/installed-theme";
 import { InstalledThemeProvider } from "@/features/storefront/installed-theme-provider";
@@ -18,15 +19,19 @@ import { StorefrontMotion } from "@/features/storefront/components/storefront-mo
 export function generateStaticParams(): Array<{ storeSlug: string }> { return []; }
 export const revalidate = 3600;
 
-/** The site address for canonical links and share images. Read from configuration, not the request, so pages stay cacheable. */
-function siteAddress(): URL | undefined {
-  const value = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.STOREFRONT_SITE_URL;
+/**
+ * The site address for canonical links and share images. Read from configuration, not the request, so pages stay
+ * cacheable: the shop's own subdomain when shops have one, otherwise the configured site address.
+ */
+function siteAddress(storeSlug: string): URL | undefined {
+  const own = storeUrl(storeSlug);
+  const value = /^https?:\/\//.test(own) ? own : process.env.NEXT_PUBLIC_SITE_URL ?? process.env.STOREFRONT_SITE_URL;
   try { return value ? new URL(value) : undefined; } catch { return undefined; }
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ storeSlug: string }> }): Promise<Metadata> {
   const { storeSlug } = await params; const data = await getServerStorefront(storeSlug);
-  const metadataBase = siteAddress();
+  const metadataBase = siteAddress(storeSlug);
   if (!data) return { metadataBase, title: "Store not found", robots: { index: false, follow: false } };
   // A protected store keeps its description and images out of search results and link previews.
   if ((await loadAccessStatus(data.store.id, undefined)).protected) return { metadataBase, title: data.store.name, robots: { index: false, follow: false } };

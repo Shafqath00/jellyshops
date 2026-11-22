@@ -2,6 +2,7 @@ import cors from "cors";
 import type { Express } from "express";
 import { randomUUID } from "node:crypto";
 import { type AppConfig } from "../config.js";
+import { corsOriginMatchers } from "./cors-origins.js";
 
 declare global {
   namespace Express {
@@ -65,9 +66,10 @@ export function configureMiddleware(
       // `CORS_ORIGINS=*` is intentionally supported for local/testing
       // deployments. The cors package reflects the request origin when
       // `origin: true`, which also keeps Authorization preflights working.
+      // Entries like `https://*.jellyshop.io` allow every shop subdomain (see cors-origins.ts).
       origin: config.corsOrigins.includes("*")
         ? true
-        : config.corsOrigins,
+        : corsOriginMatchers(config.corsOrigins),
     }),
   );
 }
