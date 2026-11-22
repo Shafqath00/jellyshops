@@ -1,12 +1,11 @@
 "use client";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Link, { useAdminPathname } from "@/features/admin/admin-routing";
 import type { ReactNode } from "react";
 import { SETTINGS_GROUPS } from "./settings-sections";
 
 /** Settings pages get a grouped list on the left (hidden on the settings index, which shows the same list as tiles). */
 export function SettingsFrame({ children }: { children: ReactNode }) {
-  const pathname = usePathname() ?? "";
+  const pathname = useAdminPathname();
   if (pathname === "/admin/settings") return <>{children}</>;
   return <div className="jk-settings">
     <nav className="jk-settings-nav" aria-label="Settings">

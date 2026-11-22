@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link from "@/features/admin/admin-routing";
 import { useCallback, useState } from "react";
 import { Package, Plus } from "lucide-react";
 import {

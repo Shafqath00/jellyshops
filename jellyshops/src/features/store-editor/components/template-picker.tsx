@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "@/features/admin/admin-routing";
 import { Loader2 } from "lucide-react";
 import type { StorefrontTemplateRecord, StorefrontTemplateType, TemplateAssignmentRecord } from "../api/types";
 import { isMainTemplate, selectableTemplates, type AssignableTemplateType } from "../template-names";

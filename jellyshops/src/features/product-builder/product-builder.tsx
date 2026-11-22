@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatedDetails } from "./animated-details";
-import Link from "next/link";
+import Link, { adminPagePath, useShopAdminHref } from "@/features/admin/admin-routing";
 import { Banner, Card, MoreActions, StatusBadge } from "@/components/admin";
 import { TemplatePicker } from "@/features/store-editor/components/template-picker";
 import { Sheet, SheetTitle, SheetDescription } from "@/components/ui/sheet";
@@ -55,6 +55,7 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
   const { repository } = useShop();
   const confirmation = useProductConfirm();
   const { session, activeStore } = useAuth();
+  const adminHref = useShopAdminHref();
   const token = session?.access_token;
   const storeId = activeStore?.id;
   const currency = activeStore?.currency ?? "INR";
@@ -180,7 +181,7 @@ export function ProductBuilder({ initial }: { initial?: Product }) {
       // Adopt the server's variant ids so the next save updates these rows instead of adding new ones.
       setDraft((current) => ({ ...current, published: savingDraft.published, archived: savingDraft.archived, media: canonical.media ?? current.media, ...(hasVariantAxes(savingDraft) ? { variants: canonical.variants } : {}) }));
       // A new product gets its own address, so reloading the page edits it instead of creating another.
-      if (!productId && typeof window !== "undefined" && window.location.pathname.startsWith("/admin/products")) window.history.replaceState(null, "", `/admin/products/${encodeURIComponent(result.id)}`);
+      if (!productId && typeof window !== "undefined" && adminPagePath(window.location.pathname).startsWith("/admin/products")) window.history.replaceState(null, "", adminHref(`/admin/products/${encodeURIComponent(result.id)}`));
       setProductId(result.id);
       // Custom data is stored apart from the product, so it is saved once the product and its combinations exist.
       const savedVariantIds: Record<string, string> = {};

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/features/admin/admin-routing";
 import { MoreHorizontal } from "lucide-react";
 import * as Dropdown from "@radix-ui/react-dropdown-menu";
 import { useRef } from "react";

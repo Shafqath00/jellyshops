@@ -1,9 +1,9 @@
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import CollectionsPage from "@/app/admin/products/collections/page";
-import ProductsPage from "@/app/admin/products/page";
-import StockPage from "@/app/admin/products/inventory/page";
+import CollectionsPage from "@/app/admin/s/[shop]/products/collections/page";
+import ProductsPage from "@/app/admin/s/[shop]/products/page";
+import StockPage from "@/app/admin/s/[shop]/products/inventory/page";
 
 const api = vi.hoisted(() => ({ request: vi.fn(), all: vi.fn() }));
 vi.mock("@/features/admin/api/catalog-api", () => ({ useAdminCatalog: () => ({ ...api, ready: true, storeId: "store-a" }) }));

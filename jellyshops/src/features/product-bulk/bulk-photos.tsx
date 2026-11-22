@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link from "@/features/admin/admin-routing";
 import { useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import { ImagePlus, UploadCloud } from "lucide-react";
 import { AdminPage, Banner, Button, Card, EmptyState, StatusBadge, buttonClass, type StatusTone } from "@/components/admin";

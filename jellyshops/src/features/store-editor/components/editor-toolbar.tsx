@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/features/admin/admin-routing";
 import { BrandLogo } from "@/components/layout/brand-logo";
 import {
   AlertCircle,

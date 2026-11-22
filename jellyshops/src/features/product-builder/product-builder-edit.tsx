@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/features/admin/admin-routing";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/features/auth/providers/auth-provider";
 import { catalogProductToStorefrontProduct } from "@/features/commerce/api/client";

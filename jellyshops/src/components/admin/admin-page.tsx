@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link from "@/features/admin/admin-routing";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, ChevronDown } from "lucide-react";
 

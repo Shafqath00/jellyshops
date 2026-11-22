@@ -120,5 +120,5 @@ export {
   checkStoreAddress, foldLookalikes, isSystemStoreAddress, normaliseStoreAddress,
 } from "./store-address.js";
 export type { StoreAddressCheck, StoreAddressProblem } from "./store-address.js";
-export { DEFAULT_STORE_ROOT_DOMAIN, isInStore, storeBase, storeLinkSettings, storePagePath, storePath, storeUrl } from "./store-links.js";
+export { DEFAULT_STORE_ROOT_DOMAIN, isInStore, jellyshopHomeUrl, storeBase, storeLinkSettings, storePagePath, storePath, storeUrl } from "./store-links.js";
 export type { StoreLinkMode, StoreLinkSettings } from "./store-links.js";

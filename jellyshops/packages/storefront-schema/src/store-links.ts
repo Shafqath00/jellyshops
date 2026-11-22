@@ -83,3 +83,10 @@ export function storePagePath(storeSlug: string, pathname: string): string {
   }
   return pathname || "/";
 }
+
+/** The Jellyshop home page: the main address on subdomain deployments (shops live elsewhere), "/" otherwise. */
+export function jellyshopHomeUrl(settings: StoreLinkSettings = storeLinkSettings()): string {
+  if (settings.mode !== "subdomain") return "/";
+  const local = /^(localhost|127\.0\.0\.1)(:|$)/.test(settings.rootDomain);
+  return `${local ? "http" : "https"}://${settings.rootDomain}`;
+}

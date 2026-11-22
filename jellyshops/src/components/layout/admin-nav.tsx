@@ -1,6 +1,5 @@
 "use client";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Link, { useAdminPathname } from "@/features/admin/admin-routing";
 import { CreditCard, FileText, Home, Inbox, Percent, Settings, Store, Tag, Users, type LucideIcon } from "lucide-react";
 
 export type AdminDestination = { label: string; href: string };
@@ -54,7 +53,7 @@ const NAV_TONES: Record<string, string> = {
 };
 
 export function AdminNav({ onNavigate }: { onNavigate?: () => void }) {
-  const pathname = usePathname() ?? "";
+  const pathname = useAdminPathname();
   const item = (group: AdminNavGroup) => {
     const childHref = group.children ? activeChild(pathname, group.children) : undefined;
     const open = Boolean(childHref) || (group.children ? isWithin(pathname, group.href) : false);

@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link, { toShopAdmin, useAdminRouter } from "@/features/admin/admin-routing";
 import { useEffect, useState } from "react";
 import { ExternalLink, Menu, Plus } from "lucide-react";
 import { useAuth } from "@/features/auth/providers/auth-provider";
@@ -19,15 +19,21 @@ import { storeUrl } from "@jelly/storefront-schema";
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { activeStore: store, stores, setActiveStoreId, session, signOut } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const router = useAdminRouter();
   useEffect(() => {
     document.documentElement.classList.add("admin-ui");
     return () => document.documentElement.classList.remove("admin-ui");
   }, []);
   if (!store) return null;
+  // Each shop has its own admin address: switching opens that shop's admin home.
+  const switchStore = (storeId: string) => {
+    const target = stores.find((item) => item.id === storeId);
+    if (target) setActiveStoreId(storeId, () => router.push(toShopAdmin(target.slug, "/admin")));
+  };
   const storeCard = <div className="admin-sidebar-footer"><div className="admin-store-card">
     <span className="admin-avatar" aria-hidden="true">{storeInitial(store.name)}</span>
     {stores.length > 1 ? <label className="min-w-0 flex-1"><span className="admin-store-card-label">Active store</span>
-      <select aria-label="Switch store" value={store.id} onChange={(event) => setActiveStoreId(event.target.value)}>{stores.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label> :
+      <select aria-label="Switch store" value={store.id} onChange={(event) => switchStore(event.target.value)}>{stores.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label> :
       <div><span className="admin-store-card-label">Active store</span><span className="admin-store-card-name">{store.name}</span></div>}
   </div><Link href="/admin/stores/new" className="admin-add-store" onClick={() => setMenuOpen(false)}><Plus size={14} aria-hidden="true" />Add another store</Link></div>;
   return <ToastProvider><div className="admin-shell">

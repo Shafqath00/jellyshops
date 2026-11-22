@@ -8,7 +8,7 @@ import { newStoreProblems, slugFromName } from "./new-store-api";
 const push = vi.fn();
 const refreshMerchant = vi.fn(async () => {});
 const setActiveStoreId = vi.fn();
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push }), useParams: () => ({}) }));
 vi.mock("@/features/auth/providers/auth-provider", () => {
   const activeStore = { id: "store-a", country: "GB" };
   const getAccessToken = async () => "token";

@@ -7,7 +7,7 @@ import { AdminSearch } from "./admin-search";
 
 const push = vi.fn();
 let pathname = "/admin/products/collections";
-vi.mock("next/navigation", () => ({ usePathname: () => pathname, useRouter: () => ({ push }) }));
+vi.mock("next/navigation", () => ({ usePathname: () => pathname, useRouter: () => ({ push }), useParams: () => ({}) }));
 beforeEach(() => { push.mockClear(); });
 
 it("opens only the group you are in and marks the current page", () => {

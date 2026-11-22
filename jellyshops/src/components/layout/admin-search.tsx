@@ -1,5 +1,5 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useAdminRouter as useRouter } from "@/features/admin/admin-routing";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import { adminDestinations } from "./admin-nav";

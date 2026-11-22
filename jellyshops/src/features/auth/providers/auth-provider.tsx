@@ -11,7 +11,8 @@ interface AuthContextValue {
   configured: boolean; loading: boolean; merchantLoading: boolean;
   merchantStatus: "loading" | "ready" | "error"; merchantError: string | null;
   session: Session | null; stores: MerchantStore[]; activeStore: MerchantStore | null;
-  setActiveStoreId: (storeId: string) => void;
+  /** Pick a store. `onChanged` runs once the change is allowed (an editor with unsaved work may refuse it). */
+  setActiveStoreId: (storeId: string, onChanged?: () => void) => void;
   refreshMerchant: () => Promise<void>; signOut: () => Promise<void>;
   getAccessToken: (refresh?: boolean) => Promise<string>;
 }
@@ -100,8 +101,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       merchantStatus: refreshing ? "loading" : current?.status ?? "loading",
       merchantError: current?.error ?? null,
       activeStore: stores.find((store) => store.id === activeStoreId) ?? stores[0] ?? null,
-      setActiveStoreId: (storeId) => {
-        const commit = () => { setActiveStoreId(storeId); if (session) rememberStore(session.user.id, storeId); };
+      setActiveStoreId: (storeId, onChanged) => {
+        const commit = () => { setActiveStoreId(storeId); if (session) rememberStore(session.user.id, storeId); onChanged?.(); };
         const event = new CustomEvent("jelly:before-store-change", { cancelable: true, detail: { commit } });
         if (window.dispatchEvent(event)) commit();
       }, refreshMerchant,

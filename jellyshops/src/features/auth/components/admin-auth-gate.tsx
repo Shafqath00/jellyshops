@@ -1,10 +1,19 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
+import Link, { useAdminRouter as useRouter } from "@/features/admin/admin-routing";
 import { AlertCircle, LoaderCircle, Sparkles } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/features/auth/providers/auth-provider";
+
+/**
+ * Where to come back to after signing in. On the admin host the browser shows "/orders" for what the app calls
+ * "/admin/orders" (see features/admin/admin-routing.tsx); sign-in only returns to /admin and /s/ addresses.
+ */
+export function adminReturnPath(pathname: string): string {
+  if (pathname === "/admin" || pathname.startsWith("/admin/") || pathname.startsWith("/s/")) return pathname;
+  return pathname === "/" ? "/admin" : `/admin${pathname}`;
+}
 
 export function AdminAuthGate({
   children,
@@ -17,7 +26,7 @@ export function AdminAuthGate({
 
   useEffect(() => {
     if (configured && !loading && !session) {
-      router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+      router.replace(`/login?next=${encodeURIComponent(adminReturnPath(pathname))}`);
     }
 
     if (

@@ -1,6 +1,6 @@
 "use client";
 import type { ReactNode } from "react";
-import Link from "next/link";
+import Link from "@/features/admin/admin-routing";
 import { AlertTriangle, CheckCircle2, Info, Inbox, X, XCircle, type LucideIcon } from "lucide-react";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import type { StatusTone } from "./status";

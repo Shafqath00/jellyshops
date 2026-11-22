@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link from "@/features/admin/admin-routing";
 import { useEffect, useId, useRef, useState } from "react";
 import { ExternalLink, LogOut, Plus, Settings } from "lucide-react";
 import { storeUrl } from "@jelly/storefront-schema";

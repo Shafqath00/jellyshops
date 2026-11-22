@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 const { useAuth, replace, retry } = vi.hoisted(() => ({ useAuth: vi.fn(), replace: vi.fn(), retry: vi.fn(async () => {}) }));
 vi.mock("@/features/auth/providers/auth-provider", () => ({ useAuth }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ replace }), usePathname: () => "/admin" }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace }), usePathname: () => "/admin", useParams: () => ({}) }));
 import { AdminAuthGate } from "./admin-auth-gate";
 beforeEach(() => { vi.clearAllMocks(); });
 it("shows a retry after merchant loading fails instead of redirecting to onboarding", async () => {

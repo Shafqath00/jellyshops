@@ -10,7 +10,8 @@ export function merchantReturnPath(value?: string | null): string {
     const url = new URL(value, routeOrigin);
     const pathname = decodeURIComponent(url.pathname);
     if (url.origin !== routeOrigin || /[\\\u0000-\u001f\u007f]/.test(pathname)) return "/admin";
-    if (pathname === "/onboarding" || pathname === "/admin" || pathname.startsWith("/admin/")) {
+    // /s/<shop>/... is a shop's admin on the admin host (shop subdomains, see features/admin/admin-routing.tsx).
+    if (pathname === "/onboarding" || pathname === "/admin" || pathname.startsWith("/admin/") || pathname.startsWith("/s/")) {
       return pathname === "/onboarding" ? "/onboarding" : url.pathname + url.search + url.hash;
     }
   } catch {

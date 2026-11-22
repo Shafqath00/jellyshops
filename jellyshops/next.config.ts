@@ -30,6 +30,14 @@ const nextConfig: NextConfig = {
       { source: "/admin/settings/store-access", destination: "/admin/online-store/preferences", permanent: true },
       { source: "/admin/products/builder", destination: "/admin/products/new", permanent: true },
       { source: "/admin/products/builder/:id", destination: "/admin/products/:id", permanent: true },
+      // The same moves inside one shop's admin (/admin/s/<shop>/...).
+      { source: "/admin/s/:shop/products/stock", destination: "/admin/s/:shop/products/inventory", permanent: true },
+      { source: "/admin/s/:shop/online-store/navigation", destination: "/admin/s/:shop/content/menus", permanent: true },
+      { source: "/admin/s/:shop/engagement", destination: "/admin/s/:shop/customers/messages", permanent: true },
+      { source: "/admin/s/:shop/store", destination: "/admin/s/:shop/online-store/preferences", permanent: true },
+      { source: "/admin/s/:shop/settings/store-access", destination: "/admin/s/:shop/online-store/preferences", permanent: true },
+      { source: "/admin/s/:shop/products/builder", destination: "/admin/s/:shop/products/new", permanent: true },
+      { source: "/admin/s/:shop/products/builder/:id", destination: "/admin/s/:shop/products/:id", permanent: true },
     ];
   },
   turbopack: {
