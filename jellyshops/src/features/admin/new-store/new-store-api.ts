@@ -1,22 +1,21 @@
+import { checkStoreAddress, normaliseStoreAddress } from "@jelly/storefront-schema";
 import { markets, type SetupMarket } from "@/features/auth/api/onboarding-api";
 
 /** What the "Add another store" form sends. */
 export interface NewStoreInput { name: string; slug: string; country: SetupMarket; design: string }
 export interface CreatedStore { id: string; slug: string; name: string }
 
-const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
 /** A web address made from the store name (same rule as onboarding). */
 export function slugFromName(value: string) {
-  return value.normalize("NFKD").replace(/\p{Diacritic}/gu, "").toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-").replace(/^-/, "").slice(0, 63).replace(/-$/, "");
+  return normaliseStoreAddress(value);
 }
 
 /** Problems that stop the form, in plain words, by field. */
 export function newStoreProblems(input: NewStoreInput): Partial<Record<keyof NewStoreInput, string>> {
   const problems: Partial<Record<keyof NewStoreInput, string>> = {};
   if (!input.name.trim()) problems.name = "Enter a store name.";
-  if (input.slug.length < 3 || input.slug.length > 63 || !SLUG_PATTERN.test(input.slug)) problems.slug = "Use 3 to 63 lowercase letters, numbers and single hyphens.";
+  const address = checkStoreAddress(input.slug);
+  if (!address.ok) problems.slug = address.message;
   if (!markets[input.country]) problems.country = "Choose where the business is based.";
   return problems;
 }

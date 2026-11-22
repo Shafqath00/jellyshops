@@ -115,3 +115,8 @@ export { MAX_QUANTITY_RULE_VALUE, NO_QUANTITY_RULE, allowedQuantity, hasQuantity
 export type { QuantityRule } from "./quantity-rules.js";
 export { STOREFRONT_WORDS, STOREFRONT_WORD_TRANSLATIONS, storefrontWord, type StorefrontWordKey } from "./storefront-words.js";
 export { COLOR_SETTING_PATTERN, colorSettingCss, isPaletteColor, PALETTE_SCHEME_ROLES, PALETTE_THEME_COLORS, paletteReference } from "./palette-colors.js";
+export {
+  BLOCKED_WORD_STORE_ADDRESSES, BRAND_STORE_ADDRESSES, STORE_ADDRESS_MAX_LENGTH, STORE_ADDRESS_MIN_LENGTH, SYSTEM_STORE_ADDRESSES,
+  checkStoreAddress, foldLookalikes, isSystemStoreAddress, normaliseStoreAddress,
+} from "./store-address.js";
+export type { StoreAddressCheck, StoreAddressProblem } from "./store-address.js";

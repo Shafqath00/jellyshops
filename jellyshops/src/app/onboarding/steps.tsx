@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
+import { STORE_ADDRESS_MAX_LENGTH, checkStoreAddress, normaliseStoreAddress } from "@jelly/storefront-schema";
 import {
   BedDouble, Check, Gem, Headphones, Laptop, Palette, Rocket, Shirt, ShoppingBag, Smartphone, Sofa, Sparkles, Store, Truck, Utensils,
 } from "lucide-react";
@@ -72,8 +73,7 @@ export const themeCover = (id: string) => `/templates/${id}.webp`;
 export const suggestedTheme = (category?: string) => categories.find((item) => item.id === category)?.theme ?? "jelly-signature";
 
 export function slugFromName(value: string) {
-  return value.normalize("NFKD").replace(/\p{Diacritic}/gu, "").toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-").replace(/^-/, "").slice(0, 63).replace(/-$/, "");
+  return normaliseStoreAddress(value);
 }
 
 /** Problems that stop the step from moving on. Steps 2 to 5 are optional apart from a half-filled product. */
@@ -82,8 +82,8 @@ export function validateStep(step: SetupStep, answers: SetupAnswers): Record<str
   if (step === "store" || step === "review") {
     if (!answers.fullName?.trim()) issues.fullName = "Enter your name.";
     if (!answers.name?.trim()) issues.name = "Enter a store name.";
-    const slug = answers.slug ?? "";
-    if (slug.length < 3 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) issues.slug = "Use 3–63 lowercase letters, numbers and single hyphens.";
+    const address = checkStoreAddress(answers.slug ?? "");
+    if (!address.ok) issues.slug = address.message;
     if (!answers.country || !markets[answers.country]) issues.country = "Choose where your business is based.";
   }
   if ((step === "products" || step === "review") && answers.product && Object.values(answers.product).some((value) => value !== undefined && value !== "")) {
@@ -134,7 +134,7 @@ export function SetupFields({ step, answers, change, changeSlug, fieldErrors, ad
         <Field field="slug" label="Store web address" hint="Lowercase letters, numbers and hyphens." error={fieldErrors.slug}>
           <div className={styles.slugField}>
             <span aria-hidden="true">jelly.shop/</span>
-            <input {...attrs("slug", true)} required maxLength={63} autoCapitalize="none" spellCheck={false}
+            <input {...attrs("slug", true)} required maxLength={STORE_ADDRESS_MAX_LENGTH} autoCapitalize="none" spellCheck={false}
               value={answers.slug ?? ""} onChange={(event) => changeSlug(event.target.value.toLowerCase())} />
           </div>
           <p role="status" className={styles.address} data-state={addressState ?? undefined}>

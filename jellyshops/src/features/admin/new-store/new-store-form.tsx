@@ -82,7 +82,7 @@ export function NewStoreForm() {
             <input id="new-store-name" className="jk-input" value={input.name} maxLength={120} autoComplete="organization" onChange={(event) => change({ name: event.target.value })} />
           </Field>
           <Field id="new-store-slug" label="Web address" required help={address === "taken" ? undefined : addressHelp} error={shown.slug ?? (address === "taken" ? "That web address is taken. Choose another." : undefined)}>
-            <input id="new-store-slug" className="jk-input" value={input.slug} maxLength={63} autoCapitalize="none" spellCheck={false} onChange={(event) => { setSlugEdited(true); change({ slug: event.target.value.toLowerCase() }); }} />
+            <input id="new-store-slug" className="jk-input" value={input.slug} maxLength={40} autoCapitalize="none" spellCheck={false} onChange={(event) => { setSlugEdited(true); change({ slug: event.target.value.toLowerCase() }); }} />
           </Field>
           <Field id="new-store-country" label="Where the business is based" required help={`Prices will be in ${markets[input.country].currency}. This cannot be changed later.`} error={shown.country}>
             <select id="new-store-country" className="jk-input" value={input.country} onChange={(event) => change({ country: event.target.value as SetupMarket })}>

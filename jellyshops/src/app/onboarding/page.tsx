@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { checkStoreAddress } from "@jelly/storefront-schema";
 import "@/features/brand/brand.css";
 import { geist, geistMono } from "@/features/brand/fonts";
 import { JellyShopLogo } from "@/features/brand/logo";
@@ -140,7 +141,7 @@ export default function OnboardingPage() {
   }, [answers, busy, conflict, consentRequired, created, save, step]);
 
   const currentSlug = answers.slug ?? "";
-  const validAddress = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(currentSlug) && currentSlug.length >= 3 && currentSlug.length <= 63;
+  const validAddress = checkStoreAddress(currentSlug).ok;
   useEffect(() => {
     if (step !== "store" || !validAddress) return;
     const controller = new AbortController();

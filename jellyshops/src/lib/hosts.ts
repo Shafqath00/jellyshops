@@ -6,6 +6,8 @@
  * Nothing calls this yet; the proxy starts using it in step 4 of the plan.
  */
 
+import { isSystemStoreAddress } from "@jelly/storefront-schema";
+
 export const DEFAULT_ROOT_DOMAIN = "jellyshop.io";
 /** Merchant admin for every shop: `admin.<root>`. */
 export const MERCHANT_ADMIN_LABEL = "admin";
@@ -17,14 +19,10 @@ export const DEV_ROOT_DOMAIN = "localhost";
 export const PREVIEW_SHOP_PREFIX = "_shop";
 
 /**
- * Subdomains that never belong to a shop. Step 2 of the plan replaces this with the shared reserved list; until then it
- * holds the names the platform itself needs.
+ * Subdomains that never belong to a shop: the platform's own names from the shared address rules. Brand and offensive
+ * names are only refused when a shop is created or renamed, so an existing shop is never cut off by a list change.
  */
-export const SYSTEM_SUBDOMAINS: ReadonlySet<string> = new Set([
-  "www", MERCHANT_ADMIN_LABEL, PLATFORM_ADMIN_LABEL, "api", "app", "apps", "auth", "mail", "email", "smtp", "imap", "pop",
-  "mx", "webmail", "status", "static", "assets", "cdn", "media", "img", "images", "files", "uploads", "docs", "help",
-  "support", "ns", "ns1", "ns2", "dns", "ftp", "dev", "staging", "test", "qa", "preview", "sandbox", "internal", "ops",
-]);
+const SYSTEM_SUBDOMAINS = { has: isSystemStoreAddress };
 
 /**
  * First path segments on the marketing site that are the app's own pages or public files, not old `/<slug>` store

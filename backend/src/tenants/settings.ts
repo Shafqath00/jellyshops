@@ -5,7 +5,7 @@ import type { AuthProvider } from "../auth/types.js";
 import type { CommerceDatabase, SqlExecutor } from "../commerce/repository.js";
 import { ApiError } from "../http/errors.js";
 import { businessTypeSchema, storeCategorySchema, storeDescriptionSchema, validTimezone } from "../onboarding/schema.js";
-import { storeSlugSchema } from "./store-slug.js";
+import { existingStoreSlugSchema, storeSlugSchema } from "./store-slug.js";
 
 export const MARKET_CURRENCIES: Readonly<Record<string, string>> = { IN: "INR", GB: "GBP", US: "USD" };
 export interface CheckoutPolicy { currency: string; country: string; shippingMinor: number }
@@ -16,7 +16,7 @@ export interface StoreSettings extends CheckoutPolicy {
 const patchSchema = z.object({
   revision: z.number().int().nonnegative(),
   name: z.string().trim().min(1).max(120).optional(),
-  slug: storeSlugSchema.optional(),
+  slug: existingStoreSlugSchema.optional(),
   contactEmail: z.email().nullable().optional(),
   timezone: z.string().refine(validTimezone).optional(),
   shippingMinor: z.number().int().nonnegative().max(2147483647).optional(),
@@ -62,6 +62,8 @@ export class StoreSettingsRepository {
         const current = await this.read(sql, storeId);
         if (current.revision !== input.revision) throw new ApiError(409, "SETTINGS_REVISION_CONFLICT", "Settings changed in another session. Reload before saving.");
         if (input.slug !== undefined && input.slug !== current.slug) {
+          const address = storeSlugSchema.safeParse(input.slug);
+          if (!address.success) throw new ApiError(422, "STORE_SLUG_INVALID", address.error.issues[0]?.message ?? "This address isn't available. Try another.");
           const used = await sql.query(`SELECT 1 FROM "StorefrontPublication" WHERE "storeId" = $1 UNION ALL SELECT 1 FROM "Order" WHERE "storeId" = $1 LIMIT 1`, [storeId]);
           if (used.rows.length) throw new ApiError(422, "STORE_SLUG_LOCKED", "The store address cannot change after publication or an order.");
         }

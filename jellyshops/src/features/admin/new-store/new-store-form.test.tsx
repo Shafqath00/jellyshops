@@ -19,7 +19,8 @@ afterEach(() => { vi.unstubAllGlobals(); push.mockReset(); setActiveStoreId.mock
 describe("new store rules", () => {
   it("makes a web address from the name and explains problems in plain words", () => {
     expect(slugFromName("Express Bed Café")).toBe("express-bed-cafe");
-    expect(newStoreProblems({ name: "", slug: "ab", country: "GB", design: "" })).toEqual({ name: "Enter a store name.", slug: "Use 3 to 63 lowercase letters, numbers and single hyphens." });
+    expect(newStoreProblems({ name: "", slug: "ab", country: "GB", design: "" })).toEqual({ name: "Enter a store name.", slug: "Use 3 to 40 characters." });
+    expect(newStoreProblems({ name: "Pay", slug: "paypal", country: "GB", design: "" }).slug).toBe("This address isn't available. Try another.");
     expect(newStoreProblems({ name: "Shop", slug: "my-shop", country: "GB", design: "" })).toEqual({});
   });
 });
