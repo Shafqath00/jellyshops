@@ -29,6 +29,7 @@ import { SqlMediaRepository } from "../media/sql-media-repository.js";
 import type { MediaStorage } from "../media/storage.js";
 import { createStorefrontMediaReferenceReader } from "../media/storefront-reference-reader.js";
 import { SupabaseMediaStorage } from "../media/supabase-media-storage.js";
+import { R2MediaStorage } from "../media/r2-media-storage.js";
 import { PublicStorefrontContextService } from "../storefront/context/service.js";
 import { SqlPublicStorefrontContextRepository } from "../storefront/context/sql-repository.js";
 import { createDefaultStorefrontDocument, storefrontDocumentValidator } from "../storefront/document-validator.js";
@@ -52,6 +53,15 @@ import type { AppContext, AppDependencies } from "./types.js";
 export function createDefaultMediaStorage(
   config: AppConfig,
 ): MediaStorage {
+  if (config.mediaProvider === "r2") {
+    if (!config.r2) throw new Error("Cloudflare R2 media storage configuration is missing");
+    // While files are being moved, anything not copied yet is still read from Supabase Storage.
+    const fallback = config.supabaseUrl && config.supabaseSecretKey
+      ? new SupabaseMediaStorage(config.supabaseUrl, config.supabaseSecretKey, config.supabaseMediaBucket)
+      : undefined;
+    return new R2MediaStorage({ ...config.r2, fallback });
+  }
+
   if (config.mediaProvider === "supabase") {
     if (
       !config.supabaseUrl ||
@@ -145,7 +155,7 @@ export function resolveAppDependencies(dependencies: Partial<AppDependencies> = 
     dependencies.catalogService ??
     (supabasePool
       ? (() => {
-        const catalogRepository = new CatalogPostgresRepository(supabasePool, postgresCommerceDatabase(supabasePool));
+        const catalogRepository = new CatalogPostgresRepository(supabasePool, postgresCommerceDatabase(supabasePool), { mediaPublicBase: config.mediaPublicBase });
         return new CatalogService(catalogRepository, catalogRepository) as CatalogAdmin;
       })()
       : undefined);
@@ -187,6 +197,7 @@ export function resolveAppDependencies(dependencies: Partial<AppDependencies> = 
     mediaRepository,
     mediaStorage,
     storefrontSql ? createStorefrontMediaReferenceReader(storefrontSql) : undefined,
+    config.mediaPublicBase,
   );
 
   const contentService =

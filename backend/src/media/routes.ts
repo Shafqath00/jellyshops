@@ -44,7 +44,11 @@ export function createPublicMediaRouter(service: MediaService): Router {
     if (requestedWidth !== undefined && (typeof requestedWidth !== "string" || !MEDIA_WIDTHS.some(width => String(width) === requestedWidth))) {
       throw new ApiError(400, "MEDIA_WIDTH_INVALID", `Choose a supported image width: ${MEDIA_WIDTHS.join(", ")}`);
     }
-    const media = await service.open(request.params.storeId, request.params.mediaId, requestedWidth === undefined ? undefined : Number(requestedWidth));
+    const width = requestedWidth === undefined ? undefined : Number(requestedWidth);
+    // With a public photo domain, the old API address only points there: permanently, so browsers and caches remember.
+    const location = await service.publicLocation(request.params.storeId, request.params.mediaId, width);
+    if (location) { response.set("Cache-Control", "public, max-age=31536000, immutable").redirect(301, location); return; }
+    const media = await service.open(request.params.storeId, request.params.mediaId, width);
     // Files never change (a new photo gets a new id), so browsers and CDNs may keep them for a year.
     response.set("Cache-Control", "public, max-age=31536000, s-maxage=31536000, immutable").set("ETag", media.etag).type(media.mimeType).send(media.contents);
   });

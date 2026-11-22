@@ -64,7 +64,12 @@ export function cardPhotoSrcSet(url: string, widths?: readonly number[]): string
     const base = `/themes/${theme[1]}/${theme[2]}`;
     return `${base}-640.webp 640w, ${base}-1024.webp 1024w, ${url} ${THEME_PHOTO_ORIGINAL_WIDTH}w`;
   }
-  if (!MEDIA_PHOTO.test(url)) return undefined;
+  // Photos on the public photo domain: copies sit next to the photo as <url>.w<width>.webp (same rule as the schema
+  // package's directPhotoSrcSet; this package has no dependencies). Only the recorded widths exist there.
+  if (!MEDIA_PHOTO.test(url)) {
+    if (!widths?.length || !/^https?:\/\/[^?#]+\.(png|jpe?g|webp|gif|avif)$/i.test(url)) return undefined;
+    return [...widths].filter((width) => MEDIA_WIDTHS.includes(width)).sort((a, b) => a - b).map((width) => `${url}.w${width}.webp ${width}w`).join(", ") || undefined;
+  }
   // Without a list (photos uploaded before copies were recorded) only the three oldest sizes are asked for.
   const list = widths?.filter((width) => MEDIA_WIDTHS.includes(width)) ?? [];
   return (list.length ? list : LEGACY_WIDTHS).map((width) => `${url}${url.includes("?") ? "&" : "?"}w=${width} ${width}w`).join(", ");

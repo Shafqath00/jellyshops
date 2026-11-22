@@ -18,6 +18,8 @@ export interface MediaRecord {
   variantWidths?: number[] | null;
   /** A tiny blurred WebP as a data URL, shown while the photo loads; null when there is none. */
   placeholder?: string | null;
+  /** Direct address on the public photo domain, when one is configured (MEDIA_PUBLIC_BASE). */
+  publicUrl?: string;
 }
 
 export interface StoredMediaRecord extends MediaRecord {

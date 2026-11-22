@@ -12,7 +12,7 @@ const tinyPng = Buffer.from(
   "base64",
 );
 
-async function createMediaApp() {
+async function createMediaApp(extra: Partial<AppConfig> = {}) {
   const directory = await mkdtemp(path.join(tmpdir(), "jelly-media-"));
   const config: AppConfig = {
     port: 3001,
@@ -26,6 +26,7 @@ async function createMediaApp() {
     uploadDirectory: path.join(directory, "uploads"),
     maxUploadBytes: 1024 * 1024,
     demoStoreId: "store-demo",
+    ...extra,
   };
   return createApp({ config });
 }
@@ -103,5 +104,20 @@ describe("media routes", () => {
       .set("Authorization", "Bearer jelly-demo-merchant");
     expect(removed.status).toBe(204);
     expect((await request(app).get(uploaded.body.url)).status).toBe(404);
+  });
+  it("points old photo addresses at the public photo domain once one is configured", async () => {
+    const cdnApp = await createMediaApp({ mediaPublicBase: "https://img.example.test" });
+    const photo = await sharp({ create: { width: 700, height: 500, channels: 3, background: "red" } }).png().toBuffer();
+    const uploaded = await request(cdnApp).post("/api/stores/store-demo/media").set("Authorization", "Bearer jelly-demo-merchant").attach("file", photo, { filename: "bed.png", contentType: "image/png" });
+    expect(uploaded.status).toBe(201);
+    expect(uploaded.body.publicUrl).toBe(`https://img.example.test/store-demo/${uploaded.body.id}.png`);
+    const original = await request(cdnApp).get(uploaded.body.url);
+    expect(original.status).toBe(301);
+    expect(original.headers.location).toBe(uploaded.body.publicUrl);
+    expect(original.headers["cache-control"]).toBe("public, max-age=31536000, immutable");
+    // A 700px photo has copies at 320, 640 and its own width (960); 1920 is served by the largest one.
+    expect((await request(cdnApp).get(`${uploaded.body.url}?w=640`)).headers.location).toBe(`${uploaded.body.publicUrl}.w640.webp`);
+    expect((await request(cdnApp).get(`${uploaded.body.url}?w=1920`)).headers.location).toBe(`${uploaded.body.publicUrl}.w960.webp`);
+    expect((await request(cdnApp).get(`${uploaded.body.url}?w=500`)).status).toBe(400);
   });
 });

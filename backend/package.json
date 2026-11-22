@@ -31,6 +31,7 @@
     "@jelly/storefront-schema": "file:./jelly-storefront-schema-0.1.0.tgz",
     "@jelly/storefront-themes": "file:./jelly-storefront-themes-0.1.0.tgz",
     "@supabase/supabase-js": "2.116.0",
+    "aws4fetch": "1.0.20",
     "cors": "2.8.6",
     "dotenv": "17.4.2",
     "exceljs": "^4.4.0",

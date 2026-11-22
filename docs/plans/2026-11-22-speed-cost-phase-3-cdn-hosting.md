@@ -128,3 +128,24 @@ The subdomain work can run in parallel after step 4; step 1 doesn't touch the sa
 - Cloudflare: [Next.js on Workers (OpenNext / vinext guidance)](https://developers.cloudflare.com/workers/framework-guides/web-apps/opennext/), [OpenNext Cloudflare](https://opennext.js.org/cloudflare), [OpenNext Cloudflare releases](https://github.com/opennextjs/opennextjs-cloudflare/releases), [Next.js across platforms (adapter API)](https://nextjs.org/nextjs-across-platforms)
 - Vercel: [Pricing](https://vercel.com/pricing), [Pricing docs](https://vercel.com/docs/pricing), [Regional pricing (sfo1 example)](https://vercel.com/docs/pricing/regional-pricing/sfo1)
 - Cloudflare R2 and SaaS: [R2 pricing](https://developers.cloudflare.com/r2/pricing), [Cloudflare for SaaS plans](https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/plans/)
+
+## Step 1 built (2026-11-22, code only, nothing switched on)
+
+| Piece | Where |
+| --- | --- |
+| R2 storage (signed with `aws4fetch` 1.0.20; immutable, image-only types; refuses keys that leave the store folder; reads fall back to Supabase while files move; removes from both) | `backend/src/media/r2-media-storage.ts` |
+| Settings `MEDIA_PROVIDER=r2`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `MEDIA_PUBLIC_BASE` (https only); the backend refuses to start with `r2` and missing R2 settings | `backend/src/config.ts`, `app/dependencies.ts`, `.env.example` |
+| Direct photo addresses: upload/list responses and catalogue product media carry `publicUrl` when `MEDIA_PUBLIC_BASE` is set (not for outside links); the old `/api/public/media/...` address answers 301 to the right copy (the next larger recorded width, else the largest, else the original) without reading the file | `backend/src/media/public-url.ts`, `service.ts` (`publicLocation`), `routes.ts`, `catalog/postgres-repository.ts` |
+| Storefront: product photos use `publicUrl`; cards and the product gallery build `srcset` from the recorded widths as `<url>.w<width>.webp`, each described by its real width | `storefront-schema` `directPhotoSrcSet` (+ `productMediaSrcSet`), `storefront-ui` `cardPhotoSrcSet`, `commerce/api/client.ts` |
+| Copy script (lists every file in the Supabase bucket, skips files already in R2 with the same size, checks the size after each copy, never changes the source or the database) | `backend/scripts/copy-media-to-r2.ts`, logic `src/media/copy-to-r2.ts`, listing `SupabaseMediaStorage.listFiles()` |
+
+Checked: backend 835/835 tests (R2 storage against a pretend bucket incl. the AWS signature header, fallback,
+type and key rules; public addresses and the 301 for each width; copy dry run / copy / rerun / size mismatch /
+unreadable file); storefront tests for direct sizes and the product mapping; the new listing against staging storage
+(read-only): 344 files, 81.2 MB, all with sizes, in 5 top folders. The schema package was repacked for the backend.
+
+Not checked: a real R2 bucket (no account yet). Images chosen in the editor (section images) keep their API address
+and are served through the 301 until a later step rewrites them at Publish.
+
+Order to switch on (staging), each with your yes: create the account/bucket/token → set `MEDIA_PROVIDER=r2` + R2
+settings (new uploads go to R2, old files still read from Supabase) → copy dry run → copy → set `MEDIA_PUBLIC_BASE`.

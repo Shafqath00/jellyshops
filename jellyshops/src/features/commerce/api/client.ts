@@ -98,6 +98,9 @@ export interface PublicStoreDetails {
   country: string;
 }
 
+/** A photo's direct address on the public photo domain when the backend gives one, else its API address. */
+const photoAddress = (entry: { url: string; publicUrl?: string }) => entry.publicUrl ?? entry.url;
+
 export function catalogProductToStorefrontProduct(product: PublicCatalogProduct): Product {
   const image = [...product.media].sort((a, b) => a.position - b.position)[0];
   return {
@@ -116,7 +119,7 @@ export function catalogProductToStorefrontProduct(product: PublicCatalogProduct)
     productType: product.productType ?? "",
     vendor: product.vendor ?? undefined,
     tags: product.tags ?? [],
-    imageUrl: image?.url ?? "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1200&q=85",
+    imageUrl: (image ? photoAddress(image) : undefined) ?? "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=1200&q=85",
     published: product.status === undefined || product.status === "ACTIVE",
     archived: product.status === "ARCHIVED",
     primaryCategoryId: product.primaryCategoryId ?? undefined,
@@ -127,7 +130,7 @@ export function catalogProductToStorefrontProduct(product: PublicCatalogProduct)
     personalisation: readPersonalisationFields((product as { personalisation?: unknown }).personalisation),
     quantityRule: (() => { const rule = readQuantityRule((product as { quantityRule?: unknown }).quantityRule); return hasQuantityRule(rule) ? rule : null; })(),
     inventoryOptionIds: product.inventoryOptionIds ?? [],
-    media: product.media.map((entry) => ({ ...entry, altText: entry.altText ?? undefined })),
+    media: product.media.map((entry) => ({ ...entry, url: photoAddress(entry), altText: entry.altText ?? undefined })),
     featured: false,
     variants: product.variants.map((variant) => ({
       id: variant.id,

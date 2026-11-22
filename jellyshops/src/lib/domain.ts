@@ -336,4 +336,4 @@ export function getEffectiveCategoryOptionDefinitions(categoryId: string, catego
 }
 
 /** What the media API knows about a stored photo beyond its address: the resized copies that exist and a blur. */
-export interface MediaHints { variantWidths?: number[]; placeholder?: string }
+export interface MediaHints { variantWidths?: number[]; placeholder?: string; /** Direct address on the public photo domain. */ publicUrl?: string }

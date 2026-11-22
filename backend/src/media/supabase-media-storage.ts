@@ -112,4 +112,22 @@ export class SupabaseMediaStorage
       throw error;
     }
   }
+
+  /**
+   * Every file in the bucket with its size, folder by folder (used by the copy to Cloudflare R2). Reads only.
+   */
+  async *listFiles(prefix = ""): AsyncIterable<{ key: string; size: number | null }> {
+    const pageSize = 1000;
+    for (let offset = 0; ; offset += pageSize) {
+      const { data, error } = await this.client.storage.from(this.bucket).list(prefix, { limit: pageSize, offset, sortBy: { column: "name", order: "asc" } });
+      if (error) throw error;
+      for (const entry of data ?? []) {
+        const key = prefix ? `${prefix}/${entry.name}` : entry.name;
+        // Folders come back without an id.
+        if (entry.id === null) yield* this.listFiles(key);
+        else yield { key, size: typeof entry.metadata?.size === "number" ? entry.metadata.size : null };
+      }
+      if (!data || data.length < pageSize) return;
+    }
+  }
 }

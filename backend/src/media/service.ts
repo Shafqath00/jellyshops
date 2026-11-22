@@ -6,6 +6,7 @@ import type { MediaRepository } from "./repository.js";
 import type { MediaStorage } from "./storage.js";
 import type { MediaRecord, StoredMedia, StoredMediaRecord } from "./types.js";
 import { validateImage } from "./validation.js";
+import { chooseCopyWidth, knownCopyWidths, mediaPublicUrl } from "./public-url.js";
 
 export const MEDIA_WIDTHS = [320, 640, 960, 1280, 1920] as const;
 /** Longest side kept for an uploaded photo. Larger photos are scaled down on upload: no shopper screen needs more. */
@@ -22,9 +23,10 @@ export async function makePlaceholder(photo: Buffer): Promise<string | null> {
     return url.length <= MEDIA_PLACEHOLDER_MAX ? url : null;
   } catch { return null; }
 }
-function publicRecord(record: StoredMediaRecord): MediaRecord {
-  const { storageKey: _storageKey, ...media } = record;
-  return media;
+function publicRecord(this: void, record: StoredMediaRecord, publicBase?: string): MediaRecord {
+  const { storageKey, ...media } = record;
+  const publicUrl = mediaPublicUrl(publicBase, storageKey);
+  return publicUrl ? { ...media, publicUrl } : media;
 }
 export function derivativeKey(key: string, width: number): string { return `${key}.w${width}.webp`; }
 function representationKeys(record: StoredMediaRecord): string[] {
@@ -35,7 +37,22 @@ export class MediaService {
     private readonly repository: MediaRepository,
     private readonly storage: MediaStorage,
     private readonly storefrontReferenceReader?: (storeId: string, mediaId: string) => Promise<boolean>,
+    /** Public photo domain (MEDIA_PUBLIC_BASE); when set, records carry their direct address. */
+    readonly publicBase?: string,
   ) {}
+  private shown(record: StoredMediaRecord): MediaRecord { return publicRecord(record, this.publicBase); }
+  /**
+   * Where a photo lives on the public photo domain (the copy that fits `width`, or the original), or null when no
+   * public domain is configured or the photo is unknown. No file is read: the old API address just points there.
+   */
+  async publicLocation(storeId: string, mediaId: string, width?: number): Promise<string | null> {
+    if (!this.publicBase) return null;
+    if (width !== undefined && !MEDIA_WIDTHS.some(value => value === width)) throw new ApiError(400, "MEDIA_WIDTH_INVALID", `Choose a supported image width: ${WIDTH_LIST}`);
+    const record = await this.repository.get(storeId, mediaId);
+    if (!record) throw new ApiError(404, "MEDIA_NOT_FOUND", "The requested image was not found");
+    const copy = chooseCopyWidth(knownCopyWidths(record), width);
+    return mediaPublicUrl(this.publicBase, copy ? derivativeKey(record.storageKey, copy) : record.storageKey) ?? null;
+  }
   private async findByHash(storeId: string, hash: string): Promise<StoredMediaRecord | null> {
     return this.repository.findByHash ? this.repository.findByHash(storeId, hash)
       : (await this.repository.list(storeId)).find(record => record.contentHash === hash) ?? null;
@@ -43,7 +60,7 @@ export class MediaService {
   async upload(storeId: string, file: Express.Multer.File): Promise<MediaRecord> {
     const contentHash = createHash("sha256").update(file.buffer).digest("hex");
     const existing = await this.findByHash(storeId, contentHash);
-    if (existing) return publicRecord(existing);
+    if (existing) return this.shown(existing);
     const image = await validateImage(file.buffer);
     const id = randomUUID();
     // Sharp strips metadata by default. Animated decoding retains all supported frames.
@@ -82,24 +99,24 @@ export class MediaService {
         originalName: path.basename(file.originalname.replaceAll("\\", "/")), altText: null, referenced: false,
         variantWidths: [...variantWidths], placeholder,
       });
-      return publicRecord(stored);
+      return this.shown(stored);
     } catch (error) {
       await Promise.all(written.map(key => this.storage.remove(key).catch(() => undefined)));
       // The unique index arbitrates uploads across concurrent service instances.
       if ((error as { code?: string }).code === "23505") {
         const winner = await this.findByHash(storeId, contentHash);
-        if (winner) return publicRecord(winner);
+        if (winner) return this.shown(winner);
       }
       throw error;
     }
   }
   async list(storeId: string, unusedOlderThan30Days = false): Promise<MediaRecord[]> {
     const records = await this.repository.list(storeId);
-    if (!unusedOlderThan30Days) return records.map(publicRecord);
+    if (!unusedOlderThan30Days) return records.map(record => this.shown(record));
     const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
     const unused = await Promise.all(records.map(async record =>
       !record.referenced && Date.parse(record.createdAt) < cutoff && !await this.storefrontReferenceReader?.(storeId, record.id) ? record : null));
-    return unused.filter((record): record is StoredMediaRecord => record !== null).map(publicRecord);
+    return unused.filter((record): record is StoredMediaRecord => record !== null).map(record => this.shown(record));
   }
   async open(storeId: string, mediaId: string, width?: number): Promise<StoredMedia> {
     if (width !== undefined && !MEDIA_WIDTHS.some(value => value === width)) throw new ApiError(400, "MEDIA_WIDTH_INVALID", `Choose a supported image width: ${WIDTH_LIST}`);
@@ -122,7 +139,7 @@ export class MediaService {
     if (!contents) throw new ApiError(404, "MEDIA_NOT_FOUND", "The requested image was not found");
     // Stored files never change, so the content hash already identifies the bytes; hashing every response again is waste.
     const etag = record.contentHash ? `"${record.contentHash.slice(0, 32)}-${served ?? "o"}"` : `"${createHash("sha256").update(mimeType).update(contents).digest("hex")}"`;
-    return { record: publicRecord(record), contents, mimeType, etag };
+    return { record: this.shown(record), contents, mimeType, etag };
   }
   async remove(storeId: string, mediaId: string): Promise<void> {
     const record = await this.repository.get(storeId, mediaId);

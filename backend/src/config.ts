@@ -180,12 +180,17 @@ const environmentSchema = z.object({
    *
    * supabase:
    *   Stores images in Supabase Storage.
+   *
+   * r2:
+   *   Stores images in Cloudflare R2 (R2_* settings). Reads fall back to Supabase Storage while files are being moved
+   *   when SUPABASE_URL and SUPABASE_SECRET_KEY are set.
    */
   MEDIA_PROVIDER: z
     .enum([
       "local-files",
       "gcs",
       "supabase",
+      "r2",
     ])
     .default("local-files"),
 
@@ -259,6 +264,18 @@ const environmentSchema = z.object({
     emptyToUndefined,
     z.string().min(1).optional(),
   ),
+
+  /** Cloudflare R2 (MEDIA_PROVIDER=r2): account id, an R2 API token's key pair and the bucket name. */
+  R2_ACCOUNT_ID: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+  R2_ACCESS_KEY_ID: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+  R2_SECRET_ACCESS_KEY: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+  R2_BUCKET: z.preprocess(emptyToUndefined, z.string().min(1).optional()),
+
+  /**
+   * Public address of the photo bucket (e.g. https://img.jellycdn.net). When set, photos are linked straight to it and
+   * the API's old photo address redirects there. Set it only once every file is in the bucket.
+   */
+  MEDIA_PUBLIC_BASE: z.preprocess(emptyToUndefined, z.string().url().refine((value) => value.startsWith("https://") || value.startsWith("http://localhost") || value.startsWith("http://127.0.0.1"), "MEDIA_PUBLIC_BASE must be an https address").optional()),
 });
 
 export interface AppConfig {
@@ -281,7 +298,8 @@ export interface AppConfig {
   mediaProvider:
     | "local-files"
     | "gcs"
-    | "supabase";
+    | "supabase"
+    | "r2";
 
   dataDirectory: string;
 
@@ -310,6 +328,12 @@ export interface AppConfig {
   supabaseAnonKey?: string;
 
   supabaseMediaBucket: string;
+
+  /** Cloudflare R2 settings (MEDIA_PROVIDER=r2). */
+  r2?: { accountId: string; accessKeyId: string; secretAccessKey: string; bucket: string };
+
+  /** Public address photos are served from, without a trailing slash; unset = served through the API. */
+  mediaPublicBase?: string;
 
   stripe?: StripeServerConfig;
 }
@@ -389,6 +413,13 @@ export function loadConfig(
     );
   }
 
+  if (
+    parsed.MEDIA_PROVIDER === "r2" &&
+    (!parsed.R2_ACCOUNT_ID || !parsed.R2_ACCESS_KEY_ID || !parsed.R2_SECRET_ACCESS_KEY || !parsed.R2_BUCKET)
+  ) {
+    throw new Error("R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY and R2_BUCKET are required when MEDIA_PROVIDER=r2");
+  }
+
   return {
     port:
       parsed.PORT,
@@ -453,6 +484,12 @@ export function loadConfig(
 
     supabaseMediaBucket:
       parsed.SUPABASE_MEDIA_BUCKET,
+
+    r2: parsed.R2_ACCOUNT_ID && parsed.R2_ACCESS_KEY_ID && parsed.R2_SECRET_ACCESS_KEY && parsed.R2_BUCKET
+      ? { accountId: parsed.R2_ACCOUNT_ID, accessKeyId: parsed.R2_ACCESS_KEY_ID, secretAccessKey: parsed.R2_SECRET_ACCESS_KEY, bucket: parsed.R2_BUCKET }
+      : undefined,
+
+    mediaPublicBase: parsed.MEDIA_PUBLIC_BASE?.replace(/\/$/, ""),
 
     /*
      * Stripe

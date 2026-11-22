@@ -26,3 +26,27 @@ describe("card photos use what the media API recorded", () => {
     expect(card("javascript:alert(1)")).not.toContain("background-image");
   });
 });
+
+describe("photos on the public photo domain", () => {
+  const cdn = "https://img.example.test/store-1/photo-1.png";
+
+  it("builds sizes next to the photo from the recorded widths, never wider than the photo", async () => {
+    const { directPhotoSrcSet, productMediaSrcSet } = await import("@jelly/storefront-schema");
+    expect(directPhotoSrcSet(cdn, [320, 640, 960], 700)).toBe(`${cdn}.w320.webp 320w, ${cdn}.w640.webp 640w, ${cdn}.w960.webp 700w`);
+    expect(directPhotoSrcSet(cdn, [], 700)).toBeUndefined();
+    expect(directPhotoSrcSet("https://elsewhere.test/photo", [320])).toBeUndefined();
+    expect(productMediaSrcSet({ id: "m", url: cdn, width: 2000, variantWidths: [320, 640] })).toBe(`${cdn}.w320.webp 320w, ${cdn}.w640.webp 640w`);
+    expect(cardPhotoSrcSet(cdn, [320, 640])).toBe(`${cdn}.w320.webp 320w, ${cdn}.w640.webp 640w`);
+    expect(cardPhotoSrcSet(cdn)).toBeUndefined();
+  });
+
+  it("uses the direct address for product photos when the backend sends one", async () => {
+    const { catalogProductToStorefrontProduct } = await import("@/features/commerce/api/client");
+    const product = catalogProductToStorefrontProduct({
+      id: "p1", storeId: "s1", handle: "bed", title: "Bed", description: "", status: "ACTIVE", available: true, variants: [],
+      media: [{ id: "m1", url: "/api/public/media/s1/m1", publicUrl: cdn, position: 0, variantWidths: [320] }],
+    } as never);
+    expect(product.imageUrl).toBe(cdn);
+    expect(product.media?.[0].url).toBe(cdn);
+  });
+});

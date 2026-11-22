@@ -12,6 +12,8 @@ export interface ProductMediaLike {
   height?: number | null;
   mimeType?: string;
   originalName?: string;
+  /** Widths of the resized copies the upload made (photos on the public photo domain). */
+  variantWidths?: number[] | null;
 }
 export interface ProductMediaInput { mediaId: string; altText?: string | null; appliesTo?: MediaAssignments }
 export interface MediaAssignmentIssue { code: string; message: string; mediaId?: string }
@@ -105,7 +107,26 @@ export function productMediaUrl(url: string, width: 320 | 640 | 1280): string {
   return `${pathname}?${params}${hash === undefined ? "" : `#${hash}`}`;
 }
 
+/**
+ * Copies of a photo on the public photo domain sit next to it as `<url>.w<width>.webp`, for the widths the upload
+ * recorded. Each is described by its real width (a copy is never wider than the photo). Undefined when nothing fits.
+ */
+export function directPhotoSrcSet(url: string, widths: readonly number[] | null | undefined, photoWidth?: number | null): string | undefined {
+  if (!widths?.length || !/^https?:\/\/[^?#]+\.(png|jpe?g|webp|gif|avif)$/i.test(url)) return undefined;
+  const seen = new Set<number>();
+  const sources: string[] = [];
+  for (const width of [...widths].sort((a, b) => a - b)) {
+    const real = photoWidth ? Math.min(width, photoWidth) : width;
+    if (seen.has(real)) continue;
+    seen.add(real);
+    sources.push(`${url}.w${width}.webp ${real}w`);
+  }
+  return sources.join(", ") || undefined;
+}
+
 export function productMediaSrcSet(media: ProductMediaLike): string | undefined {
+  const direct = directPhotoSrcSet(media.url, media.variantWidths, media.width);
+  if (direct) return direct;
   if (productMediaUrl(media.url, 320) === media.url) return undefined;
   // Avoid false width descriptors when a source is smaller than a target size.
   const widths = ([320, 640, 1280] as const).filter((width) => !media.width || width <= media.width);

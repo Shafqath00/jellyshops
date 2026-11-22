@@ -49,6 +49,8 @@ export interface CatalogMedia {
   variantWidths?: number[];
   /** Tiny blurred WebP data URL shown while the photo loads. */
   placeholder?: string;
+  /** Direct address on the public photo domain (when configured); copies are `<publicUrl>.w<width>.webp`. */
+  publicUrl?: string;
 }
 
 /** "Total 500 g, show the price per 100 g". Both units must measure the same thing. */
