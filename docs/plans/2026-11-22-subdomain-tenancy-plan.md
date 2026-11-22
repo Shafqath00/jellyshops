@@ -1,7 +1,17 @@
 # Shop subdomains on jellyshop.io: design and implementation plan
 
-Status: **draft, waiting for approval.** No code has been changed.
+Status: **approved with the decisions below; step 1 in progress.**
 Date: 2026-11-22. Vercel facts were checked against vercel.com/docs on this date.
+
+## Owner decisions (2026-11-22)
+
+These override the sections further down where they differ.
+
+1. **The shop admin is on its own origin**, not `{shop}.jellyshop.io/admin` (§12 item 1). Merchants use `admin.jellyshop.io` for every shop they belong to; the platform super-admin moves to **`platform.jellyshop.io`** (default chosen while the owner had not named one; easy to change in `src/lib/hosts.ts`). Shop subdomains serve the storefront only. Consequences: no admin rewrite on shop hosts (§2), the `x-jelly-shop` header and the per-shop no-access page become "pick a shop" inside the admin host (§6), the "Manage shop" pill links to `admin.jellyshop.io` (§6), the `/admin` CSP is still wanted but no longer a precondition (§8).
+2. **Sign-in hand-off with browser sessions** (§6 option 1). With the admin on one origin, the hand-off is only needed from `jellyshop.io` (sign-up/onboarding) to `admin.jellyshop.io`; no per-shop hand-off.
+3. **Database-level tenant scope (§5A) is a later, separate project.** Step 12 is out of scope.
+4. **Retired shop addresses are reserved forever** (§10): they keep redirecting and are never given to another shop.
+5. **Hosting:** Vercel Hobby (free) plan; the domain's nameservers will point to Vercel; there are no MX/email records to copy. Note: Vercel's Hobby plan is for personal, non-commercial use, so a paid plan will be needed before shops trade for real; Hobby also caps custom domains at 50 per project (fine for the wildcard, a limit for §11).
 
 ## 0. What the repo looks like today (this changes the brief)
 
