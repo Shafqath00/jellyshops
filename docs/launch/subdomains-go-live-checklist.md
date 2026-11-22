@@ -27,6 +27,7 @@ Apply in this order to staging first, then production. Both folders hold the sam
 | `20261122030000_reserved_slugs.sql` | `ReservedSlug`: addresses nobody may take |
 | `20261122040000_store_slug_history.sql` | `StoreSlugHistory`: retired addresses, which redirect for good |
 | `20261122050000_platform_admins.sql` | `PlatformAdmin`, `PlatformAuditEvent`: Jellyshop staff and their log |
+| `20261122060000_platform_admin_read_only.sql` | takes back the backend's rights to add or change platform admins and to change their log |
 
 Check after each (read-only):
 
@@ -40,10 +41,11 @@ SELECT c.relname, c.relrowsecurity,
 ```
 
 Expected: `relrowsecurity` true, one `backend_access:jelly_backend` policy, `browser` false.
-`SELECT count(*) FROM "ReservedSlug"` should be 162.
+`SELECT count(*) FROM "ReservedSlug"` should be 162. After the fourth:
+`SELECT has_table_privilege('jelly_backend', '"PlatformAdmin"', 'INSERT')` should be false.
 
-- [ ] Staging: three migrations applied and checked.
-- [ ] Production: three migrations applied and checked.
+- [x] Staging: first three applied and checked (2026-11-22). - [ ] Staging: the fourth.
+- [ ] Production: all four applied and checked.
 
 Until `StoreSlugHistory` exists, a shop's address can't change once it is published; nothing breaks either way.
 
