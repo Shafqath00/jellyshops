@@ -7,7 +7,10 @@ import type { MediaStorage } from "./storage.js";
 import type { MediaRecord, StoredMedia, StoredMediaRecord } from "./types.js";
 import { validateImage } from "./validation.js";
 
-export const MEDIA_WIDTHS = [320, 640, 1280] as const;
+export const MEDIA_WIDTHS = [320, 640, 960, 1280, 1920] as const;
+/** Longest side kept for an uploaded photo. Larger photos are scaled down on upload: no shopper screen needs more. */
+export const MEDIA_MAX_SIDE = 2560;
+const WIDTH_LIST = MEDIA_WIDTHS.join(", ");
 function publicRecord(record: StoredMediaRecord): MediaRecord {
   const { storageKey: _storageKey, ...media } = record;
   return media;
@@ -33,7 +36,10 @@ export class MediaService {
     const image = await validateImage(file.buffer);
     const id = randomUUID();
     // Sharp strips metadata by default. Animated decoding retains all supported frames.
-    const original = await sharp(file.buffer, { animated: true, limitInputPixels: 40_000_000 }).rotate().toBuffer({ resolveWithObject: true });
+    // Rotated upright, metadata stripped (Sharp's default) and scaled down to MEDIA_MAX_SIDE, keeping the format.
+    const original = await sharp(file.buffer, { animated: true, limitInputPixels: 40_000_000 }).rotate()
+      .resize({ width: MEDIA_MAX_SIDE, height: MEDIA_MAX_SIDE, fit: "inside", withoutEnlargement: true })
+      .toBuffer({ resolveWithObject: true });
     const written: string[] = [];
     const put = async (extension: string, contents: Buffer, mimeType: string): Promise<string> => {
       // Both adapters address objects by this key. Record the attempt first so a
@@ -45,7 +51,10 @@ export class MediaService {
     };
     try {
       const storageKey = await put(image.extension, original.data, image.mimeType);
-      for (const width of MEDIA_WIDTHS) {
+      // Copies narrower than the photo, plus one at the photo's own width (the first size not narrower): larger copies
+      // would only repeat it.
+      const firstWide = MEDIA_WIDTHS.find(value => value >= original.info.width);
+      for (const width of MEDIA_WIDTHS.filter(value => value < original.info.width || value === firstWide)) {
         const contents = await sharp(original.data, { animated: true, limitInputPixels: 40_000_000 })
           .resize({ width, withoutEnlargement: true }).webp().toBuffer();
         await put(`${image.extension}.w${width}.webp`, contents, "image/webp");
@@ -77,14 +86,24 @@ export class MediaService {
     return unused.filter((record): record is StoredMediaRecord => record !== null).map(publicRecord);
   }
   async open(storeId: string, mediaId: string, width?: number): Promise<StoredMedia> {
-    if (width !== undefined && !MEDIA_WIDTHS.some(value => value === width)) throw new ApiError(400, "MEDIA_WIDTH_INVALID", "Choose a supported image width: 320, 640, or 1280");
+    if (width !== undefined && !MEDIA_WIDTHS.some(value => value === width)) throw new ApiError(400, "MEDIA_WIDTH_INVALID", `Choose a supported image width: ${WIDTH_LIST}`);
     const record = await this.repository.get(storeId, mediaId);
     if (!record) throw new ApiError(404, "MEDIA_NOT_FOUND", "The requested image was not found");
-    let contents = width && record.contentHash ? await this.storage.open(derivativeKey(record.storageKey, width)) : null;
+    // A copy that was never made (small photo, or uploaded before that width existed) is served by the next larger copy,
+    // else the largest smaller one (a small photo's full-size copy), then the original.
+    let contents: Buffer | null = null; let served: number | undefined;
+    if (width && record.contentHash) {
+      const order = [...MEDIA_WIDTHS.filter(value => value >= width), ...MEDIA_WIDTHS.filter(value => value < width).reverse()];
+      for (const candidate of order) {
+        contents = await this.storage.open(derivativeKey(record.storageKey, candidate));
+        if (contents) { served = candidate; break; }
+      }
+    }
     const mimeType = contents ? "image/webp" : record.mimeType;
     contents ??= await this.storage.open(record.storageKey);
     if (!contents) throw new ApiError(404, "MEDIA_NOT_FOUND", "The requested image was not found");
-    const etag = `"${createHash("sha256").update(mimeType).update(contents).digest("hex")}"`;
+    // Stored files never change, so the content hash already identifies the bytes; hashing every response again is waste.
+    const etag = record.contentHash ? `"${record.contentHash.slice(0, 32)}-${served ?? "o"}"` : `"${createHash("sha256").update(mimeType).update(contents).digest("hex")}"`;
     return { record: publicRecord(record), contents, mimeType, etag };
   }
   async remove(storeId: string, mediaId: string): Promise<void> {

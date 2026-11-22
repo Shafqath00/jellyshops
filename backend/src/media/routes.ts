@@ -4,7 +4,7 @@ import multer from "multer";
 import { requireMerchant, requireStorePermission } from "../auth/middleware.js";
 import type { AuthProvider } from "../auth/types.js";
 import { ApiError } from "../http/errors.js";
-import type { MediaService } from "./service.js";
+import { MEDIA_WIDTHS, type MediaService } from "./service.js";
 
 export function createMediaRouter(service: MediaService, authProvider: AuthProvider, maxUploadBytes: number): Router {
   const router = Router({ mergeParams: true });
@@ -41,11 +41,12 @@ export function createPublicMediaRouter(service: MediaService): Router {
   const router = Router();
   router.get<{ storeId: string; mediaId: string }>("/:storeId/:mediaId", async (request, response) => {
     const requestedWidth = request.query.w;
-    if (requestedWidth !== undefined && (typeof requestedWidth !== "string" || !/^(320|640|1280)$/.test(requestedWidth))) {
-      throw new ApiError(400, "MEDIA_WIDTH_INVALID", "Choose a supported image width: 320, 640, or 1280");
+    if (requestedWidth !== undefined && (typeof requestedWidth !== "string" || !MEDIA_WIDTHS.some(width => String(width) === requestedWidth))) {
+      throw new ApiError(400, "MEDIA_WIDTH_INVALID", `Choose a supported image width: ${MEDIA_WIDTHS.join(", ")}`);
     }
     const media = await service.open(request.params.storeId, request.params.mediaId, requestedWidth === undefined ? undefined : Number(requestedWidth));
-    response.set("Cache-Control", "public, max-age=31536000, immutable").set("ETag", media.etag).type(media.mimeType).send(media.contents);
+    // Files never change (a new photo gets a new id), so browsers and CDNs may keep them for a year.
+    response.set("Cache-Control", "public, max-age=31536000, s-maxage=31536000, immutable").set("ETag", media.etag).type(media.mimeType).send(media.contents);
   });
   return router;
 }

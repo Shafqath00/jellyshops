@@ -2,12 +2,13 @@ import { notFound } from "next/navigation";
 import { getServerStorefront } from "./server-storefront";
 import { resolveStorefrontRoute, type PublicStorefrontResource } from "./resource-loader";
 import { PublishedRuntimeStorefront } from "./storefront-page";
+import { storeCacheTag, storefrontFetchInit } from "./storefront-cache";
 const origin = (process.env.STOREFRONT_API_URL ?? process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001").replace(/\/$/, "");
 export async function ServerContentPage({ storeSlug, type, handle, blogHandle }: { storeSlug: string; type: "page" | "blog" | "article"; handle: string; blogHandle?: string }) {
   const data = await getServerStorefront(storeSlug);
   if (!data || data.publication.kind !== "v4") notFound();
   const path = type === "page" ? `pages/${encodeURIComponent(handle)}` : type === "blog" ? `blogs/${encodeURIComponent(handle)}` : `blogs/${encodeURIComponent(blogHandle ?? "")}/articles/${encodeURIComponent(handle)}`;
-  const response = await fetch(`${origin}/api/public/stores/${encodeURIComponent(data.store.id)}/storefront/context/${path}`, { cache: "no-store" });
+  const response = await fetch(`${origin}/api/public/stores/${encodeURIComponent(data.store.id)}/storefront/context/${path}`, storefrontFetchInit([storeCacheTag(data.store.id)], undefined, "server"));
   if (response.status === 404) notFound();
   if (!response.ok) throw new Error("The page service is temporarily unavailable.");
   const context = await response.json() as Record<string, unknown>;

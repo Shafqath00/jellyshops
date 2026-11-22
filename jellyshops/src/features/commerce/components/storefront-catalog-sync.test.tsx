@@ -42,3 +42,13 @@ it("hydrates backend Collection descriptions into only the matching public store
   expect((await loadCollectionPageContext(reader, "plain"))?.collection).not.toHaveProperty("description");
   expect((await loadCollectionPageContext(reader, "private"))?.collection).toBeUndefined();
 });
+
+it("does not download the catalogue again when the page already has it from the server", async () => {
+  testRepository = createRepository(memoryStorage());
+  const fetcher = vi.fn(async () => Response.json({}));
+  vi.stubGlobal("fetch", fetcher);
+  render(<StorefrontCatalogSync storeSlug="sweet-bakes" initialReady><Status /></StorefrontCatalogSync>);
+  expect(screen.getByText("ready")).toBeTruthy();
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  expect(fetcher).not.toHaveBeenCalled();
+});

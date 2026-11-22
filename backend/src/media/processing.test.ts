@@ -24,7 +24,7 @@ it("sanitizes orientation and EXIF retaining full resolution without upscaling d
  const original = await service.open("store", uploaded.id);
  expect(await sharp(original.contents).metadata()).toMatchObject({ width: 400, height: 900 });
  expect((await sharp(original.contents).metadata()).exif).toBeUndefined();
- for (const [width, expected] of [[320, 320], [640, 400], [1280, 400]]) {
+ for (const [width, expected] of [[320, 320], [640, 400], [960, 400], [1280, 400], [1920, 400]]) {
   const image = await service.open("store", uploaded.id, width);
   expect((await sharp(image.contents).metadata()).width).toBe(expected);
   expect(image.mimeType).toBe("image/webp");
@@ -36,7 +36,8 @@ it("deduplicates concurrent input bytes per store", async () => {
  const [a,b] = await Promise.all([service.upload("store", file(bytes)), service.upload("store", file(bytes))]);
  expect(a.id).toBe(b.id);
  expect(await repository.list("store")).toHaveLength(1);
- expect(await readdir(path.join(dir, "uploads", "store"))).toHaveLength(4);
+ // The original and one copy: a 10px photo needs no larger copies.
+ expect(await readdir(path.join(dir, "uploads", "store"))).toHaveLength(2);
  expect((await service.upload("other", file(bytes))).id).not.toBe(a.id);
 });
 it("cleans all representations when persistence fails", async () => {
@@ -66,7 +67,7 @@ it("preserves animated GIF frames in sanitized original and WebP derivatives", a
 it("cleans successful writes when a derivative write fails", async () => {
  const { service, storage, dir } = await setup();
  const put = storage.put.bind(storage); let calls = 0;
- storage.put = async input => { const key = await put(input); if (++calls === 3) throw new Error("storage unavailable"); return key; };
+ storage.put = async input => { const key = await put(input); if (++calls === 2) throw new Error("storage unavailable"); return key; };
  const bytes = await sharp({ create: { width: 10, height: 10, channels: 3, background: "red" } }).png().toBuffer();
  await expect(service.upload("store", file(bytes))).rejects.toThrow("storage unavailable");
  expect(await readdir(path.join(dir, "uploads", "store"))).toHaveLength(0);
@@ -83,3 +84,14 @@ it("lists only unreferenced images older than thirty days for manual cleanup", a
  expect(await repository.list("store")).toHaveLength(3);
 });
 
+it("scales very large photos down on upload and makes no copies larger than the photo", async () => {
+ const { service, dir } = await setup();
+ const bytes = await sharp({ create: { width: 3200, height: 1600, channels: 3, background: "blue" } }).jpeg().toBuffer();
+ const uploaded = await service.upload("store", file(bytes));
+ expect(uploaded).toMatchObject({ width: 2560, height: 1280 });
+ expect(await readdir(path.join(dir, "uploads", "store"))).toHaveLength(6);
+ const small = await sharp({ create: { width: 700, height: 700, channels: 3, background: "green" } }).png().toBuffer();
+ const smallUpload = await service.upload("store", file(small));
+ expect((await readdir(path.join(dir, "uploads", "store"))).filter(name => name.startsWith(smallUpload.id))).toHaveLength(4);
+ expect((await sharp((await service.open("store", smallUpload.id, 1920)).contents).metadata()).width).toBe(700);
+});

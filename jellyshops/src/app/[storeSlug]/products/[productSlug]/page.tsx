@@ -5,6 +5,9 @@ import { productMetaDescription, productMetaTitle, productSocialTitle } from "@/
 import ProductPageClient from "./product-client";
 import { isVariantBuyable } from "@/lib/variant-stock";
 import { serverRouteValues } from "@/features/storefront/server-route-values";
+
+/** Rendered on its first visit and kept until the store changes (see the store layout). */
+export function generateStaticParams() { return []; }
 type Props = { params: Promise<{ storeSlug: string; productSlug: string }> };
 async function productData(params: Props["params"]) {
   const { storeSlug, productSlug } = await params; const data = await getServerStorefront(storeSlug);

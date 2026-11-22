@@ -13,5 +13,5 @@ it("server renders the published blog using current-store public content", async
   const element = await Page({params: Promise.resolve({storeSlug: "store-a", blogSlug: "news"})});
   render(await ServerContentPage(element.props));
   expect(screen.getByText("selected")).toBeVisible();
-  expect(fetcher).toHaveBeenCalledWith(expect.stringContaining("/api/public/stores/store-a/storefront/context/blogs/news"), {cache: "no-store"});
+  expect(fetcher).toHaveBeenCalledWith(expect.stringContaining("/api/public/stores/store-a/storefront/context/blogs/news"), { next: { revalidate: expect.any(Number), tags: ["store:store-a"] } });
 });

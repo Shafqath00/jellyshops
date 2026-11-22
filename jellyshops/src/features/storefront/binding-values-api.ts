@@ -1,5 +1,6 @@
 import type { DynamicBinding } from "@jelly/storefront-schema";
 import { bindingKey, type BindingValues } from "./dynamic-settings";
+import { storeCacheTag, storefrontFetchInit } from "./storefront-cache";
 
 export interface BindingValuesRequest {
   storeId: string;
@@ -33,7 +34,8 @@ export function createBindingValueLoader(options: { path: (storeId: string) => s
       method: "POST",
       headers: { "Content-Type": "application/json", ...options.headers?.() },
       body: JSON.stringify({ ...(resource ? { resource } : {}), bindings }),
-      cache: "no-store",
+      // Shopper values (no extra headers) are published data, cached with the store on the server; editor reads stay live.
+      ...(options.headers ? { cache: "no-store" as const } : storefrontFetchInit([storeCacheTag(storeId)])),
     });
     if (!response.ok) throw new Error(`Custom field values could not be loaded (${response.status})`);
     const body = await response.json() as { values?: Array<{ binding: DynamicBinding; value: unknown }> };

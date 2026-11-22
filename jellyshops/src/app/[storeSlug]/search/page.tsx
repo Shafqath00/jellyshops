@@ -7,6 +7,9 @@ import SearchPageClient from "./search-client";
 import { searchFromParams } from "@/features/storefront/list-search";
 import { fetchCatalogPage } from "@/features/storefront/catalog-browse-fetch";
 
+/** Reads the address (search words, filters), so it is rendered for every visit; the store data it uses is still cached. */
+export const dynamic = "force-dynamic";
+
 const apiBaseUrl = process.env.STOREFRONT_API_URL ?? process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
 
 export default async function SearchPage({ params, searchParams }: { params: Promise<{ storeSlug: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {

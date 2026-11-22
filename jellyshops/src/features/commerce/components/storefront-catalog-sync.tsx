@@ -51,7 +51,10 @@ export function StorefrontCatalogSync({
   const orderPage = (usePathname() ?? "").includes("/order/");
 
   useEffect(() => {
-    if (orderPage) return;
+    // Store pages already carry the published catalogue from the server (`initialReady`). Downloading it all again in
+    // every shopper's browser cost a backend round trip per product page and grew with the catalogue, so only pages
+    // without server data fetch it here.
+    if (orderPage || initialReady) return;
     let cancelled = false;
 
     async function syncCatalog() {

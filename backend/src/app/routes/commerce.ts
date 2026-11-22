@@ -43,7 +43,7 @@ export function mountStripeWebhooks(app: Express, context: AppContext): void {
       createConnectPaymentsWebhookRouter(
         deps.stripeGateway,
         deps.webhookSql,
-        { database: deps.commerceDatabase, hooks: deps.orderRuntime?.hooks },
+        { database: deps.commerceDatabase, hooks: deps.orderRuntime?.hooks, onStoreChanged: context.storefrontRefresher?.enabled ? (storeId) => context.storefrontRefresher!.storeChanged(storeId) : undefined },
       ),
     );
   }

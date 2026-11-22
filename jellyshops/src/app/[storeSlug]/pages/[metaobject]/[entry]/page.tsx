@@ -4,6 +4,9 @@ import { MetaobjectEntryContent } from "@/features/storefront/metaobject-entry-v
 import { getServerStorefront } from "@/features/storefront/server-storefront";
 import { fetchPublicMetaobjectEntry } from "@/features/storefront/metaobjects-api";
 
+/** Rendered on its first visit and kept until the store changes (see the store layout). */
+export function generateStaticParams() { return []; }
+
 type Params = Promise<{ storeSlug: string; metaobject: string; entry: string }>;
 
 async function load(params: Params) {

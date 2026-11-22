@@ -1,5 +1,5 @@
 import { expect, it, vi, afterEach } from "vitest";
-import { loadServerStorefront } from "./server-storefront";
+import { loadServerStorefront, STOREFRONT_CACHE_SECONDS } from "./server-storefront";
 afterEach(() => vi.unstubAllGlobals());
 it("distinguishes an unavailable API from a missing store and never loads a draft", async () => {
   const fetcher = vi.fn(async () => new Response("{}", { status: 503 }));
@@ -9,7 +9,7 @@ it("distinguishes an unavailable API from a missing store and never loads a draf
   expect(fetcher).not.toHaveBeenCalledWith(expect.stringContaining("draft"), expect.anything());
 });
 
-it("reuses a store's data for 30 seconds, tagged with the store, and fetches design, products and collections side by side", async () => {
+it("caches a store's data on the server, tagged with the store, and fetches design, products and collections side by side", async () => {
   const calls: Array<{ url: string; init: RequestInit & { next?: { revalidate?: number; tags?: string[] } } }> = [];
   let open = 0; let mostAtOnce = 0;
   const json = (body: unknown) => new Response(JSON.stringify(body), { status: 200, headers: { "content-type": "application/json" } });
@@ -24,7 +24,13 @@ it("reuses a store's data for 30 seconds, tagged with the store, and fetches des
   });
   await loadServerStorefront("shop", fetcher as never).catch(() => undefined);
   expect(calls.length).toBeGreaterThanOrEqual(4);
-  for (const { init } of calls) expect(init.next).toEqual({ revalidate: 30, tags: ["storefront:shop"] });
+  for (const { init } of calls) {
+    expect(init.next?.revalidate).toBe(STOREFRONT_CACHE_SECONDS);
+    expect(init.next?.tags).toContain("storefront:shop");
+  }
+  // Everything after the store lookup is also tagged with the store id, so the backend can refresh it by id.
+  expect(calls.slice(1).every(({ init }) => init.next?.tags?.some((tag) => tag.startsWith("store:")))).toBe(true);
   expect(calls.every(({ init }) => init.cache !== "no-store")).toBe(true);
-  expect(mostAtOnce).toBe(3);
+  // Design, products, collections and menu destinations are read side by side.
+  expect(mostAtOnce).toBe(4);
 });

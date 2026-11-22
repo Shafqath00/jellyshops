@@ -1,3 +1,4 @@
+import type { StorefrontRefresher } from "../storefront/cache-refresh.js";
 import type express from "express";
 import type { AdminSalesService, AdminSummaryService, CustomerService, OrderTagService } from "../admin/service.js";
 import type { AuthProvider } from "../auth/types.js";
@@ -32,6 +33,8 @@ import type { TenantRepository } from "../tenants/repository.js";
 
 export interface AppDependencies {
   config: AppConfig;
+  /** Asks the storefront to rebuild a store's cached pages; read from the environment when left out. */
+  storefrontRefresher?: StorefrontRefresher;
   authProvider: AuthProvider;
 
   // Tenant / catalog / content
@@ -81,6 +84,8 @@ export interface AppContext {
   mediaService: MediaService;
   /** Where uploaded files (media, theme package assets) are kept. */
   mediaStorage: MediaStorage;
+  /** Set by createApp: asks the storefront to rebuild a store's cached pages. */
+  storefrontRefresher?: StorefrontRefresher;
   publicStorefrontContextService: PublicStorefrontContextService | undefined;
   adminServices: { summary: AdminSummaryService; customers: CustomerService; sales?: AdminSalesService; orderTags?: OrderTagService } | undefined;
   commerceRepository: CommerceRepository | undefined;

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { storeCacheTag, storefrontFetchInit } from "./storefront-cache";
 
 const searchContextSchema = z.object({
   type: z.literal("search"), query: z.string(), state: z.enum(["empty", "results", "none"]), resultCount: z.number().int().nonnegative(),
@@ -40,7 +41,7 @@ export async function loadPublicSearchPageContext({ baseUrl, storeId, query, fet
 
 export async function loadPublicPageContext({ baseUrl, storeId, handle, fetch: fetcher = fetch }: PageOptions): Promise<PublicPageContext | null> {
   try {
-    const response = await fetcher(`${baseUrl.replace(/\/$/, "")}/api/public/stores/${encodeURIComponent(storeId)}/storefront/context/pages/${encodeURIComponent(handle)}`, { headers: { Accept: "application/json" }, cache: "no-store" });
+    const response = await fetcher(`${baseUrl.replace(/\/$/, "")}/api/public/stores/${encodeURIComponent(storeId)}/storefront/context/pages/${encodeURIComponent(handle)}`, { headers: { Accept: "application/json" }, ...storefrontFetchInit([storeCacheTag(storeId)]) });
     if (!response.ok) return null;
     const parsed = pageContextSchema.safeParse(await response.json());
     return parsed.success ? parsed.data : null;
@@ -49,7 +50,7 @@ export async function loadPublicPageContext({ baseUrl, storeId, handle, fetch: f
 
 export async function loadPublicBlogContext({ baseUrl, storeId, handle, fetch: fetcher = fetch }: BlogOptions): Promise<PublicBlogContext | null> {
   try {
-    const response = await fetcher(`${baseUrl.replace(/\/$/, "")}/api/public/stores/${encodeURIComponent(storeId)}/storefront/context/blogs/${encodeURIComponent(handle)}`, { headers: { Accept: "application/json" }, cache: "no-store" });
+    const response = await fetcher(`${baseUrl.replace(/\/$/, "")}/api/public/stores/${encodeURIComponent(storeId)}/storefront/context/blogs/${encodeURIComponent(handle)}`, { headers: { Accept: "application/json" }, ...storefrontFetchInit([storeCacheTag(storeId)]) });
     if (!response.ok) return null;
     const parsed = blogContextSchema.safeParse(await response.json());
     return parsed.success ? parsed.data : null;
@@ -58,7 +59,7 @@ export async function loadPublicBlogContext({ baseUrl, storeId, handle, fetch: f
 
 export async function loadPublicArticleContext({ baseUrl, storeId, blogHandle, articleHandle, fetch: fetcher = fetch }: ArticleOptions): Promise<PublicArticleContext | null> {
   try {
-    const response = await fetcher(`${baseUrl.replace(/\/$/, "")}/api/public/stores/${encodeURIComponent(storeId)}/storefront/context/blogs/${encodeURIComponent(blogHandle)}/articles/${encodeURIComponent(articleHandle)}`, { headers: { Accept: "application/json" }, cache: "no-store" });
+    const response = await fetcher(`${baseUrl.replace(/\/$/, "")}/api/public/stores/${encodeURIComponent(storeId)}/storefront/context/blogs/${encodeURIComponent(blogHandle)}/articles/${encodeURIComponent(articleHandle)}`, { headers: { Accept: "application/json" }, ...storefrontFetchInit([storeCacheTag(storeId)]) });
     if (!response.ok) return null;
     const parsed = articleContextSchema.safeParse(await response.json());
     return parsed.success ? parsed.data : null;

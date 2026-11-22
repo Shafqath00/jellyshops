@@ -3,22 +3,19 @@ import { migrateStorefrontDocument, runtimeStorefrontSnapshotV4Schema } from "@j
 import { catalogProductToStorefrontProduct, type PublicCatalogResponse, type PublicStoreDetails } from "@/features/commerce/api/client";
 import type { Collection, Product, Store } from "@/lib/domain";
 import type { PublicStorefrontPublication } from "./public-storefront-api";
+import type { NavigationResource } from "@/features/navigation/resource-links";
 import { resolveMediaUrls } from "@/lib/media-urls";
+import { STOREFRONT_CACHE_SECONDS, storeCacheTag, storefrontCacheTag, storefrontFetchInit } from "./storefront-cache";
 
-export interface StorefrontBootstrapData { store: Store; products: Product[]; collections: Collection[]; publication: PublicStorefrontPublication }
+export interface StorefrontBootstrapData { store: Store; products: Product[]; collections: Collection[]; publication: PublicStorefrontPublication; /** Published pages, blogs and articles menus can link to; null when they could not be read. */ navigation?: NavigationResource[] | null }
 const origin = (process.env.STOREFRONT_API_URL ?? process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001").replace(/\/$/, "");
-/**
- * How long a store's published design, products and collections are reused between page views (seconds). Shoppers
- * then get pages without waiting on four backend calls each time; a newly published design or a product change can
- * take up to this long to appear (prices and stock are checked again at checkout). Each store's entries carry the
- * tag `storefront:<slug>`, so `revalidateTag` can refresh one store at once if Publish ever needs to be instant.
- */
-export const STOREFRONT_CACHE_SECONDS = 30;
-export const storefrontCacheTag = (slug: string) => `storefront:${slug}`;
+export { STOREFRONT_CACHE_SECONDS, storefrontCacheTag };
 
 export async function loadServerStorefront(slug: string, fetcher: typeof fetch = fetch): Promise<StorefrontBootstrapData | null> {
+  // Every read is cached on the server under the store tags, so a merchant change can refresh all of this store at once.
+  let tags = [storefrontCacheTag(slug)];
   async function read<T>(path: string): Promise<T | null> {
-    const response = await fetcher(`${origin}${path}`, { next: { revalidate: STOREFRONT_CACHE_SECONDS, tags: [storefrontCacheTag(slug)] }, headers: { Accept: "application/json" } });
+    const response = await fetcher(`${origin}${path}`, { ...storefrontFetchInit(tags, undefined, "server"), headers: { Accept: "application/json" } });
     if (response.status === 404) return null;
     if (!response.ok) throw new Error("The storefront service is temporarily unavailable.");
     return resolveMediaUrls(await response.json() as T, origin);
@@ -26,6 +23,7 @@ export async function loadServerStorefront(slug: string, fetcher: typeof fetch =
   const details = await read<{ store: PublicStoreDetails }>(`/api/public/storefronts/${encodeURIComponent(slug)}`);
   if (!details) return null;
   const id = details.store.id;
+  tags = [storefrontCacheTag(slug), storeCacheTag(id)];
   // The design, the products and the collections only need the store id: fetch them side by side, not one after another.
   async function loadPublished() {
     return read<{ id: string; document: unknown }>(`/api/stores/${encodeURIComponent(id)}/storefront/public`);
@@ -55,7 +53,12 @@ export async function loadServerStorefront(slug: string, fetcher: typeof fetch =
     } while (collectionCursor);
     return collections;
   }
-  const [published, products, collections] = await Promise.all([loadPublished(), loadProducts(), loadCollections()]);
+  // Menu destinations (pages, blogs, articles) come with the page, so menus are complete in the first HTML. A failure here
+  // only leaves those links for the browser to look up.
+  async function loadNavigation(): Promise<NavigationResource[] | null> {
+    try { return (await read<{ resources: NavigationResource[] }>(`/api/public/stores/${encodeURIComponent(id)}/storefront/context/navigation`))?.resources ?? null; } catch { return null; }
+  }
+  const [published, products, collections, navigation] = await Promise.all([loadPublished(), loadProducts(), loadCollections(), loadNavigation()]);
   if (!published) return null;
   const v4 = runtimeStorefrontSnapshotV4Schema.safeParse(published.document);
   let publication: PublicStorefrontPublication;
@@ -70,7 +73,7 @@ export async function loadServerStorefront(slug: string, fetcher: typeof fetch =
     for (const media of product.media ?? []) if (media.url.startsWith("/")) media.url = `${origin}${media.url}`;
   }
   const store: Store = { id, businessId: id, name: details.store.name, slug: details.store.slug, country: details.store.country, tagline: details.store.name, description: `Welcome to ${details.store.name}.`, currency: details.store.currency as Store["currency"], published: true, bannerUrl: products[0]?.imageUrl ?? "", shippingMinor: details.store.shippingMinor ?? 0, shippingCopy: details.store.shippingCopy ?? "", theme: { accent: "#172a1b", accentSoft: "#e8f3d6", background: "#fffdf8", surface: "#ffffff", text: "#172a1b", displayFont: "serif" } };
-  return { store, products, collections: collections.map((collection) => ({ id: collection.id, storeId: id, name: collection.title, slug: collection.handle, description: collection.description, ...(collection.descriptionDoc ? { descriptionDoc: collection.descriptionDoc } : {}) })), publication };
+  return { store, products, collections: collections.map((collection) => ({ id: collection.id, storeId: id, name: collection.title, slug: collection.handle, description: collection.description, ...(collection.descriptionDoc ? { descriptionDoc: collection.descriptionDoc } : {}) })), publication, navigation };
 }
 // Request-scoped deduplication on top of the 30-second data cache. Published HTML/data never fall back to drafts.
 export const getServerStorefront = cache((slug: string) => loadServerStorefront(slug));

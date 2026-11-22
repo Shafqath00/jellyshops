@@ -72,8 +72,8 @@ describe("media routes", () => {
     const original = await request(app).get(uploaded.body.url);
     const resized = await request(app).get(`${uploaded.body.url}?w=320`);
     expect(resized.headers["content-type"]).toMatch(/^image\/webp/);
-    expect(resized.headers["cache-control"]).toBe("public, max-age=31536000, immutable");
-    expect(resized.headers.etag).toMatch(/^"[a-f0-9]{64}"$/);
+    expect(resized.headers["cache-control"]).toBe("public, max-age=31536000, s-maxage=31536000, immutable");
+    expect(resized.headers.etag).toMatch(/^"[a-f0-9]{32}-320"$/);
     expect(resized.headers.etag).not.toBe(original.headers.etag);
     expect((await request(app).get(`${uploaded.body.url}?w=320`).set("If-None-Match", resized.headers.etag)).status).toBe(304);
     for (const width of ["0", "500", "320.0", "", "320&w=640"]) {

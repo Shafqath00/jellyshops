@@ -9,7 +9,12 @@ import { WebhookReceiptRepository } from "./receipt-repository.js";
 export function createConnectPaymentsWebhookRouter(
   gateway: StripeGateway,
   sql: SqlExecutor,
-  options: { database?: CommerceDatabase; hooks?: PaymentSettlementHooks } = {},
+  options: {
+    database?: CommerceDatabase;
+    hooks?: PaymentSettlementHooks;
+    /** Called once a payment settled, failed or was cancelled, because the stock a store shows may have changed. */
+    onStoreChanged?: (storeId: string) => Promise<void>;
+  } = {},
 ): express.Router {
   const router = express.Router();
   const receipts =
@@ -90,6 +95,8 @@ export function createConnectPaymentsWebhookRouter(
           else await process(sql);
         }
 
+        await refreshStoreAfterPayment(sql, event.type, stripeAccountId, payload, options.onStoreChanged);
+
         return response.status(200).json({
           received: true,
           duplicate: receipt.duplicate,
@@ -106,4 +113,24 @@ export function createConnectPaymentsWebhookRouter(
   );
 
   return router;
+}
+
+const STOCK_EVENTS = new Set(["payment_intent.succeeded", "payment_intent.payment_failed", "payment_intent.canceled"]);
+
+/** Stock is sold or released when a payment settles, so the store's cached pages are refreshed. Never throws. */
+async function refreshStoreAfterPayment(
+  sql: SqlExecutor,
+  type: string,
+  stripeAccountId: string | null,
+  payload: Record<string, unknown>,
+  onStoreChanged?: (storeId: string) => Promise<void>,
+): Promise<void> {
+  if (!onStoreChanged || !stripeAccountId || !STOCK_EVENTS.has(type)) return;
+  const object = (payload.data as { object?: { id?: unknown } } | undefined)?.object;
+  const intentId = typeof object?.id === "string" ? object.id : null;
+  if (!intentId) return;
+  try {
+    const row = (await sql.query<{ storeId: string }>('SELECT "storeId" FROM "Payment" WHERE "stripeAccountId" = $1 AND "paymentIntentId" = $2 LIMIT 1', [stripeAccountId, intentId])).rows[0];
+    if (row) await onStoreChanged(row.storeId);
+  } catch { /* the storefront refreshes on its time limit instead */ }
 }

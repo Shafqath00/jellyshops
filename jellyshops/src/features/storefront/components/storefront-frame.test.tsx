@@ -6,7 +6,7 @@ import { StorefrontFrame } from "./storefront-frame";
 const fixture = vi.hoisted(() => ({ pathname: "/new/search", publication: null as unknown, store: { id: "store-1", name: "New", slug: "new", theme: {} } }));
 vi.mock("next/navigation", () => ({ usePathname: () => fixture.pathname }));
 vi.mock("@/contexts/shop-context", () => ({ useShop: () => ({ repository: { getStoreBySlug: () => fixture.store, getCartForStore: () => null }, state: { version: 1, products: [], collections: [] } }) }));
-vi.mock("@/features/storefront/storefront-bootstrap", () => ({ useInitialStorefrontPublication: () => fixture.publication }));
+vi.mock("@/features/storefront/storefront-bootstrap", () => ({ useInitialStorefrontPublication: () => fixture.publication, useInitialNavigationResources: () => null }));
 vi.mock("@/features/storefront/public-storefront-api", () => ({ loadPublicStorefrontPublication: async () => fixture.publication }));
 vi.mock("./cart-panel", () => ({ CartPanel: () => null }));
 

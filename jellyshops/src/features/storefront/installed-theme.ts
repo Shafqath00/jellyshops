@@ -1,4 +1,5 @@
 import { registerThemeForPages, type DiscoveredTheme } from "@jelly/storefront-themes/runtime";
+import { storefrontFetchInit } from "./storefront-cache";
 import { rescopeCustomCss } from "@jelly/storefront-schema";
 
 /**
@@ -46,7 +47,7 @@ export async function loadInstalledTheme(versionId: string | null | undefined, o
   const known = loaded.get(versionId);
   if (known) { registerInstalledTheme(known); return known; }
   try {
-    const response = await (options.fetch ?? fetch)(`${options.baseUrl.replace(/\/$/, "")}/api/public/theme-versions/${encodeURIComponent(versionId)}`, { headers: { Accept: "application/json" } });
+    const response = await (options.fetch ?? fetch)(`${options.baseUrl.replace(/\/$/, "")}/api/public/theme-versions/${encodeURIComponent(versionId)}`, { headers: { Accept: "application/json" }, ...storefrontFetchInit([`theme-version:${versionId}`], 86400) });
     if (!response.ok) return null;
     const { version } = await response.json() as { version?: { id: string; themeId: string; version: string; css: string; manifest: InstalledTheme["manifest"]; starter: InstalledTheme["starter"] } };
     if (!version?.manifest || version.id !== versionId || version.manifest.id !== version.themeId || version.manifest.version !== version.version) return null;

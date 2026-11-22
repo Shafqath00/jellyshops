@@ -66,7 +66,8 @@ describe("MediaService", () => {
       originalname: "../../hero.png",
     } as Express.Multer.File);
 
-    expect(storage.put).toHaveBeenCalledTimes(4);
+    // The original and one copy: a tiny photo needs no larger copies.
+    expect(storage.put).toHaveBeenCalledTimes(2);
     expect(repository.create).toHaveBeenCalledOnce();
     expect(uploaded.originalName).toBe("hero.png");
     expect(uploaded).not.toHaveProperty("storageKey");
@@ -82,7 +83,7 @@ describe("MediaService", () => {
       originalname: "hero.png",
     } as Express.Multer.File)).rejects.toThrow("database failed");
 
-    expect(storage.remove).toHaveBeenCalledTimes(4);
+    expect(storage.remove).toHaveBeenCalledTimes(2);
   });
 
   it("rejects referenced media before deleting bytes", async () => {

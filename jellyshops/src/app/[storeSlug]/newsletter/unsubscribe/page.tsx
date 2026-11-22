@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { NewsletterUnsubscribe } from "@/features/customers/components/newsletter-unsubscribe";
 import { getServerStorefront } from "@/features/storefront/server-storefront";
 
+/** Reads the address (search words, filters), so it is rendered for every visit; the store data it uses is still cached. */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = { title: "Newsletter preferences", robots: { index: false, follow: false } };
 export default async function NewsletterUnsubscribePage({ params, searchParams }: { params: Promise<{ storeSlug: string }>; searchParams: Promise<{ token?: string | string[] }> }) {
   const [{ storeSlug }, query] = await Promise.all([params, searchParams]);

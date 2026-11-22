@@ -16,6 +16,7 @@ import { mountPublicStorefrontContextRoutes, mountStorefrontRoutes } from "./app
 import type { AppDependencies } from "./app/types.js";
 import { errorHandler, notFoundHandler } from "./http/errors.js";
 import { isThemePackageUpload } from "./storefront/theme-packages/routes.js";
+import { refreshStorefrontAfterChanges, storefrontRefresherFromEnv } from "./storefront/cache-refresh.js";
 
 export { publicDocumentFromTemplate } from "./app/default-storefront-workspace.js";
 export type { AppDependencies } from "./app/types.js";
@@ -27,6 +28,10 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
   if (orderRuntime) app.locals.runOrderWorkers = orderRuntime.runWorkers;
 
   configureMiddleware(app, context.config);
+  // Merchant changes ask the storefront to rebuild that store's cached pages (no-op unless STOREFRONT_REVALIDATE_URL is set).
+  const refresher = dependencies.storefrontRefresher ?? storefrontRefresherFromEnv();
+  context.storefrontRefresher = refresher;
+  app.use(refreshStorefrontAfterChanges(refresher));
 
   // Stripe signatures require raw bytes, so mount webhooks before JSON parsing.
   mountStripeWebhooks(app, context);

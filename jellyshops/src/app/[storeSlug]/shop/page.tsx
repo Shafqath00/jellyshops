@@ -5,6 +5,9 @@ import { SHOP_ALL_COLLECTION as ALL_PRODUCTS } from "@/features/storefront/page-
 import ShopPageClient from "./shop-client";
 import { searchFromParams } from "@/features/storefront/list-search";
 
+/** Reads the address (search words, filters), so it is rendered for every visit; the store data it uses is still cached. */
+export const dynamic = "force-dynamic";
+
 export default async function ShopPage({ params, searchParams }: { params: Promise<{ storeSlug: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { storeSlug } = await params;
   const data = await getServerStorefront(storeSlug);
