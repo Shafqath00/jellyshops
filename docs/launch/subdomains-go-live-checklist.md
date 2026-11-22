@@ -44,7 +44,7 @@ Expected: `relrowsecurity` true, one `backend_access:jelly_backend` policy, `bro
 `SELECT count(*) FROM "ReservedSlug"` should be 162. After the fourth:
 `SELECT has_table_privilege('jelly_backend', '"PlatformAdmin"', 'INSERT')` should be false.
 
-- [x] Staging: first three applied and checked (2026-11-22). - [ ] Staging: the fourth.
+- [x] Staging: all four applied and checked (2026-11-22).
 - [ ] Production: all four applied and checked.
 
 Until `StoreSlugHistory` exists, a shop's address can't change once it is published; nothing breaks either way.
