@@ -1,6 +1,7 @@
 import { formatMoney, type Currency, type Product } from "@/lib/domain";
 import { isVariantBuyable } from "@/lib/variant-stock";
 import { cardVariant } from "./product-card-data";
+import { storePath } from "@jelly/storefront-schema";
 
 /** One product as the compare tray and page show it. */
 export type CompareItem = { id: string; name: string; href: string; imageUrl: string; price: string; vendor?: string; available: boolean; specifications?: Record<string, string> };
@@ -10,7 +11,7 @@ export function compareItem(product: Product, storeSlug: string, currency: Curre
   return {
     id: product.id,
     name: product.name,
-    href: `/${storeSlug}/products/${product.slug}`,
+    href: storePath(storeSlug, `/products/${product.slug}`),
     imageUrl: product.imageUrl,
     price: formatMoney(cardVariant(product)?.priceMinor ?? 0, currency),
     vendor: product.vendor?.trim() || undefined,

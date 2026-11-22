@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 import type { CheckoutSection } from "../use-checkout";
+import { storePath } from "@jelly/storefront-schema";
 
 interface CheckoutLayoutProps {
   storeSlug: string;
@@ -31,7 +32,7 @@ export function CheckoutLayout({ storeSlug, section, delivery = true, children, 
         <div className="jelly-checkout__main">
           {section && (
             <header className="jelly-checkout__header">
-              <Link className="jelly-checkout__back-link" href={`/${storeSlug}/cart`}>Bag</Link>
+              <Link className="jelly-checkout__back-link" href={storePath(storeSlug, "/cart")}>Bag</Link>
               <h1 className="jelly-checkout__title">Checkout</h1>
               <nav aria-label="Checkout progress">
                 <ol className="jelly-checkout__progress" style={{ "--checkout-progress": `${Math.max(0, current) / Math.max(1, steps.length - 1)}` } as CSSProperties}>

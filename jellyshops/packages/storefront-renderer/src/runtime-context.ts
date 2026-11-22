@@ -1,5 +1,5 @@
 import type { RuntimeMenuV4 } from "@jelly/storefront-schema";
-import { safeRichTextHref } from "@jelly/storefront-schema";
+import { isInStore, safeRichTextHref, storePath } from "@jelly/storefront-schema";
 import type { CommerceDataProvider, RendererMode, StorefrontPageContext } from "./types";
 
 export type RuntimeRegion = "header" | "template" | "footer";
@@ -17,7 +17,7 @@ export interface StorefrontRuntimeContext {
 }
 
 export function createCollectionLinks(storeId: string, storeSlug: string, collections: Array<{ id: string; storeId: string; slug: string }>): Record<string, string> {
-  return Object.fromEntries(collections.filter(item => item.storeId === storeId && item.slug).map(item => [item.id, `/${encodeURIComponent(storeSlug)}/collections/${encodeURIComponent(item.slug)}`]));
+  return Object.fromEntries(collections.filter(item => item.storeId === storeId && item.slug).map(item => [item.id, storePath(storeSlug, `/collections/${encodeURIComponent(item.slug)}`)]));
 }
 
 export function createStorefrontRuntimeContext(input: StorefrontRuntimeContext): StorefrontRuntimeContext {
@@ -27,7 +27,6 @@ export function createStorefrontRuntimeContext(input: StorefrontRuntimeContext):
 export function resolveStorefrontHref(value: unknown, storeSlug?: string): string | null {
   const safe = safeRichTextHref(value);
   if (!safe || !storeSlug || !safe.startsWith("/")) return safe;
-  const root = `/${encodeURIComponent(storeSlug)}`;
-  if (safe === root || safe.startsWith(`${root}/`)) return safe;
-  return safe === "/" ? root : `${root}${safe}`;
+  if (isInStore(storeSlug, safe)) return safe;
+  return storePath(storeSlug, safe);
 }

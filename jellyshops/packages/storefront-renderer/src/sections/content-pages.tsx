@@ -1,5 +1,5 @@
 import { titleLength } from "./shared";
-import { isRichTextDocument, type SectionNode } from "@jelly/storefront-schema";
+import { isRichTextDocument, type SectionNode, storePath } from "@jelly/storefront-schema";
 import { elementProps } from "../element-style";
 import type { ReactNode } from "react";
 import { StorefrontContainer } from "@jelly/storefront-ui";
@@ -93,7 +93,7 @@ export function ArticleListSection({ context, section }: { context: StorefrontRu
   const columns = layout === "grid" ? String(numberValue(settings, "columns", 3, 2, 3)) : undefined;
   return <section className="jelly-section jelly-article-list" {...(section ? sectionData(section, { "data-layout": layout, "data-columns": columns }) : {})}><StorefrontContainer>
     {blog.articles.length ? <div className="jelly-article-list-items">{blog.articles.map((article) => {
-      const href = `/${blog.storeSlug}/blogs/${blog.handle}/${article.handle}`;
+      const href = storePath(blog.storeSlug, `/blogs/${blog.handle}/${article.handle}`);
       return <article key={article.id}>
         {showDate && article.publishedAt && <time className="jelly-article-published-at" dateTime={article.publishedAt}>{dateLabel(article.publishedAt)}</time>}
         <h2><a href={href}>{article.title}</a></h2>

@@ -13,6 +13,7 @@ import { buildStorefrontRoute, deserializeRouteValues } from "@/features/storefr
 import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
 import { isVariantBuyable } from "@/lib/variant-stock";
 import type { PublicProduct } from "@jelly/storefront-renderer";
+import { storePath } from "@jelly/storefront-schema";
 
 export default function SearchPage({ searchContext, routeValues, listSearch, serverResults }: { searchContext: PublicSearchPageContext | null; routeValues?: Array<[string, unknown]>; listSearch?: string; serverResults?: { products: PublicProduct[]; total: number } | null }) {
   const { storeSlug } = useParams<{ storeSlug: string }>();
@@ -33,7 +34,7 @@ export default function SearchPage({ searchContext, routeValues, listSearch, ser
     if (serverResults.total > 0 && searchRouteContext.state === "none") searchRouteContext.state = "results";
   }
   const route = store && publication?.kind === "v4" && searchRouteContext
-    ? buildStorefrontRoute(publication.snapshot, { type: "search", context: { ...searchRouteContext, searchHref: `/${store.slug}/search` } }, null, values)
+    ? buildStorefrontRoute(publication.snapshot, { type: "search", context: { ...searchRouteContext, searchHref: storePath(store.slug, "/search") } }, null, values)
     : null;
 
   if (!store) return null;
@@ -44,8 +45,8 @@ export default function SearchPage({ searchContext, routeValues, listSearch, ser
   const normalized = query.toLowerCase();
   const results = repository.listProducts(storeSlug).filter((product) => product.published && !product.archived && (!normalized || `${product.name} ${product.category} ${product.description}`.toLowerCase().includes(normalized))).map((product) => {
     const variant = product.variants[0];
-    return { id: product.id, name: product.name, slug: product.slug, category: product.category, imageUrl: product.imageUrl, price: formatMoney(variant?.priceMinor ?? 0, store.currency), soldOut: !isVariantBuyable(variant), lowStock: Boolean(variant && variant.stock > 0 && variant.stock <= 3), href: `/${store.slug}/products/${product.slug}` };
+    return { id: product.id, name: product.name, slug: product.slug, category: product.category, imageUrl: product.imageUrl, price: formatMoney(variant?.priceMinor ?? 0, store.currency), soldOut: !isVariantBuyable(variant), lowStock: Boolean(variant && variant.stock > 0 && variant.stock <= 3), href: storePath(store.slug, `/products/${product.slug}`) };
   });
   const Search = shell.SearchPage;
-  return <Search store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} settings={settings} query={query.trim()} results={results} shopHref={`/${store.slug}/shop`} />;
+  return <Search store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} settings={settings} query={query.trim()} results={results} shopHref={storePath(store.slug, "/shop")} />;
 }

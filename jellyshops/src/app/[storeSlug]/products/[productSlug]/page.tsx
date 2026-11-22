@@ -5,6 +5,7 @@ import { productMetaDescription, productMetaTitle, productSocialTitle } from "@/
 import ProductPageClient from "./product-client";
 import { isVariantBuyable } from "@/lib/variant-stock";
 import { serverRouteValues } from "@/features/storefront/server-route-values";
+import { storePath } from "@jelly/storefront-schema";
 
 /** Rendered on its first visit and kept until the store changes (see the store layout). */
 export function generateStaticParams() { return []; }
@@ -17,7 +18,7 @@ async function productData(params: Props["params"]) {
 }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { data, product } = await productData(params);
-  return { title: productMetaTitle(product, data.store.name), description: productMetaDescription(product), openGraph: { title: productSocialTitle(product), description: productMetaDescription(product), images: product.imageUrl ? [product.imageUrl] : [] }, alternates: { canonical: `/${data.store.slug}/products/${product.slug}` } };
+  return { title: productMetaTitle(product, data.store.name), description: productMetaDescription(product), openGraph: { title: productSocialTitle(product), description: productMetaDescription(product), images: product.imageUrl ? [product.imageUrl] : [] }, alternates: { canonical: storePath(data.store.slug, `/products/${product.slug}`) } };
 }
 export default async function ProductPage({ params }: Props) {
   const { data, product } = await productData(params);

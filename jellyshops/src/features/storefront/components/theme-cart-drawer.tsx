@@ -7,6 +7,7 @@ import { cartProductImage } from "@/lib/product-media";
 import { useCartLines } from "../use-cart-lines";
 import { cartLineKey, personalisationLabels } from "../personalisation-display";
 import { canDecreaseCartQuantity, canIncreaseCartQuantity } from "../cart-quantity";
+import { storePath } from "@jelly/storefront-schema";
 
 /** Events the storefront uses to open the slide-out cart. */
 export const CART_OPEN_EVENT = "jelly:cart-open";
@@ -56,7 +57,7 @@ export function ThemeCartDrawer({ storeSlug, open, onClose, variant = "drawer", 
       </div>}
       {staleItems > 0 && <p className="jelly-cart-drawer-note" role="status">{staleItems} item{staleItems === 1 ? " is" : "s are"} no longer available and won&apos;t be ordered.</p>}
       {lines.length === 0
-        ? <div className="jelly-cart-drawer-empty"><p>{emptyText}</p><a className="jelly-button" href={`/${store.slug}/shop`} onClick={onClose}>Continue shopping</a></div>
+        ? <div className="jelly-cart-drawer-empty"><p>{emptyText}</p><a className="jelly-button" href={storePath(store.slug, "/shop")} onClick={onClose}>Continue shopping</a></div>
         : <>
           <ul className="jelly-cart-drawer-lines">{lines.map((line) => {
             const options = line.item.configurationSelections?.flatMap((selection) => {
@@ -71,7 +72,7 @@ export function ThemeCartDrawer({ storeSlug, open, onClose, variant = "drawer", 
               {/* eslint-disable-next-line @next/next/no-img-element */}
               {image ? <img src={image} alt="" /> : <span className="jelly-cart-drawer-thumb" aria-hidden="true" />}
               <div>
-                <a href={`/${store.slug}/products/${line.product.slug}`} onClick={onClose}>{line.product.name}</a>
+                <a href={storePath(store.slug, `/products/${line.product.slug}`)} onClick={onClose}>{line.product.name}</a>
                 {detail && <p>{detail}</p>}
                 <div className="jelly-cart-drawer-quantity">
                   <button type="button" aria-label={`Remove one ${line.product.name}`} disabled={!canDecreaseCartQuantity(line.product, line.variant, line.item.quantity)} onClick={() => setQuantity(line, line.item.quantity - 1)}>−</button>
@@ -86,8 +87,8 @@ export function ThemeCartDrawer({ storeSlug, open, onClose, variant = "drawer", 
           <footer className="jelly-cart-drawer-footer">
             <p><span>Subtotal</span><strong>{money(subtotalMinor)}</strong></p>
             <small>Shipping and taxes are worked out at checkout.</small>
-            <a className="jelly-button" href={`/${store.slug}/checkout`}>Check out</a>
-            <a className="jelly-cart-drawer-view" href={`/${store.slug}/cart`} onClick={onClose}>View bag</a>
+            <a className="jelly-button" href={storePath(store.slug, "/checkout")}>Check out</a>
+            <a className="jelly-cart-drawer-view" href={storePath(store.slug, "/cart")} onClick={onClose}>View bag</a>
           </footer>
         </>}
     </div>

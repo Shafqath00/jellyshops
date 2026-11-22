@@ -4,6 +4,7 @@ import { useOptionalShop } from "@/contexts/shop-context";
 import { MAX_COMPARE, useCompareList } from "../compare-list";
 import { compareItem } from "../compare-table";
 import { CompareTrayView } from "./compare-view";
+import { storePath } from "@jelly/storefront-schema";
 
 /**
  * The live store's compare tray (theme setting Product cards > "Let shoppers compare products"), mounted by the
@@ -18,5 +19,5 @@ export function CompareTray({ storeSlug }: { storeSlug: string }) {
     const product = shop.state.products.find((item) => item.id === id && item.published && !item.archived);
     return product ? [compareItem(product, storeSlug, store.currency)] : [];
   });
-  return <CompareTrayView items={items} max={MAX_COMPARE} compareHref={`/${storeSlug}/compare`} onRemove={(id) => access.remove(id)} onClear={() => access.clear()} />;
+  return <CompareTrayView items={items} max={MAX_COMPARE} compareHref={storePath(storeSlug, "/compare")} onRemove={(id) => access.remove(id)} onClear={() => access.clear()} />;
 }

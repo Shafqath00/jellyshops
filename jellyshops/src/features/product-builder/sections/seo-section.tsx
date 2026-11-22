@@ -7,6 +7,7 @@ import { slugify } from "@/lib/domain";
 import { DESCRIPTION_LIMIT, DESCRIPTION_RECOMMENDED_MAX, TITLE_LIMIT, TITLE_RECOMMENDED_MAX, descriptionAdvice, productMetaDescription, productMetaTitle, titleAdvice } from "@/lib/seo";
 import { effectiveHandle, type DraftErrors, type ProductDraft } from "../draft";
 import { Field, Section } from "./section-parts";
+import { storePath } from "@jelly/storefront-schema";
 
 type Props = {
   draft: ProductDraft;
@@ -35,7 +36,7 @@ export function SeoSection({ draft, errors, storeName, storeSlug, saved, onChang
   const description = productMetaDescription({ description: draft.description || "Your product description appears here.", seoDescription: draft.seoDescription });
   const titleHint = titleAdvice(draft.seoTitle);
   const descriptionHint = descriptionAdvice(draft.seoDescription);
-  const path = `/${storeSlug || "your-store"}/products/${handle || "product-handle"}`;
+  const path = storePath(storeSlug || "your-store", `/products/${handle || "product-handle"}`);
   const handleChanged = saved && draft.handleManual && draft.handle.trim() !== draft.initialHandle;
   const hasContent = Boolean(draft.seoTitle || draft.seoDescription || (draft.handleManual && draft.handle !== slugify(draft.title)));
 

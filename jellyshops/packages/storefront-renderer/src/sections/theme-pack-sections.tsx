@@ -17,6 +17,7 @@ import { useWords } from "../words";
 import { rowColumnProps } from "../row-columns";
 import { mediaPhoto } from "../media-photo";
 import { TestimonialCards, testimonialReviews } from "./showcase";
+import { storePath } from "@jelly/storefront-schema";
 
 function stringSetting(settings: Record<string, unknown>, key: string, fallback = ""): string {
   const value = settings[key];
@@ -59,7 +60,7 @@ function SectionIntro({ section, fallback, editor = false }: { section: SectionN
 }
 
 export function CategoryGridSection({ section, context }: { section: SectionNode; context?: StorefrontRuntimeContext }) {
-  const shopHref = context?.storeSlug ? `/${context.storeSlug}/shop` : "#shop";
+  const shopHref = context?.storeSlug ? storePath(context.storeSlug, "/shop") : "#shop";
   const cards = visibleBlocks(section, "collection-card").flatMap((block) => {
     const label = stringSetting(block.settings, "label");
     return label ? [{ id: block.id, block, label, chip: stringSetting(block.settings, "chip"), image: imageValue(block.settings), href: resolveStorefrontHref(block.settings.link, context?.storeSlug) ?? shopHref }] : [];
@@ -114,7 +115,7 @@ export function ImageMosaicSection({ section }: { section: SectionNode }) {
 
 export function JournalTeaserSection({ section, context }: { section: SectionNode; context?: StorefrontRuntimeContext }) {
   return <section className="jelly-section jelly-journal"><StorefrontContainer><SectionIntro section={section} fallback="From the journal" />
-    <div className="jelly-journal-grid">{["The ritual of everyday objects", "A guide to thoughtful gifting", "Notes from our makers"].map((title, index) => <article key={title}><span>Journal · 0{index + 1}</span><h3>{title}</h3><a href={context?.storeSlug ? `/${context.storeSlug}/shop` : "#shop"}>Read story →</a></article>)}</div>
+    <div className="jelly-journal-grid">{["The ritual of everyday objects", "A guide to thoughtful gifting", "Notes from our makers"].map((title, index) => <article key={title}><span>Journal · 0{index + 1}</span><h3>{title}</h3><a href={context?.storeSlug ? storePath(context.storeSlug, "/shop") : "#shop"}>Read story →</a></article>)}</div>
   </StorefrontContainer></section>;
 }
 
@@ -188,7 +189,7 @@ export function SearchResultsSection({ section, context }: { section: SectionNod
   // On the live store the backend sorts, filters and pages the matches (the same browse as collection pages, with the words).
   const browse = context.mode === "published" ? context.commerce?.browseProducts : undefined;
   const remote = useMemo(() => browse && query.trim() ? (list: CatalogQuery) => browse({ ...list, query }) : undefined, [browse, query]);
-  const action = search?.searchHref ?? (context.storeSlug ? `/${context.storeSlug}/search` : "/search");
+  const action = search?.searchHref ?? (context.storeSlug ? storePath(context.storeSlug, "/search") : "/search");
   return <section className="jelly-section jelly-search-results"><StorefrontContainer><div className="jelly-search-shell">
     <h1 {...content.headingProps}>{content.headingContent}</h1>
     {content.body && <p {...content.bodyProps}>{content.body}</p>}

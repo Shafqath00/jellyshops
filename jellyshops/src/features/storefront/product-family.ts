@@ -1,6 +1,7 @@
 import type { ProductPresentationContext } from "@jelly/storefront-renderer";
 import type { Product } from "@/lib/domain";
 import { productCardSwatches } from "./product-card-data";
+import { storePath } from "@jelly/storefront-schema";
 
 /** Tags written `family:ascot` link products that are the same design in different colours. */
 const FAMILY_TAG = /^family:\s*(.+)$/i;
@@ -41,7 +42,7 @@ export function productFamily(product: Product, products: readonly Product[], st
       return {
         id: item.id,
         label: colourName(item),
-        href: `/${storeSlug}/products/${item.slug}`,
+        href: storePath(storeSlug, `/products/${item.slug}`),
         current: item.id === product.id,
         ...(swatch?.color ? { color: swatch.color } : swatch?.image ? { image: swatch.image } : item.imageUrl ? { image: item.imageUrl } : {}),
       };

@@ -6,6 +6,7 @@ import type { SectionNode } from "@jelly/storefront-schema";
 import type { PublicMetaobjectList, RendererMode } from "../types";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import { numberValue, sectionData, stringValue } from "./shared";
+import { storePath } from "@jelly/storefront-schema";
 
 type Entry = PublicMetaobjectList["entries"][number];
 type Field = PublicMetaobjectList["definition"]["fields"][number];
@@ -13,7 +14,7 @@ type Field = PublicMetaobjectList["definition"]["fields"][number];
 /** The page of one entry: /<store>/pages/<metaobject>/<entry>. */
 export function metaobjectEntryHref(storeSlug: string | undefined, definitionHandle: string, entryHandle: string): string {
   const path = `/pages/${encodeURIComponent(definitionHandle)}/${encodeURIComponent(entryHandle)}`;
-  return storeSlug ? `/${encodeURIComponent(storeSlug)}${path}` : path;
+  return storeSlug ? storePath(storeSlug, `${path}`) : path;
 }
 
 function firstImage(fields: Field[], entry: Entry): string | null {
@@ -85,7 +86,7 @@ export function MetaobjectListSection({ section, context, mode = "published" }: 
 export function MetaobjectEntryContent({ definition, entry, storeSlug }: { definition: PublicMetaobjectList["definition"]; entry: Entry; storeSlug?: string }) {
   const image = firstImage(definition.fields, entry);
   return <article className="jelly-section jelly-metaobject-entry"><StorefrontContainer>
-    <nav className="jelly-metaobject-entry-trail" aria-label="Breadcrumb"><a href={storeSlug ? `/${encodeURIComponent(storeSlug)}` : "/"}>Home</a><span aria-hidden="true">/</span><span>{definition.name}</span></nav>
+    <nav className="jelly-metaobject-entry-trail" aria-label="Breadcrumb"><a href={storeSlug ? storePath(storeSlug) : "/"}>Home</a><span aria-hidden="true">/</span><span>{definition.name}</span></nav>
     <div className="jelly-metaobject-entry-layout">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {image && <img src={image} alt={entry.displayName} />}

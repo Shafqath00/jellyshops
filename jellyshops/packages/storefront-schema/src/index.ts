@@ -120,3 +120,4 @@ export {
   checkStoreAddress, foldLookalikes, isSystemStoreAddress, normaliseStoreAddress,
 } from "./store-address.js";
 export type { StoreAddressCheck, StoreAddressProblem } from "./store-address.js";
+export { isInStore, storeBase, storePath } from "./store-links.js";

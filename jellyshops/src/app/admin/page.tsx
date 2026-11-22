@@ -10,6 +10,7 @@ import { useAdminQuery } from "@/features/admin/hooks/use-admin-query";
 import { SalesChart } from "@/features/admin/home/sales-chart";
 import { changeText } from "@/features/admin/home/change-text";
 import { KpiCard, SetupGuide, trendOf, type SetupStep } from "@/features/admin/home/dashboard-parts";
+import { storePath } from "@jelly/storefront-schema";
 
 const PERIODS: Array<{ days: SalesPeriod; label: string; previous: string }> = [
   { days: 1, label: "Last 24 hours", previous: "the 24 hours before" },
@@ -76,7 +77,7 @@ export default function DashboardPage() {
   const retry = (action: () => void) => <button type="button" className="jk-button" onClick={action}>Try again</button>;
 
   return <AdminPage title={`${greeting(timeZone)}`} hero={{ eyebrow: today }} description={<>Here is how {store.name} is doing, and what needs you next.</>}
-    primaryAction={{ label: "Add product", href: "/admin/products/new" }} secondaryActions={[{ label: "View store", href: `/${store.slug}` }]}>
+    primaryAction={{ label: "Add product", href: "/admin/products/new" }} secondaryActions={[{ label: "View store", href: storePath(store.slug) }]}>
     <WelcomeBanner storeName={store.name} />
     {summary.error && <Banner tone="critical" title="Some of your dashboard did not load" action={retry(summary.retry)}>{summary.error.message}</Banner>}
 

@@ -3,6 +3,7 @@ import { catalogProductToProduct } from "@/features/storefront/product-presentat
 import { productCardData } from "@/features/storefront/product-card-data";
 import type { Currency } from "@/lib/domain";
 import type { CatalogAdminProduct } from "./api/types";
+import { storePath } from "@jelly/storefront-schema";
 
 /** What the store design preview shows of the merchant's own store: its name, logo and products. */
 export interface TemplateStoreData {
@@ -19,7 +20,7 @@ export function templateStoreProducts(nodes: CatalogAdminProduct[], storeSlug: s
   return nodes.map(catalogProductToProduct)
     .filter((product) => product.published && !product.archived)
     .slice(0, 24)
-    .map((product) => productCardData(product, `/${storeSlug}/products/${product.slug}`, money));
+    .map((product) => productCardData(product, storePath(storeSlug, `/products/${product.slug}`), money));
 }
 
 /** The logo from the store's theme settings (branding.logoUrl), when it is a usable link. */

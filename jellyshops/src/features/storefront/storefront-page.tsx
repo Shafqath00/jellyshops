@@ -34,9 +34,10 @@ import { useCatalogBrowse } from "./catalog-browse-api";
 import { useReviewSummaries, useStorefrontReviewAccess } from "./reviews-api";
 import { catalogProductToStorefrontProduct, type PublicCatalogResponse } from "@/features/commerce/api/client";
 import { useListAddress } from "./list-address";
+import { storePath } from "@jelly/storefront-schema";
 
 function commerceProvider(storeSlug: string, currency: Currency, products: Product[], storeId?: string, cart?: StorefrontCartAccess, reviewData?: Pick<CommerceDataProvider, "ratings" | "reviews">): CommerceDataProvider {
-  const initialProducts = products.filter((product) => product.published && !product.archived).map((product) => productCardData(product, `/${storeSlug}/products/${product.slug}`, currency));
+  const initialProducts = products.filter((product) => product.published && !product.archived).map((product) => productCardData(product, storePath(storeSlug, `/products/${product.slug}`), currency));
   return {
     initialProducts,
     cart,
@@ -54,11 +55,11 @@ function commerceProvider(storeSlug: string, currency: Currency, products: Produ
         const response = await fetch(`${process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001"}/api/public/stores/${encodeURIComponent(storeId)}/catalog/products?${params}`, { cache: "no-store" });
         if (!response.ok) throw new Error("Products are temporarily unavailable.");
         const data = await response.json() as PublicCatalogResponse;
-        return data.nodes.map(catalogProductToStorefrontProduct).map((product) => productCardData(product, `/${storeSlug}/products/${product.slug}`, currency));
+        return data.nodes.map(catalogProductToStorefrontProduct).map((product) => productCardData(product, storePath(storeSlug, `/products/${product.slug}`), currency));
       }
       return products
         .filter((product) => product.published && !product.archived)
-        .map((product) => productCardData(product, `/${storeSlug}/products/${product.slug}`, currency));
+        .map((product) => productCardData(product, storePath(storeSlug, `/products/${product.slug}`), currency));
     },
   };
 }

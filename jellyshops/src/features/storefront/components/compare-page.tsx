@@ -6,6 +6,7 @@ import { MAX_COMPARE, useCompareList } from "../compare-list";
 import { compareItem } from "../compare-table";
 import { ComparePageView } from "./compare-view";
 import { StorefrontPageLoading } from "./storefront-page-loading";
+import { storePath } from "@jelly/storefront-schema";
 
 /** /[store]/compare: the products in the shopper's compare list side by side. */
 export function ComparePage() {
@@ -19,5 +20,5 @@ export function ComparePage() {
     const product = state.products.find((item) => item.id === id && item.published && !item.archived);
     return product ? [compareItem(product, storeSlug, store.currency)] : [];
   });
-  return <ComparePageView items={items} max={MAX_COMPARE} shopHref={`/${storeSlug}/shop`} onRemove={(id) => access.remove(id)} />;
+  return <ComparePageView items={items} max={MAX_COMPARE} shopHref={storePath(storeSlug, "/shop")} onRemove={(id) => access.remove(id)} />;
 }

@@ -1,6 +1,7 @@
 import type { PublicProduct } from "@jelly/storefront-renderer";
 import type { Currency, Product } from "@/lib/domain";
 import { productCardData } from "./product-card-data";
+import { storePath } from "@jelly/storefront-schema";
 
 type Searchable = { name: string; vendor?: string; category?: string; tags?: readonly string[] };
 
@@ -27,7 +28,7 @@ export function rankSuggestions<T extends Searchable>(items: readonly T[], query
 export function suggestStoreProducts(products: readonly Product[], storeSlug: string, currency: Currency) {
   const visible = products.filter((product) => product.published && !product.archived);
   return (query: string, limit: number): PublicProduct[] =>
-    rankSuggestions(visible, query, limit).map((product) => productCardData(product, `/${storeSlug}/products/${product.slug}`, currency));
+    rankSuggestions(visible, query, limit).map((product) => productCardData(product, storePath(storeSlug, `/products/${product.slug}`), currency));
 }
 
 function fold(text: string): string {

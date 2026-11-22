@@ -6,6 +6,7 @@ import { catalogProductToStorefrontProduct, type PublicCatalogResponse } from "@
 import { resolveMediaUrls } from "@/lib/media-urls";
 import type { Currency } from "@/lib/domain";
 import { productCardData } from "./product-card-data";
+import { storePath } from "@jelly/storefront-schema";
 
 const apiOrigin = () => process.env.NEXT_PUBLIC_STORE_EDITOR_API_URL ?? "http://localhost:3001";
 
@@ -35,7 +36,7 @@ export async function fetchCatalogPage(storeId: string, storeSlug: string, curre
   if (!response.ok) throw new Error("Products are temporarily unavailable.");
   const body = resolveMediaUrls(await response.json() as BrowseResponse, origin);
   return {
-    products: body.nodes.map(catalogProductToStorefrontProduct).map((product) => productCardData(product, `/${storeSlug}/products/${product.slug}`, currency)),
+    products: body.nodes.map(catalogProductToStorefrontProduct).map((product) => productCardData(product, storePath(storeSlug, `/products/${product.slug}`), currency)),
     total: body.total,
     facets: body.facets,
     price: body.price,

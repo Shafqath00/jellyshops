@@ -15,6 +15,7 @@ import { ContactForm, DeliveryForm, StepCard, type StepState } from "./contact-d
 import { OrderSummary } from "./order-summary";
 import { PaymentStep } from "./payment-step";
 import "../checkout.css";
+import { storePath } from "@jelly/storefront-schema";
 
 const ORDER: CheckoutSection[] = ["contact", "delivery", "payment"];
 
@@ -57,16 +58,16 @@ export function CheckoutView({ storeSlug, settings }: { storeSlug: string; setti
           <h1 id="already-paid-title" className="jelly-checkout__title">You&apos;ve already paid for this order</h1>
           <p>There&apos;s nothing more to pay. Your order and its delivery details are on your order page.</p>
           <div className="jelly-checkout__actions">
-            <Link className="jelly-checkout__primary jelly-checkout__primary--inline" href={`/${store.slug}/order/${paidNote.publicToken}`}>View your order</Link>
+            <Link className="jelly-checkout__primary jelly-checkout__primary--inline" href={storePath(store.slug, `/order/${paidNote.publicToken}`)}>View your order</Link>
             {checkout.lines.length > 0
               ? <button type="button" className="jelly-checkout__secondary" onClick={() => { forgetPaidOrder(storeSlug); setPaidNote(null); }}>Buy these items again</button>
-              : <Link className="jelly-checkout__secondary" href={`/${store.slug}/shop`}>Continue shopping</Link>}
+              : <Link className="jelly-checkout__secondary" href={storePath(store.slug, "/shop")}>Continue shopping</Link>}
           </div>
         </section>
       </CheckoutLayout>
     );
   }
-  if (checkout.lines.length === 0) return <CheckoutLayout storeSlug={storeSlug} style={accent}><CheckoutEmpty shopHref={`/${store.slug}/shop`} /></CheckoutLayout>;
+  if (checkout.lines.length === 0) return <CheckoutLayout storeSlug={storeSlug} style={accent}><CheckoutEmpty shopHref={storePath(store.slug, "/shop")} /></CheckoutLayout>;
 
   const position = ORDER.indexOf(section);
   const stateOf = (key: CheckoutSection): StepState => (key === section ? "open" : ORDER.indexOf(key) < position ? "done" : "waiting");
@@ -87,7 +88,7 @@ export function CheckoutView({ storeSlug, settings }: { storeSlug: string; setti
       totals={prepared?.totals}
       discount={{ applied: checkout.discount, pending: checkout.discountPending, error: checkout.discountError, editable: checkout.step === "details", onApply: checkout.applyDiscount, onRemove: checkout.removeDiscount }}
       arrives={arrives}
-      trust={{ delivery: choices.deliveryNote || undefined, returns: choices.returnsNote || undefined, returnsHref: `/${store.slug}/pages/returns` }}
+      trust={{ delivery: choices.deliveryNote || undefined, returns: choices.returnsNote || undefined, returnsHref: storePath(store.slug, "/pages/returns") }}
     />
   );
 
@@ -130,14 +131,14 @@ export function CheckoutView({ storeSlug, settings }: { storeSlug: string; setti
               connectedAccountId={prepared.connectedAccountId}
               amountMinor={prepared.totals?.amountMinor ?? checkout.estimatedSubtotal}
               currency={store.currency}
-              returnPath={`/${store.slug}/order/${prepared.publicToken}`}
+              returnPath={storePath(store.slug, `/order/${prepared.publicToken}`)}
               billing={{ name: details.name, email: details.email }}
               onBeforePay={() => rememberPaidOrder(storeSlug, { publicToken: prepared.publicToken, email: details.email.trim(), bagKey: bagKey(checkout.cart?.items ?? []), paid: false })}
               onPaid={() => {
                 markOrderPaid(storeSlug, prepared.publicToken);
                 checkout.clearBag();
                 // Replace, not push: Back from the confirmation must not land on a payment form for this order.
-                router.replace(`/${store.slug}/order/${prepared.publicToken}?paid=1`);
+                router.replace(storePath(store.slug, `/order/${prepared.publicToken}?paid=1`));
               }}
             />
           ) : null}

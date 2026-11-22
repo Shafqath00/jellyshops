@@ -10,6 +10,7 @@ import { StoreIcon } from "./store-icon";
 import type { ContentBlockOptions } from "./content-blocks";
 import { CardCartContext } from "../product-card";
 import type { ProductPresentationContext, PublicProduct, StorefrontCartAccess } from "../types";
+import { storePath } from "@jelly/storefront-schema";
 
 /**
  * Product page blocks (registry product-blocks.ts): breadcrumbs, delivery estimate and "Pairs well with" read the
@@ -28,12 +29,12 @@ function needsProduct(block: BlockNode, options: ContentBlockOptions): ReactNode
 function Breadcrumbs({ block, options }: { block: BlockNode; options: ContentBlockOptions }) {
   const product = productContext(options.context);
   if (!product) return needsProduct(block, options);
-  const root = options.context.storeSlug ? `/${encodeURIComponent(options.context.storeSlug)}` : "";
+  const slug = options.context.storeSlug;
   const shop = stringValue(block.settings, "shopLabel", "Shop");
   return <nav className="jelly-product-breadcrumbs" aria-label="Breadcrumb" {...blockStyle(block)} {...editorData(block, options, "shopLabel")}>
     <ol>
-      <li><a href={root || "/"}>Home</a></li>
-      {shop && <li><a href={`${root}/shop`}>{shop}</a></li>}
+      <li><a href={slug ? storePath(slug) : "/"}>Home</a></li>
+      {shop && <li><a href={slug ? storePath(slug, "/shop") : "/shop"}>{shop}</a></li>}
       <li><span aria-current="page">{product.product.title}</span></li>
     </ol>
   </nav>;

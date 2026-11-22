@@ -9,6 +9,7 @@ import { collectionResource, createCollectionPageContext } from "@/features/stor
 import { buildStorefrontRoute, deserializeRouteValues } from "@/features/storefront/resource-loader";
 import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
 import { useInitialStorefrontPublication } from "@/features/storefront/storefront-bootstrap";
+import { storePath } from "@jelly/storefront-schema";
 
 export default function CollectionPage({ routeValues, listSearch }: { routeValues?: Array<[string, unknown]>; listSearch?: string }) {
   const { storeSlug, collectionSlug } = useParams<{ storeSlug: string; collectionSlug: string }>();
@@ -38,5 +39,5 @@ export default function CollectionPage({ routeValues, listSearch }: { routeValue
     />;
   }
 
-  return <main className="flex min-h-[75vh] flex-col items-center justify-center"><h1>Collection not found</h1><Link href={`/${storeSlug}/shop`}>Back to shop</Link></main>;
+  return <main className="flex min-h-[75vh] flex-col items-center justify-center"><h1>Collection not found</h1><Link href={storePath(storeSlug, "/shop")}>Back to shop</Link></main>;
 }

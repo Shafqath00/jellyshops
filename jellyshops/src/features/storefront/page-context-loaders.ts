@@ -6,6 +6,7 @@ import type { PublicSearchPageContext } from "./public-page-context-api";
 import type { SearchRouteContext } from "./resource-loader";
 import { productCardData } from "./product-card-data";
 import type { PublicStorefrontResource } from "./resource-loader";
+import { storePath } from "@jelly/storefront-schema";
 
 /** "Shop all": every product, drawn with the store's own collection page (the collection "all"). */
 // The id equals the renderer's SHOP_ALL_COLLECTION_ID (checked by a test); importing the renderer here would pull
@@ -38,7 +39,7 @@ export function createCollectionPageContext(
  * collection template.
  */
 export function collectionResource(collection: Pick<Collection, "id" | "slug" | "name" | "description" | "descriptionDoc" | "imageUrl">, products: PublicProduct[], storeSlug: string): PublicStorefrontResource {
-  const linked = products.map((product) => ({ ...product, href: `/${storeSlug}/products/${product.href.split("/").pop()}` }));
+  const linked = products.map((product) => ({ ...product, href: storePath(storeSlug, `/products/${product.href.split("/").pop()}`) }));
   return {
     type: "collection",
     id: collection.id,
@@ -97,7 +98,7 @@ export function createSearchPageContext(
     results: context.results.map((product): PublicProduct => ({
       id: product.id,
       name: product.title,
-      href: `/${storeSlug}/products/${product.handle}`,
+      href: storePath(storeSlug, `/products/${product.handle}`),
       imageUrl: product.imageUrl ?? "",
       price: formatMoney(product.priceMinor, currency),
       priceMinor: product.priceMinor,

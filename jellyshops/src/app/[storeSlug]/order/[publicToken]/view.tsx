@@ -13,6 +13,7 @@ import { useOrderStatus } from "@/features/checkout/use-order-status";
 import { OrderTimeline, ShipmentList } from "@/features/commerce/components/order-tracking";
 import { useShop } from "@/contexts/shop-context";
 import { useThemePresentation } from "@/features/storefront/components/storefront-shell";
+import { storePath } from "@jelly/storefront-schema";
 
 const noSubscription = () => () => {};
 
@@ -38,7 +39,7 @@ function PublicOrderContent({ storeId, settings }: PublicOrderViewProps & { sett
     if (note?.publicToken === publicToken && note.email) setEmail(note.email);
   }, [state, storeSlug, publicToken]);
 
-  if (missing) return <main className="jelly-checkout"><div className="jelly-checkout__single"><div className="jelly-checkout__state"><h1 className="jelly-checkout__title">Order not found</h1><p>Check the link in your confirmation email, or contact the shop if you need help.</p><Link className="jelly-checkout__primary jelly-checkout__primary--inline" href={`/${storeSlug}`}>Back to the shop</Link></div></div></main>;
+  if (missing) return <main className="jelly-checkout"><div className="jelly-checkout__single"><div className="jelly-checkout__state"><h1 className="jelly-checkout__title">Order not found</h1><p>Check the link in your confirmation email, or contact the shop if you need help.</p><Link className="jelly-checkout__primary jelly-checkout__primary--inline" href={storePath(storeSlug)}>Back to the shop</Link></div></div></main>;
   if (!result || !state) {
     if (refreshError) return <main className="jelly-checkout"><div className="jelly-checkout__single"><div className="jelly-checkout__alert" role="alert"><p>We couldn’t load your order. Retrying… Check your order link or contact the shop.</p></div></div></main>;
     return <OrderConfirmationSkeleton />;
@@ -80,7 +81,7 @@ function PublicOrderContent({ storeId, settings }: PublicOrderViewProps & { sett
     }}
     tracking={tracking}
     notice={refreshError ? <p role="alert" className="jelly-checkout__alert">We couldn’t refresh the latest status. Retrying…</p> : undefined}
-    actions={Number(order.balanceDueMinor ?? 0) > 0 ? <Link className="jelly-checkout__primary jelly-checkout__primary--inline" href={`/${storeSlug}/order/${publicToken}/balance`}>Pay balance {money(order.balanceDueMinor)}</Link> : null}
+    actions={Number(order.balanceDueMinor ?? 0) > 0 ? <Link className="jelly-checkout__primary jelly-checkout__primary--inline" href={storePath(storeSlug, `/order/${publicToken}/balance`)}>Pay balance {money(order.balanceDueMinor)}</Link> : null}
   />;
 }
 

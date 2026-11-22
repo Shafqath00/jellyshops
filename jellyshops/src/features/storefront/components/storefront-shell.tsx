@@ -9,6 +9,7 @@ import { resolveThemeShell, type StorefrontCartProps, type StorefrontFooterProps
 import { SharedCartPage, SharedCheckoutPage, SharedCollectionPage, SharedContentPage, SharedOrderPage, SharedProductPage, SharedSearchPage } from "./storefront-pages";
 import { CartBadge } from "@/components/jelly/cart";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { storePath } from "@jelly/storefront-schema";
 
 export function SharedStorefrontLayout({ children, header, footer, cart }: StorefrontLayoutProps) {
   return <div className="min-h-dvh bg-[var(--store-bg)] text-[var(--store-text)] [font-family:var(--theme-font-body)]">{header}{children}{footer}{cart}</div>;
@@ -25,7 +26,7 @@ export function SharedStorefrontHeader({ store, navigation, cartCount, settings,
     "sticky top-0 z-20 grid h-[74px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b border-[var(--theme-border)] bg-[color-mix(in_srgb,var(--store-bg)_92%,transparent)] px-[clamp(20px,5vw,72px)] backdrop-blur-[16px] max-[720px]:grid-cols-[minmax(0,1fr)_auto] max-[720px]:px-4",
     variant === "compact" && "h-[58px] [&_nav]:gap-[14px] [&_nav]:text-[11px]",
   )}>
-    <Link href={`/${store.slug}`} className={clsx(
+    <Link href={storePath(store.slug)} className={clsx(
       "col-start-1 min-w-0 truncate justify-self-start text-[22px] font-bold tracking-[-0.04em] [font-family:var(--store-display,Georgia,serif)]",
       variant === "logo-centered" && "col-start-2 justify-self-center max-[720px]:col-start-1 max-[720px]:justify-self-start",
     )}>

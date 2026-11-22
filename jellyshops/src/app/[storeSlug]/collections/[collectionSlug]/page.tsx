@@ -4,6 +4,7 @@ import { getServerStorefront } from "@/features/storefront/server-storefront";
 import CollectionPageClient from "./collection-client";
 import { serverRouteValues } from "@/features/storefront/server-route-values";
 import { searchFromParams } from "@/features/storefront/list-search";
+import { storePath } from "@jelly/storefront-schema";
 
 type Props = { params: Promise<{ storeSlug: string; collectionSlug: string }> };
 async function collectionData(params: Props["params"]) {
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { data, collection } = await collectionData(params);
   const title = `${collection.name} · ${data.store.name}`;
   const description = collection.description || `Explore ${collection.name} at ${data.store.name}.`;
-  return { title, description, openGraph: { title, description }, alternates: { canonical: `/${data.store.slug}/collections/${collection.slug}` } };
+  return { title, description, openGraph: { title, description }, alternates: { canonical: storePath(data.store.slug, `/collections/${collection.slug}`) } };
 }
 export default async function CollectionPage({ params, searchParams }: Props & { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { data, collection } = await collectionData(params);

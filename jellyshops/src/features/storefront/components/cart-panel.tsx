@@ -12,6 +12,7 @@ import type { StorefrontCartProps } from "@jelly/storefront-themes/runtime";
 import { CartDrawer, CartItem, CartSummary, EmptyCart } from "@/components/jelly/cart";
 import { cartLineKey, personalisationLabels } from "../personalisation-display";
 import { canIncreaseCartQuantity, nextCartQuantity } from "../cart-quantity";
+import { storePath } from "@jelly/storefront-schema";
 
 /* ──────────────────────────────────────────────────────────────────────
  * CartPanel — connects Jellyshop commerce state to CartDrawer presentation
@@ -135,7 +136,7 @@ export function CartPanel({
           {/* Summary */}
           <CartSummary
             subtotal={formatMoney(subtotal, store.currency)}
-            checkoutHref={`/${store.slug}/checkout`}
+            checkoutHref={storePath(store.slug, "/checkout")}
             onClose={onClose}
           />
         </>

@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState, type RefObject } from "react";
 import { elementProps } from "../element-style";
-import { safeRichTextHref, type RuntimeMenuV4, type SectionNode } from "@jelly/storefront-schema";
+import { safeRichTextHref, type RuntimeMenuV4, type SectionNode, storePath } from "@jelly/storefront-schema";
 import type { StorefrontRuntimeContext } from "../runtime-context";
 import type { PublicProduct } from "../types";
 import { resolveStorefrontHref } from "../runtime-context";
@@ -19,9 +19,8 @@ function menuHref(item: RuntimeMenuItem, context: StorefrontRuntimeContext): str
   if (target.kind === "anchor") return safeRichTextHref(target.anchor.startsWith("#") ? target.anchor : `#${target.anchor}`);
   if (target.kind === "collection") return safeRichTextHref(context.collectionLinks?.[target.resourceId]);
   if (!storeSlug) return target.kind === "home" ? "/" : target.kind === "search" ? "/search" : null;
-  const root = `/${encodeURIComponent(storeSlug)}`;
-  if (target.kind === "home") return root;
-  if (target.kind === "search") return `${root}/search`;
+  if (target.kind === "home") return storePath(storeSlug);
+  if (target.kind === "search") return storePath(storeSlug, "/search");
   return safeRichTextHref(context.resourceLinks?.[`${target.kind}:${target.resourceId}`]);
 }
 
@@ -138,16 +137,16 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
   const logoUrl = image ? safeRichTextHref(image.url) : null;
   const name = typeof settings.storeName === "string" && settings.storeName.trim() ? settings.storeName : "Storefront";
   const logoWidth = typeof settings.logoWidth === "number" ? Math.min(240, Math.max(64, settings.logoWidth)) : undefined;
-  const root = context.storeSlug ? `/${encodeURIComponent(context.storeSlug)}` : "";
+  const page = (path: string) => (context.storeSlug ? storePath(context.storeSlug, path) : path);
   const layout = headerLayout(settings.layout);
   // Layouts with their own search box drop the search icon.
   const searchBar = layout === "search-bar" || layout === "category-bar" || layout === "search-first";
   const deliveryNote = layout === "search-first" && typeof settings.deliveryNote === "string" ? settings.deliveryNote.trim() : "";
   const tools = context.storeSlug ? ([
-    ["search", "Search", `${root}/search`, settings.showSearch],
-    ["account", "Account", `${root}/account`, settings.showAccount],
-    ["wishlist", "Wishlist", `${root}/wishlist`, settings.showWishlist],
-    ["bag", "Bag", `${root}/cart`, settings.showCart],
+    ["search", "Search", page("/search"), settings.showSearch],
+    ["account", "Account", page("/account"), settings.showAccount],
+    ["wishlist", "Wishlist", page("/wishlist"), settings.showWishlist],
+    ["bag", "Bag", page("/cart"), settings.showCart],
   ] as const).filter(([icon, , , visible]) => visible !== false && !(searchBar && icon === "search")) : [];
   const extraLabel = typeof settings.extraLinkLabel === "string" ? settings.extraLinkLabel.trim() : "";
   const extraHref = extraLabel ? resolveStorefrontHref(settings.extraLink, context.storeSlug) : null;
@@ -190,17 +189,17 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
       </div>
     </details>
     {layout === "split" && <MenuLinks section={section} context={context} label="Primary navigation" variant="bar" part="first" className="jelly-header-menu-first" />}
-    {layout === "search-bar" && <HeaderSearch action={`${root}/search`} suggest={suggest} />}
+    {layout === "search-bar" && <HeaderSearch action={page("/search")} suggest={suggest} />}
     {/* Phones: the search box folds into a button beside the menu, so the header stays one row. */}
     {layout === "search-bar" && <button type="button" ref={searchToggleRef} className="jelly-header-search-toggle" aria-label={searchOpen ? "Close search" : "Search"} aria-expanded={searchOpen} onClick={() => setSearchOpen((value) => !value)}><StorefrontIcon name={searchOpen ? "close" : "search"} /></button>}
-    <a className="jelly-header-brand" href={root || "/"} {...elementProps(section, "logo", editor, logoWidth ? { width: logoWidth } : undefined)}>
+    <a className="jelly-header-brand" href={context.storeSlug ? storePath(context.storeSlug) : "/"} {...elementProps(section, "logo", editor, logoWidth ? { width: logoWidth } : undefined)}>
       {logoUrl && !logoUrl.startsWith("#") ? <img src={logoUrl} alt={image?.alt || name} /> : <span>{name}</span>}
       {/* Merchant media URLs may be served by the local API and are not Next Image assets. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {overlayLogoUrl && !overlayLogoUrl.startsWith("#") && <img className="jelly-header-overlay-logo" src={overlayLogoUrl} alt="" aria-hidden="true" />}
     </a>
     {deliveryNote && <p className="jelly-header-note" {...elementProps(section, "deliveryNote", editor)}><StoreIcon name="truck" /><span>{deliveryNote}</span></p>}
-    {(layout === "category-bar" || layout === "search-first") && <HeaderSearch action={`${root}/search`} suggest={suggest} />}
+    {(layout === "category-bar" || layout === "search-first") && <HeaderSearch action={page("/search")} suggest={suggest} />}
     {layout === "split" ? <MenuLinks section={section} context={context} label="More navigation" variant="bar" part="second" className="jelly-header-menu-second" />
       : layout === "minimal" ? null
       : <MenuLinks section={section} context={context} label={layout === "search-first" ? "Departments" : "Primary navigation"} variant="bar" />}
@@ -213,7 +212,7 @@ export function HeaderSection({ section, context }: { section: SectionNode; cont
         return <a key={icon} href={href} data-tool={icon} aria-label={count ? `${label}, ${count} ${count === 1 ? "item" : "items"}` : label}><StorefrontIcon name={icon} /><span className="jelly-header-tool-label">{label}</span>{count > 0 && <span className="jelly-header-count" aria-hidden="true">{count > 99 ? "99+" : count}</span>}</a>;
       })}
     </nav>}
-    {searchOpen && (suggest || layout === "search-bar") && <div className="jelly-header-search-panel"><HeaderSearch action={`${root}/search`} suggest={suggest} autoFocus onEscape={() => { setSearchOpen(false); (searchToolRef.current ?? searchToggleRef.current)?.focus(); }} /></div>}
+    {searchOpen && (suggest || layout === "search-bar") && <div className="jelly-header-search-panel"><HeaderSearch action={page("/search")} suggest={suggest} autoFocus onEscape={() => { setSearchOpen(false); (searchToolRef.current ?? searchToggleRef.current)?.focus(); }} /></div>}
     {trust.length > 0 && <ul className="jelly-header-trust" aria-label="Why shop with us"><TrustPointItems points={trust} icons /></ul>}
   </header>;
 }

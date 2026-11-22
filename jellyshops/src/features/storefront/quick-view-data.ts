@@ -1,6 +1,7 @@
 import type { QuickViewProduct, StorefrontQuickViewAccess } from "@jelly/storefront-renderer";
 import type { Currency, Product } from "@/lib/domain";
 import { productCardData, setChoicesFor } from "./product-card-data";
+import { storePath } from "@jelly/storefront-schema";
 
 const PHOTO_URL = /^(https:\/\/|\/)[^\s"'<>]+$/;
 
@@ -25,7 +26,7 @@ export function quickViewAccess(products: Product[], storeSlug: string, currency
     load(productId) {
       const product = products.find((item) => item.id === productId && item.published && !item.archived);
       if (!product) return null;
-      const card = productCardData(product, `/${storeSlug}/products/${product.slug}`, currency);
+      const card = productCardData(product, storePath(storeSlug, `/products/${product.slug}`), currency);
       const view: QuickViewProduct = { ...card, ...setChoicesFor(product, currency), images: quickViewImages(product), summary: quickViewSummary(product.description) };
       if (!view.rating && ratings?.[product.id]) view.rating = ratings[product.id];
       return view;

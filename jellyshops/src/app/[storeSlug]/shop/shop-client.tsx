@@ -13,6 +13,7 @@ import { buildStorefrontRoute, deserializeRouteValues } from "@/features/storefr
 import { PublishedRuntimeStorefront } from "@/features/storefront/storefront-page";
 import { useInitialStorefrontPublication } from "@/features/storefront/storefront-bootstrap";
 import { StorefrontPageLoading } from "@/features/storefront/components/storefront-page-loading";
+import { storePath } from "@jelly/storefront-schema";
 
 
 export default function ShopPage({ routeValues, listSearch }: { routeValues?: Array<[string, unknown]>; listSearch?: string }) {
@@ -42,6 +43,6 @@ export default function ShopPage({ routeValues, listSearch }: { routeValues?: Ar
   const selected = search.get("category");
   const visible = selected ? products.filter((product) => product.category === selected) : products;
   const CollectionPage = shell.CollectionPage;
-  const productViews = visible.map((product) => { const variant = product.variants[0]; return { id: product.id, name: product.name, slug: product.slug, category: product.category, imageUrl: product.imageUrl, price: formatMoney(variant?.priceMinor ?? 0, store.currency), soldOut: !isVariantBuyable(variant), lowStock: Boolean(variant && variant.stock > 0 && variant.stock <= 3), href: `/${store.slug}/products/${product.slug}` }; });
-  return <CollectionPage store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} settings={settings} products={productViews} categories={categories} selectedCategory={selected ?? undefined} allHref={`/${store.slug}/shop`} categoryHref={(category) => `/${store.slug}/shop?category=${encodeURIComponent(category)}`} />;
+  const productViews = visible.map((product) => { const variant = product.variants[0]; return { id: product.id, name: product.name, slug: product.slug, category: product.category, imageUrl: product.imageUrl, price: formatMoney(variant?.priceMinor ?? 0, store.currency), soldOut: !isVariantBuyable(variant), lowStock: Boolean(variant && variant.stock > 0 && variant.stock <= 3), href: storePath(store.slug, `/products/${product.slug}`) }; });
+  return <CollectionPage store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} settings={settings} products={productViews} categories={categories} selectedCategory={selected ?? undefined} allHref={storePath(store.slug, "/shop")} categoryHref={(category) => storePath(store.slug, `/shop?category=${encodeURIComponent(category)}`)} />;
 }

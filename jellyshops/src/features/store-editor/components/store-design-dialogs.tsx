@@ -6,6 +6,7 @@ import { Button, ConfirmDialog, buttonClass } from "@/components/admin";
 import { listStarterPacks } from "@jelly/storefront-themes";
 import { templateDisplayName } from "../template-gallery";
 import type { StoreDesigns } from "../hooks/use-store-designs";
+import { storePath } from "@jelly/storefront-schema";
 
 /**
  * The two questions around using a design, shared by the Store designs library and the full-page
@@ -42,7 +43,7 @@ function ReadyDialog({ designs, onCustomize }: { designs: StoreDesigns; onCustom
   const { publish } = ready;
   const busy = publish.status === "publishing";
   const close = () => { if (!busy) setReady(null); };
-  const storeHref = activeStore ? `/${activeStore.slug}` : undefined;
+  const storeHref = activeStore ? storePath(activeStore.slug) : undefined;
 
   const title = publish.status === "published" ? `${ready.name} is live`
     : publish.status === "blocked" ? "A few things need fixing first"

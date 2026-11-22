@@ -23,6 +23,7 @@ import { requestBackInStock } from "@/features/storefront/back-in-stock-api";
 import { useVariantAddress } from "@/features/storefront/use-variant-address";
 import { isVariantBuyable, variantMaxQuantity } from "@/lib/variant-stock";
 import { pairProducts, productSignals, recommendProducts } from "@/features/storefront/recommendations";
+import { storePath } from "@jelly/storefront-schema";
 
 export default function ProductPage({ routeValues }: { routeValues?: Array<[string, unknown]> }) {
   const router = useRouter();
@@ -73,9 +74,9 @@ export default function ProductPage({ routeValues }: { routeValues?: Array<[stri
     personalisationValues,
     onPersonalisationChange: setPersonalisationValues,
     showPersonalisationProblems: personalisationTried,
-    relatedProducts: recommendProducts(productSignals(product), visibleProducts, productSignals, 12).map((item) => productCardData(item, `/${store.slug}/products/${item.slug}`, store.currency)),
+    relatedProducts: recommendProducts(productSignals(product), visibleProducts, productSignals, 12).map((item) => productCardData(item, storePath(store.slug, `/products/${item.slug}`), store.currency)),
     // "Complete the set": other collections first, each with its size choices for the Add buttons.
-    pairedProducts: pairProducts(productSignals(product), visibleProducts, productSignals, 6).map((item) => ({ ...productCardData(item, `/${store.slug}/products/${item.slug}`, store.currency), ...setChoicesFor(item, store.currency) })),
+    pairedProducts: pairProducts(productSignals(product), visibleProducts, productSignals, 6).map((item) => ({ ...productCardData(item, storePath(store.slug, `/products/${item.slug}`), store.currency), ...setChoicesFor(item, store.currency) })),
   }) : undefined;
   if (productPresentation && store && product) {
     // Other colours of the same design (products tagged family:<name>) link to each other.
@@ -94,7 +95,7 @@ export default function ProductPage({ routeValues }: { routeValues?: Array<[stri
     productPresentation.wishlistControl = <WishlistButton storeId={store.id} productId={product.id} />;
     productPresentation.buyNow = async () => {
       const result = await productPresentation.addToCart();
-      if (result.ok) router.push('/' + store.slug + '/checkout');
+      if (result.ok) router.push(storePath(store.slug, "/checkout"));
       return result;
     };
   }
@@ -102,10 +103,10 @@ export default function ProductPage({ routeValues }: { routeValues?: Array<[stri
   const productResource: PublicStorefrontResource | null = product ? { type: "product", id: product.id, handle: product.slug, visible: true, data: { title: product.name, description: product.description, product, productPresentation } } : null;
   const resolvedRoute = publication?.kind === "v4" && productResource ? buildStorefrontRoute(publication.snapshot, { type: "product", handle: productResource.handle }, productResource, values) : null;
   if (catalogStatus === "loading") return <StorefrontPageLoading label="Loading product…" />;
-  if (!store || !product || product.archived || !product.published) return <main className="flex min-h-[75vh] flex-col items-center justify-center"><h1>Product not found</h1><Link href={`/${storeSlug}/shop`}>Back to shop</Link></main>;
+  if (!store || !product || product.archived || !product.published) return <main className="flex min-h-[75vh] flex-col items-center justify-center"><h1>Product not found</h1><Link href={storePath(storeSlug, "/shop")}>Back to shop</Link></main>;
   if (publication?.kind === "v4" && resolvedRoute?.status === "ready") return <PublishedRuntimeStorefront snapshot={publication.snapshot} route={resolvedRoute} storeSlug={store.slug} currency={store.currency} products={visibleProducts} />;
   const addToCart = () => { if (variant) void addCurrentToCart({ variantId: variant.id, nextQuantity: 1, nextSelections: selections, priceMinor: finalPrice }); };
   const ProductTemplate = shell.ProductPage;
   const productOptions = options.map((option) => ({ id: option.id, name: option.name, required: option.required, values: option.values.map((value) => ({ id: value.id, label: value.label, priceAdjustment: value.priceAdjustmentMinor ? formatMoney(value.priceAdjustmentMinor, store.currency) : undefined, selected: isSelected(option.id, value.id) })) }));
-  return <ProductTemplate store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} settings={settings} product={{ name: product.name, category: product.category, description: product.description, imageUrl: productPresentation?.product.imageUrl ?? product.imageUrl, gallery: productPresentation?.product.galleryEnabled ? <ProductGalleryViewer media={productPresentation.product.media ?? []} title={product.name} /> : undefined, specifications: product.specifications }} price={formatMoney(finalPrice, store.currency)} compareAtPrice={variant?.compareAtPriceMinor && variant.compareAtPriceMinor > finalPrice ? formatMoney(variant.compareAtPriceMinor, store.currency) : undefined} shippingCopy={store.shippingCopy} availableText={variant && variant.sellable !== false ? (variant.stock > 0 ? `${variant.stock} available` : isVariantBuyable(variant) ? "Available" : "Out of stock") : requiredMissing ? "Choose the required options" : "This combination is unavailable"} options={productOptions} backHref={`/${store.slug}/shop`} variantAvailable={isVariantBuyable(variant)} requiredMissing={requiredMissing} added={added} onSelectOption={choose} onAddToCart={addToCart} />;
+  return <ProductTemplate store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} settings={settings} product={{ name: product.name, category: product.category, description: product.description, imageUrl: productPresentation?.product.imageUrl ?? product.imageUrl, gallery: productPresentation?.product.galleryEnabled ? <ProductGalleryViewer media={productPresentation.product.media ?? []} title={product.name} /> : undefined, specifications: product.specifications }} price={formatMoney(finalPrice, store.currency)} compareAtPrice={variant?.compareAtPriceMinor && variant.compareAtPriceMinor > finalPrice ? formatMoney(variant.compareAtPriceMinor, store.currency) : undefined} shippingCopy={store.shippingCopy} availableText={variant && variant.sellable !== false ? (variant.stock > 0 ? `${variant.stock} available` : isVariantBuyable(variant) ? "Available" : "Out of stock") : requiredMissing ? "Choose the required options" : "This combination is unavailable"} options={productOptions} backHref={storePath(store.slug, "/shop")} variantAvailable={isVariantBuyable(variant)} requiredMissing={requiredMissing} added={added} onSelectOption={choose} onAddToCart={addToCart} />;
 }

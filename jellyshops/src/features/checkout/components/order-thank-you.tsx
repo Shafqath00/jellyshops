@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { Check, Clock, Mail, MapPin, Package, Truck, X } from "lucide-react";
 import { ConfirmationOrderSummary, type ConfirmationDetails, type ConfirmationState, type ConfirmationSummary } from "./checkout-confirmation";
 import "../checkout.css";
+import { storePath } from "@jelly/storefront-schema";
 
 /** The four delivery steps a shopper sees after paying, worked out from the order's status and shipments. */
 export type NextStepState = "done" | "current" | "next";
@@ -124,9 +125,9 @@ export function OrderThankYou({ state, orderNumber, totalLabel, storeSlug, first
           )}
 
           <div className="jelly-order__actions">
-            {state === "failed" && <Link className="jelly-checkout__primary jelly-checkout__primary--inline" href={`/${storeSlug}/checkout`}>Back to checkout</Link>}
+            {state === "failed" && <Link className="jelly-checkout__primary jelly-checkout__primary--inline" href={storePath(storeSlug, "/checkout")}>Back to checkout</Link>}
             {actions}
-            <Link className={state === "failed" || actions ? "jelly-checkout__secondary" : "jelly-checkout__primary jelly-checkout__primary--inline"} href={`/${storeSlug}/shop`}>Continue shopping</Link>
+            <Link className={state === "failed" || actions ? "jelly-checkout__secondary" : "jelly-checkout__primary jelly-checkout__primary--inline"} href={storePath(storeSlug, "/shop")}>Continue shopping</Link>
             {paid && physical && tracking && <a className="jelly-checkout__secondary" href="#track-order">Track order</a>}
           </div>
         </div>
