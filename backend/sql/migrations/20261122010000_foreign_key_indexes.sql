@@ -7,7 +7,7 @@ CREATE INDEX IF NOT EXISTS "BackInStockRequest_variantId_idx" ON "BackInStockReq
 CREATE INDEX IF NOT EXISTS "DigitalAsset_storeId_productId_idx" ON "DigitalAsset" ("storeId", "productId");
 CREATE INDEX IF NOT EXISTS "DigitalDownloadAttempt_entitlementId_idx" ON "DigitalDownloadAttempt" ("entitlementId");
 CREATE INDEX IF NOT EXISTS "DigitalEntitlement_storeId_assetId_idx" ON "DigitalEntitlement" ("storeId", "assetId");
-CREATE INDEX IF NOT EXISTS "OrderEditHold_revisionId_storeId_idx" ON "OrderEditHold" ("revisionId", "storeId");
+CREATE INDEX IF NOT EXISTS "OrderEditHold_storeId_revisionId_idx" ON "OrderEditHold" ("storeId", "revisionId");
 CREATE INDEX IF NOT EXISTS "OrderEditHold_storeId_variantId_idx" ON "OrderEditHold" ("storeId", "variantId");
 CREATE INDEX IF NOT EXISTS "OrderFulfilment_storeId_orderId_idx" ON "OrderFulfilment" ("storeId", "orderId");
 CREATE INDEX IF NOT EXISTS "OrderNote_storeId_orderId_idx" ON "OrderNote" ("storeId", "orderId");

@@ -61,7 +61,7 @@ One `CREATE INDEX IF NOT EXISTS` per foreign key without a covering index:
 | `DigitalAsset` | `storeId, productId` |
 | `DigitalDownloadAttempt` | `entitlementId` |
 | `DigitalEntitlement` | `storeId, assetId` |
-| `OrderEditHold` | `revisionId, storeId`; `storeId, variantId` |
+| `OrderEditHold` | `storeId, revisionId`; `storeId, variantId` |
 | `OrderFulfilment`, `OrderNote`, `OrderNotification`, `OrderReturn` | `storeId, orderId` (one each) |
 | `OrderTransaction` | `revisionId`; `storeId, revisionId`; `storeId, orderId` |
 | `ProductReview` | `productId` |
@@ -161,3 +161,20 @@ Checked: all migrations in the folder run in order on PGlite, including the 20 i
 unit and PGlite tests for upload widths/placeholder, the repository before and after the migration, the backfill
 (dry run writes nothing, real run fills only empty rows, never touches files, second run does nothing), activity
 throttling, the beacon. Product galleries and other sections still use the older three sizes and no blur (cards first).
+
+## Applied to staging (2026-11-22, with approval)
+
+`media_variants`, `foreign_key_indexes`, `store_activity` applied to `ayvpxqwleurhkfyujzlu`, then
+`foreign_key_indexes_order_fix`: the `OrderEditHold` key is `("storeId", "revisionId")`, so the index I had written
+the other way round didn't cover it; the fix adds the right index and drops the wrong one (the repo file now has the
+right order, so fresh databases get only the correct index).
+
+Checked: 2 `Media` columns, 5 `Store` columns, both check constraints, all 20 indexes; `StoreLifecycleEvent` has RLS on,
+the `backend_access` policy for `jelly_backend` only and no anon/authenticated grants; the performance advisor lists no
+unindexed foreign keys (the new indexes show as "unused" only because they are new); the security advisor shows
+nothing new. All 7 stores start as `active` with their last-update date as last merchant activity; store `new` has a
+last order date (26 Oct).
+
+Backfill dry run: 97 images checked, 86 would get their copy widths and a placeholder, nothing written. The other 11
+have no copies in storage: 10 are outside photo links added by the bulk import (nothing stored), 1 is an early upload
+whose file isn't in storage. They are skipped.
