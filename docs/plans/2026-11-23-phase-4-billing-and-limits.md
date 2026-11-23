@@ -201,7 +201,7 @@ functions without a fixed `search_path` and leaked-password protection being off
 
 ### To switch it on in test mode (owner's steps in Stripe; never paste keys into chat)
 
-1. Decide the price and currency (decision 3), then create a product "Jellyshop" with a monthly recurring price in
+1. Price decided 2026-11-23: **£19 a month (GBP)**, matching the marketing site. Create a product "Jellyshop" with a monthly recurring price in
    **test mode** (Product catalogue > Add product). Copy the price id (`price_…`) into `backend/.env` as
    `STRIPE_BILLING_PRICE_ID`.
 2. Webhook: locally, `stripe listen --forward-to localhost:3001/webhooks/stripe/billing --events
@@ -212,3 +212,5 @@ functions without a fixed `search_path` and leaked-password protection being off
 4. Restart the backend, then on a shop that is on its trial (not an exempt one): Settings > Plan and billing > Choose a
    plan, pay with the test card 4242 4242 4242 4242, check the plan shows as paid, open Manage billing.
 5. Only after that works, consider `BILLING_ENFORCED=true`.
+
+**Decision 3 taken (2026-11-23):** the plan is **£19 a month in GBP**, the same price the marketing site shows. No annual price yet.
