@@ -14,15 +14,20 @@ needs the owner's yes; nothing here deletes data.
 
 Every page that isn't cached goes Washington → Iowa → Ireland and back, several times.
 
-## What the code now does
+## Status: parked while testing (2026-11-23)
 
-- `backend/src/functions.ts`: `api` and `orderWorkers` default to **`europe-west2` (London)**; `FUNCTIONS_REGION`
-  still overrides it. `api` may scale to 20 instances (was 5).
-- `jellyshops/vercel.json`: Vercel functions run in **`dub1` (Dublin)**, next to the database.
+Nothing is moved. The code defaults are unchanged: the API runs in Iowa (`us-central1`, 5 instances) and Vercel uses its
+default region. London was tried, but a first deploy paused on Firebase asking about deleting the Iowa functions and was
+cancelled; nothing was created or deleted. Do this when real shops are close.
 
-Deploying the function to a new region creates a **new** function with a **new address**; the Iowa one keeps running
-until it is deleted. That gives a safe switch-over: deploy London, point the storefront and Stripe at it, check, then
-delete Iowa.
+To move later:
+
+- Set `FUNCTIONS_REGION=europe-west2` in `backend/.env.jelly-507118` (the code reads it for both `api` and
+  `orderWorkers`). Optionally raise `maxInstances` in `backend/src/functions.ts` from 5.
+- Add `jellyshops/vercel.json` with `{ "regions": ["dub1"] }` to run Vercel functions in Dublin.
+- Deploying to a new region creates a **new** function with a **new address**; the Iowa one keeps running until it is
+  deleted. When Firebase asks whether to delete the Iowa functions, answer **No** (it needs a person at the terminal).
+  That gives a safe switch-over: deploy London, point the storefront and Stripe at it, check, then delete Iowa.
 
 ## Before deploying: check the function's settings
 

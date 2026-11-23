@@ -12,11 +12,10 @@ import { onInit } from "firebase-functions/v2/core";
 import type { createApp } from "./app.js";
 
 /**
- * London, next to the database (Supabase, Ireland) and most shoppers. Changing it moves the function: its address
- * changes, so the storefront API address and the Stripe webhook addresses must change in the same release
- * (docs/launch/hosting-move-checklist.md).
+ * Where the functions run. Iowa for now. For live shops, London (europe-west2) is closer to the database in Ireland:
+ * set FUNCTIONS_REGION=europe-west2 and follow docs/launch/hosting-move-checklist.md (the address changes).
  */
-const API_REGION = process.env.FUNCTIONS_REGION ?? "europe-west2";
+const API_REGION = process.env.FUNCTIONS_REGION ?? "us-central1";
 
 let application: ReturnType<typeof createApp>;
 let initialization: Promise<void> | undefined;
@@ -48,9 +47,7 @@ export const api = onRequest(
     region: API_REGION,
     timeoutSeconds: 60,
     memory: "1GiB",
-    // Store pages are served from the storefront cache, so most traffic never reaches here; raised from 5 so a
-    // busy hour does not queue checkouts. Keep a budget alert on the Google Cloud project.
-    maxInstances: 20,
+    maxInstances: 5,
   },
   (request, response) => {
     // Cloud Functions has already consumed the request stream and keeps the
