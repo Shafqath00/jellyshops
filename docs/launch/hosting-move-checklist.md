@@ -18,7 +18,8 @@ Every page that isn't cached goes Washington → Iowa → Ireland and back, seve
 
 Nothing is moved. The code defaults are unchanged: the API runs in Iowa (`us-central1`, 5 instances) and Vercel uses its
 default region. London was tried, but a first deploy paused on Firebase asking about deleting the Iowa functions and was
-cancelled; nothing was created or deleted. Do this when real shops are close.
+cancelled; nothing was created or deleted. Owner decision 2026-11-23: the API stays in Iowa and the storefront stays on Vercel's free Hobby plan for now; do
+this (and Vercel Pro) only when real shops are close.
 
 To move later:
 

@@ -1,5 +1,13 @@
 # Speed and cost, Phase 3: hosting, image CDN and domains (plan)
 
+> **Owner decisions, 2026-11-23: this plan is parked in part.** The API **stays in Iowa** (`us-central1`) and the
+> storefront **stays on Vercel's free Hobby plan**; neither London/Dublin nor Vercel Pro is being done for now. The
+> code defaults match (Iowa, 5 instances, no `vercel.json`). R2 photos (staging) and the cached-page work are kept.
+> Where this document recommends Vercel Pro, London or Dublin, read it as "later, when real shops trade"; the steps
+> are in `docs/launch/hosting-move-checklist.md`. Hobby limits to watch (check Vercel's pricing page for the current
+> numbers): monthly data transfer, function invocations, CPU time and ISR reads/writes. Vercel's terms limit Hobby
+> to personal, non-commercial use, so this holds while the platform is in testing.
+
 Status: **plan, waiting for your decisions.** Nothing has been changed. Part of
 `docs/plans/2026-11-20-speed-and-cost-plan.md`. Prices and product facts were checked on 2026-11-22 (sources at
 the end); confirm them on the live pricing pages before signing up.
