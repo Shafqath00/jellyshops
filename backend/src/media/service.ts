@@ -7,6 +7,7 @@ import type { MediaStorage } from "./storage.js";
 import type { MediaRecord, StoredMedia, StoredMediaRecord } from "./types.js";
 import { validateImage } from "./validation.js";
 import { chooseCopyWidth, knownCopyWidths, mediaPublicUrl } from "./public-url.js";
+import type { PlanLimitChecker } from "../billing/plan-limits.js";
 
 export const MEDIA_WIDTHS = [320, 640, 960, 1280, 1920] as const;
 /** Longest side kept for an uploaded photo. Larger photos are scaled down on upload: no shopper screen needs more. */
@@ -39,6 +40,8 @@ export class MediaService {
     private readonly storefrontReferenceReader?: (storeId: string, mediaId: string) => Promise<boolean>,
     /** Public photo domain (MEDIA_PUBLIC_BASE); when set, records carry their direct address. */
     readonly publicBase?: string,
+    /** Plan limits (photo storage). Every upload, bulk photos included, passes here. */
+    private readonly limits?: Pick<PlanLimitChecker, "check">,
   ) {}
   private shown(record: StoredMediaRecord): MediaRecord { return publicRecord(record, this.publicBase); }
   /**
@@ -68,6 +71,7 @@ export class MediaService {
     const original = await sharp(file.buffer, { animated: true, limitInputPixels: 40_000_000 }).rotate()
       .resize({ width: MEDIA_MAX_SIDE, height: MEDIA_MAX_SIDE, fit: "inside", withoutEnlargement: true })
       .toBuffer({ resolveWithObject: true });
+    await this.limits?.check(storeId, "photoBytes", original.data.length);
     const written: string[] = [];
     const put = async (extension: string, contents: Buffer, mimeType: string): Promise<string> => {
       // Both adapters address objects by this key. Record the attempt first so a

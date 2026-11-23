@@ -49,6 +49,7 @@ import { PostgresTenantRepository } from "../tenants/postgres-repository.js";
 import { StoreSettingsRepository } from "../tenants/settings.js";
 import { supabasePool } from "./database.js";
 import type { AppContext, AppDependencies } from "./types.js";
+import { PlanLimitChecker, sqlUsageReader } from "../billing/plan-limits.js";
 
 export function createDefaultMediaStorage(
   config: AppConfig,
@@ -151,12 +152,16 @@ export function resolveAppDependencies(dependencies: Partial<AppDependencies> = 
       config,
     );
 
+  // Plan limits (docs/plans/2026-11-23-phase-4-billing-and-limits.md): every store is on the default plan until
+  // stores carry their own (step 4b). Without a database there is nothing to count, so nothing is limited.
+  const planLimits = dependencies.planLimits ?? (supabasePool ? new PlanLimitChecker(sqlUsageReader(supabasePool)) : undefined);
+
   const catalogService =
     dependencies.catalogService ??
     (supabasePool
       ? (() => {
         const catalogRepository = new CatalogPostgresRepository(supabasePool, postgresCommerceDatabase(supabasePool), { mediaPublicBase: config.mediaPublicBase });
-        return new CatalogService(catalogRepository, catalogRepository) as CatalogAdmin;
+        return new CatalogService(catalogRepository, catalogRepository, planLimits) as CatalogAdmin;
       })()
       : undefined);
 
@@ -198,6 +203,7 @@ export function resolveAppDependencies(dependencies: Partial<AppDependencies> = 
     mediaStorage,
     storefrontSql ? createStorefrontMediaReferenceReader(storefrontSql) : undefined,
     config.mediaPublicBase,
+    planLimits,
   );
 
   const contentService =

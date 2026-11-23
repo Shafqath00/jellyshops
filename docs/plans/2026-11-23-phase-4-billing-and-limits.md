@@ -120,3 +120,18 @@ in a new route. Usage numbers come from cheap count queries cached for a minute.
 Sources: Stripe, [fee behaviour on connected accounts](https://docs.stripe.com/connect/direct-charges-fee-payer-behavior.md),
 [connected account configuration](https://docs.stripe.com/connect/accounts-v2/connected-account-configuration),
 [Billing with Connect](https://docs.stripe.com/connect/integrate-billing-connect).
+
+## Step 4a built (2026-11-23, code only)
+
+- `backend/src/billing/plans.ts`: the plan list (one plan, `standard`: 5,000 products, 10 GB photos, 3 people,
+  1 own domain). `plan-limits.ts`: `PlanLimitChecker.check(storeId, kind, adding)` throws `409 PLAN_LIMIT` with a plain
+  message (numbers, what to do); `usage()` for the Billing page later; `sqlUsageReader` counts products not archived,
+  photo bytes and memberships per store. Every store is on `standard` until `StoreBilling` exists (4b); `exempt` is
+  already supported by the checker.
+- Checked in `CatalogService.createProduct` (editor, duplicate, bulk import, which reports the message on the row)
+  and `MediaService.upload` (every upload, bulk photos included; refused before any file is written). Creating an
+  archived product needs no room. Staff and domain limits are defined but have no write path yet (no staff invites or
+  custom domains exist).
+- The admin already shows the server's message on product saves, duplicates, imports and uploads, so no frontend
+  change was needed.
+- Tests: `backend/src/billing/plan-limits.test.ts` (7). Staging usage is far below every limit, so nobody is blocked.

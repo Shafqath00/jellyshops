@@ -1,4 +1,5 @@
 import type { StorefrontRefresher } from "../storefront/cache-refresh.js";
+import type { PlanLimitChecker } from "../billing/plan-limits.js";
 import type { StoreActivityRecorder } from "../tenants/store-activity.js";
 import type express from "express";
 import type { AdminSalesService, AdminSummaryService, CustomerService, OrderTagService } from "../admin/service.js";
@@ -41,6 +42,8 @@ export interface AppDependencies {
   // Tenant / catalog / content
   tenantRepository: TenantRepository;
   catalogService: CatalogAdmin;
+  /** Plan limits; built from the database when left out (src/billing/plan-limits.ts). */
+  planLimits?: PlanLimitChecker;
   contentService: ContentService;
   customDataService: CustomDataService;
   ownerMetafieldService?: OwnerMetafieldService;

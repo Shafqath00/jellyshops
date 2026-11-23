@@ -11,6 +11,7 @@ function handleConflict(error: unknown): never {
 import { ApiError } from "../http/errors.js";
 import { assertValidProductConfiguration } from "./product-configuration.js";
 import type { CatalogRepository, CatalogWriter } from "./repository.js";
+import type { PlanLimitChecker } from "../billing/plan-limits.js";
 import type {
   CatalogCollection,
   CatalogCollectionDetail,
@@ -75,6 +76,8 @@ export class CatalogService implements CatalogReader {
   constructor(
     private readonly repository: CatalogRepository,
     private readonly writer?: CatalogWriter,
+    /** Plan limits (products). Every new product (editor, duplicate, import, new-store set-up) passes here. */
+    private readonly limits?: Pick<PlanLimitChecker, "check">,
   ) {}
 
   getProduct(storeId: string, id: string): Promise<CatalogProduct | null> {
@@ -128,6 +131,8 @@ export class CatalogService implements CatalogReader {
     assertDistinctVariantChoices(input.variants);
     assertMediaInput(input);
     assertValidProductConfiguration(input);
+    // An archived product does not count towards the limit, so creating one never needs room.
+    if (input.status !== "ARCHIVED") await this.limits?.check(storeId, "products");
     return this.requireWriter().createProduct(storeId, resolveProductDescription(input)).catch(handleConflict);
   }
 
