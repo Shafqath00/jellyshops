@@ -177,3 +177,38 @@ functions without a fixed `search_path` and leaked-password protection being off
 - Checked in the built-in browser, signed in, on staging data through the local frontend and backend: Express Bed
   shows "No charge", 18 products and 3 MB of photos with no limit, at 1280px and 375px (no sideways scroll). The
   trial and limit notices were not seen live (every staging shop is exempt); unit tests cover them.
+
+## Step 4d built (2026-11-23; code only, not switched on)
+
+- Settings `STRIPE_BILLING_PRICE_ID` (price_…) and `STRIPE_BILLING_WEBHOOK_SECRET` (whsec_…, must differ from the Connect
+  secrets), with the existing `STRIPE_SECRET_KEY`; leave both empty and paying stays off (`billingStripe` in config).
+- `backend/src/billing/stripe-billing.ts` (`StripeBillingService`): `startCheckout` (Stripe Checkout, subscription mode,
+  one price, `jelly_store_id` in the session and subscription metadata, the shop's Stripe customer reused, the free trial
+  carried over while more than ~2 days are left, otherwise paid at once; refuses exempt shops and shops that already have
+  a plan), `openPortal` (Stripe's customer portal), `handleEvent` (checkout completed and subscription
+  created/updated/deleted/paused/resumed: reads the subscription from Stripe again and saves its current state, so no
+  event table and no migration were needed). Return addresses must be our own admin (an allowed CORS origin and an
+  admin path). Status mapping: trialing, active, past_due as is; unpaid and paused → paused; canceled → canceled (with
+  when it ended); not-started subscriptions change nothing. Saving never touches an exempt shop and an old
+  subscription's late event never replaces a newer one.
+- Routes: `POST /api/stores/:id/billing/checkout` and `/billing/portal` (`settings:manage`), webhook
+  `POST /webhooks/stripe/billing` (raw body, own signing secret; 400 unsigned, 500 on a failed save so Stripe retries).
+  `GET /billing` now says `checkoutAvailable` and `hasSubscription`.
+- Admin: **Choose a plan** (to Stripe Checkout) and **Manage billing** (to the portal) on Settings > Plan and billing,
+  "Thank you… it can take a minute to show here" on the way back (`?billing=done`, read fresh).
+- Tests: `billing/stripe-billing.test.ts` (16, incl. real Stripe signatures for the webhook), PGlite save rules,
+  frontend button tests.
+
+### To switch it on in test mode (owner's steps in Stripe; never paste keys into chat)
+
+1. Decide the price and currency (decision 3), then create a product "Jellyshop" with a monthly recurring price in
+   **test mode** (Product catalogue > Add product). Copy the price id (`price_…`) into `backend/.env` as
+   `STRIPE_BILLING_PRICE_ID`.
+2. Webhook: locally, `stripe listen --forward-to localhost:3001/webhooks/stripe/billing --events
+   checkout.session.completed,customer.subscription.created,customer.subscription.updated,customer.subscription.deleted,customer.subscription.paused,customer.subscription.resumed`
+   and put the `whsec_…` it prints into `STRIPE_BILLING_WEBHOOK_SECRET`. For the deployed API, add the same endpoint
+   and events in Developers > Webhooks.
+3. Customer portal: Settings > Billing > Customer portal, turn on cancelling and updating the card, save once (test mode).
+4. Restart the backend, then on a shop that is on its trial (not an exempt one): Settings > Plan and billing > Choose a
+   plan, pay with the test card 4242 4242 4242 4242, check the plan shows as paid, open Manage billing.
+5. Only after that works, consider `BILLING_ENFORCED=true`.

@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { requireMerchant, requireStorePermission } from "../auth/middleware.js";
 import type { AuthProvider } from "../auth/types.js";
+import { ApiError } from "../http/errors.js";
 import type { PlanLimitChecker } from "./plan-limits.js";
 import { PLANS, type LimitKind } from "./plans.js";
 import type { StoreBillingService } from "./store-billing.js";
+import type { StripeBillingService } from "./stripe-billing.js";
 
 /** What the Billing page and the admin banners show. Staff and domain limits come once those features exist. */
 const SHOWN_LIMITS: LimitKind[] = ["products", "photoBytes"];
@@ -17,7 +19,7 @@ export function createBillingRouter(
   billing: Pick<StoreBillingService, "state">,
   limits: Pick<PlanLimitChecker, "usage">,
   authProvider: AuthProvider,
-  options: { enforced: boolean },
+  options: { enforced: boolean; stripe?: Pick<StripeBillingService, "startCheckout" | "openPortal"> },
 ): Router {
   const router = Router({ mergeParams: true });
   router.get("/billing", requireMerchant(authProvider), requireStorePermission("settings:manage"), async (request, response, next) => {
@@ -29,8 +31,25 @@ export function createBillingRouter(
         planName: PLANS[state.plan].name,
         exempt: state.status === "exempt",
         enforced: options.enforced,
+        // Whether paying is set up on this server (Stripe Billing, step 4d).
+        checkoutAvailable: Boolean(options.stripe),
         usage: usage.map(({ kind, used, limit }) => ({ kind, used, limit })),
       });
+    } catch (error) { next(error); }
+  });
+  // Start paying (Stripe Checkout) and manage billing (Stripe's portal). Owners and settings managers only.
+  router.post("/billing/checkout", requireMerchant(authProvider), requireStorePermission("settings:manage"), async (request, response, next) => {
+    try {
+      if (!options.stripe) throw new ApiError(503, "BILLING_UNAVAILABLE", "Paying for a plan isn't available yet.");
+      const body = (request.body ?? {}) as { returnUrl?: unknown };
+      response.set("Cache-Control", "no-store").json(await options.stripe.startCheckout(request.storeContext!.storeId, { returnUrl: body.returnUrl, email: request.merchant?.email }));
+    } catch (error) { next(error); }
+  });
+  router.post("/billing/portal", requireMerchant(authProvider), requireStorePermission("settings:manage"), async (request, response, next) => {
+    try {
+      if (!options.stripe) throw new ApiError(503, "BILLING_UNAVAILABLE", "Managing billing isn't available yet.");
+      const body = (request.body ?? {}) as { returnUrl?: unknown };
+      response.set("Cache-Control", "no-store").json(await options.stripe.openPortal(request.storeContext!.storeId, { returnUrl: body.returnUrl }));
     } catch (error) { next(error); }
   });
   return router;

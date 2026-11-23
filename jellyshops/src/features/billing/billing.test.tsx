@@ -97,3 +97,52 @@ describe("Settings > Plan and billing", () => {
     expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
   });
 });
+
+describe("paying with Stripe from Settings > Plan and billing", () => {
+  const returnUrl = "http://localhost:3210/admin/s/shop/settings/billing";
+
+  it("opens Stripe Checkout for a shop on its trial", async () => {
+    const { default: userEvent } = await import("@testing-library/user-event");
+    const navigate = vi.fn();
+    const fetcher = vi.fn(async (url: string, init?: RequestInit) => {
+      if (init?.method === "POST") {
+        expect(url).toMatch(/\/api\/stores\/store-1\/billing\/checkout$/);
+        expect(JSON.parse(String(init.body))).toEqual({ returnUrl });
+        return json({ url: "https://checkout.stripe.com/c/pay/cs_1" });
+      }
+      return json(summary({ checkoutAvailable: true, hasSubscription: false }));
+    });
+    render(<BillingSettings storeId="store-1" token="session" fetcher={fetcher as never} now={now} returnUrl={returnUrl} navigate={navigate} returned={false} />);
+    await userEvent.click(await screen.findByRole("button", { name: "Choose a plan" }));
+    await vi.waitFor(() => expect(navigate).toHaveBeenCalledWith("https://checkout.stripe.com/c/pay/cs_1"));
+    expect(screen.queryByRole("button", { name: "Manage billing" })).toBeNull();
+  });
+
+  it("offers Manage billing once the shop has a plan, and explains when Stripe can't be opened", async () => {
+    const { default: userEvent } = await import("@testing-library/user-event");
+    const navigate = vi.fn();
+    const fetcher = vi.fn(async (_url: string, init?: RequestInit) => init?.method === "POST"
+      ? json({ error: { message: "Choose a plan first; then you can manage billing here." } }, 409)
+      : json(summary({ status: "active", trialEndsAt: null, currentPeriodEnd: "2027-01-01T00:00:00Z", checkoutAvailable: true, hasSubscription: true })));
+    render(<BillingSettings storeId="store-1" token="session" fetcher={fetcher as never} now={now} returnUrl={returnUrl} navigate={navigate} returned={false} />);
+    expect(await screen.findByText("Your plan renews on 1 January 2027.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Choose a plan" })).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "Manage billing" }));
+    expect(await screen.findByText("Choose a plan first; then you can manage billing here.")).toBeInTheDocument();
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it("thanks the merchant on the way back and reads the plan fresh", async () => {
+    resetBillingCache();
+    const fetcher = vi.fn(async () => json(summary({ checkoutAvailable: true })));
+    render(<BillingSettings storeId="store-1" token="session" fetcher={fetcher as never} now={now} returnUrl={returnUrl} navigate={vi.fn()} returned />);
+    expect(await screen.findByText("Your plan is being set up. It can take a minute to show here.")).toBeInTheDocument();
+  });
+
+  it("shows no pay buttons while paying isn't set up on the server", async () => {
+    const fetcher = vi.fn(async () => json(summary({ checkoutAvailable: false })));
+    render(<BillingSettings storeId="store-1" token="session" fetcher={fetcher as never} now={now} returnUrl={returnUrl} navigate={vi.fn()} returned={false} />);
+    expect(await screen.findByText("You'll be able to choose how to pay for your plan here soon.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Choose a plan" })).toBeNull();
+  });
+});

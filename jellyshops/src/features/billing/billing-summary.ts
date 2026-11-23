@@ -13,6 +13,10 @@ export interface BillingSummary {
   exempt: boolean;
   /** Whether shops are closed when their plan ends (BILLING_ENFORCED); off until shops can pay. */
   enforced: boolean;
+  /** Whether paying is set up on the server (Stripe Billing). */
+  checkoutAvailable?: boolean;
+  /** Whether the shop has a Stripe subscription it can manage. */
+  hasSubscription?: boolean;
   usage: Array<{ kind: "products" | "photoBytes"; used: number; limit: number | null }>;
 }
 
@@ -109,4 +113,14 @@ export function billingNotices(summary: BillingSummary | null, now: Date): Billi
     else if (share >= NEARLY_FULL) notices.push({ tone: "warning", title: `${usageLabel(item.kind)} is nearly full`, text: `${usageText(item)} used.` });
   }
   return notices;
+}
+
+/** Starts paying (Stripe Checkout) or opens Stripe's billing portal; resolves to the Stripe page to open. */
+export async function openBillingPage(kind: "checkout" | "portal", storeId: string, token: string, returnUrl: string, fetcher: typeof fetch = fetch): Promise<string> {
+  const response = await fetcher(`${authApiOrigin()}/api/stores/${encodeURIComponent(storeId)}/billing/${kind}`, {
+    method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ returnUrl }),
+  });
+  const body = await response.json().catch(() => ({})) as { url?: string; error?: { message?: string } };
+  if (!response.ok || !body.url) throw new Error(body.error?.message ?? "Stripe couldn't be opened. Try again in a moment.");
+  return body.url;
 }

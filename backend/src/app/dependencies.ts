@@ -51,6 +51,8 @@ import { supabasePool } from "./database.js";
 import type { AppContext, AppDependencies } from "./types.js";
 import { PlanLimitChecker, sqlUsageReader } from "../billing/plan-limits.js";
 import { StoreBillingService } from "../billing/store-billing.js";
+import { StripeBillingService, type BillingStripeClient } from "../billing/stripe-billing.js";
+import Stripe from "stripe";
 
 export function createDefaultMediaStorage(
   config: AppConfig,
@@ -156,6 +158,12 @@ export function resolveAppDependencies(dependencies: Partial<AppDependencies> = 
   // Plan limits (docs/plans/2026-11-23-phase-4-billing-and-limits.md): every store is on the default plan until
   // they get their own row in "StoreBilling" (step 4b; exempt shops are never limited). Without a database there is nothing to count, so nothing is limited.
   const storeBilling = dependencies.storeBilling ?? (supabasePool ? new StoreBillingService(supabasePool, { enforced: config.billingEnforced }) : undefined);
+  // Shops paying Jellyshop (Stripe Billing on the platform account); only when STRIPE_BILLING_* are set.
+  const stripeBilling = dependencies.stripeBilling ?? (config.billingStripe && supabasePool && storeBilling
+    ? new StripeBillingService(new Stripe(config.billingStripe.secretKey, { apiVersion: config.billingStripe.apiVersion }) as unknown as BillingStripeClient, supabasePool, storeBilling, {
+      priceId: config.billingStripe.priceId, webhookSecret: config.billingStripe.webhookSecret, allowedOrigins: config.corsOrigins,
+    })
+    : undefined);
   const planLimits = dependencies.planLimits ?? (supabasePool ? new PlanLimitChecker(sqlUsageReader(supabasePool), storeBilling?.planFor) : undefined);
 
   const catalogService =
@@ -374,6 +382,7 @@ export function resolveAppDependencies(dependencies: Partial<AppDependencies> = 
     contentService,
     storeBilling,
     planLimits,
+    stripeBilling,
   };
 
   return { config, authProvider, routeDependencies: commerceDeps, catalogService, storefrontService, publicStorefrontApi, storefrontStarterApi, mediaService, mediaStorage, publicStorefrontContextService, adminServices, commerceRepository, customerService, verifyCustomer };

@@ -705,3 +705,4 @@ fieldset.jk-field {border:0;padding:0;margin:0;min-width:0}
 .jk-billing-usage-head {display:flex;justify-content:space-between;gap:var(--jk-space-3);flex-wrap:wrap}
 .jk-billing-usage-head span {color:var(--jk-text-subdued)}
 .jk-billing-notices {display:grid;gap:var(--jk-space-2);margin-bottom:var(--jk-space-4)}
+.jk-billing-actions {display:flex;align-items:center;gap:var(--jk-space-3);flex-wrap:wrap;margin-top:var(--jk-space-4)}

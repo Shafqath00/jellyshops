@@ -31,9 +31,9 @@ export function mountStoreSettingsRoutes(app: Express, context: AppContext): voi
     app.use("/api/stores/:storeId/settings", createStoreSettingsRouter(authProvider, new StoreSettingsRepository(commerceDatabase)));
   }
   // Plan, trial and usage for the Billing page and the admin banners.
-  const { storeBilling, planLimits } = context.routeDependencies;
+  const { storeBilling, planLimits, stripeBilling } = context.routeDependencies;
   if (storeBilling && planLimits) {
-    app.use("/api/stores/:storeId", createBillingRouter(storeBilling, planLimits, authProvider, { enforced: context.config.billingEnforced }));
+    app.use("/api/stores/:storeId", createBillingRouter(storeBilling, planLimits, authProvider, { enforced: context.config.billingEnforced, stripe: stripeBilling }));
   }
 }
 

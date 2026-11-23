@@ -344,6 +344,9 @@ export interface AppConfig {
   /** Pause shops whose trial ended or payment stopped (BILLING_ENFORCED). */
   billingEnforced: boolean;
 
+  /** Jellyshop's own subscription (Stripe Billing on the platform account), when STRIPE_BILLING_* are set. */
+  billingStripe?: BillingStripeConfig;
+
   stripe?: StripeServerConfig;
 }
 
@@ -509,5 +512,33 @@ export function loadConfig(
         environment,
         parsed.NODE_ENV === "production",
       ),
+    billingStripe: loadBillingStripeConfig(environment),
   };
+}
+
+export interface BillingStripeConfig {
+  secretKey: string;
+  apiVersion: typeof STRIPE_API_VERSION;
+  /** The plan's price (STRIPE_BILLING_PRICE_ID, price_…). */
+  priceId: string;
+  /** Signing secret of the /webhooks/stripe/billing endpoint (STRIPE_BILLING_WEBHOOK_SECRET). */
+  webhookSecret: string;
+}
+
+/**
+ * Shops paying for Jellyshop (docs/plans/2026-11-23-phase-4-billing-and-limits.md, step 4d). Separate from the shops'
+ * own Connect payments: it uses the platform account's key with one price and its own webhook secret.
+ */
+function loadBillingStripeConfig(environment: NodeJS.ProcessEnv): BillingStripeConfig | undefined {
+  const priceId = environment.STRIPE_BILLING_PRICE_ID?.trim();
+  const webhookSecret = environment.STRIPE_BILLING_WEBHOOK_SECRET?.trim();
+  if (!priceId && !webhookSecret) return undefined;
+  const secretKey = environment.STRIPE_SECRET_KEY?.trim();
+  if (!priceId || !webhookSecret || !secretKey) throw new Error("STRIPE_BILLING_PRICE_ID, STRIPE_BILLING_WEBHOOK_SECRET and STRIPE_SECRET_KEY are all needed for billing");
+  if (!priceId.startsWith("price_")) throw new Error("STRIPE_BILLING_PRICE_ID must be a Stripe price id (price_…)");
+  if (!webhookSecret.startsWith("whsec_")) throw new Error("STRIPE_BILLING_WEBHOOK_SECRET must be a webhook signing secret (whsec_…)");
+  for (const other of [environment.STRIPE_ACCOUNTS_V2_WEBHOOK_SECRET, environment.STRIPE_CONNECT_PAYMENTS_WEBHOOK_SECRET]) {
+    if (other?.trim() === webhookSecret) throw new Error("STRIPE_BILLING_WEBHOOK_SECRET must differ from the Connect webhook secrets");
+  }
+  return { secretKey, apiVersion: STRIPE_API_VERSION, priceId, webhookSecret };
 }

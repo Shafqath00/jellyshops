@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import type { SqlExecutor } from "../../src/commerce/repository.js";
 import { StoreBillingService, TRIAL_DAYS } from "../../src/billing/store-billing.js";
+import { saveSubscriptionChange, type SubscriptionChange } from "../../src/billing/stripe-billing.js";
 import { createOwnedStore } from "../../src/tenants/postgres-repository.js";
 import { createPGliteDatabase, seedStore } from "./pglite.js";
 
@@ -59,5 +60,34 @@ describe("StoreBilling (migration 20261123000000)", () => {
     expect(await enforced.planFor("store-ended")).toBe("standard");
     expect(await enforced.state("store-ended")).toMatchObject({ status: "trialing", pauseReason: "trial-ended", paused: true });
     expect(await new StoreBillingService(sql, { enforced: false }).isPaused("store-ended")).toBe(false);
+  });
+});
+
+describe("saving Stripe subscriptions (step 4d)", () => {
+  const change = (over: Partial<SubscriptionChange> = {}): SubscriptionChange => ({
+    storeId: "store-a", status: "active", trialEndsAt: null, currentPeriodEnd: new Date("2027-01-01T00:00:00Z"), cancelAtPeriodEnd: false,
+    stripeCustomerId: "cus_1", stripeSubscriptionId: "sub_1", ...over,
+  });
+  const row = async (database: Awaited<ReturnType<typeof setup>>, storeId = "store-a") =>
+    (await database.query<{ status: string; stripeSubscriptionId: string | null; stripeCustomerId: string | null }>(`SELECT "status", "stripeSubscriptionId", "stripeCustomerId" FROM "StoreBilling" WHERE "storeId" = $1`, [storeId])).rows[0];
+
+  it("moves a trial to paid, keeps an exempt shop as it is, and lets a late event from an old plan change nothing", async () => {
+    const database = await setup();
+    await seedStore(database, "store-a", "shop-a");
+    await seedStore(database, "store-b", "shop-b");
+    await database.query(`INSERT INTO "StoreBilling" ("storeId", "status", "trialEndsAt") VALUES ('store-a', 'trialing', NOW() + INTERVAL '5 days'), ('store-b', 'exempt', NULL)`);
+    const sql = { query: (text: string, values?: unknown[]) => database.query(text, values) };
+
+    await saveSubscriptionChange(sql, change());
+    expect(await row(database)).toEqual({ status: "active", stripeSubscriptionId: "sub_1", stripeCustomerId: "cus_1" });
+
+    await saveSubscriptionChange(sql, change({ storeId: "store-b" }));
+    expect(await row(database, "store-b")).toEqual({ status: "exempt", stripeSubscriptionId: null, stripeCustomerId: null });
+
+    // Cancelled, then a new plan: the new one wins and the old one's late "cancelled" event is ignored.
+    await saveSubscriptionChange(sql, change({ status: "canceled" }));
+    await saveSubscriptionChange(sql, change({ stripeSubscriptionId: "sub_2" }));
+    await saveSubscriptionChange(sql, change({ status: "canceled", stripeSubscriptionId: "sub_1" }));
+    expect(await row(database)).toEqual({ status: "active", stripeSubscriptionId: "sub_2", stripeCustomerId: "cus_1" });
   });
 });

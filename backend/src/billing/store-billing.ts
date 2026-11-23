@@ -27,6 +27,9 @@ export interface StoreBillingRecord {
   trialEndsAt: Date | null;
   currentPeriodEnd: Date | null;
   cancelAtPeriodEnd: boolean;
+  /** Set once the shop has started paying through Stripe Billing (step 4d). */
+  stripeCustomerId?: string | null;
+  stripeSubscriptionId?: string | null;
 }
 
 export type PauseReason = "trial-ended" | "payment-stopped" | "canceled";
@@ -38,6 +41,8 @@ export interface BillingState {
   trialEndsAt: string | null;
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
+  /** Whether the shop has a Stripe subscription it can manage (change card, cancel, invoices). */
+  hasSubscription: boolean;
   /** Why the shop would be paused; null when it is in good standing. */
   pauseReason: PauseReason | null;
   /** Whether the shop is closed right now (pauseReason set and BILLING_ENFORCED on). */
@@ -75,6 +80,7 @@ export function billingState(record: StoreBillingRecord | null, now: Date, enfor
     trialEndsAt: record?.trialEndsAt?.toISOString() ?? null,
     currentPeriodEnd: record?.currentPeriodEnd?.toISOString() ?? null,
     cancelAtPeriodEnd: record?.cancelAtPeriodEnd ?? false,
+    hasSubscription: Boolean(record?.stripeSubscriptionId),
     pauseReason: reason,
     paused: enforced && reason !== null,
   };
@@ -104,6 +110,8 @@ interface Row {
   trialEndsAt: Date | string | null;
   currentPeriodEnd: Date | string | null;
   cancelAtPeriodEnd: boolean;
+  stripeCustomerId: string | null;
+  stripeSubscriptionId: string | null;
 }
 
 const asDate = (value: Date | string | null) => (value === null ? null : value instanceof Date ? value : new Date(value));
@@ -122,7 +130,7 @@ export class StoreBillingService {
     if (this.tableMissing) return null;
     try {
       const result = await this.sql.query(
-        `SELECT "storeId", "plan", "status", "trialEndsAt", "currentPeriodEnd", "cancelAtPeriodEnd" FROM "StoreBilling" WHERE "storeId" = $1`,
+        `SELECT "storeId", "plan", "status", "trialEndsAt", "currentPeriodEnd", "cancelAtPeriodEnd", "stripeCustomerId", "stripeSubscriptionId" FROM "StoreBilling" WHERE "storeId" = $1`,
         [storeId],
       );
       const row = result.rows[0] as Row | undefined;

@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { Banner, Button, Card, SkeletonBlock, StatusBadge } from "@/components/admin";
-import { billingNotices, formatDay, loadBillingSummary, trialDaysLeft, usageLabel, usageText, type BillingSummary } from "./billing-summary";
+import { billingNotices, formatDay, loadBillingSummary, openBillingPage, trialDaysLeft, usageLabel, usageText, type BillingSummary } from "./billing-summary";
+
+const currentPage = () => (typeof window === "undefined" ? "" : window.location.origin + window.location.pathname);
+const justPaid = () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("billing") === "done";
 
 function planLine(summary: BillingSummary, now: Date): string {
   if (summary.exempt || summary.status === "none") return "This shop is not charged.";
@@ -22,9 +25,28 @@ function planLine(summary: BillingSummary, now: Date): string {
  * Settings > Plan and billing: the shop's plan, trial or renewal, and how much of the plan it uses. Paying and changing
  * plans arrive with Stripe Billing (docs/plans/2026-11-23-phase-4-billing-and-limits.md, step 4d).
  */
-export function BillingSettings({ storeId, token, fetcher = fetch, now = new Date() }: { storeId: string; token: string; fetcher?: typeof fetch; now?: Date }) {
+export function BillingSettings({ storeId, token, fetcher = fetch, now = new Date(), returnUrl = currentPage(), navigate = (url: string) => window.location.assign(url), returned = justPaid() }: {
+  storeId: string; token: string; fetcher?: typeof fetch; now?: Date;
+  /** Where Stripe sends the merchant back (this page). */
+  returnUrl?: string;
+  /** Opens the Stripe page (tests pass a stand-in). */
+  navigate?: (url: string) => void;
+  /** Back from Stripe Checkout (?billing=done). */
+  returned?: boolean;
+}) {
   const [summary, setSummary] = useState<BillingSummary | null | undefined>(undefined);
-  const [attempt, setAttempt] = useState(0);
+  // Back from paying: read fresh, not the cached copy from before.
+  const [attempt, setAttempt] = useState(returned ? 1 : 0);
+  const [opening, setOpening] = useState<"checkout" | "portal" | null>(null);
+  const [openError, setOpenError] = useState("");
+
+  const open = (kind: "checkout" | "portal") => {
+    setOpening(kind);
+    setOpenError("");
+    openBillingPage(kind, storeId, token, returnUrl, fetcher)
+      .then(navigate)
+      .catch((failure: unknown) => { setOpenError(failure instanceof Error ? failure.message : "Stripe couldn't be opened."); setOpening(null); });
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -42,7 +64,10 @@ export function BillingSettings({ storeId, token, fetcher = fetch, now = new Dat
   }
 
   const notices = billingNotices(summary, now).filter((notice) => notice.tone === "critical");
+  const chargeable = !summary.exempt && summary.status !== "none";
+  const canSubscribe = !summary.hasSubscription || summary.status === "canceled";
   return <div className="jk-stack-sm">
+    {returned && <Banner tone="success" title="Thank you">Your plan is being set up. It can take a minute to show here.</Banner>}
     {notices.map((notice) => <Banner key={notice.title} tone={notice.tone} title={notice.title}>{notice.text}</Banner>)}
     <Card title="Your plan">
       <div className="jk-billing-plan">
@@ -51,7 +76,13 @@ export function BillingSettings({ storeId, token, fetcher = fetch, now = new Dat
           {planLine(summary, now) && <p className="jk-billing-plan-line">{planLine(summary, now)}</p>}
         </div>
       </div>
-      {!summary.exempt && summary.status !== "none" && <p className="jk-hint">You&apos;ll be able to choose how to pay for your plan here soon.</p>}
+      {chargeable && !summary.checkoutAvailable && <p className="jk-hint">You&apos;ll be able to choose how to pay for your plan here soon.</p>}
+      {chargeable && summary.checkoutAvailable && <div className="jk-billing-actions">
+        {canSubscribe && <Button variant="primary" loading={opening === "checkout"} loadingLabel="Opening Stripe…" disabled={opening !== null} onClick={() => open("checkout")}>Choose a plan</Button>}
+        {summary.hasSubscription && <Button variant={canSubscribe ? "secondary" : "primary"} loading={opening === "portal"} loadingLabel="Opening Stripe…" disabled={opening !== null} onClick={() => open("portal")}>Manage billing</Button>}
+        <p className="jk-hint">{canSubscribe ? "You'll pay securely on Stripe and come back here." : "Change your card, see invoices or cancel on Stripe."}</p>
+      </div>}
+      {openError && <Banner tone="critical" title="Stripe couldn't be opened">{openError}</Banner>}
     </Card>
     <Card title="Usage" description="What this shop uses of its plan. Nothing is deleted when something is full; you just can't add more.">
       <ul className="jk-billing-usage">

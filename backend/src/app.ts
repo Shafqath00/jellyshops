@@ -1,4 +1,5 @@
 import express, { type Express } from "express";
+import { createBillingWebhookRouter } from "./billing/billing-webhook-route.js";
 import { resolveAppDependencies } from "./app/dependencies.js";
 import { configureMiddleware } from "./app/middleware.js";
 import { mountCommerceRoutes, mountOrderRuntimeRoutes, mountStripeWebhooks } from "./app/routes/commerce.js";
@@ -41,6 +42,8 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
 
   // Stripe signatures require raw bytes, so mount webhooks before JSON parsing.
   mountStripeWebhooks(app, context);
+  // Shops paying Jellyshop (Stripe Billing): its own endpoint and signing secret.
+  if (context.routeDependencies.stripeBilling) app.use("/webhooks/stripe/billing", createBillingWebhookRouter(context.routeDependencies.stripeBilling));
   // Theme package uploads carry their files as base64 and get a larger limit of their own.
   const defaultJson = express.json({ limit: "2mb" });
   app.use((request, response, next) => isThemePackageUpload(request) ? next() : defaultJson(request, response, next));
