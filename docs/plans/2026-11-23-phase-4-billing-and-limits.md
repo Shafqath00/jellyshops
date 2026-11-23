@@ -136,7 +136,7 @@ Sources: Stripe, [fee behaviour on connected accounts](https://docs.stripe.com/c
   change was needed.
 - Tests: `backend/src/billing/plan-limits.test.ts` (7). Staging usage is far below every limit, so nobody is blocked.
 
-## Step 4b built (2026-11-23; migrations not yet applied to staging)
+## Step 4b built (2026-11-23; both migrations applied to staging the same day)
 
 - Migration `20261123000000_store_billing.sql` (both folders, PGlite list): table `StoreBilling` as designed, every
   existing shop inserted as `exempt`, RLS + `backend_access` for `jelly_backend` only. Migration
@@ -155,3 +155,8 @@ Sources: Stripe, [fee behaviour on connected accounts](https://docs.stripe.com/c
 - Tests: `billing/store-billing.test.ts` (10), `test/integration/store-billing.test.ts` (4, PGlite: backfill,
   trial on create, constraints, service), gate and proxy cases. The PGlite onboarding test
   (`merchant-onboarding`, "expected 2 to be 4") fails with and without this work.
+
+Staging check after applying (2026-11-23): 7 shops, 7 `StoreBilling` rows, all `exempt`; row security on; only
+`backend_access` for `jelly_backend` (select/insert/update/delete), no browser-role grants; 4 indexes; `img`,
+`img-staging`, `shop-paused` reserved. Supabase security advisor: no new findings (the existing ones are 10 order
+functions without a fixed `search_path` and leaked-password protection being off).
