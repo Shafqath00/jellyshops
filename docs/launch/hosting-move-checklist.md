@@ -35,6 +35,11 @@ name). `backend/.env` is the local development file, so look at it first:
       `MEDIA_PUBLIC_BASE=https://img-staging.jellyshop.io`.
 - [ ] Add the storefront cache refresh: `STOREFRONT_REVALIDATE_URL=https://jellyshop.vercel.app/api/revalidate` and
       `STOREFRONT_REVALIDATE_SECRET=<a long random value>` (the same secret goes into Vercel below).
+- [ ] Two local addresses in `backend/.env` would otherwise go live (found 2026-11-23): override them in
+      `.env.jelly-507118` with `STOREFRONT_PUBLIC_URL=https://jellyshop.vercel.app` and
+      `ORDER_PUBLIC_API_URL=<the London address>` (known after the first deploy, so set it and deploy once more).
+      Other names that only `backend/.env` holds (Stripe test keys, SMTP, Supabase, scheduler secret) are what the
+      live function has been running on; keep them, or move them into `.env.jelly-507118`.
 - [ ] `CORS_ORIGINS` lists every address shoppers and merchants use (`https://jellyshop.vercel.app`, and
       `https://jellyshop.io`, `https://*.jellyshop.io` once the subdomain switch is on).
 
