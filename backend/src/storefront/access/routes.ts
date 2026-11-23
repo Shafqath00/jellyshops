@@ -31,11 +31,15 @@ export function createMerchantAccessRouter(service: Api, authProvider: AuthProvi
  * `GET .../access/status` (token in the `x-storefront-access` header) and `POST .../access/unlock`
  * for shoppers. Responses are never cached.
  */
-export function createPublicAccessRouter(service: Api): Router {
+export function createPublicAccessRouter(service: Api, isPaused?: (storeId: string) => Promise<boolean>): Router {
   const router = Router({ mergeParams: true });
   router.get<{ storeId: string }>("/status", async (request, response, next) => {
     try {
-      response.set("Cache-Control", "no-store").json(await service.status(String(request.params.storeId), request.header("x-storefront-access")));
+      const storeId = String(request.params.storeId);
+      const status = await service.status(storeId, request.header("x-storefront-access"));
+      // A paused shop (billing) shows a "temporarily unavailable" page; a failing lookup never closes a shop.
+      const paused = isPaused ? await isPaused(storeId).catch(() => false) : false;
+      response.set("Cache-Control", "no-store").json({ ...status, paused });
     } catch (error) { next(error); }
   });
   router.post<{ storeId: string }>("/unlock", async (request, response, next) => {

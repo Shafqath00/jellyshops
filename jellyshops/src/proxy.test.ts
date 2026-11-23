@@ -114,4 +114,16 @@ describe("proxy with shop subdomains", () => {
     expect(rewriteOf(response!)).toBe("/store-password/myshop");
     expect(response!.headers.get("cache-control")).toBe("private, no-store");
   });
+
+  it("shows 'temporarily unavailable' (503) on every page of a shop billing has paused, before any password", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
+      if (url.includes("/api/public/storefronts/")) return Response.json({ store: { id: "store-1" } });
+      return Response.json({ protected: true, unlocked: false, paused: true });
+    }));
+    const response = await proxy(request("https://myshop.jellyshop.io/products/bed"));
+    expect(rewriteOf(response!)).toBe("/shop-paused");
+    expect(response!.status).toBe(503);
+    expect(response!.headers.get("retry-after")).toBe("3600");
+    expect(response!.headers.get("cache-control")).toBe("private, no-store");
+  });
 });

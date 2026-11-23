@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { BLOCKED_WORD_STORE_ADDRESSES, BRAND_STORE_ADDRESSES, SYSTEM_STORE_ADDRESSES } from "@jelly/storefront-schema";
@@ -26,7 +26,9 @@ describe("store web addresses", () => {
 
 describe("ReservedSlug seed", () => {
   const seeded = (folder: string) => {
-    const sql = readFileSync(resolve(process.cwd(), folder, "20261122030000_reserved_slugs.sql"), "utf8");
+    // The first seed and every later addition (files named *_reserved_slugs*.sql).
+    const sql = readdirSync(resolve(process.cwd(), folder)).filter((name) => name.includes("_reserved_slugs")).sort()
+      .map((name) => readFileSync(resolve(process.cwd(), folder, name), "utf8")).join("\n");
     return [...sql.matchAll(/^\s*\('([^']+)', '([a-z]+)'\)/gm)].map(([, slug, reason]) => `${slug}:${reason}`).sort();
   };
   const expected = [

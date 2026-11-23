@@ -15,6 +15,7 @@ import { contentSecurityPolicy, securityHeaderOptionsFromEnv, type PageKind } fr
  * Design: docs/plans/2026-11-22-subdomain-tenancy-plan.md §2.
  */
 const NOT_FOUND_PAGE = "/shop-not-found";
+const PAUSED_PAGE = "/shop-paused";
 
 function protocolOf(request: NextRequest): "http" | "https" {
   const forwarded = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
@@ -81,6 +82,14 @@ async function shopResponse(request: NextRequest, slug: string, pathname: string
     // The shop changed its address: the same page at the new one, for good (old links, bookmarks, emails).
     const page = pathname.slice(`/sites/${slug}`.length) || "/";
     return NextResponse.redirect(new URL(storeUrl(decision.slug, page) + request.nextUrl.search, request.url), 308);
+  }
+  if (decision.kind === "paused") {
+    // Billing paused the shop: every page shows "temporarily unavailable". 503 with Retry-After tells search engines
+    // it is temporary, so the shop keeps its place in search results.
+    const response = rewrite(request, PAUSED_PAGE, { status: 503 });
+    response.headers.set("Cache-Control", "private, no-store");
+    response.headers.set("Retry-After", "3600");
+    return response;
   }
   if (decision.kind === "password") {
     const response = rewrite(request, `/store-password/${decision.slug}`);

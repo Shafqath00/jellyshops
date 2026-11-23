@@ -15,6 +15,7 @@ import { createStripeConnectRouter } from "../../stripe/accounts/routes.js";
 import { createAccountsV2WebhookRouter } from "../../stripe/webhooks/accounts-v2-route.js";
 import { createConnectPaymentsWebhookRouter } from "../../stripe/webhooks/connect-payments-route.js";
 import type { AppContext } from "../types.js";
+import { pausedShopCheckoutGuard } from "../../billing/store-billing.js";
 
 export function mountStripeWebhooks(app: Express, context: AppContext): void {
   const { routeDependencies: deps } = context;
@@ -101,6 +102,8 @@ export function mountCommerceRoutes(app: Express, context: AppContext): void {
   }
 
   if (deps.checkoutService) {
+    // A paused shop (trial ended or payment stopped, with BILLING_ENFORCED on) takes no new orders.
+    if (deps.storeBilling) app.use("/api/public/stores/:storeId/checkout", pausedShopCheckoutGuard(deps.storeBilling));
     app.use(
       "/api/public/stores/:storeId/checkout",
       createCommerceRouter(

@@ -1,4 +1,5 @@
 import pg from "pg";
+import { startTrial } from "../billing/store-billing.js";
 import { randomUUID } from "node:crypto";
 import type {
   CreateStoreInput,
@@ -123,5 +124,7 @@ export async function createOwnedStore(sql: SqlExecutor, userId: string, input: 
   );
   await sql.query(`INSERT INTO "StoreSettings" ("storeId") VALUES ($1)`, [storeId]);
   await sql.query(`INSERT INTO "StorefrontWorkspace" ("storeId", "generation", "updatedAt") VALUES ($1, 0, NOW())`, [storeId]);
+  // Every new shop starts on the free trial (docs/plans/2026-11-23-phase-4-billing-and-limits.md).
+  await startTrial(sql, storeId);
   return { id: storeId, name: input.name, slug: input.slug, currency: input.currency, country: input.country, role: "OWNER" };
 }

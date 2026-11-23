@@ -50,6 +50,7 @@ import { StoreSettingsRepository } from "../tenants/settings.js";
 import { supabasePool } from "./database.js";
 import type { AppContext, AppDependencies } from "./types.js";
 import { PlanLimitChecker, sqlUsageReader } from "../billing/plan-limits.js";
+import { StoreBillingService } from "../billing/store-billing.js";
 
 export function createDefaultMediaStorage(
   config: AppConfig,
@@ -153,8 +154,9 @@ export function resolveAppDependencies(dependencies: Partial<AppDependencies> = 
     );
 
   // Plan limits (docs/plans/2026-11-23-phase-4-billing-and-limits.md): every store is on the default plan until
-  // stores carry their own (step 4b). Without a database there is nothing to count, so nothing is limited.
-  const planLimits = dependencies.planLimits ?? (supabasePool ? new PlanLimitChecker(sqlUsageReader(supabasePool)) : undefined);
+  // they get their own row in "StoreBilling" (step 4b; exempt shops are never limited). Without a database there is nothing to count, so nothing is limited.
+  const storeBilling = dependencies.storeBilling ?? (supabasePool ? new StoreBillingService(supabasePool, { enforced: config.billingEnforced }) : undefined);
+  const planLimits = dependencies.planLimits ?? (supabasePool ? new PlanLimitChecker(sqlUsageReader(supabasePool), storeBilling?.planFor) : undefined);
 
   const catalogService =
     dependencies.catalogService ??
@@ -370,6 +372,7 @@ export function resolveAppDependencies(dependencies: Partial<AppDependencies> = 
     reservationSweeper,
     tenantRepository,
     contentService,
+    storeBilling,
   };
 
   return { config, authProvider, routeDependencies: commerceDeps, catalogService, storefrontService, publicStorefrontApi, storefrontStarterApi, mediaService, mediaStorage, publicStorefrontContextService, adminServices, commerceRepository, customerService, verifyCustomer };

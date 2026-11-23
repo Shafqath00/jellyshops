@@ -161,6 +161,12 @@ const environmentSchema = z.object({
     .enum(["true", "false"])
     .default("false"),
 
+  // Pause shops whose trial ended or payment stopped (docs/plans/2026-11-23-phase-4-billing-and-limits.md). Off until
+  // shops can pay (Stripe Billing, step 4d): while off, billing state is recorded and shown but nothing is paused.
+  BILLING_ENFORCED: z
+    .enum(["true", "false"])
+    .default("false"),
+
   AUTH_PROVIDER: z
     .enum([
       "development",
@@ -335,6 +341,9 @@ export interface AppConfig {
   /** Public address photos are served from, without a trailing slash; unset = served through the API. */
   mediaPublicBase?: string;
 
+  /** Pause shops whose trial ended or payment stopped (BILLING_ENFORCED). */
+  billingEnforced: boolean;
+
   stripe?: StripeServerConfig;
 }
 
@@ -490,6 +499,7 @@ export function loadConfig(
       : undefined,
 
     mediaPublicBase: parsed.MEDIA_PUBLIC_BASE?.replace(/\/$/, ""),
+    billingEnforced: parsed.BILLING_ENFORCED === "true",
 
     /*
      * Stripe

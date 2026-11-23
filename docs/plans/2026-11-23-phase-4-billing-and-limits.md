@@ -135,3 +135,23 @@ Sources: Stripe, [fee behaviour on connected accounts](https://docs.stripe.com/c
 - The admin already shows the server's message on product saves, duplicates, imports and uploads, so no frontend
   change was needed.
 - Tests: `backend/src/billing/plan-limits.test.ts` (7). Staging usage is far below every limit, so nobody is blocked.
+
+## Step 4b built (2026-11-23; migrations not yet applied to staging)
+
+- Migration `20261123000000_store_billing.sql` (both folders, PGlite list): table `StoreBilling` as designed, every
+  existing shop inserted as `exempt`, RLS + `backend_access` for `jelly_backend` only. Migration
+  `20261123010000_reserved_slugs_more.sql` reserves `img-staging` and `shop-paused` (also added to the shared list).
+- `backend/src/billing/store-billing.ts`: `pauseReason` / `billingState` rules (trial ended, cancelled plan run out,
+  payment stopped; `past_due` is not paused while Stripe retries), `startTrial` (called by `createOwnedStore`, skipped
+  before the migration), `StoreBillingService` (`state`, `isPaused`, `planFor` feeding the plan limits: exempt shops
+  are never limited; a missing table means "no billing yet").
+- **Pausing is off** until shops can pay: new setting `BILLING_ENFORCED` (default `false`). While off, trials are
+  recorded but no shop is closed.
+- A paused shop (once enforced): the public checkout refuses new orders (`403 SHOP_PAUSED`, "This shop isn't taking
+  orders right now."); the storefront access check returns `paused`, and the proxy shows `/shop-paused` ("Back soon.",
+  status 503 with `Retry-After`) on every page. **Design change:** the admin stays fully open (not read-only), so the
+  merchant can keep working and pay; this also avoids touching every admin route's permission check. A failed billing
+  lookup never closes a shop.
+- Tests: `billing/store-billing.test.ts` (10), `test/integration/store-billing.test.ts` (4, PGlite: backfill,
+  trial on create, constraints, service), gate and proxy cases. The PGlite onboarding test
+  (`merchant-onboarding`, "expected 2 to be 4") fails with and without this work.

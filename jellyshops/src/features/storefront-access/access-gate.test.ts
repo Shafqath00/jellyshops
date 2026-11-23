@@ -3,14 +3,14 @@ import { decideStoreAccess, resetAccessGate, storeSlugFromPath } from "./access-
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
 
-function backend(options: { protectedStore?: boolean; goodToken?: string; down?: boolean } = {}) {
+function backend(options: { protectedStore?: boolean; goodToken?: string; down?: boolean; paused?: boolean } = {}) {
   return vi.fn(async (url: string, headers?: Record<string, string>) => {
     if (options.down) throw new Error("offline");
     if (url.endsWith("/api/public/storefronts/shop")) return json({ store: { id: "store-1" } });
     if (url.endsWith("/api/public/storefronts/gone")) return json({}, 404);
     if (url.endsWith("/storefront/access/status")) {
       const token = headers?.["x-storefront-access"];
-      return json({ protected: options.protectedStore === true, unlocked: !options.protectedStore || (token !== undefined && token === options.goodToken) });
+      return json({ paused: options.paused === true, protected: options.protectedStore === true, unlocked: !options.protectedStore || (token !== undefined && token === options.goodToken) });
     }
     return json({}, 500);
   });
@@ -61,4 +61,10 @@ it("names the password cookie so only this exact site can set it in production",
   const { accessCookieName } = await import("./access-api");
   expect(accessCookieName("store-1", true)).toBe("__Host-jelly-access-store-1");
   expect(accessCookieName("store-1", false)).toBe("jelly-access-store-1");
+});
+
+it("closes a paused shop (billing) for everyone, even with a good password token", async () => {
+  const lookup = backend({ paused: true, protectedStore: true, goodToken: "good" });
+  expect(await decideStoreAccess("/shop", () => "good", { origin: "http://api", lookup })).toEqual({ kind: "paused" });
+  expect(await decideStoreAccess("/shop/products/bed", () => undefined, { origin: "http://api", lookup })).toEqual({ kind: "paused" });
 });

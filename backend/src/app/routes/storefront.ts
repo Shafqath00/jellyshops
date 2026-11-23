@@ -128,7 +128,7 @@ export function mountPublicStorefrontContextRoutes(app: Express, context: AppCon
     app.use("/api/public/stores/:storeId/storefront/binding-values", createPublicBindingValuesRouter(bindingValues));
   }
   const access = accessService(context);
-  if (access) app.use("/api/public/stores/:storeId/storefront/access", createPublicAccessRouter(access));
+  if (access) app.use("/api/public/stores/:storeId/storefront/access", createPublicAccessRouter(access, context.routeDependencies.storeBilling ? (storeId) => context.routeDependencies.storeBilling!.isPaused(storeId) : undefined));
   const reviews = reviewService(context);
   if (reviews) app.use("/api/public/stores/:storeId/reviews", createPublicReviewRouter(reviews));
   const themePackages = packageService(context);

@@ -37,11 +37,11 @@ export const APEX_PATH_SEGMENTS: ReadonlySet<string> = new Set([
   // public
   "assets", "brand", "images", "logos", "templates",
   // Next and platform
-  "_next", "sites", "platform-admin", "shop-not-found", PREVIEW_SHOP_PREFIX,
+  "_next", "sites", "platform-admin", "shop-not-found", "shop-paused", PREVIEW_SHOP_PREFIX,
 ]);
 
 /** Folders that may only be reached through a rewrite from this module, never by typing the path. */
-const INTERNAL_SEGMENTS = new Set(["sites", "platform-admin", "shop-not-found"]);
+const INTERNAL_SEGMENTS = new Set(["sites", "platform-admin", "shop-not-found", "shop-paused"]);
 
 /** Paths every host serves as they are: Next's files, the API routes, shared theme files. */
 const SHARED_SEGMENTS = new Set(["_next", "api", "themes"]);

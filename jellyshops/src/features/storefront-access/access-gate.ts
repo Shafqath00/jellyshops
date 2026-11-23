@@ -15,8 +15,9 @@ const NOT_STORES = new Set(["admin", "api", "auth", "changelog", "login", "signu
 const CACHE_MS = 60_000;
 const MAX_ENTRIES = 5_000;
 
-export type GateDecision = { kind: "pass" } | { kind: "pass-private" } | { kind: "password"; slug: string } | { kind: "moved"; slug: string };
-interface StoreAccess { storeId: string; protected: boolean }
+export type GateDecision = { kind: "pass" } | { kind: "pass-private" } | { kind: "password"; slug: string } | { kind: "moved"; slug: string } | { kind: "paused" };
+/** `paused`: the shop's plan ended or payment stopped (billing), so the storefront shows "temporarily unavailable". */
+interface StoreAccess { storeId: string; protected: boolean; paused: boolean }
 /** A shop address that changed: where the shop is now. */
 interface MovedStore { movedTo: string }
 type Lookup = (url: string, headers?: Record<string, string>) => Promise<Response>;
@@ -57,7 +58,8 @@ async function storeAccess(slug: string, origin: string, lookup: Lookup): Promis
   if (!storeId) throw new Error("store lookup failed");
   const status = await lookup(`${origin}/api/public/stores/${encodeURIComponent(storeId)}/storefront/access/status`);
   if (!status.ok) throw new Error("status failed");
-  const value = { storeId, protected: ((await status.json()) as { protected?: boolean }).protected === true };
+  const body = (await status.json()) as { protected?: boolean; paused?: boolean };
+  const value = { storeId, protected: body.protected === true, paused: body.paused === true };
   remember(stores, slug, value);
   return value;
 }
@@ -84,6 +86,7 @@ export async function decideStoreAccess(
   try {
     const access = await storeAccess(slug, options.origin, lookup);
     if (access && "movedTo" in access) return { kind: "moved", slug: access.movedTo };
+    if (access?.paused) return { kind: "paused" };
     if (!access?.protected) return { kind: "pass" };
     const token = readCookie(accessCookieName(access.storeId));
     if (token && await tokenUnlocks(access.storeId, token, options.origin, lookup)) return { kind: "pass-private" };

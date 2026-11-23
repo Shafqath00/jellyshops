@@ -20,10 +20,10 @@ export const SYSTEM_STORE_ADDRESSES: readonly string[] = [
   "_shop", "about", "abuse", "account", "accounts", "admin", "api", "app", "apps", "assets", "auth", "beta", "billing",
   "blog", "brand", "careers", "cdn", "changelog", "checkout", "contact", "cookies", "dashboard", "demo", "dev",
   "developer", "developers", "dns", "docs", "email", "files", "ftp", "help", "hostmaster", "images", "imap", "img",
-  "internal", "invoice", "jelly", "jellylinks", "jellyshop", "legal", "localhost", "login", "logos", "mail", "media",
+  "img-staging", "internal", "invoice", "jelly", "jellylinks", "jellyshop", "legal", "localhost", "login", "logos", "mail", "media",
   "mx", "news", "ns", "ns1", "ns2", "onboarding", "ops", "partners", "pay", "payments", "platform", "platform-admin",
   "pop", "postmaster", "preview", "pricing", "privacy", "qa", "root", "sandbox", "secure", "security", "shop",
-  "shop-not-found", "shops", "sign-in", "signup", "sites", "smtp", "ssl", "staging", "static", "status", "store",
+  "shop-not-found", "shop-paused", "shops", "sign-in", "signup", "sites", "smtp", "ssl", "staging", "static", "status", "store",
   "store-password", "stores", "support", "system", "templates", "terms", "test", "theme-preview", "themes", "uploads",
   "webmail", "webmaster", "www",
 ];
