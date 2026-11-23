@@ -77,7 +77,7 @@ async function audit(sql: SqlExecutor, admin: PlatformAdmin, action: string, met
   );
 }
 
-export type PlatformStoreRow = { id: string; name: string; slug: string; country: string; currency: string; createdAt: string; archived: boolean; ownerEmail: string | null };
+export type PlatformStoreRow = { id: string; name: string; slug: string; country: string; currency: string; createdAt: string; archived: boolean; ownerEmail: string | null; plan: string | null; billingStatus: string | null; trialEndsAt: string | null };
 
 export function createPlatformRouter(authProvider: AuthProvider, db: Database, now: () => number = Date.now): Router {
   const router = Router();
@@ -95,11 +95,13 @@ export function createPlatformRouter(authProvider: AuthProvider, db: Database, n
       const admin = response.locals.platformAdmin as PlatformAdmin;
       const search = typeof request.query.q === "string" ? request.query.q.trim().slice(0, 100) : "";
       const stores = await db.transaction(async (sql) => {
-        const result = await sql.query<{ id: string; name: string; slug: string; country: string; currency: string; createdAt: Date | string; archivedAt: Date | string | null; ownerEmail: string | null }>(
+        const result = await sql.query<{ id: string; name: string; slug: string; country: string; currency: string; createdAt: Date | string; archivedAt: Date | string | null; ownerEmail: string | null; plan: string | null; billingStatus: string | null; trialEndsAt: Date | string | null }>(
           `SELECT s."id", s."name", s."slug", s."country", s."currency", s."createdAt", s."archivedAt",
                   (SELECT u."email" FROM "StoreMembership" m JOIN "User" u ON u."id" = m."userId"
-                    WHERE m."storeId" = s."id" AND m."role" = 'OWNER' ORDER BY m."createdAt" LIMIT 1) AS "ownerEmail"
+                    WHERE m."storeId" = s."id" AND m."role" = 'OWNER' ORDER BY m."createdAt" LIMIT 1) AS "ownerEmail",
+                  b."plan", b."status" AS "billingStatus", b."trialEndsAt"
              FROM "Store" s
+             LEFT JOIN "StoreBilling" b ON b."storeId" = s."id"
             WHERE $1 = '' OR s."name" ILIKE '%' || $1 || '%' OR s."slug" ILIKE '%' || $1 || '%'
             ORDER BY s."createdAt" DESC
             LIMIT 200`,
@@ -112,6 +114,7 @@ export function createPlatformRouter(authProvider: AuthProvider, db: Database, n
         stores: stores.map((row): PlatformStoreRow => ({
           id: row.id, name: row.name, slug: row.slug, country: row.country, currency: row.currency,
           createdAt: new Date(row.createdAt).toISOString(), archived: Boolean(row.archivedAt), ownerEmail: row.ownerEmail,
+          plan: row.plan, billingStatus: row.billingStatus, trialEndsAt: row.trialEndsAt ? new Date(row.trialEndsAt).toISOString() : null,
         })),
       });
     } catch (error) {

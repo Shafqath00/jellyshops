@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { planText } from "./plan-text";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { storeUrl } from "@jelly/storefront-schema";
 import { MerchantAuthShell } from "@/features/auth/components/auth-shell";
@@ -14,7 +15,7 @@ import { authApiOrigin } from "@/features/auth/providers/auth-provider";
  * (`/api/platform/*`) decides who may see anything: only people listed in "PlatformAdmin", with the second step,
  * signed in within 12 hours. This page only follows what it says.
  */
-type Shop = { id: string; name: string; slug: string; country: string; currency: string; createdAt: string; archived: boolean; ownerEmail: string | null };
+type Shop = { id: string; name: string; slug: string; country: string; currency: string; createdAt: string; archived: boolean; ownerEmail: string | null; plan?: string | null; billingStatus?: string | null; trialEndsAt?: string | null };
 type Stage =
   | { kind: "loading" }
   | { kind: "sign-in"; message?: string }
@@ -164,13 +165,14 @@ function ShopList({ client, email, role, onSignOut }: { client: SupabaseClient; 
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <caption className="sr-only">Shops, newest first (up to 200)</caption>
-          <thead><tr>{["Shop", "Address", "Owner", "Market", "Created", "Status"].map((label) => <th key={label} scope="col" style={{ textAlign: "left", padding: "8px 12px" }}>{label}</th>)}</tr></thead>
+          <thead><tr>{["Shop", "Address", "Owner", "Market", "Created", "Plan", "Status"].map((label) => <th key={label} scope="col" style={{ textAlign: "left", padding: "8px 12px" }}>{label}</th>)}</tr></thead>
           <tbody>{shops.map((shop) => <tr key={shop.id} style={{ borderTop: "1px solid color-mix(in srgb, currentColor 15%, transparent)" }}>
             <td style={{ padding: "8px 12px" }}>{shop.name}</td>
             <td style={{ padding: "8px 12px" }}><a className={styles.inlineLink} href={storeUrl(shop.slug)} target="_blank" rel="noreferrer">{shop.slug}</a></td>
             <td style={{ padding: "8px 12px" }}>{shop.ownerEmail ?? "None"}</td>
             <td style={{ padding: "8px 12px" }}>{shop.country} · {shop.currency}</td>
             <td style={{ padding: "8px 12px" }}>{new Date(shop.createdAt).toLocaleDateString("en-GB")}</td>
+            <td style={{ padding: "8px 12px" }}>{planText(shop)}</td>
             <td style={{ padding: "8px 12px" }}>{shop.archived ? "Archived" : "Active"}</td>
           </tr>)}</tbody>
         </table>

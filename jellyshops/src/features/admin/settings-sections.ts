@@ -1,4 +1,4 @@
-import { Bell, Braces, CreditCard, KeyRound, Lock, Store, Truck, UserRound, type LucideIcon } from "lucide-react";
+import { Bell, Braces, CreditCard, KeyRound, Lock, ReceiptText, Store, Truck, UserRound, type LucideIcon } from "lucide-react";
 
 export type SettingsLink = { label: string; href: string; description: string; icon: LucideIcon };
 export type SettingsGroup = { label: string; items: SettingsLink[] };
@@ -11,6 +11,7 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
   { label: "Store", items: [
     { label: "General", href: "/admin/settings/general", description: "Store name, contact email, store address and time zone.", icon: Store },
     { label: "Password page", href: "/admin/online-store/preferences", description: "Keep your store private while you get it ready.", icon: Lock },
+    { label: "Plan and billing", href: "/admin/settings/billing", description: "Your plan, your free trial and how much of it this shop uses.", icon: ReceiptText },
   ] },
   { label: "Selling", items: [
     { label: "Payments", href: "/admin/payments", description: "How customers pay you and when you get paid.", icon: CreditCard },

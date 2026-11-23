@@ -373,6 +373,7 @@ export function resolveAppDependencies(dependencies: Partial<AppDependencies> = 
     tenantRepository,
     contentService,
     storeBilling,
+    planLimits,
   };
 
   return { config, authProvider, routeDependencies: commerceDeps, catalogService, storefrontService, publicStorefrontApi, storefrontStarterApi, mediaService, mediaStorage, publicStorefrontContextService, adminServices, commerceRepository, customerService, verifyCustomer };

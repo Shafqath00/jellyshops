@@ -22,12 +22,18 @@ import { TaxonomyService } from "../../taxonomy/service.js";
 import { createStoreSettingsRouter, StoreSettingsRepository } from "../../tenants/settings.js";
 import { supabasePool } from "../database.js";
 import type { AppContext } from "../types.js";
+import { createBillingRouter } from "../../billing/routes.js";
 
 export function mountStoreSettingsRoutes(app: Express, context: AppContext): void {
   const { authProvider } = context;
   const { commerceDatabase } = context.routeDependencies;
   if (commerceDatabase) {
     app.use("/api/stores/:storeId/settings", createStoreSettingsRouter(authProvider, new StoreSettingsRepository(commerceDatabase)));
+  }
+  // Plan, trial and usage for the Billing page and the admin banners.
+  const { storeBilling, planLimits } = context.routeDependencies;
+  if (storeBilling && planLimits) {
+    app.use("/api/stores/:storeId", createBillingRouter(storeBilling, planLimits, authProvider, { enforced: context.config.billingEnforced }));
   }
 }
 

@@ -83,3 +83,33 @@ describe("checkout in a paused shop", () => {
     expect(await run("POST", async () => { throw new Error("database down"); })).toBeUndefined();
   });
 });
+
+describe("GET /api/stores/:storeId/billing", () => {
+  const owner = { verify: async () => ({ userId: "u1", storeIds: ["s"], storeRoles: { s: "OWNER" as const } }) };
+  const app = async (state: Partial<ReturnType<typeof billingState>>) => {
+    const { default: express } = await import("express");
+    const { createBillingRouter } = await import("./routes.js");
+    const { errorHandler } = await import("../http/errors.js");
+    const limits = { usage: vi.fn(async (_storeId: string, kind: "products" | "photoBytes") => ({ plan: "standard" as const, kind, used: kind === "products" ? 74 : 1024, limit: kind === "products" ? 5000 : 10 * 1024 ** 3 })) };
+    return express()
+      .use("/api/stores/:storeId", createBillingRouter({ state: async () => ({ ...billingState(null, now, false), ...state }) }, limits, owner, { enforced: false }))
+      .use(errorHandler);
+  };
+
+  it("shows the owner their plan, trial and usage, never cached", async () => {
+    const { default: request } = await import("supertest");
+    const response = await request(await app({ status: "trialing", trialEndsAt: "2026-12-10T00:00:00.000Z" })).get("/api/stores/s/billing").set("Authorization", "Bearer x");
+    expect(response.status).toBe(200);
+    expect(response.headers["cache-control"]).toBe("no-store");
+    expect(response.body).toMatchObject({
+      status: "trialing", plan: "standard", planName: "Jellyshop", exempt: false, enforced: false, paused: false, trialEndsAt: "2026-12-10T00:00:00.000Z",
+      usage: [{ kind: "products", used: 74, limit: 5000 }, { kind: "photoBytes", used: 1024, limit: 10 * 1024 ** 3 }],
+    });
+  });
+
+  it("is not shown to someone without access to the shop", async () => {
+    const { default: request } = await import("supertest");
+    const response = await request(await app({})).get("/api/stores/other/billing").set("Authorization", "Bearer x");
+    expect(response.status).toBe(404);
+  });
+});

@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, type ReactNode } from "react";
+import { BillingNotices } from "@/features/billing/billing-notices";
 import { LoaderCircle } from "lucide-react";
 import { useAuth } from "@/features/auth/providers/auth-provider";
 import { toShopAdmin, useShopSlug } from "./admin-routing";
@@ -23,7 +24,7 @@ export function ShopAdminGate({ children }: { children: ReactNode }) {
   if (!match) return <NoShopAccess />;
   if (activeStore?.id !== match.id) return <AdminLoading />;
   // A fresh tree per shop, so nothing from the last shop's pages carries over.
-  return <Fragment key={match.id}>{children}</Fragment>;
+  return <Fragment key={match.id}><BillingNotices />{children}</Fragment>;
 }
 
 function AdminLoading() {

@@ -697,3 +697,11 @@ fieldset.jk-field {border:0;padding:0;margin:0;min-width:0}
 .jk-new-store-design span {display:grid;gap:2px}
 .jk-new-store-design small {color:var(--jk-text-subdued);font-size:var(--jk-text-sm)}
 .jk-new-store-actions {display:flex;justify-content:flex-end;gap:var(--jk-space-2);flex-wrap:wrap}
+
+/* Settings > Plan and billing (features/billing) and the billing notices above every shop page. */
+.jk-billing-plan-name {display:flex;align-items:center;gap:var(--jk-space-2);flex-wrap:wrap;margin:0;font-size:var(--jk-text-lg);font-weight:600;color:var(--jk-text)}
+.jk-billing-plan-line {margin:6px 0 0;font-size:var(--jk-text-sm);color:var(--jk-text-subdued)}
+.jk-billing-usage {display:grid;gap:var(--jk-space-4);margin:0;padding:0;list-style:none}
+.jk-billing-usage-head {display:flex;justify-content:space-between;gap:var(--jk-space-3);flex-wrap:wrap}
+.jk-billing-usage-head span {color:var(--jk-text-subdued)}
+.jk-billing-notices {display:grid;gap:var(--jk-space-2);margin-bottom:var(--jk-space-4)}

@@ -3,7 +3,7 @@
  * The API keeps its enum codes; the admin never shows them.
  */
 export type StatusTone = "neutral" | "info" | "success" | "warning" | "critical" | "attention";
-export type StatusKind = "order" | "payment" | "fulfilment" | "product" | "stock" | "content" | "message" | "stripe";
+export type StatusKind = "order" | "payment" | "fulfilment" | "product" | "stock" | "content" | "message" | "stripe" | "billing";
 
 type Entry = { label: string; tone: StatusTone };
 
@@ -74,6 +74,16 @@ const MAPS: Record<StatusKind, Record<string, Entry>> = {
     PENDING: { label: "Pending", tone: "warning" },
     INACTIVE: { label: "Not active", tone: "warning" },
     RESTRICTED: { label: "Restricted", tone: "critical" },
+  },
+  /** A shop's plan (backend/src/billing/store-billing.ts). */
+  billing: {
+    TRIALING: { label: "Free trial", tone: "info" },
+    ACTIVE: { label: "Active", tone: "success" },
+    PAST_DUE: { label: "Payment due", tone: "warning" },
+    PAUSED: { label: "Paused", tone: "critical" },
+    CANCELED: { label: "Cancelled", tone: "warning" },
+    EXEMPT: { label: "No charge", tone: "success" },
+    NONE: { label: "No charge", tone: "success" },
   },
 };
 

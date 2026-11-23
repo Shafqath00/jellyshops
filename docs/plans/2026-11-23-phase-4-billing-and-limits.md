@@ -160,3 +160,20 @@ Staging check after applying (2026-11-23): 7 shops, 7 `StoreBilling` rows, all `
 `backend_access` for `jelly_backend` (select/insert/update/delete), no browser-role grants; 4 indexes; `img`,
 `img-staging`, `shop-paused` reserved. Supabase security advisor: no new findings (the existing ones are 10 order
 functions without a fixed `search_path` and leaked-password protection being off).
+
+## Step 4c built (2026-11-23)
+
+- Backend `GET /api/stores/:storeId/billing` (`billing/routes.ts`, `settings:manage`, `no-store`): billing state,
+  plan name, `exempt`, `enforced` and usage (products, photo storage) against the limits.
+- Admin: Settings > **Plan and billing** (`features/billing/billing-settings.tsx`, page
+  `admin/s/[shop]/settings/billing`): plan with its status ("Free trial", "No charge", ...), trial end or renewal,
+  usage with progress bars; a "Try again" banner when billing can't be shown (staff without settings access).
+  `features/billing/billing-notices.tsx` above every shop page (in `ShopAdminGate`): shop closed, payment failed and
+  "N days left in your free trial" (last 7 days) only once billing is enforced; "nearly full" (80%) and "full" for
+  plan limits always. Data from `billing-summary.ts`, cached for a minute. Status words in `components/admin/status.ts`
+  (`billing`).
+- Platform admin shop list gains a **Plan** column (`planText`, `features/platform/plan-text.ts`), from a LEFT JOIN on
+  `StoreBilling`.
+- Checked in the built-in browser, signed in, on staging data through the local frontend and backend: Express Bed
+  shows "No charge", 18 products and 3 MB of photos with no limit, at 1280px and 375px (no sideways scroll). The
+  trial and limit notices were not seen live (every staging shop is exempt); unit tests cover them.
