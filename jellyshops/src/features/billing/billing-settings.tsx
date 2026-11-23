@@ -9,6 +9,11 @@ const justPaid = () => typeof window !== "undefined" && new URLSearchParams(wind
 
 function planLine(summary: BillingSummary, now: Date): string {
   if (summary.exempt || summary.status === "none") return "This shop is not charged.";
+  // Set to cancel (also during the trial): say so first, with the day it ends.
+  const endsOn = summary.currentPeriodEnd ?? summary.trialEndsAt;
+  if (summary.cancelAtPeriodEnd && summary.status !== "canceled" && endsOn) {
+    return `Your plan is cancelled and ends on ${formatDay(endsOn)}. To keep it, use Manage billing.`;
+  }
   if (summary.status === "trialing" && summary.trialEndsAt) {
     const days = trialDaysLeft(summary, now) ?? 0;
     return days > 0 ? `Your free trial ends on ${formatDay(summary.trialEndsAt)} (${days} ${days === 1 ? "day" : "days"} left).` : `Your free trial ended on ${formatDay(summary.trialEndsAt)}.`;

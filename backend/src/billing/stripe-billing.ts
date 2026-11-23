@@ -74,9 +74,12 @@ export function subscriptionChange(subscription: Stripe.Subscription): Subscript
     storeId,
     status,
     trialEndsAt: status === "trialing" ? seconds(subscription.trial_end) : null,
-    // A cancelled subscription has ended: keep when, so the shop stays open until then.
-    currentPeriodEnd: status === "canceled" ? seconds(subscription.ended_at) ?? periodEnd(subscription) : periodEnd(subscription),
-    cancelAtPeriodEnd: Boolean(subscription.cancel_at_period_end),
+    // A cancelled subscription has ended: keep when. One set to cancel ends on its cancel date (current API versions and
+    // Stripe's portal set `cancel_at`; older ones set `cancel_at_period_end`), so the shop stays open until then.
+    currentPeriodEnd: status === "canceled"
+      ? seconds(subscription.ended_at) ?? periodEnd(subscription)
+      : seconds(subscription.cancel_at) ?? periodEnd(subscription),
+    cancelAtPeriodEnd: Boolean(subscription.cancel_at_period_end) || typeof subscription.cancel_at === "number",
     stripeCustomerId: idOf(subscription.customer),
     stripeSubscriptionId: subscription.id,
   };

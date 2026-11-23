@@ -236,3 +236,11 @@ Manage billing. Manage billing opened Stripe's portal (the test account's defaul
 per month, trial ending Dec 7, Visa ••4242, a £0.00 trial invoice; "Return to jellyshops" came back to the Billing page.
 Not tried: cancelling, a failed payment, the trial running out (would need Stripe's test clock), live mode.
 Left behind: the shop "Billing test" on staging and its test subscription in Stripe test mode.
+
+**Cancel test (2026-11-23):** cancelled the test subscription in Stripe's portal ("available until the end of your billing
+period on December 7, 2026"). **Bug found and fixed:** current Stripe API versions (and the portal) mark a plan as
+cancelling with a cancel date, `cancel_at`, not `cancel_at_period_end`, so the shop still read as renewing. Now
+`subscriptionChange` treats either as "set to cancel" and uses `cancel_at` as the end date, and the Billing page says
+"Your plan is cancelled and ends on 7 December 2026. To keep it, use Manage billing." (also during the trial). Confirmed
+by having Stripe resend the real `customer.subscription.updated` event to the fixed backend: saved as cancelling on
+7 December, page wording correct. The test subscription stays set to cancel on 7 December in Stripe test mode.

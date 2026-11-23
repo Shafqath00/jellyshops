@@ -15,7 +15,7 @@ const SECRET = "whsec_test_billing";
 
 const subscription = (over: Partial<Stripe.Subscription> = {}): Stripe.Subscription => ({
   id: "sub_1", status: "active", metadata: { jelly_store_id: "store-a" }, customer: "cus_1", cancel_at_period_end: false,
-  trial_end: null, ended_at: null, items: { data: [{ current_period_end: at(new Date(now.getTime() + 30 * DAY)) }] },
+  trial_end: null, ended_at: null, cancel_at: null, items: { data: [{ current_period_end: at(new Date(now.getTime() + 30 * DAY)) }] },
   ...over,
 } as unknown as Stripe.Subscription);
 
@@ -48,6 +48,14 @@ describe("Stripe subscription states", () => {
     expect(subscriptionChange(subscription({ status: "trialing", trial_end: at(new Date(now.getTime() + 5 * DAY)) }))?.trialEndsAt).toEqual(new Date(now.getTime() + 5 * DAY));
     expect(subscriptionChange(subscription({ status: "canceled", ended_at: at(now) }))?.currentPeriodEnd).toEqual(now);
     expect(subscriptionChange(subscription({ metadata: {} }))).toBeNull();
+  });
+
+  it("count a plan set to cancel (cancel_at from the portal, or the older cancel_at_period_end) and end it on its cancel date", () => {
+    const cancelAt = new Date(now.getTime() + 6 * DAY);
+    // What Stripe's portal does in current API versions (found in the test-mode run).
+    expect(subscriptionChange(subscription({ status: "trialing", trial_end: at(cancelAt), cancel_at: at(cancelAt), cancel_at_period_end: false }))).toMatchObject({ cancelAtPeriodEnd: true, currentPeriodEnd: cancelAt, trialEndsAt: cancelAt });
+    expect(subscriptionChange(subscription({ cancel_at_period_end: true }))).toMatchObject({ cancelAtPeriodEnd: true, currentPeriodEnd: new Date(now.getTime() + 30 * DAY) });
+    expect(subscriptionChange(subscription())).toMatchObject({ cancelAtPeriodEnd: false });
   });
 });
 

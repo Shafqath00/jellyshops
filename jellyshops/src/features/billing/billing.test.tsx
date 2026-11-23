@@ -146,3 +146,13 @@ describe("paying with Stripe from Settings > Plan and billing", () => {
     expect(screen.queryByRole("button", { name: "Choose a plan" })).toBeNull();
   });
 });
+
+describe("a plan set to cancel", () => {
+  it("says it is cancelled and when it ends, even during the trial, and points to Manage billing", async () => {
+    const fetcher = vi.fn(async () => json(summary({ cancelAtPeriodEnd: true, currentPeriodEnd: "2026-12-07T16:19:58Z", checkoutAvailable: true, hasSubscription: true })));
+    render(<BillingSettings storeId="store-1" token="session" fetcher={fetcher as never} now={now} returnUrl="http://localhost:3210/admin" navigate={vi.fn()} returned={false} />);
+    expect(await screen.findByText("Your plan is cancelled and ends on 7 December 2026. To keep it, use Manage billing.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Manage billing" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Choose a plan" })).toBeNull();
+  });
+});
