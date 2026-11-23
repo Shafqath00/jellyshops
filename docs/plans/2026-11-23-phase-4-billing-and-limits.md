@@ -214,3 +214,13 @@ functions without a fixed `search_path` and leaked-password protection being off
 5. Only after that works, consider `BILLING_ENFORCED=true`.
 
 **Decision 3 taken (2026-11-23):** the plan is **£19 a month in GBP**, the same price the marketing site shows. No annual price yet.
+
+**Test mode set up (2026-11-23, with the owner's yes):** product "Jellyshop" (`prod_VgMcEE63qVbOXK`) with the £19.00
+monthly GBP price `price_1UeztF4enHibgB7VPnThqKhm` in the Stripe **test** account (created by a one-off script with the
+test key; running it again reuses them). `backend/.env` now has `STRIPE_BILLING_PRICE_ID` and
+`STRIPE_BILLING_WEBHOOK_SECRET` (the secret from `stripe listen --print-secret` with the same test key, so it belongs to
+local forwarding: run `stripe listen --api-key <test key> --forward-to localhost:3001/webhooks/stripe/billing` while
+testing). The deployed API has neither and keeps paying off. Checked: the backend config accepts both; a real test
+Checkout session for a made-up trial shop opened on checkout.stripe.com in subscription mode, GBP, the £19 monthly price,
+£0.00 due today (the trial carries over) and the right return address; it was expired straight away. Still the owner's:
+save the customer portal settings once in test mode, then a full run on a trial shop with the test card.
