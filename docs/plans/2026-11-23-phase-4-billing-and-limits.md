@@ -224,3 +224,15 @@ testing). The deployed API has neither and keeps paying off. Checked: the backen
 Checkout session for a made-up trial shop opened on checkout.stripe.com in subscription mode, GBP, the £19 monthly price,
 £0.00 due today (the trial carries over) and the right return address; it was expired straight away. Still the owner's:
 save the customer portal settings once in test mode, then a full run on a trial shop with the test card.
+
+**End-to-end test in Stripe test mode (2026-11-23, passed):** local backend (3001) and admin (3210) against staging,
+`stripe listen` forwarding the billing events. A new shop "Billing test" (`billing-test`,
+`store-f45378a2-1a01-47f6-8305-cc5d4f566a9a`) made through "Add another store" started on a 14-day trial ending
+7 December. Choose a plan opened Stripe Checkout ("13 days free, then £19 a month"; Stripe's adaptive pricing showed
+rupees first, with a GBP switch); paid with the test card 4242…; Stripe sent `customer.subscription.created` and
+`checkout.session.completed`, both answered 200; the shop's `StoreBilling` row now has the Stripe customer and
+subscription, status trialing with the same trial end to the second; the page came back with "Thank you" and
+Manage billing. Manage billing opened Stripe's portal (the test account's default portal settings already work): £19.00
+per month, trial ending Dec 7, Visa ••4242, a £0.00 trial invoice; "Return to jellyshops" came back to the Billing page.
+Not tried: cancelling, a failed payment, the trial running out (would need Stripe's test clock), live mode.
+Left behind: the shop "Billing test" on staging and its test subscription in Stripe test mode.
