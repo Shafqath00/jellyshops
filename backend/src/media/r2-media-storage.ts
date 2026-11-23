@@ -28,6 +28,18 @@ const ALLOWED_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "image/g
 const TYPE_BY_EXTENSION: Record<string, string> = { png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", webp: "image/webp", gif: "image/gif", avif: "image/avif" };
 export const IMMUTABLE = "public, max-age=31536000, immutable";
 
+/**
+ * The R2 account id from R2_ACCOUNT_ID. Cloudflare shows it both on its own and inside the S3 address
+ * (`https://<id>.r2.cloudflarestorage.com`), so either is accepted.
+ */
+export function r2AccountId(value: string): string {
+  const trimmed = value.trim();
+  const fromAddress = /^https?:\/\/([0-9a-f]{32})\.r2\.cloudflarestorage\.com\/?$/i.exec(trimmed);
+  const id = fromAddress?.[1] ?? trimmed;
+  if (!/^[0-9a-f]{32}$/i.test(id)) throw new Error("R2_ACCOUNT_ID should be the 32-character account id from the R2 overview page.");
+  return id.toLowerCase();
+}
+
 export function mediaTypeForKey(key: string, given?: string): string {
   if (given && ALLOWED_TYPES.has(given)) return given;
   const extension = key.split(".").pop()?.toLowerCase() ?? "";
@@ -42,7 +54,7 @@ export class R2MediaStorage implements MediaStorage {
 
   constructor(options: R2Options) {
     this.client = new AwsClient({ accessKeyId: options.accessKeyId, secretAccessKey: options.secretAccessKey, service: "s3", region: "auto" });
-    this.base = `${(options.endpoint ?? `https://${options.accountId}.r2.cloudflarestorage.com`).replace(/\/$/, "")}/${encodeURIComponent(options.bucket)}`;
+    this.base = `${(options.endpoint ?? `https://${r2AccountId(options.accountId)}.r2.cloudflarestorage.com`).replace(/\/$/, "")}/${encodeURIComponent(options.bucket)}`;
     this.fallback = options.fallback;
     this.fetcher = options.fetch ?? fetch;
   }

@@ -57,3 +57,14 @@ describe("R2 media storage", () => {
     await expect(storage.open("/abs/key")).rejects.toThrow("Invalid media key");
   });
 });
+
+describe("R2 account id", () => {
+  it("accepts the bare id or the S3 address Cloudflare shows, and refuses anything else", async () => {
+    const { r2AccountId } = await import("./r2-media-storage.js");
+    const id = "0123456789abcdef0123456789abcdef";
+    expect(r2AccountId(id)).toBe(id);
+    expect(r2AccountId(`https://${id}.r2.cloudflarestorage.com`)).toBe(id);
+    expect(r2AccountId(` https://${id.toUpperCase()}.r2.cloudflarestorage.com/ `)).toBe(id);
+    expect(() => r2AccountId("https://example.com")).toThrow("32-character account id");
+  });
+});
