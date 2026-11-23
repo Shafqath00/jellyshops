@@ -163,9 +163,10 @@ const environmentSchema = z.object({
 
   // Pause shops whose trial ended or payment stopped (docs/plans/2026-11-23-phase-4-billing-and-limits.md). Off until
   // shops can pay (Stripe Billing, step 4d): while off, billing state is recorded and shown but nothing is paused.
-  BILLING_ENFORCED: z
-    .enum(["true", "false"])
-    .default("false"),
+  BILLING_ENFORCED: z.preprocess(
+    emptyToUndefined,
+    z.enum(["true", "false"]).default("false"),
+  ),
 
   AUTH_PROVIDER: z
     .enum([
