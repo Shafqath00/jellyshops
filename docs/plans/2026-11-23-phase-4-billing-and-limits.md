@@ -288,3 +288,17 @@ Note: with a test clock the "ended" dates are clock dates, weeks ahead of real t
 this shop as open until then; in real use they are the moment Stripe gives up.
 Left behind: the shop "Billing clock test" on staging (now `active`) and its test clock, customer and subscription in
 Stripe test mode (deleting the test clock removes all three).
+
+**Live API redeployed with billing (2026-11-24, step 3 of the handoff):** the Iowa API (`api` and `orderWorkers`, project
+`jelly-507118`) had been deployed earlier the same day with three wrong or missing values: `ORDER_PUBLIC_API_URL` was
+`127.0.0.1:5001`, the billing webhook secret was the local `stripe listen` one, and there was no yearly price. Fixed in
+`backend/.env.jelly-507118` (git-ignored; it wins over `.env`): live `ORDER_PUBLIC_API_URL`, the yearly price id, and a
+new billing webhook endpoint created in Stripe **test mode** (`we_1UfMkB4enHibgB7VMO7DDbZ8`, pointing at
+`https://api-ejususpvea-uc.a.run.app/webhooks/stripe/billing`, the six billing events) whose secret was saved without
+being shown. `BILLING_ENFORCED` stays `false`. Deployed with `firebase deploy --only functions --project jelly-507118`
+(no delete question, because both functions are still in the code in their current region). Checked live: `/health` 200,
+unsigned billing webhook 400, billing route without sign-in 401, a public storefront 200, and a real signed event resent
+by Stripe to the live endpoint updated the test shop's billing row within 13 seconds. The live API uses Stripe **test**
+keys (they come from `backend/.env`). Not set: `STOREFRONT_REVALIDATE_URL` / `_SECRET` (needs the same secret in Vercel and
+a frontend redeploy), so live shop edits show within the cache time (up to 5 minutes) instead of at once. Two newer
+Vercel production deployments (24 November, 5-6 seconds) ended in "Error"; the live frontend is still the 21 November one.
