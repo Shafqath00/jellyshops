@@ -244,3 +244,29 @@ cancelling with a cancel date, `cancel_at`, not `cancel_at_period_end`, so the s
 "Your plan is cancelled and ends on 7 December 2026. To keep it, use Manage billing." (also during the trial). Confirmed
 by having Stripe resend the real `customer.subscription.updated` event to the fixed backend: saved as cancelling on
 7 December, page wording correct. The test subscription stays set to cancel on 7 December in Stripe test mode.
+
+**Trial end, failed payment and re-subscribing (2026-11-24, Stripe test mode with a test clock, passed):** local backend
+(3001) against staging, `stripe listen` forwarding the billing events (plus `invoice.paid` / `invoice.payment_failed`,
+which the handler ignores). New shop "Billing clock test" (`billing-clock-test`,
+`store-3ec3020d-6660-4d9d-96fa-ec3e3b4fa025`, owned by the resthaven-qa test merchant) made with `createOwnedStore`, so it
+started its own 14-day trial (ends 8 December). A test-clock customer with Stripe's always-declining card
+(`pm_card_chargeCustomerFail`, the same as 4000 0000 0000 0341) got a £19 monthly subscription ending its trial at the
+shop's trial end, with `jelly_store_id` set. Results (clock dates):
+
+| Step | Stripe | `StoreBilling` | App's pause rule (enforced) |
+| --- | --- | --- | --- |
+| Start | trialing, £0 trial invoice paid | trialing, trial end to the second, customer + subscription saved | open |
+| Clock +14.1 days (trial over) | past_due, £19 invoice open, 1 failed attempt | past_due, trial end cleared, period end 8 January | open (Stripe still retrying) |
+| Clock +22 more days | canceled after 9 failed attempts (this test account's retry setting cancels at the end) | canceled, period end = when it ended (22 December) | paused, reason `canceled` |
+| Re-subscribe, card 4242 (`pm_card_visa`) | new subscription active, £19 paid | active, new subscription id, period end 30 January | open |
+| Old subscription's "deleted" event resent by Stripe | | unchanged (late event from an old subscription ignored) | open |
+
+All 16 forwarded events were answered 200. `startCheckout` accepted the cancelled shop and opened a £19/month Checkout
+page with no trial (right, the trial was used up); paying it could not be finished because Stripe's card form doesn't
+draw in the desktop app's built-in browser, so the re-subscription was made through the API with the same customer
+(the unused Checkout sessions were expired). Not seen in this run: a Stripe account set to "mark unpaid" instead of
+cancelling (unpaid maps to paused, covered by unit tests) and the Billing page wording for these states (unit tests).
+Note: with a test clock the "ended" dates are clock dates, weeks ahead of real time, so the live pause check would treat
+this shop as open until then; in real use they are the moment Stripe gives up.
+Left behind: the shop "Billing clock test" on staging (now `active`) and its test clock, customer and subscription in
+Stripe test mode (deleting the test clock removes all three).
