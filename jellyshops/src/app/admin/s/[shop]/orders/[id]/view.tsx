@@ -104,7 +104,9 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
 
   // Prevent stale responses from a previous store, order, or session.
   const context = useRef("");
-  context.current = `${storeId}/${orderId}/${session?.access_token}`;
+  const contextKey = `${storeId}/${orderId}/${session?.access_token}`;
+  // Declared before the loading effects, so it runs first and they see the current key.
+  useEffect(() => { context.current = contextKey; }, [contextKey]);
 
   // UI state
   const [catalog, setCatalog] = useState<CatalogProduct[]>([]);
@@ -145,6 +147,8 @@ export function OrderDetailView({ orderId }: { orderId: string; }) {
   }, [api, storeId, orderId]);
 
   useEffect(() => {
+    // Another order or shop: clear the old one before loading, so its details never show under the new address.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDetail(null);
     setLoading(true);
     void load();

@@ -220,6 +220,7 @@ describe("store editor API client", () => {
       onerror: ((event: ProgressEvent) => void) | null = null;
       onabort: ((event: ProgressEvent) => void) | null = null;
       authorization = "";
+      // eslint-disable-next-line @typescript-eslint/no-this-alias -- the test keeps the fake request to inspect it
       constructor() { xhrInstance = this; }
       open() {}
       setRequestHeader(name: string, value: string) { if (name === "Authorization") this.authorization = value; }

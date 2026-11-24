@@ -22,7 +22,9 @@ export default function CollectionsPage(){
   const [rows,setRows]=useState<CollectionRow[]>([]),[products,setProducts]=useState<CatalogAdminProduct[]>([]);
   const [draft,setDraft]=useState<Draft|null>(null),[productQuery,setProductQuery]=useState("");
   const [error,setError]=useState(""),[formError,setFormError]=useState(""),[busy,setBusy]=useState(false),[loading,setLoading]=useState(true),[revision,setRevision]=useState(0);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- shows the loading state while the lists are fetched
   useEffect(()=>{let active=true;if(!ready)return;setLoading(true);void Promise.all([all<CollectionRow>("/collections"),all<CatalogAdminProduct>("/products")]).then(([collections,catalog])=>{if(active){setRows(collections);setProducts(catalog);setError("");}}).catch(e=>{if(active)setError(e.message);}).finally(()=>{if(active)setLoading(false);});return()=>{active=false;};},[all,ready,storeId,revision]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- another shop: drop the old shop's lists and draft
   useEffect(()=>{setDraft(null);setRows([]);setProducts([]);setFormError("");},[storeId]);
   async function save(){
     if(!draft?.title.trim()){setFormError("Give this collection a name.");return;}

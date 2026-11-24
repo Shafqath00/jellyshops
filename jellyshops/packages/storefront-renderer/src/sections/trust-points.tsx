@@ -54,6 +54,7 @@ export function TrustStripSection({ section, context, mode = "published", select
     </section>;
   }
   return <section className="jelly-trust-strip" {...sectionData(section, { "data-layout": "row" })}><StorefrontContainer>
-    <ul><TrustPointItems points={points} icons={icons} editor={editor} selectedBlockId={selectedBlockId} /></ul>
+    {/* Phones scroll this row sideways (platform-base.css), so keyboard users must be able to reach it. */}
+    <ul tabIndex={0}><TrustPointItems points={points} icons={icons} editor={editor} selectedBlockId={selectedBlockId} /></ul>
   </StorefrontContainer></section>;
 }

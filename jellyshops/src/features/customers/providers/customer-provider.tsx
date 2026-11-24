@@ -31,6 +31,8 @@ export function CustomerProvider({ children }: { children: React.ReactNode }) {
     // sign-in library, so store pages do not download it (it loads when someone signs in or returns from an email link).
     let saved = false;
     try { saved = Object.keys(window.localStorage).some((key) => key.startsWith("jelly-customer-auth")); } catch { saved = true; }
+    // Only known after mounting (the server has no localStorage), so this one update has to happen here.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!saved && !new URL(window.location.href).searchParams.get("code")) { setState({ session: null, loading: false, error: null }); return; }
     let active = true; let changed = false; let unsubscribe: () => void = () => undefined;
     void customerSupabase().then((client) => {

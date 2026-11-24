@@ -925,7 +925,7 @@
 [data-jelly-theme] .jelly-product-card .jelly-product-card-saving { display: var(--jelly-card-saving-display, none); flex-wrap: wrap; gap: 4px 8px; margin: 2px 0 0; font-size: 14px; font-weight: 600; color: var(--jelly-card-saving-color, var(--theme-text, currentColor)); }
 [data-jelly-theme] .jelly-product-card-saving [data-saving="amount"] { display: var(--jelly-card-saving-amount-display, inline); text-decoration: underline; text-underline-offset: 3px; }
 [data-jelly-theme] .jelly-product-card-saving [data-saving="percent"] { display: var(--jelly-card-saving-percent-display, inline); }
-.jelly-product-card-chip { align-self: flex-start; justify-self: start; width: fit-content; display: inline-block; margin-top: 6px; padding: 3px 8px; border-radius: 4px; background: var(--theme-accent-soft, color-mix(in srgb, currentColor 8%, transparent)); color: var(--theme-text, inherit); font-size: 12px; line-height: 1.4; }
+.jelly-product-card-chip { align-self: flex-start; justify-self: start; width: fit-content; display: inline-block; margin-top: 6px; padding: 3px 8px; border-radius: 4px; background: var(--theme-accent-soft, color-mix(in srgb, currentColor 8%, transparent)); color: var(--j-color-text, var(--theme-text, inherit)); font-size: 12px; line-height: 1.4; }
 
 
 /* Product options as large tiles, and as tabs (one per option) holding tiles. */
@@ -1863,7 +1863,7 @@ body:has(.jelly-sticky-purchase[data-visible]) { padding-bottom: 72px; }
 [data-jelly-theme] .jelly-shop-look-list a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
 [data-jelly-theme] .jelly-showcase-price { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; margin: 4px 0 0; font-weight: 600; }
 /* A little of the text colour keeps the sale price readable (AA) on tinted bands too. */
-[data-jelly-theme] .jelly-showcase-price .is-sale { color: color-mix(in srgb, var(--j-color-sale, #b42318) 85%, var(--j-color-text, #000)); }
+[data-jelly-theme] .jelly-showcase-price .is-sale { color: color-mix(in srgb, var(--j-color-sale, #b42318) 50%, var(--j-color-text, #000)); }
 [data-jelly-theme] .jelly-showcase-price s { color: var(--j-color-muted); font-weight: 400; }
 [data-jelly-theme] .jelly-shop-look-list { display: grid; gap: 12px; margin: 24px 0 0; padding: 0; list-style: none; }
 [data-jelly-theme] .jelly-shop-look-list li { position: relative; display: grid; grid-template-columns: 32px 56px minmax(0, 1fr); gap: 14px; align-items: center; padding: 10px; border-radius: var(--j-radius-md, 8px); background: var(--j-color-surface, #fff); }

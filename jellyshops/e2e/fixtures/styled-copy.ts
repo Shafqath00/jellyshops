@@ -23,7 +23,9 @@ export async function openStyledCopy(page: Page, frameTitle: string, width = 128
     const clone = root.cloneNode(true) as HTMLElement;
     clone.querySelectorAll("link[rel='stylesheet'], style, script").forEach((node) => node.remove());
     const style = document.createElement("style");
-    style.textContent = css;
+    // The copy is checked at once, so an animation restarting in it (a rotating announcement fading in) would be
+    // measured at its first frame, nearly transparent. Show every element as it ends up.
+    style.textContent = `${css}\n*, *::before, *::after { animation: none !important; transition: none !important; }`;
     clone.querySelector("head")?.append(style);
     const themeRoot = document.querySelector("[data-jelly-theme]") ?? document.body;
     const computed = getComputedStyle(themeRoot);

@@ -115,15 +115,16 @@ export default function OrdersPage() {
   const storeId = activeStore?.id;
   const role = activeStore?.role ?? "";
 
+  const accessToken = session?.access_token;
   const api = useMemo(
     () =>
-      session?.access_token
+      accessToken
         ? createMerchantCommerceApi({
             baseUrl: API_BASE_URL,
-            token: session.access_token,
+            token: accessToken,
           })
         : null,
-    [session?.access_token],
+    [accessToken],
   );
 
   // Filters and URL state
@@ -145,6 +146,8 @@ export default function OrdersPage() {
   // Initialize filters from the address bar after mounting.
   useEffect(() => {
     const next = readQueryFromUrl();
+    // Read after mounting on purpose: the server render has no address bar, so reading it earlier breaks hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setQuery(next);
     setSearch(next.query ?? "");
     setHydrated(true);
@@ -186,6 +189,7 @@ export default function OrdersPage() {
     if (!hydrated) return;
 
     if (!api || !storeId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- no shop or session yet: nothing to load
       setResult(null);
       setLoading(false);
       return;
