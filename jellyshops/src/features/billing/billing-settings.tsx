@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Banner, Button, Card, SkeletonBlock, StatusBadge } from "@/components/admin";
-import { billingNotices, formatDay, loadBillingSummary, openBillingPage, trialDaysLeft, usageLabel, usageText, type BillingSummary } from "./billing-summary";
+import { billingNotices, formatDay, loadBillingSummary, openBillingPage, PLAN_PRICES, trialDaysLeft, usageLabel, usageText, type BillingInterval, type BillingSummary } from "./billing-summary";
 
 const currentPage = () => (typeof window === "undefined" ? "" : window.location.origin + window.location.pathname);
 const justPaid = () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("billing") === "done";
@@ -44,11 +44,12 @@ export function BillingSettings({ storeId, token, fetcher = fetch, now = new Dat
   const [attempt, setAttempt] = useState(returned ? 1 : 0);
   const [opening, setOpening] = useState<"checkout" | "portal" | null>(null);
   const [openError, setOpenError] = useState("");
+  const [interval, setBillingInterval] = useState<BillingInterval>("month");
 
-  const open = (kind: "checkout" | "portal") => {
+  const open = (kind: "checkout" | "portal", chosen?: BillingInterval) => {
     setOpening(kind);
     setOpenError("");
-    openBillingPage(kind, storeId, token, returnUrl, fetcher)
+    openBillingPage(kind, storeId, token, returnUrl, fetcher, chosen)
       .then(navigate)
       .catch((failure: unknown) => { setOpenError(failure instanceof Error ? failure.message : "Stripe couldn't be opened."); setOpening(null); });
   };
@@ -82,8 +83,15 @@ export function BillingSettings({ storeId, token, fetcher = fetch, now = new Dat
         </div>
       </div>
       {chargeable && !summary.checkoutAvailable && <p className="jk-hint">You&apos;ll be able to choose how to pay for your plan here soon.</p>}
+      {chargeable && summary.checkoutAvailable && canSubscribe && summary.annualAvailable && <fieldset className="jk-billing-intervals">
+        <legend>How often to pay</legend>
+        {(Object.keys(PLAN_PRICES) as BillingInterval[]).map((value) => <label key={value} className="jk-billing-interval">
+          <input type="radio" name="billing-interval" value={value} checked={interval === value} onChange={() => setBillingInterval(value)} disabled={opening !== null} />
+          <span><strong>{PLAN_PRICES[value].label}</strong> {PLAN_PRICES[value].price}{PLAN_PRICES[value].note && <em> · {PLAN_PRICES[value].note}</em>}</span>
+        </label>)}
+      </fieldset>}
       {chargeable && summary.checkoutAvailable && <div className="jk-billing-actions">
-        {canSubscribe && <Button variant="primary" loading={opening === "checkout"} loadingLabel="Opening Stripe…" disabled={opening !== null} onClick={() => open("checkout")}>Choose a plan</Button>}
+        {canSubscribe && <Button variant="primary" loading={opening === "checkout"} loadingLabel="Opening Stripe…" disabled={opening !== null} onClick={() => open("checkout", summary.annualAvailable ? interval : undefined)}>Choose a plan</Button>}
         {summary.hasSubscription && <Button variant={canSubscribe ? "secondary" : "primary"} loading={opening === "portal"} loadingLabel="Opening Stripe…" disabled={opening !== null} onClick={() => open("portal")}>Manage billing</Button>}
         <p className="jk-hint">{canSubscribe ? "You'll pay securely on Stripe and come back here." : "Change your card, see invoices or cancel on Stripe."}</p>
       </div>}

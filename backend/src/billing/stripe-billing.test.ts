@@ -19,7 +19,7 @@ const subscription = (over: Partial<Stripe.Subscription> = {}): Stripe.Subscript
   ...over,
 } as unknown as Stripe.Subscription);
 
-function setup(record: Partial<StoreBillingRecord> | null = { status: "trialing", trialEndsAt: new Date(now.getTime() + 10 * DAY) }, live = subscription()) {
+function setup(record: Partial<StoreBillingRecord> | null = { status: "trialing", trialEndsAt: new Date(now.getTime() + 10 * DAY) }, live = subscription(), annualPriceId: string | undefined = "price_year") {
   const stripe = {
     checkout: { sessions: { create: vi.fn(async () => ({ url: "https://checkout.stripe.com/c/pay/cs_1" })) } },
     billingPortal: { sessions: { create: vi.fn(async () => ({ url: "https://billing.stripe.com/p/session/1" })) } },
@@ -28,7 +28,7 @@ function setup(record: Partial<StoreBillingRecord> | null = { status: "trialing"
   } satisfies BillingStripeClient;
   const query = vi.fn(async () => ({ rows: [] }));
   const full = record ? { storeId: "store-a", plan: "standard", trialEndsAt: null, currentPeriodEnd: null, cancelAtPeriodEnd: false, ...record } as StoreBillingRecord : null;
-  const service = new StripeBillingService(stripe, { query }, { record: async () => full }, { priceId: "price_123", webhookSecret: SECRET, allowedOrigins: ORIGINS, now: () => now });
+  const service = new StripeBillingService(stripe, { query }, { record: async () => full }, { priceId: "price_123", annualPriceId, webhookSecret: SECRET, allowedOrigins: ORIGINS, now: () => now });
   return { stripe, query, service };
 }
 
@@ -74,10 +74,25 @@ describe("starting to pay", () => {
     const { service, stripe } = setup();
     expect(await service.startCheckout("store-a", { returnUrl: "http://localhost:3210/admin/s/shop/settings/billing", email: "owner@example.test" })).toEqual({ url: "https://checkout.stripe.com/c/pay/cs_1" });
     expect(stripe.checkout.sessions.create).toHaveBeenCalledWith(expect.objectContaining({
-      mode: "subscription", line_items: [{ price: "price_123", quantity: 1 }], client_reference_id: "store-a", customer_email: "owner@example.test",
+      mode: "subscription", line_items: [{ price: "price_123", quantity: 1 }], adaptive_pricing: { enabled: false }, client_reference_id: "store-a", customer_email: "owner@example.test",
       subscription_data: { metadata: { jelly_store_id: "store-a" }, trial_end: at(new Date(now.getTime() + 10 * DAY)) },
       success_url: "http://localhost:3210/admin/s/shop/settings/billing?billing=done", cancel_url: "http://localhost:3210/admin/s/shop/settings/billing",
     }));
+  });
+
+  it("uses the yearly price when asked, keeping the trial, and refuses yearly when no yearly price is set", async () => {
+    const { service, stripe } = setup();
+    await service.startCheckout("store-a", { returnUrl: "http://localhost:3210/admin", interval: "year" });
+    const params = stripe.checkout.sessions.create.mock.calls[0]![0] as Stripe.Checkout.SessionCreateParams;
+    expect(params.line_items).toEqual([{ price: "price_year", quantity: 1 }]);
+    expect(params.adaptive_pricing).toEqual({ enabled: false });
+    expect(params.subscription_data?.trial_end).toBe(at(new Date(now.getTime() + 10 * DAY)));
+    expect(service.annualAvailable).toBe(true);
+
+    const monthlyOnly = setup(undefined, undefined, "").service;
+    expect(monthlyOnly.annualAvailable).toBe(false);
+    await expect(monthlyOnly.startCheckout("store-a", { returnUrl: "http://localhost:3210/admin", interval: "year" })).rejects.toMatchObject({ code: "BILLING_INTERVAL_UNAVAILABLE" });
+    await expect(service.startCheckout("store-a", { returnUrl: "http://localhost:3210/admin", interval: "weekly" })).rejects.toMatchObject({ code: "BILLING_INTERVAL_INVALID" });
   });
 
   it("charges at once when under two days of trial are left, and reuses the shop's Stripe customer", async () => {

@@ -126,14 +126,24 @@ export class StripeBillingService {
     private readonly stripe: BillingStripeClient,
     private readonly sql: Sql,
     private readonly billing: Pick<StoreBillingService, "record">,
-    private readonly options: { priceId: string; webhookSecret: string; allowedOrigins: string[]; now?: () => Date },
+    private readonly options: { priceId: string; annualPriceId?: string; webhookSecret: string; allowedOrigins: string[]; now?: () => Date },
   ) {}
 
   private now() { return this.options.now?.() ?? new Date(); }
 
-  /** A Stripe Checkout page where the shop starts paying; its free trial carries over while 2+ days are left. */
-  async startCheckout(storeId: string, input: { returnUrl: unknown; email?: string }): Promise<{ url: string }> {
+  /** Whether a yearly price is set up (STRIPE_BILLING_ANNUAL_PRICE_ID). */
+  get annualAvailable(): boolean { return Boolean(this.options.annualPriceId); }
+
+  /**
+   * A Stripe Checkout page where the shop starts paying, monthly (default) or yearly; its free trial carries over while
+   * 2+ days are left. Always in the price's own currency (GBP): adaptive pricing is off, so nobody sees a converted amount.
+   */
+  async startCheckout(storeId: string, input: { returnUrl: unknown; email?: string; interval?: unknown }): Promise<{ url: string }> {
     const returnUrl = checkReturnUrl(input.returnUrl, this.options.allowedOrigins);
+    const interval = input.interval ?? "month";
+    if (interval !== "month" && interval !== "year") throw new ApiError(400, "BILLING_INTERVAL_INVALID", "Choose monthly or yearly.");
+    const priceId = interval === "year" ? this.options.annualPriceId : this.options.priceId;
+    if (!priceId) throw new ApiError(400, "BILLING_INTERVAL_UNAVAILABLE", "Paying yearly isn't available yet. Choose monthly.");
     const record = await this.billing.record(storeId);
     if (record?.status === "exempt") throw new ApiError(409, "BILLING_EXEMPT", "This shop isn't charged, so there's nothing to pay.");
     if (record?.stripeSubscriptionId && record.status !== "canceled") {
@@ -143,7 +153,8 @@ export class StripeBillingService {
       ? Math.floor(record.trialEndsAt.getTime() / 1000) : undefined;
     const session = await this.stripe.checkout.sessions.create({
       mode: "subscription",
-      line_items: [{ price: this.options.priceId, quantity: 1 }],
+      line_items: [{ price: priceId, quantity: 1 }],
+      adaptive_pricing: { enabled: false },
       client_reference_id: storeId,
       metadata: { [STORE_ID_METADATA]: storeId },
       subscription_data: { metadata: { [STORE_ID_METADATA]: storeId }, ...(trialEnd ? { trial_end: trialEnd } : {}) },

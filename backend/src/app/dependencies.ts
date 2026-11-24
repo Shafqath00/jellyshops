@@ -161,7 +161,7 @@ export function resolveAppDependencies(dependencies: Partial<AppDependencies> = 
   // Shops paying Jellyshop (Stripe Billing on the platform account); only when STRIPE_BILLING_* are set.
   const stripeBilling = dependencies.stripeBilling ?? (config.billingStripe && supabasePool && storeBilling
     ? new StripeBillingService(new Stripe(config.billingStripe.secretKey, { apiVersion: config.billingStripe.apiVersion }) as unknown as BillingStripeClient, supabasePool, storeBilling, {
-      priceId: config.billingStripe.priceId, webhookSecret: config.billingStripe.webhookSecret, allowedOrigins: config.corsOrigins,
+      priceId: config.billingStripe.priceId, annualPriceId: config.billingStripe.annualPriceId, webhookSecret: config.billingStripe.webhookSecret, allowedOrigins: config.corsOrigins,
     })
     : undefined);
   const planLimits = dependencies.planLimits ?? (supabasePool ? new PlanLimitChecker(sqlUsageReader(supabasePool), storeBilling?.planFor) : undefined);

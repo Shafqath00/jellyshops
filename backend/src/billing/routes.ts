@@ -19,7 +19,7 @@ export function createBillingRouter(
   billing: Pick<StoreBillingService, "state">,
   limits: Pick<PlanLimitChecker, "usage">,
   authProvider: AuthProvider,
-  options: { enforced: boolean; stripe?: Pick<StripeBillingService, "startCheckout" | "openPortal"> },
+  options: { enforced: boolean; stripe?: Pick<StripeBillingService, "startCheckout" | "openPortal" | "annualAvailable"> },
 ): Router {
   const router = Router({ mergeParams: true });
   router.get("/billing", requireMerchant(authProvider), requireStorePermission("settings:manage"), async (request, response, next) => {
@@ -33,6 +33,8 @@ export function createBillingRouter(
         enforced: options.enforced,
         // Whether paying is set up on this server (Stripe Billing, step 4d).
         checkoutAvailable: Boolean(options.stripe),
+        // Whether a yearly price can be chosen as well as monthly.
+        annualAvailable: Boolean(options.stripe?.annualAvailable),
         usage: usage.map(({ kind, used, limit }) => ({ kind, used, limit })),
       });
     } catch (error) { next(error); }
@@ -41,8 +43,8 @@ export function createBillingRouter(
   router.post("/billing/checkout", requireMerchant(authProvider), requireStorePermission("settings:manage"), async (request, response, next) => {
     try {
       if (!options.stripe) throw new ApiError(503, "BILLING_UNAVAILABLE", "Paying for a plan isn't available yet.");
-      const body = (request.body ?? {}) as { returnUrl?: unknown };
-      response.set("Cache-Control", "no-store").json(await options.stripe.startCheckout(request.storeContext!.storeId, { returnUrl: body.returnUrl, email: request.merchant?.email }));
+      const body = (request.body ?? {}) as { returnUrl?: unknown; interval?: unknown };
+      response.set("Cache-Control", "no-store").json(await options.stripe.startCheckout(request.storeContext!.storeId, { returnUrl: body.returnUrl, email: request.merchant?.email, interval: body.interval }));
     } catch (error) { next(error); }
   });
   router.post("/billing/portal", requireMerchant(authProvider), requireStorePermission("settings:manage"), async (request, response, next) => {

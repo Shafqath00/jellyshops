@@ -215,6 +215,24 @@ functions without a fixed `search_path` and leaked-password protection being off
 
 **Decision 3 taken (2026-11-23):** the plan is **£19 a month in GBP**, the same price the marketing site shows. No annual price yet.
 
+**Decisions taken 2026-11-24 (owner):**
+
+- **VAT (decision 6): not yet.** £19 flat, no VAT added and no Stripe Tax. Revisit before turnover nears the UK
+  registration threshold or on registering voluntarily (owner to confirm with an accountant). Turning it on later means
+  Stripe Tax in the dashboard plus `automatic_tax` in `startCheckout`.
+- **Annual price: £190 a year** (two months free), built. Optional setting `STRIPE_BILLING_ANNUAL_PRICE_ID`; without it
+  the Billing page offers monthly only. With it, Settings > Plan and billing shows "How often to pay" (Monthly £19 a
+  month / Yearly £190 a year · 2 months free) and sends `interval: "month" | "year"` to `POST /billing/checkout`
+  (`BILLING_INTERVAL_INVALID` / `BILLING_INTERVAL_UNAVAILABLE` otherwise); `GET /billing` says `annualAvailable`. The
+  trial carries over the same way for both. The amounts shown come from `PLAN_PRICES` in
+  `jellyshops/src/features/billing/billing-summary.ts` and must match the Stripe prices. Test-mode price:
+  `price_1UfLtg4enHibgB7Vl93OonFZ` (£190.00 GBP yearly, same product). A live yearly price is still to create.
+- **Adaptive pricing: off**, set in code on every Checkout session (`adaptive_pricing: { enabled: false }`), so it holds
+  in test and live without a dashboard switch: everyone sees and pays GBP.
+- Checked 2026-11-24: real test-mode Checkout sessions made by `startCheckout` came back as £19.00/month and
+  £190.00/year in GBP with adaptive pricing off (expired straight away); backend and frontend billing tests pass. The
+  yearly choice on the Billing page was not seen in a browser signed in (unit test only).
+
 **Test mode set up (2026-11-23, with the owner's yes):** product "Jellyshop" (`prod_VgMcEE63qVbOXK`) with the £19.00
 monthly GBP price `price_1UeztF4enHibgB7VPnThqKhm` in the Stripe **test** account (created by a one-off script with the
 test key; running it again reuses them). `backend/.env` now has `STRIPE_BILLING_PRICE_ID` and

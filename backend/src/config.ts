@@ -520,8 +520,10 @@ export function loadConfig(
 export interface BillingStripeConfig {
   secretKey: string;
   apiVersion: typeof STRIPE_API_VERSION;
-  /** The plan's price (STRIPE_BILLING_PRICE_ID, price_…). */
+  /** The plan's monthly price (STRIPE_BILLING_PRICE_ID, price_…). */
   priceId: string;
+  /** The plan's yearly price (STRIPE_BILLING_ANNUAL_PRICE_ID, price_…); left out = monthly only. */
+  annualPriceId?: string;
   /** Signing secret of the /webhooks/stripe/billing endpoint (STRIPE_BILLING_WEBHOOK_SECRET). */
   webhookSecret: string;
 }
@@ -541,5 +543,8 @@ function loadBillingStripeConfig(environment: NodeJS.ProcessEnv): BillingStripeC
   for (const other of [environment.STRIPE_ACCOUNTS_V2_WEBHOOK_SECRET, environment.STRIPE_CONNECT_PAYMENTS_WEBHOOK_SECRET]) {
     if (other?.trim() === webhookSecret) throw new Error("STRIPE_BILLING_WEBHOOK_SECRET must differ from the Connect webhook secrets");
   }
-  return { secretKey, apiVersion: STRIPE_API_VERSION, priceId, webhookSecret };
+  const annualPriceId = environment.STRIPE_BILLING_ANNUAL_PRICE_ID?.trim() || undefined;
+  if (annualPriceId && !annualPriceId.startsWith("price_")) throw new Error("STRIPE_BILLING_ANNUAL_PRICE_ID must be a Stripe price id (price_…)");
+  if (annualPriceId === priceId) throw new Error("STRIPE_BILLING_ANNUAL_PRICE_ID must differ from STRIPE_BILLING_PRICE_ID");
+  return { secretKey, apiVersion: STRIPE_API_VERSION, priceId, ...(annualPriceId ? { annualPriceId } : {}), webhookSecret };
 }

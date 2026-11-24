@@ -17,6 +17,8 @@ export interface BillingSummary {
   checkoutAvailable?: boolean;
   /** Whether the shop has a Stripe subscription it can manage. */
   hasSubscription?: boolean;
+  /** Whether a yearly price can be chosen as well as monthly. */
+  annualAvailable?: boolean;
   usage: Array<{ kind: "products" | "photoBytes"; used: number; limit: number | null }>;
 }
 
@@ -116,9 +118,17 @@ export function billingNotices(summary: BillingSummary | null, now: Date): Billi
 }
 
 /** Starts paying (Stripe Checkout) or opens Stripe's billing portal; resolves to the Stripe page to open. */
-export async function openBillingPage(kind: "checkout" | "portal", storeId: string, token: string, returnUrl: string, fetcher: typeof fetch = fetch): Promise<string> {
+export type BillingInterval = "month" | "year";
+
+/** The plan's prices as merchants see them; they must match the Stripe prices (STRIPE_BILLING_PRICE_ID / _ANNUAL_). */
+export const PLAN_PRICES: Record<BillingInterval, { label: string; price: string; note?: string }> = {
+  month: { label: "Monthly", price: "£19 a month" },
+  year: { label: "Yearly", price: "£190 a year", note: "2 months free" },
+};
+
+export async function openBillingPage(kind: "checkout" | "portal", storeId: string, token: string, returnUrl: string, fetcher: typeof fetch = fetch, interval?: BillingInterval): Promise<string> {
   const response = await fetcher(`${authApiOrigin()}/api/stores/${encodeURIComponent(storeId)}/billing/${kind}`, {
-    method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify({ returnUrl }),
+    method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(interval ? { returnUrl, interval } : { returnUrl }),
   });
   const body = await response.json().catch(() => ({})) as { url?: string; error?: { message?: string } };
   if (!response.ok || !body.url) throw new Error(body.error?.message ?? "Stripe couldn't be opened. Try again in a moment.");

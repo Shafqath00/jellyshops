@@ -118,6 +118,25 @@ describe("paying with Stripe from Settings > Plan and billing", () => {
     expect(screen.queryByRole("button", { name: "Manage billing" })).toBeNull();
   });
 
+  it("lets the merchant pay yearly when a yearly price is set up", async () => {
+    const { default: userEvent } = await import("@testing-library/user-event");
+    const navigate = vi.fn();
+    const bodies: unknown[] = [];
+    const fetcher = vi.fn(async (_url: string, init?: RequestInit) => {
+      if (init?.method === "POST") { bodies.push(JSON.parse(String(init.body))); return json({ url: "https://checkout.stripe.com/c/pay/cs_2" }); }
+      return json(summary({ checkoutAvailable: true, hasSubscription: false, annualAvailable: true }));
+    });
+    render(<BillingSettings storeId="store-1" token="session" fetcher={fetcher as never} now={now} returnUrl={returnUrl} navigate={navigate} returned={false} />);
+    const group = await screen.findByRole("group", { name: "How often to pay" });
+    expect(group).toHaveTextContent("Monthly £19 a month");
+    expect(group).toHaveTextContent("Yearly £190 a year · 2 months free");
+    expect(screen.getByRole("radio", { name: /Monthly/ })).toBeChecked();
+    await userEvent.click(screen.getByRole("radio", { name: /Yearly/ }));
+    await userEvent.click(screen.getByRole("button", { name: "Choose a plan" }));
+    await vi.waitFor(() => expect(navigate).toHaveBeenCalledWith("https://checkout.stripe.com/c/pay/cs_2"));
+    expect(bodies).toEqual([{ returnUrl, interval: "year" }]);
+  });
+
   it("offers Manage billing once the shop has a plan, and explains when Stripe can't be opened", async () => {
     const { default: userEvent } = await import("@testing-library/user-event");
     const navigate = vi.fn();
