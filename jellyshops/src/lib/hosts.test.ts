@@ -107,13 +107,15 @@ describe("classifyHost: shops", () => {
     });
   });
 
-  it("does not serve shops on the admin path (the admin has its own host)", () => {
-    expect(route("myshop.jellyshop.io", "/admin")).toEqual({
-      kind: "shop",
-      slug: "myshop",
-      path: "/sites/myshop/admin",
-      mode: "subdomain",
+  it("sends /admin on a shop's address to that shop's admin, keeping the page and the query", () => {
+    expect(route("myshop.jellyshop.io", "/admin")).toEqual({ kind: "redirect", location: "https://admin.jellyshop.io/s/myshop" });
+    expect(route("myshop.jellyshop.io", "/admin/orders/42", { search: "?tab=open" })).toEqual({
+      kind: "redirect",
+      location: "https://admin.jellyshop.io/s/myshop/orders/42?tab=open",
     });
+    expect(route("myshop.localhost:3000", "/admin", { protocol: "http" })).toEqual({ kind: "redirect", location: "http://admin.localhost:3000/s/myshop" });
+    // Only the first segment counts: a shop page that merely contains "admin" stays a shop page.
+    expect(route("myshop.jellyshop.io", "/pages/admin")).toEqual({ kind: "shop", slug: "myshop", path: "/sites/myshop/pages/admin", mode: "subdomain" });
   });
 
   it("shows the shop-not-found page for reserved, malformed, punycode and nested labels", () => {
@@ -204,6 +206,11 @@ describe("classifyHost: today's /<slug> addresses (storeLinks: path)", () => {
 
   it("still refuses internal folders", () => {
     expect(path("jellyshop.io", "/sites/myshop")).toEqual({ kind: "not-found" });
+  });
+
+  it("sends /<shop>/admin to that shop's admin", () => {
+    expect(path("jellyshop.io", "/myshop/admin")).toEqual({ kind: "redirect", location: "https://jellyshop.io/admin/s/myshop" });
+    expect(path("jellyshop.io", "/myshop/admin/orders", { search: "?a=1" })).toEqual({ kind: "redirect", location: "https://jellyshop.io/admin/s/myshop/orders?a=1" });
   });
 });
 

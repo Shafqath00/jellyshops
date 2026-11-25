@@ -131,6 +131,11 @@ function shopPath(slug: string, path: string): string {
   return path === "/" || path === "" ? `/sites/${slug}` : `/sites/${slug}${path}`;
 }
 
+/** A shop's admin page on the admin host: `/s/<slug>` plus the page (`/orders` → `/s/<slug>/orders`). */
+function shopAdminPath(slug: string, page: string): string {
+  return page === "/" || page === "" ? `/s/${slug}` : `/s/${slug}${page}`;
+}
+
 /** Decides what to do with a request. See the tree in §2 of the tenancy plan. */
 export function classifyHost(request: HostRequest): HostRoute {
   const root = (request.rootDomain ?? DEFAULT_ROOT_DOMAIN).toLowerCase();
@@ -173,6 +178,8 @@ export function classifyHost(request: HostRequest): HostRoute {
   if (SHARED_SEGMENTS.has(segment) || hasFileExtension(path)) return { kind: "pass" };
   // Old-style links that still carry the shop's own address: /<slug>/x on <slug>.<root> → /x.
   if (segment === label) return { kind: "redirect", location: `${origin(label)}${afterFirstSegment(path)}${search}` };
+  // <shop>.<root>/admin/... opens that shop's admin; the admin asks to sign in or says the account has no access.
+  if (segment === "admin") return { kind: "redirect", location: `${origin(MERCHANT_ADMIN_LABEL)}${shopAdminPath(label, afterFirstSegment(path))}${search}` };
   return { kind: "shop", slug: label, path: shopPath(label, path), mode: "subdomain" };
 }
 
@@ -183,6 +190,8 @@ function classifyApex(path: string, search: string, segment: string, origin: (su
     // Shops still live under the main address: serve them there (path) or send old links to /_shop (preview).
     if (segment === "" || APEX_PATH_SEGMENTS.has(segment) || hasFileExtension(path) || !isShopLabel(segment) || SYSTEM_SUBDOMAINS.has(segment)) return { kind: "marketing" };
     const rest = afterFirstSegment(path);
+    // jellyshop.io/<shop>/admin/... opens that shop's admin.
+    if (firstSegment(rest) === "admin") return { kind: "redirect", location: `${origin("")}/admin${shopAdminPath(segment, afterFirstSegment(rest))}${search}` };
     if (links === "preview") return { kind: "redirect", location: `${origin("")}/${PREVIEW_SHOP_PREFIX}/${segment}${rest === "/" ? "" : rest}${search}` };
     if (SHARED_SEGMENTS.has(firstSegment(rest))) return { kind: "pass" };
     return { kind: "shop", slug: segment, path: shopPath(segment, rest), mode: "path" };
