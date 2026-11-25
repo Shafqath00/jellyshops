@@ -32,7 +32,7 @@ const SYSTEM_SUBDOMAINS = { has: isSystemStoreAddress };
  */
 export const APEX_PATH_SEGMENTS: ReadonlySet<string> = new Set([
   // src/app
-  "_home", "admin", "api", "auth", "changelog", "home-fonts", "login", "onboarding", "signup", "store-password",
+  "_home", "admin", "api", "auth", "changelog", "home-fonts", "legal", "login", "onboarding", "signup", "store-password",
   "theme-preview", "themes",
   // public
   "assets", "brand", "images", "logos", "templates",

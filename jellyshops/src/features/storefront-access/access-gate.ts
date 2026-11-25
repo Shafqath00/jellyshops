@@ -11,7 +11,7 @@
 import { accessCookieName } from "./access-api";
 
 /** Top-level app folders and files that are not stores. Keep in step with the backend's RESERVED_STORE_SLUGS. */
-const NOT_STORES = new Set(["admin", "api", "auth", "changelog", "login", "signup", "onboarding", "theme-preview", "themes", "store-password", "_next"]);
+const NOT_STORES = new Set(["admin", "api", "auth", "changelog", "legal", "login", "signup", "onboarding", "theme-preview", "themes", "store-password", "_next"]);
 const CACHE_MS = 60_000;
 const MAX_ENTRIES = 5_000;
 
