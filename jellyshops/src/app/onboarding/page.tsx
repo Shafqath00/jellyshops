@@ -10,6 +10,7 @@ import { checkStoreAddress } from "@jelly/storefront-schema";
 import "@/features/brand/brand.css";
 import { geist, geistMono } from "@/features/brand/fonts";
 import { JellyShopLogo } from "@/features/brand/logo";
+import { forgetChosenTemplate, readChosenTemplate } from "@/features/brand/chosen-template";
 import { useReducedMotion } from "@/features/brand/motion";
 import {
   markets, SetupRequestError, setupRequest,
@@ -85,6 +86,9 @@ export default function OnboardingPage() {
         return;
       }
       const nextAnswers = prefill(state.answers, latestUser.current?.user_metadata ?? {});
+      // A design picked on the home page ("Use this template") is the starting choice, unless one is already saved.
+      const chosen = readChosenTemplate();
+      if (!nextAnswers.theme && chosen && themes.some((theme) => theme.id === chosen)) nextAnswers.theme = chosen;
       revision.current = state.revision;
       saved.current = JSON.stringify({ step: state.step, answers: state.answers });
       slugEdited.current = Boolean(nextAnswers.slug && nextAnswers.slug !== slugFromName(nextAnswers.name ?? ""));
@@ -209,6 +213,7 @@ export default function OnboardingPage() {
   async function openDashboard(store: MerchantStore) {
     try {
       await refreshMerchant();
+      forgetChosenTemplate();
       setActiveStoreId(store.id);
       await openAdmin(toShopAdmin(store.slug, "/admin?welcome=1"), (next) => router.replace(next));
     } catch {

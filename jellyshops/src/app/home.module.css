@@ -831,3 +831,127 @@
 .navTrigger[aria-expanded="true"],
 .navList > li > a:hover,
 .loginLink:hover { color: var(--fg); }
+
+/* ======================================================================
+   Live template preview (_home/template-preview-dialog.tsx): full screen,
+   the design's sample store in a frame scaled to the chosen device.
+   Phones: title and close, page tabs, then previous/next and the call to action.
+   ====================================================================== */
+.preview {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  overflow: hidden;
+  border: 0;
+  background: var(--bg);
+  color: var(--fg-muted);
+  opacity: 0;
+  transform: translateY(16px) scale(.99);
+  transition: opacity .3s var(--ease), transform .3s var(--ease), overlay .3s allow-discrete, display .3s allow-discrete;
+}
+.preview[open] { opacity: 1; transform: none; }
+@starting-style { .preview[open] { opacity: 0; transform: translateY(16px) scale(.99); } }
+.preview::backdrop { background: rgb(0 0 0 / 60%); }
+
+.previewInner { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); height: 100%; }
+
+.previewBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px var(--gutter);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-raised);
+}
+
+.previewTitle { order: 1; flex: 1 1 auto; display: grid; min-width: 0; }
+.previewTitle h2 { overflow: hidden; color: var(--fg); font-size: 1.0625rem; font-weight: 600; letter-spacing: -.02em; text-overflow: ellipsis; white-space: nowrap; }
+.previewTitle span { color: var(--fg-muted); font: 500 .6875rem/1.4 var(--mono); letter-spacing: .04em; text-transform: uppercase; }
+.previewClose { order: 2; }
+
+.previewTabs {
+  order: 3;
+  flex: 1 1 100%;
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 2px;
+  scrollbar-width: none;
+}
+.previewTabs::-webkit-scrollbar { display: none; }
+
+.previewTabs button,
+.previewDevices button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: none;
+  color: var(--fg-muted);
+  font-size: .875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color .2s var(--ease), background-color .2s var(--ease), border-color .2s var(--ease);
+}
+.previewTabs button:hover,
+.previewDevices button:hover { color: var(--fg); }
+.previewTabs button[aria-pressed="true"],
+.previewDevices button[aria-pressed="true"] { border-color: var(--accent-line); background: var(--accent-soft); color: var(--fg); }
+
+.previewNav { order: 4; display: flex; align-items: center; gap: 4px; }
+.previewCount { display: none; min-width: 4.5em; color: var(--fg-muted); font: 500 .75rem/1 var(--mono); text-align: center; }
+.previewDevices { display: none; }
+.previewCta { order: 5; margin-left: auto; }
+/* Very small phones: no arrow, so previous/next and the button share one row. */
+@media (max-width: 399px) { .previewCta { padding: 0 16px; } .previewCta svg { display: none; } }
+
+.previewStage { position: relative; min-width: 0; display: grid; place-items: start center; overflow: hidden; background: var(--bg-sunken); }
+.previewStage:not([data-device="desktop"]) { padding: 16px; }
+
+.previewDevice { position: relative; overflow: hidden; background: #fff; }
+.previewStage:not([data-device="desktop"]) .previewDevice { border: 1px solid var(--line-strong); border-radius: 20px; box-shadow: 0 30px 80px -30px rgb(0 0 0 / 50%); }
+.previewDevice iframe { display: block; border: 0; transform-origin: top left; background: #fff; }
+
+.previewSkeleton { position: absolute; inset: 0; display: grid; grid-template-rows: 48px 40% 24px 1fr; gap: 16px; padding: 16px; background: #f4f4f5; }
+.previewSkeleton span { border-radius: 10px; background: linear-gradient(90deg, #e4e4e7 0%, #f4f4f5 50%, #e4e4e7 100%) 0 0 / 200% 100%; animation: shimmer 1.4s linear infinite; }
+.previewSkeleton span:nth-child(3) { width: 40%; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+@media (min-width: 400px) {
+  .previewCount { display: inline-block; }
+}
+
+@media (min-width: 640px) {
+  .previewNav { order: 2; }
+  .previewDevices { order: 3; display: flex; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: 999px; }
+  .previewDevices button { padding: 0; }
+  .previewCta { order: 4; }
+  .previewClose { order: 5; }
+  .previewTabs { order: 6; }
+}
+
+@media (min-width: 1100px) {
+  .previewBar { flex-wrap: nowrap; }
+  .previewTitle { flex: 0 1 auto; }
+  .previewTabs { order: 3; flex: 0 1 auto; margin-inline: auto; }
+  .previewDevices { order: 4; }
+  .previewCta { order: 5; margin-left: 0; }
+  .previewClose { order: 6; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preview { transform: none; transition: opacity .01ms, overlay .01ms allow-discrete, display .01ms allow-discrete; }
+  @starting-style { .preview[open] { transform: none; } }
+  .previewSkeleton span { animation: none; }
+}

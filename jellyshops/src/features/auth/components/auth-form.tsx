@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { LoaderCircle, MailCheck } from "lucide-react";
+import { rememberChosenTemplate } from "@/features/brand/chosen-template";
 import { authApiOrigin, useAuth } from "@/features/auth/providers/auth-provider";
 import { merchantSupabase } from "@/features/auth/lib/supabase-clients";
 import { merchantCallbackUrl, merchantReturnPath } from "../lib/auth-navigation";
@@ -83,6 +84,9 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const signup = mode === "signup";
   const googleEnabled = process.env.NEXT_PUBLIC_JELLYSHOP_GOOGLE_SIGN_IN === "true";
   const [recovery, setRecovery] = useState(!signup && query.get("recover") === "1");
+  // "Use this template" on the home page: onboarding starts with that design (features/brand/chosen-template.ts).
+  const chosenTemplate = query.get("template");
+  useEffect(() => { rememberChosenTemplate(chosenTemplate); }, [chosenTemplate]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

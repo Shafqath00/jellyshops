@@ -310,3 +310,8 @@ export function themePreviewEntries(): Array<{ path: string; config: ThemePrevie
     .flatMap((theme) => { const config = generatedThemePreview(theme.id); return config ? [{ path: theme.id, config, base: basePath((theme.manifest as { extends: string }).extends) }] : []; });
   return [...Object.entries(builtInPreviews).map(([path, config]) => ({ path, config })), ...generated];
 }
+
+/** A design's preview by its theme id (the home page's live previews): a built-in theme, else a generated one. */
+export function previewConfigForTheme(themeId: string): ThemePreviewConfig | null {
+  return Object.values(builtInPreviews).find((config) => config.themeId === themeId) ?? generatedThemePreview(themeId);
+}

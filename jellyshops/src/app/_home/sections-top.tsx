@@ -8,6 +8,7 @@ import { useRef, useState } from "react";
 import { features, shops, stats, steps, templates } from "../home-content";
 import { Counter, EASE, Reveal, staggerChild, staggerParent, useReducedMotion } from "@/features/brand/motion";
 import styles from "../home.module.css";
+import { TemplatePreviewDialog } from "./template-preview-dialog";
 
 /* ---------- 3. Customer marquee + stats ---------- */
 
@@ -145,6 +146,7 @@ export function Bento() {
 /* ---------- 6. Templates ---------- */
 
 export function Templates() {
+  const [open, setOpen] = useState<number | null>(null);
   return (
     <section id="templates" className={styles.section} aria-labelledby="templates-title">
       <div className={styles.container}>
@@ -159,7 +161,17 @@ export function Templates() {
           {templates.map(({ slug, name, category }) => (
             <motion.li key={slug} variants={staggerChild}>
               <motion.div whileHover="hover" className={styles.templateCard}>
-                <Link href={`/theme-preview/${slug}`} prefetch={false} className={styles.templateLink}>
+                <Link
+                  href={`/theme-preview/live/${slug}`}
+                  prefetch={false}
+                  className={styles.templateLink}
+                  onClick={(event) => {
+                    // A plain click opens the preview here; new-tab clicks open the sample store on its own.
+                    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+                    event.preventDefault();
+                    setOpen(templates.findIndex((item) => item.slug === slug));
+                  }}
+                >
                   <span className={styles.templateImage}>
                     <motion.span variants={{ hover: { scale: 1.05, y: -6 } }} transition={{ duration: 0.7, ease: EASE }} className={styles.templateImageInner}>
                       <Image src={`/assets/template-${slug.replace("jelly-", "")}.webp`} alt="" width={1200} height={800} sizes="(max-width: 639px) 92vw, (max-width: 1023px) 46vw, 380px" loading="lazy" />
@@ -179,6 +191,7 @@ export function Templates() {
           ))}
         </motion.ul>
       </div>
+      <TemplatePreviewDialog templates={templates} index={open} onIndexChange={setOpen} onClose={() => setOpen(null)} />
     </section>
   );
 }

@@ -137,6 +137,21 @@ it("creates the store from the last step with the suggested design and opens the
   expect(backend.calls.filter((call) => call === "POST /complete")).toHaveLength(1);
 });
 
+it("starts with the design picked on the home page and forgets it once the store exists", async () => {
+  localStorage.setItem("jellyshop-chosen-template", "jelly-resthaven");
+  const backend = mockBackend({ step: "products", answers: { ...ready, category: "Electronics" } });
+  const user = userEvent.setup();
+  render(<OnboardingPage />);
+
+  await user.type(await screen.findByLabelText("Product name"), "Linen bed");
+  await user.type(screen.getByLabelText(/^Price/), "499");
+  await user.click(screen.getByRole("button", { name: /create my store/i }));
+
+  await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/admin/s/fern-studio?welcome=1"));
+  expect(backend.snapshot().answers).toMatchObject({ theme: "jelly-resthaven" });
+  expect(localStorage.getItem("jellyshop-chosen-template")).toBeNull();
+});
+
 it("retries dashboard loading after completion without creating a second store", async () => {
   const backend = mockBackend({ step: "review", answers: ready });
   refreshMerchant.mockRejectedValueOnce(new Error("Network unavailable"));

@@ -11,6 +11,7 @@ beforeAll(() => {
   HTMLDialogElement.prototype.showModal ??= vi.fn(function (this: HTMLDialogElement) { this.setAttribute("open", ""); });
   HTMLDialogElement.prototype.close ??= vi.fn(function (this: HTMLDialogElement) { this.removeAttribute("open"); });
   window.matchMedia ??= vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn(), addListener: vi.fn(), removeListener: vi.fn() });
+  globalThis.ResizeObserver ??= class { observe() {} unobserve() {} disconnect() {} } as unknown as typeof ResizeObserver;
   globalThis.IntersectionObserver ??= class { observe() {} unobserve() {} disconnect() {} takeRecords() { return []; } } as unknown as typeof IntersectionObserver;
 });
 
@@ -79,4 +80,20 @@ it("opens the product tour", () => {
   render(<HomePage />);
   fireEvent.click(screen.getAllByRole("button", { name: /take the tour/i })[0]);
   expect(screen.getAllByText(/from a blank store to your first order/i)[0]).toBeInTheDocument();
+});
+
+it("opens a live preview of a store design and starts sign-up with it", () => {
+  render(<HomePage />);
+  const section = document.getElementById("templates")!;
+  const card = within(section).getByRole("link", { name: /halo/i });
+  expect(card).toHaveAttribute("href", "/theme-preview/live/jelly-halo");
+  fireEvent.click(card);
+  const dialog = screen.getByRole("dialog", { name: "Halo" });
+  expect(within(dialog).getByRole("link", { name: /use this template/i })).toHaveAttribute("href", "/signup?template=jelly-halo");
+  expect(within(dialog).getByRole("button", { name: "Checkout" })).toBeInTheDocument();
+  fireEvent.click(within(dialog).getByRole("button", { name: "Next design" }));
+  expect(within(dialog).getByRole("heading", { level: 2 })).toHaveTextContent("Diode");
+  expect(within(dialog).getByRole("link", { name: /use this template/i })).toHaveAttribute("href", "/signup?template=jelly-diode");
+  fireEvent.click(within(dialog).getByRole("button", { name: "Close preview" }));
+  expect(dialog).not.toHaveAttribute("open");
 });
