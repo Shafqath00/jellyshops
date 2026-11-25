@@ -79,7 +79,12 @@ expires or emails none of them.
 - Note: a local backend pointed at staging runs the same job every minute (it expires staging trials; emails are
   captured, not sent, without SMTP).
 
-## Step 3 built (2026-11-25; migration NOT applied to staging yet)
+## Step 3 built (2026-11-25; migration applied to staging 2026-11-25)
+
+Staging check after applying: RLS on, `backend_access` for `jelly_backend` only, backend may only read and add rows,
+no anon/authenticated grants; backfill wrote 2 user + 2 email claims (owners of `billing-test` and
+`billing-clock-test`).
+
 
 - Migration `20261125010000_trial_claims.sql` (both folders, PGlite list): table `TrialClaim` (kind `user` | `email`,
   value, storeId as a note only, claimedAt; primary key kind + value; RLS + `backend_access`; the backend may only read
