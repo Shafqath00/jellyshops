@@ -100,3 +100,16 @@ no anon/authenticated grants; backfill wrote 2 user + 2 email claims (owners of 
   no trial emails for it.
 - Admin wording: "You've already had a free trial, so this shop starts on a paid plan."
 - Until the migration runs every new shop gets a trial, as before. Card fingerprint still open.
+
+## Step 4 built (2026-11-25, code only)
+
+- `WRITE_LIMITS` in `limits-config.ts`: 300 changes a minute per person (across their shops) and 600 per shop (across
+  its staff). A change = POST/PUT/PATCH/DELETE on `/api/stores/:storeId/...`; reads are never counted.
+- `backend/src/http/write-limits.ts` (`WriteLimiter`, fixed one-minute windows, a refused change is not counted),
+  checked inside `requireStorePermission` after access is confirmed, so strangers and non-members never use up a
+  shop's allowance. Over the limit: 429 `WRITE_RATE_LIMIT` with `Retry-After` and "You're making changes very quickly.
+  Wait N seconds and try again."
+- Same for every plan and for exempt shops (abuse protection, not billing). In memory per server instance.
+- Bulk edit (saves one product at a time) waits 5 seconds and tries again on 429, for up to about a minute per
+  product (`saveWithPatience` in `bulk-edit-dialog.tsx`), so a large bulk edit slows down instead of failing.
+- Existing per-IP limiters (uploads, onboarding, public forms) are unchanged.

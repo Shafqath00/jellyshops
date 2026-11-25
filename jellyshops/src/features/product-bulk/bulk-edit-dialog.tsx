@@ -27,15 +27,33 @@ const PREVIEW_ROWS = 100;
 /** The most products one bulk edit will load and change. */
 export const BULK_EDIT_MAX = 1000;
 
+const wait = (ms: number) => new Promise<void>((resolve) => { setTimeout(resolve, ms); });
+/** How long to wait before trying again when the server says changes are coming too fast (429). */
+const RATE_LIMIT_PAUSE_MS = 5_000;
+const RATE_LIMIT_TRIES = 15;
+
+/** Saves one product; when the server asks to slow down (429), waits and tries again for about a minute. */
+export async function saveWithPatience<T>(attempt: () => Promise<T>, pause: (ms: number) => Promise<void> = wait): Promise<T> {
+  for (let tries = 1; ; tries += 1) {
+    try { return await attempt(); }
+    catch (failure) {
+      if ((failure as { status?: number })?.status !== 429 || tries >= RATE_LIMIT_TRIES) throw failure;
+      await pause(RATE_LIMIT_PAUSE_MS);
+    }
+  }
+}
+
 /**
  * Changes one thing on every selected product: choose the change, see each value before and after,
  * then confirm. Products are saved one at a time; a failure is listed and the rest carry on.
  */
-export function BulkEditDialog({ open, onOpenChange, products: ticked, collections, money, save, onDone, loadAllMatching, className = "", overlayClassName = "" }: {
+export function BulkEditDialog({ open, onOpenChange, products: ticked, collections, money, save, onDone, loadAllMatching, className = "", overlayClassName = "", pause = wait }: {
   open: boolean; onOpenChange: (open: boolean) => void; products: CatalogAdminProduct[]; collections: Array<{ id: string; title: string }>;
   /** Loads every product that matches the list's search, tab and filters (up to BULK_EDIT_MAX), so the change can cover more than the ticked rows. */
   loadAllMatching?: () => Promise<{ products: CatalogAdminProduct[]; more: boolean }>;
   money: (minor: number) => string; save: (productId: string, body: Record<string, unknown>) => Promise<unknown>; onDone: () => void; className?: string; overlayClassName?: string;
+  /** Waits between tries when the server asks to slow down (tests pass a quick one). */
+  pause?: (ms: number) => Promise<void>;
 }) {
   const toast = useToast();
   const [kind, setKind] = useState<Kind>("price");
@@ -79,7 +97,7 @@ export function BulkEditDialog({ open, onOpenChange, products: ticked, collectio
     setFailures([]); setProgress({ done: 0, total: plan.patches.length });
     const failed: string[] = [];
     for (const [index, patch] of plan.patches.entries()) {
-      try { await save(patch.productId, patch.body); }
+      try { await saveWithPatience(() => save(patch.productId, patch.body), pause); }
       catch (failure) { failed.push(`${patch.title}: ${failure instanceof Error ? failure.message : "could not be saved"}`); }
       setProgress({ done: index + 1, total: plan.patches.length });
     }

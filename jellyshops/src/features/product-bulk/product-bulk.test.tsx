@@ -261,3 +261,20 @@ describe("bulk edit dialog", () => {
     expect(screen.getByText(/Archived products are hidden from your store/)).toBeVisible();
   });
 });
+
+describe("bulk edit when the server asks to slow down", () => {
+  it("waits and tries again on 429, and gives up on other errors at once", async () => {
+    const { saveWithPatience } = await import("./bulk-edit-dialog");
+    const pauses: number[] = [];
+    const pause = async (ms: number) => { pauses.push(ms); };
+    let calls = 0;
+    const slow = Object.assign(new Error("Wait"), { status: 429 });
+    await expect(saveWithPatience(async () => { calls += 1; if (calls < 3) throw slow; return "saved"; }, pause)).resolves.toBe("saved");
+    expect(pauses).toEqual([5000, 5000]);
+
+    const broken = Object.assign(new Error("Bad price"), { status: 400 });
+    let other = 0;
+    await expect(saveWithPatience(async () => { other += 1; throw broken; }, pause)).rejects.toBe(broken);
+    expect(other).toBe(1);
+  });
+});
