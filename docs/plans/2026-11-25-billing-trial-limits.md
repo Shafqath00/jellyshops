@@ -49,3 +49,26 @@ grace ended) and sends reminders.
 - Uploads are still held in memory (capped at the per-file limit); streaming or direct-to-R2 uploads would be a
   separate change.
 - In-memory rate limits are per server instance (up to 5 instances), so the real ceiling can be higher.
+
+## Step 1 built (2026-11-25, commit 401d68b6)
+
+Limits config, trial plan, file size/count checks, per-store upload limit, £15/£150 shown. See CLAUDE.md.
+
+## Step 2 built (2026-11-25; migration NOT applied to staging yet)
+
+- Migration `20261125000000_billing_grace_reminders.sql` (both folders, PGlite list): `StoreBilling.graceEndsAt`,
+  status `expired` added to the check, table `BillingReminder` (store + kind primary key; RLS + `backend_access`).
+  The code works the old way until it runs (missing column or table detected, then remembered).
+- Grace: the webhook's first `past_due` sets `graceEndsAt` = now + 7 days; later retries keep it; any other status
+  clears it. A `past_due` shop counts as closed after `graceEndsAt` (only when `BILLING_ENFORCED` is on).
+- Job `backend/src/billing/billing-jobs.ts`, run on every tick of the scheduled worker after the order work:
+  moves ended trials without a subscription to `expired` (shown and enforced as "trial ended", trial limits kept);
+  emails the owner on trial day 10 and 13, trial ended (only for trials ended in the last 3 days), payment failed
+  (with the closing date), and shop closed (only when enforced). Each email is claimed before sending, so several
+  instances never send it twice; a failed send gives the claim back.
+- Emails use the order email sender (`ORDER_SMTP_*`); without it no email is claimed or sent, but trials still expire.
+  Links go to `<STOREFRONT_PUBLIC_URL>/admin/s/<shop>/settings/billing`.
+- Admin: the warning shows the closing date; the closed banner explains a failed payment; the Billing page explains
+  `past_due` and `expired`.
+- Note: a local backend pointed at staging runs the same job every minute (it expires staging trials; emails are
+  captured, not sent, without SMTP).

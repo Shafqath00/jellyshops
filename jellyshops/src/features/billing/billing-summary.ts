@@ -2,12 +2,14 @@ import { authApiOrigin } from "@/features/auth/providers/auth-provider";
 
 /** `GET /api/stores/:storeId/billing` (backend/src/billing/routes.ts). */
 export interface BillingSummary {
-  status: "trialing" | "active" | "past_due" | "paused" | "canceled" | "exempt" | "none";
+  status: "trialing" | "active" | "past_due" | "paused" | "canceled" | "expired" | "exempt" | "none";
   plan: string;
   planName: string;
   trialEndsAt: string | null;
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
+  /** After a failed payment: when the shop closes unless it is paid (backend step 2; absent on older servers). */
+  graceEndsAt?: string | null;
   pauseReason: "trial-ended" | "payment-stopped" | "canceled" | null;
   paused: boolean;
   exempt: boolean;
@@ -98,10 +100,18 @@ export function billingNotices(summary: BillingSummary | null, now: Date): Billi
       title: "Your shop is closed to shoppers",
       text: summary.pauseReason === "trial-ended"
         ? "Your free trial has ended. Choose a plan to open your shop again; nothing has been deleted."
-        : "Your plan has ended. Choose a plan to open your shop again; nothing has been deleted.",
+        : summary.status === "past_due"
+          ? "We still couldn't take your payment. Update your payment details to open your shop again; nothing has been deleted."
+          : "Your plan has ended. Choose a plan to open your shop again; nothing has been deleted.",
     });
   } else if (summary.enforced && summary.status === "past_due") {
-    notices.push({ tone: "warning", title: "We couldn't take your last payment", text: "Update your payment details so your shop stays open." });
+    notices.push({
+      tone: "warning",
+      title: "We couldn't take your last payment",
+      text: summary.graceEndsAt
+        ? `Update your payment details by ${formatDay(summary.graceEndsAt)}, or your shop will close to shoppers on that day.`
+        : "Update your payment details so your shop stays open.",
+    });
   } else if (summary.enforced && summary.status === "trialing") {
     const days = trialDaysLeft(summary, now);
     if (days !== null && days <= 7) {

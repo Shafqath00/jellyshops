@@ -2,6 +2,7 @@ import type { StorefrontRefresher } from "../storefront/cache-refresh.js";
 import type { PlanLimitChecker } from "../billing/plan-limits.js";
 import type { StoreBillingService } from "../billing/store-billing.js";
 import type { StripeBillingService } from "../billing/stripe-billing.js";
+import type { BillingJobs } from "../billing/billing-jobs.js";
 import type { StoreActivityRecorder } from "../tenants/store-activity.js";
 import type express from "express";
 import type { AdminSalesService, AdminSummaryService, CustomerService, OrderTagService } from "../admin/service.js";
@@ -50,6 +51,8 @@ export interface AppDependencies {
   storeBilling?: StoreBillingService;
   /** Stripe Billing (shops paying Jellyshop); built from STRIPE_BILLING_* when left out. */
   stripeBilling?: StripeBillingService;
+  /** Scheduled billing work (expire trials, reminder emails); built from the database when left out. */
+  billingJobs?: BillingJobs;
   contentService: ContentService;
   customDataService: CustomDataService;
   ownerMetafieldService?: OwnerMetafieldService;

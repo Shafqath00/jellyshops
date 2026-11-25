@@ -59,6 +59,17 @@ describe("billing notices above every admin page", () => {
     expect(notice.text).toContain("nothing has been deleted");
   });
 
+  it("give the day a shop closes after a failed payment, and explain a shop closed at the end of it", () => {
+    const [warning] = billingNotices(summary({ enforced: true, status: "past_due", graceEndsAt: "2026-12-27T10:00:00Z" }), now);
+    expect(warning).toMatchObject({ tone: "warning", title: "We couldn't take your last payment" });
+    expect(warning.text).toContain("by 27 December 2026");
+    const [closed] = billingNotices(summary({ enforced: true, status: "past_due", paused: true, pauseReason: "payment-stopped" }), now);
+    expect(closed).toMatchObject({ tone: "critical" });
+    expect(closed.text).toContain("couldn't take your payment");
+    const [expired] = billingNotices(summary({ enforced: true, status: "expired", paused: true, pauseReason: "trial-ended" }), now);
+    expect(expired.text).toContain("Your free trial has ended");
+  });
+
   it("warn when a limit is nearly full and when it is full, whether or not billing is enforced", () => {
     const notices = billingNotices(summary({ enforced: false, usage: [{ kind: "products", used: 4100, limit: 5000 }, { kind: "photoBytes", used: 10 * GB, limit: 10 * GB }] }), now);
     expect(notices.map((notice) => [notice.tone, notice.title])).toEqual([["warning", "Products is nearly full"], ["critical", "Photo storage is full"]]);

@@ -1,8 +1,9 @@
 import type Stripe from "stripe";
 import { corsOriginMatchers } from "../app/cors-origins.js";
 import { ApiError } from "../http/errors.js";
+import { BILLING_CONFIG } from "./limits-config.js";
 import { DEFAULT_PLAN } from "./plans.js";
-import type { BillingStatus, StoreBillingService } from "./store-billing.js";
+import { missingColumn, type BillingStatus, type StoreBillingService } from "./store-billing.js";
 
 /**
  * Shops paying for Jellyshop with Stripe Billing (docs/plans/2026-11-23-phase-4-billing-and-limits.md, step 4d).
@@ -85,22 +86,33 @@ export function subscriptionChange(subscription: Stripe.Subscription): Subscript
   };
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 /**
  * Saves a subscription's state on its shop. Never touches an exempt shop, and an old subscription's late event never
  * replaces a newer one (only a live subscription may take over from another).
+ *
+ * With `grace` (the step 2 migration has run), the first `past_due` sets `graceEndsAt` to now + the grace days; later
+ * `past_due` events keep that date (so retries never extend it), and any other status clears it.
  */
-export async function saveSubscriptionChange(sql: Sql, change: SubscriptionChange): Promise<void> {
+export async function saveSubscriptionChange(sql: Sql, change: SubscriptionChange, options: { grace?: boolean; now?: Date } = {}): Promise<void> {
+  const values: unknown[] = [change.storeId, DEFAULT_PLAN, change.status, change.trialEndsAt, change.currentPeriodEnd, change.cancelAtPeriodEnd, change.stripeCustomerId, change.stripeSubscriptionId];
+  if (options.grace) {
+    const now = options.now ?? new Date();
+    values.push(change.status === "past_due" ? new Date(now.getTime() + BILLING_CONFIG.graceDays * DAY_MS) : null);
+  }
   await sql.query(
-    `INSERT INTO "StoreBilling" ("storeId", "plan", "status", "trialEndsAt", "currentPeriodEnd", "cancelAtPeriodEnd", "stripeCustomerId", "stripeSubscriptionId", "updatedAt")
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+    `INSERT INTO "StoreBilling" ("storeId", "plan", "status", "trialEndsAt", "currentPeriodEnd", "cancelAtPeriodEnd", "stripeCustomerId", "stripeSubscriptionId", "updatedAt"${options.grace ? `, "graceEndsAt"` : ""})
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW()${options.grace ? ", $9" : ""})
      ON CONFLICT ("storeId") DO UPDATE SET
+       ${options.grace ? `"graceEndsAt" = CASE WHEN EXCLUDED."status" = 'past_due' THEN COALESCE("StoreBilling"."graceEndsAt", EXCLUDED."graceEndsAt") ELSE NULL END,` : ""}
        "status" = EXCLUDED."status", "trialEndsAt" = EXCLUDED."trialEndsAt", "currentPeriodEnd" = EXCLUDED."currentPeriodEnd",
        "cancelAtPeriodEnd" = EXCLUDED."cancelAtPeriodEnd", "stripeCustomerId" = COALESCE(EXCLUDED."stripeCustomerId", "StoreBilling"."stripeCustomerId"),
        "stripeSubscriptionId" = EXCLUDED."stripeSubscriptionId", "updatedAt" = NOW()
      WHERE "StoreBilling"."status" <> 'exempt'
        AND ("StoreBilling"."stripeSubscriptionId" IS NULL OR "StoreBilling"."stripeSubscriptionId" = EXCLUDED."stripeSubscriptionId"
             OR EXCLUDED."status" IN ('active', 'trialing', 'past_due'))`,
-    [change.storeId, DEFAULT_PLAN, change.status, change.trialEndsAt, change.currentPeriodEnd, change.cancelAtPeriodEnd, change.stripeCustomerId, change.stripeSubscriptionId],
+    values,
   );
 }
 
@@ -130,6 +142,8 @@ export class StripeBillingService {
   ) {}
 
   private now() { return this.options.now?.() ?? new Date(); }
+  /** Whether "StoreBilling"."graceEndsAt" exists (step 2 migration); learned from the first save. */
+  private graceColumn = true;
 
   /** Whether a yearly price is set up (STRIPE_BILLING_ANNUAL_PRICE_ID). */
   get annualAvailable(): boolean { return Boolean(this.options.annualPriceId); }
@@ -206,7 +220,14 @@ export class StripeBillingService {
     const change = subscriptionChange(subscription);
     if (!change) return "ignored";
     try {
-      await saveSubscriptionChange(this.sql, change);
+      try {
+        await saveSubscriptionChange(this.sql, change, { grace: this.graceColumn, now: this.now() });
+      } catch (error) {
+        if (!this.graceColumn || !missingColumn(error)) throw error;
+        // Before the step 2 migration: save without a grace date.
+        this.graceColumn = false;
+        await saveSubscriptionChange(this.sql, change);
+      }
     } catch (error) {
       // The shop was deleted since: nothing to update.
       if ((error as { code?: string })?.code === "23503") return "ignored";

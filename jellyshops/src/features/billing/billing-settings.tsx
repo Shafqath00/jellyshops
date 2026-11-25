@@ -14,7 +14,12 @@ function planLine(summary: BillingSummary, now: Date): string {
   if (summary.cancelAtPeriodEnd && summary.status !== "canceled" && endsOn) {
     return `Your plan is cancelled and ends on ${formatDay(endsOn)}. To keep it, use Manage billing.`;
   }
-  if (summary.status === "trialing" && summary.trialEndsAt) {
+  if (summary.status === "past_due") {
+    return summary.graceEndsAt
+      ? `Your last payment didn't go through. Update your payment details by ${formatDay(summary.graceEndsAt)} to keep your shop open.`
+      : "Your last payment didn't go through. Update your payment details to keep your shop open.";
+  }
+  if ((summary.status === "trialing" || summary.status === "expired") && summary.trialEndsAt) {
     const days = trialDaysLeft(summary, now) ?? 0;
     return days > 0 ? `Your free trial ends on ${formatDay(summary.trialEndsAt)} (${days} ${days === 1 ? "day" : "days"} left).` : `Your free trial ended on ${formatDay(summary.trialEndsAt)}.`;
   }

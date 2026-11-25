@@ -44,6 +44,7 @@ const schemaMigrations = [
   "20261122060000_platform_admin_read_only.sql",
   "20261123000000_store_billing.sql",
   "20261123010000_reserved_slugs_more.sql",
+  "20261125000000_billing_grace_reminders.sql",
 ] as const;
 
 export type IntegrationDatabase = PGlite;

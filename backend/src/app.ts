@@ -66,6 +66,16 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
       return { ...(result as object), imports };
     };
   }
+  // ...and the billing work (expire ended trials, reminder emails). Its failure never stops the order work.
+  const { billingJobs } = context.routeDependencies;
+  if (billingJobs) {
+    const earlierWork = app.locals.runOrderWorkers as undefined | (() => Promise<unknown>);
+    app.locals.runOrderWorkers = async () => {
+      const result = earlierWork ? await earlierWork() : {};
+      const billing = await billingJobs.run().catch(() => ({ ready: false, expired: 0, sent: 0, failed: 0, configured: false }));
+      return { ...(result as object), billing };
+    };
+  }
   mountPublicStorefrontContextRoutes(app, context);
   mountContentRoutes(app, context);
   mountStorefrontRoutes(app, context);

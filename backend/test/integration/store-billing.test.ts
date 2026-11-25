@@ -57,7 +57,8 @@ describe("StoreBilling (migration 20261123000000)", () => {
     const enforced = new StoreBillingService(sql, { enforced: true });
     expect(await enforced.planFor("store-exempt")).toBe("exempt");
     expect(await enforced.isPaused("store-exempt")).toBe(false);
-    expect(await enforced.planFor("store-ended")).toBe("standard");
+    // An ended trial keeps the trial limits until the shop pays.
+    expect(await enforced.planFor("store-ended")).toBe("trial");
     expect(await enforced.state("store-ended")).toMatchObject({ status: "trialing", pauseReason: "trial-ended", paused: true });
     expect(await new StoreBillingService(sql, { enforced: false }).isPaused("store-ended")).toBe(false);
   });

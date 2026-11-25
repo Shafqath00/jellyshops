@@ -52,6 +52,7 @@ import type { AppContext, AppDependencies } from "./types.js";
 import { PlanLimitChecker, sqlUsageReader } from "../billing/plan-limits.js";
 import { StoreBillingService } from "../billing/store-billing.js";
 import { StripeBillingService, type BillingStripeClient } from "../billing/stripe-billing.js";
+import { BillingJobs } from "../billing/billing-jobs.js";
 import Stripe from "stripe";
 
 export function createDefaultMediaStorage(
@@ -330,6 +331,11 @@ export function resolveAppDependencies(dependencies: Partial<AppDependencies> = 
   const orderRuntime = dependencies.orderRuntime ?? (commerceDatabase && merchantOrderService
     ? createOrderRuntime(commerceDatabase, merchantOrderService, config) : undefined);
 
+  // Billing emails go through the order email sender; the links point at the admin on the main address.
+  const billingJobs = dependencies.billingJobs ?? (supabasePool
+    ? new BillingJobs(supabasePool, orderRuntime?.transport, { adminBaseUrl: orderRuntime?.publicBaseUrl || process.env.STOREFRONT_PUBLIC_URL || "", enforced: config.billingEnforced })
+    : undefined);
+
   const adminServices = commerceRepository
     ? {
       summary: new AdminSummaryService(commerceRepository, async (storeId) => {
@@ -383,6 +389,7 @@ export function resolveAppDependencies(dependencies: Partial<AppDependencies> = 
     storeBilling,
     planLimits,
     stripeBilling,
+    billingJobs,
   };
 
   return { config, authProvider, routeDependencies: commerceDeps, catalogService, storefrontService, publicStorefrontApi, storefrontStarterApi, mediaService, mediaStorage, publicStorefrontContextService, adminServices, commerceRepository, customerService, verifyCustomer };

@@ -64,7 +64,7 @@ export function createOrderRuntime(database: CommerceDatabase, orders: MerchantO
     }));
     return { operations, email, restocked, health };
   }
-  return { notifications, digital, hooks, runWorkers, backInStock };
+  return { notifications, digital, hooks, runWorkers, backInStock, transport, publicBaseUrl };
 }
 export type OrderRuntime = ReturnType<typeof createOrderRuntime>;
 

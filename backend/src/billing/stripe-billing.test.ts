@@ -126,7 +126,29 @@ describe("billing events", () => {
     const { service, stripe, query } = setup(null, subscription({ status: "past_due" }));
     expect(await service.handleEvent(event("customer.subscription.updated", { id: "sub_1", status: "active" }))).toBe("saved");
     expect(stripe.subscriptions.retrieve).toHaveBeenCalledWith("sub_1");
-    expect(query).toHaveBeenCalledWith(expect.stringContaining(`INSERT INTO "StoreBilling"`), ["store-a", "standard", "past_due", null, expect.any(Date), false, "cus_1", "sub_1"]);
+    expect(query).toHaveBeenCalledWith(expect.stringContaining(`INSERT INTO "StoreBilling"`), ["store-a", "standard", "past_due", null, expect.any(Date), false, "cus_1", "sub_1", expect.any(Date)]);
+  });
+
+  it("start the grace period on the first failed payment, keep it on retries, clear it once paid", async () => {
+    const { service, query } = setup(null, subscription({ status: "past_due" }));
+    await service.handleEvent(event("customer.subscription.updated", { id: "sub_1" }));
+    const [sqlText, values] = query.mock.calls.at(-1) as unknown as [string, unknown[]];
+    expect(sqlText).toContain(`COALESCE("StoreBilling"."graceEndsAt", EXCLUDED."graceEndsAt")`);
+    expect(sqlText).toContain("ELSE NULL END");
+    const graceEnd = values[8] as Date;
+    expect(graceEnd.getTime() - now.getTime()).toBe(7 * 86_400_000);
+    const paid = setup(null, subscription({ status: "active" }));
+    await paid.service.handleEvent(event("customer.subscription.updated", { id: "sub_1" }));
+    expect((paid.query.mock.calls.at(-1) as unknown as [string, unknown[]])[1][8]).toBeNull();
+  });
+
+  it("still save before the grace migration has run (no graceEndsAt column)", async () => {
+    const { service, query } = setup(null, subscription({ status: "past_due" }));
+    query.mockImplementationOnce(async () => { throw Object.assign(new Error("column does not exist"), { code: "42703" }); });
+    expect(await service.handleEvent(event("customer.subscription.updated", { id: "sub_1" }))).toBe("saved");
+    const [sqlText, values] = query.mock.calls.at(-1) as unknown as [string, unknown[]];
+    expect(sqlText).not.toContain("graceEndsAt");
+    expect(values).toHaveLength(8);
   });
 
   it("follow a completed checkout to its subscription, and ignore everything else", async () => {

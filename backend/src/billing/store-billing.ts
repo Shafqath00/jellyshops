@@ -11,13 +11,14 @@ import type { PlanResolver } from "./plan-limits.js";
  * Rules:
  * - No row (or no table yet): the default plan, never paused. Shops keep working before the migration runs.
  * - `exempt`: never limited, never charged, never paused (every shop that existed when billing arrived).
- * - A trial that has ended without a subscription, a subscription that was cancelled and has run out, and `paused`
- *   all count as paused; `past_due` is not paused yet (Stripe is still retrying the payment).
+ * - A trial that has ended without a subscription (`expired`, or `trialing` past its end before the billing job has
+ *   run), a subscription that was cancelled and has run out, and `paused` all count as paused. `past_due` stays open
+ *   until `graceEndsAt` (failed payment + BILLING_CONFIG.graceDays), then counts as paused even while Stripe retries.
  * - Pausing only takes effect when BILLING_ENFORCED is on (step 4d, once shops can pay). Until then the state is
  *   recorded and shown, but no shop is closed.
  * - Paused closes the storefront and checkout. The admin stays open, so the merchant can keep working and pay.
  */
-export type BillingStatus = "trialing" | "active" | "past_due" | "paused" | "canceled" | "exempt";
+export type BillingStatus = "trialing" | "active" | "past_due" | "paused" | "canceled" | "expired" | "exempt";
 
 export const TRIAL_DAYS = BILLING_CONFIG.trialDays;
 
@@ -28,6 +29,8 @@ export interface StoreBillingRecord {
   trialEndsAt: Date | null;
   currentPeriodEnd: Date | null;
   cancelAtPeriodEnd: boolean;
+  /** While `past_due`: when the shop closes if the payment still hasn't gone through. */
+  graceEndsAt?: Date | null;
   /** Set once the shop has started paying through Stripe Billing (step 4d). */
   stripeCustomerId?: string | null;
   stripeSubscriptionId?: string | null;
@@ -42,6 +45,8 @@ export interface BillingState {
   trialEndsAt: string | null;
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
+  /** While a payment has failed: when the shop closes unless it is paid. */
+  graceEndsAt: string | null;
   /** Whether the shop has a Stripe subscription it can manage (change card, cancel, invoices). */
   hasSubscription: boolean;
   /** Why the shop would be paused; null when it is in good standing. */
@@ -62,8 +67,11 @@ export function pauseReason(record: StoreBillingRecord | null, now: Date): Pause
   switch (record.status) {
     case "exempt":
     case "active":
-    case "past_due":
       return null;
+    case "past_due":
+      return record.graceEndsAt && record.graceEndsAt.getTime() <= now.getTime() ? "payment-stopped" : null;
+    case "expired":
+      return "trial-ended";
     case "trialing":
       return record.trialEndsAt && record.trialEndsAt.getTime() <= now.getTime() ? "trial-ended" : null;
     case "canceled":
@@ -81,6 +89,7 @@ export function billingState(record: StoreBillingRecord | null, now: Date, enfor
     trialEndsAt: record?.trialEndsAt?.toISOString() ?? null,
     currentPeriodEnd: record?.currentPeriodEnd?.toISOString() ?? null,
     cancelAtPeriodEnd: record?.cancelAtPeriodEnd ?? false,
+    graceEndsAt: record?.status === "past_due" ? record.graceEndsAt?.toISOString() ?? null : null,
     hasSubscription: Boolean(record?.stripeSubscriptionId),
     pauseReason: reason,
     paused: enforced && reason !== null,
@@ -89,6 +98,8 @@ export function billingState(record: StoreBillingRecord | null, now: Date, enfor
 
 /** Postgres "undefined table": the migration has not run yet. */
 const missingTable = (error: unknown) => (error as { code?: string })?.code === "42P01";
+/** Postgres "undefined column": the step 2 migration (graceEndsAt) has not run yet. */
+export const missingColumn = (error: unknown) => (error as { code?: string })?.code === "42703";
 
 /**
  * Starts the free trial for a new shop, inside the transaction that creates it. Checks the table exists first: a
@@ -113,12 +124,14 @@ interface Row {
   cancelAtPeriodEnd: boolean;
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
+  graceEndsAt?: Date | string | null;
 }
 
 const asDate = (value: Date | string | null) => (value === null ? null : value instanceof Date ? value : new Date(value));
 
 export class StoreBillingService {
   private tableMissing = false;
+  private graceMissing = false;
 
   constructor(
     private readonly sql: Sql,
@@ -130,15 +143,15 @@ export class StoreBillingService {
   async record(storeId: string): Promise<StoreBillingRecord | null> {
     if (this.tableMissing) return null;
     try {
-      const result = await this.sql.query(
-        `SELECT "storeId", "plan", "status", "trialEndsAt", "currentPeriodEnd", "cancelAtPeriodEnd", "stripeCustomerId", "stripeSubscriptionId" FROM "StoreBilling" WHERE "storeId" = $1`,
-        [storeId],
-      );
+      const columns = `"storeId", "plan", "status", "trialEndsAt", "currentPeriodEnd", "cancelAtPeriodEnd", "stripeCustomerId", "stripeSubscriptionId"${this.graceMissing ? "" : `, "graceEndsAt"`}`;
+      const result = await this.sql.query(`SELECT ${columns} FROM "StoreBilling" WHERE "storeId" = $1`, [storeId]);
       const row = result.rows[0] as Row | undefined;
-      return row ? { ...row, trialEndsAt: asDate(row.trialEndsAt), currentPeriodEnd: asDate(row.currentPeriodEnd) } : null;
+      return row ? { ...row, trialEndsAt: asDate(row.trialEndsAt), currentPeriodEnd: asDate(row.currentPeriodEnd), graceEndsAt: asDate(row.graceEndsAt ?? null) } : null;
     } catch (error) {
       // Before the migration: every shop is on the default plan. Remembered so we stop asking.
       if (missingTable(error)) { this.tableMissing = true; return null; }
+      // Before the step 2 migration: no grace dates yet; ask again without the column.
+      if (missingColumn(error) && !this.graceMissing) { this.graceMissing = true; return this.record(storeId); }
       throw error;
     }
   }
@@ -160,7 +173,7 @@ export class StoreBillingService {
   readonly planFor: PlanResolver = async (storeId) => {
     const record = await this.record(storeId);
     if (record?.status === "exempt") return "exempt";
-    if (record?.status === "trialing" && !record.stripeSubscriptionId) return "trial";
+    if ((record?.status === "trialing" || record?.status === "expired") && !record.stripeSubscriptionId) return "trial";
     return knownPlan(record?.plan);
   };
 }
