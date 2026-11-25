@@ -65,3 +65,14 @@ export const PLAN_CONFIG = {
 
 /** Extra room for the multipart wrapping around a file when comparing Content-Length with the file limit. */
 export const MULTIPART_OVERHEAD_BYTES = 64 * 1024;
+
+/**
+ * Changes (POST/PUT/PATCH/DELETE) to one shop's data, counted after sign-in, so a stranger can never use up a shop's
+ * allowance. Per person across all their shops, and per shop across all its staff. High enough for bulk edit, which
+ * saves one product at a time. Counted in memory per server instance (up to 5), like the other limiters.
+ */
+export const WRITE_LIMITS = {
+  windowMs: 60_000,
+  perUser: 300,
+  perStore: 600,
+} as const;
