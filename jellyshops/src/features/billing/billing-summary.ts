@@ -19,7 +19,7 @@ export interface BillingSummary {
   hasSubscription?: boolean;
   /** Whether a yearly price can be chosen as well as monthly. */
   annualAvailable?: boolean;
-  usage: Array<{ kind: "products" | "photoBytes"; used: number; limit: number | null }>;
+  usage: Array<{ kind: "products" | "photoBytes" | "files"; used: number; limit: number | null }>;
 }
 
 const cache = new Map<string, { at: number; value: Promise<BillingSummary | null> }>();
@@ -69,12 +69,12 @@ const number = new Intl.NumberFormat("en-GB");
 /** "74 of 5,000 products", "72 MB of 10 GB", or without a limit for shops that have none. */
 export function usageText(item: BillingSummary["usage"][number]): string {
   const amount = (value: number) => (item.kind === "photoBytes" ? formatBytes(value) : number.format(value));
-  const noun = item.kind === "products" ? (item.used === 1 && item.limit === null ? " product" : " products") : "";
+  const noun = item.kind === "products" ? (item.used === 1 && item.limit === null ? " product" : " products") : item.kind === "files" ? (item.used === 1 && item.limit === null ? " file" : " files") : "";
   if (item.limit === null) return `${amount(item.used)}${noun}, no limit on this shop`;
   return `${amount(item.used)} of ${amount(item.limit)}${noun}`;
 }
 
-export const usageLabel = (kind: BillingSummary["usage"][number]["kind"]) => (kind === "products" ? "Products" : "Photo storage");
+export const usageLabel = (kind: BillingSummary["usage"][number]["kind"]) => (kind === "products" ? "Products" : kind === "files" ? "Files" : "Photo storage");
 
 export interface BillingNotice {
   tone: "critical" | "warning" | "info";
@@ -111,7 +111,7 @@ export function billingNotices(summary: BillingSummary | null, now: Date): Billi
   for (const item of summary.usage) {
     if (item.limit === null || item.limit === 0) continue;
     const share = item.used / item.limit;
-    if (share >= 1) notices.push({ tone: "critical", title: `${usageLabel(item.kind)} is full`, text: `${usageText(item)}. ${item.kind === "products" ? "Archive products you no longer sell" : "Delete photos you no longer use"} to add more.` });
+    if (share >= 1) notices.push({ tone: "critical", title: `${usageLabel(item.kind)} is full`, text: `${usageText(item)}. ${item.kind === "products" ? "Archive products you no longer sell" : item.kind === "files" ? "Delete files you no longer use" : "Delete photos you no longer use"} to add more.` });
     else if (share >= NEARLY_FULL) notices.push({ tone: "warning", title: `${usageLabel(item.kind)} is nearly full`, text: `${usageText(item)} used.` });
   }
   return notices;
@@ -122,8 +122,8 @@ export type BillingInterval = "month" | "year";
 
 /** The plan's prices as merchants see them; they must match the Stripe prices (STRIPE_BILLING_PRICE_ID / _ANNUAL_). */
 export const PLAN_PRICES: Record<BillingInterval, { label: string; price: string; note?: string }> = {
-  month: { label: "Monthly", price: "£19 a month" },
-  year: { label: "Yearly", price: "£190 a year", note: "2 months free" },
+  month: { label: "Monthly", price: "£15 a month" },
+  year: { label: "Yearly", price: "£150 a year", note: "2 months free" },
 };
 
 export async function openBillingPage(kind: "checkout" | "portal", storeId: string, token: string, returnUrl: string, fetcher: typeof fetch = fetch, interval?: BillingInterval): Promise<string> {

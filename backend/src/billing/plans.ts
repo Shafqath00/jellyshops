@@ -1,21 +1,15 @@
 /**
- * Jellyshop plans and what each one allows (docs/plans/2026-11-23-phase-4-billing-and-limits.md).
+ * Jellyshop plans and what each one allows. The numbers live in `limits-config.ts`
+ * (docs/plans/2026-11-25-billing-trial-limits.md); this file gives them names and types.
  *
- * Plans live in code, not a table: changing a limit is a reviewed change with a test. Until stores carry their own
- * plan (step 4b, table `StoreBilling`), every store is on the default plan below.
+ * `trial` is not something a store chooses: a store whose billing status is `trialing` is limited by it, and moves
+ * to `standard` once it pays.
  */
-export type PlanId = "standard";
+import { PLAN_CONFIG, type PlanLimits, type UploadRules } from "./limits-config.js";
 
-export interface PlanLimits {
-  /** Products that are not archived (drafts count). */
-  products: number;
-  /** Bytes of stored photos (the processed originals; the smaller copies are covered by the price). */
-  photoBytes: number;
-  /** People with access to the store, the owner included (checked once inviting staff exists). */
-  staff: number;
-  /** Own domains such as www.myshop.co.uk (checked once custom domains exist). */
-  customDomains: number;
-}
+export type { PlanLimits, UploadRules } from "./limits-config.js";
+
+export type PlanId = keyof typeof PLAN_CONFIG;
 
 export type LimitKind = keyof PlanLimits;
 
@@ -23,16 +17,13 @@ export interface Plan {
   id: PlanId;
   name: string;
   limits: PlanLimits;
+  uploads: UploadRules;
 }
 
-const GB = 1024 ** 3;
-
 export const PLANS: Record<PlanId, Plan> = {
-  standard: {
-    id: "standard",
-    name: "Jellyshop",
-    limits: { products: 5_000, photoBytes: 10 * GB, staff: 3, customDomains: 1 },
-  },
+  trial: { id: "trial", ...PLAN_CONFIG.trial },
+  standard: { id: "standard", ...PLAN_CONFIG.standard },
 };
 
+/** The plan a store pays for (its billing row's `plan`). */
 export const DEFAULT_PLAN: PlanId = "standard";

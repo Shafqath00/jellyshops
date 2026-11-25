@@ -128,8 +128,8 @@ describe("paying with Stripe from Settings > Plan and billing", () => {
     });
     render(<BillingSettings storeId="store-1" token="session" fetcher={fetcher as never} now={now} returnUrl={returnUrl} navigate={navigate} returned={false} />);
     const group = await screen.findByRole("group", { name: "How often to pay" });
-    expect(group).toHaveTextContent("Monthly £19 a month");
-    expect(group).toHaveTextContent("Yearly £190 a year · 2 months free");
+    expect(group).toHaveTextContent("Monthly £15 a month");
+    expect(group).toHaveTextContent("Yearly £150 a year · 2 months free");
     expect(screen.getByRole("radio", { name: /Monthly/ })).toBeChecked();
     await userEvent.click(screen.getByRole("radio", { name: /Yearly/ }));
     await userEvent.click(screen.getByRole("button", { name: "Choose a plan" }));

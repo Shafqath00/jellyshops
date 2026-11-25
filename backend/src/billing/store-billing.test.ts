@@ -51,7 +51,8 @@ describe("StoreBillingService", () => {
   it("reads the stored state, plans for limits and whether the shop is closed", async () => {
     const ended = service([{ storeId: "s", plan: "standard", status: "trialing", trialEndsAt: "2026-11-30T00:00:00Z", currentPeriodEnd: null, cancelAtPeriodEnd: false }]);
     expect(await ended.isPaused("s")).toBe(true);
-    expect(await ended.planFor("s")).toBe("standard");
+    // An ended trial keeps the trial limits until the shop pays.
+    expect(await ended.planFor("s")).toBe("trial");
     expect(await service([{ storeId: "s", plan: "standard", status: "exempt", trialEndsAt: null, currentPeriodEnd: null, cancelAtPeriodEnd: false }]).planFor("s")).toBe("exempt");
     expect(await service([], false).isPaused("s")).toBe(false);
   });
@@ -90,7 +91,7 @@ describe("GET /api/stores/:storeId/billing", () => {
     const { default: express } = await import("express");
     const { createBillingRouter } = await import("./routes.js");
     const { errorHandler } = await import("../http/errors.js");
-    const limits = { usage: vi.fn(async (_storeId: string, kind: "products" | "photoBytes") => ({ plan: "standard" as const, kind, used: kind === "products" ? 74 : 1024, limit: kind === "products" ? 5000 : 10 * 1024 ** 3 })) };
+    const limits = { usage: vi.fn(async (_storeId: string, kind: "products" | "photoBytes" | "files") => ({ plan: "standard" as const, kind, used: { products: 74, photoBytes: 1024, files: 12 }[kind], limit: { products: 5000, photoBytes: 10 * 1024 ** 3, files: 5000 }[kind] })) };
     return express()
       .use("/api/stores/:storeId", createBillingRouter({ state: async () => ({ ...billingState(null, now, false), ...state }) }, limits, owner, { enforced: false }))
       .use(errorHandler);
@@ -103,7 +104,7 @@ describe("GET /api/stores/:storeId/billing", () => {
     expect(response.headers["cache-control"]).toBe("no-store");
     expect(response.body).toMatchObject({
       status: "trialing", plan: "standard", planName: "Jellyshop", exempt: false, enforced: false, paused: false, trialEndsAt: "2026-12-10T00:00:00.000Z",
-      usage: [{ kind: "products", used: 74, limit: 5000 }, { kind: "photoBytes", used: 1024, limit: 10 * 1024 ** 3 }],
+      usage: [{ kind: "products", used: 74, limit: 5000 }, { kind: "photoBytes", used: 1024, limit: 10 * 1024 ** 3 }, { kind: "files", used: 12, limit: 5000 }],
     });
   });
 
@@ -111,5 +112,20 @@ describe("GET /api/stores/:storeId/billing", () => {
     const { default: request } = await import("supertest");
     const response = await request(await app({})).get("/api/stores/other/billing").set("Authorization", "Bearer x");
     expect(response.status).toBe(404);
+  });
+});
+
+describe("which limits a shop gets", () => {
+  const service = (row: Partial<StoreBillingRecord> | null) => new StoreBillingService({
+    query: vi.fn(async () => ({ rows: row ? [{ storeId: "s", plan: "standard", trialEndsAt: null, currentPeriodEnd: null, cancelAtPeriodEnd: false, stripeCustomerId: null, stripeSubscriptionId: null, ...row }] : [] })),
+  }, { enforced: false });
+
+  it("trial limits while trialing without a subscription, paid limits once subscribed, none when exempt", async () => {
+    expect(await service({ status: "trialing" }).planFor("s")).toBe("trial");
+    expect(await service({ status: "trialing", stripeSubscriptionId: "sub_1" }).planFor("s")).toBe("standard");
+    expect(await service({ status: "active" }).planFor("s")).toBe("standard");
+    expect(await service({ status: "past_due" }).planFor("s")).toBe("standard");
+    expect(await service({ status: "exempt" }).planFor("s")).toBe("exempt");
+    expect(await service(null).planFor("s")).toBe("standard");
   });
 });

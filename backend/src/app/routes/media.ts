@@ -4,6 +4,7 @@ import type { AppContext } from "../types.js";
 
 export function mountMediaRoutes(app: Express, context: AppContext): void {
   const { mediaService, authProvider, config } = context;
+  const { planLimits } = context.routeDependencies;
 
   app.use(
     "/api/stores/:storeId/media",
@@ -11,6 +12,7 @@ export function mountMediaRoutes(app: Express, context: AppContext): void {
       mediaService,
       authProvider,
       config.maxUploadBytes,
+      planLimits,
     ),
   );
 

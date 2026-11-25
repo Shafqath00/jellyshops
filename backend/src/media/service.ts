@@ -40,8 +40,8 @@ export class MediaService {
     private readonly storefrontReferenceReader?: (storeId: string, mediaId: string) => Promise<boolean>,
     /** Public photo domain (MEDIA_PUBLIC_BASE); when set, records carry their direct address. */
     readonly publicBase?: string,
-    /** Plan limits (photo storage). Every upload, bulk photos included, passes here. */
-    private readonly limits?: Pick<PlanLimitChecker, "check">,
+    /** Plan limits (file size, file count, photo storage). Every upload, bulk photos included, passes here. */
+    private readonly limits?: Pick<PlanLimitChecker, "check"> & Partial<Pick<PlanLimitChecker, "checkFileSize">>,
   ) {}
   private shown(record: StoredMediaRecord): MediaRecord { return publicRecord(record, this.publicBase); }
   /**
@@ -64,6 +64,9 @@ export class MediaService {
     const contentHash = createHash("sha256").update(file.buffer).digest("hex");
     const existing = await this.findByHash(storeId, contentHash);
     if (existing) return this.shown(existing);
+    // Plan checks before the image is decoded: a file that can't be kept is never processed.
+    await this.limits?.checkFileSize?.(storeId, file.buffer.length);
+    await this.limits?.check(storeId, "files");
     const image = await validateImage(file.buffer);
     const id = randomUUID();
     // Sharp strips metadata by default. Animated decoding retains all supported frames.

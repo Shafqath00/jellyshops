@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 import { ApiError } from "../http/errors.js";
+import { BILLING_CONFIG } from "./limits-config.js";
 import { DEFAULT_PLAN, PLANS, type PlanId } from "./plans.js";
 import type { PlanResolver } from "./plan-limits.js";
 
@@ -18,7 +19,7 @@ import type { PlanResolver } from "./plan-limits.js";
  */
 export type BillingStatus = "trialing" | "active" | "past_due" | "paused" | "canceled" | "exempt";
 
-export const TRIAL_DAYS = 14;
+export const TRIAL_DAYS = BILLING_CONFIG.trialDays;
 
 export interface StoreBillingRecord {
   storeId: string;
@@ -152,10 +153,15 @@ export class StoreBillingService {
     return (await this.state(storeId)).paused;
   }
 
-  /** The plan used for limits: exempt shops are never limited. */
+  /**
+   * The plan used for limits: exempt shops are never limited; shops in their trial get the trial limits until they
+   * subscribe (a shop that has added a card and subscribed keeps its trial days but gets the paid limits).
+   */
   readonly planFor: PlanResolver = async (storeId) => {
     const record = await this.record(storeId);
-    return record?.status === "exempt" ? "exempt" : knownPlan(record?.plan);
+    if (record?.status === "exempt") return "exempt";
+    if (record?.status === "trialing" && !record.stripeSubscriptionId) return "trial";
+    return knownPlan(record?.plan);
   };
 }
 

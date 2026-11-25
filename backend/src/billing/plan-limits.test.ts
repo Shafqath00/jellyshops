@@ -75,3 +75,54 @@ describe("where the limits are checked", () => {
     expect(repository.create).not.toHaveBeenCalled();
   });
 });
+
+describe("trial limits (limits-config.ts)", () => {
+  const trial = PLANS.trial;
+  const onTrial = async () => "trial" as const;
+
+  it("keeps trial limits well below the paid plan", () => {
+    expect(trial.limits.products).toBeLessThan(PLANS.standard.limits.products);
+    expect(trial.limits.photoBytes).toBeLessThan(PLANS.standard.limits.photoBytes);
+    expect(trial.limits.files).toBeLessThan(PLANS.standard.limits.files);
+    expect(trial.uploads.fileBytes).toBeLessThan(PLANS.standard.uploads.fileBytes);
+    expect(trial.uploads.uploadsPerMinute).toBeLessThan(PLANS.standard.uploads.uploadsPerMinute);
+  });
+
+  it("limits a trial store to the trial product count, with the trial numbers in the message", async () => {
+    await expect(new PlanLimitChecker(reader({ products: trial.limits.products - 1 }), onTrial).check("s", "products")).resolves.toBeUndefined();
+    await expect(new PlanLimitChecker(reader({ products: trial.limits.products }), onTrial).check("s", "products"))
+      .rejects.toThrow(`Your plan allows up to ${trial.limits.products} products`);
+  });
+
+  it("limits the number of files", async () => {
+    await expect(new PlanLimitChecker(reader({ files: trial.limits.files }), onTrial).check("s", "files"))
+      .rejects.toMatchObject({ status: 409, code: "PLAN_LIMIT", message: expect.stringContaining(`up to ${trial.limits.files} files`) });
+  });
+
+  it("refuses a single file over the plan's size with 413, and never limits exempt stores", async () => {
+    const checker = new PlanLimitChecker(reader({}), onTrial);
+    await expect(checker.checkFileSize("s", trial.uploads.fileBytes)).resolves.toBeUndefined();
+    await expect(checker.checkFileSize("s", trial.uploads.fileBytes + 1)).rejects.toMatchObject({ status: 413, code: "FILE_TOO_LARGE", message: expect.stringContaining("Files can be up to 5 MB on your plan") });
+    await expect(new PlanLimitChecker(reader({}), async () => "standard").checkFileSize("s", trial.uploads.fileBytes + 1)).resolves.toBeUndefined();
+    const exempt = new PlanLimitChecker(reader({}), async () => "exempt");
+    expect(await exempt.uploadRules("s")).toBeNull();
+    await expect(exempt.checkFileSize("s", 1024 ** 3)).resolves.toBeUndefined();
+  });
+
+  it("checks file size and file count before an upload is decoded or stored", async () => {
+    const repository = { create: vi.fn(), get: vi.fn(), list: vi.fn(async () => []), delete: vi.fn() } as unknown as MediaRepository;
+    const storage = { put: vi.fn(), open: vi.fn(), remove: vi.fn() } as unknown as MediaStorage;
+    const big = Buffer.alloc(trial.uploads.fileBytes + 1);
+    const tooBig = new MediaService(repository, storage, undefined, undefined, new PlanLimitChecker(reader({}), onTrial));
+    await expect(tooBig.upload("s", { buffer: big, size: big.length, originalname: "a.png" } as Express.Multer.File)).rejects.toMatchObject({ code: "FILE_TOO_LARGE" });
+    const full = new MediaService(repository, storage, undefined, undefined, new PlanLimitChecker(reader({ files: trial.limits.files }), onTrial));
+    await expect(full.upload("s", { buffer: Buffer.from("x"), size: 1, originalname: "a.png" } as Express.Multer.File)).rejects.toMatchObject({ code: "PLAN_LIMIT" });
+    expect(storage.put).not.toHaveBeenCalled();
+  });
+
+  it("counts files from the database by store", async () => {
+    const query = vi.fn(async () => ({ rows: [{ value: 7 }] }));
+    expect(await sqlUsageReader({ query } as never).usage("store-a", "files")).toBe(7);
+    expect(query).toHaveBeenLastCalledWith(expect.stringMatching(/count\(\*\).*FROM "Media" WHERE "storeId" = \$1/), ["store-a"]);
+  });
+});

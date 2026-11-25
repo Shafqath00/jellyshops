@@ -1,5 +1,5 @@
 import { ApiError } from "../http/errors.js";
-import { DEFAULT_PLAN, PLANS, type LimitKind, type PlanId } from "./plans.js";
+import { DEFAULT_PLAN, PLANS, type LimitKind, type PlanId, type UploadRules } from "./plans.js";
 
 /** How much of something a store uses now. */
 export interface UsageReader {
@@ -39,6 +39,9 @@ function limitMessage(kind: LimitKind, used: number, limit: number, adding: numb
     case "staff":
       return `Your plan allows ${number.format(limit)} people on this shop (you included) and it already has ${number.format(used)}. `
         + "Remove someone who no longer needs access, or contact us about a bigger plan.";
+    case "files":
+      return `Your plan allows up to ${number.format(limit)} files and this shop already has ${number.format(used)}. `
+        + "Delete files you no longer use in Content > Files, or pay for your plan to get more room.";
     case "customDomains":
       return `Your plan allows ${number.format(limit)} own domain${limit === 1 ? "" : "s"} and this shop already has ${number.format(used)}. `
         + "Remove one first, or contact us about a bigger plan.";
@@ -64,6 +67,18 @@ export class PlanLimitChecker {
     return { plan, kind, used, limit: plan === "exempt" ? null : PLANS[plan].limits[kind] };
   }
 
+  /** Upload rules for a store's plan; null for exempt stores (only the server-wide size cap applies). */
+  async uploadRules(storeId: string): Promise<UploadRules | null> {
+    const plan = await this.resolvePlan(storeId);
+    return plan === "exempt" ? null : PLANS[plan].uploads;
+  }
+
+  /** Refuses a single file larger than the store's plan allows (413). */
+  async checkFileSize(storeId: string, bytes: number): Promise<void> {
+    const rules = await this.uploadRules(storeId);
+    if (rules && bytes > rules.fileBytes) throw fileTooLarge(rules.fileBytes, bytes);
+  }
+
   /** `adding` is how many items (or bytes, for photos) the write adds. */
   async check(storeId: string, kind: LimitKind, adding = 1): Promise<void> {
     const plan = await this.resolvePlan(storeId);
@@ -72,6 +87,12 @@ export class PlanLimitChecker {
     const used = await this.reader.usage(storeId, kind);
     if (used + adding > limit) throw new ApiError(409, "PLAN_LIMIT", limitMessage(kind, used, limit, kind === "photoBytes" ? adding : 0));
   }
+}
+
+/** 413 for a file over the plan's per-file limit, with both sizes in plain words. */
+export function fileTooLarge(limit: number, bytes?: number): ApiError {
+  return new ApiError(413, "FILE_TOO_LARGE", `Files can be up to ${formatBytes(limit)} on your plan`
+    + (bytes ? ` and this one is ${formatBytes(bytes)}. ` : ". ") + "Make the photo smaller and try again.");
 }
 
 interface Sql {
@@ -83,6 +104,7 @@ export function sqlUsageReader(sql: Sql): UsageReader {
   const queries: Record<LimitKind, string | null> = {
     products: `SELECT count(*)::bigint AS "value" FROM "Product" WHERE "storeId" = $1 AND "status" <> 'ARCHIVED'`,
     photoBytes: `SELECT coalesce(sum("byteSize"), 0)::bigint AS "value" FROM "Media" WHERE "storeId" = $1`,
+    files: `SELECT count(*)::bigint AS "value" FROM "Media" WHERE "storeId" = $1`,
     staff: `SELECT count(*)::bigint AS "value" FROM "StoreMembership" WHERE "storeId" = $1`,
     // Custom domains are not built yet; nothing to count.
     customDomains: null,

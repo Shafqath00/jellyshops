@@ -121,3 +121,37 @@ describe("media routes", () => {
     expect((await request(cdnApp).get(`${uploaded.body.url}?w=500`)).status).toBe(400);
   });
 });
+
+describe("media upload plan rules", () => {
+  const trialRules = { uploadRules: async () => ({ fileBytes: 200 * 1024, uploadsPerMinute: 3 }), check: async () => {}, checkFileSize: async () => {}, usage: async () => ({}) };
+
+  async function appWithRules(rules: { uploadRules: () => Promise<{ fileBytes: number; uploadsPerMinute: number } | null> }) {
+    const directory = await mkdtemp(path.join(tmpdir(), "jelly-media-plan-"));
+    const config: AppConfig = {
+      port: 3001, nodeEnv: "test", corsOrigins: ["http://localhost:3000"], trustProxy: false, authProvider: "development",
+      repositoryProvider: "local-json", mediaProvider: "local-files", dataDirectory: path.join(directory, "data"),
+      uploadDirectory: path.join(directory, "uploads"), maxUploadBytes: 1024 * 1024, demoStoreId: "store-demo",
+    };
+    return createApp({ config, planLimits: rules as never });
+  }
+
+  it("refuses a file over the plan's size with 413 before reading it", async () => {
+    const app = await appWithRules(trialRules);
+    const response = await request(app)
+      .post("/api/stores/store-demo/media")
+      .set("Authorization", "Bearer jelly-demo-merchant")
+      .attach("file", Buffer.alloc(400 * 1024), { filename: "big.png", contentType: "image/png" });
+    expect(response.status).toBe(413);
+    expect(response.body.error ?? response.body).toMatchObject({ code: "FILE_TOO_LARGE" });
+  });
+
+  it("limits uploads per store per minute with 429", async () => {
+    const app = await appWithRules(trialRules);
+    const send = () => request(app).post("/api/stores/store-demo/media").set("Authorization", "Bearer jelly-demo-merchant")
+      .attach("file", tinyPng, { filename: "a.png", contentType: "image/png" });
+    for (let index = 0; index < 3; index++) expect((await send()).status).toBe(201);
+    const refused = await send();
+    expect(refused.status).toBe(429);
+    expect(refused.body.error ?? refused.body).toMatchObject({ code: "UPLOAD_RATE_LIMIT" });
+  });
+});

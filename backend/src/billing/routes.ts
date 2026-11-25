@@ -8,7 +8,7 @@ import type { StoreBillingService } from "./store-billing.js";
 import type { StripeBillingService } from "./stripe-billing.js";
 
 /** What the Billing page and the admin banners show. Staff and domain limits come once those features exist. */
-const SHOWN_LIMITS: LimitKind[] = ["products", "photoBytes"];
+const SHOWN_LIMITS: LimitKind[] = ["products", "photoBytes", "files"];
 
 /**
  * `GET /api/stores/:storeId/billing`: the shop's plan, trial or renewal, whether it is paused, and its usage against
