@@ -16,6 +16,8 @@ export const BILLING_CONFIG = {
   graceDays: 7,
   /** Days a closed shop's data is kept before it is listed for (manual) deletion (step 5). */
   retentionDays: 90,
+  /** The owner is warned this many days before the deletion date, and no shop is due for deletion sooner (step 5). */
+  retentionWarningDays: 14,
   /** Trial days on which the owner is reminded; the expiry day itself is always reminded too (step 2). */
   reminderDays: [10, 13],
   prices: { currency: "GBP", monthMinor: 1500, yearMinor: 15000 },

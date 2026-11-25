@@ -58,6 +58,18 @@ describe("platform admin API", () => {
     expect(log.rows).toEqual([{ action: "platform.stores.list", actorUserId: 1, metadata: { search: "beta" } }]);
   });
 
+  it("lists shops closed long enough to be warned about deletion, and logs it", async () => {
+    const closed = new Date(NOW - 100 * 24 * 60 * 60 * 1000);
+    await context.database.query(`INSERT INTO "StoreBilling" ("storeId", "plan", "status", "trialEndsAt") VALUES ('store-b', 'standard', 'expired', $1)`, [closed]);
+    const response = await call("/api/platform/retention", token("auth-owner", fresh));
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchObject({ retentionDays: 90, warningDays: 14 });
+    expect(response.body.shops).toEqual([expect.objectContaining({ storeId: "store-b", ownerEmail: "merchant@example.test", closedSince: closed.toISOString(), warnedAt: null, due: false })]);
+    const log = await context.database.query<{ action: string }>(`SELECT "action" FROM "PlatformAuditEvent"`);
+    expect(log.rows).toEqual([{ action: "platform.retention.list" }]);
+    expect((await call("/api/platform/retention", token("auth-merchant", fresh))).status).toBe(403);
+  });
+
   it("tells the admin who they are", async () => {
     expect((await call("/api/platform/me", token("auth-owner", fresh))).body).toEqual({ role: "OWNER", email: "owner@example.test" });
   });

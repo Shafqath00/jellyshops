@@ -4,6 +4,8 @@ import { requireMerchant } from "../auth/middleware.js";
 import type { AuthProvider } from "../auth/types.js";
 import type { SqlExecutor } from "../commerce/repository.js";
 import { ApiError } from "../http/errors.js";
+import { BILLING_CONFIG } from "../billing/limits-config.js";
+import { listRetention } from "../billing/retention.js";
 
 /**
  * The platform super-admin (platform.jellyshop.io): `/api/platform/*`. Only people listed in "PlatformAdmin" (added by
@@ -117,6 +119,22 @@ export function createPlatformRouter(authProvider: AuthProvider, db: Database, n
           plan: row.plan, billingStatus: row.billingStatus, trialEndsAt: row.trialEndsAt ? new Date(row.trialEndsAt).toISOString() : null,
         })),
       });
+    } catch (error) {
+      next(error);
+    }
+  });
+  // Closed shops whose data is kept for BILLING_CONFIG.retentionDays: warned, and due for (manual) deletion. Logged.
+  router.get("/retention", async (_request, response, next) => {
+    try {
+      const admin = response.locals.platformAdmin as PlatformAdmin;
+      const shops = await db.transaction(async (sql) => {
+        const ready = await sql.query<{ table: string | null }>(`SELECT to_regclass('public."BillingReminder"')::text AS "table"`);
+        if (!ready.rows[0]?.table) return [];
+        const rows = await listRetention(sql, new Date(now()));
+        await audit(sql, admin, "platform.retention.list");
+        return rows;
+      });
+      response.json({ shops, retentionDays: BILLING_CONFIG.retentionDays, warningDays: BILLING_CONFIG.retentionWarningDays });
     } catch (error) {
       next(error);
     }

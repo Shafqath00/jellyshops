@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { planText } from "./plan-text";
+import { ClosedShops, type ClosedShopsResult } from "./closed-shops";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { storeUrl } from "@jelly/storefront-schema";
 import { MerchantAuthShell } from "@/features/auth/components/auth-shell";
@@ -140,6 +141,7 @@ function ShopList({ client, email, role, onSignOut }: { client: SupabaseClient; 
   const [shops, setShops] = useState<Shop[] | null>(null);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
+  const loadClosed = useCallback(() => api<ClosedShopsResult["body"]>(client, "/retention") as Promise<ClosedShopsResult>, [client]);
   useEffect(() => {
     let active = true;
     void api<{ stores: Shop[] }>(client, `/stores${search ? `?q=${encodeURIComponent(search)}` : ""}`).then((result) => {
@@ -155,6 +157,7 @@ function ShopList({ client, email, role, onSignOut }: { client: SupabaseClient; 
       <div><p className={styles.eyebrow}>Jellyshop platform</p><h1 style={{ margin: 0 }}>Shops</h1></div>
       <p style={{ margin: 0 }}>{email} · {role === "OWNER" ? "Owner" : "Support"} · <button type="button" className={styles.textLink} onClick={onSignOut}>Sign out</button></p>
     </header>
+    <ClosedShops load={loadClosed} />
     <form role="search" onSubmit={(event) => { event.preventDefault(); setSearch(query.trim()); }} style={{ display: "flex", gap: 8, maxWidth: 520, marginBottom: 16 }}>
       <label className="sr-only" htmlFor="platform-search">Search shops by name or address</label>
       <input className={styles.input} id="platform-search" type="search" placeholder="Search by name or address" value={query} onChange={(event) => setQuery(event.target.value)} />

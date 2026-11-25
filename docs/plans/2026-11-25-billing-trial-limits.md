@@ -113,3 +113,21 @@ no anon/authenticated grants; backfill wrote 2 user + 2 email claims (owners of 
 - Bulk edit (saves one product at a time) waits 5 seconds and tries again on 429, for up to about a minute per
   product (`saveWithPatience` in `bulk-edit-dialog.tsx`), so a large bulk edit slows down instead of failing.
 - Existing per-IP limiters (uploads, onboarding, public forms) are unchanged.
+
+## Step 5 built (2026-11-25, code only; uses the step 2 tables)
+
+- `backend/src/billing/retention.ts`: when a shop closed (`CLOSED_SINCE_SQL`): trial end for an expired trial (the
+  billing row's start when it never had one), grace end for a failed payment, end of the last paid period when
+  cancelled, last change when paused. A shop that pays again leaves the list at once.
+- Warning email (billing job, only with `BILLING_ENFORCED` on and an email sender): once per closing, when the shop
+  has been closed `retentionDays - retentionWarningDays` (90 - 14 = 76) days. Subject "We'll delete <shop> on <date>
+  unless you choose a plan"; suggests exporting products and orders first.
+- Deletion date = the later of closed + 90 days and warned + 14 days, so nobody loses a shop with less than 14 days'
+  notice (also when enforcement is switched on long after a shop closed). A shop never warned has no deletion date
+  and is never shown as deletable.
+- Platform admin: `GET /api/platform/retention` (logged as `platform.retention.list`) and a "Closed shops" table at the
+  top of platform.jellyshop.io (shop, owner, why, closed since, warned / can be deleted from). Shown only when a shop
+  has been closed 76+ days.
+- Nothing is deleted automatically. Deleting a shop is still a manual step (and needs the publication-guard workaround
+  noted in CLAUDE.md).
+- Fixed in passing: billing emails now record the job's own time as `sentAt`.

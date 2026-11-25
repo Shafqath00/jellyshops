@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { BILLING_CONFIG } from "./limits-config.js";
+import { CLOSED_SINCE_SQL, retentionWarningKey, warnAfterMs } from "./retention.js";
 import type { BillingStatus } from "./store-billing.js";
 
 /**
@@ -10,7 +11,7 @@ import type { BillingStatus } from "./store-billing.js";
  *    truth for everything paid; this only moves the one state Stripe knows nothing about.
  * 2. The owner gets one email for each of: trial day 10 and day 13 (BILLING_CONFIG.reminderDays), trial ended, a
  *    failed payment (with the date the shop closes) and, once BILLING_ENFORCED is on, the shop closing at the end of
- *    the grace period.
+ *    the grace period and the warning before its data may be deleted (step 5, see retention.ts).
  *
  * Each email is claimed in "BillingReminder" before it is sent (primary key per store and kind), so several server
  * instances never send it twice; a failed send gives the claim back so the next tick retries. Without an email
@@ -38,13 +39,16 @@ export interface BillingCandidate {
   status: BillingStatus;
   trialEndsAt: Date | null;
   graceEndsAt: Date | null;
+  /** When the shop closed (see retention.ts), or null while it is open. */
+  closedSince?: Date | null;
 }
 
 export type ReminderKind =
   | { kind: "trial-day"; day: number }
   | { kind: "trial-ended" }
   | { kind: "payment-failed"; graceEndsAt: Date }
-  | { kind: "shop-closed"; graceEndsAt: Date };
+  | { kind: "shop-closed"; graceEndsAt: Date }
+  | { kind: "retention-warning"; closedSince: Date; deleteFrom: Date };
 
 /** The key stored in "BillingReminder": one per trial reminder, one per failed-payment episode (by its grace end). */
 export function reminderKey(reminder: ReminderKind): string {
@@ -53,6 +57,7 @@ export function reminderKey(reminder: ReminderKind): string {
     case "trial-ended": return "trial-ended";
     case "payment-failed": return `payment-failed:${reminder.graceEndsAt.toISOString()}`;
     case "shop-closed": return `shop-closed:${reminder.graceEndsAt.toISOString()}`;
+    case "retention-warning": return retentionWarningKey(reminder.closedSince);
   }
 }
 
@@ -62,6 +67,14 @@ export function reminderKey(reminder: ReminderKind): string {
  */
 export function dueReminder(candidate: BillingCandidate, now: Date, enforced: boolean): ReminderKind | null {
   const time = now.getTime();
+  // Closed long enough that its data will be deleted: the most important email, and only while really closed.
+  if (enforced && candidate.closedSince && time - candidate.closedSince.getTime() >= warnAfterMs()) {
+    const deleteFrom = new Date(Math.max(
+      candidate.closedSince.getTime() + BILLING_CONFIG.retentionDays * DAY,
+      time + BILLING_CONFIG.retentionWarningDays * DAY,
+    ));
+    return { kind: "retention-warning", closedSince: candidate.closedSince, deleteFrom };
+  }
   if (candidate.status === "trialing" && candidate.trialEndsAt) {
     const ends = candidate.trialEndsAt.getTime();
     if (ends <= time) return null; // the job marks it expired first; the next pass sends trial-ended
@@ -113,6 +126,14 @@ export function reminderMessage(reminder: ReminderKind, candidate: BillingCandid
         `Please update your card by ${day(reminder.graceEndsAt)}, or your shop will close to shoppers on that day.`,
       ];
       break;
+    case "retention-warning":
+      subject = `We'll delete ${shop} on ${day(reminder.deleteFrom)} unless you choose a plan`;
+      lines = [
+        `${shop} has been closed to shoppers since ${day(reminder.closedSince)}.`,
+        `We keep closed shops for ${BILLING_CONFIG.retentionDays} days. On or after ${day(reminder.deleteFrom)} we may delete it, with its products, photos, orders and customers. Choose a plan (${PRICE}) before then to keep it.`,
+        "If you'd like a copy of your products or orders first, export them from your admin.",
+      ];
+      break;
     case "shop-closed":
       subject = `${shop} is closed until payment goes through`;
       lines = [
@@ -121,7 +142,7 @@ export function reminderMessage(reminder: ReminderKind, candidate: BillingCandid
       ];
       break;
   }
-  const action = reminder.kind === "trial-day" || reminder.kind === "trial-ended" ? "Choose a plan" : "Update your card";
+  const action = reminder.kind === "trial-day" || reminder.kind === "trial-ended" || reminder.kind === "retention-warning" ? "Choose a plan" : "Update your card";
   const text = [...lines, `${action}: ${billingUrl}`, "Jellyshop"].join("\n\n");
   const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${escape(subject)}</title></head><body style="margin:0;padding:32px 16px;background:#f6f6f4;font-family:Arial,sans-serif;color:#111">`
     + `<div style="max-width:560px;margin:0 auto;background:#fff;border:1px solid #e3e3df;padding:32px">`
@@ -140,6 +161,7 @@ interface CandidateRow {
   status: BillingStatus;
   trialEndsAt: Date | string | null;
   graceEndsAt: Date | string | null;
+  closedSince: Date | string | null;
 }
 const asDate = (value: Date | string | null) => (value === null ? null : value instanceof Date ? value : new Date(value));
 
@@ -172,7 +194,7 @@ export class BillingJobs {
 
     const firstReminder = Math.min(...BILLING_CONFIG.reminderDays);
     const candidates = await this.sql.query(
-      `SELECT b."storeId", s."name" AS "storeName", s."slug" AS "storeSlug", owner."email" AS "ownerEmail", b."status", b."trialEndsAt", b."graceEndsAt"
+      `SELECT b."storeId", s."name" AS "storeName", s."slug" AS "storeSlug", owner."email" AS "ownerEmail", b."status", b."trialEndsAt", b."graceEndsAt", ${CLOSED_SINCE_SQL} AS "closedSince"
        FROM "StoreBilling" b
        JOIN "Store" s ON s."id" = b."storeId"
        LEFT JOIN LATERAL (
@@ -182,20 +204,23 @@ export class BillingJobs {
        WHERE (b."status" = 'trialing' AND b."stripeSubscriptionId" IS NULL AND b."trialEndsAt" <= $1::timestamptz + make_interval(days => $2))
           OR (b."status" = 'expired' AND b."trialEndsAt" >= $1::timestamptz - make_interval(days => 3))
           OR (b."status" = 'past_due' AND b."graceEndsAt" IS NOT NULL)
+          OR ($5 AND ${CLOSED_SINCE_SQL} <= $1::timestamptz - make_interval(secs => $4)
+              -- Already warned for this closing: no longer a candidate, so warned shops never crowd out others.
+              AND NOT EXISTS (SELECT 1 FROM "BillingReminder" r WHERE r."storeId" = b."storeId" AND r."kind" LIKE 'retention-warning:%' AND r."sentAt" >= ${CLOSED_SINCE_SQL}))
        ORDER BY b."storeId" LIMIT $3`,
-      [now, BILLING_CONFIG.trialDays - firstReminder, BATCH * 2],
+      [now, BILLING_CONFIG.trialDays - firstReminder, BATCH * 2, warnAfterMs() / 1000, this.options.enforced],
     );
     let sent = 0;
     let failed = 0;
     for (const raw of candidates.rows as CandidateRow[]) {
       if (sent + failed >= BATCH) break;
-      const candidate: BillingCandidate = { ...raw, trialEndsAt: asDate(raw.trialEndsAt), graceEndsAt: asDate(raw.graceEndsAt) };
+      const candidate: BillingCandidate = { ...raw, trialEndsAt: asDate(raw.trialEndsAt), graceEndsAt: asDate(raw.graceEndsAt), closedSince: asDate(raw.closedSince) };
       const reminder = dueReminder(candidate, now, this.options.enforced);
       if (!reminder || !candidate.ownerEmail) continue;
       const kind = reminderKey(reminder);
       const claimed = await this.sql.query(
-        `INSERT INTO "BillingReminder" ("storeId", "kind", "sentTo") VALUES ($1, $2, $3) ON CONFLICT DO NOTHING RETURNING "storeId"`,
-        [candidate.storeId, kind, candidate.ownerEmail],
+        `INSERT INTO "BillingReminder" ("storeId", "kind", "sentTo", "sentAt") VALUES ($1, $2, $3, $4) ON CONFLICT DO NOTHING RETURNING "storeId"`,
+        [candidate.storeId, kind, candidate.ownerEmail, now],
       );
       if (claimed.rows.length === 0) continue;
       try {
