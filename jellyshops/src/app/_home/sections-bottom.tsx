@@ -14,8 +14,9 @@ import styles from "../home.module.css";
 
 /* ---------- 7. Sell everywhere: animated channel diagram ---------- */
 
+// Channel labels sit a quarter in from each side, so they fit inside the diagram on a 320px phone too.
 const NODES = [
-  { x: 110, y: 90 }, { x: 490, y: 90 }, { x: 110, y: 310 }, { x: 490, y: 310 },
+  { x: 150, y: 90 }, { x: 450, y: 90 }, { x: 150, y: 310 }, { x: 450, y: 310 },
 ];
 
 export function SellEverywhere() {
@@ -157,7 +158,7 @@ export function Stories() {
                 </p>
                 <blockquote><p>“{story.quote}”</p></blockquote>
                 <figcaption>
-                  <Image src={`/assets/${story.avatar}.webp`} alt="" width={96} height={96} loading="lazy" />
+                  <Image src={`/assets/${story.avatar}.webp`} alt="" width={96} height={96} sizes="40px" loading="lazy" />
                   <span><strong>{story.name}</strong><span>{story.role}</span></span>
                 </figcaption>
               </figure>

@@ -10,7 +10,8 @@ import "@/features/brand/brand.css";
 import styles from "./home.module.css";
 import { brandViewport } from "@/features/brand/theme";
 
-export const viewport = brandViewport;
+// viewport-fit=cover lets the page run under notches; the header, gutters, menu and footer pad by the safe areas.
+export const viewport = { ...brandViewport, viewportFit: "cover" as const };
 
 const description = "Jellyshop is the all-in-one platform for independent brands to design an online store, take payments and manage orders, with no code.";
 

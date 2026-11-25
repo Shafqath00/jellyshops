@@ -1,10 +1,12 @@
 /* Jellyshop home page: black-and-white premium. Tokens: docs/redesign/DESIGN_TOKENS.md. Dark by default, mobile first. */
 
 .home {
-  --gutter: clamp(20px, 4vw, 40px);
-  --section: clamp(96px, 12vw, 160px);
+  /* Side space never smaller than a notch or rounded corner (viewport-fit=cover on this page). */
+  --gutter: max(clamp(16px, 4.5vw, 40px), env(safe-area-inset-left), env(safe-area-inset-right));
+  --section: clamp(72px, 12vw, 160px);
 
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: clip;
   background: var(--bg);
   color: var(--fg-muted);
@@ -84,8 +86,8 @@
 .iconButton {
   display: inline-grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   flex: none;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -105,6 +107,7 @@
   position: sticky;
   top: 0;
   z-index: 50;
+  padding-top: env(safe-area-inset-top);
   border-bottom: 1px solid transparent;
   transition: background-color .3s var(--ease), border-color .3s var(--ease);
 }
@@ -116,8 +119,8 @@
 
 .headerOpen { background: var(--bg); }
 
-.headerInner { display: flex; align-items: center; gap: 28px; width: min(100% - 2 * var(--gutter), 1200px); height: 64px; margin-inline: auto; }
-.logo { display: inline-flex; flex: none; color: var(--fg); }
+.headerInner { display: flex; align-items: center; gap: clamp(12px, 3vw, 28px); width: min(100% - 2 * var(--gutter), 1200px); height: 64px; margin-inline: auto; }
+.logo { display: inline-flex; align-items: center; flex: none; min-height: 44px; color: var(--fg); }
 .desktopNav { display: none; }
 .navList { display: flex; gap: 2px; }
 .navList > li { position: relative; }
@@ -177,14 +180,16 @@
   color: var(--fg);
 }
 
-.headerActions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.headerActions { display: flex; align-items: center; gap: 4px; margin-left: auto; }
 .loginLink { display: none; padding: 0 8px; color: var(--fg-muted); font-size: .875rem; transition: color .2s; }
 .loginLink:hover { color: var(--fg); }
-.headerCta { display: inline-flex; }
+/* Below 360px the header has room for the logo, theme switch and menu only; Start free is in the menu and the hero. */
+.headerCta { display: none; }
+.headerCta .btnSmall { min-height: 44px; }
 
 .menuButton { display: grid; place-items: center; width: 44px; height: 44px; border: 0; background: none; color: var(--fg); cursor: pointer; }
 
-.drawer { position: fixed; inset: 64px 0 0; z-index: 49; overflow-y: auto; padding: 8px var(--gutter) 32px; background: var(--bg); }
+.drawer { position: fixed; inset: 64px 0 0; z-index: 49; overflow-y: auto; overscroll-behavior: contain; padding: 8px var(--gutter) calc(32px + env(safe-area-inset-bottom)); background: var(--bg); }
 .drawerGroup { border-bottom: 1px solid var(--line); }
 
 .drawerGroup summary,
@@ -205,7 +210,7 @@
 .drawerGroup summary svg { transition: transform .25s var(--ease); }
 .drawerGroup[open] summary svg { transform: rotate(180deg); }
 .drawerGroup ul { padding-bottom: 12px; }
-.drawerGroup a { display: flex; align-items: center; gap: 12px; padding: 10px 0; color: var(--fg-muted); }
+.drawerGroup a { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 8px 0; color: var(--fg-muted); }
 .drawerActions { display: grid; gap: 10px; margin-top: 24px; }
 
 /* Hero */
@@ -215,6 +220,8 @@
 
 .announce {
   display: inline-flex;
+  max-width: 100%;
+  text-wrap: balance;
   align-items: center;
   gap: 10px;
   min-height: 36px;
@@ -245,8 +252,12 @@
 /* The outcome line in the solid brand accent (dark #9b87ff 6.9:1, light #5b3df5 5.9:1). */
 .accentWord { color: var(--accent); }
 .heroText { max-width: 40rem; margin-top: 24px; font-size: clamp(1.0625rem, 1.6vw, 1.25rem); line-height: 1.55; }
-.heroActions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 36px; }
-.heroNote { margin-top: 16px; color: var(--fg-subtle); font: 500 .75rem/1.4 var(--mono); letter-spacing: .02em; }
+/* Phones: buttons stacked and full width; from 480px side by side. */
+.heroActions { display: grid; gap: 12px; width: 100%; max-width: 24rem; margin-top: 36px; }
+.heroActions > span { display: block; }
+.heroActions > *,
+.heroActions > span > .btn { width: 100%; }
+.heroNote { margin-top: 16px; text-wrap: balance; color: var(--fg-subtle); font: 500 .75rem/1.4 var(--mono); letter-spacing: .02em; }
 
 .heroStage { position: relative; width: 100%; margin-top: clamp(48px, 6vw, 64px); }
 
@@ -296,7 +307,7 @@
 .marqueeTrack { display: flex; gap: clamp(40px, 6vw, 80px); width: max-content; animation: marquee 40s linear infinite; }
 .marquee:hover .marqueeTrack,
 .marquee[data-paused] .marqueeTrack { animation-play-state: paused; }
-.marqueeTrack li { flex: none; color: var(--fg-muted); font-size: 1.375rem; white-space: nowrap; transition: color .2s; }
+.marqueeTrack li { flex: none; color: var(--fg-muted); font-size: clamp(1.125rem, 4vw, 1.375rem); white-space: nowrap; transition: color .2s; }
 .marqueeTrack li:hover { color: var(--fg); }
 .shop0 { font-family: Georgia, "Times New Roman", serif; font-style: italic; font-weight: 600; }
 .shop1 { font-weight: 700; letter-spacing: .2em; font-size: 1rem !important; }
@@ -348,7 +359,7 @@
 }
 
 .bentoCard:hover { border-color: var(--line-strong); }
-.bentoCopy { position: relative; z-index: 1; display: grid; gap: 6px; padding: 28px 28px 0; }
+.bentoCopy { position: relative; z-index: 1; display: grid; gap: 6px; padding: clamp(20px, 6vw, 28px) clamp(20px, 6vw, 28px) 0; }
 .bentoCopy p { max-width: 30rem; font-size: .9375rem; }
 .bentoVisual { position: relative; flex: 1; display: grid; align-items: end; margin-top: 20px; min-height: 220px; }
 .bentoImage { position: absolute; inset: 0; overflow: hidden; }
@@ -438,13 +449,13 @@
   translate: -50% -50%;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 6px;
+  padding: 6px 10px;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
   background: var(--bg-raised);
   color: var(--fg);
-  font-size: .8125rem;
+  font-size: .75rem;
   white-space: nowrap;
 }
 
@@ -452,7 +463,8 @@
 
 /* Integrations */
 .integrationGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; overflow: hidden; border: 1px solid var(--line); border-radius: 20px; background: var(--line); }
-.integrationGrid li { display: flex; align-items: center; gap: 14px; padding: 20px; background: var(--bg); }
+/* Phones: logo above the words, so names like "Google Maps" keep the full tile width. */
+.integrationGrid li { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 18px 16px; background: var(--bg); }
 .integrationGrid li > span:last-child { display: grid; min-width: 0; }
 .integrationGrid strong { color: var(--fg); font-size: .9375rem; font-weight: 550; }
 .integrationGrid li > span:last-child > span { font-size: .8125rem; }
@@ -481,7 +493,7 @@
 .terminalBar { display: flex; align-items: center; gap: 6px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
 .terminalBar span { width: 10px; height: 10px; border-radius: 50%; background: var(--line-strong); }
 .terminalBar em { margin-left: auto; color: var(--fg-subtle); font: 500 .6875rem/1 var(--mono); font-style: normal; }
-.terminal pre { display: grid; gap: 4px; overflow-x: auto; padding: 20px; font: 400 .8125rem/1.7 var(--mono); }
+.terminal pre { display: grid; gap: 4px; overflow-x: auto; overscroll-behavior-x: contain; padding: clamp(14px, 4vw, 20px); font: 400 .8125rem/1.7 var(--mono); }
 .terminal code { white-space: pre; font: inherit; }
 .code_comment { color: var(--fg-subtle); }
 .code_cmd { color: var(--fg); }
@@ -493,7 +505,7 @@
 
 /* Stories */
 .storyGrid { display: grid; gap: 16px; }
-.story { display: grid; gap: 24px; height: 100%; padding: 28px; border: 1px solid var(--line); border-radius: 20px; background: var(--bg-raised); box-shadow: var(--card-shadow); }
+.story { display: grid; gap: 24px; height: 100%; padding: clamp(20px, 6vw, 28px); border: 1px solid var(--line); border-radius: 20px; background: var(--bg-raised); box-shadow: var(--card-shadow); }
 .metric { display: grid; gap: 4px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
 .metric strong { color: var(--fg); font-size: 3rem; font-weight: 600; line-height: 1; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
 .metric > span { font-size: .875rem; }
@@ -504,12 +516,12 @@
 .story figcaption strong { color: var(--fg); font-weight: 550; }
 
 /* Pricing */
-.billing { display: flex; gap: 4px; width: max-content; margin: 0 auto 40px; padding: 4px; border: 1px solid var(--line); border-radius: 999px; }
+.billing { display: flex; gap: 4px; width: max-content; max-width: 100%; margin: 0 auto 40px; padding: 4px; border: 1px solid var(--line); border-radius: 999px; }
 
 .billing button {
   position: relative;
-  min-height: 40px;
-  padding: 0 18px;
+  min-height: 44px;
+  padding: 0 clamp(12px, 4vw, 18px);
   border: 0;
   border-radius: 999px;
   background: none;
@@ -525,7 +537,7 @@
 .billingText em { font-style: normal; font-weight: 400; }
 
 .planGrid { display: grid; gap: 16px; }
-.plan { display: grid; align-content: start; gap: 20px; padding: 28px; border: 1px solid var(--line); border-radius: 20px; background: var(--bg-raised); box-shadow: var(--card-shadow); }
+.plan { display: grid; align-content: start; gap: 20px; padding: clamp(20px, 6vw, 28px); border: 1px solid var(--line); border-radius: 20px; background: var(--bg-raised); box-shadow: var(--card-shadow); }
 .planFeatured { border-color: var(--line-strong); }
 .planHead { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .badge { padding: 4px 10px; border-radius: 999px; background: var(--fg); color: var(--bg); font: 500 .6875rem/1.2 var(--mono); letter-spacing: .03em; text-transform: uppercase; }
@@ -541,7 +553,7 @@
 /* Trust */
 .trust { padding-block: var(--section); border-block: 1px solid var(--line); background: var(--bg-sunken); scroll-margin-top: 72px; }
 .trustGrid { display: grid; gap: 1px; overflow: hidden; border: 1px solid var(--line); border-radius: 20px; background: var(--line); }
-.trustGrid li { display: grid; align-content: start; gap: 10px; padding: 28px; background: var(--bg-sunken); }
+.trustGrid li { display: grid; align-content: start; gap: 10px; padding: clamp(20px, 6vw, 28px); background: var(--bg-sunken); }
 .trustGrid p { font-size: .9375rem; }
 .trustIcon { display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 8px; border: 1px solid var(--line-strong); border-radius: 12px; color: var(--fg); }
 
@@ -593,17 +605,18 @@
 .cta .heroActions { margin-top: 12px; }
 
 /* Footer */
-.footer { padding-block: 64px 32px; border-top: 1px solid var(--line); }
+.footer { padding-block: 64px calc(32px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); }
 .footerGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 20px; }
 .footerBrand { grid-column: 1 / -1; display: grid; justify-items: start; gap: 14px; max-width: 20rem; color: var(--fg); }
 .footerBrand p { color: var(--fg-muted); font-size: .9375rem; }
 .footer nav .label { margin-bottom: 14px; color: var(--fg-subtle); }
 .footer nav ul { display: grid; }
-.footer nav a { display: inline-block; padding: 6px 0; font-size: .9375rem; transition: color .2s; }
+.footer nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0; font-size: .9375rem; transition: color .2s; }
 .footer nav a:hover,
 .social a:hover { color: var(--fg); }
 .legal { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--fg-subtle); font-size: .8125rem; }
-.social { display: flex; flex-wrap: wrap; gap: 20px; }
+.social { display: flex; flex-wrap: wrap; gap: 0 20px; }
+.social a { display: inline-flex; align-items: center; min-height: 44px; }
 
 /* Dialog */
 .dialog {
@@ -638,7 +651,26 @@
 .tourDots span[data-active="true"] { width: 20px; background: var(--fg); }
 
 /* ---------- Larger screens ---------- */
+@media (min-width: 360px) {
+  .headerCta { display: inline-flex; }
+}
+
+@media (min-width: 480px) {
+  .heroActions { display: flex; flex-wrap: wrap; justify-content: center; width: auto; max-width: none; }
+  .heroActions > *,
+  .heroActions > span > .btn { width: auto; }
+}
+
+/* Phones: the hero picture (transparent, with space around the devices) runs to the screen edges. */
+@media (max-width: 639px) {
+  /* Terminal lines wrap on phones instead of scrolling sideways. */
+  .terminal code { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .heroStage { justify-self: stretch; width: auto; margin-inline: calc(-1 * var(--gutter)); }
+}
+
 @media (min-width: 640px) {
+  .node { gap: 8px; padding: 8px 12px; font-size: .8125rem; }
+  .integrationGrid li { flex-direction: row; align-items: center; gap: 14px; padding: 20px; }
   .templateGrid,
   .trustGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .integrationGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -665,8 +697,8 @@
   .faq { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 72px; align-items: start; }
 
   /* Pinned "How it works": a tall section with a sticky frame; scroll position picks the step. */
-  .how:not(.howStatic) { height: calc(var(--steps) * 85vh + 100vh); padding: 0; }
-  .how:not(.howStatic) .howSticky { position: sticky; top: 0; display: grid; align-items: center; height: 100vh; }
+  .how:not(.howStatic) { height: calc(var(--steps) * 85vh + 100vh); height: calc(var(--steps) * 85svh + 100dvh); padding: 0; }
+  .how:not(.howStatic) .howSticky { position: sticky; top: 0; display: grid; align-items: center; height: 100vh; height: 100dvh; }
   .how:not(.howStatic) .howGrid { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); align-items: center; gap: 72px; }
   .how:not(.howStatic) .howSteps { gap: 8px; }
   .how:not(.howStatic) .h2 { font-size: clamp(2.25rem, 3.6vw, 3.25rem); }
@@ -684,7 +716,9 @@
 
 @media (min-width: 1024px) {
   .desktopNav { display: block; }
-  .loginLink { display: inline-flex; }
+  .loginLink { display: inline-flex; min-height: 44px; align-items: center; }
+  .headerActions { gap: 8px; }
+  .headerCta .btnSmall { min-height: 36px; }
   .menuButton,
   .drawer { display: none !important; }
   .templateGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
