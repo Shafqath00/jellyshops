@@ -787,9 +787,13 @@
 
 /* Contrast fixes found by the measured check (text over pictures). */
 .nodeSoon { color: var(--fg); }
-:global(html[data-home-theme="light"]) .heroNote { color: var(--fg-muted); }
+.heroNote { color: light-dark(var(--fg-muted), var(--fg-subtle)); }
 
-/* Light mode: text over the hero's colour washes and over the glass cards stays AA. */
-:global(html[data-home-theme="light"]) .navTrigger,
-:global(html[data-home-theme="light"]) .navList > li > a,
-:global(html[data-home-theme="light"]) .loginLink { color: color-mix(in srgb, var(--fg) 82%, var(--bg)); }
+/* Light mode: text over the hero's colour washes and over the glass cards stays AA (dark keeps --fg-muted). */
+.navTrigger,
+.navList > li > a,
+.loginLink { color: light-dark(color-mix(in srgb, var(--fg) 82%, var(--bg)), var(--fg-muted)); }
+.navTrigger:hover,
+.navTrigger[aria-expanded="true"],
+.navList > li > a:hover,
+.loginLink:hover { color: var(--fg); }

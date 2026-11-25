@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Menu, Moon, Sun, X } from "lucide-react";
+import { ChevronDown, Menu, Monitor, Moon, Sun, X } from "lucide-react";
 import Link from "next/link";
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "motion/react";
 import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
@@ -8,25 +8,21 @@ import type { NavItem } from "../home-content";
 import { Icon } from "./icons";
 import { JellyShopLogo } from "@/features/brand/logo";
 import { EASE, SPRING, useReducedMotion } from "@/features/brand/motion";
+import { nextThemeChoice, readThemeChoice, setThemeChoice, subscribeThemeChoice, type ThemeChoice } from "@/features/brand/theme";
 import styles from "../home.module.css";
 
-const THEME_KEY = "jellyshop-home-theme";
-
-// The theme lives on <html data-home-theme>, set before paint by the script in page.tsx.
-function subscribeTheme(onChange: () => void) {
-  const observer = new MutationObserver(onChange);
-  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-home-theme"] });
-  return () => observer.disconnect();
-}
-const themeSnapshot = (): "dark" | "light" => (document.documentElement.dataset.homeTheme === "light" ? "light" : "dark");
-const serverTheme = (): "dark" | "light" => "dark";
+// The theme lives on <html data-home-theme(-choice)>, set before paint by the script in the root layout.
+const serverChoice = (): ThemeChoice => "system";
+const choiceLabel: Record<ThemeChoice, string> = { system: "System", light: "Light", dark: "Dark" };
+const ChoiceIcon = { system: Monitor, light: Sun, dark: Moon } as const;
 
 export function SiteHeader({ items }: { items: NavItem[] }) {
   const [open, setOpen] = useState<string | null>(null);
   const [drawer, setDrawer] = useState(false);
   const [drawerTop, setDrawerTop] = useState(64);
   const [scrolled, setScrolled] = useState(false);
-  const theme = useSyncExternalStore(subscribeTheme, themeSnapshot, serverTheme);
+  const themeChoice = useSyncExternalStore(subscribeThemeChoice, readThemeChoice, serverChoice);
+  const ThemeIcon = ChoiceIcon[themeChoice];
   const reduced = useReducedMotion();
   const headerRef = useRef<HTMLElement>(null);
   const navRef = useRef<HTMLElement>(null);
@@ -36,11 +32,8 @@ export function SiteHeader({ items }: { items: NavItem[] }) {
 
   useMotionValueEvent(scrollY, "change", (y) => setScrolled(y > 12));
 
-  function toggleTheme() {
-    const next = theme === "dark" ? "light" : "dark";
-    document.documentElement.dataset.homeTheme = next;
-    try { localStorage.setItem(THEME_KEY, next); } catch { /* private mode: keep it for this visit */ }
-  }
+  // One button cycles System, Light, Dark. System (the default) follows the device setting.
+  const cycleTheme = () => setThemeChoice(nextThemeChoice(themeChoice));
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -133,9 +126,14 @@ export function SiteHeader({ items }: { items: NavItem[] }) {
         </nav>
 
         <div className={styles.headerActions}>
-          <button type="button" className={styles.iconButton} onClick={toggleTheme} aria-pressed={theme === "light"}>
-            {theme === "dark" ? <Sun size={16} strokeWidth={1.5} aria-hidden="true" /> : <Moon size={16} strokeWidth={1.5} aria-hidden="true" />}
-            <span className={styles.srOnly}>Light mode</span>
+          <button
+            type="button"
+            className={styles.iconButton}
+            onClick={cycleTheme}
+            title={`Theme: ${choiceLabel[themeChoice]}`}
+            aria-label={`Theme: ${choiceLabel[themeChoice]}. Switch to ${choiceLabel[nextThemeChoice(themeChoice)]}`}
+          >
+            <ThemeIcon size={16} strokeWidth={1.5} aria-hidden="true" />
           </button>
           <Link href="/login" className={styles.loginLink}>Log in</Link>
           <motion.span whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} transition={SPRING} className={styles.headerCta}>

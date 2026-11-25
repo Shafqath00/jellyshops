@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { LegalPage } from "../legal-page";
 import { legalDocuments } from "../legal-content";
+import { brandViewport } from "@/features/brand/theme";
+
+export const viewport = brandViewport;
 
 export const metadata: Metadata = {
   title: "Privacy Policy | Jellyshop",

@@ -4,7 +4,7 @@ Branch: `redesign/jelly-shop-ui`. Written 2026-11-15 for the developer taking th
 
 ## What the brief asked for
 
-A bold, premium black-and-white SaaS look (references: Vercel, Shopify, Linear, Webflow), dark by default with a light mode, Geist + Geist Mono, Framer Motion (`motion`) + Lenis, Lucide icons, real brand logos only for real integrations, and every image made with ChatGPT in the same style. Three parts: (1) home page, (2) sign-up / log-in / password reset / email confirmation, (3) five-step onboarding that lands on the dashboard checklist.
+A bold, premium black-and-white SaaS look (references: Vercel, Shopify, Linear, Webflow), light or dark from the system setting (header switch: System / Light / Dark), Geist + Geist Mono, Framer Motion (`motion`) + Lenis, Lucide icons, real brand logos only for real integrations, and every image made with ChatGPT in the same style. Three parts: (1) home page, (2) sign-up / log-in / password reset / email confirmation, (3) five-step onboarding that lands on the dashboard checklist.
 
 ## Status
 
@@ -89,5 +89,5 @@ The database only accepts the step names `profile, store, branding, business, pr
 - Frontend: `cd jellyshops && npm install` (adds `motion` and `lenis`), then the "jellyshops-admin" launch entry (port 3210) or the dev command in `CLAUDE.md`.
 - Tests: `NODE_OPTIONS=--no-experimental-webstorage npx vitest run src/app/page.test.tsx src/app/onboarding src/features/auth src/app/admin/home-page.test.tsx src/app/changelog` (37 pass on 2026-11-15).
 - Backend onboarding: `cd backend && npx vitest run src/onboarding`.
-- Visual checks used for the home page: Playwright at 1440x900 and 390x844, scroll the page in steps, take viewport screenshots (full-page captures break the pinned "How it works" section), check `scrollWidth` for sideways scroll, emulate `prefers-reduced-motion: reduce`, switch light mode with the sun button.
+- Visual checks used for the home page: Playwright at 1440x900 and 390x844, scroll the page in steps, take viewport screenshots (full-page captures break the pinned "How it works" section), check `scrollWidth` for sideways scroll, emulate `prefers-reduced-motion: reduce`, emulate `colorScheme` light/dark (the page follows the system; the header switch cycles System / Light / Dark).
 - Machine note: this computer runs out of memory with two Next dev servers; stop one first.

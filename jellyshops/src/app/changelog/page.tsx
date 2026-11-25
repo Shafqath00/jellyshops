@@ -8,6 +8,9 @@ import { changelog, formatChangelogDate } from "./changelog-content";
 import "@/features/brand/brand.css";
 import home from "../home.module.css";
 import styles from "./changelog.module.css";
+import { brandViewport } from "@/features/brand/theme";
+
+export const viewport = brandViewport;
 
 export const metadata: Metadata = {
   title: "Changelog | Jellyshop",

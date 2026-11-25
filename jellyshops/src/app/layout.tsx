@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { ShopProvider } from "@/contexts/shop-context";
 import { storefrontFontVariables } from "./fonts";
+import { HOME_THEME_SCRIPT } from "@/features/brand/theme";
 import "./globals.css";
 import "./themes/section-defaults.css";
 import "./themes/storefront-base.css";
@@ -32,9 +33,10 @@ export default function RootLayout({
     // suppressHydrationWarning: the home-theme script below sets data-home-theme on <html> before React loads.
     <html lang="en" data-scroll-behavior="smooth" className={storefrontFontVariables} suppressHydrationWarning>
       <body>
-        {/* Home page light/dark choice, applied before paint so light mode doesn't flash dark. Only the home page reads it. */}
+        {/* Brand pages' light/dark theme (saved choice, else the system), applied before paint and kept in step
+            with system changes. Only pages with [data-brand] read it (features/brand/theme.ts). */}
         <Script id="home-theme" strategy="beforeInteractive">
-          {`try{if(localStorage.getItem("jellyshop-home-theme")==="light")document.documentElement.dataset.homeTheme="light"}catch(e){}`}
+          {HOME_THEME_SCRIPT}
         </Script>
         <ShopProvider>{children}</ShopProvider>
       </body>

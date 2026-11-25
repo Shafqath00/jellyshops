@@ -1,77 +1,57 @@
 /*
- * Jellyshop brand tokens (docs/redesign/DESIGN_TOKENS.md): premium dark base with a solid accent system
+ * Jellyshop brand tokens (docs/redesign/DESIGN_TOKENS.md): premium base with a solid accent system
  * (violet #7C5CFF, blue #3B82F6, cyan #22D3EE, magenta #F0449A and amber #FFB547). Solid colours only.
  * Every text token below is measured for WCAG AA against its page colour (see DESIGN_TOKENS.md).
  * Shared by the home page, sign-in/sign-up and onboarding. Put `data-brand` on the page root.
- * Dark is the default; the saved light-mode choice sets `html[data-home-theme="light"]`
- * before paint (script in the root layout).
+ *
+ * Light and dark: each colour is light-dark(<light>, <dark>), resolved by the `color-scheme` of [data-brand].
+ * The theme script in the root layout (features/brand/theme.ts) sets html[data-home-theme] to "light" or
+ * "dark" before paint, from the visitor's saved choice or else the system setting, and follows system
+ * changes live. Without JavaScript the attribute is missing and `light dark` follows the system by itself.
  */
 
 [data-brand] {
-  --bg: #0a0a0a;
-  --bg-raised: #111;
-  --bg-sunken: #050505;
-  --line: rgb(255 255 255 / 10%);
-  --line-strong: rgb(255 255 255 / 18%);
-  --fg: #fafafa;
-  --fg-muted: #a1a1a1;
-  --fg-subtle: #858585;         /* small text: 5.1:1 or better on every dark surface (was #6e6e6e, 3.9:1) */
-  --btn-bg: #fafafa;
-  --btn-fg: #0a0a0a;
-  --card-shadow: none;
-  --danger: #ff8a8a;
-  --danger-bg: rgb(255 138 138 / 10%);
-  --ok: #86efac;
+  color-scheme: light dark;
+  --bg: light-dark(#fafafa, #0a0a0a);
+  --bg-raised: light-dark(#fff, #111);
+  --bg-sunken: light-dark(#f2f2f2, #050505);
+  --line: light-dark(rgb(0 0 0 / 9%), rgb(255 255 255 / 10%));
+  --line-strong: light-dark(rgb(0 0 0 / 16%), rgb(255 255 255 / 18%));
+  --fg: light-dark(#0a0a0a, #fafafa);
+  --fg-muted: light-dark(#5c5c5c, #a1a1a1);
+  --fg-subtle: light-dark(#6b6b6b, #858585);   /* small text: 4.8:1 (light) and 5.1:1 (dark) or better on every surface */
+  --btn-bg: light-dark(#0a0a0a, #fafafa);
+  --btn-fg: light-dark(#fafafa, #0a0a0a);
+  --card-shadow: 0 1px 2px light-dark(rgb(0 0 0 / 5%), transparent), 0 12px 32px -16px light-dark(rgb(0 0 0 / 20%), transparent);
+  --danger: light-dark(#b42318, #ff8a8a);
+  --danger-bg: light-dark(rgb(180 35 24 / 7%), rgb(255 138 138 / 10%));
+  --ok: light-dark(#15803d, #86efac);
 
-  /* Accents, solid only (no gradients or glows, 2026-11-17). Text colours pass AA on --bg (contrast in brackets). */
+  /* Accents, solid only (no gradients or glows, 2026-11-17). Text colours pass AA on --bg (light / dark). */
   --violet: #7c5cff;
   --blue: #3b82f6;
   --cyan: #22d3ee;
   --magenta: #f0449a;
   --amber: #ffb547;
-  --accent: #9b87ff;            /* violet text and icons (6.9:1) */
-  --accent-2: #22d3ee;          /* cyan text and icons (11:1) */
-  --accent-warm: #ffb547;       /* amber text and icons (11.3:1) */
-  --accent-line: rgb(124 92 255 / 45%);
-  --accent-soft: rgb(124 92 255 / 14%);
-  --btn-primary: #6d4aff;                                                           /* solid; white text 5.15:1 (was the gradient's first stop) */
-  --btn-primary-hover: #5b3df5;                                                     /* the palette's light accent; white text 6.1:1 */
+  --accent: light-dark(#5b3df5, #9b87ff);        /* violet text and icons (5.9:1 / 6.9:1) */
+  --accent-2: light-dark(#0e7490, #22d3ee);      /* cyan text and icons (5.1:1 / 11:1) */
+  --accent-warm: light-dark(#b45309, #ffb547);   /* amber text and icons (4.8:1 / 11.3:1) */
+  --accent-line: light-dark(rgb(91 61 245 / 35%), rgb(124 92 255 / 45%));
+  --accent-soft: light-dark(rgb(91 61 245 / 9%), rgb(124 92 255 / 14%));
+  --btn-primary: #6d4aff;                        /* solid; white text 5.15:1 */
+  --btn-primary-hover: #5b3df5;                  /* white text 6.1:1 */
   --btn-primary-fg: #fff;
-  --tint-violet: rgb(124 92 255 / 8%);
-  --tint-cyan: rgb(34 211 238 / 6%);
-  --tint-warm: rgb(255 181 71 / 6%);
+  --tint-violet: light-dark(rgb(124 92 255 / 7%), rgb(124 92 255 / 8%));
+  --tint-cyan: light-dark(rgb(34 211 238 / 7%), rgb(34 211 238 / 6%));
+  --tint-warm: light-dark(rgb(255 181 71 / 9%), rgb(255 181 71 / 6%));
 
   --ease: cubic-bezier(.22, 1, .36, 1);
   --sans: var(--font-geist), "Inter", system-ui, sans-serif;
   --mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
-  color-scheme: dark;
 }
 
-html[data-home-theme="light"] [data-brand] {
-  --bg: #fafafa;
-  --bg-raised: #fff;
-  --bg-sunken: #f2f2f2;
-  --line: rgb(0 0 0 / 9%);
-  --line-strong: rgb(0 0 0 / 16%);
-  --fg: #0a0a0a;
-  --fg-muted: #5c5c5c;
-  --fg-subtle: #6b6b6b;         /* 4.8:1 or better on every light surface (was #8f8f8f, 3.1:1) */
-  --btn-bg: #0a0a0a;
-  --btn-fg: #fafafa;
-  --card-shadow: 0 1px 2px rgb(0 0 0 / 5%), 0 12px 32px -16px rgb(0 0 0 / 20%);
-  --danger: #b42318;
-  --danger-bg: rgb(180 35 24 / 7%);
-  --ok: #15803d;
-  --accent: #5b3df5;            /* 5.9:1 on #FAFAFA */
-  --accent-2: #0e7490;          /* 5.1:1 */
-  --accent-warm: #b45309;       /* 4.8:1 */
-  --accent-line: rgb(91 61 245 / 35%);
-  --accent-soft: rgb(91 61 245 / 9%);
-  --tint-violet: rgb(124 92 255 / 7%);
-  --tint-cyan: rgb(34 211 238 / 7%);
-  --tint-warm: rgb(255 181 71 / 9%);
-  color-scheme: light;
-}
+html[data-home-theme="dark"] [data-brand] { color-scheme: dark; }
+html[data-home-theme="light"] [data-brand] { color-scheme: light; }
 
 /* Lenis smooth scrolling */
 html.lenis, html.lenis body { height: auto; }

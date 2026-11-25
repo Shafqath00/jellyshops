@@ -8,6 +8,9 @@ import { SiteHeader } from "./_home/site-header";
 import { navigation } from "./home-content";
 import "@/features/brand/brand.css";
 import styles from "./home.module.css";
+import { brandViewport } from "@/features/brand/theme";
+
+export const viewport = brandViewport;
 
 const description = "Jellyshop is the all-in-one platform for independent brands to design an online store, take payments and manage orders, with no code.";
 

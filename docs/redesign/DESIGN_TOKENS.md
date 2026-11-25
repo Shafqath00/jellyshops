@@ -1,6 +1,6 @@
 # Jelly Shop design tokens (home page, sign-in, onboarding)
 
-**Direction (2026-11-15, third round):** bold, premium, black and white. A standalone SaaS brand: no Jelly Links colours or style anywhere. References: Vercel and Shopify for polish and structure, Linear and Webflow for dark surfaces (see `RESEARCH.md`). Dark mode is the default; a light mode swaps the surfaces. The admin keeps its own `--jk-*` tokens.
+**Direction (2026-11-15, third round):** bold, premium, black and white. A standalone SaaS brand: no Jelly Links colours or style anywhere. References: Vercel and Shopify for polish and structure, Linear and Webflow for dark surfaces (see `RESEARCH.md`). Light and dark follow the visitor's system setting by default (live, no reload); the header switch cycles System, Light and Dark (2026-11-25, `features/brand/theme.ts`). Tokens are `light-dark()` pairs in `brand.css`. The admin keeps its own `--jk-*` tokens.
 
 ## Colour
 
