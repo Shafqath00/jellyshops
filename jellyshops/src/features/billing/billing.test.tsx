@@ -68,6 +68,8 @@ describe("billing notices above every admin page", () => {
     expect(closed.text).toContain("couldn't take your payment");
     const [expired] = billingNotices(summary({ enforced: true, status: "expired", paused: true, pauseReason: "trial-ended" }), now);
     expect(expired.text).toContain("Your free trial has ended");
+    const [noTrial] = billingNotices(summary({ enforced: true, status: "expired", trialEndsAt: null, paused: true, pauseReason: "no-trial" }), now);
+    expect(noTrial.text).toContain("already had a free trial");
   });
 
   it("warn when a limit is nearly full and when it is full, whether or not billing is enforced", () => {

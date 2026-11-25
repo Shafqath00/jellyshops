@@ -13,6 +13,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 const GLOBAL_TABLES: Record<string, string> = {
   Store: "the shops themselves",
   User: "people, who may belong to several shops",
+  TrialClaim: "one free trial per person and email, across shops; kept after a shop is deleted (storeId is only a note)",
   MerchantProfile: "one person's profile, across their shops",
   MerchantOnboarding: "a person's sign-up answers before their shop exists",
   MerchantOnboardingImage: "pictures uploaded during sign-up, before the shop exists",

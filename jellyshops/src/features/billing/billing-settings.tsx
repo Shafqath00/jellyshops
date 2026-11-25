@@ -19,6 +19,9 @@ function planLine(summary: BillingSummary, now: Date): string {
       ? `Your last payment didn't go through. Update your payment details by ${formatDay(summary.graceEndsAt)} to keep your shop open.`
       : "Your last payment didn't go through. Update your payment details to keep your shop open.";
   }
+  if (summary.status === "expired" && !summary.trialEndsAt) {
+    return "You've already had a free trial, so this shop starts on a paid plan. Choose a plan to open it to shoppers.";
+  }
   if ((summary.status === "trialing" || summary.status === "expired") && summary.trialEndsAt) {
     const days = trialDaysLeft(summary, now) ?? 0;
     return days > 0 ? `Your free trial ends on ${formatDay(summary.trialEndsAt)} (${days} ${days === 1 ? "day" : "days"} left).` : `Your free trial ended on ${formatDay(summary.trialEndsAt)}.`;

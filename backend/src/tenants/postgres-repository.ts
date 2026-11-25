@@ -1,5 +1,6 @@
 import pg from "pg";
 import { startTrial } from "../billing/store-billing.js";
+import { claimTrial } from "../billing/trial-claims.js";
 import { randomUUID } from "node:crypto";
 import type {
   CreateStoreInput,
@@ -103,8 +104,8 @@ export class PostgresTenantRepository implements TenantRepository {
 
 /** Create the core store records in an existing transaction. */
 export async function createOwnedStore(sql: SqlExecutor, userId: string, input: CreateStoreInput): Promise<StoreSummary> {
-  const user = await sql.query<{ id: number }>(
-    `SELECT "id" FROM "User" WHERE "firebaseUid" = $1 LIMIT 1`, [userId],
+  const user = await sql.query<{ id: number; email: string | null }>(
+    `SELECT "id", "email" FROM "User" WHERE "firebaseUid" = $1 LIMIT 1`, [userId],
   );
   const internalId = user.rows[0]?.id;
   if (!internalId) throw new ApiError(409, "MERCHANT_NOT_FOUND", "Sign in again before creating a store.");
@@ -124,7 +125,9 @@ export async function createOwnedStore(sql: SqlExecutor, userId: string, input: 
   );
   await sql.query(`INSERT INTO "StoreSettings" ("storeId") VALUES ($1)`, [storeId]);
   await sql.query(`INSERT INTO "StorefrontWorkspace" ("storeId", "generation", "updatedAt") VALUES ($1, 0, NOW())`, [storeId]);
-  // Every new shop starts on the free trial (docs/plans/2026-11-23-phase-4-billing-and-limits.md).
-  await startTrial(sql, storeId);
+  // A new shop starts on the free trial unless its owner (account or email) has had one; then it pays at once
+  // (docs/plans/2026-11-25-billing-trial-limits.md, step 3).
+  const trial = await claimTrial(sql, { userId: internalId, email: user.rows[0]?.email ?? null, storeId });
+  await startTrial(sql, storeId, { trial });
   return { id: storeId, name: input.name, slug: input.slug, currency: input.currency, country: input.country, role: "OWNER" };
 }

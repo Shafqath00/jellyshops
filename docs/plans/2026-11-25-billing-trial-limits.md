@@ -78,3 +78,20 @@ expires or emails none of them.
   `past_due` and `expired`.
 - Note: a local backend pointed at staging runs the same job every minute (it expires staging trials; emails are
   captured, not sent, without SMTP).
+
+## Step 3 built (2026-11-25; migration NOT applied to staging yet)
+
+- Migration `20261125010000_trial_claims.sql` (both folders, PGlite list): table `TrialClaim` (kind `user` | `email`,
+  value, storeId as a note only, claimedAt; primary key kind + value; RLS + `backend_access`; the backend may only read
+  and add rows). Backfill: owners of every non-exempt billed shop get a user and an email claim. Rows are never
+  deleted, also not with the shop, so deleting a shop gives no new trial. Listed in `GLOBAL_TABLES` of the
+  tenant-schema test.
+- `backend/src/billing/trial-claims.ts`: `normaliseEmail` (lower case, `+tag` dropped for every provider, Gmail dots
+  dropped, googlemail.com = gmail.com), `emailClaimKey` (SHA-256 hex; the email itself is never stored),
+  `claimTrial` (inside the store's transaction; email claim first so a lost race does not use up the account's claim).
+- `createOwnedStore` (onboarding and "Add another store") calls it: no claim available = `StoreBilling` status
+  `expired` with no trial end. Pause reason `no-trial`: the storefront closes once `BILLING_ENFORCED` is on, the admin
+  stays open, trial limits apply until it subscribes, Stripe Checkout charges at once (no trial days), the job sends
+  no trial emails for it.
+- Admin wording: "You've already had a free trial, so this shop starts on a paid plan."
+- Until the migration runs every new shop gets a trial, as before. Card fingerprint still open.

@@ -30,16 +30,23 @@ describe("when a shop is out of good standing", () => {
     expect(billingState(ended, now, true)).toMatchObject({ pauseReason: "trial-ended", paused: true });
     expect(billingState(null, now, true)).toMatchObject({ status: "none", plan: "standard", paused: false });
   });
+
+  it("a shop that never had a trial pays at once", () => {
+    expect(billingState(record({ status: "expired", trialEndsAt: null }), now, true)).toMatchObject({ pauseReason: "no-trial", paused: true });
+    expect(billingState(record({ status: "expired", trialEndsAt: new Date(now.getTime() - day) }), now, true)).toMatchObject({ pauseReason: "trial-ended" });
+  });
 });
 
 describe("starting the trial", () => {
   it("adds a 14-day trial row when the table exists, and does nothing before the migration", async () => {
     const query = vi.fn(async (text: string) => ({ rows: text.includes("to_regclass") ? [{ table: "\"StoreBilling\"" }] : [] }));
-    await startTrial({ query }, "store-1", now);
-    expect(query).toHaveBeenLastCalledWith(expect.stringContaining(`INSERT INTO "StoreBilling"`), ["store-1", "standard", new Date(now.getTime() + TRIAL_DAYS * day)]);
+    await startTrial({ query }, "store-1", { now });
+    expect(query).toHaveBeenLastCalledWith(expect.stringContaining(`INSERT INTO "StoreBilling"`), ["store-1", "standard", "trialing", new Date(now.getTime() + TRIAL_DAYS * day)]);
+    await startTrial({ query }, "store-2", { now, trial: false });
+    expect(query).toHaveBeenLastCalledWith(expect.stringContaining(`INSERT INTO "StoreBilling"`), ["store-2", "standard", "expired", null]);
 
     const before = vi.fn(async () => ({ rows: [{ table: null }] }));
-    await startTrial({ query: before }, "store-1", now);
+    await startTrial({ query: before }, "store-1", { now });
     expect(before).toHaveBeenCalledTimes(1);
   });
 });

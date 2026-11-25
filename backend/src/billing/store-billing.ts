@@ -36,7 +36,8 @@ export interface StoreBillingRecord {
   stripeSubscriptionId?: string | null;
 }
 
-export type PauseReason = "trial-ended" | "payment-stopped" | "canceled";
+/** `no-trial`: the shop never had a trial because its owner already used theirs. */
+export type PauseReason = "trial-ended" | "no-trial" | "payment-stopped" | "canceled";
 
 export interface BillingState {
   /** The stored status, or "none" when the shop has no billing row. */
@@ -71,7 +72,7 @@ export function pauseReason(record: StoreBillingRecord | null, now: Date): Pause
     case "past_due":
       return record.graceEndsAt && record.graceEndsAt.getTime() <= now.getTime() ? "payment-stopped" : null;
     case "expired":
-      return "trial-ended";
+      return record.trialEndsAt ? "trial-ended" : "no-trial";
     case "trialing":
       return record.trialEndsAt && record.trialEndsAt.getTime() <= now.getTime() ? "trial-ended" : null;
     case "canceled":
@@ -105,13 +106,16 @@ export const missingColumn = (error: unknown) => (error as { code?: string })?.c
  * Starts the free trial for a new shop, inside the transaction that creates it. Checks the table exists first: a
  * failed statement would abort the whole store creation.
  */
-export async function startTrial(sql: Sql, storeId: string, now: Date = new Date()): Promise<void> {
+export async function startTrial(sql: Sql, storeId: string, options: { trial?: boolean; now?: Date } = {}): Promise<void> {
   const exists = await sql.query(`SELECT to_regclass('public."StoreBilling"')::text AS "table"`);
   if (!(exists.rows[0] as { table?: string | null } | undefined)?.table) return;
-  const trialEndsAt = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
+  const now = options.now ?? new Date();
+  // No trial (the owner has had one): `expired` with no trial end, so the shop pays at once.
+  const trial = options.trial ?? true;
+  const trialEndsAt = trial ? new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000) : null;
   await sql.query(
-    `INSERT INTO "StoreBilling" ("storeId", "plan", "status", "trialEndsAt") VALUES ($1, $2, 'trialing', $3) ON CONFLICT ("storeId") DO NOTHING`,
-    [storeId, DEFAULT_PLAN, trialEndsAt],
+    `INSERT INTO "StoreBilling" ("storeId", "plan", "status", "trialEndsAt") VALUES ($1, $2, $3, $4) ON CONFLICT ("storeId") DO NOTHING`,
+    [storeId, DEFAULT_PLAN, trial ? "trialing" : "expired", trialEndsAt],
   );
 }
 

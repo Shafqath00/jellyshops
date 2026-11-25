@@ -10,7 +10,7 @@ export interface BillingSummary {
   cancelAtPeriodEnd: boolean;
   /** After a failed payment: when the shop closes unless it is paid (backend step 2; absent on older servers). */
   graceEndsAt?: string | null;
-  pauseReason: "trial-ended" | "payment-stopped" | "canceled" | null;
+  pauseReason: "trial-ended" | "no-trial" | "payment-stopped" | "canceled" | null;
   paused: boolean;
   exempt: boolean;
   /** Whether shops are closed when their plan ends (BILLING_ENFORCED); off until shops can pay. */
@@ -100,6 +100,8 @@ export function billingNotices(summary: BillingSummary | null, now: Date): Billi
       title: "Your shop is closed to shoppers",
       text: summary.pauseReason === "trial-ended"
         ? "Your free trial has ended. Choose a plan to open your shop again; nothing has been deleted."
+        : summary.pauseReason === "no-trial"
+          ? "You've already had a free trial, so this shop starts on a paid plan. Choose a plan to open it to shoppers."
         : summary.status === "past_due"
           ? "We still couldn't take your payment. Update your payment details to open your shop again; nothing has been deleted."
           : "Your plan has ended. Choose a plan to open your shop again; nothing has been deleted.",
