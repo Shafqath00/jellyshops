@@ -54,7 +54,13 @@ grace ended) and sends reminders.
 
 Limits config, trial plan, file size/count checks, per-store upload limit, £15/£150 shown. See CLAUDE.md.
 
-## Step 2 built (2026-11-25; migration NOT applied to staging yet)
+## Step 2 built (2026-11-25; migration applied to staging 2026-11-25)
+
+Staging check after applying: `graceEndsAt` column, status check includes `expired`, grace index, `BillingReminder`
+with RLS on, `backend_access` policy for `jelly_backend` only, no anon/authenticated grants, 0 rows. Staging shops:
+7 exempt, 2 with Stripe test subscriptions (`billing-test` trialing, `billing-clock-test` active), so the job
+expires or emails none of them.
+
 
 - Migration `20261125000000_billing_grace_reminders.sql` (both folders, PGlite list): `StoreBilling.graceEndsAt`,
   status `expired` added to the check, table `BillingReminder` (store + kind primary key; RLS + `backend_access`).
