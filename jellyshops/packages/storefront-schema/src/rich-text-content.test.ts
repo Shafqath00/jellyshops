@@ -74,7 +74,7 @@ describe("page and post content", () => {
     ]);
     expect(isRichTextDocument(normalized)).toBe(true);
     expect(richTextToPlainText(normalized)).toBe("Shop beds\n\n[x] Measure the room\n[ ] Order\n\nlet a = 1;");
-    expect(richTextWordCount(normalized)).toBe(13);
+    expect(richTextWordCount(normalized)).toBe(9);
   });
 
   it("keeps media out of table cells", () => {

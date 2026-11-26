@@ -72,7 +72,7 @@ function preclean(html: string): string {
     .replace(/<!--\[if[\s\S]*?<!\[endif\]-->/gi, "")
     .replace(/<!--[\s\S]*?-->/g, "")
     // Word writes list bullets as text inside a span with mso-list: ignore; drop them, the list itself carries meaning.
-    .replace(/<span[^>]*mso-list:\s*Ignore[^>]*>[\s\S]*?<\/span>/gi, "");
+    .replace(/<span[^>]*mso-list:\s*Ignore[^>]*>(?:[^<]|<span[^>]*>[^<]*<\/span>)*<\/span>/gi, "");
 }
 
 function styleOf(element: Element): Record<string, string> {

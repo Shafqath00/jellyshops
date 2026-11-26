@@ -424,8 +424,8 @@ export function richTextToPlainText(document: RichTextDocument): string {
 
 /** Words in a document (for the editor's word count and reading time). */
 export function richTextWordCount(document: RichTextDocument): number {
-  const text = richTextToPlainText(document).trim();
-  return text ? text.split(/\s+/).length : 0;
+  // Only pieces with a letter or digit count, so table separators and checklist boxes in the plain text do not.
+  return richTextToPlainText(document).replace(/\[(?:x| )\]/g, " ").split(/\s+/).filter((word) => /[\p{L}\p{N}]/u.test(word)).length;
 }
 
 function legacyTexts(value: unknown): string[] {
