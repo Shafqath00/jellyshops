@@ -255,3 +255,33 @@ describe("CompiledStorefrontPublicationService", () => {
     });
   });
 });
+
+describe("publish check", () => {
+  const menu = (id: string, handle: string, label: string) => ({ id, handle, items: [{ id: `${id}-1`, label, target: { kind: "home" }, children: [] }] });
+
+  it("lists changed menus and says whether the rest of the design differs, publishing nothing", async () => {
+    const repository = new MemoryPublicationRepository();
+    const live = record("pub-live", "live", 4);
+    live.snapshot.menus = { m1: menu("m1", "main", "Home"), m2: menu("m2", "footer", "Help") } as never;
+    repository.publications.set(live.id, live);
+    repository.currentPublicationId = live.id;
+    const draft = successfulCompilation(6);
+    draft.snapshot!.menus = { m1: menu("m1", "main", "Shop"), m2: menu("m2", "footer", "Help"), m3: menu("m3", "extra", "New") } as never;
+    const compile = vi.fn(async () => draft);
+    const service = new CompiledStorefrontPublicationService({ compile }, repository);
+
+    expect(await service.check("store-a", 6)).toEqual({ ok: true, live: true, menus: ["extra", "main"], design: false });
+    expect(compile).toHaveBeenCalledWith("store-a", 6);
+    expect(repository.currentPublicationId).toBe("pub-live");
+
+    draft.snapshot!.theme = { ...draft.snapshot!.theme, settings: { colour: "red" } };
+    expect(await service.check("store-a", 6)).toMatchObject({ design: true });
+  });
+
+  it("treats a store that was never published as all new", async () => {
+    const draft = successfulCompilation(2);
+    draft.snapshot!.menus = { m1: menu("m1", "main", "Home") } as never;
+    const service = new CompiledStorefrontPublicationService({ compile: async () => draft }, new MemoryPublicationRepository());
+    expect(await service.check("store-a", 2)).toEqual({ ok: true, live: false, menus: ["main"], design: true });
+  });
+});

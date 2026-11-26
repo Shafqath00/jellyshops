@@ -17,7 +17,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
   ] },
   { label: "Discounts", href: "/admin/discounts", icon: Percent },
   { label: "Content", href: "/admin/content/pages", icon: FileText, section: "Manage", children: [
-    { label: "Pages", href: "/admin/content/pages" }, { label: "Blog posts", href: "/admin/content/blogs" }, { label: "Files", href: "/admin/content/files" }, { label: "Menus", href: "/admin/content/menus" }, { label: "Custom content", href: "/admin/content/metaobjects" },
+    { label: "Pages", href: "/admin/content/pages" }, { label: "Blog posts", href: "/admin/content/blogs" }, { label: "Files", href: "/admin/content/files" }, { label: "Navigation", href: "/admin/content/menus" }, { label: "Custom content", href: "/admin/content/metaobjects" },
   ] },
   { label: "Payments", href: "/admin/payments", icon: CreditCard },
   { label: "Online Store", href: "/admin/online-store", icon: Store, section: "Sales channels", children: [

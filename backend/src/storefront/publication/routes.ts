@@ -4,7 +4,7 @@ import { requireMerchant, requireStorePermission } from "../../auth/middleware.j
 import type { AuthProvider } from "../../auth/types.js";
 import { ApiError } from "../../http/errors.js";
 import type { PublicationHistoryEntry } from "./repository.js";
-import type { PublishStorefrontResult } from "./service.js";
+import type { PublishCheckResult, PublishStorefrontResult } from "./service.js";
 
 export interface StorefrontPublicationApi {
   publish(
@@ -19,6 +19,7 @@ export interface StorefrontPublicationApi {
     reused: boolean;
   }>;
   history?(storeId: string, limit?: number): Promise<PublicationHistoryEntry[]>;
+  check?(storeId: string, expectedGeneration: number): Promise<PublishCheckResult>;
   restore?(storeId: string, publicationId: string): Promise<{ id: string; sourceGeneration: number; alreadyCurrent: boolean }>;
 }
 
@@ -51,6 +52,18 @@ export function createStorefrontPublicationRouter(api: StorefrontPublicationApi,
         return;
       }
       response.status(result.reused ? 200 : 201).json(result);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // What publishing now would change (menus by handle, and whether the rest of the design differs). Publishes nothing.
+  router.get("/publish-check", requireStorePermission("storefront:publish"), async (request, response, next) => {
+    try {
+      if (!api.check) throw new ApiError(404, "NOT_FOUND", "The requested resource was not found");
+      const { expectedGeneration } = z.object({ expectedGeneration: z.coerce.number().int().nonnegative().max(2_147_483_647) }).parse(request.query);
+      const result = await api.check(storeContext(request).storeId, expectedGeneration);
+      response.status(result.ok ? 200 : 422).json(result);
     } catch (error) {
       next(error);
     }

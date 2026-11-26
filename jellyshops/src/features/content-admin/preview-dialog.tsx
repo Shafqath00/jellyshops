@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ExternalLink, Monitor, Smartphone, Tablet, X } from "lucide-react";
 import { storeUrl } from "@jelly/storefront-schema";
-import { PREVIEW_DRAFT, PREVIEW_READY, type ContentPreviewDraft } from "@/features/storefront/content-preview-messages";
+import { PREVIEW_DRAFT, PREVIEW_READY, type ContentPreviewDraft, type MenuPreviewDraft } from "@/features/storefront/content-preview-messages";
 
 type Device = "desktop" | "tablet" | "phone";
 
@@ -19,7 +19,10 @@ export function previewTarget(storeSlug: string, here = typeof window === "undef
  * Shows the unsaved draft in the store's real theme. Same-site stores are framed here with Desktop/Tablet/Phone
  * widths; stores on their own address open in a new tab (the draft is sent to that tab the same way).
  */
-export function PreviewDialog({ open, onClose, storeSlug, draft }: { open: boolean; onClose: () => void; storeSlug: string; draft: Omit<ContentPreviewDraft, "type"> }) {
+export function PreviewDialog({ open, onClose, storeSlug, draft, label, subtitle = "your unsaved changes, in your store’s design" }: {
+  open: boolean; onClose: () => void; storeSlug: string; draft: Omit<ContentPreviewDraft, "type"> | Omit<MenuPreviewDraft, "type">;
+  /** Name for screen readers, e.g. "Preview: About us". */ label?: string; subtitle?: string;
+}) {
   const [device, setDevice] = useState<Device>("desktop");
   /** The store page never said it was ready (no published design, or the store is closed). */
   const [silent, setSilent] = useState(false);
@@ -29,7 +32,7 @@ export function PreviewDialog({ open, onClose, storeSlug, draft }: { open: boole
   const windowRef = useRef<Window | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const target = previewTarget(storeSlug);
-  const message: ContentPreviewDraft = { ...draft, type: PREVIEW_DRAFT };
+  const message = { ...draft, type: PREVIEW_DRAFT } as ContentPreviewDraft | MenuPreviewDraft;
   const messageRef = useRef(message);
   useEffect(() => { messageRef.current = message; });
 
@@ -75,9 +78,9 @@ export function PreviewDialog({ open, onClose, storeSlug, draft }: { open: boole
 
   if (!open || !target.framed || typeof document === "undefined") return null;
   return createPortal(
-    <div className="jca-preview admin-ui-preview" role="dialog" aria-modal="true" aria-label={`Preview: ${draft.title || "Untitled"}`}>
+    <div className="jca-preview admin-ui-preview" role="dialog" aria-modal="true" aria-label={label ?? ("title" in draft ? `Preview: ${draft.title || "Untitled"}` : "Preview")}>
       <div className="jca-preview-bar">
-        <h2>Preview <span className="jk-muted">· your unsaved changes, in your store&apos;s design</span></h2>
+        <h2>Preview <span className="jk-muted">· {subtitle}</span></h2>
         <div className="jca-segmented" role="group" aria-label="Screen size">
           <button type="button" aria-pressed={device === "desktop"} onClick={() => setDevice("desktop")}><Monitor size={15} aria-hidden /> Desktop</button>
           <button type="button" aria-pressed={device === "tablet"} onClick={() => setDevice("tablet")}><Tablet size={15} aria-hidden /> Tablet</button>

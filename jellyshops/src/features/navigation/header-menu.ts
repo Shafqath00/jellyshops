@@ -13,3 +13,25 @@ export function referencedHeaderMenu(templates: StorefrontTemplateRecord[], glob
   }
   return "main";
 }
+
+export type MenuPlacement = "header" | "footer";
+
+/**
+ * Where each menu shows on the live design: the header and footer of the default home page (and the shared header
+ * and footer sections), found by their "menu" blocks. A menu missing from the result is not shown anywhere yet.
+ */
+export function menuPlacements(templates: StorefrontTemplateRecord[], globals: GlobalSectionRecord[]): Record<string, MenuPlacement[]> {
+  const found: Record<string, MenuPlacement[]> = {};
+  const note = (handle: string, place: MenuPlacement) => { const list = found[handle] ??= []; if (!list.includes(place)) list.push(place); };
+  const home = templates.find(template => template.type === "home" && template.handle === "default");
+  const placed = Array.isArray(home?.layout.sections) ? home!.layout.sections.map(placement => placement.kind === "global" ? globals.find(global => global.id === placement.globalSectionId)?.section : placement.section) : [];
+  const sections = [...placed, ...globals.map(global => global.section)];
+  for (const section of sections) {
+    if (!section || section.enabled === false || (section.type !== "header" && section.type !== "footer") || !Array.isArray(section.blocks)) continue;
+    for (const block of section.blocks as Array<{ type: string; enabled?: boolean; settings?: Record<string, unknown> }>) {
+      if (block.type !== "menu" || block.enabled === false) continue;
+      note(typeof block.settings?.handle === "string" && block.settings.handle ? block.settings.handle : "main", section.type);
+    }
+  }
+  return found;
+}

@@ -23,7 +23,7 @@ const DESTINATION: Partial<Record<(typeof KINDS)[number], { label: string; help:
 };
 
 /** Photo for the large menu: upload, a short description for screen readers, remove. */
-function MenuPhotoField({ id, url, alt, onUrl, onAlt, upload }: { id: string; url: string; alt: string; onUrl(url: string): void; onAlt(alt: string): void; upload(file: File): Promise<string> }) {
+export function MenuPhotoField({ id, url, alt, onUrl, onAlt, upload }: { id: string; url: string; alt: string; onUrl(url: string): void; onAlt(alt: string): void; upload(file: File): Promise<string> }) {
   const [status, setStatus] = useState<"idle" | "uploading" | "error">("idle");
   async function choose(file: File | undefined) {
     if (!file) return;

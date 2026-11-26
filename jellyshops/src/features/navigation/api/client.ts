@@ -28,7 +28,12 @@ export interface NavigationMutationResult {
   generation: number;
 }
 
+/** What publishing the draft now would change: menus (by handle) and whether the rest of the design differs. */
+export type PublishCheck = { ok: true; live: boolean; menus: string[]; design: boolean } | { ok: false; diagnostics: Array<{ message?: string }> };
+
 export interface NavigationApi {
+  /** Compares the draft with the live store; publishes nothing. */
+  publishCheck(storeId: string, expectedGeneration: number): Promise<PublishCheck>;
   listMenus(storeId: string): Promise<NavigationMenu[]>;
   createMenu(storeId: string, input: { name: string; handle: string; items: MenuItem[] }): Promise<NavigationMutationResult>;
   updateMenu(storeId: string, menuId: string, expectedRevision: number, patch: { name?: string; handle?: string; items?: MenuItem[] }): Promise<NavigationMutationResult>;
@@ -67,6 +72,12 @@ export function createNavigationApi({
 
   return {
     listMenus: (storeId) => request(base(storeId)),
+    publishCheck: async (storeId, expectedGeneration) => {
+      const response = await fetcher(`${origin}/api/stores/${encodeURIComponent(storeId)}/storefront/publish-check?expectedGeneration=${expectedGeneration}`, { headers: { Authorization: `Bearer ${token}` } });
+      const body = await response.json().catch(() => ({}));
+      if (response.ok || response.status === 422) return body as PublishCheck;
+      throw new NavigationApiError(body.error?.message ?? `Navigation request failed (${response.status})`, response.status);
+    },
     createMenu: (storeId, input) => request(base(storeId), { method: "POST", body: JSON.stringify(input) }),
     updateMenu: (storeId, menuId, expectedRevision, patch) => request(`${base(storeId)}/${encodeURIComponent(menuId)}`, {
       method: "PATCH",

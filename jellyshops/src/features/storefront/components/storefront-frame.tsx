@@ -14,6 +14,7 @@ import { CompareTray } from "./compare-tray";
 import { LanguageSwitcher, StorefrontLanguageContext, useStorefrontLanguageState } from "@/features/storefront/storefront-language";
 import { useInitialStorefrontPublication } from "@/features/storefront/storefront-bootstrap";
 import { StorefrontChromeContext } from "@/features/storefront/chrome-context";
+import { PREVIEW_MENUS_EVENT, withDraftMenus } from "@/features/storefront/content-preview-messages";
 import { RegistrySectionRenderer, ThemeCustomCss, cartDrawerSectionSettings, createCollectionLinks, withStoreIdentity } from "@jelly/storefront-renderer";
 import type { RuntimeTemplateV4, SectionNode } from "@jelly/storefront-schema";
 import { useChromeBindingValues } from "@/features/storefront/use-chrome-binding-values";
@@ -82,6 +83,16 @@ export function StorefrontFrame({ storeSlug, children }: { storeSlug: string; ch
   // The same page path on the server (/sites/<slug>/...) and in the browser (/<slug>/... or a subdomain's /...).
   const segments = storePagePath(storeSlug, pathname ?? "").split("/").filter(Boolean);
   const pageType = pageTypeFor(segments);
+  // On the admin's draft preview, the header and footer show the unsaved menus it sent.
+  const onPreview = segments[0] === "jelly-preview";
+  const [previewMenus, setPreviewMenus] = useState<Record<string, unknown[]> | null>(null);
+  useEffect(() => {
+    if (!onPreview) return;
+    const listener = (event: Event) => setPreviewMenus((event as CustomEvent<Record<string, unknown[]>>).detail);
+    window.addEventListener(PREVIEW_MENUS_EVENT, listener);
+    return () => window.removeEventListener(PREVIEW_MENUS_EVENT, listener);
+  }, [onPreview]);
+  const chromeMenus = onPreview && previewMenus && snapshot ? withDraftMenus(snapshot, previewMenus).menus : snapshot?.menus;
   const resource = pageType === "product" ? state.products.find((product) => product.storeId === storeId && product.slug === segments[1])
     : pageType === "collection" ? state.collections.find((collection) => collection.storeId === storeId && collection.slug === segments[1]) : undefined;
   const assignment = resource ? snapshot?.assignments.find((item) => item.resourceType === pageType && item.resourceId === resource.id) : undefined;
@@ -102,7 +113,7 @@ export function StorefrontFrame({ storeSlug, children }: { storeSlug: string; ch
   const headerSettings = resolvedTheme.settings.header as Record<string, unknown> | undefined;
   // Search suggestions in the header come from the store's published products.
   const suggestProducts = suggestStoreProducts(state.products.filter((product) => product.storeId === store.id), store.slug, store.currency);
-  const renderGlobal = (section: SectionNode, region: "header" | "footer" = section.type === "footer" ? "footer" : "header") => <RegistrySectionRenderer key={section.id} section={withStoreIdentity(section, { name: store.name, logoUrl: branding?.logoUrl || undefined, headerSettings, socialLinks: themeSocialLinks(resolvedTheme.settings) })} mode="published" commerce={{ getProducts: async () => [], bagCount: cartCount, suggestProducts, ...engagementActions(store.id) }} region={region} themeId={resolvedTheme.id} themeVersion={resolvedTheme.version} menus={snapshot?.menus} resourceLinks={resourceLinks} collectionLinks={createCollectionLinks(store.id, store.slug, state.collections)} storeSlug={store.slug} language={languageState.language} />;
+  const renderGlobal = (section: SectionNode, region: "header" | "footer" = section.type === "footer" ? "footer" : "header") => <RegistrySectionRenderer key={section.id} section={withStoreIdentity(section, { name: store.name, logoUrl: branding?.logoUrl || undefined, headerSettings, socialLinks: themeSocialLinks(resolvedTheme.settings) })} mode="published" commerce={{ getProducts: async () => [], bagCount: cartCount, suggestProducts, ...engagementActions(store.id) }} region={region} themeId={resolvedTheme.id} themeVersion={resolvedTheme.version} menus={chromeMenus} resourceLinks={resourceLinks} collectionLinks={createCollectionLinks(store.id, store.slug, state.collections)} storeSlug={store.slug} language={languageState.language} />;
   const onCheckout = segments[0] === "checkout" || segments[0] === "order";
   const headerContent = onCheckout ? <CheckoutHeader store={{ ...store, logoUrl: branding?.logoUrl || store.logoUrl }} /> : signature ? <>{layout?.announcement.map((section) => renderGlobal(section, "header"))}{layout?.header.map((section) => renderGlobal(section, "header"))}</> : undefined;
   // Pop-ups from the overlay group open over the page themselves; the slide-out bag section only sets the drawer.

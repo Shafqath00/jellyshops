@@ -26,3 +26,16 @@ describe("old content addresses on the storefront", () => {
     expect(await movedTo("store-a", "/pages/x", vi.fn(async () => { throw new Error("down"); }) as unknown as typeof fetch)).toBeNull();
   });
 });
+
+describe("menu previews", () => {
+  it("reads menu drafts and swaps menus by handle", async () => {
+    const { withDraftMenus } = await import("./content-preview");
+    expect(readPreviewDraft({ type: PREVIEW_DRAFT, kind: "menus", menus: { main: [] } })).toEqual({ type: PREVIEW_DRAFT, kind: "menus", menus: { main: [] } });
+    expect(readPreviewDraft({ type: PREVIEW_DRAFT, kind: "menus", menus: { main: "x" } })).toBeNull();
+    const snapshot = { menus: { m1: { id: "m1", handle: "main", items: [{ id: "a" }] }, m2: { id: "m2", handle: "footer", items: [{ id: "f" }] } } } as never;
+    const next = withDraftMenus(snapshot, { main: [{ id: "new" }] });
+    expect((next as { menus: Record<string, { items: unknown[] }> }).menus.m1!.items).toEqual([{ id: "new" }]);
+    expect((next as { menus: Record<string, { items: unknown[] }> }).menus.m2!.items).toEqual([{ id: "f" }]);
+    expect((snapshot as { menus: Record<string, { items: unknown[] }> }).menus.m1!.items).toEqual([{ id: "a" }]);
+  });
+});
