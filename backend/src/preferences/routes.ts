@@ -2,8 +2,10 @@ import { Router, type Request } from "express";
 import { z } from "zod";
 import { requireMerchant, requireStorePermission } from "../auth/middleware.js";
 import type { AuthProvider } from "../auth/types.js";
+import type { CommerceDatabase } from "../commerce/repository.js";
 import { ApiError } from "../http/errors.js";
 import { MAX_REDIRECT_CSV_BYTES, type UrlRedirectService } from "./redirects.js";
+import { collectSeoHealth } from "./seo-health.js";
 import type { PreferencesActor, StorePreferencesService } from "./service.js";
 
 const storeId = (request: Request) => request.storeContext!.storeId;
@@ -35,7 +37,7 @@ function guarded(auth: AuthProvider): Router {
 }
 
 /** Mounted at /api/stores/:storeId/preferences. */
-export function createPreferencesRouter(auth: AuthProvider, preferences: StorePreferencesService): Router {
+export function createPreferencesRouter(auth: AuthProvider, preferences: StorePreferencesService, database?: CommerceDatabase): Router {
   const router = guarded(auth);
   router.get("/", async (request, response) => { response.json(await preferences.get(storeId(request))); });
   router.put("/", async (request, response) => {
@@ -43,6 +45,12 @@ export function createPreferencesRouter(auth: AuthProvider, preferences: StorePr
     response.json(await preferences.save(storeId(request), input, actor(request)));
   });
   router.get("/history", async (request, response) => { response.json({ changes: await preferences.history(storeId(request)) }); });
+  // SEO health check and the policy states for the setup checklist: counts what is wrong in the catalogue and content.
+  router.get("/seo-health", async (request, response) => {
+    if (!database) throw new ApiError(503, "SEO_HEALTH_UNAVAILABLE", "The SEO check isn't available right now.");
+    const saved = await preferences.get(storeId(request));
+    response.json(await collectSeoHealth(database, storeId(request), saved.preferences));
+  });
   return router;
 }
 

@@ -132,3 +132,5 @@ export type { CookieBannerMode, PolicyKind, PreferenceImage, SocialPlatform, Sto
 export { changedPreferenceSections, storePreferencesSchema, validateStorePreferences } from "./store-preferences.js";
 export type { PreferenceProblem } from "./store-preferences.js";
 export { MAX_REDIRECTS_PER_STORE, MAX_REDIRECT_PATH, MAX_REDIRECT_TARGET, createsRedirectLoop, normaliseRedirectFrom, normaliseRedirectTo, redirectProblem } from "./url-redirects.js";
+export { SEO_CHECK_DEFS, buildSeoChecks, seoGrade, seoScore, setupChecklist, setupProgress, sortSeoChecks, storeSeoChecks } from "./seo-health.js";
+export type { PolicyState, RawSeoCheck, SeoArea, SeoCheck, SeoCheckItem, SeoItemKind, SeoSeverity, SetupContext, SetupItem } from "./seo-health.js";

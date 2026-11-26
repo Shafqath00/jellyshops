@@ -7,6 +7,7 @@ import type { AuthProvider } from "../auth/types.js";
 import type { CommerceDatabase } from "../commerce/repository.js";
 import { errorHandler } from "../http/errors.js";
 import { UrlRedirectService } from "./redirects.js";
+import { collectSeoHealth } from "./seo-health.js";
 import { createPreferencesRouter, createPublicPreferencesRouter, createRedirectsRouter } from "./routes.js";
 import { StorePreferencesService, type PreferenceMediaRecord } from "./service.js";
 
@@ -36,7 +37,7 @@ afterEach(async () => { await database.close(); });
 function app(role: "OWNER" | "ADMIN" | "STAFF" | null) {
   const auth: AuthProvider = { verify: async () => ({ ...owner, storeIds: role ? ["store-a"] : [], storeRoles: role ? { "store-a": role } : {} }) };
   return express().use(express.json())
-    .use("/api/stores/:storeId/preferences", createPreferencesRouter(auth, preferences))
+    .use("/api/stores/:storeId/preferences", createPreferencesRouter(auth, preferences, db))
     .use("/api/stores/:storeId/redirects", createRedirectsRouter(auth, redirects))
     .use("/api/public/stores/:storeId", createPublicPreferencesRouter(preferences, redirects))
     .use(errorHandler);
@@ -161,5 +162,71 @@ describe("URL redirects", () => {
     expect(await redirects.resolve("store-b", "/sale")).toBeNull();
     const response = await request(app(null)).get("/api/public/stores/store-a/url-redirect").query({ path: "/sale" });
     expect(response.body).toEqual({ to: "/collections/sale" });
+  });
+});
+
+describe("SEO health", () => {
+  const exec = (sql: string, values: unknown[] = []) => database.query(sql, values);
+  const product = (id: string, title: string, extra: { description?: string; seoTitle?: string | null; seoDescription?: string | null; status?: string; store?: string } = {}) =>
+    exec(`INSERT INTO "Product" ("id", "storeId", "title", "slug", "description", "seoTitle", "seoDescription", "status", "updatedAt") VALUES ($1, $2, $3, $1, $4, $5, $6, $7::"ProductStatus", CURRENT_TIMESTAMP)`,
+      [id, extra.store ?? "store-a", title, extra.description ?? "", extra.seoTitle ?? null, extra.seoDescription ?? null, extra.status ?? "ACTIVE"]);
+  const photo = (productId: string, mediaId: string, alt: string | null, mediaAlt: string | null = null, store = "store-a") =>
+    exec(`INSERT INTO "Media" ("id", "storeId", "type", "storageKey", "url", "mimeType", "byteSize", "originalName", "altText") VALUES ($1, $2, 'image', $1, '/x', 'image/png', 1, 'x.png', $3)`, [mediaId, store, mediaAlt])
+      .then(() => exec(`INSERT INTO "ProductMedia" ("storeId", "productId", "mediaId", "altText") VALUES ($1, $2, $3, $4)`, [store, productId, mediaId, alt]));
+  const find = (report: Awaited<ReturnType<typeof collectSeoHealth>>, id: string) => report.checks.find((entry) => entry.id === id);
+
+  it("counts what is wrong among live products only, per store", async () => {
+    await product("oak", "Oak bed", { description: "Solid oak.", seoDescription: "x".repeat(170) });
+    await product("pine", "Pine bed");                                                   // no description at all
+    await product("dupe-1", "Same name", { description: "a" });
+    await product("dupe-2", "Same name", { description: "b" });
+    await product("titled", "Own", { description: "a", seoTitle: "t".repeat(80) });
+    await product("draft", "Draft one", { status: "DRAFT" });                              // never counted
+    await product("other", "Other store", { store: "store-b" });                            // never counted
+    await photo("oak", "m1", "Oak bed in a bedroom");
+    await photo("oak", "m2", null, "Alt on the file itself");                               // the file's description counts
+    await photo("oak", "m3", "  ");                                                        // blank is missing
+    const report = await collectSeoHealth(db, "store-a", defaultStorePreferences());
+    expect(report.counts.products).toBe(5);
+    expect(find(report, "product-no-description")).toMatchObject({ total: 5, count: 1, items: [{ kind: "product", id: "pine", label: "Pine bed" }] });
+    expect(find(report, "product-no-photo")?.count).toBe(4);
+    expect(find(report, "product-photo-alt")).toMatchObject({ total: 3, count: 1, items: [{ id: "oak" }] });
+    expect(find(report, "product-duplicate-title")).toMatchObject({ count: 2 });
+    expect(find(report, "product-title-long")).toMatchObject({ count: 1, items: [{ id: "titled" }] });
+    expect(find(report, "product-description-long")).toMatchObject({ count: 1, items: [{ id: "oak" }] });
+    expect((await collectSeoHealth(db, "store-b", defaultStorePreferences())).counts.products).toBe(1);
+  });
+
+  it("checks published pages, posts and collections and leaves out hidden or archived ones", async () => {
+    const page = (id: string, status: string, extra = "") => exec(`INSERT INTO "StorePage" ("id", "storeId", "title", "handle", "content", "status", "updatedAt" ${extra ? ", " + extra.split("=")[0] : ""}) VALUES ($1, 'store-a', $1, $1, '{}', $2::"ContentStatus", CURRENT_TIMESTAMP ${extra ? ", " + extra.split("=")[1] : ""})`, [id, status]);
+    await page("about", "PUBLISHED");
+    await page("done", "PUBLISHED", `"seoDescription"='Described'`);
+    await page("hidden", "PUBLISHED", `"noindex"=true`);
+    await page("draft-page", "DRAFT");
+    await exec(`INSERT INTO "Blog" ("id", "storeId", "title", "handle", "updatedAt") VALUES ('b1', 'store-a', 'News', 'news', CURRENT_TIMESTAMP)`);
+    await exec(`INSERT INTO "Article" ("id", "storeId", "blogId", "title", "handle", "excerpt", "content", "status", "updatedAt") VALUES ('p1', 'store-a', 'b1', 'No words', 'p1', '', '{}', 'PUBLISHED', CURRENT_TIMESTAMP), ('p2', 'store-a', 'b1', 'Has summary', 'p2', 'A summary', '{}', 'PUBLISHED', CURRENT_TIMESTAMP)`);
+    await exec(`INSERT INTO "Collection" ("id", "storeId", "title", "slug", "description", "updatedAt") VALUES ('c1', 'store-a', 'Beds', 'beds', '', CURRENT_TIMESTAMP), ('c2', 'store-a', 'Sale', 'sale', 'On sale', CURRENT_TIMESTAMP)`);
+    const report = await collectSeoHealth(db, "store-a", defaultStorePreferences());
+    expect(report.counts).toMatchObject({ pages: 2, posts: 2, collections: 2 });
+    expect(find(report, "page-no-description")).toMatchObject({ total: 2, count: 1, items: [{ kind: "page", id: "about" }] });
+    expect(find(report, "post-no-description")).toMatchObject({ total: 2, count: 1, items: [{ kind: "post", id: "p1" }] });
+    expect(find(report, "collection-no-description")).toMatchObject({ total: 2, count: 1, items: [{ kind: "collection", id: "c1" }] });
+  });
+
+  it("reports the state of each policy page", async () => {
+    await exec(`INSERT INTO "StorePage" ("id", "storeId", "title", "handle", "content", "status", "updatedAt") VALUES ('pp', 'store-a', 'Privacy', 'privacy', '{}', 'PUBLISHED', CURRENT_TIMESTAMP), ('rp', 'store-a', 'Returns', 'returns', '{}', 'DRAFT', CURRENT_TIMESTAMP)`);
+    const prefs = defaultStorePreferences();
+    prefs.policies.shipping = "";
+    const report = await collectSeoHealth(db, "store-a", prefs);
+    expect(report.policies).toEqual({ privacy: "published", refund: "draft", terms: "missing", shipping: "unset" });
+  });
+
+  it("is served to owners and admins only, from saved preferences", async () => {
+    await product("pine", "Pine bed");
+    const ok = await request(app("ADMIN")).get("/api/stores/store-a/preferences/seo-health").set(auth);
+    expect(ok.status).toBe(200);
+    expect(ok.body.checks.find((entry: { id: string }) => entry.id === "product-no-description")).toMatchObject({ count: 1 });
+    expect((await request(app("STAFF")).get("/api/stores/store-a/preferences/seo-health").set(auth)).status).toBe(403);
+    expect((await request(app("OWNER")).get("/api/stores/store-b/preferences/seo-health").set(auth)).status).toBe(404);
   });
 });

@@ -38,7 +38,7 @@ export function mountStoreSettingsRoutes(app: Express, context: AppContext): voi
       return record ? { id: record.id, url: record.publicUrl ?? record.url, mimeType: record.mimeType, width: record.width, height: record.height } : null;
     });
     const redirects = new UrlRedirectService(commerceDatabase);
-    app.use("/api/stores/:storeId/preferences", createPreferencesRouter(authProvider, preferences));
+    app.use("/api/stores/:storeId/preferences", createPreferencesRouter(authProvider, preferences, commerceDatabase));
     app.use("/api/stores/:storeId/redirects", createRedirectsRouter(authProvider, redirects));
     app.use("/api/public/stores/:storeId", createPublicPreferencesRouter(preferences, redirects));
   }

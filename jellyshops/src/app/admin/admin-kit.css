@@ -734,3 +734,26 @@ fieldset.jk-field {border:0;padding:0;margin:0;min-width:0}
 .jk-pref-policy select {max-width:min(320px,100%)}
 .jk-pref-csv-example {display:block;white-space:pre;overflow-x:auto;padding:var(--jk-space-3);border-radius:var(--jk-radius-sm);background:var(--jk-surface-subdued)}
 .jk-pref-redirect-example {overflow-wrap:anywhere}
+
+/* Store preferences: setup checklist, SEO health, bulk SEO editor */
+.jk-pref-tasks,.jk-pref-checks {display:flex;flex-direction:column;gap:2px;margin:0;padding:0;list-style:none}
+.jk-pref-task {display:flex;align-items:flex-start;gap:var(--jk-space-3);padding:8px 0;border-top:1px solid var(--jk-border)}
+.jk-pref-task:first-child {border-top:0}
+.jk-pref-task-icon {display:grid;place-items:center;flex:none;width:22px;height:22px;margin-top:1px;border-radius:50%;box-shadow:0 0 0 1px var(--jk-border-strong) inset;color:var(--jk-text-subdued)}
+.jk-pref-task[data-done] .jk-pref-task-icon {background:var(--jk-positive);box-shadow:none;color:var(--jk-surface)}
+.jk-pref-task-text {display:flex;flex-direction:column;flex:1;min-width:0}
+.jk-pref-score {display:flex;align-items:center;gap:var(--jk-space-4)}
+.jk-pref-score-number {display:grid;place-items:center;flex:none;width:72px;height:72px;border-radius:50%;box-shadow:0 0 0 6px var(--jk-surface-subdued) inset;font:650 26px var(--jk-font)}
+.jk-pref-check {display:flex;flex-direction:column;gap:6px;padding:var(--jk-space-3) 0;border-top:1px solid var(--jk-border)}
+.jk-pref-check:first-child {border-top:0}
+.jk-pref-check-head {display:flex;flex-wrap:wrap;align-items:center;gap:var(--jk-space-2)}
+.jk-pref-check p {margin:0}
+.jk-pref-check .jk-disclosure {min-width:0}
+.jk-bulk-table td,.jk-bulk-table th {vertical-align:top}
+.jk-bulk-table td {min-width:240px}
+.jk-bulk-table td .jk-input {width:100%}
+.jk-bulk-name {min-width:180px;font-weight:550;text-align:left}
+.jk-bulk-name small {display:block}
+.jk-bulk-table tr[data-changed] {background:var(--jk-surface-selected)}
+.jk-bulk-table textarea {resize:vertical}
+.jk-bulk-table tbody th {background:transparent;border-bottom:1px solid var(--jk-border);text-transform:none;letter-spacing:normal;font-size:var(--jk-text-sm);color:var(--jk-text);white-space:normal}

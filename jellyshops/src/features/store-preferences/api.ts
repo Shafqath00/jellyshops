@@ -1,11 +1,12 @@
 "use client";
 
 import { useCallback } from "react";
-import type { PreferenceProblem, StorePreferences } from "@jelly/storefront-schema";
+import type { PolicyKind, PolicyState, PreferenceProblem, RawSeoCheck, StorePreferences } from "@jelly/storefront-schema";
 import { authApiOrigin, useAuth } from "@/features/auth/providers/auth-provider";
 
 export interface StoredPreferences { available: boolean; preferences: StorePreferences; revision: number; updatedAt: string | null }
 export interface PreferenceChange { id: string; at: string; actorName: string | null; sections: string[] }
+export interface SeoHealthReport { checks: RawSeoCheck[]; policies: Record<PolicyKind, PolicyState>; counts: { products: number; pages: number; posts: number; collections: number } }
 export interface UrlRedirect { id: string; from: string; to: string; createdAt: string }
 export interface RedirectPage { redirects: UrlRedirect[]; total: number; available: boolean }
 export interface RedirectImportRow { line: number; from: string; to: string; problem: string | null; replaces: boolean }
@@ -43,6 +44,8 @@ export function useStorePreferencesApi() {
   const save = useCallback((revision: number, preferences: StorePreferences) => call<StoredPreferences>("/preferences", { method: "PUT", body: JSON.stringify({ revision, preferences }) }), [call]);
   const history = useCallback(() => call<{ changes: PreferenceChange[] }>("/preferences/history").then((result) => result.changes), [call]);
 
+  const seoHealth = useCallback(() => call<SeoHealthReport>("/preferences/seo-health"), [call]);
+
   const listRedirects = useCallback((query: { q?: string; offset?: number; limit?: number } = {}) => {
     const params = new URLSearchParams();
     if (query.q) params.set("q", query.q);
@@ -56,5 +59,5 @@ export function useStorePreferencesApi() {
   const removeRedirects = useCallback((ids: string[]) => call<{ removed: number }>("/redirects/delete", { method: "POST", body: JSON.stringify({ ids }) }).then((r) => r.removed), [call]);
   const importRedirects = useCallback((csv: string, options: { apply: boolean; replace: boolean }) => call<RedirectImportResult>("/redirects/import", { method: "POST", body: JSON.stringify({ csv, ...options }) }), [call]);
 
-  return { ready: Boolean(storeId && token), storeId, get, save, history, listRedirects, createRedirect, updateRedirect, removeRedirects, importRedirects };
+  return { ready: Boolean(storeId && token), storeId, get, save, history, seoHealth, listRedirects, createRedirect, updateRedirect, removeRedirects, importRedirects };
 }

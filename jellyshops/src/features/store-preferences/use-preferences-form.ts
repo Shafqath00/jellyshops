@@ -77,6 +77,11 @@ export function usePreferencesForm() {
     });
   }, []);
 
+  /** Replaces the whole edited copy (used by Import: the owner still has to press Save). */
+  const replaceDraft = useCallback((next: StorePreferences) => {
+    setDraft(next); setServerProblems({}); setShowAll(false);
+  }, []);
+
   const discard = useCallback(() => {
     if (!stored) return;
     setDraft(stored.preferences); setTouched(new Set()); setShowAll(false); setServerProblems({});
@@ -107,7 +112,7 @@ export function usePreferencesForm() {
 
   const problemCount = Object.keys({ ...clientProblems, ...serverProblems }).length;
 
-  return { ready: api.ready, stored, draft, loadError, reload: load, dirty, saving, conflict, problem, problemCount, set, save, discard, api };
+  return { ready: api.ready, stored, draft, loadError, reload: load, dirty, saving, conflict, problem, problemCount, set, replaceDraft, save, discard, api };
 }
 
 export type PreferencesForm = ReturnType<typeof usePreferencesForm>;

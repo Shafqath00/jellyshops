@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { defaultStorePreferences, type StorePreferences } from "@jelly/storefront-schema";
 import { ToastProvider } from "@/components/admin";
 import { imageAdvice, imageFileProblem } from "./cards/sharing-card";
+import { exportFile } from "./settings-transfer";
 import { extractTrackingId } from "./cards/tracking-card";
 import { policyTemplate } from "./policy-templates";
 import { StorePreferencesPage } from "./preferences-page";
@@ -34,6 +35,14 @@ function stubApi(options: { saveStatus?: number; saveBody?: unknown } = {}) {
       return json({ available: true, ...stored, updatedAt: "2026-11-26T10:00:00.000Z" });
     }
     if (path.endsWith("/preferences")) return json({ available: true, ...stored, updatedAt: null });
+    if (path.endsWith("/preferences/seo-health")) return json({
+      checks: [
+        { id: "product-no-description", total: 12, count: 2, items: [{ kind: "product", id: "p1", label: "Pine bed" }, { kind: "product", id: "p2", label: "Oak bed" }] },
+        { id: "page-no-description", total: 3, count: 0, items: [] },
+      ],
+      policies: { refund: "draft", privacy: "published", terms: "unset", shipping: "unset" },
+      counts: { products: 12, pages: 3, posts: 0, collections: 2 },
+    });
     if (path.endsWith("/preferences/history")) return json({ changes: [{ id: "c1", at: "2026-11-26T09:00:00.000Z", actorName: "Sam", sections: ["seo", "tracking"] }] });
     if (path.endsWith("/settings")) return json({ settings });
     if (path.includes("/content/pages")) return json([{ id: "p1", title: "Privacy policy", handle: "privacy", status: "PUBLISHED" }, { id: "p2", title: "Returns", handle: "returns", status: "DRAFT" }]);
@@ -123,6 +132,65 @@ describe("Store preferences page", () => {
     await screen.findByText(/changed Search and sharing/);
     const result = await axe.run(container, { runOnly: ["wcag2a", "wcag2aa", "best-practice"], rules: { "color-contrast": { enabled: false }, region: { enabled: false } } });
     expect(result.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`)).toEqual([]);
+  });
+});
+
+describe("setup checklist and SEO health", () => {
+  it("shows what is left to set up and what to fix, with links to the things affected", async () => {
+    stubApi();
+    page();
+    const setup = await screen.findByRole("list", { name: "Still to do" });
+    expect(within(setup).getByText("Publish your refund policy")).toBeVisible();
+    expect(within(setup).getByText("It's still a draft, so shoppers can't read it. Publish it.")).toBeVisible();
+    expect(within(setup).queryByText("Publish your privacy policy")).toBeNull();
+    expect(screen.getByText(/^\d+ of \d+ done$/)).toBeVisible();
+    expect(screen.getByRole("progressbar", { name: "Setup progress" })).toBeVisible();
+    const checks = await screen.findByRole("list", { name: "Things to improve" });
+    expect(within(checks).getByText("2 products have no description")).toBeVisible();
+    expect(within(checks).getByText("Your homepage has no description")).toBeVisible();
+    expect(screen.getByRole("group", { name: "SEO score" })).toHaveTextContent(/Checked 12 products, 3 pages/);
+    expect(within(checks).getByRole("link", { name: "Pine bed" })).toHaveAttribute("href", expect.stringContaining("/products/p1"));
+    expect(screen.getByText(/checks? passed/)).toBeVisible();
+  });
+});
+
+describe("export and import", () => {
+  it("exports without photos and imports only the sections the owner picks, still needing Save", async () => {
+    const fetchMock = stubApi();
+    const user = userEvent.setup();
+    page();
+    await screen.findByRole("textbox", { name: /^Homepage title/ });
+    await user.click(screen.getByRole("button", { name: "More actions" }));
+    await user.click(screen.getByRole("button", { name: "Import settings" }));
+    const incoming = defaultStorePreferences();
+    incoming.seo.homeTitle = "Imported title"; incoming.tracking.metaPixelId = "123456789012";
+    const file = new File([exportFile(incoming)], "export.json", { type: "application/json" });
+    await user.upload(screen.getByLabelText("Preferences file"), file);
+    const seo = await screen.findByRole("checkbox", { name: /Search and sharing/ });
+    const tracking = screen.getByRole("checkbox", { name: /Tracking IDs/ });
+    expect(seo).toBeChecked();
+    expect(tracking).not.toBeChecked();
+    expect(screen.getByText(/belong to the store you exported from/)).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Copy 1 section to the page" }));
+    expect(screen.getByRole("textbox", { name: /^Homepage title/ })).toHaveValue("Imported title");
+    expect(screen.getByRole("textbox", { name: /^Meta Pixel ID/ })).toHaveValue("");
+    expect(fetchMock.mock.calls.some(([, init]) => init?.method === "PUT")).toBe(false);
+    expect(screen.getByRole("region", { name: "Unsaved changes" })).toBeVisible();
+  });
+  it("refuses a file that isn't an export or holds bad values", async () => {
+    stubApi();
+    const user = userEvent.setup();
+    page();
+    await screen.findByRole("textbox", { name: /^Homepage title/ });
+    await user.click(screen.getByRole("button", { name: "More actions" }));
+    await user.click(screen.getByRole("button", { name: "Import settings" }));
+    await user.upload(screen.getByLabelText("Preferences file"), new File(["{\"hello\":1}"], "x.json", { type: "application/json" }));
+    expect(await screen.findByText(/wasn't exported from Store preferences/)).toBeVisible();
+    const bad = JSON.parse(exportFile(defaultStorePreferences()));
+    bad.preferences.tracking.googleAnalyticsId = "not-an-id";
+    await user.upload(screen.getByLabelText("Preferences file"), new File([JSON.stringify(bad)], "bad.json", { type: "application/json" }));
+    expect(await screen.findByText(/nothing was imported/)).toBeVisible();
+    expect(screen.getByText(/A Google Analytics ID looks like G-XXXXXXXXXX./)).toBeVisible();
   });
 });
 
