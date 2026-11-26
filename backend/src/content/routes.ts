@@ -17,6 +17,12 @@ import {
   scheduleSchema,
 } from "./schemas.js";
 import type { ContentListQuery } from "./rules.js";
+import { htmlToRichTextDocument, MAX_IMPORT_HTML_BYTES } from "./html-import.js";
+import { richTextToHtml } from "@jelly/storefront-schema";
+import { z } from "zod";
+
+const importHtmlSchema = z.object({ html: z.string().max(MAX_IMPORT_HTML_BYTES) }).strip();
+const exportHtmlSchema = z.object({ content: z.record(z.string(), z.unknown()) }).strip();
 
 /** The content service as the routes use it. */
 export type ContentApi = Pick<ContentService,
@@ -76,6 +82,18 @@ export function createContentRouter(service: ContentApi, authProvider: AuthProvi
   router.use(requireMerchant(authProvider));
   const view = requireStorePermission("content:view");
   const edit = requireStorePermission("content:edit");
+
+  // Pasted or source-view HTML -> a safe document, and a document -> HTML for the source view.
+  router.post("/import-html", edit, handle(async (request) => {
+    const { html } = importHtmlSchema.parse(request.body);
+    try {
+      return { document: htmlToRichTextDocument(html) };
+    } catch (error) {
+      if ((error as { tooLarge?: boolean }).tooLarge) throw new ApiError(413, "CONTENT_TOO_LARGE", (error as Error).message);
+      throw error;
+    }
+  }));
+  router.post("/export-html", view, handle(async (request) => ({ html: richTextToHtml(exportHtmlSchema.parse(request.body).content) })));
 
   // Pages. Fixed paths come before "/pages/:pageId".
   router.get("/pages", view, handle((request) => service.listPages(storeId(request))));

@@ -1,5 +1,5 @@
 import { titleLength } from "./shared";
-import { isRichTextDocument, type SectionNode, storePath } from "@jelly/storefront-schema";
+import { richTextFromStoredContent, type SectionNode, storePath } from "@jelly/storefront-schema";
 import { elementProps } from "../element-style";
 import type { ReactNode } from "react";
 import { StorefrontContainer } from "@jelly/storefront-ui";
@@ -8,24 +8,11 @@ import type { StorefrontRuntimeContext } from "../runtime-context";
 import { choice, numberValue, sectionData, stringValue } from "./shared";
 import { formattedSetting, SettingText } from "./setting-text";
 
-/** Saved page/article content: rich text documents keep headings and lists; older plain text becomes paragraphs. */
+/** Saved page/article content: rich text keeps its formatting (unknown parts left out); older plain text becomes paragraphs. */
 function renderContent(value: unknown): ReactNode[] {
-  if (isRichTextDocument(value)) {
-    // The document check accepts paragraphs and headings saved without a `content` list (an empty line in the page editor), so treat a missing list as empty.
-    const blocks = value.content
-      .filter((block) => !(block.type === "paragraph" && !block.content?.length))
-      .map((block) => block.type === "heading" && !block.content ? { ...block, content: [] } : block);
-    return renderBlocks(blocks);
-  }
-  return textFromContent(value).map((paragraph, index) => <p key={`${index}-${paragraph}`}>{paragraph}</p>);
-}
-
-function textFromContent(value: unknown): string[] {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return [];
-  const record = value as Record<string, unknown>;
-  const direct = [record.text, record.body].filter((entry): entry is string => typeof entry === "string" && Boolean(entry.trim()));
-  const blocks = Array.isArray(record.blocks) ? record.blocks.flatMap(textFromContent) : [];
-  return [...direct, ...blocks];
+  // Empty paragraphs are the editor's blank lines; the page's own spacing replaces them.
+  const blocks = richTextFromStoredContent(value).content.filter((block) => !(block.type === "paragraph" && !block.content.length));
+  return renderBlocks(blocks);
 }
 
 export function PageContentSection({ context }: { context: StorefrontRuntimeContext }) {

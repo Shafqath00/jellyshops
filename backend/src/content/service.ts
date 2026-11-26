@@ -1,3 +1,4 @@
+import { richTextFromStoredContent } from "@jelly/storefront-schema";
 import { ApiError } from "../http/errors.js";
 import type { PlanLimitChecker } from "../billing/plan-limits.js";
 import type {
@@ -19,7 +20,7 @@ import {
   articlePath,
   badRequest,
   blogPath,
-  checkContentSize,
+  cleanContent,
   checkHandle,
   checkScheduleTime,
   contentState,
@@ -192,7 +193,7 @@ export class ContentService {
       storeId,
       title,
       handle,
-      content: checkContentSize(input.content ?? EMPTY_DOCUMENT),
+      content: cleanContent(input.content ?? EMPTY_DOCUMENT),
       featuredMediaId: nullableText(input.featuredMediaId) ?? null,
       seoTitle: nullableText(input.seoTitle) ?? null,
       seoDescription: nullableText(input.seoDescription) ?? null,
@@ -213,7 +214,7 @@ export class ContentService {
     const current = await this.repository.getPage(storeId, id) ?? notFound("page");
     const normalized: UpdatePageRecordInput = {
       ...(patch.title !== undefined ? { title: requiredText(patch.title, "The page title") } : {}),
-      ...(patch.content !== undefined ? { content: checkContentSize(patch.content) } : {}),
+      ...(patch.content !== undefined ? { content: cleanContent(patch.content) } : {}),
       ...(patch.showInNavigation !== undefined ? { showInNavigation: patch.showInNavigation } : {}),
       ...(patch.authorName !== undefined ? { authorName: authorName(patch.authorName) ?? null } : {}),
       ...seo(patch),
@@ -263,7 +264,7 @@ export class ContentService {
     return this.createPage(storeId, {
       title: copyTitle(source.title),
       handle: freeHandle(`${source.handle}-copy`.slice(0, 100).replace(/-+$/, ""), await this.pageHandles(storeId)),
-      content: source.content,
+      content: richTextFromStoredContent(source.content) as unknown as ContentDocument,
       featuredMediaId: source.featuredMediaId,
       seoTitle: source.seoTitle,
       seoDescription: source.seoDescription,
@@ -355,7 +356,7 @@ export class ContentService {
       title,
       handle,
       excerpt: excerpt(input.excerpt),
-      content: checkContentSize(input.content ?? EMPTY_DOCUMENT),
+      content: cleanContent(input.content ?? EMPTY_DOCUMENT),
       featuredMediaId: nullableText(input.featuredMediaId) ?? null,
       seoTitle: nullableText(input.seoTitle) ?? null,
       seoDescription: nullableText(input.seoDescription) ?? null,
@@ -381,7 +382,7 @@ export class ContentService {
     const normalized: UpdateArticleRecordInput = {
       ...(patch.title !== undefined ? { title: requiredText(patch.title, "The post title") } : {}),
       ...(patch.excerpt !== undefined ? { excerpt: excerpt(patch.excerpt) } : {}),
-      ...(patch.content !== undefined ? { content: checkContentSize(patch.content) } : {}),
+      ...(patch.content !== undefined ? { content: cleanContent(patch.content) } : {}),
       ...(patch.tags !== undefined ? { tags: normaliseTags(patch.tags) } : {}),
       ...(patch.authorName !== undefined ? { authorName: authorName(patch.authorName) ?? null } : {}),
       ...(targetBlog.id !== current.blogId ? { blogId: targetBlog.id } : {}),
@@ -431,7 +432,7 @@ export class ContentService {
       title: copyTitle(source.title),
       handle: freeHandle(`${source.handle}-copy`.slice(0, 100).replace(/-+$/, ""), await this.articleHandles(storeId, source.blogId)),
       excerpt: source.excerpt,
-      content: source.content,
+      content: richTextFromStoredContent(source.content) as unknown as ContentDocument,
       tags: source.tags,
       featuredMediaId: source.featuredMediaId,
       seoTitle: source.seoTitle,

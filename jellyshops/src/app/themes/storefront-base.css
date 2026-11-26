@@ -2666,3 +2666,31 @@ html.lenis, html.lenis body { height: auto; }
 /* While the phone menu of a theme on the platform defaults is open (a full-height panel, platform-base.css), the page behind does not scroll. */
 html[data-jelly-menu-open]:has([data-jelly-legacy-styles="off"] .jelly-mobile-navigation[open]) { overflow: hidden; }
 @keyframes jelly-menu-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+/* ------------------------------------------------------------------
+   Rich text content (pages, blog posts, descriptions): photos, video,
+   buttons, checklists, dividers, code and highlights. Zero weight
+   (:where) and tokens only, so every theme can restyle them.
+   ------------------------------------------------------------------ */
+:where(.jelly-rich-image) { margin: 1.5em auto; max-width: 100%; }
+:where(.jelly-rich-image[data-align="left"]) { margin-inline: 0 auto; }
+:where(.jelly-rich-image[data-align="right"]) { margin-inline: auto 0; }
+:where(.jelly-rich-image[data-align="full"]) { width: 100% !important; }
+:where(.jelly-rich-image) img { display: block; width: 100%; height: auto; border-radius: var(--j-radius-sm, 4px); }
+:where(.jelly-rich-image) figcaption { margin-top: 0.5em; font-size: 0.875em; color: var(--j-color-muted, currentColor); text-align: center; }
+@media (min-width: 768px) {
+  :where(.jelly-rich-image[data-align="left"]:not([style])) { float: left; max-width: 50%; margin: 0.25em 1.5em 1em 0; }
+  :where(.jelly-rich-image[data-align="right"]:not([style])) { float: right; max-width: 50%; margin: 0.25em 0 1em 1.5em; }
+}
+:where(.jelly-rich-video) { margin: 1.5em 0; position: relative; aspect-ratio: 16 / 9; width: 100%; }
+:where(.jelly-rich-video) iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; border-radius: var(--j-radius-sm, 4px); }
+:where(.jelly-rich-button) { margin: 1.5em 0; }
+:where(.jelly-rich-divider) { clear: both; border: 0; border-top: 1px solid var(--j-color-border, color-mix(in srgb, currentColor 20%, transparent)); margin: 2em 0; }
+:where(.jelly-rich-tasks) { list-style: none; padding-left: 0; }
+:where(.jelly-rich-tasks) > li { display: flex; gap: 0.6em; align-items: flex-start; }
+:where(.jelly-rich-tasks) > li > div > :first-child { margin-top: 0; }
+:where(.jelly-rich-task-box) { flex: none; display: inline-grid; place-items: center; width: 1.1em; height: 1.1em; margin-top: 0.2em; border: 1.5px solid currentColor; border-radius: 3px; font-size: 0.85em; line-height: 1; }
+:where(.jelly-rich-tasks > li[data-checked="true"]) > div { text-decoration: line-through; color: var(--j-color-muted, currentColor); }
+:where(.jelly-rich-pre) { overflow-x: auto; padding: 1em; border-radius: var(--j-radius-sm, 4px); background: var(--j-color-wash, color-mix(in srgb, currentColor 6%, transparent)); font-size: 0.875em; line-height: 1.5; }
+:where(.jelly-rich-code) { padding: 0.1em 0.3em; border-radius: 3px; background: var(--j-color-wash, color-mix(in srgb, currentColor 8%, transparent)); font-size: 0.9em; }
+:where(.jelly-rich-highlight) { color: #1a1a1a; padding: 0 0.1em; border-radius: 2px; }

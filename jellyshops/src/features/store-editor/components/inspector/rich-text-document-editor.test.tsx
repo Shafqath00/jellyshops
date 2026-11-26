@@ -56,7 +56,7 @@ it("drops unsupported persisted nodes and marks before editing or saving", async
   const section = legacySection();
   section.settings.document = { type: "doc", content: [
     { type: "script", attrs: { src: "https://example.com/x.js" } },
-    { type: "paragraph", content: [{ type: "text", text: "Safe", marks: [{ type: "code" }] }] },
+    { type: "paragraph", content: [{ type: "text", text: "Safe", marks: [{ type: "spoiler" }] }] },
   ] };
   const onSave = vi.fn(async () => undefined);
   render(<RichTextDocumentEditor section={section} onSave={onSave} />);

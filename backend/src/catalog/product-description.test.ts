@@ -26,8 +26,9 @@ describe("resolveProductDescription", () => {
       ),
     });
     expect(resolved.description).toBe("Details\n\nSoft cotton");
-    expect(JSON.stringify(resolved.descriptionDoc)).not.toMatch(/javascript|script|image|onerror/);
-    expect(resolved.descriptionDoc).toMatchObject({ content: [{ type: "heading" }, { type: "paragraph", content: [{ marks: [{ type: "bold" }, { type: "underline" }] }, { text: "cotton" }] }] });
+    // Photos are allowed in descriptions (Content redesign phase 2); their unsafe attributes are not.
+    expect(JSON.stringify(resolved.descriptionDoc)).not.toMatch(/javascript|script|onerror/);
+    expect(resolved.descriptionDoc).toMatchObject({ content: [{ type: "heading" }, { type: "paragraph", content: [{ marks: [{ type: "bold" }, { type: "underline" }] }, { text: "cotton" }] }, { type: "image", attrs: { src: "https://evil.example/x.png", alt: "" } }] });
   });
 
   it("treats an empty editor as clearing the rich text", () => {

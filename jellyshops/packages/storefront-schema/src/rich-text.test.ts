@@ -43,7 +43,7 @@ it("preserves the supported structured formatting and safe links", () => {
   expect(normalized?.content[0]).toEqual(input.content[0]);
   expect(normalized?.content[1]).toEqual({ type: "paragraph", content: [
     { type: "text", text: "Read ", marks: [{ type: "italic" }] },
-    { type: "text", text: "more", marks: [{ type: "link", attrs: { href: "/pages/about" } }] },
+    { type: "text", text: "more", marks: [{ type: "link", attrs: { href: "/pages/about", target: "_blank" } }] },
     { type: "hardBreak" },
   ] });
   expect(isRichTextDocument(normalized)).toBe(true);
@@ -53,7 +53,7 @@ it("rejects unsupported nodes and marks while safely ignoring them for read-only
   const untrusted = { type: "doc", content: [
     { type: "script", attrs: { src: "https://example.com/evil.js" } },
     { type: "paragraph", content: [
-      { type: "text", text: "Safe", marks: [{ type: "code" }, { type: "bold" }] },
+      { type: "text", text: "Safe", marks: [{ type: "spoiler" }, { type: "bold" }] },
     ] },
   ] };
   expect(isRichTextDocument(untrusted)).toBe(false);

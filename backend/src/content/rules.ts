@@ -2,6 +2,7 @@
  * Plain rules for pages, blogs and blog posts: web address endings, states, tags, schedules and list queries.
  * No database access here, so every rule is unit-tested on its own.
  */
+import { normalizeRichTextDocument, richTextFromStoredContent } from "@jelly/storefront-schema";
 import { ApiError } from "../http/errors.js";
 import type { ArticleRecord, ContentLifecycle, ContentState, ContentStatus, PageRecord } from "./repository.js";
 
@@ -107,6 +108,19 @@ export function checkContentSize(content: Record<string, unknown>): Record<strin
   const bytes = Buffer.byteLength(JSON.stringify(content), "utf8");
   if (bytes > MAX_CONTENT_BYTES) badRequest("CONTENT_TOO_LARGE", "This content is too long to save. Split it into more than one page or post.");
   return structuredClone(content);
+}
+
+/**
+ * A page or post body as it is saved: size-checked, then passed through the shared rich text allowlist (unknown
+ * parts, unsafe links and photo addresses are left out). Anything that is not a document is refused.
+ */
+export function cleanContent(content: Record<string, unknown>): Record<string, unknown> {
+  const checked = checkContentSize(content);
+  const document = normalizeRichTextDocument(checked);
+  if (document) return document as unknown as Record<string, unknown>;
+  // Older callers send { text }, { body } or { blocks: [{ text }] }; those become paragraphs.
+  if (["text", "body", "blocks"].some((key) => key in checked)) return richTextFromStoredContent(checked) as unknown as Record<string, unknown>;
+  badRequest("CONTENT_INVALID", "The content could not be read. Reload the page and try again.");
 }
 
 export type ContentSort = "updated" | "created" | "title" | "published";

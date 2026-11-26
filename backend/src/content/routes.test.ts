@@ -103,4 +103,17 @@ describe("content routes", () => {
     const unknown = await request(app).get("/api/public/stores/store-a/content-redirect?path=/admin");
     expect(unknown.body).toEqual({ location: null });
   });
+
+  it("turns pasted HTML into a safe document and a document back into HTML", async () => {
+    const { as } = setup();
+    const imported = await as("post", "/import-html").send({ html: "<h2>Hi</h2><p onclick=\"alert(1)\">Text<script>alert(1)</script></p>" });
+    expect(imported.status).toBe(200);
+    expect(imported.body.document).toEqual({ type: "doc", content: [
+      { type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: "Hi" }] },
+      { type: "paragraph", content: [{ type: "text", text: "Text" }] },
+    ] });
+    const exported = await as("post", "/export-html").send({ content: imported.body.document });
+    expect(exported.body.html).toBe("<h2>Hi</h2>\n<p>Text</p>");
+    expect((await as("post", "/import-html").send({ html: 5 })).status).toBe(400);
+  });
 });

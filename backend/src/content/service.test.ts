@@ -180,3 +180,30 @@ describe("blogs and posts", () => {
     expect((await failure(service.createArticle("store-a", { blogId: blog.id, title: "Hello" }))).code).toBe("PLAN_LIMIT");
   });
 });
+
+describe("saved content", () => {
+  it("keeps only what the rich text format allows and refuses anything that isn't a document", async () => {
+    const { service } = setup();
+    const page = await service.createPage("store-a", { title: "About", content: { type: "doc", content: [
+      { type: "script", attrs: { src: "https://evil.example/x.js" } },
+      { type: "paragraph", content: [{ type: "text", text: "Hi", marks: [{ type: "link", attrs: { href: "javascript:alert(1)" } }] }] },
+      { type: "image", attrs: { src: "/media/a.jpg", alt: "A", onerror: "alert(1)" } },
+    ] } });
+    expect(page.content).toEqual({ type: "doc", content: [
+      { type: "paragraph", content: [{ type: "text", text: "Hi" }] },
+      { type: "image", attrs: { src: "/media/a.jpg", alt: "A" } },
+    ] });
+    expect((await failure(service.updatePage("store-a", page.id, { content: { html: "<p>x</p>" } }))).code).toBe("CONTENT_INVALID");
+  });
+
+  it("turns older plain-text content into paragraphs when it is duplicated", async () => {
+    const { service, repository } = setup();
+    const page = await service.createPage("store-a", { title: "Old" });
+    repository.pages.set(page.id, { ...repository.pages.get(page.id)!, content: { text: "Hello\n\nWorld" } });
+    const copy = await service.duplicatePage("store-a", page.id);
+    expect(copy.content).toEqual({ type: "doc", content: [
+      { type: "paragraph", content: [{ type: "text", text: "Hello" }] },
+      { type: "paragraph", content: [{ type: "text", text: "World" }] },
+    ] });
+  });
+});

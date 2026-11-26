@@ -2,7 +2,8 @@ export { STORE_DESIGN_SCHEMA_VERSION } from "./version.js";
 export { createDefaultStoreDesign } from "./defaults.js";
 export { migrateStoreDesignDocument } from "./migrations.js";
 export { sectionNodeSchema, storeDesignDocumentSchema, themeIdSchema } from "./schema.js";
-export { isRichTextDocument, normalizeRichTextDocument, plainTextToRichTextDocument, resolveRichTextDocument, richTextToPlainText, safeRichTextHref } from "./rich-text.js";
+export { isRichTextDocument, normalizeRichTextDocument, parseVideoUrl, plainTextToRichTextDocument, resolveRichTextDocument, richTextFromStoredContent, richTextToPlainText, richTextWordCount, safeRichTextHref, safeRichTextImageSrc, videoEmbedUrl } from "./rich-text.js";
+export { escapeHtml, richTextToHtml } from "./rich-text-html.js";
 export { STOREFRONT_SCHEMA_VERSION, createDefaultStorefrontDocument, createStorefrontTemplate, getStorefrontPage } from "./storefront-v2-pages.js";
 export { migrateStorefrontDocument, storefrontDocumentSchema, validateStorefrontDocument } from "./storefront-v2.js";
 export {
@@ -60,7 +61,7 @@ export type { RichTextSize, RichTextStyleAttrs, RichTextStyleMark } from "./rich
 export { MAX_BLOCK_DEPTH, blockTreeHeight, childBlocks, copyBlockWithNewIds, findBlock, flattenBlocks, updateBlock, updateBlockList } from "./block-tree.js";
 export type { BlockLocation } from "./block-tree.js";
 export type { BlockNode, GlobalSettings, PageDocument, PageType, SectionNode, StoreDesignDocument, ThemeId } from "./types.js";
-export type { RichTextAlign, RichTextBlock, RichTextDocument, RichTextInline, RichTextMark, RichTextTableCell, RichTextTableRow } from "./rich-text.js";
+export type { RichTextAlign, RichTextBlock, RichTextButtonAttrs, RichTextDocument, RichTextHeadingLevel, RichTextHighlightMark, RichTextImageAttrs, RichTextInline, RichTextLinkMark, RichTextMark, RichTextMediaAlign, RichTextTableCell, RichTextTableRow, RichTextVideoAttrs, RichTextVideoProvider } from "./rich-text.js";
 export {
   MAX_VARIANTS,
   MAX_VARIANT_AXES,
