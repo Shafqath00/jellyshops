@@ -16,13 +16,19 @@ export function CheckoutHeader({ store }: { store: ChromeStore }) {
   );
 }
 
-/** A small footer with the policy links. */
-export function CheckoutFooter({ store }: { store: ChromeStore }) {
-  const links = [["Returns", "returns"], ["Shipping", "shipping"], ["Privacy", "privacy"], ["Terms", "terms"]] as const;
+const FALLBACK_LINKS = [["Returns", "returns"], ["Shipping", "shipping"], ["Privacy", "privacy"], ["Terms", "terms"]] as const;
+
+/**
+ * A small footer with the policy links: the published policy pages the merchant chose (Settings > Store preferences >
+ * Policies) when known, otherwise the starter's usual addresses.
+ */
+export function CheckoutFooter({ store, policies }: { store: ChromeStore; policies?: Array<{ label: string; href: string }> | null }) {
+  const links = policies ?? FALLBACK_LINKS.map(([label, handle]) => ({ label, href: storePath(store.slug, `/pages/${handle}`) }));
+  if (!links.length) return null;
   return (
     <footer className="jelly-checkout-chrome jelly-checkout-chrome--footer">
       <nav aria-label="Shop policies">
-        <ul>{links.map(([label, handle]) => <li key={handle}><Link href={storePath(store.slug, `/pages/${handle}`)}>{label}</Link></li>)}</ul>
+        <ul>{links.map((link) => <li key={link.href}><Link href={link.href}>{link.label}</Link></li>)}</ul>
       </nav>
     </footer>
   );

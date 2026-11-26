@@ -4,7 +4,10 @@ const product = (extra: Record<string, unknown> = {}) => ({ id: "shirt", storeId
 const storefront = vi.hoisted(() => ({ products: [] as unknown[] }));
 vi.mock("next/navigation", () => ({ notFound: () => { throw new Error("NOT_FOUND"); } }));
 vi.mock("./product-client", () => ({ default: () => null }));
-vi.mock("@/features/storefront/server-storefront", () => ({ getServerStorefront: async () => ({ store: { name: "Hemp & Co", slug: "hemp", currency: "GBP" }, products: storefront.products }) }));
+vi.mock("@/features/storefront/server-storefront", async () => {
+  const { defaultStorePreferences } = await vi.importActual<typeof import("@jelly/storefront-schema")>("@jelly/storefront-schema");
+  return { getServerStorefront: async () => ({ store: { name: "Hemp & Co", slug: "hemp", currency: "GBP" }, products: storefront.products, collections: [], preferences: defaultStorePreferences() }) };
+});
 
 import { generateMetadata } from "./page";
 
@@ -21,9 +24,9 @@ describe("product page metadata", () => {
     expect(metadata.openGraph).toMatchObject({ title: "Organic linen shirt | Hemp & Co", description: "Breathable organic linen, made to last." });
   });
 
-  it("falls back to the product name, the store and the start of the description", async () => {
+  it("falls back to the store's title template and the start of the description", async () => {
     const metadata = await metadataFor({ description: "word ".repeat(80) });
-    expect(metadata.title).toBe("Linen shirt · Hemp & Co");
+    expect(metadata.title).toBe("Linen shirt | Hemp & Co");
     expect(String(metadata.description).length).toBeLessThanOrEqual(160);
     expect(String(metadata.description).endsWith("…")).toBe(true);
     expect(metadata.openGraph).toMatchObject({ title: "Linen shirt" });

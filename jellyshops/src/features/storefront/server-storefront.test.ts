@@ -31,6 +31,6 @@ it("caches a store's data on the server, tagged with the store, and fetches desi
   // Everything after the store lookup is also tagged with the store id, so the backend can refresh it by id.
   expect(calls.slice(1).every(({ init }) => init.next?.tags?.some((tag) => tag.startsWith("store:")))).toBe(true);
   expect(calls.every(({ init }) => init.cache !== "no-store")).toBe(true);
-  // Design, products, collections and menu destinations are read side by side.
-  expect(mostAtOnce).toBe(4);
+  // Design, products, collections, menu destinations and store preferences are read side by side.
+  expect(mostAtOnce).toBe(5);
 });

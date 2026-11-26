@@ -122,6 +122,10 @@ function afterFirstSegment(path: string): string {
   return rest.startsWith("/") ? rest : `/${rest}`;
 }
 
+/** Files each shop serves for itself (search engines ask for them at the shop's own address). */
+const SHOP_FILES = new Set(["/sitemap.xml", "/robots.txt"]);
+export function isShopFile(path: string): boolean { return SHOP_FILES.has(path); }
+
 function hasFileExtension(path: string): boolean {
   const last = path.split("/").pop() ?? "";
   return /\.[a-z0-9]+$/i.test(last);
@@ -175,6 +179,7 @@ export function classifyHost(request: HostRequest): HostRoute {
   }
   if (SYSTEM_SUBDOMAINS.has(label) || !isShopLabel(label)) return { kind: "shop-not-found" };
 
+  if (isShopFile(path)) return { kind: "shop", slug: label, path: shopPath(label, path), mode: "subdomain" };
   if (SHARED_SEGMENTS.has(segment) || hasFileExtension(path)) return { kind: "pass" };
   // Old-style links that still carry the shop's own address: /<slug>/x on <slug>.<root> → /x.
   if (segment === label) return { kind: "redirect", location: `${origin(label)}${afterFirstSegment(path)}${search}` };
@@ -188,7 +193,7 @@ function classifyApex(path: string, search: string, segment: string, origin: (su
   if (preview) return preview;
   if (links !== "subdomain") {
     // Shops still live under the main address: serve them there (path) or send old links to /_shop (preview).
-    if (segment === "" || APEX_PATH_SEGMENTS.has(segment) || hasFileExtension(path) || !isShopLabel(segment) || SYSTEM_SUBDOMAINS.has(segment)) return { kind: "marketing" };
+    if (segment === "" || APEX_PATH_SEGMENTS.has(segment) || (hasFileExtension(path) && !isShopFile(afterFirstSegment(path))) || !isShopLabel(segment) || SYSTEM_SUBDOMAINS.has(segment)) return { kind: "marketing" };
     const rest = afterFirstSegment(path);
     // jellyshop.io/<shop>/admin/... opens that shop's admin.
     if (firstSegment(rest) === "admin") return { kind: "redirect", location: `${origin("")}/admin${shopAdminPath(segment, afterFirstSegment(rest))}${search}` };

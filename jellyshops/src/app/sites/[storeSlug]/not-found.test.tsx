@@ -14,6 +14,9 @@ vi.mock("@/contexts/shop-context", () => ({
 }));
 vi.mock("@/features/storefront/storefront-bootstrap", () => ({ useInitialStorefrontPublication: vi.fn() }));
 vi.mock("@/features/storefront/resource-loader", () => ({ resolveStorefrontNotFound: vi.fn() }));
+const redirects = vi.hoisted(() => ({ followUrlRedirect: vi.fn(async () => undefined) }));
+vi.mock("@/features/storefront/server-content-page", () => redirects);
+vi.mock("@/features/storefront/server-storefront", () => ({ getServerStorefront: vi.fn(async () => ({ store: { id: "store-1" } })) }));
 vi.mock("@/features/storefront/storefront-page", () => ({
   PublishedRuntimeStorefront: ({ route }: { route: { context: { pageType: string } } }) => <div data-testid="runtime-not-found">{route.context.pageType}</div>,
 }));
@@ -43,8 +46,9 @@ describe("store not found", () => {
     expect(screen.getByRole("link", { name: "Return home" })).toHaveAttribute("href", "/market");
   });
 
-  it("sends any unknown store address to the 404 page", async () => {
+  it("checks the merchant's redirects, then sends any unknown store address to the 404 page", async () => {
     const { default: Unmatched } = await import("./[...unmatched]/page");
-    expect(() => Unmatched()).toThrow("NEXT_NOT_FOUND");
+    await expect(Unmatched({ params: Promise.resolve({ storeSlug: "market", unmatched: ["old-beds", "oak%20bed"] }) })).rejects.toThrow("NEXT_NOT_FOUND");
+    expect(redirects.followUrlRedirect).toHaveBeenCalledWith("market", "store-1", "/old-beds/oak bed");
   });
 });

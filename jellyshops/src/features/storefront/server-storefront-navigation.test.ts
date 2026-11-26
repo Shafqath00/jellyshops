@@ -4,6 +4,7 @@ import { expect, it, vi } from "vitest";
 vi.mock("@jelly/storefront-schema", () => ({
   runtimeStorefrontSnapshotV4Schema: { safeParse: () => ({ success: true, data: { storeId: "s1" } }) },
   migrateStorefrontDocument: () => ({ storeId: "s1" }),
+  readStorePreferences: () => ({}),
 }));
 
 import { loadServerStorefront } from "./server-storefront";

@@ -2698,3 +2698,18 @@ html[data-jelly-menu-open]:has([data-jelly-legacy-styles="off"] .jelly-mobile-na
 /* Draft preview from the admin (route /jelly-preview): a small "not live" label and status lines. */
 .jelly-preview-badge { position: fixed; left: 50%; bottom: 16px; z-index: 1000; transform: translateX(-50%); padding: 6px 14px; border-radius: 999px; background: #1a1a1a; color: #fff; font: 600 13px/1.4 system-ui, sans-serif; box-shadow: 0 6px 20px rgb(0 0 0 / .25); pointer-events: none; white-space: nowrap; }
 .jelly-preview-problem { margin: 48px auto; max-width: 560px; padding: 0 16px; text-align: center; font: 15px/1.5 system-ui, sans-serif; }
+
+/* Store preferences: policy links under the footer and the cookie banner (Settings > Store preferences). */
+:where([data-jelly-theme]) .jelly-legal-links {padding:12px var(--j-page-edge, 16px) 20px;font-size:0.8125rem;color:var(--j-color-muted, inherit)}
+:where([data-jelly-theme]) .jelly-legal-links ul {display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;margin:0;padding:0;list-style:none}
+:where([data-jelly-theme]) .jelly-legal-links a,
+:where([data-jelly-theme]) .jelly-legal-links-button {display:inline-flex;align-items:center;min-height:24px;padding:0;border:0;background:none;color:inherit;font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+:where([data-jelly-theme]) .jelly-cookie-banner {position:fixed;z-index:60;left:max(16px, env(safe-area-inset-left));right:max(16px, env(safe-area-inset-right));bottom:max(16px, env(safe-area-inset-bottom));display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;max-width:760px;margin:0 auto;padding:16px 20px;border-radius:var(--j-radius-md, 8px);background:var(--j-color-bg, #fff);color:var(--j-color-text, #1a1a1a);box-shadow:0 0 0 1px var(--j-color-border, rgba(0,0,0,.12)), var(--j-shadow-overlay, 0 12px 32px rgba(0,0,0,.18));font-size:0.9375rem;line-height:1.5}
+:where([data-jelly-theme]) .jelly-cookie-banner p {flex:1 1 280px;margin:0}
+:where([data-jelly-theme]) .jelly-cookie-banner a {color:inherit;text-decoration:underline;text-underline-offset:3px}
+:where([data-jelly-theme]) .jelly-cookie-banner-actions {display:flex;gap:10px;flex-wrap:wrap}
+:where([data-jelly-theme]) .jelly-cookie-banner-actions .jelly-button {min-height:44px}
+@media (max-width: 480px) {
+  :where([data-jelly-theme]) .jelly-cookie-banner-actions {width:100%}
+  :where([data-jelly-theme]) .jelly-cookie-banner-actions .jelly-button {flex:1}
+}

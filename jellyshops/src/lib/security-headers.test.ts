@@ -30,9 +30,10 @@ describe("security headers", () => {
     expect(securityHeaderRules({ production: false })[0]!.headers.map((header) => header.key)).not.toContain("Strict-Transport-Security");
   });
 
-  it("lets shops show their embeds but no outside scripts, and keeps Stripe to checkout", () => {
+  it("lets shops show their embeds and the tracking tools a merchant connects, and keeps Stripe to checkout", () => {
     const shop = contentSecurityPolicy("shop", production);
-    expect(shop).toContain("script-src 'self' 'unsafe-inline';");
+    // Only Google's and Meta's tracking scripts (Settings > Store preferences > Tracking), nothing else from outside.
+    expect(shop).toContain("script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net;");
     expect(shop).toContain("https://www.youtube-nocookie.com");
     expect(shop).toContain("https://calendly.com");
     expect(shop).not.toContain("stripe");

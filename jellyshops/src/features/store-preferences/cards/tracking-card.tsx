@@ -72,6 +72,7 @@ export function PrivacyCard({ form }: { form: PreferencesForm }) {
 export function SpamCard({ form }: { form: PreferencesForm }) {
   return <Card title="Spam protection" description="Stops bots filling in your store's forms. Shoppers don't see puzzles: checks run quietly in the background.">
     <div className="jk-stack-sm" id="spam">
+      <p className="jk-muted">Every form already has hidden bot traps and limits on how often it can be sent. The choices below add an extra invisible check (Cloudflare Turnstile) once it is switched on for Jellyshop.</p>
       <PrefCheck form={form} path="spam.contactForm" label="Contact form" help="Blocks automated messages to your inbox." />
       <PrefCheck form={form} path="spam.newsletter" label="Email sign-up forms" help="Stops fake addresses joining your mailing list." />
       <PrefCheck form={form} path="spam.accountForms" label="Sign-in, create account and password reset" help="Slows down attempts to guess passwords or create fake accounts." />

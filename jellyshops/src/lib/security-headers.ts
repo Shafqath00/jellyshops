@@ -38,6 +38,18 @@ const STRIPE_SCRIPTS = ["https://js.stripe.com", "https://*.js.stripe.com"];
 const STRIPE_FRAMES = ["https://js.stripe.com", "https://*.js.stripe.com", "https://hooks.stripe.com"];
 const STRIPE_CONNECT = ["https://api.stripe.com"];
 
+/**
+ * Tracking tools a merchant can connect by ID (Settings > Store preferences > Tracking): Google Analytics 4, Google
+ * Tag Manager and Meta Pixel. Allowed on shop pages only (not checkout, admin or platform); the scripts load only
+ * after the shopper's cookie choice allows them (`features/storefront/components/store-privacy.tsx`).
+ */
+export const TRACKING_SCRIPTS = ["https://www.googletagmanager.com", "https://connect.facebook.net"];
+export const TRACKING_CONNECT = [
+  "https://www.googletagmanager.com", "https://www.google-analytics.com", "https://*.google-analytics.com",
+  "https://*.analytics.google.com", "https://www.facebook.com", "https://connect.facebook.net",
+];
+export const TRACKING_FRAMES = ["https://www.googletagmanager.com"];
+
 /** Sites shops may embed: app blocks (storefront-schema `app-blocks.ts`) and videos (renderer `block-content.tsx`). */
 export const EMBED_FRAMES = [
   "https://www.google.com", "https://calendly.com", "https://*.typeform.com", "https://docs.google.com", "https://open.spotify.com",
@@ -57,12 +69,12 @@ export function contentSecurityPolicy(kind: PageKind, options: SecurityHeaderOpt
     // The theme editor and the theme previews draw pages in frames of this site.
     admin: ["'self'", ...EMBED_FRAMES],
     marketing: ["'self'", ...EMBED_FRAMES],
-    shop: ["'self'", ...EMBED_FRAMES],
+    shop: ["'self'", ...EMBED_FRAMES, ...TRACKING_FRAMES],
     platform: ["'none'"],
   };
   const directives: Record<string, string[]> = {
     "default-src": ["'self'"],
-    "script-src": ["'self'", "'unsafe-inline'", ...(dev ? ["'unsafe-eval'"] : []), ...(stripe ? STRIPE_SCRIPTS : [])],
+    "script-src": ["'self'", "'unsafe-inline'", ...(dev ? ["'unsafe-eval'"] : []), ...(stripe ? STRIPE_SCRIPTS : []), ...(kind === "shop" ? TRACKING_SCRIPTS : [])],
     "style-src": ["'self'", "'unsafe-inline'"],
     // Product photos may come from the media API, Supabase storage or another https host.
     "img-src": ["'self'", "data:", "blob:", "https:", ...(dev && api ? [api] : [])],
@@ -73,6 +85,7 @@ export function contentSecurityPolicy(kind: PageKind, options: SecurityHeaderOpt
       ...(api ? [api] : []),
       ...(supabase ? [supabase] : []),
       ...(stripe ? [...STRIPE_CONNECT, "https://fonts.googleapis.com"] : []),
+      ...(kind === "shop" ? TRACKING_CONNECT : []),
       ...(dev ? ["ws:", "http://localhost:*", "http://127.0.0.1:*", "http://*.localhost:*"] : []),
     ],
     "frame-src": frames[kind],

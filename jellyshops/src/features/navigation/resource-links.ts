@@ -1,5 +1,5 @@
 import { storePath } from "@jelly/storefront-schema";
-export interface NavigationResource { kind: "product" | "page" | "blog" | "article"; id: string; handle: string; blogHandle?: string | null }
+export interface NavigationResource { kind: "product" | "page" | "blog" | "article"; id: string; handle: string; blogHandle?: string | null; /** Hidden from search engines (left out of the sitemap). */ noindex?: boolean; updatedAt?: string | null }
 export function createResourceLinks(storeSlug: string, resources: NavigationResource[]): Record<string, string> {
   return Object.fromEntries(resources.filter(item => item.handle && (item.kind !== "article" || item.blogHandle)).map(item => {
     const handle = encodeURIComponent(item.handle);

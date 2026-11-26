@@ -91,7 +91,8 @@ async function shopResponse(request: NextRequest, slug: string, pathname: string
     response.headers.set("Retry-After", "3600");
     return response;
   }
-  if (decision.kind === "password") {
+  // robots.txt still answers for a protected store (it tells search engines to stay out); everything else asks for the password.
+  if (decision.kind === "password" && !pathname.endsWith("/robots.txt")) {
     const response = rewrite(request, `/store-password/${decision.slug}`);
     response.headers.set("Cache-Control", "private, no-store");
     return response;
