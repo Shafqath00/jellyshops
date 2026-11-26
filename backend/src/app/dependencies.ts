@@ -220,7 +220,7 @@ export function resolveAppDependencies(dependencies: Partial<AppDependencies> = 
   const contentService =
     dependencies.contentService ??
     (storefrontSql
-      ? new ContentService(new SqlContentRepository(storefrontSql))
+      ? new ContentService(new SqlContentRepository(storefrontSql), undefined, planLimits)
       : undefined);
 
   const publicStorefrontContextService =

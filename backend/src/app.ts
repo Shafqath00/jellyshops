@@ -76,6 +76,17 @@ export function createApp(dependencies: Partial<AppDependencies> = {}): Express 
       return { ...(result as object), billing };
     };
   }
+  // ...and publishing pages and blog posts whose scheduled time has come (then the storefront rebuilds those stores).
+  const { contentService } = context.routeDependencies;
+  if (contentService) {
+    const earlierWork = app.locals.runOrderWorkers as undefined | (() => Promise<unknown>);
+    app.locals.runOrderWorkers = async () => {
+      const result = earlierWork ? await earlierWork() : {};
+      const published = await contentService.publishDue().catch(() => []);
+      await Promise.all([...new Set(published.map((entry) => entry.storeId))].map((storeId) => refresher.storeChanged(storeId)));
+      return { ...(result as object), scheduledContent: published.length };
+    };
+  }
   mountPublicStorefrontContextRoutes(app, context);
   mountContentRoutes(app, context);
   mountStorefrontRoutes(app, context);

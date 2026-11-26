@@ -4,7 +4,11 @@ import type { SqlExecutor } from "../commerce/repository.js";
 import type {
   ArticleRecord,
   BlogRecord,
+  ContentLifecycle,
+  ContentRedirectRecord,
   ContentRepository,
+  ContentResourceType,
+  ScheduledPublication,
   CreateArticleRecordInput,
   CreateBlogRecordInput,
   CreatePageRecordInput,
@@ -25,6 +29,24 @@ function date(value: unknown): Date {
   return value instanceof Date ? value : new Date(String(value));
 }
 
+function optionalDate(value: unknown): Date | null {
+  return value == null ? null : date(value);
+}
+
+function optionalText(value: unknown): string | null {
+  return value == null ? null : String(value);
+}
+
+/** Columns added by 20261126000000_content_management.sql; read safely so rows from before it still load. */
+function lifecycle(row: Row): ContentLifecycle {
+  return {
+    scheduledAt: optionalDate(row.scheduledAt),
+    archivedAt: optionalDate(row.archivedAt),
+    authorUserId: optionalText(row.authorUserId),
+    authorName: optionalText(row.authorName),
+  };
+}
+
 function page(row: Row): PageRecord {
   return {
     id: String(row.id), storeId: String(row.storeId), title: String(row.title), handle: String(row.handle),
@@ -37,6 +59,8 @@ function page(row: Row): PageRecord {
     socialMediaId: row.socialMediaId == null ? null : String(row.socialMediaId),
     noindex: Boolean(row.noindex),
     canonicalOverride: row.canonicalOverride == null ? null : String(row.canonicalOverride),
+    showInNavigation: row.showInNavigation == null ? true : Boolean(row.showInNavigation),
+    ...lifecycle(row),
     createdAt: date(row.createdAt), updatedAt: date(row.updatedAt),
   };
 }
@@ -57,8 +81,14 @@ function article(row: Row): ArticleRecord {
     socialMediaId: row.socialMediaId == null ? null : String(row.socialMediaId),
     noindex: Boolean(row.noindex),
     canonicalOverride: row.canonicalOverride == null ? null : String(row.canonicalOverride),
+    tags: Array.isArray(row.tags) ? row.tags.map(String) : [],
+    ...lifecycle(row),
     createdAt: date(row.createdAt), updatedAt: date(row.updatedAt),
   };
+}
+
+function redirect(row: Row): ContentRedirectRecord {
+  return { storeId: String(row.storeId), fromPath: String(row.fromPath), resourceType: String(row.resourceType) as ContentResourceType, resourceId: String(row.resourceId) };
 }
 
 export class SqlContentRepository implements ContentRepository {
@@ -72,9 +102,9 @@ export class SqlContentRepository implements ContentRepository {
 
   async createPage(input: CreatePageRecordInput): Promise<PageRecord> {
     const result = await this.sql.query<Row>(
-      `INSERT INTO "StorePage" ("id", "storeId", "title", "handle", "content", "featuredMediaId", "status", "publishedAt", "seoTitle", "seoDescription", "socialMediaId", "noindex", "canonicalOverride", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7::"ContentStatus", $8, $9, $10, $11, $12, $13, $14, $14) RETURNING *`,
-      [this.id(), input.storeId, input.title, input.handle, JSON.stringify(input.content), input.featuredMediaId, input.status, input.publishedAt, input.seoTitle, input.seoDescription, input.socialMediaId, input.noindex, input.canonicalOverride, this.now()],
+      `INSERT INTO "StorePage" ("id", "storeId", "title", "handle", "content", "featuredMediaId", "status", "publishedAt", "seoTitle", "seoDescription", "socialMediaId", "noindex", "canonicalOverride", "scheduledAt", "archivedAt", "authorUserId", "authorName", "showInNavigation", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7::"ContentStatus", $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $19) RETURNING *`,
+      [this.id(), input.storeId, input.title, input.handle, JSON.stringify(input.content), input.featuredMediaId, input.status, input.publishedAt, input.seoTitle, input.seoDescription, input.socialMediaId, input.noindex, input.canonicalOverride, input.scheduledAt, input.archivedAt, input.authorUserId, input.authorName, input.showInNavigation, this.now()],
     );
     return page(result.rows[0]);
   }
@@ -85,7 +115,7 @@ export class SqlContentRepository implements ContentRepository {
   }
 
   async listPages(storeId: string): Promise<PageRecord[]> {
-    const result = await this.sql.query<Row>('SELECT * FROM "StorePage" WHERE "storeId" = $1 ORDER BY "id"', [storeId]);
+    const result = await this.sql.query<Row>('SELECT * FROM "StorePage" WHERE "storeId" = $1 ORDER BY "updatedAt" DESC, "id"', [storeId]);
     return result.rows.map(page);
   }
 
@@ -120,9 +150,9 @@ export class SqlContentRepository implements ContentRepository {
 
   async createArticle(input: CreateArticleRecordInput): Promise<ArticleRecord> {
     const result = await this.sql.query<Row>(
-      `INSERT INTO "Article" ("id", "storeId", "blogId", "title", "handle", "excerpt", "content", "featuredMediaId", "status", "publishedAt", "seoTitle", "seoDescription", "socialMediaId", "noindex", "canonicalOverride", "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9::"ContentStatus", $10, $11, $12, $13, $14, $15, $16, $16) RETURNING *`,
-      [this.id(), input.storeId, input.blogId, input.title, input.handle, input.excerpt, JSON.stringify(input.content), input.featuredMediaId, input.status, input.publishedAt, input.seoTitle, input.seoDescription, input.socialMediaId, input.noindex, input.canonicalOverride, this.now()],
+      `INSERT INTO "Article" ("id", "storeId", "blogId", "title", "handle", "excerpt", "content", "featuredMediaId", "status", "publishedAt", "seoTitle", "seoDescription", "socialMediaId", "noindex", "canonicalOverride", "scheduledAt", "archivedAt", "authorUserId", "authorName", "tags", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9::"ContentStatus", $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20::text[], $21, $21) RETURNING *`,
+      [this.id(), input.storeId, input.blogId, input.title, input.handle, input.excerpt, JSON.stringify(input.content), input.featuredMediaId, input.status, input.publishedAt, input.seoTitle, input.seoDescription, input.socialMediaId, input.noindex, input.canonicalOverride, input.scheduledAt, input.archivedAt, input.authorUserId, input.authorName, input.tags, this.now()],
     );
     return article(result.rows[0]);
   }
@@ -135,8 +165,8 @@ export class SqlContentRepository implements ContentRepository {
   async listArticles(storeId: string, blogId?: string): Promise<ArticleRecord[]> {
     const result = await this.sql.query<Row>(
       blogId
-        ? 'SELECT * FROM "Article" WHERE "storeId" = $1 AND "blogId" = $2 ORDER BY "id"'
-        : 'SELECT * FROM "Article" WHERE "storeId" = $1 ORDER BY "id"',
+        ? 'SELECT * FROM "Article" WHERE "storeId" = $1 AND "blogId" = $2 ORDER BY "updatedAt" DESC, "id"'
+        : 'SELECT * FROM "Article" WHERE "storeId" = $1 ORDER BY "updatedAt" DESC, "id"',
       blogId ? [storeId, blogId] : [storeId],
     );
     return result.rows.map(article);
@@ -147,13 +177,67 @@ export class SqlContentRepository implements ContentRepository {
     return result ? article(result) : null;
   }
 
+  async deletePage(storeId: string, id: string): Promise<boolean> {
+    return this.remove("StorePage", storeId, id, "page");
+  }
+
+  async deleteBlog(storeId: string, id: string): Promise<boolean> {
+    return this.remove("Blog", storeId, id, "blog");
+  }
+
+  async deleteArticle(storeId: string, id: string): Promise<boolean> {
+    return this.remove("Article", storeId, id, "article");
+  }
+
+  async saveRedirect(input: ContentRedirectRecord): Promise<void> {
+    await this.sql.query(
+      `INSERT INTO "ContentRedirect" ("id", "storeId", "fromPath", "resourceType", "resourceId", "createdAt") VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT ("storeId", "fromPath") DO UPDATE SET "resourceType" = EXCLUDED."resourceType", "resourceId" = EXCLUDED."resourceId", "createdAt" = EXCLUDED."createdAt"`,
+      [this.id(), input.storeId, input.fromPath, input.resourceType, input.resourceId, this.now()],
+    );
+  }
+
+  async removeRedirect(storeId: string, fromPath: string): Promise<void> {
+    await this.sql.query('DELETE FROM "ContentRedirect" WHERE "storeId" = $1 AND "fromPath" = $2', [storeId, fromPath]);
+  }
+
+  async findRedirect(storeId: string, fromPath: string): Promise<ContentRedirectRecord | null> {
+    const result = await this.sql.query<Row>('SELECT * FROM "ContentRedirect" WHERE "storeId" = $1 AND "fromPath" = $2', [storeId, fromPath]);
+    return result.rows[0] ? redirect(result.rows[0]) : null;
+  }
+
+  async removeRedirectsFor(storeId: string, resourceType: ContentResourceType, resourceId: string): Promise<void> {
+    await this.sql.query('DELETE FROM "ContentRedirect" WHERE "storeId" = $1 AND "resourceType" = $2 AND "resourceId" = $3', [storeId, resourceType, resourceId]);
+  }
+
+  async publishDue(now: Date): Promise<ScheduledPublication[]> {
+    const published: ScheduledPublication[] = [];
+    for (const [table, resourceType] of [["StorePage", "page"], ["Article", "article"]] as const) {
+      const result = await this.sql.query<Row>(
+        `UPDATE "${table}" SET "status" = 'PUBLISHED'::"ContentStatus", "publishedAt" = "scheduledAt", "scheduledAt" = NULL, "updatedAt" = $1
+         WHERE "scheduledAt" IS NOT NULL AND "scheduledAt" <= $1 AND "archivedAt" IS NULL AND "status" = 'DRAFT'
+         RETURNING "storeId", "id"`,
+        [now],
+      );
+      for (const row of result.rows) published.push({ storeId: String(row.storeId), resourceType, id: String(row.id) });
+    }
+    return published;
+  }
+
+  private async remove(table: "StorePage" | "Blog" | "Article", storeId: string, id: string, resourceType: ContentResourceType): Promise<boolean> {
+    const result = await this.sql.query<Row>(`DELETE FROM "${table}" WHERE "storeId" = $1 AND "id" = $2 RETURNING "id"`, [storeId, id]);
+    if (!result.rows.length) return false;
+    await this.removeRedirectsFor(storeId, resourceType, id);
+    return true;
+  }
+
   private async update(table: "StorePage" | "Blog" | "Article", storeId: string, id: string, patch: Record<string, unknown>): Promise<Row | null> {
     const fields: string[] = [];
     const values: unknown[] = [];
     for (const [key, value] of Object.entries(patch)) {
       values.push(key === "content" ? JSON.stringify(value) : value);
       const parameter = `$${values.length}`;
-      const cast = key === "content" ? "::jsonb" : key === "status" ? '::"ContentStatus"' : "";
+      const cast = key === "content" ? "::jsonb" : key === "status" ? '::"ContentStatus"' : key === "tags" ? "::text[]" : "";
       fields.push(`"${key}" = ${parameter}${cast}`);
     }
     if (!fields.length) return this.select(table, storeId, id);

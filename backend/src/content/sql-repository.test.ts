@@ -6,6 +6,9 @@ import {
 } from "../../test/integration/pglite.js";
 import { SqlContentRepository } from "./sql-repository.js";
 
+/** Columns from 20261126000000_content_management.sql (pages ignore tags, posts ignore showInNavigation). */
+const lifecycle = { scheduledAt: null, archivedAt: null, authorUserId: null, authorName: null, showInNavigation: true, tags: [] as string[] };
+
 describe("SqlContentRepository", () => {
   let database: IntegrationDatabase;
 
@@ -37,6 +40,7 @@ describe("SqlContentRepository", () => {
       socialMediaId: null,
       noindex: false,
       canonicalOverride: null,
+      ...lifecycle,
     });
     const blog = await repository.createBlog({
       storeId: "store-a",
@@ -58,6 +62,7 @@ describe("SqlContentRepository", () => {
       socialMediaId: null,
       noindex: false,
       canonicalOverride: null,
+      ...lifecycle,
     });
     const otherPage = await repository.createPage({
       storeId: "store-b",
@@ -72,6 +77,7 @@ describe("SqlContentRepository", () => {
       socialMediaId: null,
       noindex: false,
       canonicalOverride: null,
+      ...lifecycle,
     });
 
     pageContent.blocks[0].text = "Caller mutation";
@@ -86,7 +92,7 @@ describe("SqlContentRepository", () => {
 
     await expect(repository.createPage({
       storeId: "store-a", title: "Duplicate", handle: "about", content: {}, featuredMediaId: null,
-      status: "DRAFT", publishedAt: null, seoTitle: null, seoDescription: null, socialMediaId: null, noindex: false, canonicalOverride: null,
+      status: "DRAFT", publishedAt: null, seoTitle: null, seoDescription: null, socialMediaId: null, noindex: false, canonicalOverride: null, ...lifecycle,
     })).rejects.toThrow();
 
     const updated = await repository.updatePage("store-a", page.id, {
@@ -106,13 +112,55 @@ describe("SqlContentRepository", () => {
     const first = new SqlContentRepository(database, { id: ids("page-a") });
     await first.createPage({
       storeId: "store-a", title: "FAQ", handle: "faq", content: { text: "Answers" }, featuredMediaId: null,
-      status: "DRAFT", publishedAt: null, seoTitle: null, seoDescription: null, socialMediaId: null, noindex: false, canonicalOverride: null,
+      status: "DRAFT", publishedAt: null, seoTitle: null, seoDescription: null, socialMediaId: null, noindex: false, canonicalOverride: null, ...lifecycle,
     });
 
     const restarted = new SqlContentRepository(database);
     await expect(restarted.listPages("store-a")).resolves.toMatchObject([
       { id: "page-a", handle: "faq", content: { text: "Answers" } },
     ]);
+  });
+});
+
+describe("SqlContentRepository content management", () => {
+  let database: IntegrationDatabase;
+
+  beforeEach(async () => {
+    database = await createPGliteDatabase();
+    await seedStore(database, "store-a", "a");
+  });
+
+  afterEach(async () => database.close());
+
+  const base = { featuredMediaId: null, publishedAt: null, seoTitle: null, seoDescription: null, socialMediaId: null, noindex: false, canonicalOverride: null };
+
+  it("stores authors, tags, schedules and archive times, and publishes due drafts", async () => {
+    const repository = new SqlContentRepository(database);
+    const page = await repository.createPage({ ...base, ...lifecycle, storeId: "store-a", title: "Launch", handle: "launch", content: {}, status: "DRAFT",
+      scheduledAt: new Date("2026-12-01T09:00:00.000Z"), authorUserId: "user-1", authorName: "Sam", showInNavigation: false });
+    // Exact times are not compared here: PGlite reads TIMESTAMP columns back in the machine time zone.
+    expect(page).toMatchObject({ authorName: "Sam", showInNavigation: false, archivedAt: null });
+    expect(page.scheduledAt).toBeInstanceOf(Date);
+    const blog = await repository.createBlog({ storeId: "store-a", title: "News", handle: "news" });
+    const post = await repository.createArticle({ ...base, ...lifecycle, storeId: "store-a", blogId: blog.id, title: "Hi", handle: "hi", excerpt: "", content: {}, status: "DRAFT", tags: ["One", "Two"] });
+    expect(post.tags).toEqual(["One", "Two"]);
+    expect((await repository.updateArticle("store-a", post.id, { tags: ["Three"] }))?.tags).toEqual(["Three"]);
+
+    expect(await repository.publishDue(new Date("2026-11-30T00:00:00.000Z"))).toEqual([]);
+    expect(await repository.publishDue(new Date("2026-12-01T10:00:00.000Z"))).toEqual([{ storeId: "store-a", resourceType: "page", id: page.id }]);
+    expect(await repository.getPage("store-a", page.id)).toMatchObject({ status: "PUBLISHED", scheduledAt: null, publishedAt: expect.any(Date) });
+  });
+
+  it("keeps one redirect per old address and removes an item's redirects when it is deleted", async () => {
+    const repository = new SqlContentRepository(database);
+    const page = await repository.createPage({ ...base, ...lifecycle, storeId: "store-a", title: "A", handle: "a", content: {}, status: "DRAFT" });
+    await repository.saveRedirect({ storeId: "store-a", fromPath: "/pages/old", resourceType: "page", resourceId: "someone-else" });
+    await repository.saveRedirect({ storeId: "store-a", fromPath: "/pages/old", resourceType: "page", resourceId: page.id });
+    expect(await repository.findRedirect("store-a", "/pages/old")).toEqual({ storeId: "store-a", fromPath: "/pages/old", resourceType: "page", resourceId: page.id });
+    expect(await repository.findRedirect("store-b", "/pages/old")).toBeNull();
+    expect(await repository.deletePage("store-a", page.id)).toBe(true);
+    expect(await repository.findRedirect("store-a", "/pages/old")).toBeNull();
+    expect(await repository.deletePage("store-a", page.id)).toBe(false);
   });
 });
 

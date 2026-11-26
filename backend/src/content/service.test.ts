@@ -1,191 +1,182 @@
-import { describe, expect, it } from "vitest";
-import type {
-  ArticleRecord,
-  BlogRecord,
-  ContentRepository,
-  CreateArticleRecordInput,
-  CreateBlogRecordInput,
-  CreatePageRecordInput,
-  PageRecord,
-  UpdateArticleRecordInput,
-  UpdateBlogRecordInput,
-  UpdatePageRecordInput,
-} from "./repository.js";
+import { describe, expect, it, vi } from "vitest";
+import { ApiError } from "../http/errors.js";
+import { MemoryContentRepository } from "./memory-repository.js";
 import { ContentService } from "./service.js";
 
-class FakeContentRepository implements ContentRepository {
-  pages = new Map<string, PageRecord>();
-  blogs = new Map<string, BlogRecord>();
-  articles = new Map<string, ArticleRecord>();
+const NOW = new Date("2026-11-26T12:00:00Z");
+const actor = { userId: "user-1", name: "Sam" };
 
-  async createPage(input: CreatePageRecordInput) {
-    const record: PageRecord = { id: `page-${this.pages.size + 1}`, createdAt: new Date(0), updatedAt: new Date(0), ...input };
-    this.pages.set(record.id, record);
-    return structuredClone(record);
-  }
-  async getPage(storeId: string, id: string) {
-    const record = this.pages.get(id);
-    return record?.storeId === storeId ? structuredClone(record) : null;
-  }
-  async listPages(storeId: string) {
-    return [...this.pages.values()].filter((page) => page.storeId === storeId).map((page) => structuredClone(page));
-  }
-  async updatePage(storeId: string, id: string, patch: UpdatePageRecordInput) {
-    const current = this.pages.get(id);
-    if (!current || current.storeId !== storeId) return null;
-    const updated: PageRecord = { ...current, ...structuredClone(patch), id: current.id, storeId: current.storeId, updatedAt: new Date(1) };
-    this.pages.set(id, updated);
-    return structuredClone(updated);
-  }
-
-  async createBlog(input: CreateBlogRecordInput) {
-    const record: BlogRecord = { id: `blog-${this.blogs.size + 1}`, createdAt: new Date(0), updatedAt: new Date(0), ...input };
-    this.blogs.set(record.id, record);
-    return structuredClone(record);
-  }
-  async getBlog(storeId: string, id: string) {
-    const record = this.blogs.get(id);
-    return record?.storeId === storeId ? structuredClone(record) : null;
-  }
-  async listBlogs(storeId: string) {
-    return [...this.blogs.values()].filter((blog) => blog.storeId === storeId).map((blog) => structuredClone(blog));
-  }
-  async updateBlog(storeId: string, id: string, patch: UpdateBlogRecordInput) {
-    const current = this.blogs.get(id);
-    if (!current || current.storeId !== storeId) return null;
-    const updated: BlogRecord = { ...current, ...structuredClone(patch), id: current.id, storeId: current.storeId, updatedAt: new Date(1) };
-    this.blogs.set(id, updated);
-    return structuredClone(updated);
-  }
-
-  async createArticle(input: CreateArticleRecordInput) {
-    const record: ArticleRecord = { id: `article-${this.articles.size + 1}`, createdAt: new Date(0), updatedAt: new Date(0), ...input };
-    this.articles.set(record.id, record);
-    return structuredClone(record);
-  }
-  async getArticle(storeId: string, id: string) {
-    const record = this.articles.get(id);
-    return record?.storeId === storeId ? structuredClone(record) : null;
-  }
-  async listArticles(storeId: string, blogId?: string) {
-    return [...this.articles.values()]
-      .filter((article) => article.storeId === storeId && (!blogId || article.blogId === blogId))
-      .map((article) => structuredClone(article));
-  }
-  async updateArticle(storeId: string, id: string, patch: UpdateArticleRecordInput) {
-    const current = this.articles.get(id);
-    if (!current || current.storeId !== storeId) return null;
-    const updated: ArticleRecord = { ...current, ...structuredClone(patch), id: current.id, storeId: current.storeId, blogId: current.blogId, updatedAt: new Date(1) };
-    this.articles.set(id, updated);
-    return structuredClone(updated);
-  }
+function setup(limits?: { check: (storeId: string, kind: string) => Promise<void> }) {
+  let now = NOW;
+  const repository = new MemoryContentRepository(() => now);
+  const service = new ContentService(repository, () => now, limits as never);
+  return { repository, service, setNow: (value: Date) => { now = value; } };
 }
 
-describe("ContentService", () => {
-  it("publishes and unpublishes a page without changing its content fields", async () => {
-    const repository = new FakeContentRepository();
-    const service = new ContentService(repository, () => new Date("2026-09-13T12:00:00Z"));
-    const page = await service.createPage("store-a", {
-      title: "About Us",
-      handle: "about-us",
-      content: { blocks: [{ type: "paragraph", text: "Hello" }] },
-      seoTitle: "About Jelly",
-      seoDescription: "About our shop",
-      noindex: false,
-    });
+async function failure(run: Promise<unknown>): Promise<ApiError> {
+  try { await run; } catch (error) { if (error instanceof ApiError) return error; throw error; }
+  throw new Error("expected a failure");
+}
 
-    const published = await service.publishPage("store-a", page.id);
-    expect(published).toMatchObject({
-      status: "PUBLISHED",
-      seoTitle: "About Jelly",
-      seoDescription: "About our shop",
-      publishedAt: new Date("2026-09-13T12:00:00Z"),
-    });
-
-    const unpublished = await service.unpublishPage("store-a", page.id);
-    expect(unpublished.status).toBe("DRAFT");
-    expect(unpublished.publishedAt).toBeNull();
-    expect(unpublished.content).toEqual(page.content);
+describe("pages", () => {
+  it("creates a draft with an address made from the title and the author", async () => {
+    const { service } = setup();
+    const page = await service.createPage("store-a", { title: "Delivery & Returns" }, actor);
+    expect(page).toMatchObject({ handle: "delivery-and-returns", status: "DRAFT", authorUserId: "user-1", authorName: "Sam", archivedAt: null });
+    expect(page.content).toEqual({ type: "doc", content: [] });
   });
 
-  it("publishes and unpublishes an article inside a same-store blog", async () => {
-    const repository = new FakeContentRepository();
-    const service = new ContentService(repository, () => new Date("2026-09-13T12:00:00Z"));
-    const blog = await service.createBlog("store-a", { title: "News", handle: "news" });
-    const article = await service.createArticle("store-a", {
-      blogId: blog.id,
-      title: "Opening Day",
-      handle: "opening-day",
-      excerpt: "We are open",
-      content: { blocks: [] },
-      seoTitle: "Opening Day",
-      noindex: false,
-    });
-
-    await expect(service.publishArticle("store-a", article.id)).resolves.toMatchObject({ status: "PUBLISHED" });
-    await expect(service.unpublishArticle("store-a", article.id)).resolves.toMatchObject({ status: "DRAFT", publishedAt: null });
+  it("keeps addresses unique: a made-up one gets a number, a typed one is refused with a suggestion", async () => {
+    const { service } = setup();
+    await service.createPage("store-a", { title: "About" });
+    expect((await service.createPage("store-a", { title: "About" })).handle).toBe("about-2");
+    const error = await failure(service.createPage("store-a", { title: "Our story", handle: "about" }));
+    expect(error.status).toBe(409);
+    expect(error.code).toBe("CONTENT_HANDLE_TAKEN");
+    expect(error.message).toContain("about-3");
+    expect(await service.checkPageHandle("store-a", "about")).toEqual({ handle: "about", available: false, suggestion: "about-3" });
+    expect((await service.checkPageHandle("store-b", "about")).available).toBe(true);
   });
 
-  it("rejects creating an article under a blog owned by another store", async () => {
-    const repository = new FakeContentRepository();
-    const service = new ContentService(repository);
-    const blog = await service.createBlog("store-b", { title: "Other", handle: "other" });
-
-    await expect(service.createArticle("store-a", {
-      blogId: blog.id,
-      title: "Wrong store",
-      handle: "wrong-store",
-      content: {},
-      noindex: false,
-    })).rejects.toThrow(/blog/i);
+  it("refuses an invalid address and an empty title with plain messages", async () => {
+    const { service } = setup();
+    expect((await failure(service.createPage("store-a", { title: "About", handle: "About Us!" }))).code).toBe("CONTENT_HANDLE_INVALID");
+    expect((await failure(service.createPage("store-a", { title: "   " }))).message).toBe("The page title can't be empty.");
   });
 
-  it("keeps handles stable unless explicitly edited and preserves SEO on content edits", async () => {
-    const repository = new FakeContentRepository();
-    const service = new ContentService(repository);
-    const page = await service.createPage("store-a", {
-      title: "FAQ",
-      handle: "faq",
-      content: {},
-      seoTitle: "Frequently Asked Questions",
-      seoDescription: "Answers",
-      socialMediaId: "media-1",
-      canonicalOverride: "https://example.test/pages/faq",
-      noindex: false,
-    });
-
-    const updated = await service.updatePage("store-a", page.id, {
-      title: "Help & FAQ",
-      content: { blocks: [{ type: "faq" }] },
-    });
-
-    expect(updated.handle).toBe("faq");
-    expect(updated).toMatchObject({
-      seoTitle: "Frequently Asked Questions",
-      seoDescription: "Answers",
-      socialMediaId: "media-1",
-      canonicalOverride: "https://example.test/pages/faq",
-    });
+  it("publishes at once, schedules for later, and the job publishes when the time comes", async () => {
+    const { service, setNow } = setup();
+    const now = await service.createPage("store-a", { title: "Now", publish: true });
+    expect(now.status).toBe("PUBLISHED");
+    const later = await service.createPage("store-a", { title: "Later", scheduledAt: "2026-11-27T09:00:00Z" });
+    expect(later).toMatchObject({ status: "DRAFT", scheduledAt: new Date("2026-11-27T09:00:00Z") });
+    expect(await service.publishDue()).toEqual([]);
+    setNow(new Date("2026-11-27T09:01:00Z"));
+    expect(await service.publishDue()).toEqual([{ storeId: "store-a", resourceType: "page", id: later.id }]);
+    expect(await service.getPage("store-a", later.id)).toMatchObject({ status: "PUBLISHED", scheduledAt: null, publishedAt: new Date("2026-11-27T09:00:00Z") });
+    expect((await failure(service.createPage("store-a", { title: "Past", scheduledAt: "2026-11-01T00:00:00Z" }))).code).toBe("CONTENT_SCHEDULE_INVALID");
   });
 
-  it("can explicitly clear nullable SEO and media fields", async () => {
-    const repository = new FakeContentRepository();
-    const service = new ContentService(repository);
-    const page = await service.createPage("store-a", {
-      title: "Story",
-      handle: "story",
-      content: {},
-      featuredMediaId: "media-1",
-      seoTitle: "Story title",
-      socialMediaId: "media-2",
-    });
+  it("archives before a permanent delete, and archived pages don't publish on schedule", async () => {
+    const { service, repository, setNow } = setup();
+    const page = await service.createPage("store-a", { title: "Sale", scheduledAt: "2026-11-27T09:00:00Z" });
+    expect((await failure(service.deletePage("store-a", page.id))).code).toBe("CONTENT_NOT_ARCHIVED");
+    const archived = await service.archivePage("store-a", page.id);
+    expect(archived).toMatchObject({ status: "DRAFT", scheduledAt: null });
+    setNow(new Date("2026-11-28T00:00:00Z"));
+    expect(await service.publishDue()).toEqual([]);
+    expect((await service.restorePage("store-a", page.id)).archivedAt).toBeNull();
+    await service.archivePage("store-a", page.id);
+    await service.deletePage("store-a", page.id);
+    expect(repository.pages.size).toBe(0);
+  });
 
-    const updated = await service.updatePage("store-a", page.id, {
-      featuredMediaId: null,
-      seoTitle: null,
-      socialMediaId: null,
-    });
+  it("duplicates as a draft copy with a free address", async () => {
+    const { service } = setup();
+    const page = await service.createPage("store-a", { title: "About", content: { type: "doc", content: [{ type: "paragraph" }] }, publish: true, seoTitle: "About us" });
+    const copy = await service.duplicatePage("store-a", page.id, { userId: "user-2", name: "Alex" });
+    expect(copy).toMatchObject({ title: "About (copy)", handle: "about-copy", status: "DRAFT", seoTitle: "About us", authorName: "Alex" });
+    expect(copy.content).toEqual(page.content);
+    expect((await service.duplicatePage("store-a", page.id)).handle).toBe("about-copy-2");
+  });
 
-    expect(updated).toMatchObject({ featuredMediaId: null, seoTitle: null, socialMediaId: null });
+  it("checks the plan limit before creating or duplicating", async () => {
+    const check = vi.fn(async () => { throw new ApiError(409, "PLAN_LIMIT", "full"); });
+    const { service, repository } = setup({ check });
+    expect((await failure(service.createPage("store-a", { title: "About" }))).code).toBe("PLAN_LIMIT");
+    expect(check).toHaveBeenCalledWith("store-a", "pages");
+    expect(repository.pages.size).toBe(0);
+  });
+
+  it("keeps an old address working after a rename, through more than one rename", async () => {
+    const { service } = setup();
+    const page = await service.createPage("store-a", { title: "Delivery", publish: true });
+    await service.updatePage("store-a", page.id, { handle: "shipping" });
+    await service.updatePage("store-a", page.id, { handle: "delivery-info" });
+    expect(await service.resolveRedirect("store-a", "/pages/delivery")).toBe("/pages/delivery-info");
+    expect(await service.resolveRedirect("store-a", "/pages/shipping/")).toBe("/pages/delivery-info");
+    expect(await service.resolveRedirect("store-b", "/pages/delivery")).toBeNull();
+    await service.unpublishPage("store-a", page.id);
+    expect(await service.resolveRedirect("store-a", "/pages/delivery")).toBeNull();
+  });
+
+  it("lets a new page take an old address for itself", async () => {
+    const { service } = setup();
+    const first = await service.createPage("store-a", { title: "Delivery", publish: true });
+    await service.updatePage("store-a", first.id, { handle: "shipping" });
+    const second = await service.createPage("store-a", { title: "Delivery", publish: true });
+    expect(second.handle).toBe("delivery");
+    expect(await service.resolveRedirect("store-a", "/pages/delivery")).toBeNull();
+  });
+
+  it("runs bulk actions item by item and reports what failed", async () => {
+    const { service } = setup();
+    const a = await service.createPage("store-a", { title: "A" });
+    const b = await service.createPage("store-a", { title: "B" });
+    const published = await service.bulkPages("store-a", "publish", [a.id, b.id, "missing"]);
+    expect(published.done).toEqual([a.id, b.id]);
+    expect(published.failed).toEqual([{ id: "missing", message: expect.stringContaining("doesn't exist") }]);
+    const deleted = await service.bulkPages("store-a", "delete", [a.id]);
+    expect(deleted.failed[0]?.message).toContain("Archive this page");
+  });
+
+  it("filters, counts and sorts the list", async () => {
+    const { service } = setup();
+    await service.createPage("store-a", { title: "About", publish: true });
+    const old = await service.createPage("store-a", { title: "Old" });
+    await service.archivePage("store-a", old.id);
+    await service.createPage("store-b", { title: "Elsewhere" });
+    const result = await service.browsePages("store-a", { sort: "title" });
+    expect(result.items.map((page) => page.title)).toEqual(["About"]);
+    expect(result.counts).toMatchObject({ all: 2, active: 1, published: 1, archived: 1 });
+  });
+});
+
+describe("blogs and posts", () => {
+  it("creates posts with tags inside a blog of the same store", async () => {
+    const { service } = setup();
+    const blog = await service.createBlog("store-a", { title: "News" });
+    const post = await service.createArticle("store-a", { blogId: blog.id, title: "Opening day", tags: ["Events", "events", " Shop "] }, actor);
+    expect(post).toMatchObject({ blogId: blog.id, handle: "opening-day", tags: ["Events", "Shop"], authorName: "Sam" });
+    expect((await failure(service.createArticle("store-b", { blogId: blog.id, title: "Nope" }))).status).toBe(404);
+  });
+
+  it("allows the same post address in two blogs but not twice in one", async () => {
+    const { service } = setup();
+    const news = await service.createBlog("store-a", { title: "News" });
+    const guides = await service.createBlog("store-a", { title: "Guides" });
+    await service.createArticle("store-a", { blogId: news.id, title: "Hello" });
+    expect((await service.createArticle("store-a", { blogId: guides.id, title: "Hello" })).handle).toBe("hello");
+    expect((await failure(service.createArticle("store-a", { blogId: news.id, title: "Hi", handle: "hello" }))).code).toBe("CONTENT_HANDLE_TAKEN");
+  });
+
+  it("follows a renamed blog to its posts, and a post moved to another blog", async () => {
+    const { service } = setup();
+    const news = await service.createBlog("store-a", { title: "News" });
+    const guides = await service.createBlog("store-a", { title: "Guides" });
+    const post = await service.createArticle("store-a", { blogId: news.id, title: "Choosing a mattress", publish: true });
+    await service.updateBlog("store-a", news.id, { handle: "journal" });
+    expect(await service.resolveRedirect("store-a", "/blogs/news")).toBe("/blogs/journal");
+    expect(await service.resolveRedirect("store-a", "/blogs/news/choosing-a-mattress")).toBe("/blogs/journal/choosing-a-mattress");
+    await service.updateArticle("store-a", post.id, { blogId: guides.id });
+    expect(await service.resolveRedirect("store-a", "/blogs/journal/choosing-a-mattress")).toBe("/blogs/guides/choosing-a-mattress");
+  });
+
+  it("only deletes an empty blog", async () => {
+    const { service } = setup();
+    const blog = await service.createBlog("store-a", { title: "News" });
+    const post = await service.createArticle("store-a", { blogId: blog.id, title: "Hello" });
+    expect((await failure(service.deleteBlog("store-a", blog.id))).code).toBe("CONTENT_BLOG_NOT_EMPTY");
+    await service.archiveArticle("store-a", post.id);
+    await service.deleteArticle("store-a", post.id);
+    await service.deleteBlog("store-a", blog.id);
+    expect(await service.listBlogs("store-a")).toEqual([]);
+  });
+
+  it("checks the post limit", async () => {
+    const check = vi.fn(async (_storeId: string, kind: string) => { if (kind === "articles") throw new ApiError(409, "PLAN_LIMIT", "full"); });
+    const { service } = setup({ check });
+    const blog = await service.createBlog("store-a", { title: "News" });
+    expect((await failure(service.createArticle("store-a", { blogId: blog.id, title: "Hello" }))).code).toBe("PLAN_LIMIT");
   });
 });

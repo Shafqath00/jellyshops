@@ -7,7 +7,7 @@ import { createCatalogAdminRouter, createCatalogRouter, createPublicCatalogRoute
 import { createProductBulkRouter } from "../../catalog-bulk/routes.js";
 import { ProductBulkService } from "../../catalog-bulk/service.js";
 import { PublicOrderRateLimiter } from "../../commerce/rate-limit.js";
-import { createContentRouter } from "../../content/routes.js";
+import { createContentRouter, createPublicContentRedirectRouter } from "../../content/routes.js";
 import { createCustomDataRouter } from "../../custom-data/routes.js";
 import { createCustomerRouter, createEngagementRouter, createMerchantEngagementRouter } from "../../customers/routes.js";
 import { createMerchantRouter } from "../../tenants/routes.js";
@@ -155,6 +155,7 @@ export function mountContentRoutes(app: Express, context: AppContext): void {
         authProvider,
       ),
     );
+    app.use("/api/public/stores/:storeId", createPublicContentRedirectRouter(deps.contentService));
   }
 
   if (

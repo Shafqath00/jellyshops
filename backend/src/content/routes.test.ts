@@ -1,95 +1,106 @@
 import express from "express";
 import request from "supertest";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import type { AuthProvider, MerchantPrincipal } from "../auth/types.js";
 import { errorHandler } from "../http/errors.js";
-import { createContentRouter } from "./routes.js";
+import { MemoryContentRepository } from "./memory-repository.js";
+import { createContentRouter, createPublicContentRedirectRouter } from "./routes.js";
+import { ContentService } from "./service.js";
 
 const principal: MerchantPrincipal = {
-  userId: 7,
+  userId: "user-7",
+  email: "sam@example.test",
   storeIds: ["store-a"],
   storeRoles: { "store-a": "ADMIN" },
 };
 const authProvider: AuthProvider = { verify: async () => principal };
 
 function setup() {
-  const service = {
-    listPages: vi.fn(async () => []),
-    getPage: vi.fn(async () => null),
-    createPage: vi.fn(async (storeId: string, input: Record<string, unknown>) => ({ id: "page-1", storeId, ...input, status: "DRAFT" })),
-    updatePage: vi.fn(async (storeId: string, id: string, input: Record<string, unknown>) => ({ id, storeId, ...input })),
-    publishPage: vi.fn(async (storeId: string, id: string) => ({ id, storeId, status: "PUBLISHED" })),
-    unpublishPage: vi.fn(async (storeId: string, id: string) => ({ id, storeId, status: "DRAFT", publishedAt: null })),
-    listBlogs: vi.fn(async () => []),
-    getBlog: vi.fn(async () => null),
-    createBlog: vi.fn(async (storeId: string, input: Record<string, unknown>) => ({ id: "blog-1", storeId, ...input })),
-    updateBlog: vi.fn(async (storeId: string, id: string, input: Record<string, unknown>) => ({ id, storeId, ...input })),
-    listArticles: vi.fn(async () => []),
-    getArticle: vi.fn(async () => null),
-    createArticle: vi.fn(async (storeId: string, input: Record<string, unknown>) => ({ id: "article-1", storeId, ...input, status: "DRAFT" })),
-    updateArticle: vi.fn(async (storeId: string, id: string, input: Record<string, unknown>) => ({ id, storeId, ...input })),
-    publishArticle: vi.fn(async (storeId: string, id: string) => ({ id, storeId, status: "PUBLISHED" })),
-    unpublishArticle: vi.fn(async (storeId: string, id: string) => ({ id, storeId, status: "DRAFT", publishedAt: null })),
-  };
+  const service = new ContentService(new MemoryContentRepository(() => new Date("2026-11-26T12:00:00Z")), () => new Date("2026-11-26T12:00:00Z"));
   const app = express();
   app.use((req, _res, next) => { req.id = "content-test"; next(); });
   app.use(express.json());
   app.use("/api/stores/:storeId/content", createContentRouter(service, authProvider));
+  app.use("/api/public/stores/:storeId", createPublicContentRedirectRouter(service));
   app.use(errorHandler);
-  return { app, service };
+  const as = (method: "get" | "post" | "patch" | "delete", path: string) => request(app)[method](`/api/stores/store-a/content${path}`).set("Authorization", "Bearer token");
+  return { app, service, as };
 }
 
 describe("content routes", () => {
-  it("requires store membership for page reads", async () => {
-    const { app, service } = setup();
-    const allowed = await request(app)
-      .get("/api/stores/store-a/content/pages")
-      .set("Authorization", "Bearer token");
-    const denied = await request(app)
-      .get("/api/stores/store-b/content/pages")
-      .set("Authorization", "Bearer token");
-
-    expect(allowed.status).toBe(200);
+  it("only lets members of the store in", async () => {
+    const { app } = setup();
+    const denied = await request(app).get("/api/stores/store-b/content/pages").set("Authorization", "Bearer token");
     expect(denied.status).toBe(404);
-    expect(service.listPages).toHaveBeenCalledWith("store-a");
   });
 
-  it("uses authorized store context when creating a page", async () => {
-    const { app, service } = setup();
-    const response = await request(app)
-      .post("/api/stores/store-a/content/pages")
-      .set("Authorization", "Bearer token")
-      .send({ storeId: "store-b", title: "About", handle: "about", content: {}, noindex: false });
-
+  it("creates a page in the signed-in store with the person as author, ignoring a storeId in the body", async () => {
+    const { as, service } = setup();
+    const response = await as("post", "/pages").send({ storeId: "store-b", title: "About us" });
     expect(response.status).toBe(201);
-    expect(service.createPage).toHaveBeenCalledWith(
-      "store-a",
-      expect.not.objectContaining({ storeId: "store-b" }),
-    );
+    expect(response.body).toMatchObject({ storeId: "store-a", handle: "about-us", authorUserId: "user-7", authorName: "sam" });
+    expect(await service.listPages("store-b")).toEqual([]);
   });
 
-  it("publishes and unpublishes through explicit lifecycle actions", async () => {
-    const { app, service } = setup();
-    const published = await request(app)
-      .post("/api/stores/store-a/content/pages/page-1/publish")
-      .set("Authorization", "Bearer token");
-    const unpublished = await request(app)
-      .post("/api/stores/store-a/content/pages/page-1/unpublish")
-      .set("Authorization", "Bearer token");
-
-    expect(published.status).toBe(200);
-    expect(unpublished.status).toBe(200);
-    expect(service.publishPage).toHaveBeenCalledWith("store-a", "page-1");
-    expect(service.unpublishPage).toHaveBeenCalledWith("store-a", "page-1");
+  it("browses with filters and checks addresses before the item routes", async () => {
+    const { as } = setup();
+    await as("post", "/pages").send({ title: "About", publish: true });
+    await as("post", "/pages").send({ title: "Draft page" });
+    const browse = await as("get", "/pages/browse?state=published&sort=title");
+    expect(browse.status).toBe(200);
+    expect(browse.body.items.map((page: { title: string }) => page.title)).toEqual(["About"]);
+    expect(browse.body.counts).toMatchObject({ active: 2, published: 1, draft: 1 });
+    const check = await as("get", "/pages/handle-check?handle=about");
+    expect(check.body).toEqual({ handle: "about", available: false, suggestion: "about-2" });
+    expect((await as("get", "/pages/browse?limit=1000")).status).toBe(400);
   });
 
-  it("lists articles within an optional blog filter", async () => {
-    const { app, service } = setup();
-    const response = await request(app)
-      .get("/api/stores/store-a/content/articles?blogId=blog-1")
-      .set("Authorization", "Bearer token");
+  it("answers a taken address with 409 and a suggestion", async () => {
+    const { as } = setup();
+    await as("post", "/pages").send({ title: "About" });
+    const response = await as("post", "/pages").send({ title: "Story", handle: "about" });
+    expect(response.status).toBe(409);
+    expect(response.body.error).toMatchObject({ code: "CONTENT_HANDLE_TAKEN" });
+  });
 
-    expect(response.status).toBe(200);
-    expect(service.listArticles).toHaveBeenCalledWith("store-a", "blog-1");
+  it("archives, restores, duplicates and deletes", async () => {
+    const { as } = setup();
+    const page = (await as("post", "/pages").send({ title: "Sale" })).body;
+    expect((await as("delete", `/pages/${page.id}`)).status).toBe(409);
+    expect((await as("post", `/pages/${page.id}/archive`)).body.archivedAt).toBeTruthy();
+    expect((await as("post", `/pages/${page.id}/duplicate`)).status).toBe(201);
+    expect((await as("delete", `/pages/${page.id}`)).status).toBe(204);
+    expect((await as("get", `/pages/${page.id}`)).status).toBe(404);
+  });
+
+  it("schedules and runs bulk actions", async () => {
+    const { as } = setup();
+    const page = (await as("post", "/pages").send({ title: "Launch" })).body;
+    const scheduled = await as("post", `/pages/${page.id}/schedule`).send({ scheduledAt: "2026-12-01T09:00:00Z" });
+    expect(scheduled.body).toMatchObject({ status: "DRAFT", scheduledAt: "2026-12-01T09:00:00.000Z" });
+    const bulk = await as("post", "/pages/bulk").send({ action: "publish", ids: [page.id] });
+    expect(bulk.body).toEqual({ done: [page.id], failed: [] });
+    expect((await as("post", "/pages/bulk").send({ action: "explode", ids: [page.id] })).status).toBe(400);
+  });
+
+  it("manages blogs and posts", async () => {
+    const { as } = setup();
+    const blog = (await as("post", "/blogs").send({ title: "News" })).body;
+    const post = await as("post", "/articles").send({ blogId: blog.id, title: "Hello", tags: ["One"] });
+    expect(post.status).toBe(201);
+    expect((await as("get", `/articles/browse?blogId=${blog.id}&tag=one`)).body.total).toBe(1);
+    expect((await as("get", `/articles/handle-check?handle=hello&blogId=${blog.id}`)).body.available).toBe(false);
+    expect((await as("delete", `/blogs/${blog.id}`)).status).toBe(409);
+  });
+
+  it("tells the storefront where an old address went, and nothing about drafts", async () => {
+    const { app, as } = setup();
+    const page = (await as("post", "/pages").send({ title: "Delivery", publish: true })).body;
+    await as("patch", `/pages/${page.id}`).send({ handle: "shipping" });
+    const moved = await request(app).get("/api/public/stores/store-a/content-redirect?path=/pages/delivery");
+    expect(moved.body).toEqual({ location: "/pages/shipping" });
+    expect(moved.headers["cache-control"]).toContain("max-age=60");
+    const unknown = await request(app).get("/api/public/stores/store-a/content-redirect?path=/admin");
+    expect(unknown.body).toEqual({ location: null });
   });
 });
