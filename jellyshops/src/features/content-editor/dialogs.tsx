@@ -110,6 +110,8 @@ function ImageForm({ close, media, onInsert }: {
     return () => { active = false; };
   }, [media]);
 
+  const shownItems = (items ?? []).filter((item) => safeRichTextImageSrc(item.url)).slice(0, 60);
+
   async function upload(file: File) {
     if (!media?.upload) return;
     if (!file.type.startsWith("image/")) { setError("Choose a photo (JPG, PNG, WebP or GIF)."); return; }
@@ -146,18 +148,22 @@ function ImageForm({ close, media, onInsert }: {
         </div>
       ) : null}
       {media?.list ? (
-        <div className="jce-media-grid" role="listbox" aria-label="Your photos">
-          {items === null ? <p className="jk-muted">Loading your photos…</p> : null}
-          {items?.length === 0 && !loadError ? <p className="jk-muted">No photos yet. Upload one to use it here.</p> : null}
-          {loadError ? <p className="jk-muted">{loadError}</p> : null}
-          {items?.filter((item) => safeRichTextImageSrc(item.url)).slice(0, 60).map((item) => (
-            <button key={item.id} type="button" role="option" aria-selected={chosen?.id === item.id} className="jce-media-item"
-              onClick={() => { setChosen(item); setAddress(""); if (!alt && item.alt) setAlt(item.alt); }}>
-              {/* eslint-disable-next-line @next/next/no-img-element -- store photos, small previews */}
-              <img src={item.url} alt={item.alt || item.name || ""} loading="lazy" />
-            </button>
-          ))}
-        </div>
+        shownItems.length > 0 ? (
+          <div className="jce-media-grid" role="listbox" aria-label="Your photos">
+            {shownItems.map((item) => (
+              <button key={item.id} type="button" role="option" aria-selected={chosen?.id === item.id} className="jce-media-item"
+                onClick={() => { setChosen(item); setAddress(""); if (!alt && item.alt) setAlt(item.alt); }}>
+                {/* eslint-disable-next-line @next/next/no-img-element -- store photos, small previews */}
+                <img src={item.url} alt={item.alt || item.name || ""} loading="lazy" />
+              </button>
+            ))}
+          </div>
+        ) : (
+          // Only a list of options when there are options; a message is just text.
+          <div className="jce-media-grid" role="status">
+            {items === null ? <p className="jk-muted">Loading your photos…</p> : loadError ? <p className="jk-muted">{loadError}</p> : <p className="jk-muted">No photos yet. Upload one to use it here.</p>}
+          </div>
+        )
       ) : null}
       <Field id={`${id}-address`} label="Or use a web address">
         <input id={`${id}-address`} value={address} onChange={(event) => { setAddress(event.target.value); setChosen(null); }} placeholder="https://…" autoComplete="off" />
