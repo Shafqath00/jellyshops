@@ -91,7 +91,7 @@ export function ArticleListSection({ context, section }: { context: StorefrontRu
   </StorefrontContainer></section>;
 }
 
-function articleData(context: StorefrontRuntimeContext): { title: string; excerpt: string; content: unknown; publishedAt?: string } | null {
+function articleData(context: StorefrontRuntimeContext): { title: string; excerpt: string; content: unknown; publishedAt?: string; author?: string } | null {
   if (context.page?.pageType !== "article") return null;
   const article = context.page.resource.data.article;
   if (!article || typeof article !== "object" || Array.isArray(article)) return null;
@@ -102,6 +102,7 @@ function articleData(context: StorefrontRuntimeContext): { title: string; excerp
     excerpt: typeof record.excerpt === "string" ? record.excerpt : "",
     content: record.content,
     ...(validDate(record.publishedAt) ? { publishedAt: record.publishedAt } : {}),
+    ...(typeof record.authorName === "string" && record.authorName.trim() ? { author: record.authorName.trim() } : {}),
   };
 }
 
@@ -113,6 +114,7 @@ export function ArticleHeaderSection({ context, section }: { context: Storefront
   return <section className="jelly-section jelly-article-header" {...(section ? sectionData(section, { "data-align": alignment(section) }) : {})}><StorefrontContainer>
     <h1 {...titleLength(article.title)}>{article.title}</h1>
     {showDate && article.publishedAt && <time className="jelly-article-published-at" dateTime={article.publishedAt}>Published {dateLabel(article.publishedAt)}</time>}
+    {section?.settings.showAuthor !== false && article.author && <p className="jelly-article-author">By {article.author}</p>}
     {showExcerpt && article.excerpt && <p>{article.excerpt}</p>}
   </StorefrontContainer></section>;
 }

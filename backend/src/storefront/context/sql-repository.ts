@@ -14,7 +14,12 @@ const date = (value: unknown): Date | null => value == null ? null : value insta
 const page = (row: Row): PublicPageRecord => ({ id: String(row.id), handle: String(row.handle), title: String(row.title), content: structuredClone(row.content as Record<string, unknown>), publishedAt: date(row.publishedAt) });
 const blog = (row: Row): PublicBlogRecord => ({ id: String(row.id), handle: String(row.handle), title: String(row.title) });
 const summary = (row: Row): PublicArticleSummary => ({ id: String(row.id), handle: String(row.handle), title: String(row.title), excerpt: String(row.excerpt), publishedAt: date(row.publishedAt) });
-const article = (row: Row): PublicArticleRecord => ({ ...summary(row), content: structuredClone(row.content as Record<string, unknown>) });
+const article = (row: Row): PublicArticleRecord => ({
+  ...summary(row),
+  content: structuredClone(row.content as Record<string, unknown>),
+  authorName: row.authorName == null ? null : String(row.authorName),
+  tags: Array.isArray(row.tags) ? row.tags.map(String) : [],
+});
 
 export class SqlPublicStorefrontContextRepository implements PublicStorefrontContextRepository {
   constructor(private readonly sql: SqlExecutor) {}
@@ -45,7 +50,7 @@ export class SqlPublicStorefrontContextRepository implements PublicStorefrontCon
 
   async findPublishedArticleByHandles(storeId: string, blogHandle: string, articleHandle: string): Promise<ArticlePageContext | null> {
     const result = await this.sql.query<Row>(
-      `SELECT blog."id" AS "blogId", blog."handle" AS "blogHandle", blog."title" AS "blogTitle", article."id", article."handle", article."title", article."excerpt", article."content", article."publishedAt"
+      `SELECT blog."id" AS "blogId", blog."handle" AS "blogHandle", blog."title" AS "blogTitle", article."id", article."handle", article."title", article."excerpt", article."content", article."publishedAt", article."authorName", article."tags"
        FROM "Article" article JOIN "Blog" blog ON blog."storeId" = article."storeId" AND blog."id" = article."blogId"
        WHERE article."storeId" = $1 AND blog."handle" = $2 AND article."handle" = $3 AND article."status" = 'PUBLISHED'`,
       [storeId, blogHandle, articleHandle],

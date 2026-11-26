@@ -23,6 +23,9 @@ export interface PublicArticleSummary {
 
 export interface PublicArticleRecord extends PublicArticleSummary {
   content: Record<string, unknown>;
+  /** Who wrote it (shown by the theme); null when nobody is named. */
+  authorName?: string | null;
+  tags?: string[];
 }
 
 export interface PublicSearchProduct {

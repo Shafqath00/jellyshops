@@ -85,6 +85,7 @@ export interface ContentListResult<T> {
   items: T[];
   total: number;
   counts: Record<ContentState | "all" | "active", number>;
+  facets?: { authors: Array<{ id: string; name: string }>; tags: string[] };
 }
 
 export interface HandleCheck {
@@ -172,6 +173,8 @@ export interface ContentApi {
   deleteArticle(storeId: string, articleId: string): Promise<void>;
   bulkArticles(storeId: string, action: BulkAction, ids: string[]): Promise<BulkResult>;
 
+  /** Pasted or typed HTML as a safe rich text document (cleaned on the server). */
+  importHtml(storeId: string, html: string): Promise<Record<string, unknown>>;
   listTemplates(storeId: string, type: ContentTemplate["type"]): Promise<ContentTemplate[]>;
   getAssignment(storeId: string, resourceType: TemplateAssignment["resourceType"], resourceId: string): Promise<TemplateAssignment | null>;
   assignTemplate(storeId: string, resourceType: TemplateAssignment["resourceType"], resourceId: string, templateId: string, expectedRevision: number | null): Promise<{ assignment: TemplateAssignment; generation: number }>;
@@ -262,6 +265,7 @@ export function createContentApi({
     deleteArticle: (storeId, articleId) => request(article(storeId, articleId), { method: "DELETE" }),
     bulkArticles: (storeId, action, ids) => post(content(storeId, "/articles/bulk"), { action, ids }),
 
+    importHtml: async (storeId, html) => (await post<{ document: Record<string, unknown> }>(content(storeId, "/import-html"), { html })).document,
     listTemplates: (storeId, type) => request(storefront(storeId, `/templates?type=${encodeURIComponent(type)}`)),
     getAssignment: (storeId, resourceType, resourceId) => request(storefront(storeId, `/assignments/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}`)),
     assignTemplate: (storeId, resourceType, resourceId, templateId, expectedRevision) => request(storefront(storeId, `/assignments/${encodeURIComponent(resourceType)}/${encodeURIComponent(resourceId)}`), {

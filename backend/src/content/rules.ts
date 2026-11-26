@@ -148,6 +148,8 @@ export interface ContentListResult<T> {
   items: T[];
   total: number;
   counts: ContentCounts;
+  /** Every author and tag in the store (not only on this page of results), for the filter menus. */
+  facets: { authors: Array<{ id: string; name: string }>; tags: string[] };
 }
 
 type Listable = Pick<PageRecord, "title" | "handle" | "status" | "createdAt" | "updatedAt" | "publishedAt" | "authorUserId" | "authorName" | "scheduledAt" | "archivedAt">
@@ -199,7 +201,17 @@ export function queryContent<T extends Listable>(records: readonly T[], query: C
   });
   const limit = Math.min(Math.max(query.limit ?? 50, 1), MAX_LIST_LIMIT);
   const offset = Math.max(query.offset ?? 0, 0);
-  return { items: matching.slice(offset, offset + limit), total: matching.length, counts };
+  const authors = new Map<string, string>();
+  const tags = new Map<string, string>();
+  for (const record of records) {
+    if (record.authorUserId) authors.set(record.authorUserId, record.authorName ?? "Unnamed");
+    for (const entry of record.tags ?? []) if (!tags.has(entry.toLowerCase())) tags.set(entry.toLowerCase(), entry);
+  }
+  const facets = {
+    authors: [...authors].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name, "en-GB")),
+    tags: [...tags.values()].sort((a, b) => a.localeCompare(b, "en-GB")),
+  };
+  return { items: matching.slice(offset, offset + limit), total: matching.length, counts, facets };
 }
 
 /** Where shoppers find each kind of item. */

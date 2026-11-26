@@ -144,9 +144,10 @@ export const contentSections: SectionDefinition[] = [
   },
   {
     type: "article-header", category: "content", supportedPages: ["article"],
-    settingsSchema: z.object({ showDate: z.boolean().optional(), showExcerpt: z.boolean().optional(), contentAlignment: alignmentSchema }).passthrough(),
+    settingsSchema: z.object({ showDate: z.boolean().optional(), showAuthor: z.boolean().optional(), showExcerpt: z.boolean().optional(), contentAlignment: alignmentSchema }).passthrough(),
     controls: [
       { type: "checkbox", key: "showDate", label: "Show the publish date", group: "content" },
+      { type: "checkbox", key: "showAuthor", label: "Show who wrote it", group: "content", defaultValue: true },
       { type: "checkbox", key: "showExcerpt", label: "Show the summary under the title", group: "content" },
       leftOrCenter,
     ],

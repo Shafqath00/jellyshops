@@ -5320,6 +5320,13 @@
         },
         {
           "type": "checkbox",
+          "key": "showAuthor",
+          "label": "Show who wrote it",
+          "group": "content",
+          "defaultValue": true
+        },
+        {
+          "type": "checkbox",
           "key": "showExcerpt",
           "label": "Show the summary under the title",
           "group": "content"
@@ -5345,6 +5352,9 @@
         "type": "object",
         "properties": {
           "showDate": {
+            "type": "boolean"
+          },
+          "showAuthor": {
             "type": "boolean"
           },
           "showExcerpt": {

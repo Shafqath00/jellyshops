@@ -1,0 +1,42 @@
+/* Pages and blog posts in the admin. Admin kit tokens only (light and dark mode). */
+.jca-title-link { font-weight: 600; color: var(--jk-text); text-decoration: none; }
+.jca-title-link:hover { text-decoration: underline; }
+.jca-title-link:focus-visible { outline: 2px solid var(--jk-focus); outline-offset: 2px; border-radius: 4px; }
+.jca-stack-xs { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.jca-filter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; align-items: end; }
+.jca-form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+
+/* Editor page */
+.jca-title-input { width: 100%; padding: 6px 2px; border: 0; background: transparent; color: var(--jk-text); font: 700 clamp(22px, 3vw, 30px)/1.25 var(--jk-font); letter-spacing: -.01em; }
+.jca-title-input::placeholder { color: var(--jk-text-subdued); }
+.jca-title-input:focus-visible { outline: 2px solid var(--jk-focus); outline-offset: 4px; border-radius: 8px; }
+.jca-title-card { padding: 14px 18px; }
+.jca-save-state { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--jk-text-subdued); }
+.jca-save-state[data-state="error"] { color: var(--jk-critical-text); }
+.jca-save-state[data-state="unsaved"] { color: var(--jk-warning-text, var(--jk-text)); }
+.jca-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.jca-status-text { font-size: 13px; color: var(--jk-text-subdued); }
+.jca-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.jca-featured { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 10px; background: var(--jk-surface-subdued); }
+.jca-featured-empty { display: grid; place-items: center; gap: 6px; width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; background: var(--jk-surface-subdued); color: var(--jk-text-subdued); font-size: 13px; text-align: center; }
+.jca-help { font-size: 12px; color: var(--jk-text-subdued); }
+.jca-sticky { position: sticky; top: 12px; }
+
+/* Preview */
+.jca-preview { position: fixed; inset: 0; z-index: 95; display: flex; flex-direction: column; background: var(--jk-page, var(--jk-bg)); }
+.jca-preview-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--jk-border); background: var(--jk-surface); }
+.jca-preview-bar h2 { font-size: 15px; font-weight: 650; margin-right: auto; }
+.jca-preview-stage { flex: 1; min-height: 0; display: flex; justify-content: center; padding: 16px; overflow: auto; }
+.jca-preview-frame { width: 100%; height: 100%; border: 0; border-radius: 12px; background: #fff; box-shadow: var(--jk-shadow-raised); transition: width .2s var(--jk-ease, ease); }
+.jca-preview-frame[data-device="phone"] { width: 390px; max-width: 100%; }
+.jca-preview-frame[data-device="tablet"] { width: 820px; max-width: 100%; }
+.jca-preview-stage { position: relative; }
+.jca-preview-note { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); width: min(440px, calc(100% - 48px)); padding: 18px 20px; border-radius: 14px; background: var(--jk-surface); color: var(--jk-text); box-shadow: var(--jk-shadow-raised); text-align: center; }
+.jca-preview-note p { margin-top: 6px; font-size: 14px; color: var(--jk-text-subdued); }
+.jca-segmented { display: inline-flex; padding: 3px; border-radius: var(--jk-radius-pill); background: var(--jk-surface-subdued); box-shadow: 0 0 0 1px var(--jk-border) inset; }
+.jca-segmented button { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border: 0; border-radius: var(--jk-radius-pill); background: transparent; color: var(--jk-text); font: 600 13px var(--jk-font); cursor: pointer; }
+.jca-segmented button[aria-pressed="true"] { background: var(--jk-surface); box-shadow: var(--jk-shadow); }
+.jca-segmented button:focus-visible { outline: 2px solid var(--jk-focus); outline-offset: 1px; }
+@media (prefers-reduced-motion: reduce) { .jca-preview-frame { transition: none; } }
+.jca-blog-row { flex-direction: column; align-items: stretch !important; padding-inline: 0 !important; }
+.jca-blog-row > * { width: 100%; }
