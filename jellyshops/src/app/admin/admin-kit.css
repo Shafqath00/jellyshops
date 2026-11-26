@@ -713,3 +713,24 @@ fieldset.jk-field {border:0;padding:0;margin:0;min-width:0}
 .jk-billing-interval:has(input:focus-visible) {outline:2px solid var(--jk-accent);outline-offset:2px}
 .jk-billing-interval input {width:18px;height:18px;margin:0;accent-color:var(--jk-accent)}
 .jk-billing-interval em {font-style:normal;color:var(--jk-text-subdued)}
+
+/* Store preferences */
+.jk-pref {scroll-padding-top:96px}
+.jk-pref .jk-card {scroll-margin-top:96px}
+.jk-pref-nav {display:flex;flex-wrap:wrap;gap:var(--jk-space-2)}
+.jk-pref-nav .jk-chip {min-height:32px;padding:4px 12px;text-decoration:none}
+.jk-pref-share {display:grid;grid-template-columns:minmax(0,1fr);max-width:480px;border-radius:var(--jk-radius-sm);overflow:hidden;box-shadow:0 0 0 1px var(--jk-border) inset;background:var(--jk-surface-subdued)}
+.jk-pref-share-image {aspect-ratio:1.91/1;display:grid;place-items:center;padding:var(--jk-space-3);text-align:center;background:var(--jk-surface-hover)}
+.jk-pref-share-image img {width:100%;height:100%;object-fit:cover;display:block}
+.jk-pref-share-image:has(img) {padding:0}
+.jk-pref-share-text {display:flex;flex-direction:column;gap:2px;padding:10px 12px;min-width:0}
+.jk-pref-share-text > * {overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jk-pref-tab {display:inline-flex;align-items:center;gap:8px;max-width:260px;padding:8px 14px;border-radius:10px 10px 0 0;background:var(--jk-surface-subdued);box-shadow:0 0 0 1px var(--jk-border) inset;font-size:var(--jk-text-sm)}
+.jk-pref-tab span:last-child {overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jk-pref-tab img {width:16px;height:16px;object-fit:contain}
+.jk-pref-tab-blank {width:16px;height:16px;border-radius:4px;background:var(--jk-border-strong)}
+.jk-pref-icon {object-fit:contain;background:var(--jk-surface-subdued)}
+.jk-pref-policy {display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:var(--jk-space-3)}
+.jk-pref-policy select {max-width:min(320px,100%)}
+.jk-pref-csv-example {display:block;white-space:pre;overflow-x:auto;padding:var(--jk-space-3);border-radius:var(--jk-radius-sm);background:var(--jk-surface-subdued)}
+.jk-pref-redirect-example {overflow-wrap:anywhere}

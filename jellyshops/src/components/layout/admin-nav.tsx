@@ -21,7 +21,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
   ] },
   { label: "Payments", href: "/admin/payments", icon: CreditCard },
   { label: "Online Store", href: "/admin/online-store", icon: Store, section: "Sales channels", children: [
-    { label: "Store designs", href: "/admin/online-store" }, { label: "Preferences", href: "/admin/online-store/preferences" },
+    { label: "Store designs", href: "/admin/online-store" }, { label: "Preferences", href: "/admin/settings/preferences" },
   ] },
 ];
 export const ADMIN_SETTINGS: AdminNavGroup = { label: "Settings", href: "/admin/settings", icon: Settings };
