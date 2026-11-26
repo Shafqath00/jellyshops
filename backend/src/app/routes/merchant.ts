@@ -23,12 +23,24 @@ import { createStoreSettingsRouter, StoreSettingsRepository } from "../../tenant
 import { supabasePool } from "../database.js";
 import type { AppContext } from "../types.js";
 import { createBillingRouter } from "../../billing/routes.js";
+import { UrlRedirectService } from "../../preferences/redirects.js";
+import { createPreferencesRouter, createPublicPreferencesRouter, createRedirectsRouter } from "../../preferences/routes.js";
+import { StorePreferencesService } from "../../preferences/service.js";
 
 export function mountStoreSettingsRoutes(app: Express, context: AppContext): void {
   const { authProvider } = context;
   const { commerceDatabase } = context.routeDependencies;
   if (commerceDatabase) {
     app.use("/api/stores/:storeId/settings", createStoreSettingsRouter(authProvider, new StoreSettingsRepository(commerceDatabase)));
+    // Store preferences (search listing, sharing, business details, policies, tracking, cookies) and URL redirects.
+    const preferences = new StorePreferencesService(commerceDatabase, async (storeId, mediaId) => {
+      const record = await context.mediaService.find(storeId, mediaId);
+      return record ? { id: record.id, url: record.publicUrl ?? record.url, mimeType: record.mimeType, width: record.width, height: record.height } : null;
+    });
+    const redirects = new UrlRedirectService(commerceDatabase);
+    app.use("/api/stores/:storeId/preferences", createPreferencesRouter(authProvider, preferences));
+    app.use("/api/stores/:storeId/redirects", createRedirectsRouter(authProvider, redirects));
+    app.use("/api/public/stores/:storeId", createPublicPreferencesRouter(preferences, redirects));
   }
   // Plan, trial and usage for the Billing page and the admin banners.
   const { storeBilling, planLimits, stripeBilling } = context.routeDependencies;

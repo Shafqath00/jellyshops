@@ -56,6 +56,11 @@ export class MediaService {
     const copy = chooseCopyWidth(knownCopyWidths(record), width);
     return mediaPublicUrl(this.publicBase, copy ? derivativeKey(record.storageKey, copy) : record.storageKey) ?? null;
   }
+  /** One of this store's photos, or null (used to check a photo chosen in store preferences). */
+  async find(storeId: string, mediaId: string): Promise<MediaRecord | null> {
+    const record = await this.repository.get(storeId, mediaId);
+    return record ? this.shown(record) : null;
+  }
   private async findByHash(storeId: string, hash: string): Promise<StoredMediaRecord | null> {
     return this.repository.findByHash ? this.repository.findByHash(storeId, hash)
       : (await this.repository.list(storeId)).find(record => record.contentHash === hash) ?? null;
