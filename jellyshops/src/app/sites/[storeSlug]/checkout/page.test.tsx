@@ -15,6 +15,27 @@ vi.mock("@/features/checkout/components/payment-step", () => ({
 
 const prepared = { clientSecret: "cs_test", connectedAccountId: "acct_123", orderId: "order-1", publicToken: "a-token", totals: { subtotalMinor: 50000, shippingMinor: 5000, totalMinor: 55000, amountMinor: 55000, currency: "INR" } };
 
+/**
+ * The checkout also asks the server which discounts the bag gets (automatic ones on load, and again once a code is
+ * applied). Those questions are answered here so each test's own answers stay in order: a check without a code gets
+ * "no discount route" (no automatic discounts), and asking again about the code just applied repeats the last answer.
+ */
+function withBagCheck(fetcher: ReturnType<typeof vi.fn>) {
+  let last: { code: string; status: number; body: string } | null = null;
+  return vi.fn(async (url: string, init?: RequestInit) => {
+    if (String(url).includes("/checkout/discount")) {
+      const code = String(JSON.parse(String(init?.body ?? "{}")).code ?? "").toUpperCase();
+      if (!code) return new Response(JSON.stringify({ error: { code: "NOT_FOUND", message: "Not found" } }), { status: 404 });
+      if (last && last.code === code) return new Response(last.body, { status: last.status });
+      const response: Response = await fetcher(url, init);
+      const body = await response.clone().text();
+      last = { code, status: response.status, body };
+      return response;
+    }
+    return fetcher(url, init);
+  });
+}
+
 function bag(digital = false) {
   localStorage.clear();
   const repository = createRepository(localStorage);
@@ -43,7 +64,7 @@ it("prices the order on the server, then shows the payment step with the server 
   const fetcher = vi.fn()
     .mockResolvedValueOnce(new Response(JSON.stringify({ attemptId: "attempt-1", orderId: "order-1", publicToken: "a-token" }), { status: 201 }))
     .mockResolvedValueOnce(new Response(JSON.stringify(prepared), { status: 200 }));
-  vi.stubGlobal("fetch", fetcher);
+  vi.stubGlobal("fetch", withBagCheck(fetcher));
   const user = userEvent.setup();
   render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
   await fillDelivery(user);
@@ -60,7 +81,7 @@ it("prices the order on the server, then shows the payment step with the server 
 it("shows field problems next to the fields and sends nothing", async () => {
   bag();
   const fetcher = vi.fn();
-  vi.stubGlobal("fetch", fetcher);
+  vi.stubGlobal("fetch", withBagCheck(fetcher));
   const user = userEvent.setup();
   render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
   await user.type(await screen.findByLabelText(/^email/i), "not-an-email");
@@ -75,7 +96,7 @@ it("shows field problems next to the fields and sends nothing", async () => {
 
 it("shows a plain message when the shop can't take payments", async () => {
   bag();
-  vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ error: { code: "MERCHANT_PAYMENTS_UNAVAILABLE", message: "Merchant payments are unavailable." } }), { status: 409 })));
+  vi.stubGlobal("fetch", withBagCheck(vi.fn().mockResolvedValueOnce(new Response(JSON.stringify({ error: { code: "MERCHANT_PAYMENTS_UNAVAILABLE", message: "Merchant payments are unavailable." } }), { status: 409 }))));
   const user = userEvent.setup();
   render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
   await fillDelivery(user);
@@ -88,7 +109,7 @@ it("does not ask for an address for digital-only bags", async () => {
   const fetcher = vi.fn()
     .mockResolvedValueOnce(new Response(JSON.stringify({ attemptId: "a", orderId: "o", publicToken: "t" }), { status: 201 }))
     .mockResolvedValueOnce(new Response(JSON.stringify(prepared)));
-  vi.stubGlobal("fetch", fetcher);
+  vi.stubGlobal("fetch", withBagCheck(fetcher));
   const user = userEvent.setup();
   render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
   await user.type(await screen.findByLabelText(/^email/i), "buyer@example.test");
@@ -123,7 +144,7 @@ it("checks a discount code on the server, shows it in the summary and sends it w
     .mockResolvedValueOnce(new Response(JSON.stringify(preview), { status: 200 }))
     .mockResolvedValueOnce(new Response(JSON.stringify({ attemptId: "attempt-1", orderId: "order-1", publicToken: "a-token" }), { status: 201 }))
     .mockResolvedValueOnce(new Response(JSON.stringify({ ...prepared, totals: { ...prepared.totals, discountMinor: 5000, discountCode: "SAVE10", totalMinor: 50000, amountMinor: 50000 } }), { status: 200 }));
-  vi.stubGlobal("fetch", fetcher);
+  vi.stubGlobal("fetch", withBagCheck(fetcher));
   const user = userEvent.setup();
   render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
 
@@ -150,7 +171,7 @@ it("checks a discount code on the server, shows it in the summary and sends it w
 
 it("opens the cards in turn, folds finished ones into a recap, and lets the shopper change them", async () => {
   bag();
-  vi.stubGlobal("fetch", vi.fn());
+  vi.stubGlobal("fetch", withBagCheck(vi.fn()));
   const user = userEvent.setup();
   render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
   expect(await screen.findByRole("heading", { name: /step 2:s*delivery/i })).toBeVisible();
@@ -186,7 +207,7 @@ it("follows the merchant's checkout settings: phone hidden, no second address li
   const fetcher = vi.fn()
     .mockResolvedValueOnce(new Response(JSON.stringify({ attemptId: "attempt-1", orderId: "order-1", publicToken: "a-token" }), { status: 201 }))
     .mockResolvedValueOnce(new Response(JSON.stringify(prepared), { status: 200 }));
-  vi.stubGlobal("fetch", fetcher);
+  vi.stubGlobal("fetch", withBagCheck(fetcher));
   const user = userEvent.setup();
   render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" settings={{ checkout: { accent: "#b5452b", phone: "hidden", addressLine2: "hide", note: "show", deliveryNote: "Delivered in 3 days", returnsNote: "30-day returns" } }} /></ShopProvider>);
   expect(await screen.findByText("Delivered in 3 days")).toBeVisible();
@@ -211,9 +232,9 @@ it("follows the merchant's checkout settings: phone hidden, no second address li
 
 it("remembers details on this device only when asked, and fills them in next time", async () => {
   bag();
-  vi.stubGlobal("fetch", vi.fn()
+  vi.stubGlobal("fetch", withBagCheck(vi.fn()
     .mockResolvedValueOnce(new Response(JSON.stringify({ attemptId: "attempt-1", orderId: "order-1", publicToken: "a-token" }), { status: 201 }))
-    .mockResolvedValueOnce(new Response(JSON.stringify(prepared), { status: 200 })));
+    .mockResolvedValueOnce(new Response(JSON.stringify(prepared), { status: 200 }))));
   const user = userEvent.setup();
   const { unmount } = render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
   await user.click(await screen.findByRole("checkbox", { name: /remember my details/i }));
@@ -232,9 +253,9 @@ it("remembers details on this device only when asked, and fills them in next tim
 it("leaves checkout with replace after paying, so Back cannot return to the payment form", async () => {
   bag();
   sessionStorage.clear();
-  vi.stubGlobal("fetch", vi.fn()
+  vi.stubGlobal("fetch", withBagCheck(vi.fn()
     .mockResolvedValueOnce(new Response(JSON.stringify({ attemptId: "attempt-1", orderId: "order-1", publicToken: "a-token" }), { status: 201 }))
-    .mockResolvedValueOnce(new Response(JSON.stringify(prepared), { status: 200 })));
+    .mockResolvedValueOnce(new Response(JSON.stringify(prepared), { status: 200 }))));
   const user = userEvent.setup();
   render(<ShopProvider><CheckoutView storeSlug="sweet-bakes" /></ShopProvider>);
   await fillDelivery(user);
