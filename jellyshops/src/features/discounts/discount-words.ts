@@ -1,5 +1,5 @@
 import { BadgePercent, Gift, ShoppingBag, Tag, Truck, Zap, type LucideIcon } from "lucide-react";
-import { summariseDiscount, type DiscountMethod, type DiscountStatus, type DiscountType, type SummaryNames } from "@jelly/storefront-schema";
+import { describeDiscountValue, summariseDiscount, type DiscountMethod, type DiscountStatus, type DiscountType, type SummaryNames } from "@jelly/storefront-schema";
 import type { StatusTone } from "@/components/admin";
 import type { MerchantDiscount } from "./api";
 
@@ -7,37 +7,38 @@ import type { MerchantDiscount } from "./api";
 export const DISCOUNT_TYPE_INFO: Record<DiscountType, { label: string; icon: LucideIcon; explain: string; example: string }> = {
   product_amount: {
     label: "Amount off products", icon: Tag,
-    explain: "Take money off chosen products or collections. Everything else in the bag stays full price.",
+    explain: "Money off some or all of your products.",
     example: "20% off everything in Summer Collection",
   },
   order_amount: {
     label: "Amount off order", icon: ShoppingBag,
-    explain: "Take money off the whole order, often once the customer spends a certain amount.",
+    explain: "Money off the whole order.",
     example: "£10 off orders over £50",
   },
   buy_x_get_y: {
     label: "Buy X get Y", icon: Gift,
-    explain: "When the customer buys certain items, they get other items free or cheaper.",
+    explain: "Buy some items, get others free or cheaper.",
     example: "Buy 2 candles, get 1 free",
   },
   free_shipping: {
     label: "Free shipping", icon: Truck,
-    explain: "Delivery costs nothing, for everyone or once the order reaches an amount.",
+    explain: "Delivery costs nothing.",
     example: "Free delivery on orders over £30",
   },
 };
 
 export const DISCOUNT_METHOD_INFO: Record<DiscountMethod, { label: string; icon: LucideIcon; explain: string }> = {
-  code: { label: "Discount code", icon: BadgePercent, explain: "Customers type a code at checkout. Good for emails, social posts and loyal customers." },
-  automatic: { label: "Automatic", icon: Zap, explain: "Applied by itself in the bag and at checkout to everyone who qualifies. No code needed." },
+  code: { label: "Discount code", icon: BadgePercent, explain: "Customers type a code at checkout." },
+  automatic: { label: "Automatic", icon: Zap, explain: "Applied by itself to everyone who qualifies." },
 };
 
 export const DISCOUNT_STATUS_INFO: Record<DiscountStatus, { label: string; tone: StatusTone; explain: string }> = {
   active: { label: "Active", tone: "success", explain: "Customers can use it now." },
   scheduled: { label: "Scheduled", tone: "info", explain: "It starts later." },
   expired: { label: "Expired", tone: "neutral", explain: "Its end date has passed." },
-  used_up: { label: "Used up", tone: "warning", explain: "It reached its usage limit." },
-  disabled: { label: "Switched off", tone: "neutral", explain: "You switched it off. Switch it on to use it again." },
+  // Shown as Expired, with "Used up" as a note: the four badges are Active, Scheduled, Expired and Disabled.
+  used_up: { label: "Expired", tone: "neutral", explain: "It reached its usage limit." },
+  disabled: { label: "Disabled", tone: "neutral", explain: "You disabled it. Enable it to use it again." },
 };
 
 /** "1 Dec – 31 Dec 2026", "From 1 Dec 2026", "Until 31 Dec 2026", "Always". End dates are exclusive (midnight), so the last day shown is the day before. */
@@ -63,6 +64,16 @@ export function discountSentence(discount: MerchantDiscount, options: { timeZone
     startsAt: discount.startsAt ? new Date(discount.startsAt) : null,
     endsAt: discount.endsAt ? new Date(discount.endsAt) : null,
   }, options);
+}
+
+/** One short line for the list: "20% off Summer Collection · over £50", "Buy 1 item, get 1 more free". */
+export function shortDescription(discount: MerchantDiscount, options: { formatMoney: (minor: number) => string; names?: SummaryNames }): string {
+  const value = describeDiscountValue({ ...discount, appliesTo: discount.appliesTo ?? { scope: "all", productIds: [], collectionIds: [] } }, options);
+  const minimum = discount.minimum ?? { type: "none" };
+  const extra = minimum.type === "amount" ? `over ${options.formatMoney(minimum.amountMinor)}`
+    : minimum.type === "quantity" ? `${minimum.quantity}+ items` : "";
+  const who = discount.eligibility?.scope === "first_order" ? "first orders" : discount.eligibility?.scope === "tags" ? "customer groups" : discount.eligibility?.scope === "customers" ? "chosen customers" : "";
+  return [value.replace(/ the whole order$/, " the order"), extra, who].filter(Boolean).join(" · ");
 }
 
 export function usesText(discount: Pick<MerchantDiscount, "uses" | "usageLimit">): string {

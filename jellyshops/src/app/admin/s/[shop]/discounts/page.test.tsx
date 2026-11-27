@@ -13,7 +13,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push, replace: push }), 
 const api = vi.hoisted(() => ({ list: vi.fn(), get: vi.fn(), bulk: vi.fn(), duplicate: vi.fn(), canManage: true }));
 vi.mock("@/features/discounts/api", async (original) => ({
   ...(await original<typeof import("@/features/discounts/api")>()),
-  useDiscountsApi: () => ({ ...api, listCodes: vi.fn().mockResolvedValue({ codes: [{ code: "SUMMER20", uses: 12 }], total: 1 }), generateCodes: vi.fn(), downloadCodes: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn(), codeCheck: vi.fn(), generateCode: vi.fn(), ready: true, storeId: "store-a", currency: "GBP" }),
+  useDiscountsApi: () => ({ ...api, listCodes: vi.fn().mockResolvedValue({ codes: [{ code: "SUMMER20", uses: 12 }], total: 1 }), generateCodes: vi.fn(), downloadCodes: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn(), codeCheck: vi.fn(), generateCode: vi.fn().mockResolvedValue("ABC"), ready: true, storeId: "store-a", currency: "GBP" }),
 }));
 vi.mock("@/features/discounts/use-form-data", () => ({ useDiscountFormData: () => ({ loading: false, timeZone: "Europe/London", names: { products: {}, collections: { c1: { title: "Summer", count: 3 } } }, customers: [], customerTags: [], discounts: [], catalog: [], shippingMinor: null }) }));
 afterEach(cleanup);
@@ -33,22 +33,23 @@ const listing = (discounts: MerchantDiscount[]): DiscountList => ({ discounts, t
 const page = (node: React.ReactNode) => render(<ToastProvider>{node}</ToastProvider>);
 
 describe("discounts list", () => {
-  it("shows each discount in plain words, with results", async () => {
-    api.list.mockResolvedValue(listing([base, freeShipping]));
+  it("shows each discount in one short line, with a status, uses and dates", async () => {
+    api.list.mockResolvedValue(listing([base, freeShipping, usedUp]));
     page(<DiscountsPage />);
     const table = await screen.findByRole("table");
     const row = within(table).getByRole("link", { name: "Summer sale" }).closest("tr")!;
     expect(within(row).getByText("SUMMER20")).toBeVisible();
-    expect(within(row).getByText(/^20% off products in 1 collection, when the customer spends at least £50.00 on those items, from 1 Dec to 31 Dec 2026, limited to 100 uses/)).toBeVisible();
+    expect(within(row).getByText("20% off products in 1 collection · over £50.00")).toBeVisible();
     expect(within(row).getByText("Amount off products")).toBeVisible();
     expect(within(row).getByText("12 of 100")).toBeVisible();
-    expect(within(row).getByText("£640.00")).toBeVisible();
     expect(within(row).getByText("1 Dec – 31 Dec 2026")).toBeVisible();
     const other = within(table).getByRole("link", { name: "Free delivery over £30" }).closest("tr")!;
     expect(within(other).getByText("Automatic")).toBeVisible();
-    expect(within(other).getByText("Switched off")).toBeVisible();
-    expect(within(other).getByText("None yet")).toBeVisible();
-    expect(screen.getByText("£90.00")).toBeVisible(); // given away
+    expect(within(other).getByText("Disabled")).toBeVisible();
+    const flash = within(table).getByRole("link", { name: "Flash" }).closest("tr")!;
+    expect(within(flash).getByText("Expired")).toBeVisible();
+    expect(within(flash).getByText("Used up")).toBeVisible();
+    expect(screen.getByText("£90.00")).toBeVisible(); // given away, in the stats line
     expectNoRawCodes();
   });
 
@@ -68,48 +69,56 @@ describe("discounts list", () => {
     expect(screen.getAllByRole("link", { name: /sale|Free|Flash/ }).map((link) => link.textContent)).toEqual(["Flash"]);
   });
 
-  it("switches several discounts off at once", async () => {
+  it("disables several discounts at once", async () => {
     api.list.mockResolvedValue(listing([base, usedUp]));
     api.bulk.mockResolvedValue(2);
     const user = userEvent.setup();
     page(<DiscountsPage />);
     await screen.findByRole("table");
     await user.click(screen.getByRole("checkbox", { name: /Select all/ }));
-    await user.click(screen.getByRole("button", { name: "Switch off" }));
+    await user.click(screen.getByRole("button", { name: "Disable" }));
     await waitFor(() => expect(api.bulk).toHaveBeenCalledWith(["d1", "d3"], "disable"));
-    expect(await screen.findByText("2 discounts switched off")).toBeInTheDocument();
+    expect(await screen.findByText("2 discounts disabled")).toBeInTheDocument();
   });
 
-  it("asks before deleting and says how many", async () => {
+  it("has quick actions on each row, and asks before deleting", async () => {
     api.list.mockResolvedValue(listing([base, usedUp]));
-    api.bulk.mockResolvedValue(2);
+    api.bulk.mockResolvedValue(1);
+    api.duplicate.mockResolvedValue({ ...base, id: "d9", title: "Copy of Summer sale" });
     const user = userEvent.setup();
     page(<DiscountsPage />);
     await screen.findByRole("table");
-    await user.click(screen.getByRole("checkbox", { name: /Select all/ }));
-    await user.click(screen.getByRole("button", { name: "Delete" }));
-    const dialog = await screen.findByRole("dialog", { name: "Delete 2 discounts?" });
-    await user.click(within(dialog).getByRole("button", { name: "Delete discounts" }));
-    await waitFor(() => expect(api.bulk).toHaveBeenCalledWith(["d1", "d3"], "delete"));
+    await user.click(screen.getByRole("button", { name: "Actions for Summer sale" }));
+    expect(await screen.findByRole("menuitem", { name: "Edit" })).toHaveAttribute("href", "/admin/s/store-a/discounts/d1");
+    await user.click(screen.getByRole("menuitem", { name: "Disable" }));
+    await waitFor(() => expect(api.bulk).toHaveBeenCalledWith(["d1"], "disable"));
+    await user.click(screen.getByRole("button", { name: "Actions for Summer sale" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Delete" }));
+    const dialog = await screen.findByRole("dialog", { name: "Delete Summer sale?" });
+    await user.click(within(dialog).getByRole("button", { name: "Delete discount" }));
+    await waitFor(() => expect(api.bulk).toHaveBeenCalledWith(["d1"], "delete"));
+    await user.click(screen.getByRole("button", { name: "Actions for Flash" }));
+    await user.click(await screen.findByRole("menuitem", { name: "Duplicate" }));
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/admin/s/store-a/discounts/d9"));
   });
 
-  it("starts with a helpful empty state, the type picker and templates", async () => {
+  it("starts with one clear Create button, the type picker and templates", async () => {
     api.list.mockResolvedValue(listing([]));
     const user = userEvent.setup();
-    const { container } = page(<DiscountsPage />);
-    expect(await screen.findByRole("heading", { name: "Create your first discount" })).toBeVisible();
+    page(<DiscountsPage />);
+    expect(await screen.findByRole("heading", { name: "No discounts yet" })).toBeVisible();
+    expect(screen.getAllByRole("button", { name: "Create discount" })).toHaveLength(1);
     expect(screen.getByRole("link", { name: "10% off a first order" })).toBeVisible();
-    await user.click(screen.getAllByRole("button", { name: "Create discount" })[0]!);
+    await user.click(screen.getByRole("button", { name: "Create discount" }));
     const dialog = await screen.findByRole("dialog", { name: "Create discount" });
     expect(within(dialog).getByRole("radio", { name: /Amount off products/ })).toBeChecked();
-    expect(within(dialog).getByText(/For example: £10 off orders over £50/)).toBeInTheDocument();
+    expect(within(dialog).getByText(/e\.g\. £10 off orders over £50/)).toBeInTheDocument();
     const results = await axe.run(document.body, { rules: { "color-contrast": { enabled: false }, region: { enabled: false } } });
     expect(results.violations.map((violation) => violation.id)).toEqual([]);
     await user.click(within(dialog).getByRole("radio", { name: /Buy X get Y/ }));
     await user.click(within(dialog).getByRole("radio", { name: /Automatic/ }));
     await user.click(within(dialog).getByRole("button", { name: "Continue" }));
     expect(push).toHaveBeenCalledWith("/admin/s/store-a/discounts/new?type=buy_x_get_y&method=automatic");
-    void container;
   });
 
   it("opens a template straight from the picker", async () => {
@@ -118,7 +127,7 @@ describe("discounts list", () => {
     page(<DiscountsPage />);
     await screen.findByRole("table");
     await user.click(screen.getByRole("button", { name: "Create discount" }));
-    await user.click(await screen.findByRole("button", { name: /Free shipping over £50/ }));
+    await user.click(await screen.findByRole("button", { name: "Free shipping over £50" }));
     expect(push).toHaveBeenCalledWith("/admin/s/store-a/discounts/new?template=free-shipping-50");
   });
 
@@ -137,27 +146,27 @@ describe("discounts list", () => {
     await screen.findByRole("table");
     expect(screen.queryByRole("button", { name: "Create discount" })).not.toBeInTheDocument();
     expect(screen.queryByRole("checkbox", { name: /Select all/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Actions for/ })).not.toBeInTheDocument();
   });
 });
 
 describe("discount page", () => {
-  it("explains the discount and its results, and can switch it off or duplicate it", async () => {
+  it("shows the form with performance beside it, and one actions menu", async () => {
     api.get.mockResolvedValue(base);
     api.list.mockResolvedValue(listing([base]));
     api.bulk.mockResolvedValue(1);
-    api.duplicate.mockResolvedValue({ ...base, id: "d9", title: "Copy of Summer sale", active: false });
     const user = userEvent.setup();
     const { container } = page(<DiscountPage />);
     expect(await screen.findByRole("heading", { name: "Summer sale" })).toBeVisible();
-    expect(screen.getByText(/^20% off products in Summer, when the customer spends at least £50.00/)).toBeVisible();
-    expect(screen.getByText("£64.00")).toBeVisible(); // average order: £640 over 10 orders
-    expect(screen.getByText("Europe/London time", { exact: false })).toBeVisible();
+    const summary = screen.getByRole("complementary", { name: "Discount summary" });
+    expect(within(summary).getByText(/^20% off products in Summer, when the customer spends at least £50.00/)).toBeVisible();
+    const performance = screen.getByRole("heading", { name: "Performance" }).closest(".jk-card") as HTMLElement;
+    expect(within(performance).getByText("£64.00")).toBeVisible(); // average order: £640 over 10 orders
     const results = await axe.run(container, { rules: { "color-contrast": { enabled: false }, region: { enabled: false } } });
     expect(results.violations.map((violation) => violation.id)).toEqual([]);
-    await user.click(screen.getByRole("button", { name: "Switch off" }));
+    await user.click(screen.getByRole("button", { name: "More actions" }));
+    await user.click(screen.getByRole("button", { name: "Disable" }));
     await waitFor(() => expect(api.bulk).toHaveBeenCalledWith(["d1"], "disable"));
-    await user.click(screen.getByRole("button", { name: "Duplicate" }));
-    await waitFor(() => expect(push).toHaveBeenCalledWith("/admin/s/store-a/discounts/d9"));
   });
 
   it("says plainly when a discount no longer exists", async () => {

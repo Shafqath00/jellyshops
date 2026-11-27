@@ -14,8 +14,10 @@ export interface CatalogNames {
  * Which items something covers: all products (optional), chosen products or chosen collections. Chosen items show
  * as removable chips; "Browse" opens the kit picker with search.
  */
-export function SelectionField({ legend, value, onChange, names, allowAll = false, allLabel = "All products", error, help }: {
+export function SelectionField({ legend, hideLegend = false, value, onChange, names, allowAll = false, allLabel = "All products", error, help }: {
   legend: string;
+  /** When the card around it already says the same. */
+  hideLegend?: boolean;
   value: ItemSelection;
   onChange: (next: ItemSelection) => void;
   names: CatalogNames;
@@ -45,7 +47,7 @@ export function SelectionField({ legend, value, onChange, names, allowAll = fals
   const setIds = (ids: string[]) => onChange(value.scope === "products" ? { ...value, productIds: ids } : { ...value, collectionIds: ids });
 
   return <fieldset className="jk-discount-fieldset" aria-describedby={[help ? `${id}-help` : "", error ? `${id}-error` : ""].filter(Boolean).join(" ") || undefined}>
-    <legend>{legend}</legend>
+    <legend className={hideLegend ? "sr-only" : undefined}>{legend}</legend>
     {help && <p id={`${id}-help`} className="jk-muted jk-discount-help">{help}</p>}
     <div className="jk-discount-options" role="radiogroup" aria-label={legend}>
       {scopes.map((scope) => <label key={scope.value} className="jk-discount-option">

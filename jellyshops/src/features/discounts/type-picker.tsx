@@ -14,22 +14,27 @@ export function newDiscountHref(choice: { type: DiscountType; method: DiscountMe
 }
 
 /**
- * Step one of creating a discount: what kind it is (with an example of each) and how customers get it.
- * Quick-start templates skip both choices. The form itself is the next page.
+ * Step one of creating a discount: what the customer gets (four cards with an example each) and how they get it
+ * (a code or automatically). Templates skip both. The form is the next page and never asks again.
  */
-export function DiscountTypePicker({ open, onOpenChange, onChoose }: { open: boolean; onOpenChange: (open: boolean) => void; onChoose: (href: string) => void }) {
-  const [type, setType] = useState<DiscountType>("product_amount");
-  const [method, setMethod] = useState<DiscountMethod>("code");
+export function DiscountTypePicker({ open, onOpenChange, onChoose, initial }: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onChoose: (href: string) => void;
+  /** Starting choice, e.g. when changing the type of a new discount. */
+  initial?: { type: DiscountType; method: DiscountMethod };
+}) {
+  const [type, setType] = useState<DiscountType>(initial?.type ?? "product_amount");
+  const [method, setMethod] = useState<DiscountMethod>(initial?.method ?? "code");
   const id = useId();
   return <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay className="jk-overlay" />
-      <DialogPrimitive.Content className="jk-dialog jk-dialog-wide jk-discount-picker" aria-describedby={`${id}-intro`}>
+      <DialogPrimitive.Content className="jk-dialog jk-dialog-wide jk-discount-picker" aria-describedby={undefined}>
         <DialogPrimitive.Title className="jk-dialog-title">Create discount</DialogPrimitive.Title>
         <div className="jk-dialog-body jk-dialog-scroll">
-          <p id={`${id}-intro`} className="jk-muted">Choose what the customer gets. You can set who qualifies, dates and limits on the next page.</p>
           <fieldset className="jk-discount-choice">
-            <legend>What kind of discount?</legend>
+            <legend>What does the customer get?</legend>
             <div className="jk-discount-types">
               {DISCOUNT_TYPES.map((value) => {
                 const info = DISCOUNT_TYPE_INFO[value];
@@ -39,7 +44,7 @@ export function DiscountTypePicker({ open, onOpenChange, onChoose }: { open: boo
                   <span className="jk-discount-type-icon" aria-hidden="true"><Icon size={18} /></span>
                   <span className="jk-discount-type-text">
                     <strong>{info.label}</strong>
-                    <span id={`${id}-${value}`}>{info.explain} <em>For example: {info.example}.</em></span>
+                    <span id={`${id}-${value}`}>{info.explain} <em>e.g. {info.example}</em></span>
                   </span>
                 </label>;
               })}
@@ -47,30 +52,20 @@ export function DiscountTypePicker({ open, onOpenChange, onChoose }: { open: boo
           </fieldset>
           <fieldset className="jk-discount-choice">
             <legend>How do customers get it?</legend>
-            <div className="jk-discount-methods">
+            <div className="jk-segmented jk-segmented-wide" role="radiogroup" aria-label="How do customers get it?">
               {DISCOUNT_METHODS.map((value) => {
-                const info = DISCOUNT_METHOD_INFO[value];
-                const Icon = info.icon;
-                return <label key={value} className="jk-discount-type" data-checked={method === value ? "" : undefined}>
-                  <input type="radio" name={`${id}-method`} value={value} checked={method === value} onChange={() => setMethod(value)} aria-describedby={`${id}-m-${value}`} />
-                  <span className="jk-discount-type-icon" aria-hidden="true"><Icon size={18} /></span>
-                  <span className="jk-discount-type-text"><strong>{info.label}</strong><span id={`${id}-m-${value}`}>{info.explain}</span></span>
-                </label>;
+                const Icon = DISCOUNT_METHOD_INFO[value].icon;
+                return <label key={value}><input type="radio" name={`${id}-method`} value={value} checked={method === value} onChange={() => setMethod(value)} /><Icon size={15} aria-hidden="true" /> {DISCOUNT_METHOD_INFO[value].label}</label>;
               })}
             </div>
+            <p className="jk-muted jk-discount-help">{DISCOUNT_METHOD_INFO[method].explain}</p>
           </fieldset>
           <section className="jk-discount-templates" aria-labelledby={`${id}-templates`}>
             <h3 id={`${id}-templates`}>Or start from a template</h3>
             <ul>
-              {DISCOUNT_TEMPLATES.map((template) => {
-                const Icon = DISCOUNT_TYPE_INFO[template.type].icon;
-                return <li key={template.id}>
-                  <button type="button" className="jk-discount-template" onClick={() => onChoose(newDiscountHref({ template: template.id }))}>
-                    <Icon size={16} aria-hidden="true" />
-                    <span><strong>{template.title}</strong><span>{template.description}</span></span>
-                  </button>
-                </li>;
-              })}
+              {DISCOUNT_TEMPLATES.map((template) => <li key={template.id}>
+                <button type="button" className="jk-discount-template-chip" onClick={() => onChoose(newDiscountHref({ template: template.id }))}>{template.title}</button>
+              </li>)}
             </ul>
           </section>
         </div>

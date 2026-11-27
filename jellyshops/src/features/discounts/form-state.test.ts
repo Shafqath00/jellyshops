@@ -35,7 +35,7 @@ describe("draft to input", () => {
   });
 
   it("names every problem by field", () => {
-    const draft = { ...blankDraft("product_amount", "automatic", tz, now), percent: "150", minimumType: "amount" as const, minimumAmount: "abc", limitTotal: true, usageLimit: "0", hasEnd: true, endDate: "2026-11-01", endTime: "00:00" };
+    const draft = { ...blankDraft("product_amount", "automatic", tz, now), appliesTo: { scope: "collections" as const, productIds: [], collectionIds: [] }, percent: "150", minimumType: "amount" as const, minimumAmount: "abc", limitTotal: true, usageLimit: "0", hasEnd: true, endDate: "2026-11-01", endTime: "00:00" };
     const { input, problems } = draftToInput(draft, tz);
     expect(input).toBeUndefined();
     expect(problems).toMatchObject({
@@ -46,6 +46,13 @@ describe("draft to input", () => {
       usageLimit: "Enter the total number of uses as a whole number, 1 or more.",
       endsAt: "The end must be after the start.",
     });
+  });
+
+  it("starts from values that can be saved as they are", () => {
+    for (const type of ["product_amount", "order_amount", "buy_x_get_y", "free_shipping"] as const) {
+      expect(draftToInput({ ...blankDraft(type, "code", tz, now), code: "START" }, tz).problems).toEqual({});
+      expect(draftToInput({ ...blankDraft(type, "automatic", tz, now), title: "Sale" }, tz).problems).toEqual({});
+    }
   });
 
   it("builds buy X get Y and free shipping", () => {

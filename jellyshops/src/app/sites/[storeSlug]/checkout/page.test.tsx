@@ -20,7 +20,7 @@ const prepared = { clientSecret: "cs_test", connectedAccountId: "acct_123", orde
  * applied). Those questions are answered here so each test's own answers stay in order: a check without a code gets
  * "no discount route" (no automatic discounts), and asking again about the code just applied repeats the last answer.
  */
-function withBagCheck(fetcher: ReturnType<typeof vi.fn>) {
+function withBagCheck(fetcher: (url: string, init?: RequestInit) => Promise<Response>) {
   let last: { code: string; status: number; body: string } | null = null;
   return vi.fn(async (url: string, init?: RequestInit) => {
     if (String(url).includes("/checkout/discount")) {

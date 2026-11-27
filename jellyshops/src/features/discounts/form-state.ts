@@ -110,20 +110,23 @@ function parseCount(text: string): number | null {
 
 const NO_COMBINATIONS = { product: false, order: false, shipping: false };
 
-/** A blank draft for a type and method, starting today (the merchant can change it). */
+/**
+ * A blank draft for a type and method that can be saved as it is (apart from a code, which the form generates):
+ * 10% off, all products, everyone, no minimum or limits, starting now with no end date.
+ */
 export function blankDraft(type: DiscountType, method: DiscountMethod, timeZone: string, now = new Date()): DiscountDraft {
   const start = utcToZoned(now, timeZone);
   return {
     method, type, title: "", code: "",
     valueType: "percent", percent: type === "product_amount" || type === "order_amount" ? "10" : "", amount: "",
-    appliesTo: type === "product_amount" ? { scope: "collections", productIds: [], collectionIds: [] } : ALL_ITEMS, appliesOncePerOrder: false,
+    appliesTo: ALL_ITEMS, appliesOncePerOrder: false,
     minimumType: "none", minimumAmount: "", minimumQuantity: "",
     eligibility: "everyone", tags: [], customers: [],
     limitTotal: false, usageLimit: "", oncePerCustomer: false,
     combinesWith: type === "free_shipping" ? { product: true, order: true, shipping: false } : { ...NO_COMBINATIONS, shipping: true },
     limitShipping: false, maxShipping: "",
-    buysType: "quantity", buysQuantity: "1", buysAmount: "", buysItems: { scope: "products", productIds: [], collectionIds: [] },
-    getsQuantity: "1", getsItems: { scope: "products", productIds: [], collectionIds: [] }, getsValue: "free", getsPercent: "50", getsAmount: "", limitUsesPerOrder: true, maxUsesPerOrder: "1",
+    buysType: "quantity", buysQuantity: "1", buysAmount: "", buysItems: ALL_ITEMS,
+    getsQuantity: "1", getsItems: ALL_ITEMS, getsValue: "free", getsPercent: "50", getsAmount: "", limitUsesPerOrder: true, maxUsesPerOrder: "1",
     startDate: start.date, startTime: start.time, hasEnd: false, endDate: "", endTime: "23:59",
     active: true,
   };

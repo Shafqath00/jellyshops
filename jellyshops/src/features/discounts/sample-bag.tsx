@@ -14,7 +14,7 @@ type Shopper = "new" | "returning" | "tagged" | "chosen";
  * this discount as it stands in the form (unsaved), worked out by the same calculation checkout uses. Other
  * discounts and earlier uses are left out, so the answer is about this discount alone.
  */
-export function SampleBag({ discount, data, formatMoney }: { discount: Omit<DiscountDefinition, "id" | "createdAt">; data: DiscountFormData; formatMoney: (minor: number) => string }) {
+export function SampleBag({ discount, data, formatMoney, bare = false }: { discount: Omit<DiscountDefinition, "id" | "createdAt">; data: DiscountFormData; formatMoney: (minor: number) => string; bare?: boolean }) {
   const [lines, setLines] = useState<Array<{ productId: string; quantity: number }>>([]);
   const [adding, setAdding] = useState("");
   const [delivery, setDelivery] = useState(() => moneyText(data.shippingMinor ?? 0) || "0");
@@ -50,8 +50,7 @@ export function SampleBag({ discount, data, formatMoney }: { discount: Omit<Disc
   const notApplied = result && !applied && !problem && discount.method === "automatic" ? "This discount doesn't apply to this bag." : null;
   const audience = discount.eligibility.scope;
 
-  return <Card title="Try it on a sample bag" description="See what a customer would pay with this discount as it is now, before you save.">
-    <div className="jk-discount-section jk-sample-bag">
+  const body = <div className="jk-discount-section jk-sample-bag">
       {lines.length > 0 && <ul className="jk-sample-lines" aria-label="Sample bag">
         {lines.map((line) => {
           const product = products.get(line.productId)!;
@@ -93,6 +92,6 @@ export function SampleBag({ discount, data, formatMoney }: { discount: Omit<Disc
         </dl>
         {applied && <p className="jk-muted jk-discount-help">Saves {formatMoney(applied.amountMinor + applied.shippingMinor)}. Other discounts that might also apply aren&apos;t included here.</p>}
       </div>}
-    </div>
-  </Card>;
+    </div>;
+  return bare ? body : <Card title="Try it on a sample bag" description="See what a customer would pay with this discount as it is now, before you save.">{body}</Card>;
 }
