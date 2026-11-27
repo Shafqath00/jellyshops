@@ -147,10 +147,29 @@ export async function discountsForBag(sql: DiscountSql, storeId: string, bag: Ba
   }));
   const result: DiscountCalculation = calculateDiscounts({ lines, shippingMinor: bag.shippingMinor, hasDelivery: bag.hasDelivery }, candidates, { email, tags, previousOrders }, { now, formatMoney });
 
+  // Product and collection names, so the shopper reads "20% off Wool blanket" rather than "20% off 1 product".
+  const productIds = new Set<string>();
+  const collectionIds = new Set<string>();
+  for (const definition of result.applied.map((applied) => definitions.find((item) => item.id === applied.discountId)!)) {
+    for (const selection of [definition.appliesTo, definition.buyXGetY?.buysItems, definition.buyXGetY?.getsItems]) {
+      selection?.productIds.slice(0, 3).forEach((id) => productIds.add(id));
+      selection?.collectionIds.slice(0, 3).forEach((id) => collectionIds.add(id));
+    }
+  }
+  const names = { products: {} as Record<string, string>, collections: {} as Record<string, string> };
+  if (productIds.size) for (const row of (await sql.query<{ id: string; title: string }>(`SELECT id, title FROM "Product" WHERE "storeId" = $1 AND id = ANY($2::text[])`, [storeId, [...productIds]])).rows) names.products[row.id] = row.title;
+  if (collectionIds.size) for (const row of (await sql.query<{ id: string; title: string }>(`SELECT id, title FROM "Collection" WHERE "storeId" = $1 AND id = ANY($2::text[])`, [storeId, [...collectionIds]])).rows) names.collections[row.id] = row.title;
+  const named = (ids: string[], map: Record<string, string>) => ids.length > 0 && ids.length <= 3 && ids.every((id) => map[id]);
   const byId = new Map(definitions.map((definition) => [definition.id, definition]));
+  // Names only when every chosen item has one (a long list stays "3 products").
+  const labelNames = (definition: (typeof definitions)[number]) => {
+    const selections = [definition.appliesTo, definition.buyXGetY?.buysItems, definition.buyXGetY?.getsItems].filter((item) => item && item.scope !== "all");
+    const ok = selections.every((item) => (item!.scope === "products" ? named(item!.productIds, names.products) : named(item!.collectionIds, names.collections)));
+    return ok ? names : undefined;
+  };
   const discounts = result.applied.map((applied): BagDiscountLine => ({
     discountId: applied.discountId, title: applied.title, code: applied.code, type: applied.type,
-    label: describeDiscountValue(byId.get(applied.discountId)!, { formatMoney }), amountMinor: applied.amountMinor, shippingMinor: applied.shippingMinor,
+    label: describeDiscountValue(byId.get(applied.discountId)!, { formatMoney, names: labelNames(byId.get(applied.discountId)!) }), amountMinor: applied.amountMinor, shippingMinor: applied.shippingMinor,
   }));
   const codeApplied = typed ? discounts.some((line) => line.code === typed) : false;
   return {

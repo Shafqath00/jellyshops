@@ -205,7 +205,7 @@ export class CheckoutService {
     const result = await this.deps.repository.transaction((tx) => requireBagDiscounts(tx as unknown as DiscountSql, storeId, bagOf(cart, currency, input.email, input.code)));
     if (result.discounts.length) assertChargeable(result);
     return {
-      code: result.code, label: result.discounts.find((line) => line.code === result.code)?.label ?? null,
+      code: result.code, label: result.code ? result.discounts.find((line) => line.code === result.code)?.label ?? null : null,
       subtotalMinor: result.subtotalMinor, discountMinor: result.discountMinor, shippingMinor: result.shippingMinor, totalMinor: result.totalMinor, currency,
       discounts: result.discounts.map(({ discountId: _id, ...line }) => line),
     };

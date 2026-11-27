@@ -491,12 +491,15 @@ export function describeDiscountValue(discount: Pick<DiscountDefinition, "type" 
   if (discount.type === "free_shipping") return discount.maxShippingMinor !== null ? `Free shipping on delivery up to ${money(discount.maxShippingMinor)}` : "Free shipping";
   if (discount.type === "buy_x_get_y" && discount.buyXGetY) {
     const rule = discount.buyXGetY;
-    const buys = rule.buys.type === "quantity" ? `Buy ${rule.buys.quantity}` : `Spend ${money(rule.buys.amountMinor)}`;
-    const from = describeSelection(rule.buysItems, options.names, "any products");
+    // "Buy 2 Stoneware mug", "Buy 1 from products in Summer", "Buy 3 items", "Spend £50.00 on products in Summer".
+    const items = (selection: ItemSelection, count: number) => (selection.scope === "all" ? (count === 1 ? "item" : "items")
+      : selection.scope === "products" && options.names?.products ? describeSelection(selection, options.names)
+      : `from ${describeSelection(selection, options.names)}`);
+    const buys = rule.buys.type === "quantity" ? `Buy ${rule.buys.quantity} ${items(rule.buysItems, rule.buys.quantity)}`
+      : `Spend ${money(rule.buys.amountMinor)}${rule.buysItems.scope === "all" ? "" : ` on ${describeSelection(rule.buysItems, options.names)}`}`;
     const gets = rule.getsValue.type === "free" ? "free" : rule.getsValue.type === "percent" ? `at ${rule.getsValue.percent}% off` : `at ${money(rule.getsValue.amountMinor)} off`;
-    const getsFrom = describeSelection(rule.getsItems, options.names, "any product");
     const same = JSON.stringify(rule.buysItems) === JSON.stringify(rule.getsItems);
-    return `${buys} from ${from}, get ${rule.getsQuantity} ${same ? "more " : `from ${getsFrom} `}${gets}`.replace(/\s+/g, " ");
+    return `${buys}, get ${rule.getsQuantity} ${same ? "more" : items(rule.getsItems, rule.getsQuantity)} ${gets}`.replace(/\s+/g, " ");
   }
   const amount = discount.valueType === "percent" ? `${discount.value}% off` : `${money(discount.value)} off`;
   if (discount.type === "order_amount") return `${amount} the whole order`;

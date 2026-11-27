@@ -213,7 +213,7 @@ describe("helpers", () => {
     expect(summariseDiscount(discount({ type: "free_shipping", valueType: null, value: 0, method: "automatic", code: null, minimum: { type: "amount", amountMinor: 5000 } }), { formatMoney: gbp, timeZone: "Europe/London" }))
       .toBe("Free shipping, when the customer spends at least £50.00, applied automatically");
     expect(summariseDiscount(discount({ type: "buy_x_get_y", valueType: null, value: 0, method: "automatic", buyXGetY: { buys: { type: "quantity", quantity: 1 }, buysItems: ALL_ITEMS, getsQuantity: 1, getsItems: ALL_ITEMS, getsValue: { type: "free" }, maxUsesPerOrder: null } }), { formatMoney: gbp, timeZone: "UTC" }))
-      .toBe("Buy 1 from any products, get 1 more free, applied automatically");
+      .toBe("Buy 1 item, get 1 more free, applied automatically");
   });
 });
 
