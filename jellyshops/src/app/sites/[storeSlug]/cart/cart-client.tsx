@@ -13,6 +13,8 @@ import { StorefrontPageLoading } from "@/features/storefront/components/storefro
 import { cartLineKey, personalisationLabels } from "@/features/storefront/personalisation-display";
 import { canIncreaseCartQuantity, nextCartQuantity } from "@/features/storefront/cart-quantity";
 import { storePath } from "@jelly/storefront-schema";
+import { bagItems, checkoutLines } from "@/features/checkout/checkout-model";
+import { useBagDiscounts } from "@/features/checkout/use-bag-discounts";
 
 export default function CartPage({ routeValues }: { routeValues?: Array<[string, unknown]> }) {
   const { storeSlug } = useParams<{ storeSlug: string }>();
@@ -23,6 +25,11 @@ export default function CartPage({ routeValues }: { routeValues?: Array<[string,
   const publication = useInitialStorefrontPublication();
   const values = useMemo(() => deserializeRouteValues(routeValues), [routeValues]);
   const resolvedRoute = publication?.kind === "v4" ? buildStorefrontRoute(publication.snapshot, { type: "cart" }, null, values) : null;
+  // The shop's automatic discounts on this bag, worked out by the server (codes are added at checkout).
+  const bagCart = hydrated ? repository.getCartForStore(storeSlug) : undefined;
+  const bagLines = useMemo(() => checkoutLines(bagCart, state.products), [bagCart, state.products]);
+  const items = useMemo(() => bagItems(bagLines), [bagLines]);
+  const { preview } = useBagDiscounts({ storeId: store?.id, currency: store?.currency, items, code: null });
   if (!store) return null;
   if (!hydrated) {
     // The server cannot see the bag, so the themed page arrives with a loading line in the bag section
@@ -49,7 +56,10 @@ export default function CartPage({ routeValues }: { routeValues?: Array<[string,
   const Cart = shell.CartPage;
   if (publication?.kind === "v4" && resolvedRoute?.status === "ready") {
     const subtotal = lines.reduce((sum, line) => sum + line.lineTotalMinor, 0);
-    const route = { ...resolvedRoute, context: { pageType: "cart" as const, resource: null, data: { lines: lines.map((line) => ({ id: line.id, name: `${line.productName} · ${line.variantName}`, productName: line.productName, variantName: line.variantName, imageUrl: line.imageUrl, options: line.options, quantity: line.quantity, unitPrice: line.unitPrice, total: line.lineTotal, canIncrease: line.canIncrease, onDecrease: () => line.onUpdate(line.quantity - 1), onIncrease: () => line.onUpdate(line.quantity + 1), onRemove: () => line.onUpdate(0) })), subtotal: formatMoney(subtotal, store.currency), shippingNote: store.shippingCopy || "Shipping is calculated at checkout.", checkoutHref: storePath(store.slug, "/checkout"), shopHref: storePath(store.slug, "/shop") } } };
+    // Only trusted while the server priced the same bag the page shows.
+    const priced = preview && preview.subtotalMinor === subtotal ? preview : null;
+    const discounts = (priced?.discounts ?? []).map((line) => ({ title: line.title, amount: line.amountMinor > 0 ? `−${formatMoney(line.amountMinor, store.currency)}` : "Free delivery" }));
+    const route = { ...resolvedRoute, context: { pageType: "cart" as const, resource: null, data: { discounts, total: priced ? formatMoney(priced.subtotalMinor - priced.discountMinor, store.currency) : undefined, lines: lines.map((line) => ({ id: line.id, name: `${line.productName} · ${line.variantName}`, productName: line.productName, variantName: line.variantName, imageUrl: line.imageUrl, options: line.options, quantity: line.quantity, unitPrice: line.unitPrice, total: line.lineTotal, canIncrease: line.canIncrease, onDecrease: () => line.onUpdate(line.quantity - 1), onIncrease: () => line.onUpdate(line.quantity + 1), onRemove: () => line.onUpdate(0) })), subtotal: formatMoney(subtotal, store.currency), shippingNote: store.shippingCopy || "Shipping is calculated at checkout.", checkoutHref: storePath(store.slug, "/checkout"), shopHref: storePath(store.slug, "/shop") } } };
     return <PublishedRuntimeStorefront snapshot={publication.snapshot} route={route} storeSlug={store.slug} currency={store.currency} products={state.products.filter((product) => product.published && !product.archived)} />;
   }
   return <Cart store={{ name: store.name, slug: store.slug, tagline: store.tagline, logoUrl: store.logoUrl }} settings={settings} lines={lines} subtotal={formatMoney(lines.reduce((sum, line) => sum + line.lineTotalMinor, 0), store.currency)} shopHref={storePath(store.slug, "/shop")} checkoutHref={storePath(store.slug, "/checkout")} onDecrease={(id) => { const line = lines.find((entry) => entry.id === id); if (line) line.onUpdate(line.quantity - 1); }} onIncrease={(id) => { const line = lines.find((entry) => entry.id === id); if (line) line.onUpdate(line.quantity + 1); }} />;

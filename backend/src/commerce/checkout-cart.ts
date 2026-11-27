@@ -57,6 +57,7 @@ function customerSnapshotSchema() {
 
 export interface ValidatedLine {
   variantId: string;
+  productId: string;
   quantity: number;
   titleSnapshot: string;
   skuSnapshot: string | null;
@@ -183,6 +184,7 @@ export async function validateCart(
       if (!Number.isSafeInteger(unitPriceMinor) || unitPriceMinor < 0) throw new ApiError(422, "CHECKOUT_PRICE_INVALID", "This product's price requires review.");
       return {
         variantId: variant.id,
+        productId: variant.productId,
         quantity: item.quantity,
         titleSnapshot: product?.title && product.title !== variant.title ? `${product.title} — ${variant.title}` : variant.title,
         skuSnapshot: variant.sku,

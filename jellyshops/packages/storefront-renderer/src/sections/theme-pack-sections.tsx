@@ -137,6 +137,9 @@ export function CartSummarySection({ section, context }: { section: SectionNode;
   const checkoutHref = typeof data.checkoutHref === "string" ? data.checkoutHref : undefined;
   const shopHref = typeof data.shopHref === "string" ? data.shopHref : resolveStorefrontHref(content.href, context?.storeSlug) ?? "#";
   const shippingNote = typeof data.shippingNote === "string" ? data.shippingNote : word("cart.shippingNote");
+  // Automatic discounts the shop gives on this bag (worked out on the server), and the total after them.
+  const discounts = Array.isArray(data.discounts) ? (data.discounts as Array<{ title?: unknown; amount?: unknown }>).filter((line) => typeof line.title === "string" && typeof line.amount === "string") as Array<{ title: string; amount: string }> : [];
+  const total = typeof data.total === "string" ? data.total : undefined;
   const count = lines.reduce((sum, line) => sum + line.quantity, 0);
   // The bag is saved in the shopper's browser: the server-drawn page shows this until it is read.
   if (data.pending === true) return <section className="jelly-section jelly-cart-summary" data-pending="true"><StorefrontContainer><div className="jelly-cart-empty">
@@ -171,8 +174,12 @@ export function CartSummarySection({ section, context }: { section: SectionNode;
       </li>)}</ul>
       <aside className="jelly-cart-totals" aria-label={word("cart.summary")}>
         <h2>{word("cart.summary")}</h2>
-        <dl><div><dt>{word("cart.subtotal")}</dt><dd>{subtotal}</dd></div></dl>
-        <p>{shippingNote}</p>
+        <dl>
+          <div><dt>{word("cart.subtotal")}</dt><dd>{subtotal}</dd></div>
+          {discounts.map((line) => <div key={line.title} className="jelly-cart-discount"><dt>{line.title}</dt><dd>{line.amount}</dd></div>)}
+          {discounts.length > 0 && total && <div className="jelly-cart-total"><dt>{word("cart.total")}</dt><dd>{total}</dd></div>}
+        </dl>
+        <p>{shippingNote}{discounts.length > 0 ? <> {word("cart.discountsNote")}</> : null}</p>
         {checkoutHref && <a className="jelly-button" href={checkoutHref}>{word("cart.checkout")}</a>}
         <a className="jelly-button jelly-button--link" href={shopHref}>{word("cart.continue")}</a>
       </aside>

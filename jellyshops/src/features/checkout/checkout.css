@@ -309,6 +309,9 @@
 .jelly-checkout.jelly-checkout .jelly-checkout__discount-tag button:hover { background: color-mix(in srgb, var(--checkout-text) 10%, transparent); }
 .jelly-checkout .jelly-checkout__discount-line dd { color: var(--checkout-text); font-weight: 500; }
 .jelly-checkout .jelly-checkout__discount-line dt span { color: var(--checkout-text); font-weight: 600; }
+.jelly-checkout .jelly-checkout__discount-tag[data-automatic] { padding-right: 10px; }
+.jelly-checkout .jelly-checkout__was { margin-right: 4px; color: var(--checkout-muted, var(--checkout-text)); font-weight: 400; }
+.jelly-checkout .jelly-checkout__saved dt, .jelly-checkout .jelly-checkout__saved dd { color: var(--checkout-text); font-size: 13px; font-weight: 600; }
 
 /* 12 ── Order confirmation: details, tracking, loading ── */
 .jelly-checkout.jelly-checkout--confirmation .jelly-checkout__title { font-size: var(--checkout-text-2xl); font-weight: var(--checkout-weight-bold); }

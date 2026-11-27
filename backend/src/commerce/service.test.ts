@@ -1,3 +1,4 @@
+import { resetDiscountTableCheck } from "../discounts/checkout-discounts.js";
 import { randomBytes, randomUUID } from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CheckoutService } from "./service.js";
@@ -392,11 +393,14 @@ describe("CheckoutService", () => {
 
 describe("CheckoutService discount codes", () => {
   const code = { id: "d1", storeId: "store-1", code: "SAVE10", title: "SAVE10", method: "code", kind: "order_amount", valueType: "percent", value: 10, minimumSubtotalMinor: null, usageLimit: null, oncePerCustomer: false, startsAt: null, endsAt: null, active: true, createdAt: new Date() };
-  function withCode(row: Record<string, unknown> | null, uses = 0) {
+  function withCode(row: Record<string, unknown> | null, uses = 0, automatic: Record<string, unknown>[] = []) {
+    resetDiscountTableCheck();
     const context = setup();
     (context.tx.query as ReturnType<typeof vi.fn>).mockImplementation(async (text: string) => {
+      if (text.includes("to_regclass")) return { rows: [{ ready: true }] };
       if (text.includes('JOIN "DiscountCode"')) return { rows: row ? [row] : [] };
-      if (text.includes("AS uses")) return { rows: [{ uses, mine: 0 }] };
+      if (text.includes("d.method = 'automatic'")) return { rows: automatic };
+      if (text.includes("AS uses")) return { rows: row && uses ? [{ discountId: row.id, uses, mine: 0 }] : [] };
       return { rows: [] };
     });
     return context;
@@ -428,14 +432,31 @@ describe("CheckoutService discount codes", () => {
     await expect(withCode({ ...code, value: 100 }).service.begin({ ...validCart, discountCode: "SAVE10" })).rejects.toMatchObject({ code: "DISCOUNT_NOT_APPLICABLE" });
   });
 
-  it("never touches discount columns for an order without a code", async () => {
+  it("writes no discount for an order without a code or automatic discount", async () => {
     const { service, tx } = withCode(code);
     await service.begin(validCart);
-    expect(calls(tx).some(([text]) => text.includes("discount") || text.includes("Discount"))).toBe(false);
+    expect(calls(tx).some(([text]) => text.includes('SET "discountCode"') || text.includes('INSERT INTO "OrderDiscount"') || text.includes('SET "discountMinor"'))).toBe(false);
+  });
+
+  it("applies an automatic discount without a code and records it", async () => {
+    const sale = { ...code, id: "auto1", code: null, title: "Winter sale", method: "automatic", value: 20 };
+    const { service, tx } = withCode(null, 0, [sale]);
+    await service.begin(validCart);
+    expect(calls(tx).find(([text]) => text.includes('INSERT INTO "Order"'))![1][8]).toBe(3600);
+    expect(calls(tx).find(([text]) => text.includes('SET "discountCode"'))![1]).toEqual(["store-1", expect.any(String), null, 900]);
+    expect(calls(tx).find(([text]) => text.includes('INSERT INTO "OrderDiscount"'))![1]).toEqual([expect.any(String), "store-1", expect.any(String), "auto1", null, "Winter sale", "order_amount", 900, 0]);
+  });
+
+  it("works when the discount tables aren't in the database yet", async () => {
+    resetDiscountTableCheck();
+    const context = setup();
+    (context.tx.query as ReturnType<typeof vi.fn>).mockImplementation(async (text: string) => (text.includes("to_regclass") ? { rows: [{ ready: false }] } : { rows: [] }));
+    await expect(context.service.begin(validCart)).resolves.toBeTruthy();
+    await expect(context.service.begin({ ...validCart, discountCode: "SAVE10" })).rejects.toMatchObject({ message: "This code isn't valid." });
   });
 
   it("previews what a code takes off the bag", async () => {
     const { service } = withCode({ ...code, valueType: "fixed", value: 500 });
-    await expect(service.previewDiscount("store-1", { code: "save10", currency: "usd", items: validCart.items })).resolves.toMatchObject({ code: "SAVE10", subtotalMinor: 4500, discountMinor: 500, totalMinor: 4000 });
+    await expect(service.previewDiscount("store-1", { code: "save10", currency: "usd", items: validCart.items })).resolves.toMatchObject({ code: "SAVE10", subtotalMinor: 4500, discountMinor: 500, totalMinor: 4000, discounts: [{ code: "SAVE10", label: "US$5.00 off the whole order", amountMinor: 500 }] });
   });
 });

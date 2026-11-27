@@ -1,5 +1,6 @@
 import express from "express";
 import { z } from "zod";
+import { DiscountGuessLimiter, withGuessLimit } from "../discounts/code-guess-limit.js";
 
 import { ApiError } from "../http/errors.js";
 import type { CheckoutService } from "./service.js";
@@ -23,7 +24,7 @@ const beginCheckoutSchema = z.object({
 });
 
 const discountCheckSchema = z.object({
-  code: z.string().trim().min(1).max(60),
+  code: z.string().trim().max(60).optional(),
   currency: z.string().length(3),
   items: z.array(checkoutLineSchema).min(1).max(50),
   email: z.string().trim().max(254).optional(),
@@ -44,6 +45,7 @@ function getPublicToken(request: express.Request): string {
 export function createCommerceRouter(
   service: CheckoutService,
   resolveCustomer?: (request: express.Request) => Promise<string | undefined>,
+  guesses: DiscountGuessLimiter = new DiscountGuessLimiter(),
 ): express.Router {
   const router = express.Router({ mergeParams: true });
 
@@ -68,7 +70,7 @@ export function createCommerceRouter(
           storeId,
           ...parsed.data,
         };
-        const result = customerId ? await service.begin(input, customerId) : await service.begin(input);
+        const result = await withGuessLimit(guesses, storeId, request.ip ?? "unknown", Boolean(input.discountCode?.trim()), () => (customerId ? service.begin(input, customerId) : service.begin(input)));
 
         response
           .status(201)
@@ -86,9 +88,11 @@ export function createCommerceRouter(
       try {
         const storeId = getStoreId(request);
         const parsed = discountCheckSchema.safeParse(request.body);
-        if (!parsed.success) throw new ApiError(422, "DISCOUNT_INPUT_INVALID", "Enter a discount code.");
-        await service.assertDiscountCheckAccess(storeId, request.ip ?? "unknown");
-        response.set("Cache-Control", "no-store").json(await service.previewDiscount(storeId, parsed.data));
+        if (!parsed.success) throw new ApiError(422, "DISCOUNT_INPUT_INVALID", "Check your bag and try again.");
+        const ip = request.ip ?? "unknown";
+        await service.assertDiscountCheckAccess(storeId, ip);
+        const result = await withGuessLimit(guesses, storeId, ip, Boolean(parsed.data.code), () => service.previewDiscount(storeId, parsed.data));
+        response.set("Cache-Control", "no-store").json(result);
       } catch (error) {
         next(error);
       }

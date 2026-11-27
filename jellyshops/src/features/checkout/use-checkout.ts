@@ -3,12 +3,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useShop } from "@/contexts/shop-context";
 import { createCommerceApi } from "@/features/commerce/api/client";
-import type { DiscountPreview, PreparedPayment } from "@/features/commerce/api/types";
+import type { PreparedPayment } from "@/features/commerce/api/types";
 import { useCustomer } from "@/features/customers/providers/customer-provider";
 import { checkoutProblem, type CheckoutProblem } from "./checkout-errors";
 import { forgetDetails, readSavedDetails, saveDetails } from "./checkout-memory";
+import { useBagDiscounts } from "./use-bag-discounts";
 import {
-  attemptInput, checkoutLines, CONTACT_FIELDS, DEFAULT_CHECKOUT_OPTIONS, EMPTY_DETAILS, needsDelivery, problemsFor, storeCountry, validateDetails,
+  attemptInput, bagItems, checkoutLines, CONTACT_FIELDS, DEFAULT_CHECKOUT_OPTIONS, EMPTY_DETAILS, needsDelivery, problemsFor, storeCountry, validateDetails,
   type CheckoutDetails, type CheckoutField, type CheckoutOptions,
 } from "./checkout-model";
 
@@ -38,13 +39,28 @@ export function useCheckout(storeSlug: string, options: CheckoutOptions = DEFAUL
   const [pending, setPending] = useState(false);
   const [problem, setProblem] = useState<CheckoutProblem | null>(null);
   const [prepared, setPrepared] = useState<PreparedPayment | null>(null);
-  const [discount, setDiscount] = useState<DiscountPreview | null>(null);
+  /** The code the shopper applied; the server works out every discount (this code plus automatic ones). */
+  const [appliedCode, setAppliedCode] = useState<string | null>(null);
   const [discountPending, setDiscountPending] = useState(false);
   const [discountError, setDiscountError] = useState("");
   const [remember, setRemember] = useState(false);
   const [usingSaved, setUsingSaved] = useState(false);
   const step: CheckoutStep = section === "payment" && prepared ? "payment" : "details";
-  const commerceApi = () => createCommerceApi({ token: session?.user.email_confirmed_at ? session.access_token : undefined, baseUrl: API_URL });
+  const token = session?.user.email_confirmed_at ? session.access_token : undefined;
+  const commerceApi = () => createCommerceApi({ token, baseUrl: API_URL });
+  const items = useMemo(() => bagItems(lines), [lines]);
+  // Email only counts once it looks complete (discounts for chosen customers), so typing it doesn't send a request per key.
+  const discountEmail = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(details.email.trim()) ? details.email.trim() : undefined;
+  const bag = useBagDiscounts({ storeId: store?.id, currency: store?.currency, items, code: appliedCode, email: discountEmail, enabled: step === "details", token });
+  const discount = bag.preview;
+
+  // The applied code stopped working for this bag (items changed, used up): drop it and say why next to the field.
+  useEffect(() => {
+    if (!bag.codeProblem) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reacting to the server's answer about the bag
+    setAppliedCode(null);
+    setDiscountError(bag.codeProblem);
+  }, [bag.codeProblem]);
 
   // A returning shopper's saved details fill the form once, after the page has loaded in the browser.
   useEffect(() => {
@@ -64,11 +80,10 @@ export function useCheckout(storeSlug: string, options: CheckoutOptions = DEFAUL
     setDiscountPending(true);
     setDiscountError("");
     try {
-      const { items } = attemptInput(cart, lines, details, delivery, store);
-      setDiscount(await commerceApi().checkDiscount(store.id, { code, currency: store.currency.toUpperCase(), items, ...(details.email.trim() ? { email: details.email.trim() } : {}) }));
+      const result = await commerceApi().checkDiscount(store.id, { code, currency: store.currency.toUpperCase(), items, ...(details.email.trim() ? { email: details.email.trim() } : {}) });
+      setAppliedCode(result.code ?? code.toUpperCase());
       return true;
     } catch (error) {
-      setDiscount(null);
       // An older server has no discount route at all.
       const status = typeof error === "object" && error && "status" in error ? Number((error as { status: unknown }).status) : 0;
       setDiscountError(status === 404 ? "Discount codes can't be used in this shop yet." : checkoutProblem(error).message);
@@ -79,7 +94,7 @@ export function useCheckout(storeSlug: string, options: CheckoutOptions = DEFAUL
   }
 
   function removeDiscount() {
-    setDiscount(null);
+    setAppliedCode(null);
     setDiscountError("");
   }
 
@@ -119,7 +134,7 @@ export function useCheckout(storeSlug: string, options: CheckoutOptions = DEFAUL
     setProblem(null);
     try {
       const api = commerceApi();
-      const attempt = await api.createAttempt(store.id, attemptInput(cart, lines, details, delivery, store, discount?.code));
+      const attempt = await api.createAttempt(store.id, attemptInput(cart, lines, details, delivery, store, appliedCode ?? undefined));
       const payment = await api.preparePayment(store.id, attempt.attemptId);
       if (remember) saveDetails(storeSlug, details); else forgetDetails(storeSlug);
       setPrepared(payment);
@@ -128,7 +143,7 @@ export function useCheckout(storeSlug: string, options: CheckoutOptions = DEFAUL
       const code = typeof error === "object" && error && "code" in error ? String((error as { code: unknown }).code) : "";
       if (code.startsWith("DISCOUNT_")) {
         // The code stopped working since it was applied (used up, expired): drop it and say why next to the field.
-        setDiscount(null);
+        setAppliedCode(null);
         setDiscountError(checkoutProblem(error).message);
       }
       setProblem(checkoutProblem(error));
@@ -165,7 +180,7 @@ export function useCheckout(storeSlug: string, options: CheckoutOptions = DEFAUL
     store, cart, lines, delivery, country, estimatedSubtotal, options,
     details, setField, checkField, fieldErrors,
     section, step, pending, problem, prepared,
-    discount, discountPending, discountError, applyDiscount, removeDiscount,
+    discount, appliedCode, discountPending, discountUpdating: bag.pending, discountError, applyDiscount, removeDiscount,
     remember, setRemember, usingSaved, forgetSaved, signedIn: Boolean(session),
     continueFromContact, continueToPayment, editSection, editDetails: () => editSection("contact"), clearBag,
   };

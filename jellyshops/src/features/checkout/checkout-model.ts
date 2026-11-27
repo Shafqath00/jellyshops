@@ -99,7 +99,12 @@ export function attemptInput(cart: Cart, lines: CheckoutLine[], details: Checkou
   const trimmed = Object.fromEntries(Object.entries(details).map(([key, value]) => [key, value.trim()])) as unknown as CheckoutDetails;
   const address = delivery ? { line1: trimmed.line1, ...(trimmed.line2 ? { line2: trimmed.line2 } : {}), city: trimmed.city, region: trimmed.region, postalCode: trimmed.postalCode, country: storeCountry(store) } : undefined;
   const customer = { name: trimmed.name, email: trimmed.email, ...(trimmed.phone ? { phone: trimmed.phone } : {}), ...(address ? { address } : {}), ...(trimmed.note ? { note: trimmed.note.slice(0, 1000) } : {}) };
-  const items = lines.map(({ item, product }) => ({
+  return { cartKey: cart.id, currency: store.currency.toUpperCase(), items: bagItems(lines), customerSnapshot: customer, ...(address ? { deliverySnapshot: address } : {}), ...(discountCode ? { discountCode } : {}) };
+}
+
+/** The bag's lines as the server reads them (no prices: the server sets them). */
+export function bagItems(lines: CheckoutLine[]): CommerceAttemptInput["items"] {
+  return lines.map(({ item, product }) => ({
     variantId: item.variantId,
     quantity: item.quantity,
     ...(item.personalisation?.length ? { personalisation: item.personalisation } : {}),
@@ -111,7 +116,6 @@ export function attemptInput(cart: Cart, lines: CheckoutLine[], details: Checkou
       }),
     } : {}),
   }));
-  return { cartKey: cart.id, currency: store.currency.toUpperCase(), items, customerSnapshot: customer, ...(address ? { deliverySnapshot: address } : {}), ...(discountCode ? { discountCode } : {}) };
 }
 
 /** Only send shoppers back to this site, and only over https (http is allowed on localhost for testing). */

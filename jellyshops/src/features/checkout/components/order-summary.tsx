@@ -67,15 +67,21 @@ function DiscountField({ applied, pending, error, editable, onApply, onRemove }:
         </form>
       )}
       <p className="jelly-checkout__field-error" id={`${id}-error`} role="alert" hidden={!error}>{error}</p>
-      {applied && (
+      {applied?.code && (
         <p className="jelly-checkout__discount-tag">
           <Tag size={14} aria-hidden="true" />
-          <span><b>{applied.code}</b> · {applied.label}</span>
+          <span><b>{applied.code}</b>{applied.label ? <> · {applied.label}</> : null}</span>
           {editable && (
             <button type="button" onClick={onRemove} aria-label={`Remove discount code ${applied.code}`}><X size={14} aria-hidden="true" /></button>
           )}
         </p>
       )}
+      {(applied?.discounts ?? []).filter((line) => !line.code).map((line) => (
+        <p key={line.title} className="jelly-checkout__discount-tag" data-automatic="">
+          <Tag size={14} aria-hidden="true" />
+          <span><b>{line.title}</b> · {line.label}</span>
+        </p>
+      ))}
     </div>
   );
 }
@@ -102,6 +108,10 @@ export function OrderSummary({ lines, currency, estimatedSubtotal, estimatedShip
   const shipping = totals?.shippingMinor ?? (applied ? applied.shippingMinor : delivery ? estimatedShipping : 0);
   const discountMinor = totals ? totals.discountMinor ?? 0 : applied?.discountMinor ?? 0;
   const discountCode = totals ? totals.discountCode ?? null : applied?.code ?? null;
+  // One row per discount while its amounts still add up to what the server charges; otherwise one total row.
+  const discountRows = (applied?.discounts ?? []).filter((line) => line.amountMinor > 0);
+  const rowsMatch = discountRows.length > 0 && discountRows.reduce((sum, line) => sum + line.amountMinor, 0) === discountMinor;
+  const shippingDiscount = (applied?.discounts ?? []).find((line) => line.shippingMinor > 0);
   const total = totals?.amountMinor ?? subtotal - discountMinor + shipping;
   const count = lines.reduce((sum, line) => sum + line.item.quantity, 0);
   const changed = totals !== undefined && totals.subtotalMinor !== estimatedSubtotal;
@@ -145,8 +155,12 @@ export function OrderSummary({ lines, currency, estimatedSubtotal, estimatedShip
         {discount && <DiscountField {...discount} />}
         <dl className="jelly-checkout__totals">
           <div><dt>Subtotal</dt><dd>{money(subtotal)}</dd></div>
-          {discountMinor > 0 && <div className="jelly-checkout__discount-line"><dt>Discount{discountCode ? <span> · {discountCode}</span> : null}</dt><dd>−{money(discountMinor)}</dd></div>}
-          {delivery && <div><dt>Delivery{arrives ? <span className="jelly-checkout__arrives">Arrives {arrives}</span> : null}</dt><dd>{shipping === 0 ? "Free" : money(shipping)}</dd></div>}
+          {discountMinor > 0 && rowsMatch && discountRows.map((line) => (
+            <div key={line.title} className="jelly-checkout__discount-line"><dt>{line.code ? "Discount" : line.title}{line.code ? <span> · {line.code}</span> : null}</dt><dd>−{money(line.amountMinor)}</dd></div>
+          ))}
+          {discountMinor > 0 && !rowsMatch && <div className="jelly-checkout__discount-line"><dt>Discount{discountCode ? <span> · {discountCode}</span> : null}</dt><dd>−{money(discountMinor)}</dd></div>}
+          {delivery && <div><dt>Delivery{arrives ? <span className="jelly-checkout__arrives">Arrives {arrives}</span> : null}</dt><dd>{shipping === 0 ? (shippingDiscount ? <><s className="jelly-checkout__was">{money(shippingDiscount.shippingMinor)}</s> Free</> : "Free") : money(shipping)}</dd></div>}
+          {(discountMinor > 0 || shippingDiscount) && <div className="jelly-checkout__saved"><dt>You save</dt><dd>{money(discountMinor + (shipping === 0 && shippingDiscount ? shippingDiscount.shippingMinor : 0))}</dd></div>}
           <div className="jelly-checkout__total"><dt>Total</dt><dd><span className="jelly-checkout__currency">{currency}</span> {money(total)}</dd></div>
         </dl>
         <p className="jelly-checkout__hint" aria-live="polite">

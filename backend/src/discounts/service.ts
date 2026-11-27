@@ -177,7 +177,7 @@ export async function recordOrderDiscounts(sql: DiscountSql, storeId: string, or
   for (const discount of applied) {
     await sql.query(
       `INSERT INTO "OrderDiscount" (id, "storeId", "orderId", "discountId", code, title, kind, "amountMinor", "shippingMinor") VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-      [`od-${randomUUID()}`, storeId, orderId, discount.discountId, discount.code, discount.title, discount.kind, discount.discountMinor, discount.shippingSavedMinor],
+      [`od-${randomUUID()}`, storeId, orderId, discount.discountId, discount.code || null, discount.title, discount.kind, discount.discountMinor, discount.shippingSavedMinor],
     );
   }
 }

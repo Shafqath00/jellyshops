@@ -9,7 +9,10 @@ export interface CommerceAttemptInput {
 }
 
 /** What a discount code takes off the bag, worked out by the server. */
-export interface DiscountPreview { code: string; label: string; subtotalMinor: number; discountMinor: number; shippingMinor: number; totalMinor: number; currency: string }
+/** One discount on the bag: the typed code or an automatic discount. */
+export interface DiscountPreviewLine { title: string; code: string | null; type: "product_amount" | "order_amount" | "buy_x_get_y" | "free_shipping"; label: string; amountMinor: number; shippingMinor: number }
+/** What the server says the bag costs with its discounts. `code` is the typed code once it applies. */
+export interface DiscountPreview { code: string | null; label: string | null; subtotalMinor: number; discountMinor: number; shippingMinor: number; totalMinor: number; currency: string; discounts?: DiscountPreviewLine[] }
 
 export interface CommerceAttemptResult { attemptId: string; orderId: string; publicToken: string }
 /** Totals worked out on the server; `amountMinor` is what Stripe will charge. */

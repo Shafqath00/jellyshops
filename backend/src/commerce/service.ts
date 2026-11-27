@@ -26,8 +26,8 @@ import {
   type ValidatedCart,
 } from "./checkout-cart.js";
 import { PublicOrderRateLimiter } from "./rate-limit.js";
-import { allocateAmount as allocateDiscount } from "@jelly/storefront-schema";
-import { recordOrderDiscounts, resolveDiscount, type AppliedDiscount, type DiscountSql } from "../discounts/service.js";
+import { recordOrderDiscounts, type DiscountSql } from "../discounts/service.js";
+import { lineKey, requireBagDiscounts, type BagDiscounts, type BagInput } from "../discounts/checkout-discounts.js";
 
 /** Stripe refuses smaller charges; a code may not bring an order below this. */
 const MIN_CHARGE_MINOR = 50;
@@ -56,7 +56,15 @@ export interface CheckoutServiceDeps {
   isTest?: boolean;
 }
 
-function assertChargeable(discount: AppliedDiscount): void {
+/** The bag as the discount calculation sees it. */
+function bagOf(cart: ValidatedCart, currency: string, email: string | undefined, code: string | undefined): BagInput {
+  return {
+    lines: cart.lines.map((line) => ({ variantId: line.variantId, productId: line.productId, configurationKey: line.configurationKey, unitPriceMinor: line.unitPriceMinor, quantity: line.quantity })),
+    shippingMinor: cart.shippingMinor, hasDelivery: cart.lines.some((line) => line.fulfillmentType !== "DIGITAL"), currency, email, code,
+  };
+}
+
+function assertChargeable(discount: Pick<BagDiscounts, "totalMinor">): void {
   if (discount.totalMinor < MIN_CHARGE_MINOR) throw new ApiError(422, "DISCOUNT_NOT_APPLICABLE", "This code would make the order free, and this shop can't take free orders yet.");
 }
 
@@ -183,20 +191,24 @@ export class CheckoutService {
     await new PublicOrderRateLimiter(this.deps.repository, { namespace: "checkout-discount", limit: 30, code: "CHECKOUT_RATE_LIMITED" }).assertAllowed(storeId, ip);
   }
 
-  /** What a code would take off this bag, for the order summary. The order itself checks the code again. */
-  async previewDiscount(storeId: string, input: { code: string; currency: string; items: BeginCheckoutInput["items"]; email?: string }) {
+  /**
+   * The discounts on this bag for the bag page and the order summary: the store's automatic discounts plus the typed code,
+   * if any. A typed code that can't be used throws a 422 in the shopper's words. The order itself works them out again.
+   */
+  async previewDiscount(storeId: string, input: { code?: string; currency: string; items: BeginCheckoutInput["items"]; email?: string }) {
     const policy = await this.deps.checkoutPolicy.getCheckoutPolicy(storeId);
     const currency = input.currency.toUpperCase();
     if (currency !== policy.currency) throw new ApiError(422, "CHECKOUT_CURRENCY_MISMATCH", "Use the store's currency to check out.");
     const parsedItems = checkoutInputSchema.shape.items.safeParse(input.items);
     if (!parsedItems.success) throw new ApiError(422, "DISCOUNT_INPUT_INVALID", "Enter a discount code.");
     const cart = await validateCart(this.deps, storeId, currency, parsedItems.data, policy.shippingMinor);
-    const applied = await this.deps.repository.transaction((tx) => resolveDiscount(tx as unknown as DiscountSql, storeId, input.code, {
-      subtotalMinor: cart.subtotalMinor, shippingMinor: cart.shippingMinor, currency,
-      hasDelivery: cart.lines.some((line) => line.fulfillmentType !== "DIGITAL"), email: input.email, itemCount: cart.lines.reduce((sum, line) => sum + line.quantity, 0),
-    }));
-    assertChargeable(applied);
-    return { code: applied.code, label: applied.label, subtotalMinor: cart.subtotalMinor, discountMinor: applied.discountMinor, shippingMinor: applied.shippingMinor, totalMinor: applied.totalMinor, currency };
+    const result = await this.deps.repository.transaction((tx) => requireBagDiscounts(tx as unknown as DiscountSql, storeId, bagOf(cart, currency, input.email, input.code)));
+    if (result.discounts.length) assertChargeable(result);
+    return {
+      code: result.code, label: result.discounts.find((line) => line.code === result.code)?.label ?? null,
+      subtotalMinor: result.subtotalMinor, discountMinor: result.discountMinor, shippingMinor: result.shippingMinor, totalMinor: result.totalMinor, currency,
+      discounts: result.discounts.map(({ discountId: _id, ...line }) => line),
+    };
   }
 
   async begin(
@@ -257,12 +269,9 @@ export class CheckoutService {
         }
 
         // Checked inside the lock, after any earlier attempt for this bag gave its use back.
-        const discount = discountCode
-          ? await resolveDiscount(tx as unknown as DiscountSql, input.storeId, discountCode, {
-            subtotalMinor: cart.subtotalMinor, shippingMinor: cart.shippingMinor, currency: input.currency,
-            hasDelivery: cart.lines.some((line) => line.fulfillmentType !== "DIGITAL"), email: input.customerSnapshot.email, itemCount: cart.lines.reduce((sum, line) => sum + line.quantity, 0),
-          }, { lock: true })
-          : undefined;
+        // Automatic discounts and the typed code, locked so limited uses can't be taken twice.
+        const bag = await requireBagDiscounts(tx as unknown as DiscountSql, input.storeId, bagOf(cart, input.currency, input.customerSnapshot.email, discountCode), { lock: true });
+        const discount = bag.discounts.length ? bag : undefined;
         if (discount) assertChargeable(discount);
 
         return this.createCheckout(
@@ -329,7 +338,7 @@ export class CheckoutService {
     input: z.infer<typeof checkoutInputSchema> & { customerId?: string },
     cart: ValidatedCart,
     stripeAccountId: string,
-    discount?: AppliedDiscount,
+    discount?: BagDiscounts,
   ): Promise<CheckoutAttemptResult> {
     const orderId =
       `order-${randomUUID()}`;
@@ -373,7 +382,7 @@ export class CheckoutService {
     // Only written when a code is used, so checkout keeps working before the discount migration is applied.
     if (discount) {
       await tx.query('UPDATE "Order" SET "discountCode" = $3, "discountMinor" = $4, "taxMinor" = 0 WHERE "storeId" = $1 AND "id" = $2', [input.storeId, orderId, discount.code, discount.discountMinor]);
-      await recordOrderDiscounts(tx as unknown as DiscountSql, input.storeId, orderId, [discount]);
+      await recordOrderDiscounts(tx as unknown as DiscountSql, input.storeId, orderId, discount.applied);
     }
     if (input.customerId) await tx.query('UPDATE "Order" SET "customerId" = $3 WHERE "storeId" = $1 AND "id" = $2', [input.storeId, orderId, input.customerId]);
     if (this.deps.enhancedSnapshots) {
@@ -381,7 +390,7 @@ export class CheckoutService {
     }
 
     // Refunds and order edits read each line's share of the discount.
-    const lineDiscounts = allocateDiscount(cart.lines.map((line) => line.unitPriceMinor * line.quantity), discount?.discountMinor ?? 0);
+    const lineDiscounts = cart.lines.map((line) => discount?.lineDiscounts[lineKey(line)] ?? 0);
     for (const line of cart.lines) {
       await tx.query(
         `

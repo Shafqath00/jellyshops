@@ -199,7 +199,7 @@ export function createCommerceApi({ baseUrl, token, fetch: fetcher = fetch }: Co
       }));
     },
     createAttempt: (storeId: string, input: CommerceAttemptInput) => request<CommerceAttemptResult>(`/api/public/stores/${encodeURIComponent(storeId)}/checkout/attempts`, { method: "POST", body: JSON.stringify(input) }),
-    checkDiscount: (storeId: string, input: { code: string; currency: string; items: CommerceAttemptInput["items"]; email?: string }) => request<DiscountPreview>(`/api/public/stores/${encodeURIComponent(storeId)}/checkout/discount`, { method: "POST", body: JSON.stringify(input) }),
+    checkDiscount: (storeId: string, input: { code?: string; currency: string; items: CommerceAttemptInput["items"]; email?: string }) => request<DiscountPreview>(`/api/public/stores/${encodeURIComponent(storeId)}/checkout/discount`, { method: "POST", body: JSON.stringify(input) }),
     preparePayment: (storeId: string, attemptId: string) => request<PreparedPayment>(`/api/public/stores/${encodeURIComponent(storeId)}/checkout/payment-intent`, { method: "POST", body: JSON.stringify({ attemptId }) }),
     getPublicOrder: (storeId: string, publicToken: string) => request<PublicOrderResult>(`/api/public/stores/${encodeURIComponent(storeId)}/orders/${encodeURIComponent(publicToken)}`),
     getOrderBalance: (storeId: string, publicToken: string) => request<{ revisionId: string; amountMinor: number; currency: string; status: string; clientSecret: string | null; connectedAccountId: string | null; expiresAt: string | null }>(`/api/public/stores/${encodeURIComponent(storeId)}/orders/${encodeURIComponent(publicToken)}/balance`),
