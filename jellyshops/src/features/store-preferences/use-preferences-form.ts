@@ -27,7 +27,11 @@ export function problemMap(problems: PreferenceProblem[]): ProblemMap {
  * The preferences page's state: what was loaded, the edited copy, problems, and save/discard. Problems show for
  * fields the owner has touched as they type; everything else waits for Save.
  */
-export function usePreferencesForm() {
+export function usePreferencesForm(options: {
+  /** Called with the first field that needs fixing before Save shows it (Site preferences opens that field's tab). */
+  onProblem?: (path: string) => void;
+} = {}) {
+  const { onProblem } = options;
   const api = useStorePreferencesApi();
   const toast = useToast();
   const [stored, setStored] = useState<StoredPreferences | null>(null);
@@ -93,7 +97,14 @@ export function usePreferencesForm() {
     if (!checked.ok) {
       setShowAll(true);
       toast(checked.problems.length === 1 ? "One setting needs fixing before you can save." : `${checked.problems.length} settings need fixing before you can save.`, { tone: "critical" });
-      document.getElementById(`pref-${checked.problems[0].path.replaceAll(".", "-")}`)?.focus();
+      const first = checked.problems[0].path;
+      onProblem?.(first);
+      // The field may be on another tab that is opening now: try again once it is on the page.
+      const focus = (tries: number) => {
+        const element = document.getElementById(`pref-${first.replaceAll(".", "-")}`) ?? document.querySelector<HTMLElement>(`[data-pref-path="${first}"] input, [data-pref-path="${first}"] select, [data-pref-path="${first}"] textarea`);
+        if (element) element.focus(); else if (tries > 0) window.setTimeout(() => focus(tries - 1), 100);
+      };
+      focus(10);
       return;
     }
     setSaving(true);
@@ -103,12 +114,12 @@ export function usePreferencesForm() {
       toast("Preferences saved");
     } catch (error) {
       if (error instanceof PreferencesRequestError && error.code === "PREFERENCES_REVISION_CONFLICT") setConflict(true);
-      if (error instanceof PreferencesRequestError && error.problems.length) { setServerProblems(problemMap(error.problems)); setShowAll(true); }
+      if (error instanceof PreferencesRequestError && error.problems.length) { setServerProblems(problemMap(error.problems)); setShowAll(true); onProblem?.(error.problems[0].path); }
       toast(error instanceof Error ? error.message : "Could not save. Try again.", { tone: "critical" });
     } finally {
       setSaving(false);
     }
-  }, [api, draft, saving, stored, toast]);
+  }, [api, draft, saving, stored, toast, onProblem]);
 
   const problemCount = Object.keys({ ...clientProblems, ...serverProblems }).length;
 

@@ -211,7 +211,7 @@ export function RedirectsManager() {
     { id: "actions", header: "", align: "end", cell: (row) => <span className="jk-row"><Button size="small" variant="quiet" onClick={() => setEditing(row)} aria-label={`Edit redirect from ${row.from}`}>Edit</Button><Button size="small" variant="destructive-quiet" onClick={() => setRemoving([row.id])} aria-label={`Remove redirect from ${row.from}`}>Remove</Button></span> },
   ];
 
-  return <AdminPage title="URL redirects" width="full" back={{ href: "/admin/settings/preferences", label: "Store preferences" }}
+  return <AdminPage title="URL redirects" width="full" back={{ href: "/admin/settings/preferences/advanced", label: "Site preferences" }}
     description="Keep old links working when you rename or remove pages. Shoppers and search engines are sent to the new address."
     primaryAction={{ label: "Add redirect", onAction: () => setAdding(true), disabled: !available }}
     secondaryActions={[{ label: "Import CSV", onAction: () => setImporting(true), disabled: !available }]}>

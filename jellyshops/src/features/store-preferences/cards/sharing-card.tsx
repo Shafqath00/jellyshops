@@ -37,7 +37,7 @@ export function imageAdvice(kind: Kind, image: Pick<PreferenceImage, "width" | "
   return null;
 }
 
-function ImageSetting({ form, kind, label, tip, help }: { form: PreferencesForm; kind: Kind; label: string; tip: string; help: string }) {
+export function ImageSetting({ form, kind, label, tip, help }: { form: PreferencesForm; kind: Kind; label: string; tip?: string; help: string }) {
   const { media, listImages } = useContentApi();
   const toast = useToast();
   const input = useRef<HTMLInputElement>(null);
@@ -80,7 +80,7 @@ function ImageSetting({ form, kind, label, tip, help }: { form: PreferencesForm;
   }
 
   return <div className="jk-field" data-pref-path={path}>
-    <span className="jk-strong" id={`${id}-label`}>{label} <HelpTip label={`About the ${label.toLowerCase()}`}>{tip}</HelpTip></span>
+    <span className="jk-strong" id={`${id}-label`}>{label}{tip && <> <HelpTip label={`About the ${label.toLowerCase()}`}>{tip}</HelpTip></>}</span>
     <small className="jk-muted">{help}</small>
     <div className="jk-row">
       {image ? <img src={image.url} alt={image.alt || `Chosen ${label.toLowerCase()}`} className={`jk-thumb jk-thumb-lg ${kind === "favicon" ? "jk-pref-icon" : ""}`} /> : <span className="jk-thumb jk-thumb-lg"><ImageIcon size={18} aria-hidden="true" /></span>}
@@ -91,7 +91,7 @@ function ImageSetting({ form, kind, label, tip, help }: { form: PreferencesForm;
     </div>
     {advice && <small className="jk-muted" role="status">{advice}</small>}
     {form.problem(path) && <small className="jk-field-error" role="alert">{form.problem(path)}</small>}
-    {kind === "social" && image && <Field id={`${id}-alt`} label="Describe the image" help="Read out by screen readers and shown if the image can't load.">
+    {kind === "social" && image && <Field id={`${id}-alt`} label="Image description" help="For screen readers.">
       <input id={`${id}-alt`} maxLength={200} value={image.alt} onChange={(event) => form.set(path, { ...image, alt: event.target.value })} />
     </Field>}
     <Picker open={picking} onOpenChange={setPicking} title={`Choose a ${label.toLowerCase()}`} searchLabel="Search your files" load={loadImages} multiple={false} onDone={(items) => void choose(items)} doneLabel="Use this photo" />
@@ -99,7 +99,7 @@ function ImageSetting({ form, kind, label, tip, help }: { form: PreferencesForm;
 }
 
 /** How a shared link may look in a chat or social post. */
-function SharePreview({ image, title, description, address }: { image: PreferenceImage | null; title: string; description: string; address: string }) {
+export function SharePreview({ image, title, description, address }: { image: PreferenceImage | null; title: string; description: string; address: string }) {
   return <div className="jk-pref-share" role="group" aria-label="Sharing preview">
     <div className="jk-pref-share-image">{image ? <img src={image.url} alt="" /> : <span className="jk-muted">No sharing image yet: sites may pick a random photo from your store.</span>}</div>
     <div className="jk-pref-share-text">
@@ -111,7 +111,7 @@ function SharePreview({ image, title, description, address }: { image: Preferenc
 }
 
 /** How the browser tab looks with the icon. */
-function TabPreview({ image, title }: { image: PreferenceImage | null; title: string }) {
+export function TabPreview({ image, title }: { image: PreferenceImage | null; title: string }) {
   return <div className="jk-pref-tab" role="group" aria-label="Browser tab preview">
     {image ? <img src={image.url} alt="" width={16} height={16} /> : <span className="jk-pref-tab-blank" aria-hidden="true" />}
     <span>{title}</span>

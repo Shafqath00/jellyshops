@@ -1,6 +1,7 @@
 "use client";
 import Link, { useAdminPathname } from "@/features/admin/admin-routing";
 import { CreditCard, FileText, Home, Inbox, Percent, Settings, Store, Tag, Users, type LucideIcon } from "lucide-react";
+import { SETTINGS_GROUPS } from "@/features/admin/settings-sections";
 
 export type AdminDestination = { label: string; href: string };
 export type AdminNavGroup = AdminDestination & { icon: LucideIcon; section?: string; children?: AdminDestination[] };
@@ -21,16 +22,21 @@ export const ADMIN_NAV: AdminNavGroup[] = [
   ] },
   { label: "Payments", href: "/admin/payments", icon: CreditCard },
   { label: "Online Store", href: "/admin/online-store", icon: Store, section: "Sales channels", children: [
-    { label: "Store designs", href: "/admin/online-store" }, { label: "Preferences", href: "/admin/settings/preferences" },
+    { label: "Store designs", href: "/admin/online-store" },
   ] },
 ];
 export const ADMIN_SETTINGS: AdminNavGroup = { label: "Settings", href: "/admin/settings", icon: Settings };
 
 /** Flat list for the page search: each child page, with the group it belongs to. */
 export function adminDestinations() {
-  return [...ADMIN_NAV, ADMIN_SETTINGS].flatMap((group) => group.children
+  const pages = [...ADMIN_NAV, ADMIN_SETTINGS].flatMap((group) => group.children
     ? group.children.map((child) => ({ ...child, group: group.label, icon: group.icon }))
     : [{ label: group.label, href: group.href, group: "", icon: group.icon }]);
+  // Settings pages too, so "site preferences" or "billing" finds them from anywhere.
+  const settings = SETTINGS_GROUPS.flatMap((group) => group.items)
+    .filter((item) => !pages.some((page) => page.href === item.href))
+    .map((item) => ({ label: item.label, href: item.href, group: "Settings", icon: ADMIN_SETTINGS.icon }));
+  return [...pages, ...settings];
 }
 
 function isWithin(pathname: string, href: string) {

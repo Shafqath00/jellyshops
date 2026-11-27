@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "@/features/admin/admin-routing";
-import { Banner, Button, Card, ConfirmDialog, HelpTip, StatusBadge, useToast } from "@/components/admin";
+import { Banner, Button, Card, ConfirmDialog, StatusBadge, useToast } from "@/components/admin";
 import { POLICY_KINDS, type PolicyKind } from "@jelly/storefront-schema";
 import { contentState, type PageResource } from "@/features/content/api/client";
 import { useContentApi } from "@/features/content-admin/shared";
@@ -11,7 +11,7 @@ import type { PreferencesForm } from "../use-preferences-form";
 
 const POLICY_HELP: Record<PolicyKind, string> = {
   refund: "How long shoppers have to return items and how refunds work.",
-  privacy: "What personal information you collect and how you use it. Required by law in most countries.",
+  privacy: "What personal information you collect and how you use it.",
   terms: "The rules for buying from your store.",
   shipping: "Delivery times, costs and where you deliver.",
 };
@@ -27,7 +27,7 @@ function statusOf(page: PageResource | undefined): PageStatus {
  * Which page holds each policy. Policies are ordinary pages edited with the same editor as other content; once a
  * policy page is published it is linked from the store footer and checkout automatically.
  */
-export function PoliciesCard({ form, details }: { form: PreferencesForm; details: PolicyDetails }) {
+export function PoliciesCard({ form, details, bare = false }: { form: PreferencesForm; details: PolicyDetails; bare?: boolean }) {
   const { api, storeId } = useContentApi();
   const toast = useToast();
   const [pages, setPages] = useState<PageResource[] | null>(null);
@@ -63,9 +63,8 @@ export function PoliciesCard({ form, details }: { form: PreferencesForm; details
   }
 
   const live = pages?.filter((page) => !page.archivedAt) ?? [];
-  return <Card title="Policies" description="Your refund, privacy, terms and shipping policies. Published policies are linked from your store footer and checkout.">
+  const body = <>
     <div className="jk-stack-sm" id="policies">
-      <Banner tone="info" title="Starter wording is not legal advice">Policies created here are general starting points. Read them carefully and change them to match how your business works and the law where you sell. If you&apos;re unsure, ask a legal adviser.</Banner>
       {error && <Banner tone="critical" title="Pages didn't load" action={<Button onClick={() => void load()}>Try again</Button>}>{error}</Banner>}
       <ul className="jk-rows">
         {POLICY_KINDS.map((kind) => {
@@ -75,7 +74,8 @@ export function PoliciesCard({ form, details }: { form: PreferencesForm; details
           const id = `pref-policy-${kind}`;
           return <li key={kind} className="jk-rows-item jk-pref-policy" data-pref-path={`policies.${kind}`}>
             <div className="jk-stack-sm">
-              <span className="jk-strong">{POLICY_TITLES[kind]} <HelpTip label={`About the ${POLICY_TITLES[kind].toLowerCase()}`}>{POLICY_HELP[kind]}</HelpTip></span>
+              <span className="jk-strong">{POLICY_TITLES[kind]}</span>
+              <small className="jk-muted">{POLICY_HELP[kind]}</small>
               <div className="jk-row">
                 <label className="sr-only" htmlFor={id}>Page for the {POLICY_TITLES[kind].toLowerCase()}</label>
                 <select id={id} className="jk-select" value={page ? handle : ""} disabled={!pages} onChange={(event) => form.set(`policies.${kind}`, event.target.value)}>
@@ -95,9 +95,11 @@ export function PoliciesCard({ form, details }: { form: PreferencesForm; details
         })}
       </ul>
     </div>
+    <p className="jk-muted jk-pref-note">Templates are a starting point, not legal advice. Read them and adjust them to your business.</p>
     <ConfirmDialog open={confirm !== null} onOpenChange={(open) => { if (!open) setConfirm(null); }}
       title={confirm ? `Create a ${POLICY_TITLES[confirm].toLowerCase()} from a template?` : ""}
       description="We'll create a draft page with starter wording filled in with your business details. It stays hidden from shoppers until you publish it. The wording is a general starting point, not legal advice: read it and change it to fit your business."
       confirmLabel="Create draft" onConfirm={() => { const kind = confirm; setConfirm(null); if (kind) void create(kind); }} />
-  </Card>;
+  </>;
+  return bare ? body : <Card title="Policies" description="Published policies are linked from your store footer and checkout.">{body}</Card>;
 }

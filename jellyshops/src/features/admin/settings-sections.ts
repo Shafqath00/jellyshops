@@ -1,4 +1,4 @@
-import { Bell, Braces, CreditCard, KeyRound, ReceiptText, SlidersHorizontal, Store, Truck, UserRound, Waypoints, type LucideIcon } from "lucide-react";
+import { Bell, Braces, CreditCard, KeyRound, ReceiptText, SlidersHorizontal, Store, Truck, UserRound, type LucideIcon } from "lucide-react";
 
 export type SettingsLink = { label: string; href: string; description: string; icon: LucideIcon };
 export type SettingsGroup = { label: string; items: SettingsLink[] };
@@ -10,8 +10,7 @@ export const SETTINGS_GROUPS: SettingsGroup[] = [
   ] },
   { label: "Store", items: [
     { label: "General", href: "/admin/settings/general", description: "Store name, contact email, store address and time zone.", icon: Store },
-    { label: "Store preferences", href: "/admin/settings/preferences", description: "Search listing, sharing image, policies, tracking, cookie banner and password page.", icon: SlidersHorizontal },
-    { label: "URL redirects", href: "/admin/settings/preferences/redirects", description: "Send old links to new pages so nothing breaks.", icon: Waypoints },
+    { label: "Site preferences", href: "/admin/settings/preferences", description: "Search listing, branding, policies, tracking and privacy.", icon: SlidersHorizontal },
     { label: "Plan and billing", href: "/admin/settings/billing", description: "Your plan, your free trial and how much of it this shop uses.", icon: ReceiptText },
   ] },
   { label: "Selling", items: [

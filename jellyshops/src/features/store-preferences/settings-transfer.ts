@@ -38,7 +38,7 @@ export function parseImport(text: string): ParsedImport {
   try { raw = JSON.parse(text); } catch { return { ok: false, message: "That isn't a preferences file. Choose a .json file you exported from Jellyshop.", problems: [] }; }
   const body = raw as { format?: unknown; preferences?: unknown } | null;
   if (!body || typeof body !== "object" || body.format !== EXPORT_FORMAT || typeof body.preferences !== "object" || body.preferences === null) {
-    return { ok: false, message: "That file wasn't exported from Store preferences, so it can't be imported.", problems: [] };
+    return { ok: false, message: "That file wasn't exported from Site preferences, so it can't be imported.", problems: [] };
   }
   const incoming = structuredClone(body.preferences) as { seo?: { socialImage?: unknown; favicon?: unknown } };
   if (incoming.seo && typeof incoming.seo === "object") { incoming.seo.socialImage = null; incoming.seo.favicon = null; }

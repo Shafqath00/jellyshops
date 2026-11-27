@@ -6,6 +6,7 @@ import { AdminPage, Banner, Card, CardSkeleton, ConfirmDialog, Field, HelpTip, R
 import { toShopAdmin, useAdminRouter } from "@/features/admin/admin-routing";
 import { useStoreSettings, type StoreSettings } from "@/features/admin/settings/use-store-settings";
 import { useAuth } from "@/features/auth/providers/auth-provider";
+import { BusinessDetailsSection } from "@/features/store-preferences/business-details-section";
 
 type Draft = Pick<StoreSettings, "name" | "slug" | "timezone"> & {
   contactEmail: string;
@@ -79,6 +80,7 @@ export default function GeneralSettingsPage() {
           </div>
         </Card>
       </ResourceForm>}
+    {settings && <BusinessDetailsSection />}
     <ConfirmDialog open={confirmMove} onOpenChange={setConfirmMove} title="Change your store's address?"
       description={<>Your store moves to <strong>{storeUrl(newSlug)}</strong>. Old links, bookmarks and emails lead to the new address, and no other store can use the old one. Shoppers&apos; bags don&apos;t move with it.</>}
       confirmLabel="Change address" onConfirm={persist} />

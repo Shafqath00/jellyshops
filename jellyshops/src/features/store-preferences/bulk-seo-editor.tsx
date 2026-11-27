@@ -155,7 +155,7 @@ export function BulkSeoEditor() {
   }
 
   const tabs = (["product", "page", "post"] as BulkKind[]).map((id) => ({ id, label: KIND_LABEL[id], count: counts[id] || undefined }));
-  return <AdminPage title="Bulk SEO editor" width="full" back={{ href: "/admin/settings/preferences", label: "Store preferences" }}
+  return <AdminPage title="Bulk SEO editor" width="full" back={{ href: "/admin/settings/preferences/advanced", label: "Site preferences" }}
     description="Write the search title and description for many products, pages and posts on one screen. Nothing is saved until you press Save.">
     <Banner tone="info">Search results show these instead of the page&apos;s own name and text. Leave a box empty to use the default shown in grey. Counters show Google&apos;s usual limits ({TITLE_MAX} characters for titles, {DESCRIPTION_MAX} for descriptions).</Banner>
     <div className="jk-toolbar">

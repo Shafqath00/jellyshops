@@ -42,7 +42,7 @@ function ImportForm({ current, onApply }: { current: StorePreferences; onApply: 
   return <>
     <DialogPrimitive.Title className="jk-dialog-title">Import settings</DialogPrimitive.Title>
     <div className="jk-dialog-body jk-stack-sm">
-      <p className="jk-muted">Choose a file you exported from Store preferences. You&apos;ll pick what to copy, then check it on the page and save. Photos aren&apos;t included.</p>
+      <p className="jk-muted">Choose a file you exported from Site preferences. You&apos;ll pick what to copy, then check it on the page and save. Photos aren&apos;t included.</p>
       <div className="jk-row">
         <Button onClick={() => input.current?.click()}><FileUp size={14} aria-hidden="true" /> {fileName ? "Choose another file" : "Choose file"}</Button>
         {fileName && <span className="jk-muted">{fileName}</span>}
