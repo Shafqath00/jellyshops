@@ -15,6 +15,7 @@ vi.mock("@/features/discounts/api", async (original) => ({
   ...(await original<typeof import("@/features/discounts/api")>()),
   useDiscountsApi: () => ({ ...api, create: vi.fn(), update: vi.fn(), remove: vi.fn(), codeCheck: vi.fn(), generateCode: vi.fn(), ready: true, storeId: "store-a", currency: "GBP" }),
 }));
+vi.mock("@/features/discounts/use-form-data", () => ({ useDiscountFormData: () => ({ loading: false, timeZone: "Europe/London", names: { products: {}, collections: { c1: { title: "Summer", count: 3 } } }, customers: [], customerTags: [], discounts: [] }) }));
 afterEach(cleanup);
 beforeEach(() => { vi.resetAllMocks(); api.canManage = true; });
 
@@ -148,7 +149,7 @@ describe("discount page", () => {
     const user = userEvent.setup();
     const { container } = page(<DiscountPage />);
     expect(await screen.findByRole("heading", { name: "Summer sale" })).toBeVisible();
-    expect(screen.getByText(/^20% off products in 1 collection/)).toBeVisible();
+    expect(screen.getByText(/^20% off products in Summer, when the customer spends at least £50.00/)).toBeVisible();
     expect(screen.getByText("£64.00")).toBeVisible(); // average order: £640 over 10 orders
     expect(screen.getByText("Europe/London time", { exact: false })).toBeVisible();
     const results = await axe.run(container, { rules: { "color-contrast": { enabled: false }, region: { enabled: false } } });

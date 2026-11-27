@@ -474,10 +474,10 @@ export function describeSelection(selection: ItemSelection, names: SummaryNames 
   if (selection.scope === "all") return all;
   if (selection.scope === "products") {
     const labels = selection.productIds.map((id) => names.products?.[id] ?? "a product");
-    return selection.productIds.length === 0 ? "no products yet" : names.products ? listWords(labels) : `${selection.productIds.length} ${selection.productIds.length === 1 ? "product" : "products"}`;
+    return selection.productIds.length === 0 ? "the products you choose" : names.products ? listWords(labels) : `${selection.productIds.length} ${selection.productIds.length === 1 ? "product" : "products"}`;
   }
   const labels = selection.collectionIds.map((id) => names.collections?.[id] ?? "a collection");
-  if (selection.collectionIds.length === 0) return "no collections yet";
+  if (selection.collectionIds.length === 0) return "products in the collections you choose";
   return names.collections ? `products in ${listWords(labels)}` : `products in ${selection.collectionIds.length} ${selection.collectionIds.length === 1 ? "collection" : "collections"}`;
 }
 

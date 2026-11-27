@@ -1,9 +1,15 @@
 "use client";
 
+import { useMemo } from "react";
 import { DISCOUNT_METHODS, DISCOUNT_TYPES, type DiscountMethod, type DiscountType } from "@jelly/storefront-schema";
-import { AdminPage, Banner, Card } from "@/components/admin";
+import { AdminPage, Banner, Card, CardSkeleton, useToast } from "@/components/admin";
+import { useAdminRouter } from "@/features/admin/admin-routing";
+import { useDiscountsApi } from "./api";
+import { DiscountForm } from "./discount-form";
 import { DISCOUNT_METHOD_INFO, DISCOUNT_TYPE_INFO } from "./discount-words";
+import { draftFromChoice } from "./form-state";
 import { findTemplate } from "./templates";
+import { useDiscountFormData } from "./use-form-data";
 
 /** Reads the type picker's choice from the address. Unknown values fall back to a code for an amount off products. */
 export function newDiscountChoice(type: string | null, method: string | null, template: string | null) {
@@ -16,12 +22,28 @@ export function newDiscountChoice(type: string | null, method: string | null, te
   };
 }
 
-/** Creating a discount. The full form (phase 4 of the discounts redesign) replaces this holding page. */
+/** Creating a discount: the form, filled from the picker's choice or a template. */
 export function NewDiscount({ type, method, template }: { type: string | null; method: string | null; template: string | null }) {
+  const { currency, canManage } = useDiscountsApi();
+  const data = useDiscountFormData();
+  const router = useAdminRouter();
+  const toast = useToast();
   const choice = newDiscountChoice(type, method, template);
   const info = DISCOUNT_TYPE_INFO[choice.type];
-  return <AdminPage title={choice.template?.title ?? `New ${info.label.toLowerCase()} discount`} description={`${info.label} · ${DISCOUNT_METHOD_INFO[choice.method].label}`} width="detail" back={{ label: "Discounts", href: "/admin/discounts" }}>
-    <Banner tone="info">The form for setting up this discount is being built. Until then you can switch existing discounts on and off, duplicate and delete them.</Banner>
-    <Card title={info.label}><p className="jk-muted">{info.explain} For example: {info.example}.</p></Card>
+  // Built once the shop's time zone is known, so the start date is today in the shop's own time.
+  const initial = useMemo(() => (data.loading ? null : draftFromChoice(choice, data.timeZone)), [data.loading, data.timeZone, choice.type, choice.method, choice.template?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  return <AdminPage title={choice.template?.title ?? `New discount: ${info.label.toLowerCase()}`} description={DISCOUNT_METHOD_INFO[choice.method].label} width="full" back={{ label: "Discounts", href: "/admin/discounts" }}>
+    {!canManage
+      ? <Banner tone="warning">Only the shop owner and admins can create discounts.</Banner>
+      : !initial
+        ? <Card><CardSkeleton /></Card>
+        : <DiscountForm
+          initial={initial}
+          data={data}
+          currency={currency}
+          side={choice.template ? <Card title="From a template"><p className="jk-muted">{choice.template.description} Check the details, then save.</p></Card> : undefined}
+          onSaved={(saved) => { toast(`Discount created: ${saved.title}`); router.replace(`/admin/discounts/${encodeURIComponent(saved.id)}`); }}
+          onDiscard={() => router.push("/admin/discounts")}
+        />}
   </AdminPage>;
 }
