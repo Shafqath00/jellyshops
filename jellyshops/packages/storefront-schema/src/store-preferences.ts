@@ -15,7 +15,7 @@ const plain = (max: number, label: string) => z.string().trim().max(max, `${labe
 
 const imageSchema = z.object({
   mediaId: z.string().trim().min(1).max(120),
-  url: z.string().trim().max(500).refine((value) => value.startsWith("/") || value.startsWith("https://"), "Choose a photo from your files."),
+  url: z.string().trim().max(500).refine((value) => value.startsWith("/") || value.startsWith("https://") || ["http://localhost", "http://127.0.0.1", "http://[::1]"].some((host) => value.startsWith(`${host}:`) || value.startsWith(`${host}/`)), "Choose a photo from your files."),
   width: z.number().int().positive().nullable(),
   height: z.number().int().positive().nullable(),
   alt: plain(200, "Photo description"),
