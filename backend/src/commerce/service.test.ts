@@ -391,12 +391,12 @@ describe("CheckoutService", () => {
 });
 
 describe("CheckoutService discount codes", () => {
-  const code = { id: "d1", storeId: "store-1", code: "SAVE10", kind: "percent", value: 10, minimumSubtotalMinor: null, usageLimit: null, oncePerCustomer: false, startsAt: null, endsAt: null, active: true, createdAt: new Date() };
+  const code = { id: "d1", storeId: "store-1", code: "SAVE10", title: "SAVE10", method: "code", kind: "order_amount", valueType: "percent", value: 10, minimumSubtotalMinor: null, usageLimit: null, oncePerCustomer: false, startsAt: null, endsAt: null, active: true, createdAt: new Date() };
   function withCode(row: Record<string, unknown> | null, uses = 0) {
     const context = setup();
     (context.tx.query as ReturnType<typeof vi.fn>).mockImplementation(async (text: string) => {
-      if (text.includes('FROM "DiscountCode"')) return { rows: row ? [row] : [] };
-      if (text.includes("COUNT(*)::int AS uses")) return { rows: [{ uses, mine: 0 }] };
+      if (text.includes('JOIN "DiscountCode"')) return { rows: row ? [row] : [] };
+      if (text.includes("AS uses")) return { rows: [{ uses, mine: 0 }] };
       return { rows: [] };
     });
     return context;
@@ -414,7 +414,9 @@ describe("CheckoutService discount codes", () => {
     expect(calls(tx).find(([text]) => text.includes('SET "discountCode"'))![1]).toEqual(["store-1", expect.any(String), "SAVE10", 450]);
     const shares = calls(tx).filter(([text]) => text.includes('UPDATE "OrderItem" SET "discountMinor"')).map(([, values]) => values[4] as number);
     expect(shares.reduce((sum, value) => sum + value, 0)).toBe(450);
-    expect(calls(tx).find(([text]) => text.includes('FROM "DiscountCode"'))![0]).toContain("FOR UPDATE");
+    expect(calls(tx).find(([text]) => text.includes('JOIN "DiscountCode"'))![0]).toContain("FOR UPDATE");
+    // Each discount is recorded on the order for reports and usage counts.
+    expect(calls(tx).find(([text]) => text.includes('INSERT INTO "OrderDiscount"'))![1]).toEqual([expect.any(String), "store-1", expect.any(String), "d1", "SAVE10", "SAVE10", "order_amount", 450, 0]);
   });
 
   it("refuses a code that doesn't exist or is used up, with words for the shopper", async () => {
@@ -433,7 +435,7 @@ describe("CheckoutService discount codes", () => {
   });
 
   it("previews what a code takes off the bag", async () => {
-    const { service } = withCode({ ...code, kind: "fixed", value: 500 });
+    const { service } = withCode({ ...code, valueType: "fixed", value: 500 });
     await expect(service.previewDiscount("store-1", { code: "save10", currency: "usd", items: validCart.items })).resolves.toMatchObject({ code: "SAVE10", subtotalMinor: 4500, discountMinor: 500, totalMinor: 4000 });
   });
 });

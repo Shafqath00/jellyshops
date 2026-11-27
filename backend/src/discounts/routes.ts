@@ -3,41 +3,65 @@ import { z } from "zod";
 import { requireMerchant, requireStorePermission } from "../auth/middleware.js";
 import type { AuthProvider } from "../auth/types.js";
 import { ApiError } from "../http/errors.js";
-import { DISCOUNT_KINDS } from "./rules.js";
 import type { DiscountService } from "./service.js";
 
-const discountSchema = z.object({
-  code: z.string().max(60),
-  kind: z.enum(DISCOUNT_KINDS as [string, ...string[]]),
-  value: z.number().int().min(0).max(100_000_000).optional(),
-  minimumSubtotalMinor: z.number().int().min(1).max(100_000_000).nullable().optional(),
-  usageLimit: z.number().int().min(1).max(1_000_000).nullable().optional(),
-  oncePerCustomer: z.boolean().optional(),
-  startsAt: z.string().max(40).nullable().optional(),
-  endsAt: z.string().max(40).nullable().optional(),
-  active: z.boolean().optional(),
-}).strict();
+const idsSchema = z.object({ ids: z.array(z.string().min(1).max(120)).min(1).max(500) }).strict();
+const bulkSchema = z.object({ ids: idsSchema.shape.ids, action: z.enum(["enable", "disable", "delete"]) }).strict();
 
-function parse(body: unknown) {
-  const parsed = discountSchema.safeParse(body ?? {});
-  if (!parsed.success) throw new ApiError(422, "DISCOUNT_INPUT_INVALID", "Check the discount details and try again.");
-  return parsed.data as z.infer<typeof discountSchema> & { kind: (typeof DISCOUNT_KINDS)[number] };
+function ids(body: unknown) {
+  const parsed = bulkSchema.safeParse(body ?? {});
+  if (!parsed.success) throw new ApiError(422, "DISCOUNT_INPUT_INVALID", "Choose up to 500 discounts.");
+  return parsed.data;
 }
 
-/** Merchants, under `/api/stores/:storeId/discounts`: list, create, `PUT /:id`, `DELETE /:id`. */
+/**
+ * Merchants, under `/api/stores/:storeId/discounts`. Anyone who can see orders may see discounts; only owners and
+ * admins (`discounts:manage`) may change them. Bodies are checked by the shared rules in the service.
+ *   GET /            list            POST /          create
+ *   GET /:id         one             PUT /:id        change          DELETE /:id   delete
+ *   POST /bulk       {ids, action: enable|disable|delete}
+ *   GET /code-check?code=&except=   is a code free      POST /generate-code {prefix?}
+ */
 export function createDiscountRouter(service: DiscountService, authProvider: AuthProvider): Router {
   const router = Router({ mergeParams: true });
-  router.get("/", requireMerchant(authProvider), requireStorePermission("orders:view"), async (request, response, next) => {
-    try { response.json({ discounts: await service.list(request.storeContext!.storeId) }); } catch (error) { next(error); }
+  const view = [requireMerchant(authProvider), requireStorePermission("orders:view")];
+  const manage = [requireMerchant(authProvider), requireStorePermission("discounts:manage")];
+  const storeId = (request: { storeContext?: { storeId: string } }) => request.storeContext!.storeId;
+
+  router.get("/", ...view, async (request, response, next) => {
+    try { response.json({ discounts: await service.list(storeId(request)) }); } catch (error) { next(error); }
   });
-  router.post("/", requireMerchant(authProvider), requireStorePermission("orders:manage"), async (request, response, next) => {
-    try { response.status(201).json({ discount: await service.create(request.storeContext!.storeId, parse(request.body)) }); } catch (error) { next(error); }
+  router.get("/code-check", ...manage, async (request, response, next) => {
+    try {
+      const code = typeof request.query.code === "string" ? request.query.code.slice(0, 60) : "";
+      const except = typeof request.query.except === "string" ? request.query.except.slice(0, 120) : undefined;
+      response.json(await service.codeAvailable(storeId(request), code, except));
+    } catch (error) { next(error); }
   });
-  router.put<{ storeId: string; id: string }>("/:id", requireMerchant(authProvider), requireStorePermission("orders:manage"), async (request, response, next) => {
-    try { response.json({ discount: await service.update(request.storeContext!.storeId, String(request.params.id), parse(request.body)) }); } catch (error) { next(error); }
+  router.post("/generate-code", ...manage, async (request, response, next) => {
+    try {
+      const prefix = typeof request.body?.prefix === "string" ? request.body.prefix.slice(0, 20) : "";
+      response.json({ code: await service.generateCode(storeId(request), prefix) });
+    } catch (error) { next(error); }
   });
-  router.delete<{ storeId: string; id: string }>("/:id", requireMerchant(authProvider), requireStorePermission("orders:manage"), async (request, response, next) => {
-    try { await service.remove(request.storeContext!.storeId, String(request.params.id)); response.status(204).end(); } catch (error) { next(error); }
+  router.post("/bulk", ...manage, async (request, response, next) => {
+    try {
+      const { ids: chosen, action } = ids(request.body);
+      const changed = action === "delete" ? await service.removeMany(storeId(request), chosen) : await service.setActive(storeId(request), chosen, action === "enable");
+      response.json({ changed });
+    } catch (error) { next(error); }
+  });
+  router.post("/", ...manage, async (request, response, next) => {
+    try { response.status(201).json({ discount: await service.create(storeId(request), request.body ?? {}) }); } catch (error) { next(error); }
+  });
+  router.get<{ storeId: string; id: string }>("/:id", ...view, async (request, response, next) => {
+    try { response.json({ discount: await service.get(storeId(request), String(request.params.id)) }); } catch (error) { next(error); }
+  });
+  router.put<{ storeId: string; id: string }>("/:id", ...manage, async (request, response, next) => {
+    try { response.json({ discount: await service.update(storeId(request), String(request.params.id), request.body ?? {}) }); } catch (error) { next(error); }
+  });
+  router.delete<{ storeId: string; id: string }>("/:id", ...manage, async (request, response, next) => {
+    try { await service.remove(storeId(request), String(request.params.id)); response.status(204).end(); } catch (error) { next(error); }
   });
   return router;
 }

@@ -89,7 +89,7 @@ export function mountCommerceRoutes(app: Express, context: AppContext): void {
 
   // Discount codes need the database; the public check runs through the checkout router.
   const discountDatabase = deps.commerceDatabase;
-  if (discountDatabase) app.use("/api/stores/:storeId/discounts", createDiscountRouter(new DiscountService({ query: (text: string, values?: unknown[]) => discountDatabase.transaction((transaction) => transaction.query(text, values)) } as never), authProvider));
+  if (discountDatabase) app.use("/api/stores/:storeId/discounts", createDiscountRouter(new DiscountService({ transaction: (work) => discountDatabase.transaction((transaction) => work(transaction as never)) }, deps.planLimits), authProvider));
 
   if (deps.stripeAccountService) {
     app.use(

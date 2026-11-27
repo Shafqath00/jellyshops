@@ -48,6 +48,9 @@ function limitMessage(kind: LimitKind, used: number, limit: number, adding: numb
     case "articles":
       return `Your plan allows up to ${number.format(limit)} blog posts and this shop already has ${number.format(used)}. `
         + "Archive posts you no longer need in Content > Blog posts, or pay for your plan to get more room.";
+    case "discounts":
+      return `Your plan allows up to ${number.format(limit)} discounts and this shop already has ${number.format(used)}. `
+        + "Delete discounts you no longer need in Discounts, or pay for your plan to get more room.";
     case "customDomains":
       return `Your plan allows ${number.format(limit)} own domain${limit === 1 ? "" : "s"} and this shop already has ${number.format(used)}. `
         + "Remove one first, or contact us about a bigger plan.";
@@ -115,6 +118,7 @@ export function sqlUsageReader(sql: Sql): UsageReader {
     // Archived pages and posts do not count (archiving is how a merchant makes room).
     pages: `SELECT count(*)::bigint AS "value" FROM "StorePage" WHERE "storeId" = $1 AND "archivedAt" IS NULL`,
     articles: `SELECT count(*)::bigint AS "value" FROM "Article" WHERE "storeId" = $1 AND "archivedAt" IS NULL`,
+    discounts: `SELECT count(*)::bigint AS "value" FROM "DiscountCode" WHERE "storeId" = $1`,
     // Custom domains are not built yet; nothing to count.
     customDomains: null,
   };

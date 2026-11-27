@@ -39,6 +39,8 @@ export interface PlanLimits {
   pages: number;
   /** Blog posts that are not archived (drafts count). */
   articles: number;
+  /** Discounts, whatever their state (deleting one makes room). */
+  discounts: number;
 }
 
 /** Rules for each upload request (not totals). */
@@ -59,12 +61,12 @@ export const PLAN_CONFIG = {
   /** A store in its free trial: enough to build and try a shop, not enough to use it as free hosting. */
   trial: {
     name: "Free trial",
-    limits: { products: 50, photoBytes: 500 * MB, files: 200, staff: 3, customDomains: 1, pages: 20, articles: 50 },
+    limits: { products: 50, photoBytes: 500 * MB, files: 200, staff: 3, customDomains: 1, pages: 20, articles: 50, discounts: 20 },
     uploads: { fileBytes: 5 * MB, uploadsPerMinute: 10 },
   },
   standard: {
     name: "Jellyshop",
-    limits: { products: 5_000, photoBytes: 10 * GB, files: 5_000, staff: 3, customDomains: 1, pages: 500, articles: 5_000 },
+    limits: { products: 5_000, photoBytes: 10 * GB, files: 5_000, staff: 3, customDomains: 1, pages: 500, articles: 5_000, discounts: 1_000 },
     uploads: { fileBytes: 10 * MB, uploadsPerMinute: 30 },
   },
 } as const satisfies Record<string, PlanConfig>;

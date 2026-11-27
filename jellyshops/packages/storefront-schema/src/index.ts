@@ -134,3 +134,15 @@ export type { PreferenceProblem } from "./store-preferences.js";
 export { MAX_REDIRECTS_PER_STORE, MAX_REDIRECT_PATH, MAX_REDIRECT_TARGET, createsRedirectLoop, normaliseRedirectFrom, normaliseRedirectTo, redirectProblem } from "./url-redirects.js";
 export { SEO_CHECK_DEFS, buildSeoChecks, seoGrade, seoScore, setupChecklist, setupProgress, sortSeoChecks, storeSeoChecks } from "./seo-health.js";
 export type { PolicyState, RawSeoCheck, SeoArea, SeoCheck, SeoCheckItem, SeoItemKind, SeoSeverity, SetupContext, SetupItem } from "./seo-health.js";
+export {
+  ALL_ITEMS, DISCOUNT_METHODS, DISCOUNT_TYPES, DISCOUNT_TYPE_LABELS, allocateAmount, buyXGetYAmounts, calculateDiscounts, describeDiscountValue,
+  describeSelection, discountClass, discountProblemFor, discountStatus, discountsCombine, generateDiscountCode, normaliseDiscountCode,
+  selectionIncludes, summariseDiscount,
+} from "./discount-rules.js";
+export type {
+  AppliedDiscountResult, BuyXGetY, BuyXGetYValue, CalculationOptions, DiscountCalculation, DiscountCandidate, DiscountCart, DiscountCartLine,
+  DiscountClass, DiscountCombinations, DiscountCustomer, DiscountDefinition, DiscountEligibility, DiscountMethod, DiscountMinimum, DiscountProblem,
+  DiscountStatus, DiscountType, DiscountValueType, ItemSelection, SummaryNames, SummaryOptions,
+} from "./discount-rules.js";
+export { DISCOUNT_LIMITS, discountInputSchema, validateDiscountInput } from "./discounts.js";
+export type { DiscountFieldProblem, DiscountInput } from "./discounts.js";

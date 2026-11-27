@@ -11,6 +11,7 @@ const ROLE_PERMISSIONS: Record<StoreRole, ReadonlySet<StorePermission>> = {
     "developer:view", "developer:edit", "developer:build", "developer:publish",
     "team:manage", "settings:manage",
     "payments:view", "payments:manage", "orders:view", "orders:manage", "orders:refund",
+    "discounts:manage",
   ]),
   ADMIN: new Set<StorePermission>([
     "storefront:view", "storefront:edit", "storefront:publish",
@@ -20,6 +21,7 @@ const ROLE_PERMISSIONS: Record<StoreRole, ReadonlySet<StorePermission>> = {
     "media:upload", "media:delete",
     "settings:manage",
     "payments:view", "payments:manage", "orders:view", "orders:manage", "orders:refund",
+    "discounts:manage",
   ]),
   DESIGNER: new Set<StorePermission>([
     "storefront:view", "storefront:edit",

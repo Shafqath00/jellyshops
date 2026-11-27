@@ -26,8 +26,8 @@ import {
   type ValidatedCart,
 } from "./checkout-cart.js";
 import { PublicOrderRateLimiter } from "./rate-limit.js";
-import { allocateDiscount } from "../discounts/rules.js";
-import { resolveDiscount, type AppliedDiscount, type DiscountSql } from "../discounts/service.js";
+import { allocateAmount as allocateDiscount } from "@jelly/storefront-schema";
+import { recordOrderDiscounts, resolveDiscount, type AppliedDiscount, type DiscountSql } from "../discounts/service.js";
 
 /** Stripe refuses smaller charges; a code may not bring an order below this. */
 const MIN_CHARGE_MINOR = 50;
@@ -193,7 +193,7 @@ export class CheckoutService {
     const cart = await validateCart(this.deps, storeId, currency, parsedItems.data, policy.shippingMinor);
     const applied = await this.deps.repository.transaction((tx) => resolveDiscount(tx as unknown as DiscountSql, storeId, input.code, {
       subtotalMinor: cart.subtotalMinor, shippingMinor: cart.shippingMinor, currency,
-      hasDelivery: cart.lines.some((line) => line.fulfillmentType !== "DIGITAL"), email: input.email,
+      hasDelivery: cart.lines.some((line) => line.fulfillmentType !== "DIGITAL"), email: input.email, itemCount: cart.lines.reduce((sum, line) => sum + line.quantity, 0),
     }));
     assertChargeable(applied);
     return { code: applied.code, label: applied.label, subtotalMinor: cart.subtotalMinor, discountMinor: applied.discountMinor, shippingMinor: applied.shippingMinor, totalMinor: applied.totalMinor, currency };
@@ -260,7 +260,7 @@ export class CheckoutService {
         const discount = discountCode
           ? await resolveDiscount(tx as unknown as DiscountSql, input.storeId, discountCode, {
             subtotalMinor: cart.subtotalMinor, shippingMinor: cart.shippingMinor, currency: input.currency,
-            hasDelivery: cart.lines.some((line) => line.fulfillmentType !== "DIGITAL"), email: input.customerSnapshot.email,
+            hasDelivery: cart.lines.some((line) => line.fulfillmentType !== "DIGITAL"), email: input.customerSnapshot.email, itemCount: cart.lines.reduce((sum, line) => sum + line.quantity, 0),
           }, { lock: true })
           : undefined;
         if (discount) assertChargeable(discount);
@@ -371,7 +371,10 @@ export class CheckoutService {
     );
 
     // Only written when a code is used, so checkout keeps working before the discount migration is applied.
-    if (discount) await tx.query('UPDATE "Order" SET "discountCode" = $3, "discountMinor" = $4, "taxMinor" = 0 WHERE "storeId" = $1 AND "id" = $2', [input.storeId, orderId, discount.code, discount.discountMinor]);
+    if (discount) {
+      await tx.query('UPDATE "Order" SET "discountCode" = $3, "discountMinor" = $4, "taxMinor" = 0 WHERE "storeId" = $1 AND "id" = $2', [input.storeId, orderId, discount.code, discount.discountMinor]);
+      await recordOrderDiscounts(tx as unknown as DiscountSql, input.storeId, orderId, [discount]);
+    }
     if (input.customerId) await tx.query('UPDATE "Order" SET "customerId" = $3 WHERE "storeId" = $1 AND "id" = $2', [input.storeId, orderId, input.customerId]);
     if (this.deps.enhancedSnapshots) {
       await tx.query('UPDATE "Order" SET "deliverySnapshot"=$3::jsonb,"billingAddress"=$4::jsonb,"customerNote"=$5,"isTest"=$6 WHERE "storeId"=$1 AND "id"=$2', [input.storeId, orderId, input.deliverySnapshot ? JSON.stringify(input.deliverySnapshot) : null, input.customerSnapshot.billingAddress ? JSON.stringify(input.customerSnapshot.billingAddress) : null, typeof input.customerSnapshot.note === "string" ? input.customerSnapshot.note.slice(0,10000) : null, this.deps.isTest ?? false]);
