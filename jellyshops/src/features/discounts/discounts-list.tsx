@@ -136,7 +136,7 @@ export function DiscountsList() {
           {DISCOUNT_TYPES.map((value) => <option key={value} value={value}>{DISCOUNT_TYPE_INFO[value].label}</option>)}
         </select></label>
         <label><span className="sr-only">Method</span><select className="jk-select" value={methodFilter} onChange={(event) => setMethodFilter(event.target.value as DiscountMethod | "")}>
-          <option value="">Codes and automatic</option>
+          <option value="">All methods</option>
           {DISCOUNT_METHODS.map((value) => <option key={value} value={value}>{DISCOUNT_METHOD_INFO[value].label}</option>)}
         </select></label>
         {/* Column headings are hidden on phones, so sorting has its own choice too. */}
