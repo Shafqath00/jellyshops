@@ -7,6 +7,17 @@ import { ApiError } from "../http/errors.js";
 import type { PlanLimitChecker } from "../billing/plan-limits.js";
 
 export interface DiscountSql { query<T = Record<string, unknown>>(text: string, values?: unknown[]): Promise<{ rows: T[] }> }
+export interface DiscountCodeRow { code: string; uses: number; createdAt: string }
+
+/** Most codes made in one request (more can be made in further requests, up to the plan limit). */
+export const MAX_CODES_PER_REQUEST = 1000;
+
+/** A discount's codes with their uses (r = "DiscountRedeemCode"; $1 store, $2 discount). */
+const CODES_SQL = `SELECT r.code, r."createdAt",
+    (SELECT COUNT(DISTINCT od."orderId")::int FROM "OrderDiscount" od JOIN "Order" o ON o."storeId" = od."storeId" AND o.id = od."orderId"
+      WHERE od."storeId" = r."storeId" AND od."discountId" = r."discountId" AND od.code = r.code AND o.status <> 'CANCELLED') AS uses
+  FROM "DiscountRedeemCode" r WHERE r."storeId" = $1 AND r."discountId" = $2`;
+
 export interface DiscountDatabase { transaction<T>(work: (sql: DiscountSql) => Promise<T>): Promise<T> }
 
 /** A discount as the admin sees it: the definition with dates as text, plus how it is doing. */
@@ -297,8 +308,10 @@ export class DiscountService {
         }
         const set = COLUMN_NAMES.split(",").map((name, index) => `${name.trim()} = $${index + 3}`).join(", ");
         const { rows } = await sql.query<DiscountRow>(
-          `UPDATE "DiscountCode" d SET ${set}, "updatedAt" = NOW() WHERE d."storeId" = $1 AND d.id = $2 RETURNING ${WITH_STATS}`,
-          [storeId, id, ...columns(clean)],
+          `UPDATE "DiscountCode" d SET ${set}, "updatedAt" = NOW(),
+             "endReminderSentAt" = CASE WHEN d."endsAt" IS DISTINCT FROM $${columns(clean).length + 3}::timestamptz THEN NULL ELSE d."endReminderSentAt" END
+           WHERE d."storeId" = $1 AND d.id = $2 RETURNING ${WITH_STATS}`,
+          [storeId, id, ...columns(clean), clean.endsAt],
         );
         return merchantOf(rows[0]!);
       });
@@ -328,6 +341,64 @@ export class DiscountService {
 
   async remove(storeId: string, id: string): Promise<void> {
     if (!(await this.removeMany(storeId, [id]))) throw notFound();
+  }
+
+  /** A page of a discount's codes, newest first, with how often each was used (orders not cancelled). */
+  async listCodes(storeId: string, id: string, options: { offset?: number; limit?: number } = {}): Promise<{ codes: DiscountCodeRow[]; total: number }> {
+    const limit = Math.min(Math.max(options.limit ?? 50, 1), 200);
+    const offset = Math.max(options.offset ?? 0, 0);
+    return this.database.transaction(async (sql) => {
+      await this.requireCodeDiscount(sql, storeId, id);
+      const total = await sql.query<{ total: number | string }>(`SELECT COUNT(*)::int AS total FROM "DiscountRedeemCode" WHERE "storeId" = $1 AND "discountId" = $2`, [storeId, id]);
+      const { rows } = await sql.query<DiscountCodeRow & { uses: number | string }>(`${CODES_SQL} ORDER BY r."createdAt" DESC, r.code LIMIT $3 OFFSET $4`, [storeId, id, limit, offset]);
+      return { codes: rows.map((row) => ({ code: row.code, uses: Number(row.uses), createdAt: toDate(row.createdAt)?.toISOString() ?? "" })), total: Number(total.rows[0]?.total ?? 0) };
+    });
+  }
+
+  /** Every code of a discount as CSV (Code, Times used), guarded so spreadsheets never run a cell as a formula. */
+  async codesCsv(storeId: string, id: string): Promise<string> {
+    return this.database.transaction(async (sql) => {
+      await this.requireCodeDiscount(sql, storeId, id);
+      const { rows } = await sql.query<{ code: string; uses: number | string }>(`${CODES_SQL} ORDER BY r."createdAt", r.code`, [storeId, id]);
+      const cell = (value: string) => { const guarded = /^[=+\-@]/.test(value) ? `'${value}` : value; return /[",\n]/.test(guarded) ? `"${guarded.replace(/"/g, '""')}"` : guarded; };
+      return ["Code,Times used", ...rows.map((row) => `${cell(row.code)},${Number(row.uses)}`)].join("\r\n") + "\r\n";
+    });
+  }
+
+  /**
+   * Makes `count` new random codes for a code discount (they share its settings and its usage limit). Codes nobody
+   * else in the shop uses; plan limits count every code in the shop.
+   */
+  async generateCodes(storeId: string, id: string, options: { count: number; prefix?: string; length?: number }): Promise<{ created: number; codes: string[] }> {
+    const count = Math.floor(options.count);
+    if (!(count >= 1 && count <= MAX_CODES_PER_REQUEST)) throw new ApiError(422, "DISCOUNT_CODES_COUNT", `Make between 1 and ${MAX_CODES_PER_REQUEST.toLocaleString("en-GB")} codes at a time.`, [{ path: "count", message: `Make between 1 and ${MAX_CODES_PER_REQUEST.toLocaleString("en-GB")} codes at a time.` }]);
+    const prefix = (options.prefix ?? "").trim().toUpperCase();
+    if (prefix && !/^[A-Z0-9_-]{1,20}$/.test(prefix)) throw new ApiError(422, "DISCOUNT_CODES_PREFIX", "Use up to 20 letters, numbers, dashes or underscores for the start of each code.", [{ path: "prefix", message: "Use up to 20 letters, numbers, dashes or underscores." }]);
+    const length = Math.min(Math.max(Math.floor(options.length ?? 8), 6), 16);
+    await this.planLimits?.check(storeId, "discountCodes", count);
+    return this.database.transaction(async (sql) => {
+      await this.requireCodeDiscount(sql, storeId, id, true);
+      const made: string[] = [];
+      // Random codes rarely clash; a few rounds cover the ones that do.
+      for (let round = 0; round < 5 && made.length < count; round += 1) {
+        const batch = Array.from({ length: count - made.length }, () => generateDiscountCode(() => randomInt(0, 1_000_000) / 1_000_000, length, prefix));
+        const { rows } = await sql.query<{ code: string }>(
+          `INSERT INTO "DiscountRedeemCode" (id, "storeId", "discountId", code)
+           SELECT 'redeem-' || gen_random_uuid()::text, $1, $2, c FROM unnest($3::text[]) AS c
+           ON CONFLICT ("storeId", code) DO NOTHING RETURNING code`,
+          [storeId, id, [...new Set(batch)]],
+        );
+        made.push(...rows.map((row) => row.code));
+      }
+      await sql.query(`UPDATE "DiscountCode" SET "updatedAt" = NOW() WHERE "storeId" = $1 AND id = $2`, [storeId, id]);
+      return { created: made.length, codes: made };
+    });
+  }
+
+  private async requireCodeDiscount(sql: DiscountSql, storeId: string, id: string, lock = false): Promise<void> {
+    const { rows } = await sql.query<{ method: string }>(`SELECT method FROM "DiscountCode" WHERE "storeId" = $1 AND id = $2${lock ? " FOR UPDATE" : ""}`, [storeId, id]);
+    if (!rows[0]) throw notFound();
+    if (rows[0].method !== "code") throw new ApiError(409, "DISCOUNT_NOT_A_CODE", "Automatic discounts don't have codes.");
   }
 
   /** Whether a code is free to use in this store (optionally ignoring one discount's own codes). */

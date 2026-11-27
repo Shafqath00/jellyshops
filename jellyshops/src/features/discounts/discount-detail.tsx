@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AdminPage, Banner, Button, Card, CardSkeleton, ConfirmDialog, DetailLayout, StatusBadge, useToast } from "@/components/admin";
 import { useAdminRouter } from "@/features/admin/admin-routing";
+import { DiscountCodesCard } from "./discount-codes-card";
 import { DiscountForm } from "./discount-form";
 import { draftFromDiscount } from "./form-state";
 import { useDiscountFormData } from "./use-form-data";
@@ -76,6 +77,7 @@ export function DiscountDetail({ id }: { id: string }) {
         <div><dt>Used</dt><dd>{usesText(discount)}</dd></div>
       </dl>
     </Card>
+    {discount.method === "code" && <DiscountCodesCard discount={discount} onChanged={reload} />}
     <Card title="Results" description="From paid orders that used this discount.">
       {discount.paidOrders === 0
         ? <p className="jk-muted">No paid orders yet. Results appear here once customers use it.</p>

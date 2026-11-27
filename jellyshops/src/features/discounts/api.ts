@@ -64,6 +64,20 @@ export function useDiscountsApi() {
   const duplicate = useCallback(async (id: string) => (await call<{ discount: MerchantDiscount }>(`/${encodeURIComponent(id)}/duplicate`, { method: "POST" })).discount, [call]);
   const codeCheck = useCallback((code: string, except?: string) => call<{ code: string | null; available: boolean; message: string | null }>(`/code-check?code=${encodeURIComponent(code)}${except ? `&except=${encodeURIComponent(except)}` : ""}`), [call]);
   const generateCode = useCallback(async (prefix = "") => (await call<{ code: string }>("/generate-code", { method: "POST", body: JSON.stringify({ prefix }) })).code, [call]);
+  const listCodes = useCallback((id: string, options: { offset?: number; limit?: number } = {}) => call<{ codes: Array<{ code: string; uses: number; createdAt: string }>; total: number }>(`/${encodeURIComponent(id)}/codes?offset=${options.offset ?? 0}&limit=${options.limit ?? 50}`), [call]);
+  const generateCodes = useCallback((id: string, options: { count: number; prefix?: string }) => call<{ created: number; codes: string[] }>(`/${encodeURIComponent(id)}/codes`, { method: "POST", body: JSON.stringify(options) }), [call]);
+  /** Fetches the CSV with the merchant's sign-in and hands it to the browser as a download. */
+  const downloadCodes = useCallback(async (id: string, fileName: string) => {
+    if (!storeId || !token) throw new DiscountRequestError("Select a store and sign in to continue.", 0, "NOT_READY");
+    const response = await fetch(`${authApiOrigin()}/api/stores/${encodeURIComponent(storeId)}/discounts/${encodeURIComponent(id)}/codes.csv`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!response.ok) throw new DiscountRequestError("The codes couldn't be downloaded. Try again.", response.status, "");
+    const url = URL.createObjectURL(await response.blob());
+    const link = Object.assign(document.createElement("a"), { href: url, download: fileName });
+    document.body.append(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }, [storeId, token]);
   const canManage = activeStore?.role === "OWNER" || activeStore?.role === "ADMIN";
-  return { list, get, create, update, remove, bulk, duplicate, codeCheck, generateCode, ready: Boolean(storeId && token), storeId, currency: activeStore?.currency ?? "GBP", canManage };
+  return { list, get, create, update, remove, bulk, duplicate, codeCheck, generateCode, listCodes, generateCodes, downloadCodes, ready: Boolean(storeId && token), storeId, currency: activeStore?.currency ?? "GBP", canManage };
 }

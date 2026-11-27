@@ -13,9 +13,9 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push, replace: push }), 
 const api = vi.hoisted(() => ({ list: vi.fn(), get: vi.fn(), bulk: vi.fn(), duplicate: vi.fn(), canManage: true }));
 vi.mock("@/features/discounts/api", async (original) => ({
   ...(await original<typeof import("@/features/discounts/api")>()),
-  useDiscountsApi: () => ({ ...api, create: vi.fn(), update: vi.fn(), remove: vi.fn(), codeCheck: vi.fn(), generateCode: vi.fn(), ready: true, storeId: "store-a", currency: "GBP" }),
+  useDiscountsApi: () => ({ ...api, listCodes: vi.fn().mockResolvedValue({ codes: [{ code: "SUMMER20", uses: 12 }], total: 1 }), generateCodes: vi.fn(), downloadCodes: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn(), codeCheck: vi.fn(), generateCode: vi.fn(), ready: true, storeId: "store-a", currency: "GBP" }),
 }));
-vi.mock("@/features/discounts/use-form-data", () => ({ useDiscountFormData: () => ({ loading: false, timeZone: "Europe/London", names: { products: {}, collections: { c1: { title: "Summer", count: 3 } } }, customers: [], customerTags: [], discounts: [] }) }));
+vi.mock("@/features/discounts/use-form-data", () => ({ useDiscountFormData: () => ({ loading: false, timeZone: "Europe/London", names: { products: {}, collections: { c1: { title: "Summer", count: 3 } } }, customers: [], customerTags: [], discounts: [], catalog: [], shippingMinor: null }) }));
 afterEach(cleanup);
 beforeEach(() => { vi.resetAllMocks(); api.canManage = true; });
 

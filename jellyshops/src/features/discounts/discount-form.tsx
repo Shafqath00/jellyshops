@@ -7,6 +7,7 @@ import { Banner, Button, Card, DetailLayout, Field, HelpTip, ResourceForm, TagIn
 import { DiscountRequestError, type MerchantDiscount, useDiscountsApi } from "./api";
 import { DISCOUNT_METHOD_INFO, DISCOUNT_TYPE_INFO, moneyFormatter } from "./discount-words";
 import { draftPreview, draftToInput, draftWarnings, fieldForPath, timeZoneName, type DiscountDraft, type DraftField, type DraftProblems } from "./form-state";
+import { SampleBag } from "./sample-bag";
 import { SelectionField } from "./selection-field";
 import type { DiscountFormData } from "./use-form-data";
 
@@ -65,10 +66,11 @@ export function DiscountForm({ discount, initial, data, currency, side, onSaved,
 
   const others = useMemo(() => data.discounts.filter((other) => other.id !== discount?.id), [data.discounts, discount?.id]);
   const warnings = useMemo(() => draftWarnings(draft, { timeZone: tz, now: new Date(), others, products: data.names.products, codeTaken }), [draft, tz, others, data.names.products, codeTaken]);
-  const summary = useMemo(() => summariseDiscount(draftPreview(draft, tz), {
+  const preview = useMemo(() => draftPreview(draft, tz), [draft, tz]);
+  const summary = useMemo(() => summariseDiscount(preview, {
     formatMoney: money, timeZone: tz,
     names: { products: Object.fromEntries(Object.entries(data.names.products).map(([id, item]) => [id, item.title])), collections: Object.fromEntries(Object.entries(data.names.collections).map(([id, item]) => [id, item.title])) },
-  }), [draft, tz, money, data.names]);
+  }), [preview, tz, money, data.names]);
 
   async function submit() {
     setChecked(true);
@@ -104,6 +106,7 @@ export function DiscountForm({ discount, initial, data, currency, side, onSaved,
     <Card title="Summary">
       <p className="jk-discount-sentence" aria-live="polite"><TypeIcon size={18} aria-hidden="true" /> <span>{summary}</span></p>
     </Card>
+    {data.catalog.length > 0 && <SampleBag discount={preview} data={data} formatMoney={money} />}
     {side}
   </>;
 
@@ -317,7 +320,8 @@ function CustomerChooser({ value, customers, onChange }: { value: string[]; cust
         <button type="button" onClick={() => onChange(value.filter((other) => other !== email))} aria-label={`Remove ${email}`}>×</button></li>)}
     </ul>}
     <Field id="discount-customer-search" label="Add a customer" help="Search your customers by name or email, or type an email address.">
-      <input id="discount-customer-search" className="jk-input" type="search" value={query} autoComplete="off" onChange={(event) => setQuery(event.target.value)} />
+      <input id="discount-customer-search" className="jk-input" type="search" value={query} autoComplete="off" onChange={(event) => setQuery(event.target.value)}
+        onKeyDown={(event) => { if (event.key !== "Enter") return; event.preventDefault(); const first = matches[0]?.email ?? typedEmail; if (first) { onChange([...value, first]); setQuery(""); } }} />
     </Field>
     {(matches.length > 0 || typedEmail) && <ul className="jk-discount-matches" aria-label="Matching customers">
       {matches.map((customer) => <li key={customer.email}><button type="button" onClick={() => { onChange([...value, customer.email]); setQuery(""); }}>{customer.name} <span className="jk-muted">{customer.email}</span></button></li>)}

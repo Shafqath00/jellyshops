@@ -6,6 +6,7 @@ import { ApiError } from "../http/errors.js";
 import type { DiscountService } from "./service.js";
 
 const idsSchema = z.object({ ids: z.array(z.string().min(1).max(120)).min(1).max(500) }).strict();
+const codesSchema = z.object({ count: z.number().int().min(1).max(100_000), prefix: z.string().max(20).optional(), length: z.number().int().min(6).max(16).optional() }).strict();
 const bulkSchema = z.object({ ids: idsSchema.shape.ids, action: z.enum(["enable", "disable", "delete"]) }).strict();
 
 function ids(body: unknown) {
@@ -22,6 +23,7 @@ function ids(body: unknown) {
  *   POST /bulk       {ids, action: enable|disable|delete}
  *   GET /code-check?code=&except=   is a code free      POST /generate-code {prefix?}
  *   POST /:id/duplicate             a switched-off copy
+ *   GET /:id/codes?offset=&limit=   codes with uses     GET /:id/codes.csv   all codes      POST /:id/codes {count, prefix?, length?}
  */
 export function createDiscountRouter(service: DiscountService, authProvider: AuthProvider): Router {
   const router = Router({ mergeParams: true });
@@ -54,6 +56,26 @@ export function createDiscountRouter(service: DiscountService, authProvider: Aut
   });
   router.post<{ storeId: string; id: string }>("/:id/duplicate", ...manage, async (request, response, next) => {
     try { response.status(201).json({ discount: await service.duplicate(storeId(request), String(request.params.id)) }); } catch (error) { next(error); }
+  });
+  router.get<{ storeId: string; id: string }>("/:id/codes", ...view, async (request, response, next) => {
+    try {
+      const offset = Number(request.query.offset ?? 0) || 0;
+      const limit = Number(request.query.limit ?? 50) || 50;
+      response.json(await service.listCodes(storeId(request), String(request.params.id), { offset, limit }));
+    } catch (error) { next(error); }
+  });
+  router.get<{ storeId: string; id: string }>("/:id/codes.csv", ...view, async (request, response, next) => {
+    try {
+      const csv = await service.codesCsv(storeId(request), String(request.params.id));
+      response.set("Content-Type", "text/csv; charset=utf-8").set("Content-Disposition", 'attachment; filename="discount-codes.csv"').set("Cache-Control", "no-store").send(csv);
+    } catch (error) { next(error); }
+  });
+  router.post<{ storeId: string; id: string }>("/:id/codes", ...manage, async (request, response, next) => {
+    try {
+      const parsed = codesSchema.safeParse(request.body ?? {});
+      if (!parsed.success) throw new ApiError(422, "DISCOUNT_INPUT_INVALID", "Say how many codes to make.");
+      response.status(201).json(await service.generateCodes(storeId(request), String(request.params.id), parsed.data));
+    } catch (error) { next(error); }
   });
   router.post("/", ...manage, async (request, response, next) => {
     try { response.status(201).json({ discount: await service.create(storeId(request), request.body ?? {}) }); } catch (error) { next(error); }

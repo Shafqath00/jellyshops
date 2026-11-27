@@ -3,6 +3,7 @@ import type { PlanLimitChecker } from "../billing/plan-limits.js";
 import type { StoreBillingService } from "../billing/store-billing.js";
 import type { StripeBillingService } from "../billing/stripe-billing.js";
 import type { BillingJobs } from "../billing/billing-jobs.js";
+import type { DiscountEndReminders } from "../discounts/end-reminders.js";
 import type { StoreActivityRecorder } from "../tenants/store-activity.js";
 import type express from "express";
 import type { AdminSalesService, AdminSummaryService, CustomerService, OrderTagService } from "../admin/service.js";
@@ -53,6 +54,8 @@ export interface AppDependencies {
   stripeBilling?: StripeBillingService;
   /** Scheduled billing work (expire trials, reminder emails); built from the database when left out. */
   billingJobs?: BillingJobs;
+  /** Emails owners a few days before a discount ends; built from the database when left out. */
+  discountReminders?: DiscountEndReminders;
   contentService: ContentService;
   customDataService: CustomDataService;
   ownerMetafieldService?: OwnerMetafieldService;

@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { DiscountService, recordOrderDiscounts, resolveDiscount, type DiscountSql } from "../../src/discounts/service.js";
+import { DiscountEndReminders } from "../../src/discounts/end-reminders.js";
 import { createPGliteDatabase, seedStore, type IntegrationDatabase } from "./pglite.js";
 
 const ORDER_MIGRATIONS = [
@@ -145,6 +146,59 @@ describe("discounts on the real schema", () => {
     const auto = await service.create("store-a", { method: "automatic", title: "Sale", type: "free_shipping" });
     expect(await service.duplicate("store-a", auto.id)).toMatchObject({ title: "Copy of Sale", code: null, method: "automatic" });
     await expect(service.duplicate("store-b", source.id)).rejects.toMatchObject({ code: "DISCOUNT_NOT_FOUND" });
+  });
+
+  it("makes codes in bulk, lists them with uses and exports them", async () => {
+    const discount = await service.create("store-a", percent("BULK", 10, { usageLimit: 3 }));
+    const made = await service.generateCodes("store-a", discount.id, { count: 25, prefix: "vip-" });
+    expect(made.created).toBe(25);
+    expect(made.codes.every((code) => /^VIP-[A-Z2-9]{8}$/.test(code))).toBe(true);
+    const first = made.codes[0]!;
+    // A generated code works at checkout and counts towards the discount's shared limit.
+    const applied = await resolveDiscount(sql(), "store-a", first.toLowerCase(), order);
+    expect(applied).toMatchObject({ code: first, discountMinor: 500 });
+    await placeOrder("g1", first);
+    const page = await service.listCodes("store-a", discount.id, { limit: 10 });
+    expect(page.total).toBe(26);
+    expect(page.codes).toHaveLength(10);
+    const csv = await service.codesCsv("store-a", discount.id);
+    expect(csv.split("\r\n")[0]).toBe("Code,Times used");
+    expect(csv).toContain(`${first},1`);
+    expect(csv).toContain("BULK,0");
+    expect((await service.get("store-a", discount.id)).codeCount).toBe(26);
+    await expect(service.generateCodes("store-a", discount.id, { count: 0 })).rejects.toMatchObject({ code: "DISCOUNT_CODES_COUNT" });
+    await expect(service.generateCodes("store-b", discount.id, { count: 1 })).rejects.toMatchObject({ code: "DISCOUNT_NOT_FOUND" });
+    const auto = await service.create("store-a", { method: "automatic", title: "Auto", type: "free_shipping" });
+    await expect(service.generateCodes("store-a", auto.id, { count: 1 })).rejects.toMatchObject({ code: "DISCOUNT_NOT_A_CODE" });
+  });
+
+  it("stops at the plan's code limit", async () => {
+    const limited = new DiscountService({ transaction: (work) => work(sql()) }, { check: async (_store, kind, adding = 1) => { if (kind === "discountCodes" && adding > 10) throw Object.assign(new Error("Your plan allows up to 10 discount codes"), { code: "PLAN_LIMIT" }); } });
+    const discount = await limited.create("store-a", percent("LIMITED"));
+    await expect(limited.generateCodes("store-a", discount.id, { count: 50 })).rejects.toMatchObject({ code: "PLAN_LIMIT" });
+  });
+
+  it("emails the owner once before a discount ends, and again after the end date moves", async () => {
+    await database.query(`INSERT INTO "User" ("name", "email", "firebaseUid", "updatedAt") VALUES ('Owner', 'owner@example.test', '00000000-0000-4000-8000-000000000001', NOW())`);
+    await database.query(`INSERT INTO "StoreMembership" ("storeId", "userId", "role") SELECT 'store-a', id, 'OWNER' FROM "User" WHERE email = 'owner@example.test'`);
+    const now = new Date("2026-12-29T12:00:00Z");
+    const ending = await service.create("store-a", percent("ENDING", 10, { endsAt: "2026-12-31T23:59:00Z" }));
+    await service.create("store-a", percent("LATER", 10, { endsAt: "2027-03-01T00:00:00Z" }));
+    await service.create("store-a", percent("OFFENDING", 10, { endsAt: "2026-12-30T00:00:00Z", active: false }));
+    const sent: Array<{ to: string; subject: string; text: string }> = [];
+    const reminders = new DiscountEndReminders({ query: (text, values) => database.query(text, values) as never }, { send: async (message) => { sent.push(message); } }, { adminBaseUrl: "https://jellyshop.io" });
+    expect(await reminders.run(now)).toMatchObject({ sent: 1, failed: 0, configured: true });
+    expect(sent[0]).toMatchObject({ to: "owner@example.test", subject: 'Your discount "ENDING" ends soon' });
+    expect(sent[0]!.text).toContain(`https://jellyshop.io/admin/s/store-a/discounts/${ending.id}`);
+    expect(await reminders.run(now)).toMatchObject({ sent: 0 });
+    await service.update("store-a", ending.id, percent("ENDING", 10, { endsAt: "2027-01-01T10:00:00Z" }));
+    expect(await reminders.run(now)).toMatchObject({ sent: 1 });
+    // A failed send is tried again next time.
+    const failing = new DiscountEndReminders({ query: (text, values) => database.query(text, values) as never }, { send: async () => { throw new Error("SMTP down"); } }, { adminBaseUrl: "" });
+    await service.update("store-a", ending.id, percent("ENDING", 10, { endsAt: "2027-01-01T11:00:00Z" }));
+    expect(await failing.run(now)).toMatchObject({ sent: 0, failed: 1 });
+    expect(await reminders.run(now)).toMatchObject({ sent: 1 });
+    expect(await new DiscountEndReminders({ query: (text, values) => database.query(text, values) as never }, undefined, { adminBaseUrl: "" }).run(now)).toMatchObject({ configured: false });
   });
 
   it("never finds another store's code, and makes fresh codes", async () => {

@@ -10,7 +10,7 @@ import { DiscountDetail } from "./discount-detail";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push, replace: push }), useParams: () => ({ shop: "store-a" }), usePathname: () => "/admin/s/store-a/discounts/new" }));
-const api = vi.hoisted(() => ({ create: vi.fn(), update: vi.fn(), get: vi.fn(), list: vi.fn(), bulk: vi.fn(), duplicate: vi.fn(), codeCheck: vi.fn(), generateCode: vi.fn() }));
+const api = vi.hoisted(() => ({ listCodes: vi.fn(), generateCodes: vi.fn(), downloadCodes: vi.fn(), create: vi.fn(), update: vi.fn(), get: vi.fn(), list: vi.fn(), bulk: vi.fn(), duplicate: vi.fn(), codeCheck: vi.fn(), generateCode: vi.fn() }));
 vi.mock("./api", async (original) => ({
   ...(await original<typeof import("./api")>()),
   useDiscountsApi: () => ({ ...api, remove: vi.fn(), ready: true, storeId: "store-a", currency: "GBP", canManage: true }),
@@ -19,12 +19,16 @@ const formData: DiscountFormData = {
   loading: false, timeZone: "Europe/London",
   names: { products: { mug: { title: "Stoneware mug", active: true }, old: { title: "Old vase", active: false } }, collections: { summer: { title: "Summer", count: 4 } } },
   customers: [{ email: "sam@example.test", name: "Sam" }], customerTags: ["vip"], discounts: [],
+  catalog: [{ id: "mug", title: "Stoneware mug", priceMinor: 1800, collectionIds: ["summer"], active: true }, { id: "old", title: "Old vase", priceMinor: 3000, collectionIds: [], active: false }],
+  shippingMinor: 495,
 };
 vi.mock("./use-form-data", () => ({ useDiscountFormData: () => formData }));
 afterEach(cleanup);
 beforeEach(() => {
   vi.resetAllMocks();
   api.codeCheck.mockResolvedValue({ code: "X", available: true, message: null });
+  api.listCodes.mockResolvedValue({ codes: [], total: 1 });
+  api.downloadCodes.mockResolvedValue(undefined);
   api.list.mockResolvedValue({ discounts: [], timeZone: "Europe/London", totals: { active: 0, uses: 0, paidOrders: 0, salesMinor: 0, givenMinor: 0 } });
 });
 const page = (node: React.ReactNode) => render(<ToastProvider>{node}</ToastProvider>);
@@ -104,6 +108,25 @@ describe("discount form", () => {
     expect(screen.getByText("None of the chosen products are on sale, so this discount can't apply to anything yet.")).toBeVisible();
   });
 
+  it("tries the unsaved discount on a sample bag", async () => {
+    const user = userEvent.setup();
+    page(<NewDiscount type={null} method={null} template="first-order-10" />);
+    const bag = screen.getByRole("heading", { name: "Try it on a sample bag" }).closest(".jk-card") as HTMLElement;
+    await user.selectOptions(within(bag).getByRole("combobox", { name: "Add a product to the sample bag" }), "mug");
+    await user.click(within(bag).getByRole("button", { name: "Add" }));
+    await user.click(within(bag).getByRole("button", { name: "One more Stoneware mug" }));
+    // 2 x £18 = £36, 10% off = £3.60, delivery £4.95.
+    expect(within(bag).getByText("−£3.60")).toBeVisible();
+    expect(within(bag).getByText("Customer pays").nextSibling).toHaveTextContent("£37.35");
+    await user.selectOptions(within(bag).getByRole("combobox", { name: "The customer is" }), "returning");
+    expect(within(bag).getByText("This code is for first orders only.")).toBeVisible();
+    // Changing the form changes the answer straight away.
+    await user.selectOptions(within(bag).getByRole("combobox", { name: "The customer is" }), "new");
+    await user.clear(screen.getByRole("textbox", { name: "Percentage off" }));
+    await user.type(screen.getByRole("textbox", { name: "Percentage off" }), "50");
+    expect(within(bag).getByText("−£18.00")).toBeVisible();
+  });
+
   it("passes the accessibility checks", async () => {
     const { container } = page(<NewDiscount type="buy_x_get_y" method="code" template={null} />);
     expect(await axeClean(container)).toEqual([]);
@@ -133,5 +156,33 @@ describe("discount form", () => {
     await waitFor(() => expect(api.update).toHaveBeenCalledWith("d1", expect.objectContaining({ code: "SPRING", value: 20, startsAt: "2026-11-01T09:00:00.000Z" })));
     expect(await screen.findByText("Discount saved")).toBeInTheDocument();
     expect(screen.getByText("£30.00")).toBeVisible(); // average order in Results
+  });
+
+  it("lists a discount's codes, makes more and downloads them", async () => {
+    const discount = {
+      id: "d1", title: "VIP", method: "code", code: "VIP", type: "order_amount", valueType: "percent", value: 15,
+      appliesTo: { scope: "all", productIds: [], collectionIds: [] }, appliesOncePerOrder: false, minimum: { type: "none" }, eligibility: { scope: "everyone" },
+      combinesWith: { product: false, order: false, shipping: true }, maxShippingMinor: null, buyXGetY: null, usageLimit: null, oncePerCustomer: false,
+      startsAt: null, endsAt: null, active: true, createdAt: "2026-11-01T09:00:00Z", updatedAt: "2026-11-01T09:00:00Z",
+      status: "active", uses: 0, codeCount: 1, paidOrders: 0, salesMinor: 0, givenMinor: 0,
+    } as MerchantDiscount;
+    api.get.mockResolvedValue(discount);
+    api.listCodes.mockResolvedValue({ codes: [{ code: "VIP", uses: 0, createdAt: "" }], total: 1 });
+    api.generateCodes.mockResolvedValue({ created: 50, codes: [] });
+    const user = userEvent.setup();
+    page(<DiscountDetail id="d1" />);
+    const card = (await screen.findByRole("heading", { name: "Codes" })).closest(".jk-card") as HTMLElement;
+    expect(await within(card).findByText("Not used")).toBeVisible();
+    await user.click(within(card).getByRole("button", { name: "Generate codes" }));
+    const dialog = await screen.findByRole("dialog", { name: "Generate codes" });
+    await user.type(within(dialog).getByRole("textbox", { name: /Start each code/ }), "vip-");
+    await user.type(within(dialog).getByRole("textbox", { name: /How many codes/ }), "{Enter}");
+    await waitFor(() => expect(api.generateCodes).toHaveBeenCalledWith("d1", { count: 50, prefix: "VIP-" }));
+    // Making codes never saves the discount form around the card.
+    expect(api.update).not.toHaveBeenCalled();
+    expect(await screen.findByText("50 codes made")).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    await user.click(await screen.findByRole("button", { name: "Download all as CSV" }));
+    await waitFor(() => expect(api.downloadCodes).toHaveBeenCalledWith("d1", "vip-codes.csv"));
   });
 });

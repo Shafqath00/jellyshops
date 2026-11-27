@@ -53,6 +53,7 @@ import { PlanLimitChecker, sqlUsageReader } from "../billing/plan-limits.js";
 import { StoreBillingService } from "../billing/store-billing.js";
 import { StripeBillingService, type BillingStripeClient } from "../billing/stripe-billing.js";
 import { BillingJobs } from "../billing/billing-jobs.js";
+import { DiscountEndReminders } from "../discounts/end-reminders.js";
 import Stripe from "stripe";
 
 export function createDefaultMediaStorage(
@@ -336,6 +337,11 @@ export function resolveAppDependencies(dependencies: Partial<AppDependencies> = 
     ? new BillingJobs(supabasePool, orderRuntime?.transport, { adminBaseUrl: orderRuntime?.publicBaseUrl || process.env.STOREFRONT_PUBLIC_URL || "", enforced: config.billingEnforced })
     : undefined);
 
+  // Discount end-date reminders use the same sender and admin address.
+  const discountReminders = dependencies.discountReminders ?? (supabasePool
+    ? new DiscountEndReminders(supabasePool, orderRuntime?.transport, { adminBaseUrl: orderRuntime?.publicBaseUrl || process.env.STOREFRONT_PUBLIC_URL || "" })
+    : undefined);
+
   const adminServices = commerceRepository
     ? {
       summary: new AdminSummaryService(commerceRepository, async (storeId) => {
@@ -390,6 +396,7 @@ export function resolveAppDependencies(dependencies: Partial<AppDependencies> = 
     planLimits,
     stripeBilling,
     billingJobs,
+    discountReminders,
   };
 
   return { config, authProvider, routeDependencies: commerceDeps, catalogService, storefrontService, publicStorefrontApi, storefrontStarterApi, mediaService, mediaStorage, publicStorefrontContextService, adminServices, commerceRepository, customerService, verifyCustomer };
