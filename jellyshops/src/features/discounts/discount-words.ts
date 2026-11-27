@@ -57,6 +57,9 @@ export function discountDates(discount: Pick<MerchantDiscount, "startsAt" | "end
 export function discountSentence(discount: MerchantDiscount, options: { timeZone: string; formatMoney: (minor: number) => string; names?: SummaryNames }): string {
   return summariseDiscount({
     ...discount,
+    // An older backend build answers without these; fall back to "everything / no minimum" instead of crashing the list.
+    appliesTo: discount.appliesTo ?? { scope: "all", productIds: [], collectionIds: [] },
+    minimum: discount.minimum ?? { type: "none" },
     startsAt: discount.startsAt ? new Date(discount.startsAt) : null,
     endsAt: discount.endsAt ? new Date(discount.endsAt) : null,
   }, options);
