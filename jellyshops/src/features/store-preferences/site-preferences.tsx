@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, type ReactNode } from "react";
 import Link, { useAdminPathname, useAdminRouter } from "@/features/admin/admin-routing";
 import { AdminPage, Banner, Button, CardSkeleton, SaveBar, useUnsavedChangesWarning } from "@/components/admin";
 import { useAuth } from "@/features/auth/providers/auth-provider";
@@ -68,6 +68,21 @@ export function SitePreferences({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [form]);
 
+  // On narrow screens the tab row scrolls sideways: keep the open tab in view.
+  const tabsRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const tabs = tabsRef.current;
+      const current = tabs?.querySelector<HTMLElement>("[aria-current=page]");
+      if (!tabs || !current) return;
+      // Scroll only the tab row (scrollIntoView would also move the page).
+      const overflowRight = current.offsetLeft + current.offsetWidth - (tabs.scrollLeft + tabs.clientWidth);
+      if (overflowRight > 0) tabs.scrollLeft += overflowRight + 8;
+      else if (current.offsetLeft < tabs.scrollLeft) tabs.scrollLeft = current.offsetLeft - 8;
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [pathname]);
+
   const value = useMemo(() => ({
     form, settings: settings ?? null,
     storeName: settings?.name ?? activeStore?.name ?? "",
@@ -75,7 +90,7 @@ export function SitePreferences({ children }: { children: ReactNode }) {
   }), [form, settings, activeStore]);
 
   return <AdminPage title="Site preferences" width="narrow" description="How your store looks in search and when shared, plus policies, tracking and privacy.">
-    <nav className="jk-pref-tabs" aria-label="Site preferences">
+    <nav ref={tabsRef} className="jk-pref-tabs" aria-label="Site preferences">
       {PREFERENCE_TABS.map((tab) => <Link key={tab.id} href={tab.href} className="jk-pref-tab-link" aria-current={pathname === tab.href ? "page" : undefined}>{tab.label}</Link>)}
     </nav>
     {form.loadError ? <Banner tone="critical" title="Preferences didn't load" action={<Button onClick={() => void form.reload()}>Try again</Button>}>{form.loadError}</Banner>

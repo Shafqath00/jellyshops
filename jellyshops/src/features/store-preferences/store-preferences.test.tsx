@@ -11,6 +11,7 @@ import { policyTemplate } from "./policy-templates";
 import { SitePreferences } from "./site-preferences";
 import { AdvancedTab, BrandingTab, PoliciesTab, PrivacyTab, SearchTab, TrackingTab } from "./preference-tabs";
 import { RedirectsManager } from "./redirects-manager";
+import { BusinessDetailsSection } from "./business-details-section";
 import { setAt } from "./use-preferences-form";
 
 const navigation = vi.hoisted(() => ({ replace: vi.fn(), push: vi.fn(), prefetch: vi.fn() }));
@@ -83,51 +84,76 @@ describe("Site preferences (all tabs rendered together)", () => {
     expect(title).toHaveValue("");
   });
 
-  // TODO(site-preferences tabs): written for the old one-page layout; rewrite for the tabbed page.
-  it.skip("explains problems next to the field and refuses to send them", async () => {
+  it("explains problems next to the field, refuses to send them and opens the field's tab", async () => {
     const fetchMock = stubApi();
+    navigation.push.mockClear();
     const user = userEvent.setup();
     page();
-    const pixel = await screen.findByRole("textbox", { name: /^Meta Pixel ID/ });
+    const pixel = await screen.findByRole("textbox", { name: /^Meta Pixel/ });
     await user.type(pixel, "abc");
+    await user.tab();
     expect(await screen.findByText("A Meta Pixel ID is a number of 8 to 20 digits.")).toBeVisible();
     expect(pixel).toHaveAttribute("aria-invalid", "true");
     await user.click(within(screen.getByRole("region", { name: "Unsaved changes" })).getByRole("button", { name: "Save" }));
     expect(await screen.findByText("One setting needs fixing before you can save.")).toBeVisible();
     expect(fetchMock.mock.calls.some(([, init]) => init?.method === "PUT")).toBe(false);
+    expect(navigation.push).toHaveBeenCalledWith(expect.stringMatching(/\/settings\/preferences\/tracking$/));
+    await waitFor(() => expect(pixel).toHaveFocus());
   });
 
-  // TODO(site-preferences tabs): written for the old one-page layout; rewrite for the tabbed page.
-  it.skip("keeps only the ID when a whole tracking snippet is pasted", async () => {
+  it("keeps only the ID when a whole tracking snippet is pasted", async () => {
     stubApi();
     const user = userEvent.setup();
     page();
-    const ga = await screen.findByRole("textbox", { name: /^Google Analytics 4 measurement ID/ });
+    const ga = await screen.findByRole("textbox", { name: /^Google Analytics 4/ });
     await user.click(ga);
     await user.paste("<script async src=\"https://www.googletagmanager.com/gtag/js?id=G-AB12CD34EF\"></script>");
     expect(ga).toHaveValue("G-AB12CD34EF");
   });
 
-  // TODO(site-preferences tabs): written for the old one-page layout; rewrite for the tabbed page.
-  it.skip("shows the server's field problems and the conflict banner", async () => {
+  it("shows the server's field problems and opens their tab", async () => {
+    stubApi({ saveStatus: 400, saveBody: { error: { code: "PREFERENCES_INVALID", message: "One setting needs fixing.", issues: [{ path: "seo.searchConsoleToken", message: "That isn't a Search Console code." }] } } });
+    navigation.push.mockClear();
+    const user = userEvent.setup();
+    page();
+    await user.type(await screen.findByRole("textbox", { name: /^Homepage title/ }), "Harbour");
+    await user.click(within(screen.getByRole("region", { name: "Unsaved changes" })).getByRole("button", { name: "Save" }));
+    expect(await screen.findByText("That isn't a Search Console code.")).toBeVisible();
+    expect(navigation.push).toHaveBeenCalledWith(expect.stringMatching(/\/settings\/preferences\/tracking$/));
+  });
+
+  it("shows the conflict banner when someone else saved first", async () => {
     stubApi({ saveStatus: 409, saveBody: { error: { code: "PREFERENCES_REVISION_CONFLICT", message: "These preferences were changed in another window. Reload to see the latest before saving.", currentRevision: 5 } } });
     const user = userEvent.setup();
     page();
     await user.type(await screen.findByRole("textbox", { name: /^Homepage title/ }), "Harbour");
     await user.click(within(screen.getByRole("region", { name: "Unsaved changes" })).getByRole("button", { name: "Save" }));
-    expect(await screen.findByText("Changed somewhere else")).toBeVisible();
+    expect(await screen.findByText(/Someone else saved these settings/)).toBeVisible();
+    expect(screen.getByRole("button", { name: "Reload" })).toBeVisible();
   });
 
-  // TODO(site-preferences tabs): written for the old one-page layout; rewrite for the tabbed page.
-  it.skip("lists policy pages with their state and the change history", async () => {
+  it("lists policy pages with their state, and the change history on the Advanced tab", async () => {
     stubApi();
+    const user = userEvent.setup();
     page();
+    await screen.findByRole("textbox", { name: /^Homepage title/ });
     const privacy = await screen.findByLabelText("Page for the privacy policy");
-    await waitFor(() => expect(privacy).toHaveValue("privacy"));
+    await waitFor(() => expect(privacy).not.toBeDisabled());
+    await user.selectOptions(privacy, "privacy");
+    await user.selectOptions(screen.getByLabelText("Page for the refund policy"), "returns");
     await waitFor(() => expect(screen.getAllByText("Published").length).toBeGreaterThan(0));
     expect(screen.getByText("Shoppers can't see this page yet. Publish it to link it from your footer and checkout.")).toBeVisible();
-    expect(screen.getAllByText("Page missing")).toHaveLength(2);
+    expect(screen.getAllByText("Page missing").length).toBeGreaterThan(0);
+    await user.click(screen.getByText("Change history"));
     expect(await screen.findByText(/changed Search and sharing, Tracking/)).toBeVisible();
+  });
+
+  it("shows the SEO score in one line with a link to the bulk editor", async () => {
+    stubApi();
+    page();
+    const row = (await screen.findByText(/^SEO score/)).closest("p")!;
+    expect(within(row).getByText(/things? to improve/)).toBeVisible();
+    expect(within(row).getByRole("link", { name: "Edit product and page listings" })).toHaveAttribute("href", expect.stringContaining("/settings/preferences/seo"));
   });
 
   it("has no accessibility problems (contrast checked in the browser)", async () => {
@@ -140,39 +166,21 @@ describe("Site preferences (all tabs rendered together)", () => {
   });
 });
 
-describe("setup checklist and SEO health", () => {
-  // TODO(site-preferences tabs): written for the old one-page layout; rewrite for the tabbed page.
-  it.skip("shows what is left to set up and what to fix, with links to the things affected", async () => {
-    stubApi();
-    page();
-    const setup = await screen.findByRole("list", { name: "Still to do" });
-    expect(within(setup).getByText("Publish your refund policy")).toBeVisible();
-    expect(within(setup).getByText("It's still a draft, so shoppers can't read it. Publish it.")).toBeVisible();
-    expect(within(setup).queryByText("Publish your privacy policy")).toBeNull();
-    expect(screen.getByText(/^\d+ of \d+ done$/)).toBeVisible();
-    expect(screen.getByRole("progressbar", { name: "Setup progress" })).toBeVisible();
-    const checks = await screen.findByRole("list", { name: "Things to improve" });
-    expect(within(checks).getByText("2 products have no description")).toBeVisible();
-    expect(within(checks).getByText("Your homepage has no description")).toBeVisible();
-    expect(screen.getByRole("group", { name: "SEO score" })).toHaveTextContent(/Checked 12 products, 3 pages/);
-    expect(within(checks).getByRole("link", { name: "Pine bed" })).toHaveAttribute("href", expect.stringContaining("/products/p1"));
-    expect(screen.getByText(/checks? passed/)).toBeVisible();
-  });
-});
+describe("export and import (Advanced tab)", () => {
+  async function openImport(user: ReturnType<typeof userEvent.setup>) {
+    await screen.findByRole("textbox", { name: /^Homepage title/ });
+    await user.click(screen.getByText("Export or import settings"));
+    await user.click(screen.getByRole("button", { name: "Import" }));
+  }
 
-describe("export and import", () => {
-  // TODO(site-preferences tabs): written for the old one-page layout; rewrite for the tabbed page.
-  it.skip("exports without photos and imports only the sections the owner picks, still needing Save", async () => {
+  it("imports only the sections the owner picks, still needing Save", async () => {
     const fetchMock = stubApi();
     const user = userEvent.setup();
     page();
-    await screen.findByRole("textbox", { name: /^Homepage title/ });
-    await user.click(screen.getByRole("button", { name: "More actions" }));
-    await user.click(screen.getByRole("button", { name: "Import settings" }));
+    await openImport(user);
     const incoming = defaultStorePreferences();
     incoming.seo.homeTitle = "Imported title"; incoming.tracking.metaPixelId = "123456789012";
-    const file = new File([exportFile(incoming)], "export.json", { type: "application/json" });
-    await user.upload(screen.getByLabelText("Preferences file"), file);
+    await user.upload(screen.getByLabelText("Preferences file"), new File([exportFile(incoming)], "export.json", { type: "application/json" }));
     const seo = await screen.findByRole("checkbox", { name: /Search and sharing/ });
     const tracking = screen.getByRole("checkbox", { name: /Tracking IDs/ });
     expect(seo).toBeChecked();
@@ -180,25 +188,37 @@ describe("export and import", () => {
     expect(screen.getByText(/belong to the store you exported from/)).toBeVisible();
     await user.click(screen.getByRole("button", { name: "Copy 1 section to the page" }));
     expect(screen.getByRole("textbox", { name: /^Homepage title/ })).toHaveValue("Imported title");
-    expect(screen.getByRole("textbox", { name: /^Meta Pixel ID/ })).toHaveValue("");
+    expect(screen.getByRole("textbox", { name: /^Meta Pixel/ })).toHaveValue("");
     expect(fetchMock.mock.calls.some(([, init]) => init?.method === "PUT")).toBe(false);
     expect(screen.getByRole("region", { name: "Unsaved changes" })).toBeVisible();
   });
-  // TODO(site-preferences tabs): written for the old one-page layout; rewrite for the tabbed page.
-  it.skip("refuses a file that isn't an export or holds bad values", async () => {
+
+  it("refuses a file that isn't an export or holds bad values", async () => {
     stubApi();
     const user = userEvent.setup();
     page();
-    await screen.findByRole("textbox", { name: /^Homepage title/ });
-    await user.click(screen.getByRole("button", { name: "More actions" }));
-    await user.click(screen.getByRole("button", { name: "Import settings" }));
+    await openImport(user);
     await user.upload(screen.getByLabelText("Preferences file"), new File(["{\"hello\":1}"], "x.json", { type: "application/json" }));
-    expect(await screen.findByText(/wasn't exported from Store preferences/)).toBeVisible();
+    expect(await screen.findByText(/wasn't exported from Site preferences/)).toBeVisible();
     const bad = JSON.parse(exportFile(defaultStorePreferences()));
     bad.preferences.tracking.googleAnalyticsId = "not-an-id";
     await user.upload(screen.getByLabelText("Preferences file"), new File([JSON.stringify(bad)], "bad.json", { type: "application/json" }));
     expect(await screen.findByText(/nothing was imported/)).toBeVisible();
     expect(screen.getByText(/A Google Analytics ID looks like G-XXXXXXXXXX./)).toBeVisible();
+  });
+});
+
+describe("Business details card (Settings > General)", () => {
+  it("saves on its own with the preferences revision", async () => {
+    const fetchMock = stubApi();
+    const user = userEvent.setup();
+    render(<ToastProvider><BusinessDetailsSection /></ToastProvider>);
+    const name = await screen.findByRole("textbox", { name: /^Legal business name/ });
+    expect(screen.queryByRole("button", { name: "Save business details" })).toBeNull();
+    await user.type(name, "Harbour Home Ltd");
+    await user.click(screen.getByRole("button", { name: "Save business details" }));
+    await waitFor(() => expect(putBody(fetchMock)).toMatchObject({ revision: 2, preferences: { business: { legalName: "Harbour Home Ltd" } } }));
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Save business details" })).toBeNull());
   });
 });
 
