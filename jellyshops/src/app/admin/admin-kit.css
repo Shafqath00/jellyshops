@@ -757,3 +757,41 @@ fieldset.jk-field {border:0;padding:0;margin:0;min-width:0}
 .jk-bulk-table tr[data-changed] {background:var(--jk-surface-selected)}
 .jk-bulk-table textarea {resize:vertical}
 .jk-bulk-table tbody th {background:transparent;border-bottom:1px solid var(--jk-border);text-transform:none;letter-spacing:normal;font-size:var(--jk-text-sm);color:var(--jk-text);white-space:normal}
+/* Discounts (features/discounts): list, type picker, detail. */
+.jk-discount-kpis {margin-bottom:var(--jk-space-4)}
+.jk-discount-cell {display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;max-width:440px}
+.jk-discount-cell .jk-code {font-size:var(--jk-text-xs)}
+.jk-discount-summary {font-size:var(--jk-text-xs);line-height:1.45;color:var(--jk-text-subdued);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.jk-discount-method {display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.jk-discount-method svg {color:var(--jk-text-subdued)}
+.jk-discount-picker .jk-dialog-body {gap:var(--jk-space-4)}
+.jk-discount-choice {border:0;margin:0;padding:0;min-width:0}
+.jk-discount-choice legend {margin-bottom:var(--jk-space-2);font-size:var(--jk-text-sm);font-weight:650}
+.jk-discount-types,.jk-discount-methods {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--jk-space-2)}
+@media(max-width:639px){.jk-discount-types,.jk-discount-methods{grid-template-columns:minmax(0,1fr)}}
+.jk-discount-type {position:relative;display:flex;align-items:flex-start;gap:var(--jk-space-3);padding:var(--jk-space-3);border:1px solid var(--jk-border-strong);border-radius:var(--jk-radius-sm);background:var(--jk-surface);cursor:pointer;transition:border-color .12s,background-color .12s}
+.jk-discount-type:hover {background:var(--jk-surface-hover)}
+.jk-discount-type[data-checked] {border-color:var(--jk-accent);background:var(--jk-surface-selected);box-shadow:0 0 0 1px var(--jk-accent)}
+.jk-discount-type:focus-within {outline:2px solid var(--jk-focus);outline-offset:2px}
+.jk-discount-type input {position:absolute;opacity:0;width:1px;height:1px}
+.jk-discount-type-icon {display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:10px;background:var(--jk-tone-blue-bg);color:var(--jk-tone-blue-fg)}
+.jk-discount-type-text {display:flex;flex-direction:column;gap:2px;min-width:0;font-size:var(--jk-text-sm);line-height:1.45;color:var(--jk-text-subdued)}
+.jk-discount-type-text strong {color:var(--jk-text);font-weight:650}
+.jk-discount-type-text em {font-style:normal;color:var(--jk-text)}
+.jk-discount-templates h3 {margin-bottom:var(--jk-space-2);font-size:var(--jk-text-sm);font-weight:650}
+.jk-discount-templates ul {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--jk-space-2);margin:0;padding:0;list-style:none}
+@media(max-width:639px){.jk-discount-templates ul{grid-template-columns:minmax(0,1fr)}}
+.jk-discount-template {display:flex;align-items:flex-start;gap:var(--jk-space-2);width:100%;min-height:44px;padding:var(--jk-space-2) var(--jk-space-3);border:1px dashed var(--jk-border-strong);border-radius:var(--jk-radius-sm);background:transparent;color:var(--jk-text);font:inherit;text-align:left;cursor:pointer}
+.jk-discount-template:hover {background:var(--jk-surface-hover)}
+.jk-discount-template:focus-visible {outline:2px solid var(--jk-focus);outline-offset:2px}
+.jk-discount-template svg {flex:none;margin-top:2px;color:var(--jk-text-subdued)}
+.jk-discount-template span {display:flex;flex-direction:column;gap:1px;font-size:var(--jk-text-sm)}
+.jk-discount-template span span {font-size:var(--jk-text-xs);color:var(--jk-text-subdued)}
+.jk-discount-empty {display:flex;flex-direction:column;align-items:center;gap:var(--jk-space-3)}
+.jk-discount-empty-templates {display:flex;flex-wrap:wrap;justify-content:center;gap:var(--jk-space-2) var(--jk-space-4);margin:0;padding:0;list-style:none;font-size:var(--jk-text-sm)}
+.jk-discount-sentence {display:flex;align-items:flex-start;gap:var(--jk-space-2);font-size:var(--jk-text-md);line-height:1.5}
+.jk-discount-sentence svg {flex:none;margin-top:3px;color:var(--jk-accent)}
+.jk-discount-facts {display:flex;flex-direction:column;gap:var(--jk-space-2);margin:0;font-size:var(--jk-text-sm)}
+.jk-discount-facts div {display:flex;justify-content:space-between;gap:var(--jk-space-3)}
+.jk-discount-facts dt {color:var(--jk-text-subdued)}
+.jk-discount-facts dd {margin:0;text-align:right;font-variant-numeric:tabular-nums}

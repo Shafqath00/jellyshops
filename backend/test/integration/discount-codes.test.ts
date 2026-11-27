@@ -125,6 +125,28 @@ describe("discounts on the real schema", () => {
     expect(await service.removeMany("store-a", [a.id, b.id])).toBe(1);
   });
 
+  it("reports uses, paid orders, sales and money given, and the shop's time zone", async () => {
+    const discount = await service.create("store-a", { method: "code", code: "RESULTS", type: "order_amount", valueType: "fixed", value: 500 });
+    await placeOrder("p1", "RESULTS");
+    await placeOrder("p2", "RESULTS");
+    await database.query(`UPDATE "Order" SET status = 'PENDING_PAYMENT' WHERE id = 'p2'`);
+    const result = await service.listWithResults("store-a");
+    expect(result.timeZone).toBe("Europe/London");
+    expect(result.discounts[0]).toMatchObject({ id: discount.id, uses: 2, paidOrders: 1, salesMinor: 4900, givenMinor: 500 });
+    expect(result.totals).toEqual({ active: 1, uses: 2, paidOrders: 1, salesMinor: 4900, givenMinor: 500 });
+    expect(await service.get("store-a", discount.id)).toMatchObject({ paidOrders: 1, salesMinor: 4900 });
+  });
+
+  it("duplicates a discount switched off, with a new code", async () => {
+    const source = await service.create("store-a", percent("SPRING", 15, { usageLimit: 10, eligibility: { scope: "first_order" } }));
+    const copy = await service.duplicate("store-a", source.id);
+    expect(copy).toMatchObject({ title: "Copy of SPRING", code: "SPRING-COPY", active: false, value: 15, usageLimit: 10, eligibility: { scope: "first_order" }, uses: 0 });
+    expect((await service.duplicate("store-a", source.id)).code).toBe("SPRING-COPY2");
+    const auto = await service.create("store-a", { method: "automatic", title: "Sale", type: "free_shipping" });
+    expect(await service.duplicate("store-a", auto.id)).toMatchObject({ title: "Copy of Sale", code: null, method: "automatic" });
+    await expect(service.duplicate("store-b", source.id)).rejects.toMatchObject({ code: "DISCOUNT_NOT_FOUND" });
+  });
+
   it("never finds another store's code, and makes fresh codes", async () => {
     await service.create("store-b", percent("THEIRS", 50));
     await expect(resolveDiscount(sql(), "store-a", "THEIRS", order)).rejects.toMatchObject({ code: "DISCOUNT_NOT_FOUND" });

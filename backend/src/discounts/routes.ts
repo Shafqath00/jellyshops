@@ -21,6 +21,7 @@ function ids(body: unknown) {
  *   GET /:id         one             PUT /:id        change          DELETE /:id   delete
  *   POST /bulk       {ids, action: enable|disable|delete}
  *   GET /code-check?code=&except=   is a code free      POST /generate-code {prefix?}
+ *   POST /:id/duplicate             a switched-off copy
  */
 export function createDiscountRouter(service: DiscountService, authProvider: AuthProvider): Router {
   const router = Router({ mergeParams: true });
@@ -29,7 +30,7 @@ export function createDiscountRouter(service: DiscountService, authProvider: Aut
   const storeId = (request: { storeContext?: { storeId: string } }) => request.storeContext!.storeId;
 
   router.get("/", ...view, async (request, response, next) => {
-    try { response.json({ discounts: await service.list(storeId(request)) }); } catch (error) { next(error); }
+    try { response.json(await service.listWithResults(storeId(request))); } catch (error) { next(error); }
   });
   router.get("/code-check", ...manage, async (request, response, next) => {
     try {
@@ -50,6 +51,9 @@ export function createDiscountRouter(service: DiscountService, authProvider: Aut
       const changed = action === "delete" ? await service.removeMany(storeId(request), chosen) : await service.setActive(storeId(request), chosen, action === "enable");
       response.json({ changed });
     } catch (error) { next(error); }
+  });
+  router.post<{ storeId: string; id: string }>("/:id/duplicate", ...manage, async (request, response, next) => {
+    try { response.status(201).json({ discount: await service.duplicate(storeId(request), String(request.params.id)) }); } catch (error) { next(error); }
   });
   router.post("/", ...manage, async (request, response, next) => {
     try { response.status(201).json({ discount: await service.create(storeId(request), request.body ?? {}) }); } catch (error) { next(error); }

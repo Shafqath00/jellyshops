@@ -20,6 +20,17 @@ export interface MerchantDiscount extends Omit<DiscountDefinition, "startsAt" | 
   uses: number;
   /** Codes a shopper can type (1 for an ordinary code discount, more once codes are generated in bulk). */
   codeCount: number;
+  /** Paid orders (not cancelled) that used it, what they came to in total and what the discount took off them. */
+  paidOrders: number;
+  salesMinor: number;
+  givenMinor: number;
+}
+
+/** The discounts list: every discount, the shop's time zone (dates are shown in it) and totals across them. */
+export interface DiscountListResult {
+  discounts: MerchantDiscount[];
+  timeZone: string;
+  totals: { active: number; uses: number; paidOrders: number; salesMinor: number; givenMinor: number };
 }
 
 /** A code applied at checkout (order-level discounts only until checkout reads product lines, phase 2). */
@@ -44,6 +55,7 @@ interface DiscountRow {
   eligibility: unknown; combinesWith: unknown; maxShippingMinor: number | null; buyXGetY: unknown;
   usageLimit: number | null; oncePerCustomer: boolean; startsAt: Date | string | null; endsAt: Date | string | null; active: boolean;
   createdAt: Date | string; updatedAt: Date | string; uses?: number | string; codeCount?: number | string;
+  paidOrders?: number | string; salesMinor?: number | string; givenMinor?: number | string;
 }
 
 const toDate = (value: Date | string | null | undefined): Date | null => (value === null || value === undefined ? null : value instanceof Date ? value : new Date(value));
@@ -73,6 +85,7 @@ function merchantOf(row: DiscountRow, now = new Date()): MerchantDiscount {
     startsAt: definition.startsAt?.toISOString() ?? null, endsAt: definition.endsAt?.toISOString() ?? null,
     createdAt: definition.createdAt.toISOString(), updatedAt: toDate(row.updatedAt)?.toISOString() ?? definition.createdAt.toISOString(),
     status: discountStatus(definition, uses, now), uses, codeCount: Number(row.codeCount ?? 0),
+    paidOrders: Number(row.paidOrders ?? 0), salesMinor: Number(row.salesMinor ?? 0), givenMinor: Number(row.givenMinor ?? 0),
   };
 }
 
@@ -80,7 +93,17 @@ function merchantOf(row: DiscountRow, now = new Date()): MerchantDiscount {
 const USES = `(SELECT COUNT(DISTINCT od."orderId")::int FROM "OrderDiscount" od JOIN "Order" o ON o."storeId" = od."storeId" AND o.id = od."orderId"
   WHERE od."storeId" = d."storeId" AND od."discountId" = d.id AND o.status <> 'CANCELLED')`;
 const CODE_COUNT = `(SELECT COUNT(*)::int FROM "DiscountRedeemCode" r WHERE r."discountId" = d.id)`;
+/** Results from orders that are paid or further along (not waiting for payment, not cancelled). */
+const RESULTS = `(SELECT json_build_object('paidOrders', COUNT(*), 'salesMinor', COALESCE(SUM(o."totalMinor"), 0), 'givenMinor', COALESCE(SUM(od."amountMinor" + od."shippingMinor"), 0))
+  FROM "OrderDiscount" od JOIN "Order" o ON o."storeId" = od."storeId" AND o.id = od."orderId"
+  WHERE od."storeId" = d."storeId" AND od."discountId" = d.id AND o.status NOT IN ('CANCELLED', 'PENDING_PAYMENT'))`;
 const WITH_STATS = `d.*, ${USES} AS uses, ${CODE_COUNT} AS "codeCount"`;
+const WITH_RESULTS = `${WITH_STATS}, ${RESULTS} AS results`;
+
+function resultsOf(value: unknown): Pick<DiscountRow, "paidOrders" | "salesMinor" | "givenMinor"> {
+  const results = value === null || value === undefined ? null : (typeof value === "string" ? JSON.parse(value) : value) as { paidOrders?: number; salesMinor?: number; givenMinor?: number };
+  return { paidOrders: results?.paidOrders ?? 0, salesMinor: results?.salesMinor ?? 0, givenMinor: results?.givenMinor ?? 0 };
+}
 
 function cleanInput(input: unknown) {
   const result = validateDiscountInput(input);
@@ -187,19 +210,54 @@ export class DiscountService {
   constructor(private readonly database: DiscountDatabase, private readonly planLimits?: Pick<PlanLimitChecker, "check">) {}
 
   async list(storeId: string): Promise<MerchantDiscount[]> {
+    return (await this.listWithResults(storeId)).discounts;
+  }
+
+  async listWithResults(storeId: string): Promise<DiscountListResult> {
     return this.database.transaction(async (sql) => {
-      const { rows } = await sql.query<DiscountRow>(`SELECT ${WITH_STATS} FROM "DiscountCode" d WHERE d."storeId" = $1 ORDER BY d."createdAt" DESC, d.id LIMIT 2000`, [storeId]);
+      const { rows } = await sql.query<DiscountRow & { results: unknown }>(`SELECT ${WITH_RESULTS} FROM "DiscountCode" d WHERE d."storeId" = $1 ORDER BY d."createdAt" DESC, d.id LIMIT 2000`, [storeId]);
+      const zone = await sql.query<{ timezone: string | null }>(`SELECT timezone FROM "StoreSettings" WHERE "storeId" = $1`, [storeId]);
       const now = new Date();
-      return rows.map((row) => merchantOf(row, now));
+      const discounts = rows.map((row) => merchantOf({ ...row, ...resultsOf(row.results) }, now));
+      // Sales are counted once per order, even when an order used two discounts.
+      const totals = await sql.query<{ paidOrders: number | string; salesMinor: number | string; givenMinor: number | string }>(
+        `SELECT COUNT(*)::int AS "paidOrders", COALESCE(SUM(o."totalMinor"), 0)::bigint AS "salesMinor",
+                COALESCE(SUM((SELECT SUM(x."amountMinor" + x."shippingMinor") FROM "OrderDiscount" x WHERE x."storeId" = o."storeId" AND x."orderId" = o.id)), 0)::bigint AS "givenMinor"
+         FROM "Order" o WHERE o."storeId" = $1 AND o.status NOT IN ('CANCELLED', 'PENDING_PAYMENT')
+           AND EXISTS (SELECT 1 FROM "OrderDiscount" od WHERE od."storeId" = o."storeId" AND od."orderId" = o.id)`, [storeId]);
+      const sums = totals.rows[0];
+      return {
+        discounts, timeZone: zone.rows[0]?.timezone || "Europe/London",
+        totals: {
+          active: discounts.filter((discount) => discount.status === "active").length,
+          uses: discounts.reduce((sum, discount) => sum + discount.uses, 0),
+          paidOrders: Number(sums?.paidOrders ?? 0), salesMinor: Number(sums?.salesMinor ?? 0), givenMinor: Number(sums?.givenMinor ?? 0),
+        },
+      };
     });
   }
 
   async get(storeId: string, id: string): Promise<MerchantDiscount> {
     return this.database.transaction(async (sql) => {
-      const { rows } = await sql.query<DiscountRow>(`SELECT ${WITH_STATS} FROM "DiscountCode" d WHERE d."storeId" = $1 AND d.id = $2`, [storeId, id]);
+      const { rows } = await sql.query<DiscountRow & { results: unknown }>(`SELECT ${WITH_RESULTS} FROM "DiscountCode" d WHERE d."storeId" = $1 AND d.id = $2`, [storeId, id]);
       if (!rows[0]) throw notFound();
-      return merchantOf(rows[0]);
+      return merchantOf({ ...rows[0], ...resultsOf(rows[0].results) });
     });
+  }
+
+  /** A switched-off copy to edit: "Copy of …", and for a code discount a code nobody uses yet. */
+  async duplicate(storeId: string, id: string): Promise<MerchantDiscount> {
+    const source = await this.get(storeId, id);
+    const code = source.method === "code" ? await this.copyCode(storeId, source.code ?? "") : null;
+    const { id: _id, status: _status, uses: _uses, codeCount: _count, paidOrders: _paid, salesMinor: _sales, givenMinor: _given, createdAt: _created, updatedAt: _updated, ...rest } = source;
+    return this.create(storeId, { ...rest, code, title: `Copy of ${source.title}`.slice(0, 120), active: false });
+  }
+
+  private async copyCode(storeId: string, code: string): Promise<string> {
+    for (const candidate of [`${code}-COPY`, `${code}-COPY2`, `${code}-COPY3`].map((value) => value.slice(0, 40))) {
+      if ((await this.codeAvailable(storeId, candidate)).available) return candidate;
+    }
+    return this.generateCode(storeId);
   }
 
   async create(storeId: string, input: unknown): Promise<MerchantDiscount> {
